@@ -1,0 +1,387 @@
+"""Focused evidence/locking tests; no engine, assets, GPU or network required."""
+from __future__ import annotations
+
+import copy
+import importlib.util
+import json
+import math
+import os
+from pathlib import Path
+import subprocess
+import sys
+import tempfile
+import unittest
+from unittest import mock
+
+INTEGRATION = Path(__file__).resolve().parent / "integration"
+sys.path.insert(0, str(INTEGRATION))
+import crowd_benchmark_support as support
+import run_crowd_presentation_benchmark as runner
+
+
+def distribution(values):
+    ordered = sorted(values)
+    result = {"count": len(values), "mean": round(sum(values) / len(values), 3), "max": max(values)}
+    for key, fraction in (("p5", .05), ("p50", .5), ("p95", .95), ("p99", .99)):
+        result[key] = ordered[math.ceil(fraction * len(values)) - 1]
+    return result
+
+
+def runtime():
+    stats = {"buildAttempts": 0, "buildSuccesses": 0, "buildFallbacks": 0}
+    return {"effectiveSettings": {"quality": "high", "bodyCap": 160, "frameCap": 60,
+                                  "renderer": "forward_plus", "rootSize": [1280, 720],
+                                  "worldViewportSize": [1280, 720], "renderScale": 1.0,
+                                  "textureQuality": "full", "textureSkip": 0,
+                                  "minimap": True, "appearance": "painted_ground"},
+            "activeBackends": {"nativeReducer": False, "preparedContent": {"active": False},
+                               "presentation": {"requested": "0", "nativeCapeInstances": 0,
+                                                "nativeCapeCalls": 0, "capeFallbackCalls": 0,
+                                                "flight": stats.copy(), "impact": stats.copy()}}}
+
+
+def fixture():
+    series = [round(i / 10, 3) for i in range(1, 61)]
+    census = {"nodes": 160, "builtBodies": 160, "deferred": 0}
+    summary = {key: distribution(series) for key in ("frameMilliseconds", "processPhaseMilliseconds",
+                                                    "flushPhaseMilliseconds", "drawPhaseMilliseconds",
+                                                    "worldRenderCpuMilliseconds", "worldRenderGpuMilliseconds", "drawCalls")}
+    summary.update(actorRecords=distribution([160.] * 60), actorNodes=distribution([160.] * 60),
+                   tickFrameMilliseconds=distribution(series[:20]), packetsPerFrame=distribution([1.] * 60))
+    cell = {"id": "s3-market-160", "count": 160, "frames": 60, "sampleMilliseconds": 1000,
+            "readiness": {"ready": True}, "frameSeries": series, "frameTime": distribution(series),
+            "census": {"afterSpawn": census.copy(), "afterSample": census.copy()},
+            "plan": {"active": 53, "moving": 27, "fighting": 26}, "packetsPerSecond": 60,
+            "effectiveRuntime": runtime(),
+            "summary": summary}
+    data = {"schemaVersion": 1, "benchmark": "crowd_presentation", "failureCount": 0, "failures": [],
+            "headless": False, "renderingMethod": "forward_plus", "graphicsQuality": "high",
+            "viewport": [1280, 720], "map": "four_gates", "minimapVisible": True,
+            "worldReadiness": {"ready": True}, "presenceDots": 0, "serverTime": False,
+            "crowdPolicy": {"bodyCap": 160, "fullRateBodies": 16, "halfRateBodies": 16, "clothBodies": 8},
+            "measurement": {"fpsCap": 60, "sampleMilliseconds": 1000, "warmupMilliseconds": 100,
+                            "driver": "live"}, "cells": [cell], **runtime(),
+            "runtimeBuild": {"template": False, "editor": True}}
+    request = {"mode": "windowed", "renderer": "forward_plus", "quality": "high",
+               "resolution": (1280, 720), "map": "four_gates", "minimap": "show", "fps_cap": 60,
+               "sample_ms": 1000, "warmup_ms": 100, "driver": "live", "body_cap": 160,
+               "cells": "s3-market-160", "replay": False, "executable_mode": "project"}
+    return data, request
+
+
+class ReportValidationTests(unittest.TestCase):
+    def check_rejected(self, mutate, request_mutate=None):
+        data, request = fixture()
+        mutate(data)
+        if request_mutate:
+            request_mutate(request)
+        with self.assertRaises(support.EvidenceError):
+            support.validate_report(data, request, "")
+
+    def test_valid_report_and_existing_selectors(self):
+        data, request = fixture()
+        result = support.validate_report(data, request, "Godot starts normally")
+        self.assertEqual(result["measuredCells"], ["s3-market-160"])
+        self.assertEqual(support.selected_cells("phase4"), support.OLD_CELLS)
+        self.assertNotIn("mixed-mounted-160", support.selected_cells("phase4"))
+        self.assertEqual(len(support.selected_cells("phase1")), 7)
+
+    def test_missing_duplicate_and_unrequested_cells_rejected(self):
+        for mutate in (lambda d: d.update(cells=[]),
+                       lambda d: d["cells"].append(copy.deepcopy(d["cells"][0])),
+                       lambda d: d["cells"][0].update(id="s2-invasion-160")):
+            with self.subTest(mutate=mutate):
+                self.check_rejected(mutate)
+        for selector in ("", "typo", "empty,empty", "empty,"):
+            with self.assertRaises(support.EvidenceError):
+                support.selected_cells(selector)
+
+    def test_failure_nonfinite_incomplete_and_bad_statistics_rejected(self):
+        changes = [lambda d: d.update(failureCount=1), lambda d: d.pop("failures"),
+                   lambda d: d["cells"][0].update(frames=59),
+                   lambda d: d["cells"][0]["frameSeries"].pop(),
+                   lambda d: d["cells"][0]["frameSeries"].__setitem__(0, float("nan")),
+                   lambda d: d["cells"][0]["frameTime"].update(p95=1.0),
+                   lambda d: d["cells"][0]["frameTime"].update(mean=2.0),
+                   lambda d: d["cells"][0].update(sampleMilliseconds=999),
+                   lambda d: d["cells"][0]["readiness"].update(ready=False),
+                   lambda d: d["worldReadiness"].update(ready=False),
+                   lambda d: d["cells"][0].update(status="failed")]
+        for change in changes:
+            with self.subTest(change=change):
+                self.check_rejected(change)
+
+    def test_script_errors_fail_even_when_report_passed(self):
+        data, request = fixture()
+        for log in ("SCRIPT ERROR: broken", "ERROR: resource", "Failed to load a scene", "Parse Error: bad"):
+            with self.assertRaises(support.EvidenceError):
+                support.validate_report(data, request, log)
+
+    def test_requested_actual_settings_and_workload_must_match(self):
+        for change in (lambda d: d.update(renderingMethod="gl_compatibility"),
+                       lambda d: d.update(graphicsQuality="low"),
+                       lambda d: d.update(viewport=[640, 480]),
+                       lambda d: d["effectiveSettings"].update(frameCap=30),
+                       lambda d: d["activeBackends"].update(nativeReducer=True),
+                       lambda d: d["crowdPolicy"].update(fullRateBodies=8),
+                       lambda d: d["cells"][0]["effectiveRuntime"]["effectiveSettings"].update(bodyCap=60),
+                       lambda d: d["cells"][0]["census"]["afterSample"].update(builtBodies=159),
+                       lambda d: d["cells"][0]["summary"]["actorRecords"].update(max=161.),
+                       lambda d: d["cells"][0]["plan"].update(active=52),
+                       lambda d: d["cells"][0].update(packetsPerSecond=0)):
+            with self.subTest(change=change):
+                self.check_rejected(change)
+
+    def test_exported_runtime_requires_template_not_source_editor(self):
+        data, request = fixture()
+        request["executable_mode"] = "exported"
+        with self.assertRaises(support.EvidenceError):
+            support.validate_report(data, request, "")
+        data["runtimeBuild"] = {"template": True, "editor": False, "standalone": False}
+        self.assertTrue(support.validate_report(data, request, "")["valid"])
+
+    def test_unavailable_authored_herd_is_explicit_pending_not_accepted_timing(self):
+        data, request = fixture()
+        request["cells"] = "authored-herd"
+        data["cells"] = [{"id": "authored-herd", "status": "unavailable_content", "qualification": "pending",
+                          "reason": "Current authored manifest has no herd", "declaredAmbientAnimals": 0,
+                          "frames": 0, "readiness": {"ready": False}}]
+        result = support.validate_report(data, request, "")
+        self.assertEqual(result["qualification"], "pending_content")
+        self.assertEqual(result["measuredCells"], [])
+        data["cells"][0]["qualification"] = "passed"
+        with self.assertRaises(support.EvidenceError):
+            support.validate_report(data, request, "")
+
+    def test_mounted_workload_requires_actual_mounts(self):
+        data, request = fixture()
+        request["cells"] = data["cells"][0]["id"] = "mixed-mounted-160"
+        with self.assertRaises(support.EvidenceError):
+            support.validate_report(data, request, "")
+        for point in ("afterSpawn", "afterSample"):
+            data["cells"][0]["census"][point].update(mountedActors=80, mountSkeletons=80)
+        self.assertTrue(support.validate_report(data, request, "")["valid"])
+
+    def test_replay_dynamic_population_is_allowed_but_exhaustion_is_not(self):
+        data, request = fixture()
+        request.update(replay=True, driver="replay")
+        data["measurement"]["driver"] = "replay"
+        data["replay"] = {"ok": True}
+        cell = data["cells"][0]
+        cell["id"] = "replay-four_gates"
+        cell["replayWindow"] = {"exhausted": False, "mapChanges": 0}
+        cell["census"]["afterSample"].update(nodes=161, builtBodies=161)
+        cell["summary"]["actorRecords"]["max"] = 161.
+        self.assertTrue(support.validate_report(data, request, "")["valid"])
+        cell["replayWindow"]["exhausted"] = True
+        with self.assertRaises(support.EvidenceError):
+            support.validate_report(data, request, "")
+
+    def test_traversal_requires_all_successful_route_legs_and_delivered_frames(self):
+        data, request = fixture()
+        request["cells"] = "traversal-southern-cold"
+        cell = data["cells"][0]
+        cell.update(id=request["cells"], count=1, status="complete", plan={"active": 1, "moving": 1, "fighting": 0})
+        for point in cell["census"].values():
+            point.update(nodes=1, builtBodies=1)
+        cell["wallFrameSeries"] = [20.] * 60
+        cell["wallFrameTime"] = distribution(cell["wallFrameSeries"])
+        cell["route"] = {"kind": "synthetic_client_streaming", "serverNavigationCertified": False,
+                         "legs": [{"id": name, "success": True, "milliseconds": 500,
+                                   "readiness": {"ready": True}}
+                                  for name in ("first-southern-border", "consecutive-southern-border", "interior-entry",
+                                               "interior-return", "teleport", "return")]}
+        cell.pop("summary")
+        self.assertTrue(support.validate_report(data, request, "")["valid"])
+        cell["route"]["legs"][0]["success"] = False
+        with self.assertRaises(support.EvidenceError):
+            support.validate_report(data, request, "")
+
+    def test_requested_native_path_requires_actual_calls_and_zero_fallbacks(self):
+        data, request = fixture()
+        request["native_presentation"] = "flight"
+        data["activeBackends"]["presentation"]["requested"] = "flight"
+        data["cells"][0]["effectiveRuntime"]["activeBackends"]["presentation"]["requested"] = "flight"
+        with self.assertRaises(support.EvidenceError):
+            support.validate_report(data, request, "")
+        stats = data["cells"][0]["effectiveRuntime"]["activeBackends"]["presentation"]["flight"]
+        stats.update(buildAttempts=10, buildSuccesses=10)
+        self.assertTrue(support.validate_report(data, request, "")["valid"])
+        stats["buildFallbacks"] = 1
+        with self.assertRaises(support.EvidenceError):
+            support.validate_report(data, request, "")
+
+
+class IdentityAndProcessTests(unittest.TestCase):
+    def test_missing_invalid_and_nonfinite_json_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "report.json"
+            for content in (None, "", "[]", "{bad}", '{"x":NaN}', '{"x":1e999}'):
+                if content is not None:
+                    path.write_text(content)
+                with self.assertRaises(support.EvidenceError):
+                    support.read_json(path)
+
+    def test_artifact_manifest_verified_and_cannot_escape(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            artifact = root / "client.pck"
+            artifact.write_bytes(b"a package")
+            manifest = root / "manifest.json"
+            data = {"artifacts": [{"path": "client.pck", "sha256": support.sha256_file(artifact)}]}
+            manifest.write_text(json.dumps(data))
+            self.assertEqual(support.manifest_identity(manifest)["fileCount"], 1)
+            artifact.write_bytes(b"changed")
+            with self.assertRaises(support.EvidenceError):
+                support.manifest_identity(manifest)
+            data["artifacts"][0]["path"] = "../private-file"
+            manifest.write_text(json.dumps(data))
+            with self.assertRaises(support.EvidenceError):
+                support.manifest_identity(manifest)
+
+    def test_hashes_cover_content_and_names_and_map_dependencies(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            client = root / "godot-client"
+            (client / "data/maps").mkdir(parents=True)
+            (client / "assets").mkdir()
+            world = root / "maps/world.json"
+            world.parent.mkdir()
+            (world.parent / "world.glb").write_bytes(b"mesh")
+            (world.parent / "texture.png").write_bytes(b"image")
+            world.write_text(json.dumps({"asset": {"glb": "world.glb"}, "externalResources": {"texture.png": "digest"}}))
+            (client / "data/maps/registry.json").write_text(json.dumps({"maps": {
+                "test": {"manifest": "res://../maps/world.json"}}}))
+            files = support.asset_files(client, ["test"])
+            self.assertIn(world, files)
+            self.assertIn(world.parent / "texture.png", files)
+            initial = support.hash_files(files, root)["sha256"]
+            (world.parent / "world.glb").write_bytes(b"changed mesh")
+            self.assertNotEqual(initial, support.hash_files(files, root)["sha256"])
+
+    def test_complete_manifest_rejects_added_removed_files_and_false_sizes_or_aggregate(self):
+        import hashlib
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            artifact = root / "client.pck"
+            artifact.write_bytes(b"packed")
+            manifest = root / "benchmark-package.json"
+            digest = support.sha256_file(artifact)
+            content_hash = hashlib.sha256(b"client.pck\0" + bytes.fromhex(digest)).hexdigest()
+            data = {"schemaVersion": 1, "contentComplete": True, "contentHash": content_hash,
+                    "artifacts": [{"path": "client.pck", "sha256": digest, "bytes": 6}]}
+            manifest.write_text(json.dumps(data))
+            self.assertTrue(support.manifest_identity(manifest)["contentComplete"])
+            unexpected = root / "new-runtime.glb"
+            unexpected.write_bytes(b"unexpected")
+            with self.assertRaisesRegex(support.EvidenceError, "inventory changed"):
+                support.manifest_identity(manifest)
+            unexpected.unlink()
+            artifact.unlink()
+            with self.assertRaises(support.EvidenceError):
+                support.manifest_identity(manifest)
+            artifact.write_bytes(b"packed")
+            for mutation in (lambda d: d["artifacts"][0].update(bytes=5),
+                             lambda d: d.update(contentHash="0" * 64),
+                             lambda d: d["artifacts"][0].pop("bytes")):
+                bad = copy.deepcopy(data)
+                mutation(bad)
+                manifest.write_text(json.dumps(bad))
+                with self.assertRaises(support.EvidenceError):
+                    support.manifest_identity(manifest)
+
+    def test_environment_overrides_isolated_without_recording_unrelated_secrets(self):
+        clean, names = support.clean_environment({"PATH": "usable", "ELORIA_LOOK_QUALITY": "low",
+                                                  "RABBITLANDS_CROWD_TUNING": "full=0", "SECRET_TOKEN": "hidden"})
+        self.assertEqual(clean["PATH"], "usable")
+        self.assertNotIn("ELORIA_LOOK_QUALITY", clean)
+        self.assertNotIn("SECRET_TOKEN", names)
+
+    def test_replay_output_must_stay_outside_repository(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            repo = root / "repo"
+            client = repo / "godot-client"
+            client.mkdir(parents=True)
+            (repo / ".git").write_text("gitdir: somewhere")
+            with self.assertRaises(support.EvidenceError):
+                support.require_private_replay_output(repo / "test-artifacts", client)
+            support.require_private_replay_output(Path(root.anchor) / "rl-private-not-created", client)
+
+    def test_exported_command_does_not_relabel_a_source_project(self):
+        args = runner.parser().parse_args(["--godot", "test.exe", "--executable-mode", "exported",
+                                          "--main-pack", "workload.pck"])
+        command = runner.command_for(args, Path("engine.log"))
+        self.assertIn("--main-pack", command)
+        self.assertNotIn("--path", command)
+
+    def test_exit_zero_with_missing_report_or_error_log_is_invalid(self):
+        for missing, error_log, changed in ((True, False, False), (False, True, False), (False, False, True),
+                                            (False, False, False)):
+            with self.subTest(missing=missing, error_log=error_log, changed=changed), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                exe = root / "Godot.exe"
+                exe.write_bytes(b"not executed")
+                args = runner.parser().parse_args(["--godot", str(exe), "--project-path", str(root),
+                                                  "--cells", "s3-market-160", "--mode", "windowed",
+                                                  "--quality", "high", "--minimap", "show", "--body-cap", "160",
+                                                  "--sample-ms", "1000", "--warmup-ms", "100"])
+                args.godot = exe
+                data, _request = fixture()
+
+                def fake_launch(command, *, env, stdout, **_kwargs):
+                    data["runtimeBuild"].update(executablePath=str(exe), userDataDir=env["APPDATA"] + "/Godot/app_userdata/Eloria")
+                    if not missing:
+                        Path(env["RABBITLANDS_CROWD_BENCH_OUT"]).write_text(json.dumps(data))
+                    Path(command[command.index("--log-file") + 1]).write_text("ERROR: broken resource" if error_log else "normal")
+                    stdout.write("launched a Python mock, no engine")
+                    return mock.Mock(pid=12345, wait=mock.Mock(return_value=0))
+
+                snapshots = [{"source": "initial"}, {"source": "changed" if changed else "initial"}]
+                with mock.patch.object(runner, "identity", side_effect=snapshots), \
+                        mock.patch.object(runner.subprocess, "Popen", side_effect=fake_launch):
+                    result = runner.run_one(args, "all", 1, root)
+                self.assertEqual(result["validation"]["valid"], not (missing or error_log or changed))
+                self.assertTrue(list(root.glob("*.process.json")))
+
+    def test_actual_user_data_must_be_isolated(self):
+        data, request = fixture()
+        request["user_root"] = str(INTEGRATION / "isolated-run")
+        data["runtimeBuild"]["userDataDir"] = str(INTEGRATION / "ordinary-preferences")
+        with self.assertRaises(support.EvidenceError):
+            support.validate_report(data, request, "")
+
+    def test_exclusive_lock_is_released_on_process_death_without_deleting_file(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "shared.lock"
+            script = ("import sys,time;sys.path.insert(0,sys.argv[1]);"
+                      "from crowd_benchmark_support import BenchmarkLock;"
+                      "lock=BenchmarkLock(__import__('pathlib').Path(sys.argv[2]));lock.__enter__();"
+                      "print('locked',flush=True);time.sleep(30)")
+            child = subprocess.Popen([sys.executable, "-c", script, str(INTEGRATION), str(path)],
+                                     stdout=subprocess.PIPE, text=True)
+            try:
+                self.assertEqual(child.stdout.readline().strip(), "locked")
+                with path.open("rb") as stream:
+                    stream.seek(1)  # Windows prohibits reading another process's locked byte.
+                    original = stream.read()
+                with self.assertRaises(support.EvidenceError):
+                    with support.BenchmarkLock(path):
+                        self.fail("second owner acquired lock")
+                with path.open("rb") as stream:
+                    stream.seek(1)
+                    self.assertEqual(stream.read(), original)
+                child.kill()
+                child.wait(timeout=5)
+                with support.BenchmarkLock(path):
+                    self.assertTrue(path.exists())
+                self.assertTrue(path.exists())
+            finally:
+                if child.poll() is None:
+                    child.kill()
+                    child.wait(timeout=5)
+                child.stdout.close()
+
+
+if __name__ == "__main__":
+    unittest.main()

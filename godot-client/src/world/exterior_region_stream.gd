@@ -1,6 +1,8 @@
 class_name ExteriorRegionStream
 extends Node3D
 
+const ResourceDiagnostics := preload("res://src/world/resource_diagnostics.gd")
+
 ## One private loader worker, the current region and at most three neighbours.
 ## Only surveyed reciprocal neighbors are displayed simultaneously. The
 ## server still selects the map and is the sole owner of actors/interactions.
@@ -29,6 +31,9 @@ var retain_distance := DEFAULT_RETAIN_DISTANCE
 var maximum_neighbours := MAXIMUM_NEIGHBOURS
 var _thread: Thread
 var _pending_map := ""
+var _pending_started_usec := 0
+var _resource_timings: Dictionary = {}
+var _last_preparation: Dictionary = {}
 var _generation := 0
 var _pending_generation := 0
 var _retry_after: Dictionary = {}
@@ -105,6 +110,7 @@ func update_position(position: Vector3) -> void:
 	var arrival := Vector3.INF
 	if candidate.here.has("frame") and candidate.there.has("frame"):
 		arrival = frame_transform(candidate.here.frame, candidate.there.frame).affine_inverse() * position
+	_pending_started_usec = Time.get_ticks_usec()
 	var error := _thread.start(WorldLoader.prepare_detached.bind(path, MapSceneCache.is_enabled(), visuals, arrival))
 	if error != OK:
 		_thread = null
@@ -140,7 +146,10 @@ func _process(_delta: float) -> void:
 	ContinentChunkStream.reap_orphans()
 	if _thread == null or _thread.is_alive():
 		return
+	var install_began := Time.get_ticks_usec()
 	var builder := _thread.wait_to_finish() as WorldLoader
+	if _pending_started_usec > 0:
+		ResourceDiagnostics.record(_resource_timings, &"prepare_request_to_poll", _pending_started_usec)
 	_thread = null
 	var map_id := _pending_map
 	_pending_map = ""
@@ -154,6 +163,10 @@ func _process(_delta: float) -> void:
 		_record("failed", map_id)
 		return
 	var imported := resident.root as Node3D
+	var prepared_manifest := resident.manifest as WorldManifest
+	_last_preparation = {"map": map_id, "load_phases_us": resident.phases.duplicate(),
+		"timings": ResourceDiagnostics.snapshot(resident.get("resource_timings", {})),
+		"verification": prepared_manifest.verification_diagnostics.duplicate(true) if prepared_manifest != null else {}}
 	# Login, teleport, disconnect or a second map change can supersede a load.
 	if (_pending_generation != _generation or map_id == active_map or not _nearby(map_id)
 			or residents.size() >= mini(maximum_neighbours, MAXIMUM_NEIGHBOURS)):
@@ -161,13 +174,18 @@ func _process(_delta: float) -> void:
 		_record("discarded", map_id)
 		return
 	imported.visible = false
+	var operation_began := Time.get_ticks_usec()
 	_set_collision(imported, false)
+	ResourceDiagnostics.record(_resource_timings, &"collision_activation", operation_began)
+	operation_began = Time.get_ticks_usec()
 	add_child(imported)
+	ResourceDiagnostics.record(_resource_timings, &"scene_attach", operation_began, true)
 	residents[map_id] = resident
 	MapSceneCache.note_local_digest((resident.manifest as WorldManifest).asset_id(), str(resident.digest))
 	_record("ready", map_id, {"load_ms": float(resident.phases.get(&"total", 0)) / 1000.0})
 	_refresh_views()
 	residents_changed.emit()
+	ResourceDiagnostics.record(_resource_timings, &"install_with_signal", install_began)
 
 func _drain_retired_deferred() -> void:
 	_retirement_scheduled = false
@@ -384,6 +402,7 @@ func _can_dispatch_preload() -> bool:
 		and residents.size() < mini(maximum_neighbours, MAXIMUM_NEIGHBOURS))
 
 func _retire(resident: Dictionary, map_id: String) -> void:
+	var began := Time.get_ticks_usec()
 	var imported := resident.root as Node3D
 	if imported is ContinentChunkStream:
 		(imported as ContinentChunkStream).pause_streaming()
@@ -397,6 +416,7 @@ func _retire(resident: Dictionary, map_id: String) -> void:
 	_retiring.append({"resident": resident, "map": map_id, "stack": [imported],
 		"visual_keys": (resident.get("visuals", {}) as Dictionary).keys(),
 		"freed": 0, "released_visuals": 0, "release_usec": 0, "max_slice_usec": 0})
+	ResourceDiagnostics.record(_resource_timings, &"retire_enqueue", began)
 
 func _drain_retired(max_nodes := RETIRE_NODES_PER_FRAME,
 		budget_usec := RETIRE_BUDGET_USEC) -> int:
@@ -419,6 +439,7 @@ func _drain_retired(max_nodes := RETIRE_NODES_PER_FRAME,
 			var release_started := Time.get_ticks_usec()
 			visuals.erase(visual_keys.pop_back())
 			retired.release_usec += Time.get_ticks_usec() - release_started
+			ResourceDiagnostics.record(_resource_timings, &"prepared_visual_release", release_started, true)
 			retired.released_visuals += 1
 			freed += 1
 		else:
@@ -435,6 +456,7 @@ func _drain_retired(max_nodes := RETIRE_NODES_PER_FRAME,
 				var release_started := Time.get_ticks_usec()
 				node.free()
 				retired.release_usec += Time.get_ticks_usec() - release_started
+				ResourceDiagnostics.record(_resource_timings, &"node_free", release_started, true)
 				retired.freed += 1
 				freed += 1
 		retired.max_slice_usec = maxi(int(retired.max_slice_usec), Time.get_ticks_usec() - began)
@@ -445,7 +467,61 @@ func _drain_retired(max_nodes := RETIRE_NODES_PER_FRAME,
 				"release_ms": float(retired.release_usec) / 1000.0})
 			_retiring.pop_front()
 	_retirement_draining = false
+	ResourceDiagnostics.record(_resource_timings, &"retire_slice", began)
 	return freed
+
+## Cheap, explicitly incomplete accounting: chunk estimates deduplicate shared
+## identities across roots; whole-map/outer-worker bytes are unknown here.
+## The caller must read this on the main thread. Never joins or polls workers.
+func diagnostic_snapshot() -> Dictionary:
+	var shared: Dictionary = {}
+	var seen: Dictionary = {}
+	var roots: Array[Dictionary] = []
+	var active := _diagnostic_root(active_root, shared, seen)
+	active["state"] = "active"
+	active["map"] = active_map
+	roots.append(active)
+	for map_id: String in residents:
+		var row := _diagnostic_root(residents[map_id].root, shared, seen)
+		row["state"] = "neighbour"
+		row["map"] = map_id
+		roots.append(row)
+	for retired: Dictionary in _retiring:
+		var row := _diagnostic_root(retired.resident.root, shared, seen)
+		row["state"] = "retiring"
+		row["map"] = str(retired.map)
+		row["nodes_freed"] = int(retired.freed)
+		row["prepared_visuals_remaining"] = (retired.visual_keys as Array).size()
+		roots.append(row)
+	var known_bytes := 0
+	var unknown_whole_maps := 0
+	for row: Dictionary in roots:
+		known_bytes += int(row.get("total_estimated_bytes", 0))
+		if row.get("kind", "") == "whole_map":
+			unknown_whole_maps += 1
+	return {"roots": roots, "known_chunk_estimated_bytes": known_bytes,
+		"unknown_whole_map_roots": unknown_whole_maps,
+		"in_flight_maps": 1 if _thread != null else 0,
+		"in_flight_map": _pending_map if _thread != null else "",
+		"in_flight_map_age_us": maxi(0, Time.get_ticks_usec() - _pending_started_usec) if _thread != null else 0,
+		"outer_worker_bytes_known": false,
+		"orphan_workers": ContinentChunkStream.orphan_diagnostic_snapshot(),
+		"timings": ResourceDiagnostics.snapshot(_resource_timings),
+		"last_preparation": _last_preparation.duplicate(true)}
+
+static func _diagnostic_root(imported: Variant, shared: Dictionary, seen: Dictionary) -> Dictionary:
+	if not is_instance_valid(imported) or not imported is Node3D:
+		return {"kind": "absent"}
+	var identity := (imported as Node3D).get_instance_id()
+	if seen.has(identity):
+		return {"kind": "already_counted"}
+	seen[identity] = true
+	if imported is ContinentChunkStream:
+		var result := (imported as ContinentChunkStream).resource_estimates(shared)
+		result["kind"] = "chunks"
+		result["timings"] = (imported as ContinentChunkStream).resource_timings_snapshot()
+		return result
+	return {"kind": "whole_map", "estimate_available": false}
 
 ## How far each side of a border between two Landfall isles their light
 ## blends. The links publish no blend (blendDistance 0), so the sky, the sun

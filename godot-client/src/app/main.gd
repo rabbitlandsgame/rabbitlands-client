@@ -4,6 +4,8 @@ const Diagnostics = preload("res://src/diagnostics/client_diagnostics.gd")
 const ExperienceCurve = preload("res://src/state/experience_curve.gd")
 const SeasonSky = preload("res://src/world/season_sky.gd")
 const SeasonSurfaces = preload("res://src/world/season_surfaces.gd")
+const ExternalMeshPool = preload("res://src/world/external_mesh_pool.gd")
+const ExternalTexturePool = preload("res://src/world/external_texture_pool.gd")
 const LanternGuideScript = preload("res://src/ui/lantern_guide.gd")
 const WindowStackScript = preload("res://src/ui/window_stack.gd")
 const LanternSceneScript = preload("res://src/world/lantern_scene.gd")
@@ -775,6 +777,11 @@ var _storage_sync_queued := false
 var _actor_surface_samples: Dictionary = {}
 var _grounded_actors: Dictionary = {}
 var _actor_surface_snap_pending := false
+## Completion spans include deferred/physics waits; actual loop work is
+## recorded separately so diagnostics do not mistake waiting for CPU work.
+var _surface_followup_pending := 0
+var _surface_followup_stats: Dictionary = {}
+var _surface_work_stats: Dictionary = {}
 var _local_placement_logged := false
 ## Set when `_sync_world` ran out of spawn budget with actors still to
 ## build; the next frame picks them up.
@@ -1660,6 +1667,14 @@ func client_diagnostic_snapshot() -> Dictionary:
 		"map_root_present": is_instance_valid(world_loader.world_root),
 		"map_cache_enabled": MapSceneCache.is_enabled(), "map_cache_status": str(world_loader.cache_status),
 		"map_load_phases_us": world_loader.load_phases.duplicate(),
+		"surface_work": surface_work_snapshot(),
+		"loader_work": world_loader.diagnostic_snapshot(),
+		"streaming_work": exterior_stream.diagnostic_snapshot(),
+		"resource_retention": {
+			"actor_scenes": GlbSceneCache.retention_snapshot(),
+			"animations": NativeAnimationImporter.retention_snapshot(),
+			"world_meshes": ExternalMeshPool.retention_snapshot(),
+			"world_textures": ExternalTexturePool.retention_snapshot()},
 		"actors_received": AppState.actors.size(), "actors_presented": actor_nodes.size(),
 		"local_actor_received": AppState.actors.has(AppState.local_actor_id),
 		"local_actor_presented": is_instance_valid(local_actor),
@@ -5829,10 +5844,12 @@ func _lighting_manifest() -> WorldManifest:
 ## Bind seasonal scenery after map/appearance changes; month changes only
 ## update shared material uniforms, so existing and newly streamed trees agree.
 func _sync_season_surfaces() -> void:
+	var started := Time.get_ticks_usec()
 	SeasonSurfaces.set_season(AppState.almanac.get("season", {}) as Dictionary)
 	for world: Dictionary in LookSwitch.worlds(world_loader.world_root,
 			world_loader.manifest, exterior_stream.residents):
 		SeasonSurfaces.apply(world.root as Node, world.manifest as WorldManifest)
+	_record_surface_work(&"season", started)
 
 func _update_border_lighting() -> void:
 	var lighting := _lighting_manifest()
@@ -5928,6 +5945,7 @@ func _snap_all_actors_to_surface() -> void:
 	_actor_surface_snap_pending = true
 	await get_tree().physics_frame
 	_actor_surface_snap_pending = false
+	var started := Time.get_ticks_usec()
 	for actor_value: Variant in actor_nodes.values():
 		if not is_instance_valid(actor_value):
 			continue
@@ -5935,6 +5953,7 @@ func _snap_all_actors_to_surface() -> void:
 		var actor_adapter := _adapter_for_actor(AppState.actors.get(actor.actor_id, {}) as Dictionary)
 		if actor_adapter != null:
 			_place_actor_on_surface(actor, true, actor_adapter.fallback_height())
+	_record_surface_work(&"actor_ground", started, actor_nodes.size())
 
 func _snap_all_ground_bags_to_surface() -> void:
 	await get_tree().physics_frame
@@ -15177,6 +15196,7 @@ func _paint_map_object_look(map_object: MapObject3D) -> int:
 func _bind_promoted_scenery() -> void:
 	if world_loader == null or not is_instance_valid(world_loader.world_root):
 		return
+	var started := Time.get_ticks_usec()
 	var stream := world_loader.world_root as ContinentChunkStream
 	var wanted := {}
 	for raw_object: Variant in map_object_nodes.values():
@@ -15202,6 +15222,7 @@ func _bind_promoted_scenery() -> void:
 		for node_name: String in found:
 			for map_object: MapObject3D in wanted[chunk][node_name]:
 				map_object.bind_placement(found[node_name] as Node3D)
+	_record_surface_work(&"scenery_bind", started, map_object_nodes.size())
 
 ## The Node3Ds under `root` whose names are keys of `names`, nearest first;
 ## the walk stops as soon as all are found (a kit placement is a child of its
@@ -15436,12 +15457,15 @@ func _place_map_object_on_surface(map_object: MapObject3D) -> void:
 
 func _snap_all_map_objects_to_surface() -> void:
 	await get_tree().physics_frame
+	var started := Time.get_ticks_usec()
 	for raw_object: Variant in map_object_nodes.values():
 		_place_map_object_on_surface(raw_object as MapObject3D)
 	for raw_marker: Variant in map_marker_nodes.values():
 		_place_map_marker_on_surface(raw_marker as MapMarker3D)
 	for raw_marker: Variant in player_mark_nodes.values():
 		_place_map_marker_on_surface(raw_marker as MapMarker3D)
+	_record_surface_work(&"object_ground", started,
+		map_object_nodes.size() + map_marker_nodes.size() + player_mark_nodes.size())
 
 ## Map objects and markers are placed on the rendered navigation surface when
 ## the server lists them. On a streamed territory the chunk beneath a distant
@@ -15466,14 +15490,42 @@ func _watch_surface_stream(surface_root: Node3D) -> void:
 
 func _on_resident_surfaces_changed() -> void:
 	_watch_chunk_surfaces()
-	_sync_season_surfaces.call_deferred()
-	_snap_all_actors_to_surface.call_deferred()
+	_queue_surface_followup(&"season", _sync_season_surfaces)
+	_queue_surface_followup(&"actor_ground", _snap_all_actors_to_surface)
 
 func _on_chunk_surface_ready(_identity: String, _imported: Node3D) -> void:
-	_sync_season_surfaces.call_deferred()
-	_snap_all_actors_to_surface.call_deferred()
-	_snap_all_map_objects_to_surface.call_deferred()
-	_bind_promoted_scenery.call_deferred()
+	_queue_surface_followup(&"season", _sync_season_surfaces)
+	_queue_surface_followup(&"actor_ground", _snap_all_actors_to_surface)
+	_queue_surface_followup(&"object_ground", _snap_all_map_objects_to_surface)
+	_queue_surface_followup(&"scenery_bind", _bind_promoted_scenery)
+
+func _queue_surface_followup(label: StringName, callback: Callable) -> void:
+	_surface_followup_pending += 1
+	_run_surface_followup.call_deferred(label, callback, Time.get_ticks_usec())
+
+func _run_surface_followup(label: StringName, callback: Callable, queued: int) -> void:
+	await callback.call()
+	_surface_followup_pending -= 1
+	_record_surface_span(_surface_followup_stats, label, Time.get_ticks_usec() - queued)
+
+static func _record_surface_span(stats: Dictionary, label: StringName,
+		elapsed: int, items := 0) -> void:
+	var row: Dictionary = stats.get(label, {"count": 0, "total_usec": 0,
+		"max_usec": 0, "last_usec": 0, "items": 0})
+	row.count = int(row.count) + 1
+	row.total_usec = int(row.total_usec) + elapsed
+	row.max_usec = maxi(int(row.max_usec), elapsed)
+	row.last_usec = elapsed
+	row.items = int(row.items) + items
+	stats[label] = row
+
+func _record_surface_work(label: StringName, started: int, items := 0) -> void:
+	_record_surface_span(_surface_work_stats, label, Time.get_ticks_usec() - started, items)
+
+func surface_work_snapshot() -> Dictionary:
+	return {"pending": _surface_followup_pending,
+		"completion_wall": _surface_followup_stats.duplicate(true),
+		"work": _surface_work_stats.duplicate(true)}
 
 ## The "now harvesting" indicator. The stock client drove this by matching an
 ## exact English phrase out of the chat stream; this reads the authoritative

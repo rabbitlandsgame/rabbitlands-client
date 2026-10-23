@@ -1,5 +1,52 @@
 # Client runtime performance
 
+## Reproducible performance checks
+
+Run `tests/integration/run_crowd_presentation_benchmark.py` from `godot-client`.
+Use explicit quality, renderer, resolution, frame cap and minimap choices for
+comparisons. For example, a source-project screening run is:
+
+```powershell
+python tests/integration/run_crowd_presentation_benchmark.py --godot <Godot.exe> --variants all --cells phase1 --mode windowed --renderer gl_compatibility --quality low --resolution 1280x720 --fps-cap 30 --minimap show --label reference-low
+```
+
+`phase1` covers market160, invasion160, an equipped 160-actor crowd containing
+80 supported mounts, combat160, empty, and cold/warm southern traversal. The
+route drives real client map and actor handlers without a server connection;
+it does not certify server navigation. “Cold” means the first application
+pass, not an emptied operating-system cache. `authored-herd` is separately
+selectable and reports unavailable content when the map has no authored herd.
+Unavailable content is retained as pending, never accepted as an empty timing.
+
+For shipping-path measurements, create a committed standalone benchmark export:
+
+```powershell
+python tools/package_client.py --distribution standalone --benchmark-profile --ref <commit> --no-fetch --no-zip --godot <Godot.exe> --build-dir <disposable-build-worktree> --out <local-checkpoints>
+python tests/integration/run_crowd_presentation_benchmark.py --godot <package>/app/RabbitLands.exe --executable-mode exported --package-manifest <package>/benchmark-package.json --variants all --cells phase1 --mode windowed --renderer gl_compatibility --quality medium --resolution 1280x720 --fps-cap 60 --minimap show --label reference-medium
+```
+
+The local benchmark profile adds only allowlisted synthetic workload scripts;
+ordinary distributions keep tests excluded. It keeps the ordinary game entry
+point and provides a playable standalone checkpoint. Its manifest covers the
+executable, PCK and loose files. Checkpoints and raw reports belong in ignored
+local storage. Keep replay recordings and their reports outside repositories.
+
+The runner verifies source/content/executable identity before and after each
+run, isolates settings, records effective settings and actual backend use,
+and rejects errors, incomplete readiness, mismatched populations or invalid
+statistics. It retains raw work-time and delivered-frame series separately.
+Loading diagnostics distinguish preparation, verification, attach, deferred
+grounding/binding, retirement and retained caches. Large indivisible work is
+reported explicitly rather than implied to fit a nominal time allowance.
+
+A process-owned lock serializes participating runners across worktrees. The
+lock cannot reserve the machine against unrelated applications. Pause imports,
+builds, tests and other benchmark jobs during a comparison. Use matched content
+and settings, repeat runs in alternating order, and label shared-host results
+as screening. A fast development machine does not qualify low-end hardware.
+
+## Historical measurements
+
 Notes on the runtime cost of the Godot client and the mechanisms that keep it
 down. Measured on the Four Gates package (1717 imported mesh nodes referencing
 42 meshes) at 1280x720 with the GL Compatibility renderer.

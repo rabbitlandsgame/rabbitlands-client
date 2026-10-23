@@ -37,10 +37,15 @@ const GltfQuantization := preload("res://src/world/gltf_quantization.gd")
 const GltfAnimationFidelity := preload("res://src/actors/gltf_animation_fidelity.gd")
 const WorldObjectImages := preload("res://src/world/world_object_images.gd")
 const ArchivedModelPolicy := preload("res://src/actors/archived_model_policy.gd")
+const ResourceDiagnostics := preload("res://src/world/resource_diagnostics.gd")
 const WORLD_ASSET_ROOT := "res://assets/world/"
 
 static var _scenes: Dictionary = {}
 static var _failed: Dictionary = {}
+static var _diagnostics_mutex := Mutex.new()
+static var _resource_timings: Dictionary = {}
+static var _lookup_hits := 0
+static var _lookup_misses := 0
 
 static func missing(paths: PackedStringArray) -> PackedStringArray:
 	var out := PackedStringArray()
@@ -75,12 +80,20 @@ static func instantiate(path: String) -> Node3D:
 		return null
 	var packed: PackedScene = _scenes.get(path) as PackedScene
 	if packed == null:
+		_lookup_misses += 1
+		var miss_began := Time.get_ticks_usec()
 		packed = _build(path)
+		_record_operation(&"cache_miss_build", miss_began, false)
 		if packed == null:
 			_failed[path] = true
 			return null
 		_scenes[path] = packed
-	return packed.instantiate() as Node3D
+	else:
+		_lookup_hits += 1
+	var instantiate_began := Time.get_ticks_usec()
+	var instance := packed.instantiate() as Node3D
+	_record_operation(&"scene_instantiate", instantiate_began)
+	return instance
 
 ## Drops every cached scene. Call when leaving a session so the next map is not
 ## charged for models it no longer uses.
@@ -90,6 +103,23 @@ static func clear() -> void:
 
 static func cached_scene_count() -> int:
 	return _scenes.size()
+
+## Read on the main thread, where cache publication/clearing already lives.
+## Worker builds only update timing data behind the separate mutex. Counts do
+## not attempt expensive resource walks or imply measured CPU/GPU allocation.
+static func retention_snapshot() -> Dictionary:
+	_diagnostics_mutex.lock()
+	var timings := ResourceDiagnostics.snapshot(_resource_timings)
+	_diagnostics_mutex.unlock()
+	return {"strong_scene_entries": _scenes.size(), "failed_paths": _failed.size(),
+		"lookup_hits": _lookup_hits, "lookup_misses": _lookup_misses,
+		"bytes_estimate_available": false, "timings": timings}
+
+static func _record_operation(operation: StringName, started: int, atomic := true) -> void:
+	var elapsed := Time.get_ticks_usec() - started
+	_diagnostics_mutex.lock()
+	ResourceDiagnostics.record_elapsed(_resource_timings, operation, elapsed, atomic)
+	_diagnostics_mutex.unlock()
 
 static func _canonical_path(path: String) -> String:
 	return ProjectSettings.globalize_path(path) if path.begins_with("res://") else path
@@ -114,8 +144,11 @@ static func _imported_actor_scene(path: String) -> PackedScene:
 		return null
 	if not ResourceLoader.exists(resource_path, "PackedScene"):
 		return null
-	return ResourceLoader.load(resource_path, "PackedScene",
+	var began := Time.get_ticks_usec()
+	var imported := ResourceLoader.load(resource_path, "PackedScene",
 		ResourceLoader.CACHE_MODE_REUSE) as PackedScene
+	_record_operation(&"imported_scene_read", began)
+	return imported
 
 static func _build_raw(path: String) -> PackedScene:
 	GltfQuantization.ensure_registered()
@@ -123,11 +156,16 @@ static func _build_raw(path: String) -> PackedScene:
 	var state: GLTFState = GLTFState.new()
 	var world_asset := is_world_asset(path)
 	if world_asset: state.set_additional_data(WorldObjectImages.ENABLED, true)
-	if document.append_from_file(path, state) != OK:
+	var operation_began := Time.get_ticks_usec()
+	var parse_error := document.append_from_file(path, state)
+	_record_operation(&"gltf_parse", operation_began)
+	if parse_error != OK:
 		return null
 	if world_asset and int(state.get_additional_data(WorldObjectImages.PREPARED)) < state.get_images().size():
 		build_texture_mipmaps(state)
+	operation_began = Time.get_ticks_usec()
 	var generated: Node = document.generate_scene(state, GltfAnimationFidelity.bake_fps(state))
+	_record_operation(&"gltf_generate_scene", operation_began)
 	if generated == null:
 		return null
 	if generated is not Node3D:
@@ -137,8 +175,12 @@ static func _build_raw(path: String) -> PackedScene:
 		_filter_anisotropic(generated)
 	_claim(generated, generated)
 	var packed: PackedScene = PackedScene.new()
+	operation_began = Time.get_ticks_usec()
 	var packed_error: Error = packed.pack(generated)
+	_record_operation(&"scene_pack", operation_began)
+	operation_began = Time.get_ticks_usec()
 	generated.free()
+	_record_operation(&"temporary_scene_free", operation_began)
 	if packed_error != OK:
 		push_warning("glb cache: pack failed for %s (%s)" % [
 			path, error_string(packed_error)])

@@ -13,8 +13,12 @@ extends SceneTree
 ## component timers of the benchmark Main subclass, memory before and after the
 ## crowd, and what the presentation did: bodies built and deferred, stand-ins,
 ## animation tiers, skeletons processing, live effects and the effect budget.
-## Headless runs report scene CPU; windowed runs, with vsync off and no frame
-## cap, report the rendered frame time and the renderer's own timers.
+## Headless runs report scene CPU. Windowed runs disable vsync and retain an
+## explicit frame cap (60 by default); frame-work excludes its sleep, while
+## delivered frame intervals and the renderer's own timers stay separate.
+## Phase1 adds a mixed equipped crowd with80 approved mounts, explicit authored
+## herd availability, and client-driven southern traversal. No server service
+## or private session recording is required for these synthetic workloads.
 ##
 ## The `live` and `stress` crowds are synthetic: actor records and real server
 ## packet shapes fed through AppState, as the network would, at a fixed cadence.
@@ -28,7 +32,7 @@ extends SceneTree
 ## and records the machine. Environment:
 ##
 ## - RABBITLANDS_CROWD_BENCH_CELLS: comma list of cell ids, or `phase4` (default),
-##   `quick` or `all`; see `cells_for`. A replay runs its one cell.
+##   `quick`, `phase1` or `all`; see `cells_for`. A replay runs its one cell.
 ## - RABBITLANDS_CROWD_BENCH_MAP: map id (default four_gates, or the recording's
 ##   map for a replay; `none` for no map).
 ## - RABBITLANDS_CROWD_BENCH_CENTRE: `x,y` server tile the player stands on
@@ -54,6 +58,7 @@ const FIRST_ACTOR_ID := 14000
 const FULL_KIT_A := {0: 114, 1: 106, 2: 0, 3: 117, 4: 171, 5: 184, 6: 192}
 const FULL_KIT_B := {0: 164, 1: 111, 2: 1, 3: 109, 4: 172, 5: 185, 6: 193}
 const SCHEMA := 1
+const Workloads := preload("res://tests/integration/performance_workloads.gd")
 const MAX_SPAWN_MSEC := 240000
 const MAX_READINESS_MSEC := 60000
 const MIN_SAMPLE_FRAMES := 60
@@ -128,6 +133,12 @@ var _replay_stats: Dictionary = {}
 ## Protocol v2 inputs (RABBITLANDS_CROWD_BENCH_PRESENCE / _SERVER_TIME).
 var _presence_dots := 0
 var _server_time := false
+var _route_capture := false
+var _route_frame_series: Array[float] = []
+var _route_wall_series: Array[float] = []
+var _route_last_frame_usec := 0
+var _route_primed := false
+var _route_peak_static_bytes := 0
 
 func _init() -> void:
 	call_deferred("_run")
@@ -137,7 +148,7 @@ func _init() -> void:
 ## market and one invasion cell for a smoke run.
 static func cells_for(profile: String) -> Array:
 	var cells: Array = []
-	var all := profile in ["all", "phase4"]
+	var legacy_all := profile == "phase4"
 	for count: int in [100, 160, 200, 300]:
 		cells.append({"id": "s3-market-%d" % count, "count": count, "shape": "market",
 			"activity": "third_active"})
@@ -149,8 +160,25 @@ static func cells_for(profile: String) -> Array:
 	cells.append({"id": "aoi-160", "count": 160, "shape": "aoi", "activity": "third_active"})
 	# The map and the player alone: what every other cell's frame is built on.
 	cells.append({"id": "empty", "count": 1, "shape": "market", "activity": "idle"})
-	if all:
+	if legacy_all:
 		return cells
+	cells.append({"id": "mixed-mounted-160", "count": 160, "shape": "mounted",
+		"mountedCount": 80, "activity": "third_active"})
+	cells.append({"id": "authored-herd", "count": 1, "shape": "herd", "activity": "idle"})
+	for visit: String in ["cold", "warm"]:
+		cells.append({"id": "traversal-southern-" + visit, "count": 1,
+			"shape": "traversal", "activity": "route", "visit": visit})
+	if profile == "all":
+		return cells
+	if profile == "phase1":
+		var phase_one := ["s3-market-160", "s2-invasion-160", "mixed-mounted-160",
+			"combat-160", "empty", "traversal-southern-cold", "traversal-southern-warm"]
+		var selected: Array = []
+		for wanted_id: String in phase_one:
+			for cell: Dictionary in cells:
+				if str(cell.id) == wanted_id:
+					selected.append(cell)
+		return selected
 	if profile == "quick":
 		return cells.filter(func(cell: Dictionary) -> bool:
 			return str(cell.id) in ["s3-market-160", "s2-invasion-160"])
@@ -165,7 +193,8 @@ func _run() -> void:
 	OS.low_processor_usage_mode_sleep_usec = 1
 	if not _headless:
 		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
-	root.size = Vector2i(1280, 720)
+	var requested_resolution := Workloads.resolution(_env("RABBITLANDS_CROWD_BENCH_RESOLUTION", "1280x720"))
+	root.size = requested_resolution
 	var replay := _driver_mode() == "replay"
 	var profile := "replay" if replay else _env("RABBITLANDS_CROWD_BENCH_CELLS", "phase4")
 	var cells := [] if replay else cells_for(profile)
@@ -185,6 +214,10 @@ func _run() -> void:
 		"processorCount": OS.get_processor_count(),
 		"memoryInfo": OS.get_memory_info(),
 		"godot": Engine.get_version_info(),
+		"runtimeBuild": {"standalone": OS.has_feature("standalone"), "editor": OS.has_feature("editor"),
+			"userDataDir": OS.get_user_data_dir(),
+			"template": OS.has_feature("template"), "debug": OS.has_feature("debug"),
+			"release": OS.has_feature("release"), "executablePath": OS.get_executable_path()},
 		"viewport": [root.size.x, root.size.y],
 		"presentation": OS.get_environment("RABBITLANDS_CROWD_PRESENTATION"),
 		"graphicsQuality": LookProfile.quality_name(LookProfile.quality()),
@@ -253,12 +286,16 @@ func _run() -> void:
 		RenderingServer.frame_post_draw.connect(_on_iteration_drawn)
 	_report["crowdPolicy"] = (_main.get("crowd") as RefCounted).call("describe") \
 		if _main.get("crowd") != null else {"available": false}
+	_record_effective_runtime()
 	# A replay warms nothing: what the recording shows is built in its prologue,
 	# and a model first seen during the sample costs what it costs in play.
 	if not replay:
 		await _prewarm()
 	for cell: Dictionary in cells:
-		await _run_cell(cell)
+		if str(cell.shape) == "traversal":
+			await _run_traversal_cell(cell)
+		else:
+			await _run_cell(cell)
 	await _tear_down_main()
 	_finish()
 
@@ -354,8 +391,18 @@ func _prewarm() -> void:
 
 func _run_cell(spec: Dictionary) -> void:
 	var replay := str(spec["shape"]) == "replay"
+	if str(spec.shape) == "herd":
+		await _prepare_authored_herd(spec)
+		if str(spec.get("status", "")) == "unavailable_content":
+			(_report.cells as Array).append(spec)
+			return
 	var count := int(spec["count"])
 	var records: Dictionary = {} if replay else _make_records(count, str(spec["shape"]))
+	_app_state.set("actor_mounts", {})
+	if str(spec.shape) == "mounted":
+		var mounts := Workloads.mount_rows(records, int(spec.mountedCount), str(_app_state.get("current_map")))
+		_app_state.set("actor_mounts", mounts)
+		spec["mountProfiles"] = Workloads.mount_profile_counts(mounts)
 	_app_state.set("selected_actor_id", -1)
 	var before := _memory_sample()
 	var spawn: Dictionary
@@ -370,6 +417,9 @@ func _run_cell(spec: Dictionary) -> void:
 		spawn = await _spawn_and_build(count)
 	var readiness := await _wait_for_world_readiness(str(spec["id"]), 300)
 	var census_before := _census()
+	if str(spec.shape) == "mounted":
+		_expect(int(census_before.mountedActors) == int(spec.mountedCount),
+			"mixed-mounted fixture builds all %d mounted actors" % int(spec.mountedCount))
 	var spawned_memory := _memory_sample()
 	var active: Array[int] = []
 	if not replay:
@@ -422,6 +472,7 @@ func _run_cell(spec: Dictionary) -> void:
 	await _drive_for(plan, int((_report["measurement"] as Dictionary)["sampleMilliseconds"]), raw)
 	var elapsed := Time.get_ticks_msec() - sample_started
 	var census_after := _census()
+	var sampled_runtime := _main.call("benchmark_runtime_snapshot") as Dictionary
 	var budget: Dictionary = (_main.get("effect_budget") as RefCounted).call("describe") \
 		if _main.get("effect_budget") != null else {}
 	var crowd: Dictionary = (_main.get("crowd") as RefCounted).call("describe") \
@@ -466,6 +517,7 @@ func _run_cell(spec: Dictionary) -> void:
 	result["census"] = {"afterSpawn": census_before, "afterSample": census_after}
 	result["effectBudget"] = budget
 	result["crowdPolicy"] = crowd
+	result["effectiveRuntime"] = sampled_runtime
 	result["memory"] = {"before": before, "withCrowd": spawned_memory, "afterDespawn": after,
 		"crowdDelta": _memory_delta(before, spawned_memory),
 		"perActorStaticBytes": int((int(spawned_memory.staticBytes) - int(before.staticBytes))
@@ -491,6 +543,9 @@ func _make_records(count: int, shape: String) -> Dictionary:
 		var humanoid := false
 		var half := 40
 		match shape:
+			"mounted":
+				humanoid = true
+				half = 25
 			"market":
 				humanoid = index % 10 != 0
 				half = 40
@@ -528,6 +583,7 @@ func _record(index: int, humanoid: bool, tile: Vector2i, kit: Dictionary) -> Dic
 		kind = 5
 	var id := FIRST_ACTOR_ID + index
 	return {"actor_id": id, "x": tile.x, "y": tile.y,
+		"map": str(_app_state.get("current_map")) if _app_state != null else "",
 		"rotation": (index * 977) % 65536, "actor_type": actor_type,
 		"kind": kind, "name": name, "health": 5000, "max_health": 5000,
 		"alive": true, "appearance": {}, "equipment_visuals": kit.duplicate(),
@@ -732,6 +788,12 @@ func _on_iteration_drawn() -> void:
 				"physics": float(maxi(0, _process_started_usec - _iteration_started_usec)) / 1000.0,
 				"flush": float(flush_end - _process_ended_usec) / 1000.0,
 				"draw": float(now - flush_end) / 1000.0 if flush_end != now else null}
+	if _route_capture and _last_iteration_usec >= 0.0:
+		_route_frame_series.append(_round(_last_iteration_usec / 1000.0))
+		if _route_last_frame_usec > 0:
+			_route_wall_series.append(_round(float(now - _route_last_frame_usec) / 1000.0))
+		_route_last_frame_usec = now
+		_route_peak_static_bytes = maxi(_route_peak_static_bytes, OS.get_static_memory_usage())
 	_iteration_started_usec = -1
 	_process_started_usec = -1
 	_process_ended_usec = -1
@@ -1126,7 +1188,9 @@ func _census() -> Dictionary:
 	var out := {"nodes": nodes.size(), "builtBodies": 0, "deferred": 0, "standIns": 0,
 		"drawn": 0, "inFrustumAndDrawn": 0, "tierFull": 0, "tierHalf": 0, "tierPaused": 0,
 		"skeletons": 0, "skeletonsProcessing": 0, "beyondDrawDistance": 0, "crowdHidden": 0,
-		"capeClothActive": 0, "capeSolversActive": 0}
+		"capeClothActive": 0, "capeSolversActive": 0, "mountedActors": 0,
+		"mountSkeletons": 0, "mountedVisualsProcessing": 0,
+		"mountedWornCapes": 0, "ambientAnimals": 0}
 	var planes: Array[Plane] = camera.get_frustum() if camera != null else []
 	# The quarter tier by name, so the census also runs against a client
 	# without it.
@@ -1135,6 +1199,14 @@ func _census() -> Dictionary:
 		var actor := value as ReplicatedActor3D
 		if actor == null:
 			continue
+		if is_instance_valid(actor._mount_visual):
+			out["mountedActors"] += 1
+			out["mountSkeletons"] += actor._mount_visual.find_children("*", "Skeleton3D", true, false).size()
+			out["mountedVisualsProcessing"] += int(actor._mount_visual.is_processing())
+			# Mounted cloth is called manually even though its automatic modifier
+			# is inactive. Keep this separate from capeSolversActive, not a claim
+			# that automatic-modifier counts include those manual calls.
+			out["mountedWornCapes"] += int(actor.wears_cape_cloth())
 		var deferred: bool = actor.has_method("is_model_deferred") \
 			and bool(actor.call("is_model_deferred"))
 		out[("deferred" if deferred else "builtBodies")] += 1
@@ -1190,6 +1262,9 @@ func _census() -> Dictionary:
 		if record is Dictionary and (record as Dictionary).has("step_local_msec"):
 			stamped += 1
 	out["stampedRows"] = stamped
+	var ambient := _main.get("ambient_population") as AmbientPopulation
+	if is_instance_valid(ambient):
+		out["ambientAnimals"] = (ambient.get("_spawned") as Array).size()
 	return out
 
 
@@ -1201,19 +1276,21 @@ func _live_effects() -> int:
 
 
 func _wait_for_world_readiness(label: String, minimum_msec: int) -> Dictionary:
-	if str(_report.get("map", "")) == "none":
+	if str(_report.get("map", "")) == "none" and str(_app_state.get("current_map")) in ["", "none"]:
 		await _settle_frames(4)
 		return {"label": label, "ready": true, "reason": "no map"}
 	var started := Time.get_ticks_msec()
 	var deadline := started + MAX_READINESS_MSEC
 	var stable := 0
 	var previous := ""
+	var last_state: Dictionary = {}
 	while Time.get_ticks_msec() < deadline:
 		await physics_frame
 		await process_frame
 		var loader := _main.get("world_loader") as WorldLoader
 		var chunk := loader.world_root as ContinentChunkStream if loader != null else null
-		var idle := _streaming_idle(loader, chunk)
+		last_state = _main.call("benchmark_readiness_snapshot") as Dictionary
+		var idle := _streaming_idle(loader, chunk) and bool(last_state.get("ready", false))
 		var signature := "%d|%d|%d" % [GlbSceneCache.cached_scene_count(),
 			int(Performance.get_monitor(Performance.OBJECT_RESOURCE_COUNT)),
 			chunk.cells.size() if chunk != null else -1]
@@ -1223,7 +1300,8 @@ func _wait_for_world_readiness(label: String, minimum_msec: int) -> Dictionary:
 			break
 	var ready := stable >= 12
 	_expect(ready, "%s reaches stable resources with no map work pending" % label)
-	return {"label": label, "ready": ready, "waitMilliseconds": Time.get_ticks_msec() - started}
+	return {"label": label, "ready": ready, "waitMilliseconds": Time.get_ticks_msec() - started,
+		"stableFrames": stable, "state": last_state}
 
 
 func _streaming_idle(loader: WorldLoader, chunk: ContinentChunkStream) -> bool:
@@ -1238,6 +1316,160 @@ func _streaming_idle(loader: WorldLoader, chunk: ContinentChunkStream) -> bool:
 			return false
 	var exterior := _main.get("exterior_stream") as ExteriorRegionStream
 	return exterior == null or exterior.is_idle()
+
+
+func _record_effective_runtime() -> void:
+	var runtime := _main.call("benchmark_runtime_snapshot") as Dictionary
+	_report["effectiveSettings"] = runtime.get("effectiveSettings", {})
+	_report["activeBackends"] = runtime.get("activeBackends", {})
+	_report["viewport"] = [root.size.x, root.size.y]
+
+
+func _prepare_authored_herd(spec: Dictionary) -> void:
+	var map_id := _env("RABBITLANDS_CROWD_BENCH_HERD_MAP", "sunmane_steppe")
+	var entry := MapRegistry.resolve(_main.get("map_registry") as Dictionary, map_id)
+	var groups: Array = []
+	if not entry.is_empty():
+		var manifest := WorldManifest.load_file(ProjectSettings.globalize_path(str(entry.get("manifest", ""))))
+		groups = manifest.data.get("ambientPopulation", {}).get("groups", []) as Array
+	var declared := 0
+	for group: Dictionary in groups:
+		declared += maxi(0, int(group.get("count", 0)))
+	spec["map"] = map_id
+	spec["declaredAmbientAnimals"] = declared
+	if declared == 0:
+		spec.merge({"status": "unavailable_content", "qualification": "pending",
+			"reason": "Published map has no authored ambient herd; no animals were invented or restored.",
+			"frames": 0, "sampleMilliseconds": 0, "readiness": {"ready": false},
+			"fixtureSource": "current published ambientPopulation.groups"})
+		return
+	await _route_place(map_id, Vector2i(137, 95), true)
+	_adapter = _main.get("adapter") as CoordinateAdapter
+	var center: Array = (groups[0] as Dictionary).get("center", [0, 0, 0])
+	var point := Vector3(float(center[0]), float(center[1]), float(center[2]))
+	var loader := _main.get("world_loader") as WorldLoader
+	if is_instance_valid(loader.world_root):
+		point = loader.world_root.global_transform * point
+	_centre = _adapter.godot_to_server(point)
+	await _route_place(map_id, _centre, false)
+	var ambient := _main.get("ambient_population") as AmbientPopulation
+	var actual := (ambient.get("_spawned") as Array).size() if is_instance_valid(ambient) else 0
+	spec["spawnedAmbientAnimals"] = actual
+	_expect(actual > 0, "authored-herd has real published animals before sampling")
+
+
+## A client-only route, using the real Main/AppState loader and packet handlers.
+## It intentionally does not claim server navigation or cold OS/storage caches.
+func _run_traversal_cell(spec: Dictionary) -> void:
+	var primer: Array[Dictionary] = []
+	if str(spec.visit) == "warm" and not _route_primed:
+		primer = await _traverse_southern_route()
+		_route_primed = primer.size() == Workloads.southern_route().size() and primer.all(
+			func(leg: Dictionary) -> bool: return bool(leg.get("success", false)))
+	_route_frame_series.clear()
+	_route_wall_series.clear()
+	_route_last_frame_usec = Time.get_ticks_usec()
+	_route_peak_static_bytes = OS.get_static_memory_usage()
+	var before := _memory_sample()
+	var started := Time.get_ticks_msec()
+	_route_capture = true
+	var legs: Array[Dictionary] = await _traverse_southern_route()
+	var wanted_duration := int((_report.measurement as Dictionary).sampleMilliseconds)
+	while Time.get_ticks_msec() - started < wanted_duration or _route_frame_series.size() < MIN_SAMPLE_FRAMES:
+		await _next_drawn_frame()
+	_route_capture = false
+	var elapsed := Time.get_ticks_msec() - started
+	var success := legs.size() == Workloads.southern_route().size() and legs.all(
+		func(leg: Dictionary) -> bool: return bool(leg.get("success", false)))
+	_route_primed = success
+	var readiness := await _wait_for_world_readiness(str(spec.id) + " final", 300)
+	var census := _census()
+	var result := spec.duplicate(true)
+	result.merge({"status": "complete" if success else "failed", "frames": _route_frame_series.size(),
+		"sampleMilliseconds": elapsed, "frameSeries": _route_frame_series.duplicate(),
+		"frameTime": _distribution(_route_frame_series), "wallFrameSeries": _route_wall_series.duplicate(),
+		"wallFrameTime": _distribution(_route_wall_series), "readiness": readiness,
+		"plan": {"active": 1, "moving": 1, "fighting": 0},
+		"census": {"afterSpawn": census.duplicate(true), "afterSample": census},
+		"route": {"kind": "synthetic_client_streaming", "legs": legs,
+			"sources": ["southern-streaming-walk.json", "southern-region-routes.json"],
+			"serverNavigationCertified": false, "unmeasuredPrimer": primer,
+			"cacheCondition": ("repeat in this process" if str(spec.visit) == "warm" else "first route pass in this process")
+				+ "; OS caches uncontrolled; preceding crowd cells can share assets"},
+		"memory": {"before": before, "after": _memory_sample(), "peakStaticBytes": _route_peak_static_bytes},
+		"effectiveRuntime": _main.call("benchmark_runtime_snapshot")})
+	(_report.cells as Array).append(result)
+	_expect(success, "%s completes every deterministic route leg" % str(spec.id))
+
+
+func _traverse_southern_route() -> Array[Dictionary]:
+	var results: Array[Dictionary] = []
+	_app_state.set("actor_mounts", {})
+	_app_state.set("selected_actor_id", -1)
+	for leg: Dictionary in Workloads.southern_route():
+		var start_readiness: Dictionary = await _route_place(str(leg.map), Workloads.tile(leg.start), true)
+		if not bool(start_readiness.get("ready", false)):
+			results.append({"id": leg.id, "success": false, "startReadiness": start_readiness})
+			break
+		await _route_walk_to(Workloads.tile(leg.approach))
+		var actor := (_main.get("actor_nodes") as Dictionary).get(FIRST_ACTOR_ID) as Node3D
+		var old_identity := actor.get_instance_id() if is_instance_valid(actor) else -1
+		var began := Time.get_ticks_msec()
+		var frames_before := _route_frame_series.size()
+		var arrival: Dictionary = await _route_place(str(leg.destination), Workloads.tile(leg.arrival),
+			str(leg.kind) != "border")
+		var arrived_actor := (_main.get("actor_nodes") as Dictionary).get(FIRST_ACTOR_ID) as Node3D
+		var handoff := (_main.get("exterior_stream") as ExteriorRegionStream).last_handoff
+		var success := bool(arrival.get("ready", false)) \
+			and str(_app_state.get("current_map")) == str(leg.destination) and is_instance_valid(arrived_actor)
+		results.append({"id": leg.id, "kind": leg.kind, "from": leg.map, "to": leg.destination,
+			"success": success, "milliseconds": Time.get_ticks_msec() - began,
+			"sampledFrames": _route_frame_series.size() - frames_before, "readiness": arrival,
+			"travellerRetained": is_instance_valid(arrived_actor) and arrived_actor.get_instance_id() == old_identity,
+			"continuousHandoff": str(handoff.get("from", "")) == str(leg.map) \
+				and str(handoff.get("to", "")) == str(leg.destination) and bool(handoff.get("continuous", false))})
+		if not success:
+			break
+	return results
+
+
+func _route_place(map_id: String, tile: Vector2i, clear_roster: bool) -> Dictionary:
+	_local_id = FIRST_ACTOR_ID
+	_app_state.set("local_actor_id", FIRST_ACTOR_ID)
+	if map_id != str(_app_state.get("current_map")):
+		if clear_roster:
+			_send_packet(EloriaProtocol.ServerMessage.KILL_ALL_ACTORS, PackedByteArray())
+		_send_packet(EloriaProtocol.ServerMessage.CHANGE_MAP, map_id.to_utf8_buffer() + PackedByteArray([0]))
+	_centre = tile
+	var record := _record(0, true, tile, FULL_KIT_A)
+	_app_state.set("actors", {FIRST_ACTOR_ID: record})
+	_app_state.call("mark_all_actors_changed")
+	_main.call("_sync_world", _app_state.call("take_changed_actors"))
+	await _spawn_and_build(1)
+	_adapter = _main.get("adapter") as CoordinateAdapter
+	return await _wait_for_world_readiness("route " + map_id, 300)
+
+
+func _route_walk_to(destination: Vector2i) -> void:
+	var deadline := Time.get_ticks_msec() + 30000
+	var next_step := 0
+	while Time.get_ticks_msec() < deadline:
+		var dto := (_app_state.get("actors") as Dictionary).get(FIRST_ACTOR_ID, {}) as Dictionary
+		if dto.is_empty():
+			_expect(false, "route retains its synthetic local actor")
+			return
+		var tile := Vector2i(int(dto.x), int(dto.y))
+		if tile == destination:
+			return
+		if Time.get_ticks_msec() >= next_step:
+			var step := Vector2i(signi(destination.x - tile.x), signi(destination.y - tile.y))
+			for command: int in range(20, 28):
+				if EloriaProtocol.actor_command_step(command) == step:
+					_send_actor_commands([FIRST_ACTOR_ID], command)
+					break
+			next_step = Time.get_ticks_msec() + 600
+		await _next_drawn_frame()
+	_expect(false, "route movement reaches its authored approach")
 
 
 func _tear_down_main() -> void:

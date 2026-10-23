@@ -152,6 +152,13 @@ static func _skeleton_signature(skeleton: Skeleton3D) -> String:
 static func cached_library_count() -> int:
 	return _libraries.size()
 
+## Main-thread plain-data snapshot; does not join prewarm workers or traverse
+## retained scenes/animations. These are session-lifetime strong caches.
+static func retention_snapshot() -> Dictionary:
+	return {"strong_library_entries": _libraries.size(),
+		"strong_source_scenes": _sources.size(), "prewarming_sources": _prewarming.size(),
+		"bytes_estimate_available": false, "lifetime": "session"}
+
 static func _blend_shape_defaults(owner: Node) -> Dictionary:
 	var defaults := {}
 	for node: Node in owner.find_children("*", "MeshInstance3D", true, false):
