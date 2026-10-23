@@ -1,0 +1,34 @@
+{
+  "title": "Rabbit Lands leaderboard menu icon",
+  "asset_id": "leaderboards-menu-icon-v1",
+  "generated_date": "2026-10-22",
+  "generation_mode": "Built-in image_gen",
+  "production_mode": "Faithful style match to the existing menu icon set",
+  "use_case": "ui-mockup",
+  "intended_camera": "Straight-on square menu tile, used at 26–32 pixels",
+  "file": "godot-client/assets/ui/leaderboards/menu-icon-v1.png",
+  "dimensions": [
+    1254,
+    1254
+  ],
+  "transparent_background": true,
+  "sha256": "a64531f3101bf9f9eb5517aaf3b93bf722bbd9a49862cb752a99a6173ad5c453",
+  "references": [
+    "godot-client/assets/ui/eloria_gamebuttons.png",
+    "godot-client/assets/ui/eloria_subject_icons.png"
+  ],
+  "prompt": "Use case: ui-mockup.\nAsset type: ONE production fantasy game MENU BUTTON ICON for Rabbit Lands, square, designed to read clearly at just 26–32 pixels.\nInput images: Image 1 is the existing Rabbit Lands game menu icon atlas, the PRIMARY style reference. Image 2 is the matching subject icon atlas, a supporting material and palette reference. These are style references only. Make ONE new icon, never an atlas, collage, interface or sheet.\nIdentity: Leaderboards / player rankings. One chunky aged-brass two-handled trophy cup standing over a tiny three-place winners' podium, centre block taller than the two side blocks. The cup and the three podium heights are the only pictogram; clear symmetric silhouette and very few broad shapes. No people or faces.\nSilhouette/proportions: Trophy fills most of the central field, broad cup bowl, thick curved handles, short stem, wide base. Low three-step podium at the bottom. A compact near-square silhouette fits inside the tile. Large readable negative gaps separate the handles and cup. Avoid delicate outlines or tiny ornament.\nMaterials and palette: Match the references' muted parchment-gold/brass highlights and painted brown shadow planes on a very dark desaturated navy/teal inset. Matte hand-painted old fantasy RPG style, simple bevels and restrained chunky shading, quiet highlights, low surface detail. Do not use shiny photographic metal, neon or a modern flat app icon.\nPresentation: One square dark-navy tile with the same thin sculpted brass rim and small reinforced rounded corner flourishes as the icons in Image 1. Straight-on screen view, centered, complete tile visible. Tile fills about 94 percent of the square canvas, with a tiny transparent outer margin. Opaque navy interior, genuinely transparent exterior beyond the rounded tile silhouette. No external glow or cast shadow. Keep the pictogram and rim equally legible at thumbnail scale.\nExclusions: no text, letters, digits, rank numbers, logo, watermark, ribbons, coins, gemstones, sparks, gradients outside the tile, scenes, extra icons or alternate versions. One icon only.",
+  "attempt": 1,
+  "verdict": "pass",
+  "review": "One complete brass trophy and three-place podium, painted broad gold forms on a navy tile, matching reinforced brass corners. Transparent exterior verified.",
+  "integration": [
+    "LeaderboardsButton uses the generated icon and existing open/pressed state.",
+    "Leaderboards is available in every built-in menu preset and the Menu icons configuration list.",
+    "Older saved icon lists gain the entry unless the player explicitly hid it."
+  ],
+  "validation": {
+    "rendered_client": "PASS in the full-client 1280x800 leaderboard harness; HUD button, open/pressed state, Escape, Ctrl+Shift+L and Ctrl+L Mail checked.",
+    "visual_review": "Trophy tile inspected in the actual menu bar at gameplay size alongside the existing brass icons.",
+    "profile_behavior": "Missing LeaderboardsButton entries default to visible during normalization; an explicit false remains false."
+  }
+}

@@ -1309,7 +1309,10 @@ func _ready() -> void:
 	leaderboards_window = LeaderboardsWindowScript.new()
 	game_view.add_child(leaderboards_window)
 	leaderboards_window.call("configure", Network.send_chat, model_registry, equipment_config)
-	%LeaderboardsButton.icon = SubjectIcons.icon_for("overall")
+	%LeaderboardsButton.icon = _external_texture("res://assets/ui/leaderboards/menu-icon-v1.png")
+	%LeaderboardsButton.expand_icon = true
+	%LeaderboardsButton.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	%LeaderboardsButton.vertical_icon_alignment = VERTICAL_ALIGNMENT_CENTER
 	%LeaderboardsButton.text = ""
 	%LeaderboardsButton.toggle_mode = true
 	%LeaderboardsButton.pressed.connect(func() -> void: leaderboards_window.call("toggle"))

@@ -474,7 +474,7 @@ static func _art_directed(value: Dictionary, id: String) -> Dictionary:
 		value.parts.minimap.scale = 0.72
 		_place(value, "objectives", "top_right", Vector2(-12, 220))
 		value.parts.objectives.dimensions = Vector2(260, 100)
-		_show_icons(value, ["InventoryButton", "StatsButton", "AttackButton", "ManufacturingButton", "QuestButton", "EncyclopediaButton", "OptionsButton"])
+		_show_icons(value, ["InventoryButton", "StatsButton", "AttackButton", "ManufacturingButton", "QuestButton", "EncyclopediaButton", "LeaderboardsButton", "OptionsButton"])
 		value.parts.utilities.rows = 1
 		value.parts.utilities.scale = 1
 	elif id == "adventure":
@@ -497,7 +497,7 @@ static func _art_directed(value: Dictionary, id: String) -> Dictionary:
 		_place(value, "utilities", "bottom_right", Vector2(-12, -62))
 		value.parts.utilities.rows = 1
 		value.parts.utilities.scale = 0.9
-		_show_icons(value, ["InventoryButton", "MapButton", "BuddyButton", "OptionsButton"])
+		_show_icons(value, ["InventoryButton", "MapButton", "BuddyButton", "LeaderboardsButton", "OptionsButton"])
 	elif id == "minimal":
 		value.parts.minimap.map_palette = "muted"
 		value.parts.spells.show_badges = false
@@ -535,12 +535,12 @@ static func _art_directed(value: Dictionary, id: String) -> Dictionary:
 		value.parts.utilities.frame_style = "floating"
 		value.parts.utilities.rows = 1
 		value.parts.utilities.scale = 0.9
-		_show_icons(value, ["InventoryButton", "StatsButton", "ManufacturingButton", "QuestButton", "MapButton", "OptionsButton"])
+		_show_icons(value, ["InventoryButton", "StatsButton", "ManufacturingButton", "QuestButton", "MapButton", "LeaderboardsButton", "OptionsButton"])
 	return _connected_defaults(value, id)
 
 static func _show_icons(value: Dictionary, visible: Array) -> void:
 	value.icons["__default"] = false
-	for key: String in ["WalkButton", "SitButton", "MountsButton", "LookButton", "TradeButton", "AttackButton", "InventoryButton", "SpellsButton", "ManufacturingButton", "EmotesButton", "QuestButton", "MapButton", "InfoButton", "BuddyButton", "StatsButton", "KnowledgeButton", "ConsoleButton", "HelpButton", "EncyclopediaButton", "RangingButton", "MinimapButton", "OptionsButton", "ChatButton", "DisconnectButton"]:
+	for key: String in ["WalkButton", "SitButton", "MountsButton", "LookButton", "TradeButton", "AttackButton", "InventoryButton", "SpellsButton", "ManufacturingButton", "EmotesButton", "QuestButton", "MapButton", "InfoButton", "BuddyButton", "StatsButton", "KnowledgeButton", "ConsoleButton", "HelpButton", "EncyclopediaButton", "RangingButton", "MinimapButton", "OptionsButton", "ChatButton", "DisconnectButton", "LeaderboardsButton"]:
 		value.icons[key] = key in visible
 
 static func _dock(value: Dictionary, key: String, target: String, side: String, alignment := "center", gap := 0.0) -> void:
@@ -761,6 +761,9 @@ static func normalise(raw: Variant) -> Dictionary:
 			for key: Variant in flags:
 				if key is String and key.length() < 80 and flags[key] is bool:
 					result[field][key] = flags[key]
+	# Older compact menus hide unknown buttons. Add the new entry while
+	# preserving a player's explicit choice to hide it in the HUD editor.
+	result.icons["LeaderboardsButton"] = result.icons.get("LeaderboardsButton", true)
 	var colors: Variant = raw.get("resource_colors", {})
 	result.banner_colors = BannerColors.normalise(raw.get("banner_colors", {}))
 	if colors is Dictionary:
