@@ -4,6 +4,8 @@ extends Node
 ## chat, server reply text or the full command line.
 
 var _driver_thread: Thread
+const LaunchOptions := preload("res://src/updates/launch_options.gd")
+const GraphicsOptions := preload("res://src/world/graphics_options.gd")
 
 static func record(event: String, details: Dictionary = {}) -> void:
 	var row := details.duplicate()
@@ -13,6 +15,14 @@ static func record(event: String, details: Dictionary = {}) -> void:
 	print("client_diagnostic ", JSON.stringify(row))
 
 func _ready() -> void:
+	GraphicsOptions.active_texture_skip()
+	var renderer := LaunchOptions.saved_renderer()
+	if LaunchOptions.needs_renderer_restart(renderer, RenderingServer.get_current_rendering_method(),
+			OS.get_cmdline_args(), OS.get_cmdline_user_args(), DisplayServer.get_name() == "headless"):
+		OS.set_restart_on_exit(true, LaunchOptions.restart_arguments(renderer,
+			OS.get_cmdline_args(), OS.get_cmdline_user_args()))
+		get_tree().quit()
+		return
 	var identity: Dictionary = {}
 	if FileAccess.file_exists("res://data/client_release.json"):
 		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/client_release.json"))

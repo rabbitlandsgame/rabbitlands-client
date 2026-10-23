@@ -1,6 +1,7 @@
 extends RefCounted
 
 const VramTextures := preload("res://src/world/vram_textures.gd")
+const GraphicsOptions := preload("res://src/world/graphics_options.gd")
 
 ## External PNGs are immutable, content-addressed build products. Weak entries
 ## share actual GPU textures across separately imported chunks without keeping
@@ -25,7 +26,7 @@ static func load_image(path: String) -> ImageTexture:
 		return null
 	if not image.has_mipmaps():
 		image.generate_mipmaps()
-	return _publish_or_adopt(key, ImageTexture.create_from_image(image))
+	return _publish_or_adopt(key, ImageTexture.create_from_image(GraphicsOptions.reduced_image(image)))
 
 
 static func _published(key: String) -> ImageTexture:

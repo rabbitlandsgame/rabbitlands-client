@@ -50,6 +50,7 @@ extends Node3D
 
 const SHADER := preload("res://src/world/look/grass_beds.gdshader")
 const SeasonSurfaces = preload("res://src/world/season_surfaces.gd")
+const GraphicsOptions := preload("res://src/world/graphics_options.gd")
 const NODE_NAME := "LookGrassBeds"
 
 ## WorldLoader.WORLD_COLLISION_LAYER, NAVIGATION_SURFACE_LAYER and
@@ -144,7 +145,8 @@ static func tend(parent: Node3D, active: Node3D, manifest: WorldManifest,
 	if parent == null:
 		return
 	var beds := parent.get_node_or_null(NODE_NAME) as LookGrassBeds
-	if not LookProfile.full_painted() or not bool(LookProfile.quality_value("grass")) \
+	if not GraphicsOptions.decorative_grass or not LookProfile.full_painted() \
+			or not bool(LookProfile.quality_value("grass")) \
 			or (SeasonSurfaces.current_season() == 0 and SeasonSurfaces.snow_cover(manifest) > 0.1) \
 			or OS.get_environment(LookProfile.GRASS_DEBUG_VARIABLE) == "none":
 		if beds != null:

@@ -43,6 +43,7 @@ extends RefCounted
 ## territories), so per-import state lives in the `GLTFState`.
 
 const EXTENSION_SCRIPT := "res://src/world/map_image_extension.gd"
+const GraphicsOptions := preload("res://src/world/graphics_options.gd")
 
 ## `ELORIA_VRAM_TEXTURES`: "0" turns the sidecars off (and with them the
 ## budget correction), unset (or anything else) is automatic, "force" uses
@@ -494,6 +495,8 @@ static func cache_token(manifest_data: Dictionary, glb_directory: String) -> Str
 	if not resources is Dictionary or (resources as Dictionary).is_empty():
 		return ""
 	var parts := PackedStringArray(["vram", mode_name(), str(usable_formats())])
+	if GraphicsOptions.active_texture_skip() > 0:
+		parts.append("mip-skip=%d" % GraphicsOptions.active_texture_skip())
 	if mode() != Mode.OFF:
 		for directory: String in image_directories(manifest_data, glb_directory):
 			var info := index_for_directory(directory)
@@ -585,7 +588,13 @@ static func resident_bytes(sha: String, published: int, source_directories: Pack
 		var entry := sidecar_entry(sha, directory)
 		if entry.is_empty():
 			return published
-		bytes = maxi(bytes, int(entry.gpuBytes))
+		var skip := GraphicsOptions.mip_skip(int(entry.width), int(entry.height),
+			int(entry.mipmaps), GraphicsOptions.active_texture_skip(), true)
+		var trimmed_bytes := int(entry.gpuBytes)
+		for level: int in skip:
+			trimmed_bytes -= _mip0_bytes(str(entry.format), int(entry.width) >> level,
+				int(entry.height) >> level)
+		bytes = maxi(bytes, trimmed_bytes)
 	return bytes
 
 ## Records that an indexed image was decoded after all (see _decoded_instead),
@@ -629,7 +638,7 @@ static func prepare(job: Dictionary) -> void:
 	if not sidecar.is_empty():
 		var loaded := decode_sidecar(sidecar)
 		if loaded.image != null:
-			job["image"] = loaded.image
+			job["image"] = GraphicsOptions.reduced_image(loaded.image)
 			job["kind"] = "sidecar"
 			job["mime"] = "image/vnd-ms.dds"
 			return
@@ -704,7 +713,7 @@ static func decode_source(path: String) -> Dictionary:
 		return {"image": null, "mime": mime}
 	if not image.has_mipmaps():
 		image.generate_mipmaps()
-	return {"image": image, "mime": mime}
+	return {"image": GraphicsOptions.reduced_image(image), "mime": mime}
 
 ## The image type its first bytes declare: PNG, JPEG or WebP, else "".
 static func sniff(bytes: PackedByteArray) -> String:

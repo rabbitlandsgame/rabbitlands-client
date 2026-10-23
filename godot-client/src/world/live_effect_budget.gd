@@ -17,17 +17,22 @@ extends RefCounted
 const LIMITS := {&"spell": 48, &"missile": 48, &"technique": 32, &"number": 24}
 
 var enabled := true
+var quality := 2
 var _live: Dictionary = {}
 var _skipped: Dictionary = {}
 var _admitted: Dictionary = {}
 
 ## Whether a new visual of `kind` may be drawn. `priority` visuals always may.
 func admit(kind: StringName, priority: bool) -> bool:
-	if priority or not enabled or live(kind) < int(LIMITS.get(kind, 1 << 30)):
+	if priority or not enabled or live(kind) < limit(kind):
 		_admitted[kind] = int(_admitted.get(kind, 0)) + 1
 		return true
 	_skipped[kind] = int(_skipped.get(kind, 0)) + 1
 	return false
+
+func limit(kind: StringName) -> int:
+	var scale: float = [0.5, 0.75, 1.0][clampi(quality, 0, 2)]
+	return maxi(1, int(int(LIMITS.get(kind, 1 << 30)) * scale))
 
 ## Counts `node` as live until it leaves the tree.
 func track(node: Node, kind: StringName) -> void:
@@ -43,5 +48,8 @@ func live(kind: StringName) -> int:
 	return int(_live.get(kind, 0))
 
 func describe() -> Dictionary:
-	return {"enabled": enabled, "limits": LIMITS.duplicate(), "live": _live.duplicate(),
+	var limits := {}
+	for kind: StringName in LIMITS:
+		limits[kind] = limit(kind)
+	return {"enabled": enabled, "limits": limits, "live": _live.duplicate(),
 		"admitted": _admitted.duplicate(), "skipped": _skipped.duplicate()}

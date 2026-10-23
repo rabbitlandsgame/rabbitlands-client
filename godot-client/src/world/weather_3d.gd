@@ -40,6 +40,8 @@ const RAIN_HEIGHT := 13.0
 ## restarts the system. LOW graphics quality draws half.
 const CAPACITY := {"rain": 2200, "snow": 1600, "ash": 1200, "sand": 1800}
 const LOW_QUALITY_SHARE := 0.5
+const FIRE_LIGHTS_BY_QUALITY := [2, 4, 8]
+const FIRE_LIGHT_REACH := 64.0
 
 ## How a legacy pair is drawn: the server's own light_rain, heavy_rain and
 ## thunderstorm at full intensity (weather.txt), scaled so the rain falls as
@@ -83,6 +85,7 @@ var _falls: Dictionary = {}
 var _flash: OmniLight3D
 var _flash_seconds := 0.0
 var _fires: Dictionary = {}
+var _fire_light_refresh := 0.0
 
 func _ready() -> void:
 	name = "Weather"
@@ -96,6 +99,7 @@ func set_state(current: Array, target: Array, seconds: float, draw := true,
 		snap := false, server_name := "") -> void:
 	state_name = server_name
 	_draw = draw
+	_refresh_fires()
 	if snap:
 		_shown = _amounts(current)
 		_from_fall = int(current[0]) if current.size() > 0 else 0
@@ -192,8 +196,18 @@ func place_fire(position: Vector3, fire_kind: int, tile: Vector2i) -> void:
 	fire.draw_pass_1 = _flame_mesh(FIRE_COLOURS[index])
 	fire.process_material = _flame_process(FIRE_COLOURS[index], FIRE_SCALES[index])
 	fire.position = position
+	# Precipitation follows the camera; server-placed fires stay on their tiles.
+	fire.top_level = true
 	fire.emitting = true
+	fire.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(fire)
+	# A still flame keeps the server's fire readable with particles disabled.
+	var still := MeshInstance3D.new()
+	still.name = "StillFlame"
+	still.mesh = _flame_mesh(FIRE_COLOURS[index])
+	still.position.y = 0.6
+	still.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	fire.add_child(still)
 	var glow := OmniLight3D.new()
 	glow.name = "Glow"
 	glow.light_color = FIRE_COLOURS[index]
@@ -202,6 +216,7 @@ func place_fire(position: Vector3, fire_kind: int, tile: Vector2i) -> void:
 	glow.position.y = 1.1
 	fire.add_child(glow)
 	_fires[tile] = fire
+	_refresh_fires()
 
 func remove_fire(tile: Vector2i) -> void:
 	var existing: Variant = _fires.get(tile)
@@ -243,6 +258,10 @@ func clear() -> void:
 		remove_fire(tile as Vector2i)
 
 func _process(delta: float) -> void:
+	_fire_light_refresh -= delta
+	if _fire_light_refresh <= 0.0 and not _fires.is_empty():
+		_fire_light_refresh = 0.2
+		_refresh_fire_lights()
 	if settling():
 		_ease_elapsed = minf(_ease_seconds, _ease_elapsed + delta)
 		var t := _ease_elapsed / _ease_seconds
@@ -257,6 +276,41 @@ func _process(delta: float) -> void:
 		if _flash != null:
 			_flash.light_energy = maxf(0.0, _flash.light_energy - delta * 26.0)
 			_flash.visible = _flash_seconds > 0.0
+
+## Refresh density in place, including a settled sky. Never restarts a server
+## weather transition merely because a graphics preference changed.
+func refresh_graphics() -> void:
+	_update_falls()
+	_refresh_fires()
+
+func set_effects_enabled(enabled: bool) -> void:
+	_draw = enabled
+	refresh_graphics()
+
+func _refresh_fires() -> void:
+	for value: Variant in _fires.values():
+		if not is_instance_valid(value):
+			continue
+		var fire := value as GPUParticles3D
+		fire.emitting = _draw
+		fire.layers = 1 if _draw else 0
+		(fire.get_node("StillFlame") as MeshInstance3D).visible = not _draw
+	_refresh_fire_lights()
+
+func _refresh_fire_lights() -> void:
+	var ranked: Array = []
+	for value: Variant in _fires.values():
+		if not is_instance_valid(value):
+			continue
+		var fire := value as GPUParticles3D
+		(fire.get_node("Glow") as OmniLight3D).visible = false
+		if _draw:
+			var distance := fire.global_position.distance_squared_to(global_position)
+			if distance <= FIRE_LIGHT_REACH * FIRE_LIGHT_REACH:
+				ranked.append([distance, fire])
+	ranked.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
+	for index: int in mini(ranked.size(), FIRE_LIGHTS_BY_QUALITY[LookProfile.quality()]):
+		(ranked[index][1].get_node("Glow") as OmniLight3D).visible = true
 
 ## Rain follows the camera rather than the world, so the box that is drawn is
 ## always the one the player can see. The height is followed too: this map's

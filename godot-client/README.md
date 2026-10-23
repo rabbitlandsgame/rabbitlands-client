@@ -55,7 +55,7 @@ The Options icon, Options button and `Ctrl+O` open one settings window. Tabs scr
 | Chat | Separate or combined feeds; independent visibility, movement/resize lock, text size, soft-fade opacity, line spacing, idle dimming and layout reset for the conversation and system windows. |
 | Minimap | Visibility, size, orientation, shape, border, map range, marker size, and all eleven marker categories. |
 | Banners | Names; health, ether, food and action bars and numbers; instance mode; speech bubbles; background; sit and ranging locks. |
-| Graphics | Frame limit, appearance (Original / Painted ground / Full painted), quality, shadows, particles, nameplates and distance, character visibility through obstacles, map cache usage and clearing. |
+| Graphics | Performance preset; 3D resolution; map texture resolution and renderer (next launch); frame limit; appearance (Original / Painted ground / Full painted); quality; shadows; effects; extra grass; nameplates and distance; crowd bodies and capes; map cache usage and clearing. |
 | Camera | Rotation sensitivity. The camera stays focused on the player. |
 | Audio | Sound enablement and volume, with offline attribution credits. |
 | Inventory | Equipment side, inventory and ground bag scales, storage docking, six editable quantity shortcuts and active quantity, plus all eight Store All/Drop All protection switches. |
@@ -64,6 +64,10 @@ The Options icon, Options button and `Ctrl+O` open one settings window. Tabs scr
 | Controls | Every declared client input action, including party, screenshot and obstacle visibility shortcuts. |
 
 The audit covers client preferences, context-menu choices, `eloria_hud.cfg`, window scale preferences, and casting-bar options. Window positions remain adjustable by dragging their title bars or grips. Notes, bookmarks, console aliases/filters/ignored names, favorite item lists, prepared spell assignments/powers and magic ring pins/target scopes are player-authored content managed by their existing editors or commands. Server-owned character, combat and administrative state remains on the corresponding gameplay windows. Casting mode keeps its existing session-only behavior; ring size remains per character.
+
+For slower machines, **Apply Performance preset** selects Low quality, Painted ground, 75% 3D resolution, 30 FPS, 60 crowd bodies, no remote cape cloth or directional shadows, a 20 m name distance, and no extra grass. Spell and projectile cues remain enabled; Low halves the ordinary combat visual budgets and reduces remote animation budgets. Player and target effects retain priority. Every control remains editable afterward. The preset also selects half-resolution map textures, which take effect after restarting; it preserves the renderer choice and map cache preference.
+
+3D resolution offers 100%, 75% and 50% while menus and overhead text stay at native resolution. Map textures offer Full, Half and Quarter resolution for external map images, keeping compressed textures compressed; UI and actor textures are unchanged. Texture and renderer preferences apply on the next launch. Explicit compatibility/safe-mode launchers override the saved renderer. Extra grass affects Full painted's cosmetic beds, leaving terrain and interaction objects present. A still flame identifies placed fires when effects are disabled; their particle systems and real lights stop. Low quality also limits nearby fire lights, and changing quality updates settled precipitation immediately without restarting the weather transition.
 
 ## Optional focused check
 

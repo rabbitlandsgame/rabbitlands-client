@@ -730,8 +730,9 @@ func _check_warm_cache() -> void:
 		"a package with external images keys its entry with the texture token")
 	var plain := _manifest()
 	plain.erase("externalResources")
-	_expect(VramTextures.cache_token(plain, FIXTURE) == "" and MapCache.CACHE_FORMAT_VERSION == 7,
-		"a package without external images adds nothing to its key at format 7: players keep develop's entries")
+	_expect(VramTextures.cache_token(plain, FIXTURE) == ""
+		and MapCache.cache_key(digest) == MapCache.cache_key(digest, VramTextures.cache_token(plain, FIXTURE)),
+		"a package without external images keeps its cache key at the current scene format")
 	var written := loader.cache_file
 	loader.unload_world()
 	await process_frame

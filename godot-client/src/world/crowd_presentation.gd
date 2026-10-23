@@ -90,6 +90,8 @@ var body_cap := BODY_CAP_DEFAULT
 ## in which case the player's settings are kept but not applied.
 var body_cap_forced := false
 var cloth_forced := false
+var _full_rate_forced := false
+var _half_rate_forced := false
 
 var _candidates: Array[int] = []
 var _cursor := 0
@@ -140,16 +142,28 @@ func configure(features: String, cap: String = "", tuning: String = "") -> void:
 	half_rate_bodies = HALF_RATE_BODIES
 	cloth_bodies = CLOTH_BODIES
 	cloth_forced = false
+	_full_rate_forced = false
+	_half_rate_forced = false
 	for part: String in tuning.split(",", false):
 		var pair := part.split("=")
 		if pair.size() != 2 or not pair[1].strip_edges().is_valid_int():
 			continue
 		match pair[0].strip_edges():
-			"full": full_rate_bodies = maxi(0, int(pair[1]))
-			"half": half_rate_bodies = maxi(0, int(pair[1]))
+			"full":
+				full_rate_bodies = maxi(0, int(pair[1]))
+				_full_rate_forced = true
+			"half":
+				half_rate_bodies = maxi(0, int(pair[1]))
+				_half_rate_forced = true
 			"cloth":
 				cloth_bodies = maxi(0, int(pair[1]))
 				cloth_forced = true
+
+func set_quality(level: int) -> void:
+	if not _full_rate_forced:
+		full_rate_bodies = [8, 12, FULL_RATE_BODIES][clampi(level, 0, 2)]
+	if not _half_rate_forced:
+		half_rate_bodies = [8, 12, HALF_RATE_BODIES][clampi(level, 0, 2)]
 
 ## The player's two crowd settings (settings_window.gd, Graphics). Either is
 ## ignored while the environment sets it for the session.

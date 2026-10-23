@@ -20,6 +20,11 @@ mode).bat**. Linux equivalents are `RabbitLands-debug.sh`,
 | Safe mode | OpenGL 3.3, low quality, painted look off, map cache bypassed, original map textures | `eloria-safe-mode.log` |
 
 Both compatibility launchers still use the restart updater when it is installed.
+Settings → Graphics also offers Automatic, Forward+ and OpenGL Compatibility
+as a saved renderer preference. Close and reopen the game after changing it.
+Explicit launcher/engine renderer flags take precedence over this preference.
+The updater selects the saved renderer before starting the child game; a direct
+game launch relaunches once when needed, with a guard against fallback loops.
 Renderer flags reach the child game as engine arguments, before `--`. Safe-mode
 overrides are process environment variables and preserve saved preferences.
 Renderer selection uses [Godot's command-line options](https://docs.godotengine.org/en/stable/tutorials/editor/command_line_tutorial.html).
