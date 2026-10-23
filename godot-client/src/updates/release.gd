@@ -2,7 +2,7 @@ extends RefCounted
 ## Shared by the running game and the small restart launcher. No Python or
 ## system package manager is needed on a player's computer.
 const CHUNK_BYTES := 8 * 1024 * 1024
-const MAX_MANIFEST_BYTES := 1024 * 1024
+const MAX_MANIFEST_BYTES := 16 * 1024 * 1024
 const ROOTS := ["app", "eloria-assets"]
 const DISTRIBUTION_SCHEMA := 1
 
@@ -217,7 +217,7 @@ static func valid_hash(value: Variant) -> bool:
 			return false
 	return true
 
-static func verify_manifest(envelope: Dictionary, identity: Dictionary, target := "") -> Dictionary:
+static func verify_envelope(envelope: Dictionary, identity: Dictionary) -> Dictionary:
 	if update_owner(identity) != "github":
 		return {"error": "This installation is updated by its distribution service."}
 	if not envelope.get("payload") is String or not envelope.get("signature") is String:
@@ -234,13 +234,22 @@ static func verify_manifest(envelope: Dictionary, identity: Dictionary, target :
 	if not Crypto.new().verify(HashingContext.HASH_SHA256, hash.finish(), Marshalls.base64_to_raw(envelope.signature), key):
 		return {"error": "The release signature could not be verified."}
 	var parsed: Variant = JSON.parse_string(payload.get_string_from_utf8())
-	if not parsed is Dictionary or parsed.get("schema") != 1:
+	if not parsed is Dictionary:
+		return {"error": "The release information is invalid."}
+	return parsed
+
+static func verify_manifest(envelope: Dictionary, identity: Dictionary, target := "") -> Dictionary:
+	var release := verify_envelope(envelope, identity)
+	if release.has("error"):
+		return release
+	if release.get("schema") != 1 and release.get("schema") != 2:
 		return {"error": "The update format is unsupported."}
-	var release: Dictionary = parsed
 	if not valid_commit(release.get("commit")) or release.get("platform") != identity.get("platform"):
 		return {"error": "The release is for a different client."}
 	if target != "" and release.commit != target:
 		return {"error": "The release does not match the server's client commit."}
+	if release.schema == 2:
+		return load("res://src/updates/package_updates.gd").validate(release, identity)
 	if not valid_hash(release.get("sha256")) or not positive_integer(release.get("size")) or not positive_integer(release.get("unpacked_size")):
 		return {"error": "The release size or checksum is invalid."}
 	if not release.get("parts") is Array or release.parts.is_empty() or release.parts.size() > 1000:
@@ -404,6 +413,7 @@ static func recover(root: String) -> String:
 	if not FileAccess.file_exists(journal):
 		return ""
 	var backup := root.path_join(".eloria-previous")
+	var record := read_json(journal)
 	if is_link(backup):
 		return "The update recovery folder must not be a link."
 	for name: String in ROOTS:
@@ -414,6 +424,9 @@ static func recover(root: String) -> String:
 			var current := root.path_join(name)
 			if remove_tree(current) != OK or DirAccess.rename_absolute(original, current) != OK:
 				return "Close all running Rabbit Lands windows and restart the launcher to finish recovery."
+		elif record.has("original_roots") and name not in record.original_roots:
+			if remove_tree(root.path_join(name)) != OK:
+				return "The interrupted fresh installation could not be recovered."
 	DirAccess.remove_absolute(journal)
 	return ""
 
@@ -441,6 +454,8 @@ static func install(root: String, identity: Dictionary, repair := false, progres
 	if release.has("error"):
 		DirAccess.remove_absolute(cache.path_join("pending.json"))
 		return release.error
+	if release.schema == 2:
+		return load("res://src/updates/package_updates.gd").install(root, release, identity, progress)
 	var current := read_json(root.path_join("app/client-release.json"))
 	if not repair and contains_commit(current, release.commit):
 		DirAccess.remove_absolute(cache.path_join("pending.json"))

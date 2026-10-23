@@ -51,8 +51,7 @@ class GitHubSink:
     def accept(self, path: Path, row: dict) -> None:
         if path.stat().st_size != row["size"] or client_release.digest(path) != row["sha256"]:
             raise ValueError("A runner download changed before upload.")
-        release.upload_asset(self.tag, self.release_id, path, row, self.previous.get(path.name, {}))
-        actual = next((asset for asset in release.github_assets(self.release_id) if asset["name"] == path.name), {})
+        actual = release.upload_asset_api(self.release_id, path, row, self.previous.get(path.name, {}))
         if not release.asset_matches(actual, row):
             raise ValueError(f"GitHub did not verify {path.name}; retaining the local part.")
         self.previous[path.name] = actual
@@ -179,7 +178,7 @@ def build(options) -> Path:
     if identity["commit"] != sha or identity["platform"] != options.platform:
         raise ValueError("Runner identity differs from the selected commit.")
     manifest = output / f"{stage.name}-{options.platform}.json"
-    small = [manifest]
+    small = [manifest, output / f"RabbitLands-{options.platform}.json"]
     if options.platform == "windows":
         small.append(output / f"{stage.name}-setup.exe")
     else:
@@ -196,7 +195,7 @@ def build(options) -> Path:
     receipt = root / f"{options.platform}-runner.json"
     release.write_json(receipt, {"schema": 1, "repository": release.REPOSITORY, "commit": sha,
         "platform": options.platform, "release_id": options.draft_release_id, "stage": stage.name,
-        "assets": list(storage.rows.values()), "disk": budget.report()})
+        "update_schema": 2, "assets": list(storage.rows.values()), "disk": budget.report()})
     # Keep the tiny receipt/logs. Only this invocation's fresh worktree and stage are removed.
     storage.cleanup(stage, sha)
     storage.check("workspace released")

@@ -5,6 +5,58 @@ use an explicit distribution owner: Steam replaces its own game files, and
 standalone macOS updates replace the complete signed app. Those builds retain
 commit compatibility checks but never download or apply GitHub update payloads.
 
+## Independent packages and the updater
+
+Fresh installation still starts with **one file**: the Windows `*-setup.exe`,
+or the Linux `*-download.sh` helper. The release also provides a standalone
+`*-updater.exe` / `*-updater.x86_64`. Run it beside an existing `app/` folder
+to update that installation. If downloaded elsewhere, it uses the per-user
+`Programs/RabbitLands` folder on Windows or `~/Games/RabbitLands` on Linux.
+`-- --root /absolute/game/folder` selects a custom installation explicitly;
+`--update-only` checks and installs without starting the game.
+
+The schema 2 signed manifest lists independent `.pkg.<id>.zip.###` packages.
+Each package has a full ZIP SHA-256, bounded download-part hashes, and a signed
+inventory of its files, sizes and hashes. Fixed groups cover the engine,
+client pack, actors, maps, audio, shared assets and records. Path-based buckets
+keep membership stable when another file is added. ZIP timestamps, entry order
+and permissions are fixed, so an unchanged package keeps its checksum across
+builds, independent of the release date, filename and source-file timestamps.
+The exported `RabbitLands.pck` remains one client package; this is package reuse,
+not a binary patch within a PCK, GLB or ZIP.
+
+The updater checks actual installed file hashes. Matching packages use local
+files; missing or damaged packages download again. This also works with an older
+installation that has no package receipt. Downloads resume from checksum-verified
+cached parts. A corrupt or interrupted download never replaces the live game.
+Unchanged files and verified changed packages are staged locally, then `app/`
+and `eloria-assets/` are promoted together with a recovery journal and previous
+installation backup. Files absent from the new inventory are retired. Allow
+space for that local stage and the changed package downloads.
+
+On launch the updater checks the stable `RabbitLands-<platform>.json` alias in
+the latest published release. Its **bootstrap schema 1** contract verifies the
+signature, platform and updater/uninstaller hashes before parsing the game
+package format. If the updater needs replacement, it downloads and verifies
+its successor, hands over to a temporary copy outside the installation, closes
+the original, replaces the executables, and restarts. Windows never overwrites
+its running updater in place. Game revisions do not enter the bootstrap's
+embedded trust identity. The same existing signing key is retained.
+
+Before-package clients cannot understand schema 2. For their first upgrade,
+run the new setup file, or put the new standalone updater in the game folder
+and run it once. The new updater checks their installed files and downloads
+only packages that differ. Subsequent updates use the installed updater.
+
+Run `RabbitLands-uninstall.exe` or `RabbitLands-uninstall.x86_64` to remove the
+installation and its download cache. It asks for confirmation and refuses a
+running or Steam-managed installation. On Windows it uses the registered Inno
+uninstaller when available, preserving Windows' shortcut/app-entry cleanup;
+otherwise a hidden native helper removes the files after the executable exits.
+Linux removes the recognized game folder directly. Player settings outside the
+installation are retained. Windows **Installed apps** can also uninstall an
+Inno installation.
+
 The game server names the **client Git commit packaged for that server**. This
 is independent of the server repository's own commit. Client builds contain
 their full commit ID and complete ancestor list, generated from Git at package
@@ -93,7 +145,7 @@ The output is `../dist/releases/client-<full-client-commit>/`:
 - **Windows:** one small per-user `*-setup.exe`. It embeds the launch and setup
   helpers, then downloads the matching signed game payload during installation.
   Download progress and SHA-256 checks use Inno Setup 6; the helper also verifies
-  the RSA signature, complete archive and extracted files before installing.
+  the RSA signature, each needed package ZIP and extracted files before installing.
   Setup shows verification, preparation and unpacking progress, including the
   unpacked file count. Keep setup open until these steps finish. A second setup
   is blocked, and a helper still working in the background keeps the installation
@@ -104,7 +156,8 @@ The output is `../dist/releases/client-<full-client-commit>/`:
   scripts with executable permissions. An archive larger than 256 MiB is
   split into `.tar.gz.001`, `.002`, etc., each at most 256 MiB. The
   generated release notes give the exact reassembly/extraction command.
-- Both signed update manifests and their bounded `.update.zip.###` downloads.
+- Both signed update manifests, their stable latest-release aliases, independent
+  `.pkg.<id>.zip.###` downloads, and standalone updater/uninstaller executables.
 - `SHA256SUMS` and `RELEASE-NOTES.md` for players, `release.json` listing exactly
   the upload assets, and a combined **local** `client_updates.json` policy.
 
@@ -179,19 +232,18 @@ GitHub credentials, and no credentials are embedded in the client.
 
 The packaging tool writes a `*-github-release.txt` file listing the exact
 release tag and assets to upload, and a `*-server-policy.json` file. The tag is
-`client-<full-client-commit>` and download URLs are pinned to that tag, rather
-than GitHub's moving “latest release.” This keeps the chosen client tied to the
-server being deployed.
+`client-<full-client-commit>`. Package and helper download URLs are pinned to
+that tag. The standalone updater uses the latest-release alias only to discover
+the signed manifest; its actual downloads retain immutable commit-specific URLs.
+The server policy can still select an exact packaged client commit.
 
 1. Reuse the current client release entry as a draft, targeting the packaged
    client commit with that build's tag. Create an entry if none exists yet.
-2. Upload the signed platform manifest and every `.update.zip.###` part listed
-   in the instructions. These parts are each at most 256 MiB, below GitHub's
-   release asset limit. The regular standalone ZIP/tarball is an initial
-   install artifact; if it reaches 2 GiB, use `build_release.py` to prepare the
-   Windows installer slices and split Linux download described above.
-3. After verifying all replacement assets, remove the previous compiled files,
-   publish the release and confirm its assets download without signing in.
+2. Upload the signed manifests, aliases, updater/uninstaller executables and every
+   `.pkg.<id>.zip.###` part listed in the instructions. Parts are at most 256 MiB.
+   Initial installations use the Windows setup file or Linux download helper.
+3. Verify all replacement assets, publish the release and confirm public downloads.
+   Retire the previous compiled release after the replacement is available.
 4. Put the generated policy into the **served server profile** as
    `client_updates.json`. If both platforms are published, combine their two
    `manifests` rows and keep the same `required_commit`.
@@ -224,7 +276,7 @@ poll interval.
 
 Start with `RabbitLands.bat`, `RabbitLands.sh`, or the installer shortcut. The game shows
 download progress, verifies the signed manifest, verifies every download part
-and the assembled payload, and announces when it is ready for the next launch.
+and each assembled package, and announces when it is ready for the next launch.
 Hashing and assembly run on a worker thread. Failed downloads retry automatically
 with backoff from 30 seconds to five minutes. Parts interrupted by an exit are
 retried; already complete verified parts are reused. Changing the server's
@@ -241,17 +293,15 @@ process is still running. Downloads and readiness records are scoped to each
 installation under the player's game user directory; account preferences stay
 in the existing user directory.
 
-These first updates replace the full game payload, not just changed assets.
-Keep enough free space for the download, staged game and previous version.
-Archive entries are divided into 8 MiB chunks so a large PCK does not require
-loading the entire file into RAM. The payload reader uses 64-bit file offsets
-for ZIP64 archives, including downloads larger than 4 GiB on Windows. Installers
-and launchers built before this fix can report "The update archive cannot be
-opened" after verifying a large download; those installations need a rebuilt
-setup executable containing the corrected helper and restart launcher.
-The initial restart bootstrap is stable and
-keeps the original trust key; a change to the bootstrap or signing trust root
-requires an initial installer upgrade.
+Only changed or damaged asset packages are downloaded. The local staging area
+also contains unchanged files so both game roots can be replaced together.
+Keep enough free space for the changed downloads and staged game; the previous
+installation is retained by renaming its folders. ZIP entries use 8 MiB chunks
+and 64-bit archive offsets, so even a large PCK uses bounded extraction memory.
+The schema 1 reader remains available for previously signed whole-game downloads.
+The updater now replaces its own executable through a verified handover. Its
+original trust key remains pinned; changing that key still requires a new
+trusted installer rather than trusting a key supplied by a downloaded manifest.
 
 Existing installations without this updater require one manual upgrade.
 Building artifacts does not upload them or change any live server policy.
@@ -262,6 +312,9 @@ Choose the minimum checks for the behavior being changed. For example:
 
 - Launcher shortcut changes, from the client repository:
   `python -m pytest -q godot-client/tests/test_client_release.py::test_updating_shortcuts_use_restart_launcher_for_both_platforms`.
+- Package downloads, self-update and uninstall changes:
+  `python -m pytest -q godot-client/tests/test_asset_packages.py`. Native checks use
+  the installed Godot/Inno tools on Windows and WSL Ubuntu-24.04 for Linux.
 - Login enforcement changes, from the sibling server repository:
   `python -m pytest -q tests/test_client_updates.py::test_login_denied_before_password_or_world_processing`.
 

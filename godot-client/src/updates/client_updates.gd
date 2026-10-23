@@ -1,5 +1,6 @@
 extends Node
 const Release = preload("res://src/updates/release.gd")
+const PackageDownload = preload("res://src/updates/package_download.gd")
 var identity: Dictionary = {}
 var _target := ""
 var _generation := 0
@@ -191,6 +192,19 @@ func _download(url: String, commit: String, generation: int) -> void:
 	var cache := Release.cache_for(Release.install_root())
 	if DirAccess.make_dir_recursive_absolute(cache) != OK:
 		_failed("The update cache is not writable.")
+		return
+	if release.schema == 2:
+		var error: String = await PackageDownload.prepare(Release.install_root(), release, _fetch, _run_worker,
+			func(phase: String, _done: int, _total: int, detail: String) -> void: _status.text = phase + " " + detail,
+			func() -> bool: return generation != _generation)
+		if generation != _generation:
+			return
+		if error != "" or Release.save_json(cache.path_join("pending.json"), envelope) != OK:
+			_failed(error if error != "" else "The package readiness record could not be saved.")
+			return
+		_status.text = "Changed game packages downloaded. Close and restart Rabbit Lands to install."
+		_retry_at_msec = 0
+		_retry_attempt = 0
 		return
 	var pending := Release.verify_manifest(Release.read_json(cache.path_join("pending.json")), identity, commit)
 	if not pending.has("error") and pending.sha256 == release.sha256:

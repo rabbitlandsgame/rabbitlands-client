@@ -11,6 +11,13 @@ Serialize complete release workflows with one repository-wide concurrency group
 and `cancel-in-progress: false`; only the two platform jobs within a single
 release should stage into the draft concurrently.
 
+GitHub builds now emit independently checksummed asset packages, a stable
+`RabbitLands-<platform>.json` alias, and separate updater/uninstaller executables.
+The Windows setup remains one downloadable file; Linux keeps its one-file
+download helper. See [package updates and migration](client-updates.md#independent-packages-and-the-updater).
+Promote the packaging tools and published-release cleanup changes together to
+the default branch before publishing the first package-format release.
+
 The workflow is `.github/workflows/desktop-release.yml`, named **Build desktop
 release**. It builds both desktop platforms on GitHub's hosted runners, with
 Inno Setup 6 for Windows, and leaves the verified result as a draft. It does not
@@ -96,10 +103,16 @@ Space is saved by:
   DDS scratch, preserving all shared-image cutoff checks in the same batch.
 - Removing the main import cache after the exported pack is verified, and
   removing the temporary graphics cache after its staged files are verified.
-- Writing ZIP and gzip/tar bytes directly into bounded download parts, without
+- Writing each deterministic package ZIP and gzip/tar bytes into bounded parts, without
   first making a full archive and then copying it into parts.
+- Keeping package inventories in the signed manifest rather than retaining
+  previous complete builds. Package hashes depend on contents, not a build date.
+  Updater/uninstaller copies use hard links in the runner stage.
 - Uploading one completed part at a time. GitHub must record the expected size
   and SHA-256 before the local part is removed. A failed part remains local.
+- Checking each upload's returned asset record directly, then rechecking the
+  whole release during finalization. This avoids listing hundreds of assets
+  again for every small package.
 - Keeping only receipts and logs after a successful build. No second platform's
   full stage, payloads or caches accumulate on the same runner.
 
