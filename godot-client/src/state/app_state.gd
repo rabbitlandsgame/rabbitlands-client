@@ -125,6 +125,9 @@ var game_minute_anchor_msec := 0
 var game_minute_interval_msec := 0
 var server_timestamp := 0
 var chat_lines: Array[Dictionary] = []
+## The console retains the complete connection session independently of the
+## bounded recent messages used by HUD consumers. Both arrays share line DTOs.
+var chat_history: Array[Dictionary] = []
 var active_channels: Array[int] = [0, 0, 0]
 var active_channel_index := 0
 var selected_actor_id := -1
@@ -476,12 +479,16 @@ var _pending_map_marker_removals: Dictionary = {}
 ## something the server said. Channel 254 keeps it out of the channel tabs and
 ## marks it as local wherever chat is rendered.
 const LOCAL_CHAT_CHANNEL := 254
-## How many lines the chat buffer keeps; the console shows all of them.
+## How many recent lines HUD consumers keep; the console uses chat_history.
 const CHAT_LINE_LIMIT := 1000
 
 func append_local_line(text: String) -> void:
-	chat_lines.append({"channel": LOCAL_CHAT_CHANNEL, "text": text,
+	_record_chat_line({"channel": LOCAL_CHAT_CHANNEL, "text": text,
 		"stamp": Time.get_time_string_from_system()})
+
+func _record_chat_line(line: Dictionary) -> void:
+	chat_history.append(line)
+	chat_lines.append(line)
 	if chat_lines.size() > CHAT_LINE_LIMIT:
 		chat_lines.pop_front()
 	state_changed.emit(&"chat")
@@ -640,6 +647,7 @@ func _on_connection_state_changed(value: String) -> void:
 		game_minute_interval_msec = 0
 		server_timestamp = 0
 		chat_lines.clear()
+		chat_history.clear()
 		active_channels = [0, 0, 0]
 		active_channel_index = 0
 		current_map = ""
@@ -1393,12 +1401,9 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 				var end := text.find("] ")
 				if text.begins_with("[") and end > 1 and text.substr(1, end - 1).is_valid_int():
 					channel_number = int(text.substr(1, end - 1))
-			chat_lines.append({"channel": event.channel, "channel_number": channel_number, "text": event.text,
+			_record_chat_line({"channel": event.channel, "channel_number": channel_number, "text": event.text,
 				"colour": int(event.get("colour", 0)),
 				"stamp": Time.get_time_string_from_system()})
-			if chat_lines.size() > CHAT_LINE_LIMIT:
-				chat_lines.pop_front()
-			state_changed.emit(&"chat")
 			# Channel 255 is the server's read-only popup channel. Tutorial
 			# lessons arrive here, not through DISPLAY_POPUP's choice packet.
 			if int(event.channel) == 255:
@@ -1771,11 +1776,8 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			state_changed.emit(&"protocol_unknown")
 
 func append_local_message(text: String, channel: int = 255) -> void:
-	chat_lines.append({"channel": channel, "text": text, "colour": 0,
+	_record_chat_line({"channel": channel, "text": text, "colour": 0,
 		"stamp": Time.get_time_string_from_system()})
-	if chat_lines.size() > CHAT_LINE_LIMIT:
-		chat_lines.pop_front()
-	state_changed.emit(&"chat")
 
 func active_channel_number() -> int:
 	if active_channel_index < 0 or active_channel_index >= active_channels.size():
