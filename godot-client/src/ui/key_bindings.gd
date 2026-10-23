@@ -11,9 +11,9 @@ extends RefCounted
 ## every key back to the shipped default.
 
 const PATH := "user://keys.ini"
-## The layout `render` writes, kept in the file as `#KEYS_VERSION = 2`. A file
+## The layout `render` writes, kept in the file as `#KEYS_VERSION = 3`. A file
 ## without that line is version 1.
-const VERSION := 2
+const VERSION := 3
 ## Defaults each older version shipped that a later one changed. keys.ini is
 ## written on the first run, so it lists the defaults of the build that wrote
 ## it as if the player had chosen them. An entry that still names its old
@@ -21,6 +21,7 @@ const VERSION := 2
 ## written again at this version, so a key chosen after that is kept.
 const SUPERSEDED := {
 	1: {"toggle_map": "M", "technique_ring": "TAB"},
+	2: {"toggle_leaderboards": "CTRL L"},
 }
 
 ## Names for keys whose Godot name is not what the file should say.

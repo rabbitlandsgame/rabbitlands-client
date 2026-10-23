@@ -95,6 +95,7 @@ const RangingWindowScript := preload("res://src/ui/ranging_window.gd")
 const MountsWindowScript := preload("res://src/ui/mounts_window.gd")
 const BannerDisplayMenuScript := preload("res://src/ui/banner_display_menu.gd")
 const GuildWindowScript := preload("res://src/ui/guild_window.gd")
+const LeaderboardsWindowScript := preload("res://src/ui/leaderboards_window.gd")
 const SettingsWindowScript := preload("res://src/ui/settings_window.gd")
 const CapeEmblems := preload("res://src/actors/cape_emblems.gd")
 const TargetMarkerStyle := preload("res://src/actors/target_marker_style.gd")
@@ -397,6 +398,7 @@ var mounts_window: Control
 var techniques_panel: VBoxContainer
 var technique_ring: Control
 var guild_window: Control
+var leaderboards_window: Control
 var settings_window: Control
 var reference_window: Control
 ## Client-side presentation switches. None of them changes what the server
@@ -1297,6 +1299,14 @@ func _ready() -> void:
 	guild_window = GuildWindowScript.new()
 	game_view.add_child(guild_window)
 	guild_window.call("configure", Network.send_chat)
+	leaderboards_window = LeaderboardsWindowScript.new()
+	game_view.add_child(leaderboards_window)
+	leaderboards_window.call("configure", Network.send_chat, model_registry, equipment_config)
+	%LeaderboardsButton.icon = SubjectIcons.icon_for("overall")
+	%LeaderboardsButton.text = ""
+	%LeaderboardsButton.toggle_mode = true
+	%LeaderboardsButton.pressed.connect(func() -> void: leaderboards_window.call("toggle"))
+	(leaderboards_window.get("panel") as Control).visibility_changed.connect(func() -> void: _sync_hud_button_states(true))
 	settings_window = SettingsWindowScript.new()
 	game_view.add_child(settings_window)
 	settings_panel = settings_window.panel
@@ -1822,7 +1832,7 @@ func _update_keyboard_movement() -> void:
 		return
 	if (spell_wheel != null and spell_wheel.visible) or (technique_ring != null and technique_ring.visible) \
 			or _text_entry_active() or trade_panel.visible \
-			or full_map.visible \
+			or full_map.visible or (leaderboards_window != null and leaderboards_window.is_open()) \
 			or console_panel.visible or settings_panel.visible or item_lists_panel.visible \
 			or (_actor_hud_menu != null and _actor_hud_menu.visible) \
 			or Input.is_key_pressed(KEY_ALT) or Input.is_key_pressed(KEY_CTRL):
@@ -4164,10 +4174,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		["toggle_mail", func() -> void: extension_windows.call("toggle_mail")],
 		["toggle_party", func() -> void: extension_windows.call("toggle_party")],
 		["toggle_guild", func() -> void: guild_window.call("toggle")],
+		["toggle_leaderboards", func() -> void: leaderboards_window.call("toggle")],
 		["toggle_achievements",
 			func() -> void: extension_windows.call("toggle_achievements")]]
 	for action_and_handler: Array in window_actions:
-		if event.is_action_pressed(str(action_and_handler[0])):
+		if event.is_action_pressed(str(action_and_handler[0]), false, true):
 			(action_and_handler[1] as Callable).call()
 			get_viewport().set_input_as_handled()
 			return
@@ -4211,6 +4222,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			ranging_window.call("close")
 		elif techniques_panel != null and str(techniques_panel.get("pending_key")) != "":
 			techniques_panel.call("cancel_pending")
+		elif leaderboards_window != null and bool(leaderboards_window.call("is_open")):
+			leaderboards_window.call("close")
 		elif guild_window != null and bool(guild_window.call("is_open")):
 			guild_window.call("close")
 		elif settings_window != null and settings_window.is_open():
@@ -9424,7 +9437,7 @@ func _configure_window_stack() -> void:
 			item_lists_panel, reading_panel, chat_hud, system_chat_hud]:
 		window_stack.register(panel)
 	for controller: Control in [spells_window, summoning_window, emotes_window,
-			ranging_window, mounts_window, guild_window, settings_window,
+			ranging_window, mounts_window, guild_window, leaderboards_window, settings_window,
 			reference_window, player_info_panel]:
 		window_stack.register(controller.get("panel"))
 	for panel: Control in extension_windows._cascade():
@@ -11769,7 +11782,7 @@ func _sync_hud_button_states(force := false) -> void:
 			%KnowledgeButton, %ManufacturingButton, %ChatButton, %DisconnectButton,
 			%EncyclopediaButton, %SpellsButton, %EmotesButton, %QuestButton,
 			%InfoButton, %BuddyButton, %ConsoleButton, %HelpButton,
-			%RangingButton, %MinimapButton, %OptionsButton, %MountsButton]
+			%RangingButton, %MinimapButton, %OptionsButton, %MountsButton, %LeaderboardsButton]
 	var local_actor: Dictionary = AppState.actors.get(AppState.local_actor_id, {})
 	var sitting: bool = bool(local_actor.get("sitting", false))
 	var stats_open: bool = stats_panel.visible
@@ -11799,7 +11812,8 @@ func _sync_hud_button_states(force := false) -> void:
 		ranging_window != null and bool(ranging_window.call("is_open")),
 		minimap_frame.visible,
 		settings_panel.visible,
-		mounts_window != null and bool(mounts_window.call("is_open"))]
+		mounts_window != null and bool(mounts_window.call("is_open")),
+		leaderboards_window != null and bool(leaderboards_window.call("is_open"))]
 	# Only while the player has not chosen attack mode from the HUD: a mode
 	# they picked stays picked, and Alt must not appear to be what put it there.
 	var attack_preview: bool = _alt_attack_preview and _interaction_mode != "attack"

@@ -137,6 +137,7 @@ enum ServerMessage {
 	# riding table: the dots of the players beyond the area of interest, the
 	# server's clock for the packets that follow it, and riding-table deltas.
 	ELORIA_PRESENCE = 197, ELORIA_SERVER_TIME = 196, ELORIA_MOUNT_DELTAS = 195,
+	ELORIA_LEADERBOARD_STATE = 194,
 	# Which map package the server was built against. Continues the same
 	# downward run below 211.
 	ELORIA_MAP_DIGEST = 209,
@@ -315,6 +316,7 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"player_info_v1",
 	"achievements_window_v1",
 	"achievements_catalog_v1",
+	"leaderboards_v1",
 	"actor_titles_v1",
 	"actor_occupations_v1",
 	"mounts_v1",
@@ -691,6 +693,9 @@ static func actor_command_direction(command: int) -> Vector2i:
 		26: return Vector2i(-1, 0)
 		27: return Vector2i(-1, 1)
 		_: return Vector2i.ZERO
+
+static func decode_leaderboard_state(payload: PackedByteArray) -> Dictionary:
+	return preload("res://src/network/leaderboard_codec.gd").decode(payload)
 
 static func decode_server(command: int, payload: PackedByteArray, logical_coordinates := false) -> Dictionary:
 	match command:
@@ -1130,6 +1135,8 @@ static func decode_server(command: int, payload: PackedByteArray, logical_coordi
 			if magic is Dictionary:
 				return {"type": "magic_state", "data": magic}
 			return {"type": "invalid", "error": "magic_state_json"}
+		ServerMessage.ELORIA_LEADERBOARD_STATE:
+			return decode_leaderboard_state(payload)
 		ServerMessage.ELORIA_SPELL_POWER:
 			return decode_spell_power(payload)
 		ServerMessage.ELORIA_ALMANAC_STATE:

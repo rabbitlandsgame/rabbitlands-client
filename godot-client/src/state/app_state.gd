@@ -182,6 +182,7 @@ var achievements_state: Dictionary = {"counters": [], "completed": []}
 ## category, progress and threshold: the catalogue is a server config file, so
 ## a client copy of it would go stale the first time a threshold moved.
 var achievements_catalog: Dictionary = {"worn_title": "", "entries": []}
+var leaderboard: Dictionary = {}
 ## What each player on this map is calling themselves, {actor_id: title}. Kept
 ## apart from the actor's display name, which carries a colour byte, the name
 ## and the guild tag in one string that every client unpicks by hand.
@@ -665,6 +666,7 @@ func _on_connection_state_changed(value: String) -> void:
 		worn_slots_mask = 0
 		achievements_state = {"counters": [], "completed": []}
 		achievements_catalog = {"worn_title": "", "entries": []}
+		leaderboard.clear()
 		actor_titles.clear()
 		actor_occupations.clear()
 		actor_mounts.clear()
@@ -1433,6 +1435,9 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			achievements_catalog = {"worn_title": str(event.worn_title),
 				"entries": (event.entries as Array).duplicate()}
 			state_changed.emit(&"achievements_catalog")
+		"leaderboard":
+			leaderboard = (event.data as Dictionary).duplicate(true)
+			state_changed.emit(&"leaderboard")
 		"actor_titles":
 			# An empty title is a real row: it is how somebody who took theirs
 			# off stops wearing it here too.

@@ -56,7 +56,7 @@ const BINDABLE := {
 		"toggle_spells", "toggle_summoning", "toggle_manufacture",
 		"toggle_emotes", "toggle_quest_journal", "toggle_buddy", "toggle_stats",
 		"toggle_ranging", "toggle_techniques", "toggle_help", "toggle_notepad", "toggle_options",
-		"toggle_mail", "toggle_party", "toggle_guild", "toggle_achievements"],
+		"toggle_mail", "toggle_party", "toggle_guild", "toggle_achievements", "toggle_leaderboards"],
 	"Rings": ["spell_ring", "technique_ring"],
 	"Mounts": ["toggle_mount", "toggle_gallop"],
 	"Actions": ["attack_selected", "combat_target", "summon_behavior",

@@ -1,0 +1,94 @@
+{
+  "design": "04-podium-hall",
+  "status": "implemented locally",
+  "date": "2026-10-22",
+  "preview": {
+    "file": "04-implementation-v2.png",
+    "width": 1280,
+    "height": 800,
+    "sample_data": true,
+    "previous_iteration": "04-implementation-preview.png"
+  },
+  "access": {
+    "hud": "Leaderboards",
+    "shortcut": "Ctrl+Shift+L",
+    "close": "Escape",
+    "command": "#leaderboards category [all|30]",
+    "other_controls": "Ctrl+L remains Mail; prior conflicting leaderboard defaults migrate automatically while custom bindings are preserved."
+  },
+  "implemented": [
+    "Silver, raised gold and bronze podium cards",
+    "Five generated artwork assets: painted metal portrait wreaths, textured champion panels and a midnight-blue battlement backdrop",
+    "Real character portraits from saved appearance and worn equipment, including offline players",
+    "One shared 256x256 portrait bake stage and a 32-entry in-memory cache keyed by appearance; no continuous per-card rendering",
+    "Top-ten table with highlighted self row",
+    "Server-defined searchable, collapsible category navigation",
+    "All-time and rolling last-30-days filters",
+    "Actual personal rank beyond the top ten",
+    "Refresh, loading, empty, offline and timeout states",
+    "Request IDs reject stale or dismissed responses",
+    "Window stacking, dragging, shortcut rebinding and viewport resize handling",
+    "Capability-gated structured server snapshot and legacy chat fallback",
+    "Large XP totals encoded as decimal strings",
+    "Curriculum accepts the leaderboard window's read request"
+  ],
+  "validation": {
+    "server": {
+      "command": "python -m pytest tests/test_leaderboards.py tests/test_leaderboard_window.py -q",
+      "result": "12 passed"
+    },
+    "client": {
+      "script": "godot-client/tests/test_leaderboards.gd",
+      "result": "PASS in headless and rendered runs; full main scene HUD button, window stack, Escape, Ctrl+Shift+L Leaderboards, Ctrl+L Mail, and shortcut-default migration checked. Portrait rendering covers ten sample players, cache reuse and all 16 creation options."
+    },
+    "rendered_preview": {
+      "result": "Inspected full-client 1280x800 preview with synthetic scores and runtime character portraits; all ten ranks and personal highlight visible."
+    },
+    "legacy_protocol": {
+      "script": "godot-client/tests/test_protocol.gd",
+      "result": "Leaderboard capability probe passes; suite reports 14 failures in other existing capability, actor-anchor and legacy-artwork checks"
+    },
+    "diagnostics": "Full-client render exits with existing scene UID fallback warnings and two cached texture release warnings at shutdown."
+  },
+  "limitations": [
+    "Portraits use the actual game character models and saved appearance. Unsupported or unavailable appearances use initials.",
+    "Existing category scoring behavior is preserved, including the previously identified missing gameplay update for the summoning_kills counter.",
+    "Updated client and server are required for the graphical leaderboard. No public deployment or release was performed."
+  ],
+  "client_files": [
+    "godot-client/src/ui/leaderboards_window.gd",
+    "godot-client/src/ui/leaderboard_medallion.gd",
+    "godot-client/src/network/leaderboard_codec.gd",
+    "godot-client/src/network/protocol.gd",
+    "godot-client/src/state/app_state.gd",
+    "godot-client/src/app/main.gd",
+    "godot-client/src/app/main.tscn",
+    "godot-client/src/ui/settings_window.gd",
+    "godot-client/project.godot",
+    "godot-client/tests/test_leaderboards.gd",
+    "godot-client/tests/test_protocol.gd",
+    "godot-client/README.md",
+    "godot-client/src/ui/leaderboard_art.gd",
+    "godot-client/src/ui/leaderboard_portraits.gd",
+    "godot-client/src/ui/leaderboard_circle.gdshader",
+    "godot-client/src/ui/key_bindings.gd",
+    "godot-client/tests/fixtures/leaderboards_portraits.json",
+    "godot-client/assets/ui/leaderboards/"
+  ],
+  "server_files": [
+    "eloria/leaderboards.py",
+    "eloria/database.py",
+    "eloria/protocol.py",
+    "eloria/server.py",
+    "eloria/roads.py",
+    "eloria/curriculum_cases.py",
+    "tests/test_leaderboard_window.py"
+  ],
+  "artwork": "v2-art-manifest.json",
+  "portraits": {
+    "server": "One bounded query reads only public actor type, appearance and worn visual IDs for the ten visible players; no full Character loads or private player records are sent.",
+    "client": "The current runtime character models supply race, hair, colours and worn equipment. A shared offscreen stage renders each new appearance once; cached textures are reused across rows and categories.",
+    "fallback": "Initials remain visible while a portrait loads or when appearance is unavailable. Cache and pending work clear on disconnect.",
+    "sample_data": "Preview uses ten invented players in godot-client/tests/fixtures/leaderboards_portraits.json. The first three sample players have no headgear to show their hairstyles."
+  }
+}

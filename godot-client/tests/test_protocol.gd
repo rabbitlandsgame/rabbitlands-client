@@ -65,6 +65,7 @@ func _init() -> void:
 			EloriaProtocol.ServerMessage.ELORIA_ACHIEVEMENTS_STATE,
 		"achievements_catalog_v1":
 			EloriaProtocol.ServerMessage.ELORIA_ACHIEVEMENTS_CATALOG,
+		"leaderboards_v1": EloriaProtocol.ServerMessage.ELORIA_LEADERBOARD_STATE,
 		"actor_titles_v1": EloriaProtocol.ServerMessage.ELORIA_ACTOR_TITLES,
 		"quest_offers_v1": EloriaProtocol.ServerMessage.ELORIA_QUEST_OFFERS,
 		"actor_occupations_v1":
@@ -101,6 +102,11 @@ func _init() -> void:
 		"arrival_ready_v1": EloriaProtocol.ServerMessage.CHANGE_MAP,
 		"keyboard_intent_v1": EloriaProtocol.ServerMessage.ELORIA_MOVE_INTENT}
 	var capability_probes: Dictionary = {
+		EloriaProtocol.ServerMessage.ELORIA_LEADERBOARD_STATE: (
+			'{"version":1,"category":"overall","days":0,"request_id":0,'
+			+ '"categories":[{"key":"overall","label":"Overall","group":"Skills","unit":"XP","icon":"overall"}],'
+			+ '"rows":[],"self":{"name":"Mira","rank":null,"value":"0","level":null}}'
+			).to_utf8_buffer().hex_encode(),
 		EloriaProtocol.ServerMessage.ELORIA_WEATHER_STATE: "01" + "00000000000a00" + "01555a28374000" + "c800" + "0a" + "heavy_rain".to_utf8_buffer().hex_encode(),
 		EloriaProtocol.ServerMessage.SEND_MAP_MARKER: "ea010c03e1012e2f6d6170732f666f75725f67617465732e656c6d00526565642062616e6b0060ea",
 		EloriaProtocol.ServerMessage.ELORIA_LANTERN_STATE: '{"version":1,"active":false}'.to_utf8_buffer().hex_encode(),
