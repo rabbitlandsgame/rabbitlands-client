@@ -36,6 +36,19 @@ func run() -> void:
 		updates._on_packet(206, JSON.stringify(notice).to_utf8_buffer())
 		expect(updates._status.text == "", "compatible Steam build still says update required")
 		updates.free()
+	var github := {"platform": "windows", "distribution": "github", "commit": installed,
+		"ancestors": [installed], "public_key": "present", "repository": "o/r", "release_build": true}
+	Release.save_json("res://data/client_release.json", github)
+	var prompted := Updates.new()
+	root.add_child(prompted)
+	prompted._startup.declined = true
+	prompted._status.text = prompted.StartupUpdate.COMPATIBILITY_NOTE
+	for notice in [{"schema": 1, "disabled": true}, {"schema": 1, "required_commit": required}]:
+		prompted._on_packet(206, JSON.stringify(notice).to_utf8_buffer())
+		expect(prompted._status.text.contains("as soon as possible"), "server notice cleared the startup refusal")
+		expect(prompted._request == null and not prompted._busy, "server notice bypassed update consent")
+	expect(Release.read_json(cache.path_join("pending.json")).get("sentinel") == "untouched", "startup consent changed the pending update")
+	prompted.free()
 	Release.save_json("res://data/client_release.json", {"platform": "source"})
 	DirAccess.remove_absolute(cache.path_join("pending.json"))
 	expect(Release.update_owner({}) == "github", "legacy GitHub installations changed owner")

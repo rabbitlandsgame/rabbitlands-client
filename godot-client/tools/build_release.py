@@ -227,7 +227,7 @@ def build(options) -> Path:
         folder = root / platform
         folder.mkdir()
         command = [sys.executable, str(Path(__file__).with_name("package_client.py")),
-                   "--platform", platform, "--ref", sha, "--no-fetch", "--godot", str(godot),
+                   "--platform", platform, "--ref", sha, "--release-build", "--no-fetch", "--godot", str(godot),
                    "--out", str(folder), "--update-signing-key", str(options.update_signing_key.resolve())]
         if options.server:
             command.extend(["--server", options.server])

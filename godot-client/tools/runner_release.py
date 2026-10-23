@@ -157,7 +157,7 @@ def build(options) -> Path:
     source = root / "source"
     storage.source = source / "godot-client"
     output = root / "downloads"
-    args = ["--platform", options.platform, "--ref", sha, "--no-fetch", "--godot", str(options.godot),
+    args = ["--platform", options.platform, "--ref", sha, "--release-build", "--no-fetch", "--godot", str(options.godot),
             "--build-dir", str(source), "--out", str(output), "--vram-cache", str(root / "vram-cache"),
             "--update-signing-key", str(key), "--update-public-key", str(storage.source / "data/update_public.pem"),
             "--server", options.server]

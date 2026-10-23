@@ -5,6 +5,49 @@ use an explicit distribution owner: Steam replaces its own game files, and
 standalone macOS updates replace the complete signed app. Those builds retain
 commit compatibility checks but never download or apply GitHub update payloads.
 
+## Checking when the game opens
+
+The Windows/Linux GitHub client checks the latest **published** release when
+it opens, before a server connection is needed. Draft releases are excluded.
+The check verifies the release signature and compares full Git commit ancestry;
+hashes are never treated as increasing version numbers. Current builds and
+descendants of the published release are left alone. Unrelated branches are
+not automatically downgraded. An offline check leaves the game usable.
+
+If the installed release is behind, the game asks whether to update. **Yes**
+starts the installed updater, closes the game, waits for the game and its
+previous launcher to relinquish the installation, installs changed packages,
+and reopens the game. Normal, debug, compatibility and safe-mode launches retain
+their renderer, diagnostic logging, server arguments and temporary safe-mode
+settings. A failed updater launch leaves the current game open. **No** keeps
+playing and leaves a compatibility warning asking the player to update as soon
+as possible. Server update notices cannot override that choice.
+
+Normal shortcuts use the launcher's `--launch-only` mode: they recover an
+interrupted installation if needed, but do not silently install a pending or
+new release before the game can ask. The updater also recognizes an installed
+official build and uses this behavior for older shortcuts that lack that flag.
+To update immediately from the command line, use `-- --install-update` to
+update and play, or `-- --update-only` to update and exit. With no installed
+game, the standalone updater performs the initial installation as before.
+
+Source checkouts and ordinary custom exports receive selectable manual commands
+instead of an automatic replacement. The commands fetch the published commit's
+release tag, show incoming commits, and request a fast-forward merge before
+reimporting or rebuilding. They never reset, stash, discard local edits or
+force a branch switch. Review and save local changes first; divergent branches
+need a deliberate merge. The release orchestrator and Actions runner mark
+official builds with `release_build`; `package_client.py` defaults to a custom
+build unless deliberately given `--release-build`. The game additionally
+requires its installed descriptor to match its embedded identity and an
+installed updater before offering automatic replacement.
+
+New signed manifests include the published commit's complete ancestor list.
+For an older manifest without that list, the startup check uses GitHub's commit
+comparison API. Older releases without a stable manifest alias are discovered
+through GitHub's latest-release metadata; their manifest signature is still
+required. No downloads are applied by the startup check itself.
+
 ## Independent packages and the updater
 
 Fresh installation still starts with **one file**: the Windows `*-setup.exe`,
@@ -34,7 +77,7 @@ and `eloria-assets/` are promoted together with a recovery journal and previous
 installation backup. Files absent from the new inventory are retired. Allow
 space for that local stage and the changed package downloads.
 
-On launch the updater checks the stable `RabbitLands-<platform>.json` alias in
+When explicitly run or accepted from the game, the updater checks the stable `RabbitLands-<platform>.json` alias in
 the latest published release. Its **bootstrap schema 1** contract verifies the
 signature, platform and updater/uninstaller hashes before parsing the game
 package format. If the updater needs replacement, it downloads and verifies

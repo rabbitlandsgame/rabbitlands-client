@@ -36,6 +36,8 @@ def test_packaged_history_matches_git_merge_ancestry(tmp_path):
     git("merge", "--no-ff", "-m", "merge", "side")
     merge = git("rev-parse", "HEAD")
     result = client_release.identity(repo, merge, "windows", None, "o/r")
+    assert result["release_build"] is False
+    assert client_release.identity(repo, merge, "windows", None, "o/r", release_build=True)["release_build"] is True
     assert {root, child, side, merge} == set(result["ancestors"])
     assert git("merge-base", "--is-ancestor", side, merge) == ""
 
@@ -85,4 +87,9 @@ def test_updating_shortcuts_use_restart_launcher_for_both_platforms(tmp_path):
         filename = "RabbitLands.bat" if platform == "windows" else "RabbitLands.sh"
         text = (stage / filename).read_text()
         assert "RabbitLands-updater" in text and "--server=play.example.org" in text
+        assert "--launch-only" in text
+        diagnostic = "RabbitLands (debug console).bat" if platform == "windows" else "RabbitLands-debug.sh"
+        compatibility = "RabbitLands (compatibility).bat" if platform == "windows" else "RabbitLands-compatibility.sh"
+        assert "--launch-only" in (stage / diagnostic).read_text()
+        assert "--launch-only" in (stage / compatibility).read_text()
         assert json.loads((stage / "launcher-defaults.json").read_text())["args"] == ["--server=play.example.org", "--port=2000"]

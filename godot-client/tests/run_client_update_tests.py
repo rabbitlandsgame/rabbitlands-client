@@ -30,7 +30,8 @@ def main() -> None:
     root.mkdir(parents=True, exist_ok=True)
     scripts = root / "src/updates"
     scripts.mkdir(parents=True, exist_ok=True)
-    for name in ("release.gd", "client_updates.gd", "package_updates.gd", "package_download.gd"):
+    for name in ("release.gd", "client_updates.gd", "package_updates.gd", "package_download.gd",
+                 "startup_update.gd", "launch_options.gd", "update_transport.gd"):
         shutil.copyfile(SOURCE / "src/updates" / name, scripts / name)
     (root / "data").mkdir(exist_ok=True)
     (root / "data/client_release.json").write_text('{"platform":"source"}')
