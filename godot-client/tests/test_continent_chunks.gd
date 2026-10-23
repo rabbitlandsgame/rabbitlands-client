@@ -90,6 +90,18 @@ func _externalize(path: String) -> Dictionary:
 	file.close()
 	return {"../shared/ground.png":FileAccess.get_sha256(texture_path)}
 
+## Retirement grants are shared and limited to one turn per owner/frame.
+## This detached fixture has no _process callback, so retry its real drainer
+## across process frames without resetting or bypassing the shared allowance.
+func _drain_retired_over_frames(stream: ContinentChunkStream, label: String) -> bool:
+	for _frame: int in 12:
+		await process_frame
+		stream._drain_retired()
+		if stream._retiring.is_empty():
+			return true
+	_expect(false, label + " drains within twelve process frames: " + str(stream.diagnostic_snapshot()))
+	return false
+
 func _test_shared_memory_accounting() -> void:
 	var stream := ContinentChunkStream.new()
 	stream.maximum_resident_bytes = 100
@@ -106,19 +118,34 @@ func _test_shared_memory_accounting() -> void:
 	var selected := stream.selection(Vector3.ZERO)
 	_expect(selected.size() == 2 and str(selected[0].id) == "a" and str(selected[1].id) == "b",
 		"shared PNG budget admits two near cells while distinct texture exceeds the limit")
+	var cell_ids: Dictionary = {}
 	for entry: Dictionary in selected:
 		var cell := Node3D.new()
 		stream.add_child(cell)
 		stream.cells[str(entry.id)] = {"root":cell, "entry":entry}
+		cell_ids[str(entry.id)] = cell.get_instance_id()
 	stream._update_resident_bytes()
 	_expect(stream.resident_bytes == 100, "resident byte estimate counts identical texture hash once")
 	stream._retire_cell("a")
 	_expect(stream.resident_bytes == 100, "hidden retirement geometry and shared image stay counted until freed")
-	stream._drain_retired()
-	_expect(stream.resident_bytes == 80, "retiring one sharer releases geometry but preserves the other texture cost")
+	var drained_a: bool = await _drain_retired_over_frames(stream, "first shared cell")
+	if not drained_a:
+		stream.free()
+		return
+	_expect(not is_instance_id_valid(int(cell_ids.a)) and is_instance_id_valid(int(cell_ids.b))
+		and stream.resident_bytes == 80,
+		"retiring one sharer releases geometry but preserves the other texture cost")
 	stream._retire_cell("b")
 	stream._drain_retired()
-	_expect(stream.resident_bytes == 0, "last shared image leaves the resident estimate after actual node release")
+	_expect(is_instance_id_valid(int(cell_ids.b)) and not stream._retiring.is_empty()
+		and stream.resident_bytes == 80,
+		"a second same-frame retirement keeps its nodes and bytes until the next granted turn")
+	var drained_b: bool = await _drain_retired_over_frames(stream, "last shared cell")
+	if not drained_b:
+		stream.free()
+		return
+	_expect(not is_instance_id_valid(int(cell_ids.b)) and stream.resident_bytes == 0,
+		"last shared image leaves the resident estimate after actual node release")
 	stream.maximum_resident_bytes = 1
 	_expect(stream.selection(Vector3.ZERO).size() == 1, "one oversized nearest cell preserves arrival ground")
 	stream.free()
@@ -218,7 +245,7 @@ func _test_async_arrival_and_prefetch() -> void:
 	await process_frame
 
 func _run() -> void:
-	_test_shared_memory_accounting()
+	await _test_shared_memory_accounting()
 	_test_framed_cells_outlast_budget()
 	DirAccess.make_dir_recursive_absolute(SCRATCH)
 	await _test_async_arrival_and_prefetch()

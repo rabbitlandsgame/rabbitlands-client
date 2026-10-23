@@ -39,11 +39,20 @@ func glb_path() -> String:
 func has_streaming_chunks() -> bool:
 	return data.has("streamingChunks")
 
+## Current packages contain loose mutable files and provide no enforceable
+## sealed-content provider. Build metadata, a digest manifest, timestamps and
+## environment variables do not make those files immutable. Keep verification
+## strict until a future provider can attest the bytes actually consumed.
+static func external_verification_policy() -> Dictionary:
+	return {"mode": "full_hash", "reuse_enabled": false, "sealed_generation": "",
+		"reason": "no_enforceable_sealed_installed_content_provider"}
+
 func verify_external_resources() -> Array[String]:
 	var began := Time.get_ticks_usec()
 	var timings: Dictionary = {}
 	verification_diagnostics = {"resource_references": 0, "hashes_attempted": 0,
-		"paths_rejected": 0, "failures": 0, "elapsed_us": 0, "timings": {}}
+		"paths_rejected": 0, "failures": 0, "elapsed_us": 0, "timings": {},
+		"policy": external_verification_policy()}
 	var failures: Array[String] = []
 	var resources: Variant = data.get("externalResources", {})
 	if not resources is Dictionary:

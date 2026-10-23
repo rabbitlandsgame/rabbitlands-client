@@ -47,6 +47,7 @@ func _run() -> void:
 	_expect(chunks._retiring.is_empty() and not is_instance_valid(imported),
 		"chunk cleanup skips stale traversal entries and finishes the tree")
 	chunks.free()
+	await process_frame
 
 	var exterior := ExteriorRegionStream.new()
 	root.add_child(exterior)
@@ -66,6 +67,7 @@ func _run() -> void:
 	_expect(nested_counts == [0] and freed == 2 and exterior.is_idle(),
 		"exit callbacks cannot re-enter exterior destruction or free a node twice")
 	exterior.free()
+	await process_frame
 
 	var second := ContinentChunkStream.new()
 	root.add_child(second)
@@ -83,6 +85,7 @@ func _run() -> void:
 	_expect(exits == [1] and second._retiring.is_empty() and not is_instance_valid(cell),
 		"exit callbacks cannot re-enter chunk destruction")
 	second.free()
+	await process_frame
 
 	var probe := ProcessProbe.new()
 	root.add_child(probe)

@@ -2,6 +2,7 @@ class_name ExteriorRegionStream
 extends Node3D
 
 const ResourceDiagnostics := preload("res://src/world/resource_diagnostics.gd")
+const RetirementBudget := preload("res://src/world/resource_retirement_budget.gd")
 
 ## One private loader worker, the current region and at most three neighbours.
 ## Only surveyed reciprocal neighbors are displayed simultaneously. The
@@ -406,6 +407,9 @@ func _retire(resident: Dictionary, map_id: String) -> void:
 	var imported := resident.root as Node3D
 	if imported is ContinentChunkStream:
 		(imported as ContinentChunkStream).pause_streaming()
+		# This transfer takes the descendants even if an observer had already
+		# paused preload dispatch. Cancel that obsolete owner explicitly.
+		RetirementBudget.cancel(imported)
 	imported.visible = false
 	_set_collision(imported, false)
 	imported.process_mode = Node.PROCESS_MODE_DISABLED
@@ -424,10 +428,16 @@ func _drain_retired(max_nodes := RETIRE_NODES_PER_FRAME,
 	# would find the same child before its destructor has detached it.
 	if _retirement_draining:
 		return 0
+	if _retiring.is_empty():
+		RetirementBudget.cancel(self)
+		return 0
+	var allowance := RetirementBudget.begin_slice(self, max_nodes, budget_usec)
+	if allowance.is_empty():
+		return 0
 	_retirement_draining = true
 	var began := Time.get_ticks_usec()
 	var freed := 0
-	while not _retiring.is_empty() and freed < max_nodes and Time.get_ticks_usec() - began < budget_usec:
+	while not _retiring.is_empty() and freed < int(allowance.nodes) and Time.get_ticks_usec() - began < int(allowance.usec):
 		var retired: Dictionary = _retiring[0]
 		var imported: Variant = retired.resident.root
 		if is_instance_valid(imported) and imported is ContinentChunkStream and not (imported as ContinentChunkStream).can_retire():
@@ -467,6 +477,7 @@ func _drain_retired(max_nodes := RETIRE_NODES_PER_FRAME,
 				"release_ms": float(retired.release_usec) / 1000.0})
 			_retiring.pop_front()
 	_retirement_draining = false
+	RetirementBudget.end_slice(allowance, freed, Time.get_ticks_usec() - began, not _retiring.is_empty())
 	ResourceDiagnostics.record(_resource_timings, &"retire_slice", began)
 	return freed
 
@@ -506,6 +517,7 @@ func diagnostic_snapshot() -> Dictionary:
 		"in_flight_map_age_us": maxi(0, Time.get_ticks_usec() - _pending_started_usec) if _thread != null else 0,
 		"outer_worker_bytes_known": false,
 		"orphan_workers": ContinentChunkStream.orphan_diagnostic_snapshot(),
+		"shared_retirement": RetirementBudget.diagnostic_snapshot(),
 		"timings": ResourceDiagnostics.snapshot(_resource_timings),
 		"last_preparation": _last_preparation.duplicate(true)}
 
@@ -591,6 +603,8 @@ static func _blend(a: Variant, b: Variant, weight: float) -> Variant:
 	return a
 
 func clear(preserve_expected_walk := false) -> void:
+	# Keep existing retirement jobs; surrender only the old waiting turn.
+	RetirementBudget.cancel(self)
 	var tree := Engine.get_main_loop() as SceneTree
 	var state := tree.root.get_node_or_null("AppState") if tree != null else null
 	var current := MapRegistry.normalize_server_map_id(str(state.get("current_map"))) if state != null else ""
@@ -993,3 +1007,6 @@ func _record(kind: String, map_id: String, detail := {}) -> void:
 	if events.size() > 100:
 		events.pop_front()
 	print("exterior_stream ", JSON.stringify(entry))
+
+func _exit_tree() -> void:
+	RetirementBudget.cancel(self)

@@ -28,6 +28,7 @@ const FRAMED_RADIUS := 64.0
 const ARRIVAL_FRAME_METRES := 36.0
 const VramTextures := preload("res://src/world/vram_textures.gd")
 const ResourceDiagnostics := preload("res://src/world/resource_diagnostics.gd")
+const RetirementBudget := preload("res://src/world/resource_retirement_budget.gd")
 ## Where configure() keeps a chunk's shared image figures as published.
 const PUBLISHED_SHARED_KEY := "publishedSharedResourceResidentBytes"
 ## The geometry figure the exporters published per GLB byte before it was
@@ -215,14 +216,14 @@ func configure(source: WorldManifest, cache_enabled: bool) -> void:
 		entries.append(entry)
 	var counted := _correct_entries()
 	if VramTextures.mode() != VramTextures.Mode.OFF:
-		print("vram_textures budget %s: %d of %d images at sidecar size; indexes %d of %d read (%d entries)" % [
+		print("vram_textures budget %s: %d of %d images at adjusted size; indexes %d of %d read (%d entries)" % [
 			source.asset_id(), counted.x, counted.y, int(indexes.ok), int(indexes.directories),
 			int(indexes.entries)])
 
 ## Rewrites every entry's shared image figures, in place, to what this client
 ## really holds for each (VramTextures.resident_bytes of the published one).
 ## Candidates and resident cells hold the same dictionaries (shallow copies),
-## so they see it too. Returns (images at sidecar size, images counted).
+## so they see it too. Returns (images at adjusted size, images counted).
 func _correct_entries() -> Vector2i:
 	_corrected_generation = VramTextures.budget_generation()
 	var counted: Dictionary = {}
@@ -243,11 +244,12 @@ func _correct_entries() -> Vector2i:
 
 ## Re-corrects when an answer of VramTextures.resident_bytes may have changed
 ## since: a sidecar refused at load (or not used for a role) uploads RGBA8,
-## and from then on that image must count its published figure again.
+## and from then on it uses known reduced decoded bytes or the published
+## figure while dimensions are unknown.
 func _refresh_corrections() -> void:
 	if VramTextures.budget_generation() != _corrected_generation:
 		var counted := _correct_entries()
-		print("vram_textures budget %s rechecked: %d of %d images at sidecar size" % [
+		print("vram_textures budget %s rechecked: %d of %d images at adjusted size" % [
 			territory.asset_id() if territory != null else "", counted.x, counted.y])
 
 static func bounds_distance(position: Vector3, bounds: Dictionary) -> float:
@@ -621,7 +623,12 @@ func set_physics_mode(enabled: bool, preview: bool) -> void:
 	_preview_enabled = preview
 
 func pause_streaming() -> void:
+	# Teardown observers may repeat this every frame. Only the initial
+	# pause surrenders the turn; exterior ownership transfer cancels itself.
+	if _paused:
+		return
 	_paused = true
+	RetirementBudget.cancel(self)
 
 func can_retire() -> bool:
 	poll_pending()
@@ -660,10 +667,16 @@ func _drain_retired() -> void:
 	# callback must not walk the same child again while its destructor runs.
 	if _retirement_draining:
 		return
+	if _retiring.is_empty():
+		RetirementBudget.cancel(self)
+		return
+	var allowance := RetirementBudget.begin_slice(self, RETIRE_NODES_PER_FRAME, RETIRE_BUDGET_USEC)
+	if allowance.is_empty():
+		return
 	_retirement_draining = true
 	var began := Time.get_ticks_usec()
 	var freed := 0
-	while not _retiring.is_empty() and freed < RETIRE_NODES_PER_FRAME and Time.get_ticks_usec() - began < RETIRE_BUDGET_USEC:
+	while not _retiring.is_empty() and freed < int(allowance.nodes) and Time.get_ticks_usec() - began < int(allowance.usec):
 		var retired: Dictionary = _retiring[0]
 		var stack: Array = retired.stack
 		if stack.is_empty():
@@ -687,6 +700,7 @@ func _drain_retired() -> void:
 			_retiring.pop_front()
 			_update_resident_bytes()
 	_retirement_draining = false
+	RetirementBudget.end_slice(allowance, freed, Time.get_ticks_usec() - began, not _retiring.is_empty())
 	ResourceDiagnostics.record(_resource_timings, &"retire_slice", began)
 
 ## Counts each shared image/prototype once within the supplied estimate set.
@@ -754,6 +768,7 @@ func _record(kind: String, identity: String, details := {}) -> void:
 	print("continent_chunk ", JSON.stringify(event))
 
 func _exit_tree() -> void:
+	RetirementBudget.cancel(self)
 	_paused = true
 	# Normal exterior retirement polls completion before freeing any descendant.
 	# A map change or disconnect can still free this root while an import is
