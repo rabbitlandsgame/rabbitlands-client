@@ -1093,22 +1093,28 @@ static func is_summon(dto: Dictionary) -> bool:
 ## server's colour: a demigod's name is green, an invasion creature's red, a
 ## summon's light blue. A Label3D tints as one piece, so a guild tag takes the
 ## name's colour rather than its own.
+static func banner_name(dto: Dictionary, fallback := "Unknown actor") -> String:
+	var guild_tag: String = str(dto.get("guild_tag", ""))
+	return (str(dto.get("name", fallback))
+		+ ("  [%s]" % guild_tag if not guild_tag.is_empty() else ""))
+
+static func _nameplate_colour(dto: Dictionary) -> Color:
+	var name_colour: int = int(dto.get("name_colour", 0))
+	return (CREATURE_NAME_COLOUR
+		if int(dto.get("kind", 0)) == CREATURE_ACTOR_KIND and name_colour == 0
+		else EloriaProtocol.el_text_colour(name_colour))
+
 func _add_nameplate(dto: Dictionary) -> void:
 	var label: Label3D = Label3D.new()
 	label.name = "Nameplate"
-	var guild_tag: String = str(dto.get("guild_tag", ""))
-	label.text = (str(dto.get("name", "Unknown actor"))
-		+ ("  [%s]" % guild_tag if not guild_tag.is_empty() else ""))
+	label.text = banner_name(dto)
 	label.position.y = NAMEPLATE_HEIGHT
 	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	label.no_depth_test = true
 	label.fixed_size = true
 	WORLD_LABEL_STYLE.apply(label, NAMEPLATE_FONT_SIZE, OVERHEAD_PIXEL,
 		0)
-	var name_colour: int = int(dto.get("name_colour", 0))
-	label.modulate = (CREATURE_NAME_COLOUR
-		if int(dto.get("kind", 0)) == CREATURE_ACTOR_KIND and name_colour == 0
-		else EloriaProtocol.el_text_colour(name_colour))
+	label.modulate = _nameplate_colour(dto)
 	label.outline_modulate = Color.BLACK
 	label.layers = WORLD_LABEL_STYLE.RENDER_LAYER
 	add_child(label)
@@ -1829,6 +1835,14 @@ func rebase_world(frame: Transform3D) -> void:
 func apply_server_state(dto: Dictionary, adapter: CoordinateAdapter, teleport := false) -> void:
 	if teleport and _charge_leap != null: end_charge_leap()
 	_sync_death_presentation(dto)
+	# A guild refresh removes and re-adds the actor in one socket read. Main
+	# coalesces that into an update of the existing body, including its label.
+	if dto.has("name") and is_instance_valid(_nameplate):
+		_nameplate.modulate = Color(_nameplate_colour(dto), _nameplate.modulate.a)
+		var next_name: String = banner_name(dto)
+		if _nameplate.text != next_name:
+			_nameplate.text = next_name
+			_layout_overhead()
 	set_status_effects(dto.get("status_effects", dto.get("negative_statuses", [])))
 	# The capability handshake can correct an actor already spawned from the
 	# legacy clothing bytes. Update its dyes once, including under worn armour.

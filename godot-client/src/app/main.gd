@@ -6164,7 +6164,7 @@ func _sync_world(changed: Variant = null) -> void:
 			continuation = exterior_stream.take_continuation(MapRegistry.normalize_server_map_id(AppState.current_map))
 		if not continuation.is_empty():
 			Network.move_to(continuation.tile, bool(continuation.run))
-		overhead_player_name.text = str(local_dto.get("name", "Player"))
+		overhead_player_name.text = ReplicatedActor3D.banner_name(local_dto, "Player")
 		# You get no nameplate of your own - _nameplate_visible_for skips the
 		# local actor - so this banner is the only place your own name colour
 		# can show. Demigod mode is the one that turns it green.
