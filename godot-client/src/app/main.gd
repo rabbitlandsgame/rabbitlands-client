@@ -5108,6 +5108,8 @@ func _clear_map_walk_target() -> void:
 	_map_walk_target.clear()
 	if map_marker_overlay != null:
 		map_marker_overlay.set_walk_target(null)
+	if minimap_marker_overlay != null:
+		minimap_marker_overlay.set_walk_target(null)
 
 func _on_movement_requested(tile: Vector2i) -> void:
 	# A route issues new seam legs as maps change. Other movement replaces
@@ -5152,6 +5154,7 @@ func _update_map_walk_target() -> void:
 		_clear_map_walk_target()
 		return
 	map_marker_overlay.set_walk_target(point)
+	minimap_marker_overlay.set_walk_target(point)
 
 static func _control_to_viewport_position(local_position: Vector2,
 		control_size: Vector2, target_size: Vector2i) -> Vector2:

@@ -33,6 +33,8 @@ const PIN_RADIUS := 5.5
 ## `map_marker_disc.gd`.
 const OUTLINE_WIDTH := 1.5
 const OUTLINE_COLOUR := Color(0.04, 0.04, 0.05, 0.9)
+const WALK_TARGET_COLOUR := Color(1.0, 0.15, 0.12)
+const WALK_TARGET_RADIUS := 7.0
 ## Circles are drawn as polygons rather than with `draw_circle`, so the outline
 ## and the fill are the same shape at these radii.
 const CIRCLE_SEGMENTS := 16
@@ -53,6 +55,7 @@ var _marks: Array[Dictionary] = []
 var _enabled_types: Dictionary = {}
 var _marker_scale := 1.0
 var _round := false
+var _walk_target: Variant = null
 ## The region boundaries in metres of the current map (see map_marker_overlay).
 var _boundaries: Array[Dictionary] = []
 const BOUNDARY_COLOUR := Color(1.0, 1.0, 1.0, 0.7)
@@ -103,6 +106,17 @@ func _draw_boundaries() -> void:
 func set_marks(marks: Array[Dictionary]) -> void:
 	_marks = marks
 	queue_redraw()
+
+func set_walk_target(position: Variant) -> void:
+	if _walk_target == position:
+		return
+	_walk_target = position
+	queue_redraw()
+
+func walk_target_point() -> Variant:
+	if not _walk_target is Vector3:
+		return null
+	return mark_point({"position": _walk_target})
 
 ## Which marker types the player left switched on. A type missing from the
 ## dictionary is drawn, so a type added later shows up until it is switched off
@@ -161,8 +175,6 @@ func _draw() -> void:
 	if not is_instance_valid(_camera):
 		return
 	_draw_boundaries()
-	if _marks.is_empty():
-		return
 	for mark: Dictionary in draw_order(_marks):
 		var type: StringName = mark.get("type", &"") as StringName
 		if not type_enabled(type):
@@ -186,6 +198,16 @@ func _draw() -> void:
 		else:
 			_queue_dot(point, radius, colour)
 	_flush_dots()
+	var target: Variant = walk_target_point()
+	if target is Vector2:
+		draw_walk_target(self, target as Vector2, _marker_scale)
+
+## Both maps use the same outlined red X, independent of camera zoom.
+static func draw_walk_target(control: Control, point: Vector2, marker_scale := 1.0) -> void:
+	for diagonal: Vector2 in [Vector2(1, 1), Vector2(1, -1)]:
+		var arm := diagonal * WALK_TARGET_RADIUS * marker_scale
+		control.draw_line(point - arm, point + arm, Color(0.02, 0.02, 0.02, 0.95), 6.0 * marker_scale, true)
+		control.draw_line(point - arm, point + arm, WALK_TARGET_COLOUR, 3.0 * marker_scale, true)
 
 ## A letter rather than a shape, the way the legend writes it, outlined in
 ## the same dark ring the dots carry so it reads on parkland and on roof.
