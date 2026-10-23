@@ -25,7 +25,7 @@ The initial screen defaults to `game.rabbitlandsgame.com:2000`, connects over re
 
 - `W`/`S`: move forward/backward relative to facing. `A`/`D`: strafe without turning; combine keys for diagonal movement and hold Shift to run.
 - `Q`/`E`: turn the local character. `Space`: recenter the viewport on your character.
-- Hold the mouse wheel button and drag to rotate the view; scroll to zoom. The camera always stays focused on your player.
+- Hold Left/Right to rotate around your player and Up/Down to raise/lower the viewing angle. Rebind them in Settings → Controls → Camera and adjust keyboard camera speed in Settings → Camera (15–180°/s; default 90°/s). Hold the mouse wheel button and drag to rotate the view; scroll to zoom. The camera stays focused on your player. Camera keys pause while typing or navigating menus.
 - Right-click the world to cycle Move → Trade → Fight → Use → Pick up → Harvest → Talk → Look. Left-click applies the selected action. Move retains contextual interactions on hover; other tools ignore incompatible targets. Use also selects the inventory's use-item tool. Right-click first cancels a carried item or pending spell; `Esc` returns to Move.
 - Targeted spells: choose the spell, then click its recipient. Your character moves within 15 tiles, faces the target, then channels and casts. Walking elsewhere, `Esc`, or right-click cancels the approach or channel.
 - `Ctrl+I`: toggle inventory. Drag its title bar to move it and its lower-right grip to scale the whole window proportionally. Right-click Sto All or Drop All to protect individual edge rows/columns; Get All opens and empties the ground bag on your tile subject to server slot/load validation.
@@ -57,7 +57,7 @@ The Options icon, Options button and `Ctrl+O` open one settings window. Tabs scr
 | Minimap | Visibility, size, orientation, shape, border, map range, marker size, and all eleven marker categories. |
 | Banners | Names; health, ether, food and action bars and numbers; instance mode; speech bubbles; background; sit and ranging locks. |
 | Graphics | Performance preset; 3D resolution; map texture resolution and renderer (next launch); frame limit; appearance (Original / Painted ground / Full painted); quality; shadows; effects; extra grass; nameplates and distance; crowd bodies and capes; map cache usage and clearing. |
-| Camera | Rotation sensitivity. The camera stays focused on the player. |
+| Camera | Mouse rotation sensitivity and keyboard camera speed. The camera stays focused on the player. |
 | Audio | Sound enablement and volume, with offline attribution credits. |
 | Inventory | Equipment side, inventory and ground bag scales, storage docking, six editable quantity shortcuts and active quantity, plus all eight Store All/Drop All protection switches. |
 | Spells | Spell bar visibility and docking, casting mode, number of visible shortcuts, and magic ring size. |

@@ -6,6 +6,14 @@ extends Node3D
 @export_range(3.0, 100.0) var distance := 26.0
 @export var zoom_step := 2.5
 @export var rotation_sensitivity := 0.25
+const KEYBOARD_SPEED_MIN := 15.0
+const KEYBOARD_SPEED_MAX := 180.0
+const KEYBOARD_SPEED_DEFAULT := 90.0
+## Degrees per second for both keyboard orbit axes, independent of mouse sensitivity.
+@export var keyboard_speed := KEYBOARD_SPEED_DEFAULT:
+	set(value):
+		keyboard_speed = clampf(value, KEYBOARD_SPEED_MIN, KEYBOARD_SPEED_MAX) \
+			if is_finite(value) else KEYBOARD_SPEED_DEFAULT
 # The camera's near plane follows the zoom: a quarter of the orbit distance,
 # never wider than the 1 m the scene is authored for, never narrower than
 # 0.2 m. The width matters because the client renders through GL
@@ -67,6 +75,14 @@ func handle_mouse_motion(event: InputEventMouseMotion) -> bool:
 
 func cancel_rotation() -> void:
 	_rotating = false
+
+## Left/right orbit the player; up/down raise/lower the viewing angle.
+func handle_keyboard(axes: Vector2, delta: float) -> void:
+	if axes == Vector2.ZERO:
+		return
+	yaw_degrees -= axes.x * keyboard_speed * delta
+	pitch_degrees = clampf(pitch_degrees - axes.y * keyboard_speed * delta, -80.0, -15.0)
+	_update_camera()
 
 func screen_to_ground(screen_position: Vector2, ground_height: float) -> Variant:
 	var origin := camera.project_ray_origin(screen_position)
