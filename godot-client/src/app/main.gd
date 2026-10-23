@@ -4,6 +4,7 @@ const Diagnostics = preload("res://src/diagnostics/client_diagnostics.gd")
 const ExperienceCurve = preload("res://src/state/experience_curve.gd")
 const SeasonSky = preload("res://src/world/season_sky.gd")
 const SeasonSurfaces = preload("res://src/world/season_surfaces.gd")
+const SurfaceRefreshQueue = preload("res://src/world/chunk_surface_refresh.gd")
 const ExternalMeshPool = preload("res://src/world/external_mesh_pool.gd")
 const ExternalTexturePool = preload("res://src/world/external_texture_pool.gd")
 const LanternGuideScript = preload("res://src/ui/lantern_guide.gd")
@@ -784,6 +785,13 @@ var _actor_surface_snap_pending := false
 var _surface_followup_pending := 0
 var _surface_followup_stats: Dictionary = {}
 var _surface_work_stats: Dictionary = {}
+var _surface_refresh_queue = SurfaceRefreshQueue.new()
+var _surface_refresh_running := false
+var _surface_refresh_epoch := 0
+var _surface_refresh_inflight := 0
+var _surface_spatial_stats: Dictionary = {"batches": 0, "full_batches": 0, "notifications": 0,
+	"invalidated_regions": 0, "actor_visits": 0, "actor_placement_attempts": 0,
+	"object_visits": 0, "object_placement_attempts": 0, "binding_candidates": 0}
 var _local_placement_logged := false
 ## Set when `_sync_world` ran out of spawn budget with actors still to
 ## build; the next frame picks them up.
@@ -3963,6 +3971,13 @@ func _clear_world_presentation() -> void:
 	exterior_stream.clear()
 	_retained_traveller = -1
 	world_loader.unload_world()
+	# Cancel both queued work and an old coroutine waiting on physics. A later
+	# session's queue must not be cleared by that coroutine when it resumes.
+	_surface_refresh_epoch += 1
+	_surface_refresh_queue.clear()
+	_surface_refresh_running = false
+	_surface_refresh_inflight = 0
+	_surface_followup_pending = 0
 	loaded_server_map = ""
 	full_map.hide()
 	inventory_panel.hide()
@@ -15380,32 +15395,40 @@ func _bind_promoted_scenery() -> void:
 	if world_loader == null or not is_instance_valid(world_loader.world_root):
 		return
 	var started := Time.get_ticks_usec()
-	var stream := world_loader.world_root as ContinentChunkStream
-	var wanted := {}
+	var wanted: Dictionary = {}
 	for raw_object: Variant in map_object_nodes.values():
-		if not is_instance_valid(raw_object):
-			continue
-		var map_object := raw_object as MapObject3D
-		if map_object == null or map_object.bound_node_name.is_empty() \
-				or map_object.placement_bound():
-			continue
-		var chunk := str((map_object.presentation.get("bind", {}) as Dictionary).get("chunk", ""))
-		if not wanted.has(chunk):
-			wanted[chunk] = {}
-		if not (wanted[chunk] as Dictionary).has(map_object.bound_node_name):
-			wanted[chunk][map_object.bound_node_name] = []
-		(wanted[chunk][map_object.bound_node_name] as Array).append(map_object)
+		if is_instance_valid(raw_object):
+			_collect_promoted_scenery(raw_object as MapObject3D, wanted)
+	_apply_promoted_scenery(wanted)
+	_record_surface_work(&"scenery_bind", started, map_object_nodes.size())
+
+func _collect_promoted_scenery(map_object: MapObject3D, wanted: Dictionary) -> bool:
+	if not is_instance_valid(map_object) or map_object.bound_node_name.is_empty() \
+			or map_object.placement_bound():
+		return false
+	var chunk := str((map_object.presentation.get("bind", {}) as Dictionary).get("chunk", ""))
+	if not wanted.has(chunk):
+		wanted[chunk] = {}
+	if not (wanted[chunk] as Dictionary).has(map_object.bound_node_name):
+		wanted[chunk][map_object.bound_node_name] = []
+	(wanted[chunk][map_object.bound_node_name] as Array).append(map_object)
+	return true
+
+func _apply_promoted_scenery(wanted: Dictionary) -> void:
+	if world_loader == null or not is_instance_valid(world_loader.world_root):
+		return
+	var stream := world_loader.world_root as ContinentChunkStream
 	for chunk: String in wanted:
-		var root: Node = world_loader.world_root
+		var placed_root: Node = world_loader.world_root
 		if stream != null:
-			root = (stream.cells.get(chunk, {}) as Dictionary).get("root") as Node
-		if not is_instance_valid(root):
+			placed_root = (stream.cells.get(chunk, {}) as Dictionary).get("root") as Node
+		if not is_instance_valid(placed_root):
 			continue
-		var found := _named_nodes(root, wanted[chunk] as Dictionary)
+		var found := _named_nodes(placed_root, wanted[chunk] as Dictionary)
 		for node_name: String in found:
 			for map_object: MapObject3D in wanted[chunk][node_name]:
-				map_object.bind_placement(found[node_name] as Node3D)
-	_record_surface_work(&"scenery_bind", started, map_object_nodes.size())
+				if is_instance_valid(map_object):
+					map_object.bind_placement(found[node_name] as Node3D)
 
 ## The Node3Ds under `root` whose names are keys of `names`, nearest first;
 ## the walk stops as soon as all are found (a kit placement is a child of its
@@ -15424,7 +15447,11 @@ static func _named_nodes(root: Node, names: Dictionary) -> Dictionary:
 
 ## A chunk streaming out takes its placements with it: the nodes bound to
 ## them let go, and bind again when it returns.
-func _on_chunk_cell_retiring(identity: String, _imported: Node3D) -> void:
+func _on_chunk_cell_retiring(identity: String, imported: Node3D) -> void:
+	# Chunk IDs repeat across territories. A neighbour's retirement must not
+	# release an unrelated binding on the current map with the same ID.
+	if not is_instance_valid(imported) or imported.get_parent() != world_loader.world_root:
+		return
 	for raw_object: Variant in map_object_nodes.values():
 		if not is_instance_valid(raw_object):
 			continue
@@ -15674,23 +15701,127 @@ func _watch_surface_stream(surface_root: Node3D) -> void:
 func _on_resident_surfaces_changed() -> void:
 	_watch_chunk_surfaces()
 	_apply_ambient_render_quality()
-	_queue_surface_followup(&"season", _sync_season_surfaces)
-	_queue_surface_followup(&"actor_ground", _snap_all_actors_to_surface)
+	_surface_refresh_queue.queue_full()
+	_schedule_surface_refresh()
 
-func _on_chunk_surface_ready(_identity: String, _imported: Node3D) -> void:
-	_queue_surface_followup(&"season", _sync_season_surfaces)
-	_queue_surface_followup(&"actor_ground", _snap_all_actors_to_surface)
-	_queue_surface_followup(&"object_ground", _snap_all_map_objects_to_surface)
-	_queue_surface_followup(&"scenery_bind", _bind_promoted_scenery)
+func _on_chunk_surface_ready(identity: String, imported: Node3D) -> void:
+	if _surface_refresh_queue.queue_chunk(identity, imported):
+		_schedule_surface_refresh()
 
-func _queue_surface_followup(label: StringName, callback: Callable) -> void:
-	_surface_followup_pending += 1
-	_run_surface_followup.call_deferred(label, callback, Time.get_ticks_usec())
+func _schedule_surface_refresh() -> void:
+	_surface_followup_pending = _surface_refresh_inflight + _surface_refresh_queue.pending_notifications()
+	if _surface_refresh_running or _surface_refresh_queue.pending_notifications() == 0:
+		return
+	_surface_refresh_running = true
+	_flush_surface_refresh.call_deferred(_surface_refresh_epoch)
 
-func _run_surface_followup(label: StringName, callback: Callable, queued: int) -> void:
-	await callback.call()
-	_surface_followup_pending -= 1
-	_record_surface_span(_surface_followup_stats, label, Time.get_ticks_usec() - queued)
+func _flush_surface_refresh(epoch: int) -> void:
+	await get_tree().physics_frame
+	if epoch != _surface_refresh_epoch:
+		return
+	var batch: Dictionary = _surface_refresh_queue.take()
+	if int(batch.notifications) == 0:
+		_surface_refresh_running = false
+		_surface_refresh_inflight = 0
+		_surface_followup_pending = 0
+		return
+	_surface_refresh_inflight = int(batch.notifications)
+	_surface_followup_pending = _surface_refresh_inflight + _surface_refresh_queue.pending_notifications()
+	var started := Time.get_ticks_usec()
+	var actor_visits := 0
+	var actor_placement_attempts := 0
+	var object_visits := 0
+	var object_placement_attempts := 0
+	var binding_candidates := 0
+	if SurfaceRefreshQueue.has_live_changes(batch):
+		var full := bool(batch.full)
+		var step_started := Time.get_ticks_usec()
+		if full:
+			_sync_season_surfaces()
+		else:
+			SeasonSurfaces.set_season(AppState.almanac.get("season", {}) as Dictionary)
+			for region: Dictionary in batch.regions:
+				var live: Dictionary = SurfaceRefreshQueue.live_region(region)
+				if not live.is_empty():
+					SeasonSurfaces.apply(live.imported as Node, live.manifest as WorldManifest)
+			_record_surface_work(&"season", step_started, (batch.regions as Array).size())
+		_record_surface_span(_surface_followup_stats, &"season", Time.get_ticks_usec() - int(batch.queued_usec))
+		var priorities: Dictionary = {}
+		for actor_id: int in [AppState.local_actor_id, AppState.selected_actor_id, _combat_target_actor_id()]:
+			if actor_id >= 0:
+				priorities[actor_id] = true
+		step_started = Time.get_ticks_usec()
+		for actor_value: Variant in actor_nodes.values():
+			if not is_instance_valid(actor_value):
+				continue
+			var actor := actor_value as ReplicatedActor3D
+			if actor == null:
+				continue
+			actor_visits += 1
+			var ungrounded := not _grounded_actors.has(actor.actor_id) or not _actor_surface_samples.has(actor.actor_id)
+			if not SurfaceRefreshQueue.should_refresh(batch, actor.server_target,
+					priorities.has(actor.actor_id), ungrounded):
+				continue
+			var actor_adapter := _adapter_for_actor(AppState.actors.get(actor.actor_id, {}) as Dictionary)
+			if actor_adapter != null:
+				_place_actor_on_surface(actor, true, actor_adapter.fallback_height())
+				actor_placement_attempts += 1
+		_record_surface_work(&"actor_ground", step_started, actor_visits)
+		_record_surface_span(_surface_followup_stats, &"actor_ground", Time.get_ticks_usec() - int(batch.queued_usec))
+		var changed: Dictionary = SurfaceRefreshQueue.current_chunks(batch, world_loader.world_root)
+		var wanted: Dictionary = {}
+		step_started = Time.get_ticks_usec()
+		# Each object is visited once: collect current-map bindings during the
+		# same pass that filters navigation rays for the changed surfaces.
+		for object_value: Variant in map_object_nodes.values():
+			if not is_instance_valid(object_value):
+				continue
+			var map_object := object_value as MapObject3D
+			if map_object == null:
+				continue
+			object_visits += 1
+			if SurfaceRefreshQueue.should_refresh(batch, map_object.global_position, false,
+					_ungrounded_map_objects.has(map_object.object_id)):
+				_place_map_object_on_surface(map_object)
+				object_placement_attempts += 1
+			var chunk := str((map_object.presentation.get("bind", {}) as Dictionary).get("chunk", ""))
+			if (full or changed.has(chunk)) and _collect_promoted_scenery(map_object, wanted):
+				binding_candidates += 1
+		for markers: Dictionary in [map_marker_nodes, player_mark_nodes]:
+			for marker_value: Variant in markers.values():
+				if not is_instance_valid(marker_value):
+					continue
+				var marker := marker_value as MapMarker3D
+				if marker == null:
+					continue
+				object_visits += 1
+				if SurfaceRefreshQueue.should_refresh(batch, marker.global_position, priorities.has(marker.target_actor_id)):
+					_place_map_marker_on_surface(marker)
+					object_placement_attempts += 1
+		_record_surface_work(&"object_ground", step_started, object_visits)
+		_record_surface_span(_surface_followup_stats, &"object_ground", Time.get_ticks_usec() - int(batch.queued_usec))
+		step_started = Time.get_ticks_usec()
+		_apply_promoted_scenery(wanted)
+		_record_surface_work(&"scenery_bind", step_started, binding_candidates)
+		_record_surface_span(_surface_followup_stats, &"scenery_bind", Time.get_ticks_usec() - int(batch.queued_usec))
+	_record_surface_work(&"surface_batch", started, actor_visits + object_visits)
+	_record_surface_span(_surface_followup_stats, &"surface_batch",
+		Time.get_ticks_usec() - int(batch.queued_usec), int(batch.notifications))
+	_surface_spatial_stats.batches += 1
+	if bool(batch.full):
+		_surface_spatial_stats.full_batches += 1
+	_surface_spatial_stats.notifications += int(batch.notifications)
+	_surface_spatial_stats.invalidated_regions += int(batch.invalidated_regions)
+	_surface_spatial_stats.actor_visits += actor_visits
+	_surface_spatial_stats.actor_placement_attempts += actor_placement_attempts
+	_surface_spatial_stats.object_visits += object_visits
+	_surface_spatial_stats.object_placement_attempts += object_placement_attempts
+	_surface_spatial_stats.binding_candidates += binding_candidates
+	_surface_refresh_inflight = 0
+	_surface_refresh_running = false
+	_surface_followup_pending = _surface_refresh_queue.pending_notifications()
+	if _surface_followup_pending > 0:
+		_schedule_surface_refresh()
 
 static func _record_surface_span(stats: Dictionary, label: StringName,
 		elapsed: int, items := 0) -> void:
@@ -15709,7 +15840,9 @@ func _record_surface_work(label: StringName, started: int, items := 0) -> void:
 func surface_work_snapshot() -> Dictionary:
 	return {"pending": _surface_followup_pending,
 		"completion_wall": _surface_followup_stats.duplicate(true),
-		"work": _surface_work_stats.duplicate(true)}
+		"work": _surface_work_stats.duplicate(true),
+		"spatial": _surface_spatial_stats.duplicate(),
+		"queued": _surface_refresh_queue.snapshot(), "running": _surface_refresh_running}
 
 ## The "now harvesting" indicator. The stock client drove this by matching an
 ## exact English phrase out of the chat stream; this reads the authoritative

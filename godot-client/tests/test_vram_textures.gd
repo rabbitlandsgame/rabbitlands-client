@@ -18,6 +18,47 @@ const VramTextures := preload("res://src/world/vram_textures.gd")
 const ExternalTexturePool := preload("res://src/world/external_texture_pool.gd")
 const MapCache := preload("res://src/world/map_scene_cache.gd")
 const MapImageExtension := preload("res://src/world/map_image_extension.gd")
+const GltfQuantization := preload("res://src/world/gltf_quantization.gd")
+const WorldObjectImages := preload("res://src/world/world_object_images.gd")
+
+## Only the no-plan reference uses this shim. These map fixtures deliberately
+## omit MIME types; Godot 4.7.2 otherwise probes external JPEGs as PNG first,
+## logging decoder errors before falling back. Supply explicit byte-derived
+## types to its ordinary decoder without preparing images or generating mips.
+## Planned imports still parse the unmodified, missing-MIME descriptors.
+class LegacyMimeReference:
+	extends GLTFDocumentExtension
+	const SourceTypes := preload("res://src/world/vram_textures.gd")
+	const ENABLED := &"vram_test_legacy_mime_reference"
+	const ORIGINALS := &"vram_test_legacy_mime_originals"
+	const TYPED := &"vram_test_legacy_mime_typed"
+
+	func _import_preflight(state: GLTFState, _extensions: PackedStringArray) -> Error:
+		if state.get_additional_data(ENABLED) != true:
+			return ERR_SKIP
+		var images: Array = state.get_json().get("images", [])
+		var originals: Dictionary = {}
+		for index: int in images.size():
+			var descriptor: Dictionary = images[index]
+			var uri := str(descriptor.get("uri", ""))
+			if uri.is_empty() or uri.begins_with("data:") or descriptor.has("mimeType"):
+				continue
+			var source := state.get_base_path().path_join(uri.uri_file_decode()).simplify_path()
+			var mime := SourceTypes.sniff(FileAccess.get_file_as_bytes(source))
+			if mime.is_empty():
+				return ERR_FILE_UNRECOGNIZED
+			originals[index] = true
+			descriptor["mimeType"] = mime
+		state.set_additional_data(ORIGINALS, originals)
+		state.set_additional_data(TYPED, originals.size())
+		return OK
+
+	func _import_post_parse(state: GLTFState) -> Error:
+		var images: Array = state.get_json().get("images", [])
+		var originals: Dictionary = state.get_additional_data(ORIGINALS)
+		for index: int in originals:
+			(images[index] as Dictionary).erase("mimeType")
+		return OK
 
 const FIXTURE := "res://tests/fixtures/vram"
 const SCRATCH := "user://vram-textures-test"
@@ -30,6 +71,7 @@ const SIDECAR_FORMATS := {0: Image.FORMAT_BPTC_RGBA, 1: Image.FORMAT_BPTC_RGBA,
 const SIDECARS := 4
 
 var failures := 0
+var _legacy_mime_reference: GLTFDocumentExtension
 
 func _init() -> void:
 	call_deferred("_run")
@@ -46,7 +88,12 @@ func _run() -> void:
 	OS.set_environment("ELORIA_LOOK", "0")
 	OS.set_environment("ELORIA_NO_MAP_CACHE", "1")
 	OS.low_processor_usage_mode_sleep_usec = 1
+	# Match WorldLoader's extension registration, without opting map imports
+	# into WorldObjectImages (which would also mip the embedded image).
+	GltfQuantization.ensure_registered()
 	VramTextures.ensure_registered()
+	_legacy_mime_reference = LegacyMimeReference.new()
+	GLTFDocument.register_gltf_document_extension(_legacy_mime_reference)
 	_check_sniff()
 	_check_untouched_without_plan()
 
@@ -77,6 +124,8 @@ func _run() -> void:
 
 	_set_mode("")
 	_remove_tree(SCRATCH)
+	GLTFDocument.unregister_gltf_document_extension(_legacy_mime_reference)
+	_legacy_mime_reference = null
 	print("vram textures tests: ", "PASS" if failures == 0 else "FAIL (%d)" % failures)
 	quit(1 if failures > 0 else 0)
 
@@ -92,12 +141,15 @@ func _manifest(directory := FIXTURE) -> Dictionary:
 	return JSON.parse_string(FileAccess.get_file_as_string(directory.path_join("world.json")))
 
 ## Parses a fixture GLB (`name`.glb, world or stale_roles). With `plan`, the
-## way WorldLoader does.
+## way WorldLoader does. The no-plan reference supplies explicit MIME types
+## only for the engine decoder, then restores the fixture's descriptors.
 func _parse(plan: bool, directory := FIXTURE, name := "world") -> GLTFState:
 	var document := GLTFDocument.new()
 	var state := GLTFState.new()
 	if plan:
 		state.set_additional_data(VramTextures.PLAN_KEY, VramTextures.plan_for(_manifest(directory)))
+	else:
+		state.set_additional_data(LegacyMimeReference.ENABLED, true)
 	_expect(document.append_from_file(directory.path_join(name + ".glb"), state) == OK,
 		"the fixture %s parses (plan=%s, mode=%s)" % [name, plan, VramTextures.mode_name()])
 	return state
@@ -203,8 +255,11 @@ func _check_untouched_without_plan() -> void:
 	var state := _parse(false)
 	var images: Array = state.get_json().images
 	_expect(state.get_additional_data(VramTextures.STATS_KEY) == null
-		and state.get_additional_data(VramTextures.DONE_KEY) == null,
-		"a GLB without a plan is left to GLTFDocument (actor GLBs are untouched)")
+		and state.get_additional_data(VramTextures.DONE_KEY) == null
+		and state.get_additional_data(WorldObjectImages.PREPARED) == null,
+		"a GLB without a plan uses the engine decoder, without map or world-object image preparation")
+	_expect(int(state.get_additional_data(LegacyMimeReference.TYPED)) == EXTERNAL_IMAGES,
+		"the no-plan reference types all six external images without decoding or mipping them")
 	_expect(str(images[0].uri).begins_with("shared-assets/") and not images[0].has("mimeType"),
 		"and its image descriptors are as written")
 
@@ -213,6 +268,9 @@ func _check_prepared_matches_legacy() -> void:
 	var planned := _parse(true)
 	var stats := _stats(planned)
 	var done := _done(planned)
+	_expect(planned.get_additional_data(LegacyMimeReference.TYPED) == null
+		and planned.get_additional_data(WorldObjectImages.PREPARED) == null,
+		"the planned import retains the runtime map path without the test reference or world-object decoder")
 	_expect(int(stats.get("imagesPrepared", -1)) == EXTERNAL_IMAGES
 		and int(stats.get("imagesDecoded", -1)) == EXTERNAL_IMAGES
 		and int(stats.get("imagesSidecar", -1)) == 0

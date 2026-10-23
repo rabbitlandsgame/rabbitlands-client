@@ -647,6 +647,31 @@ package stage, checks every staged image has a sidecar or a reason, and
 Compatibility under xvfb) `tests/integration/rendered_vram_textures.gd`, which
 checks the formats the GPU really holds and draws the fixture both ways.
 
+## Streaming work and resource lifetime
+
+Chunk and exterior retirement share an allowance of 2 ms and 64 released nodes
+per process frame. Weak owners take turns; each owner receives at most one
+slice per frame. A single indivisible release can exceed the time allowance,
+and diagnostics charge its full duration. Retirement estimates remain counted
+until the nodes are actually released. Pausing, cancelling and adopting a
+resident root preserve ownership without blocking other streams indefinitely.
+
+Chunk surface notifications coalesce until the next physics frame. The refresh
+checks live root identity and current transforms, then limits grounding work
+to affected bounds, priority actors and actors or objects still missing ground.
+Resident-map changes retain a full refresh. Scenery bindings are updated only
+for the active map's changed chunks. Completion wall time includes the physics
+wait; separate work counters measure the callback itself. Placement attempts
+are not a count of physics rays.
+
+Full map textures retain their existing budget policy. Reduced decoded images
+can publish a conservative estimate from their actual CPU dimensions and mip
+chain after the requested reduction succeeds. Unknown, unreduced or
+incompatible private copies retain the published estimate. These figures are
+streaming estimates, not a complete measurement of physical GPU allocation.
+Runtime manifests continue to hash content on every verification: the current
+mutable content provider offers no enforceable sealed identity for safe reuse.
+
 ## Checking a change
 
 Local benchmark exports also record an asset-only identity from actual PCK
