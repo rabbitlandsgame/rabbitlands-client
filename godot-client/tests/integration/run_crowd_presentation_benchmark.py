@@ -143,6 +143,31 @@ def wait_for_startup(process, path: Path, request: dict, timeout: float) -> dict
         time.sleep(min(.05, remaining))
 
 
+def wait_for_workload(process, failure_path: Path, request: dict,
+                      timeout: float) -> tuple[int | str, dict | None]:
+    """Poll only the small atomic failure marker, never the full timing report."""
+    deadline = time.monotonic() + timeout
+    while True:
+        if failure_path.is_file():
+            if failure_path.stat().st_size > 16384:
+                raise EvidenceError("teardown failure marker is unexpectedly large")
+            data = validate_startup_ack(read_json(failure_path), request)
+            if data.get("requiresRunnerTermination") is not True or data.get("failure") != "teardown_timeout" \
+                    or not isinstance(data.get("teardown"), dict) or data["teardown"].get("ready") is not False:
+                raise EvidenceError("invalid benchmark teardown failure marker")
+            if process.poll() is None:
+                process.kill()
+            process.wait()
+            return "teardown-failed", data
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            raise subprocess.TimeoutExpired(process.args, timeout)
+        try:
+            return process.wait(timeout=min(.1, remaining)), None
+        except subprocess.TimeoutExpired:
+            continue
+
+
 def identity(args) -> dict:
     maps = list(dict.fromkeys([args.map or "four_gates", *args.asset_map]))
     if any(name.startswith("traversal-") for name in selected_cells(args.cells, bool(args.replay))):
@@ -182,6 +207,7 @@ def run_one(args, variant: str, repeat: int, out_dir: Path) -> dict:
     user_root.mkdir(parents=True)
     report, log = out_dir / f"{name}.json", out_dir / f"{name}.log"
     started_report = Path(str(report) + ".started.json")
+    teardown_failure_path = Path(str(report) + ".teardown-failed.json")
     start_token = uuid.uuid4().hex
     launch_log = out_dir / f"{name}.launch.log"
     env, cleared = clean_environment(dict(os.environ))
@@ -221,6 +247,8 @@ def run_one(args, variant: str, repeat: int, out_dir: Path) -> dict:
     utc = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     startup = {"path": str(started_report), "timeoutSeconds": args.startup_timeout,
                "valid": False, "acknowledgement": None, "seconds": None, "error": None}
+    teardown_failure = None
+    workload_error = None
     startup_request = {"executable_mode": args.executable_mode, "executable": str(args.godot),
                        "start_token": start_token, "user_root": str(user_root)}
     if settings_seed:
@@ -236,10 +264,12 @@ def run_one(args, variant: str, repeat: int, out_dir: Path) -> dict:
             startup["acknowledgement"] = wait_for_startup(process, started_report, startup_request, args.startup_timeout)
             startup["valid"] = True
             startup["seconds"] = round(time.monotonic() - started, 3)
-            code = process.wait(timeout=args.timeout)
+            code, teardown_failure = wait_for_workload(process, teardown_failure_path, startup_request, args.timeout)
         except EvidenceError as exc:
-            startup["seconds"] = round(time.monotonic() - started, 3)
-            startup["error"] = str(exc)
+            if not startup["valid"]:
+                startup["seconds"] = round(time.monotonic() - started, 3)
+                startup["error"] = str(exc)
+            workload_error = str(exc)
             if process.poll() is None:
                 process.kill()
             code = process.wait()
@@ -265,6 +295,9 @@ def run_one(args, variant: str, repeat: int, out_dir: Path) -> dict:
            "identityStable": before == after, "interferenceLabel": args.interference_label,
            "requestedMeasurementStatus": args.measurement_status, "data": {}}
     run["startup"] = startup
+    run["teardownFailurePath"] = str(teardown_failure_path)
+    run["teardownFailure"] = teardown_failure
+    run["workloadError"] = workload_error
     run["settingsProfile"] = args.settings_profile
     run["settingsSeed"] = settings_seed
     if settings_seed:
@@ -275,6 +308,10 @@ def run_one(args, variant: str, repeat: int, out_dir: Path) -> dict:
     try:
         if not startup["valid"]:
             raise EvidenceError(startup["error"] or "benchmark startup was not acknowledged")
+        if workload_error:
+            raise EvidenceError(workload_error)
+        if teardown_failure is not None:
+            raise EvidenceError("benchmark teardown failed; the owning runner terminated its process")
         if code != 0:
             raise EvidenceError(f"engine did not exit successfully ({code})")
         if before != after:

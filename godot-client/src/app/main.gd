@@ -24,15 +24,17 @@ const CreationArchetypes = preload("res://src/ui/creation_archetypes.gd")
 const CreationClassIcons = preload("res://src/ui/creation_class_icons.gd")
 const WardrobeShirtFitScript = preload("res://src/actors/wardrobe_shirt_fit.gd")
 const NewCharacterIntroScript = preload("res://src/camera/new_character_intro.gd")
-var character_intro := NewCharacterIntroScript.new()
+## Delay Node allocation until entry: inherited scenes may replace the script
+## after construction, before these helpers have a parent to own them.
+@onready var character_intro := NewCharacterIntroScript.new()
 const ArrivalCurtainScript = preload("res://src/ui/arrival_curtain.gd")
 const ArrivalPrewarmScript = preload("res://src/world/arrival_prewarm.gd")
 ## The loading screen from signing in, or a far arrival, until the character
 ## stands on loaded ground (_update_arrival).
-var arrival_curtain := ArrivalCurtainScript.new()
+@onready var arrival_curtain := ArrivalCurtainScript.new()
 ## The respawn destination's ground on another map, loaded while dead.
 var respawn_prewarm := ArrivalPrewarmScript.new()
-var quest_trail := preload("res://src/world/quest_trail_3d.gd").new()
+@onready var quest_trail := preload("res://src/world/quest_trail_3d.gd").new()
 
 @onready var login_panel: Control = %LoginPanel
 @onready var game_view: Control = %GameView
@@ -925,7 +927,7 @@ const CreatureBannerSettings := preload("res://src/ui/creature_banner_settings.g
 const BannerColors := preload("res://src/ui/banner_colors.gd")
 var _creature_banner_options := CreatureBannerSettings.defaults()
 const MountControls := preload("res://src/mounts/mount_controls.gd")
-var mount_status := MountControls.new()
+@onready var mount_status := MountControls.new()
 var _mount_banner_options: Dictionary = MountControls.default_options()
 var _actor_hud_menu: Variant
 

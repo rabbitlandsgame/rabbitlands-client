@@ -1503,33 +1503,207 @@ func _route_walk_to(destination: Vector2i) -> void:
 	_expect(false, "route movement reaches its authored approach")
 
 
-func _tear_down_main() -> void:
-	if _main == null:
-		return
-	_app_state.set("actors", {})
-	_main.call("_sync_world")
-	var loader := _main.get("world_loader") as WorldLoader
-	var chunk: ContinentChunkStream = loader.world_root as ContinentChunkStream if loader != null else null
-	if chunk != null:
-		chunk.pause_streaming()
-	var exterior := _main.get("exterior_stream") as ExteriorRegionStream
-	if exterior != null:
-		exterior.clear()
-	var deadline := Time.get_ticks_msec() + MAX_READINESS_MSEC
-	while Time.get_ticks_msec() < deadline:
-		var idle := (chunk == null or (chunk.get("_thread") == null
-			and (chunk.get("_retiring") as Array).is_empty()
-			and ContinentChunkStream.orphans_pending() == 0)) \
-			and (exterior == null or exterior.is_idle())
-		if idle:
-			break
+## Measurement instrumentation belongs to this benchmark, not to Main or other
+## listeners. Disconnect exact callables; leave unrelated subscribers intact.
+func _stop_benchmark_instrumentation() -> void:
+	_route_capture = false
+	if physics_frame.is_connected(_on_iteration_started):
+		physics_frame.disconnect(_on_iteration_started)
+	if process_frame.is_connected(_on_process_started):
+		process_frame.disconnect(_on_process_started)
+	if RenderingServer.frame_pre_draw.is_connected(_on_draw_started):
+		RenderingServer.frame_pre_draw.disconnect(_on_draw_started)
+	if RenderingServer.frame_post_draw.is_connected(_on_iteration_drawn):
+		RenderingServer.frame_post_draw.disconnect(_on_iteration_drawn)
+	if is_instance_valid(_frame_marker):
+		if _frame_marker.is_connected("process_ended", _on_process_ended):
+			_frame_marker.disconnect("process_ended", _on_process_ended)
+		if _frame_marker.is_connected("processed", _on_iteration_drawn):
+			_frame_marker.disconnect("processed", _on_iteration_drawn)
+		_frame_marker.set_process(false)
+		_frame_marker.queue_free()
+	_frame_marker = null
+	if not _headless:
+		RenderingServer.viewport_set_measure_render_time(root.get_viewport_rid(), false)
+		if is_instance_valid(_main):
+			var viewport := _main.get("main_viewport") as SubViewport
+			if is_instance_valid(viewport):
+				RenderingServer.viewport_set_measure_render_time(viewport.get_viewport_rid(), false)
+	_iteration_started_usec = -1
+	_process_started_usec = -1
+	_process_ended_usec = -1
+	_draw_started_usec = -1
+	_last_phases.clear()
+
+
+## Teardown is outside samples. Pause only this Main's streams, but leave their
+## process callbacks alive so completed imports and sliced retirements can drain.
+## can_retire(), is_idle(), and reap_orphans() join only completed workers.
+func _teardown_pending(owner: Variant, loader: Variant,
+		exterior: Variant, require_owner_freed: bool) -> Dictionary:
+	var streams := 0
+	var workers := 0
+	var retiring_cells := 0
+	var queued_streams := 0
+	var surface_callbacks := 0
+	var actor_snap := false
+	var animation_workers := 0
+	for value: Variant in NativeAnimationImporter._prewarming.values():
+		var thread := value as Thread
+		if thread != null and thread.is_alive():
+			animation_workers += 1
+	if is_instance_valid(owner):
+		for node: Node in owner.find_children("*", "", true, false):
+			if not is_instance_valid(node) or not node is ContinentChunkStream:
+				continue
+			var stream := node as ContinentChunkStream
+			stream.pause_streaming()
+			streams += 1
+			workers += int(not stream.can_retire())
+			retiring_cells += (stream.get("_retiring") as Array).size()
+			queued_streams += int(stream.is_queued_for_deletion())
+		surface_callbacks = int((owner.call("surface_work_snapshot") as Dictionary).get("pending", 0))
+		actor_snap = bool(owner.get("_actor_surface_snap_pending"))
+	var exterior_idle: bool = not is_instance_valid(exterior) or exterior.is_idle()
+	var orphans := ContinentChunkStream.reap_orphans()
+	var cache_pending := is_instance_valid(loader) and int(loader.get("_cache_write_countdown")) > 0
+	var owner_freed := not is_instance_valid(owner)
+	return {"ready": workers == 0 and retiring_cells == 0 and queued_streams == 0
+		and surface_callbacks == 0 and not actor_snap and exterior_idle and orphans == 0 and animation_workers == 0
+		and not cache_pending and (not require_owner_freed or owner_freed),
+		"streams": streams, "workers": workers, "retiringCells": retiring_cells,
+		"queuedStreams": queued_streams, "surfaceCallbacks": surface_callbacks,
+		"actorSnapPending": actor_snap, "exteriorIdle": exterior_idle,
+		"animationWorkers": animation_workers, "animationPrewarmEntries": NativeAnimationImporter._prewarming.size(),
+		"orphans": orphans, "cacheWritePending": cache_pending, "ownerFreed": owner_freed}
+
+
+func _wait_for_teardown_idle(owner: Variant, loader: Variant,
+		exterior: Variant, label: String, deadline: int,
+		require_owner_freed := false) -> Dictionary:
+	var started := Time.get_ticks_msec()
+	var stable_frames := 0
+	var frames := 0
+	var state: Dictionary = {}
+	while true:
+		# A completed worker can queue a result for destruction, and unloading
+		# can orphan another worker in _exit_tree. Run the frame's deferred work
+		# and a physics boundary for grounding coroutines before declaring idle.
+		await physics_frame
 		await process_frame
-	_main.call("_clear_world_presentation")
-	await _settle_frames(2)
-	_main.queue_free()
-	await _settle_frames(4)
-	NativeAnimationImporter.clear()
-	GlbSceneCache.clear()
+		frames += 1
+		state = _teardown_pending(owner, loader, exterior, require_owner_freed)
+		stable_frames = stable_frames + 1 if bool(state.ready) else 0
+		if stable_frames >= 2:
+			break
+		if Time.get_ticks_msec() >= deadline:
+			state["ready"] = false
+			state["timedOut"] = true
+			break
+	state["stage"] = label
+	state["frames"] = frames
+	state["stableIdleFrames"] = stable_frames
+	state["milliseconds"] = Time.get_ticks_msec() - started
+	_expect(bool(state.ready), "benchmark teardown %s drains owned workers, retirements and deferred callbacks" % label)
+	return state
+
+
+func _tear_down_main() -> void:
+	_stop_benchmark_instrumentation()
+	if not is_instance_valid(_main):
+		return
+	var started := Time.get_ticks_msec()
+	var deadline := started + MAX_READINESS_MSEC
+	var owner := _main
+	var loader := owner.get("world_loader") as WorldLoader
+	var exterior := owner.get("exterior_stream") as ExteriorRegionStream
+	# Direct synthetic state changes emit no network commands. Clear auth before
+	# intro cancellation, whose normal game callback can send an end-chat cue.
+	if is_instance_valid(_app_state):
+		_app_state.set("authenticated", false)
+		_app_state.set("local_actor_id", -1)
+		_app_state.set("selected_actor_id", -1)
+		_app_state.set("actors", {})
+		_app_state.set("actor_mounts", {})
+		_app_state.set("combat_state", {})
+		_app_state.set("current_map", "")
+	owner.set_process(false)
+	owner.set_physics_process(false)
+	owner.set_process_input(false)
+	owner.set_process_unhandled_input(false)
+	owner.set("_world_sync_queued", false)
+	owner.set("_spawn_backlog", false)
+	owner.set("_deferred_map_load", false)
+	owner.call("_clear_map_walk_target")
+	var intro := owner.get("character_intro") as Node
+	if is_instance_valid(intro):
+		intro.call("cancel")
+	var prewarm := owner.get("respawn_prewarm") as RefCounted
+	if prewarm != null:
+		prewarm.call("discard")
+	if is_instance_valid(exterior):
+		exterior.clear()
+	var before_unload := await _wait_for_teardown_idle(owner, loader, exterior, "before unload", deadline)
+	if not bool(before_unload.ready):
+		_record_teardown_timeout(started, "beforeUnload", before_unload)
+		return
+	owner.call("_clear_world_presentation")
+	var after_unload := await _wait_for_teardown_idle(owner, loader, exterior, "after unload", deadline)
+	if not bool(after_unload.ready):
+		_record_teardown_timeout(started, "afterUnload", after_unload)
+		return
+	owner.queue_free()
+	_main = null
+	_adapter = null
+	_attributed.clear()
+	var after_main_free := await _wait_for_teardown_idle(owner, loader, exterior, "after Main free", deadline, true)
+	if not bool(after_main_free.ready):
+		_record_teardown_timeout(started, "afterMainFree", after_main_free)
+		return
+	_app_state = null
+	# Clear session caches after workers/results have released their owners.
+	# A deadline failure remains a failed report, never an accepted sample.
+	if bool(after_main_free.ready):
+		NativeAnimationImporter.clear()
+		GlbSceneCache.clear()
+	_report["teardown"] = {"ready": bool(before_unload.ready) and bool(after_unload.ready)
+		and bool(after_main_free.ready), "timeoutMilliseconds": MAX_READINESS_MSEC,
+		"milliseconds": Time.get_ticks_msec() - started,
+		"beforeUnload": before_unload, "afterUnload": after_unload, "afterMainFree": after_main_free,
+		"ownedInstrumentationDisconnected": true}
+
+
+func _record_teardown_timeout(started: int, stage: String, state: Dictionary) -> void:
+	# Main._clear_world_presentation and _exit_tree synchronously clear animation
+	# prewarms. Do not enter either with a live worker. Publish failed evidence
+	# and keep serving the render/physics loop until the owning launcher stops
+	# this exact process; normal quit is intentionally skipped by _finish.
+	_report["teardown"] = {"ready": false, "requiresRunnerTermination": true,
+		"timeoutMilliseconds": MAX_READINESS_MSEC, "milliseconds": Time.get_ticks_msec() - started,
+		"failedStage": stage, stage: state, "ownedInstrumentationDisconnected": true}
+
+
+func _publish_teardown_failure_marker(out: String) -> void:
+	# The full failed report is closed before this small atomic marker is
+	# published. The launcher polls only this marker, then terminates its child.
+	var destination := ProjectSettings.globalize_path(out + ".teardown-failed.json")
+	var temporary := destination + ".tmp-" + str(OS.get_process_id())
+	var file := FileAccess.open(temporary, FileAccess.WRITE)
+	if file == null:
+		push_error("Cannot write benchmark teardown failure marker")
+		return
+	file.store_string(JSON.stringify({"schemaVersion": 1, "benchmark": "crowd_presentation",
+		"pid": OS.get_process_id(), "executablePath": OS.get_executable_path(),
+		"executionMode": _env("RABBITLANDS_CROWD_BENCH_EXECUTION_MODE", "project"),
+		"userDataDir": OS.get_user_data_dir(),
+		"startToken": OS.get_environment("RABBITLANDS_CROWD_BENCH_START_TOKEN"),
+		"requiresRunnerTermination": true, "failure": "teardown_timeout",
+		"teardown": _report.get("teardown", {})}, "  "))
+	file.flush()
+	file.close()
+	if DirAccess.rename_absolute(temporary, destination) != OK:
+		DirAccess.remove_absolute(temporary)
+		push_error("Cannot publish benchmark teardown failure marker")
 
 
 func _memory_sample() -> Dictionary:
@@ -1648,4 +1822,8 @@ func _finish() -> void:
 		file.close()
 	print("crowd-presentation report: ", ProjectSettings.globalize_path(out) if out.begins_with("user://") else out,
 		" failures=", _failures)
+	if bool((_report.get("teardown", {}) as Dictionary).get("requiresRunnerTermination", false)):
+		_publish_teardown_failure_marker(out)
+		print("crowd-presentation teardown failed; awaiting owning runner termination")
+		return
 	quit(_failures)

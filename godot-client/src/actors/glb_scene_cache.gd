@@ -142,6 +142,16 @@ static func _imported_actor_scene(path: String) -> PackedScene:
 	var extension := resource_path.get_extension().to_lower()
 	if extension != "glb" and extension != "gltf":
 		return null
+	if OS.has_feature("editor"):
+		# ResourceLoader.exists() also accepts skipped or unfinished editor
+		# imports. Loading those emits errors before the raw fallback succeeds.
+		var import_settings := ConfigFile.new()
+		if import_settings.load(resource_path + ".import") != OK \
+				or str(import_settings.get_value("remap", "importer", "")) != "scene":
+			return null
+		var imported_path := str(import_settings.get_value("remap", "path", ""))
+		if imported_path.is_empty() or not FileAccess.file_exists(imported_path):
+			return null
 	if not ResourceLoader.exists(resource_path, "PackedScene"):
 		return null
 	var began := Time.get_ticks_usec()
