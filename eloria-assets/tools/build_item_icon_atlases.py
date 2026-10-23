@@ -18,7 +18,10 @@ from PIL import Image
 ROOT = Path(__file__).resolve().parents[2]
 CLIENT = ROOT / 'godot-client'
 SOURCE = ROOT / 'eloria-assets/source/item-icons/painted-2026-10-18'
-SUPPLEMENTS = [ROOT / 'eloria-assets/source/item-icons/quivers-2026-10-20']
+SUPPLEMENTS = [
+    ROOT / 'eloria-assets/source/item-icons/quivers-2026-10-20',
+    ROOT / 'eloria-assets/source/item-icons/perk-capes-2026-10-22',
+]
 
 
 def planned_atlases() -> list[tuple[Path, Image.Image]]:

@@ -10,7 +10,7 @@ def test_perk_cape_designs_have_unique_materials_and_back_emblems():
     designs = json.loads((CLIENT / 'eloria-assets/source/perk-capes/catalog.json').read_text())
     registry = json.loads((PROJECT / 'data/actors/equipment.json').read_text())['models']
     assert len(designs) == 10
-    for field in ('name', 'perk', 'itemId', 'visualId', 'emblem'):
+    for field in ('name', 'perk', 'itemId', 'visualId', 'imageId', 'emblem'):
         assert len({entry[field] for entry in designs}) == 10
     for entry in designs:
         model = registry[f"2:{entry['visualId']}"]
