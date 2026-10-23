@@ -246,6 +246,8 @@ func _process(_delta: float) -> void:
 	for key: String in Presets.PARTS:
 		if not model.working.parts[key].enabled:
 			if key == "chat" and parts.chat.is_temporarily_open(): continue
+			# The roster preference must not suppress an invitation's answer buttons.
+			if key == "party" and not str(AppState.party.get("invited_by", "")).is_empty(): continue
 			_root(key).hide()
 	if not bool(model.working.legacy):
 		parts.rail_panel.visible = model.working.parts.rail_panel.enabled and not (model.working.parts.rail_panel.hide_with_stats and _root("skills").is_visible_in_tree())
@@ -1467,7 +1469,8 @@ func apply_layout() -> void:
 	main._request_map_redraw()
 	for key: String in Presets.PARTS:
 		if key in ["chat", "system_chat", "spells", "resources", "compass", "objectives"]: continue
-		_root(key).visible = bool(model.working.parts[key].enabled)
+		_root(key).visible = bool(model.working.parts[key].enabled) \
+			or (key == "party" and not str(AppState.party.get("invited_by", "")).is_empty())
 	main.extension_windows._sync_tracked_quest()
 	if not model.working.parts.objectives.enabled: parts.objectives.hide()
 	if legacy:
