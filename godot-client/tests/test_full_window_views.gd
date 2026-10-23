@@ -87,6 +87,70 @@ func capture(label: String) -> void:
 	await RenderingServer.frame_post_draw
 	root.get_texture().get_image().save_png(FOLDER.path_join(label + ".png"))
 
+func check_world_overlays(shown: bool, label: String) -> void:
+	# The frame update must not bring the player's banner back over a view.
+	main._update_actor_resource_overlay()
+	expect(main.actor_resource_overlay.is_visible_in_tree() == shown,
+		label + ": player name, resources and mount banner follow world visibility")
+	expect(main._world_text_overlay.is_visible_in_tree() == shown,
+		label + ": NPC names, creature banners and world labels follow world visibility")
+	expect(main._floating_feedback_layer.is_visible_in_tree() == shown,
+		label + ": floating damage and experience follow world visibility")
+	main._world_text_overlay._sync_camera()
+	expect(main._world_text_overlay.text_viewport.render_target_update_mode ==
+		(SubViewport.UPDATE_ALWAYS if shown else SubViewport.UPDATE_DISABLED),
+		label + ": the world text pass only renders while visible")
+
+func check_overlay_transitions() -> void:
+	main.set_process(false)
+	var state := root.get_node("AppState")
+	var previous_id: int = state.local_actor_id
+	state.local_actor_id = 9001
+	var actor := Node3D.new()
+	main.world_root.add_child(actor)
+	actor.global_position = main.gameplay_camera.global_position \
+		- main.gameplay_camera.global_basis.z * 8.0 - Vector3.UP * 2.8
+	main.actor_nodes[state.local_actor_id] = actor
+	var npc_name := Label3D.new()
+	npc_name.text = "NPC name and quest marker"
+	preload("res://src/ui/world_label_style.gd").apply(npc_name, 12, 0.01, 4)
+	actor.add_child(npc_name)
+	npc_name.position.y = 2.8
+	var feedback := Label.new()
+	feedback.text = "+12 Experience"
+	feedback.position = main.game_view.size * 0.5 + Vector2(-50, 80)
+	main._floating_feedback_layer.add_child(feedback)
+	check_world_overlays(true, "gameplay")
+	await frames()
+	await capture("world-overlays-gameplay")
+	main._toggle_full_map()
+	check_world_overlays(false, "map opened")
+	await frames()
+	await capture("world-overlays-map")
+	main._toggle_console()
+	check_world_overlays(false, "map switched to console")
+	await frames()
+	await capture("world-overlays-console")
+	main.console_panel.hide()
+	check_world_overlays(true, "console closed directly")
+	main._toggle_console()
+	main._toggle_full_map()
+	check_world_overlays(false, "console switched to map")
+	main.full_map.hide()
+	check_world_overlays(true, "map closed directly")
+	# Either visible view must keep annotations hidden even if the other closes.
+	main.full_map.show()
+	main.console_panel.show()
+	main.full_map.hide()
+	check_world_overlays(false, "console remains open")
+	main.console_panel.hide()
+	check_world_overlays(true, "both views closed")
+	main.actor_nodes.erase(state.local_actor_id)
+	state.local_actor_id = previous_id
+	actor.queue_free()
+	feedback.queue_free()
+	main.set_process(true)
+
 func check_layout(label: String) -> void:
 	var workspace: Control = main.hud_workspace
 	await frames()
@@ -148,6 +212,10 @@ func check_layout(label: String) -> void:
 		expect(main.full_map.visible and not main.console_panel.visible, label + ": Tab switches from console to map")
 	await close_map(button, label)
 	expect(workspace.model.working == layout, label + ": opening and closing views preserves every HUD setting")
+	var after := geometry()
+	for key: String in before:
+		if before[key] != after[key]:
+			print("HUD geometry changed: ", label, " / ", key, ": ", before[key], " -> ", after[key])
 	expect(geometry() == before, label + ": HUD positions and sizes stay unchanged")
 
 func run() -> void:
@@ -167,6 +235,7 @@ func run() -> void:
 	main.get_node("LoginPanel").hide()
 	main.get_node("LoginBackground").hide()
 	main.game_view.show()
+	await check_overlay_transitions()
 	main.map_image.gui_input.connect(func(event: InputEvent) -> void:
 		if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT: map_clicks += 1)
 	main.console_output.gui_input.connect(func(event: InputEvent) -> void:

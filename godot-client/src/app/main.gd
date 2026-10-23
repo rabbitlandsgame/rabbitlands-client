@@ -897,6 +897,7 @@ var hud_workspace: Control
 var _hud_layout_visible: CheckButton
 var _hud_skill_selector: OptionButton
 var _floating_feedback_layer: Control
+var _world_text_overlay: TextureRect
 var _pending_floating_feedback: Array[Dictionary] = []
 var _floating_feedback_flush_queued := false
 var _active_floating_labels: Array[Label] = []
@@ -1456,10 +1457,10 @@ func _ready() -> void:
 	region_preview.mouse_exited.connect(_on_region_preview_mouse_exited)
 	_bind_shared_world()
 	viewport_container.texture = main_viewport.get_texture()
-	var text_overlay := preload("res://src/ui/world_text_overlay.gd").new()
-	game_view.add_child(text_overlay)
-	game_view.move_child(text_overlay, viewport_container.get_index() + 1)
-	text_overlay.configure(main_viewport)
+	_world_text_overlay = preload("res://src/ui/world_text_overlay.gd").new()
+	game_view.add_child(_world_text_overlay)
+	game_view.move_child(_world_text_overlay, viewport_container.get_index() + 1)
+	_world_text_overlay.configure(main_viewport)
 	minimap.texture = map_viewport.get_texture()
 	map_image.texture = full_map_viewport.get_texture()
 	full_map.hide()
@@ -2649,6 +2650,14 @@ func _toggle_console() -> void:
 	_layout_full_window_views()
 	console_panel.show()
 	chat_hud.input.release_focus()
+
+## World annotations belong to the covered scene, while HUD controls stay usable.
+## Follow visibility signals so close buttons, Escape and direct show/hide agree.
+func _sync_world_overlay_visibility() -> void:
+	var world_visible := not full_map.visible and not console_panel.visible
+	_world_text_overlay.visible = world_visible
+	_floating_feedback_layer.visible = world_visible
+	_update_actor_resource_overlay()
 
 ## The console panel shows either the session message history or the protocol
 ## diagnostics. Undecoded packets and decode errors were reduced into AppState
@@ -9401,6 +9410,9 @@ func _configure_window_stack() -> void:
 	_layout_full_window_views()
 	window_stack.register_full_window_view(full_map, viewport_container)
 	window_stack.register_full_window_view(console_panel, viewport_container)
+	full_map.visibility_changed.connect(_sync_world_overlay_visibility)
+	console_panel.visibility_changed.connect(_sync_world_overlay_visibility)
+	_sync_world_overlay_visibility()
 	# Reminder cards are HUD surfaces below all windows, including for input.
 	game_view.move_child(lantern_guide, viewport_container.get_index() + 1)
 	var tracker: Control = extension_windows.get("tracked_quest")
@@ -11211,7 +11223,7 @@ func _update_legacy_clock_and_compass() -> void:
 
 func _update_actor_resource_overlay() -> void:
 	_sync_local_status_icons()
-	if not _banner_has_content():
+	if full_map.visible or console_panel.visible or not _banner_has_content():
 		if actor_resource_overlay.visible:
 			actor_resource_overlay.hide()
 		return
