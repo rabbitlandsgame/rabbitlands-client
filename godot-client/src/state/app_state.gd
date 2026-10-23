@@ -184,6 +184,7 @@ var achievements_state: Dictionary = {"counters": [], "completed": []}
 var achievements_catalog: Dictionary = {"worn_title": "", "entries": []}
 var leaderboard: Dictionary = {}
 var gauntlet_ready: Dictionary = {}
+var gauntlet_loot: Dictionary = {}
 ## What each player on this map is calling themselves, {actor_id: title}. Kept
 ## apart from the actor's display name, which carries a colour byte, the name
 ## and the guild tag in one string that every client unpicks by hand.
@@ -669,6 +670,7 @@ func _on_connection_state_changed(value: String) -> void:
 		achievements_catalog = {"worn_title": "", "entries": []}
 		leaderboard.clear()
 		gauntlet_ready.clear()
+		gauntlet_loot.clear()
 		actor_titles.clear()
 		actor_occupations.clear()
 		actor_mounts.clear()
@@ -1510,6 +1512,9 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 		"gauntlet_ready":
 			gauntlet_ready = (event.data as Dictionary).duplicate(true)
 			state_changed.emit(&"gauntlet_ready")
+		"gauntlet_loot":
+			gauntlet_loot = (event.data as Dictionary).duplicate(true)
+			state_changed.emit(&"gauntlet_loot")
 		"party":
 			party = {"in_party": bool(event.in_party),
 				"members": event.members,

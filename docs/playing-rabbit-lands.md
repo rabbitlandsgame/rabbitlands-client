@@ -45,7 +45,11 @@ In storage, **Store All** moves eligible items together. **Protection…** choos
 
 Landed hits and dodges share a refund limit of two action points per combat round. Technique costs and ordinary timed recovery still apply.
 
-Gauntlet death keeps your carried items and returns you at full health at a safe return point. Wave messages name the completed wave; the enemy count distinguishes present enemies from later reinforcement pulses. After completing the run, each participant can claim the reward cache.
+Gauntlet death keeps your carried items and returns you at full health at a safe return point. Wave messages name the completed wave; the enemy count distinguishes present enemies from later reinforcement pulses.
+
+Creature drops are held in the party's loot ledger until the run ends. Rare finds are announced to the party. The leader can split common stacks equally, choose recipients, or edit individual quantities, then send every share directly to personal storage. Successful runs add each participant's reserved cache reward. Closing the ledger keeps the items reserved; reopen it with **Gauntlet loot**, the reward cache, or `#gauntletloot`.
+
+Shared rares can have an optional gold value per item. Each buyer approves their payment and must have the full amount in storage before delivery. The party splits that payment equally, including the buyer. **NPC** stages a sale of unwanted shared drops at the server's standard buyback value; its gold is also shared equally. Review the payment and sale previews before confirming. Sales, payments, and item delivery happen together. Whole-coin remainders follow the run's roster order. Earned creature loot remains reserved if a run ends early; completion caches require a successful clear.
 
 ## Riding and the interface
 
