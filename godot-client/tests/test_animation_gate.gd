@@ -5,6 +5,14 @@ extends SceneTree
 
 var failures := 0
 
+class CountingModifier:
+	extends SkeletonModifier3D
+	var counts: Dictionary = {}
+	func _process_modification_with_delta(_delta: float) -> void:
+		counts["modifications"] = int(counts.get("modifications", 0)) + 1
+
+
+
 func _init() -> void:
 	call_deferred("_run")
 
@@ -166,9 +174,67 @@ func _run() -> void:
 	_expect(one_shot.active, "coming back into view resumes the actor")
 	actor.queue_free()
 
+	await _check_reset_lifecycle()
+
 	print("animation gate tests: ", "PASS" if failures == 0 else "FAIL (%d)" % failures)
 	await process_frame
 	quit(failures)
+
+func _check_reset_lifecycle() -> void:
+	var owner := Node3D.new()
+	var actor := Node3D.new()
+	owner.add_child(actor)
+	var skeleton := Skeleton3D.new()
+	skeleton.add_bone("Root")
+	actor.add_child(skeleton)
+	var counts := {"modifications": 0}
+	var modifier := CountingModifier.new()
+	modifier.counts = counts
+	skeleton.add_child(modifier)
+	root.add_child(owner)
+	var player := _player_with_clip(actor, "slide", 2.0, Animation.LOOP_LINEAR)
+	player.play("slide")
+	var retiring := AnimationGate.new()
+	retiring.apply(player, AnimationGate.Tier.HALF, skeleton)
+	retiring.reset()
+	_expect(player.callback_mode_process == AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_IDLE
+		and skeleton.modifier_callback_mode_process == Skeleton3D.MODIFIER_CALLBACK_MODE_PROCESS_IDLE
+		and retiring.half_rate_count() == 0 and retiring.quarter_rate_count() == 0,
+		"default reset restores both live player and skeleton idle callbacks")
+	retiring.apply(player, AnimationGate.Tier.QUARTER, skeleton)
+	# Prove the real modifier is connected, then drain previously queued work
+	# before asserting what discard does. Discard never promises cancellation.
+	skeleton.advance(0.05)
+	await physics_frame
+	await process_frame
+	await process_frame
+	_expect(int(counts.modifications) > 0, "the queued-child fixture has a working skeleton modifier")
+	var before := player.current_animation_position
+	owner.process_mode = Node.PROCESS_MODE_DISABLED
+	retiring.reset(false)
+	_expect(player.callback_mode_process == AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
+		and skeleton.modifier_callback_mode_process == Skeleton3D.MODIFIER_CALLBACK_MODE_PROCESS_MANUAL,
+		"discard reset leaves manual callback modes untouched")
+	_expect(retiring.half_rate_count() == 0 and retiring.quarter_rate_count() == 0
+		and retiring._group_of.is_empty() and retiring._tick == 0,
+		"discard reset forgets all stepped membership and frame state")
+	var cleared_groups := true
+	for group: Dictionary in retiring._groups:
+		cleared_groups = cleared_groups and group.members.is_empty() and is_zero_approx(float(group.delta))
+	_expect(cleared_groups, "discard reset also clears every group clock")
+	for unused: int in 4:
+		retiring.advance(0.1)
+	_expect(is_equal_approx(player.current_animation_position, before),
+		"forgotten players receive no further manual advance")
+	var before_retirement := int(counts.modifications)
+	actor.queue_free()
+	await physics_frame
+	await process_frame
+	await process_frame
+	_expect(not is_instance_valid(actor) and int(counts.modifications) == before_retirement,
+		"a quiescent queued child modifier is not reactivated during subtree retirement")
+	owner.free()
+
 
 func _player_with_clip(parent: Node, clip_name: String, length: float,
 		loop_mode: Animation.LoopMode) -> AnimationPlayer:

@@ -8,6 +8,10 @@ const GraphicsOptions := preload("res://src/world/graphics_options.gd")
 ## a continent's textures alive after its last resident cell is retired.
 static var _textures: Dictionary = {}
 static var _mutex := Mutex.new()
+static var _lookup_hits := 0
+static var _lookup_misses := 0
+static var _publications := 0
+static var _adoptions := 0
 
 ## Runtime-owned shared maps use the same weak content cache as glTF textures.
 ## Loading directly keeps this available before an editor PNG import exists.
@@ -33,6 +37,10 @@ static func _published(key: String) -> ImageTexture:
 	_mutex.lock()
 	var reference: WeakRef = _textures.get(key)
 	var shared: ImageTexture = reference.get_ref() as ImageTexture if reference != null else null
+	if shared == null:
+		_lookup_misses += 1
+	else:
+		_lookup_hits += 1
 	_mutex.unlock()
 	return shared
 
@@ -46,8 +54,26 @@ static func _publish_or_adopt(key: String, candidate: ImageTexture) -> ImageText
 	if shared == null:
 		_textures[key] = weakref(candidate)
 		shared = candidate
+		_publications += 1
+	else:
+		_adoptions += 1
 	_mutex.unlock()
 	return shared
+
+## Counts weak slots separately from live GPU resources. No readback, file IO,
+## mutation/pruning, or retained strong references are added by this snapshot.
+static func retention_snapshot() -> Dictionary:
+	_mutex.lock()
+	var live := 0
+	for reference: WeakRef in _textures.values():
+		if reference != null and reference.get_ref() != null:
+			live += 1
+	var result := {"weak_slots": _textures.size(), "live_entries": live,
+		"expired_slots": _textures.size() - live, "lookup_hits": _lookup_hits,
+		"lookup_misses": _lookup_misses, "publications": _publications,
+		"concurrent_adoptions": _adoptions, "bytes_estimate_available": false}
+	_mutex.unlock()
+	return result
 
 static func share(state: GLTFState, resources: Dictionary) -> int:
 	if resources.is_empty():

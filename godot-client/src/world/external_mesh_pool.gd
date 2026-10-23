@@ -4,6 +4,7 @@ const VramTextures := preload("res://src/world/vram_textures.gd")
 const ExternalTexturePool := preload("res://src/world/external_texture_pool.gd")
 const GltfQuantization := preload("res://src/world/gltf_quantization.gd")
 const ArchivedModelPolicy := preload("res://src/actors/archived_model_policy.gd")
+const ResourceDiagnostics := preload("res://src/world/resource_diagnostics.gd")
 
 ## Prototype meshes that map packages name instead of carrying.
 ##
@@ -36,6 +37,11 @@ const ArchivedModelPolicy := preload("res://src/actors/archived_model_policy.gd"
 static var _meshes: Dictionary = {}
 static var _indexes: Dictionary = {}
 static var _mutex := Mutex.new()
+static var _resource_timings: Dictionary = {}
+static var _lookup_hits := 0
+static var _lookup_misses := 0
+static var _publications := 0
+static var _adoptions := 0
 
 ## Statistics for the load report, keyed as `load_phases` counters.
 static var last_parsed := 0
@@ -86,7 +92,10 @@ static func acquire(key: String, path: String) -> Mesh:
 		var plan: Dictionary = VramTextures.plan_for({"externalResources": images})
 		if not plan.is_empty():
 			state.set_additional_data(VramTextures.PLAN_KEY, plan)
-	if document.append_from_file(path, state) != OK:
+	var operation_began := Time.get_ticks_usec()
+	var parse_error := document.append_from_file(path, state)
+	_record_operation(&"prototype_gltf_parse", operation_began)
+	if parse_error != OK:
 		push_error("shared_mesh parse failed prototype=%s path=%s" % [key, path])
 		return null
 	if images is Dictionary:
@@ -96,7 +105,9 @@ static func acquire(key: String, path: String) -> Mesh:
 		var importer := imported as GLTFMesh
 		if importer == null:
 			continue
+		operation_began = Time.get_ticks_usec()
 		var mesh: Mesh = importer.mesh.get_mesh() if importer.mesh != null else null
+		_record_operation(&"prototype_mesh_materialize", operation_began)
 		if mesh != null:
 			meshes.append(mesh)
 	if meshes.is_empty():
@@ -110,6 +121,10 @@ static func _published(key: String) -> Mesh:
 	_mutex.lock()
 	var reference: WeakRef = _meshes.get(key)
 	var shared: Mesh = reference.get_ref() as Mesh if reference != null else null
+	if shared == null:
+		_lookup_misses += 1
+	else:
+		_lookup_hits += 1
 	_mutex.unlock()
 	return shared
 
@@ -123,8 +138,32 @@ static func _publish_or_adopt(key: String, candidate: Mesh) -> Mesh:
 	if shared == null:
 		_meshes[key] = weakref(candidate)
 		shared = candidate
+		_publications += 1
+	else:
+		_adoptions += 1
 	_mutex.unlock()
 	return shared
+
+static func _record_operation(operation: StringName, started: int) -> void:
+	var elapsed := Time.get_ticks_usec() - started
+	_mutex.lock()
+	ResourceDiagnostics.record_elapsed(_resource_timings, operation, elapsed, true)
+	_mutex.unlock()
+
+static func retention_snapshot() -> Dictionary:
+	_mutex.lock()
+	var live := 0
+	for reference: WeakRef in _meshes.values():
+		if reference != null and reference.get_ref() != null:
+			live += 1
+	var result := {"weak_slots": _meshes.size(), "live_entries": live,
+		"expired_slots": _meshes.size() - live, "index_directories": _indexes.size(),
+		"lookup_hits": _lookup_hits, "lookup_misses": _lookup_misses,
+		"publications": _publications, "concurrent_adoptions": _adoptions,
+		"bytes_estimate_available": false,
+		"timings": ResourceDiagnostics.snapshot(_resource_timings)}
+	_mutex.unlock()
+	return result
 
 
 ## The meta a resolved placement carries, naming the prototype it draws. The

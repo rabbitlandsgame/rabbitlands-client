@@ -129,6 +129,7 @@ import zipfile
 import client_release
 import release_storage
 import runner_source
+import benchmark_package
 from pathlib import Path, PurePosixPath
 from urllib.parse import unquote
 
@@ -139,6 +140,8 @@ DIST = PROJECT / "dist"
 GODOT_EXE = "Godot_v4.7.2-stable_win64_console.exe"
 MARKER = ".eloria-package"
 STORAGE = None  # Only runner_release.py supplies a bounded, disposable build context.
+BENCHMARK_LINKS = False  # Local test packages reuse immutable staged asset bytes.
+BENCHMARK_ACTOR_PLANS: dict[Path, dict] | None = None  # One local benchmark invocation only.
 ASSET_REF = re.compile(r"res://\.\./(eloria-assets/[^\"'\s]+)")
 
 # The installer's identity. Keep it fixed: Windows matches upgrades and the
@@ -664,15 +667,17 @@ def shipped_text_names(build_dir: Path, candidates: set[str]) -> dict[str, set[s
 
 
 def actor_shipping(build_dir: Path) -> dict:
-    # A runner owns one immutable committed input tree. Freeze its reference
-    # proof before retiring editor-only source files; normal local builds keep
-    # recomputing the plan as before.
-    if STORAGE and build_dir.resolve() in STORAGE.actor_plans:
-        return STORAGE.actor_plans[build_dir.resolve()]
-    plan = _actor_shipping(build_dir)
-    if STORAGE:
-        STORAGE.actor_plans[build_dir.resolve()] = plan
-    return plan
+    # Runners and explicit local benchmark builds own one committed input
+    # generation. Reuse its pure reference proof while imports and test export
+    # pruning leave runtime catalogs/references unchanged. Ordinary packages
+    # still recompute; neither cache changes staging/export validation.
+    plans = STORAGE.actor_plans if STORAGE else BENCHMARK_ACTOR_PLANS
+    if plans is None:
+        return _actor_shipping(build_dir)
+    resolved = build_dir.resolve()
+    if resolved not in plans:
+        plans[resolved] = _actor_shipping(build_dir)
+    return plans[resolved]
 
 
 def _actor_shipping(build_dir: Path) -> dict:
@@ -1015,6 +1020,10 @@ def recover_build_worktree(build_dir: Path, sha: str) -> None:
 def prepare_build_tree(build_dir: Path, sha: str) -> Path:
     if build_dir.resolve() == REPO.resolve():
         raise PackageError("the build directory must not be the source checkout")
+    # A checkout/reset begins a new source generation even if a caller reuses
+    # this build path inside one invocation. Never reuse its earlier proof.
+    if BENCHMARK_ACTOR_PLANS is not None:
+        BENCHMARK_ACTOR_PLANS.pop(build_dir.resolve(), None)
     if not (build_dir / ".git").exists():
         log(f"creating build worktree {build_dir}")
         build_dir.parent.mkdir(parents=True, exist_ok=True)
@@ -1335,7 +1344,9 @@ def export_project(godot: Path, project: Path, app_dir: Path, logs: Path, platfo
 # --- staging -----------------------------------------------------------------
 
 def copy_file(source: Path, target: Path) -> int:
-    if STORAGE:
+    if STORAGE or (BENCHMARK_LINKS and source.suffix.lower() in {
+            ".glb", ".gltf", ".png", ".jpg", ".jpeg", ".webp", ".ktx", ".ktx2",
+            ".ogg", ".ogv", ".wav", ".mp3"}):
         return release_storage.link_file(source, target)
     target.parent.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(source, target)
@@ -2967,6 +2978,7 @@ def make_online_installer(stage: Path, godot: Path, iscc: Path, version: str,
 
 
 def _main(argv=None, storage=None) -> int:
+    global BENCHMARK_LINKS, BENCHMARK_ACTOR_PLANS
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("--platform", choices=sorted(PLATFORMS), default="windows",
                         help="windows: folder + zip; linux: folder + tar.gz; macos: native app bundle")
@@ -2987,6 +2999,8 @@ def _main(argv=None, storage=None) -> int:
     parser.add_argument("--vram-cache", type=Path, default=DIST / ".build" / "vram-cache",
                         help="encode cache for the sidecars (default dist/.build/vram-cache)")
     parser.add_argument("--no-zip", action="store_true", help="leave the folder unarchived")
+    parser.add_argument("--benchmark-profile", action="store_true",
+                        help="standalone local test export with allowlisted performance workloads")
     parser.add_argument("--installer", action="store_true", help="also build an Inno Setup installer")
     parser.add_argument("--iscc", help="path to Inno Setup's ISCC.exe")
     parser.add_argument("--no-client-updates", action="store_true", help="build a client without the restart updater")
@@ -3000,6 +3014,13 @@ def _main(argv=None, storage=None) -> int:
     started = time.time()
     platform = PLATFORMS[options.platform]
     try:
+        if options.benchmark_profile and (options.distribution != "standalone" or storage):
+            raise PackageError("--benchmark-profile is a local standalone test export only")
+        # These local packages are identity-verified before and after a run.
+        # Hard links avoid copying several GB of unchanged raw assets into
+        # every phase checkpoint. Normal distributable builds keep copying.
+        BENCHMARK_LINKS = options.benchmark_profile
+        BENCHMARK_ACTOR_PLANS = {} if options.benchmark_profile else None
         updating = options.distribution == "github" and not options.no_client_updates
         if options.platform == "macos":
             if sys.platform != "darwin":
@@ -3029,6 +3050,8 @@ def _main(argv=None, storage=None) -> int:
         stamp = datetime.date.today().strftime("%Y%m%d")
         version = f"{stamp}-{sha[:9]}"
         suffix = "" if options.distribution == "github" else "-" + options.distribution
+        if options.benchmark_profile:
+            suffix += "-benchmark"
         stage = options.out.resolve() / f"{platform['folder']}-{version}{suffix}"
         log(f"packaging {options.ref} = {sha[:9]} into {stage}")
         if stage.exists():
@@ -3044,6 +3067,8 @@ def _main(argv=None, storage=None) -> int:
 
         build_dir = options.build_dir.resolve()
         project = prepare_build_tree(build_dir, sha)
+        if options.benchmark_profile:
+            benchmark_package.prepare_export(project)
         if options.distribution != "github" and "const DISTRIBUTION_SCHEMA := 1" not in (project / "src/updates/release.gd").read_text(encoding="utf-8"):
             raise PackageError("The selected commit predates store-managed updates; select a commit containing the distribution support.")
         if options.platform == "macos":
@@ -3114,6 +3139,9 @@ def _main(argv=None, storage=None) -> int:
             smoke_launch(app_dir, logs, platform, vram_textures=not options.no_vram_textures,
                          pool_test=pooled_sidecar_directory(stage))
 
+        if options.benchmark_profile:
+            benchmark_package.write_manifest(stage, sha)
+
         outputs = [stage]
         if options.platform == "macos":
             macos_package.finish(stage, project, metadata)
@@ -3163,13 +3191,18 @@ def _main(argv=None, storage=None) -> int:
 
 
 def main(argv=None, storage=None) -> int:
-    global STORAGE
+    global STORAGE, BENCHMARK_LINKS, BENCHMARK_ACTOR_PLANS
     previous = STORAGE
+    previous_links = BENCHMARK_LINKS
+    previous_actor_plans = BENCHMARK_ACTOR_PLANS
     STORAGE = storage
+    BENCHMARK_ACTOR_PLANS = None
     try:
         return _main(argv, storage)
     finally:
         STORAGE = previous
+        BENCHMARK_LINKS = previous_links
+        BENCHMARK_ACTOR_PLANS = previous_actor_plans
 
 
 if __name__ == "__main__":
