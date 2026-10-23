@@ -2131,7 +2131,10 @@ def stage_vram_textures(build_dir: Path, stage: Path, godot: Path, cache: Path, 
     if STORAGE:
         remaining = (STORAGE.budget.capacity - STORAGE.budget.reserve
                      - release_storage.unique_bytes(STORAGE.budget.roots) - 64 * 1024**2)
-        runner_args = ["--link-output", "--cache-budget-bytes", str(remaining)]
+        # The retained cache is already counted in the working set. The child
+        # measures its whole cache, so add those existing bytes to its ceiling.
+        ceiling = remaining + release_storage.unique_bytes([cache])
+        runner_args = ["--link-output", "--cache-budget-bytes", str(ceiling)]
     started = time.time()
     with open(logs / "vram-textures.log", "w", encoding="utf-8", errors="replace") as handle:
         # maps/_shared/images holds the textures shared_images.py moved out of
@@ -3085,6 +3088,9 @@ def _main(argv=None, storage=None) -> int:
         (project / "data/client_release.json").write_text(json.dumps(metadata), encoding="utf-8")
         previews = drop_preview_maps(build_dir)
         served = read_served_v2_packages(build_dir)
+        asset_cache = getattr(storage, "asset_cache", None)
+        if asset_cache:
+            asset_cache.restore_imports(project)
         import_project(godot, project, logs)
         if storage:
             storage.check("import complete")
@@ -3113,7 +3119,7 @@ def _main(argv=None, storage=None) -> int:
         check_map_data_names_no_editor_sources(stage)
         if not options.no_vram_textures:
             if storage:
-                storage.check("before graphics encoding", 1024**3)
+                storage.check("before graphics encoding", 512 * 1024**2 if asset_cache and asset_cache.hit else 1024**3)
             stage_vram_textures(build_dir, stage, godot, options.vram_cache.resolve(), logs)
             check_vram_textures(stage)
             if storage:
@@ -3124,7 +3130,8 @@ def _main(argv=None, storage=None) -> int:
         check_shared_meshes(build_dir, stage)
         if updating:
             client_release.export_launcher(stage, metadata, godot, project, EXPORT_PRESETS,
-                                           platform["preset"], run_godot, logs)
+                                           platform["preset"], run_godot, logs,
+                                           **({"cache": asset_cache.root / "helpers"} if asset_cache else {}))
         launch_args = ([] if options.platform == "macos" else
                        write_launchers(stage, options.server, build_dir, version, platform))
         if options.distribution == "steam" and options.platform != "macos":
@@ -3155,7 +3162,9 @@ def _main(argv=None, storage=None) -> int:
             outputs.extend(client_release.publish_artifacts(stage, metadata, options.update_signing_key,
                                                             godot, project, run_godot, logs,
                 shared=options.shared_release_assets,
-                **({"accept_part": storage.accept_part, "budget": storage.budget} if storage else {})))
+                **({"accept_part": storage.accept_part, "budget": storage.budget} if storage else {}),
+                **({"previous_packages": storage.previous_packages, "reuse_package": storage.reuse_package}
+                   if asset_cache else {})))
         if not options.no_zip:
             if options.platform == "macos":
                 outputs.append(macos_package.archive(stage))

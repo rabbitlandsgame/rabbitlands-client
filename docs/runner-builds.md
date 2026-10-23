@@ -59,6 +59,46 @@ in the runner receipts. The first build using shared storage must upload its
 newly named files once; later builds upload only new checksums for packages and
 helpers. Per-build manifests and Windows setup change with the build identity.
 
+### Code-only releases
+
+The desktop workflow also keeps a separate Windows/Linux Actions cache of
+prepared assets. Its key hashes the committed asset trees, import settings,
+project configuration, updater sources and build tools (including the pinned
+engine/template and Python dependency versions). Ordinary game script changes
+do not invalidate that key. Adding, changing or deleting an asset does.
+
+On a verified cache hit, the build restores Godot import products and their
+generated import records, reuses existing compressed texture encodes and keeps
+an unchanged native updater and
+uninstaller. It still scans the current project, exports the current game code
+and release identity, runs the graphics/startup checks, and signs a fresh
+manifest. Generated import settings are restored only when their source bytes
+and the fresh checkout's import policy match. Script registries and other
+editor state are regenerated.
+
+Each package's **actual staged file paths, sizes and SHA-256 hashes** are compared
+with a previous signed manifest. If they match and GitHub confirms every
+checksum-named part is complete with the correct size and digest, the ZIP is
+reused without compression or uploading. Changed packages are rebuilt normally;
+missing remote parts are recreated. A conflicting completed download stops the
+build. Deleted files cannot survive through a cached package inventory.
+
+Consequently a code-only release normally uploads the client code package,
+fresh installer and signed metadata; unchanged asset packages keep their URLs.
+An updater change or a changed native executable can add a small helper/engine
+package. The first build for an asset key, an evicted cache, or a corrupt cache
+falls back to a full build. A cache miss never skips validation. Cache files
+are checksummed before reuse, and the prior manifest must verify with the
+current public signing key. Signing secrets, complete game folders and quality
+scratch files are excluded from the cache.
+
+The workflow saves the cache only after a successful build and only when that
+key was absent, so code-only runs do not repeatedly upload the cache itself.
+GitHub may evict caches, and a branch may need its own first cache build. The
+platform job summary and runner receipt report cache hits, packages rebuilt or
+reused, and uploaded/reused bytes. The first run of this optimization populates
+the caches; the next code-only run demonstrates the fast path.
+
 Publishing still requires the usual manual review. After verifying the public
 replacement, the cleanup workflow retires older compiled releases and removes
 shared files no longer referenced by the current build. It postpones shared
@@ -155,8 +195,9 @@ Space is saved by:
   A filesystem that cannot create these links fails rather than making copies.
 - Encoding and quality-checking graphics in batches with at most 128 MiB of raw
   DDS scratch, preserving all shared-image cutoff checks in the same batch.
-- Removing the main import cache after the exported pack is verified, and
-  removing the temporary graphics cache after its staged files are verified.
+- Moving verified import products to the reusable cache after export, and
+  hard-linking retained graphics products into the stage. Without caching,
+  temporary import and graphics caches are removed after validation.
 - Writing each deterministic package ZIP into bounded parts, without
   first making a full archive and then copying it into parts.
 - Keeping package inventories in the signed manifest rather than retaining
@@ -167,8 +208,10 @@ Space is saved by:
 - Checking each upload's returned asset record directly, then rechecking the
   whole release during finalization. This avoids listing hundreds of assets
   again for every small package.
-- Keeping only receipts and logs after a successful build. No second platform's
-  full stage, payloads or caches accumulate on the same runner.
+- Removing the full source and stage after success, before saving the asset
+  cache. The disk budget includes retained products and worst-case compressed
+  cache-upload scratch, preserving the same 2 GB reserve. Each runner handles
+  only one platform.
 
 ZIP data is streamed with bounded memory. Release builds avoid the duplicate
 Linux tar entirely; standalone portable tar exports still use executable modes.

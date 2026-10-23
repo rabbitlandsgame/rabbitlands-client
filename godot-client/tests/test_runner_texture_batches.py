@@ -59,6 +59,13 @@ def test_cold_batched_encodes_keep_quality_metadata_and_linked_outputs(tmp_path,
             assert any(os.path.samefile(target, source) for source in files)
             linked += 1
     assert linked > 0
+    # Rehydrate the same cache into a fresh release stage: even BC7 sidecars
+    # must retain identical bytes without running the encoder again.
+    warm_out = tmp_path / "warm-output"
+    warm = textures.build([maps], warm_out, cache, godot, procs=1, link_output=True, cache_budget_bytes=8 * 1024**2)
+    assert warm["encoded"] == 0 and warm["cached"] > 0
+    for path in out.rglob("*.evt"):
+        assert path.read_bytes() == (warm_out / path.relative_to(out)).read_bytes()
 
 
 def test_cache_reservation_rejects_growth_before_encoding(tmp_path):
