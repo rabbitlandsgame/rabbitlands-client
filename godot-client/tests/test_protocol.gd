@@ -413,6 +413,9 @@ func _init() -> void:
 	_expect_bytes("trade inventory offer fixture",
 		EloriaProtocol.put_inventory_on_trade(7, 0x12345678),
 		PackedByteArray([36, 7, 0, 1, 7, 0x78, 0x56, 0x34, 0x12]))
+	_expect_bytes("trade storage offer uses a two-byte position",
+		EloriaProtocol.put_storage_on_trade(0x1234, 0x12345678),
+		PackedByteArray([36, 8, 0, 2, 0x34, 0x12, 0x78, 0x56, 0x34, 0x12]))
 	_expect_bytes("trade offer removal fixture",
 		EloriaProtocol.remove_trade_item(3, 0x12345678),
 		PackedByteArray([37, 6, 0, 3, 0x78, 0x56, 0x34, 0x12]))

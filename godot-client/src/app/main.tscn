@@ -2533,8 +2533,25 @@ layout_mode = 2
 
 [node name="Label" type="Label" parent="GameView/TradePanel/Content/Columns/Source" unique_id=1321716382]
 layout_mode = 2
-text = "YOUR INVENTORY"
+text = "YOUR ITEMS"
 horizontal_alignment = 1
+
+[node name="TradeSourceType" type="OptionButton" parent="GameView/TradePanel/Content/Columns/Source"]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "Offer from your backpack or storage when both players are near storage"
+item_count = 2
+selected = 0
+popup/item_0/text = "Backpack"
+popup/item_0/id = 1
+popup/item_1/text = "Storage"
+popup/item_1/id = 2
+
+[node name="TradeStorageCategory" type="OptionButton" parent="GameView/TradePanel/Content/Columns/Source"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+tooltip_text = "Storage category to offer from"
 
 [node name="TradeSource" type="ItemList" parent="GameView/TradePanel/Content/Columns/Source" unique_id=1698935706]
 unique_name_in_owner = true

@@ -257,6 +257,8 @@ var _pending_purchase: Array[String] = []
 @onready var trade_panel: Control = %TradePanel
 @onready var trade_partner: Label = %TradePartner
 @onready var trade_source: ItemList = %TradeSource
+@onready var trade_source_type: OptionButton = %TradeSourceType
+@onready var trade_storage_category: OptionButton = %TradeStorageCategory
 @onready var trade_own_offers: ItemList = %TradeOwnOffers
 @onready var trade_other_offers: ItemList = %TradeOtherOffers
 @onready var trade_quantity: SpinBox = %TradeQuantity
@@ -1566,6 +1568,8 @@ func _ready() -> void:
 	$GameView/SpellQuickbar.hide()
 	_reset_trade_destinations()
 	trade_source.item_selected.connect(_on_trade_source_selected)
+	trade_source_type.item_selected.connect(_on_trade_source_type_selected)
+	trade_storage_category.item_selected.connect(_on_trade_storage_category_selected)
 	trade_own_offers.item_selected.connect(_on_trade_own_selected)
 	trade_other_offers.item_selected.connect(_on_trade_other_selected)
 	storage_categories.item_selected.connect(_on_storage_category_selected)
@@ -3555,10 +3559,29 @@ func _on_item_list_get_pressed() -> void:
 		"" if request_count == 1 else "s"]
 		+ (" Missing " + ", ".join(missing) + "." if not missing.is_empty() else ""))
 
+func _trade_source_items() -> Dictionary:
+	if trade_source_type.get_selected_id() == 2:
+		if (not bool(AppState.trade.get("storage_available", false))
+				or not bool(AppState.storage.get("open", false)) or not _storage_stock_ready()):
+			return {}
+		return AppState.storage.get("items", {}) as Dictionary
+	return AppState.trade.get("source_inventory", {}) as Dictionary
+
+func _on_trade_source_type_selected(_index: int) -> void:
+	_sync_trade()
+
+func _on_trade_storage_category_selected(index: int) -> void:
+	var category_id: int = trade_storage_category.get_item_id(index)
+	AppState.storage["category_id"] = category_id
+	var error: Error = Network.get_storage_category(category_id)
+	if error != OK:
+		push_warning("GET_STORAGE_CATEGORY failed: " + error_string(error))
+	_sync_trade()
+
 func _on_trade_source_selected(index: int) -> void:
 	selected_trade_side = "source"
 	var slot: int = _trade_list_slot(trade_source, index)
-	var source_inventory: Dictionary = AppState.trade.get("source_inventory", {}) as Dictionary
+	var source_inventory: Dictionary = _trade_source_items()
 	var item_value: Variant = source_inventory.get(slot)
 	if item_value is Dictionary:
 		trade_quantity.max_value = maxi(1, int((item_value as Dictionary).get("quantity", 1)))
@@ -3588,13 +3611,15 @@ func _on_trade_offer_pressed() -> void:
 	if selected.is_empty():
 		return
 	var slot: int = _trade_list_slot(trade_source, int(selected[0]))
-	var source_inventory: Dictionary = AppState.trade.get("source_inventory", {}) as Dictionary
+	var source_inventory: Dictionary = _trade_source_items()
 	var item_value: Variant = source_inventory.get(slot)
 	if not item_value is Dictionary:
 		return
 	var item: Dictionary = item_value as Dictionary
 	var quantity: int = clampi(int(trade_quantity.value), 1, int(item.get("quantity", 1)))
-	var error: Error = Network.put_inventory_on_trade(slot, quantity)
+	var error: Error = (Network.put_storage_on_trade(slot, quantity)
+		if trade_source_type.get_selected_id() == 2
+		else Network.put_inventory_on_trade(slot, quantity))
 	if error != OK:
 		push_warning("PUT_OBJECT_ON_TRADE failed: " + error_string(error))
 
@@ -14528,6 +14553,7 @@ func _sync_trade() -> void:
 	if not is_open:
 		selected_trade_side = ""
 		trade_was_open = false
+		trade_source_type.select(0)
 		_reset_trade_destinations()
 		return
 	if not trade_was_open:
@@ -14535,17 +14561,28 @@ func _sync_trade() -> void:
 		_reset_trade_destinations()
 	if not bool(AppState.trade.get("storage_available", false)):
 		_reset_trade_destinations()
+		trade_source_type.select(0)
+	trade_source_type.set_item_disabled(1, not bool(AppState.trade.get("storage_available", false)))
+	var from_storage: bool = trade_source_type.get_selected_id() == 2
+	trade_storage_category.visible = from_storage
+	trade_storage_category.clear()
+	for category: Dictionary in AppState.storage.get("categories", []):
+		var category_id: int = int(category.get("id", -1))
+		trade_storage_category.add_item(str(category.get("name", "Category")), category_id)
+		if category_id == int(AppState.storage.get("category_id", -1)):
+			trade_storage_category.select(trade_storage_category.item_count - 1)
 	inventory_panel.hide()
 	stats_panel.hide()
 	full_map.hide()
 	storage_panel.hide()
+	if classic_storage != null:
+		classic_storage.refresh()
 	manufacturing_panel.hide()
 	trade_partner.text = "Trading with %s%s" % [
 		str(AppState.trade.get("partner", "another player")),
-		" — storage destinations available" if bool(
+		" — storage trading available" if bool(
 			AppState.trade.get("storage_available", false)) else ""]
-	_fill_trade_list(trade_source,
-		AppState.trade.get("source_inventory", {}) as Dictionary, "Inventory")
+	_fill_trade_list(trade_source, _trade_source_items(), "Storage" if from_storage else "Inventory")
 	_fill_trade_list(trade_own_offers,
 		AppState.trade.get("own_offers", {}) as Dictionary, "Offer")
 	_fill_trade_list(trade_other_offers,
@@ -14587,8 +14624,16 @@ func _fill_trade_list(list_control: ItemList, items: Dictionary, prefix: String)
 		# both sides. Saying which it came from is the whole point of the
 		# server sending it.
 		var source: String = "  (storage)" if int(item.get("source_type", 1)) == 2 else ""
-		list_control.add_item("%s %d  •  item #%d  ×%d%s" % [
-			prefix, slot + 1, image_id, int(item.get("quantity", 0)), source])
+		var item_name: String = "Item #%d" % image_id
+		if prefix == "Storage":
+			var stored_name: String = _storage_name_of(slot)
+			if not stored_name.is_empty():
+				item_name = stored_name
+		elif prefix == "Inventory":
+			item_name = str(AppState.inventory_names.get(slot, item_name))
+		var label: String = "%s ×%d%s" % [item_name, int(item.get("quantity", 0)), source]
+		list_control.add_item(label)
+		list_control.set_item_tooltip(index, label)
 		list_control.set_item_metadata(index, slot)
 		var icon: Texture2D = item_atlas.icon_for(image_id)
 		if icon != null:
@@ -14625,6 +14670,9 @@ func _trade_acceptance_text(value: int) -> String:
 		_: return "reviewing"
 
 func _sync_storage() -> void:
+	if bool(AppState.trade.get("open", false)):
+		_sync_trade()
+		return
 	inventory_store_all.disabled = bool(AppState.storage.get("read_only", false))
 	var is_open: bool = bool(AppState.storage.get("open", false))
 	storage_panel.visible = is_open

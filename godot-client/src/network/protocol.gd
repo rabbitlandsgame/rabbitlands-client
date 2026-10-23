@@ -558,6 +558,12 @@ static func put_inventory_on_trade(source_slot: int, quantity: int) -> PackedByt
 		(quantity >> 16) & 0xff, (quantity >> 24) & 0xff])
 	return encode(ClientMessage.PUT_OBJECT_ON_TRADE, payload)
 
+static func put_storage_on_trade(position: int, quantity: int) -> PackedByteArray:
+	return encode(ClientMessage.PUT_OBJECT_ON_TRADE, PackedByteArray([
+		2, position & 0xff, (position >> 8) & 0xff,
+		quantity & 0xff, (quantity >> 8) & 0xff,
+		(quantity >> 16) & 0xff, (quantity >> 24) & 0xff]))
+
 static func remove_trade_item(offer_slot: int, quantity: int) -> PackedByteArray:
 	var payload: PackedByteArray = PackedByteArray([
 		clampi(offer_slot, 0, 15), quantity & 0xff, (quantity >> 8) & 0xff,

@@ -980,6 +980,7 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 						(previous_inventory.get(slot, {}) as Dictionary).get("image_id", -2)):
 					inventory_names.erase(slot)
 			state_changed.emit(&"inventory")
+			_sync_trade_inventory()
 		"inventory_update":
 			inventory_metadata_dirty = true
 			var updated_item: Dictionary = event.item as Dictionary
@@ -989,12 +990,14 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 				inventory_names.erase(updated_slot)
 			inventory[int(updated_item.get("slot", -1))] = updated_item
 			state_changed.emit(&"inventory")
+			_sync_trade_inventory()
 		"inventory_remove":
 			inventory_metadata_dirty = true
 			for raw_slot: Variant in event.slots:
 				inventory.erase(int(raw_slot))
 				inventory_names.erase(int(raw_slot))
 			state_changed.emit(&"inventory")
+			_sync_trade_inventory()
 		"inventory_text":
 			inventory_text = str(event.text)
 			_inventory_text_generation += 1
@@ -1063,6 +1066,7 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			trade["open"] = true
 			trade["partner"] = str(event.name)
 			trade["storage_available"] = bool(event.storage_available)
+			trade["source_inventory"] = {}
 			trade["own_offers"] = {}
 			trade["other_offers"] = {}
 			trade["own_accepts"] = 0
@@ -1926,6 +1930,11 @@ func close_dialogue() -> void:
 	npc_dialogue["open"] = false
 	npc_dialogue["options"] = []
 	state_changed.emit(&"npc_dialogue")
+
+func _sync_trade_inventory() -> void:
+	if bool(trade.get("open", false)):
+		trade["source_inventory"] = inventory.duplicate(true)
+		state_changed.emit(&"trade")
 
 func _empty_trade_state() -> Dictionary:
 	return {"open": false, "partner": "", "storage_available": false,

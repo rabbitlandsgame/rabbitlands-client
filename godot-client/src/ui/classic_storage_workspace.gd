@@ -339,7 +339,8 @@ func _style_inventory() -> void:
 func refresh() -> void:
 	for button: Button in _transfer_buttons:
 		button.disabled = bool(AppState.storage.get("read_only", false))
-	var is_open: bool = bool(AppState.storage.get("open", false))
+	var is_open: bool = (bool(AppState.storage.get("open", false))
+		and not bool(AppState.trade.get("open", false)))
 	if is_open != _open:
 		_open = is_open
 		if is_open:

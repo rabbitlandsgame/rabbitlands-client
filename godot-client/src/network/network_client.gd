@@ -460,6 +460,9 @@ func trade_with(actor_id: int) -> Error:
 func put_inventory_on_trade(source_slot: int, quantity: int) -> Error:
 	return send_frame(EloriaProtocol.put_inventory_on_trade(source_slot, quantity))
 
+func put_storage_on_trade(position: int, quantity: int) -> Error:
+	return send_frame(EloriaProtocol.put_storage_on_trade(position, quantity))
+
 func remove_trade_item(offer_slot: int, quantity: int) -> Error:
 	return send_frame(EloriaProtocol.remove_trade_item(offer_slot, quantity))
 
