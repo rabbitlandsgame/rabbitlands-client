@@ -141,15 +141,18 @@ def export_launcher(stage: Path, metadata: dict, godot: Path, source: Path,
 
 def publish_artifacts(stage: Path, metadata: dict, private_key: Path,
                       godot: Path, source: Path, run_godot, logs: Path,
-                      *, accept_part=None, budget=None) -> list[Path]:
+                      *, accept_part=None, budget=None, shared=False) -> list[Path]:
     commit = metadata["commit"]
     platform = metadata["platform"]
     tag = f"client-{commit}"
     base = f'https://github.com/{metadata["repository"]}/releases/download/{tag}'
     import asset_packages
-    packages = asset_packages.build(stage, base, accept_part=accept_part, budget=budget)
+    import shared_release_assets as shared_assets
+    downloads = shared_assets.base(metadata["repository"]) if shared else base
+    packages = asset_packages.build(stage, downloads, accept_part=accept_part, budget=budget, shared=shared)
     release = {"schema": 2, "bootstrap_schema": 1, "repository": metadata["repository"], "commit": commit,
                "ancestors": metadata["ancestors"],
+               "launch_args": json.loads((stage / "launcher-defaults.json").read_text()).get("args", []) if (stage / "launcher-defaults.json").is_file() else [],
                "platform": platform, "version": stage.name,
                "size": sum(p["size"] for p in packages),
                "unpacked_size": sum(p["unpacked_size"] for p in packages),
@@ -159,10 +162,16 @@ def publish_artifacts(stage: Path, metadata: dict, private_key: Path,
     helpers = []
     extension = "exe" if platform == "windows" else "x86_64"
     for kind in ("updater", "uninstall"):
-        path = stage.parent / f"{stage.name}-{kind}.{extension}"
+        original = stage / f"RabbitLands-{kind}.{extension}"
+        filename = shared_assets.name(digest(original), kind, extension) if shared else f"{stage.name}-{kind}.{extension}"
+        path = stage.parent / filename
         # Keep runner accounting bounded: link the existing helper, no copy.
-        path.hardlink_to(stage / f"RabbitLands-{kind}.{extension}")
-        row = {"url": f"{base}/{path.name}", "size": path.stat().st_size, "sha256": digest(path)}
+        if path.exists():
+            if path.stat().st_size != original.stat().st_size or digest(path) != digest(original):
+                raise ValueError("A local bootstrap checksum conflicts with its shared filename.")
+        else:
+            path.hardlink_to(original)
+        row = {"url": f"{downloads}/{path.name}", "size": path.stat().st_size, "sha256": digest(path)}
         release[kind] = row
         if accept_part:
             accept_part(path, row)
@@ -194,6 +203,9 @@ def publish_artifacts(stage: Path, metadata: dict, private_key: Path,
         + f'\n\nAfter uploads complete, copy {policy.name} to the server profile as client_updates.json.\n'
         'Merge windows/linux manifest rows if publishing both platforms. Connected players are notified within 30 seconds.\n',
         encoding="utf-8")
+    if shared:
+        with instructions.open("a", encoding="utf-8") as output:
+            output.write("\nUse build_release.py upload for a combined build. Checksum-named packages and helpers belong in the shared client-assets release, not the versioned installer release.\n")
     return assets + [policy, instructions]
 
 

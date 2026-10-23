@@ -57,7 +57,7 @@ def write_payload(stage: Path, files: list[dict], output) -> None:
         write(archive, "inventory.json", json.dumps(files, separators=(",", ":")).encode())
 
 
-def build(stage: Path, base: str, *, accept_part=None, budget=None) -> list[dict]:
+def build(stage: Path, base: str, *, accept_part=None, budget=None, shared=False) -> list[dict]:
     groups = defaultdict(list)
     seen = set()
     for root in ("app", "eloria-assets"):
@@ -75,7 +75,7 @@ def build(stage: Path, base: str, *, accept_part=None, budget=None) -> list[dict
     packages = []
     for name, files in sorted(groups.items()):
         archive = stage.parent / f"{stage.name}.pkg.{name}.zip"
-        with PartWriter(archive, base, client_release.PART_BYTES, accept_part, budget) as writer:
+        with PartWriter(archive, base, client_release.PART_BYTES, accept_part, budget, shared=shared) as writer:
             write_payload(stage, files, writer)
         packages.append({"id": name, "sha256": writer.sha256, "size": writer.size,
                          "unpacked_size": sum(f["size"] for f in files),

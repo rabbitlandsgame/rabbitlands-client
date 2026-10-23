@@ -19,7 +19,7 @@ static func verify(envelope: Dictionary, identity: Dictionary) -> Dictionary:
 	var extension := "exe" if identity.platform == "windows" else "x86_64"
 	for kind: String in ["updater", "uninstall"]:
 		var row: Variant = release.get(kind)
-		if not row is Dictionary or row.get("url") != base + release.version + "-" + kind + "." + extension or not Release.valid_hash(row.get("sha256")) or not Release.positive_integer(row.get("size"), 512 * 1024 * 1024):
+		if not row is Dictionary or (row.get("url") != base + release.version + "-" + kind + "." + extension and not Release.shared_download(row, identity.repository, kind, extension)) or not Release.valid_hash(row.get("sha256")) or not Release.positive_integer(row.get("size"), 512 * 1024 * 1024):
 			return {"error": "The updater download is invalid."}
 	return release
 

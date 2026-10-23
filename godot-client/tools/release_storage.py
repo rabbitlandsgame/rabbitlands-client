@@ -94,12 +94,13 @@ class PartWriter(io.RawIOBase):
     The local part survives failed acknowledgements. Successful parts are removed.
     ZIP uses data descriptors; ZIP64 and gzip/tar can both write without seeking.
     """
-    def __init__(self, archive: Path, base_url: str, part_bytes: int, accept=None, budget=None):
+    def __init__(self, archive: Path, base_url: str, part_bytes: int, accept=None, budget=None, *, shared=False):
         super().__init__()
         if part_bytes <= 0:
             raise ValueError("Archive part size must be positive.")
         self.archive, self.base_url, self.part_bytes = archive, base_url, part_bytes
         self.accept, self.budget = accept, budget
+        self.shared = shared
         self.parts = []
         self.size = 0
         self.hasher = hashlib.sha256()
@@ -146,6 +147,17 @@ class PartWriter(io.RawIOBase):
     def _finish_part(self):
         self.handle.close()
         self.handle = None
+        if self.shared:
+            import shared_release_assets as shared
+            target = self.path.with_name(shared.name(self.part_hasher.hexdigest()))
+            if target.exists():
+                with target.open("rb") as existing:
+                    if hashlib.file_digest(existing, "sha256").hexdigest() != self.part_hasher.hexdigest():
+                        raise ValueError("A local shared download has conflicting bytes.")
+                self.path.unlink()
+            else:
+                self.path.rename(target)
+            self.path = target
         row = {"url": f"{self.base_url}/{self.path.name}", "size": self.part_size,
                "sha256": self.part_hasher.hexdigest()}
         try:

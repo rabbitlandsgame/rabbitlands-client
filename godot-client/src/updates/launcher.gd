@@ -63,7 +63,12 @@ func _ready() -> void:
 		return
 	var identity := Bootstrap.trust()
 	var installed := Release.read_json(_root.path_join("app/client-release.json"))
-	var launch_only: bool = "--launch-only" in args or (installed.get("release_build", false) == true and not "--install-update" in args and not "--update-only" in args)
+	var own := OS.get_executable_path().simplify_path()
+	var installed_helper := _root.path_join(Bootstrap.helper_name("updater", identity))
+	var managed_launcher := own.to_lower() == installed_helper.to_lower() if OS.get_name() == "Windows" else own == installed_helper
+	# Downloaded, checksum-named updaters are explicit repair/install entry points.
+	# Older shortcuts to the installed canonical helper still open the game first.
+	var launch_only: bool = "--launch-only" in args or (managed_launcher and installed.get("release_build", false) == true and not "--install-update" in args and not "--update-only" in args)
 	if launch_only:
 		if "--launch-only" in args:
 			args.remove_at(args.find("--launch-only"))
@@ -74,13 +79,24 @@ func _ready() -> void:
 		await _launch_game(identity, args)
 		return
 	Release.save_json(_root.path_join(".rabbitlands-install.json"), {"schema": 1, "repository": identity.repository, "platform": identity.platform})
-	error = await _transport.worker(func() -> String: return Release.install(_root, identity))
+	error = await _transport.worker(func() -> String:
+		return Release.recover(_root) if "--install-manifest" in args else Release.install(_root, identity))
 	if error != "":
 		_fail(error)
 		return
 	_progress("Checking for game and updater updates", 0, 1)
 	var url := "https://github.com/%s/releases/latest/download/RabbitLands-%s.json" % [identity.repository, identity.platform]
-	var fetched: Dictionary = await _transport.fetch(url)
+	var manifest_index := args.find("--install-manifest")
+	var fetched: Dictionary
+	if manifest_index >= 0:
+		var file := FileAccess.open(args[manifest_index + 1], FileAccess.READ) if manifest_index + 1 < args.size() else null
+		if file == null or file.get_length() > Release.MAX_MANIFEST_BYTES:
+			_fail("The installer's signed release information is missing or too large.")
+			return
+		fetched = {"body": file.get_buffer(file.get_length())}
+		file.close()
+	else:
+		fetched = await _transport.fetch(url)
 	if not fetched.has("error"):
 		var parsed: Variant = JSON.parse_string(fetched.body.get_string_from_utf8())
 		var envelope: Dictionary = parsed if parsed is Dictionary else {}
@@ -88,6 +104,15 @@ func _ready() -> void:
 		if release.has("error"):
 			_fail(release.error)
 			return
+		if manifest_index >= 0:
+			# The shell installer can exit during updater self-replacement. Keep
+			# the verified manifest in the durable cache before handing over.
+			var cache := Release.cache_for(_root)
+			var saved := cache.path_join("installer-manifest.json")
+			if Release.is_link(cache) or Release.is_link(saved) or DirAccess.make_dir_recursive_absolute(cache) != OK or Release.save_json(saved, envelope) != OK:
+				_fail("The installer's signed release information could not be retained.")
+				return
+			args[manifest_index + 1] = saved
 		var matched: Variant = await _transport.worker(func() -> bool: return Bootstrap.helpers_match(_root, release, identity))
 		if matched != true:
 			_progress("Updating the updater", 0, 1)
@@ -110,6 +135,12 @@ func _ready() -> void:
 		if error != "":
 			_fail(error)
 			return
+		var defaults := _root.path_join("launcher-defaults.json")
+		var launch_args: Variant = release.get("launch_args", [])
+		if not FileAccess.file_exists(defaults) and launch_args is Array:
+			if Release.save_json(defaults, {"args": launch_args}) != OK:
+				_fail("The game's launch defaults could not be saved.")
+				return
 	elif not FileAccess.file_exists(_root.path_join("app/client-release.json")) or "--update-only" in args:
 		_fail(fetched.error)
 		return
@@ -122,6 +153,13 @@ func _ready() -> void:
 func _launch_game(identity: Dictionary, args: PackedStringArray) -> void:
 	if "--install-update" in args:
 		args.remove_at(args.find("--install-update"))
+	var manifest_index := args.find("--install-manifest")
+	if manifest_index >= 0:
+		if manifest_index + 1 >= args.size():
+			_fail("The installer's signed release information is missing.")
+			return
+		args.remove_at(manifest_index + 1)
+		args.remove_at(manifest_index)
 	var binary := "RabbitLands.exe" if identity.platform == "windows" else "RabbitLands.x86_64"
 	var defaults := PackedStringArray(Release.read_json(_root.path_join("launcher-defaults.json")).get("args", []))
 	LaunchOptions.apply_environment(args)

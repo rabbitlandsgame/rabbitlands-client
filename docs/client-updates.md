@@ -58,7 +58,9 @@ to update that installation. If downloaded elsewhere, it uses the per-user
 `-- --root /absolute/game/folder` selects a custom installation explicitly;
 `--update-only` checks and installs without starting the game.
 
-The schema 2 signed manifest lists independent `.pkg.<id>.zip.###` packages.
+The schema 2 signed manifest lists independent ZIP packages. New release builds
+use checksum-named `RabbitLands-pkg-<SHA256>.zip.part` downloads in the permanent
+`client-assets` supporting prerelease; older builds use `.pkg.<id>.zip.###` names.
 Each package has a full ZIP SHA-256, bounded download-part hashes, and a signed
 inventory of its files, sizes and hashes. Fixed groups cover the engine,
 client pack, actors, maps, audio, shared assets and records. Path-based buckets
@@ -67,6 +69,24 @@ and permissions are fixed, so an unchanged package keeps its checksum across
 builds, independent of the release date, filename and source-file timestamps.
 The exported `RabbitLands.pck` remains one client package; this is package reuse,
 not a binary patch within a PCK, GLB or ZIP.
+
+The build compares local file hashes with GitHub's recorded SHA-256 and size,
+reusing identical uploaded packages across releases. Changed packages get new
+checksum names. Both platform manifests and `SHA256SUMS` reference those files;
+the latest playable release remains separate from this shared download store.
+New helpers also have checksum names, so unchanged updaters and uninstallers
+are reused. The signature still binds the repository, helper kind, platform,
+exact download URL and expected hashes. Arbitrary external URLs are rejected.
+
+For the first upgrade from a client without shared-download support, run the
+new setup file or the newly downloaded standalone updater once. Keep its
+downloaded filename when running it; the installed canonical updater serves
+normal launch shortcuts. New helpers accept both older commit-pinned downloads
+and shared downloads. Linux's one-file shell installer now downloads the native
+updater, which installs the required packages directly; it no longer downloads
+a separate complete game archive. The helper embeds its signed manifest, so it
+installs the matching build even during a draft test. Shared downloads are
+public supporting files; the draft itself is not promoted to latest by a build.
 
 The updater checks actual installed file hashes. Matching packages use local
 files; missing or damaged packages download again. This also works with an older
@@ -195,12 +215,14 @@ The output is `../dist/releases/client-<full-client-commit>/`:
   locked until it finishes. Locks left by a crashed helper can be recovered on retry.
   Setup can repair the same build. Players need an internet connection, and
   do not manually download the update parts. Shortcuts start the restart updater.
-- **Linux:** a `.tar.gz` containing the native executable, updater and launch
-  scripts with executable permissions. An archive larger than 256 MiB is
-  split into `.tar.gz.001`, `.002`, etc., each at most 256 MiB. The
-  generated release notes give the exact reassembly/extraction command.
+- **Linux:** one `*-download.sh` helper. It verifies and starts the native
+  updater, which installs the required independent packages. There is no
+  duplicate full-game archive in the orchestrated release. Play again through
+  `~/Games/RabbitLands/RabbitLands-updater.x86_64` (or your chosen parent folder).
 - Both signed update manifests, their stable latest-release aliases, independent
-  `.pkg.<id>.zip.###` downloads, and standalone updater/uninstaller executables.
+  checksum-named package downloads, and standalone updater/uninstaller executables.
+  Supporting packages and helpers live in the permanent `client-assets` prerelease
+  and are linked from the playable release; their existing uploads are reused.
 - `SHA256SUMS` and `RELEASE-NOTES.md` for players, `release.json` listing exactly
   the upload assets, and a combined **local** `client_updates.json` policy.
 
@@ -208,10 +230,11 @@ Only the listed player downloads, signed manifests, update parts and checksums
 are uploaded. Build folders, logs, signing keys and server policy stay local.
 The initial Windows ZIP is omitted because the installer handles large games.
 The source archive alone lacks imported Godot resources and generated texture
-caches; online setup downloads the prepared runtime files from the same release.
-Its commit-pinned downloads require a published release. Draft installers can be
-reviewed and tested locally; public downloads begin after publication. Get a new
-setup executable when the current compiled release is replaced.
+caches; online setup downloads the prepared runtime files named by its signed manifest.
+Shared package downloads are public supporting files, so a downloaded draft
+installer can install its signed build before the playable release is published.
+The startup check continues to use the latest published playable release.
+Get a new setup executable when the current compiled release is replaced.
 An offline Windows installer is still available with `package_client.py --installer`
 without `--online-installer`; keep all of its companion `.bin` files together.
 Every upload asset is checked against GitHub's limit and hashed. If a build
@@ -255,8 +278,9 @@ are present:
 python godot-client/tools/build_release.py upload --bundle $RabbitLandsRelease --publish
 ```
 
-Transient upload connection failures are retried up to five times per file;
-failed upload reservations are cleared before retrying. An interrupted draft can
+Ordinary metadata upload failures are retried up to five times per file. Shared
+uploads allow longer retries for concurrent platform jobs and preserve active
+reservations; only abandoned starters older than six hours are cleared. An interrupted draft can
 use the same command again. Downloads already recorded
 by GitHub with the expected size and SHA-256 are reused. The script checks the
 remote asset list, upload states, sizes and SHA-256 checksums before publication; failures
