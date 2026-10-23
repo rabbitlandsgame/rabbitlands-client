@@ -18,6 +18,7 @@ var body: Control
 var storage_content: VBoxContainer
 var list_content: VBoxContainer
 var storage_grid: GridContainer
+var _transfer_buttons: Array[Button] = []
 var favorite_grid: GridContainer
 var filter: LineEdit
 var description: Label
@@ -165,8 +166,8 @@ func _build_bank() -> void:
 	storage_content.add_child(description)
 	var actions := HBoxContainer.new()
 	storage_content.add_child(actions)
-	_button(actions, "Withdraw", withdraw_selected, "Withdraw the selected quantity; double-click an item to withdraw")
-	_button(actions, "Deposit", deposit_selected, "Deposit the selected inventory item using the quantity shortcuts")
+	_transfer_buttons.append(_button(actions, "Withdraw", withdraw_selected, "Withdraw the selected quantity; double-click an item to withdraw"))
+	_transfer_buttons.append(_button(actions, "Deposit", deposit_selected, "Deposit the selected inventory item using the quantity shortcuts"))
 	_button(actions, "Look", inspect_selected, "Ask for the selected stored item's description")
 	_button(actions, "+ List", add_selected_storage, "Add the selected stored item to the active favorite list")
 	_button(actions, "⋮", _popup_layout, "Storage layout; also available by right-clicking the title")
@@ -205,7 +206,7 @@ func _build_lists() -> void:
 	list_content.add_child(actions)
 	_button(actions, "+", _popup_add, "Add a selected item, or capture your backpack")
 	_button(actions, "New list", create_list, "Create a new favorite set")
-	_button(actions, "Get list", collect_list, "Top up the list's quantities from the open storage category")
+	_transfer_buttons.append(_button(actions, "Get list", collect_list, "Top up the list's quantities from the open storage category"))
 	list_names = main.get("saved_item_lists") as ItemList
 	list_names.reparent(list_content)
 	list_names.custom_minimum_size = Vector2(0, 95)
@@ -336,6 +337,8 @@ func _style_inventory() -> void:
 	inventory.reset_size()
 
 func refresh() -> void:
+	for button: Button in _transfer_buttons:
+		button.disabled = bool(AppState.storage.get("read_only", false))
 	var is_open: bool = bool(AppState.storage.get("open", false))
 	if is_open != _open:
 		_open = is_open
@@ -482,6 +485,9 @@ func _refresh_grid() -> void:
 	_describe_selection()
 
 func _describe_selection() -> void:
+	if bool(AppState.storage.get("read_only", false)):
+		description.text = "Storage preview · View only. Visit a storage keeper or chest to transfer items."
+		return
 	if not _stock_ready():
 		description.text = "Loading category…"
 		return
@@ -517,6 +523,9 @@ func _select_storage(position: int) -> void:
 ## backpack.
 func _on_storage_cell_pressed(cell_index: int) -> void:
 	var position: int = int(storage_grid.get_child(cell_index).get_meta("storage_position", -1))
+	if bool(AppState.storage.get("read_only", false)):
+		if position >= 0: _select_storage(position)
+		return
 	if int(main.get("_carried_slot")) >= 0:
 		main.call("_deposit_carry")
 		return
@@ -1002,7 +1011,7 @@ func _viewport_changed() -> void:
 	_clamp_lists()
 
 func _close_bank() -> void:
-	AppState.close_storage()
+	main.call("_on_storage_close_pressed")
 
 func persist() -> void:
 	main.call("_save_hud_settings")

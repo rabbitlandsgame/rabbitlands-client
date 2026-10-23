@@ -78,6 +78,20 @@ func run() -> void:
 		await capture("party-exchange.png")
 		root.size = Vector2i(1024, 640)
 		await capture("party-exchange-1024.png")
+	var ready := state.duplicate(true)
+	ready.exchange[0].vote_state = "ready"
+	ready.exchange_can_withdraw = false
+	for voter: Dictionary in ready.exchange[0].votes: voter.vote = "yes"
+	ui.apply_snapshot(ready)
+	var collect := find_button(ui._exchange_cards, "Collect approved withdrawal")
+	expect(collect != null and collect.disabled and contains_label(ui._exchange_cards, "Awaiting collection"), "approved withdrawals wait for an Exchange NPC")
+	ready.exchange_can_withdraw = true
+	ui.apply_snapshot(ready)
+	collect = find_button(ui._exchange_cards, "Collect approved withdrawal")
+	expect(not collect.disabled, "the server's nearby NPC permission enables approved collection")
+	collect.pressed.emit()
+	expect(sent.back().action == "withdraw_approved" and sent.back().request_id == ready.exchange[0].request_id, "collection names the exact approved withdrawal")
+	ui.apply_snapshot(state)
 	root.size = Vector2i(1600, 1000)
 	var propose := find_button(ui._exchange_cards, "Propose price…")
 	expect(propose != null, "an active listing offers a party price proposal")

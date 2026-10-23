@@ -1333,6 +1333,7 @@ func _ready() -> void:
 	extension_windows = ExtensionWindowsScript.new()
 	game_view.add_child(extension_windows)
 	extension_windows.configure(item_atlas, lantern_guide)
+	_configure_service_buttons()
 	extension_windows.gauntlet_loot_window.configure(item_atlas, model_registry, equipment_config)
 	extension_windows.combat_hud_preference_changed.connect(_save_hud_settings)
 	invasion_assistant_window = InvasionAssistantScript.new()
@@ -1517,6 +1518,7 @@ func _ready() -> void:
 	_configure_window_layers()
 	_configure_cartography()
 	_load_hud_settings()
+	_refresh_service_tooltips()
 	# Explicit launch options select a server without changing saved settings.
 	_apply_connection_launch_options(OS.get_cmdline_user_args())
 	_configure_trailer_capture(OS.get_cmdline_user_args())
@@ -2967,12 +2969,36 @@ func _on_stats_button_pressed() -> void:
 		_sync_stats()
 	_sync_hud_button_states(true)
 
+func _configure_service_buttons() -> void:
+	var icons := preload("res://src/ui/service_menu_icons.gd")
+	for button: Button in [%ExchangeButton, %StoragePreviewButton]:
+		button.icon = icons.texture(button == %StoragePreviewButton)
+		button.expand_icon = true
+		button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		button.toggle_mode = true
+	%ExchangeButton.pressed.connect(func() -> void: extension_windows.call("toggle_marketplace"))
+	%StoragePreviewButton.pressed.connect(_toggle_storage_preview)
+	(extension_windows.get("market_panel") as Control).visibility_changed.connect(func() -> void: _sync_hud_button_states(true))
+	storage_panel.visibility_changed.connect(func() -> void: _sync_hud_button_states(true))
+	_refresh_service_tooltips()
+
+func _refresh_service_tooltips() -> void:
+	%ExchangeButton.tooltip_text = "Exchange · Browse prices and manage listings [%s]" % settings_window.call("binding_text", "toggle_exchange")
+	%StoragePreviewButton.tooltip_text = "Storage preview · View only [%s]" % settings_window.call("binding_text", "toggle_storage_preview")
+
+func _toggle_storage_preview() -> void:
+	if bool(AppState.storage.get("open", false)):
+		_on_storage_close_pressed()
+	else:
+		AppState.storage["read_only"] = true
+		Network.send_chat("#storage view")
+
 func _on_inventory_button_pressed() -> void:
 	if bool(AppState.trade.get("open", false)):
 		return
 	inventory_panel.visible = not inventory_panel.visible
 	if inventory_panel.visible:
-		AppState.close_storage()
+		_on_storage_close_pressed()
 		_road_ui(16)
 		stats_panel.hide()
 		manufacturing_panel.hide()
@@ -3191,7 +3217,7 @@ func _on_knowledge_close_pressed() -> void:
 
 func _on_inventory_close_pressed() -> void:
 	if classic_storage != null and classic_storage.is_inventory_docked():
-		AppState.close_storage()
+		_on_storage_close_pressed()
 		return
 	inventory_panel.hide()
 
@@ -3264,6 +3290,9 @@ func _inventory_slot_is_protected(slot: int, kind: String) -> bool:
 		or (bool(values[3]) and slot % 6 == 5))
 
 func _on_inventory_store_all_pressed() -> void:
+	if bool(AppState.storage.get("read_only", false)):
+		inventory_description.text = "Storage preview is view only. Visit a storage keeper or chest to transfer items."
+		return
 	if not bool(AppState.storage.get("open", false)):
 		inventory_description.text = "Open storage before using Sto All."
 		return
@@ -3623,6 +3652,7 @@ func _on_storage_inspect_pressed() -> void:
 		push_warning("LOOK_AT_STORAGE_ITEM failed: " + error_string(error))
 
 func _on_storage_close_pressed() -> void:
+	Network.send_chat("#storage close")
 	AppState.close_storage()
 
 ## The bag grid mirrors Eternal Lands: a left click takes the quantity in the
@@ -4094,6 +4124,12 @@ func _handle_bound_action(event: InputEvent) -> bool:
 		chat_input.clear()
 		_hide_chat_input()
 		return true
+	if event.is_action_pressed("toggle_exchange", false, true):
+		extension_windows.call("toggle_marketplace")
+		return true
+	if event.is_action_pressed("toggle_storage_preview", false, true):
+		_toggle_storage_preview()
+		return true
 	if event.is_action_pressed("toggle_inventory"):
 		_on_inventory_button_pressed()
 		return true
@@ -4269,7 +4305,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		elif bool(AppState.trade.get("open", false)):
 			_on_trade_cancel_pressed()
 		elif bool(AppState.storage.get("open", false)):
-			AppState.close_storage()
+			_on_storage_close_pressed()
 		elif bool(AppState.ground_bag.get("open", false)):
 			_close_ground_bag()
 		elif item_lists_panel.visible:
@@ -11826,7 +11862,8 @@ func _sync_hud_button_states(force := false) -> void:
 			%KnowledgeButton, %ManufacturingButton, %ChatButton, %DisconnectButton,
 			%EncyclopediaButton, %SpellsButton, %EmotesButton, %QuestButton,
 			%InfoButton, %BuddyButton, %ConsoleButton, %HelpButton,
-			%RangingButton, %MinimapButton, %OptionsButton, %MountsButton, %LeaderboardsButton]
+			%RangingButton, %MinimapButton, %OptionsButton, %MountsButton, %LeaderboardsButton,
+			%ExchangeButton, %StoragePreviewButton]
 	var local_actor: Dictionary = AppState.actors.get(AppState.local_actor_id, {})
 	var sitting: bool = bool(local_actor.get("sitting", false))
 	var stats_open: bool = stats_panel.visible
@@ -11857,7 +11894,9 @@ func _sync_hud_button_states(force := false) -> void:
 		minimap_frame.visible,
 		settings_panel.visible,
 		mounts_window != null and bool(mounts_window.call("is_open")),
-		leaderboards_window != null and bool(leaderboards_window.call("is_open"))]
+		leaderboards_window != null and bool(leaderboards_window.call("is_open")),
+		extension_windows != null and (extension_windows.get("market_panel") as Control).visible,
+		storage_panel.visible]
 	# Only while the player has not chosen attack mode from the HUD: a mode
 	# they picked stays picked, and Alt must not appear to be what put it there.
 	var attack_preview: bool = _alt_attack_preview and _interaction_mode != "attack"
@@ -12972,6 +13011,7 @@ func _apply_target_marker_style() -> void:
 			(actor as ReplicatedActor3D).set_target_marker_style(_target_marker_style)
 
 func _on_binding_changed(_action: String) -> void:
+	_refresh_service_tooltips()
 	_save_hud_settings()
 	_sync_quick_slots()
 	# Quick spell badges and the Techniques hint name the keys they use.
@@ -13723,6 +13763,7 @@ func _begin_carry(slot: int) -> void:
 ## whichever slot the server picks, and the stack stays in hand until what is
 ## left is no more than one click takes.
 func _begin_storage_carry(position: int) -> void:
+	if bool(AppState.storage.get("read_only", false)): return
 	var item_value: Variant = (AppState.storage.get("items", {}) as Dictionary).get(position)
 	if not item_value is Dictionary:
 		return
@@ -14380,6 +14421,7 @@ func _trade_acceptance_text(value: int) -> String:
 		_: return "reviewing"
 
 func _sync_storage() -> void:
+	inventory_store_all.disabled = bool(AppState.storage.get("read_only", false))
 	var is_open: bool = bool(AppState.storage.get("open", false))
 	storage_panel.visible = is_open
 	if not is_open:
@@ -14608,6 +14650,11 @@ func _list_metadata_int(list_control: ItemList, index: int) -> int:
 	return int(metadata) if metadata != null else -1
 
 func _sync_storage_actions() -> void:
+	if bool(AppState.storage.get("read_only", false)):
+		storage_deposit_button.disabled = true
+		storage_withdraw_button.disabled = true
+		storage_inspect_button.disabled = storage_items.get_selected_items().is_empty()
+		return
 	var inventory_selected: bool = not storage_inventory.get_selected_items().is_empty()
 	var storage_selected: bool = not storage_items.get_selected_items().is_empty()
 	storage_deposit_button.disabled = not inventory_selected

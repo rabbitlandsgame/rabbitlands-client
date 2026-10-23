@@ -1150,6 +1150,7 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			storage["open"] = true
 			state_changed.emit(&"storage")
 		"storage_state":
+			storage["read_only"] = bool(event.get("read_only", false))
 			# Keyed by position so it lines up with the stock storage packet.
 			# A category the server re-describes replaces its rows outright.
 			var described: Dictionary = {}
@@ -1937,7 +1938,7 @@ func close_storage() -> void:
 
 func _empty_storage_state() -> Dictionary:
 	return {"open": false, "categories": [], "category_id": -1,
-		"items": {}, "described": {}, "text": ""}
+		"items": {}, "described": {}, "text": "", "read_only": false}
 
 func begin_ground_bag_inspection(bag_id: int) -> void:
 	ground_bag["bag_id"] = bag_id

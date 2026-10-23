@@ -307,6 +307,7 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"market_window_v1",
 	"market_window_v2",
 	"market_window_v3",
+	"market_remote_v1",
 	"merchant_window_v1",
 	"merchant_weights_v1",
 	"merchant_descriptions_v1",
@@ -350,6 +351,7 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"actor_status_v1",
 	"special_events_v1",
 	"storage_window_v1",
+	"storage_remote_v1",
 	# Draws the continent-v2 maps (registry status continent-v2-served: the
 	# isles' chunk-streamed packages). The server sends CHANGE_MAP onto one only
 	# to a client that claims this, and moves a client that does not off it.
@@ -1834,6 +1836,8 @@ static func decode_gauntlet_loot(payload: PackedByteArray) -> Dictionary:
 		if allocated > int(row.available_quantity) or not row.owner.is_empty() and not names.has(row.owner):
 			return {"type": "invalid", "error": "gauntlet_loot_overallocation"}
 	if state.has("exchange_enabled"):
+		if state.has("exchange_can_withdraw") and not state.exchange_can_withdraw is bool:
+			return {"type": "invalid", "error": "party_exchange_access"}
 		if not state.exchange_enabled is bool or not state.get("exchange") is Array or state.exchange.size() > 24:
 			return {"type": "invalid", "error": "party_exchange_shape"}
 		for key: String in ["exchange_total", "exchange_page", "exchange_pages", "ledger_page", "ledger_pages", "exchange_plan_types", "exchange_plan_quantity", "exchange_plan_gold"]:
@@ -1858,7 +1862,7 @@ static func decode_gauntlet_loot(payload: PackedByteArray) -> Dictionary:
 			listing_ids.append(int(listing.listing_id))
 			if int(listing.original_quantity) < 1 or int(listing.price_gold) < 1 or int(listing.quantity) > int(listing.original_quantity):
 				return {"type": "invalid", "error": "party_exchange_quantity"}
-			if listing.get("state") not in ["active", "sold", "withdrawn"] or listing.get("vote_state") not in ["none", "open", "approved", "rejected", "sold"] or listing.get("own_vote") not in ["none", "yes", "no", "abstain"]:
+			if listing.get("state") not in ["active", "sold", "withdrawn"] or listing.get("vote_state") not in ["none", "open", "ready", "approved", "rejected", "sold"] or listing.get("own_vote") not in ["none", "yes", "no", "abstain"]:
 				return {"type": "invalid", "error": "party_exchange_status"}
 			if listing.get("vote_kind", "withdrawal") not in ["withdrawal", "price_change"] or not _loot_integer(listing.get("proposed_price", 0)):
 				return {"type": "invalid", "error": "party_exchange_proposal"}
@@ -2177,6 +2181,15 @@ static func decode_marketplace(payload: PackedByteArray) -> Dictionary:
 		state["history"] = details.history
 		state["categories"] = details.categories
 		state["types"] = details.types
+		if details.has("can_trade") and not details.can_trade is bool:
+			return {"type": "invalid", "error": "marketplace_access"}
+		if not details.get("party_runs", {}) is Dictionary:
+			return {"type": "invalid", "error": "marketplace_party_runs"}
+		for listing_id: Variant in details.get("party_runs", {}):
+			if not str(listing_id).is_valid_int() or not details.party_runs[listing_id] is String:
+				return {"type": "invalid", "error": "marketplace_party_run"}
+		state["can_trade"] = details.get("can_trade", false)
+		state["party_runs"] = details.get("party_runs", {})
 	return state
 
 ## Command 223. One NPC merchant's stock, with the prices in both directions
@@ -2946,9 +2959,12 @@ static func decode_storage_state(payload: PackedByteArray) -> Dictionary:
 			row[key] = payload.slice(offset, terminator).get_string_from_utf8()
 			offset = terminator + 1
 		rows.append(row)
-	if offset != payload.size():
-		return {"type": "invalid", "error": "storage_state_trailing"}
-	return {"type": "storage_state", "category_id": int(payload[0]), "rows": rows}
+	var read_only := false
+	if offset < payload.size():
+		if payload.size() != offset + 1 or payload[offset] > 1:
+			return {"type": "invalid", "error": "storage_state_trailing"}
+		read_only = payload[offset] == 1
+	return {"type": "storage_state", "category_id": int(payload[0]), "rows": rows, "read_only": read_only}
 
 ## Where the full statistics packet keeps each thing, in its own word offsets.
 ## Constants for the same reason `STAT_SLOT_KEYS` is one: they never change,

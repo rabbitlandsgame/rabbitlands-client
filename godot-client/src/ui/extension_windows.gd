@@ -164,6 +164,13 @@ var market_buy: Button
 var market_renew: Button
 var market_cancel: Button
 var market_sell: Button
+var market_reprice: Button
+var market_votes: Button
+var market_price_dialog: ConfirmationDialog
+var market_new_price: SpinBox
+var _market_price_hint: Label
+var _market_priced_listing: Dictionary = {}
+var market_sender: Callable
 ## Browse, mine, and history are server pages; sell is the player's pack.
 var _market_tab := "browse"
 ## When the last request went out, or -1 once the server has answered it.
@@ -223,16 +230,18 @@ func _ready() -> void:
 	add_child(gauntlet_ready_window)
 	gauntlet_loot_window = preload("res://src/ui/gauntlet_loot_window.gd").new()
 	add_child(gauntlet_loot_window)
+	if item_atlas != null: gauntlet_loot_window.configure(item_atlas)
+	gauntlet_loot_window.call("_style_dialog", market_price_dialog)
 	AppState.state_changed.connect(_on_state_changed)
 	sync_all()
 
 func configure(atlas: ItemAtlas, guide: Control = null) -> void:
 	item_atlas = atlas
-	gauntlet_loot_window.configure(atlas)
+	if gauntlet_loot_window != null: gauntlet_loot_window.configure(atlas)
 	quest_guide = guide
 	if quest_guide != null:
 		quest_guide.tracking_changed.connect(_on_quest_guide_tracking_changed)
-	_sync_quests()
+	if is_node_ready(): _sync_quests()
 
 func _on_quest_guide_tracking_changed() -> void:
 	if not quest_guide.is_quest_tracked() and quest_guide.quest_title() == _tracked_quest_title:
@@ -262,7 +271,7 @@ func close_top(include_party := false) -> bool:
 		elif panel == merchant_panel:
 			AppState.close_merchant()
 		elif panel == market_panel:
-			AppState.close_marketplace()
+			_close_marketplace()
 		elif panel == detail_panel:
 			AppState.close_item_detail()
 		else:
@@ -975,8 +984,20 @@ func _on_merchant_trade() -> void:
 ## the whole market; v3 adds filters, sorting, and private sales history.
 ## An older one shows its first twenty rows unpaged.
 
+func toggle_marketplace() -> void:
+	if market_panel.visible:
+		_close_marketplace()
+	else:
+		_market_send("#auction ui browse", "Opening the Exchange…")
+
+func _close_marketplace() -> void:
+	_market_transmit("#auction close")
+	market_price_dialog.hide()
+	AppState.close_marketplace()
+
 func _sync_marketplace() -> void:
 	if not bool(AppState.marketplace.get("open", false)):
+		market_price_dialog.hide()
 		market_panel.hide()
 		_market_tab = "browse"
 		_market_request_msec = -1
@@ -1008,6 +1029,9 @@ func _render_market() -> void:
 	var selling: bool = _market_tab == "sell"
 	var history: bool = _market_tab == "history"
 	var advanced: bool = int(state.get("version", 1)) >= 3
+	var can_trade := bool(state.get("can_trade", false))
+	(market_tabs["sell"] as Button).disabled = not can_trade
+	(market_tabs["sell"] as Button).tooltip_text = "Visit an Exchange NPC within four tiles to list new items." if not can_trade else "List an item from your pack."
 	market_list.visible = not history
 	market_history.visible = history
 	(market_tabs["history"] as Button).visible = advanced
@@ -1018,9 +1042,12 @@ func _render_market() -> void:
 	var returned: int = int(state.get("returned_items", 0))
 	market_header.text = "Proceeds: %s gc    ·    Return escrow: %s item%s" % [
 		_market_number(gold), _market_number(returned), "" if returned == 1 else "s"]
-	market_collect.disabled = gold <= 0 and returned <= 0
+	market_collect.disabled = not can_trade or (gold <= 0 and returned <= 0)
 	market_collect.tooltip_text = ("Nothing is waiting for you." if market_collect.disabled
 		else "Take your sale proceeds and returned items into your pack.")
+	if not can_trade:
+		market_collect.tooltip_text = "Visit an Exchange NPC within four tiles to collect escrow."
+		market_header.text += "    ·    Remote access: prices and voting only"
 	market_search_row.visible = paged and not selling
 	market_page_row.visible = paged and not selling
 	var selected_items: PackedInt32Array = market_list.get_selected_items()
@@ -1276,7 +1303,9 @@ func _sync_market_footer(_text: String = "") -> void:
 	market_renew.visible = managing
 	market_cancel.visible = managing
 	market_sell.visible = selling
-	for button: Button in [market_buy, market_renew, market_cancel, market_sell]:
+	market_reprice.visible = managing
+	market_votes.visible = false
+	for button: Button in [market_buy, market_renew, market_cancel, market_sell, market_reprice, market_votes]:
 		button.disabled = true
 		button.tooltip_text = ""
 	market_buy.text = "Buy"
@@ -1284,6 +1313,7 @@ func _sync_market_footer(_text: String = "") -> void:
 	market_totals.text = ""
 	var waiting: bool = _market_waiting()
 	var entry: Dictionary = _market_entry()
+	var can_trade := bool(AppState.marketplace.get("can_trade", false))
 	if _market_tab == "history":
 		market_selected_icon.texture = null
 		market_selection.text = "Your completed sales · times shown in UTC"
@@ -1303,9 +1333,15 @@ func _sync_market_footer(_text: String = "") -> void:
 	market_selected_icon.texture = _named_icon(int(entry.get("image_id", 0)), item_name)
 	var quantity_limit: int = int(entry.get("quantity", 0))
 	if managing:
+		market_reprice.text = "Propose price…" if bool(entry.get("party_owned", false)) else "Edit price…"
+		market_reprice.disabled = waiting
 		if bool(entry.get("party_owned", false)):
 			market_selection.text = "Party-owned listing"
-			market_totals.text = "Manage withdrawal votes from Gauntlet loot → Party exchange."
+			var run_id := _market_party_run(entry)
+			market_totals.text = "Price changes and withdrawals\nrequire the original party's vote."
+			market_reprice.disabled = waiting or run_id.is_empty()
+			market_votes.visible = true
+			market_votes.disabled = waiting or run_id.is_empty()
 			market_renew.disabled = true
 			market_cancel.disabled = true
 			return
@@ -1314,7 +1350,8 @@ func _sync_market_footer(_text: String = "") -> void:
 			_market_time_left(int(entry.get("seconds_left", 0))).trim_suffix(" left")]
 		market_totals.text = "Renew: 365 days from now.\nCancel or expiry: back to you\nthrough return escrow."
 		market_renew.disabled = waiting
-		market_cancel.disabled = waiting
+		market_cancel.disabled = waiting or not can_trade
+		if not can_trade: market_cancel.tooltip_text = "Visit an Exchange NPC within four tiles to cancel a listing."
 		return
 	if buying:
 		var price: int = int(entry.get("unit_price", 0))
@@ -1339,7 +1376,10 @@ func _sync_market_footer(_text: String = "") -> void:
 				market_totals.text += "\nNot enough gold."
 				market_buy.tooltip_text = "You need %s gc." % _market_number(cost)
 				return
-		market_buy.disabled = waiting
+		market_buy.disabled = waiting or not can_trade
+		if not can_trade:
+			market_buy.tooltip_text = "Visit an Exchange NPC within four tiles to buy items."
+			market_totals.text += "\nVisit an Exchange NPC to buy."
 		return
 	market_selection.text = "%s\n%d in your pack" % [item_name, quantity_limit]
 	var amount: int = _market_quantity(quantity_limit)
@@ -1352,7 +1392,7 @@ func _sync_market_footer(_text: String = "") -> void:
 		market_totals.text = "Enter a price per item\nin whole gold coins."
 		return
 	market_totals.text = "%s gc if all sell\nListed for 365 days." % _market_number(amount * unit_price)
-	market_sell.disabled = waiting
+	market_sell.disabled = waiting or not can_trade
 
 func _market_status(text: String, colour: Color) -> void:
 	market_status.text = text
@@ -1360,10 +1400,13 @@ func _market_status(text: String, colour: Color) -> void:
 
 ## Sends one `#auction` command. The window redraws from the state the server
 ## answers with; until then the action buttons hold off a second click.
+func _market_transmit(command: String) -> Error:
+	return market_sender.call(command) if market_sender.is_valid() else Network.send_chat(command)
+
 func _market_send(command: String, waiting_text: String) -> void:
 	if command.is_empty():
 		return
-	var error: Error = Network.send_chat(command)
+	var error: Error = _market_transmit(command)
 	if error != OK:
 		_market_status("The request was not sent: " + error_string(error), MARKET_REFUSED_COLOUR)
 		return
@@ -1452,6 +1495,9 @@ func _market_sell_command() -> String:
 	return "#auction sell %d %d %d" % [int(entry.slot), quantity, price]
 
 func _on_market_tab(tab: String) -> void:
+	if tab == "sell" and not bool(AppState.marketplace.get("can_trade", false)):
+		_market_status("Visit an Exchange NPC within four tiles to list new items.", MARKET_REFUSED_COLOUR)
+		return
 	market_search.text = ""
 	if tab == "sell":
 		_market_tab = "sell"
@@ -1501,19 +1547,43 @@ func _on_market_page(direction: int) -> void:
 		state.get("filters", {}) as Dictionary),
 		"Turning the page…")
 
+func _market_party_run(entry: Dictionary) -> String:
+	return str((AppState.marketplace.get("party_runs", {}) as Dictionary).get(str(int(entry.get("listing_id", 0))), ""))
+
+func _on_market_reprice() -> void:
+	var entry := _market_entry()
+	if entry.is_empty() or _market_tab != "mine": return
+	_market_priced_listing = entry.duplicate(true)
+	var party := bool(entry.get("party_owned", false))
+	if party and _market_party_run(entry).is_empty(): return
+	market_price_dialog.title = ("Propose price · " if party else "Edit price · ") + str(entry.item_name)
+	market_price_dialog.ok_button_text = "Propose price · Vote Yes" if party else "Save price"
+	_market_price_hint.text = "Current price: %d GC per item. %d items remain.\n" % [int(entry.unit_price), int(entry.quantity)] + ("The original party votes on this price. Any No blocks it; abstentions are neutral and unanswered votes are ignored after 14 days. The current price stays active until approval." if party else "The new price applies to unsold items. Earlier sales and proceeds stay unchanged.")
+	market_new_price.value = int(entry.unit_price)
+	market_price_dialog.popup_centered(Vector2i(430, 290))
+
+func _on_market_votes() -> void:
+	var run_id := _market_party_run(_market_entry())
+	if not run_id.is_empty():
+		_market_transmit("#gauntletloot " + JSON.stringify({"action": "open", "run_id": run_id}))
+
 func _on_market_buy() -> void:
+	if not bool(AppState.marketplace.get("can_trade", false)): return
 	_market_send(_market_buy_command(), "Buying…")
 
 func _on_market_renew() -> void:
 	_market_send(_market_listing_command("renew"), "Renewing…")
 
 func _on_market_cancel() -> void:
+	if not bool(AppState.marketplace.get("can_trade", false)): return
 	_market_send(_market_listing_command("cancel"), "Cancelling…")
 
 func _on_market_sell() -> void:
+	if not bool(AppState.marketplace.get("can_trade", false)): return
 	_market_send(_market_sell_command(), "Listing…")
 
 func _on_market_collect() -> void:
+	if not bool(AppState.marketplace.get("can_trade", false)): return
 	_market_send("#auction collect", "Collecting…")
 
 ## How long a listing has left, in the largest unit that is not zero.
@@ -2819,6 +2889,31 @@ func _build_market_window() -> void:
 	footer.add_child(market_cancel)
 	market_sell = _market_action_button("MarketplaceSell", "List for sale", _on_market_sell)
 	footer.add_child(market_sell)
+	market_reprice = _market_action_button("MarketplaceReprice", "Edit price…", _on_market_reprice)
+	footer.add_child(market_reprice)
+	market_votes = _market_action_button("MarketplaceVotes", "Party votes…", _on_market_votes)
+	footer.add_child(market_votes)
+	market_price_dialog = ConfirmationDialog.new()
+	market_price_dialog.title = "Edit listing price"
+	market_price_dialog.ok_button_text = "Save price"
+	add_child(market_price_dialog)
+	var price_body := VBoxContainer.new()
+	price_body.add_theme_constant_override("separation", 12)
+	market_price_dialog.add_child(price_body)
+	_market_price_hint = Label.new()
+	_market_price_hint.size.x = 370
+	_market_price_hint.custom_minimum_size.x = 370
+	_market_price_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	price_body.add_child(_market_price_hint)
+	market_new_price = SpinBox.new()
+	market_new_price.min_value = 1
+	market_new_price.max_value = MARKET_PRICE_LIMIT
+	market_new_price.step = 1
+	market_new_price.custom_minimum_size = Vector2(360, 42)
+	price_body.add_child(market_new_price)
+	market_price_dialog.confirmed.connect(func() -> void:
+		market_new_price.apply()
+		_market_send("#auction price %d %d" % [int(_market_priced_listing.listing_id), int(market_new_price.value)], "Submitting price…"))
 	market_status = Label.new()
 	market_status.name = "MarketplaceStatus"
 	# One line, trimmed: a wrapping label measured before its first layout
@@ -2889,7 +2984,7 @@ func _window(window_name: String, title: String) -> PanelContainer:
 		if panel == merchant_panel:
 			AppState.close_merchant()
 		elif panel == market_panel:
-			AppState.close_marketplace()
+			_close_marketplace()
 		elif panel == detail_panel:
 			AppState.close_item_detail()
 		else:

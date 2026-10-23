@@ -409,6 +409,7 @@ func _build() -> void:
 	_label(reprice_body, "Proposed Gold Coins per item", 13, GOLD)
 	reprice_amount = SpinBox.new()
 	reprice_amount.step = 1
+	reprice_amount.update_on_text_changed = true
 	reprice_amount.min_value = 1
 	reprice_body.add_child(reprice_amount)
 	reprice_amount.value_changed.connect(func(value: float) -> void: reprice_dialog.get_ok_button().disabled = int(value) == int(_reprice_listing.get("price_gold", 0)))
@@ -586,6 +587,8 @@ func _render() -> void:
 		if not bool(member.payment_approved):
 			status.text = "%s must approve the %d GC storage payment. Rare payments and NPC proceeds are split across everyone." % [member.name, int(member.charge_gold)]
 	_render_exchange()
+	if int(_state.get("exchange_plan_quantity", 0)) > 0 and not bool(_state.get("exchange_can_withdraw", false)) and _state.phase in ["complete", "ended"]:
+		status.text = "Exchange listings are staged. Visit an Exchange NPC within four tiles to confirm distribution and post them."
 	if _show_exchange:
 		heading.text = "PARTY EXCHANGE"
 		hint.text = "The original gauntlet team keeps ownership, even after the party changes."
@@ -1078,7 +1081,7 @@ func _exchange_card(listing: Dictionary) -> void:
 	item_name.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	var details := _label(text, "Listing #%d · %d remaining · %d GC each · %s" % [int(listing.listing_id), int(listing.quantity), int(listing.price_gold), str(listing.state).capitalize()], 13, TEXT)
 	details.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	if listing.state == "active" and listing.vote_state != "open":
+	if listing.state == "active" and listing.vote_state not in ["open", "ready"]:
 		var actions := VBoxContainer.new()
 		title.add_child(actions)
 		var reprice := _button(actions, "Propose price…", func() -> void: _propose_price(listing))
@@ -1087,6 +1090,10 @@ func _exchange_card(listing: Dictionary) -> void:
 		withdraw.disabled = _pending_since > 0
 	if not str(listing.withdrawal_run_id).is_empty():
 		_button(title, "Open returned loot", func() -> void: _request("open", {"run_id": str(listing.withdrawal_run_id)})).disabled = _pending_since > 0
+	if listing.state == "active" and listing.vote_state == "ready":
+		var collect := _button(title, "Collect approved withdrawal", func() -> void: _request("withdraw_approved", {"listing_id": int(listing.listing_id), "request_id": int(listing.request_id)}))
+		collect.disabled = _pending_since > 0 or not bool(_state.get("exchange_can_withdraw", false))
+		collect.tooltip_text = "Visit an Exchange NPC within four tiles to return the unsold items to shared escrow."
 	var payouts: Array[String] = []
 	for payout: Dictionary in listing.payouts:
 		payouts.append("%s: %d GC%s" % [_member_name(str(payout.username)), int(payout.gold), " (%d pending)" % int(payout.pending_gold) if int(payout.pending_gold) > 0 else ""])
@@ -1102,6 +1109,7 @@ func _exchange_card(listing: Dictionary) -> void:
 		var price_vote: bool = listing.get("vote_kind", "withdrawal") == "price_change"
 		var purpose := "Price change" if price_vote else "Withdrawal"
 		var summary := "%s %s" % [purpose, str(listing.vote_state).capitalize()]
+		if listing.vote_state == "ready": summary = "Withdrawal approved · Awaiting collection at an Exchange NPC."
 		if listing.vote_state == "open":
 			var deadline := Time.get_datetime_string_from_unix_time(int(listing.deadline)).replace("T", " ")
 			summary = ("A No vote blocks this %s." % purpose.to_lower() if veto else purpose + " vote is open.") + " Closes " + deadline + " UTC."

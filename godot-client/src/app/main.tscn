@@ -1262,6 +1262,18 @@ layout_mode = 2
 tooltip_text = "View notepad and links [Ctrl+N]"
 text = "Info"
 
+[node name="ExchangeButton" type="Button" parent="GameView/Quickbar/QuickRows/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 2
+tooltip_text = "Exchange [Ctrl+Shift+E]"
+
+[node name="StoragePreviewButton" type="Button" parent="GameView/Quickbar/QuickRows/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 2
+tooltip_text = "Storage preview [Ctrl+Shift+S]"
+
 [node name="BuddyButton" type="Button" parent="GameView/Quickbar/QuickRows/Buttons"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(44, 44)
