@@ -9,6 +9,7 @@ var ready_button: Button
 var start_button: Button
 var cancel_button: Button
 var leave_button: Button
+var add_bot: MenuButton
 var _state: Dictionary = {}
 var _send: Callable
 
@@ -58,6 +59,15 @@ func _ready() -> void:
 	start_button = _button(actions, "Start", func() -> void: _request("start"))
 	cancel_button = _button(actions, "Cancel", cancel)
 	leave_button = _button(actions, "Leave party", func() -> void: _request("leave"))
+	add_bot = preload("res://src/ui/bot_class_picker.gd").new()
+	add_bot.name = "AddBot"
+	add_bot.custom_minimum_size = Vector2(100, 36)
+	add_bot.class_chosen.connect(func(class_id: int) -> void: _request("addbot", str(class_id)))
+	actions.add_child(add_bot)
+	# Wrapped labels settle after the first container pass. Reapply the bounds
+	# when their minimum changes so a transient narrow layout cannot leave a
+	# newly opened eight-member window taller than the viewport.
+	panel.minimum_size_changed.connect(func() -> void: _layout.call_deferred())
 	panel.hide()
 	get_viewport().size_changed.connect(_layout)
 	AppState.state_changed.connect(_on_state_changed)
@@ -107,6 +117,10 @@ func apply_snapshot(state: Dictionary) -> void:
 		status.text = str(member.status)
 		status.add_theme_color_override("font_color", Color("a8d895") if member.ready else Color("e1bb80"))
 		row.add_child(status)
+		if bool(member.get("bot", false)) and bool(state.is_leader):
+			var remove := _button(row, "×", func() -> void: _request("removebot", str(member.id)))
+			remove.custom_minimum_size = Vector2(32, 32)
+			remove.tooltip_text = "Remove " + str(member.name)
 		rows.add_child(row)
 		if member.ready: count += 1
 		if member.self: self_ready = bool(member.ready)
@@ -114,6 +128,8 @@ func apply_snapshot(state: Dictionary) -> void:
 	start_button.visible = bool(state.is_leader)
 	start_button.disabled = not bool(state.can_start)
 	leave_button.visible = bool(state.in_party)
+	add_bot.visible = bool(state.is_leader)
+	add_bot.disabled = state.members.size() >= 8
 	hint.text = "%d / %d ready. " % [count, state.members.size()]
 	if bool(state.can_start):
 		hint.text += "Everyone is ready. " + ("Click Start to bring everyone in." if state.is_leader else "Waiting for the party leader to start.")
@@ -129,9 +145,11 @@ func _toggle_ready() -> void:
 			_request("unready" if member.ready else "ready")
 			return
 
-func _request(action: String) -> void:
+func _request(action: String, value: String = "") -> void:
 	if not bool(_state.get("open", false)): return
-	var error: Error = _send.call("#gauntlet %s %s" % [action, str(_state.check_id)])
+	var command := "#gauntlet %s %s" % [action, str(_state.check_id)]
+	if not value.is_empty(): command += " " + value
+	var error: Error = _send.call(command)
 	if error != OK:
 		hint.text = "Could not send your choice. Please try again."
 

@@ -177,6 +177,7 @@ var party_invite_row: HBoxContainer
 var party_invite_label: Label
 var party_status: Label
 var party_leave_button: Button
+var party_add_bot: MenuButton
 var _party_was_joined := false
 var _party_last_inviter := ""
 var party_collapse: Button
@@ -1542,6 +1543,12 @@ func _sync_party(open_requested: bool = false) -> void:
 	var members: Array = state.get("members", []) as Array
 	var invited_by: String = str(state.get("invited_by", ""))
 	var in_party: bool = bool(state.get("in_party", false))
+	var can_manage := not in_party
+	for raw: Variant in members:
+		if bool(raw.get("is_self", false)) and bool(raw.get("leader", false)):
+			can_manage = true
+	party_add_bot.visible = can_manage
+	party_add_bot.disabled = members.size() >= 8
 	# Health and location packets refresh the roster without reopening a
 	# window the player dismissed. Joining or a new invitation can open it.
 	var open_for_change: bool = ((in_party and not _party_was_joined)
@@ -1616,6 +1623,8 @@ func _party_row(member: Dictionary) -> Control:
 	var where := Label.new()
 	where.name = "Standing"
 	where.text = "" if online else "offline"
+	if bool(member.get("is_bot", false)) and str(member.get("map_id", "")).is_empty():
+		where.text = "standby"
 	where.add_theme_font_size_override("font_size", 10)
 	where.add_theme_color_override("font_color", HUD_STYLE.MUTED)
 	header.add_child(where)
@@ -1637,6 +1646,14 @@ func _party_row(member: Dictionary) -> Control:
 	vitals.add_child(ether)
 	ether.visible = not _party_numbers
 	vitals.add_child(_party_number("EtherNumber", int(member.get("ether", 0)), int(member.get("max_ether", 0)), PARTY_ETHER, online))
+	if bool(member.get("is_bot", false)) and party_add_bot.visible:
+		var remove := Button.new()
+		remove.name = "RemoveBot"
+		remove.text = "×"
+		remove.tooltip_text = "Remove " + str(member.name)
+		HUD_STYLE.button(remove)
+		remove.pressed.connect(func() -> void: _send_party_command("#party bot remove " + str(member.name)))
+		row.add_child(remove)
 	return row
 
 func _party_number(node_name: String, current: int, maximum: int, colour: Color, online: bool) -> Label:
@@ -2190,12 +2207,17 @@ func _build() -> void:
 	HUD_STYLE.button(party_leave_button)
 	party_leave_button.pressed.connect(_on_party_leave)
 	party_actions.add_child(party_leave_button)
+	party_add_bot = preload("res://src/ui/bot_class_picker.gd").new()
+	party_add_bot.name = "AddBot"
+	HUD_STYLE.button(party_add_bot)
+	party_add_bot.class_chosen.connect(func(class_id: int) -> void: _send_party_command("#party bot add %d" % class_id))
+	party_actions.add_child(party_add_bot)
 	# Inviting needs a name, and a name needs typing; the chat command already
 	# reads well, so the window points at it rather than growing a text field
 	# that would duplicate it.
 	var party_hint := Label.new()
 	party_hint.name = "PartyHint"
-	party_hint.text = "  Invite: #party invite"
+	party_hint.text = "?"
 	party_hint.add_theme_font_size_override("font_size", 10)
 	party_hint.tooltip_text = "#party invite <name> invites a teammate. #p <message> speaks to the party."
 	party_actions.add_child(party_hint)
