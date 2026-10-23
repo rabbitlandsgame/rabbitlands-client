@@ -69,6 +69,28 @@ def fixture():
     return data, request
 
 
+def performance_fixture():
+    data, request = fixture()
+    request.update(settings_profile="performance", quality="low", fps_cap=30, body_cap=60,
+                   settings_seed_user_dir=str(INTEGRATION / "performance-userdata"))
+    data.update(graphicsQuality="low")
+    data["measurement"]["fpsCap"] = 30
+    data["crowdPolicy"].update(bodyCap=60, fullRateBodies=8, halfRateBodies=8, clothBodies=0)
+    data["runtimeBuild"]["userDataDir"] = request["settings_seed_user_dir"]
+    for observed in (data, data["cells"][0]["effectiveRuntime"]):
+        observed["effectiveSettings"].update(quality="low", frameCap=30, bodyCap=60, renderScale=.75,
+                                              textureQuality="half", textureSkip=1, appearance="painted_ground")
+    for census in data["cells"][0]["census"].values():
+        census.update(builtBodies=60, deferred=100)
+    return data, request
+
+
+def write_project(root):
+    (root / "project.godot").write_text('[application]\nconfig/use_custom_user_dir=true\n'
+                                      'config/custom_user_dir_name="Godot/app_userdata/Eloria"\n'
+                                      'config/custom_user_dir_name.linuxbsd="godot/app_userdata/Eloria"\n')
+
+
 class ReportValidationTests(unittest.TestCase):
     def check_rejected(self, mutate, request_mutate=None):
         data, request = fixture()
@@ -85,6 +107,26 @@ class ReportValidationTests(unittest.TestCase):
         self.assertEqual(support.selected_cells("phase4"), support.OLD_CELLS)
         self.assertNotIn("mixed-mounted-160", support.selected_cells("phase4"))
         self.assertEqual(len(support.selected_cells("phase1")), 7)
+
+    def test_performance_requires_actual_preset_at_top_and_each_cell(self):
+        data, request = performance_fixture()
+        self.assertTrue(support.validate_report(data, request, "")["valid"])
+        for location in ("report", "cell"):
+            for key, incorrect in (("renderScale", 1.), ("textureQuality", "full"), ("textureSkip", 0),
+                                   ("appearance", "original"), ("bodyCap", 160), ("quality", "high")):
+                with self.subTest(location=location, key=key):
+                    bad = copy.deepcopy(data)
+                    runtime_data = bad if location == "report" else bad["cells"][0]["effectiveRuntime"]
+                    runtime_data["effectiveSettings"][key] = incorrect
+                    with self.assertRaises(support.EvidenceError):
+                        support.validate_report(bad, request, "")
+        bad = copy.deepcopy(data)
+        bad["crowdPolicy"]["clothBodies"] = 8
+        with self.assertRaises(support.EvidenceError):
+            support.validate_report(bad, request, "")
+        data["runtimeBuild"]["userDataDir"] += "/different-config-directory"
+        with self.assertRaisesRegex(support.EvidenceError, "exact seeded"):
+            support.validate_report(data, request, "")
 
     def test_missing_duplicate_and_unrequested_cells_rejected(self):
         for mutate in (lambda d: d.update(cells=[]),
@@ -213,6 +255,91 @@ class ReportValidationTests(unittest.TestCase):
 
 
 class IdentityAndProcessTests(unittest.TestCase):
+    def test_settings_profile_defaults_and_conflicting_requests(self):
+        ordinary = runner.parser().parse_args(["--godot", "unused", "--quality", "low", "--fps-cap", "30"])
+        support.configure_settings_profile(ordinary, system="Linux")
+        self.assertEqual((ordinary.settings_profile, ordinary.quality, ordinary.fps_cap, ordinary.body_cap),
+                         ("default", "low", 30, None))
+        defaults = runner.parser().parse_args(["--godot", "unused"])
+        support.configure_settings_profile(defaults, system="Linux")
+        self.assertEqual((defaults.fps_cap, defaults.quality, defaults.body_cap), (60, "", None))
+        args = runner.parser().parse_args(["--godot", "unused", "--settings-profile", "performance"])
+        support.configure_settings_profile(args, system="Windows")
+        self.assertEqual((args.quality, args.fps_cap, args.body_cap), ("low", 30, 60))
+        support.configure_settings_profile(args, system="Windows")  # Idempotent before each repeated run.
+        for options in (["--quality", "high"], ["--fps-cap", "60"], ["--body-cap", "160"],
+                        ["--tuning", "cloth=8"], ["--cells", "mixed-mounted-160"], ["--cells", "phase1"]):
+            args = runner.parser().parse_args(["--godot", "unused", "--settings-profile", "performance", *options])
+            with self.subTest(options=options), self.assertRaises(support.EvidenceError):
+                support.configure_settings_profile(args, system="Windows")
+        with self.assertRaisesRegex(support.EvidenceError, "Windows only"):
+            support.configure_settings_profile(runner.parser().parse_args(
+                ["--godot", "unused", "--settings-profile", "performance"]), system="Linux")
+
+    def test_settings_seed_is_fresh_exact_and_hashed_in_actual_custom_directory(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            write_project(root)
+            fresh = root / "isolated"
+            fresh.mkdir()
+            metadata = support.seed_settings_profile("performance", root, fresh, {"APPDATA": str(fresh)}, "Windows")
+            path = fresh / "Godot/app_userdata/Eloria/eloria_hud.cfg"
+            self.assertEqual(Path(metadata["path"]), path)
+            self.assertEqual(metadata["sha256"], support.sha256_file(path))
+            self.assertEqual(metadata["content"], path.read_text())
+            self.assertEqual(path.read_text(), '[graphics]\n\nquality="low"\nappearance="painted_ground"\n'
+                             'fps_limit=30\nrender_scale=0.75\nmap_texture_quality="half"\ncrowd_bodies=60\n'
+                             'swaying_capes=0\nshadows=false\nparticles=true\ndecorative_grass=false\nname_distance=20.0\n')
+            with self.assertRaisesRegex(support.EvidenceError, "already exists"):
+                support.seed_settings_profile("performance", root, fresh, {"APPDATA": str(fresh)}, "Windows")
+            self.assertIsNone(support.seed_settings_profile("default", root, fresh, {}, "Linux"))
+
+    def test_settings_seed_rejects_unverified_os_project_path_and_inherited_appdata(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            write_project(root)
+            fresh = root / "isolated"
+            fresh.mkdir()
+            for system, appdata in (("Darwin", fresh), ("Linux", fresh), ("Windows", root / "player-settings")):
+                with self.subTest(system=system), self.assertRaises(support.EvidenceError):
+                    support.seed_settings_profile("performance", root, fresh, {"APPDATA": str(appdata)}, system)
+            (root / "project.godot").write_text('[application]\nconfig/use_custom_user_dir=false\n')
+            with self.assertRaisesRegex(support.EvidenceError, "custom user directory"):
+                support.seed_settings_profile("performance", root, fresh, {"APPDATA": str(fresh)}, "Windows")
+
+    def test_performance_config_exists_before_process_starts_and_is_recorded(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            write_project(root)
+            exe = root / "Godot.exe"
+            exe.write_bytes(b"not executed")
+            args = runner.parser().parse_args(["--godot", str(exe), "--project-path", str(root),
+                "--settings-profile", "performance", "--cells", "s3-market-160", "--mode", "windowed",
+                "--minimap", "show", "--sample-ms", "1000", "--warmup-ms", "100"])
+            args.godot = exe
+            data, _request = performance_fixture()
+
+            def fake_launch(command, *, env, stdout, **_kwargs):
+                user_dir = Path(env["APPDATA"]) / "Godot/app_userdata/Eloria"
+                self.assertTrue((user_dir / "eloria_hud.cfg").is_file())
+                self.assertIn('map_texture_quality="half"', (user_dir / "eloria_hud.cfg").read_text())
+                data["runtimeBuild"].update(executablePath=str(exe), userDataDir=str(user_dir))
+                Path(env["RABBITLANDS_CROWD_BENCH_OUT"]).write_text(json.dumps(data))
+                Path(command[command.index("--log-file") + 1]).write_text("normal")
+                return mock.Mock(pid=12345, wait=mock.Mock(return_value=0))
+
+            with mock.patch.object(support.platform, "system", return_value="Windows"), \
+                    mock.patch.object(runner, "identity", return_value={"source": "stable"}), \
+                    mock.patch.object(runner.subprocess, "Popen", side_effect=fake_launch):
+                result = runner.run_one(args, "all", 1, root)
+            self.assertTrue(result["validation"]["valid"])
+            self.assertEqual(result["settingsProfile"], "performance")
+            seed = result["settingsSeed"]
+            self.assertEqual(seed["sha256"], result["settingsSeedFinalSha256"])
+            self.assertEqual(seed["sha256"], support.sha256_file(Path(seed["path"])))
+            recorded = support.read_json(next(root.glob("*.process.json")))
+            self.assertEqual(recorded["settingsSeed"]["content"], seed["content"])
+
     def test_missing_invalid_and_nonfinite_json_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "report.json"

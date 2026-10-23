@@ -26,9 +26,9 @@ import time
 import uuid
 
 from crowd_benchmark_support import (
-    BenchmarkLock, EvidenceError, asset_files, clean_environment, default_lock_path,
+    BenchmarkLock, EvidenceError, asset_files, clean_environment, configure_settings_profile, default_lock_path,
     hash_files, manifest_identity, read_json, require_private_replay_output,
-    selected_cells, sha256_file, source_files, validate_report,
+    seed_settings_profile, selected_cells, sha256_file, source_files, validate_report,
 )
 
 CLIENT = Path(__file__).resolve().parents[2]
@@ -102,7 +102,8 @@ def request_for(args) -> dict:
             "replay": bool(args.replay), "executable_mode": args.executable_mode,
             "native_reducer": args.native_reducer, "native_presentation": args.native_presentation,
             "tuning": args.tuning, "diagnostics": args.diagnostics, "executable": str(args.godot),
-            "presence": args.presence, "server_time": args.server_time}
+            "presence": args.presence, "server_time": args.server_time,
+            "settings_profile": args.settings_profile}
 
 
 def command_for(args, log: Path) -> list[str]:
@@ -154,6 +155,7 @@ def identity(args) -> dict:
 
 
 def run_one(args, variant: str, repeat: int, out_dir: Path) -> dict:
+    configure_settings_profile(args)
     name = f"{args.label}-{variant}-{args.mode}-{args.driver}-{time.strftime('%Y%m%dT%H%M%S')}-{uuid.uuid4().hex[:8]}"
     user_root = out_dir / "userdata" / name
     user_root.mkdir(parents=True)
@@ -188,6 +190,7 @@ def run_one(args, variant: str, repeat: int, out_dir: Path) -> dict:
     if args.centre:
         overrides["RABBITLANDS_CROWD_BENCH_CENTRE"] = args.centre
     env.update(overrides)
+    settings_seed = seed_settings_profile(args.settings_profile, args.project_path, user_root, env)
     before = identity(args)
     command = command_for(args, log)
     started = time.monotonic()
@@ -219,6 +222,11 @@ def run_one(args, variant: str, repeat: int, out_dir: Path) -> dict:
            "identityBefore": before, "identityAfter": after,
            "identityStable": before == after, "interferenceLabel": args.interference_label,
            "requestedMeasurementStatus": args.measurement_status, "data": {}}
+    run["settingsProfile"] = args.settings_profile
+    run["settingsSeed"] = settings_seed
+    if settings_seed:
+        run["settingsSeedFinalSha256"] = sha256_file(Path(settings_seed["path"])) \
+            if Path(settings_seed["path"]).is_file() else None
     if args.replay:
         run["replayInput"] = before["replayInput"]
     try:
@@ -231,6 +239,8 @@ def run_one(args, variant: str, repeat: int, out_dir: Path) -> dict:
             raise EvidenceError("engine log is missing")
         text = log.read_text(encoding="utf-8-sig", errors="replace") + "\n" + launch_log.read_text(encoding="utf-8", errors="replace")
         request = request_for(args) | {"user_root": str(user_root)}
+        if settings_seed:
+            request["settings_seed_user_dir"] = settings_seed["userDataDir"]
         run["validation"] = validate_report(data, request, text)
         run["data"] = data
     except EvidenceError as exc:
@@ -253,7 +263,10 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--mode", choices=["headless", "windowed"], default="headless")
     p.add_argument("--renderer", default="forward_plus", choices=["forward_plus", "mobile", "gl_compatibility"])
     p.add_argument("--resolution", type=resolution, default=(1280, 720))
-    p.add_argument("--fps-cap", type=int, default=60)
+    p.add_argument("--settings-profile", choices=["default", "performance"], default="default",
+                   help="Performance seeds the actual preset into fresh Windows user settings before startup")
+    p.add_argument("--fps-cap", type=int, default=None,
+                   help="default 60; Performance profile requires 30")
     p.add_argument("--map", default="")
     p.add_argument("--centre", default="")
     p.add_argument("--quality", default="", choices=["", "low", "medium", "high"])
@@ -289,6 +302,7 @@ def main(argv: list[str] | None = None) -> int:
     p = parser()
     args = p.parse_args(argv)
     try:
+        configure_settings_profile(args)
         args.project_path = args.project_path.resolve()
         args.godot = executable_path(args.godot)
         for field in ("main_pack", "package_manifest", "asset_manifest", "replay"):

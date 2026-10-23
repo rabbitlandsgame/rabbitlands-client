@@ -18,6 +18,15 @@ pass, not an emptied operating-system cache. `authored-herd` is separately
 selectable and reports unavailable content when the map has no authored herd.
 Unavailable content is retained as pending, never accepted as an empty timing.
 
+On Windows, `--settings-profile performance` seeds the game's Performance
+preferences into fresh isolated storage before startup: Low, 30 FPS, 75% world
+scale, Half map textures, 60 crowd bodies and the remaining preset values.
+The runner records the seed and checks the actual loaded settings. Conflicting
+options are rejected. Use market/invasion/combat cells for this profile; the
+80-mount census requires a larger body allowance. Ordinary Low at 30 FPS uses
+`--settings-profile default --quality low --fps-cap 30` and remains a separate
+comparison. Performance profile seeding currently supports Windows only.
+
 For shipping-path measurements, create a committed standalone benchmark export:
 
 ```powershell

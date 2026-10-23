@@ -10,6 +10,7 @@ import json
 import math
 import os
 from pathlib import Path
+import platform
 import re
 import socket
 import tempfile
@@ -31,6 +32,81 @@ ALL_CELLS = OLD_CELLS + ["mixed-mounted-160", "authored-herd",
 ERROR_PATTERN = re.compile(r"SCRIPT ERROR|Parse Error|Failed to load|Error loading|ERROR:", re.I)
 OVERRIDE_PREFIXES = ("ELORIA_LOOK", "ELORIA_CROWD_", "ELORIA_NATIVE_", "RABBITLANDS_CROWD_")
 OVERRIDE_NAMES = {"ELORIA_VRAM_TEXTURES", "ELORIA_NO_MAP_CACHE", "ELORIA_SAFE_MODE"}
+PERFORMANCE_GRAPHICS = {
+    "quality": "low", "appearance": "painted_ground", "fps_limit": 30,
+    "render_scale": .75, "map_texture_quality": "half", "crowd_bodies": 60,
+    "swaying_capes": 0, "shadows": False, "particles": True,
+    "decorative_grass": False, "name_distance": 20.0,
+}
+
+
+def configure_settings_profile(args, system: str | None = None) -> None:
+    """Resolve omitted arguments, rejecting overrides that would mislabel a preset."""
+    profile = getattr(args, "settings_profile", "default")
+    if profile not in ("default", "performance"):
+        raise EvidenceError("unknown settings profile")
+    if profile == "performance":
+        if (platform.system() if system is None else system) != "Windows":
+            raise EvidenceError("Performance settings seeding currently supports Windows only")
+        for field, absent, expected in (("quality", "", "low"), ("fps_cap", None, 30),
+                                        ("body_cap", None, 60)):
+            value = getattr(args, field)
+            if value != absent and value != expected:
+                raise EvidenceError(f"Performance profile conflicts with --{field.replace('_', '-')}; requires {expected}")
+            setattr(args, field, expected)
+        if args.tuning:
+            raise EvidenceError("Performance profile does not allow crowd tuning overrides")
+    elif args.fps_cap is None:
+        args.fps_cap = 60  # Preserve the existing default profile.
+    cells = selected_cells(args.cells, bool(args.replay))
+    if "mixed-mounted-160" in cells and args.body_cap is not None and 0 < args.body_cap < 80:
+        raise EvidenceError("mixed-mounted-160 requires 80 mounted bodies; the requested body cap is below 80")
+
+
+def seed_settings_profile(profile: str, client: Path, user_root: Path,
+                          environment: dict[str, str], system: str | None = None) -> dict | None:
+    """Write only fresh, generated preferences before Godot caches texture quality.
+
+    Windows custom user:// uses APPDATA. Other platforms are rejected explicitly
+    until their isolation and custom-directory behavior are supported and tested.
+    """
+    if profile == "default":
+        return None
+    if profile != "performance" or (platform.system() if system is None else system) != "Windows":
+        raise EvidenceError("Performance settings seeding currently supports Windows only")
+    root = user_root.resolve()
+    appdata = environment.get("APPDATA")
+    if not appdata or Path(appdata).resolve() != root:
+        raise EvidenceError("Performance profile requires the fresh isolated APPDATA directory")
+    # Verify the repository's declared custom path instead of assuming the
+    # engine's default application-name directory or copying a user's config.
+    application, section = {}, ""
+    for line in (client / "project.godot").read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if line.startswith("[") and line.endswith("]"):
+            section = line[1:-1]
+        elif section == "application" and "=" in line and not line.startswith(";"):
+            key, value = line.split("=", 1)
+            application[key.strip()] = value.strip()
+    custom = "config/custom_user_dir_name"
+    if application.get("config/use_custom_user_dir") != "true" \
+            or application.get(custom) != '"Godot/app_userdata/Eloria"' \
+            or any(key.startswith(custom + ".") and key != custom + ".linuxbsd" for key in application):
+        raise EvidenceError("Performance profile does not support this project's custom user directory settings")
+    user_dir = root / "Godot/app_userdata/Eloria"
+    path = user_dir / "eloria_hud.cfg"
+    content = "[graphics]\n\n" + "".join(
+        f"{key}={json.dumps(value, ensure_ascii=False, allow_nan=False)}\n"
+        for key, value in PERFORMANCE_GRAPHICS.items())
+    user_dir.mkdir(parents=True, exist_ok=True)
+    try:
+        with path.open("x", encoding="utf-8", newline="\n") as stream:
+            stream.write(content)
+    except FileExistsError as exc:
+        raise EvidenceError("settings seed already exists; no existing preferences were overwritten") from exc
+    return {"profile": profile, "path": str(path), "userDataDir": str(user_dir),
+            "content": content, "sha256": sha256_file(path), "bytes": path.stat().st_size,
+            "scope": "generated initial settings before startup; no inherited user config"}
 
 
 def finite_tree(value: Any, label: str = "report") -> None:
@@ -111,6 +187,9 @@ def validate_runtime(runtime: dict, request: dict, renderer: str, quality: str,
     backends = _object(runtime.get("activeBackends"), label + ".activeBackends")
     expected = {"quality": quality, "bodyCap": body_cap, "frameCap": request["fps_cap"],
                 "renderer": renderer, "rootSize": list(request["resolution"])}
+    if request.get("settings_profile") == "performance":
+        expected.update(quality="low", bodyCap=60, renderScale=.75,
+                        textureQuality="half", textureSkip=1, appearance="painted_ground")
     if request.get("minimap") in ("show", "hide"):
         expected["minimap"] = request["minimap"] == "show"
     for key, value in expected.items():
@@ -193,7 +272,8 @@ def validate_report(data: dict, request: dict, log: str) -> dict:
     if request.get("body_cap") is not None and policy.get("bodyCap") != request["body_cap"]:
         raise EvidenceError("actual body cap differs from request")
     budget = {"low": 8, "medium": 12, "high": 16}[data["graphicsQuality"]]
-    expected_budgets = {"fullRateBodies": budget, "halfRateBodies": budget, "clothBodies": 8}
+    expected_budgets = {"fullRateBodies": budget, "halfRateBodies": budget,
+                        "clothBodies": 0 if request.get("settings_profile") == "performance" else 8}
     for entry in request.get("tuning", "").split(","):
         pair = entry.split("=")
         if len(pair) == 2 and pair[0].strip() in ("full", "half", "cloth"):
@@ -224,6 +304,12 @@ def validate_report(data: dict, request: dict, log: str) -> dict:
         user_dir = _object(data.get("runtimeBuild"), "runtimeBuild").get("userDataDir")
         if not isinstance(user_dir, str) or not Path(user_dir).resolve().is_relative_to(Path(request["user_root"]).resolve()):
             raise EvidenceError("engine user data escaped the isolated run directory")
+    if request.get("settings_profile") == "performance":
+        seed_dir = request.get("settings_seed_user_dir")
+        actual = _object(data.get("runtimeBuild"), "runtimeBuild").get("userDataDir")
+        if not isinstance(seed_dir, str) or not isinstance(actual, str) \
+                or os.path.normcase(str(Path(actual).resolve())) != os.path.normcase(str(Path(seed_dir).resolve())):
+            raise EvidenceError("Performance runtime did not use the exact seeded user directory")
     if request.get("replay"):
         replay = _object(data.get("replay"), "replay")
         if replay.get("ok") is not True:
