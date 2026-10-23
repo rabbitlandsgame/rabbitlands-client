@@ -216,8 +216,8 @@ func forget(id: int) -> void:
 	_far_since.erase(id)
 
 ## Who an actor is, as far as reusing its body goes: a recycled id carrying a
-## different creature or person must not wear the old one's body, and the
-## nameplate is drawn once, at build, from the name, its colour and the tag.
+## different creature or person must not wear the old one's body. Include the
+## name, its colour and the tag as they were when the body was built.
 ## Everything else a spawn packet carries is reapplied to a revived body.
 static func identity_key(dto: Dictionary) -> String:
 	return "%d|%d|%s|%s|%d" % [int(dto.get("actor_type", -1)), int(dto.get("kind", -1)),
