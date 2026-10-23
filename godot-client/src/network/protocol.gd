@@ -139,6 +139,7 @@ enum ServerMessage {
 	ELORIA_PRESENCE = 197, ELORIA_SERVER_TIME = 196, ELORIA_MOUNT_DELTAS = 195,
 	ELORIA_LEADERBOARD_STATE = 194,
 	ELORIA_GAUNTLET_READY_STATE = 193,
+	ELORIA_GAUNTLET_LOOT_STATE = 192,
 	# Which map package the server was built against. Continues the same
 	# downward run below 211.
 	ELORIA_MAP_DIGEST = 209,
@@ -314,6 +315,7 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"map_marker_actor_v1",
 	"party_window_v1",
 	"gauntlet_ready_v1",
+	"gauntlet_loot_v1",
 	"perk_catalog_v3",
 	"player_info_v1",
 	"achievements_window_v1",
@@ -1197,6 +1199,8 @@ static func decode_server(command: int, payload: PackedByteArray, logical_coordi
 			return {"type": "client_update", "notice": notice}
 		ServerMessage.ELORIA_GAUNTLET_READY_STATE:
 			return decode_gauntlet_ready(payload)
+		ServerMessage.ELORIA_GAUNTLET_LOOT_STATE:
+			return decode_gauntlet_loot(payload)
 		ServerMessage.ELORIA_LANTERN_STATE:
 			return decode_lantern(payload, logical_coordinates)
 		ServerMessage.ELORIA_EXPERIENCE_STATE:
@@ -1759,6 +1763,70 @@ static func decode_gauntlet_ready(payload: PackedByteArray) -> Dictionary:
 				if not member.get(key) is bool:
 					return {"type": "invalid", "error": "gauntlet_ready_member_flags"}
 	return {"type": "gauntlet_ready", "data": state}
+
+## A bounded page of the authoritative escrow ledger; quantities are integers.
+static func decode_gauntlet_loot(payload: PackedByteArray) -> Dictionary:
+	var state: Variant = JSON.parse_string(payload.get_string_from_utf8())
+	if not state is Dictionary or state.get("version") != 1:
+		return {"type": "invalid", "error": "gauntlet_loot_shape"}
+	if state.has("error") and not state.error is String:
+		return {"type": "invalid", "error": "gauntlet_loot_error"}
+	for key: String in ["run_id", "route", "phase", "leader", "reason", "announcement"]:
+		if not state.get(key) is String:
+			return {"type": "invalid", "error": "gauntlet_loot_text"}
+	if state.phase not in ["active", "complete", "ended", "sent"]:
+		return {"type": "invalid", "error": "gauntlet_loot_phase"}
+	for key: String in ["open", "is_leader", "can_send"]:
+		if not state.get(key) is bool:
+			return {"type": "invalid", "error": "gauntlet_loot_flag"}
+	for key: String in ["revision", "assigned", "total", "page", "pages", "announcement_id"]:
+		if not _loot_integer(state.get(key)):
+			return {"type": "invalid", "error": "gauntlet_loot_number"}
+	if not state.get("members") is Array or state.members.is_empty() or state.members.size() > 8:
+		return {"type": "invalid", "error": "gauntlet_loot_members"}
+	var names: Array[String] = []
+	for member: Variant in state.members:
+		if not member is Dictionary or not member.get("username") is String or not member.get("name") is String:
+			return {"type": "invalid", "error": "gauntlet_loot_member"}
+		if names.has(member.username) or not member.get("online") is bool or not member.get("portrait") is Dictionary:
+			return {"type": "invalid", "error": "gauntlet_loot_member_fields"}
+		names.append(member.username)
+		if not _loot_integer(member.get("charge_gold")) or not _loot_integer(member.get("rebate_gold")) or not _loot_integer(member.get("sale_share_gold")) or not member.get("payment_ready") is bool:
+			return {"type": "invalid", "error": "gauntlet_loot_payment"}
+		if not member.get("self") is bool or not member.get("payment_approved") is bool:
+			return {"type": "invalid", "error": "gauntlet_loot_payment_approval"}
+		if not member.get("preview") is Array or member.preview.size() > 8 or not _loot_integer(member.get("more")):
+			return {"type": "invalid", "error": "gauntlet_loot_preview"}
+		for item: Variant in member.preview:
+			if not item is Dictionary or not item.get("name") is String or not _loot_integer(item.get("quantity")) or not _loot_integer(item.get("image_id"), -1):
+				return {"type": "invalid", "error": "gauntlet_loot_preview_item"}
+	if not state.get("rows") is Array or state.rows.size() > 24 or int(state.pages) < 1 or int(state.page) >= int(state.pages):
+		return {"type": "invalid", "error": "gauntlet_loot_rows"}
+	var ids: Array[String] = []
+	for row: Variant in state.rows:
+		if not row is Dictionary or not row.get("id") is String or ids.has(row.id) or not row.get("name") is String or not row.get("owner") is String or not row.get("rare") is bool or not row.get("allocations") is Dictionary:
+			return {"type": "invalid", "error": "gauntlet_loot_row"}
+		ids.append(row.id)
+		if not _loot_integer(row.get("price_gold")) or not row.get("locked") is bool or row.get("source") not in ["creature", "cache", "compensation", "npc_sales"]:
+			return {"type": "invalid", "error": "gauntlet_loot_price"}
+		for key: String in ["sell_quantity", "available_quantity", "npc_gold", "sale_proceeds"]:
+			if not _loot_integer(row.get(key)):
+				return {"type": "invalid", "error": "gauntlet_loot_sale"}
+		if not _loot_integer(row.get("npc_bundle"), 1) or int(row.available_quantity) + int(row.sell_quantity) != int(row.quantity):
+			return {"type": "invalid", "error": "gauntlet_loot_sale_quantity"}
+		if not _loot_integer(row.get("quantity"), 1) or not _loot_integer(row.get("image_id"), -1):
+			return {"type": "invalid", "error": "gauntlet_loot_quantity"}
+		var allocated := 0
+		for recipient: String in row.allocations:
+			if not names.has(recipient) or not _loot_integer(row.allocations[recipient]):
+				return {"type": "invalid", "error": "gauntlet_loot_recipient"}
+			allocated += int(row.allocations[recipient])
+		if allocated > int(row.available_quantity) or not row.owner.is_empty() and not names.has(row.owner):
+			return {"type": "invalid", "error": "gauntlet_loot_overallocation"}
+	return {"type": "gauntlet_loot", "data": state}
+
+static func _loot_integer(value: Variant, minimum := 0) -> bool:
+	return (value is float or value is int) and is_finite(float(value)) and float(value) == floor(float(value)) and float(value) >= minimum and float(value) <= 2147483647
 
 ## Command 240. Who is in the party, how they are doing, and where they are.
 ## Offline members keep their rows so their absence remains visible.
