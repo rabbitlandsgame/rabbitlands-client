@@ -10,6 +10,9 @@ var melee_styles: Dictionary
 ## speed 1.0, measured from its planted foot. The clips animate in place, so
 ## this is what tells an actor how fast to run one for its own travel speed.
 var stride_speeds: Dictionary
+## Optional cadence limits for short-stride locomotion, in complete cycles per
+## second. The actor converts these to playback rates using the clip duration.
+var maximum_cycles_per_second: Dictionary
 ## Opt in when stride measurements include import scale but must also follow
 ## the runtime's small-creature enlargement and server species/invasion scale.
 var stride_scales_with_actor := false
@@ -40,6 +43,7 @@ func _init(config: Dictionary) -> void:
 	playback_speeds = config.get("playbackSpeeds", {}).duplicate(true)
 	melee_styles = config.get("meleeStyles", {}).duplicate(true)
 	stride_speeds = config.get("strideMetresPerSecond", {}).duplicate(true)
+	maximum_cycles_per_second = config.get("maximumCyclesPerSecond", {}).duplicate(true)
 	stride_scales_with_actor = bool(config.get("strideScalesWithActor", false))
 	looping_clips = PackedStringArray(config.get("loopingClips", []))
 	facing_offsets = config.get("facingOffsets", {}).duplicate(true)
