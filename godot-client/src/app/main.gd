@@ -96,6 +96,8 @@ const MountsWindowScript := preload("res://src/ui/mounts_window.gd")
 const BannerDisplayMenuScript := preload("res://src/ui/banner_display_menu.gd")
 const GuildWindowScript := preload("res://src/ui/guild_window.gd")
 const SettingsWindowScript := preload("res://src/ui/settings_window.gd")
+const GraphicsOptions := preload("res://src/world/graphics_options.gd")
+const GraphicsLaunchOptions := preload("res://src/updates/launch_options.gd")
 const CapeEmblems := preload("res://src/actors/cape_emblems.gd")
 const TargetMarkerStyle := preload("res://src/actors/target_marker_style.gd")
 const ChatHudScript := preload("res://src/ui/chat_hud.gd")
@@ -428,6 +430,11 @@ var _actor_cap_declaration := 0
 var _presence_tiles := PackedVector2Array()
 var _presence_mark_pool: Array[Dictionary] = []
 var _fps_limit := 0
+var _render_scale := 1.0
+var _map_texture_quality := "full"
+var _renderer_preference := "auto"
+var _startup_renderer_preference := GraphicsLaunchOptions.saved_renderer()
+var _applying_graphics_preset := false
 var _player_notes := ""
 ## True while the loaded package lets the hour drive its environment. An
 ## interior does not, and neither does a package that opts out.
@@ -1629,6 +1636,11 @@ func client_diagnostic_snapshot() -> Dictionary:
 		"window_size": str(get_window().size), "viewport_size": str(main_viewport.size),
 		"container_size": str(viewport_container.size),
 		"viewport_update_mode": main_viewport.render_target_update_mode,
+		"render_scale": _render_scale,
+		"map_texture_mip_skip": GraphicsOptions.active_texture_skip(),
+		"map_texture_preference": _map_texture_quality,
+		"crowd_body_cap": crowd.body_cap,
+		"effect_limits": effect_budget.describe().limits,
 		"viewport_texture_bound": viewport_container.texture == main_viewport.get_texture(),
 		"world_bound": gameplay_world != null,
 		"map_root_present": is_instance_valid(world_loader.world_root),
@@ -2869,6 +2881,8 @@ func _refresh_unified_settings() -> void:
 		"shadows": _shadows_enabled, "particles": _effects_enabled,
 		"cape_emblems": CapeEmblems.enabled,
 		"nameplates": _nameplates_enabled, "rotation_sensitivity": camera_rig.rotation_sensitivity,
+		"render_scale": _render_scale, "map_texture_quality": _map_texture_quality,
+		"renderer": _renderer_preference, "decorative_grass": GraphicsOptions.decorative_grass,
 		"start_backdrop": start_screen_backdrop.selected_id,
 		"start_animated": start_screen_backdrop.animation_enabled,
 		"invasion_assistant_scale": invasion_assistant_window._preferred_scale,
@@ -2911,6 +2925,7 @@ func _refresh_unified_settings() -> void:
 	settings_window.restore_crowd_settings(_crowd_bodies, _swaying_capes)
 	settings_window.restore_look(LookProfile.player_mode(), LookProfile.look_forced())
 	settings_window.restore_quality(LookProfile.player_quality(), LookProfile.quality_forced())
+	_refresh_graphics_restart_notice()
 	casting_bar.refresh()
 	_refresh_hud_layout_menu()
 
@@ -8581,6 +8596,11 @@ func _load_hud_settings() -> void:
 	_target_marker_style = TargetMarkerStyle.read(config)
 	_apply_target_marker_style()
 	_apply_fps_limit(config.get_value("graphics", "fps_limit", 0))
+	_render_scale = GraphicsOptions.render_scale(config.get_value("graphics", "render_scale", 1.0))
+	_map_texture_quality = GraphicsOptions.texture_quality(config.get_value("graphics", "map_texture_quality", "full"))
+	_renderer_preference = GraphicsLaunchOptions.renderer_name(config.get_value("graphics", "renderer", "auto"))
+	GraphicsOptions.decorative_grass = bool(config.get_value("graphics", "decorative_grass", true))
+	_apply_render_scale()
 	_load_look_settings(config)
 	reference_window.call("configure", console_commands,
 		settings_window.get("BINDABLE"), _player_notes, _encyclopedia_bookmarks)
@@ -8682,6 +8702,10 @@ func _save_hud_settings() -> void:
 	config.set_value("graphics", "crowd_bodies", _crowd_bodies)
 	config.set_value("graphics", "swaying_capes", _swaying_capes)
 	config.set_value("graphics", "fps_limit", _fps_limit)
+	config.set_value("graphics", "render_scale", _render_scale)
+	config.set_value("graphics", "map_texture_quality", _map_texture_quality)
+	config.set_value("graphics", "renderer", _renderer_preference)
+	config.set_value("graphics", "decorative_grass", GraphicsOptions.decorative_grass)
 	TargetMarkerStyle.write(config, _target_marker_style)
 	# The player's own choices, not what ELORIA_LOOK or ELORIA_LOOK_QUALITY
 	# made of them for this session.
@@ -12529,11 +12553,39 @@ func _apply_look_switch() -> void:
 ## new reach and density by themselves (LookGrassBeds.tend).
 func _apply_graphics_quality() -> void:
 	LookSwitch.apply_shadow_quality(world_sun)
+	crowd.set_quality(LookProfile.quality())
+	effect_budget.quality = LookProfile.quality()
+	if weather_layer != null:
+		weather_layer.set_effects_enabled(_effects_enabled)
 	_apply_actor_render_quality()
 	_apply_day_night()
 	_apply_login_backdrop_quality()
 	_update_border_lighting()
 	print("look_quality stage=applied quality=", LookProfile.quality_name(LookProfile.quality()))
+
+func _apply_render_scale() -> void:
+	main_viewport.scaling_3d_mode = Viewport.SCALING_3D_MODE_BILINEAR
+	main_viewport.scaling_3d_scale = _render_scale
+
+func _refresh_graphics_restart_notice() -> void:
+	settings_window.graphics_restart_notice.visible = (
+		GraphicsOptions.TEXTURE_QUALITIES.find(_map_texture_quality) != GraphicsOptions.active_texture_skip()
+		or _renderer_preference != _startup_renderer_preference)
+
+## A one-shot preset. Individual controls remain editable afterward, and the
+## renderer stays the player's choice. Preserve essential spell/projectile cues.
+func _apply_performance_preset() -> void:
+	_applying_graphics_preset = true
+	var values := {"quality": LookProfile.Quality.LOW,
+		"appearance": LookProfile.Mode.PAINTED_GROUND, "fps_limit": 30,
+		"render_scale": 0.75, "map_texture_quality": "half", "crowd_bodies": 60,
+		"swaying_capes": 0, "shadows": false, "particles": true,
+		"decorative_grass": false, "name_distance": 20.0}
+	for key: String in values:
+		_on_client_setting_changed("Graphics", key, values[key])
+	_applying_graphics_preset = false
+	_save_hud_settings()
+	_refresh_unified_settings()
 
 ## Quality tunes the fallback painting's lightweight drift. Video playback is
 ## controlled by the entry screen's saved Animate switch at every quality.
@@ -12804,6 +12856,22 @@ func _on_client_setting_changed(section: String, key: String,
 			invasion_assistant_window.resize_to_scale(float(value))
 		"fps_limit":
 			_apply_fps_limit(value)
+		"performance_preset":
+			_apply_performance_preset()
+			return
+		"render_scale":
+			_render_scale = GraphicsOptions.render_scale(value)
+			_apply_render_scale()
+		"map_texture_quality":
+			_map_texture_quality = GraphicsOptions.texture_quality(value)
+			_refresh_graphics_restart_notice()
+		"renderer":
+			_renderer_preference = GraphicsLaunchOptions.renderer_name(value)
+			_refresh_graphics_restart_notice()
+		"decorative_grass":
+			GraphicsOptions.decorative_grass = bool(value)
+			if not GraphicsOptions.decorative_grass:
+				LookGrassBeds.clear(world_root)
 		"appearance":
 			if LookProfile.set_player_mode(int(value)):
 				_apply_look_switch()
@@ -12834,7 +12902,8 @@ func _on_client_setting_changed(section: String, key: String,
 			_sync_harvest_sparkle()
 			# The rain's drops follow the switch at once; the sky keeps its
 			# weather either way.
-			_sync_weather()
+			if weather_layer != null:
+				weather_layer.set_effects_enabled(_effects_enabled)
 		"cape_emblems":
 			CapeEmblems.set_enabled(bool(value))
 		"nameplates":
@@ -12860,7 +12929,7 @@ func _on_client_setting_changed(section: String, key: String,
 			Network.magic_request({"op": "autocast", "enabled": bool(value)})
 	# Commands on Gameplay belong to the server; its local preferences still
 	# save immediately.
-	if key not in ["target_mode_strong", "target_mode_weak", "autogather", "magic_autocast"]:
+	if not _applying_graphics_preset and key not in ["target_mode_strong", "target_mode_weak", "autogather", "magic_autocast"]:
 		_save_hud_settings()
 
 func _apply_target_marker_style() -> void:

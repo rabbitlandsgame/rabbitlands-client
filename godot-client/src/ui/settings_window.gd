@@ -84,6 +84,7 @@ var map_cache_size: Label
 var fps_limit_option: OptionButton
 var look_option: OptionButton
 var quality_option: OptionButton
+var graphics_restart_notice: Label
 var name_distance_slider: HSlider
 var name_distance_value: Label
 
@@ -477,6 +478,22 @@ func _build_chat() -> void:
 
 func _build_graphics() -> void:
 	var page := _new_page("Graphics", tr("ELORIA_SETTINGS_GRAPHICS"))
+	_add_button(page, "performance_preset", "Apply Performance preset")
+	add_choice("Graphics", "render_scale", "3D resolution", ["100%", "75%", "50%"], [1.0, 0.75, 0.5])
+	(page.find_child("render_scale", true, false) as OptionButton).tooltip_text = "Lower the world's resolution to improve performance. Text and menus stay sharp."
+	add_choice("Graphics", "map_texture_quality", "Map textures (restart required)",
+		["Full resolution", "Half resolution", "Quarter resolution"], ["full", "half", "quarter"])
+	(page.find_child("map_texture_quality", true, false) as OptionButton).tooltip_text = "Lower map texture memory use. Character textures and menus keep their detail. Close and reopen the game to apply."
+	add_choice("Graphics", "renderer", "Renderer (restart required)",
+		["Automatic", "Forward+", "OpenGL Compatibility"], ["auto", "forward_plus", "gl_compatibility"])
+	(page.find_child("renderer", true, false) as OptionButton).tooltip_text = "Currently running: %s. Close and reopen the game to apply a change. Compatibility launchers take precedence." % (
+		"OpenGL Compatibility" if RenderingServer.get_current_rendering_method() == "gl_compatibility" else "Forward+")
+	graphics_restart_notice = Label.new()
+	graphics_restart_notice.name = "GraphicsRestartNotice"
+	graphics_restart_notice.text = "Restart the game to apply texture or renderer changes."
+	graphics_restart_notice.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	graphics_restart_notice.hide()
+	page.add_child(graphics_restart_notice)
 	_add_fps_limit_row(page)
 	# The look above the quality: whether it is on decides most of what the
 	# quality changes.
@@ -486,6 +503,7 @@ func _build_graphics() -> void:
 	_add_toggle(page, "particles", tr("ELORIA_SETTINGS_PARTICLES"), true)
 	_add_toggle(page, "nameplates", tr("ELORIA_SETTINGS_NAMEPLATES"), true)
 	_add_toggle(page, "cape_emblems", tr("ELORIA_SETTINGS_CAPE_EMBLEMS"), true)
+	_add_toggle(page, "decorative_grass", "Extra grass (Full painted appearance)", true)
 	(page.find_child("cape_emblems", true, false) as CheckBox).tooltip_text = tr("ELORIA_SETTINGS_CAPE_EMBLEMS_HINT")
 	_add_name_distance_row(page)
 	_add_count_row(page, "crowd_bodies", tr("ELORIA_SETTINGS_CROWD_BODIES"),
