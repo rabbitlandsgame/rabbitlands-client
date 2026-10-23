@@ -1762,6 +1762,14 @@ static func decode_gauntlet_ready(payload: PackedByteArray) -> Dictionary:
 			for key: String in ["self", "leader", "ready"]:
 				if not member.get(key) is bool:
 					return {"type": "invalid", "error": "gauntlet_ready_member_flags"}
+			if member.has("bot"):
+				if not member.bot is bool:
+					return {"type": "invalid", "error": "gauntlet_ready_bot"}
+				if member.bot and (not member.get("id") is String or str(member.id).is_empty()
+						or not (member.get("class_id") is float or member.get("class_id") is int)
+						or float(member.class_id) != float(int(member.class_id))
+						or int(member.class_id) < 0 or int(member.class_id) > 3):
+					return {"type": "invalid", "error": "gauntlet_ready_bot"}
 	return {"type": "gauntlet_ready", "data": state}
 
 ## A bounded page of the authoritative escrow ledger; quantities are integers.
@@ -1845,6 +1853,8 @@ static func decode_party(payload: PackedByteArray) -> Dictionary:
 			"online": (flags & 1) != 0,
 			"leader": (flags & 2) != 0,
 			"is_self": (flags & 4) != 0,
+			"is_bot": (flags & 8) != 0,
+			"class_id": (flags >> 4) & 3,
 			"health": u16(payload, offset + 1),
 			"max_health": u16(payload, offset + 3),
 			"ether": u16(payload, offset + 5),
