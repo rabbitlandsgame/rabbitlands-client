@@ -2444,6 +2444,8 @@ def write_launchers(stage: Path, server: str | None, build_dir: Path, version: s
             README_LINUX.format(version=version, host=shown_host, port=shown_port,
                                 archive=f"{stage.name}.tar.gz", folder=stage.name, binary=platform["binary"]),
             encoding="utf-8", newline="\n")
+        if updating:
+            append_update_readme(stage, "x86_64")
         return args
     (stage / "RabbitLands.bat").write_text(
         '@echo off\r\ncd /d "%~dp0app"\r\n' +
@@ -2462,7 +2464,18 @@ def write_launchers(stage: Path, server: str | None, build_dir: Path, version: s
         encoding="ascii")
     (stage / "README.txt").write_text(README.format(version=version, host=shown_host, port=shown_port),
                                       encoding="utf-8", newline="\r\n")
+    if updating:
+        append_update_readme(stage, "exe")
     return args
+
+
+def append_update_readme(stage: Path, extension: str) -> None:
+    with (stage / "README.txt").open("a", encoding="utf-8") as output:
+        output.write(f"\nUpdates and removal\n-------------------\n"
+                     f"RabbitLands-updater.{extension} checks for updates, replaces itself when needed,\n"
+                     "and downloads only changed game packages.\n"
+                     f"Run RabbitLands-uninstall.{extension} to remove this installation.\n"
+                     "Player settings outside the game folder are kept.\n")
 
 
 README = """Rabbit Lands - Windows Client
@@ -2606,7 +2619,7 @@ Logs from normal launches
 # --- outputs ------------------------------------------------------------------
 
 def tar_filter(platform: dict):
-    executables = {platform["binary"], "RabbitLands-updater.x86_64", "RabbitLands.sh", "RabbitLands-debug.sh",
+    executables = {platform["binary"], "RabbitLands-updater.x86_64", "RabbitLands-uninstall.x86_64", "RabbitLands.sh", "RabbitLands-debug.sh",
                    "RabbitLands-compatibility.sh", "RabbitLands-safe-mode.sh"}
 
     def normalise(info):
@@ -2737,9 +2750,36 @@ def online_installer_script(stage: Path, helper: Path, version: str,
     root_files = "\n".join(
         f'Source: "{path}"; DestDir: "{{app}}"; Flags: ignoreversion'
         for path in sorted(stage.iterdir()) if path.is_file() and path.name != MARKER)
-    downloads = "\n".join(
-        f"  DownloadPage.Add('{part['url']}', '{part['url'].rsplit('/', 1)[1]}', '{part['sha256']}');"
-        for part in payload["parts"])
+    package_checks = ""
+    if payload.get("schema") == 2:
+        checks, queues = [], []
+        for index, package in enumerate(payload["packages"]):
+            lines = [f"function PackageCurrent{index}: Boolean;", "begin", "  Result := False;"]
+            for entry in package["files"]:
+                name = entry["path"].replace("/", "\\").replace("'", "''")
+                lines.append(f"  if not InstalledFileMatches(ExpandConstant('{{app}}') + '\\{name}', '{entry['sha256']}') then Exit;")
+            lines.extend(["  Result := True;", "end;"])
+            checks.append("\n".join(lines))
+            queues.append(f"  if not PackageCurrent{index} then begin")
+            queues.extend(f"    DownloadPage.Add('{part['url']}', '{part['url'].rsplit('/', 1)[1]}', '{part['sha256']}');" for part in package["parts"])
+            queues.append("  end;")
+        package_checks = """function InstalledFileMatches(const Name, Hash: String): Boolean;
+begin
+  Result := False;
+  if FileExists(Name) then begin
+    try
+      Result := CompareText(GetSHA256OfFile(Name), Hash) = 0;
+    except
+      Result := False;
+    end;
+  end;
+end;
+""" + "\n\n".join(checks)
+        downloads = "\n".join(queues)
+    else:
+        downloads = "\n".join(
+            f"  DownloadPage.Add('{part['url']}', '{part['url'].rsplit('/', 1)[1]}', '{part['sha256']}');"
+            for part in payload["parts"])
     parameters = ("-- " + " ".join(launch_args)).replace('"', '""') if launch_args else ""
     space = int(payload["unpacked_size"]) + 2 * int(payload["size"]) + 512 * 1024**2
     return f'''[Setup]
@@ -2769,6 +2809,7 @@ Source: "{helper}"; Flags: dontcopy
 
 [Icons]
 Name: "{{group}}\\RabbitLands"; Filename: "{{app}}\\RabbitLands-updater.exe"; Parameters: "{parameters}"; WorkingDir: "{{app}}\\app"
+Name: "{{group}}\\Uninstall Rabbit Lands"; Filename: "{{app}}\\RabbitLands-uninstall.exe"; WorkingDir: "{{app}}"
 Name: "{{group}}\\RabbitLands (debug console)"; Filename: "{{app}}\\RabbitLands (debug console).bat"; WorkingDir: "{{app}}\\app"; IconFilename: "{{app}}\\app\\RabbitLands.exe"
 Name: "{{group}}\\RabbitLands (compatibility)"; Filename: "{{app}}\\RabbitLands (compatibility).bat"; WorkingDir: "{{app}}\\app"; IconFilename: "{{app}}\\app\\RabbitLands.exe"
 Name: "{{group}}\\RabbitLands (safe mode)"; Filename: "{{app}}\\RabbitLands (safe mode).bat"; WorkingDir: "{{app}}\\app"; IconFilename: "{{app}}\\app\\RabbitLands.exe"
@@ -2777,6 +2818,10 @@ Name: "{{group}}\\RabbitLands (safe mode)"; Filename: "{{app}}\\RabbitLands (saf
 Type: filesandordirs; Name: "{{app}}\\app"
 Type: filesandordirs; Name: "{{app}}\\eloria-assets"
 Type: filesandordirs; Name: "{{app}}\\.eloria-previous"
+Type: filesandordirs; Name: "{{app}}\\.eloria-update-stage"
+Type: filesandordirs; Name: "{{app}}\\.rabbitlands-bootstrap-previous"
+Type: files; Name: "{{app}}\\.rabbitlands-install.json"
+Type: files; Name: "{{app}}\\.eloria-update-journal.json"
 
 [Run]
 Filename: "{{app}}\\RabbitLands-updater.exe"; Parameters: "{parameters}"; WorkingDir: "{{app}}\\app"; Description: "Start Rabbit Lands"; Flags: nowait postinstall skipifsilent
@@ -2787,6 +2832,8 @@ var
   InstallPage: TOutputProgressWizardPage;
   InstallingPayload: Boolean;
   InstallError: String;
+
+{package_checks}
 
 procedure InitializeWizard;
 begin

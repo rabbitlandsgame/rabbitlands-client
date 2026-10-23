@@ -42,7 +42,8 @@ def prune(tag):
         raise ValueError("Published assets do not match the verified checksum inventory.")
     names = set(expected)
     if not all(any(name.endswith(suffix) for name in names) for suffix in
-               ("-setup.exe", "-download.sh", "-windows.json", "-linux.json", ".update.zip.001")):
+               ("-setup.exe", "-download.sh", "-windows.json", "-linux.json")) or not any(
+                   name.endswith(".update.zip.001") or ".pkg.client.zip.001" in name for name in names):
         raise ValueError("The published release is missing a required platform download.")
     removed = []
     for other in release.github_releases():

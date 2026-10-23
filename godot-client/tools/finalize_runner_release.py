@@ -13,6 +13,8 @@ def finalize(receipts: list[Path], out: Path) -> str:
     if len(data) != 2 or {item.get("platform") for item in data} != {"windows", "linux"}:
         raise ValueError("Provide one completed receipt for each platform.")
     sha, release_id = data[0]["commit"], data[0]["release_id"]
+    if len({item.get("update_schema", 1) for item in data}) != 1:
+        raise ValueError("Both platform receipts must use the same update format.")
     if not re.fullmatch(r"[0-9a-f]{40}", sha):
         raise ValueError("Runner commit must be a full public commit ID.")
     rows, stages = {}, {}
@@ -25,19 +27,24 @@ def finalize(receipts: list[Path], out: Path) -> str:
         if not re.fullmatch(f"RabbitLands-{platform.title()}-[0-9]{{8}}-{sha[:9]}", stage):
             raise ValueError("Unexpected runner stage name.")
         stages[platform] = stage
+        packaged = item.get("update_schema", 1) == 2
         allowed = re.compile(re.escape(stage) + (
-            r"(?:-windows\.json|-setup\.exe|\.update\.zip\.\d{3,})" if platform == "windows" else
-            r"(?:-linux\.json|-download\.sh|\.update\.zip\.\d{3,}|\.tar\.gz\.\d{3,})"))
+            r"(?:-windows\.json|-setup\.exe|-(?:updater|uninstall)\.exe|\.pkg\.[a-z0-9-]+\.zip\.\d{3,}|\.update\.zip\.\d{3,})" if platform == "windows" else
+            r"(?:-linux\.json|-download\.sh|-(?:updater|uninstall)\.x86_64|\.pkg\.[a-z0-9-]+\.zip\.\d{3,}|\.update\.zip\.\d{3,}|\.tar\.gz\.\d{3,})"))
         names = set()
         for row in item["assets"]:
-            if (set(row) != {"name", "size", "sha256"} or not allowed.fullmatch(row["name"])
+            if (set(row) != {"name", "size", "sha256"} or not (allowed.fullmatch(row["name"]) or (packaged and row["name"] == f"RabbitLands-{platform}.json"))
                     or row["name"] in rows or not 0 < row["size"] < release.ASSET_LIMIT
                     or not re.fullmatch(r"[0-9a-f]{64}", row["sha256"])):
                 raise ValueError("Invalid, duplicated or unexpected runner download.")
             rows[row["name"]] = row
             names.add(row["name"])
-        required = {f"{stage}-{platform}.json", f"{stage}.update.zip.001",
+        required = {f"{stage}-{platform}.json", f"{stage}.pkg.client.zip.001" if packaged else f"{stage}.update.zip.001",
                     f"{stage}-setup.exe" if platform == "windows" else f"{stage}-download.sh"}
+        if packaged:
+            extension = "exe" if platform == "windows" else "x86_64"
+            required.update({f"RabbitLands-{platform}.json", f"{stage}.pkg.engine.zip.001",
+                             f"{stage}-updater.{extension}", f"{stage}-uninstall.{extension}"})
         if platform == "linux":
             required.add(f"{stage}.tar.gz.001")
         if not required <= names:
@@ -99,7 +106,15 @@ complete archive, and reuses verified downloads when retrying. Pass another pare
 folder as its first argument. An existing game folder will not be overwritten.
 
 Neither platform needs Python or the Godot editor. `SHA256SUMS` lists all file hashes.
-The platform JSON manifests and `.update.zip.###` files support signed automatic updates.
+The platform JSON manifests and `.pkg.*.zip.###` packages support signed updates.
+The updater checks installed files and downloads only changed packages. It also
+verifies and replaces its own executable when needed. Run the installed
+`RabbitLands-uninstall` executable (or Windows Installed apps) to remove the game;
+player settings are kept.
+
+Existing installations from before package updates can migrate by downloading
+the platform's `*-updater` executable from this release into their game folder
+and running it once. Fresh Windows installations still need just the setup file.
 See [installation instructions](https://github.com/{release.REPOSITORY}/wiki/Access-and-Installation).
 ''', encoding="utf-8", newline="\n")
     release.gh("release", "edit", draft["tag_name"], "--repo", release.REPOSITORY, "--draft", "--tag", tag,

@@ -98,10 +98,14 @@ def export_launcher(stage: Path, metadata: dict, godot: Path, source: Path,
     project = logs / "updater-project"
     scripts = project / "src" / "updates"
     scripts.mkdir(parents=True, exist_ok=True)
-    for name in ("release.gd", "launcher.gd", "launch_options.gd"):
+    for name in ("release.gd", "launcher.gd", "launch_options.gd", "package_updates.gd",
+                 "package_download.gd", "update_transport.gd", "bootstrap.gd", "uninstall.gd"):
         (scripts / name).write_bytes((source / "src" / "updates" / name).read_bytes())
     (project / "data").mkdir(exist_ok=True)
-    (project / "data" / "client_release.json").write_text(json.dumps(metadata), encoding="utf-8")
+    # Bootstrap trust is independent of a game revision. Asset-only releases
+    # must not change the updater just because commit ancestry changed.
+    trust = {key: metadata[key] for key in ("schema", "platform", "public_key", "repository", "distribution")}
+    (project / "data" / "client_release.json").write_text(json.dumps(trust, sort_keys=True), encoding="utf-8")
     branding = project / "assets" / "branding"
     branding.mkdir(parents=True, exist_ok=True)
     for name in ("rabbitlands-icon.png", "rabbitlands-icon.ico", "rabbitlands-mark-64.png"):
@@ -127,6 +131,12 @@ def export_launcher(stage: Path, metadata: dict, godot: Path, source: Path,
               logs / "updater-export.log", timeout=120)
     if not (stage / binary).is_file():
         raise ValueError("updater export is incomplete")
+    # Same trusted binary, different entry point selected by executable name.
+    uninstaller = binary.replace("-updater", "-uninstall")
+    (stage / uninstaller).hardlink_to(stage / binary)
+    if metadata["platform"] == "linux":
+        (stage / binary).chmod(0o755)
+        (stage / uninstaller).chmod(0o755)
 
 
 def publish_artifacts(stage: Path, metadata: dict, private_key: Path,
@@ -136,19 +146,27 @@ def publish_artifacts(stage: Path, metadata: dict, private_key: Path,
     platform = metadata["platform"]
     tag = f"client-{commit}"
     base = f'https://github.com/{metadata["repository"]}/releases/download/{tag}'
-    archive = stage.parent / f"{stage.name}.update.zip"
-    if accept_part is None:
-        count, unpacked = build_payload(stage, archive)
-        parts = split_payload(archive, base)
-        size, checksum = archive.stat().st_size, digest(archive)
-    else:
-        with PartWriter(archive, base, PART_BYTES, accept_part, budget) as writer:
-            count, unpacked = build_payload(stage, writer)
-        parts, size, checksum = writer.parts, writer.size, writer.sha256
-    release = {"schema": 1, "commit": commit, "platform": platform,
-               "version": stage.name, "size": size,
-               "unpacked_size": unpacked, "file_count": count,
-               "sha256": checksum, "parts": parts}
+    import asset_packages
+    packages = asset_packages.build(stage, base, accept_part=accept_part, budget=budget)
+    release = {"schema": 2, "bootstrap_schema": 1, "repository": metadata["repository"], "commit": commit,
+               "platform": platform, "version": stage.name,
+               "size": sum(p["size"] for p in packages),
+               "unpacked_size": sum(p["unpacked_size"] for p in packages),
+               "file_count": sum(p["file_count"] for p in packages),
+               "sha256": hashlib.sha256(json.dumps(packages, sort_keys=True, separators=(",", ":")).encode()).hexdigest(),
+               "packages": packages, "parts": [part for p in packages for part in p["parts"]]}
+    helpers = []
+    extension = "exe" if platform == "windows" else "x86_64"
+    for kind in ("updater", "uninstall"):
+        path = stage.parent / f"{stage.name}-{kind}.{extension}"
+        # Keep runner accounting bounded: link the existing helper, no copy.
+        path.hardlink_to(stage / f"RabbitLands-{kind}.{extension}")
+        row = {"url": f"{base}/{path.name}", "size": path.stat().st_size, "sha256": digest(path)}
+        release[kind] = row
+        if accept_part:
+            accept_part(path, row)
+            path.unlink()
+        helpers.append(path)
     payload = logs / "release-payload.json"
     payload.write_text(json.dumps(release, separators=(",", ":")), encoding="utf-8")
     manifest = stage.parent / f"{stage.name}-{platform}.json"
@@ -161,11 +179,13 @@ def publish_artifacts(stage: Path, metadata: dict, private_key: Path,
     run_godot(godot, ["--headless", "--path", str(logs / "updater-project"), "--script",
                      str(source / "tools" / "verify_client_release.gd"), "--", str(request)],
               logs / "release-verify.log", timeout=120)
+    alias = stage.parent / f"RabbitLands-{platform}.json"
+    shutil.copyfile(manifest, alias)
     policy = stage.parent / f"{stage.name}-server-policy.json"
     policy.write_text(json.dumps({"schema": 1, "required_commit": commit, "enforce": True,
                                  "manifests": {platform: f"{base}/{manifest.name}"}}, indent=2), encoding="utf-8")
     instructions = stage.parent / f"{stage.name}-github-release.txt"
-    assets = [manifest] + [stage.parent / part["url"].rsplit("/", 1)[1] for part in parts]
+    assets = [manifest, alias, *helpers] + [stage.parent / part["url"].rsplit("/", 1)[1] for part in release["parts"]]
     instructions.write_text(
         f'Create public GitHub Release {tag} in {metadata["repository"]}, targeting client commit {commit}.\n'
         'Upload these assets (all download parts are under 2 GiB):\n'
@@ -173,8 +193,6 @@ def publish_artifacts(stage: Path, metadata: dict, private_key: Path,
         + f'\n\nAfter uploads complete, copy {policy.name} to the server profile as client_updates.json.\n'
         'Merge windows/linux manifest rows if publishing both platforms. Connected players are notified within 30 seconds.\n',
         encoding="utf-8")
-    if accept_part is None:
-        archive.unlink()  # Players download the pieces; the unsplit archive is redundant.
     return assets + [policy, instructions]
 
 
@@ -184,7 +202,8 @@ def export_installer_helper(stage: Path, godot: Path, tools_source: Path,
     project = logs / "installer-project"
     scripts = project / "src/updates"
     scripts.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(tools_source / "src/updates/release.gd", scripts / "release.gd")
+    for name in ("release.gd", "package_updates.gd", "package_download.gd", "update_transport.gd"):
+        shutil.copyfile(tools_source / "src/updates" / name, scripts / name)
     shutil.copyfile(tools_source / "tools/install_client_payload.gd", project / "install.gd")
     data = project / "data"
     data.mkdir(exist_ok=True)

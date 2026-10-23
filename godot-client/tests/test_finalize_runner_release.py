@@ -95,3 +95,30 @@ def test_different_platform_commits_cannot_be_finalized(tmp_path, monkeypatch):
     with pytest.raises(ValueError, match="same release"):
         runner.finalize(receipts, tmp_path / "final")
     assert calls == []
+
+
+@pytest.mark.parametrize("missing_helper", [False, True])
+def test_package_release_requires_both_bootstraps_and_latest_aliases(tmp_path, monkeypatch, missing_helper):
+    receipts, assets, calls = fixture(tmp_path, monkeypatch)
+    for path in receipts:
+        item = json.loads(path.read_text())
+        stage, platform = item["stage"], item["platform"]
+        extension = "exe" if platform == "windows" else "x86_64"
+        assets[:] = [a for a in assets if a["name"] != f"{stage}.update.zip.001"]
+        item["assets"] = [a for a in item["assets"] if not a["name"].endswith(".update.zip.001")]
+        item["update_schema"] = 2
+        names = [f"{stage}.pkg.client.zip.001", f"{stage}.pkg.engine.zip.001", f"RabbitLands-{platform}.json",
+                 f"{stage}-updater.{extension}", f"{stage}-uninstall.{extension}"]
+        if missing_helper and platform == "windows":
+            names.remove(f"{stage}-uninstall.exe")
+        for name in names:
+            item["assets"].append({"name": name, "size": 10, "sha256": "b" * 64})
+            assets.append({"id": 1000 + len(assets), "name": name, "state": "uploaded", "size": 10, "digest": "sha256:" + "b" * 64})
+        path.write_text(json.dumps(item))
+    if missing_helper:
+        with pytest.raises(ValueError, match="missing required"):
+            runner.finalize(receipts, tmp_path / "final")
+        assert calls == []
+    else:
+        runner.finalize(receipts, tmp_path / "final")
+        assert all(a["name"] != "previous-build.zip" for a in assets)
