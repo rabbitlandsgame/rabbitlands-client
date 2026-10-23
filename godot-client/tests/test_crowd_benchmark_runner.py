@@ -91,6 +91,16 @@ def write_project(root):
                                       'config/custom_user_dir_name.linuxbsd="godot/app_userdata/Eloria"\n')
 
 
+def write_startup_ack(environment, executable, user_dir, **changes):
+    ack = {"schemaVersion": 1, "benchmark": "crowd_presentation", "pid": 12345,
+           "executablePath": str(executable), "userDataDir": str(user_dir),
+           "executionMode": environment["RABBITLANDS_CROWD_BENCH_EXECUTION_MODE"],
+           "startToken": environment["RABBITLANDS_CROWD_BENCH_START_TOKEN"]}
+    ack.update(changes)
+    Path(environment["RABBITLANDS_CROWD_BENCH_OUT"] + ".started.json").write_text(json.dumps(ack))
+    return ack
+
+
 class ReportValidationTests(unittest.TestCase):
     def check_rejected(self, mutate, request_mutate=None):
         data, request = fixture()
@@ -324,15 +334,17 @@ class IdentityAndProcessTests(unittest.TestCase):
                 self.assertTrue((user_dir / "eloria_hud.cfg").is_file())
                 self.assertIn('map_texture_quality="half"', (user_dir / "eloria_hud.cfg").read_text())
                 data["runtimeBuild"].update(executablePath=str(exe), userDataDir=str(user_dir))
+                write_startup_ack(env, exe, user_dir)
                 Path(env["RABBITLANDS_CROWD_BENCH_OUT"]).write_text(json.dumps(data))
                 Path(command[command.index("--log-file") + 1]).write_text("normal")
-                return mock.Mock(pid=12345, wait=mock.Mock(return_value=0))
+                return mock.Mock(pid=12345, wait=mock.Mock(return_value=0), poll=mock.Mock(return_value=None))
 
             with mock.patch.object(support.platform, "system", return_value="Windows"), \
                     mock.patch.object(runner, "identity", return_value={"source": "stable"}), \
                     mock.patch.object(runner.subprocess, "Popen", side_effect=fake_launch):
                 result = runner.run_one(args, "all", 1, root)
             self.assertTrue(result["validation"]["valid"])
+            self.assertTrue(result["startup"]["valid"])
             self.assertEqual(result["settingsProfile"], "performance")
             seed = result["settingsSeed"]
             self.assertEqual(seed["sha256"], result["settingsSeedFinalSha256"])
@@ -441,6 +453,67 @@ class IdentityAndProcessTests(unittest.TestCase):
         command = runner.command_for(args, Path("engine.log"))
         self.assertIn("--main-pack", command)
         self.assertNotIn("--path", command)
+        self.assertNotIn("--script", command)
+        args.executable_mode = "project"
+        self.assertIn("--script", runner.command_for(args, Path("engine.log")))
+        args.executable_mode = "exported"
+        args.benchmark_script = "res://other.gd"
+        with self.assertRaisesRegex(support.EvidenceError, "custom --benchmark-script"):
+            runner.command_for(args, Path("engine.log"))
+
+    def test_startup_ack_is_bound_to_own_pid_executable_mode_token_and_isolated_user_dir(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            request = {"pid": 12345, "executable": str(root / "app.exe"), "executable_mode": "exported",
+                       "start_token": "unique-nonce", "user_root": str(root / "userdata")}
+            ack = {"schemaVersion": 1, "benchmark": "crowd_presentation", "pid": request["pid"],
+                   "executablePath": request["executable"], "executionMode": "exported",
+                   "startToken": "unique-nonce", "userDataDir": str(root / "userdata/custom")}
+            self.assertEqual(support.validate_startup_ack(ack, request), ack)
+            for key, wrong in (("schemaVersion", True), ("benchmark", "ordinary_game"), ("pid", 12346),
+                               ("executionMode", "project"), ("startToken", "old-nonce"),
+                               ("executablePath", str(root / "other.exe")), ("userDataDir", str(root / "ordinary-user"))):
+                with self.subTest(key=key), self.assertRaises(support.EvidenceError):
+                    support.validate_startup_ack(ack | {key: wrong}, request)
+            request["settings_seed_user_dir"] = str(root / "userdata/seeded")
+            with self.assertRaisesRegex(support.EvidenceError, "exact seeded"):
+                support.validate_startup_ack(ack, request)
+
+    def test_startup_wait_is_bounded_and_detects_exit_even_if_exit_zero(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "missing.started.json"
+            process = mock.Mock(poll=mock.Mock(return_value=None))
+            with mock.patch.object(runner.time, "monotonic", side_effect=[0, 0, .1]), \
+                    mock.patch.object(runner.time, "sleep") as sleep, \
+                    self.assertRaisesRegex(support.EvidenceError, "within 0.1 seconds"):
+                runner.wait_for_startup(process, path, {}, .1)
+            sleep.assert_called_once_with(.05)
+            process.poll.return_value = 0
+            with self.assertRaisesRegex(support.EvidenceError, "exited before.*\\(0\\)"):
+                runner.wait_for_startup(process, path, {}, 60)
+
+    def test_startup_failure_stops_only_owned_process_and_retains_invalid_metadata(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            exe = root / "app.exe"
+            exe.write_bytes(b"not executed")
+            args = runner.parser().parse_args(["--godot", str(exe), "--project-path", str(root),
+                                              "--executable-mode", "exported", "--main-pack", "test.pck"])
+            args.godot = exe
+            process = mock.Mock(pid=12345, poll=mock.Mock(return_value=None), wait=mock.Mock(return_value=-9))
+            with mock.patch.object(runner, "identity", side_effect=[{"source": "stable"}, support.EvidenceError("changed package")]), \
+                    mock.patch.object(runner.subprocess, "Popen", return_value=process), \
+                    mock.patch.object(runner, "wait_for_startup", side_effect=support.EvidenceError("wrong start token")):
+                result = runner.run_one(args, "all", 1, root)
+            process.kill.assert_called_once_with()
+            process.wait.assert_called_once_with()
+            self.assertFalse(result["validation"]["valid"])
+            self.assertEqual(result["validation"]["errors"], ["wrong start token"])
+            self.assertEqual(result["identityAfter"]["error"], "changed package")
+            self.assertFalse(result["startup"]["valid"])
+            recorded = support.read_json(next(root.glob("*.process.json")))
+            self.assertEqual(recorded["pid"], 12345)
+            self.assertEqual(recorded["startup"]["error"], "wrong start token")
 
     def test_exit_zero_with_missing_report_or_error_log_is_invalid(self):
         for missing, error_log, changed in ((True, False, False), (False, True, False), (False, False, True),
@@ -458,11 +531,12 @@ class IdentityAndProcessTests(unittest.TestCase):
 
                 def fake_launch(command, *, env, stdout, **_kwargs):
                     data["runtimeBuild"].update(executablePath=str(exe), userDataDir=env["APPDATA"] + "/Godot/app_userdata/Eloria")
+                    write_startup_ack(env, exe, data["runtimeBuild"]["userDataDir"])
                     if not missing:
                         Path(env["RABBITLANDS_CROWD_BENCH_OUT"]).write_text(json.dumps(data))
                     Path(command[command.index("--log-file") + 1]).write_text("ERROR: broken resource" if error_log else "normal")
                     stdout.write("launched a Python mock, no engine")
-                    return mock.Mock(pid=12345, wait=mock.Mock(return_value=0))
+                    return mock.Mock(pid=12345, wait=mock.Mock(return_value=0), poll=mock.Mock(return_value=None))
 
                 snapshots = [{"source": "initial"}, {"source": "changed" if changed else "initial"}]
                 with mock.patch.object(runner, "identity", side_effect=snapshots), \

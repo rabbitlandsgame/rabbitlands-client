@@ -141,6 +141,7 @@ GODOT_EXE = "Godot_v4.7.2-stable_win64_console.exe"
 MARKER = ".eloria-package"
 STORAGE = None  # Only runner_release.py supplies a bounded, disposable build context.
 BENCHMARK_LINKS = False  # Local test packages reuse immutable staged asset bytes.
+BENCHMARK_ACTOR_PLANS: dict[Path, dict] | None = None  # One local benchmark invocation only.
 ASSET_REF = re.compile(r"res://\.\./(eloria-assets/[^\"'\s]+)")
 
 # The installer's identity. Keep it fixed: Windows matches upgrades and the
@@ -666,15 +667,17 @@ def shipped_text_names(build_dir: Path, candidates: set[str]) -> dict[str, set[s
 
 
 def actor_shipping(build_dir: Path) -> dict:
-    # A runner owns one immutable committed input tree. Freeze its reference
-    # proof before retiring editor-only source files; normal local builds keep
-    # recomputing the plan as before.
-    if STORAGE and build_dir.resolve() in STORAGE.actor_plans:
-        return STORAGE.actor_plans[build_dir.resolve()]
-    plan = _actor_shipping(build_dir)
-    if STORAGE:
-        STORAGE.actor_plans[build_dir.resolve()] = plan
-    return plan
+    # Runners and explicit local benchmark builds own one committed input
+    # generation. Reuse its pure reference proof while imports and test export
+    # pruning leave runtime catalogs/references unchanged. Ordinary packages
+    # still recompute; neither cache changes staging/export validation.
+    plans = STORAGE.actor_plans if STORAGE else BENCHMARK_ACTOR_PLANS
+    if plans is None:
+        return _actor_shipping(build_dir)
+    resolved = build_dir.resolve()
+    if resolved not in plans:
+        plans[resolved] = _actor_shipping(build_dir)
+    return plans[resolved]
 
 
 def _actor_shipping(build_dir: Path) -> dict:
@@ -1017,6 +1020,10 @@ def recover_build_worktree(build_dir: Path, sha: str) -> None:
 def prepare_build_tree(build_dir: Path, sha: str) -> Path:
     if build_dir.resolve() == REPO.resolve():
         raise PackageError("the build directory must not be the source checkout")
+    # A checkout/reset begins a new source generation even if a caller reuses
+    # this build path inside one invocation. Never reuse its earlier proof.
+    if BENCHMARK_ACTOR_PLANS is not None:
+        BENCHMARK_ACTOR_PLANS.pop(build_dir.resolve(), None)
     if not (build_dir / ".git").exists():
         log(f"creating build worktree {build_dir}")
         build_dir.parent.mkdir(parents=True, exist_ok=True)
@@ -2965,7 +2972,7 @@ def make_online_installer(stage: Path, godot: Path, iscc: Path, version: str,
 
 
 def _main(argv=None, storage=None) -> int:
-    global BENCHMARK_LINKS
+    global BENCHMARK_LINKS, BENCHMARK_ACTOR_PLANS
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("--platform", choices=sorted(PLATFORMS), default="windows",
                         help="windows: folder + zip; linux: folder + tar.gz; macos: native app bundle")
@@ -3006,6 +3013,7 @@ def _main(argv=None, storage=None) -> int:
         # Hard links avoid copying several GB of unchanged raw assets into
         # every phase checkpoint. Normal distributable builds keep copying.
         BENCHMARK_LINKS = options.benchmark_profile
+        BENCHMARK_ACTOR_PLANS = {} if options.benchmark_profile else None
         updating = options.distribution == "github" and not options.no_client_updates
         if options.platform == "macos":
             if sys.platform != "darwin":
@@ -3174,15 +3182,18 @@ def _main(argv=None, storage=None) -> int:
 
 
 def main(argv=None, storage=None) -> int:
-    global STORAGE, BENCHMARK_LINKS
+    global STORAGE, BENCHMARK_LINKS, BENCHMARK_ACTOR_PLANS
     previous = STORAGE
     previous_links = BENCHMARK_LINKS
+    previous_actor_plans = BENCHMARK_ACTOR_PLANS
     STORAGE = storage
+    BENCHMARK_ACTOR_PLANS = None
     try:
         return _main(argv, storage)
     finally:
         STORAGE = previous
         BENCHMARK_LINKS = previous_links
+        BENCHMARK_ACTOR_PLANS = previous_actor_plans
 
 
 if __name__ == "__main__":

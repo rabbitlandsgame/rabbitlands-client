@@ -7,7 +7,12 @@ from pathlib import Path
 import re
 
 PROFILE = "client-performance-v1"
+MAIN_LOOP_CLASS = "RabbitLandsCrowdBenchmarkLoop"
+MAIN_ENTRY_SCENE = "res://tests/integration/crowd_benchmark_entry.tscn"
+EXECUTION_MODE_ENVIRONMENT = "RABBITLANDS_CROWD_BENCH_EXECUTION_MODE"
 WORKLOAD_FILES = frozenset({
+    "tests/integration/crowd_benchmark_loop.gd",
+    "tests/integration/crowd_benchmark_entry.tscn",
     "tests/integration/crowd_presentation_benchmark.gd",
     "tests/integration/crowd_benchmark_main.gd",
     "tests/integration/crowd_benchmark_main.tscn",
@@ -15,13 +20,30 @@ WORKLOAD_FILES = frozenset({
 })
 
 
+def _benchmark_loop_settings(settings: str) -> str:
+    """Select the local router only in the disposable build's application section."""
+    application = re.search(r"(?m)^\[application\][ \t]*(?:\n|$)", settings)
+    if application is None:
+        raise ValueError("Benchmark project has no application settings")
+    following_section = re.search(r"(?m)^\[", settings[application.end():])
+    end = application.end() + following_section.start() if following_section else len(settings)
+    body = settings[application.end():end]
+    body = re.sub(r"(?m)^run/(?:main_scene|main_loop_type)[ \t]*=[^\n]*(?:\n|$)", "", body)
+    # Release templates require a nonempty main scene even for a SceneTree
+    # subclass. This inert Node lets the loop decide which real Main to open.
+    body = (body.rstrip("\n") + "\nrun/main_loop_type=" + json.dumps(MAIN_LOOP_CLASS)
+            + "\nrun/main_scene=" + json.dumps(MAIN_ENTRY_SCENE) + "\n\n")
+    return settings[:application.end()] + body + settings[end:]
+
+
 def prepare_export(project: Path) -> None:
     """Keep only allowlisted workloads in the disposable package worktree.
 
     Normal exports retain their tests exclusion. This function is called only
     after the standalone benchmark option has been validated by the packager.
-    Actor imports, loose assets, texture policies and the game entry stay as
-    configured by the ordinary packaging pipeline.
+    Actor imports, loose assets and texture policies follow ordinary packaging.
+    Release templates do not execute --script, so a custom loop dispatches the
+    workload only when explicitly requested; otherwise it opens the normal game.
     """
     root = project.resolve()
     tests = (root / "tests").resolve()
@@ -38,6 +60,12 @@ def prepare_export(project: Path) -> None:
     text = presets.read_text(encoding="utf-8")
     if "tests/*," not in text:
         raise ValueError("Expected normal test exclusion in export presets")
+    config = root / "project.godot"
+    if not config.is_file():
+        raise ValueError("Benchmark project settings are missing")
+    settings = _benchmark_loop_settings(config.read_text(encoding="utf-8"))
+    settings = re.sub(r'(\[editor_plugins\]\s*)enabled\s*=\s*[^\n]*',
+                      r'\1enabled=PackedStringArray()', settings)
     for path in files:
         if path.relative_to(root).as_posix() not in WORKLOAD_FILES:
             path.unlink()
@@ -47,15 +75,15 @@ def prepare_export(project: Path) -> None:
     authoring = root / "world_authoring"
     if authoring.is_dir():
         (authoring / ".gdignore").write_text("", encoding="utf-8")
-    config = root / "project.godot"
-    if config.is_file():
-        settings = config.read_text(encoding="utf-8")
-        settings = re.sub(r'(\[editor_plugins\]\s*)enabled\s*=\s*[^\n]*',
-                          r'\1enabled=PackedStringArray()', settings)
-        config.write_text(settings, encoding="utf-8")
+    config.write_text(settings, encoding="utf-8", newline="\n")
     marker = {"schemaVersion": 1, "profile": PROFILE,
               "executionKind": "exported-local-benchmark",
               "script": "res://tests/integration/crowd_presentation_benchmark.gd",
+              "mainLoopClass": MAIN_LOOP_CLASS,
+              "mainEntryScene": MAIN_ENTRY_SCENE,
+              "executionModeEnvironment": EXECUTION_MODE_ENVIRONMENT,
+              "benchmarkExecutionMode": "exported",
+              "defaultMainScene": "res://src/app/main.tscn",
               "workloadFiles": sorted(WORKLOAD_FILES)}
     (root / "data/benchmark_profile.json").write_text(
         json.dumps(marker, indent=2) + "\n", encoding="utf-8")

@@ -34,14 +34,19 @@ python tools/package_client.py --distribution standalone --benchmark-profile --r
 python tests/integration/run_crowd_presentation_benchmark.py --godot <package>/app/RabbitLands.exe --executable-mode exported --package-manifest <package>/benchmark-package.json --variants all --cells phase1 --mode windowed --renderer gl_compatibility --quality medium --resolution 1280x720 --fps-cap 60 --minimap show --label reference-medium
 ```
 
-The local benchmark profile adds only allowlisted synthetic workload scripts;
-ordinary distributions keep tests excluded. It keeps the ordinary game entry
-point and provides a playable standalone checkpoint. Its manifest covers the
-executable, PCK and loose files. Checkpoints and raw reports belong in ignored
-local storage. Keep replay recordings and their reports outside repositories.
+The local benchmark profile adds only allowlisted synthetic workload scripts
+and a custom startup loop in its disposable export settings. The runner selects
+the workload with `RABBITLANDS_CROWD_BENCH_EXECUTION_MODE=exported`; release templates
+ignore `--script`. Starting the package normally opens the ordinary game, so
+the checkpoint remains playable. Ordinary distributions keep tests excluded
+and retain their normal startup settings. The manifest covers the executable,
+PCK and loose files. Checkpoints and raw reports belong in ignored local storage.
+Keep replay recordings and their reports outside repositories.
 
-The runner verifies source/content/executable identity before and after each
-run, isolates settings, records effective settings and actual backend use,
+The runner first requires a startup acknowledgement bound to its unique run
+token, process, executable, execution mode and isolated user directory. A wrong
+entry point fails before the full workload timeout. It verifies source/content/
+executable identity before and after each run, isolates settings, records effective settings and actual backend use,
 and rejects errors, incomplete readiness, mismatched populations or invalid
 statistics. It retains raw work-time and delivered-frame series separately.
 Loading diagnostics distinguish preparation, verification, attach, deferred

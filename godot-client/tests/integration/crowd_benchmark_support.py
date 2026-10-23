@@ -167,6 +167,31 @@ def _object(value: Any, label: str) -> dict:
     return value
 
 
+def validate_startup_ack(data: dict, request: dict) -> dict:
+    """Bind a small startup acknowledgement to this exact launched workload."""
+    finite_tree(data)
+    if type(data.get("schemaVersion")) is not int or data["schemaVersion"] != 1 \
+            or data.get("benchmark") != "crowd_presentation":
+        raise EvidenceError("startup acknowledgement has the wrong benchmark/schema")
+    if type(data.get("pid")) is not int or data["pid"] != request["pid"]:
+        raise EvidenceError("startup acknowledgement PID differs from launched process")
+    if data.get("startToken") != request["start_token"] or data.get("executionMode") != request["executable_mode"]:
+        raise EvidenceError("startup acknowledgement token/execution mode differs from requested workload")
+    executable = data.get("executablePath")
+    if not isinstance(executable, str) or not Path(executable).is_absolute() \
+            or os.path.normcase(str(Path(executable).resolve())) \
+            != os.path.normcase(str(Path(request["executable"]).resolve())):
+        raise EvidenceError("startup acknowledgement executable differs from launched executable")
+    user_dir = data.get("userDataDir")
+    if not isinstance(user_dir, str) or not Path(user_dir).is_absolute() \
+            or not Path(user_dir).resolve().is_relative_to(Path(request["user_root"]).resolve()):
+        raise EvidenceError("startup acknowledgement user data escaped the isolated run directory")
+    if request.get("settings_seed_user_dir") and os.path.normcase(str(Path(user_dir).resolve())) \
+            != os.path.normcase(str(Path(request["settings_seed_user_dir"]).resolve())):
+        raise EvidenceError("startup acknowledgement did not use the exact seeded user directory")
+    return data
+
+
 def validate_distribution(value: Any, label: str, count: int | None = None) -> dict:
     value = _object(value, label)
     n = _integer(value.get("count"), f"{label}.count", 1)

@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 from pathlib import Path
 import platform
@@ -28,7 +29,7 @@ import uuid
 from crowd_benchmark_support import (
     BenchmarkLock, EvidenceError, asset_files, clean_environment, configure_settings_profile, default_lock_path,
     hash_files, manifest_identity, read_json, require_private_replay_output,
-    seed_settings_profile, selected_cells, sha256_file, source_files, validate_report,
+    seed_settings_profile, selected_cells, sha256_file, source_files, validate_report, validate_startup_ack,
 )
 
 CLIENT = Path(__file__).resolve().parents[2]
@@ -118,8 +119,28 @@ def command_for(args, log: Path) -> list[str]:
     else:
         command += ["--rendering-method", args.renderer,
                     "--resolution", f"{args.resolution[0]}x{args.resolution[1]}"]
-    command += ["--script", args.benchmark_script]
+    if args.executable_mode == "project":
+        command += ["--script", args.benchmark_script]
+    elif args.benchmark_script != SCRIPT:
+        raise EvidenceError("exported workloads use the package's benchmark main loop; custom --benchmark-script is unsupported")
     return command
+
+
+def wait_for_startup(process, path: Path, request: dict, timeout: float) -> dict:
+    """A release template may ignore --script; prove routing before the long wait."""
+    deadline = time.monotonic() + timeout
+    while True:
+        if path.is_file():
+            if path.stat().st_size > 16384:
+                raise EvidenceError("startup acknowledgement is unexpectedly large")
+            return validate_startup_ack(read_json(path), request)
+        code = process.poll()
+        if code is not None:
+            raise EvidenceError(f"engine exited before benchmark startup acknowledgement ({code})")
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            raise EvidenceError(f"benchmark startup acknowledgement was not received within {timeout:g} seconds")
+        time.sleep(min(.05, remaining))
 
 
 def identity(args) -> dict:
@@ -160,6 +181,8 @@ def run_one(args, variant: str, repeat: int, out_dir: Path) -> dict:
     user_root = out_dir / "userdata" / name
     user_root.mkdir(parents=True)
     report, log = out_dir / f"{name}.json", out_dir / f"{name}.log"
+    started_report = Path(str(report) + ".started.json")
+    start_token = uuid.uuid4().hex
     launch_log = out_dir / f"{name}.launch.log"
     env, cleared = clean_environment(dict(os.environ))
     overrides = {
@@ -179,6 +202,7 @@ def run_one(args, variant: str, repeat: int, out_dir: Path) -> dict:
         "RABBITLANDS_CROWD_BENCH_FPS_CAP": str(args.fps_cap),
         "RABBITLANDS_CROWD_BENCH_RESOLUTION": f"{args.resolution[0]}x{args.resolution[1]}",
         "RABBITLANDS_CROWD_BENCH_EXECUTION_MODE": args.executable_mode,
+        "RABBITLANDS_CROWD_BENCH_START_TOKEN": start_token,
         "RABBITLANDS_CROWD_TUNING": args.tuning,
         "RABBITLANDS_CROWD_BENCH_MINIMAP": {"show": "1", "hide": "0"}.get(args.minimap, ""),
         "RABBITLANDS_CROWD_BENCH_PRESENCE": str(args.presence),
@@ -195,22 +219,40 @@ def run_one(args, variant: str, repeat: int, out_dir: Path) -> dict:
     command = command_for(args, log)
     started = time.monotonic()
     utc = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    startup = {"path": str(started_report), "timeoutSeconds": args.startup_timeout,
+               "valid": False, "acknowledgement": None, "seconds": None, "error": None}
+    startup_request = {"executable_mode": args.executable_mode, "executable": str(args.godot),
+                       "start_token": start_token, "user_root": str(user_root)}
+    if settings_seed:
+        startup_request["settings_seed_user_dir"] = settings_seed["userDataDir"]
     with launch_log.open("w", encoding="utf-8") as stream:
         process = subprocess.Popen(command, env=env, stdout=stream, stderr=subprocess.STDOUT,
                                    cwd=args.project_path if args.executable_mode == "project" else args.godot.parent)
         observed = set_affinity(process.pid, int(args.affinity, 16)) if args.affinity else None
+        startup_request["pid"] = process.pid
         try:
             if args.affinity and observed != int(args.affinity, 16):
-                process.kill()
-                process.wait()
                 raise EvidenceError("requested affinity could not be applied/observed on the launched process")
+            startup["acknowledgement"] = wait_for_startup(process, started_report, startup_request, args.startup_timeout)
+            startup["valid"] = True
+            startup["seconds"] = round(time.monotonic() - started, 3)
             code = process.wait(timeout=args.timeout)
+        except EvidenceError as exc:
+            startup["seconds"] = round(time.monotonic() - started, 3)
+            startup["error"] = str(exc)
+            if process.poll() is None:
+                process.kill()
+            code = process.wait()
         except subprocess.TimeoutExpired:
-            process.kill()
+            if process.poll() is None:
+                process.kill()
             process.wait()
             code = "timeout"
     process_seconds = time.monotonic() - started
-    after = identity(args)
+    try:
+        after = identity(args)
+    except (EvidenceError, OSError) as exc:
+        after = {"error": str(exc)}  # Retain invalid process evidence even if a file disappeared.
     run = {"variant": variant, "repeat": repeat, "exit": code, "pid": process.pid,
            "executable": str(args.godot), "startedUtc": utc,
            "affinityRequested": args.affinity or None, "affinityObserved": observed,
@@ -222,6 +264,7 @@ def run_one(args, variant: str, repeat: int, out_dir: Path) -> dict:
            "identityBefore": before, "identityAfter": after,
            "identityStable": before == after, "interferenceLabel": args.interference_label,
            "requestedMeasurementStatus": args.measurement_status, "data": {}}
+    run["startup"] = startup
     run["settingsProfile"] = args.settings_profile
     run["settingsSeed"] = settings_seed
     if settings_seed:
@@ -230,6 +273,8 @@ def run_one(args, variant: str, repeat: int, out_dir: Path) -> dict:
     if args.replay:
         run["replayInput"] = before["replayInput"]
     try:
+        if not startup["valid"]:
+            raise EvidenceError(startup["error"] or "benchmark startup was not acknowledged")
         if code != 0:
             raise EvidenceError(f"engine did not exit successfully ({code})")
         if before != after:
@@ -242,6 +287,10 @@ def run_one(args, variant: str, repeat: int, out_dir: Path) -> dict:
         if settings_seed:
             request["settings_seed_user_dir"] = settings_seed["userDataDir"]
         run["validation"] = validate_report(data, request, text)
+        actual_user_dir = data["runtimeBuild"]["userDataDir"]
+        acknowledged_user_dir = startup["acknowledgement"]["userDataDir"]
+        if os.path.normcase(str(Path(actual_user_dir).resolve())) != os.path.normcase(str(Path(acknowledged_user_dir).resolve())):
+            raise EvidenceError("final report user directory differs from startup acknowledgement")
         run["data"] = data
     except EvidenceError as exc:
         run["validation"] = {"valid": False, "qualification": "invalid", "errors": [str(exc)]}
@@ -288,6 +337,8 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--warmup-ms", type=int, default=2000)
     p.add_argument("--affinity", default="")
     p.add_argument("--timeout", type=float, default=3600)
+    p.add_argument("--startup-timeout", type=float, default=60,
+                   help="seconds allowed for the benchmark startup acknowledgement before the full workload timeout")
     p.add_argument("--label", default="crowd")
     p.add_argument("--out-dir", type=Path)
     p.add_argument("--lock-path", type=Path)
@@ -322,6 +373,7 @@ def main(argv: list[str] | None = None) -> int:
             raise EvidenceError("invalid map identifier")
         if args.repeats < 1 or args.sample_ms < 500 or args.warmup_ms < 100 or args.fps_cap < 0 \
                 or args.presence < 0 or args.replay_start_ms < 0 or args.timeout <= 0 or args.lock_timeout < 0 \
+                or not math.isfinite(args.startup_timeout) or args.startup_timeout <= 0 \
                 or (args.body_cap is not None and args.body_cap < 0):
             raise EvidenceError("invalid negative/zero workload or timing option")
         if args.affinity and int(args.affinity, 16) <= 0:

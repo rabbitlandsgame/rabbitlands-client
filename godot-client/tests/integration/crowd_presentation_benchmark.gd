@@ -187,6 +187,9 @@ static func cells_for(profile: String) -> Array:
 
 
 func _run() -> void:
+	if not _write_startup_handshake():
+		quit(1)
+		return
 	_headless = DisplayServer.get_name() == "headless"
 	_fps_cap = _env_int("RABBITLANDS_CROWD_BENCH_FPS_CAP", 60, 0)
 	Engine.max_fps = _fps_cap
@@ -298,6 +301,34 @@ func _run() -> void:
 			await _run_cell(cell)
 	await _tear_down_main()
 	_finish()
+
+
+## A release template ignores --script. Prove that the intended workload loop
+## started before imports/map loads, binding the acknowledgement to this run.
+func _write_startup_handshake() -> bool:
+	var execution_mode := _env("RABBITLANDS_CROWD_BENCH_EXECUTION_MODE", "project")
+	if execution_mode not in ["project", "exported"]:
+		push_error("Invalid crowd benchmark execution mode: " + execution_mode)
+		return false
+	var report_path := _env("RABBITLANDS_CROWD_BENCH_OUT", "user://crowd_presentation_benchmark.json")
+	var destination := ProjectSettings.globalize_path(report_path + ".started.json")
+	var temporary := destination + ".tmp-" + str(OS.get_process_id())
+	var file := FileAccess.open(temporary, FileAccess.WRITE)
+	if file == null:
+		push_error("Cannot write crowd benchmark startup acknowledgement: " + temporary)
+		return false
+	file.store_string(JSON.stringify({"schemaVersion": 1, "benchmark": "crowd_presentation",
+		"pid": OS.get_process_id(), "executablePath": OS.get_executable_path(),
+		"executionMode": execution_mode, "userDataDir": OS.get_user_data_dir(),
+		"startToken": OS.get_environment("RABBITLANDS_CROWD_BENCH_START_TOKEN")}, "  "))
+	file.flush()
+	file.close()
+	var error := DirAccess.rename_absolute(temporary, destination)
+	if error != OK:
+		DirAccess.remove_absolute(temporary)
+		push_error("Cannot publish crowd benchmark startup acknowledgement: %s" % error_string(error))
+		return false
+	return true
 
 
 func _set_up_main() -> void:
