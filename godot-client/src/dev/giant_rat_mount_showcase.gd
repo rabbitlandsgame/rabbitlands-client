@@ -79,8 +79,8 @@ func _ready() -> void:
 		stage.add_child(light)
 		var ground := MeshInstance3D.new()
 		var mesh := CylinderMesh.new()
-		mesh.top_radius = 2.8
-		mesh.bottom_radius = 2.8
+		mesh.top_radius = 4.9
+		mesh.bottom_radius = 4.9
 		mesh.height = .06
 		ground.mesh = mesh
 		ground.position.y = -.03
@@ -91,7 +91,7 @@ func _ready() -> void:
 		var camera := Camera3D.new()
 		camera.fov = 43
 		camera.projection = Camera3D.PROJECTION_ORTHOGONAL
-		camera.size = 4.6
+		camera.size = 6.3
 		camera.cull_mask = 3
 		stage.add_child(camera)
 		camera.position = Vector3(4.8, 3.1, -3.8) if index not in [3, 5] else Vector3(3.8, 3.8, 5.7)
@@ -99,8 +99,7 @@ func _ready() -> void:
 			camera.position = Vector3(6.5, 2.6, -.3)
 		elif index == 1:
 			camera.position = Vector3(.5, 3.5, 6.5)
-		camera.look_at(Vector3(-.15, 1.38, .05))
-		if index == 1: camera.look_at(Vector3(-.15,1.38,.05))
+		camera.look_at(Vector3(0, 1.25, 1.05))
 		if travelling and index >= 2:
 			ground.hide()
 			var floor_mesh := MeshInstance3D.new()

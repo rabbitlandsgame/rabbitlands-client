@@ -1,7 +1,8 @@
 {
   "draft": true,
+  "revision": 2,
   "sourceSha256": "628696fb30c5e4edaf5914138319dc9460db83932757f97d13009de9aa069f05",
-  "outputSha256": "702845182bb30f87868f1404663dc546fccd6f5ce6b659fcf630c9f6959da623",
+  "outputSha256": "e57784f3e13a5f9684227c97b7767aa160dcfa8544387daf4811671d2bf8181e",
   "joints": 23,
   "triangles": 4000,
   "clips": [
@@ -20,5 +21,23 @@
   ],
   "maximumIKReachErrorMetres": 0.0,
   "mountOnly": true,
-  "notes": "New anatomical rig/skin and three mount loops on preserved imported geometry/UVs/textures. Creature combat slots are deliberately absent."
+  "surfaceRepair": {
+    "mouthEditedVertices": 505,
+    "tailVertices": 1417,
+    "unchangedOutsideRepairVertices": 9980,
+    "maximumOutsideRepairDisplacementMetres": 0.0,
+    "tailGuideLengthMetres": 3.0591517623703335,
+    "fittedTailGuideLengthMetres": 3.058192126623073,
+    "tailGuideSegmentLengthDifferenceMetres": 2.220446049250313e-16,
+    "repaintedTexels": {
+      "geometry_0_normal": 12985,
+      "geometry_0_basecolor": 14115
+    }
+  },
+  "losslessPacking": {
+    "original_buffer_bytes": 5461472,
+    "packed_buffer_bytes": 2812924,
+    "animation_keys_changed": 0
+  },
+  "notes": "Local muzzle/texture cleanup, rigid facial ownership and a posterior tail rest fit; original topology/UVs and unrelated source surface retained. Creature combat slots are deliberately absent."
 }

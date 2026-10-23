@@ -38,4 +38,4 @@ assert set(results)=={'Idle_A','Walk','Jog'}
 assert worst_loop<.0001,(worst_loop,results)
 assert floor>-.006,(floor,results)
 report={'sha256':hashlib.sha256(source.read_bytes()).hexdigest(),'fresh_blender_import':True,'bones':len(arm.data.bones),'clips':results,'failures':0}
-output.write_text(json.dumps(report,indent=2)+'\n');print('GIANT_RAT_BLENDER_CHECKS',json.dumps(report))
+output.write_text(json.dumps(report,indent=2)+'\n',newline='\n');print('GIANT_RAT_BLENDER_CHECKS',json.dumps(report))

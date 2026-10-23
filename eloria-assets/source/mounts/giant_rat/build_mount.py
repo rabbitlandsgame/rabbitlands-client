@@ -2,11 +2,12 @@
 
 The neutral source is preserved; this explicitly replaces its rejected legacy
 automatic skeleton. No creature definitions or existing animations are changed.
-Run with Python + NumPy. All three loops are in place and use Y up / +Z forward.
+Run with Python + NumPy + Pillow. All loops are in place with Y up / +Z forward.
 """
 from pathlib import Path
 import copy, hashlib, json, math, struct
 import numpy as np
+from repair_surface import repair, repair_mouth_maps, OLD_TAIL, new_tail_points
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[3]
@@ -58,9 +59,38 @@ def segment_distance(points,a,b):
     t=np.clip(((points-a)@(b-a))/np.dot(b-a,b-a),0,1)
     return np.linalg.norm(points-(a+t[:,None]*(b-a)),axis=1),t
 
+def compact_storage(document,binary):
+    """Drop unreachable buffers without changing an attribute or animation key."""
+    result=copy.deepcopy(document);references=[]
+    assert not result.get('extensionsUsed'),'review extension binary references before packing'
+    for mesh in result['meshes']:
+        for primitive in mesh['primitives']:
+            assert not primitive.get('targets')
+            references.extend((primitive['attributes'],key) for key in primitive['attributes'])
+            references.append((primitive,'indices'))
+    for skin in result['skins']:references.append((skin,'inverseBindMatrices'))
+    for animation in result['animations']:
+        for sampler in animation['samplers']:references.extend([(sampler,'input'),(sampler,'output')])
+    kept=sorted({container[key] for container,key in references});remap={old:new for new,old in enumerate(kept)}
+    result['accessors']=[result['accessors'][i] for i in kept]
+    views=[(a,'bufferView') for a in result['accessors']]
+    views.extend((image,'bufferView') for image in result['images'])
+    packed=bytearray();view_map={};new_views=[]
+    for old in sorted({container[key] for container,key in views}):
+        view=result['bufferViews'][old].copy();start=view.get('byteOffset',0)
+        packed.extend(b'\0'*(-len(packed)%4));view['byteOffset']=len(packed)
+        packed.extend(binary[start:start+view['byteLength']]);view_map[old]=len(new_views);new_views.append(view)
+    for container,key in references:container[key]=remap[container[key]]
+    for container,key in views:container[key]=view_map[container[key]]
+    result['bufferViews']=new_views;result['buffers']=[{'byteLength':len(packed)}]
+    return result,packed,{'original_buffer_bytes':len(binary),'packed_buffer_bytes':len(packed),'animation_keys_changed':0}
+
 def main():
     doc,blob=read_glb(SOURCE)
+    regions=json.loads((HERE/'repair-regions-v2.json').read_text())
+    assert regions['sourceSha256']==hashlib.sha256(SOURCE.read_bytes()).hexdigest()
     primitives=doc['meshes'][0]['primitives']
+    assert len(primitives)==1,'reviewed anatomical IDs refer to the single source surface'
     source_points=np.concatenate([accessor(doc,blob,p['attributes']['POSITION']) for p in primitives])
     # Exported surfaces, rather than armature/orphan bounds, set the real floor.
     floor=float(source_points[:,1].min()); scale=1.45/(float(source_points[:,1].max())-floor)
@@ -79,7 +109,7 @@ def main():
             else: a=[sign*.50,.60,-.58];b=[sign*.51,.28,-.70];c=[sign*.49,.095,-.24];parent=hips
             u=bone(end+'_'+side+'_upper',parent,a);k=bone(end+'_'+side+'_lower',u,b);f=bone(end+'_'+side+'_paw',k,c)
             legs.append({'end':end,'side':side,'sign':sign,'ids':[u,k,f]})
-    tail_points=np.array([[.10,.45,-1.19],[-.43,.17,-1.29],[-.95,.09,-1.06],[-1.20,.075,-.57],[-1.13,.07,-.03],[-1.11,.07,.43],[-1.17,.07,.72]])
+    tail_points=new_tail_points()
     tail=[]; parent=hips
     for i,point in enumerate(tail_points): parent=bone('tail_%02d'%(i+1),parent,point);tail.append(parent)
     positions=np.array(positions)
@@ -98,7 +128,16 @@ def main():
     sole_witnesses={}
     for primitive in primitives:
         points=(accessor(doc,blob,primitive['attributes']['POSITION'])-offset)*scale
-        primitive['attributes']['POSITION']=append(doc,blob,points,'VEC3',target=34962)
+        normals=accessor(doc,blob,primitive['attributes']['NORMAL'])
+        indices=accessor(doc,blob,primitive['indices'])
+        fitted,fitted_normals,repair_report=repair(points,normals,indices,regions)
+        witnesses={'sourceSha256':regions['sourceSha256'],
+            'facePoints':np.unique(fitted[regions['faceVertexIds']].astype('<f4'),axis=0).tolist(),
+            'distalTailPoints':np.unique(fitted[regions['distalTailVertexIds']].astype('<f4'),axis=0).tolist()}
+        (HERE/'repair-witnesses-v2.json').write_text(json.dumps(witnesses,separators=(',',':'))+'\n',newline='\n')
+        repair_report['repaintedTexels']=repair_mouth_maps(doc,blob,accessor(doc,blob,primitive['attributes']['TEXCOORD_0']),indices,points,regions)
+        primitive['attributes']['POSITION']=append(doc,blob,fitted,'VEC3',target=34962)
+        primitive['attributes']['NORMAL']=append(doc,blob,fitted_normals,'VEC3',target=34962)
         fields=np.zeros((len(points),len(names)))
         head_mix=smooth(.38,.78,points[:,2])*smooth(.42,.65,points[:,1])
         spine_mix=smooth(-.40,.30,points[:,2])
@@ -124,7 +163,7 @@ def main():
             footprint=(amount>.98)&(points[:,1]<.045)
             sole_witnesses[leg['end']+'_'+leg['side']]=points[footprint].round(7).tolist()
         distances=[];fractions=[]
-        for a,b in zip(tail_points[:-1],tail_points[1:]):
+        for a,b in zip(OLD_TAIL[:-1],OLD_TAIL[1:]):
             distance,fraction=segment_distance(points,a,b);distances.append(distance);fractions.append(fraction)
         distances=np.array(distances).T;segment=distances.argmin(axis=1)
         nearest=distances[np.arange(len(points)),segment]
@@ -134,9 +173,14 @@ def main():
         low_tail=np.maximum((1-smooth(-.84,-.73,points[:,0]))*(1-smooth(.28,.42,points[:,1])),
             (1-smooth(-1.01,-.88,points[:,2]))*(1-smooth(.26,.42,points[:,1])))
         tail_amount=np.maximum(tail_amount,low_tail)
+        tail_amount[regions['tailVertexIds']]=1
         fields*=1-tail_amount[:,None]
         for i in range(len(points)):
             s=segment[i]; t=fractions[s][i]; fields[i,tail[s]]+=tail_amount[i]*(1-t);fields[i,tail[s+1]]+=tail_amount[i]*t
+        # Complete lips/chin/cheeks belong to the skull, never the forelegs.
+        face_amount=smooth(.68,.91,points[:,2])*smooth(.43,.62,points[:,1])
+        face_amount[regions['faceVertexIds']]=1
+        fields*=1-face_amount[:,None];fields[:,head]+=face_amount
         order=np.argsort(fields,axis=1)[:,-4:][:,::-1];weights=np.take_along_axis(fields,order,axis=1)
         weights/=weights.sum(axis=1,keepdims=True)
         assert np.isfinite(weights).all() and np.max(abs(weights.sum(1)-1))<1e-5
@@ -152,7 +196,7 @@ def main():
             bob=(.005+.004*math.sin(2*math.pi*cycle)) if not moving else ((-.03 if clip=='Walk' else -.06)+(.012 if clip=='Walk' else .018)*math.cos(4*math.pi*cycle))
             trans[frame,hips,1]+=bob
             rotations[frame,head]=axisq([1,0,0],(.01 if not moving else .018)*math.sin(2*math.pi*cycle))
-            # Cancel bob at the tail base to keep its low native curl clear.
+            # Keep the low tail base clear during the inherited torso bob.
             trans[frame,tail[0],1]-=bob
             for i,joint in enumerate(tail): rotations[frame,joint]=axisq([0,1,0],(.005 if not moving else .018 if clip=='Walk' else .035)*math.sin(2*math.pi*cycle-i*.55))
             if not moving: continue
@@ -188,15 +232,22 @@ def main():
                 animation['samplers'].append({'input':time_accessor,'output':append(doc,blob,values,kind),'interpolation':'LINEAR'})
                 animation['channels'].append({'sampler':len(animation['samplers'])-1,'target':{'node':joint,'path':path}})
         doc['animations'].append(animation)
-    doc['asset']['generator']='Rabbit Lands imported Giant Rat mount draft v1'
+    doc['asset']['generator']='Rabbit Lands imported Giant Rat mount draft v2'
     doc['extras']={'mountOnly':True,'source':'existing Meshy Dock Rat','sourceSha256':hashlib.sha256(SOURCE.read_bytes()).hexdigest(),'rootMotion':'in_place'}
     doc['buffers']=[{'byteLength':len(blob)}]
+    # Discard unused source buffers; preserve every animation key exactly.
+    original_doc,original_blob=doc,blob
+    doc,blob,packing=compact_storage(doc,blob)
+    for old,new in zip(original_doc['meshes'][0]['primitives'],doc['meshes'][0]['primitives']):
+        for attribute in old['attributes']:
+            assert np.array_equal(accessor(original_doc,original_blob,old['attributes'][attribute]),accessor(doc,blob,new['attributes'][attribute]))
+        assert doc['accessors'][new['attributes']['JOINTS_0']]['componentType']==5123
     encoded=json.dumps(doc,separators=(',',':')).encode();encoded+=b' '* (-len(encoded)%4);blob.extend(b'\0'*(-len(blob)%4))
     output=struct.pack('<III',0x46546c67,2,28+len(encoded)+len(blob))+struct.pack('<II',len(encoded),0x4e4f534a)+encoded+struct.pack('<II',len(blob),0x004e4942)+blob
     OUTPUT.parent.mkdir(parents=True,exist_ok=True);OUTPUT.write_bytes(output)
-    report={'draft':True,'sourceSha256':hashlib.sha256(SOURCE.read_bytes()).hexdigest(),'outputSha256':hashlib.sha256(output).hexdigest(),'joints':len(names),'triangles':4000,'clips':[(a['name'],doc['accessors'][a['samplers'][0]['input']]['max'][0]) for a in doc['animations']],'maximumIKReachErrorMetres':ik_error,'mountOnly':True,'notes':'New anatomical rig/skin and three mount loops on preserved imported geometry/UVs/textures. Creature combat slots are deliberately absent.'}
-    (HERE/'build-report.json').write_text(json.dumps(report,indent=2)+'\n')
-    (HERE/'sole-witnesses.json').write_text(json.dumps(sole_witnesses,separators=(',',':'))+'\n')
+    report={'draft':True,'revision':2,'sourceSha256':hashlib.sha256(SOURCE.read_bytes()).hexdigest(),'outputSha256':hashlib.sha256(output).hexdigest(),'joints':len(names),'triangles':4000,'clips':[(a['name'],doc['accessors'][a['samplers'][0]['input']]['max'][0]) for a in doc['animations']],'maximumIKReachErrorMetres':ik_error,'mountOnly':True,'surfaceRepair':repair_report,'losslessPacking':packing,'notes':'Local muzzle/texture cleanup, rigid facial ownership and a posterior tail rest fit; original topology/UVs and unrelated source surface retained. Creature combat slots are deliberately absent.'}
+    (HERE/'build-report.json').write_text(json.dumps(report,indent=2)+'\n',newline='\n')
+    (HERE/'sole-witnesses.json').write_text(json.dumps(sole_witnesses,separators=(',',':'))+'\n',newline='\n')
     print(json.dumps(report))
 
 if __name__=='__main__': main()

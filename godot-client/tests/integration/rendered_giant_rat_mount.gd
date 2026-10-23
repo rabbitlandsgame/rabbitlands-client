@@ -8,11 +8,16 @@ func run() -> void:
 	var view: Variant = (load("res://src/dev/giant_rat_mount_showcase.tscn") as PackedScene).instantiate()
 	root.add_child(view)
 	view.manual = true
-	var audit := "--audit" in OS.get_cmdline_user_args()
+	var detail := "--detail" in OS.get_cmdline_user_args()
+	var audit := "--audit" in OS.get_cmdline_user_args() or detail
 	if audit:
 		var cameras := [Vector3(0,2.1,-6),Vector3(6,2.1,0),Vector3(0,2.1,6),
 			Vector3(0,6,.501),Vector3(6,2.1,0),Vector3(6,2.1,0)]
 		var labels := ["SOURCE / FRONT","SOURCE / SIDE","SOURCE / REAR","SOURCE / TOP","SOURCE / WALK","SOURCE / RUN"]
+		if detail:
+			cameras = [Vector3(0,1.15,-5),Vector3(4,1.1,-4),Vector3(4,1.1,-4),
+				Vector3(0,7,1.01),Vector3(0,2.5,7),Vector3(6,2.5,1)]
+			labels = ["MOUTH / REST","MOUTH / NORMAL","MOUTH / FAST","TAIL / REST TOP","TAIL / NORMAL REAR","TAIL / FAST SIDE"]
 		for index: int in view.actors.size():
 			var actor: ReplicatedActor3D = view.actors[index]
 			actor.get_node("NativeModel").hide()
@@ -23,6 +28,12 @@ func run() -> void:
 			camera.position = cameras[index]
 			camera.size = 4.2 if index == 3 else 3.4
 			camera.look_at(Vector3(0,1.15,.5 if index == 3 else 0.0))
+			if detail:
+				camera.size = 1.15 if index < 3 else (6.8 if index == 3 else 6.3)
+				if index < 3:
+					var skull := actor._mount_visual.pony.get_skeleton() as Skeleton3D
+					camera.look_at(skull.global_transform * skull.get_bone_global_pose(skull.find_bone("head")) * Vector3(0,-.05,.30))
+				else: camera.look_at(Vector3(0,.65,1.2))
 			(stage.get_parent().get_parent().get_parent().get_child(0) as Label).text = labels[index]
 	for actor: ReplicatedActor3D in view.actors:
 		actor._mount_visual.set_process(false)
@@ -56,7 +67,7 @@ func run() -> void:
 		if audit:
 			for index: int in view.actors.size():
 				var pony: ReplicatedActor3D = view.actors[index]._mount_visual.pony
-				var clip := "Walk" if index == 4 else ("Jog" if index == 5 else "Idle_A")
+				var clip := (["Idle_A","Walk","Jog","Idle_A","Walk","Jog"][index] if detail else ("Walk" if index == 4 else ("Jog" if index == 5 else "Idle_A"))) as String
 				pony.animation_player.play(clip)
 				pony.animation_player.seek(fposmod(frame / 30.0,pony.animation_player.get_animation(clip).length),true)
 				pony.animation_player.pause()

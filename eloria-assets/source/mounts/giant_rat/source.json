@@ -11,7 +11,11 @@
     "Remove the rejected automatic rig; prepare a static neutral source with smooth normals",
     "Normalize the exported surface to a 1.45 metre height and centre the body separately from its curled tail",
     "Fit a dedicated 23-joint mount skeleton with complete paw, head and tail ownership",
-    "Author in-place idle, normal walk and fast scurry loops with fixed-world paw orientation and a low, length-preserving tail curl"
+    "Author in-place idle, normal walk and fast scurry loops with fixed-world paw orientation and a coherent tail wave",
+    "Revision 2: smooth and tuck the malformed whisker clumps into a closed muzzle; repair their baked colour/normal islands including filter padding",
+    "Revision 2: rigidly attach the complete lips, chin and cheeks to the skull, protecting original anatomical witnesses from foreleg motion",
+    "Revision 2: uncurl the physical tail behind the rump, preserving its proximal attachment, guide segment lengths, cross-section offsets and unrelated body surface",
+    "Losslessly drop unreachable source buffers without changing any animation keys"
   ],
   "contract": {
     "kind": "mount-only asset, not a combat creature",
@@ -34,5 +38,12 @@
   "engineCheck": "res://tests/test_giant_rat_mount_draft.gd",
   "renderCheck": "res://tests/integration/rendered_giant_rat_mount.gd",
   "publication": "Draft helper injects the model/profile only into the offline review. Existing mount catalogue, server ownership and live assets remain unchanged.",
-  "freshImportCheck": "blender --background --factory-startup --python eloria-assets/source/mounts/giant_rat/verify_import.py"
+  "freshImportCheck": "blender --background --factory-startup --python eloria-assets/source/mounts/giant_rat/verify_import.py",
+  "revision": 2,
+  "repairRegions": "repair-regions-v2.json",
+  "repairWitnesses": "repair-witnesses-v2.json",
+  "replayDependencies": [
+    "NumPy",
+    "Pillow"
+  ]
 }
