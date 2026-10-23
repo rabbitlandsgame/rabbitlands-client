@@ -2616,7 +2616,7 @@ func _build_chat_surfaces() -> void:
 	content.add_child(chat_log_tabs)
 	content.move_child(chat_log_tabs, 1)
 	chat_log_tabs.tab_selected.connect(func(_key: String) -> void: _sync_console())
-	chat_log_tabs.sync(AppState.active_channels, AppState.chat_lines)
+	chat_log_tabs.sync(AppState.active_channels, AppState.chat_history)
 	for line: Dictionary in AppState.chat_lines:
 		chat_hud.remember_peer(ChatMessages.peer(line))
 	_on_chat_configuration_changed("", null)
@@ -4700,7 +4700,7 @@ func _on_channel_tab_pressed(channel_index: int) -> void:
 func _sync_channel_tabs() -> void:
 	_chat_tab = chat_hud.sync_channels(AppState.active_channels, _chat_tab)
 	if chat_log_tabs != null:
-		chat_log_tabs.sync(AppState.active_channels, AppState.chat_lines)
+		chat_log_tabs.sync(AppState.active_channels, AppState.chat_history)
 	_sync_chat()
 
 func _reveal_chat_messages() -> void:
@@ -9559,20 +9559,20 @@ func _sync_chat() -> void:
 			func(line: Dictionary) -> bool: return _system_line_shown(line)), CHAT_PANEL_LINES)
 	_chat_tail = _last_chat_line()
 
-func _render_chat_feed(target: RichTextLabel, lines: Array, cap: int) -> void:
+func _render_chat_feed(target: RichTextLabel, lines: Array, cap: int = 0) -> void:
 	target.clear()
 	target.scroll_following = true
-	for line: Dictionary in lines.slice(maxi(0, lines.size() - cap)):
+	var start := maxi(0, lines.size() - cap) if cap > 0 else 0
+	for line: Dictionary in lines.slice(start):
 		_append_chat_text(target, line)
 	target.scroll_to_line(maxi(0, target.get_line_count() - 1))
 
 func _sync_console() -> void:
 	if chat_log_tabs == null:
 		return
-	chat_log_tabs.sync(AppState.active_channels, AppState.chat_lines)
-	_render_chat_feed(console_output, AppState.chat_lines.filter(
-		func(line: Dictionary) -> bool: return _console_line_shown(line)),
-		AppState.CHAT_LINE_LIMIT)
+	chat_log_tabs.sync(AppState.active_channels, AppState.chat_history)
+	_render_chat_feed(console_output, AppState.chat_history.filter(
+		func(line: Dictionary) -> bool: return _console_line_shown(line)))
 	_console_tail = _last_chat_line()
 
 func _last_chat_line() -> Dictionary:
@@ -9615,16 +9615,16 @@ func _append_chat_line() -> void:
 	if count >= 2 and is_same(previous, _console_tail):
 		_console_tail = line
 		if _console_line_shown(line):
-			_append_to_chat_feed(console_output, line, AppState.CHAT_LINE_LIMIT)
+			_append_to_chat_feed(console_output, line)
 	else:
 		_sync_console()
 
-func _append_to_chat_feed(target: RichTextLabel, line: Dictionary, cap: int) -> void:
+func _append_to_chat_feed(target: RichTextLabel, line: Dictionary, cap: int = 0) -> void:
 	var scroll := target.get_v_scroll_bar()
 	var following := scroll.value >= scroll.max_value - scroll.page - 2
 	target.scroll_following = following
 	_append_chat_text(target, line)
-	while target.get_paragraph_count() > cap + 1:
+	while cap > 0 and target.get_paragraph_count() > cap + 1:
 		target.remove_paragraph(0, true)
 	if following:
 		target.scroll_to_line(maxi(0, target.get_line_count() - 1))
@@ -14267,7 +14267,7 @@ func _on_chat_submitted(text: String) -> void:
 	# exception - the client lists its half and the server answers with the
 	# commands it takes from this player.
 	var local: ConsoleCommands.Result = console_commands.run(
-		message, AppState.chat_lines)
+		message, AppState.chat_history)
 	if local.handled:
 		for line: String in local.lines:
 			AppState.append_local_line(line)
