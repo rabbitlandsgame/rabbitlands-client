@@ -183,13 +183,13 @@ def release_notes(sha: str, stages: dict[str, Path], linux_assets: list[Path]) -
                if split else f"tar -xzf {linux}.tar.gz -C ~/Games")
     online = (stages["windows"].parent / f"{windows}-setup-downloads.json").is_file()
     windows_install = (
-        f"Download `{windows}-setup.exe` and run it. An internet connection is required: "
+        f"Download `{windows}-setup.exe` from **Assets** below and run it. An internet connection is required: "
         "setup downloads and verifies the matching game files automatically. "
         "Use the Rabbit Lands Start menu shortcut after installation. "
         "Installation is per user and needs no administrator rights."
         if online else
         f"Download `{windows}-setup.exe` and every accompanying `{windows}-setup-*.bin` "
-        "file into the same folder. Run the setup executable, then use the Rabbit Lands "
+        "file from **Assets** below into the same folder. Run the setup executable, then use the Rabbit Lands "
         "Start menu shortcut. Installation is per user and needs no administrator rights.")
     return f"""# Rabbit Lands desktop downloads
 
@@ -202,7 +202,7 @@ Only the current compiled client build is kept in GitHub Releases.
 
 ## Linux x86_64
 
-Download {linux_download} into one folder. Extract and launch:
+Download {linux_download} from **Assets** below into one folder. Extract and launch:
 
 ```sh
 mkdir -p ~/Games
@@ -268,7 +268,7 @@ def assemble(root: Path, sha: str) -> Path:
     if any(p.name.endswith("-download.sh") for p in assets):
         linux = stages["linux"].name
         start, end = notes.index("Download ", notes.index("## Linux")), notes.index("Keep the complete game folder")
-        notes = notes[:start] + f'''Download `{linux}-download.sh`, then run:
+        notes = notes[:start] + f'''Download `{linux}-download.sh` from **Assets** below, then run:
 
 ```sh
 sh ./{linux}-download.sh

@@ -105,6 +105,10 @@ After activation:
 - **Result:** review the current [draft release](https://github.com/rabbitlandsgame/rabbitlands-client/releases).
   Publication remains manual. Shared supporting files are available during the
   build, so the downloaded draft installers can be tested before publication.
+  Download the named Windows setup or Linux helper from the release's **Assets**
+  list. GitHub supplies temporary download URLs for drafts, so the instructions
+  use that list rather than links to a tag that is not yet published. The same
+  instructions continue to work after publication.
 
 The workflow reuses the project's existing client draft or creates one when
 needed. Previously published downloads remain available while a new commit

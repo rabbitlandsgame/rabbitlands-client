@@ -117,12 +117,12 @@ Client commit: `{sha}`. Only the current compiled client is kept in Releases.
 
 ## Windows x86_64
 
-Download [the Windows installer]({base}/{windows}-setup.exe) and run it.
+Download the Windows installer, `{windows}-setup.exe`, from **Assets** below and run it.
 Setup downloads and verifies the prepared game files. Installation is per user.
 
 ## Linux x86_64
 
-Download [the Linux download helper]({base}/{linux}-download.sh) and run:
+Download the Linux helper, `{linux}-download.sh`, from **Assets** below and run:
 
 ```sh
 sh ./{linux}-download.sh

@@ -69,6 +69,12 @@ def test_finalizer_verifies_every_part_before_retagging_or_pruning(tmp_path, mon
     assert upload < retag < prune
     assert "--draft" in calls[retag] and not any("--draft=false" in call for call in calls)
     assert len((tmp_path / "final/SHA256SUMS").read_text().splitlines()) == 7
+    notes = (tmp_path / "final/RELEASE-NOTES.md").read_text()
+    assert f"`RabbitLands-Windows-20261017-{SHA[:9]}-setup.exe`, from **Assets** below" in notes
+    assert f"`RabbitLands-Linux-20261017-{SHA[:9]}-download.sh`, from **Assets** below" in notes
+    # Draft assets use GitHub's temporary URL; the future published tag 404s.
+    # The built-in Assets links remain correct after publication and retagging.
+    assert f"/releases/download/client-{SHA}/" not in notes
 
 
 def test_bad_cloud_digest_preserves_previous_files_and_tag(tmp_path, monkeypatch):
