@@ -183,6 +183,7 @@ var achievements_state: Dictionary = {"counters": [], "completed": []}
 ## a client copy of it would go stale the first time a threshold moved.
 var achievements_catalog: Dictionary = {"worn_title": "", "entries": []}
 var leaderboard: Dictionary = {}
+var gauntlet_ready: Dictionary = {}
 ## What each player on this map is calling themselves, {actor_id: title}. Kept
 ## apart from the actor's display name, which carries a colour byte, the name
 ## and the guild tag in one string that every client unpicks by hand.
@@ -667,6 +668,7 @@ func _on_connection_state_changed(value: String) -> void:
 		achievements_state = {"counters": [], "completed": []}
 		achievements_catalog = {"worn_title": "", "entries": []}
 		leaderboard.clear()
+		gauntlet_ready.clear()
 		actor_titles.clear()
 		actor_occupations.clear()
 		actor_mounts.clear()
@@ -1505,6 +1507,9 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			# Every actor is drawn on the ground the table now says it holds.
 			mark_all_actors_changed()
 			state_changed.emit(&"actor_footprints")
+		"gauntlet_ready":
+			gauntlet_ready = (event.data as Dictionary).duplicate(true)
+			state_changed.emit(&"gauntlet_ready")
 		"party":
 			party = {"in_party": bool(event.in_party),
 				"members": event.members,

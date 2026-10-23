@@ -84,6 +84,7 @@ func _init() -> void:
 		"experience64_v1": EloriaProtocol.ServerMessage.ELORIA_EXPERIENCE_STATE,
 		"guild_window_v1": EloriaProtocol.ServerMessage.ELORIA_GUILD_STATE,
 		"party_window_v1": EloriaProtocol.ServerMessage.ELORIA_PARTY_STATE,
+		"gauntlet_ready_v1": EloriaProtocol.ServerMessage.ELORIA_GAUNTLET_READY_STATE,
 		"perk_catalog_v3": EloriaProtocol.ServerMessage.ELORIA_PERK_CATALOG,
 		"quest_archive_v1":
 			EloriaProtocol.ServerMessage.ELORIA_QUEST_ARCHIVE_STATE,
@@ -102,6 +103,8 @@ func _init() -> void:
 		"arrival_ready_v1": EloriaProtocol.ServerMessage.CHANGE_MAP,
 		"keyboard_intent_v1": EloriaProtocol.ServerMessage.ELORIA_MOVE_INTENT}
 	var capability_probes: Dictionary = {
+		EloriaProtocol.ServerMessage.ELORIA_GAUNTLET_READY_STATE:
+			'{"version":1,"open":false,"reason":"Cancelled"}'.to_utf8_buffer().hex_encode(),
 		EloriaProtocol.ServerMessage.ELORIA_LEADERBOARD_STATE: (
 			'{"version":1,"category":"overall","days":0,"request_id":0,'
 			+ '"categories":[{"key":"overall","label":"Overall","group":"Skills","unit":"XP","icon":"overall"}],'

@@ -138,6 +138,7 @@ enum ServerMessage {
 	# server's clock for the packets that follow it, and riding-table deltas.
 	ELORIA_PRESENCE = 197, ELORIA_SERVER_TIME = 196, ELORIA_MOUNT_DELTAS = 195,
 	ELORIA_LEADERBOARD_STATE = 194,
+	ELORIA_GAUNTLET_READY_STATE = 193,
 	# Which map package the server was built against. Continues the same
 	# downward run below 211.
 	ELORIA_MAP_DIGEST = 209,
@@ -312,6 +313,7 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"navigation_hud_v1",
 	"map_marker_actor_v1",
 	"party_window_v1",
+	"gauntlet_ready_v1",
 	"perk_catalog_v3",
 	"player_info_v1",
 	"achievements_window_v1",
@@ -1193,6 +1195,8 @@ static func decode_server(command: int, payload: PackedByteArray, logical_coordi
 			if not notice is Dictionary or notice.get("schema") != 1:
 				return {"type": "invalid", "error": "client_update_shape"}
 			return {"type": "client_update", "notice": notice}
+		ServerMessage.ELORIA_GAUNTLET_READY_STATE:
+			return decode_gauntlet_ready(payload)
 		ServerMessage.ELORIA_LANTERN_STATE:
 			return decode_lantern(payload, logical_coordinates)
 		ServerMessage.ELORIA_EXPERIENCE_STATE:
@@ -1732,11 +1736,32 @@ static func decode_quest_archive(payload: PackedByteArray) -> Dictionary:
 		return {"type": "invalid", "error": "quest_archive_trailing"}
 	return {"type": "quest_archive", "entries": entries}
 
+## Command 193. A shared selection and each party member's explicit consent.
+static func decode_gauntlet_ready(payload: PackedByteArray) -> Dictionary:
+	var state: Variant = JSON.parse_string(payload.get_string_from_utf8())
+	if not state is Dictionary or state.get("version") != 1 or not state.get("open") is bool:
+		return {"type": "invalid", "error": "gauntlet_ready_shape"}
+	if state.open:
+		for key: String in ["check_id", "route", "difficulty"]:
+			if not state.get(key) is String or str(state[key]).is_empty():
+				return {"type": "invalid", "error": "gauntlet_ready_text"}
+		if not state.get("members") is Array or state.members.is_empty() or state.members.size() > 8:
+			return {"type": "invalid", "error": "gauntlet_ready_members"}
+		if not (state.get("level") is float or state.get("level") is int):
+			return {"type": "invalid", "error": "gauntlet_ready_level"}
+		for key: String in ["is_leader", "can_start", "in_party"]:
+			if not state.get(key) is bool:
+				return {"type": "invalid", "error": "gauntlet_ready_flags"}
+		for member: Variant in state.members:
+			if not member is Dictionary or not member.get("name") is String or not member.get("status") is String:
+				return {"type": "invalid", "error": "gauntlet_ready_member"}
+			for key: String in ["self", "leader", "ready"]:
+				if not member.get(key) is bool:
+					return {"type": "invalid", "error": "gauntlet_ready_member_flags"}
+	return {"type": "gauntlet_ready", "data": state}
+
 ## Command 240. Who is in the party, how they are doing, and where they are.
-##
-## An offline member still arrives with a row: the server states their absence
-## rather than dropping them, so the window can say "offline" instead of
-## quietly shrinking and leaving the player to notice on their own.
+## Offline members keep their rows so their absence remains visible.
 static func decode_party(payload: PackedByteArray) -> Dictionary:
 	if payload.size() < 5:
 		return {"type": "invalid", "error": "party_length"}

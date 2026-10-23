@@ -169,6 +169,7 @@ var _market_tab := "browse"
 ## When the last request went out, or -1 once the server has answered it.
 var _market_request_msec := -1
 var party_panel: PanelContainer
+var gauntlet_ready_window: Control
 var party_header: Label
 var party_rows: VBoxContainer
 var party_invite_row: HBoxContainer
@@ -216,6 +217,8 @@ func _ready() -> void:
 	# too, or every centre-anchored readout lands 640 pixels off screen.
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_build()
+	gauntlet_ready_window = preload("res://src/ui/gauntlet_ready_window.gd").new()
+	add_child(gauntlet_ready_window)
 	AppState.state_changed.connect(_on_state_changed)
 	sync_all()
 
@@ -246,7 +249,10 @@ func close_top(include_party := false) -> bool:
 		# The roster is persistent HUD; its close button and toggle still work.
 		if panel == party_panel and not include_party or not panel.visible:
 			continue
-		if panel == merchant_panel:
+		if panel == gauntlet_ready_window.panel:
+			gauntlet_ready_window.cancel()
+			panel.hide()
+		elif panel == merchant_panel:
 			AppState.close_merchant()
 		elif panel == market_panel:
 			AppState.close_marketplace()
@@ -276,7 +282,7 @@ func toggle_achievements() -> void:
 func _cascade() -> Array[PanelContainer]:
 	# The tracked-quest readout is deliberately absent: it is a HUD element the
 	# player pinned, not a window covering the screen, so cancel leaves it be.
-	return [merchant_panel, market_panel, detail_panel, mail_panel,
+	return [gauntlet_ready_window.panel, merchant_panel, market_panel, detail_panel, mail_panel,
 		quest_panel, party_panel, achievements_panel]
 
 func _toggle(panel: PanelContainer) -> void:
@@ -284,7 +290,7 @@ func _toggle(panel: PanelContainer) -> void:
 		panel.hide()
 		return
 	for other: PanelContainer in _cascade():
-		if other != panel and other != party_panel:
+		if other != panel and other != party_panel and other != gauntlet_ready_window.panel:
 			other.hide()
 	panel.show()
 	panel.move_to_front()
