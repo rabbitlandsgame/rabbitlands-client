@@ -40,7 +40,7 @@ func register(window: Control, modal := false) -> void:
 		window.move_to_front()
 	_sync_layers()
 
-## The map and console cover the world without covering the player's HUD.
+## Background views cover the world without covering the player's HUD.
 ## Keep their GUI order below the HUD too; z_index alone cannot route clicks.
 func register_full_window_view(window: Control, world_surface: Control) -> void:
 	if window == null or window in _full_window_views:

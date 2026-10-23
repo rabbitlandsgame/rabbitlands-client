@@ -2615,6 +2615,7 @@ func _on_invasion_assistant_command_requested(command: String) -> void:
 
 func _show_chat_input() -> void:
 	chat_hud.open_chat(true)
+	WindowStackScript.activate(chat_hud)
 	chat_input.show()
 	chat_input.grab_focus()
 	_sync_hud_button_states(true)
@@ -2673,7 +2674,7 @@ func _toggle_console() -> void:
 	console_panel.show()
 	chat_hud.input.release_focus()
 
-## World annotations belong to the covered scene, while HUD controls stay usable.
+## World annotations belong to the covered scene beneath the map and console.
 ## Follow visibility signals so close buttons, Escape and direct show/hide agree.
 func _sync_world_overlay_visibility() -> void:
 	var world_visible := not full_map.visible and not console_panel.visible
@@ -9456,7 +9457,9 @@ func _configure_window_stack() -> void:
 	game_view.add_child(window_stack)
 	window_stack.configure(game_view)
 	_layout_full_window_views()
-	window_stack.register_full_window_view(full_map, viewport_container)
+	# The Tab map covers HUD parts in both drawing and pointer order. Normal
+	# window activation still lets explicitly opened windows appear above it.
+	window_stack.register(full_map)
 	window_stack.register_full_window_view(console_panel, viewport_container)
 	full_map.visibility_changed.connect(_sync_world_overlay_visibility)
 	console_panel.visibility_changed.connect(_sync_world_overlay_visibility)
@@ -11800,8 +11803,7 @@ func _invasion_monitor_dock_rect() -> Rect2:
 
 
 func _layout_full_window_views() -> void:
-	# These views fill the client canvas. HUD parts can move to any edge or
-	# float over them without changing their bounds or leaving legacy gaps.
+	# Fill the client canvas independently of movable HUD parts and presets.
 	for view: Control in [full_map, console_panel]:
 		view.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 

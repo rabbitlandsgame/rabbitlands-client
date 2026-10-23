@@ -62,18 +62,11 @@ func exposed_point(control: Control) -> Vector2:
 	return rect.get_center()
 
 func close_map(button: Button, label: String) -> void:
-	if button.is_visible_in_tree():
-		await click_at(button.get_global_rect().get_center())
-		expect(not main.full_map.visible, label + ": HUD map button remains clickable over the map")
-	else:
-		var inventory: Button = main.get_node("%InventoryButton")
-		await click_at(inventory.get_global_rect().get_center())
-		expect(main.inventory_panel.visible and main.inventory_panel.get_index() > main.full_map.get_index(),
-			label + ": visible HUD inventory button works above the map")
-		main.inventory_panel.hide()
-		root.gui_release_focus()
-		await press(KEY_TAB)
-		expect(not main.full_map.visible and not button.visible, label + ": Tab closes the map without enabling a hidden HUD icon")
+	var was_visible := button.visible
+	root.gui_release_focus()
+	await press(KEY_TAB)
+	expect(not main.full_map.visible and button.visible == was_visible,
+		label + ": Tab reveals the HUD without changing icon visibility")
 
 func geometry() -> Dictionary:
 	var result := {}
@@ -161,10 +154,22 @@ func check_layout(label: String) -> void:
 	await press(KEY_TAB)
 	expect(main.full_map.visible and not main.console_panel.visible, label + ": Tab opens only the map")
 	expect(bounds_match(main.full_map), label + ": map fills the complete game window")
-	expect(main.full_map.get_index() > main.viewport_container.get_index()
-		and main.full_map.get_index() < main.get_node("%Quickbar").get_index()
-		and main.full_map.z_index <= main.get_node("%Quickbar").z_index,
-		label + ": map draws and receives clicks below the HUD")
+	for key: String in Presets.PARTS:
+		var part: Control = workspace._root(key)
+		if not part.is_visible_in_tree(): continue
+		expect(main.full_map.get_index() > part.get_index()
+			and main.full_map.z_index > part.z_index,
+			label + ": map covers HUD component " + key)
+	expect(main.full_map.z_index > workspace.frame_overlay.z_index,
+		label + ": shared HUD borders stay behind the map")
+	var inventory: Button = main.get_node("%InventoryButton")
+	if inventory.is_visible_in_tree():
+		var motion := InputEventMouseMotion.new()
+		motion.position = inventory.get_global_rect().get_center()
+		root.push_input(motion, true)
+		await frames(1)
+		expect(root.gui_get_hovered_control() != inventory,
+			label + ": covered HUD buttons cannot intercept map input")
 	var previous_map_clicks := map_clicks
 	await click_at(await exposed_point(main.map_image))
 	expect(map_clicks == previous_map_clicks + 1, label + ": exposed map surface still receives clicks")
@@ -175,7 +180,7 @@ func check_layout(label: String) -> void:
 	main._hide_chat_input()
 	root.gui_release_focus()
 	await close_map(button, label)
-	expect(map_clicks == previous_map_clicks + 1, label + ": HUD click does not leak into the map")
+	expect(map_clicks == previous_map_clicks + 1, label + ": closing the map does not issue another map click")
 	root.gui_release_focus()
 	await press(KEY_QUOTELEFT)
 	expect(main.console_panel.visible and not main.full_map.visible, label + ": console hotkey opens only the console")
@@ -235,7 +240,13 @@ func run() -> void:
 	main.get_node("LoginPanel").hide()
 	main.get_node("LoginBackground").hide()
 	main.game_view.show()
+	# Keep the live FPS counter's changing digit width out of geometry checks.
+	main.fps_label.text = "FPS: 60"
+	main._fps_refresh_msec = Time.get_ticks_msec() + 300000
 	await check_overlay_transitions()
+	main._toggle_full_map()
+	await press(KEY_ESCAPE)
+	expect(not main.full_map.visible, "Escape closes the map and reveals the HUD")
 	main.map_image.gui_input.connect(func(event: InputEvent) -> void:
 		if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT: map_clicks += 1)
 	main.console_output.gui_input.connect(func(event: InputEvent) -> void:
