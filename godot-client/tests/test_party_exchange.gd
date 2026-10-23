@@ -20,6 +20,12 @@ func find_button(parent: Node, text: String) -> Button:
 		if found != null: return found
 	return null
 
+func contains_label(parent: Node, text: String) -> bool:
+	if parent is Label and parent.text.contains(text): return true
+	for child: Node in parent.get_children():
+		if contains_label(child, text): return true
+	return false
+
 func run() -> void:
 	root.get_node("Network").set_process(false)
 	root.content_scale_size = Vector2i.ZERO
@@ -72,7 +78,46 @@ func run() -> void:
 		await capture("party-exchange.png")
 		root.size = Vector2i(1024, 640)
 		await capture("party-exchange-1024.png")
+	root.size = Vector2i(1600, 1000)
+	var propose := find_button(ui._exchange_cards, "Propose price…")
+	expect(propose != null, "an active listing offers a party price proposal")
+	propose.pressed.emit()
+	await process_frame
+	expect(ui.reprice_dialog.visible and ui.reprice_dialog.size.y < 430 and int(ui.reprice_amount.value) == 5, "price proposals show the current price in a bounded dialog")
+	expect(ui.reprice_dialog.get_ok_button().disabled, "the unchanged current price cannot start a proposal")
+	ui.reprice_amount.get_line_edit().text = "8"
+	ui.reprice_amount.apply()
+	if OS.get_cmdline_user_args().has("--render"):
+		await capture("party-exchange-price-dialog.png")
+	ui.reprice_dialog.confirmed.emit()
+	ui.reprice_dialog.hide()
+	expect(sent.back().action == "request_price_change" and sent.back().unit_price == 8 and sent.back().run_id == state.run_id and sent.back().listing_id == state.exchange[1].listing_id, "a proposal names the original ledger, listing and selected price")
+	var reprice: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://tests/fixtures/party_exchange_reprice.json"))
+	expect(protocol.decode_gauntlet_loot(JSON.stringify(reprice).to_utf8_buffer()).type == "gauntlet_loot", "real server price proposals decode")
+	bad = reprice.duplicate(true)
+	bad.exchange[1].vote_kind = "direct_edit"
+	expect(protocol.decode_gauntlet_loot(JSON.stringify(bad).to_utf8_buffer()).type == "invalid", "unknown proposal kinds are rejected")
+	bad = reprice.duplicate(true)
+	bad.exchange[1].proposed_price = 0
+	expect(protocol.decode_gauntlet_loot(JSON.stringify(bad).to_utf8_buffer()).type == "invalid", "price proposals require a positive price")
+	ui.apply_snapshot(reprice)
+	expect(contains_label(ui._exchange_cards, "Proposed price: 8 GC per item") and contains_label(ui._exchange_cards, "Current: 5 GC until approval"), "voters see both the proposed and current price")
+	expect(find_button(ui._exchange_cards, "Propose price…") == null and find_button(ui._exchange_cards, "Request withdrawal") == null, "an open proposal blocks overlapping requests")
+	var price_no := find_button(ui._exchange_cards.get_child(1), "No")
+	price_no.pressed.emit()
+	expect(sent.back().action == "vote_price_change" and sent.back().request_id == reprice.exchange[1].request_id and sent.back().vote == "no", "price votes name their purpose and exact persisted request")
+	ui.apply_snapshot(reprice)
+	if OS.get_cmdline_user_args().has("--render"):
+		await capture("party-exchange-price-vote.png")
+		root.size = Vector2i(1024, 640)
+		await process_frame
+		await process_frame
+		ui._exchange_cards.get_parent().scroll_vertical = 100000
+		await capture("party-exchange-price-vote-1024.png")
+		root.size = Vector2i(1600, 1000)
+	ui.call("_propose_price", state.exchange[1])
 	ui.close()
+	expect(not ui.reprice_dialog.visible, "closing the ledger closes its price proposal editor")
 	expect(ui.reopen.visible, "party listings remain accessible after closing the distribution window")
 	var stage: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://tests/fixtures/party_exchange_staged.json"))
 	expect(protocol.decode_gauntlet_loot(JSON.stringify(stage).to_utf8_buffer()).type == "gauntlet_loot", "the real staged-listing response decodes")
@@ -101,7 +146,7 @@ func run() -> void:
 	other.revision = stage.revision
 	other.open = true
 	ui.apply_snapshot(other)
-	expect(not ui.exchange_dialog.visible, "switching runs closes stale editors even when revisions match")
+	expect(not ui.exchange_dialog.visible and not ui.reprice_dialog.visible, "switching runs closes stale editors even when revisions match")
 	ui.apply_snapshot(stage)
 	if OS.get_cmdline_user_args().has("--render"):
 		await capture("party-exchange-staging.png")

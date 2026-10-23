@@ -1860,6 +1860,10 @@ static func decode_gauntlet_loot(payload: PackedByteArray) -> Dictionary:
 				return {"type": "invalid", "error": "party_exchange_quantity"}
 			if listing.get("state") not in ["active", "sold", "withdrawn"] or listing.get("vote_state") not in ["none", "open", "approved", "rejected", "sold"] or listing.get("own_vote") not in ["none", "yes", "no", "abstain"]:
 				return {"type": "invalid", "error": "party_exchange_status"}
+			if listing.get("vote_kind", "withdrawal") not in ["withdrawal", "price_change"] or not _loot_integer(listing.get("proposed_price", 0)):
+				return {"type": "invalid", "error": "party_exchange_proposal"}
+			if listing.get("vote_kind", "withdrawal") == "price_change" and (int(listing.get("proposed_price", 0)) < 1 or int(listing.request_id) < 1 or listing.vote_state == "none"):
+				return {"type": "invalid", "error": "party_exchange_proposal_price"}
 			if not listing.get("votes") is Array or listing.votes.size() != names.size() or not listing.get("payouts") is Array or listing.payouts.size() > names.size():
 				return {"type": "invalid", "error": "party_exchange_roster"}
 			var voters: Array[String] = []

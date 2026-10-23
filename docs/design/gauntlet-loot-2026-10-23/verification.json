@@ -116,5 +116,39 @@
       "game_integration": "PASS"
     },
     "server_develop_commit": "6f74f22dcfcb3ca365ca64f8fcc3b84e1cbcce3d"
+  },
+  "party_exchange_price_votes": {
+    "status": "Implemented and verified; no deployment or release performed",
+    "previews": [
+      "party-exchange-price-dialog.png",
+      "party-exchange-price-vote.png",
+      "party-exchange-price-vote-1024.png"
+    ],
+    "preview_sha256": {
+      "party-exchange-price-dialog.png": "453db20ee72725f2a2399aeeeb33332ad2701e342679556c3d72cf9cddacfb40",
+      "party-exchange-price-vote.png": "760cd68848760ed75dcabe8771dd019aa372bbca17b5244e77124afdcf5550f1",
+      "party-exchange-price-vote-1024.png": "6af2059b026e99df57caa4600593bee15c0690ba9fbf7aa48c354fb5e1f0a2cd"
+    },
+    "server_suites": [
+      "tests/test_party_exchange.py",
+      "tests/test_party_exchange_prices.py",
+      "tests/test_gauntlet_loot.py",
+      "tests/test_marketplace_protocol.py",
+      "tests/test_marketplace_window.py"
+    ],
+    "server_checks_passed": 62,
+    "price_vote_server_checks_passed": 19,
+    "party_exchange_ui_checks_passed": 28,
+    "loot_ledger_ui_checks_passed": 24,
+    "rules": [
+      "Same persisted original roster and 14-day Yes/No/Abstain rules as withdrawal",
+      "One open proposal per listing",
+      "Current price stays active until approval",
+      "Approved price applies only to unsold items",
+      "Prior sale proceeds remain unchanged",
+      "Price, party receipt and approval update atomically",
+      "Withdrawal-only clients cannot vote on price proposals"
+    ],
+    "fixture_source": "Server-generated snapshots with fictional accounts and quantities"
   }
 }

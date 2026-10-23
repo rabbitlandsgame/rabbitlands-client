@@ -61,6 +61,11 @@ var _row_panels: Dictionary = {}
 var exchange_dialog: ConfirmationDialog
 var exchange_amount: SpinBox
 var exchange_price: SpinBox
+var reprice_dialog: ConfirmationDialog
+var reprice_amount: SpinBox
+var _reprice_description: Label
+var _reprice_listing: Dictionary = {}
+var _reprice_run := ""
 var _exchange_row: Dictionary = {}
 var _exchange_revision := -1
 var _tabs: HBoxContainer
@@ -294,7 +299,7 @@ func _build() -> void:
 	_exchange_view.hide()
 	_exchange_heading = _label(_exchange_view, "Owned by the original gauntlet team", 19, GOLD)
 	_exchange_heading.add_theme_font_override("font", Art.title_font())
-	var exchange_rules := _label(_exchange_view, "Sale proceeds go equally to the original members' storage. To withdraw an item, request a vote. Every No blocks withdrawal; abstentions do not. Unanswered votes are ignored after 14 days.", 13, MUTED)
+	var exchange_rules := _label(_exchange_view, "Sale proceeds go equally to the original members' storage. Request a vote to change the price or withdraw an item. Any No blocks the proposal; abstentions are neutral. Unanswered votes are ignored after 14 days.", 13, MUTED)
 	exchange_rules.size.x = 800
 	exchange_rules.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	var exchange_scroll := ScrollContainer.new()
@@ -392,7 +397,26 @@ func _build() -> void:
 		exchange_amount.apply()
 		exchange_price.apply()
 		_request("exchange", {"run_id": _exchange_run, "row_id": _exchange_row.id, "quantity": int(exchange_amount.value), "unit_price": int(exchange_price.value)}, _exchange_revision))
-	for dialog: ConfirmationDialog in [editor, confirmation, price_dialog, sale_dialog, exchange_dialog]:
+	reprice_dialog = ConfirmationDialog.new()
+	reprice_dialog.title = "Propose a party price change"
+	reprice_dialog.ok_button_text = "Propose price · Vote Yes"
+	add_child(reprice_dialog)
+	var reprice_body := VBoxContainer.new()
+	reprice_body.add_theme_constant_override("separation", 12)
+	reprice_dialog.add_child(reprice_body)
+	_reprice_description = _label(reprice_body, "", 14, GOLD)
+	_wrap_dialog_label(_reprice_description, 420)
+	_label(reprice_body, "Proposed Gold Coins per item", 13, GOLD)
+	reprice_amount = SpinBox.new()
+	reprice_amount.step = 1
+	reprice_amount.min_value = 1
+	reprice_body.add_child(reprice_amount)
+	reprice_amount.value_changed.connect(func(value: float) -> void: reprice_dialog.get_ok_button().disabled = int(value) == int(_reprice_listing.get("price_gold", 0)))
+	_wrap_dialog_label(_label(reprice_body, "Your proposal starts with your Yes vote. Any No blocks the change; abstentions are neutral. Unanswered votes are ignored after 14 days. Buyers pay the current price until approval. The approved price applies only to unsold items.", 12, MUTED), 420)
+	reprice_dialog.confirmed.connect(func() -> void:
+		reprice_amount.apply()
+		_request("request_price_change", {"run_id": _reprice_run, "listing_id": int(_reprice_listing.listing_id), "unit_price": int(reprice_amount.value)}))
+	for dialog: ConfirmationDialog in [editor, confirmation, price_dialog, sale_dialog, exchange_dialog, reprice_dialog]:
 		_style_dialog(dialog)
 	panel.hide()
 	_layout()
@@ -450,6 +474,7 @@ func _on_state_changed(path: StringName) -> void:
 		price_dialog.hide()
 		sale_dialog.hide()
 		exchange_dialog.hide()
+		reprice_dialog.hide()
 		portraits.clear()
 
 func apply_snapshot(state: Dictionary) -> void:
@@ -471,6 +496,7 @@ func apply_snapshot(state: Dictionary) -> void:
 		price_dialog.hide()
 		sale_dialog.hide()
 		exchange_dialog.hide()
+		reprice_dialog.hide()
 	_state = state.duplicate(true)
 	_pending_since = 0
 	set_process(false)
@@ -563,7 +589,7 @@ func _render() -> void:
 	if _show_exchange:
 		heading.text = "PARTY EXCHANGE"
 		hint.text = "The original gauntlet team keeps ownership, even after the party changes."
-		status.text = "Listings stay available during a vote. Approved withdrawals return the remaining items to shared escrow."
+		status.text = "Listings stay available at their current price during a vote. Approved changes apply to unsold items."
 		approve_button.hide()
 
 func _icon(parent: Node, image_id: int, side := 38) -> TextureRect:
@@ -839,6 +865,7 @@ func close() -> void:
 	price_dialog.hide()
 	sale_dialog.hide()
 	exchange_dialog.hide()
+	reprice_dialog.hide()
 
 func _page(direction: int) -> void:
 	_request("open", {"page": int(_state.page) + direction})
@@ -986,6 +1013,16 @@ func _ledger_page(direction: int) -> void:
 func _exchange_page(direction: int) -> void:
 	_request("open", {"exchange_page": int(_state.get("exchange_page", 0)) + direction, "ledger_page": int(_state.get("ledger_page", 0))})
 
+func _propose_price(listing: Dictionary) -> void:
+	_reprice_listing = listing.duplicate(true)
+	_reprice_run = str(_state.run_id)
+	reprice_dialog.title = "Propose price · " + str(listing.name)
+	_reprice_description.text = "Listing #%d · %d remaining\nCurrent price: %d GC per item" % [int(listing.listing_id), int(listing.quantity), int(listing.price_gold)]
+	reprice_amount.max_value = floori(float(2000000000 - int(listing.gold_sold)) / maxi(1, int(listing.quantity)))
+	reprice_amount.value = int(listing.price_gold)
+	reprice_dialog.get_ok_button().disabled = true
+	reprice_dialog.popup_centered(Vector2i(480, 330))
+
 func _render_exchange() -> void:
 	_exchange_tab.text = "Party exchange (%d)" % int(_state.get("exchange_total", 0))
 	_distribution_tab.disabled = _pending_since > 0
@@ -1042,7 +1079,11 @@ func _exchange_card(listing: Dictionary) -> void:
 	var details := _label(text, "Listing #%d · %d remaining · %d GC each · %s" % [int(listing.listing_id), int(listing.quantity), int(listing.price_gold), str(listing.state).capitalize()], 13, TEXT)
 	details.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	if listing.state == "active" and listing.vote_state != "open":
-		var withdraw := _button(title, "Request withdrawal", func() -> void: _request("request_withdrawal", {"listing_id": int(listing.listing_id)}))
+		var actions := VBoxContainer.new()
+		title.add_child(actions)
+		var reprice := _button(actions, "Propose price…", func() -> void: _propose_price(listing))
+		reprice.disabled = _pending_since > 0
+		var withdraw := _button(actions, "Request withdrawal", func() -> void: _request("request_withdrawal", {"listing_id": int(listing.listing_id)}))
 		withdraw.disabled = _pending_since > 0
 	if not str(listing.withdrawal_run_id).is_empty():
 		_button(title, "Open returned loot", func() -> void: _request("open", {"run_id": str(listing.withdrawal_run_id)})).disabled = _pending_since > 0
@@ -1058,20 +1099,25 @@ func _exchange_card(listing: Dictionary) -> void:
 		for voter: Dictionary in listing.votes:
 			votes.append("%s: %s" % [voter.name, "No response" if voter.vote == "none" else str(voter.vote).capitalize()])
 			if voter.vote == "no": veto = true
-		var summary := "Withdrawal %s" % str(listing.vote_state).capitalize()
+		var price_vote: bool = listing.get("vote_kind", "withdrawal") == "price_change"
+		var purpose := "Price change" if price_vote else "Withdrawal"
+		var summary := "%s %s" % [purpose, str(listing.vote_state).capitalize()]
 		if listing.vote_state == "open":
 			var deadline := Time.get_datetime_string_from_unix_time(int(listing.deadline)).replace("T", " ")
-			summary = ("A No vote blocks withdrawal." if veto else "Withdrawal vote is open.") + " Closes " + deadline + " UTC."
+			summary = ("A No vote blocks this %s." % purpose.to_lower() if veto else purpose + " vote is open.") + " Closes " + deadline + " UTC."
+		if price_vote:
+			summary += "\nProposed price: %d GC per item" % int(listing.proposed_price)
+			if listing.vote_state == "open": summary += " · Current: %d GC until approval" % int(listing.price_gold)
 		_exchange_wrap(_label(body, summary, 14, Color("ed9475") if veto else GOLD))
 		_exchange_wrap(_label(body, " · ".join(votes), 12, MUTED))
 		if listing.vote_state == "open" and listing.state == "active":
 			var choices := HBoxContainer.new()
 			body.add_child(choices)
 			for choice: String in ["yes", "no", "abstain"]:
-				var vote := _button(choices, choice.capitalize() + (" ✓" if listing.own_vote == choice else ""), func() -> void: _request("vote_withdrawal", {"listing_id": int(listing.listing_id), "request_id": int(listing.request_id), "vote": choice}), listing.own_vote == choice)
+				var vote := _button(choices, choice.capitalize() + (" ✓" if listing.own_vote == choice else ""), func() -> void: _request("vote_price_change" if price_vote else "vote_withdrawal", {"listing_id": int(listing.listing_id), "request_id": int(listing.request_id), "vote": choice}), listing.own_vote == choice)
 				vote.custom_minimum_size.x = 110
 				vote.disabled = _pending_since > 0
-			_exchange_wrap(_label(body, "Votes can be updated until this request resolves. Any No prevents withdrawal; abstentions do not count against it.", 11, MUTED))
+			_exchange_wrap(_label(body, "Votes can be updated until this request resolves. Any No blocks the proposal; abstentions do not count against it.", 11, MUTED))
 
 func _approve_payment() -> void:
 	for member: Dictionary in _state.members:
