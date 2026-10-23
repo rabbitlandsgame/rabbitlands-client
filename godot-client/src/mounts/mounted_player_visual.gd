@@ -40,6 +40,9 @@ func configure(player: ReplicatedActor3D, models: Dictionary, mount_id := "moor_
 	var config: Dictionary = models[mount_id].duplicate(true)
 	config.import.scale = float(config.import.scale) * float(profile.get("visualScale", 1.0))
 	var mapping: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(config.animationMap))
+	# Mount gaits can use clips the unmounted creature no longer requests.
+	for gait: String in profile.clips:
+		mapping.actions["mount_" + gait] = profile.clips[gait]
 	var errors := pony.configure({"actor_id": actor.actor_id, "x": 0, "y": 0,
 		"rotation": 0, "kind": 5, "name": "", "scale": 1.0}, CoordinateAdapter.new(), config, mapping)
 	if not errors.is_empty():

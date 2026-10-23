@@ -3634,6 +3634,8 @@ func play_action(action: StringName, restart := false) -> void:
 ## clip runs at the speed the actor is actually travelling. Anything else -
 ## and a fixed 1.45 on a clip that covers 0.61 m/s while the server walks an
 ## actor at 1.86 m/s was a long way else - reads as sliding.
+## Species with short strides can opt into a lower cycle-frequency ceiling,
+## as mounts do, to keep their motion readable at the game's travel speeds.
 ##
 ## The ceiling is 3.5 so nothing in ordinary play reaches it. `Walk` covers
 ## 0.685 m/s at speed 1.0 against a walking pace of 1.67 m/s (2.43x), and
@@ -3647,7 +3649,13 @@ func _playback_speed_for(action: StringName) -> float:
 	var stride: float = resolver.stride_speed_for_action(action, _small_creature_scale * server_scale)
 	if stride <= 0.0:
 		return resolver.playback_speed_for_action(action)
-	return clampf(_travel_speed() / stride, 0.35, 3.5)
+	var rate := clampf(_travel_speed() / stride, 0.35, 3.5)
+	var maximum_cycles := float(resolver.maximum_cycles_per_second.get(String(action), 0.0))
+	if maximum_cycles > 0.0 and animation_player != null:
+		var clip := resolver.clip_for_action(action)
+		if animation_player.has_animation(clip):
+			rate = minf(rate, animation_player.get_animation(clip).length * maximum_cycles)
+	return rate
 
 ## Metres per second the presentation is currently moving this actor. Falls
 ## back to the nominal speed for the command before the first step is timed.

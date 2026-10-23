@@ -9,7 +9,7 @@
     "idle": "Idle_A",
     "alternate_idle": "Idle_A",
     "combat_idle": "Fighting_Idle",
-    "walk": "Walk",
+    "walk": "Jog",
     "run": "Jog",
     "turn": "Idle_A",
     "sit": "Idle_A",
@@ -80,9 +80,13 @@
     "Jog"
   ],
   "strideMetresPerSecond": {
-    "walk": 0.11249993892857145,
+    "walk": 0.2508331971666667,
     "run": 0.2508331971666667
   },
   "strideScalesWithActor": true,
+  "maximumCyclesPerSecond": {
+    "walk": 1.8,
+    "run": 2.6
+  },
   "motionRevision": "leporid-authored-1"
 }
