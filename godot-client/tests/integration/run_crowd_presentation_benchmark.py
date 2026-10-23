@@ -26,6 +26,8 @@ import tempfile
 import time
 import uuid
 
+from process_memory_sampler import ProcessMemorySampler
+
 from crowd_benchmark_support import (
     BenchmarkLock, EvidenceError, asset_files, clean_environment, configure_settings_profile, default_lock_path,
     hash_files, manifest_identity, read_json, require_private_replay_output,
@@ -144,8 +146,8 @@ def wait_for_startup(process, path: Path, request: dict, timeout: float) -> dict
 
 
 def wait_for_workload(process, failure_path: Path, request: dict,
-                      timeout: float) -> tuple[int | str, dict | None]:
-    """Poll only the small atomic failure marker, never the full timing report."""
+                      timeout: float, memory_sampler=None) -> tuple[int | str, dict | None]:
+    """Poll the small failure marker and bounded optional owned-process counters."""
     deadline = time.monotonic() + timeout
     while True:
         if failure_path.is_file():
@@ -159,7 +161,10 @@ def wait_for_workload(process, failure_path: Path, request: dict,
                 process.kill()
             process.wait()
             return "teardown-failed", data
-        remaining = deadline - time.monotonic()
+        now = time.monotonic()
+        if memory_sampler is not None:
+            memory_sampler.sample_if_due(now)
+        remaining = deadline - now
         if remaining <= 0:
             raise subprocess.TimeoutExpired(process.args, timeout)
         try:
@@ -239,6 +244,8 @@ def run_one(args, variant: str, repeat: int, out_dir: Path) -> dict:
     }
     if args.centre:
         overrides["RABBITLANDS_CROWD_BENCH_CENTRE"] = args.centre
+    if args.disable_obs_vulkan_capture:
+        overrides["DISABLE_VULKAN_OBS_CAPTURE"] = "1"
     env.update(overrides)
     settings_seed = seed_settings_profile(args.settings_profile, args.project_path, user_root, env)
     before = identity(args)
@@ -249,6 +256,7 @@ def run_one(args, variant: str, repeat: int, out_dir: Path) -> dict:
                "valid": False, "acknowledgement": None, "seconds": None, "error": None}
     teardown_failure = None
     workload_error = None
+    memory_sampler = None
     startup_request = {"executable_mode": args.executable_mode, "executable": str(args.godot),
                        "start_token": start_token, "user_root": str(user_root)}
     if settings_seed:
@@ -264,7 +272,9 @@ def run_one(args, variant: str, repeat: int, out_dir: Path) -> dict:
             startup["acknowledgement"] = wait_for_startup(process, started_report, startup_request, args.startup_timeout)
             startup["valid"] = True
             startup["seconds"] = round(time.monotonic() - started, 3)
-            code, teardown_failure = wait_for_workload(process, teardown_failure_path, startup_request, args.timeout)
+            memory_sampler = ProcessMemorySampler(process, started)
+            code, teardown_failure = wait_for_workload(
+                process, teardown_failure_path, startup_request, args.timeout, memory_sampler=memory_sampler)
         except EvidenceError as exc:
             if not startup["valid"]:
                 startup["seconds"] = round(time.monotonic() - started, 3)
@@ -294,7 +304,14 @@ def run_one(args, variant: str, repeat: int, out_dir: Path) -> dict:
            "identityBefore": before, "identityAfter": after,
            "identityStable": before == after, "interferenceLabel": args.interference_label,
            "requestedMeasurementStatus": args.measurement_status, "data": {}}
+    run["processMemory"] = memory_sampler.snapshot() if memory_sampler is not None else {
+        "schemaVersion": 1, "pid": process.pid, "status": "unavailable", "sampleCount": 0,
+        "unavailableReason": {"reason": "workload_wait_not_started; no acknowledged startup"}}
     run["startup"] = startup
+    run["externalInterference"] = {"obsVulkan": {
+        "requestedDisabled": args.disable_obs_vulkan_capture,
+        "effectiveEnvValue": env.get("DISABLE_VULKAN_OBS_CAPTURE"),
+        "observedHookLoaded": None}}
     run["teardownFailurePath"] = str(teardown_failure_path)
     run["teardownFailure"] = teardown_failure
     run["workloadError"] = workload_error
@@ -381,6 +398,8 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--lock-path", type=Path)
     p.add_argument("--lock-timeout", type=float, default=0)
     p.add_argument("--interference-label", default="shared host; activity not continuously monitored")
+    p.add_argument("--disable-obs-vulkan-capture", action="store_true",
+                   help="set DISABLE_VULKAN_OBS_CAPTURE=1 only for the owned child; records no hook observation")
     p.add_argument("--measurement-status", choices=["screening", "quiet-comparison"], default="screening",
                    help="records the coordinator's conditions; does not qualify another device or reserve unrelated work")
     return p

@@ -3864,6 +3864,9 @@ func _on_reconnect_progress(attempt: int, total: int, delay_msec: int) -> void:
 	_sync_connection_banner()
 
 func _clear_world_presentation() -> void:
+	# No actor survives this clear. Forget stepped members before queueing
+	# any body, without reactivating its animation or skeleton callbacks.
+	animation_gate.reset(false)
 	SeasonSurfaces.set_season({})
 	quest_trail.clear()
 	character_intro.cancel()
@@ -3906,7 +3909,6 @@ func _clear_world_presentation() -> void:
 	map_light_root = null
 	_actor_surface_samples.clear()
 	_grounded_actors.clear()
-	animation_gate.reset()
 	# The parsed model and animation caches are only worth holding for the
 	# session they were built in.
 	TorsoBodyCover.clear()

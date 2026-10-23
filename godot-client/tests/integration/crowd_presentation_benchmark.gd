@@ -1609,6 +1609,25 @@ func _wait_for_teardown_idle(owner: Variant, loader: Variant,
 	return state
 
 
+## A few flushed, plain checkpoints survive a native crash before the final
+## report. These are outside sampling and never substitute for report validation.
+func _log_teardown_stage(stage: String) -> void:
+	var line := "%d pid=%d %s" % [Time.get_ticks_msec(), OS.get_process_id(), stage]
+	print("crowd-presentation teardown ", line)
+	var output := OS.get_environment("RABBITLANDS_CROWD_BENCH_OUT")
+	if output.is_empty():
+		return
+	var path := ProjectSettings.globalize_path(output + ".teardown.log")
+	var mode := FileAccess.READ_WRITE if FileAccess.file_exists(path) else FileAccess.WRITE
+	var log_file := FileAccess.open(path, mode)
+	if log_file == null:
+		return
+	log_file.seek_end()
+	log_file.store_line(line)
+	log_file.flush()
+	log_file.close()
+
+
 func _tear_down_main() -> void:
 	_stop_benchmark_instrumentation()
 	if not is_instance_valid(_main):
@@ -1648,16 +1667,25 @@ func _tear_down_main() -> void:
 	if not bool(before_unload.ready):
 		_record_teardown_timeout(started, "beforeUnload", before_unload)
 		return
+	# Workers, retirements and grounding callbacks are now drained. Only
+	# this owned subtree stops; the SceneTree still serves frame/reaper work.
+	owner.process_mode = Node.PROCESS_MODE_DISABLED
+	_log_teardown_stage("world-clear:before")
 	owner.call("_clear_world_presentation")
+	_log_teardown_stage("world-clear:after")
+	_log_teardown_stage("after-unload:wait")
 	var after_unload := await _wait_for_teardown_idle(owner, loader, exterior, "after unload", deadline)
+	_log_teardown_stage("after-unload:wait-complete ready=" + str(bool(after_unload.ready)))
 	if not bool(after_unload.ready):
 		_record_teardown_timeout(started, "afterUnload", after_unload)
 		return
+	_log_teardown_stage("main-free:before")
 	owner.queue_free()
 	_main = null
 	_adapter = null
 	_attributed.clear()
 	var after_main_free := await _wait_for_teardown_idle(owner, loader, exterior, "after Main free", deadline, true)
+	_log_teardown_stage("main-free:wait-complete ready=" + str(bool(after_main_free.ready)))
 	if not bool(after_main_free.ready):
 		_record_teardown_timeout(started, "afterMainFree", after_main_free)
 		return
@@ -1665,12 +1693,15 @@ func _tear_down_main() -> void:
 	# Clear session caches after workers/results have released their owners.
 	# A deadline failure remains a failed report, never an accepted sample.
 	if bool(after_main_free.ready):
+		_log_teardown_stage("final-caches:before")
 		NativeAnimationImporter.clear()
 		GlbSceneCache.clear()
+		_log_teardown_stage("final-caches:after")
 	_report["teardown"] = {"ready": bool(before_unload.ready) and bool(after_unload.ready)
 		and bool(after_main_free.ready), "timeoutMilliseconds": MAX_READINESS_MSEC,
 		"milliseconds": Time.get_ticks_msec() - started,
 		"beforeUnload": before_unload, "afterUnload": after_unload, "afterMainFree": after_main_free,
+		"ownedSubtreeDisabledAfterDrain": true,
 		"ownedInstrumentationDisconnected": true}
 
 

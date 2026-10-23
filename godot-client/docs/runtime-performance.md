@@ -53,6 +53,22 @@ Loading diagnostics distinguish preparation, verification, attach, deferred
 grounding/binding, retirement and retained caches. Large indivisible work is
 reported explicitly rather than implied to fit a nominal time allowance.
 
+Windows runs also record `processMemory`: sampled resident working set and
+private committed bytes, plus OS lifetime peaks. Samples are at most once per
+second after startup acknowledgement through workload teardown; subsecond
+changes and the final unsampled interval can be missed. Timestamps mark
+observations, including when an OS peak was observed. These whole-process
+counters are separate from Godot allocator and GPU memory. Unsupported or
+failed observations are explicitly unavailable or partial, never zero memory.
+
+`--disable-obs-vulkan-capture` optionally sets `DISABLE_VULKAN_OBS_CAPTURE=1`
+only for the owned child. Without the switch, inherited values are preserved.
+Per-run `externalInterference.obsVulkan` records the request and effective value;
+`observedHookLoaded` remains unknown (`null`) because the runner does not inspect
+modules. This requests disabling OBS's declared Vulkan implicit layer without
+changing OBS or other capture jobs. It does not establish crash causality or
+prove every capture hook is absent.
+
 A process-owned lock serializes participating runners across worktrees. The
 lock cannot reserve the machine against unrelated applications. Pause imports,
 builds, tests and other benchmark jobs during a comparison. Use matched content
