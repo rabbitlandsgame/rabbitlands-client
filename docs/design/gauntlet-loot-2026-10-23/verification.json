@@ -78,8 +78,8 @@
     "preview_sha256": {
       "party-exchange.png": "334bd26d9ae1b7a05c5216bea261a02c46bf5ad7bd10fc9656188c27cbcd740b",
       "party-exchange-1024.png": "3ded773072e876ef71de0b1215ec36f682a505fa794e1a444ea239c28bb49ac4",
-      "party-exchange-listing-dialog.png": "d286a82a183709c8748606dd5fe708d703fc2386f42ff28f8e3ed30a6bccb604",
-      "party-exchange-staging.png": "f49e80fee35ecc7fc71f8c7d6e2c756a37e1f7c7f5d7f4960948082cfa40af88"
+      "party-exchange-listing-dialog.png": "1741965248e214a18d3dab5a3c04d19ee2bfc686b975e2981d06485610aa5f68",
+      "party-exchange-staging.png": "85607aea44751b147f68aec32373700515efd2b8c63414bd7ec791c1fa533306"
     },
     "fixture_source": "Server-generated snapshots with fictional accounts and quantities",
     "ui_suite": "godot-client/tests/test_party_exchange.gd",
@@ -107,6 +107,14 @@
       "Sale while voting",
       "Storage-credit retry without double payment",
       "Passive updates never replace an editor for another run"
-    ]
+    ],
+    "merged_server_checks_passed": 110,
+    "merged_client_checks": {
+      "party_exchange": 17,
+      "loot_ledger": 24,
+      "party_bot_compatibility": "PASS",
+      "game_integration": "PASS"
+    },
+    "server_develop_commit": "6f74f22dcfcb3ca365ca64f8fcc3b84e1cbcce3d"
   }
 }
