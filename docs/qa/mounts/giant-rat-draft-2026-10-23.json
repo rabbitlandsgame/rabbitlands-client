@@ -1,0 +1,70 @@
+{
+  "date": "2026-10-23",
+  "status": "local draft; user visual approval pending",
+  "baseClientCommit": "b805e4facfd3d5b8d38888e3a421d5c8f3988a5e",
+  "mount": "giant_rat",
+  "source": "Previously generated Meshy Dock Rat",
+  "outputSha256": "702845182bb30f87868f1404663dc546fccd6f5ce6b659fcf630c9f6959da623",
+  "engine": {
+    "checks": 738,
+    "failures": 0,
+    "max_cape_link_error_metres": 5.24818897247314e-05,
+    "max_rein_error_metres": 0.0,
+    "max_rider_contact_error_metres": 0.000187689234735444,
+    "min_sole_height_metres": 0.0193982403725386,
+    "min_surface_height_metres": -4.47028014605166e-08
+  },
+  "blender": {
+    "sha256": "702845182bb30f87868f1404663dc546fccd6f5ce6b659fcf630c9f6959da623",
+    "fresh_blender_import": true,
+    "bones": 23,
+    "clips": {
+      "Idle_A": {
+        "samples": 289,
+        "minimum_surface_height_metres": -1.789205157365359e-07,
+        "maximum_loop_surface_difference_metres": 0.0
+      },
+      "Jog": {
+        "samples": 66,
+        "minimum_surface_height_metres": -1.502957900356705e-07,
+        "maximum_loop_surface_difference_metres": 0.0
+      },
+      "Walk": {
+        "samples": 103,
+        "minimum_surface_height_metres": -1.4931998748579645e-07,
+        "maximum_loop_surface_difference_metres": 0.0
+      }
+    },
+    "failures": 0
+  },
+  "render": {
+    "cape_peak": {
+      "action": "idle",
+      "actor": 900,
+      "chain": 0,
+      "frame": 0,
+      "link": 2
+    },
+    "fps": 30,
+    "frames": 135,
+    "max_cape_link_error_metres": 4.72068786621094e-05,
+    "max_contact_error_metres": 0.000151632862980478
+  },
+  "captures": [
+    "giant-rat-mount.png",
+    "giant-rat-mount.webp"
+  ],
+  "coverage": [
+    "male and female canonical riders wearing the current cape",
+    "idle, normal and fast side views and game-camera views",
+    "stable authoritative actor placement and restored on-foot visual after detach",
+    "reins connected to both hands and cape material length maintained",
+    "actual deformed mesh floor clearance including the complete tail",
+    "fresh Blender import with exact clip endpoints and half-key sampling"
+  ],
+  "limitations": [
+    "Visual acceptance is pending user review.",
+    "Three mount-only loops; no creature combat action set or live-server catalogue entry.",
+    "Existing Dock Rat pack is retained under the fitted imported pony saddle."
+  ]
+}
