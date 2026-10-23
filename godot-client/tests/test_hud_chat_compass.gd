@@ -1,5 +1,6 @@
 extends SceneTree
 ## Real keyboard/mouse routing; capture protocol frames without opening a socket.
+const SETTINGS_PATH := "res://test-artifacts/hud-chat-compass/settings.cfg"
 class CaptureNetwork extends EloriaNetworkClient:
 	var outgoing: Array[PackedByteArray] = []
 	var result: Error = OK
@@ -25,6 +26,13 @@ func expect(value: bool, label: String) -> void:
 
 func frames(count := 5) -> void:
 	for index: int in count: await process_frame
+
+func has_chat_frame(workspace: Control, surface: Control) -> bool:
+	var inverse: Transform2D = main.game_view.get_global_transform().affine_inverse()
+	var rect: Rect2 = inverse * surface.get_global_rect()
+	for panel: Dictionary in workspace.frame_overlay.panels:
+		if (panel.rect as Rect2).is_equal_approx(rect): return true
+	return false
 
 func press(code: Key) -> void:
 	var event := InputEventKey.new()
@@ -59,7 +67,10 @@ func run() -> void:
 	network.block_for_hud_preview()
 	state = root.get_node("AppState")
 	root.size = Vector2i(1440, 900)
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(SETTINGS_PATH.get_base_dir()))
+	ConfigFile.new().save(SETTINGS_PATH)
 	main = (load("res://src/app/main.tscn") as PackedScene).instantiate()
+	main.get_node("GameView/ChatWindow").preferences_path = SETTINGS_PATH
 	root.add_child(main)
 	await frames()
 	InputMap.load_from_project_settings()
@@ -70,6 +81,29 @@ func run() -> void:
 	var chat: Control = main.chat_hud
 	for id: String in ["heritage", "classic", "modular", "adventure", "minimal"]:
 		workspace.choose_preset(id, true)
+		main._on_client_setting_changed("Chat", "chat_combined", false)
+		# Every preset also supports custom chat borders, even its floating designs.
+		for key: String in ["chat", "system_chat"]:
+			workspace.change_part(key, "enabled", true)
+			workspace.change_part(key, "show_border", true)
+		await frames()
+		for key: String in ["chat", "system_chat"]:
+			var surface: Control = workspace.parts[key]
+			expect(surface.visible and has_chat_frame(workspace, surface), id + ": visible " + key + " has its border")
+			surface.get_node("Frame/Layout/Header/Close").pressed.emit()
+			await frames()
+			expect(not surface.visible and not has_chat_frame(workspace, surface), id + ": closing " + key + " removes its border")
+			surface.set_option("visible", true)
+			await frames()
+			expect(surface.visible and has_chat_frame(workspace, surface), id + ": reopening " + key + " restores its border")
+		main._on_client_setting_changed("Chat", "chat_combined", true)
+		await frames()
+		expect(not main.system_chat_hud.visible and not has_chat_frame(workspace, main.system_chat_hud),
+			id + ": combined feeds remove the hidden System border")
+		main._on_client_setting_changed("Chat", "chat_combined", false)
+		await frames()
+		expect(main.system_chat_hud.visible and has_chat_frame(workspace, main.system_chat_hud),
+			id + ": separate feeds restore the System border")
 		workspace.change_part("chat", "enabled", false)
 		chat.input.text = ""
 		chat.dismiss()
@@ -78,6 +112,7 @@ func run() -> void:
 		expect(not chat.visible, id + ": chat can start disabled")
 		await press(KEY_T)
 		expect(chat.is_visible_in_tree() and chat.input.has_focus(), id + ": T opens and focuses disabled chat")
+		expect(has_chat_frame(workspace, chat), id + ": temporary chat restores its border")
 		expect(not workspace.model.working.parts.chat.enabled and not chat.options.visible,
 			id + ": temporary typing keeps the hidden HUD preference")
 		chat.set_destination("pm:Mira")
@@ -91,6 +126,7 @@ func run() -> void:
 		main._hide_chat_input()
 		await frames()
 		expect(not chat.visible, id + ": finishing empty temporary chat restores hidden state")
+		expect(not has_chat_frame(workspace, chat), id + ": finishing temporary chat removes its border")
 	# Rebound chat shortcuts follow the same route.
 	InputMap.action_erase_events("chat_focus")
 	var rebound := InputEventKey.new()

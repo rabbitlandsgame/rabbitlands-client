@@ -1730,6 +1730,9 @@ func _ensure_chrome(key: String) -> void:
 	var chrome := PanelChrome.new()
 	chrome.name = "_HudChrome"
 	_root(key).add_child(chrome)
+	# Shared borders live outside the panel, so they must follow its visibility.
+	# Rebuild neighbour edges too when a connected panel opens or closes.
+	_root(key).visibility_changed.connect(queue_layout)
 	_chrome[key] = chrome
 	_root(key).queue_redraw()
 
