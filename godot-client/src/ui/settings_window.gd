@@ -59,7 +59,7 @@ const BINDABLE := {
 		"toggle_mail", "toggle_party", "toggle_guild", "toggle_achievements", "toggle_leaderboards"],
 	"Rings": ["spell_ring", "technique_ring"],
 	"Mounts": ["toggle_mount", "toggle_gallop"],
-	"Actions": ["attack_selected", "combat_target", "summon_behavior",
+	"Actions": ["attack_selected", "toggle_range_lock", "combat_target", "summon_behavior",
 		"toggle_sit", "toggle_show_through_obstacles", "screenshot", "cancel",
 		"connect", "disconnect", "open_last_url"],
 	"Items": ["quick_item_1", "quick_item_2", "quick_item_3", "quick_item_4",

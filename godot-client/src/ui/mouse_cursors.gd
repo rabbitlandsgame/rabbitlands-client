@@ -208,4 +208,4 @@ static func choose(context: Dictionary) -> int:
 			return EYE if bool(context.get("alt", false)) else ENTER
 		"interactive":
 			return USE
-	return WALK
+	return ATTACK if bool(context.get("alt", false)) else WALK

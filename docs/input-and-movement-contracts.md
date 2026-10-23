@@ -24,6 +24,13 @@ offered only where it would act.
   mode or with Alt held. A pending actor spell claims any actor under the
   pointer, including yourself. Other tools never turn a missed target into a
   walk.
+- Holding Alt also suppresses the empty-ground walk in Move mode and shows
+  the attack sword. Releasing Alt restores ordinary clicks. The saved
+  `ranging_lock` preference (default shortcut Alt+R, rebindable as
+  `toggle_range_lock`) blocks ground/map movement while a ranged weapon is
+  equipped, but must still permit actor attacks. Sit lock, death and modal
+  input blocking continue to apply to attacks. `tests/test_range_lock.gd`
+  checks the shortcut, saved preference and outgoing attack/movement frames.
 - The Trade icon arms a mode, as in Eternal Lands (`_on_trade_button_pressed`).
   A player already selected is asked at once; otherwise the next click on a
   player asks them. `Esc` or the Move icon puts the mode down. Covered by

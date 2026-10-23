@@ -4072,6 +4072,10 @@ func _handle_bound_action(event: InputEvent) -> bool:
 		return true
 	if not game_view.visible:
 		return false
+	if event.is_action_pressed("toggle_range_lock", false, true):
+		var lock_box: CheckBox = _banner_option_boxes["ranging_lock"] as CheckBox
+		lock_box.button_pressed = not lock_box.button_pressed
+		return true
 	# Before focused HUD buttons. Text entry and key
 	# capture were excluded above; Ctrl+R remains the guild window shortcut.
 	var mount_request := preload("res://src/mounts/mount_hotkeys.gd").request_for_event(
@@ -4524,11 +4528,14 @@ func _capture_speech_bubble_from_chat() -> void:
 				spoken, SPEECH_BUBBLE_MSEC)
 		return
 
-## Eternal Lands drops the click rather than walking you out of position when
-## either lock applies: Sit Lock while you are actually sitting, with Ctrl as
-## the deliberate override, and Ranging Lock while a bow is in hand
-## (gamewin.c, CURSOR_WALK and CURSOR_ATTACK).
+## Range lock holds position with a bow or crossbow equipped, while still
+## allowing target clicks to shoot. Sit lock also blocks attacks that could
+## stand the player up; Ctrl deliberately overrides that lock.
 func _movement_locked(ctrl_pressed: bool) -> bool:
+	return _actor_input_locked(ctrl_pressed) \
+		or (_banner_option("ranging_lock") and _range_weapon_equipped())
+
+func _actor_input_locked(ctrl_pressed: bool) -> bool:
 	if _world_input_blocked():
 		return true
 	var local_actor: Dictionary = AppState.actors.get(AppState.local_actor_id, {})
@@ -4537,7 +4544,7 @@ func _movement_locked(ctrl_pressed: bool) -> bool:
 	if (_banner_option("sit_lock") and not ctrl_pressed
 			and bool(local_actor.get("sitting", false))):
 		return true
-	return _banner_option("ranging_lock") and _range_weapon_equipped()
+	return false
 
 func _range_weapon_equipped() -> bool:
 	var local_actor: Dictionary = AppState.actors.get(AppState.local_actor_id, {})
@@ -4944,6 +4951,10 @@ func _handle_map_gui_input(event: InputEvent, map_control: TextureRect,
 	var mouse_button: InputEventMouseButton = event as InputEventMouseButton
 	if not mouse_button.pressed or mouse_button.button_index != MOUSE_BUTTON_LEFT:
 		return
+	var selecting_spell := not Network.magic_pending.is_empty() and Network.magic_scope in ["burst", "location"]
+	if not selecting_spell and _movement_locked(mouse_button.ctrl_pressed):
+		map_control.accept_event()
+		return
 	var viewport_position_value: Variant = _texture_to_viewport_position(
 		mouse_button.position, map_control, map_render_viewport.size)
 	if not viewport_position_value is Vector2:
@@ -4973,7 +4984,6 @@ func _handle_map_gui_input(event: InputEvent, map_control: TextureRect,
 		exterior_stream.pending_walk.clear()
 		_clear_keyboard_movement_tracking()
 		_clear_local_turn_prediction()
-		var selecting_spell := not Network.magic_pending.is_empty() and Network.magic_scope in ["burst", "location"]
 		var move_error: Error = Network.move_to(target_value as Vector2i,
 			mouse_button.shift_pressed)
 		if move_error != OK:
@@ -5197,7 +5207,7 @@ func _handle_world_click(event: InputEventMouseButton, viewport_position: Vector
 			"spell":
 				magic_selection.confirm_actor(picked_actor_id)
 			"attack":
-				if _movement_locked(event.ctrl_pressed):
+				if _actor_input_locked(event.ctrl_pressed):
 					return
 				_send_attack(picked_actor_id)
 			"trade":
@@ -5227,8 +5237,9 @@ func _handle_world_click(event: InputEventMouseButton, viewport_position: Vector
 				or (_interaction_mode == "use" and not picked_object.is_harvestable())):
 			_activate_map_object(picked_object, event.alt_pressed or _interaction_mode == "look")
 		return
-	# Other tools never turn a missed target into a movement order.
-	if _interaction_mode != "walk":
+	# Attack tools, including the temporary Alt sword, never turn a missed
+	# target into a movement order.
+	if _interaction_mode != "walk" or event.alt_pressed:
 		return
 	var ray_origin: Vector3 = camera_rig.ray_origin(viewport_position)
 	var ray_direction: Vector3 = camera_rig.ray_direction(viewport_position)
@@ -11888,7 +11899,7 @@ func _apply_attack_preview(previewing: bool) -> void:
 			walk_button.icon = _atlas_region(_hud_active_atlas,
 				_hud_icon_regions[%AttackButton] as Rect2)
 		walk_button.tooltip_text = ("Alt is held: a click attacks what it lands"
-			+ " on. Let Alt go for walk mode")
+			+ " on; clicking empty ground keeps you in place. Let Alt go for walk mode")
 	else:
 		walk_button.tooltip_text = "Walk mode; hold Shift while clicking to run"
 
