@@ -33,6 +33,12 @@ The crafting filter **Has ingredients only** checks ingredients. You may still n
 
 ## Equipment and carrying
 
+Choose an inventory design in **Settings → HUD** or **Settings → Inventory**, or open the inventory's **••• → Inventory design** menu. The five defaults are **Unified compact**, **Tabbed satchel**, **Edge dock**, **Adaptive inspect**, and **Shallow bottom tray**. **Unified compact** is the starting design for new players. Inventory designs are saved separately from your main HUD layout.
+
+Choose **Edit inventory…** to arrange the backpack, equipment, text preview and inspection. Drag sections to move them, drag a selected corner to resize, or adjust columns, slot sizes, positioning, colors, opacity and borders in the editor. **Undo**, **Redo**, **Reset this section**, and **Restore default** help refine a design. **Save** keeps your edits; **Cancel** or Escape discards them. Each default remembers its own edits, and you can save up to five named custom inventory designs.
+
+The pack always has 36 server positions and eight equipment positions. Reflowing a grid changes how they are displayed. The search control dims nonmatching slots while keeping their positions stable. The short preview sits below the pack; **Look** or its arrow opens full details in the selected design. A popover can be pinned while browsing. The **Qty** field and **All** set the amount for picking up, depositing, withdrawing and dropping; extra quantity shortcuts, bulk actions and protection options remain in **•••**.
+
 A **Basic Quiver** supplies unlimited ordinary bow ammunition. A **Basic Bolt Case** does the same for a crossbow. Equip the matching container as ammunition. These basic containers add no special accuracy or damage. Ordinary Arrow and Bolt stacks, and special ammunition, still run out. The ranged dispatch supplies a Basic Quiver; quartermasters sell both containers.
 
 Ranged attacks need at least two tiles of space. Start with a nearby Rabbit two to four tiles away: shorter shots are easier. Click the target again to stop aiming, or switch to melee if it reaches you.

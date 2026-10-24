@@ -739,6 +739,7 @@ var _carried_slot := -1
 var _storage_carried_position := -1
 var _storage_carried_item: Dictionary = {}
 var _inventory_quantities: Array[int] = INVENTORY_QUANTITY_DEFAULTS.duplicate()
+var _inventory_quantity_override := 0
 var _inventory_tool := "grab"
 ## Whether the next item description may open the detail window. The short line
 ## and the detail window are two readings of the same server reply, so which
@@ -951,6 +952,7 @@ var _unseen_pm_count := 0
 var _fps_refresh_msec := 0
 var _hud_layout_list: ItemList
 var hud_workspace: Control
+var inventory_workspace: Control
 var _hud_layout_visible: CheckButton
 var _hud_skill_selector: OptionButton
 var _floating_feedback_layer: Control
@@ -1702,6 +1704,9 @@ func _ready() -> void:
 	hud_workspace = preload("res://src/ui/hud_workspace.gd").new()
 	game_view.add_child(hud_workspace)
 	hud_workspace.configure.call_deferred(self)
+	inventory_workspace = preload("res://src/ui/inventory_workspace.gd").new()
+	game_view.add_child(inventory_workspace)
+	inventory_workspace.configure.call_deferred(self)
 	_start_client_diagnostics()
 
 func _start_client_diagnostics() -> void:
@@ -1884,6 +1889,8 @@ func _process(delta: float) -> void:
 		if display_second != cooldown_display_second:
 			cooldown_display_second = display_second
 			_sync_quick_slots()
+			if inventory_workspace != null and inventory_workspace.ready_to_layout:
+				inventory_workspace.refresh_actions()
 			if stats_panel.visible and stats_tabs.current_tab == 3:
 				_sync_session_experience()
 		_sync_hud_button_states()
@@ -1939,7 +1946,8 @@ func _text_entry_active() -> bool:
 ## they are up: the world takes no input and the exterior preloads wait.
 func _world_input_blocked() -> bool:
 	return _disconnect_console_active or character_intro.blocks_input() or arrival_curtain.blocks_input() \
-		or (hud_workspace != null and hud_workspace.is_open())
+		or (hud_workspace != null and hud_workspace.is_open()) \
+		or (inventory_workspace != null and inventory_workspace.is_editing())
 
 const CAMERA_ACTIONS := ["camera_rotate_left", "camera_rotate_right", "camera_tilt_up", "camera_tilt_down"]
 
@@ -4229,6 +4237,9 @@ func _input(event: InputEvent) -> void:
 	if hud_workspace != null and hud_workspace.is_open():
 		hud_workspace.handle_input(event)
 		return
+	if inventory_workspace != null and inventory_workspace.is_editing():
+		inventory_workspace.handle_editor_input(event)
+		return
 	if arrival_curtain.blocks_input():
 		return
 	if _actor_hud_menu != null and _actor_hud_menu.visible:
@@ -5808,6 +5819,8 @@ func _on_state_changed(path: StringName) -> void:
 				inventory_description.text = short_line
 		&"inventory_cooldowns":
 			_sync_quick_slots()
+			if inventory_workspace != null and inventory_workspace.ready_to_layout:
+				inventory_workspace.refresh_actions()
 		&"spells":
 			_sync_spells()
 		&"selection":
@@ -9036,6 +9049,7 @@ func _load_hud_settings() -> void:
 					int((quantities_value as Array)[index]), 1, INVENTORY_QUANTITY_MAX)
 		_selected_quantity_box = clampi(int(config.get_value(
 			"inventory", "selected_quantity", 0)), 0, _inventory_quantities.size() - 1)
+		_inventory_quantity_override = clampi(int(config.get_value("inventory", "quantity_override", 0)), 0, 0xffffffff)
 		var bulk_value: Variant = config.get_value("inventory", "bulk_exclusions", {})
 		if bulk_value is Dictionary:
 			for kind: String in ["store", "drop"]:
@@ -9262,6 +9276,7 @@ func _save_hud_settings() -> void:
 	config.set_value("inventory", "bag_window_position", ground_bag_panel.position)
 	config.set_value("inventory", "quantities", _inventory_quantities)
 	config.set_value("inventory", "selected_quantity", _selected_quantity_box)
+	config.set_value("inventory", "quantity_override", _inventory_quantity_override)
 	config.set_value("inventory", "bulk_exclusions", _bulk_exclusions)
 	config.set_value("inventory", "item_lists", _item_lists)
 	for banner_key: String in BANNER_OPTION_NODES:
@@ -9351,6 +9366,9 @@ func _clamp_ground_bag_window_to_viewport() -> void:
 		clampf(local_position.y, 8.0, maximum.y))
 
 func _on_inventory_resize_grip_gui_input(event: InputEvent) -> void:
+	if inventory_workspace != null and inventory_workspace.ready_to_layout:
+		inventory_workspace.resize_input(event)
+		return
 	if event is InputEventMouseButton:
 		var mouse: InputEventMouseButton = event as InputEventMouseButton
 		if mouse.button_index != MOUSE_BUTTON_LEFT:
@@ -9413,6 +9431,9 @@ func _apply_ground_bag_scale(requested_scale: float) -> void:
 	_clamp_ground_bag_window_to_viewport()
 
 func _apply_inventory_scale(requested_scale: float) -> void:
+	if inventory_workspace != null and inventory_workspace.ready_to_layout:
+		inventory_workspace.change_option("scale", requested_scale)
+		return
 	var maximum_scale: float = INVENTORY_MAX_SCALE
 	if game_view.size.x > 0.0 and game_view.size.y > 0.0 \
 			and inventory_panel.size.x > 0.0 and inventory_panel.size.y > 0.0:
@@ -9425,6 +9446,9 @@ func _apply_inventory_scale(requested_scale: float) -> void:
 	_clamp_inventory_window_to_viewport()
 
 func _clamp_inventory_window_to_viewport() -> void:
+	if inventory_workspace != null and inventory_workspace.ready_to_layout:
+		inventory_workspace.clamp_window()
+		return
 	if classic_storage != null and classic_storage.is_inventory_docked():
 		classic_storage.layout_dock()
 		return
@@ -9449,6 +9473,9 @@ func _on_equipment_side_selected(index: int) -> void:
 	_save_hud_settings()
 
 func _apply_equipment_side() -> void:
+	if inventory_workspace != null and inventory_workspace.ready_to_layout:
+		inventory_workspace.change_option("equipment_side", _equipment_side)
+		return
 	if equipment_column == null or inventory_body == null:
 		return
 	inventory_body.move_child(equipment_column,
@@ -12824,6 +12851,8 @@ func _sync_inventory() -> void:
 		inventory_description.text = "Select an item to inspect it."
 	if ground_bag_panel.visible:
 		_sync_ground_bag_actions()
+	if inventory_workspace != null and inventory_workspace.ready_to_layout:
+		inventory_workspace.sync_inventory()
 
 func _sync_equipment_slots() -> void:
 	for index: int in range(equipment_slot_buttons.size()):
@@ -14226,18 +14255,20 @@ func _sync_inventory_quantity_boxes() -> void:
 	for index: int in range(inventory_quantity_buttons.size()):
 		var button: Button = inventory_quantity_buttons[index]
 		button.text = str(_inventory_quantities[index])
-		button.set_pressed_no_signal(index == _selected_quantity_box)
+		button.set_pressed_no_signal(index == _selected_quantity_box and _inventory_quantity_override == 0)
 		button.tooltip_text = ("Use %d for drops and pick-ups. Right click to change it."
 			% _inventory_quantities[index])
 
 ## The amount every drop and pick-up uses until the player picks another box.
 func _selected_quantity() -> int:
+	if _inventory_quantity_override > 0: return _inventory_quantity_override
 	if _selected_quantity_box < 0 or _selected_quantity_box >= _inventory_quantities.size():
 		return 1
 	return maxi(1, _inventory_quantities[_selected_quantity_box])
 
 func _on_quantity_box_pressed(index: int) -> void:
 	_commit_quantity_edit()
+	_inventory_quantity_override = 0
 	_selected_quantity_box = index
 	_sync_inventory_quantity_boxes()
 	_save_hud_settings()
@@ -14276,6 +14307,7 @@ func _commit_quantity_edit() -> void:
 	var value: int = (int(typed) if typed.is_valid_int()
 		else INVENTORY_QUANTITY_DEFAULTS[index])
 	_inventory_quantities[index] = clampi(value, 1, INVENTORY_QUANTITY_MAX)
+	_inventory_quantity_override = 0
 	_selected_quantity_box = index
 	inventory_quantity_edit.visible = false
 	inventory_quantity_edit.release_focus()
@@ -14555,6 +14587,8 @@ func _apply_inventory_tool(slot: int) -> void:
 ## Asks the server what an item is. `with_window` decides whether the reply is
 ## allowed to open the detail window; the short line is written either way.
 func _describe_slot(slot: int, with_window: bool) -> void:
+	if inventory_workspace != null and inventory_workspace.ready_to_layout:
+		inventory_workspace.request_inspection(slot, with_window)
 	_detail_popup_allowed = with_window
 	if extension_windows != null:
 		extension_windows.set("detail_popup_allowed", with_window)
