@@ -1,0 +1,57 @@
+# Native ground-fowl motion
+
+Use this guidance for Turkey, Rooster, Pheasant and Sapphire Peafowl. These are actor-specific drafts; private continuation memory records their selected stage, qualification and review status. Completing a pilot does not approve another actor or authorize runtime installation.
+
+## Assess the complete input first
+
+Inventory every primitive, material, skin, joint and original corrective target. Turkey has one primitive and seventeen original targets; Rooster has nine material sections sharing its source animation; Pheasant has fifty source targets; Peafowl has a different forty-two-joint rig and no native Fly clip. Do not infer compatible topology or corrective layout from the family name. Guard single-primitive processors against silently discarding other sections. Material inspection also needs a plain base-colour fallback when a section has no texture.
+
+Read the original target count from the immutable source when appending position corrections or convex normal poses. A previous bird's fixed prefix can leave new position-basis normals active or overwrite original shading. Check the complete original prefix, static attributes, materials, bind/rest arrays and retained flight sampler data. For multiple sections, keep target order and shared mesh/node weight channels consistent across every primitive; independent witnesses must identify the correct section as well as its source UVs.
+
+## Reachable strides and complete claws
+
+Fit the visible hock, ankle and full claw surface rather than the named virtual knee. Calibrate each reference toe-centroid offset before placing the shared forward path. A path that sits too far forward can force a low torso to reach the long step, then overfold the leg during recovery.
+
+Find one torso level that satisfies both maximum extension and minimum folded reach over the whole cycle, for both physical and virtual chains. Intersect the feasible vertical intervals across all sampled phases. If there is no interval, revise the neutral path, stride or lift; a maximum-reach-only planner can pass standing poses and fail partway through a run. Record the feasible interval and chosen constant level. Keep the actual alternating world advances and planted-speed checks; equal foot amplitudes alone remain insufficient.
+
+Keep whole claws rigid during contact. Locate populated middle-shin probes independently on both sides and separate their field from the mobile ankle rows. Turkey's lower ankle and sparse shin rows needed a different boundary from webbed-foot sources. Preserve coherent middle-shin size while bounding strain in the ankle and upper-thigh transitions.
+
+## High collar, wattles and tall feathers
+
+Turkey's physical collar sits high above the breast. Pivoting a longer duck-like neck from the lower breast stretches the posterior neck and shoulder coat during collapse. Fit the actual collar and distribute lower/upper neck weights around those measured segment junctions. Check the complete rear neck, head and wattle from opposing views.
+
+Constrain neck membership in three dimensions. Tall back and tail feathers can overlap head height while sitting far behind the visible neck. A height-only head extension can pull them into a head fold. Conversely, cutting away the real rear neck leaves a stretched shelf below the skull. Calibrate the collar, neck domain and skin transition together; more smoothing cannot repair a wrongly located pivot.
+
+Keep the posterior tail feathers coherent with their attachment. Preserve the native flight separately when applying ground-action ownership. A low beak or feather tip does not certify a supported corpse: check breast/body support, all intervening released-leg poses, feather clearance and the held endpoint.
+
+## Stable export controls
+
+The Turkey's original chest includes substantial leg and neck influence. Opposing source guide rotations made its blended skin matrix nearly singular during the fall: intended key poses looked supported, while the exported interpolation briefly stretched chest edges. Higher cadence and a smaller position-basis error do not repair that cancellation.
+
+The revised ground-only export keeps the virtual thigh/shin rotations aligned to the body during collapse while retaining their world joint paths. Anatomical surface evaluation still uses the measured physical leg frames; neck/head and complete claw transforms retain their authored orientation. Recompute position and normal corrections against the stabilized exported controls. Reusing the former inverse-skin corrections with different guide rotations is invalid.
+
+Measure conditioning on proposed export controls during the initial pose audit, before expensive corrective fitting. Measure the smallest skin singular value over the complete exported fall and compare joint paths independently. Also recheck actual surfaces between keys, physical shin size, contact and original flight. Keep this policy explicit in the selected profile: it concerns virtual control frames and is not a blanket limit on anatomical head, foot or leg motion. Preserve failed exports as rejected rather than selecting them by version number.
+
+## Qualification and review
+
+Use the independent source, native-motion, physical-surface, current-engine and fresh-Blender gates described in [corvid motion](native-corvid-motion.md). Bind witnesses and reports to the exact exported model. Keep authored-key replay and between-key interpolation distinct, retain the fixed animated tolerances and inspect native-speed motion from side, front, rear and opposing angles. Label retained flight clearly and keep unreviewed actors assessed rather than complete. Large corrective exports remain private authoring data until measured runtime optimization and explicit promotion.
+
+## Complete-family transfer and temporal qualification
+
+A shared corrective clock must cover every material section. Fit one concatenated position/normal basis, then slice each target into the original primitive boundaries without changing their material, index, attribute or original-target prefixes. Neutral normal deltas and convex normal poses need the same section treatment. Import witnesses should retain primitive ordinal and source UV/material identity; coincident seam positions alone do not identify the correct shading surface. Review only available source actions: a seven-action rig without Fly is not an eight-action transfer.
+
+Inspect the proposed reference surface itself for inherited pose damage. Peafowl's original idle distorted a rear-toe connection even though its bind geometry was coherent. The ground adapter retained the native body/train reference, restored undeformed bind-frame legs under the actor's canonical forward transform, measured the resulting physical collar and hocks, and gave the train a small coherent clearance adjustment. Record such reference preparation explicitly; it does not permit changing the immutable source or treating every bird as the same seventeen-bone rig.
+
+Sparse fall poses missed release spikes in all three transfers. A physical hock solution can change branch as its floor constraint and body correction interact, even when exported skin matrices are well conditioned and endpoint support is valid. Keep the release plane continuous, then inspect dense point speed and strain through the complete fall. For the selected family drafts, a dependency-bound dense surface plan regularizes the remaining release interaction before corrective fitting. Complete claws and populated mid-shin fields are projected back to rigid shapes after filtering; floor clearance and the held endpoint are reapplied. Recheck their actual exported sizes, support, intersections, between-key motion and independent imports. Temporal filtering is not a substitute for those gates, and slowing playback does not resolve a discontinuity.
+
+Bind cached anatomical plans to the full source and processor signatures, verify cache identity on load, and retain rejected preflight reports. A convenient filename prefix from only one processor cannot establish that a cached plan matches the current actor, configuration or fitting code. Keep the accepted category pilot's model and review media unchanged when assembling the complete family review; all transfers remain drafts until the user reviews them.
+Check proposed skin conditioning in every authored action, including fast locomotion. Peafowl's physical run and dense surface samples passed, but the exported run failed between keys because its original shin blends approached a singular matrix. Extending body-aligned original leg/toe export rotations to its ground actions kept world guide paths and measured physical motion while removing the cancellation. Keep authored guide-key agreement separate from finite-cadence guide interpolation; physical-surface interpolation retains its own unchanged qualification limit.
+
+Rooster's overlapping sections can share material, rest position, UV and rest normal. Independent import binding therefore also uses the original bone-influence weights and original corrective-position prefix. Match those identities in both the engine and fresh Blender import. A rest-only binding can sample the wrong animated interior, producing apparent flight and normal errors despite exact source preservation. Fix an ambiguous measurement before changing the animation or its error limits.
+Keep constant armature-parent motion out of unsupported non-joint tracks. The Peafowl's final game check dropped a fixed parent height that native evaluation retained. Factoring the constant rigid parent transform into the root joint's translation/quaternion channels and removing those parent channels preserved all joint world poses and skin surfaces without changing rest geometry or binds. Prove the constant-frame equivalence, retain the derivation receipt and repeat the independent engine and Blender gates. Also check geometric facing through the actual draft registry correction: canonical reference fitting can require a different isolated correction from the current model's registry. Record that promotion requirement explicitly; do not change the game's registry as part of a local draft.
+
+## Mixed texture and vertex-colour previews
+
+A white repair surface is not proof of missing paint. Inspect `COLOR_0`, material factors and the actual imported shader graph before changing an asset. Rooster's body/wing fillers already held matching feather colours, but Workbench's texture mode and the source-assessment plot ignored them. Use a full-material reference render to distinguish an asset defect from a preview defect. A transient, padded triangle-chart bake can display the existing linear vertex-colour interpolation in Workbench while leaving the GLB, geometry and motion bytes unchanged. Keep the original textured sections' UVs and material images intact and recheck fresh-import surface witnesses after preview processing.
+
+Source plots must combine image sampling with vertex colours and material factors. Before runtime promotion, inspect the actual material on every colour-bearing surface in both cached and raw game imports: a populated colour array does not prove it contributes to albedo. The existing Rooster cached import disabled that flag on one interior material while enabling it on another. Record and repair such an appearance gate separately from passing bone/surface motion checks; a preview-only fix does not certify runtime material handling.

@@ -1,0 +1,15 @@
+# Installing completed drafts without claiming acceptance
+
+Use the selected review manifest and exact model hash. Runtime publication and human visual approval are separate: an authorized merge may install an unreviewed baseline while its per-animation review state and comments remain pending. Preserve media-version keys when recording the installed model hash separately.
+
+Compare the selected inputs with the current runtime files before promotion. Retain newer unrelated clips, actor scale, forward correction and backset. Verify existing attachment names against actual bones; generic body/neck placeholders can survive old registries even when no such bones exist.
+
+For corrective exports, lossless packing comes first. Textures can be a small fraction of a large file. The optional `pack_corrective_creature_motion.py` uses actual-pose subset bases for positions and original unit-normal endpoints for normals. Preserve the original corrective prefix, every joint key, geometry, skin, binds and texture bytes. An arbitrary normal PCA basis remains unsuitable because Godot normalizes each imported target normal. This subset representation uses signed weights: widen Blender shape-key slider ranges before evaluating them, rather than accepting its default clipping.
+
+A small local representation residual alone does not certify the result. Compare complete world-space surfaces and normals across every clip, check additional planted-foot velocity, then import the exact final file in current Godot and Blender. Keep the existing bounds; do not enlarge them to make a packing trial pass. Retained flight needs the same checks as ground actions.
+
+Overlapping feather parts can coincide in the first mapped pose and diverge in flight. Match independent probes using skin influences, UVs, rest normals and the original corrective-prefix signatures. A nearest vertex alone can select the wrong feather. Keep original target signatures in regression fixtures where needed.
+
+The original two wolf pilots retain object-level armature translation in Jog. The native retargeter copies bone and blend-shape tracks, so that translation can disappear while local bone snapshots still agree. Bake the animated non-bone ancestor translation into its first skin joint, at the union of original keys. Prove all skin-joint world poses and the complete surface remain unchanged at keys and midpoints. Check world coordinates against independent GLB witnesses; agreement between two engine paths misses this defect. Preserve the accepted centered Moorland tail while copying current non-tail idle, guard, flinch and run curves.
+
+Public regression entry points for the completed baseline are `eloria-assets/tools/test_completed_creature_motion.py`, `godot-client/tests/test_completed_creature_motion.gd` and `eloria-assets/tools/check_completed_creatures_blender.py`. The local review launcher is `review-creature-animations.bat`; original sources, processing stages, media and comments stay in the ignored authoring workspace.

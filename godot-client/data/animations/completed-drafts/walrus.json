@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "fallbackAction": "idle",
+  "playbackSpeeds": {
+    "walk": 1.0,
+    "run": 1.0,
+    "attack_primary": 1.0,
+    "death": 1.0
+  },
+  "actions": {
+    "idle": "Idle_A",
+    "alternate_idle": "Idle_A",
+    "combat_idle": "Fighting_Idle",
+    "walk": "Walk",
+    "run": "Jog",
+    "turn": "Idle_A",
+    "sit": "Idle_A",
+    "seated_idle": "Idle_A",
+    "stand": "Idle_A",
+    "death": "Death_A",
+    "pain": "Hit_Chest",
+    "attack_primary": "Sword_Attack",
+    "ranged_attack": "Sword_Attack",
+    "cast": "Sword_Attack",
+    "harvest": "Sword_Attack",
+    "pickup": "Idle_A",
+    "drop": "Idle_A",
+    "emote_greeting": "Idle_A"
+  },
+  "serverCommands": {
+    "3": "death",
+    "5": "pain",
+    "7": "idle",
+    "13": "sit",
+    "14": "stand",
+    "15": "combat_idle",
+    "18": "combat_idle",
+    "19": "idle",
+    "20": "walk",
+    "21": "walk",
+    "22": "walk",
+    "23": "walk",
+    "24": "walk",
+    "25": "walk",
+    "26": "walk",
+    "27": "walk",
+    "30": "run",
+    "31": "run",
+    "32": "run",
+    "33": "run",
+    "34": "run",
+    "35": "run",
+    "36": "run",
+    "37": "run",
+    "38": "turn",
+    "39": "turn",
+    "40": "turn",
+    "41": "turn",
+    "42": "turn",
+    "43": "turn",
+    "44": "turn",
+    "45": "turn",
+    "46": "attack_primary"
+  },
+  "loopingClips": [
+    "Idle_A",
+    "Fighting_Idle",
+    "Walk",
+    "Jog"
+  ],
+  "strideScalesWithActor": true,
+  "strideMetresPerSecond": {
+    "walk": 0.11381806643295178,
+    "run": 0.30670973691405956
+  },
+  "reviewStatus": "draft_needs_review",
+  "concept": {
+    "movement": "A low, heavy four-beat flipper shuffle becomes a quicker diagonal hustle. Broad front paddles step and brace while each multi-lobed rear flipper stays coherent; the belly, neck folds, tusks and whiskers retain their own shape.",
+    "attack": "All four flippers brace a short forward body-and-neck shove. The head loads back then drives the tusks forward and down before recovering; the source has no independent jaw control.",
+    "death": "The front support folds as the heavy trunk settles forward onto its belly and pelvis. The neck lowers into a tusk-supported rest, the paddles relax beside the body, and the complete pose holds without flipper or wrist spins."
+  }
+}
