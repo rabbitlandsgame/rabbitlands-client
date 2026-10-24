@@ -4040,6 +4040,10 @@ func _play_action_legacy(action: StringName, restart := false) -> void:
 		return
 	if _cinematic_active and action != _cinematic_action:
 		return
+	# A kill can turn us toward the next aggressor without ending combat.
+	# Keep both animation paths in guard until the engagement actually ends.
+	if not _cinematic_active and _in_combat and action in [&"idle", &"turn"]:
+		action = &"combat_idle"
 	if is_instance_valid(_mount_visual):
 		_mount_visual.call("play_action", action, restart)
 		return

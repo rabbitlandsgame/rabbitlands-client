@@ -99,6 +99,46 @@ func check_post_combat_movement() -> void:
 		expect(actor.current_action == &"idle", "a stationary hit reaction still returns to idle")
 		actor.free()
 
+func check_multicombat_idle() -> void:
+	var actor := spawn_actor()
+	add_animation_fixture(actor)
+	var dto := ActorReducer.apply_command(state(0, 0, 7, false), 18)
+	actor.apply_server_state(dto, adapter)
+	dto = ActorReducer.apply_command(dto, 46)
+	actor.apply_server_state(dto, adapter)
+	actor.animation_player.advance(0.11)
+	expect(actor.current_action == &"combat_idle", "a completed strike recovers to fighting idle")
+	# Killing the current target turns us toward another aggressor while
+	# the same combat engagement and attack clock continue.
+	for command: int in range(38, 46):
+		dto = ActorReducer.apply_command(dto, command)
+		actor.apply_server_state(dto, adapter)
+		expect(actor.current_action == &"combat_idle",
+			"retarget turn %d keeps fighting idle during multi combat" % command)
+		expect(is_equal_approx(actor.desired_facing_yaw(),
+			actor.target_yaw_for_state(0.0, command, 0, adapter)),
+			"retarget turn %d still faces the next attacker" % command)
+	dto = ActorReducer.apply_command(dto, 7)
+	actor.apply_server_state(dto, adapter)
+	expect(actor.current_action == &"combat_idle", "a resting update keeps the active combat stance")
+	actor.predict_turn(PI / 4.0)
+	expect(actor.current_action == &"combat_idle", "a predicted turn also keeps fighting idle")
+	# A buffered approach can finish after combat has already started.
+	dto = ActorReducer.apply_command(dto, 22)
+	actor.apply_server_state(dto, adapter)
+	expect(actor.current_action == &"walk", "an active combat step still walks")
+	advance(actor, 2.0)
+	expect(actor.current_action == &"combat_idle", "a completed combat step returns to fighting idle")
+	actor.apply_server_state(dto, adapter)
+	expect(actor.current_action == &"combat_idle", "a restated completed step keeps fighting idle")
+	dto = ActorReducer.apply_command(dto, 19)
+	actor.apply_server_state(dto, adapter)
+	expect(actor.current_action == &"idle", "leaving the final fight returns to normal standing idle")
+	dto = ActorReducer.apply_command(dto, 38)
+	actor.apply_server_state(dto, adapter)
+	expect(actor.current_action == &"turn", "turning outside combat keeps its normal standing pose")
+	actor.free()
+
 func check_post_combat_pace() -> void:
 	for command: int in [22, 32]:
 		var pace := 0.2 if command == 32 else 0.6
@@ -158,6 +198,7 @@ func check_post_combat_pace() -> void:
 
 func run() -> void:
 	check_post_combat_movement()
+	check_multicombat_idle()
 	check_post_combat_pace()
 	for running: bool in [false, true]:
 		var ordinary := spawn_actor()
