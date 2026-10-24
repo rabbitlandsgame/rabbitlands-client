@@ -176,6 +176,53 @@ class ClientRuntimePackageTests(unittest.TestCase):
                     self.assertIn("RABBITLANDS_RUST_EFFECTS=", text)
                     self.assertNotIn("RABBITLANDS_RUST_EFFECTS=heat_bolt", text)
 
+    def test_human_and_legacy_launchers_isolate_all_optional_families(self):
+        legacy = {
+            "RABBITLANDS_CLIENT_RUNTIME": "legacy",
+            "RABBITLANDS_REMOTE_PRESENTATION": "legacy",
+            "RABBITLANDS_RUST_EFFECTS": "legacy",
+            "RABBITLANDS_RESOURCE_ADMISSION": "legacy",
+            "RABBITLANDS_PREPARED_CONTENT": "raw",
+            "RABBITLANDS_PREPARED_NODE_POLICY": "retain",
+        }
+        human = dict(zip(legacy, ("rust", "rust", "heat_bolt", "rust", "auto", "lazy-source-v1")))
+        expected = {
+            "optimization testing": ("human-testing", human),
+            "legacy runtime": ("legacy", legacy),
+            "Rust rider pilot": ("legacy", {**legacy, "RABBITLANDS_CLIENT_RUNTIME": "rust"}),
+            "Rust comparison": ("legacy", {**legacy, "RABBITLANDS_CLIENT_RUNTIME": "compare"}),
+            "Rust heat bolt pilot": ("legacy", {**legacy, "RABBITLANDS_CLIENT_RUNTIME": "rust",
+                                                    "RABBITLANDS_RUST_EFFECTS": "heat_bolt"}),
+        }
+        for platform, extension in (("windows", "bat"), ("linux", "sh")):
+            with self.subTest(platform=platform), tempfile.TemporaryDirectory() as directory:
+                stage = Path(directory)
+                runtime_package.write_launchers(stage, platform)
+                for label, (profile, families) in expected.items():
+                    with self.subTest(launcher=label):
+                        # Model a polluted parent shell; emitted assignments must
+                        # replace every selector before the game is launched.
+                        environment = {key: "inherited-other-experiment" for key in legacy}
+                        environment["RABBITLANDS_OPTIMIZATION_PROFILE"] = "human-testing"
+                        environment["ELORIA_NATIVE_PRESENTATION"] = "1"
+                        environment["ELORIA_NATIVE_CROWD"] = "1"
+                        text = (stage / f"RabbitLands ({label}).{extension}").read_text(encoding="utf-8")
+                        for line in text.splitlines():
+                            if line.startswith('set "') and line.endswith('"'):
+                                key, value = line[5:-1].split("=", 1)
+                            elif line.startswith("export "):
+                                key, value = line[7:].split("=", 1)
+                            else:
+                                continue
+                            environment[key] = value
+                        self.assertEqual({key: environment[key] for key in legacy}, families)
+                        self.assertEqual(environment["RABBITLANDS_OPTIMIZATION_PROFILE"], profile)
+                        self.assertEqual(environment["ELORIA_NATIVE_PRESENTATION"], "0")
+                        self.assertEqual(environment["ELORIA_NATIVE_CROWD"], "0")
+                        if platform == "windows":
+                            self.assertIn("setlocal", text)
+                        self.assertIn("%*" if platform == "windows" else '"$@"', text)
+
 
 if __name__ == "__main__":
     unittest.main()
