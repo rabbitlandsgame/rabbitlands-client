@@ -22,7 +22,7 @@ func run() -> void:
 	var preview = review.preview
 	preview.set_process(false)
 	preview.stage.process_mode = Node.PROCESS_MODE_DISABLED
-	check(Presentation.PROFILES.size() == 24 and Presentation.PROFILES.keys().all(func(key): return key in Icons.ORDER), "all 24 catalogued techniques have presentation")
+	check(Presentation.PROFILES.size() == 25 and Presentation.PROFILES.keys().all(func(key): return key in Icons.ORDER), "all 25 catalogued techniques have presentation")
 	check(preview.viewport.own_world_3d and not preview.viewport.handle_input_locally, "preview has an isolated world without input")
 	var actor: ReplicatedActor3D = preview.source
 	var target: ReplicatedActor3D = preview.target

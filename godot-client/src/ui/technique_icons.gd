@@ -13,6 +13,7 @@ const ORDER: Array[String] = [
 	"sunder", "flurry", "hamstring", "riposte",
 	"backstab", "lunge", "keep_at_bay", "aimed_shot",
 	"pinning_shot", "volley", "step_back", "mark_target",
+	"provoke",
 ]
 
 static var _cache: Dictionary = {}
@@ -21,7 +22,8 @@ static var _cache: Dictionary = {}
 static func icon_for(key: String) -> Texture2D:
 	if _cache.has(key):
 		return _cache[key]
-	var index := ORDER.find(key)
+	# Provoke shares the established painted taunt artwork with Challenge.
+	var index := ORDER.find("challenge" if key == "provoke" else key)
 	if index < 0:
 		return null
 	var texture := AtlasTexture.new()
