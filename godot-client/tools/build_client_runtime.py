@@ -70,7 +70,7 @@ def run(command, env=None, cwd=None, checkpoint=None, label="native subprocess")
 
 
 def output(command, env=None, cwd=None):
-    return subprocess.check_output([str(value) for value in command], cwd=cwd, env=env,
+    return subprocess.check_output(command if isinstance(command, str) else [str(value) for value in command], cwd=cwd, env=env,
                                    text=True, encoding="utf-8", errors="replace").strip()
 
 
@@ -94,8 +94,13 @@ def windows_environment(environment):
     script = Path(installation) / "Common7/Tools/VsDevCmd.bat"
     if not installation or not script.is_file() or any(c in str(script) for c in '\r\n"'):
         raise ValueError("Visual Studio x64 C++ tools were not found by vswhere")
-    command = 'call "' + str(script) + '" -no_logo -arch=x64 -host_arch=x64 >nul && set'
-    text = output([env.get("COMSPEC", "cmd.exe"), "/d", "/s", "/c", command], env)
+    # cmd's /s /c grammar is not CommandLineToArgvW: list2cmdline would
+    # backslash-escape the batch path's quotes and cmd would treat them literally.
+    # Quote the executable separately, then pass one raw cmd command line. The
+    # outer pair is stripped by /s; the batch path's validated quotes remain.
+    command = subprocess.list2cmdline([env.get("COMSPEC", "cmd.exe")]) + \
+        ' /d /s /c "call "' + str(script) + '" -no_logo -arch=x64 -host_arch=x64 >nul && set"'
+    text = output(command, env)
     for line in text.splitlines():
         name, separator, value = line.partition("=")
         if separator and name:

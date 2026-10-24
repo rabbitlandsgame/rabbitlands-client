@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 from pathlib import Path
 import struct
 import sys
@@ -347,8 +348,27 @@ class NativeBuilderTests(unittest.TestCase):
                 result = build.windows_environment({"PATH": "old"})
             self.assertEqual(result["PATH"], "MSVC-new")
             self.assertNotIn("Path", result)
-            self.assertIn("-arch=x64", called.call_args_list[1].args[0][-1])
+            self.assertIn("-arch=x64", called.call_args_list[1].args[0])
+            self.assertIsInstance(called.call_args_list[1].args[0], str)
+            self.assertNotIn('\\"', called.call_args_list[1].args[0])
             self.assertNotIn("2022", str(called.call_args_list))
+
+    @unittest.skipUnless(os.name == "nt", "actual cmd.exe grammar is a Windows control")
+    def test_actual_windows_batch_path_with_spaces_and_parentheses(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            install = Path(temporary) / "Visual Studio (Future Edition)"
+            script = install / "Common7/Tools/VsDevCmd.bat"
+            script.parent.mkdir(parents=True)
+            script.write_bytes(b"@echo off\r\nset VSCMD_ARG_TGT_ARCH=x64\r\nset RL_FIXTURE_VS=space-parentheses\r\n")
+            original = build.output
+            def vswhere_or_real(command, *args, **kwargs):
+                if isinstance(command, list) and "-property" in command:
+                    return str(install)
+                return original(command, *args, **kwargs)
+            with mock.patch.object(build.shutil, "which", return_value="vswhere.exe"), mock.patch.object(build, "output", side_effect=vswhere_or_real):
+                actual = build.windows_environment(dict(os.environ))
+            self.assertEqual(actual["RL_FIXTURE_VS"], "space-parentheses")
+            self.assertEqual(actual["VSCMD_ARG_TGT_ARCH"], "x64")
 
     def test_wrong_rust_version_target_or_dirty_godot_cpp_fails_closed(self):
         for rust in ("rustc 1.98.0 (old)\nhost: x86_64-unknown-linux-gnu", "rustc 1.99.1 (new)\nhost: aarch64-unknown-linux-gnu"):
