@@ -7,6 +7,7 @@ const PROFILES := {
 	"fighting_retreat": ["9bb9ce", "", "", 0.0],
 	"charge": ["e4c28a", "Technique_Charge_Strike", "attack_primary", 0.22],
 	"challenge": ["dd996e", "Technique_Challenge", "defend", 0.0],
+	"provoke": ["dd996e", "Technique_Challenge", "defend", 0.0],
 	"second_wind": ["88c8b3", "Technique_Breath", "defend", 0.0],
 	"war_cry": ["e6c780", "Technique_Rally", "defend", 0.0],
 	"executioners_stroke": ["db8b75", "Technique_Executioner", "attack_primary", 0.42],
@@ -28,7 +29,7 @@ const PROFILES := {
 	"mark_target": ["dfad85", "Combat_Bow_Release", "ranged_attack", 0.0],
 }
 const RANGED := ["aimed_shot", "pinning_shot", "volley", "mark_target"]
-const SUPPORT := ["fighting_retreat", "challenge", "second_wind", "war_cry", "brace", "intercept", "riposte", "step_back"]
+const SUPPORT := ["fighting_retreat", "challenge", "provoke", "second_wind", "war_cry", "brace", "intercept", "riposte", "step_back"]
 
 static func color_for(key: String) -> Color:
 	return Color(PROFILES[key][0]) if PROFILES.has(key) else Color.WHITE

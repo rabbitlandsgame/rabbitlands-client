@@ -20,6 +20,8 @@ func _run() -> void:
 		"effects": ["poison", "shield", "regeneration"]}).to_utf8_buffer())
 	_expect(state.get("actors")[9].status_effects == ["poison", "shield", "regeneration"]
 		and state.get("actors")[9].negative_statuses == ["poison"], "both polarities are replicated")
+	_packet(state, 9, ["focus_lock"])
+	_expect(state.get("actors")[9].negative_statuses == ["focus_lock"], "Provoke focus lock is replicated")
 	_packet(state, 404, ["poison"])
 	_expect(not state.get("actors").has(404), "status cannot resurrect a removed actor")
 	_packet(state, 9, [])
@@ -63,6 +65,12 @@ func _run() -> void:
 	var all_effects := ["poison", "cripple", "expose_heat", "expose_cold", "expose_magic", "expose_radiation"]
 	fox.set_negative_statuses(all_effects + ["poison", "accuracy", "unknown"])
 	var icons := fox.get_node("StatusIcons") as Node3D
+	fox.set_status_effects(["focus_lock"])
+	_expect(icons.get_child_count() == 1 and str(icons.get_child(0).name) == "focus_lock",
+		"fixed focus has a dedicated overhead icon")
+	fox.set_status_effects([])
+	_expect(icons.get_child_count() == 0, "focus icon clears with the authoritative status")
+	fox.set_negative_statuses(all_effects + ["poison", "accuracy", "unknown"])
 	_expect(icons.get_child_count() == 6, "six distinct negative effects; duplicates and benefits excluded")
 	_expect(icons.position.y == fox.get_node("Nameplate").position.y, "row follows model's head anchor")
 	for index: int in range(6):
