@@ -125,7 +125,11 @@ func configure(owner_main: Control) -> void:
 		"timer": main.hud_timer_label, "research": main.knowledge_bar,
 		"logo": main.get_node("GameView/EloriaLogoFrame"), "fps": main.fps_label,
 		"objectives": main.extension_windows.get("tracked_quest"), "target": main.selected_target,
-		"nameplate": main.actor_resource_overlay}
+		"nameplate": main.actor_resource_overlay,
+		"gauntlet_loot": main.extension_windows.gauntlet_loot_window.reopen,
+		"rare_drops": main.extension_windows.gauntlet_loot_window.announcement}
+	for key: String in ["gauntlet_loot", "rare_drops"]:
+		parts[key].reparent(main.game_view, false)
 	for key: String in parts:
 		var control: Control = parts[key]
 		original[key] = {"node": control, "parent": control.get_parent(), "index": control.get_index(),
@@ -212,6 +216,8 @@ func configure(owner_main: Control) -> void:
 		containers[key] = wrapper
 	model.load_file(preferences_path)
 	_build_editor()
+	panel.visibility_changed.connect(_sync_gauntlet_hud)
+	main.extension_windows.gauntlet_loot_window.hud_layout_requested.connect(queue_layout)
 	main.window_stack.register(panel, true)
 	_build_settings()
 	ready_to_layout = true
@@ -249,6 +255,11 @@ func is_open() -> bool:
 
 func manages_layout() -> bool:
 	return ready_to_layout and not bool(model.working.legacy)
+
+func _sync_gauntlet_hud() -> void:
+	main.extension_windows.gauntlet_loot_window.configure_hud(
+		model.working.parts.gauntlet_loot.enabled, model.working.parts.rare_drops.enabled, is_open())
+	queue_layout()
 
 func _process(_delta: float) -> void:
 	if not ready_to_layout: return
@@ -908,7 +919,7 @@ func select_component(key: String, arc_index := -1) -> void:
 				surface.apply_options()
 				main._on_chat_configuration_changed("combined", value)
 				_capture_chat(model.working, key))
-	if key in ["rail_panel", "utilities", "spells", "items", "chat", "system_chat", "party", "minimap", "compass", "clock", "resources", "food_meter", "load_meter", "xp_meter", "player_card", "target"]:
+	if key in ["rail_panel", "utilities", "spells", "items", "chat", "system_chat", "party", "minimap", "compass", "clock", "resources", "food_meter", "load_meter", "xp_meter", "player_card", "target", "gauntlet_loot", "rare_drops"]:
 		for axis: String in ["x", "y"]:
 			var dimensions: Vector2 = _root(key).size
 			var minimum: Vector2 = _root(key).get_combined_minimum_size()
@@ -1514,10 +1525,11 @@ func apply_layout() -> void:
 		(parts.medallion as Control).configure(_text_config("medallion", "hud_detail"))
 	main._request_map_redraw()
 	for key: String in Presets.PARTS:
-		if key in ["chat", "system_chat", "spells", "resources", "compass", "objectives"]: continue
+		if key in ["chat", "system_chat", "spells", "resources", "compass", "objectives", "gauntlet_loot", "rare_drops"]: continue
 		_root(key).visible = bool(model.working.parts[key].enabled) \
 			or (key == "party" and not str(AppState.party.get("invited_by", "")).is_empty())
 	main.extension_windows._sync_tracked_quest()
+	_sync_gauntlet_hud()
 	if not model.working.parts.objectives.enabled: parts.objectives.hide()
 	if legacy:
 		for chrome: Node2D in _chrome.values(): chrome.hide()
@@ -1619,6 +1631,8 @@ func _style_part(key: String) -> void:
 		(surface._fade.material as ShaderMaterial).set_shader_parameter("backdrop_color", backdrop)
 		box.bg_color.a = 0
 		surface.add_theme_stylebox_override("panel", box)
+	elif key == "gauntlet_loot":
+		control.add_theme_stylebox_override("normal", box)
 	else:
 		control.add_theme_stylebox_override("panel", box)
 	if key == "nameplate" and not main._banner_option("banner_background"): main._apply_banner_background()
@@ -1743,7 +1757,9 @@ func layout_hud() -> void:
 		control.scale = config.axis_scale * float(config.scale)
 		if key not in ["utilities", "chat", "system_chat", "party", "items", "minimap", "compass", "medallion", "resources", "food_meter", "load_meter", "xp_meter", "player_card", "target"]: control.reset_size()
 		var dimensions := control.size
-		if config.dimensions != Vector2.ZERO and key in ["chat", "system_chat", "minimap", "compass", "clock", "research", "logo", "medallion", "resources", "food_meter", "load_meter", "xp_meter", "player_card", "target"]:
+		if key in ["gauntlet_loot", "rare_drops"]:
+			dimensions = main.extension_windows.gauntlet_loot_window.default_hud_rect(key, main.game_view.size).size
+		if config.dimensions != Vector2.ZERO and key in ["chat", "system_chat", "minimap", "compass", "clock", "research", "logo", "medallion", "resources", "food_meter", "load_meter", "xp_meter", "player_card", "target", "gauntlet_loot", "rare_drops"]:
 			dimensions = config.dimensions
 		elif key == "medallion": dimensions = Vector2(240, 200)
 		if key == "rail_panel":
@@ -2109,7 +2125,9 @@ func _position_for(key: String, dimensions: Vector2) -> Vector2:
 		"bottom_right": where = bounds - dimensions - Vector2(8, 8)
 		"free": where = config.position * bounds
 		_:
-			if original.has(key): where = original[key].rect.position / _initial_size * bounds
+			if key in ["gauntlet_loot", "rare_drops"]:
+				where = main.extension_windows.gauntlet_loot_window.default_hud_rect(key, bounds).position
+			elif original.has(key): where = original[key].rect.position / _initial_size * bounds
 	where += config.offset
 	return where.clamp(Vector2(6, 6), (bounds - dimensions - Vector2(6, 6)).max(Vector2(6, 6)))
 
@@ -2273,7 +2291,7 @@ func _resize_window(key: String, delta: Vector2, bypass_snap: bool) -> void:
 		if _resize_axis.x < 0: rect.position.x = _resize_rect.end.x - diameter
 		if _resize_axis.y < 0: rect.position.y = _resize_rect.end.y - diameter
 	var dimensions := rect.size / _resize_runtime_scale.max(Vector2.ONE * 0.01)
-	var direct := key in ["rail_panel", "utilities", "spells", "items", "chat", "system_chat", "party", "minimap", "compass", "clock", "resources", "food_meter", "load_meter", "xp_meter", "player_card", "target"]
+	var direct := key in ["rail_panel", "utilities", "spells", "items", "chat", "system_chat", "party", "minimap", "compass", "clock", "resources", "food_meter", "load_meter", "xp_meter", "player_card", "target", "gauntlet_loot", "rare_drops"]
 	if direct:
 		if key == "rail_panel" and _resize_axis.y != 0: config.full_height = false
 		if config.extend_to_edge and (config.dock_side in ["left", "right"] and _resize_axis.x != 0 or config.dock_side in ["top", "bottom"] and _resize_axis.y != 0): config.extend_to_edge = false

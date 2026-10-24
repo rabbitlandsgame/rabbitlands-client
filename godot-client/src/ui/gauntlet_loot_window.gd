@@ -3,6 +3,7 @@ const TextColors := preload("res://src/ui/text_colors.gd")
 ## Party ledger: all quantities and deliveries are server-owned snapshots.
 
 signal item_inspection_requested
+signal hud_layout_requested
 
 const Art := preload("res://src/ui/leaderboard_art.gd")
 const LedgerArt := preload("res://src/ui/gauntlet_loot_art.gd")
@@ -13,6 +14,7 @@ const MUTED := Color("9eaaa6")
 const CYAN := Color("7cc6d4")
 const BRONZE := Color("896234")
 const GREEN := Color("94d789")
+const COMPLETION_PAUSE_MSEC := 2000
 
 var panel: PanelContainer
 var reopen: Button
@@ -62,6 +64,16 @@ var _price_revision := -1
 var _sale_revision := -1
 var _selected_row := ""
 var _row_panels: Dictionary = {}
+var _hud_managed := false
+var _hud_preview := false
+var _loot_enabled := true
+var _announcements_enabled := true
+var _announcement_active := false
+var _announcement_message := ""
+var _creature_deaths_pending: Callable
+var _completion_open_pending := false
+var _completion_ready_msec := 0
+
 var exchange_dialog: ConfirmationDialog
 var exchange_amount: SpinBox
 var exchange_price: SpinBox
@@ -112,6 +124,31 @@ func configure(atlas: ItemAtlas, registry: Dictionary = {}, equipment: Dictionar
 
 func configure_sender(sender: Callable) -> void:
 	_send = sender
+
+func configure_completion_wait(creature_deaths_pending: Callable) -> void:
+	_creature_deaths_pending = creature_deaths_pending
+
+func configure_hud(loot_enabled: bool, announcements_enabled: bool, preview: bool) -> void:
+	_hud_managed = true
+	_loot_enabled = loot_enabled
+	_announcements_enabled = announcements_enabled
+	_hud_preview = preview
+	_refresh_hud_visibility()
+
+func _refresh_hud_visibility() -> void:
+	reopen.visible = _loot_enabled and (_hud_preview or (not panel.visible and not _state.is_empty()
+		and ((not bool(_state.get("exited", false)) and _state.get("phase", "") != "sent")
+			or int(_state.get("exchange_total", 0)) > 0
+			or bool(_state.get("other_pending", false)))))
+	announcement_text.text = _announcement_message if _announcement_active else "Rare drop announcement preview"
+	announcement.visible = _announcements_enabled and (_hud_preview or _announcement_active)
+
+func default_hud_rect(key: String, viewport: Vector2) -> Rect2:
+	if key == "gauntlet_loot":
+		return Rect2(Vector2(maxf(8, viewport.x - 270), 100), reopen.get_combined_minimum_size().max(Vector2(165, 34)))
+	var target := Vector2(clampf(viewport.x - 114, 640, 1460), clampf(viewport.y - 112, 380, 830))
+	var origin := Vector2(maxf(8, (viewport.x - 92 - target.x) / 2), maxf(48, (viewport.y - target.y) / 2))
+	return Rect2(Vector2(origin.x + 60, maxf(4, origin.y - 43)), Vector2(maxf(300, target.x - 120), 34).max(announcement.get_combined_minimum_size()))
 
 static func style(border := BRONZE, background := Color("080f10"), margin := 10) -> StyleBoxFlat:
 	var box := StyleBoxFlat.new()
@@ -187,13 +224,16 @@ func _button(parent: Node, text: String, action: Callable, primary := false) -> 
 
 func _build() -> void:
 	reopen = _button(self, "Gauntlet loot", _open)
+	reopen.name = "GauntletLootShortcut"
 	reopen.hide()
 	announcement = PanelContainer.new()
+	announcement.name = "RareDropAnnouncements"
 	announcement.add_theme_stylebox_override("panel", style(BRONZE, Color("081314"), 10))
 	announcement.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(announcement)
 	_surface(announcement)
 	announcement_text = _label(announcement, "", 15, GOLD)
+	announcement_text.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	announcement_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	announcement_text.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	announcement.hide()
@@ -205,7 +245,7 @@ func _build() -> void:
 	panel.resized.connect(func() -> void: panel.queue_redraw())
 	panel.visibility_changed.connect(func() -> void:
 		portraits.set_active(panel.visible)
-		reopen.visible = not panel.visible and not _state.is_empty() and (_state.get("phase", "") != "sent" or int(_state.get("exchange_total", 0)) > 0 or bool(_state.get("other_pending", false))))
+		_refresh_hud_visibility())
 	_content = VBoxContainer.new()
 	_content.add_theme_constant_override("separation", 7)
 	panel.add_child(_content)
@@ -480,19 +520,27 @@ func _layout() -> void:
 	var target := Vector2(clampf(viewport.x - 114, 640, 1460), clampf(viewport.y - 112, 380, 830))
 	panel.size = target
 	panel.position = Vector2(maxf(8, (viewport.x - 92 - target.x) / 2), maxf(48, (viewport.y - target.y) / 2))
-	announcement.position = Vector2(panel.position.x + 60, maxf(4, panel.position.y - 43))
-	announcement.size = Vector2(maxf(300, panel.size.x - 120), 34)
-	reopen.position = Vector2(maxf(8, viewport.x - 270), 100)
-	reopen.size.x = 165
+	if _hud_managed:
+		hud_layout_requested.emit()
+	else:
+		for key: String in ["gauntlet_loot", "rare_drops"]:
+			var control: Control = reopen if key == "gauntlet_loot" else announcement
+			var rect := default_hud_rect(key, viewport)
+			control.position = rect.position
+			control.size = rect.size
 	panel.queue_redraw()
 
 func _on_state_changed(path: StringName) -> void:
 	if path == &"gauntlet_loot": apply_snapshot(AppState.gauntlet_loot)
 	elif path == &"connection" and AppState.connection_state == "disconnected":
 		_state.clear()
+		_completion_open_pending = false
+		_completion_ready_msec = 0
+		_pending_since = 0
+		set_process(false)
+		_announcement_active = false
 		panel.hide()
-		reopen.hide()
-		announcement.hide()
+		_refresh_hud_visibility()
 		editor.hide()
 		confirmation.hide()
 		price_dialog.hide()
@@ -512,7 +560,16 @@ func apply_snapshot(state: Dictionary) -> void:
 		_render_exchange()
 		if _pending_since == 0: status.text = "Another gauntlet ledger was updated. Choose its run above to review loot or votes."
 		return
-	if changed_run: _selected_row = ""
+	var completed: bool = state.phase == "complete" and (changed_run or _state.get("phase", "") != "complete")
+	if changed_run:
+		_selected_row = ""
+		_completion_open_pending = false
+		_completion_ready_msec = 0
+	if completed and state.open and not panel.visible:
+		_completion_open_pending = true
+		_completion_ready_msec = 0
+	elif state.phase != "complete":
+		_completion_open_pending = false
 	if changed_run or state.phase == "sent" and _state.get("phase", "") != "sent":
 		_show_exchange = state.phase == "sent" and int(state.get("exchange_total", 0)) > 0
 	if changed_run or int(state.revision) != int(_state.get("revision", -1)):
@@ -524,29 +581,34 @@ func apply_snapshot(state: Dictionary) -> void:
 		reprice_dialog.hide()
 	_state = state.duplicate(true)
 	_pending_since = 0
-	set_process(false)
+	set_process(_completion_open_pending)
 	if just_exited: close()
-	reopen.visible = not panel.visible and (state.phase != "sent" or int(state.get("exchange_total", 0)) > 0 or bool(state.get("other_pending", false)))
 	reopen.text = "Party exchange (%d)" % int(state.exchange_total) if int(state.get("exchange_total", 0)) > 0 and state.phase == "sent" else ("More reserved loot" if state.phase == "sent" else "Gauntlet loot (%d)" % int(state.total))
 	if not str(state.announcement).is_empty():
 		var key := "%s:%d" % [state.run_id, int(state.announcement_id)]
-		announcement_text.text = "RARE FOUND: %s   ·   Party notified · Held for distribution" % state.announcement
+		_announcement_message = "RARE FOUND: %s   ·   Party notified · Held for distribution" % state.announcement
 		if _last_notice != key:
 			_last_notice = key
-			announcement.show()
+			_announcement_active = true
 			get_tree().create_timer(9).timeout.connect(func() -> void:
-				if _last_notice == key and not panel.visible: announcement.hide())
-	if state.open and not just_exited:
-		panel.show()
-		if panel.has_meta(WindowStack.STACK_META): WindowStack.activate(panel)
-		else: panel.move_to_front()
+				if _last_notice == key and not panel.visible:
+					_announcement_active = false
+					_refresh_hud_visibility())
+	if state.open and not just_exited and not _completion_open_pending:
+		_show_panel()
 	if panel.visible:
 		portraits.set_active(true)
 		_render()
 		if not str(state.get("error", "")).is_empty(): status.text = str(state.error)
 	elif changed_run:
 		portraits.begin_batch()
+	_refresh_hud_visibility()
 	_layout.call_deferred()
+
+func _show_panel() -> void:
+	panel.show()
+	if panel.has_meta(WindowStack.STACK_META): WindowStack.activate(panel)
+	else: panel.move_to_front()
 
 func _clear(parent: Node) -> void:
 	for child: Node in parent.get_children():
@@ -893,11 +955,16 @@ func _portrait_ready(key: String, texture: Texture2D) -> void:
 				if child != target: child.queue_free()
 
 func _open() -> void:
+	if _hud_preview: return
 	_request("open", {"page": int(_state.get("page", 0)), "exchange_page": int(_state.get("exchange_page", 0)), "ledger_page": int(_state.get("ledger_page", 0))}, -1, _state.get("phase", "") != "sent" or int(_state.get("exchange_total", 0)) > 0)
 
 func close() -> void:
+	_completion_open_pending = false
+	_completion_ready_msec = 0
+	set_process(_pending_since > 0)
+	_announcement_active = false
 	panel.hide()
-	announcement.hide()
+	_refresh_hud_visibility()
 	editor.hide()
 	confirmation.hide()
 	price_dialog.hide()
@@ -936,12 +1003,28 @@ func _request(action: String, extra: Dictionary = {}, revision := -1, current_ru
 		status.text = "Waiting for the server…"
 
 func _process(_delta: float) -> void:
-	if _pending_since > 0 and Time.get_ticks_msec() - _pending_since > 5000:
+	var now := Time.get_ticks_msec()
+	if _completion_open_pending:
+		# Observe the actual presented bodies: late death packets or a slower
+		# dissolve restart the quiet period instead of racing a fixed delay.
+		if _creature_deaths_pending.is_valid() and _creature_deaths_pending.call():
+			_completion_ready_msec = 0
+		elif _completion_ready_msec == 0:
+			_completion_ready_msec = now + COMPLETION_PAUSE_MSEC
+		elif now >= _completion_ready_msec:
+			_completion_open_pending = false
+			_show_panel()
+			portraits.set_active(true)
+			_render()
+			if not str(_state.get("error", "")).is_empty(): status.text = str(_state.error)
+			_refresh_hud_visibility()
+			_layout.call_deferred()
+	if _pending_since > 0 and now - _pending_since > 5000:
 		_pending_since = 0
-		set_process(false)
 		if panel.visible:
 			_render()
 			status.text = "No update received. Reopen the ledger to refresh before retrying."
+	set_process(_completion_open_pending or _pending_since > 0)
 
 func _edit_item(row: Dictionary) -> void:
 	_editing = row.duplicate(true)
