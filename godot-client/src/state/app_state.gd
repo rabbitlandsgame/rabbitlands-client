@@ -141,7 +141,7 @@ var autocast: Dictionary = {}
 ## Debuffs shown under a creature's name. Keep in step with
 ## status_effect_icons.gd NEGATIVE (that script preloads art; this one must not).
 const NEGATIVE_STATUSES := ["poison", "cripple", "expose_heat", "expose_cold",
-	"expose_magic", "expose_radiation", "stun", "root", "sunder", "mark", "challenge"]
+	"expose_magic", "expose_radiation", "stun", "root", "sunder", "mark", "challenge", "focus_lock"]
 var npc_dialogue: Dictionary = {"open": false, "name": "", "text": "",
 	"options": [], "quest": false, "quest_id": 0}
 var trade: Dictionary = {"open": false, "partner": "", "storage_available": false,

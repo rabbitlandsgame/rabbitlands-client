@@ -3,10 +3,9 @@ extends RefCounted
 const COLUMNS := 6
 const SIZE := 20.0
 const GAP := 3.0
-## Keep in step with AppState.NEGATIVE_STATUSES. The last five are left by
-## fighters' techniques (Shield Bash, Hamstring, Sunder, Mark Target, Challenge).
+## Keep in step with AppState.NEGATIVE_STATUSES, including technique effects.
 const NEGATIVE := ["poison", "cripple", "expose_heat", "expose_cold", "expose_magic", "expose_radiation",
-	"stun", "root", "sunder", "mark", "challenge"]
+	"stun", "root", "sunder", "mark", "challenge", "focus_lock"]
 const TEXTURES := {
 	"poison": preload("res://assets/ui/status/poison.svg"),
 	"cripple": preload("res://assets/ui/status/cripple.svg"),
@@ -19,6 +18,7 @@ const TEXTURES := {
 	"sunder": preload("res://assets/ui/status/sunder.svg"),
 	"mark": preload("res://assets/ui/status/mark.svg"),
 	"challenge": preload("res://assets/ui/status/challenge.svg"),
+	"focus_lock": preload("res://assets/ui/status/focus_lock.svg"),
 	"shield": preload("res://assets/ui/status/shield.svg"),
 	"magic_protection": preload("res://assets/ui/status/magic_protection.svg"),
 	"heat_protection": preload("res://assets/ui/status/heat_protection.svg"),

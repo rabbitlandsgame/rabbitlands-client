@@ -119,7 +119,7 @@ func replay() -> void:
 	source.server_target = source.position
 	source.rotation.y = -PI * 0.5
 	target.rotation.y = PI * 0.5
-	target.visible = not support or key in ["intercept", "challenge", "riposte"]
+	target.visible = not support or key in ["intercept", "challenge", "provoke", "riposte"]
 	if support and not target.visible: source.position.x = 0
 	var equipment := {0: 114}
 	if key in ["shield_bash", "brace", "intercept"]: equipment[1] = 106
@@ -164,7 +164,7 @@ func _process(delta: float) -> void:
 		var phase := "shot" if ranged else "activate" if key in Presentation.SUPPORT else "strike"
 		_emit_cue(key, phase, key not in Presentation.SUPPORT)
 		_flurry_hits = 1
-		if key == "challenge": _emit_cue(key, "impact", true)
+		if key in ["challenge", "provoke"]: _emit_cue(key, "impact", true)
 		if ranged:
 			var arrow := MissileFlight3D.new()
 			effects.add_child(arrow)

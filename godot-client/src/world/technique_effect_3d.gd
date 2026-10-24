@@ -129,7 +129,7 @@ func _source_cue(p: float, color: Color) -> void:
 				var at := _origin + _right * side * 0.30 + Vector3.UP * 0.12
 				_line(at - direction * (0.25 + p * 0.7), at + direction * 0.25, 0.045, color)
 			_motes(_origin, p, Color(color, color.a * 0.5), 10, 0.65)
-		"challenge", "war_cry":
+		"challenge", "provoke", "war_cry":
 			for i: int in 3:
 				_arc(_origin + Vector3.UP * (0.12 + i * 0.23), 0.30 + p * (2.8 if key == "war_cry" else 1.4) + i * 0.08, 0.025, color, 0, TAU)
 		"second_wind":
@@ -156,7 +156,7 @@ func _impact_cue(center: Vector3, floor: Vector3, p: float, color: Color) -> voi
 			_arc(floor + Vector3.UP * 0.09, 0.20 + p * 0.3, 0.04, color, -elapsed, TAU * 0.85)
 			for side: int in [-1, 1]:
 				_line(floor + _right * side * 0.4 + Vector3.UP * 0.04, floor + _right * side * 0.14 + Vector3.UP * 0.25, 0.035, color)
-		"mark_target", "challenge", "aimed_shot":
+		"mark_target", "challenge", "provoke", "aimed_shot":
 			var width := 0.23 + p * 0.08
 			for side: int in [-1, 1]:
 				var edge := center + _right * side * width
