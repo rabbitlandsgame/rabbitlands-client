@@ -61,6 +61,8 @@ const SCHEMA := 1
 const Workloads := preload("res://tests/integration/performance_workloads.gd")
 const RouteContent := preload("res://tests/integration/benchmark_route_content.gd")
 const MountedCensus := preload("res://tests/integration/benchmark_mounted_census.gd")
+const HeatBoltBenchmark := preload("res://tests/integration/benchmark_heat_bolt.gd")
+var _heat_bolt_benchmark: Node
 const MAX_SPAWN_MSEC := 240000
 const MAX_READINESS_MSEC := 60000
 const MIN_SAMPLE_FRAMES := 60
@@ -149,6 +151,18 @@ func _init() -> void:
 ## The cells a profile runs. `phase4` is the exit-criterion set; `quick` is one
 ## market and one invasion cell for a smoke run.
 static func cells_for(profile: String) -> Array:
+	if profile.begins_with("route-soak-"):
+		var count_text := profile.trim_prefix("route-soak-")
+		if not count_text.is_valid_int(): return []
+		var count := int(count_text)
+		if count < 2 or count > 32: return []
+		var result: Array = []
+		for index: int in count:
+			var suffix := String.chr(97 + index / 26) + String.chr(97 + index % 26)
+			result.append({"id": "traversal-southern-soak-" + suffix, "count": 1,
+				"shape": "traversal", "activity": "route", "visit": "cold" if index == 0 else "warm",
+				"soakIndex": index, "soakIterations": count})
+		return result
 	var cells: Array = []
 	var legacy_all := profile == "phase4"
 	for count: int in [100, 160, 200, 300]:
@@ -172,6 +186,10 @@ static func cells_for(profile: String) -> Array:
 			"shape": "traversal", "activity": "route", "visit": visit})
 	if profile == "all":
 		return cells
+	# Explicit Phase7 selector; existing profile memberships stay unchanged.
+	cells.append({"id":"combat-heat-bolt-160","count":160,"shape":"heat_bolt","activity":"heat_bolt_combat"})
+	if profile == "phase7":
+		return [cells[cells.size()-1]]
 	if profile == "phase1":
 		var phase_one := ["s3-market-160", "s2-invasion-160", "mixed-mounted-160",
 			"combat-160", "empty", "traversal-southern-cold", "traversal-southern-warm"]
@@ -292,6 +310,18 @@ func _run() -> void:
 	_report["crowdPolicy"] = (_main.get("crowd") as RefCounted).call("describe") \
 		if _main.get("crowd") != null else {"available": false}
 	_record_effective_runtime()
+	if OS.get_environment("RABBITLANDS_PREPARED_PLACEMENT_PROBE").strip_edges() == "1":
+		# Explicit functional run: no prewarm, sampled frames or timing cells.
+		_report["functionalOnly"] = true
+		_report["benchmarkPurpose"] = "prepared_placement_restore_probe"
+		var probe := _main.call("benchmark_restore_prepared_placement",
+			_env("RABBITLANDS_PREPARED_PLACEMENT_PROBE_MAP", "four_gates"),
+			_env("RABBITLANDS_PREPARED_PLACEMENT_PROBE_CHUNK", "02_07")) as Dictionary
+		_report["preparedPlacementProbe"] = probe
+		_expect(str(probe.get("status", "")) == "restored", "explicit prepared placement restores")
+		await _tear_down_main()
+		_finish()
+		return
 	# A replay warms nothing: what the recording shows is built in its prologue,
 	# and a model first seen during the sample costs what it costs in play.
 	if not replay:
@@ -458,6 +488,11 @@ func _run_cell(spec: Dictionary) -> void:
 	if not replay:
 		active = _active_ids(records, str(spec["activity"]))
 	var plan := _plan(active, str(spec["activity"]))
+	if str(spec.shape) == "heat_bolt":
+		_heat_bolt_benchmark = HeatBoltBenchmark.new()
+		(_main.get("world_root") as Node3D).add_child(_heat_bolt_benchmark)
+		_heat_bolt_benchmark.configure(_main, _app_state, plan, _send_packet)
+		_main.set("benchmark_heat_bolt", _heat_bolt_benchmark)
 	# Attribution diagnostics, never an acceptance configuration: the benchmark
 	# Main subclass freezes every AnimationPlayer, hides the overhead block or
 	# skips the ground rays (RABBITLANDS_CROWD_BENCH_DIAG=no_animation,...).
@@ -492,6 +527,7 @@ func _run_cell(spec: Dictionary) -> void:
 		"gateSweepEndMilliseconds": [], "declutterMilliseconds": [],
 		"halfRateStepMilliseconds": [], "combatPoseMilliseconds": [], "skeletonUpdates": [],
 		"actorRecords": [], "actorNodes": []}
+	var heat_start: Dictionary = _heat_bolt_benchmark.begin_sample() if is_instance_valid(_heat_bolt_benchmark) else {}
 	var sample_started := Time.get_ticks_msec()
 	var window_started := _replay_stats.duplicate(true)
 	if replay:
@@ -506,10 +542,24 @@ func _run_cell(spec: Dictionary) -> void:
 	var elapsed := Time.get_ticks_msec() - sample_started
 	var census_after := _census("afterSample")
 	var sampled_runtime := _main.call("benchmark_runtime_snapshot") as Dictionary
+	# No await: retain the same counter boundary while reading the already
+	# completed viewport. This stalls/readbacks outside the timed sample.
+	var boundary_capture := _capture_sample_boundary(str(spec["id"]))
 	var budget: Dictionary = (_main.get("effect_budget") as RefCounted).call("describe") \
 		if _main.get("effect_budget") != null else {}
 	var crowd: Dictionary = (_main.get("crowd") as RefCounted).call("describe") \
 		if _main.get("crowd") != null else {}
+	var heat_report: Dictionary = {}
+	if is_instance_valid(_heat_bolt_benchmark):
+		heat_report = _heat_bolt_benchmark.sample_report(heat_start)
+		var probe: Dictionary = await _heat_bolt_benchmark.removal_probe()
+		await _spawn_and_build(count)
+		var restored_readiness := await _wait_for_world_readiness("heat-bolt restoration", 300)
+		probe["restorationReady"] = bool(restored_readiness.get("ready", false))
+		_expect(bool(probe.get("success", false)) and bool(probe.restorationReady), "removed heat-bolt target restores cleanly")
+		heat_report["removedTargetProbe"] = probe
+		_heat_bolt_benchmark.finish()
+		_heat_bolt_benchmark = null
 	var remaining: Dictionary = {FIRST_ACTOR_ID: _record(0, true, _centre, FULL_KIT_A)}
 	if replay:
 		var actors := _app_state.get("actors") as Dictionary
@@ -551,6 +601,10 @@ func _run_cell(spec: Dictionary) -> void:
 	result["effectBudget"] = budget
 	result["crowdPolicy"] = crowd
 	result["effectiveRuntime"] = sampled_runtime
+	if bool(boundary_capture.get("requested", false)):
+		result["boundaryCapture"] = boundary_capture
+	if not heat_report.is_empty():
+		result["spellWorkload"] = heat_report
 	result["memory"] = {"before": before, "withCrowd": spawned_memory, "afterDespawn": after,
 		"crowdDelta": _memory_delta(before, spawned_memory),
 		"perActorStaticBytes": int((int(spawned_memory.staticBytes) - int(before.staticBytes))
@@ -566,6 +620,36 @@ func _run_cell(spec: Dictionary) -> void:
 ## The crowd's records. The player stands on the centre tile; the others take
 ## unique tiles inside the shape's half-width, seeded so every run and every
 ## variant gets the same layout.
+func _capture_sample_boundary(cell_id: String) -> Dictionary:
+	if OS.get_environment("RABBITLANDS_CROWD_BENCH_CAPTURE_BOUNDARIES").strip_edges() != "1":
+		return {"requested":false}
+	var started := Time.get_ticks_usec()
+	var out := {"requested":true,"status":"failed","outsideSample":true,
+		"boundary":"after_sample_before_despawn","viewport":"world",
+		"clockScope":"last completed presented viewport; not a pixel-equivalence clock"}
+	if _headless:
+		_expect(false,"boundary PNG requires a rendered window")
+		return out
+	var viewport := _main.get("main_viewport") as SubViewport
+	var image := viewport.get_texture().get_image() if viewport != null else null
+	if image == null or image.is_empty():
+		_expect(false,"boundary PNG has a completed image")
+		return out
+	var report := OS.get_environment("RABBITLANDS_CROWD_BENCH_OUT")
+	if report.is_empty():
+		report = "user://crowd-presentation.json"
+	var path := report.get_basename()+"."+cell_id+".after-sample.png"
+	var result := image.save_png(path)
+	out["path"] = ProjectSettings.globalize_path(path)
+	out["width"] = image.get_width()
+	out["height"] = image.get_height()
+	out["sha256"] = FileAccess.get_sha256(path) if result == OK else ""
+	out["captureMicroseconds"] = Time.get_ticks_usec()-started
+	out["status"] = "captured" if result == OK else "failed"
+	_expect(result == OK,"boundary PNG saved outside timing")
+	return out
+
+
 func _make_records(count: int, shape: String) -> Dictionary:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 7741 + count
@@ -585,6 +669,9 @@ func _make_records(count: int, shape: String) -> Dictionary:
 			"invasion":
 				humanoid = index % 7 == 0
 				half = 50 if humanoid else 30
+			"heat_bolt":
+				humanoid = true
+				half = 14
 			"melee":
 				humanoid = index % 2 == 0
 				half = 25
@@ -682,7 +769,7 @@ func _active_ids(records: Dictionary, activity: String) -> Array[int]:
 	for index: int in range(1, ids.size()):
 		# Every third remote actor, so the active third is spread through the
 		# crowd rather than packed at one end of it.
-		if activity == "all_combat" or index % 3 == 1:
+		if activity in ["all_combat", "heat_bolt_combat"] or index % 3 == 1:
 			active.append(int(ids[index]))
 	return active
 
@@ -691,6 +778,9 @@ func _plan(active: Array[int], activity: String) -> Dictionary:
 	var moving: Array[int] = []
 	var fighting: Array[int] = []
 	for index: int in range(active.size()):
+		if activity == "heat_bolt_combat":
+			(moving if index % 10 == 0 else fighting).append(active[index])
+			continue
 		if activity == "all_combat" or index % 2 == 1:
 			fighting.append(active[index])
 		else:
@@ -1096,6 +1186,9 @@ func _drive_tick(plan: Dictionary, tick: int) -> void:
 	if _presence_dots > 0 and tick % maxi(1, 1000 / cadence) == 0:
 		_send_packet(EloriaProtocol.ServerMessage.ELORIA_PRESENCE,
 			_presence_payload(float(tick * cadence) / 1000.0))
+	if is_instance_valid(_heat_bolt_benchmark):
+		_heat_bolt_benchmark.drive_tick(tick, cadence)
+		return
 	var moving: Array[int] = plan["moving"]
 	var fighting: Array[int] = plan["fighting"]
 	var live := _driver_mode() == "live"
@@ -1301,6 +1394,8 @@ func _census(boundary := "unspecified") -> Dictionary:
 	var ambient := _main.get("ambient_population") as AmbientPopulation
 	if is_instance_valid(ambient):
 		out["ambientAnimals"] = (ambient.get("_spawned") as Array).size()
+	if _main.has_method("benchmark_remote_snapshot"):
+		out["remotePresentation"] = _main.call("benchmark_remote_snapshot")
 	return out
 
 
@@ -1398,6 +1493,7 @@ func _prepare_authored_herd(spec: Dictionary) -> void:
 ## A client-only route, using the real Main/AppState loader and packet handlers.
 ## It intentionally does not claim server navigation or cold OS/storage caches.
 func _run_traversal_cell(spec: Dictionary) -> void:
+	var iteration_begin := RouteContent.clock()
 	var primer: Array[Dictionary] = []
 	if str(spec.visit) == "warm" and not _route_primed:
 		primer = await _traverse_southern_route()
@@ -1433,6 +1529,10 @@ func _run_traversal_cell(spec: Dictionary) -> void:
 			"boundaryContentSchema": 1,
 			"boundaryCaptureTiming": "synchronous capture cost is reported; remains in route frame/wall samples; transition milliseconds ends before arrival capture",
 			"serverNavigationCertified": false, "unmeasuredPrimer": primer,
+			"iterationClock": {"index": int(spec.get("soakIndex", 0)),
+				"plannedIterations": int(spec.get("soakIterations", 1)), "visit": str(spec.visit),
+				"pid": OS.get_process_id(), "mainInstanceId": _main.get_instance_id(),
+				"begin": iteration_begin, "end": RouteContent.clock()},
 			"cacheCondition": ("repeat in this process" if str(spec.visit) == "warm" else "first route pass in this process")
 				+ "; OS caches uncontrolled; preceding crowd cells can share assets"},
 		"memory": {"before": before, "after": _memory_sample(), "peakStaticBytes": _route_peak_static_bytes},

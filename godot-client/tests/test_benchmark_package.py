@@ -14,6 +14,25 @@ import package_client
 
 
 class BenchmarkPackageTests(unittest.TestCase):
+    def test_native_resource_lifetime_fixture_survives_local_export(self):
+        expected = {"tests/integration/benchmark_resource_admission.gd",
+                    "tests/test_native_streaming_lifetime.gd"}
+        self.assertTrue(expected.issubset(benchmark_package.WORKLOAD_FILES))
+        with tempfile.TemporaryDirectory() as directory:
+            project = Path(directory)
+            (project / "data").mkdir()
+            for name in benchmark_package.WORKLOAD_FILES | {"tests/unrelated_private.json"}:
+                path = project / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text("fixture", encoding="utf-8")
+            (project / "export_presets.cfg").write_text(package_client.EXPORT_PRESETS, encoding="utf-8")
+            (project / "project.godot").write_text(
+                '[application]\nrun/main_scene="res://src/app/main.tscn"\n', encoding="utf-8")
+            benchmark_package.prepare_export(project)
+            self.assertTrue(all((project / name).is_file() for name in expected))
+            self.assertFalse((project / "tests/unrelated_private.json").exists())
+
+
     def test_local_asset_links_do_not_share_mutable_metadata(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -98,6 +117,22 @@ class BenchmarkPackageTests(unittest.TestCase):
             (project / "export_presets.cfg").write_text(package_client.EXPORT_PRESETS, encoding="utf-8")
             (project / "project.godot").write_text(
                 '[application]\nrun/main_scene="res://src/app/main.tscn"\n', encoding="utf-8")
+            benchmark_package.prepare_export(project)
+            self.assertTrue((project / helper).is_file())
+            self.assertFalse((project / fixture).exists())
+
+    def test_placement_helper_is_exported_without_its_fixture(self):
+        helper = "tests/integration/benchmark_placement_diagnostics.gd"
+        fixture = "tests/test_benchmark_placement_diagnostics.gd"
+        with tempfile.TemporaryDirectory() as directory:
+            project = Path(directory)
+            (project / "data").mkdir()
+            for name in benchmark_package.WORKLOAD_FILES | {helper, fixture}:
+                path = project / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text("fixture", encoding="utf-8")
+            (project / "export_presets.cfg").write_text(package_client.EXPORT_PRESETS, encoding="utf-8")
+            (project / "project.godot").write_text('[application]\nrun/main_scene="res://src/app/main.tscn"\n', encoding="utf-8")
             benchmark_package.prepare_export(project)
             self.assertTrue((project / helper).is_file())
             self.assertFalse((project / fixture).exists())

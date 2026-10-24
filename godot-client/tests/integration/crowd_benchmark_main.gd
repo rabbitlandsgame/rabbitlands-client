@@ -2,6 +2,7 @@ extends "res://src/app/main.gd"
 ## Benchmark-only instrumentation around the existing presentation pipeline.
 ## Nothing in the shipping client pays for these timers.
 
+var benchmark_heat_bolt: Node
 var benchmark_ground_enabled := true
 var benchmark_overhead_enabled := true
 var benchmark_animation_enabled := true
@@ -37,31 +38,64 @@ func benchmark_runtime_snapshot() -> Dictionary:
 			"renderScale": main_viewport.scaling_3d_scale,
 			"textureQuality": _map_texture_quality, "textureSkip": GraphicsOptions.active_texture_skip(),
 			"frameCap": Engine.max_fps, "minimap": minimap_frame.visible,
+			"clothBudget": crowd.cloth_bodies, "shadowsPreference": _shadows_enabled,
+			"sunShadowsEnabled": world_sun.shadow_enabled,
+			"particlesEnabled": _effects_enabled, "decorativeGrass": GraphicsOptions.decorative_grass,
+			"nameDistanceMetres": _name_distance_metres,
 			"renderer": RenderingServer.get_current_rendering_method(),
 			"rootSize": [get_tree().root.size.x, get_tree().root.size.y],
 			"worldViewportSize": [main_viewport.size.x, main_viewport.size.y]},
 		"activeBackends": {"nativeReducer": AppState.native_crowd_reducer_active(),
+			"clientRuntime": client_runtime.snapshot(),
+			"remotePresentation": (remote_presentation.snapshot() if is_instance_valid(remote_presentation) else {"backend": "legacy", "reason": "not_initialized"}),
+			"remoteCoverage": remote_presentation.coverage(actor_nodes.values()),
+			"resourceAdmission": benchmark_resource_admission_snapshot(),
+			"rustSpellFlights": RustSpellFlights.snapshot_for(world_root),
+			"mountedBatch": RustRiderPose.batch_snapshot(),
 			"presentation": {"requested": OS.get_environment("ELORIA_NATIVE_PRESENTATION"),
 				"nativeCapeInstances": cape_instances, "nativeCapeCalls": cape_calls,
 				"capeFallbackCalls": cape_fallbacks, "flight": flight_stats, "impact": impact_stats},
-			"preparedContent": {"active": false, "status": "not_implemented"},
+			"preparedContent": preload("res://src/world/prepared_content.gd").snapshot(),
+			"preparedNodePolicy": preload("res://src/world/prepared_content.gd").node_policy(),
 			"mapSceneCache": {"enabled": MapSceneCache.is_enabled(), "status": str(world_loader.cache_status)}},
 	}
 
 
 # Keep positions, connection/authentication fields and replay actor data out of
 # benchmark metadata. This is taken outside sampling, never in a per-frame timer.
+func benchmark_resource_admission_snapshot() -> Dictionary:
+	var service := preload("res://src/runtime/resource_admission.gd")
+	var observed := resource_admission_snapshot()
+	# Capture cached effective selectors, not only inherited environment text.
+	observed["requested_mode"] = "rust" if service.requested() else "legacy"
+	observed["requested_estimate_budget"] = service.estimate_budget()
+	return observed
+
+
 func benchmark_resource_diagnostics() -> Dictionary:
 	var snapshot := client_diagnostic_snapshot()
 	var result: Dictionary = {}
-	for key: String in ["surface_work", "loader_work", "streaming_work",
-			"resource_retention", "map_cache_enabled", "map_cache_status",
+	for key: String in ["client_runtime", "spell_flights", "surface_work", "loader_work", "streaming_work",
+			"resource_retention", "resource_admission", "map_cache_enabled", "map_cache_status",
 			"map_load_phases_us", "chunks_resident", "chunk_resident_bytes",
 			"chunk_revision", "vram_mode", "vram_formats", "static_memory_bytes",
 			"video_memory_bytes"]:
 		if snapshot.has(key):
 			result[key] = snapshot[key]
+	result["prepared_placements"] = benchmark_placement_snapshot()
 	return result
+
+
+func benchmark_placement_snapshot() -> Dictionary:
+	var ready := bool(benchmark_readiness_snapshot().get("ready", false))
+	return preload("res://tests/integration/benchmark_placement_diagnostics.gd").capture(
+		world_loader, exterior_stream, loaded_server_map, ready)
+
+
+func benchmark_restore_prepared_placement(map_id: String, chunk_id: String) -> Dictionary:
+	var ready := bool(benchmark_readiness_snapshot().get("ready", false))
+	return preload("res://tests/integration/benchmark_placement_diagnostics.gd").restore_one(
+		world_loader, exterior_stream, loaded_server_map, map_id, chunk_id, ready)
 
 
 func benchmark_readiness_snapshot() -> Dictionary:
@@ -517,7 +551,19 @@ func _on_actor_animation_requested(animation: Dictionary) -> void:
 			actor_id) as ReplicatedActor3D)
 
 
+func _track_effect(node: Node, kind: StringName) -> void:
+	super._track_effect(node, kind)
+	if kind == &"spell" and is_instance_valid(benchmark_heat_bolt):
+		benchmark_heat_bolt.call("observe", node)
+
+
 func _on_special_effect_requested(effect: Dictionary) -> void:
+	if is_instance_valid(benchmark_heat_bolt) and int(effect.get("effect", -1)) == 2:
+		# Explicit synthetic clock after decoding the real packet, identical
+		# in all three family backends; never used by other cells.
+		effect = effect.duplicate()
+		effect["release_delay"] = 0.2
+		effect["flight_duration"] = 0.4
 	if not benchmark_attribution_enabled:
 		super._on_special_effect_requested(effect)
 		if not benchmark_animation_enabled:
@@ -538,3 +584,7 @@ func _on_special_effect_requested(effect: Dictionary) -> void:
 	if not benchmark_animation_enabled:
 		_benchmark_freeze_actor(actor_nodes.get(
 			actor_id) as ReplicatedActor3D)
+
+func benchmark_remote_snapshot() -> Dictionary:
+	return {"presentation": (remote_presentation.snapshot() if is_instance_valid(remote_presentation) else {"backend": "legacy", "reason": "not_initialized"}),
+		"coverage": remote_presentation.coverage(actor_nodes.values())}

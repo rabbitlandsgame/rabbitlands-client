@@ -25,6 +25,19 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(godot_cpp)
 
+set(RL_BUILD_JOBS 2 CACHE STRING "Bound native compiler processes")
+if(MSVC)
+    get_target_property(RL_BINDING_TARGET godot-cpp ALIASED_TARGET)
+    if(NOT RL_BINDING_TARGET)
+        set(RL_BINDING_TARGET godot-cpp)
+    endif()
+    get_target_property(RL_BINDING_OPTIONS ${RL_BINDING_TARGET} COMPILE_OPTIONS)
+    if(RL_BINDING_OPTIONS)
+        string(REGEX REPLACE "/MP[0-9]+" "/MP${RL_BUILD_JOBS}" RL_BINDING_OPTIONS "${RL_BINDING_OPTIONS}")
+        set_property(TARGET ${RL_BINDING_TARGET} PROPERTY COMPILE_OPTIONS "${RL_BINDING_OPTIONS}")
+    endif()
+endif()
+
 add_library(native_crowd SHARED
     src/native_crowd_reducer.cpp
     src/native_crowd_reducer.h
@@ -53,7 +66,11 @@ set_target_properties(native_crowd PROPERTIES
     OUTPUT_NAME "native_crowd${GODOTCPP_SUFFIX}"
     RUNTIME_OUTPUT_DIRECTORY
         "${CMAKE_CURRENT_SOURCE_DIR}/../../bin/${GODOTCPP_PLATFORM}"
+    RUNTIME_OUTPUT_DIRECTORY_RELEASE
+        "${CMAKE_CURRENT_SOURCE_DIR}/../../bin/${GODOTCPP_PLATFORM}"
     LIBRARY_OUTPUT_DIRECTORY
+        "${CMAKE_CURRENT_SOURCE_DIR}/../../bin/${GODOTCPP_PLATFORM}"
+    LIBRARY_OUTPUT_DIRECTORY_RELEASE
         "${CMAKE_CURRENT_SOURCE_DIR}/../../bin/${GODOTCPP_PLATFORM}"
 )
 

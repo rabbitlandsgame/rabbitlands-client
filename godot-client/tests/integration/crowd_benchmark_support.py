@@ -17,6 +17,10 @@ import socket
 import tempfile
 import time
 from typing import Any
+from benchmark_soak_validation import soak_ids, validate_soak
+from benchmark_remote_validation import validate_remote, validate_remote_cell
+from benchmark_prepared_validation import configure_prepared_request, validate_prepared
+from benchmark_heat_bolt_validation import HeatBoltEvidenceError, validate_heat_bolt_cell
 
 
 class EvidenceError(ValueError):
@@ -28,17 +32,30 @@ OLD_CELLS = [name for count in (100, 160, 200, 300)
 OLD_CELLS += ["combat-100", "combat-160", "aoi-160", "empty"]
 PHASE1_CELLS = ["s3-market-160", "s2-invasion-160", "mixed-mounted-160",
                 "combat-160", "empty", "traversal-southern-cold", "traversal-southern-warm"]
+PHASE7_CELLS = ["combat-heat-bolt-160"]
 ALL_CELLS = OLD_CELLS + ["mixed-mounted-160", "authored-herd",
                          "traversal-southern-cold", "traversal-southern-warm"]
 ERROR_PATTERN = re.compile(r"SCRIPT ERROR|Parse Error|Failed to load|Error loading|ERROR:", re.I)
 OVERRIDE_PREFIXES = ("ELORIA_LOOK", "ELORIA_CROWD_", "ELORIA_NATIVE_", "RABBITLANDS_CROWD_")
-OVERRIDE_NAMES = {"ELORIA_VRAM_TEXTURES", "ELORIA_NO_MAP_CACHE", "ELORIA_SAFE_MODE"}
+OVERRIDE_NAMES = {"ELORIA_VRAM_TEXTURES", "ELORIA_NO_MAP_CACHE", "ELORIA_SAFE_MODE", "RABBITLANDS_CLIENT_RUNTIME", "RABBITLANDS_RUST_EFFECTS"}
+OVERRIDE_NAMES.update({"RABBITLANDS_RESOURCE_ADMISSION", "RABBITLANDS_RESOURCE_BUDGET_MIB"})
+OVERRIDE_NAMES.update({"RABBITLANDS_PREPARED_CONTENT", "RABBITLANDS_PREPARED_NODE_POLICY"})
 PERFORMANCE_GRAPHICS = {
     "quality": "low", "appearance": "painted_ground", "fps_limit": 30,
     "render_scale": .75, "map_texture_quality": "half", "crowd_bodies": 60,
     "swaying_capes": 0, "shadows": False, "particles": True,
     "decorative_grass": False, "name_distance": 20.0,
 }
+RUST_MOUNT_PROFILES = frozenset({"moor_pony", "golden_plains_horse", "crystalback_tortoise",
+                               "rabbit", "jadefeather_raptor"})
+MIXED_MOUNT_PROFILES = RUST_MOUNT_PROFILES | {"giant_rat"}
+
+
+def configure_prepared_profile(args) -> None:
+    try:
+        configure_prepared_request(args)
+    except ValueError as exc:
+        raise EvidenceError(str(exc)) from exc
 
 
 def configure_settings_profile(args, system: str | None = None) -> None:
@@ -137,12 +154,16 @@ def read_json(path: Path) -> dict:
 
 
 def selected_cells(profile: str, replay: bool = False) -> list[str]:
+    if profile.startswith("route-soak-"):
+        if replay: raise EvidenceError("same-process route soak cannot replay private data")
+        try: return soak_ids(profile)
+        except ValueError as exc: raise EvidenceError(str(exc)) from exc
     if replay:
         return []  # The recording determines its map; validate exactly one replay cell later.
     profiles = {"phase4": OLD_CELLS, "quick": ["s3-market-160", "s2-invasion-160"],
-                "phase1": PHASE1_CELLS, "all": ALL_CELLS}
+                "phase1": PHASE1_CELLS, "phase7": PHASE7_CELLS, "all": ALL_CELLS}
     names = list(profiles[profile]) if profile in profiles else profile.split(",")
-    if not names or any(not item or item not in ALL_CELLS for item in names):
+    if not names or any(not item or item not in ALL_CELLS + PHASE7_CELLS for item in names):
         raise EvidenceError("unknown or empty benchmark cell selector")
     if len(set(names)) != len(names):
         raise EvidenceError("duplicate benchmark cell selector")
@@ -207,6 +228,37 @@ def validate_distribution(value: Any, label: str, count: int | None = None) -> d
     return value
 
 
+def validate_resource_admission(backends: dict, request: dict, label: str) -> None:
+    requested = request.get("resource_admission", "legacy")
+    # Legacy checkpoints may predate admission instrumentation. An explicit
+    # Rust request must prove its cached request, budget and instantiated owner.
+    if "resourceAdmission" not in backends and requested == "legacy":
+        return
+    admission = _object(backends.get("resourceAdmission"), label + ".resourceAdmission")
+    budget = request.get("resource_admission_budget_mib", 768) * 1048576
+    if admission.get("requested_mode") != requested or admission.get("requested_estimate_budget") != budget:
+        raise EvidenceError(f"{label}: actual admission request/budget differs")
+    if admission.get("mode") != requested:
+        raise EvidenceError(f"{label}: admission backend differs or fell back")
+    if requested == "legacy":
+        if admission.get("requested") is not False:
+            raise EvidenceError(f"{label}: admission was unexpectedly enabled")
+        return
+    if admission.get("reason") != "rust_global_admission" or admission.get("estimate_budget") != budget:
+        raise EvidenceError(f"{label}: Rust admission backend/budget is unavailable")
+    for key in ("admitted", "denied", "publication_grants", "publication_deferrals", "transition_failures"):
+        _integer(admission.get(key), label + ".resourceAdmission." + key)
+    if admission["transition_failures"] != 0:
+        raise EvidenceError(f"{label}: admission lifecycle transition failed")
+    graph = _object(admission.get("dependency_graph"), label + ".admissionDependencyGraph")
+    if _object(graph.get("failures"), label + ".admissionGraphFailures"):
+        raise EvidenceError(f"{label}: admission dependency graph failed")
+    _integer(graph.get("registrations"), label + ".admissionGraphRegistrations")
+    native = _object(admission.get("native"), label + ".admissionNative")
+    for key in ("reserved", "loading", "ready", "active", "retiring", "cancelled", "old_epoch", "denials", "forced_sync"):
+        _integer(native.get(key), label + ".admissionNative." + key)
+
+
 def validate_runtime(runtime: dict, request: dict, renderer: str, quality: str,
                      body_cap: int, label: str) -> dict:
     settings = _object(runtime.get("effectiveSettings"), label + ".effectiveSettings")
@@ -235,6 +287,22 @@ def validate_runtime(runtime: dict, request: dict, renderer: str, quality: str,
         raise EvidenceError(f"{label}: missing actual appearance/minimap settings")
     if backends.get("nativeReducer") is not (request.get("native_reducer", "off") == "on"):
         raise EvidenceError(f"{label}: actual native reducer differs from request")
+    try:
+        validate_remote(backends.get("remotePresentation"), backends.get("remoteCoverage"),
+                        request.get("remote_presentation", "legacy"), label)
+    except ValueError as exc:
+        raise EvidenceError(str(exc)) from exc
+    requested_runtime = request.get("client_runtime", "legacy")
+    # Older legacy checkpoints predate this optional service. Native requests
+    # require its actual instantiated backend at every observed boundary.
+    if "clientRuntime" in backends or requested_runtime != "legacy":
+        runtime = _object(backends.get("clientRuntime"), label + ".clientRuntime")
+        expected_presentation = "mixed" if requested_runtime == "rust" else "legacy"
+        if runtime.get("requested") != requested_runtime or runtime.get("mode") != requested_runtime \
+                or runtime.get("presentation_backend") != expected_presentation or runtime.get("mismatches") != 0:
+            raise EvidenceError(f"{label}: actual client runtime differs or fell back")
+        if requested_runtime in ("compare", "rust", "services") and runtime.get("native_available") is not True:
+            raise EvidenceError(f"{label}: requested Rust comparison runtime is unavailable")
     presentation = _object(backends.get("presentation"), label + ".presentation")
     requested = request.get("native_presentation", "off")
     expected_native = "0" if requested == "off" else requested
@@ -251,8 +319,92 @@ def validate_runtime(runtime: dict, request: dict, renderer: str, quality: str,
     if requested == "off" and (presentation["nativeCapeCalls"] or presentation["nativeCapeInstances"]
                                 or any(presentation[k]["buildAttempts"] for k in ("flight", "impact"))):
         raise EvidenceError(f"{label}: native presentation ran despite being disabled")
-    _object(backends.get("preparedContent"), label + ".preparedContent")
+    validate_resource_admission(backends, request, label)
+    try:
+        validate_prepared(backends, request, label)
+    except ValueError as exc:
+        raise EvidenceError(str(exc)) from exc
     return backends
+
+
+def validate_mounted_runtime(cell: dict, runtime: dict, policy: dict, quality: str) -> None:
+    """Phase6 actual coverage and boundary evidence; never infer calls from requested mode."""
+    label = str(cell["id"])
+    profiles = _object(cell.get("mountProfiles"), label + ".mountProfiles")
+    if set(profiles) != MIXED_MOUNT_PROFILES or sum(
+            _integer(value, label + ".mountProfileCount", 1) for value in profiles.values()) != 80:
+        raise EvidenceError(f"{label}: six-profile mounted workload differs")
+    supported = sum(profiles[profile] for profile in RUST_MOUNT_PROFILES)
+    expected_fallback = profiles["giant_rat"]
+    before = _object(cell["census"]["afterSpawn"].get("mountedPresentation"), label + ".beforeMounted")
+    after = _object(cell["census"]["afterSample"].get("mountedPresentation"), label + ".afterMounted")
+    pose = _object(after.get("rustPose"), label + ".rustPose")
+    prior = _object(before.get("rustPose"), label + ".priorRustPose")
+    if pose.get("available") != 80 or pose.get("supported") != supported \
+            or pose.get("eligible") != supported or pose.get("profiles") != profiles \
+            or pose.get("requestedModes") != {"rust": 80} or pose.get("failures") != 0 \
+            or pose.get("disabled") != expected_fallback \
+            or pose.get("eligibleActiveVisuals") != pose.get("appliedEligibleActiveVisuals"):
+        raise EvidenceError(f"{label}: actual Rust rider coverage or fallback differs")
+    active = _integer(pose.get("eligibleActiveVisuals"), label + ".eligibleActiveRiders", 1)
+    applications = _integer(pose.get("applications"), label + ".rustApplications", 1)
+    if active > supported or _integer(pose.get("registered"), label + ".registered", active) > supported:
+        raise EvidenceError(f"{label}: native rider registration exceeds supported content")
+    fresh = _object(pose.get("freshness"), label + ".freshness")
+    if fresh.get("available") != 80 or fresh.get("activeEligibleCurrentVisuals") != active:
+        raise EvidenceError(f"{label}: latest eligible active pose submissions were not applied")
+    current = _integer(fresh.get("currentSubmissionVisuals"), label + ".currentSubmissions", active)
+    ages = _object(fresh.get("applicationAgeFrames"), label + ".applicationAgeFrames")
+    age_count = _integer(ages.get("count"), label + ".applicationAgeCount", active)
+    low = _number(ages.get("minimum"), label + ".minimumApplicationAge")
+    high = _number(ages.get("maximum"), label + ".maximumApplicationAge")
+    total = _number(ages.get("sum"), label + ".summedApplicationAge")
+    if current > supported or age_count > supported or low > high or total < low * age_count \
+            or total > high * age_count:
+        raise EvidenceError(f"{label}: inconsistent pose freshness evidence")
+    # Ages include intentionally paused riders. Current-submission equality,
+    # rather than a global age limit, verifies no submitted pose was dropped.
+    secondary = _object(pose.get("secondary"), label + ".secondary")
+    previous = _object(prior.get("secondary"), label + ".priorSecondary")
+    if secondary.get("available") != 80 or _integer(secondary.get("clothFallbacks"), label + ".clothFallbacks") != 0:
+        raise EvidenceError(f"{label}: secondary runtime is missing or fell back")
+    for field in ("upperApplications", "reinApplications", "reinCalls"):
+        value = _integer(secondary.get(field), label + "." + field, 1)
+        if value <= _integer(previous.get(field), label + ".prior" + field):
+            raise EvidenceError(f"{label}: no new actual {field} after spawn readiness")
+    if secondary["upperApplications"] != applications or secondary["reinApplications"] != applications:
+        raise EvidenceError(f"{label}: coupled native upper/rein applications differ from pose applications")
+    if _integer(secondary.get("reinAvailable"), label + ".reinAvailable", 1) > supported:
+        raise EvidenceError(f"{label}: rein availability exceeds supported profiles")
+    native = _object(runtime["activeBackends"]["clientRuntime"].get("native"), label + ".rustNative")
+    for api in ("mounted_profile_api", "mounted_upper_api", "mounted_cape_api", "mounted_reins_api"):
+        if _integer(native.get(api), label + "." + api) != 1:
+            raise EvidenceError(f"{label}: missing actual {api}")
+    for field in ("poses_applied", "upper_applied", "rein_calls"):
+        if _integer(native.get(field), label + ".native." + field, 1) < applications:
+            raise EvidenceError(f"{label}: actual native {field} cannot attest census applications")
+    if _integer(native.get("rein_attempts"), label + ".nativeReinAttempts") != native["rein_calls"] \
+            or _integer(native.get("rein_failures"), label + ".nativeReinFailures") != 0:
+        raise EvidenceError(f"{label}: native rein commit failed")
+    cloth = _integer(secondary.get("clothCalls"), label + ".clothCalls")
+    native_cloth = _integer(native.get("mounted_cape_calls"), label + ".nativeMountedClothCalls")
+    if _integer(native.get("mounted_cape_attempts"), label + ".nativeMountedClothAttempts") != native_cloth:
+        raise EvidenceError(f"{label}: native mounted cloth had an unsuccessful attempt")
+    if native_cloth < cloth:
+        raise EvidenceError(f"{label}: native mounted cloth counters disagree")
+    if quality == "high" and _integer(policy.get("clothBodies"), label + ".clothBudget") > 0:
+        _integer(after.get("scheduling", {}).get("cloth"), label + ".scheduledCloth", 1)
+        _integer(secondary.get("clothAvailable"), label + ".clothAvailable", 1)
+        if cloth <= _integer(previous.get("clothCalls"), label + ".priorClothCalls"):
+            raise EvidenceError(f"{label}: High fixture did not execute eligible mounted cloth")
+    elif cloth != 0 or native_cloth != 0:
+        # This fixture's local rider has no cape. This is not a general ban on
+        # the ordinary local-player cape allowance at Medium/Low.
+        raise EvidenceError(f"{label}: inactive fixture cloth policy executed mounted cloth")
+    batch = _object(runtime["activeBackends"].get("mountedBatch"), label + ".mountedBatch")
+    if batch.get("present") is not True or batch.get("fallbacks") != 0:
+        raise EvidenceError(f"{label}: actual Rust batch is absent or fell back")
+    _integer(batch.get("batches"), label + ".nativeBatches", 1)
 
 
 def validate_report(data: dict, request: dict, log: str) -> dict:
@@ -270,6 +422,8 @@ def validate_report(data: dict, request: dict, log: str) -> dict:
         raise EvidenceError("unexpected benchmark/schema")
     if _integer(data.get("failureCount"), "failureCount") != 0 or data.get("failures") != []:
         raise EvidenceError("benchmark reports failures or omits failure metadata")
+    if data.get("functionalOnly") is True:
+        raise EvidenceError("functional-only placement probe is not accepted timing evidence")
     if data.get("headless") is not (request["mode"] == "headless"):
         raise EvidenceError("actual display mode differs from requested mode")
     if request["mode"] == "windowed" and data.get("renderingMethod") != request["renderer"]:
@@ -386,6 +540,10 @@ def validate_report(data: dict, request: dict, log: str) -> dict:
             wanted_count = int(name.rsplit("-", 1)[-1]) if name.rsplit("-", 1)[-1].isdigit() else 1
             if count != wanted_count:
                 raise EvidenceError(f"{name}: actor population differs from requested cell")
+        try:
+            validate_remote_cell(cell, request.get("remote_presentation", "legacy"))
+        except ValueError as exc:
+            raise EvidenceError(str(exc)) from exc
         census = _object(cell.get("census"), name + ".census")
         for point in ("afterSpawn", "afterSample"):
             sample = _object(census.get(point), name + "." + point)
@@ -439,6 +597,8 @@ def validate_report(data: dict, request: dict, log: str) -> dict:
                 for point in ("afterSpawn", "afterSample"):
                     if census[point].get("mountedActors") != 80 or census[point].get("mountSkeletons") != 80:
                         raise EvidenceError(f"{name}: mounted workload does not contain 80 mounted actors/skeletons")
+                if request.get("client_runtime") == "rust":
+                    validate_mounted_runtime(cell, runtime, policy, data["graphicsQuality"])
         if request.get("replay"):
             window = _object(cell.get("replayWindow"), name + ".replayWindow")
             if window.get("exhausted") is True or int(window.get("mapChanges", 0)) != 0:
@@ -450,7 +610,8 @@ def validate_report(data: dict, request: dict, log: str) -> dict:
             fighting = _integer(plan.get("fighting"), name + ".plan.fighting")
             expected_active = count - 1 if name.startswith("combat-") else \
                 (1 if name.startswith("traversal-") else (count + 1) // 3 if count > 1 else 0)
-            expected_moving = 0 if name.startswith("combat-") else (expected_active + 1) // 2
+            expected_moving = 16 if name == "combat-heat-bolt-160" else (
+                0 if name.startswith("combat-") else (expected_active + 1) // 2)
             if (active, moving, fighting) != (expected_active, expected_moving, expected_active - expected_moving):
                 raise EvidenceError(f"{name}: activity workload differs from requested cell")
             if active and not name.startswith("traversal-"):
@@ -459,8 +620,49 @@ def validate_report(data: dict, request: dict, log: str) -> dict:
                 if ticks["count"] > frames or _number(summary.get("packetsPerFrame", {}).get("mean"),
                                                       name + ".packetsPerFrame.mean", .000001) <= 0:
                     raise EvidenceError(f"{name}: no observed packet activity")
+        if name == "combat-heat-bolt-160":
+            try:
+                validate_heat_bolt_cell(cell, request)
+            except HeatBoltEvidenceError as exc:
+                raise EvidenceError(str(exc)) from exc
+        capture = cell.get("boundaryCapture")
+        if request.get("capture_boundaries", False):
+            capture = _object(capture, name + ".boundaryCapture")
+            if request.get("mode") != "windowed" or capture.get("requested") is not True \
+                    or capture.get("status") != "captured" or capture.get("outsideSample") is not True \
+                    or capture.get("boundary") != "after_sample_before_despawn" \
+                    or capture.get("viewport") != "world" or not isinstance(capture.get("path"), str):
+                raise EvidenceError(f"{name}: requested boundary image was not captured")
+            _integer(capture.get("width"), name + ".capture.width", 1)
+            _integer(capture.get("height"), name + ".capture.height", 1)
+            _integer(capture.get("captureMicroseconds"), name + ".capture.microseconds")
+            if not isinstance(capture.get("sha256"), str) or not re.fullmatch(r"[0-9a-f]{64}", capture["sha256"]):
+                raise EvidenceError(f"{name}: boundary image identity missing")
+        elif capture is not None:
+            raise EvidenceError(f"{name}: boundary image was not requested")
         measured.append(name)
+    if request.get("resource_admission") == "rust" and any(str(cell["id"]).startswith("traversal-") for cell in cells):
+        if not any(backend["resourceAdmission"]["admitted"] > 0
+                   and backend["resourceAdmission"]["publication_grants"] > 0
+                   and backend["resourceAdmission"]["dependency_graph"]["registrations"] > 0
+                   for backend in observed_native):
+            raise EvidenceError("requested Rust route admission did not execute real launch/publication/dependency work")
+    try:
+        validate_soak(data, request["cells"])
+    except ValueError as exc:
+        raise EvidenceError(str(exc)) from exc
     mode = request.get("native_presentation", "off")
+    if request.get("client_runtime") == "compare" and not any(
+            _integer(backend["clientRuntime"].get("comparisons"), "clientRuntime.comparisons") > 0
+            for backend in observed_native):
+        raise EvidenceError("requested Rust comparison runtime did not execute")
+    rust_effects = [backend.get("rustSpellFlights", {}) for backend in observed_native]
+    if request.get("rust_effects", "legacy") == "heat_bolt":
+        if not any(v.get("frames", 0) > 0 for v in rust_effects) or any(
+                v.get("fallbacks", 0) or v.get("admitted_legacy", 0) for v in rust_effects):
+            raise EvidenceError("Rust spell family never executed cleanly or fell back")
+    elif any(v.get("frames", 0) > 0 for v in rust_effects):
+        raise EvidenceError("Rust spell family ran despite being disabled")
     presentations = [backend["presentation"] for backend in observed_native]
     if mode in ("cape", "both", "all") and (not any(p["nativeCapeCalls"] > 0 for p in presentations)
                                             or any(p["capeFallbackCalls"] for p in presentations)):

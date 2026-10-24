@@ -713,3 +713,107 @@ after it loads cannot be baked into the entry.
 viewpoints built and cached and counts the pixels between them, against a floor
 it measures on the same run by photographing two builds - it must be run
 windowed, since headless draws nothing and every comparison would pass.
+
+## Optional prepared content pilot
+
+The normal client uses the existing raw/imported asset paths. A local Windows
+standalone package can include an optional native-resource catalog with
+`tools/package_client.py --prepared-catalog <generation/index.json>`.
+`RABBITLANDS_PREPARED_CONTENT=auto` selects verified entries and falls back on a
+miss. `require-pilot` rejects a missing exact variant for a listed pilot;
+unlisted assets still use their existing paths. Successful startup alone does
+not prove that a prepared entry was consumed: inspect the actual entry IDs,
+source paths and texture tokens in `PreparedContent.snapshot()`.
+
+The catalog binds complete source and payload bytes, engine/cook policy,
+retired-model policy and the exact texture/format variant. It revalidates cached
+and worker completions before publication. Native Resources can load on workers;
+scene instantiation and attachment remain on the main thread. Instance material
+overrides and MultiMesh transform buffers are private. Copying a MultiMesh can
+read renderer data and is included in the atomic instantiation cost.
+
+`tools/prepared_content_package.py describe-pilot` identifies the dense chunk,
+shared prototype, equipped actor components, animation source, storage object
+and independent interior. Cooking requires an explicitly marked disposable
+project, fresh settings per texture variant, and an actual exported import
+snapshot. Never re-import that project between snapshotting and cooking.
+Generated resources belong in ignored local build output. The package checks
+the initial and final actual PCK inputs; source editor import descriptors are
+separate provenance because the exporter rewrites them.
+
+The current cook policy preserves exact rig metadata as an identity-bound JSON
+string. It also preserves original animation key clocks in binary double
+precision and compressed textures' logical dimensions, which Godot's native
+resource serialization otherwise changes. These are restored before verified
+resources are published. Scripted, compressed-animation and local-to-scene
+animation inputs are refused by this pilot. Materials held on prepared geometry
+survive until its rendering instance is destroyed; these finite references are
+released with the geometry itself.
+
+This pilot does not establish a general loading or memory improvement. Compare
+actual hits, total readiness, the largest main-thread operation, live resource
+sharing and process memory against raw content in the same package. Script,
+streaming lifetime and rendered isolation fixtures are separate from actual
+asset parity and target-device performance qualification.
+
+## Optional shared resource admission
+
+The default loader remains unchanged. With a verified native payload,
+`RABBITLANDS_CLIENT_RUNTIME=services` keeps ordinary presentation and enables
+native services. `RABBITLANDS_RESOURCE_ADMISSION=rust` then selects one shared
+worker admission queue and one main-thread publication turn across chunk and
+exterior streams. Mandatory synchronous arrival can exceed that soft allowance.
+Cancellation retains ownership until executing workers have joined; the existing
+retirement budget remains the destruction clock.
+
+The service deduplicates verified world, prototype and image source identities.
+It holds accounting until actual weak Resource carriers disappear, including
+prepared resources discarded before instantiation. Shared cache aliases can keep
+a logical resource closure charged after its original scene is gone. Estimates
+are not measured CPU or GPU allocations; actor and cache bytes remain explicitly
+unknown. The default experimental allowance is 768 MiB and can be selected with
+`--resource-admission-budget-mib=64..8192`. Compare equivalent full-content work
+at a permissive allowance before testing a tighter policy. Inspect actual
+`resource_admission` diagnostics for mode, registrations, failures, unknowns,
+retained carriers, denials, readiness and largest atomic verification cost.
+
+## Optional prepared placement reduction
+
+Prepared worlds retain source nodes by default. An exact catalog variant with
+`--prepared-node-policy=lazy-source-v1` can remove eligible hidden leaf meshes
+already drawn by a static MultiMesh. Collision, scripts, lamps, skeletons and
+semantically mixed batches retain their ordinary nodes. The original transform,
+sibling order and material behavior remain available through a weak root-scoped
+handle. Fade and named interaction binding restore the required source on main;
+restored nodes remain until their chunk is destroyed.
+
+Retained and reduced variants must be compared in the same package. Require
+actual live Node and VisualInstance reductions, exact source hits, collision and
+current look/season behavior, and measure the first restoration cost. Handle
+snapshots report initial removal, reified sources and remaining savings. Logical
+occluder registrations are retained. Templates and handles also occupy memory,
+so reduced node count alone does not establish a total memory or frame benefit.
+
+## Preset and continuous-session evidence
+
+Benchmark snapshots include the effective cloth allowance, shadow preference and
+sun state, particles, decorative grass and name distance alongside texture,
+resolution, scale, frame cap and body policy. Compare ordinary Low at 30 FPS
+separately from `--settings-profile performance`: the complete Performance
+preset also selects fewer bodies, half textures, reduced scale and no cloth.
+Requested flags alone do not prove those settings were applied.
+
+The benchmark runner accepts `--cells route-soak-16` for sixteen consecutive
+passes through the real client streaming route. Counts from 2 through 32 are
+supported. Each pass includes two borders, interior entry and return, teleport
+and return. All passes retain one process and Main instance. The first pass is
+application-first; subsequent passes are warm. This does not flush operating
+system or shader caches or certify server navigation.
+
+Iteration witnesses include monotonic and wall clocks, process and Main IDs,
+ordered ready legs and final worker/retirement teardown. A missing or failed
+transition, restarted owner, regressed clock or incomplete drain invalidates the
+soak. Report actual elapsed time and process-memory coverage; process restarts
+are separate startup checks. Keep full raw reports and failures with the exact
+package identity. Neither a short matrix nor a clean soak enables an optional
+backend or qualifies untested hardware.

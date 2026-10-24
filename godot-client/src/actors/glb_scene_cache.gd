@@ -38,10 +38,14 @@ const GltfAnimationFidelity := preload("res://src/actors/gltf_animation_fidelity
 const WorldObjectImages := preload("res://src/world/world_object_images.gd")
 const ArchivedModelPolicy := preload("res://src/actors/archived_model_policy.gd")
 const ResourceDiagnostics := preload("res://src/world/resource_diagnostics.gd")
+const PreparedContent := preload("res://src/world/prepared_content.gd")
+const PreparedLifecycle := preload("res://src/world/prepared_scene_lifecycle.gd")
 const WORLD_ASSET_ROOT := "res://assets/world/"
 
 static var _scenes: Dictionary = {}
 static var _failed: Dictionary = {}
+static var _prepared_entries: Dictionary = {}
+static var _direct_raw_scenes: Dictionary = {}
 static var _diagnostics_mutex := Mutex.new()
 static var _resource_timings: Dictionary = {}
 static var _lookup_hits := 0
@@ -61,6 +65,14 @@ static func prepare(paths: PackedStringArray) -> Dictionary:
 	var result: Dictionary = {}
 	for path: String in paths:
 		path = _canonical_path(path)
+		if PreparedContent.selected_mode() != "raw":
+			var record := PreparedContent.acquire("scene", path, FileAccess.get_sha256(path),
+				PreparedContent.scene_texture_token(path))
+			if str(record.status) == "hit":
+				result[path] = record # Immutable native Resources, never Nodes.
+				continue
+			if str(record.status) == "reject":
+				continue
 		var scene := _build(path)
 		if scene != null:
 			result[path] = scene
@@ -69,18 +81,58 @@ static func prepare(paths: PackedStringArray) -> Dictionary:
 static func install_prepared(scenes: Dictionary) -> void:
 	for path: String in scenes:
 		if not _scenes.has(path):
-			_scenes[path] = scenes[path]
+			var prepared: Variant = scenes[path]
+			if prepared is Dictionary:
+				# Revalidate the current bytes/policy before publishing a worker record.
+				var began := Time.get_ticks_usec()
+				var verified := PreparedContent.acquire("scene", path, FileAccess.get_sha256(path),
+					PreparedContent.scene_texture_token(path))
+				_record_operation(&"prepared_completion_verify", began)
+				if str(verified.status) == "hit":
+					_scenes[path] = verified.resource
+					_prepared_entries[path] = verified.entry
+				elif str(verified.status) == "miss":
+					var raw := _build(path)
+					if raw != null:
+						_scenes[path] = raw
+			else:
+				_scenes[path] = prepared
 
 ## Returns the shared scene for `path`, or null when unavailable. Treat this
 ## scene and its subresources as immutable. Like instantiate(), call only on the
 ## main thread; worker preparation retains its separate build/publication path.
 static func packed_scene(path: String) -> PackedScene:
+	# Direct PackedScene callers own their legacy instantiate behavior. Never
+	# expose a native template that requires the prepared lifecycle adapter.
+	return _packed_scene(path, false)
+
+static func _packed_scene(path: String, allow_prepared: bool) -> PackedScene:
 	if ArchivedModelPolicy.is_retired_path(path):
 		return null
 	path = _canonical_path(path)
 	if path.is_empty() or _failed.has(path):
 		return null
+	if allow_prepared and (PreparedContent.selected_mode() != "raw" or _prepared_entries.has(path)):
+		var verification_began := Time.get_ticks_usec()
+		var verified := PreparedContent.acquire("scene", path, FileAccess.get_sha256(path),
+			PreparedContent.scene_texture_token(path))
+		_record_operation(&"prepared_publication_verify", verification_began)
+		if str(verified.status) == "hit":
+			_scenes[path] = verified.resource
+			_prepared_entries[path] = verified.entry
+		elif str(verified.status) == "reject":
+			return null
+		elif _prepared_entries.has(path):
+			_prepared_entries.erase(path)
+			_scenes.erase(path)
 	var packed: PackedScene = _scenes.get(path) as PackedScene
+	if not allow_prepared and _prepared_entries.has(path):
+		var raw := _direct_raw_scenes.get(path) as PackedScene
+		if raw == null:
+			raw = _build(path)
+			if raw != null:
+				_direct_raw_scenes[path] = raw
+		return raw
 	if packed == null:
 		_lookup_misses += 1
 		var miss_began := Time.get_ticks_usec()
@@ -96,11 +148,22 @@ static func packed_scene(path: String) -> PackedScene:
 
 ## Returns a fresh instance of `path`, or null when the file cannot be imported.
 static func instantiate(path: String) -> Node3D:
-	var packed := packed_scene(path)
+	var packed := _packed_scene(path, true)
 	if packed == null:
 		return null
 	var instantiate_began := Time.get_ticks_usec()
-	var instance := packed.instantiate() as Node3D
+	var entry: Dictionary = _prepared_entries.get(_canonical_path(path), {})
+	var instance: Node3D
+	if entry.is_empty():
+		instance = packed.instantiate() as Node3D
+	else:
+		instance = PreparedLifecycle.instantiate({"status": "hit", "resource": packed, "entry": entry})
+		if instance == null and PreparedContent.selected_mode() == "auto":
+			_prepared_entries.erase(_canonical_path(path))
+			packed = _build(_canonical_path(path))
+			if packed != null:
+				_scenes[_canonical_path(path)] = packed
+				instance = packed.instantiate() as Node3D
 	_record_operation(&"scene_instantiate", instantiate_began)
 	return instance
 
@@ -109,9 +172,11 @@ static func instantiate(path: String) -> Node3D:
 static func clear() -> void:
 	_scenes.clear()
 	_failed.clear()
+	_prepared_entries.clear()
+	_direct_raw_scenes.clear()
 
 static func cached_scene_count() -> int:
-	return _scenes.size()
+	return _scenes.size() + _direct_raw_scenes.size()
 
 ## Read on the main thread, where cache publication/clearing already lives.
 ## Worker builds only update timing data behind the separate mutex. Counts do
@@ -120,7 +185,8 @@ static func retention_snapshot() -> Dictionary:
 	_diagnostics_mutex.lock()
 	var timings := ResourceDiagnostics.snapshot(_resource_timings)
 	_diagnostics_mutex.unlock()
-	return {"strong_scene_entries": _scenes.size(), "failed_paths": _failed.size(),
+	return {"strong_scene_entries": _scenes.size() + _direct_raw_scenes.size(),
+		"direct_raw_scene_entries": _direct_raw_scenes.size(), "failed_paths": _failed.size(),
 		"lookup_hits": _lookup_hits, "lookup_misses": _lookup_misses,
 		"bytes_estimate_available": false, "timings": timings}
 
@@ -170,7 +236,9 @@ static func _imported_actor_scene(path: String) -> PackedScene:
 	return imported
 
 static func _build_raw(path: String) -> PackedScene:
-	GltfQuantization.ensure_registered()
+	if not GltfQuantization.ensure_registered():
+		push_error("raw glTF parse requires main-thread extension initialization")
+		return null
 	var document: GLTFDocument = GLTFDocument.new()
 	var state: GLTFState = GLTFState.new()
 	var world_asset := is_world_asset(path)

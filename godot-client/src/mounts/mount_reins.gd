@@ -3,9 +3,17 @@ extends Node3D
 ## Like the live bowstring, this attachment does not replace a source model.
 var surface := ImmediateMesh.new()
 var settings: Dictionary
-var last_points: Dictionary = {}
-var last_lengths: Dictionary = {}
-var last_grip_points: Dictionary = {}
+var _legacy_points: Dictionary = {}
+var _legacy_lengths: Dictionary = {}
+var _legacy_grip_points: Dictionary = {}
+var _native_provider: WeakRef
+var _native_rider := 0
+var last_points: Dictionary:
+	get: return _native_geometry().get("points", _legacy_points)
+var last_lengths: Dictionary:
+	get: return _native_geometry().get("lengths", _legacy_lengths)
+var last_grip_points: Dictionary:
+	get: return _native_geometry().get("gripPoints", _legacy_grip_points)
 var straps: MeshInstance3D
 
 func configure(profile: Dictionary) -> void:
@@ -20,6 +28,18 @@ func configure(profile: Dictionary) -> void:
 	straps.material_override = material
 	add_child(straps)
 
+func set_native_provider(backend: RefCounted, rider: int) -> void:
+	_native_provider = weakref(backend) if backend != null else null
+	_native_rider = rider
+
+func _native_geometry() -> Dictionary:
+	var backend = _native_provider.get_ref() if _native_provider != null else null
+	return backend.mounted_rein_snapshot(_native_rider, true) if backend != null else {}
+
+func native_presentation_stats() -> Dictionary:
+	var backend = _native_provider.get_ref() if _native_provider != null else null
+	return backend.mounted_rein_snapshot(_native_rider, false) if backend != null else {"available": false, "backend": "legacy"}
+
 func grip_world(rig: Skeleton3D, side: String) -> Vector3:
 	# The line passes through the curled fingers rather than ending at the
 	# wrist socket. These bones belong to the unchanged canonical player rig.
@@ -33,6 +53,9 @@ func grip_exit_world(rig: Skeleton3D, side: String) -> Vector3:
 	return rig.to_global((index + thumb) * .5)
 
 func update_contact(anchors: Dictionary, rig: Skeleton3D, seat_basis: Basis, grips: Dictionary = {}, bridle_paths: Array[PackedVector3Array] = []) -> void:
+	set_native_provider(null, 0)
+	if straps.mesh != surface:
+		straps.mesh = surface
 	visible = true
 	last_points.clear()
 	last_lengths.clear()

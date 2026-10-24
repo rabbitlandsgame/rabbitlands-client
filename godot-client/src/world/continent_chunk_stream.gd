@@ -1,5 +1,6 @@
 class_name ContinentChunkStream
 extends Node3D
+const ResourceAdmission := preload("res://src/runtime/resource_admission.gd")
 
 ## A named territory owns metadata; only the selected independent GLBs occupy
 ## renderer/physics memory. Coordinates in every cell remain territory-local.
@@ -107,14 +108,16 @@ static func orphans_pending() -> int:
 	return _orphans.size()
 
 ## Plain estimates only; never polls completion, joins, or holds a builder.
-static func orphan_diagnostic_snapshot() -> Dictionary:
+static func orphan_diagnostic_snapshot(shared_input: Variant = null) -> Dictionary:
 	var estimated := 0
-	var shared: Dictionary = {}
+	var unknown := 0
+	var shared: Dictionary = shared_input if shared_input is Dictionary else {}
 	for orphan: Dictionary in _orphans:
 		var entry: Dictionary = orphan.entry
+		unknown += 1 if str(entry.get("_admission_family", "")) == "exterior" else 0
 		if not entry.is_empty():
 			estimated += incremental_cost(entry, shared)
-	return {"workers": _orphans.size(), "estimated_bytes": estimated,
+	return {"workers": _orphans.size(), "estimated_bytes": estimated, "unknown_worker_bytes": unknown,
 		"estimate_kind": "manifest_estimate_not_measured_allocation"}
 
 static func reap_orphans() -> int:
@@ -125,11 +128,16 @@ static func reap_orphans() -> int:
 			remaining.append(orphan)
 			continue
 		var builder := thread.wait_to_finish() as WorldLoader
+		var token: Dictionary = orphan.entry.get("_admission_token", {})
 		if builder != null:
-			var resident := builder.release_world()
+			ResourceAdmission.ready(token, builder.manifest)
+			var resident := builder.release_world(true, false, token)
 			builder.free()
+			ResourceAdmission.hold(token, resident.root as Node3D, false)
 			if resident.root != null:
 				(resident.root as Node).queue_free()
+		else:
+			ResourceAdmission.event(token, ResourceAdmission.FAILED)
 	_orphans = remaining
 	return _orphans.size()
 
@@ -168,6 +176,7 @@ func _release_worker(position: Vector3, install_if_near: bool) -> void:
 	var pending := _pending
 	_pending = {}
 	if _thread.is_alive():
+		ResourceAdmission.event(pending.get("_admission_token", {}), ResourceAdmission.CANCEL)
 		# Never block the main thread on a live import.
 		_orphan(_thread, pending)
 		_thread = null
@@ -401,8 +410,12 @@ func prime(position: Vector3) -> void:
 		var blocking := not bool(entry.get("beyond_budget", false)) and bool(entry.get("blocking", true))
 		if not blocking and float(entry.distance) > ARRIVAL_CLEARANCE_METRES:
 			continue
+		var request := ResourceAdmission.request(self, entry, "chunk", true, true)
+		var requested := entry.duplicate()
+		requested["_admission_token"] = request.get("token", {})
+		ResourceAdmission.event(requested._admission_token, ResourceAdmission.LAUNCHED)
 		var builder := WorldLoader.prepare_detached(str(entry.path), _cache_enabled)
-		_install(entry, builder)
+		_install(requested, builder)
 
 ## True when every cell whose bounds hold the position is resident. Bounds
 ## include the props that overhang a cell, so neighbours overlap: a resident
@@ -536,14 +549,20 @@ func update_focus(position: Vector3) -> void:
 			continue
 		if Time.get_ticks_msec() < int(_retry_after.get(str(entry.id), 0)):
 			continue
-		_pending = entry
+		var request := ResourceAdmission.request(self, entry, "chunk", float(entry.get("distance", INF)) <= FRAMED_RADIUS)
+		if not bool(request.get("allowed", false)):
+			return
+		_pending = entry.duplicate()
+		_pending["_admission_token"] = request.get("token", {})
 		_thread = Thread.new()
 		_pending_started_usec = Time.get_ticks_usec()
 		var error := _thread.start(WorldLoader.prepare_detached.bind(str(entry.path), _cache_enabled))
 		if error != OK:
+			ResourceAdmission.event(_pending.get("_admission_token", {}), ResourceAdmission.FAILED)
 			_thread = null
 			_failed(entry, error_string(error))
 		else:
+			ResourceAdmission.event(_pending.get("_admission_token", {}), ResourceAdmission.LAUNCHED)
 			_record("requested", str(entry.id))
 		break
 
@@ -565,6 +584,8 @@ func _drain_retired_deferred() -> void:
 func poll_pending() -> void:
 	if _thread == null or _thread.is_alive():
 		return
+	if not ResourceAdmission.can_publish():
+		return
 	var builder := _thread.wait_to_finish() as WorldLoader
 	if _pending_started_usec > 0:
 		ResourceDiagnostics.record(_resource_timings, &"prepare_request_to_poll", _pending_started_usec)
@@ -579,16 +600,23 @@ func poll_pending() -> void:
 func _install(entry: Dictionary, builder: WorldLoader) -> void:
 	var install_began := Time.get_ticks_usec()
 	if builder == null:
+		ResourceAdmission.event(entry.get("_admission_token", {}), ResourceAdmission.FAILED)
 		_failed(entry, "builder_missing")
 		return
-	var resident := builder.release_world()
+	ResourceAdmission.ready(entry.get("_admission_token", {}), builder.manifest)
+	if not ResourceAdmission.can_install(entry.get("_admission_token", {})):
+		_discard_builder(entry, builder)
+		return
+	var resident := builder.release_world(true, true, entry.get("_admission_token", {}))
 	builder.free()
 	var imported := resident.root as Node3D
 	if imported == null:
+		ResourceAdmission.hold(entry.get("_admission_token", {}), null, false)
 		_failed(entry, "chunk_import_failed")
 		return
 	if not str(entry.get("packageDigest", "")).is_empty() and str(entry.packageDigest) != str(resident.digest):
 		imported.free()
+		ResourceAdmission.hold(entry.get("_admission_token", {}), null, false)
 		_failed(entry, "chunk_package_digest_mismatch")
 		return
 	var prepared_manifest := resident.manifest as WorldManifest
@@ -604,6 +632,7 @@ func _install(entry: Dictionary, builder: WorldLoader) -> void:
 	ResourceDiagnostics.record(_resource_timings, &"scene_attach", operation_began, true)
 	resident.entry = entry
 	cells[str(entry.id)] = resident
+	ResourceAdmission.hold(entry.get("_admission_token", {}), imported)
 	# Start the next queued import as soon as this worker finishes. Waiting
 	# for the focus throttle between every cell leaves visible gaps on a
 	# first traversal even while the import worker is idle.
@@ -628,6 +657,7 @@ func pause_streaming() -> void:
 	if _paused:
 		return
 	_paused = true
+	ResourceAdmission.event(_pending.get("_admission_token", {}), ResourceAdmission.CANCEL)
 	RetirementBudget.cancel(self)
 
 func can_retire() -> bool:
@@ -639,6 +669,7 @@ func _retire_cell(identity: String) -> void:
 	var resident: Dictionary = cells[identity]
 	cells.erase(identity)
 	var imported := resident.root as Node3D
+	ResourceAdmission.retiring(imported)
 	imported.process_mode = Node.PROCESS_MODE_DISABLED
 	imported.visible = false
 	ExteriorRegionStream._set_collision(imported, false)
@@ -650,9 +681,12 @@ func _retire_cell(identity: String) -> void:
 
 func _discard_builder(entry: Dictionary, builder: WorldLoader) -> void:
 	if builder == null:
+		ResourceAdmission.event(entry.get("_admission_token", {}), ResourceAdmission.FAILED)
 		return
-	var resident := builder.release_world()
+	ResourceAdmission.ready(entry.get("_admission_token", {}), builder.manifest)
+	var resident := builder.release_world(true, false, entry.get("_admission_token", {}))
 	builder.free()
+	ResourceAdmission.hold(entry.get("_admission_token", {}), resident.root as Node3D, false)
 	if resident.root != null:
 		var imported := resident.root as Node3D
 		imported.process_mode = Node.PROCESS_MODE_DISABLED
@@ -774,15 +808,28 @@ func _exit_tree() -> void:
 	# A map change or disconnect can still free this root while an import is
 	# live; that worker is orphaned and reaped later, never joined here.
 	if _thread != null:
-		if _thread.is_alive():
+		if not (_pending.get("_admission_token", {}) as Dictionary).is_empty():
+			# Even a finished admitted job must reach the existing reaper before
+			# builder destruction, so actual Resource weak carriers are captured.
+			ResourceAdmission.event(_pending.get("_admission_token", {}), ResourceAdmission.CANCEL)
+			_orphan(_thread, _pending)
+			_record("orphaned", str(_pending.get("id", "")))
+		elif _thread.is_alive():
+			ResourceAdmission.event(_pending.get("_admission_token", {}), ResourceAdmission.CANCEL)
 			_orphan(_thread, _pending)
 			_record("orphaned", str(_pending.get("id", "")))
 		else:
 			var builder := _thread.wait_to_finish() as WorldLoader
+			var token: Dictionary = _pending.get("_admission_token", {})
 			if builder != null:
+				ResourceAdmission.ready(token, builder.manifest)
 				builder.free()
+				ResourceAdmission.hold(token, null, false)
+			else:
+				ResourceAdmission.event(token, ResourceAdmission.FAILED)
 		_thread = null
 		_pending = {}
 
 func _enter_tree() -> void:
 	_paused = false
+	ResourceAdmission.register_stream(self, "chunk", incremental_cost, orphan_diagnostic_snapshot)

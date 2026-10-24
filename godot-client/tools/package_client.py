@@ -130,6 +130,8 @@ import client_release
 import release_storage
 import runner_source
 import benchmark_package
+import client_runtime_package
+import prepared_content_package
 from pathlib import Path, PurePosixPath
 from urllib.parse import unquote
 
@@ -3005,6 +3007,10 @@ def _main(argv=None, storage=None) -> int:
     parser.add_argument("--no-zip", action="store_true", help="leave the folder unarchived")
     parser.add_argument("--benchmark-profile", action="store_true",
                         help="standalone local test export with allowlisted performance workloads")
+    parser.add_argument("--client-runtime", type=Path,
+                        help="optional verified native payload built from the selected commit")
+    parser.add_argument("--prepared-catalog", type=Path,
+                        help="optional exact native pilot generation; raw content remains present")
     parser.add_argument("--installer", action="store_true", help="also build an Inno Setup installer")
     parser.add_argument("--iscc", help="path to Inno Setup's ISCC.exe")
     parser.add_argument("--no-client-updates", action="store_true", help="build a client without the restart updater")
@@ -3026,6 +3032,8 @@ def _main(argv=None, storage=None) -> int:
         # every phase checkpoint. Normal distributable builds keep copying.
         BENCHMARK_LINKS = options.benchmark_profile
         BENCHMARK_ACTOR_PLANS = {} if options.benchmark_profile else None
+        if options.prepared_catalog and (options.platform != "windows" or storage or options.distribution != "standalone"):
+            raise PackageError("Prepared pilot currently requires a local standalone Windows package; release/storage/platform integrations remain unqualified.")
         updating = options.distribution == "github" and not options.no_client_updates
         if options.platform == "macos":
             if sys.platform != "darwin":
@@ -3072,6 +3080,8 @@ def _main(argv=None, storage=None) -> int:
 
         build_dir = options.build_dir.resolve()
         project = prepare_build_tree(build_dir, sha)
+        if (project / "prepared-content").exists():
+            raise PackageError("Disposable build has an old prepared-content directory; use a fresh build checkout to avoid unintended export.")
         if options.benchmark_profile:
             benchmark_package.prepare_export(project)
         if options.distribution != "github" and "const DISTRIBUTION_SCHEMA := 1" not in (project / "src/updates/release.gd").read_text(encoding="utf-8"):
@@ -3101,6 +3111,8 @@ def _main(argv=None, storage=None) -> int:
         app_dir = stage / "app"
         export_project(godot, project, app_dir, logs, platform)
         stage_loose_client_files(build_dir, app_dir)
+        if options.client_runtime:
+            client_runtime_package.stage_payload(options.client_runtime.resolve(), build_dir, app_dir, options.platform)
         (app_dir / "client-release.json").write_text(json.dumps(metadata), encoding="utf-8")
         stage_audio_credits(app_dir, stage)
         if options.platform == "macos":
@@ -3125,6 +3137,24 @@ def _main(argv=None, storage=None) -> int:
             if storage:
                 storage.clear_cache(options.vram_cache.resolve())
                 storage.check("graphics prepared")
+        if options.prepared_catalog:
+            try:
+                prepared_receipt = prepared_content_package.install_generation(
+                    options.prepared_catalog.resolve(), project, stage)
+                # Two-pass pilot: final map/sidecar generation now exists.
+                # Import/export only the newly copied native resources; retain
+                # raw actor/map payloads and all ordinary package checks.
+                (logs / "prepared").mkdir(parents=True, exist_ok=True)
+                import_project(godot, project, logs / "prepared")
+                export_project(godot, project, app_dir, logs / "prepared", platform)
+                check_actor_pack(build_dir, app_dir)
+                check_scene_texture_pack(build_dir, app_dir)
+                check_editor_sources_unpacked(app_dir)
+                prepared_receipt["export"] = prepared_content_package.check_export(
+                    project / "prepared-content/index.json", stage)
+                (logs / "prepared-content.json").write_text(json.dumps(prepared_receipt, indent=2), encoding="utf-8")
+            except prepared_content_package.PreparedError as error:
+                raise PackageError(str(error)) from error
         check_registry(build_dir, stage)
         check_glb_textures(app_dir)
         check_shared_meshes(build_dir, stage)
@@ -3134,6 +3164,8 @@ def _main(argv=None, storage=None) -> int:
                                            **({"cache": asset_cache.root / "helpers"} if asset_cache else {}))
         launch_args = ([] if options.platform == "macos" else
                        write_launchers(stage, options.server, build_dir, version, platform))
+        if options.client_runtime:
+            client_runtime_package.write_launchers(stage, options.platform)
         if options.distribution == "steam" and options.platform != "macos":
             (stage / "README.txt").write_text(
                 "Rabbit Lands - Steam build\n"

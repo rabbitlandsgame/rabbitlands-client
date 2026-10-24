@@ -34,7 +34,11 @@ def runtime():
                                   "worldViewportSize": [1280, 720], "renderScale": 1.0,
                                   "textureQuality": "full", "textureSkip": 0,
                                   "minimap": True, "appearance": "painted_ground"},
-            "activeBackends": {"nativeReducer": False, "preparedContent": {"active": False},
+            "activeBackends": {"nativeReducer": False, "preparedNodePolicy": "retain",
+                               "preparedContent": {"mode": "raw", "active": False, "hits": 0,
+                                   "misses": {"disabled": 1}, "consumed_entries": [], "timings": {},
+                                   "strong_resource_entries": 0, "verification_reuse": False,
+                                   "estimate_kind": "declared_content_not_allocation"},
                                "presentation": {"requested": "0", "nativeCapeInstances": 0,
                                                 "nativeCapeCalls": 0, "capeFallbackCalls": 0,
                                                 "flight": stats.copy(), "impact": stats.copy()}}}
@@ -82,6 +86,44 @@ def performance_fixture():
                                               textureQuality="half", textureSkip=1, appearance="painted_ground")
     for census in data["cells"][0]["census"].values():
         census.update(builtBodies=60, deferred=100)
+    return data, request
+
+
+def mounted_rust_fixture(quality="high"):
+    data, request = fixture()
+    request.update(client_runtime="rust", cells="mixed-mounted-160", quality=quality)
+    data["graphicsQuality"] = quality
+    body_budget = {"high": 16, "medium": 12, "low": 8}[quality]
+    data["crowdPolicy"].update(fullRateBodies=body_budget, halfRateBodies=body_budget)
+    cell = data["cells"][0]
+    cell["id"] = "mixed-mounted-160"
+    cell["mountProfiles"] = {"crystalback_tortoise": 14, "giant_rat": 14, "golden_plains_horse": 13,
+                             "jadefeather_raptor": 13, "moor_pony": 13, "rabbit": 13}
+    for observed in (data, cell["effectiveRuntime"]):
+        observed["effectiveSettings"]["quality"] = quality
+        observed["activeBackends"]["clientRuntime"] = {
+            "requested": "rust", "mode": "rust", "presentation_backend": "mixed", "mismatches": 0,
+            "native_available": True, "native": {"poses_applied": 200, "upper_applied": 200,
+                "rein_calls": 200, "rein_attempts": 200, "rein_failures": 0,
+                "mounted_cape_calls": 20 if quality == "high" else 0,
+                "mounted_cape_attempts": 20 if quality == "high" else 0,
+                "mounted_profile_api": 1, "mounted_upper_api": 1, "mounted_cape_api": 1, "mounted_reins_api": 1}}
+        observed["activeBackends"]["mountedBatch"] = {"present": True, "fallbacks": 0, "batches": 10}
+    for boundary, point in cell["census"].items():
+        calls = 100 if boundary == "afterSample" else 66
+        point.update(mountedActors=80, mountSkeletons=80, mountedPresentation={
+            "scheduling": {"cloth": 8 if quality == "high" else 0}, "rustPose": {
+                "available": 80, "supported": 66, "eligible": 66, "registered": 66,
+                "profiles": dict(cell["mountProfiles"]), "requestedModes": {"rust": 80},
+                "failures": 0, "disabled": 14, "activeVisuals": 40, "appliedActiveVisuals": 33,
+                "eligibleActiveVisuals": 33, "appliedEligibleActiveVisuals": 33, "applications": calls,
+                "freshness": {"available": 80, "currentSubmissionVisuals": 66,
+                    "activeEligibleCurrentVisuals": 33,
+                    "applicationAgeFrames": {"count": 66, "minimum": 0, "maximum": 12, "sum": 198}},
+                "secondary": {"available": 80, "upperApplications": calls, "reinApplications": calls,
+                    "reinAvailable": 66, "reinCalls": calls, "clothAvailable": 40,
+                    "clothCalls": (12 if boundary == "afterSample" else 1) if quality == "high" else 0,
+                    "clothFallbacks": 0}}})
     return data, request
 
 
@@ -263,6 +305,87 @@ class ReportValidationTests(unittest.TestCase):
         with self.assertRaises(support.EvidenceError):
             support.validate_report(data, request, "")
 
+    def test_rust_runtime_request_requires_observed_backend_and_calls(self):
+        data, request = fixture()
+        request["client_runtime"] = "compare"
+        with self.assertRaises(support.EvidenceError):
+            support.validate_report(data, request, "")
+        runtime = {"requested": "compare", "mode": "compare", "presentation_backend": "legacy",
+                   "mismatches": 0, "native_available": True, "comparisons": 1}
+        data["activeBackends"]["clientRuntime"] = dict(runtime)
+        observed = data["cells"][0]["effectiveRuntime"]["activeBackends"]
+        observed["clientRuntime"] = dict(runtime)
+        self.assertTrue(support.validate_report(data, request, "")["valid"])
+        for change in ({"mode": "legacy"}, {"native_available": False}, {"mismatches": 1}, {"comparisons": 0}):
+            observed["clientRuntime"] = runtime | change
+            with self.subTest(change=change), self.assertRaises(support.EvidenceError):
+                support.validate_report(data, request, "")
+
+    def test_mounted_rust_workload_requires_actual_coverage_application_and_no_fallback(self):
+        data, request = mounted_rust_fixture()
+        self.assertTrue(support.validate_report(data, request, "")["valid"])
+        self.assertEqual(sum(data["cells"][0]["mountProfiles"][key] for key in support.RUST_MOUNT_PROFILES), 66)
+        for change in ({"available": 79}, {"supported": 13}, {"eligible": 65}, {"registered": 67},
+                       {"profiles": {"other": 80}}, {"requestedModes": {"legacy": 80}}, {"failures": 1},
+                       {"disabled": 15}, {"appliedEligibleActiveVisuals": 32}, {"eligibleActiveVisuals": 0},
+                       {"applications": 0}):
+            broken = copy.deepcopy(data)
+            broken["cells"][0]["census"]["afterSample"]["mountedPresentation"]["rustPose"].update(change)
+            with self.subTest(change=change), self.assertRaises(support.EvidenceError):
+                support.validate_report(broken, request, "")
+        for profile_counts in ({"moor_pony": 80}, {"other": 80}, data["cells"][0]["mountProfiles"] | {"giant_rat": 0}):
+            broken = copy.deepcopy(data)
+            broken["cells"][0]["mountProfiles"] = profile_counts
+            with self.subTest(profiles=profile_counts), self.assertRaises(support.EvidenceError):
+                support.validate_report(broken, request, "")
+        for change in ({"present": False}, {"fallbacks": 1}, {"batches": 0}):
+            broken = copy.deepcopy(data)
+            broken["cells"][0]["effectiveRuntime"]["activeBackends"]["mountedBatch"].update(change)
+            with self.subTest(batch=change), self.assertRaises(support.EvidenceError):
+                support.validate_report(broken, request, "")
+
+    def test_mounted_runtime_requires_current_submissions_and_new_secondary_calls(self):
+        data, request = mounted_rust_fixture()
+        for change in ({"available": 79}, {"activeEligibleCurrentVisuals": 32}, {"currentSubmissionVisuals": 67},
+                       {"applicationAgeFrames": {"count": 67, "minimum": 0, "maximum": 12, "sum": 198}},
+                       {"applicationAgeFrames": {"count": 66, "minimum": 3, "maximum": 1, "sum": 198}}):
+            broken = copy.deepcopy(data)
+            broken["cells"][0]["census"]["afterSample"]["mountedPresentation"]["rustPose"]["freshness"].update(change)
+            with self.subTest(fresh=change), self.assertRaises(support.EvidenceError):
+                support.validate_report(broken, request, "")
+        for change in ({"available": 0}, {"upperApplications": 66}, {"reinApplications": 66}, {"reinCalls": 66},
+                       {"clothCalls": 1}, {"clothFallbacks": 1}, {"reinAvailable": 0}, {"clothAvailable": 0}):
+            broken = copy.deepcopy(data)
+            broken["cells"][0]["census"]["afterSample"]["mountedPresentation"]["rustPose"]["secondary"].update(change)
+            with self.subTest(secondary=change), self.assertRaises(support.EvidenceError):
+                support.validate_report(broken, request, "")
+        for field in ("freshness", "secondary"):
+            broken = copy.deepcopy(data)
+            del broken["cells"][0]["census"]["afterSample"]["mountedPresentation"]["rustPose"][field]
+            with self.subTest(missing=field), self.assertRaises(support.EvidenceError):
+                support.validate_report(broken, request, "")
+        for change in ({"poses_applied": 0}, {"upper_applied": 0}, {"rein_calls": 0}, {"rein_failures": 1},
+                       {"rein_attempts": 201}, {"mounted_cape_calls": 0}, {"mounted_cape_attempts": 21},
+                       {"mounted_profile_api": 0}, {"mounted_upper_api": 0}, {"mounted_cape_api": 0}, {"mounted_reins_api": 0}):
+            broken = copy.deepcopy(data)
+            broken["cells"][0]["effectiveRuntime"]["activeBackends"]["clientRuntime"]["native"].update(change)
+            with self.subTest(native=change), self.assertRaises(support.EvidenceError):
+                support.validate_report(broken, request, "")
+
+    def test_mounted_cloth_is_exercised_only_by_the_current_high_fixture(self):
+        for quality in ("high", "medium", "low"):
+            data, request = mounted_rust_fixture(quality)
+            with self.subTest(quality=quality):
+                self.assertTrue(support.validate_report(data, request, "")["valid"])
+            if quality == "high":
+                data["cells"][0]["census"]["afterSample"]["mountedPresentation"]["scheduling"]["cloth"] = 0
+            else:
+                data["cells"][0]["census"]["afterSample"]["mountedPresentation"]["rustPose"]["secondary"]["clothCalls"] = 1
+                native = data["cells"][0]["effectiveRuntime"]["activeBackends"]["clientRuntime"]["native"]
+                native.update(mounted_cape_calls=1, mounted_cape_attempts=1)
+            with self.subTest(unexpected_cloth=quality), self.assertRaises(support.EvidenceError):
+                support.validate_report(data, request, "")
+
 
 class IdentityAndProcessTests(unittest.TestCase):
     def test_settings_profile_defaults_and_conflicting_requests(self):
@@ -343,7 +466,7 @@ class IdentityAndProcessTests(unittest.TestCase):
                     mock.patch.object(runner, "identity", return_value={"source": "stable"}), \
                     mock.patch.object(runner.subprocess, "Popen", side_effect=fake_launch):
                 result = runner.run_one(args, "all", 1, root)
-            self.assertTrue(result["validation"]["valid"])
+            self.assertTrue(result["validation"]["valid"], result["validation"])
             self.assertTrue(result["startup"]["valid"])
             self.assertEqual(result["settingsProfile"], "performance")
             seed = result["settingsSeed"]
@@ -542,7 +665,7 @@ class IdentityAndProcessTests(unittest.TestCase):
                 with mock.patch.object(runner, "identity", side_effect=snapshots), \
                         mock.patch.object(runner.subprocess, "Popen", side_effect=fake_launch):
                     result = runner.run_one(args, "all", 1, root)
-                self.assertEqual(result["validation"]["valid"], not (missing or error_log or changed))
+                self.assertEqual(result["validation"]["valid"], not (missing or error_log or changed), result["validation"])
                 self.assertTrue(list(root.glob("*.process.json")))
 
     def test_actual_user_data_must_be_isolated(self):

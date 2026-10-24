@@ -1,6 +1,13 @@
 extends Control
 
 const Diagnostics = preload("res://src/diagnostics/client_diagnostics.gd")
+const ClientRuntime = preload("res://src/runtime/client_runtime.gd")
+const RustSpellFlights = preload("res://src/world/rust_spell_flights.gd")
+const RustRiderPose = preload("res://src/mounts/rust_rider_pose.gd")
+var client_runtime := ClientRuntime.new()
+const RemotePresentationService = preload("res://src/runtime/remote_presentation.gd")
+@onready var remote_presentation := RemotePresentationService.new()
+var _gate_slice_tiers: Dictionary = {}
 const ExperienceCurve = preload("res://src/state/experience_curve.gd")
 const SeasonSky = preload("res://src/world/season_sky.gd")
 const SeasonSurfaces = preload("res://src/world/season_surfaces.gd")
@@ -117,6 +124,8 @@ const ActiveBuffBarScript := preload("res://src/ui/active_buff_bar.gd")
 const StatusEffectIcons := preload("res://src/ui/status_effect_icons.gd")
 const KeyBindings := preload("res://src/ui/key_bindings.gd")
 const VramTextures := preload("res://src/world/vram_textures.gd")
+const GltfQuantization := preload("res://src/world/gltf_quantization.gd")
+const MapMeshExtension := preload("res://src/world/map_mesh_extension.gd")
 var interior_cutaway: RefCounted = InteriorCutawayScript.new()
 ## On a secrets map, only the secret the player stands in is drawn; the rest
 ## of the map (and so the minimap and full map, which render the same world)
@@ -1239,6 +1248,16 @@ const EXPERIENCE_SKILLS: Array[String] = [
 	"ranging", "overall"]
 
 func _ready() -> void:
+	# GLTFDocument's global extension vector must stop changing before any
+	# UI, actor animation prewarm, map or neighbouring-region worker starts.
+	if not GltfQuantization.ensure_registered() or not VramTextures.ensure_registered() \
+			or not MapMeshExtension.ensure_registered():
+		push_error("Main could not initialize runtime glTF extensions")
+		return
+	client_runtime.initialize()
+	add_child(remote_presentation)
+	animation_gate = remote_presentation.initialize(client_runtime, animation_gate)
+	preload("res://src/runtime/resource_admission.gd").register_actor_provider(_resource_admission_actor_counts)
 	crowd.configure(OS.get_environment("RABBITLANDS_CROWD_PRESENTATION"),
 		OS.get_environment("RABBITLANDS_CROWD_BODY_CAP"),
 		OS.get_environment("RABBITLANDS_CROWD_TUNING"))
@@ -1255,9 +1274,6 @@ func _ready() -> void:
 	Diagnostics.record("main_scene_initializing")
 	var client_updates := preload("res://src/updates/client_updates.gd").new()
 	add_child(client_updates)
-	# Before any map load, and on the main thread: registering the map image
-	# extension edits a list that a worker import iterates (vram_textures.gd).
-	VramTextures.ensure_registered()
 	lantern_guide = LanternGuideScript.new()
 	game_view.add_child(lantern_guide)
 	lantern_guide.configure(self)
@@ -1703,6 +1719,10 @@ func client_diagnostic_snapshot() -> Dictionary:
 		"surface_work": surface_work_snapshot(),
 		"loader_work": world_loader.diagnostic_snapshot(),
 		"streaming_work": exterior_stream.diagnostic_snapshot(),
+		"client_runtime": client_runtime.snapshot(),
+		"remote_presentation": (remote_presentation.snapshot() if is_instance_valid(remote_presentation) else {"backend": "legacy", "reason": "not_initialized"}),
+		"resource_admission": resource_admission_snapshot(),
+		"spell_flights": RustSpellFlights.snapshot_for(world_root),
 		"resource_retention": {
 			"actor_scenes": GlbSceneCache.retention_snapshot(),
 			"animations": NativeAnimationImporter.retention_snapshot(),
@@ -3837,6 +3857,10 @@ func _close_client() -> void:
 	get_tree().quit()
 
 func _exit_tree() -> void:
+	RustRiderPose.close_batches()
+	RustSpellFlights.clear_for(world_root)
+	if is_instance_valid(remote_presentation): remote_presentation.close()
+	client_runtime.close()
 	mouse_cursors.release()
 	occluder_fade.reset()
 	ReplicatedActor3D.clear_wardrobe_texture_cache()
@@ -3966,9 +3990,13 @@ func _on_reconnect_progress(attempt: int, total: int, delay_msec: int) -> void:
 	_sync_connection_banner()
 
 func _clear_world_presentation() -> void:
+	RustRiderPose.close_batches()
 	# No actor survives this clear. Forget stepped members before queueing
 	# any body, without reactivating its animation or skeleton callbacks.
 	animation_gate.reset(false)
+	RustSpellFlights.clear_for(world_root)
+	if is_instance_valid(remote_presentation): remote_presentation.reset_world(client_runtime.current_epoch() + 1, true)
+	client_runtime.reset_session()
 	SeasonSurfaces.set_season({})
 	quest_trail.clear()
 	character_intro.cancel()
@@ -5784,6 +5812,7 @@ func _load_server_map() -> void:
 		world_loader.load_world(manifest_path, Vector3.INF, true)
 
 func _rebase_streamed_world(rebase: Transform3D) -> void:
+	if is_instance_valid(remote_presentation): remote_presentation.next_map_frame()
 	camera_rig.rebase_world(rebase)
 	# The destination may use rotated coordinates. Transform the sun with the
 	# terrain and camera so crossing the seam keeps the same physical direction.
@@ -6644,6 +6673,8 @@ func _spawn_actor(id: Variant, build := true,
 		# for up to a tenth of a second.
 		node.set_drawn(_crowd_reference_point().distance_to(node.global_position)
 			<= ACTOR_DRAW_DISTANCE_METRES)
+	node._remote_enrollment_ready = true
+	if is_instance_valid(remote_presentation): remote_presentation.consider(node)
 	if creates_body:
 		_record_actor_creation(int(id), Time.get_ticks_usec() - creation_started)
 	return true
@@ -6653,6 +6684,7 @@ func _spawn_actor(id: Variant, build := true,
 func _revive_actor(id: Variant, node: ReplicatedActor3D, dto: Dictionary,
 		actor_adapter: CoordinateAdapter) -> void:
 	actor_nodes[id] = node
+	node._remote_enrollment_ready = false
 	_built_bodies += 1
 	node.apply_server_state(dto, actor_adapter, true)
 	node.apply_vitals(int(dto.get("health", 0)), int(dto.get("max_health", 0)))
@@ -6672,6 +6704,8 @@ func _revive_actor(id: Variant, node: ReplicatedActor3D, dto: Dictionary,
 	# does, until the gate's next sweep gives it its tier.
 	node.set_animation_tier(AnimationGate.Tier.HALF if crowd.gate
 		else AnimationGate.Tier.FULL, animation_gate)
+	node._remote_enrollment_ready = true
+	if is_instance_valid(remote_presentation): remote_presentation.consider(node)
 
 ## Builds the bodies of deferred actors that have come within range, nearest
 ## first: the candidates are ranked on each gate pass, and this builds as many
@@ -7897,6 +7931,7 @@ func _update_occluder_fade(delta: float) -> void:
 ## more so when it fell on a frame that also carried a burst of server steps.
 func _update_animation_gate(delta: float) -> void:
 	animation_gate.advance(delta)
+	client_runtime.observe_gate(animation_gate)
 	if _declutter_due:
 		_declutter_due = false
 		_declutter_actor_overheads(_declutter_due_target)
@@ -7913,9 +7948,13 @@ func _update_animation_gate(delta: float) -> void:
 	var total: int = _gate_sweep_ids.size()
 	var stop: int = total if _gate_sweep_whole else mini(total,
 		_gate_sweep_index + ceili(float(total) / float(GATE_SWEEP_SLICES)))
+	_gate_slice_tiers = (remote_presentation.classify_slice(actor_nodes,
+		_gate_sweep_ids.slice(_gate_sweep_index, stop), animation_gate)
+		if is_instance_valid(remote_presentation) and remote_presentation._ready_native else {})
 	while _gate_sweep_index < stop:
 		_gate_classify(_gate_sweep_ids[_gate_sweep_index])
 		_gate_sweep_index += 1
+	_gate_slice_tiers.clear()
 	if _gate_sweep_index >= total:
 		_finish_gate_sweep()
 
@@ -7957,8 +7996,14 @@ func _gate_classify(raw_id: Variant) -> void:
 		_gate_built += 1
 		actor.set_animation_tier(AnimationGate.Tier.FULL, animation_gate)
 		return
-	var tier: AnimationGate.Tier = animation_gate.classify(actor.global_position + Vector3.UP,
-		actor.view_radius())
+	var captured: Dictionary = _gate_slice_tiers.get(raw_id, {})
+	var anchor: Vector3 = actor.global_position + Vector3.UP
+	var radius: float = actor.view_radius()
+	# A preceding visibility callback can move/rebind another actor. Recheck
+	# the captured geometry before using this same-slice batch result.
+	var tier: AnimationGate.Tier = (int(captured.tier) as AnimationGate.Tier
+		if not captured.is_empty() and captured.anchor == anchor and captured.radius == radius
+		else animation_gate.classify(anchor, radius))
 	var distance: float = (0.0 if _gate_local == null
 		else _gate_here.distance_to(actor.global_position))
 	var drawn: bool = distance <= ACTOR_DRAW_DISTANCE_METRES
@@ -11805,6 +11850,14 @@ func _on_special_effect_requested(effect: Dictionary) -> void:
 	if not _admit_effect(&"spell", [int(effect.get("actor_id", -1)),
 			int(effect.get("target_id", -1))]):
 		return
+	var rust_effect := RustSpellFlights.spawn(client_runtime, world_root, effect,
+		origin_value as Vector3, target_value, source,
+		actor_nodes.get(int(effect.get("target_id", -1))) as Node3D,
+		_crowd_priority_actor(int(effect.get("actor_id", -1)))
+			or _crowd_priority_actor(int(effect.get("target_id", -1))), effect_budget.limit(&"spell"))
+	if rust_effect != null:
+		_track_effect(rust_effect, &"spell")
+		return
 	var world_effect := WorldEffect3D.new()
 	world_root.add_child(world_effect)
 	world_effect.configure(int(effect.get("effect", -1)),
@@ -15556,10 +15609,18 @@ func _apply_promoted_scenery(wanted: Dictionary) -> void:
 				if is_instance_valid(map_object):
 					map_object.bind_placement(found[node_name] as Node3D)
 
+func _resource_admission_actor_counts() -> Dictionary:
+	return {"active_actor_nodes": actor_nodes.size(), "parked_actor_nodes": crowd.parked_count(),
+		"bytes_estimate_available": false, "allocation_kind": "unknown_actor_body_and_cache_allocation"}
+
+func resource_admission_snapshot() -> Dictionary:
+	return preload("res://src/runtime/resource_admission.gd").snapshot()
+
 ## The Node3Ds under `root` whose names are keys of `names`, nearest first;
 ## the walk stops as soon as all are found (a kit placement is a child of its
 ## chunk's root).
 static func _named_nodes(root: Node, names: Dictionary) -> Dictionary:
+	preload("res://src/world/prepared_placements.gd").restore_named(root, names)
 	var found := {}
 	var queue: Array[Node] = [root]
 	while not queue.is_empty() and found.size() < names.size():

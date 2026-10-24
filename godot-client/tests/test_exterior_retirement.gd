@@ -47,6 +47,7 @@ func _run() -> void:
 	var frames := 1
 	var total := first_freed
 	while not stream.is_idle() and frames < 200:
+		await process_frame
 		var count := stream._drain_retired(7, 100000)
 		_expect(count <= 7, "each later slice respects the node budget")
 		total += count
@@ -59,22 +60,29 @@ func _run() -> void:
 	for index: int in 4:
 		slow.add_child(SlowLeaf.new())
 	stream._retire({"root": slow}, "slow-release")
+	await process_frame
 	var slow_freed := stream._drain_retired(64, 1000)
 	_expect(slow_freed <= 1 and is_instance_valid(slow) and slow.get_child_count() >= 3,
 		"one slow destructor exhausts the time budget without releasing the rest of its siblings")
-	while not stream.is_idle():
+	var slow_deadline := Time.get_ticks_msec() + 5000
+	while not stream.is_idle() and Time.get_ticks_msec() < slow_deadline:
+		await process_frame
 		stream._drain_retired(64, 100000)
+	_expect(stream.is_idle(), "slow resource cleanup completes across bounded frame slices")
 	var visuals: Dictionary = {}
 	var weak_resources: Array[WeakRef] = []
 	for index: int in 3:
 		_add_prepared_visual(visuals, weak_resources, index)
 	stream._retire({"root": Node3D.new(), "visuals": visuals}, "prepared-visuals")
+	await process_frame
 	stream._drain_retired(1, 100000)
 	_expect(_live_resources(weak_resources) == 6 and not stream.is_idle(),
 		"freeing the last scene node does not bulk-release prepared models and meshes")
+	await process_frame
 	stream._drain_retired(1, 100000)
 	_expect(_live_resources(weak_resources) == 4 and visuals.size() == 2,
 		"one resource budget unit releases exactly one PackedScene and its owned mesh")
+	await process_frame
 	stream._drain_retired(2, 100000)
 	_expect(_live_resources(weak_resources) == 0 and stream.is_idle(),
 		"prepared model resources are eventually released without a final dictionary burst")

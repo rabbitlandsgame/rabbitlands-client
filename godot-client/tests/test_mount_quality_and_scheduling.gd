@@ -126,6 +126,9 @@ func _run() -> void:
 		visual.call("_process", 0.05)
 	_check(actor.animation_tier() == AnimationGate.Tier.PAUSED,
 		"completed offscreen upper-body action returns to sleep")
+	_check(str(upper.get("action")).is_empty() and not bool(upper.get("_returning"))
+		and is_zero_approx(float(upper.get("weight"))) and is_zero_approx(float(upper.get("grip_weight"))),
+		"completed mounted recovery publishes a fully finished upper-body state")
 	_check(int((visual.call("scheduling_stats") as Dictionary).poseSteps) == offscreen_pose_steps,
 		"offscreen one-shots advance their clock without mount, seat, reins, or cloth poses")
 	actor.set_animation_tier(AnimationGate.Tier.FULL, gate)

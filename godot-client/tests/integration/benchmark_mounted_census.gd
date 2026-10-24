@@ -21,6 +21,15 @@ static func begin(boundary: String) -> Dictionary:
 			"acceptedBounds": {"poseSteps": [0, MAX_POSE_STEPS],
 				"steppedSeconds": [0.0, MAX_STEPPED_SECONDS],
 				"pendingSeconds": [0.0, MAX_PENDING_SECONDS]}},
+		"rustPose": {"available": 0, "supported": 0, "eligible": 0, "registered": 0, "appliedVisuals": 0,
+			"activeVisuals": 0, "appliedActiveVisuals": 0, "applications": 0, "comparisons": 0,
+			"eligibleActiveVisuals": 0, "appliedEligibleActiveVisuals": 0,
+			"failures": 0, "disabled": 0, "profiles": {}, "requestedModes": {},
+			"maxPositionError": 0.0, "maxAngleError": 0.0, "maxScaleError": 0.0, "maxVisualError": 0.0,
+			"freshness": {"available": 0, "currentSubmissionVisuals": 0, "activeEligibleCurrentVisuals": 0, "applicationAgeFrames": _metric()},
+			"secondary": {"available": 0, "upperApplications": 0, "reinApplications": 0,
+				"clothAvailable": 0, "clothCalls": 0, "clothFallbacks": 0,
+				"reinAvailable": 0, "reinCalls": 0}},
 		"ponyQuality": {"available": 0, "unavailable": 0, "unavailableReasons": {},
 			"levels": {"low": 0, "medium": 0, "high": 0}, "local": 0, "remote": 0,
 			"sources": {"publicGetters": 0, "legacyProperties": 0}}}
@@ -51,6 +60,59 @@ static func include_visual(summary: Dictionary, visual: Object) -> void:
 			for field: String in ["poseSteps", "steppedSeconds", "pendingSeconds"]:
 				_add_metric(scheduling[field], stats[field])
 	_include_pony_quality(summary["ponyQuality"], visual)
+	_include_rust_pose(summary["rustPose"], visual)
+
+static func _include_rust_pose(out: Dictionary, visual: Object) -> void:
+	if not is_instance_valid(visual) or not _has_property(visual, "rust_pose") or not visual.has_method("scheduling_stats"):
+		return
+	var solver: Variant = visual.get("rust_pose")
+	if not is_instance_valid(solver) or not solver.has_method("snapshot"):
+		return
+	var stats: Dictionary = solver.snapshot()
+	out.available += 1
+	out.supported += int(bool(stats.supported))
+	out.eligible += int(not bool(stats.disabled))
+	out.registered += int(bool(stats.registered))
+	out.disabled += int(bool(stats.disabled))
+	out.appliedVisuals += int(int(stats.applications) > 0)
+	var scheduling: Dictionary = visual.scheduling_stats()
+	var active := not bool(scheduling.parked) and int(scheduling.tier) != 2
+	out.activeVisuals += int(active)
+	out.appliedActiveVisuals += int(active and int(stats.applications) > 0)
+	out.eligibleActiveVisuals += int(active and bool(stats.supported))
+	out.appliedEligibleActiveVisuals += int(active and bool(stats.supported) and int(stats.applications) > 0)
+	if stats.has("appliedCurrentSubmission") and stats.has("applicationAgeFrames"):
+		var fresh: Dictionary = out.freshness
+		fresh.available += 1
+		fresh.currentSubmissionVisuals += int(bool(stats.appliedCurrentSubmission))
+		fresh.activeEligibleCurrentVisuals += int(active and bool(stats.supported) and bool(stats.appliedCurrentSubmission))
+		if int(stats.applicationAgeFrames) >= 0:
+			_add_metric(fresh.applicationAgeFrames, int(stats.applicationAgeFrames))
+	if stats.has("upperApplications") and stats.has("reinApplications"):
+		var secondary: Dictionary = out.secondary
+		secondary.available += 1
+		secondary.upperApplications += int(stats.upperApplications)
+		secondary.reinApplications += int(stats.reinApplications)
+		var actor: Variant = visual.get("actor") if _has_property(visual, "actor") else null
+		var cloth: Variant = actor.get("_cape_cloth") if is_instance_valid(actor) else null
+		if is_instance_valid(cloth) and cloth.has_method("native_presentation_stats"):
+			var cloth_stats: Dictionary = cloth.native_presentation_stats()
+			if cloth_stats.has("mountedCalls"):
+				secondary.clothAvailable += 1
+				secondary.clothCalls += int(cloth_stats.mountedCalls)
+				secondary.clothFallbacks += int(cloth_stats.mountedFallbackCalls)
+		var reins: Variant = visual.get("reins") if _has_property(visual, "reins") else null
+		if is_instance_valid(reins) and reins.has_method("native_presentation_stats"):
+			var rein_stats: Dictionary = reins.native_presentation_stats()
+			if bool(rein_stats.get("available", false)):
+				secondary.reinAvailable += 1
+				secondary.reinCalls += int(rein_stats.get("calls", 0))
+	for field: String in ["applications", "comparisons", "failures"]:
+		out[field] = int(out[field]) + int(stats[field])
+	for field: String in ["maxPositionError", "maxAngleError", "maxScaleError", "maxVisualError"]:
+		out[field] = maxf(float(out[field]), float(stats[field]))
+	_increment(out.profiles, str(stats.profile))
+	_increment(out.requestedModes, str(stats.requested))
 
 static func _tier_counts() -> Dictionary:
 	return {"full": 0, "half": 0, "paused": 0, "quarter": 0}

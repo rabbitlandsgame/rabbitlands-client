@@ -29,7 +29,7 @@ import uuid
 from process_memory_sampler import ProcessMemorySampler
 
 from crowd_benchmark_support import (
-    BenchmarkLock, EvidenceError, asset_files, clean_environment, configure_settings_profile, default_lock_path,
+    BenchmarkLock, EvidenceError, asset_files, clean_environment, configure_prepared_profile, configure_settings_profile, default_lock_path,
     hash_files, manifest_identity, read_json, require_private_replay_output,
     seed_settings_profile, selected_cells, sha256_file, source_files, validate_report, validate_startup_ack,
 )
@@ -85,6 +85,16 @@ def resolution(value: str) -> tuple[int, int]:
     return tuple(map(int, match.groups()))
 
 
+def admission_budget(value: str) -> int:
+    try:
+        result = int(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError("admission budget must be an integer MiB value") from exc
+    if not 64 <= result <= 8192:
+        raise argparse.ArgumentTypeError("admission budget must be 64 through 8192 MiB")
+    return result
+
+
 def executable_path(value: str) -> Path:
     path = Path(value).resolve()
     if path.stem.endswith("_console"):
@@ -104,6 +114,13 @@ def request_for(args) -> dict:
             "driver": args.driver, "body_cap": args.body_cap, "cells": args.cells,
             "replay": bool(args.replay), "executable_mode": args.executable_mode,
             "native_reducer": args.native_reducer, "native_presentation": args.native_presentation,
+            "remote_presentation": getattr(args, "remote_presentation", "legacy"),
+            "client_runtime": args.client_runtime, "rust_effects": args.rust_effects,
+            "resource_admission": args.resource_admission,
+            "resource_admission_budget_mib": args.resource_admission_budget_mib,
+            "prepared_content": getattr(args, "prepared_content", "raw"),
+            "prepared_node_policy": getattr(args, "prepared_node_policy", "retain"),
+            "capture_boundaries": args.capture_boundaries,
             "tuning": args.tuning, "diagnostics": args.diagnostics, "executable": str(args.godot),
             "presence": args.presence, "server_time": args.server_time,
             "settings_profile": args.settings_profile}
@@ -237,6 +254,7 @@ def run_one(args, variant: str, repeat: int, out_dir: Path) -> dict:
         "RABBITLANDS_CROWD_BENCH_LABEL": f"{args.label}-{variant}",
         "RABBITLANDS_CROWD_BENCH_OUT": str(report),
         "RABBITLANDS_CROWD_BENCH_DIAG": args.diagnostics,
+        "RABBITLANDS_CROWD_BENCH_CAPTURE_BOUNDARIES": "1" if args.capture_boundaries else "",
         "RABBITLANDS_CROWD_BENCH_DRIVER": args.driver,
         "RABBITLANDS_CROWD_BENCH_FPS_CAP": str(args.fps_cap),
         "RABBITLANDS_CROWD_BENCH_RESOLUTION": f"{args.resolution[0]}x{args.resolution[1]}",
@@ -249,6 +267,13 @@ def run_one(args, variant: str, repeat: int, out_dir: Path) -> dict:
         "ELORIA_LOOK_QUALITY": args.quality,
         "ELORIA_NATIVE_CROWD": "1" if args.native_reducer == "on" else "0",
         "ELORIA_NATIVE_PRESENTATION": "0" if args.native_presentation == "off" else args.native_presentation,
+        "RABBITLANDS_CLIENT_RUNTIME": args.client_runtime,
+        "RABBITLANDS_REMOTE_PRESENTATION": getattr(args, "remote_presentation", "legacy"),
+        "RABBITLANDS_RESOURCE_ADMISSION": args.resource_admission,
+        "RABBITLANDS_RESOURCE_BUDGET_MIB": str(args.resource_admission_budget_mib),
+        "RABBITLANDS_RUST_EFFECTS": "heat_bolt" if args.rust_effects == "heat_bolt" else "",
+        "RABBITLANDS_PREPARED_CONTENT": getattr(args, "prepared_content", "raw"),
+        "RABBITLANDS_PREPARED_NODE_POLICY": getattr(args, "prepared_node_policy", "retain"),
     }
     if args.centre:
         overrides["RABBITLANDS_CROWD_BENCH_CENTRE"] = args.centre
@@ -392,8 +417,18 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--presence", type=int, default=0)
     p.add_argument("--server-time", action="store_true")
     p.add_argument("--diagnostics", default="")
+    p.add_argument("--capture-boundaries", action="store_true",
+                   help="save the last completed world viewport after sampling; readback is outside timing")
     p.add_argument("--native-reducer", default="off", choices=["off", "on"])
     p.add_argument("--native-presentation", default="off", choices=["off", "cape", "flight", "both", "world", "all"])
+    p.add_argument("--client-runtime", default="legacy", choices=["legacy", "compare", "rust", "services"])
+    p.add_argument("--remote-presentation", default="legacy", choices=["legacy", "rust"])
+    p.add_argument("--resource-admission", default="legacy", choices=["legacy", "rust"])
+    p.add_argument("--resource-admission-budget-mib", type=admission_budget, default=768,
+                   help="logical estimated residency allowance, 64 through 8192 MiB; not an allocation measurement")
+    p.add_argument("--rust-effects", default="legacy", choices=["legacy", "heat_bolt"])
+    p.add_argument("--prepared-content", default="raw", choices=["raw", "auto", "require-pilot"])
+    p.add_argument("--prepared-node-policy", default="retain", choices=["retain", "lazy-source-v1"])
     p.add_argument("--repeats", type=int, default=1)
     p.add_argument("--sample-ms", type=int, default=6000)
     p.add_argument("--warmup-ms", type=int, default=2000)
@@ -418,6 +453,19 @@ def main(argv: list[str] | None = None) -> int:
     args = p.parse_args(argv)
     try:
         configure_settings_profile(args)
+        if args.remote_presentation == "rust" and args.client_runtime != "rust":
+            raise EvidenceError("--remote-presentation rust requires --client-runtime rust")
+        configure_prepared_profile(args)
+        if args.resource_admission == "rust" and args.client_runtime not in ("services", "rust"):
+            raise EvidenceError("--resource-admission rust requires --client-runtime services or rust")
+        if args.capture_boundaries and args.mode != "windowed":
+            raise EvidenceError("--capture-boundaries requires --mode windowed")
+        if args.capture_boundaries and (args.replay or any(name.startswith("traversal-") for name in selected_cells(args.cells, False))):
+            raise EvidenceError("--capture-boundaries currently supports synthetic crowd cells only")
+        if args.rust_effects == "heat_bolt" and args.client_runtime != "rust":
+            raise EvidenceError("--rust-effects heat_bolt requires --client-runtime rust")
+        if args.rust_effects == "heat_bolt" and args.native_presentation != "off":
+            raise EvidenceError("Rust heat-bolt qualification requires --native-presentation off")
         args.project_path = args.project_path.resolve()
         args.godot = executable_path(args.godot)
         for field in ("main_pack", "package_manifest", "asset_manifest", "replay"):

@@ -1,0 +1,10 @@
+[configuration]
+entry_symbol = "rl_client_runtime_library_init"
+compatibility_minimum = "4.7"
+compatibility_maximum = "4.7"
+reloadable = false
+
+[libraries]
+windows.x86_64 = "./client_runtime.dll"
+linux.x86_64 = "./client_runtime.so"
+macos = "./client_runtime.dylib"

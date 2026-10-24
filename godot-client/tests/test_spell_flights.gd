@@ -144,8 +144,11 @@ func check_power_scaling() -> void:
 	state.actor_animation_requested.connect(func(event: Dictionary) -> void: requests.append(event))
 	state.special_effect_requested.connect(func(event: Dictionary) -> void: received.append(event))
 	state.call("_on_packet", 70, PackedByteArray([4, 1, 6, 1]))
+	check(requests.is_empty() and state.pending_spell_target == "actor" and state.last_spell_result.power == 6,
+		"target prompt retains accepted power while waiting for a recipient before channeling")
+	state.call("_on_packet", 70, PackedByteArray([5, 1, 6, 1]))
 	check(requests.back().action == &"cast_channel_enter" and requests.back().power == 6,
-		"accepted cast power reaches channeling")
+		"location channel receives the accepted cast power")
 	state.call("_on_packet", 70, PackedByteArray([1, 0, 8, 2]))
 	check(requests.back().action == &"cast_aggressive" and requests.back().power == 8,
 		"standard harm keeps its offensive animation and actual power")

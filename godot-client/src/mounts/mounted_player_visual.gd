@@ -1,6 +1,7 @@
 extends Node3D
 ## Profile-driven mount presentation on the real player and its wardrobe.
 const RiderPose := preload("res://src/mounts/rider_seat_pose.gd")
+const RustPose := preload("res://src/mounts/rust_rider_pose.gd")
 const ReinVisual := preload("res://src/mounts/mount_reins.gd")
 const CapeSurface := preload("res://src/mounts/mount_cape_surface.gd")
 const UpperBody := preload("res://src/mounts/mounted_upper_body.gd")
@@ -10,6 +11,7 @@ const HindLegPose := preload("res://src/mounts/mount_hind_leg_pose.gd")
 var actor: ReplicatedActor3D
 var pony: ReplicatedActor3D
 var pose := RiderPose.new()
+var rust_pose := RustPose.new()
 var reins := ReinVisual.new()
 var profile: Dictionary
 var state: Dictionary = {}
@@ -108,6 +110,7 @@ func configure(player: ReplicatedActor3D, models: Dictionary, mount_id := "moor_
 		player_anim.get_animation("Fighting_Idle"), actor.get_node("NativeModel") as Node3D)
 	if not errors.is_empty():
 		return errors
+	rust_pose.configure(pose, mount_id)
 	# Anchor the banner to the neutral seat height, independent of saddle bob
 	# and pitch during animation. Retain the current rider's body dimensions.
 	var seat_point: Vector3
@@ -293,34 +296,44 @@ func _step_visual(delta: float) -> void:
 	var lean_key := "gallopPelvisLeanDegrees" if action == "gallop" else "normalPelvisLeanDegrees"
 	if profile.has(lean_key):
 		profile.pelvisLeanDegrees = float(profile[lean_key])
+	if rust_pose.try_fit(seat, action, elapsed, duration, _finish_visual.bind(delta, seat, action)):
+		return
 	pose.fit(seat, action, elapsed, duration)
-	upper.apply()
+	_finish_visual(delta, seat, action)
+
+func _finish_visual(delta: float, seat: Transform3D, gait: String) -> void:
+	var native_secondary := rust_pose.consume_native_upper_applied()
+	if not native_secondary:
+		upper.apply()
 	refresh_cloth_permission(true)
+	if actor._cape_cloth != null:
+		actor._cape_cloth.call("set_native_mounted_constraint_kernel", rust_pose.mounted_constraint_backend())
 	if cape_simulation_enabled():
 		# Pose the body first, then cloth, once. The ordinary automatic modifier
 		# remains paused so it cannot overwrite this mounted pass afterward.
-		cape_surface.update(delta, action)
+		cape_surface.update(delta, gait)
 		actor._cape_cloth.call("_process_modification_with_delta", delta)
 		actor.get_skeleton().force_update_all_bone_transforms()
 	actor._lift_overhead(actor.server_scale)
-	var head_frame := pony.get_skeleton().global_transform * pony.get_skeleton().get_bone_global_pose(head)
-	var bridle: Dictionary = {}
-	for side: String in ["l", "r"]:
-		bridle[side] = head_frame * (sockets[side] as Vector3)
-	var parked := {}
-	for side: String in ["l", "r"]:
-		var sign_value := 1.0 if side == "l" else -1.0
-		var grip := reins.grip_world(actor.get_skeleton(), side)
-		var exit := reins.grip_exit_world(actor.get_skeleton(), side)
-		var saddle_grip := seat.origin + seat.basis * Vector3(sign_value * .055, .12, .21)
-		parked[side] = [grip.lerp(saddle_grip, upper.grip_weight), exit.lerp(saddle_grip + Vector3.DOWN * .025, upper.grip_weight)]
-	var straps: Array[PackedVector3Array] = []
-	for path: PackedVector3Array in bridle_paths:
-		var points := PackedVector3Array()
-		for point: Vector3 in path:
-			points.append(head_frame * point)
-		straps.append(points)
-	reins.update_contact(bridle, actor.get_skeleton(), seat.basis, parked, straps)
+	if not native_secondary or rust_pose._mode() != "rust":
+		var head_frame := pony.get_skeleton().global_transform * pony.get_skeleton().get_bone_global_pose(head)
+		var bridle: Dictionary = {}
+		for side: String in ["l", "r"]:
+			bridle[side] = head_frame * (sockets[side] as Vector3)
+		var parked := {}
+		for side: String in ["l", "r"]:
+			var sign_value := 1.0 if side == "l" else -1.0
+			var grip := reins.grip_world(actor.get_skeleton(), side)
+			var exit := reins.grip_exit_world(actor.get_skeleton(), side)
+			var saddle_grip := seat.origin + seat.basis * Vector3(sign_value * .055, .12, .21)
+			parked[side] = [grip.lerp(saddle_grip, upper.grip_weight), exit.lerp(saddle_grip + Vector3.DOWN * .025, upper.grip_weight)]
+		var straps: Array[PackedVector3Array] = []
+		for path: PackedVector3Array in bridle_paths:
+			var points := PackedVector3Array()
+			for point: Vector3 in path:
+				points.append(head_frame * point)
+			straps.append(points)
+		reins.update_contact(bridle, actor.get_skeleton(), seat.basis, parked, straps)
 	actor.set_hand_props_visible(false)
 	if actor.combat_presentation != null:
 		actor.combat_presentation.update_pose()
@@ -330,6 +343,7 @@ func play_action(next: StringName, restart := false) -> void:
 	_update_effective_tier()
 
 func restore() -> void:
+	rust_pose.close()
 	_parked = true
 	set_process(false)
 	_pending_delta = 0.0
@@ -345,3 +359,6 @@ func restore() -> void:
 	actor.set_hand_props_visible(true)
 	actor._refresh_cape_cloth_activity(true)
 	actor._lift_overhead(actor.server_scale)
+
+func _exit_tree() -> void:
+	rust_pose.close()
