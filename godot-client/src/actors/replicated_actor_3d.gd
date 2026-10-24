@@ -3255,6 +3255,7 @@ func _set_mount_state_legacy(state: Dictionary, models: Dictionary) -> void:
 		play_action(&"walk" if _segment_duration > 0.0 else &"idle", true)
 	if is_instance_valid(_mount_visual):
 		_mount_visual.set("state", mount_state)
+		_mount_visual.call("set_coat", str(mount_state.get("coat_id", "original")))
 
 func _equipment_model_config(part: int, visual_id: int) -> Dictionary:
 	var aliases: Dictionary = _equipment_config.get("aliases", {}) as Dictionary

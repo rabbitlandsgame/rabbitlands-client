@@ -42,6 +42,9 @@ func run() -> void:
 		mount_id = "jadefeather_raptor"
 	if "--rat" in OS.get_cmdline_user_args():
 		mount_id = "giant_rat"
+	for argument: String in OS.get_cmdline_user_args():
+		if argument.begins_with("--mount="):
+			mount_id = argument.trim_prefix("--mount=")
 	var models: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/models.json")).models
 	for body: String in ["luminous_male", "luminous_female"]:
 		var actor := make_rider(body, models)
@@ -58,6 +61,10 @@ func run() -> void:
 				rider._mount_visual._process(0.0)
 			var visual: Variant = actor._mount_visual
 			var comparison: Variant = baseline._mount_visual
+			var elapsed: float = visual.elapsed
+			actor.set_mount_state({"mode":"mounted","mount_id":mount_id,"gait":gait,"coat_id":"snow"},models)
+			expect(actor._mount_visual == visual and visual.elapsed == elapsed,"coat switch preserves the seated rider and gait clock")
+			expect(visual.coat.current == "snow","mounted action fixture uses the chosen coat")
 			for requested: StringName in [&"ranged_draw", &"ranged_hold", &"ranged_attack",
 					&"cast_aggressive", &"cast_defensive", &"heal", &"cast_channel_enter", &"cast_channel", &"cast_exit"]:
 				if requested == &"cast_aggressive":

@@ -1,0 +1,82 @@
+{
+  "date": "2026-10-24",
+  "status": "Implemented on local feature branches; visual acceptance pending",
+  "assets": [
+    {
+      "id": "cave_salamander",
+      "model": "godot-client/assets/actors/native/creatures/cave_salamander.glb",
+      "modelSha256": "3f22bf843edc883567043b52cf494bc207413e8b1b05bbdbf593090e305e0858",
+      "profile": "godot-client/data/mounts/cave_salamander.json",
+      "profileSha256": "3791d4747aac229c8b64164855ffc84162be20aaf01a6854e9715d006d43ed37",
+      "nativeClips": [
+        "Idle_A",
+        "Walk",
+        "Jog"
+      ],
+      "sourceGeometryAndAnimationsChanged": false
+    },
+    {
+      "id": "lantern_stag",
+      "model": "godot-client/assets/actors/native/creatures/lantern_stag.glb",
+      "modelSha256": "74033f3d4ce80c6ce66bcc4d62f57c76b8cec07475a675896d372f9692ed29b3",
+      "profile": "godot-client/data/mounts/lantern_stag.json",
+      "profileSha256": "214f7c411ec7a64f9469ad0aa7d8d64f64e82a0ddb43d8d9abeb6c0399de11a4",
+      "nativeClips": [
+        "Idle_A",
+        "Walk",
+        "Jog"
+      ],
+      "sourceGeometryAndAnimationsChanged": false
+    },
+    {
+      "id": "cheetah",
+      "model": "godot-client/assets/actors/native/creatures/basic_expansion/cheetah.glb",
+      "modelSha256": "7cd5593eb836745f7cc21c6573f38571a475ee5c9ac1103eca16c3b6e0290dbd",
+      "profile": "godot-client/data/mounts/cheetah.json",
+      "profileSha256": "490fb2f75a883760faee0f7bbb8bc14c6b2f49eeda85e557a0443c9493e8d3a1",
+      "nativeClips": [
+        "Idle_A",
+        "Walk",
+        "Jog"
+      ],
+      "sourceGeometryAndAnimationsChanged": false
+    }
+  ],
+  "appearanceIds": [
+    "original",
+    "ashen",
+    "snow",
+    "dappled",
+    "striped"
+  ],
+  "collectionSize": 9,
+  "speedMultipliers": {
+    "normal": 1.5,
+    "fast": 2.0
+  },
+  "checks": {
+    "serverMountTests": 52,
+    "clientCoatChecks": 685,
+    "clientWindowChecks": 67,
+    "clientProtocolChecks": 31,
+    "clientStateChecks": 39,
+    "mountedActionChecksPerNewMount": 3082,
+    "mountedActionLowerBodyError": 0.0,
+    "nativeMovementFrames": 120,
+    "nativeMovementFPS": 30,
+    "maximumRiderContactErrorMetres": 0.0324748978018761,
+    "maximumCoatNormalRepackError": 0.00012942425383
+  },
+  "captures": {
+    "riders.png": "de46f028a77a92c8314272a93136b8215349d5da8acc5a0db02cb6bf5acb0245",
+    "coats.png": "d99d778dc6970b33f9a8f86b4e93a219a3802ac63b05e4ed93dc1f68b44ab480",
+    "window.png": "09bb45cd4648129b2f29ca1beb489edc35b7aec7c59966406e1f3368b8618fb2"
+  },
+  "notes": [
+    "No new models or paid generation. Current imported animals and their native clips are reused.",
+    "Normal game catalogue, universal test ownership, capability negotiation and full/delta mount state are connected.",
+    "Per-mount coat choices persist across reconnects; applying them preserves mounted gait and endurance.",
+    "Replacement albedo texture loading and starter palette/pattern variants are implemented.",
+    "No remote merge, push, build publication or deployment was performed."
+  ]
+}
