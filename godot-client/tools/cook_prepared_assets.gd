@@ -12,10 +12,12 @@ const Quantization := preload("res://src/world/gltf_quantization.gd")
 const Archived := preload("res://src/actors/archived_model_policy.gd")
 const TextureSizes := preload("res://src/world/prepared_texture_sizes.gd")
 const AnimationKeys := preload("res://src/world/prepared_animation_keys.gd")
+const NativeStorage := preload("res://tools/prepared_native_storage.gd")
 var _root_path := ""
 var _saved: Dictionary = {}
 var _visiting: Dictionary = {}
 var _payloads: Dictionary = {}
+var _generation_payloads: Dictionary = {}
 var _inputs: Dictionary = {}
 var _shared_images: Dictionary = {}
 var _shared_meshes: Dictionary = {}
@@ -239,7 +241,9 @@ func _save_resource(source: Resource) -> Resource:
 	_sequence += 1
 	var extension := "scn" if resource is PackedScene else "res"
 	var staging := _root_path.path_join("writing-%06d.%s" % [_sequence, extension])
-	var save_error := ResourceSaver.save(resource, staging)
+	# Outer native-file compression is lossless; image GPU format, mesh data,
+	# exact clocks and all existing metadata remain unchanged.
+	var save_error := NativeStorage.save(resource, staging)
 	if save_error != OK:
 		_error("native save failed: " + staging + " " + error_string(save_error))
 		_visiting.erase(identity)
@@ -266,6 +270,7 @@ func _save_resource(source: Resource) -> Resource:
 			if logical.get_extension() == "glb" and MeshPool._published(key) == source:
 				_shared_meshes[final] = key
 	_payloads[final] = digest
+	_generation_payloads[final] = digest
 	_saved[identity] = resource
 	_visiting.erase(identity)
 	return resource
@@ -436,6 +441,14 @@ func _target(spec: Dictionary) -> Dictionary:
 	var saved := _save_resource(native)
 	if saved == null or not _errors.is_empty():
 		return {}
+	# Some built-in serializers embed data (ImageTexture embeds its Image)
+	# even after the generic property walk saved a standalone Resource. Only
+	# the actual saved native dependency closure belongs in this entry.
+	var closure := NativeStorage.closure(saved.resource_path, _payloads, _inputs, _root_path)
+	if not bool(closure.ok):
+		_error(str(closure.error))
+		return {}
+	var retained: Dictionary = closure.payloads
 	metadata["textures"] = _textures.duplicate(true)
 	metadata["source_images"] = spec.get("source_images", []).duplicate(true)
 	metadata["input_closure_policy"] = "actual-runtime-files-plus-import-products-v1"
@@ -446,15 +459,21 @@ func _target(spec: Dictionary) -> Dictionary:
 	input_paths.sort()
 	for input: String in input_paths:
 		inputs.append({"path": input, "sha256": str(_inputs[input])})
-	var payload_paths := _payloads.keys()
+	var payload_paths := retained.keys()
 	payload_paths.sort()
 	for payload: String in payload_paths:
-		payloads.append({"path": payload, "sha256": str(_payloads[payload])})
+		payloads.append({"path": payload, "sha256": str(retained[payload])})
+	var shared_images := _shared_images.duplicate()
+	var shared_meshes := _shared_meshes.duplicate()
+	for shared: Dictionary in [shared_images, shared_meshes]:
+		for payload: String in shared.keys():
+			if not retained.has(payload):
+				shared.erase(payload)
 	var entry := {"kind": kind, "node_policy": node_policy, "source": Prepared.logical_source(path),
 		"source_digest": source_digest, "texture_token": token,
 		"engine_policy": Prepared.engine_policy(), "resource": saved.resource_path,
 		"inputs": inputs, "payloads": payloads,
-		"shared_images": _shared_images.duplicate(), "shared_meshes": _shared_meshes.duplicate(),
+		"shared_images": shared_images, "shared_meshes": shared_meshes,
 		"metadata_json": Prepared.encode_metadata(metadata),
 		"texture_skip": Graphics.active_texture_skip(), "format_mask": Vram.usable_formats(),
 		"representation": "exact_native_variant", "qualification": "pending_exported_parity"}
@@ -535,6 +554,11 @@ func _run() -> void:
 		_error("scoped disposable output and targets required")
 		quit(1)
 		return
+	if DirAccess.dir_exists_absolute(_root_path) and (not DirAccess.get_files_at(_root_path).is_empty() \
+			or not DirAccess.get_directories_at(_root_path).is_empty()):
+		_error("native output must be fresh before cooking")
+		quit(1)
+		return
 	DirAccess.make_dir_recursive_absolute(_root_path)
 	# No prepared recursion while producing raw references. Set texture quality
 	# in this fresh process's isolated config before invoking the job.
@@ -597,6 +621,14 @@ func _run() -> void:
 	if not _errors.is_empty():
 		quit(1)
 		return
+	# Re-prove all roots together before deleting only this generation's
+	# unreachable files. Never reclaim a shared dependency between targets.
+	var finalized := NativeStorage.finalize(_root_path, entries, _generation_payloads)
+	if not bool(finalized.ok):
+		_error(str(finalized.error))
+		quit(1)
+		return
+	_cook_attestation["native_storage"] = finalized.stats
 	var result := {"schema_version": Prepared.SCHEMA, "policy": Prepared.COOK_POLICY,
 		"qualification": "pending_exported_parity", "entries": entries,
 		"release_cook": _cook_attestation.duplicate(true)}
