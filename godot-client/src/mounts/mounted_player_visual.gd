@@ -14,6 +14,7 @@ var pose := RiderPose.new()
 var rust_pose := RustPose.new()
 var reins := ReinVisual.new()
 var profile: Dictionary
+var coat := preload("res://src/mounts/mount_coat_visual.gd").new()
 var state: Dictionary = {}
 var saddle := -1
 var head := -1
@@ -62,6 +63,7 @@ func configure(player: ReplicatedActor3D, models: Dictionary, mount_id := "moor_
 		"rotation": 0, "kind": 5, "name": "", "scale": 1.0}, CoordinateAdapter.new(), config, mapping)
 	if not errors.is_empty():
 		return errors
+	coat.configure(pony,mount_id,profile)
 	var offset: Array = profile.get("visualOffsetMetres", [0.0, 0.0, 0.0])
 	pony.position = Vector3(float(offset[0]), float(offset[1]), float(offset[2]))
 	pony.server_target = Vector3.ZERO
@@ -139,6 +141,9 @@ func configure(player: ReplicatedActor3D, models: Dictionary, mount_id := "moor_
 	apply_render_quality(actor.render_quality(), actor.render_quality_is_local())
 	_capture_presentation_view_radius()
 	return []
+
+func set_coat(coat_id: String) -> void:
+	coat.apply(coat_id)
 
 ## Main tests a sphere centred one metre above the rider's ground position.
 ## Capture the approved mount's imported bounds once, including its visual

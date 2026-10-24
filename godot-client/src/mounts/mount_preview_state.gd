@@ -4,7 +4,8 @@ extends RefCounted
 ## cannot infer a successful summon from sending a request.
 
 const MOUNT_ID := "moor_pony"
-const MOUNT_IDS := ["moor_pony", "golden_plains_horse", "crystalback_tortoise", "rabbit", "jadefeather_raptor", "giant_rat"]
+const MOUNT_IDS := ["moor_pony", "golden_plains_horse", "crystalback_tortoise", "rabbit", "jadefeather_raptor", "giant_rat", "cave_salamander", "lantern_stag", "cheetah"]
+const Coats := preload("res://src/mounts/mount_coats.gd")
 const REASONS := ["", "disabled", "not_owned", "dead", "combat", "restricted_area",
 	"no_clearance", "immobilized", "moving", "already_summoning"]
 var actor_id := -1
@@ -85,6 +86,19 @@ func apply_snapshot(value: Variant) -> bool:
 	if mode != "summoning" and int(incoming.summon_remaining_ms) != 0:
 		last_error = "inconsistent_summon"
 		return false
+	if incoming.has("coat_id") and ((selected == "" and incoming.coat_id != "original") \
+			or (selected != "" and not Coats.valid(selected, incoming.coat_id))):
+		last_error = "invalid_coat"
+		return false
+	if incoming.has("mount_coats"):
+		var coats: Variant = incoming.mount_coats
+		if not coats is Dictionary or coats.size() > MOUNT_IDS.size():
+			last_error = "invalid_coat"
+			return false
+		for id: Variant in coats:
+			if not id is String or not Coats.valid(id, coats[id]) or id not in incoming.get("owned_mount_ids", []):
+				last_error = "invalid_coat"
+				return false
 	state = incoming.duplicate(true)
 	revision = int(incoming.revision)
 	last_error = ""

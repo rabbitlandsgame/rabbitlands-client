@@ -330,6 +330,8 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"rabbit_mount_v1",
 	"raptor_mount_v1",
 	"giant_rat_mount_v1",
+	"wild_mounts_v1",
+	"mount_coats_v1",
 	# ELORIA_MOUNT_DELTAS: changed riders only, countdowns as server-time
 	# deadlines (mount_delta_state.gd).
 	"mount_deltas_v1",

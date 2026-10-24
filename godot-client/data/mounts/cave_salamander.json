@@ -1,0 +1,230 @@
+{
+  "schemaVersion": 1,
+  "status": "mount_draft_v1",
+  "mount": "cave_salamander",
+  "saddleBone": "Bone_001",
+  "footOffsetMetres": [
+    0.68,
+    -0.63,
+    0.08
+  ],
+  "kneePoleOffsetMetres": [
+    0.82,
+    -0.12,
+    0.3
+  ],
+  "handOffsetMetres": [
+    0.12,
+    0.15,
+    0.3
+  ],
+  "elbowPoleOffsetMetres": [
+    0.3,
+    0.02,
+    -0.04
+  ],
+  "pelvisLeanDegrees": 5,
+  "torsoStabilization": 0.7,
+  "fingerGripWeight": 0.95,
+  "fingerCurlDegrees": [
+    55.0,
+    70.0,
+    50.0
+  ],
+  "footToeOutDegrees": 10,
+  "armMotion": {
+    "weight": 1.0,
+    "idle": {
+      "beatsPerCycle": 1,
+      "handFollowMetres": 0.002,
+      "elbowGiveMetres": 0.003
+    },
+    "walk": {
+      "beatsPerCycle": 1,
+      "handFollowMetres": 0.012,
+      "elbowGiveMetres": 0.018
+    },
+    "trot": {
+      "beatsPerCycle": 2,
+      "handFollowMetres": 0.009,
+      "elbowGiveMetres": 0.014
+    },
+    "gallop": {
+      "beatsPerCycle": 1,
+      "handFollowMetres": 0.012,
+      "elbowGiveMetres": 0.018
+    }
+  },
+  "reins": {
+    "headBone": "Bone_034",
+    "bridleAnchorsNative": {
+      "l": [
+        -0.37,
+        1.02,
+        2.12
+      ],
+      "r": [
+        0.37,
+        1.02,
+        2.12
+      ]
+    },
+    "widthMetres": 0.018,
+    "thicknessMetres": 0.006,
+    "crossSectionRollDegrees": 35.0,
+    "sideClearanceMetres": 0.04,
+    "sagMetres": 0.015,
+    "looseEndLengthMetres": 0.1,
+    "looseEndSpreadMetres": 0.065,
+    "segments": 20,
+    "colour": "77563a",
+    "bridlePathsNative": [
+      [
+        [
+          -0.37,
+          1.02,
+          2.12
+        ],
+        [
+          -0.444,
+          1.1,
+          2.0900000000000003
+        ],
+        [
+          0.444,
+          1.1,
+          2.0900000000000003
+        ],
+        [
+          0.37,
+          1.02,
+          2.12
+        ]
+      ],
+      [
+        [
+          -0.37,
+          1.02,
+          2.12
+        ],
+        [
+          -0.259,
+          0.9400000000000001,
+          2.12
+        ],
+        [
+          0.259,
+          0.9400000000000001,
+          2.12
+        ],
+        [
+          0.37,
+          1.02,
+          2.12
+        ]
+      ]
+    ]
+  },
+  "walkStrideMetresPerSecond": 0.1792337966334719,
+  "trotStrideMetresPerSecond": 0.1792337966334719,
+  "gallopStrideMetresPerSecond": 0.46088690562892765,
+  "playbackRateMultipliers": {},
+  "clips": {
+    "idle": "Idle_A",
+    "walk": "Walk",
+    "trot": "Walk",
+    "gallop": "Jog"
+  },
+  "notes": "Imported creature and approved native clips reused unchanged. Draft saddle, rider, rein and cape fit for normal mount selection. Server controls shared 1.5x / 2x running speed.",
+  "displayName": "Cave Salamander",
+  "visualScale": 2.0,
+  "seatPositionNative": [
+    0,
+    1.23,
+    0.24
+  ],
+  "borrowedTack": {
+    "source": "res://assets/actors/native/creatures/moor_pony.glb",
+    "sourceBone": "Bone_021",
+    "bone": "Bone_001",
+    "positionNative": [
+      0,
+      1.1,
+      0.24
+    ],
+    "scale": [
+      0.98,
+      0.5,
+      0.9
+    ],
+    "dropScale": 0.35
+  },
+  "capeContact": [
+    {
+      "bone": "Bone_001",
+      "center": [
+        0,
+        0.7,
+        0.13
+      ],
+      "radii": [
+        0.52,
+        0.4,
+        0.9
+      ],
+      "idleBackProfile": [
+        [
+          0.5,
+          1.28
+        ],
+        [
+          0.24,
+          1.24
+        ],
+        [
+          0,
+          1.15
+        ],
+        [
+          -0.25,
+          1.08
+        ],
+        [
+          -0.5,
+          1.15
+        ],
+        [
+          -0.8,
+          1.18
+        ],
+        [
+          -1.1,
+          1.15
+        ]
+      ]
+    }
+  ],
+  "capeMotion": {
+    "hangFraction": 0.7,
+    "gallopHangFraction": 0.55,
+    "liftMultiplier": 0.4,
+    "rippleMultiplier": 0.7,
+    "clearanceMetres": 0.04,
+    "gallopClearanceMetres": 0.06,
+    "idleHangFraction": 0.83,
+    "idleClearanceMetres": 0.018
+  },
+  "portraitCameraSize": 2.7,
+  "portraitLookAtHeight": 0.75,
+  "maximumCyclesPerSecond": {
+    "trot": 1.8,
+    "gallop": 2.8
+  },
+  "visualOffsetMetres": [
+    0,
+    0,
+    0
+  ],
+  "normalPelvisLeanDegrees": 5,
+  "gallopPelvisLeanDegrees": 11
+}
