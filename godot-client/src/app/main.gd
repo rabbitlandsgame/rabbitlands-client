@@ -1588,6 +1588,7 @@ func _ready() -> void:
 	_build_perks_tab()
 	stats_close.pressed.connect(func() -> void: stats_panel.hide())
 	stats_panel.visibility_changed.connect(_on_stats_panel_visibility_changed)
+	stats_panel.minimum_size_changed.connect(_fit_stats_window_to_viewport.call_deferred)
 	_build_counters_tab()
 	_build_statistics_tab()
 	session_reset.pressed.connect(_reset_session_tracking)
@@ -9973,6 +9974,22 @@ func _sync_stats_window(stats: Dictionary) -> void:
 func _on_stats_panel_visibility_changed() -> void:
 	if stats_panel.visible and _stats_window_stale:
 		_sync_stats_window(AppState.stats)
+	_fit_stats_window_to_viewport.call_deferred()
+
+## Leave the window's header and footer on screen at larger UI scales. The
+## tab bodies scroll within this height instead of pushing the window below
+## the viewport, where its last perk and scrollbar would be unreachable.
+func _fit_stats_window_to_viewport() -> void:
+	if not stats_panel.is_visible_in_tree():
+		return
+	var dragger := stats_panel.get_node_or_null("WindowDrag") as WindowDrag
+	if dragger == null:
+		return
+	var available: Vector2 = game_view.size - Vector2(
+		dragger.reserved_right + dragger.edge_margin * 2,
+		dragger.reserved_bottom + dragger.edge_margin * 2)
+	stats_panel.size = Vector2(690, 545).min(available.max(Vector2.ONE))
+	dragger.clamp_into_view()
 
 ## How the skills are grouped, and in what order.
 ##
@@ -11997,6 +12014,7 @@ func _floating_feedback_row(preferred_y: float, lowest_y: float) -> float:
 
 func _on_window_size_changed() -> void:
 	_fit_hud_action_buttons.call_deferred()
+	_fit_stats_window_to_viewport.call_deferred()
 	_layout_full_window_views()
 	# Match the render viewport to the actual drawable area so resizing changes
 	# camera aspect instead of stretching a fixed 16:9 render target. The

@@ -28,9 +28,9 @@ func run() -> void:
 	for p: Array in witnesses.facePoints: face_keys[point_key(Vector3(p[0],p[1],p[2]))] = true
 	for p: Array in witnesses.distalTailPoints: tail_keys[point_key(Vector3(p[0],p[1],p[2]))] = true
 	var models: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/models.json")).models
-	Draft.add_model(models)
 	var equipment: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/equipment.json"))
-	check(not preload("res://src/mounts/mount_profiles.gd").supports("giant_rat"), "unreviewed draft stays outside the live catalogue")
+	check(preload("res://src/mounts/mount_profiles.gd").supports("giant_rat"), "Giant Rat uses the normal mount catalogue")
+	check(FileAccess.get_sha256(models.giant_rat.scene) == "232d5a9f7a8c5348078151872daf452a4c133c9f64f7293f41aaa0e350fe1ec7", "live mount keeps the reviewed mouth, tail and native clips unchanged")
 	for body: String in ["luminous_male", "luminous_female"]:
 		var actor := ReplicatedActor3D.new()
 		root.add_child(actor)
