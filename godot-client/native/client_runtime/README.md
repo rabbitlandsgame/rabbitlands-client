@@ -3,8 +3,11 @@
 The engine-independent Rust core owns immutable rig records, numeric planning
 state and an optional spell-flight service. A thin official GDExtension adapter
 owns its lifetime on the creating main thread. Godot owns scene nodes, animation
-playback and rendering. Ordinary play uses legacy presentation; the approved
-mounted and heat-bolt pilots are explicitly selectable.
+playback and rendering. Development builds default to the experimental
+`human-testing` optimization profile. The mounted, heat-bolt and remote pilots
+activate when a compatible native payload is present; missing capabilities
+retain their legacy fallback. See the [human-testing guide](../../../docs/client-optimization-testing.md)
+for the combined profile, actual diagnostics and comparison controls.
 
 Build from the client directory:
 
@@ -20,8 +23,10 @@ The build verifies the actual clean binding checkout before compilation.
 Generated libraries, dependencies and output manifests are ignored.
 
 Set `RABBITLANDS_CLIENT_RUNTIME=rust` for the mounted pilot, `compare`
-for comparison with legacy driving presentation, or `legacy` for the ordinary
-path. Default is legacy. Comparison mode copies complete poses and is deliberately
+for comparison with legacy driving presentation, or `legacy` for that component's
+previous path. Use `--optimization-profile=legacy` without individual overrides,
+or the package's legacy launcher, to restore all previous defaults. Comparison
+mode copies complete poses and is deliberately
 expensive; its timings do not establish live-mode performance.
 Pass `--client-runtime <absolute bin/client_runtime directory>` to
 `tools/package_client.py` to include a verified optional payload. Its native
@@ -106,9 +111,9 @@ their enclosing spans or described as sample-only measurements. Whole rendered
 frame and delivered-frame measurements remain the performance decision gate.
 
 The Phase 5 single matched exported screen showed no complete-workload gain.
-The broader mounted path remains an opt-in experiment until repeated rendered
-comparisons establish a worthwhile benefit. Source parity alone never enables
-the native default or qualifies other target devices.
+The broader mounted path remains experimental. Activation for human testing
+does not establish a worthwhile benefit or qualify other target devices;
+repeated rendered comparisons remain necessary.
 
 ## Optional heat-bolt family
 
@@ -133,13 +138,14 @@ The rendered comparison uses identical on-foot content and global runtime,
 varying Script, `ELORIA_NATIVE_PRESENTATION=flight`, or the Rust family only.
 Counters include admission, packing, validation and mesh/impact submission;
 native arithmetic alone does not establish a performance benefit. The family
-remains experimental and off by default pending complete-scene qualification.
+remains experimental despite activation in the human-testing profile;
+complete-scene performance qualification remains pending.
 
 ## Optional remote derived-state pilot
 
 `RABBITLANDS_REMOTE_PRESENTATION=rust` together with
 `RABBITLANDS_CLIENT_RUNTIME=rust` selects the experimental remote presentation
-slice. Both defaults remain legacy. AppState dictionaries, network messages,
+slice, also requested by the human-testing profile. AppState dictionaries, network messages,
 local-player movement and UI remain authoritative on their existing paths.
 Unsupported cinematic, charge, predicted-turn and custom-action states transfer
 their complete derived history back to legacy presentation.
@@ -163,5 +169,5 @@ packing/call/application and gate work. Nested timing counters are subsets of
 their enclosing spans and must not be added to them.
 
 Component parity and lifecycle checks do not establish a whole-crowd
-benefit. Keep the pilot opt-in until complete rendered workloads, coverage,
-shutdown and repeated matched comparisons qualify it on the tested hardware.
+benefit. Human-testing activation is separate from qualification through complete
+rendered workloads, coverage, shutdown and repeated matched hardware comparisons.

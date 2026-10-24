@@ -21,11 +21,19 @@ const CATALOG := "res://prepared-content/index.json"
 const ENVIRONMENT := "RABBITLANDS_PREPARED_CONTENT"
 const ARGUMENT := "--prepared-content="
 const MODES := ["raw", "auto", "require-pilot"]
+const CATALOG_CACHE_PATH_LIMIT := 4
 static var _mutex := Mutex.new()
 static var _timings: Dictionary = {}
 static var _hits := 0
 static var _misses: Dictionary = {}
 static var _consumed: Dictionary = {}
+static var _catalog_documents: Dictionary = {}
+static var _catalog_order: Array[String] = []
+static var _catalog_reads := 0
+static var _catalog_bytes_read := 0
+static var _catalog_byte_hashes := 0
+static var _catalog_json_parses := 0
+static var _catalog_parse_hits := 0
 
 static func selected_mode() -> String:
 	var selected := OptimizationProfile.selected("prepared_content")
@@ -146,6 +154,58 @@ static func _record(label: StringName, started: int, atomic := false) -> void:
 	Diagnostics.record(_timings, label, started, atomic)
 	_mutex.unlock()
 
+static func _catalog_document(path: String) -> Variant:
+	# Only parsing is memoized. Read and hash the actual current bytes on EVERY
+	# lookup, including editor/loose/user paths. Neither a timestamp nor an
+	# exported/sealed-generation assumption can authorize this cache hit.
+	var input := FileAccess.open(path, FileAccess.READ)
+	if input == null:
+		return null
+	var length := input.get_length()
+	var bytes := input.get_buffer(length)
+	input.close()
+	_mutex.lock()
+	_catalog_reads += 1
+	_catalog_bytes_read += bytes.size()
+	_mutex.unlock()
+	if bytes.size() != length:
+		return null
+	var began := Time.get_ticks_usec()
+	var hashing := HashingContext.new()
+	if hashing.start(HashingContext.HASH_SHA256) != OK or hashing.update(bytes) != OK:
+		return null
+	var digest := hashing.finish().hex_encode()
+	_record(&"catalog_byte_sha256", began, true)
+	_mutex.lock()
+	_catalog_byte_hashes += 1
+	var cached: Dictionary = _catalog_documents.get(path, {})
+	if str(cached.get("sha256", "")) == digest:
+		var cached_document: Dictionary = cached.document
+		_catalog_order.erase(path)
+		_catalog_order.append(path)
+		_catalog_parse_hits += 1
+		_mutex.unlock()
+		return cached_document # Internal read-only view; acquire duplicates its selected entry.
+	_catalog_json_parses += 1
+	_mutex.unlock()
+	# Parsing may overlap another caller. Publish only data derived from these
+	# exact owned bytes; a later lookup still reads/hashes its own current bytes.
+	began = Time.get_ticks_usec()
+	var parser := JSON.new()
+	var error := parser.parse(bytes.get_string_from_utf8())
+	_record(&"catalog_json_parse", began, true)
+	if error != OK or not parser.data is Dictionary:
+		return null
+	var document: Dictionary = parser.data
+	_mutex.lock()
+	_catalog_documents[path] = {"sha256": digest, "document": document}
+	_catalog_order.erase(path)
+	_catalog_order.append(path)
+	while _catalog_order.size() > CATALOG_CACHE_PATH_LIMIT:
+		_catalog_documents.erase(_catalog_order.pop_front())
+	_mutex.unlock()
+	return document
+
 static func _miss(reason: String, required: bool, details := "") -> Dictionary:
 	_mutex.lock()
 	_misses[reason] = int(_misses.get(reason, 0)) + 1
@@ -175,12 +235,11 @@ static func acquire(kind: String, source: String, source_digest: String,
 	if not FileAccess.file_exists(catalog_path):
 		return _miss("catalog_missing", mode == "require-pilot")
 	var began := Time.get_ticks_usec()
-	var parser := JSON.new()
-	var parse_error := parser.parse(FileAccess.get_file_as_string(catalog_path))
+	var catalog_value: Variant = _catalog_document(catalog_path)
 	_record(&"catalog_read", began)
-	if parse_error != OK or not parser.data is Dictionary:
+	if not catalog_value is Dictionary:
 		return _miss("catalog_invalid", mode == "require-pilot")
-	var catalog: Dictionary = parser.data
+	var catalog: Dictionary = catalog_value
 	if int(catalog.get("schema_version", -1)) != SCHEMA \
 			or str(catalog.get("policy", "")) != COOK_POLICY \
 			or not catalog.get("entries") is Array:
@@ -203,7 +262,9 @@ static func acquire(kind: String, source: String, source_digest: String,
 		return _miss("not_listed", false)
 	if matches.size() != 1:
 		return _miss("variant_missing" if matches.is_empty() else "variant_ambiguous", required)
-	var selected: Dictionary = matches[0]
+	# Decoded metadata and returned nested fields belong to this call, never to
+	# the shared parsed catalog. A consumer cannot poison subsequent lookups.
+	var selected: Dictionary = matches[0].duplicate(true)
 	if _canonical_json(selected.get("engine_policy")) != _canonical_json(engine_policy()):
 		return _miss("engine_or_cook_policy", required)
 	if selected.has("metadata") or not selected.get("metadata_json") is String:
@@ -337,6 +398,11 @@ static func snapshot() -> Dictionary:
 	var result := {"mode": selected_mode(), "active": _hits > 0,
 		"hits": _hits, "misses": _misses.duplicate(), "consumed_entries": consumed,
 		"timings": Diagnostics.snapshot(_timings), "strong_resource_entries": 0,
-		"verification_reuse": false, "estimate_kind": "declared_content_not_allocation"}
+		"verification_reuse": false, "estimate_kind": "declared_content_not_allocation",
+		"catalog_cache": {"policy": "fresh_bytes_sha256_parse_memoization", "path_limit": CATALOG_CACHE_PATH_LIMIT,
+			"cached_paths": _catalog_documents.size(), "reads": _catalog_reads, "bytes_read": _catalog_bytes_read,
+			"byte_hashes": _catalog_byte_hashes, "json_parses": _catalog_json_parses,
+			"parse_hits": _catalog_parse_hits, "source_payload_verification_reused": false,
+			"timings_overlap_catalog_read": true}}
 	_mutex.unlock()
 	return result
