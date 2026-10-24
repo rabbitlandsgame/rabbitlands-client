@@ -1,5 +1,6 @@
 #include "client_runtime.h"
 #include <godot_cpp/classes/os.hpp>
+#include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/core/class_db.hpp>
 #include <gdextension_interface.h>
 #include <godot_cpp/godot.hpp>
@@ -30,6 +31,9 @@ struct PoseTimeScope {
 
 RabbitLandsClientRuntime::RabbitLandsClientRuntime() {
     owner_thread = OS::get_singleton()->get_thread_caller_id();
+    const Dictionary version = Engine::get_singleton()->get_version_info();
+    template_bone_commit = OS::get_singleton()->has_feature("template") &&
+        String(version.get("hash", "")) == "ed1daf0bf001b61586d9930840f2f1394092c079";
     if (rl_client_runtime_abi() == 1) core = rl_client_runtime_create();
 }
 RabbitLandsClientRuntime::~RabbitLandsClientRuntime() { rl_client_runtime_destroy(core); }
@@ -85,6 +89,10 @@ Dictionary RabbitLandsClientRuntime::runtime_info() const {
     info["records_planned"] = static_cast<int64_t>(records_planned);
     info["precision"] = "f64";
     info["mounted_pose_api"] = 1;
+    info["bone_transform_commits"] = static_cast<int64_t>(bone_transform_commits);
+    info["bone_guarded_trs_commits"] = static_cast<int64_t>(bone_guarded_trs_commits);
+    info["bone_commit_mode"] = template_bone_commit ? "verified-template-transform" : "guarded-trs";
+    info["bone_commit_verified_source"] = "ed1daf0bf001b61586d9930840f2f1394092c079";
     info["engine_scalar_bytes"] = static_cast<int64_t>(sizeof(real_t));
     info["reentrant_rejections"] = static_cast<int64_t>(reentrant_rejections);
     info["pose_calls"] = static_cast<int64_t>(pose_calls);
@@ -253,14 +261,25 @@ bool RabbitLandsClientRuntime::solve_mounted_batch(const PackedInt64Array &recor
         auto reject=[&]() {last_status=2;mounted_value_count=0;mounted_outputs.clear();return false;};
         if(!valid()) return reject();
         v->set_global_transform(read_affine(mounted_values.data()+row.offset));
+        if(!valid()) return reject(); // set_global_transform can invoke callbacks.
         for(size_t j=0;j<binding.bones;++j) {
             const double *p=mounted_values.data()+row.offset+12+j*10;
-            if(!valid()) return reject();
-            s->set_bone_pose_position(static_cast<int32_t>(j),Vector3(p[0],p[1],p[2]));
-            if(!valid()) return reject();
-            s->set_bone_pose_rotation(static_cast<int32_t>(j),Quaternion(p[3],p[4],p[5],p[6]));
-            if(!valid()) return reject();
-            s->set_bone_pose_scale(static_cast<int32_t>(j),Vector3(p[7],p[8],p[9]));
+            if(template_bone_commit && p[7]>0. && p[8]>0. && p[9]>0.) {
+                // Verified template setters defer callbacks. Reflections keep
+                // separate TRS because Basis decomposition can change signs.
+                Basis basis(Quaternion(p[3],p[4],p[5],p[6]));
+                basis.scale_local(Vector3(p[7],p[8],p[9]));
+                s->set_bone_pose(static_cast<int32_t>(j),Transform3D(basis,Vector3(p[0],p[1],p[2])));
+                ++bone_transform_commits;
+            } else {
+                if(!valid()) return reject();
+                s->set_bone_pose_position(static_cast<int32_t>(j),Vector3(p[0],p[1],p[2]));
+                if(!valid()) return reject();
+                s->set_bone_pose_rotation(static_cast<int32_t>(j),Quaternion(p[3],p[4],p[5],p[6]));
+                if(!valid()) return reject();
+                s->set_bone_pose_scale(static_cast<int32_t>(j),Vector3(p[7],p[8],p[9]));
+                ++bone_guarded_trs_commits;
+            }
         }
         if(!valid()) return reject();
         s->force_update_all_bone_transforms();

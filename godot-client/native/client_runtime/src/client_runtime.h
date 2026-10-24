@@ -34,6 +34,8 @@ class RabbitLandsClientRuntime : public RefCounted {
     uint64_t pose_attempts = 0, pose_total_us = 0, pose_convert_us = 0;
     uint64_t pose_solve_us = 0, pose_validate_us = 0, pose_apply_us = 0;
     bool mounted_operation = false, cancel_mounted_apply = false;
+    bool template_bone_commit = false;
+    uint64_t bone_transform_commits = 0, bone_guarded_trs_commits = 0;
     uint64_t reentrant_rejections = 0;
     std::vector<uint64_t> pending_rider_removals, pending_rig_removals;
     bool on_owner_thread() const;

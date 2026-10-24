@@ -15,6 +15,7 @@ CLIENT = Path(__file__).resolve().parents[1]
 REPOSITORY = CLIENT.parent
 SOURCE = CLIENT / "native/client_runtime"
 RUST_VERSION = "1.99.1"
+GODOT_CPP_REVISION = "507ed9d840c01a3c5b2a39af8bb4000bfac30bf5"
 
 
 def run(command, env=None, cwd=SOURCE):
@@ -45,12 +46,20 @@ def main(argv=None):
     rust_library = SOURCE / "core/target/release" / ("rabbitlands_client_core.lib" if target == "windows" else "librabbitlands_client_core.a")
     build = SOURCE / "build" / (target + "-release")
     command = [args.cmake, "-S", SOURCE, "-B", build, "-DGODOTCPP_TARGET=template_release",
+               "-DGODOT_CPP_REVISION=" + GODOT_CPP_REVISION,
                "-DRL_RUST_LIBRARY=" + str(rust_library), "-DRL_BUILD_JOBS=" + str(args.jobs)]
     if target == "windows":
         command += ["-G", "Visual Studio 17 2022", "-A", "x64"]
     else:
         command += ["-DCMAKE_BUILD_TYPE=Release"]
     run(command, env)
+    dependency = SOURCE / ".deps/godot-cpp"
+    observed_revision = subprocess.check_output(["git", "-C", str(dependency), "rev-parse", "HEAD"],
+                                                 text=True, env=env).strip()
+    modified = subprocess.check_output(["git", "-C", str(dependency), "status", "--porcelain", "--untracked-files=no"],
+                                       text=True, env=env).strip()
+    if observed_revision != GODOT_CPP_REVISION or modified:
+        parser.error("godot-cpp checkout must match the clean pinned revision before compilation")
     run([args.cmake, "--build", build, "--config", "Release", "--parallel", args.jobs], env)
     library = build / ("Release" if target == "windows" else "") / LIBRARIES[target]
     args.out.mkdir(parents=True, exist_ok=True)
@@ -59,7 +68,7 @@ def main(argv=None):
     (args.out / ".gdignore").write_text("", encoding="utf-8")
     manifest = {"schema": 1, "abi": ABI, "engine_major": 4, "engine_minor": 7, "platform": target,
                 "architecture": "x86_64", "library": LIBRARIES[target], "rustc": actual, "cargo": version.strip(),
-                "godot_cpp_revision": "507ed9d840c01a3c5b2a39af8bb4000bfac30bf5",
+                "godot_cpp_revision": observed_revision,
                 "source_digest": source_digest(REPOSITORY), "library_sha256": sha256(args.out / LIBRARIES[target]),
                 "descriptor_sha256": sha256(args.out / "client_runtime.gdextension")}
     (args.out / "runtime-manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
