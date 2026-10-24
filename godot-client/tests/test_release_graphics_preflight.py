@@ -188,6 +188,48 @@ class GraphicsPreflightTests(unittest.TestCase):
                     self.assertTrue((root / "project").is_dir())
                     self.assertTrue((root / "users").is_dir())
 
+    def test_verified_linux_vsync_warning_is_receipted_and_raw_logs_are_preserved(self):
+        for sink in ("launch", "engine"):
+            with self.subTest(sink=sink), tempfile.TemporaryDirectory() as temporary:
+                root, tools, godot, _, config = self.fixture(temporary)
+                config.update(platform="linux", rendering_method="gl_compatibility",
+                              rendering_driver="opengl3", display_driver="x11", gpu_index=None)
+                warning = preflight.LINUX_VSYNC_WARNING + "\n   at: set_use_vsync (gl_manager_x11.cpp:372)\n"
+                arguments = {"launch_text" if sink == "launch" else "engine_text": warning}
+                result, _, validator, _ = self.launch(config, godot, root, tools, **arguments)
+                validator.assert_called_once()
+                self.assertEqual(result["status"], "verified_scratch_retired")
+                self.assertEqual(result["allowed_driver_warnings"], [preflight.LINUX_VSYNC_WARNING])
+                self.assertEqual((root / ("launch.log" if sink == "launch" else "engine.log")).read_text(), warning)
+                self.assertFalse((root / "project").exists())
+
+    def test_driver_warning_exception_requires_exact_linux_gl_context(self):
+        cases = (("windows", "forward_plus", "d3d12", preflight.LINUX_VSYNC_WARNING),
+                 ("linux", "forward_plus", "vulkan", preflight.LINUX_VSYNC_WARNING),
+                 ("linux", "gl_compatibility", "opengl3", preflight.LINUX_VSYNC_WARNING + " altered"),
+                 ("linux", "gl_compatibility", "opengl3", "WARNING: unrecognized driver warning"))
+        for platform, method, driver, warning in cases:
+            with self.subTest(warning=warning, platform=platform, method=method), tempfile.TemporaryDirectory() as temporary:
+                root, tools, godot, _, config = self.fixture(temporary)
+                config.update(platform=platform, rendering_method=method, rendering_driver=driver)
+                with self.assertRaisesRegex(ValueError, "Engine diagnostic"):
+                    self.launch(config, godot, root, tools, launch_text=warning + "\n")
+                self.assertEqual(json.loads((root / "receipt.json").read_text())["status"], "failed")
+                self.assertTrue((root / "project").is_dir())
+
+    def test_linux_warning_never_bypasses_report_validation(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root, tools, godot, _, config = self.fixture(temporary)
+            config.update(platform="linux", rendering_method="gl_compatibility",
+                          rendering_driver="opengl3", display_driver="x11", gpu_index=None)
+            with self.assertRaisesRegex(ValueError, "actual mask mismatch"):
+                self.launch(config, godot, root, tools, launch_text=preflight.LINUX_VSYNC_WARNING + "\n",
+                            verification_error=ValueError("actual mask mismatch"))
+            receipt = json.loads((root / "receipt.json").read_text())
+            self.assertEqual(receipt["status"], "failed")
+            self.assertNotIn("allowed_driver_warnings", receipt)
+            self.assertTrue((root / "project").is_dir())
+
     def test_changed_owner_prevents_all_scratch_cleanup(self):
         with tempfile.TemporaryDirectory() as temporary:
             root, tools, godot, sibling, config = self.fixture(temporary)

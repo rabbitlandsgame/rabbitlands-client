@@ -18,9 +18,11 @@ TOOLS = Path(__file__).resolve().parent
 SCRIPTS = ("release_graphics_probe.gd", "probe_release_software_graphics.gd")
 MAX_LOG_BYTES = 4 * 1024**2
 ANSI = re.compile(r"\x1b\[[0-?]*[ -/]*[@-~]")
-ERROR = re.compile(r"(?m)^(?:USER )?(?:SCRIPT ERROR:|SHADER ERROR:|ERROR:|FATAL(?: ERROR)?:|WARNING:)|"
+ERROR = re.compile(r"(?m)^(?:USER )?(?:SCRIPT ERROR:|SHADER ERROR:|WARNING:|ERROR:|FATAL(?: ERROR)?:)|"
                    r"ObjectDB instances (?:were )?leaked|RID allocations.*leaked|"
                    r"Resources still in use at exit|Pages in use exist at exit|Leaked instance")
+LINUX_VSYNC_WARNING = ("WARNING: Could not set V-Sync mode, as changing V-Sync mode "
+                       "is not supported by the graphics driver.")
 PRIVATE_ENV = frozenset(("GH_TOKEN", "GITHUB_TOKEN", "CLIENT_UPDATE_SIGNING_KEY", "ACTIONS_ID_TOKEN_REQUEST_TOKEN"))
 
 
@@ -142,11 +144,24 @@ def run_preflight(config, godot, root, check_budget):
         _write(root / "receipt.json", receipt)
         if child.returncode != 0:
             raise ValueError("Standalone graphics preflight failed; see " + str(root / "launch.log"))
-        for path in (root / "launch.log", root / "engine.log"):
-            if path.is_file() and ERROR.search(ANSI.sub("", path.read_text(encoding="utf-8-sig", errors="replace"))):
-                raise ValueError("Engine diagnostic in standalone graphics preflight: " + str(path))
         receipt["verification"] = graphics.validate_preflight_report(config, report,
             project=project, user_directory=user_directory, godot=godot)
+        # Only a fully qualified Linux GL probe may ignore this exact driver
+        # limitation. Preserve the original logs and explicitly receipt it;
+        # all other warnings, errors and resource leaks still reject the run.
+        allowed_warnings = set()
+        for path in (root / "launch.log", root / "engine.log"):
+            if not path.is_file():
+                continue
+            lines = ANSI.sub("", path.read_text(encoding="utf-8-sig", errors="replace")).splitlines()
+            if (config["platform"] == "linux" and config["rendering_method"] == "gl_compatibility"
+                    and config["rendering_driver"] == "opengl3"):
+                if LINUX_VSYNC_WARNING in lines:
+                    allowed_warnings.add(LINUX_VSYNC_WARNING)
+                    lines = [line for line in lines if line != LINUX_VSYNC_WARNING]
+            if ERROR.search("\n".join(lines)):
+                raise ValueError("Engine diagnostic in standalone graphics preflight: " + str(path))
+        receipt["allowed_driver_warnings"] = sorted(allowed_warnings)
         # Only scratch made by this call is disposable. Preserve all diagnostic
         # files and the verified report while reclaiming generated shaders.
         if json.loads((root / "owner.json").read_text()) != owner:
