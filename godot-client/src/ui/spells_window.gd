@@ -1,6 +1,7 @@
 extends Control
 ## Compact action library. The server remains authoritative for costs and use.
 const UI := preload("res://src/ui/action_book_ui.gd")
+const TextColors := preload("res://src/ui/text_colors.gd")
 const TechniquesPanel := preload("res://src/ui/techniques_panel.gd")
 const PANEL_SIZE := Vector2(716, 636)
 const RESERVED_RIGHT_RAIL := 96.0
@@ -27,8 +28,6 @@ const EFFECT_GROUPS := {
 ## EL dims what you cannot cast rather than hiding it, so it can still be
 ## clicked and read.
 const BLOCKED_ALPHA := 0.45
-const BLOCKED_COLOR := Color(1.0, 0.36, 0.36)
-const CASTABLE_COLOR := Color(0.85, 1.0, 0.85)
 const ICON_SIZE := Vector2(36.0, 36.0)
 const TARGET_COLUMNS: Array[String] = ["self", "target", "allies", "burst"]
 const EFFECT_COLUMN_WIDTH := 148.0
@@ -330,7 +329,7 @@ func _on_spell_pressed(id: int) -> void:
 
 func _set_status(text: String, ready: bool) -> void:
 	status_label.text = ("✓ " if ready else "× ") + text
-	status_label.add_theme_color_override("font_color", UI.GOOD if ready else UI.BAD)
+	TextColors.bind(status_label, "spell_ready" if ready else "spell_blocked")
 	cast_button.disabled = not ready
 
 func _refresh_details() -> void:
@@ -350,7 +349,7 @@ func _refresh_details() -> void:
 		return
 	var definition := catalog.spell(selected_spell_id)
 	name_label.text = str(definition.name)
-	name_label.add_theme_color_override("font_color", UI.TEXT)
+	TextColors.bind(name_label, "spell_text")
 	selected_icon.texture = catalog.icon_for(selected_spell_id)
 	description_label.text = str(definition.get("description", ""))
 	description_label.tooltip_text = description_label.text
@@ -368,7 +367,7 @@ func _refresh_details() -> void:
 	var tome := catalog.knowledge_for(selected_spell_id)
 	var known := catalog.knows(selected_spell_id, AppState.known_knowledge)
 	knowledge_label.text = tome if not tome.is_empty() else "Every mage knows this"
-	knowledge_label.add_theme_color_override("font_color", UI.GOOD if known else UI.BAD)
+	TextColors.bind(knowledge_label, "spell_ready" if known else "spell_blocked")
 	knowledge_label.tooltip_text = "Known" if known else "Read this tome to learn the spell."
 	# Passed level/knowledge checks stay available in the tooltip; the chosen
 	# design prioritizes consumables over repeating satisfied prerequisites.
@@ -390,7 +389,7 @@ func _refresh_details() -> void:
 		if token != _quote_request:
 			_quote_request = token
 			status_label.text = "Checking cost and requirements…"
-			status_label.add_theme_color_override("font_color", UI.MUTED)
+			TextColors.bind(status_label, "spell_muted")
 			cast_button.disabled = true
 			Network.magic_request({"op": "preview", "id": selected_spell_id, "power": requested_power})
 		elif not _last_quote.is_empty():
@@ -472,7 +471,7 @@ func _populate() -> void:
 		section.name = group + "Spells"
 		section.add_theme_constant_override("separation", 2)
 		var title := UI.label(group, 13)
-		title.add_theme_color_override("font_color", UI.GOLD)
+		TextColors.bind(title, "book_heading")
 		section.add_child(title)
 		_grid_groups.add_child(section)
 		_groups[group] = section
@@ -591,7 +590,7 @@ func _build() -> void:
 	_grid_headings.add_theme_constant_override("margin_right", int(_content_scroll.get_v_scroll_bar().get_combined_minimum_size().x))
 	_build_details()
 	var hint := UI.label("Select to inspect · Drag to a quick slot", 12, true)
-	hint.add_theme_color_override("font_color", UI.MUTED)
+	TextColors.bind(hint, "book_muted")
 	_magic_page.add_child(hint)
 	techniques_panel = TechniquesPanel.new()
 	techniques_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -640,9 +639,11 @@ func _build_details() -> void:
 	description_label = UI.label("", 13, true)
 	description_label.max_lines_visible = 3
 	description_label.name = "SpellDescription"
+	TextColors.bind(description_label, "spell_text")
 	info.add_child(description_label)
 	numbers_label = UI.label("", 13, true)
 	numbers_label.name = "SpellNumbers"
+	TextColors.bind(numbers_label, "spell_cost")
 	info.add_child(numbers_label)
 	requirements_rows = VBoxContainer.new()
 	info.add_child(requirements_rows)

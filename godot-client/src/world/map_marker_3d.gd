@@ -2,6 +2,7 @@ class_name MapMarker3D
 extends Node3D
 const WORLD_LABEL_STYLE := preload("res://src/ui/world_label_style.gd")
 const SPELL_MATERIALS = preload("res://src/world/spell_visual_material.gd")
+const TextColors := preload("res://src/ui/text_colors.gd")
 ## A navigation marker on the map and in the gameplay viewport. The world
 ## effect is a green ground glow, rising sparks and a floating label; the
 ## full map keeps its larger gold pin. Personal annotations use the same
@@ -165,6 +166,7 @@ func _build_world_visual() -> void:
 	_world_label.fixed_size = true
 	# Match the actor labels' pixel calibration for the 50-degree game camera.
 	WORLD_LABEL_STYLE.apply(_world_label, 16, 0.0012953, 5)
+	TextColors.bind_property(_world_label, "map_marker", "modulate")
 	_world_label.no_depth_test = true
 	_world_label.layers = WORLD_LABEL_STYLE.RENDER_LAYER
 	_world_label.visibility_range_end = WORLD_RANGE

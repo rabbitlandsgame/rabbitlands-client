@@ -1,5 +1,6 @@
 class_name ClassicTitle
 extends HBoxContainer
+const TextColors := preload("res://src/ui/text_colors.gd")
 
 var title: Label
 
@@ -10,7 +11,7 @@ func _init(caption: String = "") -> void:
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	title.add_theme_color_override("font_color", Color("e9bd83"))
+	TextColors.bind(title, "ui_heading")
 	add_child(title)
 	resized.connect(queue_redraw)
 

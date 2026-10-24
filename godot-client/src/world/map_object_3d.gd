@@ -1,6 +1,7 @@
 class_name MapObject3D
 extends StaticBody3D
 const WORLD_LABEL_STYLE := preload("res://src/ui/world_label_style.gd")
+const TextColors := preload("res://src/ui/text_colors.gd")
 const STORAGE_GLOW_SHADER := preload("res://src/world/storage_glow.gdshader")
 const SPELL_MATERIALS := preload("res://src/world/spell_visual_material.gd")
 ## A clickable world object: a harvest node or an interactive.
@@ -490,7 +491,7 @@ func _build_visual(catalog: Dictionary) -> void:
 		title.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 		title.fixed_size = true
 		WORLD_LABEL_STYLE.apply(title, 15, .0012953, 5)
-		title.modulate = PORTAL_COLOUR
+		TextColors.bind_property(title, "world_entrance", "modulate")
 		title.no_depth_test = true
 		title.layers = WORLD_LABEL_STYLE.RENDER_LAYER
 		title.visibility_range_end = 80
@@ -503,7 +504,7 @@ func _build_visual(catalog: Dictionary) -> void:
 		title.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 		title.fixed_size = true
 		WORLD_LABEL_STYLE.apply(title, 16, .0012953, 5)
-		title.modulate = STORAGE_COLOUR.lightened(.3)
+		TextColors.bind_property(title, "world_storage", "modulate")
 		title.no_depth_test = true
 		title.layers = WORLD_LABEL_STYLE.RENDER_LAYER
 		title.visibility_range_end = 80
@@ -518,7 +519,7 @@ func _build_visual(catalog: Dictionary) -> void:
 		title.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 		title.fixed_size = true
 		WORLD_LABEL_STYLE.apply(title,14,.0012953,5)
-		title.modulate = HARVEST_COLOUR
+		TextColors.bind_property(title, "world_resource", "modulate")
 		title.layers = WORLD_LABEL_STYLE.RENDER_LAYER
 		title.visibility_range_end = 35
 		add_child(title)
@@ -551,7 +552,7 @@ func _add_storage_visual(height: float) -> void:
 	title.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	title.fixed_size = true
 	WORLD_LABEL_STYLE.apply(title, 16, 0.0012953, 5)
-	title.modulate = STORAGE_COLOUR.lightened(0.3)
+	TextColors.bind_property(title, "world_storage", "modulate")
 	title.no_depth_test = true
 	title.layers = WORLD_LABEL_STYLE.RENDER_LAYER
 	title.visibility_range_end = STORAGE_WORLD_RANGE

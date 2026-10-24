@@ -1,5 +1,6 @@
 class_name EncyclopediaView
 extends VBoxContainer
+const TextColors := preload("res://src/ui/text_colors.gd")
 ## The Eloria encyclopedia, laid out the way Eternal Lands lays its own out:
 ## an index of categories, a page of links per category, and a page per entry
 ## with a Back To Index link at the foot of it.
@@ -108,6 +109,7 @@ func _ready() -> void:
 	_load_document()
 	_rebuild_content()
 	reset_to_index()
+	TextColors.events().changed.connect(_on_text_colors_changed)
 
 ## The catalogues the generated half is built from. They are configured after
 ## this window exists, so the content is built twice: once from the written
@@ -639,7 +641,7 @@ func _render() -> void:
 
 func _render_index() -> String:
 	var lines: Array[String] = [_title_block("")]
-	lines.append("[color=%s]%s[/color]\n" % [NOTE_COLOUR,
+	lines.append("[color=%s]%s[/color]\n" % [_text_color("encyclopedia_note"),
 		_escape(str(_document.get("note", "")))])
 	var cells: Array[String] = []
 	for category: Dictionary in _categories:
@@ -654,7 +656,7 @@ func _render_category(category: Dictionary, page_number: int, pages: int) -> Str
 	var lines: Array[String] = [_title_block(str(category.get("title", "")).to_upper())]
 	var intro: String = str(category.get("intro", ""))
 	if not intro.is_empty():
-		lines.append("[color=%s]%s[/color]\n" % [NOTE_COLOUR, _escape(intro)])
+		lines.append("[color=%s]%s[/color]\n" % [_text_color("encyclopedia_note"), _escape(intro)])
 	var entries: Array = category.get("entries", []) as Array
 	if entries.is_empty():
 		lines.append("[i]Nothing here yet. This category is filled from a"
@@ -673,7 +675,7 @@ func _render_category(category: Dictionary, page_number: int, pages: int) -> Str
 	lines.append("[table=2]%s[/table]" % "".join(cells))
 	if pages > 1:
 		lines.append("\n[color=%s]%d entries over %d pages.[/color]" % [
-			NOTE_COLOUR, entries.size(), pages])
+			_text_color("encyclopedia_note"), entries.size(), pages])
 	return "\n".join(lines)
 
 func _render_entry(category_id: String, entry_id: String) -> String:
@@ -684,16 +686,16 @@ func _render_entry(category_id: String, entry_id: String) -> String:
 	var lines: Array[String] = [_title_block(str(category.get("title", "")).to_upper())]
 	var image: Dictionary = entry.get("image", {}) as Dictionary
 	lines.append("[center]%s[color=%s][b]%s[/b][/color][/center]\n" % [
-		_image_tag(image, 40), HEADING_COLOUR, _escape(str(entry.get("title", "")))])
+		_image_tag(image, 40), _text_color("encyclopedia_heading"), _escape(str(entry.get("title", "")))])
 	var summary: String = str(entry.get("summary", ""))
 	if not summary.is_empty():
-		lines.append("[color=%s][i]%s[/i][/color]\n" % [NOTE_COLOUR, _escape(summary)])
+		lines.append("[color=%s][i]%s[/i][/color]\n" % [_text_color("encyclopedia_note"), _escape(summary)])
 	for paragraph: String in str(entry.get("body", "")).split("\n\n", false):
 		lines.append(_escape(paragraph) + "\n")
 	var facts: Array = entry.get("facts", []) as Array
 	for fact_value: Variant in facts:
 		var fact: Array = fact_value as Array
-		var label: String = "[color=%s]%s:[/color]" % [FACT_COLOUR,
+		var label: String = "[color=%s]%s:[/color]" % [_text_color("encyclopedia_fact"),
 			_escape(str(fact[0]))]
 		var text: String = str(fact[1])
 		if text.contains("\n"):
@@ -712,7 +714,7 @@ func _render_bookmarks() -> String:
 	var lines: Array[String] = [_title_block("BOOKMARKS")]
 	if _bookmarks.is_empty():
 		lines.append("[color=%s]Nothing kept yet. Right-click a page to keep it.[/color]"
-			% NOTE_COLOUR)
+			% _text_color("encyclopedia_note"))
 		return "\n".join(lines)
 	for raw: Variant in _bookmarks:
 		var mark: Dictionary = raw as Dictionary
@@ -722,27 +724,27 @@ func _render_bookmarks() -> String:
 func _render_search(query: String) -> String:
 	var lines: Array[String] = [_title_block("SEARCH")]
 	var found: Array[Dictionary] = matches(query)
-	lines.append("[color=%s]%d %s for \"%s\".[/color]\n" % [NOTE_COLOUR, found.size(),
+	lines.append("[color=%s]%d %s for \"%s\".[/color]\n" % [_text_color("encyclopedia_note"), found.size(),
 		"page" if found.size() == 1 else "pages", _escape(query)])
 	for entry: Dictionary in found:
 		var category: Dictionary = _category(str(entry.get("category", "")))
 		lines.append("%s  [color=%s]- in %s[/color]" % [
 			_link("entry:%s:%s" % [str(entry.get("category", "")),
 				str(entry.get("id", ""))], str(entry.get("title", ""))),
-			NOTE_COLOUR, _escape(str(category.get("title", "")))])
+			_text_color("encyclopedia_note"), _escape(str(category.get("title", "")))])
 	if found.is_empty():
 		lines.append("[i]Nothing here says that.[/i]")
 	return "\n".join(lines)
 
 func _title_block(subtitle: String) -> String:
-	var block: String = "[center][color=%s]%s[/color]" % [HEADING_COLOUR,
+	var block: String = "[center][color=%s]%s[/color]" % [_text_color("encyclopedia_heading"),
 		_escape(str(_document.get("title", "The Rabbit Lands Encyclopedia")))]
 	if not subtitle.is_empty():
-		block += "\n[color=%s]%s[/color]" % [HEADING_COLOUR, _escape(subtitle)]
+		block += "\n[color=%s]%s[/color]" % [_text_color("encyclopedia_heading"), _escape(subtitle)]
 	return block + "[/center]\n"
 
 func _link(meta: String, text: String) -> String:
-	return "[url=%s][color=%s]%s[/color][/url]" % [meta, LINK_COLOUR, _escape(text)]
+	return "[url=%s][color=%s]%s[/color][/url]" % [meta, _text_color("encyclopedia_link"), _escape(text)]
 
 ## bbcode takes an atlas as a path and a rectangle, never as a texture, which
 ## is why ItemAtlas and SpellCatalog hand out their sources as well as their
@@ -864,6 +866,7 @@ func _build() -> void:
 	entry_body = RichTextLabel.new()
 	entry_body.name = "EntryBody"
 	entry_body.bbcode_enabled = true
+	TextColors.bind(entry_body, "encyclopedia_text", "default_color")
 	entry_body.fit_content = true
 	entry_body.selection_enabled = true
 	entry_body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -891,6 +894,7 @@ func _build() -> void:
 	status_line.name = "EncyclopediaStatus"
 	status_line.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	status_line.text = "Right-click for search and bookmark options"
+	TextColors.bind(status_line, "encyclopedia_note")
 	status_line.modulate = Color(1, 1, 1, 0.55)
 	shell.add_child(status_line)
 
@@ -903,7 +907,7 @@ static func _shell_heading(text: String) -> Label:
 	var label := Label.new()
 	label.name = "Heading"
 	label.text = text
-	label.add_theme_color_override("font_color", Color(0.91, 0.71, 0.32))
+	TextColors.bind(label, "encyclopedia_heading")
 	return label
 
 func _navigation_button(node_name: String, label: String, tooltip: String) -> Button:
@@ -972,7 +976,7 @@ func _render_entry_page(category_id: String, entry_id: String) -> void:
 	title.text = str(entry.get("title", ""))
 	title.add_theme_font_size_override("font_size", TITLE_FONT_SIZE)
 	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	title.add_theme_color_override("font_color", Color(0.91, 0.71, 0.32))
+	TextColors.bind(title, "encyclopedia_heading")
 	entry_page.add_child(title)
 	entry_page.add_child(_breadcrumbs(category, entry))
 	var summary: String = str(entry.get("summary", ""))
@@ -1018,6 +1022,9 @@ func _add_anchor(title: String) -> void:
 ## A button in a side pane: left-aligned, and cut short with an ellipsis rather
 ## than widening the pane it sits in.
 static func _fit_to_pane(button: Button) -> void:
+	TextColors.bind(button, "encyclopedia_link")
+	TextColors.bind(button, "encyclopedia_link_hover", "font_hover_color")
+	TextColors.bind(button, "encyclopedia_link_hover", "font_hover_pressed_color")
 	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	button.clip_text = true
 	button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
@@ -1033,6 +1040,8 @@ func _breadcrumbs(category: Dictionary, entry: Dictionary) -> Control:
 	row.name = "Breadcrumbs"
 	var root := Button.new()
 	root.name = "CrumbIndex"
+	TextColors.bind(root, "encyclopedia_link")
+	TextColors.bind(root, "encyclopedia_link_hover", "font_hover_color")
 	root.text = "Encyclopedia"
 	root.flat = true
 	root.focus_mode = Control.FOCUS_NONE
@@ -1044,6 +1053,8 @@ func _breadcrumbs(category: Dictionary, entry: Dictionary) -> Control:
 	row.add_child(separator)
 	var here := Button.new()
 	here.name = "CrumbCategory"
+	TextColors.bind(here, "encyclopedia_link")
+	TextColors.bind(here, "encyclopedia_link_hover", "font_hover_color")
 	here.text = str(category.get("title", ""))
 	here.flat = true
 	here.focus_mode = Control.FOCUS_NONE
@@ -1070,6 +1081,7 @@ func _fact_table(rows: Array) -> Control:
 		line.add_child(icon)
 		var label := Label.new()
 		label.name = "Label"
+		TextColors.bind(label, "encyclopedia_fact")
 		label.text = str(pair[0])
 		label.custom_minimum_size = Vector2(FACT_LABEL_WIDTH, 0)
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -1080,6 +1092,7 @@ func _fact_table(rows: Array) -> Control:
 		var value := RichTextLabel.new()
 		value.name = "Value"
 		value.bbcode_enabled = true
+		TextColors.bind(value, "encyclopedia_text", "default_color")
 		value.fit_content = true
 		value.scroll_active = false
 		value.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -1093,6 +1106,7 @@ func _fact_table(rows: Array) -> Control:
 static func _shell_body(text: String) -> Label:
 	var label := Label.new()
 	label.name = "Body"
+	TextColors.bind(label, "encyclopedia_text")
 	label.text = text
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -1101,6 +1115,7 @@ static func _shell_body(text: String) -> Label:
 static func _shell_note(text: String) -> Label:
 	var label := _shell_body(text)
 	label.name = "Note"
+	TextColors.bind(label, "encyclopedia_note")
 	label.modulate = Color(1, 1, 1, 0.72)
 	return label
 
@@ -1243,3 +1258,13 @@ func remove_bookmark(key: String) -> void:
 		return
 	_bookmarks.remove_at(index)
 	bookmarks_changed.emit(bookmarks())
+
+static func _text_color(role: String) -> String:
+	return "#" + TextColors.color(role).to_html(false)
+
+func _on_text_colors_changed(role: String) -> void:
+	if role.is_empty() or role.begins_with("encyclopedia_"):
+		var scroll := content_scroll.scroll_vertical if content_scroll != null else 0
+		_render()
+		if content_scroll != null:
+			content_scroll.scroll_vertical = scroll

@@ -14,6 +14,7 @@ const ResizeSnap := preload("res://src/ui/hud_resize_snap.gd")
 const MinimapLabels := preload("res://src/ui/hud_minimap_labels.gd")
 const ClockFace := preload("res://src/ui/hud_clock_face.gd")
 const FrameOverlay := preload("res://src/ui/hud_frame_overlay.gd")
+const TextColors := preload("res://src/ui/text_colors.gd")
 const SWITCHES := {"skills": "side_stats", "clock": "analog_clock", "status": "indicators",
 	"timer": "hud_timer", "research": "knowledge_bar", "fps": "show_fps"}
 var model := Presets.new()
@@ -1100,6 +1101,8 @@ func change_part(key: String, field: String, value: Variant) -> void:
 		if field != "columns": model.working.parts[key].columns = 0
 	_capture_positions()
 	model.working.parts[key][field] = value
+	if field == "text_color":
+		model.working.parts[key].text_color_custom = true
 	if field == "frame_style":
 		model.working.parts[key].show_background = value != "floating"
 		model.working.parts[key].show_border = value != "floating"
@@ -1404,6 +1407,14 @@ func cancel_edit() -> void:
 	_resizing = false
 	queue_redraw()
 
+## Canvas-drawn components receive resolved colors without writing the runtime
+## projection into the player's saved component preferences.
+func _text_config(key: String, role: String) -> Dictionary:
+	var config: Dictionary = model.working.parts[key].duplicate(true)
+	if not bool(config.get("text_color_custom", false)):
+		config.text_color = TextColors.color(role)
+	return config
+
 func apply_layout() -> void:
 	if not ready_to_layout: return
 	_applying = true
@@ -1451,7 +1462,7 @@ func apply_layout() -> void:
 	main._hud_element_options.analog_clock = clock.enabled and clock.clock_mode != "digital"
 	main._hud_element_options.digital_clock = clock.enabled and clock.clock_mode != "dial"
 	main._apply_hud_element_options()
-	clock_art.configure(main, model.working.parts.clock, legacy)
+	clock_art.configure(main, _text_config("clock", "hud_detail"), legacy)
 	for field: String in model.working.banner_options:
 		if main._banner_option_boxes.has(field): main._banner_option_boxes[field].set_pressed_no_signal(model.working.banner_options[field])
 	main._apply_banner_options()
@@ -1462,11 +1473,11 @@ func apply_layout() -> void:
 	main.bottom_meters.visible = bool(model.working.parts.resources.enabled)
 	modern_resources.visible = not legacy and bool(model.working.parts.resources.enabled)
 	(containers.resources as Control).hide()
-	if not legacy: modern_resources.configure(main, model.working.parts.resources, model.working.resource_colors)
+	if not legacy: modern_resources.configure(main, _text_config("resources", "hud_meter"), model.working.resource_colors)
 	for key: String in ["food_meter", "load_meter", "xp_meter", "player_card"]:
-		parts[key].configure(main, model.working.parts[key], model.working.resource_colors)
-	target_card.configure(main, model.working.parts.target, model.working.resource_colors)
-	var summary_config: Dictionary = model.working.parts.party.duplicate(true)
+		parts[key].configure(main, _text_config(key, "hud_detail" if key == "player_card" else "hud_meter"), model.working.resource_colors)
+	target_card.configure(main, _text_config("target", "hud_detail"), model.working.resource_colors)
+	var summary_config: Dictionary = _text_config("party", "hud_detail")
 	summary_config.show_background = false
 	summary_config.show_border = false
 	party_summary.configure(main, summary_config, model.working.resource_colors)
@@ -1497,8 +1508,8 @@ func apply_layout() -> void:
 	if not legacy:
 		main._minimap_shape = "round" if model.working.parts.minimap.frame_shape == "circle" else model.working.parts.minimap.map_shape
 		main._apply_minimap_shape()
-		modern_compass.configure(main, model.working.parts.compass)
-		(parts.medallion as Control).configure(model.working.parts.medallion)
+		modern_compass.configure(main, _text_config("compass", "hud_detail"))
+		(parts.medallion as Control).configure(_text_config("medallion", "hud_detail"))
 	main._request_map_redraw()
 	for key: String in Presets.PARTS:
 		if key in ["chat", "system_chat", "spells", "resources", "compass", "objectives"]: continue
@@ -1537,7 +1548,12 @@ func apply_layout() -> void:
 		main._fit_hud_action_buttons()
 		for key: String in ["chat", "system_chat"]: _tint_text(parts[key], Color.WHITE, true)
 		for node: Control in _original_colors:
-			if is_instance_valid(node): _restore_text(node)
+			if is_instance_valid(node):
+				node.remove_meta("hud_text_color_override")
+				var field: String = _original_colors[node].field
+				var roles: Dictionary = node.get_meta("text_color_roles", {})
+				if roles.has(field): TextColors.bind(node, str(roles[field]), field)
+				else: _restore_text(node)
 	else:
 		main.casting_bar.workspace_layout = model.working.parts.spells.duplicate(true)
 		main.casting_bar.horizontal = model.working.parts.spells.orientation == "horizontal"
@@ -1608,15 +1624,23 @@ func _style_part(key: String) -> void:
 		var parchment: PanelContainer = control.get_node("TrackerParchment")
 		parchment.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
 		(parchment.get_node("ParchmentTexture") as PanelContainer).add_theme_stylebox_override("panel", StyleBoxEmpty.new())
-	_tint_text(control, config.text_color)
+	_tint_text(control, config.text_color, not bool(config.get("text_color_custom", false)))
 
 func _tint_text(control: Control, color: Color, restore := false) -> void:
 	if control is Label or control is RichTextLabel or control is LineEdit or control is Button:
 		var field := "default_color" if control is RichTextLabel else "font_color"
 		if not _original_colors.has(control):
 			_original_colors[control] = {"field":field, "override":control.has_theme_color_override(field), "color":control.get_theme_color(field)}
-		if restore: _restore_text(control)
-		else: control.add_theme_color_override(field, color)
+		if restore:
+			control.remove_meta("hud_text_color_override")
+			var roles: Dictionary = control.get_meta("text_color_roles", {})
+			if roles.has(field):
+				TextColors.bind(control, str(roles[field]), field)
+			else:
+				_restore_text(control)
+		else:
+			control.set_meta("hud_text_color_override", color)
+			control.add_theme_color_override(field, color)
 	for child: Node in control.get_children():
 		if child is Control: _tint_text(child, color, restore)
 

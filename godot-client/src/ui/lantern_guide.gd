@@ -1,4 +1,5 @@
 extends Control
+const TextColors := preload("res://src/ui/text_colors.gd")
 ## This overlay teaches the existing UI. It cannot perform gameplay actions
 ## or locally advance a quest. Tracking changes only its presentation; skipping
 ## or leaving still requires the server's existing prompt.
@@ -45,7 +46,7 @@ func configure(owner_ui: Control) -> void:
 	body.add_theme_constant_override("separation", 8)
 	card.add_child(body)
 	chapter = Label.new()
-	chapter.add_theme_color_override("font_color", Color("f2c978"))
+	TextColors.bind(chapter, "guide_heading")
 	chapter.add_theme_font_size_override("font_size", 12)
 	body.add_child(chapter)
 	heading = Label.new()

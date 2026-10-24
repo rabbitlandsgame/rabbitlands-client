@@ -49,6 +49,13 @@ func register_full_window_view(window: Control, world_surface: Control) -> void:
 	_full_window_views.append(window)
 	register(window)
 
+## A lost session leaves only its console and HUD. Hide old session windows
+## without invoking their gameplay actions or changing saved window layouts.
+func close_session_windows() -> void:
+	for window: Control in _windows:
+		if is_instance_valid(window):
+			window.hide()
+
 func decorate(window: Control, decorations: Array) -> void:
 	_decorations[window] = decorations
 	_sync_layers()

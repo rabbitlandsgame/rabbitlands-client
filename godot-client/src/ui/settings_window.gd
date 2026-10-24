@@ -14,6 +14,8 @@ extends Control
 ## autoload singletons are registered, and this reads `AppState` directly.
 
 const AudioMix := preload("res://src/audio/audio_mix.gd")
+const ChatColors := preload("res://src/ui/chat_colors.gd")
+const TextColors := preload("res://src/ui/text_colors.gd")
 const PANEL_SIZE := Vector2(960.0, 520.0)
 ## Nothing may cover the fixed resource rail down the right-hand edge.
 const RESERVED_RIGHT_RAIL := 96.0
@@ -89,6 +91,11 @@ var quality_option: OptionButton
 var graphics_restart_notice: Label
 var name_distance_slider: HSlider
 var name_distance_value: Label
+var text_color_rows: Dictionary = {}
+var text_color_group: OptionButton
+var text_color_search: LineEdit
+var text_color_notice: Label
+var _chat_palette: Dictionary = {}
 
 ## The action waiting for a key. While this is set the window swallows every
 ## key press, so a rebind cannot fire the action it is rebinding.
@@ -378,6 +385,7 @@ func _build() -> void:
 	column.add_child(tabs)
 	_build_hud()
 	_build_chat()
+	_build_text_colors()
 	_new_page("Minimap", "Minimap")
 	_new_page("Banners", "Banners")
 	_add_banner_color_controls()
@@ -477,6 +485,222 @@ func _build_chat() -> void:
 	hint.text = "Drag either header to move it; drag its corner to resize. Each layout is saved.\nThe system window returns to its saved position when you separate the feeds."
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	page.add_child(hint)
+	_add_chat_color_controls(page)
+
+func _add_chat_color_controls(page: VBoxContainer) -> void:
+	var heading := Label.new()
+	heading.text = "Text colors"
+	heading.add_theme_font_size_override("font_size", 18)
+	page.add_child(heading)
+	var hint := Label.new()
+	hint.text = "Colors apply to both feeds, the full console and closed-window previews. Server-supplied colors are preserved until you choose a custom color for that category. Reset a category to restore its default behavior. Interface and world text colors are in the Text colors tab."
+	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	page.add_child(hint)
+	var grid := GridContainer.new()
+	grid.name = "ChatColors"
+	grid.add_theme_constant_override("h_separation", 24)
+	page.add_child(grid)
+	page.resized.connect(func() -> void: grid.columns = 2 if page.size.x >= 650 else 1)
+	for key: String in ChatColors.DEFAULTS:
+		var row := HBoxContainer.new()
+		row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		grid.add_child(row)
+		var label := Label.new()
+		label.text = ChatColors.LABELS[key]
+		label.custom_minimum_size.x = 210
+		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(label)
+		var picker := ColorPickerButton.new()
+		picker.name = "chat_color_" + key
+		picker.custom_minimum_size = Vector2(72, 28)
+		picker.edit_alpha = false
+		picker.color = ChatColors.DEFAULTS[key]
+		picker.tooltip_text = "Choose the color for " + str(ChatColors.LABELS[key]).to_lower()
+		picker.color_changed.connect(func(value: Color) -> void:
+			setting_changed.emit("Chat", "chat_color_" + key, value))
+		row.add_child(picker)
+		var reset := Button.new()
+		reset.name = "chat_color_reset_" + key
+		reset.text = "Reset"
+		reset.tooltip_text = "Use the default color and preserve server text colors."
+		reset.pressed.connect(func() -> void:
+			setting_changed.emit("Chat", "chat_color_reset_" + key, true))
+		row.add_child(reset)
+	_add_channel_color_controls(page)
+	_add_button(page, "chat_colors_reset", "Reset all chat colors to defaults")
+
+func restore_chat_colors(colors: Dictionary) -> void:
+	var palette := ChatColors.normalise(colors)
+	_chat_palette = palette
+	for key: String in ChatColors.DEFAULTS:
+		restore_value("chat_color_" + key, palette[key])
+		var reset := panel.find_child("chat_color_reset_" + key, true, false) as Button
+		if reset != null:
+			reset.disabled = not ChatColors.is_overridden(palette, key)
+	_refresh_channel_color()
+
+func _add_channel_color_controls(page: VBoxContainer) -> void:
+	var heading := Label.new()
+	heading.text = "Individual numbered channels"
+	page.add_child(heading)
+	var row := HBoxContainer.new()
+	row.name = "ChannelColorControls"
+	page.add_child(row)
+	var caption := Label.new()
+	caption.text = "Channel number"
+	row.add_child(caption)
+	var number := SpinBox.new()
+	number.name = "ChatColorChannelNumber"
+	number.min_value = 1
+	number.max_value = 2147483647
+	number.step = 1
+	number.custom_minimum_size.x = 130
+	number.value_changed.connect(func(_value: float) -> void: _refresh_channel_color())
+	row.add_child(number)
+	var picker := ColorPickerButton.new()
+	picker.name = "ChatChannelColor"
+	picker.custom_minimum_size = Vector2(72, 28)
+	picker.edit_alpha = false
+	picker.color = Color.WHITE
+	picker.color_changed.connect(func(value: Color) -> void:
+		setting_changed.emit("Chat", "chat_channel_color:" + str(roundi(number.value)), value))
+	row.add_child(picker)
+	var reset := Button.new()
+	reset.name = "ChatChannelColorReset"
+	reset.text = "Reset channel"
+	reset.pressed.connect(func() -> void:
+		setting_changed.emit("Chat", "chat_channel_reset:" + str(roundi(number.value)), true))
+	row.add_child(reset)
+	var status := Label.new()
+	status.name = "ChatChannelColorStatus"
+	row.add_child(status)
+
+func _refresh_channel_color() -> void:
+	var number := panel.find_child("ChatColorChannelNumber", true, false) as SpinBox
+	if number == null:
+		return
+	var key := ChatColors.channel_override_key(roundi(number.value))
+	var custom := ChatColors.is_overridden(_chat_palette, key)
+	(panel.find_child("ChatChannelColor", true, false) as ColorPickerButton).color = _chat_palette.get(key, Color.WHITE)
+	(panel.find_child("ChatChannelColorReset", true, false) as Button).disabled = not custom
+	(panel.find_child("ChatChannelColorStatus", true, false) as Label).text = "Custom" if custom else "Server colors"
+
+## A compact, searchable color catalog keeps the large number of roles useful.
+## Picking a color immediately updates every bound surface and saves only that
+## explicit preference. HUD component and local-banner customizations still win.
+func _build_text_colors() -> void:
+	var page := _new_page("TextColors", "Text colors")
+	var hint := Label.new()
+	hint.text = "Defaults follow Eternal Lands where the games share a text role. Rabbit Lands-only text keeps its existing colors. Changes apply immediately. Your individual HUD component and player banner colors remain in HUD and Banners."
+	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	page.add_child(hint)
+	var filter := HBoxContainer.new()
+	page.add_child(filter)
+	text_color_group = OptionButton.new()
+	text_color_group.name = "TextColorGroup"
+	text_color_group.custom_minimum_size.x = 220
+	text_color_group.add_item("All areas")
+	for group: String in TextColors.GROUPS:
+		text_color_group.add_item(group)
+	text_color_group.select(1)
+	text_color_group.item_selected.connect(func(_index: int) -> void: _filter_text_colors())
+	filter.add_child(text_color_group)
+	text_color_search = LineEdit.new()
+	text_color_search.name = "TextColorSearch"
+	text_color_search.placeholder_text = "Find a text color"
+	text_color_search.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	text_color_search.text_changed.connect(func(_text: String) -> void: _filter_text_colors())
+	filter.add_child(text_color_search)
+	var reset_group := Button.new()
+	reset_group.name = "TextColorsResetGroup"
+	reset_group.text = "Reset area"
+	reset_group.pressed.connect(_reset_text_color_group)
+	filter.add_child(reset_group)
+	var grid := GridContainer.new()
+	grid.name = "TextColorRoles"
+	grid.add_theme_constant_override("h_separation", 20)
+	grid.add_theme_constant_override("v_separation", 6)
+	page.add_child(grid)
+	page.resized.connect(func() -> void: grid.columns = 2 if page.size.x >= 820 else 1)
+	for group: String in TextColors.GROUPS:
+		for role: String in TextColors.GROUPS[group]:
+			var row := HBoxContainer.new()
+			row.name = "TextColorRow_" + role
+			row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			row.set_meta("color_group", group)
+			grid.add_child(row)
+			var caption := Label.new()
+			caption.text = TextColors.label(role)
+			caption.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			caption.custom_minimum_size.x = 160
+			caption.tooltip_text = group + ": " + caption.text
+			row.add_child(caption)
+			var sample := Label.new()
+			sample.text = "Aa 123"
+			sample.custom_minimum_size.x = 55
+			TextColors.bind(sample, role)
+			row.add_child(sample)
+			var picker := ColorPickerButton.new()
+			picker.name = "text_color_" + role
+			picker.custom_minimum_size = Vector2(64, 28)
+			picker.color = TextColors.color(role)
+			picker.edit_alpha = true
+			picker.tooltip_text = "Choose " + caption.tooltip_text.to_lower()
+			picker.color_changed.connect(func(value: Color) -> void:
+				TextColors.set_color(role, value)
+				_save_text_colors()
+				setting_changed.emit("TextColors", "text_color_" + role, value))
+			row.add_child(picker)
+			var reset := Button.new()
+			reset.name = "text_color_reset_" + role
+			reset.text = "Reset"
+			reset.tooltip_text = "Restore the default for this text."
+			reset.pressed.connect(func() -> void:
+				TextColors.reset(role)
+				_save_text_colors()
+				setting_changed.emit("TextColors", "text_color_reset_" + role, true))
+			row.add_child(reset)
+			text_color_rows[role] = row
+	text_color_notice = Label.new()
+	text_color_notice.name = "TextColorsNotice"
+	text_color_notice.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	page.add_child(text_color_notice)
+	TextColors.events().changed.connect(_restore_text_colors)
+	_restore_text_colors()
+	_filter_text_colors()
+
+func _restore_text_colors(_changed: String = "") -> void:
+	for role: String in text_color_rows:
+		var row: HBoxContainer = text_color_rows[role]
+		(row.get_node("text_color_" + role) as ColorPickerButton).color = TextColors.color(role)
+		(row.get_node("text_color_reset_" + role) as Button).disabled = not TextColors.is_overridden(role)
+
+## Refreshing the shared settings window must never save or emit a change.
+func restore_text_colors() -> void:
+	_restore_text_colors()
+
+func _filter_text_colors() -> void:
+	var selected := text_color_group.get_item_text(text_color_group.selected)
+	var query := text_color_search.text.strip_edges().to_lower()
+	for role: String in text_color_rows:
+		var row: HBoxContainer = text_color_rows[role]
+		var group := str(row.get_meta("color_group"))
+		row.visible = (text_color_group.selected == 0 or group == selected) and (query.is_empty()
+			or (group + " " + TextColors.label(role) + " " + role).to_lower().contains(query))
+
+func _reset_text_color_group() -> void:
+	var selected := text_color_group.get_item_text(text_color_group.selected)
+	if text_color_group.selected == 0:
+		TextColors.reset()
+	else:
+		for role: String in TextColors.GROUPS[selected]:
+			TextColors.reset(role)
+	_save_text_colors()
+	setting_changed.emit("TextColors", "text_colors_reset", selected)
+
+func _save_text_colors() -> void:
+	var error := TextColors.save_colors()
+	text_color_notice.text = "" if error == OK else "Could not save text colors: " + error_string(error)
 
 func _build_graphics() -> void:
 	var page := _new_page("Graphics", tr("ELORIA_SETTINGS_GRAPHICS"))

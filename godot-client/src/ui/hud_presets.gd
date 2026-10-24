@@ -244,7 +244,7 @@ static func _preset_recipe(id: String) -> Dictionary:
 		value.parts[key] = {"enabled": key != "medallion", "anchor": "original",
 			"offset": Vector2.ZERO, "position": Vector2(0.5, 0.5), "scale": 1.0, "axis_scale":Vector2.ONE,
 			"orientation": "horizontal", "rows": 1, "columns": 0, "grid_mode": "fixed", "style": id, "slots": 6, "dimensions": Vector2.ZERO,
-			"background_color": Color("241e15ed"), "border_color": Color("aa8d50"), "text_color": Color("eee3c8"),
+			"background_color": Color("241e15ed"), "border_color": Color("aa8d50"), "text_color": Color.WHITE, "text_color_custom": false,
 			"dock_target": "none", "dock_side": "right", "dock_gap": 0.0, "dock_align":"center", "dock_offset":Vector2.ZERO, "extend_to_edge":false, "edge_dock":"none",
 			"compass_mode": "round", "map_shape": "square", "map_palette": "natural", "load_display": "free", "center_resource": "health",
 			"center_color": RESOURCE_COLORS.health, "border_design": "plain", "arcs": default_arcs(),
@@ -665,6 +665,10 @@ static func normalise(raw: Variant) -> Dictionary:
 			var input: Variant = parts.get(key, {})
 			if not input is Dictionary: continue
 			var part: Dictionary = result.parts[key]
+			# Old layouts wrote the factory cream into every component. Preserve
+			# other saved tints as deliberate choices; new defaults use roles.
+			part.text_color_custom = bool(input.get("text_color_custom",
+				input.get("text_color", Color("eee3c8")) != Color("eee3c8")))
 			part.enabled = input.get("enabled", part.enabled) == true
 			part.anchor = input.get("anchor", "original") if input.get("anchor", "original") in ANCHORS else "original"
 			part.style = input.get("style", DEFAULT_PRESET) if input.get("style", DEFAULT_PRESET) in STYLES else DEFAULT_PRESET

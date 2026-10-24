@@ -1,4 +1,5 @@
 extends Control
+const TextColors := preload("res://src/ui/text_colors.gd")
 ## The nine Eloria extension windows, built here rather than in main.gd.
 ##
 ## Each is driven by one server-push state packet and renders that snapshot and
@@ -36,9 +37,6 @@ const QUEST_STONE_RAISED := Color(0.205, 0.18, 0.145, 1.0)
 const QUEST_BRASS := Color(0.72, 0.54, 0.23, 1.0)
 const QUEST_BRASS_BRIGHT := Color(0.96, 0.77, 0.26, 1.0)
 const QUEST_PARCHMENT_DARK := Color(0.34, 0.20, 0.08, 1.0)
-const QUEST_INK := Color(0.17, 0.105, 0.055, 1.0)
-const QUEST_WARM_TEXT := Color(0.96, 0.93, 0.84, 1.0)
-const QUEST_MUTED_TEXT := Color(0.68, 0.62, 0.52, 1.0)
 const QUEST_BURGUNDY := Color(0.45, 0.075, 0.045, 1.0)
 const QUEST_BURGUNDY_HOVER := Color(0.62, 0.12, 0.065, 1.0)
 const QUEST_PARCHMENT_TEXTURE: Texture2D = preload(
@@ -62,9 +60,6 @@ const MARKET_PRICE_LIMIT := 2000000000
 const MARKET_REQUEST_MSEC := 4000
 ## A week, out of the 365 days a listing runs.
 const MARKET_EXPIRING_SECONDS := 7 * 86400
-const MARKET_EXPIRING_COLOUR := Color("e0a14a")
-const MARKET_DONE_COLOUR := Color("9fd88f")
-const MARKET_REFUSED_COLOUR := Color("f08a6a")
 
 signal combat_hud_preference_changed()
 
@@ -238,6 +233,8 @@ func _ready() -> void:
 	if item_atlas != null: gauntlet_loot_window.configure(item_atlas)
 	gauntlet_loot_window.call("_style_dialog", market_price_dialog)
 	AppState.state_changed.connect(_on_state_changed)
+	TextColors.events().changed.connect(_on_text_colors_changed)
+	_bind_party_labels(party_panel)
 	sync_all()
 
 func configure(atlas: ItemAtlas, guide: Control = null) -> void:
@@ -529,11 +526,10 @@ func _sync_quests() -> void:
 			else ("%d/%d" % [current, target] if target > 0 else "in progress"))
 		quest_list.add_item("◆  %s  [%s]" % [str(entry.get("title", "")), status])
 		var row: int = quest_list.item_count - 1
-		quest_list.set_item_custom_fg_color(row, QUEST_BRASS_BRIGHT
-			if bool(entry.get("ready", false)) else QUEST_WARM_TEXT)
+		quest_list.set_item_custom_fg_color(row, TextColors.color("quest_active"))
 	if AppState.quest_journal.is_empty():
-		quest_detail.text = ("[center][color=#7c5a34][font_size=16]"
-			+ "%s[/font_size][/color][/center]" % tr("ELORIA_QUEST_NONE"))
+		quest_detail.text = ("[center][font_size=16]"
+			+ "%s[/font_size][/center]" % tr("ELORIA_QUEST_NONE"))
 		quest_track_button.disabled = true
 		quest_track_button.text = "Track"
 		_sync_tracked_quest()
@@ -559,11 +555,11 @@ func _sync_quest_archive() -> void:
 		quest_list.add_item("✓  %s  [%s]" % [str(entry.get("title", "")),
 			str(entry.get("location", ""))])
 		quest_list.set_item_custom_fg_color(quest_list.item_count - 1,
-			QUEST_MUTED_TEXT)
+			TextColors.color("quest_completed"))
 	quest_track_button.disabled = true
 	if AppState.quest_archive.is_empty():
-		quest_detail.text = ("[center][color=#7c5a34][font_size=16]"
-			+ "You have not finished any quests yet.[/font_size][/color][/center]")
+		quest_detail.text = ("[center][font_size=16]"
+			+ "You have not finished any quests yet.[/font_size][/center]")
 		return
 	var index: int = clampi(selected, 0, AppState.quest_archive.size() - 1)
 	quest_list.select(index)
@@ -629,29 +625,29 @@ func _sync_tracked_quest() -> void:
 		return
 	var target: int = int(tracked.get("target", 0))
 	var lines: Array[String] = [
-		"[center][font_size=20][color=#8f6425][b]QUEST TRACKER[/b][/color][/font_size][/center]",
-		"[font_size=17][color=#592b18]◆  [b]%s[/b][/color][/font_size]"
+		"[center][font_size=20][color={quest_heading}][b]QUEST TRACKER[/b][/color][/font_size][/center]",
+		"[font_size=17]◆  [b]%s[/b][/font_size]"
 			% str(tracked.get("title", "")),
-		"[indent][font_size=15][color=#2b1a0e]%s[/color][/font_size][/indent]"
+		"[indent][font_size=15]%s[/font_size][/indent]"
 			% str(tracked.get("objective", ""))]
 	if bool(tracked.get("ready", false)):
-		lines.append("[indent][font_size=15][color=#946c1d][b]Ready to turn in[/b][/color]"
-			+ "[color=#5e4b35] at %s[/color][/font_size][/indent]"
+		lines.append("[indent][font_size=15][color={quest_ready}][b]Ready to turn in[/b][/color]"
+			+ " at %s[/font_size][/indent]"
 			% str(tracked.get("location", "unknown")))
 	elif target > 0:
-		lines.append(("[indent][font_size=15][color=#70491d]%d of %d[/color]"
-			+ "[color=#5e4b35]  ·  %s[/color][/font_size][/indent]") % [
+		lines.append(("[indent][font_size=15]%d of %d"
+			+ "  ·  %s[/font_size][/indent]") % [
 				int(tracked.get("current", 0)), target,
 				str(tracked.get("location", "unknown"))])
 	else:
-		lines.append("[indent][font_size=15][color=#5e4b35]%s[/color][/font_size][/indent]"
+		lines.append("[indent][font_size=15]%s[/font_size][/indent]"
 			% str(tracked.get("location", "unknown")))
 	# Let the label report its natural wrapped height for this one update. The
 	# event-driven fitter turns this back off after applying the bounded size.
 	tracked_quest.custom_minimum_size.y = QUEST_TRACKER_SIZE.y
 	tracked_quest.size.y = QUEST_TRACKER_SIZE.y
 	tracked_quest_text.fit_content = true
-	tracked_quest_text.text = "\n".join(lines)
+	tracked_quest_text.text = _quest_markup("\n".join(lines))
 	tracked_quest.show()
 	# RichTextLabel resolves wrapped line height after its container settles.
 	# Fit only when the server changes the quest, never from `_process()`.
@@ -684,12 +680,12 @@ func _show_archived_quest(index: int) -> void:
 	if index < 0 or index >= AppState.quest_archive.size():
 		return
 	var entry: Dictionary = AppState.quest_archive[index]
-	quest_detail.text = ("[font_size=22][color=#592b18][b]%s[/b][/color][/font_size]"
-		+ "\n[color=#9b682d][font_size=11][b]COMPLETED IN[/b][/font_size][/color]"
-		+ "\n[color=#2b1a0e]%s[/color]\n\n"
-		+ "[color=#9b682d][font_size=11][b]CHRONICLE[/b][/font_size][/color]"
-		+ "\n[color=#2b1a0e]%s[/color]") % [str(entry.get("title", "")),
-			str(entry.get("location", "")), str(entry.get("detail", ""))]
+	quest_detail.text = _quest_markup(("[font_size=22][color={quest_heading}][b]%s[/b][/color][/font_size]"
+		+ "\n[font_size=11][color={quest_heading}][b]COMPLETED IN[/b][/color][/font_size]"
+		+ "\n%s\n\n"
+		+ "[font_size=11][color={quest_heading}][b]CHRONICLE[/b][/color][/font_size]"
+		+ "\n%s") % [str(entry.get("title", "")),
+			str(entry.get("location", "")), str(entry.get("detail", ""))])
 
 func _show_quest(index: int) -> void:
 	if index < 0 or index >= AppState.quest_journal.size():
@@ -698,21 +694,21 @@ func _show_quest(index: int) -> void:
 	quest_track_button.text = "Untrack" if _quest_is_tracked(str(entry.get("title", ""))) else "Track"
 	var target: int = int(entry.get("target", 0))
 	var lines: Array[String] = [
-		"[font_size=22][color=#592b18][b]%s[/b][/color][/font_size]"
+		"[font_size=22][color={quest_heading}][b]%s[/b][/color][/font_size]"
 			% str(entry.get("title", "")),
-		"[color=#9b682d][font_size=11][b]QUEST OBJECTIVES[/b][/font_size][/color]",
-		"[color=#2b1a0e]◆  %s[/color]" % str(entry.get("objective", "")),
+		"[font_size=11][color={quest_heading}][b]QUEST OBJECTIVES[/b][/color][/font_size]",
+		"◆  %s" % str(entry.get("objective", "")),
 		"",
-		"[color=#9b682d][font_size=11][b]LOCATION[/b][/font_size][/color]",
-		"[color=#2b1a0e]%s[/color]" % str(entry.get("location", "unknown"))]
+		"[font_size=11][color={quest_heading}][b]LOCATION[/b][/color][/font_size]",
+		"%s" % str(entry.get("location", "unknown"))]
 	if bool(entry.get("ready", false)):
-		lines.append("\n[color=#946c1d][b]%s[/b][/color]"
+		lines.append("\n[color={quest_ready}][b]%s[/b][/color]"
 			% tr("ELORIA_QUEST_READY"))
 	elif target > 0:
-		lines.append("\n[color=#9b682d][font_size=11][b]PROGRESS[/b][/font_size][/color]")
-		lines.append("[color=#2b1a0e]%d of %d complete[/color]"
+		lines.append("\n[font_size=11][color={quest_heading}][b]PROGRESS[/b][/color][/font_size]")
+		lines.append("%d of %d complete"
 			% [int(entry.get("current", 0)), target])
-	quest_detail.text = "\n".join(lines)
+	quest_detail.text = _quest_markup("\n".join(lines))
 
 # --- mail --------------------------------------------------------------------
 
@@ -766,7 +762,7 @@ func _sync_detail() -> void:
 	if not category.is_empty():
 		lines.append(category)
 	if bool(AppState.item_detail.get("equipped", false)):
-		lines.append("[color=#8fdc8f]Equipped.[/color]")
+		lines.append("[color=#%s]Equipped.[/color]" % TextColors.color("inventory_equipped").to_html(false))
 	var quantity: int = int(AppState.item_detail.get("quantity", 0))
 	if quantity > 1:
 		lines.append("Quantity: %d" % quantity)
@@ -1016,11 +1012,11 @@ func _sync_marketplace() -> void:
 	var notice: String = str(AppState.marketplace.get("notice", ""))
 	match int(AppState.marketplace.get("notice_kind", EloriaProtocol.MARKET_NOTICE_NONE)):
 		EloriaProtocol.MARKET_NOTICE_DONE:
-			_market_status(notice, MARKET_DONE_COLOUR)
+			_market_status(notice, "market_completed")
 		EloriaProtocol.MARKET_NOTICE_REFUSED:
-			_market_status(notice, MARKET_REFUSED_COLOUR)
+			_market_status(notice, "market_refused")
 		_:
-			_market_status("", QUEST_MUTED_TEXT)
+			_market_status("", "ui_disabled")
 	if not market_search.has_focus():
 		market_search.text = str(AppState.marketplace.get("query", ""))
 	_sync_market_filters()
@@ -1099,7 +1095,7 @@ func _render_market() -> void:
 			_named_icon(int(entry.get("image_id", 0)), str(entry.get("item_name", ""))))
 		market_returns.set_item_selectable(row, false)
 		if str(entry.get("reason", "")) == "expired":
-			market_returns.set_item_custom_fg_color(row, MARKET_EXPIRING_COLOUR)
+			market_returns.set_item_custom_fg_color(row, TextColors.color("market_expiring"))
 	_sync_market_footer()
 	# A container grows to fit and never shrinks back; the window is a fixed size.
 	market_panel.size = MARKET_SIZE
@@ -1121,9 +1117,9 @@ func _add_market_row(listing: Dictionary) -> void:
 		int(listing.get("listing_id", -1)), item_name, quantity, _market_number(price),
 		_market_number(price * quantity), str(listing.get("seller", "")), _market_time_left(seconds)])
 	if seconds < MARKET_EXPIRING_SECONDS:
-		market_list.set_item_custom_fg_color(row, MARKET_EXPIRING_COLOUR)
+		market_list.set_item_custom_fg_color(row, TextColors.color("market_expiring"))
 	elif own and _market_tab == "browse":
-		market_list.set_item_custom_fg_color(row, QUEST_MUTED_TEXT)
+		market_list.set_item_custom_fg_color(row, TextColors.color("ui_disabled"))
 
 func _render_market_sales(sales: Array) -> void:
 	var selected: TreeItem = market_history.get_selected()
@@ -1399,9 +1395,9 @@ func _sync_market_footer(_text: String = "") -> void:
 	market_totals.text = "%s gc if all sell\nListed for 365 days." % _market_number(amount * unit_price)
 	market_sell.disabled = waiting or not can_trade
 
-func _market_status(text: String, colour: Color) -> void:
+func _market_status(text: String, role: String) -> void:
 	market_status.text = text
-	market_status.add_theme_color_override("font_color", colour)
+	TextColors.bind(market_status, role)
 
 ## Sends one `#auction` command. The window redraws from the state the server
 ## answers with; until then the action buttons hold off a second click.
@@ -1413,9 +1409,9 @@ func _market_send(command: String, waiting_text: String) -> void:
 		return
 	var error: Error = _market_transmit(command)
 	if error != OK:
-		_market_status("The request was not sent: " + error_string(error), MARKET_REFUSED_COLOUR)
+		_market_status("The request was not sent: " + error_string(error), "market_refused")
 		return
-	_market_status(waiting_text, QUEST_MUTED_TEXT)
+	_market_status(waiting_text, "ui_disabled")
 	# Only a version-2 server answers a refusal with a state; an older one
 	# answers in chat alone, so holding the buttons would strand them.
 	if int(AppState.marketplace.get("version", 1)) >= 2:
@@ -1501,13 +1497,13 @@ func _market_sell_command() -> String:
 
 func _on_market_tab(tab: String) -> void:
 	if tab == "sell" and not bool(AppState.marketplace.get("can_trade", false)):
-		_market_status("Visit an Exchange NPC within four tiles to list new items.", MARKET_REFUSED_COLOUR)
+		_market_status("Visit an Exchange NPC within four tiles to list new items.", "market_refused")
 		return
 	market_search.text = ""
 	if tab == "sell":
 		_market_tab = "sell"
 		market_list.deselect_all()
-		_market_status("", QUEST_MUTED_TEXT)
+		_market_status("", "ui_disabled")
 		_render_market()
 		return
 	for tab_name: String in market_tabs:
@@ -1522,10 +1518,10 @@ func _on_market_search(_text: String = "") -> void:
 		for key: String in ["min_price", "max_price"]:
 			var value: String = str(filters[key])
 			if not value.is_empty() and (not value.is_valid_int() or int(value) < 0 or int(value) > MARKET_PRICE_LIMIT):
-				_market_status("Enter whole, non-negative prices up to 2,000,000,000 gc.", MARKET_REFUSED_COLOUR)
+				_market_status("Enter whole, non-negative prices up to 2,000,000,000 gc.", "market_refused")
 				return
 		if str(filters.min_price) != "" and str(filters.max_price) != "" and int(filters.min_price) > int(filters.max_price):
-			_market_status("Minimum price cannot exceed maximum price.", MARKET_REFUSED_COLOUR)
+			_market_status("Minimum price cannot exceed maximum price.", "market_refused")
 			return
 	var view: String = _market_tab if _market_tab in ["mine", "history"] else "browse"
 	_market_send(_market_view_command(view, 0, market_search.text), "Searching…")
@@ -1701,7 +1697,7 @@ func _party_row(member: Dictionary) -> Control:
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	title.add_theme_font_size_override("font_size", 12)
-	title.add_theme_color_override("font_color", HUD_STYLE.TEXT)
+	TextColors.bind(title, "party_text")
 	header.add_child(title)
 	var where := Label.new()
 	where.name = "Standing"
@@ -1709,7 +1705,7 @@ func _party_row(member: Dictionary) -> Control:
 	if bool(member.get("is_bot", false)) and str(member.get("map_id", "")).is_empty():
 		where.text = "standby"
 	where.add_theme_font_size_override("font_size", 10)
-	where.add_theme_color_override("font_color", HUD_STYLE.MUTED)
+	TextColors.bind(where, "party_muted")
 	header.add_child(where)
 
 	var low_health := float(member.get("health", 0)) / maxf(1, float(member.get("max_health", 1))) < 0.25
@@ -1734,17 +1730,17 @@ func _party_row(member: Dictionary) -> Control:
 		remove.name = "RemoveBot"
 		remove.text = "×"
 		remove.tooltip_text = "Remove " + str(member.name)
-		HUD_STYLE.button(remove)
+		_style_party_button(remove)
 		remove.pressed.connect(func() -> void: _send_party_command("#party bot remove " + str(member.name)))
 		row.add_child(remove)
 	return row
 
-func _party_number(node_name: String, current: int, maximum: int, colour: Color, online: bool) -> Label:
+func _party_number(node_name: String, current: int, maximum: int, _colour: Color, online: bool) -> Label:
 	var number := Label.new()
 	number.name = node_name
 	number.text = "%d/%d" % [current, maximum] if online else "—/—"
 	number.add_theme_font_size_override("font_size", 11)
-	number.add_theme_color_override("font_color", colour)
+	TextColors.bind(number, "party_ether" if node_name == "EtherNumber" else "party_health_low" if float(current) / maxf(1, maximum) < 0.25 else "party_health")
 	number.visible = _party_numbers
 	return number
 
@@ -1956,7 +1952,7 @@ func _achievement_row(entry: Dictionary) -> Control:
 		var reward := Label.new()
 		reward.name = "Grants"
 		reward.text = "   grants the title \"%s\"" % granted
-		reward.modulate = Color(0.85, 0.78, 0.45, 1.0)
+		TextColors.bind(reward, "ui_bright")
 		row.add_child(reward)
 	return row
 
@@ -2184,7 +2180,7 @@ func _build() -> void:
 	quest_untrack_button.text = "×"
 	quest_untrack_button.tooltip_text = "Untrack quest. Choose Track in Quests to show it again."
 	quest_untrack_button.flat = true
-	quest_untrack_button.add_theme_color_override("font_color", QUEST_INK)
+	TextColors.bind(quest_untrack_button, "ui_button")
 	quest_untrack_button.add_theme_font_size_override("font_size", 18)
 	tracker_actions.add_child(quest_untrack_button)
 	quest_untrack_button.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
@@ -2237,21 +2233,21 @@ func _build() -> void:
 	party_body.add_theme_constant_override("separation", 5)
 	party_header = party_panel.get_node("Body/Header/Title") as Label
 	party_header.add_theme_font_size_override("font_size", 12)
-	party_header.add_theme_color_override("font_color", HUD_STYLE.TEXT)
+	TextColors.bind(party_header, "party_text")
 	party_header.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	var party_close := party_panel.get_node("Body/Header/Close") as Button
 	party_close.text = "×"
-	HUD_STYLE.button(party_close)
+	_style_party_button(party_close)
 	party_collapse = Button.new()
 	party_collapse.name = "Collapse"
-	HUD_STYLE.button(party_collapse)
+	_style_party_button(party_collapse)
 	party_collapse.pressed.connect(_toggle_party_collapsed)
 	var party_title_row := party_panel.get_node("Body/Header") as HBoxContainer
 	party_options = MenuButton.new()
 	party_options.name = "Options"
 	party_options.text = "…"
 	party_options.tooltip_text = "Party display options"
-	HUD_STYLE.button(party_options)
+	_style_party_button(party_options)
 	party_options.get_popup().add_check_item("Show health/ether numbers", 0)
 	party_options.get_popup().set_item_checked(0, _party_numbers)
 	party_options.get_popup().add_item("Reset window size", 1)
@@ -2274,13 +2270,13 @@ func _build() -> void:
 	accept.name = "PartyAccept"
 	accept.text = "Accept"
 	accept.pressed.connect(_on_party_accept)
-	HUD_STYLE.button(accept)
+	_style_party_button(accept)
 	party_invite_row.add_child(accept)
 	var decline := Button.new()
 	decline.name = "PartyDecline"
 	decline.text = "Decline"
 	decline.pressed.connect(_on_party_decline)
-	HUD_STYLE.button(decline)
+	_style_party_button(decline)
 	party_invite_row.add_child(decline)
 	party_scroll = ScrollContainer.new()
 	party_scroll.name = "PartyScroll"
@@ -2298,12 +2294,12 @@ func _build() -> void:
 	party_leave_button = Button.new()
 	party_leave_button.name = "PartyLeave"
 	party_leave_button.text = "Leave party"
-	HUD_STYLE.button(party_leave_button)
+	_style_party_button(party_leave_button)
 	party_leave_button.pressed.connect(_on_party_leave)
 	party_actions.add_child(party_leave_button)
 	party_add_bot = preload("res://src/ui/bot_class_picker.gd").new()
 	party_add_bot.name = "AddBot"
-	HUD_STYLE.button(party_add_bot)
+	_style_party_button(party_add_bot)
 	party_add_bot.class_chosen.connect(func(class_id: int) -> void: _send_party_command("#party bot add %d" % class_id))
 	party_actions.add_child(party_add_bot)
 	# Inviting needs a name, and a name needs typing; the chat command already
@@ -2425,10 +2421,10 @@ func _style_quest_button(button: Button, primary: bool) -> void:
 	button.add_theme_stylebox_override("hover_pressed", pressed)
 	button.add_theme_stylebox_override("focus", hover)
 	button.add_theme_stylebox_override("disabled", disabled)
-	button.add_theme_color_override("font_color", QUEST_WARM_TEXT)
-	button.add_theme_color_override("font_hover_color", QUEST_BRASS_BRIGHT)
-	button.add_theme_color_override("font_pressed_color", QUEST_BRASS_BRIGHT)
-	button.add_theme_color_override("font_disabled_color", QUEST_MUTED_TEXT)
+	TextColors.bind(button, "ui_button", "font_color")
+	TextColors.bind(button, "ui_hover", "font_hover_color")
+	TextColors.bind(button, "ui_pressed", "font_pressed_color")
+	TextColors.bind(button, "ui_disabled", "font_disabled_color")
 	button.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.9))
 	button.add_theme_constant_override("outline_size", 2)
 	button.custom_minimum_size.y = maxf(button.custom_minimum_size.y, 38.0)
@@ -2445,12 +2441,12 @@ func _style_quest_journal(quest_views: HBoxContainer,
 	var header := body.get_node("Header") as HBoxContainer
 	header.add_theme_constant_override("separation", 10)
 	var title := header.get_node("Title") as Label
-	title.add_theme_color_override("font_color", QUEST_BRASS_BRIGHT)
+	TextColors.bind(title, "quest_heading", "font_color")
 	title.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.95))
 	title.add_theme_constant_override("outline_size", 3)
 	title.add_theme_font_size_override("font_size", 22)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	quest_count.add_theme_color_override("font_color", QUEST_BRASS_BRIGHT)
+	TextColors.bind(quest_count, "quest_heading", "font_color")
 	quest_count.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.95))
 	quest_count.add_theme_constant_override("outline_size", 2)
 	quest_count.add_theme_font_size_override("font_size", 12)
@@ -2470,14 +2466,13 @@ func _style_quest_journal(quest_views: HBoxContainer,
 			"selected_focus", "hovered_selected"]:
 		quest_list.add_theme_stylebox_override(state, selected)
 	quest_list.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
-	quest_list.add_theme_color_override("font_color", QUEST_WARM_TEXT)
-	quest_list.add_theme_color_override("font_selected_color", QUEST_BRASS_BRIGHT)
-	quest_list.add_theme_color_override("font_hovered_selected_color",
-		QUEST_BRASS_BRIGHT)
+	TextColors.bind(quest_list, "quest_active", "font_color")
+	TextColors.bind(quest_list, "ui_label", "font_selected_color")
+	TextColors.bind(quest_list, "ui_hover", "font_hovered_selected_color")
 	quest_list.add_theme_color_override("guide_color", Color(QUEST_BRASS, 0.22))
 	quest_list.add_theme_font_size_override("font_size", 14)
 	quest_list.add_theme_constant_override("line_separation", 8)
-	record_heading.add_theme_color_override("font_color", QUEST_BRASS_BRIGHT)
+	TextColors.bind(record_heading, "quest_heading", "font_color")
 	record_heading.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.9))
 	record_heading.add_theme_constant_override("outline_size", 2)
 	record_heading.add_theme_font_size_override("font_size", 12)
@@ -2489,9 +2484,9 @@ func _style_quest_journal(quest_views: HBoxContainer,
 	parchment.add_theme_stylebox_override("panel", page)
 	parchment_surface.add_theme_stylebox_override("panel",
 		_quest_texture_box(QUEST_PARCHMENT_TEXTURE, 14.0,
-			Color(0.94, 0.88, 0.76, 1.0)))
-	quest_detail.add_theme_color_override("default_color", QUEST_INK)
-	quest_detail.add_theme_color_override("font_selected_color", QUEST_INK)
+			Color(0.12, 0.14, 0.15, 1.0)))
+	TextColors.bind(quest_detail, "quest_active", "default_color")
+	TextColors.bind(quest_detail, "ui_selected", "font_selected_color")
 	quest_detail.add_theme_color_override("selection_color", Color(0.55, 0.35, 0.12, 0.28))
 	quest_detail.add_theme_font_size_override("normal_font_size", 15)
 	_style_quest_button(quest_track_button, true)
@@ -2511,8 +2506,8 @@ func _style_quest_tracker(parchment: PanelContainer,
 	parchment.add_theme_stylebox_override("panel", page)
 	parchment_surface.add_theme_stylebox_override("panel",
 		_quest_texture_box(QUEST_PARCHMENT_TEXTURE, 9.0,
-			Color(0.96, 0.90, 0.78, 0.985)))
-	tracked_quest_text.add_theme_color_override("default_color", QUEST_INK)
+			Color(0.12, 0.14, 0.15, 0.985)))
+	TextColors.bind(tracked_quest_text, "quest_active", "default_color")
 	tracked_quest_text.add_theme_font_size_override("normal_font_size", 13)
 
 ## Two inventories share one explicit transaction, matching the selected concept.
@@ -2564,8 +2559,8 @@ func _build_merchant_window() -> void:
 		list.icon_scale = 1.0
 		list.add_theme_constant_override("icon_margin", 12)
 		list.add_theme_font_size_override("font_size", 15)
-		list.add_theme_color_override("font_color", QUEST_WARM_TEXT)
-		list.add_theme_color_override("font_selected_color", QUEST_WARM_TEXT)
+		TextColors.bind(list, "ui_label", "font_color")
+		TextColors.bind(list, "ui_label", "font_selected_color")
 		list.add_theme_constant_override("v_separation", 7)
 		list.add_theme_stylebox_override("panel", _quest_box(Color("151310"), Color("76603b"), 0, 0, 4.0))
 		list.add_theme_stylebox_override("selected", _quest_box(Color("40331e"), Color("c59a53"), 1, 2, 3.0))
@@ -2593,7 +2588,7 @@ func _build_merchant_window() -> void:
 	merchant_description.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	merchant_description.bbcode_enabled = false
 	merchant_description.add_theme_font_size_override("normal_font_size", 14)
-	merchant_description.add_theme_color_override("default_color", QUEST_WARM_TEXT)
+	TextColors.bind(merchant_description, "ui_label", "default_color")
 	description_panel.add_child(merchant_description)
 	var footer := HBoxContainer.new()
 	footer.add_theme_constant_override("separation", 14)
@@ -2770,8 +2765,8 @@ func _build_market_window() -> void:
 	market_list.fixed_icon_size = Vector2i(32, 32)
 	market_list.add_theme_constant_override("icon_margin", 10)
 	market_list.add_theme_font_size_override("font_size", 15)
-	market_list.add_theme_color_override("font_color", QUEST_WARM_TEXT)
-	market_list.add_theme_color_override("font_selected_color", QUEST_WARM_TEXT)
+	TextColors.bind(market_list, "ui_label", "font_color")
+	TextColors.bind(market_list, "ui_label", "font_selected_color")
 	market_list.add_theme_constant_override("v_separation", 5)
 	market_list.add_theme_stylebox_override("panel", _quest_box(Color("151310"), Color("76603b"), 1, 2, 4.0))
 	market_list.add_theme_stylebox_override("selected", _quest_box(Color("40331e"), Color("c59a53"), 1, 2, 3.0))
@@ -2787,7 +2782,7 @@ func _build_market_window() -> void:
 	market_history.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	market_history.add_theme_font_size_override("font_size", 14)
 	market_history.add_theme_constant_override("v_separation", 8)
-	market_history.add_theme_color_override("font_color", QUEST_WARM_TEXT)
+	TextColors.bind(market_history, "ui_label", "font_color")
 	market_history.add_theme_stylebox_override("panel", _quest_box(Color("151310"), Color("76603b"), 1, 2, 4.0))
 	market_history.add_theme_stylebox_override("selected", _quest_box(Color("40331e"), Color("c59a53"), 1, 2, 3.0))
 	market_history.add_theme_stylebox_override("selected_focus", _quest_box(Color("40331e"), Color("c59a53"), 1, 2, 3.0))
@@ -2800,7 +2795,7 @@ func _build_market_window() -> void:
 	market_empty = Label.new()
 	market_empty.name = "MarketplaceEmpty"
 	market_empty.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	market_empty.add_theme_color_override("font_color", QUEST_MUTED_TEXT)
+	TextColors.bind(market_empty, "ui_disabled", "font_color")
 	body.add_child(market_empty)
 	market_page_row = HBoxContainer.new()
 	market_page_row.name = "MarketplacePages"
@@ -2826,14 +2821,14 @@ func _build_market_window() -> void:
 	var returns_heading := Label.new()
 	returns_heading.text = "Waiting in return escrow - Collect puts these back in your pack"
 	returns_heading.add_theme_font_size_override("font_size", 13)
-	returns_heading.add_theme_color_override("font_color", QUEST_BRASS_BRIGHT)
+	TextColors.bind(returns_heading, "ui_bright")
 	market_returns_box.add_child(returns_heading)
 	market_returns = ItemList.new()
 	market_returns.name = "MarketplaceReturns"
 	market_returns.custom_minimum_size = Vector2(0.0, 64.0)
 	market_returns.fixed_icon_size = Vector2i(24, 24)
 	market_returns.add_theme_font_size_override("font_size", 13)
-	market_returns.add_theme_color_override("font_color", QUEST_WARM_TEXT)
+	TextColors.bind(market_returns, "ui_label", "font_color")
 	market_returns.add_theme_stylebox_override("panel", _quest_box(Color("151310"), Color("76603b"), 1, 2, 4.0))
 	market_returns_box.add_child(market_returns)
 	var footer := HBoxContainer.new()
@@ -3011,3 +3006,29 @@ func _window(window_name: String, title: String) -> PanelContainer:
 
 func _window_body(panel: PanelContainer) -> VBoxContainer:
 	return panel.get_node("Body") as VBoxContainer
+
+func _on_text_colors_changed(role: String) -> void:
+	if role.is_empty() or role == "inventory_equipped":
+		_sync_detail()
+	if role.is_empty() or role.begins_with("quest_"):
+		_sync_quests()
+	if role.is_empty() or role.begins_with("market_"):
+		_render_market()
+
+static func _quest_markup(text: String) -> String:
+	for role: String in ["quest_heading", "quest_ready"]:
+		text = text.replace("{" + role + "}", "#" + TextColors.color(role).to_html(false))
+	return text
+
+static func _style_party_button(control: Button) -> void:
+	HUD_STYLE.button(control)
+	TextColors.bind(control, "party_muted")
+	TextColors.bind(control, "party_text", "font_pressed_color")
+	TextColors.bind(control, "ui_hover", "font_hover_color")
+	TextColors.bind(control, "party_text", "font_hover_pressed_color")
+
+static func _bind_party_labels(parent: Node) -> void:
+	for child: Node in parent.get_children():
+		if child is Label and not child.has_meta("text_color_role"):
+			TextColors.bind(child as Label, "party_text")
+		_bind_party_labels(child)

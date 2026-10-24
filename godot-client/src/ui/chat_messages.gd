@@ -11,6 +11,10 @@ static func kind(line: Dictionary) -> String:
 		return "private"
 	if channel == 2:
 		return "guild"
+	if channel == 4:
+		return "moderator"
+	if channel == 8:
+		return "mod_private"
 	if channel in [5, 6, 7]:
 		return "channel"
 	if channel != 0:
@@ -81,7 +85,7 @@ static func matches(line: Dictionary, section: String) -> bool:
 		"system": return category == "system"
 		"chat": return category != "system"
 		"general", "local": return category == "local"
-		"party", "guild", "private", "channel": return category == section
+		"party", "guild", "private", "channel", "moderator", "mod_private": return category == section
 	if section.begins_with("channel:"):
 		return category == "channel" and channel_number(line) == int(section.trim_prefix("channel:"))
 	if section.begins_with("pm:"):

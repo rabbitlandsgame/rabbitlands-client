@@ -28,7 +28,7 @@ func _run() -> void:
 		actor.configure(state.actors[id], main.adapter, {}, {}, {}, false)
 		main.actor_nodes[id] = actor
 	main._sync_world()
-	_expect(main.overhead_player_name.text == "Alice", "guildless local name")
+	_expect(main.overhead_player_name.get_parsed_text() == "Alice", "guildless local name")
 	var remote: ReplicatedActor3D = main.actor_nodes[92]
 	var plate: Label3D = remote.get_node("Nameplate")
 	_expect(plate.text == "Alice", "guildless remote name")
@@ -42,8 +42,10 @@ func _run() -> void:
 			state._on_packet(51, _actor_packet(id, tag))
 		main._sync_world(state.take_changed_actors())
 		var expected := "Alice" + ("  [%s]" % tag if not tag.is_empty() else "")
-		_expect(main.overhead_player_name.text == expected, "local tag updates to '%s'" % tag)
-		_expect(plate.text == expected, "remote tag updates to '%s'" % tag)
+		_expect(main.overhead_player_name.get_parsed_text() == expected, "local tag updates to '%s'" % tag)
+		_expect(plate.text == "Alice", "remote name remains independent of its tag")
+		var guild: Label3D = remote.get_node_or_null("GuildTag")
+		_expect((guild != null and guild.text == "  [%s]" % tag) if not tag.is_empty() else (guild == null or guild.text.is_empty()), "remote tag updates to '%s'" % tag)
 		_expect(main.actor_nodes[92] == remote, "a tag refresh reuses the remote body")
 		_expect(is_equal_approx(plate.modulate.a, 0.5), "tag refresh preserves distance fade")
 
