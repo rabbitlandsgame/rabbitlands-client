@@ -180,7 +180,7 @@ argument. Existing installations reuse their matching packages.
             release.gh("release", "delete", other["tag_name"], "--repo", release.REPOSITORY, "--yes")
     release.write_json(out / "client_updates.json", {"schema": 1, "required_commit": sha, "enforce": True,
         "manifests": {platform: f"{base}/{stage}-{platform}.json" for platform, stage in stages.items()}})
-    release.write_json(out / "runner-release.json", {"schema": 1, "commit": sha, "release_id": release_id,
+    release.write_json(out / "runner-release.json", {"schema": 1, "repository": release.REPOSITORY, "commit": sha, "release_id": release_id,
         "assets": list(rows.values()), "shared_assets": list(shared_rows.values()), "shared_release_id": pool_id,
         "transfer": {key: sum(i.get("transfer", {}).get(key, 0) for i in data) for key in ("uploaded_bytes", "reused_bytes")}})
     url = json.loads(release.gh("api", f"repos/{release.REPOSITORY}/releases/{release_id}"))["html_url"]

@@ -246,7 +246,11 @@ reused across builds.
 
 For bounded-storage hosted builds, see [runner builds](runner-builds.md). That
 path builds one platform per job, streams verified parts into an existing draft,
-and finalizes small receipts without copying full builds between jobs.
+and finalizes small receipts without copying full builds between jobs. The
+desktop Actions workflow then publishes automatically after both platforms and
+all required checks pass, and retires older compiled releases after verifying
+the public replacement. The local upload commands below retain their explicit
+`--publish` option.
 
 First push the selected client commit through the repository's configured SSH
 identity. Uploads require GitHub CLI authenticated as **rabbitlandsgame** with
