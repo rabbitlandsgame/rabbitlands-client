@@ -5,7 +5,9 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import shutil
 import struct
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -418,6 +420,169 @@ class NativeBuilderTests(unittest.TestCase):
             self.assertTrue(all(row[1]["CARGO_TARGET_DIR"] == str(args.build_root / "cargo") for row in calls))
             self.assertEqual(manifest["build"]["policy"], build.BUILD_POLICY)
             self.assertEqual(manifest["godot_cpp_revision"], build.GODOT_CPP_REVISION)
+
+
+@unittest.skipUnless(shutil.which("git"), "native-only prewarm requires local Git")
+class NativePrewarmTests(unittest.TestCase):
+    def git(self, repository, *arguments):
+        return subprocess.check_output(["git", "-C", str(repository), *arguments], stderr=subprocess.STDOUT,
+                                       timeout=30).decode().strip()
+
+    def fixture(self, root):
+        repository, _ = NativeReleaseTests().fixture(root)
+        asset = repository / "godot-client/assets/unrelated-game-asset.bin"
+        asset.parent.mkdir(parents=True)
+        asset.write_bytes(b"game asset must never enter native prewarm")
+        self.git(repository, "init", "--quiet")
+        self.git(repository, "config", "core.autocrlf", "false")
+        self.git(repository, "add", "--all")
+        self.git(repository, "-c", "user.name=Native fixture", "-c", "user.email=native-fixture@rabbitlands.invalid",
+                 "-c", "commit.gpgsign=false", "-c", "core.hooksPath=" + str(root / "no-hooks"),
+                 "commit", "--quiet", "-m", "native prewarm fixture")
+        commit = self.git(repository, "rev-parse", "HEAD")
+        # A checkout on Windows would rewrite the LF source bytes. Prewarm must
+        # use Git's original blobs and the real index rather than checkout.
+        self.git(repository, "config", "core.autocrlf", "true")
+        return repository, commit
+
+    def build_context(self, callback):
+        return mock.patch.object(build, "build_payload", side_effect=callback)
+
+    def payload(self, args, target, env, actual, **kwargs):
+        return NativeReleaseTests().payload(args.out, args.repository, target, actual)
+
+    def test_native_only_raw_blobs_and_index_prewarm_then_full_checkout_hits_same_cache(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            repository, commit = self.fixture(root)
+            source, expected = release.git_source_identity(repository, commit)
+            seen = []
+            budget = []
+            def compile(args, target, env, actual, **kwargs):
+                self.assertNotEqual(args.repository, repository)
+                self.assertFalse((args.repository / "godot-client/assets").exists())
+                self.assertEqual(release.source_identity(args.repository, commit)["input_blob_digest"], source["input_blob_digest"])
+                for relative, oid in expected.items():
+                    data = (args.repository / relative).read_bytes()
+                    self.assertEqual(blob(data), oid)
+                    index = self.git(args.repository, "ls-files", "--stage", "--", relative)
+                    self.assertIn(oid, index)
+                seen.append(args.repository)
+                return self.payload(args, target, env, actual, **kwargs)
+            # DiskBudget.check names its second parameter 'additional', so a
+            # forwarded upcoming_bytes keyword would fail this real signature.
+            def check(phase, additional=0):
+                budget.append((phase, additional))
+            with mock.patch.object(release, "tool_context", return_value=({}, toolchain())), self.build_context(compile) as built:
+                first = release.prewarm_cache(repository, commit, "windows", root / "cache", root / "prewarm", check)
+                second = release.prepare_runtime(repository, commit, "windows", root / "cache", root / "out", root / "later-work", lambda *a, **k: None)
+            self.assertEqual(built.call_count, 1)
+            self.assertFalse(first["cache_hit"])
+            self.assertTrue(second["cache_hit"])
+            self.assertEqual(first["cache_key"], second["cache_key"])
+            self.assertEqual(first["verification"]["files"], second["verification"]["files"])
+            self.assertNotIn("payload", first)
+            self.assertTrue(first["prewarm"]["scratch_cleaned"])
+            self.assertFalse(first["prewarm"]["game_assets_materialized"])
+            self.assertEqual(first["prewarm"]["input_count"], len(expected))
+            self.assertTrue(first["workspace_budget"]["measured_before_cleanup"])
+            self.assertTrue(any(value == release.BUILD_RESERVE_BYTES for _, value in budget))
+            self.assertEqual(list((root / "prewarm").iterdir()), [])
+            self.assertFalse(seen[0].exists())
+            self.assertEqual(self.git(repository, "worktree", "list", "--porcelain").count("worktree "), 1)
+
+    def test_failed_compile_cleans_tiny_git_worktree_and_preserves_unrelated_sibling(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            repository, commit = self.fixture(root)
+            sibling = root / "prewarm/unrelated/keep"
+            sibling.parent.mkdir(parents=True)
+            sibling.write_bytes(b"preserve")
+            with mock.patch.object(release, "tool_context", return_value=({}, toolchain())), self.build_context(mock.Mock(side_effect=RuntimeError("fixture compiler failure"))), self.assertRaisesRegex(RuntimeError, "compiler failure"):
+                release.prewarm_cache(repository, commit, "windows", root / "cache", root / "prewarm", lambda *a: None)
+            self.assertEqual(list((root / "prewarm").iterdir()), [sibling.parent])
+            self.assertEqual(sibling.read_bytes(), b"preserve")
+            self.assertEqual(self.git(repository, "worktree", "list", "--porcelain").count("worktree "), 1)
+            self.assertEqual(list((root / "cache").iterdir()), [])
+
+    def test_corrupt_existing_cache_still_fails_closed_without_rebuild(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            repository, commit = self.fixture(root)
+            with mock.patch.object(release, "tool_context", return_value=({}, toolchain())), self.build_context(self.payload):
+                first = release.prewarm_cache(repository, commit, "windows", root / "cache", root / "prewarm", lambda *a: None)
+            bad = root / "cache" / first["cache_key"] / "payload/client_runtime.dll"
+            bad.write_bytes(b"corrupted restored cache")
+            with mock.patch.object(release, "tool_context", return_value=({}, toolchain())), mock.patch.object(build, "build_payload") as compiled, self.assertRaises(ValueError):
+                release.prewarm_cache(repository, commit, "windows", root / "cache", root / "prewarm", lambda *a: None)
+            compiled.assert_not_called()
+            self.assertEqual(bad.read_bytes(), b"corrupted restored cache")
+            self.assertEqual(list((root / "prewarm").iterdir()), [])
+
+    def test_cache_publication_race_preserves_other_entry_and_cleans_owned_work(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            repository, commit = self.fixture(root)
+            source, _ = release.git_source_identity(repository, commit)
+            key = release.cache_key(release.cache_identity(source, "windows", toolchain()))
+            other = root / "cache" / key / "other-owner"
+            def competing(args, target, env, actual, **kwargs):
+                self.payload(args, target, env, actual, **kwargs)
+                other.parent.mkdir()
+                other.write_bytes(b"concurrent owner")
+            with mock.patch.object(release, "tool_context", return_value=({}, toolchain())), self.build_context(competing), self.assertRaises(FileExistsError):
+                release.prewarm_cache(repository, commit, "windows", root / "cache", root / "prewarm", lambda *a: None)
+            self.assertEqual(other.read_bytes(), b"concurrent owner")
+            self.assertEqual(list((root / "prewarm").iterdir()), [])
+            self.assertEqual(self.git(repository, "worktree", "list", "--porcelain").count("worktree "), 1)
+
+    def test_blob_read_failure_removes_only_its_registered_worktree(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            repository, commit = self.fixture(root)
+            original = release.subprocess.run
+            def fail_blob(command, *args, **kwargs):
+                if "cat-file" in command and "blob" in command:
+                    raise subprocess.CalledProcessError(1, command, stderr=b"fixture missing object")
+                return original(command, *args, **kwargs)
+            with mock.patch.object(release.subprocess, "run", side_effect=fail_blob), mock.patch.object(build, "build_payload") as compiled, self.assertRaises(subprocess.CalledProcessError):
+                release.prewarm_cache(repository, commit, "windows", root / "cache", root / "prewarm", lambda *a: None)
+            compiled.assert_not_called()
+            self.assertEqual(list((root / "prewarm").iterdir()), [])
+            self.assertEqual(self.git(repository, "worktree", "list", "--porcelain").count("worktree "), 1)
+
+    def test_preexisting_file_overlapping_roots_and_initial_budget_refusal_do_not_create_worktrees(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            repository, commit = self.fixture(root)
+            file = root / "preexisting"
+            file.write_bytes(b"keep")
+            with self.assertRaisesRegex(ValueError, "not a directory"):
+                release.prewarm_cache(repository, commit, "windows", root / "cache", file, lambda *a: None)
+            with self.assertRaisesRegex(ValueError, "disjoint"):
+                release.prewarm_cache(repository, commit, "windows", root / "work/cache", root / "work", lambda *a: None)
+            def exhausted(*args):
+                raise ValueError("fixture prewarm budget exhausted")
+            with self.assertRaisesRegex(ValueError, "budget exhausted"):
+                release.prewarm_cache(repository, commit, "windows", root / "cache", root / "work", exhausted)
+            self.assertFalse((root / "work").exists())
+            self.assertEqual(file.read_bytes(), b"keep")
+            self.assertEqual(self.git(repository, "worktree", "list", "--porcelain").count("worktree "), 1)
+
+    def test_linked_work_parent_is_rejected_without_following_or_cleaning_target(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            repository, commit = self.fixture(root)
+            target = root / "target"
+            target.mkdir()
+            link = root / "linked"
+            try:
+                link.symlink_to(target, target_is_directory=True)
+            except OSError:
+                self.skipTest("directory symlink privilege unavailable")
+            with self.assertRaisesRegex(ValueError, "linked"):
+                release.prewarm_cache(repository, commit, "windows", root / "cache", link / "work", lambda *a: None)
+            self.assertEqual(list(target.iterdir()), [])
 
 
 if __name__ == "__main__":

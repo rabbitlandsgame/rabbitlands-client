@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Build or verify the native-only cache for a selected desktop release commit.
 
-No engine, export, upload or release operation is performed here. The caller
-materializes the selected Git worktree before calling prepare_runtime.
+No engine, export, upload or release operation is performed here. Callers may
+prewarm the cache from exact native blobs before materializing game assets.
 """
 from __future__ import annotations
 
@@ -26,6 +26,7 @@ SCHEMA = 1
 CACHE_POLICY = "rl-native-payload-cache-v1"
 BUILD_RESERVE_BYTES = 3 * 1024**3
 MAX_PAYLOAD_BYTES = 256 * 1024**2
+MAX_PREWARM_SOURCE_BYTES = 64 * 1024**2
 SOURCE_SUFFIXES = {".rs", ".h", ".cpp", ".toml", ".lock", ".in", ".json"}
 BUILD_TOOLS = tuple(Path("godot-client/tools") / name for name in (
     "build_client_runtime.py", "release_native_runtime.py", "client_runtime_package.py"))
@@ -220,6 +221,100 @@ def workspace_bytes(directory):
             require(not path.is_symlink(), "native workspace contains a linked file")
             total += path.stat().st_size
     return total
+
+
+def unlinked_path(path):
+    """Reject linked existing ancestors before resolving an owned scratch path."""
+    path = Path(os.path.abspath(path))
+    for candidate in (*reversed(path.parents), path):
+        require(not candidate.is_symlink() and not getattr(candidate, "is_junction", lambda: False)(),
+                "linked native prewarm path is unsupported: " + str(candidate))
+    return path.resolve()
+
+
+def prewarm_cache(repository, commit, platform, cache_dir, work_root, check_budget, **tools):
+    """Build/validate the normal cache from a disposable native-only Git worktree.
+
+    Raw committed blobs avoid checkout filters and autocrlf. The later ordinary
+    prepare_runtime call revalidates the same cache against the full checkout.
+    check_budget accepts its reservation as a positional second argument, as
+    release_storage.DiskBudget.check does; prepare_runtime keeps its existing API.
+    """
+    repository, cache_dir, work_root = map(unlinked_path, (repository, cache_dir, work_root))
+    for left, right in ((repository, cache_dir), (repository, work_root), (cache_dir, work_root)):
+        require(not left.is_relative_to(right) and not right.is_relative_to(left),
+                "native prewarm source, cache and work roots must be disjoint")
+    require(not work_root.exists() or work_root.is_dir(), "native prewarm work root is not a directory")
+    _, expected = git_source_identity(repository, commit)
+    def budget(label, upcoming_bytes=0):
+        return check_budget(label, upcoming_bytes)
+    budget("before native-only prewarm worktree", MAX_PREWARM_SOURCE_BYTES)
+    work_root.mkdir(parents=True, exist_ok=True)
+    envelope = Path(tempfile.mkdtemp(prefix="rl-native-prewarm-", dir=work_root)).resolve()
+    source, compiler, output = (envelope / name for name in ("source", "compiler", "output"))
+    marker = envelope / ".rl-native-work.json"
+    ownership = {"path": str(envelope), "kind": "native-cache-prewarm", "commit": commit,
+                 "source": str(source), "repository": str(repository)}
+    marker.write_text(json.dumps(ownership), encoding="utf-8")
+    source_bytes = 0
+    receipt = None
+    try:
+        # --no-checkout never hydrates the selected game assets. read-tree sets
+        # the real worktree index without writing any tracked worktree files.
+        builder.output(["git", "-C", repository, "worktree", "add", "--detach", "--no-checkout", source, commit])
+        builder.output(["git", "-C", source, "read-tree", commit])
+        require(builder.output(["git", "-C", source, "rev-parse", "HEAD"]) == commit,
+                "native prewarm HEAD differs from selected commit")
+        for relative, oid in expected.items():
+            relative_path = Path(relative)
+            require(not relative_path.is_absolute() and ".." not in relative_path.parts,
+                    "unsafe native prewarm input path")
+            path = source / relative_path
+            require(path.resolve().is_relative_to(source) and not path.exists(),
+                    "native prewarm input already exists or escaped scratch")
+            size = int(builder.output(["git", "-C", repository, "cat-file", "-s", oid]))
+            source_bytes += size
+            require(0 <= size <= MAX_PREWARM_SOURCE_BYTES and source_bytes <= MAX_PREWARM_SOURCE_BYTES,
+                    "native prewarm inputs exceed bounded source reservation")
+            budget("native-only prewarm blob " + relative)
+            data = subprocess.run(["git", "-C", str(repository), "cat-file", "blob", oid],
+                                  check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=60).stdout
+            require(len(data) == size and hashlib.sha1(f"blob {len(data)}\0".encode() + data).hexdigest() == oid,
+                    "native prewarm raw Git blob differs: " + relative)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            unlinked_path(path.parent)
+            with path.open("xb") as stream:
+                stream.write(data)
+        verified_source = source_identity(source, commit)
+        budget("native-only prewarm sources verified")
+        receipt = prepare_runtime(source, commit, platform, cache_dir, output, compiler, budget, **tools)
+        require(receipt["source"] == verified_source, "native prewarm source proof changed")
+        # The temporary payload is only a second verification copy. Its path is
+        # deliberately absent from the returned, persistent cache receipt.
+        receipt.pop("payload", None)
+        receipt["prewarm"] = {"policy": "exact-native-git-blobs-before-assets-v1",
+                              "input_count": len(expected), "materialized_source_bytes": source_bytes,
+                              "planned_source_bytes": MAX_PREWARM_SOURCE_BYTES,
+                              "game_assets_materialized": False}
+    finally:
+        require(envelope.parent == work_root and not envelope.is_symlink()
+                and marker.is_file() and not marker.is_symlink()
+                and json.loads(marker.read_text()) == ownership,
+                "native prewarm cleanup ownership changed")
+        if source.exists():
+            require(not source.is_symlink() and (source / ".git").is_file()
+                    and not (source / ".git").is_symlink(), "native prewarm worktree ownership is missing")
+            require(Path(builder.output(["git", "-C", source, "rev-parse", "--show-toplevel"])).resolve() == source
+                    and builder.output(["git", "-C", source, "rev-parse", "HEAD"]) == commit,
+                    "native prewarm worktree identity changed before cleanup")
+            common = lambda root: Path(builder.output(["git", "-C", root, "rev-parse", "--path-format=absolute", "--git-common-dir"])).resolve()
+            require(common(source) == common(repository), "native prewarm worktree belongs to another repository")
+            builder.output(["git", "-C", repository, "worktree", "remove", "--force", source])
+            require(not source.exists(), "native prewarm worktree removal did not complete")
+        remove_owned_work(envelope, work_root)
+    budget("native-only prewarm scratch cleaned")
+    receipt["prewarm"]["scratch_cleaned"] = True
+    return receipt
 
 
 def prepare_runtime(repository, commit, platform, cache_dir, out, work_root, check_budget, *,
