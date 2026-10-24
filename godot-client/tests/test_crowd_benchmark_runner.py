@@ -34,7 +34,11 @@ def runtime():
                                   "worldViewportSize": [1280, 720], "renderScale": 1.0,
                                   "textureQuality": "full", "textureSkip": 0,
                                   "minimap": True, "appearance": "painted_ground"},
-            "activeBackends": {"nativeReducer": False, "preparedContent": {"active": False},
+            "activeBackends": {"nativeReducer": False, "preparedNodePolicy": "retain",
+                               "preparedContent": {"mode": "raw", "active": False, "hits": 0,
+                                   "misses": {"disabled": 1}, "consumed_entries": [], "timings": {},
+                                   "strong_resource_entries": 0, "verification_reuse": False,
+                                   "estimate_kind": "declared_content_not_allocation"},
                                "presentation": {"requested": "0", "nativeCapeInstances": 0,
                                                 "nativeCapeCalls": 0, "capeFallbackCalls": 0,
                                                 "flight": stats.copy(), "impact": stats.copy()}}}
@@ -462,7 +466,7 @@ class IdentityAndProcessTests(unittest.TestCase):
                     mock.patch.object(runner, "identity", return_value={"source": "stable"}), \
                     mock.patch.object(runner.subprocess, "Popen", side_effect=fake_launch):
                 result = runner.run_one(args, "all", 1, root)
-            self.assertTrue(result["validation"]["valid"])
+            self.assertTrue(result["validation"]["valid"], result["validation"])
             self.assertTrue(result["startup"]["valid"])
             self.assertEqual(result["settingsProfile"], "performance")
             seed = result["settingsSeed"]
@@ -661,7 +665,7 @@ class IdentityAndProcessTests(unittest.TestCase):
                 with mock.patch.object(runner, "identity", side_effect=snapshots), \
                         mock.patch.object(runner.subprocess, "Popen", side_effect=fake_launch):
                     result = runner.run_one(args, "all", 1, root)
-                self.assertEqual(result["validation"]["valid"], not (missing or error_log or changed))
+                self.assertEqual(result["validation"]["valid"], not (missing or error_log or changed), result["validation"])
                 self.assertTrue(list(root.glob("*.process.json")))
 
     def test_actual_user_data_must_be_isolated(self):

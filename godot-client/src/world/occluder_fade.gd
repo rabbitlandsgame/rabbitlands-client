@@ -1,5 +1,6 @@
 class_name OccluderFade
 extends RefCounted
+const PreparedPlacements := preload("res://src/world/prepared_placements.gd")
 
 ## Turns whatever stands between the camera and the local player translucent.
 ##
@@ -62,6 +63,7 @@ const GROUND_NAME_PREFIXES: Array[String] = ["AuthoredGround_", "Terrain_", "Wal
 ## One indexed mesh, plus whatever it takes to put it back the way it was.
 class Occluder extends RefCounted:
 	var node: MeshInstance3D
+	var placement: PreparedPlacements.Handle
 	## The mesh's own AABB grown by the probe radius, in the mesh's local space.
 	## Testing there rather than against a world AABB means a wall at 45 degrees
 	## is tested as the thin slab it is instead of the fat box enclosing it.
@@ -94,7 +96,9 @@ class Occluder extends RefCounted:
 	## is the exception - its node is hidden by design, and while it is faded
 	## this class is the thing holding it visible.
 	func is_drawing() -> bool:
-		if not is_instance_valid(node):
+		if placement != null and placement.root_node() == null:
+			return false
+		if not is_instance_valid(node) and placement == null:
 			return false
 		if batch != null:
 			return is_instance_valid(batch) and batch.is_visible_in_tree()
@@ -104,6 +108,8 @@ class Occluder extends RefCounted:
 	## than edits, because the imported materials are shared between every copy
 	## of a mesh and writing alpha onto one would fade every rock in the region.
 	func apply() -> void:
+		if not is_instance_valid(node) and placement != null:
+			node = placement.restore()
 		if applied or not is_instance_valid(node):
 			return
 		applied = true
@@ -292,6 +298,12 @@ func configure(manifest: WorldManifest, imported_world: Node3D) -> int:
 		var occluder := _index(node as MeshInstance3D)
 		if occluder != null:
 			_occluders.append(occluder)
+	for handle: PreparedPlacements.Handle in PreparedPlacements.handles(imported_world):
+		if handle.node() != null or proxy_names.has(str(handle.row.name)):
+			continue
+		var occluder := _index_placement(handle)
+		if occluder != null:
+			_occluders.append(occluder)
 	return _occluders.size()
 
 ## Restores everything currently faded and drops the index. Safe on a freed map:
@@ -369,7 +381,8 @@ func _probe(camera: Camera3D, player: Node3D) -> void:
 	for occluder: Occluder in _candidates(into_root * from, into_root * to):
 		if occluder.target > 0.0 or not occluder.is_drawing():
 			continue
-		var into_local: Transform3D = occluder.node.global_transform.affine_inverse()
+		var placement_transform: Transform3D = occluder.node.global_transform if is_instance_valid(occluder.node) else occluder.placement.global_placement()
+		var into_local := placement_transform.affine_inverse()
 		if not _segment_hits_box(occluder.box, into_local * from, into_local * to):
 			continue
 		if not _blocks_body(occluder, into_local, from, to, camera):
@@ -378,13 +391,16 @@ func _probe(camera: Camera3D, player: Node3D) -> void:
 		occluder.release_hold = RELEASE_HOLD_SECONDS
 		if not occluder.applied:
 			occluder.apply()
-			_active.append(occluder)
+			if occluder.applied:
+				_active.append(occluder)
 
 ## Bounds only select candidates: gaps in a canopy or doorway must not fade
 ## the whole object. Probe a small cross around the chest against real faces.
 func _blocks_body(occluder: Occluder, into_local: Transform3D,
 		from: Vector3, to: Vector3, camera: Camera3D) -> bool:
-	var mesh: Mesh = occluder.node.mesh
+	var mesh: Mesh = occluder.node.mesh if is_instance_valid(occluder.node) else occluder.placement.mesh()
+	if mesh == null:
+		return false
 	if not _triangle_meshes.has(mesh):
 		_triangle_meshes[mesh] = mesh.generate_triangle_mesh()
 	var triangles: TriangleMesh = _triangle_meshes[mesh] as TriangleMesh
@@ -502,6 +518,41 @@ func _index(mesh_instance: MeshInstance3D) -> Occluder:
 	local_box.size += margin * 2.0
 	occluder.box = local_box
 	_register(occluder, relative_transform * local_box)
+	return occluder
+
+## Preserve geometric/fade registrations while avoiding source Node and
+## VisualInstance allocations until that particular placement needs fading.
+func _index_placement(handle: PreparedPlacements.Handle) -> Occluder:
+	var mesh := handle.mesh()
+	var batch := handle.batch()
+	if handle.root_node() == null or mesh == null or mesh.get_surface_count() == 0 or batch == null:
+		return null
+	var node_name := str(handle.row.name)
+	if node_name.begins_with("StreamView_"):
+		node_name = node_name.get_slice("__", 1)
+	if node_name.begins_with("Structure_StreamCauseway_") or LookFade.keeps_solid(node_name):
+		return null
+	for prefix: String in GROUND_NAME_PREFIXES:
+		if node_name.begins_with(prefix):
+			return null
+	var transform := handle.global_placement()
+	var relative_transform := handle.relative_to(_root)
+	var box := mesh.get_aabb()
+	var root_box := relative_transform * box
+	if maxf(root_box.size.x, root_box.size.z) > _max_extent:
+		return null
+	var scale := transform.basis.get_scale()
+	var margin := Vector3(PROBE_RADIUS / maxf(absf(scale.x), 0.001),
+		PROBE_RADIUS / maxf(absf(scale.y), 0.001), PROBE_RADIUS / maxf(absf(scale.z), 0.001))
+	box.position -= margin
+	box.size += margin * 2.0
+	var occluder := Occluder.new()
+	occluder.placement = handle
+	occluder.batch = batch
+	occluder.batch_index = int(handle.row.batch_index)
+	occluder.faded_alpha = _faded_alpha
+	occluder.box = box
+	_register(occluder, relative_transform * box)
 	return occluder
 
 ## Files an occluder under every cell its expanded root-local bounds touch, so a probe that

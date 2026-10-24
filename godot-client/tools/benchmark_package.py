@@ -20,6 +20,7 @@ WORKLOAD_FILES = frozenset({
     "tests/integration/crowd_benchmark_main.tscn",
     "tests/integration/performance_workloads.gd",
     "tests/integration/benchmark_route_content.gd",
+    "tests/integration/benchmark_placement_diagnostics.gd",
     "tests/integration/benchmark_mounted_census.gd",
     "tests/integration/benchmark_heat_bolt.gd",
     "tests/integration/prepared_content_parity.gd",

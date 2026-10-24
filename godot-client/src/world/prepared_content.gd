@@ -10,6 +10,13 @@ const Vram := preload("res://src/world/vram_textures.gd")
 const Graphics := preload("res://src/world/graphics_options.gd")
 const TextureSizes := preload("res://src/world/prepared_texture_sizes.gd")
 const AnimationKeys := preload("res://src/world/prepared_animation_keys.gd")
+static func node_policy() -> String:
+	var policy := OS.get_environment("RABBITLANDS_PREPARED_NODE_POLICY").strip_edges().to_lower()
+	for argument: String in OS.get_cmdline_user_args():
+		if argument.begins_with("--prepared-node-policy="):
+			policy = argument.trim_prefix("--prepared-node-policy=")
+	return "lazy-source-v1" if policy == "lazy-source-v1" else "retain"
+
 const SCHEMA := 1
 const COOK_POLICY := "rabbitlands-native-prepared-v2"
 const CATALOG := "res://prepared-content/index.json"
@@ -193,7 +200,8 @@ static func acquire(kind: String, source: String, source_digest: String,
 			continue
 		listed = true
 		if str(entry.get("source_digest", "")) == source_digest \
-				and str(entry.get("texture_token", "")) == texture_token:
+				and str(entry.get("texture_token", "")) == texture_token \
+				and str(entry.get("node_policy", "retain")) == (node_policy() if kind == "world" else "retain"):
 			matches.append(entry)
 	var required := mode == "require-pilot" and listed
 	if not listed:

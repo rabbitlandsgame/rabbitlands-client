@@ -776,3 +776,20 @@ unknown. The default experimental allowance is 768 MiB and can be selected with
 at a permissive allowance before testing a tighter policy. Inspect actual
 `resource_admission` diagnostics for mode, registrations, failures, unknowns,
 retained carriers, denials, readiness and largest atomic verification cost.
+
+## Optional prepared placement reduction
+
+Prepared worlds retain source nodes by default. An exact catalog variant with
+`--prepared-node-policy=lazy-source-v1` can remove eligible hidden leaf meshes
+already drawn by a static MultiMesh. Collision, scripts, lamps, skeletons and
+semantically mixed batches retain their ordinary nodes. The original transform,
+sibling order and material behavior remain available through a weak root-scoped
+handle. Fade and named interaction binding restore the required source on main;
+restored nodes remain until their chunk is destroyed.
+
+Retained and reduced variants must be compared in the same package. Require
+actual live Node and VisualInstance reductions, exact source hits, collision and
+current look/season behavior, and measure the first restoration cost. Handle
+snapshots report initial removal, reified sources and remaining savings. Logical
+occluder registrations are retained. Templates and handles also occupy memory,
+so reduced node count alone does not establish a total memory or frame benefit.

@@ -118,7 +118,10 @@ class AdmissionRunnerTests(unittest.TestCase):
                 self.assertEqual(dict(os.environ), before)
             self.assertTrue(result["validation"]["valid"])
             self.assertEqual(result["effectiveOverrides"]["RABBITLANDS_RESOURCE_BUDGET_MIB"], "512")
-            self.assertEqual(result["data"]["activeBackends"]["preparedContent"], {"active": False})
+            prepared = result["data"]["activeBackends"]["preparedContent"]
+            self.assertEqual((prepared["mode"], prepared["active"], prepared["hits"], prepared["consumed_entries"]),
+                             ("raw", False, 0, []))
+            self.assertEqual(result["data"]["activeBackends"]["preparedNodePolicy"], "retain")
             self.assertIn("RABBITLANDS_RESOURCE_ADMISSION", result["clearedOverrideNames"])
             self.assertEqual(json.loads(next(root.glob("*.process.json")).read_text())["effectiveOverrides"]
                              ["RABBITLANDS_RESOURCE_ADMISSION"], "rust")

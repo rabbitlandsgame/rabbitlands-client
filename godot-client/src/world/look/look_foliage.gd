@@ -146,7 +146,7 @@ static func _replaceable_batch_override(batch: MultiMeshInstance3D) -> bool:
 	var marked: Variant = batch.get_meta(PREPARED_RAW_OVERRIDE)
 	return marked is WeakRef and (marked as WeakRef).get_ref() == batch.material_override
 
-static func keep_chroma(root: Node, region := "") -> int:
+static func keep_chroma(root: Node, region := "", targets: Array = []) -> int:
 	if not LookProfile.full_painted() or root == null:
 		return 0
 	var words := LookProfile.keep_words(region)
@@ -157,7 +157,7 @@ static func keep_chroma(root: Node, region := "") -> int:
 	var tint: Color = LookProfile.region_value(region, "props", "keep_tint", Color.WHITE)
 	var made := {}
 	var surfaces := 0
-	for node: Node in root.find_children("*", "MeshInstance3D", true, false):
+	for node: Node in (targets if not targets.is_empty() else root.find_children("*", "MeshInstance3D", true, false)):
 		var mesh_instance := node as MeshInstance3D
 		if mesh_instance.mesh == null or mesh_instance.material_override != null:
 			continue
@@ -230,7 +230,7 @@ static func _named_with(material_name: String, words: Array) -> bool:
 ## Paints every crown under `root`, a root of `region` (whose region file may
 ## name more crown materials and kit words, LookProfile.foliage_words). Safe to
 ## call again on a root it has already painted.
-static func paint(root: Node, region := "") -> int:
+static func paint(root: Node, region := "", targets: Array = []) -> int:
 	if not LookProfile.full_painted() or root == null:
 		return 0
 	var words := words_for(region)
@@ -238,7 +238,7 @@ static func paint(root: Node, region := "") -> int:
 	var made: Dictionary = {}
 	var surfaces := 0
 	var batches := 0
-	for node: Node in root.find_children("*", "MeshInstance3D", true, false):
+	for node: Node in (targets if not targets.is_empty() else root.find_children("*", "MeshInstance3D", true, false)):
 		var mesh_instance := node as MeshInstance3D
 		if mesh_instance.mesh == null or mesh_instance.material_override != null:
 			continue

@@ -298,6 +298,18 @@ func _run() -> void:
 	_report["crowdPolicy"] = (_main.get("crowd") as RefCounted).call("describe") \
 		if _main.get("crowd") != null else {"available": false}
 	_record_effective_runtime()
+	if OS.get_environment("RABBITLANDS_PREPARED_PLACEMENT_PROBE").strip_edges() == "1":
+		# Explicit functional run: no prewarm, sampled frames or timing cells.
+		_report["functionalOnly"] = true
+		_report["benchmarkPurpose"] = "prepared_placement_restore_probe"
+		var probe := _main.call("benchmark_restore_prepared_placement",
+			_env("RABBITLANDS_PREPARED_PLACEMENT_PROBE_MAP", "four_gates"),
+			_env("RABBITLANDS_PREPARED_PLACEMENT_PROBE_CHUNK", "02_07")) as Dictionary
+		_report["preparedPlacementProbe"] = probe
+		_expect(str(probe.get("status", "")) == "restored", "explicit prepared placement restores")
+		await _tear_down_main()
+		_finish()
+		return
 	# A replay warms nothing: what the recording shows is built in its prologue,
 	# and a model first seen during the sample costs what it costs in play.
 	if not replay:

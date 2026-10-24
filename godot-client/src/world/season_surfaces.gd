@@ -48,11 +48,11 @@ static func snow_cover(manifest: WorldManifest) -> float:
 		return 0.0
 	return 0.45 if region in ["sunmane_steppe", "spindle_hill", "tollholm"] else 1.0
 
-static func apply(root: Node, manifest: WorldManifest, force := false) -> int:
+static func apply(root: Node, manifest: WorldManifest, force := false, targets: Array = []) -> int:
 	if root == null or manifest == null or not DayNightBinder.drives(manifest) or _season < 0:
 		return 0
 	var generation := LookProfile.switch_generation()
-	if not force and int(root.get_meta(STAMP_META, -1)) == generation:
+	if targets.is_empty() and not force and int(root.get_meta(STAMP_META, -1)) == generation:
 		return 0
 	_binds += 1
 	if _binds % 32 == 0:
@@ -63,8 +63,9 @@ static func apply(root: Node, manifest: WorldManifest, force := false) -> int:
 	var region := LookGround.region_of(manifest)
 	var snow := snow_cover(manifest)
 	var foliage := 0.0 if region in WARM_REGIONS else 1.0
-	var nodes: Array[Node] = root.find_children("*", "MeshInstance3D", true, false)
-	if root is MeshInstance3D:
+	var nodes: Array[Node] = []
+	nodes.assign(targets if not targets.is_empty() else root.find_children("*", "MeshInstance3D", true, false))
+	if targets.is_empty() and root is MeshInstance3D:
 		nodes.push_front(root)
 	for node: Node in nodes:
 		var mesh_node := node as MeshInstance3D
@@ -96,7 +97,8 @@ static func apply(root: Node, manifest: WorldManifest, force := false) -> int:
 				if not batch_source.has_meta(META):
 					batch.material_override = material_for(batch_source, kind, mesh_node.mesh, snow, foliage)
 			changed += 1
-	root.set_meta(STAMP_META, generation)
+	if targets.is_empty():
+		root.set_meta(STAMP_META, generation)
 	return changed
 
 static func _label(node: Node, root: Node) -> String:
