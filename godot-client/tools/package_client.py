@@ -2306,7 +2306,8 @@ def wsl_path(path: Path) -> str:
 
 
 def smoke_launch(app_dir: Path, logs: Path, platform: dict, vram_textures: bool = False,
-                 pool_test: str | None = None, *, clean_feature_environment: bool = False) -> None:
+                 pool_test: str | None = None, *, clean_feature_environment: bool = False,
+                 optimization_profile: str | None = None, log_name: str = "smoke.log") -> None:
     # The launch must leave the package exactly as it was: a user:// that
     # falls back to a relative path writes settings and caches into app/,
     # and they would ship in the archive.
@@ -2319,14 +2320,15 @@ def smoke_launch(app_dir: Path, logs: Path, platform: dict, vram_textures: bool 
     before = {p for p in app_dir.parent.rglob("*")}
     try:
         text = _launch(app_dir, logs, platform, vram_textures, pool_test,
-                       clean_feature_environment=clean_feature_environment)
+                       clean_feature_environment=clean_feature_environment,
+                       optimization_profile=optimization_profile, log_name=log_name)
         for wanted, what in ((VRAM_SELF_TEST_OK, "a VRAM sidecar"),
                              (VRAM_SELF_TEST_POOL_OK if pool_test else None, "a sidecar another pool ships")):
             if wanted and vram_textures and text is not None and wanted not in text:
                 lines = [line for line in text.splitlines() if "vram_textures" in line]
                 raise PackageError(f"the exported client did not decode {what}:\n  "
                                    + "\n  ".join(lines[:10] or ["(no vram_textures line)"])
-                                   + f"\nfull log: {logs / 'smoke.log'}")
+                                   + f"\nfull log: {logs / log_name}")
     finally:
         added = sorted(p for p in app_dir.parent.rglob("*") if p not in before)
         if added:
@@ -2335,7 +2337,11 @@ def smoke_launch(app_dir: Path, logs: Path, platform: dict, vram_textures: bool 
 
 
 def _launch(app_dir: Path, logs: Path, platform: dict, vram_textures: bool = False,
-            pool_test: str | None = None, *, clean_feature_environment: bool = False) -> str | None:
+            pool_test: str | None = None, *, clean_feature_environment: bool = False,
+            optimization_profile: str | None = None, log_name: str = "smoke.log") -> str | None:
+    if optimization_profile not in (None, "legacy", "human-testing") or Path(log_name).name != log_name:
+        raise PackageError("smoke checks require a known profile and a scoped log filename")
+    profile_args = [] if optimization_profile is None else ["--", "--optimization-profile=" + optimization_profile]
     if platform.get("preset") == "macOS":
         return macos_package.smoke(app_dir, logs, run_godot, SMOKE_FAILURES)
     self_test = "ELORIA_VRAM_SELF_TEST=1 " if vram_textures else ""
@@ -2352,8 +2358,8 @@ def _launch(app_dir: Path, logs: Path, platform: dict, vram_textures: bool = Fal
                 env["ELORIA_VRAM_SELF_TEST"] = "1"
             if pool_dir:
                 env["ELORIA_VRAM_SELF_TEST_POOL"] = pool_dir
-            text = run_godot(app_dir / platform["binary"], ["--headless", "--quit-after", "600"],
-                             logs / "smoke.log", timeout=300, env=env)
+            text = run_godot(app_dir / platform["binary"], ["--headless", "--quit-after", "600", *profile_args],
+                             logs / log_name, timeout=300, env=env)
     elif os.name != "nt":
         log("smoke launch (headless, native Linux)")
         with tempfile.TemporaryDirectory(prefix="rabbitlands-smoke-") as userdir:
@@ -2364,8 +2370,8 @@ def _launch(app_dir: Path, logs: Path, platform: dict, vram_textures: bool = Fal
                 env["ELORIA_VRAM_SELF_TEST_POOL"] = pool_dir
             binary = app_dir / platform["binary"]
             binary.chmod(binary.stat().st_mode | 0o111)
-            text = run_godot(binary, ["--headless", "--quit-after", "600"],
-                             logs / "smoke.log", timeout=300, env=env, cwd=app_dir)
+            text = run_godot(binary, ["--headless", "--quit-after", "600", *profile_args],
+                             logs / log_name, timeout=300, env=env, cwd=app_dir)
     else:
         # The Linux binary runs under WSL, with a throwaway HOME for user://.
         wsl = shutil.which("wsl.exe") or shutil.which("wsl")
@@ -2374,18 +2380,18 @@ def _launch(app_dir: Path, logs: Path, platform: dict, vram_textures: bool = Fal
             log(f"smoke launch skipped: WSL distribution {WSL_DISTRO} is not available")
             return None
         log(f"smoke launch (headless, WSL {WSL_DISTRO})")
-        command = (f'home=$(mktemp -d) && cd "{wsl_path(app_dir)}" && '
-                   f'HOME="$home" XDG_DATA_HOME="$home" XDG_CONFIG_HOME="$home" {self_test}'
-                   f'./{platform["binary"]} --headless --quit-after 600; '
-                   f'status=$?; rm -rf "$home"; exit $status')
+        command = (f'rl_smoke_userdata=$(mktemp -d) && cd "{wsl_path(app_dir)}" && '
+                   f'HOME="$rl_smoke_userdata" XDG_DATA_HOME="$rl_smoke_userdata" XDG_CONFIG_HOME="$rl_smoke_userdata" {self_test}'
+                   f'./{platform["binary"]} --headless --quit-after 600 {" ".join(profile_args)}; '
+                   f'status=$?; rm -rf "$rl_smoke_userdata"; exit $status')
         # --exec, not --: "--" hands the line to the distro's login shell
         # first, which expands $home to nothing before sh ever sees it.
         text = run_godot(Path(wsl), ["-d", WSL_DISTRO, "--exec", "sh", "-c", command],
-                         logs / "smoke.log", timeout=300)
+                         logs / log_name, timeout=300)
     hits = [line for line in text.splitlines() if any(f in line for f in SMOKE_FAILURES)]
     if hits:
         raise PackageError("the exported client reported errors at startup:\n  "
-                           + "\n  ".join(hits[:30]) + f"\nfull log: {logs / 'smoke.log'}")
+                           + "\n  ".join(hits[:30]) + f"\nfull log: {logs / log_name}")
     return text
 
 
@@ -3228,6 +3234,10 @@ def _main(argv=None, storage=None) -> int:
                          **({"clean_feature_environment": True} if optimization else {}))
         if optimization:
             optimization.record_startup(logs / "smoke.log")
+            smoke_launch(app_dir, logs, platform, vram_textures=not options.no_vram_textures,
+                pool_test=pooled_sidecar_directory(stage), clean_feature_environment=True,
+                optimization_profile="human-testing", log_name="smoke-human-testing.log")
+            optimization.record_startup(logs / "smoke-human-testing.log", profile="human-testing")
             optimization.check_final_package()
             write_json = full_optimization_package.write_json
             write_json(logs / "optimization-proof.json", optimization.proof())

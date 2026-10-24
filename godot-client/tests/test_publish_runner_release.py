@@ -15,9 +15,11 @@ SHA, OLD = "a" * 40, "b" * 40
 def optimization_proof(platform):
     return {"policy": optimization.POLICY, "status": "verified_before_signing", "commit": SHA,
             "platform": platform, "features": optimization.FEATURES,
+            "default_features": optimization.DEFAULT_FEATURES, "default_profile": "legacy", "opt_in_profile": "human-testing",
             "receipt_sha256": "1" * 64, "native_source_digest": "2" * 64,
             "catalog_sha256": ("3" if platform == "windows" else "4") * 64,
-            "coverage_sha256": "5" * 64, "entries": 6}
+            "coverage_sha256": "5" * 64, "entries": 6,
+            "ordinary_startup_sha256": "6" * 64, "opt_in_startup_sha256": "7" * 64}
 
 
 def context(tmp_path, monkeypatch):
@@ -100,7 +102,8 @@ def test_publishes_latest_after_all_downloads_verify_then_cleans_old_releases(tm
     assert "Published" in (tmp_path / "summary").read_text()
 
 
-@pytest.mark.parametrize("problem", ["missing", "missing-linux", "unverified", "wrong-commit", "source-mismatch", "coverage-mismatch"])
+@pytest.mark.parametrize("problem", ["missing", "missing-linux", "unverified", "wrong-commit", "source-mismatch", "coverage-mismatch",
+                                     "enabled-default", "missing-opt-in", "old-policy"])
 def test_publication_requires_both_exact_optimization_proofs(tmp_path, monkeypatch, problem):
     path, receipt, _, current, _, calls = context(tmp_path, monkeypatch)
     if problem == "missing":
@@ -110,7 +113,10 @@ def test_publication_requires_both_exact_optimization_proofs(tmp_path, monkeypat
     else:
         field, value = {"unverified": ("status", "pending"), "wrong-commit": ("commit", OLD),
                         "source-mismatch": ("native_source_digest", "f" * 64),
-                        "coverage-mismatch": ("coverage_sha256", "f" * 64)}[problem]
+                        "coverage-mismatch": ("coverage_sha256", "f" * 64),
+                        "enabled-default": ("default_features", optimization.FEATURES),
+                        "missing-opt-in": ("opt_in_startup_sha256", ""),
+                        "old-policy": ("policy", "rl-full-optimization-package-v1")}[problem]
         receipt["optimizations"]["linux"][field] = value
     path.write_text(json.dumps(receipt))
     with pytest.raises(ValueError):

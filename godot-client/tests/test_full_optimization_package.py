@@ -17,11 +17,18 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 import full_optimization_package as full
 
 COMMIT = "a" * 40
-PROFILE = {"profile": {"features": dict(full.FEATURES)},
+OPT_IN_PROFILE = {"profile": {"features": dict(full.FEATURES), "profile": "human-testing",
+                            "human_testing": True, "reason": "human_testing_selected"},
            "runtime": {"mode": "rust", "native_available": True},
            "remote": {"backend": "rust"}, "admission": {"mode": "rust", "worker_limit": 1},
            "prepared": {"catalog_present": True, "mode": "auto", "node_policy": "lazy-source-v1"},
            "effects": {"requested": "heat_bolt"}}
+PROFILE = {"profile": {"features": dict(full.DEFAULT_FEATURES), "profile": "legacy",
+                       "human_testing": False, "reason": "default_legacy"},
+           "runtime": {"mode": "legacy", "native_available": False},
+           "remote": {"backend": "legacy"}, "admission": {"mode": "legacy", "requested": False},
+           "prepared": {"catalog_present": True, "mode": "raw", "node_policy": "retain"},
+           "effects": {"requested": "legacy"}}
 
 
 def startup(value=None):
@@ -124,21 +131,41 @@ def guard_editor(build):
                                    else "RabbitLands-release-guard-editor.x86_64")
 
 
-def test_ordinary_startup_requires_exact_six_features_and_actual_backends():
-    assert full.validate_startup(startup()) == PROFILE
+def test_explicit_opt_in_startup_requires_exact_six_features_and_actual_backends():
+    assert full.validate_startup(startup(OPT_IN_PROFILE), profile="human-testing") == OPT_IN_PROFILE
     for path, value in (("runtime", {"mode": "legacy", "native_available": False}),
                         ("remote", {"backend": "legacy"}),
                         ("admission", {"mode": "rust", "worker_limit": 2}),
                         ("prepared", {"catalog_present": False, "mode": "auto", "node_policy": "retain"}),
                         ("effects", {"requested": "legacy"})):
-        candidate = copy.deepcopy(PROFILE)
+        candidate = copy.deepcopy(OPT_IN_PROFILE)
         candidate[path] = value
         with pytest.raises(ValueError):
-            full.validate_startup(startup(candidate))
-    changed = copy.deepcopy(PROFILE)
+            full.validate_startup(startup(candidate), profile="human-testing")
+    changed = copy.deepcopy(OPT_IN_PROFILE)
     changed["profile"]["features"]["prepared_content"] = "raw"
     with pytest.raises(ValueError):
+        full.validate_startup(startup(changed), profile="human-testing")
+
+
+def test_ordinary_startup_requires_true_default_off_without_profile_override():
+    assert full.validate_startup(startup()) == PROFILE
+    for key, value in (("runtime", {"mode": "rust", "native_available": True}),
+                       ("remote", {"backend": "rust"}), ("admission", {"mode": "rust"}),
+                       ("prepared", {"catalog_present": True, "mode": "auto", "node_policy": "lazy-source-v1"}),
+                       ("effects", {"requested": "heat_bolt"})):
+        changed = copy.deepcopy(PROFILE)
+        changed[key] = value
+        with pytest.raises(ValueError):
+            full.validate_startup(startup(changed))
+    changed = copy.deepcopy(PROFILE)
+    changed["profile"]["reason"] = "legacy_selected"
+    with pytest.raises(ValueError):
         full.validate_startup(startup(changed))
+    with pytest.raises(ValueError):
+        full.validate_startup(startup(OPT_IN_PROFILE))
+    with pytest.raises(ValueError):
+        full.validate_startup(startup(), profile="human-testing")
 
 
 @pytest.mark.parametrize("text", ["", "ordinary game opened\n", startup() + startup()])
@@ -163,10 +190,18 @@ def test_final_pck_checks_all_qualities_exact_identities_and_isolated_jobs(conte
     log = build.root / "ordinary.log"
     log.write_text(startup())
     build.record_startup(log)
+    with pytest.raises(ValueError, match="incomplete"):
+        build.proof()  # Ordinary off does not prove explicit opt-in works.
+    opt_in_log = build.root / "opt-in.log"
+    opt_in_log.write_text(startup(OPT_IN_PROFILE))
+    build.record_startup(opt_in_log, profile="human-testing")
     proof = build.proof()
     assert proof["catalog_sha256"] == full.native.sha256(build.project / "prepared-content/index.json")
     assert proof["receipt_sha256"] == full.native.sha256(build.root / "full-optimizations.json")
     assert proof["commit"] == COMMIT and proof["platform"] == "windows"
+    assert proof["default_profile"] == "legacy" and proof["default_features"] == full.DEFAULT_FEATURES
+    assert proof["opt_in_profile"] == "human-testing" and proof["features"] == full.FEATURES
+    assert proof["ordinary_startup_sha256"] != proof["opt_in_startup_sha256"]
 
 
 @pytest.mark.parametrize("problem", ["no-export", "wrong-coverage", "failed-report", "wrong-catalog", "missing-entry", "extra-entry", "stage-write",
@@ -454,7 +489,7 @@ def scratch_retirement_ready(build):
     generation = build.root / "prepared-work/generation/prepared-content"
     shutil.copytree(source, generation)
     build.receipt["prepared"].update(catalog=str(generation / "index.json"), selected_source_inputs_restored=True)
-    build.receipt.update(status="verified_before_signing", ordinary_startup=PROFILE)
+    build.receipt.update(status="verified_before_signing", ordinary_startup=PROFILE, opt_in_startup=OPT_IN_PROFILE)
     build.save()
     return source, generation
 
@@ -530,6 +565,12 @@ def test_package_call_order_dominates_the_first_signing_and_upload_boundary():
                 "optimization.proof", "client_release.publish_artifacts"]
     assert all(name in calls for name in sequence)
     assert [min(calls[name]) for name in sequence] == sorted(min(calls[name]) for name in sequence)
+    assert len(calls["optimization.record_startup"]) == 2
+    assert max(calls["optimization.record_startup"]) < min(calls["optimization.check_final_package"])
+    opt_in = [node for node in ast.walk(main) if isinstance(node, ast.Call) and ast.unparse(node.func) == "smoke_launch"
+              and any(keyword.arg == "optimization_profile" and isinstance(keyword.value, ast.Constant)
+                      and keyword.value.value == "human-testing" for keyword in node.keywords)]
+    assert len(opt_in) == 1
     # Archive/install paths are downstream of the same pre-publication gates.
     for name in ("make_zip", "make_tarball", "make_online_installer", "make_installer"):
         assert min(calls["optimization.proof"]) < min(calls[name])
@@ -537,14 +578,48 @@ def test_package_call_order_dominates_the_first_signing_and_upload_boundary():
 
 @pytest.mark.parametrize("field,value", [("status", "pending"), ("commit", "b" * 40),
     ("platform", "linux"), ("entries", 0), ("entries", True), ("receipt_sha256", "not-sha"),
-    ("native_source_digest", ""), ("coverage_sha256", "f" * 63)])
+    ("native_source_digest", ""), ("coverage_sha256", "f" * 63), ("policy", "rl-full-optimization-package-v1"),
+    ("default_profile", "human-testing"), ("opt_in_profile", "legacy"), ("default_features", dict(full.FEATURES)),
+    ("ordinary_startup_sha256", ""), ("opt_in_startup_sha256", "not-sha")])
 def test_unverified_or_wrong_identity_proof_is_rejected(field, value):
     proof = {"policy": full.POLICY, "status": "verified_before_signing", "commit": COMMIT,
              "platform": "windows", "features": dict(full.FEATURES), "entries": 6,
-             **{name: "c" * 64 for name in ("receipt_sha256", "native_source_digest", "catalog_sha256", "coverage_sha256")}}
+             "default_features": dict(full.DEFAULT_FEATURES), "default_profile": "legacy", "opt_in_profile": "human-testing",
+             **{name: "c" * 64 for name in ("receipt_sha256", "native_source_digest", "catalog_sha256", "coverage_sha256",
+                                           "ordinary_startup_sha256", "opt_in_startup_sha256")}}
+    assert full.validate_proof(proof, COMMIT, "windows") == proof
     proof[field] = value
     with pytest.raises(ValueError):
         full.validate_proof(proof, COMMIT, "windows")
+
+
+@pytest.mark.parametrize("profile", [None, "human-testing"])
+def test_packaged_smoke_uses_no_default_override_and_separate_explicit_opt_in(tmp_path, monkeypatch, profile):
+    import package_client as package
+    stage = tmp_path / "package"
+    app, logs = stage / "app", tmp_path / "logs"
+    app.mkdir(parents=True)
+    logs.mkdir()
+    (app / "RabbitLands.exe").write_bytes(b"fixture; never executed")
+    monkeypatch.setenv("RABBITLANDS_OPTIMIZATION_PROFILE", "human-testing")
+    monkeypatch.setenv("RABBITLANDS_CLIENT_RUNTIME", "rust")
+    monkeypatch.setenv("GH_TOKEN", "fixture-not-a-secret")
+    calls = []
+    def launch(binary, arguments, log, **kwargs):
+        assert binary == app / "RabbitLands.exe"
+        assert all(key not in kwargs["env"] for key in
+                   ("RABBITLANDS_OPTIMIZATION_PROFILE", "RABBITLANDS_CLIENT_RUNTIME", "GH_TOKEN"))
+        assert Path(kwargs["env"]["APPDATA"]).is_dir()
+        calls.append((arguments, log, kwargs["env"]["APPDATA"]))
+        return "fixture startup\n"
+    monkeypatch.setattr(package, "run_godot", launch)
+    name = "smoke.log" if profile is None else "smoke-human-testing.log"
+    package.smoke_launch(app, logs, {"preset": "Windows Desktop", "binary": "RabbitLands.exe"},
+        clean_feature_environment=True, optimization_profile=profile, log_name=name)
+    assert calls[0][0] == ["--headless", "--quit-after", "600", *([] if profile is None else
+                            ["--", "--optimization-profile=human-testing"])]
+    assert calls[0][1] == logs / name
+    assert not Path(calls[0][2]).exists()
 
 
 def test_engine_failure_stops_only_owned_child_and_filters_secrets(context, monkeypatch):

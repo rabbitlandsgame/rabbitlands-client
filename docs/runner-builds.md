@@ -33,13 +33,14 @@ An in-progress replacement draft is preserved.
 
 ## Full optimization packages
 
-Both hosted desktop jobs use `--full-optimizations`. Ordinary launches select
-the `human-testing` defaults: Rust mounted poses, remote presentation and heat
-bolts, Rust resource admission, prepared content in `auto` mode, and the
-`lazy-source-v1` object policy. Supported participants use those paths; other
-content retains its documented fallback. This build policy is not a claim of
-better performance on every renderer or device. See [optimization testing](client-optimization-testing.md)
-for the legacy control and human checks.
+Both hosted desktop jobs use `--full-optimizations` to package and qualify the
+optional optimization paths. Ordinary launches default to `legacy`: the newer
+native backends and prepared-content paths remain off. Explicitly selecting
+`--optimization-profile=human-testing` enables Rust mounted poses, remote
+presentation and heat bolts, Rust resource admission, prepared content in `auto`
+mode, and the `lazy-source-v1` object policy. Earlier graphics improvements and
+the water-texture fix remain available in ordinary launches. This build policy
+is not a performance claim. See [optimization testing](client-optimization-testing.md).
 
 Each native Windows/Linux job builds the pinned Rust/Godot adapter or restores
 a separate payload-only native cache. Its key includes committed native sources,
@@ -57,7 +58,15 @@ exact planned sources and resulting entry identities are recorded; an old
 entry count is not evidence that a new generation is complete. Only the
 selected pilot is cooked, rather than the entire world.
 
-Cooking needs real rendering-resource storage. Windows requests D3D12 WARP;
+Before compiling or loading game assets, a tiny isolated project qualifies the
+actual renderer and saves its observations. Windows identifies system WARP by
+its DXGI adapter identity in Godot's adapter order; a guessed index or matching
+display name is insufficient. The engine must still report a CPU adapter, the
+required texture formats and a successful native buffer save/reload. Temporary
+probe projects and user caches are retired after verification, with reports and
+logs retained in diagnostics.
+
+Cooking needs real rendering-resource storage. Windows uses D3D12 WARP;
 Linux uses Mesa llvmpipe under Xvfb with the Compatibility renderer. These are
 build-time software renderers, not drivers shipped with the game. Each job
 selects dummy audio so qualification does not require a hosted audio device.
@@ -68,12 +77,16 @@ unexpected hardware adapter or unsupported format mask fails qualification;
 the tools do not manufacture a capability token.
 
 Before signing or uploading game parts, the build requires positive native
-contract checks, ordinary startup with all six defaults, and acquisition of
+contract checks, ordinary startup with the newer features off, a separate explicit
+`human-testing` startup with all six paths active, and acquisition of
 every planned entry from the final normal PCK at each texture quality. The
 guard checks exact source/catalog/entry identities, readable resource buffers,
 lazy restoration and owned cleanup using isolated user data outside the
 package. It rejects engine errors, skipped work and changes to the stage.
 Neither a benchmark PCK nor source-project resource fallback qualifies a release.
+The version 2 optimization proof binds both startup snapshots and their profile
+defaults. Earlier proofs that only qualified an enabled-by-default launch cannot
+publish a new release under this policy.
 The final-PCK guard temporarily runs the verified editor beside the package's
 PCK because release templates do not support the external check script. Its
 bytes are verified, its copy is budgeted, and it is removed on success or failure

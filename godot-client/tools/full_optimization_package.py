@@ -17,9 +17,11 @@ import release_native_runtime
 import release_prepared_content
 import release_software_graphics as graphics
 
-POLICY = "rl-full-optimization-package-v1"
+POLICY = "rl-full-optimization-package-v2"
 FEATURES = dict(client_runtime="rust", remote_presentation="rust", rust_effects="heat_bolt",
                 resource_admission="rust", prepared_content="auto", prepared_node_policy="lazy-source-v1")
+DEFAULT_FEATURES = dict(client_runtime="legacy", remote_presentation="legacy", rust_effects="legacy",
+                        resource_admission="legacy", prepared_content="raw", prepared_node_policy="retain")
 ANSI = re.compile(r"\x1b\[[0-?]*[ -/]*[@-~]")
 ERROR = re.compile(r"(?m)^(?:USER )?(?:SCRIPT ERROR:|SHADER ERROR:|ERROR:|FATAL(?: ERROR)?:)|"
                    r"ObjectDB instances (?:were )?leaked|RID allocations.*leaked|"
@@ -48,14 +50,29 @@ def clean_environment(base=None):
     return result
 
 
-def validate_startup(text):
+def validate_startup(text, *, profile="legacy"):
     lines = [line.removeprefix("RABBITLANDS_OPTIMIZATION_STARTUP ") for line in text.splitlines()
              if line.startswith("RABBITLANDS_OPTIMIZATION_STARTUP ")]
-    require(len(lines) == 1, "ordinary final package must emit exactly one optimization startup receipt")
+    require(profile in {"legacy", "human-testing"}, "unknown startup qualification profile")
+    require(len(lines) == 1, "final package must emit exactly one optimization startup receipt")
     value = json.loads(lines[0])
-    require(value["profile"]["features"] == FEATURES, "ordinary release did not select all six human-testing defaults")
+    active = profile == "human-testing"
+    require(value["profile"]["features"] == (FEATURES if active else DEFAULT_FEATURES)
+            and value["profile"].get("profile") == profile
+            and value["profile"].get("human_testing") is active
+            and value["profile"].get("reason") == ("human_testing_selected" if active else "default_legacy"),
+            "final package did not select the exact default-off or explicit opt-in profile")
+    if not active:
+        require(value["runtime"]["mode"] == "legacy" and value["runtime"]["native_available"] is False
+                and value["remote"]["backend"] == "legacy"
+                and value["admission"]["mode"] == "legacy",
+                "ordinary release unexpectedly activated an experimental native backend")
+        require(value["prepared"] == {"catalog_present": True, "mode": "raw", "node_policy": "retain"}
+                and value["effects"]["requested"] == "legacy",
+                "ordinary release unexpectedly activated prepared content or native effects")
+        return value
     require(value["runtime"]["mode"] == "rust" and value["runtime"]["native_available"] is True,
-            "ordinary final package silently fell back from its native runtime")
+            "explicit opt-in final package silently fell back from its native runtime")
     require(value["remote"]["backend"] == "rust", "ordinary final package did not activate native remote presentation")
     require(value["admission"]["mode"] == "rust" and value["admission"]["worker_limit"] == 1,
             "ordinary final package did not activate bounded native resource admission")
@@ -70,9 +87,12 @@ def validate_startup(text):
 def validate_proof(proof, commit, platform):
     require(isinstance(proof, dict) and proof.get("policy") == POLICY
             and proof.get("status") == "verified_before_signing" and proof.get("commit") == commit
-            and proof.get("platform") == platform and proof.get("features") == FEATURES,
+            and proof.get("platform") == platform and proof.get("features") == FEATURES
+            and proof.get("default_features") == DEFAULT_FEATURES
+            and proof.get("default_profile") == "legacy" and proof.get("opt_in_profile") == "human-testing",
             "release lacks verified full optimization proof for " + platform)
-    for field in ("receipt_sha256", "native_source_digest", "catalog_sha256", "coverage_sha256"):
+    for field in ("receipt_sha256", "native_source_digest", "catalog_sha256", "coverage_sha256",
+                  "ordinary_startup_sha256", "opt_in_startup_sha256"):
         require(re.fullmatch(r"[0-9a-f]{64}", str(proof.get(field, ""))), "invalid optimization proof " + field)
     require(type(proof.get("entries")) is int and proof["entries"] > 0, "optimization proof has no prepared entries")
     return proof
@@ -106,7 +126,9 @@ class FullOptimizationBuild:
                 "optimization work must be outside source and final stage")
         self.root.mkdir(parents=True)
         self.receipt = {"schema": 1, "policy": POLICY, "status": "incomplete", "commit": commit,
-                        "platform": platform, "features": FEATURES, "native_checks": [], "prepared_checks": []}
+                        "platform": platform, "features": dict(FEATURES), "default_features": dict(DEFAULT_FEATURES),
+                        "default_profile": "legacy", "opt_in_profile": "human-testing",
+                        "native_checks": [], "prepared_checks": []}
         self.budget_callback = check_budget
         self.native_bootstrap = native_bootstrap
         self.graphics = graphics.prepare_graphics(platform, self.godot.parent, self.godot.parent,
@@ -362,18 +384,27 @@ class FullOptimizationBuild:
             self.receipt["prepared_checks"].append(evidence)
             self.save()
 
-    def record_startup(self, log):
-        self.receipt["ordinary_startup"] = validate_startup(Path(log).read_text(encoding="utf-8-sig"))
+    def record_startup(self, log, *, profile="legacy"):
+        value = validate_startup(Path(log).read_text(encoding="utf-8-sig"), profile=profile)
+        self.receipt["ordinary_startup" if profile == "legacy" else "opt_in_startup"] = value
         self.save()
 
     def proof(self):
-        require(self.receipt["status"] == "verified_before_signing" and self.receipt.get("ordinary_startup"),
+        require(self.receipt["status"] == "verified_before_signing" and self.receipt.get("ordinary_startup")
+                and self.receipt.get("opt_in_startup"),
                 "full optimization package has incomplete pre-publication proof")
+        startups = {}
+        for key, profile in (("ordinary_startup", "legacy"), ("opt_in_startup", "human-testing")):
+            data = json.dumps(self.receipt[key], sort_keys=True, separators=(",", ":"), allow_nan=False)
+            validate_startup("RABBITLANDS_OPTIMIZATION_STARTUP " + data, profile=profile)
+            startups[key + "_sha256"] = hashlib.sha256(data.encode()).hexdigest()
         value = {"policy": POLICY, "status": self.receipt["status"], "commit": self.commit,
                 "platform": self.platform, "receipt_sha256": native.sha256(self.root / "full-optimizations.json"),
                 "native_source_digest": self.receipt["native"]["source"]["source_digest"],
                 "catalog_sha256": self.receipt["prepared_export"]["catalog_sha256"],
                 "coverage_sha256": hashlib.sha256(json.dumps(self.receipt["prepared"]["required_entries"],
                     sort_keys=True, separators=(",", ":")).encode()).hexdigest(),
-                "entries": self.receipt["prepared"]["entries"], "features": FEATURES}
+                "entries": self.receipt["prepared"]["entries"], "features": dict(FEATURES),
+                "default_features": dict(DEFAULT_FEATURES), "default_profile": "legacy", "opt_in_profile": "human-testing",
+                **startups}
         return validate_proof(value, self.commit, self.platform)

@@ -17,9 +17,11 @@ SHA = "a" * 40
 def optimization_proof(platform):
     return {"policy": optimization.POLICY, "status": "verified_before_signing", "commit": SHA,
             "platform": platform, "features": optimization.FEATURES,
+            "default_features": optimization.DEFAULT_FEATURES, "default_profile": "legacy", "opt_in_profile": "human-testing",
             "receipt_sha256": "1" * 64, "native_source_digest": "2" * 64,
             "catalog_sha256": ("3" if platform == "windows" else "4") * 64,
-            "coverage_sha256": "5" * 64, "entries": 6}
+            "coverage_sha256": "5" * 64, "entries": 6,
+            "ordinary_startup_sha256": "6" * 64, "opt_in_startup_sha256": "7" * 64}
 
 
 def fixture(tmp_path, monkeypatch, *, corrupt=False):
@@ -115,7 +117,8 @@ def test_different_platform_commits_cannot_be_finalized(tmp_path, monkeypatch):
     assert calls == []
 
 
-@pytest.mark.parametrize("problem", ["missing", "unverified", "wrong-platform", "source-mismatch", "coverage-mismatch"])
+@pytest.mark.parametrize("problem", ["missing", "unverified", "wrong-platform", "source-mismatch", "coverage-mismatch",
+                                     "enabled-default", "missing-opt-in", "old-policy"])
 def test_invalid_optimization_proofs_stop_before_any_cloud_write(tmp_path, monkeypatch, problem):
     receipts, _, calls = fixture(tmp_path, monkeypatch)
     value = json.loads(receipts[1].read_text())
@@ -125,6 +128,11 @@ def test_invalid_optimization_proofs_stop_before_any_cloud_write(tmp_path, monke
         value["optimizations"]["status"] = "pending"
     elif problem == "wrong-platform":
         value["optimizations"]["platform"] = "windows"
+    elif problem in {"enabled-default", "missing-opt-in", "old-policy"}:
+        field, replacement = {"enabled-default": ("default_features", optimization.FEATURES),
+                              "missing-opt-in": ("opt_in_startup_sha256", ""),
+                              "old-policy": ("policy", "rl-full-optimization-package-v1")}[problem]
+        value["optimizations"][field] = replacement
     else:
         field = "native_source_digest" if problem == "source-mismatch" else "coverage_sha256"
         value["optimizations"][field] = "f" * 64
