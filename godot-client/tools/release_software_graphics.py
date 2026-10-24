@@ -114,7 +114,9 @@ def cook_command(config, argv):
             "resource cooking requires a real renderer, not --headless")
     wanted = {"--rendering-method": config["rendering_method"],
               "--rendering-driver": config["rendering_driver"],
-              "--display-driver": config["display_driver"]}
+              "--display-driver": config["display_driver"],
+              # Build checks need real graphics resources, but no audio device.
+              "--audio-driver": "Dummy"}
     if config["gpu_index"] is not None:
         wanted["--gpu-index"] = str(config["gpu_index"])
     existing = {}
