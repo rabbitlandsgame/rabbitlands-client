@@ -204,6 +204,73 @@ func _expect_autoloads() -> bool:
 	_expect(ready, "deferred fixture starts after Network and AppState registration")
 	return ready
 
+func _raw_discovery_bypass(label: String) -> void:
+	var raw := Node3D.new()
+	for _branch: int in 64:
+		var branch := Node3D.new()
+		raw.add_child(branch)
+		for _leaf: int in 4:
+			branch.add_child(Node3D.new())
+	var before := Placements.discovery_snapshot()
+	_expect(Placements.handles(raw).is_empty(), label + ": raw tree has no placement handles")
+	Placements.restore_named(raw, {"never-present": true})
+	var after := Placements.discovery_snapshot()
+	_expect(int(after.calls) == int(before.calls) + 2
+		and int(after.fast_bypasses) == int(before.fast_bypasses) + 2
+		and int(after.nodes_visited) == int(before.nodes_visited),
+		label + ": neither direct discovery nor named binding visits the 320 descendants")
+	raw.free()
+
+func _legacy_registry_discovery(scene: PackedScene, manifest: WorldManifest) -> void:
+	var names: Array[String] = ["RABBITLANDS_OPTIMIZATION_PROFILE", "RABBITLANDS_PREPARED_CONTENT",
+		"RABBITLANDS_PREPARED_NODE_POLICY"]
+	var saved: Dictionary = {}
+	for name: String in names:
+		saved[name] = {"present": OS.has_environment(name), "value": OS.get_environment(name)}
+	OS.set_environment(names[0], "legacy")
+	OS.set_environment(names[1], "raw")
+	OS.set_environment(names[2], "retain")
+	var wrapper := Node3D.new()
+	root.add_child(wrapper)
+	var imported := Lifecycle.instantiate({"status": "hit", "resource": scene, "entry": {}})
+	wrapper.add_child(imported)
+	_relink(imported)
+	Placements.install(imported, manifest, {})
+	var before := Placements.discovery_snapshot()
+	var handles := Placements.handles(wrapper)
+	var after := Placements.discovery_snapshot()
+	_expect(Placements.selected_policy() == "retain" and Placements.Prepared.selected_mode() == "raw",
+		"installed-registry control explicitly requests legacy/raw/retain")
+	_expect(handles.size() == 5 and int(after.nodes_visited) > int(before.nodes_visited),
+		"nested installed registries keep their original traversal under legacy/raw/retain")
+	if not handles.is_empty():
+		Surfaces.set_season({"index": 3})
+		Surfaces.apply(imported, manifest, true)
+		Placements.restore_named(wrapper, {str(handles[0].row.name): true})
+		var restored: MeshInstance3D = handles[0].node()
+		_expect(restored != null and handles[0].pinned and restored.get_active_material(0).has_meta(Surfaces.META),
+			"profile changes do not strand installed handles or skip deferred season/material binding")
+		Surfaces.set_season({})
+	var reference: WeakRef = weakref(imported)
+	wrapper.free()
+	_expect(reference.get_ref() == null, "weak registry index does not pin installed roots")
+	for name: String in names:
+		if bool(saved[name].present):
+			OS.set_environment(name, str(saved[name].value))
+		else:
+			OS.unset_environment(name)
+	_raw_discovery_bypass("After installed-root release")
+	# A direct caller may carry existing runtime metadata from before the
+	# index was populated. It must remain discoverable without a policy gate.
+	var direct := Node3D.new()
+	var registry := Placements.Registry.new()
+	var direct_handle := Placements.Handle.new()
+	registry.handles.append(direct_handle)
+	direct.set_meta(Placements.REGISTRY, registry)
+	_expect(Placements.handles(direct) == [direct_handle], "direct-root registry metadata remains discoverable")
+	direct.free()
+	_raw_discovery_bypass("After direct metadata-root release")
+
 func _run() -> void:
 	# A SceneTree --script is parsed before autoload singleton registration.
 	# Main must compile only after deferred startup; these checks use its real
@@ -214,6 +281,7 @@ func _run() -> void:
 	var main_script: Script = load("res://src/app/main.gd")
 	var old_look := OS.get_environment(LookProfile.ENABLE_VARIABLE)
 	OS.set_environment(LookProfile.ENABLE_VARIABLE, "0")
+	_raw_discovery_bypass("Fresh legacy/raw process")
 	var manifest := WorldManifest.new()
 	manifest.data = {"asset": {"id": "amberwood__chunk_fixture"}, "continentGeography": {},
 		"environment": {"sun": {"enabled": true}}}
@@ -224,6 +292,7 @@ func _run() -> void:
 		quit(1)
 		return
 	_check_packed_ownership(source, reduced.scene as PackedScene)
+	_legacy_registry_discovery(reduced.scene as PackedScene, manifest)
 	_foreign_thread_restore(reduced.scene as PackedScene, manifest)
 	await _publication_callbacks(reduced.scene as PackedScene, manifest)
 	var stats: Dictionary = reduced.stats

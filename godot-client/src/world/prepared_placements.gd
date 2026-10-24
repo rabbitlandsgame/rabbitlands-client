@@ -16,6 +16,11 @@ const Ownership := preload("res://src/world/prepared_material_ownership.gd")
 const Prepared := preload("res://src/world/prepared_content.gd")
 const Vram := preload("res://src/world/vram_textures.gd")
 const SeasonSurfaces := preload("res://src/world/season_surfaces.gd")
+static var _registry_mutex := Mutex.new()
+static var _registry_roots: Dictionary = {}
+static var _discovery_calls := 0
+static var _discovery_fast_bypasses := 0
+static var _discovery_nodes_visited := 0
 
 class Handle extends RefCounted:
 	var root_ref: WeakRef
@@ -369,7 +374,12 @@ static func cook_reduce(packed: PackedScene, manifest: WorldManifest, identity: 
 	return {"scene": result, "stats": stats} if error == OK else {}
 
 static func install(root: Node3D, manifest: WorldManifest, entry: Dictionary) -> void:
-	if root == null or not root.has_meta(DATA) or root.has_meta(REGISTRY):
+	if root == null:
+		return
+	if root.has_meta(REGISTRY):
+		_remember_registry(root)
+		return
+	if not root.has_meta(DATA):
 		return
 	var data: Dictionary = root.get_meta(DATA)
 	var registry := Registry.new()
@@ -386,18 +396,81 @@ static func install(root: Node3D, manifest: WorldManifest, entry: Dictionary) ->
 		handle.manifest = manifest
 		registry.handles.append(handle)
 	root.set_meta(REGISTRY, registry)
+	_remember_registry(root)
+
+static func _remember_registry(root: Node) -> void:
+	var identity := root.get_instance_id()
+	var reference: WeakRef = weakref(root)
+	_registry_mutex.lock()
+	_registry_roots[identity] = reference
+	_registry_mutex.unlock()
+
+static func _registries_possible() -> bool:
+	_registry_mutex.lock()
+	if _registry_roots.is_empty():
+		_registry_mutex.unlock()
+		return false
+	var references := _registry_roots.duplicate()
+	_registry_mutex.unlock()
+	var possible := false
+	var expired: Dictionary = {}
+	for identity: int in references:
+		var reference := references[identity] as WeakRef
+		# Another owner may be building/freeing a detached registry root. A
+		# live WeakRef is sufficient; never inspect that foreign Node here.
+		if reference != null and reference.get_ref() != null:
+			possible = true
+		else:
+			expired[identity] = reference
+	if not expired.is_empty():
+		_registry_mutex.lock()
+		for identity: int in expired:
+			if _registry_roots.get(identity) == expired[identity]:
+				_registry_roots.erase(identity)
+		_registry_mutex.unlock()
+	return possible
+
+static func _record_discovery(visited: int, bypassed: bool) -> void:
+	_registry_mutex.lock()
+	_discovery_calls += 1
+	_discovery_nodes_visited += visited
+	_discovery_fast_bypasses += 1 if bypassed else 0
+	_registry_mutex.unlock()
+
+## Plain aggregate counters: no tree walk, Resource ownership or expiry work.
+static func discovery_snapshot() -> Dictionary:
+	_registry_mutex.lock()
+	var result := {"calls": _discovery_calls, "fast_bypasses": _discovery_fast_bypasses,
+		"nodes_visited": _discovery_nodes_visited, "weak_registry_slots": _registry_roots.size()}
+	_registry_mutex.unlock()
+	return result
 
 static func handles(root: Node) -> Array[Handle]:
 	var result: Array[Handle] = []
 	if root == null or root.is_queued_for_deletion():
 		return result
+	# Retained/live registries keep working even if the requested profile has
+	# changed. A fresh raw session has none, so its discovery costs no tree walk.
+	if root.has_meta(REGISTRY):
+		_remember_registry(root)
+	elif not _registries_possible():
+		_record_discovery(0, true)
+		return result
+	var visited := _collect_handles(root, result)
+	_record_discovery(visited, false)
+	return result
+
+static func _collect_handles(root: Node, result: Array[Handle]) -> int:
+	if root.is_queued_for_deletion():
+		return 0
+	var visited := 1
 	if root.has_meta(REGISTRY):
 		var registry := root.get_meta(REGISTRY) as Registry
 		if registry != null:
 			result.append_array(registry.handles)
 	for child: Node in root.get_children():
-		result.append_array(handles(child))
-	return result
+		visited += _collect_handles(child, result)
+	return visited
 
 static func restore_named(root: Node, names: Dictionary) -> void:
 	# Restore matching leaves before the existing breadth-first lookup so name
