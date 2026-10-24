@@ -13,6 +13,8 @@ const MapMeshExtension := preload("res://src/world/map_mesh_extension.gd")
 const ArchivedModelPolicy := preload("res://src/actors/archived_model_policy.gd")
 const UndergroundScenery := preload("res://src/world/underground_scenery.gd")
 const ResourceDiagnostics := preload("res://src/world/resource_diagnostics.gd")
+const PreparedContent := preload("res://src/world/prepared_content.gd")
+const PreparedLifecycle := preload("res://src/world/prepared_scene_lifecycle.gd")
 const GauntletSurfaceContrast := preload("res://src/world/gauntlet_surface_contrast.gd")
 
 # Static-instance batching. A region such as Four Gates imports ~1700 mesh
@@ -142,27 +144,38 @@ var _collision_shapes: Dictionary = {}
 var detached_build := false
 var detached_cache_enabled := true
 var _prepared_visuals: Dictionary = {}
+var _prepared_native: Dictionary = {}
+var _skip_prepared_lookup := false
+var _deferred_stream_arrival := Vector3.INF
+var _main_stream_prime_requested := false
 
-static func prepare_detached(path: String, cache_enabled: bool, visual_paths := PackedStringArray(), arrival := Vector3.INF) -> WorldLoader:
+static func prepare_detached(path: String, cache_enabled: bool, visual_paths := PackedStringArray(), arrival := Vector3.INF, defer_stream_prime := false) -> WorldLoader:
 	var builder := WorldLoader.new()
 	builder.detached_build = true
+	builder._main_stream_prime_requested = defer_stream_prime or PreparedContent.selected_mode() != "raw"
 	builder.detached_cache_enabled = cache_enabled
 	builder.load_world(path, arrival)
-	if builder.world_root != null:
+	if builder.world_root != null or not builder._prepared_native.is_empty():
 		var start := Time.get_ticks_usec()
 		builder._prepared_visuals = GlbSceneCache.prepare(visual_paths)
 		builder.load_phases[&"visualPreload"] = Time.get_ticks_usec() - start
 		builder.load_phases[&"total"] += builder.load_phases[&"visualPreload"]
 	return builder
 
-func release_world(detach := true) -> Dictionary:
+func release_world(detach := true, publish_prepared := true) -> Dictionary:
+	if publish_prepared and not _prepared_native.is_empty():
+		_materialize_prepared_world()
+	else:
+		_prepared_native.clear() # Stale completion: release Resources without Nodes.
 	_cache_write_countdown = 0
 	_release_snapshot()
 	var resident := {"root": world_root, "manifest": manifest,
 		"digest": package_digest, "phases": load_phases,
 		"from_cache": loaded_from_cache, "cache_status": cache_status,
 		"cache_file": cache_file, "visuals": _prepared_visuals,
-		"resource_timings": _resource_timings}
+		"resource_timings": _resource_timings,
+		"deferred_stream_arrival": _deferred_stream_arrival if publish_prepared else Vector3.INF}
+	_deferred_stream_arrival = Vector3.INF
 	_prepared_visuals = {}
 	if detach and is_instance_valid(world_root) and world_root.get_parent() != null:
 		world_root.get_parent().remove_child(world_root)
@@ -194,6 +207,7 @@ func adopt_world(resident: Dictionary) -> void:
 		# rebased static bodies before a ray can see their previous map frame.
 		for body: Node3D in world_root.find_children("*", "CollisionObject3D", true, false):
 			body.force_update_transform()
+	publish_resident_stream(resident)
 	MapSceneCache.note_local_digest(manifest.asset_id(), package_digest)
 	load_completed.emit(manifest)
 
@@ -253,7 +267,13 @@ func load_world(manifest_path: String, arrival := Vector3.INF, wait_for_arrival 
 				var spawns: Array = manifest.data.get("spawnPoints", [])
 				var position: Array = spawns[0].get("position", [0,0,0]) if not spawns.is_empty() else [0,0,0]
 				arrival = Vector3(float(position[0]), float(position[1]), float(position[2]))
-			chunks.prime(arrival)
+			if detached_build and _main_stream_prime_requested:
+				# Nested native child scenes require main-only instantiation. Keep
+				# the worker's territory skeleton private until publication; stale
+				# results never prime or create those child Nodes.
+				_deferred_stream_arrival = arrival
+			else:
+				chunks.prime(arrival)
 		mark = _phase(&"chunks", mark)
 		load_phases[&"total"] = mark - began
 		load_completed.emit(manifest)
@@ -264,6 +284,23 @@ func load_world(manifest_path: String, arrival := Vector3.INF, wait_for_arrival 
 		load_failed.emit(external_errors)
 		push_error("world_load stage=external_resources errors=%s" % [external_errors])
 		return
+	# Prepared resources use an exact format/mip/engine variant. Source
+	# verification above remains mandatory. Workers publish Resources only;
+	# release_world() materializes their Node tree on the main thread.
+	if PreparedContent.selected_mode() != "raw" and not _skip_prepared_lookup:
+		var prepared := PreparedContent.acquire("world", manifest_path, package_digest,
+			VramTextures.cache_token(manifest.data, resolved_glb_path.get_base_dir()))
+		if str(prepared.status) == "hit":
+			_prepared_native = prepared
+			cache_status = &"prepared"
+			cache_file = ""
+			load_phases[&"total"] = Time.get_ticks_usec() - began
+			if OS.get_thread_caller_id() == OS.get_main_thread_id():
+				_materialize_prepared_world()
+			return
+		if str(prepared.status) == "reject":
+			load_failed.emit(["required_prepared_content: " + str(prepared.reason)])
+			return
 	if _load_from_cache(mark, began):
 		return
 
@@ -414,6 +451,72 @@ var _cache_material_overrides: Dictionary = {}
 ##
 ## Every failure here falls through to the ordinary load. A cache is an
 ## optimisation; a client that cannot read one still has the package.
+static func publish_resident_stream(resident: Dictionary) -> bool:
+	var arrival: Vector3 = resident.get("deferred_stream_arrival", Vector3.INF)
+	if not arrival.is_finite():
+		return true
+	var imported := resident.get("root") as ContinentChunkStream
+	if OS.get_thread_caller_id() != OS.get_main_thread_id() or imported == null or not imported.is_inside_tree():
+		push_error("deferred territory prime requires attached main-thread publication")
+		return false
+	resident["deferred_stream_arrival"] = Vector3.INF
+	var began := Time.get_ticks_usec()
+	imported.prime(arrival)
+	var phases: Dictionary = resident.get("phases", {})
+	var timings: Dictionary = resident.get("resource_timings", {})
+	ResourceDiagnostics.record(timings, &"stream_prime_on_main", began, true)
+	phases[&"streamPrimePublish"] = Time.get_ticks_usec() - began
+	phases[&"total"] = int(phases.get(&"total", 0)) + int(phases[&"streamPrimePublish"])
+	resident["phases"] = phases
+	resident["resource_timings"] = timings
+	return true
+
+func _materialize_prepared_world() -> bool:
+	if OS.get_thread_caller_id() != OS.get_main_thread_id():
+		push_error("prepared world Node ownership requires main-thread publication")
+		return false
+	if _prepared_native.is_empty():
+		return world_root != null
+	var began := Time.get_ticks_usec()
+	# A worker verification is not a mutable-source publication permit.
+	_prepared_native = PreparedContent.acquire("world", manifest.source_path, package_digest,
+		VramTextures.cache_token(manifest.data, manifest.glb_path().get_base_dir()))
+	if str(_prepared_native.status) != "hit":
+		_prepared_native.clear()
+		if PreparedContent.selected_mode() == "auto":
+			var source := manifest.source_path
+			_skip_prepared_lookup = true
+			load_world(source)
+			_skip_prepared_lookup = false
+			return world_root != null
+		load_failed.emit(["prepared_world_publication_revalidation_failed"])
+		return false
+	world_root = PreparedLifecycle.instantiate(_prepared_native)
+	ResourceDiagnostics.record(_resource_timings, &"prepared_instantiate", began, true)
+	_prepared_native.clear()
+	if world_root == null:
+		if PreparedContent.selected_mode() == "auto":
+			var source := manifest.source_path
+			_skip_prepared_lookup = true
+			load_world(source)
+			_skip_prepared_lookup = false
+			return world_root != null
+		load_failed.emit(["prepared_world_instantiation_failed"])
+		return false
+	world_root.name = "ImportedWorld_" + manifest.asset_id()
+	var attach_began := Time.get_ticks_usec()
+	add_child(world_root)
+	ResourceDiagnostics.record(_resource_timings, &"scene_attach", attach_began, true)
+	_resolve_batch_links()
+	LookGround.paint_loaded(world_root, manifest)
+	LookFoliage.paint_loaded(world_root, manifest)
+	GauntletSurfaceContrast.apply(manifest, world_root)
+	UndergroundScenery.apply(manifest, world_root)
+	load_phases[&"preparedPublish"] = Time.get_ticks_usec() - began
+	load_phases[&"total"] = int(load_phases.get(&"total", 0)) + int(load_phases[&"preparedPublish"])
+	load_completed.emit(manifest)
+	return true
+
 func _load_from_cache(mark: int, began: int) -> bool:
 	if not (detached_cache_enabled if detached_build else MapSceneCache.is_enabled()):
 		cache_status = &"disabled"
@@ -1114,6 +1217,8 @@ static func _is_authored_base_terrain(node_name: StringName,
 	return false
 
 func unload_world() -> void:
+	_prepared_native.clear()
+	_deferred_stream_arrival = Vector3.INF
 	# A map change while a cache write is still queued drops the write: the
 	# tree it would pack is about to be freed, and the region will be built
 	# again the next time it is entered, which is the state it was in before.

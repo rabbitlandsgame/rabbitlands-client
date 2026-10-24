@@ -5,6 +5,8 @@ const ExternalTexturePool := preload("res://src/world/external_texture_pool.gd")
 const GltfQuantization := preload("res://src/world/gltf_quantization.gd")
 const ArchivedModelPolicy := preload("res://src/actors/archived_model_policy.gd")
 const ResourceDiagnostics := preload("res://src/world/resource_diagnostics.gd")
+const PreparedContent := preload("res://src/world/prepared_content.gd")
+const PreparedSharing := preload("res://src/world/prepared_material_sharing.gd")
 
 ## Prototype meshes that map packages name instead of carrying.
 ##
@@ -82,6 +84,16 @@ static func acquire(key: String, path: String) -> Mesh:
 	if not FileAccess.file_exists(path):
 		push_error("shared_mesh missing prototype=%s path=%s" % [key, path])
 		return null
+	if PreparedContent.selected_mode() != "raw":
+		var declared: Dictionary = index_for(path).get(key, {})
+		var token := VramTextures.cache_token({"externalResources": declared.get("images", {})}, path.get_base_dir())
+		var record := PreparedContent.acquire("mesh", path, FileAccess.get_sha256(path), token)
+		if str(record.status) == "hit":
+			var mesh := PreparedSharing.mesh_resource(record)
+			if mesh != null:
+				return _publish_or_adopt(key, mesh)
+		if str(record.status) == "reject":
+			return null
 	var document := GLTFDocument.new()
 	var state := GLTFState.new()
 	if not GltfQuantization.ensure_registered():

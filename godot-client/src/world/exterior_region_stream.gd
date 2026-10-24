@@ -157,8 +157,17 @@ func _process(_delta: float) -> void:
 	if builder == null:
 		_retry_after[map_id] = Time.get_ticks_msec() + 30000
 		return
-	var resident := builder.release_world()
+	var stale := (_pending_generation != _generation or map_id == active_map or not _nearby(map_id)
+		or residents.size() >= mini(maximum_neighbours, MAXIMUM_NEIGHBOURS))
+	var resident := builder.release_world(true, not stale)
 	builder.free()
+	if stale:
+		# A raw completion may already own Nodes; a prepared completion still
+		# contains Resources only and has been released without instantiation.
+		if resident.root != null:
+			_retire(resident, map_id)
+		_record("discarded", map_id)
+		return
 	if resident.root == null:
 		_retry_after[map_id] = Time.get_ticks_msec() + 30000
 		_record("failed", map_id)
@@ -168,12 +177,6 @@ func _process(_delta: float) -> void:
 	_last_preparation = {"map": map_id, "load_phases_us": resident.phases.duplicate(),
 		"timings": ResourceDiagnostics.snapshot(resident.get("resource_timings", {})),
 		"verification": prepared_manifest.verification_diagnostics.duplicate(true) if prepared_manifest != null else {}}
-	# Login, teleport, disconnect or a second map change can supersede a load.
-	if (_pending_generation != _generation or map_id == active_map or not _nearby(map_id)
-			or residents.size() >= mini(maximum_neighbours, MAXIMUM_NEIGHBOURS)):
-		_retire(resident, map_id)
-		_record("discarded", map_id)
-		return
 	imported.visible = false
 	var operation_began := Time.get_ticks_usec()
 	_set_collision(imported, false)
@@ -181,6 +184,8 @@ func _process(_delta: float) -> void:
 	operation_began = Time.get_ticks_usec()
 	add_child(imported)
 	ResourceDiagnostics.record(_resource_timings, &"scene_attach", operation_began, true)
+	WorldLoader.publish_resident_stream(resident)
+	_last_preparation["stream_prime_publish_us"] = int(resident.phases.get(&"streamPrimePublish", 0))
 	residents[map_id] = resident
 	MapSceneCache.note_local_digest((resident.manifest as WorldManifest).asset_id(), str(resident.digest))
 	_record("ready", map_id, {"load_ms": float(resident.phases.get(&"total", 0)) / 1000.0})

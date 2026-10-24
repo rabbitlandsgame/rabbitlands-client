@@ -7,6 +7,8 @@ const VramTextures := preload("res://src/world/vram_textures.gd")
 const MapMeshExtension := preload("res://src/world/map_mesh_extension.gd")
 const GltfAnimationFidelity := preload("res://src/actors/gltf_animation_fidelity.gd")
 const ArchivedModelPolicy := preload("res://src/actors/archived_model_policy.gd")
+const PreparedContent := preload("res://src/world/prepared_content.gd")
+const PreparedLifecycle := preload("res://src/world/prepared_scene_lifecycle.gd")
 ## Retargets a native glTF animation library onto an actor's skeleton.
 ##
 ## The shared universal library ships 162 clips built from roughly 226 000
@@ -140,19 +142,41 @@ static func _source_scene(source_path: String) -> Node:
 	if _prewarming.has(source_path):
 		var thread: Thread = _prewarming[source_path] as Thread
 		_prewarming.erase(source_path)
-		scene = thread.wait_to_finish() as Node
+		var completion: Variant = thread.wait_to_finish()
+		scene = _publish_source(completion)
 	if scene == null:
-		scene = _parse_library(source_path)
+		scene = _publish_source(_parse_library(source_path))
+	if scene == null and PreparedContent.selected_mode() == "auto":
+		scene = _publish_source(_parse_library(source_path, false))
 	if scene != null:
 		_sources[source_path] = scene
 	return scene
 
 ## The glTF parse itself. Safe off the main thread: it builds resources and
 ## nodes that belong to no tree.
-static func _parse_library(path: String) -> Node:
+static func _publish_source(completion: Variant) -> Node:
+	if completion is Dictionary:
+		var entry: Dictionary = completion.get("entry", {})
+		var source := PreparedContent.source_path(str(entry.get("source", "")))
+		if source.is_empty():
+			return null
+		var verified := PreparedContent.acquire("scene", source, FileAccess.get_sha256(source),
+			PreparedContent.scene_texture_token(source))
+		return PreparedLifecycle.instantiate(verified)
+	return completion as Node if completion is Node else null
+
+static func _parse_library(path: String, allow_prepared := true) -> Variant:
 	if not GltfQuantization.ensure_registered():
 		push_error("animation glTF parse requires main-thread extension initialization")
 		return null
+	if allow_prepared and PreparedContent.selected_mode() != "raw":
+		var record := PreparedContent.acquire("scene", path, FileAccess.get_sha256(path),
+			PreparedContent.scene_texture_token(path))
+		if str(record.status) == "hit":
+			return record # Worker completion contains immutable resources, no Nodes.
+		if str(record.status) == "reject":
+			return null
+
 	var document := GLTFDocument.new()
 	var state := GLTFState.new()
 	if document.append_from_file(path, state) != OK:

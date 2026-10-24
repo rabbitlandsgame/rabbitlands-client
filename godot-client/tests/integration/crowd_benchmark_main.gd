@@ -48,7 +48,7 @@ func benchmark_runtime_snapshot() -> Dictionary:
 			"presentation": {"requested": OS.get_environment("ELORIA_NATIVE_PRESENTATION"),
 				"nativeCapeInstances": cape_instances, "nativeCapeCalls": cape_calls,
 				"capeFallbackCalls": cape_fallbacks, "flight": flight_stats, "impact": impact_stats},
-			"preparedContent": {"active": false, "status": "not_implemented"},
+			"preparedContent": preload("res://src/world/prepared_content.gd").snapshot(),
 			"mapSceneCache": {"enabled": MapSceneCache.is_enabled(), "status": str(world_loader.cache_status)}},
 	}
 

@@ -713,3 +713,45 @@ after it loads cannot be baked into the entry.
 viewpoints built and cached and counts the pixels between them, against a floor
 it measures on the same run by photographing two builds - it must be run
 windowed, since headless draws nothing and every comparison would pass.
+
+## Optional prepared content pilot
+
+The normal client uses the existing raw/imported asset paths. A local Windows
+standalone package can include an optional native-resource catalog with
+`tools/package_client.py --prepared-catalog <generation/index.json>`.
+`RABBITLANDS_PREPARED_CONTENT=auto` selects verified entries and falls back on a
+miss. `require-pilot` rejects a missing exact variant for a listed pilot;
+unlisted assets still use their existing paths. Successful startup alone does
+not prove that a prepared entry was consumed: inspect the actual entry IDs,
+source paths and texture tokens in `PreparedContent.snapshot()`.
+
+The catalog binds complete source and payload bytes, engine/cook policy,
+retired-model policy and the exact texture/format variant. It revalidates cached
+and worker completions before publication. Native Resources can load on workers;
+scene instantiation and attachment remain on the main thread. Instance material
+overrides and MultiMesh transform buffers are private. Copying a MultiMesh can
+read renderer data and is included in the atomic instantiation cost.
+
+`tools/prepared_content_package.py describe-pilot` identifies the dense chunk,
+shared prototype, equipped actor components, animation source, storage object
+and independent interior. Cooking requires an explicitly marked disposable
+project, fresh settings per texture variant, and an actual exported import
+snapshot. Never re-import that project between snapshotting and cooking.
+Generated resources belong in ignored local build output. The package checks
+the initial and final actual PCK inputs; source editor import descriptors are
+separate provenance because the exporter rewrites them.
+
+The current cook policy preserves exact rig metadata as an identity-bound JSON
+string. It also preserves original animation key clocks in binary double
+precision and compressed textures' logical dimensions, which Godot's native
+resource serialization otherwise changes. These are restored before verified
+resources are published. Scripted, compressed-animation and local-to-scene
+animation inputs are refused by this pilot. Materials held on prepared geometry
+survive until its rendering instance is destroyed; these finite references are
+released with the geometry itself.
+
+This pilot does not establish a general loading or memory improvement. Compare
+actual hits, total readiness, the largest main-thread operation, live resource
+sharing and process memory against raw content in the same package. Script,
+streaming lifetime and rendered isolation fixtures are separate from actual
+asset parity and target-device performance qualification.

@@ -126,7 +126,7 @@ static func reap_orphans() -> int:
 			continue
 		var builder := thread.wait_to_finish() as WorldLoader
 		if builder != null:
-			var resident := builder.release_world()
+			var resident := builder.release_world(true, false)
 			builder.free()
 			if resident.root != null:
 				(resident.root as Node).queue_free()
@@ -651,7 +651,7 @@ func _retire_cell(identity: String) -> void:
 func _discard_builder(entry: Dictionary, builder: WorldLoader) -> void:
 	if builder == null:
 		return
-	var resident := builder.release_world()
+	var resident := builder.release_world(true, false)
 	builder.free()
 	if resident.root != null:
 		var imported := resident.root as Node3D
