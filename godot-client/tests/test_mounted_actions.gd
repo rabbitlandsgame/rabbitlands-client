@@ -56,6 +56,11 @@ func run() -> void:
 			for rider: ReplicatedActor3D in [actor, baseline]:
 				rider.set_mount_state({"mode": "mounted", "mount_id": mount_id, "gait": gait, "step_us": 200000}, models)
 				rider._presentation_speed = 20.0 if gait == "burst" else 10.0
+				# Keep a real interpolation segment active in this pose-only test;
+				# a remembered run command alone no longer proves mounted travel.
+				rider._segment_start = rider.global_position
+				rider._segment_duration = .2
+				rider.server_target = rider.global_position + Vector3.RIGHT * rider._presentation_speed * .2
 				rider._mount_visual.set_process(false)
 				rider.play_action(&"run")
 				rider._mount_visual._process(0.0)

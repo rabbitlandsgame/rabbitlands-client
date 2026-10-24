@@ -119,6 +119,14 @@ func advance(delta: float) -> void:
 		weight = 0.0
 		grip_weight = 0.0
 		return
+	# A shot/spell owns current_action when the last buffered step finishes,
+	# so ordinary walk/run cleanup may never send idle to this layer. Retire
+	# its remembered travel action once interpolation/coasting really stops.
+	# Do not request idle: that would also cancel held aim and spell channels.
+	var travelling := actor._segment_duration > 0.0 or actor._movement_coast_remaining > 0.0 \
+		or (actor._cinematic_active and actor._cinematic_speed > 0.0)
+	if not travelling and ground_action in [&"walk", &"run"]:
+		ground_action = &"idle"
 	if _returning:
 		_return_time += delta
 		weight = 1.0 - smoothstep(0.0, RETURN_SECONDS, _return_time)
