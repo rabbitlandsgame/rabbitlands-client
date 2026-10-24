@@ -231,11 +231,20 @@ func _run() -> void:
 		return
 	_output = output
 	var actual_user := _path(ProjectSettings.globalize_path("user://"))
-	if not _check(_same(Prepared._project_root(), app) and _same(ProjectSettings.globalize_path("res://"), app), "res:// is not the actual exported stage/app; source-project fallback forbidden") \
+	_report.merge({"stage_app": app, "project_root": Prepared._project_root(),
+		"globalized_resource_root": ProjectSettings.globalize_path("res://"),
+		"engine_executable": OS.get_executable_path(), "user_directory": actual_user})
+	var executable := OS.get_executable_path()
+	var guard_name := "RabbitLands-release-guard-editor.exe" if _platform == "windows" else "RabbitLands-release-guard-editor.x86_64"
+	var expected_executable := app.path_join(guard_name if OS.has_feature("editor") else ("RabbitLands.exe" if _platform == "windows" else "RabbitLands.x86_64"))
+	var resource_root := ProjectSettings.globalize_path("res://")
+	if not _check(_same(executable, expected_executable) and _same(executable.get_base_dir(), app) \
+		and _same(Prepared._project_root(), app) and (resource_root.is_empty() or not resource_root.is_absolute_path() or _same(resource_root, app)), "verified in-app executable/stage root required; source-project fallback forbidden") \
 		or not _check(_same(actual_user, str(job.get("expected_user_directory", ""))) and not _inside(actual_user, _stage) \
 			and not FileAccess.file_exists(Graphics.SETTINGS_PATH), "fresh isolated user directory required outside the package"):
 		_finish()
 		return
+	_report["guard_context"] = "verified_editor_in_app" if OS.has_feature("editor") else "exported_executable"
 	var catalog_sha := FileAccess.get_sha256(Prepared.CATALOG)
 	var catalog_value: Variant = JSON.parse_string(FileAccess.get_file_as_string(Prepared.CATALOG))
 	if not _check(Prepared._hex_digest(job.get("catalog_sha256")) and catalog_sha == job.catalog_sha256 \

@@ -219,11 +219,37 @@ class FullOptimizationBuild:
         self.save()
 
     def check_final_package(self):
+        # Official release templates disable external --script/path overrides.
+        # Run the verified editor beside the final PCK so exported loose-asset
+        # resolution uses the same physical app directory as the shipped game.
+        # The editor is temporary and must be gone before signing/packaging.
+        before = self.stage_inventory()
+        editor = self.stage / "app" / ("RabbitLands-release-guard-editor.exe" if self.platform == "windows"
+                                       else "RabbitLands-release-guard-editor.x86_64")
+        require(not editor.exists(), "final stage already contains a release guard editor")
+        self.check_budget("before temporary final-PCK editor", self.godot.stat().st_size)
+        try:
+            try:
+                os.link(self.godot, editor)
+            except OSError:
+                # Cross-volume builds still charge the complete copy first.
+                shutil.copy2(self.godot, editor)
+            require(native.sha256(editor) == native.sha256(self.godot), "temporary guard editor differs from verified tool")
+            self._check_final_package(editor)
+        finally:
+            editor.unlink(missing_ok=True)
+        require(before == self.stage_inventory(), "optimization runtime checks wrote into the final package")
+        self.receipt["status"] = "verified_before_signing"
+        self.save()
+
+    def stage_inventory(self):
+        return {str(path.relative_to(self.stage)): (path.stat().st_size, path.stat().st_mtime_ns)
+                for path in self.stage.rglob("*") if path.is_file()}
+
+    def _check_final_package(self, editor):
         index = self.project / "prepared-content/index.json"
         catalog = json.loads(index.read_text(encoding="utf-8"))
         require(self.receipt.get("prepared_export", {}).get("export"), "final PCK readback must precede runtime checks")
-        before = {str(path.relative_to(self.stage)): (path.stat().st_size, path.stat().st_mtime_ns)
-                  for path in self.stage.rglob("*") if path.is_file()}
         for quality, required in self.receipt["prepared"]["required_entries"].items():
             selected = [row for row in catalog["entries"] if row["texture_skip"] == ("full", "half", "quarter").index(quality)]
             require({(row["kind"], row["source"], row.get("node_policy", "retain")) for row in selected}
@@ -241,7 +267,7 @@ class FullOptimizationBuild:
             path = self.root / ("prepared-check-" + quality + "-job.json")
             write_json(path, job)
             log = self.root / "prepared-checks" / (quality + ".log")
-            self.run_engine([self.godot, "--path", self.stage / "app", "--main-pack", self.stage / "app/RabbitLands.pck",
+            self.run_engine([editor, "--main-pack", self.stage / "app/RabbitLands.pck",
                 "--script", self.project / "tools/check_prepared_release.gd", "--", path],
                 environment, log, 600)
             evidence = json.loads(Path(job["report"]).read_text())
@@ -263,11 +289,6 @@ class FullOptimizationBuild:
                     "actual final PCK acquisition did not cover every exact prepared entry")
             self.receipt["prepared_checks"].append(evidence)
             self.save()
-        after = {str(path.relative_to(self.stage)): (path.stat().st_size, path.stat().st_mtime_ns)
-                 for path in self.stage.rglob("*") if path.is_file()}
-        require(before == after, "optimization runtime checks wrote into the final package")
-        self.receipt["status"] = "verified_before_signing"
-        self.save()
 
     def record_startup(self, log):
         self.receipt["ordinary_startup"] = validate_startup(Path(log).read_text(encoding="utf-8-sig"))
