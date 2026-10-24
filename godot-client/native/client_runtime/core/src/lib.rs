@@ -6,6 +6,7 @@ mod residency;
 mod residency_ffi;
 mod admission;
 mod mounted_pose;
+mod remote;
 mod mounted_runtime;
 use mounted_pose::Rider;
 use mounted_runtime::MountedResult;

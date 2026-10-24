@@ -1,6 +1,11 @@
 class_name ReplicatedActor3D
 extends CharacterBody3D
 
+const RemotePresentationService = preload("res://src/runtime/remote_presentation.gd")
+var _remote_generation := 0
+var _remote_enrollment_ready := false
+var _remote_pending_transfer := PackedFloat64Array()
+
 const REBOUND_SKIN_POOL := preload("res://src/actors/rebound_skin_pool.gd")
 const ACTOR_RENDER_QUALITY := preload("res://src/actors/actor_render_quality.gd")
 const OLDCRAFT_ACTOR_STYLE := preload("res://src/actors/oldcraft_actor_style.gd")
@@ -504,6 +509,9 @@ const RING_SEGMENT_METRES := 0.5
 func configure(dto: Dictionary, adapter: CoordinateAdapter,
 		model_config: Dictionary, animation_config: Dictionary,
 		equipment_config: Dictionary = {}, build_model := true) -> Array[String]:
+	var remote = RemotePresentationService.current()
+	if remote != null: remote.detach(self, "reconfigured")
+	_remote_enrollment_ready = false
 	actor_id = int(dto.actor_id)
 	_is_creature = int(dto.get("kind", 0)) == CREATURE_ACTOR_KIND
 	_small_creature_scale = 1.0
@@ -1844,7 +1852,22 @@ func rebase_world(frame: Transform3D) -> void:
 	if _combat_target_marker != null:
 		_combat_target_marker.call("invalidate_ground")
 
+	var remote = RemotePresentationService.current()
+	if remote != null: remote.sync_transfer(self)
+
 func apply_server_state(dto: Dictionary, adapter: CoordinateAdapter, teleport := false) -> void:
+	if not _remote_pending_transfer.is_empty():
+		RemotePresentationService.restore_pending(self)
+		if is_queued_for_deletion(): return
+	var remote = RemotePresentationService.current() if _remote_enrollment_ready else null
+	if remote != null and remote._ready_native:
+		if remote.is_local_actor(actor_id):
+			remote.detach(self, "local_role")
+		else:
+			var started := Time.get_ticks_usec()
+			_apply_server_state_native(dto, adapter, teleport)
+			remote.record_boundary("full_server_apply_us", Time.get_ticks_usec() - started)
+			return
 	# A revived body starts a new movement stream at its respawn tile. Do
 	# not interpolate from its corpse or retain the old step schedule.
 	teleport = teleport or (current_action == &"death"
@@ -2093,6 +2116,280 @@ func apply_server_state(dto: Dictionary, adapter: CoordinateAdapter, teleport :=
 		_segment_duration = 0.0
 		_movement_coast_remaining = 0.0
 		_travel_yaw_active = false
+
+func _apply_server_state_native(dto: Dictionary, adapter: CoordinateAdapter, teleport := false) -> void:
+	# A revived body starts a new movement stream at its respawn tile. Do
+	# not interpolate from its corpse or retain the old step schedule.
+	teleport = teleport or (current_action == &"death"
+		and int(dto.get("health", 0)) > 0 and bool(dto.get("alive", true)))
+	if teleport and _charge_leap != null: end_charge_leap()
+	_sync_death_presentation(dto)
+	# A guild refresh removes and re-adds the actor in one socket read. Main
+	# coalesces that into an update of the existing body, including its label.
+	if dto.has("name") and is_instance_valid(_nameplate):
+		_nameplate.modulate = Color(_nameplate_colour(dto), _nameplate.modulate.a)
+		var next_name: String = banner_name(dto)
+		if _nameplate.text != next_name:
+			_nameplate.text = next_name
+			_layout_overhead()
+	set_status_effects(dto.get("status_effects", dto.get("negative_statuses", [])))
+	# The capability handshake can correct an actor already spawned from the
+	# legacy clothing bytes. Update its dyes once, including under worn armour.
+	if dto.has("appearance") and dto.appearance != _appearance:
+		apply_appearance_variants(dto.appearance as Dictionary)
+	if not is_equal_approx(_metres_per_tile, adapter.metres_per_tile):
+		_metres_per_tile = maxf(0.01, adapter.metres_per_tile)
+		_resize_selection()
+	if dto.has("footprint"):
+		set_footprint(dto.get("footprint") as Vector2i)
+	if dto.has("scale"):
+		set_server_scale(float(dto.get("scale")))
+	var motion := _apply_server_motion(dto, adapter, teleport)
+	var target_changed: bool = motion.target_changed
+	var actor_command: int = motion.actor_command
+	var combat_changed: bool = motion.combat_changed
+	var fresh_command: bool = motion.fresh_command
+	var command_sequence: int = motion.command_sequence
+	# Loadout changes in this packet must choose the right strike immediately.
+	apply_equipment_visuals(dto.get("equipment_visuals", {}) as Dictionary,
+		dto.get("equipment_fallback_parts", []) as Array)
+	if dto.has("command") and resolver != null:
+		var service = RemotePresentationService.current()
+		var native_handled := false
+		if service != null and service.owns(self):
+			native_handled = service.choose_action(self, resolver.action_for_command(actor_command, _in_combat),
+				target_changed, combat_changed, fresh_command, command_sequence,
+				resolver.action_to_clip.has("attack_secondary"))
+		if not native_handled:
+			var action := _movement_aware_action(
+				_paced_travel_action(resolver.action_for_command(actor_command, _in_combat)), target_changed)
+			# Health/equipment/aim updates restate the last command. Replaying it
+			# can repeat a completed sit/stand transition or interrupt an emote.
+			# Only a new command, movement or combat change may change the action;
+			# records without command sequences retain their legacy behavior.
+			var transient := current_action in [&"cast", &"cast_channel_enter", &"cast_channel",
+				&"cast_aggressive", &"cast_defensive", &"heal", &"cast_exit", &"ranged_draw",
+				&"ranged_hold", &"ranged_attack", &"attack_primary", &"attack_secondary", &"pain"]
+			var stale_strike := command_sequence >= 0 and not fresh_command and action in [&"attack_primary", &"pain"]
+			if not stale_strike and (fresh_command or target_changed
+					or (not transient and (combat_changed or command_sequence < 0)) or action == &"death"):
+				if action == &"attack_primary" and fresh_command and resolver.action_to_clip.has("attack_secondary"):
+					action = &"attack_primary" if _swing_index % 2 == 0 else &"attack_secondary"
+					_swing_index += 1
+				play_action(action, fresh_command and action in [&"attack_primary", &"attack_secondary", &"pain"])
+	var aiming: bool = int(dto.get("aiming_at", -1)) >= 0 or dto.get("aiming_at_tile") is Vector2i
+	if aiming != _ranged_aiming and current_action != &"death":
+		_ranged_aiming = aiming
+		if aiming:
+			play_action(&"ranged_draw")
+		elif current_action in [&"ranged_draw", &"ranged_hold"]:
+			play_action(&"combat_idle" if _in_combat else &"idle")
+	if current_action == &"death":
+		_segment_duration = 0.0
+		_movement_coast_remaining = 0.0
+		_travel_yaw_active = false
+	var remote = RemotePresentationService.current()
+	if remote != null: remote.sync_sink(self)
+
+func _apply_server_motion(dto: Dictionary, adapter: CoordinateAdapter, teleport: bool) -> Dictionary:
+	var service = RemotePresentationService.current()
+	if service != null:
+		var native: Dictionary = service.motion(self, dto, adapter, teleport)
+		if not native.is_empty(): return native
+	var next_target: Vector3 = adapter.footprint_center(
+		int(dto.x), int(dto.y), footprint)
+	# Server movement contains tile coordinates only. Keep the last sampled
+	# rendered-surface height until Main performs the ray sample for the new tile;
+	# otherwise each packet temporarily pushes actors back to the flat manifest
+	# fallback and can leave them visibly embedded in sculpted terrain.
+	next_target.y = server_target.y
+	var target_changed: bool = server_target.distance_squared_to(next_target) > 0.000001
+	# Where the server had this actor before this update. The step it just took
+	# is that far, which is what the pace below is measured and spent against -
+	# not the distance from the rendered body, which trails by the arrival
+	# margin and would feed its own lag back into the pacing.
+	var previous_target: Vector3 = server_target
+	server_target = next_target
+	var actor_command: int = int(dto.get("command", -1))
+	var combat_changed: bool = bool(dto.get("in_combat", _in_combat)) != _in_combat
+	_in_combat = bool(dto.get("in_combat", _in_combat))
+	var command_sequence := int(dto.get("command_sequence", -1))
+	var fresh_command := command_sequence != _last_command_sequence
+	_last_command_sequence = command_sequence
+	# Combat interrupts the movement stream. Its duration is not a step
+	# interval, and the network buffer from the approach must not slow the
+	# short move onto the bag. Keep learned gaits and any step still rendering;
+	# only the next step's timing starts afresh. Explicit transition commands
+	# also cover entering and leaving combat within one reduced update.
+	if combat_changed or (fresh_command and actor_command in [18, 19]):
+		_last_movement_update_msec = -1
+		_unconfirmed_paces.clear()
+		_unconfirmed_gait = -1
+		_jitter_allowance = 0.0
+		_schedule_due = -1.0
+	# Which command the facing comes from, and which it does not. Everything
+	# arriving in one socket read is reduced to a single state and rendered
+	# once, so the last command of a frame is rarely the one that named a
+	# direction: a creature sends the turn that puts it on its target and the
+	# swing that follows it in the same flush, and reading the facing off the
+	# last command threw the turn away every round. The reducer keeps the last
+	# directional command of the burst apart for exactly this.
+	var facing_command: int = int(dto.get("facing_command", actor_command))
+	# The server has answered a predicted turn. Drop the prediction so the
+	# rendered facing is the authoritative one from here on.
+	if _predicted_turn_pending and EloriaProtocol.is_turn_command(facing_command):
+		_predicted_turn_pending = false
+	var authoritative_yaw: float = target_yaw_for_state(
+		_target_yaw, facing_command, int(dto.rotation), adapter)
+	_target_yaw = _predicted_turn_yaw if _predicted_turn_pending else authoritative_yaw
+	_hastened = (int(dto.get("buffs", 0))
+		& EloriaProtocol.ACTOR_BUFF_DOUBLE_SPEED) != 0 or "haste" in _status_effects
+	_presentation_speed = walk_presentation_speed
+	if _hastened or (actor_command >= 30 and actor_command <= 37):
+		_presentation_speed = run_presentation_speed
+	# A delayed creature burst can cover several tiles. Present its recovery
+	# continuously; only an explicit relocation or an out-of-view correction snaps.
+	if teleport or global_position.distance_to(server_target) > (64.0 if _is_creature else 8.0):
+		global_position = server_target
+		rotation.y = _target_yaw
+		_segment_start = server_target
+		_segment_elapsed = 0.0
+		_segment_duration = 0.0
+		_last_movement_update_msec = -1
+		_pace_histories.clear()
+		_smoothed_server_interval = _pace_for_gait(pace_gait(facing_command, _hastened))
+		_unconfirmed_paces.clear()
+		_unconfirmed_gait = -1
+		_jitter_allowance = 0.0
+		_schedule_due = -1.0
+		_previous_step_tiles = 1.0
+		_previous_step_gait = pace_gait(facing_command, _hastened)
+		_movement_coast_remaining = 0.0
+		_snap_pending = false
+		_travel_yaw_active = false
+	elif target_changed:
+		# A step the server stamped with its own clock is timed by when it was
+		# taken (server_time_pacing.gd); any other by when it arrived.
+		var clock_msec: int = _movement_time_msec()
+		var stamped: bool = dto.has(ServerTimePacing.STEP_KEY)
+		var now_msec: int = int(dto[ServerTimePacing.STEP_KEY]) if stamped else clock_msec
+		var now: float = float(now_msec) / 1000.0
+		# How much ground the server covered, in tiles. A diagonal step is 1.41
+		# of them and a folded burst several, so timing the update against it
+		# gives a pace per tile that every step shape agrees on. Timing it
+		# against the step count instead read a diagonal as a short interval
+		# and rendered it 41% faster than the straight step beside it, which is
+		# what walking and running at an uneven speed was.
+		var step_tiles: float = maxf(
+			previous_target.distance_to(server_target) / _metres_per_tile, 0.001)
+		if _last_movement_update_msec >= 0:
+			var observed_interval: float = float(
+				now_msec - _last_movement_update_msec) / 1000.0
+			# The gap before this packet is the hold the server gave the step
+			# before it, so it is measured per tile of that step.
+			var gap_tiles: float = maxf(_previous_step_tiles, 0.001)
+			var gap_pace: float = maxf(observed_interval / gap_tiles, 0.05)
+			var history: PackedFloat32Array = _pace_histories.get(
+				_previous_step_gait, PackedFloat32Array())
+			# A stationary pause is idle time, not a cadence. Folding it in
+			# paced the next burst by how long the player stood still: a few
+			# single steps from bag to bag with a second's looting between them
+			# were enough to make the median a second a tile, and the run after
+			# them crawled for its first steps while the body fell tiles behind.
+			# A pause is told from the cadence by the same lateness a network
+			# hold is allowed, against the pace this gait has already shown, so
+			# it is only ever judged against steps of its own kind - #walk after
+			# #run is a different history, not a late step. A gait still being
+			# learned has nothing to judge against and takes what it is given,
+			# short of a gap longer than any step the server holds.
+			var idle: bool = gap_pace > maximum_segment_duration
+			var standing: bool = idle
+			if not standing and history.size() >= PACE_MINIMUM_REFERENCE:
+				standing = is_pause_gap(observed_interval,
+					median_of(history, _smoothed_server_interval) * gap_tiles)
+			if idle:
+				_unconfirmed_paces.clear()
+			elif standing:
+				# Pauses are not a cadence, but a pace that really has slowed -
+				# a creature back from a pursuit to its ordinary walk - looks
+				# like one pause after another. Those agree with each other and
+				# a player's looting does not, so enough of them in a row that
+				# agree replace what the gait knew.
+				if _unconfirmed_gait != _previous_step_gait:
+					_unconfirmed_paces.clear()
+					_unconfirmed_gait = _previous_step_gait
+				_unconfirmed_paces.append(gap_pace)
+				if confirms_new_pace(_unconfirmed_paces):
+					history = _unconfirmed_paces.slice(
+						_unconfirmed_paces.size() - PACE_CONFIRM_STEPS)
+					_unconfirmed_paces.clear()
+			else:
+				_unconfirmed_paces.clear()
+				history.append(gap_pace)
+				if history.size() > PACE_WINDOW:
+					history = history.slice(history.size() - PACE_WINDOW)
+			_pace_histories[_previous_step_gait] = history
+			_smoothed_server_interval = _pace_for_gait(_previous_step_gait)
+			# How late this step was against the cadence, if it was. The
+			# allowance keeps the worst of it for a while, so the steps after a
+			# hold are scheduled far enough behind their packets that the next
+			# hold of the same size lands before the body needs the tile. A gap
+			# long enough to be a player pausing earns nothing.
+			var expected_gap: float = _smoothed_server_interval * gap_tiles
+			var lateness: float = observed_interval - expected_gap
+			_jitter_allowance = jitter_allowance(_jitter_allowance,
+				0.0 if standing or is_pause_gap(observed_interval, expected_gap) else lateness,
+				JITTER_DECAY, maximum_buffer_seconds)
+		# The arriving step is held for its own gait's length, so that is the
+		# pace it is shown at: #run and #walk change it on the step they apply
+		# to rather than after half a window of steps has outvoted the other.
+		var gait: int = pace_gait(facing_command, _hastened)
+		_smoothed_server_interval = _pace_for_gait(gait)
+		# A hasted run covers 10 m/s on metre tiles, beyond the nominal 9 m/s
+		# presentation limit. The limit must accommodate the measured cadence
+		# and its bounded catch-up, or lag grows until the teleport guard fires.
+		_presentation_speed = maxf(_presentation_speed,
+			_metres_per_tile / maxf(_smoothed_server_interval, 0.001)
+			* maxf(catch_up_factor, 1.0))
+		_last_movement_update_msec = now_msec
+		_previous_step_tiles = step_tiles
+		_previous_step_gait = gait
+		_segment_start = global_position
+		_segment_elapsed = 0.0
+		_movement_coast_remaining = 0.0
+		# The server holds this step for its own length before the next one,
+		# so the schedule continues by that much: the body crosses the tile
+		# at one speed on the ground whatever shape the step is.
+		var cadence: float = _smoothed_server_interval * step_tiles
+		# When this step should finish: on the schedule the last one set, at
+		# the pace the server is sending, or later if the packet came too late
+		# for that. The body is given exactly that long to cross from wherever
+		# it is to the new tile, so a late packet costs nothing but a shorter
+		# buffer and an early one nothing but a longer one - neither changes
+		# the speed on the ground. Restarting each step from the body's
+		# position at the arrival margin, as this used to, made a late packet
+		# a stop and the early one behind it a sprint.
+		var due: float
+		if stamped:
+			due = ServerTimePacing.due_seconds(now, _schedule_due, cadence,
+				float(dto.get(ServerTimePacing.PLAYOUT_KEY, 0.0)))
+		else:
+			due = scheduled_arrival(now, _schedule_due, cadence,
+				cadence * arrival_margin + _jitter_allowance, catch_up_factor)
+		# A server-confirmed fast mount can cross a tile faster than the
+		# ordinary segment floor. Keep its short steps on the supplied cadence.
+		var segment_floor := minf(minimum_segment_duration, cadence) if is_instance_valid(_mount_visual) else minimum_segment_duration
+		var clock_now: float = float(clock_msec) / 1000.0
+		_segment_duration = clampf(maxf(due - clock_now,
+			global_position.distance_to(server_target) / maxf(_presentation_speed, 0.001)),
+			segment_floor, maximum_segment_duration + maximum_buffer_seconds)
+		_schedule_due = clock_now + _segment_duration
+		_travel_yaw = travel_yaw(_segment_start, server_target, _target_yaw)
+		_travel_yaw_active = true
+	_wake()
+	return {"target_changed": target_changed, "actor_command": actor_command,
+		"combat_changed": combat_changed, "fresh_command": fresh_command,
+		"command_sequence": command_sequence}
 
 func _sync_death_presentation(dto: Dictionary) -> void:
 	if not dto.has("health"):
@@ -2899,6 +3196,11 @@ func get_skeleton() -> Skeleton3D:
 	return _native_skeleton
 
 func set_mount_state(state: Dictionary, models: Dictionary) -> void:
+	_set_mount_state_legacy(state, models)
+	var remote = RemotePresentationService.current() if _remote_generation > 0 else null
+	if remote != null: remote.sync_transfer(self)
+
+func _set_mount_state_legacy(state: Dictionary, models: Dictionary) -> void:
 	if _model_deferred:
 		# Kept for the record only; the built actor seats its own rider.
 		mount_state = state.duplicate(true)
@@ -3564,6 +3866,8 @@ func play_technique(key: String, phase: String) -> void:
 	resolver.action_to_clip[action] = original
 
 func begin_charge_leap(route: PackedVector3Array, seconds: float) -> void:
+	var remote = RemotePresentationService.current()
+	if remote != null: remote.detach(self, "charge")
 	if current_action == &"death" or _cinematic_active or route.size() < 2: return
 	for point in route:
 		if not point.is_finite(): return
@@ -3590,6 +3894,15 @@ func end_charge_leap() -> void:
 	_wake()
 
 func play_action(action: StringName, restart := false) -> void:
+	var remote = RemotePresentationService.current() if _remote_generation > 0 else null
+	var timed: bool = remote != null and remote.owns(self)
+	var started := Time.get_ticks_usec() if timed else 0
+	if remote != null and not RemotePresentationService.ACTIONS.has(action): remote.detach(self, "custom_action")
+	_play_action_legacy(action, restart)
+	if remote != null: remote.sync_sink(self)
+	if timed: remote.record_boundary("full_action_sink_us", Time.get_ticks_usec() - started)
+
+func _play_action_legacy(action: StringName, restart := false) -> void:
 	if _charge_leap != null:
 		if action in [&"walk", &"run", &"idle", &"combat_idle", &"turn"]: return
 		if action in [&"death", &"pain"]: end_charge_leap()
@@ -3705,6 +4018,8 @@ func _travel_speed() -> float:
 	return _segment_start.distance_to(server_target) / _segment_duration
 
 func _on_animation_finished(_animation_name: StringName) -> void:
+	var remote = RemotePresentationService.current() if _remote_generation > 0 else null
+	if current_action != &"death" and remote != null and remote.owns(self) and remote.finished(self): return
 	# The server sends transition commands, not a second command for the resting
 	# pose. Keep this explicit and data-driven through the action map.
 	if current_action == &"death":
@@ -3831,6 +4146,8 @@ func weapon_trail_tip() -> Variant:
 ## first turn actor command the server broadcasts clears it and the
 ## authoritative facing takes over. Nothing here decides an outcome.
 func predict_turn(radians: float) -> void:
+	var remote = RemotePresentationService.current()
+	if remote != null: remote.detach(self, "predicted_turn")
 	if current_action == &"death":
 		return
 	_wake()
@@ -3851,6 +4168,8 @@ func face_for_spell(yaw: float) -> void:
 	_movement_coast_remaining = 0.0
 	_target_yaw = yaw
 	rotation.y = yaw
+	var remote = RemotePresentationService.current()
+	if remote != null: remote.sync_transfer(self)
 	_wake()
 
 ## Abandons a predicted turn the server has not answered. A route ordered
@@ -3955,6 +4274,8 @@ func _sync_combat_target_marker() -> void:
 ## that never reached the body would leave it embedded in the ground it was
 ## measured against.
 func set_surface_height(value: float) -> void:
+	var remote = RemotePresentationService.current() if _remote_generation > 0 else null
+	if remote != null and remote.owns(self) and remote.surface(self, value): return
 	if _charge_leap != null:
 		server_target.y = value
 		return
@@ -4058,6 +4379,11 @@ static func scheduled_arrival(now: float, last_due: float, cadence: float,
 	return maxf(earliest, last_due + cadence / maxf(catch_up, 1.0))
 
 func _physics_process(delta: float) -> void:
+	if not _remote_pending_transfer.is_empty():
+		RemotePresentationService.restore_pending(self)
+		if is_queued_for_deletion() or not _remote_pending_transfer.is_empty(): return
+	var remote = RemotePresentationService.current() if _remote_generation > 0 else null
+	if remote != null and remote.owns(self): return
 	if (_speech_bubble_expiry_msec > 0
 			and Time.get_ticks_msec() >= _speech_bubble_expiry_msec):
 		clear_speech_bubble()
@@ -4141,6 +4467,8 @@ func _settle_if_idle() -> void:
 ## A per-view greeting temporarily owns the rendered pose. Network targets
 ## continue updating normally and are restored when the greeting ends.
 func set_cinematic_presentation(point: Vector3, yaw: float, action: StringName, speed := 0.0) -> void:
+	var remote = RemotePresentationService.current()
+	if remote != null: remote.detach(self, "cinematic")
 	end_charge_leap()
 	_cinematic_active = true
 	_cinematic_position = point
@@ -4183,6 +4511,10 @@ func _advance_facing_offset(delta: float) -> void:
 	_native_model.rotation.y = _base_model_yaw + _facing_offset
 
 func _wake() -> void:
+	var remote = RemotePresentationService.current() if _remote_generation > 0 else null
+	if remote != null and remote.owns(self):
+		remote.sync_sink(self, true)
+		if remote.owns(self): return
 	# Death can pause physics before a moving body settles. Revival must
 	# restart that body too, rather than waiting for a distance-correction snap.
 	if not _settled and is_physics_processing():
@@ -4310,6 +4642,8 @@ func _restore_unmounted_animation_gate() -> void:
 ## leaves the gate's stepped groups, which otherwise went on posing, solving and
 ## skinning it every second or fourth frame for as long as it was parked.
 func pause_for_parking(gate: AnimationGate) -> void:
+	var remote = RemotePresentationService.current()
+	if remote != null: remote.detach(self, "parked")
 	_animation_gate_owner = gate
 	if is_instance_valid(_mount_visual):
 		_take_mounted_animation_ownership(gate)
@@ -4409,6 +4743,8 @@ func corpse_faded() -> bool:
 ## replaced body, or not shown because it had none, is not started again by
 ## the body that takes over. Call between `configure` and `apply_server_state`.
 func adopt_command_memory_from(previous: ReplicatedActor3D) -> void:
+	var remote = RemotePresentationService.current()
+	if remote != null and is_instance_valid(previous): remote.detach(previous, "body_transfer")
 	if previous == null or not is_instance_valid(previous) or previous == self:
 		return
 	_last_command_sequence = previous._last_command_sequence
@@ -4660,3 +4996,13 @@ func set_spell_variant(effect: int) -> void:
 	if effect in [3, 6, 72, 74, 76, 77, 78, 80, 81, 82, 92]: effect = 75
 	if _spell_base_clips.has(action):
 		resolver.action_to_clip[action] = _spell_variants.get(effect, _spell_base_clips[action])
+
+func _enter_tree() -> void:
+	call_deferred("_restore_remote_pending")
+
+func _restore_remote_pending() -> void:
+	RemotePresentationService.restore_pending(self)
+
+func _exit_tree() -> void:
+	var remote = RemotePresentationService.current()
+	if remote != null: remote.release_departing(self)

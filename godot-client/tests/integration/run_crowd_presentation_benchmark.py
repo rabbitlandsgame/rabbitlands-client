@@ -114,6 +114,7 @@ def request_for(args) -> dict:
             "driver": args.driver, "body_cap": args.body_cap, "cells": args.cells,
             "replay": bool(args.replay), "executable_mode": args.executable_mode,
             "native_reducer": args.native_reducer, "native_presentation": args.native_presentation,
+            "remote_presentation": getattr(args, "remote_presentation", "legacy"),
             "client_runtime": args.client_runtime, "rust_effects": args.rust_effects,
             "resource_admission": args.resource_admission,
             "resource_admission_budget_mib": args.resource_admission_budget_mib,
@@ -267,6 +268,7 @@ def run_one(args, variant: str, repeat: int, out_dir: Path) -> dict:
         "ELORIA_NATIVE_CROWD": "1" if args.native_reducer == "on" else "0",
         "ELORIA_NATIVE_PRESENTATION": "0" if args.native_presentation == "off" else args.native_presentation,
         "RABBITLANDS_CLIENT_RUNTIME": args.client_runtime,
+        "RABBITLANDS_REMOTE_PRESENTATION": getattr(args, "remote_presentation", "legacy"),
         "RABBITLANDS_RESOURCE_ADMISSION": args.resource_admission,
         "RABBITLANDS_RESOURCE_BUDGET_MIB": str(args.resource_admission_budget_mib),
         "RABBITLANDS_RUST_EFFECTS": "heat_bolt" if args.rust_effects == "heat_bolt" else "",
@@ -420,6 +422,7 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--native-reducer", default="off", choices=["off", "on"])
     p.add_argument("--native-presentation", default="off", choices=["off", "cape", "flight", "both", "world", "all"])
     p.add_argument("--client-runtime", default="legacy", choices=["legacy", "compare", "rust", "services"])
+    p.add_argument("--remote-presentation", default="legacy", choices=["legacy", "rust"])
     p.add_argument("--resource-admission", default="legacy", choices=["legacy", "rust"])
     p.add_argument("--resource-admission-budget-mib", type=admission_budget, default=768,
                    help="logical estimated residency allowance, 64 through 8192 MiB; not an allocation measurement")
@@ -450,6 +453,8 @@ def main(argv: list[str] | None = None) -> int:
     args = p.parse_args(argv)
     try:
         configure_settings_profile(args)
+        if args.remote_presentation == "rust" and args.client_runtime != "rust":
+            raise EvidenceError("--remote-presentation rust requires --client-runtime rust")
         configure_prepared_profile(args)
         if args.resource_admission == "rust" and args.client_runtime not in ("services", "rust"):
             raise EvidenceError("--resource-admission rust requires --client-runtime services or rust")
