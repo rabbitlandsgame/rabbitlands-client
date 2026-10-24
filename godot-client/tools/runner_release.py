@@ -224,6 +224,9 @@ def build(options) -> Path:
     native_cache = native_cache.resolve()
     if native_cache != options.out.resolve().parent / "rabbitlands-native-cache" / options.platform:
         raise ValueError("Use the job's dedicated native-runtime cache outside both repositories.")
+    # Actions cache misses leave no directory. DiskBudget needs an existing
+    # volume root before the native builder creates its cache and scratch.
+    native_cache.parent.mkdir(parents=True, exist_ok=True)
     if getattr(options, "asset_cache", None):
         cache_root = options.out.resolve().parent / "rabbitlands-asset-cache" / options.platform
         if options.asset_cache.resolve() != cache_root or any(cache_root.is_relative_to(repo) for repo in (
