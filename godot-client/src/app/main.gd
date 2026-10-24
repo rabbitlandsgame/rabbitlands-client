@@ -7083,7 +7083,7 @@ func _place_actor_on_surface(actor: ReplicatedActor3D, force := false, fallback_
 	var hit_position_value: Variant = hit.get("position")
 	if hit_position_value is Vector3:
 		var hit_position: Vector3 = hit_position_value as Vector3
-		actor.set_surface_height(hit_position.y + 0.02)
+		actor.set_surface_height(hit_position.y + 0.02, hit.get("normal", Vector3.UP))
 		_actor_surface_samples[actor.actor_id] = sample
 		_grounded_actors[actor.actor_id] = true
 		# render_diagnostics() walks the actor's whole subtree and builds a
@@ -7114,7 +7114,8 @@ func _place_actor_on_surface(actor: ReplicatedActor3D, force := false, fallback_
 				PhysicsRayQueryParameters3D.create(ray_start, ray_end, ExteriorRegionStream.PREVIEW_SURFACE_LAYER))
 			var beside_position: Variant = beside.get("position")
 			if beside_position is Vector3:
-				actor.set_surface_height((beside_position as Vector3).y + 0.02)
+				actor.set_surface_height((beside_position as Vector3).y + 0.02,
+					beside.get("normal", Vector3.UP))
 				_grounded_actors[actor.actor_id] = true
 				return
 		if _grounded_actors.has(actor.actor_id):
