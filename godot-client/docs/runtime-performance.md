@@ -793,3 +793,27 @@ current look/season behavior, and measure the first restoration cost. Handle
 snapshots report initial removal, reified sources and remaining savings. Logical
 occluder registrations are retained. Templates and handles also occupy memory,
 so reduced node count alone does not establish a total memory or frame benefit.
+
+## Preset and continuous-session evidence
+
+Benchmark snapshots include the effective cloth allowance, shadow preference and
+sun state, particles, decorative grass and name distance alongside texture,
+resolution, scale, frame cap and body policy. Compare ordinary Low at 30 FPS
+separately from `--settings-profile performance`: the complete Performance
+preset also selects fewer bodies, half textures, reduced scale and no cloth.
+Requested flags alone do not prove those settings were applied.
+
+The benchmark runner accepts `--cells route-soak-16` for sixteen consecutive
+passes through the real client streaming route. Counts from 2 through 32 are
+supported. Each pass includes two borders, interior entry and return, teleport
+and return. All passes retain one process and Main instance. The first pass is
+application-first; subsequent passes are warm. This does not flush operating
+system or shader caches or certify server navigation.
+
+Iteration witnesses include monotonic and wall clocks, process and Main IDs,
+ordered ready legs and final worker/retirement teardown. A missing or failed
+transition, restarted owner, regressed clock or incomplete drain invalidates the
+soak. Report actual elapsed time and process-memory coverage; process restarts
+are separate startup checks. Keep full raw reports and failures with the exact
+package identity. Neither a short matrix nor a clean soak enables an optional
+backend or qualifies untested hardware.

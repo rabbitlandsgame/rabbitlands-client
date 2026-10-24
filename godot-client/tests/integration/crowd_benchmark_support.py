@@ -17,6 +17,7 @@ import socket
 import tempfile
 import time
 from typing import Any
+from benchmark_soak_validation import soak_ids, validate_soak
 from benchmark_remote_validation import validate_remote, validate_remote_cell
 from benchmark_prepared_validation import configure_prepared_request, validate_prepared
 from benchmark_heat_bolt_validation import HeatBoltEvidenceError, validate_heat_bolt_cell
@@ -153,6 +154,10 @@ def read_json(path: Path) -> dict:
 
 
 def selected_cells(profile: str, replay: bool = False) -> list[str]:
+    if profile.startswith("route-soak-"):
+        if replay: raise EvidenceError("same-process route soak cannot replay private data")
+        try: return soak_ids(profile)
+        except ValueError as exc: raise EvidenceError(str(exc)) from exc
     if replay:
         return []  # The recording determines its map; validate exactly one replay cell later.
     profiles = {"phase4": OLD_CELLS, "quick": ["s3-market-160", "s2-invasion-160"],
@@ -642,6 +647,10 @@ def validate_report(data: dict, request: dict, log: str) -> dict:
                    and backend["resourceAdmission"]["dependency_graph"]["registrations"] > 0
                    for backend in observed_native):
             raise EvidenceError("requested Rust route admission did not execute real launch/publication/dependency work")
+    try:
+        validate_soak(data, request["cells"])
+    except ValueError as exc:
+        raise EvidenceError(str(exc)) from exc
     mode = request.get("native_presentation", "off")
     if request.get("client_runtime") == "compare" and not any(
             _integer(backend["clientRuntime"].get("comparisons"), "clientRuntime.comparisons") > 0

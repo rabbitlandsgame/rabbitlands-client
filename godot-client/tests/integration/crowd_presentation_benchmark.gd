@@ -151,6 +151,18 @@ func _init() -> void:
 ## The cells a profile runs. `phase4` is the exit-criterion set; `quick` is one
 ## market and one invasion cell for a smoke run.
 static func cells_for(profile: String) -> Array:
+	if profile.begins_with("route-soak-"):
+		var count_text := profile.trim_prefix("route-soak-")
+		if not count_text.is_valid_int(): return []
+		var count := int(count_text)
+		if count < 2 or count > 32: return []
+		var result: Array = []
+		for index: int in count:
+			var suffix := String.chr(97 + index / 26) + String.chr(97 + index % 26)
+			result.append({"id": "traversal-southern-soak-" + suffix, "count": 1,
+				"shape": "traversal", "activity": "route", "visit": "cold" if index == 0 else "warm",
+				"soakIndex": index, "soakIterations": count})
+		return result
 	var cells: Array = []
 	var legacy_all := profile == "phase4"
 	for count: int in [100, 160, 200, 300]:
@@ -1481,6 +1493,7 @@ func _prepare_authored_herd(spec: Dictionary) -> void:
 ## A client-only route, using the real Main/AppState loader and packet handlers.
 ## It intentionally does not claim server navigation or cold OS/storage caches.
 func _run_traversal_cell(spec: Dictionary) -> void:
+	var iteration_begin := RouteContent.clock()
 	var primer: Array[Dictionary] = []
 	if str(spec.visit) == "warm" and not _route_primed:
 		primer = await _traverse_southern_route()
@@ -1516,6 +1529,10 @@ func _run_traversal_cell(spec: Dictionary) -> void:
 			"boundaryContentSchema": 1,
 			"boundaryCaptureTiming": "synchronous capture cost is reported; remains in route frame/wall samples; transition milliseconds ends before arrival capture",
 			"serverNavigationCertified": false, "unmeasuredPrimer": primer,
+			"iterationClock": {"index": int(spec.get("soakIndex", 0)),
+				"plannedIterations": int(spec.get("soakIterations", 1)), "visit": str(spec.visit),
+				"pid": OS.get_process_id(), "mainInstanceId": _main.get_instance_id(),
+				"begin": iteration_begin, "end": RouteContent.clock()},
 			"cacheCondition": ("repeat in this process" if str(spec.visit) == "warm" else "first route pass in this process")
 				+ "; OS caches uncontrolled; preceding crowd cells can share assets"},
 		"memory": {"before": before, "after": _memory_sample(), "peakStaticBytes": _route_peak_static_bytes},

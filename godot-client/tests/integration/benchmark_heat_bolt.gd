@@ -179,7 +179,7 @@ func removal_probe() -> Dictionary:
 	var actors: Dictionary = state.get("actors")
 	var saved: Dictionary = (actors[target] as Dictionary).duplicate(true)
 	var old_node: Node3D = (main.get("actor_nodes") as Dictionary).get(target) as Node3D
-	var old_ref := weakref(old_node) if old_node != null else null
+	var old_ref: WeakRef = weakref(old_node) if old_node != null else null
 	var selected := int(state.get("selected_actor_id"))
 	state.set("selected_actor_id",target)
 	_probe_effect = null
