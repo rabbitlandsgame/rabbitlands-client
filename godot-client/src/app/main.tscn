@@ -2109,9 +2109,10 @@ text = "×"
 
 [node name="StatsTabs" type="TabContainer" parent="GameView/StatsPanel/Content" unique_id=28315277]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(670, 500)
+custom_minimum_size = Vector2(670, 0)
 layout_mode = 2
 size_flags_vertical = 3
+use_hidden_tabs_for_min_size = false
 current_tab = 0
 
 [node name="Statistics" type="MarginContainer" parent="GameView/StatsPanel/Content/StatsTabs" unique_id=2128883501]
@@ -2144,17 +2145,18 @@ text = "Show read knowledge only"
 
 [node name="Columns" type="HBoxContainer" parent="GameView/StatsPanel/Content/StatsTabs/Knowledge/KnowledgeContent" unique_id=2042216425]
 layout_mode = 2
+size_flags_vertical = 3
 theme_override_constants/separation = 12
 
 [node name="KnowledgeList" type="ItemList" parent="GameView/StatsPanel/Content/StatsTabs/Knowledge/KnowledgeContent/Columns" unique_id=978309244]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(300, 410)
+custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
 allow_reselect = true
 
 [node name="KnowledgeDetail" type="RichTextLabel" parent="GameView/StatsPanel/Content/StatsTabs/Knowledge/KnowledgeContent/Columns" unique_id=1372983616]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(340, 410)
+custom_minimum_size = Vector2(340, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Select an entry to request its server description."

@@ -90,8 +90,7 @@ func _run() -> void:
 	app_state.set("actors", {7: {"actor_id": 7, "name": "Ari", "kind": 1,
 		"alive": true, "sitting": false}})
 	main.call("_sync_hud_button_states", true)
-	var sit_button: Button = main.get_node(
-		"GameView/Quickbar/QuickRows/Buttons/SitButton") as Button
+	var sit_button: Button = main.get_node("%SitButton") as Button
 	var standing_region: Rect2 = (sit_button.icon as AtlasTexture).region
 	(app_state.get("actors") as Dictionary)[7]["sitting"] = true
 	main.call("_sync_hud_button_states", true)
