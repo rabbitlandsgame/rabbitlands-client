@@ -242,6 +242,13 @@ static func water_named(material_name: String) -> bool:
 static func paint_bound(root: Node, manifest: WorldManifest) -> int:
 	if root == null or manifest == null:
 		return 0
+	# Gauntlets retain their authored textures and the loader's route contrast
+	# in every look mode, including interiors with no enabled sun. The generic
+	# terrain paint cannot distinguish Walk_Terrain_ground from its verge.
+	if manifest.data.get("gauntlet") is Dictionary:
+		if outdoor(manifest) and LookProfile.enabled_for(root):
+			LookFoliage.keep_chroma(root, region_of(manifest))
+		return 0
 	if manifest.data.has("continentGeography") or not outdoor(manifest):
 		return 0
 	if not LookProfile.enabled_for(root):

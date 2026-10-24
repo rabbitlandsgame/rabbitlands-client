@@ -13,6 +13,7 @@ const MapMeshExtension := preload("res://src/world/map_mesh_extension.gd")
 const ArchivedModelPolicy := preload("res://src/actors/archived_model_policy.gd")
 const UndergroundScenery := preload("res://src/world/underground_scenery.gd")
 const ResourceDiagnostics := preload("res://src/world/resource_diagnostics.gd")
+const GauntletSurfaceContrast := preload("res://src/world/gauntlet_surface_contrast.gd")
 
 # Static-instance batching. A region such as Four Gates imports ~1700 mesh
 # nodes that between them reference only 42 meshes, so almost every draw call
@@ -361,6 +362,7 @@ func load_world(manifest_path: String, arrival := Vector3.INF, wait_for_arrival 
 	# materials.
 	LookGround.paint_loaded(world_root, manifest)
 	LookFoliage.paint_loaded(world_root, manifest)
+	GauntletSurfaceContrast.apply(manifest, world_root)
 	UndergroundScenery.apply(manifest, world_root)
 	mark = _phase(&"lookBinding", mark)
 	load_phases[&"total"] = mark - began
@@ -458,6 +460,7 @@ func _load_from_cache(mark: int, began: int) -> bool:
 	# fresh load does.
 	LookGround.paint_loaded(world_root, manifest)
 	LookFoliage.paint_loaded(world_root, manifest)
+	GauntletSurfaceContrast.apply(manifest, world_root)
 	UndergroundScenery.apply(manifest, world_root)
 	mark = _phase(&"lookBinding", mark)
 	load_phases[&"total"] = mark - began
