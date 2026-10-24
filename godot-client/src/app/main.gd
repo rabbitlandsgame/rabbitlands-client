@@ -4041,8 +4041,9 @@ func _on_connection_state_changed(value: String) -> void:
 	if value == "disconnected":
 		character_intro.cancel()
 		_end_arrival()
-		respawn_prewarm.discard()
-		gauntlet_prewarm.discard()
+		if not game_view.visible or _leaving_session:
+			respawn_prewarm.discard()
+			gauntlet_prewarm.discard()
 		_pickpoint_draft.clear()
 		_pickpoint_submitting = false
 	status_label.text = ("Securing the connection…" if value == "securing"
@@ -4058,7 +4059,7 @@ func _on_connection_state_changed(value: String) -> void:
 		_sync_console_session_controls()
 		_resync_after_reconnect = true
 		if first_drop:
-			_clear_world_presentation()
+			_clear_world_presentation(true)
 			_hide_chat_input()
 			_set_login_screen_visible(false)
 			console_diagnostics_button.set_pressed_no_signal(false)
@@ -4119,7 +4120,10 @@ func _on_reconnect_progress(attempt: int, _total: int, delay_msec: int) -> void:
 			else "Connecting to server in 2 seconds (attempt %d)…" % attempt), 255, "connecting")
 	_sync_connection_banner()
 
-func _clear_world_presentation() -> void:
+func _clear_world_presentation(retain_map_resources := false) -> void:
+	# The disconnect console still belongs to this session. Keep its terrain,
+	# neighbours and parsed visuals ready for reconnect, but discard live
+	# entities so the next connection rebuilds them from server snapshots.
 	RustRiderPose.close_batches()
 	# No actor survives this clear. Forget stepped members before queueing
 	# any body, without reactivating its animation or skeleton callbacks.
@@ -4127,10 +4131,14 @@ func _clear_world_presentation() -> void:
 	RustSpellFlights.clear_for(world_root)
 	if is_instance_valid(remote_presentation): remote_presentation.reset_world(client_runtime.current_epoch() + 1, true)
 	client_runtime.reset_session()
-	SeasonSurfaces.set_season({})
+	if not retain_map_resources:
+		SeasonSurfaces.set_season({})
+		respawn_prewarm.discard()
+		gauntlet_prewarm.discard()
 	quest_trail.clear()
 	character_intro.cancel()
 	_clear_map_walk_target()
+	exterior_stream.pending_walk.clear()
 	for effect: Variant in world_effects:
 		if is_instance_valid(effect): effect.queue_free()
 	world_effects.clear()
@@ -4152,7 +4160,8 @@ func _clear_world_presentation() -> void:
 		if is_instance_valid(raw_object_node):
 			(raw_object_node as Node).queue_free()
 	map_object_nodes.clear()
-	_map_presentation = {}
+	if not retain_map_resources:
+		_map_presentation = {}
 	_ungrounded_map_objects.clear()
 	for markers: Dictionary in [map_marker_nodes, player_mark_nodes]:
 		for marker: Node in markers.values():
@@ -4164,21 +4173,22 @@ func _clear_world_presentation() -> void:
 	map_marker_overlay.set_waypoints(no_marks)
 	map_marker_overlay.set_markers(no_marks)
 	map_marker_overlay.set_player_marks(no_marks)
-	if is_instance_valid(map_light_root):
-		map_light_root.queue_free()
-	map_light_root = null
+	if not retain_map_resources:
+		if is_instance_valid(map_light_root):
+			map_light_root.queue_free()
+		map_light_root = null
 	_actor_surface_samples.clear()
 	_grounded_actors.clear()
-	# The parsed model and animation caches are only worth holding for the
-	# session they were built in.
-	TorsoBodyCover.clear()
-	WardrobeShirtFitScript.clear()
-	GlbSceneCache.clear()
-	NativeAnimationImporter.clear()
 	occluder_fade.reset()
-	exterior_stream.clear()
 	_retained_traveller = -1
-	world_loader.unload_world()
+	if not retain_map_resources:
+		TorsoBodyCover.clear()
+		WardrobeShirtFitScript.clear()
+		GlbSceneCache.clear()
+		NativeAnimationImporter.clear()
+		exterior_stream.clear()
+		world_loader.unload_world()
+		loaded_server_map = ""
 	# Cancel both queued work and an old coroutine waiting on physics. A later
 	# session's queue must not be cleared by that coroutine when it resumes.
 	_surface_refresh_epoch += 1
@@ -4186,7 +4196,6 @@ func _clear_world_presentation() -> void:
 	_surface_refresh_running = false
 	_surface_refresh_inflight = 0
 	_surface_followup_pending = 0
-	loaded_server_map = ""
 	full_map.hide()
 	inventory_panel.hide()
 	stats_panel.hide()
