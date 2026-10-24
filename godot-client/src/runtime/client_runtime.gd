@@ -36,8 +36,11 @@ func allocate_instance_generation() -> int:
 func is_compare_mode() -> bool:
 	return _mode == "compare"
 
+func is_rust_mode() -> bool:
+	return _mode == "rust" and _native != null
+
 func wants_rust_pose() -> bool:
-	return false # Added only when the complete mounted slice is qualified.
+	return is_rust_mode()
 
 func initialize(directory := "") -> void:
 	close()
@@ -49,7 +52,7 @@ func initialize(directory := "") -> void:
 	if _requested == "legacy":
 		_reason = "legacy_selected"
 		return
-	if _requested != "compare":
+	if _requested not in ["compare", "rust"]:
 		_reason = "unsupported_mode"
 		return
 	if directory.is_empty():
@@ -72,7 +75,8 @@ func initialize(directory := "") -> void:
 	var platform := {"Windows": "windows", "Linux": "linux", "macOS": "macos"}.get(OS.get_name(), "unsupported") as String
 	var library: String = str(_manifest.get("library", ""))
 	var expected_library: String = {"windows": "client_runtime.dll", "linux": "client_runtime.so", "macos": "client_runtime.dylib"}.get(platform, "")
-	if str(_manifest.get("platform", "")) != platform or not OS.has_feature(str(_manifest.get("architecture", ""))) \
+	if str(_manifest.get("platform", "")) != platform or str(_manifest.get("architecture", "")) != "x86_64" \
+			or not OS.has_feature("x86_64") \
 			or library.is_empty() or library != expected_library:
 		_reason = "unsupported_platform"
 		return
@@ -97,12 +101,16 @@ func initialize(directory := "") -> void:
 		_native = null
 		_reason = "native_api_mismatch"
 		return
+	if _requested == "rust" and (int(info.get("mounted_pose_api", -1)) != 1 or int(info.get("engine_scalar_bytes", 0)) != 4):
+		_native = null
+		_reason = "mounted_pilot_unavailable"
+		return
 	if _epoch > 1 and int(_native.call("reset_epoch", _epoch)) != 0:
 		_native = null
 		_reason = "epoch_rejected"
 		return
-	_mode = "compare"
-	_reason = "native_comparison_legacy_presentation"
+	_mode = _requested
+	_reason = "native_mounted_pilot" if _mode == "rust" else "native_comparison_legacy_presentation"
 
 func reset_session() -> void:
 	_epoch += 1
@@ -150,7 +158,8 @@ func observe_gate(gate: AnimationGate) -> void:
 
 func snapshot() -> Dictionary:
 	return {"requested": _requested, "mode": _mode, "reason": _reason, "epoch": _epoch,
-		"presentation_backend": "legacy", "native_available": _native != null,
+		"presentation_backend": "mixed" if is_rust_mode() else "legacy", "native_available": _native != null,
+		"mounted_pose_enabled": wants_rust_pose(), "mounted_pose_profile": "moor_pony",
 		"comparisons": _comparisons, "records_checked": _checked, "mismatches": _mismatches,
 		"comparison_limit": COMPARE_LIMIT, "records_over_limit": _truncated,
 		"native": _native.call("runtime_info") if _native != null else {}}

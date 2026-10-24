@@ -21,6 +21,10 @@ static func begin(boundary: String) -> Dictionary:
 			"acceptedBounds": {"poseSteps": [0, MAX_POSE_STEPS],
 				"steppedSeconds": [0.0, MAX_STEPPED_SECONDS],
 				"pendingSeconds": [0.0, MAX_PENDING_SECONDS]}},
+		"rustPose": {"available": 0, "eligible": 0, "registered": 0, "appliedVisuals": 0,
+			"activeVisuals": 0, "appliedActiveVisuals": 0, "applications": 0, "comparisons": 0,
+			"failures": 0, "disabled": 0, "profiles": {}, "requestedModes": {},
+			"maxPositionError": 0.0, "maxAngleError": 0.0, "maxScaleError": 0.0, "maxVisualError": 0.0},
 		"ponyQuality": {"available": 0, "unavailable": 0, "unavailableReasons": {},
 			"levels": {"low": 0, "medium": 0, "high": 0}, "local": 0, "remote": 0,
 			"sources": {"publicGetters": 0, "legacyProperties": 0}}}
@@ -51,6 +55,30 @@ static func include_visual(summary: Dictionary, visual: Object) -> void:
 			for field: String in ["poseSteps", "steppedSeconds", "pendingSeconds"]:
 				_add_metric(scheduling[field], stats[field])
 	_include_pony_quality(summary["ponyQuality"], visual)
+	_include_rust_pose(summary["rustPose"], visual)
+
+static func _include_rust_pose(out: Dictionary, visual: Object) -> void:
+	if not is_instance_valid(visual) or not _has_property(visual, "rust_pose") or not visual.has_method("scheduling_stats"):
+		return
+	var solver: Variant = visual.get("rust_pose")
+	if not is_instance_valid(solver) or not solver.has_method("snapshot"):
+		return
+	var stats: Dictionary = solver.snapshot()
+	out.available += 1
+	out.eligible += int(not bool(stats.disabled))
+	out.registered += int(bool(stats.registered))
+	out.disabled += int(bool(stats.disabled))
+	out.appliedVisuals += int(int(stats.applications) > 0)
+	var scheduling: Dictionary = visual.scheduling_stats()
+	var active := not bool(scheduling.parked) and int(scheduling.tier) != 2
+	out.activeVisuals += int(active)
+	out.appliedActiveVisuals += int(active and int(stats.applications) > 0)
+	for field: String in ["applications", "comparisons", "failures"]:
+		out[field] = int(out[field]) + int(stats[field])
+	for field: String in ["maxPositionError", "maxAngleError", "maxScaleError", "maxVisualError"]:
+		out[field] = maxf(float(out[field]), float(stats[field]))
+	_increment(out.profiles, str(stats.profile))
+	_increment(out.requestedModes, str(stats.requested))
 
 static func _tier_counts() -> Dictionary:
 	return {"full": 0, "half": 0, "paused": 0, "quarter": 0}

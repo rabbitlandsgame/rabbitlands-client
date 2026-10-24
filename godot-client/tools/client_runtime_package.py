@@ -22,7 +22,7 @@ def source_digest(repository: Path) -> str:
         folders[:] = [name for name in folders if name not in {"target", "build", ".deps", ".git"}]
         for name in names:
             path = Path(directory) / name
-            if path.suffix in {".rs", ".h", ".cpp", ".toml", ".lock", ".in"} or name == "CMakeLists.txt":
+            if path.suffix in {".rs", ".h", ".cpp", ".toml", ".lock", ".in", ".json"} or name == "CMakeLists.txt":
                 files.append(path)
     if not files:
         raise ValueError("No client runtime source inputs")
@@ -60,7 +60,7 @@ def stage_payload(directory: Path, repository: Path, app: Path, platform: str) -
 
 
 def write_launchers(stage: Path, platform: str) -> None:
-    for name, mode in (("Rust comparison", "compare"), ("legacy runtime", "legacy")):
+    for name, mode in (("Rust rider pilot", "rust"), ("Rust comparison", "compare"), ("legacy runtime", "legacy")):
         if platform == "windows":
             body = '@echo off\r\nsetlocal\r\nset "RABBITLANDS_CLIENT_RUNTIME=' + mode + '"\r\ncall "%~dp0RabbitLands.bat" %*\r\n'
             (stage / f"RabbitLands ({name}).bat").write_bytes(body.encode("utf-8"))

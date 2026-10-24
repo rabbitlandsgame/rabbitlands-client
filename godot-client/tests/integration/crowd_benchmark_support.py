@@ -240,10 +240,11 @@ def validate_runtime(runtime: dict, request: dict, renderer: str, quality: str,
     # require its actual instantiated backend at every observed boundary.
     if "clientRuntime" in backends or requested_runtime != "legacy":
         runtime = _object(backends.get("clientRuntime"), label + ".clientRuntime")
+        expected_presentation = "mixed" if requested_runtime == "rust" else "legacy"
         if runtime.get("requested") != requested_runtime or runtime.get("mode") != requested_runtime \
-                or runtime.get("presentation_backend") != "legacy" or runtime.get("mismatches") != 0:
+                or runtime.get("presentation_backend") != expected_presentation or runtime.get("mismatches") != 0:
             raise EvidenceError(f"{label}: actual client runtime differs or fell back")
-        if requested_runtime == "compare" and runtime.get("native_available") is not True:
+        if requested_runtime in ("compare", "rust") and runtime.get("native_available") is not True:
             raise EvidenceError(f"{label}: requested Rust comparison runtime is unavailable")
     presentation = _object(backends.get("presentation"), label + ".presentation")
     requested = request.get("native_presentation", "off")
@@ -449,6 +450,20 @@ def validate_report(data: dict, request: dict, log: str) -> dict:
                 for point in ("afterSpawn", "afterSample"):
                     if census[point].get("mountedActors") != 80 or census[point].get("mountSkeletons") != 80:
                         raise EvidenceError(f"{name}: mounted workload does not contain 80 mounted actors/skeletons")
+                if request.get("client_runtime") == "rust":
+                    actual = _object(census["afterSample"].get("mountedPresentation"), name + ".mountedPresentation")
+                    pose = _object(actual.get("rustPose"), name + ".rustPose")
+                    if pose.get("available") != 80 or pose.get("eligible") != 80 or pose.get("profiles") != {"moor_pony": 80} \
+                            or pose.get("requestedModes") != {"rust": 80} or pose.get("failures") != 0 \
+                            or pose.get("disabled") != 0 or pose.get("activeVisuals") != pose.get("appliedActiveVisuals"):
+                        raise EvidenceError(f"{name}: actual Rust rider coverage or fallback differs")
+                    _integer(pose.get("applications"), name + ".rustApplications", 1)
+                    native = _object(runtime["activeBackends"]["clientRuntime"].get("native"), name + ".rustNative")
+                    _integer(native.get("poses_applied"), name + ".nativePosesApplied", 1)
+                    batch = _object(runtime["activeBackends"].get("mountedBatch"), name + ".mountedBatch")
+                    if batch.get("present") is not True or batch.get("fallbacks") != 0:
+                        raise EvidenceError(f"{name}: actual Rust batch is absent or fell back")
+                    _integer(batch.get("batches"), name + ".nativeBatches", 1)
         if request.get("replay"):
             window = _object(cell.get("replayWindow"), name + ".replayWindow")
             if window.get("exhausted") is True or int(window.get("mapChanges", 0)) != 0:

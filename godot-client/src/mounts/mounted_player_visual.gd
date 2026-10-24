@@ -1,6 +1,7 @@
 extends Node3D
 ## Profile-driven mount presentation on the real player and its wardrobe.
 const RiderPose := preload("res://src/mounts/rider_seat_pose.gd")
+const RustPose := preload("res://src/mounts/rust_rider_pose.gd")
 const ReinVisual := preload("res://src/mounts/mount_reins.gd")
 const CapeSurface := preload("res://src/mounts/mount_cape_surface.gd")
 const UpperBody := preload("res://src/mounts/mounted_upper_body.gd")
@@ -10,6 +11,7 @@ const HindLegPose := preload("res://src/mounts/mount_hind_leg_pose.gd")
 var actor: ReplicatedActor3D
 var pony: ReplicatedActor3D
 var pose := RiderPose.new()
+var rust_pose := RustPose.new()
 var reins := ReinVisual.new()
 var profile: Dictionary
 var state: Dictionary = {}
@@ -108,6 +110,7 @@ func configure(player: ReplicatedActor3D, models: Dictionary, mount_id := "moor_
 		player_anim.get_animation("Fighting_Idle"), actor.get_node("NativeModel") as Node3D)
 	if not errors.is_empty():
 		return errors
+	rust_pose.configure(pose, mount_id)
 	# Anchor the banner to the neutral seat height, independent of saddle bob
 	# and pitch during animation. Retain the current rider's body dimensions.
 	var seat_point: Vector3
@@ -293,13 +296,18 @@ func _step_visual(delta: float) -> void:
 	var lean_key := "gallopPelvisLeanDegrees" if action == "gallop" else "normalPelvisLeanDegrees"
 	if profile.has(lean_key):
 		profile.pelvisLeanDegrees = float(profile[lean_key])
+	if rust_pose.try_fit(seat, action, elapsed, duration, _finish_visual.bind(delta, seat, action)):
+		return
 	pose.fit(seat, action, elapsed, duration)
+	_finish_visual(delta, seat, action)
+
+func _finish_visual(delta: float, seat: Transform3D, gait: String) -> void:
 	upper.apply()
 	refresh_cloth_permission(true)
 	if cape_simulation_enabled():
 		# Pose the body first, then cloth, once. The ordinary automatic modifier
 		# remains paused so it cannot overwrite this mounted pass afterward.
-		cape_surface.update(delta, action)
+		cape_surface.update(delta, gait)
 		actor._cape_cloth.call("_process_modification_with_delta", delta)
 		actor.get_skeleton().force_update_all_bone_transforms()
 	actor._lift_overhead(actor.server_scale)
@@ -330,6 +338,7 @@ func play_action(next: StringName, restart := false) -> void:
 	_update_effective_tier()
 
 func restore() -> void:
+	rust_pose.close()
 	_parked = true
 	set_process(false)
 	_pending_delta = 0.0
@@ -345,3 +354,6 @@ func restore() -> void:
 	actor.set_hand_props_visible(true)
 	actor._refresh_cape_cloth_activity(true)
 	actor._lift_overhead(actor.server_scale)
+
+func _exit_tree() -> void:
+	rust_pose.close()

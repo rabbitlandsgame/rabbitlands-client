@@ -2,8 +2,8 @@
 
 The engine-independent Rust core owns immutable rig records and numeric planning
 state. A thin official GDExtension adapter owns its lifetime on the creating main
-thread. Godot owns scene nodes, animation playback and rendering. Phase 4 only
-compares scheduling; legacy presentation remains authoritative.
+thread. Godot owns scene nodes, animation playback and rendering. Ordinary play
+uses legacy presentation; the Moor Pony rider pilot is explicitly selectable.
 
 Build from the client directory:
 
@@ -17,12 +17,14 @@ core builds/tests offline. CMake fetches godot-cpp at
 `507ed9d840c01a3c5b2a39af8bb4000bfac30bf5`, targeting Godot 4.7.
 Generated libraries, dependencies and output manifests are ignored.
 
-Set `RABBITLANDS_CLIENT_RUNTIME=compare` before launching the source client to
-enable comparison mode, or `legacy` for the ordinary path. Default is legacy.
+Set `RABBITLANDS_CLIENT_RUNTIME=rust` for the Moor Pony rider pilot, `compare`
+for comparison with legacy driving presentation, or `legacy` for the ordinary
+path. Default is legacy. Comparison mode copies complete poses and is deliberately
+expensive; its timings do not establish live-mode performance.
 Pass `--client-runtime <absolute bin/client_runtime directory>` to
 `tools/package_client.py` to include a verified optional payload. Its native
 source digest must match the commit being exported. The package includes
-comparison and legacy launchers. Omitting this option produces a native-absent
+pilot, comparison and legacy launchers. Omitting this option produces a native-absent
 package. Windows x86_64 is the initial validation host; other package targets
 retain legacy support until their native payloads qualify.
 
@@ -44,3 +46,37 @@ input is `[id, generation, rig, tier, phase]`; output is
 are accepted. The adapter reuses input/output capacity; comparison diagnostics
 are sampled every 60 calls and capped at 256 records. Runtime diagnostics report
 requested and actual mode, fallback reason, epoch and comparison counts.
+
+## Moor Pony rider pilot
+
+The complete base rider calculation includes seat fit, pelvis/spine stabilization,
+both arm passes, legs, wrists, thumbs and fingers. Immutable rest transforms and
+neutral local poses remain separate. Godot samples mount animation, then a late
+same-frame coordinator submits all due riders together, validates complete tagged
+outputs, applies each pose and calls the existing upper-body/cloth/rein finish
+pass in order. No authoritative actor transform is owned by this service. Other
+mount profiles retain legacy. The pilot requires API 1, x86_64 and a four-byte
+engine scalar; unsupported native/engine combinations retain the ordinary path.
+
+Epochs, generations, weak mount/skeleton/visual bindings and coordinate-frame
+checks reject stale work. A failed batch falls back as a complete component.
+Main closes pending work before session reset or exit. Native application guards
+reject reentrant mutation and foreign-thread access; cleanup requested by a
+callback is deferred until the owned application ends.
+
+Mounted input records are `[actor, generation, rider, gait, sample_frame]` with
+14 sample values per row: world seat affine (12), elapsed seconds and cycle
+seconds. Gaits are idle/walk/trot/gallop (0–3). Comparison metadata is
+`[actor, generation, epoch, sample_frame, offset, bone_count]`. Each numeric value
+range contains visual affine (12), local position/quaternion/scale (10 per bone)
+and five contact distances. Live mode keeps the full pose inside native buffers;
+comparison getters are diagnostic operations.
+
+Diagnostics separate actual applications, failed/fallback work, supported
+profiles and active-tier coverage. The batch records submission, packing,
+native calls and remaining Godot finish work. Submission and flush totals do
+not overlap; packing/native/finish are subsets of flush. C++ conversion, Rust
+solve, validation and application counters are subsets of the native call.
+These cumulative counters include readiness/warmup and must not be summed with
+their enclosing spans or described as sample-only measurements. Whole rendered
+frame and delivered-frame measurements remain the performance decision gate.

@@ -42,6 +42,7 @@ func benchmark_runtime_snapshot() -> Dictionary:
 			"worldViewportSize": [main_viewport.size.x, main_viewport.size.y]},
 		"activeBackends": {"nativeReducer": AppState.native_crowd_reducer_active(),
 			"clientRuntime": client_runtime.snapshot(),
+			"mountedBatch": RustRiderPose.batch_snapshot(),
 			"presentation": {"requested": OS.get_environment("ELORIA_NATIVE_PRESENTATION"),
 				"nativeCapeInstances": cape_instances, "nativeCapeCalls": cape_calls,
 				"capeFallbackCalls": cape_fallbacks, "flight": flight_stats, "impact": impact_stats},

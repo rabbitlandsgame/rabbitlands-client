@@ -396,7 +396,7 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--diagnostics", default="")
     p.add_argument("--native-reducer", default="off", choices=["off", "on"])
     p.add_argument("--native-presentation", default="off", choices=["off", "cape", "flight", "both", "world", "all"])
-    p.add_argument("--client-runtime", default="legacy", choices=["legacy", "compare"])
+    p.add_argument("--client-runtime", default="legacy", choices=["legacy", "compare", "rust"])
     p.add_argument("--repeats", type=int, default=1)
     p.add_argument("--sample-ms", type=int, default=6000)
     p.add_argument("--warmup-ms", type=int, default=2000)

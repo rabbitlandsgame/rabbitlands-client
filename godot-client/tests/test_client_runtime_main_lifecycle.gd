@@ -15,7 +15,8 @@ func _expect(ok: bool, message: String) -> void:
 
 func _run() -> void:
 	var previous := OS.get_environment("RABBITLANDS_CLIENT_RUNTIME")
-	OS.set_environment("RABBITLANDS_CLIENT_RUNTIME", "compare")
+	var selected := "rust" if OS.get_cmdline_user_args().has("--runtime=rust") else "compare"
+	OS.set_environment("RABBITLANDS_CLIENT_RUNTIME", selected)
 	var app := root.get_node("/root/AppState")
 	var previous_authenticated: bool = app.get("authenticated")
 	var previous_map: String = app.get("current_map")
@@ -39,7 +40,7 @@ func _run() -> void:
 		var before := controller.snapshot()
 		var args := OS.get_cmdline_user_args()
 		if args.has("--expect-native") or args.has("--expect-native=present"):
-			_expect(before.native_available and before.mode == "compare", "Main uses the verified native comparison profile")
+			_expect(before.native_available and before.mode == selected, "Main uses the verified selected native profile")
 		elif args.has("--expect-native=absent"):
 			_expect(not before.native_available and before.mode == "legacy", "Main remains available with the native payload absent")
 		var first := controller.allocate_instance_generation()
@@ -50,13 +51,13 @@ func _run() -> void:
 		_expect(controller.current_epoch() == epoch + 1 and Controller.current() == controller,
 			"actual Main world-clear resets the epoch without closing its service")
 		main.call("_clear_world_presentation")
-		_expect(controller.current_epoch() == epoch + 2 and not controller.wants_rust_pose(),
-			"repeated world clear preserves legacy pose publication and advances the epoch")
+		_expect(controller.current_epoch() == epoch + 2 and controller.wants_rust_pose() == (before.mode == "rust"),
+			"repeated world clear preserves the selected pose owner and advances the epoch")
 		_expect(controller.allocate_instance_generation() > second,
 			"world clear does not reuse instance generations")
 		var after := controller.snapshot()
-		_expect(after.presentation_backend == "legacy" and after.mode == before.mode,
-			"map/session resets leave the selected service and legacy presentation intact")
+		_expect(after.presentation_backend == before.presentation_backend and after.mode == before.mode,
+			"map/session resets leave the selected service and presentation backend intact")
 	main.queue_free()
 	await process_frame
 	await process_frame
