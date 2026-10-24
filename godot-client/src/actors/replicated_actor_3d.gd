@@ -4933,6 +4933,9 @@ func corpse_faded() -> bool:
 		else _corpse_hold_seconds)
 	return _death_elapsed >= _death_duration() + hold + _corpse_fade_seconds
 
+func creature_death_in_progress() -> bool:
+	return _is_creature and current_action == &"death" and not corpse_faded()
+
 ## What the server has told a node this one replaces about its last command,
 ## taken before this one applies the same record: a swing already shown by the
 ## replaced body, or not shown because it had none, is not started again by

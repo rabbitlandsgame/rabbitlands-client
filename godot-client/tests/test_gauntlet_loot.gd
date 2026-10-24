@@ -85,9 +85,16 @@ func run() -> void:
 	bad.exited = false
 	expect(protocol.decode_gauntlet_loot(JSON.stringify(bad).to_utf8_buffer()).type == "gauntlet_loot", "beam preload destinations decode with the loot ledger")
 	ui.apply_snapshot(state)
+	expect(not ui.panel.visible, "completion waits before opening the loot ledger")
+	var completion_deadline := Time.get_ticks_msec() + 5000
+	while not ui.panel.visible and Time.get_ticks_msec() < completion_deadline:
+		await process_frame
 	await process_frame
 	await process_frame
 	expect(ui.panel.visible and ui.table.get_child_count() == 6, "complete run opens six ledger rows")
+	if not ui.panel.visible:
+		quit(1)
+		return
 	expect(not ui.send_button.disabled, "complete allocations enable confirmation")
 	var inspect_button: Button = ui.table.get_child(4).find_child("InspectItem", true, false)
 	expect(inspect_button != null and not inspect_button.disabled, "loot item icons offer inspection")
