@@ -1410,6 +1410,7 @@ func _ready() -> void:
 	extension_windows.configure(item_atlas, lantern_guide)
 	_configure_service_buttons()
 	extension_windows.gauntlet_loot_window.configure(item_atlas, model_registry, equipment_config)
+	extension_windows.gauntlet_loot_window.configure_completion_wait(_gauntlet_creature_deaths_pending)
 	extension_windows.combat_hud_preference_changed.connect(_save_hud_settings)
 	invasion_assistant_window = InvasionAssistantScript.new()
 	add_child(invasion_assistant_window)
@@ -6963,6 +6964,13 @@ func _apply_actor_mount(id: Variant) -> void:
 	if node == null:
 		return
 	node.set_mount_state(AppState.mount_state_for_actor(int(id)), models)
+
+func _gauntlet_creature_deaths_pending() -> bool:
+	for value: Variant in actor_nodes.values():
+		if is_instance_valid(value) and value is ReplicatedActor3D \
+				and (value as ReplicatedActor3D).creature_death_in_progress():
+			return true
+	return false
 
 func _sync_quest_offers() -> void:
 	for id: Variant in actor_nodes:
