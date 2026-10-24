@@ -1,6 +1,7 @@
 extends SceneTree
 
 const EntryStyle := preload("res://src/ui/oldcraft_entry_style.gd")
+const TextColors := preload("res://src/ui/text_colors.gd")
 
 var failures := 0
 var checks := 0
@@ -48,12 +49,12 @@ func _run() -> void:
 		"creation form echoes the class rail with carved stone and brass")
 	var parchment_frame := (main.get_node("%FormParchment") as Panel).get_theme_stylebox(
 		"panel") as StyleBoxFlat
-	_expect(parchment_frame != null and parchment_frame.bg_color.is_equal_approx(
-		Color(EntryStyle.PARCHMENT, 0.975)) and parchment_frame.expand_margin_left >= 10.0,
-		"creation form keeps an inset parchment writing surface")
+	_expect(parchment_frame != null and parchment_frame.bg_color.get_luminance() < 0.1
+		and parchment_frame.expand_margin_left >= 10.0,
+		"creation form keeps a dark inset surface for EL's bright text")
 	var randomize := main.get_node_or_null("%RandomizeAppearance") as Button
 	_expect(randomize != null and randomize.text == "Randomize Appearance" and
-		randomize.get_theme_color("font_color").is_equal_approx(EntryStyle.GOLD_BRIGHT),
+		randomize.get_theme_color("font_color").is_equal_approx(TextColors.color("login_label")),
 		"creation exposes a clearly styled appearance randomizer")
 	_expect(randomize != null and randomize.pressed.is_connected(
 		Callable(main, "_on_randomize_creation_pressed")),

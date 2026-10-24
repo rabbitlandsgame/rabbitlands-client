@@ -1,4 +1,5 @@
 extends Control
+const TextColors := preload("res://src/ui/text_colors.gd")
 ## The selected podium design. Category definitions, scores and the reader's
 ## rank are server snapshots; only presentation and filter choices live here.
 
@@ -234,7 +235,7 @@ func _build_categories() -> void:
 			group_button.name = "Group" + group_name.validate_node_name()
 			group_button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 			group_button.add_theme_font_override("font", _title_font)
-			group_button.add_theme_color_override("font_color", GOLD)
+			TextColors.bind(group_button, "leaderboard_title")
 			group_button.custom_minimum_size.y = 26
 			for state: String in ["normal", "hover", "pressed", "focus"]:
 				group_button.add_theme_stylebox_override(state, _box(Color("1c1e24"), Color("8b7046"), 1, 3, 3))
@@ -565,7 +566,12 @@ func _label(text: String, font_size: int, color: Color) -> Label:
 	label.text = text
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	label.add_theme_font_size_override("font_size", font_size)
-	label.add_theme_color_override("font_color", color)
+	var role := "leaderboard_text"
+	if color == GOLD: role = "leaderboard_title"
+	elif color == MUTED: role = "leaderboard_muted"
+	elif color == METALS[1]: role = "leaderboard_silver"
+	elif color == METALS[2]: role = "leaderboard_bronze"
+	TextColors.bind(label, role)
 	return label
 
 func _button(text: String) -> Button:
@@ -573,8 +579,8 @@ func _button(text: String) -> Button:
 	button.text = text
 	button.custom_minimum_size.y = 33
 	button.add_theme_font_size_override("font_size", 14)
-	button.add_theme_color_override("font_color", TEXT)
-	button.add_theme_color_override("font_pressed_color", GOLD)
+	TextColors.bind(button, "leaderboard_text")
+	TextColors.bind(button, "leaderboard_title", "font_pressed_color")
 	button.add_theme_stylebox_override("normal", _box(Color("1c1e24"), Color("8b7046"), 1, 3, 5))
 	button.add_theme_stylebox_override("hover", _box(Color("303035"), GOLD, 1, 3, 6))
 	button.add_theme_stylebox_override("pressed", _box(Color("54251d"), GOLD, 1, 3, 6))

@@ -1,4 +1,5 @@
 extends Control
+const TextColors := preload("res://src/ui/text_colors.gd")
 ## Party ledger: all quantities and deliveries are server-owned snapshots.
 
 signal item_inspection_requested
@@ -99,6 +100,7 @@ func _ready() -> void:
 	add_child(portraits)
 	portraits.portrait_ready.connect(_portrait_ready)
 	_build()
+	TextColors.events().changed.connect(_on_text_colors_changed)
 	AppState.state_changed.connect(_on_state_changed)
 	get_viewport().size_changed.connect(_layout)
 	set_process(false)
@@ -124,9 +126,25 @@ func _label(parent: Node, text: String, font_size := 14, color := TEXT) -> Label
 	var label := Label.new()
 	label.text = text
 	label.add_theme_font_size_override("font_size", font_size)
-	label.add_theme_color_override("font_color", color)
+	TextColors.bind(label, _text_role(color))
 	parent.add_child(label)
 	return label
+
+func _text_role(color: Color) -> String:
+	if color == GOLD: return "loot_title"
+	if color == MUTED: return "loot_muted"
+	if color == CYAN: return "loot_accent"
+	if color == GREEN: return "loot_success"
+	if color == Color("ed9475"): return "loot_error"
+	return "loot_text"
+
+func _on_text_colors_changed(role: String) -> void:
+	if not role.is_empty() and not role.begins_with("loot_"):
+		return
+	# Dialogs own a small inherited theme, including engine-created buttons.
+	# Refreshing its text colors leaves the ledger and allocation state intact.
+	for dialog: ConfirmationDialog in [editor, confirmation, price_dialog, sale_dialog, exchange_dialog, reprice_dialog]:
+		_style_dialog(dialog)
 
 func _surface(control: Control, opacity := 0.55) -> void:
 	control.draw.connect(func() -> void: LedgerArt.surface(control, opacity))
@@ -151,8 +169,8 @@ func _button(parent: Node, text: String, action: Callable, primary := false) -> 
 	button.text = text
 	button.custom_minimum_size.y = 34
 	button.add_theme_font_size_override("font_size", 14)
-	button.add_theme_color_override("font_color", Color("071316") if primary else GOLD)
-	button.add_theme_color_override("font_hover_color", TEXT)
+	TextColors.bind(button, "loot_primary" if primary else "loot_title")
+	TextColors.bind(button, "loot_text", "font_hover_color")
 	var normal := style(CYAN if primary else BRONZE,
 		Color("8ed8e5") if primary else Color("0b191b"), 9)
 	normal.border_color = Color("d5f9ff") if primary else BRONZE
@@ -220,7 +238,7 @@ func _build() -> void:
 	_run_picker.fit_to_longest_item = false
 	_run_picker.clip_text = true
 	_run_picker.add_theme_stylebox_override("normal", style(BRONZE, Color("0b191b"), 5))
-	_run_picker.add_theme_color_override("font_color", GOLD)
+	TextColors.bind(_run_picker, "loot_title")
 	_tabs.add_child(_run_picker)
 	_run_picker.item_selected.connect(func(index: int) -> void:
 		var run_id: Variant = _run_picker.get_item_metadata(index)
@@ -436,14 +454,14 @@ func _style_dialog(dialog: ConfirmationDialog) -> void:
 	border.expand_margin_left = 5
 	border.expand_margin_right = 5
 	look.set_stylebox("embedded_border", "Window", border)
-	look.set_color("title_color", "Window", GOLD)
+	look.set_color("title_color", "Window", TextColors.color("loot_title"))
 	look.set_font("title_font", "Window", Art.title_font())
 	look.set_font_size("title_font_size", "Window", 17)
-	look.set_color("font_color", "Label", TEXT)
-	look.set_color("font_color", "Button", GOLD)
-	look.set_color("font_hover_color", "Button", TEXT)
-	look.set_color("font_color", "LineEdit", TEXT)
-	look.set_color("caret_color", "LineEdit", CYAN)
+	look.set_color("font_color", "Label", TextColors.color("loot_text"))
+	look.set_color("font_color", "Button", TextColors.color("loot_title"))
+	look.set_color("font_hover_color", "Button", TextColors.color("loot_text"))
+	look.set_color("font_color", "LineEdit", TextColors.color("loot_text"))
+	look.set_color("caret_color", "LineEdit", TextColors.color("loot_accent"))
 	look.set_stylebox("normal", "Button", style(BRONZE, Color("0b2024"), 8))
 	look.set_stylebox("hover", "Button", style(CYAN, Color("173039"), 8))
 	look.set_stylebox("pressed", "Button", style(CYAN, Color("102228"), 8))
@@ -733,7 +751,7 @@ func _item_row(row: Dictionary) -> void:
 	recipient.add_theme_stylebox_override("hover", style(CYAN, Color("173038"), 4))
 	recipient.add_theme_stylebox_override("focus", style(CYAN, Color(0, 0, 0, 0), 4))
 	recipient.add_theme_stylebox_override("disabled", style(Color("293c3e"), Color("091215"), 4))
-	recipient.add_theme_color_override("font_color", GOLD)
+	TextColors.bind(recipient, "loot_title")
 	recipient.tooltip_text = ", ".join(amounts)
 	var show_portraits := not _compact_view and get_viewport_rect().size.x >= 1400 and not bool(row.locked)
 	if quantities.size() > 1:
@@ -962,7 +980,7 @@ func _editor_changed() -> void:
 	for field: SpinBox in editor_fields.values(): amount += int(field.value)
 	editor.get_ok_button().disabled = amount > int(_editing.available_quantity)
 	editor_total.text = "%d / %d assigned · %d left in escrow" % [amount, int(_editing.available_quantity), maxi(0, int(_editing.available_quantity) - amount)]
-	editor_total.add_theme_color_override("font_color", Color("ed9475") if amount > int(_editing.available_quantity) else MUTED)
+	TextColors.bind(editor_total, "loot_error" if amount > int(_editing.available_quantity) else "loot_muted")
 
 func _apply_editor() -> void:
 	var allocation := {}
@@ -1017,7 +1035,7 @@ func _sale_menu(parent: Node, row: Dictionary) -> void:
 	sell.flat = false
 	sell.text = "Exchange" if int(row.get("exchange_quantity", 0)) > 0 else ("NPC · %d GC" % int(row.sale_proceeds) if int(row.sell_quantity) == int(row.quantity) else "Sell…")
 	sell.add_theme_font_size_override("font_size", 12)
-	sell.add_theme_color_override("font_color", GOLD)
+	TextColors.bind(sell, "loot_title")
 	sell.add_theme_stylebox_override("normal", style(BRONZE, Color("0b191b"), 7))
 	sell.add_theme_stylebox_override("hover", style(CYAN, Color("173038"), 7))
 	sell.add_theme_stylebox_override("pressed", style(CYAN, Color("102228"), 7))

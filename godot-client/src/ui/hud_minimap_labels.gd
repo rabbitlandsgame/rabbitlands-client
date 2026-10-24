@@ -1,4 +1,5 @@
 extends Control
+const TextColors := preload("res://src/ui/text_colors.gd")
 ## Annotations stay above the map mask, so labels and arrowheads can sit
 ## outside the radius without clipping the live map or its markers.
 var source: Control
@@ -9,6 +10,13 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	resized.connect(queue_redraw)
+	TextColors.events().changed.connect(_on_text_colors_changed)
+
+func _on_text_colors_changed(_role: String) -> void:
+	queue_redraw()
+
+func label_color() -> Color:
+	return config.get("text_color", Color.WHITE) if bool(config.get("text_color_custom", false)) else TextColors.color("map_minimap")
 
 func configure(owner_main: Control, value: Dictionary) -> void:
 	source = owner_main
@@ -50,7 +58,7 @@ func _label_style() -> StyleBoxFlat:
 func _draw() -> void:
 	if source == null or config.is_empty(): return
 	var font := ThemeDB.fallback_font
-	var color: Color = config.text_color
+	var color: Color = label_color()
 	for marker: Dictionary in markers():
 		var point: Vector2 = marker.position
 		_plaque(Rect2(point - Vector2(12, 12), Vector2(24, 24)))

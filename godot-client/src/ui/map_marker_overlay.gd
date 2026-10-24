@@ -19,6 +19,7 @@ const GLYPH_SIZE := 18
 const GLYPH_OUTLINE := 4
 const LiveOverlayScript := preload("res://src/ui/minimap_marker_overlay.gd")
 const EntranceOverlayScript := preload("res://src/ui/entrance_map_overlay.gd")
+const TextColors := preload("res://src/ui/text_colors.gd")
 
 var _camera: Camera3D
 var _adapter: CoordinateAdapter
@@ -41,11 +42,15 @@ const BOUNDARY_COLOUR := Color(1.0, 1.0, 1.0, 0.8)
 const BOUNDARY_LABEL_COLOUR := Color(1.0, 0.95, 0.8, 0.95)
 
 func _ready() -> void:
+	TextColors.events().changed.connect(_on_text_colors_changed)
 	_live_overlay = LiveOverlayScript.new()
 	_live_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_live_overlay.show_behind_parent = true
 	add_child(_live_overlay)
 	_live_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+
+func _on_text_colors_changed(_role: String) -> void:
+	queue_redraw()
 
 ## Actors and resources keep the same pixel size on a small interior and a
 ## large exterior. Portals and pins are drawn by this overlay instead.
@@ -99,13 +104,49 @@ const PLAYER_MARK_COLOUR := Color(0.50, 0.83, 1.0)
 
 ## Called by the map image, which owns mouse input and click-to-walk.
 func label_at(position: Vector2) -> String:
+	return str(_label_record_at(position).get("label", ""))
+
+func label_color_at(position: Vector2) -> Color:
+	var mark := _label_record_at(position)
+	match str(mark.get("text_role", "")):
+		"map_personal": return personal_text_color(mark)
+		"map_server": return TextColors.color("map_server")
+	return TextColors.color("map_service")
+
+## EL retains each saved personal mark's RGB. A global color choice is an
+## explicit override; resetting it restores every individual saved color.
+static func personal_text_color(mark: Dictionary) -> Color:
+	if TextColors.is_overridden("map_personal"):
+		return TextColors.color("map_personal")
+	var saved: Variant = mark.get("colour", mark.get("color"))
+	if saved is Color:
+		return saved
+	if saved is String and Color.html_is_valid(saved):
+		return Color.html(saved)
+	if saved is Array and saved.size() >= 3:
+		var scale := 255.0 if float(saved[0]) > 1.0 or float(saved[1]) > 1.0 or float(saved[2]) > 1.0 else 1.0
+		return Color(float(saved[0]) / scale, float(saved[1]) / scale, float(saved[2]) / scale)
+	if mark.has("r") and mark.has("g") and mark.has("b"):
+		var scale := 255.0 if float(mark.r) > 1.0 or float(mark.g) > 1.0 or float(mark.b) > 1.0 else 1.0
+		return Color(float(mark.r) / scale, float(mark.g) / scale, float(mark.b) / scale)
+	return TextColors.color("map_personal")
+
+func _label_record_at(position: Vector2) -> Dictionary:
 	if not is_instance_valid(_camera) or _adapter == null:
-		return ""
+		return {}
 	var nearest := 18.0
-	var label := ""
+	var selected: Dictionary = {}
 	var marks: Array[Dictionary] = _waypoints.duplicate()
-	for marker: Dictionary in _markers + _player_marks:
-		marks.append({"position": _marker_position(marker), "label": marker.get("label", "")})
+	for marker: Dictionary in _markers:
+		var mark := marker.duplicate()
+		mark["position"] = _marker_position(marker)
+		mark["text_role"] = "map_server"
+		marks.append(mark)
+	for marker: Dictionary in _player_marks:
+		var mark := marker.duplicate()
+		mark["position"] = _marker_position(marker)
+		mark["text_role"] = "map_personal"
+		marks.append(mark)
 	for mark: Dictionary in marks:
 		var world: Vector3 = mark.get("position", Vector3.ZERO)
 		if _camera.is_position_behind(world):
@@ -113,8 +154,8 @@ func label_at(position: Vector2) -> String:
 		var point: Variant = _texture_position(_camera.unproject_position(world))
 		if point is Vector2 and position.distance_to(point) < nearest:
 			nearest = position.distance_to(point)
-			label = str(mark.get("label", ""))
-	return label
+			selected = mark
+	return selected
 
 func _draw() -> void:
 	if not is_instance_valid(_camera) or _adapter == null:
@@ -206,7 +247,7 @@ func _draw_boundaries(font: Font) -> void:
 		var width: float = font.get_string_size(text, HORIZONTAL_ALIGNMENT_CENTER, -1, 15).x
 		var at: Vector2 = (label_point as Vector2) - Vector2(width * 0.5, -5.0)
 		draw_string(font, at + Vector2(1, 1), text, HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color(0, 0, 0, 0.8))
-		draw_string(font, at, text, HORIZONTAL_ALIGNMENT_LEFT, -1, 15, BOUNDARY_LABEL_COLOUR)
+		draw_string(font, at, text, HORIZONTAL_ALIGNMENT_LEFT, -1, 15, TextColors.color("map_region", BOUNDARY_LABEL_COLOUR))
 
 func _texture_position(viewport_position: Vector2) -> Variant:
 	var target := Vector2(_viewport_size)

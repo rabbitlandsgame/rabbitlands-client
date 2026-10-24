@@ -1,4 +1,5 @@
 extends Control
+const TextColors := preload("res://src/ui/text_colors.gd")
 ## Selection is a local browse choice; riding and the saved default are confirmed
 ## only by the server snapshot. The same commands support the headless probe.
 const Profiles := preload("res://src/mounts/mount_profiles.gd")
@@ -60,12 +61,12 @@ func _build() -> void:
 	var title := Label.new()
 	title.text = "Mounts"
 	title.add_theme_font_size_override("font_size", 22)
-	title.add_theme_color_override("font_color", Color("efdcb7"))
+	TextColors.bind(title, "mount_title")
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(title)
 	collection_count = Label.new()
 	collection_count.add_theme_font_size_override("font_size", 12)
-	collection_count.add_theme_color_override("font_color", Color("b7af9d"))
+	TextColors.bind(collection_count, "mount_muted")
 	header.add_child(collection_count)
 	var close_button := Button.new()
 	close_button.text = "X"
@@ -112,7 +113,7 @@ func _build() -> void:
 		title_label.custom_minimum_size.y = 32
 		title_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		title_label.max_lines_visible = 2
-		title_label.add_theme_color_override("font_color", Color("efdcb7"))
+		TextColors.bind(title_label, "mount_title")
 		body.add_child(title_label)
 		var image := Portrait.new()
 		image.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -148,7 +149,7 @@ func _build() -> void:
 	coat_row.add_child(apply_coat)
 	status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	status.add_theme_font_size_override("font_size", 13)
-	status.add_theme_color_override("font_color", Color("d8d1bf"))
+	TextColors.bind(status, "mount_text")
 	column.add_child(status)
 	var actions := HBoxContainer.new()
 	actions.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -158,7 +159,7 @@ func _build() -> void:
 		button.custom_minimum_size = Vector2(150, 32)
 		button.focus_mode = Control.FOCUS_NONE
 		button.add_theme_font_size_override("font_size", 15)
-		button.add_theme_color_override("font_color", Color("f2e5c9"))
+		TextColors.bind(button, "mount_button")
 		button.add_theme_stylebox_override("normal", _box(Color("293e31"), Color("967d48"), 1, 5))
 		button.add_theme_stylebox_override("hover", _box(Color("3a5140"), Color("d4b96e"), 1, 5))
 		actions.add_child(button)
@@ -167,7 +168,7 @@ func _build() -> void:
 	dismount.pressed.connect(_dismount)
 	hints.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hints.add_theme_font_size_override("font_size", 12)
-	hints.add_theme_color_override("font_color", Color("b7af9d"))
+	TextColors.bind(hints, "mount_muted")
 	column.add_child(hints)
 
 static func _box(background: Color, border: Color, width: int, margin: int) -> StyleBoxFlat:

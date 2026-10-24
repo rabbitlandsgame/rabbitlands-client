@@ -1,4 +1,5 @@
 extends Node
+const TextColors := preload("res://src/ui/text_colors.gd")
 const Release = preload("res://src/updates/release.gd")
 const PackageDownload = preload("res://src/updates/package_download.gd")
 const StartupUpdate = preload("res://src/updates/startup_update.gd")
@@ -39,7 +40,7 @@ func _ready() -> void:
 	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_status.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_status.add_theme_color_override("font_color", Color("ffd58c"))
+	TextColors.bind(_status, "update_progress")
 	_status.add_theme_color_override("font_shadow_color", Color.BLACK)
 	_status.add_theme_constant_override("shadow_offset_x", 2)
 	_status.add_theme_constant_override("shadow_offset_y", 2)

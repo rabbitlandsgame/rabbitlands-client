@@ -117,6 +117,8 @@ const CapeEmblems := preload("res://src/actors/cape_emblems.gd")
 const TargetMarkerStyle := preload("res://src/actors/target_marker_style.gd")
 const ChatHudScript := preload("res://src/ui/chat_hud.gd")
 const ChatMessages := preload("res://src/ui/chat_messages.gd")
+const ChatColors := preload("res://src/ui/chat_colors.gd")
+const TextColors := preload("res://src/ui/text_colors.gd")
 const ChatLogTabsScript := preload("res://src/ui/chat_log_tabs.gd")
 const LoginBackdropScript := preload("res://src/ui/login_backdrop.gd")
 const ReferenceWindowScript := preload("res://src/ui/reference_window.gd")
@@ -203,7 +205,7 @@ var map_light_root: Node3D
 @onready var hud_logo: TextureRect = %HudLogo
 @onready var right_rail: Panel = %RightRail
 @onready var actor_resource_overlay: PanelContainer = %ActorResourceOverlay
-@onready var overhead_player_name: Label = %OverheadPlayerName
+@onready var overhead_player_name: RichTextLabel = %OverheadPlayerName
 @onready var overhead_health_row: HBoxContainer = %HealthRow
 @onready var overhead_ether_row: HBoxContainer = %EtherRow
 @onready var overhead_food_row: HBoxContainer = %FoodRow
@@ -427,6 +429,7 @@ var _shadows_enabled := true
 var _effects_enabled := true
 var _nameplates_enabled := true
 var _target_marker_style := TargetMarkerStyle.defaults()
+var _chat_colors: Dictionary = ChatColors.defaults()
 ## Trailer capture (`_configure_trailer_capture`): off unless the client was
 ## launched with TRAILER_CAPTURE_ARGUMENT. 0 draws the HUD, 1 the world alone,
 ## 2 the world without nameplates. Never saved.
@@ -542,6 +545,7 @@ var item_atlas := ItemAtlas.new()
 var spell_catalog := SpellCatalog.new()
 var manufacturing_catalog := ManufacturingCatalog.new()
 var knowledge_catalog: Array[String] = []
+var _knowledge_hover_index := -1
 var gameplay_world: World3D
 var loaded_server_map := ""
 var adapter := CoordinateAdapter.new({"walkingHeight": 0.0, "invertServerY": true})
@@ -694,6 +698,8 @@ var _minimap_visible := false
 ## Set when the socket dropped without the player asking. The next successful
 ## login resynchronises rather than trusting anything from before the drop.
 var _resync_after_reconnect := false
+var _disconnect_console_active := false
+var _leaving_session := false
 var _reading_completed_index := -1
 var _reading_shown_index := -1
 var _reading_hidden := false
@@ -1248,6 +1254,9 @@ const EXPERIENCE_SKILLS: Array[String] = [
 	"ranging", "overall"]
 
 func _ready() -> void:
+	TextColors.load_colors(chat_hud.preferences_path)
+	TextColors.events().changed.connect(_on_text_colors_changed)
+	map_image.set_script(preload("res://src/ui/map_text_tooltip.gd"))
 	# GLTFDocument's global extension vector must stop changing before any
 	# UI, actor animation prewarm, map or neighbouring-region worker starts.
 	if not GltfQuantization.ensure_registered() or not VramTextures.ensure_registered() \
@@ -1489,7 +1498,9 @@ func _ready() -> void:
 		"books": knowledge_catalog, "regions": cartography_regions,
 		"items": item_atlas, "skills": EXPERIENCE_SKILLS})
 	Network.connection_state_changed.connect(_on_connection_state_changed)
-	Network.protocol_error.connect(func(message: String): status_label.text = "Protocol error: " + message)
+	Network.protocol_error.connect(func(message: String) -> void:
+		status_label.text = "Protocol error: " + message
+		TextColors.bind(status_label, "login_error"))
 	Network.reconnect_progress.connect(_on_reconnect_progress)
 	AppState.login_succeeded.connect(_on_login_succeeded)
 	AppState.login_failed.connect(_on_login_failed)
@@ -1598,6 +1609,10 @@ func _ready() -> void:
 	_build_storage_sort_modes()
 	ground_bag_header.gui_input.connect(_on_ground_bag_header_gui_input)
 	knowledge_list.item_selected.connect(_on_knowledge_selected)
+	TextColors.bind(knowledge_list, "knowledge_selected", "font_selected_color")
+	TextColors.bind(knowledge_list, "knowledge_hover", "font_hovered_color")
+	knowledge_list.gui_input.connect(_on_knowledge_list_input)
+	knowledge_list.mouse_exited.connect(_on_knowledge_list_mouse_exited)
 	knowledge_known_only.toggled.connect(_on_knowledge_filter_toggled)
 	stats_tabs.tab_changed.connect(_on_stats_tab_changed)
 	stats_text.meta_clicked.connect(_on_stats_meta_clicked)
@@ -1908,7 +1923,7 @@ func _text_entry_active() -> bool:
 ## The new-character intro and the loading curtain both own the screen while
 ## they are up: the world takes no input and the exterior preloads wait.
 func _world_input_blocked() -> bool:
-	return character_intro.blocks_input() or arrival_curtain.blocks_input() \
+	return _disconnect_console_active or character_intro.blocks_input() or arrival_curtain.blocks_input() \
 		or (hud_workspace != null and hud_workspace.is_open())
 
 const CAMERA_ACTIONS := ["camera_rotate_left", "camera_rotate_right", "camera_tilt_up", "camera_tilt_down"]
@@ -2099,6 +2114,7 @@ func _apply_connection_launch_options(arguments: PackedStringArray) -> void:
 				port_edit.value = int(value)
 
 func _on_connect_pressed() -> void:
+	TextColors.bind(status_label, "login_status")
 	if AppState.connection_state != "disconnected":
 		Network.disconnect_from_server()
 		return
@@ -2111,6 +2127,7 @@ func _on_connect_pressed() -> void:
 		not _dev_plain_tcp, _trusted_certificate_path())
 	if error != OK:
 		status_label.text = "Connection failed: " + error_string(error)
+		TextColors.bind(status_label, "login_error")
 		connect_button.disabled = false
 
 ## A development server signs its own certificate, which no trust store will
@@ -2197,6 +2214,7 @@ func _randomize_creation_appearance(rng: RandomNumberGenerator = null) -> void:
 	_refresh_creation_preview()
 
 func _on_create_pressed() -> void:
+	TextColors.bind(create_status, "login_error")
 	var username := create_name.text.strip_edges()
 	var password := create_password.text
 	if username.length() < 3 or username.length() > 20:
@@ -2211,12 +2229,14 @@ func _on_create_pressed() -> void:
 	pending_create_username = username
 	pending_create_password = password
 	create_status.text = "Creating character…"
+	TextColors.bind(create_status, "login_status")
 	var appearance: Dictionary = _creation_appearance()
 	appearance["actor_type"] = create_gender.get_selected_id()
 	var error := Network.create_character(username, password, appearance,
 		CreationArchetypes.id_at(selected_creation_class))
 	if error != OK:
 		create_status.text = "Creation request failed: " + error_string(error)
+		TextColors.bind(create_status, "login_error")
 		_clear_pending_creation()
 
 func _on_character_created() -> void:
@@ -2235,12 +2255,14 @@ func _on_character_created() -> void:
 	_clear_pending_creation()
 	var error := Network.login(username, password)
 	if error != OK:
+		TextColors.bind(create_status, "login_error")
 		create_status.text = "Created, but login failed to send: " + error_string(error)
 		character_intro.cancel()
 		creation_panel.hide()
 		_set_login_screen_visible(true)
 
 func _on_character_creation_failed(message: String) -> void:
+	TextColors.bind(create_status, "login_error")
 	create_status.text = "Creation failed: " + message
 	_clear_pending_creation()
 
@@ -2509,6 +2531,7 @@ func _aim_preview_light(light: DirectionalLight3D, yaw: float, pitch: float) -> 
 		Vector3(0.0, 1.0, 0.0), Vector3.UP)
 
 func _on_login_pressed() -> void:
+	TextColors.bind(status_label, "login_error")
 	character_intro.cancel()
 	if AppState.authenticated:
 		return
@@ -2520,10 +2543,12 @@ func _on_login_pressed() -> void:
 		return
 	login_button.disabled = true
 	status_label.text = "Authenticating…"
+	TextColors.bind(status_label, "login_status")
 	var error := Network.login(user_edit.text, password_edit.text)
 	password_edit.clear()
 	if error != OK:
 		status_label.text = "Login send failed: " + error_string(error)
+		TextColors.bind(status_label, "login_error")
 		login_button.disabled = false
 		return
 	# Up before LOG_IN_OK: it and CHANGE_MAP arrive in one burst, and the world
@@ -2690,11 +2715,10 @@ func _build_chat_surfaces() -> void:
 	_on_chat_configuration_changed("", null)
 
 func _on_chat_configuration_changed(key: String, _value: Variant) -> void:
-	var combined := bool(chat_hud.options.get("combined", false))
 	if key == "combined":
 		_chat_tab = "all"
 		chat_hud.select_tab("all")
-	system_chat_hud.set_feed_suppressed(combined)
+	_sync_chat_surface_visibility()
 	_sync_chat()
 	_refresh_unified_settings()
 
@@ -2752,6 +2776,9 @@ func _toggle_minimap() -> void:
 	_save_hud_settings()
 
 func _toggle_console() -> void:
+	if _disconnect_console_active:
+		console_panel.show()
+		return
 	if console_panel.visible:
 		console_panel.hide()
 		return
@@ -2765,13 +2792,26 @@ func _toggle_console() -> void:
 	console_panel.show()
 	chat_hud.input.release_focus()
 
+func _sync_console_session_controls() -> void:
+	var title: Label = console_panel.get_node("Content/Header/Title")
+	title.text = "DISCONNECTED" if _disconnect_console_active else "CHAT LOG · ~ to close"
+	title.tooltip_text = ("Press a key to reconnect, or use the disconnect icon to return to login."
+		if _disconnect_console_active else "Full session history. Press ~ to close.")
+	%ConsoleClose.disabled = _disconnect_console_active
+
 ## World annotations belong to the covered scene beneath the map and console.
 ## Follow visibility signals so close buttons, Escape and direct show/hide agree.
 func _sync_world_overlay_visibility() -> void:
 	var world_visible := not full_map.visible and not console_panel.visible
 	_world_text_overlay.visible = world_visible
 	_floating_feedback_layer.visible = world_visible
+	_sync_chat_surface_visibility()
 	_update_actor_resource_overlay()
+
+func _sync_chat_surface_visibility() -> void:
+	var covered := console_panel.visible or _disconnect_console_active
+	chat_hud.set_feed_suppressed(covered)
+	system_chat_hud.set_feed_suppressed(covered or bool(chat_hud.options.get("combined", false)))
 
 ## The console panel shows either the session message history or the protocol
 ## diagnostics. Undecoded packets and decode errors were reduced into AppState
@@ -2902,6 +2942,8 @@ func _configure_unified_settings() -> void:
 	old_panel.queue_free()
 	settings_panel.visibility_changed.connect(func() -> void:
 		chat_hud.options_button.set_pressed_no_signal(settings_window.is_open())
+		if _disconnect_console_active and not settings_window.is_open():
+			console_panel.show()
 		_sync_hud_button_states(true))
 	settings_window.refresh_requested.connect(_refresh_unified_settings)
 
@@ -2970,6 +3012,8 @@ func _configure_unified_settings() -> void:
 func _refresh_unified_settings() -> void:
 	if settings_window == null or _hud_layout_list == null:
 		return
+	settings_window.restore_chat_colors(_chat_colors)
+	settings_window.restore_text_colors()
 	var values := {
 		"minimap_visible": _minimap_visible, "minimap_orientation": _minimap_orientation,
 		"minimap_shape": _minimap_shape, "minimap_border": _minimap_border,
@@ -3291,9 +3335,31 @@ func _on_knowledge_selected(index: int) -> void:
 	if knowledge_index < 0 or knowledge_index >= knowledge_catalog.size():
 		return
 	AppState.select_knowledge(knowledge_index)
+	_sync_knowledge_item_colors()
 	var error: Error = Network.get_knowledge_info(knowledge_index)
 	if error != OK:
 		push_warning("GET_KNOWLEDGE_INFO failed: " + error_string(error))
+
+func _on_knowledge_list_input(event: InputEvent) -> void:
+	if event is InputEventMouseMotion:
+		var index := knowledge_list.get_item_at_position(event.position, true)
+		if index != _knowledge_hover_index:
+			_knowledge_hover_index = index
+			_sync_knowledge_item_colors()
+
+func _on_knowledge_list_mouse_exited() -> void:
+	_knowledge_hover_index = -1
+	_sync_knowledge_item_colors()
+
+func _sync_knowledge_item_colors() -> void:
+	for index: int in range(knowledge_list.item_count):
+		var knowledge_index := _list_metadata_int(knowledge_list, index)
+		var role := "knowledge_read" if AppState.known_knowledge.has(knowledge_index) else "knowledge_unread"
+		if knowledge_index == AppState.selected_knowledge:
+			role = "knowledge_selected"
+		elif index == _knowledge_hover_index:
+			role = "knowledge_hover"
+		knowledge_list.set_item_custom_fg_color(index, TextColors.color(role))
 
 func _on_knowledge_filter_toggled(_enabled: bool) -> void:
 	_sync_knowledge()
@@ -3843,7 +3909,19 @@ func _close_ground_bag() -> void:
 	AppState.close_ground_bag()
 
 func _on_disconnect_pressed() -> void:
+	_leaving_session = true
+	_disconnect_console_active = false
+	_sync_console_session_controls()
+	_resync_after_reconnect = false
 	Network.disconnect_from_server()
+	# A dormant socket is already disconnected, so a logout must also work
+	# when no transport-state transition is needed.
+	if game_view.visible:
+		_clear_world_presentation()
+	game_view.hide()
+	_set_login_screen_visible(true)
+	status_label.text = "Disconnected"
+	_leaving_session = false
 
 func _close_client() -> void:
 	# Keep serving rendering/physics commands until a private loader completes;
@@ -3872,6 +3950,9 @@ func _exit_tree() -> void:
 	_tab_map_detail_textures.clear()
 
 func _on_login_succeeded() -> void:
+	_disconnect_console_active = false
+	_sync_console_session_controls()
+	console_panel.hide()
 	Diagnostics.record("login_succeeded", {"server_map": AppState.current_map})
 	# A new session's first sky is already there, not eased in.
 	_weather_synced = false
@@ -3895,7 +3976,7 @@ func _on_login_succeeded() -> void:
 			push_warning("resync failed: " + error_string(resync_error))
 		else:
 			AppState.append_local_message(
-				"Reconnected. Rebuilding world state from the server.", 3)
+				"Reconnected. Rebuilding world state from the server.", 255, "system")
 	_set_login_screen_visible(false)
 	creation_panel.hide()
 	_hide_chat_input()
@@ -3916,7 +3997,13 @@ func _on_login_succeeded() -> void:
 	_record_client_snapshot_after_frames()
 
 func _on_login_failed(message: String) -> void:
+	TextColors.bind(status_label, "login_error")
 	_end_arrival()
+	if _disconnect_console_active:
+		AppState.append_local_message("Reconnect failed: %s. Use the disconnect icon to return to login." % message,
+			255, "error")
+		_sync_connection_banner()
+		return
 	if character_intro.is_active():
 		character_intro.cancel()
 		creation_panel.hide()
@@ -3926,6 +4013,7 @@ func _on_login_failed(message: String) -> void:
 	login_button.disabled = false
 
 func _on_connection_state_changed(value: String) -> void:
+	TextColors.bind(status_label, "login_status")
 	if value == "disconnected":
 		character_intro.cancel()
 		_end_arrival()
@@ -3940,17 +4028,32 @@ func _on_connection_state_changed(value: String) -> void:
 	login_button.disabled = value != "connected" or AppState.authenticated
 	new_character_button.disabled = value != "connected" or AppState.authenticated
 	var was_in_world: bool = game_view.visible
-	if value == "disconnected" and was_in_world:
-		_clear_world_presentation()
-		game_view.hide()
-		_set_login_screen_visible(true)
-		status_label.text = "Disconnected"
-	if value == "connected" and _resync_after_reconnect:
-		# The socket came back on its own. The password was never retained, so
-		# the player authenticates again; the resync happens once they are back
-		# in the world.
-		status_label.text = "Reconnected. Enter your password to resume."
-		password_edit.grab_focus()
+	if value == "disconnected" and was_in_world and not _leaving_session:
+		var first_drop := not _disconnect_console_active
+		_disconnect_console_active = true
+		_sync_console_session_controls()
+		_resync_after_reconnect = true
+		if first_drop:
+			_clear_world_presentation()
+			_hide_chat_input()
+			_set_login_screen_visible(false)
+			console_diagnostics_button.set_pressed_no_signal(false)
+			_on_console_diagnostics_toggled(false)
+			_layout_full_window_views()
+			console_panel.show()
+			chat_log_tabs.select("all")
+			AppState.append_local_message("Disconnected from server! %s" % Network.last_disconnect_reason.replace("_", " "),
+				255, "error")
+			if Network.can_resume_session():
+				AppState.append_local_message("Press any key to try again. Reconnect attempts repeat every 2 seconds.",
+					255, "error")
+			AppState.append_local_message("Use the disconnect menu icon to return to the login screen.",
+				255, "error")
+			_sync_chat()
+			_sync_console()
+		else:
+			AppState.append_local_message("Could not reconnect: %s" % Network.last_disconnect_reason.replace("_", " "),
+				255, "error")
 	_sync_connection_banner()
 
 ## The connection state, wherever the player is looking. Anything other than a
@@ -3966,27 +4069,30 @@ func _sync_connection_banner() -> void:
 	var text: String = ""
 	match state:
 		"reconnecting":
-			text = "Connection lost - reconnecting (attempt %d of %d)…" % [
-				Network.reconnect_attempt(), Network.RECONNECT_DELAYS_MSEC.size()]
+			text = "Reconnecting every 2 seconds (attempt %d)…" % Network.reconnect_attempt()
 		"connecting":
 			text = "Connecting…"
 		"securing":
 			text = "Securing the connection…"
 		"connected":
-			text = ("Connected securely - not signed in" if Network.is_secure()
-				else "Connected - not signed in")
+			if _disconnect_console_active:
+				text = ("Signing back in…" if Network.can_resume_session()
+					else "Reconnect failed — use the disconnect icon to return to login")
+			else:
+				text = ("Connected securely - not signed in" if Network.is_secure()
+					else "Connected - not signed in")
 		_:
-			text = "Disconnected"
+			text = ("Disconnected — press any key to reconnect" if _disconnect_console_active
+				and Network.can_resume_session() else "Disconnected")
 	connection_banner.text = text
 	connection_banner.show()
 
-func _on_reconnect_progress(attempt: int, total: int, delay_msec: int) -> void:
+func _on_reconnect_progress(attempt: int, _total: int, delay_msec: int) -> void:
 	_resync_after_reconnect = true
-	status_label.text = "Connection lost. Reconnecting in %.1fs (attempt %d of %d)…" % [
-		float(delay_msec) / 1000.0, attempt, total]
+	status_label.text = "Connecting to server (attempt %d)…" % attempt
 	AppState.append_local_message(
-		"Connection lost. Reconnecting in %.1f seconds (attempt %d of %d)."
-			% [float(delay_msec) / 1000.0, attempt, total], 3)
+		("Connecting to server (attempt %d)…" % attempt if delay_msec == 0
+			else "Connecting to server in 2 seconds (attempt %d)…" % attempt), 255, "connecting")
 	_sync_connection_banner()
 
 func _clear_world_presentation() -> void:
@@ -4069,6 +4175,8 @@ func _clear_world_presentation() -> void:
 	OldcraftDialogueStyleScript.sync_visibility(self, false)
 	console_panel.hide()
 	_close_settings()
+	if window_stack != null:
+		window_stack.close_session_windows()
 	minimap_frame.hide()
 	chat_output.clear()
 	system_chat_hud.output.clear()
@@ -4084,6 +4192,25 @@ func _clear_world_presentation() -> void:
 	selected_target.text = "Target: none"
 
 func _input(event: InputEvent) -> void:
+	if _disconnect_console_active:
+		if event is InputEventKey and event.is_pressed() and not (event as InputEventKey).echo:
+			if settings_panel.visible and not str(settings_window.get("capturing")).is_empty():
+				settings_window.call("apply_capture", event)
+				get_viewport().set_input_as_handled()
+				return
+			if event.is_action_pressed("disconnect"):
+				_on_disconnect_pressed()
+				get_viewport().set_input_as_handled()
+			elif settings_panel.visible:
+				if event.is_action_pressed("cancel"):
+					_close_settings()
+					get_viewport().set_input_as_handled()
+			elif not event.is_action_pressed("ui_copy", false, true):
+				Network.start_reconnecting()
+				get_viewport().set_input_as_handled()
+				return
+		# Mouse input still reaches the menu icons and the selectable log.
+		return
 	if hud_workspace != null and hud_workspace.is_open():
 		hud_workspace.handle_input(event)
 		return
@@ -4585,9 +4712,19 @@ func _apply_banner_colors() -> void:
 		var item := str(row_spec[3])
 		_paint_banner_row(row, _banner_item_color(item, _banner_colour(item, bar.value / maxf(1, bar.max_value))))
 	var dto: Dictionary = AppState.actors.get(AppState.local_actor_id, {})
-	overhead_player_name.add_theme_color_override("font_color", _banner_item_color("name",
-		EloriaProtocol.el_text_colour(int(dto.get("name_colour", 0)))))
+	_sync_local_name_colors(dto)
 	mount_status.status.add_theme_color_override("font_color", _banner_item_color("mount", Color.WHITE))
+
+func _sync_local_name_colors(dto: Dictionary) -> void:
+	overhead_player_name.clear()
+	overhead_player_name.push_color(_banner_item_color("name", ReplicatedActor3D._nameplate_colour(dto)))
+	overhead_player_name.add_text(str(dto.get("name", "Player")))
+	overhead_player_name.pop()
+	var tag := str(dto.get("guild_tag", ""))
+	if not tag.is_empty():
+		overhead_player_name.push_color(ReplicatedActor3D.guild_tag_color(dto))
+		overhead_player_name.add_text("  [%s]" % tag)
+		overhead_player_name.pop()
 
 func _set_mount_banner_option(key: String, value: bool) -> void:
 	if not _mount_banner_options.has(key):
@@ -4702,8 +4839,16 @@ func _capture_speech_bubble_from_chat() -> void:
 		if node_value is ReplicatedActor3D and is_instance_valid(
 				node_value as ReplicatedActor3D):
 			(node_value as ReplicatedActor3D).show_speech_bubble(
-				spoken, SPEECH_BUBBLE_MSEC)
+				spoken, SPEECH_BUBBLE_MSEC, _speech_body_color(line, separator + 2))
 		return
+
+func _speech_body_color(line: Dictionary, start: int) -> Color:
+	var offset := 0
+	for run: Dictionary in ChatColors.raw_segments(line, _chat_colors):
+		offset += str(run.text).length()
+		if offset > start:
+			return run.color
+	return TextColors.color("world_speech")
 
 ## Range lock holds position with a bow or crossbow equipped, while still
 ## allowing target clicks to shoot. Sit lock also blocks attacks that could
@@ -4824,6 +4969,7 @@ func _on_chat_tab_pressed(tab: String) -> void:
 	elif tab in ["party", "guild", "private"] or tab.begins_with("channel:"):
 		chat_hud.set_destination(tab)
 	_sync_chat()
+	_sync_console()
 	chat_hud.open_chat()
 
 func _on_channel_tab_pressed(channel_index: int) -> void:
@@ -4845,15 +4991,22 @@ func _sync_channel_tabs() -> void:
 	if chat_log_tabs != null:
 		chat_log_tabs.sync(AppState.active_channels, AppState.chat_history)
 	_sync_chat()
+	_sync_console()
+
+func _chat_active_channel_number() -> int:
+	var destination := str(chat_hud.destination_key)
+	return int(destination.trim_prefix("channel:")) if destination.begins_with("channel:") else AppState.active_channel_number()
 
 func _reveal_chat_messages() -> void:
 	var line := _last_chat_line()
 	if line.is_empty() or not _chat_line_allowed(line):
 		return
 	if _chat_line_shown(line):
-		chat_hud.reveal_message(_formatted_chat_line(line), _chat_line_colour(line))
+		chat_hud.reveal_message(_formatted_chat_line(line), _chat_line_colour(line),
+			ChatColors.segments(line, _formatted_chat_line(line), _chat_active_channel_number(), _chat_colors))
 	if ChatMessages.kind(line) == "system" and not bool(chat_hud.options.get("combined", false)):
-		system_chat_hud.reveal_message(_formatted_chat_line(line), _chat_line_colour(line))
+		system_chat_hud.reveal_message(_formatted_chat_line(line), _chat_line_colour(line),
+			ChatColors.segments(line, _formatted_chat_line(line), _chat_active_channel_number(), _chat_colors))
 
 func _on_minimap_gui_input(event: InputEvent) -> void:
 	if _handle_minimap_drag(event):
@@ -5028,6 +5181,7 @@ func _update_full_map_cursor(at: Vector2) -> void:
 	_full_map_cursor_position = at
 	map_cursor_coordinates.hide()
 	map_image.tooltip_text = map_marker_overlay.label_at(at)
+	map_image.set("tooltip_text_color", map_marker_overlay.label_color_at(at))
 	var pixel: Variant = _texture_to_viewport_position(at, map_image, full_map_viewport.size)
 	if not pixel is Vector2:
 		map_coordinates.text = "Coordinates: outside map image"
@@ -5495,6 +5649,9 @@ func _on_state_changed(path: StringName) -> void:
 	# show, and the session is not authenticated when it happens.
 	if path == &"protocol_unknown" or path == &"protocol_errors":
 		_sync_diagnostics()
+		return
+	if path == &"chat" and _disconnect_console_active:
+		_append_chat_line()
 		return
 	if not AppState.authenticated:
 		return
@@ -6374,12 +6531,10 @@ func _sync_world(changed: Variant = null) -> void:
 			continuation = exterior_stream.take_continuation(MapRegistry.normalize_server_map_id(AppState.current_map))
 		if not continuation.is_empty():
 			Network.move_to(continuation.tile, bool(continuation.run))
-		overhead_player_name.text = ReplicatedActor3D.banner_name(local_dto, "Player")
+		_sync_local_name_colors(local_dto)
 		# You get no nameplate of your own - _nameplate_visible_for skips the
 		# local actor - so this banner is the only place your own name colour
 		# can show. Demigod mode is the one that turns it green.
-		overhead_player_name.add_theme_color_override("font_color",
-			_banner_item_color("name", EloriaProtocol.el_text_colour(int(local_dto.get("name_colour", 0)))))
 		var current_health := int(local_dto.get("health", 0))
 		var maximum_health := maxi(1, int(local_dto.get("max_health", 1)))
 		if AppState.stats.is_empty():
@@ -7354,10 +7509,12 @@ func _present_completed_reading() -> void:
 	reading_title.text = "Finished %s" % _knowledge_title(index)
 	reading_progress.max_value = 1
 	reading_progress.value = 1
-	reading_detail.text = ("[color=#8fdc8f]Knowledge gained.[/color]
-"
-		+ "Recipes that needed it are now available.")
+	_set_completed_reading_text()
 	reading_panel.show()
+
+func _set_completed_reading_text() -> void:
+	reading_detail.text = ("[color=#%s]Knowledge gained.[/color]\n" % TextColors.color("knowledge_complete").to_html()
+		+ "Recipes that needed it are now available.")
 
 func _knowledge_title(index: int) -> String:
 	if index >= 0 and index < knowledge_catalog.size():
@@ -7374,6 +7531,7 @@ func _sync_knowledge() -> void:
 	if not stats_panel.visible or stats_tabs.current_tab != 1:
 		return
 	knowledge_list.clear()
+	_knowledge_hover_index = -1
 	var known_only: bool = knowledge_known_only.button_pressed
 	for knowledge_index: int in range(knowledge_catalog.size()):
 		var is_known: bool = AppState.known_knowledge.has(knowledge_index)
@@ -7383,10 +7541,12 @@ func _sync_knowledge() -> void:
 		knowledge_list.add_item("%s  %s" % ["[Read]" if is_known else "[Unread]",
 			knowledge_catalog[knowledge_index]])
 		knowledge_list.set_item_metadata(item_index, knowledge_index)
+		knowledge_list.set_item_custom_fg_color(item_index, TextColors.color("knowledge_read" if is_known else "knowledge_unread"))
 		knowledge_list.set_item_tooltip(item_index,
 			"Knowledge #%d — %s" % [knowledge_index, "read" if is_known else "unread"])
 		if knowledge_index == AppState.selected_knowledge:
 			knowledge_list.select(item_index)
+	_sync_knowledge_item_colors()
 	var owned_count: int = AppState.known_knowledge.size()
 	if AppState.selected_knowledge < 0 or AppState.selected_knowledge >= knowledge_catalog.size():
 		knowledge_detail.text = ("Select an entry to request its server description.\n"
@@ -7696,7 +7856,7 @@ func _manufacturing_searchable(definition: Dictionary) -> String:
 
 func _sync_manufacturing_detail() -> void:
 	var failed := manufacturing_server_status.to_lower().contains("fail") or manufacturing_server_status.to_lower().contains("interrupted")
-	manufacturing_status.add_theme_color_override("font_color", Color(1.0, 0.38, 0.32) if failed else Color(0.88, 0.9, 0.82))
+	TextColors.bind(manufacturing_status, "manufacture_error" if failed else "manufacture_normal")
 	_sync_manufacturing_source()
 	var definition: Dictionary = manufacturing_catalog.recipe(
 		selected_manufacturing_recipe)
@@ -8773,6 +8933,7 @@ func _friendly_map_name(server_map: String) -> String:
 	return normalized.replace("_", " ").replace("-", " ").capitalize()
 
 func _load_hud_settings() -> void:
+	_chat_colors = ChatColors.load_colors(chat_hud.preferences_path)
 	var config: ConfigFile = ConfigFile.new()
 	if config.load(SETTINGS_PATH) == OK:
 		var spell_bar_layout: Variant = config.get_value("hud", "spell_quickbar", {})
@@ -9868,6 +10029,7 @@ func _append_chat_line() -> void:
 	var previous: Dictionary = lines[count - 2] as Dictionary if count >= 2 else {}
 	if chat_log_tabs != null:
 		chat_log_tabs.observe(line)
+	chat_hud.observe(line)
 	chat_hud.remember_peer(ChatMessages.peer(line))
 	if count >= 2 and is_same(previous, _chat_tail):
 		_chat_tail = line
@@ -9937,18 +10099,16 @@ func _formatted_chat_line(line: Dictionary) -> String:
 	return prefix + text
 
 func _chat_line_colour(line: Dictionary) -> Color:
-	var palette := {"local": Color("eee3c8"), "party": Color("9bdff1"),
-		"private": Color("d2b4f4"), "guild": Color("e1cf92"), "channel": Color("b3dfad")}
-	var colour := int(line.get("colour", 0))
-	var category := ChatMessages.kind(line)
-	return palette.get(category,
-		EloriaProtocol.el_text_colour(colour) if colour > 0 else Color("d6cbaa"))
+	return ChatColors.line_color(line, _chat_colors)
 
 func _append_chat_text(target: RichTextLabel, line: Dictionary) -> void:
 	# Literal text prevents player-supplied BBCode from becoming UI markup.
-	target.push_color(_chat_line_colour(line))
-	target.add_text(_formatted_chat_line(line) + "\n")
-	target.pop()
+	for segment: Dictionary in ChatColors.segments(line, _formatted_chat_line(line),
+			_chat_active_channel_number(), _chat_colors):
+		target.push_color(segment.color)
+		target.add_text(segment.text)
+		target.pop()
+	target.add_text("\n")
 
 func _chat_message_for_tab(message: String) -> String:
 	if message.begins_with("/") or message.begins_with("#") or message.begins_with("@"):
@@ -10134,7 +10294,7 @@ static func _stats_heading(text: String) -> Label:
 	var label := Label.new()
 	label.name = "Heading"
 	label.text = text
-	label.add_theme_color_override("font_color", EL_GUI_BRIGHT_COLOUR)
+	TextColors.bind(label, "stats_heading")
 	return label
 
 ## The whole document, rebuilt from the statistics the server last sent.
@@ -10219,7 +10379,7 @@ static func _stats_pool(title: String, value: int, maximum: int) -> Control:
 	amount.name = "Value"
 	amount.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	amount.text = "%d / %d" % [value, maximum]
-	amount.add_theme_color_override("font_color", Color(0.6, 0.6, 1.0))
+	TextColors.bind(amount, "stats_resource")
 	box.add_child(amount)
 	return box
 
@@ -10233,6 +10393,7 @@ func _stats_spend_row(label: String, current: int, base: int, kind: String,
 	row.set_meta("base", base)
 	row.set_meta("maximum", maximum)
 	row.add_child(_stats_cell(label, true))
+	TextColors.bind(row.get_child(0), "stats_nexus" if kind == "nexus" else "stats_attribute")
 	var remove := Button.new()
 	remove.name = "Remove"
 	remove.custom_minimum_size = Vector2(30, 0)
@@ -10243,6 +10404,7 @@ func _stats_spend_row(label: String, current: int, base: int, kind: String,
 	row.add_child(remove)
 	var value := _stats_cell("", false, HORIZONTAL_ALIGNMENT_RIGHT, 90)
 	value.name = "Value"
+	TextColors.bind(value, "stats_nexus" if kind == "nexus" else "stats_attribute")
 	row.add_child(value)
 	var spend := Button.new()
 	spend.name = "Spend"
@@ -10250,7 +10412,7 @@ func _stats_spend_row(label: String, current: int, base: int, kind: String,
 	spend.focus_mode = Control.FOCUS_NONE
 	spend.text = "+"
 	spend.tooltip_text = "Preview one more point in %s" % label
-	spend.add_theme_color_override("font_color", Color(0.45, 0.85, 0.45))
+	TextColors.bind(spend, "stats_spend")
 	spend.pressed.connect(_adjust_pickpoint.bind(kind, key, 1))
 	row.add_child(spend)
 	return row
@@ -10276,7 +10438,8 @@ func _refresh_pickpoint_controls() -> void:
 		valid = valid and (amount == 0 or base + amount <= maximum)
 		var value := row.get_node("Value") as Label
 		value.text = "%d / %d" % [int(row.get_meta("current")) + amount, base + amount]
-		value.modulate = Color("a1e899") if amount > 0 else Color.WHITE
+		value.modulate = Color.WHITE
+		TextColors.bind(value, "stats_pending" if amount > 0 else ("stats_nexus" if str(row.get_meta("allocation")).begins_with("nexus:") else "stats_attribute"))
 		value.tooltip_text = "%d unconfirmed point(s)" % amount if amount > 0 else ""
 		(row.get_node("Remove") as Button).disabled = _pickpoint_submitting or amount == 0
 		(row.get_node("Spend") as Button).disabled = _pickpoint_submitting or remaining <= 0 or base + amount >= maximum
@@ -10398,6 +10561,10 @@ func _stats_skill_row(skill: String, stats: Dictionary) -> Control:
 	totals.text = _experience_text(skill, stats)
 	meter.add_child(totals)
 	row.add_child(meter)
+	for child: Node in row.get_children():
+		if child is Label:
+			TextColors.bind(child, "stats_watched" if skill == _selected_experience_skill else "stats_skill")
+	TextColors.bind(totals, "stats_watched" if skill == _selected_experience_skill else "stats_skill")
 	return row
 
 ## How far along reads as a colour as well as a length, so a glance at the
@@ -11245,7 +11412,7 @@ func _build_skill_rows() -> void:
 		name_label.name = "Name"
 		name_label.text = str(spec[0])
 		name_label.add_theme_font_size_override("font_size", 10)
-		name_label.add_theme_color_override("font_color", Color.WHITE)
+		TextColors.bind(name_label, "hud_skill")
 		name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		name_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		name_label.offset_left = 3.0
@@ -11255,7 +11422,7 @@ func _build_skill_rows() -> void:
 		value_label.name = "Value"
 		value_label.text = "0"
 		value_label.add_theme_font_size_override("font_size", 10)
-		value_label.add_theme_color_override("font_color", Color.WHITE)
+		TextColors.bind(value_label, "hud_skill")
 		value_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		value_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		value_label.offset_right = -3.0
@@ -11277,8 +11444,7 @@ func _sync_skill_rows(stats: Dictionary) -> void:
 			if key == "overall" else int(stats.get(key, 0))
 		(row.get_node("Value") as Label).text = str(level)
 		var name_label: Label = row.get_node("Name") as Label
-		name_label.add_theme_color_override("font_color",
-			EL_GUI_BRIGHT_COLOUR if key == _selected_experience_skill else Color.WHITE)
+		TextColors.bind(name_label, "hud_selected" if key == _selected_experience_skill else "hud_skill")
 		var current_experience: int = _experience_total(key, stats)
 		var next_experience: int = int(stats.get(key + "_exp_next", 0))
 		var base_level: int = _experience_level_for_skill(key, stats)
@@ -11397,8 +11563,7 @@ func _sync_hud_timer_label() -> void:
 	hud_timer_label.text = "%s%d:%02d" % [
 		"S" if _hud_timer_stopwatch else "C",
 		_hud_timer_seconds / 60, _hud_timer_seconds % 60]
-	hud_timer_label.add_theme_color_override("font_color",
-		Color(0.5, 1.0, 0.5) if _hud_timer_running else Color(1.0, 0.5, 0.5))
+	TextColors.bind(hud_timer_label, "hud_timer_running" if _hud_timer_running else "hud_timer_stopped")
 
 func _on_hud_timer_gui_input(event: InputEvent) -> void:
 	if not event is InputEventMouseButton:
@@ -11524,6 +11689,7 @@ static func _set_meter(bar: ProgressBar, label: Label, value: int,
 	bar.value = clampi(value, 0, maxi(1, maximum))
 	label.text = str(value)
 	var described: String = "%s: %d / %d" % [title, value, maximum]
+	TextColors.bind(label, "hud_meter")
 	label.tooltip_text = described
 	bar.tooltip_text = described
 
@@ -12012,10 +12178,11 @@ func _spawn_floating_feedback(feedback: Dictionary) -> void:
 	label.add_theme_constant_override("outline_size", 4)
 	if kind == "level":
 		label.text = "Level %d %s" % [int(feedback.get("level", 0)), skill.capitalize()]
-		label.add_theme_color_override("font_color", Color(1.0, 0.78, 0.22, 1.0))
+		TextColors.bind(label, "float_level")
 	else:
-		label.text = "+%d %s" % [int(feedback.get("amount", 0)), skill.capitalize()]
-		label.add_theme_color_override("font_color", Color(0.45, 1.0, 0.38, 1.0))
+		var amount := int(feedback.get("amount", 0))
+		label.text = ("+%d %s" if amount >= 0 else "%d %s") % [amount, skill.capitalize()]
+		TextColors.bind(label, "float_xp_loss" if amount < 0 else "float_xp")
 	_floating_feedback_layer.add_child(label)
 	label.reset_size()
 	# Out of the top of your own banner, a line clear of the name, or out of
@@ -13131,6 +13298,8 @@ func _sync_declared_actor_cap() -> void:
 ## send commands owned by the server.
 func _on_client_setting_changed(section: String, key: String,
 		value: Variant) -> void:
+	if section == "TextColors":
+		return # The shared preference module applied and saved this choice.
 	if section == "Banners" and key.begins_with("banner_color"):
 		if key == "banner_colors_reset":
 			hud_workspace.reset_banner_colors()
@@ -13172,6 +13341,37 @@ func _on_client_setting_changed(section: String, key: String,
 		_save_hud_settings()
 		return
 	if section == "Chat":
+		if key.begins_with("chat_channel_color:") or key.begins_with("chat_channel_reset:"):
+			var number := int(key.get_slice(":", 1))
+			if key.begins_with("chat_channel_reset:"):
+				_chat_colors = ChatColors.reset_override(_chat_colors, ChatColors.channel_override_key(number))
+			else:
+				_chat_colors = ChatColors.set_channel_override(_chat_colors, number, value)
+			ChatColors.save_colors(_chat_colors, chat_hud.preferences_path)
+			_sync_chat()
+			_sync_console()
+			_refresh_unified_settings()
+			return
+		if key.begins_with("chat_color_reset_"):
+			_chat_colors = ChatColors.reset_override(_chat_colors, key.trim_prefix("chat_color_reset_"))
+			ChatColors.save_colors(_chat_colors, chat_hud.preferences_path)
+			_sync_chat()
+			_sync_console()
+			_refresh_unified_settings()
+			return
+		if key == "chat_colors_reset" or key.begins_with("chat_color_"):
+			if key == "chat_colors_reset":
+				_chat_colors = ChatColors.defaults()
+			else:
+				var role := key.trim_prefix("chat_color_")
+				if not ChatColors.DEFAULTS.has(role):
+					return
+				_chat_colors = ChatColors.set_override(_chat_colors, role, value)
+			ChatColors.save_colors(_chat_colors, chat_hud.preferences_path)
+			_sync_chat()
+			_sync_console()
+			_refresh_unified_settings()
+			return
 		var surface: PanelContainer = system_chat_hud if key.begins_with("system_chat_") else chat_hud
 		var option := key.trim_prefix("system_chat_") if key.begins_with("system_chat_") else key.trim_prefix("chat_")
 		if option == "reset_layout":
@@ -13905,8 +14105,7 @@ func _spawn_health_change_label(actor: ReplicatedActor3D, delta: int) -> void:
 	label.add_theme_color_override("font_outline_color", Color(0.015, 0.02, 0.025, 0.98))
 	label.add_theme_constant_override("outline_size", 4)
 	label.text = ("+%d" % delta) if delta > 0 else str(delta)
-	label.add_theme_color_override("font_color",
-		Color(0.42, 0.94, 0.45, 1.0) if delta > 0 else Color(0.96, 0.36, 0.30, 1.0))
+	TextColors.bind(label, "float_heal" if delta > 0 else "float_damage")
 	_floating_feedback_layer.add_child(label)
 	effect_budget.track(label, &"number")
 	label.reset_size()
@@ -14002,6 +14201,7 @@ func _build_inventory_quantity_boxes() -> void:
 		inventory_quantity_bar.add_child(button)
 		inventory_quantity_buttons.append(button)
 	inventory_quantity_edit.max_length = INVENTORY_QUANTITY_DIGITS
+	TextColors.bind(inventory_quantity_edit, "quantity_editing")
 	inventory_quantity_edit.text_submitted.connect(_on_quantity_edit_submitted)
 	inventory_quantity_edit.focus_exited.connect(_commit_quantity_edit)
 	_sync_inventory_quantity_boxes()
@@ -14595,6 +14795,11 @@ func _on_chat_submitted(text: String) -> void:
 		_console_history.remove_at(0)
 	_console_history_index = _console_history.size()
 	message = console_commands.expand(message)
+	if message.to_lower() == "#disco":
+		chat_input.clear()
+		_hide_chat_input()
+		Network.disconnect_for_reconnect()
+		return
 	# A command this client answers itself never reaches the server: the
 	# server has no opinion about who the player is ignoring. `#help` is the
 	# exception - the client lists its half and the server answers with the
@@ -15776,26 +15981,39 @@ func _sync_player_mark_nodes() -> void:
 ## each pin is, in the server's own words, beside the legend that explains the
 ## rest of the map.
 func _sync_map_marker_list() -> void:
-	var lines: Array[String] = []
+	map_marker_list.clear()
+	var count := 0
 	for raw_id: Variant in map_marker_nodes:
 		var marker: Variant = map_marker_nodes[raw_id]
 		if not is_instance_valid(marker):
 			continue
 		var pin: MapMarker3D = marker as MapMarker3D
-		lines.append("[color=#fac638]◆[/color] %s  (%d, %d)" % [
+		if count > 0: map_marker_list.add_text("\n")
+		map_marker_list.push_color(Color("fac638"))
+		map_marker_list.add_text("◆ ")
+		map_marker_list.pop()
+		map_marker_list.push_color(TextColors.color("map_server"))
+		map_marker_list.add_text("%s  (%d, %d)" % [
 			pin.label if not pin.label.is_empty() else "Marker",
 			pin.server_tile.x, pin.server_tile.y])
+		map_marker_list.pop()
+		count += 1
 	for mark: Dictionary in console_commands.marks:
 		if str(mark.get("map", "")) != EloriaProtocol.map_id_from_reference(
 				AppState.current_map):
 			continue
-		lines.append("[color=#7fd4ff]*[/color] %s  (%d, %d)" % [
+		if count > 0: map_marker_list.add_text("\n")
+		map_marker_list.push_color(Color("7fd4ff"))
+		map_marker_list.add_text("* ")
+		map_marker_list.pop()
+		map_marker_list.push_color(MapMarkerOverlayScript.personal_text_color(mark))
+		map_marker_list.add_text("%s  (%d, %d)" % [
 			str(mark.get("label", "Mark")), int(mark.get("x", 0)),
 			int(mark.get("y", 0))])
-	map_marker_list.text = "
-".join(lines)
-	map_marker_title.visible = not lines.is_empty()
-	map_marker_list.visible = not lines.is_empty()
+		map_marker_list.pop()
+		count += 1
+	map_marker_title.visible = count > 0
+	map_marker_list.visible = count > 0
 	map_marker_overlay.set_markers(_current_map_markers())
 	map_marker_overlay.set_player_marks(_current_player_marks())
 
@@ -16287,6 +16505,36 @@ static func _atlas_region(atlas: Texture2D, region: Rect2) -> AtlasTexture:
 ## inside the world viewport, so a translucent window cannot cover one: every
 ## name and health bar behind a window read straight through it and fought
 ## with the text on top. Opaque is what puts a window in front of them.
+func _apply_shared_text_theme() -> void:
+	if theme == null:
+		return
+	for type: String in ["Label", "RichTextLabel", "Button", "OptionButton", "CheckBox", "CheckButton", "LineEdit", "TextEdit", "ItemList", "TooltipLabel"]:
+		var role := "ui_button" if type in ["Button", "OptionButton", "CheckBox", "CheckButton"] else "ui_label"
+		if type in ["LineEdit", "TextEdit"]: role = "ui_input"
+		if type == "TooltipLabel": role = "ui_tooltip"
+		theme.set_color("default_color" if type == "RichTextLabel" else "font_color", type, TextColors.color(role))
+		for pair: Array in [["font_hover_color", "ui_hover"], ["font_focus_color", "ui_hover"], ["font_pressed_color", "ui_pressed"], ["font_disabled_color", "ui_disabled"], ["font_uneditable_color", "ui_disabled"], ["font_placeholder_color", "ui_placeholder"], ["font_selected_color", "ui_selected"]]:
+			theme.set_color(pair[0], type, TextColors.color(pair[1]))
+
+func _on_text_colors_changed(_role: String) -> void:
+	if not is_node_ready():
+		return
+	_apply_shared_text_theme()
+	_sync_knowledge()
+	if reading_panel.visible and reading_title.text.begins_with("Finished "):
+		_set_completed_reading_text()
+	_sync_stats_window(AppState.stats)
+	_sync_skill_rows(AppState.stats)
+	_sync_hud_timer_label()
+	_sync_local_name_colors(AppState.actors.get(AppState.local_actor_id, {}))
+	if hud_workspace != null:
+		hud_workspace.apply_layout()
+	_request_map_redraw()
+	_sync_map_marker_list()
+	map_marker_overlay.queue_redraw()
+	if _full_map_cursor_inside:
+		_update_full_map_cursor(_full_map_cursor_position)
+
 func _apply_eloria_theme() -> void:
 	var eloria_theme: Theme = Theme.new()
 	var panel: StyleBoxFlat = StyleBoxFlat.new()
@@ -16312,9 +16560,8 @@ func _apply_eloria_theme() -> void:
 	var field: StyleBoxFlat = button.duplicate() as StyleBoxFlat
 	field.bg_color = Color(0.02, 0.015, 0.01, 0.85)
 	eloria_theme.set_stylebox("normal", "LineEdit", field)
-	eloria_theme.set_color("font_color", "Label", Color(0.91, 0.86, 0.70))
-	eloria_theme.set_color("font_color", "Button", Color(0.93, 0.80, 0.58))
 	theme = eloria_theme
+	_apply_shared_text_theme()
 	var map_style := panel.duplicate() as StyleBoxFlat
 	map_style.set_border_width_all(0)
 	map_style.set_content_margin_all(0.0)

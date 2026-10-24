@@ -1122,12 +1122,15 @@ static func decode_server(command: int, payload: PackedByteArray, logical_coordi
 		ServerMessage.RAW_TEXT:
 			if payload.is_empty():
 				return {"type": "invalid", "error": "chat_length"}
-			# One copy of the line, read twice. The payload was sliced once to
-			# strip the colour markers out of it and again to read the first of
-			# them, so every chat line was copied twice to be read once.
+			# Retain the server's mid-line color choices, including c_red1's
+			# marker 127. Text remains literal UTF-8 rather than BBCode.
 			var chat_bytes: PackedByteArray = payload.slice(1)
+			var chat_runs := legacy_colored_runs(chat_bytes)
+			var chat_text := ""
+			for run: Dictionary in chat_runs:
+				chat_text += str(run.text)
 			return {"type": "chat", "channel": int(payload[0]),
-				"text": legacy_colored_string(chat_bytes),
+				"text": chat_text, "text_runs": chat_runs,
 				"colour": leading_text_colour(chat_bytes)}
 		ServerMessage.SEND_NPC_INFO:
 			# The trailing byte is the legacy portrait index. Eloria has no
@@ -3280,9 +3283,9 @@ static func decode_actor(payload: PackedByteArray, enhanced: bool, extended := f
 ## the four shades of a hue are 7 apart, not adjacent. Only the first of each
 ## entry's four shades is a text colour, so only that one is kept here.
 ##
-## Index 0 is EL's c_red1, but a colour reaches us as the byte `127 + index`
-## and a leading 127 is not read as a marker, so 0 never arrives from the wire
-## and doubles as "the server chose no colour for this name".
+## A color reaches us as the byte `127 + index`. Actor names keep the legacy
+## convention that 0 means no requested name color; chat text_runs instead
+## retain c_red1 at index 0 and use -1 for uncolored text.
 const EL_TEXT_COLOURS: Array[Color] = [
 	Color("ffb3c1"), Color("f7c49f"), Color("fbfabe"), Color("c9fecb"),
 	Color("a9effa"), Color("d2b4fb"), Color("ffffff"),
@@ -3349,10 +3352,8 @@ static func nul_string(bytes: PackedByteArray) -> String:
 	var clean := bytes if end < 0 else bytes.slice(0, end)
 	return clean.get_string_from_utf8()
 
-## The palette index of the colour byte a chat line opens with, or 0 when the
-## server led with plain text. Only the leading byte is read: mid-line colour
-## changes are stripped by `legacy_colored_string`, so a line renders in the
-## one colour the server chose for it.
+## Compatibility field for consumers that need only the opening color.
+## text_runs distinguishes uncolored text (-1) from the c_red1 marker (0).
 static func leading_text_colour(bytes: PackedByteArray) -> int:
 	if bytes.is_empty():
 		return 0
@@ -3360,6 +3361,39 @@ static func leading_text_colour(bytes: PackedByteArray) -> int:
 	if index <= 0 or index >= EL_TEXT_COLOURS.size():
 		return 0
 	return index
+
+static func legacy_colored_runs(bytes: PackedByteArray) -> Array[Dictionary]:
+	var runs: Array[Dictionary] = []
+	var clean := PackedByteArray()
+	var color := -1
+	var continuation_bytes := 0
+	for byte_value: int in bytes:
+		if byte_value == 0:
+			break
+		if continuation_bytes > 0:
+			if byte_value >= 0x80 and byte_value <= 0xbf:
+				clean.append(byte_value)
+				continuation_bytes -= 1
+				continue
+			continuation_bytes = 0
+		if byte_value >= 0x7f and byte_value <= 0x9f:
+			var index := byte_value - 127
+			if index < EL_TEXT_COLOURS.size():
+				if not clean.is_empty():
+					runs.append({"text": clean.get_string_from_utf8(), "colour": color})
+					clean.clear()
+				color = index
+			continue
+		clean.append(byte_value)
+		if byte_value >= 0xc2 and byte_value <= 0xdf:
+			continuation_bytes = 1
+		elif byte_value >= 0xe0 and byte_value <= 0xef:
+			continuation_bytes = 2
+		elif byte_value >= 0xf0 and byte_value <= 0xf4:
+			continuation_bytes = 3
+	if not clean.is_empty():
+		runs.append({"text": clean.get_string_from_utf8(), "colour": color})
+	return runs
 
 static func legacy_colored_string(bytes: PackedByteArray) -> String:
 	# EL color markers occupy the C1-control range. Preserve bytes in valid

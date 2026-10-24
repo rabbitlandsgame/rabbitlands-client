@@ -646,10 +646,13 @@ func _on_connection_state_changed(value: String) -> void:
 		game_minute_anchor_msec = 0
 		game_minute_interval_msec = 0
 		server_timestamp = 0
-		chat_lines.clear()
-		chat_history.clear()
-		active_channels = [0, 0, 0]
-		active_channel_index = 0
+		# Keep the conversation visible while the player waits in the disconnect
+		# console. Explicit logout clears it before another account can sign in.
+		if not Network.is_session_disconnect():
+			chat_lines.clear()
+			chat_history.clear()
+			active_channels = [0, 0, 0]
+			active_channel_index = 0
 		current_map = ""
 		adjacent_maps.clear()
 		lantern_tutorial.clear()
@@ -1403,6 +1406,7 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 					channel_number = int(text.substr(1, end - 1))
 			_record_chat_line({"channel": event.channel, "channel_number": channel_number, "text": event.text,
 				"colour": int(event.get("colour", 0)),
+				"text_runs": event.get("text_runs", []),
 				"stamp": Time.get_time_string_from_system()})
 			# Channel 255 is the server's read-only popup channel. Tutorial
 			# lessons arrive here, not through DISPLAY_POPUP's choice packet.
@@ -1775,9 +1779,9 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			unknown_packets[command] = record
 			state_changed.emit(&"protocol_unknown")
 
-func append_local_message(text: String, channel: int = 255) -> void:
+func append_local_message(text: String, channel: int = 255, chat_role: String = "") -> void:
 	_record_chat_line({"channel": channel, "text": text, "colour": 0,
-		"stamp": Time.get_time_string_from_system()})
+		"chat_role": chat_role, "stamp": Time.get_time_string_from_system()})
 
 func active_channel_number() -> int:
 	if active_channel_index < 0 or active_channel_index >= active_channels.size():
