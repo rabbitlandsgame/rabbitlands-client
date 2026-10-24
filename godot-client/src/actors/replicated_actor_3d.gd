@@ -278,6 +278,17 @@ var _native_skeleton: Skeleton3D
 var _native_model: Node3D
 var _mount_visual: Node3D
 var mount_state: Dictionary = {}
+## Reuse Main's cached traversal ray normal. Only presentation tilts: the
+## actor, picking capsule, labels and camera anchor retain their upright frame.
+const SURFACE_MAX_TILT := PI / 4.0
+const SURFACE_TURN_SPEED := PI
+const SURFACE_FOOT_WEIGHT := 0.35
+var _surface_up := Vector3.UP
+var _surface_target_up := Vector3.UP
+var _surface_applied_up := Vector3(NAN, NAN, NAN)
+var _surface_applied_yaw := NAN
+var _surface_native_rest := Transform3D.IDENTITY
+var _surface_native_tilted := false
 ## Authored body bounds, cached before equipment or animation can move them.
 var _native_body_bounds := AABB()
 var _base_model_yaw := 0.0
@@ -1770,6 +1781,7 @@ func set_server_scale(value: float) -> void:
 ## not be drawn in giant letters. Their heights do follow, below, or they
 ## would end up inside its head.
 func _apply_model_scale() -> void:
+	_clear_native_surface_tilt()
 	# Legibility is based on the final authored size. A tiny source model
 	# promoted to a giant must not keep its small-creature display boost.
 	if _native_body_bounds.size != Vector3.ZERO:
@@ -1786,6 +1798,7 @@ func _apply_model_scale() -> void:
 			# picking capsule and ground markers retain their server positions.
 			model.position.z = maxf(0.0, float((_model_config.get("import", {}) as Dictionary).get(
 				"visualBacksetMetres", 0.0))) * _small_creature_scale * server_scale
+	_apply_surface_orientation()
 	_size_stand_in()
 	_lift_overhead(server_scale)
 
@@ -1938,6 +1951,10 @@ func rebase_world(frame: Transform3D) -> void:
 	rotation.y += yaw
 	_target_yaw += yaw
 	_travel_yaw += yaw
+	_surface_up = frame.basis * _surface_up
+	_surface_target_up = frame.basis * _surface_target_up
+	_surface_applied_up = Vector3(NAN, NAN, NAN)
+	_apply_surface_orientation()
 	_selection_ring_draped_at = Vector3(NAN, NAN, NAN)
 	if _combat_target_marker != null:
 		_combat_target_marker.call("invalidate_ground")
@@ -3303,6 +3320,8 @@ func _set_mount_state_legacy(state: Dictionary, models: Dictionary) -> void:
 		was_mounted = false
 	mount_state = state.duplicate(true)
 	if riding and not was_mounted:
+		# Seat fitting records the neutral imported root, without terrain lean.
+		_clear_native_surface_tilt()
 		# A previously stepped player must leave the gate before mounted sampling
 		# takes ownership. Reference-pose seeks remain explicit and immediate.
 		if _animation_gate_owner != null:
@@ -3321,6 +3340,7 @@ func _set_mount_state_legacy(state: Dictionary, models: Dictionary) -> void:
 			_restore_unmounted_animation_gate()
 			push_warning("Mount: " + str(errors))
 			play_action(&"idle", true)
+			_apply_surface_orientation()
 			return
 		_mount_visual = visual
 		_mount_visual.name = "MountedPony"
@@ -3346,6 +3366,9 @@ func _set_mount_state_legacy(state: Dictionary, models: Dictionary) -> void:
 	if is_instance_valid(_mount_visual):
 		_mount_visual.set("state", mount_state)
 		_mount_visual.call("set_coat", str(mount_state.get("coat_id", "original")))
+	if riding != was_mounted:
+		_surface_applied_up = Vector3(NAN, NAN, NAN)
+		_apply_surface_orientation()
 
 func _equipment_model_config(part: int, visual_id: int) -> Dictionary:
 	var aliases: Dictionary = _equipment_config.get("aliases", {}) as Dictionary
@@ -4364,7 +4387,8 @@ func _sync_combat_target_marker() -> void:
 ## A standing actor still snaps. Nothing is interpolating it, so a correction
 ## that never reached the body would leave it embedded in the ground it was
 ## measured against.
-func set_surface_height(value: float) -> void:
+func set_surface_height(value: float, normal := Vector3.UP) -> void:
+	_set_surface_normal(normal)
 	var remote = RemotePresentationService.current() if _remote_generation > 0 else null
 	if remote != null and remote.owns(self) and remote.surface(self, value): return
 	if _charge_leap != null:
@@ -4377,6 +4401,75 @@ func set_surface_height(value: float) -> void:
 	if _snap_pending or (not mid_step and absf(global_position.y - value) > 0.5):
 		global_position.y = value
 	_wake()
+
+## Normals arrive once per destination tile, including preview terrain at a
+## seam. Reject invalid contacts and bound steep facets before interpolating.
+func _set_surface_normal(normal: Vector3) -> void:
+	if _is_creature:
+		return
+	var next := Vector3.UP
+	if normal.is_finite() and normal.length_squared() > 0.000001 and normal.y > 0.0:
+		next = normal.normalized()
+		var angle := Vector3.UP.angle_to(next)
+		if angle > SURFACE_MAX_TILT:
+			next = Vector3.UP.slerp(next, SURFACE_MAX_TILT / angle)
+		elif angle < 0.005:
+			next = Vector3.UP
+	if next.is_equal_approx(_surface_target_up):
+		return
+	_surface_target_up = next
+	if _snap_pending or _native_model == null:
+		_surface_up = next
+		_apply_surface_orientation()
+	_wake()
+
+func _advance_surface_orientation(delta: float, finish := false) -> void:
+	if _is_creature:
+		return
+	# Flat ground needs no orientation work even while heading changes.
+	if _surface_up == Vector3.UP and _surface_target_up == Vector3.UP and _surface_applied_up == Vector3.UP:
+		return
+	# A leap or scripted greeting owns its presentation while airborne/staged.
+	var target := Vector3.UP if _charge_leap != null or _cinematic_active else _surface_target_up
+	if not _surface_up.is_equal_approx(target):
+		var angle := _surface_up.angle_to(target)
+		var step := SURFACE_TURN_SPEED * maxf(0.0, delta)
+		_surface_up = target if finish or angle <= maxf(step, 0.0001) else _surface_up.slerp(target, step / angle)
+	_apply_surface_orientation()
+
+## Restore the exact unleaned transform before scale/facing edits, avoiding
+## accumulated rotations and keeping the mount's reference pose terrain-free.
+func _clear_native_surface_tilt() -> void:
+	if not _surface_native_tilted:
+		return
+	if is_instance_valid(_native_model):
+		_native_model.transform = _surface_native_rest
+	_surface_native_tilted = false
+	_surface_applied_up = Vector3(NAN, NAN, NAN)
+
+func _apply_surface_orientation() -> void:
+	if _is_creature or _native_model == null:
+		return
+	if _surface_applied_up.is_equal_approx(_surface_up) and is_equal_approx(_surface_applied_yaw, rotation.y):
+		return
+	_clear_native_surface_tilt()
+	var local_up := global_basis.inverse() * _surface_up
+	var tilt := Quaternion(Vector3.UP, local_up.normalized())
+	if is_instance_valid(_mount_visual):
+		# The saddle solver already carries this frame onto the rider, tack,
+		# reins and wardrobe, including the native batched pose path.
+		var aligned := Transform3D(Basis(tilt), _mount_visual.position)
+		# Carry the last rider pose with the mount between gated pose samples.
+		# This costs one transform, without waking a skeleton/IK/cloth update.
+		_native_model.transform = aligned * _mount_visual.transform.affine_inverse() * _native_model.transform
+		_mount_visual.transform = aligned
+	elif not _surface_up.is_equal_approx(Vector3.UP):
+		_surface_native_rest = _native_model.transform
+		_native_model.transform = Transform3D(Basis(Quaternion.IDENTITY.slerp(tilt,
+			SURFACE_FOOT_WEIGHT)), Vector3.ZERO) * _surface_native_rest
+		_surface_native_tilted = true
+	_surface_applied_up = _surface_up
+	_surface_applied_yaw = rotation.y
 
 ## The middle value of a set of per-tile intervals: the server's cadence as
 ## measured, with a held-back packet and the burst behind it both read
@@ -4488,6 +4581,7 @@ func _physics_process(delta: float) -> void:
 		rotation.y = rotate_toward(rotation.y, _cinematic_yaw, turn_speed_radians * delta)
 		_level_selection_ring()
 		_advance_facing_offset(delta)
+		_advance_surface_orientation(delta)
 		return
 	if _charge_leap != null:
 		_charge_leap.elapsed += delta
@@ -4495,6 +4589,7 @@ func _physics_process(delta: float) -> void:
 		var forward: Vector3 = _charge_leap.points[-1] - _charge_leap.points[0]
 		rotation.y = rotate_toward(rotation.y, atan2(-forward.x, -forward.z), turn_speed_radians * delta)
 		_advance_facing_offset(delta)
+		_advance_surface_orientation(delta)
 		# A delayed final movement packet must not pull the landed player back
 		# to the previous tile. Briefly hold the approved endpoint for confirmation.
 		if _charge_leap.elapsed >= _charge_leap.duration and (server_target.distance_to(_charge_leap.points[-1]) < 0.15 \
@@ -4509,6 +4604,7 @@ func _physics_process(delta: float) -> void:
 		_segment_start = server_target
 		_snap_pending = false
 		_travel_yaw_active = false
+		_advance_surface_orientation(delta)
 		_settle_if_idle()
 		return
 	if _segment_duration > 0.0:
@@ -4527,6 +4623,7 @@ func _physics_process(delta: float) -> void:
 		turn_speed_radians * delta)
 	_level_selection_ring()
 	_advance_facing_offset(delta)
+	_advance_surface_orientation(delta)
 	if _movement_coast_remaining > 0.0:
 		_movement_coast_remaining = maxf(0.0, _movement_coast_remaining - delta)
 		if _movement_coast_remaining <= 0.0 and current_action in [&"walk", &"run"]:
@@ -4549,6 +4646,8 @@ func _settle_if_idle() -> void:
 	# the resting action's value, or an actor caught mid-ease from a walk would
 	# freeze holding the walk's turn.
 	if not is_equal_approx(_facing_offset, _facing_offset_to):
+		return
+	if not _surface_up.is_equal_approx(_surface_target_up):
 		return
 	global_position = server_target
 	rotation.y = _target_yaw
@@ -4593,6 +4692,7 @@ func _advance_facing_offset(delta: float) -> void:
 		return
 	if _native_model == null or is_equal_approx(_facing_offset, _facing_offset_to):
 		return
+	_clear_native_surface_tilt()
 	_facing_offset_elapsed += delta
 	var progress: float = 1.0 if action_blend_seconds <= 0.0 else clampf(
 		_facing_offset_elapsed / action_blend_seconds, 0.0, 1.0)
@@ -4883,6 +4983,10 @@ func adopt_presentation_from(previous: ReplicatedActor3D) -> void:
 	_travel_yaw = previous._travel_yaw
 	_movement_coast_remaining = previous._movement_coast_remaining
 	_presentation_speed = previous._presentation_speed
+	_surface_up = previous._surface_up
+	_surface_target_up = previous._surface_target_up
+	_surface_applied_up = Vector3(NAN, NAN, NAN)
+	_apply_surface_orientation()
 	_snap_pending = false
 	_settled = false
 	set_physics_process(true)

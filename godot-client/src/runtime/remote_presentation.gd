@@ -445,7 +445,12 @@ func _advance_physics(delta: float, frame: int) -> void:
 		var model: Variant = node._native_model
 		if is_instance_valid(model) and not model.is_queued_for_deletion() \
 				and node.is_ancestor_of(model) and not is_instance_valid(node._mount_visual):
+			if node._surface_native_tilted: node._clear_native_surface_tilt()
 			model.rotation.y = node._base_model_yaw + node._facing_offset
+		if not _submission_valid(id, meta[at + 1], epoch, map, native): continue
+		# Presentation-only terrain state stays on the node. Reuse the completed
+		# native tick; settled actors finish their lean without more native work.
+		if not node._is_creature: node._advance_surface_orientation(delta, node._settled)
 		if not _submission_valid(id, meta[at + 1], epoch, map, native): continue
 		if node._speech_bubble_expiry_msec > 0 and Time.get_ticks_msec() >= node._speech_bubble_expiry_msec:
 			node.clear_speech_bubble()
