@@ -155,6 +155,26 @@ func _ready() -> void:
 		shortcut.offset_right = 2
 		shortcut.offset_top = 1
 		shortcut.offset_bottom = 12
+		var shade := ColorRect.new()
+		shade.name = "Cooldown"
+		shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		shade.color = Color(0.05, 0.06, 0.09, 0.66)
+		button.add_child(shade)
+		shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		shade.hide()
+		# Keep the number centered while the shade drains beneath it.
+		var seconds := Label.new()
+		seconds.name = "Seconds"
+		seconds.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		seconds.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		seconds.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		seconds.add_theme_font_size_override("font_size", 16)
+		seconds.add_theme_color_override("font_color", Color.WHITE)
+		seconds.add_theme_color_override("font_outline_color", Color.BLACK)
+		seconds.add_theme_constant_override("outline_size", 4)
+		button.add_child(seconds)
+		seconds.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		seconds.hide()
 		buttons.append(button)
 	wheel_button = Button.new()
 	wheel_button.text = "Ring"
@@ -646,6 +666,8 @@ func refresh() -> void:
 	for index in range(buttons.size()):
 		var slot: Dictionary = loadout.slots[index]
 		var button = buttons[index]
+		button.get_node("Cooldown").hide()
+		button.get_node("Seconds").hide()
 		button.technique = str(slot.get("technique", ""))
 		if not button.technique.is_empty():
 			_refresh_technique_slot(index, button)
@@ -688,10 +710,8 @@ func refresh() -> void:
 var _technique_cooling := false
 var _next_cooldown_refresh := 0
 
-## A technique in a quick slot: its painted icon, its action-point cost in the
-## top-right badge where a spell shows power, and its cooldown in seconds in
-## the top-left badge where a spell shows its target type. Unavailable-art opacity
-## is configurable independently of the cooldown and blocker tooltips.
+## A technique's cooldown stays visible over its icon even when the HUD hides
+## corner badges. The top-right badge shows its action-point cost.
 func _refresh_technique_slot(index: int, button) -> void:
 	var key: String = button.technique
 	var row: Dictionary = {}
@@ -707,14 +727,21 @@ func _refresh_technique_slot(index: int, button) -> void:
 	var cost := int(row.get("ap", 0))
 	var target_badge: Label = button.get_node("Target")
 	var power_badge: Label = button.get_node("Power")
-	target_badge.text = str(ceili(waiting)) if waiting > 0.05 else ""
-	target_badge.visible = waiting > 0.05
+	target_badge.text = ""
+	target_badge.hide()
 	power_badge.text = str(cost) if cost > 0 else ""
 	power_badge.visible = cost > 0
 	if not workspace_layout.is_empty() and not workspace_layout.get("show_badges", true):
 		target_badge.hide()
 		power_badge.hide()
 	_technique_cooling = _technique_cooling or waiting > 0.05
+	if waiting > 0.05:
+		var shade: ColorRect = button.get_node("Cooldown")
+		var seconds: Label = button.get_node("Seconds")
+		shade.anchor_top = 1.0 - clampf(waiting / maxf(0.001, float(row.get("cooldown", 0.0))), 0.0, 1.0)
+		seconds.text = str(ceili(waiting))
+		shade.show()
+		seconds.show()
 	var keys: Array[InputEvent] = InputMap.action_get_events("quick_spell_%d" % (index + 1))
 	var shortcut := keys[0].as_text() if not keys.is_empty() else "Unbound"
 	var key_label: Label = button.get_parent().get_node("Key")
