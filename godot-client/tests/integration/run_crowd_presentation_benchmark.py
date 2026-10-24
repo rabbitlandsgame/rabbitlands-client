@@ -104,7 +104,8 @@ def request_for(args) -> dict:
             "driver": args.driver, "body_cap": args.body_cap, "cells": args.cells,
             "replay": bool(args.replay), "executable_mode": args.executable_mode,
             "native_reducer": args.native_reducer, "native_presentation": args.native_presentation,
-            "client_runtime": args.client_runtime,
+            "client_runtime": args.client_runtime, "rust_effects": args.rust_effects,
+            "capture_boundaries": args.capture_boundaries,
             "tuning": args.tuning, "diagnostics": args.diagnostics, "executable": str(args.godot),
             "presence": args.presence, "server_time": args.server_time,
             "settings_profile": args.settings_profile}
