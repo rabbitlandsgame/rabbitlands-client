@@ -1,4 +1,5 @@
 #include "client_runtime.h"
+#include "client_remote.h"
 #include "client_residency.h"
 #include "client_flights.h"
 #include "../../native_crowd/src/native_spell_flight_geometry.h"
@@ -472,6 +473,7 @@ void RabbitLandsClientRuntime::_bind_methods() {
 static void initialize_runtime(ModuleInitializationLevel level) {
     if (level == MODULE_INITIALIZATION_LEVEL_SCENE) {
         ClassDB::register_class<RabbitLandsClientRuntime>();
+        ClassDB::register_class<RabbitLandsRemotePresentationRuntime>();
         ClassDB::register_class<RabbitLandsSpellFlightRuntime>();
         if (!ClassDBSingleton::get_singleton()->class_exists("NativeSpellFlightGeometry")) {
             ClassDB::register_class<NativeSpellFlightGeometry>();

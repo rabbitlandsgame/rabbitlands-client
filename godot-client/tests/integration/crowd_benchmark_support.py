@@ -17,6 +17,7 @@ import socket
 import tempfile
 import time
 from typing import Any
+from benchmark_remote_validation import validate_remote, validate_remote_cell
 from benchmark_prepared_validation import configure_prepared_request, validate_prepared
 from benchmark_heat_bolt_validation import HeatBoltEvidenceError, validate_heat_bolt_cell
 
@@ -281,6 +282,11 @@ def validate_runtime(runtime: dict, request: dict, renderer: str, quality: str,
         raise EvidenceError(f"{label}: missing actual appearance/minimap settings")
     if backends.get("nativeReducer") is not (request.get("native_reducer", "off") == "on"):
         raise EvidenceError(f"{label}: actual native reducer differs from request")
+    try:
+        validate_remote(backends.get("remotePresentation"), backends.get("remoteCoverage"),
+                        request.get("remote_presentation", "legacy"), label)
+    except ValueError as exc:
+        raise EvidenceError(str(exc)) from exc
     requested_runtime = request.get("client_runtime", "legacy")
     # Older legacy checkpoints predate this optional service. Native requests
     # require its actual instantiated backend at every observed boundary.
@@ -529,6 +535,10 @@ def validate_report(data: dict, request: dict, log: str) -> dict:
             wanted_count = int(name.rsplit("-", 1)[-1]) if name.rsplit("-", 1)[-1].isdigit() else 1
             if count != wanted_count:
                 raise EvidenceError(f"{name}: actor population differs from requested cell")
+        try:
+            validate_remote_cell(cell, request.get("remote_presentation", "legacy"))
+        except ValueError as exc:
+            raise EvidenceError(str(exc)) from exc
         census = _object(cell.get("census"), name + ".census")
         for point in ("afterSpawn", "afterSample"):
             sample = _object(census.get(point), name + "." + point)

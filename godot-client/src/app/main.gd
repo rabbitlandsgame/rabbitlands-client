@@ -5,6 +5,9 @@ const ClientRuntime = preload("res://src/runtime/client_runtime.gd")
 const RustSpellFlights = preload("res://src/world/rust_spell_flights.gd")
 const RustRiderPose = preload("res://src/mounts/rust_rider_pose.gd")
 var client_runtime := ClientRuntime.new()
+const RemotePresentationService = preload("res://src/runtime/remote_presentation.gd")
+@onready var remote_presentation := RemotePresentationService.new()
+var _gate_slice_tiers: Dictionary = {}
 const ExperienceCurve = preload("res://src/state/experience_curve.gd")
 const SeasonSky = preload("res://src/world/season_sky.gd")
 const SeasonSurfaces = preload("res://src/world/season_surfaces.gd")
@@ -1252,6 +1255,8 @@ func _ready() -> void:
 		push_error("Main could not initialize runtime glTF extensions")
 		return
 	client_runtime.initialize()
+	add_child(remote_presentation)
+	animation_gate = remote_presentation.initialize(client_runtime, animation_gate)
 	preload("res://src/runtime/resource_admission.gd").register_actor_provider(_resource_admission_actor_counts)
 	crowd.configure(OS.get_environment("RABBITLANDS_CROWD_PRESENTATION"),
 		OS.get_environment("RABBITLANDS_CROWD_BODY_CAP"),
@@ -1715,6 +1720,7 @@ func client_diagnostic_snapshot() -> Dictionary:
 		"loader_work": world_loader.diagnostic_snapshot(),
 		"streaming_work": exterior_stream.diagnostic_snapshot(),
 		"client_runtime": client_runtime.snapshot(),
+		"remote_presentation": (remote_presentation.snapshot() if is_instance_valid(remote_presentation) else {"backend": "legacy", "reason": "not_initialized"}),
 		"resource_admission": resource_admission_snapshot(),
 		"spell_flights": RustSpellFlights.snapshot_for(world_root),
 		"resource_retention": {
@@ -3853,6 +3859,7 @@ func _close_client() -> void:
 func _exit_tree() -> void:
 	RustRiderPose.close_batches()
 	RustSpellFlights.clear_for(world_root)
+	if is_instance_valid(remote_presentation): remote_presentation.close()
 	client_runtime.close()
 	mouse_cursors.release()
 	occluder_fade.reset()
@@ -3988,6 +3995,7 @@ func _clear_world_presentation() -> void:
 	# any body, without reactivating its animation or skeleton callbacks.
 	animation_gate.reset(false)
 	RustSpellFlights.clear_for(world_root)
+	if is_instance_valid(remote_presentation): remote_presentation.reset_world(client_runtime.current_epoch() + 1, true)
 	client_runtime.reset_session()
 	SeasonSurfaces.set_season({})
 	quest_trail.clear()
@@ -5804,6 +5812,7 @@ func _load_server_map() -> void:
 		world_loader.load_world(manifest_path, Vector3.INF, true)
 
 func _rebase_streamed_world(rebase: Transform3D) -> void:
+	if is_instance_valid(remote_presentation): remote_presentation.next_map_frame()
 	camera_rig.rebase_world(rebase)
 	# The destination may use rotated coordinates. Transform the sun with the
 	# terrain and camera so crossing the seam keeps the same physical direction.
@@ -6664,6 +6673,8 @@ func _spawn_actor(id: Variant, build := true,
 		# for up to a tenth of a second.
 		node.set_drawn(_crowd_reference_point().distance_to(node.global_position)
 			<= ACTOR_DRAW_DISTANCE_METRES)
+	node._remote_enrollment_ready = true
+	if is_instance_valid(remote_presentation): remote_presentation.consider(node)
 	if creates_body:
 		_record_actor_creation(int(id), Time.get_ticks_usec() - creation_started)
 	return true
@@ -6673,6 +6684,7 @@ func _spawn_actor(id: Variant, build := true,
 func _revive_actor(id: Variant, node: ReplicatedActor3D, dto: Dictionary,
 		actor_adapter: CoordinateAdapter) -> void:
 	actor_nodes[id] = node
+	node._remote_enrollment_ready = false
 	_built_bodies += 1
 	node.apply_server_state(dto, actor_adapter, true)
 	node.apply_vitals(int(dto.get("health", 0)), int(dto.get("max_health", 0)))
@@ -6692,6 +6704,8 @@ func _revive_actor(id: Variant, node: ReplicatedActor3D, dto: Dictionary,
 	# does, until the gate's next sweep gives it its tier.
 	node.set_animation_tier(AnimationGate.Tier.HALF if crowd.gate
 		else AnimationGate.Tier.FULL, animation_gate)
+	node._remote_enrollment_ready = true
+	if is_instance_valid(remote_presentation): remote_presentation.consider(node)
 
 ## Builds the bodies of deferred actors that have come within range, nearest
 ## first: the candidates are ranked on each gate pass, and this builds as many
@@ -7934,9 +7948,13 @@ func _update_animation_gate(delta: float) -> void:
 	var total: int = _gate_sweep_ids.size()
 	var stop: int = total if _gate_sweep_whole else mini(total,
 		_gate_sweep_index + ceili(float(total) / float(GATE_SWEEP_SLICES)))
+	_gate_slice_tiers = (remote_presentation.classify_slice(actor_nodes,
+		_gate_sweep_ids.slice(_gate_sweep_index, stop), animation_gate)
+		if is_instance_valid(remote_presentation) and remote_presentation._ready_native else {})
 	while _gate_sweep_index < stop:
 		_gate_classify(_gate_sweep_ids[_gate_sweep_index])
 		_gate_sweep_index += 1
+	_gate_slice_tiers.clear()
 	if _gate_sweep_index >= total:
 		_finish_gate_sweep()
 
@@ -7978,8 +7996,14 @@ func _gate_classify(raw_id: Variant) -> void:
 		_gate_built += 1
 		actor.set_animation_tier(AnimationGate.Tier.FULL, animation_gate)
 		return
-	var tier: AnimationGate.Tier = animation_gate.classify(actor.global_position + Vector3.UP,
-		actor.view_radius())
+	var captured: Dictionary = _gate_slice_tiers.get(raw_id, {})
+	var anchor: Vector3 = actor.global_position + Vector3.UP
+	var radius: float = actor.view_radius()
+	# A preceding visibility callback can move/rebind another actor. Recheck
+	# the captured geometry before using this same-slice batch result.
+	var tier: AnimationGate.Tier = (int(captured.tier) as AnimationGate.Tier
+		if not captured.is_empty() and captured.anchor == anchor and captured.radius == radius
+		else animation_gate.classify(anchor, radius))
 	var distance: float = (0.0 if _gate_local == null
 		else _gate_here.distance_to(actor.global_position))
 	var drawn: bool = distance <= ACTOR_DRAW_DISTANCE_METRES

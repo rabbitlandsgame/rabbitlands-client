@@ -43,6 +43,8 @@ func benchmark_runtime_snapshot() -> Dictionary:
 			"worldViewportSize": [main_viewport.size.x, main_viewport.size.y]},
 		"activeBackends": {"nativeReducer": AppState.native_crowd_reducer_active(),
 			"clientRuntime": client_runtime.snapshot(),
+			"remotePresentation": (remote_presentation.snapshot() if is_instance_valid(remote_presentation) else {"backend": "legacy", "reason": "not_initialized"}),
+			"remoteCoverage": remote_presentation.coverage(actor_nodes.values()),
 			"resourceAdmission": benchmark_resource_admission_snapshot(),
 			"rustSpellFlights": RustSpellFlights.snapshot_for(world_root),
 			"mountedBatch": RustRiderPose.batch_snapshot(),
@@ -578,3 +580,7 @@ func _on_special_effect_requested(effect: Dictionary) -> void:
 	if not benchmark_animation_enabled:
 		_benchmark_freeze_actor(actor_nodes.get(
 			actor_id) as ReplicatedActor3D)
+
+func benchmark_remote_snapshot() -> Dictionary:
+	return {"presentation": (remote_presentation.snapshot() if is_instance_valid(remote_presentation) else {"backend": "legacy", "reason": "not_initialized"}),
+		"coverage": remote_presentation.coverage(actor_nodes.values())}

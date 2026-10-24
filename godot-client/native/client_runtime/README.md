@@ -134,3 +134,34 @@ varying Script, `ELORIA_NATIVE_PRESENTATION=flight`, or the Rust family only.
 Counters include admission, packing, validation and mesh/impact submission;
 native arithmetic alone does not establish a performance benefit. The family
 remains experimental and off by default pending complete-scene qualification.
+
+## Optional remote derived-state pilot
+
+`RABBITLANDS_REMOTE_PRESENTATION=rust` together with
+`RABBITLANDS_CLIENT_RUNTIME=rust` selects the experimental remote presentation
+slice. Both defaults remain legacy. AppState dictionaries, network messages,
+local-player movement and UI remain authoritative on their existing paths.
+Unsupported cinematic, charge, predicted-turn and custom-action states transfer
+their complete derived history back to legacy presentation.
+
+The ordered bridge applies touched-actor events synchronously at the existing
+state boundary. It retains movement and gait histories, separate server and
+arrival clocks, mounted fast-segment pacing, teleport/combat resets and body
+replacement state. One native physics batch advances enrolled remote actors;
+Godot validates the complete tagged result before applying it in that same
+physics frame. Epochs, generations, weak scene bindings and map-frame identity
+reject removed, reused or obsolete actors. A rejected result transfers surviving
+state back to legacy rather than publishing a partial batch.
+
+The ordinary AnimationGate keeps its shared group membership, accumulated delta
+and manual skeleton sampling semantics. Mounted coupled clocks remain with the
+mounted coordinator. Godot still samples AnimationPlayer clips and performs
+scene, selection and speech updates; the remote service does not advance a
+second animation clock. Diagnostics expose actual enrollment and fallback
+coverage, ordered event calls, complete server/action boundaries, physics
+packing/call/application and gate work. Nested timing counters are subsets of
+their enclosing spans and must not be added to them.
+
+Component parity and lifecycle checks do not establish a whole-crowd
+benefit. Keep the pilot opt-in until complete rendered workloads, coverage,
+shutdown and repeated matched comparisons qualify it on the tested hardware.

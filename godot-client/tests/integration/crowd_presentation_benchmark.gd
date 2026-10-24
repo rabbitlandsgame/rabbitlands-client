@@ -1382,6 +1382,8 @@ func _census(boundary := "unspecified") -> Dictionary:
 	var ambient := _main.get("ambient_population") as AmbientPopulation
 	if is_instance_valid(ambient):
 		out["ambientAnimals"] = (ambient.get("_spawned") as Array).size()
+	if _main.has_method("benchmark_remote_snapshot"):
+		out["remotePresentation"] = _main.call("benchmark_remote_snapshot")
 	return out
 
 
