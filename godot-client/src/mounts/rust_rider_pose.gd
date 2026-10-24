@@ -16,6 +16,7 @@ var _epoch := 0
 var _generation := 0
 var _frame := 0
 var _disabled := false
+var _supported := false
 var _mode_override := ""
 var _profile_id := ""
 var comparisons := 0
@@ -34,7 +35,8 @@ func configure(legacy: RefCounted, mount_id: String, controller_override: RefCou
 	var tree: SceneTree = _legacy.actor.get_tree() if is_instance_valid(_legacy.actor) else null
 	var app: Node = tree.root.get_node_or_null("AppState") if tree != null else null
 	_app_ref = weakref(app) if app != null else null
-	_disabled = mount_id != "moor_pony" or _legacy.visual_root == null
+	_supported = mount_id == "moor_pony"
+	_disabled = not _supported or _legacy.visual_root == null
 	# Other profiles and gait-dependent pelvis adapters remain on the qualified path.
 	_disabled = _disabled or _legacy.profile.has("normalPelvisLeanDegrees") or _legacy.profile.has("gallopPelvisLeanDegrees")
 	var controller = controller_override if controller_override != null else RuntimeController.current()
@@ -183,7 +185,7 @@ func sample(seat: Transform3D, seconds: float, cycle: float) -> PackedFloat64Arr
 	return values
 
 func snapshot() -> Dictionary:
-	return {"requested": _mode(), "registered": _rider > 0, "disabled": _disabled,
+	return {"requested": _mode(), "registered": _rider > 0, "disabled": _disabled, "supported": _supported,
 		"profile": _profile_id,
 		"epoch": _epoch, "generation": _generation, "comparisons": comparisons,
 		"applications": applications, "failures": failures, "maxPositionError": maximum_position_error,

@@ -21,8 +21,9 @@ static func begin(boundary: String) -> Dictionary:
 			"acceptedBounds": {"poseSteps": [0, MAX_POSE_STEPS],
 				"steppedSeconds": [0.0, MAX_STEPPED_SECONDS],
 				"pendingSeconds": [0.0, MAX_PENDING_SECONDS]}},
-		"rustPose": {"available": 0, "eligible": 0, "registered": 0, "appliedVisuals": 0,
+		"rustPose": {"available": 0, "supported": 0, "eligible": 0, "registered": 0, "appliedVisuals": 0,
 			"activeVisuals": 0, "appliedActiveVisuals": 0, "applications": 0, "comparisons": 0,
+			"eligibleActiveVisuals": 0, "appliedEligibleActiveVisuals": 0,
 			"failures": 0, "disabled": 0, "profiles": {}, "requestedModes": {},
 			"maxPositionError": 0.0, "maxAngleError": 0.0, "maxScaleError": 0.0, "maxVisualError": 0.0},
 		"ponyQuality": {"available": 0, "unavailable": 0, "unavailableReasons": {},
@@ -65,6 +66,7 @@ static func _include_rust_pose(out: Dictionary, visual: Object) -> void:
 		return
 	var stats: Dictionary = solver.snapshot()
 	out.available += 1
+	out.supported += int(bool(stats.supported))
 	out.eligible += int(not bool(stats.disabled))
 	out.registered += int(bool(stats.registered))
 	out.disabled += int(bool(stats.disabled))
@@ -73,6 +75,8 @@ static func _include_rust_pose(out: Dictionary, visual: Object) -> void:
 	var active := not bool(scheduling.parked) and int(scheduling.tier) != 2
 	out.activeVisuals += int(active)
 	out.appliedActiveVisuals += int(active and int(stats.applications) > 0)
+	out.eligibleActiveVisuals += int(active and bool(stats.supported))
+	out.appliedEligibleActiveVisuals += int(active and bool(stats.supported) and int(stats.applications) > 0)
 	for field: String in ["applications", "comparisons", "failures"]:
 		out[field] = int(out[field]) + int(stats[field])
 	for field: String in ["maxPositionError", "maxAngleError", "maxScaleError", "maxVisualError"]:
