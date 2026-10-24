@@ -150,6 +150,11 @@ var _last_groups_update := 0
 var _groups_refresh_elapsed := 0.0
 var _tab_maps: Dictionary = {}
 var _setting_coordinates := false
+var _pending_pages: Dictionary = {}
+var _catalog_requested := false
+var _groups_by_name: Dictionary = {}
+var _live_group_names: Dictionary = {}
+var _group_rows: Dictionary = {}
 
 
 func _ready() -> void:
@@ -188,7 +193,7 @@ func _process(delta: float) -> void:
 	_groups_refresh_elapsed += delta
 	if _groups_refresh_elapsed >= MAP_REFRESH_SECONDS:
 		_groups_refresh_elapsed = 0.0
-		command_requested.emit("#invasion_assistant groups")
+		_refresh_groups()
 	_map_refresh_elapsed += delta
 	_index_refresh_elapsed += delta
 	if _map_refresh_elapsed >= MAP_REFRESH_SECONDS:
@@ -461,6 +466,7 @@ func _select_map(map_id: String) -> void:
 	if map_id.is_empty():
 		return
 	selected_map_id = map_id
+	_pending_pages.erase("map")
 	teleport_button.disabled = true
 	map_canvas.coordinates_supported = false
 	monitor_canvas.coordinates_supported = false
@@ -713,21 +719,116 @@ func _is_last_page(update: Dictionary) -> bool:
 
 
 func _accumulate(previous: Dictionary, update: Dictionary, key: String) -> Dictionary:
-	# The group and monster lists outgrew one packet - 600 invasion groups
-	# against a 64KB ceiling - so the server sends them a page at a time. The
-	# first page replaces what was held; the rest append to it. Rebuilding on
-	# every page would make the list flicker through nine partial states and
-	# lose the player's selection each time.
+	# Each page is copied once. Copying the entire accumulated prefix on each
+	# arrival turned the current catalogue into seconds of main-thread work.
 	var merged: Dictionary = update.duplicate(true)
 	if int(update.get("page", 0)) > 0:
-		var carried: Array = (previous.get(key, []) as Array).duplicate(true)
+		var carried: Array = previous.get(key, []) as Array
 		carried.append_array(merged.get(key, []) as Array)
 		merged[key] = carried
 	return merged
 
 
+func _assemble_pages(update: Dictionary, key: String) -> Dictionary:
+	var kind := str(update.get("kind", ""))
+	var page := int(update.get("page", 0))
+	var pages := int(update.get("pages", 1))
+	var previous: Dictionary = _pending_pages.get(kind, {})
+	if pages < 1 or page < 0 or page >= pages:
+		_pending_pages.erase(kind)
+		return {}
+	if page > 0 and not previous.is_empty() and previous.get("snapshot", "") != update.get("snapshot", ""):
+		return {} # A late page from an older response cannot cancel the new one.
+	if page > 0 and (previous.is_empty() or int(previous.get("page", -1)) != page - 1
+			or int(previous.get("pages", 1)) != pages
+			or previous.get("revision", "") != update.get("revision", "")
+			or previous.get("map", {}).get("id", "") != update.get("map", {}).get("id", "")):
+		_pending_pages.erase(kind)
+		return {}
+	var assembled := _accumulate(previous, update, key)
+	if not _is_last_page(update):
+		_pending_pages[kind] = assembled
+		return {}
+	_pending_pages.erase(kind)
+	return assembled
+
+
+func _refresh_groups() -> void:
+	if _catalog_requested:
+		return
+	var revision := str(groups_state.get("revision", ""))
+	command_requested.emit("#invasion_assistant status " + revision
+		if bool(groups_state.get("status_supported", false)) and not revision.is_empty()
+		else "#invasion_assistant groups")
+
+
+func _apply_group_status(update: Dictionary) -> void:
+	if str(update.get("revision", "")) != str(groups_state.get("revision", "")) or groups_state.is_empty():
+		if not _catalog_requested:
+			_catalog_requested = true
+			command_requested.emit("#invasion_assistant groups")
+		return
+	var live: Dictionary = {}
+	for row: Dictionary in update.get("groups", []):
+		if not _groups_by_name.has(str(row.name)):
+			if not _catalog_requested:
+				_catalog_requested = true
+				command_requested.emit("#invasion_assistant groups")
+			return
+		live[str(row.name)] = row
+	var names: Dictionary = _live_group_names.duplicate()
+	names.merge(live)
+	var changed: Dictionary = {}
+	var membership_changed := false
+	for group_name: String in names:
+		var group: Dictionary = _groups_by_name[group_name]
+		var row: Dictionary = live.get(group_name, {})
+		var movement: Dictionary = row.get("movement", group.get("configured_movement", {}))
+		for field: String in ["active", "alive", "queued", "movement"]:
+			var value: Variant = movement if field == "movement" else row.get(field, false if field == "active" else 0)
+			if group.get(field) != value:
+				membership_changed = membership_changed or field == "active"
+				group[field] = value
+				changed[group_name] = group
+		if row.has("coordinatesSupported") and group.get("coordinatesSupported", true) != row.coordinatesSupported:
+			group["coordinatesSupported"] = row.coordinatesSupported
+			changed[group_name] = group
+	_live_group_names = live
+	_last_groups_update = Time.get_ticks_msec()
+	if membership_changed:
+		groups_state.groups.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+			if bool(a.active) != bool(b.active):
+				return bool(a.active)
+			if str(a.get("map_name", "")) != str(b.get("map_name", "")):
+				return str(a.get("map_name", "")) < str(b.get("map_name", ""))
+			return str(a.name) < str(b.name))
+		_rebuild_groups()
+		var selected_name := str(selected_group.get("name", ""))
+		if changed.has(selected_name) and not _group_rows.has(selected_name):
+			_show_group(changed[selected_name])
+	else:
+		for group_name: String in changed:
+			if _group_rows.has(group_name):
+				var index: int = _group_rows[group_name]
+				group_list.set_item_text(index, _group_row_text(changed[group_name]))
+			if group_name == str(selected_group.get("name", "")):
+				_show_group(changed[group_name])
+		for index: int in range(monitor_groups.item_count):
+			var group_name := str(monitor_groups.get_item_metadata(index))
+			if changed.has(group_name):
+				var row: Dictionary = changed[group_name]
+				monitor_groups.set_item_text(index, "%s  ·  %d alive / %d queued" % [group_name, int(row.alive), int(row.queued)])
+
+
 func apply_update(update: Dictionary) -> void:
 	var kind := str(update.get("kind", ""))
+	var list_key := {"map": "creatures", "groups": "groups", "group_status": "groups", "monsters": "monsters"}
+	if list_key.has(kind):
+		if kind == "map" and not selected_map_id.is_empty() and str(update.get("map", {}).get("id", "")) != selected_map_id:
+			return
+		update = _assemble_pages(update, str(list_key[kind]))
+		if update.is_empty():
+			return
 	match kind:
 		"index":
 			index_state = update.duplicate(true)
@@ -739,21 +840,28 @@ func apply_update(update: Dictionary) -> void:
 			var incoming: String = str(update.get("map", {}).get("id", ""))
 			if not selected_map_id.is_empty() and incoming != selected_map_id:
 				return # A response for the previous selection cannot change bounds.
-			if int(update.get("page", 0)) > 0 and incoming != str(map_state.get("map", {}).get("id", "")):
-				return
-			map_state = _accumulate(map_state, update, "creatures")
+			map_state = update
 			var map: Dictionary = map_state.get("map", {}) as Dictionary
 			selected_map_id = str(map.get("id", selected_map_id))
 			if _is_last_page(update):
 				_last_map_update = Time.get_ticks_msec()
 				_show_map_state()
 		"groups":
-			groups_state = _accumulate(groups_state, update, "groups")
+			groups_state = update
+			_catalog_requested = false
+			_groups_by_name.clear()
+			_live_group_names.clear()
+			for group: Dictionary in groups_state.get("groups", []):
+				_groups_by_name[str(group.name)] = group
+				if bool(group.get("active", false)):
+					_live_group_names[str(group.name)] = true
 			if _is_last_page(update):
 				_last_groups_update = Time.get_ticks_msec()
 				_rebuild_groups()
+		"group_status":
+			_apply_group_status(update)
 		"monsters":
-			monsters_state = _accumulate(monsters_state, update, "monsters")
+			monsters_state = update
 			if _is_last_page(update):
 				_rebuild_monsters()
 	if not visible:
@@ -1433,6 +1541,7 @@ func _rebuild_groups() -> void:
 		return
 	_stash_draft()
 	group_list.clear()
+	_group_rows.clear()
 	group_picker.clear()
 	monitor_groups.clear()
 	var query := group_filter.text.strip_edges().to_lower()
@@ -1454,8 +1563,8 @@ func _rebuild_groups() -> void:
 			" ".join(group.get("creatures", []) as Array), "active" if bool(group.get("active",false)) else "ready"]
 		if not query.is_empty() and not query in searchable.to_lower():
 			continue
-		var row := group_list.add_item("%s · %s · %s" % [name, group.get("map_name", ""),
-			"ACTIVE · %d alive / %d queued" % [int(group.get("alive",0)),int(group.get("queued",0))] if bool(group.get("active",false)) else "Ready"])
+		var row := group_list.add_item(_group_row_text(group))
+		_group_rows[name] = row
 		group_list.set_item_metadata(row, group)
 		group_list.set_item_tooltip(row, "%s\n%s" % [name, searchable])
 		if name == selected_name:
@@ -1472,9 +1581,17 @@ func _rebuild_groups() -> void:
 		_add_monster_to_group()
 
 
+func _group_row_text(group: Dictionary) -> String:
+	return "%s · %s · %s" % [group.get("name", ""), group.get("map_name", ""),
+		"ACTIVE · %d alive / %d queued" % [int(group.get("alive",0)),int(group.get("queued",0))] if bool(group.get("active",false)) else "Ready"]
+
+
 func _on_group_selected(index: int) -> void:
+	_show_group(group_list.get_item_metadata(index))
+
+
+func _show_group(next_group: Dictionary) -> void:
 	_stash_draft()
-	var next_group: Dictionary = group_list.get_item_metadata(index)
 	var same_group := str(next_group.get("name", "")) == str(selected_group.get("name", ""))
 	var focused := gui_get_focus_owner()
 	var preserve_fields := same_group and (_draft_dirty or (focused != null and settings_column.is_ancestor_of(focused)))
@@ -1486,7 +1603,7 @@ func _on_group_selected(index: int) -> void:
 	var previous_rows := group_composition.get_selected_items()
 	if same_group and not previous_rows.is_empty():
 		previous_type = str(group_composition.get_item_metadata(previous_rows[0]).get("type", ""))
-	selected_group = (group_list.get_item_metadata(index) as Dictionary).duplicate(true)
+	selected_group = next_group.duplicate(true)
 	_loading_group = true
 	var dynamic := bool(selected_group.get("dynamic", false))
 	var active := bool(selected_group.get("active", false))
@@ -1848,7 +1965,7 @@ func _refresh_current() -> void:
 			if not selected_map_id.is_empty():
 				command_requested.emit("#invasion_assistant map " + selected_map_id)
 		1:
-			command_requested.emit("#invasion_assistant groups")
+			_refresh_groups()
 		2:
 			command_requested.emit("#invasion_assistant monsters")
 	status.text = "Refreshing server-authoritative data…"

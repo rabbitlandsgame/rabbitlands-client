@@ -204,6 +204,14 @@ func run() -> void:
 	var group_event := {"type": "invasion_assistant", "state": {"kind": "groups", "groups": [{"map_id": "negative-map",
 		"movement": {"anchor": {"x": -1, "y": -1}, "radius": 2, "region": {"x0": -2, "y0": -2, "x1": 0, "y1": 0}}}]}}
 	expect(admin_context.convert(group_event).ok, "group movement accepts signed logical coordinates in verified bounds")
+	var status_event := group_event.duplicate(true)
+	status_event.state.kind = "group_status"
+	expect(admin_context.convert(status_event).ok, "lightweight status validates signed movement")
+	status_event.state.groups[0].movement.anchor.x = 100000
+	expect(not admin_context.convert(status_event).ok, "status cannot bypass coordinate bounds")
+	var configured_event := group_event.duplicate(true)
+	configured_event.state.groups[0]["configured_movement"] = {"anchor": {"x": true, "y": -1}}
+	expect(not admin_context.convert(configured_event).ok, "configured movement must also pass coordinate validation")
 	var bad_group: Dictionary = group_event.duplicate(true)
 	bad_group.state.groups[0].movement.region.x1 = 100000
 	expect(not admin_context.convert(bad_group).ok, "group movement rejects a region outside its coordinate profile")
