@@ -5,6 +5,7 @@ signal used(key: String)
 signal close_requested
 const REFRESH_MSEC := 200
 const UI := preload("res://src/ui/action_book_ui.gd")
+const TextColors := preload("res://src/ui/text_colors.gd")
 const Icons := preload("res://src/ui/technique_icons.gd")
 const Preview := preload("res://src/ui/technique_effect_preview.gd")
 
@@ -289,7 +290,7 @@ func _refresh_selected() -> void:
 	favorite_button.set_pressed_no_signal(selected_key in _favorites)
 	var reason := unavailable_reason(selected_key)
 	status_label.text = "Click a creature for %s." % str(row.get("name", selected_key)) if pending_key == selected_key else ("✓ Ready" if reason.is_empty() else "× " + reason)
-	status_label.add_theme_color_override("font_color", UI.GOOD if reason.is_empty() else UI.BAD)
+	TextColors.bind(status_label, "spell_ready" if reason.is_empty() else "spell_blocked")
 	use_button.disabled = not reason.is_empty()
 	var release := str(row.get("kind", "")) == "stance" and bool(row.get("active", false))
 	use_button.text = ("Release " if release else "Use ") + str(row.get("name", selected_key))
@@ -386,7 +387,7 @@ func _rebuild() -> void:
 			var section := VBoxContainer.new()
 			section.add_theme_constant_override("separation", 2)
 			var heading := UI.label(group, 13)
-			heading.add_theme_color_override("font_color", UI.GOLD)
+			TextColors.bind(heading, "book_heading")
 			section.add_child(heading)
 			list.add_child(section)
 			groups[group] = section
@@ -456,7 +457,7 @@ func _build() -> void:
 	add_child(resources)
 	points_label = UI.label("Action points —", 13)
 	points_label.name = "ActionPoints"
-	points_label.add_theme_color_override("font_color", Color("c982ee"))
+	TextColors.bind(points_label, "book_points")
 	resources.add_child(points_label)
 	points_meter = ProgressBar.new()
 	points_meter.custom_minimum_size = Vector2(100, 9)
@@ -562,5 +563,5 @@ func _build() -> void:
 	assign_button.pressed.connect(_assign_selected)
 	assignment.add_child(assign_button)
 	hint_label = UI.label("Select to inspect · Drag to a quick slot", 12, true)
-	hint_label.add_theme_color_override("font_color", UI.MUTED)
+	TextColors.bind(hint_label, "book_muted")
 	add_child(hint_label)

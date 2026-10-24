@@ -55,6 +55,67 @@ Set-Location app
 This direct invocation does not run the older restart updater. Use it only to
 compare rendering, then return to the normal launcher for updates.
 
+## Disconnects and chat colors
+
+Losing a logged-in connection opens the console and preserves the session's chat
+history. Press a key to start reconnecting: the first attempt starts immediately,
+then attempts repeat every two seconds until the session resumes. The client
+signs back into the same character and requests fresh world state. Credentials
+remain in memory only and are cleared when you log out or authentication fails.
+
+Use `#disco` to enter this waiting state deliberately. Use the disconnect menu
+icon to cancel retries and return to the login screen. A rejected login or invalid
+session needs a return to login; its error remains visible in the console.
+
+Settings → Chat offers individual message colors, a reset for each category,
+per-numbered-channel heading colors and **Reset all chat colors to defaults**.
+Changes apply to both floating feeds, their previews and the full console, including
+messages already received. Saved choices survive a restart.
+
+The default renderer uses Eternal Lands' exact 28-color protocol palette. It
+preserves the server's color markers throughout every message, including local
+speech, private messages, guild messages, moderator messages and system feedback.
+Uncolored text is white. The first numbered-channel color is white when active
+and gray when inactive; later body markers retain their server colors. When a
+server sends only one color marker, that whole channel message follows the
+active/inactive color, as in EL. Links retain their surrounding message color.
+
+Choosing a category color overrides its server colors. The separate guild and
+numbered-channel heading controls keep headings independently adjustable. A
+per-channel choice overrides that channel's first color marker. Reset removes
+the custom choice and restores the normal server-color behavior. An explicit
+choice remains an override even when its RGB equals the displayed default.
+
+| Message or text role | Default behavior |
+| --- | --- |
+| Harvesting and harvesting events | EL orange2 (`#fc7a3a`), supplied by the RL server |
+| Special finds and guild messages | Server-supplied EL blue2 (`#7697f8`), with later color markers preserved |
+| Private messages | Server-supplied EL orange1 (`#f7c49f`) |
+| Nearby speech | White speaker, server-supplied EL yellow1 (`#fbfabe`) body |
+| Inactive numbered channel headings | Gray (`#999999`) |
+| Active numbered channel headings | White (`#ffffff`) |
+| Uncolored system and client feedback | White (`#ffffff`) |
+| Disconnects | EL red2 (`#fa5a5a`) |
+| Connection attempts | Pink (`#ffb3c1`) |
+| Welcome, success, warnings and announcements | Preserve each server-supplied shade |
+| Web links | Preserve the message color; a separate link-color override is optional |
+
+Harvest feedback appears in the System feed; nearby players' speech keeps its
+conversation category even when it mentions harvesting. Existing preferences from
+the earlier full-palette format keep custom colors while untouched factory values
+upgrade to the new defaults. Old files did not distinguish an untouched factory
+color from an intentionally chosen identical RGB.
+
+Settings → Text colors covers interface controls, login, NPC dialogue, inventory,
+crafting, statistics, knowledge, quests, books, spells, contacts, HUD controls,
+world labels, floating combat/progression feedback and map text. Search or filter
+by area, choose individual colors, or reset a role, an area or the whole palette.
+Changes apply immediately and persist across restarts. Defaults follow EL where
+the games share a text role; RL-specific text retains its existing palette.
+Personal map marks retain any saved individual RGB until a global personal-mark
+override is chosen. Explicit HUD component and local-player banner customizations
+retain precedence through their existing controls.
+
 ## What diagnostics capture
 
 `client_diagnostic` JSON lines survive release exports. Startup records the build,

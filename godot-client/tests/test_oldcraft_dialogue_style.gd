@@ -1,6 +1,7 @@
 extends SceneTree
 
 const DialogueStyle := preload("res://src/ui/oldcraft_dialogue_style.gd")
+const TextColors := preload("res://src/ui/text_colors.gd")
 
 var failures := 0
 var checks := 0
@@ -46,9 +47,10 @@ func _run() -> void:
 	var page := backdrop.get_theme_stylebox("panel") as StyleBoxTexture
 	_expect(page != null and page.texture != null and page.texture.resource_path.ends_with(
 		"/assets/ui/oldcraft_inspired/eloria_parchment.png")
-		and body.get_theme_color("default_color").is_equal_approx(DialogueStyle.INK)
+		and page.modulate_color.get_luminance() < 0.2
+		and body.get_theme_color("default_color").is_equal_approx(TextColors.color("npc_text"))
 		and body.get_theme_stylebox("normal") is StyleBoxEmpty,
-		"the whole window is parchment and the reading area has no separate fill")
+		"darkened parchment keeps EL's white dialogue readable without a separate fill")
 	_expect(main.has_meta(DialogueStyle.STYLE_META),
 		"style application is observable without a frame-time worker")
 	_expect(panel.position.x >= 24.0 and panel.position.x <= 36.0
@@ -86,8 +88,8 @@ func _run() -> void:
 	var kicker := main.get_node("%DialogueKicker") as Label
 	_expect(kicker.text.contains("QUEST MISSIVE") and kicker.text.contains("17")
 		and kicker.get_theme_color(
-		"font_color").is_equal_approx(DialogueStyle.QUEST_YELLOW),
-		"quest state has an unmistakable gold hierarchy marker")
+		"font_color").is_equal_approx(TextColors.color("npc_footer")),
+		"quest state keeps its identifier and customizable instruction text")
 	_expect(options.get_child_count() == 2,
 		"the response list keeps every server-authored option")
 	var primary := options.get_child(0) as Button

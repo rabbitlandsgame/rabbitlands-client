@@ -26,6 +26,9 @@ var selection_mode := 0 # coordinates, centerpoint, rectangular region
 var movement: Dictionary = {}
 var zoom := 1.0
 var pan := Vector2.ZERO
+## The map-first workspace fills its canvas; Fit still reveals the full map.
+var fill_view := false
+var _fitted_view := false
 var _panning := false
 var _drawing_region := false
 var _region_start := Vector2i.ZERO
@@ -63,6 +66,7 @@ func set_map_state(value: Dictionary, texture: Texture2D = null,
 	if previous_map != next_map or not coordinates_supported:
 		selected_tile = null
 		reset_view()
+		_fitted_view = false
 		_drawing_region = false
 	_hover_text = ""
 	tooltip_text = "Click the tactical map to select teleport coordinates."
@@ -72,7 +76,9 @@ func set_map_state(value: Dictionary, texture: Texture2D = null,
 func _map_rect() -> Rect2:
 	var available := Vector2(maxf(1, size.x - PAD * 2), maxf(1, size.y - PAD * 2))
 	var source := background.get_size() if background != null else _bounds()
-	var fitted: Vector2 = source * minf(available.x / source.x, available.y / source.y)
+	var scale_x := available.x / source.x
+	var scale_y := available.y / source.y
+	var fitted: Vector2 = source * (maxf(scale_x, scale_y) if fill_view and not _fitted_view else minf(scale_x, scale_y))
 	return Rect2((size - fitted * zoom) * 0.5 + pan, fitted * zoom)
 
 
@@ -84,6 +90,7 @@ func zoom_by(factor: float) -> void:
 
 
 func reset_view() -> void:
+	_fitted_view = true
 	zoom = 1.0
 	pan = Vector2.ZERO
 	queue_redraw()

@@ -1,9 +1,11 @@
 extends HFlowContainer
 ## Read filters only: selecting a log tab never changes the send destination.
 const Messages := preload("res://src/ui/chat_messages.gd")
+const TextColors := preload("res://src/ui/text_colors.gd")
 signal tab_selected(key: String)
 var selected := "all"
 var buttons: Dictionary = {}
+var _unread: Dictionary = {}
 
 func _ready() -> void:
 	name = "ChatLogTabs"
@@ -19,6 +21,10 @@ func _add_tab(key: String, title: String) -> void:
 	button.text = title
 	button.toggle_mode = true
 	button.focus_mode = Control.FOCUS_NONE
+	TextColors.bind(button, "chat_tab")
+	TextColors.bind(button, "chat_selector", "font_hover_color")
+	TextColors.bind(button, "chat_selected", "font_pressed_color")
+	TextColors.bind(button, "chat_selected", "font_hover_pressed_color")
 	button.pressed.connect(func() -> void:
 		select(key)
 		tab_selected.emit(key))
@@ -54,8 +60,11 @@ func sync(channels: Array, lines: Array) -> void:
 
 func select(key: String) -> void:
 	selected = key
+	_unread.erase(key)
 	for candidate: String in buttons:
-		(buttons[candidate] as Button).set_pressed_no_signal(candidate == key)
+		var button: Button = buttons[candidate]
+		button.set_pressed_no_signal(candidate == key)
+		TextColors.bind(button, "chat_unread" if _unread.has(candidate) else "chat_tab")
 
 func observe(line: Dictionary) -> void:
 	var number := Messages.channel_number(line)
@@ -65,4 +74,8 @@ func observe(line: Dictionary) -> void:
 	var key := "pm:" + person.to_lower()
 	if not person.is_empty() and not buttons.has(key):
 		_add_tab(key, "Private · " + person)
+	if not Messages.matches(line, selected):
+		for candidate: String in buttons:
+			if candidate != selected and Messages.matches(line, candidate):
+				_unread[candidate] = true
 	select(selected)

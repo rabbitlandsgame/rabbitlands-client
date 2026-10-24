@@ -1,11 +1,12 @@
 class_name ClassicStorageWorkspace
 extends Node
+const TextColors := preload("res://src/ui/text_colors.gd")
 ## Classic storage and named favorite sets share the existing server state.
 ## Docking temporarily groups the real inventory, preserving its tools.
 
 const BACKGROUND := Color("05090a")
 const AMBER := Color("896234")
-const GOLD := Color("e9bd83")
+const GOLD := Color(0.77, 0.57, 0.39)
 const CELL := 40
 const INVENTORY_ICON_MARGIN := 4
 const STORAGE_SIZE := Vector2(CELL * 6 + 134, CELL * 6 + 158)
@@ -76,6 +77,7 @@ func configure(owner_main: Node) -> void:
 			bank.position = stored_position as Vector2
 	refresh_favorites()
 	get_viewport().size_changed.connect(_viewport_changed)
+	TextColors.events().changed.connect(_on_text_colors_changed)
 
 static func style_box(border: Color = AMBER, margin: float = 2) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
@@ -91,17 +93,17 @@ static func classic_theme() -> Theme:
 	result.set_stylebox("panel", "PanelContainer", style_box())
 	for kind: String in ["Button", "LineEdit", "SpinBox", "ItemList"]:
 		result.set_stylebox("normal" if kind != "ItemList" else "panel", kind, style_box())
-		result.set_color("font_color", kind, GOLD)
+		result.set_color("font_color", kind, TextColors.color("inventory_text"))
 	var highlight: StyleBoxFlat = style_box(Color("7cc6d4"))
 	highlight.bg_color = Color("172326")
 	result.set_stylebox("disabled", "Button", style_box())
-	result.set_color("font_disabled_color", "Button", Color("737979"))
+	result.set_color("font_disabled_color", "Button", TextColors.color("ui_disabled"))
 	for state: String in ["hover", "pressed", "hover_pressed", "focus"]:
 		result.set_stylebox(state, "Button", highlight)
 	result.set_stylebox("selected", "ItemList", highlight)
 	result.set_stylebox("selected_focus", "ItemList", highlight)
-	result.set_color("font_selected_color", "ItemList", Color("7cc6d4"))
-	result.set_color("font_color", "Label", GOLD)
+	result.set_color("font_selected_color", "ItemList", TextColors.color("inventory_selected"))
+	result.set_color("font_color", "Label", TextColors.color("inventory_text"))
 	result.set_constant("separation", "VBoxContainer", 4)
 	result.set_constant("separation", "HBoxContainer", 4)
 	return result
@@ -308,7 +310,7 @@ func _style_inventory() -> void:
 	equipment.custom_minimum_size.x = CELL * 2
 	var equipment_title: Label = equipment.get_node("EquipmentTitle") as Label
 	equipment_title.text = "Equipment"
-	equipment_title.add_theme_color_override("font_color", Color("6d854e"))
+	TextColors.bind(equipment_title, "equipment_heading")
 	var pack: Control = inventory.get_node("Content/InventoryBody/BackpackColumn") as Control
 	(pack.get_node("Scroll") as Control).custom_minimum_size = Vector2(CELL * 6, CELL * 6)
 	var short_description: Control = main.get("inventory_description") as Control
@@ -326,8 +328,9 @@ func _style_inventory() -> void:
 		(main.get(str(pair[0])) as Button).text = str(pair[1])
 	for shortcut: Button in main.get("inventory_quantity_buttons"):
 		shortcut.custom_minimum_size.y = 20
-		shortcut.add_theme_color_override("font_color", Color("78a7ff"))
-		shortcut.add_theme_color_override("font_pressed_color", Color("6cdf7b"))
+		TextColors.bind(shortcut, "quantity")
+		TextColors.bind(shortcut, "quantity_selected", "font_pressed_color")
+		TextColors.bind(shortcut, "quantity_selected", "font_hover_pressed_color")
 		shortcut.add_theme_stylebox_override("normal", style_box(Color("4275b8"), 0))
 	# This editor floats over a shortcut; it must not add a row to the layout.
 	var quantity_edit: Control = main.get("inventory_quantity_edit") as Control
@@ -392,7 +395,7 @@ func _grid_cell(grid: GridContainer, index: int, on_pressed: Callable, on_input:
 		count.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		count.position = Vector2(1, 0)
 		count.add_theme_font_size_override("font_size", 10)
-		count.add_theme_color_override("font_color", Color.WHITE)
+		TextColors.bind(count, "inventory_count")
 		count.add_theme_color_override("font_outline_color", Color.BLACK)
 		count.add_theme_constant_override("outline_size", 2)
 		cell.add_child(count)
@@ -1024,3 +1027,9 @@ func persist() -> void:
 	var error: Error = config.save(main.get("SETTINGS_PATH"))
 	if error != OK:
 		list_status.text = "Could not save preferences: " + error_string(error)
+
+func _on_text_colors_changed(role: String) -> void:
+	if not role.is_empty() and not role.begins_with("inventory_") and not role.begins_with("ui_"):
+		return
+	for control: Control in [bank, inventory, lists]:
+		control.theme = classic_theme()

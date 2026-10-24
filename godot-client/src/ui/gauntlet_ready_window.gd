@@ -1,4 +1,5 @@
 extends Control
+const TextColors := preload("res://src/ui/text_colors.gd")
 ## A complete server snapshot drives the roster and the leader's Start button.
 
 var panel: PanelContainer
@@ -34,7 +35,7 @@ func _ready() -> void:
 	var title := Label.new()
 	title.text = "Gauntlet · Ready check"
 	title.add_theme_font_size_override("font_size", 22)
-	title.add_theme_color_override("font_color", Color("edc981"))
+	TextColors.bind(title, "ready_title")
 	body.add_child(title)
 	selection = Label.new()
 	selection.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -115,7 +116,7 @@ func apply_snapshot(state: Dictionary) -> void:
 		row.add_child(player_name)
 		var status := Label.new()
 		status.text = str(member.status)
-		status.add_theme_color_override("font_color", Color("a8d895") if member.ready else Color("e1bb80"))
+		TextColors.bind(status, "ready_success" if member.ready else "ready_waiting")
 		row.add_child(status)
 		if bool(member.get("bot", false)) and bool(state.is_leader):
 			var remove := _button(row, "×", func() -> void: _request("removebot", str(member.id)))

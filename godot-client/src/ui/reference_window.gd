@@ -1,4 +1,5 @@
 extends Control
+const TextColors := preload("res://src/ui/text_colors.gd")
 ## The reference windows: help, notes, links and the encyclopedia.
 ##
 ## The legacy client had ten of these, all XML- or file-driven, and this client
@@ -73,6 +74,7 @@ func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_build()
 	AppState.state_changed.connect(_on_state_changed)
+	TextColors.events().changed.connect(_on_text_colors_changed)
 
 func configure(commands: ConsoleCommands, bindable_actions: Dictionary,
 		notes: String, bookmarks: Array = []) -> void:
@@ -234,7 +236,7 @@ func _refresh_buddies() -> void:
 		buddy_list.add_item("%s  -  %s" % [str(name),
 			"here now" if here else "away"])
 		buddy_list.set_item_custom_fg_color(buddy_list.item_count - 1,
-			Color(0.62, 0.88, 0.62) if here else Color(0.66, 0.66, 0.70))
+			TextColors.color("reference_online" if here else "reference_offline"))
 	if names.is_empty():
 		buddy_list.add_item("Nobody is on your list. Add one below.")
 		buddy_list.set_item_disabled(0, true)
@@ -502,3 +504,7 @@ func _build() -> void:
 	add_buddy_button.pressed.connect(_on_add_buddy_pressed)
 	buddy_add_row.add_child(add_buddy_button)
 	_refresh_buddies()
+
+func _on_text_colors_changed(role: String) -> void:
+	if role.is_empty() or role.begins_with("reference_"):
+		_refresh_buddies()

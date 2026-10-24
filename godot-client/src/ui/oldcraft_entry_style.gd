@@ -1,5 +1,6 @@
 class_name OldcraftEntryStyle
 extends RefCounted
+const TextColors := preload("res://src/ui/text_colors.gd")
 ## Low-cost entry-screen styling inspired by Oldcraft's fantasy materials and
 ## open, scenic login composition.
 ##
@@ -15,9 +16,9 @@ extends RefCounted
 const GOLD := Color(0.957, 0.773, 0.259, 1.0)
 const GOLD_DARK := Color(0.722, 0.541, 0.231, 1.0)
 const GOLD_BRIGHT := Color(1.0, 0.86, 0.48, 1.0)
-const PARCHMENT := Color(0.914, 0.835, 0.659, 1.0)
-const WARM_TEXT := Color(0.961, 0.941, 0.878, 1.0)
-const MUTED := Color(0.69, 0.65, 0.58, 1.0)
+const PARCHMENT := Color(0.035, 0.04, 0.05, 1.0)
+const WARM_TEXT := Color.WHITE
+const MUTED := Color.WHITE
 const STONE := Color(0.118, 0.118, 0.133, 0.94)
 const STONE_RAISED := Color(0.20, 0.20, 0.22, 0.96)
 const FIELD := Color(0.025, 0.026, 0.032, 0.96)
@@ -85,9 +86,9 @@ static func _style_controls(root: Control) -> void:
 		button.add_theme_stylebox_override("hover_pressed", button_pressed)
 		button.add_theme_stylebox_override("focus", button_hover)
 		button.add_theme_stylebox_override("disabled", button_disabled)
-		button.add_theme_color_override("font_color", WARM_TEXT)
-		button.add_theme_color_override("font_hover_color", GOLD_BRIGHT)
-		button.add_theme_color_override("font_pressed_color", GOLD)
+		TextColors.bind(button, "login_label")
+		TextColors.bind(button, "ui_hover", "font_hover_color")
+		TextColors.bind(button, "ui_pressed", "font_pressed_color")
 		button.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.9))
 		button.add_theme_constant_override("outline_size", 2)
 		button.custom_minimum_size.y = maxf(button.custom_minimum_size.y, 36.0)
@@ -99,17 +100,17 @@ static func _style_controls(root: Control) -> void:
 		var field := value as LineEdit
 		field.add_theme_stylebox_override("normal", field_normal)
 		field.add_theme_stylebox_override("focus", field_focus)
-		field.add_theme_color_override("font_color", WARM_TEXT)
-		field.add_theme_color_override("font_placeholder_color", MUTED)
-		field.add_theme_color_override("caret_color", GOLD_BRIGHT)
+		TextColors.bind(field, "login_input")
+		TextColors.bind(field, "login_placeholder", "font_placeholder_color")
+		TextColors.bind(field, "login_input", "caret_color")
 		field.custom_minimum_size.y = maxf(field.custom_minimum_size.y, 36.0)
 	for value: Node in root.find_children("*", "CheckBox", true, false):
 		var check := value as CheckBox
-		check.add_theme_color_override("font_color", WARM_TEXT)
-		check.add_theme_color_override("font_hover_color", GOLD_BRIGHT)
+		TextColors.bind(check, "login_label")
+		TextColors.bind(check, "ui_hover", "font_hover_color")
 	for value: Node in root.find_children("*", "Label", true, false):
 		var label := value as Label
-		label.add_theme_color_override("font_color", WARM_TEXT)
+		TextColors.bind(label, "login_label")
 		label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.95))
 		label.add_theme_constant_override("outline_size", 2)
 
@@ -156,7 +157,7 @@ static func _style_login_layout(main: Control) -> void:
 		secondary.add_theme_stylebox_override("hover_pressed", secondary_pressed)
 		secondary.add_theme_stylebox_override("focus", secondary_hover)
 		secondary.add_theme_stylebox_override("disabled", secondary_disabled)
-		secondary.add_theme_color_override("font_color", GOLD)
+		TextColors.bind(secondary, "login_label")
 		secondary.custom_minimum_size.y = maxf(
 			secondary.custom_minimum_size.y, 36.0)
 	var login := main.get_node_or_null("%Login") as Button
@@ -179,8 +180,8 @@ static func _style_login_layout(main: Control) -> void:
 		var port_field := port.get_line_edit()
 		port_field.add_theme_stylebox_override("normal", field_normal)
 		port_field.add_theme_stylebox_override("focus", field_focus)
-		port_field.add_theme_color_override("font_color", WARM_TEXT)
-		port_field.add_theme_color_override("caret_color", GOLD_BRIGHT)
+		TextColors.bind(port_field, "login_input")
+		TextColors.bind(port_field, "login_input", "caret_color")
 		port_field.custom_minimum_size.y = maxf(
 			port_field.custom_minimum_size.y, 36.0)
 		port.custom_minimum_size.y = maxf(port.custom_minimum_size.y, 36.0)
@@ -226,7 +227,7 @@ static func _style_creation_layout(main: Control) -> void:
 		form_panel.add_theme_stylebox_override("panel", form_frame)
 		for value: Node in form_panel.find_children("*", "Label", true, false):
 			var label := value as Label
-			label.add_theme_color_override("font_color", Color(0.22, 0.14, 0.07, 1.0))
+			TextColors.bind(label, "login_label")
 			label.add_theme_color_override("font_outline_color", Color.TRANSPARENT)
 			label.add_theme_constant_override("outline_size", 0)
 	var parchment := main.get_node_or_null("%FormParchment") as Panel
@@ -254,15 +255,15 @@ static func _style_creation_layout(main: Control) -> void:
 		option.add_theme_stylebox_override("hover", option_hover)
 		option.add_theme_stylebox_override("pressed", option_hover)
 		option.add_theme_stylebox_override("focus", option_hover)
-		option.add_theme_color_override("font_color", WARM_TEXT)
-		option.add_theme_color_override("font_hover_color", GOLD_BRIGHT)
+		TextColors.bind(option, "login_label")
+		TextColors.bind(option, "ui_hover", "font_hover_color")
 	var randomize := main.get_node_or_null("%RandomizeAppearance") as Button
 	if randomize != null:
 		randomize.add_theme_stylebox_override("normal", _flat_box(
 			Color(0.105, 0.095, 0.09, 0.98), GOLD_DARK, 2, 4, 6.0))
 		randomize.add_theme_stylebox_override("hover", _flat_box(
 			Color(0.16, 0.125, 0.08, 1.0), GOLD_BRIGHT, 2, 4, 6.0))
-		randomize.add_theme_color_override("font_color", GOLD_BRIGHT)
+		TextColors.bind(randomize, "login_label")
 	for path: String in [
 			"CreationPanel/Columns/FormPanel/Form/CreationFieldsScroll/CreationFields/AccountSection",
 			"CreationPanel/Columns/FormPanel/Form/CreationFieldsScroll/CreationFields/IdentitySection",
@@ -270,39 +271,39 @@ static func _style_creation_layout(main: Control) -> void:
 		var section := main.get_node_or_null(path) as Label
 		if section == null:
 			continue
-		section.add_theme_color_override("font_color", BURGUNDY_PRESSED)
+		TextColors.bind(section, "login_label")
 		section.add_theme_font_size_override("font_size", 12)
 	var class_header := main.get_node_or_null("CreationPanel/Columns/ClassRail/ClassContent/ClassHeader") as Label
 	if class_header != null:
-		class_header.add_theme_color_override("font_color", GOLD_BRIGHT)
+		TextColors.bind(class_header, "ui_bright")
 	var class_title := main.get_node_or_null("%ClassTitle") as Label
 	if class_title != null:
-		class_title.add_theme_color_override("font_color", GOLD_BRIGHT)
+		TextColors.bind(class_title, "ui_bright")
 	var class_tagline := main.get_node_or_null("%ClassTagline") as Label
 	if class_tagline != null:
-		class_tagline.add_theme_color_override("font_color", GOLD)
+		TextColors.bind(class_tagline, "login_label")
 
 
 static func _style_titles(main: Control) -> void:
 	var login_title := main.get_node_or_null("LoginPanel/Content/Subtitle") as Label
 	if login_title != null:
 		login_title.text = "ENTER THE WORLD OF ELORIA"
-		login_title.add_theme_color_override("font_color", GOLD_BRIGHT)
+		TextColors.bind(login_title, "login_label")
 		login_title.add_theme_font_size_override("font_size", 18)
 		login_title.add_theme_constant_override("outline_size", 3)
 	var creation_title := main.get_node_or_null(
 		"CreationPanel/Columns/FormPanel/Form/CreationFieldsScroll/CreationFields/Title") as Label
 	if creation_title != null:
 		creation_title.text = "FORGE YOUR HERO"
-		creation_title.add_theme_color_override("font_color", BURGUNDY_PRESSED)
+		TextColors.bind(creation_title, "login_label")
 		creation_title.add_theme_font_size_override("font_size", 27)
 		creation_title.add_theme_constant_override("outline_size", 0)
 	var status := main.get_node_or_null("%Status") as Label
 	if status != null:
-		status.add_theme_color_override("font_color", MUTED)
+		TextColors.bind(status, "login_status")
 	var create_status := main.get_node_or_null("%CreateStatus") as Label
 	if create_status != null:
-		create_status.add_theme_color_override("font_color", Color(0.31, 0.22, 0.13, 1.0))
+		TextColors.bind(create_status, "login_status")
 
 
 static func _style_preview(main: Control) -> void:

@@ -13,11 +13,12 @@ func run() -> void:
 	var state := root.get_node("AppState")
 	state.authenticated = true
 	state.local_actor_id = 42
-	state.actor_mounts[42] = {"mode": "on_foot", "selected_mount_id": "giant_rat", "mount_id": "",
-		"owned_mount_ids": ["moor_pony", "golden_plains_horse", "crystalback_tortoise", "rabbit", "jadefeather_raptor", "giant_rat"], "blocked_reason": "", "gait": "on_foot"}
+	state.actor_mounts[42] = {"mode": "on_foot", "selected_mount_id": "cheetah", "mount_id": "",
+		"owned_mount_ids": preload("res://src/mounts/mount_profiles.gd").PATHS.keys(), "mount_coats":{}, "blocked_reason": "", "gait": "on_foot"}
 	var window: Variant = (load("res://src/ui/mounts_window.gd") as Script).new()
 	root.add_child(window)
 	window.open()
+	window._choose_coat(3)
 	for frame: int in 8:
 		await process_frame
 	print("MOUNTS_WINDOW_LAYOUT ", window.panel.size, " minimum=", window.panel.get_combined_minimum_size(),

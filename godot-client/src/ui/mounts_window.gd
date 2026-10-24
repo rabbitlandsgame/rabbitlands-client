@@ -1,9 +1,11 @@
 extends Control
+const TextColors := preload("res://src/ui/text_colors.gd")
 ## Selection is a local browse choice; riding and the saved default are confirmed
 ## only by the server snapshot. The same commands support the headless probe.
 const Profiles := preload("res://src/mounts/mount_profiles.gd")
 const Portrait := preload("res://src/mounts/mount_portrait.gd")
 const Hotkeys := preload("res://src/mounts/mount_hotkeys.gd")
+const Coats := preload("res://src/mounts/mount_coats.gd")
 var panel: PanelContainer
 var cards := {}
 var portraits := {}
@@ -26,6 +28,9 @@ var collection_count: Label
 var empty_label: Label
 var _fit_queued := false
 var _reveal_candidate := false
+var coat_choice: OptionButton
+var apply_coat: Button
+var coat_drafts := {}
 
 func _ready() -> void:
 	name = "MountsLayer"
@@ -56,12 +61,12 @@ func _build() -> void:
 	var title := Label.new()
 	title.text = "Mounts"
 	title.add_theme_font_size_override("font_size", 22)
-	title.add_theme_color_override("font_color", Color("efdcb7"))
+	TextColors.bind(title, "mount_title")
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(title)
 	collection_count = Label.new()
 	collection_count.add_theme_font_size_override("font_size", 12)
-	collection_count.add_theme_color_override("font_color", Color("b7af9d"))
+	TextColors.bind(collection_count, "mount_muted")
 	header.add_child(collection_count)
 	var close_button := Button.new()
 	close_button.text = "X"
@@ -108,7 +113,7 @@ func _build() -> void:
 		title_label.custom_minimum_size.y = 32
 		title_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		title_label.max_lines_visible = 2
-		title_label.add_theme_color_override("font_color", Color("efdcb7"))
+		TextColors.bind(title_label, "mount_title")
 		body.add_child(title_label)
 		var image := Portrait.new()
 		image.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -127,9 +132,24 @@ func _build() -> void:
 	empty_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	empty_label.hide()
 	column.add_child(empty_label)
+	var coat_row := HBoxContainer.new()
+	column.add_child(coat_row)
+	var coat_label := Label.new()
+	coat_label.text = "Coat"
+	coat_row.add_child(coat_label)
+	coat_choice = OptionButton.new()
+	coat_choice.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	for id: String in Coats.IDS:
+		coat_choice.add_item(Coats.LABELS[id])
+	coat_choice.item_selected.connect(_choose_coat)
+	coat_row.add_child(coat_choice)
+	apply_coat = Button.new()
+	apply_coat.text = "Apply coat"
+	apply_coat.pressed.connect(_apply_coat)
+	coat_row.add_child(apply_coat)
 	status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	status.add_theme_font_size_override("font_size", 13)
-	status.add_theme_color_override("font_color", Color("d8d1bf"))
+	TextColors.bind(status, "mount_text")
 	column.add_child(status)
 	var actions := HBoxContainer.new()
 	actions.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -139,7 +159,7 @@ func _build() -> void:
 		button.custom_minimum_size = Vector2(150, 32)
 		button.focus_mode = Control.FOCUS_NONE
 		button.add_theme_font_size_override("font_size", 15)
-		button.add_theme_color_override("font_color", Color("f2e5c9"))
+		TextColors.bind(button, "mount_button")
 		button.add_theme_stylebox_override("normal", _box(Color("293e31"), Color("967d48"), 1, 5))
 		button.add_theme_stylebox_override("hover", _box(Color("3a5140"), Color("d4b96e"), 1, 5))
 		actions.add_child(button)
@@ -148,7 +168,7 @@ func _build() -> void:
 	dismount.pressed.connect(_dismount)
 	hints.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hints.add_theme_font_size_override("font_size", 12)
-	hints.add_theme_color_override("font_color", Color("b7af9d"))
+	TextColors.bind(hints, "mount_muted")
 	column.add_child(hints)
 
 static func _box(background: Color, border: Color, width: int, margin: int) -> StyleBoxFlat:
@@ -175,6 +195,7 @@ func toggle() -> void:
 func open() -> void:
 	var state := _state()
 	candidate = str(state.get("selected_mount_id", "moor_pony"))
+	coat_drafts.clear()
 	_reveal_candidate = true
 	search.text = ""
 	_filter_cards()
@@ -247,7 +268,7 @@ func _fit_panel() -> void:
 		if card.visible: visible_count += 1
 	var rows := maxi(1, ceili(float(visible_count) / grid.columns))
 	scroll.custom_minimum_size.y = minf(rows * (CARD_HEIGHT + CARD_GAP) - CARD_GAP,
-		maxf(80.0, screen.y - 270.0))
+		maxf(80.0, screen.y - 308.0))
 	panel.reset_size()
 	var excess := panel.size.y - (screen.y - 86.0)
 	if excess > 0:
@@ -270,6 +291,17 @@ func choose(id: String) -> void:
 		sync()
 		scroll.ensure_control_visible(cards[id])
 
+func _saved_coat(id: String) -> String:
+	return str(_state().get("mount_coats", {}).get(id, "original"))
+
+func _choose_coat(index: int) -> void:
+	coat_drafts[candidate] = Coats.IDS[index]
+	sync()
+
+func _apply_coat() -> void:
+	if not apply_coat.disabled and send_command.is_valid():
+		send_command.call("#mount coat %s %s" % [candidate, coat_drafts.get(candidate,_saved_coat(candidate))])
+
 func _state() -> Dictionary:
 	return AppState.actor_mounts.get(AppState.local_actor_id, {})
 
@@ -287,12 +319,20 @@ func sync() -> void:
 	if candidate.is_empty():
 		candidate = str(state.get("selected_mount_id", "moor_pony"))
 	var mode := str(state.get("mode", "on_foot"))
+	var chosen := str(coat_drafts.get(candidate,_saved_coat(candidate)))
+	coat_choice.select(maxi(0,Coats.IDS.find(chosen)))
+	coat_choice.tooltip_text = "Preview a colour or pattern, then apply it to this mount."
+	apply_coat.disabled = not AppState.authenticated or candidate not in owned \
+		or not state.has("mount_coats") or chosen == _saved_coat(candidate)
+	apply_coat.tooltip_text = "Saved for this mount and visible to other players."
 	for id: String in cards:
 		var selected := candidate == id
 		(cards[id] as PanelContainer).add_theme_stylebox_override("panel",
 			_box(Color("1b262b"), Color("e1bd6b") if selected else Color("5d605a"), 2 if selected else 1, 6))
 		(labels[id] as Button).text = "Riding" if mode == "mounted" and str(state.get("mount_id", "")) == id else ("Selected" if selected else ("Available" if id in owned else "Unavailable"))
 		(labels[id] as Button).disabled = id not in owned
+		if _portraits_built:
+			portraits[id].set_coat(str(coat_drafts.get(id,_saved_coat(id))))
 	var already_riding := mode != "on_foot" and str(state.get("mount_id", "")) == candidate
 	ride.disabled = not AppState.authenticated or state.is_empty() or candidate not in owned \
 		or already_riding or not cards.get(candidate, panel).visible or not str(state.get("blocked_reason", "")).is_empty()

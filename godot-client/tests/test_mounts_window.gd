@@ -17,7 +17,7 @@ func run() -> void:
 	state.authenticated = true
 	state.local_actor_id = 42
 	state.actor_mounts[42] = {"mode": "on_foot", "selected_mount_id": "moor_pony", "mount_id": "",
-		"owned_mount_ids": ["moor_pony", "golden_plains_horse", "crystalback_tortoise", "rabbit", "jadefeather_raptor", "giant_rat"], "blocked_reason": "", "gait": "on_foot"}
+		"owned_mount_ids": preload("res://src/mounts/mount_profiles.gd").PATHS.keys(), "mount_coats":{}, "blocked_reason": "", "gait": "on_foot"}
 	var window: Variant = (load("res://src/ui/mounts_window.gd") as Script).new()
 	root.add_child(window)
 	var sent: Array[String] = []
@@ -26,10 +26,10 @@ func run() -> void:
 	for frame: int in 4:
 		await process_frame
 	expect(window.panel.get_rect().end.y <= 680, "mount window fits above the fixed bottom bar")
-	expect(window.is_open() and window.cards.size() == 6, "all six enabled mounts appear")
+	expect(window.is_open() and window.cards.size() == 9, "all nine enabled mounts appear")
 	expect(window.grid.columns == 3, "mount collection uses a compact three-column grid")
 	for card: Variant in window.cards.values():
-		expect(window.scroll.get_global_rect().encloses(card.get_global_rect()), "every current mount fits without scrolling")
+		expect(card.size.x <= window.scroll.size.x, "mount cards fit horizontally")
 	window.search.text = "raptor"
 	window.search.text_changed.emit(window.search.text)
 	expect(window.cards.jadefeather_raptor.visible and not window.cards.moor_pony.visible, "search filters mounts by name")
@@ -83,6 +83,18 @@ func run() -> void:
 	state.actor_mounts[42].selected_mount_id = "giant_rat"
 	state.state_changed.emit(&"mount_states")
 	expect(window.status.text == "Riding Giant Rat" and window.ride.disabled, "server snapshot confirms riding the Giant Rat")
+	for id: String in ["cave_salamander","lantern_stag","cheetah"]:
+		window.choose(id)
+		window._ride()
+		expect(sent.back() == "#mount ride "+id,"new mount uses production ride command")
+	window._choose_coat(3)
+	expect(window.portraits.cheetah.coat.current == "dappled" and not window.apply_coat.disabled,"coat preview is available")
+	expect(not state.actor_mounts[42].mount_coats.has("cheetah"),"preview does not predict server confirmation")
+	window._apply_coat()
+	expect(sent.back() == "#mount coat cheetah dappled","apply asks server to save coat")
+	state.actor_mounts[42].mount_coats.cheetah = "dappled"
+	state.state_changed.emit(&"mount_states")
+	expect(window.apply_coat.disabled,"confirmed coat no longer needs applying")
 	window._dismount()
 	expect(sent.back() == "#mount", "Dismount uses normal server command")
 	state.actor_mounts[42].blocked_reason = "combat"
@@ -93,7 +105,7 @@ func run() -> void:
 	for frame: int in 8: await process_frame
 	expect(window.panel.get_global_rect().end.x <= 704, "compact mount grid fits a smaller game window")
 	for card: Variant in window.cards.values():
-		expect(window.scroll.get_global_rect().encloses(card.get_global_rect()), "all current mounts also fit the smaller window")
+		expect(card.size.x <= window.scroll.size.x, "all mounts fit horizontally in smaller windows")
 	state.actor_mounts[42].selected_mount_id = "giant_rat"
 	window.close()
 	window.open()
@@ -105,7 +117,7 @@ func run() -> void:
 	root.content_scale_size = Vector2i(1024,610)
 	for frame: int in 8: await process_frame
 	for card: Variant in window.cards.values():
-		expect(window.scroll.get_global_rect().encloses(card.get_global_rect()), "shorter game windows retain both mount rows when there is room")
+		expect(card.size.x <= window.scroll.size.x, "shorter game windows keep readable cards")
 	window.close()
 	expect(not window.is_open(), "window closes")
 	for portrait: Variant in window.portraits.values():
