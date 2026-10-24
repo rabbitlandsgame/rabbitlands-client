@@ -129,6 +129,7 @@ import zipfile
 import client_release
 import release_storage
 import runner_source
+import benchmark_package
 from pathlib import Path, PurePosixPath
 from urllib.parse import unquote
 
@@ -139,6 +140,8 @@ DIST = PROJECT / "dist"
 GODOT_EXE = "Godot_v4.7.2-stable_win64_console.exe"
 MARKER = ".eloria-package"
 STORAGE = None  # Only runner_release.py supplies a bounded, disposable build context.
+BENCHMARK_LINKS = False  # Local test packages reuse immutable staged asset bytes.
+BENCHMARK_ACTOR_PLANS: dict[Path, dict] | None = None  # One local benchmark invocation only.
 ASSET_REF = re.compile(r"res://\.\./(eloria-assets/[^\"'\s]+)")
 
 # The installer's identity. Keep it fixed: Windows matches upgrades and the
@@ -664,15 +667,17 @@ def shipped_text_names(build_dir: Path, candidates: set[str]) -> dict[str, set[s
 
 
 def actor_shipping(build_dir: Path) -> dict:
-    # A runner owns one immutable committed input tree. Freeze its reference
-    # proof before retiring editor-only source files; normal local builds keep
-    # recomputing the plan as before.
-    if STORAGE and build_dir.resolve() in STORAGE.actor_plans:
-        return STORAGE.actor_plans[build_dir.resolve()]
-    plan = _actor_shipping(build_dir)
-    if STORAGE:
-        STORAGE.actor_plans[build_dir.resolve()] = plan
-    return plan
+    # Runners and explicit local benchmark builds own one committed input
+    # generation. Reuse its pure reference proof while imports and test export
+    # pruning leave runtime catalogs/references unchanged. Ordinary packages
+    # still recompute; neither cache changes staging/export validation.
+    plans = STORAGE.actor_plans if STORAGE else BENCHMARK_ACTOR_PLANS
+    if plans is None:
+        return _actor_shipping(build_dir)
+    resolved = build_dir.resolve()
+    if resolved not in plans:
+        plans[resolved] = _actor_shipping(build_dir)
+    return plans[resolved]
 
 
 def _actor_shipping(build_dir: Path) -> dict:
@@ -1015,6 +1020,10 @@ def recover_build_worktree(build_dir: Path, sha: str) -> None:
 def prepare_build_tree(build_dir: Path, sha: str) -> Path:
     if build_dir.resolve() == REPO.resolve():
         raise PackageError("the build directory must not be the source checkout")
+    # A checkout/reset begins a new source generation even if a caller reuses
+    # this build path inside one invocation. Never reuse its earlier proof.
+    if BENCHMARK_ACTOR_PLANS is not None:
+        BENCHMARK_ACTOR_PLANS.pop(build_dir.resolve(), None)
     if not (build_dir / ".git").exists():
         log(f"creating build worktree {build_dir}")
         build_dir.parent.mkdir(parents=True, exist_ok=True)
@@ -1335,7 +1344,9 @@ def export_project(godot: Path, project: Path, app_dir: Path, logs: Path, platfo
 # --- staging -----------------------------------------------------------------
 
 def copy_file(source: Path, target: Path) -> int:
-    if STORAGE:
+    if STORAGE or (BENCHMARK_LINKS and source.suffix.lower() in {
+            ".glb", ".gltf", ".png", ".jpg", ".jpeg", ".webp", ".ktx", ".ktx2",
+            ".ogg", ".ogv", ".wav", ".mp3"}):
         return release_storage.link_file(source, target)
     target.parent.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(source, target)
@@ -2120,7 +2131,10 @@ def stage_vram_textures(build_dir: Path, stage: Path, godot: Path, cache: Path, 
     if STORAGE:
         remaining = (STORAGE.budget.capacity - STORAGE.budget.reserve
                      - release_storage.unique_bytes(STORAGE.budget.roots) - 64 * 1024**2)
-        runner_args = ["--link-output", "--cache-budget-bytes", str(remaining)]
+        # The retained cache is already counted in the working set. The child
+        # measures its whole cache, so add those existing bytes to its ceiling.
+        ceiling = remaining + release_storage.unique_bytes([cache])
+        runner_args = ["--link-output", "--cache-budget-bytes", str(ceiling)]
     started = time.time()
     with open(logs / "vram-textures.log", "w", encoding="utf-8", errors="replace") as handle:
         # maps/_shared/images holds the textures shared_images.py moved out of
@@ -2390,7 +2404,7 @@ def write_compatibility_launchers(stage: Path, args: list[str], platform: dict,
         option = "--client-safe-mode" if safe else "--client-compatibility"
         log_name = f"eloria-{slug}.log"
         if windows:
-            command = (f'"%~dp0RabbitLands-updater.exe" -- {option}' if updating else
+            command = (f'"%~dp0RabbitLands-updater.exe" -- --launch-only {option}' if updating else
                        f'"%~dp0app\\RabbitLands.exe" {renderer} --verbose --log-file "%~dp0{log_name}"{extra}')
             environment = ("" if updating or not safe else "".join(
                 f'set "{key}={value}"\r\n' for key, value in safe_environment.items()))
@@ -2402,7 +2416,7 @@ def write_compatibility_launchers(stage: Path, args: list[str], platform: dict,
                 f'type "%~dp0{log_name}"\r\necho.\r\necho Log saved as {log_name}.\r\n' +
                 'pause >nul\r\nexit /b %ELORIA_EXIT_CODE%\r\n', encoding="ascii")
         else:
-            command = (f'../RabbitLands-updater.x86_64 -- {option} "$@"' if updating else
+            command = (f'../RabbitLands-updater.x86_64 -- --launch-only {option} "$@"' if updating else
                        f'./{platform["binary"]} {renderer} --verbose --log-file "../{log_name}"{extra} "$@"')
             environment = ("" if updating or not safe else "".join(
                 f'export {key}={value}\n' for key, value in safe_environment.items()))
@@ -2424,6 +2438,8 @@ def write_launchers(stage: Path, server: str | None, build_dir: Path, version: s
         shown_host, shown_port = default_server(build_dir)
     extra = (" -- " + " ".join(args)) if args else ""
     updating = (stage / ("RabbitLands-updater.exe" if platform["binary"].endswith(".exe") else "RabbitLands-updater.x86_64")).is_file()
+    if updating:
+        extra = " -- --launch-only" + (" " + " ".join(args) if args else "")
     (stage / "launcher-defaults.json").write_text(json.dumps({"args": args}), encoding="utf-8")
     write_compatibility_launchers(stage, args, platform, updating)
     if not platform["binary"].endswith(".exe"):
@@ -2435,7 +2451,7 @@ def write_launchers(stage: Path, server: str | None, build_dir: Path, version: s
             '#!/bin/sh\n'
             'cd "$(dirname "$0")/app" || exit 1\n'
             'echo "Rabbit Lands is running; its log is saved as eloria-debug.log beside this script."\n'
-            + (f'../RabbitLands-updater.x86_64 -- --client-debug {" ".join(args)} "$@"\n' if updating else
+            + (f'../RabbitLands-updater.x86_64 -- --launch-only --client-debug {" ".join(args)} "$@"\n' if updating else
                f'./{platform["binary"]} --verbose --log-file ../eloria-debug.log{extra} "$@"\n') +
             'status=$?\n'
             'echo "Rabbit Lands exited with status $status."\n'
@@ -2444,6 +2460,8 @@ def write_launchers(stage: Path, server: str | None, build_dir: Path, version: s
             README_LINUX.format(version=version, host=shown_host, port=shown_port,
                                 archive=f"{stage.name}.tar.gz", folder=stage.name, binary=platform["binary"]),
             encoding="utf-8", newline="\n")
+        if updating:
+            append_update_readme(stage, "x86_64")
         return args
     (stage / "RabbitLands.bat").write_text(
         '@echo off\r\ncd /d "%~dp0app"\r\n' +
@@ -2454,7 +2472,7 @@ def write_launchers(stage: Path, server: str | None, build_dir: Path, version: s
     (stage / "RabbitLands (debug console).bat").write_text(
         '@echo off\r\ncd /d "%~dp0app"\r\n'
         'echo Rabbit Lands is running; its log will appear here when it exits.\r\n'
-        + (f'"%~dp0RabbitLands-updater.exe" -- --client-debug {" ".join(args)}\r\n' if updating else
+        + (f'"%~dp0RabbitLands-updater.exe" -- --launch-only --client-debug {" ".join(args)}\r\n' if updating else
            f'RabbitLands.exe --verbose --log-file "%~dp0eloria-debug.log"{extra}\r\n') +
         'type "%~dp0eloria-debug.log"\r\n'
         'echo.\r\necho The log is saved as eloria-debug.log. Press any key to close this window.\r\n'
@@ -2462,7 +2480,20 @@ def write_launchers(stage: Path, server: str | None, build_dir: Path, version: s
         encoding="ascii")
     (stage / "README.txt").write_text(README.format(version=version, host=shown_host, port=shown_port),
                                       encoding="utf-8", newline="\r\n")
+    if updating:
+        append_update_readme(stage, "exe")
     return args
+
+
+def append_update_readme(stage: Path, extension: str) -> None:
+    with (stage / "README.txt").open("a", encoding="utf-8") as output:
+        output.write(f"\nUpdates and removal\n-------------------\n"
+                     "The game checks the latest published release when it opens and asks before updating.\n"
+                     "Accepting closes the game, updates it, and reopens in the same launch mode.\n"
+                     f"RabbitLands-updater.{extension} checks for updates, replaces itself when needed,\n"
+                     "and downloads only changed game packages.\n"
+                     f"Run RabbitLands-uninstall.{extension} to remove this installation.\n"
+                     "Player settings outside the game folder are kept.\n")
 
 
 README = """Rabbit Lands - Windows Client
@@ -2606,7 +2637,7 @@ Logs from normal launches
 # --- outputs ------------------------------------------------------------------
 
 def tar_filter(platform: dict):
-    executables = {platform["binary"], "RabbitLands-updater.x86_64", "RabbitLands.sh", "RabbitLands-debug.sh",
+    executables = {platform["binary"], "RabbitLands-updater.x86_64", "RabbitLands-uninstall.x86_64", "RabbitLands.sh", "RabbitLands-debug.sh",
                    "RabbitLands-compatibility.sh", "RabbitLands-safe-mode.sh"}
 
     def normalise(info):
@@ -2679,6 +2710,8 @@ def _compile_installer(stage: Path, source: Path, iscc: Path, version: str, laun
     spanning = size > client_release.PART_BYTES - 8 * 1024**2
     launch_binary = "RabbitLands-updater.exe" if (stage / "RabbitLands-updater.exe").is_file() else "app\\RabbitLands.exe"
     launch_parameters = ('-- ' + parameters) if parameters else ''
+    if launch_binary == "RabbitLands-updater.exe":
+        launch_parameters = '-- --launch-only' + (' ' + parameters if parameters else '')
     script = f"""; Generated by godot-client/tools/package_client.py
 [Setup]
 AppId={INSTALLER_APP_ID.replace('{', '{{')}
@@ -2737,10 +2770,37 @@ def online_installer_script(stage: Path, helper: Path, version: str,
     root_files = "\n".join(
         f'Source: "{path}"; DestDir: "{{app}}"; Flags: ignoreversion'
         for path in sorted(stage.iterdir()) if path.is_file() and path.name != MARKER)
-    downloads = "\n".join(
-        f"  DownloadPage.Add('{part['url']}', '{part['url'].rsplit('/', 1)[1]}', '{part['sha256']}');"
-        for part in payload["parts"])
-    parameters = ("-- " + " ".join(launch_args)).replace('"', '""') if launch_args else ""
+    package_checks = ""
+    if payload.get("schema") == 2:
+        checks, queues = [], []
+        for index, package in enumerate(payload["packages"]):
+            lines = [f"function PackageCurrent{index}: Boolean;", "begin", "  Result := False;"]
+            for entry in package["files"]:
+                name = entry["path"].replace("/", "\\").replace("'", "''")
+                lines.append(f"  if not InstalledFileMatches(ExpandConstant('{{app}}') + '\\{name}', '{entry['sha256']}') then Exit;")
+            lines.extend(["  Result := True;", "end;"])
+            checks.append("\n".join(lines))
+            queues.append(f"  if not PackageCurrent{index} then begin")
+            queues.extend(f"    DownloadPage.Add('{part['url']}', '{part['url'].rsplit('/', 1)[1]}', '{part['sha256']}');" for part in package["parts"])
+            queues.append("  end;")
+        package_checks = """function InstalledFileMatches(const Name, Hash: String): Boolean;
+begin
+  Result := False;
+  if FileExists(Name) then begin
+    try
+      Result := CompareText(GetSHA256OfFile(Name), Hash) = 0;
+    except
+      Result := False;
+    end;
+  end;
+end;
+""" + "\n\n".join(checks)
+        downloads = "\n".join(queues)
+    else:
+        downloads = "\n".join(
+            f"  DownloadPage.Add('{part['url']}', '{part['url'].rsplit('/', 1)[1]}', '{part['sha256']}');"
+            for part in payload["parts"])
+    parameters = ("-- --launch-only " + " ".join(launch_args)).strip().replace('"', '""')
     space = int(payload["unpacked_size"]) + 2 * int(payload["size"]) + 512 * 1024**2
     return f'''[Setup]
 AppId={INSTALLER_APP_ID.replace('{', '{{')}
@@ -2769,6 +2829,7 @@ Source: "{helper}"; Flags: dontcopy
 
 [Icons]
 Name: "{{group}}\\RabbitLands"; Filename: "{{app}}\\RabbitLands-updater.exe"; Parameters: "{parameters}"; WorkingDir: "{{app}}\\app"
+Name: "{{group}}\\Uninstall Rabbit Lands"; Filename: "{{app}}\\RabbitLands-uninstall.exe"; WorkingDir: "{{app}}"
 Name: "{{group}}\\RabbitLands (debug console)"; Filename: "{{app}}\\RabbitLands (debug console).bat"; WorkingDir: "{{app}}\\app"; IconFilename: "{{app}}\\app\\RabbitLands.exe"
 Name: "{{group}}\\RabbitLands (compatibility)"; Filename: "{{app}}\\RabbitLands (compatibility).bat"; WorkingDir: "{{app}}\\app"; IconFilename: "{{app}}\\app\\RabbitLands.exe"
 Name: "{{group}}\\RabbitLands (safe mode)"; Filename: "{{app}}\\RabbitLands (safe mode).bat"; WorkingDir: "{{app}}\\app"; IconFilename: "{{app}}\\app\\RabbitLands.exe"
@@ -2777,6 +2838,10 @@ Name: "{{group}}\\RabbitLands (safe mode)"; Filename: "{{app}}\\RabbitLands (saf
 Type: filesandordirs; Name: "{{app}}\\app"
 Type: filesandordirs; Name: "{{app}}\\eloria-assets"
 Type: filesandordirs; Name: "{{app}}\\.eloria-previous"
+Type: filesandordirs; Name: "{{app}}\\.eloria-update-stage"
+Type: filesandordirs; Name: "{{app}}\\.rabbitlands-bootstrap-previous"
+Type: files; Name: "{{app}}\\.rabbitlands-install.json"
+Type: files; Name: "{{app}}\\.eloria-update-journal.json"
 
 [Run]
 Filename: "{{app}}\\RabbitLands-updater.exe"; Parameters: "{parameters}"; WorkingDir: "{{app}}\\app"; Description: "Start Rabbit Lands"; Flags: nowait postinstall skipifsilent
@@ -2787,6 +2852,8 @@ var
   InstallPage: TOutputProgressWizardPage;
   InstallingPayload: Boolean;
   InstallError: String;
+
+{package_checks}
 
 procedure InitializeWizard;
 begin
@@ -2884,9 +2951,10 @@ def make_online_installer(stage: Path, godot: Path, iscc: Path, version: str,
     if payload["commit"] != metadata["commit"] or payload["platform"] != "windows":
         raise PackageError("The online installer manifest does not match the staged client.")
     base = f"https://github.com/{metadata['repository']}/releases/download/client-{metadata['commit']}/"
+    import shared_release_assets as shared
     for part in payload["parts"]:
-        name = part["url"].removeprefix(base)
-        if not part["url"].startswith(base) or Path(name).name != name:
+        name = part["url"].rsplit("/", 1)[-1]
+        if (not part["url"].startswith(base) and not shared.matches(part, metadata["repository"])) or Path(name).name != name:
             raise PackageError("Unexpected online installer download URL.")
         path = stage.parent / name
         if STORAGE and STORAGE.part_matches(name, part):
@@ -2914,6 +2982,7 @@ def make_online_installer(stage: Path, godot: Path, iscc: Path, version: str,
 
 
 def _main(argv=None, storage=None) -> int:
+    global BENCHMARK_LINKS, BENCHMARK_ACTOR_PLANS
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("--platform", choices=sorted(PLATFORMS), default="windows",
                         help="windows: folder + zip; linux: folder + tar.gz; macos: native app bundle")
@@ -2934,6 +3003,8 @@ def _main(argv=None, storage=None) -> int:
     parser.add_argument("--vram-cache", type=Path, default=DIST / ".build" / "vram-cache",
                         help="encode cache for the sidecars (default dist/.build/vram-cache)")
     parser.add_argument("--no-zip", action="store_true", help="leave the folder unarchived")
+    parser.add_argument("--benchmark-profile", action="store_true",
+                        help="standalone local test export with allowlisted performance workloads")
     parser.add_argument("--installer", action="store_true", help="also build an Inno Setup installer")
     parser.add_argument("--iscc", help="path to Inno Setup's ISCC.exe")
     parser.add_argument("--no-client-updates", action="store_true", help="build a client without the restart updater")
@@ -2941,11 +3012,20 @@ def _main(argv=None, storage=None) -> int:
                         help="private RSA signing key, never shipped")
     parser.add_argument("--update-public-key", type=Path, default=CLIENT / "data/update_public.pem")
     parser.add_argument("--github-repository", default="rabbitlandsgame/rabbitlands-client", help="public GitHub release repository (OWNER/REPO)")
+    parser.add_argument("--release-build", action="store_true", help="mark an official release; normal local builds require manual updates")
+    parser.add_argument("--shared-release-assets", action="store_true", help="reuse checksum-named packages in the shared downloads release")
     options = parser.parse_args(argv)
 
     started = time.time()
     platform = PLATFORMS[options.platform]
     try:
+        if options.benchmark_profile and (options.distribution != "standalone" or storage):
+            raise PackageError("--benchmark-profile is a local standalone test export only")
+        # These local packages are identity-verified before and after a run.
+        # Hard links avoid copying several GB of unchanged raw assets into
+        # every phase checkpoint. Normal distributable builds keep copying.
+        BENCHMARK_LINKS = options.benchmark_profile
+        BENCHMARK_ACTOR_PLANS = {} if options.benchmark_profile else None
         updating = options.distribution == "github" and not options.no_client_updates
         if options.platform == "macos":
             if sys.platform != "darwin":
@@ -2975,6 +3055,8 @@ def _main(argv=None, storage=None) -> int:
         stamp = datetime.date.today().strftime("%Y%m%d")
         version = f"{stamp}-{sha[:9]}"
         suffix = "" if options.distribution == "github" else "-" + options.distribution
+        if options.benchmark_profile:
+            suffix += "-benchmark"
         stage = options.out.resolve() / f"{platform['folder']}-{version}{suffix}"
         log(f"packaging {options.ref} = {sha[:9]} into {stage}")
         if stage.exists():
@@ -2990,6 +3072,8 @@ def _main(argv=None, storage=None) -> int:
 
         build_dir = options.build_dir.resolve()
         project = prepare_build_tree(build_dir, sha)
+        if options.benchmark_profile:
+            benchmark_package.prepare_export(project)
         if options.distribution != "github" and "const DISTRIBUTION_SCHEMA := 1" not in (project / "src/updates/release.gd").read_text(encoding="utf-8"):
             raise PackageError("The selected commit predates store-managed updates; select a commit containing the distribution support.")
         if options.platform == "macos":
@@ -2997,11 +3081,16 @@ def _main(argv=None, storage=None) -> int:
         if storage:
             storage.check("source ready", 1024**3)  # Allow imports/export scratch before starting Godot.
         metadata = client_release.identity(REPO, sha, options.platform,
-                    None if options.no_client_updates and options.distribution == "github" else options.update_public_key,
-                    options.github_repository, options.distribution)
+                    # Read-only discovery still needs the public trust key in
+                    # custom builds that omit the managed updater entirely.
+                    options.update_public_key if options.update_public_key.is_file() else None,
+                    options.github_repository, options.distribution, release_build=options.release_build)
         (project / "data/client_release.json").write_text(json.dumps(metadata), encoding="utf-8")
         previews = drop_preview_maps(build_dir)
         served = read_served_v2_packages(build_dir)
+        asset_cache = getattr(storage, "asset_cache", None)
+        if asset_cache:
+            asset_cache.restore_imports(project)
         import_project(godot, project, logs)
         if storage:
             storage.check("import complete")
@@ -3030,7 +3119,7 @@ def _main(argv=None, storage=None) -> int:
         check_map_data_names_no_editor_sources(stage)
         if not options.no_vram_textures:
             if storage:
-                storage.check("before graphics encoding", 1024**3)
+                storage.check("before graphics encoding", 512 * 1024**2 if asset_cache and asset_cache.hit else 1024**3)
             stage_vram_textures(build_dir, stage, godot, options.vram_cache.resolve(), logs)
             check_vram_textures(stage)
             if storage:
@@ -3041,7 +3130,8 @@ def _main(argv=None, storage=None) -> int:
         check_shared_meshes(build_dir, stage)
         if updating:
             client_release.export_launcher(stage, metadata, godot, project, EXPORT_PRESETS,
-                                           platform["preset"], run_godot, logs)
+                                           platform["preset"], run_godot, logs,
+                                           **({"cache": asset_cache.root / "helpers"} if asset_cache else {}))
         launch_args = ([] if options.platform == "macos" else
                        write_launchers(stage, options.server, build_dir, version, platform))
         if options.distribution == "steam" and options.platform != "macos":
@@ -3058,6 +3148,9 @@ def _main(argv=None, storage=None) -> int:
             smoke_launch(app_dir, logs, platform, vram_textures=not options.no_vram_textures,
                          pool_test=pooled_sidecar_directory(stage))
 
+        if options.benchmark_profile:
+            benchmark_package.write_manifest(stage, sha)
+
         outputs = [stage]
         if options.platform == "macos":
             macos_package.finish(stage, project, metadata)
@@ -3068,7 +3161,10 @@ def _main(argv=None, storage=None) -> int:
         if updating:
             outputs.extend(client_release.publish_artifacts(stage, metadata, options.update_signing_key,
                                                             godot, project, run_godot, logs,
-                **({"accept_part": storage.accept_part, "budget": storage.budget} if storage else {})))
+                shared=options.shared_release_assets,
+                **({"accept_part": storage.accept_part, "budget": storage.budget} if storage else {}),
+                **({"previous_packages": storage.previous_packages, "reuse_package": storage.reuse_package}
+                   if asset_cache else {})))
         if not options.no_zip:
             if options.platform == "macos":
                 outputs.append(macos_package.archive(stage))
@@ -3107,13 +3203,18 @@ def _main(argv=None, storage=None) -> int:
 
 
 def main(argv=None, storage=None) -> int:
-    global STORAGE
+    global STORAGE, BENCHMARK_LINKS, BENCHMARK_ACTOR_PLANS
     previous = STORAGE
+    previous_links = BENCHMARK_LINKS
+    previous_actor_plans = BENCHMARK_ACTOR_PLANS
     STORAGE = storage
+    BENCHMARK_ACTOR_PLANS = None
     try:
         return _main(argv, storage)
     finally:
         STORAGE = previous
+        BENCHMARK_LINKS = previous_links
+        BENCHMARK_ACTOR_PLANS = previous_actor_plans
 
 
 if __name__ == "__main__":

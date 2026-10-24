@@ -134,13 +134,41 @@ func run() -> void:
 		check_motion(actor, visual, body)
 		actor.set_mount_state({}, models)
 		expect(cloth.get("_mount_surface") == null and cloth.active, "dismount restores ordinary cape cloth")
-		actor.free()
-	var file := FileAccess.open("res://../.local/qa/mounted-cape-checks.json", FileAccess.WRITE)
-	file.store_string(JSON.stringify({"samples": report, "motion": motion, "checks": checks, "failures": failures}, "  "))
-	var samples := FileAccess.open("res://../.local/qa/mounted-cape-geometry.json", FileAccess.WRITE)
-	samples.store_string(JSON.stringify(geometry))
+		await _retire_fixtures([actor])
+	var output_directory := ProjectSettings.globalize_path("res://../.local/qa")
+	var output_ready := DirAccess.make_dir_recursive_absolute(output_directory) == OK
+	expect(output_ready, "ignored cape artifact directory is available")
+	if output_ready:
+		_write_artifact(output_directory.path_join("mounted-cape-checks.json"),
+			{"samples": report, "motion": motion, "checks": checks, "failures": failures}, "  ")
+		_write_artifact(output_directory.path_join("mounted-cape-geometry.json"), geometry)
+	ReplicatedActor3D.clear_wardrobe_texture_cache()
+	NativeAnimationImporter.clear()
+	GlbSceneCache.clear()
+	await _drain()
 	print("MOUNT_CAPE_CHECKS ", checks, " failures=", failures)
 	quit(1 if failures else 0)
+
+func _write_artifact(path: String, data: Variant, indent := "") -> void:
+	var file := FileAccess.open(path, FileAccess.WRITE)
+	expect(file != null, "cape artifact opens: " + path.get_file())
+	if file == null:
+		return
+	file.store_string(JSON.stringify(data, indent))
+	file.close()
+
+func _retire_fixtures(actors: Array[ReplicatedActor3D]) -> void:
+	for actor: ReplicatedActor3D in actors:
+		actor.process_mode = Node.PROCESS_MODE_DISABLED
+	await _drain()
+	for actor: ReplicatedActor3D in actors:
+		actor.queue_free()
+	await _drain()
+
+func _drain() -> void:
+	await physics_frame
+	await process_frame
+	await process_frame
 
 func check_motion(actor: ReplicatedActor3D, visual: Node3D, body: String) -> void:
 	# Freeze the pony/rider pose to distinguish fabric flow from pony bobbing.

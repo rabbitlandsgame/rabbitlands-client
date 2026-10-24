@@ -14,6 +14,8 @@ import build_release as release
 import package_client as package
 import runner_release
 import setup_runner_tools
+import shared_release_assets
+import release_asset_cache
 
 SECRET = "CLIENT_UPDATE_SIGNING_KEY"
 
@@ -63,6 +65,7 @@ def prepare() -> tuple[str, int]:
             or draft["author"]["login"] not in (release.ACCOUNT, "github-actions[bot]")):
         raise ValueError("The draft must belong to the Rabbit Lands account or this repository's workflow.")
     release_id = draft["id"]
+    shared_release_assets.ensure(sha)
     with Path(os.environ["GITHUB_OUTPUT"]).open("a", encoding="utf-8") as output:
         output.write(f"commit={sha}\nrelease_id={release_id}\n")
     summary = os.environ.get("GITHUB_STEP_SUMMARY")
@@ -106,6 +109,7 @@ def build(platform: str, release_id: int) -> Path:
             return runner_release.build(SimpleNamespace(platform=platform, ref=sha,
                 out=temp / "rabbitlands-releases", godot=config["godot"], iscc=config.get("iscc"),
                 update_signing_key=key_path, tool_root=[tool_root], draft_release_id=release_id,
+                asset_cache=temp / "rabbitlands-asset-cache" / platform,
                 server="game.rabbitlandsgame.com:2001"))
     finally:
         for name, value in previous.items():
@@ -119,6 +123,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("prepare")
+    cache = commands.add_parser("cache-key")
+    cache.add_argument("--platform", choices=("windows", "linux"), required=True)
     target = commands.add_parser("build")
     target.add_argument("--platform", choices=("windows", "linux"), required=True)
     target.add_argument("--release-id", type=int, required=True)
@@ -126,6 +132,10 @@ def main() -> int:
     try:
         if options.command == "prepare":
             prepare()
+        elif options.command == "cache-key":
+            key = release_asset_cache.input_key(package.git, workflow_commit(), options.platform)
+            with Path(os.environ["GITHUB_OUTPUT"]).open("a", encoding="utf-8") as output:
+                output.write(f"key={key}\n")
         else:
             build(options.platform, options.release_id)
     except (OSError, ValueError, package.PackageError) as error:

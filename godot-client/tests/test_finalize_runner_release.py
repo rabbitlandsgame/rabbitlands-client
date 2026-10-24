@@ -69,6 +69,14 @@ def test_finalizer_verifies_every_part_before_retagging_or_pruning(tmp_path, mon
     assert upload < retag < prune
     assert "--draft" in calls[retag] and not any("--draft=false" in call for call in calls)
     assert len((tmp_path / "final/SHA256SUMS").read_text().splitlines()) == 7
+    verified = json.loads((tmp_path / "final/runner-release.json").read_text())
+    assert verified["repository"] == release.REPOSITORY and verified["commit"] == SHA
+    notes = (tmp_path / "final/RELEASE-NOTES.md").read_text()
+    assert f"`RabbitLands-Windows-20261017-{SHA[:9]}-setup.exe`, from **Assets** below" in notes
+    assert f"`RabbitLands-Linux-20261017-{SHA[:9]}-download.sh`, from **Assets** below" in notes
+    # Draft assets use GitHub's temporary URL; the future published tag 404s.
+    # The built-in Assets links remain correct after publication and retagging.
+    assert f"/releases/download/client-{SHA}/" not in notes
 
 
 def test_bad_cloud_digest_preserves_previous_files_and_tag(tmp_path, monkeypatch):
@@ -95,3 +103,30 @@ def test_different_platform_commits_cannot_be_finalized(tmp_path, monkeypatch):
     with pytest.raises(ValueError, match="same release"):
         runner.finalize(receipts, tmp_path / "final")
     assert calls == []
+
+
+@pytest.mark.parametrize("missing_helper", [False, True])
+def test_package_release_requires_both_bootstraps_and_latest_aliases(tmp_path, monkeypatch, missing_helper):
+    receipts, assets, calls = fixture(tmp_path, monkeypatch)
+    for path in receipts:
+        item = json.loads(path.read_text())
+        stage, platform = item["stage"], item["platform"]
+        extension = "exe" if platform == "windows" else "x86_64"
+        assets[:] = [a for a in assets if a["name"] != f"{stage}.update.zip.001"]
+        item["assets"] = [a for a in item["assets"] if not a["name"].endswith(".update.zip.001")]
+        item["update_schema"] = 2
+        names = [f"{stage}.pkg.client.zip.001", f"{stage}.pkg.engine.zip.001", f"RabbitLands-{platform}.json",
+                 f"{stage}-updater.{extension}", f"{stage}-uninstall.{extension}"]
+        if missing_helper and platform == "windows":
+            names.remove(f"{stage}-uninstall.exe")
+        for name in names:
+            item["assets"].append({"name": name, "size": 10, "sha256": "b" * 64})
+            assets.append({"id": 1000 + len(assets), "name": name, "state": "uploaded", "size": 10, "digest": "sha256:" + "b" * 64})
+        path.write_text(json.dumps(item))
+    if missing_helper:
+        with pytest.raises(ValueError, match="missing required"):
+            runner.finalize(receipts, tmp_path / "final")
+        assert calls == []
+    else:
+        runner.finalize(receipts, tmp_path / "final")
+        assert all(a["name"] != "previous-build.zip" for a in assets)

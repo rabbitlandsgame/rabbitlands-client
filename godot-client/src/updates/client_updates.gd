@@ -1,5 +1,8 @@
 extends Node
 const Release = preload("res://src/updates/release.gd")
+const PackageDownload = preload("res://src/updates/package_download.gd")
+const StartupUpdate = preload("res://src/updates/startup_update.gd")
+var _startup: Node
 var identity: Dictionary = {}
 var _target := ""
 var _generation := 0
@@ -21,10 +24,7 @@ func _ready() -> void:
 		set_process(false)
 		return
 	identity = Release.read_json("res://data/client_release.json")
-	if identity.get("platform", "source") == "source" or identity.get("public_key", "") == "":
-		set_process(false)
-		return
-	if Release.update_owner(identity) == "github":
+	if identity.get("platform", "source") != "source" and Release.update_owner(identity) == "github":
 		var cache := Release.cache_for(Release.install_root())
 		if DirAccess.make_dir_recursive_absolute(cache) == OK:
 			_lease = cache.path_join("running-%d.json" % OS.get_process_id())
@@ -44,6 +44,15 @@ func _ready() -> void:
 	_status.add_theme_constant_override("shadow_offset_x", 2)
 	_status.add_theme_constant_override("shadow_offset_y", 2)
 	layer.add_child(_status)
+	_startup = StartupUpdate.new()
+	_startup.identity = identity
+	_startup.notice_changed.connect(func(message: String) -> void:
+		_status.text = message
+		get_node("/root/AppState").call("append_local_message", message, 3))
+	add_child(_startup)
+	if identity.get("platform", "source") == "source" or identity.get("public_key", "") == "":
+		set_process(false)
+		return
 	get_node("/root/Network").connect("packet_received", _on_packet)
 	get_node("/root/Network").connect("connection_state_changed", func(state: String) -> void:
 		if state == "connected" and not _busy:
@@ -51,11 +60,9 @@ func _ready() -> void:
 	if Release.update_owner(identity) != "github":
 		set_process(false)
 		return
-	var pending := Release.read_json(Release.cache_for(Release.install_root()).path_join("pending.json"))
-	if not pending.is_empty():
-		var release := Release.verify_manifest(pending, identity)
-		if not release.has("error") and not Release.contains_commit(identity, release.commit):
-			_status.text = "Game update downloaded. Close and restart Rabbit Lands to install."
+	# Cached updates from older clients still require explicit consent. The
+	# startup checker owns discovery; there is no background install decision.
+	set_process(false)
 
 func _process(_delta: float) -> void:
 	if not _busy and not _latest_notice.is_empty() and _retry_at_msec > 0 and Time.get_ticks_msec() >= _retry_at_msec:
@@ -87,6 +94,12 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			_status.text = ""
 		elif Release.valid_commit(notice.get("required_commit")):
 			_status.text = "" if Release.contains_commit(identity, notice.required_commit) else Release.external_update_message(identity)
+		return
+	if _startup != null:
+		# Discovery and consent own this launch's update decision. In particular,
+		# a server policy cannot clear a refusal or replace a custom build.
+		if _startup.declined or (Release.valid_commit(notice.get("required_commit")) and not Release.contains_commit(identity, notice.required_commit)):
+			_status.text = StartupUpdate.COMPATIBILITY_NOTE
 		return
 	if notice.get("disabled", false) == true:
 		_generation += 1
@@ -191,6 +204,19 @@ func _download(url: String, commit: String, generation: int) -> void:
 	var cache := Release.cache_for(Release.install_root())
 	if DirAccess.make_dir_recursive_absolute(cache) != OK:
 		_failed("The update cache is not writable.")
+		return
+	if release.schema == 2:
+		var error: String = await PackageDownload.prepare(Release.install_root(), release, _fetch, _run_worker,
+			func(phase: String, _done: int, _total: int, detail: String) -> void: _status.text = phase + " " + detail,
+			func() -> bool: return generation != _generation)
+		if generation != _generation:
+			return
+		if error != "" or Release.save_json(cache.path_join("pending.json"), envelope) != OK:
+			_failed(error if error != "" else "The package readiness record could not be saved.")
+			return
+		_status.text = "Changed game packages downloaded. Close and restart Rabbit Lands to install."
+		_retry_at_msec = 0
+		_retry_attempt = 0
 		return
 	var pending := Release.verify_manifest(Release.read_json(cache.path_join("pending.json")), identity, commit)
 	if not pending.has("error") and pending.sha256 == release.sha256:

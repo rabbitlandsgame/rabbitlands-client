@@ -1,25 +1,126 @@
 # Desktop releases on runners with limited disk space
 
 For the separate Steam depot and macOS test workflow, see [store builds](store-builds.md).
-The GitHub installer workflow described here retains its current triggers and outputs.
+The GitHub installer workflow described here builds and publishes both desktop installers.
 
 `godot-client/tools/runner_release.py` stages one platform in an existing draft
 release. Windows and Linux use **separate jobs**, pinned to the same full client
 commit. `finalize_runner_release.py` combines their small receipts after both
-jobs succeed. The usual local `build_release.py` commands remain available.
+jobs succeed. A final publishing job rechecks the downloads and makes the
+verified release public. The usual local `build_release.py` commands remain available.
 Serialize complete release workflows with one repository-wide concurrency group
 and `cancel-in-progress: false`; only the two platform jobs within a single
 release should stage into the draft concurrently.
 
+GitHub builds now emit independently checksummed asset packages, a stable
+`RabbitLands-<platform>.json` alias, and separate updater/uninstaller executables.
+The Windows setup remains one downloadable file; Linux keeps its one-file
+download helper. See [package updates and migration](client-updates.md#independent-packages-and-the-updater).
+Promote the packaging tools and published-release cleanup changes together to
+the default branch before publishing the first package-format release.
+
 The workflow is `.github/workflows/desktop-release.yml`, named **Build desktop
 release**. It builds both desktop platforms on GitHub's hosted runners, with
-Inno Setup 6 for Windows, and leaves the verified result as a draft. It does not
-publish the release or deploy the server's client-update policy.
+Inno Setup 6 for Windows. After both builds, signing/startup checks, finalization
+and receipt retention succeed, it automatically publishes the release as
+**latest**. The server's client-update enforcement policy remains a separate deployment.
 
 The currently published installer remains online while a replacement draft is
-built. Publishing the verified replacement triggers **Retire previous published
-client**, which checks the public asset inventory before removing older published
-compiled releases. It leaves any in-progress replacement draft alone.
+built. After publication, the publishing job runs the existing verified cleanup
+to remove older compiled releases and unused supporting files. Manual publication
+still triggers **Retire previous published client**, using the same cleanup.
+An in-progress replacement draft is preserved.
+
+## Reusing uploaded downloads
+
+Both the Actions runner and the local combined release build use one permanent
+`client-assets` **prerelease** for supporting downloads. It is never marked
+latest. The ordinary `client-<commit>` release still contains the Windows setup,
+Linux installation helper, signed manifests and checksum inventory. Its release
+notes link to standalone updater/uninstaller downloads in the shared release.
+There is still one retained playable release, with a replacement draft while
+building. The shared release is a file store, not compiled version history.
+
+Package parts have names `RabbitLands-pkg-<SHA256>.zip.part`; helper names include
+their kind, complete SHA-256 and platform extension. Their bytes and URLs stay
+the same across build dates and client commits when their contents stay the
+same. Common Windows/Linux packages can share a single upload. ZIP timestamps,
+file ordering and package membership remain deterministic.
+
+Before each upload, the build compares the local SHA-256 and size with GitHub's
+recorded digest, size and completed-upload state. An exact match is reused
+without an upload, rename or delete. Changed bytes get a new checksum name.
+An unexpected completed file with a conflicting checksum stops the build.
+Concurrent platform jobs wait for an identical in-flight upload instead of
+deleting one another's reservation. An interrupted starter reservation older
+than six hours can be retired and retried; active uploads are preserved.
+
+Finalization rereads and verifies **every referenced file** in both releases
+before changing the draft tag or pruning previous draft files. `SHA256SUMS`
+covers files in both locations. Uploaded and reused byte totals are included
+in the runner receipts. The first build using shared storage must upload its
+newly named files once; later builds upload only new checksums for packages and
+helpers. Per-build manifests and Windows setup change with the build identity.
+
+### Code-only releases
+
+The desktop workflow also keeps a separate Windows/Linux Actions cache of
+prepared assets. Its key hashes the committed asset trees, import settings,
+project configuration, updater sources and build tools (including the pinned
+engine/template and Python dependency versions). Ordinary game script changes
+do not invalidate that key. Adding, changing or deleting an asset does.
+
+On a verified cache hit, the build restores Godot import products and their
+generated import records, reuses existing compressed texture encodes and keeps
+an unchanged native updater and
+uninstaller. It still scans the current project, exports the current game code
+and release identity, runs the graphics/startup checks, and signs a fresh
+manifest. Generated import settings are restored only when their source bytes
+and the fresh checkout's import policy match. Script registries and other
+editor state are regenerated.
+
+Each package's **actual staged file paths, sizes and SHA-256 hashes** are compared
+with a previous signed manifest. If they match and GitHub confirms every
+checksum-named part is complete with the correct size and digest, the ZIP is
+reused without compression or uploading. Changed packages are rebuilt normally;
+missing remote parts are recreated. A conflicting completed download stops the
+build. Deleted files cannot survive through a cached package inventory.
+
+Consequently a code-only release normally uploads the client code package,
+fresh installer and signed metadata; unchanged asset packages keep their URLs.
+An updater change or a changed native executable can add a small helper/engine
+package. The first build for an asset key, an evicted cache, or a corrupt cache
+falls back to a full build. A cache miss never skips validation. Cache files
+are checksummed before reuse, and the prior manifest must verify with the
+current public signing key. Signing secrets, complete game folders and quality
+scratch files are excluded from the cache.
+
+The workflow saves the cache only after a successful build and only when that
+key was absent, so code-only runs do not repeatedly upload the cache itself.
+GitHub may evict caches, and a branch may need its own first cache build. The
+platform job summary and runner receipt report cache hits, packages rebuilt or
+reused, and uploaded/reused bytes. The first run of this optimization populates
+the caches; the next code-only run demonstrates the fast path.
+
+After verifying the public replacement, the publishing job retires older
+compiled releases and removes shared files no longer referenced by the current
+build. It postpones shared
+cleanup whenever any client draft exists, including unfinished builds whose
+inventories are not yet ready. Failed builds leave the working release intact.
+The manual-publication cleanup job loads its tools from the published client
+tag; automatic publication uses the same source commit as the builds.
+[GitHub's workflow token does not trigger release-event workflows](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/trigger-a-workflow#triggering-a-workflow-from-a-workflow), so the publishing job
+invokes cleanup directly. No additional account token or secret is needed.
+
+Linux installation now downloads and verifies the native updater, which installs
+the same independent packages used for updates. Its signed manifest is embedded
+in the shell installer, so a draft installs its own build even while a different
+release is public. The updater retains the verified manifest across its own
+replacement and preserves the build's server defaults. No second full-game tar archive
+is built or uploaded by release orchestration. Run the installed
+`~/Games/RabbitLands/RabbitLands-updater.x86_64` to play again. A different parent
+folder can be passed to the downloaded shell helper. Explicit standalone local
+packaging can still create a portable archive when requested.
 
 ## Enable and run the workflow
 
@@ -41,13 +142,18 @@ After activation:
   Direct pushes to `master` also start it. A push to `develop` does not.
 - **Manual:** open [Actions → Build desktop release](https://github.com/rabbitlandsgame/rabbitlands-client/actions/workflows/desktop-release.yml),
   click **Run workflow**, choose **master** for the stable source or **develop**
-  for a test build, then click **Run workflow** again. Both platforms use that
-  run's exact commit, even if the branch advances during the build.
+  for a develop release, then click **Run workflow** again. Both platforms use
+  that run's exact commit, even if the branch advances during the build. Both
+  manual and automatic runs publish after all required checks pass.
 - **Progress:** the run has a draft preparation job, separate Windows and Linux
-  jobs, and final verification. The summary links to the release downloads.
-- **Result:** review the current [draft release](https://github.com/rabbitlandsgame/rabbitlands-client/releases).
-  Publication remains manual; the online installer's public download URLs require
-  publication before installation can be tested end to end.
+  jobs, final verification, and publication. The summary links to the public release.
+- **Result:** download from the [latest release](https://github.com/rabbitlandsgame/rabbitlands-client/releases/latest).
+  Published installers become available to the client's startup update check.
+  Shared supporting files are available while the replacement is still building.
+  Download the named Windows setup or Linux helper from the release's **Assets**
+  list. GitHub supplies temporary download URLs for drafts, so the instructions
+  use that list rather than links to a tag that is not yet published. The same
+  instructions continue to work after publication.
 
 The workflow reuses the project's existing client draft or creates one when
 needed. Previously published downloads remain available while a new commit
@@ -60,6 +166,16 @@ Only one release workflow runs at a time. After failure, fix the cause and start
 a fresh manual run (or use GitHub's rerun controls). Previous downloads are not
 pruned by a failed platform build. Small receipts, disk reports and startup logs
 are retained as run artifacts for seven days; complete game folders are not.
+
+Build or verification failures leave the replacement in draft. The final publish
+job rechecks the exact source commit, installer inventory and every shared
+download's size/digest before publication, then checks the public result before
+retiring previous releases. It refuses a source commit that does not contain
+the currently published client, preventing an older manual build becoming latest.
+If publication succeeds but cleanup fails, the new build stays published and
+older downloads remain available. Use **Re-run failed jobs** to retry publication
+and cleanup without rebuilding; an already published verified release is accepted
+only while it is still latest.
 
 `setup_runner_tools.py` downloads Godot 4.7.2 and Inno Setup 6.7.3 from their
 official releases, checks pinned sizes and SHA-256 hashes, extracts only the
@@ -94,17 +210,26 @@ Space is saved by:
   A filesystem that cannot create these links fails rather than making copies.
 - Encoding and quality-checking graphics in batches with at most 128 MiB of raw
   DDS scratch, preserving all shared-image cutoff checks in the same batch.
-- Removing the main import cache after the exported pack is verified, and
-  removing the temporary graphics cache after its staged files are verified.
-- Writing ZIP and gzip/tar bytes directly into bounded download parts, without
+- Moving verified import products to the reusable cache after export, and
+  hard-linking retained graphics products into the stage. Without caching,
+  temporary import and graphics caches are removed after validation.
+- Writing each deterministic package ZIP into bounded parts, without
   first making a full archive and then copying it into parts.
+- Keeping package inventories in the signed manifest rather than retaining
+  previous complete builds. Package hashes depend on contents, not a build date.
+  Updater/uninstaller copies use hard links in the runner stage.
 - Uploading one completed part at a time. GitHub must record the expected size
   and SHA-256 before the local part is removed. A failed part remains local.
-- Keeping only receipts and logs after a successful build. No second platform's
-  full stage, payloads or caches accumulate on the same runner.
+- Checking each upload's returned asset record directly, then rechecking the
+  whole release during finalization. This avoids listing hundreds of assets
+  again for every small package.
+- Removing the full source and stage after success, before saving the asset
+  cache. The disk budget includes retained products and worst-case compressed
+  cache-upload scratch, preserving the same 2 GB reserve. Each runner handles
+  only one platform.
 
-ZIP and tar data are streamed with bounded memory. The Linux tar contains normal
-files and executable launchers, even though its staging files use hard links.
+ZIP data is streamed with bounded memory. Release builds avoid the duplicate
+Linux tar entirely; standalone portable tar exports still use executable modes.
 
 ### Local validation
 
@@ -198,8 +323,10 @@ python godot-client/tools/finalize_runner_release.py `
 Finalization rejects mismatched commits, release IDs, platform inventories and
 remote checksums. After every replacement download is verified, it adds
 `SHA256SUMS`, updates the release's commit-specific tag and installation notes,
-and removes previous compiled files. The result stays a **draft**. The local
-`client_updates.json` output is not uploaded or deployed automatically.
+and removes previous draft files. This standalone command leaves a **draft**.
+The Actions workflow then publishes using
+`publish_runner_release.py --receipt <out>/runner-release.json` in a separate
+job. The local `client_updates.json` output is not deployed automatically.
 
 The online installers' public download URLs become usable after publication.
 On failure, previous downloads are retained. Rerun in a fresh job/output

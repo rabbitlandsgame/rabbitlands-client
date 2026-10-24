@@ -91,6 +91,11 @@ withdrawals and deposits. Double-click a stored item to withdraw it.
 You can walk with storage open by clicking the world, Tab map or minimap.
 Storage closes automatically when you reach eight tiles from its keeper or chest.
 
+When both players are within four tiles of storage, the trade window's source
+selector lets you offer directly from **Storage** by category. You can also
+receive a selected partner offer into storage. Both players must stay in range
+until the trade completes; cancelled offers return to their original source.
+
 Use the first eight backpack slots from the item quick bar with **1–8** or
 **Ctrl+1–8**. Hover a slot to see its active shortcuts, quantity and cooldown.
 Rebind item shortcuts in **Settings → Controls**.

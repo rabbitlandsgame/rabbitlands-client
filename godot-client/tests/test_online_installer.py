@@ -63,7 +63,8 @@ def online_fixture(tmp_path, streamed=False):
     project = tmp_path / "project"
     (project / "src/updates").mkdir(parents=True)
     (project / "data").mkdir()
-    (project / "src/updates/release.gd").write_bytes((CLIENT / "src/updates/release.gd").read_bytes())
+    for name in ("release.gd", "package_updates.gd", "package_download.gd", "update_transport.gd"):
+        (project / "src/updates" / name).write_bytes((CLIENT / "src/updates" / name).read_bytes())
     (project / "install.gd").write_bytes((CLIENT / "tools/install_client_payload.gd").read_bytes())
     (project / "data/client_release.json").write_text(json.dumps(identity))
     (project / "data/install_manifest.json").write_text(json.dumps(envelope))
@@ -363,7 +364,13 @@ def test_compiled_setup_streams_progress_and_rejects_second_setup(tmp_path):
             time.sleep(0.05)
         # The release helper is still paused. Progress must already have
         # reached Inno's callback and the helper's flushed log, before exit.
-        assert "RL_PROGRESS|0|Unpacking game files: 0 of 4 files" in log.read_text(errors="replace")
+        progress_deadline = time.monotonic() + 5
+        while "RL_PROGRESS|0|Unpacking game files: 0 of 4 files" not in log.read_text(errors="replace"):
+            # The gate file is written by the child; its flushed stdout still
+            # has to cross Inno's pipe and callback before reaching this log.
+            assert first.poll() is None
+            assert time.monotonic() < progress_deadline, log.read_text(errors="replace")
+            time.sleep(0.02)
         other_root = tmp_path / "must-not-install"
         second = subprocess.run([*command[:-2], f"/DIR={other_root}",
                                  f"/LOG={tmp_path / 'second-setup.log'}"],

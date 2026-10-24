@@ -1,6 +1,9 @@
 extends Node
 ## The online setup runs this embedded helper after downloading the signed parts.
 const Release = preload("res://src/updates/release.gd")
+const Packages = preload("res://src/updates/package_updates.gd")
+const Download = preload("res://src/updates/package_download.gd")
+const Transport = preload("res://src/updates/update_transport.gd")
 var _lock := ""
 var _owns_lock := false
 var _lock_owner: FileAccess
@@ -62,7 +65,13 @@ func _lock_root(root: String) -> String:
 	return ""
 
 func _ready() -> void:
-	var error := _install()
+	var identity := Release.read_json("res://data/client_release.json")
+	var manifest := Release.verify_manifest(Release.read_json("res://data/install_manifest.json"), identity, str(identity.get("commit", "")))
+	var error: String
+	if not manifest.has("error") and manifest.schema == 2:
+		error = await _install_packages(manifest, identity)
+	else:
+		error = _install()
 	_release_lock()
 	if error != "":
 		print("RL_ERROR|" + error)
@@ -75,6 +84,45 @@ func _ready() -> void:
 
 func _exit_tree() -> void:
 	_release_lock()
+
+func _install_packages(release: Dictionary, identity: Dictionary) -> String:
+	var args := OS.get_cmdline_user_args()
+	if args.size() != 4 or args[0] != "--root" or args[2] != "--parts":
+		return "The installer arguments are invalid."
+	var root := args[1].simplify_path()
+	if not root.is_absolute_path() or Release.is_link(root):
+		return "Choose a writable installation folder."
+	var current := Release.read_json(root.path_join("app/client-release.json"))
+	if not current.is_empty() and (Release.update_owner(current) != "github" or current.get("repository") != identity.repository or current.get("public_key") != identity.public_key):
+		return "This installation belongs to a different distribution or signing key."
+	if DirAccess.make_dir_recursive_absolute(root) != OK:
+		return "The installation folder cannot be created."
+	var error := _lock_root(root)
+	if error != "":
+		return error
+	var cache := Release.cache_for(root)
+	var existing := DirAccess.open(cache)
+	if existing != null:
+		for name: String in existing.get_files():
+			if name.begins_with("running-") and name.ends_with(".json") and Release.lease_process_running(int(Release.read_json(cache.path_join(name)).get("pid", 0))):
+				return "Close Rabbit Lands before installing."
+	var transport := Transport.new()
+	add_child(transport)
+	var parts := args[3].simplify_path()
+	var known: Dictionary = {}
+	for part: Dictionary in release.parts:
+		known[part.url] = part
+	var fetch := func(url: String, target: String, limit: int) -> Dictionary:
+		var part: Dictionary = known[url]
+		var source := parts.path_join(url.get_file())
+		var valid: Variant = await transport.worker(func() -> bool: return Release.check_file(source, int(part.size), part.sha256))
+		if valid == true:
+			return {} if DirAccess.copy_absolute(source, target) == OK else {"error": "A verified download could not be copied."}
+		return await transport.fetch(url, target, limit)
+	error = await Download.prepare(root, release, fetch, transport.worker, _progress)
+	if error != "":
+		return error
+	return await transport.worker(func() -> String: return Packages.install(root, release, identity, _progress))
 
 func _install() -> String:
 	var args := OS.get_cmdline_user_args()

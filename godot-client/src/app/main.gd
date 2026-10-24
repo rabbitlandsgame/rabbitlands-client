@@ -4,6 +4,9 @@ const Diagnostics = preload("res://src/diagnostics/client_diagnostics.gd")
 const ExperienceCurve = preload("res://src/state/experience_curve.gd")
 const SeasonSky = preload("res://src/world/season_sky.gd")
 const SeasonSurfaces = preload("res://src/world/season_surfaces.gd")
+const SurfaceRefreshQueue = preload("res://src/world/chunk_surface_refresh.gd")
+const ExternalMeshPool = preload("res://src/world/external_mesh_pool.gd")
+const ExternalTexturePool = preload("res://src/world/external_texture_pool.gd")
 const LanternGuideScript = preload("res://src/ui/lantern_guide.gd")
 const WindowStackScript = preload("res://src/ui/window_stack.gd")
 const LanternSceneScript = preload("res://src/world/lantern_scene.gd")
@@ -22,15 +25,19 @@ const CreationArchetypes = preload("res://src/ui/creation_archetypes.gd")
 const CreationClassIcons = preload("res://src/ui/creation_class_icons.gd")
 const WardrobeShirtFitScript = preload("res://src/actors/wardrobe_shirt_fit.gd")
 const NewCharacterIntroScript = preload("res://src/camera/new_character_intro.gd")
-var character_intro := NewCharacterIntroScript.new()
+## Delay Node allocation until entry: inherited scenes may replace the script
+## after construction, before these helpers have a parent to own them.
+@onready var character_intro := NewCharacterIntroScript.new()
 const ArrivalCurtainScript = preload("res://src/ui/arrival_curtain.gd")
 const ArrivalPrewarmScript = preload("res://src/world/arrival_prewarm.gd")
 ## The loading screen from signing in, or a far arrival, until the character
 ## stands on loaded ground (_update_arrival).
-var arrival_curtain := ArrivalCurtainScript.new()
+@onready var arrival_curtain := ArrivalCurtainScript.new()
 ## The respawn destination's ground on another map, loaded while dead.
 var respawn_prewarm := ArrivalPrewarmScript.new()
-var quest_trail := preload("res://src/world/quest_trail_3d.gd").new()
+## The beam's ground, loaded quietly while completed gauntlet loot is split.
+var gauntlet_prewarm := ArrivalPrewarmScript.new()
+@onready var quest_trail := preload("res://src/world/quest_trail_3d.gd").new()
 
 @onready var login_panel: Control = %LoginPanel
 @onready var game_view: Control = %GameView
@@ -252,6 +259,8 @@ var _pending_purchase: Array[String] = []
 @onready var trade_panel: Control = %TradePanel
 @onready var trade_partner: Label = %TradePartner
 @onready var trade_source: ItemList = %TradeSource
+@onready var trade_source_type: OptionButton = %TradeSourceType
+@onready var trade_storage_category: OptionButton = %TradeStorageCategory
 @onready var trade_own_offers: ItemList = %TradeOwnOffers
 @onready var trade_other_offers: ItemList = %TradeOtherOffers
 @onready var trade_quantity: SpinBox = %TradeQuantity
@@ -775,10 +784,34 @@ var _storage_sync_queued := false
 var _actor_surface_samples: Dictionary = {}
 var _grounded_actors: Dictionary = {}
 var _actor_surface_snap_pending := false
+## Completion spans include deferred/physics waits; actual loop work is
+## recorded separately so diagnostics do not mistake waiting for CPU work.
+var _surface_followup_pending := 0
+var _surface_followup_stats: Dictionary = {}
+var _surface_work_stats: Dictionary = {}
+var _surface_refresh_queue = SurfaceRefreshQueue.new()
+var _surface_refresh_running := false
+var _surface_refresh_epoch := 0
+var _surface_refresh_inflight := 0
+var _surface_spatial_stats: Dictionary = {"batches": 0, "full_batches": 0, "notifications": 0,
+	"invalidated_regions": 0, "actor_visits": 0, "actor_placement_attempts": 0,
+	"object_visits": 0, "object_placement_attempts": 0, "binding_candidates": 0}
 var _local_placement_logged := false
 ## Set when `_sync_world` ran out of spawn budget with actors still to
 ## build; the next frame picks them up.
 var _spawn_backlog := false
+## Full body creation has one count/time allowance per rendered process frame,
+## shared by initial arrivals and later deferred-body promotion. Placeholder
+## creation and parked-body reuse retain their own existing behavior.
+var _actor_creation_frame := -1
+var _actor_creation_count := 0
+var _actor_creation_spent_usec := 0
+var _actor_creation_priority_seen: Dictionary = {}
+var _actor_creation_overrun_seen := false
+## Bounded scalar diagnostics, never a per-actor or per-frame history.
+var _actor_creation_totals: Dictionary = {"builds": 0, "priorityBypasses": 0,
+	"atomicOverruns": 0, "framesOverBudget": 0, "maximumAtomicUsec": 0,
+	"maximumFrameUsec": 0, "maximumBuildsInFrame": 0}
 ## The local character's arrival while its ground streams in behind the
 ## curtain: {position, started, ready}. Empty when none is pending.
 var _arrival: Dictionary = {}
@@ -918,7 +951,7 @@ const CreatureBannerSettings := preload("res://src/ui/creature_banner_settings.g
 const BannerColors := preload("res://src/ui/banner_colors.gd")
 var _creature_banner_options := CreatureBannerSettings.defaults()
 const MountControls := preload("res://src/mounts/mount_controls.gd")
-var mount_status := MountControls.new()
+@onready var mount_status := MountControls.new()
 var _mount_banner_options: Dictionary = MountControls.default_options()
 var _actor_hud_menu: Variant
 
@@ -1309,7 +1342,7 @@ func _ready() -> void:
 	leaderboards_window = LeaderboardsWindowScript.new()
 	game_view.add_child(leaderboards_window)
 	leaderboards_window.call("configure", Network.send_chat, model_registry, equipment_config)
-	%LeaderboardsButton.icon = _external_texture("res://assets/ui/leaderboards/menu-icon-v1.png")
+	%LeaderboardsButton.icon = _external_texture("res://assets/ui/menu-icons/leaderboard.png")
 	%LeaderboardsButton.expand_icon = true
 	%LeaderboardsButton.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	%LeaderboardsButton.vertical_icon_alignment = VERTICAL_ALIGNMENT_CENTER
@@ -1333,6 +1366,7 @@ func _ready() -> void:
 	extension_windows = ExtensionWindowsScript.new()
 	game_view.add_child(extension_windows)
 	extension_windows.configure(item_atlas, lantern_guide)
+	_configure_service_buttons()
 	extension_windows.gauntlet_loot_window.configure(item_atlas, model_registry, equipment_config)
 	extension_windows.combat_hud_preference_changed.connect(_save_hud_settings)
 	invasion_assistant_window = InvasionAssistantScript.new()
@@ -1517,6 +1551,7 @@ func _ready() -> void:
 	_configure_window_layers()
 	_configure_cartography()
 	_load_hud_settings()
+	_refresh_service_tooltips()
 	# Explicit launch options select a server without changing saved settings.
 	_apply_connection_launch_options(OS.get_cmdline_user_args())
 	_configure_trailer_capture(OS.get_cmdline_user_args())
@@ -1535,6 +1570,8 @@ func _ready() -> void:
 	$GameView/SpellQuickbar.hide()
 	_reset_trade_destinations()
 	trade_source.item_selected.connect(_on_trade_source_selected)
+	trade_source_type.item_selected.connect(_on_trade_source_type_selected)
+	trade_storage_category.item_selected.connect(_on_trade_storage_category_selected)
 	trade_own_offers.item_selected.connect(_on_trade_own_selected)
 	trade_other_offers.item_selected.connect(_on_trade_other_selected)
 	storage_categories.item_selected.connect(_on_storage_category_selected)
@@ -1651,6 +1688,8 @@ func client_diagnostic_snapshot() -> Dictionary:
 		"container_size": str(viewport_container.size),
 		"viewport_update_mode": main_viewport.render_target_update_mode,
 		"render_scale": _render_scale,
+		"actor_creation_budget": actor_creation_budget_snapshot(),
+		"ambient_creation_pending": ambient_creation_pending_count(),
 		"map_texture_mip_skip": GraphicsOptions.active_texture_skip(),
 		"map_texture_preference": _map_texture_quality,
 		"crowd_body_cap": crowd.body_cap,
@@ -1660,6 +1699,14 @@ func client_diagnostic_snapshot() -> Dictionary:
 		"map_root_present": is_instance_valid(world_loader.world_root),
 		"map_cache_enabled": MapSceneCache.is_enabled(), "map_cache_status": str(world_loader.cache_status),
 		"map_load_phases_us": world_loader.load_phases.duplicate(),
+		"surface_work": surface_work_snapshot(),
+		"loader_work": world_loader.diagnostic_snapshot(),
+		"streaming_work": exterior_stream.diagnostic_snapshot(),
+		"resource_retention": {
+			"actor_scenes": GlbSceneCache.retention_snapshot(),
+			"animations": NativeAnimationImporter.retention_snapshot(),
+			"world_meshes": ExternalMeshPool.retention_snapshot(),
+			"world_textures": ExternalTexturePool.retention_snapshot()},
 		"actors_received": AppState.actors.size(), "actors_presented": actor_nodes.size(),
 		"local_actor_received": AppState.actors.has(AppState.local_actor_id),
 		"local_actor_presented": is_instance_valid(local_actor),
@@ -2616,7 +2663,7 @@ func _build_chat_surfaces() -> void:
 	content.add_child(chat_log_tabs)
 	content.move_child(chat_log_tabs, 1)
 	chat_log_tabs.tab_selected.connect(func(_key: String) -> void: _sync_console())
-	chat_log_tabs.sync(AppState.active_channels, AppState.chat_lines)
+	chat_log_tabs.sync(AppState.active_channels, AppState.chat_history)
 	for line: Dictionary in AppState.chat_lines:
 		chat_hud.remember_peer(ChatMessages.peer(line))
 	_on_chat_configuration_changed("", null)
@@ -2987,12 +3034,36 @@ func _on_stats_button_pressed() -> void:
 		_sync_stats()
 	_sync_hud_button_states(true)
 
+func _configure_service_buttons() -> void:
+	var icons := preload("res://src/ui/service_menu_icons.gd")
+	for button: Button in [%ExchangeButton, %StoragePreviewButton]:
+		button.icon = icons.texture(button == %StoragePreviewButton)
+		button.expand_icon = true
+		button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		button.toggle_mode = true
+	%ExchangeButton.pressed.connect(func() -> void: extension_windows.call("toggle_marketplace"))
+	%StoragePreviewButton.pressed.connect(_toggle_storage_preview)
+	(extension_windows.get("market_panel") as Control).visibility_changed.connect(func() -> void: _sync_hud_button_states(true))
+	storage_panel.visibility_changed.connect(func() -> void: _sync_hud_button_states(true))
+	_refresh_service_tooltips()
+
+func _refresh_service_tooltips() -> void:
+	%ExchangeButton.tooltip_text = "Exchange · Browse prices and manage listings [%s]" % settings_window.call("binding_text", "toggle_exchange")
+	%StoragePreviewButton.tooltip_text = "Storage preview · View only [%s]" % settings_window.call("binding_text", "toggle_storage_preview")
+
+func _toggle_storage_preview() -> void:
+	if bool(AppState.storage.get("open", false)):
+		_on_storage_close_pressed()
+	else:
+		AppState.storage["read_only"] = true
+		Network.send_chat("#storage view")
+
 func _on_inventory_button_pressed() -> void:
 	if bool(AppState.trade.get("open", false)):
 		return
 	inventory_panel.visible = not inventory_panel.visible
 	if inventory_panel.visible:
-		AppState.close_storage()
+		_on_storage_close_pressed()
 		_road_ui(16)
 		stats_panel.hide()
 		manufacturing_panel.hide()
@@ -3211,7 +3282,7 @@ func _on_knowledge_close_pressed() -> void:
 
 func _on_inventory_close_pressed() -> void:
 	if classic_storage != null and classic_storage.is_inventory_docked():
-		AppState.close_storage()
+		_on_storage_close_pressed()
 		return
 	inventory_panel.hide()
 
@@ -3284,6 +3355,9 @@ func _inventory_slot_is_protected(slot: int, kind: String) -> bool:
 		or (bool(values[3]) and slot % 6 == 5))
 
 func _on_inventory_store_all_pressed() -> void:
+	if bool(AppState.storage.get("read_only", false)):
+		inventory_description.text = "Storage preview is view only. Visit a storage keeper or chest to transfer items."
+		return
 	if not bool(AppState.storage.get("open", false)):
 		inventory_description.text = "Open storage before using Sto All."
 		return
@@ -3487,10 +3561,29 @@ func _on_item_list_get_pressed() -> void:
 		"" if request_count == 1 else "s"]
 		+ (" Missing " + ", ".join(missing) + "." if not missing.is_empty() else ""))
 
+func _trade_source_items() -> Dictionary:
+	if trade_source_type.get_selected_id() == 2:
+		if (not bool(AppState.trade.get("storage_available", false))
+				or not bool(AppState.storage.get("open", false)) or not _storage_stock_ready()):
+			return {}
+		return AppState.storage.get("items", {}) as Dictionary
+	return AppState.trade.get("source_inventory", {}) as Dictionary
+
+func _on_trade_source_type_selected(_index: int) -> void:
+	_sync_trade()
+
+func _on_trade_storage_category_selected(index: int) -> void:
+	var category_id: int = trade_storage_category.get_item_id(index)
+	AppState.storage["category_id"] = category_id
+	var error: Error = Network.get_storage_category(category_id)
+	if error != OK:
+		push_warning("GET_STORAGE_CATEGORY failed: " + error_string(error))
+	_sync_trade()
+
 func _on_trade_source_selected(index: int) -> void:
 	selected_trade_side = "source"
 	var slot: int = _trade_list_slot(trade_source, index)
-	var source_inventory: Dictionary = AppState.trade.get("source_inventory", {}) as Dictionary
+	var source_inventory: Dictionary = _trade_source_items()
 	var item_value: Variant = source_inventory.get(slot)
 	if item_value is Dictionary:
 		trade_quantity.max_value = maxi(1, int((item_value as Dictionary).get("quantity", 1)))
@@ -3520,13 +3613,15 @@ func _on_trade_offer_pressed() -> void:
 	if selected.is_empty():
 		return
 	var slot: int = _trade_list_slot(trade_source, int(selected[0]))
-	var source_inventory: Dictionary = AppState.trade.get("source_inventory", {}) as Dictionary
+	var source_inventory: Dictionary = _trade_source_items()
 	var item_value: Variant = source_inventory.get(slot)
 	if not item_value is Dictionary:
 		return
 	var item: Dictionary = item_value as Dictionary
 	var quantity: int = clampi(int(trade_quantity.value), 1, int(item.get("quantity", 1)))
-	var error: Error = Network.put_inventory_on_trade(slot, quantity)
+	var error: Error = (Network.put_storage_on_trade(slot, quantity)
+		if trade_source_type.get_selected_id() == 2
+		else Network.put_inventory_on_trade(slot, quantity))
 	if error != OK:
 		push_warning("PUT_OBJECT_ON_TRADE failed: " + error_string(error))
 
@@ -3643,6 +3738,7 @@ func _on_storage_inspect_pressed() -> void:
 		push_warning("LOOK_AT_STORAGE_ITEM failed: " + error_string(error))
 
 func _on_storage_close_pressed() -> void:
+	Network.send_chat("#storage close")
 	AppState.close_storage()
 
 ## The bag grid mirrors Eternal Lands: a left click takes the quantity in the
@@ -3732,6 +3828,7 @@ func _close_client() -> void:
 	# Keep serving rendering/physics commands until a private loader completes;
 	# joining a live import while the rendering server shuts down can deadlock.
 	character_intro.cancel()
+	gauntlet_prewarm.discard()
 	await get_tree().process_frame
 	exterior_stream.clear()
 	while not exterior_stream.is_idle():
@@ -3739,6 +3836,7 @@ func _close_client() -> void:
 	get_tree().quit()
 
 func _exit_tree() -> void:
+	mouse_cursors.release()
 	occluder_fade.reset()
 	ReplicatedActor3D.clear_wardrobe_texture_cache()
 	NativeAnimationImporter.clear()
@@ -3807,6 +3905,7 @@ func _on_connection_state_changed(value: String) -> void:
 		character_intro.cancel()
 		_end_arrival()
 		respawn_prewarm.discard()
+		gauntlet_prewarm.discard()
 		_pickpoint_draft.clear()
 		_pickpoint_submitting = false
 	status_label.text = ("Securing the connection…" if value == "securing"
@@ -3866,6 +3965,9 @@ func _on_reconnect_progress(attempt: int, total: int, delay_msec: int) -> void:
 	_sync_connection_banner()
 
 func _clear_world_presentation() -> void:
+	# No actor survives this clear. Forget stepped members before queueing
+	# any body, without reactivating its animation or skeleton callbacks.
+	animation_gate.reset(false)
 	SeasonSurfaces.set_season({})
 	quest_trail.clear()
 	character_intro.cancel()
@@ -3908,7 +4010,6 @@ func _clear_world_presentation() -> void:
 	map_light_root = null
 	_actor_surface_samples.clear()
 	_grounded_actors.clear()
-	animation_gate.reset()
 	# The parsed model and animation caches are only worth holding for the
 	# session they were built in.
 	TorsoBodyCover.clear()
@@ -3919,6 +4020,13 @@ func _clear_world_presentation() -> void:
 	exterior_stream.clear()
 	_retained_traveller = -1
 	world_loader.unload_world()
+	# Cancel both queued work and an old coroutine waiting on physics. A later
+	# session's queue must not be cleared by that coroutine when it resumes.
+	_surface_refresh_epoch += 1
+	_surface_refresh_queue.clear()
+	_surface_refresh_running = false
+	_surface_refresh_inflight = 0
+	_surface_followup_pending = 0
 	loaded_server_map = ""
 	full_map.hide()
 	inventory_panel.hide()
@@ -4123,6 +4231,12 @@ func _handle_bound_action(event: InputEvent) -> bool:
 		chat_input.clear()
 		_hide_chat_input()
 		return true
+	if event.is_action_pressed("toggle_exchange", false, true):
+		extension_windows.call("toggle_marketplace")
+		return true
+	if event.is_action_pressed("toggle_storage_preview", false, true):
+		_toggle_storage_preview()
+		return true
 	if event.is_action_pressed("toggle_inventory"):
 		_on_inventory_button_pressed()
 		return true
@@ -4298,7 +4412,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		elif bool(AppState.trade.get("open", false)):
 			_on_trade_cancel_pressed()
 		elif bool(AppState.storage.get("open", false)):
-			AppState.close_storage()
+			_on_storage_close_pressed()
 		elif bool(AppState.ground_bag.get("open", false)):
 			_close_ground_bag()
 		elif item_lists_panel.visible:
@@ -4700,7 +4814,7 @@ func _on_channel_tab_pressed(channel_index: int) -> void:
 func _sync_channel_tabs() -> void:
 	_chat_tab = chat_hud.sync_channels(AppState.active_channels, _chat_tab)
 	if chat_log_tabs != null:
-		chat_log_tabs.sync(AppState.active_channels, AppState.chat_lines)
+		chat_log_tabs.sync(AppState.active_channels, AppState.chat_history)
 	_sync_chat()
 
 func _reveal_chat_messages() -> void:
@@ -5379,6 +5493,8 @@ func _on_state_changed(path: StringName) -> void:
 			_sync_map_markers()
 		&"death":
 			_prefetch_respawn()
+		&"gauntlet_loot":
+			_prefetch_gauntlet_exit()
 		&"actors":
 			# A busy map emits this once per actor packet. Rebuilding the whole
 			# actor presentation for each of them repeated the same work many
@@ -5578,7 +5694,9 @@ func _load_server_map() -> void:
 			character_intro.cancel()
 	if handoff.is_empty() and not character_intro.blocks_input():
 		# A respawn onto another map adopts the ground loaded while dead.
-		var prewarmed: Dictionary = respawn_prewarm.take(normalized_map)
+		var prewarmed: Dictionary = gauntlet_prewarm.take(normalized_map)
+		if prewarmed.is_empty():
+			prewarmed = respawn_prewarm.take(normalized_map)
 		if not prewarmed.is_empty():
 			handoff = {"resident": prewarmed, "continuous": false}
 		else:
@@ -5858,10 +5976,12 @@ func _lighting_manifest() -> WorldManifest:
 ## Bind seasonal scenery after map/appearance changes; month changes only
 ## update shared material uniforms, so existing and newly streamed trees agree.
 func _sync_season_surfaces() -> void:
+	var started := Time.get_ticks_usec()
 	SeasonSurfaces.set_season(AppState.almanac.get("season", {}) as Dictionary)
 	for world: Dictionary in LookSwitch.worlds(world_loader.world_root,
 			world_loader.manifest, exterior_stream.residents):
 		SeasonSurfaces.apply(world.root as Node, world.manifest as WorldManifest)
+	_record_surface_work(&"season", started)
 
 func _update_border_lighting() -> void:
 	var lighting := _lighting_manifest()
@@ -5943,10 +6063,14 @@ func _populate_ambient_life(manifest: WorldManifest) -> void:
 		ambient_population = AmbientPopulation.new()
 		ambient_population.name = "AmbientPopulation"
 		world_root.add_child(ambient_population)
+	var population := ambient_population
+	population.apply_render_quality(LookProfile.quality())
 	await get_tree().physics_frame
-	if gameplay_world == null or world_loader.manifest != manifest:
+	if not is_instance_valid(population) or ambient_population != population \
+			or gameplay_world == null or world_loader.manifest != manifest:
 		return
-	var spawned: int = ambient_population.populate(manifest,
+	population.apply_render_quality(LookProfile.quality())
+	var spawned: int = population.populate(manifest,
 		gameplay_world.direct_space_state, chunk_stream)
 	if spawned > 0:
 		print_debug("ambient_population map=", AppState.current_map, " spawned=", spawned)
@@ -5957,6 +6081,7 @@ func _snap_all_actors_to_surface() -> void:
 	_actor_surface_snap_pending = true
 	await get_tree().physics_frame
 	_actor_surface_snap_pending = false
+	var started := Time.get_ticks_usec()
 	for actor_value: Variant in actor_nodes.values():
 		if not is_instance_valid(actor_value):
 			continue
@@ -5964,6 +6089,7 @@ func _snap_all_actors_to_surface() -> void:
 		var actor_adapter := _adapter_for_actor(AppState.actors.get(actor.actor_id, {}) as Dictionary)
 		if actor_adapter != null:
 			_place_actor_on_surface(actor, true, actor_adapter.fallback_height())
+	_record_surface_work(&"actor_ground", started, actor_nodes.size())
 
 func _snap_all_ground_bags_to_surface() -> void:
 	await get_tree().physics_frame
@@ -6103,6 +6229,24 @@ func _report_arrival() -> void:
 		Network.send_chat("#arrived " + AppState.current_map)
 	Diagnostics.record("arrival_reported", {"map": AppState.current_map})
 
+## Prepare the server's beam destination while the completed loot is reviewed.
+## The hidden stream is adopted by _load_server_map when the party exits.
+func _prefetch_gauntlet_exit() -> void:
+	var loot: Dictionary = AppState.gauntlet_loot
+	var destination: Variant = loot.get("exit_destination")
+	if loot.get("phase", "") not in ["complete", "ended", "sent"] or bool(loot.get("exited", false)) or not destination is Dictionary:
+		gauntlet_prewarm.discard()
+		return
+	var target: Dictionary = destination
+	var server_map := str(target.get("map", ""))
+	var map_id: String = MapRegistry.normalize_server_map_id(server_map)
+	if map_id == MapRegistry.normalize_server_map_id(AppState.current_map):
+		gauntlet_prewarm.discard()
+		return
+	var entry: Dictionary = MapRegistry.resolve(map_registry, server_map)
+	if not entry.is_empty():
+		gauntlet_prewarm.prewarm(entry, map_id, Vector2i(int(target.x), int(target.y)), world_root)
+
 ## While dead, the ground where a respawn will land is loaded in the background
 ## (the death state's `destination`): kept resident on this map, or prewarmed
 ## in a hidden stream on another, so clicking respawn needs no loading.
@@ -6136,7 +6280,7 @@ func _prefetch_respawn() -> void:
 ## AppState has written since the last pass - only those actors are visited;
 ## without it every actor is, which is what a map load and the fixtures need.
 ## An actor with no node yet is built either way, at most ACTOR_SPAWN_BUDGET
-## of them per pass; the rest are picked up on the following frames.
+## of them per process frame, within the shared elapsed allowance.
 func _sync_world(changed: Variant = null) -> void:
 	# A whole map waiting for the curtain, or a character whose ground is still
 	# streaming in: nothing is placed on ground that is not there yet.
@@ -6274,39 +6418,90 @@ func _remove_stale_actor_nodes(changed: Variant) -> void:
 
 ## Gives each arriving actor a node. The player's own is always built at once.
 ## With lazy bodies (crowd_presentation.gd) the nearest arrivals inside the
-## build radius are built, ACTOR_SPAWN_BUDGET of them a pass, and every other
+## build radius share the per-process-frame count/time allowance, and every other
 ## arrival gets a deferred node now - its map dot, and a stand-in if it is in
 ## view - whose body `_update_model_builds` builds nearest first. Without them
 ## the rest simply wait for a later pass, as they always did.
+func _actor_creation_begin_frame(process_frame: int = -1) -> void:
+	var frame := Engine.get_process_frames() if process_frame < 0 else process_frame
+	if frame == _actor_creation_frame:
+		return
+	_actor_creation_frame = frame
+	_actor_creation_count = 0
+	_actor_creation_spent_usec = 0
+	_actor_creation_priority_seen.clear()
+	_actor_creation_overrun_seen = false
+
+func _actor_creation_may_start(id: int, process_frame: int = -1) -> bool:
+	_actor_creation_begin_frame(process_frame)
+	if _actor_creation_count < ACTOR_SPAWN_BUDGET \
+			and _actor_creation_spent_usec < crowd.BUILD_BUDGET_USEC:
+		return true
+	# At most three distinct critical ids in a frame, each admitted once beyond
+	# the ordinary allowance. Rapid target/selection changes cannot grow this.
+	return id >= 0 and _crowd_priority_actor(id) and _actor_creation_priority_seen.size() < 3 \
+		and not _actor_creation_priority_seen.has(id)
+
+func _record_actor_creation(id: int, elapsed_usec: int, process_frame: int = -1) -> void:
+	_actor_creation_begin_frame(process_frame)
+	var cost := maxi(0, elapsed_usec)
+	var priority := id >= 0 and _crowd_priority_actor(id)
+	if priority:
+		if _actor_creation_count >= ACTOR_SPAWN_BUDGET \
+				or _actor_creation_spent_usec >= crowd.BUILD_BUDGET_USEC:
+			_actor_creation_totals.priorityBypasses += 1
+		_actor_creation_priority_seen[id] = true
+	_actor_creation_count += 1
+	_actor_creation_spent_usec += cost
+	_actor_creation_totals.builds += 1
+	_actor_creation_totals.maximumAtomicUsec = maxi(_actor_creation_totals.maximumAtomicUsec, cost)
+	_actor_creation_totals.maximumFrameUsec = maxi(_actor_creation_totals.maximumFrameUsec, _actor_creation_spent_usec)
+	_actor_creation_totals.maximumBuildsInFrame = maxi(_actor_creation_totals.maximumBuildsInFrame, _actor_creation_count)
+	if cost > crowd.BUILD_BUDGET_USEC:
+		_actor_creation_totals.atomicOverruns += 1
+	if _actor_creation_spent_usec > crowd.BUILD_BUDGET_USEC and not _actor_creation_overrun_seen:
+		_actor_creation_totals.framesOverBudget += 1
+		_actor_creation_overrun_seen = true
+
+func actor_creation_budget_snapshot(process_frame: int = -1) -> Dictionary:
+	_actor_creation_begin_frame(process_frame)
+	return {"processFrame": _actor_creation_frame, "bodiesThisFrame": _actor_creation_count,
+		"microsecondsThisFrame": _actor_creation_spent_usec,
+		"bodyLimit": ACTOR_SPAWN_BUDGET, "microsecondLimit": crowd.BUILD_BUDGET_USEC,
+		"totals": _actor_creation_totals.duplicate()}
+
+func _actor_arrival_priority(id: int) -> int:
+	if id == AppState.local_actor_id:
+		return 0
+	if id == AppState.selected_actor_id:
+		return 1
+	if id == _combat_target_actor_id():
+		return 2
+	return 3
+
 func _spawn_arrivals(arriving: Array) -> void:
 	if arriving.is_empty():
 		return
-	if not crowd.lazy:
-		var spawned: int = 0
-		for id: Variant in arriving:
-			if spawned < ACTOR_SPAWN_BUDGET or int(id) == AppState.local_actor_id:
-				_spawn_actor(id)
-				spawned += 1
-			else:
-				_spawn_backlog = true
-		return
-	var reference: Vector3 = _crowd_reference_point()
+	var reference := _crowd_reference_point()
 	var ranked: Array = []
-	for id: Variant in arriving:
-		if int(id) == AppState.local_actor_id:
-			_spawn_actor(id)
+	for index: int in arriving.size():
+		var id: int = int(arriving[index])
+		if not AppState.actors.has(id) or actor_nodes.has(id):
 			continue
-		ranked.append([_record_distance(AppState.actors[id] as Dictionary, reference), id])
-	ranked.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
-	var built: int = 0
-	var deferred: int = 0
+		var distance := _record_distance(AppState.actors[id] as Dictionary, reference)
+		ranked.append([_actor_arrival_priority(id), distance if crowd.lazy else float(index), id, distance])
+	ranked.sort_custom(func(a: Array, b: Array) -> bool:
+		if a[0] != b[0]: return a[0] < b[0]
+		if a[1] != b[1]: return a[1] < b[1]
+		return a[2] < b[2])
+	var deferred := 0
 	for pair: Array in ranked:
-		var id: Variant = pair[1]
-		if built < ACTOR_SPAWN_BUDGET and float(pair[0]) <= crowd.BUILD_RADIUS_METRES \
-				and _body_cap_allows(int(id), float(pair[0])):
+		var id: int = int(pair[2])
+		var wants_body: bool = not crowd.lazy or _crowd_priority_actor(id) \
+			or (float(pair[3]) <= crowd.BUILD_RADIUS_METRES and _body_cap_allows(id, float(pair[3])))
+		if wants_body and _actor_creation_may_start(id):
 			_spawn_actor(id)
-			built += 1
-		elif deferred < crowd.DEFERRED_SPAWNS_PER_PASS:
+		elif crowd.lazy and deferred < crowd.DEFERRED_SPAWNS_PER_PASS:
 			_spawn_actor(id, false)
 			deferred += 1
 		else:
@@ -6391,19 +6586,24 @@ func _present_actor(id: Variant) -> void:
 ## place of the node it has: `build` false makes a deferred node without a body
 ## (crowd_presentation.gd). A replacement carries on the old node's motion.
 func _spawn_actor(id: Variant, build := true,
-		previous: ReplicatedActor3D = null) -> void:
+		previous: ReplicatedActor3D = null) -> bool:
 	var dto: Dictionary = _presentation_dto(AppState.actors[id])
 	var actor_adapter: CoordinateAdapter = _adapter_for_actor(dto)
 	if actor_adapter == null:
 		# Its map is a neighbour that is not resident yet: built on a later pass.
 		_spawn_backlog = true
-		return
+		return false
 	var identity: String = CrowdPresentationScript.identity_key(dto)
 	if previous == null:
 		var parked := crowd.take_parked(int(id), identity) as ReplicatedActor3D
 		if parked != null:
 			_revive_actor(id, parked, dto, actor_adapter)
-			return
+			return true
+	var creates_body: bool = build or int(id) == AppState.local_actor_id or not crowd.lazy
+	if creates_body and not _actor_creation_may_start(int(id)):
+		_spawn_backlog = true
+		return false
+	var creation_started := Time.get_ticks_usec()
 	var node := ReplicatedActor3D.new()
 	node.name = "Actor_%d" % id
 	node.set_meta(&"identity_key", identity)
@@ -6443,6 +6643,9 @@ func _spawn_actor(id: Variant, build := true,
 		# for up to a tenth of a second.
 		node.set_drawn(_crowd_reference_point().distance_to(node.global_position)
 			<= ACTOR_DRAW_DISTANCE_METRES)
+	if creates_body:
+		_record_actor_creation(int(id), Time.get_ticks_usec() - creation_started)
+	return true
 
 ## Puts a parked body back for the actor it was parked for: the same steps a
 ## new node takes, on a node that already has its model.
@@ -6456,6 +6659,9 @@ func _revive_actor(id: Variant, node: ReplicatedActor3D, dto: Dictionary,
 	node.set_title(str(AppState.actor_titles.get(int(id), "")))
 	node.set_occupation(str(AppState.actor_occupations.get(int(id), "")))
 	node.set_quest_available(AppState.quest_offer_actors.has(int(id)))
+	# Parked bodies were absent from live quality changes. Reconcile before
+	# mount/tack attachment so every returned visual inherits current policy.
+	node.apply_render_quality(LookProfile.quality(), int(id) == AppState.local_actor_id)
 	_apply_actor_mount(id)
 	_place_actor_on_surface(node, true, actor_adapter.fallback_height())
 	node.set_selected(int(id) == AppState.selected_actor_id)
@@ -6468,15 +6674,28 @@ func _revive_actor(id: Variant, node: ReplicatedActor3D, dto: Dictionary,
 
 ## Builds the bodies of deferred actors that have come within range, nearest
 ## first: the candidates are ranked on each gate pass, and this builds as many
-## a frame as `CrowdPresentation.BUILDS_PER_FRAME` and its time budget allow.
+## a process frame as the arrival-shared count/time allowance permits.
 ## Each is a new node in the deferred one's place, carrying on its motion.
 func _update_model_builds() -> void:
-	if not crowd.lazy or crowd.pending_candidates() == 0:
+	if not crowd.lazy:
 		return
-	var started: int = Time.get_ticks_usec()
-	var built: int = 0
-	while built < crowd.BUILDS_PER_FRAME \
-			and Time.get_ticks_usec() - started < crowd.BUILD_BUDGET_USEC:
+	# Critical bodies must not wait behind a stale distance-ranked candidate queue.
+	var priority_ids := [AppState.local_actor_id, AppState.selected_actor_id, _combat_target_actor_id()]
+	var seen: Dictionary = {}
+	for raw_id: int in priority_ids:
+		if raw_id < 0 or seen.has(raw_id) or not AppState.actors.has(raw_id):
+			continue
+		seen[raw_id] = true
+		var value: Variant = actor_nodes.get(raw_id)
+		if is_instance_valid(value) and value is ReplicatedActor3D \
+				and (value as ReplicatedActor3D).is_model_deferred() and _actor_creation_may_start(raw_id):
+			if _replace_actor_node(raw_id, true):
+				crowd.builds += 1
+	_actor_creation_begin_frame()
+	var started := Time.get_ticks_usec()
+	var remaining := maxi(0, crowd.BUILD_BUDGET_USEC - _actor_creation_spent_usec)
+	while crowd.pending_candidates() > 0 and _actor_creation_may_start(-1) \
+			and Time.get_ticks_usec() - started < remaining:
 		var id: int = crowd.next_candidate()
 		if id < 0:
 			break
@@ -6490,27 +6709,26 @@ func _update_model_builds() -> void:
 		if not _body_cap_allows(id, Vector2(deferred.global_position.x - reference.x,
 				deferred.global_position.z - reference.z).length()):
 			continue
-		_replace_actor_node(id, true)
-		crowd.builds += 1
-		built += 1
+		if _replace_actor_node(id, true):
+			crowd.builds += 1
 
 ## Swaps an actor's node for a new one with (`build`) or without its body. The
 ## old node is hidden at once and freed at the end of the frame, so nothing
 ## holding it this frame finds it gone mid-call.
-func _replace_actor_node(id: int, build: bool) -> void:
+func _replace_actor_node(id: int, build: bool) -> bool:
 	# Validity before the cast: `as` on a freed node raises.
 	var previous_value: Variant = actor_nodes.get(id)
 	if not is_instance_valid(previous_value):
-		return
+		return false
 	var previous := previous_value as ReplicatedActor3D
 	if previous == null:
-		return
+		return false
 	actor_nodes.erase(id)
 	_spawn_actor(id, build, previous)
 	if not actor_nodes.has(id):
 		# The map it stands on is not placed now: keep the old node instead.
 		actor_nodes[id] = previous
-		return
+		return false
 	if not previous.is_model_deferred():
 		_built_bodies = maxi(0, _built_bodies - 1)
 	previous.visible = false
@@ -6518,6 +6736,7 @@ func _replace_actor_node(id: int, build: bool) -> void:
 	previous.process_mode = Node.PROCESS_MODE_DISABLED
 	previous.queue_free()
 	_apply_overhead_health(id, _overhead_target_actor)
+	return true
 
 ## Bind mount presentation to the current player identity and map, including
 ## state received before a visible actor's model finished loading.
@@ -9559,20 +9778,20 @@ func _sync_chat() -> void:
 			func(line: Dictionary) -> bool: return _system_line_shown(line)), CHAT_PANEL_LINES)
 	_chat_tail = _last_chat_line()
 
-func _render_chat_feed(target: RichTextLabel, lines: Array, cap: int) -> void:
+func _render_chat_feed(target: RichTextLabel, lines: Array, cap: int = 0) -> void:
 	target.clear()
 	target.scroll_following = true
-	for line: Dictionary in lines.slice(maxi(0, lines.size() - cap)):
+	var start := maxi(0, lines.size() - cap) if cap > 0 else 0
+	for line: Dictionary in lines.slice(start):
 		_append_chat_text(target, line)
 	target.scroll_to_line(maxi(0, target.get_line_count() - 1))
 
 func _sync_console() -> void:
 	if chat_log_tabs == null:
 		return
-	chat_log_tabs.sync(AppState.active_channels, AppState.chat_lines)
-	_render_chat_feed(console_output, AppState.chat_lines.filter(
-		func(line: Dictionary) -> bool: return _console_line_shown(line)),
-		AppState.CHAT_LINE_LIMIT)
+	chat_log_tabs.sync(AppState.active_channels, AppState.chat_history)
+	_render_chat_feed(console_output, AppState.chat_history.filter(
+		func(line: Dictionary) -> bool: return _console_line_shown(line)))
 	_console_tail = _last_chat_line()
 
 func _last_chat_line() -> Dictionary:
@@ -9615,16 +9834,16 @@ func _append_chat_line() -> void:
 	if count >= 2 and is_same(previous, _console_tail):
 		_console_tail = line
 		if _console_line_shown(line):
-			_append_to_chat_feed(console_output, line, AppState.CHAT_LINE_LIMIT)
+			_append_to_chat_feed(console_output, line)
 	else:
 		_sync_console()
 
-func _append_to_chat_feed(target: RichTextLabel, line: Dictionary, cap: int) -> void:
+func _append_to_chat_feed(target: RichTextLabel, line: Dictionary, cap: int = 0) -> void:
 	var scroll := target.get_v_scroll_bar()
 	var following := scroll.value >= scroll.max_value - scroll.page - 2
 	target.scroll_following = following
 	_append_chat_text(target, line)
-	while target.get_paragraph_count() > cap + 1:
+	while cap > 0 and target.get_paragraph_count() > cap + 1:
 		target.remove_paragraph(0, true)
 	if following:
 		target.scroll_to_line(maxi(0, target.get_line_count() - 1))
@@ -11858,7 +12077,8 @@ func _sync_hud_button_states(force := false) -> void:
 			%KnowledgeButton, %ManufacturingButton, %ChatButton, %DisconnectButton,
 			%EncyclopediaButton, %SpellsButton, %EmotesButton, %QuestButton,
 			%InfoButton, %BuddyButton, %ConsoleButton, %HelpButton,
-			%RangingButton, %MinimapButton, %OptionsButton, %MountsButton, %LeaderboardsButton]
+			%RangingButton, %MinimapButton, %OptionsButton, %MountsButton, %LeaderboardsButton,
+			%ExchangeButton, %StoragePreviewButton]
 	var local_actor: Dictionary = AppState.actors.get(AppState.local_actor_id, {})
 	var sitting: bool = bool(local_actor.get("sitting", false))
 	var stats_open: bool = stats_panel.visible
@@ -11889,7 +12109,9 @@ func _sync_hud_button_states(force := false) -> void:
 		minimap_frame.visible,
 		settings_panel.visible,
 		mounts_window != null and bool(mounts_window.call("is_open")),
-		leaderboards_window != null and bool(leaderboards_window.call("is_open"))]
+		leaderboards_window != null and bool(leaderboards_window.call("is_open")),
+		extension_windows != null and (extension_windows.get("market_panel") as Control).visible,
+		storage_panel.visible]
 	# Only while the player has not chosen attack mode from the HUD: a mode
 	# they picked stays picked, and Alt must not appear to be what put it there.
 	var attack_preview: bool = _alt_attack_preview and _interaction_mode != "attack"
@@ -12624,6 +12846,7 @@ func _apply_graphics_quality() -> void:
 	if weather_layer != null:
 		weather_layer.set_effects_enabled(_effects_enabled)
 	_apply_actor_render_quality()
+	_apply_ambient_render_quality()
 	_apply_day_night()
 	_apply_login_backdrop_quality()
 	_update_border_lighting()
@@ -12679,6 +12902,38 @@ func _apply_actor_render_quality() -> void:
 	if is_instance_valid(preview_actor):
 		preview_actor.apply_render_quality(level, true)
 
+## Active and retained territory populations have the same quality immediately.
+## Population-local quality polling still covers a population attaching later.
+func _ambient_life_populations() -> Array[AmbientPopulation]:
+	var populations: Array[AmbientPopulation] = []
+	if is_instance_valid(ambient_population) and not ambient_population.is_queued_for_deletion():
+		populations.append(ambient_population)
+	var roots: Array[Node] = []
+	if is_instance_valid(world_root):
+		roots.append(world_root)
+	if world_loader != null and is_instance_valid(world_loader.world_root):
+		roots.append(world_loader.world_root)
+	for resident: Dictionary in exterior_stream.residents.values():
+		var resident_root := resident.get("root") as Node
+		if is_instance_valid(resident_root):
+			roots.append(resident_root)
+	for resident_root: Node in roots:
+		var population := resident_root.get_node_or_null("AmbientPopulation") as AmbientPopulation
+		if is_instance_valid(population) and not population.is_queued_for_deletion() and population not in populations:
+			populations.append(population)
+	return populations
+
+func _apply_ambient_render_quality(level: int = -1) -> void:
+	var quality := LookProfile.quality() if level < 0 else level
+	for population: AmbientPopulation in _ambient_life_populations():
+		population.apply_render_quality(quality)
+
+func ambient_creation_pending_count() -> int:
+	var pending := 0
+	for population: AmbientPopulation in _ambient_life_populations():
+		pending += population.pending_creation_count()
+	return pending
+
 ## Puts develop's environment for the bound map back, from the copy taken as
 ## it was bound, paints its sky again if the look is on, and lets the hour and
 ## the border blend rewrite it and the grade follow, in the order a bind does.
@@ -12691,22 +12946,27 @@ func _rebind_look_environment() -> void:
 	_apply_day_night()
 	_update_border_lighting()
 
-## Keeps a copy of develop's environment as the binder built it, with its Sky
-## taken apart (`_unlooked_sky`) so the copy costs no radiance maps. The Sky the
-## deep copy made is released before any frame is drawn, so the renderer never
-## allocates for it.
+## Keeps an independent environment snapshot without constructing a temporary
+## Sky. GLES3 keeps new skies on a renderer dirty list until its next update;
+## cloning then discarding a Sky before that update can orphan its radiance.
 func _keep_unlooked_environment(environment: Environment) -> void:
-	_unlooked_environment = environment.duplicate(true) as Environment
+	var sky: Sky = environment.sky
+	# A shallow copy initially shares Sky. Detach it from the copy before
+	# deep-copying the remaining resources; never change the live environment.
+	var without_sky := environment.duplicate(false) as Environment
+	without_sky.sky = null
+	_unlooked_environment = without_sky.duplicate(true) as Environment
 	_unlooked_sky = {}
-	var sky: Sky = _unlooked_environment.sky
 	if sky == null:
 		return
+	var kept_material: Material = null
+	if sky.sky_material != null:
+		kept_material = sky.sky_material.duplicate(true) as Material
 	_unlooked_sky = {
-		"material": sky.sky_material,
+		"material": kept_material,
 		"radiance_size": sky.radiance_size,
 		"process_mode": sky.process_mode,
 	}
-	_unlooked_environment.sky = null
 
 ## A fresh environment from develop's copy, with a new Sky assembled from the
 ## kept parts. The material is copied again because the hour recolours a
@@ -13006,6 +13266,7 @@ func _apply_target_marker_style() -> void:
 			(actor as ReplicatedActor3D).set_target_marker_style(_target_marker_style)
 
 func _on_binding_changed(_action: String) -> void:
+	_refresh_service_tooltips()
 	_save_hud_settings()
 	_sync_quick_slots()
 	# Quick spell badges and the Techniques hint name the keys they use.
@@ -13757,6 +14018,7 @@ func _begin_carry(slot: int) -> void:
 ## whichever slot the server picks, and the stack stays in hand until what is
 ## left is no more than one click takes.
 func _begin_storage_carry(position: int) -> void:
+	if bool(AppState.storage.get("read_only", false)): return
 	var item_value: Variant = (AppState.storage.get("items", {}) as Dictionary).get(position)
 	if not item_value is Dictionary:
 		return
@@ -14267,7 +14529,7 @@ func _on_chat_submitted(text: String) -> void:
 	# exception - the client lists its half and the server answers with the
 	# commands it takes from this player.
 	var local: ConsoleCommands.Result = console_commands.run(
-		message, AppState.chat_lines)
+		message, AppState.chat_history)
 	if local.handled:
 		for line: String in local.lines:
 			AppState.append_local_line(line)
@@ -14317,6 +14579,7 @@ func _sync_trade() -> void:
 	if not is_open:
 		selected_trade_side = ""
 		trade_was_open = false
+		trade_source_type.select(0)
 		_reset_trade_destinations()
 		return
 	if not trade_was_open:
@@ -14324,17 +14587,28 @@ func _sync_trade() -> void:
 		_reset_trade_destinations()
 	if not bool(AppState.trade.get("storage_available", false)):
 		_reset_trade_destinations()
+		trade_source_type.select(0)
+	trade_source_type.set_item_disabled(1, not bool(AppState.trade.get("storage_available", false)))
+	var from_storage: bool = trade_source_type.get_selected_id() == 2
+	trade_storage_category.visible = from_storage
+	trade_storage_category.clear()
+	for category: Dictionary in AppState.storage.get("categories", []):
+		var category_id: int = int(category.get("id", -1))
+		trade_storage_category.add_item(str(category.get("name", "Category")), category_id)
+		if category_id == int(AppState.storage.get("category_id", -1)):
+			trade_storage_category.select(trade_storage_category.item_count - 1)
 	inventory_panel.hide()
 	stats_panel.hide()
 	full_map.hide()
 	storage_panel.hide()
+	if classic_storage != null:
+		classic_storage.refresh()
 	manufacturing_panel.hide()
 	trade_partner.text = "Trading with %s%s" % [
 		str(AppState.trade.get("partner", "another player")),
-		" — storage destinations available" if bool(
+		" — storage trading available" if bool(
 			AppState.trade.get("storage_available", false)) else ""]
-	_fill_trade_list(trade_source,
-		AppState.trade.get("source_inventory", {}) as Dictionary, "Inventory")
+	_fill_trade_list(trade_source, _trade_source_items(), "Storage" if from_storage else "Inventory")
 	_fill_trade_list(trade_own_offers,
 		AppState.trade.get("own_offers", {}) as Dictionary, "Offer")
 	_fill_trade_list(trade_other_offers,
@@ -14376,8 +14650,16 @@ func _fill_trade_list(list_control: ItemList, items: Dictionary, prefix: String)
 		# both sides. Saying which it came from is the whole point of the
 		# server sending it.
 		var source: String = "  (storage)" if int(item.get("source_type", 1)) == 2 else ""
-		list_control.add_item("%s %d  •  item #%d  ×%d%s" % [
-			prefix, slot + 1, image_id, int(item.get("quantity", 0)), source])
+		var item_name: String = "Item #%d" % image_id
+		if prefix == "Storage":
+			var stored_name: String = _storage_name_of(slot)
+			if not stored_name.is_empty():
+				item_name = stored_name
+		elif prefix == "Inventory":
+			item_name = str(AppState.inventory_names.get(slot, item_name))
+		var label: String = "%s ×%d%s" % [item_name, int(item.get("quantity", 0)), source]
+		list_control.add_item(label)
+		list_control.set_item_tooltip(index, label)
 		list_control.set_item_metadata(index, slot)
 		var icon: Texture2D = item_atlas.icon_for(image_id)
 		if icon != null:
@@ -14414,6 +14696,10 @@ func _trade_acceptance_text(value: int) -> String:
 		_: return "reviewing"
 
 func _sync_storage() -> void:
+	if bool(AppState.trade.get("open", false)):
+		_sync_trade()
+		return
+	inventory_store_all.disabled = bool(AppState.storage.get("read_only", false))
 	var is_open: bool = bool(AppState.storage.get("open", false))
 	storage_panel.visible = is_open
 	if not is_open:
@@ -14642,6 +14928,11 @@ func _list_metadata_int(list_control: ItemList, index: int) -> int:
 	return int(metadata) if metadata != null else -1
 
 func _sync_storage_actions() -> void:
+	if bool(AppState.storage.get("read_only", false)):
+		storage_deposit_button.disabled = true
+		storage_withdraw_button.disabled = true
+		storage_inspect_button.disabled = storage_items.get_selected_items().is_empty()
+		return
 	var inventory_selected: bool = not storage_inventory.get_selected_items().is_empty()
 	var storage_selected: bool = not storage_items.get_selected_items().is_empty()
 	storage_deposit_button.disabled = not inventory_selected
@@ -15211,31 +15502,41 @@ func _paint_map_object_look(map_object: MapObject3D) -> int:
 func _bind_promoted_scenery() -> void:
 	if world_loader == null or not is_instance_valid(world_loader.world_root):
 		return
-	var stream := world_loader.world_root as ContinentChunkStream
-	var wanted := {}
+	var started := Time.get_ticks_usec()
+	var wanted: Dictionary = {}
 	for raw_object: Variant in map_object_nodes.values():
-		if not is_instance_valid(raw_object):
-			continue
-		var map_object := raw_object as MapObject3D
-		if map_object == null or map_object.bound_node_name.is_empty() \
-				or map_object.placement_bound():
-			continue
-		var chunk := str((map_object.presentation.get("bind", {}) as Dictionary).get("chunk", ""))
-		if not wanted.has(chunk):
-			wanted[chunk] = {}
-		if not (wanted[chunk] as Dictionary).has(map_object.bound_node_name):
-			wanted[chunk][map_object.bound_node_name] = []
-		(wanted[chunk][map_object.bound_node_name] as Array).append(map_object)
+		if is_instance_valid(raw_object):
+			_collect_promoted_scenery(raw_object as MapObject3D, wanted)
+	_apply_promoted_scenery(wanted)
+	_record_surface_work(&"scenery_bind", started, map_object_nodes.size())
+
+func _collect_promoted_scenery(map_object: MapObject3D, wanted: Dictionary) -> bool:
+	if not is_instance_valid(map_object) or map_object.bound_node_name.is_empty() \
+			or map_object.placement_bound():
+		return false
+	var chunk := str((map_object.presentation.get("bind", {}) as Dictionary).get("chunk", ""))
+	if not wanted.has(chunk):
+		wanted[chunk] = {}
+	if not (wanted[chunk] as Dictionary).has(map_object.bound_node_name):
+		wanted[chunk][map_object.bound_node_name] = []
+	(wanted[chunk][map_object.bound_node_name] as Array).append(map_object)
+	return true
+
+func _apply_promoted_scenery(wanted: Dictionary) -> void:
+	if world_loader == null or not is_instance_valid(world_loader.world_root):
+		return
+	var stream := world_loader.world_root as ContinentChunkStream
 	for chunk: String in wanted:
-		var root: Node = world_loader.world_root
+		var placed_root: Node = world_loader.world_root
 		if stream != null:
-			root = (stream.cells.get(chunk, {}) as Dictionary).get("root") as Node
-		if not is_instance_valid(root):
+			placed_root = (stream.cells.get(chunk, {}) as Dictionary).get("root") as Node
+		if not is_instance_valid(placed_root):
 			continue
-		var found := _named_nodes(root, wanted[chunk] as Dictionary)
+		var found := _named_nodes(placed_root, wanted[chunk] as Dictionary)
 		for node_name: String in found:
 			for map_object: MapObject3D in wanted[chunk][node_name]:
-				map_object.bind_placement(found[node_name] as Node3D)
+				if is_instance_valid(map_object):
+					map_object.bind_placement(found[node_name] as Node3D)
 
 ## The Node3Ds under `root` whose names are keys of `names`, nearest first;
 ## the walk stops as soon as all are found (a kit placement is a child of its
@@ -15254,7 +15555,11 @@ static func _named_nodes(root: Node, names: Dictionary) -> Dictionary:
 
 ## A chunk streaming out takes its placements with it: the nodes bound to
 ## them let go, and bind again when it returns.
-func _on_chunk_cell_retiring(identity: String, _imported: Node3D) -> void:
+func _on_chunk_cell_retiring(identity: String, imported: Node3D) -> void:
+	# Chunk IDs repeat across territories. A neighbour's retirement must not
+	# release an unrelated binding on the current map with the same ID.
+	if not is_instance_valid(imported) or imported.get_parent() != world_loader.world_root:
+		return
 	for raw_object: Variant in map_object_nodes.values():
 		if not is_instance_valid(raw_object):
 			continue
@@ -15470,12 +15775,15 @@ func _place_map_object_on_surface(map_object: MapObject3D) -> void:
 
 func _snap_all_map_objects_to_surface() -> void:
 	await get_tree().physics_frame
+	var started := Time.get_ticks_usec()
 	for raw_object: Variant in map_object_nodes.values():
 		_place_map_object_on_surface(raw_object as MapObject3D)
 	for raw_marker: Variant in map_marker_nodes.values():
 		_place_map_marker_on_surface(raw_marker as MapMarker3D)
 	for raw_marker: Variant in player_mark_nodes.values():
 		_place_map_marker_on_surface(raw_marker as MapMarker3D)
+	_record_surface_work(&"object_ground", started,
+		map_object_nodes.size() + map_marker_nodes.size() + player_mark_nodes.size())
 
 ## Map objects and markers are placed on the rendered navigation surface when
 ## the server lists them. On a streamed territory the chunk beneath a distant
@@ -15500,14 +15808,149 @@ func _watch_surface_stream(surface_root: Node3D) -> void:
 
 func _on_resident_surfaces_changed() -> void:
 	_watch_chunk_surfaces()
-	_sync_season_surfaces.call_deferred()
-	_snap_all_actors_to_surface.call_deferred()
+	_apply_ambient_render_quality()
+	_surface_refresh_queue.queue_full()
+	_schedule_surface_refresh()
 
-func _on_chunk_surface_ready(_identity: String, _imported: Node3D) -> void:
-	_sync_season_surfaces.call_deferred()
-	_snap_all_actors_to_surface.call_deferred()
-	_snap_all_map_objects_to_surface.call_deferred()
-	_bind_promoted_scenery.call_deferred()
+func _on_chunk_surface_ready(identity: String, imported: Node3D) -> void:
+	if _surface_refresh_queue.queue_chunk(identity, imported):
+		_schedule_surface_refresh()
+
+func _schedule_surface_refresh() -> void:
+	_surface_followup_pending = _surface_refresh_inflight + _surface_refresh_queue.pending_notifications()
+	if _surface_refresh_running or _surface_refresh_queue.pending_notifications() == 0:
+		return
+	_surface_refresh_running = true
+	_flush_surface_refresh.call_deferred(_surface_refresh_epoch)
+
+func _flush_surface_refresh(epoch: int) -> void:
+	await get_tree().physics_frame
+	if epoch != _surface_refresh_epoch:
+		return
+	var batch: Dictionary = _surface_refresh_queue.take()
+	if int(batch.notifications) == 0:
+		_surface_refresh_running = false
+		_surface_refresh_inflight = 0
+		_surface_followup_pending = 0
+		return
+	_surface_refresh_inflight = int(batch.notifications)
+	_surface_followup_pending = _surface_refresh_inflight + _surface_refresh_queue.pending_notifications()
+	var started := Time.get_ticks_usec()
+	var actor_visits := 0
+	var actor_placement_attempts := 0
+	var object_visits := 0
+	var object_placement_attempts := 0
+	var binding_candidates := 0
+	if SurfaceRefreshQueue.has_live_changes(batch):
+		var full := bool(batch.full)
+		var step_started := Time.get_ticks_usec()
+		if full:
+			_sync_season_surfaces()
+		else:
+			SeasonSurfaces.set_season(AppState.almanac.get("season", {}) as Dictionary)
+			for region: Dictionary in batch.regions:
+				var live: Dictionary = SurfaceRefreshQueue.live_region(region)
+				if not live.is_empty():
+					SeasonSurfaces.apply(live.imported as Node, live.manifest as WorldManifest)
+			_record_surface_work(&"season", step_started, (batch.regions as Array).size())
+		_record_surface_span(_surface_followup_stats, &"season", Time.get_ticks_usec() - int(batch.queued_usec))
+		var priorities: Dictionary = {}
+		for actor_id: int in [AppState.local_actor_id, AppState.selected_actor_id, _combat_target_actor_id()]:
+			if actor_id >= 0:
+				priorities[actor_id] = true
+		step_started = Time.get_ticks_usec()
+		for actor_value: Variant in actor_nodes.values():
+			if not is_instance_valid(actor_value):
+				continue
+			var actor := actor_value as ReplicatedActor3D
+			if actor == null:
+				continue
+			actor_visits += 1
+			var ungrounded := not _grounded_actors.has(actor.actor_id) or not _actor_surface_samples.has(actor.actor_id)
+			if not SurfaceRefreshQueue.should_refresh(batch, actor.server_target,
+					priorities.has(actor.actor_id), ungrounded):
+				continue
+			var actor_adapter := _adapter_for_actor(AppState.actors.get(actor.actor_id, {}) as Dictionary)
+			if actor_adapter != null:
+				_place_actor_on_surface(actor, true, actor_adapter.fallback_height())
+				actor_placement_attempts += 1
+		_record_surface_work(&"actor_ground", step_started, actor_visits)
+		_record_surface_span(_surface_followup_stats, &"actor_ground", Time.get_ticks_usec() - int(batch.queued_usec))
+		var changed: Dictionary = SurfaceRefreshQueue.current_chunks(batch, world_loader.world_root)
+		var wanted: Dictionary = {}
+		step_started = Time.get_ticks_usec()
+		# Each object is visited once: collect current-map bindings during the
+		# same pass that filters navigation rays for the changed surfaces.
+		for object_value: Variant in map_object_nodes.values():
+			if not is_instance_valid(object_value):
+				continue
+			var map_object := object_value as MapObject3D
+			if map_object == null:
+				continue
+			object_visits += 1
+			if SurfaceRefreshQueue.should_refresh(batch, map_object.global_position, false,
+					_ungrounded_map_objects.has(map_object.object_id)):
+				_place_map_object_on_surface(map_object)
+				object_placement_attempts += 1
+			var chunk := str((map_object.presentation.get("bind", {}) as Dictionary).get("chunk", ""))
+			if (full or changed.has(chunk)) and _collect_promoted_scenery(map_object, wanted):
+				binding_candidates += 1
+		for markers: Dictionary in [map_marker_nodes, player_mark_nodes]:
+			for marker_value: Variant in markers.values():
+				if not is_instance_valid(marker_value):
+					continue
+				var marker := marker_value as MapMarker3D
+				if marker == null:
+					continue
+				object_visits += 1
+				if SurfaceRefreshQueue.should_refresh(batch, marker.global_position, priorities.has(marker.target_actor_id)):
+					_place_map_marker_on_surface(marker)
+					object_placement_attempts += 1
+		_record_surface_work(&"object_ground", step_started, object_visits)
+		_record_surface_span(_surface_followup_stats, &"object_ground", Time.get_ticks_usec() - int(batch.queued_usec))
+		step_started = Time.get_ticks_usec()
+		_apply_promoted_scenery(wanted)
+		_record_surface_work(&"scenery_bind", step_started, binding_candidates)
+		_record_surface_span(_surface_followup_stats, &"scenery_bind", Time.get_ticks_usec() - int(batch.queued_usec))
+	_record_surface_work(&"surface_batch", started, actor_visits + object_visits)
+	_record_surface_span(_surface_followup_stats, &"surface_batch",
+		Time.get_ticks_usec() - int(batch.queued_usec), int(batch.notifications))
+	_surface_spatial_stats.batches += 1
+	if bool(batch.full):
+		_surface_spatial_stats.full_batches += 1
+	_surface_spatial_stats.notifications += int(batch.notifications)
+	_surface_spatial_stats.invalidated_regions += int(batch.invalidated_regions)
+	_surface_spatial_stats.actor_visits += actor_visits
+	_surface_spatial_stats.actor_placement_attempts += actor_placement_attempts
+	_surface_spatial_stats.object_visits += object_visits
+	_surface_spatial_stats.object_placement_attempts += object_placement_attempts
+	_surface_spatial_stats.binding_candidates += binding_candidates
+	_surface_refresh_inflight = 0
+	_surface_refresh_running = false
+	_surface_followup_pending = _surface_refresh_queue.pending_notifications()
+	if _surface_followup_pending > 0:
+		_schedule_surface_refresh()
+
+static func _record_surface_span(stats: Dictionary, label: StringName,
+		elapsed: int, items := 0) -> void:
+	var row: Dictionary = stats.get(label, {"count": 0, "total_usec": 0,
+		"max_usec": 0, "last_usec": 0, "items": 0})
+	row.count = int(row.count) + 1
+	row.total_usec = int(row.total_usec) + elapsed
+	row.max_usec = maxi(int(row.max_usec), elapsed)
+	row.last_usec = elapsed
+	row.items = int(row.items) + items
+	stats[label] = row
+
+func _record_surface_work(label: StringName, started: int, items := 0) -> void:
+	_record_surface_span(_surface_work_stats, label, Time.get_ticks_usec() - started, items)
+
+func surface_work_snapshot() -> Dictionary:
+	return {"pending": _surface_followup_pending,
+		"completion_wall": _surface_followup_stats.duplicate(true),
+		"work": _surface_work_stats.duplicate(true),
+		"spatial": _surface_spatial_stats.duplicate(),
+		"queued": _surface_refresh_queue.snapshot(), "running": _surface_refresh_running}
 
 ## The "now harvesting" indicator. The stock client drove this by matching an
 ## exact English phrase out of the chat stream; this reads the authoritative
@@ -15602,6 +16045,8 @@ func _cursor_context() -> Dictionary:
 ## equipped, unequipped or Ctrl-dropped; the finger uses it; the eye looks at
 ## it. This is the promise, so it must match _on_inventory_slot_pressed.
 func _slot_cursor_target(button: Button) -> String:
+	if bool(button.get_meta("gauntlet_loot_inspect", false)):
+		return "item_inspect"
 	var slot: int = inventory_slot_buttons.find(button)
 	if slot < 0:
 		var equipment_index: int = equipment_slot_buttons.find(button)
@@ -15709,7 +16154,7 @@ func _apply_eloria_art() -> void:
 	_apply_rabbitlands_branding()
 	_hud_active_atlas = _external_texture("res://assets/ui/eloria_gamebuttons.png")
 	_hud_inactive_atlas = _external_texture("res://assets/ui/eloria_gamebuttons_inactive.png")
-	%MountsButton.icon = _external_texture("res://assets/ui/mounts.svg")
+	%MountsButton.icon = _external_texture("res://assets/ui/menu-icons/mounts.png")
 	if _hud_active_atlas != null:
 		# The Godot HUD atlas uses one canonical row-major icon order.  Keeping
 		# these regions contiguous makes the art easy to audit and prevents the

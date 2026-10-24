@@ -1,5 +1,107 @@
 # Client runtime performance
 
+## Reproducible performance checks
+
+Run `tests/integration/run_crowd_presentation_benchmark.py` from `godot-client`.
+Use explicit quality, renderer, resolution, frame cap and minimap choices for
+comparisons. For example, a source-project screening run is:
+
+```powershell
+python tests/integration/run_crowd_presentation_benchmark.py --godot <Godot.exe> --variants all --cells phase1 --mode windowed --renderer gl_compatibility --quality low --resolution 1280x720 --fps-cap 30 --minimap show --label reference-low
+```
+
+`phase1` covers market160, invasion160, an equipped 160-actor crowd containing
+80 supported mounts, combat160, empty, and cold/warm southern traversal. The
+route drives real client map and actor handlers without a server connection;
+it does not certify server navigation. “Cold” means the first application
+pass, not an emptied operating-system cache. `authored-herd` is separately
+selectable and reports unavailable content when the map has no authored herd.
+Unavailable content is retained as pending, never accepted as an empty timing.
+
+On Windows, `--settings-profile performance` seeds the game's Performance
+preferences into fresh isolated storage before startup: Low, 30 FPS, 75% world
+scale, Half map textures, 60 crowd bodies and the remaining preset values.
+The runner records the seed and checks the actual loaded settings. Conflicting
+options are rejected. Use market/invasion/combat cells for this profile; the
+80-mount census requires a larger body allowance. Ordinary Low at 30 FPS uses
+`--settings-profile default --quality low --fps-cap 30` and remains a separate
+comparison. Performance profile seeding currently supports Windows only.
+
+For shipping-path measurements, create a committed standalone benchmark export:
+
+```powershell
+python tools/package_client.py --distribution standalone --benchmark-profile --ref <commit> --no-fetch --no-zip --godot <Godot.exe> --build-dir <disposable-build-worktree> --out <local-checkpoints>
+python tests/integration/run_crowd_presentation_benchmark.py --godot <package>/app/RabbitLands.exe --executable-mode exported --package-manifest <package>/benchmark-package.json --variants all --cells phase1 --mode windowed --renderer gl_compatibility --quality medium --resolution 1280x720 --fps-cap 60 --minimap show --label reference-medium
+```
+
+The local benchmark profile adds only allowlisted synthetic workload scripts
+and a custom startup loop in its disposable export settings. The runner selects
+the workload with `RABBITLANDS_CROWD_BENCH_EXECUTION_MODE=exported`; release templates
+ignore `--script`. Starting the package normally opens the ordinary game, so
+the checkpoint remains playable. Ordinary distributions keep tests excluded
+and retain their normal startup settings. The manifest covers the executable,
+PCK and loose files. Checkpoints and raw reports belong in ignored local storage.
+Keep replay recordings and their reports outside repositories.
+
+The runner first requires a startup acknowledgement bound to its unique run
+token, process, executable, execution mode and isolated user directory. A wrong
+entry point fails before the full workload timeout. It verifies source/content/
+executable identity before and after each run, isolates settings, records effective settings and actual backend use,
+and rejects errors, incomplete readiness, mismatched populations or invalid
+statistics. It retains raw work-time and delivered-frame series separately.
+Loading diagnostics distinguish preparation, verification, attach, deferred
+grounding/binding, retirement and retained caches. Large indivisible work is
+reported explicitly rather than implied to fit a nominal time allowance.
+
+Windows runs also record `processMemory`: sampled resident working set and
+private committed bytes, plus OS lifetime peaks. Samples are at most once per
+second after startup acknowledgement through workload teardown; subsecond
+changes and the final unsampled interval can be missed. Timestamps mark
+observations, including when an OS peak was observed. These whole-process
+counters are separate from Godot allocator and GPU memory. Unsupported or
+failed observations are explicitly unavailable or partial, never zero memory.
+
+`--disable-obs-vulkan-capture` optionally sets `DISABLE_VULKAN_OBS_CAPTURE=1`
+only for the owned child. Without the switch, inherited values are preserved.
+Per-run `externalInterference.obsVulkan` records the request and effective value;
+`observedHookLoaded` remains unknown (`null`) because the runner does not inspect
+modules. This requests disabling OBS's declared Vulkan implicit layer without
+changing OBS or other capture jobs. It does not establish crash causality or
+prove every capture hook is absent.
+
+A process-owned lock serializes participating runners across worktrees. The
+lock cannot reserve the machine against unrelated applications. Pause imports,
+builds, tests and other benchmark jobs during a comparison. Use matched content
+and settings, repeat runs in alternating order, and label shared-host results
+as screening. A fast development machine does not qualify low-end hardware.
+
+## Crowd and scenery presentation
+
+Mounts inherit their rider's quality and use one clock for mount, rider, tack,
+reins and cloth. Half/quarter-rate updates accumulate skipped time; offscreen
+one-shot actions finish without posing the whole mount. Local, selected and
+combat-target riders retain priority. Parking sleeps both model subtrees, and
+revival reconciles current quality before restoring mount presentation. A worn
+cape still needs quality, distance/tier and crowd allowance; remote Medium/Low
+capes sleep, while the local cape remains available.
+
+New and deferred actor bodies share one allowance per process frame: four
+bodies and a soft 6 ms elapsed stop, with at most three distinct critical actor
+exceptions. Ambient creation has its own shared allowance across populations:
+Low/Medium/High allow two/three/four successful creations, at most 32 attempts,
+and a soft 1.5 ms elapsed stop. One indivisible load can exceed either stop;
+these independent allowances are not a combined frame-time guarantee.
+
+Ambient meshes follow quality and animated scenery uses skeleton gating with
+full/half-rate allowances of 8/8, 12/12 and 16/16 at Low, Medium and High, per
+population. Those caps are separate from replicated actors. Retirement forgets
+only departing animation members, preserving survivors' clocks; full clears
+discard membership without reactivating retiring callbacks. Readiness includes
+queued ambient creation. Synthetic fixtures cover these paths; authored-herd
+performance remains pending approved populated content.
+
+## Historical measurements
+
 Notes on the runtime cost of the Godot client and the mechanisms that keep it
 down. Measured on the Four Gates package (1717 imported mesh nodes referencing
 42 meshes) at 1280x720 with the GL Compatibility renderer.
@@ -545,7 +647,43 @@ package stage, checks every staged image has a sidecar or a reason, and
 Compatibility under xvfb) `tests/integration/rendered_vram_textures.gd`, which
 checks the formats the GPU really holds and draws the fixture both ways.
 
+## Streaming work and resource lifetime
+
+Chunk and exterior retirement share an allowance of 2 ms and 64 released nodes
+per process frame. Weak owners take turns; each owner receives at most one
+slice per frame. A single indivisible release can exceed the time allowance,
+and diagnostics charge its full duration. Retirement estimates remain counted
+until the nodes are actually released. Pausing, cancelling and adopting a
+resident root preserve ownership without blocking other streams indefinitely.
+
+Chunk surface notifications coalesce until the next physics frame. The refresh
+checks live root identity and current transforms, then limits grounding work
+to affected bounds, priority actors and actors or objects still missing ground.
+Resident-map changes retain a full refresh. Scenery bindings are updated only
+for the active map's changed chunks. Completion wall time includes the physics
+wait; separate work counters measure the callback itself. Placement attempts
+are not a count of physics rays.
+
+Full map textures retain their existing budget policy. Reduced decoded images
+can publish a conservative estimate from their actual CPU dimensions and mip
+chain after the requested reduction succeeds. Unknown, unreduced or
+incompatible private copies retain the published estimate. These figures are
+streaming estimates, not a complete measurement of physical GPU allocation.
+Runtime manifests continue to hash content on every verification: the current
+mutable content provider offers no enforceable sealed identity for safe reuse.
+
 ## Checking a change
+
+Local benchmark exports also record an asset-only identity from actual PCK
+payload bytes and all loose assets, with explicit code/metadata exclusions.
+The runner verifies it before and after each process. This allows different
+client code to be compared with the same assets; it does not allow the runtime
+loader to skip verification. Route boundary snapshots record selected and
+resident content and their capture cost. Full-route frame/wall samples include
+that diagnostic cost; transition timing ends before the arrival snapshot.
+Mounted snapshots distinguish available joint scheduling counters from the
+legacy path and record actual mount quality. Their counters cover each visual's
+lifetime through the boundary, including warmup, rather than only the sample.
 
 `tests/test_runtime_performance.gd` guards the viewport scheduling, the surface
 sample cache, the in-place packet decode, the shared icons, the actor change

@@ -21,6 +21,8 @@ const PANEL_SIZE := Vector2(560.0, 380.0)
 const PARTY_WIDTH := 244.0
 const PARTY_MINIMUM := Vector2(144, 108)
 const PARTY_NAMES_WIDTH := 216.0
+
+signal party_layout_saved
 const PARTY_HEALTH := Color("479947")
 const PARTY_LOW_HEALTH := Color("b74935")
 const PARTY_ETHER := Color("4287ac")
@@ -164,6 +166,13 @@ var market_buy: Button
 var market_renew: Button
 var market_cancel: Button
 var market_sell: Button
+var market_reprice: Button
+var market_votes: Button
+var market_price_dialog: ConfirmationDialog
+var market_new_price: SpinBox
+var _market_price_hint: Label
+var _market_priced_listing: Dictionary = {}
+var market_sender: Callable
 ## Browse, mine, and history are server pages; sell is the player's pack.
 var _market_tab := "browse"
 ## When the last request went out, or -1 once the server has answered it.
@@ -177,6 +186,7 @@ var party_invite_row: HBoxContainer
 var party_invite_label: Label
 var party_status: Label
 var party_leave_button: Button
+var party_add_bot: MenuButton
 var _party_was_joined := false
 var _party_last_inviter := ""
 var party_collapse: Button
@@ -190,6 +200,8 @@ var _party_expanded_size := Vector2(PARTY_WIDTH, 0)
 var _party_resizing := false
 var _party_resize_mouse := Vector2.ZERO
 var _party_resize_size := Vector2.ZERO
+var _party_layout_queued := false
+var _party_controls_visible := true
 var preferences_path := WindowPreferences.SETTINGS_PATH
 var achievements_panel: PanelContainer
 var achievements_header: Label
@@ -222,16 +234,19 @@ func _ready() -> void:
 	add_child(gauntlet_ready_window)
 	gauntlet_loot_window = preload("res://src/ui/gauntlet_loot_window.gd").new()
 	add_child(gauntlet_loot_window)
+	gauntlet_loot_window.item_inspection_requested.connect(func() -> void: detail_popup_allowed = true)
+	if item_atlas != null: gauntlet_loot_window.configure(item_atlas)
+	gauntlet_loot_window.call("_style_dialog", market_price_dialog)
 	AppState.state_changed.connect(_on_state_changed)
 	sync_all()
 
 func configure(atlas: ItemAtlas, guide: Control = null) -> void:
 	item_atlas = atlas
-	gauntlet_loot_window.configure(atlas)
+	if gauntlet_loot_window != null: gauntlet_loot_window.configure(atlas)
 	quest_guide = guide
 	if quest_guide != null:
 		quest_guide.tracking_changed.connect(_on_quest_guide_tracking_changed)
-	_sync_quests()
+	if is_node_ready(): _sync_quests()
 
 func _on_quest_guide_tracking_changed() -> void:
 	if not quest_guide.is_quest_tracked() and quest_guide.quest_title() == _tracked_quest_title:
@@ -261,7 +276,7 @@ func close_top(include_party := false) -> bool:
 		elif panel == merchant_panel:
 			AppState.close_merchant()
 		elif panel == market_panel:
-			AppState.close_marketplace()
+			_close_marketplace()
 		elif panel == detail_panel:
 			AppState.close_item_detail()
 		else:
@@ -974,8 +989,20 @@ func _on_merchant_trade() -> void:
 ## the whole market; v3 adds filters, sorting, and private sales history.
 ## An older one shows its first twenty rows unpaged.
 
+func toggle_marketplace() -> void:
+	if market_panel.visible:
+		_close_marketplace()
+	else:
+		_market_send("#auction ui browse", "Opening the Exchange…")
+
+func _close_marketplace() -> void:
+	_market_transmit("#auction close")
+	market_price_dialog.hide()
+	AppState.close_marketplace()
+
 func _sync_marketplace() -> void:
 	if not bool(AppState.marketplace.get("open", false)):
+		market_price_dialog.hide()
 		market_panel.hide()
 		_market_tab = "browse"
 		_market_request_msec = -1
@@ -1007,6 +1034,9 @@ func _render_market() -> void:
 	var selling: bool = _market_tab == "sell"
 	var history: bool = _market_tab == "history"
 	var advanced: bool = int(state.get("version", 1)) >= 3
+	var can_trade := bool(state.get("can_trade", false))
+	(market_tabs["sell"] as Button).disabled = not can_trade
+	(market_tabs["sell"] as Button).tooltip_text = "Visit an Exchange NPC within four tiles to list new items." if not can_trade else "List an item from your pack."
 	market_list.visible = not history
 	market_history.visible = history
 	(market_tabs["history"] as Button).visible = advanced
@@ -1017,9 +1047,12 @@ func _render_market() -> void:
 	var returned: int = int(state.get("returned_items", 0))
 	market_header.text = "Proceeds: %s gc    ·    Return escrow: %s item%s" % [
 		_market_number(gold), _market_number(returned), "" if returned == 1 else "s"]
-	market_collect.disabled = gold <= 0 and returned <= 0
+	market_collect.disabled = not can_trade or (gold <= 0 and returned <= 0)
 	market_collect.tooltip_text = ("Nothing is waiting for you." if market_collect.disabled
 		else "Take your sale proceeds and returned items into your pack.")
+	if not can_trade:
+		market_collect.tooltip_text = "Visit an Exchange NPC within four tiles to collect escrow."
+		market_header.text += "    ·    Remote access: prices and voting only"
 	market_search_row.visible = paged and not selling
 	market_page_row.visible = paged and not selling
 	var selected_items: PackedInt32Array = market_list.get_selected_items()
@@ -1275,7 +1308,9 @@ func _sync_market_footer(_text: String = "") -> void:
 	market_renew.visible = managing
 	market_cancel.visible = managing
 	market_sell.visible = selling
-	for button: Button in [market_buy, market_renew, market_cancel, market_sell]:
+	market_reprice.visible = managing
+	market_votes.visible = false
+	for button: Button in [market_buy, market_renew, market_cancel, market_sell, market_reprice, market_votes]:
 		button.disabled = true
 		button.tooltip_text = ""
 	market_buy.text = "Buy"
@@ -1283,6 +1318,7 @@ func _sync_market_footer(_text: String = "") -> void:
 	market_totals.text = ""
 	var waiting: bool = _market_waiting()
 	var entry: Dictionary = _market_entry()
+	var can_trade := bool(AppState.marketplace.get("can_trade", false))
 	if _market_tab == "history":
 		market_selected_icon.texture = null
 		market_selection.text = "Your completed sales · times shown in UTC"
@@ -1302,12 +1338,25 @@ func _sync_market_footer(_text: String = "") -> void:
 	market_selected_icon.texture = _named_icon(int(entry.get("image_id", 0)), item_name)
 	var quantity_limit: int = int(entry.get("quantity", 0))
 	if managing:
+		market_reprice.text = "Propose price…" if bool(entry.get("party_owned", false)) else "Edit price…"
+		market_reprice.disabled = waiting
+		if bool(entry.get("party_owned", false)):
+			market_selection.text = "Party-owned listing"
+			var run_id := _market_party_run(entry)
+			market_totals.text = "Price changes and withdrawals\nrequire the original party's vote."
+			market_reprice.disabled = waiting or run_id.is_empty()
+			market_votes.visible = true
+			market_votes.disabled = waiting or run_id.is_empty()
+			market_renew.disabled = true
+			market_cancel.disabled = true
+			return
 		market_selection.text = "%s  ×%d    ·    %s gc each\nExpires in %s." % [item_name,
 			quantity_limit, _market_number(int(entry.get("unit_price", 0))),
 			_market_time_left(int(entry.get("seconds_left", 0))).trim_suffix(" left")]
 		market_totals.text = "Renew: 365 days from now.\nCancel or expiry: back to you\nthrough return escrow."
 		market_renew.disabled = waiting
-		market_cancel.disabled = waiting
+		market_cancel.disabled = waiting or not can_trade
+		if not can_trade: market_cancel.tooltip_text = "Visit an Exchange NPC within four tiles to cancel a listing."
 		return
 	if buying:
 		var price: int = int(entry.get("unit_price", 0))
@@ -1332,7 +1381,10 @@ func _sync_market_footer(_text: String = "") -> void:
 				market_totals.text += "\nNot enough gold."
 				market_buy.tooltip_text = "You need %s gc." % _market_number(cost)
 				return
-		market_buy.disabled = waiting
+		market_buy.disabled = waiting or not can_trade
+		if not can_trade:
+			market_buy.tooltip_text = "Visit an Exchange NPC within four tiles to buy items."
+			market_totals.text += "\nVisit an Exchange NPC to buy."
 		return
 	market_selection.text = "%s\n%d in your pack" % [item_name, quantity_limit]
 	var amount: int = _market_quantity(quantity_limit)
@@ -1345,7 +1397,7 @@ func _sync_market_footer(_text: String = "") -> void:
 		market_totals.text = "Enter a price per item\nin whole gold coins."
 		return
 	market_totals.text = "%s gc if all sell\nListed for 365 days." % _market_number(amount * unit_price)
-	market_sell.disabled = waiting
+	market_sell.disabled = waiting or not can_trade
 
 func _market_status(text: String, colour: Color) -> void:
 	market_status.text = text
@@ -1353,10 +1405,13 @@ func _market_status(text: String, colour: Color) -> void:
 
 ## Sends one `#auction` command. The window redraws from the state the server
 ## answers with; until then the action buttons hold off a second click.
+func _market_transmit(command: String) -> Error:
+	return market_sender.call(command) if market_sender.is_valid() else Network.send_chat(command)
+
 func _market_send(command: String, waiting_text: String) -> void:
 	if command.is_empty():
 		return
-	var error: Error = Network.send_chat(command)
+	var error: Error = _market_transmit(command)
 	if error != OK:
 		_market_status("The request was not sent: " + error_string(error), MARKET_REFUSED_COLOUR)
 		return
@@ -1445,6 +1500,9 @@ func _market_sell_command() -> String:
 	return "#auction sell %d %d %d" % [int(entry.slot), quantity, price]
 
 func _on_market_tab(tab: String) -> void:
+	if tab == "sell" and not bool(AppState.marketplace.get("can_trade", false)):
+		_market_status("Visit an Exchange NPC within four tiles to list new items.", MARKET_REFUSED_COLOUR)
+		return
 	market_search.text = ""
 	if tab == "sell":
 		_market_tab = "sell"
@@ -1494,23 +1552,49 @@ func _on_market_page(direction: int) -> void:
 		state.get("filters", {}) as Dictionary),
 		"Turning the page…")
 
+func _market_party_run(entry: Dictionary) -> String:
+	return str((AppState.marketplace.get("party_runs", {}) as Dictionary).get(str(int(entry.get("listing_id", 0))), ""))
+
+func _on_market_reprice() -> void:
+	var entry := _market_entry()
+	if entry.is_empty() or _market_tab != "mine": return
+	_market_priced_listing = entry.duplicate(true)
+	var party := bool(entry.get("party_owned", false))
+	if party and _market_party_run(entry).is_empty(): return
+	market_price_dialog.title = ("Propose price · " if party else "Edit price · ") + str(entry.item_name)
+	market_price_dialog.ok_button_text = "Propose price · Vote Yes" if party else "Save price"
+	_market_price_hint.text = "Current price: %d GC per item. %d items remain.\n" % [int(entry.unit_price), int(entry.quantity)] + ("The original party votes on this price. Any No blocks it; abstentions are neutral and unanswered votes are ignored after 14 days. The current price stays active until approval." if party else "The new price applies to unsold items. Earlier sales and proceeds stay unchanged.")
+	market_new_price.value = int(entry.unit_price)
+	market_price_dialog.popup_centered(Vector2i(430, 290))
+
+func _on_market_votes() -> void:
+	var run_id := _market_party_run(_market_entry())
+	if not run_id.is_empty():
+		_market_transmit("#gauntletloot " + JSON.stringify({"action": "open", "run_id": run_id}))
+
 func _on_market_buy() -> void:
+	if not bool(AppState.marketplace.get("can_trade", false)): return
 	_market_send(_market_buy_command(), "Buying…")
 
 func _on_market_renew() -> void:
 	_market_send(_market_listing_command("renew"), "Renewing…")
 
 func _on_market_cancel() -> void:
+	if not bool(AppState.marketplace.get("can_trade", false)): return
 	_market_send(_market_listing_command("cancel"), "Cancelling…")
 
 func _on_market_sell() -> void:
+	if not bool(AppState.marketplace.get("can_trade", false)): return
 	_market_send(_market_sell_command(), "Listing…")
 
 func _on_market_collect() -> void:
+	if not bool(AppState.marketplace.get("can_trade", false)): return
 	_market_send("#auction collect", "Collecting…")
 
 ## How long a listing has left, in the largest unit that is not zero.
 func _market_time_left(seconds: int) -> String:
+	if seconds == 0xFFFFFFFF:
+		return "Party vote required"
 	if seconds >= 2 * 86400:
 		return "%d days left" % (seconds / 86400)
 	if seconds >= 86400:
@@ -1542,6 +1626,12 @@ func _sync_party(open_requested: bool = false) -> void:
 	var members: Array = state.get("members", []) as Array
 	var invited_by: String = str(state.get("invited_by", ""))
 	var in_party: bool = bool(state.get("in_party", false))
+	var can_manage := not in_party
+	for raw: Variant in members:
+		if bool(raw.get("is_self", false)) and bool(raw.get("leader", false)):
+			can_manage = true
+	party_add_bot.visible = can_manage
+	party_add_bot.disabled = members.size() >= 8
 	# Health and location packets refresh the roster without reopening a
 	# window the player dismissed. Joining or a new invitation can open it.
 	var open_for_change: bool = ((in_party and not _party_was_joined)
@@ -1616,6 +1706,8 @@ func _party_row(member: Dictionary) -> Control:
 	var where := Label.new()
 	where.name = "Standing"
 	where.text = "" if online else "offline"
+	if bool(member.get("is_bot", false)) and str(member.get("map_id", "")).is_empty():
+		where.text = "standby"
 	where.add_theme_font_size_override("font_size", 10)
 	where.add_theme_color_override("font_color", HUD_STYLE.MUTED)
 	header.add_child(where)
@@ -1637,6 +1729,14 @@ func _party_row(member: Dictionary) -> Control:
 	vitals.add_child(ether)
 	ether.visible = not _party_numbers
 	vitals.add_child(_party_number("EtherNumber", int(member.get("ether", 0)), int(member.get("max_ether", 0)), PARTY_ETHER, online))
+	if bool(member.get("is_bot", false)) and party_add_bot.visible:
+		var remove := Button.new()
+		remove.name = "RemoveBot"
+		remove.text = "×"
+		remove.tooltip_text = "Remove " + str(member.name)
+		HUD_STYLE.button(remove)
+		remove.pressed.connect(func() -> void: _send_party_command("#party bot remove " + str(member.name)))
+		row.add_child(remove)
 	return row
 
 func _party_number(node_name: String, current: int, maximum: int, colour: Color, online: bool) -> Label:
@@ -1652,23 +1752,27 @@ func _layout_party() -> void:
 	var count := (AppState.party.get("members", []) as Array).size()
 	var bounds := get_viewport_rect().size
 	var dragger := party_panel.get_node("WindowDrag") as WindowDrag
-	var bottom := bounds.y - WindowDrag.RESERVED_BOTTOM_BAR
+	var bottom := bounds.y - dragger.reserved_bottom
 	if is_instance_valid(dragger.bottom_hud):
 		bottom = minf(bottom, dragger.bottom_hud.global_position.y)
-	var maximum := Vector2(maxf(PARTY_MINIMUM.x, bounds.x - 108), maxf(PARTY_MINIMUM.y, bottom - 12))
+	var scale := party_panel.get_global_transform().get_scale().abs().max(Vector2.ONE * 0.01)
+	var maximum := (Vector2(bounds.x - dragger.reserved_right - dragger.edge_margin,
+		bottom - dragger.edge_margin * 2) / scale).max(PARTY_MINIMUM)
 	_party_expanded_size.x = clampf(_party_expanded_size.x, PARTY_MINIMUM.x, maximum.x)
 	var compact := _party_expanded_size.x < PARTY_NAMES_WIDTH
 	party_header.text = "Party" if compact and count > 0 else party_header.tooltip_text
 	var row_height := 36.0
 	for row: Node in party_rows.get_children():
 		(row.get_node("Vitals/Identity") as Control).visible = not compact
-		row_height = maxf(row_height, (row as Control).get_combined_minimum_size().y)
+		if (row as Control).visible:
+			row_height = maxf(row_height, (row as Control).get_combined_minimum_size().y)
 	party_scroll.visible = not _party_collapsed and count > 0
 	party_scroll.custom_minimum_size.y = row_height
 	var body := _window_body(party_panel)
-	(body.get_node("PartyActions") as Control).visible = not _party_collapsed
+	(body.get_node("PartyActions") as Control).visible = _party_controls_visible and not _party_collapsed
 	party_leave_button.visible = count > 0
 	party_leave_button.text = "Leave" if compact else "Leave party"
+	party_add_bot.text = "+" if compact else "Add bot"
 	(body.get_node("PartyActions/PartyHint") as Control).visible = not compact
 	party_status.visible = not _party_collapsed and not party_status.text.is_empty()
 	party_collapse.text = "▸" if _party_collapsed else "▾"
@@ -1719,7 +1823,13 @@ func _on_party_option(id: int) -> void:
 	_save_party_layout()
 
 func _queue_party_layout() -> void:
-	_layout_party.call_deferred()
+	if _party_layout_queued: return
+	_party_layout_queued = true
+	get_tree().process_frame.connect(_flush_party_layout, CONNECT_ONE_SHOT)
+
+func _flush_party_layout() -> void:
+	_party_layout_queued = false
+	_layout_party()
 
 func _toggle_party_collapsed() -> void:
 	_party_collapsed = not _party_collapsed
@@ -1729,6 +1839,7 @@ func _toggle_party_collapsed() -> void:
 func _save_party_layout() -> void:
 	WindowPreferences.store_layout("party_hud", Rect2(party_panel.position, _party_expanded_size), _party_collapsed, preferences_path,
 		{"numbers": _party_numbers, "custom_size": _party_custom_size})
+	party_layout_saved.emit()
 
 ## The catalogue, one category at a time, with a bar on every line.
 ##
@@ -2190,12 +2301,17 @@ func _build() -> void:
 	HUD_STYLE.button(party_leave_button)
 	party_leave_button.pressed.connect(_on_party_leave)
 	party_actions.add_child(party_leave_button)
+	party_add_bot = preload("res://src/ui/bot_class_picker.gd").new()
+	party_add_bot.name = "AddBot"
+	HUD_STYLE.button(party_add_bot)
+	party_add_bot.class_chosen.connect(func(class_id: int) -> void: _send_party_command("#party bot add %d" % class_id))
+	party_actions.add_child(party_add_bot)
 	# Inviting needs a name, and a name needs typing; the chat command already
 	# reads well, so the window points at it rather than growing a text field
 	# that would duplicate it.
 	var party_hint := Label.new()
 	party_hint.name = "PartyHint"
-	party_hint.text = "  Invite: #party invite"
+	party_hint.text = "?"
 	party_hint.add_theme_font_size_override("font_size", 10)
 	party_hint.tooltip_text = "#party invite <name> invites a teammate. #p <message> speaks to the party."
 	party_actions.add_child(party_hint)
@@ -2218,6 +2334,7 @@ func _build() -> void:
 	party_status.add_theme_font_size_override("font_size", 11)
 	party_body.add_child(party_status)
 	party_body.move_child(party_actions, party_body.get_child_count() - 1)
+	party_panel.minimum_size_changed.connect(_queue_party_layout)
 	get_viewport().size_changed.connect(_queue_party_layout)
 	if is_instance_valid(party_dragger.bottom_hud):
 		party_dragger.bottom_hud.resized.connect(_queue_party_layout)
@@ -2789,6 +2906,31 @@ func _build_market_window() -> void:
 	footer.add_child(market_cancel)
 	market_sell = _market_action_button("MarketplaceSell", "List for sale", _on_market_sell)
 	footer.add_child(market_sell)
+	market_reprice = _market_action_button("MarketplaceReprice", "Edit price…", _on_market_reprice)
+	footer.add_child(market_reprice)
+	market_votes = _market_action_button("MarketplaceVotes", "Party votes…", _on_market_votes)
+	footer.add_child(market_votes)
+	market_price_dialog = ConfirmationDialog.new()
+	market_price_dialog.title = "Edit listing price"
+	market_price_dialog.ok_button_text = "Save price"
+	add_child(market_price_dialog)
+	var price_body := VBoxContainer.new()
+	price_body.add_theme_constant_override("separation", 12)
+	market_price_dialog.add_child(price_body)
+	_market_price_hint = Label.new()
+	_market_price_hint.size.x = 370
+	_market_price_hint.custom_minimum_size.x = 370
+	_market_price_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	price_body.add_child(_market_price_hint)
+	market_new_price = SpinBox.new()
+	market_new_price.min_value = 1
+	market_new_price.max_value = MARKET_PRICE_LIMIT
+	market_new_price.step = 1
+	market_new_price.custom_minimum_size = Vector2(360, 42)
+	price_body.add_child(market_new_price)
+	market_price_dialog.confirmed.connect(func() -> void:
+		market_new_price.apply()
+		_market_send("#auction price %d %d" % [int(_market_priced_listing.listing_id), int(market_new_price.value)], "Submitting price…"))
 	market_status = Label.new()
 	market_status.name = "MarketplaceStatus"
 	# One line, trimmed: a wrapping label measured before its first layout
@@ -2859,7 +3001,7 @@ func _window(window_name: String, title: String) -> PanelContainer:
 		if panel == merchant_panel:
 			AppState.close_merchant()
 		elif panel == market_panel:
-			AppState.close_marketplace()
+			_close_marketplace()
 		elif panel == detail_panel:
 			AppState.close_item_detail()
 		else:

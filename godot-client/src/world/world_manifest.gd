@@ -2,11 +2,14 @@ class_name WorldManifest
 extends RefCounted
 
 const SUPPORTED_SCHEMA_MAJOR := 1
+const ResourceDiagnostics := preload("res://src/world/resource_diagnostics.gd")
 
 var source_path := ""
 var data: Dictionary = {}
 var errors: Array[String] = []
 var warnings: Array[String] = []
+## Last verification only; no file-stat/read pass is added to count bytes.
+var verification_diagnostics: Dictionary = {}
 
 static func load_file(path: String) -> WorldManifest:
 	var result := WorldManifest.new()
@@ -36,12 +39,28 @@ func glb_path() -> String:
 func has_streaming_chunks() -> bool:
 	return data.has("streamingChunks")
 
+## Current packages contain loose mutable files and provide no enforceable
+## sealed-content provider. Build metadata, a digest manifest, timestamps and
+## environment variables do not make those files immutable. Keep verification
+## strict until a future provider can attest the bytes actually consumed.
+static func external_verification_policy() -> Dictionary:
+	return {"mode": "full_hash", "reuse_enabled": false, "sealed_generation": "",
+		"reason": "no_enforceable_sealed_installed_content_provider"}
+
 func verify_external_resources() -> Array[String]:
+	var began := Time.get_ticks_usec()
+	var timings: Dictionary = {}
+	verification_diagnostics = {"resource_references": 0, "hashes_attempted": 0,
+		"paths_rejected": 0, "failures": 0, "elapsed_us": 0, "timings": {},
+		"policy": external_verification_policy()}
 	var failures: Array[String] = []
 	var resources: Variant = data.get("externalResources", {})
 	if not resources is Dictionary:
 		failures.append("externalResources must be a URI-to-SHA256 object")
+		verification_diagnostics.failures = failures.size()
+		verification_diagnostics.elapsed_us = Time.get_ticks_usec() - began
 		return failures
+	verification_diagnostics.resource_references = (resources as Dictionary).size()
 	var source := ProjectSettings.globalize_path(source_path).replace("\\", "/").simplify_path()
 	var scope := ProjectSettings.globalize_path("res://../eloria-assets").replace("\\", "/").simplify_path()
 	if not source.to_lower().begins_with(scope.to_lower() + "/"):
@@ -54,10 +73,22 @@ func verify_external_resources() -> Array[String]:
 		var path := ProjectSettings.globalize_path(glb_path()).replace("\\", "/").get_base_dir().path_join(uri).simplify_path()
 		if uri.is_absolute_path() or ":" in uri or not path.to_lower().begins_with(scope.to_lower() + "/"):
 			failures.append("external resource outside asset scope: " + uri)
+			verification_diagnostics.paths_rejected += 1
 			continue
 		var expected := str(resources[raw_uri])
-		if expected.length() != 64 or FileAccess.get_sha256(path) != expected:
+		var actual := ""
+		# Preserve the original short-circuit: invalid expected digests never
+		# cause a file read merely for instrumentation.
+		if expected.length() == 64:
+			var hash_began := Time.get_ticks_usec()
+			actual = FileAccess.get_sha256(path)
+			ResourceDiagnostics.record(timings, &"external_image_hash", hash_began, true)
+			verification_diagnostics.hashes_attempted += 1
+		if expected.length() != 64 or actual != expected:
 			failures.append("external resource missing or digest mismatch: " + uri)
+	verification_diagnostics.failures = failures.size()
+	verification_diagnostics.elapsed_us = Time.get_ticks_usec() - began
+	verification_diagnostics.timings = ResourceDiagnostics.snapshot(timings)
 	return failures
 
 func coordinate_adapter() -> CoordinateAdapter:

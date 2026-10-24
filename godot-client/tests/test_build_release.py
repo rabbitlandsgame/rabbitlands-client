@@ -62,7 +62,8 @@ def test_build_freezes_one_commit_and_collects_only_supported_downloads(tmp_path
     assert all(command[command.index("--ref") + 1] == SHA for command in commands)
     assert "--installer" in commands[0] and "--no-zip" in commands[0]
     assert "--online-installer" in commands[0]
-    assert "--installer" not in commands[1] and "--no-zip" not in commands[1]
+    assert "--installer" not in commands[1] and "--no-zip" in commands[1]
+    assert all("--shared-release-assets" in command for command in commands)
     assert all("--no-smoke" not in command and "--no-client-updates" not in command for command in commands)
     paths = [Path(row["path"]) for row in data["assets"]]
     assert any(path.name.endswith("-setup-1.bin") for path in paths)

@@ -1,0 +1,38 @@
+{
+  "status": "Implemented and verified source; no production deployment performed",
+  "shortcuts": {
+    "exchange": "Ctrl+Shift+E",
+    "storage_preview": "Ctrl+Shift+S"
+  },
+  "configurable_in": "Settings > Controls, saved through existing keys.ini",
+  "server_checks_passed": 144,
+  "remote_service_ui_checks_passed": 35,
+  "party_exchange_ui_checks_passed": 31,
+  "ui_regressions": {
+    "marketplace_search_and_history": "PASS",
+    "classic_storage": "PASS",
+    "storage_organizer": "PASS",
+    "hud_presets": "PASS"
+  },
+  "npc_transfer_range_tiles": 4,
+  "rules": [
+    "Remote exchange prices, personal repricing and original-party price proposals",
+    "My listings includes eligible original-party listings",
+    "Purchases, new listings, cancellations and escrow collection require an Exchange NPC",
+    "Gauntlet listing plans can be staged remotely but posted only at an Exchange NPC",
+    "Asynchronous approved withdrawals persist in ready state until original-member NPC collection",
+    "Storage previews deny all transfers, including drag, double click, bulk and favorite-list paths",
+    "Normal keeper/chest access and privileged god-storage authorization remain separate",
+    "Permissions refresh independently for exchange and party views when walking",
+    "Closing a view does not reopen it on movement"
+  ],
+  "fixtures": "Server-generated packets with fictional accounts only",
+  "previews": [
+    "remote-exchange-price.png",
+    "remote-storage-preview.png"
+  ],
+  "sha256": {
+    "remote-exchange-price.png": "4fc4fe0cbacdefa37be2cf84c7da3d4691694a00782c6682e71ae65b6d24d28f",
+    "remote-storage-preview.png": "3f78a720ecd93bc1decc405a64682e594b642b2a93da67bc4da3bf6d856abdf6"
+  }
+}

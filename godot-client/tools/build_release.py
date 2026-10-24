@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import base64
+import datetime
 import importlib
 import json
 import os
@@ -17,9 +18,13 @@ import shutil
 import subprocess
 import sys
 import time
+import urllib.error
+import urllib.parse
+import urllib.request
 
 import client_release
 import package_client
+import shared_release_assets as shared
 
 REPOSITORY = "rabbitlandsgame/rabbitlands-client"
 ACCOUNT = "rabbitlandsgame"
@@ -101,13 +106,25 @@ def platform_assets(folder: Path, sha: str, platform: str) -> tuple[list[Path], 
     if not payload["parts"]:
         raise ValueError("An update payload must have at least one part.")
     for part in payload["parts"]:
-        name = part["url"].removeprefix(base)
-        if not part["url"].startswith(base) or not re.fullmatch(re.escape(stage.name) + r"\.update\.zip\.\d{3,}", name):
+        name = part["url"].rsplit("/", 1)[-1]
+        suffix = r"\.pkg\.[a-z0-9-]+\.zip\.\d{3,}" if payload.get("schema") == 2 else r"\.update\.zip\.\d{3,}"
+        if not shared.matches(part, REPOSITORY) and (not part["url"].startswith(base) or not re.fullmatch(re.escape(stage.name) + suffix, name)):
             raise ValueError("Unexpected update asset URL.")
         path = folder / name
         if path.stat().st_size != part["size"] or client_release.digest(path) != part["sha256"]:
             raise ValueError(f"Update part verification failed: {name}")
         assets.append(path)
+    if payload.get("schema") == 2:
+        alias = folder / f"RabbitLands-{platform}.json"
+        if alias.read_bytes() != manifest.read_bytes():
+            raise ValueError("The latest-update alias differs from the signed manifest.")
+        assets.append(alias)
+        for kind in ("updater", "uninstall"):
+            row = payload[kind]
+            path = folder / row["url"].rsplit("/", 1)[-1]
+            if (not row["url"].startswith(base) and not shared.matches(row, REPOSITORY)) or path.parent != folder or not path.is_file() or path.stat().st_size != row["size"] or client_release.digest(path) != row["sha256"]:
+                raise ValueError("A bootstrap executable failed verification.")
+            assets.append(path)
     policy = json.loads((folder / f"{stage.name}-server-policy.json").read_text(encoding="utf-8"))
     if policy != {"schema": 1, "required_commit": sha, "enforce": True,
                   "manifests": {platform: base + manifest.name}}:
@@ -127,23 +144,32 @@ def platform_assets(folder: Path, sha: str, platform: str) -> tuple[list[Path], 
         else:
             assets.extend([setup, *sorted(folder.glob(f"{stage.name}-setup-*.bin"))])
     else:
-        assets.extend(initial_linux_assets(folder / f"{stage.name}.tar.gz"))
+        if shared.matches(payload.get("updater", {}), REPOSITORY):
+            from linux_download_helper import bootstrap_script
+            helper = folder / f"{stage.name}-download.sh"
+            helper.write_text(bootstrap_script(payload["updater"], signed), encoding="utf-8", newline="\n")
+            assets.append(helper)
+        else:
+            assets.extend(initial_linux_assets(folder / f"{stage.name}.tar.gz"))
     return assets, policy, stage
 
 
 def inventory(root: Path, assets: list[Path]) -> list[dict]:
     rows = []
-    names = set()
+    names = {}
     for path in assets:
         path = path.resolve()
         if not path.is_relative_to(root.resolve()) or not path.is_file():
             raise ValueError("Release assets must be files inside this build's output directory.")
         size = path.stat().st_size
+        digest = client_release.digest(path)
+        if path.name in names and shared.is_name(path.name) and names[path.name] == (size, digest):
+            continue
         if not 0 < size < ASSET_LIMIT or path.name in names:
             raise ValueError(f"Invalid, duplicate or oversized release asset: {path.name}")
-        names.add(path.name)
+        names[path.name] = (size, digest)
         rows.append({"path": path.relative_to(root.resolve()).as_posix(),
-                     "size": size, "sha256": client_release.digest(path)})
+                     "size": size, "sha256": digest})
     if len(rows) > 1000:
         raise ValueError("GitHub permits at most 1000 assets in a release.")
     return rows
@@ -157,13 +183,13 @@ def release_notes(sha: str, stages: dict[str, Path], linux_assets: list[Path]) -
                if split else f"tar -xzf {linux}.tar.gz -C ~/Games")
     online = (stages["windows"].parent / f"{windows}-setup-downloads.json").is_file()
     windows_install = (
-        f"Download `{windows}-setup.exe` and run it. An internet connection is required: "
+        f"Download `{windows}-setup.exe` from **Assets** below and run it. An internet connection is required: "
         "setup downloads and verifies the matching game files automatically. "
         "Use the Rabbit Lands Start menu shortcut after installation. "
         "Installation is per user and needs no administrator rights."
         if online else
         f"Download `{windows}-setup.exe` and every accompanying `{windows}-setup-*.bin` "
-        "file into the same folder. Run the setup executable, then use the Rabbit Lands "
+        "file from **Assets** below into the same folder. Run the setup executable, then use the Rabbit Lands "
         "Start menu shortcut. Installation is per user and needs no administrator rights.")
     return f"""# Rabbit Lands desktop downloads
 
@@ -176,7 +202,7 @@ Only the current compiled client build is kept in GitHub Releases.
 
 ## Linux x86_64
 
-Download {linux_download} into one folder. Extract and launch:
+Download {linux_download} from **Assets** below into one folder. Extract and launch:
 
 ```sh
 mkdir -p ~/Games
@@ -192,8 +218,12 @@ Godot editor. Use the supplied compatibility or safe-mode launcher if needed.
 file with `sha256sum <filename>` against its entry before extracting. On
 Windows use `Get-FileHash <filename> -Algorithm SHA256` in PowerShell.
 
-The platform JSON manifests and `.update.zip.###` files are for the game's
-signed automatic updater. Initial installations use the downloads above.
+The platform JSON manifests and `.pkg.*.zip.###` files are for the game's
+signed updater, which downloads only changed packages and updates itself.
+The separately downloadable `*-updater` executable can migrate an older install;
+place it in the game folder and run it. Run `RabbitLands-uninstall` to remove
+the installation while keeping player settings. Initial Windows installations
+still use just the setup executable above.
 See [installation instructions](https://github.com/{REPOSITORY}/wiki/Access-and-Installation).
 """
 
@@ -208,7 +238,7 @@ def build(options) -> Path:
         folder = root / platform
         folder.mkdir()
         command = [sys.executable, str(Path(__file__).with_name("package_client.py")),
-                   "--platform", platform, "--ref", sha, "--no-fetch", "--godot", str(godot),
+                   "--platform", platform, "--ref", sha, "--release-build", "--shared-release-assets", "--no-zip", "--no-fetch", "--godot", str(godot),
                    "--out", str(folder), "--update-signing-key", str(options.update_signing_key.resolve())]
         if options.server:
             command.extend(["--server", options.server])
@@ -234,7 +264,26 @@ def assemble(root: Path, sha: str) -> Path:
         raise ValueError("Too many release assets.")
     write_json(root / "client_updates.json", {"schema": 1, "required_commit": sha,
                "enforce": True, "manifests": manifests})
-    (root / "RELEASE-NOTES.md").write_text(release_notes(sha, stages, assets), encoding="utf-8")
+    notes = release_notes(sha, stages, assets)
+    if any(p.name.endswith("-download.sh") for p in assets):
+        linux = stages["linux"].name
+        start, end = notes.index("Download ", notes.index("## Linux")), notes.index("Keep the complete game folder")
+        notes = notes[:start] + f'''Download `{linux}-download.sh` from **Assets** below, then run:
+
+```sh
+sh ./{linux}-download.sh
+~/Games/RabbitLands/RabbitLands-updater.x86_64
+```
+
+The helper verifies the native updater, which installs this signed build using
+checksum-verified packages. It needs curl and sha256sum.
+
+''' + notes[end:]
+        notes += "\n## Standalone helpers\n\n"
+        for path in assets:
+            if shared.is_name(path.name) and shared.NAME.fullmatch(path.name)[1] != "pkg":
+                notes += f"[{path.name}]({shared.base(REPOSITORY)}/{path.name})\n\n"
+    (root / "RELEASE-NOTES.md").write_text(notes, encoding="utf-8")
     bundle = root / "release.json"
     write_json(bundle, {"schema": 1, "repository": REPOSITORY, "commit": sha,
                        "tag": f"client-{sha}", "assets": rows})
@@ -291,6 +340,68 @@ def upload_asset(tag: str, release_id: int, path: Path, row: dict, old: dict) ->
             time.sleep(min(2**attempt, 8))
 
 
+def upload_asset_api(release_id: int, path: Path, row: dict, old: dict, *, immutable=False) -> dict:
+    """Stream one runner asset; verify the upload response without listing N pages.
+
+    Hundreds of independent packages must not trigger a whole-release scan per
+    upload. Finalization still re-reads and verifies the complete remote inventory.
+    """
+    if asset_matches(old, row):
+        return old
+    token = os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")
+    if not token:
+        token = gh("auth", "token", "--hostname", "github.com")
+    url = f"https://uploads.github.com/repos/{REPOSITORY}/releases/{int(release_id)}/assets?name=" + urllib.parse.quote(path.name, safe="-._")
+    attempts = 30 if immutable else 5
+    for attempt in range(attempts):
+        if old:
+            if immutable:
+                if old.get("state") == "uploaded":
+                    raise ValueError(f"Shared download checksum conflict: {path.name}; existing bytes were preserved.")
+                try:
+                    created = datetime.datetime.fromisoformat(old.get("created_at", "").replace("Z", "+00:00"))
+                    stale = time.time() - created.timestamp() > 6 * 3600
+                except (ValueError, TypeError):
+                    stale = False
+                if old.get("state") == "starter" and stale:
+                    gh("api", "--method", "DELETE", f"repos/{REPOSITORY}/releases/assets/{int(old['id'])}")
+                    old = {}
+                    continue
+                # Both platform jobs may discover the same new package. Let
+                # the first upload finish instead of deleting its reservation.
+                time.sleep(min(2**min(attempt, 3), 8))
+                old = next((a for a in github_assets(release_id) if a["name"] == path.name), {})
+                if asset_matches(old, row):
+                    return old
+                continue
+            gh("api", "--method", "DELETE", f"repos/{REPOSITORY}/releases/assets/{int(old['id'])}")
+            old = {}
+        try:
+            print(f"Uploading {path.name} ({row['size']} bytes)", flush=True)
+            with path.open("rb") as stream:
+                request = urllib.request.Request(url, data=stream, method="POST", headers={
+                    "Authorization": "Bearer " + token, "Accept": "application/vnd.github+json",
+                    "Content-Type": "application/octet-stream", "Content-Length": str(row["size"]),
+                    "User-Agent": "Rabbit-Lands-release", "X-GitHub-Api-Version": "2022-11-28"})
+                with urllib.request.urlopen(request, timeout=3600) as response:
+                    actual = json.loads(response.read(1024 * 1024))
+            if actual.get("name") != path.name or not asset_matches(actual, row):
+                raise ValueError(f"GitHub did not verify {path.name}; retaining the local part.")
+            return actual
+        except (urllib.error.URLError, TimeoutError, ConnectionError, OSError) as error:
+            if isinstance(error, urllib.error.HTTPError) and error.code not in (408, 409, 422, 429, 500, 502, 503, 504):
+                raise ValueError(f"GitHub upload failed for {path.name} (HTTP {error.code}).") from None
+            # Recover a completed upload after a lost response, or remove its
+            # interrupted starter reservation before retrying the same filename.
+            old = next((asset for asset in github_assets(release_id) if asset["name"] == path.name), {})
+            if asset_matches(old, row):
+                return old
+            if attempt == attempts - 1:
+                raise ValueError(f"GitHub upload failed for {path.name}; retaining the local part.") from None
+            time.sleep(min(2**attempt, 8))
+    raise ValueError("GitHub upload did not complete.")
+
+
 def upload(bundle: Path, publish: bool = False) -> None:
     root = bundle.resolve().parent
     data = json.loads(bundle.read_text(encoding="utf-8"))
@@ -342,12 +453,21 @@ def upload(bundle: Path, publish: bool = False) -> None:
         raise ValueError("Could not find the expected draft release.")
     # Fetch drafts by their release ID; the tag endpoint is for published releases.
     previous = {asset["name"]: asset for asset in github_assets(existing["id"])}
+    shared_paths = [p for p in paths if shared.is_name(p.name)]
+    pool = shared.ensure(sha) if shared_paths else None
+    previous_shared = {a["name"]: a for a in github_assets(pool["id"])} if pool else {}
     # Small calls avoid the Windows command-line length limit. Resume only when
     # GitHub's recorded digest proves that an existing upload is identical.
     for path, row in zip(paths, data["assets"]):
-        upload_asset(tag, existing["id"], path, row, previous.get(path.name, {}))
+        if shared.is_name(path.name):
+            previous_shared[path.name] = upload_asset_api(pool["id"], path, row, previous_shared.get(path.name, {}), immutable=True)
+        else:
+            upload_asset(tag, existing["id"], path, row, previous.get(path.name, {}))
     uploaded = github_assets(existing["id"])
-    expected = {path.name: path.stat().st_size for path in paths}
+    shared_remote = {a["name"]: a for a in github_assets(pool["id"])} if pool else {}
+    if any(not asset_matches(shared_remote.get(p.name, {}), row) for p, row in zip(paths, data["assets"]) if shared.is_name(p.name)):
+        raise ValueError("Shared download checksum verification failed; the release remains a draft.")
+    expected = {path.name: path.stat().st_size for path in paths if not shared.is_name(path.name)}
     remote_sizes = {asset["name"]: asset["size"] for asset in uploaded}
     if any(remote_sizes.get(name) != size for name, size in expected.items()):
         raise ValueError("Remote assets do not match the bundle; the release remains a draft.")

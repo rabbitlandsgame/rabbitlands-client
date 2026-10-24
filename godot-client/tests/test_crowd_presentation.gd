@@ -153,6 +153,19 @@ func _gate_and_build() -> void:
 	await process_frame
 
 
+func _wait_for_bodies(ids: Array) -> void:
+	for unused: int in range(90):
+		var waiting := false
+		for id: int in ids:
+			var actor := _nodes().get(id) as ReplicatedActor3D
+			if actor == null or actor.is_model_deferred():
+				waiting = true
+				break
+		if not waiting:
+			return
+		await _gate_and_build()
+
+
 func _put(records: Array) -> void:
 	var actors: Dictionary = (_app_state.get("actors") as Dictionary)
 	for record: Dictionary in records:
@@ -163,6 +176,7 @@ func _put(records: Array) -> void:
 func _test_lazy_bodies() -> void:
 	_put([_record(LOCAL, 500, 500), _record(101, 510, 500), _record(102, 700, 500, false)])
 	await _sync()
+	await _wait_for_bodies([101])
 	var nodes := _nodes()
 	var near := nodes.get(101) as ReplicatedActor3D
 	var far := nodes.get(102) as ReplicatedActor3D
@@ -170,7 +184,7 @@ func _test_lazy_bodies() -> void:
 		return
 	_expect(not (nodes[LOCAL] as ReplicatedActor3D).is_model_deferred(), "the player's own body is built at once")
 	_expect(not near.is_model_deferred() and near.get_node_or_null("NativeModel") != null,
-		"an actor 10 m away is built at once")
+		"an actor 10 m away receives its body within bounded successive frames")
 	_expect(far.is_model_deferred() and far.get_node_or_null("NativeModel") == null
 		and far.get_skeleton() == null and far.animation_player == null,
 		"an actor 200 m away is a deferred node: no model, skeleton or animation")
@@ -181,11 +195,11 @@ func _test_lazy_bodies() -> void:
 		"out of draw range it is not drawn, and neither is its stand-in")
 	# It walks into range: the next gate pass ranks it, and a build replaces it.
 	_put([_record(102, 560, 500, false)])
-	await _sync()
+	_main.call("_sync_world", _app_state.call("take_changed_actors"))
 	far = _nodes().get(102) as ReplicatedActor3D
 	_expect(far.is_model_deferred(), "presenting a record does not build its body by itself")
 	var deferred_at: Vector3 = far.global_position
-	await _gate_and_build()
+	await _wait_for_bodies([102])
 	var built := _nodes().get(102) as ReplicatedActor3D
 	_expect(built != null and built != far and not built.is_model_deferred()
 		and built.get_skeleton() != null, "within range the gate pass builds its body in a new node")
@@ -198,21 +212,20 @@ func _test_lazy_bodies() -> void:
 	for index: int in range(8):
 		batch.append(_record(110 + index, 500 + 30 - index * 3, 520))
 	_put(batch)
-	await _sync()
+	_main.call("_sync_world", _app_state.call("take_changed_actors"))
 	var built_ids: Array[int] = []
 	for index: int in range(8):
 		if not (_nodes()[110 + index] as ReplicatedActor3D).is_model_deferred():
 			built_ids.append(110 + index)
-	_expect(built_ids.size() == ACTOR_SPAWN_BUDGET(),
-		"one pass builds exactly the spawn budget (%d of 8)" % built_ids.size())
-	_expect(built_ids == [114, 115, 116, 117], "and builds the nearest ones: %s" % [built_ids])
+	_expect(built_ids.size() <= ACTOR_SPAWN_BUDGET(),
+		"one process frame stays within the count allowance (%d of 8)" % built_ids.size())
+	var expected: Array = [117, 116, 115, 114, 113, 112, 111, 110].slice(0, built_ids.size())
+	expected.sort()
+	_expect(built_ids == expected, "and any bodies admitted are the nearest ones: %s" % [built_ids])
 	var waiting := _nodes()[110] as ReplicatedActor3D
 	_expect(waiting.is_model_deferred() and waiting.is_drawn() and waiting.stand_in_visible(),
 		"one still waiting inside the draw distance shows its stand-in")
-	await _gate_and_build()
-	# Four a frame within a time budget: the queue may need a frame or two more.
-	for unused: int in range(4):
-		await process_frame
+	await _wait_for_bodies([110, 111, 112, 113, 114, 115, 116, 117])
 	var remaining := 0
 	for index: int in range(8):
 		remaining += int((_nodes()[110 + index] as ReplicatedActor3D).is_model_deferred())

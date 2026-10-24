@@ -14,6 +14,104 @@ var _benchmark_max_skeleton_updates_per_actor := 0
 var _benchmark_attribution_attachment: Dictionary = {}
 
 
+## Snapshots are outside timed frames. Requested environment flags are kept
+## separately from instantiated native backends and completed native work.
+func benchmark_runtime_snapshot() -> Dictionary:
+	var cape_instances := 0
+	var cape_calls := 0
+	var cape_fallbacks := 0
+	for raw_actor: Variant in actor_nodes.values():
+		var actor := raw_actor as ReplicatedActor3D
+		if not is_instance_valid(actor) or actor._cape_cloth == null:
+			continue
+		var stats := actor._cape_cloth.call("native_presentation_stats") as Dictionary
+		cape_instances += int(bool(stats.get("active", false)))
+		cape_calls += int(stats.get("nativeCalls", 0))
+		cape_fallbacks += int(stats.get("fallbackCalls", 0))
+	var flight_stats := preload("res://src/world/spell_flight_3d.gd").native_presentation_stats()
+	var impact_stats := preload("res://src/world/world_effect_3d.gd").native_presentation_stats()
+	return {
+		"clientDiagnostics": benchmark_resource_diagnostics(),
+		"effectiveSettings": {"quality": LookProfile.quality_name(LookProfile.quality()),
+			"appearance": LookProfile.mode_name(LookProfile.mode()), "bodyCap": crowd.body_cap,
+			"renderScale": main_viewport.scaling_3d_scale,
+			"textureQuality": _map_texture_quality, "textureSkip": GraphicsOptions.active_texture_skip(),
+			"frameCap": Engine.max_fps, "minimap": minimap_frame.visible,
+			"renderer": RenderingServer.get_current_rendering_method(),
+			"rootSize": [get_tree().root.size.x, get_tree().root.size.y],
+			"worldViewportSize": [main_viewport.size.x, main_viewport.size.y]},
+		"activeBackends": {"nativeReducer": AppState.native_crowd_reducer_active(),
+			"presentation": {"requested": OS.get_environment("ELORIA_NATIVE_PRESENTATION"),
+				"nativeCapeInstances": cape_instances, "nativeCapeCalls": cape_calls,
+				"capeFallbackCalls": cape_fallbacks, "flight": flight_stats, "impact": impact_stats},
+			"preparedContent": {"active": false, "status": "not_implemented"},
+			"mapSceneCache": {"enabled": MapSceneCache.is_enabled(), "status": str(world_loader.cache_status)}},
+	}
+
+
+# Keep positions, connection/authentication fields and replay actor data out of
+# benchmark metadata. This is taken outside sampling, never in a per-frame timer.
+func benchmark_resource_diagnostics() -> Dictionary:
+	var snapshot := client_diagnostic_snapshot()
+	var result: Dictionary = {}
+	for key: String in ["surface_work", "loader_work", "streaming_work",
+			"resource_retention", "map_cache_enabled", "map_cache_status",
+			"map_load_phases_us", "chunks_resident", "chunk_resident_bytes",
+			"chunk_revision", "vram_mode", "vram_formats", "static_memory_bytes",
+			"video_memory_bytes"]:
+		if snapshot.has(key):
+			result[key] = snapshot[key]
+	return result
+
+
+func benchmark_readiness_snapshot() -> Dictionary:
+	var chunk_states: Array[Dictionary] = []
+	var roots: Array[Node3D] = []
+	if is_instance_valid(world_loader.world_root):
+		roots.append(world_loader.world_root)
+	for resident: Dictionary in exterior_stream.residents.values():
+		var resident_root := resident.get("root") as Node3D
+		if is_instance_valid(resident_root) and resident_root not in roots:
+			roots.append(resident_root)
+	var ready := world_loader.world_root != null and loaded_server_map == AppState.current_map and not _deferred_map_load \
+		and not _actor_surface_snap_pending and exterior_stream.is_idle() \
+		and int(world_loader.get("_cache_write_countdown")) <= 0
+	for candidate: Node3D in roots:
+		var chunk := candidate as ContinentChunkStream
+		if chunk == null:
+			continue
+		var views := chunk.get("_preload_views") as Array
+		var state := {"cells": chunk.cells.size(), "pendingThread": chunk.get("_thread") != null,
+			"retiring": (chunk.get("_retiring") as Array).size(),
+			"viewsReady": views.is_empty() or chunk.views_ready(), "viewsFailed": chunk.views_failed(),
+			"prefetchReady": chunk.prefetch_ready()}
+		if chunk == world_loader.world_root:
+			state["arrivalReady"] = chunk.arrival_ready(camera_rig.focus)
+		ready = ready and not bool(state.pendingThread) and int(state.retiring) == 0 \
+			and bool(state.viewsReady) and not bool(state.viewsFailed) and bool(state.prefetchReady) \
+			and bool(state.get("arrivalReady", true))
+		chunk_states.append(state)
+	var ambient_pending := 0
+	if is_instance_valid(ambient_population):
+		ambient_pending = (ambient_population.get("_pending_cells") as Dictionary).size()
+	var ambient_creation_pending := ambient_pending
+	if has_method("ambient_creation_pending_count"):
+		ambient_creation_pending = int(call("ambient_creation_pending_count"))
+	elif is_instance_valid(ambient_population) and ambient_population.has_method("pending_creation_count"):
+		ambient_creation_pending = int(ambient_population.call("pending_creation_count"))
+	var followup := {"pending": 0, "available": false}
+	if has_method("surface_work_snapshot"):
+		followup = call("surface_work_snapshot") as Dictionary
+	ready = ready and ambient_creation_pending == 0 and int(followup.get("pending", 0)) == 0 \
+		and ContinentChunkStream.orphans_pending() == 0
+	return {"ready": ready, "loadedMap": loaded_server_map, "chunks": chunk_states,
+		"actorGroundingPending": _actor_surface_snap_pending,
+		"ambientPendingCells": ambient_pending, "ambientPendingCreation": ambient_creation_pending,
+		"surfaceFollowups": followup,
+		"orphanImports": ContinentChunkStream.orphans_pending(),
+		"exteriorIdle": exterior_stream.is_idle()}
+
+
 ## The gate with its half-rate stepping timed: the players and skeleton
 ## modifiers it advances every other frame, all on the same frame.
 class TimedAnimationGate:

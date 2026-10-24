@@ -46,6 +46,7 @@ func sample() -> Dictionary:
 func run() -> void:
 	root.get_node("Network").set_process(false)
 	root.content_scale_size = Vector2i.ZERO
+	root.gui_embed_subwindows = true
 	root.size = Vector2i(1280, 720)
 	var background := TextureRect.new()
 	background.texture = load("res://assets/ui/start_screen/02-amberwood-lantern-path-poster.jpg")
@@ -54,7 +55,12 @@ func run() -> void:
 	background.modulate = Color(0.3, 0.3, 0.3)
 	background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.add_child(background)
-	var ui: Control = load("res://src/ui/gauntlet_loot_window.gd").new()
+	var ledger_script: GDScript = load("res://src/ui/gauntlet_loot_window.gd")
+	if ledger_script == null or not ledger_script.can_instantiate():
+		push_error("The ledger script must compile before UI checks can run")
+		quit(1)
+		return
+	var ui: Control = ledger_script.new()
 	root.add_child(ui)
 	var atlas := ItemAtlas.new()
 	atlas.configure(JSON.parse_string(FileAccess.get_file_as_string("res://data/items/atlases.json")))
@@ -72,14 +78,35 @@ func run() -> void:
 	bad = state.duplicate(true)
 	bad.rows[0].quantity = 1.5
 	expect(protocol.decode_gauntlet_loot(JSON.stringify(bad).to_utf8_buffer()).type == "invalid", "fractional quantities are rejected")
+	bad = state.duplicate(true)
+	bad.exit_destination = {"map": "four_gates", "x": -1, "y": 162}
+	expect(protocol.decode_gauntlet_loot(JSON.stringify(bad).to_utf8_buffer()).type == "invalid", "invalid beam preload coordinates are rejected")
+	bad.exit_destination.x = 309
+	bad.exited = false
+	expect(protocol.decode_gauntlet_loot(JSON.stringify(bad).to_utf8_buffer()).type == "gauntlet_loot", "beam preload destinations decode with the loot ledger")
 	ui.apply_snapshot(state)
 	await process_frame
 	await process_frame
 	expect(ui.panel.visible and ui.table.get_child_count() == 6, "complete run opens six ledger rows")
 	expect(not ui.send_button.disabled, "complete allocations enable confirmation")
+	var inspect_button: Button = ui.table.get_child(4).find_child("InspectItem", true, false)
+	expect(inspect_button != null and not inspect_button.disabled, "loot item icons offer inspection")
+	inspect_button.pressed.emit()
+	expect(sent.back().action == "inspect" and sent.back().row_id == "4" and sent.back().run_id == state.run_id and sent.back().page == 0,
+		"inspection identifies the server-owned loot row and page")
+	expect(not ui.send_button.disabled and ui._pending_since == 0, "inspection does not lock delivery or wait for a ledger revision")
+	ui.sell_all_button.pressed.emit()
+	expect(sent.back().action == "sell_all" and not sent.back().has("npc_gold") and ui.panel.visible,
+		"sell all stages a server-priced plan without closing the loot window")
+	ui.apply_snapshot(state)
+	ui.call("_edit_sale", state.rows[1])
+	expect(ui.sale_dialog.visible, "individual NPC quantities remain editable after staging all sales")
+	ui.sale_dialog.hide()
 	ui.split_button.pressed.emit()
 	expect(sent.back().action == "split" and sent.back().revision == 3, "split sends the server revision")
 	expect(ui.send_button.disabled, "pending edits disable delivery")
+	(ui.table.get_child(0).find_child("InspectItem", true, false) as Button).pressed.emit()
+	expect(sent.back().action == "inspect", "items remain inspectable while allocation edits are pending")
 	ui.apply_snapshot(state)
 	ui.call("_edit_item", state.rows[0])
 	expect(ui.editor.visible and ui.editor_fields.size() == 4, "custom split exposes all recipients")
@@ -95,10 +122,15 @@ func run() -> void:
 	state.is_leader = false
 	ui.apply_snapshot(state)
 	expect(ui.split_button.disabled and ui.send_button.disabled, "members see a read-only allocation preview")
+	expect(ui.sell_all_button.disabled, "only the party leader can stage all NPC sales")
+	(ui.table.get_child(4).find_child("InspectItem", true, false) as Button).pressed.emit()
+	expect(sent.back().action == "inspect", "non-leaders can inspect rare loot")
 	state.is_leader = true
 	ui.apply_snapshot(state)
 	ui.call("_edit_price", state.rows[4])
 	expect(ui.price_dialog.visible, "rare items expose the optional gold valuation")
+	await process_frame
+	expect(ui.price_dialog.size.y < 350, "wrapped payment help keeps the gold dialog within the window")
 	ui.price_amount.get_line_edit().text = "800"
 	ui.price_dialog.confirmed.emit()
 	expect(sent.back().action == "price" and sent.back().price_gold == 800, "gold value is submitted as a whole server-validated amount")
@@ -106,6 +138,8 @@ func run() -> void:
 	ui.apply_snapshot(state)
 	ui.call("_edit_sale", state.rows[5])
 	expect(ui.sale_dialog.visible and int(ui.sale_amount.max_value) == 1, "NPC sale quantity is bounded by the available drop")
+	await process_frame
+	expect(ui.sale_dialog.size.y < 350, "wrapped sale help keeps NPC confirmation controls on screen")
 	ui.sale_amount.get_line_edit().text = "1"
 	ui.sale_dialog.confirmed.emit()
 	expect(sent.back().action == "sell" and sent.back().quantity == 1 and not sent.back().has("npc_gold"), "the NPC request contains a quantity, never a client-selected sale price")
@@ -149,6 +183,27 @@ func run() -> void:
 		await process_frame
 		await process_frame
 		await capture("ledger-1024.png")
+		root.size = Vector2i(1600, 1000)
+		ui.apply_snapshot(sample())
+		await process_frame
+		await process_frame
+		await capture("ledger-simple.png")
+		ui.call("_edit_price", state.rows[4])
+		await capture("ledger-price-dialog.png")
+		ui.price_dialog.hide()
+		ui.call("_edit_sale", state.rows[5])
+		await capture("ledger-sale-dialog.png")
+		ui.sale_dialog.hide()
+	ui.apply_snapshot(state)
+	ui.send_button.pressed.emit()
+	expect(ui.confirmation.dialog_text.contains("beam"), "save and exit explains the party's return to the beam")
+	ui.confirmation.confirmed.emit()
+	expect(sent.back().action == "send" and sent.back().exit and ui.panel.visible, "save and exit waits for delivery and the server's exit acknowledgement")
+	state.phase = "sent"
+	state.exited = true
+	ui.apply_snapshot(state)
+	expect(not ui.panel.visible and not ui.reopen.visible, "successful save and exit closes the party's completed ledger")
+	ui.apply_snapshot(sample())
 	ui.close()
 	expect(not ui.panel.visible and ui.reopen.visible, "closing preserves a way back to reserved loot")
 	ui.queue_free()
@@ -192,6 +247,8 @@ func paid_sample() -> Dictionary:
 	return state
 
 func capture(filename: String) -> void:
+	await process_frame
+	await process_frame
 	await RenderingServer.frame_post_draw
 	var directory := ProjectSettings.globalize_path("res://test-artifacts/gauntlet-loot")
 	DirAccess.make_dir_recursive_absolute(directory)

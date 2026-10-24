@@ -12,6 +12,7 @@ const ExternalMeshPool := preload("res://src/world/external_mesh_pool.gd")
 const MapMeshExtension := preload("res://src/world/map_mesh_extension.gd")
 const ArchivedModelPolicy := preload("res://src/actors/archived_model_policy.gd")
 const UndergroundScenery := preload("res://src/world/underground_scenery.gd")
+const ResourceDiagnostics := preload("res://src/world/resource_diagnostics.gd")
 
 # Static-instance batching. A region such as Four Gates imports ~1700 mesh
 # nodes that between them reference only 42 meshes, so almost every draw call
@@ -127,6 +128,7 @@ var package_digest := ""
 ## costs nothing against a load measured in seconds, so the loader always says
 ## where it went and `tests/integration/map_load_phases.gd` only has to read it.
 var load_phases: Dictionary = {}
+var _resource_timings: Dictionary = {}
 
 ## Trimesh shapes built during the load in progress, keyed by the mesh they
 ## were built from, so a mesh a region places hundreds of times is walked once.
@@ -158,7 +160,8 @@ func release_world(detach := true) -> Dictionary:
 	var resident := {"root": world_root, "manifest": manifest,
 		"digest": package_digest, "phases": load_phases,
 		"from_cache": loaded_from_cache, "cache_status": cache_status,
-		"cache_file": cache_file, "visuals": _prepared_visuals}
+		"cache_file": cache_file, "visuals": _prepared_visuals,
+		"resource_timings": _resource_timings}
 	_prepared_visuals = {}
 	if detach and is_instance_valid(world_root) and world_root.get_parent() != null:
 		world_root.get_parent().remove_child(world_root)
@@ -178,6 +181,7 @@ func adopt_world(resident: Dictionary) -> void:
 	cache_status = resident.cache_status
 	cache_file = str(resident.cache_file)
 	load_phases = resident.phases
+	_resource_timings = resident.get("resource_timings", {})
 	world_root.transform = Transform3D.IDENTITY
 	# An already-resident tree stays attached. Re-entering the SceneTree would
 	# destroy and recreate thousands of renderer/physics registrations at the
@@ -198,6 +202,7 @@ func load_world(manifest_path: String, arrival := Vector3.INF, wait_for_arrival 
 	var began: int = Time.get_ticks_usec()
 	var mark: int = began
 	load_phases = {}
+	_resource_timings = {}
 	print("world_load stage=manifest_open path=", manifest_path)
 	load_started.emit(manifest_path)
 	manifest = WorldManifest.load_file(manifest_path)
@@ -246,6 +251,7 @@ func load_world(manifest_path: String, arrival := Vector3.INF, wait_for_arrival 
 		load_completed.emit(manifest)
 		return
 	var external_errors := manifest.verify_external_resources()
+	mark = _phase(&"externalVerify", mark)
 	if not external_errors.is_empty():
 		load_failed.emit(external_errors)
 		push_error("world_load stage=external_resources errors=%s" % [external_errors])
@@ -264,7 +270,9 @@ func load_world(manifest_path: String, arrival := Vector3.INF, wait_for_arrival 
 	var image_plan: Dictionary = VramTextures.plan_for(manifest.data)
 	if not image_plan.is_empty():
 		state.set_additional_data(VramTextures.PLAN_KEY, image_plan)
+	var operation_began := Time.get_ticks_usec()
 	var error: Error = document.append_from_file(resolved_glb_path, state)
+	ResourceDiagnostics.record(_resource_timings, &"gltf_parse", operation_began, true)
 	if error != OK:
 		push_error("world_load stage=glb_import error=%s path=%s" % [
 			error_string(error), resolved_glb_path])
@@ -285,7 +293,9 @@ func load_world(manifest_path: String, arrival := Vector3.INF, wait_for_arrival 
 		print_debug("world_load stage=regroup groups=", groups)
 	mark = _phase(&"regroup", mark)
 	ArchivedModelPolicy.apply_to_gltf_state(state, resolved_glb_path)
+	operation_began = Time.get_ticks_usec()
 	var generated: Node = document.generate_scene(state)
+	ResourceDiagnostics.record(_resource_timings, &"gltf_generate_scene", operation_began, true)
 	if generated == null:
 		push_error("world_load stage=scene_generate error=null_scene path=%s" % resolved_glb_path)
 		load_failed.emit(["glb_scene_generation_failed"])
@@ -307,7 +317,9 @@ func load_world(manifest_path: String, arrival := Vector3.INF, wait_for_arrival 
 	load_phases[&"sharedMeshParsed"] = ExternalMeshPool.last_parsed
 	mark = _phase(&"sharedMeshes", mark)
 	world_root.name = "ImportedWorld_" + manifest.asset_id()
+	operation_began = Time.get_ticks_usec()
 	add_child(world_root)
+	ResourceDiagnostics.record(_resource_timings, &"scene_attach", operation_began, true)
 	print_debug("world_load stage=scene_attached node=", world_root.name,
 		" children=", world_root.get_child_count(), " transform=", world_root.transform)
 	mark = _phase(&"attach", mark)
@@ -350,6 +362,7 @@ func load_world(manifest_path: String, arrival := Vector3.INF, wait_for_arrival 
 	LookGround.paint_loaded(world_root, manifest)
 	LookFoliage.paint_loaded(world_root, manifest)
 	UndergroundScenery.apply(manifest, world_root)
+	mark = _phase(&"lookBinding", mark)
 	load_phases[&"total"] = mark - began
 	load_completed.emit(manifest)
 	if cache_status == &"miss" and not detached_build:
@@ -360,6 +373,20 @@ func ensure_chunk_arrival(position: Vector3) -> bool:
 	if not world_root is ContinentChunkStream:
 		return false
 	return (world_root as ContinentChunkStream).ensure_position(position)
+
+## Called by diagnostics on the owning thread, never to poll or join a worker.
+## Engine operation timings overlap phase timings; do not add them together.
+func diagnostic_snapshot() -> Dictionary:
+	var result := {"cache_status": str(cache_status), "detached": detached_build,
+		"load_phases_us": load_phases.duplicate(),
+		"timings": ResourceDiagnostics.snapshot(_resource_timings),
+		"verification": manifest.verification_diagnostics.duplicate(true) if manifest != null else {},
+		"cache_write_pending": _cache_write_countdown > 0,
+		"cache_snapshot_nodes": _cache_nodes.size(),
+		"prepared_visual_scenes": _prepared_visuals.size()}
+	if is_instance_valid(world_root) and world_root is ContinentChunkStream:
+		result["chunks"] = (world_root as ContinentChunkStream).diagnostic_snapshot()
+	return result
 
 # --------------------------------------------------------------------------
 # The map cache
@@ -397,15 +424,19 @@ func _load_from_cache(mark: int, began: int) -> bool:
 	# materials rather than handing back the ones the last load is still
 	# holding. That is what a fresh load does, and the point of the cache is to
 	# be indistinguishable from one.
+	var operation_began := Time.get_ticks_usec()
 	var packed: PackedScene = ResourceLoader.load(
 		cache_file, "PackedScene", ResourceLoader.CACHE_MODE_IGNORE_DEEP) as PackedScene
+	ResourceDiagnostics.record(_resource_timings, &"cache_read", operation_began, true)
 	mark = _phase(&"cacheRead", mark)
 	if packed == null:
 		push_warning("map cache: %s did not load; rebuilding" % cache_file)
 		DirAccess.remove_absolute(cache_file)
 		cache_status = &"unreadable"
 		return false
+	operation_began = Time.get_ticks_usec()
 	var restored: Node3D = packed.instantiate() as Node3D
+	ResourceDiagnostics.record(_resource_timings, &"cache_instantiate", operation_began, true)
 	if restored == null:
 		push_warning("map cache: %s is not a Node3D; rebuilding" % cache_file)
 		DirAccess.remove_absolute(cache_file)
@@ -413,7 +444,9 @@ func _load_from_cache(mark: int, began: int) -> bool:
 		return false
 	world_root = restored
 	world_root.name = "ImportedWorld_" + manifest.asset_id()
+	operation_began = Time.get_ticks_usec()
 	add_child(world_root)
+	ResourceDiagnostics.record(_resource_timings, &"scene_attach", operation_began, true)
 	mark = _phase(&"cacheInstantiate", mark)
 	var relinked: int = _resolve_batch_links()
 	mark = _phase(&"cacheLinks", mark)
@@ -426,6 +459,7 @@ func _load_from_cache(mark: int, began: int) -> bool:
 	LookGround.paint_loaded(world_root, manifest)
 	LookFoliage.paint_loaded(world_root, manifest)
 	UndergroundScenery.apply(manifest, world_root)
+	mark = _phase(&"lookBinding", mark)
 	load_phases[&"total"] = mark - began
 	load_completed.emit(manifest)
 	return true
@@ -635,7 +669,9 @@ func _write_cache() -> void:
 		if is_instance_valid(node):
 			node.owner = world_root
 	var packed := PackedScene.new()
+	var operation_began := Time.get_ticks_usec()
 	var error: Error = packed.pack(world_root)
+	ResourceDiagnostics.record(_resource_timings, &"cache_pack", operation_began, true)
 	_undo_pristine(undo)
 	load_phases[&"cachePack"] = Time.get_ticks_usec() - began
 	_release_snapshot()
@@ -655,7 +691,9 @@ func _save_entry(packed: PackedScene, path: String, map_id: String) -> void:
 	var began: int = Time.get_ticks_usec()
 	var staging: String = MapSceneCache.staging_path(path)
 	var flags: int = ResourceSaver.FLAG_COMPRESS if CACHE_COMPRESS else 0
+	var operation_began := Time.get_ticks_usec()
 	var error: Error = ResourceSaver.save(packed, staging, flags)
+	ResourceDiagnostics.record(_resource_timings, &"cache_save", operation_began, true)
 	if error != OK:
 		push_warning("map cache: save failed for %s (%s)" % [path, error_string(error)])
 		DirAccess.remove_absolute(staging)
@@ -1138,7 +1176,9 @@ func _apply_navigation_collision() -> void:
 			faces.append(vertices[index])
 			faces.append(vertices[index + 1])
 		var shape: ConcavePolygonShape3D = ConcavePolygonShape3D.new()
+		var operation_began := Time.get_ticks_usec()
 		shape.set_faces(faces)
+		ResourceDiagnostics.record(_resource_timings, &"navigation_shape_set_faces", operation_began, true)
 		var collision: CollisionShape3D = CollisionShape3D.new()
 		collision.name = "Nav_" + str(polygon.get("id", body.get_child_count()))
 		collision.shape = shape
@@ -1310,7 +1350,9 @@ func _trimesh_shape(mesh: Mesh) -> ConcavePolygonShape3D:
 	var cached: ConcavePolygonShape3D = _collision_shapes.get(key) as ConcavePolygonShape3D
 	if cached != null:
 		return cached
+	var operation_began := Time.get_ticks_usec()
 	var built: ConcavePolygonShape3D = mesh.create_trimesh_shape()
+	ResourceDiagnostics.record(_resource_timings, &"trimesh_shape_build", operation_began, true)
 	_collision_shapes[key] = built
 	return built
 

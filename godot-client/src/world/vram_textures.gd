@@ -138,6 +138,11 @@ static var _warned: Dictionary = {}
 ## encoded for): uploaded as RGBA8, so the budget must count the published
 ## figure for them, not the sidecar's.
 static var _decoded_instead: Dictionary = {}
+## CPU images observed before upload: dimensions/mips, current requested tier,
+## and a conservative RGBA8 footprint. Unknown images retain published figures.
+## Private copies for incompatible pooled roles keep the old conservative
+## figure, since multiple encodings of that sha can coexist.
+static var _decoded_footprints: Dictionary = {}
 ## Bumped whenever a resident_bytes answer may have changed (a sha added to
 ## _decoded_instead, or `reconfigure`), so a chunk stream knows its corrected
 ## figures are stale (ContinentChunkStream._refresh_corrections).
@@ -271,6 +276,7 @@ static func reconfigure() -> void:
 	_by_sha.clear()
 	_warned.clear()
 	_decoded_instead.clear()
+	_decoded_footprints.clear()
 	_budget_generation += 1
 	_mutex.unlock()
 
@@ -562,8 +568,9 @@ static func lookup(sha: String) -> Dictionary:
 ## What one shared image really holds on the GPU once resident, for
 ## ContinentChunkStream's budget. The publisher writes every image as RGBA8
 ## with mips (scene_io.py: w*h*4*4/3), which is what a decoded image costs and
-## stays the answer whenever this client would decode it: sidecars off, no
-## index entry, or a format the renderer lacks. An image uploaded from its
+## stays the answer for unobserved decodes: sidecars off, no index entry, or a
+## format the renderer lacks. A successfully decoded reduced image can instead
+## publish a conservative footprint from its actual CPU dimensions/mips. An image uploaded from its
 ## sidecar costs the sidecar's GPU bytes (a quarter for BC7/BC5, an eighth for
 ## BC1). Per sha, not a factor, because only the client knows which of those
 ## applies to each image; and here rather than in the publisher, so no map is
@@ -574,20 +581,22 @@ static func lookup(sha: String) -> Dictionary:
 ## (`sidecar_entry`, reading its index if no one has yet): another index that
 ## lists a sidecar for the same sha does not count, because the load never
 ## uses it. An image that some directory decodes, or that no directory is
-## named for, keeps the published figure.
+## named for, keeps the published figure until a successful reduced CPU decode
+## supplies its dimensions/mips. That corrected fallback remains conservative
+## RGBA8 and never lowers unknown or incompatible-role private-copy estimates.
 static func resident_bytes(sha: String, published: int, source_directories: PackedStringArray) -> int:
 	if mode() == Mode.OFF or source_directories.is_empty():
-		return published
+		return _decoded_resident_bytes(sha, published)
 	_mutex.lock()
 	var decoded := _decoded_instead.has(sha)
 	_mutex.unlock()
 	if decoded:
-		return published
+		return _decoded_resident_bytes(sha, published)
 	var bytes := 0
 	for directory: String in source_directories:
 		var entry := sidecar_entry(sha, directory)
 		if entry.is_empty():
-			return published
+			return _decoded_resident_bytes(sha, published)
 		var skip := GraphicsOptions.mip_skip(int(entry.width), int(entry.height),
 			int(entry.mipmaps), GraphicsOptions.active_texture_skip(), true)
 		var trimmed_bytes := int(entry.gpuBytes)
@@ -597,8 +606,50 @@ static func resident_bytes(sha: String, published: int, source_directories: Pack
 		bytes = maxi(bytes, trimmed_bytes)
 	return bytes
 
+## Only a successful CPU decode can lower a fallback estimate. Do not derive
+## dimensions from published byte counts or trust unvalidated index metadata.
+static func _decoded_resident_bytes(sha: String, published: int) -> int:
+	var requested := GraphicsOptions.active_texture_skip()
+	if requested <= 0:
+		return published
+	_mutex.lock()
+	var known: Dictionary = (_decoded_footprints.get(sha, {}) as Dictionary).duplicate()
+	_mutex.unlock()
+	if known.is_empty() or int(known.requested_skip) != requested \
+			or int(known.applied_skip) <= 0 or bool(known.private_copy):
+		return published
+	return int(known.rgba8_bytes)
+
+static func _note_decoded_footprint(sha: String, image: Image, applied_skip: int,
+		private_copy: bool) -> void:
+	if sha.is_empty() or image == null or image.is_empty() or image.is_compressed():
+		return
+	if not (image.get_format() in [Image.FORMAT_L8, Image.FORMAT_LA8, Image.FORMAT_R8,
+			Image.FORMAT_RG8, Image.FORMAT_RGB8, Image.FORMAT_RGBA8]):
+		return
+	var requested := GraphicsOptions.active_texture_skip()
+	if requested <= 0 or (applied_skip <= 0 and not private_copy):
+		return
+	var width := image.get_width()
+	var height := image.get_height()
+	var mipmaps := image.get_mipmap_count()
+	var rgba8_bytes := 0
+	for level: int in mipmaps + 1:
+		rgba8_bytes += maxi(1, width >> level) * maxi(1, height >> level) * 4
+	_mutex.lock()
+	var old: Dictionary = _decoded_footprints.get(sha, {})
+	var same_tier := not old.is_empty() and int(old.requested_skip) == requested
+	var footprint := {"requested_skip": requested, "applied_skip": applied_skip,
+		"width": width, "height": height, "mipmaps": mipmaps,
+		"rgba8_bytes": maxi(rgba8_bytes, int(old.get("rgba8_bytes", 0)) if same_tier else 0),
+		"private_copy": private_copy or bool(old.get("private_copy", false))}
+	if old != footprint:
+		_decoded_footprints[sha] = footprint
+		_budget_generation += 1
+	_mutex.unlock()
+
 ## Records that an indexed image was decoded after all (see _decoded_instead),
-## so the chunk budget counts it at the published figure from now on.
+## so the chunk budget uses decoded accounting (published until known).
 static func note_decoded_instead(sha: String) -> void:
 	_mutex.lock()
 	if not _decoded_instead.has(sha):
@@ -650,6 +701,9 @@ static func prepare(job: Dictionary) -> void:
 	job["mime"] = decoded.mime
 	job["image"] = decoded.image
 	job["kind"] = "decoded" if decoded.image != null else "failed"
+	if decoded.image != null:
+		_note_decoded_footprint(str(job.sha), decoded.image, int(decoded.get("mip_skip", 0)),
+			bool(job.get("private", false)))
 
 ## Reads and checks one sidecar: the file's sha256 against the index, the
 ## header, the zstd frame against the size the header promises, and the DDS's
@@ -713,7 +767,9 @@ static func decode_source(path: String) -> Dictionary:
 		return {"image": null, "mime": mime}
 	if not image.has_mipmaps():
 		image.generate_mipmaps()
-	return {"image": GraphicsOptions.reduced_image(image), "mime": mime}
+	var skip := GraphicsOptions.mip_skip(image.get_width(), image.get_height(),
+		image.get_mipmap_count(), GraphicsOptions.active_texture_skip())
+	return {"image": GraphicsOptions.reduced_image(image), "mime": mime, "mip_skip": skip}
 
 ## The image type its first bytes declare: PNG, JPEG or WebP, else "".
 static func sniff(bytes: PackedByteArray) -> String:

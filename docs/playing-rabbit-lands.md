@@ -41,6 +41,10 @@ At the default Carry attribute of 4, carrying capacity is 160 EMU through overal
 
 In storage, **Store All** moves eligible items together. **Protection…** chooses the slots it should leave alone.
 
+The **Exchange** menu icon or **Ctrl+Shift+E** opens prices from anywhere. **My listings** includes your own listings and listings owned by your original gauntlet parties. Use **Edit price…** for your own items or **Propose price…** for a party vote; **Party votes…** opens that listing's saved party ledger. Buying, posting new listings, cancelling listings and collecting escrow require an Exchange NPC within four tiles. The window updates its available actions as you move.
+
+The **Storage preview** chest icon or **Ctrl+Shift+S** opens a view-only copy of your personal storage. You can browse categories, inspect goods and use the usual sorting and filters. Transfers and favorite-list collection are disabled. Open normal storage through a nearby keeper or chest to transfer items. Both shortcuts can be changed in **Settings → Controls** and are saved with your other hotkeys.
+
 ## Fighting and gauntlets
 
 Landed hits and dodges share a refund limit of two action points per combat round. Technique costs and ordinary timed recovery still apply.
@@ -49,7 +53,11 @@ Gauntlet death keeps your carried items and returns you at full health at a safe
 
 Creature drops are held in the party's loot ledger until the run ends. Rare finds are announced to the party. The leader can split common stacks equally, choose recipients, or edit individual quantities, then send every share directly to personal storage. Successful runs add each participant's reserved cache reward. Closing the ledger keeps the items reserved; reopen it with **Gauntlet loot**, the reward cache, or `#gauntletloot`.
 
-Shared rares can have an optional gold value per item. Each buyer approves their payment and must have the full amount in storage before delivery. The party splits that payment equally, including the buyer. **NPC** stages a sale of unwanted shared drops at the server's standard buyback value; its gold is also shared equally. Review the payment and sale previews before confirming. Sales, payments, and item delivery happen together. Whole-coin remainders follow the run's roster order. Earned creature loot remains reserved if a run ends early; completion caches require a successful clear.
+Shared rares can have an optional gold value per item. Each buyer approves their payment and must have the full amount in storage before delivery. The party splits that payment equally, including the buyer. **Sell… → NPC buyback** stages a sale of unwanted shared drops at the server's standard value; its gold is also shared equally. Review the payment and sale previews before confirming. NPC sales, payments, and item delivery happen together. Whole-coin remainders follow the run's roster order. Earned creature loot remains reserved if a run ends early; completion caches require a successful clear.
+
+**Sell… → List on party exchange** stages a listing at your selected gold price per item. You can plan it remotely; visit an Exchange NPC within four tiles to confirm distribution and post it. Each sale pays an equal share directly into the original players' storage, including offline players. Partial purchases keep coin rounding fair across the whole listing. Party membership changes do not change who owns the items or receives the proceeds. Reopen **Gauntlet loot → Party exchange** to review listings, proceeds and votes; the run selector includes earlier ledgers.
+
+Any original member can **Propose price…** or **Request withdrawal**. Price proposals show the current and proposed Gold Coins per item. Vote **Yes**, **No** or **Abstain**, at different times if needed. A No blocks the proposal, while abstentions do not count against it. If everyone responds with no No and at least one Yes, the proposal completes immediately. Otherwise, after 14 days, unanswered votes are ignored and the remaining votes decide. Votes may be changed until the request resolves. Each listing allows one open proposal at a time. Approved price changes apply only to unsold items; earlier sales keep their original proceeds. Approved withdrawals wait for an original member to use **Collect approved withdrawal** near an Exchange NPC. Collection puts the unsold items back in shared escrow for the original team. Listings stay available to buyers at the current price during voting and never expire automatically.
 
 ## Riding and the interface
 

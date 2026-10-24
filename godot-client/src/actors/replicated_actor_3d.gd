@@ -345,6 +345,7 @@ var _silhouette: OccludedSilhouette
 ## is worn: the cloth solver runs off the skeleton on its own clock, so a
 ## paused body has to put it to sleep too and wake it with the body.
 var _animation_tier: int = AnimationGate.Tier.FULL
+var _animation_gate_owner: AnimationGate
 var _cape_cloth_worn := false
 var _cape_cloth_allowed := true
 ## The resolved graphics quality and whether this is the player's own actor.
@@ -1026,6 +1027,17 @@ func apply_render_quality(level: int, is_local_actor: bool = false) -> void:
 	_render_quality_local_actor = is_local_actor
 	_apply_render_quality_to_visuals()
 	_refresh_cape_cloth_activity(true)
+	if is_instance_valid(_mount_visual):
+		_mount_visual.call("apply_render_quality", _render_quality, _render_quality_local_actor)
+
+func render_quality() -> int:
+	return _render_quality
+
+func render_quality_is_local() -> bool:
+	return _render_quality_local_actor
+
+func mounted_presentation_priority() -> bool:
+	return _render_quality_local_actor or _selected or _combat_target
 
 func _apply_render_quality_to_visuals() -> void:
 	if is_instance_valid(_native_model):
@@ -2532,7 +2544,17 @@ func wears_cape_cloth() -> bool:
 	return _cape_cloth != null and _cape_cloth_worn
 
 func cape_cloth_active() -> bool:
+	if is_instance_valid(_mount_visual):
+		return bool(_mount_visual.call("cape_simulation_enabled"))
 	return _cape_cloth != null and _cape_cloth.active
+
+## The automatic modifier and mounted manual clock consume the same policy.
+## The mounted path deliberately keeps the automatic modifier inactive.
+func cape_cloth_should_simulate() -> bool:
+	return _cape_cloth != null and _cape_cloth_worn and _cape_cloth_allowed \
+		and _animation_tier != AnimationGate.Tier.PAUSED \
+		and _animation_tier != AnimationGate.Tier.QUARTER \
+		and ACTOR_RENDER_QUALITY.cape_enabled(_render_quality, _render_quality_local_actor)
 
 ## Cape cloth is enabled only when all four owners agree: equipment says a
 ## cape is worn, the crowd's cloth budget allows this body, the animation gate
@@ -2543,18 +2565,12 @@ func cape_cloth_active() -> bool:
 func _refresh_cape_cloth_activity(reset_when_enabled: bool = false) -> void:
 	if _cape_cloth == null:
 		return
-	var enabled := (_cape_cloth_worn
-		and _cape_cloth_allowed
-		and not is_instance_valid(_mount_visual)
-		and _animation_tier != AnimationGate.Tier.PAUSED
-		# Stepped every fourth frame, the solver's clamped step would leave
-		# the cloth trailing its body; it hangs instead.
-		and _animation_tier != AnimationGate.Tier.QUARTER
-		and ACTOR_RENDER_QUALITY.cape_enabled(
-			_render_quality, _render_quality_local_actor))
+	var enabled := cape_cloth_should_simulate() and not is_instance_valid(_mount_visual)
 	if enabled and reset_when_enabled and not _cape_cloth.active:
 		_cape_cloth.call("reset")
 	_cape_cloth.active = enabled
+	if is_instance_valid(_mount_visual):
+		_mount_visual.call("refresh_cloth_permission", reset_when_enabled)
 
 ## How far the worn torso reaches from each of the solver's capsules. The
 ## solver knows the skeleton and nothing else; the equipment is only known
@@ -2891,6 +2907,14 @@ func set_mount_state(state: Dictionary, models: Dictionary) -> void:
 		was_mounted = false
 	mount_state = state.duplicate(true)
 	if riding and not was_mounted:
+		# A previously stepped player must leave the gate before mounted sampling
+		# takes ownership. Reference-pose seeks remain explicit and immediate.
+		if _animation_gate_owner != null:
+			_animation_gate_owner.discard(animation_player)
+		_set_model_processing(true)
+		if animation_player != null:
+			animation_player.active = true
+			animation_player.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 		var visual := (load("res://src/mounts/mounted_player_visual.gd") as Script).new() as Node3D
 		add_child(visual)
 		# Configure before marking mounted: reference poses must play normally.
@@ -2898,11 +2922,18 @@ func set_mount_state(state: Dictionary, models: Dictionary) -> void:
 		if not errors.is_empty():
 			visual.call("restore")
 			visual.free()
+			_restore_unmounted_animation_gate()
 			push_warning("Mount: " + str(errors))
 			play_action(&"idle", true)
 			return
 		_mount_visual = visual
 		_mount_visual.name = "MountedPony"
+		_mount_visual.call("apply_render_quality", _render_quality, _render_quality_local_actor)
+		_mount_visual.call("set_animation_tier", _animation_tier,
+			_animation_gate_owner.one_shot_tier if _animation_gate_owner != null else AnimationGate.Tier.HALF,
+			_animation_gate_owner.gate_skeletons if _animation_gate_owner != null else true,
+			_animation_gate_owner.stagger if _animation_gate_owner != null else true)
+		_refresh_cape_cloth_activity(true)
 		_pace_histories.clear()
 		_last_movement_update_msec = -1
 		current_action = &"idle"
@@ -2911,6 +2942,7 @@ func set_mount_state(state: Dictionary, models: Dictionary) -> void:
 		_mount_visual = null
 		previous.call("restore")
 		previous.free()
+		_restore_unmounted_animation_gate()
 		_pace_histories.clear()
 		_last_movement_update_msec = -1
 		current_action = &"idle"
@@ -4156,8 +4188,11 @@ func _wake() -> void:
 ## test: the body as drawn plus the banner over it, on the widest side of
 ## the ground it holds.
 func view_radius() -> float:
-	return (NAMEPLATE_HEIGHT + 0.6) * maxf(server_scale, 0.01) \
+	var radius := (NAMEPLATE_HEIGHT + 0.6) * maxf(server_scale, 0.01) \
 		* float(maxi(footprint.x, footprint.y))
+	if is_instance_valid(_mount_visual):
+		radius = maxf(radius, float(_mount_visual.call("presentation_view_radius")))
+	return radius
 
 ## The child carrying this actor's mark on the full map, and the one thing left
 ## drawn when the actor itself is too far away to be worth drawing. A dot on a
@@ -4211,7 +4246,12 @@ func is_drawn() -> bool:
 ## which finishes it at the same speed: in a fight the bodies behind the
 ## camera strike every round, and each strike woke them to full rate.
 func set_animation_tier(tier: int, gate: AnimationGate) -> void:
+	_animation_gate_owner = gate
 	if is_instance_valid(_mount_visual):
+		# The mounted manager owns both pose clocks. Keep this player out of the
+		# gate's stepped membership so an old half-rate group cannot pose it too.
+		_take_mounted_animation_ownership(gate)
+		_mount_visual.call("set_animation_tier", tier, gate.one_shot_tier, gate.gate_skeletons, gate.stagger)
 		return
 	if animation_player == null:
 		return
@@ -4233,12 +4273,43 @@ func set_animation_tier(tier: int, gate: AnimationGate) -> void:
 func animation_tier() -> int:
 	return _animation_tier
 
+func _set_mounted_animation_tier(tier: int) -> void:
+	_animation_tier = tier
+	_set_model_processing(tier != AnimationGate.Tier.PAUSED)
+	_refresh_cape_cloth_activity()
+
+func _take_mounted_animation_ownership(gate: AnimationGate) -> void:
+	# A paused ordinary player uses idle callbacks. A mounted player instead
+	# stays manual and inactive while the manager owns explicit pose sampling.
+	# Membership-only removal avoids an idle/manual callback-mode round trip.
+	gate.discard(animation_player)
+	if animation_player != null:
+		animation_player.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
+		animation_player.active = false
+
+func _restore_unmounted_animation_gate() -> void:
+	if _animation_gate_owner != null:
+		var tier := _animation_tier
+		_animation_tier = -1 # Reapply even when the effective tier is unchanged.
+		set_animation_tier(tier, _animation_gate_owner)
+	elif animation_player != null:
+		animation_player.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_IDLE
+		animation_player.active = true
+		_set_model_processing(true)
+		if _native_skeleton != null:
+			_native_skeleton.modifier_callback_mode_process = Skeleton3D.MODIFIER_CALLBACK_MODE_PROCESS_IDLE
+
 ## A parked body (crowd_presentation.gd) is hidden while it waits to be worn
 ## again, so nothing of it animates, whatever clip it was in: paused here, it
 ## leaves the gate's stepped groups, which otherwise went on posing, solving and
 ## skinning it every second or fourth frame for as long as it was parked.
 func pause_for_parking(gate: AnimationGate) -> void:
-	if is_instance_valid(_mount_visual) or animation_player == null:
+	_animation_gate_owner = gate
+	if is_instance_valid(_mount_visual):
+		_take_mounted_animation_ownership(gate)
+		_mount_visual.call("pause_for_parking")
+		return
+	if animation_player == null:
 		return
 	_animation_tier = AnimationGate.Tier.PAUSED
 	gate.apply(animation_player, AnimationGate.Tier.PAUSED, _native_skeleton)

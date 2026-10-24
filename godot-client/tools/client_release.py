@@ -26,7 +26,7 @@ def digest(path: Path) -> str:
 
 
 def identity(repo: Path, sha: str, platform: str, public_key: Path | None,
-             repository: str, distribution: str = "github") -> dict:
+             repository: str, distribution: str = "github", *, release_build: bool = False) -> dict:
     if distribution not in {"github", "steam", "standalone"}:
         raise ValueError("unsupported client distribution")
     if not re.fullmatch(r"[0-9a-f]{40}", sha):
@@ -44,7 +44,7 @@ def identity(repo: Path, sha: str, platform: str, public_key: Path | None,
         raise ValueError("update-public-key must contain a public RSA key only")
     return {"schema": 1, "commit": sha, "platform": platform,
             "ancestors": ancestors, "public_key": pem, "repository": repository,
-            "distribution": distribution}
+            "distribution": distribution, "release_build": release_build}
 
 
 def build_payload(stage: Path, output: Path | BinaryIO) -> tuple[int, int]:
@@ -94,14 +94,18 @@ def split_payload(archive: Path, base_url: str, part_bytes: int = PART_BYTES) ->
 
 
 def export_launcher(stage: Path, metadata: dict, godot: Path, source: Path,
-                    preset_text: str, preset_name: str, run_godot, logs: Path) -> None:
+                    preset_text: str, preset_name: str, run_godot, logs: Path, *, cache=None) -> None:
     project = logs / "updater-project"
     scripts = project / "src" / "updates"
     scripts.mkdir(parents=True, exist_ok=True)
-    for name in ("release.gd", "launcher.gd", "launch_options.gd"):
+    for name in ("release.gd", "launcher.gd", "launch_options.gd", "package_updates.gd",
+                 "package_download.gd", "update_transport.gd", "bootstrap.gd", "uninstall.gd"):
         (scripts / name).write_bytes((source / "src" / "updates" / name).read_bytes())
     (project / "data").mkdir(exist_ok=True)
-    (project / "data" / "client_release.json").write_text(json.dumps(metadata), encoding="utf-8")
+    # Bootstrap trust is independent of a game revision. Asset-only releases
+    # must not change the updater just because commit ancestry changed.
+    trust = {key: metadata[key] for key in ("schema", "platform", "public_key", "repository", "distribution")}
+    (project / "data" / "client_release.json").write_text(json.dumps(trust, sort_keys=True), encoding="utf-8")
     branding = project / "assets" / "branding"
     branding.mkdir(parents=True, exist_ok=True)
     for name in ("rabbitlands-icon.png", "rabbitlands-icon.ico", "rabbitlands-mark-64.png"):
@@ -120,35 +124,77 @@ def export_launcher(stage: Path, metadata: dict, godot: Path, source: Path,
     preset_text = preset_text.replace('binary_format/embed_pck=false', 'binary_format/embed_pck=true')
     preset_text = preset_text.replace('[preset.1.options]', '[preset.1.options]\n\nbinary_format/embed_pck=true')
     (project / "export_presets.cfg").write_text(preset_text, encoding="utf-8")
-    run_godot(godot, ["--headless", "--path", str(project), "--import"], logs / "updater-import.log", timeout=120)
     binary = "RabbitLands-updater.exe" if metadata["platform"] == "windows" else "RabbitLands-updater.x86_64"
     (stage / "RabbitLands-updater.pck").unlink(missing_ok=True)
-    run_godot(godot, ["--headless", "--path", str(project), "--export-release", preset_name, str(stage / binary)],
-              logs / "updater-export.log", timeout=120)
+    # Fingerprint the complete generated project plus the pinned engine. Trust
+    # changes and helper edits must rebuild even when game assets are unchanged.
+    cached = None
+    if cache:
+        fingerprint = hashlib.sha256((str(metadata["platform"]) + preset_name).encode())
+        for path in sorted(project.rglob("*")):
+            if path.is_file() and ".godot" not in path.relative_to(project).parts:
+                fingerprint.update(path.relative_to(project).as_posix().encode() + b"\0" + path.read_bytes())
+        fingerprint.update(digest(godot).encode())
+        cached = cache / (fingerprint.hexdigest() + ".bin")
+    if cached and cached.is_file():
+        (stage / binary).hardlink_to(cached)
+    else:
+        run_godot(godot, ["--headless", "--path", str(project), "--import"], logs / "updater-import.log", timeout=120)
+        run_godot(godot, ["--headless", "--path", str(project), "--export-release", preset_name, str(stage / binary)],
+                  logs / "updater-export.log", timeout=120)
+        if cached:
+            cache.mkdir(parents=True, exist_ok=True)
+            cached.hardlink_to(stage / binary)
     if not (stage / binary).is_file():
         raise ValueError("updater export is incomplete")
+    # Same trusted binary, different entry point selected by executable name.
+    uninstaller = binary.replace("-updater", "-uninstall")
+    (stage / uninstaller).hardlink_to(stage / binary)
+    if metadata["platform"] == "linux":
+        (stage / binary).chmod(0o755)
+        (stage / uninstaller).chmod(0o755)
 
 
 def publish_artifacts(stage: Path, metadata: dict, private_key: Path,
                       godot: Path, source: Path, run_godot, logs: Path,
-                      *, accept_part=None, budget=None) -> list[Path]:
+                      *, accept_part=None, budget=None, shared=False,
+                      previous_packages=None, reuse_package=None) -> list[Path]:
     commit = metadata["commit"]
     platform = metadata["platform"]
     tag = f"client-{commit}"
     base = f'https://github.com/{metadata["repository"]}/releases/download/{tag}'
-    archive = stage.parent / f"{stage.name}.update.zip"
-    if accept_part is None:
-        count, unpacked = build_payload(stage, archive)
-        parts = split_payload(archive, base)
-        size, checksum = archive.stat().st_size, digest(archive)
-    else:
-        with PartWriter(archive, base, PART_BYTES, accept_part, budget) as writer:
-            count, unpacked = build_payload(stage, writer)
-        parts, size, checksum = writer.parts, writer.size, writer.sha256
-    release = {"schema": 1, "commit": commit, "platform": platform,
-               "version": stage.name, "size": size,
-               "unpacked_size": unpacked, "file_count": count,
-               "sha256": checksum, "parts": parts}
+    import asset_packages
+    import shared_release_assets as shared_assets
+    downloads = shared_assets.base(metadata["repository"]) if shared else base
+    packages = asset_packages.build(stage, downloads, accept_part=accept_part, budget=budget, shared=shared,
+                                    previous_packages=previous_packages, reuse_package=reuse_package)
+    release = {"schema": 2, "bootstrap_schema": 1, "repository": metadata["repository"], "commit": commit,
+               "ancestors": metadata["ancestors"],
+               "launch_args": json.loads((stage / "launcher-defaults.json").read_text()).get("args", []) if (stage / "launcher-defaults.json").is_file() else [],
+               "platform": platform, "version": stage.name,
+               "size": sum(p["size"] for p in packages),
+               "unpacked_size": sum(p["unpacked_size"] for p in packages),
+               "file_count": sum(p["file_count"] for p in packages),
+               "sha256": hashlib.sha256(json.dumps(packages, sort_keys=True, separators=(",", ":")).encode()).hexdigest(),
+               "packages": packages, "parts": [part for p in packages for part in p["parts"]]}
+    helpers = []
+    extension = "exe" if platform == "windows" else "x86_64"
+    for kind in ("updater", "uninstall"):
+        original = stage / f"RabbitLands-{kind}.{extension}"
+        filename = shared_assets.name(digest(original), kind, extension) if shared else f"{stage.name}-{kind}.{extension}"
+        path = stage.parent / filename
+        # Keep runner accounting bounded: link the existing helper, no copy.
+        if path.exists():
+            if path.stat().st_size != original.stat().st_size or digest(path) != digest(original):
+                raise ValueError("A local bootstrap checksum conflicts with its shared filename.")
+        else:
+            path.hardlink_to(original)
+        row = {"url": f"{downloads}/{path.name}", "size": path.stat().st_size, "sha256": digest(path)}
+        release[kind] = row
+        if accept_part:
+            accept_part(path, row)
+            path.unlink()
+        helpers.append(path)
     payload = logs / "release-payload.json"
     payload.write_text(json.dumps(release, separators=(",", ":")), encoding="utf-8")
     manifest = stage.parent / f"{stage.name}-{platform}.json"
@@ -161,11 +207,13 @@ def publish_artifacts(stage: Path, metadata: dict, private_key: Path,
     run_godot(godot, ["--headless", "--path", str(logs / "updater-project"), "--script",
                      str(source / "tools" / "verify_client_release.gd"), "--", str(request)],
               logs / "release-verify.log", timeout=120)
+    alias = stage.parent / f"RabbitLands-{platform}.json"
+    shutil.copyfile(manifest, alias)
     policy = stage.parent / f"{stage.name}-server-policy.json"
     policy.write_text(json.dumps({"schema": 1, "required_commit": commit, "enforce": True,
                                  "manifests": {platform: f"{base}/{manifest.name}"}}, indent=2), encoding="utf-8")
     instructions = stage.parent / f"{stage.name}-github-release.txt"
-    assets = [manifest] + [stage.parent / part["url"].rsplit("/", 1)[1] for part in parts]
+    assets = [manifest, alias, *helpers] + [stage.parent / part["url"].rsplit("/", 1)[1] for part in release["parts"]]
     instructions.write_text(
         f'Create public GitHub Release {tag} in {metadata["repository"]}, targeting client commit {commit}.\n'
         'Upload these assets (all download parts are under 2 GiB):\n'
@@ -173,8 +221,9 @@ def publish_artifacts(stage: Path, metadata: dict, private_key: Path,
         + f'\n\nAfter uploads complete, copy {policy.name} to the server profile as client_updates.json.\n'
         'Merge windows/linux manifest rows if publishing both platforms. Connected players are notified within 30 seconds.\n',
         encoding="utf-8")
-    if accept_part is None:
-        archive.unlink()  # Players download the pieces; the unsplit archive is redundant.
+    if shared:
+        with instructions.open("a", encoding="utf-8") as output:
+            output.write("\nUse build_release.py upload for a combined build. Checksum-named packages and helpers belong in the shared client-assets release, not the versioned installer release.\n")
     return assets + [policy, instructions]
 
 
@@ -184,7 +233,8 @@ def export_installer_helper(stage: Path, godot: Path, tools_source: Path,
     project = logs / "installer-project"
     scripts = project / "src/updates"
     scripts.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(tools_source / "src/updates/release.gd", scripts / "release.gd")
+    for name in ("release.gd", "package_updates.gd", "package_download.gd", "update_transport.gd"):
+        shutil.copyfile(tools_source / "src/updates" / name, scripts / name)
     shutil.copyfile(tools_source / "tools/install_client_payload.gd", project / "install.gd")
     data = project / "data"
     data.mkdir(exist_ok=True)

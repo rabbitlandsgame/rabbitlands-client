@@ -52,6 +52,10 @@ const ACTION_TARGETS := {
 ## promises, so the pointer says "move", "use" or "look" before the click.
 const SLOT_CURSORS := {"item_grab": GRAB, "item_use": USE, "item_inspect": EYE}
 
+# DisplayServer retains installed textures beyond this manager's lifetime.
+# Weak owners let an older Main release its slots without clearing a newer Main.
+static var _slot_owners: Dictionary = {}
+
 var _textures: Array = []
 var _hotspots: Array = []
 var _names: Array[String] = []
@@ -61,10 +65,7 @@ var _current := -1
 ## operating system pointer alone - when anything is missing, so a broken asset
 ## degrades to a working default cursor rather than an invisible one.
 func configure(manifest_path: String) -> bool:
-	_textures.clear()
-	_hotspots.clear()
-	_names.clear()
-	_current = -1
+	release()
 	var manifest_text: String = FileAccess.get_file_as_string(
 		ProjectSettings.globalize_path(manifest_path))
 	if manifest_text.is_empty():
@@ -120,12 +121,13 @@ func current() -> int:
 ## Swaps the pointer. Repeated calls with the same cursor are free, so callers
 ## can state the wanted cursor every refresh without bookkeeping.
 func apply(cursor_id: int) -> void:
-	if not loaded() or cursor_id == _current:
+	if not loaded() or (cursor_id == _current and _owns_slot(Input.CURSOR_ARROW)):
 		return
 	if cursor_id < 0 or cursor_id >= CURSOR_COUNT:
 		return
-	Input.set_custom_mouse_cursor(_textures[cursor_id] as Texture2D,
+	_set_custom_cursor(_textures[cursor_id] as Texture2D,
 		Input.CURSOR_ARROW, _hotspots[cursor_id] as Vector2)
+	_slot_owners[Input.CURSOR_ARROW] = weakref(self)
 	_current = cursor_id
 
 ## The caret glyph rides the I-beam shape instead of the arrow, so every text
@@ -133,8 +135,29 @@ func apply(cursor_id: int) -> void:
 func install_text_caret() -> void:
 	if not loaded():
 		return
-	Input.set_custom_mouse_cursor(_textures[TEXT] as Texture2D,
+	_set_custom_cursor(_textures[TEXT] as Texture2D,
 		Input.CURSOR_IBEAM, _hotspots[TEXT] as Vector2)
+	_slot_owners[Input.CURSOR_IBEAM] = weakref(self)
+
+## Drop platform references while RenderingServer still exists. Calling this
+## repeatedly is safe; slots since claimed by another manager remain installed.
+func release() -> void:
+	for shape: int in [Input.CURSOR_ARROW, Input.CURSOR_IBEAM]:
+		if _owns_slot(shape):
+			_set_custom_cursor(null, shape)
+			_slot_owners.erase(shape)
+	_textures.clear()
+	_hotspots.clear()
+	_names.clear()
+	_current = -1
+
+func _owns_slot(shape: int) -> bool:
+	var owner := _slot_owners.get(shape) as WeakRef
+	return owner != null and owner.get_ref() == self
+
+func _set_custom_cursor(texture: Texture2D, shape: int,
+		hotspot: Vector2 = Vector2.ZERO) -> void:
+	Input.set_custom_mouse_cursor(texture, shape, hotspot)
 
 ## The decision table, ported from check_cursor_change (gamewin.c) and reduced
 ## to the interactions this client has. Pure so the whole matrix is testable.

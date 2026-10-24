@@ -27,6 +27,8 @@ const FRAMED_RADIUS := 64.0
 ## so the first view after the curtain lifts has no missing terrain.
 const ARRIVAL_FRAME_METRES := 36.0
 const VramTextures := preload("res://src/world/vram_textures.gd")
+const ResourceDiagnostics := preload("res://src/world/resource_diagnostics.gd")
+const RetirementBudget := preload("res://src/world/resource_retirement_budget.gd")
 ## Where configure() keeps a chunk's shared image figures as published.
 const PUBLISHED_SHARED_KEY := "publishedSharedResourceResidentBytes"
 ## The geometry figure the exporters published per GLB byte before it was
@@ -65,9 +67,12 @@ var has_focus := false
 var initial_focus := Vector3.INF
 var events: Array[Dictionary] = []
 var revision := 0
+var _resource_timings: Dictionary = {}
+var _last_preparation: Dictionary = {}
 var _cache_enabled := true
 var _thread: Thread
 var _pending: Dictionary = {}
+var _pending_started_usec := 0
 var _paused := false
 var _retry_after: Dictionary = {}
 var _retiring: Array[Dictionary] = []
@@ -100,6 +105,17 @@ static func _orphan(thread: Thread, entry: Dictionary) -> void:
 
 static func orphans_pending() -> int:
 	return _orphans.size()
+
+## Plain estimates only; never polls completion, joins, or holds a builder.
+static func orphan_diagnostic_snapshot() -> Dictionary:
+	var estimated := 0
+	var shared: Dictionary = {}
+	for orphan: Dictionary in _orphans:
+		var entry: Dictionary = orphan.entry
+		if not entry.is_empty():
+			estimated += incremental_cost(entry, shared)
+	return {"workers": _orphans.size(), "estimated_bytes": estimated,
+		"estimate_kind": "manifest_estimate_not_measured_allocation"}
 
 static func reap_orphans() -> int:
 	var remaining: Array[Dictionary] = []
@@ -200,14 +216,14 @@ func configure(source: WorldManifest, cache_enabled: bool) -> void:
 		entries.append(entry)
 	var counted := _correct_entries()
 	if VramTextures.mode() != VramTextures.Mode.OFF:
-		print("vram_textures budget %s: %d of %d images at sidecar size; indexes %d of %d read (%d entries)" % [
+		print("vram_textures budget %s: %d of %d images at adjusted size; indexes %d of %d read (%d entries)" % [
 			source.asset_id(), counted.x, counted.y, int(indexes.ok), int(indexes.directories),
 			int(indexes.entries)])
 
 ## Rewrites every entry's shared image figures, in place, to what this client
 ## really holds for each (VramTextures.resident_bytes of the published one).
 ## Candidates and resident cells hold the same dictionaries (shallow copies),
-## so they see it too. Returns (images at sidecar size, images counted).
+## so they see it too. Returns (images at adjusted size, images counted).
 func _correct_entries() -> Vector2i:
 	_corrected_generation = VramTextures.budget_generation()
 	var counted: Dictionary = {}
@@ -228,11 +244,12 @@ func _correct_entries() -> Vector2i:
 
 ## Re-corrects when an answer of VramTextures.resident_bytes may have changed
 ## since: a sidecar refused at load (or not used for a role) uploads RGBA8,
-## and from then on that image must count its published figure again.
+## and from then on it uses known reduced decoded bytes or the published
+## figure while dimensions are unknown.
 func _refresh_corrections() -> void:
 	if VramTextures.budget_generation() != _corrected_generation:
 		var counted := _correct_entries()
-		print("vram_textures budget %s rechecked: %d of %d images at sidecar size" % [
+		print("vram_textures budget %s rechecked: %d of %d images at adjusted size" % [
 			territory.asset_id() if territory != null else "", counted.x, counted.y])
 
 static func bounds_distance(position: Vector3, bounds: Dictionary) -> float:
@@ -521,6 +538,7 @@ func update_focus(position: Vector3) -> void:
 			continue
 		_pending = entry
 		_thread = Thread.new()
+		_pending_started_usec = Time.get_ticks_usec()
 		var error := _thread.start(WorldLoader.prepare_detached.bind(str(entry.path), _cache_enabled))
 		if error != OK:
 			_thread = null
@@ -548,6 +566,8 @@ func poll_pending() -> void:
 	if _thread == null or _thread.is_alive():
 		return
 	var builder := _thread.wait_to_finish() as WorldLoader
+	if _pending_started_usec > 0:
+		ResourceDiagnostics.record(_resource_timings, &"prepare_request_to_poll", _pending_started_usec)
 	_thread = null
 	var entry := _pending
 	_pending = {}
@@ -571,9 +591,17 @@ func _install(entry: Dictionary, builder: WorldLoader) -> void:
 		imported.free()
 		_failed(entry, "chunk_package_digest_mismatch")
 		return
+	var prepared_manifest := resident.manifest as WorldManifest
+	_last_preparation = {"cell": str(entry.id), "load_phases_us": resident.phases.duplicate(),
+		"timings": ResourceDiagnostics.snapshot(resident.get("resource_timings", {})),
+		"verification": prepared_manifest.verification_diagnostics.duplicate(true) if prepared_manifest != null else {}}
 	imported.set_meta("continent_chunk_id", str(entry.id))
+	var operation_began := Time.get_ticks_usec()
 	ExteriorRegionStream._set_collision(imported, _physics_enabled, _preview_enabled, "", true)
+	ResourceDiagnostics.record(_resource_timings, &"collision_activation", operation_began)
+	operation_began = Time.get_ticks_usec()
 	add_child(imported)
+	ResourceDiagnostics.record(_resource_timings, &"scene_attach", operation_began, true)
 	resident.entry = entry
 	cells[str(entry.id)] = resident
 	# Start the next queued import as soon as this worker finishes. Waiting
@@ -586,19 +614,28 @@ func _install(entry: Dictionary, builder: WorldLoader) -> void:
 		"prepare_ms": float(resident.phases.get("total", 0)) / 1000.0,
 		"activate_ms": float(Time.get_ticks_usec() - install_began) / 1000.0})
 	cell_ready.emit(str(entry.id), imported)
+	# Includes synchronous listeners; deferred grounding/binding is timed by
+	# its consumer. Keep the existing ready event and signal order unchanged.
+	ResourceDiagnostics.record(_resource_timings, &"install_with_signal", install_began)
 
 func set_physics_mode(enabled: bool, preview: bool) -> void:
 	_physics_enabled = enabled
 	_preview_enabled = preview
 
 func pause_streaming() -> void:
+	# Teardown observers may repeat this every frame. Only the initial
+	# pause surrenders the turn; exterior ownership transfer cancels itself.
+	if _paused:
+		return
 	_paused = true
+	RetirementBudget.cancel(self)
 
 func can_retire() -> bool:
 	poll_pending()
 	return _thread == null
 
 func _retire_cell(identity: String) -> void:
+	var began := Time.get_ticks_usec()
 	var resident: Dictionary = cells[identity]
 	cells.erase(identity)
 	var imported := resident.root as Node3D
@@ -609,6 +646,7 @@ func _retire_cell(identity: String) -> void:
 	cell_retiring.emit(identity, imported)
 	_changed()
 	_record("evicted", identity)
+	ResourceDiagnostics.record(_resource_timings, &"retire_enqueue", began)
 
 func _discard_builder(entry: Dictionary, builder: WorldLoader) -> void:
 	if builder == null:
@@ -629,10 +667,16 @@ func _drain_retired() -> void:
 	# callback must not walk the same child again while its destructor runs.
 	if _retirement_draining:
 		return
+	if _retiring.is_empty():
+		RetirementBudget.cancel(self)
+		return
+	var allowance := RetirementBudget.begin_slice(self, RETIRE_NODES_PER_FRAME, RETIRE_BUDGET_USEC)
+	if allowance.is_empty():
+		return
 	_retirement_draining = true
 	var began := Time.get_ticks_usec()
 	var freed := 0
-	while not _retiring.is_empty() and freed < RETIRE_NODES_PER_FRAME and Time.get_ticks_usec() - began < RETIRE_BUDGET_USEC:
+	while not _retiring.is_empty() and freed < int(allowance.nodes) and Time.get_ticks_usec() - began < int(allowance.usec):
 		var retired: Dictionary = _retiring[0]
 		var stack: Array = retired.stack
 		if stack.is_empty():
@@ -648,12 +692,52 @@ func _drain_retired() -> void:
 			stack.append(node.get_child(node.get_child_count() - 1))
 		else:
 			stack.pop_back()
+			var operation_began := Time.get_ticks_usec()
 			node.free()
+			ResourceDiagnostics.record(_resource_timings, &"node_free", operation_began, true)
 			freed += 1
 		if stack.is_empty():
 			_retiring.pop_front()
 			_update_resident_bytes()
 	_retirement_draining = false
+	RetirementBudget.end_slice(allowance, freed, Time.get_ticks_usec() - began, not _retiring.is_empty())
+	ResourceDiagnostics.record(_resource_timings, &"retire_slice", began)
+
+## Counts each shared image/prototype once within the supplied estimate set.
+## A pending worker's figure is its complete published/corrected cell estimate,
+## not a measurement of what the worker has allocated so far. No policy refresh
+## or scene-tree traversal is performed by a diagnostic read.
+func resource_estimates(shared: Dictionary) -> Dictionary:
+	var active_bytes := 0
+	var retiring_bytes := 0
+	var pending_bytes := 0
+	for resident: Dictionary in cells.values():
+		active_bytes += incremental_cost(resident.entry, shared)
+	for retired: Dictionary in _retiring:
+		retiring_bytes += incremental_cost(retired.entry, shared)
+	if _thread != null and not _pending.is_empty():
+		pending_bytes = incremental_cost(_pending, shared)
+	return {"active_cells": cells.size(), "retiring_cells": _retiring.size(),
+		"in_flight_cells": 1 if _thread != null else 0,
+		"active_estimated_bytes": active_bytes,
+		"retiring_incremental_estimated_bytes": retiring_bytes,
+		"in_flight_incremental_estimated_bytes": pending_bytes,
+		"total_estimated_bytes": active_bytes + retiring_bytes + pending_bytes,
+		"estimate_kind": "manifest_estimate_not_measured_allocation"}
+
+func diagnostic_snapshot() -> Dictionary:
+	var result := resource_estimates({})
+	result["territory"] = territory.asset_id() if territory != null else ""
+	result["pending_cell"] = str(_pending.get("id", ""))
+	result["in_flight_age_us"] = maxi(0, Time.get_ticks_usec() - _pending_started_usec) if _thread != null else 0
+	result["soft_budget_bytes"] = maximum_resident_bytes
+	result["paused"] = _paused
+	result["timings"] = ResourceDiagnostics.snapshot(_resource_timings)
+	result["last_preparation"] = _last_preparation.duplicate(true)
+	return result
+
+func resource_timings_snapshot() -> Dictionary:
+	return ResourceDiagnostics.snapshot(_resource_timings)
 
 func _update_resident_bytes() -> void:
 	_refresh_corrections()
@@ -684,6 +768,7 @@ func _record(kind: String, identity: String, details := {}) -> void:
 	print("continent_chunk ", JSON.stringify(event))
 
 func _exit_tree() -> void:
+	RetirementBudget.cancel(self)
 	_paused = true
 	# Normal exterior retirement polls completion before freeing any descendant.
 	# A map change or disconnect can still free this root while an import is

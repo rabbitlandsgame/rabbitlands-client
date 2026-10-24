@@ -1,0 +1,110 @@
+{
+  "date": "2026-10-23",
+  "status": "straighter tail base; user visual review pending",
+  "baseClientCommit": "b805e4facfd3d5b8d38888e3a421d5c8f3988a5e",
+  "mount": "giant_rat",
+  "source": "Previously generated Meshy Dock Rat",
+  "outputSha256": "232d5a9f7a8c5348078151872daf452a4c133c9f64f7293f41aaa0e350fe1ec7",
+  "engine": {
+    "checks": 746,
+    "failures": 0,
+    "max_cape_link_error_metres": 5.24818897247314e-05,
+    "max_distal_tail_native_z_metres": -3.52299404144287,
+    "max_facial_rigid_attachment_error_metres": 0.0,
+    "max_rein_error_metres": 0.0,
+    "max_rider_contact_error_metres": 0.000187689234735444,
+    "min_sole_height_metres": 0.00347074680030346,
+    "min_surface_height_metres": 0.00347074680030346
+  },
+  "blender": {
+    "sha256": "232d5a9f7a8c5348078151872daf452a4c133c9f64f7293f41aaa0e350fe1ec7",
+    "fresh_blender_import": true,
+    "bones": 23,
+    "clips": {
+      "Idle_A": {
+        "samples": 289,
+        "minimum_surface_height_metres": 0.01692749373614788,
+        "maximum_loop_surface_difference_metres": 0.0
+      },
+      "Jog": {
+        "samples": 66,
+        "minimum_surface_height_metres": 0.02725602127611637,
+        "maximum_loop_surface_difference_metres": 0.0
+      },
+      "Walk": {
+        "samples": 103,
+        "minimum_surface_height_metres": 0.027864139527082443,
+        "maximum_loop_surface_difference_metres": 0.0
+      }
+    },
+    "failures": 0
+  },
+  "render": {
+    "cape_peak": {
+      "action": "idle",
+      "actor": 900,
+      "chain": 0,
+      "frame": 0,
+      "link": 2
+    },
+    "fps": 30,
+    "frames": 135,
+    "max_cape_link_error_metres": 4.72068786621094e-05,
+    "max_contact_error_metres": 0.000151632862980478
+  },
+  "captures": [
+    "tail-v3/giant-rat-mount.png",
+    "tail-v3/giant-rat-mount.webp",
+    "tail-v3/details/giant-rat-mount.png",
+    "tail-v3/details/giant-rat-mount.webp"
+  ],
+  "coverage": [
+    "male and female canonical riders wearing the current cape",
+    "idle, normal and fast side views and game-camera views",
+    "stable authoritative actor placement and restored on-foot visual after detach",
+    "reins connected to both hands and cape material length maintained",
+    "actual deformed mesh floor clearance including the complete tail",
+    "fresh Blender import with exact clip endpoints and half-key sampling",
+    "fixed original facial surface witnesses follow the skull throughout every gait",
+    "fixed original distal tail witnesses stay behind the rump throughout every gait",
+    "native close-up review of the mouth in idle, normal and fast motion and the tail from top, rear and side",
+    "straighter proximal tail from top, side and rear; protected original attachment seam",
+    "exact preservation of the reviewed mouth, textures, UVs, skin weights and inherited non-tail animation channels"
+  ],
+  "limitations": [
+    "Visual acceptance is pending user review.",
+    "Three mount-only loops; no creature combat action set or live-server catalogue entry.",
+    "Existing Dock Rat pack is retained under the fitted imported pony saddle."
+  ],
+  "revision": 3,
+  "surfaceRepair": {
+    "mouthEditedVertices": 505,
+    "tailVertices": 1417,
+    "unchangedOutsideRepairVertices": 9980,
+    "maximumOutsideRepairDisplacementMetres": 0.0,
+    "protectedTailAttachmentVertices": 17,
+    "tailGuideMaximumLateralOffsetMetres": 0.2,
+    "tailGuideLengthMetres": 3.0591517623703335,
+    "fittedTailGuideLengthMetres": 3.0438457425445047,
+    "tailGuideSegmentLengthDifferenceMetres": 2.220446049250313e-16,
+    "repaintedTexels": {
+      "geometry_0_normal": 12985,
+      "geometry_0_basecolor": 14115
+    }
+  },
+  "detailRender": {
+    "cape_peak": {},
+    "fps": 30,
+    "frames": 135,
+    "max_cape_link_error_metres": 0.0,
+    "max_contact_error_metres": 0.0
+  },
+  "tailRestPreservation": {
+    "baselineSha256": "e57784f3e13a5f9684227c97b7767aa160dcfa8544387daf4811671d2bf8181e",
+    "outputSha256": "232d5a9f7a8c5348078151872daf452a4c133c9f64f7293f41aaa0e350fe1ec7",
+    "bodyAndMuzzleOutsideTailPositionsAndNormalsExact": true,
+    "indicesUVsWeightsAndEmbeddedImagesExact": true,
+    "nonTailAnimationChannelsAndTailRotationsExact": true,
+    "maximumUnaffectedAnimationChannelDifference": 0.0
+  }
+}

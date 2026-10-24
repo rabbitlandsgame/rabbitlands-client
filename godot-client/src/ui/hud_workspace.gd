@@ -44,6 +44,7 @@ var _drag_mouse := Vector2.ZERO
 var _drag_position := Vector2.ZERO
 var _initial_size := Vector2(1280, 720)
 var _layout_queued := false
+var _layout_running := false
 var modern_compass: Control
 var modern_resources: Control
 var minimap_labels: Control
@@ -134,6 +135,7 @@ func configure(owner_main: Control) -> void:
 			"visible": control.visible,
 			"panel_style": control.get_theme_stylebox("panel")}
 		if key in ["chat", "system_chat"]: original[key].bottom_hud = control.bottom_hud
+		elif key == "party": original[key].bottom_hud = (control.get_node("WindowDrag") as WindowDrag).bottom_hud
 	for child: Node in main.get_node("GameView/Quickbar/QuickRows/Buttons").get_children():
 		if child is Button: icon_buttons.append(child)
 	for button: Button in icon_buttons + main.quick_slot_buttons:
@@ -220,6 +222,13 @@ func configure(owner_main: Control) -> void:
 	for key: String in ["party", "minimap", "objectives"]:
 		var dragger := parts[key].get_node_or_null("WindowDrag") as WindowDrag
 		if dragger != null: dragger.moved.connect(func(_where: Vector2) -> void: _remember_moved(key))
+	parts.party.resized.connect(func() -> void:
+		if not _layout_running: queue_layout())
+	main.extension_windows.party_layout_saved.connect(func() -> void:
+		if _applying: return
+		model.working.parts.party.dimensions = main.extension_windows._party_expanded_size if main.extension_windows._party_custom_size else Vector2.ZERO
+		queue_layout()
+		if not is_open(): _store())
 	for key: String in ["chat", "system_chat"]:
 		var surface: PanelContainer = parts[key]
 		surface.dragger.moved.connect(func(_where: Vector2) -> void: _remember_moved(key))
@@ -264,15 +273,34 @@ func _process(_delta: float) -> void:
 			tracker_text.text = _quest_tags.sub(tracker_text.text, "", true)
 		if model.working.parts.objectives.compact and tracker_text.text.contains("QUEST TRACKER"):
 			tracker_text.text = tracker_text.text.substr(tracker_text.text.find("\n") + 1)
+		var party_changed := false
 		var actions: Control = parts.party.get_node("Body/PartyActions")
-		actions.visible = not model.working.parts.party.compact or parts.party.get_global_rect().has_point(get_global_mouse_position())
-		(parts.party.get_node("Body/Header") as Control).visible = actions.visible
+		var collapsed: bool = main.extension_windows._party_collapsed
+		var show_controls: bool = collapsed or not model.working.parts.party.compact \
+			or parts.party.get_global_rect().has_point(get_global_mouse_position()) \
+			or main.extension_windows.party_add_bot.get_popup().visible or main.extension_windows.party_options.get_popup().visible
+		var header: Control = parts.party.get_node("Body/Header")
+		main.extension_windows._party_controls_visible = show_controls
+		if actions.visible != (show_controls and not collapsed) or header.visible != show_controls:
+			actions.visible = show_controls and not collapsed
+			header.visible = show_controls
+			party_changed = true
 		var self_name := ""
 		for member: Dictionary in AppState.party.get("members", []):
 			if member.get("is_self", false): self_name = str(member.get("name", ""))
 		for row: Node in main.extension_windows.party_rows.get_children():
-			if row is Control: row.visible = (model.working.parts.party.show_self and not model.working.parts.party.show_player_details) or str(row.name) != "Member" + self_name
-		party_summary.visible = model.working.parts.party.show_player_details and model.working.parts.party.show_self and not main.extension_windows.get("_party_collapsed")
+			if row is Control:
+				var show_row: bool = (model.working.parts.party.show_self and not model.working.parts.party.show_player_details) or str(row.name) != "Member" + self_name
+				if row.visible != show_row:
+					row.visible = show_row
+					party_changed = true
+		var show_summary: bool = model.working.parts.party.show_player_details and model.working.parts.party.show_self and not collapsed
+		if party_summary.visible != show_summary:
+			party_summary.visible = show_summary
+			party_changed = true
+		if party_changed:
+			main.extension_windows._queue_party_layout()
+			queue_layout()
 
 static func _logo_ink_rect(image: Image) -> Rect2i:
 	# Ignore nearly invisible export residue around the mark when centering it.
@@ -1245,7 +1273,7 @@ func _capture_live(value: Dictionary) -> void:
 	value.parts.minimap.enabled = bool(main._minimap_visible)
 	value.parts.minimap.map_shape = main._minimap_shape
 	for field: String in Presets.BANNER_FIELDS: value.banner_options[field] = main._banner_option(field)
-	value.parts.party.dimensions = parts.party.size
+	value.parts.party.dimensions = main.extension_windows._party_expanded_size if main.extension_windows._party_custom_size else Vector2.ZERO
 	for key: String in SWITCHES:
 		value.parts[key].enabled = bool(main._hud_element_options[SWITCHES[key]])
 	var analog: bool = main._hud_element_options.get("analog_clock", true)
@@ -1279,7 +1307,8 @@ func _remember_moved(key: String, persist := true) -> void:
 	model.working.parts[key].position = _normal_position(parts[key])
 	model.working.parts[key].offset = Vector2.ZERO
 	if key in ["chat", "system_chat"]: _capture_chat(model.working, key)
-	elif key in ["party", "minimap"]: model.working.parts[key].dimensions = parts[key].size
+	elif key == "party": model.working.parts.party.dimensions = main.extension_windows._party_expanded_size if main.extension_windows._party_custom_size else Vector2.ZERO
+	elif key == "minimap": model.working.parts[key].dimensions = parts[key].size
 	if not persist:
 		_update_chrome()
 		return
@@ -1393,6 +1422,7 @@ func apply_layout() -> void:
 			if key in ["chat", "system_chat"]:
 				dragger.bottom_hud = original[key].bottom_hud if legacy else null
 				parts[key].bottom_hud = original[key].bottom_hud if legacy else null
+			elif key == "party": dragger.bottom_hud = original[key].bottom_hud if legacy else null
 	var row: Control = main.get_node("GameView/Quickbar/QuickRows/Buttons")
 	for button: Button in icon_buttons:
 		var parent: Node = row if legacy else utility_grid
@@ -1440,7 +1470,7 @@ func apply_layout() -> void:
 	summary_config.show_background = false
 	summary_config.show_border = false
 	party_summary.configure(main, summary_config, model.working.resource_colors)
-	party_summary.visible = not legacy and summary_config.show_self and summary_config.show_player_details
+	party_summary.visible = not legacy and summary_config.show_self and summary_config.show_player_details and not main.extension_windows._party_collapsed
 	target_card.visible = not legacy and bool(model.working.parts.target.enabled)
 	(containers.target as Control).hide()
 	for key: String in ["chat", "system_chat"]:
@@ -1454,6 +1484,9 @@ func apply_layout() -> void:
 		elif model.working.parts[key].dimensions != Vector2.ZERO: surface.resize_window(model.working.parts[key].dimensions)
 	var party_size: Vector2 = model.working.parts.party.dimensions
 	if party_size != Vector2.ZERO: main.extension_windows.resize_party_window(party_size)
+	else:
+		main.extension_windows._party_custom_size = false
+		main.extension_windows._layout_party()
 	main._on_chat_configuration_changed("", null)
 	main._minimap_visible = bool(model.working.parts.minimap.enabled)
 	main.minimap_frame.visible = main._minimap_visible
@@ -1475,8 +1508,9 @@ func apply_layout() -> void:
 	if not model.working.parts.objectives.enabled: parts.objectives.hide()
 	if legacy:
 		for chrome: Node2D in _chrome.values(): chrome.hide()
+		main.extension_windows._party_controls_visible = true
 		for key: String in ["chat", "system_chat"]: parts[key]._header.show()
-		(parts.party.get_node("Body/PartyActions") as Control).show()
+		(parts.party.get_node("Body/PartyActions") as Control).visible = not main.extension_windows._party_collapsed
 		(parts.party.get_node("Body/Header") as Control).show()
 		for child: Control in main.extension_windows.party_rows.get_children(): child.show()
 		var parchment: PanelContainer = parts.objectives.get_node("TrackerParchment")
@@ -1527,6 +1561,7 @@ func apply_layout() -> void:
 	if banner_controls != null:
 		banner_controls.sync_colors(model.working.banner_colors, model.working.resource_colors)
 	layout_hud()
+	main.extension_windows._queue_party_layout()
 	queue_layout()
 
 func _restore_original(key: String) -> void:
@@ -1665,6 +1700,7 @@ func layout_hud() -> void:
 		_center_editor()
 		queue_redraw()
 		return
+	_layout_running = true
 	_layout_menu_icons()
 	_layout_items()
 	for key: String in Presets.PARTS:
@@ -1681,7 +1717,7 @@ func layout_hud() -> void:
 		control.scale = config.axis_scale * float(config.scale)
 		if key not in ["utilities", "chat", "system_chat", "party", "items", "minimap", "compass", "medallion", "resources", "food_meter", "load_meter", "xp_meter", "player_card", "target"]: control.reset_size()
 		var dimensions := control.size
-		if config.dimensions != Vector2.ZERO and key in ["chat", "system_chat", "party", "minimap", "compass", "clock", "research", "logo", "medallion", "resources", "food_meter", "load_meter", "xp_meter", "player_card", "target"]:
+		if config.dimensions != Vector2.ZERO and key in ["chat", "system_chat", "minimap", "compass", "clock", "research", "logo", "medallion", "resources", "food_meter", "load_meter", "xp_meter", "player_card", "target"]:
 			dimensions = config.dimensions
 		elif key == "medallion": dimensions = Vector2(240, 200)
 		if key == "rail_panel":
@@ -1704,6 +1740,7 @@ func layout_hud() -> void:
 	_update_chrome()
 	main._layout_minimap_cardinals()
 	_center_editor()
+	_layout_running = false
 	queue_redraw()
 
 func _fit_rail_statistics() -> void:

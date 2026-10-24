@@ -540,6 +540,8 @@ static func _art_directed(value: Dictionary, id: String) -> Dictionary:
 
 static func _show_icons(value: Dictionary, visible: Array) -> void:
 	value.icons["__default"] = false
+	value.icons["ExchangeButton"] = true
+	value.icons["StoragePreviewButton"] = true
 	for key: String in ["WalkButton", "SitButton", "MountsButton", "LookButton", "TradeButton", "AttackButton", "InventoryButton", "SpellsButton", "ManufacturingButton", "EmotesButton", "QuestButton", "MapButton", "InfoButton", "BuddyButton", "StatsButton", "KnowledgeButton", "ConsoleButton", "HelpButton", "EncyclopediaButton", "RangingButton", "MinimapButton", "OptionsButton", "ChatButton", "DisconnectButton", "LeaderboardsButton"]:
 		value.icons[key] = key in visible
 
@@ -764,6 +766,8 @@ static func normalise(raw: Variant) -> Dictionary:
 	# Older compact menus hide unknown buttons. Add the new entry while
 	# preserving a player's explicit choice to hide it in the HUD editor.
 	result.icons["LeaderboardsButton"] = result.icons.get("LeaderboardsButton", true)
+	result.icons["ExchangeButton"] = result.icons.get("ExchangeButton", true)
+	result.icons["StoragePreviewButton"] = result.icons.get("StoragePreviewButton", true)
 	var colors: Variant = raw.get("resource_colors", {})
 	result.banner_colors = BannerColors.normalise(raw.get("banner_colors", {}))
 	if colors is Dictionary:

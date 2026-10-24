@@ -1,5 +1,8 @@
 extends SceneTree
 
+const GltfQuantization := preload("res://src/world/gltf_quantization.gd")
+const VramTextures := preload("res://src/world/vram_textures.gd")
+
 var failures := 0
 var stage: Node3D
 var stream: ExteriorRegionStream
@@ -10,6 +13,11 @@ func _init() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
+	# Main registers image extensions before it dispatches any map worker.
+	# This fixture begins with synthetic roots, so its first real load happens
+	# on that worker; ensure_registered() deliberately cannot register there.
+	GltfQuantization.ensure_registered()
+	_expect(VramTextures.ensure_registered(), "map image extension is registered on the main thread")
 	registry = JSON.parse_string(FileAccess.get_file_as_string("res://data/maps/registry.json")).maps
 	stage = Node3D.new()
 	root.add_child(stage)
@@ -93,10 +101,14 @@ func _run() -> void:
 		rendered_frames += 1
 		await process_frame
 	_expect(stream.is_idle(), "cancelled import finishes without a blocking join")
+	if not stream.is_idle():
+		# Keep serving frames after a failed bounded drain. The owning test
+		# runner must terminate its process rather than quit with a live worker.
+		return
 	_expect(rendered_frames > 1, "the main loop keeps running during loading")
 	_expect(stream.residents.is_empty(), "a stale completion cannot revive a disconnected world")
 	GlbSceneCache.clear()
-	var visual_path := "res://assets/world/harvestables/moor_peat.glb"
+	var visual_path := "res://assets/world/interactives/storage.glb"
 	var prepared := GlbSceneCache.prepare(GlbSceneCache.missing(PackedStringArray([visual_path])))
 	GlbSceneCache.install_prepared(prepared)
 	var visual := GlbSceneCache.instantiate(ProjectSettings.globalize_path(visual_path))
@@ -104,8 +116,24 @@ func _run() -> void:
 		"preloaded resource and absolute runtime path share one cached scene")
 	if visual != null: visual.free()
 	GlbSceneCache.clear()
+	stream.clear()
+	loader.unload_world()
+	deadline = Time.get_ticks_msec() + 30000
+	while not stream.is_idle() and Time.get_ticks_msec() < deadline:
+		await process_frame
+	_expect(stream.is_idle(), "final clear drains worker and retirement ownership before stage deletion")
+	if not stream.is_idle():
+		return
 	stage.queue_free()
 	await process_frame
+	deadline = Time.get_ticks_msec() + 30000
+	ContinentChunkStream.reap_orphans()
+	while ContinentChunkStream.orphans_pending() > 0 and Time.get_ticks_msec() < deadline:
+		await process_frame
+		ContinentChunkStream.reap_orphans()
+	_expect(ContinentChunkStream.orphans_pending() == 0, "stage deletion leaves no live orphan imports")
+	if ContinentChunkStream.orphans_pending() > 0:
+		return
 	print("exterior streaming tests: ", "PASS" if failures == 0 else "FAIL")
 	quit(failures)
 

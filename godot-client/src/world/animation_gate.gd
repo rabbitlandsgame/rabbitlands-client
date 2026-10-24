@@ -138,6 +138,12 @@ func _join(player: AnimationPlayer, tier: Tier, skeleton: Skeleton3D) -> void:
 	_group_of[player] = chosen
 
 func _leave(player: Object) -> void:
+	discard(player)
+
+## Forget one departing player without changing callbacks, survivor membership,
+## or group clocks. Variant also accepts an expired dictionary key without a
+## cast to a freed Node. This does not cancel work queued before departure.
+func discard(player: Variant) -> void:
 	var current: int = int(_group_of.get(player, -1))
 	if current < 0:
 		return
@@ -173,18 +179,22 @@ func advance(delta: float) -> void:
 			members.erase(value)
 			_group_of.erase(value)
 
-## Forgets every player, handing the stepped ones back to idle processing.
-func reset() -> void:
+## Forgets every player. Live callers restore idle callbacks by default.
+## Full-world discard leaves callback modes untouched: these nodes are about to
+## be freed, so resetting the gate must not reactivate their queued work. Work
+## already queued before this call is not canceled by forgetting membership.
+func reset(restore_idle: bool = true) -> void:
 	for group: Dictionary in _groups:
 		var members: Dictionary = group["members"]
-		for value: Variant in members:
-			if is_instance_valid(value):
-				(value as AnimationPlayer).callback_mode_process = (
-					AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_IDLE)
-			var skeleton: Variant = members[value]
-			if is_instance_valid(skeleton):
-				(skeleton as Skeleton3D).modifier_callback_mode_process = (
-					Skeleton3D.MODIFIER_CALLBACK_MODE_PROCESS_IDLE)
+		if restore_idle:
+			for value: Variant in members:
+				if is_instance_valid(value):
+					(value as AnimationPlayer).callback_mode_process = (
+						AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_IDLE)
+				var skeleton: Variant = members[value]
+				if is_instance_valid(skeleton):
+					(skeleton as Skeleton3D).modifier_callback_mode_process = (
+						Skeleton3D.MODIFIER_CALLBACK_MODE_PROCESS_IDLE)
 		members.clear()
 		group["delta"] = 0.0
 	_group_of.clear()

@@ -460,6 +460,9 @@ func trade_with(actor_id: int) -> Error:
 func put_inventory_on_trade(source_slot: int, quantity: int) -> Error:
 	return send_frame(EloriaProtocol.put_inventory_on_trade(source_slot, quantity))
 
+func put_storage_on_trade(position: int, quantity: int) -> Error:
+	return send_frame(EloriaProtocol.put_storage_on_trade(position, quantity))
+
 func remove_trade_item(offer_slot: int, quantity: int) -> Error:
 	return send_frame(EloriaProtocol.remove_trade_item(offer_slot, quantity))
 
@@ -479,9 +482,11 @@ func get_storage_category(category_id: int) -> Error:
 	return send_frame(EloriaProtocol.get_storage_category(category_id))
 
 func deposit_storage(inventory_slot: int, quantity: int) -> Error:
+	if bool(AppState.storage.get("read_only", false)): return ERR_UNAUTHORIZED
 	return send_frame(EloriaProtocol.deposit_storage(inventory_slot, quantity))
 
 func withdraw_storage(position: int, quantity: int) -> Error:
+	if bool(AppState.storage.get("read_only", false)): return ERR_UNAUTHORIZED
 	return send_frame(EloriaProtocol.withdraw_storage(position, quantity))
 
 func look_at_storage_item(position: int) -> Error:

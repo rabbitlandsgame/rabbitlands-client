@@ -2,6 +2,39 @@
 from pathlib import Path
 
 
+def bootstrap_script(updater, envelope=None):
+    import json
+    import shared_release_assets as shared
+    if not shared.matches(updater, "rabbitlandsgame/rabbitlands-client") or not updater["url"].endswith(".x86_64"):
+        raise ValueError("Invalid Linux updater download.")
+    return '''#!/bin/sh
+set -eu
+for tool in curl sha256sum mktemp chmod; do
+    command -v "$tool" >/dev/null 2>&1 || { echo "Install $tool and retry." >&2; exit 1; }
+done
+target_parent=${1:-"$HOME/Games"}
+mkdir -p -- "$target_parent"
+target_parent=$(cd -- "$target_parent" && pwd -P)
+install_root="$target_parent/RabbitLands"
+temporary=$(mktemp -d "${TMPDIR:-/tmp}/rabbitlands-install.XXXXXX")
+trap 'rm -f -- "$temporary/updater" "$temporary/manifest.json"; rmdir -- "$temporary"' 0
+trap 'exit 129' 1
+trap 'exit 130' 2
+trap 'exit 143' 15
+echo "Downloading the Rabbit Lands installer"
+curl --fail --location --proto '=https' --connect-timeout 20 --max-time 600 --retry 3 \\
+    --output "$temporary/updater" '@URL@'
+printf '%s  %s\\n' '@HASH@' "$temporary/updater" | sha256sum -c -
+chmod 700 "$temporary/updater"
+echo "Installing Rabbit Lands to $install_root"
+@MANIFEST@
+"$temporary/updater" -- --root "$install_root" --install-update @MANIFEST_ARGUMENT@
+printf 'To play again, run:\\n  %s/RabbitLands-updater.x86_64\\n' "$install_root"
+'''.replace("@URL@", updater["url"]).replace("@HASH@", updater["sha256"]).replace(
+        "@MANIFEST@", "cat >\"$temporary/manifest.json\" <<'RABBITLANDS_MANIFEST'\n" + json.dumps(envelope, separators=(",", ":")) + "\nRABBITLANDS_MANIFEST" if envelope else "").replace(
+        "@MANIFEST_ARGUMENT@", '--install-manifest "$temporary/manifest.json"' if envelope else "")
+
+
 def download_script(folder, sha, base, archive_hash, parts):
     checksums = "\n".join(f"{row['sha256']} {Path(row['path']).name}" for row in parts)
     joined = " ".join(f'"$cache_dir/{Path(row["path"]).name}"' for row in parts)
