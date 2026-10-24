@@ -29,7 +29,7 @@ import uuid
 from process_memory_sampler import ProcessMemorySampler
 
 from crowd_benchmark_support import (
-    BenchmarkLock, EvidenceError, asset_files, clean_environment, configure_settings_profile, default_lock_path,
+    BenchmarkLock, EvidenceError, asset_files, clean_environment, configure_prepared_profile, configure_settings_profile, default_lock_path,
     hash_files, manifest_identity, read_json, require_private_replay_output,
     seed_settings_profile, selected_cells, sha256_file, source_files, validate_report, validate_startup_ack,
 )
@@ -117,6 +117,8 @@ def request_for(args) -> dict:
             "client_runtime": args.client_runtime, "rust_effects": args.rust_effects,
             "resource_admission": args.resource_admission,
             "resource_admission_budget_mib": args.resource_admission_budget_mib,
+            "prepared_content": getattr(args, "prepared_content", "raw"),
+            "prepared_node_policy": getattr(args, "prepared_node_policy", "retain"),
             "capture_boundaries": args.capture_boundaries,
             "tuning": args.tuning, "diagnostics": args.diagnostics, "executable": str(args.godot),
             "presence": args.presence, "server_time": args.server_time,
@@ -268,6 +270,8 @@ def run_one(args, variant: str, repeat: int, out_dir: Path) -> dict:
         "RABBITLANDS_RESOURCE_ADMISSION": args.resource_admission,
         "RABBITLANDS_RESOURCE_BUDGET_MIB": str(args.resource_admission_budget_mib),
         "RABBITLANDS_RUST_EFFECTS": "heat_bolt" if args.rust_effects == "heat_bolt" else "",
+        "RABBITLANDS_PREPARED_CONTENT": getattr(args, "prepared_content", "raw"),
+        "RABBITLANDS_PREPARED_NODE_POLICY": getattr(args, "prepared_node_policy", "retain"),
     }
     if args.centre:
         overrides["RABBITLANDS_CROWD_BENCH_CENTRE"] = args.centre
@@ -420,6 +424,8 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--resource-admission-budget-mib", type=admission_budget, default=768,
                    help="logical estimated residency allowance, 64 through 8192 MiB; not an allocation measurement")
     p.add_argument("--rust-effects", default="legacy", choices=["legacy", "heat_bolt"])
+    p.add_argument("--prepared-content", default="raw", choices=["raw", "auto", "require-pilot"])
+    p.add_argument("--prepared-node-policy", default="retain", choices=["retain", "lazy-source-v1"])
     p.add_argument("--repeats", type=int, default=1)
     p.add_argument("--sample-ms", type=int, default=6000)
     p.add_argument("--warmup-ms", type=int, default=2000)
@@ -444,6 +450,7 @@ def main(argv: list[str] | None = None) -> int:
     args = p.parse_args(argv)
     try:
         configure_settings_profile(args)
+        configure_prepared_profile(args)
         if args.resource_admission == "rust" and args.client_runtime not in ("services", "rust"):
             raise EvidenceError("--resource-admission rust requires --client-runtime services or rust")
         if args.capture_boundaries and args.mode != "windowed":

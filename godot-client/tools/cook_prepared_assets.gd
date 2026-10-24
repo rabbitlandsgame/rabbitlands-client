@@ -1,4 +1,5 @@
 extends SceneTree
+const Placements := preload("res://src/world/prepared_placements.gd")
 ## Coordinator-owned offline job: exactly ONE texture variant per fresh process.
 ## Never run this in a live client or on a worker. Generated files belong only
 ## in the disposable package project, never authored asset/source directories.
@@ -385,6 +386,10 @@ func _target(spec: Dictionary) -> Dictionary:
 	var source_digest := ""
 	var token := ""
 	var metadata: Dictionary = {}
+	var node_policy := str(spec.get("node_policy", "retain"))
+	if node_policy not in ["retain", Placements.POLICY] or (kind != "world" and node_policy != "retain"):
+		_error("unsupported prepared node policy")
+		return {}
 	if kind == "world":
 		var manifest := WorldManifest.load_file(path)
 		if not manifest.is_valid() or manifest.has_streaming_chunks() \
@@ -394,6 +399,13 @@ func _target(spec: Dictionary) -> Dictionary:
 		source_digest = MapSceneCache.package_digest(path, manifest.glb_path())
 		token = Vram.cache_token(manifest.data, manifest.glb_path().get_base_dir())
 		native = _pristine_world(path)
+		if node_policy == Placements.POLICY and native != null:
+			var reduced := Placements.cook_reduce(native as PackedScene, manifest, Prepared.logical_source(path) + "|" + source_digest)
+			if reduced.is_empty() or int(reduced.get("stats", {}).get("removed_sources", 0)) <= 0:
+				_error("reduction target has no qualified static source group: " + path)
+				return {}
+			native = reduced.scene as PackedScene
+			metadata["static_reduction"] = reduced.stats
 	elif kind == "scene":
 		# Preserves the existing animation-fidelity, embedded world-image and
 		# anisotropic-filter policy. Equipment imports stay on this main thread.
@@ -419,7 +431,7 @@ func _target(spec: Dictionary) -> Dictionary:
 		_error("raw target did not build: " + path)
 		return {}
 	if native is PackedScene:
-		metadata = _scene_metadata(native as PackedScene, Prepared.logical_source(path))
+		metadata.merge(_scene_metadata(native as PackedScene, Prepared.logical_source(path)))
 	var saved := _save_resource(native)
 	if saved == null or not _errors.is_empty():
 		return {}
@@ -437,7 +449,7 @@ func _target(spec: Dictionary) -> Dictionary:
 	payload_paths.sort()
 	for payload: String in payload_paths:
 		payloads.append({"path": payload, "sha256": str(_payloads[payload])})
-	var entry := {"kind": kind, "source": Prepared.logical_source(path),
+	var entry := {"kind": kind, "node_policy": node_policy, "source": Prepared.logical_source(path),
 		"source_digest": source_digest, "texture_token": token,
 		"engine_policy": Prepared.engine_policy(), "resource": saved.resource_path,
 		"inputs": inputs, "payloads": payloads,

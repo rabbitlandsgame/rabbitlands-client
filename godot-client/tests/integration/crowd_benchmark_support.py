@@ -17,6 +17,7 @@ import socket
 import tempfile
 import time
 from typing import Any
+from benchmark_prepared_validation import configure_prepared_request, validate_prepared
 from benchmark_heat_bolt_validation import HeatBoltEvidenceError, validate_heat_bolt_cell
 
 
@@ -36,6 +37,7 @@ ERROR_PATTERN = re.compile(r"SCRIPT ERROR|Parse Error|Failed to load|Error loadi
 OVERRIDE_PREFIXES = ("ELORIA_LOOK", "ELORIA_CROWD_", "ELORIA_NATIVE_", "RABBITLANDS_CROWD_")
 OVERRIDE_NAMES = {"ELORIA_VRAM_TEXTURES", "ELORIA_NO_MAP_CACHE", "ELORIA_SAFE_MODE", "RABBITLANDS_CLIENT_RUNTIME", "RABBITLANDS_RUST_EFFECTS"}
 OVERRIDE_NAMES.update({"RABBITLANDS_RESOURCE_ADMISSION", "RABBITLANDS_RESOURCE_BUDGET_MIB"})
+OVERRIDE_NAMES.update({"RABBITLANDS_PREPARED_CONTENT", "RABBITLANDS_PREPARED_NODE_POLICY"})
 PERFORMANCE_GRAPHICS = {
     "quality": "low", "appearance": "painted_ground", "fps_limit": 30,
     "render_scale": .75, "map_texture_quality": "half", "crowd_bodies": 60,
@@ -45,6 +47,13 @@ PERFORMANCE_GRAPHICS = {
 RUST_MOUNT_PROFILES = frozenset({"moor_pony", "golden_plains_horse", "crystalback_tortoise",
                                "rabbit", "jadefeather_raptor"})
 MIXED_MOUNT_PROFILES = RUST_MOUNT_PROFILES | {"giant_rat"}
+
+
+def configure_prepared_profile(args) -> None:
+    try:
+        configure_prepared_request(args)
+    except ValueError as exc:
+        raise EvidenceError(str(exc)) from exc
 
 
 def configure_settings_profile(args, system: str | None = None) -> None:
@@ -300,7 +309,10 @@ def validate_runtime(runtime: dict, request: dict, renderer: str, quality: str,
                                 or any(presentation[k]["buildAttempts"] for k in ("flight", "impact"))):
         raise EvidenceError(f"{label}: native presentation ran despite being disabled")
     validate_resource_admission(backends, request, label)
-    _object(backends.get("preparedContent"), label + ".preparedContent")
+    try:
+        validate_prepared(backends, request, label)
+    except ValueError as exc:
+        raise EvidenceError(str(exc)) from exc
     return backends
 
 
@@ -399,6 +411,8 @@ def validate_report(data: dict, request: dict, log: str) -> dict:
         raise EvidenceError("unexpected benchmark/schema")
     if _integer(data.get("failureCount"), "failureCount") != 0 or data.get("failures") != []:
         raise EvidenceError("benchmark reports failures or omits failure metadata")
+    if data.get("functionalOnly") is True:
+        raise EvidenceError("functional-only placement probe is not accepted timing evidence")
     if data.get("headless") is not (request["mode"] == "headless"):
         raise EvidenceError("actual display mode differs from requested mode")
     if request["mode"] == "windowed" and data.get("renderingMethod") != request["renderer"]:

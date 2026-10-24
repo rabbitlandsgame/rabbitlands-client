@@ -50,6 +50,7 @@ func benchmark_runtime_snapshot() -> Dictionary:
 				"nativeCapeInstances": cape_instances, "nativeCapeCalls": cape_calls,
 				"capeFallbackCalls": cape_fallbacks, "flight": flight_stats, "impact": impact_stats},
 			"preparedContent": preload("res://src/world/prepared_content.gd").snapshot(),
+			"preparedNodePolicy": preload("res://src/world/prepared_content.gd").node_policy(),
 			"mapSceneCache": {"enabled": MapSceneCache.is_enabled(), "status": str(world_loader.cache_status)}},
 	}
 
@@ -75,7 +76,20 @@ func benchmark_resource_diagnostics() -> Dictionary:
 			"video_memory_bytes"]:
 		if snapshot.has(key):
 			result[key] = snapshot[key]
+	result["prepared_placements"] = benchmark_placement_snapshot()
 	return result
+
+
+func benchmark_placement_snapshot() -> Dictionary:
+	var ready := bool(benchmark_readiness_snapshot().get("ready", false))
+	return preload("res://tests/integration/benchmark_placement_diagnostics.gd").capture(
+		world_loader, exterior_stream, loaded_server_map, ready)
+
+
+func benchmark_restore_prepared_placement(map_id: String, chunk_id: String) -> Dictionary:
+	var ready := bool(benchmark_readiness_snapshot().get("ready", false))
+	return preload("res://tests/integration/benchmark_placement_diagnostics.gd").restore_one(
+		world_loader, exterior_stream, loaded_server_map, map_id, chunk_id, ready)
 
 
 func benchmark_readiness_snapshot() -> Dictionary:

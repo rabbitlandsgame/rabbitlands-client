@@ -16,6 +16,7 @@ const UndergroundScenery := preload("res://src/world/underground_scenery.gd")
 const ResourceDiagnostics := preload("res://src/world/resource_diagnostics.gd")
 const PreparedContent := preload("res://src/world/prepared_content.gd")
 const PreparedLifecycle := preload("res://src/world/prepared_scene_lifecycle.gd")
+const PreparedPlacements := preload("res://src/world/prepared_placements.gd")
 const GauntletSurfaceContrast := preload("res://src/world/gauntlet_surface_contrast.gd")
 
 # Static-instance batching. A region such as Four Gates imports ~1700 mesh
@@ -499,6 +500,7 @@ func _materialize_prepared_world() -> bool:
 			return world_root != null
 		load_failed.emit(["prepared_world_publication_revalidation_failed"])
 		return false
+	var prepared_entry: Dictionary = _prepared_native.get("entry", {})
 	world_root = PreparedLifecycle.instantiate(_prepared_native)
 	ResourceDiagnostics.record(_resource_timings, &"prepared_instantiate", began, true)
 	_prepared_native.clear()
@@ -516,6 +518,7 @@ func _materialize_prepared_world() -> bool:
 	add_child(world_root)
 	ResourceDiagnostics.record(_resource_timings, &"scene_attach", attach_began, true)
 	_resolve_batch_links()
+	PreparedPlacements.install(world_root, manifest, prepared_entry)
 	LookGround.paint_loaded(world_root, manifest)
 	LookFoliage.paint_loaded(world_root, manifest)
 	GauntletSurfaceContrast.apply(manifest, world_root)

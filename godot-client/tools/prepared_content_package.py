@@ -457,7 +457,11 @@ def pilot_qualification_plan(project: Path, chunk: str = PILOT_WORLD) -> dict:
 
 
 def write_job(project: Path, texture: str, output: str, targets: list[tuple[str, str]], path: Path,
-              user_root: Path) -> None:
+              user_root: Path, node_policy: str = "retain", four_gates: bool = False) -> None:
+    if node_policy not in {"retain", "lazy-source-v1"}:
+        raise PreparedError("unsupported node policy")
+    if four_gates:
+        targets = [("world", "eloria-assets/maps/four-gates/chunks/02_07/world.json")]
     if not targets:
         raise PreparedError("at least one explicit target is required")
     if texture not in {"full", "half", "quarter"}:
@@ -477,7 +481,7 @@ def write_job(project: Path, texture: str, output: str, targets: list[tuple[str,
     for kind, source in targets:
         closure = Closure(project)
         closure.visit(scoped(project.parent, source))
-        result.append({"kind": kind, "source": source,
+        result.append({"kind": kind, "source": source, "node_policy": node_policy if kind == "world" else "retain",
                        "inputs": [{"path": key, "sha256": value} for key, value in sorted(closure.files.items())],
                        "source_images": closure.images,
                        "runtime_import_snapshot": runtime_import_provenance(project, closure.files)})
@@ -522,7 +526,7 @@ def merge_catalogs(project: Path, catalogs: list[Path], output: Path) -> dict:
             raise PreparedError(f"unknown catalog: {path}")
         for entry in catalog["entries"]:
             entry_metadata(entry)
-            key = tuple(entry[field] for field in ("kind", "source", "source_digest", "texture_token"))
+            key = (*tuple(entry[field] for field in ("kind", "source", "source_digest", "texture_token")), entry.get("node_policy", "retain"))
             if key in identities:
                 raise PreparedError(f"duplicate exact variant: {key}")
             identities.add(key)
@@ -568,9 +572,11 @@ def install_generation(index: Path, project: Path, stage: Path) -> dict:
     variants=set()
     view=ExportView(stage)
     for entry in document["entries"]:
-        variant=tuple(entry[field] for field in ("kind","source","source_digest","texture_token"))
+        variant=(*tuple(entry[field] for field in ("kind","source","source_digest","texture_token")), entry.get("node_policy","retain"))
         if variant in variants: raise PreparedError("duplicate prepared variant")
         variants.add(variant)
+        if entry.get("node_policy","retain") not in {"retain","lazy-source-v1"} or (entry.get("kind")!="world" and entry.get("node_policy","retain")!="retain"):
+            raise PreparedError("unsupported node-policy variant")
         if entry.get("kind") not in {"world","mesh","scene"} or not HEX.fullmatch(str(entry.get("entry_id",""))):
             raise PreparedError("invalid prepared target")
         inputs=entry.get("inputs")
@@ -657,6 +663,8 @@ def main() -> int:
     plan = sub.add_parser("plan-pilot")
     plan.add_argument("--texture", required=True, choices=["full", "half", "quarter"])
     plan.add_argument("--variant", required=True)
+    plan.add_argument("--node-policy", choices=["retain","lazy-source-v1"], default="retain")
+    plan.add_argument("--four-gates", action="store_true", help="cook only current Four Gates child 02_07 for actual source-node reduction qualification")
     plan.add_argument("--chunk", default=PILOT_WORLD)
     plan.add_argument("--job", required=True, type=Path)
     plan.add_argument("--user-root", required=True, type=Path)
@@ -678,7 +686,7 @@ def main() -> int:
     elif args.command == "plan-pilot":
         if not re.fullmatch(r"[a-z0-9][a-z0-9-]{0,63}", args.variant):
             raise PreparedError("simple variant directory name required")
-        write_job(project, args.texture, f"res://prepared-content/{args.variant}", pilot(project, args.chunk), args.job, args.user_root)
+        write_job(project, args.texture, f"res://prepared-content/{args.variant}", pilot(project, args.chunk), args.job, args.user_root, args.node_policy, args.four_gates)
         print(json.dumps({"job": str(args.job), "status": "planned; no engine launched"}))
     else:
         print(json.dumps(merge_catalogs(project, args.catalogs, project / "prepared-content/index.json")))

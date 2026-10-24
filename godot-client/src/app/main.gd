@@ -15596,6 +15596,7 @@ func resource_admission_snapshot() -> Dictionary:
 ## the walk stops as soon as all are found (a kit placement is a child of its
 ## chunk's root).
 static func _named_nodes(root: Node, names: Dictionary) -> Dictionary:
+	preload("res://src/world/prepared_placements.gd").restore_named(root, names)
 	var found := {}
 	var queue: Array[Node] = [root]
 	while not queue.is_empty() and found.size() < names.size():
