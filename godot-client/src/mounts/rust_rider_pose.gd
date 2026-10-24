@@ -1,7 +1,8 @@
 extends RefCounted
-## Optional Moor Pony solver. No authoritative actor field is owned here.
+## Optional approved-profile rider solver. No authoritative actor field is owned here.
 const Batch := preload("res://src/mounts/rust_rider_pose_batch.gd")
 const RuntimeController := preload("res://src/runtime/client_runtime.gd")
+const APPROVED := RuntimeController.MOUNTED_PROFILE_IDS
 const GAITS := {"idle": 0, "walk": 1, "trot": 2, "gallop": 3}
 static var _next_generation := 1
 static var _batch_ref: WeakRef
@@ -16,6 +17,18 @@ var _epoch := 0
 var _generation := 0
 var _frame := 0
 var _disabled := false
+var _registered_lean := 0.0
+var _upper
+var _upper_rider := 0
+var _reins_rider := 0
+var upper_applications := 0
+var rein_applications := 0
+var _last_applied_tag := -1
+var _last_applied_engine_frame := -1
+var _last_submitted_engine_frame := -1
+var _upper_capture_revision := -1
+var _upper_clip_revision := -1
+var _native_upper_applied := false
 var _supported := false
 var _mode_override := ""
 var _profile_id := ""
@@ -30,15 +43,14 @@ var maximum_visual_error := 0.0
 func configure(legacy: RefCounted, mount_id: String, controller_override: RefCounted = null,
 		native_override: RefCounted = null, mode_override := "") -> void:
 	close()
+	_controller = null
 	_legacy = legacy
 	_profile_id = mount_id
 	var tree: SceneTree = _legacy.actor.get_tree() if is_instance_valid(_legacy.actor) else null
 	var app: Node = tree.root.get_node_or_null("AppState") if tree != null else null
 	_app_ref = weakref(app) if app != null else null
-	_supported = mount_id == "moor_pony"
+	_supported = mount_id in APPROVED
 	_disabled = not _supported or _legacy.visual_root == null
-	# Other profiles and gait-dependent pelvis adapters remain on the qualified path.
-	_disabled = _disabled or _legacy.profile.has("normalPelvisLeanDegrees") or _legacy.profile.has("gallopPelvisLeanDegrees")
 	var controller = controller_override if controller_override != null else RuntimeController.current()
 	if controller != null:
 		_controller = weakref(controller)
@@ -49,6 +61,8 @@ func configure(legacy: RefCounted, mount_id: String, controller_override: RefCou
 	else:
 		_generation = _next_generation
 		_next_generation += 1
+	if not _disabled and _mode() == "rust" and tree != null:
+		_ensure_shared_batch(tree)
 
 func _mode() -> String:
 	if not _mode_override.is_empty():
@@ -78,7 +92,7 @@ func _ensure_registered() -> bool:
 		return false
 	var epoch := _current_epoch()
 	if _rider != 0 and epoch == _epoch:
-		return true
+		return _refresh_lean()
 	close()
 	_epoch = epoch
 	var skeleton: Skeleton3D = _legacy.skeleton
@@ -145,18 +159,123 @@ func _ensure_registered() -> bool:
 		close()
 		_disabled = true
 		return false
+	_registered_lean = float(profile.get("pelvisLeanDegrees", 3.0))
 	return true
+
+func _refresh_lean() -> bool:
+	var degrees := float(_legacy.profile.get("pelvisLeanDegrees", 3.0))
+	if degrees == _registered_lean:
+		return true
+	if not _native.has_method("set_mounted_lean") or not _native.set_mounted_lean(_rider, degrees):
+		close()
+		_disabled = true
+		return false
+	_registered_lean = degrees
+	return true
+
+func _ensure_upper() -> bool:
+	if not _native.has_method("configure_mounted_upper"):
+		return false
+	var owner = _legacy.actor.get("_mount_visual")
+	if not is_instance_valid(owner):
+		return false
+	_upper = owner.get("upper")
+	if _upper == null:
+		return false
+	var capture_revision := int(_upper.get("_capture_revision"))
+	var clip_revision := int(_upper.get("_clip_revision"))
+	if _upper_rider != _rider or capture_revision != _upper_capture_revision or clip_revision != _upper_clip_revision:
+		var clips: Array = []
+		var facings := PackedFloat64Array()
+		for key: StringName in _upper.ACTIONS:
+			clips.append(_upper.clips.get(key))
+			facings.append(_legacy.actor.resolver.facing_offset_for_action(key))
+		if _upper_rider != _rider:
+			var definition := PackedFloat64Array()
+			_append_quaternion(definition, _upper.get("_neutral_spine"))
+			_append_basis(definition, _upper.get("_reference_parent"))
+			_append_basis(definition, _legacy.skeleton.get_bone_rest(int(_upper.get("_spine"))).basis.orthonormalized())
+			var parent_defaults: Dictionary = _upper.get("_parent_rest_rotations")
+			for ancestor: int in _upper.get("_parent_chain"):
+				_append_quaternion(definition, parent_defaults[ancestor])
+			if not _native.configure_mounted_upper(_rider, PackedInt32Array(_upper.bones), PackedInt32Array(_upper.get("_parent_chain")), definition, clips, facings):
+				return false
+			_upper_rider = _rider
+		elif not _native.set_mounted_upper_clips(_rider, clips, facings):
+			return false
+		var capture := PackedFloat64Array()
+		var from: Dictionary = _upper.get("_from")
+		for bone: int in _upper.bones:
+			_append_quaternion(capture, from.get(bone, _legacy.skeleton.get_bone_pose_rotation(bone)))
+		if not _native.set_mounted_upper_capture(_rider, capture):
+			return false
+		_upper_capture_revision = capture_revision
+		_upper_clip_revision = clip_revision
+	return true
+
+func _ensure_reins() -> bool:
+	if _reins_rider == _rider:
+		return true
+	if not _native.has_method("configure_mounted_reins"):
+		return false
+	var owner = _legacy.actor.get("_mount_visual")
+	if owner == null:
+		return false
+	var reins: Variant = owner.reins
+	var bones := PackedInt32Array()
+	for side: String in ["l", "r"]:
+		for stem: String in ["middle", "ring", "index", "thumb"]:
+			bones.append(_legacy.skeleton.find_bone(stem + "_02_" + side))
+	bones.append(int(owner.head))
+	var anchors := PackedFloat64Array()
+	for side: String in ["l", "r"]:
+		_append_vector(anchors, owner.sockets[side])
+	var tuning := PackedFloat64Array()
+	for key: String in ["segments", "sagMetres", "sideClearanceMetres", "looseEndLengthMetres", "looseEndSpreadMetres", "widthMetres", "thicknessMetres", "crossSectionRollDegrees"]:
+		tuning.append(float(reins.settings[key]))
+	if not _native.configure_mounted_reins(_rider, reins, reins.straps, owner.pony.get_skeleton(), bones, anchors, tuning, owner.bridle_paths):
+		return false
+	reins.set_native_provider(_native, _rider)
+	_reins_rider = _rider
+	return true
+
+func upper_sample() -> PackedFloat64Array:
+	return PackedFloat64Array([_upper.ACTIONS.find(_upper.action), float(_upper.time),
+		float(_upper.weight), 1.0 if bool(_upper.get("_returning")) else 0.0, float(_upper.grip_weight)])
+
+func mark_native_upper_applied() -> void:
+	_native_upper_applied = true
+	upper_applications += 1
+	rein_applications += 1
+	_last_applied_tag = _frame
+	_last_applied_engine_frame = Engine.get_process_frames()
+	var owner = _legacy.actor.get("_mount_visual")
+	if owner != null:
+		owner.reins.set_native_provider(_native, _rider)
+
+func consume_native_upper_applied() -> bool:
+	var applied := _native_upper_applied
+	_native_upper_applied = false
+	return applied
 
 ## True means this call owns fit + finish, including synchronous compare.
 func try_fit(seat: Transform3D, gait: String, seconds: float, cycle: float, finish: Callable) -> bool:
 	if not GAITS.has(gait) or not _ensure_registered():
 		return false
+	if not _ensure_upper() or (_mode() == "rust" and not _ensure_reins()):
+		failures += 1
+		close()
+		_disabled = true
+		return false
 	_frame += 1
+	_last_submitted_engine_frame = Engine.get_process_frames()
 	if _mode() == "compare":
 		var records := record(gait)
 		var samples := sample(seat, seconds, cycle)
-		var ok: bool = _native.solve_mounted_batch(records, samples, _epoch, false)
+		var ok: bool = _native.solve_mounted_presentation_batch(records, samples, upper_sample(), _epoch, false)
 		_legacy.fit(seat, gait, seconds, cycle)
+		_upper.apply()
+		_native_upper_applied = true
 		if ok:
 			var metadata: PackedInt64Array = _native.mounted_pose_metadata()
 			var values: PackedFloat64Array = _native.mounted_pose_values()
@@ -166,11 +285,7 @@ func try_fit(seat: Transform3D, gait: String, seconds: float, cycle: float, fini
 			failures += 1
 		finish.call()
 		return true
-	var batch = _batch_ref.get_ref() if _batch_ref != null else null
-	if batch == null:
-		batch = Batch.new()
-		_legacy.actor.get_tree().root.add_child(batch)
-		_batch_ref = weakref(batch)
+	var batch = _ensure_shared_batch(_legacy.actor.get_tree())
 	batch.submit(self, seat, gait, seconds, cycle, finish)
 	return true
 
@@ -188,11 +303,20 @@ func snapshot() -> Dictionary:
 	return {"requested": _mode(), "registered": _rider > 0, "disabled": _disabled, "supported": _supported,
 		"profile": _profile_id,
 		"epoch": _epoch, "generation": _generation, "comparisons": comparisons,
-		"applications": applications, "failures": failures, "maxPositionError": maximum_position_error,
+		"applications": applications, "failures": failures,
+		"upperApplications": upper_applications, "reinApplications": rein_applications,
+		"lastSubmittedTag": _frame, "lastAppliedTag": _last_applied_tag,
+		"lastSubmittedEngineFrame": _last_submitted_engine_frame, "lastAppliedEngineFrame": _last_applied_engine_frame,
+		"appliedCurrentSubmission": _last_applied_tag == _frame and _last_applied_tag >= 0,
+		"applicationAgeFrames": Engine.get_process_frames() - _last_applied_engine_frame if _last_applied_engine_frame >= 0 else -1, "maxPositionError": maximum_position_error,
 		"maxAngleError": maximum_angle_error, "maxScaleError": maximum_scale_error,
 		"maxVisualError": maximum_visual_error}
 
 ## On demand only; no per-frame diagnostic dictionary or complete pose copy.
+func mounted_constraint_backend() -> RefCounted:
+	return _native if _mode() == "rust" and _rider > 0 and _native != null \
+		and _native.has_method("step_mounted_cape") else null
+
 func contact_errors() -> PackedFloat64Array:
 	if _native == null or _rider <= 0:
 		return PackedFloat64Array()
@@ -211,7 +335,7 @@ func still_valid(epoch: int) -> bool:
 	if not _legacy.visual_root.is_ancestor_of(_legacy.skeleton):
 		return false
 	var mount = _legacy.actor.get("_mount_visual")
-	return mount != null and not bool(mount.get("_parked"))
+	return is_instance_valid(mount) and not mount.is_queued_for_deletion() and not bool(mount.get("_parked"))
 
 func frame_identity() -> Array:
 	# A continuous map handoff retains both actor and rig, and does not reset
@@ -254,6 +378,14 @@ func compare_output(values: PackedFloat64Array, offset: int) -> void:
 		maximum_scale_error = maxf(maximum_scale_error, scale.distance_to(skeleton.get_bone_pose_scale(bone)))
 
 func close() -> void:
+	_upper = null
+	_upper_rider = 0
+	_reins_rider = 0
+	_last_applied_tag = -1
+	_last_applied_engine_frame = -1
+	_upper_capture_revision = -1
+	_upper_clip_revision = -1
+	_native_upper_applied = false
 	if _native != null:
 		if _rider > 0:
 			_native.unregister_mounted_rider(_rider)
@@ -261,6 +393,17 @@ func close() -> void:
 			_native.unregister_rig(_rig)
 	_rider = 0
 	_rig = 0
+
+static func shared_batch_if_present() -> Node:
+	return _batch_ref.get_ref() if _batch_ref != null else null
+
+static func _ensure_shared_batch(tree: SceneTree) -> Node:
+	var batch = shared_batch_if_present()
+	if batch == null:
+		batch = Batch.new()
+		tree.root.add_child(batch)
+		_batch_ref = weakref(batch)
+	return batch
 
 static func close_batches() -> void:
 	var batch = _batch_ref.get_ref() if _batch_ref != null else null

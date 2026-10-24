@@ -17,6 +17,7 @@ int32_t rl_client_runtime_plan(RlRuntime *, const RlPlanRecord *, size_t, int64_
 int32_t rl_client_runtime_register_mounted_rider(RlRuntime *, uint64_t rig, const int32_t *, const double *,
     const int32_t *thumbs, const double *grips, size_t thumb_count, uint64_t *handle);
 int32_t rl_client_runtime_unregister_mounted_rider(RlRuntime *, uint64_t);
+int32_t rl_client_runtime_set_mounted_lean(RlRuntime *, uint64_t, double);
 int32_t rl_client_runtime_solve_mounted(RlRuntime *, const RlMountedRecord *, const double *, size_t count,
     int64_t epoch, RlMountedResult *, size_t output_capacity, double *, size_t value_capacity, size_t *value_count);
 }

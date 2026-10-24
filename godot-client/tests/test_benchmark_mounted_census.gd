@@ -23,6 +23,7 @@ class LegacyPony:
 class ScheduledVisual:
 	extends RefCounted
 	var pony: Variant
+	var rust_pose: Variant
 	var stats: Variant = {}
 	func scheduling_stats() -> Variant:
 		return stats
@@ -30,6 +31,10 @@ class ScheduledVisual:
 class LegacyVisual:
 	extends RefCounted
 	var pony: Variant
+
+class ScalarSolver extends RefCounted:
+	var data: Dictionary = {}
+	func snapshot() -> Dictionary: return data
 
 func _init() -> void:
 	call_deferred("_run")
@@ -39,6 +44,7 @@ func _run() -> void:
 	_test_missing_and_legacy_quality()
 	_test_invalid_and_bounded_values()
 	_test_quality_failures()
+	_test_rust_freshness()
 	print("BENCHMARK_MOUNTED_CENSUS_CHECKS failures=", failures)
 	quit(1 if failures else 0)
 
@@ -176,3 +182,22 @@ func _check(ok: bool, label: String) -> void:
 	if not ok:
 		failures += 1
 		push_error(label)
+
+func _test_rust_freshness() -> void:
+	var summary := Census.begin("afterSample")
+	for current: bool in [true, false]:
+		var visual := ScheduledVisual.new()
+		visual.pony = PublicPony.new()
+		visual.stats = _stats()
+		visual.rust_pose = ScalarSolver.new()
+		visual.rust_pose.data = {"supported": true, "disabled": false, "registered": true,
+			"applications": 4, "comparisons": 0, "failures": 0, "profile": "moor_pony", "requested": "rust",
+			"maxPositionError": 0.0, "maxAngleError": 0.0, "maxScaleError": 0.0, "maxVisualError": 0.0,
+			"appliedCurrentSubmission": current, "applicationAgeFrames": 0 if current else 3,
+			"upperApplications": 4, "reinApplications": 4}
+		Census.include_visual(summary, visual)
+	_check(summary.rustPose.appliedEligibleActiveVisuals == 2 and summary.rustPose.freshness.activeEligibleCurrentVisuals == 1,
+		"fresh current-submission attestation cannot be replaced by lifetime-ever-applied counts")
+	_check(summary.rustPose.freshness.applicationAgeFrames.maximum == 3 and summary.rustPose.secondary.upperApplications == 8
+		and summary.rustPose.secondary.reinApplications == 8 and summary.rustPose.secondary.clothAvailable == 0,
+		"secondary calls and missing cloth remain actual boundary scalar evidence")

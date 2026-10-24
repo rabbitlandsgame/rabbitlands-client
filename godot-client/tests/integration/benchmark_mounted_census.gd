@@ -25,7 +25,11 @@ static func begin(boundary: String) -> Dictionary:
 			"activeVisuals": 0, "appliedActiveVisuals": 0, "applications": 0, "comparisons": 0,
 			"eligibleActiveVisuals": 0, "appliedEligibleActiveVisuals": 0,
 			"failures": 0, "disabled": 0, "profiles": {}, "requestedModes": {},
-			"maxPositionError": 0.0, "maxAngleError": 0.0, "maxScaleError": 0.0, "maxVisualError": 0.0},
+			"maxPositionError": 0.0, "maxAngleError": 0.0, "maxScaleError": 0.0, "maxVisualError": 0.0,
+			"freshness": {"available": 0, "currentSubmissionVisuals": 0, "activeEligibleCurrentVisuals": 0, "applicationAgeFrames": _metric()},
+			"secondary": {"available": 0, "upperApplications": 0, "reinApplications": 0,
+				"clothAvailable": 0, "clothCalls": 0, "clothFallbacks": 0,
+				"reinAvailable": 0, "reinCalls": 0}},
 		"ponyQuality": {"available": 0, "unavailable": 0, "unavailableReasons": {},
 			"levels": {"low": 0, "medium": 0, "high": 0}, "local": 0, "remote": 0,
 			"sources": {"publicGetters": 0, "legacyProperties": 0}}}
@@ -77,6 +81,32 @@ static func _include_rust_pose(out: Dictionary, visual: Object) -> void:
 	out.appliedActiveVisuals += int(active and int(stats.applications) > 0)
 	out.eligibleActiveVisuals += int(active and bool(stats.supported))
 	out.appliedEligibleActiveVisuals += int(active and bool(stats.supported) and int(stats.applications) > 0)
+	if stats.has("appliedCurrentSubmission") and stats.has("applicationAgeFrames"):
+		var fresh: Dictionary = out.freshness
+		fresh.available += 1
+		fresh.currentSubmissionVisuals += int(bool(stats.appliedCurrentSubmission))
+		fresh.activeEligibleCurrentVisuals += int(active and bool(stats.supported) and bool(stats.appliedCurrentSubmission))
+		if int(stats.applicationAgeFrames) >= 0:
+			_add_metric(fresh.applicationAgeFrames, int(stats.applicationAgeFrames))
+	if stats.has("upperApplications") and stats.has("reinApplications"):
+		var secondary: Dictionary = out.secondary
+		secondary.available += 1
+		secondary.upperApplications += int(stats.upperApplications)
+		secondary.reinApplications += int(stats.reinApplications)
+		var actor: Variant = visual.get("actor") if _has_property(visual, "actor") else null
+		var cloth: Variant = actor.get("_cape_cloth") if is_instance_valid(actor) else null
+		if is_instance_valid(cloth) and cloth.has_method("native_presentation_stats"):
+			var cloth_stats: Dictionary = cloth.native_presentation_stats()
+			if cloth_stats.has("mountedCalls"):
+				secondary.clothAvailable += 1
+				secondary.clothCalls += int(cloth_stats.mountedCalls)
+				secondary.clothFallbacks += int(cloth_stats.mountedFallbackCalls)
+		var reins: Variant = visual.get("reins") if _has_property(visual, "reins") else null
+		if is_instance_valid(reins) and reins.has_method("native_presentation_stats"):
+			var rein_stats: Dictionary = reins.native_presentation_stats()
+			if bool(rein_stats.get("available", false)):
+				secondary.reinAvailable += 1
+				secondary.reinCalls += int(rein_stats.get("calls", 0))
 	for field: String in ["applications", "comparisons", "failures"]:
 		out[field] = int(out[field]) + int(stats[field])
 	for field: String in ["maxPositionError", "maxAngleError", "maxScaleError", "maxVisualError"]:

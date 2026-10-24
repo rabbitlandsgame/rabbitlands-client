@@ -11,9 +11,13 @@ var moving_blend := 0.0
 var idle_blend := 1.0
 var flow_time := 0.0
 var motion: Dictionary = {}
+var _native_surface_values := PackedFloat64Array()
+var _native_surface_offsets := PackedInt32Array()
 
 func configure(skeleton: Skeleton3D, contact: Array = [], settings: Dictionary = {}) -> void:
 	rig = skeleton
+	_native_surface_values.clear()
+	_native_surface_offsets.clear()
 	motion = settings
 	# Bounds fitted to v8's existing body: native rump top 1.38–1.42 m,
 	# half-width 0.34 m. The larger envelope also clears interpolated cloth.
@@ -138,3 +142,51 @@ func limit_lift(point: Vector3, root: Vector3, material_length: float, fraction:
 	hang = lerpf(hang, float(motion.get("idleHangFraction", hang)), idle_blend)
 	point.y = minf(point.y, root.y - material_length * hang)
 	return project(point)
+
+## Stable packed storage: only the sampled frames/blends change each step.
+## No point projection or resource access is delegated through callbacks.
+func native_snapshot(step: float) -> PackedFloat64Array:
+	if _native_surface_values.is_empty():
+		_native_surface_values.resize(17)
+		_native_surface_values[0] = 1.0
+		_native_surface_values[1] = envelopes.size()
+		for envelope: Dictionary in envelopes:
+			_native_surface_offsets.append(_native_surface_values.size())
+			_native_surface_values.resize(_native_surface_values.size() + 30)
+			var profile: Array = envelope.get("idle_back_profile", [])
+			_native_surface_values.append(profile.size())
+			for pair: Array in profile:
+				_native_surface_values.append(float(pair[0]))
+				_native_surface_values.append(float(pair[1]))
+	_native_surface_values[2] = clearance
+	_native_surface_values[3] = idle_blend
+	_native_surface_values[4] = moving_blend
+	_native_surface_values[5] = gallop_blend
+	_native_surface_values[6] = flow_time
+	_native_surface_values[7] = float(motion.get("rippleMultiplier", 1.0))
+	_native_surface_values[8] = float(motion.get("liftMultiplier", 1.0))
+	var hang := lerpf(float(motion.get("hangFraction", .68)),
+		float(motion.get("gallopHangFraction", .45)), gallop_blend)
+	_native_surface_values[9] = lerpf(hang, float(motion.get("idleHangFraction", hang)), idle_blend)
+	_native_store_vector(10, back)
+	_native_store_vector(13, side)
+	_native_surface_values[16] = step
+	for index: int in envelopes.size():
+		var at := int(_native_surface_offsets[index])
+		var envelope: Dictionary = envelopes[index]
+		_native_store_frame(at, envelope.frame)
+		_native_store_frame(at + 12, envelope.inverse)
+		_native_store_vector(at + 24, envelope.center)
+		_native_store_vector(at + 27, envelope.radii)
+	return _native_surface_values
+
+func _native_store_vector(at: int, value: Vector3) -> void:
+	_native_surface_values[at] = value.x
+	_native_surface_values[at + 1] = value.y
+	_native_surface_values[at + 2] = value.z
+
+func _native_store_frame(at: int, frame: Transform3D) -> void:
+	_native_store_vector(at, frame.basis.x)
+	_native_store_vector(at + 3, frame.basis.y)
+	_native_store_vector(at + 6, frame.basis.z)
+	_native_store_vector(at + 9, frame.origin)

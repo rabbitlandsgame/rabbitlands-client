@@ -302,8 +302,12 @@ func _step_visual(delta: float) -> void:
 	_finish_visual(delta, seat, action)
 
 func _finish_visual(delta: float, seat: Transform3D, gait: String) -> void:
-	upper.apply()
+	var native_secondary := rust_pose.consume_native_upper_applied()
+	if not native_secondary:
+		upper.apply()
 	refresh_cloth_permission(true)
+	if actor._cape_cloth != null:
+		actor._cape_cloth.call("set_native_mounted_constraint_kernel", rust_pose.mounted_constraint_backend())
 	if cape_simulation_enabled():
 		# Pose the body first, then cloth, once. The ordinary automatic modifier
 		# remains paused so it cannot overwrite this mounted pass afterward.
@@ -311,24 +315,25 @@ func _finish_visual(delta: float, seat: Transform3D, gait: String) -> void:
 		actor._cape_cloth.call("_process_modification_with_delta", delta)
 		actor.get_skeleton().force_update_all_bone_transforms()
 	actor._lift_overhead(actor.server_scale)
-	var head_frame := pony.get_skeleton().global_transform * pony.get_skeleton().get_bone_global_pose(head)
-	var bridle: Dictionary = {}
-	for side: String in ["l", "r"]:
-		bridle[side] = head_frame * (sockets[side] as Vector3)
-	var parked := {}
-	for side: String in ["l", "r"]:
-		var sign_value := 1.0 if side == "l" else -1.0
-		var grip := reins.grip_world(actor.get_skeleton(), side)
-		var exit := reins.grip_exit_world(actor.get_skeleton(), side)
-		var saddle_grip := seat.origin + seat.basis * Vector3(sign_value * .055, .12, .21)
-		parked[side] = [grip.lerp(saddle_grip, upper.grip_weight), exit.lerp(saddle_grip + Vector3.DOWN * .025, upper.grip_weight)]
-	var straps: Array[PackedVector3Array] = []
-	for path: PackedVector3Array in bridle_paths:
-		var points := PackedVector3Array()
-		for point: Vector3 in path:
-			points.append(head_frame * point)
-		straps.append(points)
-	reins.update_contact(bridle, actor.get_skeleton(), seat.basis, parked, straps)
+	if not native_secondary or rust_pose._mode() != "rust":
+		var head_frame := pony.get_skeleton().global_transform * pony.get_skeleton().get_bone_global_pose(head)
+		var bridle: Dictionary = {}
+		for side: String in ["l", "r"]:
+			bridle[side] = head_frame * (sockets[side] as Vector3)
+		var parked := {}
+		for side: String in ["l", "r"]:
+			var sign_value := 1.0 if side == "l" else -1.0
+			var grip := reins.grip_world(actor.get_skeleton(), side)
+			var exit := reins.grip_exit_world(actor.get_skeleton(), side)
+			var saddle_grip := seat.origin + seat.basis * Vector3(sign_value * .055, .12, .21)
+			parked[side] = [grip.lerp(saddle_grip, upper.grip_weight), exit.lerp(saddle_grip + Vector3.DOWN * .025, upper.grip_weight)]
+		var straps: Array[PackedVector3Array] = []
+		for path: PackedVector3Array in bridle_paths:
+			var points := PackedVector3Array()
+			for point: Vector3 in path:
+				points.append(head_frame * point)
+			straps.append(points)
+		reins.update_contact(bridle, actor.get_skeleton(), seat.basis, parked, straps)
 	actor.set_hand_props_visible(false)
 	if actor.combat_presentation != null:
 		actor.combat_presentation.update_pose()
