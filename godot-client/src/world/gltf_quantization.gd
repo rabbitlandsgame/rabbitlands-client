@@ -21,15 +21,38 @@ extends GLTFDocumentExtension
 
 static var _registered: GLTFDocumentExtension = null
 static var _world_images: GLTFDocumentExtension = null
+static var _registration_mutex := Mutex.new()
+static var _registration_ready := false
 
 
-static func ensure_registered() -> void:
-	if _registered != null:
-		return
-	_registered = new()
-	GLTFDocument.register_gltf_document_extension(_registered)
-	_world_images = preload("res://src/world/world_object_images.gd").new()
-	GLTFDocument.register_gltf_document_extension(_world_images)
+## Only the main thread may mutate GLTFDocument's process-wide extension
+## vector. Main and standalone prewarm/load entry points finish registration
+## before starting any import worker. A worker-first call fails explicitly;
+## callers must not continue a raw parse when this returns false.
+static func ensure_registered() -> bool:
+	if OS.get_thread_caller_id() != OS.get_main_thread_id():
+		return is_registered()
+	if _registration_ready:
+		return true
+	_registration_mutex.lock()
+	var quantization: GLTFDocumentExtension = new()
+	var world_images: GLTFDocumentExtension = preload("res://src/world/world_object_images.gd").new()
+	GLTFDocument.register_gltf_document_extension(quantization)
+	GLTFDocument.register_gltf_document_extension(world_images)
+	_registered = quantization
+	_world_images = world_images
+	# Publish completion only after BOTH global registrations. The mutex
+	# protects a defensive worker-first observation, never a parse or mesh.
+	_registration_ready = true
+	_registration_mutex.unlock()
+	return true
+
+
+static func is_registered() -> bool:
+	_registration_mutex.lock()
+	var ready := _registration_ready
+	_registration_mutex.unlock()
+	return ready
 
 
 func _get_supported_extensions() -> PackedStringArray:

@@ -238,6 +238,7 @@ def run_one(args, variant: str, repeat: int, out_dir: Path) -> dict:
         "RABBITLANDS_CROWD_BENCH_LABEL": f"{args.label}-{variant}",
         "RABBITLANDS_CROWD_BENCH_OUT": str(report),
         "RABBITLANDS_CROWD_BENCH_DIAG": args.diagnostics,
+        "RABBITLANDS_CROWD_BENCH_CAPTURE_BOUNDARIES": "1" if args.capture_boundaries else "",
         "RABBITLANDS_CROWD_BENCH_DRIVER": args.driver,
         "RABBITLANDS_CROWD_BENCH_FPS_CAP": str(args.fps_cap),
         "RABBITLANDS_CROWD_BENCH_RESOLUTION": f"{args.resolution[0]}x{args.resolution[1]}",
@@ -251,6 +252,7 @@ def run_one(args, variant: str, repeat: int, out_dir: Path) -> dict:
         "ELORIA_NATIVE_CROWD": "1" if args.native_reducer == "on" else "0",
         "ELORIA_NATIVE_PRESENTATION": "0" if args.native_presentation == "off" else args.native_presentation,
         "RABBITLANDS_CLIENT_RUNTIME": args.client_runtime,
+        "RABBITLANDS_RUST_EFFECTS": "heat_bolt" if args.rust_effects == "heat_bolt" else "",
     }
     if args.centre:
         overrides["RABBITLANDS_CROWD_BENCH_CENTRE"] = args.centre
@@ -394,9 +396,12 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--presence", type=int, default=0)
     p.add_argument("--server-time", action="store_true")
     p.add_argument("--diagnostics", default="")
+    p.add_argument("--capture-boundaries", action="store_true",
+                   help="save the last completed world viewport after sampling; readback is outside timing")
     p.add_argument("--native-reducer", default="off", choices=["off", "on"])
     p.add_argument("--native-presentation", default="off", choices=["off", "cape", "flight", "both", "world", "all"])
     p.add_argument("--client-runtime", default="legacy", choices=["legacy", "compare", "rust"])
+    p.add_argument("--rust-effects", default="legacy", choices=["legacy", "heat_bolt"])
     p.add_argument("--repeats", type=int, default=1)
     p.add_argument("--sample-ms", type=int, default=6000)
     p.add_argument("--warmup-ms", type=int, default=2000)
@@ -421,6 +426,14 @@ def main(argv: list[str] | None = None) -> int:
     args = p.parse_args(argv)
     try:
         configure_settings_profile(args)
+        if args.capture_boundaries and args.mode != "windowed":
+            raise EvidenceError("--capture-boundaries requires --mode windowed")
+        if args.capture_boundaries and (args.replay or any(name.startswith("traversal-") for name in selected_cells(args.cells, False))):
+            raise EvidenceError("--capture-boundaries currently supports synthetic crowd cells only")
+        if args.rust_effects == "heat_bolt" and args.client_runtime != "rust":
+            raise EvidenceError("--rust-effects heat_bolt requires --client-runtime rust")
+        if args.rust_effects == "heat_bolt" and args.native_presentation != "off":
+            raise EvidenceError("Rust heat-bolt qualification requires --native-presentation off")
         args.project_path = args.project_path.resolve()
         args.godot = executable_path(args.godot)
         for field in ("main_pack", "package_manifest", "asset_manifest", "replay"):

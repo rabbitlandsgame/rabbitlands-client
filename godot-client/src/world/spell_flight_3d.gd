@@ -5,6 +5,11 @@ const SPELL_MATERIALS = preload("res://src/world/spell_visual_material.gd")
 const SEGMENTS := 28
 const AFTERGLOW := 0.24
 var duration := 0.4
+var _presentation_guard: Callable
+
+func _presentation_valid() -> bool:
+	return is_instance_valid(self) and not is_queued_for_deletion() and (
+		_presentation_guard.is_null() or (_presentation_guard.is_valid() and bool(_presentation_guard.call())))
 var start := Vector3.ZERO
 var destination := Vector3.ZERO
 var effect_id := 2
@@ -131,13 +136,19 @@ func draw_at(time: float) -> void:
 			if time >= 0.0:
 				_commit_native_surface(native_arrays[0], native_arrays[1],
 					native_arrays[2], _ribbon_material)
+				if not is_instance_valid(self) or not _presentation_valid():
+					return
 			_commit_native_surface(native_arrays[3], native_arrays[4],
 				native_arrays[5], _glow_material)
+			if not is_instance_valid(self) or not _presentation_valid():
+				return
 			_native_build_successes += 1
 			return
 		_native_build_fallbacks += 1
 		_native_geometry = null
 		_mesh_node.mesh = _mesh
+		if not is_instance_valid(self) or not _presentation_valid():
+			return
 		_native_mesh = null
 	var p := clampf(time / duration, 0.0, 1.0)
 	var fade := 1.0 - smoothstep(duration, duration + AFTERGLOW, time)
@@ -159,6 +170,8 @@ func draw_at(time: float) -> void:
 				_segment(previous, next, width, color, view)
 				previous = next
 		_mesh.surface_end()
+		if not is_instance_valid(self) or not _presentation_valid():
+			return
 	_mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES, _glow_material)
 	var head_position := point_at(p)
 	var size := (0.25 if effect_id == 2 else 0.19) * magnitude
@@ -182,6 +195,8 @@ func draw_at(time: float) -> void:
 			color.a = (1.0 - age) * fade * 0.7
 			_glow(point, (0.025 + float(i % 3) * 0.009) * magnitude, color, right, up)
 	_mesh.surface_end()
+	if not is_instance_valid(self) or not _presentation_valid():
+		return
 
 func _native_output_valid(built: Variant, time: float) -> bool:
 	if typeof(built) != TYPE_ARRAY:
@@ -221,7 +236,11 @@ func _commit_native_surface(vertices: PackedVector3Array,
 	arrays[Mesh.ARRAY_COLOR] = colors
 	arrays[Mesh.ARRAY_TEX_UV] = uvs
 	_native_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	if not is_instance_valid(self) or not _presentation_valid():
+		return
 	_native_mesh.surface_set_material(_native_mesh.get_surface_count() - 1, material)
+	if not is_instance_valid(self) or not _presentation_valid():
+		return
 
 func _segment(a: Vector3, b: Vector3, width: float, color: Color, view: Vector3) -> void:
 	var side := (b - a).cross(view).normalized() * width * 0.5

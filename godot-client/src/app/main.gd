@@ -2,6 +2,7 @@ extends Control
 
 const Diagnostics = preload("res://src/diagnostics/client_diagnostics.gd")
 const ClientRuntime = preload("res://src/runtime/client_runtime.gd")
+const RustSpellFlights = preload("res://src/world/rust_spell_flights.gd")
 const RustRiderPose = preload("res://src/mounts/rust_rider_pose.gd")
 var client_runtime := ClientRuntime.new()
 const ExperienceCurve = preload("res://src/state/experience_curve.gd")
@@ -120,6 +121,8 @@ const ActiveBuffBarScript := preload("res://src/ui/active_buff_bar.gd")
 const StatusEffectIcons := preload("res://src/ui/status_effect_icons.gd")
 const KeyBindings := preload("res://src/ui/key_bindings.gd")
 const VramTextures := preload("res://src/world/vram_textures.gd")
+const GltfQuantization := preload("res://src/world/gltf_quantization.gd")
+const MapMeshExtension := preload("res://src/world/map_mesh_extension.gd")
 var interior_cutaway: RefCounted = InteriorCutawayScript.new()
 ## On a secrets map, only the secret the player stands in is drawn; the rest
 ## of the map (and so the minimap and full map, which render the same world)
@@ -1242,6 +1245,12 @@ const EXPERIENCE_SKILLS: Array[String] = [
 	"ranging", "overall"]
 
 func _ready() -> void:
+	# GLTFDocument's global extension vector must stop changing before any
+	# UI, actor animation prewarm, map or neighbouring-region worker starts.
+	if not GltfQuantization.ensure_registered() or not VramTextures.ensure_registered() \
+			or not MapMeshExtension.ensure_registered():
+		push_error("Main could not initialize runtime glTF extensions")
+		return
 	client_runtime.initialize()
 	crowd.configure(OS.get_environment("RABBITLANDS_CROWD_PRESENTATION"),
 		OS.get_environment("RABBITLANDS_CROWD_BODY_CAP"),
@@ -1259,9 +1268,6 @@ func _ready() -> void:
 	Diagnostics.record("main_scene_initializing")
 	var client_updates := preload("res://src/updates/client_updates.gd").new()
 	add_child(client_updates)
-	# Before any map load, and on the main thread: registering the map image
-	# extension edits a list that a worker import iterates (vram_textures.gd).
-	VramTextures.ensure_registered()
 	lantern_guide = LanternGuideScript.new()
 	game_view.add_child(lantern_guide)
 	lantern_guide.configure(self)
@@ -1708,6 +1714,7 @@ func client_diagnostic_snapshot() -> Dictionary:
 		"loader_work": world_loader.diagnostic_snapshot(),
 		"streaming_work": exterior_stream.diagnostic_snapshot(),
 		"client_runtime": client_runtime.snapshot(),
+		"spell_flights": RustSpellFlights.snapshot_for(world_root),
 		"resource_retention": {
 			"actor_scenes": GlbSceneCache.retention_snapshot(),
 			"animations": NativeAnimationImporter.retention_snapshot(),
@@ -3843,6 +3850,7 @@ func _close_client() -> void:
 
 func _exit_tree() -> void:
 	RustRiderPose.close_batches()
+	RustSpellFlights.clear_for(world_root)
 	client_runtime.close()
 	mouse_cursors.release()
 	occluder_fade.reset()
@@ -3977,6 +3985,7 @@ func _clear_world_presentation() -> void:
 	# No actor survives this clear. Forget stepped members before queueing
 	# any body, without reactivating its animation or skeleton callbacks.
 	animation_gate.reset(false)
+	RustSpellFlights.clear_for(world_root)
 	client_runtime.reset_session()
 	SeasonSurfaces.set_season({})
 	quest_trail.clear()
@@ -11814,6 +11823,14 @@ func _on_special_effect_requested(effect: Dictionary) -> void:
 		return
 	if not _admit_effect(&"spell", [int(effect.get("actor_id", -1)),
 			int(effect.get("target_id", -1))]):
+		return
+	var rust_effect := RustSpellFlights.spawn(client_runtime, world_root, effect,
+		origin_value as Vector3, target_value, source,
+		actor_nodes.get(int(effect.get("target_id", -1))) as Node3D,
+		_crowd_priority_actor(int(effect.get("actor_id", -1)))
+			or _crowd_priority_actor(int(effect.get("target_id", -1))), effect_budget.limit(&"spell"))
+	if rust_effect != null:
+		_track_effect(rust_effect, &"spell")
 		return
 	var world_effect := WorldEffect3D.new()
 	world_root.add_child(world_effect)

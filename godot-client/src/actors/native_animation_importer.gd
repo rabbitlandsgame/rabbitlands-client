@@ -3,6 +3,8 @@ class_name NativeAnimationImporter
 extends RefCounted
 
 const GltfQuantization := preload("res://src/world/gltf_quantization.gd")
+const VramTextures := preload("res://src/world/vram_textures.gd")
+const MapMeshExtension := preload("res://src/world/map_mesh_extension.gd")
 const GltfAnimationFidelity := preload("res://src/actors/gltf_animation_fidelity.gd")
 const ArchivedModelPolicy := preload("res://src/actors/archived_model_policy.gd")
 ## Retargets a native glTF animation library onto an actor's skeleton.
@@ -100,14 +102,26 @@ static func clear() -> void:
 ## `_source_scene` joins this worker from the main thread - a deadlock. No
 ## library names one today; the packaging tests check every animationLibrary
 ## in models.json.
-static func prewarm(source_path: String) -> void:
-	if ArchivedModelPolicy.is_retired_path(source_path):
-		return
-	if source_path.is_empty() or _sources.has(source_path) or _prewarming.has(source_path):
-		return
+static func prewarm(source_path: String) -> bool:
+	# These dictionaries and worker ownership already belong to main. Reject
+	# worker-first API use before reading or changing any of them.
+	if OS.get_thread_caller_id() != OS.get_main_thread_id():
+		return false
+	if ArchivedModelPolicy.is_retired_path(source_path) or source_path.is_empty():
+		return false
+	# Standalone users may not have Main. Register the complete runtime set
+	# before starting this worker, including map extensions that otherwise
+	# could be registered later while this animation parse iterates the list.
+	if not GltfQuantization.ensure_registered() or not VramTextures.ensure_registered() \
+			or not MapMeshExtension.ensure_registered():
+		return false
+	if _sources.has(source_path) or _prewarming.has(source_path):
+		return true
 	var thread := Thread.new()
-	if thread.start(_parse_library.bind(source_path)) == OK:
-		_prewarming[source_path] = thread
+	if thread.start(_parse_library.bind(source_path)) != OK:
+		return false
+	_prewarming[source_path] = thread
+	return true
 
 static func is_prewarming(source_path: String) -> bool:
 	return _prewarming.has(source_path)
@@ -136,7 +150,9 @@ static func _source_scene(source_path: String) -> Node:
 ## The glTF parse itself. Safe off the main thread: it builds resources and
 ## nodes that belong to no tree.
 static func _parse_library(path: String) -> Node:
-	GltfQuantization.ensure_registered()
+	if not GltfQuantization.ensure_registered():
+		push_error("animation glTF parse requires main-thread extension initialization")
+		return null
 	var document := GLTFDocument.new()
 	var state := GLTFState.new()
 	if document.append_from_file(path, state) != OK:

@@ -199,6 +199,13 @@ func adopt_world(resident: Dictionary) -> void:
 
 func load_world(manifest_path: String, arrival := Vector3.INF, wait_for_arrival := false) -> void:
 	unload_world()
+	# A standalone streamed territory can start chunk workers below and return
+	# before the raw-GLB branch. Complete all global registration first.
+	if not GltfQuantization.ensure_registered() or not VramTextures.ensure_registered() \
+			or not MapMeshExtension.ensure_registered():
+		push_error("world_load stage=gltf_registration requires main-thread initialization")
+		load_failed.emit(["gltf_extensions_uninitialized"])
+		return
 	loaded_by_adoption = false
 	var began: int = Time.get_ticks_usec()
 	var mark: int = began
@@ -262,12 +269,8 @@ func load_world(manifest_path: String, arrival := Vector3.INF, wait_for_arrival 
 
 	var document: GLTFDocument = GLTFDocument.new()
 	var state: GLTFState = GLTFState.new()
-	# The map image extension prepares the package's external images (decode
-	# and mip chain, once, on the WorkerThreadPool) before the parse uploads
-	# them; see vram_textures.gd. Registration is a no-op after the first.
-	GltfQuantization.ensure_registered()
-	VramTextures.ensure_registered()
-	MapMeshExtension.ensure_registered()
+	# The already-registered map image extension prepares the package's
+	# external images before the parse uploads them; see vram_textures.gd.
 	var image_plan: Dictionary = VramTextures.plan_for(manifest.data)
 	if not image_plan.is_empty():
 		state.set_additional_data(VramTextures.PLAN_KEY, image_plan)

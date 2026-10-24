@@ -37,6 +37,11 @@ const EFFECT_PALETTES := {75: Color("a18bff"), 76: Color("ff9a42"),
 var effect_id: int = -1
 var power_level := 1
 var elapsed: float = 0.0
+var _presentation_guard: Callable
+
+func _presentation_valid() -> bool:
+	return is_instance_valid(self) and not is_queued_for_deletion() and (
+		_presentation_guard.is_null() or (_presentation_guard.is_valid() and bool(_presentation_guard.call())))
 
 var _ring: MeshInstance3D
 var flight: Node3D
@@ -102,6 +107,8 @@ func configure(effect: int, origin: Vector3, target: Variant = null, power := 1)
 	_detail_material = SPELL_MATERIALS.geometry(palette, power_level)
 	_material = StandardMaterial3D.new()
 	_material.albedo_color = SPELL_MATERIALS.body_tint(palette)
+	if not is_instance_valid(self) or not _presentation_valid():
+		return
 	_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	_material.blend_mode = BaseMaterial3D.BLEND_MODE_MIX
@@ -118,31 +125,56 @@ func configure(effect: int, origin: Vector3, target: Variant = null, power := 1)
 	ring_mesh.material = _material
 	_ring = MeshInstance3D.new()
 	_ring.name = "EffectRing"
+	if not is_instance_valid(self) or not _presentation_valid():
+		return
 	_ring.mesh = ring_mesh
+	if not is_instance_valid(self) or not _presentation_valid():
+		return
 	_ring.position = _impact + Vector3.UP * 0.055
+	if not is_instance_valid(self) or not _presentation_valid():
+		return
 	_ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	if not is_instance_valid(self) or not _presentation_valid():
+		return
 	add_child(_ring)
+	if not is_instance_valid(self) or not _presentation_valid():
+		return
 	_details_node = MeshInstance3D.new()
 	_details_node.name = "EffectRunes"
 	_details_node.mesh = _native_details if _native_geometry != null else _details
+	if not is_instance_valid(self) or not _presentation_valid():
+		return
 	_details_node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(_details_node)
+	if not is_instance_valid(self) or not _presentation_valid():
+		return
 	_add_burst(palette)
 	if target is Vector3 and _impact.length_squared() > 0.0025:
 		flight = SpellFlight.new()
 		flight.name = "SpellFlight"
 		add_child(flight)
+		if not is_instance_valid(self) or not _presentation_valid():
+			return
 		var from := Vector3.UP
 		var to := _impact + Vector3.UP
 		# Effect 10 is mana stolen from the target, returning to the caster.
+		flight._presentation_guard = _presentation_guard
 		flight.configure(effect_id, palette, to if effect_id in [10, 86] else from,
 			from if effect_id in [10, 86] else to, power_level)
+		if not is_instance_valid(self) or not _presentation_valid():
+			return
 		if effect_id in [10, 86]:
 			_impact = Vector3.ZERO
 		_ring.hide()
+		if not is_instance_valid(self) or not _presentation_valid():
+			return
 		_burst.emitting = false
+		if not is_instance_valid(self) or not _presentation_valid():
+			return
 	else:
 		_start_impact()
+		if not is_instance_valid(self) or not _presentation_valid():
+			return
 
 ## Weak references keep removal/teleport packets safe during a visual flight.
 ## Bind before its first frame; geometry stays in this effect's local space.
@@ -171,7 +203,11 @@ func configure_timing(release_seconds: float, flight_seconds: float) -> void:
 		release_delay += maxf(0.0, flight_seconds)
 	impact_started = false
 	_ring.hide()
+	if not is_instance_valid(self) or not _presentation_valid():
+		return
 	_burst.emitting = false
+	if not is_instance_valid(self) or not _presentation_valid():
+		return
 
 func _update_anchors() -> void:
 	var from: Vector3 = flight.destination if effect_id in [10, 86] else flight.start
@@ -189,13 +225,23 @@ func _update_anchors() -> void:
 	if is_instance_valid(impact_actor) and area_radius <= 0.0:
 		_impact = to_local(impact_actor.global_position)
 	_ring.position = _impact + Vector3.UP * 0.055
+	if not is_instance_valid(self) or not _presentation_valid():
+		return
 	_burst.position = _impact + Vector3.UP * 0.9 if area_radius > 0.0 else flight.destination
+	if not is_instance_valid(self) or not _presentation_valid():
+		return
 
 func _start_impact() -> void:
 	impact_started = true
 	_ring.show()
+	if not is_instance_valid(self) or not _presentation_valid():
+		return
 	_burst.restart()
+	if not is_instance_valid(self) or not _presentation_valid():
+		return
 	_burst.emitting = true
+	if not is_instance_valid(self) or not _presentation_valid():
+		return
 
 ## The particles themselves. A harmful effect falls inwards and a beneficial
 ## one rises, which is the one piece of meaning the server's own grouping
@@ -227,18 +273,44 @@ func _add_burst(palette: Color) -> void:
 
 	_burst = GPUParticles3D.new()
 	_burst.name = "EffectBurst"
+	if not is_instance_valid(self) or not _presentation_valid():
+		return
 	_burst.amount = SpellPresentation.power_count(PARTICLE_COUNT, power_level)
+	if not is_instance_valid(self) or not _presentation_valid():
+		return
 	_burst.lifetime = LIFETIME_SECONDS * 0.8
+	if not is_instance_valid(self) or not _presentation_valid():
+		return
 	_burst.one_shot = true
+	if not is_instance_valid(self) or not _presentation_valid():
+		return
 	_burst.explosiveness = 0.96 if effect_id in HARM_EFFECTS else 0.48
+	if not is_instance_valid(self) or not _presentation_valid():
+		return
 	_burst.process_material = process
+	if not is_instance_valid(self) or not _presentation_valid():
+		return
 	_burst.draw_pass_1 = quad
+	if not is_instance_valid(self) or not _presentation_valid():
+		return
 	_burst.layers = GAMEPLAY_LAYER
+	if not is_instance_valid(self) or not _presentation_valid():
+		return
 	_burst.position = _impact + Vector3.UP * 0.9
+	if not is_instance_valid(self) or not _presentation_valid():
+		return
 	_burst.visibility_aabb = AABB(Vector3(-4, -2, -4), Vector3(8, 8, 8))
+	if not is_instance_valid(self) or not _presentation_valid():
+		return
 	_burst.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	if not is_instance_valid(self) or not _presentation_valid():
+		return
 	add_child(_burst)
+	if not is_instance_valid(self) or not _presentation_valid():
+		return
 	_burst.emitting = false
+	if not is_instance_valid(self) or not _presentation_valid():
+		return
 
 func _palette() -> Color:
 	if EFFECT_PALETTES.has(effect_id): return EFFECT_PALETTES[effect_id]
@@ -258,35 +330,53 @@ func _process(delta: float) -> void:
 	if flight != null:
 		if not impact_started:
 			_update_anchors()
+			if not is_instance_valid(self) or not _presentation_valid():
+				return
 		if elapsed >= release_delay:
 			_launched = true
 		flight.draw_at(elapsed - release_delay)
+		if not is_instance_valid(self) or not _presentation_valid():
+			return
 		impact_time -= release_delay + float(flight.duration)
 		if impact_time < 0.0:
 			return
 		if not impact_started:
 			_start_impact()
+			if not is_instance_valid(self) or not _presentation_valid():
+				return
 	else:
 		impact_time -= release_delay
 		if impact_time < 0.0:
 			return
 		if not impact_started:
 			_start_impact()
+			if not is_instance_valid(self) or not _presentation_valid():
+				return
 	var progress: float = clampf(impact_time / LIFETIME_SECONDS, 0.0, 1.0)
 	if is_instance_valid(_ring):
 		var scale_factor: float = 0.55 + (1.0-pow(1.0-progress, 3.0)) * 0.6
 		var footprint := area_radius / (RING_RADIUS * SpellPresentation.power_radius(power_level)) if area_radius > 0.0 else 1.0
 		_ring.scale = Vector3(scale_factor*footprint, 1.0, scale_factor*footprint)
+		if not is_instance_valid(self) or not _presentation_valid():
+			return
 	if _material != null:
 		_material.albedo_color.a = (1.0 - progress) * 0.65 * SpellPresentation.power_intensity(power_level)
+		if not is_instance_valid(self) or not _presentation_valid():
+			return
 		(_material.next_pass as StandardMaterial3D).albedo_color.a = _material.albedo_color.a * 0.40
+		if not is_instance_valid(self) or not _presentation_valid():
+			return
 	_draw_details(progress)
+	if not is_instance_valid(self) or not _presentation_valid():
+		return
 	if progress >= 1.0:
 		queue_free()
 
 func _draw_details(progress: float) -> void:
 	if _native_geometry == null:
 		_draw_details_gdscript(progress)
+		if not is_instance_valid(self) or not _presentation_valid():
+			return
 		return
 	_native_build_attempts += 1
 	var color := _palette()
@@ -299,13 +389,19 @@ func _draw_details(progress: float) -> void:
 		flight != null, contact)
 	if _native_output_valid(built):
 		_commit_native_details(built as Array)
+		if not is_instance_valid(self) or not _presentation_valid():
+			return
 		_native_build_successes += 1
 		return
 	_native_build_fallbacks += 1
 	_native_geometry = null
 	_native_details.clear_surfaces()
 	_details_node.mesh = _details
+	if not is_instance_valid(self) or not _presentation_valid():
+		return
 	_draw_details_gdscript(progress)
+	if not is_instance_valid(self) or not _presentation_valid():
+		return
 
 
 func _native_output_valid(built: Variant) -> bool:
@@ -329,7 +425,11 @@ func _commit_native_details(packed: Array) -> void:
 	arrays[Mesh.ARRAY_COLOR] = packed[1]
 	_native_details.clear_surfaces()
 	_native_details.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	if not is_instance_valid(self) or not _presentation_valid():
+		return
 	_native_details.surface_set_material(0, _detail_material)
+	if not is_instance_valid(self) or not _presentation_valid():
+		return
 
 
 func _draw_details_gdscript(progress: float) -> void:
@@ -373,6 +473,8 @@ func _draw_details_gdscript(progress: float) -> void:
 			Color(1.0, 0.91, 0.70, flash * 0.85))
 	_draw_spell_identity(progress, color, size, radius)
 	_details.surface_end()
+	if not is_instance_valid(self) or not _presentation_valid():
+		return
 
 var area_radius := 0.0
 var area_scope := ""

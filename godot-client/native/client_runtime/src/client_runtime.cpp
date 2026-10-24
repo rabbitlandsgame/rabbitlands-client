@@ -1,4 +1,7 @@
 #include "client_runtime.h"
+#include "client_flights.h"
+#include "../../native_crowd/src/native_spell_flight_geometry.h"
+#include <godot_cpp/classes/class_db_singleton.hpp>
 #include "../../shared/cape_constraint_math.h"
 #include <godot_cpp/classes/os.hpp>
 #include <godot_cpp/classes/engine.hpp>
@@ -86,6 +89,8 @@ Dictionary RabbitLandsClientRuntime::runtime_info() const {
     info["engine_major"] = 4; info["engine_minor"] = 7;
     info["core_version"] = "0.1.0";
     info["language"] = "rust";
+    info["cpp_spell_flight_provider"] = client_runtime_owns_cpp_flight() ? "client_runtime" :
+        (ClassDBSingleton::get_singleton()->class_exists("NativeSpellFlightGeometry") ? "external" : "absent");
     info["ready"] = core != nullptr;
     info["plan_calls"] = static_cast<int64_t>(calls);
     info["records_planned"] = static_cast<int64_t>(records_planned);
@@ -462,7 +467,14 @@ void RabbitLandsClientRuntime::_bind_methods() {
     ClassDB::bind_method(D_METHOD("plan_batch", "records", "epoch", "tick"), &RabbitLandsClientRuntime::plan_batch);
 }
 static void initialize_runtime(ModuleInitializationLevel level) {
-    if (level == MODULE_INITIALIZATION_LEVEL_SCENE) ClassDB::register_class<RabbitLandsClientRuntime>();
+    if (level == MODULE_INITIALIZATION_LEVEL_SCENE) {
+        ClassDB::register_class<RabbitLandsClientRuntime>();
+        ClassDB::register_class<RabbitLandsSpellFlightRuntime>();
+        if (!ClassDBSingleton::get_singleton()->class_exists("NativeSpellFlightGeometry")) {
+            ClassDB::register_class<NativeSpellFlightGeometry>();
+            client_runtime_mark_cpp_flight_owned();
+        }
+    }
 }
 static void terminate_runtime(ModuleInitializationLevel) {}
 extern "C" GDExtensionBool GDE_EXPORT rl_client_runtime_library_init(GDExtensionInterfaceGetProcAddress address,

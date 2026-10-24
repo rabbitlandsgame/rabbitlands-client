@@ -170,7 +170,9 @@ static func _imported_actor_scene(path: String) -> PackedScene:
 	return imported
 
 static func _build_raw(path: String) -> PackedScene:
-	GltfQuantization.ensure_registered()
+	if not GltfQuantization.ensure_registered():
+		push_error("raw glTF parse requires main-thread extension initialization")
+		return null
 	var document: GLTFDocument = GLTFDocument.new()
 	var state: GLTFState = GLTFState.new()
 	var world_asset := is_world_asset(path)

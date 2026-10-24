@@ -17,6 +17,7 @@ import socket
 import tempfile
 import time
 from typing import Any
+from benchmark_heat_bolt_validation import HeatBoltEvidenceError, validate_heat_bolt_cell
 
 
 class EvidenceError(ValueError):
@@ -28,11 +29,12 @@ OLD_CELLS = [name for count in (100, 160, 200, 300)
 OLD_CELLS += ["combat-100", "combat-160", "aoi-160", "empty"]
 PHASE1_CELLS = ["s3-market-160", "s2-invasion-160", "mixed-mounted-160",
                 "combat-160", "empty", "traversal-southern-cold", "traversal-southern-warm"]
+PHASE7_CELLS = ["combat-heat-bolt-160"]
 ALL_CELLS = OLD_CELLS + ["mixed-mounted-160", "authored-herd",
                          "traversal-southern-cold", "traversal-southern-warm"]
 ERROR_PATTERN = re.compile(r"SCRIPT ERROR|Parse Error|Failed to load|Error loading|ERROR:", re.I)
 OVERRIDE_PREFIXES = ("ELORIA_LOOK", "ELORIA_CROWD_", "ELORIA_NATIVE_", "RABBITLANDS_CROWD_")
-OVERRIDE_NAMES = {"ELORIA_VRAM_TEXTURES", "ELORIA_NO_MAP_CACHE", "ELORIA_SAFE_MODE", "RABBITLANDS_CLIENT_RUNTIME"}
+OVERRIDE_NAMES = {"ELORIA_VRAM_TEXTURES", "ELORIA_NO_MAP_CACHE", "ELORIA_SAFE_MODE", "RABBITLANDS_CLIENT_RUNTIME", "RABBITLANDS_RUST_EFFECTS"}
 PERFORMANCE_GRAPHICS = {
     "quality": "low", "appearance": "painted_ground", "fps_limit": 30,
     "render_scale": .75, "map_texture_quality": "half", "crowd_bodies": 60,
@@ -143,9 +145,9 @@ def selected_cells(profile: str, replay: bool = False) -> list[str]:
     if replay:
         return []  # The recording determines its map; validate exactly one replay cell later.
     profiles = {"phase4": OLD_CELLS, "quick": ["s3-market-160", "s2-invasion-160"],
-                "phase1": PHASE1_CELLS, "all": ALL_CELLS}
+                "phase1": PHASE1_CELLS, "phase7": PHASE7_CELLS, "all": ALL_CELLS}
     names = list(profiles[profile]) if profile in profiles else profile.split(",")
-    if not names or any(not item or item not in ALL_CELLS for item in names):
+    if not names or any(not item or item not in ALL_CELLS + PHASE7_CELLS for item in names):
         raise EvidenceError("unknown or empty benchmark cell selector")
     if len(set(names)) != len(names):
         raise EvidenceError("duplicate benchmark cell selector")
@@ -546,7 +548,8 @@ def validate_report(data: dict, request: dict, log: str) -> dict:
             fighting = _integer(plan.get("fighting"), name + ".plan.fighting")
             expected_active = count - 1 if name.startswith("combat-") else \
                 (1 if name.startswith("traversal-") else (count + 1) // 3 if count > 1 else 0)
-            expected_moving = 0 if name.startswith("combat-") else (expected_active + 1) // 2
+            expected_moving = 16 if name == "combat-heat-bolt-160" else (
+                0 if name.startswith("combat-") else (expected_active + 1) // 2)
             if (active, moving, fighting) != (expected_active, expected_moving, expected_active - expected_moving):
                 raise EvidenceError(f"{name}: activity workload differs from requested cell")
             if active and not name.startswith("traversal-"):
@@ -555,12 +558,39 @@ def validate_report(data: dict, request: dict, log: str) -> dict:
                 if ticks["count"] > frames or _number(summary.get("packetsPerFrame", {}).get("mean"),
                                                       name + ".packetsPerFrame.mean", .000001) <= 0:
                     raise EvidenceError(f"{name}: no observed packet activity")
+        if name == "combat-heat-bolt-160":
+            try:
+                validate_heat_bolt_cell(cell, request)
+            except HeatBoltEvidenceError as exc:
+                raise EvidenceError(str(exc)) from exc
+        capture = cell.get("boundaryCapture")
+        if request.get("capture_boundaries", False):
+            capture = _object(capture, name + ".boundaryCapture")
+            if request.get("mode") != "windowed" or capture.get("requested") is not True \
+                    or capture.get("status") != "captured" or capture.get("outsideSample") is not True \
+                    or capture.get("boundary") != "after_sample_before_despawn" \
+                    or capture.get("viewport") != "world" or not isinstance(capture.get("path"), str):
+                raise EvidenceError(f"{name}: requested boundary image was not captured")
+            _integer(capture.get("width"), name + ".capture.width", 1)
+            _integer(capture.get("height"), name + ".capture.height", 1)
+            _integer(capture.get("captureMicroseconds"), name + ".capture.microseconds")
+            if not isinstance(capture.get("sha256"), str) or not re.fullmatch(r"[0-9a-f]{64}", capture["sha256"]):
+                raise EvidenceError(f"{name}: boundary image identity missing")
+        elif capture is not None:
+            raise EvidenceError(f"{name}: boundary image was not requested")
         measured.append(name)
     mode = request.get("native_presentation", "off")
     if request.get("client_runtime") == "compare" and not any(
             _integer(backend["clientRuntime"].get("comparisons"), "clientRuntime.comparisons") > 0
             for backend in observed_native):
         raise EvidenceError("requested Rust comparison runtime did not execute")
+    rust_effects = [backend.get("rustSpellFlights", {}) for backend in observed_native]
+    if request.get("rust_effects", "legacy") == "heat_bolt":
+        if not any(v.get("frames", 0) > 0 for v in rust_effects) or any(
+                v.get("fallbacks", 0) or v.get("admitted_legacy", 0) for v in rust_effects):
+            raise EvidenceError("Rust spell family never executed cleanly or fell back")
+    elif any(v.get("frames", 0) > 0 for v in rust_effects):
+        raise EvidenceError("Rust spell family ran despite being disabled")
     presentations = [backend["presentation"] for backend in observed_native]
     if mode in ("cape", "both", "all") and (not any(p["nativeCapeCalls"] > 0 for p in presentations)
                                             or any(p["capeFallbackCalls"] for p in presentations)):

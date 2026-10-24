@@ -18,13 +18,31 @@ const EXTRAS_KEY := "eloria"
 const PROTOTYPE_FIELD := "prototype"
 
 static var _registered: GLTFDocumentExtension = null
+static var _registration_mutex := Mutex.new()
+static var _registration_ready := false
 
 
-static func ensure_registered() -> void:
-	if _registered != null:
-		return
-	_registered = new()
-	GLTFDocument.register_gltf_document_extension(_registered)
+## Like quantization/image registration, this must finish on main before
+## import workers start: it edits the same GLTFDocument static vector.
+static func ensure_registered() -> bool:
+	if OS.get_thread_caller_id() != OS.get_main_thread_id():
+		return is_registered()
+	if _registration_ready:
+		return true
+	_registration_mutex.lock()
+	var extension: GLTFDocumentExtension = new()
+	GLTFDocument.register_gltf_document_extension(extension)
+	_registered = extension
+	_registration_ready = true
+	_registration_mutex.unlock()
+	return true
+
+
+static func is_registered() -> bool:
+	_registration_mutex.lock()
+	var ready := _registration_ready
+	_registration_mutex.unlock()
+	return ready
 
 
 func _import_node(_state: GLTFState, _gltf_node: GLTFNode, json: Dictionary, node: Node) -> Error:

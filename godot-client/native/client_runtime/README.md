@@ -1,9 +1,10 @@
 # Optional client runtime
 
-The engine-independent Rust core owns immutable rig records and numeric planning
-state. A thin official GDExtension adapter owns its lifetime on the creating main
-thread. Godot owns scene nodes, animation playback and rendering. Ordinary play
-uses legacy presentation; the approved-profile mounted pilot is explicitly selectable.
+The engine-independent Rust core owns immutable rig records, numeric planning
+state and an optional spell-flight service. A thin official GDExtension adapter
+owns its lifetime on the creating main thread. Godot owns scene nodes, animation
+playback and rendering. Ordinary play uses legacy presentation; the approved
+mounted and heat-bolt pilots are explicitly selectable.
 
 Build from the client directory:
 
@@ -108,3 +109,28 @@ The Phase 5 single matched exported screen showed no complete-workload gain.
 The broader mounted path remains an opt-in experiment until repeated rendered
 comparisons establish a worthwhile benefit. Source parity alone never enables
 the native default or qualifies other target devices.
+
+## Optional heat-bolt family
+
+`RABBITLANDS_RUST_EFFECTS=heat_bolt` with `RABBITLANDS_CLIENT_RUNTIME=rust`
+enables the effect-2 family, powers 1–10. The core owns admission, release and
+travel clocks, moving endpoints, exact-once arrival/expiry and ribbon/glow
+geometry in a coarse frame batch. Godot keeps the approved impact visuals,
+particles, materials, per-effect meshes and transparency sorting. Unsupported
+and self/area effects retain their existing path. A native capacity limit never
+drops a visual already admitted by the ordinary priority policy.
+
+The entire numeric result is validated before publication. Epochs, generations,
+weak scene bindings and callback checks protect mesh/material/tree boundaries.
+An invalid batch transfers surviving effects to the existing clock exactly
+once; unexpected queued deletion is distinct from normal expiry. Importer
+extensions are fully registered on main before any runtime glTF workers start.
+
+The verified DLL also includes the unchanged existing C++ flight-geometry
+implementation. Both its source files participate in payload provenance, and
+diagnostics distinguish the verified provider from an external extension.
+The rendered comparison uses identical on-foot content and global runtime,
+varying Script, `ELORIA_NATIVE_PRESENTATION=flight`, or the Rust family only.
+Counters include admission, packing, validation and mesh/impact submission;
+native arithmetic alone does not establish a performance benefit. The family
+remains experimental and off by default pending complete-scene qualification.
