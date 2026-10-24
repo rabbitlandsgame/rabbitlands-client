@@ -211,6 +211,42 @@ def test_missing_required_inventory_root_is_never_a_transient_entry(tmp_path):
         storage.unique_bytes([tmp_path / "missing-required-root"])
 
 
+def test_several_transient_entry_races_can_settle_within_bounded_inventory_attempts(tmp_path, monkeypatch):
+    staging = tmp_path / "writing-000952.res"
+    staging.write_bytes(bytes(256))
+    original = Path.lstat
+    calls = []
+
+    def initially_changing(path, *args, **kwargs):
+        if path == staging:
+            calls.append(True)
+            if len(calls) < storage.INVENTORY_ATTEMPTS:
+                raise FileNotFoundError("fixture concurrent resource publication")
+        return original(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "lstat", initially_changing)
+    assert storage.unique_bytes([tmp_path]) == 256
+    assert len(calls) == storage.INVENTORY_ATTEMPTS
+
+
+@pytest.mark.parametrize("error", [PermissionError(13, "fixture inaccessible directory"),
+                                 OSError(5, "fixture directory IO failure")])
+def test_unreadable_directory_enumeration_is_never_silently_omitted(tmp_path, monkeypatch, error):
+    blocked = tmp_path / "unreadable"
+    blocked.mkdir()
+    (blocked / "asset.res").write_bytes(bytes(256))
+    original = storage.os.scandir
+
+    def fail_enumeration(path):
+        if Path(path) == blocked:
+            raise error
+        return original(path)
+
+    monkeypatch.setattr(storage.os, "scandir", fail_enumeration)
+    with pytest.raises(type(error), match="fixture"):
+        storage.unique_bytes([tmp_path])
+
+
 def test_required_inventory_root_disappearing_during_walk_still_fails(tmp_path, monkeypatch):
     root = tmp_path / "required-root"
     root.mkdir()

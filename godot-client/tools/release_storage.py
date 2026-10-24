@@ -10,7 +10,7 @@ from stat import S_ISLNK
 
 RUNNER_BYTES = 14_000_000_000
 RESERVE_BYTES = 2_000_000_000
-INVENTORY_ATTEMPTS = 4
+INVENTORY_ATTEMPTS = 8
 
 
 class _InventoryChanged(Exception):
@@ -36,6 +36,11 @@ def unique_bytes(roots: list[Path], *, allow_internal_symlinks=False) -> int:
 def _unique_bytes_once(roots, *, allow_internal_symlinks):
     seen = set()
     total = 0
+    def walk_error(error):
+        # os.walk otherwise silently skips unreadable subtrees, which would
+        # understate the inventory. Only enumerated-entry lstat ENOENT retries.
+        raise error
+
     def check_link(path):
         if not allow_internal_symlinks or not any(path.resolve().is_relative_to(root.resolve()) for root in roots if root.is_dir()):
             raise ValueError(f"Runner input link escapes its accounted roots: {path}")
@@ -65,7 +70,7 @@ def _unique_bytes_once(roots, *, allow_internal_symlinks):
         if root.is_file():
             count(root)
             continue
-        for directory, folders, files in os.walk(root, followlinks=False):
+        for directory, folders, files in os.walk(root, followlinks=False, onerror=walk_error):
             regular_folders = []
             for name in folders:
                 path = Path(directory) / name
