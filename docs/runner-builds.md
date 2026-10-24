@@ -60,6 +60,8 @@ selected pilot is cooked, rather than the entire world.
 Cooking needs real rendering-resource storage. Windows requests D3D12 WARP;
 Linux uses Mesa llvmpipe under Xvfb with the Compatibility renderer. These are
 build-time software renderers, not drivers shipped with the game. Each job
+selects dummy audio so qualification does not require a hosted audio device.
+The game keeps its ordinary audio-driver selection. Each job
 must report its actual renderer, adapter and supported texture-format mask,
 and pass a resource-buffer save/reload check. A dummy/headless renderer,
 unexpected hardware adapter or unsupported format mask fails qualification;
