@@ -1,5 +1,9 @@
 //! Engine-independent, main-thread-owned presentation data. No Godot pointers.
 use std::panic::{AssertUnwindSafe, catch_unwind};
+mod mounted_pose;
+mod mounted_runtime;
+use mounted_pose::Rider;
+use mounted_runtime::MountedResult;
 
 pub const ABI_VERSION: u32 = 1;
 pub const OK: i32 = 0;
@@ -42,6 +46,9 @@ pub struct Runtime {
     next_handle: u64,
     rigs: Vec<(u64, Rig)>,
     scratch: Vec<PlanResult>,
+    mounted_riders: Vec<(u64, Rider)>,
+    mounted_values: Vec<f64>,
+    mounted_results: Vec<MountedResult>,
 }
 
 impl Default for Runtime {
@@ -51,6 +58,9 @@ impl Default for Runtime {
             next_handle: 1,
             rigs: Vec::new(),
             scratch: Vec::new(),
+            mounted_riders: Vec::new(),
+            mounted_values: Vec::new(),
+            mounted_results: Vec::new(),
         }
     }
 }
@@ -63,6 +73,9 @@ impl Runtime {
         self.epoch = epoch;
         self.rigs.clear();
         self.scratch.clear();
+        self.mounted_riders.clear();
+        self.mounted_values.clear();
+        self.mounted_results.clear();
         // Handles are never reused, including after a map/session reset.
         Ok(())
     }
@@ -120,6 +133,7 @@ impl Runtime {
     pub fn unregister_rig(&mut self, handle: u64) -> bool {
         if let Some(index) = self.rigs.iter().position(|(id, _)| *id == handle) {
             self.rigs.swap_remove(index);
+            self.mounted_riders.retain(|(_, rider)| rider.rig != handle);
             true
         } else {
             false

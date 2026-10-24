@@ -279,6 +279,37 @@ class ReportValidationTests(unittest.TestCase):
             with self.subTest(change=change), self.assertRaises(support.EvidenceError):
                 support.validate_report(data, request, "")
 
+    def test_mounted_rust_workload_requires_actual_coverage_application_and_no_fallback(self):
+        data, request = fixture()
+        request.update(client_runtime="rust", cells="mixed-mounted-160")
+        cell = data["cells"][0]
+        cell["id"] = "mixed-mounted-160"
+        for observed in (data, cell["effectiveRuntime"]):
+            observed["activeBackends"]["clientRuntime"] = {
+                "requested": "rust", "mode": "rust", "presentation_backend": "mixed", "mismatches": 0,
+                "native_available": True, "native": {"poses_applied": 100}}
+            observed["activeBackends"]["mountedBatch"] = {"present": True, "fallbacks": 0, "batches": 10}
+        for point in cell["census"].values():
+            point.update(mountedActors=80, mountSkeletons=80, mountedPresentation={"rustPose": {
+                "available": 80, "eligible": 80, "profiles": {"moor_pony": 80}, "requestedModes": {"rust": 80},
+                "failures": 0, "disabled": 0, "activeVisuals": 40, "appliedActiveVisuals": 40, "applications": 100}})
+        self.assertTrue(support.validate_report(data, request, "")["valid"])
+        for change in ({"available": 79}, {"eligible": 79}, {"profiles": {"other": 80}},
+                       {"requestedModes": {"legacy": 80}}, {"failures": 1}, {"disabled": 1},
+                       {"appliedActiveVisuals": 39}, {"applications": 0}):
+            broken = copy.deepcopy(data)
+            broken["cells"][0]["census"]["afterSample"]["mountedPresentation"]["rustPose"].update(change)
+            with self.subTest(change=change), self.assertRaises(support.EvidenceError):
+                support.validate_report(broken, request, "")
+        for change in ({"present": False}, {"fallbacks": 1}, {"batches": 0}):
+            broken = copy.deepcopy(data)
+            broken["cells"][0]["effectiveRuntime"]["activeBackends"]["mountedBatch"].update(change)
+            with self.subTest(batch=change), self.assertRaises(support.EvidenceError):
+                support.validate_report(broken, request, "")
+        cell["effectiveRuntime"]["activeBackends"]["clientRuntime"]["native"]["poses_applied"] = 0
+        with self.assertRaises(support.EvidenceError):
+            support.validate_report(data, request, "")
+
 
 class IdentityAndProcessTests(unittest.TestCase):
     def test_settings_profile_defaults_and_conflicting_requests(self):

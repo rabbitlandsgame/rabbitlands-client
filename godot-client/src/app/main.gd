@@ -2,6 +2,7 @@ extends Control
 
 const Diagnostics = preload("res://src/diagnostics/client_diagnostics.gd")
 const ClientRuntime = preload("res://src/runtime/client_runtime.gd")
+const RustRiderPose = preload("res://src/mounts/rust_rider_pose.gd")
 var client_runtime := ClientRuntime.new()
 const ExperienceCurve = preload("res://src/state/experience_curve.gd")
 const SeasonSky = preload("res://src/world/season_sky.gd")
@@ -3841,6 +3842,7 @@ func _close_client() -> void:
 	get_tree().quit()
 
 func _exit_tree() -> void:
+	RustRiderPose.close_batches()
 	client_runtime.close()
 	mouse_cursors.release()
 	occluder_fade.reset()
@@ -3971,6 +3973,7 @@ func _on_reconnect_progress(attempt: int, total: int, delay_msec: int) -> void:
 	_sync_connection_banner()
 
 func _clear_world_presentation() -> void:
+	RustRiderPose.close_batches()
 	# No actor survives this clear. Forget stepped members before queueing
 	# any body, without reactivating its animation or skeleton callbacks.
 	animation_gate.reset(false)

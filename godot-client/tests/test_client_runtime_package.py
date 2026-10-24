@@ -73,7 +73,7 @@ class ClientRuntimePackageTests(unittest.TestCase):
             repository, _, _ = self.fixture(root)
             native = repository / runtime_package.NATIVE_PATH
             for relative in ["src/client_runtime.cpp", "src/client_core.h", "core/Cargo.toml",
-                             "core/Cargo.lock", "core/rust-toolchain.toml", "client_runtime.gdextension.in"]:
+                             "core/Cargo.lock", "core/rust-toolchain.toml", "client_runtime.gdextension.in", "build_profile.json"]:
                 with self.subTest(input=relative):
                     before = runtime_package.source_digest(repository)
                     path = native / relative
@@ -135,7 +135,7 @@ class ClientRuntimePackageTests(unittest.TestCase):
             with self.subTest(platform=platform), tempfile.TemporaryDirectory() as directory:
                 stage = Path(directory)
                 runtime_package.write_launchers(stage, platform)
-                for label, mode in [("Rust comparison", "compare"), ("legacy runtime", "legacy")]:
+                for label, mode in [("Rust rider pilot", "rust"), ("Rust comparison", "compare"), ("legacy runtime", "legacy")]:
                     text = (stage / f"RabbitLands ({label}).{extension}").read_text(encoding="utf-8")
                     self.assertIn("RABBITLANDS_CLIENT_RUNTIME=" + mode, text)
                     self.assertIn("%*" if platform == "windows" else '"$@"', text)

@@ -83,6 +83,10 @@ func _preflight() -> void:
 	_write(path, JSON.stringify(manifest))
 	controller.initialize(directory)
 	_expect(controller.snapshot().reason == "unsupported_platform", "architecture mismatch is rejected before loading")
+	manifest.architecture = "debug"
+	_write(path, JSON.stringify(manifest))
+	controller.initialize(directory)
+	_expect(controller.snapshot().reason == "unsupported_platform", "an unrelated engine feature is not accepted as an architecture")
 	manifest.architecture = "x86_64"
 	_write(path, JSON.stringify(manifest))
 	controller.initialize(directory)
