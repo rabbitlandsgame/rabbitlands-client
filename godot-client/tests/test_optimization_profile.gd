@@ -21,18 +21,23 @@ func _run() -> void:
 	var environment: Dictionary = {}
 	var before := environment.duplicate(true)
 	var result := Policy.resolve(environment, PackedStringArray())
-	_check(result.features == active and result.profile == "human-testing"
-		and result.reason == "default_human_testing" and not result.hardware_qualified,
-		"ordinary launch requests all human-testing features")
+	_check(result.features == legacy and result.profile == "legacy"
+		and result.reason == "default_legacy" and not result.human_testing and not result.hardware_qualified,
+		"ordinary launch keeps every optional optimization disabled")
 	_check(environment == before, "pure resolution never modifies its input")
+	result = Policy.resolve({Policy.ENVIRONMENT: "human-testing"}, PackedStringArray())
+	_check(result.features == active and result.profile == "human-testing"
+		and result.reason == "human_testing_selected" and result.human_testing and not result.hardware_qualified,
+		"explicit human-testing environment opts in to all experimental features")
 	for profile: String in ["legacy", "invalid", " "]:
 		var arguments := PackedStringArray(["--optimization-profile=" + profile])
 		result = Policy.resolve({}, arguments)
-		_check(result.features == legacy and result.profile == "legacy",
+		_check(result.features == legacy and result.profile == "legacy" and not result.human_testing,
 			"legacy and invalid explicit profiles fail safely to legacy")
 	result = Policy.resolve({Policy.ENVIRONMENT: "legacy"},
 		PackedStringArray(["--optimization-profile=human-testing"]))
-	_check(result.features == active, "profile CLI overrides profile environment")
+	_check(result.features == active and result.human_testing and result.reason == "human_testing_selected",
+		"explicit human-testing CLI overrides profile environment")
 	for feature: String in Policy.FEATURES:
 		var definition: Dictionary = Policy.FEATURES[feature]
 		environment = {Policy.ENVIRONMENT: "human-testing", definition.environment: legacy[feature]}
@@ -71,9 +76,9 @@ func _check_actual_selectors(active: Dictionary, legacy: Dictionary) -> void:
 	var previous_request: int = admission._request_mode
 	for enabled: bool in [true, false]:
 		if enabled:
-			OS.unset_environment(Policy.ENVIRONMENT)
+			OS.set_environment(Policy.ENVIRONMENT, "human-testing")
 		else:
-			OS.set_environment(Policy.ENVIRONMENT, "legacy")
+			OS.unset_environment(Policy.ENVIRONMENT)
 		var expected: Dictionary = active if enabled else legacy
 		for feature: String in expected:
 			_check(Policy.selected(feature) == expected[feature], "actual environment resolution: " + feature)
@@ -84,6 +89,9 @@ func _check_actual_selectors(active: Dictionary, legacy: Dictionary) -> void:
 		_check(snapshot.requested == expected.client_runtime and snapshot.mode == "legacy",
 			"controller consumes profile and preserves missing-payload fallback")
 		_check(snapshot.optimization_profile.features == expected, "controller reports resolved profile requests")
+		_check(bool(snapshot.optimization_profile.human_testing) == enabled
+			and snapshot.optimization_profile.reason == ("human_testing_selected" if enabled else "default_legacy"),
+			"actual ordinary-off and explicit opt-in profile diagnostics agree")
 		controller.close()
 		admission._request_mode = -1
 		_check(bool(admission.requested()) == enabled, "admission consumes the profile")

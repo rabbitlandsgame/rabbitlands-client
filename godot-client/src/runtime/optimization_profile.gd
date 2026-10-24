@@ -1,10 +1,11 @@
 class_name ClientOptimizationProfile
 extends RefCounted
-## Development defaults for human testing, not hardware-qualified recommendations.
+## Experimental paths are opt-in while their performance is being qualified.
 ## Explicit feature options override the profile. No environment is mutated.
 const ENVIRONMENT := "RABBITLANDS_OPTIMIZATION_PROFILE"
 const ARGUMENT := "--optimization-profile="
-const DEFAULT_PROFILE := "human-testing"
+const DEFAULT_PROFILE := "legacy"
+const HUMAN_TESTING_PROFILE := "human-testing"
 const FEATURES := {
 	"client_runtime": {"environment": "RABBITLANDS_CLIENT_RUNTIME", "argument": "--client-runtime=", "active": "rust", "legacy": "legacy"},
 	"remote_presentation": {"environment": "RABBITLANDS_REMOTE_PRESENTATION", "argument": "--remote-presentation=", "active": "rust", "legacy": "legacy"},
@@ -26,11 +27,11 @@ static func _option(environment_value: String, arguments: PackedStringArray, pre
 static func resolve_profile(environment_value: String, arguments: PackedStringArray) -> Dictionary:
 	var option := _option(environment_value, arguments, ARGUMENT)
 	var requested := str(option.value) if bool(option.present) else DEFAULT_PROFILE
-	var active := requested == DEFAULT_PROFILE
-	return {"requested": requested, "profile": DEFAULT_PROFILE if active else "legacy",
+	var active := requested == HUMAN_TESTING_PROFILE
+	return {"requested": requested, "profile": HUMAN_TESTING_PROFILE if active else "legacy",
 		"human_testing": active, "hardware_qualified": false,
-		"reason": ("default_human_testing" if not bool(option.present) else "human_testing_selected")
-			if active else ("legacy_selected" if requested == "legacy" else "invalid_profile_legacy")}
+		"reason": "human_testing_selected" if active else ("default_legacy" if not bool(option.present)
+			else ("legacy_selected" if requested == "legacy" else "invalid_profile_legacy"))}
 
 static func _resolve_feature(feature: String, environment_value: String,
 		arguments: PackedStringArray, profile: Dictionary) -> String:

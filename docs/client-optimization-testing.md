@@ -1,11 +1,15 @@
 # Client optimization testing on develop
 
-The development client selects the `human-testing` optimization profile on a
-normal launch. It requests the Rust mounted-pose, remote-presentation and heat
-bolt paths, global resource admission, automatic prepared-content loading and
-the `lazy-source-v1` static-object policy together. These are experimental
-human-testing defaults, not a promise that every workload or graphics preset
-will run faster. They are not qualified recommendations for low-end hardware.
+The development client selects the `legacy` optimization profile on a normal
+launch. All six optional paths are off: Rust mounted poses, remote presentation,
+heat bolts, resource admission, prepared-content loading and lazy source objects.
+Content uses the raw path with retained source objects. This profile change does
+not revert the graphics or water-loading fixes.
+
+The explicit `human-testing` profile enables those six experimental paths
+together, using automatic prepared-content loading and `lazy-source-v1` static
+objects. It is not a promise that every workload or graphics preset will run
+faster, or a qualified recommendation for low-end hardware.
 
 Requested features can fall back independently. An ordinary checkout without
 the ignored native build or a matching prepared catalog can still play through
@@ -17,7 +21,7 @@ actually ran.
 Use a current native test package with its `app/` and `eloria-assets/` folders
 kept together. Do not copy a DLL or catalog from another package into it.
 
-- `RabbitLands.bat` uses the development profile unless explicitly overridden.
+- `RabbitLands.bat` uses the legacy profile unless explicitly overridden.
 - `RabbitLands (optimization testing).bat` explicitly selects all six testing
   options and replaces inherited feature environment settings.
 - `RabbitLands (legacy runtime).bat` explicitly disables all six families and
@@ -35,8 +39,10 @@ release pipeline now assembles the native runtime and fresh prepared pilot on
 both Windows and Linux. Its per-platform checks must succeed before signing
 and uploading game parts; a package's actual diagnostics remain authoritative.
 
-The global profile supplies defaults. An explicit individual option still wins.
-For example, this requests the development profile with raw content:
+The global profile supplies defaults. A feature's command-line option overrides
+its environment value, and either overrides the global profile. The global
+profile's command-line option overrides `RABBITLANDS_OPTIMIZATION_PROFILE`.
+For example, this opts into human testing while keeping raw content:
 
 ```powershell
 .\RabbitLands.bat --optimization-profile=human-testing --prepared-content=raw
@@ -49,9 +55,17 @@ executable directly, include the separator yourself:
 .\app\RabbitLands.exe -- --optimization-profile=legacy
 ```
 
+For a checkout or package made before this default change, that explicit option
+or `RABBITLANDS_OPTIMIZATION_PROFILE=legacy` selects the legacy profile. After
+updating, an ordinary launch needs no profile flag. To opt in through the
+environment, set `RABBITLANDS_OPTIMIZATION_PROFILE=human-testing` for that launch.
+These controls require no edits to user configuration or secrets.
+
 Use the provided legacy launcher for a clean control if your shell already has
-individual experimental options set. Deliberately supplied command-line feature
-options can override that launcher too.
+individual experimental options set: it resets all six feature environment
+settings. Selecting the global legacy profile alone does not clear individual
+overrides. Deliberately supplied command-line feature options can override that
+launcher too.
 
 ## What to try and report
 
@@ -73,7 +87,7 @@ options can override that launcher too.
 
 Include the package commit, launcher used, renderer, graphics preset, map/position,
 mount or spell, reproduction steps and whether the legacy control reproduces it.
-The debug-console launcher uses the same development defaults and saves a
+The debug-console launcher uses the same legacy default and saves a
 verbose `eloria-debug.log` beside the package. The ordinary engine log is under
 the client's Godot user-data directory, normally
 `%APPDATA%/Godot/app_userdata/Eloria/logs/client.log` on Windows. Review logs before
@@ -122,9 +136,11 @@ The [desktop release workflow](runner-builds.md) uses `--full-optimizations` on
 both native operating systems. It verifies or builds a source-matched native
 payload, cooks a fresh source-derived pilot against the actual first export,
 then checks the final normal PCK at all three texture qualities. Native payload
-caching does not permit reuse of a stale cooked catalog. The ordinary launch
-must also confirm all six defaults and actual native availability before the
-package can proceed to signing and upload.
+caching does not permit reuse of a stale cooked catalog. Full-feature packaging
+and its proof gates remain required even though ordinary play defaults to
+legacy. All-six activation and actual native availability are checked with the
+explicit human-testing profile before the package can proceed to signing and
+upload; the final normal-PCK guards remain required.
 
 The cooker uses build-time software rendering: D3D12 WARP on Windows and Mesa
 llvmpipe with Xvfb on Linux. Actual adapter identity, texture capabilities and
