@@ -115,6 +115,141 @@ def test_budget_counts_linked_assets_once_and_preserves_margin(tmp_path, monkeyp
         budget.free_check()
 
 
+def test_live_resource_rename_restarts_inventory_and_counts_final_file(tmp_path, monkeypatch):
+    staging, final = tmp_path / "writing-000952.res", tmp_path / "digest.res"
+    staging.write_bytes(bytes(256))
+    original = Path.lstat
+    moved = []
+
+    def rename_before_stat(path, *args, **kwargs):
+        if path == staging and not moved:
+            staging.rename(final)
+            moved.append(True)
+        return original(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "lstat", rename_before_stat)
+    assert storage.unique_bytes([tmp_path]) == 256
+    assert moved and final.is_file() and not staging.exists()
+
+
+def test_inventory_retry_resets_inode_dedup_and_keeps_budget_enforcement(tmp_path, monkeypatch):
+    staging, final, alias = tmp_path / "writing-000952.res", tmp_path / "digest.res", tmp_path / "a-alias.res"
+    staging.write_bytes(bytes(256))
+    os.link(staging, alias)
+    original_stat, original_walk = Path.lstat, storage.os.walk
+    moved, scans = [], []
+
+    def sorted_walk(*args, **kwargs):
+        scans.append(True)
+        for directory, folders, files in original_walk(*args, **kwargs):
+            yield directory, folders, sorted(files)
+
+    def rename_before_stat(path, *args, **kwargs):
+        if path == staging and not moved:
+            staging.rename(final)
+            moved.append(True)
+        return original_stat(path, *args, **kwargs)
+
+    budget = storage.DiskBudget([tmp_path], capacity=384, reserve=64)
+    monkeypatch.setattr(storage.os, "walk", sorted_walk)
+    monkeypatch.setattr(Path, "lstat", rename_before_stat)
+    budget.check("live rename", additional=64)
+    assert len(scans) == 2
+    assert budget.peak == 256 and budget.planned_peak == 320
+    with pytest.raises(ValueError, match="margin"):
+        budget.check("still enforced", additional=65)
+    monkeypatch.setattr(storage.shutil, "disk_usage", lambda path: type("Usage", (), {"free": 63})())
+    with pytest.raises(ValueError, match="reserve"):
+        budget.check("physical reserve still enforced")
+
+
+def test_removed_duplicate_staging_resource_is_absent_after_retry(tmp_path, monkeypatch):
+    staging = tmp_path / "writing-000952.res"
+    staging.write_bytes(bytes(256))
+    (tmp_path / "digest.res").write_bytes(bytes(256))
+    original = Path.lstat
+    removed = []
+
+    def remove_before_stat(path, *args, **kwargs):
+        if path == staging and not removed:
+            staging.unlink()
+            removed.append(True)
+        return original(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "lstat", remove_before_stat)
+    assert storage.unique_bytes([tmp_path]) == 256
+    assert removed
+
+
+def test_inventory_churn_is_bounded_and_permissions_still_fail(tmp_path, monkeypatch):
+    staging = tmp_path / "writing-000952.res"
+    staging.write_bytes(bytes(256))
+    original = Path.lstat
+    for exception in (FileNotFoundError, PermissionError, OSError):
+        calls = []
+
+        def fail_stat(path, *args, **kwargs):
+            if path == staging:
+                calls.append(True)
+                raise exception("fixture storage change")
+            return original(path, *args, **kwargs)
+
+        with monkeypatch.context() as patch:
+            patch.setattr(Path, "lstat", fail_stat)
+            if exception is FileNotFoundError:
+                with pytest.raises(ValueError, match="cannot verify disk budget"):
+                    storage.unique_bytes([tmp_path])
+                assert len(calls) == storage.INVENTORY_ATTEMPTS
+            else:
+                with pytest.raises(exception, match="fixture storage change"):
+                    storage.unique_bytes([tmp_path])
+                assert len(calls) == 1
+
+
+def test_missing_required_inventory_root_is_never_a_transient_entry(tmp_path):
+    with pytest.raises(FileNotFoundError):
+        storage.unique_bytes([tmp_path / "missing-required-root"])
+
+
+def test_required_inventory_root_disappearing_during_walk_still_fails(tmp_path, monkeypatch):
+    root = tmp_path / "required-root"
+    root.mkdir()
+    original = storage.os.walk
+    scans = []
+
+    def remove_root_during_walk(*args, **kwargs):
+        scans.append(True)
+        for entry in original(*args, **kwargs):
+            root.rmdir()
+            yield entry
+
+    monkeypatch.setattr(storage.os, "walk", remove_root_during_walk)
+    with pytest.raises(FileNotFoundError):
+        storage.unique_bytes([root])
+    assert len(scans) == 1
+
+
+def test_inventory_still_rejects_a_link_after_transient_rename(tmp_path, monkeypatch):
+    staging, final = tmp_path / "writing-000952.res", tmp_path / "digest.res"
+    staging.write_bytes(bytes(256))
+    original = Path.lstat
+    moved = []
+
+    def rename_then_observe_link(path, *args, **kwargs):
+        if path == staging and not moved:
+            staging.rename(final)
+            moved.append(True)
+        if path == final:
+            # Exercise the link policy without requiring Windows symlink privileges.
+            return type("LinkStat", (), {"st_mode": 0o120777})()
+        return original(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "lstat", rename_then_observe_link)
+    with pytest.raises(ValueError, match="link escapes"):
+        storage.unique_bytes([tmp_path])
+    assert moved
+
+
 def test_hard_link_failure_has_no_silent_copy_fallback(tmp_path, monkeypatch):
     source = tmp_path / "original"
     source.write_bytes(b"asset")

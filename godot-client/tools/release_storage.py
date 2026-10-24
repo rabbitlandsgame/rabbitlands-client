@@ -6,43 +6,79 @@ import io
 import os
 from pathlib import Path
 import shutil
+from stat import S_ISLNK
 
 RUNNER_BYTES = 14_000_000_000
 RESERVE_BYTES = 2_000_000_000
+INVENTORY_ATTEMPTS = 4
+
+
+class _InventoryChanged(Exception):
+    """An enumerated entry disappeared before its size could be measured."""
 
 
 def unique_bytes(roots: list[Path], *, allow_internal_symlinks=False) -> int:
-    """Count hard-linked files once, including Git objects and ignored caches."""
+    """Count linked files once; retry boundedly when a live writer renames one.
+
+    A traversal is not an atomic filesystem snapshot. Restarting the whole
+    inventory gives a renamed final resource a chance to be accounted for,
+    rather than silently omitting a vanished staging name. Physical free-space
+    checks and allocation reservations remain separate mandatory guards.
+    """
+    for attempt in range(INVENTORY_ATTEMPTS):
+        try:
+            return _unique_bytes_once(roots, allow_internal_symlinks=allow_internal_symlinks)
+        except _InventoryChanged as error:
+            if attempt == INVENTORY_ATTEMPTS - 1:
+                raise ValueError("Runner storage inventory kept changing; cannot verify disk budget") from error
+
+
+def _unique_bytes_once(roots, *, allow_internal_symlinks):
     seen = set()
     total = 0
     def check_link(path):
         if not allow_internal_symlinks or not any(path.resolve().is_relative_to(root.resolve()) for root in roots if root.is_dir()):
             raise ValueError(f"Runner input link escapes its accounted roots: {path}")
 
-    def count(path):
+    def entry_stat(path, *, enumerated=False):
+        try:
+            return path.lstat()
+        except FileNotFoundError as error:
+            if enumerated:
+                raise _InventoryChanged(str(path)) from error
+            raise
+
+    def count(path, *, enumerated=False, observation=None):
         nonlocal total
-        if path.is_symlink():
+        stat = observation if observation is not None else entry_stat(path, enumerated=enumerated)
+        if S_ISLNK(stat.st_mode):
             check_link(path)
-        stat = path.lstat()
         key = (stat.st_dev, stat.st_ino)
         if key not in seen:
             seen.add(key)
             total += stat.st_size
 
     for root in roots:
+        # Accounted roots are required inputs, unlike live descendant names.
+        # Never turn a missing root into an empty successful inventory.
+        root.lstat()
         if root.is_file():
             count(root)
             continue
         for directory, folders, files in os.walk(root, followlinks=False):
+            regular_folders = []
             for name in folders:
                 path = Path(directory) / name
-                if path.is_symlink():
-                    check_link(path)
-                    count(path)
-            folders[:] = [name for name in folders if not (Path(directory) / name).is_symlink()]
+                observation = entry_stat(path, enumerated=True)
+                if S_ISLNK(observation.st_mode):
+                    count(path, observation=observation)
+                else:
+                    regular_folders.append(name)
+            folders[:] = regular_folders
             for name in files:
                 path = Path(directory) / name
-                count(path)
+                count(path, enumerated=True)
+        root.lstat()
     return total
 
 
