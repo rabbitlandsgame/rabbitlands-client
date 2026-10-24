@@ -3,6 +3,10 @@ extends RefCounted
 ## southern-streaming-walk and southern-region-routes fixtures. The client driver
 ## exercises presentation/streaming; it does not certify server pathfinding.
 const MountProfiles := preload("res://src/mounts/mount_profiles.gd")
+## Keep the measured Phase 1/5/6 cohort stable as the product catalog expands.
+## Giant Rat deliberately exercises the ordinary fallback beside five native profiles.
+const MIXED_MOUNT_PROFILE_IDS := ["crystalback_tortoise", "giant_rat",
+	"golden_plains_horse", "jadefeather_raptor", "moor_pony", "rabbit"]
 
 static func resolution(value: String) -> Vector2i:
 	var parts := value.to_lower().split("x")
@@ -14,10 +18,9 @@ static func mount_rows(records: Dictionary, count: int, map_id: String) -> Dicti
 	var rows := {}
 	var ids := records.keys()
 	ids.sort()
-	var profiles := MountProfiles.PATHS.keys()
-	profiles.sort()
-	# Include the local player. Cycling only the explicitly supported profiles
-	# preserves approved content and gives exactly 80 mounts in the 160 fixture.
+	var profiles: Array = MIXED_MOUNT_PROFILE_IDS
+	# Include the local player. Product catalog additions belong to separate
+	# coverage fixtures, rather than silently changing this historical workload.
 	for index: int in mini(count, ids.size()):
 		var id := int(ids[index])
 		var record := records[id] as Dictionary

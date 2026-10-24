@@ -22,7 +22,9 @@ func _run() -> void:
 	var mounts := Workloads.mount_rows(records, 80, "four_gates")
 	_check(mounts.size() == 80 and mounts.has(14000), "exactly80 mounts include the local actor")
 	var counts := Workloads.mount_profile_counts(mounts)
-	_check(counts.size() == 5, "all five supported approved mount profiles are exercised")
+	_check(counts == {"crystalback_tortoise": 14, "giant_rat": 14,
+		"golden_plains_horse": 13, "jadefeather_raptor": 13, "moor_pony": 13, "rabbit": 13},
+		"original six-profile cohort includes five native profiles and the Giant Rat fallback")
 	for id: int in mounts:
 		var row := mounts[id] as Dictionary
 		_check(row.owner == records[id].name and row.map == records[id].map,

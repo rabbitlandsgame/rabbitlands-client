@@ -202,8 +202,20 @@ static func cells_for(profile: String) -> Array:
 	if profile == "quick":
 		return cells.filter(func(cell: Dictionary) -> bool:
 			return str(cell.id) in ["s3-market-160", "s2-invasion-160"])
-	var wanted := profile.split(",", false)
-	return cells.filter(func(cell: Dictionary) -> bool: return str(cell.id) in wanted)
+	# Explicit CSV selectors follow the caller's order, as the host runner does.
+	# Reject the whole selector on empty, unknown or repeated ids; a partial plan
+	# would otherwise measure a different workload from the requested evidence.
+	var by_id: Dictionary = {}
+	for cell: Dictionary in cells:
+		by_id[str(cell.id)] = cell
+	var ordered: Array = []
+	var seen: Dictionary = {}
+	for wanted_id: String in profile.split(",", true):
+		if wanted_id.is_empty() or not by_id.has(wanted_id) or seen.has(wanted_id):
+			return []
+		seen[wanted_id] = true
+		ordered.append(by_id[wanted_id])
+	return ordered
 
 
 func _run() -> void:
