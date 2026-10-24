@@ -310,11 +310,61 @@ func _run() -> void:
 	up.position = canvas._point(Vector2(70,80))
 	canvas._gui_input(up)
 	_expect(regions == [Rect2i(70,80,21,21)], "drawing in either direction normalizes inclusive logical region corners")
+	_check_refresh_protocol(assistant, commands)
 	assistant.queue_free()
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(monitor_preferences))
 	if failures == 0:
 		print("invasion assistant tests passed")
 	quit(failures)
+
+
+func _check_refresh_protocol(assistant, commands: Array[String]) -> void:
+	assistant._discard_draft()
+	var group: Dictionary = assistant.selected_group.duplicate(true)
+	group["configured_movement"] = {"anchor": null, "region": null, "radius": 18}
+	var full := {"kind": "groups", "revision": "r1", "status_supported": true, "groups": [group]}
+	assistant.apply_update(full)
+	commands.clear()
+	assistant._refresh_groups()
+	_expect(commands == ["#invasion_assistant status r1"], "new server uses a lightweight status request")
+	assistant.group_description.text = "Keep this draft"
+	assistant.group_description.text_changed.emit("Keep this draft")
+	assistant.apply_update({"kind": "group_status", "revision": "r1", "groups": [{"name": group.name,
+		"active": true, "alive": 7, "queued": 3, "movement": {"anchor": {"x": 42, "y": 43}, "radius": 8, "region": null}}]})
+	_expect(assistant.selected_group.alive == 7 and assistant.selected_group.queued == 3, "status updates living and queued counts")
+	_expect(assistant.selected_group.movement.anchor.x == 42, "status updates active movement")
+	_expect(assistant.group_description.text == "Keep this draft", "status retains unsaved settings")
+	assistant.group_filter.text = "no matching group"
+	assistant._rebuild_groups()
+	assistant.apply_update({"kind": "group_status", "revision": "r1", "groups": [{"name": group.name,
+		"active": true, "alive": 6, "queued": 2, "movement": {"anchor": {"x": 42, "y": 43}, "radius": 8, "region": null}}]})
+	_expect(assistant.selected_group.alive == 6, "selected details stay live while the group is filtered out")
+	assistant.group_filter.text = ""
+	assistant._rebuild_groups()
+	assistant.apply_update({"kind": "group_status", "revision": "r1", "groups": []})
+	_expect(not assistant.selected_group.active and assistant.selected_group.alive == 0, "absent status row clears a completed group")
+	_expect(assistant.selected_group.movement.anchor == null, "a cleared group restores configured movement")
+	commands.clear()
+	assistant.apply_update({"kind": "group_status", "revision": "r2", "groups": []})
+	_expect(commands == ["#invasion_assistant groups"], "unknown revision requests a fresh catalog")
+	var first := {"kind": "groups", "revision": "r2", "status_supported": true, "snapshot": "new", "page": 0, "pages": 2, "groups": [group]}
+	assistant.apply_update(first)
+	_expect(assistant.groups_state.revision == "r1", "partial catalog is never published")
+	var last := first.duplicate(true)
+	last.page = 1
+	last.groups = []
+	last.snapshot = "old"
+	assistant.apply_update(last)
+	_expect(assistant.groups_state.revision == "r1", "interleaved snapshot pages cannot mix catalogs")
+	assistant.apply_update(first)
+	last.snapshot = "new"
+	assistant.apply_update(last)
+	_expect(assistant.groups_state.revision == "r2" and assistant.group_list.item_count == 1, "complete catalog publishes atomically")
+	_expect(not full.groups[0].has("queued") or full.groups[0].queued != 3, "incoming catalog is not mutated by live updates")
+	assistant.apply_update({"kind": "groups", "groups": [group]})
+	commands.clear()
+	assistant._refresh_groups()
+	_expect(commands == ["#invasion_assistant groups"], "old server retains legacy refresh requests")
 
 
 func _check_monitor_docking(assistant: Window, preferences_path: String) -> void:
