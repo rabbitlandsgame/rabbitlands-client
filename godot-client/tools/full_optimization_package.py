@@ -16,6 +16,7 @@ import prepared_content_package as prepared
 import release_native_runtime
 import release_prepared_content
 import release_software_graphics as graphics
+import runner_retirement
 
 POLICY = "rl-full-optimization-package-v1"
 FEATURES = dict(client_runtime="rust", remote_presentation="rust", rust_effects="heat_bolt",
@@ -96,7 +97,7 @@ def stop_owned(child):
 
 class FullOptimizationBuild:
     def __init__(self, project, stage, godot, platform, commit, work_root, native_cache,
-                 check_budget=None, *, software_gpu_index=0):
+                 check_budget=None, *, software_gpu_index=0, native_bootstrap=None):
         self.project, self.stage, self.godot = map(lambda value: Path(value).resolve(), (project, stage, godot))
         self.platform, self.commit = platform, commit
         self.root, self.cache = Path(work_root).resolve(), Path(native_cache).resolve()
@@ -108,6 +109,7 @@ class FullOptimizationBuild:
         self.receipt = {"schema": 1, "policy": POLICY, "status": "incomplete", "commit": commit,
                         "platform": platform, "features": FEATURES, "native_checks": [], "prepared_checks": []}
         self.budget_callback = check_budget
+        self.native_bootstrap = native_bootstrap
         self.graphics = graphics.prepare_graphics(platform, self.godot.parent, self.godot.parent,
                                                   self.check_budget, gpu_index=software_gpu_index)
         self.save()
@@ -123,10 +125,13 @@ class FullOptimizationBuild:
         write_json(self.root / "full-optimizations.json", self.receipt)
 
     def prepare_native(self):
-        receipt = release_native_runtime.prepare_runtime(self.project.parent, self.commit, self.platform,
-            # MSVC still emits some intermediate files through MAX_PATH-limited
-            # APIs. Keep compiler scratch out of the long per-commit log path.
-            self.cache, self.root / "runtime-payload", self.cache.parent / ("work-" + self.platform), self.check_budget)
+        if self.native_bootstrap is not None:
+            receipt = release_native_runtime.prepare_from_prewarm(self.project.parent, self.commit, self.platform,
+                self.cache, self.root / "runtime-payload", self.native_bootstrap, self.check_budget)
+        else:
+            receipt = release_native_runtime.prepare_runtime(self.project.parent, self.commit, self.platform,
+                # Keep MSVC scratch outside the long per-commit log path.
+                self.cache, self.root / "runtime-payload", self.cache.parent / ("work-" + self.platform), self.check_budget)
         self.receipt["native"] = receipt
         payload = Path(receipt["payload"])
         native.stage_payload(payload, self.project.parent, self.project, self.platform)
@@ -217,6 +222,71 @@ class FullOptimizationBuild:
         receipt["catalog_sha256"] = native.sha256(self.project / "prepared-content/index.json")
         self.receipt["prepared_export"] = receipt
         self.save()
+
+    def retire_intermediate_pck(self, installed):
+        """The first pack's cook readers have exited; reserve a fresh final pack."""
+        pack = self.stage / "app/RabbitLands.pck"
+        catalog = self.project / "prepared-content/index.json"
+        cook_receipt = self.receipt.get("prepared", {})
+        require((self.stage / ".eloria-package").read_text().strip() == self.commit,
+                "intermediate pack is outside this selected stage")
+        require(cook_receipt.get("status") == "cooked_pending_final_export"
+                and cook_receipt.get("selected_source_inputs_restored") is True
+                and not (self.project / prepared.RUNTIME_IMPORT_MARKER).exists(),
+                "intermediate pack still belongs to an unfinished runtime cook")
+        require(installed.get("index_sha256") == native.sha256(catalog)
+                and installed.get("index_sha256") == cook_receipt.get("index_sha256"),
+                "installed prepared inputs differ before final export")
+        require(pack.is_file() and not pack.is_symlink() and pack.resolve() == pack
+                and "intermediate_export" not in self.receipt,
+                "intermediate pack must be a fresh owned regular file")
+        prepared_bytes = sum(path.stat().st_size for path in catalog.parent.rglob("*") if path.is_file())
+        # Ordinary content is unchanged. Add the entire installed native tree,
+        # catalog/path overhead and a conservative fixed metadata allowance.
+        allocation = pack.stat().st_size + prepared_bytes + 64 * 1024**2
+        self.receipt["intermediate_export"] = {"path": str(pack), "sha256": native.sha256(pack),
+            "bytes": pack.stat().st_size, "final_export_reservation_bytes": allocation,
+            "status": "verified_before_retirement"}
+        self.save()
+        self.check_budget("before intermediate PCK retirement")
+        pack.unlink()
+        self.receipt["intermediate_export"]["status"] = "retired_before_final_export"
+        self.save()
+        self.check_budget("before final prepared export", allocation)
+
+    def retire_prepared_sources(self):
+        """Release cook scratch only after the final exported runtime passes."""
+        proof = self.proof()
+        source = self.project / "prepared-content"
+        generated = self.root / "prepared-work/generation/prepared-content"
+        receipt_path = self.root / "prepared-source-retirement.json"
+        require(not receipt_path.exists()
+                and (self.stage / ".eloria-package").read_text().strip() == self.commit
+                and Path(self.receipt["prepared"]["catalog"]).resolve() == generated / "index.json"
+                and self.receipt["prepared"].get("selected_source_inputs_restored") is True,
+                "prepared retirement requires this build's completed owned generation")
+        for directory in (source, generated):
+            require(directory.is_dir() and runner_retirement.regular_tree(directory) == directory
+                    and native.sha256(directory / "index.json") == proof["catalog_sha256"],
+                    "prepared source retirement input differs from final verified catalog")
+        pack = self.stage / "app/RabbitLands.pck"
+        pack_hash = native.sha256(pack)
+        rows = {label: {path.relative_to(directory).as_posix(): {"size": path.stat().st_size,
+                            "sha256": native.sha256(path)}
+                        for path in sorted(directory.rglob("*")) if path.is_file()}
+                for label, directory in (("installed", source), ("generation", generated))}
+        write_json(receipt_path, {"schema": 1, "status": "verified_before_retirement",
+            "commit": self.commit, "catalog_sha256": proof["catalog_sha256"],
+            "final_pck_sha256": pack_hash, "proof": proof, "files": rows})
+        self.check_budget("prepared sources verified after final PCK qualification")
+        shutil.rmtree(source)
+        shutil.rmtree(generated)
+        require(native.sha256(pack) == pack_hash and self.proof() == proof,
+                "qualified package/proof changed during source retirement")
+        retirement = json.loads(receipt_path.read_text())
+        retirement["status"] = "retired_after_final_pck_and_ordinary_startup_checks"
+        write_json(receipt_path, retirement)
+        self.check_budget("prepared source scratch retired before archives and installer")
 
     def check_final_package(self):
         # Official release templates disable external --script/path overrides.

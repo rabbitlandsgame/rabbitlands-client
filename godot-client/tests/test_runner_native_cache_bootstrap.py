@@ -97,6 +97,30 @@ def bootstrap(tmp_path, monkeypatch):
     return options, calls
 
 
+@pytest.mark.parametrize("platform", ["windows", "linux"])
+def test_sdk_retirement_receives_same_process_proof_before_any_runtime_materialization(bootstrap, monkeypatch, platform):
+    options, calls = bootstrap
+    options.platform = platform
+    options.native_cache = options.out.parent / "rabbitlands-native-cache" / platform
+    options.native_tool_root = options.out.parent / "rabbitlands-native-toolchain"
+    if platform == "windows":
+        # Packaging is mocked below; provide the accounted regular tool file
+        # required by the actual Windows runner before that boundary.
+        options.iscc = options.godot
+    def retire(root, runner_temp, commit, actual_platform, receipt, check, output):
+        assert root == options.native_tool_root and runner_temp == options.out.parent
+        assert commit == COMMIT and actual_platform == platform
+        assert receipt is options.fixture_prewarm[0]["receipt"]
+        assert check.__self__.native_bootstrap is receipt
+        assert not check.__self__.source.parent.exists()
+        assert Path(output).parent == check.__self__.root
+        calls.append("retire-sdk")
+    monkeypatch.setattr(runner.runner_retirement, "retire_native_sdk", retire)
+    with pytest.raises(ReachedPackaging):
+        runner.build(options)
+    assert calls.index("prewarm") < calls.index("retire-sdk") < calls.index("package")
+
+
 @pytest.mark.parametrize("warm", [False, True])
 @pytest.mark.parametrize("explicit", [False, True])
 def test_owned_native_cache_parent_reaches_real_budget_cold_and_warm(bootstrap, warm, explicit):

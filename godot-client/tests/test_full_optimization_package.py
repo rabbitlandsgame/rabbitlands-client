@@ -8,6 +8,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import shutil
 import sys
 
 import pytest
@@ -309,6 +310,25 @@ def test_failed_native_verification_never_stages_or_reaches_proof(context, monke
         build.proof()
 
 
+def test_full_native_setup_uses_only_verified_handoff_after_sdk_retirement(context, monkeypatch):
+    build, _, _ = context
+    build.native_bootstrap = {"fixture": "same-process-only"}
+    payload = build.root / "verified-payload"
+    payload.mkdir()
+    def handoff(repository, commit, platform, cache, output, bootstrap, budget):
+        assert repository == build.project.parent and commit == COMMIT and platform == "windows"
+        assert cache == build.cache and output == build.root / "runtime-payload"
+        assert bootstrap is build.native_bootstrap
+        return {"payload": str(payload), "prewarm_handoff": {"compiler_probe": False}}
+    def stage(*args):
+        (build.project / "bin/client_runtime").mkdir(parents=True)
+    monkeypatch.setattr(full.release_native_runtime, "prepare_from_prewarm", handoff)
+    monkeypatch.setattr(full.release_native_runtime, "prepare_runtime", lambda *a, **k: pytest.fail("SDK has retired"))
+    monkeypatch.setattr(full.native, "stage_payload", stage)
+    assert build.prepare_native() == payload
+    assert build.receipt["native"]["prewarm_handoff"]["compiler_probe"] is False
+
+
 def native_completion(argv):
     script = str(argv[argv.index("--script") + 1]).rsplit("/", 1)[-1]
     if script == "test_rust_mounted_upper.gd":
@@ -366,6 +386,113 @@ def test_cook_proof_is_checked_before_accepting_generated_catalog(context, monke
     assert build.prepare_content() == build.project / "prepared-content/index.json"
     assert len(calls) == 1
     assert build.receipt["prepared"]["graphics"][0]["status"] == "verified"
+
+
+def intermediate_ready(build):
+    (build.stage / ".eloria-package").write_text(COMMIT + "\n")
+    digest = full.native.sha256(build.project / "prepared-content/index.json")
+    build.receipt["prepared"].update(status="cooked_pending_final_export",
+        selected_source_inputs_restored=True, index_sha256=digest)
+    return {"index_sha256": digest}
+
+
+def test_first_pack_retirement_keeps_proof_and_reserves_entire_final_pack(context):
+    build, _, budget = context
+    installed = intermediate_ready(build)
+    pack = build.stage / "app/RabbitLands.pck"
+    first_bytes, first_hash = pack.stat().st_size, full.native.sha256(pack)
+    native_file = build.project / "prepared-content/native/test.res"
+    native_file.parent.mkdir()
+    native_file.write_bytes(b"compressed fixture payload")
+    native_bytes = sum(p.stat().st_size for p in native_file.parent.parent.rglob("*") if p.is_file())
+    build.retire_intermediate_pck(installed)
+    assert not pack.exists()
+    proof = build.receipt["intermediate_export"]
+    assert proof["sha256"] == first_hash and proof["bytes"] == first_bytes
+    assert proof["status"] == "retired_before_final_export"
+    assert budget[-1] == ("optimizations: before final prepared export", first_bytes + native_bytes + 64 * 1024**2)
+    assert native_file.read_bytes() == b"compressed fixture payload"
+
+
+@pytest.mark.parametrize("condition", ["wrong-stage", "cook-incomplete", "inputs-unrestored", "runtime-marker", "catalog-change", "repeat"])
+def test_first_pack_cannot_retire_until_exact_cook_install_and_ownership_pass(context, condition):
+    build, _, _ = context
+    installed = intermediate_ready(build)
+    if condition == "wrong-stage":
+        (build.stage / ".eloria-package").write_text("b" * 40)
+    elif condition == "cook-incomplete":
+        build.receipt["prepared"]["status"] = "incomplete"
+    elif condition == "inputs-unrestored":
+        build.receipt["prepared"]["selected_source_inputs_restored"] = False
+    elif condition == "runtime-marker":
+        (build.project / full.prepared.RUNTIME_IMPORT_MARKER).write_text("{}")
+    elif condition == "catalog-change":
+        (build.project / "prepared-content/index.json").write_text("changed")
+    else:
+        build.receipt["intermediate_export"] = {"status": "already_retired"}
+    with pytest.raises(ValueError):
+        build.retire_intermediate_pck(installed)
+    assert (build.stage / "app/RabbitLands.pck").read_bytes() == b"final-pck-fixture"
+
+
+def test_final_export_budget_failure_blocks_after_intermediate_retirement(context, monkeypatch):
+    build, _, _ = context
+    installed = intermediate_ready(build)
+    def check(phase, allocation=0):
+        if allocation:
+            raise ValueError("insufficient final export capacity")
+    monkeypatch.setattr(build, "check_budget", check)
+    with pytest.raises(ValueError, match="final export"):
+        build.retire_intermediate_pck(installed)
+    assert not (build.stage / "app/RabbitLands.pck").exists()
+    assert build.receipt["intermediate_export"]["status"] == "retired_before_final_export"
+
+
+def scratch_retirement_ready(build):
+    (build.stage / ".eloria-package").write_text(COMMIT + "\n")
+    source = build.project / "prepared-content"
+    generation = build.root / "prepared-work/generation/prepared-content"
+    shutil.copytree(source, generation)
+    build.receipt["prepared"].update(catalog=str(generation / "index.json"), selected_source_inputs_restored=True)
+    build.receipt.update(status="verified_before_signing", ordinary_startup=PROFILE)
+    build.save()
+    return source, generation
+
+
+def test_prepared_scratch_retires_only_after_final_pack_proof_and_keeps_that_proof(context):
+    build, _, budget = context
+    source, generation = scratch_retirement_ready(build)
+    proof = build.proof()
+    pack_hash = full.native.sha256(build.stage / "app/RabbitLands.pck")
+    build.retire_prepared_sources()
+    assert not source.exists() and not generation.exists()
+    assert build.proof() == proof
+    assert full.native.sha256(build.stage / "app/RabbitLands.pck") == pack_hash
+    saved = json.loads((build.root / "prepared-source-retirement.json").read_text())
+    assert saved["proof"] == proof and saved["final_pck_sha256"] == pack_hash
+    assert saved["status"] == "retired_after_final_pck_and_ordinary_startup_checks"
+    assert saved["files"]["installed"]["index.json"]["sha256"] == proof["catalog_sha256"]
+    assert budget[-1] == ("optimizations: prepared source scratch retired before archives and installer", 0)
+
+
+@pytest.mark.parametrize("condition", ["incomplete", "wrong-owner", "wrong-catalog", "foreign-generation", "unrestored"])
+def test_prepared_scratch_requires_final_qualification_and_exact_owned_catalog(context, condition):
+    build, _, _ = context
+    source, generation = scratch_retirement_ready(build)
+    if condition == "incomplete":
+        build.receipt["status"] = "incomplete"
+    elif condition == "wrong-owner":
+        (build.stage / ".eloria-package").write_text("b" * 40)
+    elif condition == "wrong-catalog":
+        (generation / "index.json").write_text("changed")
+    elif condition == "foreign-generation":
+        build.receipt["prepared"]["catalog"] = str(source / "index.json")
+    else:
+        build.receipt["prepared"]["selected_source_inputs_restored"] = False
+    build.save()
+    with pytest.raises(ValueError):
+        build.retire_prepared_sources()
+    assert source.is_dir() and generation.is_dir()
 
 
 @pytest.mark.parametrize("failure", ["generation", "wrong-adapter", "missing-buffer"])

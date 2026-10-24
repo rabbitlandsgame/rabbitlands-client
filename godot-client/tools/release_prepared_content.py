@@ -95,6 +95,11 @@ def _discover(project: Path, targets: list[tuple[str, str]]) -> dict[str, str]:
     return files
 
 
+def selected_source_inputs(project: Path) -> dict[str, str]:
+    """Exact source closure retained before disposable runner inputs retire."""
+    return _discover(project, list(dict.fromkeys([*prepared.pilot(project), ("world", FOUR_GATES)])))
+
+
 def _overlay_sidecars(project: Path, stage: Path, files: dict[str, str], overlay: _Overlay) -> list[dict]:
     """Use actual selected staged indices/DDS, without copying the whole stage."""
     selected = set(files)

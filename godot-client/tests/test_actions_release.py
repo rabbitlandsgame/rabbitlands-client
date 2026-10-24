@@ -22,6 +22,9 @@ def context(tmp_path, monkeypatch):
     for name, value in {"GITHUB_ACTIONS": "true", "GITHUB_REPOSITORY": actions.release.REPOSITORY,
                         "GITHUB_REF": "refs/heads/master", "GITHUB_EVENT_NAME": "push",
                         "GITHUB_SHA": SHA, "SIGNING_KEY_AVAILABLE": "true",
+                        "GITHUB_RUN_ID": "42", "GITHUB_RUN_ATTEMPT": "1",
+                        "RUSTUP_HOME": str(tmp_path / "rabbitlands-native-toolchain/rustup"),
+                        "CARGO_HOME": str(tmp_path / "rabbitlands-native-toolchain/cargo"),
                         "GITHUB_OUTPUT": str(tmp_path / "outputs"), "RUNNER_TEMP": str(tmp_path)}.items():
         monkeypatch.setenv(name, value)
     monkeypatch.setattr(actions.package, "git", lambda *args: SHA)
@@ -164,6 +167,8 @@ def test_key_is_removed_from_environment_and_deleted_after_build(tmp_path, monke
         assert actions.SECRET not in os.environ
         assert paths[0].read_bytes() == key
         assert not paths[0].is_relative_to(actions.package.REPO)
+        assert options.native_tool_root == tmp_path / "rabbitlands-native-toolchain"
+        assert (options.native_tool_root / actions.runner_retirement.SDK_MARKER).is_file()
         if fail:
             raise ValueError("fixture build failure")
         return tmp_path / "receipt.json"

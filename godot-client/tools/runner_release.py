@@ -19,6 +19,7 @@ import client_release
 import shared_release_assets as shared
 import package_client as package
 import release_native_runtime
+import runner_retirement
 from release_storage import DiskBudget
 from release_asset_cache import AssetCache, input_key
 
@@ -104,6 +105,7 @@ class RunnerStorage:
         self.actor_plans = {}
         self.asset_cache = asset_cache
         self.previous_packages = {}
+        self.native_bootstrap = None
 
     def reuse_package(self, previous):
         parts = previous.get("parts", [])
@@ -177,6 +179,26 @@ class RunnerStorage:
             path.mkdir()
             (path / ".gdignore").write_text("", encoding="utf-8")
 
+    def retire_unstaged_maps(self, project, stage, commit, protected):
+        if (project.resolve() != self.source or self.source != self.root / "source/godot-client"
+                or stage.resolve().parent != self.root / "downloads"
+                or (stage / package.MARKER).read_text().strip() != commit
+                or json.loads((self.root / ".runner-release.json").read_text()) != {
+                    "repository": release.REPOSITORY, "commit": commit}
+                or project.parent.resolve() not in self.actor_plans):
+            raise ValueError("Map retirement requires this runner's selected source and staged reference proof")
+        expected = {}
+        for row in package.git("ls-tree", "-r", "-z", commit, "--", "eloria-assets/maps", cwd=project.parent).split("\0"):
+            if not row:
+                continue
+            meta, path = row.split("\t", 1)
+            mode, kind, blob = meta.split()
+            if mode not in {"100644", "100755"} or kind != "blob":
+                raise ValueError("Map retirement requires regular committed inputs")
+            expected[path] = blob
+        return runner_retirement.retire_unstaged_maps(project.parent, stage, expected, protected,
+            self.check, self.root / "map-source-retirement.json")
+
     def cleanup(self, stage, sha):
         source = self.root / "source"
         if (source.resolve() != source or stage.resolve().parent != self.root / "downloads"
@@ -249,6 +271,10 @@ def build(options) -> Path:
     bootstrap = release_native_runtime.prewarm_cache(package.REPO, sha, options.platform,
         native_cache, native_cache.parent / ("bootstrap-" + options.platform), storage.check)
     release.write_json(root / "native-bootstrap.json", bootstrap)
+    storage.native_bootstrap = bootstrap
+    if getattr(options, "native_tool_root", None) is not None:
+        runner_retirement.retire_native_sdk(options.native_tool_root, options.out.resolve().parent, sha,
+            options.platform, bootstrap, storage.check, root / "native-toolchain-retirement.json")
     storage.check("native cache verified before runtime source materialization")
     args = ["--platform", options.platform, "--ref", sha, "--release-build", "--shared-release-assets", "--no-zip", "--no-fetch", "--godot", str(options.godot),
             "--build-dir", str(source), "--out", str(output), "--vram-cache", str(cache.vram if cache else root / "vram-cache"),

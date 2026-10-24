@@ -17,6 +17,7 @@ import setup_runner_tools
 import shared_release_assets
 import release_asset_cache
 import release_native_runtime
+import runner_retirement
 
 SECRET = "CLIENT_UPDATE_SIGNING_KEY"
 
@@ -101,6 +102,7 @@ def build(platform: str, release_id: int) -> Path:
     native_tool_root = temp / "rabbitlands-native-toolchain"
     if not native_tool_root.is_dir():
         raise ValueError("Install the pinned native toolchain in the job's accounted native-toolchain directory first.")
+    runner_retirement.claim_native_sdk(native_tool_root, temp, sha, platform)
     config = setup_runner_tools.install(platform, tool_root)
     previous = {name: os.environ.get(name) for name in config["env"]}
     try:
@@ -113,7 +115,7 @@ def build(platform: str, release_id: int) -> Path:
             return runner_release.build(SimpleNamespace(platform=platform, ref=sha,
                 out=temp / "rabbitlands-releases", godot=config["godot"], iscc=config.get("iscc"),
                 update_signing_key=key_path, tool_root=[tool_root, native_tool_root], draft_release_id=release_id,
-                native_cache=temp / "rabbitlands-native-cache" / platform,
+                native_cache=temp / "rabbitlands-native-cache" / platform, native_tool_root=native_tool_root,
                 asset_cache=temp / "rabbitlands-asset-cache" / platform,
                 server="game.rabbitlandsgame.com:2001"))
     finally:

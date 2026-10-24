@@ -2146,7 +2146,10 @@ def stage_vram_textures(build_dir: Path, stage: Path, godot: Path, cache: Path, 
         # ExternalTexturePool; sidecars for the whole pool would add 490 MB to
         # the download for a win those maps never had. The pools that were
         # sidecar-backed before stay sidecar-backed.
-        result = subprocess.run([sys.executable, str(tool), "--maps", str(build_dir / "eloria-assets" / "maps"),
+        # The stage is the proved shipping closure. Runner source-only map
+        # inputs have retired by now, and must not add unshipped encode work.
+        maps = (stage if STORAGE else build_dir) / "eloria-assets/maps"
+        result = subprocess.run([sys.executable, str(tool), "--maps", str(maps),
                                  "--out-root", str(stage / "eloria-assets" / "maps"), "--cache", str(cache),
                                  "--godot", str(godot), "--skip-dir", "_shared/images",
                                  *runner_args],
@@ -3102,7 +3105,8 @@ def _main(argv=None, storage=None) -> int:
             optimization = full_optimization_package.FullOptimizationBuild(project, stage, godot,
                 options.platform, sha, logs / "optimizations",
                 options.native_runtime_cache or options.out.resolve() / ".build/native-runtime-cache",
-                storage.check if storage else None, software_gpu_index=options.software_gpu_index)
+                storage.check if storage else None, software_gpu_index=options.software_gpu_index,
+                native_bootstrap=getattr(storage, "native_bootstrap", None))
             options.client_runtime = optimization.prepare_native()
         if options.benchmark_profile:
             benchmark_package.prepare_export(project)
@@ -3130,6 +3134,16 @@ def _main(argv=None, storage=None) -> int:
             storage.check("import complete")
         check_actor_imports(project)
         check_scene_texture_imports(project)
+        if storage and optimization:
+            # Stage/prove map shipping before the first export reservation, so
+            # warm import+graphics caches do not overlap unused map sources.
+            warnings = stage_eloria_assets(build_dir, stage, previews, served)
+            check_served_packages(stage, served)
+            check_map_data_names_no_editor_sources(stage)
+            check_registry(build_dir, stage)
+            check_shared_meshes(build_dir, stage)
+            storage.retire_unstaged_maps(project, stage, sha,
+                full_optimization_package.release_prepared_content.selected_source_inputs(project))
         if storage:
             storage.check("before export", 1_500_000_000)
         app_dir = stage / "app"
@@ -3151,9 +3165,10 @@ def _main(argv=None, storage=None) -> int:
             if not optimization:
                 storage.clear_cache(project / ".godot")
             storage.check("export validated")
-        warnings = stage_eloria_assets(build_dir, stage, previews, served)
-        check_served_packages(stage, served)
-        check_map_data_names_no_editor_sources(stage)
+        if not (storage and optimization):
+            warnings = stage_eloria_assets(build_dir, stage, previews, served)
+            check_served_packages(stage, served)
+            check_map_data_names_no_editor_sources(stage)
         if not options.no_vram_textures:
             if storage:
                 storage.check("before graphics encoding", 512 * 1024**2 if asset_cache and asset_cache.hit else 1024**3)
@@ -3173,6 +3188,8 @@ def _main(argv=None, storage=None) -> int:
                 # raw actor/map payloads and all ordinary package checks.
                 (logs / "prepared").mkdir(parents=True, exist_ok=True)
                 import_project(godot, project, logs / "prepared")
+                if storage and optimization:
+                    optimization.retire_intermediate_pck(prepared_receipt)
                 export_project(godot, project, app_dir, logs / "prepared", platform)
                 check_actor_pack(build_dir, app_dir)
                 check_scene_texture_pack(build_dir, app_dir)
@@ -3217,6 +3234,7 @@ def _main(argv=None, storage=None) -> int:
             if storage:
                 storage.optimization_proof = optimization.proof()
                 storage.clear_cache(project / ".godot")
+                optimization.retire_prepared_sources()
                 storage.check("full optimization package qualified before signing")
 
         if options.benchmark_profile:
