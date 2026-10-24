@@ -233,7 +233,7 @@ def build(options) -> Path:
     git_dir = Path(package.git("rev-parse", "--path-format=absolute", "--git-common-dir").strip())
     budget = DiskBudget([package.REPO, git_dir, root, options.godot.resolve(),
                          *([options.iscc.resolve().parent] if options.iscc else []), *options.tool_root,
-                         native_cache,
+                         native_cache.parent,  # Payload cache plus its short-lived compiler scratch.
                          *([cache.root] if cache else [])])
     budget.check("preflight", 7_000_000_000)  # Runtime worktree + import/export scratch, before any uploads.
     storage = RunnerStorage(root, budget, GitHubSink(options.draft_release_id), cache)

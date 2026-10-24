@@ -124,7 +124,9 @@ class FullOptimizationBuild:
 
     def prepare_native(self):
         receipt = release_native_runtime.prepare_runtime(self.project.parent, self.commit, self.platform,
-            self.cache, self.root / "runtime-payload", self.root / "native-work", self.check_budget)
+            # MSVC still emits some intermediate files through MAX_PATH-limited
+            # APIs. Keep compiler scratch out of the long per-commit log path.
+            self.cache, self.root / "runtime-payload", self.cache.parent / ("work-" + self.platform), self.check_budget)
         self.receipt["native"] = receipt
         payload = Path(receipt["payload"])
         native.stage_payload(payload, self.project.parent, self.project, self.platform)
