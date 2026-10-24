@@ -1,10 +1,11 @@
 extends RefCounted
+const TextColors := preload("res://src/ui/text_colors.gd")
 ## Shared chrome for the action book. Availability always comes from game state.
-const TEXT := Color("eee3c8")
-const MUTED := Color("b6aa91")
-const GOLD := Color("e8c77a")
-const GOOD := Color("73df89")
-const BAD := Color("ff7979")
+const TEXT := Color(0.77, 0.57, 0.39)
+const MUTED := Color("999999")
+const GOLD := Color(0.95, 0.76, 0.52)
+const GOOD := Color("00ff00")
+const BAD := Color("ff0000")
 const SURFACE := Color("100d09")
 
 static func box(fill: Color, edge := Color.TRANSPARENT, margin := 6.0) -> StyleBoxFlat:
@@ -20,7 +21,11 @@ static func button(text: String = "") -> Button:
 	result.text = text
 	result.custom_minimum_size.y = 28
 	result.add_theme_font_size_override("font_size", 13)
-	result.add_theme_color_override("font_color", TEXT)
+	TextColors.bind(result, "book_text")
+	TextColors.bind(result, "ui_hover", "font_hover_color")
+	TextColors.bind(result, "ui_pressed", "font_pressed_color")
+	TextColors.bind(result, "ui_hover", "font_hover_pressed_color")
+	TextColors.bind(result, "ui_disabled", "font_disabled_color")
 	result.add_theme_stylebox_override("normal", box(Color("17120d"), Color("80623b")))
 	result.add_theme_stylebox_override("hover", box(Color("332719"), GOLD))
 	result.add_theme_stylebox_override("pressed", box(Color("45331f"), GOLD))
@@ -52,7 +57,7 @@ static func label(text := "", font_size := 14, wrap := false) -> Label:
 	var result := Label.new()
 	result.text = text
 	result.add_theme_font_size_override("font_size", font_size)
-	result.add_theme_color_override("font_color", TEXT)
+	TextColors.bind(result, "book_text")
 	if wrap:
 		result.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	return result
@@ -76,9 +81,9 @@ static func requirement(parent: Control, title: String, detail: String, met: Var
 	var row := HBoxContainer.new()
 	row.set_meta("requirement", {"label": title, "detail": detail, "met": met})
 	row.add_theme_constant_override("separation", 5)
-	var color: Color = MUTED if met == null else GOOD if met else BAD
+	var role := "book_muted" if met == null else "spell_ready" if met else "spell_blocked"
 	var marker := label("•" if met == null else "✓" if met else "×", 14)
-	marker.add_theme_color_override("font_color", color)
+	TextColors.bind(marker, role)
 	row.add_child(marker)
 	if icon != null:
 		var picture := TextureRect.new()
@@ -89,13 +94,13 @@ static func requirement(parent: Control, title: String, detail: String, met: Var
 		row.add_child(picture)
 	var text := label(title, 13, true)
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	text.add_theme_color_override("font_color", color)
+	TextColors.bind(text, role)
 	row.add_child(text)
 	var count := label(detail, 12, detail.length() > 20)
 	count.custom_minimum_size.x = 78 if detail.length() > 9 else 60
 	count.size_flags_horizontal = Control.SIZE_SHRINK_END
 	count.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	count.add_theme_color_override("font_color", color)
+	TextColors.bind(count, role)
 	row.add_child(count)
 	parent.add_child(row)
 	return row

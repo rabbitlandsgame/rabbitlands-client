@@ -3,6 +3,7 @@ extends SubViewportContainer
 const Profiles := preload("res://src/mounts/mount_profiles.gd")
 var viewport: SubViewport
 var actor: ReplicatedActor3D
+var coat := preload("res://src/mounts/mount_coat_visual.gd").new()
 
 func configure(id: String) -> void:
 	viewport = SubViewport.new()
@@ -63,7 +64,11 @@ func configure(id: String) -> void:
 			push_warning("Mount portrait tack: " + str(tack_errors))
 		# Static portrait uses the native rest frame; its saddle stays aligned.
 		actor.animation_player.pause()
+	coat.configure(actor,id,profile)
 	set_active(true)
+
+func set_coat(coat_id: String) -> void:
+	if actor != null: coat.apply(coat_id)
 
 func set_active(active: bool) -> void:
 	if viewport == null:

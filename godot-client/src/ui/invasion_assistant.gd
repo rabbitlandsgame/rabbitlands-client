@@ -1,5 +1,6 @@
 class_name InvasionAssistantWindow
 extends Window
+const TextColors := preload("res://src/ui/text_colors.gd")
 
 signal command_requested(command: String)
 
@@ -196,6 +197,8 @@ func _ready() -> void:
 	close_requested.connect(hide)
 	visibility_changed.connect(_on_visibility_changed)
 	_build_ui()
+	TextColors.events().changed.connect(_apply_invasion_text_colors)
+	_apply_invasion_text_colors()
 	get_tree().root.size_changed.connect(_fit_to_viewport)
 	_fit_to_viewport()
 	hide()
@@ -924,6 +927,7 @@ func _button(parent: Node, text: String, callback: Callable) -> Button:
 	button.custom_minimum_size.y = 32
 	button.pressed.connect(callback)
 	parent.add_child(button)
+	TextColors.bind(button, "invasion_text")
 	return button
 
 
@@ -931,6 +935,7 @@ func _label(parent: Node, text: String) -> Label:
 	var label := Label.new()
 	label.text = text
 	parent.add_child(label)
+	TextColors.bind(label, "invasion_text")
 	return label
 
 
@@ -967,12 +972,12 @@ func _surface_style(background: String, border: String, margin: float = 8.0) -> 
 
 func _primary_button(button: Button) -> void:
 	button.add_theme_stylebox_override("normal", _surface_style("20302b", "c4a45e"))
-	button.add_theme_color_override("font_color", Color("efd293"))
+	TextColors.bind(button, "invasion_hint")
 
 
 func _danger_button(button: Button) -> void:
 	button.add_theme_stylebox_override("normal", _surface_style("211d20", "b65c51"))
-	button.add_theme_color_override("font_color", Color("ff9384"))
+	TextColors.bind(button, "invasion_destructive")
 
 
 func _show_map_browser() -> void:
@@ -1140,8 +1145,9 @@ func _build_ui() -> void:
 	skin.set_constant("line_separation", "ItemList", 8)
 	skin.set_constant("h_separation", "HBoxContainer", 8)
 	skin.set_constant("separation", "VBoxContainer", 8)
-	skin.set_color("font_color", "Label", Color("eee6d5"))
-	skin.set_color("default_color", "RichTextLabel", Color("eee6d5"))
+	skin.set_color("font_color", "Label", TextColors.color("invasion_text"))
+	skin.set_color("font_color", "Button", TextColors.color("invasion_text"))
+	skin.set_color("default_color", "RichTextLabel", TextColors.color("invasion_text"))
 	theme = skin
 	var surface := Panel.new()
 	surface.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -1181,7 +1187,7 @@ func _build_ui() -> void:
 	freshness = _label(builder_utilities, "Waiting for a live snapshot")
 	freshness.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	freshness.add_theme_font_size_override("font_size", 12)
-	freshness.modulate = Color("a0b3b7")
+	TextColors.bind(freshness, "invasion_freshness")
 	summary = Label.new()
 	summary.hide()
 	builder_utilities.add_child(summary)
@@ -1611,7 +1617,7 @@ func _build_monitor(root: VBoxContainer) -> void:
 	monitor_canvas.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	monitor_canvas.coordinate_selected.connect(_on_monitor_coordinate)
 	monitor_panel.add_child(monitor_canvas)
-	_label(monitor_panel, "ACTIVE GROUPS").add_theme_color_override("font_color", Color("d8ba78"))
+	TextColors.bind(_label(monitor_panel, "ACTIVE GROUPS"), "invasion_heading")
 	monitor_cards = VBoxContainer.new()
 	monitor_cards.add_theme_constant_override("separation", 6)
 	monitor_panel.add_child(monitor_cards)
@@ -1827,24 +1833,24 @@ func _rebuild_roster() -> void:
 	var lines: Array[String] = ["[b]LIVE PLAYERS[/b]"]
 	var players: Array = map_state.get("players", []) as Array
 	if players.is_empty():
-		lines.append("[color=#8296a3]None[/color]")
+		lines.append("[color={invasion_muted}]None[/color]")
 	for raw_player: Variant in players:
 		var player := raw_player as Dictionary
-		lines.append("[color=#68e7ff]●[/color] %s  CL %d  [%d,%d]" % [
+		lines.append("[color={invasion_ally}]●[/color] %s  CL %d  [%d,%d]" % [
 			player.get("name", "Player"), player.get("combat_level", 0),
 			player.get("x", 0), player.get("y", 0)])
 	lines.append("\n[b]INVASION CREATURES[/b]")
 	var creatures: Array = map_state.get("creatures", []) as Array
 	if creatures.is_empty():
-		lines.append("[color=#8296a3]None[/color]")
+		lines.append("[color={invasion_muted}]None[/color]")
 	for raw_creature: Variant in creatures:
 		var creature := raw_creature as Dictionary
-		var marker := "[color=#ffc94f]◆[/color]" if bool(creature.get("boss", false)) or bool(creature.get("miniboss", false)) else "[color=#ff6b63]◆[/color]"
+		var marker := "[color={invasion_boss}]◆[/color]" if bool(creature.get("boss", false)) or bool(creature.get("miniboss", false)) else "[color={invasion_enemy}]◆[/color]"
 		lines.append("%s %s\n   %s · %d/%d HP · [%d,%d]" % [marker,
 			creature.get("name", "Invader"), creature.get("tier", "Unknown"),
 			creature.get("health", 0), creature.get("max_health", 0),
 			creature.get("x", 0), creature.get("y", 0)])
-	map_roster.text = "\n".join(lines)
+	map_roster.text = _invasion_markup("\n".join(lines))
 
 
 func _on_coordinate_selected(tile: Vector2i) -> void:
@@ -2189,7 +2195,7 @@ func has_placeholder_model(monster: Dictionary) -> bool:
 
 func _on_monster_selected(index: int) -> void:
 	selected_monster = (monster_list.get_item_metadata(index) as Dictionary).duplicate(true)
-	monster_detail.text = ("[font_size=15][b]%s[/b][/font_size]\n[color=#9fc0d4]%s[/color]\n\n"
+	monster_detail.text = _invasion_markup(("[font_size=15][b]%s[/b][/font_size]\n[color={invasion_detail}]%s[/color]\n\n"
 		+ "[b]General strength[/b]  %s (rating %d)\n"
 		+ "[b]Combat level[/b]  %d\n[b]Native level[/b]  %d\n"
 		+ "[b]Health / Ether[/b]  %d / %d\n"
@@ -2203,9 +2209,9 @@ func _on_monster_selected(index: int) -> void:
 		selected_monster.get("defense", 0), selected_monster.get("damage_min", 0),
 		selected_monster.get("damage_max", 0), selected_monster.get("armor_min", 0),
 		selected_monster.get("armor_max", 0),
-		("[color=#ffd36a]★ Used by a configured invasion spawn group[/color]"
+		("[color={invasion_hint}]★ Used by a configured invasion spawn group[/color]"
 		if bool(selected_monster.get("configured", false)) else
-		"Available for ad-hoc invasion spawning")]
+		"Available for ad-hoc invasion spawning")])
 	_update_monster_actions()
 
 
@@ -2454,3 +2460,21 @@ func _local_landmarks(map_id: String) -> Array[Dictionary]:
 			result.append({"name": name, "kind": "landmark", "x": tile.x,
 				"y": tile.y, "source": "client_map"})
 	return result
+
+func _apply_invasion_text_colors(role: String = "") -> void:
+	if not role.is_empty() and not role.begins_with("invasion_"):
+		return
+	if theme != null:
+		for kind: String in ["Label", "Button"]:
+			theme.set_color("font_color", kind, TextColors.color("invasion_text"))
+	for node: Node in find_children("*", "RichTextLabel", true, false):
+		TextColors.bind(node as RichTextLabel, "invasion_text", "default_color")
+	if map_roster != null and not map_roster.text.is_empty():
+		_rebuild_roster()
+	if monster_list != null and not monster_list.get_selected_items().is_empty():
+		_on_monster_selected(monster_list.get_selected_items()[0])
+
+static func _invasion_markup(text: String) -> String:
+	for role: String in ["invasion_muted", "invasion_ally", "invasion_boss", "invasion_enemy", "invasion_detail", "invasion_hint"]:
+		text = text.replace("{" + role + "}", "#" + TextColors.color(role).to_html(false))
+	return text

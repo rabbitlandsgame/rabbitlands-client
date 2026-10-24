@@ -39,6 +39,7 @@ class Result:
 
 const COMMANDS := {
 	"#help": "List this client's commands, then the server's.",
+	"#disco": "Disconnect to the console; press a key to reconnect.",
 	"#calc": "Evaluate arithmetic: #calc 12 * (3 + 4)",
 	"#mark": "Mark your current tile: #mark <label>",
 	"#markpos": "Mark a tile: #markpos <x> <y> <label>",

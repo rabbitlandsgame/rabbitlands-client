@@ -1,0 +1,13 @@
+{
+  "date": "2026-10-24",
+  "problem": "A mounted bow or spell action could retain the previous walk/run action after the final buffered movement step, keeping the animal moving in place.",
+  "change": "Retire remembered travel during an upper-body action when interpolation and movement coasting have stopped. Preserve held aim, channels, rider seating and legitimate cinematic travel.",
+  "validation": {
+    "regressionBeforeFix": {"mount": "moor_pony", "checks": 209, "failures": 80},
+    "regressionAfterFix": {"mounts": 9, "gaits": ["cruise", "burst"], "upperBodyActions": 10, "checks": 1881, "failures": 0},
+    "mountedPoseAndActions": {"checks": 3082, "failures": 0, "maximumLowerBodyError": 0.0},
+    "animationQualityAndSchedulingFailures": 0
+  },
+  "scope": "Client animation state only; no model, animation-clip, server, speed or control changes.",
+  "publication": "Committed locally alongside the new mounts and coat choices; not merged or deployed."
+}

@@ -14,6 +14,7 @@ const GLB_MESH_EXTRAS := preload("res://src/actors/glb_mesh_extras.gd")
 const WARDROBE_SHIRT_FIT := preload("res://src/actors/wardrobe_shirt_fit.gd")
 const QUIVER_STRAP_FIT := preload("res://src/actors/quiver_strap_fit.gd")
 const WORLD_LABEL_STYLE := preload("res://src/ui/world_label_style.gd")
+const TextColors := preload("res://src/ui/text_colors.gd")
 const ARCHIVED_MODEL_POLICY := preload("res://src/actors/archived_model_policy.gd")
 const STATUS_ICONS := preload("res://src/ui/status_effect_icons.gd")
 const COMBAT_TARGET_MARKER := preload("res://src/actors/combat_target_marker_3d.gd")
@@ -307,6 +308,8 @@ var _equipment_applied: bool = false
 var _equipment_hides: Dictionary = {}
 var _hidden_body_surfaces: Dictionary = {}
 var _nameplate: Label3D
+var _guild_nameplate: Label3D
+var _name_dto: Dictionary = {}
 var _overhead_crowded := false
 var _status_effects: Array[String] = []
 var _status_icons: Node3D
@@ -319,6 +322,7 @@ var _quest_marker: Label3D
 var _quest_marker_tween: Tween
 var _speech_bubble: Label3D
 var _speech_bubble_expiry_msec := 0
+var _speech_color := Color.WHITE
 var _health_bar_background: MeshInstance3D
 var _overhead_background: MeshInstance3D
 var _health_bar_fill: MeshInstance3D
@@ -1111,23 +1115,38 @@ static func is_summon(dto: Dictionary) -> bool:
 ##
 ## Natural creatures use bright yellow. Other names keep the
 ## server's colour: a demigod's name is green, an invasion creature's red, a
-## summon's light blue. A Label3D tints as one piece, so a guild tag takes the
-## name's colour rather than its own.
+## summon's light blue. The guild tag has its own label and color marker.
 static func banner_name(dto: Dictionary, fallback := "Unknown actor") -> String:
 	var guild_tag: String = str(dto.get("guild_tag", ""))
 	return (str(dto.get("name", fallback))
 		+ ("  [%s]" % guild_tag if not guild_tag.is_empty() else ""))
 
 static func _nameplate_colour(dto: Dictionary) -> Color:
+	var role := name_color_role(dto)
 	var name_colour: int = int(dto.get("name_colour", 0))
-	return (CREATURE_NAME_COLOUR
-		if int(dto.get("kind", 0)) == CREATURE_ACTOR_KIND and name_colour == 0
-		else EloriaProtocol.el_text_colour(name_colour))
+	if name_colour > 0 and not TextColors.is_overridden(role):
+		return EloriaProtocol.el_text_colour(name_colour)
+	return TextColors.color(role)
+
+static func name_color_role(dto: Dictionary) -> String:
+	var kind := int(dto.get("kind", 0))
+	if kind == 2:
+		return "world_npc"
+	if kind == 4 or (kind == 5 and bool(dto.get("enhanced", false))):
+		return "world_pk"
+	if kind == CREATURE_ACTOR_KIND:
+		return "world_creature"
+	return "world_special_map" if int(dto.get("map_type", 0)) == 2 else "world_player"
+
+static func guild_tag_color(dto: Dictionary) -> Color:
+	var index := int(dto.get("guild_colour", 0))
+	return (EloriaProtocol.el_text_colour(index) if index > 0 and not TextColors.is_overridden("world_guild")
+		else TextColors.color("world_guild"))
 
 func _add_nameplate(dto: Dictionary) -> void:
 	var label: Label3D = Label3D.new()
 	label.name = "Nameplate"
-	label.text = banner_name(dto)
+	label.text = str(dto.get("name", "Unknown actor"))
 	label.position.y = NAMEPLATE_HEIGHT
 	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	label.no_depth_test = true
@@ -1139,11 +1158,67 @@ func _add_nameplate(dto: Dictionary) -> void:
 	label.layers = WORLD_LABEL_STYLE.RENDER_LAYER
 	add_child(label)
 	_nameplate = label
+	_name_dto = _name_info(dto)
+	if not TextColors.events().changed.is_connected(_on_text_colors_changed):
+		TextColors.events().changed.connect(_on_text_colors_changed)
+	_sync_nameplate_text()
 	_add_health_bar()
 	_add_overhead_background()
 	_layout_overhead()
 	apply_vitals(int(dto.get("health", 0)), int(dto.get("max_health", 0)))
 	set_status_effects(dto.get("status_effects", dto.get("negative_statuses", [])))
+
+static func _name_info(dto: Dictionary) -> Dictionary:
+	var result := {}
+	for field: String in ["name", "kind", "name_colour", "guild_tag", "guild_colour", "enhanced", "map_type"]:
+		if dto.has(field): result[field] = dto[field]
+	return result
+
+func _sync_nameplate_text() -> void:
+	if not is_instance_valid(_nameplate):
+		return
+	_nameplate.text = str(_name_dto.get("name", "Unknown actor"))
+	var name_color := _nameplate_colour(_name_dto)
+	_nameplate.modulate = Color(name_color, name_color.a * _overhead_fade)
+	var tag := str(_name_dto.get("guild_tag", ""))
+	if not tag.is_empty() and not is_instance_valid(_guild_nameplate):
+		_guild_nameplate = Label3D.new()
+		_guild_nameplate.name = "GuildTag"
+		_guild_nameplate.position = _nameplate.position
+		_guild_nameplate.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		_guild_nameplate.no_depth_test = true
+		_guild_nameplate.fixed_size = true
+		WORLD_LABEL_STYLE.apply(_guild_nameplate, NAMEPLATE_FONT_SIZE, OVERHEAD_PIXEL, 0)
+		_guild_nameplate.outline_modulate = Color.BLACK
+		add_child(_guild_nameplate)
+	var name_width := _nameplate.font.get_string_size(_nameplate.text, HORIZONTAL_ALIGNMENT_LEFT, -1, _nameplate.font_size).x
+	var tag_width := 0.0
+	if is_instance_valid(_guild_nameplate):
+		_guild_nameplate.text = "  [%s]" % tag if not tag.is_empty() else ""
+		tag_width = _guild_nameplate.font.get_string_size(_guild_nameplate.text, HORIZONTAL_ALIGNMENT_LEFT, -1, _guild_nameplate.font_size).x
+		_guild_nameplate.offset.x = name_width * 0.5
+		var guild_color := guild_tag_color(_name_dto)
+		_guild_nameplate.modulate = Color(guild_color, guild_color.a * _overhead_fade)
+		_guild_nameplate.visible = not tag.is_empty() and _overhead_shown() and _banner_names
+	_nameplate.offset.x = -tag_width * 0.5
+
+func _on_text_colors_changed(_role: String) -> void:
+	if not _role.is_empty() and not _role.begins_with("world_"):
+		return
+	_sync_nameplate_text()
+	if is_instance_valid(_title_line):
+		_title_line.modulate = TextColors.color("world_title")
+	if is_instance_valid(_occupation_line):
+		_occupation_line.modulate = TextColors.color("world_occupation")
+	if is_instance_valid(_speech_bubble):
+		_speech_bubble.modulate = TextColors.color("world_speech") if TextColors.is_overridden("world_speech") else _speech_color
+	if is_instance_valid(_quest_marker) and not _quest_marker.text.is_empty():
+		set_quest_available(false)
+		set_quest_available(true)
+	var previous := _health_current
+	_health_current = -1
+	apply_vitals(previous, _health_maximum)
+	_refresh_overhead()
 
 ## One icon per active effect, in a stable order. Only server status
 ## snapshots change this list; a spell animation cannot prove an effect landed.
@@ -1279,6 +1354,9 @@ func _layout_overhead() -> void:
 	var raster: float = float(WORLD_LABEL_STYLE.RASTER_SCALE)
 	var name_width: float = _nameplate.font.get_string_size(_nameplate.text,
 		HORIZONTAL_ALIGNMENT_LEFT, -1, _nameplate.font_size).x / raster
+	if is_instance_valid(_guild_nameplate):
+		name_width += _guild_nameplate.font.get_string_size(_guild_nameplate.text,
+			HORIZONTAL_ALIGNMENT_LEFT, -1, _guild_nameplate.font_size).x / raster
 	if not _banner_names:
 		name_width = 0.0
 	var occupied: bool = _banner_names and _has_occupation()
@@ -1369,7 +1447,7 @@ func apply_vitals(current: int, maximum: int) -> void:
 	var clamped: int = clampi(current, 0, maximum)
 	var ratio: float = float(clamped) / float(maximum)
 	_health_label.text = "%d/%d" % [clamped, maximum]
-	_health_label.modulate = _health_colour(ratio)
+	_health_label.modulate = (TextColors.color("world_health") if TextColors.is_overridden("world_health") else _health_colour(ratio))
 	var fill_quad: QuadMesh = _health_bar_fill.mesh as QuadMesh
 	if clamped > 0:
 		var width: float = HEALTH_BAR_WIDTH * ratio
@@ -1433,8 +1511,14 @@ func set_overhead_crowded(crowded: bool) -> void:
 	_refresh_overhead()
 
 func _fade_label(label: Label3D) -> void:
-	label.modulate.a = _overhead_fade
-	label.outline_modulate.a = _overhead_fade
+	var alpha := 1.0
+	if label == _nameplate: alpha = _nameplate_colour(_name_dto).a
+	elif label == _guild_nameplate: alpha = guild_tag_color(_name_dto).a
+	elif label == _title_line: alpha = TextColors.color("world_title").a
+	elif label == _occupation_line: alpha = TextColors.color("world_occupation").a
+	elif label == _health_label and TextColors.is_overridden("world_health"): alpha = TextColors.color("world_health").a
+	label.modulate.a = alpha * _overhead_fade
+	label.outline_modulate.a = alpha * _overhead_fade
 
 func _fade_quad(quad: MeshInstance3D, opacity: float) -> void:
 	var material := (quad.mesh as QuadMesh).material as StandardMaterial3D
@@ -1496,6 +1580,9 @@ func _refresh_overhead() -> void:
 	if is_instance_valid(_nameplate):
 		_nameplate.visible = _overhead_shown() and _banner_names
 		_fade_label(_nameplate)
+	if is_instance_valid(_guild_nameplate):
+		_guild_nameplate.visible = _overhead_shown() and _banner_names and not _guild_nameplate.text.is_empty()
+		_fade_label(_guild_nameplate)
 	if is_instance_valid(_title_line):
 		_title_line.visible = _overhead_shown() and _banner_names and not _title_line.text.is_empty()
 		_fade_label(_title_line)
@@ -1535,7 +1622,7 @@ func set_title(title: String) -> void:
 		label.fixed_size = true
 		WORLD_LABEL_STYLE.apply(label, TITLE_FONT_SIZE, OVERHEAD_PIXEL,
 			OVERHEAD_OUTLINE_SIZE)
-		label.modulate = Color(0.85, 0.78, 0.45, 1.0)
+		label.modulate = TextColors.color("world_title")
 		label.layers = WORLD_LABEL_STYLE.RENDER_LAYER
 		add_child(label)
 		_title_line = label
@@ -1575,11 +1662,12 @@ func set_quest_available(available: bool) -> void:
 		_quest_marker.outline_modulate = Color(0.28, 0.13, 0.01)
 		add_child(_quest_marker)
 	_quest_marker.text = "!"
-	_quest_marker.modulate = Color(1.0, 0.73, 0.13)
+	var marker_color := TextColors.color("world_quest")
+	_quest_marker.modulate = marker_color
 	_quest_marker_tween = create_tween().set_loops()
-	_quest_marker_tween.tween_property(_quest_marker, "modulate", Color(1.5, 1.25, 0.5), 0.8)
+	_quest_marker_tween.tween_property(_quest_marker, "modulate", marker_color.lightened(0.35), 0.8)
 	_quest_marker_tween.parallel().tween_property(_quest_marker, "offset:y", 42.0 * WORLD_LABEL_STYLE.RASTER_SCALE, 0.8).set_trans(Tween.TRANS_SINE)
-	_quest_marker_tween.tween_property(_quest_marker, "modulate", Color(1.0, 0.73, 0.13), 0.8)
+	_quest_marker_tween.tween_property(_quest_marker, "modulate", marker_color, 0.8)
 	_quest_marker_tween.parallel().tween_property(_quest_marker, "offset:y", 36.0 * WORLD_LABEL_STYLE.RASTER_SCALE, 0.8).set_trans(Tween.TRANS_SINE)
 	_refresh_overhead()
 
@@ -1605,7 +1693,7 @@ func set_occupation(occupation: String) -> void:
 			label.fixed_size = true
 			# Plain letters over the block's backing, like the name above it.
 			WORLD_LABEL_STYLE.apply(label, OCCUPATION_FONT_SIZE, OVERHEAD_PIXEL, 0)
-			label.modulate = OCCUPATION_COLOUR
+			label.modulate = TextColors.color("world_occupation")
 			label.outline_modulate = Color.BLACK
 			label.layers = WORLD_LABEL_STYLE.RENDER_LAYER
 			add_child(label)
@@ -1629,7 +1717,8 @@ func health_drop() -> float:
 ## Eternal Lands repeats local chat over the speaker's head while "Show Speech
 ## Bubbles" is on (text.c check_chat_text_to_overtext), sitting above the
 ## banner rather than replacing it.
-func show_speech_bubble(speech: String, duration_msec: int) -> void:
+func show_speech_bubble(speech: String, duration_msec: int, color := Color.WHITE) -> void:
+	_speech_color = color
 	if not is_instance_valid(_speech_bubble):
 		var label: Label3D = Label3D.new()
 		label.name = "SpeechBubble"
@@ -1649,11 +1738,12 @@ func show_speech_bubble(speech: String, duration_msec: int) -> void:
 		label.width = SPEECH_BUBBLE_WIDTH
 		WORLD_LABEL_STYLE.apply(label, SPEECH_BUBBLE_FONT_SIZE, OVERHEAD_PIXEL, 6)
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		label.modulate = SPEECH_BUBBLE_TEXT
+		label.modulate = TextColors.color("world_speech")
 		label.layers = WORLD_LABEL_STYLE.RENDER_LAYER
 		add_child(label)
 		_speech_bubble = label
 	_speech_bubble.text = speech
+	_speech_bubble.modulate = TextColors.color("world_speech") if TextColors.is_overridden("world_speech") else color
 	_speech_bubble.show()
 	_speech_bubble_expiry_msec = Time.get_ticks_msec() + duration_msec
 
@@ -1722,7 +1812,7 @@ func _lift_overhead(factor: float) -> void:
 	# One height for the lot: the bar, the numbers and the bubble sit above or
 	# below the name inside the block rather than at world heights of their
 	# own, so the gaps between them hold their size along with the text.
-	for node_name: String in ["Nameplate", "TitleLine", "OccupationLine", "QuestOfferMarker",
+	for node_name: String in ["Nameplate", "GuildTag", "TitleLine", "OccupationLine", "QuestOfferMarker",
 			"HealthBarBackground", "HealthBarFill", "HealthNumbers", "SpeechBubble",
 			"OverheadBackground", "StatusIcons"]:
 		var node := get_node_or_null(node_name) as Node3D
@@ -1877,10 +1967,10 @@ func apply_server_state(dto: Dictionary, adapter: CoordinateAdapter, teleport :=
 	# A guild refresh removes and re-adds the actor in one socket read. Main
 	# coalesces that into an update of the existing body, including its label.
 	if dto.has("name") and is_instance_valid(_nameplate):
-		_nameplate.modulate = Color(_nameplate_colour(dto), _nameplate.modulate.a)
-		var next_name: String = banner_name(dto)
-		if _nameplate.text != next_name:
-			_nameplate.text = next_name
+		var next_name_info := _name_info(dto)
+		if _name_dto != next_name_info:
+			_name_dto = next_name_info
+			_sync_nameplate_text()
 			_layout_overhead()
 	set_status_effects(dto.get("status_effects", dto.get("negative_statuses", [])))
 	# The capability handshake can correct an actor already spawned from the
@@ -2127,10 +2217,10 @@ func _apply_server_state_native(dto: Dictionary, adapter: CoordinateAdapter, tel
 	# A guild refresh removes and re-adds the actor in one socket read. Main
 	# coalesces that into an update of the existing body, including its label.
 	if dto.has("name") and is_instance_valid(_nameplate):
-		_nameplate.modulate = Color(_nameplate_colour(dto), _nameplate.modulate.a)
-		var next_name: String = banner_name(dto)
-		if _nameplate.text != next_name:
-			_nameplate.text = next_name
+		var next_name_info := _name_info(dto)
+		if _name_dto != next_name_info:
+			_name_dto = next_name_info
+			_sync_nameplate_text()
 			_layout_overhead()
 	set_status_effects(dto.get("status_effects", dto.get("negative_statuses", [])))
 	# The capability handshake can correct an actor already spawned from the
@@ -3255,6 +3345,7 @@ func _set_mount_state_legacy(state: Dictionary, models: Dictionary) -> void:
 		play_action(&"walk" if _segment_duration > 0.0 else &"idle", true)
 	if is_instance_valid(_mount_visual):
 		_mount_visual.set("state", mount_state)
+		_mount_visual.call("set_coat", str(mount_state.get("coat_id", "original")))
 
 func _equipment_model_config(part: int, visual_id: int) -> Dictionary:
 	var aliases: Dictionary = _equipment_config.get("aliases", {}) as Dictionary

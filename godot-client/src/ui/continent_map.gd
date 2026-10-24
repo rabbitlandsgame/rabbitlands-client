@@ -20,6 +20,7 @@ const MIN_HIT_SIZE := 44.0
 const LEGEND_SIZE := 14
 const LEGEND_LINE := 23.0
 const BoatRouteOverlayScript := preload("res://src/ui/boat_route_overlay.gd")
+const TextColors := preload("res://src/ui/text_colors.gd")
 
 var _image_size := Vector2.ZERO
 var _regions: Array[Dictionary] = []
@@ -27,6 +28,19 @@ var _current_index := -1
 var _hovered_index := -1
 var _marker_positions: Array[Vector2] = []
 var _dock_legend := false
+
+func _ready() -> void:
+	TextColors.events().changed.connect(_on_text_colors_changed)
+
+func _on_text_colors_changed(_role: String) -> void:
+	queue_redraw()
+
+func label_color(index: int) -> Color:
+	if index == _hovered_index:
+		return TextColors.color("map_hover", HOVER_COLOUR)
+	if index == _current_index:
+		return TextColors.color("map_current", CURRENT_COLOUR)
+	return TextColors.color("map_continent", LABEL_COLOUR)
 
 ## Region names, bounds and polygons use the picture's own pixels.
 func configure(image_size: Vector2, regions: Array[Dictionary]) -> void:
@@ -215,16 +229,16 @@ func _draw() -> void:
 	var lines := _legend_lines()
 	var legend := legend_rect().position + Vector2(0, 14)
 	draw_line(legend, legend + Vector2(30, 0), Color(0.85, 0.76, 0.54), 3.0)
-	draw_string(font, legend + Vector2(40, 5), lines[0], HORIZONTAL_ALIGNMENT_LEFT, -1, LEGEND_SIZE, LABEL_COLOUR)
+	draw_string(font, legend + Vector2(40, 5), lines[0], HORIZONTAL_ALIGNMENT_LEFT, -1, LEGEND_SIZE, TextColors.color("map_continent", LABEL_COLOUR))
 	legend.y += LEGEND_LINE
 	for part: int in range(4):
 		draw_line(legend + Vector2(part * 8, 0), legend + Vector2(part * 8 + 4, 0),
 			BoatRouteOverlayScript.ROUTE_COLOUR, 2.0)
-	draw_string(font, legend + Vector2(40, 5), lines[1], HORIZONTAL_ALIGNMENT_LEFT, -1, LEGEND_SIZE, LABEL_COLOUR)
+	draw_string(font, legend + Vector2(40, 5), lines[1], HORIZONTAL_ALIGNMENT_LEFT, -1, LEGEND_SIZE, TextColors.color("map_continent", LABEL_COLOUR))
 	if _dock_legend:
 		legend.y += LEGEND_LINE
 		BoatRouteOverlayScript.draw_dock(self, legend + Vector2(15, 0))
-		draw_string(font, legend + Vector2(40, 5), lines[2], HORIZONTAL_ALIGNMENT_LEFT, -1, LEGEND_SIZE, LABEL_COLOUR)
+		draw_string(font, legend + Vector2(40, 5), lines[2], HORIZONTAL_ALIGNMENT_LEFT, -1, LEGEND_SIZE, TextColors.color("map_continent", LABEL_COLOUR))
 	for index: int in range(_regions.size()):
 		var rect: Rect2 = region_rect(index)
 		if rect.size.x <= 0.0:
@@ -232,7 +246,7 @@ func _draw() -> void:
 		if (_regions[index].get("label", []) as Array).size() == 2:
 			rect = Rect2(region_label_position(index) - Vector2(rect.size.x * 0.5, 16), Vector2(rect.size.x, 32))
 		_draw_label(font, rect, str(_regions[index].get("name", "")),
-			CURRENT_COLOUR if index == _current_index else LABEL_COLOUR)
+			label_color(index))
 
 ## The name sits along the bottom edge of a region big enough to leave its
 ## map readable above it, and across the middle of one that is not. It is

@@ -1,5 +1,6 @@
 class_name OldcraftDialogueStyle
 extends RefCounted
+const TextColors := preload("res://src/ui/text_colors.gd")
 ## Event-driven fantasy styling for the one NPC dialogue window.
 ##
 ## One parchment surface carries the speaker, copy and compact response rows.
@@ -10,12 +11,12 @@ extends RefCounted
 const GOLD := Color(0.957, 0.773, 0.259, 1.0)
 const GOLD_DARK := Color(0.722, 0.541, 0.231, 1.0)
 const GOLD_BRIGHT := Color(1.0, 0.86, 0.48, 1.0)
-const INK := Color(0.16, 0.095, 0.045, 1.0)
-const WARM_TEXT := Color(0.961, 0.941, 0.878, 1.0)
+const INK := Color.WHITE
+const WARM_TEXT := Color.WHITE
 const BURGUNDY := Color(0.42, 0.072, 0.045, 1.0)
 const BURGUNDY_HOVER := Color(0.62, 0.12, 0.065, 1.0)
-const QUEST_YELLOW := BURGUNDY
-const TALK_GOLD := Color(0.40, 0.29, 0.17, 1.0)
+const QUEST_YELLOW := Color.WHITE
+const TALK_GOLD := Color.WHITE
 const STYLE_META := &"eloria_oldcraft_dialogue_style"
 const DECORATION_SIGNAL_META := &"eloria_dialogue_decoration_signal"
 const PARCHMENT_TEXTURE := preload(
@@ -43,7 +44,8 @@ static func _parchment_box() -> StyleBoxTexture:
 	var crop_height := texture_size.y * 0.62
 	box.region_rect = Rect2(0.0, (texture_size.y - crop_height) * 0.5,
 		texture_size.x, crop_height)
-	box.modulate_color = Color(0.985, 0.94, 0.84, 1.0)
+	# Keep the existing paper grain, darkened for EL's white conversation text.
+	box.modulate_color = Color(0.13, 0.14, 0.15, 1.0)
 	box.set_content_margin_all(0.0)
 	return box
 
@@ -96,10 +98,10 @@ static func apply(main: Control) -> void:
 		panel.set_meta(DECORATION_SIGNAL_META, true)
 
 	speaker.add_theme_stylebox_override("normal", StyleBoxEmpty.new())
-	speaker.add_theme_color_override("font_color", INK)
+	TextColors.bind(speaker, "npc_text")
 	speaker.add_theme_constant_override("outline_size", 0)
 	if kicker != null:
-		kicker.add_theme_color_override("font_color", TALK_GOLD)
+		TextColors.bind(kicker, "npc_footer")
 		kicker.add_theme_constant_override("outline_size", 0)
 	if divider != null:
 		var rule := StyleBoxFlat.new()
@@ -112,16 +114,16 @@ static func apply(main: Control) -> void:
 	page.set_content_margin_all(2.0)
 	body.add_theme_stylebox_override("normal", page)
 	body.add_theme_stylebox_override("focus", page)
-	body.add_theme_color_override("default_color", INK)
-	body.add_theme_color_override("font_selected_color", Color(0.08, 0.045, 0.02, 1.0))
+	TextColors.bind(body, "npc_text", "default_color")
+	TextColors.bind(body, "ui_selected", "font_selected_color")
 	body.add_theme_color_override("selection_color", Color(0.78, 0.58, 0.24, 0.45))
 	body.add_theme_font_size_override("normal_font_size", 16)
 	body.add_theme_constant_override("line_separation", 1)
 	if instruction != null:
-		instruction.add_theme_color_override("font_color", TALK_GOLD)
+		TextColors.bind(instruction, "npc_footer")
 		instruction.add_theme_constant_override("outline_size", 0)
 	if footer != null:
-		footer.add_theme_color_override("font_color", TALK_GOLD)
+		TextColors.bind(footer, "npc_footer")
 	layout(main)
 	main.set_meta(STYLE_META, true)
 
@@ -192,7 +194,7 @@ static func update_state(main: Control, quest: bool, quest_id: int,
 		kicker.text = (("QUEST MISSIVE  |  %d" % quest_id
 			if quest_id > 0 else "QUEST MISSIVE") if quest
 			else "A VOICE OF ELORIA")
-		kicker.add_theme_color_override("font_color", QUEST_YELLOW if quest else TALK_GOLD)
+		TextColors.bind(kicker, "npc_footer")
 	if instruction != null:
 		instruction.visible = has_options
 		instruction.text = "CHOOSE YOUR COURSE" if quest else "CHOOSE YOUR RESPONSE"
@@ -228,9 +230,9 @@ static func style_option(button: Button, quest: bool, index: int) -> void:
 	if button == null:
 		return
 	var primary := quest and index == 0
-	var normal := _flat_box(BURGUNDY if primary else Color(0.94, 0.86, 0.69, 0.4),
+	var normal := _flat_box(Color(0.10, 0.08, 0.06, 0.85),
 		GOLD_DARK, 2 if primary else 1, 4, 5.0)
-	var hover := _flat_box(BURGUNDY_HOVER, GOLD_DARK, 2, 4, 5.0)
+	var hover := _flat_box(Color(0.15, 0.10, 0.065, 1.0), GOLD_DARK, 2, 4, 5.0)
 	var pressed := _flat_box(Color(0.25, 0.035, 0.022, 1.0),
 		Color(0.72, 0.48, 0.16, 1.0), 2, 4, 5.0)
 	for box: StyleBoxFlat in [normal, hover, pressed]:
@@ -241,9 +243,11 @@ static func style_option(button: Button, quest: bool, index: int) -> void:
 	button.add_theme_stylebox_override("hover_pressed", pressed)
 	button.add_theme_stylebox_override("focus",
 		_flat_box(Color.TRANSPARENT, BURGUNDY_HOVER, 2, 4, 5.0))
-	button.add_theme_color_override("font_color", WARM_TEXT if primary else INK)
-	button.add_theme_color_override("font_hover_color", GOLD_BRIGHT)
-	button.add_theme_color_override("font_pressed_color", GOLD)
+	TextColors.bind(button, "npc_reply")
+	TextColors.bind(button, "npc_reply_hover", "font_hover_color")
+	TextColors.bind(button, "npc_reply_hover", "font_pressed_color")
+	TextColors.bind(button, "npc_reply_hover", "font_hover_pressed_color")
+	TextColors.bind(button, "npc_unavailable", "font_disabled_color")
 	button.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.88))
 	button.add_theme_constant_override("outline_size", 0)
 	button.add_theme_font_size_override("font_size", 15)

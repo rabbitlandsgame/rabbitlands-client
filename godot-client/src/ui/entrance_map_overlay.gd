@@ -6,7 +6,15 @@ const DOT_COLOUR := Color("e8d09b")
 const TEXT_COLOUR := Color("f2e4b7")
 const TEXT_OUTLINE := Color(0.04, 0.04, 0.05, 0.95)
 const LABEL_SIZE := 13
+const TextColors := preload("res://src/ui/text_colors.gd")
 var _region_names: Array = []
+
+func _ready() -> void:
+	super._ready()
+	TextColors.events().changed.connect(_on_text_colors_changed)
+
+func _on_text_colors_changed(_role: String) -> void:
+	queue_redraw()
 
 func set_region_names(names: Array) -> void:
 	_region_names = names
@@ -80,5 +88,5 @@ static func draw_marker(canvas: Control, point: Vector2, label: String, font_siz
 		canvas.draw_line(begin, nearest, DOT_COLOUR, 1.0, true)
 	for line: String in lines:
 		canvas.draw_string_outline(font, at, line, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, 3, TEXT_OUTLINE)
-		canvas.draw_string(font, at, line, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, TEXT_COLOUR)
+		canvas.draw_string(font, at, line, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, TextColors.color("map_service", TEXT_COLOUR))
 		at.y += line_height

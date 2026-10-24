@@ -2,6 +2,8 @@ extends PanelContainer
 ## Independently movable conversation/system surfaces with a feathered backdrop.
 const FADE_SHADER := preload("res://src/ui/chat_soft_fade.gdshader")
 const PreviewScript := preload("res://src/ui/chat_preview.gd")
+const TextColors := preload("res://src/ui/text_colors.gd")
+const Messages := preload("res://src/ui/chat_messages.gd")
 const MINIMUM := Vector2(320, 165)
 const DEFAULT_SIZE := Vector2(490, 240)
 const DEFAULT_OPTIONS := {"font_size": 16, "background_opacity": 0.30,
@@ -41,6 +43,8 @@ var _frame: Control
 var preview_feed: Control
 var _feed_suppressed := false
 var _temporarily_open := false
+var _selected_tab := "all"
+var _unread: Dictionary = {}
 
 func _ready() -> void:
 	if not has_node("Frame"):
@@ -132,7 +136,8 @@ func _ready() -> void:
 	output.context_menu_enabled = true
 	output.shortcut_keys_enabled = true
 	output.tooltip_text = "Drag to select text. Ctrl+C or right-click → Copy."
-	output.add_theme_color_override("default_color", Color("eee3c8"))
+	output.add_theme_color_override("default_color", Color.WHITE)
+	TextColors.bind($Frame/Layout/Header/Title, "chat_selector")
 	output.add_theme_constant_override("outline_size", 2)
 	output.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.9))
 	bottom_hud = get_parent().get_node_or_null("Quickbar") as Control
@@ -205,9 +210,10 @@ func _build_surface() -> void:
 func _style_control(control: Button) -> void:
 	control.focus_mode = Control.FOCUS_NONE
 	control.add_theme_font_size_override("font_size", 13)
-	control.add_theme_color_override("font_color", Color("d9d3bd"))
-	control.add_theme_color_override("font_hover_color", Color("fff4d5"))
-	control.add_theme_color_override("font_pressed_color", Color("e9cd8a"))
+	TextColors.bind(control, "chat_selector")
+	TextColors.bind(control, "chat_selector", "font_hover_color")
+	TextColors.bind(control, "chat_selected", "font_pressed_color")
+	TextColors.bind(control, "chat_selected", "font_hover_pressed_color")
 	for state: String in ["normal", "hover", "pressed", "focus"]:
 		var style := StyleBoxFlat.new()
 		style.bg_color = Color.TRANSPARENT
@@ -229,7 +235,8 @@ func _style_input() -> void:
 		underline.border_color = Color(0.85, 0.80, 0.64, 0.7 if state == "focus" else 0.25)
 		underline.set_content_margin_all(4)
 		input.add_theme_stylebox_override(state, underline)
-	input.add_theme_color_override("font_color", Color("eee3c8"))
+	TextColors.bind(input, "ui_input")
+	TextColors.bind(input, "ui_placeholder", "font_placeholder_color")
 	input.add_theme_color_override("font_outline_color", Color.BLACK)
 	input.add_theme_constant_override("outline_size", 1)
 	input.tooltip_text = "Enter sends to the displayed destination; /name sends privately; // replies."
@@ -241,6 +248,7 @@ func _make_tab(key: String, title: String) -> Button:
 	button.toggle_mode = true
 	button.set_meta("key", key)
 	_style_control(button)
+	TextColors.bind(button, "chat_tab")
 	buttons[key] = button
 	tabs.add_child(button)
 	return button
@@ -313,8 +321,20 @@ func set_destination(key: String) -> void:
 	input.placeholder_text = "Choose a player or type /name message…" if key == "private" else "Type a message…"
 
 func select_tab(key: String) -> void:
+	_selected_tab = key
+	_unread.erase(key)
 	for raw: Variant in buttons:
-		(buttons[raw] as Button).set_pressed_no_signal(str(raw) == key)
+		var button: Button = buttons[raw]
+		button.set_pressed_no_signal(str(raw) == key)
+		TextColors.bind(button, "chat_unread" if _unread.has(str(raw)) else "chat_tab")
+
+func observe(line: Dictionary) -> void:
+	if Messages.matches(line, _selected_tab):
+		return
+	for key: String in buttons:
+		if key != _selected_tab and Messages.matches(line, key):
+			_unread[key] = true
+	select_tab(_selected_tab)
 
 func _layout_key() -> String:
 	return "system_chat_soft" if feed_role == "system" else "chat_soft"
@@ -372,12 +392,12 @@ func reset_layout() -> void:
 	resize_window(fallback.size)
 	save_layout()
 
-func reveal_message(text: String = "", colour: Color = Color("eee3c8")) -> void:
+func reveal_message(text: String = "", colour: Color = Color.WHITE, segments: Array[Dictionary] = []) -> void:
 	_last_message_msec = Time.get_ticks_msec()
 	if _feed_suppressed:
 		return
 	if user_closed:
-		preview_feed.add_message(text, colour)
+		preview_feed.add_message(text, colour, segments)
 	elif bool(options.get("visible", true)):
 		show()
 

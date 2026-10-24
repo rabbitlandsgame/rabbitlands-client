@@ -1,4 +1,5 @@
 extends Control
+const TextColors := preload("res://src/ui/text_colors.gd")
 ## The summoning window: every creature this profile can call up, one to a
 ## row, with what it costs written beside it.
 ##
@@ -32,9 +33,6 @@ const RESERVED_RIGHT_RAIL := 96.0
 
 ## EL dims what you cannot do rather than hiding it, so it can still be read.
 const BLOCKED_ALPHA := 0.45
-const BLOCKED_COLOR := Color(1.0, 0.36, 0.36)
-const READY_COLOR := Color(0.85, 1.0, 0.85)
-const COST_COLOR := Color(0.72, 0.78, 0.9)
 const ICON_SIZE := Vector2(32.0, 32.0)
 const ROW_HEIGHT := 44.0
 
@@ -155,8 +153,7 @@ func sync() -> void:
 			else "\n".join(reasons))
 		var note: Label = row.get_node("Row/Asks/Requirements") as Label
 		note.text = _requirements_line(catalog.recipe(index), reasons)
-		note.add_theme_color_override("font_color",
-			READY_COLOR if reasons.is_empty() else BLOCKED_COLOR)
+		TextColors.bind(note, "summon_ready" if reasons.is_empty() else "summon_blocked")
 	if behavior_button != null:
 		behavior_button.disabled = false
 		behavior_button.tooltip_text = "Direct your summons at any level: assist, passive or choose target filters"
@@ -286,7 +283,7 @@ func _populate() -> void:
 		cost.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 		cost.autowrap_mode = TextServer.AUTOWRAP_OFF
 		cost.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-		cost.add_theme_color_override("font_color", COST_COLOR)
+		TextColors.bind(cost, "summon_cost")
 		asks.add_child(cost)
 
 ## A summon leaves no item behind, so its recipe carries no output image and

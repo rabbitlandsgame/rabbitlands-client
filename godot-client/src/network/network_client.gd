@@ -84,6 +84,8 @@ func _reset_coordinate_session() -> void:
 	_rx.clear()
 
 func fail_coordinate_context(reason: String) -> void:
+	_session_disconnect = _session_disconnect or _session_credentials_confirmed
+	_forget_session()
 	_reconnect_enabled = false
 	_drop_connection(reason)
 
@@ -155,8 +157,10 @@ func _send_release_identity() -> void:
 ## half-open socket cannot hold a character hostage; this is what keeps a
 ## parked client on the right side of it.
 const HEARTBEAT_INTERVAL_MSEC := 25000
-## Backoff for an unexpected drop. A deliberate disconnect never reconnects.
-const RECONNECT_DELAYS_MSEC: Array[int] = [1000, 2000, 4000, 8000, 15000]
+## A key starts reconnection; subsequent attempts start two seconds apart.
+## The same bound covers a stalled TCP connection, TLS handshake or login, so
+## an unresponsive endpoint cannot leave the retry loop waiting indefinitely.
+const RECONNECT_INTERVAL_MSEC := 2000
 ## The most TLS records one read takes off the socket (16 KiB of plaintext
 ## each). Anything still waiting is left for the next read, later in the same
 ## frame or early in the next; the bound only keeps a flooding peer from
@@ -174,6 +178,16 @@ var _port := 0
 var _reconnect_enabled := false
 var _reconnect_attempt := 0
 var _reconnect_at_msec := 0
+var _reconnect_started_msec := 0
+var _reconnect_timeout_at_msec := 0
+var last_disconnect_reason := ""
+## Credentials stay only in this process, until explicit logout or a rejected
+## login. A transport reconnect must authenticate again before resuming play.
+var _session_username := ""
+var _session_password := ""
+var _session_credentials_confirmed := false
+var _resume_session := false
+var _session_disconnect := false
 var _last_heartbeat_msec := 0
 ## Whether this connection attempt's socket has TCP no-delay set. Every
 ## connect opens a new socket, so it is set again for each one.
@@ -204,6 +218,7 @@ func _link() -> StreamPeer:
 func connect_to_server(host: String, port: int, secure := true,
 		trusted_certificate_path := "") -> Error:
 	if offline_hud_preview: return ERR_UNAVAILABLE
+	disconnect_from_server()
 	Diagnostics.record("connection_requested", {"host": host, "port": port, "tls": secure})
 	_reset_coordinate_session()
 	_host = host
@@ -246,19 +261,64 @@ func _begin_handshake() -> bool:
 ## A disconnect the player asked for. Cancels any pending reconnect, so the
 ## client does not fight the person who just pressed the button.
 func disconnect_from_server() -> void:
+	var was_resumable := can_resume_session() or _session_disconnect
 	_reset_coordinate_session()
+	_forget_session()
+	_session_disconnect = false
 	_reconnect_enabled = false
 	_reconnect_attempt = 0
 	_reconnect_at_msec = 0
+	_reconnect_started_msec = 0
+	_reconnect_timeout_at_msec = 0
+	last_disconnect_reason = ""
 	if _secure:
 		_tls.disconnect_from_stream()
 	_handshaking = false
 	_peer.disconnect_from_host()
 	_rx.clear()
-	_set_state("disconnected")
+	# Logout while already dormant still needs to clear the reducer's saved
+	# chat/channel session now that can_resume_session() is false.
+	_set_state("disconnected", was_resumable)
+
+## #disco closes the socket just like an unexpected loss, retaining the
+## authenticated account so the first key can resume it later.
+func disconnect_for_reconnect() -> void:
+	_reconnect_enabled = false
+	_reconnect_attempt = 0
+	_reconnect_at_msec = 0
+	_reconnect_started_msec = 0
+	_reconnect_timeout_at_msec = 0
+	_drop_connection("manual_disconnect")
+
+func can_resume_session() -> bool:
+	return not offline_hud_preview and _resume_session and _session_credentials_confirmed \
+		and not _session_username.is_empty() and not _host.is_empty() and _port > 0
+
+## Distinguishes a lost authenticated session from a failed login connection,
+## including fatal failures whose credentials have already been discarded.
+func is_session_disconnect() -> bool:
+	return _session_disconnect
+
+## Called only for the first key after a recoverable loss. Repeated key
+## events do not reset the timer or open overlapping sockets.
+func start_reconnecting() -> bool:
+	if not can_resume_session() or _reconnect_enabled:
+		return false
+	_reconnect_enabled = true
+	_reconnect_attempt = 0
+	_reconnect_at_msec = 0
+	_reconnect_started_msec = 0
+	_schedule_reconnect(true)
+	return true
+
+func _forget_session() -> void:
+	_session_username = ""
+	_session_password = ""
+	_session_credentials_confirmed = false
+	_resume_session = false
 
 func is_reconnecting() -> bool:
-	return _reconnect_at_msec > 0
+	return _reconnect_enabled
 
 func reconnect_attempt() -> int:
 	return _reconnect_attempt
@@ -279,29 +339,36 @@ func request_resync() -> Error:
 		return stats_error
 	return inventory_error
 
-## Called when the socket drops without the player asking for it.
-func _schedule_reconnect() -> void:
-	if not _reconnect_enabled or _host.is_empty():
+## The first key starts immediately. Later failures wait until two seconds
+## after the previous attempt began, with no finite attempt limit.
+func _schedule_reconnect(immediate := false) -> void:
+	if not _reconnect_enabled or not can_resume_session():
 		return
-	if _reconnect_attempt >= RECONNECT_DELAYS_MSEC.size():
-		_reconnect_enabled = false
-		_reconnect_at_msec = 0
+	if _reconnect_at_msec > 0:
 		return
-	var delay: int = RECONNECT_DELAYS_MSEC[_reconnect_attempt]
+	var now := Time.get_ticks_msec()
+	var delay := 0 if immediate else maxi(0, _reconnect_started_msec + RECONNECT_INTERVAL_MSEC - now)
 	_reconnect_attempt += 1
-	_reconnect_at_msec = Time.get_ticks_msec() + delay
+	_reconnect_at_msec = maxi(1, now + delay)
 	_set_state("reconnecting")
-	reconnect_progress.emit(_reconnect_attempt, RECONNECT_DELAYS_MSEC.size(), delay)
+	# Zero total denotes an unlimited retry loop.
+	reconnect_progress.emit(_reconnect_attempt, 0, delay)
 
 func _drop_connection(reason: String) -> void:
 	Diagnostics.record("connection_dropped", {"reason": reason})
+	last_disconnect_reason = reason
+	_session_disconnect = _session_disconnect or _session_credentials_confirmed
+	_resume_session = _session_credentials_confirmed and not _session_username.is_empty()
+	_reconnect_timeout_at_msec = 0
+	if not _reconnect_enabled:
+		_reconnect_at_msec = 0
 	_reset_coordinate_session()
-	protocol_error.emit(reason)
 	if _secure:
 		_tls.disconnect_from_stream()
 	_handshaking = false
 	_peer.disconnect_from_host()
 	_rx.clear()
+	protocol_error.emit(reason)
 	_set_state("disconnected")
 	_schedule_reconnect()
 
@@ -321,6 +388,11 @@ func login(username: String, password: String) -> Error:
 		protocol_error.emit(coordinate_registry_error)
 		return ERR_INVALID_DATA
 	var error := send_frame(EloriaProtocol.login(username, password), true)
+	if error == OK:
+		if username != _session_username or password != _session_password:
+			_session_credentials_confirmed = false
+		_session_username = username
+		_session_password = password
 	Diagnostics.record("login_sent", {"error": error_string(error)})
 	return error
 
@@ -523,9 +595,15 @@ func create_character(username: String, password: String, appearance: Dictionary
 
 func _process(_delta: float) -> void:
 	if offline_hud_preview: return
-	if _reconnect_at_msec > 0 and Time.get_ticks_msec() >= _reconnect_at_msec:
+	if _reconnect_enabled and _reconnect_timeout_at_msec > 0 \
+			and Time.get_ticks_msec() >= _reconnect_timeout_at_msec:
+		_drop_connection("reconnect_timeout")
+		return
+	if _reconnect_enabled and _reconnect_at_msec > 0 and Time.get_ticks_msec() >= _reconnect_at_msec:
 		_reset_coordinate_session()
 		_reconnect_at_msec = 0
+		_reconnect_started_msec = Time.get_ticks_msec()
+		_reconnect_timeout_at_msec = _reconnect_started_msec + RECONNECT_INTERVAL_MSEC
 		_set_state("connecting")
 		# A reconnect gets a fresh TLS session. Reusing the old one would try
 		# to resume a handshake against a socket that no longer exists.
@@ -534,8 +612,7 @@ func _process(_delta: float) -> void:
 		if _secure:
 			_tls.disconnect_from_stream()
 		if _peer.connect_to_host(_host, _port) != OK:
-			_set_state("disconnected")
-			_schedule_reconnect()
+			_drop_connection("connection_start_failed")
 			return
 	_peer.poll()
 	var status := _peer.get_status()
@@ -543,7 +620,7 @@ func _process(_delta: float) -> void:
 		_drop_connection("socket_error")
 		return
 	if status != StreamPeerTCP.STATUS_CONNECTED:
-		if _state == "connected" or _state == "securing":
+		if _state in ["connected", "securing", "connecting"] and status != StreamPeerTCP.STATUS_CONNECTING:
 			# The peer closed the socket without an error status.
 			_drop_connection("connection_closed")
 		return
@@ -584,8 +661,6 @@ func _process(_delta: float) -> void:
 				return
 
 	if _state != "connected":
-		_reconnect_attempt = 0
-		_reconnect_enabled = true
 		_handshaking = false
 		_last_heartbeat_msec = Time.get_ticks_msec()
 		# Matches the legacy connection lifecycle. Server currently tolerates/ignores version metadata.
@@ -593,6 +668,10 @@ func _process(_delta: float) -> void:
 		_send_release_identity()
 		send_frame(EloriaProtocol.encode(EloriaProtocol.ClientMessage.SEND_OPENING_SCREEN))
 		_set_state("connected")
+		if _reconnect_enabled and can_resume_session():
+			if login(_session_username, _session_password) != OK:
+				_drop_connection("login_send_failed")
+				return
 	_send_due_heartbeat()
 	_read_link()
 
@@ -649,7 +728,7 @@ func _read_link() -> void:
 			break
 		var result := link.get_data(available)
 		if result[0] != OK:
-			protocol_error.emit("socket_read_failed")
+			_drop_connection("socket_read_failed")
 			return
 		_rx.append_array(result[1])
 		received = true
@@ -678,6 +757,19 @@ func _drain_packets() -> void:
 				return
 			"ok":
 				consumed += int(decoded.consumed)
+				if decoded.command == EloriaProtocol.ServerMessage.LOG_IN_OK:
+					_session_credentials_confirmed = not _session_username.is_empty()
+					_resume_session = false
+					_session_disconnect = false
+					_reconnect_enabled = false
+					_reconnect_attempt = 0
+					_reconnect_at_msec = 0
+					_reconnect_timeout_at_msec = 0
+				elif decoded.command == EloriaProtocol.ServerMessage.LOG_IN_NOT_OK:
+					_forget_session()
+					_reconnect_enabled = false
+					_reconnect_at_msec = 0
+					_reconnect_timeout_at_msec = 0
 				packet_received.emit(decoded.command, decoded.payload)
 				# A synchronous reducer may close/reset the link. Do not decode
 				# another row from this burst or trim a replacement connection.
@@ -696,8 +788,8 @@ func _trim_receive_buffer(consumed: int) -> void:
 		return
 	_rx = _rx.slice(consumed)
 
-func _set_state(value: String) -> void:
-	if _state == value:
+func _set_state(value: String, force := false) -> void:
+	if _state == value and not force:
 		return
 	_state = value
 	Diagnostics.record("connection_state", {"state": value, "tls": _secure})

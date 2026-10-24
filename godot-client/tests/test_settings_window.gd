@@ -39,7 +39,7 @@ func _run() -> void:
 	await process_frame
 	_expect(panel.visible, "the settings button opens it")
 	_expect((window.call("tab_titles") as Array)
-			== ["HUD", "Chat", "Minimap", "Banners", "Graphics", "Camera", "Audio", "Inventory", "Spells", "Gameplay", "Controls"],
+			== ["HUD", "Chat", "Text colors", "Minimap", "Banners", "Graphics", "Camera", "Audio", "Inventory", "Spells", "Gameplay", "Controls"],
 		"it is tabbed: %s" % str(window.call("tab_titles")))
 	var rect: Rect2 = panel.get_global_rect()
 	_expect(rect.position.x >= 0.0 and rect.position.y >= 0.0
