@@ -585,5 +585,134 @@ class NativePrewarmTests(unittest.TestCase):
             self.assertEqual(list(target.iterdir()), [])
 
 
+@unittest.skipUnless(shutil.which("git"), "native handoff requires local Git")
+class NativeHandoffTests(unittest.TestCase):
+    def warm(self, root):
+        repository, commit = NativePrewarmTests().fixture(root)
+        def compile(args, target, env, actual, **kwargs):
+            return NativeReleaseTests().payload(args.out, args.repository, target, actual)
+        with mock.patch.object(release, "tool_context", return_value=({}, toolchain())), mock.patch.object(build, "build_payload", side_effect=compile):
+            receipt = release.prewarm_cache(repository, commit, "windows", root / "cache", root / "prewarm", lambda *a: None)
+        return repository, commit, receipt
+
+    def handoff(self, root, repository, commit, receipt, output="out", budget=None):
+        with mock.patch.object(build, "host_platform", return_value="windows"), mock.patch.object(release, "tool_context", side_effect=AssertionError("SDK already retired")), mock.patch.object(build, "toolchain_identity", side_effect=AssertionError("compiler probe forbidden")), mock.patch.object(build, "build_payload", side_effect=AssertionError("rebuild forbidden")):
+            return release.prepare_from_prewarm(repository, commit, "windows", root / "cache", root / output,
+                                                receipt, budget or (lambda *a: None))
+
+    def test_handoff_after_sdk_retirement_matches_normal_verified_cache_hit(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            repository, commit, receipt = self.warm(root)
+            with mock.patch.object(release, "tool_context", return_value=({}, toolchain())), mock.patch.object(build, "build_payload", side_effect=AssertionError("cache hit cannot rebuild")):
+                normal = release.prepare_runtime(repository, commit, "windows", root / "cache", root / "ordinary", root / "later-work", lambda *a, **k: None)
+            requests = []
+            actual = self.handoff(root, repository, commit, receipt, budget=lambda phase, additional=0: requests.append((phase, additional)))
+            for key in ("source", "cache_key", "built_for_commit", "verification", "selected_commit", "platform"):
+                self.assertEqual(actual[key], normal[key])
+            self.assertTrue(actual["cache_hit"])
+            self.assertEqual(actual["workspace_budget"]["status"], "not_created")
+            self.assertEqual(actual["workspace_budget"]["sample_count"], 0)
+            self.assertIsNone(actual["workspace_budget"]["observed_peak_workspace_bytes"])
+            self.assertFalse(actual["prewarm_handoff"]["compiler_probe"])
+            self.assertEqual(actual["prewarm_handoff"]["receipt_sha256"], hashlib.sha256(release.canonical(receipt)).hexdigest())
+            self.assertEqual([size for _, size in requests], [actual["verification"]["bytes"], 0])
+            self.assertFalse((root / "later-work").exists())
+
+    def test_missing_or_mutated_receipt_fails_before_payload_copy(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            repository, commit, receipt = self.warm(root)
+            variants = [None, {}]
+            for kind in ("commit", "platform", "key", "source", "cleaned", "policy", "assets", "identity", "rust", "foreign_compiler", "verification", "built_for"):
+                changed = json.loads(json.dumps(receipt))
+                if kind == "commit": changed["selected_commit"] = "f" * 40
+                elif kind == "platform": changed["platform"] = "linux"
+                elif kind == "key": changed["cache_key"] = "../other-cache"
+                elif kind == "source": changed["source"]["input_blob_digest"] = "changed"
+                elif kind == "cleaned": changed["prewarm"]["scratch_cleaned"] = False
+                elif kind == "policy": changed["prewarm"]["policy"] = "unverified"
+                elif kind == "assets": changed["prewarm"]["game_assets_materialized"] = True
+                elif kind == "identity": changed.pop("cache_identity")
+                elif kind == "rust": changed["cache_identity"]["toolchain"]["rustc"] = "rustc 1.98.0 (wrong)"
+                elif kind == "foreign_compiler":
+                    changed["cache_identity"]["toolchain"]["compiler"] = "another observed compiler"
+                    changed["cache_key"] = release.cache_key(changed["cache_identity"])
+                elif kind == "verification": changed["verification"]["manifest"]["library_sha256"] = "f" * 64
+                elif kind == "built_for": changed["built_for_commit"] = "f" * 40
+                variants.append(changed)
+            for index, changed in enumerate(variants):
+                with self.subTest(index=index), self.assertRaises(ValueError):
+                    self.handoff(root, repository, commit, changed, output="bad-" + str(index))
+                self.assertFalse((root / ("bad-" + str(index))).exists())
+
+    def test_missing_cache_or_modified_materialized_source_never_rebuilds(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            repository, commit, receipt = self.warm(root)
+            source = repository / package.EXTERNAL_SOURCE_INPUTS[0]
+            original = source.read_bytes()
+            source.write_bytes(b"source changed after prewarm")
+            with self.assertRaisesRegex(ValueError, "Git blob"):
+                self.handoff(root, repository, commit, receipt)
+            source.write_bytes(original)
+            shutil.rmtree(root / "cache" / receipt["cache_key"])
+            with self.assertRaisesRegex(ValueError, "cache entry is missing"):
+                self.handoff(root, repository, commit, receipt)
+            self.assertFalse((root / "out").exists())
+
+    def test_cache_native_descriptor_and_compiler_provenance_are_reverified(self):
+        for mutation in ("checksum", "architecture", "descriptor", "compiler"):
+            with self.subTest(mutation=mutation), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                repository, commit, receipt = self.warm(root)
+                entry = root / "cache" / receipt["cache_key"]
+                payload = entry / "payload"
+                manifest = json.loads((payload / "runtime-manifest.json").read_text())
+                if mutation in {"checksum", "architecture"}:
+                    data = bytearray((payload / "client_runtime.dll").read_bytes())
+                    struct.pack_into("<H", data, 68, 0xAA64)
+                    (payload / "client_runtime.dll").write_bytes(data)
+                    if mutation == "architecture":
+                        manifest["library_sha256"] = package.sha256(payload / "client_runtime.dll")
+                elif mutation == "descriptor":
+                    (payload / "client_runtime.gdextension").write_bytes(b"[configuration]\nentry_symbol=\"changed\"\n")
+                    manifest["descriptor_sha256"] = package.sha256(payload / "client_runtime.gdextension")
+                else:
+                    manifest["build"]["compiler"] = "different compiler provenance"
+                (payload / "runtime-manifest.json").write_text(json.dumps(manifest))
+                with self.assertRaises(ValueError):
+                    self.handoff(root, repository, commit, receipt)
+                self.assertFalse((root / "out").exists())
+
+    def test_copied_payload_and_end_of_copy_source_are_rechecked(self):
+        for mutation in ("payload", "source"):
+            with self.subTest(mutation=mutation), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                repository, commit, receipt = self.warm(root)
+                original = release.shutil.copytree
+                def changed_copy(source, destination, *args, **kwargs):
+                    result = original(source, destination, *args, **kwargs)
+                    if mutation == "payload":
+                        (Path(destination) / "client_runtime.dll").write_bytes(b"changed during copy")
+                    else:
+                        (repository / package.NATIVE_PATH / "src/client_runtime.cpp").write_bytes(b"changed after source proof")
+                    return result
+                with mock.patch.object(release.shutil, "copytree", side_effect=changed_copy), self.assertRaises(ValueError):
+                    self.handoff(root, repository, commit, receipt)
+
+    def test_budget_refusal_preserves_cache_and_does_not_create_output(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            repository, commit, receipt = self.warm(root)
+            def exhausted(phase, additional=0):
+                self.assertEqual(additional, receipt["verification"]["bytes"])
+                raise ValueError("fixture handoff budget exhausted")
+            with self.assertRaisesRegex(ValueError, "budget exhausted"):
+                self.handoff(root, repository, commit, receipt, budget=exhausted)
+            self.assertFalse((root / "out").exists())
+            self.assertTrue((root / "cache" / receipt["cache_key"]).is_dir())
+
+
 if __name__ == "__main__":
     unittest.main()

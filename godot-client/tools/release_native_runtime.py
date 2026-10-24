@@ -24,6 +24,7 @@ from client_runtime_package import ABI, EXTERNAL_SOURCE_INPUTS, LIBRARIES, NATIV
 
 SCHEMA = 1
 CACHE_POLICY = "rl-native-payload-cache-v1"
+PREWARM_POLICY = "exact-native-git-blobs-before-assets-v1"
 BUILD_RESERVE_BYTES = 3 * 1024**3
 MAX_PAYLOAD_BYTES = 256 * 1024**2
 MAX_PREWARM_SOURCE_BYTES = 64 * 1024**2
@@ -289,10 +290,12 @@ def prewarm_cache(repository, commit, platform, cache_dir, work_root, check_budg
         budget("native-only prewarm sources verified")
         receipt = prepare_runtime(source, commit, platform, cache_dir, output, compiler, budget, **tools)
         require(receipt["source"] == verified_source, "native prewarm source proof changed")
+        receipt["cache_identity"] = cache_identity(verified_source, platform, receipt["verification"]["manifest"]["build"])
+        require(cache_key(receipt["cache_identity"]) == receipt["cache_key"], "native prewarm cache identity changed")
         # The temporary payload is only a second verification copy. Its path is
         # deliberately absent from the returned, persistent cache receipt.
         receipt.pop("payload", None)
-        receipt["prewarm"] = {"policy": "exact-native-git-blobs-before-assets-v1",
+        receipt["prewarm"] = {"policy": PREWARM_POLICY,
                               "input_count": len(expected), "materialized_source_bytes": source_bytes,
                               "planned_source_bytes": MAX_PREWARM_SOURCE_BYTES,
                               "game_assets_materialized": False}
@@ -315,6 +318,78 @@ def prewarm_cache(repository, commit, platform, cache_dir, work_root, check_budg
     budget("native-only prewarm scratch cleaned")
     receipt["prewarm"]["scratch_cleaned"] = True
     return receipt
+
+
+def prepare_from_prewarm(repository, commit, platform, cache_dir, out, prewarm_receipt, check_budget):
+    """Revalidate/stage a trusted same-process prewarm after SDK retirement.
+
+    This API is deliberately not a CLI receipt-file import. The release runner
+    retains its own prewarm result in memory. No installed compiler/SDK probe or
+    cache rebuild is attempted; missing or changed evidence is a hard failure.
+    """
+    require(platform in {"windows", "linux"} and builder.host_platform() == platform,
+            "native prewarm handoff must run on its target OS/architecture")
+    repository, cache_dir, out = map(unlinked_path, (repository, cache_dir, out))
+    for left, right in ((repository, cache_dir), (repository, out), (cache_dir, out)):
+        require(not left.is_relative_to(right) and not right.is_relative_to(left),
+                "native prewarm handoff source, cache and output must be disjoint")
+    require(not out.exists(), "native output must be a fresh directory")
+    require(isinstance(prewarm_receipt, dict), "same-process native prewarm receipt is missing")
+    # Snapshot caller-owned dictionaries so budget callbacks cannot change the
+    # captured identity halfway through validation and copying.
+    try:
+        saved = json.loads(canonical(prewarm_receipt))
+    except (TypeError, ValueError) as error:
+        raise ValueError("native prewarm receipt is not finite serializable evidence") from error
+    prewarm = saved.get("prewarm")
+    require(saved.get("schema") == SCHEMA and saved.get("policy") == CACHE_POLICY
+            and saved.get("platform") == platform and saved.get("selected_commit") == commit
+            and saved.get("scratch_cleaned") is True and isinstance(prewarm, dict)
+            and prewarm.get("policy") == PREWARM_POLICY and prewarm.get("scratch_cleaned") is True
+            and prewarm.get("game_assets_materialized") is False
+            and prewarm.get("planned_source_bytes") == MAX_PREWARM_SOURCE_BYTES,
+            "native prewarm receipt policy, platform, commit or cleanup differs")
+    source = source_identity(repository, commit)
+    require(saved.get("source") == source and prewarm.get("input_count") == source["input_count"]
+            and type(prewarm.get("materialized_source_bytes")) is int
+            and 0 < prewarm["materialized_source_bytes"] <= MAX_PREWARM_SOURCE_BYTES,
+            "native prewarm source proof differs from selected materialized sources")
+    identity = saved.get("cache_identity")
+    require(isinstance(identity, dict) and isinstance(identity.get("toolchain"), dict),
+            "native prewarm captured toolchain identity is missing")
+    actual = identity["toolchain"]
+    required_tools = {"policy", "rustc", "rust_host", "cargo", "cmake", "ninja", "compiler", "compiler_path", "generator"}
+    require(set(actual) == required_tools and all(isinstance(value, str) and value.strip() for value in actual.values()),
+            "native prewarm captured toolchain inventory differs")
+    cmake_version = re.search(r"cmake version (\d+)\.(\d+)", actual["cmake"])
+    require(actual["policy"] == builder.BUILD_POLICY and actual["generator"] == "Ninja"
+            and actual["rust_host"] == builder.HOST_TARGETS[platform]
+            and actual["rustc"].startswith("rustc " + builder.RUST_VERSION + " ")
+            and (actual["cargo"] == "cargo " + builder.RUST_VERSION
+                 or actual["cargo"].startswith("cargo " + builder.RUST_VERSION + " "))
+            and cmake_version and tuple(map(int, cmake_version.groups())) >= (3, 20),
+            "native prewarm captured compiler or pinned toolchain is unsupported")
+    require(identity == cache_identity(source, platform, actual)
+            and saved.get("cache_key") == cache_key(identity), "native prewarm captured cache identity/key differs")
+    entry = cache_dir / saved["cache_key"]
+    record, verified = validate_cache(entry, repository, platform, identity)
+    require(saved.get("built_for_commit") == record["built_for_commit"] and saved.get("verification") == verified,
+            "native prewarm cache bytes/provenance differ from captured verification")
+    check_budget("before prewarmed native payload materialization", verified["bytes"])
+    out.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copytree(entry / "payload", out)
+    copied = verify_release_payload(out, repository, platform, identity)
+    require(copied == verified, "prewarmed native output copy changed payload bytes")
+    require(source_identity(repository, commit) == source, "selected native inputs changed during prewarm handoff")
+    check_budget("prewarmed native payload verified", 0)
+    return {"schema": SCHEMA, "policy": CACHE_POLICY, "platform": platform, "payload": str(out),
+            "selected_commit": commit, "source": source, "cache_key": saved["cache_key"], "cache_hit": True,
+            "built_for_commit": record["built_for_commit"], "verification": copied, "scratch_cleaned": True,
+            "workspace_budget": {"planned_workspace_bytes": BUILD_RESERVE_BYTES, "observed_peak_workspace_bytes": None,
+                                 "sample_count": 0, "poll_seconds": 5, "measured_before_cleanup": False,
+                                 "status": "not_created", "scope": "verified prewarm handoff; no compiler workspace"},
+            "prewarm_handoff": {"policy": "verified-same-process-prewarm-v1", "compiler_probe": False,
+                                "receipt_sha256": hashlib.sha256(canonical(saved)).hexdigest()}}
 
 
 def prepare_runtime(repository, commit, platform, cache_dir, out, work_root, check_budget, *,
