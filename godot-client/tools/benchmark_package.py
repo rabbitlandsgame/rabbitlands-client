@@ -21,6 +21,7 @@ WORKLOAD_FILES = frozenset({
     "tests/integration/performance_workloads.gd",
     "tests/integration/benchmark_route_content.gd",
     "tests/integration/benchmark_mounted_census.gd",
+    "tests/integration/benchmark_heat_bolt.gd",
 })
 
 

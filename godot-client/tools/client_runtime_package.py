@@ -12,6 +12,8 @@ NATIVE_PATH = Path("godot-client/native/client_runtime")
 EXTERNAL_SOURCE_INPUTS = (
     Path("godot-client/native/shared/cape_constraint_math.h"),
     Path("godot-client/native/shared/mounted_cape_surface_math.h"),
+    Path("godot-client/native/native_crowd/src/native_spell_flight_geometry.cpp"),
+    Path("godot-client/native/native_crowd/src/native_spell_flight_geometry.h"),
 )
 
 
@@ -70,11 +72,22 @@ def stage_payload(directory: Path, repository: Path, app: Path, platform: str) -
 
 
 def write_launchers(stage: Path, platform: str) -> None:
-    for name, mode in (("Rust rider pilot", "rust"), ("Rust comparison", "compare"), ("legacy runtime", "legacy")):
+    profiles = (("Rust rider pilot", "rust", ""), ("Rust comparison", "compare", ""),
+                ("legacy runtime", "legacy", ""), ("Rust heat bolt pilot", "rust", "heat_bolt"))
+    for name, mode, effects in profiles:
         if platform == "windows":
-            body = '@echo off\r\nsetlocal\r\nset "RABBITLANDS_CLIENT_RUNTIME=' + mode + '"\r\ncall "%~dp0RabbitLands.bat" %*\r\n'
+            body = ('@echo off\r\nsetlocal\r\nset "RABBITLANDS_CLIENT_RUNTIME=' + mode
+                    + '"\r\nset "RABBITLANDS_RUST_EFFECTS=' + effects + '"\r\n')
+            if effects:
+                body += 'set "ELORIA_NATIVE_PRESENTATION=0"\r\n'
+            body += 'call "%~dp0RabbitLands.bat" %*\r\n'
             (stage / f"RabbitLands ({name}).bat").write_bytes(body.encode("utf-8"))
         elif platform == "linux":
             script = stage / f"RabbitLands ({name}).sh"
-            script.write_text('#!/bin/sh\nexport RABBITLANDS_CLIENT_RUNTIME=' + mode + '\nexec "$(dirname "$0")/RabbitLands.sh" "$@"\n', encoding="utf-8")
+            body = ('#!/bin/sh\nexport RABBITLANDS_CLIENT_RUNTIME=' + mode
+                    + '\nexport RABBITLANDS_RUST_EFFECTS=' + effects + '\n')
+            if effects:
+                body += 'export ELORIA_NATIVE_PRESENTATION=0\n'
+            body += 'exec "$(dirname "$0")/RabbitLands.sh" "$@"\n'
+            script.write_text(body, encoding="utf-8")
             script.chmod(0o755)

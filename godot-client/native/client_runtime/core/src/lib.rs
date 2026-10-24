@@ -1,4 +1,6 @@
 //! Engine-independent, main-thread-owned presentation data. No Godot pointers.
+pub mod flight;
+
 use std::panic::{AssertUnwindSafe, catch_unwind};
 mod mounted_pose;
 mod mounted_runtime;

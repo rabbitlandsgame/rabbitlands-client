@@ -84,7 +84,9 @@ static func acquire(key: String, path: String) -> Mesh:
 		return null
 	var document := GLTFDocument.new()
 	var state := GLTFState.new()
-	GltfQuantization.ensure_registered()
+	if not GltfQuantization.ensure_registered():
+		push_error("shared_mesh parse requires main-thread extension initialization")
+		return null
 	VramTextures.ensure_registered()
 	var entry: Dictionary = index_for(path).get(key, {})
 	var images: Variant = entry.get("images")

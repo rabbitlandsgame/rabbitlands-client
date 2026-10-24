@@ -157,5 +157,25 @@ class ClientRuntimePackageTests(unittest.TestCase):
                     self.assertIn("%*" if platform == "windows" else '"$@"', text)
 
 
+    def test_spell_comparator_source_inputs_and_explicit_pilot_launchers(self):
+        for relative in ("godot-client/native/native_crowd/src/native_spell_flight_geometry.cpp",
+                         "godot-client/native/native_crowd/src/native_spell_flight_geometry.h"):
+            self.assertIn(Path(relative), runtime_package.EXTERNAL_SOURCE_INPUTS)
+        # The generic exact-external-bytes test above mutates every listed input,
+        # including both unchanged C++ comparator implementation and header.
+        for platform, extension in (("windows", "bat"), ("linux", "sh")):
+            with self.subTest(platform=platform), tempfile.TemporaryDirectory() as directory:
+                stage = Path(directory)
+                runtime_package.write_launchers(stage, platform)
+                pilot = (stage / f"RabbitLands (Rust heat bolt pilot).{extension}").read_text(encoding="utf-8")
+                self.assertIn("RABBITLANDS_CLIENT_RUNTIME=rust", pilot)
+                self.assertIn("RABBITLANDS_RUST_EFFECTS=heat_bolt", pilot)
+                self.assertIn("ELORIA_NATIVE_PRESENTATION=0", pilot)
+                for label in ("Rust rider pilot", "Rust comparison", "legacy runtime"):
+                    text = (stage / f"RabbitLands ({label}).{extension}").read_text(encoding="utf-8")
+                    self.assertIn("RABBITLANDS_RUST_EFFECTS=", text)
+                    self.assertNotIn("RABBITLANDS_RUST_EFFECTS=heat_bolt", text)
+
+
 if __name__ == "__main__":
     unittest.main()

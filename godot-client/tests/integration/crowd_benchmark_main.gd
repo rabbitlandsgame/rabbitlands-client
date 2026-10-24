@@ -2,6 +2,7 @@ extends "res://src/app/main.gd"
 ## Benchmark-only instrumentation around the existing presentation pipeline.
 ## Nothing in the shipping client pays for these timers.
 
+var benchmark_heat_bolt: Node
 var benchmark_ground_enabled := true
 var benchmark_overhead_enabled := true
 var benchmark_animation_enabled := true
@@ -42,6 +43,7 @@ func benchmark_runtime_snapshot() -> Dictionary:
 			"worldViewportSize": [main_viewport.size.x, main_viewport.size.y]},
 		"activeBackends": {"nativeReducer": AppState.native_crowd_reducer_active(),
 			"clientRuntime": client_runtime.snapshot(),
+			"rustSpellFlights": RustSpellFlights.snapshot_for(world_root),
 			"mountedBatch": RustRiderPose.batch_snapshot(),
 			"presentation": {"requested": OS.get_environment("ELORIA_NATIVE_PRESENTATION"),
 				"nativeCapeInstances": cape_instances, "nativeCapeCalls": cape_calls,
@@ -56,7 +58,7 @@ func benchmark_runtime_snapshot() -> Dictionary:
 func benchmark_resource_diagnostics() -> Dictionary:
 	var snapshot := client_diagnostic_snapshot()
 	var result: Dictionary = {}
-	for key: String in ["client_runtime", "surface_work", "loader_work", "streaming_work",
+	for key: String in ["client_runtime", "spell_flights", "surface_work", "loader_work", "streaming_work",
 			"resource_retention", "map_cache_enabled", "map_cache_status",
 			"map_load_phases_us", "chunks_resident", "chunk_resident_bytes",
 			"chunk_revision", "vram_mode", "vram_formats", "static_memory_bytes",
@@ -519,7 +521,19 @@ func _on_actor_animation_requested(animation: Dictionary) -> void:
 			actor_id) as ReplicatedActor3D)
 
 
+func _track_effect(node: Node, kind: StringName) -> void:
+	super._track_effect(node, kind)
+	if kind == &"spell" and is_instance_valid(benchmark_heat_bolt):
+		benchmark_heat_bolt.call("observe", node)
+
+
 func _on_special_effect_requested(effect: Dictionary) -> void:
+	if is_instance_valid(benchmark_heat_bolt) and int(effect.get("effect", -1)) == 2:
+		# Explicit synthetic clock after decoding the real packet, identical
+		# in all three family backends; never used by other cells.
+		effect = effect.duplicate()
+		effect["release_delay"] = 0.2
+		effect["flight_duration"] = 0.4
 	if not benchmark_attribution_enabled:
 		super._on_special_effect_requested(effect)
 		if not benchmark_animation_enabled:

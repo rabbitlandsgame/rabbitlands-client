@@ -7,6 +7,7 @@
 
 #include <gdextension_interface.h>
 #include <godot_cpp/core/defs.hpp>
+#include <godot_cpp/classes/class_db_singleton.hpp>
 #include <godot_cpp/godot.hpp>
 
 using namespace godot;
@@ -18,7 +19,9 @@ void initialize_native_crowd_module(
     }
     ClassDB::register_class<NativeCrowdReducer>();
     ClassDB::register_class<NativeCrowdStore>();
-    ClassDB::register_class<NativeSpellFlightGeometry>();
+    if (!ClassDBSingleton::get_singleton()->class_exists("NativeSpellFlightGeometry")) {
+        ClassDB::register_class<NativeSpellFlightGeometry>();
+    }
     ClassDB::register_class<NativeCapeConstraintKernel>();
     ClassDB::register_class<NativeWorldEffectGeometry>();
 }
