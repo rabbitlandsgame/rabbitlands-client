@@ -1787,6 +1787,13 @@ static func decode_gauntlet_loot(payload: PackedByteArray) -> Dictionary:
 		return {"type": "invalid", "error": "gauntlet_loot_shape"}
 	if state.has("error") and not state.error is String:
 		return {"type": "invalid", "error": "gauntlet_loot_error"}
+	if state.has("exited") and not state.exited is bool:
+		return {"type": "invalid", "error": "gauntlet_loot_exit"}
+	if state.get("exit_destination") != null:
+		var destination: Variant = state.exit_destination
+		if not destination is Dictionary or not destination.get("map") is String or str(destination.get("map", "")).is_empty() \
+				or not _loot_integer(destination.get("x")) or not _loot_integer(destination.get("y")):
+			return {"type": "invalid", "error": "gauntlet_loot_destination"}
 	for key: String in ["run_id", "route", "phase", "leader", "reason", "announcement"]:
 		if not state.get(key) is String:
 			return {"type": "invalid", "error": "gauntlet_loot_text"}

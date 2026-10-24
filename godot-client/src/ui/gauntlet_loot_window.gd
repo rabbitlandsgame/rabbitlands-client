@@ -1,6 +1,8 @@
 extends Control
 ## Party ledger: all quantities and deliveries are server-owned snapshots.
 
+signal item_inspection_requested
+
 const Art := preload("res://src/ui/leaderboard_art.gd")
 const LedgerArt := preload("res://src/ui/gauntlet_loot_art.gd")
 const Portraits := preload("res://src/ui/leaderboard_portraits.gd")
@@ -22,6 +24,7 @@ var table: VBoxContainer
 var deliveries: VBoxContainer
 var split_button: Button
 var clear_button: Button
+var sell_all_button: Button
 var send_button: Button
 var approve_button: Button
 var status: Label
@@ -274,6 +277,8 @@ func _build() -> void:
 	next_button = _button(page_row, "›", func() -> void: _page(1))
 	split_button = _button(page_row, "Split common equally", func() -> void: _request("split"))
 	clear_button = _button(page_row, "Clear assignments", func() -> void: _request("clear"))
+	sell_all_button = _button(page_row, "Sell all to NPC", func() -> void: _request("sell_all"))
+	sell_all_button.tooltip_text = "Stage all sellable shared loot at the established NPC prices. Adjust individual NPC quantities before saving. Personal rewards, staged exchange listings and unsellable items are kept."
 	_storage = PanelContainer.new()
 	_storage.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_storage.size_flags_stretch_ratio = 1.0
@@ -330,9 +335,8 @@ func _build() -> void:
 	approve_button = _button(footer, "Approve my payment", _approve_payment)
 	approve_button.hide()
 	_button(footer, "↻", _open).tooltip_text = "Refresh the loot ledger"
-	var save_button := _button(footer, "Save & close", close)
-	save_button.custom_minimum_size.x = 132
-	send_button = _button(footer, "CONFIRM & SEND TO STORAGE", _confirm_send, true)
+	_button(footer, "Close", close).tooltip_text = "Close for now. Unsent loot remains reserved."
+	send_button = _button(footer, "SAVE & EXIT TO BEAM", _confirm_send, true)
 	send_button.add_theme_font_override("font", Art.title_font())
 	send_button.add_theme_font_size_override("font_size", 15)
 	send_button.custom_minimum_size = Vector2(280, 42)
@@ -342,10 +346,11 @@ func _build() -> void:
 	editor.confirmed.connect(_apply_editor)
 	add_child(editor)
 	confirmation = ConfirmationDialog.new()
-	confirmation.title = "Send gauntlet loot to storage"
-	confirmation.ok_button_text = "Send to storage"
+	confirmation.title = "Save gauntlet loot and return to the beam"
+	confirmation.ok_button_text = "Save & exit to beam"
 	_wrap_dialog_label(confirmation.get_label(), 440)
-	confirmation.confirmed.connect(func() -> void: _request("send", {"run_id": _confirmation_run}, _confirm_revision))
+	confirmation.confirmed.connect(func() -> void:
+		_request("exit" if _state.phase == "sent" else "send", {"run_id": _confirmation_run, "exit": true}, _confirm_revision))
 	add_child(confirmation)
 	price_dialog = ConfirmationDialog.new()
 	price_dialog.title = "Rare item value"
@@ -481,6 +486,7 @@ func _on_state_changed(path: StringName) -> void:
 func apply_snapshot(state: Dictionary) -> void:
 	if state.is_empty(): return
 	var changed_run := str(_state.get("run_id", "")) != str(state.run_id)
+	var just_exited := not changed_run and bool(state.get("exited", false)) and not bool(_state.get("exited", false))
 	if changed_run and not _state.is_empty() and panel.visible and not state.open:
 		for key: String in ["ledgers", "ledger_page", "ledger_pages"]:
 			if state.has(key): _state[key] = state[key].duplicate(true) if state[key] is Array else state[key]
@@ -501,6 +507,7 @@ func apply_snapshot(state: Dictionary) -> void:
 	_state = state.duplicate(true)
 	_pending_since = 0
 	set_process(false)
+	if just_exited: close()
 	reopen.visible = not panel.visible and (state.phase != "sent" or int(state.get("exchange_total", 0)) > 0 or bool(state.get("other_pending", false)))
 	reopen.text = "Party exchange (%d)" % int(state.exchange_total) if int(state.get("exchange_total", 0)) > 0 and state.phase == "sent" else ("More reserved loot" if state.phase == "sent" else "Gauntlet loot (%d)" % int(state.total))
 	if not str(state.announcement).is_empty():
@@ -511,7 +518,7 @@ func apply_snapshot(state: Dictionary) -> void:
 			announcement.show()
 			get_tree().create_timer(9).timeout.connect(func() -> void:
 				if _last_notice == key and not panel.visible: announcement.hide())
-	if state.open:
+	if state.open and not just_exited:
 		panel.show()
 		if panel.has_meta(WindowStack.STACK_META): WindowStack.activate(panel)
 		else: panel.move_to_front()
@@ -540,7 +547,7 @@ func _render() -> void:
 	_exchange_heading.visible = not _compact_view
 	heading.text = "GAUNTLET COMPLETE" if _state.phase == "complete" else ("LOOT DELIVERED" if _state.phase == "sent" else ("GAUNTLET IN PROGRESS" if _state.phase == "active" else "GAUNTLET ENDED"))
 	route.text = str(_state.route)
-	hint.text = "All creature drops held until completion. Personal cache rewards stay with their owner."
+	hint.text = "Click an item icon to inspect it. Personal cache rewards stay with their owner."
 	_portrait_nodes.clear()
 	_row_panels.clear()
 	portraits.begin_batch()
@@ -556,12 +563,9 @@ func _render() -> void:
 	for member: Dictionary in _state.members: _delivery_card(member)
 	split_button.disabled = not _editable()
 	clear_button.disabled = not _editable()
-	send_button.disabled = not _editable() or not bool(_state.can_send)
-	send_button.text = "DELIVERED TO STORAGE" if _state.phase == "sent" else "CONFIRM & SEND TO STORAGE"
-	for row: Dictionary in _state.rows:
-		if int(row.get("exchange_quantity", 0)) > 0:
-			send_button.text = "DISTRIBUTION CONFIRMED" if _state.phase == "sent" else "CONFIRM DISTRIBUTION"
-			break
+	sell_all_button.disabled = not _editable()
+	send_button.disabled = (not bool(_state.is_leader) or _pending_since > 0 or bool(_state.get("exited", false))) if _state.phase == "sent" else (not _editable() or not bool(_state.can_send))
+	send_button.text = "RETURN PARTY TO BEAM" if _state.phase == "sent" else "SAVE & EXIT TO BEAM"
 	send_button.visible = not _show_exchange
 	approve_button.hide()
 	for member: Dictionary in _state.members:
@@ -663,11 +667,24 @@ func _item_row(row: Dictionary) -> void:
 	item.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	item.size_flags_stretch_ratio = 0.85
 	line.add_child(item)
-	var icon_plate := PanelContainer.new()
+	var icon_plate := Button.new()
+	icon_plate.name = "InspectItem"
+	icon_plate.set_meta("gauntlet_loot_inspect", true)
+	icon_plate.tooltip_text = "Inspect %s · description and stats" % str(row.name)
+	icon_plate.custom_minimum_size = Vector2.ONE * (34 if _compact_view else 46)
 	icon_plate.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	icon_plate.add_theme_stylebox_override("panel", style(Color("2e484a"), Color("091719"), 2))
+	icon_plate.add_theme_stylebox_override("normal", style(Color("2e484a"), Color("091719"), 2))
+	icon_plate.add_theme_stylebox_override("hover", style(CYAN, Color("173038"), 2))
+	icon_plate.add_theme_stylebox_override("pressed", style(CYAN, Color("102228"), 2))
+	icon_plate.add_theme_stylebox_override("focus", style(CYAN, Color(0, 0, 0, 0), 2))
+	icon_plate.pressed.connect(_inspect_item.bind(row))
 	item.add_child(icon_plate)
-	_icon(icon_plate, int(row.image_id), 30 if _compact_view else 42)
+	var item_icon := _icon(icon_plate, int(row.image_id), 0)
+	item_icon.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	item_icon.offset_left = 2
+	item_icon.offset_top = 2
+	item_icon.offset_right = -2
+	item_icon.offset_bottom = -2
 	var item_text := VBoxContainer.new()
 	item_text.alignment = BoxContainer.ALIGNMENT_CENTER
 	item_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -873,6 +890,17 @@ func close() -> void:
 func _page(direction: int) -> void:
 	_request("open", {"page": int(_state.page) + direction})
 
+func _inspect_item(row: Dictionary) -> void:
+	if _state.is_empty(): return
+	_select_row(str(row.id))
+	item_inspection_requested.emit()
+	# Inspection is read-only: it never waits for or locks allocation edits.
+	var data := {"action": "inspect", "run_id": str(_state.run_id),
+		"row_id": str(row.id), "page": int(_state.page)}
+	var error: Error = _send.call("#gauntletloot " + JSON.stringify(data))
+	if error != OK:
+		status.text = "Could not inspect this item. Check the connection and try again."
+
 func _request(action: String, extra: Dictionary = {}, revision := -1, current_run := true) -> void:
 	if _state.is_empty() or _pending_since > 0: return
 	var data := {"action": action, "run_id": str(_state.run_id),
@@ -945,10 +973,14 @@ func _apply_editor() -> void:
 	_request("allocate", {"run_id": _editor_run, "row_id": _editing.id, "allocations": allocation}, _edit_revision)
 
 func _confirm_send() -> void:
-	if not _editable() or not bool(_state.can_send): return
+	if send_button.disabled: return
 	_confirm_revision = int(_state.revision)
 	_confirmation_run = str(_state.run_id)
-	confirmation.dialog_text = "Send all %d allocated item types directly to the %d party members' personal storage?\n\nReview the storage preview before confirming. This delivery can only happen once." % [int(_state.total), _state.members.size()]
+	if _state.phase == "sent":
+		confirmation.dialog_text = "Loot is saved in storage. Close the party's loot windows and return everyone still in this instance to the beam?"
+		confirmation.popup_centered(Vector2i(480, 180))
+		return
+	confirmation.dialog_text = "Save all %d allocated item types to the %d party members' personal storage, then close the loot windows and return everyone still in this instance to the beam?\n\nReview the storage preview before confirming. This delivery can only happen once." % [int(_state.total), _state.members.size()]
 	for member: Dictionary in _state.members:
 		if int(member.charge_gold) > 0:
 			confirmation.dialog_text += "\n%s pays %d GC from storage and receives %d GC back." % [member.name, int(member.charge_gold), int(member.rebate_gold)]

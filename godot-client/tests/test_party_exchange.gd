@@ -164,6 +164,16 @@ func run() -> void:
 	ui.apply_snapshot(stage)
 	if OS.get_cmdline_user_args().has("--render"):
 		await capture("party-exchange-staging.png")
+	var exited := state.duplicate(true)
+	exited.open = true
+	ui.apply_snapshot(exited)
+	exited.open = false
+	exited.exited = true
+	ui.apply_snapshot(exited)
+	expect(not ui.panel.visible and ui.reopen.visible, "exiting closes the ledger and keeps party listings accessible")
+	exited.open = true
+	ui.apply_snapshot(exited)
+	expect(ui.panel.visible and ui._show_exchange, "party exchange listings reopen after returning to the beam")
 	ui.queue_free()
 	background.queue_free()
 	await process_frame

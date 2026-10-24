@@ -78,14 +78,35 @@ func run() -> void:
 	bad = state.duplicate(true)
 	bad.rows[0].quantity = 1.5
 	expect(protocol.decode_gauntlet_loot(JSON.stringify(bad).to_utf8_buffer()).type == "invalid", "fractional quantities are rejected")
+	bad = state.duplicate(true)
+	bad.exit_destination = {"map": "four_gates", "x": -1, "y": 162}
+	expect(protocol.decode_gauntlet_loot(JSON.stringify(bad).to_utf8_buffer()).type == "invalid", "invalid beam preload coordinates are rejected")
+	bad.exit_destination.x = 309
+	bad.exited = false
+	expect(protocol.decode_gauntlet_loot(JSON.stringify(bad).to_utf8_buffer()).type == "gauntlet_loot", "beam preload destinations decode with the loot ledger")
 	ui.apply_snapshot(state)
 	await process_frame
 	await process_frame
 	expect(ui.panel.visible and ui.table.get_child_count() == 6, "complete run opens six ledger rows")
 	expect(not ui.send_button.disabled, "complete allocations enable confirmation")
+	var inspect_button: Button = ui.table.get_child(4).find_child("InspectItem", true, false)
+	expect(inspect_button != null and not inspect_button.disabled, "loot item icons offer inspection")
+	inspect_button.pressed.emit()
+	expect(sent.back().action == "inspect" and sent.back().row_id == "4" and sent.back().run_id == state.run_id and sent.back().page == 0,
+		"inspection identifies the server-owned loot row and page")
+	expect(not ui.send_button.disabled and ui._pending_since == 0, "inspection does not lock delivery or wait for a ledger revision")
+	ui.sell_all_button.pressed.emit()
+	expect(sent.back().action == "sell_all" and not sent.back().has("npc_gold") and ui.panel.visible,
+		"sell all stages a server-priced plan without closing the loot window")
+	ui.apply_snapshot(state)
+	ui.call("_edit_sale", state.rows[1])
+	expect(ui.sale_dialog.visible, "individual NPC quantities remain editable after staging all sales")
+	ui.sale_dialog.hide()
 	ui.split_button.pressed.emit()
 	expect(sent.back().action == "split" and sent.back().revision == 3, "split sends the server revision")
 	expect(ui.send_button.disabled, "pending edits disable delivery")
+	(ui.table.get_child(0).find_child("InspectItem", true, false) as Button).pressed.emit()
+	expect(sent.back().action == "inspect", "items remain inspectable while allocation edits are pending")
 	ui.apply_snapshot(state)
 	ui.call("_edit_item", state.rows[0])
 	expect(ui.editor.visible and ui.editor_fields.size() == 4, "custom split exposes all recipients")
@@ -101,6 +122,9 @@ func run() -> void:
 	state.is_leader = false
 	ui.apply_snapshot(state)
 	expect(ui.split_button.disabled and ui.send_button.disabled, "members see a read-only allocation preview")
+	expect(ui.sell_all_button.disabled, "only the party leader can stage all NPC sales")
+	(ui.table.get_child(4).find_child("InspectItem", true, false) as Button).pressed.emit()
+	expect(sent.back().action == "inspect", "non-leaders can inspect rare loot")
 	state.is_leader = true
 	ui.apply_snapshot(state)
 	ui.call("_edit_price", state.rows[4])
@@ -170,6 +194,16 @@ func run() -> void:
 		ui.call("_edit_sale", state.rows[5])
 		await capture("ledger-sale-dialog.png")
 		ui.sale_dialog.hide()
+	ui.apply_snapshot(state)
+	ui.send_button.pressed.emit()
+	expect(ui.confirmation.dialog_text.contains("beam"), "save and exit explains the party's return to the beam")
+	ui.confirmation.confirmed.emit()
+	expect(sent.back().action == "send" and sent.back().exit and ui.panel.visible, "save and exit waits for delivery and the server's exit acknowledgement")
+	state.phase = "sent"
+	state.exited = true
+	ui.apply_snapshot(state)
+	expect(not ui.panel.visible and not ui.reopen.visible, "successful save and exit closes the party's completed ledger")
+	ui.apply_snapshot(sample())
 	ui.close()
 	expect(not ui.panel.visible and ui.reopen.visible, "closing preserves a way back to reserved loot")
 	ui.queue_free()
