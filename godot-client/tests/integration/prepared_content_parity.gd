@@ -687,6 +687,8 @@ func run(tree: SceneTree, plan_path: String) -> Dictionary:
 		"exact describe-pilot qualification plan is required")
 	_report = {"schemaVersion": 1, "fixture": "prepared_content_pilot", "targets": [],
 		"runtimeBuild": {"template": OS.has_feature("template"), "editor": OS.has_feature("editor"),
+			"globalizedResourceRoot": ProjectSettings.globalize_path("res://"),
+			"resolvedProjectRoot": Prepared._project_root(),
 			"userDataDir": OS.get_user_data_dir()}, "engine": Engine.get_version_info(),
 		"textureSkip": Graphics.active_texture_skip(), "usableFormats": Vram.usable_formats(),
 		"scope": "direct selected component and independent package parity; no gameplay/camera/route/performance claim"}

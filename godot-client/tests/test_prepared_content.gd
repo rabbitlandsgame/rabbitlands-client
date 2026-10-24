@@ -140,6 +140,14 @@ func _script_preflight() -> void:
 		Engine.remove_meta("prepared_script_ran")
 
 func _run() -> void:
+	_expect(Prepared._resource_root("", "C:/fixture/app/RabbitLands.exe") == "C:/fixture/app",
+		"PCK template with an empty resource root uses its executable directory")
+	_expect(Prepared._resource_root("C:/fixture/project/", "C:/engine/Godot.exe") == "C:/fixture/project",
+		"editor project keeps its actual project root")
+	_expect(Prepared.logical_source("res://assets/world/fixture.glb") == "godot-client/assets/world/fixture.glb"
+		and Prepared.logical_source("res://../eloria-assets/maps/fixture/world.glb") == "eloria-assets/maps/fixture/world.glb"
+		and Prepared.logical_source("res://../../outside.glb").is_empty(),
+		"virtual project and sibling asset scopes normalize without accepting an escape")
 	_lifecycle_isolation()
 	_script_preflight()
 	DirAccess.make_dir_recursive_absolute(DIRECTORY)
