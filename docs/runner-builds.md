@@ -1,12 +1,13 @@
 # Desktop releases on runners with limited disk space
 
 For the separate Steam depot and macOS test workflow, see [store builds](store-builds.md).
-The GitHub installer workflow described here retains its current triggers and outputs.
+The GitHub installer workflow described here builds and publishes both desktop installers.
 
 `godot-client/tools/runner_release.py` stages one platform in an existing draft
 release. Windows and Linux use **separate jobs**, pinned to the same full client
 commit. `finalize_runner_release.py` combines their small receipts after both
-jobs succeed. The usual local `build_release.py` commands remain available.
+jobs succeed. A final publishing job rechecks the downloads and makes the
+verified release public. The usual local `build_release.py` commands remain available.
 Serialize complete release workflows with one repository-wide concurrency group
 and `cancel-in-progress: false`; only the two platform jobs within a single
 release should stage into the draft concurrently.
@@ -20,13 +21,15 @@ the default branch before publishing the first package-format release.
 
 The workflow is `.github/workflows/desktop-release.yml`, named **Build desktop
 release**. It builds both desktop platforms on GitHub's hosted runners, with
-Inno Setup 6 for Windows, and leaves the verified result as a draft. It does not
-publish the release or deploy the server's client-update policy.
+Inno Setup 6 for Windows. After both builds, signing/startup checks, finalization
+and receipt retention succeed, it automatically publishes the release as
+**latest**. The server's client-update enforcement policy remains a separate deployment.
 
 The currently published installer remains online while a replacement draft is
-built. Publishing the verified replacement triggers **Retire previous published
-client**, which checks the public asset inventory before removing older published
-compiled releases. It leaves any in-progress replacement draft alone.
+built. After publication, the publishing job runs the existing verified cleanup
+to remove older compiled releases and unused supporting files. Manual publication
+still triggers **Retire previous published client**, using the same cleanup.
+An in-progress replacement draft is preserved.
 
 ## Reusing uploaded downloads
 
@@ -99,14 +102,15 @@ platform job summary and runner receipt report cache hits, packages rebuilt or
 reused, and uploaded/reused bytes. The first run of this optimization populates
 the caches; the next code-only run demonstrates the fast path.
 
-Publishing still requires the usual manual review. After verifying the public
-replacement, the cleanup workflow retires older compiled releases and removes
-shared files no longer referenced by the current build. It postpones shared
+After verifying the public replacement, the publishing job retires older
+compiled releases and removes shared files no longer referenced by the current
+build. It postpones shared
 cleanup whenever any client draft exists, including unfinished builds whose
 inventories are not yet ready. Failed builds leave the working release intact.
-The cleanup job loads its tools from the published client tag, so its format
-matches that release. Promote this workflow change to the default branch before
-publishing the first shared-storage build.
+The manual-publication cleanup job loads its tools from the published client
+tag; automatic publication uses the same source commit as the builds.
+[GitHub's workflow token does not trigger release-event workflows](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/trigger-a-workflow#triggering-a-workflow-from-a-workflow), so the publishing job
+invokes cleanup directly. No additional account token or secret is needed.
 
 Linux installation now downloads and verifies the native updater, which installs
 the same independent packages used for updates. Its signed manifest is embedded
@@ -138,13 +142,14 @@ After activation:
   Direct pushes to `master` also start it. A push to `develop` does not.
 - **Manual:** open [Actions → Build desktop release](https://github.com/rabbitlandsgame/rabbitlands-client/actions/workflows/desktop-release.yml),
   click **Run workflow**, choose **master** for the stable source or **develop**
-  for a test build, then click **Run workflow** again. Both platforms use that
-  run's exact commit, even if the branch advances during the build.
+  for a develop release, then click **Run workflow** again. Both platforms use
+  that run's exact commit, even if the branch advances during the build. Both
+  manual and automatic runs publish after all required checks pass.
 - **Progress:** the run has a draft preparation job, separate Windows and Linux
-  jobs, and final verification. The summary links to the release downloads.
-- **Result:** review the current [draft release](https://github.com/rabbitlandsgame/rabbitlands-client/releases).
-  Publication remains manual. Shared supporting files are available during the
-  build, so the downloaded draft installers can be tested before publication.
+  jobs, final verification, and publication. The summary links to the public release.
+- **Result:** download from the [latest release](https://github.com/rabbitlandsgame/rabbitlands-client/releases/latest).
+  Published installers become available to the client's startup update check.
+  Shared supporting files are available while the replacement is still building.
   Download the named Windows setup or Linux helper from the release's **Assets**
   list. GitHub supplies temporary download URLs for drafts, so the instructions
   use that list rather than links to a tag that is not yet published. The same
@@ -161,6 +166,16 @@ Only one release workflow runs at a time. After failure, fix the cause and start
 a fresh manual run (or use GitHub's rerun controls). Previous downloads are not
 pruned by a failed platform build. Small receipts, disk reports and startup logs
 are retained as run artifacts for seven days; complete game folders are not.
+
+Build or verification failures leave the replacement in draft. The final publish
+job rechecks the exact source commit, installer inventory and every shared
+download's size/digest before publication, then checks the public result before
+retiring previous releases. It refuses a source commit that does not contain
+the currently published client, preventing an older manual build becoming latest.
+If publication succeeds but cleanup fails, the new build stays published and
+older downloads remain available. Use **Re-run failed jobs** to retry publication
+and cleanup without rebuilding; an already published verified release is accepted
+only while it is still latest.
 
 `setup_runner_tools.py` downloads Godot 4.7.2 and Inno Setup 6.7.3 from their
 official releases, checks pinned sizes and SHA-256 hashes, extracts only the
@@ -308,8 +323,10 @@ python godot-client/tools/finalize_runner_release.py `
 Finalization rejects mismatched commits, release IDs, platform inventories and
 remote checksums. After every replacement download is verified, it adds
 `SHA256SUMS`, updates the release's commit-specific tag and installation notes,
-and removes previous compiled files. The result stays a **draft**. The local
-`client_updates.json` output is not uploaded or deployed automatically.
+and removes previous draft files. This standalone command leaves a **draft**.
+The Actions workflow then publishes using
+`publish_runner_release.py --receipt <out>/runner-release.json` in a separate
+job. The local `client_updates.json` output is not deployed automatically.
 
 The online installers' public download URLs become usable after publication.
 On failure, previous downloads are retained. Rerun in a fresh job/output

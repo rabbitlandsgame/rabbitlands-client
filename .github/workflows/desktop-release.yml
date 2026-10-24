@@ -154,10 +154,36 @@ jobs:
         run: |
           python godot-client/tools/finalize_runner_release.py --windows "$RELEASE_TEMP/receipts/windows-runner.json" --linux "$RELEASE_TEMP/receipts/linux-runner.json" --out "$RELEASE_TEMP/final-release"
           cat "$RELEASE_TEMP/final-release/RELEASE-NOTES.md" >> "$GITHUB_STEP_SUMMARY"
-          printf '\nThe release remains a draft. Review it in [GitHub Releases](https://github.com/rabbitlandsgame/rabbitlands-client/releases).\n' >> "$GITHUB_STEP_SUMMARY"
+          printf '\nBoth platforms are verified. The publishing job will make this release public.\n' >> "$GITHUB_STEP_SUMMARY"
       - name: Retain release verification and the optional server policy
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: release-verification
           path: ${{ runner.temp }}/final-release/*
           retention-days: 7
+
+  publish:
+    needs: [prepare, finalize]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.prepare.outputs.commit }}
+          fetch-depth: 0
+          filter: blob:none
+          sparse-checkout: godot-client/tools
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.13'
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release-verification
+          path: ${{ runner.temp }}/verified-release
+      - name: Publish the verified release and retire previous downloads
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TEMP: ${{ runner.temp }}
+        run: python godot-client/tools/publish_runner_release.py --receipt "$RELEASE_TEMP/verified-release/runner-release.json"
