@@ -115,7 +115,7 @@ def test_budget_counts_linked_assets_once_and_preserves_margin(tmp_path, monkeyp
         budget.free_check()
 
 
-def test_live_resource_rename_restarts_inventory_and_counts_final_file(tmp_path, monkeypatch):
+def test_live_resource_rename_rescans_directory_and_counts_final_file(tmp_path, monkeypatch):
     staging, final = tmp_path / "writing-000952.res", tmp_path / "digest.res"
     staging.write_bytes(bytes(256))
     original = Path.lstat
@@ -132,7 +132,64 @@ def test_live_resource_rename_restarts_inventory_and_counts_final_file(tmp_path,
     assert moved and final.is_file() and not staging.exists()
 
 
-def test_inventory_retry_resets_inode_dedup_and_keeps_budget_enforcement(tmp_path, monkeypatch):
+@pytest.mark.parametrize("replace", [False, True])
+def test_directory_retry_accounts_observed_same_name_growth_or_replacement(tmp_path, monkeypatch, replace):
+    stable = tmp_path / "a-stable.res"
+    stable.write_bytes(bytes(64))
+    staging, final = tmp_path / "writing-000952.res", tmp_path / "digest.res"
+    staging.write_bytes(bytes(128))
+    original_stat, original_walk = Path.lstat, storage.os.walk
+    moved = []
+
+    def sorted_walk(*args, **kwargs):
+        for directory, folders, files in original_walk(*args, **kwargs):
+            yield directory, folders, sorted(files)
+
+    def publish_and_grow(path, *args, **kwargs):
+        if path == staging and not moved:
+            staging.rename(final)
+            if replace:
+                replacement = tmp_path / "replacement.res"
+                replacement.write_bytes(bytes(1024))
+                replacement.replace(stable)
+            else:
+                stable.write_bytes(bytes(1024))
+            moved.append(True)
+        return original_stat(path, *args, **kwargs)
+
+    monkeypatch.setattr(storage.os, "walk", sorted_walk)
+    monkeypatch.setattr(Path, "lstat", publish_and_grow)
+    budget = storage.DiskBudget([tmp_path], capacity=1000, reserve=64)
+    with pytest.raises(ValueError, match="margin"):
+        budget.check("live growth must remain accounted")
+    assert budget.peak == 1152 + (64 if replace else 0)
+    assert storage.unique_bytes([tmp_path]) == 1152  # Fresh idle inventory.
+
+
+def test_rename_retry_discovers_new_nested_directory_and_deduplicates_links(tmp_path, monkeypatch):
+    (tmp_path / "nested").mkdir()
+    (tmp_path / "nested/keep.res").write_bytes(bytes(64))
+    staging, final = tmp_path / "writing-000952.res", tmp_path / "digest.res"
+    staging.write_bytes(bytes(128))
+    original = Path.lstat
+    moved = []
+
+    def publish_with_new_directory(path, *args, **kwargs):
+        if path == staging and not moved:
+            staging.rename(final)
+            nested = tmp_path / "new-nested"
+            nested.mkdir()
+            os.link(final, nested / "alias.res")
+            (nested / "new.res").write_bytes(bytes(256))
+            moved.append(True)
+        return original(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "lstat", publish_with_new_directory)
+    assert storage.unique_bytes([tmp_path]) == 448
+    assert moved
+
+
+def test_inventory_retry_preserves_inode_dedup_and_keeps_budget_enforcement(tmp_path, monkeypatch):
     staging, final, alias = tmp_path / "writing-000952.res", tmp_path / "digest.res", tmp_path / "a-alias.res"
     staging.write_bytes(bytes(256))
     os.link(staging, alias)
@@ -154,7 +211,7 @@ def test_inventory_retry_resets_inode_dedup_and_keeps_budget_enforcement(tmp_pat
     monkeypatch.setattr(storage.os, "walk", sorted_walk)
     monkeypatch.setattr(Path, "lstat", rename_before_stat)
     budget.check("live rename", additional=64)
-    assert len(scans) == 2
+    assert len(scans) == 1  # Retry the affected directory, not all accounted roots.
     assert budget.peak == 256 and budget.planned_peak == 320
     with pytest.raises(ValueError, match="margin"):
         budget.check("still enforced", additional=65)

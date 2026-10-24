@@ -6,35 +6,23 @@ import io
 import os
 from pathlib import Path
 import shutil
-from stat import S_ISLNK
+from stat import S_ISDIR, S_ISLNK
 
 RUNNER_BYTES = 14_000_000_000
 RESERVE_BYTES = 2_000_000_000
 INVENTORY_ATTEMPTS = 8
 
 
-class _InventoryChanged(Exception):
-    """An enumerated entry disappeared before its size could be measured."""
-
-
 def unique_bytes(roots: list[Path], *, allow_internal_symlinks=False) -> int:
-    """Count linked files once; retry boundedly when a live writer renames one.
+    """Count linked files once, with bounded recovery for live atomic renames.
 
-    A traversal is not an atomic filesystem snapshot. Restarting the whole
-    inventory gives a renamed final resource a chance to be accounted for,
-    rather than silently omitting a vanished staging name. Physical free-space
-    checks and allocation reservations remain separate mandatory guards.
+    Rescan only a directory with vanished entries, measuring newly observed
+    names before its stable prefix. Keep the largest observed size per inode
+    conservatively even if deleted or replaced during this sample. A walk
+    is not atomic; idle recounts, allocation reservations and physical free
+    space remain separate mandatory guards.
     """
-    for attempt in range(INVENTORY_ATTEMPTS):
-        try:
-            return _unique_bytes_once(roots, allow_internal_symlinks=allow_internal_symlinks)
-        except _InventoryChanged as error:
-            if attempt == INVENTORY_ATTEMPTS - 1:
-                raise ValueError("Runner storage inventory kept changing; cannot verify disk budget") from error
-
-
-def _unique_bytes_once(roots, *, allow_internal_symlinks):
-    seen = set()
+    seen = {}
     total = 0
     def walk_error(error):
         # os.walk otherwise silently skips unreadable subtrees, which would
@@ -45,44 +33,62 @@ def _unique_bytes_once(roots, *, allow_internal_symlinks):
         if not allow_internal_symlinks or not any(path.resolve().is_relative_to(root.resolve()) for root in roots if root.is_dir()):
             raise ValueError(f"Runner input link escapes its accounted roots: {path}")
 
-    def entry_stat(path, *, enumerated=False):
-        try:
-            return path.lstat()
-        except FileNotFoundError as error:
-            if enumerated:
-                raise _InventoryChanged(str(path)) from error
-            raise
-
-    def count(path, *, enumerated=False, observation=None):
+    def count(path, observation):
         nonlocal total
-        stat = observation if observation is not None else entry_stat(path, enumerated=enumerated)
+        stat = observation
         if S_ISLNK(stat.st_mode):
             check_link(path)
         key = (stat.st_dev, stat.st_ino)
-        if key not in seen:
-            seen.add(key)
-            total += stat.st_size
+        previous = seen.get(key, 0)
+        if stat.st_size > previous:
+            total += stat.st_size - previous
+            seen[key] = stat.st_size
+
+    def directory_entries(directory, names):
+        observed_names, regular_folders = set(), {}
+        for attempt in range(INVENTORY_ATTEMPTS):
+            vanished = False
+            # Check new final/staging names before walking the stable prefix
+            # again, so its cost cannot repeatedly outlast a transient name.
+            names = sorted(names, key=lambda name: name in observed_names)
+            for name in names:
+                path = Path(directory) / name
+                try:
+                    observation = path.lstat()
+                except FileNotFoundError:
+                    # A prior observation stays conservatively counted. An
+                    # unseen missing name requires discovery of its successor.
+                    vanished |= name not in observed_names
+                    regular_folders.pop(name, None)
+                    continue
+                observed_names.add(name)
+                if S_ISLNK(observation.st_mode):
+                    regular_folders.pop(name, None)
+                    count(path, observation)
+                elif S_ISDIR(observation.st_mode):
+                    regular_folders[name] = True
+                else:
+                    regular_folders.pop(name, None)
+                    count(path, observation)
+            if not vanished:
+                return list(regular_folders)
+            if attempt == INVENTORY_ATTEMPTS - 1:
+                raise ValueError("Runner storage inventory kept changing; cannot verify disk budget")
+            # Keep inode/name observations within this sample, and discover
+            # the final checksum name which replaced a transient staging file.
+            # Enumeration errors propagate; they are never empty inventories.
+            with os.scandir(directory) as entries:
+                names = [entry.name for entry in entries]
 
     for root in roots:
         # Accounted roots are required inputs, unlike live descendant names.
         # Never turn a missing root into an empty successful inventory.
-        root.lstat()
+        observation = root.lstat()
         if root.is_file():
-            count(root)
+            count(root, observation)
             continue
         for directory, folders, files in os.walk(root, followlinks=False, onerror=walk_error):
-            regular_folders = []
-            for name in folders:
-                path = Path(directory) / name
-                observation = entry_stat(path, enumerated=True)
-                if S_ISLNK(observation.st_mode):
-                    count(path, observation=observation)
-                else:
-                    regular_folders.append(name)
-            folders[:] = regular_folders
-            for name in files:
-                path = Path(directory) / name
-                count(path, enumerated=True)
+            folders[:] = directory_entries(directory, [*folders, *files])
         root.lstat()
     return total
 
