@@ -453,10 +453,17 @@ def validate_report(data: dict, request: dict, log: str) -> dict:
                 if request.get("client_runtime") == "rust":
                     actual = _object(census["afterSample"].get("mountedPresentation"), name + ".mountedPresentation")
                     pose = _object(actual.get("rustPose"), name + ".rustPose")
-                    if pose.get("available") != 80 or pose.get("eligible") != 80 or pose.get("profiles") != {"moor_pony": 80} \
+                    profiles = _object(cell.get("mountProfiles"), name + ".mountProfiles")
+                    if sum(_integer(value, name + ".mountProfileCount") for value in profiles.values()) != 80:
+                        raise EvidenceError(f"{name}: requested mount profile census differs")
+                    supported = _integer(profiles.get("moor_pony"), name + ".supportedRiders", 1)
+                    if pose.get("available") != 80 or pose.get("supported") != supported \
+                            or pose.get("eligible") != supported or pose.get("profiles") != profiles \
                             or pose.get("requestedModes") != {"rust": 80} or pose.get("failures") != 0 \
-                            or pose.get("disabled") != 0 or pose.get("activeVisuals") != pose.get("appliedActiveVisuals"):
+                            or pose.get("disabled") != 80 - supported \
+                            or pose.get("eligibleActiveVisuals") != pose.get("appliedEligibleActiveVisuals"):
                         raise EvidenceError(f"{name}: actual Rust rider coverage or fallback differs")
+                    _integer(pose.get("eligibleActiveVisuals"), name + ".eligibleActiveRiders", 1)
                     _integer(pose.get("applications"), name + ".rustApplications", 1)
                     native = _object(runtime["activeBackends"]["clientRuntime"].get("native"), name + ".rustNative")
                     _integer(native.get("poses_applied"), name + ".nativePosesApplied", 1)
