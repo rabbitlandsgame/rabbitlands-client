@@ -3023,8 +3023,8 @@ def _main(argv=None, storage=None) -> int:
                         help="build and qualify the native runtime and fresh prepared pilot on native Windows/Linux")
     parser.add_argument("--native-runtime-cache", type=Path,
                         help="verified payload-only cache for full optimization builds")
-    parser.add_argument("--software-gpu-index", type=int, default=0,
-                        help="Windows release-cook WARP adapter index (hosted runners use zero)")
+    parser.add_argument("--software-gpu-index", type=int,
+                        help="optional Windows WARP index; default identifies system WARP by DXGI identity")
     parser.add_argument("--installer", action="store_true", help="also build an Inno Setup installer")
     parser.add_argument("--iscc", help="path to Inno Setup's ISCC.exe")
     parser.add_argument("--no-client-updates", action="store_true", help="build a client without the restart updater")

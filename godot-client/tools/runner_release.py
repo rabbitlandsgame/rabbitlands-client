@@ -19,6 +19,8 @@ import client_release
 import shared_release_assets as shared
 import package_client as package
 import release_native_runtime
+import release_graphics_preflight
+import release_software_graphics
 import runner_retirement
 from release_storage import DiskBudget
 from release_asset_cache import AssetCache, input_key
@@ -266,6 +268,16 @@ def build(options) -> Path:
     source = root / "source"
     storage.source = source / "godot-client"
     output = root / "downloads"
+    # A tiny rendered probe must pass before compiler/source/texture work.
+    # Requested flags alone are not proof of the actual selected adapter.
+    try:
+        graphics_config = release_software_graphics.prepare_graphics(options.platform,
+            options.godot.resolve().parent, options.godot.resolve().parent, storage.check)
+    except ValueError as error:
+        release.write_json(root / "graphics-configuration-failure.json", {"status": "failed", "error": str(error)})
+        raise
+    release_graphics_preflight.run_preflight(graphics_config, options.godot,
+        root / "graphics-preflight", storage.check)
     # Reserve compiler scratch while only the small selected native source is
     # present. The full build still verifies this cache against its own source.
     bootstrap = release_native_runtime.prewarm_cache(package.REPO, sha, options.platform,

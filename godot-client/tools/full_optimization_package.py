@@ -96,7 +96,7 @@ def stop_owned(child):
 
 class FullOptimizationBuild:
     def __init__(self, project, stage, godot, platform, commit, work_root, native_cache,
-                 check_budget=None, *, software_gpu_index=0, native_bootstrap=None):
+                 check_budget=None, *, software_gpu_index=None, native_bootstrap=None):
         self.project, self.stage, self.godot = map(lambda value: Path(value).resolve(), (project, stage, godot))
         self.platform, self.commit = platform, commit
         self.root, self.cache = Path(work_root).resolve(), Path(native_cache).resolve()

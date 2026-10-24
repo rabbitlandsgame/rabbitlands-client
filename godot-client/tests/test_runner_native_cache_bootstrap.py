@@ -90,11 +90,38 @@ def bootstrap(tmp_path, monkeypatch):
     monkeypatch.setattr(runner.client_release, "identity", lambda *args: {})
     monkeypatch.setattr(runner, "GitHubSink", lambda *args: object())
     monkeypatch.setattr(runner.package, "main", package)
+    monkeypatch.setattr(runner.release_software_graphics, "prepare_graphics",
+                        lambda *args, **kwargs: {"platform": options.platform})
+    def graphics_preflight(config, engine, root, check):
+        assert engine == options.godot and config["platform"] == options.platform
+        assert root == check.__self__.root / "graphics-preflight"
+        assert not check.__self__.source.parent.exists()
+        calls.append("graphics-preflight")
+        return {"status": "verified_scratch_retired"}
+    monkeypatch.setattr(runner.release_graphics_preflight, "run_preflight", graphics_preflight)
     # The callable is faked even before the production integration lands. No
     # branch of these runner tests may reach a compiler, Git fetch or engine.
     monkeypatch.setattr(native, "prewarm_cache", prewarm, raising=False)
     monkeypatch.setattr(release_storage.shutil, "disk_usage", lambda path: SimpleNamespace(free=100_000_000_000))
     return options, calls
+
+
+def test_graphics_preflight_precedes_native_compile_and_runtime_assets(bootstrap):
+    options, calls = bootstrap
+    with pytest.raises(ReachedPackaging):
+        runner.build(options)
+    assert calls.index("graphics-preflight") < calls.index("prewarm") < calls.index("package")
+
+
+def test_graphics_rejection_prevents_native_source_assets_and_packaging(bootstrap, monkeypatch):
+    options, calls = bootstrap
+    def reject(*args):
+        raise ValueError("actual software renderer rejected")
+    monkeypatch.setattr(runner.release_graphics_preflight, "run_preflight", reject)
+    with pytest.raises(ValueError, match="actual software renderer rejected"):
+        runner.build(options)
+    assert "prewarm" not in calls and "package" not in calls
+    assert not (options.out / ("runner-linux-" + COMMIT) / "source").exists()
 
 
 @pytest.mark.parametrize("platform", ["windows", "linux"])

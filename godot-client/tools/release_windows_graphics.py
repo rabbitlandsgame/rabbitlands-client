@@ -8,6 +8,7 @@ Godot ed1daf0bf create_adapter uses HIGH_PERFORMANCE preference order.
 from __future__ import annotations
 
 import ctypes
+import json
 import re
 import sys
 import uuid
@@ -135,4 +136,7 @@ def select_warp(inventory, requested_index=None):
 
 
 def identify_warp(gpu_index=None):
-    return select_warp(enumerate_adapters(), gpu_index)
+    inventory = enumerate_adapters()
+    # Preserve native evidence even if WARP cannot be uniquely selected.
+    print("DXGI_WARP_OBSERVATION " + json.dumps(inventory, sort_keys=True, separators=(",", ":")), flush=True)
+    return select_warp(inventory, gpu_index)
