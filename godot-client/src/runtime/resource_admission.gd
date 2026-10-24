@@ -49,6 +49,9 @@ var _graph_failures: Dictionary = {}
 var _graph_registrations := 0
 var _graph_verify_total_us := 0
 var _graph_verify_largest_atomic_us := 0
+var _graph_verify_work: Dictionary = {"calls": 0, "full_sha256_references": 0,
+	"full_sha256_reads": 0, "full_sha256_reads_deduplicated": 0,
+	"index_json_references": 0, "index_json_reads": 0, "index_json_reads_deduplicated": 0}
 var _graph_carrier_total_us := 0
 var _graph_carrier_largest_atomic_us := 0
 
@@ -176,6 +179,11 @@ func _bind_dependencies(key: String, manifest: WorldManifest) -> void:
 	var elapsed := Time.get_ticks_usec() - began
 	_graph_verify_total_us += elapsed
 	_graph_verify_largest_atomic_us = maxi(_graph_verify_largest_atomic_us, elapsed)
+	_graph_verify_work["calls"] += 1
+	var work: Dictionary = graph.get("verification_work", {})
+	for counter: String in ["full_sha256_references", "full_sha256_reads", "full_sha256_reads_deduplicated",
+			"index_json_references", "index_json_reads", "index_json_reads_deduplicated"]:
+		_graph_verify_work[counter] += int(work.get(counter, 0))
 	if not bool(graph.get("complete", false)):
 		if lease.has("dependency_keys"):
 			lease["joined_identity_valid"] = false
@@ -634,6 +642,7 @@ func _dependency_snapshot() -> Dictionary:
 		"inventory": inventory, "source_content_hash": JSON.stringify(source_inventory, "", true, true).sha256_text(),
 		"native": _native.call("admission_graph_snapshot") if _native != null else {},
 		"verification_total_us": _graph_verify_total_us, "verification_largest_atomic_us": _graph_verify_largest_atomic_us,
+		"verification_work": _graph_verify_work.duplicate(), "verification_dedup_scope": "single_describe_invocation",
 		"carrier_total_us": _graph_carrier_total_us, "carrier_largest_atomic_us": _graph_carrier_largest_atomic_us,
 		"lifetime_policy": "conservative_whole_resident_resource_graph_weak_carriers",
 		"allocation_kind": "unknown_cpu_gpu_allocation", "verification_reuse": false}

@@ -23,8 +23,46 @@ static func _path(base: String, uri: String) -> String:
 		scope = user_scope
 	return actual if actual.to_lower().begins_with(scope.to_lower() + "/") else ""
 
+static func _full_sha256(path: String, work: Dictionary) -> String:
+	work["full_sha256_references"] += 1
+	var hashes: Dictionary = work.hashes
+	if hashes.has(path):
+		work["full_sha256_reads_deduplicated"] += 1
+		return str(hashes[path])
+	work["full_sha256_reads"] += 1
+	var actual := FileAccess.get_sha256(path)
+	hashes[path] = actual
+	return actual
+
+static func _prototype_index(path: String, work: Dictionary) -> Variant:
+	work["index_json_references"] += 1
+	var indices: Dictionary = work.indices
+	if indices.has(path):
+		work["index_json_reads_deduplicated"] += 1
+		return indices[path]
+	work["index_json_reads"] += 1
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	indices[path] = parsed
+	return parsed
+
 static func describe(manifest: WorldManifest) -> Dictionary:
 	var began := Time.get_ticks_usec()
+	# Each invocation owns fresh dictionaries. Launch and joined verification
+	# each fully hash every distinct declared path; no timestamps, session cache
+	# or previously trusted expected digest can authorize later mutable bytes.
+	var work := {"hashes": {}, "indices": {}, "full_sha256_references": 0,
+		"full_sha256_reads": 0, "full_sha256_reads_deduplicated": 0,
+		"index_json_references": 0, "index_json_reads": 0, "index_json_reads_deduplicated": 0}
+	var result := _describe(manifest, work)
+	work.erase("hashes")
+	work.erase("indices")
+	result["elapsed_us"] = Time.get_ticks_usec() - began
+	result["verification_work"] = work
+	result["verification_dedup_scope"] = "single_describe_invocation"
+	result["verification_reuse"] = false
+	return result
+
+static func _describe(manifest: WorldManifest, work: Dictionary) -> Dictionary:
 	if manifest == null or not manifest.is_valid():
 		return {"complete": false, "reason": "invalid_joined_manifest"}
 	var manifest_text := FileAccess.get_file_as_string(manifest.source_path)
@@ -51,15 +89,14 @@ static func describe(manifest: WorldManifest) -> Dictionary:
 				continue
 			var sha := str(declared[uri])
 			var path := _path(base, uri)
-			if not _digest(sha) or path.is_empty() or FileAccess.get_sha256(path) != sha:
+			if not _digest(sha) or path.is_empty() or _full_sha256(path, work) != sha:
 				return {"complete": false, "reason": "source_dependency_digest_mismatch", "path": path}
 			var key := _key("prototype" if is_mesh else "image", sha, policy)
 			var dependencies: Array[String] = []
 			if is_mesh:
-				# Read the present index rather than trusting the pool's session
-				# memoization. Its image declarations are verified again here.
-				var text := FileAccess.get_file_as_string(path.get_base_dir().path_join("index.json"))
-				var parsed: Variant = JSON.parse_string(text)
+				# Read/parse each current directory index once in this invocation.
+				# The next launch/join call reads it again; pool memoization is not used.
+				var parsed: Variant = _prototype_index(path.get_base_dir().path_join("index.json"), work)
 				if not parsed is Dictionary or not parsed.get("prototypes") is Dictionary:
 					return {"complete": false, "reason": "prototype_index_missing"}
 				var entry: Variant = parsed.prototypes.get(prototype)
@@ -71,7 +108,7 @@ static func describe(manifest: WorldManifest) -> Dictionary:
 				for image_uri: String in image_uris:
 					var image_sha := str(images[image_uri])
 					var image_path := _path(path.get_base_dir(), image_uri)
-					if not _digest(image_sha) or image_path.is_empty() or FileAccess.get_sha256(image_path) != image_sha:
+					if not _digest(image_sha) or image_path.is_empty() or _full_sha256(image_path, work) != image_sha:
 						return {"complete": false, "reason": "prototype_image_digest_mismatch", "path": image_path}
 					var image_key := _key("image", image_sha, policy)
 					nodes[image_key] = {"key": image_key, "kind": "image", "source_sha256": image_sha,
@@ -87,8 +124,8 @@ static func describe(manifest: WorldManifest) -> Dictionary:
 	direct.sort()
 	# Root identity includes the manifest plus actual consumed GLB. Embedded
 	# images are covered by its bytes, not falsely reported as external images.
-	var manifest_sha := FileAccess.get_sha256(manifest.source_path)
-	var glb_sha := FileAccess.get_sha256(manifest.glb_path()) if not manifest.has_streaming_chunks() else ""
+	var manifest_sha := _full_sha256(manifest.source_path, work)
+	var glb_sha := _full_sha256(manifest.glb_path(), work) if not manifest.has_streaming_chunks() else ""
 	if not _digest(manifest_sha) or (not manifest.has_streaming_chunks() and not _digest(glb_sha)):
 		return {"complete": false, "reason": "root_source_digest_missing"}
 	var root_source := (manifest_sha + "|" + glb_sha).sha256_text()
@@ -100,7 +137,7 @@ static func describe(manifest: WorldManifest) -> Dictionary:
 	var ordered: Array[Dictionary] = []
 	for key: String in keys:
 		ordered.append(nodes[key])
-	return {"complete": true, "root": root_key, "nodes": ordered, "elapsed_us": Time.get_ticks_usec() - began,
+	return {"complete": true, "root": root_key, "nodes": ordered,
 		"coverage": "world-glb-embedded-images-and-transitive-external-prototype-images",
 		"allocation_kind": "unknown_cpu_gpu_allocation", "verification_reuse": false}
 
