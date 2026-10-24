@@ -9,6 +9,10 @@ import shutil
 ABI = 1
 LIBRARIES = {"windows": "client_runtime.dll", "linux": "client_runtime.so", "macos": "client_runtime.dylib"}
 NATIVE_PATH = Path("godot-client/native/client_runtime")
+EXTERNAL_SOURCE_INPUTS = (
+    Path("godot-client/native/shared/cape_constraint_math.h"),
+    Path("godot-client/native/shared/mounted_cape_surface_math.h"),
+)
 
 
 def sha256(path: Path) -> str:
@@ -29,6 +33,12 @@ def source_digest(repository: Path) -> str:
     digest = hashlib.sha256()
     for path in sorted(files, key=lambda value: value.relative_to(root).as_posix()):
         digest.update(path.relative_to(root).as_posix().encode() + b"\0")
+        digest.update(bytes.fromhex(sha256(path)))
+    for relative in EXTERNAL_SOURCE_INPUTS:
+        path = repository / relative
+        if not path.is_file() or path.is_symlink():
+            raise ValueError("Missing or linked external native source input: " + relative.as_posix())
+        digest.update(b"external/" + relative.as_posix().encode() + b"\0")
         digest.update(bytes.fromhex(sha256(path)))
     return digest.hexdigest()
 

@@ -6,6 +6,7 @@ var checks := 0
 var failures := 0
 var _raw_angle_max := 0.0
 var _normalized_angle_max := 0.0
+var _mount_id := "moor_pony"
 var _models: Dictionary
 var _controller: FixtureController
 
@@ -30,6 +31,15 @@ func expect(ok: bool, label: String) -> void:
 		failures += 1
 		push_error(label)
 
+func _fixture_visuals() -> Dictionary:
+	return {}
+
+func _fixture_equipment() -> Dictionary:
+	return {}
+
+func _fixture_cloth_allowed() -> bool:
+	return false
+
 func _actor(body: String, id: int, scale: float, changed_rest: bool) -> ReplicatedActor3D:
 	var actor := ReplicatedActor3D.new()
 	root.add_child(actor)
@@ -38,7 +48,7 @@ func _actor(body: String, id: int, scale: float, changed_rest: bool) -> Replicat
 	var errors := actor.configure({"actor_id": id, "x": 120, "y": 70, "rotation": 0,
 		"kind": 1, "name": "RustPoseFixture", "scale": scale,
 		"appearance": {"skin": 0, "hair": 0, "eyes": 0, "shirt": 0, "pants": 0, "boots": 0, "head": 0},
-		"equipment_visuals": {}}, CoordinateAdapter.new(), config, mapping)
+		"equipment_visuals": _fixture_visuals()}, CoordinateAdapter.new(), config, mapping, _fixture_equipment())
 	expect(errors.is_empty(), body + " real actor loads: " + str(errors))
 	if not errors.is_empty():
 		actor.queue_free()
@@ -54,13 +64,13 @@ func _actor(body: String, id: int, scale: float, changed_rest: bool) -> Replicat
 		var rest := rig.get_bone_rest(bone)
 		rest.basis = Basis(Vector3.RIGHT, 0.17) * rest.basis.scaled(Vector3(1.05, 0.95, 1.1))
 		rig.set_bone_rest(bone, rest)
-	actor.set_mount_state({"mode": "mounted", "mount_id": "moor_pony", "gait": "walk", "step_us": 200000}, _models)
-	expect(is_instance_valid(actor.get("_mount_visual")), body + " real Moor Pony configures")
+	actor.set_mount_state({"mode": "mounted", "mount_id": _mount_id, "gait": "walk", "step_us": 200000}, _models)
+	expect(is_instance_valid(actor.get("_mount_visual")), body + " real " + _mount_id + " configures")
 	if not is_instance_valid(actor.get("_mount_visual")):
 		actor.queue_free()
 		return null
 	actor.get("_mount_visual").set_process(false)
-	actor.set_cape_cloth_allowed(false)
+	actor.set_cape_cloth_allowed(_fixture_cloth_allowed())
 	actor.play_action(&"run")
 	actor._presentation_speed = 3.75
 	return actor
@@ -100,9 +110,9 @@ func _pair(body: String, scale: float, changed_rest: bool) -> void:
 	var original: Array[Transform3D] = []
 	for actor: ReplicatedActor3D in actors:
 		original.append(actor.global_transform)
-	actors[0].get("_mount_visual").rust_pose.configure(actors[0].get("_mount_visual").pose, "moor_pony", null, null, "legacy")
+	actors[0].get("_mount_visual").rust_pose.configure(actors[0].get("_mount_visual").pose, _mount_id, null, null, "legacy")
 	for index: int in [1, 2]:
-		actors[index].get("_mount_visual").rust_pose.configure(actors[index].get("_mount_visual").pose, "moor_pony", _controller)
+		actors[index].get("_mount_visual").rust_pose.configure(actors[index].get("_mount_visual").pose, _mount_id, _controller)
 	for gait: String in ["walk", "cruise", "burst"]:
 		for actor: ReplicatedActor3D in actors:
 			actor.get("_mount_visual").state.gait = gait
@@ -134,7 +144,7 @@ func _pair(body: String, scale: float, changed_rest: bool) -> void:
 		actors[1].get("_mount_visual")._step_visual(1.0 / 30.0)
 	var shadow: Dictionary = actors[1].get("_mount_visual").rust_pose.snapshot()
 	expect(int(shadow.comparisons) == 8 and int(shadow.failures) == 0, "shadow mode actually compared eight poses")
-	expect(float(shadow.maxPositionError) < 0.0001 and float(shadow.maxAngleError) < 0.001 and float(shadow.maxScaleError) < 0.0001 and float(shadow.maxVisualError) < 0.0001, "full pre-upper-body shadow pose parity")
+	expect(float(shadow.maxPositionError) < 0.0001 and float(shadow.maxAngleError) < 0.001 and float(shadow.maxScaleError) < 0.0001 and float(shadow.maxVisualError) < 0.0001, "full sampled upper-body shadow pose parity")
 	actors[1].get("_mount_visual").rust_pose._mode_override = "rust"
 	# Reset invalidates every old handle; the same live mount lazily registers fresh immutable data.
 	_controller.epoch += 1
@@ -151,9 +161,9 @@ func _pair(body: String, scale: float, changed_rest: bool) -> void:
 		actor.set_mount_state({}, _models)
 		expect(visual.transform.is_equal_approx(exact), "native pilot dismount restores exact native rest transform")
 	# A fresh lifetime tests callbacks without contaminating the paired sequence.
-	actors[1].set_mount_state({"mode": "mounted", "mount_id": "moor_pony", "gait": "walk", "step_us": 200000}, _models)
+	actors[1].set_mount_state({"mode": "mounted", "mount_id": _mount_id, "gait": "walk", "step_us": 200000}, _models)
 	actors[1].get("_mount_visual").set_process(false)
-	actors[1].get("_mount_visual").rust_pose.configure(actors[1].get("_mount_visual").pose, "moor_pony", _controller)
+	actors[1].get("_mount_visual").rust_pose.configure(actors[1].get("_mount_visual").pose, _mount_id, _controller)
 	actors[1].get("_mount_visual")._step_visual(0.0)
 	Shim.flush_pending()
 	_reentrant_apply_probe(actors[1])
@@ -204,6 +214,14 @@ func _foreign_thread_probe(native) -> void:
 			"unregister": native.unregister_rig(1),
 			"rider": native.register_mounted_rider(0, PackedInt32Array(), PackedFloat64Array(), PackedInt32Array(), PackedFloat64Array()),
 			"bind": native.bind_mounted_rider(0, null, null, null, -1, 0),
+			"lean": native.set_mounted_lean(1, 2.0),
+			"upperConfigure": native.configure_mounted_upper(1, PackedInt32Array(), PackedInt32Array(), PackedFloat64Array(), [], PackedFloat64Array()),
+			"upperClips": native.set_mounted_upper_clips(1, [], PackedFloat64Array()),
+			"upperCapture": native.set_mounted_upper_capture(1, PackedFloat64Array()),
+			"upperSolve": native.solve_mounted_presentation_batch(PackedInt64Array(), PackedFloat64Array(), PackedFloat64Array(), 1, true),
+			"reinsConfigure": native.configure_mounted_reins(1, null, null, null, PackedInt32Array(), PackedFloat64Array(), PackedFloat64Array(), []),
+			"reinSnapshot": native.mounted_rein_snapshot(1, true),
+			"mountedCape": native.step_mounted_cape([], [], [], [], PackedVector3Array(), [], PackedVector3Array(), PackedFloat64Array(), PackedFloat64Array(), [], Vector3.ZERO, 0.3, Vector3.ZERO, 0.0, 0.0, Transform3D.IDENTITY, false, PackedFloat64Array()),
 			"unregisterRider": native.unregister_mounted_rider(1),
 			"solve": native.solve_mounted_batch(PackedInt64Array(), PackedFloat64Array(), 1, true),
 			"plan": native.plan_batch(PackedInt64Array(), 1, 0),
@@ -215,7 +233,7 @@ func _foreign_thread_probe(native) -> void:
 	if error != OK:
 		return
 	var rejected: Dictionary = worker.wait_to_finish()
-	expect(int(rejected.reset) != 0 and int(rejected.register) == 0 and not bool(rejected.unregister) and int(rejected.rider) == 0 and not bool(rejected.bind) and not bool(rejected.unregisterRider) and not bool(rejected.solve), "every foreign mutation rejects")
+	expect(int(rejected.reset) != 0 and int(rejected.register) == 0 and not bool(rejected.unregister) and int(rejected.rider) == 0 and not bool(rejected.bind) and not bool(rejected.unregisterRider) and not bool(rejected.solve) and not bool(rejected.lean) and not bool(rejected.upperConfigure) and not bool(rejected.upperClips) and not bool(rejected.upperCapture) and not bool(rejected.upperSolve) and not bool(rejected.mountedCape) and not bool(rejected.reinsConfigure) and not bool(rejected.reinSnapshot.available), "every foreign mutation rejects")
 	expect((rejected.plan as PackedInt64Array).is_empty() and (rejected.metadata as PackedInt64Array).is_empty() and (rejected.values as PackedFloat64Array).is_empty() and (rejected.contacts as PackedFloat64Array).is_empty(), "foreign buffer getters do not read mutable buffers")
 	expect(int(rejected.status) != 0 and not bool(rejected.info.ready) and str(rejected.info.reason) == "wrong_thread", "foreign diagnostics return explicit unavailable state")
 	expect(before == native.runtime_info() and before_status == native.get_last_status(), "foreign calls leave every owner counter and status unchanged")
@@ -261,6 +279,14 @@ func _drain() -> void:
 	await process_frame
 
 func run() -> void:
+	for argument: String in OS.get_cmdline_user_args():
+		if argument.begins_with("--mount="):
+			_mount_id = argument.trim_prefix("--mount=")
+	if _mount_id not in Shim.APPROVED:
+		push_error("Expected one of the five current approved mount IDs")
+		quit(1)
+		return
+	print("RUST_MOUNTED_PROFILE ", _mount_id)
 	var q := Quaternion(0.2, 0.3, 0.4, 0.5)
 	expect(Shim.rotation_error(q, q) < 0.0000001, "angle comparison has a zero self-distance for non-unit stored quaternions")
 	expect(Shim.rotation_error(q, Quaternion(-q.x, -q.y, -q.z, -q.w)) < 0.0000001, "quaternion signs describe the same rotation")

@@ -1,7 +1,8 @@
 class_name ClientRuntimeController
 extends RefCounted
-## Optional compute service. Phase 4 observes the legacy gate; it never applies
-## its output to presentation. Missing/invalid optional files stay on legacy.
+const MOUNTED_PROFILE_IDS := ["moor_pony", "golden_plains_horse", "crystalback_tortoise", "rabbit", "jadefeather_raptor"]
+## Optional compute service; ordinary play stays legacy. Comparison observes
+## legacy presentation; explicit Rust mode owns supported mounted work.
 const ABI := 1
 const COMPARE_INTERVAL := 60
 const COMPARE_LIMIT := 256
@@ -159,7 +160,7 @@ func observe_gate(gate: AnimationGate) -> void:
 func snapshot() -> Dictionary:
 	return {"requested": _requested, "mode": _mode, "reason": _reason, "epoch": _epoch,
 		"presentation_backend": "mixed" if is_rust_mode() else "legacy", "native_available": _native != null,
-		"mounted_pose_enabled": wants_rust_pose(), "mounted_pose_profile": "moor_pony",
+		"mounted_pose_enabled": wants_rust_pose(), "mounted_pose_profiles": MOUNTED_PROFILE_IDS.duplicate(),
 		"comparisons": _comparisons, "records_checked": _checked, "mismatches": _mismatches,
 		"comparison_limit": COMPARE_LIMIT, "records_over_limit": _truncated,
 		"native": _native.call("runtime_info") if _native != null else {}}

@@ -1,4 +1,5 @@
 #include "client_runtime.h"
+#include "../../shared/cape_constraint_math.h"
 #include <godot_cpp/classes/os.hpp>
 #include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/core/class_db.hpp>
@@ -65,6 +66,7 @@ void RabbitLandsClientRuntime::finish_mounted_operation() {
     pending_rider_removals.clear(); pending_rig_removals.clear();
     for (auto handle : removed_riders) unregister_mounted_rider(static_cast<int64_t>(handle));
     for (auto handle : removed_rigs) unregister_rig(static_cast<int64_t>(handle));
+    cancel_mounted_apply = false;
     last_status = status;
 }
 bool RabbitLandsClientRuntime::resolve_mounted_target(const RiderBinding &binding,Skeleton3D *&s,Node3D *&v) const {
@@ -89,6 +91,20 @@ Dictionary RabbitLandsClientRuntime::runtime_info() const {
     info["records_planned"] = static_cast<int64_t>(records_planned);
     info["precision"] = "f64";
     info["mounted_pose_api"] = 1;
+    info["mounted_profile_api"] = 1;
+    info["mounted_upper_api"] = 1;
+    info["mounted_cape_api"] = 1;
+    info["mounted_reins_api"] = 1;
+    info["rein_attempts"] = static_cast<int64_t>(rein_attempts);
+    info["rein_failures"] = static_cast<int64_t>(rein_failures);
+    info["rein_calls"] = static_cast<int64_t>(rein_calls);
+    info["rein_us"] = static_cast<int64_t>(rein_us);
+    info["mounted_cape_attempts"] = static_cast<int64_t>(mounted_cape_attempts);
+    info["mounted_cape_calls"] = static_cast<int64_t>(mounted_cape_calls);
+    info["mounted_cape_us"] = static_cast<int64_t>(mounted_cape_us);
+    info["upper_solved"] = static_cast<int64_t>(upper_solved);
+    info["upper_applied"] = static_cast<int64_t>(upper_applied);
+    info["pose_upper_us"] = static_cast<int64_t>(pose_upper_us);
     info["bone_transform_commits"] = static_cast<int64_t>(bone_transform_commits);
     info["bone_guarded_trs_commits"] = static_cast<int64_t>(bone_guarded_trs_commits);
     info["bone_commit_mode"] = template_bone_commit ? "verified-template-transform" : "guarded-trs";
@@ -193,8 +209,78 @@ bool RabbitLandsClientRuntime::unregister_mounted_rider(int64_t handle) {
     last_status=rl_client_runtime_unregister_mounted_rider(core,static_cast<uint64_t>(handle));
     riders.erase(static_cast<uint64_t>(handle));return last_status==0;
 }
+bool RabbitLandsClientRuntime::set_mounted_lean(int64_t handle,double degrees) {
+    if(!can_mutate()) return false;
+    if(handle<=0 || !riders.count(static_cast<uint64_t>(handle)) || !std::isfinite(degrees)) {last_status=1;return false;}
+    last_status=rl_client_runtime_set_mounted_lean(core,static_cast<uint64_t>(handle),degrees);
+    return last_status==0;
+}
+bool RabbitLandsClientRuntime::step_mounted_cape(Array points,Array previous,const Array &rests,const Array &lengths,
+    const PackedVector3Array &collision_world,const Array &collision_pairs,
+    const PackedVector3Array &collision_axes,const PackedFloat64Array &collision_spans,
+    const PackedFloat64Array &collision_radii,const Array &collision_reaches,
+    const Vector3 &fall,double damping,const Vector3 &forward,double plane_at,double anchor_y,
+    const Transform3D &to_world,bool settled,const PackedFloat64Array &surface) {
+    if(!can_mutate())return false;
+    PoseTimeScope timer(mounted_cape_us);++mounted_cape_attempts;
+    const rl_cape::MountedSurface sampled(surface);
+    if(!sampled.valid()) {last_status=1;return false;}
+    const bool ok=rl_cape::step(points,previous,rests,lengths,collision_world,collision_pairs,collision_axes,
+        collision_spans,collision_radii,collision_reaches,fall,damping,forward,plane_at,anchor_y,to_world,settled,&sampled);
+    last_status=ok?0:1;if(ok)++mounted_cape_calls;return ok;
+}
+bool RabbitLandsClientRuntime::configure_mounted_reins(int64_t handle,Node3D *reins_node,MeshInstance3D *straps,Skeleton3D *pony,
+    const PackedInt32Array &bones,const PackedFloat64Array &anchors,const PackedFloat64Array &parameters,const Array &paths) {
+    if(!can_mutate())return false;
+    auto found=riders.find(static_cast<uint64_t>(handle));Skeleton3D *s=nullptr;Node3D *v=nullptr;
+    if(handle<=0 || found==riders.end() || !resolve_mounted_target(found->second,s,v)) {last_status=2;return false;}
+    auto *owner=Object::cast_to<Node3D>(ObjectDB::get_instance(found->second.owner));
+    auto renderer=std::make_shared<MountedReinRenderer>();
+    if(!renderer->configure(s,owner,reins_node,straps,pony,bones,anchors,parameters,paths)) {last_status=1;return false;}
+    found->second.reins=std::move(renderer);last_status=0;return true;
+}
+Dictionary RabbitLandsClientRuntime::mounted_rein_snapshot(int64_t handle,bool geometry) const {
+    Dictionary result;if(!on_owner_thread()) {result["available"]=false;result["reason"]="wrong_thread";return result;}
+    auto found=riders.find(static_cast<uint64_t>(handle));
+    if(handle<=0 || found==riders.end() || !found->second.reins) {result["available"]=false;return result;}
+    result=found->second.reins->snapshot(geometry);result["available"]=true;
+    result["lastAppliedTag"]=found->second.last_frame;result["generation"]=found->second.generation;return result;
+}
+bool RabbitLandsClientRuntime::configure_mounted_upper(int64_t handle,const PackedInt32Array &bones,const PackedInt32Array &chain,
+    const PackedFloat64Array &definition,const Array &animations,const PackedFloat64Array &facings) {
+    if(!can_mutate())return false;
+    auto found=riders.find(static_cast<uint64_t>(handle));
+    Skeleton3D *s=nullptr;Node3D *v=nullptr;
+    if(handle<=0 || found==riders.end() || !resolve_mounted_target(found->second,s,v)) {last_status=2;return false;}
+    auto upper=std::make_shared<MountedUpperSampler>();
+    if(!upper->configure(s,bones,chain,definition) || !upper->set_clips(s,animations,facings)) {last_status=1;return false;}
+    found->second.upper=std::move(upper);last_status=0;return true;
+}
+bool RabbitLandsClientRuntime::set_mounted_upper_clips(int64_t handle,const Array &animations,const PackedFloat64Array &facings) {
+    if(!can_mutate())return false;
+    auto found=riders.find(static_cast<uint64_t>(handle));
+    Skeleton3D *s=nullptr;Node3D *v=nullptr;
+    if(handle<=0 || found==riders.end() || !found->second.upper || !resolve_mounted_target(found->second,s,v)) {last_status=2;return false;}
+    const bool ok=found->second.upper->set_clips(s,animations,facings);last_status=ok?0:1;return ok;
+}
+bool RabbitLandsClientRuntime::set_mounted_upper_capture(int64_t handle,const PackedFloat64Array &rotations) {
+    if(!can_mutate())return false;
+    auto found=riders.find(static_cast<uint64_t>(handle));
+    if(handle<=0 || found==riders.end() || !found->second.upper) {last_status=2;return false;}
+    const bool ok=found->second.upper->set_capture(rotations);last_status=ok?0:1;return ok;
+}
+bool RabbitLandsClientRuntime::solve_mounted_presentation_batch(const PackedInt64Array &records,const PackedFloat64Array &samples,
+    const PackedFloat64Array &upper,int64_t epoch,bool apply) {
+    if(!can_mutate())return false;
+    if(upper.size()!=records.size()/5*5 || records.size()%5) {last_status=1;return false;}
+    return solve_mounted_impl(records,samples,upper,epoch,apply);
+}
 bool RabbitLandsClientRuntime::solve_mounted_batch(const PackedInt64Array &records,const PackedFloat64Array &samples,
     int64_t epoch,bool apply) {
+    return solve_mounted_impl(records,samples,PackedFloat64Array(),epoch,apply);
+}
+bool RabbitLandsClientRuntime::solve_mounted_impl(const PackedInt64Array &records,const PackedFloat64Array &samples,
+    const PackedFloat64Array &upper,int64_t epoch,bool apply) {
     if(!can_mutate()) return false;
     Ref<RabbitLandsClientRuntime> keep_alive(this);
     PoseTimeScope total_time(pose_total_us);
@@ -230,6 +316,17 @@ bool RabbitLandsClientRuntime::solve_mounted_batch(const PackedInt64Array &recor
     pose_solve_us += pose_elapsed_us(solve_began);
     if(last_status!=0 || used!=required || !finite_values(mounted_values.data(),used)) {
         if(last_status==0)last_status=1;mounted_outputs.clear();return false;
+    }
+    if(!upper.is_empty()) {
+        const auto upper_began=PoseClock::now();
+        for(size_t i=0;i<count;++i) {
+            const auto found=riders.find(mounted_inputs[i].rider);
+            if(found==riders.end() || !found->second.upper
+                || !found->second.upper->apply(mounted_values,static_cast<size_t>(mounted_outputs[i].offset),upper.ptr()+i*5)) {
+                last_status=1;mounted_outputs.clear();return false;
+            }
+        }
+        pose_upper_us+=pose_elapsed_us(upper_began);upper_solved+=count;
     }
     // Validate every tagged complete output before the first scene mutation.
     const auto validation_began = PoseClock::now();
@@ -285,7 +382,13 @@ bool RabbitLandsClientRuntime::solve_mounted_batch(const PackedInt64Array &recor
         s->force_update_all_bone_transforms();
         // skeleton_updated/transform callbacks may free nodes or request reset.
         if(!valid()) return reject();
+        if(!upper.is_empty()) {
+            PoseTimeScope rein_time(rein_us);++rein_attempts;
+            if(!binding.reins || !binding.reins->render(s,read_affine(samples.ptr()+i*14),upper[i*5+4],valid)) {++rein_failures;return reject();}
+            ++rein_calls;
+        }
         riders.at(handle).last_frame=row.frame;++poses_applied;
+        if(!upper.is_empty())++upper_applied;
     }
     last_status=0;return true;
 }
@@ -337,6 +440,16 @@ void RabbitLandsClientRuntime::_bind_methods() {
     ClassDB::bind_method(D_METHOD("register_mounted_rider","rig","bones","constants","thumbs","grips"), &RabbitLandsClientRuntime::register_mounted_rider);
     ClassDB::bind_method(D_METHOD("bind_mounted_rider","rider","skeleton","visual","owner","actor","generation"), &RabbitLandsClientRuntime::bind_mounted_rider);
     ClassDB::bind_method(D_METHOD("unregister_mounted_rider","rider"), &RabbitLandsClientRuntime::unregister_mounted_rider);
+    ClassDB::bind_method(D_METHOD("step_mounted_cape","points","previous","rests","lengths",
+        "collision_world","collision_pairs","collision_axes","collision_spans","collision_radii","collision_reaches",
+        "fall","damping","forward","plane_at","anchor_y","to_world","settled","surface"), &RabbitLandsClientRuntime::step_mounted_cape);
+    ClassDB::bind_method(D_METHOD("configure_mounted_reins","rider","reins","straps","pony","bones","anchors","parameters","paths"), &RabbitLandsClientRuntime::configure_mounted_reins);
+    ClassDB::bind_method(D_METHOD("mounted_rein_snapshot","rider","geometry"), &RabbitLandsClientRuntime::mounted_rein_snapshot);
+    ClassDB::bind_method(D_METHOD("configure_mounted_upper","rider","bones","chain","definition","animations","facings"), &RabbitLandsClientRuntime::configure_mounted_upper);
+    ClassDB::bind_method(D_METHOD("set_mounted_upper_clips","rider","animations","facings"), &RabbitLandsClientRuntime::set_mounted_upper_clips);
+    ClassDB::bind_method(D_METHOD("set_mounted_upper_capture","rider","rotations"), &RabbitLandsClientRuntime::set_mounted_upper_capture);
+    ClassDB::bind_method(D_METHOD("solve_mounted_presentation_batch","records","samples","upper","epoch","apply"), &RabbitLandsClientRuntime::solve_mounted_presentation_batch);
+    ClassDB::bind_method(D_METHOD("set_mounted_lean","rider","degrees"), &RabbitLandsClientRuntime::set_mounted_lean);
     ClassDB::bind_method(D_METHOD("solve_mounted_batch","records","samples","epoch","apply"), &RabbitLandsClientRuntime::solve_mounted_batch);
     ClassDB::bind_method(D_METHOD("mounted_pose_metadata"), &RabbitLandsClientRuntime::mounted_pose_metadata);
     ClassDB::bind_method(D_METHOD("mounted_pose_values"), &RabbitLandsClientRuntime::mounted_pose_values);

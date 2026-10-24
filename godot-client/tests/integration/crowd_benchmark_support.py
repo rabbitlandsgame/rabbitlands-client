@@ -39,6 +39,9 @@ PERFORMANCE_GRAPHICS = {
     "swaying_capes": 0, "shadows": False, "particles": True,
     "decorative_grass": False, "name_distance": 20.0,
 }
+RUST_MOUNT_PROFILES = frozenset({"moor_pony", "golden_plains_horse", "crystalback_tortoise",
+                               "rabbit", "jadefeather_raptor"})
+MIXED_MOUNT_PROFILES = RUST_MOUNT_PROFILES | {"giant_rat"}
 
 
 def configure_settings_profile(args, system: str | None = None) -> None:
@@ -266,6 +269,86 @@ def validate_runtime(runtime: dict, request: dict, renderer: str, quality: str,
     return backends
 
 
+def validate_mounted_runtime(cell: dict, runtime: dict, policy: dict, quality: str) -> None:
+    """Phase6 actual coverage and boundary evidence; never infer calls from requested mode."""
+    label = str(cell["id"])
+    profiles = _object(cell.get("mountProfiles"), label + ".mountProfiles")
+    if set(profiles) != MIXED_MOUNT_PROFILES or sum(
+            _integer(value, label + ".mountProfileCount", 1) for value in profiles.values()) != 80:
+        raise EvidenceError(f"{label}: six-profile mounted workload differs")
+    supported = sum(profiles[profile] for profile in RUST_MOUNT_PROFILES)
+    expected_fallback = profiles["giant_rat"]
+    before = _object(cell["census"]["afterSpawn"].get("mountedPresentation"), label + ".beforeMounted")
+    after = _object(cell["census"]["afterSample"].get("mountedPresentation"), label + ".afterMounted")
+    pose = _object(after.get("rustPose"), label + ".rustPose")
+    prior = _object(before.get("rustPose"), label + ".priorRustPose")
+    if pose.get("available") != 80 or pose.get("supported") != supported \
+            or pose.get("eligible") != supported or pose.get("profiles") != profiles \
+            or pose.get("requestedModes") != {"rust": 80} or pose.get("failures") != 0 \
+            or pose.get("disabled") != expected_fallback \
+            or pose.get("eligibleActiveVisuals") != pose.get("appliedEligibleActiveVisuals"):
+        raise EvidenceError(f"{label}: actual Rust rider coverage or fallback differs")
+    active = _integer(pose.get("eligibleActiveVisuals"), label + ".eligibleActiveRiders", 1)
+    applications = _integer(pose.get("applications"), label + ".rustApplications", 1)
+    if active > supported or _integer(pose.get("registered"), label + ".registered", active) > supported:
+        raise EvidenceError(f"{label}: native rider registration exceeds supported content")
+    fresh = _object(pose.get("freshness"), label + ".freshness")
+    if fresh.get("available") != 80 or fresh.get("activeEligibleCurrentVisuals") != active:
+        raise EvidenceError(f"{label}: latest eligible active pose submissions were not applied")
+    current = _integer(fresh.get("currentSubmissionVisuals"), label + ".currentSubmissions", active)
+    ages = _object(fresh.get("applicationAgeFrames"), label + ".applicationAgeFrames")
+    age_count = _integer(ages.get("count"), label + ".applicationAgeCount", active)
+    low = _number(ages.get("minimum"), label + ".minimumApplicationAge")
+    high = _number(ages.get("maximum"), label + ".maximumApplicationAge")
+    total = _number(ages.get("sum"), label + ".summedApplicationAge")
+    if current > supported or age_count > supported or low > high or total < low * age_count \
+            or total > high * age_count:
+        raise EvidenceError(f"{label}: inconsistent pose freshness evidence")
+    # Ages include intentionally paused riders. Current-submission equality,
+    # rather than a global age limit, verifies no submitted pose was dropped.
+    secondary = _object(pose.get("secondary"), label + ".secondary")
+    previous = _object(prior.get("secondary"), label + ".priorSecondary")
+    if secondary.get("available") != 80 or _integer(secondary.get("clothFallbacks"), label + ".clothFallbacks") != 0:
+        raise EvidenceError(f"{label}: secondary runtime is missing or fell back")
+    for field in ("upperApplications", "reinApplications", "reinCalls"):
+        value = _integer(secondary.get(field), label + "." + field, 1)
+        if value <= _integer(previous.get(field), label + ".prior" + field):
+            raise EvidenceError(f"{label}: no new actual {field} after spawn readiness")
+    if secondary["upperApplications"] != applications or secondary["reinApplications"] != applications:
+        raise EvidenceError(f"{label}: coupled native upper/rein applications differ from pose applications")
+    if _integer(secondary.get("reinAvailable"), label + ".reinAvailable", 1) > supported:
+        raise EvidenceError(f"{label}: rein availability exceeds supported profiles")
+    native = _object(runtime["activeBackends"]["clientRuntime"].get("native"), label + ".rustNative")
+    for api in ("mounted_profile_api", "mounted_upper_api", "mounted_cape_api", "mounted_reins_api"):
+        if _integer(native.get(api), label + "." + api) != 1:
+            raise EvidenceError(f"{label}: missing actual {api}")
+    for field in ("poses_applied", "upper_applied", "rein_calls"):
+        if _integer(native.get(field), label + ".native." + field, 1) < applications:
+            raise EvidenceError(f"{label}: actual native {field} cannot attest census applications")
+    if _integer(native.get("rein_attempts"), label + ".nativeReinAttempts") != native["rein_calls"] \
+            or _integer(native.get("rein_failures"), label + ".nativeReinFailures") != 0:
+        raise EvidenceError(f"{label}: native rein commit failed")
+    cloth = _integer(secondary.get("clothCalls"), label + ".clothCalls")
+    native_cloth = _integer(native.get("mounted_cape_calls"), label + ".nativeMountedClothCalls")
+    if _integer(native.get("mounted_cape_attempts"), label + ".nativeMountedClothAttempts") != native_cloth:
+        raise EvidenceError(f"{label}: native mounted cloth had an unsuccessful attempt")
+    if native_cloth < cloth:
+        raise EvidenceError(f"{label}: native mounted cloth counters disagree")
+    if quality == "high" and _integer(policy.get("clothBodies"), label + ".clothBudget") > 0:
+        _integer(after.get("scheduling", {}).get("cloth"), label + ".scheduledCloth", 1)
+        _integer(secondary.get("clothAvailable"), label + ".clothAvailable", 1)
+        if cloth <= _integer(previous.get("clothCalls"), label + ".priorClothCalls"):
+            raise EvidenceError(f"{label}: High fixture did not execute eligible mounted cloth")
+    elif cloth != 0 or native_cloth != 0:
+        # This fixture's local rider has no cape. This is not a general ban on
+        # the ordinary local-player cape allowance at Medium/Low.
+        raise EvidenceError(f"{label}: inactive fixture cloth policy executed mounted cloth")
+    batch = _object(runtime["activeBackends"].get("mountedBatch"), label + ".mountedBatch")
+    if batch.get("present") is not True or batch.get("fallbacks") != 0:
+        raise EvidenceError(f"{label}: actual Rust batch is absent or fell back")
+    _integer(batch.get("batches"), label + ".nativeBatches", 1)
+
+
 def validate_report(data: dict, request: dict, log: str) -> dict:
     """Reject invalid evidence, returning explicit measured/pending cell classifications.
 
@@ -451,26 +534,7 @@ def validate_report(data: dict, request: dict, log: str) -> dict:
                     if census[point].get("mountedActors") != 80 or census[point].get("mountSkeletons") != 80:
                         raise EvidenceError(f"{name}: mounted workload does not contain 80 mounted actors/skeletons")
                 if request.get("client_runtime") == "rust":
-                    actual = _object(census["afterSample"].get("mountedPresentation"), name + ".mountedPresentation")
-                    pose = _object(actual.get("rustPose"), name + ".rustPose")
-                    profiles = _object(cell.get("mountProfiles"), name + ".mountProfiles")
-                    if sum(_integer(value, name + ".mountProfileCount") for value in profiles.values()) != 80:
-                        raise EvidenceError(f"{name}: requested mount profile census differs")
-                    supported = _integer(profiles.get("moor_pony"), name + ".supportedRiders", 1)
-                    if pose.get("available") != 80 or pose.get("supported") != supported \
-                            or pose.get("eligible") != supported or pose.get("profiles") != profiles \
-                            or pose.get("requestedModes") != {"rust": 80} or pose.get("failures") != 0 \
-                            or pose.get("disabled") != 80 - supported \
-                            or pose.get("eligibleActiveVisuals") != pose.get("appliedEligibleActiveVisuals"):
-                        raise EvidenceError(f"{name}: actual Rust rider coverage or fallback differs")
-                    _integer(pose.get("eligibleActiveVisuals"), name + ".eligibleActiveRiders", 1)
-                    _integer(pose.get("applications"), name + ".rustApplications", 1)
-                    native = _object(runtime["activeBackends"]["clientRuntime"].get("native"), name + ".rustNative")
-                    _integer(native.get("poses_applied"), name + ".nativePosesApplied", 1)
-                    batch = _object(runtime["activeBackends"].get("mountedBatch"), name + ".mountedBatch")
-                    if batch.get("present") is not True or batch.get("fallbacks") != 0:
-                        raise EvidenceError(f"{name}: actual Rust batch is absent or fell back")
-                    _integer(batch.get("batches"), name + ".nativeBatches", 1)
+                    validate_mounted_runtime(cell, runtime, policy, data["graphicsQuality"])
         if request.get("replay"):
             window = _object(cell.get("replayWindow"), name + ".replayWindow")
             if window.get("exhausted") is True or int(window.get("mapChanges", 0)) != 0:

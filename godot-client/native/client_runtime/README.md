@@ -3,7 +3,7 @@
 The engine-independent Rust core owns immutable rig records and numeric planning
 state. A thin official GDExtension adapter owns its lifetime on the creating main
 thread. Godot owns scene nodes, animation playback and rendering. Ordinary play
-uses legacy presentation; the Moor Pony rider pilot is explicitly selectable.
+uses legacy presentation; the approved-profile mounted pilot is explicitly selectable.
 
 Build from the client directory:
 
@@ -15,9 +15,10 @@ Rust 1.99.1 is pinned. The default installed `stable` alias must report that exa
 version; select another installed alias with `--toolchain`. The dependency-free
 core builds/tests offline. CMake fetches godot-cpp at
 `507ed9d840c01a3c5b2a39af8bb4000bfac30bf5`, targeting Godot 4.7.
+The build verifies the actual clean binding checkout before compilation.
 Generated libraries, dependencies and output manifests are ignored.
 
-Set `RABBITLANDS_CLIENT_RUNTIME=rust` for the Moor Pony rider pilot, `compare`
+Set `RABBITLANDS_CLIENT_RUNTIME=rust` for the mounted pilot, `compare`
 for comparison with legacy driving presentation, or `legacy` for the ordinary
 path. Default is legacy. Comparison mode copies complete poses and is deliberately
 expensive; its timings do not establish live-mode performance.
@@ -47,16 +48,33 @@ are accepted. The adapter reuses input/output capacity; comparison diagnostics
 are sampled every 60 calls and capped at 256 records. Runtime diagnostics report
 requested and actual mode, fallback reason, epoch and comparison counts.
 
-## Moor Pony rider pilot
+## Mounted presentation pilot
 
 The complete base rider calculation includes seat fit, pelvis/spine stabilization,
 both arm passes, legs, wrists, thumbs and fingers. Immutable rest transforms and
 neutral local poses remain separate. Godot samples mount animation, then a late
 same-frame coordinator submits all due riders together, validates complete tagged
-outputs, applies each pose and calls the existing upper-body/cloth/rein finish
-pass in order. No authoritative actor transform is owned by this service. Other
-mount profiles retain legacy. The pilot requires API 1, x86_64 and a four-byte
+outputs and applies each pose. Five explicit profiles are supported: Moor Pony,
+Golden Plains Horse, Crystalback Tortoise, Giant Meadow Rabbit and Jadefeather
+Raptor. Giant Rat retains legacy. No authoritative actor transform is owned by
+this service. The pilot requires API 1, x86_64 and a four-byte
 engine scalar; unsupported native/engine combinations retain the ordinary path.
+
+Cached C++ upper-body sampling modifies the complete Rust base pose before one
+scene commit. Existing Godot action clocks remain authoritative. Native reins
+retain per-rider geometry buffers and an ArrayMesh, with the existing material
+and spatial grouping. Mounted cloth reuses the existing compiled C++ capsule
+and Verlet arithmetic with sampled mount contacts and flow; its packed point
+and history state, rest/fabric construction and bone output remain in Godot.
+This is a mixed Rust/C++ runtime, not a rewrite of every operation into Rust.
+The exact shared-header bytes are included in native payload provenance.
+
+The late coordinator is created during optional mount configuration so the first
+prepared frame can finish in that frame. On the pinned official release engine,
+positive bone scales use a verified complete-transform setter span. Nonpositive
+scales and other engine builds retain guarded separate TRS setters. Mesh calls
+retain ownership checks at each callback boundary. Cancellation is scoped to the
+owned operation; it cannot prevent later riders from registering.
 
 Epochs, generations, weak mount/skeleton/visual bindings and coordinate-frame
 checks reject stale work. A failed batch falls back as a complete component.
@@ -66,17 +84,27 @@ callback is deferred until the owned application ends.
 
 Mounted input records are `[actor, generation, rider, gait, sample_frame]` with
 14 sample values per row: world seat affine (12), elapsed seconds and cycle
-seconds. Gaits are idle/walk/trot/gallop (0–3). Comparison metadata is
+seconds. The presentation batch also carries action index, clip time, blend
+weight, returning flag and grip weight per rider. Gaits are idle/walk/trot/gallop
+(0–3). Comparison metadata is
 `[actor, generation, epoch, sample_frame, offset, bone_count]`. Each numeric value
 range contains visual affine (12), local position/quaternion/scale (10 per bone)
 and five contact distances. Live mode keeps the full pose inside native buffers;
 comparison getters are diagnostic operations.
 
 Diagnostics separate actual applications, failed/fallback work, supported
-profiles and active-tier coverage. The batch records submission, packing,
+profiles, current-submission freshness and active-tier coverage. Actual upper,
+rein and mounted-cloth successes/failures are separate counters. The batch records submission, packing,
 native calls and remaining Godot finish work. Submission and flush totals do
 not overlap; packing/native/finish are subsets of flush. C++ conversion, Rust
-solve, validation and application counters are subsets of the native call.
+solve, upper sampling, validation and application counters are subsets of the
+native call. Rein time is inside application; mounted-cloth time is a later
+native call inside the Godot finish pass.
 These cumulative counters include readiness/warmup and must not be summed with
 their enclosing spans or described as sample-only measurements. Whole rendered
 frame and delivered-frame measurements remain the performance decision gate.
+
+The Phase 5 single matched exported screen showed no complete-workload gain.
+The broader mounted path remains an opt-in experiment until repeated rendered
+comparisons establish a worthwhile benefit. Source parity alone never enables
+the native default or qualifies other target devices.

@@ -370,6 +370,12 @@ impl Rider {
         }
         Ok(out)
     }
+    /// Gait changes are infrequent presentation events, not per-bone uploads.
+    pub fn set_lean(&mut self, degrees: f64) -> Result<(), i32> {
+        if !degrees.is_finite() { return Err(INVALID); }
+        self.constants[81] = degrees;
+        Ok(())
+    }
     fn reset(&mut self, rig: &Rig) {
         for i in 0..self.local.len() {
             let v = &rig.neutral_pose[i * 10..];

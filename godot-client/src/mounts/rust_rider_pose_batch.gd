@@ -53,13 +53,20 @@ func flush() -> void:
 		var epoch: int = group[1]
 		var records := PackedInt64Array()
 		var samples := PackedFloat64Array()
+		var upper := PackedFloat64Array()
+		var with_upper: bool = native.has_method("solve_mounted_presentation_batch")
 		for row: Array in group[2]:
 			var pose = (row[0] as WeakRef).get_ref()
 			records.append_array(pose.record(str(row[2])))
 			samples.append_array(pose.sample(row[1], float(row[3]), float(row[4])))
+			if with_upper and pose.has_method("upper_sample"):
+				upper.append_array(pose.upper_sample())
+			else:
+				with_upper = false
 		packing_us += Time.get_ticks_usec() - packing_began
 		var native_began := Time.get_ticks_usec()
-		var ok: bool = native.solve_mounted_batch(records, samples, epoch, true)
+		var ok: bool = native.solve_mounted_presentation_batch(records, samples, upper, epoch, true) \
+			if with_upper else native.solve_mounted_batch(records, samples, epoch, true)
 		native_call_us += Time.get_ticks_usec() - native_began
 		batches += 1
 		var finish_began := Time.get_ticks_usec()
@@ -68,6 +75,8 @@ func flush() -> void:
 			if pose == null or not pose.still_valid(epoch):
 				continue
 			if ok:
+				if with_upper:
+					pose.mark_native_upper_applied()
 				pose.applications += 1
 				poses += 1
 			else:

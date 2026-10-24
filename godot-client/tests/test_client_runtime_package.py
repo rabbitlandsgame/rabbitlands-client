@@ -22,6 +22,10 @@ class ClientRuntimePackageTests(unittest.TestCase):
         source.parent.mkdir(parents=True)
         source.write_text("pub const ABI: u32 = 1;\n", encoding="utf-8")
         (native / "CMakeLists.txt").write_text("project(runtime)\n", encoding="utf-8")
+        for relative in runtime_package.EXTERNAL_SOURCE_INPUTS:
+            shared = repository / relative
+            shared.parent.mkdir(parents=True, exist_ok=True)
+            shared.write_text("// fixture shared native arithmetic\n", encoding="utf-8")
         payload = root / "payload"
         payload.mkdir()
         (payload / "client_runtime.dll").write_bytes(b"fixture-native-library")
@@ -80,6 +84,18 @@ class ClientRuntimePackageTests(unittest.TestCase):
                     path.parent.mkdir(parents=True, exist_ok=True)
                     path.write_text("another source input", encoding="utf-8")
                     self.assertNotEqual(runtime_package.source_digest(repository), before)
+
+    def test_exact_external_arithmetic_bytes_are_bound_and_required(self):
+        with tempfile.TemporaryDirectory() as directory:
+            repository, _, _ = self.fixture(Path(directory))
+            for relative in runtime_package.EXTERNAL_SOURCE_INPUTS:
+                before = runtime_package.source_digest(repository)
+                path = repository / relative
+                path.write_text("// changed external arithmetic\n", encoding="utf-8")
+                self.assertNotEqual(runtime_package.source_digest(repository), before)
+            path.unlink()
+            with self.assertRaisesRegex(ValueError, "external native source input"):
+                runtime_package.source_digest(repository)
 
     def test_build_outputs_are_not_mistaken_for_source_inputs(self):
         with tempfile.TemporaryDirectory() as directory:

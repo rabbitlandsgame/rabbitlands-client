@@ -55,6 +55,10 @@ impl Runtime {
         self.mounted_riders.swap_remove(index);
         Ok(())
     }
+    pub fn set_mounted_lean(&mut self, handle: u64, degrees: f64) -> Result<(), i32> {
+        self.mounted_riders.iter_mut().find(|(h, _)| *h == handle)
+            .ok_or(STALE)?.1.set_lean(degrees)
+    }
     pub fn solve_mounted(
         &mut self,
         records: &[MountedRecord],
@@ -198,6 +202,15 @@ pub unsafe extern "C" fn rl_client_runtime_unregister_mounted_rider(
     .unwrap_or(INTERNAL)
 }
 #[unsafe(no_mangle)]
+pub unsafe extern "C" fn rl_client_runtime_set_mounted_lean(
+    runtime: *mut Runtime, handle: u64, degrees: f64,
+) -> i32 {
+    if runtime.is_null() { return INVALID; }
+    catch_unwind(AssertUnwindSafe(|| unsafe {
+        (&mut *runtime).set_mounted_lean(handle, degrees).err().unwrap_or(OK)
+    })).unwrap_or(INTERNAL)
+}
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn rl_client_runtime_solve_mounted(
     runtime: *mut Runtime,
     records: *const MountedRecord,
@@ -327,4 +340,28 @@ mod tests {
         assert_eq!(runtime.solve_mounted(&row, &samples[..14], 2), Err(STALE));
         assert_eq!(runtime.solve_mounted(&row, &samples[..14], 1), Err(STALE));
     }
+    #[test]
+    fn gait_lean_event_is_finite_and_generation_scoped() {
+        let (source, bones, constants) = crate::mounted_pose::tests::fixture();
+        let mut runtime = Runtime::default();
+        let rig = runtime.register_rig(&source.parents, &source.rest, &source.neutral_pose).unwrap();
+        let rider = runtime.register_mounted_rider(rig, &bones, &constants, &[], &[]).unwrap();
+        let rows = [MountedRecord { id: 1, generation: 2, rider, gait: 3, frame: 1 }];
+        let mut samples = [0.; SAMPLE];
+        for i in [0,4,8] { samples[i]=1.; }
+        samples[13]=1.;
+        runtime.solve_mounted(&rows,&samples,1).unwrap();
+        let baseline=runtime.mounted_values.clone();
+        runtime.set_mounted_lean(rider, constants[81]+7.).unwrap();
+        runtime.solve_mounted(&rows,&samples,1).unwrap();
+        let changed=runtime.mounted_values.clone();
+        assert_ne!(baseline,changed);
+        assert_eq!(runtime.set_mounted_lean(rider,f64::NAN),Err(INVALID));
+        assert_eq!(runtime.set_mounted_lean(rider,f64::INFINITY),Err(INVALID));
+        runtime.solve_mounted(&rows,&samples,1).unwrap();
+        assert_eq!(runtime.mounted_values,changed);
+        runtime.reset(2).unwrap();
+        assert_eq!(runtime.set_mounted_lean(rider,1.),Err(STALE));
+    }
+
 }

@@ -21,6 +21,8 @@ var _return_time := 0.0
 var _returning := false
 var _return_grip := 0.0
 var _from: Dictionary = {}
+var _capture_revision := 0
+var _clip_revision := 0
 var _neutral_spine := Quaternion.IDENTITY
 var _spine := -1
 var _parent_chain: Array[int] = []
@@ -54,6 +56,7 @@ func configure(player: ReplicatedActor3D) -> void:
 		_cache_clip(key, actor.animation_player.get_animation(name))
 
 func _cache_clip(key: StringName, clip: Animation) -> void:
+	_clip_revision += 1
 	clips[key] = clip
 	var rotations: Array = []
 	var parents := {}
@@ -98,6 +101,7 @@ func request(next: StringName, restart := false) -> void:
 	_returning = false
 
 func _capture() -> void:
+	_capture_revision += 1
 	_from.clear()
 	for bone: int in bones:
 		_from[bone] = skeleton.get_bone_pose_rotation(bone)
@@ -121,6 +125,7 @@ func advance(delta: float) -> void:
 		grip_weight = _return_grip * weight
 		if weight <= 0.0:
 			action = &""
+			_returning = false
 			actor.current_action = ground_action
 		return
 	_blend_time += delta

@@ -85,6 +85,10 @@ var _mount_last_frame := Transform3D.IDENTITY
 var _mount_frame_ready := false
 ## Optional arithmetic-only extension. GDScript remains the complete fallback;
 ## the native object never reads the skeleton or writes a bone.
+var _native_mounted_constraint_kernel: RefCounted
+var _native_mounted_constraint_calls := 0
+var _native_mounted_constraint_fallbacks := 0
+var _native_mounted_constraint_disabled := false
 var _native_constraint_kernel: RefCounted
 var _native_constraint_kernel_initialized := false
 var _native_constraint_status := "disabled"
@@ -168,7 +172,12 @@ var _section_halves := PackedFloat32Array()
 var _section_folds := PackedFloat32Array()
 var _section_blend := PackedFloat32Array()
 
+func set_native_mounted_constraint_kernel(backend: RefCounted) -> void:
+	_native_mounted_constraint_kernel = backend if not _native_mounted_constraint_disabled else null
+
 func set_mount_surface(surface: RefCounted) -> void:
+	_native_mounted_constraint_kernel = null
+	_native_mounted_constraint_disabled = false
 	_mount_surface = surface
 	_mount_frame_ready = false
 	reset()
@@ -318,6 +327,11 @@ func native_presentation_stats() -> Dictionary:
 		"status": _native_constraint_status,
 		"nativeCalls": _native_constraint_calls,
 		"fallbackCalls": _native_constraint_fallbacks,
+		"mountedBackendAvailable": _native_mounted_constraint_kernel != null,
+		"mountedCalls": _native_mounted_constraint_calls,
+		"mountedFallbackCalls": _native_mounted_constraint_fallbacks,
+		"mountedPointStateOwner": "packed_arrays",
+		"counterWindow": "cumulative_since_cloth_node_creation",
 	}
 
 
@@ -817,7 +831,13 @@ func _process_modification_with_delta(delta: float) -> void:
 		if forward != Vector3.ZERO else 0.0
 	var down := (to_world.basis * anchor_pose.basis * _hang_local).normalized()
 	var anchor_carry := to_world.basis * anchor_pose.basis * _anchor_rest_inverse
-	# A mounted cape stays on the GDScript solver: the native kernel has no mount surface.
+	# Both paths share the existing capsule/Verlet arithmetic. The mounted
+	# extension adds the sampled mount surface, flow and sixteen relaxations.
+	if _mount_surface != null and _native_mounted_constraint_kernel != null and _try_native_constraint_step(
+			skeleton, to_world, to_local, anchor_pose, down, anchor_carry, fall,
+			damping, forward, plane_at, anchor_world.y, true, step):
+		_settled = true
+		return
 	if _mount_surface == null and _native_constraint_kernel != null and _try_native_constraint_step(
 			skeleton, to_world, to_local, anchor_pose, down, anchor_carry, fall,
 			damping, forward, plane_at, anchor_world.y):
@@ -885,7 +905,7 @@ func _process_modification_with_delta(delta: float) -> void:
 func _try_native_constraint_step(skeleton: Skeleton3D, to_world: Transform3D,
 		to_local: Transform3D, anchor_pose: Transform3D, down: Vector3,
 		carried: Basis, fall: Vector3, damping: float, forward: Vector3,
-		plane_at: float, anchor_y: float) -> bool:
+		plane_at: float, anchor_y: float, mounted := false, step := 0.0) -> bool:
 	# The kernel simulates whatever line it is handed: the cloth's own hang
 	# when it was measured, the material line otherwise.
 	var rests: Array[PackedVector3Array] = []
@@ -897,15 +917,30 @@ func _try_native_constraint_step(skeleton: Skeleton3D, to_world: Transform3D,
 			rest = _hang_from(fabric[0], chain, down)
 		rests.append(rest)
 		fabrics.append(fabric)
-	var solved := bool(_native_constraint_kernel.call("step",
-		_points, _previous, rests, _lengths,
-		_collision_world, _collision_pairs, _collision_axes,
-		_collision_spans, _collision_radii, _collision_reaches,
-		fall, damping, forward, plane_at, anchor_y, to_world, _settled))
-	if not solved:
-		_native_constraint_fallbacks += 1
-		return false
-	_native_constraint_calls += 1
+	var solved := false
+	if mounted:
+		solved = bool(_native_mounted_constraint_kernel.call("step_mounted_cape",
+			_points, _previous, rests, _lengths,
+			_collision_world, _collision_pairs, _collision_axes,
+			_collision_spans, _collision_radii, _collision_reaches,
+			fall, damping, forward, plane_at, anchor_y, to_world, _settled,
+			_mount_surface.call("native_snapshot", step)))
+		if not solved:
+			_native_mounted_constraint_fallbacks += 1
+			_native_mounted_constraint_disabled = true
+			_native_mounted_constraint_kernel = null
+			return false
+		_native_mounted_constraint_calls += 1
+	else:
+		solved = bool(_native_constraint_kernel.call("step",
+			_points, _previous, rests, _lengths,
+			_collision_world, _collision_pairs, _collision_axes,
+			_collision_spans, _collision_radii, _collision_reaches,
+			fall, damping, forward, plane_at, anchor_y, to_world, _settled))
+		if not solved:
+			_native_constraint_fallbacks += 1
+			return false
+		_native_constraint_calls += 1
 	if _keeps_off_legs():
 		_keep_off_legs(forward, carried)
 	for chain: int in range(_bones.size()):
