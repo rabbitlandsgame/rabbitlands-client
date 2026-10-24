@@ -38,6 +38,7 @@ func _run() -> void:
 	_expect(network.RECONNECT_INTERVAL_MSEC == 2000, "reconnect cadence is two seconds")
 
 	_begin_ui_session()
+	var resources := _seed_world_resources()
 	app.append_local_message("Conversation before the connection dropped.")
 	app.active_channels.assign([3, 6, 0])
 	app.active_channel_index = 1
@@ -64,6 +65,7 @@ func _run() -> void:
 		"recoverable drops preserve the channel tabs and selection")
 	_expect(not network.is_reconnecting() and announced.is_empty(), "a drop waits for a key without starting retries")
 	_expect(bool(scene.get("_resync_after_reconnect")), "the next authenticated session requests fresh world snapshots")
+	_expect_world_resources(resources, "dormant disconnect")
 	_expect(scene.connection_banner.visible and scene.connection_banner.text.contains("press any key"),
 		"the banner identifies the dormant disconnect state")
 	var rail: Control = scene.get_node("GameView/ResourceHud")
@@ -83,12 +85,60 @@ func _run() -> void:
 	_expect(network.is_reconnecting() and network.reconnect_attempt() == 13
 		and announced.back()[2] >= 1990 and announced.back()[2] <= 2000,
 		"subsequent attempts retain the two-second cadence beyond the old retry limit")
+	network.call("_drop_connection", "socket_error")
+	await process_frame
+	_expect_world_resources(resources, "failed retry")
+	# A successful login gets the map packet again. The matching resident map
+	# must bypass loading, while the normal authoritative resync still runs.
+	var listener := TCPServer.new()
+	_expect(listener.listen(0, "127.0.0.1") == OK, "UI reconnect transport opens")
+	var ui_peer := network.get("_peer") as StreamPeerTCP
+	network.set("_secure", false)
+	_expect(ui_peer.connect_to_host("127.0.0.1", listener.get_local_port()) == OK,
+		"UI reconnect reaches the local transport")
+	_expect(await _until(func() -> bool:
+		ui_peer.poll()
+		return ui_peer.get_status() == StreamPeerTCP.STATUS_CONNECTED and listener.is_connection_available()),
+		"UI reconnect transport becomes ready")
+	var server_peer := listener.take_connection()
+	network.call("_set_state", "connected")
+	app.authenticated = true
+	app.current_map = "four_gates"
+	scene.call("_on_login_succeeded")
+	await process_frame
+	_expect_world_resources(resources, "same-map reconnect")
+	_expect(not bool(scene.get("_disconnect_console_active"))
+		and not bool(scene.get("_resync_after_reconnect")), "successful reconnect resumes play and requests resync")
+	if server_peer != null:
+		var received := await _receive_bytes(server_peer)
+		var commands: Array[int] = []
+		while not received.is_empty():
+			var decoded := EloriaProtocol.try_decode(received)
+			if decoded.status != "ok": break
+			commands.append(int(decoded.command))
+			received = received.slice(int(decoded.consumed))
+		_expect(commands.has(EloriaProtocol.ClientMessage.SEND_ME_MY_ACTORS)
+			and commands.has(EloriaProtocol.ClientMessage.SEND_MY_STATS)
+			and commands.has(EloriaProtocol.ClientMessage.SEND_MY_INVENTORY),
+			"reusing terrain still sends all three authoritative snapshot requests")
+	else:
+		_expect(false, "UI reconnect transport accepts the client")
+	network.call("_drop_connection", "socket_error")
+	if server_peer != null: server_peer.disconnect_from_host()
+	listener.stop()
 	_logout_through_icon()
 	_expect(not scene.game_view.visible and scene.get_node("LoginPanel").visible
 		and not scene.console_panel.visible, "the disconnect menu icon returns to login during retry")
 	_expect(not network.is_reconnecting() and not network.can_resume_session()
 		and str(network.get("_session_password")).is_empty() and app.chat_lines.is_empty(),
 		"explicit logout cancels retries, forgets credentials and clears the prior session")
+	await process_frame
+	_expect(scene.world_loader.world_root == null and str(scene.loaded_server_map).is_empty()
+		and scene.exterior_stream.residents.is_empty() and not is_instance_valid(resources.chunk)
+		and not is_instance_valid(resources.lights) and GlbSceneCache.cached_scene_count() == 0,
+		"returning to login releases retained terrain, neighbours, lighting and visual caches")
+	_expect(not scene.respawn_prewarm.pending() and not scene.gauntlet_prewarm.pending(),
+		"returning to login releases retained arrival preloads")
 
 	_begin_ui_session()
 	scene.call("_on_chat_submitted", "#DiScO")
@@ -141,6 +191,54 @@ func _key(code: Key, echo := false) -> void:
 	event.pressed = true
 	event.echo = echo
 	root.push_input(event, true)
+
+func _seed_world_resources() -> Dictionary:
+	var manifest := WorldManifest.new()
+	manifest.data = {"asset": {"id": "four_gates"}}
+	var chunks := ContinentChunkStream.new()
+	chunks.territory = manifest
+	scene.world_loader.add_child(chunks)
+	var chunk := Node3D.new()
+	chunks.add_child(chunk)
+	chunks.cells["fixture"] = {"root": chunk, "manifest": manifest,
+		"entry": {"id": "fixture", "estimatedResidentBytes": 0,
+			"bounds": {"min": [0, -10, 0], "max": [10, 20, 10]}}}
+	scene.world_loader.world_root = chunks
+	scene.world_loader.manifest = manifest
+	scene.loaded_server_map = "four_gates"
+	app.current_map = "four_gates"
+	scene.exterior_stream.activate("four_gates", chunks, manifest)
+	scene.exterior_stream.pending_walk = {"map": "fixture_neighbour", "tile": Vector2i(5, 5)}
+	var neighbour := Node3D.new()
+	scene.exterior_stream.add_child(neighbour)
+	scene.exterior_stream.residents["fixture_neighbour"] = {"root": neighbour, "manifest": manifest}
+	var lights := Node3D.new()
+	scene.world_root.add_child(lights)
+	scene.map_light_root = lights
+	scene.set("_map_presentation", {"map": "four_gates", "nodes": {}, "groupings": []})
+	var visual := PackedScene.new()
+	var source := Node3D.new()
+	_expect(visual.pack(source) == OK, "visual cache fixture packs")
+	source.free()
+	GlbSceneCache.install_prepared({"res://tests/reconnect-fixture.glb": visual})
+	for prewarm: RefCounted in [scene.respawn_prewarm, scene.gauntlet_prewarm]:
+		var loader := WorldLoader.new()
+		scene.world_root.add_child(loader)
+		prewarm.set("_loader", loader)
+	return {"root": chunks, "chunk": chunk, "neighbour": neighbour, "lights": lights,
+		"cached_scenes": GlbSceneCache.cached_scene_count()}
+
+func _expect_world_resources(resources: Dictionary, stage: String) -> void:
+	_expect(scene.world_loader.world_root == resources.root and is_instance_valid(resources.chunk)
+		and (resources.root as ContinentChunkStream).cells["fixture"].root == resources.chunk
+		and scene.loaded_server_map == "four_gates", stage + " keeps the identical map and chunk")
+	_expect(scene.exterior_stream.residents.get("fixture_neighbour", {}).get("root") == resources.neighbour
+		and scene.map_light_root == resources.lights
+		and scene.get("_map_presentation").get("map") == "four_gates",
+		stage + " keeps neighbouring terrain, lighting and map presentation")
+	_expect(GlbSceneCache.cached_scene_count() == int(resources.cached_scenes), stage + " keeps parsed visual resources")
+	_expect(scene.respawn_prewarm.pending() and scene.gauntlet_prewarm.pending(), stage + " keeps arrival preloads")
+	_expect(scene.exterior_stream.pending_walk.is_empty(), stage + " discards the old session's walking route")
 
 func _logout_through_icon() -> void:
 	# Exercise the production menu icon's connected signal.
