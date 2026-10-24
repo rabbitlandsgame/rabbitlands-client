@@ -1,6 +1,7 @@
 class_name RustSpellFlightManager
 extends Node
-## Opt-in heat-bolt slice. Unsupported shapes and any failed preflight use the
+const OptimizationProfile := preload("res://src/runtime/optimization_profile.gd")
+## Human-testing heat-bolt slice. Unsupported shapes and any failed preflight use the
 ## normal WorldEffect3D path. All native output is validated before mesh writes.
 const Proxy = preload("res://src/world/rust_spell_effect_3d.gd")
 const SERVICE_NAME := "RustSpellFlights"
@@ -29,7 +30,7 @@ var _frame_admission_us := 0
 static func spawn(controller: ClientRuntimeController, parent: Node3D,
 		effect: Dictionary, origin: Vector3, target: Variant,
 		source: Node3D, receiver: Node3D, priority: bool, limit: int) -> Node3D:
-	if OS.get_environment("RABBITLANDS_RUST_EFFECTS").strip_edges().to_lower() != "heat_bolt" \
+	if OptimizationProfile.selected("rust_effects") != "heat_bolt" \
 			or controller == null or controller.native_runtime() == null \
 			or not controller.is_rust_mode() \
 			or int(effect.get("effect", -1)) != 2 or not target is Vector3 \
@@ -63,7 +64,7 @@ static func snapshot_for(parent: Node3D) -> Dictionary:
 	var manager := parent.get_node_or_null(NodePath(SERVICE_NAME)) if is_instance_valid(parent) else null
 	return manager.snapshot() if manager != null and manager.has_method("snapshot") else {
 		"active": false, "family": "heat_bolt", "reason": "not_instantiated",
-		"requested":OS.get_environment("RABBITLANDS_RUST_EFFECTS").strip_edges().to_lower()}
+		"requested":OptimizationProfile.selected("rust_effects")}
 
 static func clear_for(parent: Node3D) -> void:
 	var manager := parent.get_node_or_null(NodePath(SERVICE_NAME)) as RustSpellFlightManager if is_instance_valid(parent) else null
@@ -434,7 +435,7 @@ func _record_admission(microseconds: int) -> void:
 
 func snapshot() -> Dictionary:
 	return {"active": _native != null, "family": "heat_bolt", "reason": _reason,
-		"requested": OS.get_environment("RABBITLANDS_RUST_EFFECTS").strip_edges().to_lower(),
+		"requested": OptimizationProfile.selected("rust_effects"),
 		"epoch": _epoch, "live": _proxies.size(), "high_water": _high_water,
 		"admitted_rust":_admitted_rust,"admitted_legacy":_admitted_legacy,"events":_events.duplicate(),
 		"frames": _frames, "fallbacks": _fallbacks, "last_frame": _last.duplicate(),

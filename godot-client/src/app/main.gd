@@ -1247,6 +1247,20 @@ const EXPERIENCE_SKILLS: Array[String] = [
 	"summoning", "manufacturing", "crafting", "engineering", "tailoring",
 	"ranging", "overall"]
 
+func _log_optimization_startup() -> void:
+	var prepared = preload("res://src/world/prepared_content.gd")
+	var runtime: Dictionary = client_runtime.snapshot()
+	var remote: Dictionary = remote_presentation.snapshot()
+	print("RABBITLANDS_OPTIMIZATION_STARTUP ", JSON.stringify({
+		"profile": runtime.optimization_profile,
+		"runtime": {"mode": runtime.mode, "native_available": runtime.native_available, "reason": runtime.reason},
+		"remote": {"backend": remote.backend, "reason": remote.reason},
+		"admission": preload("res://src/runtime/resource_admission.gd").snapshot(),
+		"prepared": {"mode": prepared.selected_mode(), "node_policy": prepared.node_policy(),
+			"catalog_present": FileAccess.file_exists(prepared.CATALOG)},
+		"effects": RustSpellFlights.snapshot_for(world_root),
+	}))
+
 func _ready() -> void:
 	# GLTFDocument's global extension vector must stop changing before any
 	# UI, actor animation prewarm, map or neighbouring-region worker starts.
@@ -1258,6 +1272,7 @@ func _ready() -> void:
 	add_child(remote_presentation)
 	animation_gate = remote_presentation.initialize(client_runtime, animation_gate)
 	preload("res://src/runtime/resource_admission.gd").register_actor_provider(_resource_admission_actor_counts)
+	_log_optimization_startup()
 	crowd.configure(OS.get_environment("RABBITLANDS_CROWD_PRESENTATION"),
 		OS.get_environment("RABBITLANDS_CROWD_BODY_CAP"),
 		OS.get_environment("RABBITLANDS_CROWD_TUNING"))

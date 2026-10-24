@@ -1,4 +1,4 @@
-"""Verified optional native payload. Ordinary packages remain native-absent."""
+"""Verified optional native payload and isolated human-testing launchers."""
 from __future__ import annotations
 import hashlib
 import json
@@ -72,22 +72,45 @@ def stage_payload(directory: Path, repository: Path, app: Path, platform: str) -
 
 
 def write_launchers(stage: Path, platform: str) -> None:
-    profiles = (("Rust rider pilot", "rust", ""), ("Rust comparison", "compare", ""),
-                ("legacy runtime", "legacy", ""), ("Rust heat bolt pilot", "rust", "heat_bolt"))
-    for name, mode, effects in profiles:
+    # A global legacy profile supplies defaults, not a veto on individual
+    # overrides. Reset every family so an inherited experimental environment
+    # cannot turn a legacy control or an isolated pilot into a mixed run.
+    legacy = {
+        "RABBITLANDS_CLIENT_RUNTIME": "legacy",
+        "RABBITLANDS_REMOTE_PRESENTATION": "legacy",
+        "RABBITLANDS_RUST_EFFECTS": "legacy",
+        "RABBITLANDS_RESOURCE_ADMISSION": "legacy",
+        "RABBITLANDS_PREPARED_CONTENT": "raw",
+        "RABBITLANDS_PREPARED_NODE_POLICY": "retain",
+    }
+    human_testing = {
+        "RABBITLANDS_CLIENT_RUNTIME": "rust",
+        "RABBITLANDS_REMOTE_PRESENTATION": "rust",
+        "RABBITLANDS_RUST_EFFECTS": "heat_bolt",
+        "RABBITLANDS_RESOURCE_ADMISSION": "rust",
+        "RABBITLANDS_PREPARED_CONTENT": "auto",
+        "RABBITLANDS_PREPARED_NODE_POLICY": "lazy-source-v1",
+    }
+    profiles = (
+        ("optimization testing", "human-testing", human_testing),
+        ("legacy runtime", "legacy", {}),
+        ("Rust rider pilot", "legacy", {"RABBITLANDS_CLIENT_RUNTIME": "rust"}),
+        ("Rust comparison", "legacy", {"RABBITLANDS_CLIENT_RUNTIME": "compare"}),
+        ("Rust heat bolt pilot", "legacy", {
+            "RABBITLANDS_CLIENT_RUNTIME": "rust", "RABBITLANDS_RUST_EFFECTS": "heat_bolt"}),
+    )
+    for name, profile, overrides in profiles:
+        environment = {"RABBITLANDS_OPTIMIZATION_PROFILE": profile, **legacy, **overrides,
+                       "ELORIA_NATIVE_PRESENTATION": "0", "ELORIA_NATIVE_CROWD": "0"}
         if platform == "windows":
-            body = ('@echo off\r\nsetlocal\r\nset "RABBITLANDS_CLIENT_RUNTIME=' + mode
-                    + '"\r\nset "RABBITLANDS_RUST_EFFECTS=' + effects + '"\r\n')
-            if effects:
-                body += 'set "ELORIA_NATIVE_PRESENTATION=0"\r\n'
+            body = '@echo off\r\nsetlocal\r\n'
+            body += ''.join(f'set "{key}={value}"\r\n' for key, value in environment.items())
             body += 'call "%~dp0RabbitLands.bat" %*\r\n'
             (stage / f"RabbitLands ({name}).bat").write_bytes(body.encode("utf-8"))
         elif platform == "linux":
             script = stage / f"RabbitLands ({name}).sh"
-            body = ('#!/bin/sh\nexport RABBITLANDS_CLIENT_RUNTIME=' + mode
-                    + '\nexport RABBITLANDS_RUST_EFFECTS=' + effects + '\n')
-            if effects:
-                body += 'export ELORIA_NATIVE_PRESENTATION=0\n'
+            body = '#!/bin/sh\n'
+            body += ''.join(f'export {key}={value}\n' for key, value in environment.items())
             body += 'exec "$(dirname "$0")/RabbitLands.sh" "$@"\n'
             script.write_text(body, encoding="utf-8")
             script.chmod(0o755)

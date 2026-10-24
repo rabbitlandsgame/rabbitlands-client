@@ -2396,7 +2396,9 @@ def write_compatibility_launchers(stage: Path, args: list[str], platform: dict,
                                  updating: bool) -> None:
     """Force renderer selection before Godot initializes, also through updates."""
     windows = platform["binary"].endswith(".exe")
-    extra = (" -- " + " ".join(args)) if args else ""
+    # Additional launcher arguments are game/user arguments even when there is
+    # no baked server. Keep their separator before forwarding them on both OSes.
+    extra = " --" + (" " + " ".join(args) if args else "")
     renderer = "--rendering-method gl_compatibility --rendering-driver opengl3"
     safe_environment = {"ELORIA_LOOK": "0", "ELORIA_LOOK_QUALITY": "low",
                         "ELORIA_VRAM_TEXTURES": "0", "ELORIA_NO_MAP_CACHE": "1"}
@@ -2413,7 +2415,7 @@ def write_compatibility_launchers(stage: Path, args: list[str], platform: dict,
             (stage / f"RabbitLands ({label}).bat").write_text(
                 '@echo off\r\nsetlocal\r\ncd /d "%~dp0app"\r\n' + environment +
                 f'echo Starting Rabbit Lands in {label} mode. Close the game to view the log.\r\n' +
-                command + '\r\nset "ELORIA_EXIT_CODE=%errorlevel%"\r\n' +
+                command + ' %*\r\nset "ELORIA_EXIT_CODE=%errorlevel%"\r\n' +
                 'echo Rabbit Lands exited with status %ELORIA_EXIT_CODE%.\r\n' +
                 f'type "%~dp0{log_name}"\r\necho.\r\necho Log saved as {log_name}.\r\n' +
                 'pause >nul\r\nexit /b %ELORIA_EXIT_CODE%\r\n', encoding="ascii")
@@ -2438,7 +2440,7 @@ def write_launchers(stage: Path, server: str | None, build_dir: Path, version: s
         shown_host, shown_port = host, port or default_server(build_dir)[1]
     else:
         shown_host, shown_port = default_server(build_dir)
-    extra = (" -- " + " ".join(args)) if args else ""
+    extra = " --" + (" " + " ".join(args) if args else "")
     updating = (stage / ("RabbitLands-updater.exe" if platform["binary"].endswith(".exe") else "RabbitLands-updater.x86_64")).is_file()
     if updating:
         extra = " -- --launch-only" + (" " + " ".join(args) if args else "")
@@ -2467,15 +2469,15 @@ def write_launchers(stage: Path, server: str | None, build_dir: Path, version: s
         return args
     (stage / "RabbitLands.bat").write_text(
         '@echo off\r\ncd /d "%~dp0app"\r\n' +
-        f'start "" "%~dp0{"RabbitLands-updater.exe" if updating else "app" + chr(92) + "RabbitLands.exe"}"{extra}\r\n', encoding="ascii")
+        f'start "" "%~dp0{"RabbitLands-updater.exe" if updating else "app" + chr(92) + "RabbitLands.exe"}"{extra} %*\r\n', encoding="ascii")
     # The installed export templates carry no console wrapper, and a GUI exe
     # prints nothing to the window that started it, so the log goes to a file
     # that is shown once the game exits.
     (stage / "RabbitLands (debug console).bat").write_text(
         '@echo off\r\ncd /d "%~dp0app"\r\n'
         'echo Rabbit Lands is running; its log will appear here when it exits.\r\n'
-        + (f'"%~dp0RabbitLands-updater.exe" -- --launch-only --client-debug {" ".join(args)}\r\n' if updating else
-           f'RabbitLands.exe --verbose --log-file "%~dp0eloria-debug.log"{extra}\r\n') +
+        + (f'"%~dp0RabbitLands-updater.exe" -- --launch-only --client-debug {" ".join(args)} %*\r\n' if updating else
+           f'RabbitLands.exe --verbose --log-file "%~dp0eloria-debug.log"{extra} %*\r\n') +
         'type "%~dp0eloria-debug.log"\r\n'
         'echo.\r\necho The log is saved as eloria-debug.log. Press any key to close this window.\r\n'
         'pause >nul\r\n',

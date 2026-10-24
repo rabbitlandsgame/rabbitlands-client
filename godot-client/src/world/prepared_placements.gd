@@ -1,5 +1,6 @@
 class_name PreparedPlacements
 extends RefCounted
+const OptimizationProfile := preload("res://src/runtime/optimization_profile.gd")
 ## Optional prepared representation: a static MultiMesh draws every placement,
 ## with one original source per uniform batch and lazy leaf sources for fade or
 ## server binding. Native templates contain Resources and data, never live Nodes.
@@ -228,10 +229,7 @@ class Registry extends RefCounted:
 	var retained_visuals := 0
 
 static func selected_policy() -> String:
-	var policy := OS.get_environment("RABBITLANDS_PREPARED_NODE_POLICY").strip_edges().to_lower()
-	for argument: String in OS.get_cmdline_user_args():
-		if argument.begins_with("--prepared-node-policy="):
-			policy = argument.trim_prefix("--prepared-node-policy=")
+	var policy := OptimizationProfile.selected("prepared_node_policy")
 	return POLICY if policy == POLICY else "retain"
 
 static func _counts(root: Node) -> Vector2i:
