@@ -1845,6 +1845,10 @@ func rebase_world(frame: Transform3D) -> void:
 		_combat_target_marker.call("invalidate_ground")
 
 func apply_server_state(dto: Dictionary, adapter: CoordinateAdapter, teleport := false) -> void:
+	# A revived body starts a new movement stream at its respawn tile. Do
+	# not interpolate from its corpse or retain the old step schedule.
+	teleport = teleport or (current_action == &"death"
+		and int(dto.get("health", 0)) > 0 and bool(dto.get("alive", true)))
 	if teleport and _charge_leap != null: end_charge_leap()
 	_sync_death_presentation(dto)
 	# A guild refresh removes and re-adds the actor in one socket read. Main
@@ -4179,7 +4183,9 @@ func _advance_facing_offset(delta: float) -> void:
 	_native_model.rotation.y = _base_model_yaw + _facing_offset
 
 func _wake() -> void:
-	if not _settled:
+	# Death can pause physics before a moving body settles. Revival must
+	# restart that body too, rather than waiting for a distance-correction snap.
+	if not _settled and is_physics_processing():
 		return
 	_settled = false
 	set_physics_process(true)
