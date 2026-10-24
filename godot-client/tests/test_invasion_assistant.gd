@@ -18,7 +18,7 @@ func _run() -> void:
 	root.add_child(assistant)
 	assistant._preferred_scale = 1.0
 	assistant._fit_to_viewport()
-	_expect(assistant.size == Vector2i(1100, 620), "builder opens at a readable frame size")
+	_expect(assistant.size == Vector2i(1152, 648), "builder opens at a readable frame size")
 	var commands: Array[String] = []
 	assistant.command_requested.connect(func(command: String) -> void: commands.append(command))
 	var registry_file := FileAccess.open("res://data/maps/registry.json", FileAccess.READ)
@@ -91,9 +91,9 @@ func _run() -> void:
 	root.size = Vector2i(1280,720)
 	assistant.resize_to_scale(0.65)
 	_expect(assistant.content_scale_factor == 1.0, "resizing never shrinks type")
-	_expect(not assistant.map_sidebar.visible, "compact builder collapses map sidebar")
+	_expect(not assistant.maps_popup.visible, "compact builder keeps browsing outside the map workspace")
 	assistant.resize_to_scale(1.0)
-	_expect(assistant.map_sidebar.visible, "wide builder restores map sidebar")
+	_expect(not assistant.maps_popup.visible, "wide builder also keeps the map dominant")
 	assistant.set_monitor_mode(true)
 	_expect(assistant.size.x <= 390 and assistant.monitor_panel.visible,
 		"monitor is a compact panel leaving the game visible")
@@ -311,6 +311,7 @@ func _run() -> void:
 	canvas._gui_input(up)
 	_expect(regions == [Rect2i(70,80,21,21)], "drawing in either direction normalizes inclusive logical region corners")
 	_check_refresh_protocol(assistant, commands)
+	_check_design_modes(assistant, commands)
 	assistant.queue_free()
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(monitor_preferences))
 	if failures == 0:
@@ -367,6 +368,55 @@ func _check_refresh_protocol(assistant, commands: Array[String]) -> void:
 	_expect(commands == ["#invasion_assistant groups"], "old server retains legacy refresh requests")
 
 
+func _check_design_modes(assistant, commands: Array[String]) -> void:
+	var groups: Array = []
+	for entry: Array in [["North Gate Wave", 24, 12], ["Market Vanguard", 28, 0], ["South Gate Patrol", 9, 6]]:
+		var group: Dictionary = assistant.selected_group.duplicate(true)
+		group.name = entry[0]
+		group.active = true
+		group.alive = entry[1]
+		group.queued = entry[2]
+		group.map_id = assistant.selected_map_id
+		group.auto_respawn_minutes = -1
+		groups.append(group)
+	assistant.selected_group = {}
+	assistant.group_filter.text = ""
+	assistant.apply_update({"kind": "groups", "groups": groups, "revision": "design-r1", "status_supported": true})
+	_expect(not assistant.tabs.tabs_visible and not assistant.maps_popup.visible, "builder opens on the map with browsing tucked away")
+	assistant._show_inspector_section(1)
+	assistant.section_headers[0].pressed.emit()
+	_expect(assistant.inspector_tabs.current_tab == 0 and assistant.inspector_tabs.visible, "composition expands in place")
+	assistant.section_headers[0].pressed.emit()
+	_expect(not assistant.inspector_tabs.visible, "the selected section can collapse without losing its controls")
+	assistant.section_headers[2].pressed.emit()
+	_expect(assistant.inspector_tabs.current_tab == 2 and assistant.inspector_tabs.visible, "settings remain accessible through their section header")
+	assistant.group_description.text = "Preserve this edit"
+	assistant.group_description.text_changed.emit("Preserve this edit")
+	assistant.set_monitor_mode(true)
+	_expect(assistant._monitor_rows.size() == 3 and assistant.monitor_selected_panel.visible, "monitor shows all three active groups and selected controls")
+	var first_row: Button = assistant._monitor_rows["North Gate Wave"].button
+	var row_id := first_row.get_instance_id()
+	var status_rows: Array = []
+	for group: Dictionary in groups:
+		status_rows.append({"name": group.name, "active": true, "alive": int(group.alive) - 1, "queued": group.queued, "movement": group.get("movement", {})})
+	assistant.apply_update({"kind": "group_status", "revision": "design-r1", "groups": status_rows})
+	_expect(assistant._monitor_rows["North Gate Wave"].button.get_instance_id() == row_id, "live counts reuse monitor rows instead of rebuilding them")
+	assistant.monitor_x.value = 30
+	assistant.monitor_y.value = 40
+	_expect(assistant.map_canvas.selected_tile == Vector2i(30, 40) and assistant.monitor_canvas.selected_tile == Vector2i(30, 40), "typed monitor destinations keep both map views aligned")
+	commands.clear()
+	assistant.monitor_clear.pressed.emit()
+	_expect(commands.is_empty() and assistant.action_dialog.visible, "monitor clear still requires a scoped review")
+	assistant.action_dialog.hide()
+	assistant._monitor_rows["Market Vanguard"].button.pressed.emit()
+	_expect(assistant.selected_group.name == "Market Vanguard" and assistant._monitor_rows.keys()[0] == "Market Vanguard", "selecting a monitor row expands it at the top")
+	assistant._select_group_name("North Gate Wave")
+	assistant.set_monitor_mode(false)
+	_expect(assistant.group_description.text == "Preserve this edit", "switching views and groups retains the builder draft")
+	assistant.map_canvas.reset_view()
+	_expect(assistant.map_canvas._fitted_view and assistant.map_canvas.zoom == 1.0, "Fit reveals the full map from the filled map workspace")
+
+
 func _check_monitor_docking(assistant: Window, preferences_path: String) -> void:
 	var hud := {"area": Rect2(24, 18, 1100, 660)}
 	assistant.configure_monitor_dock(func() -> Rect2: return hud.area)
@@ -375,7 +425,7 @@ func _check_monitor_docking(assistant: Window, preferences_path: String) -> void
 		"monitor defaults to a seamless HUD dock")
 	_expect(assistant.position == Vector2i(734, 18) and assistant.size == Vector2i(390, 660),
 		"dock follows the exact 3D viewport edge and full available height")
-	_expect(assistant.monitor_dock_button.text == "Undock", "docked monitor exposes Undock")
+	_expect(assistant.monitor_dock_button.tooltip_text.begins_with("Detach"), "docked monitor exposes a labeled detach control")
 	hud.area = Rect2(12, 10, 1050, 650)
 	assistant._process(0.0)
 	_expect(assistant.position == Vector2i(672, 10) and assistant.size.y == 650,
@@ -431,7 +481,7 @@ func _check_monitor_docking(assistant: Window, preferences_path: String) -> void
 	_expect(assistant.position == floating_position, "restoring viewport restores the preferred floating position")
 	assistant.set_monitor_docked(true)
 	assistant.set_monitor_mode(false)
-	_expect(not assistant.borderless and not assistant.monitor_dock_button.visible,
+	_expect(assistant.borderless and not assistant.monitor_dock_button.visible,
 		"full builder keeps its normal frame and controls")
 
 

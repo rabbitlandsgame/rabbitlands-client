@@ -30,12 +30,23 @@ func _run() -> void:
 	_assistant._preferred_scale = 1.0
 	_assistant._fit_to_viewport()
 	_send(_map_state())
-	_send(_groups_state())
+	var groups := _groups_state()
+	groups.groups[0].alive = 24
+	groups.groups[0].queued = 12
+	groups.groups[0].composition[2].quantity = 8
+	groups.groups[0].movement = {"anchor": {"x": 310, "y": 260}, "radius": 18, "region": null}
+	for entry: Array in [["Market Vanguard", 28, 0], ["South Gate Patrol", 9, 6]]:
+		var other: Dictionary = groups.groups[0].duplicate(true)
+		other.name = entry[0]
+		other.alive = entry[1]
+		other.queued = entry[2]
+		groups.groups.append(other)
+	_send(groups)
 	_send(_monsters_state())
 	_assistant._on_group_selected(0)
 	_assistant.tabs.current_tab = 0
 	await _settle()
-	_expect(_assistant.size == Vector2i(1100,620), "readable builder fits the game viewport")
+	_expect(_assistant.size == Vector2i(1152,648), "readable builder fits the game viewport")
 	_expect(_assistant.map_list.item_count == 11, "all server maps remain selectable")
 	_expect(_assistant.group_composition.item_count == 3, "composition is beside the map")
 	_expect(_assistant._map_texture("four_gates") != null, "published player Tab-map artwork is reused")
@@ -55,6 +66,8 @@ func _run() -> void:
 	_expect(_assistant.monster_list.item_count == 3, "reviewed-model filter retains only reviewed creatures")
 	_assistant.monster_updated_only.button_pressed = false
 	_assistant.set_monitor_mode(true)
+	_assistant._discard_draft()
+	_assistant._on_monitor_location(1)
 	await _settle()
 	_expect(_assistant.size.x <= 390, "monitor leaves most of the game visible")
 	var dock_area: Rect2 = _main._invasion_monitor_dock_rect()
@@ -85,8 +98,8 @@ func _run() -> void:
 	root.size = Vector2i(960, 540)
 	await _settle()
 	dock_area = _main._invasion_monitor_dock_rect()
-	_expect(Rect2(_assistant.position, _assistant.size).is_equal_approx(
-		Rect2(dock_area.end.x - _assistant.size.x, dock_area.position.y, _assistant.size.x, dock_area.size.y)),
+	_expect(_assistant.position == Vector2i(int(dock_area.end.x) - _assistant.size.x, int(dock_area.position.y))
+		and _assistant.size.y == int(dock_area.size.y),
 		"small-screen dock stays attached to the live HUD")
 	await _capture("invasion-assistant-monitor-small.png", "Docked monitor on a smaller game window")
 	root.size = SCREEN_SIZE
@@ -96,7 +109,7 @@ func _run() -> void:
 	_assistant.resize_to_scale(0.65)
 	_assistant._size_save_countdown = 0
 	await _settle()
-	_expect(not _assistant.map_sidebar.visible and _assistant.content_scale_factor == 1.0, "compact builder reflows without shrinking text")
+	_expect(not _assistant.maps_popup.visible and _assistant.content_scale_factor == 1.0, "compact builder reflows without shrinking text")
 	await _capture("invasion-assistant-compact-builder.png", "Narrow builder collapses the map sidebar and preserves readable type")
 	_assistant.resize_to_scale(1.0)
 	_assistant._size_save_countdown = 0
@@ -131,9 +144,9 @@ func _send(state: Dictionary) -> void:
 		JSON.stringify(state).to_utf8_buffer())
 
 
-func _index_maps() -> Array:
+static func _index_maps() -> Array:
 	var maps: Array = []
-	for entry: Array in [["four_gates", "Four Gates City", 12, 24, 2],
+	for entry: Array in [["four_gates", "Four Gates City", 8, 61, 3],
 			["ember", "Emberhaven", 4, 11, 1], ["crownwater", "Crownwater", 3, 0, 0],
 			["mirrorhold", "Mirrorhold", 2, 9, 0], ["grey_moors", "Grey Moors", 5, 6, 0],
 			["sunmane", "Sunmane Steppe", 1, 4, 0], ["westhaven", "Westhaven", 2, 0, 0],
@@ -146,13 +159,13 @@ func _index_maps() -> Array:
 	return maps
 
 
-func _map_state() -> Dictionary:
+static func _map_state() -> Dictionary:
 	var players: Array = []
 	for entry: Array in [["Kellan", 78, 96, 45], ["Maren", 120, 60, 38],
 			["Toma Reed", 44, 150, 62], ["Ivet Somer", 160, 132, 21],
 			["Halden", 90, 40, 55], ["Nyx", 30, 110, 33],
 			["Sorrel", 140, 90, 47], ["Bram", 70, 170, 29]]:
-		players.append({"name": entry[0], "x": entry[1], "y": entry[2],
+		players.append({"name": entry[0], "x": int(entry[1]) + 180, "y": int(entry[2]) + 60,
 			"combat_level": entry[3]})
 	var creatures: Array = []
 	for entry: Array in [["Ash Wyrm", 82, 100, 150, 180, "Formidable", true],
@@ -161,19 +174,19 @@ func _map_state() -> Dictionary:
 			["Ember Shade", 110, 70, 90, 120, "Fearsome", false],
 			["Ember Shade", 118, 66, 120, 120, "Fearsome", false],
 			["Slag Crawler", 50, 140, 30, 45, "Average", false]]:
-		creatures.append({"name": entry[0], "x": entry[1], "y": entry[2],
+		creatures.append({"name": entry[0], "x": int(entry[1]) + 180, "y": int(entry[2]) + 60,
 			"health": entry[3], "max_health": entry[4], "tier": entry[5],
 			"boss": entry[6]})
 	return {"kind": "map",
 		"map": {"id": "four_gates", "name": "Four Gates City",
-			"file": "maps/startmap.elm", "width": 256, "height": 256},
-		"locations": [{"name": "North Gate", "kind": "invasion_spawn", "x": 128, "y": 20},
-			{"name": "South Gate", "kind": "invasion_spawn", "x": 128, "y": 232},
-			{"name": "Storage", "kind": "portal", "x": 96, "y": 118}],
+			"file": "maps/startmap.elm", "width": 594, "height": 594},
+		"locations": [{"name": "North Gate", "kind": "invasion_spawn", "x": 310, "y": 290},
+			{"name": "South Gate", "kind": "invasion_spawn", "x": 310, "y": 45},
+			{"name": "Storage", "kind": "portal", "x": 220, "y": 180}],
 		"players": players, "creatures": creatures}
 
 
-func _groups_state() -> Dictionary:
+static func _groups_state() -> Dictionary:
 	return {"kind": "groups", "groups": [
 		{"name": "North Gate Wave", "description": "Opening pressure on the north road",
 			"map_id": "four_gates", "map_name": "Four Gates City", "minimum": 340,
@@ -181,7 +194,7 @@ func _groups_state() -> Dictionary:
 			"composition": [{"type": "ash_wyrm", "name": "Ash Wyrm", "quantity": 4},
 				{"type": "cinder_hound", "name": "Cinder Hound", "quantity": 12},
 				{"type": "ember_shade", "name": "Ember Shade", "quantity": 6}],
-			"locations": [{"x": 128, "y": 20, "quantity": 12}], "strength": 1840,
+			"locations": [{"x": 310, "y": 290, "quantity": 12}], "strength": 1840,
 			"active": true, "alive": 300, "queued": 620, "boss": "The Cinder Maw",
 			"boss_type": "ash_wyrm", "boss_name": "The Cinder Maw",
 			"health_multiplier": 1.5, "auto_respawn_minutes": -1, "dynamic": true},
@@ -211,7 +224,7 @@ func _groups_state() -> Dictionary:
 			"boss_name": "", "health_multiplier": 1.0, "dynamic": true}]}
 
 
-func _monsters_state() -> Dictionary:
+static func _monsters_state() -> Dictionary:
 	var monsters: Array = []
 	# The last column is the server's placeholder_model: only 57 of the 244
 	# shipped creatures carry "model: final", so a roster where two thirds are
@@ -245,6 +258,23 @@ func _settle() -> void:
 
 func _capture(name: String, description: String) -> void:
 	await process_frame
+	if name == "invasion-assistant-builder.png":
+		_expect(_assistant.section_headers[2].get_global_rect().end.y <= (_assistant.section_stack.get_parent() as Control).get_global_rect().end.y,
+			"all three inspector section headers fit the default builder")
+	if name == "invasion-assistant-compact-builder.png":
+		_expect(_assistant.workspace_scroll.get_global_rect().encloses(_assistant.teleport_button.get_global_rect()),
+			"compact builder keeps Teleport visible without scrolling the workspace")
+	if name == "invasion-assistant-monitor.png":
+		_expect(_assistant._monitor_rows.size() == 3, "monitor has three interactive group rows")
+		for row: Dictionary in _assistant._monitor_rows.values():
+			_expect(_assistant.monitor_scroll.get_global_rect().encloses(row.button.get_global_rect()),
+				"each active group is visible without scrolling the default monitor")
+	var geometry: Dictionary = {"window_size": str(_assistant.size), "window_position": str(_assistant.position), "dock": str(_main._invasion_monitor_dock_rect())}
+	for key: String in ["workspace", "inspector", "inspector_tabs", "section_stack", "map_canvas", "teleport_button", "monitor_panel", "monitor_scroll", "monitor_cards", "monitor_footer", "monitor_canvas"]:
+		var node: Control = _assistant.get(key)
+		geometry[key] = {"rect": str(node.get_global_rect()), "minimum": str(node.get_combined_minimum_size())}
+	var metrics := FileAccess.open(_artifacts.path_join(name + ".json"), FileAccess.WRITE)
+	metrics.store_string(JSON.stringify(geometry, "  "))
 	var image: Image = root.get_texture().get_image()
 	_expect(image != null and image.get_size() == root.size,
 		"%s is a full %dx%d frame" % [name, root.size.x, root.size.y])
