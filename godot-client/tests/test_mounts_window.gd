@@ -17,7 +17,7 @@ func run() -> void:
 	state.authenticated = true
 	state.local_actor_id = 42
 	state.actor_mounts[42] = {"mode": "on_foot", "selected_mount_id": "moor_pony", "mount_id": "",
-		"owned_mount_ids": ["moor_pony", "golden_plains_horse", "crystalback_tortoise", "rabbit", "jadefeather_raptor"], "blocked_reason": "", "gait": "on_foot"}
+		"owned_mount_ids": ["moor_pony", "golden_plains_horse", "crystalback_tortoise", "rabbit", "jadefeather_raptor", "giant_rat"], "blocked_reason": "", "gait": "on_foot"}
 	var window: Variant = (load("res://src/ui/mounts_window.gd") as Script).new()
 	root.add_child(window)
 	var sent: Array[String] = []
@@ -26,7 +26,7 @@ func run() -> void:
 	for frame: int in 4:
 		await process_frame
 	expect(window.panel.get_rect().end.y <= 680, "mount window fits above the fixed bottom bar")
-	expect(window.is_open() and window.cards.size() == 5, "five enabled mounts appear")
+	expect(window.is_open() and window.cards.size() == 6, "all six enabled mounts appear")
 	expect(window.grid.columns == 3, "mount collection uses a compact three-column grid")
 	for card: Variant in window.cards.values():
 		expect(window.scroll.get_global_rect().encloses(card.get_global_rect()), "every current mount fits without scrolling")
@@ -34,6 +34,9 @@ func run() -> void:
 	window.search.text_changed.emit(window.search.text)
 	expect(window.cards.jadefeather_raptor.visible and not window.cards.moor_pony.visible, "search filters mounts by name")
 	expect(sent.is_empty(), "search never sends a mount command")
+	window.search.text = "rat"
+	window.search.text_changed.emit(window.search.text)
+	expect(window.cards.giant_rat.visible and not window.cards.moor_pony.visible, "Giant Rat can be found by name")
 	window.search.text = "missing mount"
 	window.search.text_changed.emit(window.search.text)
 	expect(window.empty_label.visible and window.ride.disabled, "empty search cannot ride a hidden selection")
@@ -73,6 +76,13 @@ func run() -> void:
 	window.choose("jadefeather_raptor")
 	window._ride()
 	expect(sent.back() == "#mount ride jadefeather_raptor", "raptor uses normal authoritative switching")
+	window.choose("giant_rat")
+	window._ride()
+	expect(sent.back() == "#mount ride giant_rat", "Giant Rat uses normal authoritative switching")
+	state.actor_mounts[42].mount_id = "giant_rat"
+	state.actor_mounts[42].selected_mount_id = "giant_rat"
+	state.state_changed.emit(&"mount_states")
+	expect(window.status.text == "Riding Giant Rat" and window.ride.disabled, "server snapshot confirms riding the Giant Rat")
 	window._dismount()
 	expect(sent.back() == "#mount", "Dismount uses normal server command")
 	state.actor_mounts[42].blocked_reason = "combat"
@@ -84,13 +94,13 @@ func run() -> void:
 	expect(window.panel.get_global_rect().end.x <= 704, "compact mount grid fits a smaller game window")
 	for card: Variant in window.cards.values():
 		expect(window.scroll.get_global_rect().encloses(card.get_global_rect()), "all current mounts also fit the smaller window")
-	state.actor_mounts[42].selected_mount_id = "jadefeather_raptor"
+	state.actor_mounts[42].selected_mount_id = "giant_rat"
 	window.close()
 	window.open()
 	for frame: int in 8: await process_frame
-	var card_rect: Rect2 = window.cards["jadefeather_raptor"].get_global_rect()
-	var scroll_rect: Rect2 = window.cards["jadefeather_raptor"].get_parent().get_parent().get_global_rect()
-	expect(card_rect.position.x >= scroll_rect.position.x and card_rect.end.x <= scroll_rect.end.x + 1, "reopening reveals the saved raptor card on small screens")
+	var card_rect: Rect2 = window.cards["giant_rat"].get_global_rect()
+	var scroll_rect: Rect2 = window.cards["giant_rat"].get_parent().get_parent().get_global_rect()
+	expect(scroll_rect.encloses(card_rect), "reopening reveals the saved Giant Rat card on small screens")
 	root.size = Vector2i(1024,610)
 	root.content_scale_size = Vector2i(1024,610)
 	for frame: int in 8: await process_frame

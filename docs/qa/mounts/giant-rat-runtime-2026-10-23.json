@@ -1,0 +1,78 @@
+{
+  "date": "2026-10-23",
+  "mount": "giant_rat",
+  "status": "Normal client/server catalogue integration validated",
+  "assetSha256": "232d5a9f7a8c5348078151872daf452a4c133c9f64f7293f41aaa0e350fe1ec7",
+  "reviewedAssetUnchanged": true,
+  "riderAndMotionProfileUnchanged": true,
+  "clientBase": "0d11a0d8",
+  "serverBase": "d6b5d428058c0fe0bf7eac6290df2e2f24d5fdd6",
+  "capability": "giant_rat_mount_v1",
+  "runtimeProfile": "res://data/mounts/giant_rat.json",
+  "access": "The shipped mounts_grant_all=1 policy grants Giant Rat idempotently to every authenticated character, including existing profiles; selection is saved.",
+  "compatibility": "Older clients keep their supported catalogue and a drawable saved default; complete and delta tables filter unsupported Giant Rat rows.",
+  "normalRunMultiplier": 1.5,
+  "fastRunMultiplier": 2.0,
+  "controls": "R toggles mounting; Space toggles gallop; the Mounts window chooses the saved mount.",
+  "clientChecks": {
+    "test_mount_protocol": {
+      "checks": 31,
+      "failures": 0
+    },
+    "test_mount_preview_state": {
+      "checks": 39,
+      "failures": 0
+    },
+    "test_mounts_window": {
+      "checks": 48,
+      "failures": 0
+    },
+    "test_mounted_actions_rat": {
+      "checks": 3070,
+      "failures": 0
+    },
+    "test_giant_rat_mount_draft": {
+      "checks": 747,
+      "failures": 0,
+      "max_cape_link_error_metres": 5.24818897247314e-05,
+      "max_distal_tail_native_z_metres": -3.52299404144287,
+      "max_facial_rigid_attachment_error_metres": 0.0,
+      "max_rein_error_metres": 0.0,
+      "max_rider_contact_error_metres": 0.000187689234735444,
+      "min_sole_height_metres": 0.00347074680030346,
+      "min_surface_height_metres": 0.00347074680030346
+    }
+  },
+  "serverChecks": {
+    "passed": 48,
+    "failed": 0,
+    "suites": [
+      "test_giant_rat_mount",
+      "test_mount_selection",
+      "test_mount_store",
+      "test_mount_rollout",
+      "test_raptor_mount",
+      "test_mount_deltas"
+    ]
+  },
+  "nativeRiderRender": {
+    "cape_peak": {
+      "action": "idle",
+      "actor": 900,
+      "chain": 0,
+      "frame": 0,
+      "link": 2
+    },
+    "fps": 30,
+    "frames": 45,
+    "max_cape_link_error_metres": 4.72068786621094e-05,
+    "max_contact_error_metres": 0.000151632862980478
+  },
+  "nativeWindowRender": {
+    "mounts": 6,
+    "columns": 3,
+    "rows": 2,
+    "giantRatSelected": true
+  },
+  "deployment": "Source integration checks only. The updated client and server must be running for players to receive and ride Giant Rat."
+}
