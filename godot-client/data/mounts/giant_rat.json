@@ -1,0 +1,244 @@
+{
+  "schemaVersion": 1,
+  "status": "giant_rat_mount_runtime_v3",
+  "mount": "giant_rat",
+  "saddleBone": "spine",
+  "footOffsetMetres": [
+    0.57,
+    -0.6,
+    0.08
+  ],
+  "kneePoleOffsetMetres": [
+    0.72,
+    -0.14,
+    0.27
+  ],
+  "handOffsetMetres": [
+    0.12,
+    0.15,
+    0.3
+  ],
+  "elbowPoleOffsetMetres": [
+    0.3,
+    0.02,
+    -0.04
+  ],
+  "pelvisLeanDegrees": 5,
+  "torsoStabilization": 0.7,
+  "fingerGripWeight": 0.95,
+  "fingerCurlDegrees": [
+    55.0,
+    70.0,
+    50.0
+  ],
+  "footToeOutDegrees": 10,
+  "armMotion": {
+    "weight": 1.0,
+    "idle": {
+      "beatsPerCycle": 1,
+      "handFollowMetres": 0.002,
+      "elbowGiveMetres": 0.003
+    },
+    "walk": {
+      "beatsPerCycle": 1,
+      "handFollowMetres": 0.012,
+      "elbowGiveMetres": 0.018
+    },
+    "trot": {
+      "beatsPerCycle": 2,
+      "handFollowMetres": 0.009,
+      "elbowGiveMetres": 0.014
+    },
+    "gallop": {
+      "beatsPerCycle": 1,
+      "handFollowMetres": 0.012,
+      "elbowGiveMetres": 0.018
+    }
+  },
+  "reins": {
+    "headBone": "head",
+    "bridleAnchorsNative": {
+      "l": [
+        -0.21,
+        0.823,
+        1.266
+      ],
+      "r": [
+        0.094,
+        0.816,
+        1.24
+      ]
+    },
+    "widthMetres": 0.018,
+    "thicknessMetres": 0.006,
+    "crossSectionRollDegrees": 35.0,
+    "sideClearanceMetres": 0.04,
+    "sagMetres": 0.015,
+    "looseEndLengthMetres": 0.1,
+    "looseEndSpreadMetres": 0.065,
+    "segments": 20,
+    "colour": "77563a",
+    "bridlePathsNative": [
+      [
+        [
+          -0.21,
+          0.823,
+          1.266
+        ],
+        [
+          -0.27,
+          0.94,
+          1.16
+        ],
+        [
+          -0.24,
+          1.08,
+          1.1
+        ],
+        [
+          0.14,
+          1.08,
+          1.1
+        ],
+        [
+          0.18,
+          0.94,
+          1.16
+        ],
+        [
+          0.094,
+          0.816,
+          1.24
+        ]
+      ],
+      [
+        [
+          -0.21,
+          0.823,
+          1.266
+        ],
+        [
+          -0.18,
+          0.72,
+          1.28
+        ],
+        [
+          0.08,
+          0.72,
+          1.27
+        ],
+        [
+          0.094,
+          0.816,
+          1.24
+        ]
+      ]
+    ]
+  },
+  "walkStrideMetresPerSecond": 0.5058823529411764,
+  "trotStrideMetresPerSecond": 0.5058823529411764,
+  "gallopStrideMetresPerSecond": 1.111111111111111,
+  "playbackRateMultipliers": {},
+  "clips": {
+    "idle": "Idle_A",
+    "walk": "Walk",
+    "trot": "Walk",
+    "gallop": "Jog"
+  },
+  "notes": "Reviewed Giant Rat rider fit, muzzle repair, straighter tail and native normal/fast clips promoted unchanged to the normal mount catalogue. Uses the shared server-authoritative mount controls and travel speeds.",
+  "displayName": "Giant Rat",
+  "visualScale": 1.0,
+  "seatPositionNative": [
+    0,
+    1.6,
+    0.06
+  ],
+  "borrowedTack": {
+    "source": "res://assets/actors/native/creatures/moor_pony.glb",
+    "sourceBone": "Bone_021",
+    "bone": "spine",
+    "positionNative": [
+      0,
+      1.47,
+      0.06
+    ],
+    "scale": [
+      0.85,
+      0.52,
+      0.73
+    ],
+    "dropScale": 0.38
+  },
+  "capeContact": [
+    {
+      "bone": "hips",
+      "center": [
+        0,
+        0.93,
+        -0.45
+      ],
+      "radii": [
+        0.68,
+        0.44,
+        0.66
+      ],
+      "idleBackProfile": [
+        [
+          0.3,
+          1.61
+        ],
+        [
+          0.08,
+          1.57
+        ],
+        [
+          -0.15,
+          1.45
+        ],
+        [
+          -0.35,
+          1.31
+        ],
+        [
+          -0.6,
+          1.16
+        ],
+        [
+          -0.85,
+          0.96
+        ],
+        [
+          -1.05,
+          0.72
+        ],
+        [
+          -1.25,
+          0.48
+        ]
+      ]
+    }
+  ],
+  "capeMotion": {
+    "hangFraction": 0.69,
+    "gallopHangFraction": 0.54,
+    "liftMultiplier": 0.4,
+    "rippleMultiplier": 0.7,
+    "clearanceMetres": 0.04,
+    "gallopClearanceMetres": 0.06,
+    "idleHangFraction": 0.84,
+    "idleClearanceMetres": 0.018
+  },
+  "portraitCameraSize": 3.2,
+  "portraitLookAtHeight": 1.0,
+  "maximumCyclesPerSecond": {
+    "trot": 2.0,
+    "gallop": 3.2
+  },
+  "visualOffsetMetres": [
+    0,
+    0,
+    0
+  ],
+  "normalPelvisLeanDegrees": 5,
+  "gallopPelvisLeanDegrees": 9
+}

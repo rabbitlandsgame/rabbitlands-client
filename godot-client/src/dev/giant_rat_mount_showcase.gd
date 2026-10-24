@@ -40,7 +40,6 @@ func _ready() -> void:
 	grid.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	column.add_child(grid)
 	var models: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/models.json")).models
-	Draft.add_model(models)
 	var mapping: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/animations/luminous.json"))
 	var equipment: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/equipment.json"))
 	for index: int in PANELS.size():

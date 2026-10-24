@@ -1,5 +1,6 @@
 extends SceneTree
 const Codec := preload("res://src/mounts/mount_protocol.gd")
+const InterestCodec := preload("res://src/network/interest_protocol.gd")
 var checks := 0
 var failures := 0
 
@@ -44,6 +45,20 @@ func _init() -> void:
 		raptor.states[0].gait = gait
 		raptor.states[0].step_us = 100000 if gait == "burst" else 133333
 		check(decode(raptor).type == "mount_states")
+	var rat: Dictionary = raptor.duplicate(true)
+	rat.states[0].mount_id = "giant_rat"
+	rat.states[0].selected_mount_id = "giant_rat"
+	rat.states[0].owned_mount_ids.append("giant_rat")
+	for gait: String in ["cruise", "burst"]:
+		rat.states[0].gait = gait
+		rat.states[0].step_us = 100000 if gait == "burst" else 133333
+		check(decode(rat).type == "mount_states")
+		var delta_row: Dictionary = rat.states[0].duplicate(true)
+		delta_row.merge({"schema_version":2, "summon_due":0, "combat_until":0,
+			"endurance_at":1000, "endurance_rate":0, "endurance_max_ms":8000}, true)
+		var delta := {"schema_version":2, "map":"four_gates", "full":true,
+			"states":[delta_row], "removed":[]}
+		check(InterestCodec.decode_mount_deltas(JSON.stringify(delta).to_utf8_buffer()).type == "mount_update")
 	for step: int in [2000000,666667,444444]:
 		tortoise.states[0].step_us = step
 		check(decode(tortoise).type == "mount_states")

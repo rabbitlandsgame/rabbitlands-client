@@ -40,6 +40,8 @@ func run() -> void:
 		mount_id = "rabbit"
 	if "--raptor" in OS.get_cmdline_user_args():
 		mount_id = "jadefeather_raptor"
+	if "--rat" in OS.get_cmdline_user_args():
+		mount_id = "giant_rat"
 	var models: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/models.json")).models
 	for body: String in ["luminous_male", "luminous_female"]:
 		var actor := make_rider(body, models)
