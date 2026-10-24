@@ -75,7 +75,7 @@ mount or spell, reproduction steps and whether the legacy control reproduces it.
 The debug-console launcher uses the same development defaults and saves a
 verbose `eloria-debug.log` beside the package. The ordinary engine log is under
 the client's Godot user-data directory, normally
-`%APPDATA%/Godot/app_userdata/Eloria/logs/godot.log` on Windows. Review logs before
+`%APPDATA%/Godot/app_userdata/Eloria/logs/client.log` on Windows. Review logs before
 sharing them and remove account details, chat or other personal information.
 
 Developers should inspect actual diagnostics, not just requested settings:
