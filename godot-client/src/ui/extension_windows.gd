@@ -752,8 +752,13 @@ func _on_mail_selected(index: int) -> void:
 ## the inventory, and Inspect wants the whole card. The state that arrives is
 ## the same either way - what changes is whether it is shown here.
 var detail_popup_allowed := true
+## The inventory workspace can present the same authoritative detail inline.
+var item_detail_presenter: Callable
 
 func _sync_detail() -> void:
+	if item_detail_presenter.is_valid():
+		item_detail_presenter.call(AppState.item_detail, detail_popup_allowed)
+		return
 	if not bool(AppState.item_detail.get("open", false)) or not detail_popup_allowed:
 		detail_panel.hide()
 		return

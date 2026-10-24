@@ -1,0 +1,199 @@
+extends SceneTree
+const Presets := preload("res://src/ui/inventory_presets.gd")
+const FOLDER := "res://test-artifacts/inventory-designs"
+var failures := 0
+var checks := 0
+var main: Control
+var workspace: Control
+var app: Node
+
+func _init() -> void: call_deferred("run")
+
+func expect(value: bool, label: String) -> void:
+	checks += 1
+	if value: print("PASS: ", label)
+	else:
+		failures += 1
+		push_error(label)
+
+func frames(count := 5) -> void:
+	for index: int in count: await process_frame
+
+func run() -> void:
+	create_timer(100).timeout.connect(func() -> void: quit(99))
+	var fresh := Presets.new()
+	expect(fresh.active == "unified" and fresh.working.recipe == "unified", "Unified compact is the default for new players")
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(FOLDER))
+	root.get_node("Network").block_for_hud_preview()
+	root.size = Vector2i(1280, 720)
+	app = root.get_node("AppState")
+	main = (load("res://src/app/main.tscn") as PackedScene).instantiate()
+	main.get_node("GameView/ChatWindow").preferences_path = FOLDER.path_join("isolated_%d.cfg" % Time.get_ticks_usec())
+	root.add_child(main)
+	await frames(8)
+	main.get_node("LoginPanel").hide()
+	main.get_node("LoginBackground").hide()
+	main.game_view.show()
+	workspace = main.inventory_workspace
+	expect(workspace.model.active == "unified", "a fresh player profile opens Unified compact")
+	app.set("inventory", {0: {"image_id": 1, "quantity": 24, "inventory_usable": true},
+		1: {"image_id": 35, "quantity": 1, "inventory_usable": false},
+		36: {"image_id": 8, "quantity": 1, "inventory_usable": false}})
+	app.set("inventory_names", {0: "Hearth Bread", 1: "Iron Sword", 36: "Leather Armor"})
+	app.set("stats", {"carried": 205, "capacity": 320})
+	main.selected_inventory_slot = 0
+	main.inventory_panel.show()
+	main._sync_inventory()
+	var pack_buttons: Array = main.inventory_slot_buttons.duplicate()
+	var worn_buttons: Array = main.equipment_slot_buttons.duplicate()
+	var hud_before: Dictionary = main.hud_workspace.model.working.duplicate(true)
+	for id: String in Presets.BUILT_INS:
+		workspace.choose_preset(id, true)
+		await frames()
+		expect(main.inventory_slot_buttons.size() == 36 and main.equipment_slot_buttons.size() == 8, id + " retains all 36 pack and 8 wear slots")
+		expect(main.inventory_slot_buttons == pack_buttons and main.equipment_slot_buttons == worn_buttons, id + " reuses live controls and their signals")
+		var bounds: Rect2 = main.inventory_panel.get_global_rect()
+		expect(bounds.position.x >= -1 and bounds.position.y >= -1 and bounds.end.x <= main.game_view.size.x + 1 and bounds.end.y <= main.game_view.size.y + 1, id + " fits 1280x720")
+		workspace.request_inspection(0, true)
+		workspace.present_detail(_bread(), true)
+		await frames()
+		expect(workspace.inspection_title.text == "Hearth Bread" and workspace.inspection_text.text.contains("Restores 40 food"), id + " shows authoritative item details")
+		if id == "popover": expect(main.extension_windows.detail_panel.visible, "popover uses a compact external card")
+		else: expect(not main.extension_windows.detail_panel.visible, id + " has no separate item modal")
+		workspace.close_inspection()
+	expect(main.hud_workspace.model.working == hud_before, "inventory design selection preserves the player's HUD")
+	workspace.choose_preset("tabbed", true)
+	await frames()
+	var pack_size: Vector2 = main.inventory_panel.size
+	workspace.request_inspection(0, true)
+	workspace.present_detail(_bread(), true)
+	await frames()
+	expect(main.inventory_panel.size.is_equal_approx(pack_size), "tabbed Pack and Inspect occupy the same rectangle")
+	workspace.open_editor()
+	var before: Dictionary = workspace.model.snapshot()
+	workspace.change_part("backpack", "columns", 9)
+	expect(main.inventory_grid.columns == 9, "column changes reflow the real grid live")
+	workspace.undo_edit()
+	expect(main.inventory_grid.columns == 6, "Undo restores grid geometry")
+	workspace.undo_edit(true)
+	expect(main.inventory_grid.columns == 9, "Redo restores the edit")
+	workspace.change_option("background", Color("283228ee"))
+	workspace.choose_preset("tray", true)
+	workspace.finish_edit(false)
+	expect(workspace.model.snapshot() == before, "Cancel restores the design and all preset caches")
+	expect(not workspace.is_editing() and not main._world_input_blocked(), "leaving the editor restores gameplay input")
+	workspace.open_editor()
+	workspace.change_part("backpack", "cell", 40)
+	var custom_id: String = workspace.model.save_custom("My satchel")
+	workspace.finish_edit(true)
+	var reloaded := Presets.new()
+	reloaded.load_file(workspace.preferences_path)
+	expect(reloaded.active == custom_id and reloaded.working.parts.backpack.cell == 40, "saved custom design survives reopening")
+	workspace.choose_preset("unified", true)
+	workspace.open_editor()
+	workspace.change_part("backpack", "columns", 12)
+	workspace.choose_preset("dock", true)
+	workspace.choose_preset("unified")
+	expect(workspace.model.working.parts.backpack.columns == 12, "switching presets retains per-preset edits")
+	workspace.finish_edit(false)
+	workspace.choose_preset("popover", true)
+	workspace.request_inspection(0, true)
+	workspace.present_detail(_bread(), true)
+	await frames()
+	workspace._pinned = true
+	main.inventory_panel.hide()
+	await frames()
+	expect(main.extension_windows.detail_panel.visible, "a pinned card remains visible when inventory closes")
+	workspace.close_inspection()
+	await frames()
+	expect(not main.extension_windows.detail_panel.visible, "closing the pinned card dismisses its independent window")
+	main.inventory_panel.show()
+	workspace.choose_preset("unified", true)
+	var shortcuts: Array = main._inventory_quantities.duplicate()
+	workspace._quantity_submitted("17")
+	expect(main._selected_quantity() == 17 and main._inventory_quantities == shortcuts, "typing an amount preserves the player's six quantity shortcuts")
+	app.get("inventory")[0].quantity = 2000000000
+	workspace._quantity_all()
+	expect(main._selected_quantity() == 2000000000, "All retains the complete server stack amount beyond seven digits")
+	main._on_quantity_box_pressed(1)
+	expect(main._selected_quantity() == shortcuts[1], "choosing a shortcut clears the temporary quantity")
+	main._on_quantity_box_pressed(0)
+	app.get("inventory")[0].quantity = 24
+	workspace.search.text = "bread"
+	workspace.search.text_changed.emit("bread")
+	expect(main.inventory_slot_buttons[0].self_modulate.a == 1 and main.inventory_slot_buttons[1].self_modulate.a < 1,
+		"search dims nonmatches without moving or hiding server positions")
+	workspace.search.text = ""
+	workspace.search.text_changed.emit("")
+	expect(main.inventory_slot_buttons[1].self_modulate.a == 1, "clearing search restores every slot")
+	workspace.open_editor()
+	var window_position: Vector2 = main.inventory_panel.position
+	var press := InputEventMouseButton.new()
+	press.button_index = MOUSE_BUTTON_LEFT
+	press.pressed = true
+	press.position = workspace.header.get_global_rect().get_center()
+	workspace.handle_editor_input(press)
+	var motion := InputEventMouseMotion.new()
+	motion.position = press.position - Vector2(80, 0)
+	workspace.handle_editor_input(motion)
+	expect(main.inventory_panel.position.x < window_position.x and workspace.model.working.anchor == "free", "the inventory header moves the whole window during editing")
+	press.pressed = false
+	workspace.handle_editor_input(press)
+	workspace.finish_edit(false)
+	main.classic_storage._attach_inventory()
+	workspace.apply_layout()
+	expect(main.classic_storage.is_inventory_docked() and main.inventory_panel.get_parent() == main.classic_storage.body,
+		"storage can still dock the customized real inventory")
+	main.classic_storage._detach_inventory()
+	workspace.apply_layout()
+	expect(main.inventory_panel.get_parent() == main.game_view and main.inventory_grid.get_child_count() == 36,
+		"undocking restores the customized inventory and all its controls")
+	var standalone := Presets.new()
+	var ids: Array[String] = []
+	for index: int in 5: ids.append(standalone.save_custom("Design %d" % index))
+	expect(standalone.custom.size() == 5 and standalone.save_custom("Sixth").is_empty(), "custom designs stop at five without overwriting saved designs")
+	expect(standalone.save_custom("Renamed", ids[0]) == ids[0] and standalone.custom.size() == 5, "a custom design can update at capacity")
+	standalone.delete_custom(ids[0])
+	expect(standalone.custom.size() == 4 and standalone.active == Presets.DEFAULT, "deleting the active custom design recovers a built-in layout")
+	var config := ConfigFile.new()
+	config.load(workspace.preferences_path)
+	config.set_value("unrelated_settings", "sentinel", "preserved")
+	config.save(workspace.preferences_path)
+	workspace.store()
+	config.load(workspace.preferences_path)
+	expect(config.get_value("unrelated_settings", "sentinel", "") == "preserved", "inventory persistence keeps the other HUD and settings sections")
+	workspace.request_inspection(0, true)
+	var unrelated := _bread()
+	unrelated.image_id = 999
+	workspace.present_detail(unrelated, true)
+	expect(workspace._detail_slot != 1, "mismatched late detail never targets a different inventory item")
+	workspace.request_inspection(0, true)
+	workspace.present_detail(_bread(), true)
+	app.get("inventory_cooldowns")[0] = {"end_msec": Time.get_ticks_msec() + 30000}
+	workspace.refresh_actions()
+	expect((workspace.inspection_actions.get_node("use") as Button).disabled, "inspection Use follows an active cooldown")
+	app.get("inventory_cooldowns")[0].end_msec = Time.get_ticks_msec() - 1
+	workspace.refresh_actions()
+	expect(not (workspace.inspection_actions.get_node("use") as Button).disabled, "inspection Use becomes available when cooldown expires")
+	app.get("inventory_cooldowns").clear()
+	app.get("inventory").erase(0)
+	workspace.sync_inventory()
+	var any_enabled := false
+	for button: Button in workspace.inspection_actions.get_children(): any_enabled = any_enabled or (button.visible and not button.disabled)
+	expect(not any_enabled, "inspection actions stop when the inspected item leaves its slot")
+	# Malformed saved preferences cannot create non-finite positions or erase slots.
+	var invalid := Presets.preset("unified")
+	invalid.scale = NAN
+	invalid.position = Vector2(INF, 1)
+	invalid.parts.backpack.columns = -999
+	invalid.parts.backpack.enabled = false
+	var repaired := Presets.normalise(invalid)
+	expect(is_finite(repaired.scale) and repaired.position.is_finite() and repaired.parts.backpack.columns >= 1 and repaired.parts.backpack.enabled, "invalid preferences recover safely")
+	print("INVENTORY WORKSPACE: ", checks, " checks, ", failures, " failures")
+	main.queue_free()
+	await frames()
+	quit(1 if failures > 0 else 0)
+
+func _bread() -> Dictionary:
+	return {"open": true, "image_id": 1, "name": "Hearth Bread", "category": "Food", "quantity": 24,
+		"description": "Baked before dawn at the Four Gates ovens.", "stats": "Restores 40 food. Weight 2.", "equipped": false}

@@ -516,6 +516,8 @@ func _refresh_pickers() -> void:
 
 func open_editor() -> void:
 	if not ready_to_layout or is_open(): return
+	if main.inventory_workspace != null and main.inventory_workspace.is_editing():
+		main.inventory_workspace.finish_edit(false)
 	_capture_live(model.working)
 	_before = model.working.duplicate(true)
 	_custom_before = model.custom.duplicate(true)
@@ -1765,6 +1767,7 @@ func layout_hud() -> void:
 	main._layout_minimap_cardinals()
 	_center_editor()
 	_layout_running = false
+	if main.inventory_workspace != null: main.inventory_workspace.queue_layout()
 	queue_redraw()
 
 func _fit_rail_statistics() -> void:

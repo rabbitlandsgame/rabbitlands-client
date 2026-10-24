@@ -1,0 +1,77 @@
+{
+  "product": "Rabbit Lands",
+  "date": "2026-10-24",
+  "status": "implemented",
+  "preset_names": [
+    "Unified compact",
+    "Tabbed satchel",
+    "Edge dock",
+    "Adaptive inspect",
+    "Shallow bottom tray"
+  ],
+  "entry_points": [
+    "Settings > HUD > Inventory design",
+    "Settings > Inventory > Inventory design",
+    "Inventory > More > Inventory design"
+  ],
+  "editor_features": [
+    "live reflow of original slot controls",
+    "section dragging and corner resizing",
+    "grid columns and cell size",
+    "window anchors and scale",
+    "equipment placement",
+    "preview and inspection sizes",
+    "colors, opacity and shared HUD borders",
+    "undo and redo",
+    "reset section and restore default",
+    "per-preset edits",
+    "five named custom designs",
+    "save or cancel"
+  ],
+  "inventory_positions": 36,
+  "equipment_positions": 8,
+  "verification": {
+    "runtime": "integrated with current origin/develop",
+    "functional_checks": 55,
+    "functional_failures": 0,
+    "original_inventory_actions": "PASS",
+    "offline_sandbox": "PASS",
+    "native_capture_count": 22,
+    "capture_resolutions": [
+      [
+        1280,
+        720
+      ],
+      [
+        1920,
+        1080
+      ]
+    ],
+    "runtime_script_errors": 0,
+    "live_server_transactions_tested": false,
+    "visual_review": "All five presets reviewed at desktop scale; compact dock, merged inline preview/details, shared-footprint tabs, anchored card and shallow tray refined through native captures.",
+    "base_commit": "dfe56b5a161496a99fe797169331c7875458253b"
+  },
+  "startup_compatibility": "Uses the current develop WorldLoader and stream publication APIs without changing world loading.",
+  "previews": [
+    "native/01-unified-compact.png",
+    "native/02-tabbed-satchel.png",
+    "native/02-tabbed-pack.png",
+    "native/03-edge-dock.png",
+    "native/04-adaptive-inspect.png",
+    "native/05-bottom-tray.png",
+    "native/06-inventory-editor.png"
+  ],
+  "source_sha256": {
+    "src/app/main.gd": "670ed8a3d0d1ae17f183a102e0480333c3926edaa4c863ec4670a7098e415ca7",
+    "src/ui/extension_windows.gd": "0649fa7ff22c3994c0d2032f3593d04a67c5c053b68bb0259df5b1ba20b11039",
+    "src/ui/hud_workspace.gd": "da2d8e1c1c6c08b38b5f8724c3604f89fc51de3daaf0864acfc37503ee839f1a",
+    "src/ui/inventory_presets.gd": "beeb18ca1db9d797f43abb859a8804ce45b34a682ef77b2c04f145a0fe03b05a",
+    "src/ui/inventory_workspace.gd": "64148106b1a251d33f5bbcdd849286e4394cb30c983ddb834d48a6f564c5e577",
+    "src/ui/inventory_editor.gd": "f24dbaee902169566a273885af1f7be26603ecbd73ae72c9dbab129221e44433",
+    "prototypes/inventory_editor_preview.gd": "8ebc19e3748f0c0ae9aa44d7143b0a984b6b0f36e57e62d7302efb0465470ae7",
+    "tests/test_inventory_workspace.gd": "62dc8d924e912b72f76452e8439bfbb6a97c9f45693c0e8fa30c1c03d683cd97",
+    "tests/integration/rendered_inventory_designs.gd": "a06627f955d4ce7a3e65f3e8a4062be0cae9973e72753e1aa51d5db10cd09feb"
+  },
+  "default_preset": "Unified compact"
+}
