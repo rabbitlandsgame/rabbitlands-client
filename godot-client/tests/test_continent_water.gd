@@ -1,5 +1,7 @@
 extends SceneTree
 
+const ExternalTexturePool := preload("res://src/world/external_texture_pool.gd")
+
 var failures := 0
 
 func _init() -> void:
@@ -30,7 +32,31 @@ func _loader(origin: Vector3) -> WorldLoader:
 		{"globalTranslation": [origin.x, origin.y, origin.z]}]}
 	return loader
 
+func _image_load_calls() -> int:
+	return int(ExternalTexturePool.retention_snapshot().get("image_load_calls", -1))
+
+func _expect_no_wave_load(loader: WorldLoader, meshes: Array, message: String) -> void:
+	var before := _image_load_calls()
+	_expect(loader._apply_continent_water(meshes) == 0, message + ": no material is replaced")
+	_expect(_image_load_calls() == before, message + ": no wave texture is requested")
+
 func _run() -> void:
+	_expect(_image_load_calls() >= 0, "Texture acquisition diagnostics expose image_load_calls")
+	var dry := _loader(Vector3(618, 0, 1490))
+	var dry_floor := _water(dry.world_root, "Terrain_Floor", Vector3.ZERO)
+	var raised_pond := _water(dry.world_root, "Water_RaisedPond", Vector3(0, 5, 0))
+	var custom_water := _water(dry.world_root, "Water_CustomShader", Vector3.ZERO)
+	var custom_material := ShaderMaterial.new()
+	custom_material.shader = preload("res://src/world/continent_water.gdshader")
+	(custom_water.mesh as PlaneMesh).material = custom_material
+	_expect_no_wave_load(dry, [], "An empty continent chunk")
+	_expect_no_wave_load(dry, [dry_floor], "A dry continent chunk")
+	_expect_no_wave_load(dry, [raised_pond], "A raised authored pond")
+	_expect_no_wave_load(dry, [custom_water], "A named sea-level surface with a non-BaseMaterial shader")
+	_expect(dry_floor.get_surface_override_material(0) == null
+		and raised_pond.get_surface_override_material(0) == null
+		and custom_water.get_surface_override_material(0) == null,
+		"Ineligible continent surfaces preserve their authored materials")
 	var west := _loader(Vector3(618, 0, 1490))
 	var group := Node3D.new()
 	group.position = Vector3(12, 0, -4)
@@ -81,8 +107,13 @@ func _run() -> void:
 	decorative.mesh.surface_get_material(0).resource_name = "water_fountain"
 	var authored_pool := _water(shared.world_root, "Water_mirrorhold_Pool", Vector3(0, 82, 0))
 	authored_pool.mesh.surface_get_material(0).resource_name = "water_sea"
+	_expect_no_wave_load(shared, [fountain, decorative, authored_pool],
+		"Shared drainage with only decorative, non-sea and nonnumeric water names")
+	var shared_loads_before := _image_load_calls()
 	_expect(shared._apply_continent_water([lake, river, fountain, decorative, authored_pool]) == 2,
 		"Exported elevated lakes and sloping rivers share water; retained fountains and authored pools are excluded")
+	_expect(_image_load_calls() == shared_loads_before + 1,
+		"Multiple eligible water surfaces request the shared texture once per apply call")
 	var lake_material := lake.get_surface_override_material(0) as ShaderMaterial
 	var river_material := river.get_surface_override_material(0) as ShaderMaterial
 	_expect(lake_material != null and river_material != null,
@@ -113,6 +144,7 @@ func _run() -> void:
 	_expect(restored_material != null and restored_material.get_shader_parameter("water_to_continent") == transform,
 		"Cached water retains the same continent transform")
 	restored.free()
+	dry.free()
 	west.free()
 	east.free()
 	island.free()
