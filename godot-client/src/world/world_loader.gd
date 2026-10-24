@@ -565,7 +565,7 @@ func _resolve_shared_meshes(package: WorldManifest, root: Node) -> int:
 			instance.add_child(child)
 		if parent != null:
 			parent.remove_child(node)
-		node.queue_free()
+		_dispose_import_node(node)
 		instance.name = name
 		if parent != null:
 			parent.add_child(instance)
@@ -575,6 +575,17 @@ func _resolve_shared_meshes(package: WorldManifest, root: Node) -> int:
 		push_error("world_load stage=shared_meshes unresolved=%d first=%s manifest=%s" % [
 			missing.size(), str(missing.keys()[0]), package.source_path])
 	return placed
+
+## A detached import belongs to one builder until its worker returns. Removing
+## a node outside SceneTree does not clear its owner in Godot; queue_free()
+## would let the main thread erase that owner's list while this worker is still
+## replacing siblings/reparenting children. Finish private destruction here.
+## Ordinary live/main-thread loading retains its deferred deletion behavior.
+func _dispose_import_node(node: Node) -> void:
+	if detached_build and not node.is_inside_tree():
+		node.free()
+	else:
+		node.queue_free()
 
 ## What the loader produced, taken while the tree is still only the loader's.
 ##
@@ -1107,7 +1118,7 @@ func unload_world() -> void:
 	set_process(false)
 	_release_snapshot()
 	if is_instance_valid(world_root):
-		world_root.queue_free()
+		_dispose_import_node(world_root)
 	world_root = null
 	loaded_from_cache = false
 	cache_status = &"disabled"
@@ -1187,7 +1198,7 @@ func _apply_navigation_collision() -> void:
 		collision.shape = shape
 		body.add_child(collision)
 	if body.get_child_count() == 0:
-		body.queue_free()
+		_dispose_import_node(body)
 		manifest.warnings.append("navigation polygons did not produce collision")
 		return
 	world_root.add_child(body)

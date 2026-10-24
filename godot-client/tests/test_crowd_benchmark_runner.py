@@ -263,6 +263,22 @@ class ReportValidationTests(unittest.TestCase):
         with self.assertRaises(support.EvidenceError):
             support.validate_report(data, request, "")
 
+    def test_rust_runtime_request_requires_observed_backend_and_calls(self):
+        data, request = fixture()
+        request["client_runtime"] = "compare"
+        with self.assertRaises(support.EvidenceError):
+            support.validate_report(data, request, "")
+        runtime = {"requested": "compare", "mode": "compare", "presentation_backend": "legacy",
+                   "mismatches": 0, "native_available": True, "comparisons": 1}
+        data["activeBackends"]["clientRuntime"] = dict(runtime)
+        observed = data["cells"][0]["effectiveRuntime"]["activeBackends"]
+        observed["clientRuntime"] = dict(runtime)
+        self.assertTrue(support.validate_report(data, request, "")["valid"])
+        for change in ({"mode": "legacy"}, {"native_available": False}, {"mismatches": 1}, {"comparisons": 0}):
+            observed["clientRuntime"] = runtime | change
+            with self.subTest(change=change), self.assertRaises(support.EvidenceError):
+                support.validate_report(data, request, "")
+
 
 class IdentityAndProcessTests(unittest.TestCase):
     def test_settings_profile_defaults_and_conflicting_requests(self):

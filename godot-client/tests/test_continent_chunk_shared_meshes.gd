@@ -37,7 +37,7 @@ func _run() -> void:
 	_check_cost()
 	_check_selection()
 	_check_blocking()
-	_check_residency()
+	await _check_residency()
 	_check_validation()
 	OS.set_environment(VramTextures.ENVIRONMENT, "")
 	VramTextures.reconfigure()
@@ -176,15 +176,15 @@ func _check_residency() -> void:
 	stream._update_resident_bytes()
 	_expect(stream.resident_bytes == 3 * GEOMETRY + 3 * PROTOTYPE,
 		"a retiring cell still holds its prototype until its nodes are freed: %d" % stream.resident_bytes)
-	_drain(stream)
+	await _drain(stream)
 	_expect(stream.resident_bytes == 2 * GEOMETRY + PROTOTYPE,
 		"freed, its prototype leaves the count: %d" % stream.resident_bytes)
 	stream._retire_cell("a")
-	_drain(stream)
+	await _drain(stream)
 	_expect(stream.resident_bytes == GEOMETRY + PROTOTYPE,
 		"a shared prototype stays while another resident cell draws it: %d" % stream.resident_bytes)
 	stream._retire_cell("b")
-	_drain(stream)
+	await _drain(stream)
 	_expect(stream.resident_bytes == 0, "and leaves with the last: %d" % stream.resident_bytes)
 	stream.free()
 
@@ -193,6 +193,9 @@ func _drain(stream: ContinentChunkStream) -> void:
 		if stream._retiring.is_empty():
 			return
 		stream._drain_retired()
+		# A shared owner receives at most one retirement slice per frame.
+		await process_frame
+	_expect(stream._retiring.is_empty(), "retirement drains within the bounded frame allowance")
 
 func _check_validation() -> void:
 	var cases := {

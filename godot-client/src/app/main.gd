@@ -1,6 +1,8 @@
 extends Control
 
 const Diagnostics = preload("res://src/diagnostics/client_diagnostics.gd")
+const ClientRuntime = preload("res://src/runtime/client_runtime.gd")
+var client_runtime := ClientRuntime.new()
 const ExperienceCurve = preload("res://src/state/experience_curve.gd")
 const SeasonSky = preload("res://src/world/season_sky.gd")
 const SeasonSurfaces = preload("res://src/world/season_surfaces.gd")
@@ -1239,6 +1241,7 @@ const EXPERIENCE_SKILLS: Array[String] = [
 	"ranging", "overall"]
 
 func _ready() -> void:
+	client_runtime.initialize()
 	crowd.configure(OS.get_environment("RABBITLANDS_CROWD_PRESENTATION"),
 		OS.get_environment("RABBITLANDS_CROWD_BODY_CAP"),
 		OS.get_environment("RABBITLANDS_CROWD_TUNING"))
@@ -1703,6 +1706,7 @@ func client_diagnostic_snapshot() -> Dictionary:
 		"surface_work": surface_work_snapshot(),
 		"loader_work": world_loader.diagnostic_snapshot(),
 		"streaming_work": exterior_stream.diagnostic_snapshot(),
+		"client_runtime": client_runtime.snapshot(),
 		"resource_retention": {
 			"actor_scenes": GlbSceneCache.retention_snapshot(),
 			"animations": NativeAnimationImporter.retention_snapshot(),
@@ -3837,6 +3841,7 @@ func _close_client() -> void:
 	get_tree().quit()
 
 func _exit_tree() -> void:
+	client_runtime.close()
 	mouse_cursors.release()
 	occluder_fade.reset()
 	ReplicatedActor3D.clear_wardrobe_texture_cache()
@@ -3969,6 +3974,7 @@ func _clear_world_presentation() -> void:
 	# No actor survives this clear. Forget stepped members before queueing
 	# any body, without reactivating its animation or skeleton callbacks.
 	animation_gate.reset(false)
+	client_runtime.reset_session()
 	SeasonSurfaces.set_season({})
 	quest_trail.clear()
 	character_intro.cancel()
@@ -7897,6 +7903,7 @@ func _update_occluder_fade(delta: float) -> void:
 ## more so when it fell on a frame that also carried a burst of server steps.
 func _update_animation_gate(delta: float) -> void:
 	animation_gate.advance(delta)
+	client_runtime.observe_gate(animation_gate)
 	if _declutter_due:
 		_declutter_due = false
 		_declutter_actor_overheads(_declutter_due_target)

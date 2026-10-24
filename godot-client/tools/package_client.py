@@ -130,6 +130,7 @@ import client_release
 import release_storage
 import runner_source
 import benchmark_package
+import client_runtime_package
 from pathlib import Path, PurePosixPath
 from urllib.parse import unquote
 
@@ -3005,6 +3006,8 @@ def _main(argv=None, storage=None) -> int:
     parser.add_argument("--no-zip", action="store_true", help="leave the folder unarchived")
     parser.add_argument("--benchmark-profile", action="store_true",
                         help="standalone local test export with allowlisted performance workloads")
+    parser.add_argument("--client-runtime", type=Path,
+                        help="optional verified native payload built from the selected commit")
     parser.add_argument("--installer", action="store_true", help="also build an Inno Setup installer")
     parser.add_argument("--iscc", help="path to Inno Setup's ISCC.exe")
     parser.add_argument("--no-client-updates", action="store_true", help="build a client without the restart updater")
@@ -3101,6 +3104,8 @@ def _main(argv=None, storage=None) -> int:
         app_dir = stage / "app"
         export_project(godot, project, app_dir, logs, platform)
         stage_loose_client_files(build_dir, app_dir)
+        if options.client_runtime:
+            client_runtime_package.stage_payload(options.client_runtime.resolve(), build_dir, app_dir, options.platform)
         (app_dir / "client-release.json").write_text(json.dumps(metadata), encoding="utf-8")
         stage_audio_credits(app_dir, stage)
         if options.platform == "macos":
@@ -3134,6 +3139,8 @@ def _main(argv=None, storage=None) -> int:
                                            **({"cache": asset_cache.root / "helpers"} if asset_cache else {}))
         launch_args = ([] if options.platform == "macos" else
                        write_launchers(stage, options.server, build_dir, version, platform))
+        if options.client_runtime:
+            client_runtime_package.write_launchers(stage, options.platform)
         if options.distribution == "steam" and options.platform != "macos":
             (stage / "README.txt").write_text(
                 "Rabbit Lands - Steam build\n"

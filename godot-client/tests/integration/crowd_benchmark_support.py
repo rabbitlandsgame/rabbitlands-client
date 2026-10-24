@@ -32,7 +32,7 @@ ALL_CELLS = OLD_CELLS + ["mixed-mounted-160", "authored-herd",
                          "traversal-southern-cold", "traversal-southern-warm"]
 ERROR_PATTERN = re.compile(r"SCRIPT ERROR|Parse Error|Failed to load|Error loading|ERROR:", re.I)
 OVERRIDE_PREFIXES = ("ELORIA_LOOK", "ELORIA_CROWD_", "ELORIA_NATIVE_", "RABBITLANDS_CROWD_")
-OVERRIDE_NAMES = {"ELORIA_VRAM_TEXTURES", "ELORIA_NO_MAP_CACHE", "ELORIA_SAFE_MODE"}
+OVERRIDE_NAMES = {"ELORIA_VRAM_TEXTURES", "ELORIA_NO_MAP_CACHE", "ELORIA_SAFE_MODE", "RABBITLANDS_CLIENT_RUNTIME"}
 PERFORMANCE_GRAPHICS = {
     "quality": "low", "appearance": "painted_ground", "fps_limit": 30,
     "render_scale": .75, "map_texture_quality": "half", "crowd_bodies": 60,
@@ -235,6 +235,16 @@ def validate_runtime(runtime: dict, request: dict, renderer: str, quality: str,
         raise EvidenceError(f"{label}: missing actual appearance/minimap settings")
     if backends.get("nativeReducer") is not (request.get("native_reducer", "off") == "on"):
         raise EvidenceError(f"{label}: actual native reducer differs from request")
+    requested_runtime = request.get("client_runtime", "legacy")
+    # Older legacy checkpoints predate this optional service. Native requests
+    # require its actual instantiated backend at every observed boundary.
+    if "clientRuntime" in backends or requested_runtime != "legacy":
+        runtime = _object(backends.get("clientRuntime"), label + ".clientRuntime")
+        if runtime.get("requested") != requested_runtime or runtime.get("mode") != requested_runtime \
+                or runtime.get("presentation_backend") != "legacy" or runtime.get("mismatches") != 0:
+            raise EvidenceError(f"{label}: actual client runtime differs or fell back")
+        if requested_runtime == "compare" and runtime.get("native_available") is not True:
+            raise EvidenceError(f"{label}: requested Rust comparison runtime is unavailable")
     presentation = _object(backends.get("presentation"), label + ".presentation")
     requested = request.get("native_presentation", "off")
     expected_native = "0" if requested == "off" else requested
@@ -461,6 +471,10 @@ def validate_report(data: dict, request: dict, log: str) -> dict:
                     raise EvidenceError(f"{name}: no observed packet activity")
         measured.append(name)
     mode = request.get("native_presentation", "off")
+    if request.get("client_runtime") == "compare" and not any(
+            _integer(backend["clientRuntime"].get("comparisons"), "clientRuntime.comparisons") > 0
+            for backend in observed_native):
+        raise EvidenceError("requested Rust comparison runtime did not execute")
     presentations = [backend["presentation"] for backend in observed_native]
     if mode in ("cape", "both", "all") and (not any(p["nativeCapeCalls"] > 0 for p in presentations)
                                             or any(p["capeFallbackCalls"] for p in presentations)):

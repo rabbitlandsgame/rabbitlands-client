@@ -41,6 +41,7 @@ func benchmark_runtime_snapshot() -> Dictionary:
 			"rootSize": [get_tree().root.size.x, get_tree().root.size.y],
 			"worldViewportSize": [main_viewport.size.x, main_viewport.size.y]},
 		"activeBackends": {"nativeReducer": AppState.native_crowd_reducer_active(),
+			"clientRuntime": client_runtime.snapshot(),
 			"presentation": {"requested": OS.get_environment("ELORIA_NATIVE_PRESENTATION"),
 				"nativeCapeInstances": cape_instances, "nativeCapeCalls": cape_calls,
 				"capeFallbackCalls": cape_fallbacks, "flight": flight_stats, "impact": impact_stats},
@@ -54,7 +55,7 @@ func benchmark_runtime_snapshot() -> Dictionary:
 func benchmark_resource_diagnostics() -> Dictionary:
 	var snapshot := client_diagnostic_snapshot()
 	var result: Dictionary = {}
-	for key: String in ["surface_work", "loader_work", "streaming_work",
+	for key: String in ["client_runtime", "surface_work", "loader_work", "streaming_work",
 			"resource_retention", "map_cache_enabled", "map_cache_status",
 			"map_load_phases_us", "chunks_resident", "chunk_resident_bytes",
 			"chunk_revision", "vram_mode", "vram_formats", "static_memory_bytes",

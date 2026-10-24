@@ -104,6 +104,7 @@ def request_for(args) -> dict:
             "driver": args.driver, "body_cap": args.body_cap, "cells": args.cells,
             "replay": bool(args.replay), "executable_mode": args.executable_mode,
             "native_reducer": args.native_reducer, "native_presentation": args.native_presentation,
+            "client_runtime": args.client_runtime,
             "tuning": args.tuning, "diagnostics": args.diagnostics, "executable": str(args.godot),
             "presence": args.presence, "server_time": args.server_time,
             "settings_profile": args.settings_profile}
@@ -249,6 +250,7 @@ def run_one(args, variant: str, repeat: int, out_dir: Path) -> dict:
         "ELORIA_LOOK_QUALITY": args.quality,
         "ELORIA_NATIVE_CROWD": "1" if args.native_reducer == "on" else "0",
         "ELORIA_NATIVE_PRESENTATION": "0" if args.native_presentation == "off" else args.native_presentation,
+        "RABBITLANDS_CLIENT_RUNTIME": args.client_runtime,
     }
     if args.centre:
         overrides["RABBITLANDS_CROWD_BENCH_CENTRE"] = args.centre
@@ -394,6 +396,7 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--diagnostics", default="")
     p.add_argument("--native-reducer", default="off", choices=["off", "on"])
     p.add_argument("--native-presentation", default="off", choices=["off", "cape", "flight", "both", "world", "all"])
+    p.add_argument("--client-runtime", default="legacy", choices=["legacy", "compare"])
     p.add_argument("--repeats", type=int, default=1)
     p.add_argument("--sample-ms", type=int, default=6000)
     p.add_argument("--warmup-ms", type=int, default=2000)
