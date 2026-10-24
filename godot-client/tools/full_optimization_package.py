@@ -16,7 +16,6 @@ import prepared_content_package as prepared
 import release_native_runtime
 import release_prepared_content
 import release_software_graphics as graphics
-import runner_retirement
 
 POLICY = "rl-full-optimization-package-v1"
 FEATURES = dict(client_runtime="rust", remote_presentation="rust", rust_effects="heat_bolt",
@@ -256,6 +255,9 @@ class FullOptimizationBuild:
 
     def retire_prepared_sources(self):
         """Release cook scratch only after the final exported runtime passes."""
+        # The runner imports build_release before package_client. Keep this
+        # runner-only helper lazy so the standalone packager can import first.
+        from runner_retirement import regular_tree
         proof = self.proof()
         source = self.project / "prepared-content"
         generated = self.root / "prepared-work/generation/prepared-content"
@@ -266,7 +268,7 @@ class FullOptimizationBuild:
                 and self.receipt["prepared"].get("selected_source_inputs_restored") is True,
                 "prepared retirement requires this build's completed owned generation")
         for directory in (source, generated):
-            require(directory.is_dir() and runner_retirement.regular_tree(directory) == directory
+            require(directory.is_dir() and regular_tree(directory) == directory
                     and native.sha256(directory / "index.json") == proof["catalog_sha256"],
                     "prepared source retirement input differs from final verified catalog")
         pack = self.stage / "app/RabbitLands.pck"
