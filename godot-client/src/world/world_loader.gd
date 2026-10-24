@@ -1,5 +1,6 @@
 class_name WorldLoader
 extends Node3D
+const ResourceAdmission := preload("res://src/runtime/resource_admission.gd")
 
 const WORLD_COLLISION_LAYER := 1
 const NAVIGATION_SURFACE_LAYER := 8
@@ -162,7 +163,11 @@ static func prepare_detached(path: String, cache_enabled: bool, visual_paths := 
 		builder.load_phases[&"total"] += builder.load_phases[&"visualPreload"]
 	return builder
 
-func release_world(detach := true, publish_prepared := true) -> Dictionary:
+func release_world(detach := true, publish_prepared := true, admission_token: Dictionary = {}) -> Dictionary:
+	# Capture only weak Resource carriers while the exact prepared primary is
+	# still owned. Stale/failed materialization must not acknowledge physical
+	# release while a CACHE_MODE_REUSE alias survives. Never instantiate here.
+	ResourceAdmission.retain_prepared(admission_token, _prepared_native.get("resource") as Resource)
 	if publish_prepared and not _prepared_native.is_empty():
 		_materialize_prepared_world()
 	else:
@@ -212,6 +217,9 @@ func adopt_world(resident: Dictionary) -> void:
 	load_completed.emit(manifest)
 
 func load_world(manifest_path: String, arrival := Vector3.INF, wait_for_arrival := false) -> void:
+	# Registry is main-only. Detached worker loaders never touch it.
+	ResourceAdmission.register_loader(self, {"scene_cache": GlbSceneCache.retention_snapshot,
+		"animation_cache": NativeAnimationImporter.retention_snapshot})
 	unload_world()
 	# A standalone streamed territory can start chunk workers below and return
 	# before the raw-GLB branch. Complete all global registration first.
@@ -1226,6 +1234,7 @@ func unload_world() -> void:
 	set_process(false)
 	_release_snapshot()
 	if is_instance_valid(world_root):
+		ResourceAdmission.retiring(world_root)
 		_dispose_import_node(world_root)
 	world_root = null
 	loaded_from_cache = false

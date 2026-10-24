@@ -1,4 +1,5 @@
 #include "client_runtime.h"
+#include "client_residency.h"
 #include "client_flights.h"
 #include "../../native_crowd/src/native_spell_flight_geometry.h"
 #include <godot_cpp/classes/class_db_singleton.hpp>
@@ -95,6 +96,7 @@ Dictionary RabbitLandsClientRuntime::runtime_info() const {
     info["plan_calls"] = static_cast<int64_t>(calls);
     info["records_planned"] = static_cast<int64_t>(records_planned);
     info["precision"] = "f64";
+    info["residency_schema"] = rl_client_runtime_residency_schema();
     info["mounted_pose_api"] = 1;
     info["mounted_profile_api"] = 1;
     info["mounted_upper_api"] = 1;
@@ -442,6 +444,7 @@ PackedInt64Array RabbitLandsClientRuntime::plan_batch(const PackedInt64Array &re
     return result;
 }
 void RabbitLandsClientRuntime::_bind_methods() {
+    bind_residency_methods();
     ClassDB::bind_method(D_METHOD("register_mounted_rider","rig","bones","constants","thumbs","grips"), &RabbitLandsClientRuntime::register_mounted_rider);
     ClassDB::bind_method(D_METHOD("bind_mounted_rider","rider","skeleton","visual","owner","actor","generation"), &RabbitLandsClientRuntime::bind_mounted_rider);
     ClassDB::bind_method(D_METHOD("unregister_mounted_rider","rider"), &RabbitLandsClientRuntime::unregister_mounted_rider);

@@ -755,3 +755,24 @@ actual hits, total readiness, the largest main-thread operation, live resource
 sharing and process memory against raw content in the same package. Script,
 streaming lifetime and rendered isolation fixtures are separate from actual
 asset parity and target-device performance qualification.
+
+## Optional shared resource admission
+
+The default loader remains unchanged. With a verified native payload,
+`RABBITLANDS_CLIENT_RUNTIME=services` keeps ordinary presentation and enables
+native services. `RABBITLANDS_RESOURCE_ADMISSION=rust` then selects one shared
+worker admission queue and one main-thread publication turn across chunk and
+exterior streams. Mandatory synchronous arrival can exceed that soft allowance.
+Cancellation retains ownership until executing workers have joined; the existing
+retirement budget remains the destruction clock.
+
+The service deduplicates verified world, prototype and image source identities.
+It holds accounting until actual weak Resource carriers disappear, including
+prepared resources discarded before instantiation. Shared cache aliases can keep
+a logical resource closure charged after its original scene is gone. Estimates
+are not measured CPU or GPU allocations; actor and cache bytes remain explicitly
+unknown. The default experimental allowance is 768 MiB and can be selected with
+`--resource-admission-budget-mib=64..8192`. Compare equivalent full-content work
+at a permissive allowance before testing a tighter policy. Inspect actual
+`resource_admission` diagnostics for mode, registrations, failures, unknowns,
+retained carriers, denials, readiness and largest atomic verification cost.

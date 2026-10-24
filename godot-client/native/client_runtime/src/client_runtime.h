@@ -60,6 +60,7 @@ class RabbitLandsClientRuntime : public RefCounted {
     };
 protected:
     static void _bind_methods();
+    static void bind_residency_methods();
 public:
     RabbitLandsClientRuntime();
     ~RabbitLandsClientRuntime();
@@ -93,5 +94,17 @@ public:
     PackedFloat64Array mounted_pose_values() const;
     PackedFloat64Array mounted_contact_errors(int64_t actor, int64_t generation, int64_t frame) const;
     PackedInt64Array plan_batch(const PackedInt64Array &records, int64_t epoch, int64_t tick);
+    int64_t residency_catalog(const PackedInt64Array &records, const PackedInt64Array &dependencies);
+    int64_t residency_reconcile(const PackedInt64Array &records, int64_t epoch);
+    int64_t residency_events(const PackedInt64Array &records);
+    int64_t residency_retry(const PackedInt64Array &keys, int64_t epoch);
+    PackedInt64Array residency_step(int64_t epoch, const PackedInt64Array &limits, int64_t capacity);
+    Dictionary residency_snapshot(const PackedInt64Array &limits);
+    PackedInt64Array admission_begin(int64_t epoch, const PackedInt64Array &snapshot);
+    int64_t admission_event(int64_t lease, int64_t epoch, int64_t event);
+    Dictionary admission_snapshot();
+    int64_t admission_dependencies(int64_t lease, int64_t epoch, const PackedInt64Array &records, const PackedInt64Array &edges);
+    PackedInt64Array admission_release_dependencies(const PackedInt64Array &keys);
+    Dictionary admission_graph_snapshot();
 };
 }

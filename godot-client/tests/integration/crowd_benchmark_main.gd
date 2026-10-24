@@ -43,6 +43,7 @@ func benchmark_runtime_snapshot() -> Dictionary:
 			"worldViewportSize": [main_viewport.size.x, main_viewport.size.y]},
 		"activeBackends": {"nativeReducer": AppState.native_crowd_reducer_active(),
 			"clientRuntime": client_runtime.snapshot(),
+			"resourceAdmission": benchmark_resource_admission_snapshot(),
 			"rustSpellFlights": RustSpellFlights.snapshot_for(world_root),
 			"mountedBatch": RustRiderPose.batch_snapshot(),
 			"presentation": {"requested": OS.get_environment("ELORIA_NATIVE_PRESENTATION"),
@@ -55,11 +56,20 @@ func benchmark_runtime_snapshot() -> Dictionary:
 
 # Keep positions, connection/authentication fields and replay actor data out of
 # benchmark metadata. This is taken outside sampling, never in a per-frame timer.
+func benchmark_resource_admission_snapshot() -> Dictionary:
+	var service := preload("res://src/runtime/resource_admission.gd")
+	var observed := resource_admission_snapshot()
+	# Capture cached effective selectors, not only inherited environment text.
+	observed["requested_mode"] = "rust" if service.requested() else "legacy"
+	observed["requested_estimate_budget"] = service.estimate_budget()
+	return observed
+
+
 func benchmark_resource_diagnostics() -> Dictionary:
 	var snapshot := client_diagnostic_snapshot()
 	var result: Dictionary = {}
 	for key: String in ["client_runtime", "spell_flights", "surface_work", "loader_work", "streaming_work",
-			"resource_retention", "map_cache_enabled", "map_cache_status",
+			"resource_retention", "resource_admission", "map_cache_enabled", "map_cache_status",
 			"map_load_phases_us", "chunks_resident", "chunk_resident_bytes",
 			"chunk_revision", "vram_mode", "vram_formats", "static_memory_bytes",
 			"video_memory_bytes"]:
