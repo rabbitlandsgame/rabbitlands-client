@@ -1,8 +1,10 @@
 class_name ClientResourceAdmission
 extends RefCounted
+const OptimizationProfile := preload("res://src/runtime/optimization_profile.gd")
 ## One main-thread admission owner for real chunk/exterior loader launches.
 ## Streams keep workers, Resources, Nodes and queues; the shared retirement
-## allowance remains the only destruction clock. Defaults to legacy.
+## allowance remains the only destruction clock. Human testing requests Rust;
+## missing native capabilities retain the existing legacy launch path.
 const Controller := preload("res://src/runtime/client_runtime.gd")
 const DependencyGraph := preload("res://src/runtime/resource_dependency_graph.gd")
 const ResidencyWords := preload("res://src/runtime/resource_residency.gd")
@@ -63,10 +65,7 @@ static func requested() -> bool:
 		return false
 	if _request_mode >= 0:
 		return _request_mode == 1
-	var value := OS.get_environment("RABBITLANDS_RESOURCE_ADMISSION").strip_edges().to_lower()
-	for argument: String in OS.get_cmdline_user_args():
-		if argument.begins_with("--resource-admission="):
-			value = argument.trim_prefix("--resource-admission=")
+	var value := OptimizationProfile.selected("resource_admission")
 	_request_mode = 1 if value == "rust" else 0
 	return _request_mode == 1
 

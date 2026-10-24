@@ -1,6 +1,7 @@
 class_name RemotePresentation
 extends Node
-## Opt-in derived state only. AppState, network records and UI stay authoritative.
+const OptimizationProfile := preload("res://src/runtime/optimization_profile.gd")
+## Derived state only. AppState, network records and UI stay authoritative.
 ## AnimationPlayer samples clips; the native service never runs a second clip clock.
 const ACTIONS: Array[StringName] = [&"idle", &"combat_idle", &"walk", &"run", &"turn", &"death",
 	&"sit", &"seated_idle", &"stand", &"ranged_draw", &"ranged_hold", &"ranged_attack", &"cast",
@@ -36,20 +37,19 @@ func initialize(controller: ClientRuntimeController, gate: AnimationGate) -> Ani
 	_controller = controller
 	_gate = gate
 	_current = weakref(self)
-	_requested = OS.get_environment("RABBITLANDS_REMOTE_PRESENTATION").strip_edges().to_lower()
-	if _requested.is_empty(): _requested = "legacy"
+	_requested = OptimizationProfile.selected("remote_presentation")
 	set_physics_process(false)
+	# Coverage needs actual local authority even when the native owner is off.
+	# Resolve after SceneTree initialization without an autoload parser dependency.
+	var tree := get_tree() if is_inside_tree() else null
+	var state: Variant = tree.root.get_node_or_null("AppState") if tree != null else null
+	_app_state = weakref(state) if state != null else null
 	if _requested != "rust":
 		_reason = "legacy_selected" if _requested == "legacy" else "unsupported_mode"
 		return gate
-	# Resolve the real autoload after SceneTree initialization. Actor scripts are
-	# also loaded by tools before autoload symbols are available to the parser.
-	var tree := get_tree() if is_inside_tree() else null
-	var state: Variant = tree.root.get_node_or_null("AppState") if tree != null else null
 	if state == null:
 		_reason = "app_state_unavailable"
 		return gate
-	_app_state = weakref(state)
 	if controller == null or not controller.is_rust_mode() \
 			or not ClassDB.class_exists("RabbitLandsRemotePresentationRuntime"):
 		_reason = "verified_runtime_unavailable"

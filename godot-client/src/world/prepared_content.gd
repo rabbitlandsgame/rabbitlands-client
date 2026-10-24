@@ -1,4 +1,5 @@
 extends RefCounted
+const OptimizationProfile := preload("res://src/runtime/optimization_profile.gd")
 ## Optional native-resource path. This is an exact-variant catalog, not a
 ## claim that a PackedScene containing textures is independent of texture policy.
 ## Every consumed source/payload is hashed on each lookup. No timestamp cache,
@@ -11,10 +12,7 @@ const Graphics := preload("res://src/world/graphics_options.gd")
 const TextureSizes := preload("res://src/world/prepared_texture_sizes.gd")
 const AnimationKeys := preload("res://src/world/prepared_animation_keys.gd")
 static func node_policy() -> String:
-	var policy := OS.get_environment("RABBITLANDS_PREPARED_NODE_POLICY").strip_edges().to_lower()
-	for argument: String in OS.get_cmdline_user_args():
-		if argument.begins_with("--prepared-node-policy="):
-			policy = argument.trim_prefix("--prepared-node-policy=")
+	var policy := OptimizationProfile.selected("prepared_node_policy")
 	return "lazy-source-v1" if policy == "lazy-source-v1" else "retain"
 
 const SCHEMA := 1
@@ -30,10 +28,7 @@ static var _misses: Dictionary = {}
 static var _consumed: Dictionary = {}
 
 static func selected_mode() -> String:
-	var selected := OS.get_environment(ENVIRONMENT).strip_edges().to_lower()
-	for argument: String in OS.get_cmdline_user_args():
-		if argument.begins_with(ARGUMENT):
-			selected = argument.substr(ARGUMENT.length()).to_lower()
+	var selected := OptimizationProfile.selected("prepared_content")
 	return selected if selected in MODES else "raw"
 
 static func engine_policy() -> Dictionary:
