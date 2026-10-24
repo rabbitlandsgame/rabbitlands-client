@@ -281,4 +281,3 @@ def prepare_generation(project: Path, stage: Path, *, platform: str, godot: Path
             receipt["selected_source_inputs_restored"] = True
         finally:
             receipt_file.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-
