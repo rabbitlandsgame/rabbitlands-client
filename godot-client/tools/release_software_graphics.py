@@ -54,8 +54,14 @@ def _linux_packages():
     return packages
 
 
+def _identify_warp(gpu_index):
+    # Keep the native Windows dependency out of Linux and fake-only callers.
+    from release_windows_graphics import identify_warp
+    return identify_warp(gpu_index)
+
+
 def prepare_graphics(platform, godot_dir, tool_root, check_budget, *,
-                     external_driver_dir=None, gpu_index=0, xvfb_run=None):
+                     external_driver_dir=None, gpu_index=None, xvfb_run=None):
     """Return process-only configuration; does not launch Godot or install tools.
 
     Linux's signed distro packages must already be installed by the workflow.
@@ -69,16 +75,23 @@ def prepare_graphics(platform, godot_dir, tool_root, check_budget, *,
     require(godot_dir.is_dir() and tool_root.is_dir() and godot_dir.is_relative_to(tool_root),
             "Godot tools must be inside the accounted tool root")
     require(external_driver_dir is None, "unqualified external graphics driver sideload is unsupported")
-    require(type(gpu_index) is int and gpu_index >= 0, "software adapter index must be a nonnegative integer")
+    require(gpu_index is None or (type(gpu_index) is int and gpu_index >= 0),
+            "software adapter index must be automatic or a nonnegative integer")
     check_budget("before software graphics configuration")
     common = {"schema": 1, "policy": POLICY, "platform": platform,
               "tool_root": str(tool_root), "godot_dir": str(godot_dir),
               "requires_actual_observation": True, "ships_driver_files": False,
               "format_mask": FORMAT_MASK}
     if platform == "windows":
+        adapter = _identify_warp(gpu_index)
+        selected = adapter.get("selected_index")
+        require(adapter.get("policy") == "rl-windows-warp-selection-v1"
+                and type(selected) is int and selected >= 0
+                and (gpu_index is None or selected == gpu_index),
+                "actual Windows WARP selection differs from its requested index")
         config = dict(common, env={}, command_prefix=[],
                       rendering_method="forward_plus", rendering_driver="d3d12",
-                      display_driver="windows", gpu_index=gpu_index,
+                      display_driver="windows", gpu_index=selected, windows_adapter=adapter,
                       software_kind="system-warp", packages={})
     else:
         paths = {name: (str(xvfb_run) if name == "xvfb-run" and xvfb_run is not None
@@ -160,8 +173,61 @@ def validate_observation(config, observation):
         require(adapter_type == CPU_DEVICE_TYPE and
                 ("warp" in name.lower() or "microsoft basic render driver" in name.lower()),
                 "selected Windows adapter is not the expected CPU WARP renderer")
+        if "windows_adapter" in config:
+            selection = config["windows_adapter"]
+            require(selection.get("selected_index") == config["gpu_index"]
+                    and name.strip().casefold() == str(selection.get("selected_adapter", {}).get("name", "")).strip().casefold(),
+                    "actual Windows adapter differs from the independently selected WARP identity")
     else:
         # Godot's GL adapter-type API returns OTHER even for llvmpipe.
         require("llvmpipe" in name.lower(), "selected Linux adapter is not llvmpipe")
     return {"schema": 1, "policy": POLICY, "status": "verified", "requested": config,
             "observed": dict(observation), "ships_driver_files": False}
+
+
+def validate_preflight_report(config, report, *, project, user_directory, godot):
+    """Bind early renderer proof to this exact fresh project, profile and editor.
+
+    Configuration and the adapter inventory do not substitute for an actual
+    CPU renderer, texture capabilities or native buffer save/reload.
+    """
+    require(isinstance(report, dict) and type(report.get("schema_version")) is int
+            and report["schema_version"] == 1 and report.get("status") == "pass"
+            and report.get("failures") == [], "early graphics preflight did not pass")
+    for key, expected in (("project_root", project), ("user_directory", user_directory),
+                          ("engine_executable", godot)):
+        value = report.get(key)
+        require(isinstance(value, str) and Path(value).is_absolute(),
+                "early graphics " + key + " is missing or not absolute")
+        actual_path, expected_path = str(Path(value).resolve()), str(Path(expected).resolve())
+        if config["platform"] == "windows":
+            actual_path, expected_path = actual_path.casefold(), expected_path.casefold()
+        require(actual_path == expected_path, "early graphics " + key + " differs from this invocation")
+    version = report.get("engine_version")
+    require(isinstance(version, dict) and all(type(version.get(key)) is int and version[key] == value
+            for key, value in (("major", 4), ("minor", 7), ("patch", 2)))
+            and version.get("status") == "stable", "early graphics editor version differs from the pinned release")
+    observed = report.get("graphics")
+    receipt = validate_observation(config, observed)
+    require(observed.get("requested_platform") == config["platform"]
+            and str(observed.get("display_driver", "")).casefold() == config["display_driver"].casefold(),
+            "early graphics native platform/display differs")
+    buffer = observed.get("resource_buffer_detail")
+    require(isinstance(buffer, dict) and buffer.get("ok") is True and buffer.get("error") == ""
+            and type(buffer.get("buffer_elements")) is int and buffer["buffer_elements"] == 12
+            and buffer.get("save_reload") is True and buffer.get("removed") is True,
+            "early graphics actual resource-buffer proof is incomplete")
+    if config["platform"] == "windows":
+        require("windows_adapter" in config, "early graphics independent WARP selection is missing")
+        require(type(observed.get("expected_cpu_type")) is int and observed["expected_cpu_type"] == CPU_DEVICE_TYPE
+                and observed.get("rendering_device_present") is True
+                and observed.get("rendering_device_name") == observed.get("adapter_name"),
+                "early graphics selected RenderingDevice does not confirm the actual CPU adapter")
+        # The pinned editor does not bind RenderingDevice.get_device_type to
+        # scripts. Keep that absence explicit; RenderingServer's supported
+        # bound getter above must still report the real CPU type.
+        available = observed.get("rendering_device_type_available")
+        require(type(available) is bool and type(observed.get("rendering_device_type")) is int
+                and observed["rendering_device_type"] == (CPU_DEVICE_TYPE if available else -1),
+                "early graphics RenderingDevice type observation is inconsistent")
+    return dict(receipt, preflight=dict(report))

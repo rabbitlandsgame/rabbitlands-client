@@ -10,6 +10,16 @@ import release_software_graphics as graphics
 
 
 class SoftwareGraphicsTests(unittest.TestCase):
+    @staticmethod
+    def warp_selection(index=0, name="Microsoft Basic Render Driver"):
+        # Fake DXGI inventory: the independent WARP identity is matched to a
+        # concrete EnumAdapters1 ordinal, not assumed to be adapter zero.
+        identity = {"low_part": 1234, "high_part": 0}
+        selected = {"name": name, "index": index, "luid": identity, "flags": 2}
+        return {"policy": "rl-windows-warp-selection-v1", "selected_index": index,
+                "selected_adapter": selected, "warp": {"luid": identity, "flags": 2},
+                "requested_index": None, "adapters": [selected]}
+
     def config(self, root, platform="windows"):
         tools = root / "tools"
         tools.mkdir(exist_ok=True)
@@ -20,6 +30,7 @@ class SoftwareGraphicsTests(unittest.TestCase):
         for name in ("xvfb-run", "Xvfb", "xauth"):
             (commands / name).touch()
         with mock.patch.object(graphics, "host_platform", return_value=platform), \
+             mock.patch.object(graphics, "_identify_warp", return_value=self.warp_selection()), \
              mock.patch.object(graphics.shutil, "which", side_effect=lambda name: str(commands / name)), \
              mock.patch.object(graphics, "_linux_packages", return_value={name: "fixture-version" for name in graphics.LINUX_PACKAGES}):
             return graphics.prepare_graphics(platform, godot, tools, mock.Mock())
@@ -40,6 +51,91 @@ class SoftwareGraphicsTests(unittest.TestCase):
             self.assertEqual(config["command_prefix"], [])
             self.assertFalse(config["ships_driver_files"])
             self.assertTrue(config["requires_actual_observation"])
+
+    def test_windows_automatic_selection_uses_real_fixture_ordinal_and_retains_receipt(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            original = self.config(Path(temporary))
+            selection = self.warp_selection(2)
+            with mock.patch.object(graphics, "host_platform", return_value="windows"), \
+                 mock.patch.object(graphics, "_identify_warp", return_value=selection) as identify:
+                config = graphics.prepare_graphics("windows", original["godot_dir"],
+                                                   original["tool_root"], mock.Mock())
+            identify.assert_called_once_with(None)
+            self.assertEqual(config["gpu_index"], 2)
+            self.assertEqual(config["windows_adapter"], selection)
+            command = graphics.cook_command(config, ["godot", "--script", "cook.gd"])
+            self.assertEqual(command[command.index("--gpu-index") + 1], "2")
+            self.assertEqual(graphics.validate_observation(config, self.observation(config))["status"], "verified")
+
+    def test_windows_explicit_index_is_forwarded_and_must_match_selection(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            original = self.config(Path(temporary))
+            with mock.patch.object(graphics, "host_platform", return_value="windows"), \
+                 mock.patch.object(graphics, "_identify_warp", return_value=self.warp_selection(2)) as identify:
+                config = graphics.prepare_graphics("windows", original["godot_dir"],
+                                                   original["tool_root"], mock.Mock(), gpu_index=2)
+                identify.assert_called_once_with(2)
+                self.assertEqual(config["gpu_index"], 2)
+            with mock.patch.object(graphics, "host_platform", return_value="windows"), \
+                 mock.patch.object(graphics, "_identify_warp", return_value=self.warp_selection(1)) as identify:
+                with self.assertRaisesRegex(ValueError, "requested index"):
+                    graphics.prepare_graphics("windows", original["godot_dir"],
+                                              original["tool_root"], mock.Mock(), gpu_index=2)
+                identify.assert_called_once_with(2)
+
+    def test_windows_invalid_indices_fail_before_native_selector(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            original = self.config(Path(temporary))
+            with mock.patch.object(graphics, "host_platform", return_value="windows"), \
+                 mock.patch.object(graphics, "_identify_warp") as identify:
+                for index in (-1, True, False, 0.0, "2"):
+                    with self.subTest(index=index), self.assertRaisesRegex(ValueError, "nonnegative integer"):
+                        graphics.prepare_graphics("windows", original["godot_dir"],
+                                                  original["tool_root"], mock.Mock(), gpu_index=index)
+                identify.assert_not_called()
+
+    def test_windows_malformed_selection_fails_before_configuration(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            original = self.config(Path(temporary))
+            for update in ({"policy": "unknown"}, {"selected_index": -1}, {"selected_index": True},
+                           {"selected_index": "2"}):
+                selection = dict(self.warp_selection(2), **update)
+                with self.subTest(update=update), \
+                     mock.patch.object(graphics, "host_platform", return_value="windows"), \
+                     mock.patch.object(graphics, "_identify_warp", return_value=selection), \
+                     self.assertRaisesRegex(ValueError, "WARP selection"):
+                    graphics.prepare_graphics("windows", original["godot_dir"],
+                                              original["tool_root"], mock.Mock())
+
+    def test_actual_windows_adapter_must_match_selected_identity_and_cpu_type(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            config = self.config(Path(temporary))
+            # Both names pass the old broad WARP-name gate. They still must
+            # match the independently selected DXGI adapter exactly.
+            for update, message in (({"adapter_name": "Microsoft WARP Rendering Adapter"}, "independently selected"),
+                                    ({"adapter_type": 2}, "CPU WARP"),
+                                    ({"adapter_type": True}, "name/type")):
+                with self.subTest(update=update), self.assertRaisesRegex(ValueError, message):
+                    graphics.validate_observation(config, dict(self.observation(config), **update))
+            config["gpu_index"] = 1
+            with self.assertRaisesRegex(ValueError, "independently selected"):
+                graphics.validate_observation(config, self.observation(config))
+
+    def test_linux_never_loads_windows_adapter_selector(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            original = self.config(root, "linux")
+            commands = root / "tools" / "commands"
+            with mock.patch.object(graphics, "host_platform", return_value="linux"), \
+                 mock.patch.object(graphics, "_identify_warp", side_effect=AssertionError("Windows selector on Linux")) as identify, \
+                 mock.patch.object(graphics.shutil, "which", side_effect=lambda name: str(commands / name)), \
+                 mock.patch.object(graphics, "_linux_packages", return_value=original["packages"]):
+                config = graphics.prepare_graphics("linux", original["godot_dir"],
+                                                   original["tool_root"], mock.Mock())
+            identify.assert_not_called()
+            self.assertNotIn("windows_adapter", config)
+            self.assertIsNone(config["gpu_index"])
+            self.assertEqual(config["rendering_driver"], "opengl3")
 
     def test_linux_requests_real_llvmpipe_x11_display(self):
         with tempfile.TemporaryDirectory() as temporary:

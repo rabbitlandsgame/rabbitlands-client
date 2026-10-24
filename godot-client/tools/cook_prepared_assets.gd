@@ -13,6 +13,7 @@ const Archived := preload("res://src/actors/archived_model_policy.gd")
 const TextureSizes := preload("res://src/world/prepared_texture_sizes.gd")
 const AnimationKeys := preload("res://src/world/prepared_animation_keys.gd")
 const NativeStorage := preload("res://tools/prepared_native_storage.gd")
+const ReleaseGraphics := preload("res://tools/release_graphics_probe.gd")
 var _root_path := ""
 var _saved: Dictionary = {}
 var _visiting: Dictionary = {}
@@ -481,25 +482,7 @@ func _target(spec: Dictionary) -> Dictionary:
 	return entry
 
 static func _resource_buffer_roundtrip() -> bool:
-	# A dummy renderer reports empty MultiMesh buffers. Prove both actual
-	# readable storage and the native save/reload used by the real producer.
-	var multimesh := MultiMesh.new()
-	multimesh.transform_format = MultiMesh.TRANSFORM_3D
-	multimesh.mesh = BoxMesh.new()
-	multimesh.instance_count = 1
-	var expected := Transform3D(Basis.IDENTITY, Vector3(1.25, 2.5, 3.75))
-	multimesh.set_instance_transform(0, expected)
-	if multimesh.buffer.size() != 12 or not multimesh.get_instance_transform(0).is_equal_approx(expected):
-		return false
-	var path := "user://release-cook-buffer-probe.res"
-	if FileAccess.file_exists(path) or ResourceSaver.save(multimesh, path) != OK:
-		return false
-	multimesh = null
-	var restored := ResourceLoader.load(path, "MultiMesh", ResourceLoader.CACHE_MODE_IGNORE) as MultiMesh
-	var valid := restored != null and restored.buffer.size() == 12 \
-		and restored.get_instance_transform(0).is_equal_approx(expected)
-	var removed := DirAccess.remove_absolute(ProjectSettings.globalize_path(path)) == OK
-	return valid and removed
+	return bool(ReleaseGraphics.buffer_roundtrip().ok)
 
 static func _isolated_user_matches(platform: String, expected: String, actual: String) -> bool:
 	if platform not in ["windows", "linux"]:
@@ -509,10 +492,7 @@ static func _isolated_user_matches(platform: String, expected: String, actual: S
 	return not expected.is_empty() and (expected.to_lower() == actual.to_lower() if platform == "windows" else expected == actual)
 
 static func _software_adapter_matches(platform: String, adapter_name: String, adapter_type: int) -> bool:
-	var normalized := adapter_name.to_lower()
-	return (platform == "windows" and adapter_type == RenderingDevice.DEVICE_TYPE_CPU \
-		and ("warp" in normalized or "microsoft basic render driver" in normalized)) \
-		or (platform == "linux" and "llvmpipe" in normalized)
+	return ReleaseGraphics.software_adapter_matches(platform, adapter_name, adapter_type)
 
 func _run() -> void:
 	if OS.get_thread_caller_id() != OS.get_main_thread_id():
@@ -582,20 +562,15 @@ func _run() -> void:
 	Quantization.ensure_registered()
 	Vram.ensure_registered()
 	var detected_mask := Vram.usable_formats()
-	var adapter_name := RenderingServer.get_video_adapter_name()
-	var adapter_type := int(RenderingServer.get_video_adapter_type())
-	var software_adapter := _software_adapter_matches(platform, adapter_name, adapter_type)
-	_cook_attestation = {"platform": platform, "detected_format_mask": detected_mask,
-		"rendering_method": RenderingServer.get_current_rendering_method(),
-		"rendering_driver": RenderingServer.get_current_rendering_driver_name(),
-		"adapter_name": adapter_name, "adapter_type": adapter_type, "software_adapter": software_adapter,
-		"resource_buffer_probe": _resource_buffer_roundtrip(),
-		"policy": "actual-renderer-supported-format-subset-v1"}
+	_cook_attestation = ReleaseGraphics.observe(platform)
+	_cook_attestation["runtime_format_mask"] = detected_mask
+	print("PREPARED_COOK_GRAPHICS_OBSERVATION ", JSON.stringify(_cook_attestation, "", true, true))
 	if bool(job.get("require_rendered_resource_buffers", false)) and not bool(_cook_attestation.resource_buffer_probe):
 		_error("release cooking requires actual readable renderer resource buffers; dummy/headless data is not qualified")
 		quit(1)
 		return
-	if bool(job.get("require_software_renderer", false)) and (not software_adapter or detected_mask != 7):
+	if bool(job.get("require_software_renderer", false)) and (not bool(_cook_attestation.software_adapter) \
+		or detected_mask != 7 or int(_cook_attestation.detected_format_mask) != 7):
 		_error("release cook requires the actual qualified CPU software adapter and BC1/BC5/BC7 support")
 		quit(1)
 		return
