@@ -12,25 +12,83 @@ static var _lookup_hits := 0
 static var _lookup_misses := 0
 static var _publications := 0
 static var _adoptions := 0
+static var _image_paths: Dictionary = {}
+static var _image_load_calls := 0
+static var _image_path_hits := 0
+static var _image_hash_reads := 0
+static var _image_decodes := 0
+static var _image_resource_fallbacks := 0
+static var _image_uploads := 0
 
 ## Runtime-owned shared maps use the same weak content cache as glTF textures.
-## Loading directly keeps this available before an editor PNG import exists.
+## Assets are immutable for a running session, just like texture quality.
+## Weak path aliases avoid rereading/hashing a named image for every chunk.
 static func load_image(path: String) -> ImageTexture:
-	var key := FileAccess.get_sha256(path)
-	if key.is_empty():
-		return null
-	var shared := _published(key)
+	var path_key := "%s|mip-skip=%d" % [path.simplify_path(), GraphicsOptions.active_texture_skip()]
+	_mutex.lock()
+	_image_load_calls += 1
+	var reference: WeakRef = _image_paths.get(path_key)
+	var shared: ImageTexture = reference.get_ref() as ImageTexture if reference != null else null
+	if shared != null:
+		_image_path_hits += 1
+	_mutex.unlock()
 	if shared != null:
 		return shared
 	# Decode and upload outside the lock: texture creation is a rendering-server
 	# round trip that only the main thread can serve, so a worker holding the
 	# lock across it would deadlock a main thread waiting for the lock.
-	var image := Image.load_from_file(path)
+	var image: Image = null
+	var key := "imported-image|" + path_key
+	if FileAccess.file_exists(path):
+		_note_image_work(&"hash")
+		key = FileAccess.get_sha256(path)
+		if key.is_empty():
+			return null
+		shared = _published(key)
+		if shared != null:
+			return _remember_image_path(path_key, shared)
+		# The packager deliberately ships these raw files loose. Decode their
+		# bytes using the same mip/tier preparation as other external images;
+		# Image.load_from_file(res://...) incorrectly treats this as an import.
+		_note_image_work(&"decode")
+		image = VramTextures.decode_source(path).image
+	elif path.begins_with("res://") and ResourceLoader.exists(path, "Texture2D"):
+		# Also support ordinary Godot exports that contain only an imported
+		# texture. Read back/prepare it once, never on a live path-cache hit.
+		shared = _published(key)
+		if shared != null:
+			return _remember_image_path(path_key, shared)
+		_note_image_work(&"resource")
+		var imported := ResourceLoader.load(path, "Texture2D") as Texture2D
+		if imported != null:
+			image = imported.get_image()
+		if image != null and not image.is_empty():
+			if image.is_compressed() and image.decompress() != OK:
+				return null
+			if not image.has_mipmaps():
+				image.generate_mipmaps()
+			image = GraphicsOptions.reduced_image(image)
 	if image == null or image.is_empty():
 		return null
-	if not image.has_mipmaps():
-		image.generate_mipmaps()
-	return _publish_or_adopt(key, ImageTexture.create_from_image(GraphicsOptions.reduced_image(image)))
+	_note_image_work(&"upload")
+	return _remember_image_path(path_key, _publish_or_adopt(key, ImageTexture.create_from_image(image)))
+
+
+static func _remember_image_path(path_key: String, texture: ImageTexture) -> ImageTexture:
+	_mutex.lock()
+	_image_paths[path_key] = weakref(texture)
+	_mutex.unlock()
+	return texture
+
+
+static func _note_image_work(kind: StringName) -> void:
+	_mutex.lock()
+	match kind:
+		&"hash": _image_hash_reads += 1
+		&"decode": _image_decodes += 1
+		&"resource": _image_resource_fallbacks += 1
+		&"upload": _image_uploads += 1
+	_mutex.unlock()
 
 
 static func _published(key: String) -> ImageTexture:
@@ -71,7 +129,11 @@ static func retention_snapshot() -> Dictionary:
 	var result := {"weak_slots": _textures.size(), "live_entries": live,
 		"expired_slots": _textures.size() - live, "lookup_hits": _lookup_hits,
 		"lookup_misses": _lookup_misses, "publications": _publications,
-		"concurrent_adoptions": _adoptions, "bytes_estimate_available": false}
+		"concurrent_adoptions": _adoptions, "bytes_estimate_available": false,
+		"image_path_slots": _image_paths.size(), "image_load_calls": _image_load_calls,
+		"image_path_hits": _image_path_hits, "image_hash_reads": _image_hash_reads,
+		"image_decodes": _image_decodes, "image_resource_fallbacks": _image_resource_fallbacks,
+		"image_uploads": _image_uploads}
 	_mutex.unlock()
 	return result
 

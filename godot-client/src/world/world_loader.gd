@@ -1053,11 +1053,10 @@ func _apply_continent_water(mesh_instances: Array) -> int:
 	var origin := Vector3(float(translation[0]), float(translation[1]), float(translation[2]))
 	var shared_drainage := str(manifest.data.continentGeography.get("geometryMode", "")) == "continent-chunks-v1"
 	var territory := manifest.asset_id().get_slice("__chunk_", 0)
-	# Shared pixels are exported unchanged from the toolkit's water_lake.
-	# Loading the PNG directly also works without an editor import or a local
-	# water_lake material (Grey Moors only packages its regional bog material).
-	var wave_texture := preload("res://src/world/external_texture_pool.gd").load_image(
-		"res://assets/world/continent-water.png")
+	# Dry/decorative chunks must not decode/upload a wave texture only to drop
+	# the last reference immediately. Acquire once at the first eligible surface.
+	var wave_texture: ImageTexture = null
+	var wave_texture_loaded := false
 	var applied := 0
 	for value: Variant in mesh_instances:
 		var node := value as MeshInstance3D
@@ -1091,6 +1090,10 @@ func _apply_continent_water(mesh_instances: Array) -> int:
 				continue
 			if shared_drainage and original.resource_name != "water_sea":
 				continue
+			if not wave_texture_loaded:
+				wave_texture = ExternalTexturePool.load_image(
+					"res://assets/world/continent-water.png")
+				wave_texture_loaded = true
 			var water := ShaderMaterial.new()
 			water.resource_name = "continent_sea"
 			water.shader = preload("res://src/world/continent_water.gdshader")
