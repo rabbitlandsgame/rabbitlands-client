@@ -7,6 +7,7 @@ import re
 import build_release as release
 import shared_release_assets as shared
 from runner_release import authorize
+from full_optimization_package import validate_proof
 
 
 def finalize(receipts: list[Path], out: Path) -> str:
@@ -28,6 +29,7 @@ def finalize(receipts: list[Path], out: Path) -> str:
                 or item["commit"] != sha or item["release_id"] != release_id):
             raise ValueError("Runner receipts do not describe the same release.")
         platform = item["platform"]
+        validate_proof(item.get("optimizations"), sha, platform)
         stage = item["stage"]
         if not re.fullmatch(f"RabbitLands-{platform.title()}-[0-9]{{8}}-{sha[:9]}", stage):
             raise ValueError("Unexpected runner stage name.")
@@ -70,6 +72,10 @@ def finalize(receipts: list[Path], out: Path) -> str:
         raise ValueError("Too many release assets.")
     if len(shared_rows) > 1000:
         raise ValueError("Too many shared release assets.")
+    optimization_proofs = {item["platform"]: item["optimizations"] for item in data}
+    if len({proof["coverage_sha256"] for proof in optimization_proofs.values()}) != 1 \
+            or len({proof["native_source_digest"] for proof in optimization_proofs.values()}) != 1:
+        raise ValueError("Desktop platforms qualified different native sources or prepared coverage plans.")
     authorize()
     if release.gh("api", f"repos/{release.REPOSITORY}/commits/{sha}", "--jq", ".sha") != sha:
         raise ValueError("Runner source commit is not public.")
@@ -181,6 +187,7 @@ argument. Existing installations reuse their matching packages.
     release.write_json(out / "client_updates.json", {"schema": 1, "required_commit": sha, "enforce": True,
         "manifests": {platform: f"{base}/{stage}-{platform}.json" for platform, stage in stages.items()}})
     release.write_json(out / "runner-release.json", {"schema": 1, "repository": release.REPOSITORY, "commit": sha, "release_id": release_id,
+        "optimizations": optimization_proofs,
         "assets": list(rows.values()), "shared_assets": list(shared_rows.values()), "shared_release_id": pool_id,
         "transfer": {key: sum(i.get("transfer", {}).get(key, 0) for i in data) for key in ("uploaded_bytes", "reused_bytes")}})
     url = json.loads(release.gh("api", f"repos/{release.REPOSITORY}/releases/{release_id}"))["html_url"]

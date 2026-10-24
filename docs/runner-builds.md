@@ -31,6 +31,56 @@ to remove older compiled releases and unused supporting files. Manual publicatio
 still triggers **Retire previous published client**, using the same cleanup.
 An in-progress replacement draft is preserved.
 
+## Full optimization packages
+
+Both hosted desktop jobs use `--full-optimizations`. Ordinary launches select
+the `human-testing` defaults: Rust mounted poses, remote presentation and heat
+bolts, Rust resource admission, prepared content in `auto` mode, and the
+`lazy-source-v1` object policy. Supported participants use those paths; other
+content retains its documented fallback. This build policy is not a claim of
+better performance on every renderer or device. See [optimization testing](client-optimization-testing.md)
+for the legacy control and human checks.
+
+Each native Windows/Linux job builds the pinned Rust/Godot adapter or restores
+a separate payload-only native cache. Its key includes committed native sources,
+shared native dependencies, build helpers and the actual compiler/toolchain
+identity. A hit is verified against the selected source commit and actual
+library, descriptor and provenance bytes before staging. A corrupt or mismatched
+native cache stops the build; it is not accepted as an older working payload.
+Compilation uses bounded parallelism and disposable, measured scratch storage.
+
+Prepared content is generated fresh for each release from the current pilot
+plan and the actual first export's import records and texture products. It is
+not restored from a historical cooked catalog. Full, half and quarter texture
+jobs include the retained pilot and the Four Gates lazy-object target. The
+exact planned sources and resulting entry identities are recorded; an old
+entry count is not evidence that a new generation is complete. Only the
+selected pilot is cooked, rather than the entire world.
+
+Cooking needs real rendering-resource storage. Windows requests D3D12 WARP;
+Linux uses Mesa llvmpipe under Xvfb with the Compatibility renderer. These are
+build-time software renderers, not drivers shipped with the game. Each job
+must report its actual renderer, adapter and supported texture-format mask,
+and pass a resource-buffer save/reload check. A dummy/headless renderer,
+unexpected hardware adapter or unsupported format mask fails qualification;
+the tools do not manufacture a capability token.
+
+Before signing or uploading game parts, the build requires positive native
+contract checks, ordinary startup with all six defaults, and acquisition of
+every planned entry from the final normal PCK at each texture quality. The
+guard checks exact source/catalog/entry identities, readable resource buffers,
+lazy restoration and owned cleanup using isolated user data outside the
+package. It rejects engine errors, skipped work and changes to the stage.
+Neither a benchmark PCK nor source-project resource fallback qualifies a release.
+
+Platform receipts contain optimization proofs bound to the selected commit,
+native source digest and prepared coverage plan. Finalization and publication
+require matching Windows/Linux source and coverage proofs as well as verified
+downloads. Software rendering and functional guards do not replace visual
+review, gameplay checks or target-hardware performance qualification. Hosted
+execution of this expanded path must be judged from its own run diagnostics;
+older local rehearsals below do not qualify it.
+
 ## Reusing uploaded downloads
 
 Both the Actions runner and the local combined release build use one permanent
@@ -65,7 +115,7 @@ helpers. Per-build manifests and Windows setup change with the build identity.
 ### Code-only releases
 
 The desktop workflow also keeps a separate Windows/Linux Actions cache of
-prepared assets. Its key hashes the committed asset trees, import settings,
+import and texture build products. Its key hashes the committed asset trees, import settings,
 project configuration, updater sources and build tools (including the pinned
 engine/template and Python dependency versions). Ordinary game script changes
 do not invalidate that key. Adding, changing or deleting an asset does.
@@ -92,8 +142,8 @@ An updater change or a changed native executable can add a small helper/engine
 package. The first build for an asset key, an evicted cache, or a corrupt cache
 falls back to a full build. A cache miss never skips validation. Cache files
 are checksummed before reuse, and the prior manifest must verify with the
-current public signing key. Signing secrets, complete game folders and quality
-scratch files are excluded from the cache.
+current public signing key. Signing secrets, complete game folders, freshly
+cooked prepared catalogs and quality scratch files are excluded from this cache.
 
 The workflow saves the cache only after a successful build and only when that
 key was absent, so code-only runs do not repeatedly upload the cache itself.
@@ -212,7 +262,12 @@ Space is saved by:
   DDS scratch, preserving all shared-image cutoff checks in the same batch.
 - Moving verified import products to the reusable cache after export, and
   hard-linking retained graphics products into the stage. Without caching,
-  temporary import and graphics caches are removed after validation.
+  temporary import and graphics caches are removed after validation. Full
+  optimization builds retain the selected imports through cooking and the
+  second export, then release them after final-package qualification.
+- Keeping the pinned Rust toolchain, native build/dependency scratch and native
+  payload cache in accounted job directories. Native compilation samples its
+  owned scratch usage and stops on a budget violation before publication.
 - Writing each deterministic package ZIP into bounded parts, without
   first making a full archive and then copying it into parts.
 - Keeping package inventories in the signed manifest rather than retaining
@@ -247,6 +302,9 @@ installation with Godot, graphics scratch batching, checksum failures, executabl
 modes and Windows long-path cleanup. These are local checks; a hosted workflow
 still needs its first run once it is configured.
 
+Those measurements describe the earlier packaging path. They are not a measured
+peak or elapsed-time guarantee for the full native build and fresh cooking path.
+
 ## Job setup
 
 Use the final `rabbitlandsgame/rabbitlands-client` repository only. For the initial
@@ -275,6 +333,13 @@ without WSL. The packaging checks still require the login screen and graphics
 texture self-tests. Windows Git operations enable long-path handling locally
 for these builds.
 
+Full optimization builds additionally require Rust 1.99.1, CMake, Ninja and the
+native C++ toolchain: MSVC x64 on Windows or GNU x86_64 on Linux. The workflow
+keeps `RUSTUP_HOME` and `CARGO_HOME` under the accounted native-toolchain folder.
+Linux also installs Mesa OpenGL libraries, Xvfb and xauth for software cooking.
+Installed package versions and the actual renderer observation are retained in
+the diagnostics. No graphics DLLs are copied into the release stage.
+
 The workflow token needs `contents: write` on this repository. Runner staging
 accepts the repository's own Actions installation token; local staging requires
 the `rabbitlandsgame` account. Both platforms receive the **same draft release
@@ -299,6 +364,7 @@ python godot-client/tools/runner_release.py `
   --godot "$env:RUNNER_TEMP/toolchain/Godot.exe" `
   --iscc "C:/Program Files (x86)/Inno Setup 6/ISCC.exe" `
   --tool-root "$env:RUNNER_TEMP/toolchain" `
+  --tool-root "$env:RUNNER_TEMP/rabbitlands-native-toolchain" `
   --update-signing-key "$env:RUNNER_TEMP/signing-private.pem" `
   --draft-release-id 123456
 ```

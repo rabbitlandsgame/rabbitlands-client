@@ -132,6 +132,7 @@ import runner_source
 import benchmark_package
 import client_runtime_package
 import prepared_content_package
+import full_optimization_package
 from pathlib import Path, PurePosixPath
 from urllib.parse import unquote
 
@@ -2302,7 +2303,7 @@ def wsl_path(path: Path) -> str:
 
 
 def smoke_launch(app_dir: Path, logs: Path, platform: dict, vram_textures: bool = False,
-                 pool_test: str | None = None) -> None:
+                 pool_test: str | None = None, *, clean_feature_environment: bool = False) -> None:
     # The launch must leave the package exactly as it was: a user:// that
     # falls back to a relative path writes settings and caches into app/,
     # and they would ship in the archive.
@@ -2314,7 +2315,8 @@ def smoke_launch(app_dir: Path, logs: Path, platform: dict, vram_textures: bool 
     # pool's sidecars) makes it also decode one of those, from where it ships.
     before = {p for p in app_dir.parent.rglob("*")}
     try:
-        text = _launch(app_dir, logs, platform, vram_textures, pool_test)
+        text = _launch(app_dir, logs, platform, vram_textures, pool_test,
+                       clean_feature_environment=clean_feature_environment)
         for wanted, what in ((VRAM_SELF_TEST_OK, "a VRAM sidecar"),
                              (VRAM_SELF_TEST_POOL_OK if pool_test else None, "a sidecar another pool ships")):
             if wanted and vram_textures and text is not None and wanted not in text:
@@ -2330,18 +2332,19 @@ def smoke_launch(app_dir: Path, logs: Path, platform: dict, vram_textures: bool 
 
 
 def _launch(app_dir: Path, logs: Path, platform: dict, vram_textures: bool = False,
-            pool_test: str | None = None) -> str | None:
+            pool_test: str | None = None, *, clean_feature_environment: bool = False) -> str | None:
     if platform.get("preset") == "macOS":
         return macos_package.smoke(app_dir, logs, run_godot, SMOKE_FAILURES)
     self_test = "ELORIA_VRAM_SELF_TEST=1 " if vram_textures else ""
     pool_dir = f"res://../{pool_test}" if vram_textures and pool_test else ""
     if pool_dir:
         self_test += f"ELORIA_VRAM_SELF_TEST_POOL={pool_dir} "
+    base_env = full_optimization_package.clean_environment() if clean_feature_environment else dict(os.environ)
     if platform["binary"].endswith(".exe"):
         log("smoke launch (headless)")
         with tempfile.TemporaryDirectory(prefix="eloria-smoke-") as appdata:
             # A throwaway APPDATA keeps user:// away from the real client settings.
-            env = dict(os.environ, APPDATA=appdata, LOCALAPPDATA=appdata)
+            env = dict(base_env, APPDATA=appdata, LOCALAPPDATA=appdata)
             if vram_textures:
                 env["ELORIA_VRAM_SELF_TEST"] = "1"
             if pool_dir:
@@ -2351,7 +2354,7 @@ def _launch(app_dir: Path, logs: Path, platform: dict, vram_textures: bool = Fal
     elif os.name != "nt":
         log("smoke launch (headless, native Linux)")
         with tempfile.TemporaryDirectory(prefix="rabbitlands-smoke-") as userdir:
-            env = dict(os.environ, HOME=userdir, XDG_DATA_HOME=userdir, XDG_CONFIG_HOME=userdir)
+            env = dict(base_env, HOME=userdir, XDG_DATA_HOME=userdir, XDG_CONFIG_HOME=userdir)
             if vram_textures:
                 env["ELORIA_VRAM_SELF_TEST"] = "1"
             if pool_dir:
@@ -3013,6 +3016,12 @@ def _main(argv=None, storage=None) -> int:
                         help="optional verified native payload built from the selected commit")
     parser.add_argument("--prepared-catalog", type=Path,
                         help="optional exact native pilot generation; raw content remains present")
+    parser.add_argument("--full-optimizations", action="store_true",
+                        help="build and qualify the native runtime and fresh prepared pilot on native Windows/Linux")
+    parser.add_argument("--native-runtime-cache", type=Path,
+                        help="verified payload-only cache for full optimization builds")
+    parser.add_argument("--software-gpu-index", type=int, default=0,
+                        help="Windows release-cook WARP adapter index (hosted runners use zero)")
     parser.add_argument("--installer", action="store_true", help="also build an Inno Setup installer")
     parser.add_argument("--iscc", help="path to Inno Setup's ISCC.exe")
     parser.add_argument("--no-client-updates", action="store_true", help="build a client without the restart updater")
@@ -3034,6 +3043,10 @@ def _main(argv=None, storage=None) -> int:
         # every phase checkpoint. Normal distributable builds keep copying.
         BENCHMARK_LINKS = options.benchmark_profile
         BENCHMARK_ACTOR_PLANS = {} if options.benchmark_profile else None
+        if options.full_optimizations and (options.platform not in {"windows", "linux"}
+                or options.client_runtime or options.prepared_catalog or options.no_smoke
+                or options.no_vram_textures or options.benchmark_profile):
+            raise PackageError("Full optimization builds require native Windows/Linux, fresh generated payloads, VRAM and all qualification checks.")
         if options.prepared_catalog and (options.platform != "windows" or storage or options.distribution != "standalone"):
             raise PackageError("Prepared pilot currently requires a local standalone Windows package; release/storage/platform integrations remain unqualified.")
         updating = options.distribution == "github" and not options.no_client_updates
@@ -3084,6 +3097,13 @@ def _main(argv=None, storage=None) -> int:
         project = prepare_build_tree(build_dir, sha)
         if (project / "prepared-content").exists():
             raise PackageError("Disposable build has an old prepared-content directory; use a fresh build checkout to avoid unintended export.")
+        optimization = None
+        if options.full_optimizations:
+            optimization = full_optimization_package.FullOptimizationBuild(project, stage, godot,
+                options.platform, sha, logs / "optimizations",
+                options.native_runtime_cache or options.out.resolve() / ".build/native-runtime-cache",
+                storage.check if storage else None, software_gpu_index=options.software_gpu_index)
+            options.client_runtime = optimization.prepare_native()
         if options.benchmark_profile:
             benchmark_package.prepare_export(project)
         if options.distribution != "github" and "const DISTRIBUTION_SCHEMA := 1" not in (project / "src/updates/release.gd").read_text(encoding="utf-8"):
@@ -3104,6 +3124,8 @@ def _main(argv=None, storage=None) -> int:
         if asset_cache:
             asset_cache.restore_imports(project)
         import_project(godot, project, logs)
+        if optimization:
+            optimization.check_native()
         if storage:
             storage.check("import complete")
         check_actor_imports(project)
@@ -3126,7 +3148,8 @@ def _main(argv=None, storage=None) -> int:
         check_editor_sources_unpacked(app_dir)
         if storage:
             storage.check("export and staging validated")
-            storage.clear_cache(project / ".godot")
+            if not optimization:
+                storage.clear_cache(project / ".godot")
             storage.check("export validated")
         warnings = stage_eloria_assets(build_dir, stage, previews, served)
         check_served_packages(stage, served)
@@ -3139,10 +3162,12 @@ def _main(argv=None, storage=None) -> int:
             if storage:
                 storage.clear_cache(options.vram_cache.resolve())
                 storage.check("graphics prepared")
+        if optimization:
+            options.prepared_catalog = optimization.prepare_content()
         if options.prepared_catalog:
             try:
                 prepared_receipt = prepared_content_package.install_generation(
-                    options.prepared_catalog.resolve(), project, stage)
+                    options.prepared_catalog.resolve(), project, stage, **({"link_payloads": True} if optimization else {}))
                 # Two-pass pilot: final map/sidecar generation now exists.
                 # Import/export only the newly copied native resources; retain
                 # raw actor/map payloads and all ordinary package checks.
@@ -3154,6 +3179,8 @@ def _main(argv=None, storage=None) -> int:
                 check_editor_sources_unpacked(app_dir)
                 prepared_receipt["export"] = prepared_content_package.check_export(
                     project / "prepared-content/index.json", stage)
+                if optimization:
+                    optimization.record_export(prepared_receipt)
                 (logs / "prepared-content.json").write_text(json.dumps(prepared_receipt, indent=2), encoding="utf-8")
             except prepared_content_package.PreparedError as error:
                 raise PackageError(str(error)) from error
@@ -3180,7 +3207,17 @@ def _main(argv=None, storage=None) -> int:
                 script.chmod(0o755)
         if not options.no_smoke and options.platform != "macos":
             smoke_launch(app_dir, logs, platform, vram_textures=not options.no_vram_textures,
-                         pool_test=pooled_sidecar_directory(stage))
+                         pool_test=pooled_sidecar_directory(stage),
+                         **({"clean_feature_environment": True} if optimization else {}))
+        if optimization:
+            optimization.record_startup(logs / "smoke.log")
+            optimization.check_final_package()
+            write_json = full_optimization_package.write_json
+            write_json(logs / "optimization-proof.json", optimization.proof())
+            if storage:
+                storage.optimization_proof = optimization.proof()
+                storage.clear_cache(project / ".godot")
+                storage.check("full optimization package qualified before signing")
 
         if options.benchmark_profile:
             benchmark_package.write_manifest(stage, sha)

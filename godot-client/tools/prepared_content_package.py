@@ -12,6 +12,7 @@ import argparse
 import hashlib
 import json
 import math
+import os
 from pathlib import Path, PurePosixPath
 import re
 import struct
@@ -241,12 +242,13 @@ def gltf(path: Path) -> tuple[dict, bytes]:
 
 
 class Closure:
-    def __init__(self, project: Path):
+    def __init__(self, project: Path, *, include_sidecars: bool = True):
         self.project = project.resolve()
         self.repository = self.project.parent
         self.files: dict[str, str] = {}
         self.images: list[dict] = []
         self._visited: set[Path] = set()
+        self._include_sidecars = include_sidecars
         retired=self.project/"data/assets/retired_procedural_models.json"
         policy=json.loads(retired.read_text(encoding="utf-8")) if retired.is_file() else {}
         self.retired_prototypes=set(policy.get("retiredMapPrototypes",[]))
@@ -310,6 +312,8 @@ class Closure:
         self.images.append(record)
 
     def sidecars(self, source: Path) -> None:
+        if not self._include_sidecars:
+            return
         index = source.parent / "vram/index.json"
         if not index.is_file():
             return
@@ -456,8 +460,16 @@ def pilot_qualification_plan(project: Path, chunk: str = PILOT_WORLD) -> dict:
             "merge duplicate renderer variants only when the complete exact runtime identity is equal"]}
 
 
+def isolated_user_directory(user_root: Path, platform: str) -> Path:
+    """Match project.godot's explicit custom-user-directory on the native OS."""
+    if platform not in {"windows", "linux"}:
+        raise PreparedError("prepared cooking supports Windows/Linux native hosts only")
+    return user_root.resolve() / ("Godot" if platform == "windows" else "godot") / "app_userdata/Eloria"
+
+
 def write_job(project: Path, texture: str, output: str, targets: list[tuple[str, str]], path: Path,
-              user_root: Path, node_policy: str = "retain", four_gates: bool = False) -> None:
+              user_root: Path, node_policy: str = "retain", four_gates: bool = False,
+              *, platform: str = "windows", format_mask: int | None = None) -> None:
     if node_policy not in {"retain", "lazy-source-v1"}:
         raise PreparedError("unsupported node policy")
     if four_gates:
@@ -474,9 +486,9 @@ def write_job(project: Path, texture: str, output: str, targets: list[tuple[str,
         raise PreparedError("package coordinator must mark this as a disposable cook project")
     if user_root.exists() and any(user_root.iterdir()):
         raise PreparedError("cook user root must be fresh and empty")
-    # Current project declares this Windows custom user directory. Other
-    # platforms need their own tested isolation mapping, not an assumed flag.
-    expected_user = user_root.resolve() / "Godot/app_userdata/Eloria"
+    expected_user = isolated_user_directory(user_root, platform)
+    if format_mask is not None and (type(format_mask) is not int or not 0 <= format_mask <= 7):
+        raise PreparedError("exact BC1/BC5/BC7 format mask must be an integer from 0 to 7")
     result = []
     for kind, source in targets:
         closure = Closure(project)
@@ -486,9 +498,12 @@ def write_job(project: Path, texture: str, output: str, targets: list[tuple[str,
                        "source_images": closure.images,
                        "runtime_import_snapshot": runtime_import_provenance(project, closure.files)})
     job = {"schema_version": SCHEMA, "texture_quality": texture, "output": output, "targets": result,
+           "platform": platform,
            "expected_user_directory": str(expected_user),
            "required_environment": {"APPDATA": str(user_root.resolve()), "XDG_DATA_HOME": str(user_root.resolve())},
-           "required_runtime": "Windows fresh isolated APPDATA; exact target renderer/format mask; serial coordinator"}
+           "required_runtime": "native " + platform + "; fresh isolated user data; exact renderer/format mask; serial coordinator"}
+    if format_mask is not None:
+        job["format_mask"] = format_mask
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(job, indent=2) + "\n", encoding="utf-8")
 
@@ -553,7 +568,7 @@ def merge_catalogs(project: Path, catalogs: list[Path], output: Path) -> dict:
     return {"entries": len(entries), "index_sha256": digest(output), "qualification": result["qualification"]}
 
 
-def install_generation(index: Path, project: Path, stage: Path) -> dict:
+def install_generation(index: Path, project: Path, stage: Path, *, link_payloads: bool = False) -> dict:
     """Copy only declared native payloads into a disposable export project.
 
     Validate raw-map inputs against the *staged* sidecar generation. Validate
@@ -622,7 +637,10 @@ def install_generation(index: Path, project: Path, stage: Path) -> dict:
         relative=name.removeprefix("res://prepared-content/")
         target=scoped(destination,relative)
         target.parent.mkdir(parents=True,exist_ok=True)
-        shutil.copyfile(scoped(source,relative),target)
+        if link_payloads:
+            os.link(scoped(source,relative),target)  # Fail rather than silently double runner scratch.
+        else:
+            shutil.copyfile(scoped(source,relative),target)
     shutil.copyfile(index,destination/"index.json")
     return {"entries":len(document["entries"]),"payloads":len(payloads),"index_sha256":digest(index)}
 

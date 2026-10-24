@@ -23,6 +23,7 @@ var _textures: Array[Dictionary] = []
 var _sequence := 0
 var _errors: Array[String] = []
 var _shader_inputs: Dictionary = {}
+var _cook_attestation: Dictionary = {}
 
 func _init() -> void:
 	_run.call_deferred()
@@ -460,6 +461,40 @@ func _target(spec: Dictionary) -> Dictionary:
 	entry["entry_id"] = Prepared.entry_identity(entry)
 	return entry
 
+static func _resource_buffer_roundtrip() -> bool:
+	# A dummy renderer reports empty MultiMesh buffers. Prove both actual
+	# readable storage and the native save/reload used by the real producer.
+	var multimesh := MultiMesh.new()
+	multimesh.transform_format = MultiMesh.TRANSFORM_3D
+	multimesh.mesh = BoxMesh.new()
+	multimesh.instance_count = 1
+	var expected := Transform3D(Basis.IDENTITY, Vector3(1.25, 2.5, 3.75))
+	multimesh.set_instance_transform(0, expected)
+	if multimesh.buffer.size() != 12 or not multimesh.get_instance_transform(0).is_equal_approx(expected):
+		return false
+	var path := "user://release-cook-buffer-probe.res"
+	if FileAccess.file_exists(path) or ResourceSaver.save(multimesh, path) != OK:
+		return false
+	multimesh = null
+	var restored := ResourceLoader.load(path, "MultiMesh", ResourceLoader.CACHE_MODE_IGNORE) as MultiMesh
+	var valid := restored != null and restored.buffer.size() == 12 \
+		and restored.get_instance_transform(0).is_equal_approx(expected)
+	var removed := DirAccess.remove_absolute(ProjectSettings.globalize_path(path)) == OK
+	return valid and removed
+
+static func _isolated_user_matches(platform: String, expected: String, actual: String) -> bool:
+	if platform not in ["windows", "linux"]:
+		return false
+	expected = expected.replace("\\", "/").simplify_path().trim_suffix("/")
+	actual = actual.replace("\\", "/").simplify_path().trim_suffix("/")
+	return not expected.is_empty() and (expected.to_lower() == actual.to_lower() if platform == "windows" else expected == actual)
+
+static func _software_adapter_matches(platform: String, adapter_name: String, adapter_type: int) -> bool:
+	var normalized := adapter_name.to_lower()
+	return (platform == "windows" and adapter_type == RenderingDevice.DEVICE_TYPE_CPU \
+		and ("warp" in normalized or "microsoft basic render driver" in normalized)) \
+		or (platform == "linux" and "llvmpipe" in normalized)
+
 func _run() -> void:
 	if OS.get_thread_caller_id() != OS.get_main_thread_id():
 		_error("cooking requires main-thread ownership")
@@ -478,16 +513,19 @@ func _run() -> void:
 	var job: Dictionary = parser.data
 	var marker := JSON.new()
 	var marker_path := "res://.prepared-cook-project.json"
-	if not OS.has_feature("windows") or marker.parse(FileAccess.get_file_as_string(marker_path)) != OK \
+	var platform := str(job.get("platform", "windows"))
+	var actual_platform := {"Windows": "windows", "Linux": "linux"}.get(OS.get_name(), "unsupported") as String
+	if platform not in ["windows", "linux"] or actual_platform != platform \
+			or marker.parse(FileAccess.get_file_as_string(marker_path)) != OK \
 			or not marker.data is Dictionary or str(marker.data.get("purpose", "")) != "disposable-native-cook":
-		_error("current cook requires a marked disposable Windows project")
+		_error("cook requires a marked disposable project on its exact Windows/Linux native host")
 		quit(1)
 		return
 	var expected_user := str(job.get("expected_user_directory", "")).replace("\\", "/").simplify_path()
 	var actual_user := ProjectSettings.globalize_path("user://").replace("\\", "/").simplify_path().trim_suffix("/")
-	if expected_user.is_empty() or expected_user.to_lower() != actual_user.to_lower() \
+	if not _isolated_user_matches(platform, expected_user, actual_user) \
 			or FileAccess.file_exists(Graphics.SETTINGS_PATH):
-		_error("fresh isolated APPDATA/user directory required before touching graphics config")
+		_error("fresh isolated native user directory required before touching graphics config")
 		quit(1)
 		return
 	_root_path = str(job.get("output", ""))
@@ -519,6 +557,34 @@ func _run() -> void:
 	MapSceneCache.forget_setting()
 	Quantization.ensure_registered()
 	Vram.ensure_registered()
+	var detected_mask := Vram.usable_formats()
+	var adapter_name := RenderingServer.get_video_adapter_name()
+	var adapter_type := int(RenderingServer.get_video_adapter_type())
+	var software_adapter := _software_adapter_matches(platform, adapter_name, adapter_type)
+	_cook_attestation = {"platform": platform, "detected_format_mask": detected_mask,
+		"rendering_method": RenderingServer.get_current_rendering_method(),
+		"rendering_driver": RenderingServer.get_current_rendering_driver_name(),
+		"adapter_name": adapter_name, "adapter_type": adapter_type, "software_adapter": software_adapter,
+		"resource_buffer_probe": _resource_buffer_roundtrip(),
+		"policy": "actual-renderer-supported-format-subset-v1"}
+	if bool(job.get("require_rendered_resource_buffers", false)) and not bool(_cook_attestation.resource_buffer_probe):
+		_error("release cooking requires actual readable renderer resource buffers; dummy/headless data is not qualified")
+		quit(1)
+		return
+	if bool(job.get("require_software_renderer", false)) and (not software_adapter or detected_mask != 7):
+		_error("release cook requires the actual qualified CPU software adapter and BC1/BC5/BC7 support")
+		quit(1)
+		return
+	if job.has("format_mask"):
+		var requested_mask: Variant = job.get("format_mask")
+		if typeof(requested_mask) not in [TYPE_INT, TYPE_FLOAT] or float(requested_mask) != float(int(requested_mask)) \
+				or int(requested_mask) < 0 or int(requested_mask) > 7 \
+				or (int(requested_mask) & detected_mask) != int(requested_mask):
+			_error("exact requested formats are unsupported by the actual cook renderer")
+			quit(1)
+			return
+		Vram.force_formats(int(requested_mask))
+		_cook_attestation["requested_format_mask"] = int(requested_mask)
 	var entries: Array[Dictionary] = []
 	for value: Variant in job.targets:
 		if not value is Dictionary:
@@ -532,7 +598,8 @@ func _run() -> void:
 		quit(1)
 		return
 	var result := {"schema_version": Prepared.SCHEMA, "policy": Prepared.COOK_POLICY,
-		"qualification": "pending_exported_parity", "entries": entries}
+		"qualification": "pending_exported_parity", "entries": entries,
+		"release_cook": _cook_attestation.duplicate(true)}
 	var output := FileAccess.open(_root_path.path_join("variant-catalog.json"), FileAccess.WRITE)
 	if output == null:
 		_error("cannot write variant catalog")

@@ -14,7 +14,7 @@ actually ran.
 
 ## Start a test
 
-Use a current Windows test package with its `app/` and `eloria-assets/` folders
+Use a current native test package with its `app/` and `eloria-assets/` folders
 kept together. Do not copy a DLL or catalog from another package into it.
 
 - `RabbitLands.bat` uses the development profile unless explicitly overridden.
@@ -30,9 +30,10 @@ These named controls also disable inherited older native crowd/presentation
 experiments. The ordinary launcher preserves deliberately supplied environment
 settings.
 
-Corresponding `.sh` launchers exist for Linux native packages. The prepared
-catalog packaging path is currently limited to local standalone Windows builds;
-other platforms must use their available legacy/raw fallback.
+Corresponding `.sh` launchers exist for Linux native packages. The desktop
+release pipeline now assembles the native runtime and fresh prepared pilot on
+both Windows and Linux. Its per-platform checks must succeed before signing
+and uploading game parts; a package's actual diagnostics remain authoritative.
 
 The global profile supplies defaults. An explicit individual option still wins.
 For example, this requests the development profile with raw content:
@@ -104,9 +105,10 @@ from that package's actual catalog rather than inferred from an earlier count.
 Entries must match current source bytes, engine/cook policy, texture format,
 mip selection and node policy. Full/half/quarter textures can select different
 entries. A renderer or device exposing different supported formats can miss the
-catalog and use raw content. The Four Gates lazy-object pilot originally covers
-only its exact full-texture variant; reduced variants need matching entries or
-the retained/raw fallback. It does not remove arbitrary interactive objects.
+catalog and use raw content. The fresh full-optimization release pipeline plans
+the Four Gates lazy-object pilot for full, half and quarter textures. Earlier
+packages may contain only the full-texture variant; inspect their actual catalog
+before assuming reduced-quality coverage. It does not remove arbitrary interactive objects.
 
 Human testing uses `auto`, so absent, changed or incompatible prepared content
 falls back rather than requiring a pilot hit. If the exact lazy variant is
@@ -115,6 +117,27 @@ not implicitly select a different prepared node policy. `require-pilot` is a
 qualification tool option, not the normal human-testing setting.
 
 ## Build and package prerequisites
+
+The [desktop release workflow](runner-builds.md) uses `--full-optimizations` on
+both native operating systems. It verifies or builds a source-matched native
+payload, cooks a fresh source-derived pilot against the actual first export,
+then checks the final normal PCK at all three texture qualities. Native payload
+caching does not permit reuse of a stale cooked catalog. The ordinary launch
+must also confirm all six defaults and actual native availability before the
+package can proceed to signing and upload.
+
+The cooker uses build-time software rendering: D3D12 WARP on Windows and Mesa
+llvmpipe with Xvfb on Linux. Actual adapter identity, texture capabilities and
+resource-buffer save/reload must pass; headless/dummy storage is insufficient.
+These checks establish functional packaging, not visual equivalence, real-device
+frame rates or whole-world prepared coverage. The workflow still runs
+automatically on `master` pushes and manually for `master` or `develop`; pushing
+to `develop` alone does not start or publish a release.
+
+The commands below remain available for intentionally assembling and checking
+explicit local payloads. An externally supplied prepared catalog still uses the
+local standalone Windows path; the automated fresh-generation path supplies
+the Windows/Linux release integration.
 
 The native DLL and prepared payloads live in ignored build storage. Pushing source
 to develop does not publish those binaries or automatically cook new content.

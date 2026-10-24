@@ -9,8 +9,17 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 import build_release as release
 import finalize_runner_release as runner
+import full_optimization_package as optimization
 
 SHA = "a" * 40
+
+
+def optimization_proof(platform):
+    return {"policy": optimization.POLICY, "status": "verified_before_signing", "commit": SHA,
+            "platform": platform, "features": optimization.FEATURES,
+            "receipt_sha256": "1" * 64, "native_source_digest": "2" * 64,
+            "catalog_sha256": ("3" if platform == "windows" else "4") * 64,
+            "coverage_sha256": "5" * 64, "entries": 6}
 
 
 def fixture(tmp_path, monkeypatch, *, corrupt=False):
@@ -22,7 +31,8 @@ def fixture(tmp_path, monkeypatch, *, corrupt=False):
         rows = [{"name": stage + suffix, "size": 10, "sha256": "b" * 64} for suffix in suffixes]
         path = tmp_path / f"{platform}.json"
         path.write_text(json.dumps({"schema": 1, "repository": release.REPOSITORY, "commit": SHA,
-            "platform": platform, "release_id": 123, "stage": stage, "assets": rows}))
+            "platform": platform, "release_id": 123, "stage": stage, "assets": rows,
+            "optimizations": optimization_proof(platform)}))
         receipts.append(path)
         assets.extend({"id": len(assets) + index + 1, "name": row["name"], "state": "uploaded",
                        "size": row["size"], "digest": "sha256:" + row["sha256"]} for index, row in enumerate(rows))
@@ -101,6 +111,25 @@ def test_different_platform_commits_cannot_be_finalized(tmp_path, monkeypatch):
     data["commit"] = "e" * 40
     receipts[1].write_text(json.dumps(data))
     with pytest.raises(ValueError, match="same release"):
+        runner.finalize(receipts, tmp_path / "final")
+    assert calls == []
+
+
+@pytest.mark.parametrize("problem", ["missing", "unverified", "wrong-platform", "source-mismatch", "coverage-mismatch"])
+def test_invalid_optimization_proofs_stop_before_any_cloud_write(tmp_path, monkeypatch, problem):
+    receipts, _, calls = fixture(tmp_path, monkeypatch)
+    value = json.loads(receipts[1].read_text())
+    if problem == "missing":
+        value.pop("optimizations")
+    elif problem == "unverified":
+        value["optimizations"]["status"] = "pending"
+    elif problem == "wrong-platform":
+        value["optimizations"]["platform"] = "windows"
+    else:
+        field = "native_source_digest" if problem == "source-mismatch" else "coverage_sha256"
+        value["optimizations"][field] = "f" * 64
+    receipts[1].write_text(json.dumps(value))
+    with pytest.raises(ValueError):
         runner.finalize(receipts, tmp_path / "final")
     assert calls == []
 

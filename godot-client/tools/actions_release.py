@@ -16,6 +16,7 @@ import runner_release
 import setup_runner_tools
 import shared_release_assets
 import release_asset_cache
+import release_native_runtime
 
 SECRET = "CLIENT_UPDATE_SIGNING_KEY"
 
@@ -97,6 +98,9 @@ def build(platform: str, release_id: int) -> Path:
     check_signing_key(key, public)
     temp = Path(os.environ["RUNNER_TEMP"]).resolve()
     tool_root = temp / "rabbitlands-toolchain"
+    native_tool_root = temp / "rabbitlands-native-toolchain"
+    if not native_tool_root.is_dir():
+        raise ValueError("Install the pinned native toolchain in the job's accounted native-toolchain directory first.")
     config = setup_runner_tools.install(platform, tool_root)
     previous = {name: os.environ.get(name) for name in config["env"]}
     try:
@@ -108,7 +112,8 @@ def build(platform: str, release_id: int) -> Path:
                 output.write(key)
             return runner_release.build(SimpleNamespace(platform=platform, ref=sha,
                 out=temp / "rabbitlands-releases", godot=config["godot"], iscc=config.get("iscc"),
-                update_signing_key=key_path, tool_root=[tool_root], draft_release_id=release_id,
+                update_signing_key=key_path, tool_root=[tool_root, native_tool_root], draft_release_id=release_id,
+                native_cache=temp / "rabbitlands-native-cache" / platform,
                 asset_cache=temp / "rabbitlands-asset-cache" / platform,
                 server="game.rabbitlandsgame.com:2001"))
     finally:
@@ -133,9 +138,11 @@ def main() -> int:
         if options.command == "prepare":
             prepare()
         elif options.command == "cache-key":
-            key = release_asset_cache.input_key(package.git, workflow_commit(), options.platform)
+            selected = workflow_commit()
+            key = release_asset_cache.input_key(package.git, selected, options.platform)
+            native_key = release_native_runtime.release_cache_key(package.REPO, selected, options.platform)["key"]
             with Path(os.environ["GITHUB_OUTPUT"]).open("a", encoding="utf-8") as output:
-                output.write(f"key={key}\n")
+                output.write(f"key={key}\nnative_key={native_key}\n")
         else:
             build(options.platform, options.release_id)
     except (OSError, ValueError, package.PackageError) as error:

@@ -220,6 +220,10 @@ def build(options) -> Path:
     root.mkdir(parents=True, exist_ok=False)
     release.write_json(root / ".runner-release.json", {"repository": release.REPOSITORY, "commit": sha})
     cache = None
+    native_cache = getattr(options, "native_cache", None) or options.out.resolve().parent / "rabbitlands-native-cache" / options.platform
+    native_cache = native_cache.resolve()
+    if native_cache != options.out.resolve().parent / "rabbitlands-native-cache" / options.platform:
+        raise ValueError("Use the job's dedicated native-runtime cache outside both repositories.")
     if getattr(options, "asset_cache", None):
         cache_root = options.out.resolve().parent / "rabbitlands-asset-cache" / options.platform
         if options.asset_cache.resolve() != cache_root or any(cache_root.is_relative_to(repo) for repo in (
@@ -229,6 +233,7 @@ def build(options) -> Path:
     git_dir = Path(package.git("rev-parse", "--path-format=absolute", "--git-common-dir").strip())
     budget = DiskBudget([package.REPO, git_dir, root, options.godot.resolve(),
                          *([options.iscc.resolve().parent] if options.iscc else []), *options.tool_root,
+                         native_cache,
                          *([cache.root] if cache else [])])
     budget.check("preflight", 7_000_000_000)  # Runtime worktree + import/export scratch, before any uploads.
     storage = RunnerStorage(root, budget, GitHubSink(options.draft_release_id), cache)
@@ -238,7 +243,8 @@ def build(options) -> Path:
     args = ["--platform", options.platform, "--ref", sha, "--release-build", "--shared-release-assets", "--no-zip", "--no-fetch", "--godot", str(options.godot),
             "--build-dir", str(source), "--out", str(output), "--vram-cache", str(cache.vram if cache else root / "vram-cache"),
             "--update-signing-key", str(key), "--update-public-key", str(storage.source / "data/update_public.pem"),
-            "--server", options.server]
+            "--server", options.server, "--full-optimizations", "--native-runtime-cache",
+            str(native_cache)]
     if options.platform == "windows":
         if options.iscc is None:
             raise ValueError("The Windows runner needs Inno Setup 6 (--iscc).")
@@ -286,6 +292,7 @@ def build(options) -> Path:
         "shared_helpers": {kind: payload[kind]["url"].rsplit("/", 1)[1] for kind in ("updater", "uninstall")},
         "transfer": {"uploaded_bytes": storage.sink.uploaded_bytes, "reused_bytes": storage.sink.reused_bytes},
         "asset_cache": cache.report() if cache else {"hit": False, "enabled": False},
+        "optimizations": storage.optimization_proof,
         "assets": list(storage.rows.values()), "disk": budget.report()})
     # Keep the tiny receipt/logs. Only this invocation's fresh worktree and stage are removed.
     storage.cleanup(stage, sha)
@@ -318,6 +325,7 @@ def main():
     parser.add_argument("--update-signing-key", type=Path, required=True)
     parser.add_argument("--draft-release-id", type=int, required=True)
     parser.add_argument("--asset-cache", type=Path)
+    parser.add_argument("--native-cache", type=Path)
     parser.add_argument("--tool-root", type=Path, action="append", required=True,
                         help="downloaded Godot/templates/tool directories charged to runner storage; repeatable")
     parser.add_argument("--server", default="game.rabbitlandsgame.com:2001")

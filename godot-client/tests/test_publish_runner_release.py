@@ -7,8 +7,17 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 import publish_runner_release as publisher
+import full_optimization_package as optimization
 
 SHA, OLD = "a" * 40, "b" * 40
+
+
+def optimization_proof(platform):
+    return {"policy": optimization.POLICY, "status": "verified_before_signing", "commit": SHA,
+            "platform": platform, "features": optimization.FEATURES,
+            "receipt_sha256": "1" * 64, "native_source_digest": "2" * 64,
+            "catalog_sha256": ("3" if platform == "windows" else "4") * 64,
+            "coverage_sha256": "5" * 64, "entries": 6}
 
 
 def context(tmp_path, monkeypatch):
@@ -22,7 +31,8 @@ def context(tmp_path, monkeypatch):
         return {"name": name, "size": 10, "sha256": "c" * 64}
     receipt = {"schema": 1, "repository": release.REPOSITORY, "commit": SHA, "release_id": 123,
         "assets": [row(n) for n in names], "shared_release_id": 777,
-        "shared_assets": [row(shared.name("c" * 64))]}
+        "shared_assets": [row(shared.name("c" * 64))],
+        "optimizations": {platform: optimization_proof(platform) for platform in ("windows", "linux")}}
     path = tmp_path / "runner-release.json"
     path.write_text(json.dumps(receipt))
     def remote(row):
@@ -88,6 +98,25 @@ def test_publishes_latest_after_all_downloads_verify_then_cleans_old_releases(tm
     assert not current["draft"]
     assert calls[-1] == ("cleanup", "client-" + SHA)
     assert "Published" in (tmp_path / "summary").read_text()
+
+
+@pytest.mark.parametrize("problem", ["missing", "missing-linux", "unverified", "wrong-commit", "source-mismatch", "coverage-mismatch"])
+def test_publication_requires_both_exact_optimization_proofs(tmp_path, monkeypatch, problem):
+    path, receipt, _, current, _, calls = context(tmp_path, monkeypatch)
+    if problem == "missing":
+        receipt.pop("optimizations")
+    elif problem == "missing-linux":
+        receipt["optimizations"].pop("linux")
+    else:
+        field, value = {"unverified": ("status", "pending"), "wrong-commit": ("commit", OLD),
+                        "source-mismatch": ("native_source_digest", "f" * 64),
+                        "coverage-mismatch": ("coverage_sha256", "f" * 64)}[problem]
+        receipt["optimizations"]["linux"][field] = value
+    path.write_text(json.dumps(receipt))
+    with pytest.raises(ValueError):
+        publisher.publish(path)
+    assert current["draft"]
+    assert not calls
 
 
 @pytest.mark.parametrize("problem", ["wrong-commit", "wrong-repo", "missing-linux", "duplicate", "wrong-tag",

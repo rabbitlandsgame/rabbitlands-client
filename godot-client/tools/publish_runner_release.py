@@ -17,6 +17,7 @@ import build_release as release
 import package_client as package
 import prune_published_release
 import shared_release_assets as shared
+from full_optimization_package import validate_proof
 
 
 def rows(items):
@@ -39,6 +40,13 @@ def publish(receipt: Path) -> str:
             or data.get("commit") != sha or type(data.get("release_id")) is not int
             or data["release_id"] <= 0):
         raise ValueError("Publication requires this workflow's verified release receipt.")
+    if set(data.get("optimizations", {})) != {"windows", "linux"}:
+        raise ValueError("Publication requires full optimization proof for both desktop platforms.")
+    for platform, proof in data["optimizations"].items():
+        validate_proof(proof, sha, platform)
+    if len({proof["coverage_sha256"] for proof in data["optimizations"].values()}) != 1 \
+            or len({proof["native_source_digest"] for proof in data["optimizations"].values()}) != 1:
+        raise ValueError("Platform optimization source/coverage proofs do not match.")
     expected, pooled = rows(data["assets"]), rows(data["shared_assets"])
     required = {"SHA256SUMS", "RabbitLands-windows.json", "RabbitLands-linux.json"}
     for platform, suffixes in (("Windows", ("setup.exe", "windows.json")),

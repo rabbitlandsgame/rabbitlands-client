@@ -18,6 +18,7 @@ SHA = "a" * 40
 
 
 def context(tmp_path, monkeypatch):
+    (tmp_path / "rabbitlands-native-toolchain").mkdir(exist_ok=True)
     for name, value in {"GITHUB_ACTIONS": "true", "GITHUB_REPOSITORY": actions.release.REPOSITORY,
                         "GITHUB_REF": "refs/heads/master", "GITHUB_EVENT_NAME": "push",
                         "GITHUB_SHA": SHA, "SIGNING_KEY_AVAILABLE": "true",
