@@ -112,6 +112,7 @@ func _run() -> void:
 		_check(controller.is_rust_mode(), "native owner is verified client runtime")
 		_check_yaw_readback()
 		_check_parity()
+		_check_surface_orientation()
 		_check_finished_and_death()
 		_check_mount_floor()
 		_check_transfers()
@@ -252,6 +253,50 @@ func _check_parity() -> void:
 	_check(native.legacy_physics_calls == 0, "native actors never run the legacy integrator while owned")
 	_check(service.snapshot().physics_outputs > 0 and service.snapshot().action_decisions > 0,
 		"actual native interpolation and action decisions executed")
+	legacy.free()
+	native.free()
+
+func _check_surface_orientation() -> void:
+	var legacy := _actor(121, false)
+	var native := _actor(122, true)
+	var normal := Vector3(-0.4, 1.0, 0.3).normalized()
+	var dto := {"x": 2, "y": 1, "rotation": 0, "command": 32, "command_sequence": 1}
+	for actor: TimedActor in [legacy, native]:
+		actor.apply_server_state(dto, adapter)
+		actor.set_surface_height(2.0, normal)
+	for tick: int in 30:
+		legacy._physics_process(1.0 / 120.0)
+		_step(1.0 / 120.0)
+		_check(legacy._native_model.transform.is_equal_approx(native._native_model.transform),
+			"native moving body retains slope lean and facing correction parity")
+	for tick: int in 180:
+		legacy._physics_process(1.0 / 60.0)
+		_step(1.0 / 60.0)
+	_check(legacy._native_model.transform.is_equal_approx(native._native_model.transform),
+		"native body finishes the sampled lean before sleeping")
+	var outputs: int = service.snapshot().physics_outputs
+	for tick: int in 30: _step(1.0 / 60.0)
+	_check(service.snapshot().physics_outputs == outputs, "settled slope adds no recurring native physics outputs")
+	# A refreshed surface at the same height must also wake/finish native lean.
+	var changed := Vector3(0.2, 1.0, -0.3).normalized()
+	native.set_surface_height(native.server_target.y, changed)
+	_step(1.0 / 60.0)
+	_check(native._surface_up.is_equal_approx(changed), "native stationary terrain refresh does not freeze the previous normal")
+	# Remote mounts use the same completed tick, without a second integrator.
+	native._clear_native_surface_tilt()
+	var mount := FastMount.new()
+	native.add_child(mount)
+	native._mount_visual = mount
+	native.mount_state = {"mode": "mounted", "step_us": 133333}
+	native._surface_applied_up = Vector3(NAN, NAN, NAN)
+	service.sync_transfer(native)
+	native.set_surface_height(native.server_target.y, normal)
+	_step(1.0 / 60.0)
+	_check(mount.global_basis.y.is_equal_approx(normal), "native remote mount follows the sampled traversal plane")
+	_check(native.global_basis.y.is_equal_approx(Vector3.UP) and native.legacy_physics_calls == 0,
+		"native slope presentation leaves authoritative frame and physics ownership intact")
+	native._mount_visual = null
+	mount.free()
 	legacy.free()
 	native.free()
 
