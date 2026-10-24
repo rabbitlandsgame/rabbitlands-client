@@ -15,6 +15,7 @@ const PARTS := {"rail_panel": "Blank HUD panel", "utilities": "Menu icons", "res
 	"status": "Status indicators", "timer": "Countdown / stopwatch",
 	"research": "Research progress", "logo": "Rabbit Lands logo", "fps": "FPS",
 	"objectives": "Tracked objectives", "target": "Selected target", "nameplate": "Character banner",
+	"gauntlet_loot": "Gauntlet loot", "rare_drops": "Rare drop announcements",
 	"player_card": "Player card", "food_meter": "Food meter", "load_meter": "Load meter", "xp_meter": "Experience meter"}
 const ANCHORS := ["original", "top_left", "top_center", "top_right", "left",
 	"right", "bottom_left", "bottom_center", "bottom_right", "free"]
