@@ -72,14 +72,32 @@ static func scene_texture_token(source: String) -> String:
 		"world-preupload-mips" if world else "actor-runtime-import",
 		Graphics.active_texture_skip(), Vram.usable_formats(), Vram.mode_name()]
 
+static func _resource_root(globalized: String, executable: String) -> String:
+	# A template mounted from its PCK can have an empty resource_path. Godot
+	# then globalizes res://foo to relative foo, unlike an editor project.
+	var root := globalized.replace("\\", "/").simplify_path()
+	if root.is_empty() or not root.is_absolute_path() or root.begins_with("res://"):
+		root = executable.replace("\\", "/").get_base_dir().simplify_path()
+	return root.trim_suffix("/")
+
+static func _project_root() -> String:
+	return _resource_root(ProjectSettings.globalize_path("res://"), OS.get_executable_path())
+
+static func _runtime_absolute(path: String) -> String:
+	var project_root := _project_root()
+	if path.begins_with("res://"):
+		return project_root.path_join(path.trim_prefix("res://")).replace("\\", "/").simplify_path()
+	var absolute := ProjectSettings.globalize_path(path).replace("\\", "/").simplify_path()
+	return absolute if absolute.is_absolute_path() else project_root.path_join(absolute).simplify_path()
+
 static func logical_source(path: String) -> String:
 	# Isolated user storage may physically live inside a project during tests.
 	# Preserve its explicit logical namespace before checking physical roots.
 	if path.begins_with("user://"):
 		return path
-	var absolute := ProjectSettings.globalize_path(path).replace("\\", "/").simplify_path()
-	var asset_root := ProjectSettings.globalize_path("res://../eloria-assets").replace("\\", "/").simplify_path()
-	var project_root := ProjectSettings.globalize_path("res://").replace("\\", "/").simplify_path().trim_suffix("/")
+	var absolute := _runtime_absolute(path)
+	var asset_root := _runtime_absolute("res://../eloria-assets")
+	var project_root := _project_root()
 	if absolute.begins_with(asset_root + "/"):
 		return "eloria-assets/" + absolute.substr(asset_root.length() + 1)
 	if absolute.begins_with(project_root + "/"):
@@ -104,8 +122,8 @@ static func _hex_digest(value: Variant) -> bool:
 	return true
 
 static func _contained(path: String, directory: String) -> bool:
-	var candidate := ProjectSettings.globalize_path(path).replace("\\", "/").simplify_path()
-	var parent := ProjectSettings.globalize_path(directory).replace("\\", "/").simplify_path().trim_suffix("/")
+	var candidate := _runtime_absolute(path)
+	var parent := _runtime_absolute(directory).trim_suffix("/")
 	return candidate.begins_with(parent + "/")
 
 static func _safe_source(logical: String, catalog_path: String) -> String:
