@@ -66,6 +66,7 @@ const PAINTED_META := &"look_painted_foliage"
 const BATCH_META := &"static_batch"
 ## WorldLoader.BATCH_INDEX_META: the member's instance in its batch.
 const BATCH_INDEX_META := &"static_batch_index"
+const PREPARED_RAW_OVERRIDE := &"rl_prepared_raw_batch_override"
 ## How far apart a batch's instances' seeds are (the golden ratio, as in
 ## painted_foliage_body.gdshaderinc).
 const INSTANCE_SEED_STEP := 0.6180339
@@ -137,6 +138,14 @@ static func translation_of(manifest: WorldManifest) -> Vector2:
 ## jade court and Verdant's jade stair went grey. The copy names its faded
 ## variant, so it fades as any stand-in does and keeps its colour while it
 ## does. Returns the surfaces changed.
+static func _replaceable_batch_override(batch: MultiMeshInstance3D) -> bool:
+	if batch.material_override == null:
+		return true
+	if not batch.has_meta(PREPARED_RAW_OVERRIDE):
+		return false
+	var marked: Variant = batch.get_meta(PREPARED_RAW_OVERRIDE)
+	return marked is WeakRef and (marked as WeakRef).get_ref() == batch.material_override
+
 static func keep_chroma(root: Node, region := "") -> int:
 	if not LookProfile.full_painted() or root == null:
 		return 0
@@ -173,7 +182,7 @@ static func keep_chroma(root: Node, region := "") -> int:
 			if copy == null:
 				continue
 			mesh_instance.set_surface_override_material(surface, copy)
-			if batch != null and batch.material_override == null:
+			if batch != null and _replaceable_batch_override(batch):
 				batch.material_override = copy
 			surfaces += 1
 	if surfaces > 0:
@@ -280,7 +289,7 @@ static func paint(root: Node, region := "") -> int:
 				continue
 			mesh_instance.set_surface_override_material(surface, painted)
 			surfaces += 1
-			if batch != null and batch.material_override == null:
+			if batch != null and _replaceable_batch_override(batch):
 				var batch_key := "batch:%d" % batch.get_instance_id()
 				# A batched trunk shares its members' copy: it has no seed.
 				made[batch_key] = painted if kind == Kind.NONE else painted_for(source, kind,
