@@ -18,6 +18,7 @@ import build_release as release
 import client_release
 import shared_release_assets as shared
 import package_client as package
+import release_native_runtime
 from release_storage import DiskBudget
 from release_asset_cache import AssetCache, input_key
 
@@ -243,6 +244,12 @@ def build(options) -> Path:
     source = root / "source"
     storage.source = source / "godot-client"
     output = root / "downloads"
+    # Reserve compiler scratch while only the small selected native source is
+    # present. The full build still verifies this cache against its own source.
+    bootstrap = release_native_runtime.prewarm_cache(package.REPO, sha, options.platform,
+        native_cache, native_cache.parent / ("bootstrap-" + options.platform), storage.check)
+    release.write_json(root / "native-bootstrap.json", bootstrap)
+    storage.check("native cache verified before runtime source materialization")
     args = ["--platform", options.platform, "--ref", sha, "--release-build", "--shared-release-assets", "--no-zip", "--no-fetch", "--godot", str(options.godot),
             "--build-dir", str(source), "--out", str(output), "--vram-cache", str(cache.vram if cache else root / "vram-cache"),
             "--update-signing-key", str(key), "--update-public-key", str(storage.source / "data/update_public.pem"),
