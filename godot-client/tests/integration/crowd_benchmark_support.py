@@ -35,6 +35,7 @@ ALL_CELLS = OLD_CELLS + ["mixed-mounted-160", "authored-herd",
 ERROR_PATTERN = re.compile(r"SCRIPT ERROR|Parse Error|Failed to load|Error loading|ERROR:", re.I)
 OVERRIDE_PREFIXES = ("ELORIA_LOOK", "ELORIA_CROWD_", "ELORIA_NATIVE_", "RABBITLANDS_CROWD_")
 OVERRIDE_NAMES = {"ELORIA_VRAM_TEXTURES", "ELORIA_NO_MAP_CACHE", "ELORIA_SAFE_MODE", "RABBITLANDS_CLIENT_RUNTIME", "RABBITLANDS_RUST_EFFECTS"}
+OVERRIDE_NAMES.update({"RABBITLANDS_RESOURCE_ADMISSION", "RABBITLANDS_RESOURCE_BUDGET_MIB"})
 PERFORMANCE_GRAPHICS = {
     "quality": "low", "appearance": "painted_ground", "fps_limit": 30,
     "render_scale": .75, "map_texture_quality": "half", "crowd_bodies": 60,
@@ -212,6 +213,37 @@ def validate_distribution(value: Any, label: str, count: int | None = None) -> d
     return value
 
 
+def validate_resource_admission(backends: dict, request: dict, label: str) -> None:
+    requested = request.get("resource_admission", "legacy")
+    # Legacy checkpoints may predate admission instrumentation. An explicit
+    # Rust request must prove its cached request, budget and instantiated owner.
+    if "resourceAdmission" not in backends and requested == "legacy":
+        return
+    admission = _object(backends.get("resourceAdmission"), label + ".resourceAdmission")
+    budget = request.get("resource_admission_budget_mib", 768) * 1048576
+    if admission.get("requested_mode") != requested or admission.get("requested_estimate_budget") != budget:
+        raise EvidenceError(f"{label}: actual admission request/budget differs")
+    if admission.get("mode") != requested:
+        raise EvidenceError(f"{label}: admission backend differs or fell back")
+    if requested == "legacy":
+        if admission.get("requested") is not False:
+            raise EvidenceError(f"{label}: admission was unexpectedly enabled")
+        return
+    if admission.get("reason") != "rust_global_admission" or admission.get("estimate_budget") != budget:
+        raise EvidenceError(f"{label}: Rust admission backend/budget is unavailable")
+    for key in ("admitted", "denied", "publication_grants", "publication_deferrals", "transition_failures"):
+        _integer(admission.get(key), label + ".resourceAdmission." + key)
+    if admission["transition_failures"] != 0:
+        raise EvidenceError(f"{label}: admission lifecycle transition failed")
+    graph = _object(admission.get("dependency_graph"), label + ".admissionDependencyGraph")
+    if _object(graph.get("failures"), label + ".admissionGraphFailures"):
+        raise EvidenceError(f"{label}: admission dependency graph failed")
+    _integer(graph.get("registrations"), label + ".admissionGraphRegistrations")
+    native = _object(admission.get("native"), label + ".admissionNative")
+    for key in ("reserved", "loading", "ready", "active", "retiring", "cancelled", "old_epoch", "denials", "forced_sync"):
+        _integer(native.get(key), label + ".admissionNative." + key)
+
+
 def validate_runtime(runtime: dict, request: dict, renderer: str, quality: str,
                      body_cap: int, label: str) -> dict:
     settings = _object(runtime.get("effectiveSettings"), label + ".effectiveSettings")
@@ -249,7 +281,7 @@ def validate_runtime(runtime: dict, request: dict, renderer: str, quality: str,
         if runtime.get("requested") != requested_runtime or runtime.get("mode") != requested_runtime \
                 or runtime.get("presentation_backend") != expected_presentation or runtime.get("mismatches") != 0:
             raise EvidenceError(f"{label}: actual client runtime differs or fell back")
-        if requested_runtime in ("compare", "rust") and runtime.get("native_available") is not True:
+        if requested_runtime in ("compare", "rust", "services") and runtime.get("native_available") is not True:
             raise EvidenceError(f"{label}: requested Rust comparison runtime is unavailable")
     presentation = _object(backends.get("presentation"), label + ".presentation")
     requested = request.get("native_presentation", "off")
@@ -267,6 +299,7 @@ def validate_runtime(runtime: dict, request: dict, renderer: str, quality: str,
     if requested == "off" and (presentation["nativeCapeCalls"] or presentation["nativeCapeInstances"]
                                 or any(presentation[k]["buildAttempts"] for k in ("flight", "impact"))):
         raise EvidenceError(f"{label}: native presentation ran despite being disabled")
+    validate_resource_admission(backends, request, label)
     _object(backends.get("preparedContent"), label + ".preparedContent")
     return backends
 
@@ -579,6 +612,12 @@ def validate_report(data: dict, request: dict, log: str) -> dict:
         elif capture is not None:
             raise EvidenceError(f"{name}: boundary image was not requested")
         measured.append(name)
+    if request.get("resource_admission") == "rust" and any(str(cell["id"]).startswith("traversal-") for cell in cells):
+        if not any(backend["resourceAdmission"]["admitted"] > 0
+                   and backend["resourceAdmission"]["publication_grants"] > 0
+                   and backend["resourceAdmission"]["dependency_graph"]["registrations"] > 0
+                   for backend in observed_native):
+            raise EvidenceError("requested Rust route admission did not execute real launch/publication/dependency work")
     mode = request.get("native_presentation", "off")
     if request.get("client_runtime") == "compare" and not any(
             _integer(backend["clientRuntime"].get("comparisons"), "clientRuntime.comparisons") > 0

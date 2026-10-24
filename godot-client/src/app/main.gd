@@ -1252,6 +1252,7 @@ func _ready() -> void:
 		push_error("Main could not initialize runtime glTF extensions")
 		return
 	client_runtime.initialize()
+	preload("res://src/runtime/resource_admission.gd").register_actor_provider(_resource_admission_actor_counts)
 	crowd.configure(OS.get_environment("RABBITLANDS_CROWD_PRESENTATION"),
 		OS.get_environment("RABBITLANDS_CROWD_BODY_CAP"),
 		OS.get_environment("RABBITLANDS_CROWD_TUNING"))
@@ -1714,6 +1715,7 @@ func client_diagnostic_snapshot() -> Dictionary:
 		"loader_work": world_loader.diagnostic_snapshot(),
 		"streaming_work": exterior_stream.diagnostic_snapshot(),
 		"client_runtime": client_runtime.snapshot(),
+		"resource_admission": resource_admission_snapshot(),
 		"spell_flights": RustSpellFlights.snapshot_for(world_root),
 		"resource_retention": {
 			"actor_scenes": GlbSceneCache.retention_snapshot(),
@@ -15582,6 +15584,13 @@ func _apply_promoted_scenery(wanted: Dictionary) -> void:
 			for map_object: MapObject3D in wanted[chunk][node_name]:
 				if is_instance_valid(map_object):
 					map_object.bind_placement(found[node_name] as Node3D)
+
+func _resource_admission_actor_counts() -> Dictionary:
+	return {"active_actor_nodes": actor_nodes.size(), "parked_actor_nodes": crowd.parked_count(),
+		"bytes_estimate_available": false, "allocation_kind": "unknown_actor_body_and_cache_allocation"}
+
+func resource_admission_snapshot() -> Dictionary:
+	return preload("res://src/runtime/resource_admission.gd").snapshot()
 
 ## The Node3Ds under `root` whose names are keys of `names`, nearest first;
 ## the walk stops as soon as all are found (a kit placement is a child of its

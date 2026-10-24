@@ -53,7 +53,7 @@ func initialize(directory := "") -> void:
 	if _requested == "legacy":
 		_reason = "legacy_selected"
 		return
-	if _requested not in ["compare", "rust"]:
+	if _requested not in ["compare", "rust", "services"]:
 		_reason = "unsupported_mode"
 		return
 	if directory.is_empty():
@@ -111,7 +111,7 @@ func initialize(directory := "") -> void:
 		_reason = "epoch_rejected"
 		return
 	_mode = _requested
-	_reason = "native_mounted_pilot" if _mode == "rust" else "native_comparison_legacy_presentation"
+	_reason = "native_resource_services_legacy_presentation" if _mode == "services" else ("native_mounted_pilot" if _mode == "rust" else "native_comparison_legacy_presentation")
 
 func reset_session() -> void:
 	_epoch += 1

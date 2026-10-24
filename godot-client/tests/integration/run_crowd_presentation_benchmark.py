@@ -85,6 +85,16 @@ def resolution(value: str) -> tuple[int, int]:
     return tuple(map(int, match.groups()))
 
 
+def admission_budget(value: str) -> int:
+    try:
+        result = int(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError("admission budget must be an integer MiB value") from exc
+    if not 64 <= result <= 8192:
+        raise argparse.ArgumentTypeError("admission budget must be 64 through 8192 MiB")
+    return result
+
+
 def executable_path(value: str) -> Path:
     path = Path(value).resolve()
     if path.stem.endswith("_console"):
@@ -105,6 +115,8 @@ def request_for(args) -> dict:
             "replay": bool(args.replay), "executable_mode": args.executable_mode,
             "native_reducer": args.native_reducer, "native_presentation": args.native_presentation,
             "client_runtime": args.client_runtime, "rust_effects": args.rust_effects,
+            "resource_admission": args.resource_admission,
+            "resource_admission_budget_mib": args.resource_admission_budget_mib,
             "capture_boundaries": args.capture_boundaries,
             "tuning": args.tuning, "diagnostics": args.diagnostics, "executable": str(args.godot),
             "presence": args.presence, "server_time": args.server_time,
@@ -253,6 +265,8 @@ def run_one(args, variant: str, repeat: int, out_dir: Path) -> dict:
         "ELORIA_NATIVE_CROWD": "1" if args.native_reducer == "on" else "0",
         "ELORIA_NATIVE_PRESENTATION": "0" if args.native_presentation == "off" else args.native_presentation,
         "RABBITLANDS_CLIENT_RUNTIME": args.client_runtime,
+        "RABBITLANDS_RESOURCE_ADMISSION": args.resource_admission,
+        "RABBITLANDS_RESOURCE_BUDGET_MIB": str(args.resource_admission_budget_mib),
         "RABBITLANDS_RUST_EFFECTS": "heat_bolt" if args.rust_effects == "heat_bolt" else "",
     }
     if args.centre:
@@ -401,7 +415,10 @@ def parser() -> argparse.ArgumentParser:
                    help="save the last completed world viewport after sampling; readback is outside timing")
     p.add_argument("--native-reducer", default="off", choices=["off", "on"])
     p.add_argument("--native-presentation", default="off", choices=["off", "cape", "flight", "both", "world", "all"])
-    p.add_argument("--client-runtime", default="legacy", choices=["legacy", "compare", "rust"])
+    p.add_argument("--client-runtime", default="legacy", choices=["legacy", "compare", "rust", "services"])
+    p.add_argument("--resource-admission", default="legacy", choices=["legacy", "rust"])
+    p.add_argument("--resource-admission-budget-mib", type=admission_budget, default=768,
+                   help="logical estimated residency allowance, 64 through 8192 MiB; not an allocation measurement")
     p.add_argument("--rust-effects", default="legacy", choices=["legacy", "heat_bolt"])
     p.add_argument("--repeats", type=int, default=1)
     p.add_argument("--sample-ms", type=int, default=6000)
@@ -427,6 +444,8 @@ def main(argv: list[str] | None = None) -> int:
     args = p.parse_args(argv)
     try:
         configure_settings_profile(args)
+        if args.resource_admission == "rust" and args.client_runtime not in ("services", "rust"):
+            raise EvidenceError("--resource-admission rust requires --client-runtime services or rust")
         if args.capture_boundaries and args.mode != "windowed":
             raise EvidenceError("--capture-boundaries requires --mode windowed")
         if args.capture_boundaries and (args.replay or any(name.startswith("traversal-") for name in selected_cells(args.cells, False))):

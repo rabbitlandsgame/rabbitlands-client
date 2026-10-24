@@ -1,5 +1,6 @@
 class_name ExteriorRegionStream
 extends Node3D
+const ResourceAdmission := preload("res://src/runtime/resource_admission.gd")
 
 const ResourceDiagnostics := preload("res://src/world/resource_diagnostics.gd")
 const RetirementBudget := preload("res://src/world/resource_retirement_budget.gd")
@@ -32,6 +33,7 @@ var retain_distance := DEFAULT_RETAIN_DISTANCE
 var maximum_neighbours := MAXIMUM_NEIGHBOURS
 var _thread: Thread
 var _pending_map := ""
+var _admission_token: Dictionary = {}
 var _pending_started_usec := 0
 var _resource_timings: Dictionary = {}
 var _last_preparation: Dictionary = {}
@@ -61,6 +63,7 @@ const RETIRE_BUDGET_USEC := 2000
 signal residents_changed
 
 func configure(maps: Dictionary) -> void:
+	ResourceAdmission.register_stream(self, "exterior")
 	registry = maps
 	var raw: Variant = JSON.parse_string(FileAccess.get_file_as_string(CONNECTIONS))
 	if raw is Dictionary:
@@ -103,21 +106,28 @@ func update_position(position: Vector3) -> void:
 		return
 	var map_id := str(candidate.map)
 	var entry := MapRegistry.resolve(registry, map_id)
+	var path := ProjectSettings.globalize_path(str(entry.get("manifest", "")))
+	var request := ResourceAdmission.request(self, {"id": map_id, "path": path}, "exterior")
+	if not bool(request.get("allowed", false)):
+		return
+	_admission_token = request.get("token", {})
 	_pending_map = map_id
 	_pending_generation = _generation
 	_thread = Thread.new()
-	var path := ProjectSettings.globalize_path(str(entry.get("manifest", "")))
 	var visuals := GlbSceneCache.missing(PackedStringArray(candidate.there.get("visualScenes", [])))
 	var arrival := Vector3.INF
 	if candidate.here.has("frame") and candidate.there.has("frame"):
 		arrival = frame_transform(candidate.here.frame, candidate.there.frame).affine_inverse() * position
 	_pending_started_usec = Time.get_ticks_usec()
-	var error := _thread.start(WorldLoader.prepare_detached.bind(path, MapSceneCache.is_enabled(), visuals, arrival))
+	var error := _thread.start(WorldLoader.prepare_detached.bind(path, MapSceneCache.is_enabled(), visuals, arrival, ResourceAdmission.requested()))
 	if error != OK:
+		ResourceAdmission.event(_admission_token, ResourceAdmission.FAILED)
+		_admission_token = {}
 		_thread = null
 		_retry_after[map_id] = Time.get_ticks_msec() + 30000
 		_record("failed", map_id, {"error": error_string(error)})
 	else:
+		ResourceAdmission.event(_admission_token, ResourceAdmission.LAUNCHED)
 		_record("requested", map_id, {"distance": candidate.distance})
 
 func _wanted_neighbours(candidates: Array[Dictionary]) -> Dictionary:
@@ -147,6 +157,8 @@ func _process(_delta: float) -> void:
 	ContinentChunkStream.reap_orphans()
 	if _thread == null or _thread.is_alive():
 		return
+	if not ResourceAdmission.can_publish():
+		return
 	var install_began := Time.get_ticks_usec()
 	var builder := _thread.wait_to_finish() as WorldLoader
 	if _pending_started_usec > 0:
@@ -154,13 +166,20 @@ func _process(_delta: float) -> void:
 	_thread = null
 	var map_id := _pending_map
 	_pending_map = ""
+	var admission_token := _admission_token
+	_admission_token = {}
 	if builder == null:
+		ResourceAdmission.event(admission_token, ResourceAdmission.FAILED)
 		_retry_after[map_id] = Time.get_ticks_msec() + 30000
 		return
-	var stale := (_pending_generation != _generation or map_id == active_map or not _nearby(map_id)
+	ResourceAdmission.ready(admission_token, builder.manifest)
+	var stale := (not ResourceAdmission.can_install(admission_token)
+		or _pending_generation != _generation or map_id == active_map or not _nearby(map_id)
 		or residents.size() >= mini(maximum_neighbours, MAXIMUM_NEIGHBOURS))
-	var resident := builder.release_world(true, not stale)
+	var resident := builder.release_world(true, not stale, admission_token)
 	builder.free()
+	if stale or resident.root == null:
+		ResourceAdmission.hold(admission_token, resident.root as Node3D, false)
 	if stale:
 		# A raw completion may already own Nodes; a prepared completion still
 		# contains Resources only and has been released without instantiation.
@@ -187,6 +206,7 @@ func _process(_delta: float) -> void:
 	WorldLoader.publish_resident_stream(resident)
 	_last_preparation["stream_prime_publish_us"] = int(resident.phases.get(&"streamPrimePublish", 0))
 	residents[map_id] = resident
+	ResourceAdmission.hold(admission_token, imported)
 	MapSceneCache.note_local_digest((resident.manifest as WorldManifest).asset_id(), str(resident.digest))
 	_record("ready", map_id, {"load_ms": float(resident.phases.get(&"total", 0)) / 1000.0})
 	_refresh_views()
@@ -410,6 +430,7 @@ func _can_dispatch_preload() -> bool:
 func _retire(resident: Dictionary, map_id: String) -> void:
 	var began := Time.get_ticks_usec()
 	var imported := resident.root as Node3D
+	ResourceAdmission.retiring(imported)
 	if imported is ContinentChunkStream:
 		(imported as ContinentChunkStream).pause_streaming()
 		# This transfer takes the descendants even if an observer had already
@@ -608,6 +629,7 @@ static func _blend(a: Variant, b: Variant, weight: float) -> Variant:
 	return a
 
 func clear(preserve_expected_walk := false) -> void:
+	ResourceAdmission.event(_admission_token, ResourceAdmission.CANCEL)
 	# Keep existing retirement jobs; surrender only the old waiting turn.
 	RetirementBudget.cancel(self)
 	var tree := Engine.get_main_loop() as SceneTree
@@ -1015,3 +1037,11 @@ func _record(kind: String, map_id: String, detail := {}) -> void:
 
 func _exit_tree() -> void:
 	RetirementBudget.cancel(self)
+	if _thread != null and not _admission_token.is_empty():
+		# Preserve the already-owned worker across an unexpected owner exit.
+		# The existing reaper joins only after completion on a later main frame.
+		ResourceAdmission.event(_admission_token, ResourceAdmission.CANCEL)
+		ContinentChunkStream._orphan(_thread, {"id": _pending_map, "estimatedResidentBytes": 0,
+			"_admission_token": _admission_token, "_admission_family": "exterior"})
+		_thread = null
+		_admission_token = {}

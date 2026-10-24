@@ -27,6 +27,7 @@ add_library(client_runtime SHARED src/client_runtime.cpp src/client_runtime.h sr
 target_sources(client_runtime PRIVATE src/client_flights.cpp src/client_flights.h
     ${CMAKE_CURRENT_SOURCE_DIR}/../native_crowd/src/native_spell_flight_geometry.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/../native_crowd/src/native_spell_flight_geometry.h)
+target_sources(client_runtime PRIVATE src/client_residency.cpp src/client_residency.h)
 target_link_libraries(client_runtime PRIVATE godot-cpp "${RL_RUST_LIBRARY}")
 if(WIN32)
     target_link_libraries(client_runtime PRIVATE ws2_32 userenv advapi32 bcrypt ntdll)

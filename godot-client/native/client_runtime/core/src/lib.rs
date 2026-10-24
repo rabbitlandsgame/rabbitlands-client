@@ -2,6 +2,9 @@
 pub mod flight;
 
 use std::panic::{AssertUnwindSafe, catch_unwind};
+mod residency;
+mod residency_ffi;
+mod admission;
 mod mounted_pose;
 mod mounted_runtime;
 use mounted_pose::Rider;
@@ -45,6 +48,8 @@ pub struct Rig {
 
 pub struct Runtime {
     epoch: i64,
+    residency: residency::Planner,
+    admission: admission::Admission,
     next_handle: u64,
     rigs: Vec<(u64, Rig)>,
     scratch: Vec<PlanResult>,
@@ -57,6 +62,8 @@ impl Default for Runtime {
     fn default() -> Self {
         Self {
             epoch: 1,
+            residency: residency::Planner::default(),
+            admission: admission::Admission::default(),
             next_handle: 1,
             rigs: Vec::new(),
             scratch: Vec::new(),
@@ -72,6 +79,7 @@ impl Runtime {
         if epoch <= self.epoch {
             return Err(STALE);
         }
+        self.residency.reset(epoch)?;
         self.epoch = epoch;
         self.rigs.clear();
         self.scratch.clear();
