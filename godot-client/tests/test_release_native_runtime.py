@@ -385,6 +385,16 @@ class NativeBuilderTests(unittest.TestCase):
         self.assertEqual(actual["generator"], "Ninja")
         self.assertEqual(actual["compiler"], "g++ 14.2")
 
+    def test_windows_identity_retains_version_when_stdout_usage_precedes_stderr_banner(self):
+        responses = ["rustc 1.99.1 (fixture)\nhost: x86_64-pc-windows-msvc",
+                     "cargo 1.99.1", "cmake version 4.4.3", "1.11.1"]
+        probe = mock.Mock(stdout="usage: cl [ option... ] filename...\n",
+                          stderr="Microsoft (R) C/C++ Optimizing Compiler Version 19.44.35228 for x64\n")
+        with mock.patch.object(build.shutil, "which", side_effect=lambda name, **kwargs: name), mock.patch.object(build, "output", side_effect=responses), mock.patch.object(build.subprocess, "run", return_value=probe):
+            actual = build.toolchain_identity("windows", "cargo.exe", "1.99.1", "cmake.exe", "ninja.exe", {})
+        self.assertIn("usage: cl", actual["compiler"])
+        self.assertIn("Compiler Version 19.44.35228 for x64", actual["compiler"])
+
     def test_build_uses_ninja_pinned_dependency_bounded_jobs_and_external_cargo_target(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

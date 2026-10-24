@@ -156,7 +156,7 @@ def toolchain_identity(target, cargo, toolchain, cmake, ninja, env):
             "cargo": output([cargo_path, "+" + toolchain, "--version"], env),
             "cmake": output([cmake, "--version"], env).splitlines()[0],
             "ninja": output([ninja, "--version"], env),
-            "compiler": banner.splitlines()[0], "compiler_path": compiler, "generator": "Ninja"}
+            "compiler": banner, "compiler_path": compiler, "generator": "Ninja"}
 
 
 def verify_dependency(directory, env):

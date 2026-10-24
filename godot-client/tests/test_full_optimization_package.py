@@ -81,9 +81,11 @@ def context(tmp_path, monkeypatch):
 
 def final_engine(build, rows, reports, *, mutation=None):
     def run(argv, environment, log, timeout_seconds, **kwargs):
-        assert Path(argv[0]) == build.godot
+        editor = guard_editor(build)
+        assert Path(argv[0]) == editor
+        assert editor.is_file() and editor.read_bytes() == build.godot.read_bytes()
         assert argv[argv.index("--main-pack") + 1] == build.stage / "app/RabbitLands.pck"
-        assert argv[argv.index("--path") + 1] == build.stage / "app"
+        assert "--path" not in argv
         script = Path(argv[argv.index("--script") + 1])
         assert script == build.project / "tools/check_prepared_release.gd"
         assert not script.is_relative_to(build.stage)
@@ -103,7 +105,7 @@ def final_engine(build, rows, reports, *, mutation=None):
                   "catalog_sha256": job["catalog_sha256"], "catalog_entries": len(rows),
                   "entry_ids": [row["entry_id"] for row in selected], "entries": selected,
                   "texture_quality": quality, "stage_app": str(build.stage / "app"),
-                  "project_root": str(build.stage / "app"), "graphics": observation(),
+                  "project_root": str(build.stage / "app"), "graphics": observation(build.platform),
                   "resources": {"mesh_surfaces": 3, "multimesh_instances": 2, "textures": 2,
                                 "animation_keys": 4, "skeleton_bones": 5, "collision_shapes": 1},
                   "nodes_before": 1, "nodes_after": 1,
@@ -114,6 +116,11 @@ def final_engine(build, rows, reports, *, mutation=None):
         reports.append(job)
         return "PREPARED_RELEASE_CHECK " + json.dumps({"status": report["status"]})
     return run
+
+
+def guard_editor(build):
+    return build.stage / "app" / ("RabbitLands-release-guard-editor.exe" if build.platform == "windows"
+                                   else "RabbitLands-release-guard-editor.x86_64")
 
 
 def test_ordinary_startup_requires_exact_six_features_and_actual_backends():
@@ -142,8 +149,11 @@ def test_missing_or_duplicate_startup_receipt_is_not_proof(text):
 def test_final_pck_checks_all_qualities_exact_identities_and_isolated_jobs(context, monkeypatch):
     build, rows, _ = context
     reports = []
+    before = build.stage_inventory()
     monkeypatch.setattr(build, "run_engine", final_engine(build, rows, reports))
     build.check_final_package()
+    assert not guard_editor(build).exists()
+    assert build.stage_inventory() == before
     assert [job["texture_quality"] for job in reports] == ["full", "half", "quarter"]
     assert len(build.receipt["prepared_checks"]) == 3
     assert build.receipt["status"] == "verified_before_signing"
@@ -188,9 +198,82 @@ def test_final_pck_failure_never_makes_a_publishable_proof(context, monkeypatch,
     monkeypatch.setattr(build, "run_engine", final_engine(build, rows, [], mutation=mutation))
     with pytest.raises(ValueError):
         build.check_final_package()
+    assert not guard_editor(build).exists()
     assert build.receipt["status"] != "verified_before_signing"
     with pytest.raises(ValueError):
         build.proof()
+
+
+def test_existing_guard_editor_is_preserved_and_never_launched(context, monkeypatch):
+    build, _, _ = context
+    editor = guard_editor(build)
+    editor.write_bytes(b"not owned by this invocation")
+    monkeypatch.setattr(build, "run_engine", lambda *a, **k: pytest.fail("existing editor must not launch"))
+    with pytest.raises(ValueError, match="already contains"):
+        build.check_final_package()
+    assert editor.read_bytes() == b"not owned by this invocation"
+    assert build.receipt["status"] != "verified_before_signing"
+
+
+@pytest.mark.parametrize("platform", ["windows", "linux"])
+def test_cross_volume_guard_copy_is_budgeted_verified_and_removed(context, monkeypatch, platform):
+    build, rows, budget = context
+    build.platform = platform
+    actual = observation(platform)
+    build.graphics.update(platform=platform, rendering_method=actual["rendering_method"],
+                          rendering_driver=actual["rendering_driver"])
+    copies = []
+    original = full.shutil.copy2
+    def copy(source, target):
+        assert any("before temporary final-PCK editor" in phase and size == build.godot.stat().st_size
+                   for phase, size in budget)
+        assert Path(source) == build.godot and Path(target) == guard_editor(build)
+        copies.append((source, target))
+        return original(source, target)
+    monkeypatch.setattr(full.os, "link", lambda *a, **k: (_ for _ in ()).throw(OSError("cross-volume fixture")))
+    monkeypatch.setattr(full.shutil, "copy2", copy)
+    monkeypatch.setattr(build, "run_engine", final_engine(build, rows, []))
+    build.check_final_package()
+    assert len(copies) == 1
+    assert not guard_editor(build).exists()
+    assert build.godot.read_bytes() == b"verified-editor-fixture"
+
+
+def test_guard_copy_reservation_failure_prevents_materialization(context, monkeypatch):
+    build, _, _ = context
+    def exhausted(phase, upcoming_bytes):
+        assert "before temporary final-PCK editor" in phase
+        assert upcoming_bytes == build.godot.stat().st_size
+        raise ValueError("fixture copy budget exhausted")
+    build.budget_callback = exhausted
+    monkeypatch.setattr(full.os, "link", lambda *a, **k: pytest.fail("budget refusal must precede linking"))
+    monkeypatch.setattr(full.shutil, "copy2", lambda *a, **k: pytest.fail("budget refusal must precede copying"))
+    with pytest.raises(ValueError, match="budget exhausted"):
+        build.check_final_package()
+    assert not guard_editor(build).exists()
+
+
+def test_corrupt_temporary_guard_copy_never_launches_and_is_removed(context, monkeypatch):
+    build, _, _ = context
+    monkeypatch.setattr(full.os, "link", lambda *a, **k: (_ for _ in ()).throw(OSError("cross-volume fixture")))
+    monkeypatch.setattr(full.shutil, "copy2", lambda source, target: Path(target).write_bytes(b"changed editor bytes"))
+    monkeypatch.setattr(build, "run_engine", lambda *a, **k: pytest.fail("unverified editor must not launch"))
+    with pytest.raises(ValueError, match="differs from verified tool"):
+        build.check_final_package()
+    assert not guard_editor(build).exists()
+    assert build.godot.read_bytes() == b"verified-editor-fixture"
+
+
+def test_final_engine_failure_cleans_temporary_editor_before_propagating(context, monkeypatch):
+    build, _, _ = context
+    def failed(argv, *args, **kwargs):
+        assert Path(argv[0]) == guard_editor(build) and guard_editor(build).is_file()
+        raise ValueError("fixture final-PCK engine failure")
+    monkeypatch.setattr(build, "run_engine", failed)
+    with pytest.raises(ValueError, match="final-PCK engine failure"):
+        build.check_final_package()
+    assert not guard_editor(build).exists()
+    assert build.receipt["status"] != "verified_before_signing"
 
 
 def test_native_payload_is_verified_before_staging_and_source_scan_is_guarded(context, monkeypatch):
