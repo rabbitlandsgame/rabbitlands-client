@@ -72,6 +72,10 @@ guard checks exact source/catalog/entry identities, readable resource buffers,
 lazy restoration and owned cleanup using isolated user data outside the
 package. It rejects engine errors, skipped work and changes to the stage.
 Neither a benchmark PCK nor source-project resource fallback qualifies a release.
+The final-PCK guard temporarily runs the verified editor beside the package's
+PCK because release templates do not support the external check script. Its
+bytes are verified, its copy is budgeted, and it is removed on success or failure
+before the final stage inventory and any signing or packaging.
 
 Platform receipts contain optimization proofs bound to the selected commit,
 native source digest and prepared coverage plan. Finalization and publication
