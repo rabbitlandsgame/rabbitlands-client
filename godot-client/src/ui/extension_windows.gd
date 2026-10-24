@@ -234,6 +234,7 @@ func _ready() -> void:
 	add_child(gauntlet_ready_window)
 	gauntlet_loot_window = preload("res://src/ui/gauntlet_loot_window.gd").new()
 	add_child(gauntlet_loot_window)
+	gauntlet_loot_window.item_inspection_requested.connect(func() -> void: detail_popup_allowed = true)
 	if item_atlas != null: gauntlet_loot_window.configure(item_atlas)
 	gauntlet_loot_window.call("_style_dialog", market_price_dialog)
 	AppState.state_changed.connect(_on_state_changed)

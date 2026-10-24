@@ -35,6 +35,8 @@ const ArrivalPrewarmScript = preload("res://src/world/arrival_prewarm.gd")
 @onready var arrival_curtain := ArrivalCurtainScript.new()
 ## The respawn destination's ground on another map, loaded while dead.
 var respawn_prewarm := ArrivalPrewarmScript.new()
+## The beam's ground, loaded quietly while completed gauntlet loot is split.
+var gauntlet_prewarm := ArrivalPrewarmScript.new()
 @onready var quest_trail := preload("res://src/world/quest_trail_3d.gd").new()
 
 @onready var login_panel: Control = %LoginPanel
@@ -3826,6 +3828,7 @@ func _close_client() -> void:
 	# Keep serving rendering/physics commands until a private loader completes;
 	# joining a live import while the rendering server shuts down can deadlock.
 	character_intro.cancel()
+	gauntlet_prewarm.discard()
 	await get_tree().process_frame
 	exterior_stream.clear()
 	while not exterior_stream.is_idle():
@@ -3902,6 +3905,7 @@ func _on_connection_state_changed(value: String) -> void:
 		character_intro.cancel()
 		_end_arrival()
 		respawn_prewarm.discard()
+		gauntlet_prewarm.discard()
 		_pickpoint_draft.clear()
 		_pickpoint_submitting = false
 	status_label.text = ("Securing the connection…" if value == "securing"
@@ -5489,6 +5493,8 @@ func _on_state_changed(path: StringName) -> void:
 			_sync_map_markers()
 		&"death":
 			_prefetch_respawn()
+		&"gauntlet_loot":
+			_prefetch_gauntlet_exit()
 		&"actors":
 			# A busy map emits this once per actor packet. Rebuilding the whole
 			# actor presentation for each of them repeated the same work many
@@ -5688,7 +5694,9 @@ func _load_server_map() -> void:
 			character_intro.cancel()
 	if handoff.is_empty() and not character_intro.blocks_input():
 		# A respawn onto another map adopts the ground loaded while dead.
-		var prewarmed: Dictionary = respawn_prewarm.take(normalized_map)
+		var prewarmed: Dictionary = gauntlet_prewarm.take(normalized_map)
+		if prewarmed.is_empty():
+			prewarmed = respawn_prewarm.take(normalized_map)
 		if not prewarmed.is_empty():
 			handoff = {"resident": prewarmed, "continuous": false}
 		else:
@@ -6220,6 +6228,24 @@ func _report_arrival() -> void:
 	if AppState.authenticated and Network._link_ready():
 		Network.send_chat("#arrived " + AppState.current_map)
 	Diagnostics.record("arrival_reported", {"map": AppState.current_map})
+
+## Prepare the server's beam destination while the completed loot is reviewed.
+## The hidden stream is adopted by _load_server_map when the party exits.
+func _prefetch_gauntlet_exit() -> void:
+	var loot: Dictionary = AppState.gauntlet_loot
+	var destination: Variant = loot.get("exit_destination")
+	if loot.get("phase", "") not in ["complete", "ended", "sent"] or bool(loot.get("exited", false)) or not destination is Dictionary:
+		gauntlet_prewarm.discard()
+		return
+	var target: Dictionary = destination
+	var server_map := str(target.get("map", ""))
+	var map_id: String = MapRegistry.normalize_server_map_id(server_map)
+	if map_id == MapRegistry.normalize_server_map_id(AppState.current_map):
+		gauntlet_prewarm.discard()
+		return
+	var entry: Dictionary = MapRegistry.resolve(map_registry, server_map)
+	if not entry.is_empty():
+		gauntlet_prewarm.prewarm(entry, map_id, Vector2i(int(target.x), int(target.y)), world_root)
 
 ## While dead, the ground where a respawn will land is loaded in the background
 ## (the death state's `destination`): kept resident on this map, or prewarmed
@@ -16019,6 +16045,8 @@ func _cursor_context() -> Dictionary:
 ## equipped, unequipped or Ctrl-dropped; the finger uses it; the eye looks at
 ## it. This is the promise, so it must match _on_inventory_slot_pressed.
 func _slot_cursor_target(button: Button) -> String:
+	if bool(button.get_meta("gauntlet_loot_inspect", false)):
+		return "item_inspect"
 	var slot: int = inventory_slot_buttons.find(button)
 	if slot < 0:
 		var equipment_index: int = equipment_slot_buttons.find(button)
