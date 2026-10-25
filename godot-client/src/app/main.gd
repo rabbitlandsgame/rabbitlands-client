@@ -35,6 +35,12 @@ const NewCharacterIntroScript = preload("res://src/camera/new_character_intro.gd
 ## Delay Node allocation until entry: inherited scenes may replace the script
 ## after construction, before these helpers have a parent to own them.
 @onready var character_intro := NewCharacterIntroScript.new()
+const CampaignSceneScript = preload("res://src/world/campaign_scene.gd")
+const CampaignHudScript = preload("res://src/ui/campaign_hud.gd")
+const CampaignWorksScript = preload("res://src/world/campaign_works.gd")
+@onready var campaign_scene := CampaignSceneScript.new()
+@onready var campaign_hud := CampaignHudScript.new()
+@onready var campaign_works := CampaignWorksScript.new()
 const ArrivalCurtainScript = preload("res://src/ui/arrival_curtain.gd")
 const ArrivalPrewarmScript = preload("res://src/world/arrival_prewarm.gd")
 ## The loading screen from signing in, or a far arrival, until the character
@@ -1295,6 +1301,17 @@ func _ready() -> void:
 	world_root.add_child(quest_trail)
 	add_child(character_intro)
 	add_child(arrival_curtain)
+	add_child(campaign_scene)
+	add_child(campaign_hud)
+	world_root.add_child(campaign_works)
+	campaign_scene.configure(main_viewport)
+	campaign_hud.target_requested.connect(_on_campaign_target)
+	campaign_hud.action_requested.connect(_on_campaign_action)
+	campaign_hud.decision_requested.connect(_on_campaign_decision)
+	campaign_hud.companion_requested.connect(_on_campaign_companion)
+	campaign_scene.presentation_finished.connect(_on_campaign_scene_finished)
+	campaign_hud.transcript_requested.connect(campaign_scene.show_transcript)
+	campaign_hud.reduced_motion_changed.connect(campaign_scene.set_reduced_motion)
 	character_intro.conversation_requested.connect(_request_arrival_conversation)
 	character_intro.conversation_ended.connect(_end_arrival_conversation)
 	Diagnostics.record("main_scene_initializing")
@@ -1830,6 +1847,7 @@ func _process(delta: float) -> void:
 		_update_map_viewports()
 		_update_local_actor_follow()
 		_update_character_intro(delta)
+		_update_campaign(delta)
 		_update_keyboard_camera(delta)
 		_update_attached_map_markers()
 		var trail_actor: Variant = actor_nodes.get(AppState.local_actor_id)
@@ -1946,7 +1964,7 @@ func _text_entry_active() -> bool:
 ## The new-character intro and the loading curtain both own the screen while
 ## they are up: the world takes no input and the exterior preloads wait.
 func _world_input_blocked() -> bool:
-	return _disconnect_console_active or character_intro.blocks_input() or arrival_curtain.blocks_input() \
+	return _disconnect_console_active or character_intro.blocks_input() or campaign_scene.blocks_input() or arrival_curtain.blocks_input() \
 		or (hud_workspace != null and hud_workspace.is_open()) \
 		or (inventory_workspace != null and inventory_workspace.is_editing())
 
@@ -3933,6 +3951,8 @@ func _close_ground_bag() -> void:
 	AppState.close_ground_bag()
 
 func _on_disconnect_pressed() -> void:
+	campaign_scene.reset_session()
+	campaign_hud.hide()
 	_leaving_session = true
 	_disconnect_console_active = false
 	_sync_console_session_controls()
@@ -3951,6 +3971,7 @@ func _close_client() -> void:
 	# Keep serving rendering/physics commands until a private loader completes;
 	# joining a live import while the rendering server shuts down can deadlock.
 	character_intro.cancel()
+	campaign_scene.cancel("client_closed")
 	gauntlet_prewarm.discard()
 	await get_tree().process_frame
 	exterior_stream.clear()
@@ -4040,6 +4061,9 @@ func _on_connection_state_changed(value: String) -> void:
 	TextColors.bind(status_label, "login_status")
 	if value == "disconnected":
 		character_intro.cancel()
+		campaign_scene.cancel("disconnected")
+		campaign_hud.hide()
+		campaign_works.clear()
 		_end_arrival()
 		if not game_view.visible or _leaving_session:
 			respawn_prewarm.discard()
@@ -4252,6 +4276,10 @@ func _input(event: InputEvent) -> void:
 		return
 	if arrival_curtain.blocks_input():
 		return
+	if campaign_scene.blocks_input():
+		if campaign_scene.handle_input(event):
+			get_viewport().set_input_as_handled()
+		return # Scene buttons and keyboard GUI navigation retain their events.
 	if _actor_hud_menu != null and _actor_hud_menu.visible:
 		if _actor_hud_menu.handle_event(event):
 			get_viewport().set_input_as_handled()
@@ -5703,6 +5731,9 @@ func _on_state_changed(path: StringName) -> void:
 			lantern_guide.apply_state(AppState.lantern_tutorial)
 			if is_instance_valid(lantern_scene): lantern_scene.apply_state(AppState.lantern_tutorial)
 		&"map":
+			campaign_scene.cancel("map_changed")
+			campaign_hud.hide()
+			campaign_works.clear()
 			_pickpoint_draft.clear()
 			_pickpoint_submitting = false
 			_load_server_map()
@@ -5714,6 +5745,8 @@ func _on_state_changed(path: StringName) -> void:
 			# Markers survive a map change; which of them belong here does not.
 			_sync_map_markers()
 		&"death":
+			if bool(AppState.death.get("dead", false)):
+				campaign_scene.cancel("death")
 			_prefetch_respawn()
 		&"gauntlet_loot":
 			_prefetch_gauntlet_exit()
@@ -7037,7 +7070,7 @@ func _update_local_actor_follow() -> void:
 	if not is_instance_valid(target):
 		return
 	var focus_position: Vector3 = target.global_position
-	if not character_intro.blocks_input():
+	if not character_intro.blocks_input() and not campaign_scene.blocks_input():
 		camera_rig.set_focus(focus_position)
 	map_camera.global_position = focus_position + Vector3(0, 220, 0)
 	var minimap_heading := 0.0
@@ -7071,6 +7104,70 @@ func _update_character_intro(delta: float) -> void:
 	character_intro.update(delta, camera_rig,
 		actor_nodes.get(AppState.local_actor_id) as Node3D,
 		_grounded_actors.has(AppState.local_actor_id), guide_ready, guide, guide_id, AppState.npc_dialogue)
+
+func _update_campaign(delta: float) -> void:
+	var available := AppState.authenticated and not _disconnect_console_active \
+		and not bool(AppState.death.get("dead", false))
+	if not available:
+		campaign_scene.cancel("unavailable")
+		campaign_hud.hide()
+		campaign_works.clear()
+		return
+	var ready := not character_intro.is_active() and not arrival_curtain.blocks_input() \
+		and _grounded_actors.has(AppState.local_actor_id)
+	if ready:
+		campaign_works.apply_snapshot(AppState.campaign, adapter, AppState.current_map,
+			_campaign_surface_height, campaign_scene.reduced_motion)
+	campaign_scene.update_ambient(AppState.campaign, actor_nodes, adapter, _campaign_surface_height, delta)
+	campaign_scene.update(delta, AppState.campaign, camera_rig, actor_nodes,
+		AppState.local_actor_id, AppState.current_map, ready, adapter, _campaign_surface_height)
+	campaign_works.set_readouts_visible(campaign_scene.work_readouts_visible())
+	if campaign_scene.blocks_input():
+		_stop_keyboard_movement()
+	var tile: Variant = _local_actor_server_tile()
+	campaign_hud.apply_state(AppState.campaign, tile if tile is Vector2i else Vector2i.ZERO,
+		AppState.current_map, campaign_scene.reduced_motion, campaign_scene.blocks_input() \
+		or character_intro.is_active() or arrival_curtain.blocks_input())
+
+func _on_campaign_target(object_id: int, tile: Vector2i, nearby: bool) -> void:
+	if _world_input_blocked() or not bool(AppState.campaign.get("active", false)):
+		return
+	if not (AppState.campaign.get("travel", {}) as Dictionary).is_empty() \
+			or EloriaProtocol.map_id_from_reference(str(AppState.campaign.get("map", ""))) \
+			!= EloriaProtocol.map_id_from_reference(AppState.current_map):
+		return
+	magic_selection.cancel()
+	if nearby:
+		Network.use_map_object(object_id)
+	else:
+		Network.move_to(tile)
+
+func _on_campaign_action(action: String) -> void:
+	if _world_input_blocked():
+		return
+	Network.campaign_request(action)
+
+func _campaign_surface_height(point: Vector3) -> float:
+	var sampled: Variant = _navigation_ray_position(point + Vector3.UP * 200.0, Vector3.DOWN)
+	return (sampled as Vector3).y + 0.025 if sampled is Vector3 else NAN
+
+func _on_campaign_decision(action: String, run_id: String, revision: int) -> void:
+	if _world_input_blocked():
+		return
+	Network.campaign_decision(action, run_id, revision)
+
+func _on_campaign_companion(command: String) -> void:
+	if _world_input_blocked():
+		return
+	Network.campaign_companion(command)
+
+func _on_campaign_scene_finished(token: String, reason: String) -> void:
+	if reason not in ["finished", "skipped", "already_seen", "loading_timeout", "actor_lost", "camera_lost"] \
+			or not AppState.authenticated:
+		return
+	var scene: Dictionary = AppState.campaign.get("scene", {})
+	if bool(scene.get("requires_ack", false)) and str(scene.get("token", "")) == token:
+		Network.campaign_scene_done(str(AppState.campaign.get("run_id", "")), token)
 
 func _request_arrival_conversation(actor_id: int) -> void:
 	AppState.close_dialogue()

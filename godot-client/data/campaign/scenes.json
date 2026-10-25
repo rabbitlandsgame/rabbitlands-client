@@ -1,0 +1,186 @@
+{
+  "version": 1,
+  "scenes": {
+    "measure.landing.arrival": {
+      "title": "The Ferry That Arrived Twice",
+      "duration": 24.0,
+      "anchor": "odo",
+      "shots": [
+        {"t": 0.0, "position": [-7.0, 6.0, 10.0], "target": [0.0, 1.1, 0.0]},
+        {"t": 5.0, "position": [-4.0, 3.4, 6.0], "target": [0.0, 1.3, 0.0]},
+        {"t": 12.0, "position": [4.0, 3.0, 6.0], "target": [0.0, 1.1, 0.0]},
+        {"t": 20.0, "position": [3.0, 4.5, 8.0], "target": [0.0, 1.0, 0.0]},
+        {"t": 24.0, "position": [3.0, 4.5, 8.0], "target": [0.0, 1.0, 0.0]}
+      ],
+      "cues": [
+        {"at": 0.0, "actor": "worker", "action": "idle", "offset": [0.0, 0.0, 0.0]},
+        {"at": 3.0, "actor": "odo", "action": "walk", "offset": [0.65, 0.0, 0.0], "move_seconds": 2.0},
+        {"at": 5.0, "actor": "odo", "action": "emote_greet", "offset": [0.65, 0.0, 0.0]},
+        {"at": 10.0, "actor": "odo", "action": "idle", "offset": [0.65, 0.0, 0.0]}
+      ],
+      "lines": [
+        {"at": 0.0, "speaker": "", "text": "A supply boat has reached the quay. Damaged access leaves its workers stranded."},
+        {"at": 5.0, "speaker": "Odo Fenn", "text": "The landing can wait. Get them onto dry ground."},
+        {"at": 10.0, "speaker": "Landing clerk", "text": "This cargo was signed in yesterday."},
+        {"at": 14.0, "speaker": "Worker", "text": "Then yesterday can lend us a hand."},
+        {"at": 18.0, "speaker": "Odo Fenn", "text": "Hold the approach, mend the access, or help move the injured. Tell me where you need me."}
+      ]
+    },
+    "measure.landing.resolved": {
+      "title": "Everyone on Dry Ground",
+      "duration": 12.0,
+      "anchor": "odo",
+      "shots": [
+        {"t": 0.0, "position": [-4.0, 3.8, 7.0], "target": [0.0, 1.0, 0.0]},
+        {"t": 12.0, "position": [-2.0, 3.2, 6.0], "target": [0.0, 1.2, 0.0]}
+      ],
+      "cues": [{"at": 1.0, "actor": "odo", "action": "emote_greet", "offset": [0.0, 0.0, 0.0]}],
+      "lines": [
+        {"at": 0.0, "speaker": "Odo Fenn", "text": "Every worker is accounted for. Now we can ask why two orders claim the same cargo."},
+        {"at": 6.0, "speaker": "Worker", "text": "The chest and fittings are secure. We will put your chosen priority to work first.", "variants": {"medical": "The dry medical chest comes first. The pump crate will wait in salvage holding.", "pump": "The pump fittings come first. The care station will draw on its emergency reserve."}}
+      ]
+    },
+    "measure.claims.revealed": {
+      "title": "One Cargo, Two Claims",
+      "duration": 10.0,
+      "anchor": "odo",
+      "shots": [
+        {"t": 0.0, "position": [4.0, 3.5, 7.0], "target": [0.0, 1.0, 0.0]},
+        {"t": 10.0, "position": [2.5, 3.2, 6.0], "target": [0.0, 1.2, 0.0]}
+      ],
+      "cues": [{"at": 0.0, "actor": "odo", "action": "idle", "offset": [0.0, 0.0, 0.0]}],
+      "lines": [
+        {"at": 0.0, "speaker": "Odo Fenn", "text": "The seals agree. The cargo and the witnesses do not."},
+        {"at": 5.0, "speaker": "Odo Fenn", "text": "Keep the independent account. A claim on paper cannot make one fitting serve two works."}
+      ]
+    },
+    "measure.sluice.demonstration": {
+      "title": "A Reading at the Quay",
+      "duration": 20.0,
+      "anchor": "voss",
+      "shots": [
+        {"t": 0.0, "position": [-6.0, 5.0, 8.0], "target": [0.0, 1.0, 0.0]},
+        {"t": 6.0, "position": [3.5, 3.2, 6.0], "target": [0.0, 1.1, 0.0]},
+        {"t": 14.0, "position": [3.0, 4.0, 7.0], "target": [0.0, 1.0, 0.0]},
+        {"t": 20.0, "position": [3.0, 4.0, 7.0], "target": [0.0, 1.0, 0.0]}
+      ],
+      "cues": [
+        {"at": 0.0, "actor": "voss", "action": "emote_greet", "offset": [0.0, 0.0, 0.0]},
+        {"at": 3.0, "actor": "voss", "action": "idle", "offset": [0.0, 0.0, 0.0]},
+        {"at": 5.0, "actor": "worker", "action": "walk", "offset": [0.8, 0.0, 0.0], "move_seconds": 2.0},
+        {"at": 9.0, "actor": "worker", "action": "idle", "offset": [0.8, 0.0, 0.0]},
+        {"at": 12.0, "actor": "odo", "action": "emote_greet", "offset": [0.0, 0.0, 0.0]}
+      ],
+      "lines": [
+        {"at": 0.0, "speaker": "Serit Voss", "text": "Keep the crew clear. I can hold the bypass."},
+        {"at": 5.0, "speaker": "", "text": "Voss stays at the work while the crew withdraws. The salvaged equipment can now be installed."},
+        {"at": 10.0, "speaker": "Odo Fenn", "text": "Our crew will hold the bypass while we take the reading.", "variants": {"medical": "Your medical chest is ready. We will hold a crew-operated bypass until the fittings are recovered.", "pump": "Your pump fittings are ready. The care station has used its reserve; the test mechanism can now work properly."}},
+        {"at": 15.0, "speaker": "Odo Fenn", "text": "Try the marked gauge yourself. Then decide who should see the account."}
+      ]
+    },
+    "measure.sluice.resolved": {
+      "title": "The Account We Keep",
+      "duration": 10.0,
+      "anchor": "odo",
+      "shots": [
+        {"t": 0.0, "position": [-3.0, 4.0, 7.0], "target": [0.0, 1.1, 0.0]},
+        {"t": 10.0, "position": [-3.0, 4.0, 7.0], "target": [0.0, 1.1, 0.0]}
+      ],
+      "cues": [{"at": 1.0, "actor": "odo", "action": "emote_greet", "offset": [0.0, 0.0, 0.0]}],
+      "lines": [
+        {"at": 0.0, "speaker": "Odo Fenn", "text": "We have a reading, witnesses, and your decision. That is an account worth keeping."},
+        {"at": 5.0, "speaker": "", "text": "The first emergency is over. Your work and chosen account have been recorded."}
+      ]
+    },
+    "measure.twinbrook.arrival": {
+      "title": "The Work at Twinbrook",
+      "duration": 22.0,
+      "anchor": "sluice_prop",
+      "fov": 52.0,
+      "shots": [
+        {"t": 0.0, "position": [9.0, 9.0, 15.0], "target": [2.0, 1.0, -2.0]},
+        {"t": 6.0, "position": [4.0, 3.0, -4.8], "target": [0.0, 1.2, -1.0]},
+        {"t": 14.0, "position": [-5.0, 5.5, 10.0], "target": [1.0, 1.0, -3.0]},
+        {"t": 22.0, "position": [-5.0, 5.5, 10.0], "target": [1.0, 1.0, -3.0]}
+      ],
+      "cues": [
+        {"at": 0.0, "actor": "voss", "action": "defend", "offset": [0, 0, 1], "move_seconds": 0.8, "face": "sluice_prop"},
+        {"at": 0.0, "actor": "worker", "action": "idle", "destination": "worker_trapped", "face": "worker_safe"},
+        {"at": 2.0, "actor": "odo", "action": "walk", "offset": [0.75, 0, 0], "move_seconds": 1.2, "face": "bypass"},
+        {"at": 7.0, "actor": "odo", "action": "emote_greet", "offset": [0.75, 0, 0], "face": "bypass"},
+        {"at": 11.0, "actor": "odo", "action": "idle", "offset": [0.75, 0, 0], "face": "bypass"}
+      ],
+      "lines": [
+        {"at": 0.0, "speaker": "", "text": "At the private test work, a stranded crew waits beyond a bypass that will not stay open."},
+        {"at": 5.0, "speaker": "Serit Voss", "text": "Leave the part alone. Brace this bypass and get the crew clear first."},
+        {"at": 10.0, "speaker": "Odo Fenn", "text": "I will show the controls. You can hold the approach or help the work. Keep a safe way back."},
+        {"at": 16.0, "speaker": "Odo Fenn", "text": "Check the bypass, secure its brace, then release the crew. We fit the salvaged equipment after everyone is safe."}
+      ]
+    },
+    "measure.twinbrook.voss_rescue": {
+      "title": "The Crew Comes First",
+      "duration": 17.0,
+      "anchor": "sluice_prop",
+      "fov": 53.0,
+      "shots": [
+        {"t": 0.0, "position": [6.0, 7.5, 13.0], "target": [3.0, 1.0, -3.0]},
+        {"t": 7.5, "anchor": "worker_safe", "position": [4.0, 5.5, 8.0], "target": [0.0, 1.0, 3.0]},
+        {"t": 12.0, "anchor": "worker_safe", "position": [-3.0, 4.5, 7.0], "target": [0.0, 1.2, 2.0]},
+        {"t": 17.0, "anchor": "worker_safe", "position": [-3.0, 4.5, 7.0], "target": [0.0, 1.2, 2.0]}
+      ],
+      "cues": [
+        {"at": 0.0, "actor": "voss", "action": "defend", "offset": [0, 0, 1], "move_seconds": 0.8, "face": "sluice_prop"},
+        {"at": 0.0, "actor": "worker", "action": "idle", "destination": "worker_trapped", "face": "worker_safe"},
+        {"at": 2.0, "actor": "worker", "action": "walk", "from": "worker_trapped", "destination": "worker_safe", "move_seconds": 6.0, "face": "worker_safe"},
+        {"at": 9.0, "actor": "worker", "action": "idle", "destination": "worker_safe", "face": "bypass"},
+        {"at": 10.0, "actor": "voss", "action": "idle", "offset": [0, 0, 0], "move_seconds": 0.8, "face": "worker_safe"},
+        {"at": 11.0, "actor": "odo", "action": "emote_nod", "offset": [0, 0, 0], "face": "worker_safe"}
+      ],
+      "lines": [
+        {"at": 0.0, "speaker": "Serit Voss", "text": "The brace is holding. Go now; I am staying here until you are clear."},
+        {"at": 8.5, "speaker": "Works Hand", "text": "Across and safe. Nobody left behind."},
+        {"at": 11.0, "speaker": "Odo Fenn", "text": "Now we can install the salvaged part and make an honest test.", "variants": {"medical": "Your medical reserve is ready. The crew will operate a braced bypass while we test the work.", "pump": "The pump fitting you saved can now be installed. The care station has spent its reserve."}},
+        {"at": 14.0, "speaker": "Odo Fenn", "text": "The intake and diversion do different jobs. Watch the water, then compare the independent gauge."}
+      ]
+    },
+    "measure.twinbrook.flow": {
+      "title": "Read the Water",
+      "show_readouts": true,
+      "duration": 14.0,
+      "anchor": "gauge",
+      "shots": [
+        {"t": 0.0, "position": [4.0, 4.3, 7.0], "target": [0.0, 1.1, 0.0]},
+        {"t": 6.0, "anchor": "flow", "position": [4.0, 5.5, 8.0], "target": [-1.5, 0.4, 0.0]},
+        {"t": 14.0, "anchor": "gauge", "position": [3.0, 4.5, 7.0], "target": [0.0, 1.1, 0.0]}
+      ],
+      "cues": [
+        {"at": 0.0, "actor": "odo", "action": "emote_greet", "offset": [0, 0, 0], "face": "gauge"},
+        {"at": 5.0, "actor": "odo", "action": "idle", "offset": [0, 0, 0], "face": "flow"}
+      ],
+      "lines": [
+        {"at": 0.0, "speaker": "Odo Fenn", "text": "The stream tells you what the controls are doing. The gauge supplies an independent comparison."},
+        {"at": 5.0, "speaker": "Odo Fenn", "text": "A mark in the permitted column is a claim. A reading you can reproduce is evidence."},
+        {"at": 10.0, "speaker": "Odo Fenn", "text": "Record the result you observed. Then decide how this account should be shared."}
+      ]
+    },
+    "measure.twinbrook.resolved": {
+      "title": "Four People, One Account",
+      "duration": 14.0,
+      "anchor": "gauge",
+      "shots": [
+        {"t": 0.0, "position": [8.0, 8.0, 12.0], "target": [0.0, 1.0, 0.0]},
+        {"t": 7.0, "position": [-4.0, 5.0, 9.0], "target": [-1.5, 1.1, 0.0]},
+        {"t": 14.0, "position": [-4.0, 5.0, 9.0], "target": [-1.5, 1.1, 0.0]}
+      ],
+      "cues": [
+        {"at": 0.0, "actor": "odo", "action": "emote_nod", "offset": [0, 0, 0], "face": "gauge"},
+        {"at": 4.0, "actor": "voss", "action": "idle", "offset": [0, 0, 0], "face": "gauge"}
+      ],
+      "lines": [
+        {"at": 0.0, "speaker": "Odo Fenn", "text": "The crew is safe and the test can be repeated. Your chosen account stays with the evidence."},
+        {"at": 5.0, "speaker": "Serit Voss", "text": "Then put down what happened here, including what it cost."},
+        {"at": 9.0, "speaker": "", "text": "Party members choose individually whether to record this outcome. Helping another expedition does not overwrite your own story."}
+      ]
+    }
+  }
+}
