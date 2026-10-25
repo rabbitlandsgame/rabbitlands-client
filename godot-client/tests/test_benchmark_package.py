@@ -14,6 +14,48 @@ import package_client
 
 
 class BenchmarkPackageTests(unittest.TestCase):
+    def test_export_pruning_preserves_real_workload_dependency_closure(self):
+        source = Path(__file__).resolve().parents[1]
+        resource = re.compile(r'''["']res://(tests/[^"'\r\n]+)["']''')
+
+        def closure(project, roots):
+            found, missing, pending = set(), set(), list(roots)
+            while pending:
+                name = pending.pop()
+                if name in found:
+                    continue
+                found.add(name)
+                path = project / name
+                if not path.is_file():
+                    missing.add(name)
+                    continue
+                pending.extend(resource.findall(path.read_text(encoding="utf-8")))
+            return found, missing
+
+        inputs, missing = closure(source, benchmark_package.WORKLOAD_FILES)
+        self.assertFalse(missing, f"Missing source workload dependencies: {missing}")
+        readiness = "tests/integration/client_world_readiness.gd"
+        self.assertIn(readiness, inputs)
+        # Reproduce the original omission as a negative control. The dependency
+        # exists before export and must be detected when real pruning deletes it.
+        for omitted in (False, True):
+            with self.subTest(omitted=omitted), tempfile.TemporaryDirectory() as directory:
+                project = Path(directory)
+                (project / "data").mkdir()
+                for name in inputs | {"tests/unrelated_private.gd"}:
+                    path = project / name
+                    path.parent.mkdir(parents=True, exist_ok=True)
+                    path.write_bytes((source / name).read_bytes() if name in inputs else b"fixture")
+                (project / "export_presets.cfg").write_text(package_client.EXPORT_PRESETS, encoding="utf-8")
+                (project / "project.godot").write_text(
+                    '[application]\nrun/main_scene="res://src/app/main.tscn"\n', encoding="utf-8")
+                allowed = benchmark_package.WORKLOAD_FILES - {readiness} if omitted else benchmark_package.WORKLOAD_FILES
+                with mock.patch.object(benchmark_package, "WORKLOAD_FILES", allowed):
+                    benchmark_package.prepare_export(project)
+                _, missing = closure(project, allowed)
+                self.assertEqual(missing, {readiness} if omitted else set())
+                self.assertFalse((project / "tests/unrelated_private.gd").exists())
+
     def test_native_resource_lifetime_fixture_survives_local_export(self):
         expected = {"tests/integration/benchmark_resource_admission.gd",
                     "tests/test_native_streaming_lifetime.gd"}

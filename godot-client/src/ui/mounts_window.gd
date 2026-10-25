@@ -12,6 +12,8 @@ var portraits := {}
 var labels := {}
 var ride := Button.new()
 var dismount := Button.new()
+var evolve := Button.new()
+var progression := Label.new()
 var status := Label.new()
 var hints := Label.new()
 var candidate := ""
@@ -151,6 +153,10 @@ func _build() -> void:
 	status.add_theme_font_size_override("font_size", 13)
 	TextColors.bind(status, "mount_text")
 	column.add_child(status)
+	progression.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	progression.add_theme_font_size_override("font_size", 12)
+	TextColors.bind(progression, "mount_muted")
+	column.add_child(progression)
 	var actions := HBoxContainer.new()
 	actions.alignment = BoxContainer.ALIGNMENT_CENTER
 	actions.add_theme_constant_override("separation", 12)
@@ -166,6 +172,11 @@ func _build() -> void:
 	ride.text = "Ride"
 	ride.pressed.connect(_ride)
 	dismount.pressed.connect(_dismount)
+	evolve.text = "Evolve bond"
+	evolve.tooltip_text = "A cosmetic travel milestone. Riding speed and combat rules stay the same."
+	evolve.pressed.connect(_evolve)
+	evolve.custom_minimum_size.y = 30
+	column.add_child(evolve)
 	hints.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hints.add_theme_font_size_override("font_size", 12)
 	TextColors.bind(hints, "mount_muted")
@@ -353,6 +364,18 @@ func sync() -> void:
 			_: status.text = "Choose a mount, then Ride."
 	hints.text = "Mount / Dismount" + Hotkeys.key_hint("toggle_mount") + "     Gallop" + Hotkeys.key_hint("toggle_gallop")
 
+	var progress: Dictionary = state.get("mount_progression", {}).get(candidate, {})
+	progression.visible = not progress.is_empty() and candidate in owned
+	evolve.visible = progression.visible
+	evolve.disabled = not AppState.authenticated or not progress.get("can_evolve", false)
+	if not progress.is_empty():
+		var stage: int = clampi(int(progress.get("stage", 0)), 0, 2)
+		var stages := ["Familiar", "Bonded", "Seasoned"]
+		var next_xp: int = int(progress.get("next_xp", 0))
+		progression.text = "%s · %d travel XP%s\nCosmetic bond only; riding stats and appearance are unchanged." % [
+			stages[stage], int(progress.get("xp", 0)), " / %d to evolve" % next_xp if next_xp > 0 else " · final stage"]
+		progression.tooltip_text = "Earn one XP per completed adjacent mounted walking step. Standing still and teleports do not count."
+
 func _ride() -> void:
 	if not ride.disabled and Profiles.supports(candidate) and send_command.is_valid():
 		send_command.call("#mount ride " + candidate)
@@ -360,3 +383,8 @@ func _ride() -> void:
 func _dismount() -> void:
 	if not dismount.disabled and send_command.is_valid():
 		send_command.call("#mount")
+
+func _evolve() -> void:
+	var progress: Dictionary = _state().get("mount_progression", {}).get(candidate, {})
+	if not evolve.disabled and not progress.is_empty() and Profiles.supports(candidate) and send_command.is_valid():
+		send_command.call("#mount evolve %s %d" % [candidate, int(progress.stage)])

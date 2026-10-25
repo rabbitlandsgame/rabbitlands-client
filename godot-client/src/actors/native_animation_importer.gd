@@ -57,9 +57,8 @@ static func import_library(owner: Node, source_path: String,
 	# path and still expose different bones, and a retargeted library is only
 	# reusable by a skeleton with the same bones in the same order.
 	var shape_defaults := _blend_shape_defaults(owner)
-	var cache_key := "%s|%s|%s|%s|%s|%s|%s" % [source_path, skeleton_path,
-		_skeleton_signature(target_skeleton), JSON.stringify(bone_aliases),
-		",".join(wanted_clips), ",".join(looping_clips), JSON.stringify(shape_defaults)]
+	var cache_key := _library_key(source_path, skeleton_path, target_skeleton,
+		bone_aliases, wanted_clips, looping_clips, shape_defaults)
 	var cached: Dictionary = _libraries.get(cache_key, {}) as Dictionary
 	if cached.is_empty():
 		cached = _build(owner, source_path, skeleton_path, target_skeleton, bone_aliases,
@@ -70,15 +69,39 @@ static func import_library(owner: Node, source_path: String,
 	if library == null:
 		return result
 	var target_player := AnimationPlayer.new()
-	# Normalize blend weights against the authored RESET, including tracks that
-	# one clip omits. Otherwise an idle's root yaw persists in the bow pose.
-	target_player.deterministic = true
+	# Complete player clips carry explicit defaults for omitted channels, so
+	# normalized blending cannot inherit an idle's root yaw in the bow pose.
+	# It also avoids a deterministic mix's transient zero-total weight when a
+	# large first step consumes the entire crossfade (a visible bind-pose flash).
+	# Sparse corrective creature libraries retain their RESET-based policy.
+	target_player.deterministic = not bool(cached.get("complete_defaults", false))
 	target_player.name = "NativeAnimationPlayer"
 	owner.add_child(target_player)
 	target_player.add_animation_library("", library)
 	result.player = target_player
 	result.clips = cached.get("clips", PackedStringArray())
 	return result
+
+static func _library_key(path: String, skeleton_path: String, skeleton: Skeleton3D,
+		aliases: Dictionary, wanted: PackedStringArray, loops: PackedStringArray,
+		defaults: Dictionary) -> String:
+	return "%s|%s|%s|%s|%s|%s|%s" % [path, skeleton_path,
+		_skeleton_signature(skeleton), JSON.stringify(aliases),
+		",".join(wanted), ",".join(loops), JSON.stringify(defaults)]
+
+## Worker-owned detached nodes only. Publication into the session cache is
+## separate and always performed on main; no live actor crosses the boundary.
+static func prepare_detached(owner: Node, source: Node, path: String,
+		skeleton: Skeleton3D, aliases: Dictionary, wanted: PackedStringArray,
+		loops: PackedStringArray) -> Dictionary:
+	var skeleton_path := String(owner.get_path_to(skeleton))
+	var defaults := _blend_shape_defaults(owner)
+	return {"key": _library_key(path, skeleton_path, skeleton, aliases, wanted, loops, defaults),
+		"built": _build(owner, path, skeleton_path, skeleton, aliases, wanted, loops, defaults, source)}
+
+static func install_prepared(record: Dictionary) -> void:
+	if not record.is_empty() and not _libraries.has(record.key):
+		_libraries[record.key] = record.built
 
 ## Drops every cached library and parsed source. Call when leaving a session.
 static func clear() -> void:
@@ -195,7 +218,11 @@ static func cached_library_count() -> int:
 ## Main-thread plain-data snapshot; does not join prewarm workers or traverse
 ## retained scenes/animations. These are session-lifetime strong caches.
 static func retention_snapshot() -> Dictionary:
+	var removed := 0
+	for entry: Dictionary in _libraries.values():
+		removed += int(entry.get("default_tracks_removed", 0))
 	return {"strong_library_entries": _libraries.size(),
+		"default_only_shape_tracks_removed": removed,
 		"strong_source_scenes": _sources.size(), "prewarming_sources": _prewarming.size(),
 		"bytes_estimate_available": false, "lifetime": "session"}
 
@@ -232,10 +259,11 @@ static func _blend_shape_path(owner: Node, source_player: AnimationPlayer,
 static func _build(owner: Node, source_path: String, skeleton_path: String,
 		target_skeleton: Skeleton3D, bone_aliases: Dictionary,
 		wanted_clips: PackedStringArray,
-		looping_clips: PackedStringArray, shape_defaults: Dictionary) -> Dictionary:
+		looping_clips: PackedStringArray, shape_defaults: Dictionary,
+		prepared_source: Node = null, compact_rest_tracks := true) -> Dictionary:
 	var built := {"library": null, "clips": PackedStringArray(),
 		"errors": PackedStringArray()}
-	var source_scene := _source_scene(source_path)
+	var source_scene := prepared_source if prepared_source != null else _source_scene(source_path)
 	if source_scene == null:
 		built.errors.append("animation library load failed: " + source_path)
 		return built
@@ -272,15 +300,12 @@ static func _build(owner: Node, source_path: String, skeleton_path: String,
 				if bone.is_empty() or target_skeleton.find_bone(bone) < 0:
 					continue
 				track_path = NodePath(skeleton_path + ":" + bone)
-			var target_track := target.add_track(source.track_get_type(source_track))
+			# Copy immutable track data in the engine. Reading and reinserting
+			# every baked key through script made first-use retargeting hundreds
+			# of milliseconds even when the source scene was already resident.
+			var target_track := target.get_track_count()
+			source.copy_track(source_track, target)
 			target.track_set_path(target_track, track_path)
-			target.track_set_interpolation_type(target_track,
-				source.track_get_interpolation_type(source_track))
-			for key_index in source.track_get_key_count(source_track):
-				target.track_insert_key(target_track,
-					source.track_get_key_time(source_track, key_index),
-					source.track_get_key_value(source_track, key_index),
-					source.track_get_key_transition(source_track, key_index))
 		if target.get_track_count() > 0:
 			library.add_animation(clip_name, target)
 			built.clips.append(String(clip_name))
@@ -311,11 +336,56 @@ static func _build(owner: Node, source_path: String, skeleton_path: String,
 	if library.has_animation(&"RESET"):
 		library.remove_animation(&"RESET")
 	library.add_animation(&"RESET", reset)
+	var complete_defaults := source_path.get_file() == "Universal_Animation_Library.glb"
+	if complete_defaults:
+		_complete_default_channels(library, reset)
+	built["complete_defaults"] = complete_defaults
+	# Dense corrective libraries can repeat an unchanged default in hundreds
+	# of blend-shape tracks. Deterministic playback already supplies that exact
+	# value from RESET when a clip omits the track. Keep RESET intact, including
+	# every corrective, and retain every channel with any non-default key.
+	built["default_tracks_removed"] = _compact_default_shapes(library, shape_defaults) \
+		if compact_rest_tracks and not complete_defaults else 0
 	built.clips = library.get_animation_list()
 	built.library = library
 	if built.clips.is_empty():
 		built.errors.append("no animation tracks matched the target skeleton")
 	return built
+
+static func _complete_default_channels(library: AnimationLibrary, reset: Animation) -> void:
+	for name: StringName in library.get_animation_list():
+		if name == &"RESET": continue
+		var animation := library.get_animation(name)
+		var existing := {}
+		for track: int in animation.get_track_count():
+			existing["%s|%s" % [animation.track_get_path(track), animation.track_get_type(track)]] = true
+		for track: int in reset.get_track_count():
+			var key := "%s|%s" % [reset.track_get_path(track), reset.track_get_type(track)]
+			if not existing.has(key): reset.copy_track(track, animation)
+
+static func _compact_default_shapes(library: AnimationLibrary, defaults: Dictionary) -> int:
+	if defaults.is_empty():
+		return 0
+	var removed := 0
+	for clip: StringName in library.get_animation_list():
+		if clip == &"RESET":
+			continue
+		var animation := library.get_animation(clip)
+		for track: int in range(animation.get_track_count() - 1, -1, -1):
+			if animation.track_get_type(track) != Animation.TYPE_BLEND_SHAPE:
+				continue
+			var path := str(animation.track_get_path(track))
+			if not defaults.has(path) or animation.track_get_key_count(track) == 0:
+				continue
+			var constant := true
+			for key: int in animation.track_get_key_count(track):
+				if animation.track_get_key_value(track, key) != defaults[path]:
+					constant = false
+					break
+			if constant:
+				animation.remove_track(track)
+				removed += 1
+	return removed
 
 static func _find_player(root: Node) -> AnimationPlayer:
 	if root is AnimationPlayer:

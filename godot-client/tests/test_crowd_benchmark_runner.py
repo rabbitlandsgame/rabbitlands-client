@@ -64,12 +64,13 @@ def fixture():
             "worldReadiness": {"ready": True}, "presenceDots": 0, "serverTime": False,
             "crowdPolicy": {"bodyCap": 160, "fullRateBodies": 16, "halfRateBodies": 16, "clothBodies": 8},
             "measurement": {"fpsCap": 60, "sampleMilliseconds": 1000, "warmupMilliseconds": 100,
-                            "driver": "live"}, "cells": [cell], **runtime(),
+                            "driver": "live", "requestedWindowMode": "windowed", "windowPlatform": "Windows",
+                            "requestedDisplayWindowMode": 0, "actualWindowMode": 0}, "cells": [cell], **runtime(),
             "runtimeBuild": {"template": False, "editor": True}}
     request = {"mode": "windowed", "renderer": "forward_plus", "quality": "high",
                "resolution": (1280, 720), "map": "four_gates", "minimap": "show", "fps_cap": 60,
                "sample_ms": 1000, "warmup_ms": 100, "driver": "live", "body_cap": 160,
-               "cells": "s3-market-160", "replay": False, "executable_mode": "project"}
+               "cells": "s3-market-160", "replay": False, "executable_mode": "project", "window_mode": "windowed"}
     return data, request
 
 
@@ -144,6 +145,24 @@ def write_startup_ack(environment, executable, user_dir, **changes):
 
 
 class ReportValidationTests(unittest.TestCase):
+    def test_fullscreen_requires_reported_backend_mode_and_keeps_resolution_checks(self):
+        data, request = fixture()
+        request["window_mode"] = "fullscreen"
+        data["measurement"].update(requestedWindowMode="fullscreen", requestedDisplayWindowMode=4,
+                                   actualWindowMode=4)
+        self.assertTrue(support.validate_report(data, request, "")["valid"])
+        for changes in ({"actualWindowMode": 0}, {"requestedDisplayWindowMode": 0},
+                        {"requestedWindowMode": "windowed"}):
+            bad = copy.deepcopy(data)
+            bad["measurement"].update(changes)
+            with self.subTest(changes=changes), self.assertRaisesRegex(support.EvidenceError, "window mode"):
+                support.validate_report(bad, request, "")
+        data["measurement"].update(windowPlatform="macOS", requestedDisplayWindowMode=3, actualWindowMode=3)
+        self.assertTrue(support.validate_report(data, request, "")["valid"])
+        data["viewport"] = [2560, 1600]
+        with self.assertRaisesRegex(support.EvidenceError, "viewport differs"):
+            support.validate_report(data, request, "")
+
     def check_rejected(self, mutate, request_mutate=None):
         data, request = fixture()
         mutate(data)
@@ -159,6 +178,24 @@ class ReportValidationTests(unittest.TestCase):
         self.assertEqual(support.selected_cells("phase4"), support.OLD_CELLS)
         self.assertNotIn("mixed-mounted-160", support.selected_cells("phase4"))
         self.assertEqual(len(support.selected_cells("phase1")), 7)
+
+    def test_absent_current_services_attest_only_legacy_requests(self):
+        data, request = fixture()
+        for observed in [data, data['cells'][0]['effectiveRuntime']]:
+            backends = observed['activeBackends']
+            absent = dict(available=False, backend='legacy', mode='legacy', requested='legacy',
+                          presentation_backend='legacy', mismatches=0, native_available=False,
+                          reason='not_in_current_main')
+            backends.update(clientRuntime=absent.copy(), remotePresentation=absent.copy(),
+                            remoteCoverage=dict(backend='legacy', reason='not_in_current_main'),
+                            resourceAdmission=dict(available=False, mode='legacy', requested=False,
+                                reason='not_in_current_main', requested_mode='legacy',
+                                requested_estimate_budget=768 * 1048576))
+        self.assertTrue(support.validate_report(data, request, '')['valid'])
+        for key, value in [('client_runtime', 'rust'), ('client_runtime', 'compare'),
+                           ('remote_presentation', 'rust'), ('resource_admission', 'rust')]:
+            with self.subTest(key=key, value=value), self.assertRaises(support.EvidenceError):
+                support.validate_report(data, request | {key: value}, '')
 
     def test_performance_requires_actual_preset_at_top_and_each_cell(self):
         data, request = performance_fixture()
@@ -388,6 +425,18 @@ class ReportValidationTests(unittest.TestCase):
 
 
 class IdentityAndProcessTests(unittest.TestCase):
+    def test_window_mode_default_selection_and_headless_rejection(self):
+        args = runner.parser().parse_args(["--godot", "unused"])
+        self.assertEqual(args.window_mode, "windowed")
+        args = runner.parser().parse_args(["--godot", "unused", "--mode", "windowed",
+                                          "--window-mode", "fullscreen"])
+        self.assertEqual(runner.request_for(args)["window_mode"], "fullscreen")
+        with mock.patch.object(runner, "executable_path") as resolve, \
+                mock.patch.object(sys, "stderr"):
+            rejected = runner.main(["--godot", "unused", "--window-mode", "fullscreen"])
+        self.assertEqual(rejected, 1)
+        resolve.assert_not_called()
+
     def test_settings_profile_defaults_and_conflicting_requests(self):
         ordinary = runner.parser().parse_args(["--godot", "unused", "--quality", "low", "--fps-cap", "30"])
         support.configure_settings_profile(ordinary, system="Linux")
@@ -453,6 +502,7 @@ class IdentityAndProcessTests(unittest.TestCase):
             data, _request = performance_fixture()
 
             def fake_launch(command, *, env, stdout, **_kwargs):
+                self.assertEqual(env["RABBITLANDS_CROWD_BENCH_WINDOW_MODE"], "windowed")
                 user_dir = Path(env["APPDATA"]) / "Godot/app_userdata/Eloria"
                 self.assertTrue((user_dir / "eloria_hud.cfg").is_file())
                 self.assertIn('map_texture_quality="half"', (user_dir / "eloria_hud.cfg").read_text())
@@ -520,6 +570,28 @@ class IdentityAndProcessTests(unittest.TestCase):
             initial = support.hash_files(files, root)["sha256"]
             (world.parent / "world.glb").write_bytes(b"changed mesh")
             self.assertNotEqual(initial, support.hash_files(files, root)["sha256"])
+
+    def test_stream_root_omits_unused_monolith_but_requires_real_chunk_mesh(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            client = root / "godot-client"
+            (client / "data/maps").mkdir(parents=True)
+            world = root / "maps/world.json"
+            chunk = root / "maps/chunks/one/world.json"
+            chunk.parent.mkdir(parents=True)
+            chunk.write_text(json.dumps({"asset": {"glb": "world.glb"}}))
+            mesh = chunk.with_suffix(".glb")
+            mesh.write_bytes(b"actual chunk geometry")
+            world.write_text(json.dumps({"asset": {"glb": "unused-root.glb"},
+                "streamingChunks": {"chunks": [{"manifest": "chunks/one/world.json"}]}}))
+            (client / "data/maps/registry.json").write_text(json.dumps({"maps": {
+                "test": {"manifest": "res://../maps/world.json"}}}))
+            files = support.asset_files(client, ["test"])
+            self.assertIn(mesh, files)
+            self.assertNotIn(world.parent / "unused-root.glb", files)
+            mesh.unlink()
+            with self.assertRaises(support.EvidenceError):
+                support.asset_files(client, ["test"])
 
     def test_complete_manifest_rejects_added_removed_files_and_false_sizes_or_aggregate(self):
         import hashlib
@@ -647,12 +719,16 @@ class IdentityAndProcessTests(unittest.TestCase):
                 exe.write_bytes(b"not executed")
                 args = runner.parser().parse_args(["--godot", str(exe), "--project-path", str(root),
                                                   "--cells", "s3-market-160", "--mode", "windowed",
+                                                  "--window-mode", "fullscreen",
                                                   "--quality", "high", "--minimap", "show", "--body-cap", "160",
                                                   "--sample-ms", "1000", "--warmup-ms", "100"])
                 args.godot = exe
                 data, _request = fixture()
+                data["measurement"].update(requestedWindowMode="fullscreen", requestedDisplayWindowMode=4,
+                                           actualWindowMode=4)
 
                 def fake_launch(command, *, env, stdout, **_kwargs):
+                    self.assertEqual(env["RABBITLANDS_CROWD_BENCH_WINDOW_MODE"], "fullscreen")
                     data["runtimeBuild"].update(executablePath=str(exe), userDataDir=env["APPDATA"] + "/Godot/app_userdata/Eloria")
                     write_startup_ack(env, exe, data["runtimeBuild"]["userDataDir"])
                     if not missing:

@@ -89,6 +89,9 @@ func _run() -> void:
 		"performance caps frames and decoration while keeping combat cues")
 	var stored := ConfigFile.new()
 	stored.load(Options.SETTINGS_PATH)
+	expect(main.get("_vsync_preference") == "off"
+		and stored.get_value("graphics", "vsync_mode", "") == "off",
+		"performance preset applies and saves vertical sync Off")
 	expect(stored.get_value("graphics", "map_texture_quality") == "half"
 		and stored.get_value("graphics", "render_scale") == 0.75
 		and stored.get_value("graphics", "crowd_bodies") == 60, "preset persists device preferences")

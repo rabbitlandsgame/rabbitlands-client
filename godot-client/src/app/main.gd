@@ -461,6 +461,10 @@ var _actor_cap_declaration := 0
 var _presence_tiles := PackedVector2Array()
 var _presence_mark_pool: Array[Dictionary] = []
 var _fps_limit := 0
+var _vsync_preference := SettingsWindowScript.VSYNC_DEFAULT
+var _window_mode_preference := SettingsWindowScript.WINDOW_DEFAULT
+var _window_mode_initialized := false
+var _window_mode_launch_override := false
 var _render_scale := 1.0
 var _map_texture_quality := "full"
 var _renderer_preference := "auto"
@@ -482,6 +486,8 @@ var spell_loadout = preload("res://src/ui/spell_loadout.gd").new()
 var casting_bar: Control
 var spell_wheel: Control
 var _magic_area_preview: MeshInstance3D
+var _magic_preview_key := ""
+var _magic_preview_refresh := 0
 var player_info_panel: Control
 var active_buff_bar: Control
 var local_status_grid: GridContainer
@@ -824,6 +830,12 @@ var _local_placement_logged := false
 ## Set when `_sync_world` ran out of spawn budget with actors still to
 ## build; the next frame picks them up.
 var _spawn_backlog := false
+var _actor_work_frame := -1
+var _actor_work_usec := 0
+var _actor_work_nodes := 0
+var _actor_work_bodies := 0
+var _actor_preparation_closing := false
+var actor_resource_warmup := preload("res://src/actors/actor_resource_warmup.gd").new()
 ## Full body creation has one count/time allowance per rendered process frame,
 ## shared by initial arrivals and later deferred-body promotion. Placeholder
 ## creation and parked-body reuse retain their own existing behavior.
@@ -1233,6 +1245,8 @@ const TRAILER_CAPTURE_KEY := KEY_F9
 ## milliseconds of model, skin and equipment work, so a pack of twenty
 ## arriving together was one long frame; the rest follow on the next frames.
 const ACTOR_SPAWN_BUDGET := 4
+## Shared cooperative allowance includes presentation, animation gates and nodes.
+const ACTOR_SPAWN_BUDGET_USEC := 4000
 ## The chat panel shows this many of the newest lines. The console shows the
 ## whole buffer AppState keeps.
 const CHAT_PANEL_LINES := 100
@@ -1758,9 +1772,19 @@ func client_diagnostic_snapshot() -> Dictionary:
 		"login_visible": login_panel.is_visible_in_tree(),
 		"game_visible": game_view.is_visible_in_tree(),
 		"window_size": str(get_window().size), "viewport_size": str(main_viewport.size),
+		"root_viewport_size": str(get_tree().root.size),
+		"window_mode": DisplayServer.window_get_mode(),
+		"window_mode_preference": _window_mode_preference,
+		"window_mode_launch_override": _window_mode_launch_override,
 		"container_size": str(viewport_container.size),
 		"viewport_update_mode": main_viewport.render_target_update_mode,
 		"render_scale": _render_scale,
+		"vsync_preference": _vsync_preference,
+		"vsync_mode": DisplayServer.window_get_vsync_mode(),
+		"window_focused": get_window().has_focus(),
+		"max_fps": Engine.max_fps,
+		"low_processor_usage_mode": OS.low_processor_usage_mode,
+		"low_processor_usage_mode_sleep_usec": OS.low_processor_usage_mode_sleep_usec,
 		"actor_creation_budget": actor_creation_budget_snapshot(),
 		"ambient_creation_pending": ambient_creation_pending_count(),
 		"map_texture_mip_skip": GraphicsOptions.active_texture_skip(),
@@ -1886,7 +1910,9 @@ func _process(delta: float) -> void:
 			presentation_effects.update(camera_rig.focus, AppState.continuous_game_minute(),
 				weather_layer.mistiness() if weather_layer != null else 0.0, gloom,
 				world_environment.environment.fog_light_color, delta, _effects_enabled)
+		var actor_gate_started := Time.get_ticks_usec()
 		_update_animation_gate(delta)
+		_charge_actor_work(Time.get_ticks_usec() - actor_gate_started)
 		_update_model_builds()
 		# Rain is everywhere, so only the box the player is standing in is
 		# drawn. Left at the world origin it fell a hundred metres away from
@@ -3073,6 +3099,7 @@ func _refresh_unified_settings() -> void:
 		"cape_emblems": CapeEmblems.enabled,
 		"nameplates": _nameplates_enabled, "rotation_sensitivity": camera_rig.rotation_sensitivity,
 		"render_scale": _render_scale, "map_texture_quality": _map_texture_quality,
+		"vsync_mode": _vsync_preference, "window_mode": _window_mode_preference,
 		"renderer": _renderer_preference, "decorative_grass": GraphicsOptions.decorative_grass,
 		"keyboard_speed": camera_rig.keyboard_speed,
 		"start_backdrop": start_screen_backdrop.selected_id,
@@ -3973,7 +4000,11 @@ func _on_disconnect_pressed() -> void:
 func _close_client() -> void:
 	# Keep serving rendering/physics commands until a private loader completes;
 	# joining a live import while the rendering server shuts down can deadlock.
+	_actor_preparation_closing = true
 	character_intro.cancel()
+	actor_resource_warmup.clear()
+	while not actor_resource_warmup.is_idle():
+		await get_tree().process_frame
 	campaign_scene.cancel("client_closed")
 	gauntlet_prewarm.discard()
 	await get_tree().process_frame
@@ -3983,6 +4014,7 @@ func _close_client() -> void:
 	get_tree().quit()
 
 func _exit_tree() -> void:
+	actor_resource_warmup.clear()
 	RustRiderPose.close_batches()
 	RustSpellFlights.clear_for(world_root)
 	if is_instance_valid(remote_presentation): remote_presentation.close()
@@ -4212,6 +4244,7 @@ func _clear_world_presentation(retain_map_resources := false) -> void:
 	if not retain_map_resources:
 		TorsoBodyCover.clear()
 		WardrobeShirtFitScript.clear()
+		actor_resource_warmup.clear()
 		GlbSceneCache.clear()
 		NativeAnimationImporter.clear()
 		exterior_stream.clear()
@@ -6582,6 +6615,7 @@ func _sync_world(changed: Variant = null) -> void:
 	_remove_stale_actor_nodes(changed)
 	var visit: Array = (AppState.actors.keys() if changed == null
 		else (changed as Dictionary).keys())
+	var presentation_started := Time.get_ticks_usec()
 	var arriving: Dictionary = {}
 	for id: Variant in visit:
 		if not AppState.actors.has(id):
@@ -6597,6 +6631,7 @@ func _sync_world(changed: Variant = null) -> void:
 		for id: Variant in AppState.actors:
 			if not actor_nodes.has(id):
 				arriving[id] = true
+	_charge_actor_work(Time.get_ticks_usec() - presentation_started)
 	_spawn_arrivals(arriving.keys())
 	actor_label.text = "Actors: %d" % AppState.actors.size()
 	if AppState.local_actor_id >= 0 and actor_nodes.has(AppState.local_actor_id) and AppState.actors.has(AppState.local_actor_id):
@@ -6760,16 +6795,52 @@ func _spawn_arrivals(arriving: Array) -> void:
 		var id: int = int(pair[2])
 		var wants_body: bool = not crowd.lazy or _crowd_priority_actor(id) \
 			or (float(pair[3]) <= crowd.BUILD_RADIUS_METRES and _body_cap_allows(id, float(pair[3])))
-		if wants_body and _actor_creation_may_start(id):
-			_spawn_actor(id)
-		elif crowd.lazy and deferred < crowd.DEFERRED_SPAWNS_PER_PASS:
-			_spawn_actor(id, false)
+		if wants_body and _actor_creation_may_start(id) \
+				and _actor_work_available(true, _crowd_priority_actor(id)) and _remote_model_ready(id):
+			_build_actor_budgeted(id)
+		elif crowd.lazy and deferred < crowd.DEFERRED_SPAWNS_PER_PASS and _actor_work_available(false):
+			_build_actor_budgeted(id, false)
 			deferred += 1
 		else:
 			_spawn_backlog = true
 
 ## Where crowd distances are measured from: the player's body, else the tile
 ## their record names, else the camera's focus.
+func _actor_work_available(body: bool, priority := false) -> bool:
+	var frame := Engine.get_process_frames()
+	if frame != _actor_work_frame:
+		_actor_work_frame = frame
+		_actor_work_usec = 0
+		_actor_work_nodes = 0
+		_actor_work_bodies = 0
+	return priority or (_actor_work_usec < ACTOR_SPAWN_BUDGET_USEC \
+		and _actor_work_nodes < 32 and (not body or _actor_work_bodies < ACTOR_SPAWN_BUDGET))
+
+func _build_actor_budgeted(id: Variant, body := true, previous: ReplicatedActor3D = null) -> bool:
+	if not _actor_work_available(body, _crowd_priority_actor(int(id))):
+		return false
+	var started := Time.get_ticks_usec()
+	var created := _spawn_actor(id, body, previous)
+	_actor_work_usec += Time.get_ticks_usec() - started
+	if not created:
+		return false
+	_actor_work_nodes += 1
+	if body:
+		_actor_work_bodies += 1
+	return true
+
+func _charge_actor_work(usec: int) -> void:
+	_actor_work_available(false) # Establish this frame's accounting first.
+	_actor_work_usec += usec
+
+func _remote_model_ready(id: int) -> bool:
+	if _actor_preparation_closing:
+		return false
+	if id == AppState.local_actor_id:
+		return true
+	var config: Dictionary = models.get(_model_for_actor(AppState.actors[id]), {})
+	return actor_resource_warmup.request(config, _animation_for_model(config))
+
 func _crowd_reference_point() -> Vector3:
 	var local_value: Variant = actor_nodes.get(AppState.local_actor_id)
 	if is_instance_valid(local_value):
@@ -6943,6 +7014,7 @@ func _revive_actor(id: Variant, node: ReplicatedActor3D, dto: Dictionary,
 ## a process frame as the arrival-shared count/time allowance permits.
 ## Each is a new node in the deferred one's place, carrying on its motion.
 func _update_model_builds() -> void:
+	actor_resource_warmup.poll()
 	if not crowd.lazy:
 		return
 	# Critical bodies must not wait behind a stale distance-ranked candidate queue.
@@ -6954,13 +7026,14 @@ func _update_model_builds() -> void:
 		seen[raw_id] = true
 		var value: Variant = actor_nodes.get(raw_id)
 		if is_instance_valid(value) and value is ReplicatedActor3D \
-				and (value as ReplicatedActor3D).is_model_deferred() and _actor_creation_may_start(raw_id):
+				and (value as ReplicatedActor3D).is_model_deferred() and _actor_creation_may_start(raw_id) \
+				and _actor_work_available(true, true) and _remote_model_ready(raw_id):
 			if _replace_actor_node(raw_id, true):
 				crowd.builds += 1
 	_actor_creation_begin_frame()
 	var started := Time.get_ticks_usec()
 	var remaining := maxi(0, crowd.BUILD_BUDGET_USEC - _actor_creation_spent_usec)
-	while crowd.pending_candidates() > 0 and _actor_creation_may_start(-1) \
+	while crowd.pending_candidates() > 0 and _actor_creation_may_start(-1) and _actor_work_available(true) \
 			and Time.get_ticks_usec() - started < remaining:
 		var id: int = crowd.next_candidate()
 		if id < 0:
@@ -6974,6 +7047,8 @@ func _update_model_builds() -> void:
 		var reference: Vector3 = _crowd_reference_point()
 		if not _body_cap_allows(id, Vector2(deferred.global_position.x - reference.x,
 				deferred.global_position.z - reference.z).length()):
+			continue
+		if not _remote_model_ready(id):
 			continue
 		if _replace_actor_node(id, true):
 			crowd.builds += 1
@@ -6990,7 +7065,7 @@ func _replace_actor_node(id: int, build: bool) -> bool:
 	if previous == null:
 		return false
 	actor_nodes.erase(id)
-	_spawn_actor(id, build, previous)
+	_build_actor_budgeted(id, build, previous)
 	if not actor_nodes.has(id):
 		# The map it stands on is not placed now: keep the old node instead.
 		actor_nodes[id] = previous
@@ -9242,6 +9317,9 @@ func _load_hud_settings() -> void:
 	_target_marker_style = TargetMarkerStyle.read(config)
 	_apply_target_marker_style()
 	_apply_fps_limit(config.get_value("graphics", "fps_limit", 0))
+	_apply_window_mode(config.get_value("graphics", "window_mode", SettingsWindowScript.WINDOW_DEFAULT),
+		not _window_mode_initialized)
+	_apply_vsync_mode(config.get_value("graphics", "vsync_mode", SettingsWindowScript.VSYNC_DEFAULT))
 	_render_scale = GraphicsOptions.render_scale(config.get_value("graphics", "render_scale", 1.0))
 	_map_texture_quality = GraphicsOptions.texture_quality(config.get_value("graphics", "map_texture_quality", "full"))
 	_renderer_preference = GraphicsLaunchOptions.renderer_name(config.get_value("graphics", "renderer", "auto"))
@@ -9348,6 +9426,8 @@ func _save_hud_settings() -> void:
 	config.set_value("graphics", "crowd_bodies", _crowd_bodies)
 	config.set_value("graphics", "swaying_capes", _swaying_capes)
 	config.set_value("graphics", "fps_limit", _fps_limit)
+	config.set_value("graphics", "vsync_mode", _vsync_preference)
+	config.set_value("graphics", "window_mode", _window_mode_preference)
 	config.set_value("graphics", "render_scale", _render_scale)
 	config.set_value("graphics", "map_texture_quality", _map_texture_quality)
 	config.set_value("graphics", "renderer", _renderer_preference)
@@ -13181,6 +13261,21 @@ func _save_screenshot() -> String:
 	return path
 
 ## Apply the same validated frame cap at startup and after a settings change.
+func _apply_window_mode(value: Variant, preserve_launch_arguments := false) -> void:
+	_window_mode_preference = SettingsWindowScript.window_preference(value)
+	_window_mode_launch_override = preserve_launch_arguments \
+		and SettingsWindowScript.has_display_argument(OS.get_cmdline_args())
+	_window_mode_initialized = true
+	if DisplayServer.get_name() != "headless" and not _window_mode_launch_override:
+		DisplayServer.window_set_mode(SettingsWindowScript.display_mode(_window_mode_preference))
+	settings_window.restore_value("window_mode", _window_mode_preference)
+
+func _apply_vsync_mode(value: Variant) -> void:
+	_vsync_preference = SettingsWindowScript.vsync_preference(value)
+	if DisplayServer.get_name() != "headless":
+		DisplayServer.window_set_vsync_mode(SettingsWindowScript.vsync_mode(_vsync_preference))
+	settings_window.restore_value("vsync_mode", _vsync_preference)
+
 func _apply_fps_limit(value: Variant) -> void:
 	# Old or invalid preferences keep the default of no explicit frame cap.
 	_fps_limit = int(value) if value is int and value in SettingsWindowScript.FPS_LIMITS else 0
@@ -13276,7 +13371,7 @@ func _refresh_graphics_restart_notice() -> void:
 func _apply_performance_preset() -> void:
 	_applying_graphics_preset = true
 	var values := {"quality": LookProfile.Quality.LOW,
-		"appearance": LookProfile.Mode.PAINTED_GROUND, "fps_limit": 30,
+		"appearance": LookProfile.Mode.PAINTED_GROUND, "fps_limit": 30, "vsync_mode": "off",
 		"render_scale": 0.75, "map_texture_quality": "half", "crowd_bodies": 60,
 		"swaying_capes": 0, "shadows": false, "particles": true,
 		"decorative_grass": false, "name_distance": 20.0}
@@ -13625,6 +13720,10 @@ func _on_client_setting_changed(section: String, key: String,
 			invasion_assistant_window.resize_to_scale(float(value))
 		"fps_limit":
 			_apply_fps_limit(value)
+		"vsync_mode":
+			_apply_vsync_mode(value)
+		"window_mode":
+			_apply_window_mode(value)
 		"performance_preset":
 			_apply_performance_preset()
 			return
@@ -14083,16 +14182,16 @@ func _spell_target_candidate(spell_id: int, actor_id: int) -> bool:
 
 func _update_magic_preview() -> void:
 	var aiming := not Network.magic_pending.is_empty() and Network.magic_scope in ["burst", "location"]
-	if _magic_area_preview != null: _magic_area_preview.visible = false
+	if is_instance_valid(_magic_area_preview): _magic_area_preview.visible = false
 	if not aiming or full_map.visible: return
 	var hovered: Control = get_viewport().gui_get_hovered_control()
 	if hovered != null and hovered != viewport_container and not viewport_container.is_ancestor_of(hovered): return
 	var position := _local_viewport_position(viewport_container.get_local_mouse_position())
 	var tile: Variant = _map_target_tile(gameplay_camera, position)
 	if not tile is Vector2i: return
-	if _magic_area_preview == null:
+	if not is_instance_valid(_magic_area_preview):
 		_magic_area_preview = MeshInstance3D.new()
-		_magic_area_preview.mesh = PlaneMesh.new()
+		_magic_preview_key = ""
 		var material := StandardMaterial3D.new()
 		material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 		material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
@@ -14101,11 +14200,17 @@ func _update_magic_preview() -> void:
 		_magic_area_preview.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		world_root.add_child(_magic_area_preview)
 	var width := 9.0 if Network.magic_scope == "burst" else 1.0
-	(_magic_area_preview.mesh as PlaneMesh).size = Vector2.ONE * width * adapter.metres_per_tile
 	var point: Vector3 = adapter.tile_center(tile.x, tile.y)
-	var sampled: Variant = _navigation_ray_position(point + Vector3(0, 200, 0), Vector3.DOWN)
-	if sampled is Vector3: point.y = sampled.y
-	_magic_area_preview.position = point + Vector3(0, 0.05, 0)
+	var key := "%s|%s|%s|%s" % [AppState.current_map, tile, width, adapter.metres_per_tile]
+	var now := Time.get_ticks_msec()
+	if key != _magic_preview_key or now >= _magic_preview_refresh:
+		_magic_area_preview.mesh = preload("res://src/world/terrain_target_preview.gd").build(point,
+			width * adapter.metres_per_tile, func(at: Vector3) -> Variant:
+				return _navigation_ray_position(at + Vector3(0, 200, 0), Vector3.DOWN),
+			adapter.metres_per_tile * 0.5)
+		_magic_area_preview.position = point
+		_magic_preview_key = key
+		_magic_preview_refresh = now + 250
 	var player: Dictionary = AppState.actors.get(AppState.local_actor_id, {})
 	var in_range := maxi(absi(tile.x - int(player.get("x", tile.x))), absi(tile.y - int(player.get("y", tile.y)))) <= 15
 	(_magic_area_preview.material_override as StandardMaterial3D).albedo_color = Color(0.2, 0.75, 1.0, 0.3) if in_range else Color(1.0, 0.2, 0.1, 0.3)

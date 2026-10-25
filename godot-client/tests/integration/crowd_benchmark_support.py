@@ -442,6 +442,13 @@ def validate_report(data: dict, request: dict, log: str) -> dict:
             and data.get("minimapVisible") is not (request["minimap"] == "show"):
         raise EvidenceError("actual minimap visibility differs from request")
     measurement = _object(data.get("measurement"), "measurement")
+    if request["mode"] == "windowed" and "window_mode" in request:
+        expected_mode = 0 if request["window_mode"] == "windowed" else (
+            3 if measurement.get("windowPlatform") == "macOS" else 4)
+        if (measurement.get("requestedWindowMode") != request["window_mode"]
+                or measurement.get("requestedDisplayWindowMode") != expected_mode
+                or measurement.get("actualWindowMode") != expected_mode):
+            raise EvidenceError("actual window mode differs from requested window mode")
     for field, key in (("fpsCap", "fps_cap"), ("sampleMilliseconds", "sample_ms"),
                        ("warmupMilliseconds", "warmup_ms"), ("driver", "driver")):
         if measurement.get(field) != request[key]:
@@ -813,7 +820,7 @@ def asset_files(client: Path, maps: list[str]) -> list[Path]:
         if path in seen:
             continue
         if not path.is_relative_to(client.parent.resolve()) or not path.is_file():
-            raise EvidenceError("map dependency missing or outside runtime repository")
+            raise EvidenceError(f"map dependency missing or outside runtime repository: {path}")
         seen.add(path)
         files.append(path)
         vram = path.parent / "vram"
@@ -824,10 +831,14 @@ def asset_files(client: Path, maps: list[str]) -> list[Path]:
             continue
         doc = read_json(path)
         refs = list(doc.get("externalResources", {})) + list(doc.get("externalMeshes", {}))
+        chunks = doc.get("streamingChunks", {}).get("chunks", [])
         glb = doc.get("asset", {}).get("glb")
-        if glb:
+        # WorldLoader takes the chunk-stream path before importing asset.glb.
+        # Published stream roots deliberately omit that obsolete monolithic GLB.
+        # Every real chunk manifest/mesh and shared resource is still required.
+        if glb and not chunks:
             refs.append(glb)
-        refs += [c["manifest"] for c in doc.get("streamingChunks", {}).get("chunks", []) if "manifest" in c]
+        refs += [c["manifest"] for c in chunks if "manifest" in c]
         for ref in refs:
             pending.append((client / ref[6:] if ref.startswith("res://") else path.parent / ref).resolve())
     return files

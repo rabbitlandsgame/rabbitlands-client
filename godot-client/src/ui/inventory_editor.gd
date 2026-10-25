@@ -148,7 +148,11 @@ func select_component(key: String) -> void:
 			if axis == "x": offset.x = value
 			else: offset.y = value
 			workspace.change_part(key, "offset", offset))
-	if key in ["backpack", "equipment"]:
+	if key == "actions":
+		_number("Buttons per row", part.columns, 1, 5, 1, func(value: float) -> void: workspace.change_part(key, "columns", int(value)))
+		for action: String in ["store", "get", "drop", "mix", "lists"]:
+			_toggle("Show " + action.capitalize(), part.get("show_" + action, true), func(value: bool) -> void: workspace.change_part(key, "show_" + action, value))
+	elif key in ["backpack", "equipment"]:
 		_number("Columns", part.columns, 1, 12 if key == "backpack" else 8, 1, func(value: float) -> void: workspace.change_part(key, "columns", int(value)))
 		_number("Slot size", part.cell, 28, 64, 1, func(value: float) -> void: workspace.change_part(key, "cell", int(value)))
 		_number("Slot spacing", config.gap, 0, 10, 1, func(value: float) -> void: workspace.change_option("gap", int(value)))

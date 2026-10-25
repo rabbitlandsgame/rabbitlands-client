@@ -6,7 +6,7 @@ const DEFAULT := "unified"
 const MAX_CUSTOM := 5
 const BUILT_INS := {"unified": "Unified compact", "tabbed": "Tabbed satchel",
 	"dock": "Edge dock", "popover": "Adaptive inspect", "tray": "Shallow bottom tray"}
-const PARTS := {"backpack": "Backpack", "equipment": "Equipment", "preview": "Text preview", "inspection": "Inspection"}
+const PARTS := {"backpack": "Backpack", "equipment": "Equipment", "preview": "Text preview", "inspection": "Inspection", "actions": "Action bar"}
 const PLACEMENTS := ["inline", "replace", "side", "popover"]
 var active := DEFAULT
 var working := preset(DEFAULT)
@@ -25,6 +25,9 @@ static func preset(id: String) -> Dictionary:
 	result.parts.equipment.columns = 2
 	result.parts.inspection.height = 150
 	result.parts.inspection.width = 250
+	result.parts.actions.columns = 3
+	for action: String in ["store", "get", "drop", "mix", "lists"]:
+		result.parts.actions["show_" + action] = true
 	result["show_description"] = true
 	result["show_stats"] = true
 	result["show_comparison"] = true
@@ -82,6 +85,10 @@ static func normalise(raw: Variant) -> Dictionary:
 		part.width = roundi(number(input.get("width"), part.width, 200, 500))
 		part.show_quantity = input.get("show_quantity", true) == true
 		part.icon_opacity = number(input.get("icon_opacity"), 1, 0.25, 1)
+		if key == "actions":
+			part.columns = clampi(part.columns, 1, 5)
+			for action: String in ["store", "get", "drop", "mix", "lists"]:
+				part["show_" + action] = input.get("show_" + action, true) == true
 		var offset: Variant = input.get("offset")
 		if offset is Vector2 and offset.is_finite(): part.offset = offset.clamp(Vector2(-500, -300), Vector2(800, 500))
 	return result

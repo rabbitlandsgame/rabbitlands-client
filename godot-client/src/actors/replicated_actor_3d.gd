@@ -134,6 +134,8 @@ var _selection_ring_draped_at := Vector3(NAN, NAN, NAN)
 var _metres_per_tile := 1.0
 var resolver: AnimationResolver
 var animation_player: AnimationPlayer
+var _boss_rank := 0
+var _boss_rank_label: Label3D
 var combat_presentation: CombatPresentation3D
 var _in_combat := false
 var _ranged_aiming := false
@@ -1169,6 +1171,7 @@ func _add_nameplate(dto: Dictionary) -> void:
 	label.layers = WORLD_LABEL_STYLE.RENDER_LAYER
 	add_child(label)
 	_nameplate = label
+	set_boss_rank(int(dto.get("boss_rank", 0)))
 	_name_dto = _name_info(dto)
 	if not TextColors.events().changed.is_connected(_on_text_colors_changed):
 		TextColors.events().changed.connect(_on_text_colors_changed)
@@ -1584,6 +1587,9 @@ func overhead_fade() -> float:
 	return _overhead_fade
 
 func _refresh_overhead() -> void:
+	if is_instance_valid(_boss_rank_label):
+		_boss_rank_label.visible = _drawn and not _crowd_hidden and _overhead_fade > 0.0 and _boss_rank > 0
+		_fade_label(_boss_rank_label)
 	if is_instance_valid(_quest_marker):
 		# Quest offers remain visible when nameplates are disabled or crowded.
 		_quest_marker.visible = _drawn and not _crowd_hidden and _overhead_fade > 0.0 \
@@ -1767,6 +1773,28 @@ func clear_speech_bubble() -> void:
 ## same reason the footprint's setter is: the size can change after the
 ## model is built - an ordinary creature is promoted to an invasion boss
 ## and is redrawn larger without being respawned.
+func set_boss_rank(value: int) -> void:
+	var rank := clampi(value, 0, 2)
+	if rank == _boss_rank:
+		return
+	_boss_rank = rank
+	if rank > 0 and not is_instance_valid(_boss_rank_label):
+		_boss_rank_label = Label3D.new()
+		_boss_rank_label.name = "BossRank"
+		_boss_rank_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		_boss_rank_label.no_depth_test = true
+		_boss_rank_label.fixed_size = true
+		_boss_rank_label.offset = Vector2(0, 26)
+		WORLD_LABEL_STYLE.apply(_boss_rank_label, 16, OVERHEAD_PIXEL, 2)
+		_boss_rank_label.outline_modulate = Color.BLACK
+		_boss_rank_label.layers = WORLD_LABEL_STYLE.RENDER_LAYER
+		add_child(_boss_rank_label)
+	if is_instance_valid(_boss_rank_label):
+		_boss_rank_label.text = "BOSS" if rank == 2 else ("MINIBOSS" if rank == 1 else "")
+		_boss_rank_label.modulate = Color("ffd166") if rank == 2 else Color("ff9c66")
+		_boss_rank_label.position.y = banner_head_height() + NAMEPLATE_CLEARANCE
+	_refresh_overhead()
+
 func set_server_scale(value: float) -> void:
 	var next := maxf(0.01, value)
 	if is_equal_approx(next, server_scale):
@@ -1825,7 +1853,7 @@ func _lift_overhead(factor: float) -> void:
 	# One height for the lot: the bar, the numbers and the bubble sit above or
 	# below the name inside the block rather than at world heights of their
 	# own, so the gaps between them hold their size along with the text.
-	for node_name: String in ["Nameplate", "GuildTag", "TitleLine", "OccupationLine", "QuestOfferMarker",
+	for node_name: String in ["Nameplate", "GuildTag", "TitleLine", "OccupationLine", "QuestOfferMarker", "BossRank",
 			"HealthBarBackground", "HealthBarFill", "HealthNumbers", "SpeechBubble",
 			"OverheadBackground", "StatusIcons"]:
 		var node := get_node_or_null(node_name) as Node3D
@@ -1966,6 +1994,7 @@ func apply_server_state(dto: Dictionary, adapter: CoordinateAdapter, teleport :=
 	if not _remote_pending_transfer.is_empty():
 		RemotePresentationService.restore_pending(self)
 		if is_queued_for_deletion(): return
+	set_boss_rank(int(dto.get("boss_rank", 0)))
 	var remote = RemotePresentationService.current() if _remote_enrollment_ready else null
 	if remote != null and remote._ready_native:
 		if remote.is_local_actor(actor_id):
@@ -4085,9 +4114,16 @@ func _play_action_legacy(action: StringName, restart := false) -> void:
 		if not replays.has_animation(key):
 			replays.add_animation(key, animation_player.get_animation(clip))
 		clip = StringName("action_restarts/" + str(key))
-	animation_player.play(clip, blend)
+	# Several semantic actions share one physical loop (idle/turn, or a
+	# flyer's walk/run). Crossfading that clip into itself clears corrective
+	# morph weights in the mixer. Keep its clock and pose; only the semantic
+	# action and playback speed change. Explicit restarts still restart.
+	var same_loop := not restart and animation_player.is_playing() \
+		and animation_player.assigned_animation == clip
+	if not same_loop:
+		animation_player.play(clip, blend)
 	action_crossfade_seconds = blend / maxf(
-		absf(animation_player.speed_scale), 0.01) if had_pose else 0.0
+		absf(animation_player.speed_scale), 0.01) if had_pose and not same_loop else 0.0
 	# Retarget the facing correction to this action and ease to it over the same
 	# crossfade the clips blend across, so the body's turn tracks the pose change
 	# rather than snapping ahead of or behind it.
@@ -4361,7 +4397,10 @@ func set_target_marker_style(appearance: Dictionary) -> void:
 	_level_selection_ring()
 
 func set_combat_target(value: bool) -> void:
-	_combat_target = value and current_action != &"death"
+	var next := value and current_action != &"death"
+	if next == _combat_target:
+		return
+	_combat_target = next
 	if _combat_target and _combat_target_marker == null:
 		_combat_target_marker = COMBAT_TARGET_MARKER.new()
 		add_child(_combat_target_marker)

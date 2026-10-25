@@ -20,6 +20,10 @@ const PANEL_SIZE := Vector2(960.0, 520.0)
 ## Nothing may cover the fixed resource rail down the right-hand edge.
 const RESERVED_RIGHT_RAIL := 96.0
 const FPS_LIMITS: Array[int] = [0, 30, 60, 75, 90, 120, 144, 165, 240, 360]
+const VSYNC_DEFAULT := "on"
+const VSYNC_PREFERENCES: Array[String] = ["mailbox", "on", "off"]
+const WINDOW_DEFAULT := "windowed"
+const WINDOW_PREFERENCES: Array[String] = ["windowed", "fullscreen"]
 ## How far away other actors' names still show, in metres. The top of the range
 ## is main.gd's ACTOR_DRAW_DISTANCE_METRES: past it there is no body to hang a
 ## name over.
@@ -720,6 +724,12 @@ func _build_graphics() -> void:
 	graphics_restart_notice.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	graphics_restart_notice.hide()
 	page.add_child(graphics_restart_notice)
+	add_choice("Graphics", "window_mode", "Display mode",
+		["Windowed", "Fullscreen"], WINDOW_PREFERENCES)
+	(page.find_child("window_mode", true, false) as OptionButton).tooltip_text = "Windowed keeps the game in a normal window. Fullscreen fills the display. Changes apply immediately."
+	add_choice("Graphics", "vsync_mode", "Vertical sync",
+		["Low latency", "On", "Off"], VSYNC_PREFERENCES)
+	(page.find_child("vsync_mode", true, false) as OptionButton).tooltip_text = "On prevents screen tearing. Low latency can make controls feel more responsive. Off may allow tearing. Changes apply immediately."
 	_add_fps_limit_row(page)
 	# The look above the quality: whether it is on decides most of what the
 	# quality changes.
@@ -741,6 +751,29 @@ func _build_graphics() -> void:
 	# The combat box can also be dismissed from its own right-click menu, so
 	# this is the way back once a player has done that.
 	_add_map_cache_row(page)
+
+static func window_preference(value: Variant) -> String:
+	return value if value is String and value in WINDOW_PREFERENCES else WINDOW_DEFAULT
+
+static func display_mode(value: Variant) -> DisplayServer.WindowMode:
+	return DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN if window_preference(value) == "fullscreen" \
+		else DisplayServer.WINDOW_MODE_WINDOWED
+
+static func has_display_argument(arguments: PackedStringArray) -> bool:
+	for argument: String in arguments:
+		if argument in ["--windowed", "-w", "--fullscreen", "-f"]:
+			return true
+	return false
+
+## Preserve explicit choices; older or invalid settings retain the existing default.
+static func vsync_preference(value: Variant) -> String:
+	return value if value is String and value in VSYNC_PREFERENCES else VSYNC_DEFAULT
+
+static func vsync_mode(value: Variant) -> DisplayServer.VSyncMode:
+	match vsync_preference(value):
+		"on": return DisplayServer.VSYNC_ENABLED
+		"off": return DisplayServer.VSYNC_DISABLED
+	return DisplayServer.VSYNC_MAILBOX
 
 func _add_fps_limit_row(page: VBoxContainer) -> void:
 	var row := HBoxContainer.new()

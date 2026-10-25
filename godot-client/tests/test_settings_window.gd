@@ -7,6 +7,7 @@ extends SceneTree
 ## and nothing else leaves the client.
 
 const SETTINGS_PATH := "user://eloria_hud.cfg"
+const Settings := preload("res://src/ui/settings_window.gd")
 
 var failures := 0
 
@@ -47,6 +48,8 @@ func _run() -> void:
 		and not rect.intersects(resource_rail.get_global_rect()),
 		"it fits 1280x720 clear of the resource rail: %s" % rect)
 	_test_fps_limit(main, window)
+	_test_vsync_mode(main, window)
+	_test_window_mode(main, window)
 	var emblems := preload("res://src/actors/cape_emblems.gd")
 	var cape_toggle := panel.find_child("cape_emblems", true, false) as CheckBox
 	_expect(cape_toggle != null, "Graphics has a cape emblem preference")
@@ -350,6 +353,131 @@ func _test_fps_limit(main: Control, window: Control) -> void:
 	_expect(Engine.max_fps == 0 and option.get_selected_id() == 0,
 		"settings from an older client default to Unlimited")
 	main.call("_on_client_setting_changed", "Graphics", "fps_limit", original)
+
+## The selector keeps the player's semantic choice even on headless or a
+## renderer whose effective mode falls back to On. Real-backend timing is
+## covered separately; this guards the actual UI, persistence and mapping.
+func _test_vsync_mode(main: Control, window: Control) -> void:
+	var option := (window.get("panel") as Node).find_child("vsync_mode", true, false) as OptionButton
+	if not _expect(option != null, "Graphics offers vertical sync"):
+		return
+	var original: String = main.get("_vsync_preference")
+	var frame_cap := Engine.max_fps
+	var physics_ticks := Engine.physics_ticks_per_second
+	var time_scale := Engine.time_scale
+	_expect(option.item_count == 3, "vertical sync has three supported choices")
+	var labels := ["Low latency", "On", "Off"]
+	var modes := [DisplayServer.VSYNC_MAILBOX, DisplayServer.VSYNC_ENABLED, DisplayServer.VSYNC_DISABLED]
+	for index: int in Settings.VSYNC_PREFERENCES.size():
+		var preference: String = Settings.VSYNC_PREFERENCES[index]
+		_expect(option.get_item_text(index) == labels[index]
+			and option.get_item_metadata(index) == preference
+			and Settings.vsync_mode(preference) == modes[index],
+			"vertical sync choice maps to its actual backend mode: " + preference)
+		option.select(index)
+		option.item_selected.emit(index)
+		var stored := ConfigFile.new()
+		_expect(main.get("_vsync_preference") == preference
+			and stored.load(SETTINGS_PATH) == OK
+			and stored.get_value("graphics", "vsync_mode", "") == preference,
+			"selecting vertical sync applies and saves: " + preference)
+		main.call("_apply_vsync_mode", "off" if preference != "off" else "on")
+		main.call("_load_hud_settings")
+		_expect(main.get("_vsync_preference") == preference
+			and option.get_item_metadata(option.selected) == preference,
+			"saved vertical sync restores without overwriting explicit choice: " + preference)
+	_expect(Engine.max_fps == frame_cap and Engine.physics_ticks_per_second == physics_ticks
+		and Engine.time_scale == time_scale, "vertical sync preserves frame cap and game timing")
+	var config := ConfigFile.new()
+	config.load(SETTINGS_PATH)
+	for invalid: Variant in [null, true, 3, 0, 1.0, "On", "adaptive", "", {}, []]:
+		config.set_value("graphics", "vsync_mode", invalid)
+		config.save(SETTINGS_PATH)
+		main.call("_load_hud_settings")
+		_expect(main.get("_vsync_preference") == "on"
+			and option.get_item_metadata(option.selected) == "on"
+			and Settings.vsync_mode(invalid) == DisplayServer.VSYNC_ENABLED,
+			"invalid vertical sync uses On: " + str(invalid))
+	config.erase_section_key("graphics", "vsync_mode")
+	config.save(SETTINGS_PATH)
+	main.call("_load_hud_settings")
+	_expect(main.get("_vsync_preference") == "on"
+		and option.get_item_metadata(option.selected) == "on",
+		"new and older-client settings preserve the On default")
+	var diagnostic: Dictionary = main.call("client_diagnostic_snapshot")
+	_expect(diagnostic.vsync_preference == "on"
+		and diagnostic.vsync_mode == DisplayServer.window_get_vsync_mode()
+		and diagnostic.window_focused == main.get_window().has_focus()
+		and diagnostic.low_processor_usage_mode == OS.low_processor_usage_mode
+		and diagnostic.low_processor_usage_mode_sleep_usec == OS.low_processor_usage_mode_sleep_usec
+		and diagnostic.max_fps == Engine.max_fps,
+		"diagnostics distinguish preference, actual sync, focus and idle settings")
+	main.call("_on_client_setting_changed", "Graphics", "vsync_mode", original)
+
+func _test_window_mode(main: Control, window: Control) -> void:
+	var option := (window.get("panel") as Node).find_child("window_mode", true, false) as OptionButton
+	if not _expect(option != null, "Graphics offers display mode"):
+		return
+	var original: String = main.get("_window_mode_preference")
+	var frame_cap := Engine.max_fps
+	var vsync: String = main.get("_vsync_preference")
+	var quality := LookProfile.player_quality()
+	var labels := ["Windowed", "Fullscreen"]
+	var modes := [DisplayServer.WINDOW_MODE_WINDOWED, DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN]
+	_expect(option.item_count == 2, "display mode has two supported choices")
+	for index: int in Settings.WINDOW_PREFERENCES.size():
+		var preference: String = Settings.WINDOW_PREFERENCES[index]
+		_expect(option.get_item_text(index) == labels[index]
+			and option.get_item_metadata(index) == preference
+			and Settings.display_mode(preference) == modes[index],
+			"display choice maps to its actual backend mode: " + preference)
+		option.select(index)
+		option.item_selected.emit(index)
+		var stored := ConfigFile.new()
+		_expect(main.get("_window_mode_preference") == preference
+			and not main.get("_window_mode_launch_override")
+			and stored.load(SETTINGS_PATH) == OK
+			and stored.get_value("graphics", "window_mode", "") == preference,
+			"display selection applies immediately, supersedes launch flag and saves: " + preference)
+		main.call("_apply_window_mode", "windowed" if preference == "fullscreen" else "fullscreen")
+		main.call("_load_hud_settings")
+		_expect(main.get("_window_mode_preference") == preference
+			and option.get_item_metadata(option.selected) == preference,
+			"saved display preference restores: " + preference)
+	_expect(Engine.max_fps == frame_cap and main.get("_vsync_preference") == vsync
+		and LookProfile.player_quality() == quality,
+		"display changes preserve frame cap, vertical sync and quality")
+	for arguments: PackedStringArray in [PackedStringArray(["--windowed"]), PackedStringArray(["-w"]),
+			PackedStringArray(["--fullscreen"]), PackedStringArray(["-f"]),
+			PackedStringArray(["--path", "game", "--fullscreen", "--resolution", "1280x720"])]:
+		_expect(Settings.has_display_argument(arguments), "explicit window launch mode wins at startup: " + str(arguments))
+	for arguments: PackedStringArray in [PackedStringArray(), PackedStringArray(["--headless"]),
+			PackedStringArray(["--resolution", "1280x720"]), PackedStringArray(["--fullscreen-extra"])]:
+		_expect(not Settings.has_display_argument(arguments), "other launch arguments retain the saved display mode: " + str(arguments))
+	var config := ConfigFile.new()
+	config.load(SETTINGS_PATH)
+	for invalid: Variant in [null, true, 4, 0, 1.0, "Fullscreen", "maximized", "", {}, []]:
+		config.set_value("graphics", "window_mode", invalid)
+		config.save(SETTINGS_PATH)
+		main.call("_load_hud_settings")
+		_expect(main.get("_window_mode_preference") == "windowed"
+			and option.get_item_metadata(option.selected) == "windowed"
+			and Settings.display_mode(invalid) == DisplayServer.WINDOW_MODE_WINDOWED,
+			"invalid display preference uses Windowed: " + str(invalid))
+	config.erase_section_key("graphics", "window_mode")
+	config.save(SETTINGS_PATH)
+	main.call("_load_hud_settings")
+	_expect(main.get("_window_mode_preference") == "windowed"
+		and option.get_item_metadata(option.selected) == "windowed",
+		"new and older-client settings preserve the Windowed default")
+	var diagnostic: Dictionary = main.call("client_diagnostic_snapshot")
+	_expect(diagnostic.window_mode_preference == "windowed"
+		and diagnostic.window_mode == DisplayServer.window_get_mode()
+		and diagnostic.root_viewport_size == str(root.size)
+		and diagnostic.window_size == str(main.get_window().size)
+		and diagnostic.viewport_size == str(main.get("main_viewport").size),
+		"diagnostics report actual display mode and all presentation dimensions")
+	main.call("_on_client_setting_changed", "Graphics", "window_mode", original)
 
 ## The audit guards the full preference inventory, not just the original
 ## graphics controls. Exercise actual UI signals and saved values as well as

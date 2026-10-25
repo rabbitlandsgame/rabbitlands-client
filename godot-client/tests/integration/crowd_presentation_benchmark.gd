@@ -43,6 +43,7 @@ extends SceneTree
 ## - RABBITLANDS_CROWD_BENCH_REPLAY_START_MSEC: where the replay's warmup starts,
 ##   in ms after the recording's YOU_ARE (default 30000).
 ## - RABBITLANDS_CROWD_BENCH_OUT: report path (default user://).
+## - RABBITLANDS_CROWD_BENCH_WINDOW_MODE: windowed (default) or fullscreen.
 ## - RABBITLANDS_CROWD_PRESENTATION / RABBITLANDS_CROWD_BODY_CAP: read by Main.
 ## - RABBITLANDS_CROWD_BENCH_PRESENCE: send ELORIA_PRESENCE once a second with
 ##   this many players beyond the area of interest (82-139 tiles away, each
@@ -229,6 +230,7 @@ func _run() -> void:
 	if not _headless:
 		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 	var requested_resolution := Workloads.resolution(_env("RABBITLANDS_CROWD_BENCH_RESOLUTION", "1280x720"))
+	var requested_window_mode := _env("RABBITLANDS_CROWD_BENCH_WINDOW_MODE", "windowed")
 	root.size = requested_resolution
 	var replay := _driver_mode() == "replay"
 	var profile := "replay" if replay else _env("RABBITLANDS_CROWD_BENCH_CELLS", "phase4")
@@ -268,6 +270,8 @@ func _run() -> void:
 				50 if _driver_mode() == "live" else 100, 25),
 			"driverDescription": _driver_description(),
 			"vsync": "disabled" if not _headless else "n/a",
+			"requestedWindowMode": requested_window_mode,
+			"windowPlatform": OS.get_name(),
 			"fpsCap": _env_int("RABBITLANDS_CROWD_BENCH_FPS_CAP", 60, 0),
 			"frameMetric": ("frame work: first physics step (or process) to frame_post_draw "
 				+ "(windowed) or to a deferred call queued by the last node to process, after "
@@ -287,7 +291,8 @@ func _run() -> void:
 				"activity": "recorded"})
 	else:
 		_creatures = _creature_actor_types()
-	if not _expect(not cells.is_empty(), "profile %s selects at least one cell" % profile) \
+	if not _expect(requested_window_mode in ["windowed", "fullscreen"], "valid rendered window mode") \
+			or not _expect(not cells.is_empty(), "profile %s selects at least one cell" % profile) \
 			or not _expect(replay or not _creatures.is_empty(), "creature models resolve"):
 		_finish()
 		return
@@ -296,6 +301,38 @@ func _run() -> void:
 		_finish()
 		return
 	Engine.max_fps = _fps_cap
+	# Main has loaded the player's settings since the first override. Keep
+	# benchmark pacing explicit and record the actual backend mode.
+	if not _headless:
+		var display_mode := DisplayServer.WINDOW_MODE_WINDOWED
+		if requested_window_mode == "fullscreen":
+			# macOS implements fullscreen through its native fullscreen space.
+			display_mode = DisplayServer.WINDOW_MODE_FULLSCREEN if OS.get_name() == "macOS" \
+				else DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN
+		DisplayServer.window_set_mode(display_mode)
+		# Process resize notifications and Main's deferred viewport updates before
+		# readiness, actor construction, or any timed frames begin.
+		for settle_frame: int in range(3):
+			await process_frame
+		await RenderingServer.frame_post_draw
+		_report.measurement["requestedDisplayWindowMode"] = display_mode
+		_report.measurement["actualWindowMode"] = DisplayServer.window_get_mode()
+		_report.measurement["actualWindowSize"] = [DisplayServer.window_get_size().x,
+			DisplayServer.window_get_size().y]
+		if not _expect(_report.measurement.actualWindowMode == display_mode,
+				"rendered benchmark applies requested window mode after Main settings load"):
+			_finish()
+			return
+		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
+		_report.measurement["actualVsyncMode"] = DisplayServer.window_get_vsync_mode()
+		if not _expect(_report.measurement.actualVsyncMode == DisplayServer.VSYNC_DISABLED,
+				"rendered benchmark applies VSync disabled after Main settings load"):
+			_finish()
+			return
+	else:
+		_report.measurement["requestedDisplayWindowMode"] = null
+		_report.measurement["actualWindowMode"] = null
+		_report.measurement["actualVsyncMode"] = null
 	physics_frame.connect(_on_iteration_started)
 	process_frame.connect(_on_process_started)
 	# The last node to process marks where node processing ends and the
@@ -1811,6 +1848,12 @@ func _tear_down_main() -> void:
 		_record_teardown_timeout(started, "afterUnload", after_unload)
 		return
 	_log_teardown_stage("main-free:before")
+	var actor_warmup: RefCounted = owner.get("actor_resource_warmup")
+	actor_warmup.clear()
+	while not actor_warmup.is_idle() and Time.get_ticks_msec() < deadline:
+		await process_frame
+	if not _expect(actor_warmup.is_idle(), "actor preparation drains before Main is freed"):
+		return
 	owner.queue_free()
 	_main = null
 	_adapter = null

@@ -6,12 +6,12 @@
     "run": 1.25
   },
   "actions": {
-    "idle": "Idle_A",
-    "alternate_idle": "Idle_A",
-    "combat_idle": "Fighting_Idle",
-    "walk": "Walk",
-    "run": "Jog",
-    "turn": "Idle_A",
+    "idle": "Fly",
+    "alternate_idle": "Fly",
+    "combat_idle": "Fly",
+    "walk": "Fly",
+    "run": "Fly",
+    "turn": "Fly",
     "sit": "Idle_A",
     "seated_idle": "Idle_A",
     "stand": "Idle_A",
@@ -21,8 +21,8 @@
     "ranged_attack": "Sword_Attack",
     "cast": "Sword_Attack",
     "harvest": "Sword_Attack",
-    "pickup": "Idle_A",
-    "drop": "Idle_A",
+    "pickup": "Fly",
+    "drop": "Fly",
     "emote_greeting": "Idle_A",
     "fly": "Fly"
   },
@@ -102,5 +102,11 @@
     "Walk",
     "Jog",
     "Fly"
-  ]
+  ],
+  "runtimeLocomotion": {
+    "mode": "flight",
+    "sourceClip": "Fly",
+    "takeoffLanding": "not required for continuously airborne species",
+    "attackAndDeath": "preserve existing authored clips and corrective resets"
+  }
 }

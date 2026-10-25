@@ -108,7 +108,7 @@ def executable_path(value: str) -> Path:
 
 
 def request_for(args) -> dict:
-    return {"mode": args.mode, "renderer": args.renderer, "quality": args.quality,
+    return {"mode": args.mode, "window_mode": args.window_mode, "renderer": args.renderer, "quality": args.quality,
             "resolution": args.resolution, "map": args.map, "minimap": args.minimap,
             "fps_cap": args.fps_cap, "sample_ms": args.sample_ms, "warmup_ms": args.warmup_ms,
             "driver": args.driver, "body_cap": args.body_cap, "cells": args.cells,
@@ -258,6 +258,7 @@ def run_one(args, variant: str, repeat: int, out_dir: Path) -> dict:
         "RABBITLANDS_CROWD_BENCH_DRIVER": args.driver,
         "RABBITLANDS_CROWD_BENCH_FPS_CAP": str(args.fps_cap),
         "RABBITLANDS_CROWD_BENCH_RESOLUTION": f"{args.resolution[0]}x{args.resolution[1]}",
+        "RABBITLANDS_CROWD_BENCH_WINDOW_MODE": args.window_mode,
         "RABBITLANDS_CROWD_BENCH_EXECUTION_MODE": args.executable_mode,
         "RABBITLANDS_CROWD_BENCH_START_TOKEN": start_token,
         "RABBITLANDS_CROWD_TUNING": args.tuning,
@@ -397,6 +398,8 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--asset-manifest", type=Path)
     p.add_argument("--asset-map", action="append", default=[])
     p.add_argument("--mode", choices=["headless", "windowed"], default="headless")
+    p.add_argument("--window-mode", choices=["windowed", "fullscreen"], default="windowed",
+                   help="rendered window mode; fullscreen requests exclusive fullscreen on Windows/Linux")
     p.add_argument("--renderer", default="forward_plus", choices=["forward_plus", "mobile", "gl_compatibility"])
     p.add_argument("--resolution", type=resolution, default=(1280, 720))
     p.add_argument("--settings-profile", choices=["default", "performance"], default="default",
@@ -453,6 +456,8 @@ def main(argv: list[str] | None = None) -> int:
     args = p.parse_args(argv)
     try:
         configure_settings_profile(args)
+        if args.window_mode == "fullscreen" and args.mode != "windowed":
+            raise EvidenceError("--window-mode fullscreen requires --mode windowed")
         if args.remote_presentation == "rust" and args.client_runtime != "rust":
             raise EvidenceError("--remote-presentation rust requires --client-runtime rust")
         configure_prepared_profile(args)

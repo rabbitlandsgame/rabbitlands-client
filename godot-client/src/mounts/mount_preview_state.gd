@@ -78,6 +78,26 @@ func apply_snapshot(value: Variant) -> bool:
 		if selected != "" and selected not in owned:
 			last_error = "invalid_ownership"
 			return false
+	if incoming.has("mount_progression"):
+		var progress: Variant = incoming.mount_progression
+		if not progress is Dictionary or progress.size() > MOUNT_IDS.size():
+			last_error = "invalid_progression"
+			return false
+		for id: Variant in progress:
+			var entry: Variant = progress[id]
+			if (id not in incoming.get("owned_mount_ids", []) or not entry is Dictionary
+					or not _integer(entry.get("xp"), 0, 1000)
+					or not _integer(entry.get("stage"), 0, 2)
+					or not _integer(entry.get("next_xp"), 0, 1000)
+					or not entry.get("can_evolve") is bool):
+				last_error = "invalid_progression"
+				return false
+			var stage: int = int(entry.stage)
+			var thresholds := [0, 250, 1000]
+			var next_xp: int = thresholds[stage + 1] if stage < 2 else 0
+			if entry.xp < thresholds[stage] or entry.next_xp != next_xp or entry.can_evolve != (next_xp > 0 and entry.xp >= next_xp):
+				last_error = "invalid_progression"
+				return false
 	for spec: Array in [["step_us", 10000, 2000000], ["endurance_ms", 0, 8000],
 		["summon_remaining_ms", 0, 1500], ["combat_remaining_ms", 0, 10000]]:
 		if not _integer(incoming.get(spec[0]), spec[1], spec[2]):

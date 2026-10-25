@@ -330,6 +330,7 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"actor_occupations_v1",
 	"mounts_v1",
 	"mount_selection_v1",
+	"mount_progression_v1",
 	"crystalback_mount_v1",
 	"rabbit_mount_v1",
 	"raptor_mount_v1",
@@ -3205,7 +3206,7 @@ static func decode_actor(payload: PackedByteArray, enhanced: bool, extended := f
 		# map the actor stands on (ELORIA_ADJACENT_MAPS names it), 0 for our own.
 		"map_handle": u16(payload, 6),
 		"actor_type": u16(payload, 10) if extended else int(payload[10]),
-		"scale": 1.0}
+		"scale": 1.0, "boss_rank": 0}
 	if enhanced:
 		actor["appearance"] = {
 			"skin": int(payload[12]), "hair": AppearanceVariants.hair_from_wire(int(payload[13]), int(payload[17])), "shirt": int(payload[14]),
@@ -3277,6 +3278,11 @@ static func decode_actor(payload: PackedByteArray, enhanced: bool, extended := f
 			var scale_offset: int = 17 + shift + plain_end + 1
 			if payload.size() >= scale_offset + 2:
 				actor["scale"] = decode_actor_scale(u16(payload, scale_offset))
+				var rank_offset := scale_offset + 2
+				if payload.size() >= rank_offset + 4 \
+						and payload.slice(rank_offset, rank_offset + 3) == PackedByteArray([82, 75, 1]) \
+						and int(payload[rank_offset + 3]) in [1, 2]:
+					actor["boss_rank"] = int(payload[rank_offset + 3])
 	actor["alive"] = int(actor.get("health", 0)) > 0
 	# The frame byte is the actor's current animation state. FRAME_COMBAT_IDLE
 	# is the only value that carries gameplay meaning at spawn: an actor

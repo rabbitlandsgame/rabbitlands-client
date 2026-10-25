@@ -167,6 +167,19 @@ const RECONNECT_INTERVAL_MSEC := 2000
 ## holding the frame.
 const MAXIMUM_RECORDS_PER_READ := 64
 
+const DISPATCH_BUDGET_USEC := 3000
+const DISPATCH_PACKETS_PER_FRAME := 256
+var _dispatch_frame := -1
+var _dispatch_spent_usec := 0
+var _dispatch_packets := 0
+var _dispatch_max_usec := 0
+
+func reset_dispatch_statistics() -> void:
+	_dispatch_max_usec = 0
+
+func dispatch_statistics() -> Dictionary:
+	return {"maximum_frame_ms": _dispatch_max_usec / 1000.0}
+
 signal reconnect_progress(attempt: int, total: int, delay_msec: int)
 
 var _peer := StreamPeerTCP.new()
@@ -764,16 +777,35 @@ func _read_link() -> void:
 			_tls.poll()
 			if _tls.get_status() != StreamPeerTLS.STATUS_CONNECTED:
 				break
-	if received:
+	if received or not _rx.is_empty():
 		_drain_packets()
 
 func _drain_packets() -> void:
+	var frame := Engine.get_process_frames()
+	if frame != _dispatch_frame:
+		_dispatch_frame = frame
+		_dispatch_spent_usec = 0
+		_dispatch_packets = 0
+	if _dispatch_spent_usec >= DISPATCH_BUDGET_USEC or _dispatch_packets >= DISPATCH_PACKETS_PER_FRAME:
+		return
+	var started := Time.get_ticks_usec()
+	_drain_packet_buffer(started)
+	_dispatch_spent_usec += Time.get_ticks_usec() - started
+	_dispatch_max_usec = maxi(_dispatch_max_usec, _dispatch_spent_usec)
+
+func _drain_packet_buffer(started: int) -> void:
 	# Slicing the receive buffer after every packet copied the whole remainder
 	# once per packet, which is quadratic across a burst. The buffer is now
 	# trimmed once, after the burst has been decoded.
 	var consumed := 0
 	var generation: int = coordinates.generation
 	while true:
+		# Early and late reads share this allowance. Resume in order next
+		# frame even if no new bytes arrive; never skip ahead to a ping.
+		if _dispatch_packets >= DISPATCH_PACKETS_PER_FRAME \
+				or _dispatch_spent_usec + Time.get_ticks_usec() - started >= DISPATCH_BUDGET_USEC:
+			_trim_receive_buffer(consumed)
+			return
 		var decoded := EloriaProtocol.try_decode(_rx, consumed)
 		match decoded.status:
 			"incomplete":
@@ -785,6 +817,7 @@ func _drain_packets() -> void:
 				return
 			"ok":
 				consumed += int(decoded.consumed)
+				_dispatch_packets += 1
 				if decoded.command == EloriaProtocol.ServerMessage.LOG_IN_OK:
 					_session_credentials_confirmed = not _session_username.is_empty()
 					_resume_session = false

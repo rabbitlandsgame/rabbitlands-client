@@ -17,6 +17,7 @@ var inspection_title: Label
 var inspection_category: Label
 var inspection_text: RichTextLabel
 var inspection_actions: HBoxContainer
+var bulk_actions: GridContainer
 var inspection_close: Button
 var external_canvas: Control
 var footer: HBoxContainer
@@ -137,6 +138,9 @@ func configure(owner_main: Control) -> void:
 	expand.tooltip_text = "Inspect selected item"
 	groups.preview.add_child(expand)
 	_build_inspection()
+	bulk_actions = preload("res://src/ui/inventory_action_bar.gd").new()
+	groups.actions.add_child(bulk_actions)
+	bulk_actions.configure(main, self)
 	footer = HBoxContainer.new()
 	footer.name = "InventoryLoadRow"
 	canvas.add_child(footer)
@@ -449,8 +453,14 @@ func apply_layout() -> void:
 		external_canvas.custom_minimum_size = detail_size
 		detail_root.size = detail_size + Vector2(16, 16)
 		groups.inspection.visible = show_detail and options.parts.inspection.enabled
+	var action_height: int = bulk_actions.apply_options(options.parts.actions)
+	groups.actions.visible = options.parts.actions.enabled and action_height > 0
+	bulk_actions.position = Vector2.ZERO
+	bulk_actions.size = Vector2(body_size.x, action_height)
+	_place("actions", Vector2(0, bottom), Vector2(maxf(body_size.x, bulk_actions.get_combined_minimum_size().x), action_height))
+	bulk_actions.size.x = groups.actions.size.x
 	# Include moved components in the window's real input and background bounds.
-	for key: String in ["backpack", "equipment", "preview", "inspection"]:
+	for key: String in ["backpack", "equipment", "preview", "inspection", "actions"]:
 		var group: Control = groups[key]
 		if group.visible and group.get_parent() == canvas:
 			group.position = group.position.max(Vector2(0, top))
@@ -892,7 +902,7 @@ func handle_editor_input(event: InputEvent) -> void:
 			_resizing = main.inventory_resize_grip.get_global_rect().has_point(event.position)
 			get_viewport().set_input_as_handled()
 			return
-		for key: String in ["inspection", "preview", "equipment", "backpack"]:
+		for key: String in ["actions", "inspection", "preview", "equipment", "backpack"]:
 			var control: Control = groups[key]
 			if control.is_visible_in_tree() and control.get_global_rect().has_point(event.position):
 				editor.select_component(key)
