@@ -2,6 +2,7 @@ extends "res://src/app/main.gd"
 ## Benchmark-only instrumentation around the existing presentation pipeline.
 ## Nothing in the shipping client pays for these timers.
 
+const PROFILE_GATE_SOURCE_SHA256 := "7862794be68047fbedfa356cca6e83604b13424cd367a33b36c9455d9bab1282"
 var benchmark_heat_bolt: Node
 var benchmark_ground_enabled := true
 var benchmark_overhead_enabled := true
@@ -111,9 +112,48 @@ class TimedAnimationGate:
 
 	func advance(delta: float) -> void:
 		var started := Time.get_ticks_usec()
-		super.advance(delta)
+		if owner_main != null and bool(owner_main.get("benchmark_detailed_profile_enabled")):
+			_profile_advance(delta)
+		else:
+			super.advance(delta)
 		if owner_main != null:
 			owner_main.call("_benchmark_add", &"half_rate_step", started)
+
+
+	func _profile_advance(delta: float) -> void:
+		owner_main.set("_benchmark_profile_gate_frame", Engine.get_process_frames())
+		_tick += 1
+		for group: Dictionary in _groups:
+			group["delta"] = float(group["delta"]) + delta
+			if (_tick + int(group["phase"])) % int(group["stride"]) != 0:
+				continue
+			var step: float = group["delta"]
+			group["delta"] = 0.0
+			var members: Dictionary = group["members"]
+			if members.is_empty():
+				continue
+			var gone: Array = []
+			for value: Variant in members:
+				if not is_instance_valid(value):
+					gone.append(value)
+					continue
+				var player: AnimationPlayer = value as AnimationPlayer
+				if player.active and player.is_inside_tree():
+					var player_started := Time.get_ticks_usec()
+					player.advance(step)
+					var player_usec := Time.get_ticks_usec() - player_started
+					var skeleton_usec := 0
+					var skeleton_called := false
+					var skeleton: Variant = members[value]
+					if is_instance_valid(skeleton) and (skeleton as Skeleton3D).is_inside_tree():
+						var skeleton_started := Time.get_ticks_usec()
+						(skeleton as Skeleton3D).advance(step)
+						skeleton_usec = Time.get_ticks_usec() - skeleton_started
+						skeleton_called = true
+					owner_main.call("_benchmark_profile_manual_step", player, int(group["tier"]), int(group["phase"]), player_usec, skeleton_usec, skeleton_called)
+			for value: Variant in gone:
+				members.erase(value)
+				_group_of.erase(value)
 
 
 func _init() -> void:
@@ -123,6 +163,11 @@ func _init() -> void:
 
 
 func benchmark_reset_frame() -> void:
+	_benchmark_profile_metric_frames.clear()
+	_benchmark_profile_signal_frames.clear()
+	_benchmark_profile_manual.clear()
+	_benchmark_profile_listeners.clear()
+	_benchmark_profile_gate_frame = -1
 	_benchmark_usec.clear()
 	_benchmark_calls.clear()
 	_benchmark_values.clear()
@@ -131,6 +176,7 @@ func benchmark_reset_frame() -> void:
 
 func benchmark_take_frame() -> Dictionary:
 	return {
+		"profile": _benchmark_profile_snapshot() if benchmark_detailed_profile_enabled else {},
 		"microseconds": _benchmark_usec.duplicate(),
 		"calls": _benchmark_calls.duplicate(),
 		"values": _benchmark_values.duplicate(),
@@ -142,6 +188,8 @@ func benchmark_take_frame() -> Dictionary:
 
 
 func _benchmark_add(label: StringName, started: int) -> void:
+	if benchmark_detailed_profile_enabled:
+		_benchmark_profile_mark(label)
 	_benchmark_usec[label] = int(_benchmark_usec.get(label, 0)) \
 		+ Time.get_ticks_usec() - started
 	_benchmark_calls[label] = int(_benchmark_calls.get(label, 0)) + 1
@@ -160,6 +208,10 @@ func _process(delta: float) -> void:
 ## combat callback is replaced in place by rebuilding the complete ordered
 ## connection list, so the other callbacks retain their relative positions.
 func benchmark_attach_attribution(nodes: Dictionary) -> Dictionary:
+	if benchmark_detailed_profile_enabled and not (animation_gate is TimedAnimationGate):
+		return {"ok": false, "error": "detailed legacy probe unsupported: Main replaced the timed gate", "actualGate": _benchmark_profile_gate_identity()}
+	if benchmark_detailed_profile_enabled and not _benchmark_profile_gate_source_matches():
+		return {"ok": false, "error": "diagnostic gate copy no longer matches runtime source"}
 	_benchmark_skeleton_frames.clear()
 	var plans: Array[Dictionary] = []
 	# Preflight the complete fixture before touching any connection. A failure
@@ -183,6 +235,8 @@ func benchmark_attach_attribution(nodes: Dictionary) -> Dictionary:
 				return {"ok": false,
 					"error": "actor %d has an invalid skeleton callback" % id}
 			var flags := int(connection.get("flags", 0))
+			if benchmark_detailed_profile_enabled and (flags & (CONNECT_DEFERRED | CONNECT_ONE_SHOT)) != 0:
+				return {"ok": false, "error": "detailed synchronous frame profiling refuses deferred/one-shot listeners before mutation"}
 			if (flags & CONNECT_REFERENCE_COUNTED) != 0:
 				return {"ok": false,
 					"error": ("actor %d has a reference-counted skeleton callback; "
@@ -204,6 +258,12 @@ func benchmark_attach_attribution(nodes: Dictionary) -> Dictionary:
 			plan["direct_index"] = direct_index
 		plans.append(plan)
 
+	if benchmark_detailed_profile_enabled:
+		var detailed := _benchmark_profile_attach_plans(plans)
+		if bool(detailed.get("ok", false)):
+			_benchmark_profile_register(nodes)
+			_benchmark_profile_census() # Prime track-count cache outside warmup/timing.
+		return detailed
 	var combat_delegates := 0
 	var passive_observers := 0
 	var verified_replacements := 0
@@ -545,3 +605,199 @@ func _on_special_effect_requested(effect: Dictionary) -> void:
 func benchmark_remote_snapshot() -> Dictionary:
 	return {"presentation": (remote_presentation.snapshot() if is_instance_valid(remote_presentation) else {"backend": "legacy", "reason": "not_initialized"}),
 		"coverage": remote_presentation.coverage(actor_nodes.values())}
+
+
+## Detailed diagnostic state; never reached when attribution is disabled.
+var _benchmark_profile_players: Dictionary = {}
+var _benchmark_profile_actor_rows: Array[Dictionary] = []
+var _benchmark_profile_tracks: Dictionary = {}
+var _benchmark_profile_manual: Dictionary = {}
+var _benchmark_profile_listeners: Dictionary = {}
+var _benchmark_profile_gate_frame := -1
+var _benchmark_profile_metric_frames: Dictionary = {}
+var _benchmark_profile_signal_frames: Dictionary = {}
+var benchmark_detailed_profile_enabled := false
+var _benchmark_profile_delegate_owners: Array[RefCounted] = []
+
+class ProfileListenerDelegate extends RefCounted:
+	var owner_main: Node
+	var actor_id: int
+	var label: StringName
+	var callback: Callable
+	var is_combat: bool
+	func invoke() -> void:
+		if is_instance_valid(owner_main):
+			owner_main.call("_benchmark_profile_listener", actor_id, label, callback, is_combat)
+
+func _benchmark_profile_gate_source_matches() -> bool:
+	# Compiled/remapped export scripts cannot attest this copied source loop.
+	if OS.has_feature("template") \
+			or OS.get_environment("RABBITLANDS_CROWD_BENCH_EXECUTION_MODE") == "exported" \
+			or not FileAccess.file_exists("res://src/world/animation_gate.gd"):
+		return false
+	var source := FileAccess.get_file_as_string("res://src/world/animation_gate.gd").replace("\r\n", "\n")
+	var first := source.find("func advance(delta: float) -> void:")
+	var last := source.find("## Forgets every player.", first)
+	return first >= 0 and last > first and source.substr(first, last-first).sha256_text() == PROFILE_GATE_SOURCE_SHA256
+
+func _benchmark_profile_register(nodes: Dictionary) -> void:
+	for raw_id: Variant in nodes:
+		var actor := nodes[raw_id] as ReplicatedActor3D
+		if not is_instance_valid(actor) or actor.animation_player == null:
+			continue
+		var skeleton := actor.get_skeleton()
+		var dto: Dictionary = AppState.actors.get(raw_id, {})
+		var metadata := {"actor": actor, "actor_id": int(raw_id), "model": _model_for_actor(dto),
+			"bones": skeleton.get_bone_count() if skeleton != null else 0}
+		_benchmark_profile_players[actor.animation_player] = metadata
+		_benchmark_profile_actor_rows.append(metadata)
+
+func _benchmark_profile_manual_step(player: AnimationPlayer, tier: int, phase: int,
+		player_usec: int, skeleton_usec: int, skeleton_called: bool) -> void:
+	var metadata: Dictionary = _benchmark_profile_players.get(player, {})
+	var model := str(metadata.get("model", "unregistered"))
+	var key := "%s/tier%d/phase%d" % [model, tier, phase]
+	var row: Dictionary = _benchmark_profile_manual.get(key, {"model": model, "tier": tier,
+		"phase": phase, "players": 0, "skeleton_calls": 0, "player_usec": 0, "skeleton_usec": 0})
+	row.players = int(row.players) + 1
+	row.skeleton_calls = int(row.skeleton_calls) + int(skeleton_called)
+	row.player_usec = int(row.player_usec) + player_usec
+	row.skeleton_usec = int(row.skeleton_usec) + skeleton_usec
+	_benchmark_profile_manual[key] = row
+	_benchmark_usec[&"manual_player_advance"] = int(_benchmark_usec.get(&"manual_player_advance", 0)) + player_usec
+	_benchmark_usec[&"manual_skeleton_advance"] = int(_benchmark_usec.get(&"manual_skeleton_advance", 0)) + skeleton_usec
+	_benchmark_profile_mark(&"manual_player_advance", _benchmark_profile_gate_frame)
+	if skeleton_called:
+		_benchmark_profile_mark(&"manual_skeleton_advance", _benchmark_profile_gate_frame)
+
+func _benchmark_profile_track_count(player: AnimationPlayer) -> int:
+	var clip := player.assigned_animation
+	if clip.is_empty() or not player.has_animation(clip):
+		return 0
+	var animation := player.get_animation(clip)
+	var key := animation.get_instance_id()
+	if not _benchmark_profile_tracks.has(key):
+		_benchmark_profile_tracks[key] = animation.get_track_count()
+	return int(_benchmark_profile_tracks[key])
+
+func _benchmark_profile_census() -> Dictionary:
+	var tiers := {"full": 0, "half": 0, "quarter": 0, "paused": 0}
+	var models := {}
+	for metadata: Dictionary in _benchmark_profile_actor_rows:
+		var value: Variant = metadata.actor
+		if not is_instance_valid(value):
+			continue
+		var actor := value as ReplicatedActor3D
+		if actor == null or actor.animation_player == null:
+			continue
+		var tier := actor.animation_tier()
+		var label := "full" if tier == AnimationGate.Tier.FULL else (
+			"half" if tier == AnimationGate.Tier.HALF else (
+			"quarter" if tier == AnimationGate.Tier.QUARTER else "paused"))
+		tiers[label] = int(tiers[label]) + 1
+		var key := "%s/%s" % [str(metadata.model), label]
+		var row: Dictionary = models.get(key, {"model": metadata.model, "tier": label,
+			"bodies": 0, "bones": 0, "assigned_clip_tracks": 0, "crossfade_duration_nonzero": 0})
+		row.bodies = int(row.bodies) + 1
+		row.bones = int(row.bones) + int(metadata.bones)
+		row.assigned_clip_tracks = int(row.assigned_clip_tracks) + _benchmark_profile_track_count(actor.animation_player)
+		row.crossfade_duration_nonzero = int(row.crossfade_duration_nonzero) + int(actor.action_crossfade_seconds > 0.0)
+		models[key] = row
+	return {"tiers": tiers, "models": models, "half_groups": animation_gate.group_sizes(AnimationGate.Tier.HALF),
+		"quarter_groups": animation_gate.group_sizes(AnimationGate.Tier.QUARTER),
+		"collection_engine_frame": Engine.get_process_frames(),
+		"track_scope": "assigned clip only; outgoing crossfade clips are not exposed by AnimationPlayer"}
+
+func _benchmark_profile_mark(label: StringName, origin_frame := -1) -> void:
+	var execution := Engine.get_process_frames()
+	var origin := execution if origin_frame < 0 else origin_frame
+	var row: Dictionary = _benchmark_profile_metric_frames.get(label, {"origin": [], "execution": []})
+	if (row.origin as Array).is_empty() or (row.origin as Array)[-1] != origin:
+		(row.origin as Array).append(origin)
+	if (row.execution as Array).is_empty() or (row.execution as Array)[-1] != execution:
+		(row.execution as Array).append(execution)
+	_benchmark_profile_metric_frames[label] = row
+
+func _benchmark_profile_signal_started(actor_id: int) -> void:
+	var frame := Engine.get_process_frames()
+	_benchmark_profile_signal_frames[actor_id] = frame
+	_benchmark_profile_mark(&"skeleton_signal_dispatch", frame)
+	_benchmark_note_skeleton(actor_id)
+
+func _benchmark_profile_listener(actor_id: int, label: StringName, callback: Callable, is_combat: bool) -> void:
+	if not callback.is_valid():
+		return # Original target has been freed; its original signal would not run.
+	var origin := int(_benchmark_profile_signal_frames.get(actor_id, -1))
+	var started := Time.get_ticks_usec()
+	callback.call()
+	var elapsed := Time.get_ticks_usec() - started
+	_benchmark_profile_mark(label, origin)
+	_benchmark_usec[&"skeleton_listener_total"] = int(_benchmark_usec.get(&"skeleton_listener_total", 0)) + elapsed
+	if is_combat:
+		_benchmark_usec[&"combat_pose_from_skeleton"] = int(_benchmark_usec.get(&"combat_pose_from_skeleton", 0)) + elapsed
+	var row: Dictionary = _benchmark_profile_listeners.get(label, {"calls": 0, "usec": 0})
+	row.calls = int(row.calls) + 1
+	row.usec = int(row.usec) + elapsed
+	_benchmark_profile_listeners[label] = row
+
+func _benchmark_profile_snapshot() -> Dictionary:
+	return {"gate_engine_frame": _benchmark_profile_gate_frame,
+		"metric_frames": _benchmark_profile_metric_frames.duplicate(true),
+		"origin_scope": "synchronous timer call or skeleton signal dispatch; native pose evaluation origin is not exposed",
+		"manual": _benchmark_profile_manual.duplicate(true),
+		"listeners": _benchmark_profile_listeners.duplicate(true),
+		"census": _benchmark_profile_census(),
+		"gate_source_sha256": PROFILE_GATE_SOURCE_SHA256}
+
+func _benchmark_profile_attach_plans(plans: Array[Dictionary]) -> Dictionary:
+	var applied: Array[Dictionary] = []
+	var listener_count := 0
+	var delegates: Array[RefCounted] = []
+	for plan: Dictionary in plans:
+		var skeleton := plan.skeleton as Skeleton3D
+		var actor_id := int(plan.id)
+		var originals := plan.originals as Array[Dictionary]
+		var replacement: Array[Dictionary] = [{"callable": Callable(self, "_benchmark_profile_signal_started").bind(actor_id), "flags": 0}]
+		var combat := plan.combat as CombatPresentation3D
+		for index: int in range(originals.size()):
+			var original := originals[index]["callable"] as Callable
+			var target := original.get_object()
+			var label := StringName("%s.%s" % [target.get_class() if target != null else "static", original.get_method()])
+			var is_combat := index == int(plan.direct_index) and combat != null
+			label = StringName("%s/%s" % [_model_for_actor(AppState.actors.get(actor_id, {})), label])
+			var descriptor := originals[index].duplicate()
+			var delegate := ProfileListenerDelegate.new()
+			delegate.owner_main = self
+			delegate.actor_id = actor_id
+			delegate.label = label
+			delegate.callback = original
+			delegate.is_combat = is_combat
+			delegates.append(delegate)
+			descriptor["callable"] = Callable(delegate, "invoke")
+			replacement.append(descriptor)
+			listener_count += 1
+		var result := _benchmark_replace_connections(skeleton, originals, replacement)
+		if not bool(result.get("ok", false)):
+			var rollback_errors := _benchmark_rollback_attribution(applied)
+			return {"ok": false, "error": "detailed listener attachment failed: %s; rollback: %s" % [result, rollback_errors]}
+		applied.append({"kind": "replacement", "skeleton": skeleton, "originals": originals, "replacement": replacement})
+	_benchmark_profile_delegate_owners.append_array(delegates)
+	_benchmark_attribution_attachment = {"ok": true, "detailed": true, "actors": plans.size(),
+		"timedListeners": listener_count, "originalListenerOrderAndFlagsVerified": true,
+		"fullAnimationClock": "Godot AnimationPlayer idle path unchanged", "gateSourceHash": PROFILE_GATE_SOURCE_SHA256,
+		"actualGate": _benchmark_profile_gate_identity(),
+		"actualGateFamily": "TimedAnimationGate", "nativeRemoteBackendClaim": false}
+	return _benchmark_attribution_attachment.duplicate(true)
+
+func _benchmark_profile_gate_identity() -> Dictionary:
+	var script := animation_gate.get_script() as Script
+	return {"class": animation_gate.get_class(), "script": script.resource_path if script != null else "",
+		"isTimedLegacyProbe": animation_gate is TimedAnimationGate,
+		"runtime": _benchmark_profile_backend_snapshot("client_runtime"),
+		"remote": _benchmark_profile_backend_snapshot("remote_presentation")}
+
+func _benchmark_profile_backend_snapshot(property: String) -> Dictionary:
+	var backend: Variant = get(property)
+	if is_instance_valid(backend) and backend.has_method("snapshot"):
+		return backend.call("snapshot") as Dictionary
+	return {"available": false, "reason": "not_initialized"}

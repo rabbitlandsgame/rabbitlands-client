@@ -121,7 +121,9 @@ def request_for(args) -> dict:
             "prepared_content": getattr(args, "prepared_content", "raw"),
             "prepared_node_policy": getattr(args, "prepared_node_policy", "retain"),
             "capture_boundaries": args.capture_boundaries,
-            "tuning": args.tuning, "diagnostics": args.diagnostics, "executable": str(args.godot),
+            "tuning": args.tuning, "diagnostics": args.diagnostics, "attribution": args.attribution,
+            "attribution_scope": "source-project-only" if args.attribution else "disabled",
+            "executable": str(args.godot),
             "presence": args.presence, "server_time": args.server_time,
             "settings_profile": args.settings_profile}
 
@@ -254,6 +256,7 @@ def run_one(args, variant: str, repeat: int, out_dir: Path) -> dict:
         "RABBITLANDS_CROWD_BENCH_LABEL": f"{args.label}-{variant}",
         "RABBITLANDS_CROWD_BENCH_OUT": str(report),
         "RABBITLANDS_CROWD_BENCH_DIAG": args.diagnostics,
+        "RABBITLANDS_CROWD_BENCH_ATTRIBUTION": "1" if args.attribution else "",
         "RABBITLANDS_CROWD_BENCH_CAPTURE_BOUNDARIES": "1" if args.capture_boundaries else "",
         "RABBITLANDS_CROWD_BENCH_DRIVER": args.driver,
         "RABBITLANDS_CROWD_BENCH_FPS_CAP": str(args.fps_cap),
@@ -420,6 +423,8 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--presence", type=int, default=0)
     p.add_argument("--server-time", action="store_true")
     p.add_argument("--diagnostics", default="")
+    p.add_argument("--attribution", action="store_true",
+                   help="source-project-only frame/gate/listener diagnostic; unsupported for exported/compiled scripts; never acceptance timing")
     p.add_argument("--capture-boundaries", action="store_true",
                    help="save the last completed world viewport after sampling; readback is outside timing")
     p.add_argument("--native-reducer", default="off", choices=["off", "on"])
@@ -456,6 +461,8 @@ def main(argv: list[str] | None = None) -> int:
     args = p.parse_args(argv)
     try:
         configure_settings_profile(args)
+        if args.attribution and args.executable_mode != "project":
+            raise EvidenceError("--attribution is source-project-only; exported/compiled scripts are unsupported")
         if args.window_mode == "fullscreen" and args.mode != "windowed":
             raise EvidenceError("--window-mode fullscreen requires --mode windowed")
         if args.remote_presentation == "rust" and args.client_runtime != "rust":
@@ -533,7 +540,7 @@ def main(argv: list[str] | None = None) -> int:
         summary = {"schemaVersion": 2, "machine": machine(), "arguments": arguments,
                    "lockPath": str(lock_path), "qualification": "invalid" if any(not r["validation"]["valid"] for r in runs)
                    else "pending_content" if any(r["validation"]["pendingCells"] for r in runs)
-                   else "diagnostic" if args.diagnostics else "screening",
+                   else "diagnostic" if args.diagnostics or args.attribution else "screening",
                    "runs": [{k: v for k, v in r.items() if k != "data"} | {
                        "cells": [{"id": c["id"], "frameTime": c.get("frameTime"), "readiness": c.get("readiness"),
                                   "census": c.get("census"), "effectiveRuntime": c.get("effectiveRuntime")}

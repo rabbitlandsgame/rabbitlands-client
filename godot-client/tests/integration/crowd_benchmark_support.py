@@ -414,6 +414,7 @@ def validate_report(data: dict, request: dict, log: str) -> dict:
     Unknown additive report fields remain available for subsequent phase instrumentation.
     """
     finite_tree(data)
+    validate_profile_frames(data, request)
     errors = ERROR_PATTERN.findall(log)
     if errors:
         raise EvidenceError(f"engine log contains {len(errors)} script/load/error lines")
@@ -679,7 +680,7 @@ def validate_report(data: dict, request: dict, log: str) -> dict:
                               or any(p[family]["buildFallbacks"] for p in presentations)):
             raise EvidenceError(f"requested native {family} path was not exercised without fallbacks")
     return {"valid": True, "qualification": "pending_content" if pending else
-            "diagnostic" if request.get("diagnostics") else "screening",
+            "diagnostic" if request.get("diagnostics") or request.get("attribution") else "screening",
             "measuredCells": measured, "pendingCells": pending}
 
 
@@ -914,3 +915,57 @@ def require_private_replay_output(output: Path, client: Path) -> None:
     for parent in (client, *client.parents):
         if (parent / ".git").exists() and output.resolve().is_relative_to(parent.resolve()):
             raise EvidenceError("replay output contains player data: choose a directory outside the repository")
+
+
+def validate_profile_frames(data: dict, request: dict) -> None:
+    if not request.get("attribution"):
+        return
+    if request.get("executable_mode", "project") != "project":
+        raise EvidenceError("detailed attribution is source-project-only; exports are unsupported")
+    measurement = data.get("measurement")
+    if not isinstance(measurement, dict) or measurement.get("attribution") is not True:
+        raise EvidenceError("detailed attribution request was not applied")
+    if measurement.get("attributionScope") != "source-project-only":
+        raise EvidenceError("detailed attribution source-project scope is missing")
+    for cell in data.get("cells", []):
+        if cell.get("status") == "unavailable_content":
+            continue
+        frames = cell.get("profileFrames")
+        series = cell.get("frameSeries")
+        if (cell.get("profileSchemaVersion") != 1 or not isinstance(frames, list)
+                or not isinstance(series, list) or len(frames) != cell.get("frames")
+                or len(series) != len(frames) or type(cell.get("count")) is not int):
+            raise EvidenceError("detailed frame profile is incomplete")
+        for index, row in enumerate(frames):
+            if (not isinstance(row, dict) or row.get("index") != index or row.get("aligned") is not True
+                    or type(row.get("engine_frame")) is not int
+                    or row["engine_frame"] < 0
+                    or row["engine_frame"] != row.get("gate_engine_frame")
+                    or row.get("frame_ms") != cell["frameSeries"][index]):
+                raise EvidenceError("detailed frame clocks are misaligned")
+            if not all(isinstance(row.get(key), dict) for key in ("phases", "microseconds", "manual", "listeners", "census")):
+                raise EvidenceError("detailed frame attribution fields are missing")
+            if row.get("packet_origin_engine_frame") != row["engine_frame"]:
+                raise EvidenceError("detailed packet origin frame differs from completed draw")
+            phase_frames = row.get("phase_frames", {})
+            if not isinstance(phase_frames, dict):
+                raise EvidenceError("detailed phase boundary clocks are missing")
+            for name in ("origin", "process_end", "draw_end") + (() if request.get("mode") == "headless" else ("draw_start",)):
+                if phase_frames.get(name) != row["engine_frame"]:
+                    raise EvidenceError("detailed phase boundary frame differs from completed draw")
+            metric_frames = row.get("metric_frames")
+            if not isinstance(metric_frames, dict):
+                raise EvidenceError("detailed timer frame origins are missing")
+            if not {"main_process_inclusive", "half_rate_step"} <= metric_frames.keys():
+                raise EvidenceError("detailed Main/gate timer origins are incomplete")
+            for metric in metric_frames.values():
+                if (not isinstance(metric, dict) or set(metric) != {"origin", "execution"}
+                        or any(not isinstance(metric[key], list) or not metric[key]
+                               or any(type(frame) is not int or frame != row["engine_frame"] for frame in metric[key])
+                               for key in ("origin", "execution"))):
+                    raise EvidenceError("detailed timer execution frame differs from completed draw")
+            tiers = row["census"].get("tiers", {})
+            if (not isinstance(tiers, dict) or set(tiers) != {"full", "half", "quarter", "paused"}
+                    or any(type(value) is not int or value < 0 for value in tiers.values())
+                    or sum(tiers.values()) != cell["count"]):
+                raise EvidenceError("detailed frame tier census does not cover every actor")

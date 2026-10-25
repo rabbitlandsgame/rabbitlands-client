@@ -106,6 +106,11 @@ var _fps_cap := 60
 ## its skeleton updates counted (crowd_benchmark_main.gd), which adds a call
 ## per skeleton update; for attribution, not for a comparison.
 var _attribution := false
+var _last_profile_frame_id := -1
+var _profile_origin_frame := -1
+var _profile_process_end_frame := -1
+var _profile_draw_start_frame := -1
+var _last_profile_phase_frames: Dictionary = {}
 var _attributed: Dictionary = {}
 ## Frame work: from the first physics step (or the process step) of an engine
 ## iteration to the end of its draw, so the frame cap's sleep is not counted.
@@ -283,6 +288,13 @@ func _run() -> void:
 		"failures": [],
 		"unixTime": int(Time.get_unix_time_from_system()),
 	}
+	var detailed_requested := OS.get_environment("RABBITLANDS_CROWD_BENCH_ATTRIBUTION").strip_edges() == "1"
+	_report.measurement["attributionScope"] = "source-project-only" if detailed_requested else "disabled"
+	if detailed_requested and (OS.has_feature("template") \
+			or _env("RABBITLANDS_CROWD_BENCH_EXECUTION_MODE", "project") != "project"):
+		_expect(false, "detailed attribution is source-project-only; exported/compiled scripts are unsupported")
+		_finish()
+		return
 	if replay:
 		var recording := _load_replay(OS.get_environment("RABBITLANDS_CROWD_BENCH_REPLAY").strip_edges())
 		_report["replay"] = recording
@@ -550,6 +562,9 @@ func _run_cell(spec: Dictionary) -> void:
 	_main.set("benchmark_overhead_enabled", not diagnostics.has("no_overhead"))
 	_main.set("benchmark_ground_enabled", not diagnostics.has("no_ground"))
 	_attribution = OS.get_environment("RABBITLANDS_CROWD_BENCH_ATTRIBUTION").strip_edges() == "1"
+	_main.set("benchmark_attribution_enabled", _attribution)
+	_main.set("benchmark_detailed_profile_enabled", _attribution)
+	_report.measurement["attribution"] = _attribution
 	if _attribution:
 		# Bodies kept from an earlier cell (the player) are timed already.
 		var fresh: Dictionary = {}
@@ -558,7 +573,10 @@ func _run_cell(spec: Dictionary) -> void:
 			if is_instance_valid(nodes[id]) and not _attributed.has((nodes[id] as Object).get_instance_id()):
 				fresh[id] = nodes[id]
 				_attributed[(nodes[id] as Object).get_instance_id()] = true
-		_report["attribution%s" % str(spec["id"])] = _main.call("benchmark_attach_attribution", fresh)
+		var attachment: Dictionary = _main.call("benchmark_attach_attribution", fresh)
+		_report["attribution%s" % str(spec["id"])] = attachment
+		if not _expect(bool(attachment.get("ok", false)), "ordered detailed attribution attaches faithfully"):
+			return
 	if replay:
 		_replay_begin()
 	else:
@@ -587,7 +605,8 @@ func _run_cell(spec: Dictionary) -> void:
 			var row: PackedInt64Array = commands[command]
 			row[3] = 0
 			commands[command] = row
-	await _drive_for(plan, int((_report["measurement"] as Dictionary)["sampleMilliseconds"]), raw)
+	var profile_frames: Array = []
+	await _drive_for(plan, int((_report["measurement"] as Dictionary)["sampleMilliseconds"]), raw, profile_frames)
 	var elapsed := Time.get_ticks_msec() - sample_started
 	var census_after := _census("afterSample")
 	var sampled_runtime := _main.call("benchmark_runtime_snapshot") as Dictionary
@@ -633,6 +652,9 @@ func _run_cell(spec: Dictionary) -> void:
 	for value: Variant in raw["frameMilliseconds"] as Array:
 		series.append(_round(float(value)))
 	result["frameSeries"] = series
+	if _attribution:
+		result["profileFrames"] = profile_frames
+		result["profileSchemaVersion"] = 1
 	result["fpsP5"] = _round(1000.0 / float((frame_summary as Dictionary)["p95"])) \
 		if frame_summary is Dictionary and float((frame_summary as Dictionary)["p95"]) > 0.0 else null
 	result["fpsMean"] = _round(1000.0 / float((frame_summary as Dictionary)["mean"])) \
@@ -852,7 +874,7 @@ func _prime(plan: Dictionary) -> void:
 ## little health, so health bars and floating numbers move as they do in play.
 ## A replay instead delivers every recorded frame that has fallen due, and ends
 ## early when the recording does.
-func _drive_for(plan: Dictionary, duration: int, raw: Variant) -> void:
+func _drive_for(plan: Dictionary, duration: int, raw: Variant, profile_frames: Array = []) -> void:
 	var replay := not _replay_times.is_empty()
 	var cadence_value: Variant = (_report["measurement"] as Dictionary)["cadenceMilliseconds"]
 	var cadence := int(cadence_value) if cadence_value != null else 0
@@ -872,6 +894,7 @@ func _drive_for(plan: Dictionary, duration: int, raw: Variant) -> void:
 		_driver_packets = 0
 		_driver_usec = 0
 		var frame_started := Time.get_ticks_usec()
+		var packet_origin_frame := Engine.get_process_frames() if _attribution else -1
 		var now := Time.get_ticks_msec()
 		if replay:
 			_replay_due()
@@ -922,11 +945,40 @@ func _drive_for(plan: Dictionary, duration: int, raw: Variant) -> void:
 		(raw["actorRecords"] as Array).append((_app_state.get("actors") as Dictionary).size())
 		(raw["actorNodes"] as Array).append((_main.get("actor_nodes") as Dictionary).size())
 		_append_render_sample(raw)
+		if _attribution:
+			var profile: Dictionary = measured.get("profile", {}) as Dictionary
+			var metric_frames: Dictionary = profile.get("metric_frames", {})
+			var aligned := int(profile.get("gate_engine_frame", -1)) == _last_profile_frame_id
+			for metric: Variant in metric_frames.values():
+				for frame: Variant in (metric.origin as Array) + (metric.execution as Array):
+					aligned = aligned and int(frame) == _last_profile_frame_id
+			for boundary: String in _last_profile_phase_frames:
+				if boundary != "draw_start" or not _headless:
+					aligned = aligned and int(_last_profile_phase_frames[boundary]) == _last_profile_frame_id
+			aligned = aligned and packet_origin_frame == _last_profile_frame_id
+			profile_frames.append({"index": profile_frames.size(), "engine_frame": _last_profile_frame_id,
+				"gate_engine_frame": profile.get("gate_engine_frame", -1),
+				"aligned": aligned, "metric_frames": metric_frames,
+				"phase_frames": _last_profile_phase_frames.duplicate(true),
+				"packet_origin_engine_frame": packet_origin_frame,
+				"collection_engine_frame": Engine.get_process_frames(),
+				"frame_ms": _round(work), "wall_ms": (raw["wallMilliseconds"] as Array)[-1],
+				"phases": _last_phases.duplicate(true), "microseconds": usec.duplicate(true),
+				"calls": calls.duplicate(true), "packets": _driver_packets,
+				"manual": profile.get("manual", {}), "listeners": profile.get("listeners", {}),
+				"census": profile.get("census", {}),
+				"render_scope": "existing most-recently-completed viewport monitors; no additional GPU query",
+				"world_gpu_ms": (raw["worldRenderGpuMilliseconds"] as Array)[-1],
+				"world_cpu_ms": (raw["worldRenderCpuMilliseconds"] as Array)[-1]})
 
 
 func _on_iteration_started() -> void:
 	if _iteration_started_usec < 0:
 		_iteration_started_usec = Time.get_ticks_usec()
+		if _attribution:
+			_profile_origin_frame = Engine.get_process_frames()
+			_profile_process_end_frame = -1
+			_profile_draw_start_frame = -1
 
 
 ## The idle step begins: what came before it in the iteration was physics.
@@ -939,14 +991,21 @@ func _on_process_started() -> void:
 func _on_process_ended() -> void:
 	if _iteration_started_usec >= 0 and _process_ended_usec < 0:
 		_process_ended_usec = Time.get_ticks_usec()
+		if _attribution:
+			_profile_process_end_frame = Engine.get_process_frames()
 
 
 func _on_draw_started() -> void:
 	if _iteration_started_usec >= 0 and _draw_started_usec < 0:
 		_draw_started_usec = Time.get_ticks_usec()
+		if _attribution:
+			_profile_draw_start_frame = Engine.get_process_frames()
 
 
 func _on_iteration_drawn() -> void:
+	if _attribution:
+		_last_profile_frame_id = Engine.get_process_frames()
+		_last_profile_phase_frames = {"origin": _profile_origin_frame, "process_end": _profile_process_end_frame, "draw_start": _profile_draw_start_frame, "draw_end": _last_profile_frame_id}
 	var now := Time.get_ticks_usec()
 	_last_phases = {}
 	if _iteration_started_usec >= 0:
