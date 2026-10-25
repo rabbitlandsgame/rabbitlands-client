@@ -140,6 +140,7 @@ enum ServerMessage {
 	ELORIA_LEADERBOARD_STATE = 194,
 	ELORIA_GAUNTLET_READY_STATE = 193,
 	ELORIA_GAUNTLET_LOOT_STATE = 192,
+	ELORIA_CAMPAIGN_STATE = 191,
 	# Which map package the server was built against. Continues the same
 	# downward run below 211.
 	ELORIA_MAP_DIGEST = 209,
@@ -287,6 +288,8 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"followup_tutorials_v1",
 	"field_dispatch_v1",
 	"signed_ashore_v1",
+	"campaign_v1",
+	"campaign_party_v1",
 	"actor16_v1",
 	"adjacent_actors_v1",
 	# Players within 80 tiles as actors, the rest as ELORIA_PRESENCE dots, and
@@ -1215,6 +1218,8 @@ static func decode_server(command: int, payload: PackedByteArray, logical_coordi
 			return decode_gauntlet_ready(payload)
 		ServerMessage.ELORIA_GAUNTLET_LOOT_STATE:
 			return decode_gauntlet_loot(payload)
+		ServerMessage.ELORIA_CAMPAIGN_STATE:
+			return decode_campaign(payload)
 		ServerMessage.ELORIA_LANTERN_STATE:
 			return decode_lantern(payload, logical_coordinates)
 		ServerMessage.ELORIA_EXPERIENCE_STATE:
@@ -3523,6 +3528,153 @@ static func decode_lantern(payload: PackedByteArray, logical_coordinates := fals
 			if value.flags.has(key) and not value.flags[key] is bool:
 				return {"type":"invalid", "error":"lantern_flags"}
 	return {"type":"lantern_tutorial", "state":value}
+
+static func decode_campaign(payload: PackedByteArray) -> Dictionary:
+	var value: Variant = JSON.parse_string(payload.get_string_from_utf8())
+	if not value is Dictionary or value.get("version") != 1 or not value.get("active") is bool:
+		return {"type": "invalid", "error": "campaign_shape"}
+	for field: String in ["title", "hint", "map", "run_id", "key", "party_notice"]:
+		if value.has(field) and not value[field] is String:
+			return {"type": "invalid", "error": "campaign_text"}
+	if value.has("stage") and not value.stage is String and (typeof(value.stage) not in [TYPE_INT, TYPE_FLOAT] \
+			or not is_finite(float(value.stage)) or float(value.stage) != floor(float(value.stage))):
+		return {"type": "invalid", "error": "campaign_stage"}
+	if bool(value.active) and (str(value.get("map", "")).is_empty() or str(value.get("run_id", "")).is_empty()):
+		return {"type": "invalid", "error": "campaign_identity"}
+	for field: String in ["available", "started"]:
+		if value.has(field) and not value[field] is bool:
+			return {"type": "invalid", "error": "campaign_boolean"}
+	if not value.get("targets", []) is Array or value.get("targets", []).size() > 64:
+		return {"type": "invalid", "error": "campaign_targets"}
+	for target: Variant in value.get("targets", []):
+		if not target is Dictionary or not target.get("id") is String or not target.get("label") is String \
+				or not target.get("tile") is Array or target.tile.size() != 2:
+			return {"type": "invalid", "error": "campaign_target"}
+		var object_id: Variant = target.get("object_id")
+		if typeof(object_id) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(object_id)) \
+				or float(object_id) != floor(float(object_id)) or int(object_id) < 0 or int(object_id) > 65535:
+			return {"type": "invalid", "error": "campaign_object"}
+		for point: Variant in target.tile:
+			if typeof(point) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(point)) \
+					or float(point) != floor(float(point)) or float(point) < -2147483648.0 or float(point) > 2147483647.0:
+				return {"type": "invalid", "error": "campaign_tile"}
+		if target.has("approach"):
+			if not target.approach is Array or target.approach.size() != 2:
+				return {"type": "invalid", "error": "campaign_approach"}
+			for point: Variant in target.approach:
+				if typeof(point) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(point)) \
+						or float(point) != floor(float(point)) or float(point) < -2147483648.0 or float(point) > 2147483647.0:
+					return {"type": "invalid", "error": "campaign_approach"}
+		for flag: String in ["enabled", "completed"]:
+			if target.has(flag) and not target[flag] is bool:
+				return {"type": "invalid", "error": "campaign_target_flag"}
+		if target.has("detail") and not target.detail is String:
+			return {"type": "invalid", "error": "campaign_target_text"}
+		if target.has("range") and (typeof(target.range) not in [TYPE_INT, TYPE_FLOAT] \
+				or not is_finite(float(target.range)) or float(target.range) < 0.0 or float(target.range) > 20.0):
+			return {"type": "invalid", "error": "campaign_range"}
+	var scene: Variant = value.get("scene", {})
+	if not scene is Dictionary:
+		return {"type": "invalid", "error": "campaign_scene"}
+	if not scene.is_empty():
+		for field: String in ["id", "token"]:
+			if not scene.get(field) is String or str(scene[field]).is_empty():
+				return {"type": "invalid", "error": "campaign_scene_identity"}
+		if scene.has("variant") and not scene.variant is String:
+			return {"type": "invalid", "error": "campaign_scene_variant"}
+		if scene.has("requires_ack") and not scene.requires_ack is bool:
+			return {"type": "invalid", "error": "campaign_scene_ack"}
+		if scene.has("ack_revision") and not _campaign_integer(scene.ack_revision, 0, 2147483647.0):
+			return {"type": "invalid", "error": "campaign_scene_ack_revision"}
+	for bindings: Variant in [value.get("actors", {}), scene.get("actors", {})]:
+		if not bindings is Dictionary:
+			return {"type": "invalid", "error": "campaign_actors"}
+		for role: Variant in bindings:
+			var actor_id: Variant = bindings[role]
+			if not role is String or typeof(actor_id) not in [TYPE_INT, TYPE_FLOAT] \
+					or not is_finite(float(actor_id)) or float(actor_id) != floor(float(actor_id)) \
+					or float(actor_id) < 0.0 or float(actor_id) > 2147483647.0:
+				return {"type": "invalid", "error": "campaign_actor_id"}
+	for anchors: Variant in [value.get("anchors", {}), scene.get("anchors", {})]:
+		if not anchors is Dictionary or anchors.size() > 32:
+			return {"type": "invalid", "error": "campaign_anchors"}
+		for key: Variant in anchors:
+			var point: Variant = anchors[key]
+			if not key is String or not point is Array or point.size() != 2:
+				return {"type": "invalid", "error": "campaign_anchor"}
+			for coordinate: Variant in point:
+				if not _campaign_integer(coordinate, -2147483648.0, 2147483647.0):
+					return {"type": "invalid", "error": "campaign_anchor_tile"}
+	var party: Variant = value.get("party", {})
+	if not party is Dictionary:
+		return {"type": "invalid", "error": "campaign_party"}
+	if party.has("owner") and not party.owner is String:
+		return {"type": "invalid", "error": "campaign_owner"}
+	if party.has("role") and party.role not in ["owner", "eligible", "helper"]:
+		return {"type": "invalid", "error": "campaign_role"}
+	for flag: String in ["can_join", "can_start_own", "waiting_for_owner", "waiting_for_scene"]:
+		if party.has(flag) and not party[flag] is bool:
+			return {"type": "invalid", "error": "campaign_party_flag"}
+	if not party.get("members", []) is Array or party.get("members", []).size() > 8:
+		return {"type": "invalid", "error": "campaign_members"}
+	for member: Variant in party.get("members", []):
+		if not member is Dictionary or not member.get("name") is String:
+			return {"type": "invalid", "error": "campaign_member"}
+		if member.has("role") and member.role not in ["owner", "eligible", "helper"]:
+			return {"type": "invalid", "error": "campaign_member_role"}
+		for flag: String in ["online", "present", "ready"]:
+			if member.has(flag) and not member[flag] is bool:
+				return {"type": "invalid", "error": "campaign_member_flag"}
+		if member.has("adoption") and member.adoption not in ["pending", "adopted", "help_only", ""]:
+			return {"type": "invalid", "error": "campaign_member_adoption"}
+	var adoption: Variant = value.get("adoption", {})
+	if not adoption is Dictionary:
+		return {"type": "invalid", "error": "campaign_adoption"}
+	if not adoption.is_empty():
+		if adoption.get("state") not in ["pending", "adopted", "help_only"]:
+			return {"type": "invalid", "error": "campaign_adoption_state"}
+		for field: String in ["run_id", "summary", "reason"]:
+			if adoption.has(field) and not adoption[field] is String:
+				return {"type": "invalid", "error": "campaign_adoption_text"}
+		if adoption.has("revision") and not _campaign_integer(adoption.revision, 0, 2147483647.0):
+			return {"type": "invalid", "error": "campaign_adoption_revision"}
+		if adoption.has("can_adopt") and not adoption.can_adopt is bool:
+			return {"type": "invalid", "error": "campaign_adoption_allowed"}
+		if adoption.state == "pending" and (not adoption.has("revision") \
+				or str(adoption.get("run_id", value.get("run_id", ""))).is_empty()):
+			return {"type": "invalid", "error": "campaign_adoption_identity"}
+	var mechanism: Variant = value.get("mechanism", {})
+	if not mechanism is Dictionary:
+		return {"type": "invalid", "error": "campaign_mechanism"}
+	for flag: String in ["bypass_open", "fitting", "crew_safe"]:
+		if mechanism.has(flag) and not mechanism[flag] is bool:
+			return {"type": "invalid", "error": "campaign_mechanism_flag"}
+	for setting: String in ["flow", "gauge"]:
+		if mechanism.has(setting) and not _campaign_integer(mechanism[setting], 0, 2):
+			return {"type": "invalid", "error": "campaign_mechanism_setting"}
+	if mechanism.has("claimed_gauge") and not _campaign_integer(mechanism.claimed_gauge, 0, 8):
+		return {"type": "invalid", "error": "campaign_claimed_gauge"}
+	var travel: Variant = value.get("travel", {})
+	if not travel is Dictionary:
+		return {"type": "invalid", "error": "campaign_travel"}
+	for field: String in ["map", "npc", "title", "route"]:
+		if travel.has(field) and not travel[field] is String:
+			return {"type": "invalid", "error": "campaign_travel_text"}
+	if not travel.is_empty() and str(travel.get("map", "")).is_empty():
+		return {"type": "invalid", "error": "campaign_travel_map"}
+	var companion: Variant = value.get("companion", {})
+	if not companion is Dictionary:
+		return {"type": "invalid", "error": "campaign_companion"}
+	if not companion.is_empty():
+		if not companion.get("name") is String or not companion.get("status") is String \
+				or companion.get("mode") not in ["follow", "wait", "regroup", "help"] \
+				or not companion.get("can_command") is bool:
+			return {"type": "invalid", "error": "campaign_companion_shape"}
+	return {"type": "campaign", "state": value}
+
+static func _campaign_integer(value: Variant, minimum: float, maximum: float) -> bool:
+	return typeof(value) in [TYPE_INT, TYPE_FLOAT] and is_finite(float(value)) \
+		and float(value) == floor(float(value)) and float(value) >= minimum and float(value) <= maximum
 
 static func decode_tutorial_experience(value: Dictionary) -> Dictionary:
 	if typeof(value.get("version")) not in [TYPE_INT, TYPE_FLOAT] or value.version != 1 \

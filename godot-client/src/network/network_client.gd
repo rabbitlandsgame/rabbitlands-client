@@ -504,6 +504,34 @@ func harvest(object_id: int) -> Error:
 func use_map_object(object_id: int) -> Error:
 	return send_frame(EloriaProtocol.use_map_object(object_id))
 
+func campaign_request(action: String) -> Error:
+	if action not in ["start", "resume", "leave", "hint", "join", "own"]:
+		return ERR_INVALID_PARAMETER
+	return send_chat("#campaign " + action)
+
+func campaign_decision(action: String, run_id: String, revision: int) -> Error:
+	if action not in ["adopt", "help"] or not _campaign_identifier(run_id) or revision < 0:
+		return ERR_INVALID_PARAMETER
+	return send_chat("#campaign %s %s %d" % [action, run_id, revision])
+
+func campaign_scene_done(run_id: String, token: String) -> Error:
+	if not _campaign_identifier(run_id) or not _campaign_identifier(token):
+		return ERR_INVALID_PARAMETER
+	return send_chat("#campaign scene_done %s %s" % [run_id, token])
+
+func campaign_companion(command: String) -> Error:
+	if command not in ["follow", "wait", "regroup", "help"]:
+		return ERR_INVALID_PARAMETER
+	return send_chat("#campaign companion " + command)
+
+static func _campaign_identifier(value: String) -> bool:
+	if value.is_empty() or value.length() > 256:
+		return false
+	for character: String in value:
+		if not character in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-.:" :
+			return false
+	return true
+
 func tutorial_ui(action: int) -> Error:
 	if action not in [1, 2, 3, 4, 5, 6, 7, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22]:
 		return ERR_INVALID_PARAMETER

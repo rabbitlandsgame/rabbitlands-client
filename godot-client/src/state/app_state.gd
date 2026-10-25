@@ -85,6 +85,8 @@ var current_map := ""
 ## carry in the stock "z" field (ELORIA_ADJACENT_MAPS); 0 is the current map.
 var adjacent_maps: Dictionary = {}
 var lantern_tutorial: Dictionary = {}
+## Authoritative field objectives and optional per-view story presentation.
+var campaign: Dictionary = {}
 var actors: Dictionary = {}
 ## Optional coarse actor-command reducer. The descriptor is generated only by
 ## the native benchmark build, and this instance exists only for an explicit
@@ -656,6 +658,7 @@ func _on_connection_state_changed(value: String) -> void:
 		current_map = ""
 		adjacent_maps.clear()
 		lantern_tutorial.clear()
+		campaign.clear()
 		selected_actor_id = -1
 		techniques.clear()
 		autocast.clear()
@@ -1575,6 +1578,9 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 		"lantern_tutorial":
 			lantern_tutorial = (event.state as Dictionary).duplicate(true)
 			state_changed.emit(&"lantern_tutorial")
+		"campaign":
+			campaign = (event.state as Dictionary).duplicate(true)
+			state_changed.emit(&"campaign")
 		"almanac":
 			almanac = (event as Dictionary).duplicate(true)
 			almanac.erase("type")
