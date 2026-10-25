@@ -389,7 +389,9 @@ func _benchmark_rollback_attribution(applied: Array[Dictionary]) -> Array[String
 	for index: int in range(applied.size() - 1, -1, -1):
 		var record := applied[index]
 		var skeleton := record["skeleton"] as Skeleton3D
-		if str(record["kind"]) == "replacement":
+		if str(record["kind"]) == "brackets":
+			_benchmark_profile_remove_observers([record])
+		elif str(record["kind"]) == "replacement":
 			var restored := _benchmark_replace_connections(skeleton,
 				record["replacement"] as Array[Dictionary],
 				record["originals"] as Array[Dictionary])
@@ -618,6 +620,10 @@ var _benchmark_profile_metric_frames: Dictionary = {}
 var _benchmark_profile_signal_frames: Dictionary = {}
 var benchmark_detailed_profile_enabled := false
 var _benchmark_profile_delegate_owners: Array[RefCounted] = []
+var _benchmark_profile_observers: Array[Dictionary] = []
+var _benchmark_profile_layouts: Dictionary = {}
+var _benchmark_profile_signal_depths: Dictionary = {}
+var _benchmark_profile_errors: Array[String] = []
 
 class ProfileListenerDelegate extends RefCounted:
 	var owner_main: Node
@@ -625,9 +631,14 @@ class ProfileListenerDelegate extends RefCounted:
 	var label: StringName
 	var callback: Callable
 	var is_combat: bool
-	func invoke() -> void:
+	var skeleton: Skeleton3D
+	var starts: Array[Dictionary] = []
+	func before() -> void:
 		if is_instance_valid(owner_main):
-			owner_main.call("_benchmark_profile_listener", actor_id, label, callback, is_combat)
+			owner_main.call("_benchmark_profile_listener_before", self)
+	func after() -> void:
+		if is_instance_valid(owner_main):
+			owner_main.call("_benchmark_profile_listener_after", self)
 
 func _benchmark_profile_gate_source_matches() -> bool:
 	# Compiled/remapped export scripts cannot attest this copied source loop.
@@ -719,29 +730,69 @@ func _benchmark_profile_mark(label: StringName, origin_frame := -1) -> void:
 	_benchmark_profile_metric_frames[label] = row
 
 func _benchmark_profile_signal_started(actor_id: int) -> void:
+	var depth := int(_benchmark_profile_signal_depths.get(actor_id, 0))
+	if depth != 0:
+		_benchmark_profile_invalidate("nested skeleton signal emission")
+	_benchmark_profile_signal_depths[actor_id] = depth + 1
+	var layout: Dictionary = _benchmark_profile_layouts.get(actor_id, {})
+	if not layout.is_empty() and not _benchmark_connections_match(layout.skeleton, layout.replacement):
+		_benchmark_profile_invalidate("listener layout changed after attachment")
 	var frame := Engine.get_process_frames()
 	_benchmark_profile_signal_frames[actor_id] = frame
 	_benchmark_profile_mark(&"skeleton_signal_dispatch", frame)
 	_benchmark_note_skeleton(actor_id)
 
-func _benchmark_profile_listener(actor_id: int, label: StringName, callback: Callable, is_combat: bool) -> void:
-	if not callback.is_valid():
-		return # Original target has been freed; its original signal would not run.
-	var origin := int(_benchmark_profile_signal_frames.get(actor_id, -1))
-	var started := Time.get_ticks_usec()
-	callback.call()
-	var elapsed := Time.get_ticks_usec() - started
-	_benchmark_profile_mark(label, origin)
+func _benchmark_profile_signal_finished(actor_id: int) -> void:
+	if int(_benchmark_profile_signal_depths.get(actor_id, 0)) != 1:
+		_benchmark_profile_invalidate("unbalanced or nested skeleton signal emission")
+	var depth := int(_benchmark_profile_signal_depths.get(actor_id, 0)) - 1
+	if depth <= 0:
+		_benchmark_profile_signal_depths.erase(actor_id)
+	else:
+		_benchmark_profile_signal_depths[actor_id] = depth
+
+func _benchmark_profile_invalidate(reason: String) -> void:
+	if not _benchmark_profile_errors.has(reason):
+		_benchmark_profile_errors.append(reason)
+
+func _benchmark_profile_listener_before(delegate: ProfileListenerDelegate) -> void:
+	if not delegate.callback.is_valid() or not is_instance_valid(delegate.skeleton) \
+			or not delegate.skeleton.skeleton_updated.is_connected(delegate.callback):
+		_benchmark_profile_invalidate("original listener removed before timing bracket")
+	delegate.starts.append({"usec": Time.get_ticks_usec(), "frame": Engine.get_process_frames()})
+
+func _benchmark_profile_listener_after(delegate: ProfileListenerDelegate) -> void:
+	if delegate.starts.is_empty():
+		_benchmark_profile_invalidate("listener timing bracket has no start")
+		return
+	var started: Dictionary = delegate.starts.pop_back()
+	if not delegate.callback.is_valid() or not is_instance_valid(delegate.skeleton) \
+			or not delegate.skeleton.skeleton_updated.is_connected(delegate.callback):
+		_benchmark_profile_invalidate("original listener removed inside timing bracket")
+	var elapsed := Time.get_ticks_usec() - int(started.usec)
+	if int(started.frame) != Engine.get_process_frames():
+		_benchmark_profile_invalidate("listener timing bracket crossed engine frames")
+	var origin := int(_benchmark_profile_signal_frames.get(delegate.actor_id, -1))
+	_benchmark_profile_mark(delegate.label, origin)
 	_benchmark_usec[&"skeleton_listener_total"] = int(_benchmark_usec.get(&"skeleton_listener_total", 0)) + elapsed
-	if is_combat:
+	if delegate.is_combat:
 		_benchmark_usec[&"combat_pose_from_skeleton"] = int(_benchmark_usec.get(&"combat_pose_from_skeleton", 0)) + elapsed
-	var row: Dictionary = _benchmark_profile_listeners.get(label, {"calls": 0, "usec": 0})
+	var row: Dictionary = _benchmark_profile_listeners.get(delegate.label, {"calls": 0, "usec": 0})
 	row.calls = int(row.calls) + 1
 	row.usec = int(row.usec) + elapsed
-	_benchmark_profile_listeners[label] = row
+	_benchmark_profile_listeners[delegate.label] = row
 
 func _benchmark_profile_snapshot() -> Dictionary:
+	if not _benchmark_profile_signal_depths.is_empty():
+		_benchmark_profile_invalidate("skeleton signal emission incomplete at collection")
+	for record: Dictionary in _benchmark_profile_observers:
+		if not is_instance_valid(record.skeleton) \
+				or not _benchmark_connections_match(record.skeleton, record.replacement):
+			_benchmark_profile_invalidate("listener layout changed before collection")
 	return {"gate_engine_frame": _benchmark_profile_gate_frame,
+		"listener_timing_valid": _benchmark_profile_errors.is_empty(),
+		"listener_timing_errors": _benchmark_profile_errors.duplicate(),
+		"listener_layout_scope": "stable synchronous original callables; observer brackets; changed layouts/nested emissions invalidate timings",
 		"metric_frames": _benchmark_profile_metric_frames.duplicate(true),
 		"origin_scope": "synchronous timer call or skeleton signal dispatch; native pose evaluation origin is not exposed",
 		"manual": _benchmark_profile_manual.duplicate(true),
@@ -751,13 +802,18 @@ func _benchmark_profile_snapshot() -> Dictionary:
 
 func _benchmark_profile_attach_plans(plans: Array[Dictionary]) -> Dictionary:
 	var applied: Array[Dictionary] = []
+	if _benchmark_profile_observers.is_empty():
+		_benchmark_profile_errors.clear()
 	var listener_count := 0
 	var delegates: Array[RefCounted] = []
 	for plan: Dictionary in plans:
 		var skeleton := plan.skeleton as Skeleton3D
 		var actor_id := int(plan.id)
 		var originals := plan.originals as Array[Dictionary]
-		var replacement: Array[Dictionary] = [{"callable": Callable(self, "_benchmark_profile_signal_started").bind(actor_id), "flags": 0}]
+		var start := Callable(self, "_benchmark_profile_signal_started").bind(actor_id)
+		var finish := Callable(self, "_benchmark_profile_signal_finished").bind(actor_id)
+		var installed: Array[Callable] = [start, finish]
+		var replacement: Array[Dictionary] = [{"callable": start, "flags": 0}]
 		var combat := plan.combat as CombatPresentation3D
 		for index: int in range(originals.size()):
 			var original := originals[index]["callable"] as Callable
@@ -765,29 +821,63 @@ func _benchmark_profile_attach_plans(plans: Array[Dictionary]) -> Dictionary:
 			var label := StringName("%s.%s" % [target.get_class() if target != null else "static", original.get_method()])
 			var is_combat := index == int(plan.direct_index) and combat != null
 			label = StringName("%s/%s" % [_model_for_actor(AppState.actors.get(actor_id, {})), label])
-			var descriptor := originals[index].duplicate()
 			var delegate := ProfileListenerDelegate.new()
 			delegate.owner_main = self
 			delegate.actor_id = actor_id
 			delegate.label = label
 			delegate.callback = original
 			delegate.is_combat = is_combat
+			delegate.skeleton = skeleton
 			delegates.append(delegate)
-			descriptor["callable"] = Callable(delegate, "invoke")
-			replacement.append(descriptor)
+			var before := Callable(delegate, "before")
+			var after := Callable(delegate, "after")
+			installed.append_array([before, after])
+			replacement.append({"callable": before, "flags": 0})
+			replacement.append(originals[index].duplicate())
+			replacement.append({"callable": after, "flags": 0})
 			listener_count += 1
+		replacement.append({"callable": finish, "flags": 0})
 		var result := _benchmark_replace_connections(skeleton, originals, replacement)
 		if not bool(result.get("ok", false)):
 			var rollback_errors := _benchmark_rollback_attribution(applied)
 			return {"ok": false, "error": "detailed listener attachment failed: %s; rollback: %s" % [result, rollback_errors]}
-		applied.append({"kind": "replacement", "skeleton": skeleton, "originals": originals, "replacement": replacement})
+		applied.append({"kind": "brackets", "id": actor_id, "skeleton": skeleton,
+			"originals": originals, "replacement": replacement, "installed": installed})
 	_benchmark_profile_delegate_owners.append_array(delegates)
+	_benchmark_profile_observers.append_array(applied)
+	for record: Dictionary in applied:
+		_benchmark_profile_layouts[record.id] = record
 	_benchmark_attribution_attachment = {"ok": true, "detailed": true, "actors": plans.size(),
 		"timedListeners": listener_count, "originalListenerOrderAndFlagsVerified": true,
+		"listenerIdentityPolicy": "original native/script callables retained; before/after observers only",
+		"listenerTimingScope": "stable synchronous layouts; mutation and nested emissions invalidate timings",
 		"fullAnimationClock": "Godot AnimationPlayer idle path unchanged", "gateSourceHash": PROFILE_GATE_SOURCE_SHA256,
 		"actualGate": _benchmark_profile_gate_identity(),
 		"actualGateFamily": "TimedAnimationGate", "nativeRemoteBackendClaim": false}
 	return _benchmark_attribution_attachment.duplicate(true)
+
+func _benchmark_profile_remove_observers(records: Array) -> int:
+	var removed := 0
+	for record: Dictionary in records:
+		var skeleton := record.skeleton as Skeleton3D
+		if not is_instance_valid(skeleton):
+			continue
+		for observer: Callable in record.installed:
+			if skeleton.skeleton_updated.is_connected(observer):
+				skeleton.skeleton_updated.disconnect(observer)
+				removed += 1
+	return removed
+
+func benchmark_detach_attribution() -> Dictionary:
+	# Never reconnect originals: native/script listeners may remove themselves.
+	var removed := _benchmark_profile_remove_observers(_benchmark_profile_observers)
+	_benchmark_profile_observers.clear()
+	_benchmark_profile_layouts.clear()
+	_benchmark_profile_delegate_owners.clear()
+	_benchmark_profile_signal_depths.clear()
+	_benchmark_profile_players.clear()
+	_benchmark_profile_actor_rows.clear()
+	return {"ok": true, "removedObservers": removed, "reconnectedOriginals": 0}
 
 func _benchmark_profile_gate_identity() -> Dictionary:
 	var script := animation_gate.get_script() as Script

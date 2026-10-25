@@ -937,6 +937,12 @@ def validate_profile_frames(data: dict, request: dict) -> None:
                 or len(series) != len(frames) or type(cell.get("count")) is not int):
             raise EvidenceError("detailed frame profile is incomplete")
         for index, row in enumerate(frames):
+
+            if (not isinstance(row, dict) or row.get("listener_timing_valid") is not True
+                    or row.get("listener_timing_errors") != []
+                    or not isinstance(row.get("listener_layout_scope"), str)
+                    or not row["listener_layout_scope"].startswith("stable synchronous original callables")):
+                raise EvidenceError("detailed listener timings require stable original callable layouts")
             if (not isinstance(row, dict) or row.get("index") != index or row.get("aligned") is not True
                     or type(row.get("engine_frame")) is not int
                     or row["engine_frame"] < 0

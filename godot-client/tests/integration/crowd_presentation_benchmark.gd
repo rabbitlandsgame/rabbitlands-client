@@ -629,6 +629,10 @@ func _run_cell(spec: Dictionary) -> void:
 		_heat_bolt_benchmark.finish()
 		_heat_bolt_benchmark = null
 	var remaining: Dictionary = {FIRST_ACTOR_ID: _record(0, true, _centre, FULL_KIT_A)}
+	if _attribution:
+		var detached: Dictionary = _main.call("benchmark_detach_attribution")
+		_expect(bool(detached.get("ok", false)), "detailed observers detach before actor removal")
+		_attributed.clear()
 	if replay:
 		var actors := _app_state.get("actors") as Dictionary
 		remaining = {_local_id: actors[_local_id]} if actors.has(_local_id) else {}
@@ -957,6 +961,9 @@ func _drive_for(plan: Dictionary, duration: int, raw: Variant, profile_frames: A
 					aligned = aligned and int(_last_profile_phase_frames[boundary]) == _last_profile_frame_id
 			aligned = aligned and packet_origin_frame == _last_profile_frame_id
 			profile_frames.append({"index": profile_frames.size(), "engine_frame": _last_profile_frame_id,
+				"listener_timing_valid": profile.get("listener_timing_valid", false),
+				"listener_timing_errors": profile.get("listener_timing_errors", []),
+				"listener_layout_scope": profile.get("listener_layout_scope", ""),
 				"gate_engine_frame": profile.get("gate_engine_frame", -1),
 				"aligned": aligned, "metric_frames": metric_frames,
 				"phase_frames": _last_profile_phase_frames.duplicate(true),
@@ -967,9 +974,9 @@ func _drive_for(plan: Dictionary, duration: int, raw: Variant, profile_frames: A
 				"calls": calls.duplicate(true), "packets": _driver_packets,
 				"manual": profile.get("manual", {}), "listeners": profile.get("listeners", {}),
 				"census": profile.get("census", {}),
-				"render_scope": "existing most-recently-completed viewport monitors; no additional GPU query",
-				"world_gpu_ms": (raw["worldRenderGpuMilliseconds"] as Array)[-1],
-				"world_cpu_ms": (raw["worldRenderCpuMilliseconds"] as Array)[-1]})
+				"render_scope": ("unavailable: headless draws nothing" if _headless else "existing most-recently-completed viewport monitors; no additional GPU query"),
+				"world_gpu_ms": null if _headless else (raw["worldRenderGpuMilliseconds"] as Array)[-1],
+				"world_cpu_ms": null if _headless else (raw["worldRenderCpuMilliseconds"] as Array)[-1]})
 
 
 func _on_iteration_started() -> void:
@@ -1735,6 +1742,9 @@ func _route_walk_to(destination: Vector2i) -> void:
 ## listeners. Disconnect exact callables; leave unrelated subscribers intact.
 func _stop_benchmark_instrumentation() -> void:
 	_route_capture = false
+	if is_instance_valid(_main):
+		_main.call("benchmark_detach_attribution")
+	_attributed.clear()
 	if physics_frame.is_connected(_on_iteration_started):
 		physics_frame.disconnect(_on_iteration_started)
 	if process_frame.is_connected(_on_process_started):
