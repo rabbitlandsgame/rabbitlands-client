@@ -46,6 +46,7 @@ var _ambient_post := Transform3D.IDENTITY
 var _ambient_elapsed := 0.0
 var _ack_identity := ""
 var _ack_requested := false
+var _view_focus: Node3D
 
 func _ready() -> void:
 	var config := ConfigFile.new()
@@ -147,7 +148,18 @@ func is_active() -> bool:
 	return pending or playing
 
 func work_readouts_visible() -> bool:
-	return not playing or bool(_definition.get("show_readouts", false))
+	if not playing:
+		return true
+	var shown := bool(_definition.get("show_readouts", false))
+	for shot: Dictionary in _definition.get("shots", []):
+		if float(shot.get("t", 0)) > (0.0 if reduced_motion else elapsed):
+			break
+		if shot.has("readouts"):
+			shown = bool(shot.readouts)
+	return shown
+
+func occlusion_focus() -> Node3D:
+	return _view_focus if playing else null
 
 func transcript_text() -> String:
 	return _last_transcript
@@ -267,6 +279,10 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 func _start(rig: Node3D, camera: Camera3D, local: Node3D, nodes: Dictionary,
 		bindings: Dictionary) -> void:
 	configure()
+	if not is_instance_valid(_view_focus):
+		_view_focus = Node3D.new()
+		_view_focus.name = "CampaignViewFocus"
+		add_child(_view_focus)
 	_release_ambient()
 	_rig = rig
 	_camera = camera
@@ -313,7 +329,13 @@ func _apply_camera() -> void:
 		for i in range(1, shots.size()):
 			last = shots[i]
 			if elapsed <= float(last.t):
-				weight = smoothstep(float(first.t), float(last.t), elapsed)
+				if bool(last.get("cut", false)):
+					if elapsed < float(last.t):
+						last = first
+					else:
+						first = last
+				else:
+					weight = smoothstep(float(first.t), float(last.t), elapsed)
 				break
 			first = last
 	var first_anchor: Vector3 = _anchors.get(str(first.get("anchor", "")), _origin)
@@ -322,6 +344,7 @@ func _apply_camera() -> void:
 	var target := (first_anchor + _vector(first.target)).lerp(last_anchor + _vector(last.target), weight)
 	_camera.global_position = position
 	_camera.look_at(target, Vector3.UP)
+	_view_focus.global_position = target - Vector3.UP # Existing scenery fade probes chest height.
 	_camera.near = 0.5
 	_camera.fov = float(_definition.get("fov", 50.0))
 
@@ -350,7 +373,10 @@ func _apply_actors() -> void:
 		var action := StringName(str(chosen.get("action", "idle")))
 		if action == &"walk" and progress >= 1.0:
 			action = &"idle"
-		var direction: Vector3 = _anchors.get(str(chosen.get("face", "")), _origin) - at
+		var facing := str(chosen.get("face", ""))
+		var face_point: Vector3 = _anchors.get(facing,
+			(_actors[facing] as Node3D).global_position if _actors.has(facing) else _origin)
+		var direction: Vector3 = face_point - at
 		var yaw := atan2(-direction.x, -direction.z) if Vector2(direction.x, direction.z).length() > 0.05 else post.basis.get_euler().y
 		if actor.has_method("set_cinematic_presentation"):
 			actor.call("set_cinematic_presentation", at, yaw, action,

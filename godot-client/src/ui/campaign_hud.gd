@@ -13,6 +13,7 @@ var _body_scroll: ScrollContainer
 var _title: Label
 var _hint: Label
 var _notice: Label
+var _bank: Label
 var _party: Label
 var _adoption: Label
 var _adoption_actions: HFlowContainer
@@ -74,6 +75,10 @@ func _build() -> void:
 	_notice.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_notice.add_theme_font_size_override("font_size", 14)
 	column.add_child(_notice)
+	_bank = Label.new()
+	_bank.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_bank.add_theme_font_size_override("font_size", 14)
+	column.add_child(_bank)
 	_party = Label.new()
 	_party.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_party.add_theme_font_size_override("font_size", 14)
@@ -118,7 +123,7 @@ func _build() -> void:
 	_scroll.add_child(_targets)
 	_entry = Button.new()
 	_entry.text = "Begin The Missing Measure"
-	_entry.pressed.connect(func() -> void: action_requested.emit("resume" if bool(_state.get("started", false)) else "start"))
+	_entry.pressed.connect(func() -> void: action_requested.emit("bank" if str(_state.get("kind", "")) == "bank" else "resume" if bool(_state.get("started", false)) else "start"))
 	column.add_child(_entry)
 	_join = Button.new()
 	_join.text = "Join the party's expedition"
@@ -141,7 +146,7 @@ func _build() -> void:
 	actions.add_child(_account)
 	_leave = Button.new()
 	_leave.text = "Return"
-	_leave.tooltip_text = "Return to the public quay. Completed milestones are saved."
+	_leave.tooltip_text = "Return to the public road. Completed milestones are saved."
 	_leave.pressed.connect(func() -> void: action_requested.emit("leave"))
 	actions.add_child(_leave)
 	_reduced = CheckButton.new()
@@ -172,12 +177,13 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 			+ "\nSpeak with " + str(travel.get("npc", "Odo Fenn")) + " there to continue."
 	_notice.text = str(snapshot.get("party_notice", ""))
 	_notice.visible = not _notice.text.is_empty()
+	_apply_bank(snapshot.get("bank", {}))
 	_apply_party(party, snapshot.get("adoption", {}))
 	_apply_companion(snapshot.get("companion", {}))
 	_entry.visible = (not active or travelling) and bool(snapshot.get("available", false)) and not can_own
 	_join.visible = not active and can_join
 	_own.visible = can_own
-	_entry.text = "Continue The Missing Measure" if bool(snapshot.get("started", false)) else "Begin The Missing Measure"
+	_entry.text = ("Continue " if bool(snapshot.get("started", false)) else "Begin ") + str(snapshot.get("title", "The Missing Measure"))
 	if travelling:
 		_entry.text = "Continue at " + str(travel.get("npc", "Odo"))
 	_leave.visible = active and not travelling
@@ -186,7 +192,13 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 	_scroll.visible = active and not travelling
 	_reduced.set_pressed_no_signal(reduced_motion)
 	_layout()
-	var rows: Array = snapshot.get("targets", [])
+	var rows: Array = []
+	# Keep the server's clue order stable within each group, including legacy
+	# encounters that have no navigation-only checkpoint.
+	for navigation: bool in [true, false]:
+		for target: Dictionary in snapshot.get("targets", []):
+			if (int(target.get("object_id", -1)) == 0) == navigation:
+				rows.append(target)
 	var signature := str(snapshot.get("run_id", "")) + ":" + JSON.stringify(rows)
 	for target: Dictionary in rows:
 		signature += ":" + str(_nearby(target))
@@ -204,11 +216,40 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 		var completed := bool(target.get("completed", false))
 		var enabled := bool(target.get("enabled", true)) and not completed
 		var nearby := _nearby(target)
-		button.text = ("✓ " if completed else "" if nearby else "Go to · ") + str(target.get("label", "Work site"))
+		var navigation := int(target.get("object_id", -1)) == 0
+		button.text = ("✓ " if completed else "Walk to · " if navigation else "" if nearby else "Go to · ") + str(target.get("label", "Work site"))
 		button.disabled = not enabled
 		button.tooltip_text = str(target.get("detail", "Use the marked place in the world."))
 		button.pressed.connect(_request_target.bind(str(target.get("id", "")), int(target.get("object_id", -1))))
 		_targets.add_child(button)
+
+func _apply_bank(bank: Dictionary) -> void:
+	_bank.visible = not bank.is_empty()
+	if bank.is_empty():
+		return
+	var lines: PackedStringArray = []
+	var earlier := str(bank.get("inherited_disclosure", ""))
+	if not earlier.is_empty():
+		lines.append("Earlier account: " + {"public": "public inspection", "protected": "witness protected", "supervised": "witnessed cooperation"}.get(earlier, earlier) + ".")
+	for text: String in [str(bank.get("cost", "")), str(bank.get("consequence", ""))]:
+		if not text.is_empty():
+			lines.append(text)
+	if int(bank.get("route_total", 0)) > 0 and str(_state.get("key", "")) == "trail":
+		lines.append("Route observations: %d/%d" % [int(bank.get("route_step", 0)), int(bank.route_total)])
+	if str(bank.get("remedy", "")) == "maintenance" and not bool(bank.get("remedy_complete", false)):
+		lines.append("Crew checks: %d/2. Then reset, reopen and test both valves." % int(bank.get("maintenance_step", 0)))
+	if str(_state.get("key", "")) in ["reconstruction", "account", "complete"]:
+		lines.append("Reconstruction: %d/%d verified markers." % [int(bank.get("sequence_step", 0)), int(bank.get("sequence_total", 3))])
+	var error := str(bank.get("last_error", ""))
+	if not error.is_empty():
+		lines.append(error)
+	if not str(bank.get("misplaced", "")).is_empty():
+		lines.append("Lift the misplaced marker at its work site, then correct the route. Verified observations stay saved.")
+	if bool(bank.get("tree_cared", false)):
+		lines.append("The orchard channel is cleared for the existing tree.")
+	if bool(bank.get("bypass_ready", false)):
+		lines.append("The new maintenance bypass has been checked.")
+	_bank.text = "\n".join(lines)
 
 func _apply_party(party: Dictionary, adoption: Dictionary) -> void:
 	var lines: PackedStringArray = []
