@@ -290,6 +290,7 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"signed_ashore_v1",
 	"campaign_v1",
 	"campaign_party_v1",
+	"campaign_bank_v1",
 	"actor16_v1",
 	"adjacent_actors_v1",
 	# Players within 80 tiles as actors, the rest as ELORIA_PRESENCE dots, and
@@ -3533,7 +3534,7 @@ static func decode_campaign(payload: PackedByteArray) -> Dictionary:
 	var value: Variant = JSON.parse_string(payload.get_string_from_utf8())
 	if not value is Dictionary or value.get("version") != 1 or not value.get("active") is bool:
 		return {"type": "invalid", "error": "campaign_shape"}
-	for field: String in ["title", "hint", "map", "run_id", "key", "party_notice"]:
+	for field: String in ["title", "hint", "map", "run_id", "key", "kind", "party_notice"]:
 		if value.has(field) and not value[field] is String:
 			return {"type": "invalid", "error": "campaign_text"}
 	if value.has("stage") and not value.stage is String and (typeof(value.stage) not in [TYPE_INT, TYPE_FLOAT] \
@@ -3670,6 +3671,35 @@ static func decode_campaign(payload: PackedByteArray) -> Dictionary:
 				or companion.get("mode") not in ["follow", "wait", "regroup", "help"] \
 				or not companion.get("can_command") is bool:
 			return {"type": "invalid", "error": "campaign_companion_shape"}
+	var bank: Variant = value.get("bank", {})
+	if not bank is Dictionary:
+		return {"type": "invalid", "error": "campaign_bank"}
+	for field: String in ["cost", "consequence", "last_error", "misplaced"]:
+		if bank.has(field) and not bank[field] is String:
+			return {"type": "invalid", "error": "campaign_bank_text"}
+	for field: String in ["tree_cared", "bypass_ready", "sequence_correct", "crossing_ready", "remedy_complete"]:
+		if bank.has(field) and not bank[field] is bool:
+			return {"type": "invalid", "error": "campaign_bank_flag"}
+	if bank.has("approach") and bank.approach not in ["", "pending", "detour", "planks", "secure"]:
+		return {"type": "invalid", "error": "campaign_bank_approach"}
+	if bank.has("remedy") and bank.remedy not in ["", "pending", "reserve", "material", "maintenance"]:
+		return {"type": "invalid", "error": "campaign_bank_remedy"}
+	if bank.has("disclosure") and bank.disclosure not in ["", "pending", "custodian", "public", "protected"]:
+		return {"type": "invalid", "error": "campaign_bank_disclosure"}
+	if bank.has("inherited_disclosure") and bank.inherited_disclosure not in ["", "public", "protected", "supervised"]:
+		return {"type": "invalid", "error": "campaign_bank_inherited"}
+	for field: String in ["diversion", "reading"]:
+		if bank.has(field) and not _campaign_integer(bank[field], 0, 2):
+			return {"type": "invalid", "error": "campaign_bank_model"}
+	if bank.has("claimed_gauge") and not _campaign_integer(bank.claimed_gauge, 0, 8):
+		return {"type": "invalid", "error": "campaign_bank_claim"}
+	for prefix: String in ["sequence", "route", "maintenance"]:
+		var step := prefix + "_step"
+		var total := prefix + "_total"
+		if bank.has(total) and not _campaign_integer(bank[total], 0, 32):
+			return {"type": "invalid", "error": "campaign_bank_progress"}
+		if bank.has(step) and not _campaign_integer(bank[step], 0, float(bank.get(total, 32))):
+			return {"type": "invalid", "error": "campaign_bank_progress"}
 	return {"type": "campaign", "state": value}
 
 static func _campaign_integer(value: Variant, minimum: float, maximum: float) -> bool:

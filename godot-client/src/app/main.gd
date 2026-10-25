@@ -38,9 +38,11 @@ const NewCharacterIntroScript = preload("res://src/camera/new_character_intro.gd
 const CampaignSceneScript = preload("res://src/world/campaign_scene.gd")
 const CampaignHudScript = preload("res://src/ui/campaign_hud.gd")
 const CampaignWorksScript = preload("res://src/world/campaign_works.gd")
+const CampaignBankWorksScript = preload("res://src/world/campaign_bank_works.gd")
 @onready var campaign_scene := CampaignSceneScript.new()
 @onready var campaign_hud := CampaignHudScript.new()
 @onready var campaign_works := CampaignWorksScript.new()
+@onready var campaign_bank_works := CampaignBankWorksScript.new()
 const ArrivalCurtainScript = preload("res://src/ui/arrival_curtain.gd")
 const ArrivalPrewarmScript = preload("res://src/world/arrival_prewarm.gd")
 ## The loading screen from signing in, or a far arrival, until the character
@@ -1304,6 +1306,7 @@ func _ready() -> void:
 	add_child(campaign_scene)
 	add_child(campaign_hud)
 	world_root.add_child(campaign_works)
+	world_root.add_child(campaign_bank_works)
 	campaign_scene.configure(main_viewport)
 	campaign_hud.target_requested.connect(_on_campaign_target)
 	campaign_hud.action_requested.connect(_on_campaign_action)
@@ -4064,6 +4067,7 @@ func _on_connection_state_changed(value: String) -> void:
 		campaign_scene.cancel("disconnected")
 		campaign_hud.hide()
 		campaign_works.clear()
+		campaign_bank_works.clear()
 		_end_arrival()
 		if not game_view.visible or _leaving_session:
 			respawn_prewarm.discard()
@@ -5734,6 +5738,7 @@ func _on_state_changed(path: StringName) -> void:
 			campaign_scene.cancel("map_changed")
 			campaign_hud.hide()
 			campaign_works.clear()
+			campaign_bank_works.clear()
 			_pickpoint_draft.clear()
 			_pickpoint_submitting = false
 			_load_server_map()
@@ -7112,16 +7117,20 @@ func _update_campaign(delta: float) -> void:
 		campaign_scene.cancel("unavailable")
 		campaign_hud.hide()
 		campaign_works.clear()
+		campaign_bank_works.clear()
 		return
 	var ready := not character_intro.is_active() and not arrival_curtain.blocks_input() \
 		and _grounded_actors.has(AppState.local_actor_id)
 	if ready:
 		campaign_works.apply_snapshot(AppState.campaign, adapter, AppState.current_map,
 			_campaign_surface_height, campaign_scene.reduced_motion)
+		campaign_bank_works.apply_snapshot(AppState.campaign, adapter, AppState.current_map,
+			_campaign_surface_height, campaign_scene.reduced_motion)
 	campaign_scene.update_ambient(AppState.campaign, actor_nodes, adapter, _campaign_surface_height, delta)
 	campaign_scene.update(delta, AppState.campaign, camera_rig, actor_nodes,
 		AppState.local_actor_id, AppState.current_map, ready, adapter, _campaign_surface_height)
 	campaign_works.set_readouts_visible(campaign_scene.work_readouts_visible())
+	campaign_bank_works.set_readouts_visible(campaign_scene.work_readouts_visible())
 	if campaign_scene.blocks_input():
 		_stop_keyboard_movement()
 	var tile: Variant = _local_actor_server_tile()
@@ -7137,7 +7146,9 @@ func _on_campaign_target(object_id: int, tile: Vector2i, nearby: bool) -> void:
 			!= EloriaProtocol.map_id_from_reference(AppState.current_map):
 		return
 	magic_selection.cancel()
-	if nearby:
+	if object_id == 0:
+		Network.move_to(tile) # A campaign route pin is navigation, never a use request.
+	elif nearby:
 		Network.use_map_object(object_id)
 	else:
 		Network.move_to(tile)
@@ -8219,6 +8230,8 @@ func _update_occluder_fade(delta: float) -> void:
 	occluder_fade.sync_worlds(world_loader.manifest, world_loader.world_root, exterior_stream.residents)
 	var target_value: Variant = actor_nodes.get(AppState.local_actor_id)
 	var target: Node3D = target_value as Node3D if target_value is Node3D else null
+	if str(AppState.campaign.get("kind", "")) == "bank" and campaign_scene.playing:
+		target = campaign_scene.occlusion_focus()
 	occluder_fade.update(delta, gameplay_camera, target)
 
 ## Which actors animate this frame, and how often. Every actor's skeleton

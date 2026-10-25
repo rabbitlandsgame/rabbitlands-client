@@ -505,7 +505,7 @@ func use_map_object(object_id: int) -> Error:
 	return send_frame(EloriaProtocol.use_map_object(object_id))
 
 func campaign_request(action: String) -> Error:
-	if action not in ["start", "resume", "leave", "hint", "join", "own"]:
+	if action not in ["start", "resume", "leave", "hint", "join", "own", "bank", "continue"]:
 		return ERR_INVALID_PARAMETER
 	return send_chat("#campaign " + action)
 
