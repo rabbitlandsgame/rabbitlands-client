@@ -32,3 +32,19 @@ an asymmetric crown updo.
 The result retains Rabbit Lands' stylized Human models and painted materials.
 The leaderboard paintings provide art direction rather than an exact match
 for fine portrait detail.
+
+## Local preview
+
+In the prepared customization checkout, double-click
+`test-human-customization.bat`. The offline workshop offers both Human bodies,
+the portrait outfits and four starter outfits, animation poses, camera rotation
+and all appearance controls. **Save preview** stores choices separately for
+each body on this computer. **Screenshot** saves an image in the preview's
+private user-data folder; **Open saves** opens that folder. Closing the window
+or pressing Escape finishes the session.
+
+This launcher uses the prepared `.local/validation` project and its existing
+asset cache. It runs with networking blocked and an isolated editor/user
+profile. Server account creation and online saving are tested separately.
+`-SmokeTest` runs the launcher's automatic check in a separate preview profile;
+`-Compatibility` selects the compatibility renderer when needed.
