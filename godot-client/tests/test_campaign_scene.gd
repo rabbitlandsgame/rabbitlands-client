@@ -53,7 +53,7 @@ func run() -> void:
 	expect(definitions.size() >= 3, "authored arrival, consequence and demonstration scenes load")
 	for id: String in definitions:
 		var authored: Dictionary = definitions[id]
-		expect(float(authored.duration) > 0.0 and float(authored.duration) <= 60.0, id + " is a bounded scene")
+		expect(float(authored.duration) > 0.0 and float(authored.duration) <= Scene.MAX_DURATION, id + " is a bounded scene")
 		expect((authored.shots as Array).size() >= 2 and not (authored.lines as Array).is_empty(), id + " has camera staging and a transcript")
 	var good := snapshot()
 	var decoded := EloriaProtocol.decode_server(191, JSON.stringify(good).to_utf8_buffer())

@@ -44,6 +44,7 @@ const CampaignRoadWorksScript = preload("res://src/world/campaign_road_works.gd"
 const CampaignLampsWorksScript = preload("res://src/world/campaign_lamps_works.gd")
 const CampaignGuidanceScript = preload("res://src/world/campaign_guidance.gd")
 const CampaignCrossingScript = preload("res://src/world/campaign_crossing.gd")
+const CampaignCartScript = preload("res://src/world/campaign_cart.gd")
 @onready var campaign_scene := CampaignSceneScript.new()
 @onready var campaign_hud := CampaignHudScript.new()
 @onready var campaign_works := CampaignWorksScript.new()
@@ -52,6 +53,7 @@ const CampaignCrossingScript = preload("res://src/world/campaign_crossing.gd")
 @onready var campaign_lamps_works := CampaignLampsWorksScript.new()
 @onready var campaign_guidance := CampaignGuidanceScript.new()
 @onready var campaign_crossing := CampaignCrossingScript.new()
+@onready var campaign_cart := CampaignCartScript.new()
 const ArrivalCurtainScript = preload("res://src/ui/arrival_curtain.gd")
 const ArrivalPrewarmScript = preload("res://src/world/arrival_prewarm.gd")
 ## The loading screen from signing in, or a far arrival, until the character
@@ -1336,6 +1338,7 @@ func _ready() -> void:
 	world_root.add_child(campaign_lamps_works)
 	world_root.add_child(campaign_guidance)
 	world_root.add_child(campaign_crossing)
+	world_root.add_child(campaign_cart)
 	campaign_scene.configure(main_viewport)
 	campaign_hud.target_requested.connect(_on_campaign_target)
 	campaign_hud.actor_target_requested.connect(_on_campaign_actor_target)
@@ -4130,6 +4133,7 @@ func _on_connection_state_changed(value: String) -> void:
 		campaign_lamps_works.clear()
 		campaign_guidance.clear()
 		campaign_crossing.clear()
+		campaign_cart.clear()
 		_end_arrival()
 		if not game_view.visible or _leaving_session:
 			respawn_prewarm.discard()
@@ -5809,6 +5813,7 @@ func _on_state_changed(path: StringName) -> void:
 			campaign_lamps_works.clear()
 			campaign_guidance.clear()
 			campaign_crossing.clear()
+			campaign_cart.clear()
 			_pickpoint_draft.clear()
 			_pickpoint_submitting = false
 			_load_server_map()
@@ -7239,6 +7244,7 @@ func _update_campaign(delta: float) -> void:
 		campaign_lamps_works.clear()
 		campaign_guidance.clear()
 		campaign_crossing.clear()
+		campaign_cart.clear()
 		return
 	var ready := not character_intro.is_active() and not arrival_curtain.blocks_input() \
 		and _grounded_actors.has(AppState.local_actor_id)
@@ -7253,9 +7259,16 @@ func _update_campaign(delta: float) -> void:
 			_campaign_surface_height, campaign_scene.reduced_motion)
 		campaign_crossing.apply_snapshot(AppState.campaign, adapter, AppState.current_map,
 			_campaign_surface_height)
+		campaign_cart.apply_snapshot(AppState.campaign, adapter, AppState.current_map,
+			_campaign_surface_height)
 	campaign_scene.update_ambient(AppState.campaign, actor_nodes, adapter, _campaign_surface_height, delta)
 	campaign_scene.update(delta, AppState.campaign, camera_rig, actor_nodes,
 		AppState.local_actor_id, AppState.current_map, ready, adapter, _campaign_surface_height)
+	var accident := campaign_scene.cart_accident_progress()
+	if ready and accident >= 0.0:
+		campaign_cart.set_cinematic_accident(accident)
+	else:
+		campaign_cart.clear_cinematic_presentation()
 	campaign_works.set_readouts_visible(campaign_scene.work_readouts_visible())
 	campaign_bank_works.set_readouts_visible(campaign_scene.work_readouts_visible())
 	campaign_road_works.set_readouts_visible(campaign_scene.work_readouts_visible())
@@ -7270,6 +7283,7 @@ func _update_campaign(delta: float) -> void:
 		and campaign_scene.can_replay(AppState.campaign, AppState.current_map))
 	lantern_guide.apply_campaign(AppState.campaign)
 	campaign_crossing.set_readouts_visible(lantern_guide.using_campaign() and not campaign_scene.is_active())
+	campaign_cart.set_readouts_visible(lantern_guide.using_campaign() and not campaign_scene.is_active())
 	campaign_guidance.apply_snapshot(AppState.campaign, map_object_nodes, actor_nodes,
 		AppState.current_map, tile if tile is Vector2i else Vector2i.ZERO,
 		lantern_guide.using_campaign(), not ready or campaign_scene.is_active())
@@ -7381,12 +7395,20 @@ func _on_campaign_scene_inspection(action: String) -> void:
 	var scene: Dictionary = AppState.campaign.get("scene", {})
 	var inspection: Dictionary = scene.get("inspection", {})
 	var context: Dictionary = campaign_scene.inspection_context()
-	if str(scene.get("id", "")) != "measure.landing.arrival" or inspection.is_empty() \
+	var cart_entry := str(scene.get("id", "")) == "measure.cart.arrival"
+	var expected_inspection := "cart_assessment" if cart_entry else "landing_overview"
+	if str(scene.get("id", "")) not in ["measure.landing.arrival", "measure.cart.arrival"] or inspection.is_empty() \
 			or not EloriaProtocol.campaign_scene_inspection_valid(inspection) \
+			or str(inspection.get("id", "")) != expected_inspection \
+			or int(AppState.campaign.get("content_revision", 1)) != (2 if cart_entry else 1) \
 			or str((AppState.campaign.get("party", {}) as Dictionary).get("role", "owner")) != "owner" \
 			or str(context.get("run_id", "")) != str(AppState.campaign.get("run_id", "")) \
 			or str(context.get("token", "")) != str(scene.get("token", "")) \
 			or str(context.get("id", "")) != str(inspection.id):
+		return
+	if cart_entry and ((AppState.campaign.get("cart", {}) as Dictionary).is_empty() \
+			or not EloriaProtocol.campaign_cart_valid(AppState.campaign.get("cart", {})) \
+			or EloriaProtocol.map_id_from_reference(AppState.current_map) != "greenlight"):
 		return
 	var protagonist := int(inspection.actor_id)
 	var actual: Dictionary = AppState.actors.get(AppState.local_actor_id, {})
@@ -7402,7 +7424,7 @@ func _on_campaign_scene_inspection(action: String) -> void:
 	if error != OK:
 		campaign_scene.inspection_send_failed()
 		if action == "start":
-			AppState.append_local_message("Could not begin the landing inspection. Please try again.")
+			AppState.append_local_message("Could not begin the inspection. Please try again.")
 
 func _on_campaign_scene_choice(option_id: String) -> void:
 	# The scene intentionally owns world input here. This decision does not
@@ -7417,7 +7439,12 @@ func _on_campaign_scene_choice(option_id: String) -> void:
 	var scene: Dictionary = AppState.campaign.get("scene", {})
 	var choice: Dictionary = scene.get("choice", {})
 	var context: Dictionary = campaign_scene.choice_context()
-	if str(scene.get("id", "")) not in ["measure.landing.arrival", "measure.landing.plan"] or str(choice.get("id", "")) != "opening_rescue" \
+	var cart_entry := str(scene.get("id", "")) == "measure.cart.arrival"
+	var inquiry_entry := str(scene.get("id", "")) == "measure.claims.inquiry"
+	var expected_choice := "claims_lead" if inquiry_entry else "cart_release" if cart_entry else "opening_rescue"
+	if str(scene.get("id", "")) not in ["measure.landing.arrival", "measure.landing.plan", "measure.cart.arrival", "measure.claims.inquiry"] \
+			or str(choice.get("id", "")) != expected_choice \
+			or int(AppState.campaign.get("content_revision", 1)) != (2 if cart_entry or inquiry_entry else 1) \
 			or not EloriaProtocol.campaign_scene_choice_valid(choice) \
 			or not bool(choice.get("can_choose", false)) or not bool(choice.get("owner_is_you", false)) \
 			or not str(choice.get("selected", "")).is_empty() \
@@ -7426,10 +7453,25 @@ func _on_campaign_scene_choice(option_id: String) -> void:
 			or str(context.get("token", "")) != str(scene.get("token", "")) \
 			or str(context.get("id", "")) != str(choice.id) or not bool(context.get("waiting", false)):
 		return
-	if str(scene.id) == "measure.landing.arrival":
+	if (cart_entry or inquiry_entry) and EloriaProtocol.map_id_from_reference(AppState.current_map) != "greenlight":
+		return
+	if inquiry_entry:
+		var inquiry: Dictionary = AppState.campaign.get("inquiry", {})
+		var actual: Dictionary = AppState.actors.get(AppState.local_actor_id, {})
+		if inquiry.is_empty() or not EloriaProtocol.campaign_inquiry_valid(inquiry) \
+				or str(scene.get("variant", "")) == "installation" \
+				or int((scene.get("actors", {}) as Dictionary).get("protagonist", -1)) != AppState.local_actor_id \
+				or not is_instance_valid(actor_nodes.get(AppState.local_actor_id)) \
+				or int(actual.get("kind", 0)) != 1 or int(actual.get("health", 0)) <= 0:
+			return
+	if cart_entry and ((AppState.campaign.get("cart", {}) as Dictionary).is_empty() \
+			or not EloriaProtocol.campaign_cart_valid(AppState.campaign.get("cart", {}))):
+		return
+	if str(scene.id) in ["measure.landing.arrival", "measure.cart.arrival"]:
 		var inspection: Dictionary = scene.get("inspection", {})
 		var actual: Dictionary = AppState.actors.get(AppState.local_actor_id, {})
 		if inspection.is_empty() or not EloriaProtocol.campaign_scene_inspection_valid(inspection) \
+				or str(inspection.get("id", "")) != ("cart_assessment" if cart_entry else "landing_overview") \
 				or str(inspection.status) != "complete" or int(inspection.actor_id) != AppState.local_actor_id \
 				or int((scene.get("actors", {}) as Dictionary).get("protagonist", -1)) != AppState.local_actor_id \
 				or not is_instance_valid(actor_nodes.get(AppState.local_actor_id)) \
@@ -7446,7 +7488,7 @@ func _on_campaign_scene_choice(option_id: String) -> void:
 	var error := Network.campaign_scene_choice(str(AppState.campaign.run_id), str(scene.token), option_id)
 	if error != OK:
 		campaign_scene.choice_send_failed()
-		AppState.append_local_message("Could not send your rescue choice. Please try again.")
+		AppState.append_local_message("Could not send your choice. Please try again.")
 
 func _request_arrival_conversation(actor_id: int) -> void:
 	AppState.close_dialogue()

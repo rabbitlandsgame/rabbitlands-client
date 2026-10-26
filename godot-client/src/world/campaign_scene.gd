@@ -2,10 +2,11 @@ extends Node
 ## Reversible, per-view story staging. Only server snapshots authorize a scene;
 ## the camera, gestures, skip and transcript never complete a gameplay objective.
 const DATA_PATH := "res://data/campaign/scenes.json"
+const CART_DATA_PATH := "res://data/campaign/last_cart_scenes.json"
 const Dialogue := preload("res://src/ui/campaign_dialogue.gd")
 const Choice := preload("res://src/ui/campaign_choice.gd")
 const WAIT_LIMIT := 45.0
-const MAX_DURATION := 60.0
+const MAX_DURATION := 120.0
 
 signal presentation_finished(token: String, reason: String)
 signal replay_finished(token: String, reason: String)
@@ -14,6 +15,7 @@ signal inspection_requested(action: String)
 signal transcript_changed(text: String)
 
 var reduced_motion := false
+var auto_dialogue := false
 var playing := false
 var pending := false
 var elapsed := 0.0
@@ -55,10 +57,18 @@ var _inspection_active := false
 var _inspection_pending_at := -1
 var _inspection_error := ""
 var _protagonist_name := "You"
+var _cart_state: Dictionary = {}
 var _inspection_retry: Button
 var _margin: MarginContainer
 var _actions: HFlowContainer
 var _account: Button
+var _line_continue: Button
+var _auto: CheckButton
+var _line_holding := false
+var _line_gate := -1.0
+var _line_released: Dictionary = {}
+var _line_binding: Callable
+var _playback_generation := 0
 var _skip: Button
 var _reduced: CheckButton
 var _transcript: AcceptDialog
@@ -71,6 +81,7 @@ var _surface_sample: Callable
 var _ambient_actor: Node3D
 var _ambient_post := Transform3D.IDENTITY
 var _ambient_elapsed := 0.0
+var _cart_ambient: Dictionary = {}
 var _ack_identity := ""
 var _ack_requested := false
 var _view_focus: Node3D
@@ -95,10 +106,15 @@ func _ready() -> void:
 	var config := ConfigFile.new()
 	if config.load("user://campaign_presentation.cfg") == OK:
 		reduced_motion = bool(config.get_value("presentation", "reduced_motion", false))
+		auto_dialogue = bool(config.get_value("presentation", "auto_dialogue", false))
 
 static func scene_definitions() -> Dictionary:
 	var data: Variant = JSON.parse_string(FileAccess.get_file_as_string(DATA_PATH))
-	return data.get("scenes", {}) if data is Dictionary else {}
+	var definitions: Dictionary = data.get("scenes", {}) if data is Dictionary else {}
+	if FileAccess.file_exists(CART_DATA_PATH):
+		var cart: Variant = JSON.parse_string(FileAccess.get_file_as_string(CART_DATA_PATH))
+		if cart is Dictionary: definitions.merge(cart.get("scenes", {}), false)
+	return definitions
 
 static func map_key(value: String) -> String:
 	return EloriaProtocol.map_id_from_reference(value)
@@ -172,6 +188,18 @@ func configure(view: SubViewport = null) -> void:
 	_inspection_retry.pressed.connect(_request_inspection)
 	actions.add_child(_inspection_retry)
 	_inspection_retry.hide()
+	_line_continue = Button.new()
+	_line_continue.name = "ContinueDialogue"
+	_line_continue.text = "Continue"
+	actions.add_child(_line_continue)
+	_line_continue.hide()
+	_auto = CheckButton.new()
+	_auto.text = "Auto dialogue"
+	_auto.tooltip_text = "Advance dialogue automatically. Turn this off to pause at each line and use Continue."
+	_auto.button_pressed = auto_dialogue
+	_auto.toggled.connect(set_auto_dialogue)
+	actions.add_child(_auto)
+	_auto.hide()
 	_transcript = AcceptDialog.new()
 	_transcript.title = "Scene account"
 	_transcript.dialog_text = ""
@@ -205,7 +233,7 @@ func _layout_presentation() -> void:
 	if not is_instance_valid(_bottom):
 		return
 	var area := get_viewport().get_visible_rect().size
-	var compact := area.x < 620.0 or area.y < 400.0
+	var compact := area.x < 900.0 or area.y < 550.0
 	var padding := 8 if compact else 16
 	for side: String in ["left", "right", "top", "bottom"]:
 		_margin.add_theme_constant_override("margin_" + side, padding)
@@ -218,8 +246,9 @@ func _layout_presentation() -> void:
 		else ("Return now · Esc" if _returning else "Return to play · Esc")
 	_account.text = "Scene account" if compact else "Read scene account"
 	_reduced.text = "Reduced motion" if compact else "Reduced camera motion"
+	_auto.text = "Auto" if compact else "Auto dialogue"
 	_actions.add_theme_constant_override("h_separation", 8 if compact else 14)
-	for control: Control in [_skip, _account, _reduced, _inspection_retry]:
+	for control: Control in [_skip, _account, _reduced, _inspection_retry, _line_continue, _auto]:
 		control.add_theme_font_size_override("font_size", 14 if compact else 16)
 
 func blocks_input() -> bool:
@@ -231,6 +260,70 @@ func is_active() -> bool:
 func is_replaying() -> bool:
 	return _replaying
 
+func is_dialogue_waiting() -> bool:
+	return playing and not _returning and _line_holding
+
+func cart_accident_progress() -> float:
+	var interval: Array = _definition.get("cart_accident", [])
+	if not playing or _returning or interval.size() != 2: return -1.0
+	return clampf((elapsed - float(interval[0])) / maxf(0.001, float(interval[1]) - float(interval[0])), 0.0, 1.0)
+
+func _scene_bindings(scene: Dictionary, snapshot: Dictionary) -> Dictionary:
+	var raw: Dictionary = scene.get("actors", snapshot.get("actors", {}))
+	if not _definition.has("cast_roles"): return raw
+	var chosen: Dictionary = {}
+	for role: String in _definition.cast_roles:
+		if raw.has(role): chosen[role] = raw[role]
+	return chosen
+
+func _line_identity(at: float) -> String:
+	return _run + "|" + _token + "|" + str(_playback_generation) + "|" + str(at)
+
+func _on_line_continue(identity: String) -> void:
+	if not is_dialogue_waiting() or identity != _line_identity(_line_gate): return
+	_line_released[str(_line_gate)] = true
+	elapsed = _line_gate
+	_line_holding = false
+	_line_continue.hide()
+	_skip.grab_focus()
+
+func continue_dialogue() -> bool:
+	if not is_dialogue_waiting(): return false
+	_on_line_continue(_line_identity(_line_gate))
+	return true
+
+func set_auto_dialogue(value: bool, persist := true) -> void:
+	auto_dialogue = value
+	if is_instance_valid(_auto): _auto.set_pressed_no_signal(value)
+	if value and _line_holding: continue_dialogue()
+	if persist:
+		var config := ConfigFile.new()
+		config.load("user://campaign_presentation.cfg")
+		config.set_value("presentation", "auto_dialogue", value)
+		config.save("user://campaign_presentation.cfg")
+
+func _hold_dialogue(next_elapsed: float) -> bool:
+	if auto_dialogue:
+		for value: Variant in _definition.get("dialogue_holds", []):
+			if float(value) <= next_elapsed: _line_released[str(float(value))] = true
+		return false
+	if _line_holding: return true
+	for value: Variant in _definition.get("dialogue_holds", []):
+		var at := float(value)
+		if _line_released.has(str(at)) or at < 0.0 or at > _duration(): continue
+		if next_elapsed < at: break
+		_line_gate = at
+		elapsed = maxf(0.0, at - 0.001)
+		_line_holding = true
+		if _line_binding.is_valid() and _line_continue.pressed.is_connected(_line_binding):
+			_line_continue.pressed.disconnect(_line_binding)
+		_line_binding = _on_line_continue.bind(_line_identity(at))
+		_line_continue.pressed.connect(_line_binding)
+		_line_continue.show()
+		_line_continue.grab_focus()
+		return true
+	return false
+
 func choice_context() -> Dictionary:
 	return {"run_id": _run, "token": _token, "id": str(_choice_state.get("id", "")), "waiting": _choice_waiting and playing and not _returning}
 
@@ -240,7 +333,8 @@ func inspection_context() -> Dictionary:
 
 func inspection_send_failed() -> void:
 	_inspection_pending_at = -1
-	_inspection_error = "The inspection has not been confirmed. Retry, or return to play and inspect the landing."
+	var subject := "cart" if str(_inspection_state.get("id", "")) == "cart_assessment" else "landing"
+	_inspection_error = "The inspection has not been confirmed. Retry, or return to play and inspect the %s." % subject
 	if is_instance_valid(_inspection_retry): _inspection_retry.show()
 
 func _has_inspection() -> bool:
@@ -384,6 +478,7 @@ func set_reduced_motion(value: bool, persist := true) -> void:
 		_reduced.set_pressed_no_signal(value)
 	if persist:
 		var config := ConfigFile.new()
+		config.load("user://campaign_presentation.cfg")
 		config.set_value("presentation", "reduced_motion", value)
 		config.save("user://campaign_presentation.cfg")
 
@@ -415,6 +510,7 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 	var previous_selection := str(_choice_state.get("selected", ""))
 	_choice_state = (scene.get("choice", {}) as Dictionary).duplicate(true)
 	_inspection_state = (scene.get("inspection", {}) as Dictionary).duplicate(true)
+	_cart_state = (snapshot.get("cart", {}) as Dictionary).duplicate(true)
 	_protagonist_name = str(_choice_state.get("owner", "You")).strip_edges()
 	if _protagonist_name.is_empty(): _protagonist_name = "You"
 	if is_active() and previous_selection != str(_choice_state.get("selected", "")):
@@ -443,6 +539,10 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 		_map = here
 		_variant = str(scene.get("variant", snapshot.get("cargo_priority", "")))
 		_definition = (_definitions[id] as Dictionary).duplicate(true)
+		# The same conversation has a different physical worksite at Twinbrook.
+		# Select its authored establishing frame once, then hold that view.
+		for shot: Dictionary in _definition.get("shots", []):
+			shot.merge((shot.get("variants", {}) as Dictionary).get(_variant, {}), true)
 		_adapter = coordinate_adapter
 		_surface_sample = surface_sample
 		_anchors.clear()
@@ -477,7 +577,7 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 		if not world_ready or not is_instance_valid(local_value) or not local_value is Node3D or not is_instance_valid(rig):
 			return
 		var local: Node3D = local_value
-		var bindings: Dictionary = scene.get("actors", snapshot.get("actors", {}))
+		var bindings: Dictionary = _scene_bindings(scene, snapshot)
 		# A named speaker may be known to the server before its native model has
 		# finished construction. Keep the camera with the player until it exists.
 		if not _replaying:
@@ -514,7 +614,7 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 		_handled[identity] = true
 	if playing:
 		if _replaying:
-			if scene.get("actors", snapshot.get("actors", {})) != _replay_bindings:
+			if _scene_bindings(scene, snapshot) != _replay_bindings:
 				cancel("actor_lost")
 				return
 			for actor_id: int in _replay_nodes:
@@ -540,6 +640,18 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 		if is_instance_valid(_transcript) and _transcript.visible:
 			return
 		var next_elapsed := minf(elapsed + maxf(0.0, delta), _duration())
+		# A local reading pause cannot advance beyond an unresolved native
+		# inspection or decision, even after a long frame or an Auto toggle.
+		if _has_inspection() and not _replaying and str(_inspection_state.get("status", "")) != "complete":
+			next_elapsed = minf(next_elapsed, float(_definition.get("inspection_wait_at", 24.0)))
+		if _has_choice() and not _choice_completed:
+			var decision_at := float(_definition.get("choice_at", -1.0))
+			if decision_at >= 0.0: next_elapsed = minf(next_elapsed, decision_at)
+		if _hold_dialogue(next_elapsed):
+			_apply_actors()
+			_apply_camera()
+			_update_caption()
+			return
 		if _has_inspection():
 			if not _replaying and not _inspection_sent and next_elapsed >= float(_definition.get("inspection_at", 19.0)):
 				_request_inspection()
@@ -549,8 +661,9 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 				if str(_inspection_state.get("status", "")) == "blocked" and _inspection_error.is_empty() \
 						and bool(_choice_state.get("owner_is_you", false)):
 					inspection_send_failed()
-					_inspection_error = "The path is blocked. Retry the walk, or return to play to reach the landing."
-				if _inspection_pending_at >= 0 and Time.get_ticks_msec() - _inspection_pending_at >= 8000:
+					_inspection_error = "The path is blocked. Retry the walk, or return to play to reach the inspection point."
+				if _inspection_pending_at >= 0 and Time.get_ticks_msec() - _inspection_pending_at >= \
+						int(float(_definition.get("inspection_timeout", 8.0)) * 1000.0):
 					inspection_send_failed()
 				_apply_actors()
 				_apply_camera()
@@ -586,6 +699,7 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 func _start(rig: Node3D, camera: Camera3D, local: Node3D, nodes: Dictionary,
 		bindings: Dictionary) -> void:
 	configure()
+	_playback_generation += 1
 	if not is_instance_valid(_view_focus):
 		_view_focus = Node3D.new()
 		_view_focus.name = "CampaignViewFocus"
@@ -613,6 +727,12 @@ func _start(rig: Node3D, camera: Camera3D, local: Node3D, nodes: Dictionary,
 	_inspection_pending_at = -1
 	_inspection_error = ""
 	_inspection_retry.hide()
+	_line_holding = false
+	_line_gate = -1.0
+	_line_released.clear()
+	_line_continue.hide()
+	_auto.visible = not (_definition.get("dialogue_holds", []) as Array).is_empty()
+	_auto.set_pressed_no_signal(auto_dialogue)
 	_choice_dialog.reset()
 	_choice_scroll.hide()
 	_resume_view.clear()
@@ -802,6 +922,10 @@ func _apply_actors() -> void:
 		var from: Vector3 = _anchors.get(str(chosen.get("from", "")), post.origin + previous_offset)
 		var to: Vector3 = _anchors.get(str(chosen.get("destination", "")), post.origin + destination)
 		var at := _ground(from.lerp(to, progress))
+		if role == "worker" and _definition.has("cart_accident"):
+			var offset: Array = _cart_state.get("worker_presentation_offset", [0, 0, 0])
+			if _replaying: offset = [-0.48, 0, 0.32]
+			if offset.size() == 3: at = _ground(at + _vector(offset))
 		var action := StringName(str(chosen.get("action", "idle")))
 		if action == &"walk" and (progress >= 1.0 or from.distance_to(to) < 0.05):
 			action = &"idle"
@@ -840,9 +964,10 @@ func _update_caption() -> void:
 			and str(_inspection_state.get("status", "")) != "complete":
 		speaker = _protagonist_name
 		role = "protagonist"
+		var subject := "cart" if str(_inspection_state.get("id", "")) == "cart_assessment" else "damaged landing"
 		text = _inspection_error if not _inspection_error.is_empty() else \
-			"Waiting for the story owner to inspect the landing…" if not bool(_choice_state.get("owner_is_you", false)) else \
-			"Taking a closer look at the damaged landing…"
+			("Waiting for the story owner to inspect the %s…" % subject) if not bool(_choice_state.get("owner_is_you", false)) else \
+			("Taking a closer look at the %s…" % subject)
 	if _choice_completed and _has_choice() and elapsed < float(_definition.get("choice_response_until", _duration())):
 		speaker = "Odo Fenn"
 		role = "odo"
@@ -889,6 +1014,8 @@ func handle_input(event: InputEvent) -> bool:
 
 func skip() -> void:
 	_stop_inspection()
+	_line_holding = false
+	if is_instance_valid(_line_continue): _line_continue.hide()
 	if _returning:
 		cancel(_return_reason)
 	elif playing and _handoff_seconds("exit_seconds") > 0.0 and not reduced_motion:
@@ -914,6 +1041,10 @@ func cancel(reason := "cancelled") -> void:
 	_return_start.clear()
 	_choice_waiting = false
 	_choice_pending_at = -1
+	_line_holding = false
+	_line_gate = -1.0
+	_line_released.clear()
+	if is_instance_valid(_line_continue): _line_continue.hide()
 	if is_instance_valid(_inspection_retry): _inspection_retry.hide()
 	if is_instance_valid(_choice_dialog): _choice_dialog.reset()
 	if is_instance_valid(_choice_scroll): _choice_scroll.hide()
@@ -981,6 +1112,12 @@ func update_ambient(snapshot: Dictionary, actor_nodes: Dictionary, adapter: Coor
 		surface_sample: Callable, delta := 1.0 / 60.0) -> void:
 	if is_active():
 		return
+	var cart: Dictionary = snapshot.get("cart", {})
+	if bool(snapshot.get("active", false)) and int(snapshot.get("content_revision", 1)) == 2 \
+			and map_key(str(snapshot.get("map", ""))) == "greenlight" and not cart.is_empty():
+		_update_cart_ambient(snapshot, actor_nodes, adapter, surface_sample)
+		return
+	_release_cart_ambient()
 	var mechanism: Dictionary = snapshot.get("mechanism", {})
 	var lamps: Dictionary = snapshot.get("lamps", {})
 	var lamps_hold := str(snapshot.get("kind", "")) == "lamps" \
@@ -1030,7 +1167,52 @@ func update_ambient(snapshot: Dictionary, actor_nodes: Dictionary, adapter: Coor
 	if actor.has_method("set_cinematic_presentation"):
 		actor.call("set_cinematic_presentation", at, yaw, &"defend", 0.0)
 
+func _update_cart_ambient(snapshot: Dictionary, actor_nodes: Dictionary, adapter: CoordinateAdapter,
+		surface_sample: Callable) -> void:
+	var cart: Dictionary = snapshot.cart
+	var desired: Dictionary = {}
+	if bool(cart.get("holder_active", false)) and str(cart.get("holder", "foreman")) == "foreman" \
+			and not bool(cart.get("released", false)):
+		desired.foreman = &"defend"
+	if not bool(cart.get("treated", false)):
+		desired.worker = &"seated_idle"
+	var bindings: Dictionary = snapshot.get("actors", {})
+	for role: String in _cart_ambient.keys():
+		var previous: Node3D = _cart_ambient[role]
+		if not desired.has(role) or actor_nodes.get(int(bindings.get(role, -1))) != previous:
+			if is_instance_valid(previous) and previous.has_method("end_cinematic_presentation"):
+				previous.call("end_cinematic_presentation")
+			_cart_ambient.erase(role)
+	if adapter == null: return
+	var tile: Array = cart.get("tile", [])
+	if tile.size() != 2: return
+	var face := adapter.tile_center(int(tile[0]), int(tile[1]))
+	for role: String in desired:
+		var value: Variant = actor_nodes.get(int(bindings.get(role, -1)))
+		if not is_instance_valid(value) or not value is Node3D: continue
+		var actor := value as Node3D
+		if not actor.has_method("set_cinematic_presentation"): continue
+		var at := _authoritative_position(actor)
+		if role == "worker" and not bool(cart.get("released", false)):
+			var offset: Array = cart.get("worker_presentation_offset", [0, 0, 0])
+			if offset.size() == 3: at += _vector(offset)
+		if surface_sample.is_valid():
+			var height: Variant = surface_sample.call(at)
+			if typeof(height) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(height)): continue
+			at.y = float(height)
+		var direction := face - at
+		var yaw := atan2(-direction.x, -direction.z) if Vector2(direction.x, direction.z).length() > 0.05 else actor.rotation.y
+		_cart_ambient[role] = actor
+		actor.call("set_cinematic_presentation", at, yaw, desired[role], 0.0)
+
+func _release_cart_ambient() -> void:
+	for value: Variant in _cart_ambient.values():
+		if is_instance_valid(value) and value.has_method("end_cinematic_presentation"):
+			value.call("end_cinematic_presentation")
+	_cart_ambient.clear()
+
 func _release_ambient() -> void:
+	_release_cart_ambient()
 	if is_instance_valid(_ambient_actor) and _ambient_actor.has_method("end_cinematic_presentation"):
 		_ambient_actor.call("end_cinematic_presentation")
 	elif is_instance_valid(_ambient_actor):

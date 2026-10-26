@@ -290,6 +290,7 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"signed_ashore_v1",
 	"campaign_v1",
 	"campaign_party_v1",
+	"campaign_cart_v1",
 	"campaign_bank_v1",
 	"campaign_road_v1",
 	"campaign_lamps_v1",
@@ -3545,6 +3546,8 @@ static func decode_campaign(payload: PackedByteArray) -> Dictionary:
 	for field: String in ["title", "hint", "map", "run_id", "key", "kind", "party_notice"]:
 		if value.has(field) and not value[field] is String:
 			return {"type": "invalid", "error": "campaign_text"}
+	if value.has("content_revision") and not _campaign_integer(value.content_revision, 1, 2):
+		return {"type": "invalid", "error": "campaign_content_revision"}
 	if value.has("stage") and not value.stage is String and (typeof(value.stage) not in [TYPE_INT, TYPE_FLOAT] \
 			or not is_finite(float(value.stage)) or float(value.stage) != floor(float(value.stage))):
 		return {"type": "invalid", "error": "campaign_stage"}
@@ -3586,6 +3589,19 @@ static func decode_campaign(payload: PackedByteArray) -> Dictionary:
 				or not is_finite(float(target.range)) or float(target.range) < 0.0 or float(target.range) > 20.0):
 			return {"type": "invalid", "error": "campaign_range"}
 	var scene: Variant = value.get("scene", {})
+	var preferred: Variant = value.get("preferred_targets", [])
+	if not preferred is Array or preferred.size() > 64:
+		return {"type": "invalid", "error": "campaign_preferred_targets"}
+	var preferred_seen: Dictionary = {}
+	for identity: Variant in preferred:
+		if not identity is String or str(identity).is_empty() or preferred_seen.has(identity):
+			return {"type": "invalid", "error": "campaign_preferred_target"}
+		var declared := false
+		for target: Dictionary in value.get("targets", []):
+			if str(target.id) == identity: declared = true
+		if not declared:
+			return {"type": "invalid", "error": "campaign_preferred_binding"}
+		preferred_seen[identity] = true
 	if not scene is Dictionary:
 		return {"type": "invalid", "error": "campaign_scene"}
 	if not scene.is_empty():
@@ -3619,7 +3635,7 @@ static func decode_campaign(payload: PackedByteArray) -> Dictionary:
 			and int((scene.get("actors", {}) as Dictionary).get("protagonist", -1)) != int(inspection.actor_id):
 		return {"type": "invalid", "error": "campaign_inspection_binding"}
 	for anchors: Variant in [value.get("anchors", {}), scene.get("anchors", {})]:
-		if not anchors is Dictionary or anchors.size() > 32:
+		if not anchors is Dictionary or anchors.size() > (64 if int(value.get("content_revision", 1)) == 2 else 32):
 			return {"type": "invalid", "error": "campaign_anchors"}
 		for key: Variant in anchors:
 			var point: Variant = anchors[key]
@@ -3728,7 +3744,74 @@ static func decode_campaign(payload: PackedByteArray) -> Dictionary:
 		return {"type": "invalid", "error": "campaign_lamps"}
 	if not campaign_crossing_valid(value.get("crossing", {})):
 		return {"type": "invalid", "error": "campaign_crossing"}
+	if not campaign_cart_valid(value.get("cart", {})):
+		return {"type": "invalid", "error": "campaign_cart"}
+	if not campaign_inquiry_valid(value.get("inquiry", {})):
+		return {"type": "invalid", "error": "campaign_inquiry"}
+	if (not (value.get("cart", {}) as Dictionary).is_empty() or not (value.get("inquiry", {}) as Dictionary).is_empty() \
+			or str((scene.get("choice", {}) as Dictionary).get("id", "")) in ["cart_release", "claims_lead"] \
+			or str((scene.get("inspection", {}) as Dictionary).get("id", "")) == "cart_assessment") \
+			and int(value.get("content_revision", 1)) != 2:
+		return {"type": "invalid", "error": "campaign_cart_revision"}
+	if str((scene.get("choice", {}) as Dictionary).get("id", "")) == "claims_lead" \
+			and (value.get("inquiry", {}) as Dictionary).is_empty():
+		return {"type": "invalid", "error": "campaign_inquiry_choice"}
 	return {"type": "campaign", "state": value}
+
+static func campaign_cart_valid(cart: Variant) -> bool:
+	if not cart is Dictionary:
+		return false
+	if cart.is_empty():
+		return true
+	if cart.get("id") != "last_cart" or cart.get("route") not in ["", "unload", "lever", "haul"] \
+			or cart.get("state") not in ["trapped", "prepared", "released", "treated", "escorting", "safe"] \
+			or not _campaign_tile(cart.get("tile")) or not _campaign_tile(cart.get("worker_tile")) \
+			or not _campaign_tile(cart.get("safe_tile")) or not _campaign_tile(cart.get("facing")) \
+			or not _campaign_tile(cart.get("footprint")):
+		return false
+	if int(cart.facing[0]) != 1 or int(cart.facing[1]) != 0 \
+			or int(cart.footprint[0]) != 5 or int(cart.footprint[1]) != 3:
+		return false
+	var tilt: Variant = cart.get("tilt_deg")
+	if typeof(tilt) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(tilt)) or float(tilt) < 0.0 or float(tilt) > 30.0:
+		return false
+	for field: String in ["load_units", "unloaded", "rope_ends"]:
+		if not _campaign_integer(cart.get(field), 0, 2):
+			return false
+	for flag: String in ["fulcrum_ready", "holder_active", "released", "treated", "worker_safe"]:
+		if not cart.get(flag) is bool:
+			return false
+	if cart.has("worker_presentation_offset"):
+		var offset: Variant = cart.worker_presentation_offset
+		if not offset is Array or offset.size() != 3:
+			return false
+		for coordinate: Variant in offset:
+			if typeof(coordinate) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(coordinate)):
+				return false
+		if absf(float(offset[0])) > 0.5 or float(offset[1]) != 0.0 or absf(float(offset[2])) > 0.5:
+			return false
+	if cart.has("holder") and (not cart.holder is String or cart.holder.length() < 1 or cart.holder.length() > 64):
+		return false
+	return true
+
+static func campaign_inquiry_valid(inquiry: Variant) -> bool:
+	if not inquiry is Dictionary:
+		return false
+	if inquiry.is_empty():
+		return true
+	if inquiry.get("lead") not in ["", "physical", "chronology", "records"] \
+			or inquiry.get("finding") not in ["unresolved", "one_kit_two_completions"]:
+		return false
+	for flag: String in ["physical_verified", "chronology_verified", "records_verified"]:
+		if not inquiry.get(flag) is bool:
+			return false
+	var claims: Variant = inquiry.get("claims")
+	if not claims is Array or claims.size() > 16:
+		return false
+	for claim: Variant in claims:
+		if not claim is String or claim.length() > 512:
+			return false
+	return true
 
 static func campaign_crossing_valid(crossing: Variant) -> bool:
 	if not crossing is Dictionary:
@@ -3750,7 +3833,7 @@ static func campaign_scene_inspection_valid(inspection: Variant) -> bool:
 		return false
 	if inspection.is_empty():
 		return true
-	if inspection.get("id") != "landing_overview" \
+	if inspection.get("id") not in ["landing_overview", "cart_assessment"] \
 			or inspection.get("status") not in ["pending", "walking", "complete", "blocked", "waiting_owner"] \
 			or not _campaign_integer(inspection.get("actor_id"), 0, 2147483647.0) \
 			or not _campaign_integer(inspection.get("object_id"), 1, 65535) \
@@ -3772,8 +3855,10 @@ static func campaign_scene_choice_valid(choice: Variant) -> bool:
 		return false
 	if choice.is_empty():
 		return true
-	if choice.get("id", "") != "opening_rescue" or not choice.get("selected") is String \
-			or choice.get("selected", "") not in ["", "defend", "repair", "evacuate"]:
+	var allowed: Array = {"opening_rescue": ["defend", "repair", "evacuate"],
+		"cart_release": ["unload", "lever", "haul"], "claims_lead": ["physical", "chronology", "records"]}.get(str(choice.get("id", "")), [])
+	if allowed.is_empty() or not choice.get("selected") is String \
+			or (not str(choice.selected).is_empty() and choice.selected not in allowed):
 		return false
 	for field: String in ["title", "response", "owner"]:
 		if not choice.get(field) is String:
@@ -3788,7 +3873,7 @@ static func campaign_scene_choice_valid(choice: Variant) -> bool:
 		return false
 	var ids: Array[String] = []
 	for option: Variant in options:
-		if not option is Dictionary or option.get("id") not in ["defend", "repair", "evacuate"] \
+		if not option is Dictionary or option.get("id") not in allowed \
 				or not option.get("label") is String or not option.get("detail") is String \
 				or str(option.id) in ids:
 			return false

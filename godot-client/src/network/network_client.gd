@@ -518,7 +518,7 @@ func use_map_object(object_id: int) -> Error:
 	return send_frame(EloriaProtocol.use_map_object(object_id))
 
 func campaign_request(action: String) -> Error:
-	if action not in ["start", "resume", "leave", "hint", "join", "own", "bank", "road", "lamps", "continue"]:
+	if action not in ["start", "resume", "leave", "hint", "join", "own", "bank", "road", "lamps", "cart", "continue"]:
 		return ERR_INVALID_PARAMETER
 	return send_chat("#campaign " + action)
 
@@ -534,7 +534,7 @@ func campaign_scene_done(run_id: String, token: String) -> Error:
 
 func campaign_scene_choice(run_id: String, token: String, option_id: String) -> Error:
 	if not _campaign_identifier(run_id) or not _campaign_identifier(token) \
-			or option_id not in ["defend", "repair", "evacuate"]:
+			or option_id not in ["defend", "repair", "evacuate", "unload", "lever", "haul", "physical", "chronology", "records"]:
 		return ERR_INVALID_PARAMETER
 	return send_chat("#campaign scene_choice %s %s %s" % [run_id, token, option_id])
 

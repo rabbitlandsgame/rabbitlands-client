@@ -19,6 +19,7 @@ var _title: Label
 var _hint: Label
 var _guidance: Label
 var _notice: Label
+var _opening_details: Label
 var _bank: Label
 var _road: Label
 var _lamps: Label
@@ -133,6 +134,10 @@ func _build() -> void:
 	_notice.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_notice.add_theme_font_size_override("font_size", 14)
 	column.add_child(_notice)
+	_opening_details = Label.new()
+	_opening_details.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_opening_details.add_theme_font_size_override("font_size", 14)
+	column.add_child(_opening_details)
 	_bank = Label.new()
 	_bank.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_bank.add_theme_font_size_override("font_size", 14)
@@ -274,6 +279,8 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 			+ "\nSpeak with " + str(travel.get("npc", "Odo Fenn")) + " there to continue."
 	_notice.text = str(snapshot.get("party_notice", ""))
 	_notice.visible = not _notice.text.is_empty()
+	_opening_details.text = opening_details(snapshot)
+	_opening_details.visible = not _opening_details.text.is_empty()
 	_apply_bank(snapshot.get("bank", {}))
 	_apply_road(snapshot.get("road", {}))
 	_apply_lamps(snapshot.get("lamps", {}))
@@ -335,6 +342,40 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 func _request_entry() -> void:
 	var kind := str(_state.get("kind", ""))
 	action_requested.emit(kind if kind in ["bank", "road", "lamps"] else "resume" if bool(_state.get("started", false)) else "start")
+
+static func opening_details(snapshot: Dictionary) -> String:
+	if int(snapshot.get("content_revision", 1)) != 2:
+		return ""
+	var cart: Dictionary = snapshot.get("cart", {})
+	var inquiry: Dictionary = snapshot.get("inquiry", {})
+	var lines: PackedStringArray = []
+	if not cart.is_empty():
+		lines.append({"trapped": "The worker is pinned. Keep the cart held while preparing a release.",
+			"prepared": "The release is prepared. Use the marked work site.",
+			"released": "The cart is clear. Treat the worker before escorting them.",
+			"treated": "The worker is treated. Walk with them to the shore muster.",
+			"escorting": "Stay with the worker on the marked route to shore.",
+			"safe": "The worker is safely ashore."}.get(str(cart.get("state", "")), "Follow the crew's instructions."))
+		var route := str(cart.get("route", ""))
+		if not route.is_empty() and not bool(cart.get("worker_safe", false)):
+			lines.append("Rescue plan · " + {"unload": "lighten the cart", "lever": "brace and lift", "haul": "secure and haul"}.get(route, ""))
+			if route == "unload": lines.append("Loads safely set down: %d of 2." % int(cart.get("unloaded", 0)))
+			elif route == "lever": lines.append("Fulcrum ready." if bool(cart.get("fulcrum_ready", false)) else "Place the fulcrum before lifting.")
+			elif route == "haul":
+				var holder := str(cart.get("holder", ""))
+				var held := "The cart is held." if holder.is_empty() else "Brake held by " \
+					+ ("the dock foreman" if holder == "foreman" else holder) + "."
+				lines.append("Rope anchors secured: %d of 2. " % int(cart.get("rope_ends", 0)) \
+					+ (held if bool(cart.get("holder_active", false)) else "A crew member must hold the cart."))
+	if not inquiry.is_empty() and (cart.is_empty() or bool(cart.get("worker_safe", false))):
+		var lead := str(inquiry.get("lead", ""))
+		if not lead.is_empty():
+			lines.append("Inquiry · " + {"physical": "follow the physical work", "chronology": "reconstruct the sequence", "records": "compare the completion records"}.get(lead, ""))
+		if str(inquiry.get("finding", "")) == "one_kit_two_completions":
+			lines.append("Verified: one fitting kit was recorded as completing two jobs.")
+		elif not (inquiry.get("claims", []) as Array).is_empty():
+			lines.append("Claims to check: " + "; ".join(PackedStringArray(inquiry.claims)))
+	return "\n".join(lines)
 
 func _apply_road(road: Dictionary) -> void:
 	_road.visible = not road.is_empty()

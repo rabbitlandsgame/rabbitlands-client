@@ -21,6 +21,15 @@ static func work_targets(snapshot: Dictionary) -> Array[Dictionary]:
 					or bool(row.get("completed", false)) or (int(row.get("object_id", -1)) == 0) != navigation:
 				continue
 			targets.append(row)
+	var explicit: Array = snapshot.get("preferred_targets", [])
+	if not explicit.is_empty():
+		var ranked: Array[Dictionary] = []
+		for identity: String in explicit:
+			for row: Dictionary in targets:
+				if str(row.id) == identity: ranked.append(row)
+		for row: Dictionary in targets:
+			if str(row.id) not in explicit: ranked.append(row)
+		return ranked
 	# Lead with work for the player's chosen approach, keeping every other
 	# server-enabled method available and preserving genuine material choices.
 	var preferred: Array = APPROACH_TARGETS.get(str(snapshot.get("approach", "")), [])
@@ -51,8 +60,10 @@ static func legend(snapshot: Dictionary) -> String:
 		if bool((snapshot.get("party", {}) as Dictionary).get("waiting_for_scene", false)):
 			return "Waiting for the party to finish the scene. Work markers appear when everyone is ready."
 		return "Follow the crew's instructions. New work sites appear when they are ready."
-	var next := "Next: " + str(targets[0].label) if targets.size()==1 or targets[0].has("actor_id") else "Choose one of the labelled work sites."
-	if targets.size() > 1 and not targets[0].has("actor_id") and not str(snapshot.get("approach", "")).is_empty():
+	var preferred := str(targets[0].id) in (snapshot.get("preferred_targets", []) as Array)
+	var next := "Next: " + str(targets[0].label) if targets.size()==1 or targets[0].has("actor_id") or preferred else "Choose one of the labelled work sites."
+	var route := str((snapshot.get("cart", {}) as Dictionary).get("route", snapshot.get("approach", "")))
+	if targets.size() > 1 and not targets[0].has("actor_id") and not preferred and not route.is_empty():
 		next = "Follow your current objective above. Other labelled sites are alternate ways to help."
 	if targets[0].has("actor_id"):
 		return next + "\nClick the named NPC when close. Choose the action below to walk over first if needed."
@@ -129,7 +140,8 @@ func apply_snapshot(snapshot: Dictionary, objects: Dictionary, actors: Dictionar
 			label.reparent(parent)
 		label.position = Vector3.UP * (2.4 if actor_id>0 else 1.1)
 		var verb := "Talk" if actor_id>0 and near(row,local_tile) else "Interact" if near(row,local_tile) else "Walk to"
-		var next := available.size()==1 or actor_id>0
+		var next := available.size()==1 or actor_id>0 or (not available.is_empty() \
+			and str(row.id) == str(available[0].id) and str(row.id) in (snapshot.get("preferred_targets", []) as Array))
 		label.text = ("NEXT · " if next else "WORK · ") + str(row.label) + "\n" + verb
 		label.modulate = NEXT_COLOUR if next else Color.WHITE
 		label.show()
