@@ -101,9 +101,11 @@ func run() -> void:
 	var presentation := Presentation.new()
 	root.add_child(presentation)
 	presentation.set_reduced_motion(false, false)
+	var ordinary: Array = []
+	presentation.presentation_finished.connect(func(token: String, reason: String) -> void: ordinary.append([token, reason]))
 	var state := {"version": 1, "active": true, "run_id": "offline-preview", "map": "greenlight",
 		"title": "The Ferry That Arrived Twice", "hint": "Inspect the landing, then choose a practical way to help.",
-		"actors": {"odo": 2, "worker": 3, "voss": 4}, "scene": {"id": "measure.landing.arrival", "token": "preview-arrival"},
+		"actors": {"odo": 2, "worker": 3, "voss": 4}, "scene": {"id": "measure.landing.arrival", "token": "preview-arrival", "requires_ack": true, "ack_revision": 1},
 		"targets": [{"id": "assess", "object_id": 61001, "label": "Inspect the damaged landing", "tile": [450, 310], "enabled": true, "completed": false}]}
 	for frame: int in range(12):
 		await process_frame
@@ -115,6 +117,23 @@ func run() -> void:
 	await capture("03-worker-dialogue.png")
 	presentation.skip()
 	expect(not presentation.blocks_input(), "rendered skip restores gameplay control")
+	var restored_camera := camera.global_transform
+	expect(presentation.request_replay(state, "greenlight"), "the current rendered scene offers explicit replay")
+	presentation.update(0.0, state, rig, actors, 1, "greenlight", true)
+	await capture("08-replay-establishing.png")
+	presentation.update(6.0, state, rig, actors, 1, "greenlight", true)
+	await capture("09-replay-odo-gesture.png")
+	expect(presentation.playing and bool((actors[2] as Node).get("_cinematic_active")), "replay animates the production imported NPC")
+	var odo: ReplicatedActor3D = actors[2]
+	var old_target := odo.server_target
+	odo.server_target += Vector3(1, 0, 0)
+	presentation.skip()
+	expect(odo.global_position.is_equal_approx(odo.server_target), "native replay restores the NPC to its latest replicated target")
+	expect(camera.global_transform.is_equal_approx(restored_camera), "native replay restores the gameplay camera")
+	presentation.update(0.1, state, rig, actors, 1, "greenlight", true)
+	expect(ordinary.size() == 1, "native replay and its next snapshot send no extra original completion")
+	odo.server_target = old_target
+	odo.global_position = old_target
 	var hud := FieldHud.new()
 	root.add_child(hud)
 	hud.apply_state(state, Vector2i(450, 308), "greenlight")

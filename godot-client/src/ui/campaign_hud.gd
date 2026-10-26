@@ -1,4 +1,4 @@
-extends CanvasLayer
+extends Control
 ## The quest's field checklist. Its controls request ordinary movement/use;
 ## only a new authoritative snapshot changes completion or available decisions.
 signal target_requested(object_id: int, tile: Vector2i, nearby: bool)
@@ -9,6 +9,7 @@ signal convoy_requested(command: String)
 signal prediction_requested(run_id: String, revision: int, candidate: int)
 signal transcript_requested
 signal reduced_motion_changed(value: bool)
+signal replay_requested
 
 var _panel: PanelContainer
 var _body_scroll: ScrollContainer
@@ -40,13 +41,51 @@ var _leave: Button
 var _help: Button
 var _account: Button
 var _reduced: CheckButton
+var _replay: Button
 var _state: Dictionary = {}
 var _local_tile := Vector2i.ZERO
 var _target_signature := ""
 var _current_map := ""
+var _embedded := false
+var _available := false
+var _replay_available := false
+var _column: VBoxContainer
+
+func embed_instruction(label: Label) -> void:
+	if label.get_parent() != _column:
+		label.reparent(_column)
+		_column.move_child(label, 0)
+	label.custom_minimum_size.x = 0
+
+static func tracking_identity(snapshot: Dictionary) -> String:
+	return str(snapshot.get("kind", "opening")) + ":" + str(snapshot.get("run_id", "lead"))
+
+func embed() -> void:
+	_build()
+	_embedded = true
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_panel.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
+	_title.hide()
+	_hint.hide()
+	_layout()
+
+func presentation_available() -> bool:
+	return _available
+
+func set_replay_available(value: bool) -> void:
+	_build()
+	_replay_available = value
+	_replay.disabled = not value
+
+func request_replay() -> void:
+	if _replay_available:
+		replay_requested.emit()
 
 func _ready() -> void:
-	layer = 85
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_build()
 	hide()
 
@@ -70,6 +109,7 @@ func _build() -> void:
 		margin.add_theme_constant_override("margin_" + side, 12)
 	_body_scroll.add_child(margin)
 	var column := VBoxContainer.new()
+	_column = column
 	column.add_theme_constant_override("separation", 8)
 	margin.add_child(column)
 	_title = Label.new()
@@ -185,6 +225,12 @@ func _build() -> void:
 	_account.text = "Scene account"
 	_account.pressed.connect(func() -> void: transcript_requested.emit())
 	actions.add_child(_account)
+	_replay = Button.new()
+	_replay.text = "Replay scene"
+	_replay.tooltip_text = "Watch the current scene again. Quest progress and rewards stay saved."
+	_replay.disabled = true
+	_replay.pressed.connect(request_replay)
+	column.add_child(_replay)
 	_leave = Button.new()
 	_leave.text = "Return"
 	_leave.tooltip_text = "Return to the public road. Completed milestones are saved."
@@ -208,8 +254,9 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 	var can_own := bool(party.get("can_start_own", false)) and str(party.get("role", "")) != "owner"
 	var travel: Dictionary = snapshot.get("travel", {})
 	var travelling := not travel.is_empty()
-	visible = not blocked and (active and matches or travelling or not active and (bool(snapshot.get("available", false)) or can_join or can_own))
-	if not visible:
+	_available = not blocked and (active and matches or travelling or not active and (bool(snapshot.get("available", false)) or can_join or can_own))
+	visible = _available
+	if not _available:
 		return
 	_title.text = str(travel.get("title", snapshot.get("title", "The Missing Measure")))
 	_hint.text = str(snapshot.get("hint", "Explore the quay and speak with the field crew."))
@@ -234,6 +281,8 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 	_account.visible = active
 	_scroll.visible = active and not travelling
 	_reduced.set_pressed_no_signal(reduced_motion)
+	_title.visible = not _embedded
+	_hint.visible = not _embedded
 	_layout()
 	var rows: Array = []
 	# Keep the server's clue order stable within each group, including legacy
@@ -514,6 +563,11 @@ func _request_decision(action: String) -> void:
 
 func _layout() -> void:
 	var viewport_size := get_viewport().get_visible_rect().size
+	if _embedded:
+		custom_minimum_size = Vector2(0, clampf(viewport_size.y - 250.0, 72.0, 300.0))
+		_panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		_scroll.custom_minimum_size.y = 56.0
+		return
 	var width := minf(332.0, maxf(240.0, viewport_size.x - 24.0))
 	_panel.offset_left = -width - 12.0
 	_panel.offset_right = -12.0

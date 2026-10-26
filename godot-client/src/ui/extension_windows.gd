@@ -89,6 +89,8 @@ var quest_panel: PanelContainer
 var quest_list: ItemList
 var quest_detail: RichTextLabel
 var quest_track_button: Button
+var quest_replay_button: Button
+var _quest_entries: Array[Dictionary] = []
 var quest_guide: Control
 var quest_active_button: Button
 var quest_done_button: Button
@@ -511,31 +513,52 @@ func _sync_quests() -> void:
 	quest_active_button.button_pressed = not _quest_showing_archive
 	quest_done_button.button_pressed = _quest_showing_archive
 	quest_done_button.text = "Completed (%d)" % AppState.quest_archive.size()
+	_quest_entries.clear()
+	for entry: Dictionary in AppState.quest_journal:
+		_quest_entries.append(entry.duplicate(true))
+	if quest_guide != null and quest_guide.has_method("campaign_entry"):
+		var campaign: Dictionary = quest_guide.campaign_entry()
+		if not campaign.is_empty():
+			var matched := false
+			if bool(campaign.get("_exact_title", false)):
+				for entry: Dictionary in _quest_entries:
+					if str(entry.get("title", "")) == str(campaign.title):
+						entry.merge(campaign, true)
+						matched = true
+						break
+			if not matched:
+				_quest_entries.append(campaign)
 	quest_count.text = ("%d COMPLETE" % AppState.quest_archive.size()
-		if _quest_showing_archive else "%d ACTIVE" % AppState.quest_journal.size())
+		if _quest_showing_archive else "%d ACTIVE" % _quest_entries.size())
 	if _quest_showing_archive:
 		_sync_quest_archive()
 		_sync_tracked_quest()
 		return
 	var selected: int = _selected_index(quest_list)
+	var selected_key := str(quest_list.get_item_metadata(selected)) if selected >= 0 and selected < quest_list.item_count else ""
 	quest_list.clear()
-	for entry: Dictionary in AppState.quest_journal:
+	for entry: Dictionary in _quest_entries:
 		var target: int = int(entry.get("target", 0))
 		var current: int = int(entry.get("current", 0))
 		var status: String = ("ready" if bool(entry.get("ready", false))
 			else ("%d/%d" % [current, target] if target > 0 else "in progress"))
-		quest_list.add_item("◆  %s  [%s]" % [str(entry.get("title", "")), status])
+		quest_list.add_item(("▶  Current expedition · %s" if bool(entry.get("_campaign", false)) else "◆  %s  [" + status + "]") % str(entry.get("title", "")))
 		var row: int = quest_list.item_count - 1
+		var identity := str(entry.get("_campaign_identity", "quest:" + str(entry.get("title", ""))))
+		quest_list.set_item_metadata(row, identity)
+		if identity == selected_key:
+			selected = row
 		quest_list.set_item_custom_fg_color(row, TextColors.color("quest_active"))
-	if AppState.quest_journal.is_empty():
+	if _quest_entries.is_empty():
 		quest_detail.text = ("[center][font_size=16]"
 			+ "%s[/font_size][/center]" % tr("ELORIA_QUEST_NONE"))
 		quest_track_button.disabled = true
 		quest_track_button.text = "Track"
+		quest_replay_button.hide()
 		_sync_tracked_quest()
 		return
 	quest_track_button.disabled = false
-	var index: int = clampi(selected, 0, AppState.quest_journal.size() - 1)
+	var index: int = clampi(selected, 0, _quest_entries.size() - 1)
 	quest_list.select(index)
 	_sync_tracked_quest()
 	_show_quest(index)
@@ -549,6 +572,7 @@ func _quest_is_tracked(title: String) -> bool:
 ## is nothing left to do - so the button is disabled rather than removed, which
 ## would move everything else when the view changes.
 func _sync_quest_archive() -> void:
+	quest_replay_button.hide()
 	var selected: int = _selected_index(quest_list)
 	quest_list.clear()
 	for entry: Dictionary in AppState.quest_archive:
@@ -582,13 +606,22 @@ func _on_quest_track_pressed() -> void:
 	if _quest_showing_archive:
 		return
 	var index: int = _selected_index(quest_list)
-	if index < 0 or index >= AppState.quest_journal.size():
+	if index < 0 or index >= _quest_entries.size():
 		return
 	var title: String = str(
-		(AppState.quest_journal[index] as Dictionary).get("title", ""))
-	var entry: Dictionary = AppState.quest_journal[index]
+		(_quest_entries[index] as Dictionary).get("title", ""))
+	var entry: Dictionary = _quest_entries[index]
+	if bool(entry.get("_campaign", false)) and quest_guide != null:
+		quest_guide.set_campaign_tracked(not quest_guide.using_campaign())
+		return
+	var was_tracked := _quest_is_tracked(title)
+	if quest_guide != null and quest_guide.has_method("prefer_standard_quest"):
+		quest_guide.prefer_standard_quest()
 	if quest_guide != null and quest_guide.quest_title() == title:
-		quest_guide.set_quest_tracked(not quest_guide.is_quest_tracked())
+		if quest_guide.is_quest_tracked() != not was_tracked:
+			quest_guide.set_quest_tracked(not was_tracked)
+		else:
+			_sync_quests()
 		return
 	if str(entry.get("location", "")) == "Main world":
 		var error := Network.send_chat("#quests untrack" if title == _tracked_quest_title else "#quests track " + title)
@@ -608,6 +641,9 @@ func _on_quest_untrack_pressed() -> void:
 ## The tracked quest as the server last stated it. Nothing is remembered from
 ## an earlier journal: if the server stops listing the quest, the readout goes.
 func _sync_tracked_quest() -> void:
+	if quest_guide != null and quest_guide.has_method("using_campaign") and quest_guide.using_campaign():
+		tracked_quest.hide()
+		return
 	var tracked: Dictionary = {}
 	for entry: Dictionary in AppState.quest_journal:
 		if str(entry.get("title", "")) == _tracked_quest_title:
@@ -688,10 +724,13 @@ func _show_archived_quest(index: int) -> void:
 			str(entry.get("location", "")), str(entry.get("detail", ""))])
 
 func _show_quest(index: int) -> void:
-	if index < 0 or index >= AppState.quest_journal.size():
+	if index < 0 or index >= _quest_entries.size():
 		return
-	var entry: Dictionary = AppState.quest_journal[index]
-	quest_track_button.text = "Untrack" if _quest_is_tracked(str(entry.get("title", ""))) else "Track"
+	var entry: Dictionary = _quest_entries[index]
+	var campaign := bool(entry.get("_campaign", false)) and quest_guide != null
+	quest_track_button.text = "Untrack" if (quest_guide.using_campaign() if campaign else _quest_is_tracked(str(entry.get("title", "")))) else "Track"
+	quest_replay_button.visible = campaign
+	sync_campaign_replay()
 	var target: int = int(entry.get("target", 0))
 	var lines: Array[String] = [
 		"[font_size=22][color={quest_heading}][b]%s[/b][/color][/font_size]"
@@ -709,6 +748,12 @@ func _show_quest(index: int) -> void:
 		lines.append("%d of %d complete"
 			% [int(entry.get("current", 0)), target])
 	quest_detail.text = _quest_markup("\n".join(lines))
+
+func sync_campaign_replay() -> void:
+	if quest_replay_button == null or quest_guide == null:
+		return
+	var content: Control = quest_guide.get("campaign_content") as Control
+	quest_replay_button.disabled = content == null or not bool(content.get("_replay_available"))
 
 # --- mail --------------------------------------------------------------------
 
@@ -2145,7 +2190,21 @@ func _build() -> void:
 	quest_track_button.name = "QuestTrack"
 	quest_track_button.text = "Track"
 	quest_track_button.pressed.connect(_on_quest_track_pressed)
-	quest_side.add_child(quest_track_button)
+	var quest_actions := HFlowContainer.new()
+	quest_actions.name = "QuestActions"
+	quest_actions.alignment = FlowContainer.ALIGNMENT_END
+	quest_actions.add_theme_constant_override("h_separation", 8)
+	quest_side.add_child(quest_actions)
+	quest_actions.add_child(quest_track_button)
+	quest_replay_button = Button.new()
+	quest_replay_button.name = "QuestReplayScene"
+	quest_replay_button.text = "Replay current scene"
+	quest_replay_button.tooltip_text = "Replay a scene you have already watched here. Quest progress and rewards stay saved."
+	quest_replay_button.hide()
+	quest_replay_button.pressed.connect(func() -> void:
+		if quest_guide != null and not quest_replay_button.disabled:
+			quest_guide.request_campaign_replay())
+	quest_actions.add_child(quest_replay_button)
 	_style_quest_journal(quest_views, quest_parchment,
 		quest_parchment_surface, quest_record_heading)
 
@@ -2495,6 +2554,7 @@ func _style_quest_journal(quest_views: HBoxContainer,
 	quest_detail.add_theme_color_override("selection_color", Color(0.55, 0.35, 0.12, 0.28))
 	quest_detail.add_theme_font_size_override("normal_font_size", 15)
 	_style_quest_button(quest_track_button, true)
+	_style_quest_button(quest_replay_button, false)
 	quest_track_button.custom_minimum_size.x = 154.0
 	quest_track_button.size_flags_horizontal = Control.SIZE_SHRINK_END
 

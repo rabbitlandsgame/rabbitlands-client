@@ -21,6 +21,99 @@ var highlighted: Control
 var compact := false
 var docked := false
 var manufacturing_rect := Rect2()
+var campaign_content: Control
+var _campaign: Dictionary = {}
+var _campaign_choices: Dictionary = {}
+var _prefer_campaign := false
+var _campaign_signature := ""
+var _body: VBoxContainer
+var _buttons: HFlowContainer
+var _pending_campaign_kind := ""
+var _pending_campaign_msec := 0
+
+func attach_campaign(content: Control) -> void:
+	campaign_content = content
+	content.reparent(_body)
+	_body.move_child(content, _buttons.get_index())
+	content.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+	content.call("embed")
+	_refresh()
+
+func apply_campaign(snapshot: Dictionary) -> void:
+	if not _pending_campaign_kind.is_empty() and not str(snapshot.get("run_id", "")).is_empty() \
+			and str(snapshot.get("kind", "opening")) == _pending_campaign_kind \
+			and Time.get_ticks_msec() - _pending_campaign_msec <= 30000:
+		_campaign_choices[str(snapshot.get("kind", "opening")) + ":" + str(snapshot.run_id)] = true
+		_prefer_campaign = true
+		_pending_campaign_kind = ""
+	_campaign = snapshot
+	if bool(snapshot.get("active", false)) and not _campaign_choices.has(campaign_identity()):
+		_campaign_choices[campaign_identity()] = true
+		_prefer_campaign = true
+	var entry := campaign_entry()
+	var signature := JSON.stringify(entry)
+	_refresh()
+	if signature != _campaign_signature:
+		_campaign_signature = signature
+		tracking_changed.emit()
+
+func campaign_identity() -> String:
+	return str(_campaign.get("kind", "opening")) + ":" + str(_campaign.get("run_id", "lead"))
+
+func has_campaign() -> bool:
+	var party: Dictionary = _campaign.get("party", {})
+	return not _campaign.is_empty() and (bool(_campaign.get("active", false)) \
+		or bool(_campaign.get("available", false)) \
+		or not (_campaign.get("travel", {}) as Dictionary).is_empty() \
+		or bool(party.get("can_join", false)) or bool(party.get("can_start_own", false)))
+
+func campaign_entry() -> Dictionary:
+	if not has_campaign():
+		return {}
+	var travel: Dictionary = _campaign.get("travel", {})
+	var adoption: Dictionary = _campaign.get("adoption", {})
+	var objective := str(_campaign.get("hint", "Explore with the field crew."))
+	if not travel.is_empty():
+		objective = str(travel.get("route", objective)) + "\nSpeak with " + str(travel.get("npc", "the local crew")) + " to continue."
+	if str(adoption.get("state", "")) == "pending":
+		objective += "\n\nYour account: " + str(adoption.get("summary", "Choose whether to record this shared outcome."))
+		if not bool(adoption.get("can_adopt", false)):
+			objective += "\n" + str(adoption.get("reason", "Complete your own field practice first."))
+	var map := EloriaProtocol.map_id_from_reference(str(travel.get("map", _campaign.get("map", ""))))
+	return {"title":str(_campaign.get("title", "The Missing Measure")), "objective":objective,
+		"location":map.replace("_", " ").capitalize() if not map.is_empty() else "Field expedition",
+		"_campaign":true, "_campaign_identity":campaign_identity(),
+		"_exact_title":str(_campaign.get("kind", "opening")) == "opening"}
+
+func is_campaign_tracked() -> bool:
+	return has_campaign() and bool(_campaign_choices.get(campaign_identity(), false))
+
+func using_campaign() -> bool:
+	return _prefer_campaign and is_campaign_tracked()
+
+func set_campaign_tracked(tracked: bool) -> void:
+	if not has_campaign():
+		return
+	_campaign_choices[campaign_identity()] = tracked
+	_prefer_campaign = tracked
+	_refresh()
+	tracking_changed.emit()
+
+func prefer_standard_quest() -> void:
+	_prefer_campaign = false
+	_refresh()
+
+func follow_campaign_request(action: String) -> void:
+	# Explicitly beginning/joining from a pinned contact card follows that new
+	# run; mere availability at a contact never pins a card by itself.
+	if using_campaign() and str(_campaign.get("run_id", "")).is_empty() \
+			and action in ["start", "resume", "join", "bank", "road", "lamps"]:
+		_pending_campaign_kind = str(_campaign.get("kind", "opening"))
+		_pending_campaign_msec = Time.get_ticks_msec()
+
+func request_campaign_replay() -> void:
+	if is_instance_valid(campaign_content):
+		campaign_content.call("request_replay")
 
 func configure(owner_ui: Control) -> void:
 	main = owner_ui
@@ -43,6 +136,7 @@ func configure(owner_ui: Control) -> void:
 	card.add_theme_stylebox_override("panel", style)
 	add_child(card)
 	var body := VBoxContainer.new()
+	_body = body
 	body.add_theme_constant_override("separation", 8)
 	card.add_child(body)
 	chapter = Label.new()
@@ -60,6 +154,7 @@ func configure(owner_ui: Control) -> void:
 	instruction.add_theme_font_size_override("font_size", 14)
 	body.add_child(instruction)
 	var buttons := HFlowContainer.new()
+	_buttons = buttons
 	body.add_child(buttons)
 	collapse = Button.new()
 	collapse.text = "Less"
@@ -69,7 +164,7 @@ func configure(owner_ui: Control) -> void:
 	untrack.name = "UntrackQuest"
 	untrack.text = "Untrack"
 	untrack.tooltip_text = "Hide this quest window. Keep your progress and choose Track in Quests to show it again."
-	untrack.pressed.connect(func(): set_quest_tracked(false))
+	untrack.pressed.connect(func(): set_campaign_tracked(false) if using_campaign() else set_quest_tracked(false))
 	buttons.add_child(untrack)
 	skip = Button.new()
 	skip.name = "SkipTutorial"
@@ -90,6 +185,8 @@ func apply_state(value: Dictionary) -> void:
 ## Guide payload titles describe the current step; the journal uses the quest's
 ## stable title. Keep the player's choice across objective and chapter updates.
 func quest_title() -> String:
+	if using_campaign():
+		return str(campaign_entry().get("title", "The Missing Measure"))
 	if not bool(state.get("active", false)):
 		return ""
 	match str(state.get("tutorial", "")):
@@ -101,12 +198,17 @@ func quest_title() -> String:
 	return "The Last Lantern"
 
 func is_quest_tracked() -> bool:
+	if using_campaign():
+		return true
 	var title := quest_title()
 	if str(state.get("tutorial", "")) == "field_dispatch":
 		return not title.is_empty()
 	return not title.is_empty() and not _untracked_quests.has(title)
 
 func set_quest_tracked(tracked: bool) -> void:
+	# The ordinary journal selects its own guide without changing the saved
+	# local choice for an expedition or a server-owned field dispatch.
+	_prefer_campaign = false
 	var title := quest_title()
 	if title.is_empty():
 		return
@@ -124,6 +226,29 @@ func set_quest_tracked(tracked: bool) -> void:
 	tracking_changed.emit()
 
 func _refresh() -> void:
+	if card == null:
+		return
+	var campaign := using_campaign()
+	if is_instance_valid(campaign_content):
+		campaign_content.visible = campaign and not compact and bool(campaign_content.call("presentation_available"))
+	if campaign:
+		visible = AppState.authenticated and is_instance_valid(campaign_content) \
+			and bool(campaign_content.call("presentation_available"))
+		card.visible = visible
+		chapter.text = "CURRENT EXPEDITION"
+		heading.text = str(campaign_entry().get("title", "The Missing Measure"))
+		campaign_content.call("embed_instruction", instruction)
+		instruction.text = str(campaign_entry().get("objective", ""))
+		instruction.visible = not compact
+		skip.hide()
+		help.hide()
+		collapse.text = "Instructions" if compact else "Less"
+		card.reset_size()
+		return
+	if instruction.get_parent() != _body:
+		instruction.reparent(_body)
+		_body.move_child(instruction, heading.get_index() + 1)
+		instruction.custom_minimum_size.x = heading.custom_minimum_size.x
 	visible = AppState.authenticated and is_quest_tracked()
 	card.visible = visible
 	if not visible: return
@@ -261,6 +386,25 @@ func control_for_step() -> Control:
 	return null
 
 func _process(_delta: float) -> void:
+	if using_campaign():
+		if docked:
+			card.reparent(self)
+			card.z_as_relative = false
+			card.z_index = 8
+			docked = false
+		highlighted = null
+		if not AppState.authenticated:
+			card.hide()
+			hide()
+			return
+		if visible:
+			var area := get_viewport_rect().size
+			var width := minf(310, maxf(190, area.x - 24))
+			card.custom_minimum_size.x = width
+			heading.custom_minimum_size.x = width - 24
+			card.position = Vector2(maxf(12, area.x-width-96), clampf(62, 8, maxf(8, area.y-card.size.y-12)))
+		queue_redraw()
+		return
 	var manufacturing := _node("ManufacturingPanel")
 	var workspace: Control = main.get("mixing_workspace")
 	var custom_mixing: bool = workspace != null and workspace.ready_to_layout
