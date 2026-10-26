@@ -431,6 +431,155 @@ def geometry_v2(stage, sex, base, region, points, low_normal, raw_delta, high_no
     return base, region, descriptor
 
 
+def refine_features_v4(stage, sex, paint, regions, normal, geometry, mouth_y):
+    """Authored eye/lip finish in the existing canonical atlas, not an upscale.
+
+    The iris carries neutral radial pigment so the selected eye hue remains
+    independent. The normal map supplies a curved corneal response; no floating
+    eye overlay or extra draw is needed. Lip relief joins the same position-only
+    CPU field as the earlier sculpt, preserving seam and morph coherence.
+    """
+    x, y = np.meshgrid(np.linspace(X_MIN, X_MAX, SIZE), np.linspace(Y_MAX, Y_MIN, SIZE))
+    base = paint[..., :3].copy()
+    source_pigment = base.copy()
+    eye, iris = regions[..., 0].copy(), regions[..., 1].copy()
+    skin = (1-eye)*(1-regions[..., 2])
+    denominator = gaussian_filter(1-eye, 15)
+    skin_fill = np.stack([gaussian_filter(base[..., channel]*(1-eye), 15)/np.maximum(denominator,.001)
+                          for channel in range(3)], -1)
+    lid_relief = np.zeros(x.shape)
+    def glaze(rgb, weight):
+        nonlocal base
+        weight = np.clip(weight, 0, 1)[..., None]
+        base = base*(1-weight)+np.asarray(rgb)*weight
+    eyes = []
+    for side in (-1, 1):
+        selected = iris*(x*side > 0)
+        cx, cy = (x*selected).sum()/selected.sum(), (y*selected).sum()/selected.sum()
+        native_eye = eye*(x*side > 0)
+        aperture_pixels = native_eye > .20
+        width = np.clip((np.percentile(x[aperture_pixels],98)-np.percentile(x[aperture_pixels],2))*.48,.014,.022)
+        along = (x-cx)/width
+        arch = np.maximum(1-along*along,0)**.65
+        upper = min(np.percentile(y[aperture_pixels],98)-cy,.0080)*.72
+        lower = min(cy-np.percentile(y[aperture_pixels],2),.0065)*.96
+        top = cy+upper*arch+side*(x-cx)*.035
+        bottom = cy-lower*arch+side*(x-cx)*.035
+        opening = smoothstep(bottom-.0003,bottom+.00025,y)*(1-smoothstep(top-.00025,top+.0003,y))
+        opening *= 1-smoothstep(.96,1.04,abs(along))
+        shaped_eye = np.minimum(native_eye,opening)
+        covered = np.clip(native_eye-shaped_eye,0,1)[...,None]
+        base = base*(1-covered)+skin_fill*covered
+        regions[...,3] = regions[...,3]*(1-covered[...,0])+.78*covered[...,0]
+        regions[...,0] = np.where(x*side>0,shaped_eye,regions[...,0])
+        inside = selected > .2
+        source_radius = float(np.percentile(abs(x[inside]-cx), 98))/.96
+        source_cy = cy
+        radius = source_radius
+        # The source masks overfill the aperture. A smaller iris tucked under
+        # the upper lid exposes readable sclera without a round doll-eye disc.
+        radius *= .81 if sex == "female" else .84
+        cy += .0015
+        dx, dy = (x-cx)/radius, (y-cy)/radius
+        r, angle = np.hypot(dx, dy), np.arctan2(dy, dx)
+        fibres = (.41+.055*np.sin(angle*31+r*21+np.sin(angle*7)*1.4)
+                  +.035*np.sin(angle*57-r*15)+.020*np.sin(angle*83+np.sin(angle*13)*2+r*34)
+                  +.050*np.sin(angle*9+r*8))
+        # Retain the source's irregular crypts and stromal mottling. Radial
+        # remapping reduces its oversized pupil without replacing organic
+        # pigment with identical synthetic spokes on both eyes.
+        source_r = .60*r+.40*np.sqrt(np.maximum(r,0))
+        source_x = cx+np.cos(angle)*source_r*source_radius
+        source_y = source_cy+np.sin(angle)*source_r*source_radius
+        coordinates = [(Y_MAX-source_y)/(Y_MAX-Y_MIN)*(SIZE-1),
+                       (source_x-X_MIN)/(X_MAX-X_MIN)*(SIZE-1)]
+        old_value = source_pigment @ np.array([.2126,.7152,.0722])
+        organic = map_coordinates(old_value, coordinates, order=1, mode="nearest")
+        organic = np.clip(organic,.025,.58)
+        fibres = fibres*.30+organic*.70
+        # A defined pupil/limbus with a softly variegated mid iris. Its upper
+        # shadow belongs to the lid, rather than a uniformly luminous circle.
+        pupil = smoothstep(.25, .36, r)
+        limbus = 1-smoothstep(.79, 1.02, r)
+        value = (.025+(fibres-.025)*pupil)*(.23+.77*limbus)
+        value *= .72+.28*(1-smoothstep(.15, .80, dy))
+        glint=np.exp(-((dx+.26)/.050)**2-((dy-.34)/.070)**2)
+        value=value*(1-glint*.70)+glint*.70
+        # Replace the old oversized iris with a warm scleral surround. Keep
+        # the precise aperture, while the principal glint moves with the light.
+        new_iris = (1-smoothstep(.95,1.035,r))*shaped_eye
+        glaze([.77,.745,.705], np.clip(selected-new_iris,0,1)*shaped_eye)
+        weight = np.clip(new_iris, 0, 1)[..., None]
+        base = base*(1-weight)+value[..., None]*weight
+        regions[...,1] = np.where(x*side > 0,new_iris,regions[...,1])
+        # Moist scleral rim and warm inner corner, shaded beneath upper lid.
+        eye_side = shaped_eye
+        sclera = np.clip(eye_side-selected, 0, 1)
+        glaze([.72, .69, .63], sclera*.16)
+        upper_shadow = np.exp(-((y-cy-radius*.48)/(radius*.34))**2)
+        glaze([.18, .115, .105], eye_side*upper_shadow*.18)
+        inner_x = cx-side*radius*1.65
+        tear = np.exp(-((x-inner_x)/.0018)**2-((y-cy+.0007)/.0011)**2)
+        glaze([.52, .255, .235], tear*eye_side*.30)
+        rim_extent=(1-smoothstep(.87,1.04,abs(along)))*(x*side>0)
+        rim=np.exp(-((y-top)/.00050)**2)*rim_extent
+        crease=np.exp(-((y-top-.0021)/.0008)**2)*rim_extent
+        waterline=np.exp(-((y-bottom-.00015)/.00038)**2)*rim_extent
+        glaze([.15,.09,.08],rim*(.45 if sex=="female" else .30))
+        glaze([.43,.29,.26],crease*.10)
+        glaze([.84,.62,.53],waterline*.13)
+        lid_relief += (rim*.00060+waterline*.00030-crease*.00022)*native_eye
+        # Tangent-space corneal curvature is restricted to the eye pigment.
+        # Map Y runs down the atlas; canonical Y runs upward.
+        curve = np.stack([np.clip(dx, -1, 1)*.53, -np.clip(dy, -1, 1)*.53,
+                          np.sqrt(np.maximum(1-.53**2*np.minimum(r*r, 1.8), .15))], -1)
+        curve = unit(curve)*.5+.5
+        normal = normal*(1-weight)+curve*weight
+        regions[..., 3] = regions[..., 3]*(1-new_iris)+.12*new_iris
+        eyes.append({"center_m": [float(cx), float(cy)], "iris_radius_m": radius})
+    width = .027 if sex == "female" else .028
+    arch = np.maximum(1-(x/width)**2, 0)
+    seam = mouth_y-.0007*arch
+    upper = seam+(.0022+.0018*np.exp(-((abs(x)-.007)/.005)**2))*arch
+    lower = seam-.0037*arch
+    extent = 1-smoothstep(.93, 1.04, abs(x)/width)
+    upper_pigment = np.exp(-((y-upper)/.0020)**2)*extent
+    lower_pigment = np.exp(-((y-lower)/.0025)**2)*extent
+    seam_line = np.exp(-((y-seam)/.00065)**2)*extent
+    corners = np.exp(-((abs(x)-width*.96)/.0020)**2-((y-mouth_y+.0002)/.0012)**2)
+    glaze([.49, .225, .215] if sex == "female" else [.43, .255, .23], upper_pigment*skin*.34)
+    glaze([.66, .345, .31] if sex == "female" else [.58, .34, .29], lower_pigment*skin*.28)
+    glaze([.235, .095, .09], seam_line*skin*(.57 if sex == "female" else .46))
+    glaze([.27, .125, .115], corners*skin*.47)
+    cupid = np.exp(-((y-upper-.0015)/.00065)**2)*extent
+    glaze([.87, .63, .52], cupid*skin*.13)
+    philtrum = np.exp(-(x/.004)**2-((y-mouth_y-.010)/.006)**2)
+    glaze([.49, .32, .28], philtrum*skin*.065)
+    lip = np.maximum(upper_pigment, lower_pigment)*skin
+    regions[..., 3] = np.minimum(regions[..., 3], .80-lip*.28)
+    paint[..., :3] = np.clip(base, 0, 1)
+    # Refine the actual vermilion form and corner indentation. This bounded
+    # addition never reaches the skull, neck or helmet/hair seam protections.
+    relief = (.00035*upper_pigment+.00040*lower_pigment-.00070*seam_line-.00055*corners)*skin+lid_relief
+    size, stride, max_delta = geometry["size"], geometry["stride"], geometry["max_delta_m"]
+    path = stage/f"{sex}-sculpt.bin"
+    field = np.frombuffer(gzip.decompress(path.read_bytes()), np.uint8).reshape(size, size, stride).astype(float)/127.5-1
+    reduced = np.asarray(Image.fromarray(relief.astype(np.float32)).resize((size, size), Image.Resampling.BILINEAR))
+    field[..., 2] += reduced/max_delta
+    delta = field[..., :3]*max_delta
+    delta *= np.minimum(1, .0055/np.maximum(np.linalg.norm(delta, axis=-1, keepdims=True), 1e-9))
+    field[..., :3] = delta/max_delta
+    ry, rx = np.gradient(reduced, -(Y_MAX-Y_MIN)/(size-1), (X_MAX-X_MIN)/(size-1))
+    n = field[..., 3:6]
+    n = unit(np.stack([n[..., 0]-rx*n[..., 2], n[..., 1]-ry*n[..., 2], n[..., 2]], -1))
+    field[..., 3:6] = n
+    path.write_bytes(gzip.compress(np.round(np.clip(field*.5+.5, 0, 1)*255).astype(np.uint8).tobytes(), compresslevel=9, mtime=0))
+    geometry.update(bytes=path.stat().st_size, sha256=sha(path), baked_max_displacement_m=float(np.linalg.norm(delta, axis=-1).max()))
+    return paint, regions, normal, {"version": 4, "eyes": eyes,
+        "max_lip_relief_addition_m": float(abs(relief).max()),
+        "description": "Neutral iris fibres, pupil/limbus and curved corneal normals; measured vermilion seam/corners and bounded lip relief"}
+
+
 def run(args):
     root = args.root.resolve()
     g, ea = load_tools(args.tools_root.resolve() if args.tools_root else root)
@@ -455,6 +604,9 @@ def run(args):
             base, region, geometry = geometry_v2(args.stage, sex, base, region, points, normal, delta, coherent, valid, eye_y,args.geometry_v3,mouth_y)
         painted, regions, detailed_normal = paint_portrait(base.copy(), region, points,
             high_normal if geometry else normal, high_normal, valid, eye_y, sex, source_iris=bool(geometry),reference=args.geometry_v3,mouth_y=mouth_y)
+        features = None
+        if args.features_v4:
+            painted, regions, detailed_normal, features = refine_features_v4(args.stage, sex, painted, regions, detailed_normal, geometry, mouth_y)
         save_png(args.stage/f"{sex}-paint.png", painted)
         save_png(args.stage/f"{sex}-regions.png", regions)
         save_png(args.stage/f"{sex}-normal.png", detailed_normal)
@@ -470,6 +622,10 @@ def run(args):
         if args.geometry_v3:
             descriptor["version"] = 3
             descriptor["paint_recipe"] = "Human portrait v3: preserved 4K source pigment, measured lip landmarks, authored lid/nose/brow planes and refined feature topology"
+        if features:
+            descriptor["version"] = 4
+            descriptor["features"] = features
+            descriptor["paint_recipe"] = "Human portrait v4: articulated iris/cornea response and measured lip seam, vermilion and corner relief"
         (args.stage/f"{sex}.json").write_text(json.dumps(descriptor, indent=2)+"\n", newline="\n")
         report = {"sex": sex, "runtime_triangles_unchanged": not bool(geometry), "valid_head_pixels": int(valid.sum()),
                   "source_albedo_size": [4096, 4096], **bake}
@@ -483,7 +639,7 @@ def run(args):
             if geometry:
                 (destination/f"{sex}-sculpt.bin").write_bytes((args.stage/f"{sex}-sculpt.bin").read_bytes())
         print(json.dumps(report), flush=True)
-    manifest = {"version": 3 if args.geometry_v3 else (2 if args.geometry_v2 else 1), "heads": reports,
+    manifest = {"version": 4 if args.features_v4 else (3 if args.geometry_v3 else (2 if args.geometry_v2 else 1)), "heads": reports,
                 "outputs": {p.name: {"bytes": p.stat().st_size, "sha256": sha(p)} for p in args.stage.iterdir() if p.suffix in (".png", ".bin", ".json") and p.name != "bake-report.json"}}
     (args.stage/"bake-report.json").write_text(json.dumps(manifest, indent=2)+"\n", newline="\n")
 
@@ -497,4 +653,8 @@ if __name__ == "__main__":
     parser.add_argument("--install", action="store_true")
     parser.add_argument("--geometry-v2", action="store_true", help="Bake bounded High-only surface conformance and lid artwork")
     parser.add_argument("--geometry-v3", action="store_true", help="Refine measured lip/lid/brow planes while preserving exact source pigment")
-    run(parser.parse_args())
+    parser.add_argument("--features-v4", action="store_true", help="Refine eye pigment, corneal response and mouth form over v3")
+    args = parser.parse_args()
+    if args.features_v4:
+        args.geometry_v3 = True
+    run(args)

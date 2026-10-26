@@ -55,6 +55,7 @@ func run() -> void:
 	var equipment: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/equipment.json"))
 	var animation: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/animations/luminous.json"))
 	HIGH.clear()
+	check_feature_artwork()
 	check_seam_midpoints()
 	for sex: String in ["male", "female"]:
 		var slug := "luminous_" + sex
@@ -88,6 +89,11 @@ func run() -> void:
 			var elapsed := Time.get_ticks_usec() - started
 			if level == 2:
 				expect(HIGH.cache_metrics().texture_bundles == 1, "one shared High texture bundle")
+				for part: String in HIGH.PARTS:
+					var surface := actor._native_model.find_child(part, true, false) as MeshInstance3D
+					var finish := surface.material_override as ShaderMaterial
+					expect(bool(finish.get_shader_parameter("portrait_eye_surface")) == (part == "eyes"),
+						"wet corneal response is restricted to the existing eye patch " + part)
 				var head_triangles := count_head_triangles(actor)
 				expect(head_triangles >= 6000 and head_triangles <= 8200, "reviewed 6–8k High head budget")
 				results.append({"sex":sex,"head_triangles":head_triangles})
@@ -242,6 +248,33 @@ func freeze(actor: ReplicatedActor3D, action: String, seconds: float) -> void:
 	actor.animation_player.seek(seconds, true)
 	actor.animation_player.pause()
 	actor.get_skeleton().force_update_all_bone_transforms()
+
+func check_feature_artwork() -> void:
+	for sex: String in ["male", "female"]:
+		var prefix := "res://data/actors/portraits_high/" + sex
+		var descriptor: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(prefix + ".json"))
+		var geometry: Dictionary = descriptor.geometry
+		expect(int(descriptor.version) == 4 and int(geometry.stride) == 6 and int(geometry.size) == 256,
+			"feature artwork reuses the existing six-channel CPU grid " + sex)
+		expect(FileAccess.get_sha256(str(geometry.path)) == str(geometry.sha256), "descriptor identifies exact sculpt payload " + sex)
+		expect(float(geometry.baked_max_displacement_m) <= .005501, "feature sculpt retains original displacement clamp")
+		var paint := Image.load_from_file(prefix + "-paint.png")
+		var regions := Image.load_from_file(prefix + "-regions.png")
+		var normal := Image.load_from_file(prefix + "-normal.png")
+		expect(paint.get_size() == Vector2i(1024,1024) and regions.get_size() == paint.get_size() and normal.get_size() == paint.get_size(),
+			"same three1K shared maps per sex")
+		for eye: Dictionary in descriptor.features.eyes:
+			var center := Vector2(float(eye.center_m[0]),float(eye.center_m[1]))
+			var radius := float(eye.iris_radius_m)
+			var projection: Dictionary = descriptor.projection
+			var scale := Vector2(1023.0/(float(projection.x_max)-float(projection.x_min)),1023.0/(float(projection.y_max)-float(projection.y_min)))
+			var at := Vector2i(roundi((center.x-float(projection.x_min))*scale.x), roundi((float(projection.y_max)-center.y)*scale.y))
+			var ring := at + Vector2i(roundi(radius*.55*scale.x),0)
+			expect(radius > .004 and radius < .010 and regions.get_pixelv(at).g > .75, "defined pupil stays inside selected iris")
+			expect(paint.get_pixelv(at).get_luminance() < paint.get_pixelv(ring).get_luminance()*.50,
+				"pupil and variegated iris remain distinct in authored map")
+			var curve := normal.get_pixelv(ring)
+			expect(absf(curve.r-.5) > .05 and curve.b > .75, "corneal map carries curved surface response")
 
 func check_geometry(source: Mesh, result: Mesh, label: String) -> void:
 	expect(source.get_surface_count() == result.get_surface_count(), "surface count preserved " + label)

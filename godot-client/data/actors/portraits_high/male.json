@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "sex": "male",
   "size": 1024,
   "projection": {
@@ -15,19 +15,40 @@
   },
   "runtime_source_sha256": "1cc5bd8cd2761e71f711dc33aabd500ea88cb918c0806223991cb5bd87bb2d75",
   "authoring_source_sha256": "0cb1a7f78c15712872e3e9f6a1a458273a179b8d8cd8461d792ca5b915559c86",
-  "paint_recipe": "Human portrait v3: preserved 4K source pigment, measured lip landmarks, authored lid/nose/brow planes and refined feature topology",
+  "paint_recipe": "Human portrait v4: articulated iris/cornea response and measured lip seam, vermilion and corner relief",
   "geometry": {
     "path": "res://data/actors/portraits_high/male-sculpt.bin",
     "size": 256,
     "stride": 6,
     "max_delta_m": 0.006,
     "edge_length_m": 0.0095,
-    "bytes": 186030,
-    "sha256": "6c3ffe48abc2cc1f2d5bb3cc5d80f9348cdfcd53f37ac93d3f5aaf0a4bd6135a",
-    "baked_max_displacement_m": 0.0055000000000000005,
+    "bytes": 185271,
+    "sha256": "9a1be0e970281e101b10ca291a8fc3808bb9eb66c76fe30bbee698f08ebee70b",
+    "baked_max_displacement_m": 0.005450043649233161,
     "feature_edge_length_m": 0.0045,
     "subdivision_passes": 2,
     "eye_y_m": 0.07662649416957293,
     "mouth_y_m": 0.01559628543499511
+  },
+  "features": {
+    "version": 4,
+    "eyes": [
+      {
+        "center_m": [
+          -0.03466107858870751,
+          0.07968899751690661
+        ],
+        "iris_radius_m": 0.00712206943136186
+      },
+      {
+        "center_m": [
+          0.03107437438304545,
+          0.07902613572221871
+        ],
+        "iris_radius_m": 0.006264491074900844
+      }
+    ],
+    "max_lip_relief_addition_m": 0.0006166268709723341,
+    "description": "Neutral iris fibres, pupil/limbus and curved corneal normals; measured vermilion seam/corners and bounded lip relief"
   }
 }

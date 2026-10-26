@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "sex": "female",
   "size": 1024,
   "projection": {
@@ -15,19 +15,40 @@
   },
   "runtime_source_sha256": "3a8ff81e9f152102ee1e57d892759c0a8e69ab49064ab8e473f5cb9ed3e8fc94",
   "authoring_source_sha256": "6316da8288c310bcfa79c24249e1b804c3e076766c56419db397743d47466f1a",
-  "paint_recipe": "Human portrait v3: preserved 4K source pigment, measured lip landmarks, authored lid/nose/brow planes and refined feature topology",
+  "paint_recipe": "Human portrait v4: articulated iris/cornea response and measured lip seam, vermilion and corner relief",
   "geometry": {
     "path": "res://data/actors/portraits_high/female-sculpt.bin",
     "size": 256,
     "stride": 6,
     "max_delta_m": 0.006,
     "edge_length_m": 0.0095,
-    "bytes": 205718,
-    "sha256": "1fd4865de46ea64d82e328c6c60141a16461df5d29cb0750d8235803240a0ea4",
-    "baked_max_displacement_m": 0.0055000000000000005,
+    "bytes": 205040,
+    "sha256": "f4841c9a718704f795ecd2da7de4d253cebe7b3218e2dee20a00fac32d1980d6",
+    "baked_max_displacement_m": 0.005432950857250693,
     "feature_edge_length_m": 0.0045,
     "subdivision_passes": 2,
     "eye_y_m": 0.07355782493262619,
     "mouth_y_m": 0.003279569892473133
+  },
+  "features": {
+    "version": 4,
+    "eyes": [
+      {
+        "center_m": [
+          -0.03806292448598041,
+          0.07592019648767735
+        ],
+        "iris_radius_m": 0.008500701453223824
+      },
+      {
+        "center_m": [
+          0.0370160156412935,
+          0.07581793409761359
+        ],
+        "iris_radius_m": 0.008109554253059852
+      }
+    ],
+    "max_lip_relief_addition_m": 0.0006163079870104659,
+    "description": "Neutral iris fibres, pupil/limbus and curved corneal normals; measured vermilion seam/corners and bounded lip relief"
   }
 }

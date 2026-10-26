@@ -1,22 +1,26 @@
 extends SceneTree
 ## Production actor reference review: central presets, both tiers, three views.
 ## RL_FACE_REFERENCE_OUTPUT selects ignored output; image aspect stays square.
+## RL_FACE_REFERENCE_DETAIL=1 gives close feature views and both light angles;
+## RL_FACE_REFERENCE_PALETTE=1 also samples three iris/skin combinations.
 const PRESETS=preload("res://src/actors/human_portrait_presets.gd")
 var stage:Node3D
 var camera:Camera3D
 var light:DirectionalLight3D
 var output:String
 var records:=[]
+var detail_review:=false
 func _init() -> void:call_deferred("run")
 func run() -> void:
  output=OS.get_environment("RL_FACE_REFERENCE_OUTPUT")
+ detail_review=OS.get_environment("RL_FACE_REFERENCE_DETAIL")=="1"
  if output.is_empty():output=ProjectSettings.globalize_path("res://test-artifacts/human-face-reference")
  DirAccess.make_dir_recursive_absolute(output)
  root.size=Vector2i(840,840);stage=Node3D.new();root.add_child(stage)
  var env:=WorldEnvironment.new();env.environment=Environment.new();env.environment.background_mode=Environment.BG_COLOR;env.environment.background_color=Color("353b40");env.environment.ambient_light_source=Environment.AMBIENT_SOURCE_COLOR;env.environment.ambient_light_color=Color("c5c9cf");env.environment.ambient_light_energy=.48;stage.add_child(env)
  light=DirectionalLight3D.new();light.rotation_degrees=Vector3(-25,-35,0);light.light_energy=1.1;light.light_color=Color("fff0de");stage.add_child(light)
  var fill:=DirectionalLight3D.new();fill.rotation_degrees=Vector3(-20,145,0);fill.light_energy=.30;fill.light_color=Color("bbcfdb");stage.add_child(fill)
- camera=Camera3D.new();camera.projection=Camera3D.PROJECTION_ORTHOGONAL;camera.size=.46;camera.cull_mask=3;camera.current=true;stage.add_child(camera)
+ camera=Camera3D.new();camera.projection=Camera3D.PROJECTION_ORTHOGONAL;camera.size=.25 if detail_review else .46;camera.cull_mask=3;camera.current=true;stage.add_child(camera)
  var models:Dictionary=JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/models.json")).models
  var equipment:Dictionary=JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/equipment.json"))
  var animations:Dictionary=JSON.parse_string(FileAccess.get_file_as_string("res://data/animations/luminous.json"))
@@ -32,15 +36,24 @@ func run() -> void:
   for level:int in [1,2]:
    var start:=Time.get_ticks_usec();actor.apply_render_quality(level,true);var usec:=Time.get_ticks_usec()-start
    actor.play_action(&"idle",true);actor.animation_player.seek(.4,true);actor.animation_player.pause();actor.get_skeleton().force_update_all_bone_transforms()
-   var skeleton:=actor.get_skeleton();var focus:=skeleton.to_global(skeleton.get_bone_global_pose(skeleton.find_bone("Head")).origin)+Vector3(0,.075,0)
+   var skeleton:=actor.get_skeleton();var focus:=skeleton.to_global(skeleton.get_bone_global_pose(skeleton.find_bone("Head")).origin)+Vector3(0,.055 if detail_review else .075,0)
    for angle:String in ["front","threequarter","profile"]:
-    camera.position=focus+{"front":Vector3(0,0,1),"threequarter":Vector3(.75,.32,1),"profile":Vector3(1,0,.015)}[angle];camera.look_at(focus)
+    camera.position=focus+{"front":Vector3(0,0,1),"threequarter":Vector3(.62,.035,1) if detail_review else Vector3(.75,.32,1),"profile":Vector3(1,0,.015)}[angle];camera.look_at(focus)
     await capture(name.to_lower()+"-"+("high" if level==2 else "medium")+"-"+angle)
    if level==2:
     light.rotation_degrees.y=55
-    camera.position=focus+Vector3(.75,.32,1);camera.look_at(focus)
-    await capture(name.to_lower()+"-high-alternate-light")
+    for angle:String in (["front","threequarter","profile"] if detail_review else ["threequarter"]):
+     camera.position=focus+{"front":Vector3(0,0,1),"threequarter":Vector3(.62,.035,1) if detail_review else Vector3(.75,.32,1),"profile":Vector3(1,0,.015)}[angle];camera.look_at(focus)
+     await capture(name.to_lower()+"-high-alternate-light"+("-"+angle if detail_review else ""))
     light.rotation_degrees.y=-35
+    if OS.get_environment("RL_FACE_REFERENCE_PALETTE")=="1":
+     for choice:int in [0,1,2]:
+      var variant:=appearance.duplicate()
+      variant.eyes=choice;variant.skin=[0,3,5][choice]
+      actor.apply_appearance_variants(variant)
+      actor.play_action(&"idle",true);actor.animation_player.seek(.4,true);actor.animation_player.pause();actor.get_skeleton().force_update_all_bone_transforms()
+      camera.position=focus+Vector3(.32,.015,1);camera.look_at(focus)
+      await capture(name.to_lower()+"-high-eye-"+str(choice)+"-skin-"+str(variant.skin))
    records.append({"name":name,"appearance":appearance,"level":level,"configure_usec":source_usec,"quality_switch_usec":usec,"errors":errors,"geometry":geometry_metrics(actor),"cache":HighPortraitAppearance.cache_metrics()})
   actor.free();await process_frame
  FileAccess.open(output.path_join("manifest.json"),FileAccess.WRITE).store_string(JSON.stringify({"records":records},"  "))

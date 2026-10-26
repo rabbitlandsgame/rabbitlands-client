@@ -108,6 +108,15 @@ static func apply(native_root: Node3D, skeleton: Skeleton3D,
 		material.set_shader_parameter("portrait_paint", bundle.paint)
 		material.set_shader_parameter("portrait_regions", bundle.regions)
 		material.set_shader_parameter("portrait_normal", bundle.normal)
+		material.set_shader_parameter("portrait_eye_surface", part == "eyes")
+		material.set_shader_parameter("portrait_bounds", Vector4(float(projection.x_min), float(projection.x_max),
+			float(projection.y_min), float(projection.y_max)))
+		var features: Dictionary = bundle.descriptor.get("features", {})
+		var eyes: Array = features.get("eyes", [])
+		if eyes.size() == 2:
+			material.set_shader_parameter("portrait_eye_centers", Vector4(float(eyes[0].center_m[0]), float(eyes[0].center_m[1]),
+				float(eyes[1].center_m[0]), float(eyes[1].center_m[1])))
+			material.set_shader_parameter("portrait_iris_radii", Vector2(float(eyes[0].iris_radius_m), float(eyes[1].iris_radius_m)))
 		node.material_override = material
 		node.mesh = result
 		node.set_meta(META, {"source": source, "result": result, "override": original_override,
