@@ -6,6 +6,7 @@ const WAIT_LIMIT := 45.0
 const MAX_DURATION := 60.0
 
 signal presentation_finished(token: String, reason: String)
+signal replay_finished(token: String, reason: String)
 signal transcript_changed(text: String)
 
 var reduced_motion := false
@@ -47,6 +48,10 @@ var _ambient_elapsed := 0.0
 var _ack_identity := ""
 var _ack_requested := false
 var _view_focus: Node3D
+var _replay_requested_identity := ""
+var _replaying := false
+var _replay_bindings: Dictionary = {}
+var _replay_nodes: Dictionary = {}
 
 func _ready() -> void:
 	var config := ConfigFile.new()
@@ -147,6 +152,39 @@ func blocks_input() -> bool:
 func is_active() -> bool:
 	return pending or playing
 
+func can_replay(snapshot: Dictionary, current_map: String) -> bool:
+	return _replay_requested_identity.is_empty() and _replay_allowed(snapshot, current_map)
+
+func _replay_allowed(snapshot: Dictionary, current_map: String) -> bool:
+	if is_active() or not bool(snapshot.get("active", false)):
+		return false
+	var here := map_key(current_map)
+	if here.is_empty() or map_key(str(snapshot.get("map", ""))) != here:
+		return false
+	var scene: Dictionary = snapshot.get("scene", {})
+	var token := str(scene.get("token", ""))
+	var run := str(snapshot.get("run_id", ""))
+	var identity := run + ":" + token
+	if run.is_empty() or token.is_empty() or not _handled.has(identity):
+		return false
+	if _definitions.is_empty():
+		_definitions = scene_definitions()
+	if not _definitions.has(str(scene.get("id", ""))):
+		return false
+	if str(snapshot.get("kind", "")) == "lamps" \
+			and str(scene.get("id", "")) in ["measure.lamps.admission", "measure.lamps.resolved"] \
+			and not bool((snapshot.get("lamps", {}) as Dictionary).get("evidence_secure", false)):
+		return false
+	# A replay cannot stand in for an outstanding first viewing or rejoin ack.
+	return not bool(scene.get("requires_ack", false)) or \
+		(_ack_identity == identity + ":" + str(scene.get("ack_revision", 0)) and _ack_requested)
+
+func request_replay(snapshot: Dictionary, current_map: String) -> bool:
+	if not can_replay(snapshot, current_map):
+		return false
+	_replay_requested_identity = str(snapshot.get("run_id", "")) + ":" + str(snapshot.scene.token)
+	return true
+
 func work_readouts_visible() -> bool:
 	if not playing:
 		return true
@@ -202,6 +240,7 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 	if is_active() and (_token != next_token or _run != next_run or _map != here):
 		cancel("replaced")
 	if next_token.is_empty() or scene.is_empty():
+		_replay_requested_identity = ""
 		return
 	var identity := next_run + ":" + next_token
 	var ack_identity := identity + ":" + str(scene.get("ack_revision", 0))
@@ -209,7 +248,9 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 		_ack_identity = ack_identity
 		_ack_requested = false
 	if not is_active():
-		if _handled.has(identity):
+		var replay := _replay_requested_identity == identity and _replay_allowed(snapshot, current_map)
+		_replay_requested_identity = ""
+		if _handled.has(identity) and not replay:
 			if bool(scene.get("requires_ack", false)) and not _ack_requested:
 				_ack_requested = true
 				presentation_finished.emit(next_token, "already_seen")
@@ -221,6 +262,7 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 			_handled[identity] = true
 			return # An unknown presentation must never lock a working quest.
 		_token = next_token
+		_replaying = replay
 		_run = next_run
 		_map = here
 		_variant = str(scene.get("variant", snapshot.get("cargo_priority", "")))
@@ -260,6 +302,14 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 			return
 		var local: Node3D = local_value
 		var bindings: Dictionary = scene.get("actors", snapshot.get("actors", {}))
+		if _replaying:
+			for role: String in bindings:
+				var bound: Variant = actor_nodes.get(int(bindings[role]))
+				if not is_instance_valid(bound) or not bound is Node3D:
+					_actor_wait_elapsed += maxf(0.0, delta)
+					if _actor_wait_elapsed >= 2.0:
+						cancel("actor_lost")
+					return
 		if _actor_wait_elapsed < 2.0:
 			for role: String in bindings:
 				if not is_instance_valid(actor_nodes.get(int(bindings[role]))):
@@ -271,8 +321,22 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 		if not _anchors_ready():
 			return # Keep gameplay available while neighboring terrain finishes loading.
 		_start(rig, camera_value as Camera3D, local, actor_nodes, bindings)
+		if _replaying:
+			_replay_bindings = bindings.duplicate(true)
+			_replay_nodes = {local_actor_id: local}
+			for role: String in bindings:
+				var actor_id := int(bindings[role])
+				_replay_nodes[actor_id] = actor_nodes.get(actor_id)
 		_handled[identity] = true
 	if playing:
+		if _replaying:
+			if scene.get("actors", snapshot.get("actors", {})) != _replay_bindings:
+				cancel("actor_lost")
+				return
+			for actor_id: int in _replay_nodes:
+				if not is_instance_valid(_replay_nodes[actor_id]) or actor_nodes.get(actor_id) != _replay_nodes[actor_id]:
+					cancel("actor_lost")
+					return
 		if not is_instance_valid(_rig) or not is_instance_valid(_camera):
 			cancel("camera_lost")
 			return
@@ -441,6 +505,11 @@ func skip() -> void:
 
 func cancel(reason := "cancelled") -> void:
 	var owned := is_active()
+	var was_replay := _replaying
+	_replay_requested_identity = ""
+	_replaying = false
+	_replay_bindings.clear()
+	_replay_nodes.clear()
 	for role: String in _actors:
 		var actor_value: Variant = _actors[role]
 		if not is_instance_valid(actor_value):
@@ -476,9 +545,12 @@ func cancel(reason := "cancelled") -> void:
 			control.grab_focus()
 		_saved_focus = null
 	if owned:
-		if reason in ["finished", "skipped", "loading_timeout", "actor_lost", "camera_lost"]:
-			_ack_requested = true
-		presentation_finished.emit(_token, reason)
+		if was_replay:
+			replay_finished.emit(_token, reason)
+		else:
+			if reason in ["finished", "skipped", "loading_timeout", "actor_lost", "camera_lost"]:
+				_ack_requested = true
+			presentation_finished.emit(_token, reason)
 	if reason in ["disconnected", "map_changed", "session_ended", "unavailable"]:
 		_ack_identity = ""
 		_ack_requested = false

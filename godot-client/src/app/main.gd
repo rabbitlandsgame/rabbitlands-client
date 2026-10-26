@@ -1339,6 +1339,7 @@ func _ready() -> void:
 	campaign_hud.prediction_requested.connect(_on_campaign_prediction)
 	campaign_scene.presentation_finished.connect(_on_campaign_scene_finished)
 	campaign_hud.transcript_requested.connect(campaign_scene.show_transcript)
+	campaign_hud.replay_requested.connect(_on_campaign_replay)
 	campaign_hud.reduced_motion_changed.connect(campaign_scene.set_reduced_motion)
 	character_intro.conversation_requested.connect(_request_arrival_conversation)
 	character_intro.conversation_ended.connect(_end_arrival_conversation)
@@ -1348,6 +1349,7 @@ func _ready() -> void:
 	lantern_guide = LanternGuideScript.new()
 	game_view.add_child(lantern_guide)
 	lantern_guide.configure(self)
+	lantern_guide.attach_campaign(campaign_hud)
 	actor_resource_overlay.get_node("Rows").add_child(mount_status)
 	mount_status.display_changed.connect(_layout_actor_resource_overlay)
 	var model_registry: Dictionary = _json("res://data/actors/models.json")
@@ -7213,6 +7215,11 @@ func _update_campaign(delta: float) -> void:
 	if not available:
 		campaign_scene.cancel("unavailable")
 		campaign_hud.hide()
+		campaign_hud.set_replay_available(false)
+		if is_instance_valid(lantern_guide):
+			lantern_guide.apply_campaign({})
+		if is_instance_valid(extension_windows):
+			extension_windows.sync_campaign_replay()
 		campaign_works.clear()
 		campaign_bank_works.clear()
 		campaign_road_works.clear()
@@ -7242,6 +7249,21 @@ func _update_campaign(delta: float) -> void:
 	campaign_hud.apply_state(AppState.campaign, tile if tile is Vector2i else Vector2i.ZERO,
 		AppState.current_map, campaign_scene.reduced_motion, campaign_scene.blocks_input() \
 		or character_intro.is_active() or arrival_curtain.blocks_input())
+	campaign_hud.set_replay_available(_campaign_replay_ready() \
+		and campaign_scene.can_replay(AppState.campaign, AppState.current_map))
+	lantern_guide.apply_campaign(AppState.campaign)
+	extension_windows.sync_campaign_replay()
+
+func _campaign_replay_ready() -> bool:
+	return AppState.authenticated and not _disconnect_console_active \
+		and not bool(AppState.death.get("dead", false)) \
+		and _grounded_actors.has(AppState.local_actor_id) \
+		and not character_intro.is_active() and not arrival_curtain.blocks_input() \
+		and not _world_input_blocked()
+
+func _on_campaign_replay() -> void:
+	if _campaign_replay_ready():
+		campaign_scene.request_replay(AppState.campaign, AppState.current_map)
 
 func _on_campaign_target(object_id: int, tile: Vector2i, nearby: bool) -> void:
 	if _world_input_blocked() or not bool(AppState.campaign.get("active", false)):
@@ -7261,6 +7283,7 @@ func _on_campaign_target(object_id: int, tile: Vector2i, nearby: bool) -> void:
 func _on_campaign_action(action: String) -> void:
 	if _world_input_blocked():
 		return
+	lantern_guide.follow_campaign_request(action)
 	Network.campaign_request(action)
 
 func _campaign_surface_height(point: Vector3) -> float:
