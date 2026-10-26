@@ -1,0 +1,376 @@
+class_name HighHairAppearance
+extends RefCounted
+## Optional source-derived Human hair finish. All processing is once on change;
+## Low/Medium restore the exact incoming mesh/material references.
+const HIGH := 2
+const SHADER := preload("res://src/actors/high_hair_appearance.gdshader")
+const GROOM := preload("res://src/actors/portrait_groom.gd")
+const META := &"rl_high_hair"
+const USER_META := &"rl_high_hair_user"
+const EXIT_META := &"rl_high_hair_exit"
+const CACHE_LIMIT := 24
+const MATERIAL_LIMIT := 128
+static var _meshes: Dictionary = {}
+static var _materials: Dictionary = {}
+static var _users: Dictionary = {}
+static var _cold_usec := 0
+static var _hits := 0
+
+static func _supported(config: Dictionary) -> bool:
+	return str(config.get("culture", "")) == "luminous" and str(config.get("bodyTemplate", "")) in ["luminous_male", "luminous_female"]
+
+static func _hair_nodes(native_root: Node3D) -> Array[MeshInstance3D]:
+	var result: Array[MeshInstance3D] = []
+	for node: Node in native_root.find_children("*", "MeshInstance3D", true, false):
+		if node.get_parent() != null and str(node.get_parent().name).begins_with("AppearanceHair_"):
+			result.append(node as MeshInstance3D)
+	return result
+
+static func _locally_visible(node: Node3D, native_root: Node3D) -> bool:
+	var cursor: Node = node
+	while cursor != null:
+		if cursor is Node3D and not (cursor as Node3D).visible: return false
+		if cursor == native_root: return true
+		cursor = cursor.get_parent()
+	return false
+
+static func apply(native_root: Node3D, skeleton: Skeleton3D, appearance: Dictionary, config: Dictionary, level: int) -> void:
+	if not is_instance_valid(native_root): return
+	if level != HIGH or not _supported(config) or not is_instance_valid(skeleton):
+		release(native_root)
+		return
+	var head := skeleton.find_bone("Head")
+	if head < 0: return
+	var visible_hair := false
+	for hair: MeshInstance3D in _hair_nodes(native_root):
+		if hair.mesh != null and _locally_visible(hair, native_root): visible_hair = true
+	if not visible_hair:
+		release(native_root)
+		return
+	_users[native_root.get_instance_id()] = weakref(native_root)
+	native_root.set_meta(USER_META, true)
+	if not native_root.has_meta(EXIT_META):
+		native_root.tree_exiting.connect(func() -> void: release(native_root), CONNECT_ONE_SHOT)
+		native_root.set_meta(EXIT_META, true)
+	var detail := clampi(int(appearance.get("hair_detail", 0)), 0, 2)
+	var style := AppearanceVariants.hair_style(int(appearance.get("hair", 0)))
+	var color := AppearanceVariants.hair_color(int(appearance.get("hair", 0)))
+	var sex := str(config.get("gender", ""))
+	var head_from_root := skeleton.get_bone_global_rest(head).affine_inverse() * GROOM._to_root(skeleton, native_root).affine_inverse()
+	for hair: MeshInstance3D in _hair_nodes(native_root):
+		if hair.mesh == null or not _locally_visible(hair, native_root): continue
+		var previous: Dictionary = hair.get_meta(META, {})
+		var source := hair.mesh
+		var original_override := hair.material_override
+		var originals: Array[Material] = []
+		if not previous.is_empty() and hair.mesh == previous.result:
+			source = previous.source
+			original_override = previous.override
+			originals.assign(previous.surfaces)
+		else:
+			for surface: int in source.get_surface_count():
+				originals.append(hair.get_surface_override_material(surface))
+		var authored := hair.get_meta(GROOM.SOURCE_META, source) as Mesh
+		var transform := head_from_root * GROOM._to_root(hair, native_root)
+		var key := "%d:%d:%s:%d:%d:%s" % [source.get_instance_id(), authored.get_instance_id(), sex, style, detail, transform]
+		var result := _meshes.get(key) as Mesh
+		if result == null:
+			var started := Time.get_ticks_usec()
+			result = _refine(source, authored, transform, sex, style, detail)
+			_cold_usec += Time.get_ticks_usec() - started
+			if _meshes.size() >= CACHE_LIMIT: _meshes.erase(_meshes.keys()[0])
+			_meshes[key] = result
+		else: _hits += 1
+		var high_materials: Array[Material] = []
+		for surface: int in source.get_surface_count():
+			var original := authored.surface_get_material(surface) as StandardMaterial3D
+			var material_key := "%d:%s:%d:%d" % [original.get_instance_id() if original != null else 0, color.to_html(), style, detail]
+			var material := _materials.get(material_key) as ShaderMaterial
+			if material == null:
+				material = ShaderMaterial.new()
+				material.shader = SHADER
+				material.set_shader_parameter("hair_color", color * (original.albedo_color if original != null else Color.WHITE))
+				if original != null:
+					material.set_shader_parameter("use_texture", original.albedo_texture != null)
+					material.set_shader_parameter("base_texture", original.albedo_texture)
+					material.set_shader_parameter("use_normal", original.normal_enabled and original.normal_texture != null)
+					material.set_shader_parameter("normal_texture", original.normal_texture)
+					material.set_shader_parameter("normal_scale", minf(original.normal_scale, 0.45))
+				if _materials.size() >= MATERIAL_LIMIT: _materials.erase(_materials.keys()[0])
+				_materials[material_key] = material
+			high_materials.append(material)
+		hair.material_override = null
+		hair.mesh = result
+		for surface: int in high_materials.size(): hair.set_surface_override_material(surface, high_materials[surface])
+		hair.set_meta(META, {"source":source, "result":result, "override":original_override, "surfaces":originals, "materials":high_materials})
+	_prune_users()
+
+static func restore(native_root: Node3D) -> void:
+	if not is_instance_valid(native_root): return
+	for hair: MeshInstance3D in _hair_nodes(native_root):
+		if not hair.has_meta(META): continue
+		var previous: Dictionary = hair.get_meta(META)
+		if hair.mesh == previous.result:
+			hair.mesh = previous.source as Mesh
+			hair.material_override = previous.override as Material
+			for surface: int in mini(previous.surfaces.size(), hair.mesh.get_surface_count()):
+				if hair.get_surface_override_material(surface) == previous.materials[surface]:
+					hair.set_surface_override_material(surface, previous.surfaces[surface] as Material)
+		hair.remove_meta(META)
+
+static func release(native_root: Node3D) -> void:
+	if is_instance_valid(native_root):
+		restore(native_root)
+		native_root.remove_meta(USER_META)
+		_users.erase(native_root.get_instance_id())
+	_prune_users()
+
+static func _prune_users() -> void:
+	for id: int in _users.keys():
+		var node := (_users[id] as WeakRef).get_ref() as Node3D
+		if not is_instance_valid(node) or not node.has_meta(USER_META): _users.erase(id)
+	if _users.is_empty():
+		_meshes.clear()
+		_materials.clear()
+
+static func clear() -> void:
+	for reference: WeakRef in _users.values():
+		var node := reference.get_ref() as Node3D
+		if is_instance_valid(node):
+			restore(node)
+			node.remove_meta(USER_META)
+	_users.clear()
+	_meshes.clear()
+	_materials.clear()
+	_cold_usec = 0
+	_hits = 0
+
+static func cache_metrics() -> Dictionary:
+	_prune_users()
+	var bytes := 0
+	var packed := 0
+	var vertices := 0
+	var triangles := 0
+	for mesh: Mesh in _meshes.values():
+		for surface: int in mesh.get_surface_count():
+			var data := RenderingServer.mesh_get_surface(mesh.get_rid(),surface)
+			for key: String in ["vertex_data","attribute_data","skin_data","index_data","blend_shape_data"]:
+				var buffer: Variant = data.get(key)
+				if buffer is PackedByteArray: packed += buffer.size()
+			var arrays := mesh.surface_get_arrays(surface)
+			vertices += arrays[Mesh.ARRAY_VERTEX].size()
+			triangles += arrays[Mesh.ARRAY_INDEX].size() / 3
+			for attribute: Variant in arrays:
+				if attribute != null: bytes += attribute.to_byte_array().size()
+	return {"mesh_entries":_meshes.size(), "material_entries":_materials.size(), "high_users":_users.size(), "array_bytes":bytes,"packed_buffer_bytes":packed,"vertices":vertices,"triangles":triangles,"cold_fit_usec":_cold_usec,"cache_hits":_hits,"texture_bytes_added":0}
+
+static func _flow(point: Vector3, detail: int, style: int, sex: String) -> Vector3:
+	if sex != "male" or style != 1 or detail == 0: return GROOM._hair_point(point, 0.075, detail) if detail > 0 else point
+	var crown := smoothstep(0.070, 0.155, point.y)
+	var fringe := smoothstep(0.005, 0.065, point.z) * crown
+	if detail == 1:
+		# Broad overlapping sweeps replace the high-frequency sawtooth fringe.
+		var wave := 0.5 + 0.5 * sin(point.x * 47.0 + point.z * 24.0 + 0.4)
+		return point + Vector3(sin(point.z * 26.0 + point.x * 12.0) * 0.0035 * crown + 0.002 * fringe,
+			(0.006 + wave * 0.015) * crown - fringe * (0.003 + 0.008 * pow(sin(point.x * 58.0 + 0.8), 2.0)),
+			sin(point.x * 42.0) * 0.003 * crown)
+	return point + Vector3(0.010 * fringe, 0.005 * crown + 0.0025 * crown * sin(point.x * 30.0 + point.z * 20.0), -0.006 * fringe)
+
+static func _jacobian(point: Vector3, detail: int, high: bool, style: int, sex: String) -> Basis:
+	var e := 0.0001
+	var centre := _flow(point, detail, style, sex) if high else GROOM._hair_point(point, 0.075, detail)
+	var axes: Array[Vector3] = []
+	for axis: Vector3 in [Vector3.RIGHT, Vector3.UP, Vector3.BACK]:
+		axes.append(((_flow(point + axis * e, detail, style, sex) if high else GROOM._hair_point(point + axis * e, 0.075, detail)) - centre) / e)
+	return Basis(axes[0], axes[1], axes[2])
+
+static func _refine(source: Mesh, authored: Mesh, to_head: Transform3D, sex: String, style: int, detail: int) -> Mesh:
+	# Unknown custom or morph channels retain authored geometry; shading still
+	# improves. Production Human hair has neither, but future assets stay safe.
+	if source.get_blend_shape_count() > 0: return source
+	var result := ArrayMesh.new()
+	var from_head := to_head.affine_inverse()
+	for surface: int in source.get_surface_count():
+		var arrays := source.surface_get_arrays(surface).duplicate(true)
+		if source.surface_get_primitive_type(surface) != Mesh.PRIMITIVE_TRIANGLES: return source
+		for slot: int in range(Mesh.ARRAY_CUSTOM0, Mesh.ARRAY_CUSTOM3 + 1):
+			if arrays[slot] != null: return source
+		var points: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+		var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
+		var tangents: PackedFloat32Array = arrays[Mesh.ARRAY_TANGENT] if arrays[Mesh.ARRAY_TANGENT] != null else PackedFloat32Array()
+		var input := authored.surface_get_arrays(surface)
+		var original_points: PackedVector3Array = input[Mesh.ARRAY_VERTEX]
+		if sex == "male" and style == 1 and detail > 0 and original_points.size() == points.size():
+			for index: int in points.size():
+				var local := to_head * original_points[index]
+				points[index] = from_head * _flow(local, detail, style, sex)
+				var high_j := _jacobian(local, detail, true, style, sex)
+				var old_j := _jacobian(local, detail, false, style, sex)
+				var jacobian := from_head.basis * high_j * old_j.inverse() * to_head.basis
+				normals[index] = (jacobian.inverse().transposed() * normals[index]).normalized()
+				if tangents.size() == points.size() * 4:
+					var t := Vector3(tangents[index * 4], tangents[index * 4 + 1], tangents[index * 4 + 2])
+					t = (jacobian * t).normalized()
+					t = (t - normals[index] * normals[index].dot(t)).normalized()
+					for component: int in 3: tangents[index * 4 + component] = t[component]
+		if sex == "female" and style == 3 and detail == 2:
+			var groups := _updo_groups(arrays, to_head)
+			for index: int in points.size():
+				var group: int = groups.vertices[index]
+				if group == 0: continue
+				var centre: Vector3 = groups.centres[group]
+				var scale := Vector3(0.92,1.04,0.86) if group == 1 else (Vector3(0.74,0.80,0.74) if group == 2 else Vector3(1.08,0.98,1.18))
+				var target := Vector3(-0.014,0.219,-0.082) if group == 1 else (Vector3(0.027,0.219,-0.113) if group == 2 else centre + Vector3(0,0.001,0.001))
+				points[index] = from_head * (target + (to_head * points[index] - centre) * scale)
+				var j := from_head.basis * Basis.from_scale(scale) * to_head.basis
+				normals[index] = (j.inverse().transposed() * normals[index]).normalized()
+				if tangents.size() == points.size()*4:
+					var t := Vector3(tangents[index*4],tangents[index*4+1],tangents[index*4+2])
+					t = j*t
+					t = (t-normals[index]*normals[index].dot(t)).normalized()
+					for component: int in 3: tangents[index*4+component]=t[component]
+		arrays[Mesh.ARRAY_VERTEX] = points
+		arrays[Mesh.ARRAY_NORMAL] = normals
+		if not tangents.is_empty(): arrays[Mesh.ARRAY_TANGENT] = tangents
+		arrays = _refine_edges(arrays, to_head, 0.012)
+		result.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays, [], GROOM._lods(source,surface), source.surface_get_format(surface) & Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS)
+		result.surface_set_material(surface, source.surface_get_material(surface))
+	return result
+
+static func _updo_groups(arrays: Array, to_head: Transform3D) -> Dictionary:
+	var points: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+	var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
+	var parents := PackedInt32Array()
+	parents.resize(points.size())
+	var ranks := PackedByteArray()
+	ranks.resize(points.size())
+	var weld: Dictionary = {}
+	for index: int in points.size():
+		var key := Vector3i((points[index]*100000.0).round())
+		parents[index] = int(weld.get(key,index))
+		weld[key] = parents[index]
+	for corner: int in range(0,indices.size(),3):
+		var first := GROOM._component_root(parents,indices[corner])
+		for offset: int in [1,2]:
+			var second := GROOM._component_root(parents,indices[corner+offset])
+			if first == second: continue
+			if ranks[first] < ranks[second]:
+				parents[first]=second
+				first=second
+			else:
+				parents[second]=first
+				if ranks[first]==ranks[second]:ranks[first]+=1
+	var bounds: Dictionary = {}
+	for index: int in points.size():
+		var component := GROOM._component_root(parents,index)
+		var point := to_head*points[index]
+		var box: Dictionary = bounds.get(component,{"low":point,"high":point,"sum":Vector3.ZERO,"count":0})
+		box.low=(box.low as Vector3).min(point)
+		box.high=(box.high as Vector3).max(point)
+		box.sum+=point
+		box.count+=1
+		bounds[component]=box
+	var selected: Dictionary={}
+	var centres: Dictionary={}
+	var next:=3
+	for component: int in bounds:
+		var box: Dictionary=bounds[component]
+		var centre: Vector3=box.sum/float(box.count)
+		var group:=0
+		if box.count>500 and box.low.y>0.17 and box.high.z< -0.025:
+			group=1 if centre.x<0 else 2
+		elif box.count<600 and box.low.y>0.04 and box.high.z>0.065:
+			group=next
+			next+=1
+		if group>0:
+			selected[component]=group
+			centres[group]=centre
+	var vertices:=PackedInt32Array()
+	vertices.resize(points.size())
+	for index: int in points.size(): vertices[index]=int(selected.get(GROOM._component_root(parents,index),0))
+	return {"vertices":vertices,"centres":centres}
+
+static func _edge(a: int, b: int) -> Vector2i:
+	return Vector2i(mini(a,b),maxi(a,b))
+
+static func _refine_edges(arrays: Array, to_head: Transform3D, threshold: float) -> Array:
+	var p: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+	var n: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
+	var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
+	if indices.is_empty() or n.size() != p.size(): return arrays
+	var influences: int = arrays[Mesh.ARRAY_BONES].size() / p.size() if arrays[Mesh.ARRAY_BONES] != null else 0
+	var edges: Dictionary = {}
+	for corner: int in range(0,indices.size(),3):
+		for pair: Vector2i in [Vector2i(0,1),Vector2i(1,2),Vector2i(2,0)]:
+			var a := indices[corner + pair.x]
+			var b := indices[corner + pair.y]
+			var key := _edge(a,b)
+			if edges.has(key) or edges.size() >= 1600: continue
+			if (to_head.basis * (p[b] - p[a])).length() >= threshold: edges[key] = p.size() + edges.size()
+	var output := PackedInt32Array()
+	for corner: int in range(0,indices.size(),3):
+		var a := indices[corner]
+		var b := indices[corner+1]
+		var c := indices[corner+2]
+		var ab := int(edges.get(_edge(a,b),-1))
+		var bc := int(edges.get(_edge(b,c),-1))
+		var ca := int(edges.get(_edge(c,a),-1))
+		var mask := (1 if ab >= 0 else 0) | (2 if bc >= 0 else 0) | (4 if ca >= 0 else 0)
+		match mask:
+			0: output.append_array(PackedInt32Array([a,b,c]))
+			1: output.append_array(PackedInt32Array([a,ab,c,ab,b,c]))
+			2: output.append_array(PackedInt32Array([a,b,bc,a,bc,c]))
+			4: output.append_array(PackedInt32Array([a,b,ca,b,c,ca]))
+			3: output.append_array(PackedInt32Array([a,ab,c,ab,bc,c,ab,b,bc]))
+			5: output.append_array(PackedInt32Array([a,ab,ca,ab,b,c,ab,c,ca]))
+			6: output.append_array(PackedInt32Array([a,b,ca,b,bc,ca,bc,c,ca]))
+			7: output.append_array(PackedInt32Array([a,ab,ca,ab,b,bc,ca,bc,c,ab,bc,ca]))
+	var normals_to_head := to_head.basis.inverse().transposed()
+	for key: Vector2i in edges:
+		var a := key.x
+		var b := key.y
+		# Cubic PN edge midpoint: endpoint normals bend the edge continuously.
+		# Bounded at 1.2 mm so imported skull/helmet clearance stays conservative.
+		var hp := to_head*p[a]
+		var hq := to_head*p[b]
+		var na := (normals_to_head*n[a]).normalized()
+		var nb := (normals_to_head*n[b]).normalized()
+		var delta := -(na * (hq-hp).dot(na) + nb * (hp-hq).dot(nb)) * 0.125
+		delta = delta.limit_length(0.0012) if na.dot(nb) > 0.45 else Vector3.ZERO
+		p.append((p[a]+p[b])*0.5 + to_head.basis.inverse()*delta)
+		n.append((n[a]+n[b]).normalized())
+		for slot: int in [Mesh.ARRAY_TEX_UV,Mesh.ARRAY_TEX_UV2,Mesh.ARRAY_COLOR]:
+			if arrays[slot] != null:
+				var attribute: Variant = arrays[slot]
+				attribute.append((attribute[a]+attribute[b])*0.5)
+				arrays[slot]=attribute
+		if arrays[Mesh.ARRAY_TANGENT] != null:
+			var t: PackedFloat32Array = arrays[Mesh.ARRAY_TANGENT]
+			var tangent := (Vector3(t[a*4],t[a*4+1],t[a*4+2]) + Vector3(t[b*4],t[b*4+1],t[b*4+2])).normalized()
+			tangent=(tangent-n[n.size()-1]*n[n.size()-1].dot(tangent)).normalized()
+			t.append_array(PackedFloat32Array([tangent.x,tangent.y,tangent.z,t[a*4+3]]))
+			arrays[Mesh.ARRAY_TANGENT]=t
+		if arrays[Mesh.ARRAY_BONES] != null:
+			_append_skin(arrays,a,b,influences)
+	arrays[Mesh.ARRAY_VERTEX]=p
+	arrays[Mesh.ARRAY_NORMAL]=n
+	arrays[Mesh.ARRAY_INDEX]=output
+	return arrays
+
+static func _append_skin(arrays: Array, a: int, b: int, influences: int) -> void:
+	var bones: PackedInt32Array=arrays[Mesh.ARRAY_BONES]
+	var weights: PackedFloat32Array=arrays[Mesh.ARRAY_WEIGHTS]
+	var combined: Dictionary={}
+	for index: int in [a,b]:
+		for slot: int in influences:
+			var offset := index*influences+slot
+			if weights[offset]>0.0: combined[bones[offset]]=float(combined.get(bones[offset],0.0))+weights[offset]*0.5
+	var joints: Array=combined.keys()
+	joints.sort_custom(func(first: int,second: int)->bool: return combined[first]>combined[second])
+	var total:=0.0
+	for slot: int in mini(influences,joints.size()): total+=float(combined[joints[slot]])
+	for slot: int in influences:
+		bones.append(int(joints[slot]) if slot<joints.size() else 0)
+		weights.append(float(combined[joints[slot]])/maxf(total,0.00001) if slot<joints.size() else 0.0)
+	arrays[Mesh.ARRAY_BONES]=bones
+	arrays[Mesh.ARRAY_WEIGHTS]=weights
