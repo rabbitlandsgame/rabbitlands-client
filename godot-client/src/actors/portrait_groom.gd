@@ -309,10 +309,17 @@ static func _beard_coverage(point: Vector3, eye_height: float, style: int) -> fl
 	moustache *= 1.0 - smoothstep(0.030, 0.046, x)
 	var mask := maxf(jaw * lips_clear, moustache)
 	if style == 2:
-		mask = moustache
+		mask = _moustache_coverage(x, y)
 	elif style == 3:
-		mask = maxf(jaw * lips_clear * (1.0 - smoothstep(0.026, 0.042, x)), moustache)
+		var chin := (1.0 - smoothstep(-0.081, -0.070, y)) * lips_clear
+		mask = maxf(chin * (1.0 - smoothstep(0.026, 0.042, x)), _moustache_coverage(x, y))
 	return clampf(mask * front * edge * bottom, 0.0, 1.0)
+
+static func _moustache_coverage(x: float, y: float) -> float:
+	var centre := -0.053 - 0.011 * pow(x / 0.040, 2.0)
+	var mask := smoothstep(centre - 0.008, centre - 0.004, y)
+	mask *= 1.0 - smoothstep(centre + 0.003, centre + 0.007, y)
+	return mask * smoothstep(0.002, 0.007, x) * (1.0 - smoothstep(0.033, 0.043, x))
 
 static func _full_beard_coverage(point: Vector3, eye_height: float) -> float:
 	var y := point.y - eye_height
@@ -324,10 +331,7 @@ static func _full_beard_coverage(point: Vector3, eye_height: float) -> float:
 	var jaw := 1.0 - smoothstep(cheek_top - 0.003, cheek_top + 0.004, y)
 	var mouth := sqrt(pow(point.x / 0.024, 2.0) + pow((y + 0.063) / 0.008, 2.0))
 	jaw *= smoothstep(0.95, 1.18, mouth)
-	var moustache_y := -0.053 - 0.011 * pow(x / 0.040, 2.0)
-	var moustache := smoothstep(moustache_y - 0.008, moustache_y - 0.004, y)
-	moustache *= 1.0 - smoothstep(moustache_y + 0.003, moustache_y + 0.007, y)
-	moustache *= smoothstep(0.002, 0.007, x) * (1.0 - smoothstep(0.033, 0.043, x))
+	var moustache := _moustache_coverage(x, y)
 	var soul := (1.0 - smoothstep(0.007, 0.012, x)) * smoothstep(-0.098, -0.088, y)
 	soul *= 1.0 - smoothstep(-0.082, -0.075, y)
 	var sideburn := smoothstep(0.056, 0.064, x) * (1.0 - smoothstep(0.075, 0.082, x))

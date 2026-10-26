@@ -20,6 +20,10 @@ func _init() -> void:
 func _run() -> void:
 	_source = OS.get_environment("RL_GROOM_SOURCE")
 	_folder = OS.get_environment("RL_GROOM_OUTPUT")
+	if _source.is_empty():
+		_source = ProjectSettings.globalize_path("res://")
+	if _folder.is_empty():
+		_folder = ProjectSettings.globalize_path("res://test-artifacts/portrait-groom")
 	DirAccess.make_dir_recursive_absolute(_folder)
 	GLTFDocument.register_gltf_document_extension(Quantization.new())
 	root.size = Vector2i(640, 640)

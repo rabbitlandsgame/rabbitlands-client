@@ -6,6 +6,13 @@ uniform float density = 1.0;
 uniform float eye_height = 0.075;
 uniform int style = 5;
 
+float moustache_coverage(float x, float y) {
+	float centre = -0.053 - 0.011 * pow(x / 0.040, 2.0);
+	float mask = smoothstep(centre - 0.008, centre - 0.004, y);
+	mask *= 1.0 - smoothstep(centre + 0.003, centre + 0.007, y);
+	return mask * smoothstep(0.002, 0.007, x) * (1.0 - smoothstep(0.033, 0.043, x));
+}
+
 float full_beard_coverage(vec2 point, float z) {
 	float y = point.y - eye_height;
 	float x = abs(point.x);
@@ -15,10 +22,7 @@ float full_beard_coverage(vec2 point, float z) {
 	float jaw = 1.0 - smoothstep(cheek_top - 0.003, cheek_top + 0.004, y);
 	float mouth = length(vec2(point.x / 0.024, (y + 0.063) / 0.008));
 	jaw *= smoothstep(0.95, 1.18, mouth);
-	float moustache_y = -0.053 - 0.011 * pow(x / 0.040, 2.0);
-	float moustache = smoothstep(moustache_y - 0.008, moustache_y - 0.004, y);
-	moustache *= 1.0 - smoothstep(moustache_y + 0.003, moustache_y + 0.007, y);
-	moustache *= smoothstep(0.002, 0.007, x) * (1.0 - smoothstep(0.033, 0.043, x));
+	float moustache = moustache_coverage(x, y);
 	float soul = (1.0 - smoothstep(0.007, 0.012, x)) * smoothstep(-0.098, -0.088, y);
 	soul *= 1.0 - smoothstep(-0.082, -0.075, y);
 	float sideburn = smoothstep(0.056, 0.064, x) * (1.0 - smoothstep(0.075, 0.082, x));
@@ -44,8 +48,11 @@ float coverage(vec2 point, float z) {
 	float moustache = smoothstep(-0.066, -0.060, y) * (1.0 - smoothstep(-0.047, -0.040, y));
 	moustache *= 1.0 - smoothstep(0.030, 0.046, x);
 	float mask = max(jaw * lips_clear, moustache);
-	if (style == 2) { mask = moustache; }
-	if (style == 3) { mask = max(jaw * lips_clear * (1.0 - smoothstep(0.026, 0.042, x)), moustache); }
+	if (style == 2) { mask = moustache_coverage(x, y); }
+	if (style == 3) {
+		float chin = (1.0 - smoothstep(-0.081, -0.070, y)) * lips_clear;
+		mask = max(chin * (1.0 - smoothstep(0.026, 0.042, x)), moustache_coverage(x, y));
+	}
 	return clamp(mask * front * edge * bottom, 0.0, 1.0);
 }
 
