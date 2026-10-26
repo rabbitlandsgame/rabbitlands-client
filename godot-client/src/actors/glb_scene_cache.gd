@@ -40,11 +40,15 @@ const ArchivedModelPolicy := preload("res://src/actors/archived_model_policy.gd"
 const ResourceDiagnostics := preload("res://src/world/resource_diagnostics.gd")
 const PreparedContent := preload("res://src/world/prepared_content.gd")
 const PreparedLifecycle := preload("res://src/world/prepared_scene_lifecycle.gd")
+const GeometryCache := preload("res://src/world/map_geometry_cache.gd")
+const GeometrySources := preload("res://src/world/map_geometry_texture_sources.gd")
+const MapSceneCache := preload("res://src/world/map_scene_cache.gd")
 const WORLD_ASSET_ROOT := "res://assets/world/"
 
 static var _scenes: Dictionary = {}
 static var _failed: Dictionary = {}
 static var _prepared_entries: Dictionary = {}
+static var _geometry_entries: Dictionary = {}
 static var _direct_raw_scenes: Dictionary = {}
 static var _diagnostics_mutex := Mutex.new()
 static var _resource_timings: Dictionary = {}
@@ -65,6 +69,11 @@ static func prepare(paths: PackedStringArray) -> Dictionary:
 	var result: Dictionary = {}
 	for path: String in paths:
 		path = _canonical_path(path)
+		if not GeometryCache.cooking and PreparedContent.selected_mode() != "require-pilot" and GeometryCache.eligible("asset",path):
+			var geometry := GeometryCache.acquire("asset",path,FileAccess.get_sha256(path),{},MapSceneCache.is_enabled())
+			if str(geometry.status) == "hit":
+				result[path] = {"geometry_record":geometry}
+				continue
 		if PreparedContent.selected_mode() != "raw":
 			var record := PreparedContent.acquire("scene", path, FileAccess.get_sha256(path),
 				PreparedContent.scene_texture_token(path))
@@ -83,6 +92,15 @@ static func install_prepared(scenes: Dictionary) -> void:
 		if not _scenes.has(path):
 			var prepared: Variant = scenes[path]
 			if prepared is Dictionary:
+				if prepared.has("geometry_record"):
+					var geometry: Dictionary = prepared.geometry_record
+					if GeometryCache.revalidate(geometry):
+						_scenes[path] = geometry.resource
+						_geometry_entries[path] = geometry
+					else:
+						var raw := _build(path)
+						if raw != null: _scenes[path] = raw
+					continue
 				# Revalidate the current bytes/policy before publishing a worker record.
 				var began := Time.get_ticks_usec()
 				var verified := PreparedContent.acquire("scene", path, FileAccess.get_sha256(path),
@@ -112,6 +130,20 @@ static func _packed_scene(path: String, allow_prepared: bool) -> PackedScene:
 	path = _canonical_path(path)
 	if path.is_empty() or _failed.has(path):
 		return null
+	if _geometry_entries.has(path):
+		if allow_prepared: return _scenes.get(path) as PackedScene
+		var raw := _direct_raw_scenes.get(path) as PackedScene
+		if raw == null:
+			raw = _build(path)
+			if raw != null: _direct_raw_scenes[path] = raw
+		return raw
+	if allow_prepared and not _scenes.has(path) and not GeometryCache.cooking \
+			and PreparedContent.selected_mode() != "require-pilot" and GeometryCache.eligible("asset",path):
+		var geometry := GeometryCache.acquire("asset",path,FileAccess.get_sha256(path),{},MapSceneCache.is_enabled())
+		if str(geometry.status) == "hit":
+			_scenes[path] = geometry.resource
+			_geometry_entries[path] = geometry
+			return geometry.resource as PackedScene
 	if allow_prepared and (PreparedContent.selected_mode() != "raw" or _prepared_entries.has(path)):
 		var verification_began := Time.get_ticks_usec()
 		var verified := PreparedContent.acquire("scene", path, FileAccess.get_sha256(path),
@@ -154,7 +186,17 @@ static func instantiate(path: String) -> Node3D:
 	var instantiate_began := Time.get_ticks_usec()
 	var entry: Dictionary = _prepared_entries.get(_canonical_path(path), {})
 	var instance: Node3D
-	if entry.is_empty():
+	var geometry: Dictionary = _geometry_entries.get(_canonical_path(path),{})
+	if not geometry.is_empty():
+		instance = GeometryCache.instantiate(geometry,not bool(geometry.get("bound",false)) and not bool(geometry.get("prepared_on_main",false)))
+		if instance == null:
+			_geometry_entries.erase(_canonical_path(path))
+			_scenes.erase(_canonical_path(path))
+			packed = _build(_canonical_path(path))
+			if packed != null:
+				_scenes[_canonical_path(path)] = packed
+				instance = packed.instantiate() as Node3D
+	elif entry.is_empty():
 		instance = packed.instantiate() as Node3D
 	else:
 		instance = PreparedLifecycle.instantiate({"status": "hit", "resource": packed, "entry": entry})
@@ -173,6 +215,7 @@ static func clear() -> void:
 	_scenes.clear()
 	_failed.clear()
 	_prepared_entries.clear()
+	_geometry_entries.clear()
 	_direct_raw_scenes.clear()
 
 static func cached_scene_count() -> int:
@@ -202,6 +245,7 @@ static func _canonical_path(path: String) -> String:
 static func _build(path: String) -> PackedScene:
 	if ArchivedModelPolicy.is_retired_path(path):
 		return null
+	if GeometryCache.cooking: return _build_raw(path)
 	var imported := _imported_actor_scene(path)
 	if imported != null:
 		return imported
@@ -250,6 +294,7 @@ static func _build_raw(path: String) -> PackedScene:
 		return null
 	if world_asset and int(state.get_additional_data(WorldObjectImages.PREPARED)) < state.get_images().size():
 		build_texture_mipmaps(state)
+	GeometrySources.note(state,path)
 	operation_began = Time.get_ticks_usec()
 	var generated: Node = document.generate_scene(state, GltfAnimationFidelity.bake_fps(state))
 	_record_operation(&"gltf_generate_scene", operation_began)

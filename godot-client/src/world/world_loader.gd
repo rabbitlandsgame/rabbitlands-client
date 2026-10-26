@@ -18,6 +18,9 @@ const PreparedContent := preload("res://src/world/prepared_content.gd")
 const PreparedLifecycle := preload("res://src/world/prepared_scene_lifecycle.gd")
 const PreparedPlacements := preload("res://src/world/prepared_placements.gd")
 const GauntletSurfaceContrast := preload("res://src/world/gauntlet_surface_contrast.gd")
+const GeometryCache := preload("res://src/world/map_geometry_cache.gd")
+const GeometrySources := preload("res://src/world/map_geometry_texture_sources.gd")
+const MaterialOwnership := preload("res://src/world/prepared_material_ownership.gd")
 
 # Static-instance batching. A region such as Four Gates imports ~1700 mesh
 # nodes that between them reference only 42 meshes, so almost every draw call
@@ -147,6 +150,11 @@ var detached_build := false
 var detached_cache_enabled := true
 var _prepared_visuals: Dictionary = {}
 var _prepared_native: Dictionary = {}
+var _geometry_native: Dictionary = {}
+var _skip_geometry_lookup := false
+## Offline preparer only: capture the loader's pristine geometry before live
+## look passes and the separately prepared underground decoration instances.
+var geometry_capture := false
 var _skip_prepared_lookup := false
 var _deferred_stream_arrival := Vector3.INF
 var _main_stream_prime_requested := false
@@ -154,10 +162,12 @@ var _main_stream_prime_requested := false
 static func prepare_detached(path: String, cache_enabled: bool, visual_paths := PackedStringArray(), arrival := Vector3.INF, defer_stream_prime := false) -> WorldLoader:
 	var builder := WorldLoader.new()
 	builder.detached_build = true
-	builder._main_stream_prime_requested = defer_stream_prime or PreparedContent.selected_mode() != "raw"
+	builder._main_stream_prime_requested = defer_stream_prime or PreparedContent.selected_mode() != "raw" \
+		or (cache_enabled and OS.get_environment("ELORIA_NO_GEOMETRY_CACHE") != "1" \
+			and OS.get_environment("ELORIA_GEOMETRY_BACKGROUND_CHUNKS") == "1" and GeometryCache.scoped_map(path))
 	builder.detached_cache_enabled = cache_enabled
 	builder.load_world(path, arrival)
-	if builder.world_root != null or not builder._prepared_native.is_empty():
+	if builder.world_root != null or not builder._prepared_native.is_empty() or not builder._geometry_native.is_empty():
 		var start := Time.get_ticks_usec()
 		builder._prepared_visuals = GlbSceneCache.prepare(visual_paths)
 		builder.load_phases[&"visualPreload"] = Time.get_ticks_usec() - start
@@ -169,6 +179,24 @@ func release_world(detach := true, publish_prepared := true, admission_token: Di
 	# still owned. Stale/failed materialization must not acknowledge physical
 	# release while a CACHE_MODE_REUSE alias survives. Never instantiate here.
 	ResourceAdmission.retain_prepared(admission_token, _prepared_native.get("resource") as Resource)
+	var geometry_resource := _geometry_native.get("resource") as Resource
+	# Split preparation can already own pooled/imported textures before its
+	# unbound PackedScene references them. A fresh Resource-only carrier also
+	# covers stale jobs, without constructing Nodes or publishing textures.
+	if not _geometry_native.is_empty() or not _prepared_visuals.is_empty():
+		var carriers := Resource.new()
+		carriers.set_meta(&"rl_geometry_carriers", [_geometry_native, _prepared_visuals])
+		ResourceAdmission.retain_prepared(admission_token, carriers)
+	if publish_prepared and not _geometry_native.is_empty():
+		_materialize_geometry_world()
+	else:
+		_geometry_native.clear()
+	# Binding mutates this private template. Capture its final graph with a
+	# fresh carrier, rather than reusing a pre-binding root-group snapshot.
+	if geometry_resource != null:
+		var bound_carrier := Resource.new()
+		bound_carrier.set_meta(&"rl_geometry_bound_carrier", geometry_resource)
+		ResourceAdmission.retain_prepared(admission_token, bound_carrier)
 	if publish_prepared and not _prepared_native.is_empty():
 		_materialize_prepared_world()
 	else:
@@ -296,7 +324,7 @@ func load_world(manifest_path: String, arrival := Vector3.INF, wait_for_arrival 
 	# Prepared resources use an exact format/mip/engine variant. Source
 	# verification above remains mandatory. Workers publish Resources only;
 	# release_world() materializes their Node tree on the main thread.
-	if PreparedContent.selected_mode() != "raw" and not _skip_prepared_lookup:
+	if not geometry_capture and PreparedContent.selected_mode() != "raw" and not _skip_prepared_lookup:
 		var prepared := PreparedContent.acquire("world", manifest_path, package_digest,
 			VramTextures.cache_token(manifest.data, resolved_glb_path.get_base_dir()))
 		if str(prepared.status) == "hit":
@@ -310,7 +338,34 @@ func load_world(manifest_path: String, arrival := Vector3.INF, wait_for_arrival 
 		if str(prepared.status) == "reject":
 			load_failed.emit(["required_prepared_content: " + str(prepared.reason)])
 			return
-	if _load_from_cache(mark, began):
+	var geometry_scoped := GeometryCache.eligible("world",manifest_path)
+	# Warm background cells already reuse the raw prototype/image pools. Full
+	# native publication checks cost more there and move work onto the frame.
+	# Keep that proven worker path; foreground/whole-map loads use prepared
+	# geometry. The explicit switch retains the native worker qualification path.
+	var raw_background_chunk := detached_build and OS.get_thread_caller_id() != OS.get_main_thread_id() \
+		and manifest.asset_id().contains("__chunk_") and OS.get_environment("ELORIA_GEOMETRY_BACKGROUND_CHUNKS") != "1"
+	if not geometry_capture and geometry_scoped and not _skip_geometry_lookup and not raw_background_chunk:
+		_geometry_native = GeometryCache.acquire("world",manifest_path,package_digest,
+			GeometryCache.world_proof(manifest,package_digest),
+			detached_cache_enabled if detached_build else MapSceneCache.is_enabled())
+		if str(_geometry_native.get("status","")) == "hit":
+			load_phases.merge(_geometry_native.get("timings_us",{}),true)
+			cache_status = &"geometry"
+			cache_file = str(_geometry_native.entry.primary)
+			load_phases[&"total"] = Time.get_ticks_usec()-began
+			if OS.get_thread_caller_id() == OS.get_main_thread_id():
+				_materialize_geometry_world()
+			return
+		_geometry_native.clear()
+	if geometry_scoped and raw_background_chunk and _load_from_cache(mark,began):
+		return # Preserve an existing valid legacy entry on the original worker path.
+	if geometry_scoped:
+		# A missing maintenance result uses the raw loader. Do not rebuild the
+		# old texture-heavy scene cache during a scoped map's arrival.
+		cache_status = &"geometry_raw_background" if raw_background_chunk else &"geometry_raw"
+		cache_file = ""
+	elif _load_from_cache(mark,began):
 		return
 
 	var document: GLTFDocument = GLTFDocument.new()
@@ -336,6 +391,7 @@ func load_world(manifest_path: String, arrival := Vector3.INF, wait_for_arrival 
 			load_phases[StringName(counter)] = int(image_stats[counter])
 	ExternalTexturePool.share(state, manifest.data.get("externalResources", {}))
 	var mipped: int = _build_texture_mipmaps(state)
+	GeometrySources.note(state,resolved_glb_path)
 	print_debug("world_load stage=texture_mipmaps rebuilt=", mipped)
 	mark = _phase(&"mipmaps", mark)
 	var groups: int = _regroup_wide_siblings(state)
@@ -403,9 +459,13 @@ func load_world(manifest_path: String, arrival := Vector3.INF, wait_for_arrival 
 	mark = _phase(&"batching", mark)
 	# What the loader produced, before anything else in the client has been
 	# handed it. See `_snapshot_for_cache`.
-	if cache_status == &"miss" and not detached_build:
+	if geometry_capture or (cache_status == &"miss" and not detached_build):
 		_snapshot_for_cache()
 	mark = _phase(&"cacheSnapshot", mark)
+	if geometry_capture:
+		load_phases[&"total"] = mark-began
+		load_completed.emit(manifest)
+		return
 	# Look pass (a no-op with ELORIA_LOOK=0): paint the ground and
 	# the crowns. After the cache snapshot, so the cache keeps the loader's own
 	# materials.
@@ -434,7 +494,8 @@ func diagnostic_snapshot() -> Dictionary:
 		"verification": manifest.verification_diagnostics.duplicate(true) if manifest != null else {},
 		"cache_write_pending": _cache_write_countdown > 0,
 		"cache_snapshot_nodes": _cache_nodes.size(),
-		"prepared_visual_scenes": _prepared_visuals.size()}
+		"prepared_visual_scenes": _prepared_visuals.size(),
+		"geometry_cache":GeometryCache.snapshot()}
 	if is_instance_valid(world_root) and world_root is ContinentChunkStream:
 		result["chunks"] = (world_root as ContinentChunkStream).diagnostic_snapshot()
 	return result
@@ -479,6 +540,53 @@ static func publish_resident_stream(resident: Dictionary) -> bool:
 	resident["phases"] = phases
 	resident["resource_timings"] = timings
 	return true
+
+func _materialize_geometry_world() -> bool:
+	if OS.get_thread_caller_id() != OS.get_main_thread_id() or _geometry_native.is_empty(): return false
+	var began := Time.get_ticks_usec()
+	var record := _geometry_native
+	_geometry_native = {}
+	world_root = GeometryCache.instantiate(record,not bool(record.get("prepared_on_main",false)))
+	load_phases.merge(record.get("timings_us",{}),true)
+	if world_root == null:
+		var source := manifest.source_path
+		_skip_geometry_lookup = true
+		load_world(source)
+		_skip_geometry_lookup = false
+		return world_root != null
+	world_root.name = "ImportedWorld_"+manifest.asset_id()
+	add_child(world_root)
+	_resolve_batch_links()
+	var look_began := Time.get_ticks_usec()
+	LookGround.paint_loaded(world_root,manifest)
+	LookFoliage.paint_loaded(world_root,manifest)
+	GauntletSurfaceContrast.apply(manifest,world_root)
+	UndergroundScenery.apply(manifest,world_root)
+	MaterialOwnership.refresh(world_root)
+	load_phases[&"geometryLookBinding"] = Time.get_ticks_usec()-look_began
+	loaded_from_cache = true
+	load_phases[&"geometryPublish"] = Time.get_ticks_usec()-began
+	load_phases[&"total"] = int(load_phases.get(&"total",0))+int(load_phases[&"geometryPublish"])
+	load_completed.emit(manifest)
+	return true
+
+func take_geometry_snapshot() -> PackedScene:
+	if not geometry_capture or world_root == null or OS.get_thread_caller_id() != OS.get_main_thread_id(): return null
+	var undo := _restore_pristine()
+	var links: Array = []
+	for node: Node in _cache_nodes:
+		if not is_instance_valid(node): continue
+		node.owner = world_root
+		if node.has_meta(BATCH_META):
+			links.append([node,node.get_meta(BATCH_META)])
+			node.remove_meta(BATCH_META)
+	var lifetime := MaterialOwnership.strip_runtime_metadata(world_root)
+	var packed := PackedScene.new()
+	var error := packed.pack(world_root)
+	MaterialOwnership.restore_runtime_metadata(lifetime)
+	for row: Array in links: row[0].set_meta(BATCH_META,row[1])
+	_undo_pristine(undo)
+	return packed if error == OK else null
 
 func _materialize_prepared_world() -> bool:
 	if OS.get_thread_caller_id() != OS.get_main_thread_id():
@@ -1232,6 +1340,7 @@ static func _is_authored_base_terrain(node_name: StringName,
 
 func unload_world() -> void:
 	_prepared_native.clear()
+	_geometry_native.clear()
 	_deferred_stream_arrival = Vector3.INF
 	# A map change while a cache write is still queued drops the write: the
 	# tree it would pack is about to be freed, and the region will be built

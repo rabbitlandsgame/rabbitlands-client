@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "version": 1,
+  "maps": [
+    "boarsend", "brambleshaw", "coilmere", "greenlight", "hearthcroft",
+    "hornmere", "landfall", "pinebrow", "ravenhead", "reedfall", "ringholm",
+    "saltsound", "stagheath", "suncoil", "twinbrook", "warrenmead", "whitepeak",
+    "landfall_insides",
+    "amberwood_gauntlet", "whitehorn_gauntlet", "ssarathi_gauntlet",
+    "grey_moors_gauntlet", "crownwater_gauntlet", "sunmane_gauntlet",
+    "amethyst_gauntlet", "manymouth_gauntlet", "harrowcrag_gauntlet",
+    "resin_road_gauntlet", "drowned_arcades_gauntlet", "ice_stair_gauntlet",
+    "coil_causeway_gauntlet", "barrow_run_gauntlet", "red_canyon_gauntlet",
+    "resonant_cut_gauntlet", "bund_run_gauntlet"
+  ],
+  "groups": {
+    "landfall_continent": [
+      "boarsend", "brambleshaw", "coilmere", "greenlight", "hearthcroft",
+      "hornmere", "landfall", "pinebrow", "ravenhead", "reedfall", "ringholm",
+      "saltsound", "stagheath", "suncoil", "twinbrook", "warrenmead", "whitepeak"
+    ],
+    "landfall_insides": ["landfall_insides"],
+    "gauntlets": [
+      "amberwood_gauntlet", "whitehorn_gauntlet", "ssarathi_gauntlet",
+      "grey_moors_gauntlet", "crownwater_gauntlet", "sunmane_gauntlet",
+      "amethyst_gauntlet", "manymouth_gauntlet", "harrowcrag_gauntlet",
+      "resin_road_gauntlet", "drowned_arcades_gauntlet", "ice_stair_gauntlet",
+      "coil_causeway_gauntlet", "barrow_run_gauntlet", "red_canyon_gauntlet",
+      "resonant_cut_gauntlet", "bund_run_gauntlet"
+    ]
+  },
+  "asset_overlays": [
+    {
+      "owner": "landfall_insides",
+      "config": "res://data/world/underground-scenery.json"
+    }
+  ]
+}
