@@ -1,0 +1,1120 @@
+{
+  "manatee": {
+    "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/manatee.glb",
+    "sha256": "87b87a7d20718e7090a6fe0e17cb1a4a57ab2a9c3fdb8cfe90a3bcbd9c6e31f8",
+    "fitted_candidate_sha256": "7d059c816b3cf31717f89f2745c73afa6b46a629db052e3e66e2207a536ed5ae",
+    "baseline_sha256": "52ff82c70d0fc191e6a7d1ffcec75b2baaa41e07ce672217822046be44e09c54",
+    "height": 0.3896481226449361,
+    "bake_fps": 3072,
+    "bytes": 2607548,
+    "source_bytes": 2607588,
+    "human_approved": false,
+    "runtime_installed": true,
+    "concept": {
+      "movement": "Quiet buoyant swimming, driven by a coherent dorsoventral tail stroke, with restrained body pitch and relaxed steering flippers; faster travel increases the tail beat rather than adding a ground gait.",
+      "attack": "A defensive forward shoulder and muzzle shove, with the flippers bracing laterally and the tail providing the impulse, followed by a smooth recoil.",
+      "death": "The tail beat fades, the body settles forward onto separate belly patches, the chin lowers, and both flippers relax onto the bottom before a still hold."
+    },
+    "gaits": {
+      "Walk": {
+        "duration": 2.2,
+        "stride": 0.3506833103804425,
+        "stance_fraction": 0.0,
+        "touchdown": {},
+        "support_pattern": "buoyant swimming; no planted foot contact"
+      },
+      "Jog": {
+        "duration": 1.3,
+        "stride": 0.5260249655706638,
+        "stance_fraction": 0.0,
+        "touchdown": {},
+        "support_pattern": "buoyant swimming; no planted foot contact"
+      }
+    },
+    "locomotion_mode": "swimming",
+    "motion_style": "swimming",
+    "source_family": "Aquatic mammals",
+    "runtime_conformance": {
+      "maximum_surface_error_over_height": 0.0,
+      "maximum_normal_error": 0.0,
+      "numerically_flat_channels_normalized": 0,
+      "static_arrays_images_skin_and_rest_exact": true
+    }
+  },
+  "dolphin": {
+    "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/dolphin.glb",
+    "sha256": "b932f5a8aebd7c6702163e1eb07510e92fff9954028111901d842eb56158c49a",
+    "fitted_candidate_sha256": "2e0d10b0036169d6dd18c48dba4ec191159e7c0703e731ed7d28ebc283633c82",
+    "baseline_sha256": "594336902af90829e9f72d1d783e480878c5ce219145c091398e40a32e3ef595",
+    "height": 0.4443368431032169,
+    "bake_fps": 3072,
+    "bytes": 2227280,
+    "source_bytes": 2227320,
+    "human_approved": false,
+    "runtime_installed": true,
+    "concept": {
+      "movement": "A streamlined, level cruise becomes a quicker, deeper tail beat. The flukes drive the motion while the dorsal fin stays coherent with the trunk and the pectoral fins make restrained steering strokes.",
+      "attack": "An energetic rostrum-led body ram: a quick rearward load, a straight forward burst and a smooth return, with the fins swept clear of the face. No independent biting jaw is assumed.",
+      "death": "Propulsion fades, the body glides forward and sinks onto separate belly supports. The rostrum lowers, the flippers relax and the flukes settle without rolling the animal onto its side."
+    },
+    "gaits": {
+      "Walk": {
+        "duration": 1.6,
+        "stride": 0.6665052646548254,
+        "stance_fraction": 0.0,
+        "touchdown": {},
+        "support_pattern": "buoyant swimming; no planted foot contact"
+      },
+      "Jog": {
+        "duration": 0.95,
+        "stride": 0.9775410548270773,
+        "stance_fraction": 0.0,
+        "touchdown": {},
+        "support_pattern": "buoyant swimming; no planted foot contact"
+      }
+    },
+    "locomotion_mode": "swimming",
+    "motion_style": "swimming",
+    "source_family": "Aquatic mammals",
+    "runtime_conformance": {
+      "maximum_surface_error_over_height": 0.0,
+      "maximum_normal_error": 0.0,
+      "numerically_flat_channels_normalized": 0,
+      "static_arrays_images_skin_and_rest_exact": true
+    }
+  },
+  "caecilian": {
+    "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/caecilian.glb",
+    "sha256": "63b741a78e8fb4b470090416e65ff335777d5534dd5335793399fdaacc061ec0",
+    "fitted_candidate_sha256": "9a4734c936e242aa6c24c427a4d201b01df4d9c2eeed2fb6911ac917aaff80b2",
+    "baseline_sha256": "343f15ee49fb006bc44661878fba22e045931123b15a5d026325e7f2d017366b",
+    "height": 0.22802700519629987,
+    "bake_fps": 3072,
+    "bytes": 3729584,
+    "source_bytes": 3729620,
+    "human_approved": false,
+    "runtime_installed": true,
+    "concept": {
+      "movement": "A low, steady annulated body crawl driven by a traveling lateral wave. Faster travel increases the wave cadence and sweep while the skull remains forward and the underside stays supported.",
+      "attack": "A short front-body coil and lifted head lead to a forward nose/body jab and smooth recovery. The source has no independent jaw control, so no fabricated opening bite is used.",
+      "death": "The traveling wave fades into a relaxed shallow S. The front body and skull lower, the belly settles in several disjoint regions, and the entire body holds still without rolling."
+    },
+    "gaits": {
+      "Walk": {
+        "duration": 1.9,
+        "stride": 0.30783645701500484,
+        "stance_fraction": 0.0,
+        "touchdown": {},
+        "support_pattern": "Continuous ventral body support, no feet or planted-paw test"
+      },
+      "Jog": {
+        "duration": 1.05,
+        "stride": 0.41044860935333977,
+        "stance_fraction": 0.0,
+        "touchdown": {},
+        "support_pattern": "Continuous ventral body support, no feet or planted-paw test"
+      }
+    },
+    "locomotion_mode": "grounded",
+    "motion_style": "legless crawling",
+    "source_family": "Amphibious creatures",
+    "runtime_conformance": {
+      "maximum_surface_error_over_height": 0.0,
+      "maximum_normal_error": 0.0,
+      "numerically_flat_channels_normalized": 0,
+      "static_arrays_images_skin_and_rest_exact": true
+    }
+  },
+  "mudskipper": {
+    "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/mudskipper.glb",
+    "sha256": "24c77aa82b5232ffebcf1a272373c7420a78dc437810ce9747d44babe965582a",
+    "fitted_candidate_sha256": "5b2582c94816aa5e2087f1018572fefcf8178a58e3ef35343fed63a0fce45393",
+    "baseline_sha256": "65ca9d9950a4a3359f596ef407e5b98d4e1aff84a71214a7dcfec70c1696b803",
+    "height": 0.32617213952154916,
+    "bake_fps": 3072,
+    "bytes": 1845204,
+    "source_bytes": 1845244,
+    "human_approved": false,
+    "runtime_installed": true,
+    "concept": {
+      "movement": "A low, inquisitive fish uses alternating pectoral-fin crutches for a deliberate crawl. Faster travel becomes a compact paired-fin skip with a small body lift and restrained lateral tail assistance. The wide eyes and head stay forward.",
+      "attack": "A quick pectoral brace, raised front body and short forward head/body bump, followed by a low recovery. No independent jaw is assumed.",
+      "death": "Propulsion and tail sway fade, the body settles forward onto separate belly and chin patches, the pectoral fins relax outward and the tail lowers without a side roll."
+    },
+    "gaits": {
+      "Walk": {
+        "duration": 1.55,
+        "stride": 0.16129032258064518,
+        "stance_fraction": 0.62,
+        "touchdown": {
+          "left": 0.0,
+          "right": 0.5
+        },
+        "stroke_native": 0.1,
+        "support_pattern": "Pectoral fin edge contact; alternating crawl and paired recovery skip"
+      },
+      "Jog": {
+        "duration": 0.85,
+        "stride": 0.30952380952380953,
+        "stance_fraction": 0.42,
+        "touchdown": {
+          "left": 0.0,
+          "right": 0.0
+        },
+        "stroke_native": 0.13,
+        "support_pattern": "Pectoral fin edge contact; alternating crawl and paired recovery skip"
+      }
+    },
+    "locomotion_mode": "grounded",
+    "motion_style": "pectoral fin crawl",
+    "source_family": "Amphibious creatures",
+    "runtime_conformance": {
+      "maximum_surface_error_over_height": 0.0,
+      "maximum_normal_error": 0.0,
+      "numerically_flat_channels_normalized": 0,
+      "static_arrays_images_skin_and_rest_exact": true
+    }
+  },
+  "abyssal_armored_fish": {
+    "runtime_path": "godot-client/assets/actors/native/creatures/abyssal_armored_fish.glb",
+    "sha256": "e381cfec066a6018550852d93b2cd1d1adf1250dca2c7061b5e974b6c761a7be",
+    "fitted_candidate_sha256": "7e3dc10e684f0789df7acb4df1f15a20f51c834a9eb1cf253ad7e85160b81f69",
+    "baseline_sha256": "a0509bedaaa71d144371a9844d48fe0e5d5d992fb32359e6dc06048c994e612a",
+    "height": 1.6999153924109802,
+    "bake_fps": 3072,
+    "bytes": 2760452,
+    "source_bytes": 2760496,
+    "human_approved": false,
+    "runtime_installed": true,
+    "concept": {
+      "movement": "An armored deep-water fish cruises with a steady heavy trunk and deliberate lateral caudal strokes. Faster travel strengthens the posterior wave while the head, eye lenses and plated torso remain coherent; pectoral fins steer rather than walk.",
+      "attack": "A short backward load and forceful straight forward armored-head/body ram, with pectorals swept clear of the face. No invented jaw opening is assumed.",
+      "death": "Tail propulsion fades and the fish drifts down into a supported forward rest on separate head and belly regions. Fins fold or relax clear of the bottom rather than holding the body up on a single fin tip; the natural upward tail silhouette is retained when clearance allows."
+    },
+    "gaits": {
+      "Walk": {
+        "duration": 1.7,
+        "stride": 2.124894240513725,
+        "stance_fraction": 0.0,
+        "touchdown": {},
+        "support_pattern": "Buoyant swimming, no planted-foot test"
+      },
+      "Jog": {
+        "duration": 0.9,
+        "stride": 3.2298392455808624,
+        "stance_fraction": 0.0,
+        "touchdown": {},
+        "support_pattern": "Buoyant swimming, no planted-foot test"
+      }
+    },
+    "locomotion_mode": "swimming",
+    "motion_style": "buoyant lateral-tail swimming",
+    "source_family": "Fish and rays",
+    "runtime_conformance": {
+      "maximum_surface_error_over_height": 0.0,
+      "maximum_normal_error": 0.0,
+      "numerically_flat_channels_normalized": 0,
+      "static_arrays_images_skin_and_rest_exact": true
+    }
+  },
+  "hammerhead_shark": {
+    "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/hammerhead_shark.glb",
+    "sha256": "136ef7219ad52f72e90ac0ca065abe6a7095c18db6ff4629e1cd08dbd12cf59d",
+    "fitted_candidate_sha256": "aa4c48e98eed2b4d2eee574b483edbc18f3dbb470d4a5a1251f9497448f34205",
+    "baseline_sha256": "1e377487b5a6bbd7926bf22d13cc95411848f5e65f1a82c888a70cf04aaa41be",
+    "height": 0.4804695274492073,
+    "bake_fps": 3072,
+    "bytes": 1848728,
+    "source_bytes": 1848768,
+    "human_approved": false,
+    "runtime_installed": true,
+    "concept": {
+      "movement": "A streamlined, level patrol driven by a smooth lateral wave increasing toward the caudal fin. The hammer-shaped head stays forward and steady, with small pectoral steering adjustments. Faster travel strengthens the tail stroke and cadence rather than bouncing the trunk.",
+      "attack": "A short rearward load and strong forward torpedo lunge, with a small downward catch of the broad head and restrained recovery. The source has no independent jaw control, so no fabricated jaw opening is used.",
+      "death": "Tail propulsion fades as the animal drifts forward and lowers onto separate belly, pelvic and broad chin supports. Pectoral and small ventral fins release clear of the bottom, with a stable forward rest rather than an axial roll."
+    },
+    "gaits": {
+      "Walk": {
+        "duration": 1.65,
+        "stride": 0.7687512439187317,
+        "stance_fraction": 0.0,
+        "touchdown": {},
+        "support_pattern": "Buoyant swimming, no planted-foot test"
+      },
+      "Jog": {
+        "duration": 0.82,
+        "stride": 1.1050799131331768,
+        "stance_fraction": 0.0,
+        "touchdown": {},
+        "support_pattern": "Buoyant swimming, no planted-foot test"
+      }
+    },
+    "locomotion_mode": "swimming",
+    "motion_style": "buoyant lateral-tail swimming",
+    "source_family": "Fish and rays",
+    "runtime_conformance": {
+      "maximum_surface_error_over_height": 0.0,
+      "maximum_normal_error": 0.0,
+      "numerically_flat_channels_normalized": 0,
+      "static_arrays_images_skin_and_rest_exact": true
+    }
+  },
+  "sturgeon": {
+    "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/sturgeon.glb",
+    "sha256": "6aa18dd1ba2d77901c72545abaee4e0a0706161cc74d5dfb530cc84e1eaa194e",
+    "fitted_candidate_sha256": "f32822c74e8b23c236bb4a7257054f2256a7957e43cf5ff3318975cfc6f803c9",
+    "baseline_sha256": "bb34a2ce4ca152a5cd3895c101eca5180f22da802c34a430ebf4d0792788fa47",
+    "height": 0.29003941384812226,
+    "bake_fps": 3072,
+    "bytes": 3274764,
+    "source_bytes": 3274804,
+    "human_approved": false,
+    "runtime_installed": true,
+    "concept": {
+      "movement": "A low, deliberate bottom-cruise with a restrained armored forebody, continuous lateral caudal propulsion and small pectoral trim. Pursuit increases cadence and tail amplitude without vertical hopping.",
+      "attack": "The pointed rostrum leads a low forward scooping body thrust. Load back briefly, lift the snout slightly through the forward surge, then recover without inventing a mouth hinge.",
+      "death": "Propulsion fades as the long body drifts forward onto separate pelvic, central belly, chest and chin patches. Pectorals/pelvic fins, the two ventral blades, barbels and caudal panel release clear so the body is supported rather than suspended on appendages."
+    },
+    "gaits": {
+      "Walk": {
+        "duration": 1.85,
+        "stride": 0.4205571500797773,
+        "stance_fraction": 0.0,
+        "touchdown": {},
+        "support_pattern": "Buoyant swimming, no planted-foot test"
+      },
+      "Jog": {
+        "duration": 0.94,
+        "stride": 0.6235847397734628,
+        "stance_fraction": 0.0,
+        "touchdown": {},
+        "support_pattern": "Buoyant swimming, no planted-foot test"
+      }
+    },
+    "locomotion_mode": "swimming",
+    "motion_style": "buoyant lateral-tail swimming",
+    "source_family": "Fish and rays",
+    "runtime_conformance": {
+      "maximum_surface_error_over_height": 0.0,
+      "maximum_normal_error": 0.0,
+      "numerically_flat_channels_normalized": 0,
+      "static_arrays_images_skin_and_rest_exact": true
+    }
+  },
+  "seahorse": {
+    "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/seahorse.glb",
+    "sha256": "27c94e1343cd96eb23b81cee83bb7f489e97b87a6951a6ffceb55a30f01acaf0",
+    "fitted_candidate_sha256": "e44d4ab4459e44ef7f20876b4db8a1e5a7856373f43f906204d56ed349da4cd3",
+    "baseline_sha256": "3204950cd96cf4ebd9bc74b97750cc1cf88e5ceb20534a607d01298da91e3bb4",
+    "height": 1.000000690076045,
+    "bake_fps": 3072,
+    "bytes": 1819000,
+    "source_bytes": 1819052,
+    "human_approved": false,
+    "runtime_installed": true,
+    "concept": {
+      "movement": "Upright buoyant hover and gentle forward drift with paired side-fin fanning, quiet plated trunk and a small sagittal tail curl. Faster travel leans forward and increases fin cadence rather than adopting a lateral fish tail stroke.",
+      "attack": "A short upper-body load followed by a quick forward snout jab and recovery, keeping the tubular muzzle and eyes coherent.",
+      "death": "Fin fanning fades while the armored trunk tips forward into a supported rest, the neck and skull release and the trailing tail lays down without an axial side roll."
+    },
+    "gaits": {
+      "Walk": {
+        "duration": 2.0,
+        "stride": 0.48000033123650154,
+        "stance_fraction": 0.0,
+        "touchdown": {},
+        "support_pattern": "Upright buoyant fin swimming, no planted-foot test",
+        "fin_cycles": 6
+      },
+      "Jog": {
+        "duration": 1.1,
+        "stride": 0.8800006072669195,
+        "stance_fraction": 0.0,
+        "touchdown": {},
+        "support_pattern": "Upright buoyant fin swimming, no planted-foot test",
+        "fin_cycles": 7
+      }
+    },
+    "locomotion_mode": "swimming",
+    "motion_style": "upright buoyant paired-fin swimming",
+    "source_family": "Fish and rays",
+    "runtime_conformance": {
+      "maximum_surface_error_over_height": 0.0,
+      "maximum_normal_error": 0.0,
+      "numerically_flat_channels_normalized": 0,
+      "static_arrays_images_skin_and_rest_exact": true
+    }
+  },
+  "luminous_manta_ray": {
+    "runtime_path": "godot-client/assets/actors/native/creatures/luminous_manta_ray.glb",
+    "sha256": "928ca234659593d12392067b539517ebf7c322ff312dbb633980881afb511e01",
+    "fitted_candidate_sha256": "eaaa512742e16b4d41dd6044a7711b8432a357c1d020c276a58a6f69ca242cef",
+    "baseline_sha256": "c729ca016aa4d168486a197276d6e4293cb2604b78115e05c576f45a08750e87",
+    "height": 1.6993342265220537,
+    "bake_fps": 3072,
+    "bytes": 2843656,
+    "source_bytes": 2843700,
+    "human_approved": false,
+    "runtime_installed": true,
+    "concept": {
+      "movement": "Broad symmetric pectoral-disk strokes drive a slow luminous glide. Faster travel increases spanwise wave amplitude/cadence while the central disk and face remain quiet and the curved ornamental tail trails with sagittal lag.",
+      "attack": "A brief wing load leads into a forward mantle-and-cephalic-lobe surge, then a controlled recovery. The face, eyes, mouth rim and long lobes remain coherent.",
+      "death": "The central disk settles level onto separate underside regions. The wide fins relax outward and the long vertical tail curve and upper ornamental fan lay down behind the body without rolling the main disk onto its side."
+    },
+    "gaits": {
+      "Walk": {
+        "duration": 2.1,
+        "stride": 1.8692676491742592,
+        "stance_fraction": 0.0,
+        "touchdown": {},
+        "support_pattern": "Buoyant pectoral-disk swimming, no planted-foot test"
+      },
+      "Jog": {
+        "duration": 1.15,
+        "stride": 3.0588016077396967,
+        "stance_fraction": 0.0,
+        "touchdown": {},
+        "support_pattern": "Buoyant pectoral-disk swimming, no planted-foot test"
+      }
+    },
+    "locomotion_mode": "swimming",
+    "motion_style": "buoyant paired pectoral-disk swimming",
+    "source_family": "Fish and rays",
+    "runtime_conformance": {
+      "maximum_surface_error_over_height": 0.0,
+      "maximum_normal_error": 0.0,
+      "numerically_flat_channels_normalized": 0,
+      "static_arrays_images_skin_and_rest_exact": true
+    }
+  },
+  "octopus": {
+    "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/octopus.glb",
+    "sha256": "db11fdb99503896770892d3a3514a8e8dd3063610ff12fa697ba33f608f9520f",
+    "fitted_candidate_sha256": "5bcd71112cf4cc645ed43fdab80619239691ce4227051d8add1b2558ff0cd8af",
+    "baseline_sha256": "fb5be70e1f2c2fb62fb18bfe83aa4c5c4856a1e4c169b66fc7d132aa3b031fa1",
+    "height": 0.3789071947958476,
+    "bake_fps": 3072,
+    "bytes": 9031260,
+    "source_bytes": 9031312,
+    "human_approved": false,
+    "runtime_installed": true,
+    "concept": {
+      "movement": "Buoyant ten-arm sculling: a restrained mantle pulse accompanies staggered soft arm waves. Faster travel increases the arm wave and cadence, while the face stays forward and the mantle keeps its volume. This is aquatic swimming rather than a planted terrestrial walk.",
+      "attack": "The forward pair of arms coil upward in preparation, then extend into a broad forward grasp with a short mantle surge; the other six arms brace and trail without passing through the head.",
+      "death": "The soft central head and mantle settle onto separate real underside supports. All ten visible arms relax and splay onto the bottom with preserved curve lengths, without a rigid sideways fall or continued tip writhing."
+    },
+    "gaits": {
+      "Walk": {
+        "duration": 2.0,
+        "stride": 0.3031257558366781,
+        "stance_fraction": 0.0,
+        "touchdown": {},
+        "support_pattern": "Buoyant ten-arm sculling, no planted-foot test"
+      },
+      "Jog": {
+        "duration": 1.1,
+        "stride": 0.5494154324539791,
+        "stance_fraction": 0.0,
+        "touchdown": {},
+        "support_pattern": "Buoyant ten-arm sculling, no planted-foot test"
+      }
+    },
+    "locomotion_mode": "swimming",
+    "motion_style": "buoyant ten-arm sculling",
+    "source_family": "Cephalopods and jellyfish",
+    "runtime_conformance": {
+      "maximum_surface_error_over_height": 0.0,
+      "maximum_normal_error": 0.0,
+      "numerically_flat_channels_normalized": 0,
+      "static_arrays_images_skin_and_rest_exact": true
+    }
+  },
+  "cuttlefish": {
+    "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/cuttlefish.glb",
+    "sha256": "0af98400d4f41def465f62fbe637fc7bf33f28318457426a1ac7e6f34726dade",
+    "fitted_candidate_sha256": "579185d7474557508dfec3323a0eaa1591cd0c49db1b006a654362d0adbc5319",
+    "baseline_sha256": "88d022ebdd9363b40001c5c24b82ca94f69bb2761ceecb04a433e6d40be93480",
+    "height": 0.3349613389648306,
+    "bake_fps": 3072,
+    "bytes": 10866436,
+    "source_bytes": 10939668,
+    "human_approved": false,
+    "runtime_installed": true,
+    "concept": {
+      "movement": "A calm buoyant glide driven by traveling waves along both lateral fin ribbons. Faster travel increases fin-wave cadence and amplitude while the mantle stays quiet and all eleven visible source arms follow with restrained lag.",
+      "attack": "The two measured clubbed tentacles draw up, then extend into a paired forward snap with a short mantle surge. The shorter arms open slightly, while the complete eyes and cranial cap stay coherent.",
+      "death": "The mantle and real cranial oral underside settle separately onto the bottom. Both fin ribbons relax and all visible arms release into a supported still ending without a sideways roll or spinning tips."
+    },
+    "gaits": {
+      "Walk": {
+        "duration": 2.0,
+        "stride": 0.3349613389648306,
+        "stance_fraction": 0.0,
+        "touchdown": {},
+        "support_pattern": "Buoyant lateral ribbon-fin swimming; no planted-foot test"
+      },
+      "Jog": {
+        "duration": 1.15,
+        "stride": 0.5526862092919704,
+        "stance_fraction": 0.0,
+        "touchdown": {},
+        "support_pattern": "Buoyant lateral ribbon-fin swimming; no planted-foot test"
+      }
+    },
+    "locomotion_mode": "swimming",
+    "motion_style": "buoyant lateral ribbon-fin swimming",
+    "source_family": "Cephalopods and jellyfish",
+    "runtime_conformance": {
+      "maximum_surface_error_over_height": 2.4858608191684284e-16,
+      "maximum_normal_error": 2.5438405243138006e-16,
+      "numerically_flat_channels_normalized": 83,
+      "static_arrays_images_skin_and_rest_exact": true
+    }
+  },
+  "nautilus": {
+    "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/nautilus.glb",
+    "sha256": "a0780177a07b4dd0958fb2e0d39f2740b54a3344ceb4e4167cf5a9a3e6c780b3",
+    "fitted_candidate_sha256": "6fbd24e67c8e6c7a7f2ad93613cc38d7770f346a06f8d3d2e8497f558a32845c",
+    "baseline_sha256": "d09465affbb80108b46381fd78201fd7ac007d5d1b24cc4e891a9429160ff50d",
+    "height": 0.6035151763155449,
+    "bake_fps": 3072,
+    "bytes": 10406656,
+    "source_bytes": 10572420,
+    "human_approved": false,
+    "runtime_installed": true,
+    "concept": {
+      "movement": "A rigid spiral shell glides buoyantly with a restrained jet-like pulse and gentle arm-fan lag. Faster travel increases pulse and reach cadence without bending the shell or inventing lateral fins.",
+      "attack": "The hood braces over the coherent eyes while the measured forward arm fan loads and unfurls into a short forward grasp, carried by a brief whole-body surge.",
+      "death": "The heavy rigid shell tips onto a measured broad-side bearing facet. The head droops separately and the common arm web releases into a relaxed supported arm pile. The shell shape and spiral ornaments stay rigid, with no continued tip writhing."
+    },
+    "gaits": {
+      "Walk": {
+        "duration": 2.3,
+        "stride": 0.45263638223665864,
+        "stance_fraction": 0.0,
+        "touchdown": {},
+        "support_pattern": "Buoyant jet-like shell glide; no planted-foot test"
+      },
+      "Jog": {
+        "duration": 1.3,
+        "stride": 0.8449212468417627,
+        "stance_fraction": 0.0,
+        "touchdown": {},
+        "support_pattern": "Buoyant jet-like shell glide; no planted-foot test"
+      }
+    },
+    "locomotion_mode": "swimming",
+    "motion_style": "buoyant rigid-shell pulsed swimming",
+    "source_family": "Cephalopods and jellyfish",
+    "runtime_conformance": {
+      "maximum_surface_error_over_height": 1.0283644267254071e-16,
+      "maximum_normal_error": 3.1401849173675503e-16,
+      "numerically_flat_channels_normalized": 90,
+      "static_arrays_images_skin_and_rest_exact": true
+    }
+  },
+  "levitating_jellyfish": {
+    "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/levitating_jellyfish.glb",
+    "sha256": "387f9c5cb4353f046f4049e8b4baf9a02c4e37e4026aa8a604d9ede0db81bd2a",
+    "fitted_candidate_sha256": "d65f8140fabc839bd8354fc92cc970ec8a874213b3a4aa6f71c3b70518d7acd8",
+    "baseline_sha256": "19669b347e6dba20403fcb6a71c1667f0ddeac0c59064c7036bea81b57528e5a",
+    "height": 1.0000009146784445,
+    "bake_fps": 3072,
+    "bytes": 8799020,
+    "source_bytes": 9721004,
+    "human_approved": false,
+    "runtime_installed": true,
+    "concept": {
+      "movement": "Soft bell contraction and recovery drive a buoyant forward glide, with low trailing tentacle lag. Faster travel has stronger shorter pulses, not a planted walking step.",
+      "attack": "A short braced bell contraction drives a forward-reaching cast of the front trailing tentacles, with a coherent inner-arm recoil.",
+      "death": "The bell loses buoyancy and compresses downward while every actual tentacle and inner oral arm relaxes outward onto the bottom. A held still ending replaces rotational tumbling."
+    },
+    "gaits": {
+      "Walk": {
+        "duration": 2.0,
+        "stride": 0.7000006402749112,
+        "stance_fraction": 0.0,
+        "touchdown": {},
+        "support_pattern": "Buoyant bell pulse; no planted-foot test"
+      },
+      "Jog": {
+        "duration": 1.15,
+        "stride": 1.300001189081978,
+        "stance_fraction": 0.0,
+        "touchdown": {},
+        "support_pattern": "Buoyant bell pulse; no planted-foot test"
+      }
+    },
+    "locomotion_mode": "swimming",
+    "motion_style": "buoyant soft-bell pulsed glide",
+    "source_family": "Cephalopods and jellyfish",
+    "runtime_conformance": {
+      "maximum_surface_error_over_height": 0.0,
+      "maximum_normal_error": 0.0,
+      "numerically_flat_channels_normalized": 107,
+      "static_arrays_images_skin_and_rest_exact": true
+    }
+  },
+  "bronze_tide_crab": {
+    "runtime_path": "godot-client/assets/actors/native/creatures/bronze_tide_crab.glb",
+    "sha256": "706a3f5f574789caac86f7b5a89f29254b07df263773f8d202734ea955c068ad",
+    "fitted_candidate_sha256": "75e5a1ee8564035148838110247a5ef86422c52381537aa80cc61f40d3e826f3",
+    "baseline_sha256": "cb0fd37ccd4b700aa8178e07e8452d4dc74548dc775a305d4c18896f0ff2c0f2",
+    "height": 1.7000008508838695,
+    "bake_fps": 3072,
+    "bytes": 3160520,
+    "source_bytes": 3160568,
+    "human_approved": false,
+    "runtime_installed": true,
+    "concept": {
+      "movement": "A low, steady forward crab scuttle with a cautious five-group wave gait. The supplied asymmetric right fore-fork keeps its two pointed blades together, with six actual contacts and a coherent armored carapace. Faster travel lengthens reach and increases cadence.",
+      "attack": "The crab braces its pointed legs, draws a claw back, then snaps it forward; a following mirrored claw snap gives a short aggressive double strike. Actual movable fingers close coherently around their measured hinge.",
+      "death": "The carapace drops onto a measured balanced underside bearing, the walking limbs relax outward and both claws settle in front. The final pose is held still."
+    },
+    "gaits": {
+      "Walk": {
+        "duration": 1.45,
+        "stride": 0.5100002552651608,
+        "stance_fraction": 0.84,
+        "touchdown": {
+          "fore_fork_right": 0.2,
+          "mid_right": 0.6,
+          "hind_right": 0.8,
+          "fore_left": 0.0,
+          "hind_left": 0.4
+        },
+        "support_pattern": "Five-group wave gait; six actual pointed blades, shared fore-fork contacts move together."
+      },
+      "Jog": {
+        "duration": 0.88,
+        "stride": 0.7140003573712251,
+        "stance_fraction": 0.82,
+        "touchdown": {
+          "fore_fork_right": 0.2,
+          "mid_right": 0.6,
+          "hind_right": 0.8,
+          "fore_left": 0.0,
+          "hind_left": 0.4
+        },
+        "support_pattern": "Five-group wave gait; six actual pointed blades, shared fore-fork contacts move together."
+      }
+    },
+    "locomotion_mode": "grounded",
+    "motion_style": "grounded five-group crab wave gait",
+    "source_family": "Crabs and lobster",
+    "runtime_conformance": {
+      "maximum_surface_error_over_height": 0.0,
+      "maximum_normal_error": 0.0,
+      "numerically_flat_channels_normalized": 0,
+      "static_arrays_images_skin_and_rest_exact": true
+    }
+  },
+  "crystal_shore_crab": {
+    "runtime_path": "godot-client/assets/actors/native/creatures/crystal_shore_crab.glb",
+    "sha256": "a56b2eab67b659dfbd27055b5b4c6d2862590e4142505e3556f8228981e05565",
+    "fitted_candidate_sha256": "d53109089e2a83e9c51415a03ae7bfd5eb36e3a44b4efa4ae3107f0cbd420e3f",
+    "baseline_sha256": "ed55be44a6a32781d8c3bb3be77baa7925679460e4ade46520726753d291d936",
+    "height": 1.7000016258764785,
+    "bake_fps": 3072,
+    "bytes": 3776580,
+    "source_bytes": 3776628,
+    "human_approved": false,
+    "runtime_installed": true,
+    "concept": {
+      "movement": "A compact eight-blade shore crab creeps with an overlapping alternating wave. The inner armor stays braced while the outer jointed limbs rotate without swelling; fast scuttle increases cadence and reach with a level shell.",
+      "attack": "A short braced double pincer thrust: right claw opens and snaps ahead, then the left follows, keeping all walking blades planted.",
+      "death": "The rigid shell sinks onto its actual underside as the eight blades unfold outward. Both claws rest in front and the final collapsed silhouette holds still."
+    },
+    "gaits": {
+      "Walk": {
+        "duration": 1.3,
+        "stride": 0.40800039021035484,
+        "stance_fraction": 0.83,
+        "touchdown": {
+          "fore_right": 0.125,
+          "mid_fore_right": 0.375,
+          "mid_hind_right": 0.625,
+          "hind_right": 0.875,
+          "fore_left": 0.625,
+          "mid_fore_left": 0.875,
+          "mid_hind_left": 0.125,
+          "hind_left": 0.375
+        },
+        "support_pattern": "Overlapping alternating wave; eight separate actual pointed blade contacts."
+      },
+      "Jog": {
+        "duration": 0.82,
+        "stride": 0.5780005527980028,
+        "stance_fraction": 0.8,
+        "touchdown": {
+          "fore_right": 0.125,
+          "mid_fore_right": 0.375,
+          "mid_hind_right": 0.625,
+          "hind_right": 0.875,
+          "fore_left": 0.625,
+          "mid_fore_left": 0.875,
+          "mid_hind_left": 0.125,
+          "hind_left": 0.375
+        },
+        "support_pattern": "Overlapping alternating wave; eight separate actual pointed blade contacts."
+      }
+    },
+    "locomotion_mode": "grounded",
+    "motion_style": "grounded eight-blade crab wave gait",
+    "source_family": "Crabs and lobster",
+    "runtime_conformance": {
+      "maximum_surface_error_over_height": 0.0,
+      "maximum_normal_error": 0.0,
+      "numerically_flat_channels_normalized": 0,
+      "static_arrays_images_skin_and_rest_exact": true
+    }
+  },
+  "delta_mud_crab": {
+    "runtime_path": "godot-client/assets/actors/native/creatures/delta_mud_crab.glb",
+    "sha256": "6c22642c12db8c5f84adc1ffd07e9c0acc05e3f102e51b59435b3fe78752c1e2",
+    "fitted_candidate_sha256": "cad5098dd7924efa7c9dad51a9f03883aed79513b90a5fafa817a9552230e9a0",
+    "baseline_sha256": "fa8ad0c847e0fb29db3bf1d5b29662e18be95fff64815ce45a47f92310a6b59b",
+    "height": 1.700000491119343,
+    "bake_fps": 3072,
+    "bytes": 3486492,
+    "source_bytes": 3486536,
+    "human_approved": false,
+    "runtime_installed": true,
+    "concept": {
+      "movement": "A broad heavy mud crab advances with a low, measured seven-support wave. Its asymmetric supplied legs reach equally through long rigid sections while the spiked shell and face stay coherent. The faster scuttle increases reach and cadence without bounce.",
+      "attack": "Two weighty forward pincer snaps, right then left, open widely before closing. The wide decorated palms and real movable fingers remain coherent while all walking supports brace.",
+      "death": "The spiked shell settles onto its real underside bearing, seven rigid walking branches relax outward and both decorated pincers come to rest in front. The supported ending holds still."
+    },
+    "gaits": {
+      "Walk": {
+        "duration": 1.6,
+        "stride": 0.4760001375134161,
+        "stance_fraction": 0.86,
+        "touchdown": {
+          "fore_left": 0,
+          "mid_fore_right": 0.14285714285714285,
+          "mid_hind_left": 0.2857142857142857,
+          "hind_right": 0.42857142857142855,
+          "mid_fore_left": 0.5714285714285714,
+          "mid_hind_right": 0.7142857142857143,
+          "hind_left": 0.8571428571428571
+        },
+        "support_pattern": "Seven-group overlapping wave; seven actual pointed terminals of continuous rigid lower sections."
+      },
+      "Jog": {
+        "duration": 1.02,
+        "stride": 0.6800001964477372,
+        "stance_fraction": 0.88,
+        "touchdown": {
+          "fore_left": 0,
+          "mid_fore_right": 0.14285714285714285,
+          "mid_hind_left": 0.2857142857142857,
+          "hind_right": 0.42857142857142855,
+          "mid_fore_left": 0.5714285714285714,
+          "mid_hind_right": 0.7142857142857143,
+          "hind_left": 0.8571428571428571
+        },
+        "support_pattern": "Seven-group overlapping wave; seven actual pointed terminals of continuous rigid lower sections."
+      }
+    },
+    "locomotion_mode": "grounded",
+    "motion_style": "grounded seven-branch mud-crab wave gait",
+    "source_family": "Crabs and lobster",
+    "runtime_conformance": {
+      "maximum_surface_error_over_height": 0.0,
+      "maximum_normal_error": 0.0,
+      "numerically_flat_channels_normalized": 0,
+      "static_arrays_images_skin_and_rest_exact": true
+    }
+  },
+  "glacier_crab": {
+    "runtime_path": "godot-client/assets/actors/native/creatures/glacier_crab.glb",
+    "sha256": "7260cc6c8ef7e6dacad168512244e91bb9731395b0b3ac3be19728d76dda0410",
+    "fitted_candidate_sha256": "6f78ad3d5ea65ffd438a1f544094e2f6dc7e11993fa0b9437a107645336d4183",
+    "baseline_sha256": "ac02ed5648f43e90b661730ec0a807698e65e6540b0651724b9b82513f2dca14",
+    "height": 1.700004453305617,
+    "bake_fps": 3072,
+    "bytes": 2935892,
+    "source_bytes": 2935936,
+    "human_approved": false,
+    "runtime_installed": true,
+    "concept": {
+      "movement": "A tall faceted ice crab advances on alternating support tripods with a steady layered shell. Sharp outside blades take equal steps; the faster scuttle increases cadence and reach.",
+      "attack": "The two inner crescent cutters spread and lift before thrusting forward and down in a quick right-left ice-blade shear. Whole curved blades move around their actual hinges; no extra finger motion is invented.",
+      "death": "The rigid ice shell descends onto a real underside bearing, the six outside blades relax outward and the two inner cutters settle in front. The layered carapace remains coherent and the supported ending holds still."
+    },
+    "gaits": {
+      "Walk": {
+        "duration": 1.4,
+        "stride": 0.4420011578594604,
+        "stance_fraction": 0.72,
+        "touchdown": {
+          "fore_left": 0.0,
+          "mid_right": 0.0,
+          "hind_left": 0.0,
+          "fore_right": 0.5,
+          "mid_left": 0.5,
+          "hind_right": 0.5
+        },
+        "support_pattern": "Alternating tripods of six actual outside pointed walking blades."
+      },
+      "Jog": {
+        "duration": 0.95,
+        "stride": 0.6120016031900221,
+        "stance_fraction": 0.66,
+        "touchdown": {
+          "fore_left": 0.0,
+          "mid_right": 0.0,
+          "hind_left": 0.0,
+          "fore_right": 0.5,
+          "mid_left": 0.5,
+          "hind_right": 0.5
+        },
+        "support_pattern": "Alternating tripods of six actual outside pointed walking blades."
+      }
+    },
+    "locomotion_mode": "grounded",
+    "motion_style": "grounded six-blade tripod gait",
+    "source_family": "Crabs and lobster",
+    "runtime_conformance": {
+      "maximum_surface_error_over_height": 0.0,
+      "maximum_normal_error": 0.0,
+      "numerically_flat_channels_normalized": 0,
+      "static_arrays_images_skin_and_rest_exact": true
+    }
+  },
+  "manymouth_crab": {
+    "runtime_path": "godot-client/assets/actors/native/creatures/manymouth_crab.glb",
+    "sha256": "18e0d318ea63fba19306fa0638404b43a38c409f5325062dd747fb8207ff1fbc",
+    "fitted_candidate_sha256": "a5ceeaeb2743265dca140de0cf401aca153bd2bdb0cee4869901d921dc46b4bf",
+    "baseline_sha256": "12ec29819deda03b409d8a720de948b26538e288227d0a6b03b18d2f57aace9c",
+    "height": 1.700001305779576,
+    "bake_fps": 3072,
+    "bytes": 3797940,
+    "source_bytes": 3797980,
+    "human_approved": false,
+    "runtime_installed": true,
+    "concept": {
+      "movement": "A broad, coral-encrusted seven-limbed crab advances with a low overlapping wave. The shell and watchful face remain steady while the orange terminal claws take equal measured steps; faster scuttle increases reach and cadence.",
+      "attack": "Two heavy forward pincer snaps, right then left: the thick arms open the real blue fingers, thrust and close, then recover while the walking limbs brace. Coral ornaments and central mandibles stay with the shell.",
+      "death": "The decorated carapace settles onto its actual underside; seven articulated walking limbs relax outward and the two complete pincers rest in front. The broad supported silhouette holds still."
+    },
+    "gaits": {
+      "Walk": {
+        "duration": 1.5,
+        "stride": 0.4760003656182813,
+        "stance_fraction": 0.86,
+        "touchdown": {
+          "fore_left": 0.0,
+          "mid_right": 0.14285714285714285,
+          "mid_hind_left": 0.2857142857142857,
+          "hind_right": 0.42857142857142855,
+          "mid_fore_left": 0.5714285714285714,
+          "fore_right": 0.7142857142857143,
+          "hind_left": 0.8571428571428571
+        },
+        "support_pattern": "Seven-group overlapping wave; seven actual three-piece walking limbs and pointed orange terminals."
+      },
+      "Jog": {
+        "duration": 0.96,
+        "stride": 0.6800005223118304,
+        "stance_fraction": 0.86,
+        "touchdown": {
+          "fore_left": 0.0,
+          "mid_right": 0.14285714285714285,
+          "mid_hind_left": 0.2857142857142857,
+          "hind_right": 0.42857142857142855,
+          "mid_fore_left": 0.5714285714285714,
+          "fore_right": 0.7142857142857143,
+          "hind_left": 0.8571428571428571
+        },
+        "support_pattern": "Seven-group overlapping wave; seven actual three-piece walking limbs and pointed orange terminals."
+      }
+    },
+    "locomotion_mode": "grounded",
+    "motion_style": "grounded seven-limb Manymouth Crab wave gait",
+    "source_family": "Crabs and lobster",
+    "runtime_conformance": {
+      "maximum_surface_error_over_height": 0.0,
+      "maximum_normal_error": 0.0,
+      "numerically_flat_channels_normalized": 0,
+      "static_arrays_images_skin_and_rest_exact": true
+    }
+  },
+  "lobster": {
+    "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/lobster.glb",
+    "sha256": "e3eba2f6b39be47bc01faee73c8992f1f74d47d821f249c8e7868ecf605ad099",
+    "fitted_candidate_sha256": "b141bbc65fa5bb6031f1e38e2b3e43afa84a7780f8a83f8cb9547bca22294b28",
+    "baseline_sha256": "1685ca1a4fda2493cf79dc5946ed1bcd30997bec5f0e0ef1a0b830c9e6d7ff89",
+    "height": 0.3291015420942728,
+    "bake_fps": 3072,
+    "bytes": 4024380,
+    "source_bytes": 4024412,
+    "human_approved": false,
+    "runtime_installed": true,
+    "concept": {
+      "movement": "A low bronze lobster creeps on an overlapping eight-leg wave. Its carapace stays steady, rounded feet take clear equal advances, the centered segmented tail follows with restrained pitch and the four antennae make small independent sweeps.",
+      "attack": "The large asymmetric pincers open, reach forward and snap in a braced right-left sequence. Whole bent forearms and palms rotate around measured sockets; the genuine fingers close without stretching.",
+      "death": "The carapace settles forward/down onto its actual underside; outer limbs relax, eight inner pendant appendages fold aside, both pincers and the centered tail/fan find support. The final pose holds still."
+    },
+    "gaits": {
+      "Walk": {
+        "duration": 1.45,
+        "stride": 0.09214843178639638,
+        "stance_fraction": 0.84,
+        "touchdown": {
+          "fore_left": 0.0,
+          "mid_fore_right": 0.125,
+          "mid_hind_left": 0.25,
+          "hind_right": 0.375,
+          "fore_right": 0.5,
+          "mid_fore_left": 0.625,
+          "mid_hind_right": 0.75,
+          "hind_left": 0.875
+        },
+        "support_pattern": "Eight outer walking limbs in an overlapping alternating wave. Inner pendant appendages are not walking contacts."
+      },
+      "Jog": {
+        "duration": 0.92,
+        "stride": 0.1316406168377091,
+        "stance_fraction": 0.84,
+        "touchdown": {
+          "fore_left": 0.0,
+          "mid_fore_right": 0.125,
+          "mid_hind_left": 0.25,
+          "hind_right": 0.375,
+          "fore_right": 0.5,
+          "mid_fore_left": 0.625,
+          "mid_hind_right": 0.75,
+          "hind_left": 0.875
+        },
+        "support_pattern": "Eight outer walking limbs in an overlapping alternating wave. Inner pendant appendages are not walking contacts."
+      }
+    },
+    "locomotion_mode": "grounded",
+    "motion_style": "grounded eight-leg lobster wave",
+    "source_family": "Crabs and lobster",
+    "runtime_conformance": {
+      "maximum_surface_error_over_height": 0.0,
+      "maximum_normal_error": 0.0,
+      "numerically_flat_channels_normalized": 0,
+      "static_arrays_images_skin_and_rest_exact": true
+    }
+  },
+  "bronze_diving_beetle": {
+    "runtime_path": "godot-client/assets/actors/native/creatures/bronze_diving_beetle.glb",
+    "sha256": "47cb33d9ddb38b02f011c11e42195d66e83f2a0d988b3e5f889e5343a7d043a5",
+    "fitted_candidate_sha256": "6f7739defaadf848e235d9709ff7959a3f4f0aaef509954cadc4a0d0292ab97d",
+    "baseline_sha256": "329f4867a766e75a1e4d858ecfb23848516a6a571038105f4fb061f3d6a8cc5a",
+    "height": 1.7000064817667553,
+    "bake_fps": 3072,
+    "bytes": 3709100,
+    "source_bytes": 3709132,
+    "human_approved": false,
+    "runtime_installed": true,
+    "concept": {
+      "movement": "A compact bronze-and-patina shell moves with a low steady eight-leg wave. Complete pointed feet take clear equal steps; the faster scurry increases cadence and reach without bouncing or stretching the armor.",
+      "attack": "The beetle braces its eight feet, pulls its head back, then drives forward into a short armored head-and-mandible shove. Its three real curved jaws flare and clamp while the shell remains whole.",
+      "death": "The carapace drops forward/down onto its actual underside. The walking tips release and the limbs fold outward; the three mandibles and posterior oval appendages relax into a supported low ending, held still."
+    },
+    "gaits": {
+      "Walk": {
+        "duration": 1.2,
+        "stride": 0.7480028519773724,
+        "stance_fraction": 0.8,
+        "touchdown": {
+          "fore_left": 0.0,
+          "mid_fore_right": 0.125,
+          "mid_hind_left": 0.25,
+          "hind_right": 0.375,
+          "fore_right": 0.5,
+          "mid_fore_left": 0.625,
+          "mid_hind_right": 0.75,
+          "hind_left": 0.875
+        },
+        "support_pattern": "Eight actual walking chains in an overlapping alternating wave; jaws and posterior appendages excluded."
+      },
+      "Jog": {
+        "duration": 0.72,
+        "stride": 1.1220042779660586,
+        "stance_fraction": 0.72,
+        "touchdown": {
+          "fore_left": 0.0,
+          "mid_fore_right": 0.125,
+          "mid_hind_left": 0.25,
+          "hind_right": 0.375,
+          "fore_right": 0.5,
+          "mid_fore_left": 0.625,
+          "mid_hind_right": 0.75,
+          "hind_left": 0.875
+        },
+        "support_pattern": "Eight actual walking chains in an overlapping alternating wave; jaws and posterior appendages excluded."
+      }
+    },
+    "locomotion_mode": "grounded",
+    "motion_style": "grounded eight-leg armored wave",
+    "source_family": "Beetles",
+    "runtime_conformance": {
+      "maximum_surface_error_over_height": 0.0,
+      "maximum_normal_error": 0.0,
+      "numerically_flat_channels_normalized": 0,
+      "static_arrays_images_skin_and_rest_exact": true
+    }
+  },
+  "crystal_carapace_beetle": {
+    "runtime_path": "godot-client/assets/actors/native/creatures/crystal_carapace_beetle.glb",
+    "sha256": "251227e4c652fd6716a22b000a083cadb18865487d5d534785eead597109dadc",
+    "fitted_candidate_sha256": "252700e9cf9601ca6c84f56ab2f9e3cd3bd14f7f5cb67cf628e59201bbb1793b",
+    "baseline_sha256": "cfa325531d576aa2f113ea0ebba2381ddb911af876462b9da9096fbd60ece4f7",
+    "height": 1.699995339000342,
+    "bake_fps": 3072,
+    "bytes": 3019128,
+    "source_bytes": 3019168,
+    "human_approved": false,
+    "runtime_installed": true,
+    "concept": {
+      "movement": "A blue-violet crystal beetle carries a steady faceted shell on alternating support tripods. Six pointed feet make deliberate equal advances; the faster scurry quickens the same pattern while two small frontal palps hover clear.",
+      "attack": "The beetle lowers and braces its shell, draws its head and palps back, then thrusts forward with a crystalline beak-and-mandible bite. Its two true curved mandibles spread and close, while the smaller palps flare clear of the face.",
+      "death": "The ventral shield and abdomen settle forward/down. Six walking limbs release into a relaxed outward fold; the head, curved mandibles and small palps lower into a supported still ending while the crystal plates remain intact."
+    },
+    "gaits": {
+      "Walk": {
+        "duration": 1.15,
+        "stride": 0.7139980423801436,
+        "stance_fraction": 0.72,
+        "touchdown": {
+          "fore_left": 0.0,
+          "mid_right": 0.0,
+          "hind_left": 0.0,
+          "fore_right": 0.5,
+          "mid_left": 0.5,
+          "hind_right": 0.5
+        },
+        "support_pattern": "Six actual body-attached walking chains in alternating support tripods; head palps and mandibles excluded."
+      },
+      "Jog": {
+        "duration": 0.72,
+        "stride": 1.053997110180212,
+        "stance_fraction": 0.66,
+        "touchdown": {
+          "fore_left": 0.0,
+          "mid_right": 0.0,
+          "hind_left": 0.0,
+          "fore_right": 0.5,
+          "mid_left": 0.5,
+          "hind_right": 0.5
+        },
+        "support_pattern": "Six actual body-attached walking chains in alternating support tripods; head palps and mandibles excluded."
+      }
+    },
+    "locomotion_mode": "grounded",
+    "motion_style": "grounded six-leg crystal beetle tripod",
+    "source_family": "Beetles",
+    "runtime_conformance": {
+      "maximum_surface_error_over_height": 0.0,
+      "maximum_normal_error": 0.0,
+      "numerically_flat_channels_normalized": 0,
+      "static_arrays_images_skin_and_rest_exact": true
+    }
+  },
+  "amethyst_stag_beetle": {
+    "runtime_path": "godot-client/assets/actors/native/creatures/amethyst_stag_beetle.glb",
+    "sha256": "502b8abb61884f32a0733043f92bd7ca2005911a9e91c48a67caee0ecc0dd620",
+    "fitted_candidate_sha256": "57874f2a16ce04d5faca0253e028d370c55cf30a78d10851ab2e44784c463a9f",
+    "baseline_sha256": "1b9d12fd75094cc7a8e606f970f47146c09b4e1477d324815ea5dd2d64485de9",
+    "height": 1.70000450266598,
+    "bake_fps": 3072,
+    "bytes": 3092468,
+    "source_bytes": 3092504,
+    "human_approved": false,
+    "runtime_installed": true,
+    "concept": {
+      "movement": "An armored amethyst stag beetle carries its tall head horn steadily over six deliberate pointed-foot steps in alternating tripods. Scurry increases cadence and full common advance without wobbling the iridescent shell.",
+      "attack": "The six feet brace as the beetle draws its horn and asymmetric mandibles back, then drives its head forward and down into a broad horn-led shove and closing bite. The complete hooked jaws open and close independently of the facial caps.",
+      "death": "The thorax and abdomen settle forward onto the ground. The six legs unfold outward, the head and rigid tall horn tip forward, and both whole mandibles and the small ventral appendage settle into a held supported ending."
+    },
+    "gaits": {
+      "Walk": {
+        "duration": 1.15,
+        "stride": 0.7140018911197116,
+        "stance_fraction": 0.72,
+        "touchdown": {
+          "fore_left": 0.0,
+          "mid_right": 0.0,
+          "hind_left": 0.0,
+          "fore_right": 0.5,
+          "mid_left": 0.5,
+          "hind_right": 0.5
+        },
+        "support_pattern": "Six actual body-attached walking chains in alternating support tripods; head palps and mandibles excluded."
+      },
+      "Jog": {
+        "duration": 0.72,
+        "stride": 1.0540027916529076,
+        "stance_fraction": 0.66,
+        "touchdown": {
+          "fore_left": 0.0,
+          "mid_right": 0.0,
+          "hind_left": 0.0,
+          "fore_right": 0.5,
+          "mid_left": 0.5,
+          "hind_right": 0.5
+        },
+        "support_pattern": "Six actual body-attached walking chains in alternating support tripods; head palps and mandibles excluded."
+      }
+    },
+    "locomotion_mode": "grounded",
+    "motion_style": "grounded six-leg stag beetle tripod",
+    "source_family": "Beetles",
+    "runtime_conformance": {
+      "maximum_surface_error_over_height": 0.0,
+      "maximum_normal_error": 0.0,
+      "numerically_flat_channels_normalized": 0,
+      "static_arrays_images_skin_and_rest_exact": true
+    }
+  },
+  "amber_lantern_moth": {
+    "runtime_path": "godot-client/assets/actors/native/creatures/amber_lantern_moth.glb",
+    "sha256": "ab2ac357c494244e928572cc84ccca021e1c41b36b7a6f9deeace892d49320a5",
+    "fitted_candidate_sha256": "9c703ff4d2c810b13b9897a4c2d740b0002fff355b6416e7e520be93b170ccca",
+    "baseline_sha256": "22e8e6356eb2db3ba29d33831c0c696e38cbd79ffef6486368f9cb6c2c50eadc",
+    "height": 0.6095800154330606,
+    "bake_fps": 3072,
+    "bytes": 2523920,
+    "source_bytes": 2523960,
+    "human_approved": false,
+    "runtime_installed": true,
+    "concept": {
+      "movement": "An amber moth hovers with broad paired wing fans and a quiet centered abdomen. Slow flight uses steady wide beats, while fast flight tightens its body and increases wing cadence. Leaf-like antennae lag gently without dragging the head.",
+      "attack": "The moth draws back, opens its broad wing fans, then drives forward and slightly downward in a forceful head-led swoop. A strong recovery beat returns it to its hovering guard.",
+      "death": "Its wing beat falters and loses amplitude as the body tips forward and sinks. The thorax and abdomen settle on the ground with the complete wing fans spread low, antennae drooping and a still ending."
+    },
+    "gaits": {
+      "Walk": {
+        "duration": 1.6,
+        "stride": 0.45718501157479546,
+        "stance_fraction": 0.0,
+        "touchdown": {},
+        "mode": "airborne",
+        "support_pattern": "Airborne body and measured attached wing fans; no feet or planted stride are claimed."
+      },
+      "Jog": {
+        "duration": 1.0,
+        "stride": 0.7314960185196727,
+        "stance_fraction": 0.0,
+        "touchdown": {},
+        "mode": "airborne",
+        "support_pattern": "Airborne body and measured attached wing fans; no feet or planted stride are claimed."
+      }
+    },
+    "locomotion_mode": "airborne",
+    "motion_style": "airborne",
+    "source_family": "Moths",
+    "runtime_conformance": {
+      "maximum_surface_error_over_height": 0.0,
+      "maximum_normal_error": 0.0,
+      "numerically_flat_channels_normalized": 0,
+      "static_arrays_images_skin_and_rest_exact": true
+    }
+  }
+}
