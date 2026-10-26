@@ -25,7 +25,8 @@ static func install(player: AnimationPlayer, model: Dictionary) -> void:
 	var source := current
 	if player.has_meta(RESULT_META) and current == player.get_meta(RESULT_META):
 		source = player.get_meta(SOURCE_META) as AnimationLibrary
-	var result := derive(source)
+	var profile := "male" if str(model.get("bodyTemplate", "")) == "luminous_male" else "female"
+	var result := derive(source, profile, _target_skeleton(player, source))
 	if result == current:
 		return
 	player.set_meta(SOURCE_META, source)
@@ -33,10 +34,14 @@ static func install(player: AnimationPlayer, model: Dictionary) -> void:
 	player.remove_animation_library(&"")
 	player.add_animation_library(&"", result)
 
-static func derive(source: AnimationLibrary) -> AnimationLibrary:
+static func derive(source: AnimationLibrary, profile := "female", skeleton: Skeleton3D = null) -> AnimationLibrary:
 	if source == null:
 		return null
-	var key := source.get_instance_id()
+	# The accepted female pass remains the exact v1 result. Male silhouettes
+	# use their own baked arm placement, never a mutation of that shared clip.
+	if profile != "male" or skeleton == null:
+		profile = "female"
+	var key := "%s:%s" % [source.get_instance_id(), profile]
 	if _libraries.has(key):
 		return _libraries[key].result as AnimationLibrary
 	var result := AnimationLibrary.new()
@@ -46,13 +51,154 @@ static func derive(source: AnimationLibrary) -> AnimationLibrary:
 		var animation := source.get_animation(name)
 		# Sharing these resources is intentional: attacks, casts, RESET and all
 		# remaining actions retain their exact original keys and hit timings.
-		result.add_animation(name, _travel(animation, name == &"Run_Female", neutral) if name in CLIPS else animation)
+		var clip := _travel(animation, name == &"Run_Female", neutral) if name in CLIPS else animation
+		if name in CLIPS and profile == "male":
+			_male_placement(clip, skeleton, name == &"Run_Female")
+		result.add_animation(name, clip)
 	if _libraries.size() >= CACHE_LIMIT:
 		_libraries.erase(_libraries.keys()[0])
 	# Keep the source strongly referenced alongside its derivative so a freed
 	# source's instance ID cannot be reused as a different library's cache key.
 	_libraries[key] = {"source": source, "result": result}
 	return result
+
+static func _target_skeleton(player: AnimationPlayer, library: AnimationLibrary) -> Skeleton3D:
+	if not library.has_animation(&"Walk"):
+		return null
+	var root := player.get_node_or_null(player.root_node)
+	var animation := library.get_animation(&"Walk")
+	if root == null:
+		return null
+	for track: int in animation.get_track_count():
+		var path := str(animation.track_get_path(track)).get_slice(":", 0)
+		var skeleton := root.get_node_or_null(NodePath(path)) as Skeleton3D
+		if skeleton != null:
+			return skeleton
+	return null
+
+## Evaluate the existing v1 arm pose in canonical rig space, then bake a
+## male-specific elbow/forearm plane. This runs once per shared clip variant;
+## no Skeleton3D pose is written and no per-frame modifier is installed.
+static func _male_placement(animation: Animation, skeleton: Skeleton3D, running: bool) -> void:
+	var channels := {}
+	for track: int in animation.get_track_count():
+		var bone := str(animation.track_get_path(track).get_concatenated_subnames()).get_slice(":", 0)
+		if not channels.has(bone): channels[bone] = {}
+		channels[bone][animation.track_get_type(track)] = track
+	var frames := {}
+	var pending := {}
+	# Read every source pose before replacing any keys, so a later sample
+	# cannot accidentally include an earlier sample's correction.
+	for bone: String in ["upperarm_l", "upperarm_r", "lowerarm_l", "lowerarm_r", "hand_l", "hand_r"]:
+		if not channels.has(bone) or not channels[bone].has(Animation.TYPE_ROTATION_3D): continue
+		var track: int = channels[bone][Animation.TYPE_ROTATION_3D]
+		var values: Array[Quaternion] = []
+		for index: int in animation.track_get_key_count(track):
+			var time := animation.track_get_key_time(track, index)
+			if not frames.has(time):
+				frames[time] = _male_pose(animation, skeleton, channels, time, running)
+			values.append(frames[time][bone])
+		pending[track] = values
+	for track: int in pending:
+		var values: Array = pending[track]
+		for index: int in values.size():
+			animation.track_set_key_value(track, index, values[index])
+
+static func _male_pose(animation: Animation, skeleton: Skeleton3D, channels: Dictionary,
+		time: float, running: bool) -> Dictionary:
+	var local: Array[Transform3D] = []
+	var global: Array[Transform3D] = []
+	var t := fposmod(time, animation.length) if animation.length > 0 else 0.0
+	for bone: int in skeleton.get_bone_count():
+		var rest := skeleton.get_bone_rest(bone)
+		var tracks: Dictionary = channels.get(str(skeleton.get_bone_name(bone)), {})
+		var origin := animation.position_track_interpolate(tracks[Animation.TYPE_POSITION_3D], t) if tracks.has(Animation.TYPE_POSITION_3D) else rest.origin
+		var rotation := animation.rotation_track_interpolate(tracks[Animation.TYPE_ROTATION_3D], t) if tracks.has(Animation.TYPE_ROTATION_3D) else rest.basis.get_rotation_quaternion()
+		var scale := animation.scale_track_interpolate(tracks[Animation.TYPE_SCALE_3D], t) if tracks.has(Animation.TYPE_SCALE_3D) else rest.basis.get_scale()
+		var transform := Transform3D(Basis(rotation).scaled(scale), origin)
+		local.append(transform)
+		var parent := skeleton.get_bone_parent(bone)
+		global.append(global[parent] * transform if parent >= 0 else transform)
+	var result := {}
+	for side: String in ["l", "r"]:
+		var sign := 1.0 if side == "l" else -1.0
+		var upper := skeleton.find_bone("upperarm_" + side)
+		var lower := skeleton.find_bone("lowerarm_" + side)
+		var hand := skeleton.find_bone("hand_" + side)
+		var thumb := skeleton.find_bone("thumb_01_" + side)
+		var parent := skeleton.get_bone_parent(upper)
+		var shoulder: Transform3D = global[upper]
+		var upper_vector: Vector3 = shoulder.basis * local[lower].origin
+		var desired := _with_width(upper_vector, sign * (0.045 if running else 0.035))
+		if running:
+			# The source upper-arm swing is centred behind the chest: both
+			# hands dip together at the passing phases. Keep its phase but
+			# centre a smaller male swing under/slightly ahead of the shoulder.
+			var z := clampf(upper_vector.z * 0.75 + 0.08, -upper_vector.length() * 0.7, upper_vector.length() * 0.7)
+			desired = Vector3(desired.x, -sqrt(maxf(upper_vector.length_squared() - desired.x * desired.x - z * z, 0.000001)), z)
+		shoulder.basis = Basis(Quaternion(upper_vector.normalized(), desired.normalized())) * shoulder.basis
+		result["upperarm_" + side] = (global[parent].basis.inverse() * shoulder.basis).orthonormalized().get_rotation_quaternion().normalized()
+		var elbow: Transform3D = shoulder * local[lower]
+		var forearm: Vector3 = elbow.basis * local[hand].origin
+		var wrist_x := sign * maxf(absf(shoulder.origin.x) + (0.035 if running else 0.055), 0.220 if running else 0.225)
+		desired = _with_width(forearm, wrist_x - elbow.origin.x)
+		if running:
+			# Preserve a purposeful bent elbow even on the rear arm. Solve
+			# the forearm on a constant-flexion cone while retaining front
+			# clearance; hand width alone can hide a straight-looking elbow.
+			var upper_direction: Vector3 = (shoulder.basis * local[lower].origin).normalized()
+			desired = _bent_forearm(upper_direction, forearm.length(), wrist_x - elbow.origin.x, deg_to_rad(86.0))
+		elbow.basis = Basis(Quaternion(forearm.normalized(), desired.normalized())) * elbow.basis
+		result["lowerarm_" + side] = (shoulder.basis.inverse() * elbow.basis).orthonormalized().get_rotation_quaternion().normalized()
+		var wrist: Transform3D = elbow * local[hand]
+		# Relaxed palms face the torso while walking; a running forearm keeps
+		# its thumb uppermost. Aim by the actual canonical thumb rest vector,
+		# preserving finger channels and allowing weapon carry to aim last.
+		if thumb >= 0:
+			var axis := wrist.basis.y.normalized()
+			var thumb_local := skeleton.get_bone_global_rest(hand).affine_inverse() * skeleton.get_bone_global_rest(thumb).origin
+			var across := wrist.basis * thumb_local
+			if running:
+				# The thumb's proximal joint sits off the palm plane. Aiming that
+				# wrist-to-thumb vector rolls the actual palm upwards. Use the
+				# true MCP row and wrist-to-middle-finger plane instead.
+				var middle := skeleton.find_bone("middle_01_" + side)
+				var index := skeleton.find_bone("index_01_" + side)
+				var pinky := skeleton.find_bone("pinky_01_" + side)
+				if middle >= 0 and index >= 0 and pinky >= 0:
+					var to_hand := skeleton.get_bone_global_rest(hand).affine_inverse()
+					var palm_forward := (to_hand * skeleton.get_bone_global_rest(middle).origin).normalized()
+					var palm_across := to_hand.basis * (skeleton.get_bone_global_rest(index).origin - skeleton.get_bone_global_rest(pinky).origin)
+					axis = (wrist.basis * palm_forward).normalized()
+					across = wrist.basis * palm_across
+			across = (across - axis * across.dot(axis)).normalized()
+			var aim := Vector3.UP if running else Vector3.BACK
+			aim = aim - axis * aim.dot(axis)
+			if across.length_squared() > 0.5 and aim.length_squared() > 0.01:
+				aim = aim.normalized()
+				var angle := atan2(axis.dot(across.cross(aim)), across.dot(aim))
+				if not running: angle = clampf(angle, -deg_to_rad(50), deg_to_rad(50))
+				wrist.basis = Basis(axis, angle) * wrist.basis
+		result["hand_" + side] = (elbow.basis.inverse() * wrist.basis).orthonormalized().get_rotation_quaternion().normalized()
+	return result
+
+static func _with_width(vector: Vector3, width: float) -> Vector3:
+	var length_squared := vector.length_squared()
+	var x := clampf(width, -sqrt(length_squared) * 0.8, sqrt(length_squared) * 0.8)
+	var factor := sqrt(maxf(length_squared - x * x, 0.000001) / maxf(vector.y * vector.y + vector.z * vector.z, 0.000001))
+	return Vector3(x, vector.y * factor, vector.z * factor)
+
+static func _bent_forearm(upper: Vector3, length: float, width: float, flexion: float) -> Vector3:
+	var x := clampf(width / length, -0.8, 0.8)
+	var radius := sqrt(1.0 - x * x)
+	var plane := Vector2(upper.y, upper.z)
+	var axis := plane.normalized()
+	var along := clampf((cos(flexion) - upper.x * x) / maxf(plane.length() * radius, 0.00001), -1.0, 1.0)
+	var perpendicular := Vector2(-axis.y, axis.x) * sqrt(maxf(1.0 - along * along, 0.0))
+	var first := axis * along + perpendicular
+	var second := axis * along - perpendicular
+	var yz := first if first.y >= second.y else second
+	return Vector3(x, yz.x * radius, yz.y * radius) * length
 
 static func _rotations(animation: Animation) -> Dictionary:
 	var result := {}

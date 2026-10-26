@@ -2,6 +2,10 @@ extends SceneTree
 ## Real imported Human rigs: immutable shared source, complete action/track
 ## preservation, cyclic arm corrections and untouched lower-body contacts.
 const POLISH := preload("res://src/actors/human_locomotion_polish.gd")
+# Captured from the accepted v1 female arm curves, including every original
+# timestamp and quaternion component. The male pass must not rewrite them.
+const FEMALE_V1 := {&"Walk": "5dddc810458e7b7d590fe6b53a152d52d0456e899aa977c704581dc544f246c9",
+	&"Run_Female": "ffdf688884907f72668674ca34c868554cbd45398ac8850142cee93330f2ba85"}
 var failures := 0
 var checks := 0
 var metrics: Array = []
@@ -26,6 +30,27 @@ func snapshot(animation: Animation) -> Array:
 		result.append(values)
 	return result
 
+func arm_digest(animation: Animation) -> String:
+	var context := HashingContext.new()
+	context.start(HashingContext.HASH_SHA256)
+	for bone: String in POLISH.ARM_BONES:
+		for track: int in animation.get_track_count():
+			if animation.track_get_type(track) != Animation.TYPE_ROTATION_3D or str(animation.track_get_path(track).get_concatenated_subnames()) != bone:
+				continue
+			context.update(bone.to_utf8_buffer())
+			var values := PackedFloat64Array()
+			for index: int in animation.track_get_key_count(track):
+				var q: Quaternion = animation.track_get_key_value(track, index)
+				values.append_array(PackedFloat64Array([animation.track_get_key_time(track, index), q.x, q.y, q.z, q.w]))
+			context.update(values.to_byte_array())
+	return context.finish().hex_encode()
+
+func rotation_delta(first: Quaternion, last: Quaternion) -> float:
+	# acos(dot) reports a spurious ~0.04 degrees even for the same float32
+	# quaternion. The relative rotation's vector part remains well-conditioned.
+	var relative := (first.inverse() * last).normalized()
+	return 2.0 * atan2(Vector3(relative.x, relative.y, relative.z).length(), absf(relative.w))
+
 func run() -> void:
 	var models: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/models.json")).models
 	var equipment: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/equipment.json"))
@@ -45,7 +70,7 @@ func run() -> void:
 		var original := {}
 		for name: StringName in source.get_animation_list(): original[name] = snapshot(source.get_animation(name))
 		# Configure may already have installed the integration hook. Benchmark
-		# one cold derivative explicitly; the second Human must reuse that one.
+		# one cold derivative explicitly; each sex retains its own shared pair.
 		if slug == "luminous_male": POLISH.clear()
 		var began := Time.get_ticks_usec()
 		POLISH.install(player, models[slug])
@@ -66,10 +91,13 @@ func run() -> void:
 			if not human or name not in POLISH.CLIPS:
 				expect(old == new, "non-locomotion resources remain shared " + str(name))
 				continue
+			if slug == "luminous_female":
+				expect(arm_digest(new) == FEMALE_V1[name], "female locomotion remains exactly the accepted v1 output")
 			expect(old != new and new.length == old.length and new.loop_mode == old.loop_mode, "only travel animation resource is derived " + str(name))
 			expect(new.get_track_count() == old.get_track_count(), "no track added or removed " + str(name))
 			var modified := 0
 			var worst_loop := 0.0
+			var largest_arm_step := 0.0
 			var copied_keys := 0
 			for track: int in old.get_track_count():
 				copied_keys += old.track_get_key_count(track)
@@ -86,25 +114,54 @@ func run() -> void:
 						var q := after as Quaternion
 						expect(is_finite(q.x) and is_finite(q.y) and is_finite(q.z) and is_finite(q.w) and absf(q.length() - 1.0) < 0.00001, "finite normalized arm quaternion")
 						changed = changed or not q.is_equal_approx(before)
+						if index > 0:
+							largest_arm_step = maxf(largest_arm_step, rotation_delta(new.track_get_key_value(track, index - 1), q))
 					else:
 						expect(after == before, "all torso/root/leg/translation/scale/finger keys remain exact")
 				if arm_rotation:
 					modified += int(changed)
 					var first := new.rotation_track_interpolate(track, 0.0)
 					var last := new.rotation_track_interpolate(track, new.length)
-					worst_loop = maxf(worst_loop, first.angle_to(last))
+					worst_loop = maxf(worst_loop, rotation_delta(first, last))
 				expect(new.track_get_interpolation_type(track) == old.track_get_interpolation_type(track), "interpolation unchanged")
 			expect(modified > 0 and worst_loop < 0.0001, "arm polish is visible and loop closes " + str(name))
+			expect(largest_arm_step < deg_to_rad(25), "no abrupt arm/wrist key jump " + str(name))
+			if slug == "luminous_male":
+				player.play(name)
+				player.pause()
+				var rig := actor.get_skeleton()
+				for sample: int in range(49):
+					player.seek(new.length * float(sample) / 48.0, true)
+					rig.force_update_all_bone_transforms()
+					for side: String in ["l", "r"]:
+						var shoulder := rig.get_bone_global_pose(rig.find_bone("upperarm_" + side)).origin
+						var elbow := rig.get_bone_global_pose(rig.find_bone("lowerarm_" + side)).origin
+						var wrist := rig.get_bone_global_pose(rig.find_bone("hand_" + side)).origin
+						var spread := (elbow.x - shoulder.x) * (1 if side == "l" else -1)
+						expect(spread > 0.025 and spread < 0.055, "male elbow follows a stable front-view track")
+						if name == &"Run_Female":
+							var flex := rad_to_deg((elbow - shoulder).angle_to(wrist - elbow))
+							expect(flex > 84.5 and flex < 87.5, "male rear/forward running elbows retain their bend")
+							var middle := rig.get_bone_global_pose(rig.find_bone("middle_01_" + side)).origin
+							var index := rig.get_bone_global_pose(rig.find_bone("index_01_" + side)).origin
+							var pinky := rig.get_bone_global_pose(rig.find_bone("pinky_01_" + side)).origin
+							var forward := (middle - wrist).normalized()
+							var across := index - pinky
+							across = (across - forward * across.dot(forward)).normalized()
+							var up := (Vector3.UP - forward * Vector3.UP.dot(forward)).normalized()
+							expect(across.dot(up) > 0.98, "male run thumb-side is uppermost instead of palm-up")
 			metrics.append({"model": slug, "clip": name, "duration": new.length, "modified_arm_tracks": modified,
 				"max_loop_degrees": rad_to_deg(worst_loop), "first_install_usec": build_usec,
-				"copied_keys": copied_keys, "tracks": old.get_track_count()})
+				"copied_keys": copied_keys, "tracks": old.get_track_count(), "max_arm_key_step_degrees": rad_to_deg(largest_arm_step)})
 		POLISH.install(player, models[slug])
 		expect(player.get_animation_library(&"") == result, "install is idempotent")
 		for quality: int in [ActorRenderQuality.Quality.LOW, ActorRenderQuality.Quality.MEDIUM, ActorRenderQuality.Quality.HIGH]:
 			actor.apply_render_quality(quality, true)
 			expect(player.get_animation_library(&"") == result, "quality switch retains polished locomotion")
+		if human:
+			expect(POLISH.derive(source, str(models[slug].gender), actor.get_skeleton()) == result, "same source and sex reuse one shared derivative")
 		if human and source == previous_source:
-			expect(result == previous_result, "same rig/source shares Human derivative across sexes")
+			expect(result != previous_result, "male and female keep distinct cached locomotion")
 		previous_source = source
 		previous_result = result
 		actor.free()
