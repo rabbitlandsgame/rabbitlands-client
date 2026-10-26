@@ -116,6 +116,9 @@ static func _groom_hair(hair: MeshInstance3D, skeleton: Skeleton3D,
 	if not hair.has_meta(SOURCE_META):
 		hair.set_meta(SOURCE_META, hair.mesh)
 	var source := hair.get_meta(SOURCE_META) as Mesh
+	# The production actor's tint pass installs a whole-instance override.
+	# Grooming owns the material on each imported surface from here onward.
+	hair.material_override = null
 	if detail == 0:
 		hair.mesh = source
 		for surface: int in source.get_surface_count():
@@ -169,7 +172,7 @@ static func _groom_hair(hair: MeshInstance3D, skeleton: Skeleton3D,
 				[], _lods(source, surface), source.surface_get_format(surface) & Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS)
 			groomed.surface_set_material(surface, source.surface_get_material(surface))
 		_cache(_hair_meshes, key, groomed, HAIR_CACHE_LIMIT)
-		hair.mesh = groomed
+	hair.mesh = groomed
 	for surface: int in source.get_surface_count():
 		var original := source.surface_get_material(surface) as StandardMaterial3D
 		if original == null:

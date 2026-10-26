@@ -103,11 +103,19 @@ func _run() -> void:
 				distant.position = Vector3(12345.67, 112.3, -9988.76)
 				distant.rotation = Vector3(0.12, 1.234, -0.23)
 				var distant_skeleton := distant.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
+				for node: Node in distant.find_children("*", "MeshInstance3D", true, false):
+					var mesh := node as MeshInstance3D
+					if mesh.has_meta(Groom.SOURCE_META):
+						mesh.mesh = mesh.get_meta(Groom.SOURCE_META) as Mesh
 				var cache_before := Groom.cache_metrics()
 				var hit_start := Time.get_ticks_usec()
 				Groom.apply(distant, distant_skeleton, look, config)
 				var hit_usec := Time.get_ticks_usec() - hit_start
 				_expect(Groom.cache_metrics() == cache_before, "world translation/rotation share grooming cache")
+				for node: Node in distant.find_children("*", "MeshInstance3D", true, false):
+					var mesh := node as MeshInstance3D
+					if mesh.has_meta(Groom.SOURCE_META):
+						_expect(mesh.mesh != mesh.get_meta(Groom.SOURCE_META), "new hair instance receives cached sculpt")
 				if beard != null:
 					_expect((distant.get_node("PortraitFacialHair") as MeshInstance3D).mesh == beard.mesh,
 						"distant actors share fitted beard resource")
