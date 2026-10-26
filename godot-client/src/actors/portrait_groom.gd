@@ -258,6 +258,10 @@ static func _build_beard(source: Mesh, mesh_to_skeleton: Transform3D,
 				var direction := (to_head.basis * normals[source_index]).normalized()
 				var lower := 1.0 - smoothstep(eye_height - 0.095, eye_height - 0.045, local.y)
 				var length: float = [0.0, 0.0011, 0.0035, 0.005, 0.007, 0.014][style]
+				if style == 5:
+					# Keep the cheek/sideburn close and carry length at the central
+					# chin, instead of expanding the whole jaw as a squared shell.
+					length *= 0.42 + 0.58 * (1.0 - smoothstep(0.018, 0.066, absf(local.x)))
 				var amount := coverage[source_index]
 				local += direction * (0.0008 + length * amount * (0.35 + 0.65 * lower))
 				if style in [3, 4, 5]:
@@ -266,7 +270,7 @@ static func _build_beard(source: Mesh, mesh_to_skeleton: Transform3D,
 				vertex.append(from_head * local)
 				normal.append(normals[source_index])
 				uv.append(Vector2(original_local.x, original_local.y))
-				colors.append(Color(amount, maxf(original_local.z, 0.0), 0, 1))
+				colors.append(Color(amount, original_local.z + 0.2, 0, 1))
 				for influence: int in influences:
 					bones.append(input[Mesh.ARRAY_BONES][source_index * influences + influence])
 					weights.append(input[Mesh.ARRAY_WEIGHTS][source_index * influences + influence])
@@ -292,6 +296,8 @@ static func _build_beard(source: Mesh, mesh_to_skeleton: Transform3D,
 static func _beard_coverage(point: Vector3, eye_height: float, style: int) -> float:
 	var y := point.y - eye_height
 	var x := absf(point.x)
+	if style == 5:
+		return _full_beard_coverage(point, eye_height)
 	var front := smoothstep(-0.012, 0.014, point.z)
 	var edge := 1.0 - smoothstep(0.065, 0.085, x)
 	var bottom := smoothstep(-0.123, -0.100, y)
@@ -307,6 +313,29 @@ static func _beard_coverage(point: Vector3, eye_height: float, style: int) -> fl
 	elif style == 3:
 		mask = maxf(jaw * lips_clear * (1.0 - smoothstep(0.026, 0.042, x)), moustache)
 	return clampf(mask * front * edge * bottom, 0.0, 1.0)
+
+static func _full_beard_coverage(point: Vector3, eye_height: float) -> float:
+	var y := point.y - eye_height
+	var x := absf(point.x)
+	var front := smoothstep(-0.012, 0.014, point.z)
+	# A rising curved cheek edge leaves the mouth and cheek plane readable.
+	# The central beard begins below the lower lip; the moustache is separate.
+	var cheek_top := -0.073 + 0.033 * smoothstep(0.014, 0.070, x)
+	var jaw := 1.0 - smoothstep(cheek_top - 0.003, cheek_top + 0.004, y)
+	var mouth := sqrt(pow(point.x / 0.024, 2.0) + pow((y + 0.063) / 0.008, 2.0))
+	jaw *= smoothstep(0.95, 1.18, mouth)
+	var moustache_y := -0.053 - 0.011 * pow(x / 0.040, 2.0)
+	var moustache := smoothstep(moustache_y - 0.008, moustache_y - 0.004, y)
+	moustache *= 1.0 - smoothstep(moustache_y + 0.003, moustache_y + 0.007, y)
+	moustache *= smoothstep(0.002, 0.007, x) * (1.0 - smoothstep(0.033, 0.043, x))
+	var soul := (1.0 - smoothstep(0.007, 0.012, x)) * smoothstep(-0.098, -0.088, y)
+	soul *= 1.0 - smoothstep(-0.082, -0.075, y)
+	var sideburn := smoothstep(0.056, 0.064, x) * (1.0 - smoothstep(0.075, 0.082, x))
+	sideburn *= smoothstep(-0.083, -0.064, y) * (1.0 - smoothstep(0.015, 0.033, y))
+	sideburn *= smoothstep(-0.010, -0.002, point.z) * (1.0 - smoothstep(0.010, 0.018, point.z))
+	var edge := 1.0 - smoothstep(0.073, 0.086, x)
+	var bottom := smoothstep(-0.123, -0.100, y)
+	return clampf(maxf(maxf(jaw, maxf(moustache, soul)) * front, sideburn) * edge * bottom, 0.0, 1.0)
 
 static func _subdivide_patch(input: Array, selected: PackedInt32Array) -> Dictionary:
 	var points: PackedVector3Array = input[Mesh.ARRAY_VERTEX]

@@ -6,7 +6,31 @@ uniform float density = 1.0;
 uniform float eye_height = 0.075;
 uniform int style = 5;
 
+float full_beard_coverage(vec2 point, float z) {
+	float y = point.y - eye_height;
+	float x = abs(point.x);
+	float front = smoothstep(-0.012, 0.014, z);
+	float tuft = sin(point.x * 580.0 + sin(point.x * 137.0)) * 0.0012;
+	float cheek_top = -0.073 + 0.033 * smoothstep(0.014, 0.070, x) + tuft;
+	float jaw = 1.0 - smoothstep(cheek_top - 0.003, cheek_top + 0.004, y);
+	float mouth = length(vec2(point.x / 0.024, (y + 0.063) / 0.008));
+	jaw *= smoothstep(0.95, 1.18, mouth);
+	float moustache_y = -0.053 - 0.011 * pow(x / 0.040, 2.0);
+	float moustache = smoothstep(moustache_y - 0.008, moustache_y - 0.004, y);
+	moustache *= 1.0 - smoothstep(moustache_y + 0.003, moustache_y + 0.007, y);
+	moustache *= smoothstep(0.002, 0.007, x) * (1.0 - smoothstep(0.033, 0.043, x));
+	float soul = (1.0 - smoothstep(0.007, 0.012, x)) * smoothstep(-0.098, -0.088, y);
+	soul *= 1.0 - smoothstep(-0.082, -0.075, y);
+	float sideburn = smoothstep(0.056, 0.064, x) * (1.0 - smoothstep(0.075, 0.082, x));
+	sideburn *= smoothstep(-0.083, -0.064, y) * (1.0 - smoothstep(0.015, 0.033, y));
+	sideburn *= smoothstep(-0.010, -0.002, z) * (1.0 - smoothstep(0.010, 0.018, z));
+	float edge = 1.0 - smoothstep(0.073, 0.086, x);
+	float bottom = smoothstep(-0.123 + tuft, -0.100 + tuft, y);
+	return clamp(max(max(jaw, max(moustache, soul)) * front, sideburn) * edge * bottom, 0.0, 1.0);
+}
+
 float coverage(vec2 point, float z) {
+	if (style == 5) { return full_beard_coverage(point, z); }
 	float y = point.y - eye_height;
 	float x = abs(point.x);
 	float front = smoothstep(-0.012, 0.014, z);
@@ -38,6 +62,6 @@ void fragment() {
 	ROUGHNESS = 0.86;
 	SPECULAR = 0.18;
 	float stubble = smoothstep(0.25, 0.72, strands * broken);
-	ALPHA = coverage(UV, COLOR.g) * mix(stubble, 1.0, density) * (0.91 + 0.09 * broken);
+	ALPHA = coverage(UV, COLOR.g - 0.2) * mix(stubble, 1.0, density) * (0.91 + 0.09 * broken);
 	ALPHA_SCISSOR_THRESHOLD = 0.36;
 }
