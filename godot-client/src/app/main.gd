@@ -43,6 +43,7 @@ const CampaignBankWorksScript = preload("res://src/world/campaign_bank_works.gd"
 const CampaignRoadWorksScript = preload("res://src/world/campaign_road_works.gd")
 const CampaignLampsWorksScript = preload("res://src/world/campaign_lamps_works.gd")
 const CampaignGuidanceScript = preload("res://src/world/campaign_guidance.gd")
+const CampaignCrossingScript = preload("res://src/world/campaign_crossing.gd")
 @onready var campaign_scene := CampaignSceneScript.new()
 @onready var campaign_hud := CampaignHudScript.new()
 @onready var campaign_works := CampaignWorksScript.new()
@@ -50,6 +51,7 @@ const CampaignGuidanceScript = preload("res://src/world/campaign_guidance.gd")
 @onready var campaign_road_works := CampaignRoadWorksScript.new()
 @onready var campaign_lamps_works := CampaignLampsWorksScript.new()
 @onready var campaign_guidance := CampaignGuidanceScript.new()
+@onready var campaign_crossing := CampaignCrossingScript.new()
 const ArrivalCurtainScript = preload("res://src/ui/arrival_curtain.gd")
 const ArrivalPrewarmScript = preload("res://src/world/arrival_prewarm.gd")
 ## The loading screen from signing in, or a far arrival, until the character
@@ -1333,6 +1335,7 @@ func _ready() -> void:
 	world_root.add_child(campaign_road_works)
 	world_root.add_child(campaign_lamps_works)
 	world_root.add_child(campaign_guidance)
+	world_root.add_child(campaign_crossing)
 	campaign_scene.configure(main_viewport)
 	campaign_hud.target_requested.connect(_on_campaign_target)
 	campaign_hud.actor_target_requested.connect(_on_campaign_actor_target)
@@ -4126,6 +4129,7 @@ func _on_connection_state_changed(value: String) -> void:
 		campaign_road_works.clear()
 		campaign_lamps_works.clear()
 		campaign_guidance.clear()
+		campaign_crossing.clear()
 		_end_arrival()
 		if not game_view.visible or _leaving_session:
 			respawn_prewarm.discard()
@@ -5804,6 +5808,7 @@ func _on_state_changed(path: StringName) -> void:
 			campaign_road_works.clear()
 			campaign_lamps_works.clear()
 			campaign_guidance.clear()
+			campaign_crossing.clear()
 			_pickpoint_draft.clear()
 			_pickpoint_submitting = false
 			_load_server_map()
@@ -7233,6 +7238,7 @@ func _update_campaign(delta: float) -> void:
 		campaign_road_works.clear()
 		campaign_lamps_works.clear()
 		campaign_guidance.clear()
+		campaign_crossing.clear()
 		return
 	var ready := not character_intro.is_active() and not arrival_curtain.blocks_input() \
 		and _grounded_actors.has(AppState.local_actor_id)
@@ -7245,6 +7251,8 @@ func _update_campaign(delta: float) -> void:
 			_campaign_surface_height, campaign_scene.reduced_motion)
 		campaign_lamps_works.apply_snapshot(AppState.campaign, adapter, AppState.current_map,
 			_campaign_surface_height, campaign_scene.reduced_motion)
+		campaign_crossing.apply_snapshot(AppState.campaign, adapter, AppState.current_map,
+			_campaign_surface_height)
 	campaign_scene.update_ambient(AppState.campaign, actor_nodes, adapter, _campaign_surface_height, delta)
 	campaign_scene.update(delta, AppState.campaign, camera_rig, actor_nodes,
 		AppState.local_actor_id, AppState.current_map, ready, adapter, _campaign_surface_height)
@@ -7261,6 +7269,7 @@ func _update_campaign(delta: float) -> void:
 	campaign_hud.set_replay_available(_campaign_replay_ready() \
 		and campaign_scene.can_replay(AppState.campaign, AppState.current_map))
 	lantern_guide.apply_campaign(AppState.campaign)
+	campaign_crossing.set_readouts_visible(lantern_guide.using_campaign() and not campaign_scene.is_active())
 	campaign_guidance.apply_snapshot(AppState.campaign, map_object_nodes, actor_nodes,
 		AppState.current_map, tile if tile is Vector2i else Vector2i.ZERO,
 		lantern_guide.using_campaign(), not ready or campaign_scene.is_active())

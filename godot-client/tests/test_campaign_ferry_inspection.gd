@@ -21,7 +21,7 @@ func fixture(token: String, helper := false) -> Dictionary:
 	var adapter := CoordinateAdapter.new({"metresPerTile":1.0,"serverOrigin":[435,448],"walkingHeight":2.5,"invertServerY":true})
 	var actors := {}
 	for id: int in [1,2,3,4,5,6]:
-		var tile: Vector2i = {1:Vector2i(450,308),2:Vector2i(450,313),3:Vector2i(457,319),4:Vector2i(444,310),5:Vector2i(456,318),6:Vector2i(451,308)}[id]
+		var tile: Vector2i = CameraFixture.PIER_TILES[id]
 		var actor := CameraFixture.Actor.new()
 		stage.add_child(actor)
 		actor.global_position = adapter.tile_center(tile.x,tile.y)
@@ -46,9 +46,9 @@ func fixture(token: String, helper := false) -> Dictionary:
 	choice.can_choose = false
 	var state := {"version":1,"kind":"opening","active":true,"run_id":"inspection-run","map":"greenlight","title":"The Ferry That Arrived Twice","key":"assess","targets":[],
 		"actors":{"odo":2,"worker":3,"clerk":4,"foreman":5,"protagonist":1},
-		"anchors":{"clerk_arrival":[444,310],"clerk_stand":[447,312],"foreman_arrival":[456,318],"foreman_turn":[455,317],"foreman_stand":[453,315],"protagonist_post":[450,308],"inspection_turn":[449,309],"inspection_stand":[448,310],"inspection_damage":[450,310]},
+		"anchors":CameraFixture.PIER_ANCHORS.duplicate(true),
 		"scene":{"id":"measure.landing.arrival","token":token,"requires_ack":true,"ack_revision":0,"choice":choice,
-			"inspection":{"id":"landing_overview","actor_id":1,"object_id":61001,"status":"waiting_owner" if helper else "pending","can_start":not helper,"path":[[449,309],[448,310]],"approach":[448,310]}}}
+			"inspection":{"id":"landing_overview","actor_id":1,"object_id":61001,"status":"waiting_owner" if helper else "pending","can_start":not helper,"path":[[438,321],[436,320]],"approach":[436,320]}}}
 	state.scene.actors = state.actors.duplicate(true)
 	var inspections: Array[String] = []
 	var choices: Array[String] = []
@@ -91,15 +91,19 @@ func run() -> void:
 	expect(f.inspections.is_empty() and f.scene._actors.protagonist == f.actors[1],"the actual local protagonist is staged but inspection is not requested before its authored cue")
 	at(f,19); tick(f,0); tick(f,0.1)
 	expect(f.inspections == ["start"] and f.scene.inspection_context().waiting,"the inspection cue requests native work exactly once")
-	at(f,20.2)
-	expect(f.actors[1].global_position.is_equal_approx(f.adapter.tile_center(449,309)),"the visible protagonist follows the actual inspection turn anchor")
+	expect(f.actors[1].action == &"run", "the protagonist runs along the longer shore approach before slowing at the pier mouth")
+	at(f,20.8)
+	expect(f.actors[1].global_position.is_equal_approx(f.adapter.tile_center(438,321)),"the visible protagonist follows the actual pier inspection turn anchor")
 	expect(f.actors[1].server_target == original_target and JSON.stringify(f.state) == original_state,"visual staging alone cannot move the authoritative target or mark inspection complete")
 	f.state.scene.inspection.status = "walking"
 	f.state.scene.inspection.can_start = false
-	f.actors[1].server_target.origin = f.adapter.tile_center(449,309)
+	f.actors[1].server_target.origin = f.adapter.tile_center(438,321)
+	at(f,21.4)
+	expect(f.actors[1].action == &"walk" and f.actors[1].global_position.distance_to(f.adapter.tile_center(436,320)) < f.adapter.tile_center(438,321).distance_to(f.adapter.tile_center(436,320)), "the final inspection leg slows to a careful walk toward the existing deck")
 	at(f,22)
-	expect(f.actors[1].global_position.is_equal_approx(f.adapter.tile_center(448,310)) and f.actors[1].action == &"pickup","the protagonist reaches and examines the authored damaged-access post")
-	f.actors[1].server_target.origin = f.adapter.tile_center(448,310)
+	expect(f.actors[1].global_position.is_equal_approx(f.adapter.tile_center(436,320)) and f.actors[1].action == &"pickup","the protagonist reaches and examines the authored pier support post")
+	expect(f.state.scene.inspection.path == [[438,321],[436,320]] and f.state.anchors.inspection_damage == [433,319], "the native inspection path faces the marked loose support rather than the former inland target")
+	f.actors[1].server_target.origin = f.adapter.tile_center(436,320)
 	at(f,24)
 	var wait_view: Transform3D = f.camera.global_transform
 	tick(f,65)

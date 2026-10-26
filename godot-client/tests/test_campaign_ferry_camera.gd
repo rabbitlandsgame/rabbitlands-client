@@ -1,5 +1,15 @@
 extends SceneTree
 const Presentation := preload("res://src/world/campaign_scene.gd")
+# Authored native pier posts, shared by the controller-only fixtures below.
+# The body/collision route is covered by the server's native layout tests.
+const PIER_TILES := {1:Vector2i(444,322), 2:Vector2i(442,319), 3:Vector2i(425,316),
+	4:Vector2i(447,317), 5:Vector2i(432,317), 6:Vector2i(446,322)}
+const PIER_ANCHORS := {"entry":[444,322], "odo_meeting":[442,319], "clerk_arrival":[447,317],
+	"clerk_turn":[445,319], "clerk_stand":[444,319], "foreman_arrival":[432,317],
+	"foreman_turn":[435,318], "foreman_stand":[440,318], "protagonist_post":[444,322],
+	"inspection_turn":[438,321], "inspection_stand":[436,320], "inspection_damage":[433,319],
+	"crossing_near":[435,320], "crossing_center":[430,318], "crossing_far":[425,316],
+	"worker_far":[425,316], "muster":[441,325]}
 var checks := 0
 var failures := 0
 
@@ -34,8 +44,8 @@ func fixture(token: String) -> Dictionary:
 	var stage := Node3D.new()
 	root.add_child(stage)
 	var adapter := CoordinateAdapter.new({"metresPerTile": 1.0, "serverOrigin": [435, 448], "walkingHeight": 2.5, "invertServerY": true})
-	var roles := {"odo": 2, "worker": 3, "clerk": 4, "foreman": 5}
-	var tiles := {1: Vector2i(450, 308), 2: Vector2i(450, 313), 3: Vector2i(457, 319), 4: Vector2i(444, 310), 5: Vector2i(456, 318)}
+	var roles := {"odo": 2, "worker": 3, "clerk": 4, "foreman": 5, "protagonist": 1}
+	var tiles := PIER_TILES
 	var actors := {}
 	for id: int in tiles:
 		var actor := Actor.new()
@@ -61,8 +71,7 @@ func fixture(token: String) -> Dictionary:
 	scene.set_reduced_motion(false, false)
 	var state := {"version": 1, "kind": "opening", "active": true, "run_id": "ferry-camera", "map": "greenlight",
 		"title": "The Ferry That Arrived Twice", "key": "assess", "actors": roles, "targets": [],
-		"anchors": {"odo_meeting": [450, 313], "clerk_arrival": [444, 310], "clerk_stand": [447, 312],
-			"foreman_arrival": [456, 318], "foreman_turn": [455, 317], "foreman_stand": [453, 315]},
+		"anchors": PIER_ANCHORS.duplicate(true),
 		"scene": {"id": "measure.landing.arrival", "token": token, "requires_ack": true, "ack_revision": 1}}
 	return {"stage": stage, "scene": scene, "rig": rig, "camera": camera, "actors": actors,
 		"adapter": adapter, "state": state, "original": camera.global_transform, "focus": rig.focus,
@@ -83,7 +92,17 @@ func run() -> void:
 	root.get_node("Network").call("block_for_hud_preview")
 	var arrival: Dictionary = Presentation.scene_definitions()["measure.landing.arrival"]
 	var duration := float(arrival.duration)
+	var first_shot: Dictionary = arrival.shots[0].duplicate(true)
+	first_shot.erase("t")
+	var one_fixed_shot := true
+	for shot: Dictionary in arrival.shots:
+		var placement := shot.duplicate(true)
+		placement.erase("t")
+		one_fixed_shot = one_fixed_shot and placement == first_shot
+	expect(one_fixed_shot and first_shot.get("anchor") == "crossing_near", "the arrival uses one fixed pier-anchored group shot throughout its authored hold")
 	var f := fixture("continuous")
+	expect(f.state.anchors.crossing_near == [435,320] and f.state.anchors.crossing_center == [430,318] \
+		and f.state.anchors.crossing_far == [425,316], "near, center and far anchors identify the existing pier rather than the old dry court")
 	var results: Array = []
 	f.scene.presentation_finished.connect(func(token: String, reason: String) -> void: results.append([token, reason]))
 	tick(f, 0.0)
@@ -93,27 +112,32 @@ func run() -> void:
 	expect(f.camera.global_position.distance_to(f.original.origin) < 0.01, "entry starts gently without a position jump")
 	at(f, 1.2)
 	expect(f.camera.global_position.distance_to(f.original.origin) > 0.1 and f.camera.fov > 50 and f.camera.fov < 67, "the camera and lens interpolate through the approach")
+	at(f, 3.0)
+	expect((f.actors[4] as Node3D).global_position.is_equal_approx(tile_position(f, Vector2i(445,319))), "the clerk passes the shore-side turn before joining Odo")
 	at(f, 4.0)
 	var group_view: Transform3D = f.camera.global_transform
-	expect((f.actors[4] as Node3D).global_position.is_equal_approx(tile_position(f, Vector2i(447, 312))), "the clerk walks from the ferry side to Odo before speaking")
-	expect((f.actors[5] as Node3D).global_position.is_equal_approx(tile_position(f, Vector2i(455, 317))), "the foreman approaches through the dry quay waypoint")
-	expect((f.actors[3] as Node3D).global_transform.is_equal_approx((f.actors[3] as Actor).server_target), "the injured worker stays at the rescue site during the briefing")
+	expect((f.actors[4] as Node3D).global_position.is_equal_approx(tile_position(f, Vector2i(444,319))), "the clerk walks from the shore post to Odo before speaking")
+	expect((f.actors[5] as Node3D).global_position.is_equal_approx(tile_position(f, Vector2i(435,318))), "the foreman approaches from the pier through its authored waypoint")
+	expect((f.actors[3] as Node3D).global_position.is_equal_approx((f.actors[3] as Actor).server_target.origin) \
+		and f.actors[3].action == &"emote_rest", "the injured worker rests at the remote pier post during the briefing")
 	at(f, 6.0)
-	expect(f.scene._dialogue.speaker_label.text == "Odo Fenn" and f.scene._caption.text.contains("safe way"), "Odo's highlighted name is separate from his dialogue")
+	expect(f.scene._dialogue.speaker_label.text == "Odo Fenn" and f.scene._caption.text.contains("One careful helper can pass"), "Odo's highlighted name is separate from his dialogue")
+	at(f, 7.0)
+	expect((f.actors[5] as Node3D).global_position.is_equal_approx(tile_position(f, Vector2i(440,318))), "the foreman reaches the shore meeting while the worker remains farther out")
 	at(f, 10.0)
 	expect(f.scene._dialogue.speaker_label.text == "Landing clerk", "the visible clerk receives the clerk's dialogue")
 	expect(f.camera.global_transform.is_equal_approx(group_view), "the clerk speaks inside the same steady group view")
 	at(f, 14.0)
-	expect(f.scene._dialogue.speaker_label.text == "Dock foreman" and f.scene._caption.text.contains("crew"), "the healthy foreman speaks for the crew")
+	expect(f.scene._dialogue.speaker_label.text == "Dock foreman" and f.scene._caption.text.contains("farther out on the pier"), "the healthy foreman identifies the injured worker's visible pier location")
 	at(f, 19.0)
-	expect(f.scene._caption.text.contains("damaged boards"), "Odo names the physical inspection before any rescue choice")
+	expect(f.scene._caption.text.contains("jammed support at the pier mouth"), "Odo names the physical pier inspection before any rescue choice")
 	expect(f.camera.global_transform.is_equal_approx(group_view), "speaker changes and the inspection instruction keep the group framing steady")
 	at(f, duration - 2.0)
 	expect((f.actors[4] as Node3D).global_position.is_equal_approx((f.actors[4] as Actor).server_target.origin) \
 		and (f.actors[5] as Node3D).global_position.is_equal_approx((f.actors[5] as Actor).server_target.origin), "both healthy speakers walk back to their live posts before camera release")
 	var moving: Actor = f.actors[1]
 	var displacement := Vector3(2, 0.3, -1)
-	moving.global_position += displacement
+	moving.server_target.origin += displacement
 	var target: Transform3D = f.original
 	target.origin += displacement
 	at(f, duration - 0.5)
@@ -128,8 +152,10 @@ func run() -> void:
 	dispose(f)
 	var seek := fixture("seek")
 	tick(seek, 0.0); at(seek, 10.0)
-	var shot_offset: Array = arrival.shots[0].position
-	var group_shot: Vector3 = (seek.actors[2] as Node3D).global_position + Vector3(shot_offset[0],shot_offset[1],shot_offset[2])
+	var shot: Dictionary = arrival.shots[0]
+	var shot_offset: Array = shot.position
+	var anchor_tile: Array = seek.state.anchors[shot.anchor]
+	var group_shot: Vector3 = tile_position(seek, Vector2i(anchor_tile[0],anchor_tile[1])) + Vector3(shot_offset[0],shot_offset[1],shot_offset[2])
 	expect(seek.camera.global_position.is_equal_approx(group_shot), "a direct arrival seek retains the authored group view rather than cutting to the current speaker")
 	dispose(seek)
 	# Keep the generic pose-order regression independent of this scene's new

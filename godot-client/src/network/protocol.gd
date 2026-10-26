@@ -3726,7 +3726,24 @@ static func decode_campaign(payload: PackedByteArray) -> Dictionary:
 		return {"type": "invalid", "error": "campaign_road"}
 	if not _campaign_lamps_valid(value.get("lamps", {})):
 		return {"type": "invalid", "error": "campaign_lamps"}
+	if not campaign_crossing_valid(value.get("crossing", {})):
+		return {"type": "invalid", "error": "campaign_crossing"}
 	return {"type": "campaign", "state": value}
+
+static func campaign_crossing_valid(crossing: Variant) -> bool:
+	if not crossing is Dictionary:
+		return false
+	if crossing.is_empty():
+		return true
+	if crossing.get("id") != "greenlight_inner_pier":
+		return false
+	for field: String in ["damage_tile", "work_tile", "far_tile", "muster_tile"]:
+		if not _campaign_tile(crossing.get(field)):
+			return false
+	for flag: String in ["single_file", "braced", "load_tested", "rope_secured", "worker_safe"]:
+		if not crossing.get(flag) is bool:
+			return false
+	return true
 
 static func campaign_scene_inspection_valid(inspection: Variant) -> bool:
 	if not inspection is Dictionary:

@@ -4,6 +4,7 @@ extends SceneTree
 const Presentation := preload("res://src/world/campaign_scene.gd")
 const Guidance := preload("res://src/world/campaign_guidance.gd")
 const Hud := preload("res://src/ui/campaign_hud.gd")
+const Crossing := preload("res://src/world/campaign_crossing.gd")
 var checks := 0
 var failures := 0
 var directory := ""
@@ -15,6 +16,7 @@ var presentation: Node
 var guide: Control
 var hud: Control
 var guidance: Node
+var crossing: Node3D
 var adapter: CoordinateAdapter
 var actors: Dictionary = {}
 var objects: Dictionary = {}
@@ -62,6 +64,8 @@ func run() -> void:
 		quit(1)
 		return
 	bundle = JSON.parse_string(FileAccess.get_file_as_string(source))
+	local_id = int(bundle.local_actor_id)
+	adapter = CoordinateAdapter.new({"metresPerTile": 1.0, "serverOrigin": [435, 448], "walkingHeight": 2.5})
 	fixture_source = source
 	directory = OS.get_environment("RL_FERRY_PREVIEW_OUT")
 	if directory.is_empty(): directory = "user://ferry-preview"
@@ -92,15 +96,14 @@ func run() -> void:
 	stage.add_child(loader)
 	var loaded := [false]
 	loader.load_completed.connect(func(_manifest: WorldManifest) -> void: loaded[0] = true)
-	loader.load_world(ProjectSettings.globalize_path("res://../eloria-assets/maps/continent-v2/greenlight/client/world.json"), Vector3(15.5, 2.5, 140.5))
+	var entry: Array = bundle.players[0].tile
+	loader.load_world(ProjectSettings.globalize_path("res://../eloria-assets/maps/continent-v2/greenlight/client/world.json"), adapter.tile_center(int(entry[0]), int(entry[1])))
 	var deadline := Time.get_ticks_msec() + 90000
 	while not loaded[0] and Time.get_ticks_msec() < deadline: await process_frame
 	expect(loaded[0], "the production Greenlight quay loads")
 	if not loaded[0]: quit(1); return
 	main.gameplay_world = stage.get_world_3d()
-	adapter = CoordinateAdapter.new({"metresPerTile": 1.0, "serverOrigin": [435, 448], "walkingHeight": 2.5})
 	main.adapter = adapter
-	local_id = int(bundle.local_actor_id)
 	var registry: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/models.json"))
 	var people: Array = bundle.players.duplicate(true)
 	for person: Dictionary in bundle.cast.values(): people.append(person)
@@ -128,6 +131,15 @@ func run() -> void:
 		object.configure(dto, adapter, catalog)
 		objects[int(spec.object_id)] = object
 	await physics_frame
+	deadline = Time.get_ticks_msec() + 15000
+	while Time.get_ticks_msec() < deadline:
+		var all_surfaces := true
+		for actor: ReplicatedActor3D in actors.values():
+			if not is_finite(float(main.call("_campaign_surface_height", actor.global_position))):
+				all_surfaces = false
+		if all_surfaces: break
+		await process_frame
+		await physics_frame
 	for actor: ReplicatedActor3D in actors.values():
 		var ground: float = main.call("_campaign_surface_height", actor.global_position)
 		expect(is_finite(ground), "a native actor stands on a real navigation surface")
@@ -152,6 +164,8 @@ func run() -> void:
 	presentation.inspection_requested.connect(preview_inspection)
 	guidance = Guidance.new()
 	stage.add_child(guidance)
+	crossing = Crossing.new()
+	stage.add_child(crossing)
 	guide = (load("res://src/ui/lantern_guide.gd") as GDScript).new()
 	root.add_child(guide)
 	guide.configure(main)
@@ -192,13 +206,14 @@ func run() -> void:
 		for stamp: float in samples.keys():
 			if time >= stamp:
 				if stamp == 19.7:
-					expect(inspection_calls == ["start"] and (actors[local_id] as ReplicatedActor3D)._cinematic_action == &"walk", "the protagonist walks during one explicit native inspection request")
+					expect(inspection_calls == ["start"] and (actors[local_id] as ReplicatedActor3D)._cinematic_action in [&"walk", &"run"], "the protagonist approaches the real pier during one native inspection request")
 				if stamp == 22.4:
 					expect((actors[local_id] as ReplicatedActor3D)._cinematic_action == &"pickup", "the protagonist visibly examines the damaged boards before deciding")
 				await capture(str(samples[stamp]))
 				samples.erase(stamp)
 		if presentation.choice_context().waiting and not chose:
 			chose = true
+			expect(is_instance_valid(crossing.native) and crossing.debris.visible, "the damaged access has a visible approved debris model on the real pier")
 			expect(str(state.scene.inspection.status) == "complete", "choices wait for the native inspection proof")
 			expect_player_dialogue("live decision")
 			group_view = rig.camera.global_transform
@@ -230,6 +245,9 @@ func run() -> void:
 	tick(0.0); tick(19.7)
 	expect(inspection_calls == ["start"], "replaying the walk sends no native inspection or movement request")
 	tick(6.4)
+	# A direct seek changes the native actor's target yaw. Let its ordinary
+	# turn interpolation catch up, as it does during the authored two-second turn.
+	await create_timer(0.35).timeout
 	expect_player_dialogue("recorded replay")
 	expect(presentation._choice_dialog.continue_button.visible and presentation._choice_dialog.status_label.text.begins_with("Recorded choice:"), "replay shows the recorded plan and waits for Continue")
 	for id: String in presentation._choice_dialog.option_buttons:
@@ -246,7 +264,9 @@ func run() -> void:
 	expect(results.size() == 1 and inspection_calls == ["start"] and choice_calls == ["repair"] and JSON.stringify(state) == recorded, "replay cannot repeat inspection, choice, progress or scene acknowledgment")
 	root.size = Vector2i(1280,720); root.content_scale_factor = 1.0
 	state = snapshot("repair-seal-inspected")
-	set_local_tile(Vector2i(449,301), true)
+	for row: Dictionary in bundle.snapshots:
+		if str(row.label) == "repair-seal-inspected":
+			set_local_tile(Vector2i(int(row.local_tile[0]), int(row.local_tile[1])), true)
 	tick(0.0)
 	await capture("20-next-quest-action-after-conversation")
 	await finish_preview()
@@ -310,6 +330,7 @@ func review_smoke(option_id: String) -> void:
 	var recorded := JSON.stringify(state)
 	expect(presentation.request_replay(state, "greenlight"), "offline inspection conversation remains replayable")
 	tick(0.0); tick(26.1)
+	await create_timer(0.35).timeout
 	expect_player_dialogue("offline replay")
 	await capture("offline-" + option_id + "-player-recorded-choice")
 	presentation._choice_dialog.continue_button.pressed.emit(); tick(1.0)
@@ -367,7 +388,9 @@ func tick(delta: float) -> void:
 	if inspection_delivery >= 0.0 and presentation.elapsed + delta >= inspection_delivery:
 		inspection_delivery = -1.0
 		state = snapshot("post-inspect")
-		set_local_tile(Vector2i(448,310))
+		var approach: Array = state.scene.inspection.approach
+		set_local_tile(Vector2i(int(approach[0]), int(approach[1])))
+	crossing.apply_snapshot(state, adapter, "greenlight", Callable(main, "_campaign_surface_height"))
 	presentation.update(delta, state, rig, actors, local_id, "greenlight", true, adapter, Callable(main, "_campaign_surface_height"))
 	var tile: Vector2i = adapter.godot_to_server((actors[local_id] as Node3D).global_position)
 	hud.apply_state(state, tile, "greenlight", presentation.reduced_motion, presentation.is_active())
@@ -375,6 +398,7 @@ func tick(delta: float) -> void:
 	guide.apply_campaign(state)
 	guide._process(0.0)
 	guidance.apply_snapshot(state, objects, actors, "greenlight", tile, guide.using_campaign(), presentation.is_active())
+	crossing.set_readouts_visible(guide.using_campaign() and not presentation.is_active())
 
 func visible_rings() -> int:
 	var count := 0

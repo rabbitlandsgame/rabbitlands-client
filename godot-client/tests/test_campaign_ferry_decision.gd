@@ -6,9 +6,9 @@ const CameraFixture := preload("res://tests/test_campaign_ferry_camera.gd")
 var checks := 0
 var failures := 0
 const RESPONSES := {
-	"defend":"I will keep the crew back. Clear the startled cargo scavenger from the marked approach, then secure the landing rope so everyone can cross.",
-	"repair":"Start at the leaking seal north of me. Inspect it, compare the workbench parts, fit one Wood Plank at the access mechanism, then test the repair.",
-	"evacuate":"Start with the injured worker on the southeast quay. Use one Bandage, then walk with them to the dry muster point and confirm they are safe."}
+	"defend":"I will keep the crew and cargo back. One helper can use the deck. Clear the startled scavenger, then secure the marked handline so the crew can pass one at a time.",
+	"repair":"Start at the marked damaged access. Inspect the loose support joint, compare the shore workbench parts, fit one Wood Plank at the support, then test its load. Leave the loaded cargo ashore until it holds.",
+	"evacuate":"Use the single-file deck to reach the injured worker's marked post. Apply one Bandage, then walk with them to the shore muster point. Keep the rest of the crew and cargo back."}
 
 func _init() -> void: run.call_deferred()
 func expect(ok: bool, message: String) -> void:
@@ -22,8 +22,8 @@ static func decision(owner := true) -> Dictionary:
 	# Same public contract and initial instructions as the native server bundles.
 	return {"id":"opening_rescue", "title":"How will you get the worker clear?", "selected":"", "response":"",
 		"can_choose":owner, "owner":"MeasureHuman0", "owner_is_you":owner, "options":[
-		{"id":"defend", "label":"Clear the approach", "detail":"Keep the crew back, defeat the startled cargo scavenger, then secure the landing rope. No supplies are required."},
-		{"id":"repair", "label":"Repair the access", "detail":"Inspect the leaking joint, compare the workbench parts, fit one Wood Plank, then test the repair. The plank is consumed when fitted."},
+		{"id":"defend", "label":"Clear the approach", "detail":"Use the single-file deck, defeat the startled cargo scavenger, then rig a safe handline while the crew stays back. No supplies are required."},
+		{"id":"repair", "label":"Brace the landing", "detail":"Inspect the loose support, compare packing with heavy ballast, fit one Wood Plank, then test the load. The plank is consumed when fitted."},
 		{"id":"evacuate", "label":"Lead an evacuation", "detail":"Use one Bandage to stabilize the injured worker, then walk with them to the dry muster point. The bandage is consumed during treatment."}]}
 
 func fixture(token: String, owner := true) -> Dictionary:
@@ -31,7 +31,7 @@ func fixture(token: String, owner := true) -> Dictionary:
 	root.add_child(stage)
 	var adapter := CoordinateAdapter.new({"metresPerTile":1.0, "serverOrigin":[435,448], "walkingHeight":2.5, "invertServerY":true})
 	var actors := {}
-	var tiles := {1:Vector2i(450,308), 2:Vector2i(450,313), 3:Vector2i(457,319), 4:Vector2i(444,310), 5:Vector2i(456,318)}
+	var tiles := CameraFixture.PIER_TILES
 	for id: int in tiles:
 		var actor := CameraFixture.Actor.new()
 		stage.add_child(actor)
@@ -54,8 +54,7 @@ func fixture(token: String, owner := true) -> Dictionary:
 	scene.set_reduced_motion(false, false)
 	var state := {"version":1, "kind":"opening", "active":true, "run_id":"decision-run", "map":"greenlight",
 		"title":"The Ferry That Arrived Twice", "key":"rescue", "actors":{"odo":2,"worker":3,"clerk":4,"foreman":5,"protagonist":1}, "targets":[],
-		"anchors":{"odo_meeting":[450,313], "clerk_arrival":[444,310], "clerk_stand":[447,312],
-			"foreman_arrival":[456,318], "foreman_turn":[455,317], "foreman_stand":[453,315]},
+		"anchors":CameraFixture.PIER_ANCHORS.duplicate(true),
 		"scene":{"id":"measure.landing.plan", "token":token, "requires_ack":true, "ack_revision":1, "choice":decision(owner)}}
 	var ordinary: Array = []
 	var replay: Array = []
