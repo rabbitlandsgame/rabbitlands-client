@@ -1,7 +1,8 @@
 class_name HumanLocomotionPolish
 extends RefCounted
 ## Human-only, immutable derivatives of the imported travel clips. The source
-## library, body/skin/rest pose, root, torso and lower-body channels stay exact.
+## library, body/skin/rest pose, root and lower-body channels stay exact. The
+## male reference pass adds upper-body intent; the female pass stays exact.
 ## Runtime playback uses ordinary cached Animation resources at every quality.
 
 const SOURCE_META := &"human_locomotion_source"
@@ -10,6 +11,7 @@ const CACHE_LIMIT := 8
 const CLIPS: Array[StringName] = [&"Walk", &"Run_Female"]
 const ARM_BONES := ["clavicle_l", "clavicle_r", "upperarm_l", "upperarm_r",
 	"lowerarm_l", "lowerarm_r", "hand_l", "hand_r"]
+const RUN_TORSO := {"spine_01": 4.0, "spine_02": 2.0, "neck_01": -2.0}
 static var _libraries: Dictionary = {}
 
 static func supports(model: Dictionary) -> bool:
@@ -54,6 +56,8 @@ static func derive(source: AnimationLibrary, profile := "female", skeleton: Skel
 		var clip := _travel(animation, name == &"Run_Female", neutral) if name in CLIPS else animation
 		if name in CLIPS and profile == "male":
 			_male_placement(clip, skeleton, name == &"Run_Female")
+			if name == &"Run_Female" and source.has_animation(&"Fighting_Idle"):
+				_male_running_hands(clip, source.get_animation(&"Fighting_Idle"), skeleton)
 		result.add_animation(name, clip)
 	if _libraries.size() >= CACHE_LIMIT:
 		_libraries.erase(_libraries.keys()[0])
@@ -85,6 +89,8 @@ static func _male_placement(animation: Animation, skeleton: Skeleton3D, running:
 		var bone := str(animation.track_get_path(track).get_concatenated_subnames()).get_slice(":", 0)
 		if not channels.has(bone): channels[bone] = {}
 		channels[bone][animation.track_get_type(track)] = track
+	if running:
+		_male_running_torso(animation, skeleton, channels)
 	var frames := {}
 	var pending := {}
 	# Read every source pose before replacing any keys, so a later sample
@@ -104,8 +110,7 @@ static func _male_placement(animation: Animation, skeleton: Skeleton3D, running:
 		for index: int in values.size():
 			animation.track_set_key_value(track, index, values[index])
 
-static func _male_pose(animation: Animation, skeleton: Skeleton3D, channels: Dictionary,
-		time: float, running: bool) -> Dictionary:
+static func _pose_at(animation: Animation, skeleton: Skeleton3D, channels: Dictionary, time: float) -> Dictionary:
 	var local: Array[Transform3D] = []
 	var global: Array[Transform3D] = []
 	var t := fposmod(time, animation.length) if animation.length > 0 else 0.0
@@ -119,6 +124,53 @@ static func _male_pose(animation: Animation, skeleton: Skeleton3D, channels: Dic
 		local.append(transform)
 		var parent := skeleton.get_bone_parent(bone)
 		global.append(global[parent] * transform if parent >= 0 else transform)
+	return {"local": local, "global": global}
+
+static func _male_running_torso(animation: Animation, skeleton: Skeleton3D, channels: Dictionary) -> void:
+	# The frontal references establish forward running intent, not a measured
+	# 3D pitch. This modest native-length spine lean is an authored depth
+	# interpretation; the pelvis, legs and support surfaces remain untouched.
+	for name: String in RUN_TORSO:
+		var bone := skeleton.find_bone(name)
+		if bone < 0 or not channels.get(name, {}).has(Animation.TYPE_ROTATION_3D): continue
+		var track: int = channels[name][Animation.TYPE_ROTATION_3D]
+		var values: Array[Quaternion] = []
+		for key: int in animation.track_get_key_count(track):
+			var pose := _pose_at(animation, skeleton, channels, animation.track_get_key_time(track, key))
+			var global: Array = pose.global
+			var parent := skeleton.get_bone_parent(bone)
+			var aimed: Basis = Basis(Vector3.RIGHT, deg_to_rad(RUN_TORSO[name])) * global[bone].basis
+			values.append((global[parent].basis.inverse() * aimed).orthonormalized().get_rotation_quaternion().normalized())
+		for key: int in values.size(): animation.track_set_key_value(track, key, values[key])
+
+static func _male_running_hands(animation: Animation, fist: Animation, skeleton: Skeleton3D) -> void:
+	var targets := {}
+	for track: int in fist.get_track_count():
+		if fist.track_get_type(track) == Animation.TYPE_ROTATION_3D:
+			targets[str(fist.track_get_path(track).get_concatenated_subnames())] = track
+	for track: int in animation.get_track_count():
+		if animation.track_get_type(track) != Animation.TYPE_ROTATION_3D: continue
+		var bone := str(animation.track_get_path(track).get_concatenated_subnames())
+		if not targets.has(bone) or bone.get_slice("_", 0) not in ["thumb", "index", "middle", "ring", "pinky"]: continue
+		var joint := skeleton.find_bone(bone)
+		# The shared library also carries terminal finger channels absent from
+		# these body rigs. Leave those original tracks alone.
+		if joint < 0 or int(bone.get_slice("_",1)) not in [1,2,3]: continue
+		var closed := fist.rotation_track_interpolate(targets[bone], 0.0)
+		# Stay within the established native grip. This source skin keeps much
+		# of the distal hand rigid; forcing further bone curl distorts creases
+		# without making a closed fist. Skin refinement is a separate change.
+		for key: int in animation.track_get_key_count(track):
+			var original: Quaternion = animation.track_get_key_value(track, key)
+			animation.track_set_key_value(track, key, original.slerp(closed,0.8 if bone.begins_with("thumb_") else 0.95).normalized())
+	# Equipped hands retain the final existing WeaponCarryPose grip override.
+
+static func _male_pose(animation: Animation, skeleton: Skeleton3D, channels: Dictionary,
+		time: float, running: bool) -> Dictionary:
+	var pose := _pose_at(animation, skeleton, channels, time)
+	var local: Array = pose.local
+	var global: Array = pose.global
+	var center: float = global[skeleton.find_bone("pelvis")].origin.x
 	var result := {}
 	for side: String in ["l", "r"]:
 		var sign := 1.0 if side == "l" else -1.0
@@ -129,25 +181,27 @@ static func _male_pose(animation: Animation, skeleton: Skeleton3D, channels: Dic
 		var parent := skeleton.get_bone_parent(upper)
 		var shoulder: Transform3D = global[upper]
 		var upper_vector: Vector3 = shoulder.basis * local[lower].origin
-		var desired := _with_width(upper_vector, sign * (0.045 if running else 0.035))
-		if running:
-			# The source upper-arm swing is centred behind the chest: both
-			# hands dip together at the passing phases. Keep its phase but
-			# centre a smaller male swing under/slightly ahead of the shoulder.
-			var z := clampf(upper_vector.z * 0.75 + 0.08, -upper_vector.length() * 0.7, upper_vector.length() * 0.7)
-			desired = Vector3(desired.x, -sqrt(maxf(upper_vector.length_squared() - desired.x * desired.x - z * z, 0.000001)), z)
+		# Reviewed frontal video shows continuous alternating pumps. The source
+		# run holds an upper arm behind the torso for half its cycle. Replace
+		# that plateau with a periodic guide at the original contralateral leg
+		# phase; neither video establishes a new physical forward stride speed.
+		var phase := fposmod(time / animation.length, 1.0)
+		var swing := cos(phase * TAU + (0.0 if side == "l" else PI)) * (1.0 if running else -1.0)
+		var forward := (swing + 1.0) * 0.5
+		var arm_angle := deg_to_rad(3.0 + 26.0 * swing if running else -3.0 + 20.0 * swing)
+		var width := sign * (0.040 if running else 0.030)
+		var radius := sqrt(maxf(upper_vector.length_squared() - width * width, 0.000001))
+		var desired := Vector3(width, -radius * cos(arm_angle), radius * sin(arm_angle))
 		shoulder.basis = Basis(Quaternion(upper_vector.normalized(), desired.normalized())) * shoulder.basis
 		result["upperarm_" + side] = (global[parent].basis.inverse() * shoulder.basis).orthonormalized().get_rotation_quaternion().normalized()
 		var elbow: Transform3D = shoulder * local[lower]
 		var forearm: Vector3 = elbow.basis * local[hand].origin
-		var wrist_x := sign * maxf(absf(shoulder.origin.x) + (0.035 if running else 0.055), 0.220 if running else 0.225)
-		desired = _with_width(forearm, wrist_x - elbow.origin.x)
-		if running:
-			# Preserve a purposeful bent elbow even on the rear arm. Solve
-			# the forearm on a constant-flexion cone while retaining front
-			# clearance; hand width alone can hide a straight-looking elbow.
-			var upper_direction: Vector3 = (shoulder.basis * local[lower].origin).normalized()
-			desired = _bent_forearm(upper_direction, forearm.length(), wrist_x - elbow.origin.x, deg_to_rad(86.0))
+		var wrist_x := center + sign * (0.250 - 0.130 * forward if running else 0.225 - 0.020 * forward)
+		# Rising hands travel inward toward the chest, then release beside the
+		# hip. Keep the rear elbow bent and let the front bend tighten gently.
+		var upper_direction: Vector3 = (shoulder.basis * local[lower].origin).normalized()
+		var flex := deg_to_rad(86.0 + 6.0 * swing if running else 20.0 + 12.0 * forward)
+		desired = _bent_forearm(upper_direction, forearm.length(), wrist_x - elbow.origin.x, flex)
 		elbow.basis = Basis(Quaternion(forearm.normalized(), desired.normalized())) * elbow.basis
 		result["lowerarm_" + side] = (shoulder.basis.inverse() * elbow.basis).orthonormalized().get_rotation_quaternion().normalized()
 		var wrist: Transform3D = elbow * local[hand]
@@ -179,6 +233,10 @@ static func _male_pose(animation: Animation, skeleton: Skeleton3D, channels: Dic
 				var angle := atan2(axis.dot(across.cross(aim)), across.dot(aim))
 				if not running: angle = clampf(angle, -deg_to_rad(50), deg_to_rad(50))
 				wrist.basis = Basis(axis, angle) * wrist.basis
+				if running:
+					# A small native wrist flexion softens the open palm silhouette;
+					# equipped wrist aiming still runs afterwards in WeaponCarryPose.
+					wrist.basis = Basis(aim, -sign*deg_to_rad(10.0))*wrist.basis
 		result["hand_" + side] = (elbow.basis.inverse() * wrist.basis).orthonormalized().get_rotation_quaternion().normalized()
 	return result
 

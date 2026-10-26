@@ -1,6 +1,6 @@
 extends SceneTree
 ## Real imported Human rigs: immutable shared source, complete action/track
-## preservation, cyclic arm corrections and untouched lower-body contacts.
+## preservation, cyclic male upper-body fitting and untouched lower-body contacts.
 const POLISH := preload("res://src/actors/human_locomotion_polish.gd")
 # Captured from the accepted v1 female arm curves, including every original
 # timestamp and quaternion component. The male pass must not rewrite them.
@@ -99,10 +99,15 @@ func run() -> void:
 			var worst_loop := 0.0
 			var largest_arm_step := 0.0
 			var copied_keys := 0
+			var minimum_thumb_alignment := 1.0
 			for track: int in old.get_track_count():
 				copied_keys += old.track_get_key_count(track)
 				var bone := str(old.track_get_path(track).get_concatenated_subnames()).get_slice(":", 0)
 				var arm_rotation := old.track_get_type(track) == Animation.TYPE_ROTATION_3D and bone in POLISH.ARM_BONES
+				var male_run_detail := (slug == "luminous_male" and name == &"Run_Female"
+					and old.track_get_type(track) == Animation.TYPE_ROTATION_3D
+					and (bone in ["spine_01", "spine_02", "neck_01"] or bone.get_slice("_", 0) in ["thumb", "index", "middle", "ring", "pinky"]))
+				var permitted_rotation := arm_rotation or male_run_detail
 				expect(new.track_get_path(track) == old.track_get_path(track) and new.track_get_type(track) == old.track_get_type(track), "track identity preserved")
 				expect(new.track_get_key_count(track) == old.track_get_key_count(track), "source cadence preserved")
 				var changed := false
@@ -110,15 +115,15 @@ func run() -> void:
 					expect(new.track_get_key_time(track, index) == old.track_get_key_time(track, index), "authored key time preserved")
 					var before: Variant = old.track_get_key_value(track, index)
 					var after: Variant = new.track_get_key_value(track, index)
-					if arm_rotation:
+					if permitted_rotation:
 						var q := after as Quaternion
 						expect(is_finite(q.x) and is_finite(q.y) and is_finite(q.z) and is_finite(q.w) and absf(q.length() - 1.0) < 0.00001, "finite normalized arm quaternion")
 						changed = changed or not q.is_equal_approx(before)
 						if index > 0:
 							largest_arm_step = maxf(largest_arm_step, rotation_delta(new.track_get_key_value(track, index - 1), q))
 					else:
-						expect(after == before, "all torso/root/leg/translation/scale/finger keys remain exact")
-				if arm_rotation:
+						expect(after == before, "all protected root/leg/position/scale/other-action channels remain exact")
+				if permitted_rotation:
 					modified += int(changed)
 					var first := new.rotation_track_interpolate(track, 0.0)
 					var last := new.rotation_track_interpolate(track, new.length)
@@ -141,7 +146,7 @@ func run() -> void:
 						expect(spread > 0.025 and spread < 0.055, "male elbow follows a stable front-view track")
 						if name == &"Run_Female":
 							var flex := rad_to_deg((elbow - shoulder).angle_to(wrist - elbow))
-							expect(flex > 84.5 and flex < 87.5, "male rear/forward running elbows retain their bend")
+							expect(flex > 78.5 and flex < 93.5, "male rear/forward running elbows retain a natural bend")
 							var middle := rig.get_bone_global_pose(rig.find_bone("middle_01_" + side)).origin
 							var index := rig.get_bone_global_pose(rig.find_bone("index_01_" + side)).origin
 							var pinky := rig.get_bone_global_pose(rig.find_bone("pinky_01_" + side)).origin
@@ -149,10 +154,30 @@ func run() -> void:
 							var across := index - pinky
 							across = (across - forward * across.dot(forward)).normalized()
 							var up := (Vector3.UP - forward * Vector3.UP.dot(forward)).normalized()
-							expect(across.dot(up) > 0.98, "male run thumb-side is uppermost instead of palm-up")
-			metrics.append({"model": slug, "clip": name, "duration": new.length, "modified_arm_tracks": modified,
+							minimum_thumb_alignment = minf(minimum_thumb_alignment,across.dot(up))
+							# The intentional ten-degree wrist flexion allows a small
+							# thumb-axis tilt; palms must still remain upright.
+							expect(across.dot(up) > cos(deg_to_rad(15.0)), "male run thumb-side stays upright through relaxed wrist flexion")
+							for finger: String in ["index", "middle", "ring", "pinky"]:
+								var knuckle := rig.get_bone_global_pose(rig.find_bone(finger+"_01_"+side)).origin
+								var middle_joint := rig.get_bone_global_pose(rig.find_bone(finger+"_02_"+side)).origin
+								var distal := rig.get_bone_global_pose(rig.find_bone(finger+"_03_"+side)).origin
+								expect((middle_joint-knuckle).angle_to(distal-middle_joint) > deg_to_rad(55.0), "native runner grip keeps the articulated finger joints bent")
+				if name == &"Run_Female":
+					var widths := []
+					var heights := []
+					for phase: float in [0.0, 0.5]:
+						player.seek(new.length * phase, true)
+						rig.force_update_all_bone_transforms()
+						var center := rig.get_bone_global_pose(rig.find_bone("pelvis")).origin
+						var hand := rig.get_bone_global_pose(rig.find_bone("hand_l")).origin
+						widths.append(absf(hand.x - center.x))
+						heights.append(hand.y)
+					expect(widths[0] < widths[1] - 0.06 and heights[0] > heights[1] + 0.15, "rising male hand pumps toward the chest and releases beside the hip")
+			metrics.append({"model": slug, "clip": name, "duration": new.length, "modified_rotation_tracks": modified,
+				"minimum_thumb_alignment":minimum_thumb_alignment,
 				"max_loop_degrees": rad_to_deg(worst_loop), "first_install_usec": build_usec,
-				"copied_keys": copied_keys, "tracks": old.get_track_count(), "max_arm_key_step_degrees": rad_to_deg(largest_arm_step)})
+				"copied_keys": copied_keys, "tracks": old.get_track_count(), "max_rotation_key_step_degrees": rad_to_deg(largest_arm_step)})
 		POLISH.install(player, models[slug])
 		expect(player.get_animation_library(&"") == result, "install is idempotent")
 		for quality: int in [ActorRenderQuality.Quality.LOW, ActorRenderQuality.Quality.MEDIUM, ActorRenderQuality.Quality.HIGH]:
