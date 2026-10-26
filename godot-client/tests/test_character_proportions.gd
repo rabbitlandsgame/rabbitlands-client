@@ -51,6 +51,7 @@ func run() -> void:
 		var body := native.find_child("body", true, false) as MeshInstance3D
 		var source := body.mesh
 		var original_vertices: PackedVector3Array = source.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
+		var original_normals: PackedVector3Array = source.surface_get_arrays(0)[Mesh.ARRAY_NORMAL]
 		var rig := actor.get_skeleton()
 		var rest: Array[Transform3D] = []
 		for bone: int in range(rig.get_bone_count()):
@@ -83,6 +84,7 @@ func run() -> void:
 				for bone: int in range(rest.size()):
 					expect(rig.get_bone_rest(bone) == rest[bone], slug + " authored bone rest remains exact")
 				expect(source.surface_get_arrays(0)[Mesh.ARRAY_VERTEX] == original_vertices, slug + " imported body resource stays immutable")
+				expect(source.surface_get_arrays(0)[Mesh.ARRAY_NORMAL] == original_normals, slug + " imported normal resource stays immutable")
 				for surface: int in range(body.mesh.get_surface_count()):
 					var arrays := body.mesh.surface_get_arrays(surface)
 					var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
@@ -91,6 +93,36 @@ func run() -> void:
 						if not vertices[index].is_finite() or not normals[index].is_finite():
 							expect(false, slug + " finite sculpted vertices and normals")
 							break
+
+				if human and body.has_meta(FIT.SOURCE_META):
+					var authored := body.get_meta(FIT.SOURCE_META) as Mesh
+					var normal_frame := FIT.face_frame(native, rig)
+					var to_head: Transform3D = normal_frame.to_head * FIT._to_root(rig, native).affine_inverse() * FIT._to_root(body, native)
+					var untouched := true
+					var maximum_pack_error := 0.0
+					for surface: int in range(body.mesh.get_surface_count()):
+						var before := authored.surface_get_arrays(surface)
+						var after_arrays := body.mesh.surface_get_arrays(surface)
+						var finish_control := after_arrays.duplicate(true)
+						FIT._finish_face_normals(finish_control, to_head, normal_frame)
+						var unique := {}
+						for index: int in before[Mesh.ARRAY_INDEX]:
+							unique[index] = true
+						var order: Array = unique.keys()
+						order.sort()
+						if order.size() != after_arrays[Mesh.ARRAY_VERTEX].size():
+							continue
+						for index: int in range(order.size()):
+							var original_index := int(order[index])
+							var point: Vector3 = to_head * before[Mesh.ARRAY_VERTEX][original_index]
+							if point.y < float(normal_frame.eye_y) - 0.17:
+								if finish_control[Mesh.ARRAY_NORMAL][index] != after_arrays[Mesh.ARRAY_NORMAL][index]:
+									untouched = false
+								maximum_pack_error = maxf(maximum_pack_error, after_arrays[Mesh.ARRAY_NORMAL][index].distance_to(before[Mesh.ARRAY_NORMAL][original_index]))
+					expect(untouched, slug + " normal finish leaves lower-body arrays exact")
+					# ArrayMesh encodes normals octahedrally; an untouched normal can
+					# round one quantization step when the custom mesh is published.
+					expect(maximum_pack_error < 0.00015, slug + " lower-body normal publishing stays within encoding precision")
 				if human:
 					var fitted := body.mesh
 					actor.position += Vector3(10000, 0, 20000)

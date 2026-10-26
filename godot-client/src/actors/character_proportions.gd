@@ -173,11 +173,79 @@ static func fit(source: Mesh, to_head: Transform3D, frame: Dictionary, shape: Ve
 		arrays[Mesh.ARRAY_NORMAL] = normals
 		if not tangents.is_empty():
 			arrays[Mesh.ARRAY_TANGENT] = tangents
+		if not shape.is_zero_approx():
+			_finish_face_normals(arrays, to_head, frame)
 		result.add_surface_from_arrays(source.surface_get_primitive_type(surface), arrays, blends, lods,
 			source.surface_get_format(surface) & Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS)
 		result.surface_set_material(surface, source.surface_get_material(surface))
 		result.surface_set_name(surface, source.surface_get_name(surface))
 	return result
+
+## Reconcile shading with the sculpted front face. Area weighting replaces
+## inconsistent imported seam normals while refusing opposite-facing mouth
+## surfaces and preserving the authored neck, ears, eyelids and scalp.
+## This runs only while constructing an existing custom-face derivative.
+static func _finish_face_normals(arrays: Array, to_head: Transform3D, frame: Dictionary) -> void:
+	var points: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+	var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
+	var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
+	if normals.size() != points.size() or indices.is_empty():
+		return
+	var geometric := PackedVector3Array()
+	geometric.resize(points.size())
+	for triangle: int in range(0, indices.size() - 2, 3):
+		var a := indices[triangle]
+		var b := indices[triangle + 1]
+		var c := indices[triangle + 2]
+		var face_normal := (points[b] - points[a]).cross(points[c] - points[a])
+		if face_normal.dot(normals[a] + normals[b] + normals[c]) < 0.0:
+			face_normal = -face_normal
+		for index: int in [a, b, c]:
+			geometric[index] += face_normal
+	var normal_to_head := to_head.basis.inverse().transposed()
+	var groups := {}
+	var used := {}
+	for index: int in indices:
+		used[index] = true
+	for index: int in used:
+		var point := to_head * points[index]
+		var normal := (normal_to_head * normals[index]).normalized()
+		if point.y < frame.eye_y - 0.13 or point.y > frame.eye_y or absf(point.x) > 0.09 or point.z < frame.eye_z - 0.05 or normal.z < 0.15:
+			continue
+		var key := Vector3i(roundi(point.x * 100000.0), roundi(point.y * 100000.0), roundi(point.z * 100000.0))
+		if not groups.has(key):
+			groups[key] = []
+		groups[key].append(index)
+	var original := normals.duplicate()
+	var tangents: PackedFloat32Array = arrays[Mesh.ARRAY_TANGENT] if arrays[Mesh.ARRAY_TANGENT] != null else PackedFloat32Array()
+	for group: Array in groups.values():
+		for index: int in group:
+			var sum := Vector3.ZERO
+			for other: int in group:
+				# Preserve a crease sharper than 75 degrees instead of averaging
+				# a visible lip with the inner mouth at the same location.
+				if original[index].dot(original[other]) > 0.258819:
+					sum += geometric[other]
+			if sum.is_zero_approx():
+				continue
+			var point := to_head * points[index]
+			var blend := smoothstep(frame.eye_y - 0.13, frame.eye_y - 0.09, point.y) * (1.0 - smoothstep(frame.eye_y - 0.015, frame.eye_y, point.y))
+			blend *= 1.0 - smoothstep(0.07, 0.09, absf(point.x))
+			blend *= smoothstep(frame.eye_z - 0.05, frame.eye_z - 0.02, point.z)
+			if blend <= 0.0:
+				continue
+			normals[index] = original[index].lerp(sum.normalized(), blend).normalized()
+			if tangents.size() == points.size() * 4:
+				var tangent := Vector3(tangents[index * 4], tangents[index * 4 + 1], tangents[index * 4 + 2])
+				tangent -= normals[index] * tangent.dot(normals[index])
+				if tangent.is_zero_approx():
+					tangent = normals[index].cross(Vector3.RIGHT if absf(normals[index].x) < 0.9 else Vector3.UP)
+				tangent = tangent.normalized()
+				for component: int in range(3):
+					tangents[index * 4 + component] = tangent[component]
+	arrays[Mesh.ARRAY_NORMAL] = normals
+	if not tangents.is_empty():
+		arrays[Mesh.ARRAY_TANGENT] = tangents
 
 ## Compact unused attribute slots before caching. All surface and LOD indices,
 ## blend arrays and four/eight skin influences retain their original meaning.

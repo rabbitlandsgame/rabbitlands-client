@@ -65,7 +65,7 @@ func check_picking(actor: ReplicatedActor3D, label: String) -> void:
 func run() -> void:
 	output = OS.get_environment("RL_REAL_PREVIEW_OUTPUT")
 	if output.is_empty():
-		output = "C:/rabbitlands/worktrees/client-portrait-customization-20261026/.local/runtime-portraits"
+		output = ProjectSettings.globalize_path("res://test-artifacts/human-portraits")
 	DirAccess.make_dir_recursive_absolute(output)
 	root.size = Vector2i(720, 720)
 	stage = Node3D.new()
@@ -117,10 +117,31 @@ func run() -> void:
 			actor.apply_appearance_variants(look)
 			freeze_idle(actor)
 			var focus := focus_of(actor)
-			for angle: String in ["front", "threequarter"]:
-				camera.position = focus + (Vector3(0, 0.055, 1.0) if angle == "front" else Vector3(0.40, 0.055, 1.0))
+			for angle: String in ["front", "threequarter", "profile"]:
+				camera.position = focus + {"front": Vector3(0, 0.055, 1.0), "threequarter": Vector3(0.40, 0.055, 1.0), "profile": Vector3(0.95, 0.055, 0.02)}[angle]
 				camera.look_at(focus)
 				await capture(preset.id + "-" + mode + "-" + angle)
+
+			if mode == "after":
+				var beard := actor._native_model.get_node_or_null("PortraitFacialHair") as MeshInstance3D
+				if beard != null and beard.mesh != null:
+					var vertices := 0
+					var triangles := 0
+					var maximum_weight_error := 0.0
+					for surface: int in range(beard.mesh.get_surface_count()):
+						var arrays := beard.mesh.surface_get_arrays(surface)
+						var positions: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+						var weights: PackedFloat32Array = arrays[Mesh.ARRAY_WEIGHTS]
+						var stride := weights.size() / positions.size()
+						vertices += positions.size()
+						triangles += arrays[Mesh.ARRAY_INDEX].size() / 3
+						for index: int in range(positions.size()):
+							var total := 0.0
+							for influence: int in range(stride):
+								total += weights[index * stride + influence]
+							maximum_weight_error = maxf(maximum_weight_error, absf(total - 1.0))
+					expect(maximum_weight_error < 0.0001, preset.id + " normalized beard skin")
+					records.append({"beard": preset.id, "vertices": vertices, "triangles": triangles, "skin_binds": beard.skin.get_bind_count(), "maximum_skin_weight_error": maximum_weight_error})
 		if preset.id == "tavi":
 			actor.apply_equipment_visuals({3: 143})
 			freeze_idle(actor)
