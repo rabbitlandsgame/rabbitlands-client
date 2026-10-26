@@ -163,7 +163,7 @@ func run()->void:
 		HAIR.release(native)
 		hair.get_parent().hide()
 		HAIR.apply(native,actor.get_skeleton(),look,config,2)
-		expect(hair.mesh==original.mesh and int(HAIR.cache_metrics().mesh_entries)==0,preset.id+" helmet-hidden hair skips extra meshes")
+		expect(hair.mesh==original.mesh and not hair.has_meta(HAIR.META),preset.id+" helmet-hidden hair skips extra meshes")
 		hair.get_parent().show()
 		actor.free()
 		await process_frame

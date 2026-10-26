@@ -3,6 +3,7 @@ extends RefCounted
 ## Once-on-change grooming of imported geometry. No rest pose, animation,
 ## equipment asset or source Mesh is modified. Bounded caches share derivatives.
 
+const PROPORTIONS := preload("res://src/actors/character_proportions.gd")
 const HAIR_SHADER := preload("res://src/actors/portrait_hair.gdshader")
 const BEARD_SHADER := preload("res://src/actors/portrait_beard.gdshader")
 const HAIR_CACHE_LIMIT := 40
@@ -49,11 +50,13 @@ static func apply(native_root: Node3D, skeleton: Skeleton3D,
 	var eye_height := _eye_height(eyes, skeleton, frame, native_root)
 	var color := AppearanceVariants.hair_color(int(appearance.get("hair", 0)))
 	var detail := clampi(int(appearance.get("hair_detail", 0)), 0, 2)
+	var hair_length := roundi(PROPORTIONS.value(appearance,"hair_length"))
+	var hair_volume := roundi(PROPORTIONS.value(appearance,"hair_volume"))
 	var updo := str(model_config.get("gender", "")) == "female" and AppearanceVariants.hair_style(int(appearance.get("hair", 0))) == 3
 	for node: Node in native_root.find_children("*", "MeshInstance3D", true, false):
 		var hair := node as MeshInstance3D
 		if hair.get_parent() != null and str(hair.get_parent().name).begins_with("AppearanceHair_"):
-			_groom_hair(hair, skeleton, frame, eye_height, detail, color, native_root, updo)
+			_groom_hair(hair, skeleton, frame, eye_height, detail, color, native_root, updo, hair_length, hair_volume)
 	var old := native_root.get_node_or_null("PortraitFacialHair")
 	if old != null:
 		native_root.remove_child(old)
@@ -67,19 +70,22 @@ static func apply(native_root: Node3D, skeleton: Skeleton3D,
 	var key := "%d:%d:%s" % [body.mesh.get_instance_id(), style, transform]
 	var beard_mesh := _beard_meshes.get(key) as ArrayMesh
 	if beard_mesh == null:
-		beard_mesh = _build_beard(body.mesh, transform, frame, eye_height, style)
+		beard_mesh = _build_beard(body.mesh, transform, frame, eye_height, style, PROPORTIONS.face_frame(native_root,skeleton), PROPORTIONS.face_shape(appearance))
 		if beard_mesh.get_surface_count() == 0:
 			return
 		_cache(_beard_meshes, key, beard_mesh, BEARD_CACHE_LIMIT)
 	var beard := MeshInstance3D.new()
 	beard.name = "PortraitFacialHair"
-	var material_key := "%s:%d:%.5f" % [color.to_html(), style, eye_height]
+	var canonical_frame:=PROPORTIONS.face_frame(native_root,skeleton)
+	var mouth_y:float=canonical_frame.get("mouth_y",eye_height-0.063)
+	var material_key := "%s:%d:%.5f:%.5f" % [color.to_html(), style, eye_height,mouth_y]
 	var material := _beard_materials.get(material_key) as ShaderMaterial
 	if material == null:
 		material = ShaderMaterial.new()
 		material.shader = BEARD_SHADER
 		material.set_shader_parameter("hair_color", color)
 		material.set_shader_parameter("eye_height", eye_height)
+		material.set_shader_parameter("mouth_height",mouth_y)
 		material.set_shader_parameter("style", style)
 		_cache(_beard_materials, material_key, material, 128)
 	beard.material_override = material
@@ -101,8 +107,9 @@ static func _eye_height(eyes: MeshInstance3D, skeleton: Skeleton3D,
 	var to_head := frame.affine_inverse() * _to_root(skeleton, native_root).affine_inverse() * _to_root(eyes, native_root)
 	var total := 0.0
 	var count := 0
-	for surface: int in eyes.mesh.get_surface_count():
-		var arrays := eyes.mesh.surface_get_arrays(surface)
+	var eye_source := eyes.get_meta(PROPORTIONS.SOURCE_META,eyes.mesh) as Mesh
+	for surface: int in eye_source.get_surface_count():
+		var arrays := eye_source.surface_get_arrays(surface)
 		var points: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
 		var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
 		for index: int in indices:
@@ -111,7 +118,7 @@ static func _eye_height(eyes: MeshInstance3D, skeleton: Skeleton3D,
 	return total / float(count) if count > 0 else 0.075
 
 static func _groom_hair(hair: MeshInstance3D, skeleton: Skeleton3D,
-		frame: Transform3D, eye_height: float, detail: int, color: Color, native_root: Node3D, updo: bool) -> void:
+		frame: Transform3D, eye_height: float, detail: int, color: Color, native_root: Node3D, updo: bool, hair_length: int = 50, hair_volume: int = 50) -> void:
 	if hair.mesh == null:
 		return
 	if not hair.has_meta(SOURCE_META):
@@ -120,7 +127,7 @@ static func _groom_hair(hair: MeshInstance3D, skeleton: Skeleton3D,
 	# The production actor's tint pass installs a whole-instance override.
 	# Grooming owns the material on each imported surface from here onward.
 	hair.material_override = null
-	if detail == 0:
+	if detail == 0 and hair_length == 50 and hair_volume == 50:
 		hair.mesh = source
 		for surface: int in source.get_surface_count():
 			var original := source.surface_get_material(surface) as StandardMaterial3D
@@ -131,7 +138,7 @@ static func _groom_hair(hair: MeshInstance3D, skeleton: Skeleton3D,
 		return
 	var to_head := frame.affine_inverse() * _to_root(skeleton, native_root).affine_inverse() * _to_root(hair, native_root)
 	var from_head := to_head.affine_inverse()
-	var key := "%d:%d:%s" % [source.get_instance_id(), detail, to_head]
+	var key := "%d:%d:%s:%d:%d" % [source.get_instance_id(), detail, to_head,hair_length,hair_volume]
 	var groomed := _hair_meshes.get(key) as ArrayMesh
 	if groomed == null:
 		groomed = ArrayMesh.new()
@@ -145,17 +152,21 @@ static func _groom_hair(hair: MeshInstance3D, skeleton: Skeleton3D,
 			var normal_from_head := from_head.basis.inverse().transposed()
 			for index: int in positions.size():
 				var local := to_head * positions[index]
-				var moved := _hair_point(local, eye_height, detail)
+				var moved := _hair_point(local, eye_height, detail) if detail > 0 else local
 				var bun := int(buns.vertices[index]) if not buns.is_empty() else 0
 				if bun > 0:
 					moved = _bun_point(local, bun, buns.centres[bun])
+				var groomed_point := moved
+				moved = _size_hair_point(moved,eye_height,hair_length,hair_volume)
 				positions[index] = from_head * moved
 				var epsilon := 0.0001
-				var jacobian := Basis((_hair_point(local + Vector3.RIGHT * epsilon, eye_height, detail) - moved) / epsilon,
-					(_hair_point(local + Vector3.UP * epsilon, eye_height, detail) - moved) / epsilon,
-					(_hair_point(local + Vector3.BACK * epsilon, eye_height, detail) - moved) / epsilon)
+				var jacobian := Basis(((_hair_point(local + Vector3.RIGHT * epsilon, eye_height, detail) if detail > 0 else local + Vector3.RIGHT * epsilon) - groomed_point) / epsilon,
+					((_hair_point(local + Vector3.UP * epsilon, eye_height, detail) if detail > 0 else local + Vector3.UP * epsilon) - groomed_point) / epsilon,
+					((_hair_point(local + Vector3.BACK * epsilon, eye_height, detail) if detail > 0 else local + Vector3.BACK * epsilon) - groomed_point) / epsilon)
 				if bun > 0:
 					jacobian = Basis.from_scale(Vector3(0.82, 0.90, 0.82) if bun == 1 else Vector3(0.64, 0.75, 0.70))
+				if hair_length != 50 or hair_volume != 50:
+					jacobian = _size_hair_jacobian(groomed_point,eye_height,hair_length,hair_volume) * jacobian
 				if normals.size() == positions.size():
 					normals[index] = (normal_from_head * jacobian.inverse().transposed() * normal_to_head * normals[index]).normalized()
 				if tangents.size() == positions.size() * 4:
@@ -174,6 +185,14 @@ static func _groom_hair(hair: MeshInstance3D, skeleton: Skeleton3D,
 			groomed.surface_set_material(surface, source.surface_get_material(surface))
 		_cache(_hair_meshes, key, groomed, HAIR_CACHE_LIMIT)
 	hair.mesh = groomed
+	if detail == 0:
+		for surface: int in source.get_surface_count():
+			var original := source.surface_get_material(surface) as StandardMaterial3D
+			if original != null:
+				var tinted := original.duplicate() as StandardMaterial3D
+				tinted.albedo_color=original.albedo_color*color
+				hair.set_surface_override_material(surface,tinted)
+		return
 	for surface: int in source.get_surface_count():
 		var original := source.surface_get_material(surface) as StandardMaterial3D
 		if original == null:
@@ -194,6 +213,28 @@ static func _groom_hair(hair: MeshInstance3D, skeleton: Skeleton3D,
 			_cache(_hair_materials, material_key, material, 128)
 		hair.set_surface_override_material(surface, material)
 
+## Cheap shared selection field. The hairline roots stay fixed; extra length
+## carries existing nape/temple pieces downward and volume lofts the crown.
+static func _size_hair_point(point: Vector3, eye_y: float, length: int, volume: int) -> Vector3:
+	if length == 50 and volume == 50: return point
+	var amount := float(length-50)/50.0
+	var back := 1.0-smoothstep(-0.025,0.055,point.z)
+	var sides := smoothstep(0.055,0.090,absf(point.x))
+	var low := 1.0-smoothstep(eye_y+0.025,eye_y+0.095,point.y)
+	point.y -= amount*maxf(0.0,eye_y+0.075-point.y)*0.40*maxf(back,sides)*low
+	var loft := float(volume-50)/50.0
+	var crown := smoothstep(eye_y-0.005,eye_y+0.070,point.y)
+	var radial := Vector3(point.x,(point.y-eye_y)*0.6,point.z+0.025).normalized()
+	point += radial*crown*loft*(0.010 if loft>0.0 else 0.0015)
+	return point
+static func _size_hair_jacobian(point: Vector3, eye_y: float, length: int, volume: int) -> Basis:
+	if length == 50 and volume == 50: return Basis.IDENTITY
+	var e:=0.0001
+	var p:=_size_hair_point(point,eye_y,length,volume)
+	return Basis((_size_hair_point(point+Vector3.RIGHT*e,eye_y,length,volume)-p)/e,
+		(_size_hair_point(point+Vector3.UP*e,eye_y,length,volume)-p)/e,
+		(_size_hair_point(point+Vector3.BACK*e,eye_y,length,volume)-p)/e)
+
 static func _hair_point(point: Vector3, eye_height: float, detail: int) -> Vector3:
 	var crown := smoothstep(eye_height - 0.005, eye_height + 0.07, point.y)
 	var fringe := smoothstep(-0.01, 0.065, point.z) * crown
@@ -207,7 +248,7 @@ static func _hair_point(point: Vector3, eye_height: float, detail: int) -> Vecto
 	return point + Vector3(0.012 * fringe, 0.005 * crown, -0.008 * fringe)
 
 static func _build_beard(source: Mesh, mesh_to_skeleton: Transform3D,
-		frame: Transform3D, eye_height: float, style: int) -> ArrayMesh:
+		frame: Transform3D, eye_height: float, style: int, face_frame: Dictionary = {}, face_shape: Variant = Vector3.ZERO) -> ArrayMesh:
 	var result := ArrayMesh.new()
 	var to_head := frame.affine_inverse() * mesh_to_skeleton
 	var from_head := to_head.affine_inverse()
@@ -222,7 +263,7 @@ static func _build_beard(source: Mesh, mesh_to_skeleton: Transform3D,
 		var coverage := PackedFloat32Array()
 		coverage.resize(points.size())
 		for index: int in points.size():
-			coverage[index] = _beard_coverage(to_head * points[index], eye_height, style)
+			coverage[index] = _canonical_beard_coverage(to_head*points[index],eye_height,style,face_frame,face_shape)
 		for triangle: int in range(0, indices.size() - 2, 3):
 			if maxf(coverage[indices[triangle]], maxf(coverage[indices[triangle + 1]], coverage[indices[triangle + 2]])) > 0.15:
 				selected.append_array(indices.slice(triangle, triangle + 3))
@@ -239,11 +280,12 @@ static func _build_beard(source: Mesh, mesh_to_skeleton: Transform3D,
 		input[Mesh.ARRAY_WEIGHTS] = refined.weights
 		coverage.resize(points.size())
 		for index: int in points.size():
-			coverage[index] = _beard_coverage(to_head * points[index], eye_height, style)
+			coverage[index] = _canonical_beard_coverage(to_head*points[index],eye_height,style,face_frame,face_shape)
 		var remap: Dictionary = {}
 		var vertex := PackedVector3Array()
 		var normal := PackedVector3Array()
 		var uv := PackedVector2Array()
+		var canonical_uv := PackedVector2Array()
 		var colors := PackedColorArray()
 		var bones := PackedInt32Array()
 		var weights := PackedFloat32Array()
@@ -256,13 +298,14 @@ static func _build_beard(source: Mesh, mesh_to_skeleton: Transform3D,
 				remap[source_index] = vertex.size()
 				var local := to_head * points[source_index]
 				var original_local := local
+				var canonical := PROPORTIONS.inverse_face_point(local,face_frame,face_shape) if not face_frame.is_empty() else local
 				var direction := (to_head.basis * normals[source_index]).normalized()
 				var lower := 1.0 - smoothstep(eye_height - 0.095, eye_height - 0.045, local.y)
 				var length: float = [0.0, 0.0011, 0.0035, 0.005, 0.007, 0.014][style]
 				if style == 5:
 					# Keep the cheek/sideburn close and carry length at the central
 					# chin, instead of expanding the whole jaw as a squared shell.
-					length *= 0.42 + 0.58 * (1.0 - smoothstep(0.018, 0.066, absf(local.x)))
+					length *= 0.22 + 0.78 * (1.0 - smoothstep(0.018, 0.066, absf(local.x)))
 				var amount := coverage[source_index]
 				local += direction * (0.0008 + length * amount * (0.35 + 0.65 * lower))
 				if style in [3, 4, 5]:
@@ -271,7 +314,8 @@ static func _build_beard(source: Mesh, mesh_to_skeleton: Transform3D,
 				vertex.append(from_head * local)
 				normal.append(normals[source_index])
 				uv.append(Vector2(original_local.x, original_local.y))
-				colors.append(Color(amount, original_local.z + 0.2, 0, 1))
+				canonical_uv.append(Vector2(canonical.x,canonical.y))
+				colors.append(Color(amount, original_local.z + 0.2, canonical.z+0.2, 1))
 				for influence: int in influences:
 					bones.append(input[Mesh.ARRAY_BONES][source_index * influences + influence])
 					weights.append(input[Mesh.ARRAY_WEIGHTS][source_index * influences + influence])
@@ -281,6 +325,7 @@ static func _build_beard(source: Mesh, mesh_to_skeleton: Transform3D,
 		arrays[Mesh.ARRAY_VERTEX] = vertex
 		arrays[Mesh.ARRAY_NORMAL] = normal
 		arrays[Mesh.ARRAY_TEX_UV] = uv
+		arrays[Mesh.ARRAY_TEX_UV2] = canonical_uv
 		arrays[Mesh.ARRAY_COLOR] = colors
 		arrays[Mesh.ARRAY_INDEX] = mapped
 		if influences > 0:
@@ -294,7 +339,12 @@ static func _build_beard(source: Mesh, mesh_to_skeleton: Transform3D,
 		result.surface_set_material(result.get_surface_count() - 1, _beard_base_material)
 	return result
 
-static func _beard_coverage(point: Vector3, eye_height: float, style: int) -> float:
+static func _canonical_beard_coverage(point: Vector3, eye_height: float, style: int, face_frame: Dictionary, face_shape: Variant) -> float:
+	var canonical:=PROPORTIONS.inverse_face_point(point,face_frame,face_shape) if not face_frame.is_empty() else point
+	return _beard_coverage(canonical,eye_height,style,float(face_frame.get("mouth_y",eye_height-0.063)))
+
+static func _beard_coverage(point: Vector3, eye_height: float, style: int, mouth_y: float = NAN) -> float:
+	if is_finite(mouth_y):point.y+=eye_height-0.063-mouth_y
 	var y := point.y - eye_height
 	var x := absf(point.x)
 	if style == 5:
@@ -339,7 +389,8 @@ static func _full_beard_coverage(point: Vector3, eye_height: float) -> float:
 	sideburn *= smoothstep(-0.083, -0.064, y) * (1.0 - smoothstep(0.015, 0.033, y))
 	sideburn *= smoothstep(-0.010, -0.002, point.z) * (1.0 - smoothstep(0.010, 0.018, point.z))
 	var edge := 1.0 - smoothstep(0.073, 0.086, x)
-	var bottom := smoothstep(-0.123, -0.100, y)
+	var lower_edge := -0.145 + 0.030*smoothstep(0.018,0.070,x)
+	var bottom := smoothstep(lower_edge-0.010,lower_edge+0.010,y)
 	return clampf(maxf(maxf(jaw, maxf(moustache, soul)) * front, sideburn) * edge * bottom, 0.0, 1.0)
 
 static func _subdivide_patch(input: Array, selected: PackedInt32Array) -> Dictionary:
