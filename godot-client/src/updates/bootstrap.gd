@@ -139,7 +139,17 @@ static func start_handoff(root: String, envelope: Dictionary, args := PackedStri
 		return "The updater handover helper could not be created."
 	if OS.get_name() == "Linux":
 		FileAccess.set_unix_permissions(worker, 448)
-	if OS.create_process(worker, ["--headless", "--", "--handoff", root, manifest]) <= 0:
+	var executable := worker
+	var arguments := PackedStringArray(["--headless", "--", "--handoff", root, manifest])
+	if OS.get_name() == "Linux":
+		# The shell installer deletes its temporary folder when this updater
+		# exits. Start the worker from a durable folder before Godot saves its
+		# initial working directory, which it restores during shutdown.
+		# Pass paths and arguments positionally so shell characters stay literal.
+		executable = "/bin/sh"
+		arguments = PackedStringArray(["-c", 'cd "$1" || exit 1; shift; exec "$@"',
+			"rabbitlands-handoff", root, worker]) + arguments
+	if OS.create_process(executable, arguments) <= 0:
 		return "The updater handover helper could not start."
 	return ""
 
