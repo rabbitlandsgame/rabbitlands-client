@@ -42,12 +42,14 @@ const CampaignWorksScript = preload("res://src/world/campaign_works.gd")
 const CampaignBankWorksScript = preload("res://src/world/campaign_bank_works.gd")
 const CampaignRoadWorksScript = preload("res://src/world/campaign_road_works.gd")
 const CampaignLampsWorksScript = preload("res://src/world/campaign_lamps_works.gd")
+const CampaignGuidanceScript = preload("res://src/world/campaign_guidance.gd")
 @onready var campaign_scene := CampaignSceneScript.new()
 @onready var campaign_hud := CampaignHudScript.new()
 @onready var campaign_works := CampaignWorksScript.new()
 @onready var campaign_bank_works := CampaignBankWorksScript.new()
 @onready var campaign_road_works := CampaignRoadWorksScript.new()
 @onready var campaign_lamps_works := CampaignLampsWorksScript.new()
+@onready var campaign_guidance := CampaignGuidanceScript.new()
 const ArrivalCurtainScript = preload("res://src/ui/arrival_curtain.gd")
 const ArrivalPrewarmScript = preload("res://src/world/arrival_prewarm.gd")
 ## The loading screen from signing in, or a far arrival, until the character
@@ -1330,14 +1332,17 @@ func _ready() -> void:
 	world_root.add_child(campaign_bank_works)
 	world_root.add_child(campaign_road_works)
 	world_root.add_child(campaign_lamps_works)
+	world_root.add_child(campaign_guidance)
 	campaign_scene.configure(main_viewport)
 	campaign_hud.target_requested.connect(_on_campaign_target)
+	campaign_hud.actor_target_requested.connect(_on_campaign_actor_target)
 	campaign_hud.action_requested.connect(_on_campaign_action)
 	campaign_hud.decision_requested.connect(_on_campaign_decision)
 	campaign_hud.companion_requested.connect(_on_campaign_companion)
 	campaign_hud.convoy_requested.connect(_on_campaign_convoy)
 	campaign_hud.prediction_requested.connect(_on_campaign_prediction)
 	campaign_scene.presentation_finished.connect(_on_campaign_scene_finished)
+	campaign_scene.choice_requested.connect(_on_campaign_scene_choice)
 	campaign_hud.transcript_requested.connect(campaign_scene.show_transcript)
 	campaign_hud.replay_requested.connect(_on_campaign_replay)
 	campaign_hud.reduced_motion_changed.connect(campaign_scene.set_reduced_motion)
@@ -4119,6 +4124,7 @@ func _on_connection_state_changed(value: String) -> void:
 		campaign_bank_works.clear()
 		campaign_road_works.clear()
 		campaign_lamps_works.clear()
+		campaign_guidance.clear()
 		_end_arrival()
 		if not game_view.visible or _leaving_session:
 			respawn_prewarm.discard()
@@ -5796,6 +5802,7 @@ func _on_state_changed(path: StringName) -> void:
 			campaign_bank_works.clear()
 			campaign_road_works.clear()
 			campaign_lamps_works.clear()
+			campaign_guidance.clear()
 			_pickpoint_draft.clear()
 			_pickpoint_submitting = false
 			_load_server_map()
@@ -7224,6 +7231,7 @@ func _update_campaign(delta: float) -> void:
 		campaign_bank_works.clear()
 		campaign_road_works.clear()
 		campaign_lamps_works.clear()
+		campaign_guidance.clear()
 		return
 	var ready := not character_intro.is_active() and not arrival_curtain.blocks_input() \
 		and _grounded_actors.has(AppState.local_actor_id)
@@ -7252,6 +7260,9 @@ func _update_campaign(delta: float) -> void:
 	campaign_hud.set_replay_available(_campaign_replay_ready() \
 		and campaign_scene.can_replay(AppState.campaign, AppState.current_map))
 	lantern_guide.apply_campaign(AppState.campaign)
+	campaign_guidance.apply_snapshot(AppState.campaign, map_object_nodes, actor_nodes,
+		AppState.current_map, tile if tile is Vector2i else Vector2i.ZERO,
+		lantern_guide.using_campaign(), not ready or campaign_scene.is_active())
 	extension_windows.sync_campaign_replay()
 
 func _campaign_replay_ready() -> bool:
@@ -7285,6 +7296,27 @@ func _on_campaign_action(action: String) -> void:
 		return
 	lantern_guide.follow_campaign_request(action)
 	Network.campaign_request(action)
+
+func _on_campaign_actor_target(actor_id: int, _tile: Vector2i, _nearby: bool) -> void:
+	if _world_input_blocked() or not AppState.authenticated or not bool(AppState.campaign.get("active", false)) \
+			or not (AppState.campaign.get("travel", {}) as Dictionary).is_empty() \
+			or EloriaProtocol.map_id_from_reference(str(AppState.campaign.get("map", ""))) \
+			!= EloriaProtocol.map_id_from_reference(AppState.current_map):
+		return
+	for target: Dictionary in AppState.campaign.get("targets", []):
+		if CampaignGuidanceScript.conversation_actor(AppState.campaign, target) != actor_id \
+				or not bool(target.get("enabled", false)) or bool(target.get("completed", false)):
+			continue
+		if int((AppState.actors.get(actor_id, {}) as Dictionary).get("kind", 0)) != 2:
+			return
+		var local_tile: Variant = _local_actor_server_tile()
+		magic_selection.cancel()
+		if local_tile is Vector2i and CampaignGuidanceScript.near(target, local_tile):
+			Network.touch_actor(actor_id)
+		else:
+			var approach: Array = target.get("approach", target.tile)
+			Network.move_to(Vector2i(int(approach[0]), int(approach[1])))
+		return
 
 func _campaign_surface_height(point: Vector3) -> float:
 	var sampled: Variant = _navigation_ray_position(point + Vector3.UP * 200.0, Vector3.DOWN)
@@ -7325,6 +7357,41 @@ func _on_campaign_scene_finished(token: String, reason: String) -> void:
 	var scene: Dictionary = AppState.campaign.get("scene", {})
 	if bool(scene.get("requires_ack", false)) and str(scene.get("token", "")) == token:
 		Network.campaign_scene_done(str(AppState.campaign.get("run_id", "")), token)
+
+func _on_campaign_scene_choice(option_id: String) -> void:
+	# The scene intentionally owns world input here. This decision does not
+	# require walking into ordinary NPC conversation range during the camera.
+	if not AppState.authenticated or _disconnect_console_active or bool(AppState.death.get("dead", false)) \
+			or not _grounded_actors.has(AppState.local_actor_id) or not campaign_scene.playing \
+			or campaign_scene.is_replaying() or not bool(AppState.campaign.get("active", false)) \
+			or not (AppState.campaign.get("travel", {}) as Dictionary).is_empty() \
+			or EloriaProtocol.map_id_from_reference(str(AppState.campaign.get("map", ""))) \
+			!= EloriaProtocol.map_id_from_reference(AppState.current_map):
+		return
+	var scene: Dictionary = AppState.campaign.get("scene", {})
+	var choice: Dictionary = scene.get("choice", {})
+	var context: Dictionary = campaign_scene.choice_context()
+	if str(scene.get("id", "")) != "measure.landing.plan" or str(choice.get("id", "")) != "opening_rescue" \
+			or not EloriaProtocol.campaign_scene_choice_valid(choice) \
+			or not bool(choice.get("can_choose", false)) or not bool(choice.get("owner_is_you", false)) \
+			or not str(choice.get("selected", "")).is_empty() \
+			or str((AppState.campaign.get("party", {}) as Dictionary).get("role", "owner")) != "owner" \
+			or str(context.get("run_id", "")) != str(AppState.campaign.get("run_id", "")) \
+			or str(context.get("token", "")) != str(scene.get("token", "")) \
+			or str(context.get("id", "")) != str(choice.id) or not bool(context.get("waiting", false)):
+		return
+	var offered := false
+	for option: Dictionary in choice.get("options", []):
+		if str(option.id) == option_id:offered = true
+	if not offered:return
+	var odo := int((AppState.campaign.get("actors", {}) as Dictionary).get("odo", -1))
+	if odo < 0 or not is_instance_valid(actor_nodes.get(odo)) \
+			or int((AppState.actors.get(odo, {}) as Dictionary).get("kind", 0)) != 2:
+		return
+	var error := Network.campaign_scene_choice(str(AppState.campaign.run_id), str(scene.token), option_id)
+	if error != OK:
+		campaign_scene.choice_send_failed()
+		AppState.append_local_message("Could not send your rescue choice. Please try again.")
 
 func _request_arrival_conversation(actor_id: int) -> void:
 	AppState.close_dialogue()
@@ -8390,7 +8457,7 @@ func _update_occluder_fade(delta: float) -> void:
 	occluder_fade.sync_worlds(world_loader.manifest, world_loader.world_root, exterior_stream.residents)
 	var target_value: Variant = actor_nodes.get(AppState.local_actor_id)
 	var target: Node3D = target_value as Node3D if target_value is Node3D else null
-	if str(AppState.campaign.get("kind", "")) in ["bank", "road", "lamps"] and campaign_scene.playing:
+	if campaign_scene.playing:
 		target = campaign_scene.occlusion_focus()
 	occluder_fade.update(delta, gameplay_camera, target)
 
@@ -10002,6 +10069,8 @@ func _collect_minimap_marks() -> Array[Dictionary]:
 			continue
 		var map_object: MapObject3D = raw_object as MapObject3D
 		if map_object == null or not map_object.is_visible_in_tree():
+			continue
+		if map_object.has_meta("campaign_work_available") and not bool(map_object.get_meta("campaign_work_available")):
 			continue
 		if entrance_ids.has(map_object.object_id):
 			continue
@@ -15949,6 +16018,20 @@ func _activate_map_object(map_object: MapObject3D, inspect: bool) -> void:
 		if look_error != OK:
 			push_warning("LOOK_AT_MAP_OBJECT failed: " + error_string(look_error))
 		return
+	if CampaignGuidanceScript.is_opening(AppState.campaign) and bool(AppState.campaign.get("active", false)) \
+			and EloriaProtocol.map_id_from_reference(str(AppState.campaign.get("map", ""))) \
+			== EloriaProtocol.map_id_from_reference(AppState.current_map):
+		for target: Dictionary in AppState.campaign.get("targets", []):
+			if int(target.get("object_id", -1)) != map_object.object_id:
+				continue
+			if not bool(target.get("enabled", false)) or bool(target.get("completed", false)) \
+					or str(target.get("id", "")) in ["return", "leave"]:
+				return
+			var local_tile: Variant = _local_actor_server_tile()
+			var nearby := local_tile is Vector2i and CampaignGuidanceScript.near(target, local_tile)
+			var destination: Array = target.tile if nearby else target.get("approach", target.tile)
+			_on_campaign_target(map_object.object_id, Vector2i(int(destination[0]),int(destination[1])), nearby)
+			return
 	if map_object.is_harvestable():
 		# HARVEST is a toggle on the server: sending it for the node already
 		# being harvested stops the run.

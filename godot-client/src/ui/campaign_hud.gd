@@ -1,7 +1,9 @@
 extends Control
+const Guidance := preload("res://src/world/campaign_guidance.gd")
 ## The quest's field checklist. Its controls request ordinary movement/use;
 ## only a new authoritative snapshot changes completion or available decisions.
 signal target_requested(object_id: int, tile: Vector2i, nearby: bool)
+signal actor_target_requested(actor_id: int, tile: Vector2i, nearby: bool)
 signal action_requested(action: String)
 signal decision_requested(action: String, run_id: String, revision: int)
 signal companion_requested(command: String)
@@ -15,6 +17,7 @@ var _panel: PanelContainer
 var _body_scroll: ScrollContainer
 var _title: Label
 var _hint: Label
+var _guidance: Label
 var _notice: Label
 var _bank: Label
 var _road: Label
@@ -50,6 +53,7 @@ var _embedded := false
 var _available := false
 var _replay_available := false
 var _column: VBoxContainer
+var _opening_actions_first := false
 
 func embed_instruction(label: Label) -> void:
 	if label.get_parent() != _column:
@@ -120,6 +124,11 @@ func _build() -> void:
 	_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_hint.add_theme_font_size_override("font_size", 16)
 	column.add_child(_hint)
+	_guidance = Label.new()
+	_guidance.name = "WorkSiteInstructions"
+	_guidance.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_guidance.add_theme_font_size_override("font_size", 14)
+	column.add_child(_guidance)
 	_notice = Label.new()
 	_notice.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_notice.add_theme_font_size_override("font_size", 14)
@@ -281,16 +290,24 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 	_account.visible = active
 	_scroll.visible = active and not travelling
 	_reduced.set_pressed_no_signal(reduced_motion)
+	_guidance.visible = active and matches and not travelling and Guidance.is_opening(snapshot)
+	_guidance.text = Guidance.legend(snapshot) if _guidance.visible else ""
+	if _guidance.visible != _opening_actions_first:
+		_opening_actions_first = _guidance.visible
+		_column.move_child(_scroll, _hint.get_index() + 1 if _opening_actions_first else _entry.get_index() - 1)
 	_title.visible = not _embedded
 	_hint.visible = not _embedded
 	_layout()
 	var rows: Array = []
+	var source: Array = Guidance.work_targets(snapshot) if Guidance.is_opening(snapshot) else snapshot.get("targets", [])
 	# Keep the server's clue order stable within each group, including legacy
 	# encounters that have no navigation-only checkpoint.
 	for navigation: bool in [true, false]:
-		for target: Dictionary in snapshot.get("targets", []):
+		for target: Dictionary in source:
 			if (int(target.get("object_id", -1)) == 0) == navigation:
 				rows.append(target)
+	if Guidance.is_opening(snapshot):
+		_scroll.visible = _scroll.visible and not rows.is_empty()
 	var signature := str(snapshot.get("run_id", "")) + ":" + JSON.stringify(rows)
 	for target: Dictionary in rows:
 		signature += ":" + str(_nearby(target))
@@ -308,7 +325,7 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 		var completed := bool(target.get("completed", false))
 		var enabled := bool(target.get("enabled", true)) and not completed
 		var nearby := _nearby(target)
-		var navigation := int(target.get("object_id", -1)) == 0
+		var navigation := int(target.get("object_id", -1)) == 0 and not target.has("actor_id")
 		button.text = ("✓ " if completed else "Walk to · " if navigation else "" if nearby else "Go to · ") + str(target.get("label", "Work site"))
 		button.disabled = not enabled
 		button.tooltip_text = str(target.get("detail", "Use the marked place in the world."))
@@ -590,5 +607,8 @@ func _request_target(identity: String, object_id: int) -> void:
 		if not bool(target.get("enabled", true)) or bool(target.get("completed", false)):
 			return
 		var raw: Array = target.get("tile", [0, 0]) if _nearby(target) else target.get("approach", target.get("tile", [0, 0]))
-		target_requested.emit(object_id, Vector2i(int(raw[0]), int(raw[1])), _nearby(target))
+		if target.has("actor_id"):
+			actor_target_requested.emit(int(target.actor_id), Vector2i(int(raw[0]), int(raw[1])), _nearby(target))
+		else:
+			target_requested.emit(object_id, Vector2i(int(raw[0]), int(raw[1])), _nearby(target))
 		return

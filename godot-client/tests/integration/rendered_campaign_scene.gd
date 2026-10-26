@@ -116,6 +116,7 @@ func run() -> void:
 	presentation.update(8.0, state, rig, actors, 1, "greenlight", true)
 	await capture("03-worker-dialogue.png")
 	presentation.skip()
+	presentation.update(0.7, state, rig, actors, 1, "greenlight", true)
 	expect(not presentation.blocks_input(), "rendered skip restores gameplay control")
 	var restored_camera := camera.global_transform
 	expect(presentation.request_replay(state, "greenlight"), "the current rendered scene offers explicit replay")
@@ -128,6 +129,7 @@ func run() -> void:
 	var old_target := odo.server_target
 	odo.server_target += Vector3(1, 0, 0)
 	presentation.skip()
+	presentation.update(0.7, state, rig, actors, 1, "greenlight", true)
 	expect(odo.global_position.is_equal_approx(odo.server_target), "native replay restores the NPC to its latest replicated target")
 	expect(camera.global_transform.is_equal_approx(restored_camera), "native replay restores the gameplay camera")
 	presentation.update(0.1, state, rig, actors, 1, "greenlight", true)

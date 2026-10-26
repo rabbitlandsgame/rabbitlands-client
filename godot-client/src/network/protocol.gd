@@ -3579,6 +3579,9 @@ static func decode_campaign(payload: PackedByteArray) -> Dictionary:
 				return {"type": "invalid", "error": "campaign_target_flag"}
 		if target.has("detail") and not target.detail is String:
 			return {"type": "invalid", "error": "campaign_target_text"}
+		if target.has("actor_id") and (not _campaign_integer(target.actor_id, 1, 2147483647.0) \
+				or int(object_id) != 0 or not target.get("role", "") is String or str(target.get("role", "")).is_empty()):
+			return {"type": "invalid", "error": "campaign_target_actor"}
 		if target.has("range") and (typeof(target.range) not in [TYPE_INT, TYPE_FLOAT] \
 				or not is_finite(float(target.range)) or float(target.range) < 0.0 or float(target.range) > 20.0):
 			return {"type": "invalid", "error": "campaign_range"}
@@ -3595,6 +3598,8 @@ static func decode_campaign(payload: PackedByteArray) -> Dictionary:
 			return {"type": "invalid", "error": "campaign_scene_ack"}
 		if scene.has("ack_revision") and not _campaign_integer(scene.ack_revision, 0, 2147483647.0):
 			return {"type": "invalid", "error": "campaign_scene_ack_revision"}
+		if not campaign_scene_choice_valid(scene.get("choice", {})):
+			return {"type": "invalid", "error": "campaign_scene_choice"}
 	for bindings: Variant in [value.get("actors", {}), scene.get("actors", {})]:
 		if not bindings is Dictionary:
 			return {"type": "invalid", "error": "campaign_actors"}
@@ -3604,6 +3609,9 @@ static func decode_campaign(payload: PackedByteArray) -> Dictionary:
 					or not is_finite(float(actor_id)) or float(actor_id) != floor(float(actor_id)) \
 					or float(actor_id) < 0.0 or float(actor_id) > 2147483647.0:
 				return {"type": "invalid", "error": "campaign_actor_id"}
+	for target: Dictionary in value.get("targets", []):
+		if target.has("actor_id") and int((value.get("actors", {}) as Dictionary).get(str(target.get("role", "")), -1)) != int(target.actor_id):
+			return {"type": "invalid", "error": "campaign_target_binding"}
 	for anchors: Variant in [value.get("anchors", {}), scene.get("anchors", {})]:
 		if not anchors is Dictionary or anchors.size() > 32:
 			return {"type": "invalid", "error": "campaign_anchors"}
@@ -3713,6 +3721,34 @@ static func decode_campaign(payload: PackedByteArray) -> Dictionary:
 	if not _campaign_lamps_valid(value.get("lamps", {})):
 		return {"type": "invalid", "error": "campaign_lamps"}
 	return {"type": "campaign", "state": value}
+
+static func campaign_scene_choice_valid(choice: Variant) -> bool:
+	if not choice is Dictionary:
+		return false
+	if choice.is_empty():
+		return true
+	if choice.get("id", "") != "opening_rescue" or not choice.get("selected") is String \
+			or choice.get("selected", "") not in ["", "defend", "repair", "evacuate"]:
+		return false
+	for field: String in ["title", "response", "owner"]:
+		if not choice.get(field) is String:
+			return false
+	for field: String in ["can_choose", "owner_is_you"]:
+		if not choice.get(field) is bool:
+			return false
+	if bool(choice.can_choose) and (not bool(choice.owner_is_you) or not str(choice.selected).is_empty()):
+		return false
+	var options: Variant = choice.get("options")
+	if not options is Array or options.size() != 3:
+		return false
+	var ids: Array[String] = []
+	for option: Variant in options:
+		if not option is Dictionary or option.get("id") not in ["defend", "repair", "evacuate"] \
+				or not option.get("label") is String or not option.get("detail") is String \
+				or str(option.id) in ids:
+			return false
+		ids.append(str(option.id))
+	return true
 
 static func _campaign_lamps_valid(lamps: Variant) -> bool:
 	if not lamps is Dictionary:

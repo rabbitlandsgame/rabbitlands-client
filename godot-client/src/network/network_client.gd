@@ -532,6 +532,12 @@ func campaign_scene_done(run_id: String, token: String) -> Error:
 		return ERR_INVALID_PARAMETER
 	return send_chat("#campaign scene_done %s %s" % [run_id, token])
 
+func campaign_scene_choice(run_id: String, token: String, option_id: String) -> Error:
+	if not _campaign_identifier(run_id) or not _campaign_identifier(token) \
+			or option_id not in ["defend", "repair", "evacuate"]:
+		return ERR_INVALID_PARAMETER
+	return send_chat("#campaign scene_choice %s %s %s" % [run_id, token, option_id])
+
 func campaign_companion(command: String) -> Error:
 	if command not in ["follow", "wait", "regroup", "help"]:
 		return ERR_INVALID_PARAMETER
