@@ -85,8 +85,8 @@ These refinements reuse their existing draw surfaces and bone rig.
 Meshes and clips are derived when an appearance changes and cached. They do
 not add a per-frame script modifier. On the development machine, a new High
 study look took roughly 0.2–0.35 seconds to prepare after loading the source
-assets. Novel controls with warmed assets took roughly 35–106 ms; cached hair
-choices took 2–5 ms. These are debug preview measurements, not a frame-rate
+assets. Novel hair length choices with warmed assets took roughly 42–174 ms;
+repeated controls took 4–11 ms. These are debug preview measurements, not a frame-rate
 guarantee for other devices or scenes. The male video-guided animation pass
 adds about 4 KiB of code and no animation assets.
 
