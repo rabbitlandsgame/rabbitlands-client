@@ -46,8 +46,10 @@ same adjustment in the wearer's rest space; joint and grip anchors stay fixed.
 
 Human walking has a relaxed elbow bend. Running balances the left and right
 arm swing and steadies the wrists. The male body has a separate arm pass with
-closer elbow placement, a continuous running pump and inward-facing hands,
-guided by the supplied walking and running reference videos.
+outward upper-arm placement that varies through the stride, a continuous
+running pump and inward-facing hands, guided by the supplied reference videos.
+The native elbow hinge follows the intended bend plane; the rising running
+hand reaches toward the sternum while its elbow stays outside the torso.
 The female walk and run retain their previous motion. These changes preserve
 the original lower body movement, clip lengths, attack and spell timing. Equipped weapon poses
 continue to adjust the hands after animation playback.
@@ -88,7 +90,7 @@ study look took roughly 0.2–0.35 seconds to prepare after loading the source
 assets. Novel hair length choices with warmed assets took roughly 42–174 ms;
 repeated controls took 4–11 ms. These are debug preview measurements, not a frame-rate
 guarantee for other devices or scenes. The male video-guided animation pass
-adds about 4 KiB of code and no animation assets.
+adds about 5 KiB of code and no animation assets.
 
 A warmed, isolated head comparison on an RTX 5080 Laptop GPU at 1280×720
 measured median GPU time of 0.227→0.241 ms for sixteen Humans sharing two faces,

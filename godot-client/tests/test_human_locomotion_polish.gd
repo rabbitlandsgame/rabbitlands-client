@@ -135,6 +135,7 @@ func run() -> void:
 				player.play(name)
 				player.pause()
 				var rig := actor.get_skeleton()
+				var abductions: Array[float] = []
 				for sample: int in range(49):
 					player.seek(new.length * float(sample) / 48.0, true)
 					rig.force_update_all_bone_transforms()
@@ -143,10 +144,20 @@ func run() -> void:
 						var elbow := rig.get_bone_global_pose(rig.find_bone("lowerarm_" + side)).origin
 						var wrist := rig.get_bone_global_pose(rig.find_bone("hand_" + side)).origin
 						var spread := (elbow.x - shoulder.x) * (1 if side == "l" else -1)
-						expect(spread > 0.025 and spread < 0.055, "male elbow follows a stable front-view track")
+						# Frontal reference upperarms angle outward. Allow for native
+						# proportions and uncertain shoulder centres under the cape.
+						var frontal_angle := rad_to_deg(atan2(spread, shoulder.y-elbow.y))
+						abductions.append(frontal_angle)
+						expect(frontal_angle > (18.0 if name == &"Run_Female" else 12.0)
+							and frontal_angle < (36.0 if name == &"Run_Female" else 30.0), "male elbow abduction follows the frontal video envelope")
+						var upper_direction := (elbow-shoulder).normalized()
+						var native_hinge := rig.get_bone_global_pose(rig.find_bone("upperarm_"+side)).basis*rig.get_bone_rest(rig.find_bone("lowerarm_"+side)).basis.x
+						native_hinge = (native_hinge-upper_direction*native_hinge.dot(upper_direction)).normalized()
+						var bend_normal := upper_direction.cross((wrist-elbow).normalized()).normalized()
+						expect(native_hinge.dot(bend_normal)>cos(deg_to_rad(2.0)), "native elbow hinge aligns with the actual bend on both arms")
 						if name == &"Run_Female":
 							var flex := rad_to_deg((elbow - shoulder).angle_to(wrist - elbow))
-							expect(flex > 78.5 and flex < 93.5, "male rear/forward running elbows retain a natural bend")
+							expect(flex > 78.5 and flex < 104.5, "male running bend retains rear release and the raised forward forearm")
 							var middle := rig.get_bone_global_pose(rig.find_bone("middle_01_" + side)).origin
 							var index := rig.get_bone_global_pose(rig.find_bone("index_01_" + side)).origin
 							var pinky := rig.get_bone_global_pose(rig.find_bone("pinky_01_" + side)).origin
@@ -163,6 +174,7 @@ func run() -> void:
 								var middle_joint := rig.get_bone_global_pose(rig.find_bone(finger+"_02_"+side)).origin
 								var distal := rig.get_bone_global_pose(rig.find_bone(finger+"_03_"+side)).origin
 								expect((middle_joint-knuckle).angle_to(distal-middle_joint) > deg_to_rad(55.0), "native runner grip keeps the articulated finger joints bent")
+				expect(float(abductions.max())-float(abductions.min()) > 2.0, "elbow abduction varies through the observed pump instead of following a fixed rail")
 				if name == &"Run_Female":
 					var widths := []
 					var heights := []
@@ -174,6 +186,15 @@ func run() -> void:
 						widths.append(absf(hand.x - center.x))
 						heights.append(hand.y)
 					expect(widths[0] < widths[1] - 0.06 and heights[0] > heights[1] + 0.15, "rising male hand pumps toward the chest and releases beside the hip")
+					for side: String in ["l", "r"]:
+						player.seek(new.length * (0.0 if side == "l" else 0.5), true)
+						rig.force_update_all_bone_transforms()
+						var shoulder := rig.get_bone_global_pose(rig.find_bone("upperarm_"+side)).origin
+						var wrist := rig.get_bone_global_pose(rig.find_bone("hand_"+side)).origin
+						var pelvis := rig.get_bone_global_pose(rig.find_bone("pelvis")).origin
+						var drop := (shoulder.y-wrist.y)/(shoulder.y-pelvis.y)
+						expect(drop > 0.18 and drop < 0.37, "forward running hand stays near the observed sternum height with the wider elbow")
+						expect((wrist.x-pelvis.x)*(1 if side == "l" else -1)>0.05, "running hand stays on its own side of the sternum")
 			metrics.append({"model": slug, "clip": name, "duration": new.length, "modified_rotation_tracks": modified,
 				"minimum_thumb_alignment":minimum_thumb_alignment,
 				"max_loop_degrees": rad_to_deg(worst_loop), "first_install_usec": build_usec,

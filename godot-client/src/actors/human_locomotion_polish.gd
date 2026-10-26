@@ -189,19 +189,40 @@ static func _male_pose(animation: Animation, skeleton: Skeleton3D, channels: Dic
 		var swing := cos(phase * TAU + (0.0 if side == "l" else PI)) * (1.0 if running else -1.0)
 		var forward := (swing + 1.0) * 0.5
 		var arm_angle := deg_to_rad(3.0 + 26.0 * swing if running else -3.0 + 20.0 * swing)
-		var width := sign * (0.040 if running else 0.030)
+		# The frontal references abduct the upper arm; the old fixed 3/4 cm
+		# outset made both elbows hang almost vertically beside the torso.
+		# Transfer the angle with native segment length, allowing the forward
+		# arm to open slightly instead of keeping an elbow on a fixed rail.
+		var spread := 0.370 + 0.055 * forward if running else 0.255 + 0.085 * forward
+		var width := sign * upper_vector.length() * spread
 		var radius := sqrt(maxf(upper_vector.length_squared() - width * width, 0.000001))
 		var desired := Vector3(width, -radius * cos(arm_angle), radius * sin(arm_angle))
 		shoulder.basis = Basis(Quaternion(upper_vector.normalized(), desired.normalized())) * shoulder.basis
-		result["upperarm_" + side] = (global[parent].basis.inverse() * shoulder.basis).orthonormalized().get_rotation_quaternion().normalized()
 		var elbow: Transform3D = shoulder * local[lower]
 		var forearm: Vector3 = elbow.basis * local[hand].origin
-		var wrist_x := center + sign * (0.250 - 0.130 * forward if running else 0.225 - 0.020 * forward)
+		var wrist_x := center + sign * (0.250 - 0.130 * forward if running else 0.245 + 0.010 * forward)
 		# Rising hands travel inward toward the chest, then release beside the
 		# hip. Keep the rear elbow bent and let the front bend tighten gently.
 		var upper_direction: Vector3 = (shoulder.basis * local[lower].origin).normalized()
-		var flex := deg_to_rad(86.0 + 6.0 * swing if running else 20.0 + 12.0 * forward)
+		# The wider running elbow needs more forward flexion to keep the hand
+		# at the observed sternum height. The rear running bend stays unchanged.
+		var flex_degrees := 86.0 + 6.0 * swing + 10.0 * forward * forward if running else 28.0 + 10.0 * forward
+		var flex := deg_to_rad(flex_degrees)
 		desired = _bent_forearm(upper_direction, forearm.length(), wrist_x - elbow.origin.x, flex)
+		# A direction-only aim retains the source upperarm's axial roll. Align
+		# the native rest-X elbow hinge with the intended bend plane first;
+		# forearm pronation and wrist aiming remain independent of this roll.
+		var native_plane := shoulder.basis * skeleton.get_bone_rest(lower).basis.x
+		native_plane -= upper_direction * native_plane.dot(upper_direction)
+		var target_plane := upper_direction.cross(desired.normalized())
+		if native_plane.length_squared() > 0.00001 and target_plane.length_squared() > 0.00001:
+			native_plane = native_plane.normalized()
+			target_plane = target_plane.normalized()
+			var roll := atan2(upper_direction.dot(native_plane.cross(target_plane)), native_plane.dot(target_plane))
+			shoulder.basis = Basis(upper_direction, roll) * shoulder.basis
+			elbow = shoulder * local[lower]
+			forearm = elbow.basis * local[hand].origin
+		result["upperarm_" + side] = (global[parent].basis.inverse() * shoulder.basis).orthonormalized().get_rotation_quaternion().normalized()
 		elbow.basis = Basis(Quaternion(forearm.normalized(), desired.normalized())) * elbow.basis
 		result["lowerarm_" + side] = (shoulder.basis.inverse() * elbow.basis).orthonormalized().get_rotation_quaternion().normalized()
 		var wrist: Transform3D = elbow * local[hand]
