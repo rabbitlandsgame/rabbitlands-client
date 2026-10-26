@@ -44,9 +44,7 @@ static func apply(native_root: Node3D, skeleton: Skeleton3D,
 	var to_head := skeleton.get_bone_global_rest(head).affine_inverse() * _to_root(skeleton, native_root).affine_inverse()
 	var projection: Dictionary = bundle.descriptor.projection
 	var frame := COMPACTOR.face_frame(native_root, skeleton)
-	var shape := Vector3((COMPACTOR.value(appearance, "jaw") - 50.0) / 50.0,
-		(COMPACTOR.value(appearance, "cheekbones") - 50.0) / 50.0,
-		(COMPACTOR.value(appearance, "nose") - 50.0) / 50.0)
+	var shape := COMPACTOR.face_shape(appearance)
 	for part: String in PARTS + [BEARD]:
 		var node := native_root.find_child(part, true, false) as MeshInstance3D
 		if node == null or node.mesh == null:
@@ -67,10 +65,10 @@ static func apply(native_root: Node3D, skeleton: Skeleton3D,
 		# the neutral, already-refined source. Subdivide/sample that stable mesh
 		# once; a new slider value only reapplies the cheap face field below.
 		var neutral := source
-		if part == "body" and node.has_meta(COMPACTOR.SOURCE_META) and source == node.get_meta(COMPACTOR.RESULT_META):
+		if part != BEARD and node.has_meta(COMPACTOR.SOURCE_META) and source == node.get_meta(COMPACTOR.RESULT_META):
 			neutral = node.get_meta(COMPACTOR.SOURCE_META) as Mesh
 		var canonical_key := "%d:%s:%s:%s" % [neutral.get_instance_id(), transform, sex, part]
-		var key := "%s:%s" % [canonical_key, shape if part == "body" else Vector3.ZERO]
+		var key := "%s:%s" % [canonical_key, shape]
 		var result := _meshes.get(key) as ArrayMesh
 		if result == null:
 			if part == BEARD:
@@ -82,7 +80,7 @@ static func apply(native_root: Node3D, skeleton: Skeleton3D,
 					if _canonical_meshes.size() >= CANONICAL_CACHE_LIMIT:
 						_canonical_meshes.erase(_canonical_meshes.keys()[0])
 					_canonical_meshes[canonical_key] = canonical_mesh
-				result = _shape_mesh(canonical_mesh, transform, frame, shape) if part == "body" and not shape.is_zero_approx() else canonical_mesh
+				result = _shape_mesh(canonical_mesh, transform, frame, shape) if not COMPACTOR.face_is_neutral(shape) else canonical_mesh
 			if _meshes.size() >= CACHE_LIMIT:
 				_meshes.erase(_meshes.keys()[0])
 			_meshes[key] = result
@@ -216,7 +214,7 @@ static func _supported(config: Dictionary) -> bool:
 	return str(config.get("culture", "")) == "luminous" and str(config.get("bodyTemplate", "")) in ["luminous_male", "luminous_female"]
 
 static func _project_mesh(source: Mesh, to_head: Transform3D, projection: Dictionary,
-		bundle: Dictionary, frame: Dictionary, shape: Vector3, part: String) -> ArrayMesh:
+		bundle: Dictionary, frame: Dictionary, shape: Variant, part: String) -> ArrayMesh:
 	var result := ArrayMesh.new()
 	for blend: int in source.get_blend_shape_count():
 		result.add_blend_shape(source.get_blend_shape_name(blend))
@@ -227,9 +225,10 @@ static func _project_mesh(source: Mesh, to_head: Transform3D, projection: Dictio
 		var blends := source.surface_get_blend_shape_arrays(surface)
 		var lods := LODS._surface_lods(source, surface)
 		COMPACTOR.compact(arrays, blends, lods)
-		var custom := part == "body" and not shape.is_zero_approx() and not frame.is_empty()
+		var custom := part == "body" and not COMPACTOR.face_is_neutral(shape) and not frame.is_empty()
 		if part != BEARD and bundle.has("sculpt"):
-			_subdivide(arrays, blends, to_head, bundle, frame, shape, custom)
+			for _pass: int in int(bundle.descriptor.geometry.get("subdivision_passes", 1)):
+				_subdivide(arrays, blends, to_head, bundle, frame, shape, custom)
 		var points: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
 		var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
 		var tangents: PackedFloat32Array = arrays[Mesh.ARRAY_TANGENT] if arrays[Mesh.ARRAY_TANGENT] != null else PackedFloat32Array()
@@ -250,16 +249,16 @@ static func _project_mesh(source: Mesh, to_head: Transform3D, projection: Dictio
 				var groom_uv: PackedVector2Array = arrays[Mesh.ARRAY_TEX_UV]
 				var groom_color: PackedColorArray = arrays[Mesh.ARRAY_COLOR]
 				var anchor := Vector3(groom_uv[index].x, groom_uv[index].y, groom_color[index].g - 0.2)
-				var raw_anchor := _canonical(anchor, frame, shape) if not shape.is_zero_approx() else anchor
+				var raw_anchor := _canonical(anchor, frame, shape) if not COMPACTOR.face_is_neutral(shape) else anchor
 				var moved_anchor := _sculpt_point(raw_anchor, bundle)
-				if not shape.is_zero_approx():
+				if not COMPACTOR.face_is_neutral(shape):
 					moved_anchor = COMPACTOR.face_point(moved_anchor, frame, shape)
 				points[index] = from_head * (p + moved_anchor - anchor)
 				continue
 			var sculpted := _sculpt_point(canonical, bundle)
 			var moved := COMPACTOR.face_point(sculpted, frame, shape) if custom else sculpted
 			points[index] = from_head * moved
-			var influence := _sculpt_mask(canonical)
+			var influence := _normal_mask(canonical)
 			if normals.size() == points.size() and influence > 0.0 and bundle.has("sculpt"):
 				var n := _sample_sculpt(canonical, bundle, 3).normalized()
 				if custom:
@@ -269,7 +268,10 @@ static func _project_mesh(source: Mesh, to_head: Transform3D, projection: Dictio
 						(COMPACTOR.face_point(sculpted + Vector3.BACK * e, frame, shape) - moved) / e)
 					n = (jacobian.inverse().transposed() * n).normalized()
 				var original_normal := (normal_to_head * normals[index]).normalized()
-				normals[index] = (normal_from_head * original_normal.lerp(n, influence).normalized()).normalized()
+				# A front-projected source normal must not turn an inner mouth or
+				# rear-facing lip surface outward at a coincident UV boundary.
+				var normal_influence := influence * smoothstep(-.25,.10,original_normal.z)
+				normals[index] = (normal_from_head * original_normal.lerp(n, normal_influence).normalized()).normalized()
 				if tangents.size() == points.size() * 4:
 					var tangent := Vector3(tangents[index * 4], tangents[index * 4 + 1], tangents[index * 4 + 2])
 					tangent = (tangent - normals[index] * tangent.dot(normals[index])).normalized()
@@ -288,15 +290,58 @@ static func _project_mesh(source: Mesh, to_head: Transform3D, projection: Dictio
 				arrays[Mesh.ARRAY_TANGENT] = tangents
 			arrays[Mesh.ARRAY_TEX_UV2] = uv
 			arrays[Mesh.ARRAY_COLOR] = colors
+			_finish_head_normals(arrays, to_head)
 		result.add_surface_from_arrays(source.surface_get_primitive_type(surface), arrays, blends, lods,
 			source.surface_get_format(surface) & Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS)
 		result.surface_set_material(surface, source.surface_get_material(surface))
 		result.surface_set_name(surface, source.surface_get_name(surface))
 	return result
 
+## Reconcile smooth source normals across coincident UV seams. Averaging the
+## coarse mesh's face normals would reinstate broad planes at the interior of
+## its old triangles, even after those triangles have been subdivided.
+static func _finish_head_normals(arrays: Array, to_head: Transform3D) -> void:
+	var points: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+	var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
+	var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
+	if normals.size() != points.size() or indices.is_empty():
+		return
+	var groups := {}
+	for index: int in points.size():
+		var p := to_head * points[index]
+		if p.y < -.075 or p.y > .17 or absf(p.x) > .095 or p.z < -.025:
+			continue
+		var key := Vector3i(roundi(p.x*100000),roundi(p.y*100000),roundi(p.z*100000))
+		if not groups.has(key):
+			groups[key] = []
+		groups[key].append(index)
+	var original := normals.duplicate()
+	var tangents: PackedFloat32Array = arrays[Mesh.ARRAY_TANGENT] if arrays[Mesh.ARRAY_TANGENT] != null else PackedFloat32Array()
+	for group: Array in groups.values():
+		for index: int in group:
+			var sum := Vector3.ZERO
+			for other: int in group:
+				if original[index].dot(original[other]) > .258819:
+					sum += original[other]
+			if sum.is_zero_approx():
+				continue
+			var p := to_head * points[index]
+			var weight := _normal_mask(p)
+			normals[index] = original[index].lerp(sum.normalized(),weight).normalized()
+			if tangents.size() == points.size()*4:
+				var tangent := Vector3(tangents[index*4],tangents[index*4+1],tangents[index*4+2])
+				tangent = tangent-normals[index]*tangent.dot(normals[index])
+				if not tangent.is_zero_approx():
+					tangent = tangent.normalized()
+					for component: int in 3:
+						tangents[index*4+component] = tangent[component]
+	arrays[Mesh.ARRAY_NORMAL] = normals
+	if not tangents.is_empty():
+		arrays[Mesh.ARRAY_TANGENT] = tangents
+
 ## Reuse the completed High topology and source-normal field for every slider
 ## value. Only the face's existing bounded field and its Jacobian vary here.
-static func _shape_mesh(source: Mesh, to_head: Transform3D, frame: Dictionary, shape: Vector3) -> ArrayMesh:
+static func _shape_mesh(source: Mesh, to_head: Transform3D, frame: Dictionary, shape: Variant) -> ArrayMesh:
 	var result := ArrayMesh.new()
 	for blend: int in source.get_blend_shape_count():
 		result.add_blend_shape(source.get_blend_shape_name(blend))
@@ -344,14 +389,15 @@ static func _sculpt_mask(p: Vector3) -> float:
 	return smoothstep(-0.060, -0.030, p.y) * (1.0 - smoothstep(0.120, 0.145, p.y)) * \
 		(1.0 - smoothstep(0.067, 0.083, absf(p.x))) * smoothstep(-0.004, 0.014, p.z)
 
-static func _canonical(p: Vector3, frame: Dictionary, shape: Vector3) -> Vector3:
-	var result := p
-	for _iteration: int in 12:
-		var residual := p - COMPACTOR.face_point(result, frame, shape)
-		result += residual
-		if residual.length_squared() < 0.0000000000000001:
-			break
-	return result
+## Shading covers the complete visible head, independently of the stricter
+## positional seam protections. Fade beyond the cheek/temple rather than
+## mixing imported hard normals back into the middle of a facial plane.
+static func _normal_mask(p: Vector3) -> float:
+	return smoothstep(-.080,-.050,p.y)*(1.0-smoothstep(.175,.205,p.y))* \
+		(1.0-smoothstep(.090,.115,absf(p.x)))*smoothstep(-.040,-.005,p.z)
+
+static func _canonical(p: Vector3, frame: Dictionary, shape: Variant) -> Vector3:
+	return COMPACTOR.inverse_face_point(p, frame, shape)
 
 static func _sculpt_point(p: Vector3, bundle: Dictionary) -> Vector3:
 	if not bundle.has("sculpt") or _sculpt_mask(p) <= 0.0:
@@ -377,7 +423,7 @@ static func _sample_sculpt(p: Vector3, bundle: Dictionary, offset: int) -> Vecto
 ## Adaptive red/green triangle splitting shares edge decisions between both
 ## incident faces. UV seams retain separate attributes but identical midpoints.
 static func _subdivide(arrays: Array, blends: Array, to_head: Transform3D, bundle: Dictionary,
-		frame: Dictionary, shape: Vector3, custom: bool) -> void:
+		frame: Dictionary, shape: Variant, custom: bool) -> void:
 	var points: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
 	var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
 	if indices.is_empty():
@@ -385,6 +431,9 @@ static func _subdivide(arrays: Array, blends: Array, to_head: Transform3D, bundl
 	var edges := {}
 	var out := PackedInt32Array()
 	var limit := float(bundle.descriptor.geometry.edge_length_m)
+	var feature_limit := float(bundle.descriptor.geometry.get("feature_edge_length_m", limit))
+	var eye_y := float(bundle.descriptor.geometry.get("eye_y_m", .075))
+	var mouth_y := float(bundle.descriptor.geometry.get("mouth_y_m",eye_y-.065))
 	var canonical := PackedVector3Array()
 	canonical.resize(points.size())
 	for index: int in points.size():
@@ -399,7 +448,11 @@ static func _subdivide(arrays: Array, blends: Array, to_head: Transform3D, bundl
 			var pa := canonical[a]
 			var pb := canonical[b]
 			var midpoint := (pa + pb) * 0.5
-			if midpoint.y < -0.045 or midpoint.y > 0.135 or absf(midpoint.x) > 0.080 or midpoint.z < 0.006 or pa.distance_to(pb) <= limit:
+			var feature := (absf(absf(midpoint.x) - .031) < .024 and absf(midpoint.y - eye_y) < .023) or \
+				(absf(midpoint.x) < .033 and absf(midpoint.y - mouth_y) < .015) or \
+				(absf(midpoint.x) < .020 and absf(midpoint.y - eye_y + .032) < .022)
+			var edge_limit := feature_limit if feature else limit
+			if midpoint.y < -0.045 or midpoint.y > 0.135 or absf(midpoint.x) > 0.080 or midpoint.z < 0.006 or pa.distance_to(pb) <= edge_limit:
 				continue
 			var key := Vector2i(mini(a, b), maxi(a, b))
 			if not edges.has(key):

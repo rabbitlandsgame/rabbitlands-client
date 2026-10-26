@@ -36,25 +36,37 @@ void fragment() {
 	original = mix(original, paint.rgb * base_color.rgb, coverage);
 	mask = mix(mask, detail.rgb, coverage);
 	vec3 skin = original * skin_tint.rgb;
+	// The authored lip roughness band doubles as a compact pigment selector;
+	// eyes/brows are excluded, and the nose stays above this range. This keeps
+	// warm vermilion detail through skin selection without another texture.
+	float lip_pigment = coverage * (1.0 - mask.r) * (1.0 - mask.b) *
+		(1.0 - smoothstep(0.59, 0.71, detail.a));
 	if (recolor_skin) {
 		vec3 pigment = original / max(skin_reference.rgb, vec3(0.005));
 		float value = dot(original, vec3(0.2126, 0.7152, 0.0722)) /
 			max(dot(skin_reference.rgb, vec3(0.2126, 0.7152, 0.0722)), 0.005);
 		// Retain the authored local warm/cool paint while the selected skin
 		// colour continues to own the broad pigment of the head and body.
-		skin = skin_color.rgb * mix(vec3(value), pigment, mix(0.20, 0.30, coverage));
+		skin = skin_color.rgb * mix(vec3(value), pigment, mix(mix(0.20, 0.50, coverage), 0.85, lip_pigment));
 	}
 	skin = apply_stubble(skin, atlas_uv);
 	float peak = max(original.r, max(original.g, original.b));
 	float eye_value = dot(eye_tint.rgb, vec3(0.2126, 0.7152, 0.0722));
 	vec3 natural_eye = mix(eye_tint.rgb, vec3(eye_value), 0.20);
-	vec3 iris = natural_eye * min(peak * 1.05, 0.90);
+	// Source iris pixels are already shaded. Restore their readable value
+	// after hue selection rather than multiplying two dark pigments together.
+	vec3 iris = natural_eye * min(peak * 2.40, 0.65);
 	float highlight = smoothstep(0.38, 0.72, min(original.r, min(original.g, original.b)));
 	vec3 eye = mix(original, mix(iris, original, highlight), mask.g);
 	ALBEDO = mix(skin, eye, mask.r);
-	ALBEDO = mix(ALBEDO, vec3(peak) * hair_tint.rgb, mask.b);
+	float brow_value = clamp(peak * 3.5 + 0.15, 0.28, 0.90);
+	// The imported brow primitive also contains light skin between hairs.
+	// Dye only its dark pigment, preserving those feathered skin gaps instead
+	// of turning the whole primitive into a uniformly coloured wedge.
+	float brow_pigment = mask.b * (1.0 - smoothstep(0.08, 0.32, peak));
+	ALBEDO = mix(ALBEDO, vec3(brow_value) * hair_tint.rgb, brow_pigment);
 	ROUGHNESS = mix(roughness, detail.a, coverage);
-	SPECULAR = mix(0.50, mix(0.24, 0.38, mask.r), coverage);
+	SPECULAR = mix(0.50, mix(mix(0.24, 0.32, lip_pigment), 0.38, mask.r), coverage);
 	// UV2 was baked once into this High-only mesh from the canonical head.
 	// Derivative tangents follow the animated surface, so texture details stay
 	// attached through head turns, skeletal animation and facial proportions.

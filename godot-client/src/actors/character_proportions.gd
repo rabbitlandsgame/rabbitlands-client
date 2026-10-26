@@ -3,7 +3,9 @@ extends RefCounted
 ## Cosmetic body scale lives on the complete visual hierarchy: body, rig,
 ## garments, sockets, hair and cloth receive the same affine transform. No
 ## gameplay dimensions or authored meshes on disk are changed.
-const CACHE_LIMIT := 12
+const CACHE_LIMIT := 48
+const FACE_FIELDS := ["jaw", "cheekbones", "nose", "face_length", "eye_size", "eye_tilt",
+	"eye_spacing", "nose_width", "lip_fullness", "brow_depth"]
 const SOURCE_META := &"portrait_face_source"
 const RESULT_META := &"portrait_face_result"
 const LODS := preload("res://src/actors/wardrobe_shirt_fit.gd")
@@ -26,6 +28,37 @@ static func visual_scale(appearance: Dictionary) -> Vector3:
 	var breadth := lerpf(0.85, 1.15, value(appearance, "build") / 100.0)
 	return Vector3(breadth, height, breadth)
 
+## Stable normalized field order is shared by the cheap face and High finish.
+## Legacy Vector3 callers retain exactly the original three sculpt controls.
+static func face_shape(appearance: Dictionary) -> PackedFloat32Array:
+	var result := PackedFloat32Array()
+	for key: String in FACE_FIELDS:
+		result.append((value(appearance, key) - 50.0) / 50.0)
+	return result
+
+static func face_is_neutral(shape: Variant) -> bool:
+	if shape is Vector3:
+		return (shape as Vector3).is_zero_approx()
+	if shape is not PackedFloat32Array:
+		return true
+	for component: float in shape:
+		if not is_zero_approx(component):
+			return false
+	return true
+
+static func _face_parameters(shape: Variant) -> PackedFloat32Array:
+	if shape is PackedFloat32Array and shape.size() >= FACE_FIELDS.size():
+		return shape
+	var result := PackedFloat32Array()
+	result.resize(FACE_FIELDS.size())
+	if shape is Vector3:
+		for index: int in 3:
+			result[index] = shape[index]
+	elif shape is PackedFloat32Array:
+		for index: int in mini(shape.size(), result.size()):
+			result[index] = shape[index]
+	return result
+
 static func clear() -> void:
 	_meshes.clear()
 	_body_meshes.clear()
@@ -46,28 +79,30 @@ static func restore(root: Node3D) -> void:
 static func apply(root: Node3D, skeleton: Skeleton3D, appearance: Dictionary) -> void:
 	if root == null or skeleton == null:
 		return
-	var shape := Vector3((value(appearance, "jaw") - 50.0) / 50.0,
-		(value(appearance, "cheekbones") - 50.0) / 50.0,
-		(value(appearance, "nose") - 50.0) / 50.0)
-	if shape.is_zero_approx():
+	var shape := face_shape(appearance)
+	if face_is_neutral(shape):
+		restore(root)
 		return
 	var frame := face_frame(root, skeleton)
 	if frame.is_empty():
 		return
 	for node: Node in root.find_children("*", "MeshInstance3D", true, false):
 		var instance := node as MeshInstance3D
-		# The field fades to zero before eyes, ears, scalp and neckline. Only
-		# skin geometry below the eyes needs a derived mesh; headwear keeps its
-		# approved cap and perimeter instead of acquiring another fit variant.
-		if instance.name.to_lower() not in ["body", "char1", "mesh_node"] or instance.mesh == null:
+		# Eyes, lids and brows use the same rest-position field. An eye control
+		# must move its skin opening with the eye patch rather than separating
+		# them. Skull/headwear perimeter and neck remain fixed.
+		var part := instance.name.to_lower()
+		if part not in ["body", "char1", "mesh_node", "eyes", "eyebrows", "scalp"] or instance.mesh == null:
 			continue
 		var source := instance.mesh
+		if instance.has_meta(RESULT_META) and source == instance.get_meta(RESULT_META):
+			source = instance.get_meta(SOURCE_META) as Mesh
 		var to_head: Transform3D = frame.to_head * _to_root(skeleton, root).affine_inverse() * _to_root(instance, root)
 		var key := "%s|%s|%s|%s|%s" % [source.get_instance_id(), shape, to_head, frame.eye_y, frame.scale]
 		if not _meshes.has(key):
 			if _meshes.size() >= CACHE_LIMIT:
 				_meshes.erase(_meshes.keys()[0])
-			_meshes[key] = fit(source, to_head, frame, shape)
+			_meshes[key] = fit(source, to_head, frame, shape, part in ["body", "char1", "mesh_node"])
 		instance.set_meta(SOURCE_META, source)
 		instance.mesh = _meshes[key] as Mesh
 		instance.set_meta(RESULT_META, instance.mesh)
@@ -94,13 +129,16 @@ static func face_frame(root: Node3D, skeleton: Skeleton3D) -> Dictionary:
 	var low := Vector3(INF, INF, INF)
 	var high := Vector3(-INF, -INF, -INF)
 	var found := false
+	var side_low := [Vector3(INF, INF, INF), Vector3(INF, INF, INF)]
+	var side_high := [Vector3(-INF, -INF, -INF), Vector3(-INF, -INF, -INF)]
 	for node: Node in root.find_children("*", "MeshInstance3D", true, false):
 		var eyes := node as MeshInstance3D
 		if eyes.name.to_lower() != "eyes" or eyes.mesh == null:
 			continue
 		var transform := to_head * _to_root(skeleton, root).affine_inverse() * _to_root(eyes, root)
-		for surface: int in range(eyes.mesh.get_surface_count()):
-			var arrays := eyes.mesh.surface_get_arrays(surface)
+		var source := eyes.get_meta(SOURCE_META, eyes.mesh) as Mesh
+		for surface: int in range(source.get_surface_count()):
+			var arrays := source.surface_get_arrays(surface)
 			var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
 			var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
 			var used := indices if not indices.is_empty() else PackedInt32Array(range(vertices.size()))
@@ -108,38 +146,100 @@ static func face_frame(root: Node3D, skeleton: Skeleton3D) -> Dictionary:
 				var point: Vector3 = transform * vertices[index]
 				low = low.min(point)
 				high = high.max(point)
+				var side := 0 if point.x < 0.0 else 1
+				side_low[side] = (side_low[side] as Vector3).min(point)
+				side_high[side] = (side_high[side] as Vector3).max(point)
 				found = true
 	if not found:
 		return {}
-	return {"to_head": to_head, "eye_y": (low.y + high.y) * 0.5,
+	var eye_y := (low.y + high.y) * .5
+	var size := clampf((high.x-low.x)/.10,.8,1.4)
+	# The two retained Human sources have distinct mouth/eye spacing. These
+	# measured rest landmarks keep fullness on the lips, not the philtrum.
+	var mouth_y := lerpf(.01560,.00328,clampf((size-.8824)/(.2679),0,1))
+	return {"to_head": to_head, "eye_y": eye_y, "mouth_y": mouth_y,
 		"eye_z": (low.z + high.z) * 0.5,
-		"scale": clampf((high.x - low.x) / 0.10, 0.8, 1.4)}
+		"eye_left": (side_low[0] + side_high[0]) * 0.5,
+		"eye_right": (side_low[1] + side_high[1]) * 0.5,
+		"scale": size}
 
-## Smooth local sculpting field, confined to the front face. The maximum
-## authored displacement is 12 mm at standard scale. The neck seam, eyelids,
-## ears and skull perimeter remain exact, including at slider extremes.
-static func face_point(point: Vector3, frame: Dictionary, shape: Vector3) -> Vector3:
+## Bounded shared rest field for the front face and coherent eye/lid opening.
+## Combined normalized extremes stay below 25 mm in the sampled unit frame;
+## the neck, rear skull and cap perimeter remain fixed.
+static func face_point(point: Vector3, frame: Dictionary, shape: Variant) -> Vector3:
 	var size: float = frame.scale
 	var y := (point.y - float(frame.eye_y)) / size
 	var x := point.x / size
 	var z := (point.z - float(frame.eye_z)) / size
 	var front := smoothstep(-0.055, -0.005, z)
 	var sides := 1.0 - smoothstep(0.055, 0.080, absf(x))
-	var top := 1.0 - smoothstep(-0.015, 0.0, y)
 	var bottom := smoothstep(-0.16, -0.12, y)
-	var mask := front * sides * top * bottom
-	if mask <= 0.0:
+	var upper := 1.0 - smoothstep(0.045, 0.072, y)
+	if front * sides * bottom * upper <= 0.0:
 		return point
+	var parameters := _face_parameters(shape)
+	var top := 1.0 - smoothstep(-0.015, 0.0, y)
+	var mask := front * sides * top * bottom
 	var jaw := exp(-pow((y + 0.095) / 0.034, 2.0))
 	var cheeks := exp(-pow((y + 0.035) / 0.023, 2.0))
 	var centre := 1.0 - smoothstep(0.012, 0.028, absf(x))
 	var nose := exp(-pow((y + 0.035) / 0.025, 2.0)) * centre
 	var width := smoothstep(0.0, 0.035, absf(x))
-	point.x += signf(x) * width * (0.012 * jaw * shape.x + 0.008 * cheeks * shape.y) * mask * size
-	point.z += 0.010 * nose * shape.z * mask * size
+	var delta := Vector3.ZERO
+	delta.x = signf(x) * width * (0.012 * jaw * parameters[0] + 0.008 * cheeks * parameters[1]) * mask
+	delta.z = 0.010 * nose * parameters[2] * mask
+	# Length pivots beneath the eyes, so the brow/hairline does not stretch.
+	delta.y += y * 0.13 * parameters[3] * mask
+	var side := -1.0 if x < 0.0 else 1.0
+	var eye: Vector3 = frame.get("eye_left" if side < 0.0 else "eye_right",
+		Vector3(side * .030 * size, frame.eye_y, frame.eye_z))
+	var ex := (point.x - eye.x) / size
+	var ey := (point.y - eye.y) / size
+	# Each eye has its own pivot, but their influences meet at a stationary
+	# central bridge. Fading before x=0 avoids a sign-dependent centre crack.
+	var orbital_side := smoothstep(.005, .020, absf(x))
+	var orbit := exp(-pow(ex / .030, 4.0) - pow(ey / .024, 4.0)) * front * sides * bottom * upper * orbital_side
+	var angle := side * parameters[5] * .14
+	var rotated := Vector2(ex, ey).rotated(angle)
+	delta.x += (ex * .20 * parameters[4] + rotated.x - ex + side * .0045 * parameters[6]) * orbit
+	delta.y += (ey * .38 * parameters[4] + rotated.y - ey) * orbit
+	# Broad orbital depth keeps the eyeball/lid/brow relationship coherent;
+	# narrow pigment bands cannot create a convincing hooded eye by themselves.
+	var brow := exp(-pow(ex / .033, 4.0) - pow((ey - .016) / .018, 2.0)) * front * sides * upper
+	delta.z += .0052 * parameters[9] * brow
+	delta.y -= .0012 * parameters[9] * brow
+	delta.z -= .0009 * parameters[9] * exp(-pow(x/.007,2.0)-pow((y-.020)/.018,2.0)) * front * upper
+	var nasal_width := exp(-pow((y + .032) / .025, 2.0) - pow(x / .024, 4.0)) * front * sides
+	delta.x += x * .28 * parameters[7] * nasal_width
+	var lip_offset := (point.y-float(frame.get("mouth_y",float(frame.eye_y)-.064*size)))/size
+	var lip := exp(-pow(x / .032, 4.0) - pow(lip_offset / .014, 4.0)) * front * sides
+	delta.y += lip_offset * .30 * parameters[8] * lip
+	delta.z += .0028 * parameters[8] * lip
+	delta.x += x * .06 * parameters[8] * lip
+	point += delta * size
 	return point
 
-static func fit(source: Mesh, to_head: Transform3D, frame: Dictionary, shape: Vector3) -> Mesh:
+static func face_jacobian(point: Vector3, frame: Dictionary, shape: Variant) -> Basis:
+	var moved := face_point(point, frame, shape)
+	var epsilon := .00005
+	return Basis((face_point(point + Vector3.RIGHT * epsilon, frame, shape) - moved) / epsilon,
+		(face_point(point + Vector3.UP * epsilon, frame, shape) - moved) / epsilon,
+		(face_point(point + Vector3.BACK * epsilon, frame, shape) - moved) / epsilon)
+
+## Shared inverse for fitted grooming coverage and High's source-coordinate
+## lookup. The bounded rest field is independent of normals, UV and pose.
+static func inverse_face_point(point: Vector3, frame: Dictionary, shape: Variant) -> Vector3:
+	var result := point
+	for _iteration: int in 8:
+		var residual := point - face_point(result, frame, shape)
+		if residual.length_squared() < .0000000000000001:
+			break
+		var jacobian := face_jacobian(result, frame, shape)
+		var step := jacobian.inverse() * residual if absf(jacobian.determinant()) > .05 else residual * .5
+		result += step.limit_length(.020)
+	return result
+
+static func fit(source: Mesh, to_head: Transform3D, frame: Dictionary, shape: Variant, finish_normals: bool = true) -> Mesh:
 	var result := ArrayMesh.new()
 	result.resource_name = source.resource_name + " Portrait Face"
 	for blend: int in range(source.get_blend_shape_count()):
@@ -180,7 +280,7 @@ static func fit(source: Mesh, to_head: Transform3D, frame: Dictionary, shape: Ve
 		arrays[Mesh.ARRAY_NORMAL] = normals
 		if not tangents.is_empty():
 			arrays[Mesh.ARRAY_TANGENT] = tangents
-		if not shape.is_zero_approx():
+		if finish_normals and not face_is_neutral(shape):
 			_finish_face_normals(arrays, to_head, frame)
 		result.add_surface_from_arrays(source.surface_get_primitive_type(surface), arrays, blends, lods,
 			source.surface_get_format(surface) & Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS)

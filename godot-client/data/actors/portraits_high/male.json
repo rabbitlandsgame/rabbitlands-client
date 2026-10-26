@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "sex": "male",
   "size": 1024,
   "projection": {
@@ -15,15 +15,19 @@
   },
   "runtime_source_sha256": "1cc5bd8cd2761e71f711dc33aabd500ea88cb918c0806223991cb5bd87bb2d75",
   "authoring_source_sha256": "0cb1a7f78c15712872e3e9f6a1a458273a179b8d8cd8461d792ca5b915559c86",
-  "paint_recipe": "Human portrait v2: retained source iris, anatomical lid aperture, high-poly head surface and coherent normals",
+  "paint_recipe": "Human portrait v3: preserved 4K source pigment, measured lip landmarks, authored lid/nose/brow planes and refined feature topology",
   "geometry": {
     "path": "res://data/actors/portraits_high/male-sculpt.bin",
     "size": 256,
     "stride": 6,
     "max_delta_m": 0.006,
-    "edge_length_m": 0.0065,
-    "bytes": 184348,
-    "sha256": "d35a33cf4418f044c26e98fbda9c217536e51c4deed6170f9459d06f84bb42db",
-    "baked_max_displacement_m": 0.004503668528851449
+    "edge_length_m": 0.0095,
+    "bytes": 186030,
+    "sha256": "6c3ffe48abc2cc1f2d5bb3cc5d80f9348cdfcd53f37ac93d3f5aaf0a4bd6135a",
+    "baked_max_displacement_m": 0.0055000000000000005,
+    "feature_edge_length_m": 0.0045,
+    "subdivision_passes": 2,
+    "eye_y_m": 0.07662649416957293,
+    "mouth_y_m": 0.01559628543499511
   }
 }

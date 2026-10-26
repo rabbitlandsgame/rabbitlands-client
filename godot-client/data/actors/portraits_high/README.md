@@ -1,82 +1,86 @@
 # Human High portrait artwork
 
-High graphics adds an optional, shared portrait layer to the two Human heads.
-Low and Medium retain their exact current meshes, materials and source atlases.
-No skeleton, animation or equipment variant is added. High alone refines the
-front head using the retained, registered high-resolution Human sources.
+Ten shared face controls shape the existing Human body, eyes, brows and scalp
+at every graphics tier. Neutral values restore exact original/refined mesh
+objects. High adds optional detail without a new skeleton, animation, physics
+shape, equipment variant or head draw.
 
-The six 1024-pixel maps contain reprojected 4K source albedo plus authored warm
-and cool facial planes, lip pigment, sparse freckles and restrained brow strokes;
-the original painted iris/pupil artwork within a narrower lid opening; packed
-eye/brow regions and roughness; and restrained pore detail. The CPU sculpt grids
-transfer lip/nose/lid planes and coherent source normals, including at neutral
-face sliders. This remains a stylized game portrait, rather than the full source
-sculpt or a replacement skeleton.
+Version 3 preserves the exact split source's 4K pigment and iris artwork. Lip
+colour and roughness follow measured male/female mouth landmarks. Sculpt fields
+refine lip, philtrum, nose, lid and tapered brow planes. Smooth source normals
+cover the full frontal head independently of the stricter positional seam mask
+and weld across coincident UV positions; the normal map adds fine relief.
+These are interpretations of the supplied studies, not painted portrait matches.
 
-`HighPortraitAppearance` creates a compact High-only derivative carrying UV2
-coordinates measured in the canonical Head rest frame. Those coordinates follow
-the ordinary rig, rather than being projected from world position during an
-animation. Original UV1 and skin influences stay exact on retained vertices.
-Adaptive edge splitting adds 1,761 male / 1,766 female front-head
-triangles; midpoint UVs and four/eight skin influences are interpolated and
-normalized. Shared edge decisions and a position-only field keep duplicated UV
-seams closed even when their normals differ. The field is exactly zero at the
-neck, ears, rear skull and cap perimeter. Measured original-vertex displacement
-is at most 1.57 mm male / 3.12 mm female in the reviewed presets, below the
-5.5 mm authoring clamp. The facial-hair shell follows the same skin-point delta
-while retaining its existing shader and attributes. Restoring Medium reinstates
-the exact source Mesh and Material objects.
-The stubble pigment include uses the original source UV atlas at every tier.
+The four head parts have 7,846 male / 7,592 female Head-weighted triangles versus
+1,926 / 2,604 at Low/Medium: +5,920 / +4,988. Two adaptive splitting passes
+prioritize eyes, nose and lips. Retained UV1/bone influences stay exact; midpoint
+UVs and four/eight influences are interpolated and normalized. Shared edge
+choices and a position-only field keep UV seams closed. Geometry delta is
+exactly zero at neck, ears, rear skull and cap perimeter. The authoring clamp is
+5.5 mm; final neutral/custom proofs measured retained-vertex deltas under 4 mm
+and original seam gaps under 0.3 micrometres. Shared controls apply after the
+canonical High refinement.
 
-The three maps per sex are shared between actors, use BPTC compression and have
-mipmaps. Their compiled texture payload is approximately 4 MiB per sex, 8 MiB for
-both. The two compressed `.bin` grids total 380 KiB on disk and decode to
-384 KiB CPU memory per sex; these are not GPU textures. Each grid is 256 square,
-six bytes per sample: signed XYZ delta within ±6 mm, followed by XYZ source
-normal in [-1,1], both encoded to unsigned bytes. The descriptor owns the path,
-dimensions, range and SHA-256; the payload uses gzip compression with a `.bin`
-extension included by the client package filter.
+UV2 is measured once in canonical Head rest space and follows ordinary skinning;
+paint never projects from animated/world position. Stubble uses original UV1.
+Beards follow the same skin-point delta while preserving fitted anchors and
+canonical coverage; the independent High hair finish may refine them afterward.
+Downgrading restores exact incoming selected Mesh/Material objects.
 
-A tested head's four High surfaces use about 0.62–0.65 MiB of arrays. A custom
-face also retains the shared canonical High body, bringing a single distinct
-custom head's cache total to about 1.17–1.22 MiB. Canonical topology/normal-field
-work is shared across sliders (eight mesh entries); finished derivatives are
-bounded to 24 entries. New complete-actor jaw slider values measured 17–39 ms
-clean-shaven and 47–84 ms with the full beard (including its existing grooming
-rebuild) in the debug Vulkan preview. Cached preset updates were about 5–9 ms. The cold
-first High application measured 0.11–0.17 seconds; none of this deformation runs
-per frame. Last-user downgrade
-or removal releases the High bundles and derivative cache. Low/Medium creation
-does not load a High texture or allocate a High mesh. Extra pixel shading work
-is restricted to this optional material pass; no draw, bone or physics shape is
-added. Low/Medium never decode the sculpt or create a High derivative.
+Six 1024-pixel PNGs retain BPTC/mipmap import settings: about 4 MiB compiled per
+sex, 8 MiB shared for both. Compressed CPU grids total 391,748 bytes (383 KiB),
+decoding to 384 KiB per sex / 768 KiB both. Each 256-square sample has six bytes:
+signed XYZ delta within +/-6 mm and XYZ source normal in [-1,1]. Descriptors own
+range, dimensions, thresholds, landmarks and SHA-256. Gzip payloads use `.bin`,
+which the client package filter includes. PNG/JSON/grids total about 3.46 MiB on
+disk, approximately 4 KiB more than version 2. Raw high-poly/4K sources never ship.
 
-An isolated warmed 120-frame Vulkan comparison on an RTX 5080 Laptop GPU at
-1280×720 held hair, shadows, LOD and animation policy at Medium. Sixteen full-body
-Humans measured median GPU 0.228→0.231 ms; a close male head 0.113→0.120 ms.
-The two distinct custom heads shared ten unique canonical/finished meshes,
-2,498,456 bytes of decoded arrays and 1,333,796 packed GPU stream bytes. These
-are fixture measurements, rather than an estimate for every device or scene.
+The frozen reference fixture's four head parts use 396,212 decoded array bytes
+at Medium versus 949,316 at High for Rowan/Tavi; Mira uses 437,300 versus 886,860.
+A custom High face also retains a shared canonical derivative: approximately
+1.81 MiB decoded arrays male / 1.69 MiB female before optional beard, plus shared
+maps/grid. Decoded bytes are not a GPU memory estimate. Canonical cache is
+bounded to eight meshes and finished derivatives to 24. Last-user downgrade or
+removal releases High bundles, sculpt and mesh caches. Initial Low/Medium loads
+none of them. Live actors can retain evicted mesh entries.
 
-Rebuild offline using the retained ignored `human_bodies_2026-10` authoring folder:
+The final isolated Vulkan fixture held hair, animation and render policy at
+Medium on an RTX 5080 Laptop GPU, 1280x720, 120 warmed frames. Median GPU time was
+0.227 to 0.241 ms for sixteen bodies and 0.115 to 0.126 ms for a close head.
+Sixteen actors with two distinct faces shared sixteen canonical/finished meshes:
+3,672,352 decoded array bytes, 1,958,392 packed GPU stream bytes, 786,432 CPU
+sculpt bytes and 8,388,768 compiled texture bytes. Their conservative CPU-plus-GPU
+sum is 14.81 MB decimal, not a VRAM figure. After ten novel controls the bounded
+caches held about 7.53 MB decoded arrays and 4.02 MB packed streams.
+
+Novel High head processing measured 53-68 ms, separately from 21-34 ms for the
+Medium actor update; cached High calls were 0.95-3.75 ms. Deformation runs only
+on changes. Beard/equipment fitting can add work. Frozen reference quality
+switches took 0.23-0.32 seconds including the independent hair finish. Initial
+Medium configuration took 1.24-1.80 seconds for the first two source bodies and
+0.24 seconds for a later cached male; those loads are not High processing costs.
+These measurements describe this fixture and machine, not a universal bound.
+
+Rebuild offline from the retained ignored `human_bodies_2026-10` folder:
 
 ```powershell
 python godot-client/tools/bake_human_high_portraits.py `
   --root <task-client-checkout> `
   --sources <ignored-human-authoring-folder> `
-  --stage <ignored-versioned-output-folder> --geometry-v2 --install
+  --stage <ignored-versioned-output-folder> --geometry-v3 --install
 ```
 
-A sparse authoring worktree can supply `--tools-root <full-reader-checkout>`.
-The recipe verifies the split GLB hashes against the runtime body's provenance,
-preserves those inputs, and records the normal transfer's measured registration
-error and output hashes in the ignored stage. Installing writes only this data
-folder. The source meshes and original 4K textures are not runtime deliverables.
+Sparse worktrees may supply `--tools-root <full-reader-checkout>`. The recipe
+verifies source split hashes against runtime provenance, preserves inputs, and
+records registration/output hashes in the ignored stage. Installation writes
+only this data folder. The nearest-surface raw albedo experiment was rejected;
+version 3 retains the clean exact source projection.
 
-Import these six PNGs with their authored `.import` settings before previewing.
-Run `tests/high_portrait_appearance.gd` using the normal production renderer; set
-`RL_HIGH_PORTRAIT_OUTPUT` to an ignored directory. It exercises both heads at
-three angles, neutral/custom sliders, three eye and skin colours, rotated lights,
-exact quality restoration after sliders/helmets/removal, initial Low/Medium
-allocation, bounded geometry, UV-seam midpoint coherence, normalized skin weights,
-animation-stable UV2, fitted facial hair and retained stubble pigment.
+Import the PNGs with authored `.import` settings. Run
+`tests/test_human_face_controls.gd` for shared fields/restoration,
+`tests/high_portrait_appearance.gd` for High geometry/weights/seams/lifecycle,
+and `tests/human_face_reference_preview.gd` for central presets, both tiers,
+square-aspect front/side/three-quarter views and alternate light. Respectively,
+`RL_FACE_CONTROL_OUTPUT`, `RL_HIGH_PORTRAIT_OUTPUT` and `RL_FACE_REFERENCE_OUTPUT`
+select ignored evidence directories.

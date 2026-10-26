@@ -88,6 +88,9 @@ func run() -> void:
 			var elapsed := Time.get_ticks_usec() - started
 			if level == 2:
 				expect(HIGH.cache_metrics().texture_bundles == 1, "one shared High texture bundle")
+				var head_triangles := count_head_triangles(actor)
+				expect(head_triangles >= 6000 and head_triangles <= 8200, "reviewed 6–8k High head budget")
+				results.append({"sex":sex,"head_triangles":head_triangles})
 				for part: String in HIGH.PARTS:
 					var node := actor._native_model.find_child(part, true, false) as MeshInstance3D
 					expect(node.has_meta(HIGH.META), "High artwork applies " + part)
@@ -188,7 +191,12 @@ func run() -> void:
 				var beard_source := beard.mesh
 				var beard_material := beard.material_override
 				actor.apply_render_quality(2, true)
-				expect(beard.mesh != beard_source and beard.material_override == beard_material, "High beard follows head without changing shader")
+				var portrait_source: Dictionary = beard.get_meta(HIGH.META,{})
+				expect(beard.mesh != beard_source and portrait_source.get("source") == beard_source
+					and portrait_source.get("override") == beard_material,
+					"High portrait beard retains exact incoming source mesh/material")
+				expect((beard.material_override as ShaderMaterial).shader == (beard_material as ShaderMaterial).shader,
+					"independent High grooming retains the beard shader")
 				freeze(actor, "idle", .4)
 				var skeleton := actor.get_skeleton()
 				var focus := skeleton.to_global(skeleton.get_bone_global_pose(skeleton.find_bone("Head")).origin) + Vector3(0, .06, 0)
@@ -246,7 +254,7 @@ func check_geometry(source: Mesh, result: Mesh, label: String) -> void:
 		var ai: PackedInt32Array = a[Mesh.ARRAY_INDEX]
 		var bi: PackedInt32Array = b[Mesh.ARRAY_INDEX]
 		expect(source.get_blend_shape_count() == result.get_blend_shape_count(), "blend shape count preserved")
-		expect(bi.size() >= ai.size() and bi.size() - ai.size() < 7200, "bounded head-only triangle refinement " + label)
+		expect(bi.size() >= ai.size() and bi.size() - ai.size() < 21000, "bounded head-only triangle refinement " + label)
 		var seam_positions := {}
 		var maximum_delta := 0.0
 		var maximum_seam_gap := 0.0
@@ -254,7 +262,7 @@ func check_geometry(source: Mesh, result: Mesh, label: String) -> void:
 			var p: Vector3 = a[Mesh.ARRAY_VERTEX][index]
 			var q: Vector3 = b[Mesh.ARRAY_VERTEX][index]
 			maximum_delta = maxf(maximum_delta, p.distance_to(q))
-			expect(p.distance_to(q) < .0065 and q.is_finite(), "bounded finite sculpt " + label)
+			expect(p.distance_to(q) < .0085 and q.is_finite(), "bounded finite sculpt including selected face Jacobian " + label)
 			expect(a[Mesh.ARRAY_TEX_UV][index] == b[Mesh.ARRAY_TEX_UV][index], "UV1 remains exact " + label)
 			var key := Vector3i(roundi(p.x * 1000000), roundi(p.y * 1000000), roundi(p.z * 1000000))
 			if seam_positions.has(key):
@@ -287,6 +295,10 @@ func check_geometry(source: Mesh, result: Mesh, label: String) -> void:
 
 func check_seam_midpoints() -> void:
 	var bundle := HIGH._bundle("male")
+	expect(HIGH._normal_mask(Vector3(.080,.140,.030)) > .999,
+		"smooth source normals cover outer cheek/temple and forehead beyond displacement fade")
+	expect(HIGH._sculpt_mask(Vector3(.080,.140,.030)) < .1,
+		"normal coverage does not relax positional seam protections")
 	var points := PackedVector3Array([Vector3(-.025,.04,.05), Vector3(.025,.04,.05), Vector3(0,.02,.05),
 		Vector3(.025,.04,.05), Vector3(-.025,.04,.05), Vector3(0,.06,.05)])
 	var arrays := []
@@ -319,6 +331,33 @@ func check_seam_midpoints() -> void:
 			expect(HIGH._canonical(moved, frame, shape).distance_to(p) < .000001, "custom face inverse remains stable at extrema")
 	expect(pairs > 0, "fixture actually tests duplicated new edge midpoint")
 	HIGH.clear()
+
+func count_head_triangles(actor: ReplicatedActor3D) -> int:
+	var total := 0
+	var head := actor.get_skeleton().find_bone("Head")
+	for part: String in HIGH.PARTS:
+		var node := actor._native_model.find_child(part,true,false) as MeshInstance3D
+		var head_bind := -1
+		for bind: int in node.skin.get_bind_count():
+			if node.skin.get_bind_bone(bind) == head or node.skin.get_bind_name(bind) == &"Head":
+				head_bind = bind
+		for surface: int in node.mesh.get_surface_count():
+			var arrays := node.mesh.surface_get_arrays(surface)
+			var points: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+			var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
+			var weights: PackedFloat32Array = arrays[Mesh.ARRAY_WEIGHTS]
+			var bones: PackedInt32Array = arrays[Mesh.ARRAY_BONES]
+			var width := int(weights.size()/points.size())
+			for triangle: int in range(0,indices.size(),3):
+				var weight := 0.0
+				for corner: int in 3:
+					var index := indices[triangle+corner]
+					for influence: int in width:
+						if bones[index*width+influence] == head_bind:
+							weight += weights[index*width+influence]
+				if weight/3.0 > .45:
+					total += 1
+	return total
 
 func capture(name: String) -> void:
 	for frame: int in 5:

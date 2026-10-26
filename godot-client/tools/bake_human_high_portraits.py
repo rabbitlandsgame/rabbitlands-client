@@ -188,7 +188,7 @@ def bake_high_normals(sources, sex, points, low_normal, valid, head, runtime, g,
                     "normal_bake_coverage": float(np.mean(influence[valid.reshape(-1)] > .05))}, delta.reshape(points.shape), transferred.reshape(points.shape)
 
 
-def paint_portrait(base, region, points, low_normal, high_normal, valid, eye_y, sex, source_iris=False):
+def paint_portrait(base, region, points, low_normal, high_normal, valid, eye_y, sex, source_iris=False, reference=False, mouth_y=None):
     x, y, z = points[..., 0], points[..., 1], points[..., 2]
     yy = y-eye_y
     def brush(cx, cy, sx, sy):
@@ -208,12 +208,23 @@ def paint_portrait(base, region, points, low_normal, high_normal, valid, eye_y, 
     lip_y = -.064 - .002*np.cos(x*95)
     lips = np.exp(-(x/.027)**4-((yy-lip_y)/.0065)**2)
     lower_lip = np.exp(-(x/.022)**4-((yy+.069)/.0033)**2)
+    if reference:
+        mouth_offset=y-mouth_y
+        arch=np.maximum(1-(x/.028)**2,0)
+        upper=(.0038-.0009*np.cos(x*180))*arch
+        lips=np.exp(-(x/.027)**4-((mouth_offset-upper)/.0030)**2)
+        lips+=np.exp(-(x/.026)**4-((mouth_offset+.0038*arch)/.0030)**2)
+        lips=np.clip(lips,0,1)
+        lower_lip=np.exp(-(x/.023)**4-((mouth_offset+.0040*arch)/.0028)**2)
     glaze([.72, .40, .34], cheeks*skin, .12 if sex == "female" else .075)
     glaze([.37, .42, .49], temples*skin, .085)
     glaze([.51, .35, .35], under_eye*skin, .13)
     glaze([.75, .43, .34], nose*skin, .055)
-    glaze([.55, .285, .27], lips*skin, .30 if sex == "female" else .23)
-    glaze([.77, .47, .41], lower_lip*skin, .12)
+    glaze([.55, .285, .27], lips*skin, (.48 if sex == "female" else .30) if reference else (.30 if sex == "female" else .23))
+    glaze([.77, .47, .41], lower_lip*skin, .18 if reference else .12)
+    if reference:
+        cupid = np.exp(-(x/.023)**4-((mouth_offset-upper-.0010)/.0012)**2)
+        glaze([.84,.54,.47], cupid*skin, .15 if sex == "female" else .075)
     forehead = brush(-.008, .068, .050, .025)
     glaze([.89, .735, .61], forehead*skin, .045)
     # Preserve the source's strong tapered brow silhouette and add restrained
@@ -281,6 +292,8 @@ def paint_portrait(base, region, points, low_normal, high_normal, valid, eye_y, 
     normal = unit(normal)
     roughness = np.full(x.shape, .80)
     roughness -= np.clip(nose*.08 + lower_lip*.20, 0, .24)
+    if reference:
+        roughness -= lips*.17
     roughness = roughness*(1-region[..., 0]) + (.38 if source_iris else .20)*region[..., 0]
     if source_iris:
         roughness = roughness*(1-region[..., 1]) + .29*region[..., 1]
@@ -299,7 +312,7 @@ def smoothstep(a, b, x):
     return value*value*(3-2*value)
 
 
-def geometry_v2(stage, sex, base, region, points, low_normal, raw_delta, high_normal, valid, eye_y):
+def geometry_v2(stage, sex, base, region, points, low_normal, raw_delta, high_normal, valid, eye_y, reference=False, mouth_y=None):
     x, y, z = points[..., 0], points[..., 1], points[..., 2]
     weight = smoothstep(-.060, -.030, y)*(1-smoothstep(.120, .145, y))
     weight *= (1-smoothstep(.067, .083, abs(x)))*smoothstep(-.004, .014, z)
@@ -317,6 +330,58 @@ def geometry_v2(stage, sex, base, region, points, low_normal, raw_delta, high_no
     # The shared field normal is independent of source UV and source normals.
     # This also repairs neutral-slider head seams, not just custom faces.
     coherent = unit(np.stack([gaussian_filter(high_normal[..., c], .8) for c in range(3)], -1))
+    if reference:
+        yy = y-eye_y
+        finish = np.zeros_like(delta)
+        mouth_offset=y-mouth_y
+        arch=np.maximum(1-(x/.028)**2,0)
+        upper=(.0038-.0009*np.cos(x*180))*arch
+        upper_lip = np.exp(-(x/.025)**4-((mouth_offset-upper)/.0028)**2)
+        lower_lip = np.exp(-(x/.024)**4-((mouth_offset+.0040*arch)/.0030)**2)
+        philtrum = np.exp(-(x/.0055)**2-((mouth_offset-.013)/.007)**2)
+        finish[..., 2] += upper_lip*(.0017 if sex == "female" else .0010)
+        finish[..., 2] += lower_lip*(.0017 if sex == "female" else .0011)-philtrum*.00045
+        tip = np.exp(-(x/.011)**2-((yy+.034)/.010)**2)
+        bridge = np.exp(-(x/.008)**2-((yy+.012)/.020)**2)
+        finish[..., 2] += bridge*.00055-tip*(.0009 if sex == "female" else .0004)
+        finish[..., 1] += tip*(.0012 if sex == "female" else .00045)
+        eye_boundary = distance_transform_edt(region[...,0] < .35, sampling=((Y_MAX-Y_MIN)/(SIZE-1),(X_MAX-X_MIN)/(SIZE-1)))
+        lid_rim = np.exp(-((eye_boundary-.00075)/.0009)**2)*(region[...,0] < .35)
+        lid_rim *= np.exp(-((yy-.001)/.019)**4)*(abs(x) > .010)*(abs(x) < .065)
+        finish[...,2] += lid_rim*.0009
+        for side in (-1,1):
+            iris=region[...,1]*(x*side>0)
+            if iris.sum()>1:
+                cx,cy=(x*iris).sum()/iris.sum(),(y*iris).sum()/iris.sum()
+                along=(x-cx)/.022
+                orbit=np.exp(-((x-cx)/.029)**4-((y-cy)/.022)**4)
+                orbit*=smoothstep(.006,.020,abs(x))
+                finish[...,1] += (-(y-cy)*.28*np.minimum(abs(along),1.15)**1.5+side*(x-cx)*.032)*orbit
+            # Retain each source brow's arch, but taper the outer third and
+            # reduce its uniformly thick block silhouette in actual geometry.
+            brow=(region[...,2]>.25)&(x*side>0)&(y>eye_y+.005)&(y<eye_y+.050)
+            columns=np.flatnonzero(brow.any(axis=0))
+            if len(columns)<4:
+                continue
+            centers=np.array([np.mean(y[brow[:,column],column]) for column in columns])
+            centerline=np.interp(np.arange(SIZE),columns,centers)[None,:]
+            inner,outer=np.percentile(abs(x[brow]),[2,98])
+            t=np.clip((abs(x)-inner)/max(outer-inner,.005),0,1)
+            taper=.65+.20*np.sin(np.pi*t)-.40*t*t
+            influence=np.exp(-((y-centerline)/.010)**4)
+            influence*=smoothstep(inner-.002,inner+.001,abs(x))*(1-smoothstep(outer,outer+.003,abs(x)))*(x*side>0)
+            finish[...,1] += ((y-centerline)*(taper-1)+.0008*np.sin(np.pi*t)+.0006*t)*influence
+            finish[...,2] -= .0004*(1-taper)*influence
+        finish *= weight[...,None]
+        delta += finish
+        delta *= np.minimum(1,.0055/np.maximum(np.linalg.norm(delta,axis=-1,keepdims=True),1e-9))
+        # Move the coherent source normals through the authored plane field.
+        fy, fx = np.gradient(finish,-(Y_MAX-Y_MIN)/(SIZE-1),(X_MAX-X_MIN)/(SIZE-1),axis=(0,1))
+        a,b,c,d=1+fx[...,0],fy[...,0],fx[...,1],1+fy[...,1]
+        nx=coherent[...,0]-fx[...,2]*coherent[...,2]
+        ny=coherent[...,1]-fy[...,2]*coherent[...,2]
+        determinant=np.maximum(a*d-b*c,.1)
+        coherent=unit(np.stack([(d*nx-c*ny)/determinant,(-b*nx+a*ny)/determinant,coherent[...,2]],-1))
     size, max_delta = 256, .006
     channels = np.concatenate([np.clip(delta/max_delta*.5+.5, 0, 1), coherent*.5+.5], -1)
     reduced = np.stack([np.asarray(Image.fromarray(np.round(channels[..., c]*255).astype(np.uint8)).resize((size, size), Image.Resampling.BILINEAR)) for c in range(6)], -1)
@@ -357,10 +422,13 @@ def geometry_v2(stage, sex, base, region, points, low_normal, raw_delta, high_no
     base = base*(1-outside[..., None])+skin_fill*outside[..., None]
     region[..., 0] = np.minimum(native_eye, openings)
     region[..., 1] = native_iris*openings
-    return base, region, {"path": f"res://data/actors/portraits_high/{sex}-sculpt.bin", "size": size,
+    descriptor = {"path": f"res://data/actors/portraits_high/{sex}-sculpt.bin", "size": size,
                          "stride": 6, "max_delta_m": max_delta, "edge_length_m": .0065,
                          "bytes": len(blob), "sha256": sha(path),
                          "baked_max_displacement_m": float(np.max(np.linalg.norm(delta[valid], axis=-1)))}
+    if reference:
+        descriptor.update(edge_length_m=.0095,feature_edge_length_m=.0045,subdivision_passes=2,eye_y_m=eye_y,mouth_y_m=mouth_y)
+    return base, region, descriptor
 
 
 def run(args):
@@ -372,11 +440,21 @@ def run(args):
         base, region, points, normal, valid, head, eye_y, runtime, split = raster_head(root, args.sources, sex, g, ea)
         save_png(args.stage/f"{sex}-source-projection.png", base)
         high_normal, bake, delta, coherent = bake_high_normals(args.sources, sex, points, normal, valid, head, runtime, g, ea)
+        mouth_y=None
+        if args.geometry_v3:
+            args.geometry_v2 = True
+            rows=np.arange(SIZE)
+            row_y=Y_MAX-rows*(Y_MAX-Y_MIN)/(SIZE-1)
+            central=abs(points[SIZE//2,:,0])<.018
+            profile=gaussian_filter(np.mean(base[:,central] @ np.array([.2126,.7152,.0722]),axis=1),1)
+            candidates=(row_y>eye_y-.090)&(row_y<eye_y-.050)
+            mouth_row=np.flatnonzero(candidates)[np.argmin(profile[candidates])]
+            mouth_y=float(row_y[mouth_row])
         geometry = None
         if args.geometry_v2:
-            base, region, geometry = geometry_v2(args.stage, sex, base, region, points, normal, delta, coherent, valid, eye_y)
+            base, region, geometry = geometry_v2(args.stage, sex, base, region, points, normal, delta, coherent, valid, eye_y,args.geometry_v3,mouth_y)
         painted, regions, detailed_normal = paint_portrait(base.copy(), region, points,
-            high_normal if geometry else normal, high_normal, valid, eye_y, sex, source_iris=bool(geometry))
+            high_normal if geometry else normal, high_normal, valid, eye_y, sex, source_iris=bool(geometry),reference=args.geometry_v3,mouth_y=mouth_y)
         save_png(args.stage/f"{sex}-paint.png", painted)
         save_png(args.stage/f"{sex}-regions.png", regions)
         save_png(args.stage/f"{sex}-normal.png", detailed_normal)
@@ -389,6 +467,9 @@ def run(args):
             descriptor["version"] = 2
             descriptor["geometry"] = geometry
             descriptor["paint_recipe"] = "Human portrait v2: retained source iris, anatomical lid aperture, high-poly head surface and coherent normals"
+        if args.geometry_v3:
+            descriptor["version"] = 3
+            descriptor["paint_recipe"] = "Human portrait v3: preserved 4K source pigment, measured lip landmarks, authored lid/nose/brow planes and refined feature topology"
         (args.stage/f"{sex}.json").write_text(json.dumps(descriptor, indent=2)+"\n", newline="\n")
         report = {"sex": sex, "runtime_triangles_unchanged": not bool(geometry), "valid_head_pixels": int(valid.sum()),
                   "source_albedo_size": [4096, 4096], **bake}
@@ -402,7 +483,7 @@ def run(args):
             if geometry:
                 (destination/f"{sex}-sculpt.bin").write_bytes((args.stage/f"{sex}-sculpt.bin").read_bytes())
         print(json.dumps(report), flush=True)
-    manifest = {"version": 2 if args.geometry_v2 else 1, "heads": reports,
+    manifest = {"version": 3 if args.geometry_v3 else (2 if args.geometry_v2 else 1), "heads": reports,
                 "outputs": {p.name: {"bytes": p.stat().st_size, "sha256": sha(p)} for p in args.stage.iterdir() if p.suffix in (".png", ".bin", ".json") and p.name != "bake-report.json"}}
     (args.stage/"bake-report.json").write_text(json.dumps(manifest, indent=2)+"\n", newline="\n")
 
@@ -415,4 +496,5 @@ if __name__ == "__main__":
     parser.add_argument("--stage", type=Path, required=True)
     parser.add_argument("--install", action="store_true")
     parser.add_argument("--geometry-v2", action="store_true", help="Bake bounded High-only surface conformance and lid artwork")
+    parser.add_argument("--geometry-v3", action="store_true", help="Refine measured lip/lid/brow planes while preserving exact source pigment")
     run(parser.parse_args())
