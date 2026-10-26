@@ -4,6 +4,7 @@ signal inspection_requested(slot: int, full: bool)
 const Presets := preload("res://src/ui/inventory_presets.gd")
 const Chrome := preload("res://src/ui/compact_hud_style.gd")
 const Frame := preload("res://src/ui/hud_panel_chrome.gd")
+const ItemNames := preload("res://src/state/item_names.gd")
 var model := Presets.new()
 var main: Control
 var preferences_path := WindowPreferences.SETTINGS_PATH
@@ -716,8 +717,8 @@ func present_detail(value: Dictionary, allowed: bool) -> void:
 	queue_layout()
 
 func _render_detail() -> void:
-	inspection_title.text = str(_detail.get("name", "Item details"))
-	inspection_title.tooltip_text = inspection_title.text
+	inspection_title.text = ItemNames.display(str(_detail.get("name", "Item details")))
+	inspection_title.tooltip_text = ItemNames.tooltip(str(_detail.get("name", "Item details")))
 	var current: Dictionary = AppState.inventory.get(_detail_slot, {})
 	var bound: bool = _detail_slot >= 0 and int(current.get("image_id", -1)) == int(_detail.get("image_id", -2))
 	inspection_category.text = "%s · ×%s%s" % [str(_detail.get("category", "")),
@@ -729,7 +730,7 @@ func _render_detail() -> void:
 	if model.working.show_stats and not str(_detail.get("stats", "")).is_empty(): lines.append(str(_detail.stats))
 	if model.working.show_description and not str(_detail.get("description", "")).is_empty(): lines.append(str(_detail.description))
 	if model.working.show_comparison and not str(_detail.get("comparison_name", "")).is_empty():
-		lines.append("Compared with %s\n%s" % [_detail.comparison_name, _detail.get("comparison", "")])
+		lines.append("Compared with %s\n%s" % [ItemNames.display(str(_detail.comparison_name)), _detail.get("comparison", "")])
 	inspection_text.text = "\n".join(lines)
 	refresh_actions()
 
@@ -775,12 +776,13 @@ func sync_inventory() -> void:
 	var description: Dictionary = main._inventory_description_for(slot) if slot >= 0 else {}
 	var cached: Dictionary = _detail_cache.get(slot, {})
 	if int(cached.get("image_id", -1)) != int(item.get("image_id", -2)): cached = {}
-	var item_name := str(cached.get("name", description.get("name", AppState.inventory_names.get(slot, "Item"))))
+	var item_name := ItemNames.display(str(cached.get("name", description.get("name", AppState.inventory_names.get(slot, "Item")))))
 	var category := str(cached.get("category", description.get("category", "")))
 	var status: String = main.inventory_description.text
 	if AppState.inventory_text.is_empty() and not status.begins_with("Could not") and not status.begins_with("Requested") and not status.begins_with("Dropped"):
 		main.inventory_description.text = "%s%s · ×%s\n%s" % [item_name, " · " + category if not category.is_empty() else "",
 			main._grouped(int(item.get("quantity", 0))), str(cached.get("stats", "Weight %s" % description.emu if description.has("emu") else "Choose Look for item details"))] if not item.is_empty() else "Select an item to inspect it."
+	main.inventory_description.text = ItemNames.in_text(main.inventory_description.text)
 	main.inventory_description.tooltip_text = main.inventory_description.text
 	if not quantity_value.has_focus(): quantity_value.text = str(main._selected_quantity())
 	main.inventory_use_button.disabled = item.is_empty() or slot >= 36 or not item.get("inventory_usable", false) or main._inventory_cooldown_remaining(slot) > 0
@@ -803,7 +805,7 @@ func _filter_slots() -> void:
 	for index: int in main.inventory_slot_buttons.size():
 		var definition: Dictionary = main._inventory_description_for(index)
 		var name_text := str(definition.get("name", AppState.inventory_names.get(index, "")))
-		var matches: bool = query.is_empty() or (name_text + " " + str(definition.get("category", ""))).to_lower().contains(query)
+		var matches: bool = query.is_empty() or (ItemNames.searchable(name_text) + " " + str(definition.get("category", ""))).to_lower().contains(query)
 		main.inventory_slot_buttons[index].self_modulate.a = 1.0 if matches else 0.25
 
 func _visibility_changed() -> void:
@@ -821,6 +823,7 @@ func is_editing() -> bool:
 	return editor != null and editor.visible
 
 func open_editor() -> void:
+	if main.mixing_workspace != null and main.mixing_workspace.is_editing(): main.mixing_workspace.finish_edit(false)
 	if is_editing(): return
 	if bool(AppState.storage.get("open", false)): AppState.close_storage()
 	if main.hud_workspace != null and main.hud_workspace.is_open(): main.hud_workspace.cancel_edit()

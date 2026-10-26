@@ -9,6 +9,7 @@ const RemotePresentationService = preload("res://src/runtime/remote_presentation
 @onready var remote_presentation := RemotePresentationService.new()
 var _gate_slice_tiers: Dictionary = {}
 const ExperienceCurve = preload("res://src/state/experience_curve.gd")
+const ItemNames = preload("res://src/state/item_names.gd")
 const SeasonSky = preload("res://src/world/season_sky.gd")
 const SeasonSurfaces = preload("res://src/world/season_surfaces.gd")
 const SurfaceRefreshQueue = preload("res://src/world/chunk_surface_refresh.gd")
@@ -620,6 +621,7 @@ var manufacturing_ready_preference := true
 var manufacturing_queue_rows: VBoxContainer
 var manufacturing_queue_start: Button
 var manufacturing_skill := ""
+var manufacturing_sort_mode := "name"
 ## Queued batches, `{recipe, wanted, made}`, worked from the top. The queue
 ## lives here rather than on the server because the server mixes one batch at
 ## a time and says when each one ends; a second copy of the list over there
@@ -977,6 +979,7 @@ var _fps_refresh_msec := 0
 var _hud_layout_list: ItemList
 var hud_workspace: Control
 var inventory_workspace: Control
+var mixing_workspace: Control
 var _hud_layout_visible: CheckButton
 var _hud_skill_selector: OptionButton
 var _floating_feedback_layer: Control
@@ -1336,6 +1339,7 @@ func _ready() -> void:
 	campaign_hud.prediction_requested.connect(_on_campaign_prediction)
 	campaign_scene.presentation_finished.connect(_on_campaign_scene_finished)
 	campaign_hud.transcript_requested.connect(campaign_scene.show_transcript)
+	campaign_hud.replay_requested.connect(_on_campaign_replay)
 	campaign_hud.reduced_motion_changed.connect(campaign_scene.set_reduced_motion)
 	character_intro.conversation_requested.connect(_request_arrival_conversation)
 	character_intro.conversation_ended.connect(_end_arrival_conversation)
@@ -1345,6 +1349,7 @@ func _ready() -> void:
 	lantern_guide = LanternGuideScript.new()
 	game_view.add_child(lantern_guide)
 	lantern_guide.configure(self)
+	lantern_guide.attach_campaign(campaign_hud)
 	actor_resource_overlay.get_node("Rows").add_child(mount_status)
 	mount_status.display_changed.connect(_layout_actor_resource_overlay)
 	var model_registry: Dictionary = _json("res://data/actors/models.json")
@@ -1750,6 +1755,9 @@ func _ready() -> void:
 	inventory_workspace = preload("res://src/ui/inventory_workspace.gd").new()
 	game_view.add_child(inventory_workspace)
 	inventory_workspace.configure.call_deferred(self)
+	mixing_workspace = preload("res://src/ui/mixing_workspace.gd").new()
+	game_view.add_child(mixing_workspace)
+	mixing_workspace.configure.call_deferred(self)
 	_start_client_diagnostics()
 
 func _start_client_diagnostics() -> void:
@@ -2003,7 +2011,8 @@ func _text_entry_active() -> bool:
 func _world_input_blocked() -> bool:
 	return _disconnect_console_active or character_intro.blocks_input() or campaign_scene.blocks_input() or arrival_curtain.blocks_input() \
 		or (hud_workspace != null and hud_workspace.is_open()) \
-		or (inventory_workspace != null and inventory_workspace.is_editing())
+		or (inventory_workspace != null and inventory_workspace.is_editing()) \
+		or (mixing_workspace != null and mixing_workspace.is_editing())
 
 const CAMERA_ACTIONS := ["camera_rotate_left", "camera_rotate_right", "camera_tilt_up", "camera_tilt_down"]
 
@@ -4320,6 +4329,9 @@ func _input(event: InputEvent) -> void:
 		return
 	if inventory_workspace != null and inventory_workspace.is_editing():
 		inventory_workspace.handle_editor_input(event)
+		return
+	if mixing_workspace != null and mixing_workspace.is_editing():
+		mixing_workspace.handle_editor_input(event)
 		return
 	if arrival_curtain.blocks_input():
 		return
@@ -7203,6 +7215,11 @@ func _update_campaign(delta: float) -> void:
 	if not available:
 		campaign_scene.cancel("unavailable")
 		campaign_hud.hide()
+		campaign_hud.set_replay_available(false)
+		if is_instance_valid(lantern_guide):
+			lantern_guide.apply_campaign({})
+		if is_instance_valid(extension_windows):
+			extension_windows.sync_campaign_replay()
 		campaign_works.clear()
 		campaign_bank_works.clear()
 		campaign_road_works.clear()
@@ -7232,6 +7249,21 @@ func _update_campaign(delta: float) -> void:
 	campaign_hud.apply_state(AppState.campaign, tile if tile is Vector2i else Vector2i.ZERO,
 		AppState.current_map, campaign_scene.reduced_motion, campaign_scene.blocks_input() \
 		or character_intro.is_active() or arrival_curtain.blocks_input())
+	campaign_hud.set_replay_available(_campaign_replay_ready() \
+		and campaign_scene.can_replay(AppState.campaign, AppState.current_map))
+	lantern_guide.apply_campaign(AppState.campaign)
+	extension_windows.sync_campaign_replay()
+
+func _campaign_replay_ready() -> bool:
+	return AppState.authenticated and not _disconnect_console_active \
+		and not bool(AppState.death.get("dead", false)) \
+		and _grounded_actors.has(AppState.local_actor_id) \
+		and not character_intro.is_active() and not arrival_curtain.blocks_input() \
+		and not _world_input_blocked()
+
+func _on_campaign_replay() -> void:
+	if _campaign_replay_ready():
+		campaign_scene.request_replay(AppState.campaign, AppState.current_map)
 
 func _on_campaign_target(object_id: int, tile: Vector2i, nearby: bool) -> void:
 	if _world_input_blocked() or not bool(AppState.campaign.get("active", false)):
@@ -7251,6 +7283,7 @@ func _on_campaign_target(object_id: int, tile: Vector2i, nearby: bool) -> void:
 func _on_campaign_action(action: String) -> void:
 	if _world_input_blocked():
 		return
+	lantern_guide.follow_campaign_request(action)
 	Network.campaign_request(action)
 
 func _campaign_surface_height(point: Vector3) -> float:
@@ -8058,7 +8091,7 @@ func _sync_manufacturing() -> void:
 	_sync_manufacturing_tabs()
 	manufacturing_list.clear()
 	var filter_text: String = manufacturing_filter.text.strip_edges().to_lower()
-	for recipe_index: int in range(manufacturing_catalog.count()):
+	for recipe_index: int in _manufacturing_recipe_order():
 		var definition: Dictionary = manufacturing_catalog.recipe(recipe_index)
 		if (not manufacturing_skill.is_empty()
 				and str(definition.get("skill", "")) != manufacturing_skill):
@@ -8094,6 +8127,18 @@ func _sync_manufacturing() -> void:
 	_sync_manufacturing_detail()
 	_sync_manufacturing_queue()
 
+func _manufacturing_recipe_order() -> Array[int]:
+	var order: Array[int] = []
+	for index: int in manufacturing_catalog.count(): order.append(index)
+	order.sort_custom(func(a: int, b: int) -> bool:
+		var left: Dictionary = manufacturing_catalog.recipe(a)
+		var right: Dictionary = manufacturing_catalog.recipe(b)
+		if manufacturing_sort_mode == "level" and int(left.get("level", 0)) != int(right.get("level", 0)):
+			return int(left.get("level", 0)) < int(right.get("level", 0))
+		var compared := ItemNames.display(str(left.get("output", ""))).naturalnocasecmp_to(ItemNames.display(str(right.get("output", ""))))
+		return a < b if compared == 0 else compared < 0)
+	return order
+
 func _manufacturing_availability(recipe_index: int) -> Dictionary:
 	var availability := manufacturing_catalog.availability(recipe_index,
 		AppState.inventory, AppState.known_knowledge, AppState.stats,
@@ -8111,17 +8156,18 @@ func _manufacturing_availability(recipe_index: int) -> Dictionary:
 ## the recipe consumes or needs to hand. Searching for "hatchet" should find
 ## what a hatchet is for, not only the hatchet.
 func _manufacturing_searchable(definition: Dictionary) -> String:
-	var text: String = "%s %s" % [str(definition.get("output", "")),
+	var text: String = "%s %s" % [ItemNames.searchable(str(definition.get("output", ""))),
 		str(definition.get("skill", ""))]
 	for key: String in ["ingredients", "tools"]:
 		var listed: Variant = definition.get(key, [])
 		if listed is Array:
 			for value: Variant in listed as Array:
 				if value is Dictionary:
-					text += " " + str((value as Dictionary).get("name", ""))
+					text += " " + ItemNames.searchable(str((value as Dictionary).get("name", "")))
 	return text.to_lower()
 
 func _sync_manufacturing_detail() -> void:
+	if mixing_workspace != null and mixing_workspace.ready_to_layout: mixing_workspace.queue_sync()
 	var failed := manufacturing_server_status.to_lower().contains("fail") or manufacturing_server_status.to_lower().contains("interrupted")
 	TextColors.bind(manufacturing_status, "manufacture_error" if failed else "manufacture_normal")
 	_sync_manufacturing_source()
@@ -8269,6 +8315,7 @@ func _sync_manufacturing_tools(tools: Array[Dictionary]) -> void:
 		manufacturing_tool_rows.add_child(row)
 
 func _sync_manufacturing_queue() -> void:
+	if mixing_workspace != null and mixing_workspace.ready_to_layout: mixing_workspace.queue_sync()
 	if manufacturing_queue_rows == null:
 		return
 	for child: Node in manufacturing_queue_rows.get_children():
@@ -14337,6 +14384,7 @@ func _inventory_tooltip(item: Dictionary, slot: int) -> String:
 	var heading: String = (str(described.get("name", ""))
 		if not str(described.get("name", "")).is_empty()
 		else str(AppState.inventory_names.get(slot, "Item image #%d" % image_id)))
+	heading = ItemNames.display(heading)
 	var tooltip: String = "%s — quantity %d%s" % [heading,
 		int(item.get("quantity", 0)), " — " + ", ".join(traits) if not traits.is_empty() else ""]
 	if not str(described.get("category", "")).is_empty():
@@ -15487,9 +15535,9 @@ func _fill_storage_item_list(list_control: ItemList, items: Dictionary, prefix: 
 			label = "%s %d  •  item #%d  ×%d" % [prefix, position + 1,
 				image_id, int(item.get("quantity", 0))]
 		elif not stored:
-			label = "%s  ×%d" % [name, int(item.get("quantity", 0))]
+			label = "%s  ×%d" % [ItemNames.display(name), int(item.get("quantity", 0))]
 		else:
-			label = "%s  ×%d  •  %s" % [name, int(item.get("quantity", 0)),
+			label = "%s  ×%d  •  %s" % [ItemNames.display(name), int(item.get("quantity", 0)),
 				_storage_row_detail(described)]
 		var icon: Texture2D = _named_icon(image_id, name)
 		# An item without a tooltip of its own shows its text as one.

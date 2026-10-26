@@ -526,6 +526,7 @@ func _refresh_pickers() -> void:
 	_refresh_actions()
 
 func open_editor() -> void:
+	if main.mixing_workspace != null and main.mixing_workspace.is_editing(): main.mixing_workspace.finish_edit(false)
 	if not ready_to_layout or is_open(): return
 	if main.inventory_workspace != null and main.inventory_workspace.is_editing():
 		main.inventory_workspace.finish_edit(false)
@@ -1784,6 +1785,7 @@ func layout_hud() -> void:
 	_center_editor()
 	_layout_running = false
 	if main.inventory_workspace != null: main.inventory_workspace.queue_layout()
+	if main.mixing_workspace != null: main.mixing_workspace.queue_layout()
 	queue_redraw()
 
 func _fit_rail_statistics() -> void:

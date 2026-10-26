@@ -21,7 +21,9 @@ var _last_error := ""
 var _lease := ""
 
 func _ready() -> void:
-	if get_node("/root/Network").offline_hud_preview:
+	var arguments := OS.get_cmdline_user_args()
+	var local_mixing_trial := arguments.has("--local-mixing-trial") and arguments.has("--dev-plain-tcp") and arguments.has("--server=127.0.0.1")
+	if get_node("/root/Network").offline_hud_preview or local_mixing_trial:
 		set_process(false)
 		return
 	identity = Release.read_json("res://data/client_release.json")
