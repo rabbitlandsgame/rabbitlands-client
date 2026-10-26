@@ -13551,6 +13551,8 @@ func _apply_actor_render_quality() -> void:
 				level, int(raw_id) == AppState.local_actor_id)
 	if is_instance_valid(preview_actor):
 		preview_actor.apply_render_quality(level, true)
+	if is_instance_valid(appearance_editor):
+		appearance_editor.refresh_render_quality()
 
 ## Active and retained territory populations have the same quality immediately.
 ## Population-local quality polling still covers a population attaching later.

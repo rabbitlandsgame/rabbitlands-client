@@ -2,7 +2,6 @@ shader_type spatial;
 render_mode cull_disabled, diffuse_burley, specular_schlick_ggx;
 
 uniform vec4 hair_color : source_color = vec4(0.24, 0.10, 0.04, 1.0);
-uniform float density = 1.0;
 uniform float eye_height = 0.075;
 uniform int style = 5;
 
@@ -61,14 +60,15 @@ void fragment() {
 	// Fine broken strokes and broad lock shading share the fitted head surface;
 	// no texture atlas, transparency layer or simulated strands are required.
 	float strands = sin(UV.x * 17300.0 + sin(UV.y * 930.0) * 1.2);
-	float broken = sin(UV.y * 15600.0 + UV.x * 9400.0);
 	float locks = 0.92 + 0.08 * smoothstep(-0.8, 0.8,
 		sin(UV.x * 950.0 + UV.y * 140.0 + sin(UV.y * 200.0) * 0.8));
 	float fiber = mix(0.96, 1.02, smoothstep(-0.8, 0.8, strands));
+	// Average subpixel strokes instead of letting them alias during motion.
+	float visible_fibers = 1.0 - smoothstep(0.6, 1.5, fwidth(UV.x * 17300.0));
+	fiber = mix(0.99, fiber, visible_fibers);
 	ALBEDO = hair_color.rgb * fiber * locks * 0.78;
 	ROUGHNESS = 0.86;
 	SPECULAR = 0.18;
-	float stubble = smoothstep(0.25, 0.72, strands * broken);
-	ALPHA = coverage(UV, COLOR.g - 0.2) * mix(stubble, 1.0, density) * (0.91 + 0.09 * broken);
+	ALPHA = coverage(UV, COLOR.g - 0.2);
 	ALPHA_SCISSOR_THRESHOLD = 0.36;
 }

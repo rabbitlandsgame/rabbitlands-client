@@ -10,6 +10,7 @@ var _editor
 var _sex: OptionButton
 var _outfit: OptionButton
 var _pose: OptionButton
+var _quality: OptionButton
 var _pause: CheckBox
 var _message: Label
 var _models: Dictionary
@@ -73,8 +74,9 @@ func _build_ui() -> void:
 	title.text = "Rabbit Lands · Human Workshop"
 	title.add_theme_font_size_override("font_size", 25)
 	header.add_child(title)
-	var toolbar := HBoxContainer.new()
-	toolbar.add_theme_constant_override("separation", 8)
+	var toolbar := HFlowContainer.new()
+	toolbar.add_theme_constant_override("h_separation", 8)
+	toolbar.add_theme_constant_override("v_separation", 6)
 	header.add_child(toolbar)
 	_sex = _picker(toolbar, "Body", ["Human Female", "Human Male"])
 	_sex.item_selected.connect(_select_sex)
@@ -82,6 +84,11 @@ func _build_ui() -> void:
 	_outfit.item_selected.connect(func(_index: int) -> void: _refresh_outfit())
 	_pose = _picker(toolbar, "Pose", ["Idle", "Walk in place", "Run in place", "Attack", "Cast"])
 	_pose.item_selected.connect(func(_index: int) -> void: _play_pose())
+	_quality = _picker(toolbar, "Graphics", ["Low", "Medium", "High"])
+	_quality.select(1)
+	_quality.item_selected.connect(func(index: int) -> void:
+		_editor.set_preview_quality(index)
+		_message.text = "High uses the portrait art in development. Low and Medium use the lightweight Human appearance.")
 	_pause = CheckBox.new()
 	_pause.text = "Pause"
 	toolbar.add_child(_pause)
@@ -108,6 +115,7 @@ func _build_ui() -> void:
 	header.add_child(_message)
 	_editor = EDITOR.new()
 	_canvas.add_child(_editor)
+	_editor.set_preview_quality(_quality.selected)
 	for node: Node in _editor.find_children("*", "Button", true, false):
 		var button := node as Button
 		if button.text == "Close":
@@ -120,13 +128,15 @@ func _build_ui() -> void:
 			_play_pose(false))
 
 func _picker(parent: Node, label_text: String, entries: Array) -> OptionButton:
+	var group := HBoxContainer.new()
+	parent.add_child(group)
 	var label := Label.new()
 	label.text = label_text
-	parent.add_child(label)
+	group.add_child(label)
 	var picker := OptionButton.new()
 	for entry: String in entries:
 		picker.add_item(entry)
-	parent.add_child(picker)
+	group.add_child(picker)
 	return picker
 
 func _theme() -> Theme:
@@ -167,6 +177,7 @@ func _select_sex(index: int) -> void:
 	var look: Dictionary = _looks.get(str(index), _default_look(index))
 	var dto := {"actor_id": 1, "actor_type": index, "kind": 1, "x": 0, "y": 0,
 		"rotation": 0, "name": "", "appearance": look, "equipment_visuals": _loadout()}
+	_editor.set_preview_quality(_quality.selected)
 	_editor.open_for(dto, _models["luminous_female" if index == 0 else "luminous_male"], _animations, _equipment, _save_preview)
 	for node: Node in _editor.find_children("*", "CheckBox", true, false):
 		var check := node as CheckBox
@@ -244,6 +255,7 @@ func _run_smoke() -> void:
 	_expect(bool(root.get_node("Network").get("offline_hud_preview")), "network is blocked for this preview")
 	for sex: int in [0, 1]:
 		_select_sex(sex)
+		_expect(ReplicatedActor3D.HIGH_PORTRAIT.cache_metrics().texture_bundles == 0, "Medium starts without High portrait textures")
 		for outfit: int in range(5):
 			_outfit.select(outfit)
 			_refresh_outfit()
@@ -257,6 +269,17 @@ func _run_smoke() -> void:
 				_play_pose()
 				_expect(actor.animation_player.is_playing(), "selected pose plays")
 			await process_frame
+		var actor: ReplicatedActor3D = _editor.get("_actor")
+		var body := actor._native_model.find_child("body", true, false) as MeshInstance3D
+		var medium_mesh := body.mesh
+		_editor.set_preview_quality(0)
+		_expect(ReplicatedActor3D.HIGH_PORTRAIT.cache_metrics().texture_bundles == 0, "Low loads no High portrait textures")
+		_editor.set_preview_quality(2)
+		_expect(ReplicatedActor3D.HIGH_PORTRAIT.cache_metrics().texture_bundles == 1, "High activates only the selected body's portrait artwork")
+		_expect(body.mesh != medium_mesh, "High uses its anchored portrait UVs")
+		_editor.set_preview_quality(1)
+		_expect(body.mesh == medium_mesh, "Medium restores the exact lightweight mesh")
+		_expect(ReplicatedActor3D.HIGH_PORTRAIT.cache_metrics().texture_bundles == 0, "returning to Medium releases High resources")
 		_expect(_save_preview("") == OK, "local preview saves")
 		_expect(_json(SAVE_PATH).has(str(sex)), "saved Human body can be restored")
 	await process_frame

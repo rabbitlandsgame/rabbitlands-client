@@ -1,5 +1,6 @@
 shader_type spatial;
 render_mode cull_disabled, diffuse_burley, specular_schlick_ggx;
+#include "res://src/actors/stubble_pigment.gdshaderinc"
 
 uniform sampler2D base_texture : source_color, filter_linear_mipmap, repeat_enable;
 // Linear data: R protects the whole eye from skin dye, G selects the iris,
@@ -41,6 +42,7 @@ void fragment() {
 	float highlight = smoothstep(0.55, 0.9, min(original.r, min(original.g, original.b)));
 	eye = mix(eye, mix(iris, original, highlight), mask.g);
 	ALBEDO = mix(skin, eye, mask.r);
+	ALBEDO = apply_stubble(ALBEDO, UV * mask_uv_scale + mask_uv_offset);
 	ALBEDO = mix(ALBEDO, vec3(peak) * hair_tint.rgb, mask.b);
 	ROUGHNESS = roughness;
 	if (use_normal) {

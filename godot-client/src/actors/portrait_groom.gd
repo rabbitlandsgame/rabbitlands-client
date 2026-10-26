@@ -59,7 +59,9 @@ static func apply(native_root: Node3D, skeleton: Skeleton3D,
 		native_root.remove_child(old)
 		old.queue_free()
 	var style := clampi(int(appearance.get("facial_hair", 0)), 0, 5)
-	if style == 0:
+	# Short stubble is opaque pigment on the existing skin material. Keeping a
+	# sub-millimetre shell and high-frequency alpha scissor made it shimmer.
+	if style in [0, 1]:
 		return
 	var transform := _to_root(skeleton, native_root).affine_inverse() * _to_root(body, native_root)
 	var key := "%d:%d:%s" % [body.mesh.get_instance_id(), style, transform]
@@ -77,7 +79,6 @@ static func apply(native_root: Node3D, skeleton: Skeleton3D,
 		material = ShaderMaterial.new()
 		material.shader = BEARD_SHADER
 		material.set_shader_parameter("hair_color", color)
-		material.set_shader_parameter("density", 0.25 if style == 1 else 1.0)
 		material.set_shader_parameter("eye_height", eye_height)
 		material.set_shader_parameter("style", style)
 		_cache(_beard_materials, material_key, material, 128)

@@ -46,6 +46,8 @@ func run() -> void:
 	for slug: String in ["luminous_male", "luminous_female", "orun_male"]:
 		var actor := ReplicatedActor3D.new()
 		root.add_child(actor)
+		# Sculpt/fit validation is independent of the optional High UV layer.
+		actor.apply_render_quality(1, true)
 		var errors := actor.configure({"actor_id": 9800, "x": 0, "y": 0, "rotation": 0,
 			"kind": 1, "name": "", "appearance": {}, "equipment_visuals": {}},
 			CoordinateAdapter.new({"walkingHeight": 0.0}), models[slug], animations, equipment)
@@ -164,7 +166,15 @@ func run() -> void:
 			actor.apply_appearance_variants({})
 		actor.apply_equipment_visuals({})
 		await process_frame
-		expect(body.mesh == source, slug + " removing gear and resetting sliders restores exact original mesh")
+		# The bounded shared body cache can evict this neutral resource while
+		# exercising all outfits. A rebuilt neutral mesh must still have exact
+		# attribute data; resource identity alone is not a geometry regression.
+		expect(body.mesh.get_surface_count() == source.get_surface_count(), slug + " reset restores neutral surface count")
+		for surface: int in range(source.get_surface_count()):
+			var neutral := source.surface_get_arrays(surface)
+			var reset := body.mesh.surface_get_arrays(surface)
+			for channel: int in range(Mesh.ARRAY_MAX):
+				expect(neutral[channel] == reset[channel], slug + " reset restores exact neutral mesh channel " + str(channel))
 		actor.free()
 	FIT.clear()
 	print("Character proportions: %d checks, %d failures" % [checks, failures])

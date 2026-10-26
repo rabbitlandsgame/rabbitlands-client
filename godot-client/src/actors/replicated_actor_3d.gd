@@ -15,6 +15,9 @@ const WARDROBE_SHIRT_FIT := preload("res://src/actors/wardrobe_shirt_fit.gd")
 const QUIVER_STRAP_FIT := preload("res://src/actors/quiver_strap_fit.gd")
 const CHARACTER_PROPORTIONS := preload("res://src/actors/character_proportions.gd")
 const PORTRAIT_GROOM := preload("res://src/actors/portrait_groom.gd")
+const STUBBLE_APPEARANCE := preload("res://src/actors/stubble_appearance.gd")
+const HUMAN_LOCOMOTION := preload("res://src/actors/human_locomotion_polish.gd")
+const HIGH_PORTRAIT := preload("res://src/actors/high_portrait_appearance.gd")
 const WORLD_LABEL_STYLE := preload("res://src/ui/world_label_style.gd")
 const TextColors := preload("res://src/ui/text_colors.gd")
 const ARCHIVED_MODEL_POLICY := preload("res://src/actors/archived_model_policy.gd")
@@ -306,6 +309,7 @@ var _attachment_bones: Dictionary = {}
 var _model_config: Dictionary = {}
 var _appearance: Dictionary = {}
 var _portrait_scale := Vector3.ONE
+var _human_shape_needs_finish := false
 var _face_material: ShaderMaterial
 var _face_group_materials: Dictionary = {}
 var _skin_materials: Dictionary = {}
@@ -378,6 +382,7 @@ var _cape_cloth_allowed := true
 ## equipment created later inherit the same policy without rebuilding either
 ## resource cache.
 var _render_quality: int = ACTOR_RENDER_QUALITY.QUALITY_DEFAULT
+var _render_quality_selected := false
 var _render_quality_local_actor := false
 ## Configured without its body: identity, picking, the overhead block, the map
 ## dot and every protocol state are here, but no model, skeleton, animation or
@@ -487,6 +492,9 @@ static func clear_wardrobe_texture_cache() -> void:
 	NecklineSkin.clear()
 	CHARACTER_PROPORTIONS.clear()
 	PORTRAIT_GROOM.clear()
+	STUBBLE_APPEARANCE.clear()
+	HUMAN_LOCOMOTION.clear()
+	HIGH_PORTRAIT.clear()
 ## The speech bubble sits above the name instead, and wraps well short of the
 ## screen it is now measured against.
 const SPEECH_BUBBLE_RISE := 28.0
@@ -531,6 +539,9 @@ const RING_SEGMENT_METRES := 0.5
 func configure(dto: Dictionary, adapter: CoordinateAdapter,
 		model_config: Dictionary, animation_config: Dictionary,
 		equipment_config: Dictionary = {}, build_model := true) -> Array[String]:
+	# Choose the tier before loading any optional High-only portrait resources.
+	if not _render_quality_selected:
+		_render_quality = LookProfile.quality()
 	var remote = RemotePresentationService.current()
 	if remote != null: remote.detach(self, "reconfigured")
 	_remote_enrollment_ready = false
@@ -642,6 +653,7 @@ func configure(dto: Dictionary, adapter: CoordinateAdapter,
 					animation_path, skeleton, model_config.get("boneAliases", {}),
 					wanted_clips, resolver.looping_clips)
 			animation_player = imported.player
+			HUMAN_LOCOMOTION.install(animation_player, model_config)
 			errors.append_array(Array(imported.errors))
 			if animation_player != null:
 				if not animation_player.animation_finished.is_connected(
@@ -1056,6 +1068,7 @@ func render_diagnostics() -> Dictionary:
 ## they are deliberately outside this walk. The missing-model capsule is the
 ## one body-level fallback and follows explicitly.
 func apply_render_quality(level: int, is_local_actor: bool = false) -> void:
+	_render_quality_selected = true
 	_render_quality = ACTOR_RENDER_QUALITY.normalized_quality(level)
 	_render_quality_local_actor = is_local_actor
 	_apply_render_quality_to_visuals()
@@ -1074,6 +1087,18 @@ func mounted_presentation_priority() -> bool:
 
 func _apply_render_quality_to_visuals() -> void:
 	if is_instance_valid(_native_model):
+		# All authored body coverage, cape drape and quiver-strap fitting have
+		# finished before this stage. Fit the final wardrobe exactly once.
+		HIGH_PORTRAIT.restore(_native_model)
+		if _human_shape_needs_finish:
+			# Body refinement is identical on the head. Doing it before the
+			# individual face lets all face choices reuse the same outfit fit.
+			CHARACTER_PROPORTIONS.apply_body_refinement(_native_model, _native_skeleton, _model_config)
+			CHARACTER_PROPORTIONS.apply(_native_model, _native_skeleton, _appearance)
+			PORTRAIT_GROOM.apply(_native_model, _native_skeleton, _appearance, _model_config)
+			_human_shape_needs_finish = false
+		HIGH_PORTRAIT.apply(_native_model, _native_skeleton, _appearance, _model_config, _render_quality)
+		STUBBLE_APPEARANCE.apply(_native_model, _appearance, _model_config)
 		ACTOR_RENDER_QUALITY.apply_actor(_native_model, _render_quality)
 	var fallback := get_node_or_null("MissingModelFallback") as MeshInstance3D
 	if fallback != null:
@@ -2705,6 +2730,10 @@ func apply_equipment_visuals(visuals: Dictionary, fallback_parts: Array = []) ->
 		return
 	if _equipment_applied and _equipment_matches(visuals, fallback_parts):
 		return
+	if is_instance_valid(_native_model):
+		HIGH_PORTRAIT.restore(_native_model)
+		CHARACTER_PROPORTIONS.restore(_native_model)
+		CHARACTER_PROPORTIONS.restore_body_refinement(_native_model)
 	_equipment_applied = true
 	var torso_before: int = int(_equipment_visuals.get(BODY_PART, 0))
 	var shins_before := Vector2i(int(_equipment_visuals.get(LEGS_PART, 0)),
@@ -2762,9 +2791,9 @@ func apply_equipment_visuals(visuals: Dictionary, fallback_parts: Array = []) ->
 		combat_presentation.set_equipped_bow(bow_path)
 	# Equipment adds and removes mesh instances, so the silhouette's clone set
 	# has to be built again against what the actor is now made of.
+	_apply_render_quality_to_visuals()
 	if _silhouette != null and _silhouette.is_enabled():
 		_silhouette.rebuild()
-	_apply_render_quality_to_visuals()
 	if is_instance_valid(_native_model):
 		OLDCRAFT_ACTOR_STYLE.apply_surface_finish(_native_model)
 
@@ -3231,7 +3260,9 @@ func _refresh_wardrobe_cover() -> void:
 	var native_model: Node3D = get_node_or_null("NativeModel") as Node3D
 	if native_model == null:
 		return
+	HIGH_PORTRAIT.restore(native_model)
 	CHARACTER_PROPORTIONS.restore(native_model)
+	CHARACTER_PROPORTIONS.restore_body_refinement(native_model)
 	var torso_visual: int = int(_equipment_visuals.get(BODY_PART, 0))
 	var covered: bool = torso_visual != 0
 	var torso_model := {}
@@ -3331,8 +3362,7 @@ func _refresh_wardrobe_cover() -> void:
 	# Fit after coverage selects the current canonical surface; grooming reads
 	# this final face and therefore follows every shape and outfit transition.
 	if _uses_portrait_customization():
-		CHARACTER_PROPORTIONS.apply(native_model, _native_skeleton, _appearance)
-		PORTRAIT_GROOM.apply(native_model, _native_skeleton, _appearance, _model_config)
+		_human_shape_needs_finish = true
 
 func _refresh_body_surface_visibility() -> void:
 	var native_model: Node3D = get_node_or_null("NativeModel") as Node3D
@@ -5295,5 +5325,7 @@ func _restore_remote_pending() -> void:
 	RemotePresentationService.restore_pending(self)
 
 func _exit_tree() -> void:
+	if is_instance_valid(_native_model):
+		HIGH_PORTRAIT.release(_native_model)
 	var remote = RemotePresentationService.current()
 	if remote != null: remote.release_departing(self)

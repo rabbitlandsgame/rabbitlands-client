@@ -29,16 +29,36 @@ hair retains the original shape; Tousled adds uneven locks and Swept gives a
 more arranged silhouette. Swept on the female Buns style gathers the buns into
 an asymmetric crown updo.
 
-The result retains Rabbit Lands' stylized Human models and painted materials.
-The leaderboard paintings provide art direction rather than an exact match
-for fine portrait detail.
+Stubble is pigment in the skin material with filtered detail, so it follows
+the face during movement and camera rotation. Longer facial hair uses fitted,
+skinned geometry. Both Human bodies have subtle chest and waist definition,
+arm taper and palm refinements. Skinned garments and equipment receive the
+same adjustment in the wearer's rest space; joint and grip anchors stay fixed.
+
+Human walking has a relaxed elbow bend. Running balances the left and right
+arm swing and steadies the wrists. These changes preserve the original lower
+body movement, clip lengths, attack and spell timing. Equipped weapon poses
+continue to adjust the hands after animation playback.
+
+Low and Medium graphics use the lightweight Human appearance. High graphics
+adds the first portrait-detail art pass: dedicated face colour, facial regions
+and baked normal maps for both bodies. The maps follow fixed mesh UVs during
+animation. Switching back to Low or Medium restores the original materials
+and releases unused High portrait resources. All graphics levels use the
+same body, facial shape, customization and animation controls.
+
+The High pass is a foundation for further painting and anatomy work. The
+leaderboard portraits remain the art direction; the current models do not yet
+match their fine painted detail.
 
 ## Local preview
 
 In the prepared customization checkout, double-click
 `test-human-customization.bat`. The offline workshop offers both Human bodies,
 the portrait outfits and four starter outfits, animation poses, camera rotation
-and all appearance controls. **Save preview** stores choices separately for
+and all appearance controls. Choose **Graphics → Low / Medium / High** to
+compare the two artwork paths; the workshop starts in Medium.
+**Save preview** stores choices separately for
 each body on this computer. **Screenshot** saves an image in the preview's
 private user-data folder; **Open saves** opens that folder. Closing the window
 or pressing Escape finishes the session.

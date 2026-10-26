@@ -20,6 +20,15 @@ var _status: Label
 var _yaw := PI + 0.2
 var _closeup := false
 var _show_equipment := false
+var quality_level := -1
+
+func set_preview_quality(level: int) -> void:
+	quality_level = clampi(level, 0, 2)
+	refresh_render_quality()
+
+func refresh_render_quality() -> void:
+	if is_instance_valid(_actor):
+		_actor.apply_render_quality(quality_level if quality_level >= 0 else LookProfile.quality(), true)
 
 func _ready() -> void:
 	name = "AppearanceEditor"
@@ -182,6 +191,7 @@ func _refresh() -> void:
 	if not is_instance_valid(_actor):
 		_actor = ReplicatedActor3D.new()
 		_stage.add_child(_actor)
+		_actor.apply_render_quality(quality_level if quality_level >= 0 else LookProfile.quality(), true)
 		var dto := _dto.duplicate(true)
 		dto.x = 0
 		dto.y = 0
@@ -191,7 +201,6 @@ func _refresh() -> void:
 		dto.equipment_fallback_parts = []
 		_actor.configure(dto, CoordinateAdapter.new({"walkingHeight": 0.0}), _model, _animations, _equipment)
 		_actor.set_nameplate_visible(false)
-		_actor.apply_render_quality(LookProfile.quality(), true)
 	else:
 		_actor.apply_appearance_variants(look)
 	_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
