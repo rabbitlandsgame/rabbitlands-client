@@ -1822,6 +1822,11 @@ func _apply_character_proportions() -> void:
 			rest.origin.y *= ratio.y
 			seat_pose.set("visual_rest", rest)
 			seat_pose.set("baseline_pelvis", (seat_pose.get("baseline_pelvis") as Vector3) * ratio)
+		# Native mounted poses retain their own copy of the seat reference.
+		# Retire it so the next gated pose registers the updated proportions.
+		var native_pose: RefCounted = _mount_visual.get("rust_pose")
+		if native_pose != null:
+			native_pose.call("close")
 	_apply_model_scale()
 
 func set_server_scale(value: float) -> void:
