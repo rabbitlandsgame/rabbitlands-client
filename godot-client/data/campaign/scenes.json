@@ -3,14 +3,21 @@
   "scenes": {
     "measure.landing.arrival": {
       "title": "The Ferry That Arrived Twice",
-      "duration": 28.0,
+      "duration": 40.0,
       "entry_seconds": 2.4,
       "exit_seconds": 1.8,
-      "required_actors": ["odo", "clerk", "foreman"],
+      "required_actors": ["odo", "clerk", "foreman", "protagonist"],
+      "stage_protagonist": true,
+      "inspection_id": "landing_overview",
+      "inspection_at": 19.0,
+      "inspection_wait_at": 24.0,
+      "choice_id": "opening_rescue",
+      "choice_at": 26.0,
+      "choice_response_until": 33.0,
       "anchor": "odo",
       "shots": [
-        {"t": 0.0, "anchor_actor": "odo", "position": [-7.0, 5.8, 10.0], "target": [0.0, 1.2, -0.3]},
-        {"t": 28.0, "anchor_actor": "odo", "position": [-7.0, 5.8, 10.0], "target": [0.0, 1.2, -0.3]}
+        {"t": 0.0, "anchor_actor": "odo", "position": [6.0, 7.0, 12.0], "target": [0.0, -0.8, 0.0]},
+        {"t": 40.0, "anchor_actor": "odo", "position": [6.0, 7.0, 12.0], "target": [0.0, -0.8, 0.0]}
       ],
       "cues": [
         {"at": 0.0, "actor": "odo", "action": "idle", "offset": [0, 0, 0], "face": "foreman_stand"},
@@ -28,21 +35,35 @@
         {"at": 14.0, "actor": "foreman", "action": "emote_greet", "destination": "foreman_stand", "face": "odo"},
         {"at": 14.0, "actor": "odo", "action": "idle", "offset": [0, 0, 0], "face": "foreman_stand"},
         {"at": 16.0, "actor": "foreman", "action": "idle", "destination": "foreman_stand", "face": "odo"},
-        {"at": 19.0, "actor": "odo", "action": "emote_greet", "offset": [0, 0, 0], "face": "foreman_stand"},
-        {"at": 21.0, "actor": "odo", "action": "idle", "offset": [0, 0, 0], "face": "foreman_stand"},
-        {"at": 22.0, "actor": "clerk", "action": "walk", "from": "clerk_stand", "destination": "clerk_arrival", "move_seconds": 3.0, "face": "clerk_arrival"},
-        {"at": 22.0, "actor": "foreman", "action": "walk", "from": "foreman_stand", "destination": "foreman_turn", "move_seconds": 2.8, "face": "foreman_turn"},
-        {"at": 24.8, "actor": "foreman", "action": "walk", "from": "foreman_turn", "destination": "foreman_arrival", "move_seconds": 1.2, "face": "foreman_arrival"},
-        {"at": 25.0, "actor": "clerk", "action": "idle", "destination": "clerk_arrival", "face": "post"},
-        {"at": 26.0, "actor": "foreman", "action": "idle", "destination": "foreman_arrival", "face": "post"},
-        {"at": 26.0, "actor": "odo", "action": "idle", "offset": [0, 0, 0], "face": "post"}
+        {"at": 19.0, "actor": "odo", "action": "emote_greet", "offset": [0, 0, 0], "face": "protagonist"},
+        {"at": 21.0, "actor": "odo", "action": "idle", "offset": [0, 0, 0], "face": "protagonist"},
+        {"at": 26.0, "actor": "odo", "action": "idle", "offset": [0, 0, 0], "face": "protagonist"},
+        {"at": 27.0, "actor": "odo", "action": "emote_nod", "offset": [0, 0, 0], "face": "protagonist"},
+        {"at": 29.0, "actor": "odo", "action": "idle", "offset": [0, 0, 0], "face": "protagonist"},
+        {"at": 34.0, "actor": "clerk", "action": "walk", "from": "clerk_stand", "destination": "clerk_arrival", "move_seconds": 3.0, "face": "clerk_arrival"},
+        {"at": 34.0, "actor": "foreman", "action": "walk", "from": "foreman_stand", "destination": "foreman_turn", "move_seconds": 2.8, "face": "foreman_turn"},
+        {"at": 36.8, "actor": "foreman", "action": "walk", "from": "foreman_turn", "destination": "foreman_arrival", "move_seconds": 1.2, "face": "foreman_arrival"},
+        {"at": 37.0, "actor": "clerk", "action": "idle", "destination": "clerk_arrival", "face": "post"},
+        {"at": 38.0, "actor": "foreman", "action": "idle", "destination": "foreman_arrival", "face": "post"},
+        {"at": 38.0, "actor": "odo", "action": "idle", "offset": [0, 0, 0], "face": "post"},
+        {"at": 0.0, "actor": "protagonist", "action": "idle", "offset": [0, 0, 0], "face": "odo"},
+        {"at": 19.0, "actor": "protagonist", "action": "walk", "from": "protagonist_post", "destination": "inspection_turn", "move_seconds": 1.2, "face": "inspection_turn"},
+        {"at": 20.2, "actor": "protagonist", "action": "walk", "from": "inspection_turn", "destination": "inspection_stand", "move_seconds": 1.8, "face": "inspection_stand"},
+        {"at": 22.0, "actor": "protagonist", "action": "pickup", "destination": "inspection_stand", "face": "inspection_damage"},
+        {"at": 24.0, "actor": "protagonist", "action": "idle", "destination": "inspection_stand", "face": "odo"},
+        {"at": 33.0, "actor": "protagonist", "action": "walk", "from": "inspection_stand", "destination": "protagonist_return", "move_seconds": 4.8, "face": "protagonist_return"},
+        {"at": 38.0, "actor": "protagonist", "action": "idle", "destination": "protagonist_return", "face": "post"}
       ],
       "lines": [
         {"at": 0.0, "speaker": "", "text": "A supply boat has reached the quay. Damaged access leaves its workers stranded."},
         {"at": 6.0, "speaker": "Odo Fenn", "speaker_actor": "odo", "text": "The cargo can wait. We need a safe way off that landing."},
         {"at": 10.0, "speaker": "Landing clerk", "speaker_actor": "clerk", "text": "But this cargo was signed in yesterday. These are the same seals."},
         {"at": 14.0, "speaker": "Dock foreman", "speaker_actor": "foreman", "text": "Then yesterday can lend us a hand. My crew is still waiting by the damaged access."},
-        {"at": 19.0, "speaker": "Odo Fenn", "speaker_actor": "odo", "text": "First inspect the damaged landing at the NEXT marker. We will choose a rescue plan once you know what is wrong."}
+        {"at": 19.0, "speaker": "Odo Fenn", "speaker_actor": "odo", "text": "Take a look at the damaged boards beside you. We need a safe way to reach the crew."},
+        {"at": 22.0, "speaker": "", "text": "You examine the split boards and the damaged crossing."},
+        {"at": 24.0, "speaker": "You", "speaker_actor": "protagonist", "text": "The crossing will not hold the crew. We need another way to get them clear."},
+        {"at": 25.0, "speaker": "Odo Fenn", "speaker_actor": "odo", "text": "What will you do?"},
+        {"at": 33.0, "speaker": "Odo Fenn", "speaker_actor": "odo", "text": "Your next work site is marked. We will follow your lead."}
       ]
     },
     "measure.landing.plan": {
@@ -55,9 +76,10 @@
       "choice_id": "opening_rescue",
       "choice_at": 6.0,
       "choice_response_until": 12.0,
+      "stage_protagonist": true,
       "shots": [
-        {"t": 0.0, "anchor_actor": "odo", "position": [6.0, 7.0, 12.0], "target": [0.0, -4.0, 0.0]},
-        {"t": 16.0, "anchor_actor": "odo", "position": [6.0, 7.0, 12.0], "target": [0.0, -4.0, 0.0]}
+        {"t": 0.0, "anchor_actor": "odo", "position": [6.0, 7.0, 12.0], "target": [0.0, -0.8, 0.0]},
+        {"t": 16.0, "anchor_actor": "odo", "position": [6.0, 7.0, 12.0], "target": [0.0, -0.8, 0.0]}
       ],
       "cues": [
         {"at": 0.0, "actor": "odo", "action": "idle", "offset": [0, 0, 0], "face": "entry"},

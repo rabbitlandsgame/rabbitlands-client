@@ -28,6 +28,8 @@ var _applied_width := -1.0
 var _measure_revision := 0
 var _continue_binding: Callable
 var _error := ""
+var _embedded := false
+var _panel_style: StyleBoxFlat
 
 func _init() -> void:
 	name = "CampaignChoice"
@@ -35,6 +37,7 @@ func _init() -> void:
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var panel := _box(Color(0.035, 0.05, 0.065, 0.96), Color("786341"), 1)
 	panel.set_content_margin_all(10)
+	_panel_style = panel
 	add_theme_stylebox_override("panel", panel)
 	_column = VBoxContainer.new()
 	_column.add_theme_constant_override("separation", 7)
@@ -101,6 +104,7 @@ func apply_choice(payload: Dictionary, replay: bool = false) -> void:
 	if _options.is_empty():
 		reset()
 		return
+	set_meta(&"dialogue_scroll_hint", "%d approaches · scroll to read all" % _options.size())
 	var options_fingerprint := JSON.stringify(_options)
 	var rebuilt := changed_context or options_fingerprint != _options_fingerprint
 	if rebuilt:
@@ -109,7 +113,7 @@ func apply_choice(payload: Dictionary, replay: bool = false) -> void:
 	if _replay or not str(_payload.get("selected", "")).is_empty() or not bool(_payload.get("can_choose", false)):
 		_pending = ""
 	title_label.text = str(_payload.get("title", "Choose an approach"))
-	title_label.visible = not title_label.text.is_empty()
+	title_label.visible = not _embedded and not title_label.text.is_empty()
 	show()
 	_refresh()
 	_schedule_measure()
@@ -125,6 +129,7 @@ func reset() -> void:
 	_fingerprint = ""
 	_options_fingerprint = ""
 	_error = ""
+	set_meta(&"dialogue_scroll_hint", "Scroll to read more.")
 	set_meta(&"focused_choice", "")
 	title_label.text = ""
 	status_label.text = ""
@@ -142,6 +147,16 @@ func release_pending(message: String = "") -> void:
 	_error = message
 	if not _payload.is_empty():
 		_refresh()
+
+func set_embedded(value: bool) -> void:
+	if _embedded == value:
+		return
+	_embedded = value
+	add_theme_stylebox_override("panel", StyleBoxEmpty.new() if value else _panel_style)
+	title_label.visible = not value and not title_label.text.is_empty()
+	_column.add_theme_constant_override("separation", 5 if value else 7)
+	_grid.add_theme_constant_override("h_separation", 6 if value else 8)
+	_schedule_measure()
 
 func fit_width(width: float) -> void:
 	if width <= 0 or is_equal_approx(width, _applied_width):
@@ -251,6 +266,7 @@ func _refresh() -> void:
 		status_label.text = "Waiting for " + (owner if not owner.is_empty() else "the story owner") + " to choose an approach."
 	else:
 		status_label.text = "Choose an approach to continue." if _can_choose() else "This choice is not available at this point."
+	status_label.add_theme_color_override("font_color", GOLD if _replay and not selected_label.is_empty() else Color("ddd7ca"))
 
 func _choose(id: String, token: String) -> void:
 	if not visible or token != str(_payload.get("token", "")) or not option_buttons.has(id) or not _can_choose():

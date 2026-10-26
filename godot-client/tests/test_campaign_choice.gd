@@ -123,6 +123,16 @@ func _run() -> void:
 	expect(requests.size() == 2, "helpers cannot submit owner choices")
 	widget.apply_choice(recorded, true)
 	await settle()
+	var frozen_payload: Dictionary = widget._payload.duplicate(true)
+	widget.set_embedded(true)
+	await settle()
+	expect(not widget.title_label.visible and widget.get_theme_stylebox("panel") is StyleBoxEmpty, "embedding removes only the duplicate title and outer panel")
+	expect(widget.option_buttons.size() == 3 and widget._payload == frozen_payload and widget.continue_button.visible, "embedding preserves all approaches, the authoritative account and replay Continue")
+	expect("3 approaches" in str(widget.get_meta(&"dialogue_scroll_hint","")), "embedded content exposes its approach count for a persistent scroll hint")
+	expect(widget.status_label.get_theme_color("font_color") == Choice.GOLD, "the replay footer keeps the recorded choice emphatic even while details scroll")
+	widget.set_embedded(false)
+	await settle()
+	expect(widget.title_label.visible and widget.get_theme_stylebox("panel") is StyleBoxFlat, "standalone presentation can be restored without changing the choice")
 	expect(widget.continue_button.visible and not widget.continue_button.disabled, "replay offers a separate Continue")
 	for id: String in widget.option_buttons:
 		var button: Button = widget.option_buttons[id]

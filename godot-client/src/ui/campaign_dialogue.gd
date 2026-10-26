@@ -9,6 +9,12 @@ const PORTRAIT_INTERVAL := 1.0 / 30.0
 
 var speaker_label: Label
 var body_label: Label
+var content_slot: ScrollContainer
+var _content_body: VBoxContainer
+var _content_hint: Label
+var _custom_content: WeakRef
+var _content_height := 170.0
+var _content_revision := 0
 var _row: HBoxContainer
 var _portrait_frame: PanelContainer
 var _portrait_image: TextureRect
@@ -78,6 +84,27 @@ func _init() -> void:
 	body_label.add_theme_constant_override("outline_size", 2)
 	body_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.65))
 	column.add_child(body_label)
+	_content_hint = Label.new()
+	_content_hint.name = "ContentScrollHint"
+	_content_hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_content_hint.add_theme_color_override("font_color", Color("d2c4a8"))
+	_content_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_content_hint.hide()
+	column.add_child(_content_hint)
+	content_slot = ScrollContainer.new()
+	content_slot.name = "DialogueContentSlot"
+	content_slot.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	content_slot.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	content_slot.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	content_slot.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	content_slot.follow_focus = true
+	content_slot.custom_minimum_size.y = _content_height
+	column.add_child(content_slot)
+	_content_body = VBoxContainer.new()
+	_content_body.name = "DialogueContent"
+	_content_body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	content_slot.add_child(_content_body)
+	content_slot.resized.connect(_schedule_content_hint)
 	_viewport = SubViewport.new()
 	_viewport.name = "SpeakerHeadCamera"
 	_viewport.own_world_3d = false
@@ -110,18 +137,92 @@ func set_line(speaker: String, text: String, actor: Node3D = null) -> void:
 	var bound := actor if is_instance_valid(actor) and not speaker.is_empty() else null
 	var previous := _actor.get_ref() as Node3D if _actor != null else null
 	var same_actor := (_actor == null and bound == null) or (is_instance_valid(previous) and previous == bound)
-	if visible and speaker_label.text == speaker and body_label.text == text and same_actor:
+	if visible and not content_slot.visible and speaker_label.text == speaker and body_label.text == text and same_actor:
 		return
+	_hide_content()
 	speaker_label.text = speaker
 	speaker_label.visible = not speaker.is_empty()
 	body_label.text = text
+	body_label.show()
 	_actor = weakref(bound) if bound != null else null
 	_elapsed = PORTRAIT_INTERVAL
 	show()
 	set_process(_actor != null)
 	_update_portrait()
 
+func set_content(speaker: String, content: Control, actor: Node3D = null) -> void:
+	if not is_instance_valid(content) or content == self or content.is_ancestor_of(self):
+		set_line(speaker, "", actor)
+		return
+	var current := _custom_content.get_ref() as Control if _custom_content != null else null
+	var previous := _actor.get_ref() as Node3D if _actor != null else null
+	var bound := actor if is_instance_valid(actor) and not speaker.is_empty() else null
+	var same_actor := (_actor == null and bound == null) or (is_instance_valid(previous) and previous == bound)
+	if visible and content_slot.visible and content.visible and current == content and speaker_label.text == speaker and same_actor:
+		return
+	_hide_content()
+	if content.get_parent() != _content_body:
+		if content.get_parent() != null:
+			content.reparent(_content_body, false)
+		else:
+			_content_body.add_child(content)
+	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	if not content.minimum_size_changed.is_connected(_schedule_content_hint):
+		content.minimum_size_changed.connect(_schedule_content_hint)
+	_custom_content = weakref(content)
+	speaker_label.text = speaker
+	speaker_label.visible = not speaker.is_empty()
+	body_label.text = ""
+	body_label.hide()
+	_actor = weakref(bound) if bound != null else null
+	_elapsed = PORTRAIT_INTERVAL
+	content_slot.show()
+	content.show()
+	show()
+	set_process(_actor != null)
+	_update_portrait()
+	_schedule_content_hint()
+
+func fit_content_height(height: float) -> void:
+	var bounded := maxf(56.0, height)
+	if is_equal_approx(_content_height, bounded):
+		return
+	_content_height = bounded
+	content_slot.custom_minimum_size.y = bounded
+	_schedule_content_hint()
+
+func content_active() -> bool:
+	return content_slot.visible and _custom_content != null and is_instance_valid(_custom_content.get_ref())
+
+func _hide_content() -> void:
+	var content := _custom_content.get_ref() as Control if _custom_content != null else null
+	if is_instance_valid(content):
+		content.hide()
+	_custom_content = null
+	_content_hint.hide()
+	content_slot.hide()
+	_content_revision += 1
+
+func _schedule_content_hint() -> void:
+	_content_revision += 1
+	if is_inside_tree():
+		_update_content_hint.call_deferred(_content_revision)
+
+func _update_content_hint(revision: int) -> void:
+	await get_tree().process_frame
+	if revision != _content_revision or not content_active():
+		return
+	var content := _custom_content.get_ref() as Control
+	var bar := content_slot.get_v_scroll_bar()
+	var overflow := bar.max_value > bar.page + 1.0
+	_content_hint.text = str(content.get_meta(&"dialogue_scroll_hint", "Scroll to read more."))
+	_content_hint.visible = overflow
+	var focused := get_viewport().gui_get_focus_owner()
+	if is_instance_valid(focused) and content.is_ancestor_of(focused):
+		content_slot.ensure_control_visible(focused)
+
 func reset() -> void:
+	_hide_content()
 	_actor = null
 	speaker_label.text = ""
 	body_label.text = ""
@@ -133,7 +234,9 @@ func reset() -> void:
 	hide()
 
 func subtitle_text() -> String:
-	return body_label.text if speaker_label.text.is_empty() else speaker_label.text + ": " + body_label.text
+	if speaker_label.text.is_empty():
+		return body_label.text
+	return speaker_label.text if body_label.text.is_empty() else speaker_label.text + ": " + body_label.text
 
 func portrait_visible() -> bool:
 	return _portrait_frame.visible
@@ -149,6 +252,7 @@ func fit_width(width: float) -> void:
 	_row.add_theme_constant_override("separation", 10 if compact else 18)
 	speaker_label.add_theme_font_size_override("font_size", 17 if narrow else 19 if compact else 24)
 	body_label.add_theme_font_size_override("font_size", 15 if narrow else 17 if compact else 20)
+	_content_hint.add_theme_font_size_override("font_size", 12 if narrow else 13)
 	custom_minimum_size = Vector2(0, 78 if compact else 112)
 
 func _process(delta: float) -> void:

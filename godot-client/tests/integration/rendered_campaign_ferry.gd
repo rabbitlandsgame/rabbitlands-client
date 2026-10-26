@@ -25,6 +25,8 @@ var captures: Array = []
 var choice_calls: Array = []
 var preview_run := ""
 var fixture_source := ""
+var inspection_calls: Array = []
+var inspection_delivery := -1.0
 
 func _init() -> void: run.call_deferred()
 func expect(ok: bool, message: String) -> void:
@@ -147,6 +149,7 @@ func run() -> void:
 	presentation.set_reduced_motion(false, false)
 	presentation.presentation_finished.connect(func(token: String, reason: String) -> void: results.append([token, reason]))
 	presentation.choice_requested.connect(preview_choose)
+	presentation.inspection_requested.connect(preview_inspection)
 	guidance = Guidance.new()
 	stage.add_child(guidance)
 	guide = (load("res://src/ui/lantern_guide.gd") as GDScript).new()
@@ -159,15 +162,12 @@ func run() -> void:
 	hud.transcript_requested.connect(presentation.show_transcript)
 	hud.reduced_motion_changed.connect(presentation.set_reduced_motion)
 	hud.replay_requested.connect(func() -> void: presentation.request_replay(state, "greenlight"))
-	hud.target_requested.connect(func(_id: int, _tile: Vector2i, _nearby: bool) -> void:
-		if OS.get_environment("RL_FERRY_KEEP_OPEN") == "1" and str(state.scene.id) == "measure.landing.arrival" and not presentation.is_active():
-			state = snapshot("post-inspect")
-			set_local_tile(Vector2i(450, 309)))
 	root.get_node("AppState").authenticated = true
 	state = snapshot("initial")
 	preview_run = str(state.run_id)
-	var source_state := JSON.stringify(state)
 	var original: Transform3D = rig.camera.global_transform
+	var initial_position: Vector3 = (actors[local_id] as Node3D).global_position
+	var immutable_fixture := JSON.stringify(bundle)
 	tick(0.0)
 	deadline = Time.get_ticks_msec() + 15000
 	while not presentation.playing and Time.get_ticks_msec() < deadline:
@@ -180,89 +180,81 @@ func run() -> void:
 		else: await review_loop()
 		await finish_preview()
 		return
-	if OS.get_environment("RL_FERRY_PLAN_ONLY") == "1": tick(28.0)
-	var samples := {0.0: "01-player-viewport", 1.2: "02-camera-approach", 2.4: "03-quay-establishing",
-		6.1: "04-odo-briefing", 10.2: "05-clerk-dialogue", 14.2: "06-foreman-dialogue",
-		19.2: "07-first-step-instruction", 24.8: "08-crew-returning", 27.2: "09-camera-return", 27.9: "10-camera-nearly-home"}
+	var samples := {0.0:"01-player-viewport", 1.2:"02-camera-approach", 2.4:"03-quay-establishing",
+		6.1:"04-odo-briefing", 10.2:"05-clerk-dialogue", 14.2:"06-foreman-dialogue",
+		19.7:"07-player-walking-to-damage", 22.4:"08-player-inspecting-damage", 24.7:"09-player-turns-to-odo",
+		27.2:"13-odo-response-in-same-dialogue", 37.2:"14-crew-returning", 39.2:"15-camera-return", 39.9:"16-camera-nearly-home"}
 	var frames := 0
-	while presentation.playing and frames <= 850:
+	var chose := false
+	var group_view := Transform3D.IDENTITY
+	while presentation.playing and frames <= 1260:
 		var time: float = presentation.elapsed
 		for stamp: float in samples.keys():
 			if time >= stamp:
+				if stamp == 19.7:
+					expect(inspection_calls == ["start"] and (actors[local_id] as ReplicatedActor3D)._cinematic_action == &"walk", "the protagonist walks during one explicit native inspection request")
+				if stamp == 22.4:
+					expect((actors[local_id] as ReplicatedActor3D)._cinematic_action == &"pickup", "the protagonist visibly examines the damaged boards before deciding")
 				await capture(str(samples[stamp]))
 				samples.erase(stamp)
+		if presentation.choice_context().waiting and not chose:
+			chose = true
+			expect(str(state.scene.inspection.status) == "complete", "choices wait for the native inspection proof")
+			expect_player_dialogue("live decision")
+			group_view = rig.camera.global_transform
+			var unchanged := JSON.stringify(state)
+			tick(65.0)
+			expect(is_equal_approx(presentation.elapsed, 26.0) and rig.camera.global_transform.is_equal_approx(group_view) and JSON.stringify(state) == unchanged, "the inspection and decision share one steady shot while the player considers the options")
+			await capture("10-player-profile-and-options")
+			root.size = Vector2i(720,480); root.content_scale_factor = 1.5
+			await capture("11-small-player-profile-and-options-150-percent")
+			await expect_choice_reachable("live small-window decision")
+			expect_conversation_heads("live small-window decision")
+			root.size = Vector2i(1280,720); root.content_scale_factor = 1.0
+			presentation._choice_dialog.option_buttons.repair.pressed.emit()
+			tick(0.0); tick(0.0)
+			expect(choice_calls == ["repair"] and str(state.scene.choice.selected) == "repair", "the player's option receives the actual native repair confirmation")
+			expect(not presentation._dialogue.content_active() and presentation._dialogue.speaker_label.text == "Odo Fenn" and presentation._caption.text == state.scene.choice.response, "Odo's portrait and instructions replace the player options in the same dialogue row")
+			expect(rig.camera.global_transform.is_equal_approx(group_view), "Odo responds without changing the established group camera")
+			await capture("12-odo-instructions-after-choice")
 		await process_frame
 		tick(1.0 / 30.0)
 		frames += 1
-	expect(not presentation.is_active() and rig.camera.global_transform.is_equal_approx(original), "native completion returns to the exact original camera")
-	expect(results.size() == 1 and JSON.stringify(state) == source_state, "the whole scene leaves native objectives untouched and completes once")
-	state = snapshot("initial-ready")
-	tick(0.0)
-	expect(visible_rings() == 1 and guidance._labels.assess.visible, "only the named first work circle is visible after the briefing")
-	await capture("11-first-objective-and-marker")
-	state = snapshot("post-inspect")
-	set_local_tile(Vector2i(450, 309))
-	tick(0.0)
-	tick(6.1)
-	expect(presentation.choice_context().waiting and presentation._choice_dialog.option_buttons.size() == 3, "inspection opens all three native rescue plans inside Odo's scene")
-	var group_view: Transform3D = rig.camera.global_transform
-	tick(20.0)
-	expect(is_equal_approx(presentation.elapsed, 6.0) and rig.camera.global_transform.is_equal_approx(group_view), "the group camera and conversation wait steadily for a decision")
-	await capture("12-three-rescue-plans")
-	root.size = Vector2i(720, 480); root.content_scale_factor = 1.5
-	await capture("13-small-rescue-plans-150-percent")
-	expect_choice_fits("live small-window choice")
-	expect_conversation_heads("live small-window choice")
-	root.size = Vector2i(1280, 720); root.content_scale_factor = 1.0
-	var source_choice := JSON.stringify(state.scene.choice)
-	presentation._choice_dialog.option_buttons.repair.pressed.emit()
-	expect(choice_calls == ["repair"] and str(state.scene.choice.selected) == "repair", "the real repair option requests the native fixture's authoritative confirmation once")
-	tick(0.0); tick(1.0)
-	expect(presentation._dialogue.speaker_label.text == "Odo Fenn" and presentation._caption.text == state.scene.choice.response, "Odo explains the selected route after confirmation")
-	expect(rig.camera.global_transform.is_equal_approx(group_view) and source_choice != JSON.stringify(state.scene.choice), "the response keeps the established group view")
-	await capture("14-odo-repair-instructions")
-	tick(20.0)
-	expect(not presentation.is_active() and results.size() == 2, "the plan scene returns control after its response")
-	state = snapshot("repair-seal-inspected")
-	set_local_tile(Vector2i(449, 301))
-	tick(0.0)
-	await capture("15-branch-objective")
-	var replay_state := JSON.stringify(state)
-	expect(presentation.request_replay(state, "greenlight"), "the current native plan can be replayed after completion")
-	tick(0.0); tick(6.1)
-	expect(presentation._choice_dialog.option_buttons.size() == 3 and presentation._choice_dialog.continue_button.visible, "replay displays all three options and waits for Continue")
+	var expected := original
+	expected.origin += (actors[local_id] as ReplicatedActor3D).server_target - initial_position
+	expect(not presentation.is_active() and rig.camera.global_transform.is_equal_approx(expected), "the viewport returns smoothly to the player's real inspection position")
+	expect((actors[local_id] as Node3D).global_position.is_equal_approx((actors[local_id] as ReplicatedActor3D).server_target), "the protagonist returns to native control without a position snap")
+	expect(results.size() == 1 and inspection_calls == ["start"] and JSON.stringify(bundle) == immutable_fixture, "the single scene requests one native inspection and acknowledges once without modifying the recorded fixture")
+	var recorded := JSON.stringify(state)
+	expect(presentation.request_replay(state, "greenlight"), "the complete inspection conversation can be replayed")
+	tick(0.0); tick(19.7)
+	expect(inspection_calls == ["start"], "replaying the walk sends no native inspection or movement request")
+	tick(6.4)
+	expect_player_dialogue("recorded replay")
+	expect(presentation._choice_dialog.continue_button.visible and presentation._choice_dialog.status_label.text.begins_with("Recorded choice:"), "replay shows the recorded plan and waits for Continue")
 	for id: String in presentation._choice_dialog.option_buttons:
-		expect(presentation._choice_dialog.option_buttons[id].disabled, "replay " + id + " is read-only")
-	expect(presentation._choice_dialog.status_label.text.begins_with("Recorded choice: Repair"), "replay identifies the owner's recorded plan")
-	await capture("16-replay-recorded-choice")
-	root.size = Vector2i(720, 480); root.content_scale_factor = 1.5
-	await capture("17-small-replay-choice-150-percent")
-	expect_choice_fits("replay small-window choice")
-	expect_conversation_heads("replay small-window choice")
-	presentation._choice_dialog.continue_button.pressed.emit()
-	tick(1.0)
-	expect(presentation._caption.text == state.scene.choice.response, "replay repeats Odo's recorded instructions after Continue")
-	await capture("18-small-replay-followup-150-percent")
+		expect(presentation._choice_dialog.option_buttons[id].disabled, "replay " + id + " stays read-only")
+	await capture("17-replay-player-profile-recorded-choice")
+	root.size = Vector2i(720,480); root.content_scale_factor = 1.5
+	await capture("18-small-replay-player-profile-150-percent")
+	await expect_choice_reachable("replay small-window decision")
+	expect_conversation_heads("replay small-window decision")
+	presentation._choice_dialog.continue_button.pressed.emit(); tick(1.0)
+	expect(presentation._caption.text == state.scene.choice.response and presentation._dialogue.speaker_label.text == "Odo Fenn", "replay Continue restores Odo and his recorded follow-up")
+	await capture("19-small-odo-followup-150-percent")
 	presentation.skip(); tick(0.7)
-	expect(results.size() == 2 and choice_calls == ["repair"] and JSON.stringify(state) == replay_state, "replay changes no native objective, reward, decision or scene acknowledgment")
-	root.size = Vector2i(1280, 720); root.content_scale_factor = 1.0
-	state = snapshot("initial-ready")
-	set_local_tile(Vector2i(450, 308))
-	root.size = Vector2i(720, 480)
-	root.content_scale_factor = 1.5
+	expect(results.size() == 1 and inspection_calls == ["start"] and choice_calls == ["repair"] and JSON.stringify(state) == recorded, "replay cannot repeat inspection, choice, progress or scene acknowledgment")
+	root.size = Vector2i(1280,720); root.content_scale_factor = 1.0
+	state = snapshot("repair-seal-inspected")
+	set_local_tile(Vector2i(449,301), true)
 	tick(0.0)
-	await capture("19-small-quest-guidance-150-percent")
-	root.size = Vector2i(1280, 720)
-	root.content_scale_factor = 1.0
-	tick(0.0)
-	expect(presentation.request_replay(state, "greenlight"), "native replay remains available after reviewing the same current scene")
-	tick(0.0); tick(10.2)
-	expect(presentation._dialogue.portrait_visible() and presentation._dialogue.speaker_label.text == "Landing clerk", "the cinematic headshot follows the actual speaking clerk")
-	root.size = Vector2i(720, 480); root.content_scale_factor = 1.5
-	await capture("20-small-clerk-headshot-150-percent")
-	presentation.skip(); tick(0.7)
-	expect(results.size() == 2 and not presentation.is_active(), "native replay's smooth return never repeats the original completion")
+	await capture("20-next-quest-action-after-conversation")
 	await finish_preview()
+
+func preview_inspection(action: String) -> void:
+	inspection_calls.append(action)
+	if action == "start": inspection_delivery = 23.0
+	elif action == "cancel": inspection_delivery = -1.0
 
 func preview_choose(option_id: String) -> void:
 	choice_calls.append(option_id)
@@ -275,51 +267,58 @@ func preview_choose(option_id: String) -> void:
 		bundle = JSON.parse_string(FileAccess.get_file_as_string(path))
 	state = snapshot(option_id + "-selected")
 
-func expect_choice_fits(label: String) -> void:
-	var viewport := root.get_visible_rect()
+func expect_player_dialogue(label: String) -> void:
+	expect(presentation._dialogue.content_active() and not presentation._dialogue.body_label.visible \
+		and presentation._dialogue.speaker_label.text == str(state.scene.choice.owner), label + " uses the player's named dialogue space")
+	expect(presentation._dialogue.portrait_visible() and presentation._dialogue._actor.get_ref() == actors[local_id], label + " uses the actual player headshot")
+	expect(presentation._choice_dialog.option_buttons.size() == 3 \
+		and presentation._bottom.is_ancestor_of(presentation._choice_dialog), label + " puts all three options inside the NPC dialogue panel")
+	var toward: Vector3 = ((actors[int(state.actors.odo)] as Node3D).global_position - (actors[local_id] as Node3D).global_position).normalized()
+	expect((-((actors[local_id] as Node3D).global_basis.z)).dot(toward) > 0.8, label + " has the player facing Odo")
+
+func expect_choice_reachable(label: String) -> void:
 	var scroll: ScrollContainer = presentation._choice_scroll
 	for button: Button in presentation._choice_dialog.option_buttons.values():
-		expect(viewport.encloses(button.get_global_rect()) and scroll.get_global_rect().encloses(button.get_global_rect()), label + " shows " + button.name)
+		scroll.ensure_control_visible(button)
+		await process_frame; await process_frame
+		expect(root.get_visible_rect().encloses(button.get_global_rect()) and scroll.get_global_rect().encloses(button.get_global_rect()), label + " can show " + button.name)
 	if presentation._choice_dialog.continue_button.visible:
-		expect(viewport.encloses(presentation._choice_dialog.continue_button.get_global_rect()), label + " shows Continue")
+		scroll.ensure_control_visible(presentation._choice_dialog.continue_button)
+		await process_frame; await process_frame
+		expect(root.get_visible_rect().encloses(presentation._choice_dialog.continue_button.get_global_rect()), label + " can show Continue")
+	expect(root.get_visible_rect().encloses(presentation._skip.get_global_rect()) and root.get_visible_rect().encloses(presentation._reduced.get_global_rect()), label + " keeps scene controls outside the scrolling choices")
 
 func expect_conversation_heads(label: String) -> void:
-	for role: String in ["odo", "clerk", "foreman"]:
-		var actor: ReplicatedActor3D = actors[int(state.actors[role])]
+	for role: String in ["odo", "clerk", "foreman", "protagonist"]:
+		var binding: Dictionary = state.scene.get("actors", state.actors)
+		var actor: ReplicatedActor3D = actors[int(binding[role])]
 		var skeleton := actor.get_skeleton()
 		var head := skeleton.global_transform * skeleton.get_bone_global_pose(skeleton.find_bone("Head")).origin
 		var screen := rig.camera.unproject_position(head)
-		expect(screen.y > 70.0 and screen.y + 12.0 < presentation._choice_scroll.position.y \
-			and root.get_visible_rect().has_point(screen), label + " keeps " + role + " visible between the title and options")
+		expect(screen.y > 70.0 and screen.y + 12.0 < presentation._bottom.position.y \
+			and root.get_visible_rect().has_point(screen), label + " keeps " + role + " visible above the dialogue")
 
 func review_smoke(option_id: String) -> void:
-	presentation.skip(); tick(0.7)
-	state = snapshot("initial-ready"); tick(0.0)
-	hud.target_requested.emit(61001, Vector2i(450,309), true)
-	tick(0.0); tick(6.1)
-	expect(str(state.scene.id) == "measure.landing.plan" and presentation.choice_context().waiting, "offline Inspect starts the interactive plan scene")
+	tick(19.0); tick(5.0); tick(2.0)
+	expect(presentation.choice_context().waiting and inspection_calls == ["start"], "offline review walks, inspects and opens options in one scene")
 	presentation._choice_dialog.option_buttons[option_id].pressed.emit()
 	tick(0.0); tick(1.0)
-	expect(choice_calls == [option_id] and str(state.scene.choice.selected) == option_id \
-		and str(state.run_id) == preview_run and presentation._caption.text == state.scene.choice.response, "offline " + option_id + " shows that native route's confirmed response")
+	expect(choice_calls == [option_id] and str(state.scene.choice.selected) == option_id and presentation._caption.text == state.scene.choice.response, "offline " + option_id + " shows its native confirmed response")
 	tick(20.0)
-	state.scene.requires_ack = false
-	state.party.waiting_for_scene = false
+	state.scene.requires_ack = false; state.party.waiting_for_scene = false
 	tick(0.0)
 	var recorded := JSON.stringify(state)
-	expect(presentation.request_replay(state, "greenlight"), "offline recorded plan remains replayable")
-	tick(0.0); tick(6.1)
-	expect(presentation._choice_dialog.option_buttons.size() == 3 \
-		and presentation._choice_dialog.status_label.text.begins_with("Recorded choice:"), "offline replay shows all three plans with the recorded highlight")
-	await capture("offline-" + option_id + "-recorded-choice")
-	presentation._choice_dialog.continue_button.pressed.emit()
-	tick(1.0)
+	expect(presentation.request_replay(state, "greenlight"), "offline inspection conversation remains replayable")
+	tick(0.0); tick(26.1)
+	expect_player_dialogue("offline replay")
+	await capture("offline-" + option_id + "-player-recorded-choice")
+	presentation._choice_dialog.continue_button.pressed.emit(); tick(1.0)
 	expect(presentation._caption.text == state.scene.choice.response, "offline Continue repeats the recorded response")
 	presentation.skip(); tick(0.7)
-	expect(results.size() == 2 and choice_calls == [option_id] and JSON.stringify(state) == recorded, "offline replay is read-only and does not repeat a decision")
+	expect(results.size() == 1 and choice_calls == [option_id] and inspection_calls == ["start"] and JSON.stringify(state) == recorded, "offline replay is read-only")
 
 func review_loop() -> void:
-	root.title = "Rabbit Lands · Ferry review · Inspect landing in guide to choose a plan · Space to replay · Esc to return/close"
+	root.title = "Rabbit Lands · Ferry review · Choose a plan in your dialogue panel · Space to replay · Esc to return/close"
 	var escaped := false
 	var spaced := false
 	var close := [false]
@@ -330,14 +329,9 @@ func review_loop() -> void:
 	while not close[0]:
 		await process_frame
 		if review_seconds > 0 and Time.get_ticks_msec() - began > review_seconds * 1000: break
-		if not presentation.is_active() and not results.is_empty() and bool((state.get("party", {}) as Dictionary).get("waiting_for_scene", false)):
-			if str(state.scene.id) == "measure.landing.arrival":
-				state = snapshot("initial-ready")
-			else:
-				# This view only acknowledges presentation locally. No server,
-				# objective completion, items or persistent player save is used.
-				state.scene.requires_ack = false
-				state.party.waiting_for_scene = false
+		if not presentation.is_active() and not results.is_empty():
+			state.scene.requires_ack = false
+			state.party.waiting_for_scene = false
 		var escape := Input.is_physical_key_pressed(KEY_ESCAPE)
 		var space := Input.is_physical_key_pressed(KEY_SPACE)
 		if escape and not escaped:
@@ -353,23 +347,27 @@ func finish_preview() -> void:
 	expect(await ContinentChunkStream.drain_workers(self), "native preview streaming workers retire")
 	var report := FileAccess.open(directory.path_join("report.json"), FileAccess.WRITE)
 	report.store_string(JSON.stringify({"checks": checks, "failures": failures, "captures": captures,
-		"native_cast": bundle.cast.keys(), "native_objects": objects.size(), "offline": true, "choice_calls": choice_calls}, "  "))
+		"native_cast": bundle.cast.keys(), "native_objects": objects.size(), "offline": true, "choice_calls": choice_calls, "inspection_calls": inspection_calls}, "  "))
 	presentation.queue_free(); guide.queue_free(); stage.queue_free(); main.queue_free()
 	await process_frame; await process_frame
 	print("native ferry: ", checks, " checks; ", failures, " failures")
 	quit(1 if failures else 0)
 
-func set_local_tile(tile: Vector2i) -> void:
+func set_local_tile(tile: Vector2i, teleport := false) -> void:
 	var actor: ReplicatedActor3D = actors[local_id]
 	var dto: Dictionary = bundle.players[0].duplicate(true)
 	dto.x = tile.x; dto.y = tile.y
 	dto = main.call("_presentation_dto", dto)
-	actor.apply_server_state(dto, adapter, true)
+	actor.apply_server_state(dto, adapter, teleport)
 	var height: float = main.call("_campaign_surface_height", actor.global_position)
 	if is_finite(height): actor.set_surface_height(height)
-	rig.set_focus(actor.global_position)
+	if not presentation.is_active(): rig.set_focus(actor.global_position)
 
 func tick(delta: float) -> void:
+	if inspection_delivery >= 0.0 and presentation.elapsed + delta >= inspection_delivery:
+		inspection_delivery = -1.0
+		state = snapshot("post-inspect")
+		set_local_tile(Vector2i(448,310))
 	presentation.update(delta, state, rig, actors, local_id, "greenlight", true, adapter, Callable(main, "_campaign_surface_height"))
 	var tile: Vector2i = adapter.godot_to_server((actors[local_id] as Node3D).global_position)
 	hud.apply_state(state, tile, "greenlight", presentation.reduced_motion, presentation.is_active())

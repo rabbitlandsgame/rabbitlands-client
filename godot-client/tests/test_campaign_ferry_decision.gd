@@ -18,7 +18,7 @@ func expect(ok: bool, message: String) -> void:
 		failures += 1
 		push_error(message)
 
-func decision(owner := true) -> Dictionary:
+static func decision(owner := true) -> Dictionary:
 	# Same public contract and initial instructions as the native server bundles.
 	return {"id":"opening_rescue", "title":"How will you get the worker clear?", "selected":"", "response":"",
 		"can_choose":owner, "owner":"MeasureHuman0", "owner_is_you":owner, "options":[
@@ -53,7 +53,7 @@ func fixture(token: String, owner := true) -> Dictionary:
 	root.add_child(scene)
 	scene.set_reduced_motion(false, false)
 	var state := {"version":1, "kind":"opening", "active":true, "run_id":"decision-run", "map":"greenlight",
-		"title":"The Ferry That Arrived Twice", "key":"rescue", "actors":{"odo":2,"worker":3,"clerk":4,"foreman":5}, "targets":[],
+		"title":"The Ferry That Arrived Twice", "key":"rescue", "actors":{"odo":2,"worker":3,"clerk":4,"foreman":5,"protagonist":1}, "targets":[],
 		"anchors":{"odo_meeting":[450,313], "clerk_arrival":[444,310], "clerk_stand":[447,312],
 			"foreman_arrival":[456,318], "foreman_turn":[455,317], "foreman_stand":[453,315]},
 		"scene":{"id":"measure.landing.plan", "token":token, "requires_ack":true, "ack_revision":1, "choice":decision(owner)}}
@@ -91,7 +91,7 @@ func run() -> void:
 		expect(not f.scene._choice_scroll.visible and not f.scene.choice_context().waiting, "the decision waits for Odo's question at six seconds")
 		at(f, 6)
 		expect(f.scene._choice_waiting and f.scene._choice_scroll.visible and f.scene._choice_dialog.option_buttons.size() == 3, "the real controller pauses with all three rescue approaches")
-		expect(f.scene._dialogue.speaker_label.text == "Odo Fenn" and f.scene._caption.text.contains("How will you help"), "Odo asks the plan question before the controls appear")
+		expect(f.scene._dialogue.speaker_label.text == "MeasureHuman0" and f.scene._dialogue.content_active() and f.scene._dialogue._actor.get_ref() == f.actors[1], "the choice replaces speech with the bound player's profile in the same dialogue space")
 		var held_view: Transform3D = f.camera.global_transform
 		var source := JSON.stringify(f.state)
 		var token: String = f.scene._choice_token()
@@ -131,11 +131,15 @@ func run() -> void:
 				f.scene._layout_presentation()
 				for _frame: int in range(5): await process_frame
 				var viewport_box := Rect2(Vector2.ZERO,root.get_visible_rect().size)
-				var choice_box: Rect2 = f.scene._choice_scroll.get_global_rect()
-				expect(viewport_box.encloses(choice_box), "the integrated decision panel stays on-screen at "+str(size_and_scale))
+				var choice_box: Rect2 = f.scene._dialogue.content_slot.get_global_rect()
+				expect(viewport_box.encloses(choice_box) and f.scene._bottom.get_global_rect().encloses(choice_box), "choices stay inside the same on-screen bottom dialogue panel at "+str(size_and_scale))
 				for button: Button in f.scene._choice_dialog.option_buttons.values():
-					expect(choice_box.encloses(button.get_global_rect()), "every full native option is visible without scrolling at "+str(size_and_scale))
-				expect(choice_box.encloses(f.scene._choice_dialog.continue_button.get_global_rect()), "replay Continue is reachable alongside all three options")
+					f.scene._dialogue.content_slot.ensure_control_visible(button)
+					for _frame: int in range(2): await process_frame
+					expect(choice_box.grow(1).encloses(button.get_global_rect()), "every full native option is reachable inside the bounded bottom slot at "+str(size_and_scale))
+				f.scene._dialogue.content_slot.ensure_control_visible(f.scene._choice_dialog.continue_button)
+				for _frame: int in range(2): await process_frame
+				expect(choice_box.grow(1).encloses(f.scene._choice_dialog.continue_button.get_global_rect()), "replay Continue is reachable in the same bounded dialogue slot")
 			root.size = Vector2i(1280,720)
 			root.content_scale_factor = 1.0
 		f.scene._on_choice_option("repair", f.scene._choice_token())

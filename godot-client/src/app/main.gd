@@ -1343,6 +1343,7 @@ func _ready() -> void:
 	campaign_hud.prediction_requested.connect(_on_campaign_prediction)
 	campaign_scene.presentation_finished.connect(_on_campaign_scene_finished)
 	campaign_scene.choice_requested.connect(_on_campaign_scene_choice)
+	campaign_scene.inspection_requested.connect(_on_campaign_scene_inspection)
 	campaign_hud.transcript_requested.connect(campaign_scene.show_transcript)
 	campaign_hud.replay_requested.connect(_on_campaign_replay)
 	campaign_hud.reduced_motion_changed.connect(campaign_scene.set_reduced_motion)
@@ -7358,6 +7359,42 @@ func _on_campaign_scene_finished(token: String, reason: String) -> void:
 	if bool(scene.get("requires_ack", false)) and str(scene.get("token", "")) == token:
 		Network.campaign_scene_done(str(AppState.campaign.get("run_id", "")), token)
 
+func _on_campaign_scene_inspection(action: String) -> void:
+	# This modal request asks the server to walk the real owner and verify the
+	# inspection. Neither a rendered position nor a scene timer proves arrival.
+	if action not in ["start", "cancel"] or not AppState.authenticated or _disconnect_console_active \
+			or bool(AppState.death.get("dead", false)) or campaign_scene.is_replaying() \
+			or not bool(AppState.campaign.get("active", false)) \
+			or not (AppState.campaign.get("travel", {}) as Dictionary).is_empty() \
+			or EloriaProtocol.map_id_from_reference(str(AppState.campaign.get("map", ""))) \
+			!= EloriaProtocol.map_id_from_reference(AppState.current_map):
+		return
+	var scene: Dictionary = AppState.campaign.get("scene", {})
+	var inspection: Dictionary = scene.get("inspection", {})
+	var context: Dictionary = campaign_scene.inspection_context()
+	if str(scene.get("id", "")) != "measure.landing.arrival" or inspection.is_empty() \
+			or not EloriaProtocol.campaign_scene_inspection_valid(inspection) \
+			or str((AppState.campaign.get("party", {}) as Dictionary).get("role", "owner")) != "owner" \
+			or str(context.get("run_id", "")) != str(AppState.campaign.get("run_id", "")) \
+			or str(context.get("token", "")) != str(scene.get("token", "")) \
+			or str(context.get("id", "")) != str(inspection.id):
+		return
+	var protagonist := int(inspection.actor_id)
+	var actual: Dictionary = AppState.actors.get(AppState.local_actor_id, {})
+	if protagonist != AppState.local_actor_id \
+			or int((scene.get("actors", {}) as Dictionary).get("protagonist", -1)) != protagonist \
+			or not is_instance_valid(actor_nodes.get(protagonist)) \
+			or int(actual.get("kind", 0)) != 1 or int(actual.get("health", 0)) <= 0:
+		return
+	if action == "start" and (not campaign_scene.playing or not bool(context.get("waiting", false)) \
+			or not _grounded_actors.has(protagonist) or not bool(inspection.can_start)):
+		return
+	var error := Network.campaign_scene_inspect(str(AppState.campaign.run_id), str(scene.token), action)
+	if error != OK:
+		campaign_scene.inspection_send_failed()
+		if action == "start":
+			AppState.append_local_message("Could not begin the landing inspection. Please try again.")
+
 func _on_campaign_scene_choice(option_id: String) -> void:
 	# The scene intentionally owns world input here. This decision does not
 	# require walking into ordinary NPC conversation range during the camera.
@@ -7371,7 +7408,7 @@ func _on_campaign_scene_choice(option_id: String) -> void:
 	var scene: Dictionary = AppState.campaign.get("scene", {})
 	var choice: Dictionary = scene.get("choice", {})
 	var context: Dictionary = campaign_scene.choice_context()
-	if str(scene.get("id", "")) != "measure.landing.plan" or str(choice.get("id", "")) != "opening_rescue" \
+	if str(scene.get("id", "")) not in ["measure.landing.arrival", "measure.landing.plan"] or str(choice.get("id", "")) != "opening_rescue" \
 			or not EloriaProtocol.campaign_scene_choice_valid(choice) \
 			or not bool(choice.get("can_choose", false)) or not bool(choice.get("owner_is_you", false)) \
 			or not str(choice.get("selected", "")).is_empty() \
@@ -7380,6 +7417,15 @@ func _on_campaign_scene_choice(option_id: String) -> void:
 			or str(context.get("token", "")) != str(scene.get("token", "")) \
 			or str(context.get("id", "")) != str(choice.id) or not bool(context.get("waiting", false)):
 		return
+	if str(scene.id) == "measure.landing.arrival":
+		var inspection: Dictionary = scene.get("inspection", {})
+		var actual: Dictionary = AppState.actors.get(AppState.local_actor_id, {})
+		if inspection.is_empty() or not EloriaProtocol.campaign_scene_inspection_valid(inspection) \
+				or str(inspection.status) != "complete" or int(inspection.actor_id) != AppState.local_actor_id \
+				or int((scene.get("actors", {}) as Dictionary).get("protagonist", -1)) != AppState.local_actor_id \
+				or not is_instance_valid(actor_nodes.get(AppState.local_actor_id)) \
+				or int(actual.get("kind", 0)) != 1 or int(actual.get("health", 0)) <= 0:
+			return
 	var offered := false
 	for option: Dictionary in choice.get("options", []):
 		if str(option.id) == option_id:offered = true

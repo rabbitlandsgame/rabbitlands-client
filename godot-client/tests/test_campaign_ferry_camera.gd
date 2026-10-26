@@ -81,6 +81,8 @@ func run() -> void:
 	create_timer(90).timeout.connect(func() -> void: push_error("Ferry camera test timed out"); quit(1))
 	root.size = Vector2i(1280, 720)
 	root.get_node("Network").call("block_for_hud_preview")
+	var arrival: Dictionary = Presentation.scene_definitions()["measure.landing.arrival"]
+	var duration := float(arrival.duration)
 	var f := fixture("continuous")
 	var results: Array = []
 	f.scene.presentation_finished.connect(func(token: String, reason: String) -> void: results.append([token, reason]))
@@ -104,9 +106,9 @@ func run() -> void:
 	at(f, 14.0)
 	expect(f.scene._dialogue.speaker_label.text == "Dock foreman" and f.scene._caption.text.contains("crew"), "the healthy foreman speaks for the crew")
 	at(f, 19.0)
-	expect(f.scene._caption.text.contains("NEXT") and f.scene._caption.text.contains("inspect"), "the closing instruction names the first marked action")
+	expect(f.scene._caption.text.contains("damaged boards"), "Odo names the physical inspection before any rescue choice")
 	expect(f.camera.global_transform.is_equal_approx(group_view), "speaker changes and the inspection instruction keep the group framing steady")
-	at(f, 26.0)
+	at(f, duration - 2.0)
 	expect((f.actors[4] as Node3D).global_position.is_equal_approx((f.actors[4] as Actor).server_target.origin) \
 		and (f.actors[5] as Node3D).global_position.is_equal_approx((f.actors[5] as Actor).server_target.origin), "both healthy speakers walk back to their live posts before camera release")
 	var moving: Actor = f.actors[1]
@@ -114,11 +116,11 @@ func run() -> void:
 	moving.global_position += displacement
 	var target: Transform3D = f.original
 	target.origin += displacement
-	at(f, 27.5)
+	at(f, duration - 0.5)
 	var near_end: float = f.camera.global_position.distance_to(target.origin)
-	at(f, 27.99)
+	at(f, duration - 0.01)
 	expect(f.camera.global_position.distance_to(target.origin) < near_end and f.camera.global_position.distance_to(target.origin) < 0.02, "the final shot eases into the player's latest live position")
-	at(f, 28.0)
+	at(f, duration)
 	expect(not f.scene.blocks_input() and f.camera.global_transform.is_equal_approx(target), "normal completion reaches the gameplay viewport with no final cut")
 	expect(f.rig.focus.is_equal_approx(f.focus + displacement) and f.rig.distance == 31 and f.rig.yaw_degrees == 42 and f.rig.pitch_degrees == -52, "return preserves the player's zoom, orbit and updated focus")
 	expect(is_equal_approx(f.camera.fov, 67) and is_equal_approx(f.camera.near, 0.8) and is_equal_approx(f.camera.far, 1800), "return restores every lens setting")
@@ -126,7 +128,8 @@ func run() -> void:
 	dispose(f)
 	var seek := fixture("seek")
 	tick(seek, 0.0); at(seek, 10.0)
-	var group_shot: Vector3 = (seek.actors[2] as Node3D).global_position + Vector3(-7, 5.8, 10)
+	var shot_offset: Array = arrival.shots[0].position
+	var group_shot: Vector3 = (seek.actors[2] as Node3D).global_position + Vector3(shot_offset[0],shot_offset[1],shot_offset[2])
 	expect(seek.camera.global_position.is_equal_approx(group_shot), "a direct arrival seek retains the authored group view rather than cutting to the current speaker")
 	dispose(seek)
 	# Keep the generic pose-order regression independent of this scene's new
@@ -135,7 +138,7 @@ func run() -> void:
 	var speaker_definition: Dictionary = Presentation.scene_definitions()["measure.landing.arrival"].duplicate(true)
 	speaker_definition.shots = [
 		{"t":0.0, "anchor_actor":"clerk", "position":[4.0, 3.5, 6.0], "target":[0.0, 1.2, 0.0]},
-		{"t":28.0, "anchor_actor":"clerk", "position":[4.0, 3.5, 6.0], "target":[0.0, 1.2, 0.0]}]
+		{"t":duration, "anchor_actor":"clerk", "position":[4.0, 3.5, 6.0], "target":[0.0, 1.2, 0.0]}]
 	seek.scene._definitions = {"measure.landing.arrival":speaker_definition}
 	tick(seek, 0.0); at(seek, 10.0)
 	var clerk_shot: Vector3 = (seek.actors[4] as Node3D).global_position + Vector3(4, 3.5, 6)

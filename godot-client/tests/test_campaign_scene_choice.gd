@@ -76,6 +76,17 @@ func run() -> void:
 	for option:String in ["defend","repair","evacuate"]:
 		reset_main();main.call("_on_campaign_scene_choice",option)
 		expect(frames.size()==1 and frames[0]==EloriaProtocol.chat("#campaign scene_choice choice-run choice-run:measure.landing.plan "+option),"Main accepts the current owner "+option+" choice without an NPC proximity requirement")
+	for option:String in ["defend","repair","evacuate"]:
+		reset_main();app.actors[1]={"kind":1,"health":20,"x":448,"y":310}
+		app.campaign.scene.id="measure.landing.arrival";app.campaign.scene.token="choice-run:measure.landing.arrival"
+		app.campaign.scene.actors={"odo":20,"protagonist":1}
+		app.campaign.scene.inspection={"id":"landing_overview","status":"complete","actor_id":1,"object_id":61001,"path":[[449,309],[448,310]],"approach":[448,310],"can_start":false}
+		scene_double.get("test_context").token=app.campaign.scene.token
+		main.call("_on_campaign_scene_choice",option)
+		expect(frames.size()==1 and frames[0]==EloriaProtocol.chat("#campaign scene_choice choice-run choice-run:measure.landing.arrival "+option),"the confirmed native inspection unlocks "+option+" within the same arrival scene")
+		frames.clear();app.campaign.scene.inspection.status="walking"
+		main.call("_on_campaign_scene_choice",option)
+		expect(frames.is_empty(),"a rendered inspection pose never substitutes for authoritative completion before "+option)
 	for blocker:String in ["replay","helper","not_owner","already_selected","stale_run","stale_token","stale_choice","not_waiting","wrong_scene","foreign_map","travel","inactive","dead","disconnect","signed_out","ungrounded","not_playing","missing_odo","non_npc_odo","unknown_option"]:
 		reset_main()
 		match blocker:
@@ -87,7 +98,7 @@ func run() -> void:
 			"stale_token":scene_double.get("test_context").token="older-token"
 			"stale_choice":scene_double.get("test_context").id="older-choice"
 			"not_waiting":scene_double.get("test_context").waiting=false
-			"wrong_scene":app.campaign.scene.id="measure.landing.arrival"
+			"wrong_scene":app.campaign.scene.id="measure.landing.resolved"
 			"foreign_map":app.current_map="twinbrook"
 			"travel":app.campaign.travel={"map":"twinbrook","npc":"Odo Fenn"}
 			"inactive":app.campaign.active=false

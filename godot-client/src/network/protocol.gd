@@ -3600,6 +3600,8 @@ static func decode_campaign(payload: PackedByteArray) -> Dictionary:
 			return {"type": "invalid", "error": "campaign_scene_ack_revision"}
 		if not campaign_scene_choice_valid(scene.get("choice", {})):
 			return {"type": "invalid", "error": "campaign_scene_choice"}
+		if not campaign_scene_inspection_valid(scene.get("inspection", {})):
+			return {"type": "invalid", "error": "campaign_scene_inspection"}
 	for bindings: Variant in [value.get("actors", {}), scene.get("actors", {})]:
 		if not bindings is Dictionary:
 			return {"type": "invalid", "error": "campaign_actors"}
@@ -3612,6 +3614,10 @@ static func decode_campaign(payload: PackedByteArray) -> Dictionary:
 	for target: Dictionary in value.get("targets", []):
 		if target.has("actor_id") and int((value.get("actors", {}) as Dictionary).get(str(target.get("role", "")), -1)) != int(target.actor_id):
 			return {"type": "invalid", "error": "campaign_target_binding"}
+	var inspection: Dictionary = scene.get("inspection", {})
+	if not inspection.is_empty() and int(inspection.actor_id) > 0 \
+			and int((scene.get("actors", {}) as Dictionary).get("protagonist", -1)) != int(inspection.actor_id):
+		return {"type": "invalid", "error": "campaign_inspection_binding"}
 	for anchors: Variant in [value.get("anchors", {}), scene.get("anchors", {})]:
 		if not anchors is Dictionary or anchors.size() > 32:
 			return {"type": "invalid", "error": "campaign_anchors"}
@@ -3721,6 +3727,28 @@ static func decode_campaign(payload: PackedByteArray) -> Dictionary:
 	if not _campaign_lamps_valid(value.get("lamps", {})):
 		return {"type": "invalid", "error": "campaign_lamps"}
 	return {"type": "campaign", "state": value}
+
+static func campaign_scene_inspection_valid(inspection: Variant) -> bool:
+	if not inspection is Dictionary:
+		return false
+	if inspection.is_empty():
+		return true
+	if inspection.get("id") != "landing_overview" \
+			or inspection.get("status") not in ["pending", "walking", "complete", "blocked", "waiting_owner"] \
+			or not _campaign_integer(inspection.get("actor_id"), 0, 2147483647.0) \
+			or not _campaign_integer(inspection.get("object_id"), 1, 65535) \
+			or not inspection.get("can_start") is bool or not _campaign_tile(inspection.get("approach")):
+		return false
+	var path: Variant = inspection.get("path")
+	if not path is Array or path.is_empty() or path.size() > 32:
+		return false
+	for tile: Variant in path:
+		if not _campaign_tile(tile):
+			return false
+	if path.back() != inspection.approach:
+		return false
+	return not bool(inspection.can_start) or (int(inspection.actor_id) > 0 \
+		and str(inspection.status) in ["pending", "blocked"])
 
 static func campaign_scene_choice_valid(choice: Variant) -> bool:
 	if not choice is Dictionary:

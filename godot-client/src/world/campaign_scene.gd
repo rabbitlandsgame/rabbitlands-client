@@ -10,6 +10,7 @@ const MAX_DURATION := 60.0
 signal presentation_finished(token: String, reason: String)
 signal replay_finished(token: String, reason: String)
 signal choice_requested(option_id: String)
+signal inspection_requested(action: String)
 signal transcript_changed(text: String)
 
 var reduced_motion := false
@@ -48,6 +49,16 @@ var _choice_review := false
 var _choice_initially_selected := false
 var _choice_pending_at := -1
 var _choice_error := ""
+var _inspection_state: Dictionary = {}
+var _inspection_sent := false
+var _inspection_active := false
+var _inspection_pending_at := -1
+var _inspection_error := ""
+var _protagonist_name := "You"
+var _inspection_retry: Button
+var _margin: MarginContainer
+var _actions: HFlowContainer
+var _account: Button
 var _skip: Button
 var _reduced: CheckButton
 var _transcript: AcceptDialog
@@ -129,6 +140,7 @@ func configure(view: SubViewport = null) -> void:
 	bottom.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	_screen.add_child(bottom)
 	var margin := MarginContainer.new()
+	_margin = margin
 	for side: String in ["left", "right", "top", "bottom"]:
 		margin.add_theme_constant_override("margin_" + side, 16)
 	bottom.add_child(margin)
@@ -138,6 +150,7 @@ func configure(view: SubViewport = null) -> void:
 	column.add_child(_dialogue)
 	_caption = _dialogue.body_label
 	var actions := HFlowContainer.new()
+	_actions = actions
 	actions.add_theme_constant_override("h_separation", 14)
 	actions.add_theme_constant_override("v_separation", 6)
 	column.add_child(actions)
@@ -145,15 +158,20 @@ func configure(view: SubViewport = null) -> void:
 	_skip.text = "Return to play · Esc"
 	_skip.pressed.connect(skip)
 	actions.add_child(_skip)
-	var account := Button.new()
-	account.text = "Read scene account"
-	account.pressed.connect(show_transcript)
-	actions.add_child(account)
+	_account = Button.new()
+	_account.text = "Read scene account"
+	_account.pressed.connect(show_transcript)
+	actions.add_child(_account)
 	_reduced = CheckButton.new()
 	_reduced.text = "Reduced camera motion"
 	_reduced.button_pressed = reduced_motion
 	_reduced.toggled.connect(set_reduced_motion)
 	actions.add_child(_reduced)
+	_inspection_retry = Button.new()
+	_inspection_retry.text = "Retry inspection"
+	_inspection_retry.pressed.connect(_request_inspection)
+	actions.add_child(_inspection_retry)
+	_inspection_retry.hide()
 	_transcript = AcceptDialog.new()
 	_transcript.title = "Scene account"
 	_transcript.dialog_text = ""
@@ -169,17 +187,16 @@ func configure(view: SubViewport = null) -> void:
 	_transcript_text.selection_enabled = true
 	_transcript_text.bbcode_enabled = false
 	_transcript.add_child(_transcript_text)
-	_choice_scroll = ScrollContainer.new()
-	_choice_scroll.name = "CinematicDecision"
-	_choice_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	_choice_scroll.follow_focus = true
-	_screen.add_child(_choice_scroll)
 	_choice_dialog = Choice.new()
-	_choice_scroll.add_child(_choice_dialog)
+	_choice_dialog.set_embedded(true)
+	_choice_scroll = _dialogue.content_slot
 	_choice_dialog.option_selected.connect(_on_choice_option)
 	_choice_dialog.continue_requested.connect(_on_choice_continue)
 	_choice_dialog.minimum_size_changed.connect(_layout_presentation)
-	_choice_scroll.hide()
+	# Keep ownership even for old snapshots without a choice. The dialogue
+	# retains the embedded control while switching back to ordinary speech.
+	_dialogue.set_content("You", _choice_dialog)
+	_dialogue.set_line("", "")
 	get_viewport().size_changed.connect(_layout_presentation)
 	_layout_presentation()
 	_layer.hide()
@@ -188,16 +205,22 @@ func _layout_presentation() -> void:
 	if not is_instance_valid(_bottom):
 		return
 	var area := get_viewport().get_visible_rect().size
-	_bottom.offset_top = -clampf(area.y * 0.30, 176.0, 242.0)
-	_dialogue.fit_width(maxf(160.0, area.x - 32.0))
-	if is_instance_valid(_choice_scroll):
-		_choice_dialog.fit_width(maxf(160.0, area.x - 32.0))
-		_choice_scroll.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
-		_choice_scroll.offset_left = 16
-		_choice_scroll.offset_right = -16
-		_choice_scroll.offset_bottom = _bottom.offset_top - 10.0
-		var available := maxf(60.0, area.y + _bottom.offset_top - 90.0)
-		_choice_scroll.offset_top = _choice_scroll.offset_bottom - minf(available, _choice_dialog.get_combined_minimum_size().y)
+	var compact := area.x < 620.0 or area.y < 400.0
+	var padding := 8 if compact else 16
+	for side: String in ["left", "right", "top", "bottom"]:
+		_margin.add_theme_constant_override("margin_" + side, padding)
+	var height := minf(300.0, maxf(160.0, area.y - 88.0)) if _choice_waiting \
+		else clampf(area.y * 0.30, 176.0, 242.0)
+	_bottom.offset_top = -height
+	_dialogue.fit_width(maxf(160.0, area.x - padding * 2.0))
+	_dialogue.fit_content_height(maxf(64.0, height - (72.0 if compact else 96.0)))
+	_skip.text = ("Return now · Esc" if _returning else "Return · Esc") if compact \
+		else ("Return now · Esc" if _returning else "Return to play · Esc")
+	_account.text = "Scene account" if compact else "Read scene account"
+	_reduced.text = "Reduced motion" if compact else "Reduced camera motion"
+	_actions.add_theme_constant_override("h_separation", 8 if compact else 14)
+	for control: Control in [_skip, _account, _reduced, _inspection_retry]:
+		control.add_theme_font_size_override("font_size", 14 if compact else 16)
 
 func blocks_input() -> bool:
 	return playing
@@ -210,6 +233,37 @@ func is_replaying() -> bool:
 
 func choice_context() -> Dictionary:
 	return {"run_id": _run, "token": _token, "id": str(_choice_state.get("id", "")), "waiting": _choice_waiting and playing and not _returning}
+
+func inspection_context() -> Dictionary:
+	return {"run_id": _run, "token": _token, "id": str(_inspection_state.get("id", "")),
+		"waiting": playing and not _returning and _inspection_sent and str(_inspection_state.get("status", "")) != "complete"}
+
+func inspection_send_failed() -> void:
+	_inspection_pending_at = -1
+	_inspection_error = "The inspection has not been confirmed. Retry, or return to play and inspect the landing."
+	if is_instance_valid(_inspection_retry): _inspection_retry.show()
+
+func _has_inspection() -> bool:
+	return not _inspection_state.is_empty() \
+		and str(_definition.get("inspection_id", "")) == str(_inspection_state.get("id", "")) \
+		and EloriaProtocol.campaign_scene_inspection_valid(_inspection_state)
+
+func _request_inspection() -> void:
+	if not playing or _returning or _replaying or not _has_inspection() \
+			or not bool(_inspection_state.get("can_start", false)) \
+			or str(_inspection_state.get("status", "")) == "complete": return
+	_inspection_sent = true
+	_inspection_active = true
+	_inspection_pending_at = Time.get_ticks_msec()
+	_inspection_error = ""
+	_inspection_retry.hide()
+	inspection_requested.emit("start")
+
+func _stop_inspection() -> void:
+	if _inspection_active and not _replaying and str(_inspection_state.get("status", "")) != "complete":
+		inspection_requested.emit("cancel")
+	_inspection_active = false
+	_inspection_pending_at = -1
 
 func choice_send_failed() -> void:
 	_choice_pending_at = -1
@@ -229,7 +283,7 @@ func _show_choice() -> void:
 	payload.token = _choice_token()
 	payload.error = _choice_error
 	_choice_dialog.apply_choice(payload, _choice_review)
-	_choice_scroll.show()
+	_dialogue.set_content(_protagonist_name, _choice_dialog, _actors.get("protagonist") as Node3D)
 	_layout_presentation()
 
 func _on_choice_option(option_id: String, token: String) -> void:
@@ -255,7 +309,7 @@ func _finish_choice() -> void:
 	_choice_completed = true
 	_choice_pending_at = -1
 	_choice_dialog.reset()
-	_choice_scroll.hide()
+	_layout_presentation()
 
 func can_replay(snapshot: Dictionary, current_map: String) -> bool:
 	return _replay_requested_identity.is_empty() and _replay_allowed(snapshot, current_map)
@@ -360,6 +414,9 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 	var identity := next_run + ":" + next_token
 	var previous_selection := str(_choice_state.get("selected", ""))
 	_choice_state = (scene.get("choice", {}) as Dictionary).duplicate(true)
+	_inspection_state = (scene.get("inspection", {}) as Dictionary).duplicate(true)
+	_protagonist_name = str(_choice_state.get("owner", "You")).strip_edges()
+	if _protagonist_name.is_empty(): _protagonist_name = "You"
 	if is_active() and previous_selection != str(_choice_state.get("selected", "")):
 		_build_transcript()
 	var ack_identity := identity + ":" + str(scene.get("ack_revision", 0))
@@ -483,6 +540,25 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 		if is_instance_valid(_transcript) and _transcript.visible:
 			return
 		var next_elapsed := minf(elapsed + maxf(0.0, delta), _duration())
+		if _has_inspection():
+			if not _replaying and not _inspection_sent and next_elapsed >= float(_definition.get("inspection_at", 19.0)):
+				_request_inspection()
+			if not _replaying and str(_inspection_state.get("status", "")) != "complete" \
+					and next_elapsed >= float(_definition.get("inspection_wait_at", 24.0)):
+				elapsed = float(_definition.get("inspection_wait_at", 24.0))
+				if str(_inspection_state.get("status", "")) == "blocked" and _inspection_error.is_empty() \
+						and bool(_choice_state.get("owner_is_you", false)):
+					inspection_send_failed()
+					_inspection_error = "The path is blocked. Retry the walk, or return to play to reach the landing."
+				if _inspection_pending_at >= 0 and Time.get_ticks_msec() - _inspection_pending_at >= 8000:
+					inspection_send_failed()
+				_apply_actors()
+				_apply_camera()
+				_update_caption()
+				return
+			if str(_inspection_state.get("status", "")) == "complete":
+				_inspection_active = false
+				_inspection_retry.hide()
 		var choice_at := float(_definition.get("choice_at", -1.0))
 		if _has_choice() and not _choice_completed and choice_at >= 0.0 and next_elapsed >= choice_at:
 			elapsed = choice_at
@@ -532,6 +608,11 @@ func _start(rig: Node3D, camera: Camera3D, local: Node3D, nodes: Dictionary,
 	_choice_initially_selected = not str(_choice_state.get("selected", "")).is_empty()
 	_choice_pending_at = -1
 	_choice_error = ""
+	_inspection_sent = false
+	_inspection_active = false
+	_inspection_pending_at = -1
+	_inspection_error = ""
+	_inspection_retry.hide()
 	_choice_dialog.reset()
 	_choice_scroll.hide()
 	_resume_view.clear()
@@ -543,11 +624,16 @@ func _start(rig: Node3D, camera: Camera3D, local: Node3D, nodes: Dictionary,
 	_posts.clear()
 	for role: String in bindings:
 		var actor_value: Variant = nodes.get(int(bindings[role]))
-		if not is_instance_valid(actor_value) or not actor_value is Node3D or actor_value == local:
+		if not is_instance_valid(actor_value) or not actor_value is Node3D:
+			continue
+		if actor_value == local and (role != "protagonist" or not bool(_definition.get("stage_protagonist", false))):
 			continue
 		var actor: Node3D = actor_value
 		_actors[role] = actor
 		_posts[role] = actor.global_transform
+	if _actors.has("protagonist"):
+		_anchors["protagonist_post"] = (_actors.protagonist as Node3D).global_position
+		_anchors["protagonist_return"] = _authoritative_position(_actors.protagonist)
 	for key: String in _anchors:
 		_anchors[key] = _ground(_anchors[key])
 	var anchor := str(_definition.get("anchor", ""))
@@ -640,8 +726,27 @@ func _local_position() -> Vector3:
 	if _local_actor != null:
 		var local := _local_actor.get_ref() as Node3D
 		if is_instance_valid(local):
-			return local.global_position
+			return _authoritative_position(local) if _actors.get("protagonist") == local else local.global_position
 	return _local_start
+
+func _authoritative_position(actor: Node3D) -> Vector3:
+	# A staged body may be between authored poses while ordinary native walk
+	# packets update its real destination. Restore the viewport to that real pose.
+	if actor is ReplicatedActor3D: return (actor as ReplicatedActor3D).server_target
+	for property: Dictionary in actor.get_property_list():
+		if str(property.name) == "server_target":
+			var value: Variant = actor.get("server_target")
+			if value is Vector3: return value
+			if value is Transform3D: return value.origin
+	return actor.global_position
+
+func _authoritative_yaw(actor: Node3D, fallback: float) -> float:
+	if actor is ReplicatedActor3D: return (actor as ReplicatedActor3D)._target_yaw
+	for property: Dictionary in actor.get_property_list():
+		if str(property.name) == "server_target":
+			var value: Variant = actor.get("server_target")
+			if value is Transform3D: return value.basis.get_euler().y
+	return fallback
 
 func _gameplay_camera() -> Dictionary:
 	var movement := _local_position() - _local_start if _camera_handoff() else Vector3.ZERO
@@ -675,6 +780,8 @@ func _apply_camera_pose(pose: Dictionary) -> void:
 
 func _apply_actors() -> void:
 	var cues: Array = _definition.get("cues", [])
+	if _actors.has("protagonist"):
+		_anchors["protagonist_return"] = _ground(_authoritative_position(_actors.protagonist))
 	for role: String in _actors:
 		var actor: Node3D = _actors[role]
 		var post: Transform3D = _posts[role]
@@ -696,14 +803,16 @@ func _apply_actors() -> void:
 		var to: Vector3 = _anchors.get(str(chosen.get("destination", "")), post.origin + destination)
 		var at := _ground(from.lerp(to, progress))
 		var action := StringName(str(chosen.get("action", "idle")))
-		if action == &"walk" and progress >= 1.0:
+		if action == &"walk" and (progress >= 1.0 or from.distance_to(to) < 0.05):
 			action = &"idle"
 		var facing := str(chosen.get("face", ""))
 		var face_point: Vector3 = _anchors.get(facing,
 			(_actors[facing] as Node3D).global_position if _actors.has(facing) else _origin)
 		var direction: Vector3 = face_point - at
+		var resting_yaw := _authoritative_yaw(actor, post.basis.get_euler().y) if role == "protagonist" \
+			else post.basis.get_euler().y
 		var yaw := atan2(-direction.x, -direction.z) if facing != "post" \
-			and Vector2(direction.x, direction.z).length() > 0.05 else post.basis.get_euler().y
+			and Vector2(direction.x, direction.z).length() > 0.05 else resting_yaw
 		if actor.has_method("set_cinematic_presentation"):
 			actor.call("set_cinematic_presentation", at, yaw, action,
 				to.distance_to(from) / move_seconds if move_seconds > 0.0 and progress < 1.0 else 0.0)
@@ -715,6 +824,9 @@ func _line_text(line: Dictionary) -> String:
 	return str((line.get("variants", {}) as Dictionary).get(_variant, line.get("text", "")))
 
 func _update_caption() -> void:
+	if _choice_waiting:
+		_dialogue.set_content(_protagonist_name, _choice_dialog, _actors.get("protagonist") as Node3D)
+		return
 	var chosen: Dictionary = {}
 	for line: Dictionary in _definition.get("lines", []):
 		if float(line.get("at", 0.0)) > elapsed:
@@ -722,7 +834,15 @@ func _update_caption() -> void:
 		chosen = line
 	var speaker := str(chosen.get("speaker", ""))
 	var role := str(chosen.get("speaker_actor", ""))
+	if role == "protagonist": speaker = _protagonist_name
 	var text := _line_text(chosen)
+	if _has_inspection() and not _replaying and elapsed >= float(_definition.get("inspection_wait_at", 24.0)) \
+			and str(_inspection_state.get("status", "")) != "complete":
+		speaker = _protagonist_name
+		role = "protagonist"
+		text = _inspection_error if not _inspection_error.is_empty() else \
+			"Waiting for the story owner to inspect the landing…" if not bool(_choice_state.get("owner_is_you", false)) else \
+			"Taking a closer look at the damaged landing…"
 	if _choice_completed and _has_choice() and elapsed < float(_definition.get("choice_response_until", _duration())):
 		speaker = "Odo Fenn"
 		role = "odo"
@@ -768,6 +888,7 @@ func handle_input(event: InputEvent) -> bool:
 	return false
 
 func skip() -> void:
+	_stop_inspection()
 	if _returning:
 		cancel(_return_reason)
 	elif playing and _handoff_seconds("exit_seconds") > 0.0 and not reduced_motion:
@@ -776,7 +897,7 @@ func skip() -> void:
 		_return_duration = minf(0.7, _handoff_seconds("exit_seconds"))
 		_return_reason = "skipped"
 		_return_start = _capture_camera()
-		_choice_scroll.hide()
+		_choice_dialog.hide()
 		if is_instance_valid(_transcript):
 			_transcript.hide()
 		_skip.text = "Return now · Esc"
@@ -784,6 +905,7 @@ func skip() -> void:
 		cancel("skipped")
 
 func cancel(reason := "cancelled") -> void:
+	_stop_inspection()
 	var owned := is_active()
 	var was_replay := _replaying
 	var movement := _local_position() - _local_start if _camera_handoff() else Vector3.ZERO
@@ -792,6 +914,7 @@ func cancel(reason := "cancelled") -> void:
 	_return_start.clear()
 	_choice_waiting = false
 	_choice_pending_at = -1
+	if is_instance_valid(_inspection_retry): _inspection_retry.hide()
 	if is_instance_valid(_choice_dialog): _choice_dialog.reset()
 	if is_instance_valid(_choice_scroll): _choice_scroll.hide()
 	_replay_requested_identity = ""

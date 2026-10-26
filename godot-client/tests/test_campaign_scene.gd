@@ -104,7 +104,7 @@ func run() -> void:
 	expect(odo.global_position.is_equal_approx(odo.post.origin) and not camera.global_transform.is_equal_approx(original_camera), "the camera approaches Odo while he waits for the crew")
 	scene.update(2.0, good, rig, actors, 1, "greenlight", true)
 	expect(odo.action == &"emote_greet" and scene._dialogue.speaker_label.text == "Odo Fenn", "NPC gesture and attributed subtitle accompany the scene")
-	expect(scene.transcript_text().contains("inspect the damaged landing") and scene.transcript_text().contains("once you know what is wrong"), "the arrival account names inspection before the later rescue-plan decision")
+	expect(scene.transcript_text().contains("damaged boards beside you") and scene.transcript_text().contains("You examine the split boards"), "the arrival account describes the protagonist's physical inspection before choosing a rescue plan")
 	scene.skip()
 	expect(scene.blocks_input() and scene._returning, "skip begins the opening's short camera return")
 	scene.update(0.7, good, rig, actors, 1, "greenlight", true)

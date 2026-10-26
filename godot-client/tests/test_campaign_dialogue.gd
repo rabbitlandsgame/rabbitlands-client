@@ -2,6 +2,7 @@ extends SceneTree
 ## Headless layout/identity checks; --render DIR additionally captures real
 ## approved native NPC faces with the same unchanged live actor API.
 const Dialogue := preload("res://src/ui/campaign_dialogue.gd")
+const Choice := preload("res://src/ui/campaign_choice.gd")
 var failures := 0
 var checks := 0
 
@@ -85,6 +86,75 @@ func _run() -> void:
 		expect(widget.get_combined_minimum_size().x <= width-32, "dialogue fits available width at " + str(width))
 		expect(widget.body_label.get_global_rect().end.x <= row.end.x+1, "body stays inside the row at " + str(width))
 		expect(widget.get_combined_minimum_size().y <= (128 if width > 900 else 110), "portrait and caption preserve room for scene controls at " + str(width))
+	var protagonist := HeadActor.new()
+	stage.add_child(protagonist)
+	protagonist.position = Vector3(-3, 2, 5)
+	protagonist.rotation.y = -0.8
+	var player_post := protagonist.global_transform
+	var player_head := protagonist.skeleton.get_bone_pose(0)
+	var choice = Choice.new()
+	choice.set_embedded(true)
+	var options := {"id":"opening_rescue", "token":"profile:plan", "title":"How will you get the worker clear?", "selected":"repair", "response":"Inspect the seal first.", "can_choose":false, "owner":"MeasureHuman0", "owner_is_you":true,
+		"options":[
+		{"id":"defend", "label":"Clear the approach", "detail":"Keep the crew back, defeat the startled cargo scavenger, then secure the landing rope. No supplies are required."},
+		{"id":"repair", "label":"Repair the access", "detail":"Inspect the leaking joint, compare the workbench parts, fit one Wood Plank, then test the repair. The plank is consumed when fitted."},
+		{"id":"evacuate", "label":"Lead an evacuation", "detail":"Use one Bandage to stabilize the injured worker, then walk with them to the dry muster point. The bandage is consumed during treatment."}]}
+	choice.apply_choice(options,true)
+	var emitted: Array = []
+	choice.option_selected.connect(func(id: String, token: String) -> void: emitted.append([id,token]))
+	widget.fit_content_height(190)
+	widget.set_content("MeasureHuman0",choice,protagonist)
+	for _frame: int in range(5): await process_frame
+	expect(widget.content_active() and widget.content_slot.is_ancestor_of(choice), "the existing choice widget is embedded inside the same dialogue content slot")
+	expect(widget.speaker_label.text == "MeasureHuman0" and widget._actor.get_ref() == protagonist and widget.portrait_visible(), "choices use the real supplied player profile and name")
+	expect(not widget.body_label.visible and widget.subtitle_text() == "MeasureHuman0", "player choices replace NPC text without attributing old dialogue to the player")
+	var cadence: float = widget._elapsed
+	widget.set_content("MeasureHuman0",choice,protagonist)
+	expect(is_equal_approx(widget._elapsed,cadence), "an unchanged embedded choice preserves the portrait render cadence")
+	for dimensions: Array in [[1280,720,1.0],[720,480,1.5]]:
+		root.size = Vector2i(dimensions[0],dimensions[1])
+		root.content_scale_factor = dimensions[2]
+		for _frame: int in range(3): await process_frame
+		widget.size.x = root.get_visible_rect().size.x-32
+		widget.fit_width(widget.size.x)
+		widget.fit_content_height(190)
+		for _frame: int in range(6): await process_frame
+		expect(choice._grid.columns == 3, "the actual inner content width keeps all three approaches across at "+str(dimensions))
+		for button: Button in choice.option_buttons.values():
+			widget.content_slot.ensure_control_visible(button)
+			for _frame: int in range(2): await process_frame
+			expect(widget.content_slot.get_global_rect().grow(1).encloses(button.get_global_rect()), "each embedded full-detail option is reachable at "+str(dimensions))
+		widget.content_slot.ensure_control_visible(choice.continue_button)
+		for _frame: int in range(2): await process_frame
+		expect(widget.content_slot.get_global_rect().grow(1).encloses(choice.continue_button.get_global_rect()), "replay Continue stays inside the same bottom content space")
+	# Also exercise a genuinely narrow logical canvas, rather than assuming
+	# every client's project stretch produces the same physical/logical ratio.
+	root.content_scale_size = Vector2i(720,480)
+	root.size = Vector2i(720,480)
+	root.content_scale_factor = 1.5
+	for _frame: int in range(3): await process_frame
+	widget.size.x = root.get_visible_rect().size.x-32
+	widget.fit_width(widget.size.x)
+	widget.fit_content_height(110)
+	for _frame: int in range(7): await process_frame
+	expect(choice._grid.columns == 1 and widget.content_slot.size.y <= 110.1, "a narrow one-column choice remains bounded instead of expanding over the world")
+	expect(widget._content_hint.visible and "3 approaches" in widget._content_hint.text and widget.content_slot.get_v_scroll_bar().visible, "overflow keeps a visible approach count and scrollbar outside the scroll content")
+	for button: Button in choice.option_buttons.values():
+		widget.content_slot.ensure_control_visible(button)
+		for _frame: int in range(2): await process_frame
+		expect(widget.content_slot.get_global_rect().grow(1).encloses(button.get_global_rect()), "each narrow read-only option can be brought fully into view")
+	widget.content_slot.ensure_control_visible(choice.continue_button)
+	for _frame: int in range(2): await process_frame
+	expect(widget.content_slot.get_global_rect().grow(1).encloses(choice.continue_button.get_global_rect()), "narrow replay Continue is reachable in the same slot")
+	expect(protagonist.global_transform == player_post and protagonist.skeleton.get_bone_pose(0) == player_head, "embedding choices never changes the real player's world or bone pose")
+	widget.set_line("Odo Fenn","Start at the leaking seal north of me.",actor)
+	expect(not widget.content_active() and not choice.visible and widget.body_label.visible, "Odo's confirmed response removes the player-choice content")
+	expect(widget._actor.get_ref() == actor and widget.speaker_label.text == "Odo Fenn" and widget.portrait_visible(), "the same portrait frame switches back to the actual NPC")
+	choice._choose("defend","profile:plan")
+	expect(emitted.is_empty(), "a hidden old choice cannot act after dialogue returns to the NPC")
+	root.content_scale_size = Vector2i(1280,720)
+	root.content_scale_factor = 1.0
+	root.size = Vector2i(1280,720)
 	widget.reset()
 	expect(not widget.visible and not widget.portrait_visible() and widget.subtitle_text().is_empty(), "reset removes the line and portrait")
 	expect(widget._viewport.render_target_update_mode == SubViewport.UPDATE_DISABLED, "a finished scene stops rendering its portrait")
