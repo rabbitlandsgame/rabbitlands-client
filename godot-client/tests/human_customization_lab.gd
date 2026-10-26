@@ -64,6 +64,7 @@ func _build_ui() -> void:
 	_canvas.theme = _theme()
 	var margin := MarginContainer.new()
 	_header_margin = margin
+	margin.minimum_size_changed.connect(_fit.call_deferred)
 	_canvas.add_child(margin)
 	margin.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
 	for edge: String in ["left", "right", "top"]:
@@ -318,6 +319,15 @@ func _run_smoke() -> void:
 	_expect(_editor.position.y >= 100 and _editor.get_global_rect().end.y <= root.size.y, "preview fits below toolbar")
 	await RenderingServer.frame_post_draw
 	root.get_texture().get_image().save_png("user://workshop-smoke.png")
+	root.size = Vector2i(1080, 760)
+	await process_frame
+	await process_frame
+	_fit()
+	await process_frame
+	_expect(_editor.position.y >= _header_margin.get_global_rect().end.y
+		and _editor.get_global_rect().end.y <= root.size.y, "minimum-size preview fits below the wrapped toolbar")
+	await RenderingServer.frame_post_draw
+	root.get_texture().get_image().save_png("user://workshop-smoke-minimum.png")
 	print("HUMAN_WORKSHOP_SMOKE: ", "PASS" if _failures == 0 else "FAIL %d" % _failures)
 	_editor.call("_release_preview")
 	_canvas.queue_free()
