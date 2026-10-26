@@ -39,14 +39,24 @@ def embedded_motions(page):
 
 class Catalog:
     def __init__(self,root):
-        self.root=Path(root).resolve();self.archive=self.root/'.local/asset-authoring';self.work=self.archive/'working';self.state=self.work/'animation-review';self.media={};self.actors=[];self.warnings=[];self.last_refresh=0;self.hashes={};self.lock=threading.RLock();self.known_versions=set();self.refresh()
+        self.root=Path(root).resolve();self.archive=self.root/'.local/asset-authoring';self.work=self.archive/'working';self.state=self.work/'animation-review';locations=read(self.archive/'locations.json',{});self.archives=[self.archive.resolve()]+[Path(p).resolve() for p in locations.get('read_only_authoring_workspaces',[])];self.media={};self.actors=[];self.warnings=[];self.last_refresh=0;self.hashes={};self.lock=threading.RLock();self.known_versions=set();self.refresh()
+    def archive_path(self,relative):
+        # The first root owns new state; additional roots are read-only media.
+        paths=[root/relative for root in self.archives]
+        return next((p for p in paths if p.exists()),paths[0])
+    def review_source(self,path):
+        path=Path(path).resolve()
+        for index,root in enumerate(self.archives):
+            if path.is_relative_to(root):
+                return ('historical/'+str(index)+'/' if index else '')+path.relative_to(root).as_posix()
+        raise ValueError('Review source is outside configured authoring archives')
     def file_hash(self,path):
         path=Path(path);s=path.stat();key=(str(path),s.st_size,s.st_mtime_ns)
         if key not in self.hashes:self.hashes[key]=digest(path)
         return self.hashes[key]
     def asset(self,path):
         path=Path(path).resolve()
-        if not path.is_relative_to(self.archive.resolve()) or not path.is_file():return None
+        if not any(path.is_relative_to(root) for root in self.archives) or not path.is_file():return None
         if path.suffix.lower() not in {'.mp4','.jpg','.jpeg','.png','.webp'}:return None
         ident=hashlib.sha256(str(path).encode()).hexdigest()[:24];self.media[ident]=path
         return '/media/'+ident+'/'+urllib.parse.quote(path.name)
@@ -88,7 +98,7 @@ class Catalog:
             if isinstance(source,dict):model_hash=model_hash or source.get('model_sha256') or source.get('sha256')
             if entry.get('runtime_model_sha256'):model_hash=entry['runtime_model_sha256']
             version=digest(manifest_path);name=info.get('name',actor.replace('_',' ').title());concept=info.get('concept',{}) or timing.get(actor,{}).get('concept',{})
-            self.actors.append({'id':actor,'name':name,'family':info.get('family_name',family.replace('_',' ').title()),'version':version,'model_sha256':model_hash,'runtime_installed':bool(entry.get('runtime_installed')),'concept':concept,'motions':dict(sorted(normalized.items(),key=lambda kv:ORDER.get(kv[0],99))),'review_source':str(ap.relative_to(self.archive)),'agent_followups':entry.get('agent_followups',{}),'qualification':{'client_strict_passed':info.get('client_strict_passed'),'motion_checks_passed':info.get('motion_checks_passed')}})
+            self.actors.append({'id':actor,'name':name,'family':info.get('family_name',family.replace('_',' ').title()),'version':version,'model_sha256':model_hash,'runtime_installed':bool(entry.get('runtime_installed')),'concept':concept,'motions':dict(sorted(normalized.items(),key=lambda kv:ORDER.get(kv[0],99))),'review_source':self.review_source(ap),'agent_followups':entry.get('agent_followups',{}),'qualification':{'client_strict_passed':info.get('client_strict_passed'),'motion_checks_passed':info.get('motion_checks_passed')}})
     def refresh(self):
         with self.lock:self._refresh()
     def _refresh(self):
@@ -97,7 +107,7 @@ class Catalog:
         for family,entry in queue.get('families',{}).items():
             if entry.get('human_approved') is True:continue
             if entry.get('review'):self.package(family,entry)
-        human=self.work/'humanoid-draft-batch-20261019/delivery-v10/review.html'
+        human=self.archive_path('working/humanoid-draft-batch-20261019/delivery-v10/review.html')
         if human.exists():
             m=read(human.parent/'manifest.json',{})
             self.package('humanoid_baseline',{'review':str(human),'completed_draft_actors':list(m.get('actors',{})),'runtime_installed':True})
@@ -108,7 +118,7 @@ class Catalog:
                 self.actors=[a for a in self.actors if a['id']!=actor];self.package(entry.get('family','New drafts'),{**entry,'completed_draft_actors':[actor]})
         # The original two wolf pilots share comparison footage; the UI makes
         # that explicit while keeping separate per-creature comments.
-        legacy=self.archive/'workspace/generate_models/wolf_action_motion_pilot/delivery-v2'
+        legacy=self.archive_path('workspace/generate_models/wolf_action_motion_pilot/delivery-v2')
         lm=legacy/'delivery-manifest.json'
         if lm.exists():
             for actor in ('dire_wolf','moorland_dire_wolf'):
@@ -118,7 +128,7 @@ class Catalog:
                     if videos:
                         version=hashlib.sha256(json.dumps([actor,clip,{v:self.file_hash(legacy/folder/(v+'-comparison.mp4')) for v in videos}],sort_keys=True).encode()).hexdigest()
                         motions[clip]={'label':LABELS[clip],'videos':videos,'duration':None,'playback_duration':None,'loop':False,'pose_sheet':None,'fps':30,'version':version}
-                if motions:self.actors.append({'id':actor,'name':actor.replace('_',' ').title(),'family':'Wolf source pilots','version':digest(lm),'model_sha256':None,'runtime_installed':False,'concept':{'movement':'Shared comparison footage shows both original wolves. Comments here apply to the selected creature. Their accepted walk is not marked as unreviewed.'},'motions':motions,'review_source':str((legacy/'review.html').relative_to(self.archive)),'qualification':{},'comparison_media':True})
+                if motions:self.actors.append({'id':actor,'name':actor.replace('_',' ').title(),'family':'Wolf source pilots','version':digest(lm),'model_sha256':None,'runtime_installed':False,'concept':{'movement':'Shared comparison footage shows both original wolves. Comments here apply to the selected creature. Their accepted walk is not marked as unreviewed.'},'motions':motions,'review_source':self.review_source(legacy/'review.html'),'qualification':{},'comparison_media':True})
         # Installation is independent of the reviewed media version. Keep each
         # existing comment key and rendered-model hash intact after promotion.
         installed=read(self.state/'runtime-installations.json',{}).get('actors',{})

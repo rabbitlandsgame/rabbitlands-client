@@ -63,4 +63,25 @@ class InstallationTests(unittest.TestCase):
    self.assertTrue(actor['runtime_installed']);self.assertEqual(actor['runtime_model_sha256'],'installed-runtime');self.assertEqual(actor['model_sha256'],'rendered-source');self.assertEqual(actor['version'],'review-v1');self.assertEqual(actor['motions']['Walk']['version'],'motion-v1')
    self.assertFalse((work/'animation-review/comments.json').exists())
 
+class ReadOnlyArchiveTests(unittest.TestCase):
+ def test_external_media_needs_explicit_archive_and_rejects_escape(self):
+  with tempfile.TemporaryDirectory() as temp:
+   base=Path(temp);root=base/'task';archive=root/'.local/asset-authoring';history=base/'history';history.mkdir();video=history/'walk.mp4';video.write_bytes(b'local review')
+   self.assertIsNone(app.Catalog(root).asset(video))
+   app.atomic_json(archive/'locations.json',{'read_only_authoring_workspaces':[str(history)]})
+   catalog=app.Catalog(root);self.assertTrue(catalog.asset(video).startswith('/media/'))
+   other=base/'outside.mp4';other.write_bytes(b'outside')
+   self.assertIsNone(catalog.asset(other));self.assertEqual(catalog.state,archive/'working/animation-review')
+ def test_historical_review_keeps_versions_and_does_not_write_to_history(self):
+  with tempfile.TemporaryDirectory() as temp:
+   base=Path(temp);root=base/'task';archive=root/'.local/asset-authoring';history=base/'history';review=history/'working/sample';review.mkdir(parents=True);(review/'Walk-side.mp4').write_bytes(b'local review')
+   (review/'review.html').write_text('<script>const motions={"Walk":{"duration":1,"videos":{"side":"Walk-side.mp4"}}};</script>')
+   app.atomic_json(review/'manifest.json',{'actors':{'sample':{'name':'Sample','review':'review.html','sha256':'model'}}})
+   app.atomic_json(archive/'locations.json',{'read_only_authoring_workspaces':[str(history)]})
+   app.atomic_json(archive/'working/memory/animation-review-queue.json',{'families':{'sample':{'review':str(review/'review.html')}}})
+   before={str(p.relative_to(history)):p.read_bytes() for p in history.rglob('*') if p.is_file()}
+   catalog=app.Catalog(root);one=catalog.snapshot()['actors'][0];catalog.refresh();two=catalog.snapshot()['actors'][0]
+   self.assertEqual(one['motions']['Walk']['version'],two['motions']['Walk']['version']);self.assertTrue(one['review_source'].startswith('historical/1/'));self.assertFalse(catalog.warnings)
+   self.assertEqual(before,{str(p.relative_to(history)):p.read_bytes() for p in history.rglob('*') if p.is_file()});self.assertFalse((catalog.state/'comments.json').exists())
+
 if __name__=='__main__':unittest.main()
