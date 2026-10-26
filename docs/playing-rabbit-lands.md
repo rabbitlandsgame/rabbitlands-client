@@ -31,6 +31,12 @@ For the medicine errand, gather the Sage, Hearthroot and Bramble in one trip, in
 
 The crafting filter **Has ingredients only** checks ingredients. You may still need food, ether, a tool, knowledge or a higher skill. The recipe details explain those requirements, and an unsuccessful attempt shows a red result.
 
+The small **i** button beside the mixing skill selector shows recipes with ingredients for at least one mix in your pack; it lights green when active. **A/L** switches the recipe list between alphabetical names and required level, low to high; level order shows each recipe's level. Hover for the controls' meanings. These choices are remembered across sessions. Storage counts are unchecked here, so i is disabled while mixing from storage. Shorter item labels such as **Iron Sword** appear in mixing and inventory; the original name still works in searches. Long selected names shrink to fit without enlarging the window, and the full name is available on hover.
+
+Choose a mixing design in **Settings → HUD → Mixing design**, or open **Mixing → ••• → Mixing design**. The five presets are **Compact workbench**, **Tabbed fieldbook**, **Narrow edge dock**, **Quick-mix popover**, and **Shallow mixing tray**. **Customize mixing…** opens the live editor: drag sections, resize their corners, or change positioning, text, colors and borders. Undo/Redo, section resets, per-preset edits and five named custom designs work independently of your inventory and main HUD. Save keeps edits; Cancel or Escape restores the previous design.
+
+The **Recipes**, **Mix** and **Queue** tabs share the fieldbook's footprint. The quick-mix card can be pinned; an unpinned card closes on a world click. Expand **Queue** to manage batches, or use **•••** for ingredient filtering, full requirements and clearing the queue. **Inventory / Storage** selects the ingredient source; storage counts stay unknown here, and the server checks the supplies. A missing tool offers **Take from storage** when a keeper is within reach.
+
 ## Equipment and carrying
 
 Choose an inventory design in **Settings → HUD** or **Settings → Inventory**, or open the inventory's **••• → Inventory design** menu. The five defaults are **Unified compact**, **Tabbed satchel**, **Edge dock**, **Adaptive inspect**, and **Shallow bottom tray**. **Unified compact** is the starting design for new players. Inventory designs are saved separately from your main HUD layout.

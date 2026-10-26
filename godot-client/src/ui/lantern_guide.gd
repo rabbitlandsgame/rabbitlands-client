@@ -165,7 +165,10 @@ func _node(name: String) -> Control:
 	# The native manufacturing builder moves these nodes into its side pane,
 	# so their scene-unique owner lookup is no longer available afterwards.
 	if name == "ManufacturingMixOne": return main.get("manufacturing_mix_one") as Control
-	if name == "ManufacturingDetail": return main.get("manufacturing_detail") as Control
+	if name == "ManufacturingDetail":
+		var workspace: Control = main.get("mixing_workspace")
+		if workspace != null and workspace.ready_to_layout: return workspace.groups.details
+		return main.get("manufacturing_detail") as Control
 	return main.get_node_or_null("%"+name) as Control
 
 func _visible(node: Control) -> bool:
@@ -259,7 +262,9 @@ func control_for_step() -> Control:
 
 func _process(_delta: float) -> void:
 	var manufacturing := _node("ManufacturingPanel")
-	var should_dock := visible and _visible(manufacturing)
+	var workspace: Control = main.get("mixing_workspace")
+	var custom_mixing: bool = workspace != null and workspace.ready_to_layout
+	var should_dock := visible and _visible(manufacturing) and not custom_mixing
 	if should_dock != docked:
 		docked = should_dock
 		var detail: Control = main.get("manufacturing_detail")
