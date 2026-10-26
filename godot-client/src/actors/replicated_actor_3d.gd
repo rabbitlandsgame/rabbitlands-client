@@ -651,17 +651,20 @@ func configure(dto: Dictionary, adapter: CoordinateAdapter,
 					wanted_clips.append(technique_clip)
 			if model_config.has("culture") and not wanted_clips.has("Rest_Pose"):
 				wanted_clips.append("Rest_Pose")
+			if HUMAN_LOCOMOTION.supports(model_config) and not wanted_clips.has(HUMAN_LOCOMOTION.ATTACKS.SOURCE_STROKE):
+				wanted_clips.append(HUMAN_LOCOMOTION.ATTACKS.SOURCE_STROKE)
 			var imported := NativeAnimationImporter.import_library(self,
 					animation_path, skeleton, model_config.get("boneAliases", {}),
 					wanted_clips, resolver.looping_clips)
 			animation_player = imported.player
 			HUMAN_LOCOMOTION.install(animation_player, model_config)
+			_configure_human_animation_mapping()
 			errors.append_array(Array(imported.errors))
 			if animation_player != null:
 				if not animation_player.animation_finished.is_connected(
 						_on_animation_finished):
 					animation_player.animation_finished.connect(_on_animation_finished)
-				errors.append_array(resolver.validate(imported.clips))
+				errors.append_array(resolver.validate(animation_player.get_animation_list()))
 				play_action(&"idle")
 				if resolver.action_to_clip.has("cast_channel"):
 					combat_presentation = CombatPresentation3D.new()
@@ -2303,13 +2306,13 @@ func apply_server_state(dto: Dictionary, adapter: CoordinateAdapter, teleport :=
 		# records without command sequences retain their legacy behavior.
 		var transient := current_action in [&"cast", &"cast_channel_enter", &"cast_channel",
 			&"cast_aggressive", &"cast_defensive", &"heal", &"cast_exit", &"ranged_draw",
-			&"ranged_hold", &"ranged_attack", &"attack_primary", &"attack_secondary", &"pain"]
+			&"ranged_hold", &"ranged_attack", &"attack_primary", &"attack_secondary",
+			&"attack_flurry", &"attack_flurry_secondary", &"pain"]
 		var stale_strike := command_sequence >= 0 and not fresh_command and action in [&"attack_primary", &"pain"]
 		if not stale_strike and (fresh_command or target_changed
 				or (not transient and (combat_changed or command_sequence < 0)) or action == &"death"):
 			if action == &"attack_primary" and fresh_command and resolver.action_to_clip.has("attack_secondary"):
-				action = &"attack_primary" if _swing_index % 2 == 0 else &"attack_secondary"
-				_swing_index += 1
+				action = _next_melee_action()
 			play_action(action, fresh_command and action in [&"attack_primary", &"attack_secondary", &"pain"])
 	var aiming: bool = int(dto.get("aiming_at", -1)) >= 0 or dto.get("aiming_at_tile") is Vector2i
 	if aiming != _ranged_aiming and current_action != &"death":
@@ -2375,13 +2378,13 @@ func _apply_server_state_native(dto: Dictionary, adapter: CoordinateAdapter, tel
 			# records without command sequences retain their legacy behavior.
 			var transient := current_action in [&"cast", &"cast_channel_enter", &"cast_channel",
 				&"cast_aggressive", &"cast_defensive", &"heal", &"cast_exit", &"ranged_draw",
-				&"ranged_hold", &"ranged_attack", &"attack_primary", &"attack_secondary", &"pain"]
+				&"ranged_hold", &"ranged_attack", &"attack_primary", &"attack_secondary",
+				&"attack_flurry", &"attack_flurry_secondary", &"pain"]
 			var stale_strike := command_sequence >= 0 and not fresh_command and action in [&"attack_primary", &"pain"]
 			if not stale_strike and (fresh_command or target_changed
 					or (not transient and (combat_changed or command_sequence < 0)) or action == &"death"):
 				if action == &"attack_primary" and fresh_command and resolver.action_to_clip.has("attack_secondary"):
-					action = &"attack_primary" if _swing_index % 2 == 0 else &"attack_secondary"
-					_swing_index += 1
+					action = _next_melee_action()
 				play_action(action, fresh_command and action in [&"attack_primary", &"attack_secondary", &"pain"])
 	var aiming: bool = int(dto.get("aiming_at", -1)) >= 0 or dto.get("aiming_at_tile") is Vector2i
 	if aiming != _ranged_aiming and current_action != &"death":
@@ -2826,13 +2829,70 @@ func _refresh_quiver_cape_fit() -> void:
 		if shape >= 0:
 			quiver.set_blend_shape_value(shape, 1.0 if cape_worn else 0.0)
 
+func _configure_human_animation_mapping() -> void:
+	if not HUMAN_LOCOMOTION.supports(_model_config) or animation_player == null:
+		return
+	var cuts := HUMAN_LOCOMOTION.ATTACKS.normal_clips()
+	if not animation_player.has_animation(cuts[0]):
+		return
+	_default_melee_clips = {"attack_primary": cuts[0], "attack_secondary": cuts[1]}
+	var flurries := HUMAN_LOCOMOTION.ATTACKS.flurry_clips()
+	for index: int in flurries.size():
+		if animation_player.has_animation(flurries[index]):
+			resolver.action_to_clip["attack_flurry" if index == 0 else "attack_flurry_secondary"] = flurries[index]
+	_refresh_melee_animation_mapping()
+
+## Shuffle pairs of opposing cuts, retaining both alternatives in each pair.
+## The counter is shared with native presentation, so repeated state packets
+## never select a second swing for the same server attack.
+func _melee_action_at(index: int) -> StringName:
+	var choice := index & 1
+	if HUMAN_LOCOMOTION.supports(_model_config):
+		choice = choice ^ (hash([actor_id, index >> 1]) & 1)
+	return &"attack_primary" if choice == 0 else &"attack_secondary"
+
+func _next_melee_action() -> StringName:
+	var action := _melee_action_at(_swing_index)
+	_swing_index += 1
+	return action
+
 func _refresh_melee_animation_mapping() -> void:
 	if resolver == null or not resolver.melee_styles.has("unarmed"):
+		return
+	if HUMAN_LOCOMOTION.supports(_model_config) and animation_player != null \
+			and animation_player.has_animation(HUMAN_LOCOMOTION.ATTACKS.guard_clip()):
+		var primary := int(_equipment_visuals.get(0, 0)) > 0
+		var offhand := int(_equipment_visuals.get(1, 0))
+		var armed := primary or offhand >= 160
+		var cuts := HUMAN_LOCOMOTION.ATTACKS.normal_clips("r" if primary else "l")
+		var human_style: Dictionary = resolver.melee_styles["unarmed"]
+		if armed:
+			human_style = {"attack_primary": cuts[0], "attack_secondary": cuts[1]}
+		for action: Variant in _default_melee_clips:
+			resolver.action_to_clip[action] = human_style.get(action, _default_melee_clips[action])
+		_remap_human_loop(&"combat_idle", HUMAN_LOCOMOTION.ATTACKS.guard_clip() if armed else &"Fighting_Idle")
+		var held := 1 if offhand > 0 else 0
+		if primary:
+			var weapon := _equipment_model_config(0, int(_equipment_visuals.get(0, 0)))
+			held = held | (1 if not _ranged_bow_path(weapon).is_empty() else 2)
+		_remap_human_loop(&"run", HUMAN_LOCOMOTION.run_clip_for_hands(held))
 		return
 	var style: Dictionary = (resolver.melee_styles["unarmed"]
 		if int(_equipment_visuals.get(0, 0)) <= 0 else _default_melee_clips)
 	for action: Variant in _default_melee_clips:
 		resolver.action_to_clip[action] = style.get(action, _default_melee_clips[action])
+
+## An equipment swap changes only the grip variant. Preserve the loop phase
+## so the accepted stride does not restart when a weapon is drawn or removed.
+func _remap_human_loop(action: StringName, clip: StringName) -> void:
+	var previous := resolver.clip_for_action(action)
+	resolver.action_to_clip[String(action)] = clip
+	if current_action != action or previous == clip or not animation_player.is_playing():
+		return
+	var phase := animation_player.current_animation_position / maxf(animation_player.current_animation_length, 0.001)
+	animation_player.play(clip, action_blend_seconds)
+	animation_player.seek(phase * animation_player.get_animation(clip).length, true)
+	action_crossfade_seconds = action_blend_seconds / maxf(absf(animation_player.speed_scale), 0.01)
 
 ## Whether `visuals` asks for exactly what is already worn. The part loop's own
 ## skip condition, taken over the whole request: the same visual id for every
@@ -4179,11 +4239,11 @@ func _play_action_legacy(action: StringName, restart := false) -> void:
 	var blend := action_blend_seconds
 	if action in [&"ranged_attack", &"pain", &"death"]:
 		blend = 0.045
-	elif action in [&"attack_primary", &"attack_secondary", &"cast_aggressive"]:
+	elif action in [&"attack_primary", &"attack_secondary", &"attack_flurry", &"attack_flurry_secondary", &"cast_aggressive"]:
 		blend = 0.09
 	# Preview/cinematic cold starts retain their explicit reset semantics.
 	# New strikes and hit reactions instead keep the pose they blend from.
-	var cold_restart := restart and action not in [&"attack_primary", &"attack_secondary", &"pain"]
+	var cold_restart := restart and action not in [&"attack_primary", &"attack_secondary", &"attack_flurry", &"attack_flurry_secondary", &"pain"]
 	if cold_restart:
 		animation_player.stop(true)
 	var had_pose := not cold_restart and not animation_player.assigned_animation.is_empty()
@@ -4275,7 +4335,7 @@ func _on_animation_finished(_animation_name: StringName) -> void:
 	elif current_action == &"cast_channel_enter":
 		play_action(&"cast_channel")
 	elif current_action in [&"cast", &"cast_aggressive", &"cast_defensive", &"heal",
-		&"cast_exit", &"attack_primary", &"attack_secondary", &"defend", &"ranged_attack", &"pain"]:
+		&"cast_exit", &"attack_primary", &"attack_secondary", &"attack_flurry", &"attack_flurry_secondary", &"defend", &"ranged_attack", &"pain"]:
 		play_action(_movement_aware_action(&"combat_idle" if _in_combat else &"idle", false))
 
 func presentation_action_time() -> float:

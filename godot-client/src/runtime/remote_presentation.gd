@@ -10,6 +10,7 @@ const ACTIONS: Array[StringName] = [&"idle", &"combat_idle", &"walk", &"run", &"
 const FIXED := 47
 const GateScript = preload("res://src/runtime/remote_animation_gate.gd")
 const ServerTimePacing = preload("res://src/actors/server_time_pacing.gd")
+const HumanMotion = preload("res://src/actors/human_locomotion_polish.gd")
 static var _current: WeakRef
 var _controller: ClientRuntimeController
 var _app_state: WeakRef
@@ -300,7 +301,14 @@ func choose_action(node, resolved: StringName, target_changed: bool,
 		fail_closed("action_output_invalid")
 		return false
 	_stats.action_decisions += 1
-	if selected >= 0 and owns(node): node.play_action(ACTIONS[selected], bool(result.meta[6]))
+	if selected >= 0 and owns(node):
+		var chosen: StringName = ACTIONS[selected]
+		if chosen in [&"attack_primary", &"attack_secondary"] and fresh and secondary \
+				and HumanMotion.supports(node._model_config):
+			# Native selection advanced the same occurrence counter. Keep its
+			# stale-packet handling while Humans shuffle their two single cuts.
+			chosen = node._melee_action_at(maxi(0, node._swing_index - 1))
+		node.play_action(chosen, bool(result.meta[6]))
 	_stats.action_total_us += Time.get_ticks_usec() - started
 	return true
 

@@ -1,6 +1,6 @@
 extends SceneTree
 ## Real imported Human rigs: immutable shared source, complete action/track
-## preservation, cyclic male upper-body fitting and untouched lower-body contacts.
+## preservation, standing arms, free/held running hands and untouched contacts.
 const POLISH := preload("res://src/actors/human_locomotion_polish.gd")
 # Captured from the accepted v1 female arm curves, including every original
 # timestamp and quaternion component. The male pass must not rewrite them.
@@ -22,6 +22,8 @@ func expect(ok: bool, label: String) -> void:
 
 func snapshot(animation: Animation) -> Array:
 	var result: Array = [animation.length, animation.loop_mode, animation.step]
+	for marker: StringName in animation.get_marker_names():
+		result.append([marker,animation.get_marker_time(marker),animation.get_marker_color(marker)])
 	for track: int in animation.get_track_count():
 		var values: Array = [animation.track_get_path(track), animation.track_get_type(track),
 			animation.track_get_interpolation_type(track), animation.track_get_interpolation_loop_wrap(track), animation.track_is_enabled(track)]
@@ -51,6 +53,53 @@ func rotation_delta(first: Quaternion, last: Quaternion) -> float:
 	var relative := (first.inverse() * last).normalized()
 	return 2.0 * atan2(Vector3(relative.x, relative.y, relative.z).length(), absf(relative.w))
 
+func idle_arm_target(walk: Animation, bone: String) -> Quaternion:
+	for track: int in walk.get_track_count():
+		if walk.track_get_type(track) == Animation.TYPE_ROTATION_3D and str(walk.track_get_path(track).get_concatenated_subnames()) == bone:
+			return walk.rotation_track_interpolate(track,walk.length*0.25).slerp(
+				walk.rotation_track_interpolate(track,walk.length*0.75),0.5).normalized()
+	push_error("walk arm track missing: "+bone)
+	return Quaternion.IDENTITY
+
+func held_variants(source: AnimationLibrary, result: AnimationLibrary, sex: String, rig: Skeleton3D) -> void:
+	# Reconstruct the accepted travel grip before the new free-hand fist. The
+	# baseline is independent of which run variant the actor currently plays.
+	var baseline := POLISH._travel(source.get_animation(&"Run_Female"),true,
+		POLISH._walking_hands(source.get_animation(&"Walk")))
+	if sex == "male":
+		POLISH._male_placement(baseline,rig,true)
+		POLISH._male_running_hands(baseline,source.get_animation(&"Fighting_Idle"),rig)
+	var free := result.get_animation(&"Run_Female")
+	expect(POLISH.run_clip_for_hands(0) == &"Run_Female", "empty hands select the free running fist")
+	for mask: int in range(1,4):
+		var expected_name: StringName = [&"Human_Run_Hold_L",&"Human_Run_Hold_R",&"Human_Run_Hold_Both"][mask-1]
+		expect(POLISH.run_clip_for_hands(mask) == expected_name, "held mask maps to its actual left/right hands")
+		expect(result.has_animation(expected_name), "held running variant exists "+str(expected_name))
+		var held := result.get_animation(expected_name)
+		expect(held.length == free.length and held.loop_mode == free.loop_mode and held.step == free.step, "held run keeps the exact free run timing")
+		expect(held.get_track_count() == free.get_track_count(), "held variant adds no animation channels")
+		expect(held.get_marker_names() == free.get_marker_names(), "held run marker names stay exact")
+		for marker: StringName in free.get_marker_names():
+			expect(held.get_marker_time(marker) == free.get_marker_time(marker), "held run event time stays exact")
+		var restored := {"l":0,"r":0}
+		for track: int in free.get_track_count():
+			var bone := str(free.track_get_path(track).get_concatenated_subnames()).get_slice(":",0)
+			var finger := free.track_get_type(track) == Animation.TYPE_ROTATION_3D and bone.get_slice("_",0) in ["thumb","index","middle","ring","pinky"]
+			var side := "l" if bone.ends_with("_l") else "r" if bone.ends_with("_r") else ""
+			var selected := finger and ((side == "l" and mask & 1) or (side == "r" and mask & 2))
+			var expected := baseline if selected else free
+			expect(held.track_get_path(track) == free.track_get_path(track) and held.track_get_type(track) == free.track_get_type(track), "held run track identity stays exact")
+			expect(held.track_get_key_count(track) == free.track_get_key_count(track), "held run key count stays exact")
+			expect(held.track_get_interpolation_type(track) == free.track_get_interpolation_type(track) and held.track_get_interpolation_loop_wrap(track) == free.track_get_interpolation_loop_wrap(track), "held run interpolation stays exact")
+			for key: int in free.track_get_key_count(track):
+				expect(held.track_get_key_time(track,key) == free.track_get_key_time(track,key) and held.track_get_key_transition(track,key) == free.track_get_key_transition(track,key), "held run authored key timing stays exact")
+				var value: Variant = held.track_get_key_value(track,key)
+				expect(value == expected.track_get_key_value(track,key), "held fingers match their accepted grip; free fingers and all other motion stay exact")
+				if selected and value != free.track_get_key_value(track,key): restored[side] += 1
+		for side: String in ["l","r"]:
+			var selected := (mask & (1 if side == "l" else 2)) != 0
+			expect(int(restored[side]) > 0 if selected else int(restored[side]) == 0, "only the requested hand restores its pre-fist finger motion")
+
 func run() -> void:
 	var models: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/models.json")).models
 	var equipment: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/equipment.json"))
@@ -78,7 +127,9 @@ func run() -> void:
 		var result := player.get_animation_library(&"")
 		var human := slug.begins_with("luminous_")
 		expect((result != source) == human, slug + " opt-in keeps other races original")
-		expect(source.get_animation_list() == result.get_animation_list(), "all clip names remain exact")
+		for name: StringName in source.get_animation_list():
+			expect(result.has_animation(name), "all original clip names persist "+str(name))
+		if not human: expect(source.get_animation_list() == result.get_animation_list(), "other races gain no Human animation aliases")
 		for action: String in animations.actions:
 			expect(result.has_animation(animations.actions[action]), "all mapped actions remain available " + action)
 		for name: StringName in source.get_animation_list():
@@ -88,26 +139,34 @@ func run() -> void:
 				"tracks": new.get_track_count(), "loop_mode": new.loop_mode,
 				"shared_original": old == new, "source_snapshot_hash": original[name].hash()})
 			expect(snapshot(old) == original[name], "source remains immutable " + str(name))
-			if not human or name not in POLISH.CLIPS:
-				expect(old == new, "non-locomotion resources remain shared " + str(name))
+			var travel := name in POLISH.CLIPS
+			var idle := name in POLISH.IDLE_CLIPS
+			if not human or (not travel and not idle):
+				expect(old == new, "unchanged original action resources remain shared " + str(name))
 				continue
-			if slug == "luminous_female":
+			if slug == "luminous_female" and travel:
 				expect(arm_digest(new) == FEMALE_V1[name], "female locomotion remains exactly the accepted v1 output")
-			expect(old != new and new.length == old.length and new.loop_mode == old.loop_mode, "only travel animation resource is derived " + str(name))
+			expect(old != new and new.length == old.length and new.loop_mode == old.loop_mode and new.step == old.step, "standing/travel derivatives preserve original timing " + str(name))
 			expect(new.get_track_count() == old.get_track_count(), "no track added or removed " + str(name))
+			expect(new.get_marker_names() == old.get_marker_names(), "original event marker names persist")
+			for marker: StringName in old.get_marker_names():
+				expect(new.get_marker_time(marker) == old.get_marker_time(marker), "original event marker times remain exact")
 			var modified := 0
 			var worst_loop := 0.0
 			var largest_arm_step := 0.0
 			var copied_keys := 0
 			var minimum_thumb_alignment := 1.0
+			var source_worst_loop := 0.0
 			for track: int in old.get_track_count():
 				copied_keys += old.track_get_key_count(track)
 				var bone := str(old.track_get_path(track).get_concatenated_subnames()).get_slice(":", 0)
 				var arm_rotation := old.track_get_type(track) == Animation.TYPE_ROTATION_3D and bone in POLISH.ARM_BONES
+				var run_fingers := (name == &"Run_Female" and old.track_get_type(track) == Animation.TYPE_ROTATION_3D
+					and bone.get_slice("_",0) in ["thumb","index","middle","ring","pinky"])
 				var male_run_detail := (slug == "luminous_male" and name == &"Run_Female"
 					and old.track_get_type(track) == Animation.TYPE_ROTATION_3D
-					and (bone in ["spine_01", "spine_02", "neck_01"] or bone.get_slice("_", 0) in ["thumb", "index", "middle", "ring", "pinky"]))
-				var permitted_rotation := arm_rotation or male_run_detail
+					and bone in ["spine_01", "spine_02", "neck_01"])
+				var permitted_rotation := arm_rotation or run_fingers or male_run_detail
 				expect(new.track_get_path(track) == old.track_get_path(track) and new.track_get_type(track) == old.track_get_type(track), "track identity preserved")
 				expect(new.track_get_key_count(track) == old.track_get_key_count(track), "source cadence preserved")
 				var changed := false
@@ -121,6 +180,9 @@ func run() -> void:
 						changed = changed or not q.is_equal_approx(before)
 						if index > 0:
 							largest_arm_step = maxf(largest_arm_step, rotation_delta(new.track_get_key_value(track, index - 1), q))
+						if idle and arm_rotation:
+							var target := idle_arm_target(result.get_animation(&"Walk"),bone)
+							expect(rotation_delta(q,target) <= rotation_delta(before,target)*0.15+0.00001, "idle arms settle close to the accepted quarter/threequarter walk midpoint")
 					else:
 						expect(after == before, "all protected root/leg/position/scale/other-action channels remain exact")
 				if permitted_rotation:
@@ -128,10 +190,11 @@ func run() -> void:
 					var first := new.rotation_track_interpolate(track, 0.0)
 					var last := new.rotation_track_interpolate(track, new.length)
 					worst_loop = maxf(worst_loop, rotation_delta(first, last))
+					source_worst_loop = maxf(source_worst_loop, rotation_delta(old.rotation_track_interpolate(track,0.0),old.rotation_track_interpolate(track,old.length)))
 				expect(new.track_get_interpolation_type(track) == old.track_get_interpolation_type(track), "interpolation unchanged")
-			expect(modified > 0 and worst_loop < 0.0001, "arm polish is visible and loop closes " + str(name))
+			expect(modified > 0 and worst_loop < (source_worst_loop*0.15+0.0001 if idle else 0.0001), "arm polish is visible and retains cyclic continuity " + str(name))
 			expect(largest_arm_step < deg_to_rad(25), "no abrupt arm/wrist key jump " + str(name))
-			if slug == "luminous_male":
+			if slug == "luminous_male" and travel:
 				player.play(name)
 				player.pause()
 				var rig := actor.get_skeleton()
@@ -199,6 +262,7 @@ func run() -> void:
 				"minimum_thumb_alignment":minimum_thumb_alignment,
 				"max_loop_degrees": rad_to_deg(worst_loop), "first_install_usec": build_usec,
 				"copied_keys": copied_keys, "tracks": old.get_track_count(), "max_rotation_key_step_degrees": rad_to_deg(largest_arm_step)})
+		if human: held_variants(source,result,str(models[slug].gender),actor.get_skeleton())
 		POLISH.install(player, models[slug])
 		expect(player.get_animation_library(&"") == result, "install is idempotent")
 		for quality: int in [ActorRenderQuality.Quality.LOW, ActorRenderQuality.Quality.MEDIUM, ActorRenderQuality.Quality.HIGH]:

@@ -50,15 +50,29 @@ outward upper-arm placement that varies through the stride, a continuous
 running pump and inward-facing hands, guided by the supplied reference videos.
 The native elbow hinge follows the intended bend plane; the rising running
 hand reaches toward the sternum while its elbow stays outside the torso.
-The female walk and run retain their previous motion. These changes preserve
-the original lower body movement, clip lengths, attack and spell timing. Equipped weapon poses
-continue to adjust the hands after animation playback.
+Both bodies keep open walking hands and use a more curled, relaxed fist when
+running. Held hands retain their equipment grip, including the left hand for
+bows and shields. The female travel arms and the accepted male elbow motion
+stay unchanged. Standing arms settle toward the midpoint of the walk while
+retaining the standing animation's breathing. The original lower body movement,
+travel clip lengths and spell timing stay unchanged.
+
+Normal Human weapon attacks use one deliberate cut with a windup and recovery,
+lasting 1.06 seconds. Opposing forehand and backhand cuts play in shuffled pairs;
+an off-hand-only blade uses the mirrored left-hand family. The previous rapid
+combinations remain available as Flurry previews for future skill use. Unarmed
+attacks keep their jabs. The fitted weapon-ready pose gives the shield more
+clearance. These are presentation changes; server damage, attack rounds and
+skill rules are unchanged.
 
 Low and Medium graphics use the lightweight Human appearance. High graphics
 adds face colour, facial regions and baked normal maps for both bodies, with
 refined head geometry recovering eyelid, nose and lip form from the retained
 high-resolution sources. The face controls deform the eyes, lids, brows and
-grooming together. Eye colour retains the source iris detail. Human
+grooming together. High eyes add a defined pupil and limbal ring, irregular iris
+detail, shaded upper lids and a restrained corneal reflection. The mouth has a
+clearer lip seam, corners and philtrum, with bounded relief that follows the face
+controls. Eye colour retains the source iris detail. Human
 eye colours also have a more restrained brightness in Low and Medium.
 High hair adds overlapping tapered locks, curved edges, asymmetric sweeps and
 the female updo while reusing its existing textures and materials. The maps
@@ -75,7 +89,7 @@ match their fine painted detail.
 
 Low and Medium retain their existing triangle counts and texture set. High
 uses six shared 1024-square face maps: approximately 8 MiB of compiled texture
-data for both bodies, plus 383 KiB of compressed sculpt data (768 KiB decoded
+data for both bodies, plus 381 KiB of compressed sculpt data (768 KiB decoded
 CPU data) and 35 KiB of hair curves. These resources are shared; equipment
 files are reused.
 
@@ -89,12 +103,18 @@ not add a per-frame script modifier. On the development machine, a new High
 study look took roughly 0.2–0.35 seconds to prepare after loading the source
 assets. Novel hair length choices with warmed assets took roughly 42–174 ms;
 repeated controls took 4–11 ms. These are debug preview measurements, not a frame-rate
-guarantee for other devices or scenes. The male video-guided animation pass
-adds about 5 KiB of code and no animation assets.
+guarantee for other devices or scenes. Hand, idle and attack refinements derive
+shared clips at load time; they add no model or animation asset files and no
+extra per-frame pose modifier.
+The combined stance, grip and single-cut derivatives used about 1.35 MiB of
+debug process memory per body, roughly 2.18 MiB more for both bodies together
+than the accepted travel-only pass. Preparing a new shared set took 17–35 ms
+on this machine; cached access took under 0.03 ms. These are estimates from the
+isolated preview, excluding source asset loading and the rest of the game.
 
 A warmed, isolated head comparison on an RTX 5080 Laptop GPU at 1280×720
-measured median GPU time of 0.227→0.241 ms for sixteen Humans sharing two faces,
-and 0.115→0.126 ms for one close-up head. Hair and other quality settings stayed
+measured median GPU time of 0.226→0.241 ms for sixteen Humans sharing two faces,
+and 0.115→0.130 ms for one close-up head. Hair and other quality settings stayed
 at Medium in that comparison, so these numbers isolate the face pass rather
 than predicting the cost of the entire High graphics setting.
 
@@ -112,6 +132,8 @@ and all appearance controls. Choose **Graphics → Low / Medium / High** to
 compare the two artwork paths; the workshop starts in Medium.
 **Front view** faces the model straight toward the camera for checking the
 face and elbow placement. Dragging still lets you inspect other angles.
+The pose menu includes both single-cut directions, the original Flurry, and
+the weapon-ready pose. Equip a weapon to compare the normal cuts.
 **Save preview** stores choices separately for
 each body on this computer. **Screenshot** saves an image in the preview's
 private user-data folder; **Open saves** opens that folder. Closing the window

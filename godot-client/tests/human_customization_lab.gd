@@ -3,7 +3,7 @@ extends SceneTree
 
 const EDITOR = preload("res://src/ui/appearance_editor.gd")
 const SAVE_PATH := "user://human-workshop.json"
-const POSES := [&"idle", &"walk", &"run", &"attack_primary", &"cast_channel"]
+const POSES := [&"idle", &"walk", &"run", &"attack_primary", &"cast_channel", &"attack_secondary", &"attack_flurry", &"combat_idle"]
 var _canvas: Control
 var _header_margin: MarginContainer
 var _editor
@@ -83,7 +83,7 @@ func _build_ui() -> void:
 	_sex.item_selected.connect(_select_sex)
 	_outfit = _picker(toolbar, "Outfit", ["Portrait outfit", "Vanguard", "Ranger", "Arcanist", "Warden"])
 	_outfit.item_selected.connect(func(_index: int) -> void: _refresh_outfit())
-	_pose = _picker(toolbar, "Pose", ["Idle", "Walk in place", "Run in place", "Attack", "Cast"])
+	_pose = _picker(toolbar, "Pose", ["Idle", "Walk in place", "Run in place", "Attack forehand", "Cast", "Attack backhand", "Flurry (original)", "Combat ready"])
 	_pose.item_selected.connect(func(_index: int) -> void: _play_pose())
 	_quality = _picker(toolbar, "Graphics", ["Low", "Medium", "High"])
 	_quality.select(1)

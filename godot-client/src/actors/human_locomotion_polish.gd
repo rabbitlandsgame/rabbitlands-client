@@ -1,14 +1,18 @@
 class_name HumanLocomotionPolish
 extends RefCounted
-## Human-only, immutable derivatives of the imported travel clips. The source
+## Human-only, immutable derivatives of the imported stance/travel clips. The source
 ## library, body/skin/rest pose, root and lower-body channels stay exact. The
-## male reference pass adds upper-body intent; the female pass stays exact.
+## accepted travel arms stay exact; finger poses and standing arms are separate.
 ## Runtime playback uses ordinary cached Animation resources at every quality.
 
 const SOURCE_META := &"human_locomotion_source"
 const RESULT_META := &"human_locomotion_result"
 const CACHE_LIMIT := 8
 const CLIPS: Array[StringName] = [&"Walk", &"Run_Female"]
+const IDLE_CLIPS: Array[StringName] = [&"Idle_Subtle", &"Idle_A"]
+const HELD_RUN_CLIPS: Array[StringName] = [&"Human_Run_Hold_L", &"Human_Run_Hold_R", &"Human_Run_Hold_Both"]
+const HANDS := preload("res://src/actors/human_hand_pose.gd")
+const ATTACKS := preload("res://src/actors/human_attack_library.gd")
 const ARM_BONES := ["clavicle_l", "clavicle_r", "upperarm_l", "upperarm_r",
 	"lowerarm_l", "lowerarm_r", "hand_l", "hand_r"]
 const RUN_TORSO := {"spine_01": 4.0, "spine_02": 2.0, "neck_01": -2.0}
@@ -19,6 +23,11 @@ static func supports(model: Dictionary) -> bool:
 
 static func clear() -> void:
 	_libraries.clear()
+	ATTACKS.clear()
+
+## Bits describe the actual held hands, including the separate left-hand bow.
+static func run_clip_for_hands(mask: int) -> StringName:
+	return HELD_RUN_CLIPS[clampi(mask, 1, 3)-1] if mask != 0 else &"Run_Female"
 
 static func install(player: AnimationPlayer, model: Dictionary) -> void:
 	if player == null or not supports(model) or not player.has_animation_library(&""):
@@ -39,8 +48,8 @@ static func install(player: AnimationPlayer, model: Dictionary) -> void:
 static func derive(source: AnimationLibrary, profile := "female", skeleton: Skeleton3D = null) -> AnimationLibrary:
 	if source == null:
 		return null
-	# The accepted female pass remains the exact v1 result. Male silhouettes
-	# use their own baked arm placement, never a mutation of that shared clip.
+	# Accepted female travel arms stay exact. Male silhouettes use their own
+	# baked arm placement, never a mutation of that shared source clip.
 	if profile != "male" or skeleton == null:
 		profile = "female"
 	var key := "%s:%s" % [source.get_instance_id(), profile]
@@ -49,6 +58,7 @@ static func derive(source: AnimationLibrary, profile := "female", skeleton: Skel
 	var result := AnimationLibrary.new()
 	var walk: Animation = source.get_animation(&"Walk") if source.has_animation(&"Walk") else null
 	var neutral := _walking_hands(walk)
+	var held_run: Animation
 	for name: StringName in source.get_animation_list():
 		var animation := source.get_animation(name)
 		# Sharing these resources is intentional: attacks, casts, RESET and all
@@ -58,12 +68,63 @@ static func derive(source: AnimationLibrary, profile := "female", skeleton: Skel
 			_male_placement(clip, skeleton, name == &"Run_Female")
 			if name == &"Run_Female" and source.has_animation(&"Fighting_Idle"):
 				_male_running_hands(clip, source.get_animation(&"Fighting_Idle"), skeleton)
+		if name == &"Run_Female":
+			held_run = _copy_animation(clip)
+			HANDS.apply_to_clip(clip, profile)
 		result.add_animation(name, clip)
+	if result.has_animation(&"Walk"):
+		for idle_name: StringName in IDLE_CLIPS:
+			if source.has_animation(idle_name):
+				result.remove_animation(idle_name)
+				result.add_animation(idle_name, _idle_arms(source.get_animation(idle_name), result.get_animation(&"Walk")))
+	if held_run != null:
+		for mask: int in range(1, 4):
+			var variant := held_run if mask == 3 else _copy_animation(result.get_animation(&"Run_Female"))
+			if mask != 3:
+				_restore_held_fingers(variant, held_run, "l" if mask == 1 else "r")
+			result.add_animation(run_clip_for_hands(mask), variant)
+	ATTACKS.append(result, source, {"culture":"luminous", "bodyTemplate":"luminous_"+profile}, skeleton)
 	if _libraries.size() >= CACHE_LIMIT:
 		_libraries.erase(_libraries.keys()[0])
 	# Keep the source strongly referenced alongside its derivative so a freed
 	# source's instance ID cannot be reused as a different library's cache key.
 	_libraries[key] = {"source": source, "result": result}
+	return result
+
+static func _copy_animation(source: Animation) -> Animation:
+	var result := Animation.new()
+	result.length = source.length
+	result.loop_mode = source.loop_mode
+	result.step = source.step
+	for track: int in source.get_track_count(): source.copy_track(track, result)
+	for marker: StringName in source.get_marker_names():
+		result.add_marker(marker, source.get_marker_time(marker))
+		result.set_marker_color(marker, source.get_marker_color(marker))
+	return result
+
+## Held hands retain their pre-refinement travel grip; the other hand can use
+## the relaxed fist. All four variants share the exact accepted body motion.
+static func _restore_held_fingers(result: Animation, held: Animation, side: String) -> void:
+	for track: int in result.get_track_count():
+		if result.track_get_type(track) != Animation.TYPE_ROTATION_3D: continue
+		var bone := str(result.track_get_path(track).get_concatenated_subnames())
+		if not bone.ends_with("_"+side) or bone.get_slice("_",0) not in ["thumb","index","middle","ring","pinky"]: continue
+		for key: int in result.track_get_key_count(track):
+			result.track_set_key_value(track, key, held.track_get_key_value(track,key))
+
+## Keep authored breathing/feet/head, settling the arms toward the two accepted
+## mid-walk poses with a small amount of the original standing movement.
+static func _idle_arms(source: Animation, walk: Animation) -> Animation:
+	var result := _copy_animation(source)
+	var walking := _rotations(walk)
+	for track: int in source.get_track_count():
+		if source.track_get_type(track) != Animation.TYPE_ROTATION_3D: continue
+		var bone := str(source.track_get_path(track).get_concatenated_subnames()).get_slice(":",0)
+		if bone not in ARM_BONES or not walking.has(bone): continue
+		var neutral := _sample(walk, walking[bone], walk.length*0.25).slerp(_sample(walk, walking[bone], walk.length*0.75),0.5).normalized()
+		for key: int in result.track_get_key_count(track):
+			var original: Quaternion = source.track_get_key_value(track,key)
+			result.track_set_key_value(track,key,original.slerp(neutral,0.92).normalized())
 	return result
 
 static func _target_skeleton(player: AnimationPlayer, library: AnimationLibrary) -> Skeleton3D:
@@ -157,13 +218,12 @@ static func _male_running_hands(animation: Animation, fist: Animation, skeleton:
 		# these body rigs. Leave those original tracks alone.
 		if joint < 0 or int(bone.get_slice("_",1)) not in [1,2,3]: continue
 		var closed := fist.rotation_track_interpolate(targets[bone], 0.0)
-		# Stay within the established native grip. This source skin keeps much
-		# of the distal hand rigid; forcing further bone curl distorts creases
-		# without making a closed fist. Skin refinement is a separate change.
+		# Keep the accepted native grip as the held-hand baseline. The free-hand
+		# refinement below fits physical fingertip and palm surface landmarks.
 		for key: int in animation.track_get_key_count(track):
 			var original: Quaternion = animation.track_get_key_value(track, key)
 			animation.track_set_key_value(track, key, original.slerp(closed,0.8 if bone.begins_with("thumb_") else 0.95).normalized())
-	# Equipped hands retain the final existing WeaponCarryPose grip override.
+	# Held Run variants keep this seed; free hands receive HumanHandPose.
 
 static func _male_pose(animation: Animation, skeleton: Skeleton3D, channels: Dictionary,
 		time: float, running: bool) -> Dictionary:
