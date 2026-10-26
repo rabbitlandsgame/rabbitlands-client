@@ -291,6 +291,7 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"campaign_v1",
 	"campaign_party_v1",
 	"campaign_bank_v1",
+	"campaign_road_v1",
 	"actor16_v1",
 	"adjacent_actors_v1",
 	# Players within 80 tiles as actors, the rest as ELORIA_PRESENCE dots, and
@@ -3700,7 +3701,87 @@ static func decode_campaign(payload: PackedByteArray) -> Dictionary:
 			return {"type": "invalid", "error": "campaign_bank_progress"}
 		if bank.has(step) and not _campaign_integer(bank[step], 0, float(bank.get(total, 32))):
 			return {"type": "invalid", "error": "campaign_bank_progress"}
+	if not _campaign_road_valid(value.get("road", {})):
+		return {"type": "invalid", "error": "campaign_road"}
 	return {"type": "campaign", "state": value}
+
+static func _campaign_road_valid(road: Variant) -> bool:
+	if not road is Dictionary:
+		return false
+	if road.is_empty():
+		return true
+	for field: String in ["cost", "consequence", "stage"]:
+		if road.has(field) and not road[field] is String:
+			return false
+	if road.get("preparation", "") not in ["", "brace", "protect", "shared_load"]:
+		return false
+	if road.get("tobin_memory", "") not in ["", "remembered_casks", "remembered_palace"] \
+			or not road.get("legacy_context", "") is String \
+			or not road.get("herd_cleared", false) is bool:
+		return false
+	var animals: Variant = road.get("animals", [])
+	if not animals is Array or animals.size() > 8:
+		return false
+	for animal: Variant in animals:
+		if not animal is Dictionary or not animal.get("id") is String or not animal.get("alive") is bool \
+				or not _campaign_integer(animal.get("actor_id"), 0, 2147483647.0) or not _campaign_tile(animal.get("tile")):
+			return false
+	var hazard: Variant = road.get("hazard", {})
+	if not hazard is Dictionary or not _campaign_integer(hazard.get("index", 0), 0, 2) \
+			or hazard.get("state", "warning") not in ["warning", "inspected", "assigned", "resolved"] \
+			or hazard.get("solution", "") not in ["", "anchor", "diversion", "rebalance"] \
+			or not hazard.get("kind", "") is String:
+		return false
+	var carts: Variant = road.get("carts", [])
+	if not carts is Array or carts.size() > 3:
+		return false
+	var ids: Array = []
+	for cart: Variant in carts:
+		if not cart is Dictionary or cart.get("id") not in ["lead", "rear", "consignment"] or cart.id in ids:
+			return false
+		ids.append(cart.id)
+		if not _campaign_tile(cart.get("tile")) or not _campaign_tile(cart.get("facing", [1, 0])) \
+				or cart.get("state") not in ["waiting", "moving", "stable", "recovering"]:
+			return false
+		for field: String in ["route_index", "route_total", "motion_seq", "cargo_units"]:
+			if not _campaign_integer(cart.get(field, 0), 0, 65535):
+				return false
+		if int(cart.get("route_total", 0)) > 0 and int(cart.get("route_index", 0)) >= int(cart.route_total):
+			return false
+		if not _campaign_integer(cart.get("step_ms", 250), 0, 5000):
+			return false
+		var lean: Variant = cart.get("lean_deg", 0)
+		if typeof(lean) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(lean)) or absf(float(lean)) > 12:
+			return false
+	var stock: Variant = road.get("stock", {})
+	if not stock is Dictionary:
+		return false
+	for key: String in ["remaining", "spent", "reserved_last_bowl"]:
+		if stock.has(key) and not _campaign_integer(stock[key], 0, 10):
+			return false
+	var convoy: Variant = road.get("convoy", {})
+	if not convoy is Dictionary or (not convoy.is_empty() and (not convoy.get("can_command") is bool \
+			or not convoy.get("status") is String or convoy.get("mode") not in ["follow", "wait", "regroup", "help"])):
+		return false
+	var shipment: Variant = road.get("consignment", {})
+	if not shipment is Dictionary:
+		return false
+	for flag: String in ["agreement", "inspected"]:
+		if shipment.has(flag) and not shipment[flag] is bool:
+			return false
+	if shipment.get("method", "") not in ["", "witness", "measure", "checkpoint"] \
+			or shipment.get("custody", "") not in ["", "witnessed_transfer", "safe_hold", "carrier_return"]:
+		return false
+	var checkpoint: Variant = road.get("checkpoint", {})
+	if not checkpoint is Dictionary or (checkpoint.has("tile") and not _campaign_tile(checkpoint.tile)):
+		return false
+	var optional: Variant = road.get("optional", {})
+	return optional is Dictionary and optional.get("supper", "unfound") in ["unfound", "found", "treated", "safe", "completed"] \
+		and optional.get("last_bowl", "unstarted") in ["unstarted", "portioned", "completed"]
+
+static func _campaign_tile(tile: Variant) -> bool:
+	return tile is Array and tile.size() == 2 and _campaign_integer(tile[0], -2147483648.0, 2147483647.0) \
+		and _campaign_integer(tile[1], -2147483648.0, 2147483647.0)
 
 static func _campaign_integer(value: Variant, minimum: float, maximum: float) -> bool:
 	return typeof(value) in [TYPE_INT, TYPE_FLOAT] and is_finite(float(value)) \

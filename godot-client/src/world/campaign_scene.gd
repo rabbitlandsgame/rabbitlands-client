@@ -225,6 +225,11 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 		_anchors.clear()
 		var raw_anchors: Dictionary = (snapshot.get("anchors", {}) as Dictionary).duplicate(true)
 		raw_anchors.merge(scene.get("anchors", {}), true)
+		# A road scene establishes the accepted cart pose at the scene barrier,
+		# never a future waypoint along the route.
+		if str(snapshot.get("kind", "")) == "road":
+			for cart: Dictionary in (snapshot.get("road", {}) as Dictionary).get("carts", []):
+				raw_anchors["cart_" + str(cart.id)] = cart.tile
 		if _adapter != null:
 			for key: String in raw_anchors:
 				var tile: Array = raw_anchors[key]
@@ -340,6 +345,10 @@ func _apply_camera() -> void:
 			first = last
 	var first_anchor: Vector3 = _anchors.get(str(first.get("anchor", "")), _origin)
 	var last_anchor: Vector3 = _anchors.get(str(last.get("anchor", "")), _origin)
+	if _actors.has(str(first.get("anchor_actor", ""))):
+		first_anchor = (_actors[str(first.anchor_actor)] as Node3D).global_position
+	if _actors.has(str(last.get("anchor_actor", ""))):
+		last_anchor = (_actors[str(last.anchor_actor)] as Node3D).global_position
 	var position := (first_anchor + _vector(first.position)).lerp(last_anchor + _vector(last.position), weight)
 	var target := (first_anchor + _vector(first.target)).lerp(last_anchor + _vector(last.target), weight)
 	_camera.global_position = position

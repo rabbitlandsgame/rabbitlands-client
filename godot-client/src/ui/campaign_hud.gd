@@ -5,6 +5,7 @@ signal target_requested(object_id: int, tile: Vector2i, nearby: bool)
 signal action_requested(action: String)
 signal decision_requested(action: String, run_id: String, revision: int)
 signal companion_requested(command: String)
+signal convoy_requested(command: String)
 signal transcript_requested
 signal reduced_motion_changed(value: bool)
 
@@ -14,6 +15,7 @@ var _title: Label
 var _hint: Label
 var _notice: Label
 var _bank: Label
+var _road: Label
 var _party: Label
 var _adoption: Label
 var _adoption_actions: HFlowContainer
@@ -24,6 +26,9 @@ var _own: Button
 var _companion: Label
 var _companion_actions: HFlowContainer
 var _companion_buttons: Dictionary = {}
+var _convoy: Label
+var _convoy_actions: HFlowContainer
+var _convoy_buttons: Dictionary = {}
 var _scroll: ScrollContainer
 var _targets: VBoxContainer
 var _entry: Button
@@ -79,6 +84,10 @@ func _build() -> void:
 	_bank.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_bank.add_theme_font_size_override("font_size", 14)
 	column.add_child(_bank)
+	_road = Label.new()
+	_road.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_road.add_theme_font_size_override("font_size", 14)
+	column.add_child(_road)
 	_party = Label.new()
 	_party.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_party.add_theme_font_size_override("font_size", 14)
@@ -112,6 +121,20 @@ func _build() -> void:
 		button.pressed.connect(_request_companion.bind(command))
 		_companion_actions.add_child(button)
 		_companion_buttons[command] = button
+	_convoy = Label.new()
+	_convoy.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_convoy.add_theme_font_size_override("font_size", 14)
+	column.add_child(_convoy)
+	_convoy_actions = HFlowContainer.new()
+	_convoy_actions.add_theme_constant_override("h_separation", 5)
+	_convoy_actions.add_theme_constant_override("v_separation", 5)
+	column.add_child(_convoy_actions)
+	for command: String in ["follow", "wait", "regroup", "help"]:
+		var button := Button.new()
+		button.text = command.capitalize()
+		button.pressed.connect(_request_convoy.bind(command))
+		_convoy_actions.add_child(button)
+		_convoy_buttons[command] = button
 	_scroll = ScrollContainer.new()
 	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_scroll.custom_minimum_size.y = 108
@@ -123,7 +146,7 @@ func _build() -> void:
 	_scroll.add_child(_targets)
 	_entry = Button.new()
 	_entry.text = "Begin The Missing Measure"
-	_entry.pressed.connect(func() -> void: action_requested.emit("bank" if str(_state.get("kind", "")) == "bank" else "resume" if bool(_state.get("started", false)) else "start"))
+	_entry.pressed.connect(_request_entry)
 	column.add_child(_entry)
 	_join = Button.new()
 	_join.text = "Join the party's expedition"
@@ -178,6 +201,7 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 	_notice.text = str(snapshot.get("party_notice", ""))
 	_notice.visible = not _notice.text.is_empty()
 	_apply_bank(snapshot.get("bank", {}))
+	_apply_road(snapshot.get("road", {}))
 	_apply_party(party, snapshot.get("adoption", {}))
 	_apply_companion(snapshot.get("companion", {}))
 	_entry.visible = (not active or travelling) and bool(snapshot.get("available", false)) and not can_own
@@ -222,6 +246,70 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 		button.tooltip_text = str(target.get("detail", "Use the marked place in the world."))
 		button.pressed.connect(_request_target.bind(str(target.get("id", "")), int(target.get("object_id", -1))))
 		_targets.add_child(button)
+
+func _request_entry() -> void:
+	var kind := str(_state.get("kind", ""))
+	action_requested.emit(kind if kind in ["bank", "road"] else "resume" if bool(_state.get("started", false)) else "start")
+
+func _apply_road(road: Dictionary) -> void:
+	_road.visible = not road.is_empty()
+	var convoy: Dictionary = road.get("convoy", {})
+	_convoy.visible = not convoy.is_empty()
+	_convoy_actions.visible = not convoy.is_empty()
+	if road.is_empty():
+		return
+	var lines: PackedStringArray = []
+	var context := str(road.get("legacy_context", ""))
+	if not context.is_empty():
+		lines.append(context)
+	if road.has("actual_workers") and road.has("permit_workers"):
+		lines.append("Crew: %d counted; %d names on the permit." % [int(road.actual_workers), int(road.permit_workers)])
+	var preparation := str(road.get("preparation", ""))
+	if not preparation.is_empty():
+		lines.append("Load plan · " + {"brace": "braced with one Wood Plank", "protect": "protected loading", "shared_load": "smaller shared loads"}.get(preparation, ""))
+	for text: String in [str(road.get("cost", "")), str(road.get("consequence", ""))]:
+		if not text.is_empty():
+			lines.append(text)
+	var stock: Dictionary = road.get("stock", {})
+	if not stock.is_empty():
+		lines.append("Field food: %d portions available; %d kept for late arrivals." % [int(stock.get("remaining", 0)), int(stock.get("reserved_last_bowl", 0))])
+	var hazard: Dictionary = road.get("hazard", {})
+	if not hazard.is_empty() and not str(hazard.get("kind", "")).is_empty():
+		var situation: String = {"herd": "Herd crossing", "rear_cart": "Rear cart", "soft_ground": "Soft ground"}.get(str(hazard.kind), "Field interruption")
+		var status: String = {"warning": "stop and inspect", "inspected": "choose the field work", "assigned": "complete the assigned work", "resolved": "stable"}.get(str(hazard.get("state", "")), "read the work site")
+		lines.append(situation + " · " + status + ".")
+		if str(hazard.get("kind", "")) == "herd":
+			lines.append("The herd has cleared the cart lane." if bool(road.get("herd_cleared", false)) else "Keep the carts stopped until the animals physically clear the lane.")
+	for cart: Dictionary in road.get("carts", []):
+		lines.append({"lead": "Lead cart", "rear": "Rear cart", "consignment": "Current consignment"}.get(str(cart.id), "Work cart") \
+			+ " · %d load units · " % int(cart.get("cargo_units", 0)) + str(cart.get("state", "waiting")).capitalize())
+	var consignment: Dictionary = road.get("consignment", {})
+	if bool(consignment.get("agreement", false)):
+		lines.append("The carrier's agreement is witnessed for this current shipment.")
+	var custody := str(consignment.get("custody", ""))
+	if not custody.is_empty():
+		lines.append({"witnessed_transfer": "This shipment transfers under witnessed terms.",
+			"safe_hold": "This shipment stays in safe custody under the agreed terms.",
+			"carrier_return": "The carrier takes this shipment back with the corrected account."}.get(custody, ""))
+	var optional: Dictionary = road.get("optional", {})
+	if not optional.is_empty():
+		lines.append("Optional · late worker: " + {"unfound": "not yet found", "found": "stayed with an injured animal",
+			"treated": "animal treated; walk back safely", "safe": "returned safely", "completed": "your account recorded"}.get(str(optional.get("supper", "unfound")), ""))
+		lines.append("Optional · Last Bowl: " + {"unstarted": "keep food for late arrivals", "portioned": "portions kept; record the work",
+			"completed": "your account recorded"}.get(str(optional.get("last_bowl", "unstarted")), ""))
+	_road.text = "\n".join(lines)
+	if not convoy.is_empty():
+		_convoy.text = "Field convoy · " + str(convoy.get("mode", "wait")).capitalize() + "\n" + str(convoy.get("status", ""))
+		var allowed := bool(convoy.get("can_command", false))
+		if not allowed:
+			_convoy.text += "\nThe story owner directs the carts. Odo's field orders are separate."
+		for button: Button in _convoy_buttons.values():
+			button.disabled = not allowed
+
+func _request_convoy(command: String) -> void:
+	var convoy: Dictionary = (_state.get("road", {}) as Dictionary).get("convoy", {})
+	if bool(convoy.get("can_command", false)) and command in ["follow", "wait", "regroup", "help"]:
+		convoy_requested.emit(command)
 
 func _apply_bank(bank: Dictionary) -> void:
 	_bank.visible = not bank.is_empty()

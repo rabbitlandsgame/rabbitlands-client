@@ -778,6 +778,583 @@
           "text": "Each party member decides whether this outcome becomes their own story. Helping this work preserves an uncommitted personal account."
         }
       ]
+    },
+    "measure.road.departure": {
+      "title": "Six Workers, Twelve Names",
+      "duration": 20.0,
+      "anchor": "oyun",
+      "fov": 52.0,
+      "shots": [
+        {
+          "t": 0,
+          "position": [
+            7,
+            6,
+            10
+          ],
+          "target": [
+            0,
+            1,
+            -1
+          ],
+          "readouts": false,
+          "anchor": "briefing"
+        },
+        {
+          "t": 4,
+          "position": [
+            3,
+            2.3,
+            4
+          ],
+          "target": [
+            0,
+            1.2,
+            0
+          ],
+          "readouts": false,
+          "cut": true
+        },
+        {
+          "t": 11,
+          "position": [
+            4,
+            4,
+            7
+          ],
+          "target": [
+            0,
+            1,
+            0
+          ],
+          "readouts": true,
+          "cut": true,
+          "anchor": "load"
+        },
+        {
+          "t": 16,
+          "position": [
+            4,
+            3.0,
+            6
+          ],
+          "target": [
+            0,
+            1.1,
+            0
+          ],
+          "readouts": false,
+          "cut": true
+        }
+      ],
+      "cues": [
+        {
+          "at": 0,
+          "actor": "oyun",
+          "action": "emote_point",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "face": "odo"
+        },
+        {
+          "at": 4,
+          "actor": "odo",
+          "action": "emote_nod",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "face": "oyun"
+        },
+        {
+          "at": 8,
+          "actor": "worker",
+          "action": "emote_point",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "face": "load"
+        },
+        {
+          "at": 12,
+          "actor": "odo",
+          "action": "walk",
+          "offset": [
+            1,
+            0,
+            0
+          ],
+          "face": "oyun",
+          "move_seconds": 2.5
+        }
+      ],
+      "lines": [
+        {
+          "at": 0,
+          "speaker": "Oyun Tarag",
+          "text": "I fed six workers. These permits claim twelve. The road cannot eat a name on paper."
+        },
+        {
+          "at": 4,
+          "speaker": "Odo Fenn",
+          "text": "Then count the hands and the loads separately. Tell us what moved, and who was left carrying it."
+        },
+        {
+          "at": 8,
+          "speaker": "Farm Works Hand",
+          "text": "We shifted extra loads without changing the papers. Brace the rear, protect the supplies, or share the weight."
+        },
+        {
+          "at": 13,
+          "speaker": "Oyun Tarag",
+          "text": "You are free to leave, guests. Soup buys no service here. Keep two bowls for whoever reaches us late."
+        },
+        {
+          "at": 17,
+          "speaker": "",
+          "text": "Inspect and prepare both carts in play. The field food is finite; a safe departure can wait."
+        }
+      ]
+    },
+    "measure.road.herd": {
+      "title": "The Road Belongs to Them Too",
+      "duration": 14.0,
+      "anchor": "herd",
+      "fov": 55.0,
+      "shots": [
+        {
+          "t": 0,
+          "position": [
+            7,
+            6,
+            10
+          ],
+          "target": [
+            0,
+            1,
+            0
+          ],
+          "readouts": false
+        },
+        {
+          "t": 5,
+          "position": [
+            2,
+            3.5,
+            6
+          ],
+          "target": [
+            0,
+            1,
+            0
+          ],
+          "readouts": true,
+          "cut": true,
+          "anchor": "rear_slip_1"
+        },
+        {
+          "t": 10,
+          "position": [
+            5,
+            5,
+            8
+          ],
+          "target": [
+            0,
+            1,
+            0
+          ],
+          "readouts": false,
+          "cut": true,
+          "anchor": "warning_1"
+        }
+      ],
+      "cues": [
+        {
+          "at": 0,
+          "actor": "worker",
+          "action": "emote_point",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "face": "herd"
+        },
+        {
+          "at": 4,
+          "actor": "odo",
+          "action": "emote_nod",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "face": "herd"
+        }
+      ],
+      "lines": [
+        {
+          "at": 0,
+          "speaker": "Odo Fenn",
+          "text": "Crown stags ahead. Hold the carts. They need room to cross, and we need a firm place to stand."
+        },
+        {
+          "at": 5,
+          "speaker": "Farm Works Hand",
+          "text": "Inspect the stopped load. Anchor it, guide a safe diversion, or take weight off together."
+        },
+        {
+          "at": 10,
+          "speaker": "",
+          "text": "Complete the field work and let the harmless herd clear. Watching this scene does not clear the road."
+        }
+      ]
+    },
+    "measure.road.rear_cart": {
+      "title": "What the Rear Cart Carries",
+      "duration": 15.0,
+      "anchor": "cart_rear",
+      "fov": 53.0,
+      "shots": [
+        {
+          "t": 0,
+          "position": [
+            3,
+            4,
+            7
+          ],
+          "target": [
+            0,
+            1,
+            0
+          ],
+          "readouts": true
+        },
+        {
+          "t": 5,
+          "position": [
+            5,
+            4.5,
+            7
+          ],
+          "target": [
+            0,
+            1,
+            0
+          ],
+          "readouts": false,
+          "cut": true,
+          "anchor": "cart_rear"
+        },
+        {
+          "t": 11,
+          "position": [
+            3,
+            4,
+            6
+          ],
+          "target": [
+            0,
+            1,
+            0
+          ],
+          "readouts": true,
+          "cut": true
+        }
+      ],
+      "cues": [
+        {
+          "at": 1,
+          "actor": "worker",
+          "action": "emote_point",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "face": "rear_slip_2"
+        },
+        {
+          "at": 6,
+          "actor": "odo",
+          "action": "emote_nod",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "face": "rear_slip_2"
+        }
+      ],
+      "lines": [
+        {
+          "at": 0,
+          "speaker": "Odo Fenn",
+          "text": "Our first stop is saved. Softer ground lies ahead; keep watching what the rear cart carries when we reach it."
+        },
+        {
+          "at": 5,
+          "speaker": "Farm Works Hand",
+          "text": "A brace needs a sound anchor. A diversion needs a guide. Rebalancing means handling the load, not just naming a plan."
+        },
+        {
+          "at": 11,
+          "speaker": "",
+          "text": "Bring the carts to the next safe point in play. Then take the public road through Reedfall to Tobin at Brambleshaw."
+        }
+      ]
+    },
+    "measure.road.consignment": {
+      "title": "One Shipment, Witnessed Terms",
+      "duration": 20.0,
+      "anchor": "tobin",
+      "fov": 52.0,
+      "shots": [
+        {
+          "t": 0,
+          "position": [
+            -4,
+            3,
+            5
+          ],
+          "target": [
+            0,
+            1.2,
+            0
+          ],
+          "readouts": false
+        },
+        {
+          "t": 6,
+          "position": [
+            3,
+            2.6,
+            1.5
+          ],
+          "target": [
+            0,
+            1.1,
+            0
+          ],
+          "readouts": false,
+          "cut": true,
+          "anchor_actor": "carrier"
+        },
+        {
+          "t": 11,
+          "position": [
+            4,
+            5,
+            8
+          ],
+          "target": [
+            0,
+            1,
+            0
+          ],
+          "readouts": true,
+          "cut": true,
+          "anchor": "cart_consignment"
+        },
+        {
+          "t": 16,
+          "position": [
+            -4,
+            3,
+            5
+          ],
+          "target": [
+            0,
+            1.2,
+            0
+          ],
+          "readouts": false,
+          "cut": true
+        }
+      ],
+      "cues": [
+        {
+          "at": 0,
+          "actor": "tobin",
+          "action": "emote_point",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "face": "carrier"
+        },
+        {
+          "at": 5,
+          "actor": "carrier",
+          "action": "emote_nod",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "face": "tobin"
+        },
+        {
+          "at": 11,
+          "actor": "odo",
+          "action": "emote_point",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "face": "inspection"
+        }
+      ],
+      "lines": [
+        {
+          "at": 0,
+          "speaker": "Tobin Ware",
+          "text": "I can swear how many wheels passed my post. I cannot swear which work received the fitting.",
+          "variants": {
+            "remembered_casks": "I remember your boat and toll observations. They are leads, not a claim on the palace stores. This carrier must agree to this inspection.",
+            "remembered_palace": "You asked about the sealed palace casks before. They stay sealed. Here we need witnessed terms from the current carrier."
+          }
+        },
+        {
+          "at": 5,
+          "speaker": "Current Carrier",
+          "text": "Ask me for witnessed terms on this shipment. If it cannot leave safely, record the safety stop and the reason."
+        },
+        {
+          "at": 10,
+          "speaker": "Odo Fenn",
+          "text": "Compare the seal, weight and fittings with the current delivery account. The palace stores remain sealed."
+        },
+        {
+          "at": 15,
+          "speaker": "Tobin Ware",
+          "text": "I will witness the agreed inspection and custody. My toll post grants no general claim over another person’s cargo."
+        }
+      ]
+    },
+    "measure.road.resolved": {
+      "title": "An Account That Can Travel",
+      "duration": 17.0,
+      "anchor": "carrier",
+      "fov": 53.0,
+      "shots": [
+        {
+          "t": 0,
+          "position": [
+            5,
+            4,
+            8
+          ],
+          "target": [
+            -2,
+            1,
+            0
+          ],
+          "readouts": false
+        },
+        {
+          "t": 7,
+          "position": [
+            -3,
+            2.5,
+            5
+          ],
+          "target": [
+            0,
+            1.2,
+            0
+          ],
+          "readouts": false,
+          "cut": true
+        },
+        {
+          "t": 12,
+          "position": [
+            5,
+            5,
+            9
+          ],
+          "target": [
+            0,
+            1,
+            0
+          ],
+          "readouts": true,
+          "cut": true,
+          "anchor": "inspection"
+        }
+      ],
+      "cues": [
+        {
+          "at": 0,
+          "actor": "tobin",
+          "action": "emote_nod",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "face": "carrier"
+        },
+        {
+          "at": 4,
+          "actor": "carrier",
+          "action": "emote_nod",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "face": "tobin"
+        },
+        {
+          "at": 8,
+          "actor": "odo",
+          "action": "emote_nod",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "face": "carrier"
+        }
+      ],
+      "lines": [
+        {
+          "at": 0,
+          "speaker": "Tobin Ware",
+          "text": "This current shipment has a checkable account and witnessed terms.",
+          "variants": {
+            "witnessed_transfer": "This shipment transfers under the carrier’s witnessed agreement. Record its destination and who receives it.",
+            "safe_hold": "This shipment stays in safe custody under the agreed terms. Record the reason and who may release it.",
+            "carrier_return": "The carrier takes this shipment back under the witnessed terms, with the delivery account corrected."
+          }
+        },
+        {
+          "at": 6,
+          "speaker": "Current Carrier",
+          "text": "Keep the load, the route and the terms together. A permit is no substitute for the work we actually carried."
+        },
+        {
+          "at": 11,
+          "speaker": "Odo Fenn",
+          "text": "Edda at Greenlight is asking about the causeway crews. She should hear what these carts and workers proved."
+        },
+        {
+          "at": 15,
+          "speaker": "",
+          "text": "Each party member chooses whether to record this outcome or keep helping without committing their own account."
+        }
+      ]
     }
   }
 }
