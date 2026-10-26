@@ -13,6 +13,8 @@ const CapeEmblems := preload("res://src/actors/cape_emblems.gd")
 const GLB_MESH_EXTRAS := preload("res://src/actors/glb_mesh_extras.gd")
 const WARDROBE_SHIRT_FIT := preload("res://src/actors/wardrobe_shirt_fit.gd")
 const QUIVER_STRAP_FIT := preload("res://src/actors/quiver_strap_fit.gd")
+const CHARACTER_PROPORTIONS := preload("res://src/actors/character_proportions.gd")
+const PORTRAIT_GROOM := preload("res://src/actors/portrait_groom.gd")
 const WORLD_LABEL_STYLE := preload("res://src/ui/world_label_style.gd")
 const TextColors := preload("res://src/ui/text_colors.gd")
 const ARCHIVED_MODEL_POLICY := preload("res://src/actors/archived_model_policy.gd")
@@ -303,6 +305,7 @@ var _weapon_carry: SkeletonModifier3D = null
 var _attachment_bones: Dictionary = {}
 var _model_config: Dictionary = {}
 var _appearance: Dictionary = {}
+var _portrait_scale := Vector3.ONE
 var _face_material: ShaderMaterial
 var _face_group_materials: Dictionary = {}
 var _skin_materials: Dictionary = {}
@@ -482,6 +485,7 @@ static var _wardrobe_texture_cache: Dictionary = {}
 static func clear_wardrobe_texture_cache() -> void:
 	_wardrobe_texture_cache.clear()
 	NecklineSkin.clear()
+	CHARACTER_PROPORTIONS.clear()
 ## The speech bubble sits above the name instead, and wraps well short of the
 ## screen it is now measured against.
 const SPEECH_BUBBLE_RISE := 28.0
@@ -654,6 +658,7 @@ func configure(dto: Dictionary, adapter: CoordinateAdapter,
 
 func apply_appearance_variants(appearance: Dictionary) -> void:
 	_appearance = appearance.duplicate()
+	_apply_character_proportions()
 	if _native_skeleton == null:
 		return
 	var culture: String = str(_model_config.get("culture", "luminous"))
@@ -722,6 +727,8 @@ func apply_appearance_variants(appearance: Dictionary) -> void:
 		for node: Node in nodes:
 			if node is MeshInstance3D and node.has_meta("neck_source"):
 				NecklineSkin.refresh_materials(node as MeshInstance3D)
+	if _silhouette != null and _silhouette.is_enabled():
+		_silhouette.rebuild()
 
 func _set_appearance_visible(mesh_node: MeshInstance3D, visible_by_style: bool) -> void:
 	# Appearance owns whether a wardrobe surface exists at all; equipment only
@@ -1795,6 +1802,28 @@ func set_boss_rank(value: int) -> void:
 		_boss_rank_label.position.y = banner_head_height() + NAMEPLATE_CLEARANCE
 	_refresh_overhead()
 
+## Keep scale in the visual hierarchy, after all named rest/bind fitting.
+## Mounted seating records that hierarchy's neutral transform, so update its
+## reference too when an existing player changes proportions while riding.
+func _uses_portrait_customization() -> bool:
+	return str(_model_config.get("culture", "")) == "luminous" and str(_model_config.get("bodyTemplate", "")) in ["luminous_male", "luminous_female"]
+
+func _apply_character_proportions() -> void:
+	var next := CHARACTER_PROPORTIONS.visual_scale(_appearance) if _uses_portrait_customization() else Vector3.ONE
+	if next.is_equal_approx(_portrait_scale):
+		return
+	var ratio := next / _portrait_scale
+	_portrait_scale = next
+	if is_instance_valid(_mount_visual):
+		var seat_pose: RefCounted = _mount_visual.get("pose")
+		if seat_pose != null:
+			var rest: Transform3D = seat_pose.get("visual_rest")
+			rest.basis = rest.basis * Basis.from_scale(ratio)
+			rest.origin.y *= ratio.y
+			seat_pose.set("visual_rest", rest)
+			seat_pose.set("baseline_pelvis", (seat_pose.get("baseline_pelvis") as Vector3) * ratio)
+	_apply_model_scale()
+
 func set_server_scale(value: float) -> void:
 	var next := maxf(0.01, value)
 	if is_equal_approx(next, server_scale):
@@ -1821,7 +1850,11 @@ func _apply_model_scale() -> void:
 	for node_name: String in ["NativeModel", "MissingModelFallback"]:
 		var model := get_node_or_null(node_name) as Node3D
 		if model != null:
-			model.scale = Vector3.ONE * total
+			model.scale = _portrait_scale * total
+			if node_name == "NativeModel" and _uses_portrait_customization() and _native_body_bounds.size.y > 0.0 and not is_instance_valid(_mount_visual):
+				# Scale around the authored sole, including source models whose
+				# floor is offset from their rig origin.
+				model.position.y = -_native_body_bounds.position.y * total * _portrait_scale.y
 			# Measured in gameplay metres after import scale. The logical tile,
 			# picking capsule and ground markers retain their server positions.
 			model.position.z = maxf(0.0, float((_model_config.get("import", {}) as Dictionary).get(
@@ -1836,7 +1869,7 @@ func _apply_model_scale() -> void:
 func head_height() -> float:
 	if is_instance_valid(_native_model) and _native_body_bounds.size.y > 0.0:
 		return (_native_model.transform * _native_body_bounds).end.y
-	return (NAMEPLATE_HEIGHT - NAMEPLATE_CLEARANCE) * server_scale
+	return (NAMEPLATE_HEIGHT - NAMEPLATE_CLEARANCE) * server_scale * _portrait_scale.y
 
 ## Mounted banners follow the actor at a fixed seat-relative height, while
 ## the visible rider continues to follow the mount's animated saddle.
@@ -2645,7 +2678,7 @@ func _paced_travel_action(action: StringName) -> StringName:
 	if _hastened and action == &"walk":
 		return &"run"
 	if _is_creature and action == &"walk" and resolver != null:
-		var scale := _small_creature_scale * server_scale
+		var scale := _small_creature_scale * server_scale * _portrait_scale.z
 		var walk := resolver.stride_speed_for_action(&"walk", scale)
 		var run := resolver.stride_speed_for_action(&"run", scale)
 		if walk > 0 and run > walk and _travel_speed() > walk * 1.8:
@@ -3192,6 +3225,7 @@ func _refresh_wardrobe_cover() -> void:
 	var native_model: Node3D = get_node_or_null("NativeModel") as Node3D
 	if native_model == null:
 		return
+	CHARACTER_PROPORTIONS.restore(native_model)
 	var torso_visual: int = int(_equipment_visuals.get(BODY_PART, 0))
 	var covered: bool = torso_visual != 0
 	var torso_model := {}
@@ -3287,6 +3321,12 @@ func _refresh_wardrobe_cover() -> void:
 			_set_mesh_color(mesh_node, want)
 			continue
 		material.albedo_color = want
+
+	# Fit after coverage selects the current canonical surface; grooming reads
+	# this final face and therefore follows every shape and outfit transition.
+	if _uses_portrait_customization():
+		CHARACTER_PROPORTIONS.apply(native_model, _native_skeleton, _appearance)
+		PORTRAIT_GROOM.apply(native_model, _native_skeleton, _appearance, _model_config)
 
 func _refresh_body_surface_visibility() -> void:
 	var native_model: Node3D = get_node_or_null("NativeModel") as Node3D
@@ -4150,7 +4190,7 @@ func _playback_speed_for(action: StringName) -> float:
 		var clip := resolver.clip_for_action(action)
 		if animation_player.has_animation(clip):
 			return animation_player.get_animation(clip).length / _death_animation_seconds
-	var stride: float = resolver.stride_speed_for_action(action, _small_creature_scale * server_scale)
+	var stride: float = resolver.stride_speed_for_action(action, _small_creature_scale * server_scale * _portrait_scale.z)
 	if stride <= 0.0:
 		return resolver.playback_speed_for_action(action)
 	var rate := clampf(_travel_speed() / stride, 0.35, 3.5)
