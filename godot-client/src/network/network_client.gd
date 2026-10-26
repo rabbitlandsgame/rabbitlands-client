@@ -505,7 +505,7 @@ func use_map_object(object_id: int) -> Error:
 	return send_frame(EloriaProtocol.use_map_object(object_id))
 
 func campaign_request(action: String) -> Error:
-	if action not in ["start", "resume", "leave", "hint", "join", "own", "bank", "road", "continue"]:
+	if action not in ["start", "resume", "leave", "hint", "join", "own", "bank", "road", "lamps", "continue"]:
 		return ERR_INVALID_PARAMETER
 	return send_chat("#campaign " + action)
 
@@ -528,6 +528,11 @@ func campaign_convoy(command: String) -> Error:
 	if command not in ["follow", "wait", "regroup", "help"]:
 		return ERR_INVALID_PARAMETER
 	return send_chat("#campaign convoy " + command)
+
+func campaign_predict(run_id: String, trial_revision: int, candidate: int) -> Error:
+	if not _campaign_identifier(run_id) or trial_revision < 0 or candidate < 0 or candidate > 3:
+		return ERR_INVALID_PARAMETER
+	return send_chat("#campaign predict %s %d %d" % [run_id, trial_revision, candidate])
 
 static func _campaign_identifier(value: String) -> bool:
 	if value.is_empty() or value.length() > 256:

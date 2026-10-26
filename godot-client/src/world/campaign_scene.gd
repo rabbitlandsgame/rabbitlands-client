@@ -192,6 +192,11 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 		cancel("map_changed")
 		return
 	var scene: Dictionary = snapshot.get("scene", {})
+	if str(snapshot.get("kind", "")) == "lamps" \
+			and str(scene.get("id", "")) in ["measure.lamps.admission", "measure.lamps.resolved"] \
+			and not bool((snapshot.get("lamps", {}) as Dictionary).get("evidence_secure", false)):
+		cancel("evidence_not_secure")
+		return
 	var next_token := str(scene.get("token", ""))
 	var next_run := str(snapshot.get("run_id", ""))
 	if is_active() and (_token != next_token or _run != next_run or _map != here):
@@ -230,6 +235,10 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 		if str(snapshot.get("kind", "")) == "road":
 			for cart: Dictionary in (snapshot.get("road", {}) as Dictionary).get("carts", []):
 				raw_anchors["cart_" + str(cart.id)] = cart.tile
+		if str(snapshot.get("kind", "")) == "lamps":
+			var equipment_tile: Array = (snapshot.get("lamps", {}) as Dictionary).get("equipment_tile", raw_anchors.get("equipment", []))
+			if equipment_tile.size() == 2:
+				raw_anchors.equipment_current = equipment_tile
 		if _adapter != null:
 			for key: String in raw_anchors:
 				var tile: Array = raw_anchors[key]
@@ -481,10 +490,15 @@ func update_ambient(snapshot: Dictionary, actor_nodes: Dictionary, adapter: Coor
 	if is_active():
 		return
 	var mechanism: Dictionary = snapshot.get("mechanism", {})
+	var lamps: Dictionary = snapshot.get("lamps", {})
+	var lamps_hold := str(snapshot.get("kind", "")) == "lamps" \
+		and map_key(str(snapshot.get("map", ""))) == "greenlight" \
+		and "edda" in str(lamps.get("holder", "")).to_lower() and bool(lamps.get("holder_active", false))
 	var wanted := bool(snapshot.get("active", false)) and map_key(str(snapshot.get("map", ""))) == "twinbrook" \
 		and bool(mechanism.get("bypass_open", false)) and not bool(mechanism.get("crew_safe", false))
+	wanted = wanted or bool(snapshot.get("active", false)) and lamps_hold
 	var bindings: Dictionary = snapshot.get("actors", {})
-	var actor_value: Variant = actor_nodes.get(int(bindings.get("voss", -1)))
+	var actor_value: Variant = actor_nodes.get(int(bindings.get("edda" if lamps_hold else "voss", -1)))
 	if not wanted or not is_instance_valid(actor_value) or not actor_value is Node3D:
 		_release_ambient()
 		return
@@ -499,13 +513,19 @@ func update_ambient(snapshot: Dictionary, actor_nodes: Dictionary, adapter: Coor
 	var post := _ambient_post.origin
 	var face := post + Vector3.FORWARD
 	var anchors: Dictionary = snapshot.get("anchors", {})
-	var anchor: Array = anchors.get("sluice_prop", anchors.get("bypass", []))
-	var work: Array = anchors.get("voss_work", [])
+	var anchor: Array = anchors.get("gate", []) if lamps_hold else anchors.get("sluice_prop", anchors.get("bypass", []))
+	var work: Array = anchors.get("edda_work", []) if lamps_hold else anchors.get("voss_work", [])
 	if adapter != null:
 		if work.size() == 2:
 			post = adapter.tile_center(int(work[0]), int(work[1]))
 		if anchor.size() == 2:
 			face = adapter.tile_center(int(anchor[0]), int(anchor[1]))
+	# The real companion must reach the held post first. The one-metre
+	# reversible step only brings her hands to the already held gate surface.
+	if lamps_hold and _ambient_elapsed <= maxf(0, delta) \
+			and Vector2(actor.global_position.x - post.x, actor.global_position.z - post.z).length() > 0.8:
+		_release_ambient()
+		return
 	var at := post + Vector3.BACK * minf(1.0, _ambient_elapsed / 0.8)
 	if surface_sample.is_valid():
 		var height: Variant = surface_sample.call(at)

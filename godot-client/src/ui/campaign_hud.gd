@@ -6,6 +6,7 @@ signal action_requested(action: String)
 signal decision_requested(action: String, run_id: String, revision: int)
 signal companion_requested(command: String)
 signal convoy_requested(command: String)
+signal prediction_requested(run_id: String, revision: int, candidate: int)
 signal transcript_requested
 signal reduced_motion_changed(value: bool)
 
@@ -16,6 +17,9 @@ var _hint: Label
 var _notice: Label
 var _bank: Label
 var _road: Label
+var _lamps: Label
+var _prediction_actions: HFlowContainer
+var _prediction_buttons: Array[Button] = []
 var _party: Label
 var _adoption: Label
 var _adoption_actions: HFlowContainer
@@ -88,6 +92,20 @@ func _build() -> void:
 	_road.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_road.add_theme_font_size_override("font_size", 14)
 	column.add_child(_road)
+	_lamps = Label.new()
+	_lamps.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_lamps.add_theme_font_size_override("font_size", 14)
+	column.add_child(_lamps)
+	_prediction_actions = HFlowContainer.new()
+	_prediction_actions.add_theme_constant_override("h_separation", 5)
+	_prediction_actions.add_theme_constant_override("v_separation", 5)
+	column.add_child(_prediction_actions)
+	for candidate: int in range(4):
+		var button := Button.new()
+		button.text = "Interval " + ["I", "II", "III", "IV"][candidate]
+		button.pressed.connect(_request_prediction.bind(candidate))
+		_prediction_actions.add_child(button)
+		_prediction_buttons.append(button)
 	_party = Label.new()
 	_party.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_party.add_theme_font_size_override("font_size", 14)
@@ -202,6 +220,7 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 	_notice.visible = not _notice.text.is_empty()
 	_apply_bank(snapshot.get("bank", {}))
 	_apply_road(snapshot.get("road", {}))
+	_apply_lamps(snapshot.get("lamps", {}))
 	_apply_party(party, snapshot.get("adoption", {}))
 	_apply_companion(snapshot.get("companion", {}))
 	_entry.visible = (not active or travelling) and bool(snapshot.get("available", false)) and not can_own
@@ -249,7 +268,7 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 
 func _request_entry() -> void:
 	var kind := str(_state.get("kind", ""))
-	action_requested.emit(kind if kind in ["bank", "road"] else "resume" if bool(_state.get("started", false)) else "start")
+	action_requested.emit(kind if kind in ["bank", "road", "lamps"] else "resume" if bool(_state.get("started", false)) else "start")
 
 func _apply_road(road: Dictionary) -> void:
 	_road.visible = not road.is_empty()
@@ -305,6 +324,79 @@ func _apply_road(road: Dictionary) -> void:
 			_convoy.text += "\nThe story owner directs the carts. Odo's field orders are separate."
 		for button: Button in _convoy_buttons.values():
 			button.disabled = not allowed
+
+func _apply_lamps(lamps: Dictionary) -> void:
+	_lamps.visible = not lamps.is_empty()
+	var local_work := bool(_state.get("active", false)) and (_state.get("travel", {}) as Dictionary).is_empty() \
+		and EloriaProtocol.map_id_from_reference(str(_state.get("map", ""))) == _current_map
+	var prediction: Dictionary = lamps.get("prediction", {})
+	var at_lesson := str(_state.get("key", "")) == "calibration" or bool(prediction.get("can_choose", false))
+	_prediction_actions.visible = bool(lamps.get("challenge", false)) and local_work and at_lesson
+	if lamps.is_empty():
+		return
+	var settings: Dictionary = lamps.get("settings", {})
+	var lines: PackedStringArray = []
+	var worker := str(lamps.get("worker_status", ""))
+	if not worker.is_empty():
+		lines.append("Teren · " + worker.replace("_", " "))
+	var problem := str(lamps.get("last_error", ""))
+	if not problem.is_empty():
+		lines.append(problem)
+	var holder := str(lamps.get("holder", ""))
+	if holder == "edda":
+		holder = "Edda Tine"
+	if not holder.is_empty():
+		lines.append("Mechanism held by " + holder if bool(lamps.get("holder_active", false)) else holder + " is moving to the holding post.")
+	lines.append("Settings · marker %d / lamp height %d / drain %d" % [int(settings.get("marker", 0)), int(settings.get("shutter", 0)), int(settings.get("bleed", 0))])
+	lines.append("Interval %s · water %d\nTide %d + load %d − drain %d (minimum 0)" % [["I", "II", "III", "IV"][clampi(int(lamps.get("cycle", 0)), 0, 3)], int(lamps.get("water", 0)), int(lamps.get("tide", 0)), int(lamps.get("load", 0)), int(settings.get("bleed", 0))])
+	lines.append("Marker %d / beam %d / clearance %d\nLamp: %s %s · pointer: %s" % [int(lamps.get("marker_number", 1)), int(lamps.get("beam_height", 1)), int(lamps.get("clearance", 0)), str(lamps.get("lamp_shape", "")), str(lamps.get("lamp_word", "")), str(lamps.get("indicator", ""))])
+	var observations: Array = lamps.get("observations", [])
+	if not observations.is_empty() and at_lesson:
+		lines.append("Recorded tests:")
+		for observation: Dictionary in observations.slice(maxi(0, observations.size() - 4)):
+			lines.append("%s · water %d / clearance %d · %s %s" % [["I", "II", "III", "IV"][clampi(int(observation.get("cycle", 0)), 0, 3)], int(observation.get("water", 0)), int(observation.get("clearance", 0)), str(observation.get("lamp_shape", "")), str(observation.get("lamp_word", ""))])
+	var allowed := bool(prediction.get("can_choose", false)) and bool(lamps.get("challenge", false)) \
+		and bool(_state.get("active", false)) and (_state.get("travel", {}) as Dictionary).is_empty() \
+		and EloriaProtocol.map_id_from_reference(str(_state.get("map", ""))) == _current_map
+	for button: Button in _prediction_buttons:
+		button.disabled = not allowed # Every candidate has the same eligibility.
+	if bool(lamps.get("challenge", false)) and at_lesson:
+		lines.append("The visible load changed. Choose an interval, then advance the cycle and take a fresh reading there.")
+		if not allowed:
+			lines.append("Approach the test station to choose an interval.")
+	var candidate: Variant = prediction.get("candidate")
+	if candidate != null and at_lesson:
+		lines.append("Your prediction: interval " + ["I", "II", "III", "IV"][clampi(int(candidate), 0, 3)])
+	var feedback := str(prediction.get("feedback", ""))
+	if not feedback.is_empty() and at_lesson:
+		lines.append(feedback)
+	if bool(lamps.get("evidence_secure", false)):
+		lines.append("The equipment and independent readings are secure.")
+	var inheritance: Dictionary = lamps.get("inheritance", {})
+	if bool(inheritance.get("worker_ally", false)):
+		lines.append("Nessa's safe return is recorded in the crew account.")
+	if bool(inheritance.get("refuge_provisions", false)):
+		lines.append("The late arrivals' provisions remain recorded at Oyun's field kitchen.")
+	for reading: Dictionary in lamps.get("evidence_readings", []):
+		lines.append("%s · measured %d / claimed %d" % [str(reading.get("post", "Equipment")).replace("_", " ").capitalize(), int(reading.get("value", 0)), int(reading.get("claimed", 0))])
+	for text: String in [str(lamps.get("context", "")), str(lamps.get("consequence", "")), str(lamps.get("legacy_advice", ""))]:
+		if not text.is_empty():
+			lines.append(text)
+	var board_tile: Array = (_state.get("anchors", {}) as Dictionary).get("board", [])
+	var near_board := board_tile.size() == 2 and _local_tile.distance_to(Vector2i(board_tile[0], board_tile[1])) <= 4
+	if at_lesson or near_board or bool(lamps.get("board_done", false)):
+		var instructions := str(lamps.get("board_text", ""))
+		if not instructions.is_empty():
+			lines.append(instructions)
+	_lamps.text = "\n".join(lines)
+
+func _request_prediction(candidate: int) -> void:
+	var prediction: Dictionary = (_state.get("lamps", {}) as Dictionary).get("prediction", {})
+	if not bool(prediction.get("can_choose", false)) or candidate < 0 or candidate > 3 \
+			or not bool(_state.get("active", false)) or not (_state.get("travel", {}) as Dictionary).is_empty() \
+			or EloriaProtocol.map_id_from_reference(str(_state.get("map", ""))) != _current_map:
+		return
+	prediction_requested.emit(str(_state.get("run_id", "")), int(prediction.get("revision", -1)), candidate)
 
 func _request_convoy(command: String) -> void:
 	var convoy: Dictionary = (_state.get("road", {}) as Dictionary).get("convoy", {})

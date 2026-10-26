@@ -1355,6 +1355,566 @@
           "text": "Each party member chooses whether to record this outcome or keep helping without committing their own account."
         }
       ]
+    },
+    "measure.lamps.arrival": {
+      "title": "When the Lamps Answer",
+      "duration": 19.0,
+      "anchor": "edda",
+      "fov": 53.0,
+      "shots": [
+        {
+          "t": 0,
+          "position": [
+            8,
+            7,
+            10
+          ],
+          "target": [
+            0,
+            1,
+            -6
+          ],
+          "readouts": false,
+          "anchor": "briefing"
+        },
+        {
+          "t": 4,
+          "position": [
+            -3,
+            2.6,
+            4
+          ],
+          "target": [
+            0,
+            1.2,
+            0
+          ],
+          "readouts": false,
+          "cut": true
+        },
+        {
+          "t": 10,
+          "position": [
+            1,
+            10,
+            15
+          ],
+          "target": [
+            1,
+            1.2,
+            0
+          ],
+          "readouts": true,
+          "cut": true,
+          "anchor": "control"
+        },
+        {
+          "t": 16,
+          "position": [
+            -3,
+            2.6,
+            4
+          ],
+          "target": [
+            0,
+            1.2,
+            0
+          ],
+          "readouts": false,
+          "cut": true
+        }
+      ],
+      "cues": [
+        {
+          "at": 0,
+          "actor": "edda",
+          "action": "emote_greet",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "face": "control"
+        },
+        {
+          "at": 6,
+          "actor": "edda",
+          "action": "emote_nod",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "face": "marker"
+        },
+        {
+          "at": 12,
+          "actor": "edda",
+          "action": "walk",
+          "offset": [
+            0.8,
+            0,
+            0
+          ],
+          "face": "control",
+          "move_seconds": 2
+        }
+      ],
+      "lines": [
+        {
+          "at": 0,
+          "speaker": "Edda Tine",
+          "text": "Here we can step the work cycle ourselves. Nobody must wait for the tide or the night.",
+          "variants": {
+            "safe_hold": "Tobin’s shipment stays under witnessed hold. We will test the equipment already here, with its copied authorization.",
+            "carrier_return": "The carrier took that consignment back under the recorded terms. This local fixture still needs an independent test.",
+            "witnessed_transfer": "Your witnessed transfer identifies which fitting was meant for this work. Compare that account with what is actually installed."
+          }
+        },
+        {
+          "at": 5,
+          "speaker": "Edda Tine",
+          "text": "Change one setting. Watch the water mark, the lamp height and the pointer answer it. A bright lamp alone proves little."
+        },
+        {
+          "at": 11,
+          "speaker": "",
+          "text": "Advance, hold and record the controlled test. The words, shapes and readings carry the same information as the light."
+        },
+        {
+          "at": 16,
+          "speaker": "Edda Tine",
+          "text": "Then the load changes. Use your own readings to choose an interval, and test that prediction in play."
+        }
+      ]
+    },
+    "measure.lamps.rescue": {
+      "title": "A Worker Between the Bays",
+      "duration": 16.0,
+      "anchor": "worker",
+      "fov": 54.0,
+      "shots": [
+        {
+          "t": 0,
+          "position": [
+            4,
+            4,
+            7
+          ],
+          "target": [
+            0,
+            1,
+            0
+          ],
+          "readouts": false,
+          "anchor_actor": "worker"
+        },
+        {
+          "t": 5,
+          "position": [
+            5,
+            5,
+            8
+          ],
+          "target": [
+            0,
+            1,
+            0
+          ],
+          "readouts": true,
+          "cut": true,
+          "anchor": "refuge_1"
+        },
+        {
+          "t": 11,
+          "position": [
+            4,
+            4,
+            7
+          ],
+          "target": [
+            0,
+            1,
+            0
+          ],
+          "readouts": false,
+          "cut": true,
+          "anchor": "gate"
+        }
+      ],
+      "cues": [
+        {
+          "at": 0,
+          "actor": "worker",
+          "action": "emote_greet",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "face": "refuge_1"
+        },
+        {
+          "at": 5,
+          "actor": "edda",
+          "action": "emote_greet",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "face": "gate"
+        }
+      ],
+      "lines": [
+        {
+          "at": 0,
+          "speaker": "Teren Wick",
+          "text": "I can reach the first refuge if someone makes the next stretch safe. Do not send me on a promise from the lamp alone."
+        },
+        {
+          "at": 5,
+          "speaker": "Edda Tine",
+          "text": "Protect the approach, fit a temporary brace, or work through the marked maintenance bays. I can hold a mechanism you have secured."
+        },
+        {
+          "at": 11,
+          "speaker": "",
+          "text": "A party can divide the work. Alone, direct Edda and move between stable refuges. A setback needs recovery, not a chapter restart."
+        }
+      ]
+    },
+    "measure.lamps.worker_safe": {
+      "title": "The Person Before the Permit",
+      "duration": 13.0,
+      "anchor": "worker",
+      "fov": 53.0,
+      "shots": [
+        {
+          "t": 0,
+          "position": [
+            4,
+            3,
+            6
+          ],
+          "target": [
+            0,
+            1.1,
+            0
+          ],
+          "readouts": false,
+          "anchor_actor": "worker"
+        },
+        {
+          "t": 6,
+          "position": [
+            4,
+            4,
+            7
+          ],
+          "target": [
+            0,
+            1,
+            0
+          ],
+          "readouts": true,
+          "cut": true,
+          "anchor": "equipment_current"
+        },
+        {
+          "t": 10,
+          "position": [
+            4,
+            3,
+            6
+          ],
+          "target": [
+            0,
+            1.1,
+            0
+          ],
+          "readouts": false,
+          "cut": true,
+          "anchor_actor": "worker"
+        }
+      ],
+      "cues": [
+        {
+          "at": 1,
+          "actor": "worker",
+          "action": "emote_nod",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "face": "edda"
+        },
+        {
+          "at": 6,
+          "actor": "edda",
+          "action": "emote_greet",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "face": "equipment_current"
+        }
+      ],
+      "lines": [
+        {
+          "at": 0,
+          "speaker": "Teren Wick",
+          "text": "I am on safe ground. Keep the refuge marks where the next crew can read them."
+        },
+        {
+          "at": 5,
+          "speaker": "Edda Tine",
+          "text": "Now make the local equipment safe: isolate it, move it under witness, or protect an independent measurement."
+        },
+        {
+          "at": 10,
+          "speaker": "",
+          "text": "Secure the equipment and the readings before asking who authorized the shortage."
+        }
+      ]
+    },
+    "measure.lamps.admission": {
+      "title": "Who Signed for the Fitting",
+      "duration": 21.0,
+      "anchor": "voss",
+      "fov": 53.0,
+      "shots": [
+        {
+          "t": 0,
+          "position": [
+            -4,
+            2.7,
+            5
+          ],
+          "target": [
+            0,
+            1.2,
+            0
+          ],
+          "readouts": false
+        },
+        {
+          "t": 7,
+          "position": [
+            4,
+            4,
+            7
+          ],
+          "target": [
+            0,
+            1,
+            0
+          ],
+          "readouts": true,
+          "cut": true,
+          "anchor": "equipment_current"
+        },
+        {
+          "t": 12,
+          "position": [
+            -4,
+            2.7,
+            5
+          ],
+          "target": [
+            0,
+            1.2,
+            0
+          ],
+          "readouts": false,
+          "cut": true
+        },
+        {
+          "t": 17,
+          "position": [
+            4,
+            3,
+            6
+          ],
+          "target": [
+            0,
+            1.2,
+            0
+          ],
+          "readouts": false,
+          "cut": true,
+          "anchor_actor": "edda"
+        }
+      ],
+      "cues": [
+        {
+          "at": 0,
+          "actor": "voss",
+          "action": "emote_nod",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "face": "edda"
+        },
+        {
+          "at": 7,
+          "actor": "voss",
+          "action": "emote_greet",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "face": "equipment_current"
+        },
+        {
+          "at": 12,
+          "actor": "edda",
+          "action": "emote_greet",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "face": "voss"
+        }
+      ],
+      "lines": [
+        {
+          "at": 0,
+          "speaker": "Serit Voss",
+          "text": "I moved fittings between urgent jobs. No single office would authorize the whole tradeoff, and I expected the coastal reserve to cover the next gap."
+        },
+        {
+          "at": 7,
+          "speaker": "Edda Tine",
+          "text": "These readings prove a shortage. They do not prove that the crews agreed to bear it."
+        },
+        {
+          "at": 12,
+          "speaker": "Serit Voss",
+          "text": "They did not. I hid which crew would wait. Helping at one gate did not make that account honest."
+        },
+        {
+          "at": 17,
+          "speaker": "Edda Tine",
+          "text": "Choose a public challenge, a protected examination, or limited cooperation under a witnessed condition. The evidence stays safe."
+        }
+      ]
+    },
+    "measure.lamps.resolved": {
+      "title": "Terms the Crew Can Read",
+      "duration": 16.0,
+      "anchor": "edda",
+      "fov": 53.0,
+      "shots": [
+        {
+          "t": 0,
+          "position": [
+            -4,
+            3,
+            6
+          ],
+          "target": [
+            0,
+            1.2,
+            0
+          ],
+          "readouts": false
+        },
+        {
+          "t": 6,
+          "position": [
+            5,
+            5,
+            8
+          ],
+          "target": [
+            0,
+            1,
+            -2
+          ],
+          "readouts": true,
+          "cut": true,
+          "anchor": "worker_safe"
+        },
+        {
+          "t": 11,
+          "position": [
+            -4,
+            3,
+            6
+          ],
+          "target": [
+            0,
+            1.2,
+            0
+          ],
+          "readouts": false,
+          "cut": true
+        }
+      ],
+      "cues": [
+        {
+          "at": 0,
+          "actor": "edda",
+          "action": "emote_nod",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "face": "voss"
+        },
+        {
+          "at": 5,
+          "actor": "voss",
+          "action": "emote_nod",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "face": "edda"
+        },
+        {
+          "at": 10,
+          "actor": "worker",
+          "action": "emote_greet",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "face": "service_lamp"
+        }
+      ],
+      "lines": [
+        {
+          "at": 0,
+          "speaker": "Edda Tine",
+          "text": "The work and its account are secured.",
+          "variants": {
+            "public": "The crews will challenge the account publicly. The readings and the hidden shortage remain on record.",
+            "protected": "The examination will protect the witnesses. Record the readings and state plainly what we are withholding.",
+            "conditional": "Voss may help only under the witnessed condition. No fresh borrowing disappears into an unspoken promise."
+          }
+        },
+        {
+          "at": 6,
+          "speaker": "Serit Voss",
+          "text": "The coast was promised as the remedy. Follow that reserve through the boat accounts; do not take my expectation as a delivery."
+        },
+        {
+          "at": 11,
+          "speaker": "",
+          "text": "Each party member chooses their own account. The service lamp and readable work instructions remain useful optional follow-ups."
+        }
+      ]
     }
   }
 }

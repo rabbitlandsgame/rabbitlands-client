@@ -292,6 +292,7 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"campaign_party_v1",
 	"campaign_bank_v1",
 	"campaign_road_v1",
+	"campaign_lamps_v1",
 	"actor16_v1",
 	"adjacent_actors_v1",
 	# Players within 80 tiles as actors, the rest as ELORIA_PRESENCE dots, and
@@ -3703,7 +3704,90 @@ static func decode_campaign(payload: PackedByteArray) -> Dictionary:
 			return {"type": "invalid", "error": "campaign_bank_progress"}
 	if not _campaign_road_valid(value.get("road", {})):
 		return {"type": "invalid", "error": "campaign_road"}
+	if not _campaign_lamps_valid(value.get("lamps", {})):
+		return {"type": "invalid", "error": "campaign_lamps"}
 	return {"type": "campaign", "state": value}
+
+static func _campaign_lamps_valid(lamps: Variant) -> bool:
+	if not lamps is Dictionary:
+		return false
+	if lamps.is_empty():
+		return true
+	for forbidden: String in ["safe_phase", "correct_candidate", "expected_answer"]:
+		if lamps.has(forbidden):
+			return false
+	var settings: Variant = lamps.get("settings", {})
+	if not settings is Dictionary:
+		return false
+	for setting: String in ["marker", "shutter", "bleed"]:
+		if settings.has(setting) and not _campaign_integer(settings[setting], 0, 2):
+			return false
+	for key: String in ["cycle", "tide", "load", "water", "clearance", "marker_number", "beam_height", "refuge_step"]:
+		var bounds: Array = {"cycle": [0, 3], "tide": [0, 2], "load": [0, 8], "water": [0, 16],
+			"clearance": [-16, 16], "marker_number": [1, 3], "beam_height": [1, 3], "refuge_step": [0, 4]}[key]
+		if lamps.has(key) and not _campaign_integer(lamps[key], bounds[0], bounds[1]):
+			return false
+	for key: String in ["lamp_word", "lamp_shape", "indicator", "holder", "worker_status", "context", "consequence", "board_text", "stage", "legacy_advice", "last_error"]:
+		if lamps.has(key) and not lamps[key] is String:
+			return false
+	for key: String in ["challenge", "evidence_secure", "lamp_done", "board_done", "holder_active", "route_ready"]:
+		if lamps.has(key) and not lamps[key] is bool:
+			return false
+	if lamps.get("approach", "") not in ["", "protect", "brace", "maintenance"] \
+			or lamps.get("evidence_method", "") not in ["", "isolate", "witnessed_move", "independent_measure"] \
+			or lamps.get("terms", "") not in ["", "public", "protected", "conditional"] \
+			or lamps.get("inherited_custody", "") not in ["", "witnessed_transfer", "safe_hold", "carrier_return"]:
+		return false
+	var prediction: Variant = lamps.get("prediction", {})
+	if lamps.has("equipment_tile") and not _campaign_tile(lamps.equipment_tile):
+		return false
+	if lamps.has("equipment_motion_seq") and not _campaign_integer(lamps.equipment_motion_seq, 0, 2147483647.0):
+		return false
+	var supplies: Variant = lamps.get("supplies", {})
+	if not supplies is Dictionary or not supplies.get("lamp_built", false) is bool \
+			or not _campaign_integer(supplies.get("lamp_fat", 1), 0, 1):
+		return false
+	var inheritance: Variant = lamps.get("inheritance", {})
+	if not inheritance is Dictionary or not inheritance.get("worker_ally", false) is bool \
+			or not inheritance.get("refuge_provisions", false) is bool:
+		return false
+	if not prediction is Dictionary or not _campaign_integer(prediction.get("revision", 0), 0, 2147483647.0) \
+			or prediction.get("status", "unselected") not in ["unselected", "selected", "contradicted", "verified"] \
+			or not prediction.get("feedback", "") is String or not prediction.get("can_choose", false) is bool:
+		return false
+	if prediction.get("candidate") != null and not _campaign_integer(prediction.candidate, 0, 3):
+		return false
+	var observations: Variant = lamps.get("observations", [])
+	var zones: Variant = lamps.get("unsafe_zones", [])
+	if not zones is Array or zones.size() > 8:
+		return false
+	for zone: Variant in zones:
+		if not zone is Dictionary or not zone.get("key") is String or not zone.get("active") is bool \
+				or not zone.get("bounds") is Array or zone.bounds.size() != 4:
+			return false
+		for coordinate: Variant in zone.bounds:
+			if not _campaign_integer(coordinate, -2147483648.0, 2147483647.0):
+				return false
+	var evidence: Variant = lamps.get("evidence_readings", [])
+	if not evidence is Array or evidence.size() > 32:
+		return false
+	for reading: Variant in evidence:
+		if not reading is Dictionary or not reading.get("post") is String \
+				or not _campaign_integer(reading.get("value"), -16, 16) \
+				or not _campaign_integer(reading.get("claimed"), 0, 16):
+			return false
+	if not observations is Array or observations.size() > 32:
+		return false
+	for reading: Variant in observations:
+		if not reading is Dictionary or not _campaign_integer(reading.get("cycle"), 0, 3):
+			return false
+		for key: String in ["water", "clearance", "marker_number", "beam_height", "tide", "load"]:
+			if reading.has(key) and not _campaign_integer(reading[key], -16, 16):
+				return false
+		for key: String in ["lamp_word", "lamp_shape", "indicator"]:
+			if reading.has(key) and not reading[key] is String:
+				return false
+	return true
 
 static func _campaign_road_valid(road: Variant) -> bool:
 	if not road is Dictionary:
