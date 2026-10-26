@@ -4,9 +4,12 @@ Human male and female characters can customize their face, grooming and body
 proportions. Other races keep their current appearance options.
 
 During character creation, scroll to **Face & silhouette**. Choose facial hair
-and a hair finish, then adjust jaw width, cheekbones, nose profile, height and
-body breadth. Rowan, Mira and Tavi offer starting looks inspired by the
-leaderboard portraits. They preserve your selected sex and starting class.
+and a hair finish, then adjust jaw width, cheekbones, face length, nose profile
+and width, lip fullness, brow definition, eye size, eye angle and eye spacing.
+Hair length and volume adjust the selected hairstyle. Height and body breadth
+control the overall silhouette. Rowan, Mira and Tavi offer editable starting
+looks guided by the archived Human player studies. They also select the study's
+hair, eye and skin colours, and preserve your selected sex and starting class.
 Use **Inspect face** for a close-up while adjusting your facial features.
 **Reset shape** returns the face, grooming and proportions to their original
 settings without changing your hair colour or wardrobe dyes.
@@ -18,6 +21,11 @@ your current outfit. **Apply appearance** asks the server to save the complete
 look; its confirmation appears in chat. Close or Escape leaves unapplied
 changes behind.
 
+Saving the new face, eye and hair controls online requires a server with the
+matching appearance update. The client checks support before sending the look
+and explains when an older server cannot save it. Local previews and local
+preview saves support all controls without a server connection.
+
 Height ranges from 90% to 110% of the authored body height. Body breadth ranges
 from 85% to 115%. These choices change appearance only: movement speed, reach,
 tile footprint, combat rules and equipment statistics stay the same. Clothes,
@@ -25,9 +33,10 @@ armour, hair, held items and capes follow the same chosen proportions.
 
 The available facial hair includes clean shaven, stubble, moustache, goatee,
 short beard and full beard. Facial hair uses the selected hair colour. Classic
-hair retains the original shape; Tousled adds uneven locks and Swept gives a
+hair uses the authored style; Tousled adds uneven locks and Swept gives a
 more arranged silhouette. Swept on the female Buns style gathers the buns into
-an asymmetric crown updo.
+an asymmetric crown updo. Length and volume adjustments follow the same scalp
+and face fitting as the hairstyle.
 
 Stubble is pigment in the skin material with filtered detail, so it follows
 the face during movement and camera rotation. Longer facial hair uses fitted,
@@ -37,7 +46,8 @@ same adjustment in the wearer's rest space; joint and grip anchors stay fixed.
 
 Human walking has a relaxed elbow bend. Running balances the left and right
 arm swing and steadies the wrists. The male body has a separate arm pass with
-closer elbow placement, a sustained running bend and inward-facing palms.
+closer elbow placement, a continuous running pump and inward-facing hands,
+guided by the supplied walking and running reference videos.
 The female walk and run retain their previous motion. These changes preserve
 the original lower body movement, clip lengths, attack and spell timing. Equipped weapon poses
 continue to adjust the hands after animation playback.
@@ -45,10 +55,12 @@ continue to adjust the hands after animation playback.
 Low and Medium graphics use the lightweight Human appearance. High graphics
 adds face colour, facial regions and baked normal maps for both bodies, with
 refined head geometry recovering eyelid, nose and lip form from the retained
-high-resolution sources. Eye colour retains the source iris detail. Human
+high-resolution sources. The face controls deform the eyes, lids, brows and
+grooming together. Eye colour retains the source iris detail. Human
 eye colours also have a more restrained brightness in Low and Medium.
-High hair refines curved edges, asymmetric sweeps and the female updo while
-reusing its existing textures. The maps follow fixed mesh UVs during animation.
+High hair adds overlapping tapered locks, curved edges, asymmetric sweeps and
+the female updo while reusing its existing textures and materials. The maps
+follow fixed mesh UVs during animation.
 Switching back to Low or Medium restores the lightweight geometry and materials
 and releases unused High portrait resources. All graphics levels use the
 same body proportions, facial settings, grooming choices and animation controls.
@@ -56,6 +68,38 @@ same body proportions, facial settings, grooming choices and animation controls.
 The High pass is a foundation for further painting and anatomy work. The
 leaderboard portraits remain the art direction; the current models do not yet
 match their fine painted detail.
+
+## Resource budget
+
+Low and Medium retain their existing triangle counts and texture set. High
+uses six shared 1024-square face maps: approximately 8 MiB of compiled texture
+data for both bodies, plus 383 KiB of compressed sculpt data (768 KiB decoded
+CPU data) and 35 KiB of hair curves. These resources are shared; equipment
+files are reused.
+
+The four head surfaces contain about 7,600–7,900 triangles at High, compared
+with 1,900–2,600 at Medium. The three study hairstyles add approximately
+3,200–4,500 triangles at High. The High full beard adds about 1,900 triangles.
+These refinements reuse their existing draw surfaces and bone rig.
+
+Meshes and clips are derived when an appearance changes and cached. They do
+not add a per-frame script modifier. On the development machine, a new High
+study look took roughly 0.2–0.35 seconds to prepare after loading the source
+assets. Novel controls with warmed assets took roughly 35–106 ms; cached hair
+choices took 2–5 ms. These are debug preview measurements, not a frame-rate
+guarantee for other devices or scenes. The male video-guided animation pass
+adds about 4 KiB of code and no animation assets.
+
+A warmed, isolated head comparison on an RTX 5080 Laptop GPU at 1280×720
+measured median GPU time of 0.227→0.241 ms for sixteen Humans sharing two faces,
+and 0.115→0.126 ms for one close-up head. Hair and other quality settings stayed
+at Medium in that comparison, so these numbers isolate the face pass rather
+than predicting the cost of the entire High graphics setting.
+
+The additional saved face, eye and hair fields add nine bytes to an updated
+actor appearance packet and about 164 bytes to a player's saved appearance.
+Private concept references and local review captures are authoring evidence
+and are excluded from the game package.
 
 ## Local preview
 
