@@ -226,6 +226,7 @@ static func create_character(username: String, password: String, appearance: Dic
 	# servers ignore trailing create bytes; updated servers default an absent
 	# byte to Vanguard, so old clients and servers remain wire-compatible.
 	payload.append(clampi(class_id, 0, 255))
+	payload.append_array(PortraitCustomization.encode(appearance))
 	return encode(ClientMessage.CREATE_CHAR, payload)
 
 static func version(protocol_major: int, protocol_minor: int,
@@ -345,6 +346,7 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"quest_offers_v1",
 	"actor_footprints_v1",
 	"actor_wardrobe_v1",
+	"actor_customization_v1",
 	"weather_state_v1",
 	"attribute_state_v1",
 	"counter_layout_v1",
@@ -3261,6 +3263,8 @@ static func decode_actor(payload: PackedByteArray, enhanced: bool, extended := f
 					appearance[key] = int(payload[wardrobe_offset + 3 + index])
 					if (worn_mask & (1 << part)) == 0:
 						clothing_visuals.erase(part)
+				wardrobe_offset += 7
+			appearance.merge(PortraitCustomization.decode(payload, wardrobe_offset))
 	else:
 		actor["frame"] = int(payload[11 + shift])
 		actor["max_health"] = u16(payload, 12 + shift)

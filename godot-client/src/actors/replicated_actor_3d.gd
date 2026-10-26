@@ -486,6 +486,7 @@ static func clear_wardrobe_texture_cache() -> void:
 	_wardrobe_texture_cache.clear()
 	NecklineSkin.clear()
 	CHARACTER_PROPORTIONS.clear()
+	PORTRAIT_GROOM.clear()
 ## The speech bubble sits above the name instead, and wraps well short of the
 ## screen it is now measured against.
 const SPEECH_BUBBLE_RISE := 28.0
