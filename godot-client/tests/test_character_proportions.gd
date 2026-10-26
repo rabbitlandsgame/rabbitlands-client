@@ -35,6 +35,14 @@ func run() -> void:
 	var models: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/models.json"))["models"]
 	var equipment: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/equipment.json"))
 	var animations: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/animations/luminous.json"))
+
+	var creature := ReplicatedActor3D.new()
+	creature.server_scale = 2.0
+	creature._presentation_speed = 2.0
+	for scales: bool in [false, true]:
+		creature.resolver = AnimationResolver.new({"actions": {"walk": "Walk"}, "strideMetresPerSecond": {"walk": 1.0}, "strideScalesWithActor": scales})
+		expect(is_equal_approx(creature._playback_speed_for(&"walk"), 1.0 if scales else 2.0), "creature stride scale remains profile-controlled")
+	creature.free()
 	for slug: String in ["luminous_male", "luminous_female", "orun_male"]:
 		var actor := ReplicatedActor3D.new()
 		root.add_child(actor)
@@ -62,6 +70,26 @@ func run() -> void:
 		var base_height := actor.head_height()
 		var base_scale := native.scale
 		var human := slug.begins_with("luminous_")
+
+		if human:
+			var original_speed := actor._presentation_speed
+			for breadth: int in [0, 100]:
+				actor.apply_appearance_variants({"build": breadth})
+				var forward_scale := FIT.visual_scale({"build": breadth}).z
+				for action: StringName in [&"walk", &"run"]:
+					actor._presentation_speed = 1.6 if action == &"walk" else 4.8
+					var expected_rate := actor._presentation_speed / (float(animations.strideMetresPerSecond[String(action)]) * forward_scale)
+					expect(is_equal_approx(actor._playback_speed_for(action), expected_rate), slug + " " + str(action) + " follows real profile stride at build " + str(breadth))
+			# A future Human profile can opt in to species scale too; breadth
+			# must still enter exactly once rather than compounding in the resolver.
+			actor.resolver.stride_scales_with_actor = true
+			actor.server_scale = 2.0
+			actor._presentation_speed = 1.6
+			expect(is_equal_approx(actor._playback_speed_for(&"walk"), 1.6 / (float(animations.strideMetresPerSecond.walk) * 2.0 * 1.15)), slug + " body breadth scales stride once alongside optional species scale")
+			actor.resolver.stride_scales_with_actor = false
+			actor.server_scale = 1.0
+			actor._presentation_speed = original_speed
+			actor.apply_appearance_variants({})
 		for class_index: int in range(4 if human else 1):
 			var loadout := CreationArchetypes.loadout_at(class_index)
 			actor.apply_equipment_visuals(loadout)

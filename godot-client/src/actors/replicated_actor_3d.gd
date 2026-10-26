@@ -2684,7 +2684,7 @@ func _paced_travel_action(action: StringName) -> StringName:
 	if _hastened and action == &"walk":
 		return &"run"
 	if _is_creature and action == &"walk" and resolver != null:
-		var scale := _small_creature_scale * server_scale * _portrait_scale.z
+		var scale := _small_creature_scale * server_scale
 		var walk := resolver.stride_speed_for_action(&"walk", scale)
 		var run := resolver.stride_speed_for_action(&"run", scale)
 		if walk > 0 and run > walk and _travel_speed() > walk * 1.8:
@@ -4196,7 +4196,11 @@ func _playback_speed_for(action: StringName) -> float:
 		var clip := resolver.clip_for_action(action)
 		if animation_player.has_animation(clip):
 			return animation_player.get_animation(clip).length / _death_animation_seconds
-	var stride: float = resolver.stride_speed_for_action(action, _small_creature_scale * server_scale * _portrait_scale.z)
+	var stride: float = resolver.stride_speed_for_action(action, _small_creature_scale * server_scale)
+	# Human breadth scales the complete visual in forward Z. It is separate
+	# from the creature profile's opt-in species/invasion scale policy.
+	if _uses_portrait_customization():
+		stride *= _portrait_scale.z
 	if stride <= 0.0:
 		return resolver.playback_speed_for_action(action)
 	var rate := clampf(_travel_speed() / stride, 0.35, 3.5)
