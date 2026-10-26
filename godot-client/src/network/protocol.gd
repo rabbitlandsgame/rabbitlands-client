@@ -53,6 +53,7 @@ enum ClientMessage {
 	# for that Eternal Lands never had is numbered from there up.
 	ELORIA_MIX_REQUEST = 200, ELORIA_TOOL_REQUEST = 201, ELORIA_TUTORIAL_UI = 203,
 	ELORIA_MAP_COMMAND = 204, ELORIA_CLIENT_RELEASE = 205,
+	ELORIA_APPEARANCE_PROTOCOL = 190,
 	# Use a combat technique: {"op": "use", "key", "target_id"}. Carries only
 	# an actor id, so it is never coordinate-framed. The state comes back on
 	# ELORIA_MAGIC_STATE as kind "techniques".
@@ -141,6 +142,7 @@ enum ServerMessage {
 	ELORIA_GAUNTLET_READY_STATE = 193,
 	ELORIA_GAUNTLET_LOOT_STATE = 192,
 	ELORIA_CAMPAIGN_STATE = 191,
+	ELORIA_APPEARANCE_PROTOCOL = 190,
 	# Which map package the server was built against. Continues the same
 	# downward run below 211.
 	ELORIA_MAP_DIGEST = 209,
@@ -212,7 +214,7 @@ static func login(username: String, password: String) -> PackedByteArray:
 	return encode(ClientMessage.LOG_IN, payload)
 
 static func create_character(username: String, password: String, appearance: Dictionary,
-		class_id := 0) -> PackedByteArray:
+		class_id := 0, appearance_version := 1) -> PackedByteArray:
 	var payload := (username + " " + password).to_utf8_buffer()
 	payload.append(0)
 	# Exact legacy order: skin, hair, shirt, pants, boots, actor type, head, eyes.
@@ -226,8 +228,13 @@ static func create_character(username: String, password: String, appearance: Dic
 	# servers ignore trailing create bytes; updated servers default an absent
 	# byte to Vanguard, so old clients and servers remain wire-compatible.
 	payload.append(clampi(class_id, 0, 255))
-	payload.append_array(PortraitCustomization.encode(appearance))
+	# Network supplies the negotiated version. Keep the pure encoder's PC/1
+	# default for existing tools and older server fixtures.
+	payload.append_array(PortraitCustomization.encode(appearance, appearance_version))
 	return encode(ClientMessage.CREATE_CHAR, payload)
+
+static func appearance_protocol_probe() -> PackedByteArray:
+	return encode(ClientMessage.ELORIA_APPEARANCE_PROTOCOL, PackedByteArray(PortraitCustomization.V2_TAG))
 
 static func version(protocol_major: int, protocol_minor: int,
 		client_version: PackedByteArray, host := PackedByteArray([0, 0, 0, 0]),
@@ -347,6 +354,7 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"actor_footprints_v1",
 	"actor_wardrobe_v1",
 	"actor_customization_v1",
+	"actor_customization_v2",
 	"weather_state_v1",
 	"attribute_state_v1",
 	"counter_layout_v1",
@@ -722,6 +730,10 @@ static func decode_leaderboard_state(payload: PackedByteArray) -> Dictionary:
 	return preload("res://src/network/leaderboard_codec.gd").decode(payload)
 
 static func decode_server(command: int, payload: PackedByteArray, logical_coordinates := false) -> Dictionary:
+	if command == ServerMessage.ELORIA_APPEARANCE_PROTOCOL:
+		return ({"type": "appearance_protocol", "version": 2}
+			if payload == PackedByteArray(PortraitCustomization.V2_TAG)
+			else {"type": "invalid", "error": "appearance_protocol"})
 	match command:
 		ServerMessage.ELORIA_INVASION_ASSISTANT_STATE:
 			var parsed: Variant = JSON.parse_string(payload.get_string_from_utf8())

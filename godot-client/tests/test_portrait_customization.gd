@@ -19,7 +19,7 @@ func run() -> void:
 	root.size = Vector2i(1280, 720)
 	var defaults := PortraitCustomization.DEFAULTS
 	expect(PortraitCustomization.decode(PortraitCustomization.encode({}), 0) == defaults, "legacy default shape remains neutral")
-	var look := {"facial_hair": 5, "jaw": 80, "cheekbones": 65, "nose": 73, "height": 100, "build": 0, "hair_detail": 2}
+	var look := PortraitCustomization.normalized({"facial_hair": 5, "jaw": 80, "cheekbones": 65, "nose": 73, "height": 100, "build": 0, "hair_detail": 2})
 	var encoded := PortraitCustomization.encode(look)
 	expect(encoded.size() == 10 and PortraitCustomization.decode(encoded, 0) == look, "all seven selections survive compact wire encoding")
 	for index: int in range(3, 10):
