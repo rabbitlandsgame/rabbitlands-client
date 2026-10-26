@@ -2321,16 +2321,21 @@ func _on_create_pressed() -> void:
 	if password != create_confirm.text:
 		create_status.text = "Passwords do not match."
 		return
+	var appearance: Dictionary = _creation_appearance()
+	appearance["actor_type"] = create_gender.get_selected_id()
+	var appearance_error := Network.validate_creation_appearance(appearance)
+	if appearance_error != OK:
+		create_status.text = Network.appearance_error
+		TextColors.bind(create_status, "login_error")
+		return
 	pending_create_username = username
 	pending_create_password = password
 	create_status.text = "Creating character…"
 	TextColors.bind(create_status, "login_status")
-	var appearance: Dictionary = _creation_appearance()
-	appearance["actor_type"] = create_gender.get_selected_id()
 	var error := Network.create_character(username, password, appearance,
 		CreationArchetypes.id_at(selected_creation_class))
 	if error != OK:
-		create_status.text = "Creation request failed: " + error_string(error)
+		create_status.text = Network.appearance_error if error == ERR_UNAVAILABLE else "Creation request failed: " + error_string(error)
 		TextColors.bind(create_status, "login_error")
 		_clear_pending_creation()
 

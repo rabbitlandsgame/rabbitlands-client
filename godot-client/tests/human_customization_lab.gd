@@ -168,10 +168,8 @@ func _theme() -> Theme:
 	return theme
 
 func _default_look(sex: int) -> Dictionary:
-	return {"skin": 2, "eyes": 1 if sex == 0 else 2, "hair": AppearanceVariants.pack_hair(3 if sex == 0 else 1, 4 if sex == 0 else 1),
-		"shirt": 5, "pants": 2, "boots": 2, "hair_detail": 2 if sex == 0 else 1,
-		"facial_hair": 0, "jaw": 35 if sex == 0 else 60, "cheekbones": 70 if sex == 0 else 65,
-		"nose": 35 if sex == 0 else 45, "height": 50, "build": 38 if sex == 0 else 50}
+	return preload("res://src/actors/human_portrait_presets.gd").appearance("Mira" if sex == 0 else "Rowan").merged(
+		{"shirt": 5, "pants": 2, "boots": 2})
 
 func _select_sex(index: int) -> void:
 	if is_instance_valid(_editor.get("_actor")) and _current_sex >= 0:
@@ -267,10 +265,22 @@ func _run_smoke() -> void:
 		_select_sex(sex)
 		_expect(ReplicatedActor3D.HIGH_PORTRAIT.cache_metrics().texture_bundles == 0, "Medium starts without High portrait textures")
 		_expect(ReplicatedActor3D.HIGH_HAIR.cache_metrics().mesh_entries == 0, "Medium starts without High hair geometry")
+		var form = _editor.get("_form")
+		for preset_name: String in ["Rowan", "Mira", "Tavi"]:
+			for button: Node in form.find_children("*", "Button", true, false):
+				if (button as Button).text == preset_name:
+					(button as Button).pressed.emit()
+					break
+			var presets = preload("res://src/actors/human_portrait_presets.gd")
+			_expect(form.values() == PortraitCustomization.normalized(presets.shape(preset_name)), "all face eye and hair controls follow the selected study preset")
+			_expect(_editor.call("_values").hair == presets.palette(preset_name).hair, "study preset sets the correct hair style and colour")
+			_expect((_editor.get("_actor") as ReplicatedActor3D)._model_config.gender == ("female" if sex == 0 else "male"), "study preset preserves the selected Human sex")
 		for outfit: int in range(5):
 			_outfit.select(outfit)
 			_refresh_outfit()
-			(_editor.get("_form")).set_values({"jaw": 65, "nose": 40, "height": 100, "build": 0, "facial_hair": 4 if sex == 1 else 0, "hair_detail": 2})
+			var study_look: Dictionary = preload("res://src/actors/human_portrait_presets.gd").shape("Mira" if sex == 0 else "Rowan")
+			study_look.merge({"jaw": 65, "nose": 40, "height": 100, "build": 0, "facial_hair": 4 if sex == 1 else 0, "hair_detail": 2}, true)
+			form.set_values(study_look)
 			_editor.call("_refresh")
 			var actor: ReplicatedActor3D = _editor.get("_actor")
 			_expect(actor.get("_model_config").gender == ("female" if sex == 0 else "male"), "selected Human body matches")
@@ -314,6 +324,8 @@ func _run_smoke() -> void:
 				_expect(hair.get_surface_override_material(surface) == source.materials[surface], "Medium restores each hair surface material")
 		_expect(_save_preview("") == OK, "local preview saves")
 		_expect(_json(SAVE_PATH).has(str(sex)), "saved Human body can be restored")
+		for field: String in PortraitCustomization.EXTRA_FIELDS:
+			_expect(int(_json(SAVE_PATH)[str(sex)].get(field, -1)) == int(form.values()[field]), "local preview saves the new " + field + " control")
 	await process_frame
 	_fit()
 	_expect(_editor.position.y >= 100 and _editor.get_global_rect().end.y <= root.size.y, "preview fits below toolbar")

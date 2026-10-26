@@ -4,6 +4,7 @@ extends VBoxContainer
 signal changed
 signal preset_selected(appearance: Dictionary)
 const CUSTOMIZATION = preload("res://src/actors/portrait_customization.gd")
+const PRESETS = preload("res://src/actors/human_portrait_presets.gd")
 var controls: Dictionary = {}
 var _timer: Timer
 
@@ -25,26 +26,32 @@ func _init() -> void:
 	add_child(grid)
 	_add_choice(grid, "facial_hair", "Facial hair", ["Clean shaven", "Stubble", "Moustache", "Goatee", "Short beard", "Full beard"])
 	_add_choice(grid, "hair_detail", "Hair finish", ["Classic", "Tousled", "Swept"])
+	_add_slider(grid, "hair_length", "Hair length", "Shorter", "Longer")
+	_add_slider(grid, "hair_volume", "Hair volume", "Close", "Full")
 	_add_slider(grid, "jaw", "Jaw width", "Narrow", "Broad")
 	_add_slider(grid, "cheekbones", "Cheekbones", "Soft", "Defined")
+	_add_slider(grid, "face_length", "Face length", "Shorter", "Longer")
 	_add_slider(grid, "nose", "Nose profile", "Delicate", "Strong")
+	_add_slider(grid, "nose_width", "Nose width", "Narrow", "Broad")
+	_add_slider(grid, "lip_fullness", "Lip fullness", "Fine", "Full")
+	_add_slider(grid, "brow_depth", "Brow definition", "Soft", "Strong")
+	_add_slider(grid, "eye_size", "Eye size", "Smaller", "Larger")
+	_add_slider(grid, "eye_tilt", "Eye angle", "Lower", "Lifted")
+	_add_slider(grid, "eye_spacing", "Eye spacing", "Closer", "Wider")
 	_add_slider(grid, "height", "Height", "90%", "110%")
 	_add_slider(grid, "build", "Body breadth", "85%", "115%")
 	var presets := HBoxContainer.new()
 	add_child(presets)
-	for entry: Dictionary in [
-		{"label": "Rowan", "facial_hair": 0, "jaw": 60, "cheekbones": 65, "nose": 45, "height": 55, "build": 48, "hair_detail": 1},
-		{"label": "Mira", "facial_hair": 0, "jaw": 35, "cheekbones": 70, "nose": 35, "height": 50, "build": 38, "hair_detail": 2},
-		{"label": "Tavi", "facial_hair": 5, "jaw": 80, "cheekbones": 60, "nose": 70, "height": 62, "build": 78, "hair_detail": 2}]:
+	# Keep the starting looks above the longer list of individual controls.
+	move_child(presets, 2)
+	for preset_name: String in PRESETS.LOOKS:
 		var button := Button.new()
-		button.text = entry.label
-		button.tooltip_text = "Face and silhouette inspired by the leaderboard portrait"
+		button.text = preset_name
+		button.tooltip_text = "Editable face and hair from the Human player studies; keeps your selected sex and class"
 		presets.add_child(button)
 		button.pressed.connect(func() -> void:
-			set_values(entry)
-			var palette := {"Rowan": [1, 1, 2, 2], "Mira": [3, 4, 1, 1], "Tavi": [1, 1, 3, 2]}
-			var look: Array = palette[entry.label]
-			preset_selected.emit({"hair": AppearanceVariants.pack_hair(look[0], look[1]), "eyes": look[2], "skin": look[3]})
+			set_values(PRESETS.shape(preset_name))
+			preset_selected.emit(PRESETS.palette(preset_name))
 			changed.emit())
 	var reset := Button.new()
 	reset.text = "Reset shape"

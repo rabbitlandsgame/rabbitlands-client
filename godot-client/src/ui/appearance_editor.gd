@@ -221,7 +221,12 @@ func _apply() -> void:
 	for field: String in look:
 		entries.append("%s=%d" % [field, look[field]])
 	var error: int = _send.call("#appearance " + " ".join(entries))
-	_status.text = "Appearance requested. The server will confirm in chat." if error == OK else "Could not send. Reconnect and try again."
+	if error == OK:
+		_status.text = "Appearance requested. The server will confirm in chat."
+	elif error == ERR_UNAVAILABLE:
+		_status.text = "This server needs an update to save the new face, eye and hair controls. Your preview is still available."
+	else:
+		_status.text = "Could not send. Reconnect and try again."
 
 func _release_preview() -> void:
 	if is_instance_valid(_actor):
