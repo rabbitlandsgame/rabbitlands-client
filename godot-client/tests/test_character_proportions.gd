@@ -72,6 +72,8 @@ func run() -> void:
 		var base_height := actor.head_height()
 		var base_scale := native.scale
 		var human := slug.begins_with("luminous_")
+		expect(actor._face_material != null and bool(actor._face_material.get_shader_parameter("natural_iris")) == human,
+			slug + " natural eye pigment is scoped to Human bodies")
 
 		if human:
 			var original_speed := actor._presentation_speed

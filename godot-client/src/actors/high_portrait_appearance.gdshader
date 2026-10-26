@@ -22,7 +22,9 @@ uniform float roughness = 0.85;
 uniform sampler2D portrait_paint : source_color, filter_linear_mipmap, repeat_disable;
 uniform sampler2D portrait_regions : filter_linear_mipmap, repeat_disable;
 uniform sampler2D portrait_normal : hint_normal, filter_linear_mipmap, repeat_disable;
-uniform float portrait_normal_strength = 0.65;
+// The High geometry now owns broad planes; this map carries only pore/paint
+// microrelief instead of reapplying the coarse source's geometric residual.
+uniform float portrait_normal_strength = 0.30;
 
 void fragment() {
 	vec2 atlas_uv = UV * mask_uv_scale + mask_uv_offset;
@@ -52,7 +54,7 @@ void fragment() {
 	ALBEDO = mix(skin, eye, mask.r);
 	ALBEDO = mix(ALBEDO, vec3(peak) * hair_tint.rgb, mask.b);
 	ROUGHNESS = mix(roughness, detail.a, coverage);
-	SPECULAR = mix(0.50, mix(0.24, 0.50, mask.r), coverage);
+	SPECULAR = mix(0.50, mix(0.24, 0.38, mask.r), coverage);
 	// UV2 was baked once into this High-only mesh from the canonical head.
 	// Derivative tangents follow the animated surface, so texture details stay
 	// attached through head turns, skeletal animation and facial proportions.

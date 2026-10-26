@@ -99,6 +99,11 @@ func _build_ui() -> void:
 				actor.animation_player.pause()
 			else:
 				actor.animation_player.play())
+	var front := Button.new()
+	front.text = "Front view"
+	front.tooltip_text = "Face the camera straight on to inspect the face and arm movement"
+	toolbar.add_child(front)
+	front.pressed.connect(_front_view)
 	var screenshot := Button.new()
 	screenshot.text = "Screenshot"
 	toolbar.add_child(screenshot)
@@ -215,6 +220,10 @@ func _play_pose(restart := true) -> void:
 	if _pause.button_pressed:
 		actor.animation_player.pause()
 
+func _front_view() -> void:
+	_editor.set("_yaw", PI)
+	_editor.call("_frame")
+
 func _save_preview(_command: String) -> int:
 	_looks[str(_current_sex)] = _editor.call("_values")
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
@@ -256,6 +265,7 @@ func _run_smoke() -> void:
 	for sex: int in [0, 1]:
 		_select_sex(sex)
 		_expect(ReplicatedActor3D.HIGH_PORTRAIT.cache_metrics().texture_bundles == 0, "Medium starts without High portrait textures")
+		_expect(ReplicatedActor3D.HIGH_HAIR.cache_metrics().mesh_entries == 0, "Medium starts without High hair geometry")
 		for outfit: int in range(5):
 			_outfit.select(outfit)
 			_refresh_outfit()
@@ -269,17 +279,38 @@ func _run_smoke() -> void:
 				_play_pose()
 				_expect(actor.animation_player.is_playing(), "selected pose plays")
 			await process_frame
+		_outfit.select(0)
+		_refresh_outfit()
+		_pose.select(1)
+		_play_pose()
+		_front_view()
 		var actor: ReplicatedActor3D = _editor.get("_actor")
 		var body := actor._native_model.find_child("body", true, false) as MeshInstance3D
 		var medium_mesh := body.mesh
+		var hair_sources: Array[Dictionary] = []
+		for node: Node in actor._native_model.find_children("*", "MeshInstance3D", true, false):
+			if node.get_parent() != null and str(node.get_parent().name).begins_with("AppearanceHair_"):
+				var hair := node as MeshInstance3D
+				var materials: Array[Material] = []
+				for surface: int in hair.mesh.get_surface_count():
+					materials.append(hair.get_surface_override_material(surface))
+				hair_sources.append({"node": hair, "mesh": hair.mesh, "override": hair.material_override, "materials": materials})
 		_editor.set_preview_quality(0)
 		_expect(ReplicatedActor3D.HIGH_PORTRAIT.cache_metrics().texture_bundles == 0, "Low loads no High portrait textures")
+		_expect(ReplicatedActor3D.HIGH_HAIR.cache_metrics().mesh_entries == 0, "Low loads no High hair geometry")
 		_editor.set_preview_quality(2)
 		_expect(ReplicatedActor3D.HIGH_PORTRAIT.cache_metrics().texture_bundles == 1, "High activates only the selected body's portrait artwork")
 		_expect(body.mesh != medium_mesh, "High uses its anchored portrait UVs")
+		_expect(ReplicatedActor3D.HIGH_HAIR.cache_metrics().mesh_entries > 0, "High refines visible Human hair")
 		_editor.set_preview_quality(1)
 		_expect(body.mesh == medium_mesh, "Medium restores the exact lightweight mesh")
 		_expect(ReplicatedActor3D.HIGH_PORTRAIT.cache_metrics().texture_bundles == 0, "returning to Medium releases High resources")
+		_expect(ReplicatedActor3D.HIGH_HAIR.cache_metrics().mesh_entries == 0, "returning to Medium releases High hair resources")
+		for source: Dictionary in hair_sources:
+			var hair: MeshInstance3D = source.node
+			_expect(hair.mesh == source.mesh and hair.material_override == source.override, "Medium restores exact hair geometry and material")
+			for surface: int in source.materials.size():
+				_expect(hair.get_surface_override_material(surface) == source.materials[surface], "Medium restores each hair surface material")
 		_expect(_save_preview("") == OK, "local preview saves")
 		_expect(_json(SAVE_PATH).has(str(sex)), "saved Human body can be restored")
 	await process_frame

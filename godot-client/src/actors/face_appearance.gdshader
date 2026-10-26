@@ -19,6 +19,7 @@ uniform vec4 skin_color : source_color = vec4(1.0);
 uniform bool recolor_skin = false;
 uniform bool use_regions = true;
 uniform vec4 eye_tint : source_color = vec4(1.0);
+uniform bool natural_iris = false;
 uniform vec4 hair_tint : source_color = vec4(1.0);
 uniform float roughness = 0.85;
 
@@ -38,7 +39,14 @@ void fragment() {
 	vec3 eye = original;
 	float peak = max(original.r, max(original.g, original.b));
 	// Neutralise the authored iris hue, retaining its pupil and highlights.
+	// Preserve the selected pigment without boosting bright iris texels into
+	// a luminous disc. The original pupil and catchlight stay in the texture.
 	vec3 iris = eye_tint.rgb * min(peak * 1.6, 1.0);
+	if (natural_iris) {
+		float eye_value = dot(eye_tint.rgb, vec3(0.2126, 0.7152, 0.0722));
+		vec3 iris_pigment = mix(eye_tint.rgb, vec3(eye_value), 0.12);
+		iris = iris_pigment * min(peak, 0.85);
+	}
 	float highlight = smoothstep(0.55, 0.9, min(original.r, min(original.g, original.b)));
 	eye = mix(eye, mix(iris, original, highlight), mask.g);
 	ALBEDO = mix(skin, eye, mask.r);

@@ -8,6 +8,7 @@ No service or generator runs.
 from __future__ import annotations
 import argparse
 import hashlib
+import gzip
 import io
 import json
 from pathlib import Path
@@ -178,12 +179,16 @@ def bake_high_normals(sources, sex, points, low_normal, valid, head, runtime, g,
     transferred[total < 1e-8] = low[total < 1e-8]
     influence = np.clip((.014-distance[:, 0])/.009, 0, 1) * .48
     result = unit(low*(1-influence[:, None]) + transferred*influence[:, None]).reshape(points.shape)
+    target = (v+offset)[ids]
+    target = (target*weights[..., None]).sum(1) / np.maximum(total[:, None], 1e-9)
+    delta = target-points.reshape(-1, 3)
+    delta[total < 1e-8] = 0
     return result, {"high_source_sha256": sha(high), "registration_offset_m": offset.tolist(),
                     "nearest_median_m": float(np.median(distance[valid.reshape(-1), 0])),
-                    "normal_bake_coverage": float(np.mean(influence[valid.reshape(-1)] > .05))}
+                    "normal_bake_coverage": float(np.mean(influence[valid.reshape(-1)] > .05))}, delta.reshape(points.shape), transferred.reshape(points.shape)
 
 
-def paint_portrait(base, region, points, low_normal, high_normal, valid, eye_y, sex):
+def paint_portrait(base, region, points, low_normal, high_normal, valid, eye_y, sex, source_iris=False):
     x, y, z = points[..., 0], points[..., 1], points[..., 2]
     yy = y-eye_y
     def brush(cx, cy, sx, sy):
@@ -229,7 +234,7 @@ def paint_portrait(base, region, points, low_normal, high_normal, valid, eye_y, 
     # existing iris boundaries and the player's independently selected dye.
     corneal_x = np.zeros(x.shape)
     corneal_y = np.zeros(x.shape)
-    for side in (-1, 1):
+    for side in (() if source_iris else (-1, 1)):
         iris = region[..., 1] * (x*side > 0)
         if iris.sum() < 1:
             continue
@@ -276,7 +281,9 @@ def paint_portrait(base, region, points, low_normal, high_normal, valid, eye_y, 
     normal = unit(normal)
     roughness = np.full(x.shape, .80)
     roughness -= np.clip(nose*.08 + lower_lip*.20, 0, .24)
-    roughness = roughness*(1-region[..., 0]) + .20*region[..., 0]
+    roughness = roughness*(1-region[..., 0]) + (.38 if source_iris else .20)*region[..., 0]
+    if source_iris:
+        roughness = roughness*(1-region[..., 1]) + .29*region[..., 1]
     coverage = gaussian_filter(valid.astype(float), .6)
     rgba = np.concatenate([np.clip(base, 0, 1), coverage[..., None]], -1)
     regions = np.concatenate([np.clip(region, 0, 1), np.clip(roughness, .18, .88)[..., None]], -1)
@@ -287,6 +294,75 @@ def save_png(path, array):
     Image.fromarray(np.round(array*255).astype(np.uint8)).save(path, optimize=True)
 
 
+def smoothstep(a, b, x):
+    value = np.clip((x-a)/(b-a), 0, 1)
+    return value*value*(3-2*value)
+
+
+def geometry_v2(stage, sex, base, region, points, low_normal, raw_delta, high_normal, valid, eye_y):
+    x, y, z = points[..., 0], points[..., 1], points[..., 2]
+    weight = smoothstep(-.060, -.030, y)*(1-smoothstep(.120, .145, y))
+    weight *= (1-smoothstep(.067, .083, abs(x)))*smoothstep(-.004, .014, z)
+    # Conform the low-poly front to the retained high-poly surface, rather than
+    # displacing along potentially different UV-seam normals.
+    delta = np.stack([gaussian_filter(raw_delta[..., c], 1.2) for c in range(3)], -1) * .80
+    delta *= np.minimum(1, .0045/np.maximum(np.linalg.norm(delta, axis=-1, keepdims=True), 1e-9))
+    def brush(cx, cy, sx, sy):
+        return np.exp(-((x-cx)/sx)**2-((y-eye_y-cy)/sy)**2)
+    # Small sex-specific sculpt finishing on the source lip/nose planes.
+    delta[..., 2] += brush(0, -.064, .022, .007) * (.00065 if sex == "female" else .00045)
+    delta[..., 2] += brush(0, -.035, .010, .018) * .00035
+    delta *= weight[..., None]
+    delta *= np.minimum(1, .0055/np.maximum(np.linalg.norm(delta, axis=-1, keepdims=True), 1e-9))
+    # The shared field normal is independent of source UV and source normals.
+    # This also repairs neutral-slider head seams, not just custom faces.
+    coherent = unit(np.stack([gaussian_filter(high_normal[..., c], .8) for c in range(3)], -1))
+    size, max_delta = 256, .006
+    channels = np.concatenate([np.clip(delta/max_delta*.5+.5, 0, 1), coherent*.5+.5], -1)
+    reduced = np.stack([np.asarray(Image.fromarray(np.round(channels[..., c]*255).astype(np.uint8)).resize((size, size), Image.Resampling.BILINEAR)) for c in range(6)], -1)
+    blob = gzip.compress(reduced.astype(np.uint8).tobytes(), compresslevel=9, mtime=0)
+    path = stage/f"{sex}-sculpt.bin"
+    path.write_bytes(blob)
+    # Retain source iris/pupil/limbal artwork. Narrow the aperture into an
+    # anatomical lid opening and paint lid skin outside it, not a coloured disc.
+    native_eye = region[..., 0].copy()
+    native_iris = region[..., 1].copy()
+    skin_weight = 1-np.clip(native_eye, 0, 1)
+    denominator = gaussian_filter(skin_weight, 10)
+    skin_fill = np.stack([gaussian_filter(base[..., c]*skin_weight, 10)/np.maximum(denominator, .001) for c in range(3)], -1)
+    openings = np.zeros(x.shape)
+    for side in (-1, 1):
+        iris = native_iris*(x*side > 0)
+        if iris.sum() < 1:
+            continue
+        cx, cy = (x*iris).sum()/iris.sum(), (y*iris).sum()/iris.sum()
+        old = (native_eye > .20) & (x*side > 0)
+        if not old.any():
+            continue
+        width = np.clip((np.percentile(x[old], 98)-np.percentile(x[old], 2))*.48, .014, .022)
+        upper = min(np.percentile(y[old], 98)-cy, .0080)*.88
+        lower = min(cy-np.percentile(y[old], 2), .0065)*.90
+        along = np.clip((x-cx)/width, -1.5, 1.5)
+        arch = np.maximum(1-along*along, 0)**.65
+        top = cy + upper*arch + side*(x-cx)*.025
+        bottom = cy - lower*arch + side*(x-cx)*.025
+        aperture = smoothstep(bottom-.0004, bottom+.0003, y)*(1-smoothstep(top-.0003, top+.0004, y))
+        aperture *= 1-smoothstep(.96, 1.05, abs(along))
+        openings = np.maximum(openings, aperture)
+        # A very restrained upper-lid rim provides an actual painted lid edge.
+        rim = np.exp(-((y-top)/.00045)**2)*(1-smoothstep(.86, 1.05, abs(along)))
+        rim *= native_eye
+        base = base*(1-rim[..., None]*.13) + np.array([.38,.245,.23])*rim[..., None]*.13
+    outside = np.clip(native_eye-openings, 0, 1)
+    base = base*(1-outside[..., None])+skin_fill*outside[..., None]
+    region[..., 0] = np.minimum(native_eye, openings)
+    region[..., 1] = native_iris*openings
+    return base, region, {"path": f"res://data/actors/portraits_high/{sex}-sculpt.bin", "size": size,
+                         "stride": 6, "max_delta_m": max_delta, "edge_length_m": .0065,
+                         "bytes": len(blob), "sha256": sha(path),
+                         "baked_max_displacement_m": float(np.max(np.linalg.norm(delta[valid], axis=-1)))}
+
+
 def run(args):
     root = args.root.resolve()
     g, ea = load_tools(args.tools_root.resolve() if args.tools_root else root)
@@ -295,8 +371,12 @@ def run(args):
     for sex in ("male", "female"):
         base, region, points, normal, valid, head, eye_y, runtime, split = raster_head(root, args.sources, sex, g, ea)
         save_png(args.stage/f"{sex}-source-projection.png", base)
-        high_normal, bake = bake_high_normals(args.sources, sex, points, normal, valid, head, runtime, g, ea)
-        painted, regions, detailed_normal = paint_portrait(base.copy(), region, points, normal, high_normal, valid, eye_y, sex)
+        high_normal, bake, delta, coherent = bake_high_normals(args.sources, sex, points, normal, valid, head, runtime, g, ea)
+        geometry = None
+        if args.geometry_v2:
+            base, region, geometry = geometry_v2(args.stage, sex, base, region, points, normal, delta, coherent, valid, eye_y)
+        painted, regions, detailed_normal = paint_portrait(base.copy(), region, points,
+            high_normal if geometry else normal, high_normal, valid, eye_y, sex, source_iris=bool(geometry))
         save_png(args.stage/f"{sex}-paint.png", painted)
         save_png(args.stage/f"{sex}-regions.png", regions)
         save_png(args.stage/f"{sex}-normal.png", detailed_normal)
@@ -305,8 +385,12 @@ def run(args):
                       "textures": {name: f"res://data/actors/portraits_high/{sex}-{name}.png" for name in ("paint", "regions", "normal")},
                       "runtime_source_sha256": sha(runtime), "authoring_source_sha256": sha(split),
                       "paint_recipe": "Human portrait v1: warm/cool planes, lip pigment, iris fibres, freckles, high-poly normal bake"}
+        if geometry:
+            descriptor["version"] = 2
+            descriptor["geometry"] = geometry
+            descriptor["paint_recipe"] = "Human portrait v2: retained source iris, anatomical lid aperture, high-poly head surface and coherent normals"
         (args.stage/f"{sex}.json").write_text(json.dumps(descriptor, indent=2)+"\n", newline="\n")
-        report = {"sex": sex, "runtime_triangles_unchanged": True, "valid_head_pixels": int(valid.sum()),
+        report = {"sex": sex, "runtime_triangles_unchanged": not bool(geometry), "valid_head_pixels": int(valid.sum()),
                   "source_albedo_size": [4096, 4096], **bake}
         reports.append(report)
         if args.install:
@@ -315,9 +399,11 @@ def run(args):
             for suffix in ("paint.png", "regions.png", "normal.png", ".json"):
                 source = args.stage/(f"{sex}{suffix}" if suffix == ".json" else f"{sex}-{suffix}")
                 (destination/source.name).write_bytes(source.read_bytes())
+            if geometry:
+                (destination/f"{sex}-sculpt.bin").write_bytes((args.stage/f"{sex}-sculpt.bin").read_bytes())
         print(json.dumps(report), flush=True)
-    manifest = {"version": 1, "heads": reports,
-                "outputs": {p.name: {"bytes": p.stat().st_size, "sha256": sha(p)} for p in args.stage.glob("*.png")}}
+    manifest = {"version": 2 if args.geometry_v2 else 1, "heads": reports,
+                "outputs": {p.name: {"bytes": p.stat().st_size, "sha256": sha(p)} for p in args.stage.iterdir() if p.suffix in (".png", ".bin", ".json") and p.name != "bake-report.json"}}
     (args.stage/"bake-report.json").write_text(json.dumps(manifest, indent=2)+"\n", newline="\n")
 
 
@@ -328,4 +414,5 @@ if __name__ == "__main__":
     parser.add_argument("--sources", type=Path, required=True)
     parser.add_argument("--stage", type=Path, required=True)
     parser.add_argument("--install", action="store_true")
+    parser.add_argument("--geometry-v2", action="store_true", help="Bake bounded High-only surface conformance and lid artwork")
     run(parser.parse_args())

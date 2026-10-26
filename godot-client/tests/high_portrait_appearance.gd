@@ -8,6 +8,7 @@ var stage: Node3D
 var camera: Camera3D
 var folder := ""
 var results: Array = []
+var geometry_records: Array = []
 
 func _init() -> void:
 	call_deferred("run")
@@ -54,6 +55,7 @@ func run() -> void:
 	var equipment: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/equipment.json"))
 	var animation: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/animations/luminous.json"))
 	HIGH.clear()
+	check_seam_midpoints()
 	for sex: String in ["male", "female"]:
 		var slug := "luminous_" + sex
 		var actor := ReplicatedActor3D.new()
@@ -102,7 +104,7 @@ func run() -> void:
 				camera.look_at(focus)
 				await capture("%s-%s-%s" % [sex, "high" if level == 2 else "medium", angle])
 			results.append({"sex": sex, "level": level, "apply_usec": elapsed, "cache": HIGH.cache_metrics()})
-		if sex == "male":
+		if sex in ["male", "female"]:
 			for color: int in [0, 2]:
 				appearance.eyes = color
 				actor.apply_appearance_variants(appearance)
@@ -111,9 +113,38 @@ func run() -> void:
 				var focus := skeleton.to_global(skeleton.get_bone_global_pose(skeleton.find_bone("Head")).origin) + Vector3(0, .06, 0)
 				camera.position = focus + Vector3(.4, .055, 1)
 				camera.look_at(focus)
-				await capture("male-high-eyes-" + str(color))
+				await capture(sex + "-high-eyes-" + str(color))
 			appearance.eyes = 1
 			actor.apply_appearance_variants(appearance)
+		var original_jaw: int = appearance.jaw
+		var canonical_count := int(HIGH.cache_metrics().canonical_mesh_entries)
+		var slider_times := []
+		for jaw: int in [0, 25, 50, 75, 100, original_jaw]:
+			appearance.jaw = jaw
+			var start := Time.get_ticks_usec()
+			actor.apply_appearance_variants(appearance)
+			slider_times.append(Time.get_ticks_usec() - start)
+			expect(int(HIGH.cache_metrics().canonical_mesh_entries) == canonical_count, "new slider values reuse canonical sculpt/topology work")
+		results.append({"sex": sex, "new_jaw_values": [0,25,50,75,100,original_jaw], "complete_actor_slider_usec": slider_times})
+		# Pigment and lighting reviews use the same finished geometry.
+		freeze(actor, "idle", .4)
+		var review_skeleton := actor.get_skeleton()
+		var review_focus := review_skeleton.to_global(review_skeleton.get_bone_global_pose(review_skeleton.find_bone("Head")).origin) + Vector3(0,.06,0)
+		camera.position = review_focus + Vector3(.4,.055,1)
+		camera.look_at(review_focus)
+		for skin: int in [0, 5]:
+			appearance.skin = skin
+			actor.apply_appearance_variants(appearance)
+			freeze(actor, "idle", .4)
+			await capture(sex + "-high-skin-" + str(skin))
+		appearance.skin = 2
+		actor.apply_appearance_variants(appearance)
+		freeze(actor, "idle", .4)
+		key.rotation_degrees.y = 40
+		await capture(sex + "-high-light-right")
+		key.rotation_degrees.y = -80
+		await capture(sex + "-high-light-left")
+		key.rotation_degrees.y = -28
 		var body := actor._native_model.find_child("body", true, false) as MeshInstance3D
 		var high_mesh := body.mesh
 		var uv: PackedVector2Array = body.mesh.surface_get_arrays(0)[Mesh.ARRAY_TEX_UV2]
@@ -128,6 +159,44 @@ func run() -> void:
 				"Medium restores exact refined mesh/material " + part)
 		expect(HIGH.cache_metrics().texture_bundles == 0 and HIGH.cache_metrics().mesh_entries == 0,
 			"last High user downgrade releases images and mesh cache")
+		# The High finish also applies at neutral sliders; changing a face and
+		# returning to Medium must recover its new exact baseline, not the old
+		# preset or a twice-displaced High mesh.
+		appearance.jaw = 50
+		appearance.cheekbones = 50
+		appearance.nose = 50
+		actor.apply_appearance_variants(appearance)
+		var neutral_body := actor._native_model.find_child("body", true, false) as MeshInstance3D
+		var neutral_source := neutral_body.mesh
+		var neutral_material := neutral_body.material_override
+		actor.apply_render_quality(2, true)
+		check_geometry(neutral_source, neutral_body.mesh, sex + " neutral")
+		freeze(actor, "idle", .4)
+		for angle: String in ["front", "threequarter", "profile"]:
+			var skeleton := actor.get_skeleton()
+			var focus := skeleton.to_global(skeleton.get_bone_global_pose(skeleton.find_bone("Head")).origin) + Vector3(0, .06, 0)
+			camera.position = focus + {"front": Vector3(0, .055, 1), "threequarter": Vector3(.4, .055, 1), "profile": Vector3(.95, .055, .02)}[angle]
+			camera.look_at(focus)
+			await capture(sex + "-neutral-high-" + angle)
+		actor.apply_render_quality(1, true)
+		expect(neutral_body.mesh == neutral_source and neutral_body.material_override == neutral_material, "neutral exact restore after slider change")
+		if sex == "male":
+			for style: int in [2, 3, 5]:
+				appearance.facial_hair = style
+				actor.apply_appearance_variants(appearance)
+				var beard := actor._native_model.find_child(HIGH.BEARD, true, false) as MeshInstance3D
+				var beard_source := beard.mesh
+				var beard_material := beard.material_override
+				actor.apply_render_quality(2, true)
+				expect(beard.mesh != beard_source and beard.material_override == beard_material, "High beard follows head without changing shader")
+				freeze(actor, "idle", .4)
+				var skeleton := actor.get_skeleton()
+				var focus := skeleton.to_global(skeleton.get_bone_global_pose(skeleton.find_bone("Head")).origin) + Vector3(0, .06, 0)
+				camera.position = focus + Vector3(.4, .055, 1)
+				camera.look_at(focus)
+				await capture("male-high-beard-" + str(style))
+				actor.apply_render_quality(1, true)
+				expect(beard.mesh == beard_source and beard.material_override == beard_material, "Medium beard exact restore")
 		actor.apply_render_quality(0, true)
 		expect(HIGH.cache_metrics().texture_bundles == 0, "Low allocates no High texture")
 		appearance.facial_hair = 1
@@ -140,10 +209,23 @@ func run() -> void:
 				and material.get_shader_parameter("stubble_mask") is Texture2D, "High retains surface-bound stubble pigment")
 		actor.apply_render_quality(1, true)
 		expect(HIGH.cache_metrics().texture_bundles == 0, "stubble High downgrade also releases resources")
+		# A helmet changes body coverage and then restores it. Both resulting
+		# lower-tier sources must survive another High round trip exactly.
+		for visuals: Dictionary in [{3: 143}, {}]:
+			actor.apply_equipment_visuals(visuals)
+			var current_body := actor._native_model.find_child("body", true, false) as MeshInstance3D
+			var current_mesh := current_body.mesh
+			var current_material := current_body.material_override
+			actor.apply_render_quality(2, true)
+			actor.apply_render_quality(1, true)
+			expect(current_body.mesh == current_mesh and current_body.material_override == current_material, "helmet transition exact Medium restore")
+		# Release while actively High, rather than only after a downgrade.
+		actor.apply_render_quality(2, true)
 		actor.free()
 		await process_frame
+		expect(HIGH.cache_metrics().high_users == 0 and HIGH.cache_metrics().sculpt_cpu_bytes == 0, "actor removal releases High CPU sculpt")
 	FileAccess.open(folder.path_join("checks.json"), FileAccess.WRITE).store_string(JSON.stringify({"checks": checks,
-		"failures": failures, "results": results}, "  "))
+		"failures": failures, "results": results, "geometry": geometry_records}, "  "))
 	print("High portraits: ", checks, " checks, ", failures, " failures")
 	quit(1 if failures else 0)
 
@@ -158,12 +240,85 @@ func check_geometry(source: Mesh, result: Mesh, label: String) -> void:
 	for surface: int in source.get_surface_count():
 		var a := source.surface_get_arrays(surface)
 		var b := result.surface_get_arrays(surface)
+		var blends := source.surface_get_blend_shape_arrays(surface)
+		var lods := HIGH.LODS._surface_lods(source, surface)
+		HIGH.COMPACTOR.compact(a, blends, lods)
 		var ai: PackedInt32Array = a[Mesh.ARRAY_INDEX]
 		var bi: PackedInt32Array = b[Mesh.ARRAY_INDEX]
-		expect(ai.size() == bi.size(), "triangle count preserved")
-		for corner: int in ai.size():
-			expect((a[Mesh.ARRAY_VERTEX][ai[corner]] as Vector3).distance_to(b[Mesh.ARRAY_VERTEX][bi[corner]]) < 0.000001,
-				"High adds only anchored texture coordinates; position unchanged")
+		expect(source.get_blend_shape_count() == result.get_blend_shape_count(), "blend shape count preserved")
+		expect(bi.size() >= ai.size() and bi.size() - ai.size() < 7200, "bounded head-only triangle refinement " + label)
+		var seam_positions := {}
+		var maximum_delta := 0.0
+		var maximum_seam_gap := 0.0
+		for index: int in (a[Mesh.ARRAY_VERTEX] as PackedVector3Array).size():
+			var p: Vector3 = a[Mesh.ARRAY_VERTEX][index]
+			var q: Vector3 = b[Mesh.ARRAY_VERTEX][index]
+			maximum_delta = maxf(maximum_delta, p.distance_to(q))
+			expect(p.distance_to(q) < .0065 and q.is_finite(), "bounded finite sculpt " + label)
+			expect(a[Mesh.ARRAY_TEX_UV][index] == b[Mesh.ARRAY_TEX_UV][index], "UV1 remains exact " + label)
+			var key := Vector3i(roundi(p.x * 1000000), roundi(p.y * 1000000), roundi(p.z * 1000000))
+			if seam_positions.has(key):
+				maximum_seam_gap = maxf(maximum_seam_gap, q.distance_to(seam_positions[key]))
+				expect(q.distance_to(seam_positions[key]) < .000003, "coincident UV seam stays closed " + label)
+			else:
+				seam_positions[key] = q
+		var vertices: PackedVector3Array = b[Mesh.ARRAY_VERTEX]
+		var normals: PackedVector3Array = b[Mesh.ARRAY_NORMAL]
+		var weights: PackedFloat32Array = b[Mesh.ARRAY_WEIGHTS]
+		var width := int(weights.size() / vertices.size())
+		var original_weights: PackedFloat32Array = a[Mesh.ARRAY_WEIGHTS]
+		var original_bones: PackedInt32Array = a[Mesh.ARRAY_BONES]
+		var bones: PackedInt32Array = b[Mesh.ARRAY_BONES]
+		expect(width == int(original_weights.size() / (a[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()), "original influence width retained")
+		for index: int in original_weights.size():
+			expect(weights[index] == original_weights[index] and bones[index] == original_bones[index], "retained vertex keeps exact canonical influence")
+		for lod: Variant in HIGH.LODS._surface_lods(result, surface).values():
+			for index: int in lod:
+				expect(index >= 0 and index < vertices.size(), "retained LOD index stays valid")
+		for index: int in vertices.size():
+			expect(vertices[index].is_finite() and normals[index].is_finite() and absf(normals[index].length() - 1.0) < .002, "finite normalized High vertex/normal")
+			var sum := 0.0
+			for influence: int in width:
+				sum += weights[index * width + influence]
+			expect(absf(sum - 1.0) < .001, "normalized canonical skin weights")
+		geometry_records.append({"part": label, "surface": surface, "source_triangles": ai.size() / 3,
+			"high_triangles": bi.size() / 3, "vertices": vertices.size(), "max_displacement_m": maximum_delta,
+			"max_original_seam_gap_m": maximum_seam_gap})
+
+func check_seam_midpoints() -> void:
+	var bundle := HIGH._bundle("male")
+	var points := PackedVector3Array([Vector3(-.025,.04,.05), Vector3(.025,.04,.05), Vector3(0,.02,.05),
+		Vector3(.025,.04,.05), Vector3(-.025,.04,.05), Vector3(0,.06,.05)])
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = points
+	arrays[Mesh.ARRAY_NORMAL] = PackedVector3Array([Vector3.BACK, Vector3.BACK, Vector3.BACK, Vector3.UP, Vector3.UP, Vector3.UP])
+	arrays[Mesh.ARRAY_TEX_UV] = PackedVector2Array([Vector2.ZERO, Vector2.ONE, Vector2(.5,0), Vector2(.2,.3), Vector2(.8,.9), Vector2(.1,.7)])
+	arrays[Mesh.ARRAY_INDEX] = PackedInt32Array([0,1,2,3,4,5])
+	arrays[Mesh.ARRAY_BONES] = PackedInt32Array([0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0])
+	arrays[Mesh.ARRAY_WEIGHTS] = PackedFloat32Array([1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0])
+	HIGH._subdivide(arrays, [], Transform3D.IDENTITY, bundle, {}, Vector3.ZERO, false)
+	var split: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+	var positions := {}
+	var pairs := 0
+	for index: int in range(6, split.size()):
+		var p := split[index]
+		var key := Vector3i(roundi(p.x * 1000000), roundi(p.y * 1000000), roundi(p.z * 1000000))
+		var moved := HIGH._sculpt_point(p, bundle)
+		if positions.has(key):
+			pairs += 1
+			expect(moved == positions[key], "new UV seam midpoint evaluates identically despite unrelated normal/UV")
+		positions[key] = moved
+	for p: Vector3 in [Vector3(0,-.061,.06), Vector3(.09,.05,.06), Vector3(0,.15,.06), Vector3(0,.04,-.01)]:
+		expect(HIGH._sculpt_point(p, bundle) == p, "neck/ear/cap/rear seam displacement exactly zero")
+	for x: float in [-.05,0,.05]:
+		var p := Vector3(x,.02,.05)
+		var frame := {"scale":1.0,"eye_y":.075,"eye_z":.045}
+		for shape: Vector3 in [Vector3(-1,-1,-1), Vector3.ONE]:
+			var moved := HIGH.COMPACTOR.face_point(p, frame, shape)
+			expect(HIGH._canonical(moved, frame, shape).distance_to(p) < .000001, "custom face inverse remains stable at extrema")
+	expect(pairs > 0, "fixture actually tests duplicated new edge midpoint")
+	HIGH.clear()
 
 func capture(name: String) -> void:
 	for frame: int in 5:

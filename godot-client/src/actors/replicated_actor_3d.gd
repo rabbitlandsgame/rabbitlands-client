@@ -18,6 +18,7 @@ const PORTRAIT_GROOM := preload("res://src/actors/portrait_groom.gd")
 const STUBBLE_APPEARANCE := preload("res://src/actors/stubble_appearance.gd")
 const HUMAN_LOCOMOTION := preload("res://src/actors/human_locomotion_polish.gd")
 const HIGH_PORTRAIT := preload("res://src/actors/high_portrait_appearance.gd")
+const HIGH_HAIR := preload("res://src/actors/high_hair_appearance.gd")
 const WORLD_LABEL_STYLE := preload("res://src/ui/world_label_style.gd")
 const TextColors := preload("res://src/ui/text_colors.gd")
 const ARCHIVED_MODEL_POLICY := preload("res://src/actors/archived_model_policy.gd")
@@ -495,6 +496,7 @@ static func clear_wardrobe_texture_cache() -> void:
 	STUBBLE_APPEARANCE.clear()
 	HUMAN_LOCOMOTION.clear()
 	HIGH_PORTRAIT.clear()
+	HIGH_HAIR.clear()
 ## The speech bubble sits above the name instead, and wraps well short of the
 ## screen it is now measured against.
 const SPEECH_BUBBLE_RISE := 28.0
@@ -683,6 +685,7 @@ func apply_appearance_variants(appearance: Dictionary) -> void:
 	var native_model: Node3D = get_node_or_null("NativeModel") as Node3D
 	if native_model == null:
 		return
+	HIGH_HAIR.restore(native_model)
 	for node_value: Node in native_model.find_children("*", "MeshInstance3D", true, false):
 		var mesh_node: MeshInstance3D = node_value as MeshInstance3D
 		var mesh_name: String = mesh_node.name.to_lower()
@@ -830,6 +833,7 @@ func _apply_grouped_face_appearance(native_model: Node3D, spec: Dictionary,
 			_face_material = face
 
 func _configure_skin_color(material: ShaderMaterial, part: String, surface: int) -> void:
+	material.set_shader_parameter("natural_iris", _uses_portrait_customization())
 	var palette: Dictionary = _model_config.get("skinPalette", {})
 	var refs: Array = palette.get("references", {}).get(part, [])
 	var calibrated := surface < refs.size()
@@ -1089,6 +1093,7 @@ func _apply_render_quality_to_visuals() -> void:
 	if is_instance_valid(_native_model):
 		# All authored body coverage, cape drape and quiver-strap fitting have
 		# finished before this stage. Fit the final wardrobe exactly once.
+		HIGH_HAIR.restore(_native_model)
 		HIGH_PORTRAIT.restore(_native_model)
 		if _human_shape_needs_finish:
 			# Body refinement is identical on the head. Doing it before the
@@ -1098,6 +1103,7 @@ func _apply_render_quality_to_visuals() -> void:
 			PORTRAIT_GROOM.apply(_native_model, _native_skeleton, _appearance, _model_config)
 			_human_shape_needs_finish = false
 		HIGH_PORTRAIT.apply(_native_model, _native_skeleton, _appearance, _model_config, _render_quality)
+		HIGH_HAIR.apply(_native_model, _native_skeleton, _appearance, _model_config, _render_quality)
 		STUBBLE_APPEARANCE.apply(_native_model, _appearance, _model_config)
 		ACTOR_RENDER_QUALITY.apply_actor(_native_model, _render_quality)
 	var fallback := get_node_or_null("MissingModelFallback") as MeshInstance3D
@@ -2731,6 +2737,7 @@ func apply_equipment_visuals(visuals: Dictionary, fallback_parts: Array = []) ->
 	if _equipment_applied and _equipment_matches(visuals, fallback_parts):
 		return
 	if is_instance_valid(_native_model):
+		HIGH_HAIR.restore(_native_model)
 		HIGH_PORTRAIT.restore(_native_model)
 		CHARACTER_PROPORTIONS.restore(_native_model)
 		CHARACTER_PROPORTIONS.restore_body_refinement(_native_model)
@@ -3260,6 +3267,7 @@ func _refresh_wardrobe_cover() -> void:
 	var native_model: Node3D = get_node_or_null("NativeModel") as Node3D
 	if native_model == null:
 		return
+	HIGH_HAIR.restore(native_model)
 	HIGH_PORTRAIT.restore(native_model)
 	CHARACTER_PROPORTIONS.restore(native_model)
 	CHARACTER_PROPORTIONS.restore_body_refinement(native_model)
@@ -5326,6 +5334,7 @@ func _restore_remote_pending() -> void:
 
 func _exit_tree() -> void:
 	if is_instance_valid(_native_model):
+		HIGH_HAIR.release(_native_model)
 		HIGH_PORTRAIT.release(_native_model)
 	var remote = RemotePresentationService.current()
 	if remote != null: remote.release_departing(self)

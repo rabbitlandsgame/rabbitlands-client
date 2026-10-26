@@ -36,16 +36,22 @@ arm taper and palm refinements. Skinned garments and equipment receive the
 same adjustment in the wearer's rest space; joint and grip anchors stay fixed.
 
 Human walking has a relaxed elbow bend. Running balances the left and right
-arm swing and steadies the wrists. These changes preserve the original lower
-body movement, clip lengths, attack and spell timing. Equipped weapon poses
+arm swing and steadies the wrists. The male body has a separate arm pass with
+closer elbow placement, a sustained running bend and inward-facing palms.
+The female walk and run retain their previous motion. These changes preserve
+the original lower body movement, clip lengths, attack and spell timing. Equipped weapon poses
 continue to adjust the hands after animation playback.
 
 Low and Medium graphics use the lightweight Human appearance. High graphics
-adds the first portrait-detail art pass: dedicated face colour, facial regions
-and baked normal maps for both bodies. The maps follow fixed mesh UVs during
-animation. Switching back to Low or Medium restores the original materials
+adds face colour, facial regions and baked normal maps for both bodies, with
+refined head geometry recovering eyelid, nose and lip form from the retained
+high-resolution sources. Eye colour retains the source iris detail. Human
+eye colours also have a more restrained brightness in Low and Medium.
+High hair refines curved edges, asymmetric sweeps and the female updo while
+reusing its existing textures. The maps follow fixed mesh UVs during animation.
+Switching back to Low or Medium restores the lightweight geometry and materials
 and releases unused High portrait resources. All graphics levels use the
-same body, facial shape, customization and animation controls.
+same body proportions, facial settings, grooming choices and animation controls.
 
 The High pass is a foundation for further painting and anatomy work. The
 leaderboard portraits remain the art direction; the current models do not yet
@@ -58,6 +64,8 @@ In the prepared customization checkout, double-click
 the portrait outfits and four starter outfits, animation poses, camera rotation
 and all appearance controls. Choose **Graphics → Low / Medium / High** to
 compare the two artwork paths; the workshop starts in Medium.
+**Front view** faces the model straight toward the camera for checking the
+face and elbow placement. Dragging still lets you inspect other angles.
 **Save preview** stores choices separately for
 each body on this computer. **Screenshot** saves an image in the preview's
 private user-data folder; **Open saves** opens that folder. Closing the window
