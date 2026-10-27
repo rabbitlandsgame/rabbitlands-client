@@ -5,8 +5,8 @@
   "batch_size": 5,
   "creature_count": 235,
   "batch_count": 47,
-  "completed_batches": 2,
-  "qualified_creatures": 10,
+  "completed_batches": 3,
+  "qualified_creatures": 15,
   "status": "in progress",
   "actors": [
     {
@@ -121,7 +121,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/dragon_turtle.glb",
       "source_sha256": "c3ce5547877c70fcc29c6356585fef20cd615fe637a246e700f12fc492a0cd68",
       "source_bytes": 57775636,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "6b853e814bb7a1f74f24a3469168c8cc11d2ca45e7eca6ee2f570c2acb4a11c7",
+      "candidate_bytes": 57273908,
+      "qualification_report": "docs/qa/creature-storage/batch-003/dragon_turtle.json"
     },
     {
       "actor": "rooster",
@@ -130,7 +133,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/rooster.glb",
       "source_sha256": "3d960a4673f225bbc7ca26ead0ffbcb25428d9a8a8ef2de458b42a462f35921e",
       "source_bytes": 57533648,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "9068932d132fd505202d42182a50c02fcccc58f658c1b5362b1d46e9ef69c320",
+      "candidate_bytes": 55785220,
+      "qualification_report": "docs/qa/creature-storage/batch-003/rooster.json"
     },
     {
       "actor": "saltmarsh_crocodile",
@@ -139,7 +145,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/saltmarsh_crocodile.glb",
       "source_sha256": "d3f5eba4815ab89a85b41b7201df152a25942decc0d5a7cf0bd3e2e32248e6c2",
       "source_bytes": 56864860,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "d0d8ba1092eb7394cbb22cd2460ea5c8fc8c978d044568fa672c8d6258493554",
+      "candidate_bytes": 56669016,
+      "qualification_report": "docs/qa/creature-storage/batch-003/saltmarsh_crocodile.json"
     },
     {
       "actor": "swan",
@@ -148,7 +157,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/swan.glb",
       "source_sha256": "d7895ef8bdc6b53b014aacb295cec1fc6914538bd233210bb2a808690eeed144",
       "source_bytes": 56301048,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "55dba90a3f158fbd5a27246d599b3ff896e834b03c72afc44d36f04644a9066c",
+      "candidate_bytes": 54211784,
+      "qualification_report": "docs/qa/creature-storage/batch-003/swan.json"
     },
     {
       "actor": "gargoyle",
@@ -157,7 +169,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/gargoyle.glb",
       "source_sha256": "958d4eb271eb89ce463635f51f6c725cff830d1ff892d30ced1a1ee18939b875",
       "source_bytes": 53971792,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "f7599c02477dbd964107406214b2e9dfe83ef893529cf1a72068f441328c0feb",
+      "candidate_bytes": 53599236,
+      "qualification_report": "docs/qa/creature-storage/batch-003/gargoyle.json"
     },
     {
       "actor": "pelican",
@@ -2142,7 +2157,8 @@
   ],
   "completed_batch_numbers": [
     1,
-    2
+    2,
+    3
   ],
-  "reviewed_creatures": 10
+  "reviewed_creatures": 15
 }
