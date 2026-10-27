@@ -100,6 +100,10 @@ def test_the_authored_source_holds_the_spec_doors_and_the_stairs():
     found = TS.interactives(design)
     assert found and all(entry['object'] in TS.INTERACTIVE_IDS for entry in found)
     assert [e['role'] for e in found if e['role'] == 'crafting_station'] == ['crafting_station']
+    # every lore object names its short label and the point of the prop or picture it describes (the pick-only
+    # objects.json record, retarget_underground.py); the anvil serves smithing
+    assert all(entry.get('label') and entry.get('at') for entry in found)
+    assert [e['target'] for e in found if e['role'] == 'crafting_station'] == ['smithing']
 
 
 def mutate(change):
@@ -145,6 +149,14 @@ REFUSALS = {
     'an interactive with an unknown role': (lambda d: section(d, 'market')['interactives'].append(
         {'object': 59251, 'tile': [135, 25], 'role': 'shop', 'text': 'x'}), 'role'),
     'an unknown section key': (lambda d: section(d, 'market').update(ceiling=4), 'unknown keys'),
+    'an interactive with an unknown key': (lambda d: section(d, 'smithy')['interactives'][0].update(colour=1),
+                                           'unknown keys'),
+    'an interactive point outside the rooms': (lambda d: section(d, 'castle')['interactives'][0].update(at=[0, 0]),
+                                               'none of the'),
+    'a target holding a bar': (lambda d: section(d, 'smithy')['interactives'][0].update(target='smith|ing'),
+                               'holds'),
+    'a wall decal at a height': (lambda d: section(d, 'castle')['decals'][0].update(height=1.0),
+                                 'only a floor decal'),
 }
 
 
@@ -322,12 +334,66 @@ def test_a_doorway_is_a_flat_opening_with_one_open_tile(built):
 
 def test_windows_decals_doors_and_stairs_are_drawn(built):
     nodes = built.nodes
-    for name in ('Build_shop_west_window_glass', 'Build_shop_north_window_glass', 'Build_shop_north_decal_banner_orun',
+    pane = built.T.window_art(built.T.THEMES['shop'])
+    for name in (f'Build_shop_west_{pane}', f'Build_shop_north_{pane}', 'Build_shop_north_decal_banner_orun',
                  'Decal_shop_decal_rug_home', 'Part_shop_0_decal_botanical_prints', 'Build_shop_south_door_daylight',
                  'Door_shop_door_spill', 'Build_shop_stair0_stair_dark', 'Stair_upstairs_0_stair_dark',
                  'Walk_shop_oak_planks', 'Walk_shop_cobalt_tile', 'Part_shop_0_lime_plaster', 'Part_shop_0_soot_brick',
                  'Roof_shop_wall_cap', 'Build_shop_north_wall_cap', 'Build_shop_north_timber_band'):
         assert name in nodes, name
+
+
+def test_stairs_are_steps_with_rails_and_a_stairwell_is_never_a_black_pit(built):
+    """A flight: lit treads, shaded risers, timber stringers and rails; a stairwell: treads and sides that darken with
+    depth (not black), a dark way on only at its foot under a lintel, and rails along both sides."""
+    nodes = built.nodes
+    for name in ('Build_shop_stair0_oak_planks', 'Build_shop_stair0_oak_planks_shade', 'Build_shop_stair0_timber_band',
+                 'Stair_upstairs_0_oak_planks', 'Stair_upstairs_0_oak_planks_shade', 'Stair_upstairs_0_oak_planks_dusk',
+                 'Stair_upstairs_0_lime_plaster_shade', 'Stair_upstairs_0_timber_band', 'Stair_upstairs_0_stair_dark'):
+        assert name in nodes, name
+    data = (built.package/'world.glb').read_bytes()
+    document = json.loads(data[20:20+struct.unpack('<I', data[12:16])[0]])
+    shade = next(m for m in document['materials'] if m['name'] == 'oak_planks_shade')['pbrMetallicRoughness']
+    plain = next(m for m in document['materials'] if m['name'] == 'oak_planks')['pbrMetallicRoughness']
+    # the shaded copy samples the same texture under a darker base colour
+    assert shade['baseColorTexture'] == plain['baseColorTexture']
+    assert shade['baseColorFactor'][:3] == [built.T.SHADES['_shade']]*3
+    # each passage portal carries its drawn stair's offset from the end tile (retarget writes it into objects.json)
+    portals = {p['id']: p for p in built.manifest['portals']}
+    assert portals['shop-passage0-0']['modelOffset'] == [0.0, 0.0, -2.7]       # a 2.6 m flight ending 4 m north
+    assert portals['upstairs-passage0-1']['modelOffset'] == [0.0, 0.0, -2.0]   # a 2 m well ending 3 m north
+
+
+def test_street_doors_spill_soft_daylight_and_doorways_have_timber_jambs(built):
+    nodes = built.nodes
+    assert {'Door_shop_door_spill', 'Door_shop_timber_band', 'Part_shop_0_timber_band'} <= nodes
+    door = built.T.FLAT['door_daylight']
+    assert max(door['emissive']) < .5 and max(door['base_color'][:3]) < .8   # warm, not blown out
+    assert built.T.THEMES['castle']['doorWidth'] <= 2.5
+    from PIL import Image
+    import io
+    picture = Image.open(io.BytesIO(built.T.door_spill_image())).convert('RGBA')
+    alpha = np.asarray(picture)[..., 3]
+    # brightest at the threshold's middle, fading into the room and to both sides
+    assert alpha[0, 32] == alpha.max() > 0 and alpha[-1].max() == 0 and alpha[:, 0].max() == 0
+
+
+def test_props_against_a_partition_name_it_as_their_cutaway_wall():
+    """A prop hung on a partition or standing with its back to one carries that partition's node (in its own room's
+    surface) as `cutawayWall`, so the runtime hides it with the partition; a prop turned to face the partition, or
+    standing clear of it, carries none."""
+    import build_town_interiors as T
+    design = synthetic()
+    design['sections'][0]['props'] += [
+        {'asset': 'wall_sconce', 'at': [16.0, 16.3], 'yaw': 0, 'height': 1.6},
+        {'asset': 'bookcase', 'at': [18.5, 16.05], 'yaw': 0, 'blockBox': [0.66, 0.2]},
+        {'asset': 'bookcase', 'at': [17.0, 17.0], 'yaw': 180, 'blockBox': [0.66, 0.2]},
+        {'asset': 'supply_chest', 'at': [18.5, 15.95], 'yaw': 180, 'blockBox': [0.5, 0.3]},
+        {'asset': 'stool', 'at': [15.0, 14.0], 'yaw': 0, 'blockBox': [0.2, 0.2]}]
+    design = T.annotate(design)
+    placed = T.dressing(design['sections'][0])[-5:]
+    assert [item.get('cutawayWall') for item in placed] == [
+        'Part_shop_0_lime_plaster', 'Part_shop_0_lime_plaster', 'Part_shop_0_soot_brick', None, None]
 
 
 def test_decals_clamp_to_their_edge_and_surfaces_repeat(built):
@@ -342,8 +408,12 @@ def test_decals_clamp_to_their_edge_and_surfaces_repeat(built):
         wraps[document['images'][texture['source']]['name']] = (sampler['wrapS'], sampler['wrapT'])
     decals = {name for name in wraps if name.startswith('decal_')}
     assert decals == {'decal_banner_orun', 'decal_rug_home', 'decal_botanical_prints'}
-    assert all(wraps[name] == (33071, 33071) for name in decals)
-    assert all(wraps[name] == (10497, 10497) for name in set(wraps) - decals)
+    # the other single pictures: the door's daylight spill and, once the art role publishes it, the painted window
+    glazing = built.T.window_art(built.T.THEMES['shop'])
+    pictures = decals | {'door_spill'} | ({glazing} if glazing in built.T.WINDOW_ART else set())
+    assert pictures <= set(wraps)
+    assert all(wraps[name] == (33071, 33071) for name in pictures)
+    assert all(wraps[name] == (10497, 10497) for name in set(wraps) - pictures)
     assert 'oak_planks' in wraps and len(samplers) == 2
 
 

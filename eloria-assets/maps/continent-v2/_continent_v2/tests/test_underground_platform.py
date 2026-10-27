@@ -791,3 +791,50 @@ def test_retarget_check_with_map_reports_and_writes_nothing(retarget_tree, monke
     assert {Path(p).resolve() for p in report["stale"]} == {t.objects.resolve(), t.package.resolve()}
     assert report["orphans"] == ["777", "59299"]
     assert {path: path.read_bytes() for path in before} == before
+
+
+def test_retarget_writes_pick_only_records_for_interior_interactives_and_stair_offsets(retarget_tree):
+    """An interior interactive gets a pick-only record (no ring, no model) on the prop its `at` names: modelOffset from
+    the tile's centre, the prop's packaged size (reused-scenery.json) unless the source gives one, its short label; a
+    drawn stair's end carries the offset its package portal records. Records no source has any longer go."""
+    t = retarget_tree
+    town = json.loads(t.sources["building"].read_bytes())
+    tavern = town["sections"][0]
+    tavern["props"] = [{"asset": "anvil_stump", "at": [41.5, 42.5], "yaw": 0, "scale": 2, "blockBox": [0.4, 0.4]}]
+    tavern["interactives"] = [
+        {"object": 59254, "tile": [43, 42], "role": "crafting_station", "text": "The forge is hot.", "label": "The anvil",
+         "at": [41.5, 42.5], "target": "smithing"},
+        {"object": 59251, "tile": [36, 40], "role": "information", "text": "Over the hearth: a painting.",
+         "at": [34.6, 40.5], "height": 3.0, "radius": 0.9},
+        {"object": 59252, "tile": [38, 38], "role": "information", "text": "A note. Read it."}]
+    t.sources["building"].write_bytes((json.dumps(town, indent=1) + "\n").encode("utf-8"))
+    scenery = t.checkout / t.R.SCENERY
+    scenery.parent.mkdir(parents=True)
+    scenery.write_text(json.dumps({"assets": [{"id": "anvil_stump", "bounds": [[-0.45, 0, -0.4], [0.45, 0.93, 0.4]]}]}),
+                       encoding="utf-8")
+    package = json.loads(t.package.read_bytes())
+    package["portals"][1]["modelOffset"] = [0.0, 0.0, -2.7]
+    t.package.write_bytes((json.dumps(package, indent=2) + "\n").encode("utf-8"))
+    objects = json.loads(t.objects.read_bytes())
+    objects["authoredObjects"]["59299"] = {"interactive": True, "pickOnly": True, "label": "Gone",
+                                           "modelOffset": [0, 0, 0], "height": 1, "radius": 1}
+    t.objects.write_bytes((json.dumps(objects, indent=2) + "\n").encode("utf-8"))
+    outputs, _, _ = t.R.retarget(t.checkout)
+    authored = json.loads(outputs[t.objects])["authoredObjects"]
+    # the anvil: 1.5 m west and 0.5 m south (world +Z) of tile (43, 42)'s centre, its packaged size at scale 2
+    assert authored["59254"] == {"interactive": True, "pickOnly": True, "label": "The anvil",
+                                 "modelOffset": [-2.0, 0.0, 0.0], "height": 1.86, "radius": 0.9}
+    assert list(authored["59254"]) == ["interactive", "pickOnly", "label", "modelOffset", "height", "radius"]
+    # a picture on the wall: the source's own size; the label is the text's first clause when the source gives none
+    assert authored["59251"] == {"interactive": True, "pickOnly": True, "label": "Over the hearth",
+                                 "modelOffset": [-1.9, 0.0, 0.0], "height": 3.0, "radius": 0.9}
+    assert authored["59252"]["modelOffset"] == [0.0, 0.0, 0.0] and authored["59252"]["label"] == "A note"
+    assert (authored["59252"]["height"], authored["59252"]["radius"]) == (1.8, 0.8)
+    assert "59299" not in authored
+    # the stair's pick stands on its flight; the other end's portal records none
+    assert authored["59221"]["modelOffset"] == [0.0, 0.0, -2.7] and "modelOffset" not in authored["59222"]
+    # an interactive's id may not take another object's record
+    objects["authoredObjects"]["59252"] = {"entrance": True, "exteriorTile": [3, 3], "scene": "res://x.glb"}
+    t.objects.write_bytes(json.dumps(objects).encode("utf-8"))
+    with pytest.raises(SystemExit, match="another object's record"):
+        t.R.retarget(t.checkout)

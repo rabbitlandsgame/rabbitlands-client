@@ -33,17 +33,21 @@ WHAT IS DRAWN, PER SECTION (mesh node `<bucket>_<material>`):
   Walk_<s>        each room's floor in its surface (a stairwell cut out)
   Roof_<s>        the ceiling at wall height (always hidden by the cutaway)
   Build_<s>_<side>   the outer walls facing `side`: face, top cap (wall_cap, mitred at the corners), trim bands, and
-                  on them the windows (glass and timber frame), wall decals and the lit street doors; cut away by
-                  facing (cutaway.walls, threshold 0.35)
+                  on them the windows (the art role's leaded glazing, the theme's `window` picture, or a flat pane
+                  until it is published; the timber frame, sill, centre mullion and transom drawn over it), wall decals and the lit street doors (soft daylight, the theme's door size);
+                  cut away by facing (cutaway.walls, threshold 0.35)
   Part_<s>_<k>    partition walls (full height): a solid piece between rooms with both faces in their rooms' surfaces,
-                  cap, trims, the doorway openings with jamb reveals, soffits and lintels. Never cut by facing: each is
-                  its own small node, so OccluderFade/LookFade fades it while it covers the player (cutaway.partitions
-                  lists them for the runtime)
-  Build_<s>_stair<k>   a flight of stairs up to an opening (stairs_up passage ends) or to a shut door (sealedStairs),
-                  set against an outer wall and cut away with it
-  Stair_<s>_<k>   a stairwell down (stairs_down passage ends): treads, well sides and a low balustrade; never cut
-  Door_<s>        the daylight spilling in at each street door, on the floor (not cut, so a door reads with its wall
-                  gone)
+                  cap, trims, the doorway openings with timber jamb linings, casings on both faces, soffits and
+                  lintels. Never cut by facing: each is its own small node; cutaway.partitions lists them (node,
+                  section, rooms, centre, along, normal) and the runtime hides a partition standing between the camera
+                  and the player, with every prop whose `cutawayWall` names it (props against a partition, dressing())
+  Build_<s>_stair<k>   a flight of stairs up to an opening (stairs_up passage ends) or to a shut plank door
+                  (sealedStairs): lit treads with nosings, shaded risers, timber stringers, handrails on newels and
+                  balusters where floor lies beside it; set against an outer wall and cut away with it
+  Stair_<s>_<k>   a stairwell down (stairs_down passage ends): treads and sides darkening with depth (SHADES, never
+                  black), a dark passage under a lintel at its foot and a handrail on both sides; never cut
+  Door_<s>        at each street door, on the floor: a timber threshold and the daylight spilling in (a generated soft
+                  picture, PICTURES); not cut, so a door reads with its wall gone
   Decal_<s>       floor decals (rugs, inlays)
 Surface textures repeat (the glTF sampler 0); decal textures, wall and floor alike, clamp to their edge
 (DECAL_SAMPLER), as single pictures.
@@ -61,7 +65,8 @@ MANIFEST (world.json): spawnPoints (each section's primary arrival, facing into 
 named from roomNames; radius one metre short of the room's longer half extent, so the music sync's padded square
 covers the whole room), spaces (each room's exact rectangle, by name, for the music zones: classified by the name
 alone, so a name without a music keyword is covered by its chamber only), portals and interactives (each door's
-exit, labelled with its exitLabel; each passage end; the source's interior interactives), environment and camera from
+exit, labelled with its exitLabel; each passage end, with its drawn stair's `modelOffset` from the end tile,
+stair_offset(); the source's interior interactives), environment and camera from
 the source, lighting.markers (the source's lights and lamp props), cutaway, sectioned + sections, interiorClass
 "insides", parentRegion "landfall", provenance (source, this builder and the helpers it imports, each with its sha256;
 the surfaces' files; the approval note).
@@ -132,7 +137,8 @@ write_json = B.write_json
 
 _BASE = {'floor': 'oak_planks', 'walls': 'lime_plaster', 'wallHeight': 3.4, 'partitionHeight': 3.4, 'margin': .55,
          'wallThickness': .3, 'partitionThickness': .24, 'doorWidth': 2.0, 'doorHeight': 2.6, 'doorwayTop': 2.5,
-         'windowSill': 1.0, 'windowHead': 2.3, 'trim': ((0., .16), (3.08, 3.3)), 'stairs': 'timber_band'}
+         'windowSill': 1.0, 'windowHead': 2.3, 'trim': ((0., .16), (3.08, 3.3)), 'stairs': 'oak_planks',
+         'stairRail': 'timber_band', 'window': 'window_leaded'}
 THEMES = {
     'tavern': {**_BASE},
     'shop': {**_BASE},
@@ -141,10 +147,12 @@ THEMES = {
                'trim': ((0., .16), (3.28, 3.5))},
     'house': {**_BASE, 'wallHeight': 3.2, 'partitionHeight': 3.2, 'doorWidth': 1.6, 'doorHeight': 2.4,
               'doorwayTop': 2.3, 'windowHead': 2.2, 'trim': ((0., .14), (2.9, 3.1))},
+    # the keep's street door is the size of its painted facade door (about 2.4 x 3.2 m), not a gateway
     'castle': {**_BASE, 'floor': 'limestone_flagstone', 'walls': 'ashlar_wall', 'wallHeight': 4.6,
-               'partitionHeight': 4.6, 'wallThickness': .5, 'partitionThickness': .4, 'doorWidth': 3.0,
-               'doorHeight': 3.6, 'doorwayTop': 3.3, 'windowSill': 1.4, 'windowHead': 3.6,
-               'trim': ((0., .24), (4.16, 4.44)), 'stairs': 'ashlar_wall'},
+               'partitionHeight': 4.6, 'wallThickness': .5, 'partitionThickness': .4, 'doorWidth': 2.4,
+               'doorHeight': 3.2, 'doorwayTop': 3.3, 'windowSill': 1.4, 'windowHead': 3.6,
+               'trim': ((0., .24), (4.16, 4.44)), 'stairs': 'limestone_flagstone', 'stairRail': 'ashlar_wall',
+               'window': 'window_leaded_tall'},
 }
 assert set(THEMES) == set(TS.STYLES)
 
@@ -164,20 +172,36 @@ SURFACES = {
 }
 # a decal's placeholder colour, by id prefix (the codex art replaces it)
 DECAL_PLACEHOLDERS = (('banner_', (128, 44, 42)), ('rug_', (142, 56, 42)), ('map_', (216, 198, 152)),
-                      ('star_', (38, 46, 82)), ('botanical_', (224, 214, 186)))
+                      ('star_', (38, 46, 82)), ('botanical_', (224, 214, 186)), ('painting_', (58, 52, 44)),
+                      ('book_', (196, 170, 128)))
 # A decal is one picture, not a tile: its texture samples CLAMP_TO_EDGE (33071), so a banner's or a rug's far edge
 # never bleeds in along the near one at low mip levels. The surfaces keep the builder's REPEAT sampler 0 (10497).
+# The other single pictures (the window glazing, WINDOW_ART; the door's daylight spill, PICTURES) clamp too.
 DECAL_SAMPLER = {'magFilter': 9729, 'minFilter': 9987, 'wrapS': 33071, 'wrapT': 33071}
 MAX_TEXTURE = 1024
+# Shaded copies of a surface (`<surface><suffix>`): the same texture under a darker base colour, for stair risers and
+# the deeper treads and sides of a stairwell, so a flight reads as steps (lit treads, shadowed risers) and a stairwell
+# as a stair going down into dimness rather than a black pit.
+SHADES = {'_shade': .58, '_dusk': .34}
+# The window glazing (the art role's codex pictures under INTERIOR_TEXTURES, 2026-10-27: leaded quarries over hazy,
+# day-neutral daylight, mid-value and never near white): the theme's `window` names one; it fills each window quad as
+# one picture (stretched to the quad, clamped), matte and never emissive, so a window reads as glass by day and is no
+# lamp at night; the builder's frame, sill, centre mullion and transom stand over it. Until the picture is published a
+# window is a flat pane (window_glass).
+WINDOW_ART = ('window_leaded', 'window_leaded_tall')
+WINDOW_MATERIAL = dict(base_color=(.92, .92, .9, 1), roughness=.45)
 # the shell's own flat materials
 FLAT = {
     'wall_cap': dict(base_color=(.21, .17, .14, 1), roughness=.95),
-    'door_daylight': dict(base_color=(1, .92, .76, 1), emissive=(.9, .78, .56), roughness=.9),
-    'door_spill': dict(base_color=(1, .9, .7, .22), emissive=(.3, .25, .17), alpha_mode='BLEND', roughness=1.),
-    'window_glass': dict(base_color=(.58, .62, .62, 1), emissive=(.09, .08, .06), roughness=.25),
+    # the street door's daylight: warm and soft, well short of white (the keep's 3 x 3.6 m door blew out, 2026-10-27)
+    'door_daylight': dict(base_color=(.74, .66, .5, 1), emissive=(.3, .25, .17), roughness=.9),
+    'window_glass': dict(base_color=(.5, .54, .55, 1), emissive=(.05, .045, .035), roughness=.25),
     'stair_dark': dict(base_color=(.008, .009, .011, 1), double_sided=True),
-    'sealed_door': dict(base_color=(.30, .19, .10, 1), roughness=.85),
+    'iron': dict(base_color=(.11, .11, .12, 1), metallic=.6, roughness=.55),
 }
+# generated pictures (an RGBA image the builder draws, not art): the daylight spilling in at a street door, fading
+# from the threshold into the room and to its sides
+PICTURES = ('door_spill',)
 assert set(TS.FLOORS) | set(TS.WALLS) <= set(SURFACES)
 
 # minimap colours
@@ -186,10 +210,17 @@ MINIMAP = {'oak_planks': (124, 88, 56), 'limestone_flagstone': (136, 130, 118), 
            'stairs': (120, 196, 232), 'passage': (120, 196, 232)}
 
 # Stair art: width across, depth from the wall, steps and the rise of each (metres).
-STAIRS = {'stairs_up': {'width': 1.8, 'depth': 2.6, 'steps': 6, 'rise': .2},
-          'stairs_down': {'width': 1.8, 'depth': 2.0, 'steps': 5, 'rise': .3}}
+STAIRS = {'stairs_up': {'width': 1.8, 'depth': 2.6, 'steps': 8, 'rise': .2},
+          'stairs_down': {'width': 1.8, 'depth': 2.0, 'steps': 6, 'rise': .25}}
+# a tread's nosing (metres down its front edge) and a handrail's height above the treads' nosing line
+NOSING = .04
+RAIL_HEIGHT = .9
+# the top of the low dark passage at a stairwell's foot (metres; the well's far face is wall above it)
+WELL_PASSAGE = -.85
 # Scraps of floor at most this many tiles cut off from a section's arrival are closed; a larger pocket is refused.
 STRANDED_MAX = 6
+# the width of a doorway's casing boards (metres)
+CASING = .12
 # a prop marked `light` (a glowing piece) shines warm: colour, energy, range, height above its foot (before scale)
 PROP_GLOW = ([1, .72, .42], 1.0, 7, 1.0)
 CUTAWAY_THRESHOLD = .35
@@ -257,35 +288,98 @@ def decal_placeholder(image_id):
     return next(colour for prefix, colour in DECAL_PLACEHOLDERS if image_id.startswith(prefix))
 
 
+def shaded(name):
+    """(surface, factor) for a shaded surface name `<surface><suffix>` (SHADES), else None."""
+    for suffix, factor in SHADES.items():
+        if name.endswith(suffix) and name[:-len(suffix)] in SURFACES:
+            return name[:-len(suffix)], factor
+    return None
+
+
+def window_art(theme=None):
+    """The material a theme's windows take: its `window` glazing picture (WINDOW_ART) once the art role has published
+    it under INTERIOR_TEXTURES, else the flat pane 'window_glass'."""
+    art = (theme or _BASE)['window']
+    return art if surface_file(art) is not None else 'window_glass'
+
+
+def door_spill_image(size=64):
+    """The daylight on the floor inside a street door, as an RGBA picture: u across the door, v from the threshold
+    (top row) into the room; warm, fading with distance and toward both sides (never a hard pale rectangle)."""
+    v = np.linspace(0, 1, size)[:, None]
+    u = np.linspace(-1, 1, size)[None, :]
+    side = np.clip((1-np.abs(u))/.45, 0, 1)
+    alpha = .34*(1-v)**1.6*(side*side*(3-2*side))
+    pixels = np.zeros((size, size, 4), dtype=np.uint8)
+    pixels[..., :3] = (255, 228, 178)
+    pixels[..., 3] = np.round(alpha*255).astype(np.uint8)
+    return _png(Image.fromarray(pixels, 'RGBA'))
+
+
 def register_materials(builder, used):
-    """Every material the shell uses: surfaces and decals with their images, the flat ones. Returns the surfaces'
-    provenance {id: {file | placeholder, sha256?}}."""
+    """Every material the shell uses: surfaces (and their SHADES) and decals with their images, the painted window,
+    the generated pictures, the flat ones. Returns the surfaces' provenance {id: {file | placeholder, sha256?}}."""
     record = {}
-    for name in sorted(used):
-        if name in SURFACES:
+    def surface(name):
+        if name not in record:
             spec = SURFACES[name]
             data, alpha, record[name] = surface_image(name, spec['placeholder'])
             builder.add_image(name, data)
-            builder.add_material(G.Material(name, roughness=spec['roughness'], base_color_texture=name,
-                                            alpha_mode='MASK' if alpha else 'OPAQUE'))
+        return 'MASK' if surface_image_alpha(name) else 'OPAQUE'
+    for name in sorted(used):
+        if name in SURFACES:
+            alpha = surface(name)
+            builder.add_material(G.Material(name, roughness=SURFACES[name]['roughness'], base_color_texture=name,
+                                            alpha_mode=alpha))
+        elif shaded(name):
+            base, factor = shaded(name)
+            alpha = surface(base)
+            builder.add_material(G.Material(name, roughness=SURFACES[base]['roughness'], base_color_texture=base,
+                                            base_color=(factor, factor, factor, 1), alpha_mode=alpha))
         elif name.startswith('decal_'):
             image_id = name[len('decal_'):]
             data, alpha, record[name] = surface_image(image_id, decal_placeholder(image_id))
             builder.add_image(name, data)
             builder.add_material(G.Material(name, roughness=.92, base_color_texture=name,
                                             alpha_mode='MASK' if alpha else 'OPAQUE'))
+        elif name in WINDOW_ART:
+            data, alpha, record[name] = surface_image(name, None)
+            builder.add_image(name, data)
+            builder.add_material(G.Material(name, **WINDOW_MATERIAL, base_color_texture=name))
+        elif name in PICTURES:
+            builder.add_image(name, door_spill_image())
+            builder.add_material(G.Material(name, base_color_texture=name, emissive=(.16, .13, .09),
+                                            alpha_mode='BLEND', roughness=1.))
+            record[name] = {'generated': 'build_town_interiors.door_spill_image'}
         elif name in FLAT:
             builder.add_material(G.Material(name, **FLAT[name]))
         else:
-            raise SystemExit(f'no material {name!r} in SURFACES or FLAT')
+            raise SystemExit(f'no material {name!r} in SURFACES, SHADES, PICTURES or FLAT')
     clamp_decals(builder)
     return record
 
 
+_ALPHA = {}
+
+
+def surface_image_alpha(name):
+    """Whether a surface's published art carries alpha (cached; a placeholder never does)."""
+    if name not in _ALPHA:
+        path = surface_file(name)
+        if path is None:
+            _ALPHA[name] = False
+        else:
+            with Image.open(path) as image:
+                _ALPHA[name] = _has_alpha(image)
+    return _ALPHA[name]
+
+
 def clamp_decals(builder):
-    """Give every decal texture (image `decal_<id>`) the DECAL_SAMPLER, added once after the builder's REPEAT sampler 0;
-    surface textures keep sampler 0. Runs after every material is registered."""
-    decals = {index for index, image in enumerate(builder._images) if image['name'].startswith('decal_')}
+    """Give every single-picture texture (a decal's image `decal_<id>`, the painted window, the generated PICTURES)
+    the DECAL_SAMPLER, added once after the builder's REPEAT sampler 0; surface textures keep sampler 0. Runs after
+    every material is registered."""
+    decals = {index for index, image in enumerate(builder._images)
+              if image['name'].startswith('decal_') or image['name'] in (*WINDOW_ART, *PICTURES)}
     if not decals:
         return
     builder._samplers.append(dict(DECAL_SAMPLER))
@@ -350,10 +444,43 @@ def _wall_node(section, prop):
     return f'Build_{section["id"]}_{prop["wall"]}_{material}'
 
 
+# A prop stands against a partition when its back is within this gap (metres) of the partition's face and it faces
+# away from it (a piece's +Z, its front), or hangs on it (raised at least PARTITION_HUNG metres)
+PARTITION_PROP_GAP = .35
+PARTITION_HUNG = 1.0
+
+
+def _partition_node(section, prop):
+    """The partition node a prop stands against or hangs on (`Part_<s>_<k>_<its room's surface>`), or None: the
+    client hides it with that partition (cutaway.partitions), as an outer-wall prop drops with its wall."""
+    x, y = prop['at']
+    angle = math.radians(prop.get('yaw', 0))
+    front = (math.sin(angle), -math.cos(angle))   # a piece's +Z in tile units (tile +y is world -Z)
+    if 'blockBox' in prop:
+        depth = prop['blockBox'][1]
+    else:
+        depth = prop.get('block', 0)
+    half = theme_of(section)['partitionThickness']/2
+    hung = prop.get('height', 0) >= PARTITION_HUNG
+    for k, part in enumerate(partitions(section)):
+        (ax, ay), (dx, dy), (nx, ny) = part['a'], part['along'], part['normal']
+        u = (x-ax)*dx+(y-ay)*dy
+        s = (x-ax)*nx+(y-ay)*ny
+        if not any(u0-.2 <= u <= u1+.2 for u0, u1 in part['solid']):
+            continue
+        away = (front[0]*nx+front[1]*ny)*(1 if s > 0 else -1)
+        if abs(s)-half-depth <= PARTITION_PROP_GAP and (away >= .7 or (hung and abs(s)-half <= PARTITION_PROP_GAP)):
+            room = part['rooms'][0] if s > 0 else part['rooms'][1]
+            material = TS.wall_of(section, room) or theme_of(section)['walls']
+            return f'Part_{section["id"]}_{k}_{material}'
+    return None
+
+
 def dressing(section):
     """The section's reused scenery, as placements in tile units: {asset, x, y, height, yaw, scale, block, blockBox?,
     wall, side?, outward?, cutawayWall?, palette?, light?}. A prop against a wall (`wall`) carries its outward direction
-    (world) and its wall's cutaway node (`cutawayWall`), so the client's cutaway drops it with that wall."""
+    (world) and its wall's cutaway node (`cutawayWall`), so the client's cutaway drops it with that wall; a prop against
+    a partition (_partition_node) carries the partition's node as its `cutawayWall`, so it hides with the partition."""
     items = []
     for prop in section.get('props', []):
         x, y = prop['at']
@@ -365,6 +492,10 @@ def dressing(section):
             item['side'] = prop['wall']
             item['outward'] = world_dir(TS.SIDE_TILE[prop['wall']])
             item['cutawayWall'] = _wall_node(section, prop)
+        else:
+            node = _partition_node(section, prop)
+            if node is not None:
+                item['cutawayWall'] = node
         if 'palette' in prop:
             item['palette'] = prop['palette']
         if prop.get('light'):
@@ -748,16 +879,25 @@ def partition_geometry(section, add, notes):
                 add(upright(P(v0, sign*half), P(v1, sign*half), 0, height, toward, material, v0), bucket)
                 trims(add, bucket, P(v0, sign*half), P(v1, sign*half), toward, theme, v0)
             add(level([P(v0, -half), P(v1, -half), P(v1, half), P(v0, half)], height, 'wall_cap'), bucket)
-            # the doorways' reveals, in room i's surface, each facing into its opening
+            # the doorways' jambs: timber linings (not a sliver of plaster), each facing into its opening
             if any(abs(u0-o) < 1e-9 for o in jambs):
-                add(upright(P(u0, half), P(u0, -half), 0, top, (-dx, -dy), sides[0][2]), bucket)
+                add(upright(P(u0, half), P(u0, -half), 0, top, (-dx, -dy), 'timber_band'), bucket)
             if any(abs(u1-o) < 1e-9 for o in jambs):
-                add(upright(P(u1, -half), P(u1, half), 0, top, (dx, dy), sides[0][2]), bucket)
+                add(upright(P(u1, -half), P(u1, half), 0, top, (dx, dy), 'timber_band'), bucket)
+        low, high = cut_a, part['length']-cut_b
         for o0, o1, _ in part['openings']:
             for sign, toward, material in sides:
                 add(upright(P(o0, sign*half), P(o1, sign*half), top, height, toward, material, o0), bucket)
                 trims(add, bucket, P(o0, sign*half), P(o1, sign*half), toward, theme, o0,
                       heights=[h for h in theme['trim'] if h[0] >= top])
+                # the casing round the doorway on this face: two jamb boards and a head board, standing 2 cm proud
+                # (a board is left out where the opening runs to the partition's end)
+                face_at = sign*(half+.02)
+                for e0, e1 in ((o0-CASING, o0), (o1, o1+CASING)):
+                    if e0 >= low-1e-6 and e1 <= high+1e-6:
+                        add(upright(P(e0, face_at), P(e1, face_at), 0, top, toward, 'timber_band', e0), bucket)
+                add(upright(P(max(low, o0-CASING), face_at), P(min(high, o1+CASING), face_at), top, top+CASING,
+                            toward, 'timber_band', o0), bucket)
             add(level([P(o0, -half), P(o1, -half), P(o1, half), P(o0, half)], height, 'wall_cap'), bucket)
             add(level([P(o0, -half), P(o1, -half), P(o1, half), P(o0, half)], top, 'timber_band', up=False), bucket)
         mid = part['length']/2
@@ -800,17 +940,29 @@ def door_geometry(section, add):
         add(face([world(*a, 0), world(*b, 0), world(*b, theme['doorHeight']), world(*a, theme['doorHeight'])],
                  world_dir(inward), 'door_daylight', [[0, 1], [1, 1], [1, 0], [0, 0]]), bucket)
         _door_frame(add, bucket, wall, along, inward, theme['doorWidth'], 0, theme['doorHeight'], .045)
-        far = _offset(wall, inward, 1.8)
-        add(level([_offset(wall, along, -w), _offset(wall, along, w), _offset(far, along, w+.5),
-                   _offset(far, along, -(w+.5))], .012, 'door_spill'), f'Door_{sid}')
+        # on the floor (never cut away, so the doorway still reads with its wall gone): a timber threshold along the
+        # wall and the daylight spilling in, a soft picture fading into the room and to both sides
+        sill = _offset(wall, inward, .2)
+        add(level([_offset(wall, along, -(w+.08)), _offset(wall, along, w+.08), _offset(sill, along, w+.08),
+                   _offset(sill, along, -(w+.08))], .02, 'timber_band'), f'Door_{sid}')
+        add(upright(_offset(sill, along, -(w+.08)), _offset(sill, along, w+.08), 0, .02, inward, 'timber_band'),
+            f'Door_{sid}')
+        far = _offset(wall, inward, 2.6)
+        corners = [_offset(wall, along, -(w+.2)), _offset(wall, along, w+.2), _offset(far, along, w+.9),
+                   _offset(far, along, -(w+.9))]
+        add(face([world(*p, .012) for p in corners], (0, 1, 0), 'door_spill', [[0, 0], [1, 0], [1, 1], [0, 1]]),
+            f'Door_{sid}')
         spans.append((side, wall, along, w))
     return spans
 
 
 def window_geometry(section, add, doors):
+    """Each window: the theme's glazing picture (window_art(): one whole picture per quad) or, until it is published,
+    a flat pane; the timber frame, sill, centre mullion and transom over it either way."""
     theme = theme_of(section)
     sid = section['id']
     sill, head = theme['windowSill'], theme['windowHead']
+    glazing = window_art(theme)
     for index, window in enumerate(section.get('windows', [])):
         where = f'{sid}: window {index}'
         a, b = side_segment(section, window['room'], window['side'])
@@ -828,7 +980,14 @@ def window_geometry(section, add, doors):
                 raise SystemExit(f'{where}: it overlaps a street door')
         bucket = f'Build_{sid}_{side}'
         p = _offset(centre, inward, .02)
-        add(upright(_offset(p, along, -w), _offset(p, along, w), sill, head, inward, 'window_glass'), bucket)
+        a, b = _offset(p, along, -w), _offset(p, along, w)
+        if glazing in WINDOW_ART:
+            # the art role's leaded glazing, one whole picture per window; `along` runs right to left as seen from
+            # the room, so b is the picture's left edge
+            add(picture([world(*b, sill), world(*a, sill), world(*a, head), world(*b, head)], world_dir(inward),
+                        glazing), bucket)
+        else:
+            add(upright(a, b, sill, head, inward, 'window_glass'), bucket)
         _door_frame(add, bucket, centre, along, inward, window['width'], sill-.12, head, .045)
         q = _offset(centre, inward, .05)
         add(upright(_offset(q, along, -(w+.14)), _offset(q, along, w+.14), sill-.12, sill, inward, 'timber_band'),
@@ -879,7 +1038,7 @@ def decal_geometry(section, add):
             cx, cy = x0+(x1-x0)*u, y0+(y1-y0)*v
             if not (x0 <= cx-width/2 and cx+width/2 <= x1 and y0 <= cy-tall/2 and cy+tall/2 <= y1):
                 raise SystemExit(f'{where}: the decal runs off its room')
-            h = .01+.002*index
+            h = decal.get('height', 0)+.01+.002*index
             corners = [world(cx-width/2, cy-tall/2, h), world(cx+width/2, cy-tall/2, h),
                        world(cx+width/2, cy+tall/2, h), world(cx-width/2, cy+tall/2, h)]
             if turned:
@@ -915,9 +1074,48 @@ def decal_geometry(section, add):
         add(picture(corners, world_dir(inward), material), bucket)
 
 
+def _post(add, bucket, centre, half, h0, h1, material):
+    """A square post (tile axes) of half width `half` round a tile point, from h0 to h1 metres, capped."""
+    x, y = centre
+    x0, y0, x1, y1 = x-half, y-half, x+half, y+half
+    add(upright((x0, y0), (x1, y0), h0, h1, (0, -1), material), bucket)
+    add(upright((x0, y1), (x1, y1), h0, h1, (0, 1), material), bucket)
+    add(upright((x0, y0), (x0, y1), h0, h1, (-1, 0), material), bucket)
+    add(upright((x1, y0), (x1, y1), h0, h1, (1, 0), material), bucket)
+    add(level([(x0, y0), (x1, y0), (x1, y1), (x0, y1)], h1, material), bucket)
+
+
+def _rail(add, bucket, p0, h0, p1, h1, lateral, material, half=.035, thick=.03):
+    """A handrail from tile point p0 at h0 to p1 at h1 metres (it may slope): its top and both sides, `lateral` the
+    unit tile direction across it."""
+    lx, ly = lateral
+    r = repeat_of(material)
+    length = math.hypot(p1[0]-p0[0], p1[1]-p0[1], h1-h0)
+    uvs = [[0, 0], [length/r, 0], [length/r, .07/r], [0, .07/r]]
+    def at(p, s, h):
+        return world(p[0]+lx*s, p[1]+ly*s, h)
+    add(face([at(p0, -half, h0+thick), at(p1, -half, h1+thick), at(p1, half, h1+thick), at(p0, half, h0+thick)],
+             (0, 1, 0), material, uvs), bucket)
+    for s in (-1, 1):
+        add(face([at(p0, s*half, h0-thick), at(p1, s*half, h1-thick), at(p1, s*half, h1+thick),
+                  at(p0, s*half, h0+thick)], world_dir((lx*s, ly*s)), material, uvs), bucket)
+
+
+def _open_side(section, point):
+    """True where a stair's side has floor beside it (no outer wall or partition within a step of it): it gets a
+    handrail."""
+    if not outline(section).buffer(-.05).contains(Point(point)):
+        return False
+    return not any(line.distance(Point(point)) < .3 for line in _partition_lines(section))
+
+
 def stair_geometry(section, add, walls):
     """Each stair (stairs()): stairs_up and sealed flights against their outer wall (cut away with it), stairwells
-    down into the floor (never cut). Returns the stairwells' footprints, which the floor leaves open."""
+    down into the floor (never cut). A flight has lit treads with a nosing, shaded risers (SHADES), stepped timber
+    stringers and, on every side with floor beside it, a handrail on newel posts and balusters; it rises to a dark
+    opening in the wall (a passage up), or to a shut plank door with iron straps (a sealed stair). A stairwell's treads
+    and sides darken with depth (never black), a dark passage opens under a timber lintel at its foot, and a handrail
+    runs along both its sides. Returns the stairwells' footprints, which the floor leaves open."""
     theme = theme_of(section)
     sid = section['id']
     wells = []
@@ -928,43 +1126,80 @@ def stair_geometry(section, add, walls):
         steps, rise, depth = spec['steps'], spec['rise'], spec['depth']
         a0, run = d-depth, depth/steps
         room_side = (-ux, -uy)
-        material = theme['stairs']
+        tread, rail = theme['stairs'], theme['stairRail']
         def P(a, b):
             return (cx+ux*a+vx*b, cy+uy*a+vy*b)
         if stair['art'] == 'stairs_up':
             bucket = f'Build_{sid}_stair{k}'
             walls[bucket] = world_dir((ux, uy))
+            top = steps*rise
             for i in range(steps):
                 ai, aj = a0+i*run, (a0+(i+1)*run if i < steps-1 else d)
                 h = (i+1)*rise
-                add(level([P(ai, -w), P(aj, -w), P(aj, w), P(ai, w)], h, material), bucket)
-                add(upright(P(ai, -w), P(ai, w), i*rise, h, room_side, material), bucket)
+                add(level([P(ai, -w), P(aj, -w), P(aj, w), P(ai, w)], h, tread), bucket)
+                add(upright(P(ai, -w), P(ai, w), i*rise, h-NOSING, room_side, tread+'_shade'), bucket)
+                # the nosing: the tread's front edge, a lit lip standing proud of the shaded riser
+                add(upright(P(ai-.025, -w), P(ai-.025, w), h-NOSING, h, room_side, tread), bucket)
+                add(level([P(ai-.025, -w), P(ai, -w), P(ai, w), P(ai-.025, w)], h, tread), bucket)
                 for sign in (-1, 1):
-                    add(upright(P(ai, sign*w), P(aj, sign*w), 0, h, (sign*vx, sign*vy), material, ai), bucket)
-            top = steps*rise
+                    add(upright(P(ai, sign*w), P(aj, sign*w), 0, h, (sign*vx, sign*vy), rail, ai), bucket)
+            for sign in (-1, 1):
+                if not _open_side(section, P((a0+d)/2, sign*(w+.45))):
+                    continue
+                lateral = (sign*vx, sign*vy)
+                b = sign*(w-.06)
+                low, high = a0+.08, d-.14
+                h_low, h_high = rise+RAIL_HEIGHT, top+RAIL_HEIGHT
+                _post(add, bucket, P(low, b), .05, 0, h_low+.08, rail)
+                _post(add, bucket, P(high, b), .05, 0, h_high+.08, rail)
+                _rail(add, bucket, P(low, b), h_low, P(high, b), h_high, lateral, rail)
+                for i in range(1, steps):
+                    a = a0+(i+.5)*run
+                    _post(add, bucket, P(a, b), .018, (i+1)*rise, h_low+(h_high-h_low)*(a-low)/(high-low), rail)
             head = min(top+2.2, theme['wallHeight']-.2)
-            opening = 'sealed_door' if stair['kind'] == 'sealed' else 'stair_dark'
-            add(upright(P(d-.02, -w*.92), P(d-.02, w*.92), top, head, room_side, opening), bucket)
+            if stair['kind'] == 'sealed':
+                # a shut door of dark planks with two iron straps and a ring
+                add(upright(P(d-.02, -w*.92), P(d-.02, w*.92), top, head, room_side, 'timber_band_shade'), bucket)
+                for strap in (top+(head-top)*.22, top+(head-top)*.74):
+                    add(upright(P(d-.035, -w*.92), P(d-.035, w*.92), strap-.04, strap+.04, room_side, 'iron'),
+                        bucket)
+                _post(add, bucket, P(d-.06, w*.45), .035, top+(head-top)*.45, top+(head-top)*.45+.09, 'iron')
+            else:
+                add(upright(P(d-.02, -w*.92), P(d-.02, w*.92), top, head, room_side, 'stair_dark'), bucket)
             _door_frame(add, bucket, P(d, 0), (vx, vy), room_side, w*1.84, top, head, .04)
         else:
             bucket = f'Stair_{sid}_{k}'
-            bottom = -(steps*rise+.2)
+            bottom = -steps*rise
+            sides = (TS.wall_of(section, TS.room_of(section, cx, cy)) or theme['walls'])+'_shade'
             for i in range(steps):
                 ai, aj = a0+i*run, (a0+(i+1)*run if i < steps-1 else d)
                 h = -(i+1)*rise
-                tread = material if i < 2 else 'stair_dark'
-                add(level([P(ai, -w), P(aj, -w), P(aj, w), P(ai, w)], h, tread), bucket)
-                add(upright(P(ai, -w), P(ai, w), h, -i*rise, room_side, tread), bucket)
+                lit = tread if i < 2 else tread+('_shade' if i < 4 else '_dusk')
+                add(level([P(ai, -w), P(aj, -w), P(aj, w), P(ai, w)], h, lit), bucket)
+                add(upright(P(ai, -w), P(ai, w), h, -i*rise, (ux, uy), lit), bucket)
+                if i < steps-1:
+                    # the tread's lit nosing on its downhill edge, so each step reads from above
+                    add(level([P(aj-.05, -w), P(aj, -w), P(aj, w), P(aj-.05, w)], h+.004, tread), bucket)
             for sign in (-1, 1):
-                add(upright(P(a0, sign*w), P(d, sign*w), bottom, 0, (-sign*vx, -sign*vy), 'stair_dark', a0), bucket)
-                # a low balustrade along the well's side
-                b0, b1 = sign*(w+.02), sign*(w+.1)
-                add(upright(P(a0, b0), P(d, b0), 0, .9, (-sign*vx, -sign*vy), material, a0), bucket)
-                add(upright(P(a0, b1), P(d, b1), 0, .9, (sign*vx, sign*vy), material, a0), bucket)
-                add(level([P(a0, b0), P(d, b0), P(d, b1), P(a0, b1)], .9, material), bucket)
-                add(upright(P(a0, b0), P(a0, b1), 0, .9, room_side, material), bucket)
-            add(upright(P(d, -w), P(d, w), bottom, 0, room_side, 'stair_dark'), bucket)
-            add(level([P(a0, -w), P(d, -w), P(d, w), P(a0, w)], bottom, 'stair_dark'), bucket)
+                add(upright(P(a0, sign*w), P(d, sign*w), bottom, 0, (-sign*vx, -sign*vy), sides, a0), bucket)
+            # the well's far face (most of what the camera sees of it, looking down at -50 degrees) is its walls'
+            # dim surface; only at the foot does a low dark passage lead on, under a timber lintel
+            add(upright(P(d, -w), P(d, w), WELL_PASSAGE, 0, room_side, sides), bucket)
+            add(upright(P(d, -w*.8), P(d, w*.8), bottom, WELL_PASSAGE, room_side, 'stair_dark'), bucket)
+            for sign in (-1, 1):
+                add(upright(P(d, sign*w*.8), P(d, sign*w), bottom, WELL_PASSAGE, room_side, sides), bucket)
+            add(upright(P(d-.02, -w*.86), P(d-.02, w*.86), WELL_PASSAGE, WELL_PASSAGE+.14, room_side, rail), bucket)
+            # a handrail along both sides of the well, on newels and balusters
+            for sign in (-1, 1):
+                b = sign*(w+.07)
+                lateral = (sign*vx, sign*vy)
+                low, high = a0+.05, d-.08
+                _post(add, bucket, P(low, b), .05, 0, RAIL_HEIGHT+.08, rail)
+                _post(add, bucket, P(high, b), .05, 0, RAIL_HEIGHT+.08, rail)
+                _rail(add, bucket, P(low, b), RAIL_HEIGHT, P(high, b), RAIL_HEIGHT, lateral, rail)
+                count = max(2, int((high-low)/.3))
+                for i in range(1, count):
+                    _post(add, bucket, P(low+(high-low)*i/count, b), .018, 0, RAIL_HEIGHT, rail)
             wells.append(stair['footprint'])
     return wells
 
@@ -1026,6 +1261,15 @@ def section_lights(section):
         if total > TS.MAX_LIGHTS_PER_ROOM:
             raise SystemExit(f'{sid}: room {room} has {total} lights with its lamps (at most {TS.MAX_LIGHTS_PER_ROOM})')
     return result
+
+
+def stair_offset(stair):
+    """A passage end's drawn stair as [dx, 0, dz] metres from its end tile's centre to the flight's (or the well's)
+    centre: retarget_underground.py writes it as the end's objects.json modelOffset, so the stair's pick and label
+    stand on the stair drawn 1.4-4 m beyond the tile."""
+    centre = stair['footprint'].centroid
+    tx, ty = stair['end']['tile']
+    return [round(centre.x-(tx+.5), 3)+0., 0., round(-(centre.y-(ty+.5)), 3)+0.]
 
 
 def section_bounds(section):
@@ -1314,13 +1558,15 @@ def _build(server, source, design, ident, cells, out, registry, approval, share_
                           'position': list(world(*door['exit'])), 'serverTile': door['exit'],
                           'destinationMap': door['map'], 'destinationTile': door['returnTile'], 'section': sid,
                           'label': door['exitLabel'] or f'Leave {section["name"]}'})
+        drawn = {(s['end']['passage'], s['end']['end']): s for s in stairs(section) if s['kind'] == 'passage'}
         for end in section['_ends']:
             other = ends[(end['passage'], 1-end['end'])]
             exits.append({'id': f'{sid}-passage{end["passage"]}-{end["end"]}', 'objectId': end['object'],
                           'role': 'portal', 'kind': end['art'], 'position': list(world(*end['tile'])),
                           'serverTile': end['tile'], 'destinationMap': ident, 'destinationTile': other['arrival'],
                           'section': sid, 'destinationSection': other['section'],
-                          'label': end['label'] or f'On into {names[other["section"]]}'})
+                          'label': end['label'] or f'On into {names[other["section"]]}',
+                          'modelOffset': stair_offset(drawn[(end['passage'], end['end'])])})
         for entry in TS.interactives(section):
             objects.append({'id': f'{sid}-interactive{entry["index"]}', 'objectId': entry['object'],
                             'role': entry['role'], 'position': list(world(*entry['tile'])),

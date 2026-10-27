@@ -30,9 +30,11 @@ EDGE tiles from the map's edge):
                                   their own room's
   windows [{room, side, at, width}]        a window in the room's outer wall on `side`, centred `at` (0..1, west to
                                   east or south to north) along it
-  decals [{image, room, side, at, size}]   DECALS art: on a wall (`side` a compass side; at [u, v]: u along the wall as
-                                  for windows, v the centre's height as a share of the wall's) or on the floor (`side`
-                                  "floor"; at [u, v] across the room from its south-west corner); size [w, h] metres
+  decals [{image, room, side, at, size, height?}]   DECALS art: on a wall (`side` a compass side; at [u, v]: u along
+                                  the wall as for windows, v the centre's height as a share of the wall's) or on the
+                                  floor (`side` "floor"; at [u, v] across the room from its south-west corner; `height`
+                                  lays it on a surface that high instead, e.g. a book on a dresser's worktop); size [w,
+                                  h] metres
   entrances [DOOR, ...]           one per line (see DOORS)
   props [{asset, at, yaw, scale, block, blockBox, wall, height, palette, light, clearWall}]   reused kit scenery:
                                   block = radius (tiles) closed on the walk grid, blockBox [hx, hy] = a rectangle (half
@@ -40,7 +42,12 @@ EDGE tiles from the map's edge):
                                   wall it stands against: it cuts away with that wall
   lights [{at, height, colour, energy, range}]   at most MAX_LIGHTS_PER_ROOM in any room (props that are lamps count)
   npcs [{name, role, occupation, actorType, facing, tile, greeting, mapCategory?, mapLabel?}]
-  interactives [{object, tile, role, text}]       role one of INTERACTIVE_ROLES
+  interactives [{object, tile, role, text, label?, at?, target?, height?, radius?}]   role one of INTERACTIVE_ROLES;
+                                  `label` the short name the client shows on hover (else the text's first clause), `at`
+                                  [x, y] the point of the prop or picture it describes (the click shape stands there:
+                                  retarget_underground.py writes a pick-only objects.json record, no ring, no model),
+                                  `target` the server's target column (default by role: notice, crafting; the anvil's
+                                  "smithing"), `height`/`radius` the pick's size (metres; else the prop's at `at`)
   sealedStairs [{room, side, at}] a flight of stairs up to a shut door in the room's outer wall: art only, no portal
   nodes [], spawns []             required and empty: the town has no harvest nodes and no encounters
 
@@ -78,11 +85,14 @@ FLOORS = ("oak_planks", "limestone_flagstone", "cobalt_tile", "packed_earth")
 WALLS = ("lime_plaster", "soot_brick", "ashlar_wall", "timber_band")
 PEOPLES = ("greyhaven", "glasswarden", "orun", "ssarathi", "luminous", "votary", "mycelari", "stoneborn")
 DECALS = tuple(f"banner_{people}" for people in PEOPLES) + (
-    "rug_tavern", "rug_runner", "rug_home", "map_landfall", "star_chart", "botanical_prints")
+    "rug_tavern", "rug_runner", "rug_home", "map_landfall", "star_chart", "botanical_prints", "painting_unlit_boat",
+    "book_recipes")
 DOOR_KINDS = ("building", "underground")
 PASSAGE_ARTS = S.MOUTH_ARTS + ("stairs_up", "stairs_down")
 FACINGS = ("N", "NE", "E", "SE", "S", "SW", "W", "NW")
 INTERACTIVE_ROLES = ("information", "crafting_station")
+INTERACTIVE_KEYS = ("object", "tile", "role", "text")
+INTERACTIVE_OPTIONAL = ("label", "at", "target", "height", "radius")
 DOOR_IDS = range(59201, 59221)
 PASSAGE_IDS = range(59221, 59241)
 INTERACTIVE_IDS = range(59251, 59300)
@@ -341,8 +351,11 @@ def interactives(item):
     result = []
     for index, entry in enumerate(item.get("interactives", [])):
         where = f"{sid}: interactive {index}"
-        if not isinstance(entry, dict) or sorted(entry) != sorted(("object", "tile", "role", "text")):
-            raise SourceError(f"{where}: give exactly {{object, tile, role, text}}")
+        if not isinstance(entry, dict) or not set(INTERACTIVE_KEYS) <= set(entry):
+            raise SourceError(f"{where}: give {{object, tile, role, text}}")
+        extra = sorted(set(entry) - set(INTERACTIVE_KEYS) - set(INTERACTIVE_OPTIONAL))
+        if extra:
+            raise SourceError(f"{where}: unknown keys {extra}")
         if not isinstance(entry["object"], int) or entry["object"] not in INTERACTIVE_IDS:
             raise SourceError(f"{where}: object {entry['object']!r} lies outside the interior interactive band "
                               f"{INTERACTIVE_IDS.start}-{INTERACTIVE_IDS.stop - 1}")
@@ -350,8 +363,28 @@ def interactives(item):
             raise SourceError(f"{where}: role {entry['role']!r} is not one of {INTERACTIVE_ROLES}")
         _pair(entry["tile"], f"{where} tile")
         _text(entry["text"], f"{where} text")
+        for key in ("label", "target"):
+            if key in entry:
+                _text(entry[key], f"{where} {key}")
+                if any(mark in entry[key] for mark in ("|", "#", "\n", "\r")) or entry[key] != entry[key].strip():
+                    raise SourceError(f"{where}: {key} {entry[key]!r} is padded or holds '|', '#' or a line break")
+        if "at" in entry:
+            _pair(entry["at"], f"{where} at", (int, float))
+        if "height" in entry:
+            _number(entry["height"], f"{where} height", .3, 5)
+        if "radius" in entry:
+            _number(entry["radius"], f"{where} radius", .2, 3)
         result.append({**copy.deepcopy(entry), "section": sid, "index": index})
     return result
+
+
+def interactive_label(entry):
+    """An interactive's short name: its `label`, else its text up to the first colon or full stop."""
+    if entry.get("label"):
+        return entry["label"]
+    text = entry["text"].strip()
+    cut = min((i for i in (text.find(":"), text.find(". ")) if i > 0), default=len(text))
+    return text[:cut].rstrip(".").strip()
 
 
 def object_ids(design):
@@ -480,8 +513,13 @@ def _check_section(design, section, cells):
         _number(window["width"], f"{where} width", .4, 4)
     for index, decal in enumerate(section.get("decals", [])):
         where = f"{sid}: decal {index}"
-        if not isinstance(decal, dict) or sorted(decal) != sorted(("image", "room", "side", "at", "size")):
-            raise SourceError(f"{where}: give exactly {{image, room, side, at, size}}")
+        if not isinstance(decal, dict) or sorted(set(decal) - {"height"}) != sorted(("image", "room", "side", "at",
+                                                                                       "size")):
+            raise SourceError(f"{where}: give exactly {{image, room, side, at, size}} (and a floor decal's height)")
+        if "height" in decal:
+            if decal.get("side") != "floor":
+                raise SourceError(f"{where}: only a floor decal lies at a height (on a surface)")
+            _number(decal["height"], f"{where} height", .05, 3)
         if decal["image"] not in DECALS:
             raise SourceError(f"{where}: image {decal['image']!r} is not one of the decal surfaces {DECALS}")
         if decal["room"] not in range(count) or decal["side"] not in SIDES + ("floor",):
@@ -556,6 +594,9 @@ def _check_section(design, section, cells):
         x, y = entry["tile"]
         if room_of(section, x + .5, y + .5) is None:
             raise SourceError(f"{sid}: interactive {entry['object']} stands in none of the rooms")
+        if "at" in entry and room_of(section, *entry["at"]) is None:
+            raise SourceError(f"{sid}: interactive {entry['object']}: its point `at` {entry['at']} is in none of the "
+                              "rooms")
 
 
 def check(design):

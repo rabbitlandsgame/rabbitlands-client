@@ -280,6 +280,9 @@ TOWN_SELECTION = {
     'glassware_cart': ('lf-biomes','glassware-handcart-1','length',2.4),
     'apple_cart': ('lf-biomes','apple-cart-1','length',2.4),
     'notice_board': ('lf-biomes','notice-board-1','height',2.2),
+    # fix wave (2026-10-27, review B5): Jessamy's net frame in the net-mender's loft, the crownwater kit's own
+    # mending frame with its net, at its reviewed length
+    'net_mending_frame': ('crownwater','net-mending-frame-1','length',3.0),
     # The town's own furniture (owner 2026-10-27): the lf-interiors kit, 35 Meshy pieces prepared at real size
     # (work-output/landfall-town/spec_kit.json). Each row keeps the measure and metres the kit was prepared at, so the
     # packaged piece is the kit piece's size (factor 1).

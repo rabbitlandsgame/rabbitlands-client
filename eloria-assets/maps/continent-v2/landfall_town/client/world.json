@@ -19,7 +19,7 @@
     "bounds": {
       "min": [
         20.0,
-        -1.7,
+        -1.5,
         148.0
       ],
       "max": [
@@ -294,7 +294,7 @@
       "position": [
         176,
         0,
-        293.5
+        293
       ],
       "radius": 4.5,
       "name": "The True Note workshop"
@@ -369,20 +369,20 @@
       "id": "weaver_house-0",
       "section": "weaver_house",
       "position": [
-        67,
+        65.5,
         0,
-        235.5
+        236
       ],
-      "radius": 5.5,
+      "radius": 4,
       "name": "Loom workroom"
     },
     {
       "id": "weaver_house-1",
       "section": "weaver_house",
       "position": [
-        64,
+        57.5,
         0,
-        241
+        236
       ],
       "radius": 2.5,
       "name": "Weaver's kitchen"
@@ -391,11 +391,11 @@
       "id": "weaver_house-2",
       "section": "weaver_house",
       "position": [
-        70.5,
+        73.5,
         0,
-        241
+        236
       ],
-      "radius": 2,
+      "radius": 2.5,
       "name": "Weaver's bedroom"
     },
     {
@@ -605,7 +605,7 @@
     "The True Note workshop": {
       "x0": 170.5,
       "x1": 181.5,
-      "z0": 291.5,
+      "z0": 290.5,
       "z1": 295.5,
       "section": "magic_shop",
       "room": 1
@@ -660,25 +660,25 @@
     },
     "Loom workroom": {
       "x0": 60.5,
-      "x1": 73.5,
+      "x1": 70.5,
       "z0": 232.5,
-      "z1": 238.5,
+      "z1": 239.5,
       "section": "weaver_house",
       "room": 0
     },
     "Weaver's kitchen": {
-      "x0": 60.5,
-      "x1": 67.5,
-      "z0": 238.5,
-      "z1": 243.5,
+      "x0": 54.5,
+      "x1": 60.5,
+      "z0": 232.5,
+      "z1": 239.5,
       "section": "weaver_house",
       "room": 1
     },
     "Weaver's bedroom": {
-      "x0": 67.5,
-      "x1": 73.5,
-      "z0": 238.5,
-      "z1": 243.5,
+      "x0": 70.5,
+      "x1": 76.5,
+      "z0": 232.5,
+      "z1": 239.5,
       "section": "weaver_house",
       "room": 2
     },
@@ -840,7 +840,12 @@
       ],
       "section": "tavern_ground",
       "destinationSection": "tavern_upper",
-      "label": "Upstairs: the guest rooms"
+      "label": "Upstairs: the guest rooms",
+      "modelOffset": [
+        0.0,
+        0.0,
+        -2.7
+      ]
     },
     {
       "id": "market-exit",
@@ -1061,7 +1066,12 @@
       ],
       "section": "tavern_upper",
       "destinationSection": "tavern_ground",
-      "label": "Downstairs: the taproom"
+      "label": "Downstairs: the taproom",
+      "modelOffset": [
+        0.0,
+        0.0,
+        -2.0
+      ]
     }
   ],
   "interactives": [
@@ -1108,7 +1118,12 @@
       ],
       "section": "tavern_ground",
       "destinationSection": "tavern_upper",
-      "label": "Upstairs: the guest rooms"
+      "label": "Upstairs: the guest rooms",
+      "modelOffset": [
+        0.0,
+        0.0,
+        -2.7
+      ]
     },
     {
       "id": "market-exit",
@@ -1329,7 +1344,12 @@
       ],
       "section": "tavern_upper",
       "destinationSection": "tavern_ground",
-      "label": "Downstairs: the taproom"
+      "label": "Downstairs: the taproom",
+      "modelOffset": [
+        0.0,
+        0.0,
+        -2.0
+      ]
     },
     {
       "id": "tavern_ground-interactive0",
@@ -1400,13 +1420,13 @@
       "objectId": 59282,
       "role": "information",
       "position": [
-        67,
+        66,
         0,
-        235
+        236
       ],
       "serverTile": [
-        67,
-        89
+        66,
+        88
       ],
       "section": "weaver_house",
       "label": "Wynn's loom, strung with cape cloth in cobalt and cream. Mara sells what comes off it on the plaza; the hem stitch is her mother's."
@@ -1432,13 +1452,13 @@
       "objectId": 59284,
       "role": "information",
       "position": [
-        147,
+        146,
         0,
-        236
+        237
       ],
       "serverTile": [
-        147,
-        88
+        146,
+        87
       ],
       "section": "netmender_house",
       "label": "Jessamy's net frame: a boat's net stretched over the mending table, half its knots new. She says she can tell which harbour tied the old ones."
@@ -1610,165 +1630,171 @@
       "step": 0.1
     },
     "gridAlignment": "tile-centres-v1",
-    "sha256": "0b2ffb7bc4371bc11af362eb2656faa8c4ee20d24c864d628174e138bd5c87e7",
+    "sha256": "3d7f8fa005b8dba1128443371d09c4cc3393fd9c14fca11a0b0c93a3c2308a22",
     "nodeNames": [
       "Build_castle_east_ashlar_wall",
       "Build_castle_east_decal_banner_glasswarden",
       "Build_castle_east_decal_banner_luminous",
       "Build_castle_east_timber_band",
       "Build_castle_east_wall_cap",
-      "Build_castle_east_window_glass",
+      "Build_castle_east_window_leaded_tall",
       "Build_castle_north_ashlar_wall",
       "Build_castle_north_decal_banner_greyhaven",
       "Build_castle_north_decal_banner_votary",
       "Build_castle_north_decal_map_landfall",
       "Build_castle_north_timber_band",
       "Build_castle_north_wall_cap",
-      "Build_castle_north_window_glass",
+      "Build_castle_north_window_leaded_tall",
       "Build_castle_south_ashlar_wall",
       "Build_castle_south_decal_banner_ssarathi",
       "Build_castle_south_decal_banner_stoneborn",
       "Build_castle_south_timber_band",
       "Build_castle_south_wall_cap",
-      "Build_castle_south_window_glass",
+      "Build_castle_south_window_leaded_tall",
       "Build_castle_stair0_ashlar_wall",
-      "Build_castle_stair0_sealed_door",
+      "Build_castle_stair0_iron",
+      "Build_castle_stair0_limestone_flagstone",
+      "Build_castle_stair0_limestone_flagstone_shade",
       "Build_castle_stair0_timber_band",
+      "Build_castle_stair0_timber_band_shade",
       "Build_castle_west_ashlar_wall",
       "Build_castle_west_door_daylight",
       "Build_castle_west_timber_band",
       "Build_castle_west_wall_cap",
-      "Build_castle_west_window_glass",
+      "Build_castle_west_window_leaded_tall",
       "Build_clerk_house_east_lime_plaster",
       "Build_clerk_house_east_timber_band",
       "Build_clerk_house_east_wall_cap",
-      "Build_clerk_house_east_window_glass",
+      "Build_clerk_house_east_window_leaded",
       "Build_clerk_house_north_lime_plaster",
       "Build_clerk_house_north_timber_band",
       "Build_clerk_house_north_wall_cap",
-      "Build_clerk_house_north_window_glass",
+      "Build_clerk_house_north_window_leaded",
       "Build_clerk_house_south_door_daylight",
       "Build_clerk_house_south_lime_plaster",
       "Build_clerk_house_south_timber_band",
       "Build_clerk_house_south_wall_cap",
-      "Build_clerk_house_south_window_glass",
+      "Build_clerk_house_south_window_leaded",
       "Build_clerk_house_west_decal_botanical_prints",
       "Build_clerk_house_west_lime_plaster",
       "Build_clerk_house_west_timber_band",
       "Build_clerk_house_west_wall_cap",
-      "Build_clerk_house_west_window_glass",
+      "Build_clerk_house_west_window_leaded",
       "Build_magic_shop_east_lime_plaster",
       "Build_magic_shop_east_timber_band",
       "Build_magic_shop_east_wall_cap",
-      "Build_magic_shop_east_window_glass",
+      "Build_magic_shop_east_window_leaded",
       "Build_magic_shop_north_lime_plaster",
       "Build_magic_shop_north_timber_band",
       "Build_magic_shop_north_wall_cap",
-      "Build_magic_shop_north_window_glass",
+      "Build_magic_shop_north_window_leaded",
       "Build_magic_shop_south_door_daylight",
       "Build_magic_shop_south_lime_plaster",
       "Build_magic_shop_south_timber_band",
       "Build_magic_shop_south_wall_cap",
-      "Build_magic_shop_south_window_glass",
+      "Build_magic_shop_south_window_leaded",
       "Build_magic_shop_west_lime_plaster",
       "Build_magic_shop_west_timber_band",
       "Build_magic_shop_west_wall_cap",
-      "Build_magic_shop_west_window_glass",
+      "Build_magic_shop_west_window_leaded",
       "Build_market_east_lime_plaster",
       "Build_market_east_timber_band",
       "Build_market_east_wall_cap",
-      "Build_market_east_window_glass",
+      "Build_market_east_window_leaded",
       "Build_market_north_decal_botanical_prints",
       "Build_market_north_lime_plaster",
       "Build_market_north_timber_band",
       "Build_market_north_wall_cap",
-      "Build_market_north_window_glass",
+      "Build_market_north_window_leaded",
       "Build_market_south_door_daylight",
       "Build_market_south_lime_plaster",
       "Build_market_south_timber_band",
       "Build_market_south_wall_cap",
-      "Build_market_south_window_glass",
+      "Build_market_south_window_leaded",
       "Build_market_west_lime_plaster",
       "Build_market_west_timber_band",
       "Build_market_west_wall_cap",
-      "Build_market_west_window_glass",
+      "Build_market_west_window_leaded",
       "Build_netmender_house_east_lime_plaster",
       "Build_netmender_house_east_timber_band",
       "Build_netmender_house_east_wall_cap",
-      "Build_netmender_house_east_window_glass",
+      "Build_netmender_house_east_window_leaded",
       "Build_netmender_house_north_lime_plaster",
       "Build_netmender_house_north_timber_band",
       "Build_netmender_house_north_wall_cap",
-      "Build_netmender_house_north_window_glass",
+      "Build_netmender_house_north_window_leaded",
       "Build_netmender_house_south_lime_plaster",
       "Build_netmender_house_south_timber_band",
       "Build_netmender_house_south_wall_cap",
-      "Build_netmender_house_south_window_glass",
+      "Build_netmender_house_south_window_leaded",
       "Build_netmender_house_west_door_daylight",
       "Build_netmender_house_west_lime_plaster",
       "Build_netmender_house_west_timber_band",
       "Build_netmender_house_west_wall_cap",
-      "Build_netmender_house_west_window_glass",
+      "Build_netmender_house_west_window_leaded",
       "Build_smithy_east_lime_plaster",
       "Build_smithy_east_soot_brick",
       "Build_smithy_east_timber_band",
       "Build_smithy_east_wall_cap",
-      "Build_smithy_east_window_glass",
+      "Build_smithy_east_window_leaded",
       "Build_smithy_north_lime_plaster",
       "Build_smithy_north_timber_band",
       "Build_smithy_north_wall_cap",
-      "Build_smithy_north_window_glass",
+      "Build_smithy_north_window_leaded",
       "Build_smithy_south_door_daylight",
       "Build_smithy_south_soot_brick",
       "Build_smithy_south_timber_band",
       "Build_smithy_south_wall_cap",
-      "Build_smithy_south_window_glass",
+      "Build_smithy_south_window_leaded",
       "Build_smithy_west_lime_plaster",
       "Build_smithy_west_soot_brick",
       "Build_smithy_west_timber_band",
       "Build_smithy_west_wall_cap",
-      "Build_smithy_west_window_glass",
+      "Build_smithy_west_window_leaded",
       "Build_tavern_ground_east_lime_plaster",
       "Build_tavern_ground_east_soot_brick",
       "Build_tavern_ground_east_timber_band",
       "Build_tavern_ground_east_wall_cap",
-      "Build_tavern_ground_east_window_glass",
+      "Build_tavern_ground_east_window_leaded",
       "Build_tavern_ground_north_lime_plaster",
       "Build_tavern_ground_north_timber_band",
       "Build_tavern_ground_north_wall_cap",
-      "Build_tavern_ground_north_window_glass",
+      "Build_tavern_ground_north_window_leaded",
       "Build_tavern_ground_south_door_daylight",
       "Build_tavern_ground_south_lime_plaster",
       "Build_tavern_ground_south_soot_brick",
       "Build_tavern_ground_south_timber_band",
       "Build_tavern_ground_south_wall_cap",
-      "Build_tavern_ground_south_window_glass",
+      "Build_tavern_ground_south_window_leaded",
+      "Build_tavern_ground_stair0_oak_planks",
+      "Build_tavern_ground_stair0_oak_planks_shade",
       "Build_tavern_ground_stair0_stair_dark",
       "Build_tavern_ground_stair0_timber_band",
+      "Build_tavern_ground_west_decal_painting_unlit_boat",
       "Build_tavern_ground_west_lime_plaster",
       "Build_tavern_ground_west_timber_band",
       "Build_tavern_ground_west_wall_cap",
-      "Build_tavern_ground_west_window_glass",
+      "Build_tavern_ground_west_window_leaded",
       "Build_tavern_upper_east_lime_plaster",
       "Build_tavern_upper_east_timber_band",
       "Build_tavern_upper_east_wall_cap",
-      "Build_tavern_upper_east_window_glass",
+      "Build_tavern_upper_east_window_leaded",
       "Build_tavern_upper_north_lime_plaster",
       "Build_tavern_upper_north_timber_band",
       "Build_tavern_upper_north_wall_cap",
-      "Build_tavern_upper_north_window_glass",
+      "Build_tavern_upper_north_window_leaded",
       "Build_tavern_upper_south_lime_plaster",
       "Build_tavern_upper_south_timber_band",
       "Build_tavern_upper_south_wall_cap",
-      "Build_tavern_upper_south_window_glass",
+      "Build_tavern_upper_south_window_leaded",
       "Build_tavern_upper_west_lime_plaster",
       "Build_tavern_upper_west_timber_band",
       "Build_tavern_upper_west_wall_cap",
-      "Build_tavern_upper_west_window_glass",
+      "Build_tavern_upper_west_window_leaded",
       "Build_watch_house_east_lime_plaster",
       "Build_watch_house_east_timber_band",
       "Build_watch_house_east_wall_cap",
-      "Build_watch_house_east_window_glass",
+      "Build_watch_house_east_window_leaded",
       "Build_watch_house_north_decal_banner_orun",
       "Build_watch_house_north_decal_banner_ssarathi",
       "Build_watch_house_north_lime_plaster",
@@ -1777,30 +1803,30 @@
       "Build_watch_house_south_lime_plaster",
       "Build_watch_house_south_timber_band",
       "Build_watch_house_south_wall_cap",
-      "Build_watch_house_south_window_glass",
+      "Build_watch_house_south_window_leaded",
       "Build_watch_house_west_decal_map_landfall",
       "Build_watch_house_west_door_daylight",
       "Build_watch_house_west_lime_plaster",
       "Build_watch_house_west_timber_band",
       "Build_watch_house_west_wall_cap",
-      "Build_watch_house_west_window_glass",
+      "Build_watch_house_west_window_leaded",
       "Build_weaver_house_east_lime_plaster",
       "Build_weaver_house_east_timber_band",
       "Build_weaver_house_east_wall_cap",
-      "Build_weaver_house_east_window_glass",
+      "Build_weaver_house_east_window_leaded",
       "Build_weaver_house_north_door_daylight",
       "Build_weaver_house_north_lime_plaster",
       "Build_weaver_house_north_timber_band",
       "Build_weaver_house_north_wall_cap",
-      "Build_weaver_house_north_window_glass",
+      "Build_weaver_house_north_window_leaded",
       "Build_weaver_house_south_lime_plaster",
       "Build_weaver_house_south_timber_band",
       "Build_weaver_house_south_wall_cap",
-      "Build_weaver_house_south_window_glass",
+      "Build_weaver_house_south_window_leaded",
       "Build_weaver_house_west_lime_plaster",
       "Build_weaver_house_west_timber_band",
       "Build_weaver_house_west_wall_cap",
-      "Build_weaver_house_west_window_glass",
+      "Build_weaver_house_west_window_leaded",
       "Part_castle_0_ashlar_wall",
       "Part_castle_0_decal_banner_mycelari",
       "Part_castle_0_decal_banner_orun",
@@ -1891,20 +1917,21 @@
       "Part_weaver_house_0_lime_plaster",
       "Part_weaver_house_0_timber_band",
       "Part_weaver_house_0_wall_cap",
+      "Part_weaver_house_1_decal_botanical_prints",
       "Part_weaver_house_1_lime_plaster",
       "Part_weaver_house_1_timber_band",
       "Part_weaver_house_1_wall_cap",
-      "Part_weaver_house_2_decal_botanical_prints",
-      "Part_weaver_house_2_lime_plaster",
-      "Part_weaver_house_2_timber_band",
-      "Part_weaver_house_2_wall_cap",
+      "Stair_tavern_upper_0_lime_plaster_shade",
+      "Stair_tavern_upper_0_oak_planks",
+      "Stair_tavern_upper_0_oak_planks_dusk",
+      "Stair_tavern_upper_0_oak_planks_shade",
       "Stair_tavern_upper_0_stair_dark",
       "Stair_tavern_upper_0_timber_band"
     ],
     "servedGrid": {
       "binary": "served-grid.escg.gz",
       "format": "ESCG-v2",
-      "sha256": "d0ff236305d6bdb695e9c375ee0e2051e88d0ada55566f615b95e57b0e7363cc",
+      "sha256": "f9f2a4a69b339108974ebe820beeae79f71ec31a05d409f97bf427f62058d313",
       "unitMetres": 0.05,
       "climbMetres": 1.0,
       "originMetres": -100.0,
@@ -2271,7 +2298,7 @@
         "position": [
           176.8,
           1.0,
-          293.1
+          292.1
         ],
         "color": [
           0.6,
@@ -2287,7 +2314,7 @@
         "position": [
           174.0,
           2.9,
-          293.7
+          293.0
         ],
         "color": [
           1.0,
@@ -2443,6 +2470,22 @@
         "section": "smithy"
       },
       {
+        "id": "smithy-lamp-2",
+        "position": [
+          217.28,
+          2.7,
+          290.4
+        ],
+        "color": [
+          1,
+          0.72,
+          0.42
+        ],
+        "energyHint": 1.0,
+        "rangeHint": 7,
+        "section": "smithy"
+      },
+      {
         "id": "clerk_house-light-0",
         "position": [
           22.0,
@@ -2587,11 +2630,27 @@
         "section": "clerk_house"
       },
       {
+        "id": "clerk_house-light-9",
+        "position": [
+          33.2,
+          1.6,
+          234.1
+        ],
+        "color": [
+          1.0,
+          0.74,
+          0.46
+        ],
+        "energyHint": 0.5,
+        "rangeHint": 4,
+        "section": "clerk_house"
+      },
+      {
         "id": "weaver_house-light-0",
         "position": [
-          69.0,
+          66.0,
           2.6,
-          235.6
+          236.0
         ],
         "color": [
           1.0,
@@ -2607,23 +2666,23 @@
         "position": [
           63.5,
           2.6,
-          236.5
+          238.0
         ],
         "color": [
           1.0,
           0.82,
           0.6
         ],
-        "energyHint": 0.7,
+        "energyHint": 0.6,
         "rangeHint": 6,
         "section": "weaver_house"
       },
       {
         "id": "weaver_house-light-2",
         "position": [
-          66.0,
+          69.2,
           2.0,
-          233.2
+          233.0
         ],
         "color": [
           0.74,
@@ -2637,9 +2696,9 @@
       {
         "id": "weaver_house-light-3",
         "position": [
-          72.6,
+          70.2,
           1.9,
-          233.8
+          233.7
         ],
         "color": [
           1.0,
@@ -2653,9 +2712,9 @@
       {
         "id": "weaver_house-light-4",
         "position": [
-          61.6,
+          57.4,
           0.9,
-          241.0
+          233.5
         ],
         "color": [
           1.0,
@@ -2669,9 +2728,9 @@
       {
         "id": "weaver_house-light-5",
         "position": [
-          64.8,
+          57.4,
           2.6,
-          241.6
+          236.4
         ],
         "color": [
           1.0,
@@ -2685,9 +2744,9 @@
       {
         "id": "weaver_house-light-6",
         "position": [
-          64.0,
+          55.0,
           2.0,
-          242.8
+          237.0
         ],
         "color": [
           0.74,
@@ -2701,9 +2760,9 @@
       {
         "id": "weaver_house-light-7",
         "position": [
-          70.0,
+          73.5,
           2.6,
-          240.8
+          236.0
         ],
         "color": [
           1.0,
@@ -2717,9 +2776,9 @@
       {
         "id": "weaver_house-light-8",
         "position": [
-          73.2,
+          76.2,
           1.9,
-          239.6
+          235.7
         ],
         "color": [
           1.0,
@@ -2733,9 +2792,9 @@
       {
         "id": "weaver_house-light-9",
         "position": [
-          70.5,
+          76.2,
           2.0,
-          242.8
+          237.4
         ],
         "color": [
           0.74,
@@ -3576,7 +3635,7 @@
         "section": "castle"
       },
       {
-        "node": "Build_castle_east_window_glass",
+        "node": "Build_castle_east_window_leaded_tall",
         "outward": [
           1.0,
           0,
@@ -3639,7 +3698,7 @@
         "section": "castle"
       },
       {
-        "node": "Build_castle_north_window_glass",
+        "node": "Build_castle_north_window_leaded_tall",
         "outward": [
           0.0,
           0,
@@ -3693,7 +3752,7 @@
         "section": "castle"
       },
       {
-        "node": "Build_castle_south_window_glass",
+        "node": "Build_castle_south_window_leaded_tall",
         "outward": [
           0.0,
           0,
@@ -3711,7 +3770,25 @@
         "section": "castle"
       },
       {
-        "node": "Build_castle_stair0_sealed_door",
+        "node": "Build_castle_stair0_iron",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "castle"
+      },
+      {
+        "node": "Build_castle_stair0_limestone_flagstone",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "castle"
+      },
+      {
+        "node": "Build_castle_stair0_limestone_flagstone_shade",
         "outward": [
           0.0,
           0,
@@ -3721,6 +3798,15 @@
       },
       {
         "node": "Build_castle_stair0_timber_band",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "castle"
+      },
+      {
+        "node": "Build_castle_stair0_timber_band_shade",
         "outward": [
           0.0,
           0,
@@ -3765,7 +3851,7 @@
         "section": "castle"
       },
       {
-        "node": "Build_castle_west_window_glass",
+        "node": "Build_castle_west_window_leaded_tall",
         "outward": [
           -1.0,
           0,
@@ -3801,7 +3887,7 @@
         "section": "clerk_house"
       },
       {
-        "node": "Build_clerk_house_east_window_glass",
+        "node": "Build_clerk_house_east_window_leaded",
         "outward": [
           1.0,
           0,
@@ -3837,7 +3923,7 @@
         "section": "clerk_house"
       },
       {
-        "node": "Build_clerk_house_north_window_glass",
+        "node": "Build_clerk_house_north_window_leaded",
         "outward": [
           0.0,
           0,
@@ -3882,7 +3968,7 @@
         "section": "clerk_house"
       },
       {
-        "node": "Build_clerk_house_south_window_glass",
+        "node": "Build_clerk_house_south_window_leaded",
         "outward": [
           0.0,
           0,
@@ -3927,7 +4013,7 @@
         "section": "clerk_house"
       },
       {
-        "node": "Build_clerk_house_west_window_glass",
+        "node": "Build_clerk_house_west_window_leaded",
         "outward": [
           -1.0,
           0,
@@ -3963,7 +4049,7 @@
         "section": "magic_shop"
       },
       {
-        "node": "Build_magic_shop_east_window_glass",
+        "node": "Build_magic_shop_east_window_leaded",
         "outward": [
           1.0,
           0,
@@ -3999,7 +4085,7 @@
         "section": "magic_shop"
       },
       {
-        "node": "Build_magic_shop_north_window_glass",
+        "node": "Build_magic_shop_north_window_leaded",
         "outward": [
           0.0,
           0,
@@ -4044,7 +4130,7 @@
         "section": "magic_shop"
       },
       {
-        "node": "Build_magic_shop_south_window_glass",
+        "node": "Build_magic_shop_south_window_leaded",
         "outward": [
           0.0,
           0,
@@ -4080,7 +4166,7 @@
         "section": "magic_shop"
       },
       {
-        "node": "Build_magic_shop_west_window_glass",
+        "node": "Build_magic_shop_west_window_leaded",
         "outward": [
           -1.0,
           0,
@@ -4116,7 +4202,7 @@
         "section": "market"
       },
       {
-        "node": "Build_market_east_window_glass",
+        "node": "Build_market_east_window_leaded",
         "outward": [
           1.0,
           0,
@@ -4161,7 +4247,7 @@
         "section": "market"
       },
       {
-        "node": "Build_market_north_window_glass",
+        "node": "Build_market_north_window_leaded",
         "outward": [
           0.0,
           0,
@@ -4206,7 +4292,7 @@
         "section": "market"
       },
       {
-        "node": "Build_market_south_window_glass",
+        "node": "Build_market_south_window_leaded",
         "outward": [
           0.0,
           0,
@@ -4242,7 +4328,7 @@
         "section": "market"
       },
       {
-        "node": "Build_market_west_window_glass",
+        "node": "Build_market_west_window_leaded",
         "outward": [
           -1.0,
           0,
@@ -4278,7 +4364,7 @@
         "section": "netmender_house"
       },
       {
-        "node": "Build_netmender_house_east_window_glass",
+        "node": "Build_netmender_house_east_window_leaded",
         "outward": [
           1.0,
           0,
@@ -4314,7 +4400,7 @@
         "section": "netmender_house"
       },
       {
-        "node": "Build_netmender_house_north_window_glass",
+        "node": "Build_netmender_house_north_window_leaded",
         "outward": [
           0.0,
           0,
@@ -4350,7 +4436,7 @@
         "section": "netmender_house"
       },
       {
-        "node": "Build_netmender_house_south_window_glass",
+        "node": "Build_netmender_house_south_window_leaded",
         "outward": [
           0.0,
           0,
@@ -4395,7 +4481,7 @@
         "section": "netmender_house"
       },
       {
-        "node": "Build_netmender_house_west_window_glass",
+        "node": "Build_netmender_house_west_window_leaded",
         "outward": [
           -1.0,
           0,
@@ -4440,7 +4526,7 @@
         "section": "smithy"
       },
       {
-        "node": "Build_smithy_east_window_glass",
+        "node": "Build_smithy_east_window_leaded",
         "outward": [
           1.0,
           0,
@@ -4476,7 +4562,7 @@
         "section": "smithy"
       },
       {
-        "node": "Build_smithy_north_window_glass",
+        "node": "Build_smithy_north_window_leaded",
         "outward": [
           0.0,
           0,
@@ -4521,7 +4607,7 @@
         "section": "smithy"
       },
       {
-        "node": "Build_smithy_south_window_glass",
+        "node": "Build_smithy_south_window_leaded",
         "outward": [
           0.0,
           0,
@@ -4566,7 +4652,7 @@
         "section": "smithy"
       },
       {
-        "node": "Build_smithy_west_window_glass",
+        "node": "Build_smithy_west_window_leaded",
         "outward": [
           -1.0,
           0,
@@ -4611,7 +4697,7 @@
         "section": "tavern_ground"
       },
       {
-        "node": "Build_tavern_ground_east_window_glass",
+        "node": "Build_tavern_ground_east_window_leaded",
         "outward": [
           1.0,
           0,
@@ -4647,7 +4733,7 @@
         "section": "tavern_ground"
       },
       {
-        "node": "Build_tavern_ground_north_window_glass",
+        "node": "Build_tavern_ground_north_window_leaded",
         "outward": [
           0.0,
           0,
@@ -4701,11 +4787,29 @@
         "section": "tavern_ground"
       },
       {
-        "node": "Build_tavern_ground_south_window_glass",
+        "node": "Build_tavern_ground_south_window_leaded",
         "outward": [
           0.0,
           0,
           1.0
+        ],
+        "section": "tavern_ground"
+      },
+      {
+        "node": "Build_tavern_ground_stair0_oak_planks",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "tavern_ground"
+      },
+      {
+        "node": "Build_tavern_ground_stair0_oak_planks_shade",
+        "outward": [
+          0.0,
+          0,
+          -1.0
         ],
         "section": "tavern_ground"
       },
@@ -4724,6 +4828,15 @@
           0.0,
           0,
           -1.0
+        ],
+        "section": "tavern_ground"
+      },
+      {
+        "node": "Build_tavern_ground_west_decal_painting_unlit_boat",
+        "outward": [
+          -1.0,
+          0,
+          0.0
         ],
         "section": "tavern_ground"
       },
@@ -4755,7 +4868,7 @@
         "section": "tavern_ground"
       },
       {
-        "node": "Build_tavern_ground_west_window_glass",
+        "node": "Build_tavern_ground_west_window_leaded",
         "outward": [
           -1.0,
           0,
@@ -4791,7 +4904,7 @@
         "section": "tavern_upper"
       },
       {
-        "node": "Build_tavern_upper_east_window_glass",
+        "node": "Build_tavern_upper_east_window_leaded",
         "outward": [
           1.0,
           0,
@@ -4827,7 +4940,7 @@
         "section": "tavern_upper"
       },
       {
-        "node": "Build_tavern_upper_north_window_glass",
+        "node": "Build_tavern_upper_north_window_leaded",
         "outward": [
           0.0,
           0,
@@ -4863,7 +4976,7 @@
         "section": "tavern_upper"
       },
       {
-        "node": "Build_tavern_upper_south_window_glass",
+        "node": "Build_tavern_upper_south_window_leaded",
         "outward": [
           0.0,
           0,
@@ -4899,7 +5012,7 @@
         "section": "tavern_upper"
       },
       {
-        "node": "Build_tavern_upper_west_window_glass",
+        "node": "Build_tavern_upper_west_window_leaded",
         "outward": [
           -1.0,
           0,
@@ -4935,7 +5048,7 @@
         "section": "watch_house"
       },
       {
-        "node": "Build_watch_house_east_window_glass",
+        "node": "Build_watch_house_east_window_leaded",
         "outward": [
           1.0,
           0,
@@ -5016,7 +5129,7 @@
         "section": "watch_house"
       },
       {
-        "node": "Build_watch_house_south_window_glass",
+        "node": "Build_watch_house_south_window_leaded",
         "outward": [
           0.0,
           0,
@@ -5070,7 +5183,7 @@
         "section": "watch_house"
       },
       {
-        "node": "Build_watch_house_west_window_glass",
+        "node": "Build_watch_house_west_window_leaded",
         "outward": [
           -1.0,
           0,
@@ -5106,7 +5219,7 @@
         "section": "weaver_house"
       },
       {
-        "node": "Build_weaver_house_east_window_glass",
+        "node": "Build_weaver_house_east_window_leaded",
         "outward": [
           1.0,
           0,
@@ -5151,7 +5264,7 @@
         "section": "weaver_house"
       },
       {
-        "node": "Build_weaver_house_north_window_glass",
+        "node": "Build_weaver_house_north_window_leaded",
         "outward": [
           0.0,
           0,
@@ -5187,7 +5300,7 @@
         "section": "weaver_house"
       },
       {
-        "node": "Build_weaver_house_south_window_glass",
+        "node": "Build_weaver_house_south_window_leaded",
         "outward": [
           0.0,
           0,
@@ -5223,7 +5336,7 @@
         "section": "weaver_house"
       },
       {
-        "node": "Build_weaver_house_west_window_glass",
+        "node": "Build_weaver_house_west_window_leaded",
         "outward": [
           -1.0,
           0,
@@ -7160,18 +7273,18 @@
           1
         ],
         "centre": [
-          64.0,
-          238.5
+          60.5,
+          236.0
         ],
         "along": [
-          1.0,
-          0,
-          -0.0
-        ],
-        "normal": [
-          -0.0,
+          0.0,
           0,
           -1.0
+        ],
+        "normal": [
+          1.0,
+          0,
+          0.0
         ]
       },
       {
@@ -7182,18 +7295,18 @@
           1
         ],
         "centre": [
-          64.0,
-          238.5
+          60.5,
+          236.0
         ],
         "along": [
-          1.0,
-          0,
-          -0.0
-        ],
-        "normal": [
-          -0.0,
+          0.0,
           0,
           -1.0
+        ],
+        "normal": [
+          1.0,
+          0,
+          0.0
         ]
       },
       {
@@ -7204,18 +7317,40 @@
           1
         ],
         "centre": [
-          64.0,
-          238.5
+          60.5,
+          236.0
         ],
         "along": [
-          1.0,
-          0,
-          -0.0
-        ],
-        "normal": [
-          -0.0,
+          0.0,
           0,
           -1.0
+        ],
+        "normal": [
+          1.0,
+          0,
+          0.0
+        ]
+      },
+      {
+        "node": "Part_weaver_house_1_decal_botanical_prints",
+        "section": "weaver_house",
+        "rooms": [
+          0,
+          2
+        ],
+        "centre": [
+          70.5,
+          236.0
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
         ]
       },
       {
@@ -7227,17 +7362,17 @@
         ],
         "centre": [
           70.5,
-          238.5
+          236.0
         ],
         "along": [
-          1.0,
-          0,
-          -0.0
-        ],
-        "normal": [
-          -0.0,
+          0.0,
           0,
           -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
         ]
       },
       {
@@ -7249,17 +7384,17 @@
         ],
         "centre": [
           70.5,
-          238.5
+          236.0
         ],
         "along": [
-          1.0,
-          0,
-          -0.0
-        ],
-        "normal": [
-          -0.0,
+          0.0,
           0,
           -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
         ]
       },
       {
@@ -7271,95 +7406,7 @@
         ],
         "centre": [
           70.5,
-          238.5
-        ],
-        "along": [
-          1.0,
-          0,
-          -0.0
-        ],
-        "normal": [
-          -0.0,
-          0,
-          -1.0
-        ]
-      },
-      {
-        "node": "Part_weaver_house_2_decal_botanical_prints",
-        "section": "weaver_house",
-        "rooms": [
-          1,
-          2
-        ],
-        "centre": [
-          67.5,
-          241.0
-        ],
-        "along": [
-          0.0,
-          0,
-          -1.0
-        ],
-        "normal": [
-          -1.0,
-          0,
-          -0.0
-        ]
-      },
-      {
-        "node": "Part_weaver_house_2_lime_plaster",
-        "section": "weaver_house",
-        "rooms": [
-          1,
-          2
-        ],
-        "centre": [
-          67.5,
-          241.0
-        ],
-        "along": [
-          0.0,
-          0,
-          -1.0
-        ],
-        "normal": [
-          -1.0,
-          0,
-          -0.0
-        ]
-      },
-      {
-        "node": "Part_weaver_house_2_timber_band",
-        "section": "weaver_house",
-        "rooms": [
-          1,
-          2
-        ],
-        "centre": [
-          67.5,
-          241.0
-        ],
-        "along": [
-          0.0,
-          0,
-          -1.0
-        ],
-        "normal": [
-          -1.0,
-          0,
-          -0.0
-        ]
-      },
-      {
-        "node": "Part_weaver_house_2_wall_cap",
-        "section": "weaver_house",
-        "rooms": [
-          1,
-          2
-        ],
-        "centre": [
-          67.5,
-          241.0
+          236.0
         ],
         "along": [
           0.0,
@@ -7411,7 +7458,7 @@
       "bounds": {
         "min": [
           168.5,
-          289.5
+          288.5
         ],
         "max": [
           183.5,
@@ -7452,12 +7499,12 @@
       "name": "The weaver's house",
       "bounds": {
         "min": [
-          58.5,
+          52.5,
           230.5
         ],
         "max": [
-          75.5,
-          245.5
+          78.5,
+          241.5
         ]
       }
     },
@@ -7537,12 +7584,12 @@
   },
   "provenance": {
     "source": "_continent_v2/content/landfall_town.json",
-    "sourceSha256": "4cdd723a1fde08c07ecc5aeee4e2e39d0cba17333562ce9347cab70fb68aab2e",
+    "sourceSha256": "bb454c1c620845e8a87b6000479c0b523d2481f99d6ab46873b7f6c0a4af5881",
     "builder": "_continent_v2/build_town_interiors.py",
-    "builderSha256": "fb95afd92eeabdb5754841c79c9049620c1e1665540c46ce72a086dfe4340099",
+    "builderSha256": "86ad2d46102926a0479f69b08a610acc29c98d5bad7e42eb0cba3786ce656ddd",
     "imports": {
       "_continent_v2/build_underground.py": "d4ad29b2b55f51752aea4478d782915cd1b774cf59611e689b84d868468e2845",
-      "_continent_v2/town_source.py": "33bc973e6f4b6e3e30b20daadf0480ee4d47336a68ca18cba7204c5d132a1d00",
+      "_continent_v2/town_source.py": "bf9eabfb14686f95df0b95871b0798a512147e6bdd808232b358374d48ca3f84",
       "_continent_v2/underground_source.py": "1c96af628d148d491d1a5b021470bdbdbf35885ef53d605c953ce97e03f26981"
     },
     "surfaces": {
@@ -7586,6 +7633,10 @@
         "file": "godot-client/src/world/look/textures/interior/banner_votary.png",
         "sha256": "f9d972c731c1ef9ed1a39a02f9d127d92ad76db60a56c72f7ab45104d4653a53"
       },
+      "decal_book_recipes": {
+        "file": "godot-client/src/world/look/textures/interior/book_recipes.png",
+        "sha256": "f2bcb6fb64fda86c2dd4397fc91f88759a5b356509284232d877f4b8c7206d78"
+      },
       "decal_botanical_prints": {
         "file": "godot-client/src/world/look/textures/interior/botanical_prints.png",
         "sha256": "634aa8ed0edac69a17f14b69c7853e59efb642de5ee9763be4af80adbb055555"
@@ -7593,6 +7644,10 @@
       "decal_map_landfall": {
         "file": "godot-client/src/world/look/textures/interior/map_landfall.png",
         "sha256": "ae3dad1d0e38a50eb1d76b428f8d31aa915eb8666aaacd22765efa51b1fcf152"
+      },
+      "decal_painting_unlit_boat": {
+        "file": "godot-client/src/world/look/textures/interior/painting_unlit_boat.png",
+        "sha256": "ae1ddb1c62fabcb4b56ca2fab7fd6f91e944e3cd69584ac40dcdbf92797ef203"
       },
       "decal_rug_home": {
         "file": "godot-client/src/world/look/textures/interior/rug_home.png",
@@ -7609,6 +7664,9 @@
       "decal_star_chart": {
         "file": "godot-client/src/world/look/textures/interior/star_chart.png",
         "sha256": "a78fb13190311d38536525cd1a076d31fa852bdca58220e046d9b09f892f140a"
+      },
+      "door_spill": {
+        "generated": "build_town_interiors.door_spill_image"
       },
       "lime_plaster": {
         "file": "godot-client/src/world/look/textures/interior/lime_plaster.png",
@@ -7633,15 +7691,25 @@
       "timber_band": {
         "file": "godot-client/src/world/look/textures/interior/timber_band.png",
         "sha256": "92d0b330dadeae25b88e11365b9b404b18725b27204170258a2ad5bacafc899e"
+      },
+      "window_leaded": {
+        "file": "godot-client/src/world/look/textures/interior/window_leaded.png",
+        "sha256": "051bdd722e50093d9fe4a642e056c12db638bc003c01fe9e0f42373c64afc0cd"
+      },
+      "window_leaded_tall": {
+        "file": "godot-client/src/world/look/textures/interior/window_leaded_tall.png",
+        "sha256": "7c6a93fb1d841d589941c3a70fb74cda92747d503cf60c52803c89e091e1ef38"
       }
     },
     "ownerApproved": "owner, 2026-10-27, chat: 'Implement your plan' - Landfall town interiors room shells (build_town_interiors.py)"
   },
   "externalResources": {
+    "../../../_shared/images/051bdd722e50093d9fe4a642e056c12db638bc003c01fe9e0f42373c64afc0cd.png": "051bdd722e50093d9fe4a642e056c12db638bc003c01fe9e0f42373c64afc0cd",
     "../../../_shared/images/1815b403523991e323d48e0194ce1691b7069bd489040bf3e975f691ce369ce6.png": "1815b403523991e323d48e0194ce1691b7069bd489040bf3e975f691ce369ce6",
     "../../../_shared/images/19c73dae0df448d01915becab43a811cac222541f4af26dcd7da66440d40c434.png": "19c73dae0df448d01915becab43a811cac222541f4af26dcd7da66440d40c434",
     "../../../_shared/images/1c0c664c6fd952c03b5b44497acebe04a723bd9126e7f9159fb7d7a61918ddd3.png": "1c0c664c6fd952c03b5b44497acebe04a723bd9126e7f9159fb7d7a61918ddd3",
     "../../../_shared/images/1c22e7650b4a131f5c7229664bd3d891e75c3f71a803bcd332c66f47e1df7dd0.png": "1c22e7650b4a131f5c7229664bd3d891e75c3f71a803bcd332c66f47e1df7dd0",
+    "../../../_shared/images/3c38d01b21bbf1b76fd552dffd49745302d862e2575bb7e8697138ddadfad6cd.png": "3c38d01b21bbf1b76fd552dffd49745302d862e2575bb7e8697138ddadfad6cd",
     "../../../_shared/images/404bf85e230cd818243b94ad1e62ad45b9e7793090f6587df801ec1675eb5cc2.png": "404bf85e230cd818243b94ad1e62ad45b9e7793090f6587df801ec1675eb5cc2",
     "../../../_shared/images/446c63a5de7f7ff9041615c5c135f032d66e309ee58b4d6bd91c03cbb38303ba.png": "446c63a5de7f7ff9041615c5c135f032d66e309ee58b4d6bd91c03cbb38303ba",
     "../../../_shared/images/634aa8ed0edac69a17f14b69c7853e59efb642de5ee9763be4af80adbb055555.png": "634aa8ed0edac69a17f14b69c7853e59efb642de5ee9763be4af80adbb055555",
@@ -7649,16 +7717,19 @@
     "../../../_shared/images/682543d6c83ee2d503ea804e6c4d89058baca49cbb4f17970732d650f692f761.png": "682543d6c83ee2d503ea804e6c4d89058baca49cbb4f17970732d650f692f761",
     "../../../_shared/images/68cc4c2b5c72aa8c9f7b7458126a1ef871a505d2dc555860f3defc09e9388ad6.png": "68cc4c2b5c72aa8c9f7b7458126a1ef871a505d2dc555860f3defc09e9388ad6",
     "../../../_shared/images/7043bc306ea3534cc7e13caed7be552a64280543fe0278b9b5880385bff7447b.png": "7043bc306ea3534cc7e13caed7be552a64280543fe0278b9b5880385bff7447b",
+    "../../../_shared/images/7c6a93fb1d841d589941c3a70fb74cda92747d503cf60c52803c89e091e1ef38.png": "7c6a93fb1d841d589941c3a70fb74cda92747d503cf60c52803c89e091e1ef38",
     "../../../_shared/images/7cdac3774eb88dfba6b2db7f2c2de3a45a94f15e05b5434f82c03e1e765193fd.png": "7cdac3774eb88dfba6b2db7f2c2de3a45a94f15e05b5434f82c03e1e765193fd",
     "../../../_shared/images/7fb734c32a1d3e9e51b6032df16d77f8c38beaf48e905c1fc4dd8fb5e1ca5b78.png": "7fb734c32a1d3e9e51b6032df16d77f8c38beaf48e905c1fc4dd8fb5e1ca5b78",
     "../../../_shared/images/92d0b330dadeae25b88e11365b9b404b18725b27204170258a2ad5bacafc899e.png": "92d0b330dadeae25b88e11365b9b404b18725b27204170258a2ad5bacafc899e",
     "../../../_shared/images/979c0ddf2b0709117009a016a405994a4fe381339881883e224ef34f634de3d8.png": "979c0ddf2b0709117009a016a405994a4fe381339881883e224ef34f634de3d8",
     "../../../_shared/images/a78fb13190311d38536525cd1a076d31fa852bdca58220e046d9b09f892f140a.png": "a78fb13190311d38536525cd1a076d31fa852bdca58220e046d9b09f892f140a",
+    "../../../_shared/images/ae1ddb1c62fabcb4b56ca2fab7fd6f91e944e3cd69584ac40dcdbf92797ef203.png": "ae1ddb1c62fabcb4b56ca2fab7fd6f91e944e3cd69584ac40dcdbf92797ef203",
     "../../../_shared/images/ae3dad1d0e38a50eb1d76b428f8d31aa915eb8666aaacd22765efa51b1fcf152.png": "ae3dad1d0e38a50eb1d76b428f8d31aa915eb8666aaacd22765efa51b1fcf152",
     "../../../_shared/images/ba8aa54809dcf45df767b5ffee01e08a82dcf0293f8e2a943196eb326f182263.png": "ba8aa54809dcf45df767b5ffee01e08a82dcf0293f8e2a943196eb326f182263",
     "../../../_shared/images/c1b8913a8bb8973bc7e4df976bb07deadc58e81b758ce31ac88ddcb186114ab4.png": "c1b8913a8bb8973bc7e4df976bb07deadc58e81b758ce31ac88ddcb186114ab4",
     "../../../_shared/images/c6745ae858f829376dd7d56ae5b6c6e0db9acfe7323500ba709e40f2a1ac94d4.png": "c6745ae858f829376dd7d56ae5b6c6e0db9acfe7323500ba709e40f2a1ac94d4",
     "../../../_shared/images/eb84f95d987bf6217abf20541f4da5e539b88432f112a1f15e1e3332bae550f0.png": "eb84f95d987bf6217abf20541f4da5e539b88432f112a1f15e1e3332bae550f0",
+    "../../../_shared/images/f2bcb6fb64fda86c2dd4397fc91f88759a5b356509284232d877f4b8c7206d78.png": "f2bcb6fb64fda86c2dd4397fc91f88759a5b356509284232d877f4b8c7206d78",
     "../../../_shared/images/f9d972c731c1ef9ed1a39a02f9d127d92ad76db60a56c72f7ab45104d4653a53.png": "f9d972c731c1ef9ed1a39a02f9d127d92ad76db60a56c72f7ab45104d4653a53"
   }
 }

@@ -48,7 +48,8 @@ POLYGONS = {"landfall": [[40.0, 0.0], [100.0, 0.0], [100.0, 60.0], [40.0, 60.0]]
             "coilmere": [[100.0, 0.0], [160.0, 0.0], [160.0, 60.0], [100.0, 60.0]]}
 FRAMES = {"landfall": SW, "coilmere": TH}
 V2 = "eloria-assets/maps/continent-v2"
-REHOMED = {"Gate Warden Ilyon": ("guide", 308), "Wayfinder Nesh": ("tutorial", 307),
+# Nash: the server's tutorial wayfinder (formerly "Wayfinder Nesh"; renamed in the server's npcs.txt, 2b6fee2)
+REHOMED = {"Gate Warden Ilyon": ("guide", 308), "Nash": ("tutorial", 307),
            "Ferryman Caldus": ("dialogue", 310), "Hemmen": ("dialogue", 312),
            "Bettany Orl": ("shop", 303)}
 TARGETS = P.LANDING_TARGETS

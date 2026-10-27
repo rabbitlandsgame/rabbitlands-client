@@ -29,7 +29,8 @@
       ],
       "decals": [
         {"image": "rug_tavern", "room": 0, "side": "floor", "at": [0.25,0.5], "size": [3.0,2.0]},
-        {"image": "rug_runner", "room": 2, "side": "floor", "at": [0.43,0.25], "size": [3.0,1.0]}
+        {"image": "rug_runner", "room": 2, "side": "floor", "at": [0.43,0.25], "size": [3.0,1.0]},
+        {"image": "painting_unlit_boat", "room": 0, "side": "west", "at": [0.5,0.77], "size": [1.2,0.8]}
       ],
       "entrances": [
         {"map": "landfall", "kind": "building", "object": 59201, "tile": [107,250], "position": [-173.8,121.49,-3.8], "returnTile": [104,247], "arrival": [26,23], "exit": [26,21], "exitFacing": [0,-1], "category": "tavern", "label": "The Unlit Boat", "exitLabel": "The west-gate road"}
@@ -61,7 +62,7 @@
         {"asset": "trestle_table", "at": [39.04,22.9], "yaw": 270, "blockBox": [1.08,0.4], "wall": "east"},
         {"asset": "wooden_pail", "at": [38.45,24.4], "yaw": 0, "blockBox": [0.15,0.13]},
         {"asset": "clay_jars", "at": [38.9,25.75], "yaw": 270, "blockBox": [0.59,0.53], "wall": "east"},
-        {"asset": "barrel_stack", "at": [36.0,21.2], "yaw": 0, "blockBox": [0.82,0.61]},
+        {"asset": "barrel_stack", "at": [36.0,21.35], "yaw": 90, "blockBox": [0.82,0.61]},
         {"asset": "feed_sacks", "at": [33.45,21.0], "yaw": 0, "blockBox": [0.63,0.34]},
         {"asset": "harvest_baskets", "at": [34.5,21.45], "yaw": 0, "blockBox": [0.43,0.26]},
         {"asset": "mushroom_basket", "at": [39.0,23.4], "yaw": 0, "height": 0.61},
@@ -69,7 +70,10 @@
         {"asset": "crate_stack", "at": [38.4,31.54], "yaw": 0, "blockBox": [0.9,0.89], "wall": "north"},
         {"asset": "barrel_stack", "at": [33.7,31.82], "yaw": 0, "blockBox": [0.82,0.61], "wall": "north"},
         {"asset": "bench", "at": [34.4,26.9], "yaw": 180, "blockBox": [0.88,0.22]},
-        {"asset": "wall_sconce", "at": [39.3,27.6], "yaw": 270, "height": 1.75, "light": true}
+        {"asset": "wall_sconce", "at": [39.3,27.6], "yaw": 270, "height": 1.75, "light": true},
+        {"asset": "bench", "at": [23.3,21.0], "yaw": 180, "blockBox": [0.88,0.22]},
+        {"asset": "weapon_rack_with_weapons", "at": [31.95,21.62], "yaw": 270, "blockBox": [0.62,0.36]},
+        {"asset": "potted_cypress", "at": [21.05,21.05], "yaw": 0, "blockBox": [0.48,0.44]}
       ],
       "lights": [
         {"at": [21.75,26.5], "height": 0.7, "colour": [1.0,0.6,0.3], "energy": 2.0, "range": 9},
@@ -86,7 +90,7 @@
         {"name": "Kiri-Sal", "role": "dialogue", "occupation": "Cook", "actorType": 353, "facing": "W", "tile": [36,23], "greeting": "Out of my kitchen unless you can gut an eel. You cannot? Then stand by the door and I will tell you what you are missing."}
       ],
       "interactives": [
-        {"object": 59251, "tile": [22,26], "role": "information", "text": "Over the hearth: a painted boat with no lantern, nosing in toward a hill where every hand holds up what light it had. The grove's telling."}
+        {"object": 59251, "tile": [22,26], "role": "information", "text": "Over the hearth: a painted boat with no lantern, nosing in toward a hill where every hand holds up what light it had. The grove's telling.", "label": "The Unlit Boat painting", "at": [20.6,26.5], "height": 3.0, "radius": 0.9}
       ],
       "nodes": [],
       "spawns": []
@@ -143,7 +147,11 @@
         {"asset": "flower_planter", "at": [121.25,23.0], "yaw": 90, "blockBox": [0.98,0.69], "wall": "west"},
         {"asset": "terracotta_pots", "at": [129.55,28.75], "yaw": 270, "blockBox": [0.57,0.46]},
         {"asset": "terracotta_pots", "at": [128.5,21.5], "yaw": 180, "blockBox": [0.57,0.46]},
-        {"asset": "wall_sconce", "at": [120.72,24.75], "yaw": 90, "height": 1.9, "wall": "west", "light": true}
+        {"asset": "wall_sconce", "at": [120.72,24.75], "yaw": 90, "height": 1.9, "wall": "west", "light": true},
+        {"asset": "trestle_table", "at": [132.75,23.4], "yaw": 90, "blockBox": [1.04,0.36]},
+        {"asset": "harvest_baskets", "at": [132.75,22.85], "yaw": 90, "height": 0.61},
+        {"asset": "mushroom_basket", "at": [132.75,23.95], "yaw": 0, "height": 0.61},
+        {"asset": "barrel_stack", "at": [138.9,21.45], "yaw": 90, "blockBox": [0.8,0.6]}
       ],
       "lights": [
         {"at": [135.5,28.0], "height": 2.9, "colour": [1.0,0.82,0.6], "energy": 1.2, "range": 8},
@@ -163,7 +171,7 @@
     {
       "id": "magic_shop", "name": "The True Note", "style": "magic", "danger": "Open to all",
       "about": "The magic shop in #24 on the avenue (door D): a cobalt-tiled shop floor and a workshop behind it for the arcanist's lenses and reagents, a star chart on the back wall.",
-      "rooms": [[176,24.5,5.5,4],[176,30.5,5.5,2]],
+      "rooms": [[176,24.5,5.5,4],[176,31,5.5,2.5]],
       "roomNames": ["The True Note shop","The True Note workshop"],
       "links": [[0,1,2.4,[[175.5,28.5]]]],
       "floors": ["cobalt_tile","cobalt_tile"],
@@ -188,28 +196,30 @@
         {"asset": "potion_shelf", "at": [179.75,28.17], "yaw": 0, "blockBox": [0.52,0.15]},
         {"asset": "crystal_cluster", "at": [180.91,27.4], "yaw": 270, "blockBox": [0.52,0.52], "wall": "east"},
         {"asset": "crystal_ball_stand", "at": [173.5,24.5], "yaw": 0, "blockBox": [0.31,0.3]},
-        {"asset": "glassware_cart", "at": [171.38,22.0], "yaw": 90, "blockBox": [1.18,0.82], "wall": "west"},
+        {"asset": "glassware_cart", "at": [171.8,22.25], "yaw": 90, "blockBox": [1.18,0.82], "wall": "west"},
         {"asset": "lectern", "at": [172.4,27.3], "yaw": 0, "blockBox": [0.4,0.33]},
         {"asset": "wall_sconce", "at": [170.72,26.6], "yaw": 90, "height": 1.85, "wall": "west", "light": true},
-        {"asset": "bookcase", "at": [172.2,32.2], "yaw": 0, "blockBox": [0.69,0.24], "wall": "north"},
-        {"asset": "alchemy_table_alembic", "at": [174.4,32.01], "yaw": 0, "blockBox": [0.78,0.43], "wall": "north"},
-        {"asset": "cauldron", "at": [176.8,31.92], "yaw": 0, "blockBox": [0.41,0.48], "wall": "north"},
-        {"asset": "lens_tripod", "at": [179.4,31.95], "yaw": 0, "blockBox": [0.78,0.49], "wall": "north"},
-        {"asset": "lens_grinder", "at": [171.21,30.5], "yaw": 90, "blockBox": [0.65,0.65], "wall": "west"},
-        {"asset": "lens_crate", "at": [180.75,29.6], "yaw": 0, "scale": 0.7, "blockBox": [0.4,0.4]}
+        {"asset": "bookcase", "at": [172.2,33.2], "yaw": 0, "blockBox": [0.69,0.24], "wall": "north"},
+        {"asset": "alchemy_table_alembic", "at": [174.4,33.01], "yaw": 0, "blockBox": [0.78,0.43], "wall": "north"},
+        {"asset": "cauldron", "at": [176.8,32.92], "yaw": 0, "blockBox": [0.41,0.48], "wall": "north"},
+        {"asset": "lens_tripod", "at": [179.4,32.95], "yaw": 0, "blockBox": [0.78,0.49], "wall": "north"},
+        {"asset": "lens_grinder", "at": [171.21,31.0], "yaw": 90, "blockBox": [0.65,0.65], "wall": "west"},
+        {"asset": "lens_crate", "at": [180.75,30.1], "yaw": 0, "scale": 0.7, "blockBox": [0.4,0.4]},
+        {"asset": "trestle_table", "at": [177.3,30.65], "yaw": 0, "blockBox": [1.04,0.36]},
+        {"asset": "stool", "at": [177.3,29.75], "yaw": 0, "blockBox": [0.22,0.22]}
       ],
       "lights": [
         {"at": [178.5,26.2], "height": 2.9, "colour": [0.82,0.78,1.0], "energy": 1.2, "range": 8},
         {"at": [175.0,23.0], "height": 2.9, "colour": [1.0,0.82,0.6], "energy": 0.8, "range": 7},
         {"at": [173.25,21.2], "height": 2.0, "colour": [0.72,0.82,1.0], "energy": 0.3, "range": 4},
-        {"at": [176.8,30.9], "height": 1.0, "colour": [0.6,1.0,0.7], "energy": 0.5, "range": 4},
-        {"at": [174.0,30.3], "height": 2.9, "colour": [1.0,0.82,0.6], "energy": 0.8, "range": 6}
+        {"at": [176.8,31.9], "height": 1.0, "colour": [0.6,1.0,0.7], "energy": 0.5, "range": 4},
+        {"at": [174.0,31.0], "height": 2.9, "colour": [1.0,0.82,0.6], "energy": 0.8, "range": 6}
       ],
       "npcs": [
         {"name": "Ilka Tarn", "role": "shop", "occupation": "Arcanist", "actorType": 323, "facing": "S", "tile": [178,26], "greeting": "The True Note. Higher reagents and focuses, every one of them tested by ear. If it does not ring, it is not on the shelf.", "mapCategory": "magic_shop", "mapLabel": "The True Note"}
       ],
       "interactives": [
-        {"object": 59253, "tile": [173,27], "role": "information", "text": "A star chart in gilt on deep blue. Small notes in the margin mark which stars ring truest through a tuning glass."}
+        {"object": 59253, "tile": [173,27], "role": "information", "text": "A star chart in gilt on deep blue. Small notes in the margin mark which stars ring truest through a tuning glass.", "label": "The star chart", "at": [172.37,28.35], "height": 2.5, "radius": 0.8}
       ],
       "nodes": [],
       "spawns": []
@@ -231,7 +241,8 @@
         {"room": 2, "side": "north", "at": 0.55, "width": 1.0}
       ],
       "decals": [
-        {"image": "rug_home", "room": 2, "side": "floor", "at": [0.42,0.45], "size": [1.8,1.2]}
+        {"image": "rug_home", "room": 2, "side": "floor", "at": [0.42,0.45], "size": [1.8,1.2]},
+        {"image": "rug_home", "room": 1, "side": "floor", "at": [0.5,0.5], "size": [2.4,1.6]}
       ],
       "entrances": [
         {"map": "landfall", "kind": "building", "object": 59205, "tile": [97,261], "position": [-183.5,121.49,-14.8], "returnTile": [95,259], "arrival": [216,23], "exit": [216,21], "exitFacing": [0,-1], "category": "blacksmith", "label": "Hild's Forge", "exitLabel": "The west-gate road"}
@@ -256,7 +267,13 @@
         {"asset": "bed_single", "at": [221.72,33.46], "yaw": 0, "blockBox": [0.72,0.98], "wall": "north"},
         {"asset": "supply_chest", "at": [221.72,31.95], "yaw": 0, "blockBox": [0.53,0.33]},
         {"asset": "wardrobe", "at": [218.6,34.15], "yaw": 0, "blockBox": [0.64,0.29], "wall": "north"},
-        {"asset": "wall_sconce", "at": [222.28,30.2], "yaw": 270, "height": 1.7, "wall": "east", "light": true}
+        {"asset": "wall_sconce", "at": [222.28,30.2], "yaw": 270, "height": 1.7, "wall": "east", "light": true},
+        {"asset": "feed_sacks", "at": [211.75,30.0], "yaw": 90, "blockBox": [0.6,0.3]},
+        {"asset": "supply_chest", "at": [216.95,29.3], "yaw": 270, "blockBox": [0.5,0.3]},
+        {"asset": "harvest_baskets", "at": [213.7,34.1], "yaw": 0, "blockBox": [0.43,0.26], "wall": "north"},
+        {"asset": "mushroom_basket", "at": [214.4,31.5], "yaw": 0, "height": 0.61},
+        {"asset": "wooden_pail", "at": [212.3,33.9], "yaw": 0, "blockBox": [0.16,0.14]},
+        {"asset": "wall_sconce", "at": [217.28,33.6], "yaw": 270, "height": 1.7, "light": true}
       ],
       "lights": [
         {"at": [218.9,26.7], "height": 1.0, "colour": [1.0,0.5,0.2], "energy": 2.2, "range": 10},
@@ -271,7 +288,7 @@
         {"name": "Pim", "role": "dialogue", "occupation": "Apprentice", "actorType": 309, "facing": "SW", "tile": [218,24], "greeting": "Mind the bellows. If you want Hild, she is the one hitting things. If you want somebody to talk to, I am the one not hitting things."}
       ],
       "interactives": [
-        {"object": 59254, "tile": [216,25], "role": "crafting_station", "text": "The forge is hot. Open your manufacture window to smith."}
+        {"object": 59254, "tile": [216,25], "role": "crafting_station", "text": "The forge is hot. Open your manufacture window to smith.", "label": "The anvil", "at": [215.5,25.5], "target": "smithing"}
       ],
       "nodes": [],
       "spawns": []
@@ -324,7 +341,14 @@
         {"asset": "stool", "at": [26.25,91.85], "yaw": 0, "blockBox": [0.22,0.22]},
         {"asset": "chair", "at": [20.83,87.9], "yaw": 100, "blockBox": [0.27,0.27], "wall": "west"},
         {"asset": "supply_chest", "at": [20.89,91.7], "yaw": 90, "blockBox": [0.5,0.3], "wall": "west"},
-        {"asset": "wall_sconce", "at": [25.95,92.29], "yaw": 0, "wall": "north", "height": 1.5}
+        {"asset": "wall_sconce", "at": [25.95,92.29], "yaw": 0, "wall": "north", "height": 1.5},
+        {"asset": "writing_desk_ledgers", "at": [34.09,89.9], "yaw": 270, "blockBox": [0.64,0.3], "wall": "east"},
+        {"asset": "chair", "at": [33.4,89.9], "yaw": 90, "blockBox": [0.27,0.27]},
+        {"asset": "bookcase", "at": [23.2,92.24], "yaw": 0, "blockBox": [0.65,0.2], "wall": "north"},
+        {"asset": "dressed_round_table", "at": [24.4,88.7], "yaw": 0, "blockBox": [0.55,0.55]},
+        {"asset": "chair", "at": [23.35,88.7], "yaw": 90, "blockBox": [0.3,0.3]},
+        {"asset": "chair", "at": [25.45,88.7], "yaw": 270, "blockBox": [0.3,0.3]},
+        {"asset": "potted_cypress", "at": [33.85,87.15], "yaw": 0, "blockBox": [0.48,0.44]}
       ],
       "lights": [
         {"at": [22.0,84.6], "height": 1.9, "colour": [1.0,0.74,0.46], "energy": 0.8, "range": 5},
@@ -335,81 +359,84 @@
         {"at": [31.0,81.3], "height": 2.0, "colour": [0.74,0.82,1.0], "energy": 0.3, "range": 4},
         {"at": [27.8,89.0], "height": 2.6, "colour": [1.0,0.82,0.6], "energy": 0.6, "range": 6},
         {"at": [26.0,91.9], "height": 1.8, "colour": [1.0,0.74,0.46], "energy": 0.6, "range": 4},
-        {"at": [31.0,91.8], "height": 2.0, "colour": [0.74,0.82,1.0], "energy": 0.25, "range": 4}
+        {"at": [31.0,91.8], "height": 2.0, "colour": [0.74,0.82,1.0], "energy": 0.25, "range": 4},
+        {"at": [33.2,89.9], "height": 1.6, "colour": [1.0,0.74,0.46], "energy": 0.5, "range": 4}
       ],
       "npcs": [
         {"name": "Aldith", "role": "dialogue", "occupation": "Copyist", "actorType": 304, "facing": "E", "tile": [22,83], "greeting": "Mind the desk; the ink is wet. Hemmen writes the register. I write it again, so that there are two."}
       ],
       "interactives": [
-        {"object": 59281, "tile": [21,84], "role": "information", "text": "Aldith's copy desk: a fair copy of this spring's register lines, each one initialled twice, once by her and once by Hemmen."}
+        {"object": 59281, "tile": [21,84], "role": "information", "text": "Aldith's copy desk: a fair copy of this spring's register lines, each one initialled twice, once by her and once by Hemmen.", "label": "Aldith's copy desk", "at": [20.91,83.5]}
       ],
       "nodes": [],
       "spawns": []
     },
     {
       "id": "weaver_house", "name": "The weaver's house", "style": "house", "danger": "A private home, open by day",
-      "about": "The weaver's house in #27 on the avenue's south side (door H, facing north: the north wall): the loom workroom at the front where Wynn weaves the cloth for her daughter Mara's capes, the kitchen and bedroom behind.",
-      "rooms": [[67,88.5,6.5,3],[64,83,3.5,2.5],[70.5,83,3,2.5]],
+      "about": "The weaver's house in #27 on the avenue's south side (door H, facing north: the north wall): the loom workroom in the middle, the street door in its north wall, where Wynn weaves the cloth for her daughter Mara's capes; the kitchen to the west and the bedroom to the east.",
+      "rooms": [[65.5,88,5,3.5],[57.5,88,3,3.5],[73.5,88,3,3.5]],
       "roomNames": ["Loom workroom","Weaver's kitchen","Weaver's bedroom"],
-      "links": [[0,1,2.6,[[64,85.5]]],[0,2,2.6,[[70,85.5]]]],
+      "links": [[0,1,3.6,[[60.5,87.5]]],[0,2,3.6,[[70.5,87.5]]]],
       "floors": ["oak_planks","oak_planks","oak_planks"],
       "walls": "lime_plaster",
       "windows": [
-        {"room": 0, "side": "north", "at": 0.42, "width": 1.0},
-        {"room": 0, "side": "north", "at": 0.88, "width": 1.0},
-        {"room": 0, "side": "west", "at": 0.5, "width": 1.0},
-        {"room": 0, "side": "east", "at": 0.5, "width": 1.0},
+        {"room": 0, "side": "north", "at": 0.87, "width": 1.0},
+        {"room": 0, "side": "south", "at": 0.3, "width": 1.0},
+        {"room": 0, "side": "south", "at": 0.55, "width": 1.0},
+        {"room": 1, "side": "west", "at": 0.35, "width": 1.0},
         {"room": 1, "side": "south", "at": 0.5, "width": 1.0},
-        {"room": 2, "side": "south", "at": 0.5, "width": 1.0}
+        {"room": 2, "side": "east", "at": 0.3, "width": 1.0},
+        {"room": 2, "side": "north", "at": 0.5, "width": 1.0}
       ],
       "decals": [
-        {"image": "rug_runner", "room": 0, "side": "floor", "at": [0.231,0.5], "size": [1.0,3.0]},
-        {"image": "rug_home", "room": 2, "side": "floor", "at": [0.4,0.62], "size": [2.1,1.4]},
-        {"image": "botanical_prints", "room": 2, "side": "west", "at": [0.45,0.6], "size": [1.4,0.7]}
+        {"image": "rug_runner", "room": 0, "side": "floor", "at": [0.3,0.45], "size": [1.0,3.0]},
+        {"image": "rug_home", "room": 2, "side": "floor", "at": [0.45,0.4], "size": [2.1,1.4]},
+        {"image": "botanical_prints", "room": 2, "side": "west", "at": [0.82,0.6], "size": [1.4,0.7]},
+        {"image": "rug_home", "room": 1, "side": "floor", "at": [0.5,0.42], "size": [2.1,1.4]}
       ],
       "entrances": [
         {"map": "landfall", "kind": "building", "object": 59207, "tile": [152,252], "position": [-129.7,121.49,-3.4], "returnTile": [149,255], "arrival": [63,88], "exit": [63,90], "exitFacing": [0,1], "label": "The weaver's house", "exitLabel": "The avenue"}
       ],
       "props": [
-        {"asset": "loom", "at": [69.0,90.42], "yaw": 0, "blockBox": [0.93,0.99], "wall": "north"},
-        {"asset": "stool", "at": [69.0,89.1], "yaw": 180, "blockBox": [0.2,0.2]},
-        {"asset": "harvest_baskets", "at": [67.4,91.19], "yaw": 0, "blockBox": [0.39,0.22], "wall": "north"},
-        {"asset": "harvest_baskets", "at": [70.6,91.19], "yaw": 0, "blockBox": [0.39,0.22], "wall": "north"},
-        {"asset": "crate_stack", "at": [72.56,86.6], "yaw": 0, "blockBox": [0.86,0.85], "wall": "east"},
-        {"asset": "goods_shelf_stocked", "at": [60.96,86.6], "yaw": 90, "blockBox": [0.85,0.37], "wall": "west"},
-        {"asset": "trestle_table", "at": [67.0,86.07], "yaw": 0, "blockBox": [1.04,0.36]},
-        {"asset": "wall_shelf_jars_bottles", "at": [60.65,90.5], "yaw": 90, "wall": "west", "height": 1.3},
-        {"asset": "wall_sconce", "at": [73.29,90.3], "yaw": 270, "wall": "east", "height": 1.5},
-        {"asset": "kitchen_hearth_pot_spit", "at": [61.09,83.0], "yaw": 90, "blockBox": [0.9,0.5], "wall": "west"},
-        {"asset": "trestle_table", "at": [64.8,81.75], "yaw": 0, "blockBox": [1.04,0.36]},
-        {"asset": "bench", "at": [64.8,82.6], "yaw": 0, "blockBox": [0.84,0.22]},
-        {"asset": "terracotta_pots", "at": [61.01,84.65], "yaw": 90, "blockBox": [0.5,0.42], "wall": "west"},
-        {"asset": "wooden_pail", "at": [61.05,81.35], "yaw": 0, "blockBox": [0.16,0.16]},
-        {"asset": "feed_sacks", "at": [66.99,81.25], "yaw": 270, "blockBox": [0.6,0.3]},
-        {"asset": "wall_shelf_jars_bottles", "at": [61.6,85.23], "yaw": 0, "height": 1.35},
-        {"asset": "bed_single", "at": [72.47,82.2], "yaw": 270, "blockBox": [0.68,0.94], "wall": "east"},
-        {"asset": "supply_chest", "at": [71.06,82.2], "yaw": 270, "blockBox": [0.5,0.3]},
-        {"asset": "wardrobe", "at": [72.45,85.03], "yaw": 0, "blockBox": [0.6,0.26]},
-        {"asset": "stool", "at": [72.9,83.55], "yaw": 0, "blockBox": [0.2,0.2]},
-        {"asset": "wall_sconce", "at": [73.29,84.4], "yaw": 270, "wall": "east", "height": 1.5}
+        {"asset": "loom", "at": [66.0,90.42], "yaw": 0, "blockBox": [0.93,0.99], "wall": "north"},
+        {"asset": "stool", "at": [66.0,89.1], "yaw": 180, "blockBox": [0.2,0.2]},
+        {"asset": "harvest_baskets", "at": [67.45,91.19], "yaw": 0, "blockBox": [0.39,0.22], "wall": "north"},
+        {"asset": "harvest_baskets", "at": [68.35,91.19], "yaw": 0, "blockBox": [0.39,0.22], "wall": "north"},
+        {"asset": "goods_shelf_stocked", "at": [61.06,90.15], "yaw": 90, "blockBox": [0.85,0.37]},
+        {"asset": "trestle_table", "at": [64.6,85.55], "yaw": 0, "blockBox": [1.04,0.36]},
+        {"asset": "crate_stack", "at": [69.0,85.4], "yaw": 0, "blockBox": [0.86,0.85]},
+        {"asset": "wall_sconce", "at": [70.28,90.3], "yaw": 270, "height": 1.5},
+        {"asset": "kitchen_hearth_pot_spit", "at": [57.4,90.9], "yaw": 0, "blockBox": [0.9,0.5], "wall": "north"},
+        {"asset": "dressed_round_table", "at": [57.4,87.6], "yaw": 0, "blockBox": [0.55,0.55]},
+        {"asset": "stool", "at": [56.45,87.6], "yaw": 0, "blockBox": [0.2,0.2]},
+        {"asset": "stool", "at": [58.35,87.6], "yaw": 0, "blockBox": [0.2,0.2]},
+        {"asset": "terracotta_pots", "at": [55.0,85.1], "yaw": 90, "blockBox": [0.5,0.42], "wall": "west"},
+        {"asset": "wooden_pail", "at": [59.3,90.9], "yaw": 0, "blockBox": [0.16,0.16]},
+        {"asset": "feed_sacks", "at": [55.35,90.95], "yaw": 0, "blockBox": [0.6,0.3], "wall": "north"},
+        {"asset": "wall_shelf_jars_bottles", "at": [59.55,91.34], "yaw": 0, "wall": "north", "height": 1.35},
+        {"asset": "bed_single", "at": [75.5,89.6], "yaw": 270, "blockBox": [0.68,0.94], "wall": "east"},
+        {"asset": "supply_chest", "at": [74.1,89.6], "yaw": 270, "blockBox": [0.5,0.3]},
+        {"asset": "wardrobe", "at": [72.2,91.17], "yaw": 0, "blockBox": [0.6,0.26], "wall": "north"},
+        {"asset": "stool", "at": [75.6,87.4], "yaw": 0, "blockBox": [0.2,0.2]},
+        {"asset": "wall_sconce", "at": [76.29,88.3], "yaw": 270, "wall": "east", "height": 1.5}
       ],
       "lights": [
-        {"at": [69.0,88.4], "height": 2.6, "colour": [1.0,0.82,0.6], "energy": 0.9, "range": 7},
-        {"at": [63.5,87.5], "height": 2.6, "colour": [1.0,0.82,0.6], "energy": 0.7, "range": 6},
-        {"at": [66.0,90.8], "height": 2.0, "colour": [0.74,0.82,1.0], "energy": 0.3, "range": 4},
-        {"at": [72.6,90.2], "height": 1.9, "colour": [1.0,0.74,0.46], "energy": 0.5, "range": 4},
-        {"at": [61.6,83.0], "height": 0.9, "colour": [1.0,0.6,0.3], "energy": 2.0, "range": 8},
-        {"at": [64.8,82.4], "height": 2.6, "colour": [1.0,0.82,0.6], "energy": 0.7, "range": 6},
-        {"at": [64.0,81.2], "height": 2.0, "colour": [0.74,0.82,1.0], "energy": 0.3, "range": 4},
-        {"at": [70.0,83.2], "height": 2.6, "colour": [1.0,0.82,0.6], "energy": 0.6, "range": 6},
-        {"at": [73.2,84.4], "height": 1.9, "colour": [1.0,0.74,0.46], "energy": 0.5, "range": 4},
-        {"at": [70.5,81.2], "height": 2.0, "colour": [0.74,0.82,1.0], "energy": 0.25, "range": 4}
+        {"at": [66.0,88.0], "height": 2.6, "colour": [1.0,0.82,0.6], "energy": 0.9, "range": 7},
+        {"at": [63.5,86.0], "height": 2.6, "colour": [1.0,0.82,0.6], "energy": 0.6, "range": 6},
+        {"at": [69.2,91.0], "height": 2.0, "colour": [0.74,0.82,1.0], "energy": 0.3, "range": 4},
+        {"at": [70.2,90.3], "height": 1.9, "colour": [1.0,0.74,0.46], "energy": 0.5, "range": 4},
+        {"at": [57.4,90.5], "height": 0.9, "colour": [1.0,0.6,0.3], "energy": 2.0, "range": 8},
+        {"at": [57.4,87.6], "height": 2.6, "colour": [1.0,0.82,0.6], "energy": 0.7, "range": 6},
+        {"at": [55.0,87.0], "height": 2.0, "colour": [0.74,0.82,1.0], "energy": 0.3, "range": 4},
+        {"at": [73.5,88.0], "height": 2.6, "colour": [1.0,0.82,0.6], "energy": 0.6, "range": 6},
+        {"at": [76.2,88.3], "height": 1.9, "colour": [1.0,0.74,0.46], "energy": 0.5, "range": 4},
+        {"at": [76.2,86.6], "height": 2.0, "colour": [0.74,0.82,1.0], "energy": 0.25, "range": 4}
       ],
       "npcs": [
-        {"name": "Wynn Vell", "role": "dialogue", "occupation": "Weaver", "actorType": 306, "facing": "W", "tile": [69,87], "greeting": "Mind the warp; it is longer than the room. Mara sells the capes. I make them, and I make them slowly."}
+        {"name": "Wynn Vell", "role": "dialogue", "occupation": "Weaver", "actorType": 306, "facing": "W", "tile": [68,88], "greeting": "Mind the warp; it is longer than the room. Mara sells the capes. I make them, and I make them slowly."}
       ],
       "interactives": [
-        {"object": 59282, "tile": [67,89], "role": "information", "text": "Wynn's loom, strung with cape cloth in cobalt and cream. Mara sells what comes off it on the plaza; the hem stitch is her mother's."}
+        {"object": 59282, "tile": [66,88], "role": "information", "text": "Wynn's loom, strung with cape cloth in cobalt and cream. Mara sells what comes off it on the plaza; the hem stitch is her mother's.", "label": "Wynn's loom", "at": [66.0,90.42]}
       ],
       "nodes": [],
       "spawns": []
@@ -477,7 +504,7 @@
         {"name": "Oma-Nuri", "role": "dialogue", "occupation": "Watchwoman", "actorType": 355, "facing": "W", "tile": [112,85], "greeting": "Night watch. I am awake because somebody has to be, and polite because the sergeant is listening."}
       ],
       "interactives": [
-        {"object": 59283, "tile": [107,89], "role": "information", "text": "The watch duty board: a column for each people that keeps the watch, names chalked in eight hands, and nobody's name at the top."}
+        {"object": 59283, "tile": [107,89], "role": "information", "text": "The watch duty board: a column for each people that keeps the watch, names chalked in eight hands, and nobody's name at the top.", "label": "The watch duty board", "at": [106.4,90.99]}
       ],
       "nodes": [],
       "spawns": []
@@ -521,7 +548,7 @@
         {"asset": "fish_crates", "at": [148.9,91.72], "yaw": 0, "blockBox": [0.84,0.69], "wall": "north"},
         {"asset": "lobster_pots", "at": [150.84,91.55], "yaw": 270, "blockBox": [0.66,0.57], "wall": "east"},
         {"asset": "rope_coils", "at": [149.9,88.25], "yaw": 15, "blockBox": [0.7,0.72]},
-        {"asset": "trestle_table", "at": [146.0,88.6], "yaw": 0, "blockBox": [1.04,0.36]},
+        {"asset": "net_mending_frame", "at": [146.5,88.4], "yaw": 0, "blockBox": [1.44,0.62]},
         {"asset": "wall_sconce", "at": [140.71,91.2], "yaw": 90, "wall": "west", "height": 1.6}
       ],
       "lights": [
@@ -536,7 +563,7 @@
         {"name": "Jessamy Reel", "role": "dialogue", "occupation": "Net-mender", "actorType": 300, "facing": "S", "tile": [146,90], "greeting": "Step over the floats. If you are here about a net, put it on the frame. If you are here about the beacon, sit down; I tell it badly and it takes a while."}
       ],
       "interactives": [
-        {"object": 59284, "tile": [147,88], "role": "information", "text": "Jessamy's net frame: a boat's net stretched over the mending table, half its knots new. She says she can tell which harbour tied the old ones."}
+        {"object": 59284, "tile": [146,87], "role": "information", "text": "Jessamy's net frame: a boat's net stretched over the mending table, half its knots new. She says she can tell which harbour tied the old ones.", "label": "Jessamy's net frame", "at": [146.5,88.4]}
       ],
       "nodes": [],
       "spawns": []
@@ -578,7 +605,8 @@
         {"image": "banner_greyhaven", "room": 0, "side": "north", "at": [0.725,0.55], "size": [0.9,1.8]},
         {"image": "rug_runner", "room": 2, "side": "floor", "at": [0.5,0.767], "size": [1.2,3.6]},
         {"image": "rug_runner", "room": 3, "side": "floor", "at": [0.5,0.5], "size": [1.2,3.6]},
-        {"image": "map_landfall", "room": 3, "side": "north", "at": [0.875,0.55], "size": [1.6,1.4]}
+        {"image": "map_landfall", "room": 3, "side": "north", "at": [0.875,0.55], "size": [1.6,1.4]},
+        {"image": "rug_runner", "room": 4, "side": "floor", "at": [0.5,0.3], "size": [1.0,3.0]}
       ],
       "entrances": [
         {"map": "landfall", "kind": "building", "object": 59210, "tile": [221,276], "position": [-59.1,122.79,-28.6], "returnTile": [218,273], "arrival": [23,154], "exit": [21,154], "exitFacing": [-1,0], "label": "The keep", "exitLabel": "The keep terrace"}
@@ -605,7 +633,7 @@
         {"asset": "high_seat", "at": [38.88,156.41], "yaw": 67.5, "blockBox": [0.56,0.5]},
         {"asset": "high_seat", "at": [38.88,152.59], "yaw": 112.5, "blockBox": [0.56,0.5]},
         {"asset": "high_seat", "at": [41.59,149.88], "yaw": 157.5, "blockBox": [0.56,0.5]},
-        {"asset": "high_seat", "at": [45.41,149.88], "yaw": 202.5, "blockBox": [0.56,0.5]},
+        {"asset": "sundial_plinth", "at": [45.41,149.88], "yaw": 202.5, "blockBox": [0.36,0.35]},
         {"asset": "high_seat", "at": [48.12,152.59], "yaw": 247.5, "blockBox": [0.56,0.5]},
         {"asset": "stone_bench", "at": [43.5,165.09], "yaw": 0, "blockBox": [0.94,0.32], "wall": "north"},
         {"asset": "stone_bench", "at": [54.09,151.9], "yaw": 270, "blockBox": [0.94,0.32], "wall": "east"},
@@ -645,7 +673,21 @@
         {"asset": "supply_chest", "at": [31.91,160.45], "yaw": 270, "blockBox": [0.5,0.3]},
         {"asset": "wall_sconce", "at": [20.71,160.6], "yaw": 90, "wall": "west", "height": 2.2},
         {"asset": "wall_sconce", "at": [32.09,164.6], "yaw": 270, "height": 2.2},
-        {"asset": "wall_sconce", "at": [23.71,171.0], "yaw": 90, "wall": "west", "height": 2.2}
+        {"asset": "wall_sconce", "at": [23.71,171.0], "yaw": 90, "wall": "west", "height": 2.2},
+        {"asset": "lichen_mat", "at": [38.65,152.5], "yaw": 30, "scale": 0.75},
+        {"asset": "stone_bench", "at": [38.0,165.09], "yaw": 0, "blockBox": [0.94,0.32], "wall": "north"},
+        {"asset": "stone_bench", "at": [49.0,165.09], "yaw": 0, "blockBox": [0.94,0.32], "wall": "north"},
+        {"asset": "stone_bench", "at": [33.4,146.6], "yaw": 90, "blockBox": [0.94,0.32]},
+        {"asset": "stone_bench", "at": [33.4,162.4], "yaw": 90, "blockBox": [0.94,0.32]},
+        {"asset": "stone_bench", "at": [38.0,144.35], "yaw": 180, "blockBox": [0.94,0.32]},
+        {"asset": "stone_bench", "at": [49.0,144.35], "yaw": 180, "blockBox": [0.94,0.32]},
+        {"asset": "flower_planter", "at": [53.75,148.3], "yaw": 270, "blockBox": [0.98,0.69], "wall": "east"},
+        {"asset": "flower_planter", "at": [53.75,160.7], "yaw": 270, "blockBox": [0.98,0.69], "wall": "east"},
+        {"asset": "armour_stand", "at": [24.6,174.6], "yaw": 0, "blockBox": [0.47,0.39]},
+        {"asset": "armour_stand", "at": [28.4,174.6], "yaw": 0, "blockBox": [0.47,0.39]},
+        {"asset": "stone_bench", "at": [24.0,169.9], "yaw": 90, "blockBox": [0.94,0.32], "wall": "west"},
+        {"asset": "potted_cypress", "at": [28.95,169.2], "yaw": 0, "blockBox": [0.48,0.44]},
+        {"asset": "wall_sconce", "at": [29.29,171.0], "yaw": 270, "wall": "east", "height": 2.2}
       ],
       "lights": [
         {"at": [26.5,154.5], "height": 3.8, "colour": [1.0,0.82,0.6], "energy": 1.2, "range": 9},
@@ -673,7 +715,7 @@
       ],
       "npcs": [
         {"name": "Oswin", "role": "dialogue", "occupation": "Hall-keeper", "actorType": 310, "facing": "S", "tile": [23,156], "greeting": "Wipe your feet. The delegations pay me to keep this floor clean and the doors open, and I do both."},
-        {"name": "Factor Rufus Dane", "role": "dialogue", "occupation": "Westhaven Factor", "actorType": 350, "facing": "SW", "tile": [43,159], "greeting": "Rufus Dane, factor for the Westhaven houses. If you are here for the petition, you are early. If you are against it, you are Ssarathi."},
+        {"name": "Factor Rufus Dane", "role": "dialogue", "occupation": "Westhaven Factor", "actorType": 350, "facing": "SW", "tile": [47,158], "greeting": "Rufus Dane, factor for the Westhaven houses. If you are here for the petition, you are early. If you are against it, you are Ssarathi."},
         {"name": "Asi-Nem", "role": "dialogue", "occupation": "Ssarathi Delegate", "actorType": 354, "facing": "NW", "tile": [43,149], "greeting": "Sit, if you like; the petitioner's place is in the middle and it is not comfortable. Ask me about the river, not the vote. The vote does not change."},
         {"name": "Envoy Tolui Odhan", "role": "dialogue", "occupation": "Orun Envoy", "actorType": 338, "facing": "SW", "tile": [39,158], "greeting": "I am the Orun envoy. Forgive me if I do not sit. Everything in this keep belongs to a host I have never met."},
         {"name": "Kesra Halde", "role": "dialogue", "occupation": "Glasswarden Delegate", "actorType": 325, "facing": "W", "tile": [48,154], "greeting": "Kesra Halde, for the Barrens. Speak from the middle of the ring, please. The room is honest there."},
@@ -681,14 +723,14 @@
         {"name": "Corbin Lask", "role": "dialogue", "occupation": "League Post-Clerk", "actorType": 346, "facing": "SE", "tile": [23,164], "greeting": "League post, Landfall office. If it is for the palace, it goes up the stair. If you want an answer, it goes somewhere else."}
       ],
       "interactives": [
-        {"object": 59271, "tile": [30,157], "role": "information", "text": "A notice under the palace's seal, the first to come down in living memory: a south gate and a north one, cut this year beside the two old west gates. It calls this a renovation."},
-        {"object": 59272, "tile": [41,154], "role": "information", "text": "The map table of Landfall: the isle painted under glass, every post of the eight peoples marked in its own colour. Nobody has marked the keep."},
-        {"object": 59273, "tile": [46,156], "role": "information", "text": "The Luminous seat. Hemmen will not sit in it: a clerk who votes is a record that decides."},
-        {"object": 59274, "tile": [41,158], "role": "information", "text": "The Votary seat. Ostrid will not leave her door, and no other Votary will sit in her place."},
-        {"object": 59275, "tile": [39,153], "role": "information", "text": "The Mycelari seat. Lichen has grown over its arms; the Mycelari asked that nobody scrape it off, and nobody has."},
-        {"object": 59276, "tile": [45,151], "role": "information", "text": "The Stoneborn seat. They cut the stone it stands on and sent no chair and no delegate: a cut stone, they say, keeps a place well enough."},
-        {"object": 59277, "tile": [26,144], "role": "information", "text": "The register volume of the great freeze, open at six names in one shaking hand. Two of the six lines have never been closed."},
-        {"object": 59278, "tile": [26,171], "role": "information", "text": "A letter slot in the shut door at the top of the stair. Whatever goes through is gone by morning; in two hundred years, two things have come back down."}
+        {"object": 59271, "tile": [30,157], "role": "information", "text": "A notice under the palace's seal, the first to come down in living memory: a south gate and a north one, cut this year beside the two old west gates. It calls this a renovation.", "label": "The renovation notice", "at": [31.2,158.79]},
+        {"object": 59272, "tile": [41,154], "role": "information", "text": "The map table of Landfall: the isle painted under glass, every post of the eight peoples marked in its own colour. Nobody has marked the keep.", "label": "The map table of Landfall", "at": [43.5,154.5]},
+        {"object": 59273, "tile": [46,156], "role": "information", "text": "The Luminous seat. Hemmen will not sit in it: a clerk who votes is a record that decides.", "label": "The Luminous seat", "at": [48.12,156.41]},
+        {"object": 59274, "tile": [41,158], "role": "information", "text": "The Votary seat. Ostrid will not leave her door, and no other Votary will sit in her place.", "label": "The Votary seat", "at": [41.59,159.12]},
+        {"object": 59275, "tile": [39,153], "role": "information", "text": "The Mycelari seat. Lichen has grown over its arms; the Mycelari asked that nobody scrape it off, and nobody has.", "label": "The Mycelari seat", "at": [38.88,152.59]},
+        {"object": 59276, "tile": [45,151], "role": "information", "text": "The Stoneborn seat. They cut the stone it stands on and sent no chair and no delegate: a cut stone, they say, keeps a place well enough.", "label": "The Stoneborn stone", "at": [45.41,149.88]},
+        {"object": 59277, "tile": [26,144], "role": "information", "text": "The register volume of the great freeze, open at six names in one shaking hand. Two of the six lines have never been closed.", "label": "The register of the great freeze", "at": [26.5,145.2]},
+        {"object": 59278, "tile": [26,171], "role": "information", "text": "A letter slot in the shut door at the top of the stair. Whatever goes through is gone by morning; in two hundred years, two things have come back down.", "label": "The letter slot", "at": [26.5,175.4], "height": 4.0, "radius": 0.9}
       ],
       "nodes": [],
       "spawns": []
@@ -716,7 +758,8 @@
         {"image": "rug_home", "room": 1, "side": "floor", "at": [0.4,0.4], "size": [1.8,1.2]},
         {"image": "rug_home", "room": 2, "side": "floor", "at": [0.32,0.43], "size": [1.8,1.2]},
         {"image": "rug_home", "room": 3, "side": "floor", "at": [0.4,0.62], "size": [1.5,1.0]},
-        {"image": "rug_home", "room": 4, "side": "floor", "at": [0.42,0.55], "size": [2.1,1.4]}
+        {"image": "rug_home", "room": 4, "side": "floor", "at": [0.42,0.55], "size": [2.1,1.4]},
+        {"image": "book_recipes", "room": 4, "side": "floor", "at": [0.14,0.5714], "size": [0.3,0.45], "height": 0.87}
       ],
       "props": [
         {"asset": "bed_single", "at": [74.6,26.34], "yaw": 0, "blockBox": [0.72,0.98]},
@@ -744,7 +787,12 @@
         {"asset": "potted_cypress", "at": [71.05,29.0], "yaw": 90, "blockBox": [0.52,0.48], "wall": "west"},
         {"asset": "wardrobe", "at": [88.0,32.15], "yaw": 0, "blockBox": [0.64,0.29], "wall": "north"},
         {"asset": "wall_sconce", "at": [77.2,32.28], "yaw": 0, "height": 1.75, "wall": "north", "light": true},
-        {"asset": "wall_sconce", "at": [83.0,32.28], "yaw": 0, "height": 1.75, "wall": "north", "light": true}
+        {"asset": "wall_sconce", "at": [83.0,32.28], "yaw": 0, "height": 1.75, "wall": "north", "light": true},
+        {"asset": "dressed_round_table", "at": [81.6,30.9], "yaw": 0, "blockBox": [0.55,0.55]},
+        {"asset": "chair", "at": [80.6,31.0], "yaw": 90, "blockBox": [0.3,0.3]},
+        {"asset": "chair", "at": [82.6,31.0], "yaw": 270, "blockBox": [0.3,0.3]},
+        {"asset": "wall_shelf_jars_bottles", "at": [81.6,32.34], "yaw": 0, "wall": "north", "height": 1.3},
+        {"asset": "harvest_baskets", "at": [74.3,32.05], "yaw": 0, "blockBox": [0.43,0.26], "wall": "north"}
       ],
       "lights": [
         {"at": [72.9,29.8], "height": 2.9, "colour": [1.0,0.82,0.6], "energy": 0.7, "range": 6},
@@ -759,7 +807,7 @@
         {"name": "Edwy Coyle", "role": "dialogue", "occupation": "Lodger", "actorType": 349, "facing": "N", "tile": [82,25], "greeting": "Room three. I am leaving on the next boat. I have been leaving on the next boat for eleven days."}
       ],
       "interactives": [
-        {"object": 59252, "tile": [86,24], "role": "information", "text": "Bettany's recipe book, spine split. The first page is in her mother's hand: delta eel, slow over smoke. Under it, in Bettany's: never rush it."}
+        {"object": 59252, "tile": [86,24], "role": "information", "text": "Bettany's recipe book, spine split. The first page is in her mother's hand: delta eel, slow over smoke. Under it, in Bettany's: never rush it.", "label": "Bettany's recipe book", "at": [85.2,24.5], "height": 1.0, "radius": 0.5}
       ],
       "nodes": [],
       "spawns": []
