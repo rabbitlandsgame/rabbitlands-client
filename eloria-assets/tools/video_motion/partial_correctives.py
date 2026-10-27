@@ -109,6 +109,13 @@ def split_corrective_partition(document, binary, profile):
     if mode == 'rigid':
         if 'skin' not in node or np.any(owners < 0) or np.any(owners >= len(document['skins'][node['skin']]['joints'])):
             raise ValueError('Rigid owner must be an existing skin joint')
+        if not {'JOINTS_0', 'WEIGHTS_0'} <= set(primitive['attributes']):
+            raise ValueError('Rigid ownership requires an explicit source skin encoding')
+        joint_spec = document['accessors'][primitive['attributes']['JOINTS_0']]
+        if joint_spec['componentType'] not in (5121, 5123) or joint_spec.get('normalized'):
+            raise ValueError('Rigid joints require unsigned integer skin storage')
+        if np.any(owners > np.iinfo(np.dtype(DTYPES[joint_spec['componentType']])).max):
+            raise ValueError('Rigid owner exceeds the retained source joint storage')
         full_owners = np.full(count, -1, dtype=np.int64)
         full_owners[selected] = owners
         triangle_owners = full_owners[triangles[membership == 3]]

@@ -154,3 +154,15 @@ def test_multi_owner_partitions_fail_closed(tmp_path,damage):
         positions = np.ndarray((9,3),'<f4',b,offset=d['bufferViews'][spec['bufferView']]['byteOffset'])
         positions[6] = positions[3]
     with pytest.raises(ValueError): split_corrective_partition(d,b,p)
+
+
+@pytest.mark.parametrize('multi', [False, True])
+def test_rigid_owner_cannot_wrap_in_retained_eight_bit_storage(tmp_path, multi):
+    d,b,p = multi_owner_fixture(tmp_path)
+    for i in range(255): d['nodes'].append({'name': 'Extra'+str(i)})
+    d['skins'][0]['joints'] = list(range(257))
+    if multi: p['owner_joints'] = [256]*6
+    else:
+        p.pop('owner_joints'); p['owner_joint'] = 256
+    with pytest.raises(ValueError, match='joint storage'):
+        split_corrective_partition(d,b,p)
