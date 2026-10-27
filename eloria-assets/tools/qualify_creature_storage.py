@@ -187,6 +187,7 @@ def exact_source(job):
                     same_accessor(ad, ab, ix, bd, bb, newt[key])
     clips = {}
     removed_rows = 0
+    duplicate_curves = 0
     assert len(ad["animations"]) == len(bd["animations"])
     all_original_targets = {
         (c["target"]["node"], c["target"]["path"])
@@ -197,12 +198,15 @@ def exact_source(job):
         assert {k: v for k, v in old.items() if k not in ("channels", "samplers")} == {
             k: v for k, v in new.items() if k not in ("channels", "samplers")
         }
-        new_channels = {
-            (c["target"]["node"], c["target"]["path"]): c for c in new["channels"]
-        }
-        assert len(new_channels) == len(
-            new["channels"]
-        ), "Duplicate target curves require explicit qualification"
+        # Some current legacy imports contain more than one curve for a
+        # property. Preserve every occurrence and its relative order: engines
+        # may resolve the last occurrence. Never collapse this to a single map
+        # entry or deduplicate the authored channels.
+        new_channels = {}
+        for channel in new["channels"]:
+            key = (channel["target"]["node"], channel["target"]["path"])
+            new_channels.setdefault(key, []).append(channel)
+        duplicate_curves += sum(len(channels)-1 for channels in new_channels.values())
         times = []
         for oc in old["channels"]:
             oa = old["samplers"][oc["sampler"]]
@@ -224,7 +228,8 @@ def exact_source(job):
                 if mask["targets_after"] == 0:
                     assert key not in new_channels
                     continue
-            nc = new_channels.pop(key)
+            nc = new_channels[key].pop(0)
+            if not new_channels[key]: del new_channels[key]
             assert {k: v for k, v in oc.items() if k != "sampler"} == {
                 k: v for k, v in nc.items() if k != "sampler"
             }
@@ -266,7 +271,9 @@ def exact_source(job):
                 )
             assert np.all(eligible[deleted]), (old["name"], oc["target"])
             removed_rows += int(deleted.sum())
-        for key, channel in new_channels.items():
+        for key, channels in new_channels.items():
+            assert len(channels) == 1, "A neutral duration anchor cannot add duplicate curves"
+            channel = channels[0]
             assert (
                 key not in all_original_targets
             ), "A duration anchor may not change an authored property"
@@ -311,6 +318,7 @@ def exact_source(job):
         retained_key_time_and_value_bits_exact_only_flat_interiors_removed=True,
         every_removed_default_and_key_is_zero=True,
         redundant_flat_key_rows_proved=removed_rows,
+        preexisting_duplicate_property_curves_preserved_in_occurrence_order=duplicate_curves,
         meshes=build["inactive_targets"]["meshes"],
         clips=clips,
         proof="Zero defaults and every LINEAR/STEP key zero prove inactive targets remain zero continuously and under crossfades. All retained accessor bytes and retained time/value rows are exact. Deleted key rows sit strictly inside three bit-identical adjacent rows; plateau boundaries and endpoints remain.",
