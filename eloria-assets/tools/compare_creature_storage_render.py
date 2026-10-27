@@ -9,7 +9,7 @@ from PIL import Image, ImageDraw
 
 
 def compare(job):
-    folder = Path(job["output"]) / "actual-render"
+    folder = Path(job.get("render_directory", Path(job["output"]) / "actual-render"))
     capture = json.loads((folder / "render.json").read_text(encoding="utf-8"))
     samples = []
     for label in capture["frames"]:
@@ -45,8 +45,8 @@ def compare(job):
         source_sha256=capture["placements"][0]["sha256"],
         candidate_sha256=capture["placements"][1]["sha256"],
         image_pairs=len(samples),
-        width=512,
-        height=512,
+        width=int(source.shape[1]),
+        height=int(source.shape[0]),
         different_image_pairs=sum(row["different_pixels"] > 0 for row in samples),
         maximum_different_pixels=max(row["different_pixels"] for row in samples),
         maximum_pixels_above_two_levels=max(
@@ -82,7 +82,7 @@ def compare(job):
     for row, label in enumerate(chosen):
         for column, name in enumerate(("baseline", "candidate")):
             board.paste(
-                Image.open(folder / (name + "-" + label + ".png")),
+                Image.open(folder / (name + "-" + label + ".png")).resize((512, 512)),
                 (column * 512, row * 552 + 40),
             )
             draw.text(
