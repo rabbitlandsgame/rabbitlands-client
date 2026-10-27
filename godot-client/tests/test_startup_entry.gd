@@ -25,6 +25,7 @@ func _run() -> void:
 	expect(main.create_race.get_selected_metadata() == "luminous", "initial race is Human")
 	var expected := {"skin": 1, "hair": AppearanceVariants.pack_hair(4, 1),
 		"eyes": 2, "head": 0, "shirt": 0, "pants": 0, "boots": 0}
+	expected.merge(PortraitCustomization.DEFAULTS)
 	expect(main.call("_creation_appearance") == expected, "all initial appearance bytes are fixed")
 	expect(main.selected_creation_class == 0 and main.creation_class_gear_visible,
 		"initial class and equipment preview are fixed")

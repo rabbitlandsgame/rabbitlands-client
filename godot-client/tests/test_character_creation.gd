@@ -51,8 +51,8 @@ func run() -> void:
 	expect(vanguard_loadout == {0: 114, 1: 106, 2: 105, 3: 134, 4: 220, 5: 209, 6: 249},
 		"Vanguard previews the whole militia set: helm, jack, kneecops, warboots, sword and shield")
 	expect(CreationArchetypes.loadout_at(1) ==
-		{0: 164, 3: 159, 4: 230, 5: 225, 6: 226},
-		"Ranger previews hood, vest, breeches and fieldboots with the longbow")
+		{0: 164, 3: 159, 4: 230, 5: 225, 6: 226, 8: 1},
+		"Ranger previews hood, vest, breeches, fieldboots, longbow and quiver")
 	expect(CreationArchetypes.loadout_at(2) ==
 		{0: 142, 3: 115, 4: 185, 5: 222, 6: 198} and
 		str(CreationArchetypes.at(2).get("starting_items", "")).contains("Acolyte"),
@@ -201,11 +201,11 @@ func run() -> void:
 			var look: Dictionary = main.call("_creation_appearance")
 			look["actor_type"] = actor_type
 			var packet := EloriaProtocol.create_character("Preview", "secret", look)
-			var tail := packet.slice(packet.size() - 9)
+			var tail := packet.slice(packet.find(0, 3) + 1)
 			expect(tail[0] == expected_skin and tail[5] == actor_type, "creation bytes preserve race, sex and default skin")
 			var class_packet := EloriaProtocol.create_character(
 				"Preview", "secret", look, int(main.get("selected_creation_class")))
-			var class_tail := class_packet.slice(class_packet.size() - 9)
+			var class_tail := class_packet.slice(class_packet.find(0, 3) + 1)
 			expect(class_tail.slice(0, 8) == tail.slice(0, 8) and class_tail[8] == 2,
 				"class is an independent ninth byte and never replaces race appearance")
 			var materials: Dictionary = actor.get("_skin_materials")
