@@ -39,3 +39,25 @@ def test_compaction_preserves_signed_zero_inside_constant_numeric_values():
     assert report['constant_samplers_collapsed'] == 0
     output = packed['animations'][0]['samplers'][0]['output']
     assert accessor(packed, binary, output).astype('<f4').tobytes() == values.tobytes()
+
+
+def test_original_presentation_bounds_are_hash_bound_metadata(tmp_path):
+    source, profile = source_fixture(tmp_path)
+    bounds = {'source_sha256': profile['source_sha256'], 'meshes': [
+        {'source_node': 1, 'position': [-1., -2., -3.], 'size': [4., 5., 6.]}]}
+    candidate = tmp_path / 'bounded.glb'
+    prepare(source, candidate, bounds=bounds)
+    document, _ = read_glb(candidate)
+    extras = document['meshes'][0]['extras']
+    assert extras['rabbitlands_actor_bounds_v1'] == {'position': [-1., -2., -3.], 'size': [4., 5., 6.]}
+    assert extras['rabbitlands_coat_pattern_height'] == 5.
+    bounds['source_sha256'] = '0' * 64
+    with pytest.raises(ValueError): prepare(source, candidate, bounds=bounds)
+
+
+def test_invalid_original_presentation_bounds_are_rejected(tmp_path):
+    source, profile = source_fixture(tmp_path)
+    for span in [[-1, 2, 3], [0, 0, 0], [float('inf'), 1, 1], [True, 1, 1], [1e300, 1, 1]]:
+        bounds = {'source_sha256': profile['source_sha256'], 'meshes': [
+            {'source_node': 1, 'position': [0, 0, 0], 'size': span}]}
+        with pytest.raises(ValueError): prepare(source, tmp_path / 'bad.glb', bounds=bounds)
