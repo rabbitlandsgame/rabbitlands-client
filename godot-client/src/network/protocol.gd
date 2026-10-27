@@ -291,6 +291,7 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"campaign_v1",
 	"campaign_party_v1",
 	"campaign_cart_v1",
+	"campaign_rescue_v1",
 	"campaign_bank_v1",
 	"campaign_road_v1",
 	"campaign_lamps_v1",
@@ -1159,6 +1160,8 @@ static func decode_server(command: int, payload: PackedByteArray, logical_coordi
 		ServerMessage.ELORIA_MAGIC_STATE:
 			var magic: Variant = JSON.parse_string(payload.get_string_from_utf8())
 			if magic is Dictionary:
+				if magic.get("kind") == "actor_death" and magic.has("hold_for_scene") and not magic.hold_for_scene is bool:
+					return {"type":"invalid", "error":"actor_death_hold"}
 				return {"type": "magic_state", "data": magic}
 			return {"type": "invalid", "error": "magic_state_json"}
 		ServerMessage.ELORIA_LEADERBOARD_STATE:
@@ -3614,6 +3617,10 @@ static func decode_campaign(payload: PackedByteArray) -> Dictionary:
 			return {"type": "invalid", "error": "campaign_scene_ack"}
 		if scene.has("ack_revision") and not _campaign_integer(scene.ack_revision, 0, 2147483647.0):
 			return {"type": "invalid", "error": "campaign_scene_ack_revision"}
+		if scene.has("corpse_template") and (not campaign_corpse_template_valid(scene.corpse_template) \
+				or str(value.get("kind", "")) != "rescue" \
+				or str(scene.id) not in ["measure.rescue.captive", "measure.rescue.shadow"]):
+			return {"type":"invalid", "error":"campaign_corpse_template"}
 		if not campaign_scene_choice_valid(scene.get("choice", {})):
 			return {"type": "invalid", "error": "campaign_scene_choice"}
 		if not campaign_scene_inspection_valid(scene.get("inspection", {})):
@@ -3630,12 +3637,19 @@ static func decode_campaign(payload: PackedByteArray) -> Dictionary:
 	for target: Dictionary in value.get("targets", []):
 		if target.has("actor_id") and int((value.get("actors", {}) as Dictionary).get(str(target.get("role", "")), -1)) != int(target.actor_id):
 			return {"type": "invalid", "error": "campaign_target_binding"}
+	if scene.has("corpse_template") and int(scene.corpse_template.actor_id) \
+			!= int((scene.get("actors", {}) as Dictionary).get("goblin_boss", -1)):
+		return {"type":"invalid", "error":"campaign_corpse_binding"}
 	var inspection: Dictionary = scene.get("inspection", {})
+	var inspection_role := "mother" if str(inspection.get("id", "")) == "rescue_family" else "protagonist"
 	if not inspection.is_empty() and int(inspection.actor_id) > 0 \
-			and int((scene.get("actors", {}) as Dictionary).get("protagonist", -1)) != int(inspection.actor_id):
+			and int((scene.get("actors", {}) as Dictionary).get(inspection_role, -1)) != int(inspection.actor_id):
 		return {"type": "invalid", "error": "campaign_inspection_binding"}
+	if str(inspection.get("id", "")) == "rescue_family" \
+			and (str(value.get("kind", "")) != "rescue" or str(scene.get("id", "")) != "measure.rescue.captive"):
+		return {"type": "invalid", "error": "campaign_rescue_family"}
 	for anchors: Variant in [value.get("anchors", {}), scene.get("anchors", {})]:
-		if not anchors is Dictionary or anchors.size() > (64 if int(value.get("content_revision", 1)) == 2 else 32):
+		if not anchors is Dictionary or anchors.size() > (64 if int(value.get("content_revision", 1)) == 2 or str(value.get("kind", "")) == "rescue" else 32):
 			return {"type": "invalid", "error": "campaign_anchors"}
 		for key: Variant in anchors:
 			var point: Variant = anchors[key]
@@ -3748,6 +3762,27 @@ static func decode_campaign(payload: PackedByteArray) -> Dictionary:
 		return {"type": "invalid", "error": "campaign_cart"}
 	if not campaign_inquiry_valid(value.get("inquiry", {})):
 		return {"type": "invalid", "error": "campaign_inquiry"}
+	if not campaign_rescue_valid(value.get("rescue", {})):
+		return {"type": "invalid", "error": "campaign_rescue"}
+	var rescue: Dictionary = value.get("rescue", {})
+	if str(value.get("kind", "")) == "rescue" and map_id_from_reference(str(value.get("map", ""))) not in ["landfall", "landfall_insides"]:
+		return {"type":"invalid", "error":"campaign_rescue_map"}
+	if str(value.get("kind", "")) == "rescue" and bool(value.active) and rescue.is_empty():
+		return {"type": "invalid", "error": "campaign_rescue_missing"}
+	if not rescue.is_empty():
+		if str(value.get("kind", "")) != "rescue" or str(value.get("stage", "")) != str(rescue.stage):
+			return {"type": "invalid", "error": "campaign_rescue_identity"}
+		var patient: Dictionary = rescue.patient
+		if int(patient.actor_id) > 0 and int((value.get("actors", {}) as Dictionary).get("mother", -1)) != int(patient.actor_id):
+			return {"type": "invalid", "error": "campaign_rescue_patient_binding"}
+	var rescue_choice := str((scene.get("choice", {}) as Dictionary).get("id", ""))
+	if rescue_choice in ["rescue_response", "rescue_accept", "rescue_reward"]:
+		var allowed_scenes: Array = {"rescue_response":["measure.rescue.abduction", "measure.rescue.injured"],
+			"rescue_accept":["measure.rescue.commitment"], "rescue_reward":["measure.rescue.resolved"]}[rescue_choice]
+		if str(value.get("kind", "")) != "rescue" or rescue.is_empty() or str(scene.get("id", "")) not in allowed_scenes:
+			return {"type": "invalid", "error": "campaign_rescue_choice"}
+		if rescue_choice == "rescue_reward" and not _campaign_integer((scene.get("actors", {}) as Dictionary).get("recipient"), 1, 2147483647.0):
+			return {"type": "invalid", "error": "campaign_rescue_recipient"}
 	if (not (value.get("cart", {}) as Dictionary).is_empty() or not (value.get("inquiry", {}) as Dictionary).is_empty() \
 			or str((scene.get("choice", {}) as Dictionary).get("id", "")) in ["cart_release", "claims_lead"] \
 			or str((scene.get("inspection", {}) as Dictionary).get("id", "")) == "cart_assessment") \
@@ -3757,6 +3792,34 @@ static func decode_campaign(payload: PackedByteArray) -> Dictionary:
 			and (value.get("inquiry", {}) as Dictionary).is_empty():
 		return {"type": "invalid", "error": "campaign_inquiry_choice"}
 	return {"type": "campaign", "state": value}
+
+## One actual held boss may be reconstructed as a collision-free scene visual
+## outside native creature interest. This never admits a network gameplay actor.
+static func campaign_corpse_template_valid(value: Variant) -> bool:
+	if not value is Dictionary or value.is_empty() or JSON.stringify(value).to_utf8_buffer().size() > 4096:
+		return false
+	var integers := {"actor_id":[1,65535], "actor_type":[624,624], "kind":[5,5], "x":[0,2047], "y":[0,2047],
+		"rotation":[-32768,65535], "frame":[0,255], "health":[0,0], "max_health":[1,1000000]}
+	for field: String in integers:
+		if not _campaign_integer(value.get(field), float(integers[field][0]), float(integers[field][1])):
+			return false
+	if not value.get("name") is String or str(value.name).is_empty() or str(value.name).length() > 128:
+		return false
+	var scale: Variant = value.get("scale")
+	if typeof(scale) not in [TYPE_INT,TYPE_FLOAT] or not is_finite(float(scale)) or float(scale) <= 0.0 or float(scale) > 8.0:
+		return false
+	var death: Variant = value.get("death_presentation")
+	if not death is Dictionary or death.get("kind") != "actor_death" \
+			or not _campaign_integer(death.get("actor_id"), int(value.actor_id), int(value.actor_id)) \
+			or not death.get("temporary") is bool or not death.get("hold_for_scene") is bool \
+			or not bool(death.hold_for_scene):
+		return false
+	for field: String in ["elapsed", "animation_seconds", "hold_seconds", "fade_seconds"]:
+		var seconds: Variant = death.get(field)
+		if typeof(seconds) not in [TYPE_INT,TYPE_FLOAT] or not is_finite(float(seconds)) \
+				or float(seconds) < 0.0 or float(seconds) > 604800.0:
+			return false
+	return float(death.fade_seconds) > 0.0
 
 static func campaign_cart_valid(cart: Variant) -> bool:
 	if not cart is Dictionary:
@@ -3792,6 +3855,73 @@ static func campaign_cart_valid(cart: Variant) -> bool:
 			return false
 	if cart.has("holder") and (not cart.holder is String or cart.holder.length() < 1 or cart.holder.length() > 64):
 		return false
+	return true
+
+## Rescue gameplay remains authoritative; these bounds only admit the saved
+## patient, finite companion resources and each recipient's reward controls.
+static func campaign_rescue_valid(rescue: Variant) -> bool:
+	if not rescue is Dictionary:
+		return false
+	if rescue.is_empty():
+		return true
+	if rescue.get("stage") not in ["choice", "ambush", "injured", "ready", "to_mine", "mine", "boss", "boss_confrontation", "boss_defeated", \
+			"daughter_freed", "aftermath", "burned", "reward", "complete"] \
+			or rescue.get("branch") not in ["", "help", "watch"]:
+		return false
+	for field: String in ["mother", "patient", "daughter", "reward", "supplies"]:
+		if not rescue.get(field) is Dictionary:
+			return false
+	for field: String in ["can_accept", "can_defer"]:
+		if not rescue.get(field) is bool:
+			return false
+	if rescue.has("at_entrance") and not rescue.at_entrance is bool:
+		return false
+	var mother: Dictionary = rescue.mother
+	for resource: String in ["health", "mana"]:
+		if not _campaign_integer(mother.get("max_" + resource), 1, 1000000) \
+				or not _campaign_integer(mother.get(resource), 0, float(mother["max_" + resource])):
+			return false
+	if not _campaign_integer(mother.get("level"), 10, 10) \
+			or not _campaign_integer(mother.get("revives_spent"), 0, 1000000):
+		return false
+	for field: String in ["enabled", "following", "downed", "configured"]:
+		if not mother.get(field) is bool:
+			return false
+	var patient: Dictionary = rescue.patient
+	if not _campaign_integer(patient.get("actor_id"), 0, 65535) \
+			or not _campaign_integer(patient.get("lesson_remaining"), 0, 1):
+		return false
+	if not patient.get("can_cast") is bool:
+		return false
+	if patient.has("learned_patient_only") and not patient.learned_patient_only is bool:
+		return false
+	if bool(patient.can_cast) and (int(patient.actor_id) <= 0 or str(rescue.stage) != "injured" \
+			or not bool(mother.downed)):
+		return false
+	for field: String in ["caged", "rescued"]:
+		if not (rescue.daughter as Dictionary).get(field) is bool:
+			return false
+	if rescue.daughter.has("returned") and not rescue.daughter.returned is bool:
+		return false
+	for field: String in ["can_choose", "claimed"]:
+		if not (rescue.reward as Dictionary).get(field) is bool:
+			return false
+	if rescue.reward.get("choice") not in ["", "sword", "bow", "wand"] \
+			or bool(rescue.reward.can_choose) and bool(rescue.reward.claimed):
+		return false
+	for field: String in ["claimed", "can_claim"]:
+		if not (rescue.supplies as Dictionary).get(field) is bool:
+			return false
+	if not rescue.get("encounters") is Array or rescue.encounters.size() > 64:
+		return false
+	var identities: Dictionary = {}
+	for encounter: Variant in rescue.encounters:
+		if not encounter is Dictionary or not encounter.get("id") is String \
+				or str(encounter.id).is_empty() or str(encounter.id).length() > 128 \
+				or identities.has(encounter.id) or not encounter.get("alive") is bool \
+				or not encounter.get("cleared") is bool:
+			return false
+		identities[encounter.id] = true
 	return true
 
 static func campaign_inquiry_valid(inquiry: Variant) -> bool:
@@ -3833,7 +3963,7 @@ static func campaign_scene_inspection_valid(inspection: Variant) -> bool:
 		return false
 	if inspection.is_empty():
 		return true
-	if inspection.get("id") not in ["landing_overview", "cart_assessment"] \
+	if inspection.get("id") not in ["landing_overview", "cart_assessment", "rescue_family"] \
 			or inspection.get("status") not in ["pending", "walking", "complete", "blocked", "waiting_owner"] \
 			or not _campaign_integer(inspection.get("actor_id"), 0, 2147483647.0) \
 			or not _campaign_integer(inspection.get("object_id"), 1, 65535) \
@@ -3856,7 +3986,9 @@ static func campaign_scene_choice_valid(choice: Variant) -> bool:
 	if choice.is_empty():
 		return true
 	var allowed: Array = {"opening_rescue": ["defend", "repair", "evacuate"],
-		"cart_release": ["unload", "lever", "haul"], "claims_lead": ["physical", "chronology", "records"]}.get(str(choice.get("id", "")), [])
+		"cart_release": ["unload", "lever", "haul"], "claims_lead": ["physical", "chronology", "records"],
+		"rescue_response": ["help", "watch"], "rescue_accept": ["accept", "defer"],
+		"rescue_reward": ["sword", "bow", "wand"]}.get(str(choice.get("id", "")), [])
 	if allowed.is_empty() or not choice.get("selected") is String \
 			or (not str(choice.selected).is_empty() and choice.selected not in allowed):
 		return false
@@ -3869,7 +4001,7 @@ static func campaign_scene_choice_valid(choice: Variant) -> bool:
 	if bool(choice.can_choose) and (not bool(choice.owner_is_you) or not str(choice.selected).is_empty()):
 		return false
 	var options: Variant = choice.get("options")
-	if not options is Array or options.size() != 3:
+	if not options is Array or options.size() != allowed.size():
 		return false
 	var ids: Array[String] = []
 	for option: Variant in options:

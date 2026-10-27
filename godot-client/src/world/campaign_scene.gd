@@ -3,6 +3,7 @@ extends Node
 ## the camera, gestures, skip and transcript never complete a gameplay objective.
 const DATA_PATH := "res://data/campaign/scenes.json"
 const CART_DATA_PATH := "res://data/campaign/last_cart_scenes.json"
+const RESCUE_DATA_PATH := "res://data/campaign/rescue_scenes.json"
 const Dialogue := preload("res://src/ui/campaign_dialogue.gd")
 const Choice := preload("res://src/ui/campaign_choice.gd")
 const WAIT_LIMIT := 45.0
@@ -13,6 +14,7 @@ signal replay_finished(token: String, reason: String)
 signal choice_requested(option_id: String)
 signal inspection_requested(action: String)
 signal transcript_changed(text: String)
+signal event_requested(event_id: String)
 
 var reduced_motion := false
 var auto_dialogue := false
@@ -24,11 +26,15 @@ var _actor_wait_elapsed := 0.0
 var _token := ""
 var _map := ""
 var _run := ""
+var _scene_id := ""
+var _event_emitted: Dictionary = {}
 var _variant := ""
 var _definition: Dictionary = {}
 var _handled: Dictionary = {}
 var _actors: Dictionary = {}
 var _posts: Dictionary = {}
+var _visibility_posts: Dictionary = {}
+var _portrait_only_roles: Dictionary = {}
 var _rig: Node3D
 var _camera: Camera3D
 var _saved: Dictionary = {}
@@ -92,12 +98,20 @@ var _replay_requested_identity := ""
 var _replaying := false
 var _replay_bindings: Dictionary = {}
 var _replay_nodes: Dictionary = {}
+var _replay_actor_factory: Callable
+var _cast_cache_identity := ""
+var _cast_templates: Dictionary = {}
+var _replay_visuals: Dictionary = {}
+var _replay_stage: Node3D
+var _live_corpse_id := -1
 var _local_actor: WeakRef
 var _local_start := Vector3.ZERO
 var _returning := false
 var _return_elapsed := 0.0
 var _return_duration := 0.0
 var _return_reason := ""
+var _last_return_reason := ""
+var _last_playback_replay := false
 var _return_start: Dictionary = {}
 var _reduced_view: Dictionary = {}
 var _reduced_origin := Vector3.ZERO
@@ -117,7 +131,122 @@ static func scene_definitions() -> Dictionary:
 	if FileAccess.file_exists(CART_DATA_PATH):
 		var cart: Variant = JSON.parse_string(FileAccess.get_file_as_string(CART_DATA_PATH))
 		if cart is Dictionary: definitions.merge(cart.get("scenes", {}), false)
+	if FileAccess.file_exists(RESCUE_DATA_PATH):
+		var rescue: Variant = JSON.parse_string(FileAccess.get_file_as_string(RESCUE_DATA_PATH))
+		if rescue is Dictionary: definitions.merge(rescue.get("scenes", {}), false)
 	return definitions
+
+func event_context() -> Dictionary:
+	return {"run_id":_run, "token":_token, "id":_scene_id}
+
+func configure_replay_actor_factory(factory: Callable) -> void:
+	_replay_actor_factory = factory
+
+func _cast_identity(snapshot: Dictionary) -> String:
+	if not bool(snapshot.get("active", false)) or str(snapshot.get("kind", "")) != "rescue": return ""
+	return str(snapshot.get("run_id", "")) + ":" + str(snapshot.get("map", ""))
+
+func remember_replay_cast(snapshot: Dictionary, authoritative_actors: Dictionary) -> void:
+	var identity := _cast_identity(snapshot)
+	if identity != _cast_cache_identity:
+		_clear_replay_cast()
+		_cast_cache_identity = identity
+	if identity.is_empty(): return
+	_live_corpse_id = -1
+	var scene: Dictionary = snapshot.get("scene", {})
+	var raw: Dictionary = scene.get("actors", snapshot.get("actors", {}))
+	for role: String in raw:
+		var id := int(raw[role])
+		var dto: Variant = authoritative_actors.get(id)
+		if dto is Dictionary:
+			_cast_templates[role] = {"actor_id":id,"dto":dto.duplicate(true)}
+			if role == "goblin_boss" and int(dto.get("health", 1)) == 0 \
+					and bool((dto.get("death_presentation", {}) as Dictionary).get("hold_for_scene", false)):
+				_live_corpse_id = id
+	var corpse: Variant = scene.get("corpse_template")
+	if corpse is Dictionary and raw.has("goblin_boss") \
+			and int(corpse.get("actor_id", -1)) == int(raw.goblin_boss) \
+			and int(corpse.get("health", 1)) == 0:
+		_cast_templates.goblin_boss = {"actor_id":int(corpse.actor_id),"dto":corpse.duplicate(true)}
+		_live_corpse_id = -1
+		var present: Variant = authoritative_actors.get(int(corpse.actor_id))
+		if present is Dictionary and int(present.get("health", 1)) == 0 \
+				and int(present.get("actor_type", -1)) == int(corpse.get("actor_type", -2)) \
+				and int(present.get("kind", -1)) == int(corpse.get("kind", -2)) \
+				and bool((present.get("death_presentation", {}) as Dictionary).get("hold_for_scene", false)):
+			_live_corpse_id = int(corpse.actor_id)
+
+func _clear_replay_cast() -> void:
+	_cast_templates.clear()
+	_replay_visuals.clear()
+	if is_instance_valid(_replay_stage): _replay_stage.queue_free()
+	_replay_stage = null
+	_cast_cache_identity = ""
+	_live_corpse_id = -1
+
+func _replay_view_nodes(snapshot: Dictionary, live_nodes: Dictionary) -> Dictionary:
+	if _cast_cache_identity.is_empty() or _cast_cache_identity != _cast_identity(snapshot): return live_nodes
+	var view := live_nodes.duplicate()
+	var raw: Dictionary = (snapshot.get("scene", {}) as Dictionary).get("actors", snapshot.get("actors", {}))
+	for role: String in _definition.get("cast_roles", []):
+		if not _cast_templates.has(role): continue
+		var row: Dictionary = _cast_templates[role]
+		var id := int(row.actor_id)
+		if raw.has(role) and is_instance_valid(live_nodes.get(int(raw[role]))):
+			if role != "goblin_boss" or int(row.dto.get("health", 1)) > 0 or _live_corpse_id == id: continue
+		if not _replaying:
+			# The camera can return to a defeated boss outside creature interest.
+			# Only that explicitly authorized, already-dead role is reconstructed.
+			if role != "goblin_boss" or not raw.has(role) or int(raw[role]) != id \
+					or int(row.dto.get("health", 1)) > 0 \
+					or _scene_id not in ["measure.rescue.captive", "measure.rescue.shadow"]: continue
+		var visual: Variant = _replay_visuals.get(id)
+		if not is_instance_valid(visual) and _replay_actor_factory.is_valid():
+			if not is_instance_valid(_replay_stage):
+				_replay_stage = Node3D.new()
+				_replay_stage.name = "CampaignReplayCast"
+				add_child(_replay_stage)
+				_replay_stage.top_level = true
+			visual = _replay_actor_factory.call(row.dto.duplicate(true), _replay_stage, _adapter, _surface_sample)
+			if visual is Node3D and is_instance_valid(visual): _replay_visuals[id] = visual
+		if visual is Node3D and is_instance_valid(visual):
+			visual.process_mode = Node.PROCESS_MODE_INHERIT
+			visual.show()
+			view[id] = visual
+	return view
+
+func _beat_matches(beat: Dictionary) -> bool:
+	var condition: Variant = beat.get("when", "")
+	var branch := str(_choice_state.get("selected", ""))
+	if branch.is_empty(): branch = _variant
+	return condition == "" or condition == branch or (condition is Array and branch in condition)
+
+func presentation_state() -> Dictionary:
+	var events: Array = []
+	if playing and not _returning:
+		for event: Dictionary in _definition.get("events", []):
+			if _beat_matches(event) and elapsed >= float(event.get("at", 0.0)) \
+					and elapsed <= float(event.get("until", _duration())): events.append(event.duplicate(true))
+	var handoff_fade := false
+	if not _replaying and not _last_playback_replay \
+			and (playing or _returning or _last_return_reason in ["finished", "skipped"]):
+		for event: Dictionary in _definition.get("events", []):
+			if str(event.get("type", "")) == "fade" and bool(event.get("handoff", false)) \
+					and _beat_matches(event) and (elapsed >= float(event.get("at", 0.0)) \
+					or _returning or (not playing and _last_return_reason in ["finished", "skipped"])):
+				handoff_fade = true
+	return {"id":_scene_id,"run_id":_run,"token":_token,"elapsed":elapsed,"playing":playing,
+		"returning":_returning,"replaying":_replaying,"events":events,"variant":_variant,
+		"choice":_choice_state.duplicate(true),"actors":_actors.duplicate(),"pending":pending,
+		"handoff_fade":handoff_fade,"return_reason":_return_reason if _returning else _last_return_reason}
+
+func _request_scene_events() -> void:
+	if not playing or _returning or _replaying: return
+	for event: Dictionary in presentation_state().events:
+		var id := str(event.get("id", ""))
+		if bool(event.get("request", false)) and not id.is_empty() and not _event_emitted.has(id):
+			_event_emitted[id] = true
+			event_requested.emit(id)
 
 static func map_key(value: String) -> String:
 	return EloriaProtocol.map_id_from_reference(value)
@@ -272,7 +401,10 @@ func cart_accident_progress() -> float:
 	return clampf((elapsed - float(interval[0])) / maxf(0.001, float(interval[1]) - float(interval[0])), 0.0, 1.0)
 
 func _scene_bindings(scene: Dictionary, snapshot: Dictionary) -> Dictionary:
-	var raw: Dictionary = scene.get("actors", snapshot.get("actors", {}))
+	var raw: Dictionary = (scene.get("actors", snapshot.get("actors", {})) as Dictionary).duplicate()
+	if _replaying and _cast_cache_identity == _cast_identity(snapshot):
+		for role: String in _cast_templates:
+			if not raw.has(role): raw[role] = _cast_templates[role].actor_id
 	if not _definition.has("cast_roles"): return raw
 	var chosen: Dictionary = {}
 	for role: String in _definition.cast_roles:
@@ -318,6 +450,7 @@ func _offer_line_continue() -> void:
 	var target := _line_gate if _line_holding else _duration()
 	if not _line_holding:
 		for line: Dictionary in _definition.get("lines", []):
+			if not _beat_matches(line): continue
 			var at := float(line.get("at", 0.0))
 			if at > elapsed + 0.0001: target = minf(target, at)
 		if _has_choice() and not _choice_completed:
@@ -368,6 +501,10 @@ func inspection_context() -> Dictionary:
 
 func inspection_send_failed() -> void:
 	_inspection_pending_at = -1
+	if str(_inspection_state.get("id", "")) == "rescue_family":
+		_inspection_error = "The way to the cage is blocked. Retry, or return to play and approach the cage."
+		if is_instance_valid(_inspection_retry): _inspection_retry.show()
+		return
 	var subject := "cart" if str(_inspection_state.get("id", "")) == "cart_assessment" else "landing"
 	_inspection_error = "The inspection has not been confirmed. Retry, or return to play and inspect the %s." % subject
 	if is_instance_valid(_inspection_retry): _inspection_retry.show()
@@ -412,7 +549,8 @@ func _show_choice() -> void:
 	payload.token = _choice_token()
 	payload.error = _choice_error
 	_choice_dialog.apply_choice(payload, _choice_review)
-	_dialogue.set_content(_protagonist_name, _choice_dialog, _actors.get("protagonist") as Node3D)
+	_dialogue.set_content(_protagonist_name, _choice_dialog,
+		_actors.get(str(_definition.get("choice_actor", "protagonist"))) as Node3D)
 	_layout_presentation()
 
 func _on_choice_option(option_id: String, token: String) -> void:
@@ -569,6 +707,7 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 			_handled[identity] = true
 			return # An unknown presentation must never lock a working quest.
 		_token = next_token
+		_scene_id = id
 		_replaying = replay
 		_run = next_run
 		_map = here
@@ -602,6 +741,7 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 		elapsed = 0.0
 		_rig = rig
 		_build_transcript()
+	actor_nodes = _replay_view_nodes(snapshot, actor_nodes)
 	if pending:
 		_wait_elapsed += maxf(0.0, delta)
 		if _wait_elapsed >= WAIT_LIMIT:
@@ -773,6 +913,7 @@ func _start(rig: Node3D, camera: Camera3D, local: Node3D, nodes: Dictionary,
 		_line_continue.pressed.disconnect(_line_binding)
 	_line_binding = Callable()
 	_camera_entry_elapsed = 0.0
+	_event_emitted.clear()
 	_line_continue.hide()
 	_auto.visible = not (_definition.get("dialogue_holds", []) as Array).is_empty()
 	_auto.set_pressed_no_signal(auto_dialogue)
@@ -785,15 +926,20 @@ func _start(rig: Node3D, camera: Camera3D, local: Node3D, nodes: Dictionary,
 	_saved_focus = weakref(focus) if focus != null else null
 	_actors.clear()
 	_posts.clear()
+	_visibility_posts.clear()
+	_portrait_only_roles.clear()
 	for role: String in bindings:
 		var actor_value: Variant = nodes.get(int(bindings[role]))
 		if not is_instance_valid(actor_value) or not actor_value is Node3D:
 			continue
-		if actor_value == local and (role != "protagonist" or not bool(_definition.get("stage_protagonist", false))):
+		if actor_value == local and role != "recipient" \
+				and (role != "protagonist" or not bool(_definition.get("stage_protagonist", false))):
 			continue
 		var actor: Node3D = actor_value
 		_actors[role] = actor
 		_posts[role] = actor.global_transform
+		_visibility_posts[role] = actor.visible
+		if actor == local and role == "recipient": _portrait_only_roles[role] = true
 	if _actors.has("protagonist"):
 		_anchors["protagonist_post"] = (_actors.protagonist as Node3D).global_position
 		_anchors["protagonist_return"] = _authoritative_position(_actors.protagonist)
@@ -812,6 +958,8 @@ func _start(rig: Node3D, camera: Camera3D, local: Node3D, nodes: Dictionary,
 	_skip.grab_focus()
 	pending = false
 	playing = true
+	_last_return_reason = ""
+	_last_playback_replay = _replaying
 	_apply_actors()
 	_apply_camera()
 	_update_caption()
@@ -947,11 +1095,14 @@ func _apply_actors() -> void:
 		_anchors["protagonist_return"] = _ground(_authoritative_position(_actors.protagonist))
 	for role: String in _actors:
 		var actor: Node3D = _actors[role]
+		if _portrait_only_roles.has(role): continue
+		if not _replaying and role in _definition.get("native_roles", []):
+			continue # These roles are walking an owned, authoritative story route.
 		var post: Transform3D = _posts[role]
 		var chosen: Dictionary = {}
 		var previous_offset := Vector3.ZERO
 		for cue: Dictionary in cues:
-			if str(cue.get("actor", "")) != role or float(cue.get("at", 0.0)) > elapsed:
+			if str(cue.get("actor", "")) != role or float(cue.get("at", 0.0)) > elapsed or not _beat_matches(cue):
 				continue
 			if not chosen.is_empty():
 				previous_offset = _vector(chosen.get("offset", [0, 0, 0]))
@@ -965,6 +1116,12 @@ func _apply_actors() -> void:
 		var from: Vector3 = _anchors.get(str(chosen.get("from", "")), post.origin + previous_offset)
 		var to: Vector3 = _anchors.get(str(chosen.get("destination", "")), post.origin + destination)
 		var at := _ground(from.lerp(to, progress))
+		var attached := str(chosen.get("attach_to", ""))
+		if not attached.is_empty() and _actors.has(attached):
+			var carrier := _actors[attached] as Node3D
+			at = carrier.global_transform * _vector(chosen.get("offset", [0, 0, 0]))
+			if bool(chosen.get("ground_attachment", false)): at = _ground(at)
+		if chosen.has("visible"): actor.visible = bool(chosen.visible)
 		if role == "worker" and _definition.has("cart_accident"):
 			var offset: Array = _cart_state.get("worker_presentation_offset", [0, 0, 0])
 			if _replaying: offset = [-0.48, 0, 0.32]
@@ -988,17 +1145,24 @@ func _apply_actors() -> void:
 			actor.rotation.y = yaw
 
 func _line_text(line: Dictionary) -> String:
-	return str((line.get("variants", {}) as Dictionary).get(_variant, line.get("text", "")))
+	var branch := str(_choice_state.get("selected", ""))
+	return str((line.get("variants", {}) as Dictionary).get(branch if not branch.is_empty() else _variant, line.get("text", "")))
+
+func _response_speaker() -> String:
+	var speakers: Dictionary = _definition.get("response_speakers", {})
+	return str(speakers.get(str(_choice_state.get("selected", "")), _definition.get("response_speaker", "Odo Fenn")))
 
 func _update_caption() -> void:
 	if _choice_waiting:
-		_dialogue.set_content(_protagonist_name, _choice_dialog, _actors.get("protagonist") as Node3D)
+		_dialogue.set_content(_protagonist_name, _choice_dialog,
+			_actors.get(str(_definition.get("choice_actor", "protagonist"))) as Node3D)
 		_line_continue.hide()
 		return
 	var chosen: Dictionary = {}
 	for line: Dictionary in _definition.get("lines", []):
 		if float(line.get("at", 0.0)) > elapsed:
 			break
+		if not _beat_matches(line): continue
 		chosen = line
 	var speaker := str(chosen.get("speaker", ""))
 	var role := str(chosen.get("speaker_actor", ""))
@@ -1012,11 +1176,16 @@ func _update_caption() -> void:
 		text = _inspection_error if not _inspection_error.is_empty() else \
 			("Waiting for the story owner to inspect the %s…" % subject) if not bool(_choice_state.get("owner_is_you", false)) else \
 			("Taking a closer look at the %s…" % subject)
+		if str(_inspection_state.get("id", "")) == "rescue_family":
+			speaker = "Elen Reed"
+			role = "mother"
+			text = _inspection_error if not _inspection_error.is_empty() else "Stay close, Liora. We’re getting you out of here."
 	if _choice_completed and _has_choice() and elapsed < float(_definition.get("choice_response_until", _duration())):
-		speaker = "Odo Fenn"
-		role = "odo"
+		speaker = _response_speaker()
+		role = str(_definition.get("response_actor", "odo"))
 		text = str(_choice_state.get("response", ""))
-		if text.is_empty(): text = "No rescue plan was recorded. Speak to Odo when you are ready to decide."
+		if text.is_empty():
+			text = "Return to play and speak to %s when you are ready to decide." % (speaker if not speaker.is_empty() else "the speaker")
 	if role.is_empty() and not speaker.is_empty():
 		role = {"Odo Fenn": "odo", "Landing clerk": "clerk", "Dock foreman": "foreman",
 			"Worker": "worker", "Works Hand": "worker", "Serit Voss": "voss"}.get(speaker, "")
@@ -1028,10 +1197,12 @@ func _update_caption() -> void:
 	var actor: Node3D = _actors.get(role) as Node3D
 	_dialogue.set_line(speaker, text, actor if is_instance_valid(actor) else null)
 	_offer_line_continue()
+	_request_scene_events()
 
 func _build_transcript() -> void:
 	var lines: PackedStringArray = [str(_definition.get("title", "")), ""]
 	for line: Dictionary in _definition.get("lines", []):
+		if not _beat_matches(line): continue
 		var speaker := str(line.get("speaker", ""))
 		lines.append((speaker + ": " if not speaker.is_empty() else "") + _line_text(line))
 	if _has_choice():
@@ -1040,7 +1211,7 @@ func _build_transcript() -> void:
 			lines.append(("[Recorded choice] " if str(option.id) == str(_choice_state.get("selected", "")) else "") \
 				+ str(option.label) + ": " + str(option.detail))
 		if not str(_choice_state.get("response", "")).is_empty():
-			lines.append("Odo Fenn: " + str(_choice_state.response))
+			lines.append(_response_speaker() + ": " + str(_choice_state.response))
 	_last_transcript = "\n\n".join(lines)
 	transcript_changed.emit(_last_transcript)
 
@@ -1083,6 +1254,9 @@ func cancel(reason := "cancelled") -> void:
 	_stop_inspection()
 	var owned := is_active()
 	var was_replay := _replaying
+	if owned:
+		_last_return_reason = reason
+		_last_playback_replay = was_replay
 	var movement := _local_position() - _local_start if _camera_handoff() else Vector3.ZERO
 	_returning = false
 	_return_elapsed = 0.0
@@ -1106,13 +1280,19 @@ func cancel(reason := "cancelled") -> void:
 		var actor_value: Variant = _actors[role]
 		if not is_instance_valid(actor_value):
 			continue
+		if _portrait_only_roles.has(role): continue
 		var actor: Node3D = actor_value
+		actor.visible = bool(_visibility_posts.get(role, true))
 		if actor.has_method("end_cinematic_presentation"):
 			actor.call("end_cinematic_presentation")
 		else:
 			actor.global_transform = _posts[role]
 	_actors.clear()
 	_posts.clear()
+	for visual: Variant in _replay_visuals.values():
+		if is_instance_valid(visual):
+			visual.hide()
+			visual.process_mode = Node.PROCESS_MODE_DISABLED
 	if not _saved.is_empty():
 		if is_instance_valid(_rig):
 			var rig_pose: Transform3D = _saved.rig
@@ -1152,9 +1332,10 @@ func cancel(reason := "cancelled") -> void:
 			if reason in ["finished", "skipped", "loading_timeout", "actor_lost", "camera_lost"]:
 				_ack_requested = true
 			presentation_finished.emit(_token, reason)
-	if reason in ["disconnected", "map_changed", "session_ended", "unavailable"]:
+	if reason in ["disconnected", "map_changed", "session_ended", "unavailable", "client_closed"]:
 		_ack_identity = ""
 		_ack_requested = false
+		_clear_replay_cast()
 	if reason not in ["finished", "skipped"]:
 		_release_ambient()
 

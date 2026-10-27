@@ -6,6 +6,14 @@ const GOLD := Color("f1cd78")
 const TEXT := Color("fffaf0")
 const PORTRAIT_LAYER_MASK := 1 # Native models; excludes gameplay/map overlays.
 const PORTRAIT_INTERVAL := 1.0 / 30.0
+# Measured rest-space head envelopes of these existing imported rigs. Their
+# bone names are not the humanoid "Head" convention; no actor pose is changed.
+const CREATURE_HEAD_PROFILES := {
+	"res://assets/actors/native/creatures/mire_goblin.glb": {
+		"bone": "head", "bounds": AABB(Vector3(-0.69, 1.12, 0.10), Vector3(1.51, 0.60, 0.64))},
+	"res://assets/actors/native/creatures/drowned_lich_king.glb": {
+		"bone": "Bone_021", "bounds": AABB(Vector3(-0.15, 1.29, 0.10), Vector3(0.30, 0.41, 0.33))},
+}
 
 var speaker_label: Label
 var body_label: Label
@@ -272,19 +280,65 @@ func _update_portrait() -> void:
 		return
 	var skeleton := actor.call("get_skeleton") as Skeleton3D
 	var head_bone := skeleton.find_bone("Head") if is_instance_valid(skeleton) else -1
+	var creature_profile := _creature_head_profile(actor, skeleton) if head_bone < 0 else {}
+	if not creature_profile.is_empty():
+		head_bone = skeleton.find_bone(str(creature_profile.bone))
 	if head_bone < 0:
 		_portrait_frame.hide()
 		_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
 		return
 	_viewport.world_3d = actor.get_world_3d()
+	if not creature_profile.is_empty():
+		_frame_creature_head(actor, skeleton, head_bone, creature_profile.bounds)
+		_camera.current = true
+		_portrait_frame.show()
+		_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+		return
 	var head: Vector3 = skeleton.global_transform * skeleton.get_bone_global_pose(head_bone).origin
-	var height := maxf(0.5, head.y - actor.global_position.y)
-	var focus := head + Vector3.UP * height * 0.025
-	var forward := -actor.global_basis.z.normalized()
-	var side := actor.global_basis.x.normalized()
+	var rest_head := skeleton.global_transform * skeleton.get_bone_global_rest(head_bone).origin
+	var height := maxf(0.5, (rest_head - actor.global_position).dot(actor.global_basis.y.normalized()))
+	var turn := _head_turn(skeleton, head_bone)
+	var forward := (turn * -actor.global_basis.z).normalized()
+	var side := (turn * actor.global_basis.x).normalized()
+	var up := (turn * actor.global_basis.y).normalized()
+	var focus := head + up * height * 0.025
 	_camera.size = height * 0.37
-	_camera.global_position = focus + forward * 0.9 - side * 0.07 + Vector3.UP * 0.025
-	_camera.look_at(focus)
+	_camera.far = 2.2
+	_camera.global_position = focus + forward * 0.9 - side * 0.07 + up * 0.025
+	_camera.look_at(focus, up)
 	_camera.current = true
 	_portrait_frame.show()
 	_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+
+func _creature_head_profile(actor: Node3D, skeleton: Skeleton3D) -> Dictionary:
+	if not is_instance_valid(skeleton) or not actor is ReplicatedActor3D:
+		return {}
+	var model: Dictionary = actor.get("_model_config")
+	var profile: Dictionary = CREATURE_HEAD_PROFILES.get(str(model.get("scene", "")), {})
+	if profile.is_empty() or skeleton.find_bone(str(profile.bone)) < 0:
+		return {}
+	return profile
+
+func _frame_creature_head(actor: Node3D, skeleton: Skeleton3D, bone: int, bounds: AABB) -> void:
+	var rest := skeleton.get_bone_global_rest(bone)
+	var pose := skeleton.get_bone_global_pose(bone)
+	var head_delta := pose * rest.affine_inverse()
+	var focus := skeleton.global_transform * (head_delta * bounds.get_center())
+	# A fallen goblin still speaks from its actual fallen head. Follow the
+	# head's rest-to-pose rotation, including roll, rather than actor foot yaw.
+	var turn := _head_turn(skeleton, bone)
+	var forward := (turn * -actor.global_basis.z).normalized()
+	var side := (turn * actor.global_basis.x).normalized()
+	var up := (turn * actor.global_basis.y).normalized()
+	var scale := skeleton.global_basis.get_scale().abs()
+	var envelope := bounds.size * scale
+	_camera.size = maxf(envelope.x, maxf(envelope.y, envelope.z)) * 1.12
+	var distance := maxf(0.9, _camera.size * 1.6)
+	_camera.far = maxf(2.2, distance + _camera.size * 1.5)
+	_camera.global_position = focus + forward * distance - side * _camera.size * 0.04
+	_camera.look_at(focus, up)
+
+func _head_turn(skeleton: Skeleton3D, bone: int) -> Basis:
+	var skeleton_basis := skeleton.global_basis.orthonormalized()
+	return skeleton_basis * skeleton.get_bone_global_pose(bone).basis.orthonormalized() \
+		* skeleton.get_bone_global_rest(bone).basis.orthonormalized().inverse() * skeleton_basis.inverse()

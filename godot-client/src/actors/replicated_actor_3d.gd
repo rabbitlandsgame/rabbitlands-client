@@ -150,6 +150,7 @@ var _death_elapsed := 0.0
 var _death_finished := false
 var _death_animation_seconds := 0.0
 var _corpse_temporary := false
+var _corpse_scene_held := false
 var _corpse_hold_seconds := 3.0
 var _corpse_fade_seconds := 4.0
 var _death_snapshot_msec := -1
@@ -2559,6 +2560,7 @@ func _sync_death_presentation(dto: Dictionary) -> void:
 			_death_animation_seconds = 0.0
 			_death_snapshot_msec = -1
 			_corpse_temporary = false
+			_corpse_scene_held = false
 			if _corpse_dissolve != null:
 				_corpse_dissolve.reset()
 				_corpse_dissolve = null
@@ -2570,6 +2572,7 @@ func _sync_death_presentation(dto: Dictionary) -> void:
 	var snapshot: Dictionary = dto.get("death_presentation", {})
 	_death_animation_seconds = float(snapshot.get("animation_seconds", 0.0))
 	_corpse_temporary = bool(snapshot.get("temporary", false))
+	_corpse_scene_held = bool(snapshot.get("hold_for_scene", false))
 	_corpse_hold_seconds = float(snapshot.get("hold_seconds", 3.0))
 	_corpse_fade_seconds = maxf(0.01, float(snapshot.get("fade_seconds", 4.0)))
 	play_action(&"death")
@@ -2604,6 +2607,9 @@ func _hold_death_pose() -> void:
 func _update_corpse_pose() -> void:
 	if not _death_finished and _death_elapsed >= _death_duration():
 		_hold_death_pose()
+	if _corpse_scene_held:
+		_set_corpse_transparency(0.0)
+		return
 	if _corpse_temporary or _is_creature:
 		# Temporary bodies dissolve two seconds after their clip ends. The
 		# server can retain the hidden corpse until its existing cleanup time.

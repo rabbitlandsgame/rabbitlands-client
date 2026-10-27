@@ -13,6 +13,9 @@ var _identity := ""
 static func is_opening(snapshot: Dictionary) -> bool:
 	return str(snapshot.get("kind", "opening")) in ["", "opening"]
 
+static func is_guided(snapshot: Dictionary) -> bool:
+	return is_opening(snapshot) or str(snapshot.get("kind", "")) == "rescue"
+
 static func work_targets(snapshot: Dictionary) -> Array[Dictionary]:
 	var targets: Array[Dictionary] = []
 	for navigation: bool in [true, false]:
@@ -56,6 +59,11 @@ static func conversation_actor(snapshot: Dictionary, target: Dictionary) -> int:
 
 static func legend(snapshot: Dictionary) -> String:
 	var targets := work_targets(snapshot)
+	if str(snapshot.get("kind", "")) == "rescue":
+		if targets.is_empty():
+			return "Follow the objective above. Action markers appear when the next step is ready."
+		return "Follow the objective above." \
+			+ "\nGround circles mark ready actions. Select a label to walk there, then select it again when close."
 	if targets.is_empty():
 		if bool((snapshot.get("party", {}) as Dictionary).get("waiting_for_scene", false)):
 			return "Waiting for the party to finish the scene. Work markers appear when everyone is ready."
@@ -71,7 +79,7 @@ static func legend(snapshot: Dictionary) -> String:
 
 func apply_snapshot(snapshot: Dictionary, objects: Dictionary, actors: Dictionary,
 		current_map: String, local_tile: Vector2i, tracked: bool, blocked: bool) -> void:
-	if not is_opening(snapshot) or not bool(snapshot.get("active", false)) \
+	if not is_guided(snapshot) or not bool(snapshot.get("active", false)) \
 			or not (snapshot.get("travel", {}) as Dictionary).is_empty() \
 			or EloriaProtocol.map_id_from_reference(str(snapshot.get("map", ""))) \
 			!= EloriaProtocol.map_id_from_reference(current_map):
@@ -82,6 +90,7 @@ func apply_snapshot(snapshot: Dictionary, objects: Dictionary, actors: Dictionar
 		clear()
 		_identity = identity
 	var available := work_targets(snapshot)
+	var rescue := str(snapshot.get("kind", "")) == "rescue"
 	var ids: Dictionary = {}
 	for row: Dictionary in available:
 		ids[str(row.id)] = true
@@ -115,7 +124,7 @@ func apply_snapshot(snapshot: Dictionary, objects: Dictionary, actors: Dictionar
 				ring.visible = enabled and not blocked
 				var material := ring.material_override as StandardMaterial3D
 				if material != null:
-					material.albedo_color = NEXT_COLOUR if tracked and available.size()==1 else _controlled[object_id].colour
+					material.albedo_color = NEXT_COLOUR if tracked and available.size()==1 and not rescue else _controlled[object_id].colour
 			if pin != null:pin.visible = enabled
 			object.collision_layer = int(_controlled[object_id].pick_layer) if enabled and not blocked else 0
 		if not enabled or not tracked or blocked or shown >= MAX_LABELS:
@@ -142,6 +151,10 @@ func apply_snapshot(snapshot: Dictionary, objects: Dictionary, actors: Dictionar
 		var verb := "Talk" if actor_id>0 and near(row,local_tile) else "Interact" if near(row,local_tile) else "Walk to"
 		var next := available.size()==1 or actor_id>0 or (not available.is_empty() \
 			and str(row.id) == str(available[0].id) and str(row.id) in (snapshot.get("preferred_targets", []) as Array))
+		if rescue:
+			# A ready conversation can coexist with a combat objective. Do not
+			# promote it over the objective without an explicit server priority.
+			next = str(row.id) in (snapshot.get("preferred_targets", []) as Array)
 		label.text = ("NEXT · " if next else "WORK · ") + str(row.label) + "\n" + verb
 		label.modulate = NEXT_COLOUR if next else Color.WHITE
 		label.show()

@@ -1,0 +1,1602 @@
+{
+  "version": 1,
+  "scenes": {
+    "measure.rescue.abduction": {
+      "title": "A Daughter in the Dark",
+      "duration": 64,
+      "fov": 46,
+      "entry_seconds": 2.4,
+      "exit_seconds": 1.8,
+      "anchor": "daughter_trip",
+      "cast_roles": [
+        "mother",
+        "daughter",
+        "abductor",
+        "escort",
+        "guard",
+        "protagonist"
+      ],
+      "required_actors": [
+        "mother",
+        "daughter",
+        "abductor",
+        "escort",
+        "guard",
+        "protagonist"
+      ],
+      "stage_protagonist": true,
+      "shots": [
+        {
+          "t": 0,
+          "anchor": "player_watch",
+          "position": [
+            5,
+            4.8,
+            8
+          ],
+          "target": [
+            0,
+            -0.4,
+            0
+          ],
+          "anchor_actor": "protagonist"
+        },
+        {
+          "t": 3,
+          "anchor": "player_watch",
+          "position": [
+            5,
+            4.8,
+            8
+          ],
+          "target": [
+            0,
+            -0.4,
+            0
+          ],
+          "anchor_actor": "protagonist"
+        },
+        {
+          "t": 7,
+          "anchor": "daughter_trip",
+          "position": [
+            6,
+            7,
+            12
+          ],
+          "target": [
+            -1,
+            -0.7,
+            0
+          ]
+        },
+        {
+          "t": 32,
+          "anchor": "daughter_trip",
+          "position": [
+            6,
+            7,
+            12
+          ],
+          "target": [
+            -1,
+            -0.7,
+            0
+          ]
+        },
+        {
+          "t": 38,
+          "anchor": "player_watch",
+          "position": [
+            5,
+            4.8,
+            8
+          ],
+          "target": [
+            0,
+            -0.4,
+            0
+          ],
+          "anchor_actor": "protagonist"
+        },
+        {
+          "t": 44,
+          "anchor": "player_watch",
+          "anchor_actor": "protagonist",
+          "position": [
+            5,
+            4.8,
+            8
+          ],
+          "target": [
+            0,
+            -0.4,
+            0
+          ]
+        },
+        {
+          "t": 47,
+          "anchor": "mother_intercept",
+          "position": [
+            6,
+            6,
+            10
+          ],
+          "target": [
+            1,
+            -0.8,
+            0
+          ]
+        },
+        {
+          "t": 64,
+          "anchor": "mother_intercept",
+          "position": [
+            6,
+            6,
+            10
+          ],
+          "target": [
+            1,
+            -0.8,
+            0
+          ]
+        }
+      ],
+      "dialogue_holds": [
+        2,
+        8,
+        16,
+        25,
+        34,
+        42,
+        54
+      ],
+      "cues": [
+        {
+          "at": 0,
+          "actor": "mother",
+          "action": "run",
+          "from": "mother_post",
+          "destination": "mother_turn",
+          "move_seconds": 4.5,
+          "face": "daughter"
+        },
+        {
+          "at": 0,
+          "actor": "daughter",
+          "action": "run",
+          "from": "daughter_start",
+          "destination": "family_turn",
+          "move_seconds": 3,
+          "face": "family_turn"
+        },
+        {
+          "at": 0,
+          "actor": "guard",
+          "action": "combat_idle",
+          "destination": "guard_post",
+          "face": "mother"
+        },
+        {
+          "at": 3,
+          "actor": "daughter",
+          "action": "run",
+          "from": "family_turn",
+          "destination": "daughter_trip",
+          "move_seconds": 3.5,
+          "face": "daughter_trip"
+        },
+        {
+          "at": 4,
+          "actor": "abductor",
+          "action": "run",
+          "destination": "capture",
+          "move_seconds": 4,
+          "face": "daughter_trip"
+        },
+        {
+          "at": 4,
+          "actor": "escort",
+          "action": "run",
+          "destination": "escort_post",
+          "move_seconds": 4,
+          "face": "daughter_trip"
+        },
+        {
+          "at": 6.5,
+          "actor": "daughter",
+          "action": "injury_recoil",
+          "destination": "daughter_trip",
+          "face": "capture"
+        },
+        {
+          "at": 7.05,
+          "actor": "daughter",
+          "action": "injury_pinned",
+          "destination": "daughter_trip",
+          "face": "capture"
+        },
+        {
+          "at": 8,
+          "actor": "mother",
+          "action": "idle",
+          "destination": "mother_intercept",
+          "face": "daughter_trip"
+        },
+        {
+          "at": 8,
+          "actor": "abductor",
+          "action": "combat_idle",
+          "destination": "capture",
+          "face": "daughter_trip"
+        },
+        {
+          "at": 13,
+          "actor": "abductor",
+          "action": "attack_primary",
+          "destination": "capture",
+          "face": "daughter"
+        },
+        {
+          "at": 14,
+          "actor": "daughter",
+          "action": "injury_recover",
+          "destination": "daughter_trip",
+          "face": "abductor"
+        },
+        {
+          "at": 15,
+          "actor": "abductor",
+          "action": "combat_idle",
+          "destination": "capture",
+          "face": "daughter"
+        },
+        {
+          "at": 16,
+          "actor": "daughter",
+          "action": "run",
+          "attach_to": "abductor",
+          "offset": [
+            0.7,
+            0,
+            0.1
+          ],
+          "ground_attachment": true,
+          "face": "escape_turn"
+        },
+        {
+          "at": 18,
+          "actor": "abductor",
+          "action": "run",
+          "from": "capture",
+          "destination": "escape_turn",
+          "move_seconds": 8,
+          "face": "escape_turn"
+        },
+        {
+          "at": 18,
+          "actor": "escort",
+          "action": "run",
+          "from": "escort_post",
+          "destination": "escape_turn_2",
+          "move_seconds": 8,
+          "face": "escape_turn_2"
+        },
+        {
+          "at": 26,
+          "actor": "daughter",
+          "action": "injury_pinned",
+          "visible": false
+        },
+        {
+          "at": 26,
+          "actor": "abductor",
+          "action": "idle",
+          "visible": false
+        },
+        {
+          "at": 26,
+          "actor": "escort",
+          "action": "idle",
+          "visible": false
+        },
+        {
+          "at": 28,
+          "actor": "mother",
+          "action": "defend",
+          "destination": "mother_intercept",
+          "face": "guard"
+        },
+        {
+          "at": 42,
+          "actor": "protagonist",
+          "action": "idle",
+          "face": "mother"
+        },
+        {
+          "at": 42,
+          "actor": "guard",
+          "action": "run",
+          "from": "guard_post",
+          "destination": "guard_strike",
+          "move_seconds": 5,
+          "face": "mother",
+          "when": "watch"
+        },
+        {
+          "at": 42,
+          "actor": "guard",
+          "action": "run",
+          "from": "guard_post",
+          "destination": "guard_combat",
+          "move_seconds": 5,
+          "face": "mother",
+          "when": "help"
+        },
+        {
+          "at": 46,
+          "actor": "mother",
+          "action": "defend",
+          "destination": "mother_intercept",
+          "face": "guard",
+          "when": "help"
+        },
+        {
+          "at": 46,
+          "actor": "mother",
+          "action": "defend",
+          "destination": "mother_intercept",
+          "face": "guard",
+          "when": "watch"
+        },
+        {
+          "at": 46,
+          "actor": "protagonist",
+          "action": "run",
+          "from": "protagonist_post",
+          "destination": "player_help",
+          "move_seconds": 5,
+          "face": "guard",
+          "when": "help"
+        },
+        {
+          "at": 47,
+          "actor": "guard",
+          "action": "attack_primary",
+          "destination": "guard_strike",
+          "face": "mother",
+          "when": "watch"
+        },
+        {
+          "at": 47,
+          "actor": "guard",
+          "action": "combat_idle",
+          "destination": "guard_combat",
+          "face": "mother",
+          "when": "help"
+        },
+        {
+          "at": 48,
+          "actor": "mother",
+          "action": "injury_recoil",
+          "destination": "mother_intercept",
+          "face": "guard",
+          "when": "watch"
+        },
+        {
+          "at": 48.55,
+          "actor": "mother",
+          "action": "injury_pinned",
+          "destination": "mother_intercept",
+          "face": "guard",
+          "when": "watch"
+        },
+        {
+          "at": 51,
+          "actor": "guard",
+          "action": "run",
+          "destination": "escape_turn",
+          "move_seconds": 7,
+          "face": "escape_turn",
+          "when": "watch"
+        },
+        {
+          "at": 51,
+          "actor": "protagonist",
+          "action": "combat_idle",
+          "destination": "player_help",
+          "face": "guard",
+          "when": "help"
+        },
+        {
+          "at": 58,
+          "actor": "guard",
+          "action": "idle",
+          "visible": false,
+          "when": "watch"
+        }
+      ],
+      "lines": [
+        {
+          "at": 2,
+          "speaker": "",
+          "text": "A cry cuts across the road below Landfall's south gate."
+        },
+        {
+          "at": 8,
+          "speaker": "Girl",
+          "text": "Mum! My footâ€”",
+          "speaker_actor": "daughter"
+        },
+        {
+          "at": 16,
+          "speaker": "Goblin raider",
+          "text": "Ha! Little feet. Easy catch.",
+          "speaker_actor": "abductor"
+        },
+        {
+          "at": 25,
+          "speaker": "Woman",
+          "text": "Liora! Let her go!",
+          "speaker_actor": "mother"
+        },
+        {
+          "at": 34,
+          "speaker": "Woman",
+          "text": "Please. Help me stop them!",
+          "speaker_actor": "mother"
+        }
+      ],
+      "events": [],
+      "choice_id": "rescue_response",
+      "choice_at": 42,
+      "choice_response_until": 54,
+      "response_speaker": "Woman",
+      "response_actor": "mother",
+      "native_roles": [
+        "protagonist"
+      ],
+      "response_speakers": {
+        "help": "Woman",
+        "watch": "Injured woman"
+      }
+    },
+    "measure.rescue.injured": {
+      "title": "She Is Still Alive",
+      "duration": 28,
+      "fov": 42,
+      "entry_seconds": 2.4,
+      "exit_seconds": 1.8,
+      "anchor": "mother_intercept",
+      "cast_roles": [
+        "mother",
+        "protagonist"
+      ],
+      "required_actors": [
+        "mother",
+        "protagonist"
+      ],
+      "stage_protagonist": true,
+      "shots": [
+        {
+          "t": 0,
+          "anchor": "mother_intercept",
+          "position": [
+            4.5,
+            4.2,
+            7
+          ],
+          "target": [
+            0,
+            -0.3,
+            0
+          ]
+        },
+        {
+          "t": 28,
+          "anchor": "mother_intercept",
+          "position": [
+            4.5,
+            4.2,
+            7
+          ],
+          "target": [
+            0,
+            -0.3,
+            0
+          ]
+        }
+      ],
+      "dialogue_holds": [
+        2,
+        10,
+        20
+      ],
+      "cues": [
+        {
+          "at": 0,
+          "actor": "mother",
+          "action": "injury_pinned",
+          "destination": "mother_intercept",
+          "face": "player_watch"
+        },
+        {
+          "at": 0,
+          "actor": "protagonist",
+          "action": "idle",
+          "face": "mother"
+        }
+      ],
+      "lines": [
+        {
+          "at": 2,
+          "speaker": "Injured woman",
+          "text": "I'm still here. Pleaseâ€¦ don't let them keep her.",
+          "speaker_actor": "mother"
+        },
+        {
+          "at": 10,
+          "speaker": "",
+          "text": "The woman is badly hurt. Select her and cast Heal Target."
+        },
+        {
+          "at": 20,
+          "speaker": "",
+          "text": "A real healing spell will get her back on her feet. The woman is a companion you can protect, heal and revive."
+        }
+      ],
+      "events": []
+    },
+    "measure.rescue.commitment": {
+      "title": "The Way to the Mine",
+      "duration": 52,
+      "fov": 43,
+      "entry_seconds": 2.4,
+      "exit_seconds": 1.8,
+      "anchor": "mother_intercept",
+      "cast_roles": [
+        "mother",
+        "protagonist"
+      ],
+      "required_actors": [
+        "mother",
+        "protagonist"
+      ],
+      "stage_protagonist": true,
+      "shots": [
+        {
+          "t": 0,
+          "anchor": "mother_intercept",
+          "position": [
+            5,
+            4.5,
+            8
+          ],
+          "target": [
+            0,
+            -0.3,
+            0
+          ],
+          "variants": {
+            "returned": {
+              "anchor": "entrance_focus",
+              "position": [
+                5,
+                4.5,
+                8
+              ],
+              "target": [
+                0,
+                -0.3,
+                0
+              ]
+            }
+          }
+        },
+        {
+          "t": 52,
+          "anchor": "mother_intercept",
+          "position": [
+            5,
+            4.5,
+            8
+          ],
+          "target": [
+            0,
+            -0.3,
+            0
+          ],
+          "variants": {
+            "returned": {
+              "anchor": "entrance_focus",
+              "position": [
+                5,
+                4.5,
+                8
+              ],
+              "target": [
+                0,
+                -0.3,
+                0
+              ]
+            }
+          }
+        }
+      ],
+      "dialogue_holds": [
+        2,
+        10,
+        19,
+        28,
+        40
+      ],
+      "cues": [
+        {
+          "at": 0,
+          "actor": "mother",
+          "action": "injury_standing",
+          "face": "protagonist"
+        },
+        {
+          "at": 0,
+          "actor": "protagonist",
+          "action": "idle",
+          "face": "mother"
+        },
+        {
+          "at": 28,
+          "actor": "mother",
+          "action": "emote_nod",
+          "face": "protagonist",
+          "when": "accept"
+        },
+        {
+          "at": 40,
+          "actor": "mother",
+          "action": "walk",
+          "destination": "escape_turn",
+          "move_seconds": 10,
+          "face": "escape_turn",
+          "when": "defer"
+        }
+      ],
+      "lines": [
+        {
+          "at": 2,
+          "speaker": "Woman",
+          "text": "Please... they have my daughter. They took her toward Lantern Mine.",
+          "speaker_actor": "mother",
+          "variants": {
+            "returned": "You came. I kept watch, but I could not reach her alone."
+          }
+        },
+        {
+          "at": 10,
+          "speaker": "Woman",
+          "text": "I cannot leave her down there. Please help me bring her home.",
+          "speaker_actor": "mother",
+          "variants": {
+            "returned": "She is still below. I can hear the goblins in the workings."
+          }
+        },
+        {
+          "at": 19,
+          "speaker": "Woman",
+          "text": "Will you come with me? I cannot leave her in there.",
+          "speaker_actor": "mother",
+          "variants": {
+            "returned": "Will you help me bring her home?"
+          }
+        }
+      ],
+      "events": [
+        {
+          "id": "accept-travel-fade",
+          "handoff": true,
+          "type": "fade",
+          "at": 45,
+          "until": 52,
+          "from": 0,
+          "to": 1,
+          "when": "accept"
+        }
+      ],
+      "choice_id": "rescue_accept",
+      "choice_at": 28,
+      "choice_response_until": 40,
+      "response_speaker": "Elen Reed",
+      "response_actor": "mother",
+      "native_roles": [
+        "mother",
+        "protagonist"
+      ],
+      "response_speakers": {
+        "accept": "Elen Reed",
+        "defer": "Woman"
+      }
+    },
+    "measure.rescue.descent": {
+      "title": "Below the Lanterns",
+      "duration": 62,
+      "fov": 45,
+      "entry_seconds": 2.4,
+      "exit_seconds": 1.8,
+      "anchor": "entrance_focus",
+      "cast_roles": [
+        "mother",
+        "protagonist"
+      ],
+      "required_actors": [
+        "mother",
+        "protagonist"
+      ],
+      "stage_protagonist": true,
+      "shots": [
+        {
+          "t": 0,
+          "anchor": "entrance_focus",
+          "position": [
+            6,
+            5.5,
+            10
+          ],
+          "target": [
+            0,
+            -0.4,
+            -2
+          ]
+        },
+        {
+          "t": 62,
+          "anchor": "entrance_focus",
+          "position": [
+            6,
+            5.5,
+            10
+          ],
+          "target": [
+            0,
+            -0.4,
+            -2
+          ]
+        }
+      ],
+      "dialogue_holds": [
+        3,
+        12,
+        22,
+        33,
+        44,
+        54
+      ],
+      "cues": [
+        {
+          "at": 0,
+          "actor": "mother",
+          "action": "idle",
+          "face": "protagonist"
+        },
+        {
+          "at": 0,
+          "actor": "protagonist",
+          "action": "idle",
+          "face": "mother"
+        },
+        {
+          "at": 12,
+          "actor": "mother",
+          "action": "emote_greet",
+          "face": "protagonist"
+        },
+        {
+          "at": 22,
+          "actor": "mother",
+          "action": "pickup",
+          "face": "protagonist"
+        },
+        {
+          "at": 28,
+          "actor": "mother",
+          "action": "idle",
+          "face": "protagonist"
+        }
+      ],
+      "lines": [
+        {
+          "at": 3,
+          "speaker": "Elen Reed",
+          "text": "Goblins have occupied the lower workings. They have been pillaging the nearby towns and taking people from the roads.",
+          "speaker_actor": "mother"
+        },
+        {
+          "at": 12,
+          "speaker": "Elen Reed",
+          "text": "I never thought they would come this close to Landfall. We follow the lanterns until we find where they are holding her.",
+          "speaker_actor": "mother"
+        },
+        {
+          "at": 22,
+          "speaker": "Elen Reed",
+          "text": "Take the supplies I brought. Healing potions for emergencies, and life and water reagents for your spells.",
+          "speaker_actor": "mother"
+        },
+        {
+          "at": 33,
+          "speaker": "Elen Reed",
+          "text": "Heal restores your own health. Heal Target helps me or a party member. Select the person you mean to heal.",
+          "speaker_actor": "mother"
+        },
+        {
+          "at": 44,
+          "speaker": "Elen Reed",
+          "text": "Restore Etherâ€”some call it Gain Etherâ€”replenishes your mana. A mage who watches only their health will run dry.",
+          "speaker_actor": "mother"
+        },
+        {
+          "at": 54,
+          "speaker": "Elen Reed",
+          "text": "Stay close enough that we can help each other. If I fall, heal me and I can stand with you again.",
+          "speaker_actor": "mother"
+        }
+      ],
+      "events": [
+        {
+          "type": "fade",
+          "at": 0,
+          "until": 2,
+          "from": 1,
+          "to": 0
+        }
+      ]
+    },
+    "measure.rescue.boss": {
+      "title": "The Captor",
+      "duration": 46,
+      "fov": 48,
+      "entry_seconds": 2.4,
+      "exit_seconds": 1.8,
+      "anchor": "boss_return",
+      "cast_roles": [
+        "mother",
+        "daughter",
+        "goblin_boss",
+        "protagonist",
+        "boss_minion_1",
+        "boss_minion_2"
+      ],
+      "required_actors": [
+        "mother",
+        "daughter",
+        "goblin_boss",
+        "protagonist",
+        "boss_minion_1",
+        "boss_minion_2"
+      ],
+      "stage_protagonist": true,
+      "shots": [
+        {
+          "t": 0,
+          "anchor": "boss_return",
+          "position": [
+            9,
+            10,
+            13
+          ],
+          "target": [
+            -1,
+            -0.5,
+            -1
+          ]
+        },
+        {
+          "t": 46,
+          "anchor": "boss_return",
+          "position": [
+            9,
+            10,
+            13
+          ],
+          "target": [
+            -1,
+            -0.5,
+            -1
+          ]
+        }
+      ],
+      "dialogue_holds": [
+        2,
+        12,
+        23,
+        35
+      ],
+      "cues": [
+        {
+          "at": 0,
+          "actor": "mother",
+          "action": "combat_idle",
+          "face": "goblin_boss",
+          "destination": "boss_return"
+        },
+        {
+          "at": 0,
+          "actor": "daughter",
+          "action": "injury_standing",
+          "face": "mother"
+        },
+        {
+          "at": 0,
+          "actor": "goblin_boss",
+          "action": "combat_idle",
+          "face": "mother"
+        },
+        {
+          "at": 0,
+          "actor": "protagonist",
+          "action": "combat_idle",
+          "face": "goblin_boss"
+        },
+        {
+          "at": 12,
+          "actor": "goblin_boss",
+          "action": "attack_primary",
+          "face": "protagonist"
+        },
+        {
+          "at": 15,
+          "actor": "goblin_boss",
+          "action": "combat_idle",
+          "face": "protagonist"
+        },
+        {
+          "at": 0,
+          "actor": "boss_minion_1",
+          "action": "combat_idle",
+          "destination": "boss_minion_1",
+          "face": "protagonist"
+        },
+        {
+          "at": 0,
+          "actor": "boss_minion_2",
+          "action": "combat_idle",
+          "destination": "boss_minion_2",
+          "face": "protagonist"
+        },
+        {
+          "at": 25,
+          "actor": "boss_minion_1",
+          "action": "attack_primary",
+          "face": "mother"
+        },
+        {
+          "at": 25,
+          "actor": "boss_minion_2",
+          "action": "attack_primary",
+          "face": "mother"
+        }
+      ],
+      "lines": [
+        {
+          "at": 2,
+          "speaker": "Liora Reed",
+          "text": "Mum! I'm here!",
+          "speaker_actor": "daughter"
+        },
+        {
+          "at": 12,
+          "speaker": "Goblin captor",
+          "text": "This land belongs to the night. You should have stayed behind your walls.",
+          "speaker_actor": "goblin_boss"
+        },
+        {
+          "at": 23,
+          "speaker": "Elen Reed",
+          "text": "Open the cage. She has done nothing to you.",
+          "speaker_actor": "mother"
+        },
+        {
+          "at": 35,
+          "speaker": "Goblin captor",
+          "text": "Come take her, then.",
+          "speaker_actor": "goblin_boss"
+        }
+      ],
+      "events": [
+        {
+          "id": "night-falls",
+          "type": "darkness",
+          "at": 23,
+          "until": 46
+        }
+      ]
+    },
+    "measure.rescue.captive": {
+      "title": "Liora",
+      "duration": 70,
+      "fov": 45,
+      "entry_seconds": 2.4,
+      "exit_seconds": 1.8,
+      "anchor": "cage",
+      "cast_roles": [
+        "mother",
+        "daughter",
+        "goblin_boss",
+        "protagonist"
+      ],
+      "required_actors": [
+        "mother",
+        "daughter",
+        "goblin_boss",
+        "protagonist"
+      ],
+      "stage_protagonist": true,
+      "shots": [
+        {
+          "t": 0,
+          "anchor": "boss_body",
+          "position": [
+            -7,
+            8,
+            13
+          ],
+          "target": [
+            1,
+            -0.5,
+            0
+          ]
+        },
+        {
+          "t": 10,
+          "anchor": "boss_body",
+          "position": [
+            -7,
+            8,
+            13
+          ],
+          "target": [
+            1,
+            -0.5,
+            0
+          ]
+        },
+        {
+          "t": 12,
+          "cut": true,
+          "anchor": "cage",
+          "position": [
+            7,
+            6.5,
+            13
+          ],
+          "target": [
+            0,
+            -0.5,
+            1
+          ]
+        },
+        {
+          "t": 27,
+          "anchor": "cage",
+          "position": [
+            7,
+            6.5,
+            13
+          ],
+          "target": [
+            0,
+            -0.5,
+            1
+          ]
+        },
+        {
+          "t": 28,
+          "cut": true,
+          "anchor": "family_exit",
+          "position": [
+            6,
+            5,
+            10
+          ],
+          "target": [
+            0,
+            -0.4,
+            0
+          ]
+        },
+        {
+          "t": 70,
+          "anchor": "family_exit",
+          "position": [
+            6,
+            5,
+            10
+          ],
+          "target": [
+            0,
+            -0.4,
+            0
+          ]
+        }
+      ],
+      "dialogue_holds": [
+        2,
+        12,
+        28,
+        38,
+        49,
+        60
+      ],
+      "cues": [
+        {
+          "at": 0,
+          "actor": "daughter",
+          "action": "injury_standing",
+          "destination": "daughter_captive",
+          "face": "mother"
+        },
+        {
+          "at": 0,
+          "actor": "mother",
+          "action": "idle",
+          "face": "daughter",
+          "destination": "cage_approach"
+        },
+        {
+          "at": 0,
+          "actor": "protagonist",
+          "action": "idle",
+          "face": "daughter"
+        },
+        {
+          "at": 12,
+          "actor": "mother",
+          "action": "walk",
+          "destination": "cage_approach",
+          "move_seconds": 4,
+          "face": "daughter"
+        },
+        {
+          "at": 12,
+          "actor": "goblin_boss",
+          "action": "death",
+          "destination": "boss_body",
+          "face": "mother"
+        },
+        {
+          "at": 16,
+          "actor": "mother",
+          "action": "rescue_kneel",
+          "destination": "cage_approach",
+          "face": "cage_gate"
+        },
+        {
+          "at": 22,
+          "actor": "mother",
+          "action": "walk",
+          "from": "cage_approach",
+          "destination": "mother_rescue",
+          "move_seconds": 3,
+          "face": "daughter"
+        },
+        {
+          "at": 25,
+          "actor": "mother",
+          "action": "rescue_kneel",
+          "destination": "mother_rescue",
+          "face": "daughter"
+        },
+        {
+          "at": 28,
+          "actor": "mother",
+          "action": "rescue_kneel",
+          "destination": "mother_exit_wait",
+          "face": "daughter"
+        },
+        {
+          "at": 28,
+          "actor": "daughter",
+          "action": "idle",
+          "destination": "family_exit",
+          "face": "mother"
+        },
+        {
+          "at": 38,
+          "actor": "daughter",
+          "action": "emote_nod",
+          "face": "mother",
+          "destination": "family_exit"
+        },
+        {
+          "at": 49,
+          "actor": "mother",
+          "action": "idle",
+          "face": "daughter",
+          "destination": "mother_exit_wait"
+        },
+        {
+          "at": 60,
+          "actor": "mother",
+          "action": "walk",
+          "destination": "mother_exit_wait",
+          "move_seconds": 4,
+          "face": "daughter"
+        },
+        {
+          "at": 60,
+          "actor": "daughter",
+          "action": "walk",
+          "destination": "family_exit",
+          "move_seconds": 4,
+          "face": "mother"
+        }
+      ],
+      "lines": [
+        {
+          "at": 2,
+          "speaker": "Goblin captor",
+          "text": "This does not end here… This is only the beginning.",
+          "speaker_actor": "goblin_boss"
+        },
+        {
+          "at": 12,
+          "speaker": "Elen Reed",
+          "text": "Liora. Stay back from the gate. I'm getting you out.",
+          "speaker_actor": "mother"
+        },
+        {
+          "at": 28,
+          "speaker": "Liora Reed",
+          "text": "Mum!",
+          "speaker_actor": "daughter"
+        },
+        {
+          "at": 38,
+          "speaker": "Elen Reed",
+          "text": "That's all right. You are safe now. I have you.",
+          "speaker_actor": "mother"
+        },
+        {
+          "at": 49,
+          "speaker": "Liora Reed",
+          "text": "I heard the goblins talking to someone. I could not see who it was.",
+          "speaker_actor": "daughter"
+        },
+        {
+          "at": 60,
+          "speaker": "Elen Reed",
+          "text": "We should get back to the entrance. I need to thank you properly before we go home.",
+          "speaker_actor": "mother"
+        }
+      ],
+      "events": [
+        {
+          "id": "captive-cut-out",
+          "type": "fade",
+          "at": 26.5,
+          "until": 27.5,
+          "from": 0,
+          "to": 1
+        },
+        {
+          "id": "captive-cut-in",
+          "type": "fade",
+          "at": 27.5,
+          "until": 29,
+          "from": 1,
+          "to": 0
+        },
+        {
+          "id": "cage-replay-closed",
+          "type": "gate",
+          "at": 0,
+          "until": 16,
+          "from": 0,
+          "to": 0,
+          "replay_only": true
+        },
+        {
+          "id": "cage-replay-open",
+          "type": "gate",
+          "at": 16,
+          "until": 70,
+          "duration": 3,
+          "from": 0,
+          "to": 1,
+          "replay_only": true
+        },
+        {
+          "id": "boss-last-breath",
+          "type": "native_clip",
+          "actor": "goblin_boss",
+          "clip": "Death_A",
+          "at": 0,
+          "until": 70,
+          "hold": 1.8,
+          "resume_at": 12
+        }
+      ],
+      "inspection_id": "rescue_family",
+      "inspection_at": 12,
+      "inspection_wait_at": 28,
+      "inspection_timeout": 60,
+      "native_roles": [
+        "mother",
+        "daughter"
+      ]
+    },
+    "measure.rescue.resolved": {
+      "title": "A Welcome in Landfall",
+      "duration": 60,
+      "fov": 44,
+      "entry_seconds": 2.4,
+      "exit_seconds": 1.8,
+      "anchor": "reward",
+      "cast_roles": [
+        "mother",
+        "daughter",
+        "protagonist",
+        "recipient"
+      ],
+      "required_actors": [
+        "mother",
+        "daughter",
+        "protagonist"
+      ],
+      "stage_protagonist": true,
+      "shots": [
+        {
+          "t": 0,
+          "anchor": "reward",
+          "position": [
+            6,
+            5,
+            10
+          ],
+          "target": [
+            0,
+            -0.4,
+            -2
+          ]
+        },
+        {
+          "t": 60,
+          "anchor": "reward",
+          "position": [
+            6,
+            5,
+            10
+          ],
+          "target": [
+            0,
+            -0.4,
+            -2
+          ]
+        }
+      ],
+      "dialogue_holds": [
+        2,
+        12,
+        22,
+        30,
+        42,
+        51
+      ],
+      "cues": [
+        {
+          "at": 0,
+          "actor": "mother",
+          "action": "idle",
+          "destination": "mother_exit_wait",
+          "face": "protagonist"
+        },
+        {
+          "at": 0,
+          "actor": "daughter",
+          "action": "idle",
+          "destination": "family_exit",
+          "face": "mother"
+        },
+        {
+          "at": 0,
+          "actor": "protagonist",
+          "action": "idle",
+          "face": "mother"
+        },
+        {
+          "at": 51,
+          "actor": "mother",
+          "action": "emote_greet",
+          "face": "protagonist"
+        }
+      ],
+      "lines": [
+        {
+          "at": 2,
+          "speaker": "Elen Reed",
+          "speaker_actor": "mother",
+          "text": "Thank you. You brought my daughter back to me. I will never forget what you did."
+        },
+        {
+          "at": 12,
+          "speaker": "Elen Reed",
+          "speaker_actor": "mother",
+          "text": "Take the sword, the bow, or the wand—whichever suits you. And this purse. You have earned it."
+        },
+        {
+          "at": 22,
+          "speaker": "",
+          "text": "Choose one weapon. The reward includes 10,000 gold and 20,000 experience in its skills."
+        },
+        {
+          "at": 51,
+          "speaker": "Elen Reed",
+          "speaker_actor": "mother",
+          "text": "Come and visit us in Landfall. Ask for Elen Reed. You will always be welcome in our home."
+        }
+      ],
+      "events": [],
+      "choice_id": "rescue_reward",
+      "choice_at": 30,
+      "choice_response_until": 42,
+      "response_speaker": "Elen Reed",
+      "response_actor": "mother",
+      "native_roles": [
+        "mother",
+        "daughter"
+      ],
+      "choice_actor": "recipient"
+    },
+    "measure.rescue.shadow": {
+      "title": "No Remains",
+      "duration": 40,
+      "fov": 48,
+      "entry_seconds": 2.4,
+      "exit_seconds": 1.8,
+      "anchor": "boss_body",
+      "cast_roles": [
+        "lich",
+        "goblin_boss"
+      ],
+      "required_actors": [
+        "lich",
+        "goblin_boss"
+      ],
+      "stage_protagonist": false,
+      "shots": [
+        {
+          "t": 0,
+          "anchor": "boss_body",
+          "position": [
+            -7,
+            8,
+            13
+          ],
+          "target": [
+            1,
+            -0.5,
+            0
+          ]
+        },
+        {
+          "t": 40,
+          "anchor": "boss_body",
+          "position": [
+            -7,
+            8,
+            13
+          ],
+          "target": [
+            1,
+            -0.5,
+            0
+          ]
+        }
+      ],
+      "dialogue_holds": [
+        4,
+        13,
+        24,
+        32
+      ],
+      "cues": [
+        {
+          "at": 0,
+          "actor": "lich",
+          "action": "idle",
+          "visible": false,
+          "destination": "lich",
+          "face": "goblin_boss"
+        },
+        {
+          "at": 0,
+          "actor": "goblin_boss",
+          "action": "death",
+          "destination": "boss_body",
+          "face": "lich"
+        },
+        {
+          "at": 4,
+          "actor": "lich",
+          "action": "idle",
+          "visible": true,
+          "destination": "lich",
+          "face": "goblin_boss"
+        },
+        {
+          "at": 20,
+          "actor": "lich",
+          "action": "attack_primary",
+          "destination": "lich",
+          "face": "goblin_boss"
+        },
+        {
+          "at": 24,
+          "actor": "lich",
+          "action": "idle",
+          "face": "goblin_boss"
+        }
+      ],
+      "lines": [
+        {
+          "at": 4,
+          "speaker": "",
+          "text": "A cold presence gathers beside the fallen goblin."
+        },
+        {
+          "at": 13,
+          "speaker": "The lich",
+          "text": "Useless servant. You could not even hold one child.",
+          "speaker_actor": "lich"
+        },
+        {
+          "at": 24,
+          "speaker": "The lich",
+          "text": "I will find a better servant next time.",
+          "speaker_actor": "lich"
+        },
+        {
+          "at": 32,
+          "speaker": "",
+          "text": "The corpse dissolves. Somewhere beyond the lanterns, the darkness stirs."
+        }
+      ],
+      "events": [
+        {
+          "id": "shadow-held-remains",
+          "type": "native_clip",
+          "actor": "goblin_boss",
+          "clip": "Death_A",
+          "at": 0,
+          "until": 40,
+          "hold": 2.699,
+          "resume_at": 1000
+        },
+        {
+          "type": "effect",
+          "at": 20,
+          "until": 21.4,
+          "effect": 5,
+          "power": 3,
+          "source": "lich",
+          "target": "goblin_boss",
+          "id": "lich-corpse-fire"
+        },
+        {
+          "type": "dissolve",
+          "at": 21.4,
+          "until": 40,
+          "actor": "goblin_boss",
+          "id": "goblin-ashes",
+          "duration": 5.6
+        },
+        {
+          "type": "fade",
+          "at": 37,
+          "until": 40,
+          "from": 0,
+          "to": 1
+        }
+      ]
+    }
+  }
+}

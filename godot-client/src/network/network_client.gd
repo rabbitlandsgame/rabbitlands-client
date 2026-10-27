@@ -518,7 +518,7 @@ func use_map_object(object_id: int) -> Error:
 	return send_frame(EloriaProtocol.use_map_object(object_id))
 
 func campaign_request(action: String) -> Error:
-	if action not in ["start", "resume", "leave", "hint", "join", "own", "bank", "road", "lamps", "cart", "continue"]:
+	if action not in ["start", "resume", "leave", "hint", "join", "own", "bank", "road", "lamps", "cart", "continue", "rescue", "accept", "defer", "supplies"]:
 		return ERR_INVALID_PARAMETER
 	return send_chat("#campaign " + action)
 
@@ -542,6 +542,36 @@ func campaign_scene_inspect(run_id: String, token: String, action: String) -> Er
 	if not _campaign_identifier(run_id) or not _campaign_identifier(token) or action not in ["start", "cancel"]:
 		return ERR_INVALID_PARAMETER
 	return send_chat("#campaign scene_inspect %s %s %s" % [run_id, token, action])
+
+func campaign_rescue_choice(run_id: String, token: String, option_id: String) -> Error:
+	if not _campaign_identifier(run_id) or not _campaign_identifier(token) or option_id not in ["help", "watch"]:
+		return ERR_INVALID_PARAMETER
+	return send_chat("#campaign rescue_choice %s %s %s" % [run_id, token, option_id])
+
+func campaign_rescue_reward(choice: String) -> Error:
+	if choice not in ["sword", "bow", "wand"]:
+		return ERR_INVALID_PARAMETER
+	return send_chat("#campaign reward " + choice)
+
+func campaign_rescue_reward_choice(run_id: String, token: String, choice: String) -> Error:
+	if not _campaign_identifier(run_id) or not _campaign_identifier(token) or choice not in ["sword", "bow", "wand"]:
+		return ERR_INVALID_PARAMETER
+	return send_chat("#campaign rescue_reward %s %s %s" % [run_id, token, choice])
+
+func campaign_rescue_commit(run_id: String, token: String, option_id: String) -> Error:
+	if not _campaign_identifier(run_id) or not _campaign_identifier(token) or option_id not in ["accept", "defer"]:
+		return ERR_INVALID_PARAMETER
+	return send_chat("#campaign rescue_commit %s %s %s" % [run_id, token, option_id])
+
+func campaign_rescue_burn(run_id: String, token: String) -> Error:
+	if not _campaign_identifier(run_id) or not _campaign_identifier(token):
+		return ERR_INVALID_PARAMETER
+	return send_chat("#campaign rescue_burn %s %s" % [run_id, token])
+
+func campaign_rescue_family(run_id: String, token: String, action: String) -> Error:
+	if not _campaign_identifier(run_id) or not _campaign_identifier(token) or action not in ["start", "cancel"]:
+		return ERR_INVALID_PARAMETER
+	return send_chat("#campaign rescue_family %s %s%s" % [run_id, token, " cancel" if action == "cancel" else ""])
 
 func campaign_companion(command: String) -> Error:
 	if command not in ["follow", "wait", "regroup", "help"]:
