@@ -103,3 +103,54 @@ def test_changed_skin_requires_original_secondary_effect_reference(tmp_path):
     p.update(mode='rigid', owner_joint=1)
     with pytest.raises(ValueError, match='secondary effects'):
         split_corrective_partition(d, b, p)
+
+
+def multi_owner_fixture(tmp_path):
+    d, b, p = fixture(tmp_path, zero=False)
+    pr = d['meshes'][0]['primitives'][0]
+    def append(values, original):
+        spec = copy.deepcopy(d['accessors'][original]); values = np.ascontiguousarray(values)
+        b.extend(b'\0' * (-len(b) % 4)); offset = len(b); b.extend(values.tobytes())
+        d['bufferViews'].append({'buffer': 0, 'byteOffset': offset, 'byteLength': values.nbytes})
+        spec.update(bufferView=len(d['bufferViews'])-1, count=len(values)); spec.pop('byteOffset', None)
+        d['accessors'].append(spec); return len(d['accessors'])-1
+    for name, ai in list(pr['attributes'].items()):
+        values = raw_array(d, b, ai); extra = values[3:].copy()
+        if name == 'POSITION': extra[:, 0] += 4
+        pr['attributes'][name] = append(np.concatenate([values, extra]), ai)
+    ai = pr['targets'][0]['POSITION']; values = raw_array(d,b,ai)
+    pr['targets'][0]['POSITION'] = append(np.concatenate([values, values[3:]]), ai)
+    pr['indices'] = append(np.arange(9, dtype='<u2').reshape(-1,1), pr['indices'])
+    d['nodes'].append({'name': 'OtherBone'}); d['skins'][0]['joints'].append(3)
+    p.update(vertex_ids=list(range(3,9)), mode='rigid', owner_joints=[0,0,0,1,1,1])
+    p['reference_skin'] = {'layout':'godot-four-influences-u16-v1', 'bind_names':['Root','OtherBone'],
+        'skin_hex':np.tile([0,0,0,0,65535,0,0,0],(6,1)).astype('<u2').tobytes().hex()}
+    return d,b,p
+
+
+def test_multiple_complete_rigid_islands_share_one_surface_and_reference(tmp_path):
+    d,b,p = multi_owner_fixture(tmp_path)
+    new,blob,report = split_corrective_partition(d,b,p)
+    assert len(new['meshes']) == 2
+    free = new['meshes'][1]['primitives'][0]
+    np.testing.assert_array_equal(raw_array(new,blob,free['attributes']['JOINTS_0'])[:,0],p['owner_joints'])
+    np.testing.assert_array_equal(raw_array(new,blob,free['attributes']['WEIGHTS_0']),np.tile([1,0,0,0],(6,1)))
+    assert new['meshes'][1]['extras']['rabbitlands_surface_partition_v1']['reference_skin'] == p['reference_skin']
+    assert report['owner_joints'] == p['owner_joints'] and report['owner_joint'] is None
+    assert new['skins'] == d['skins']
+
+
+@pytest.mark.parametrize('damage',['length','range','float','ambiguous','triangle','coincident','reference'])
+def test_multi_owner_partitions_fail_closed(tmp_path,damage):
+    d,b,p = multi_owner_fixture(tmp_path)
+    if damage == 'length': p['owner_joints'].pop()
+    if damage == 'range': p['owner_joints'][-1] = 2
+    if damage == 'float': p['owner_joints'][0] = 0.0
+    if damage == 'ambiguous': p['owner_joint'] = 0
+    if damage == 'triangle': p['owner_joints'][0] = 1
+    if damage == 'reference': p.pop('reference_skin')
+    if damage == 'coincident':
+        pr = d['meshes'][0]['primitives'][0]; ai = pr['attributes']['POSITION']; spec = d['accessors'][ai]
+        positions = np.ndarray((9,3),'<f4',b,offset=d['bufferViews'][spec['bufferView']]['byteOffset'])
+        positions[6] = positions[3]
+    with pytest.raises(ValueError): split_corrective_partition(d,b,p)

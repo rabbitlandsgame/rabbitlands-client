@@ -39,3 +39,16 @@ def test_partition_remaps_physical_ids_but_not_bone_ids_or_coordinates(tmp_path)
 def test_immutable_reference_hash_must_match(tmp_path):
     source, _ = source_fixture(tmp_path); d, _ = read_glb(source)
     with pytest.raises(ValueError): remap_witness({'sha256': 'a' * 64}, d, {}, None, 'b' * 64, 'c' * 64)
+
+
+def test_multi_owner_binding_remap_keeps_original_surface_observations(tmp_path):
+    source, base_profile = source_fixture(tmp_path); d,_ = read_glb(source)
+    d['nodes'].append({'name':'OtherBone'});d['skins'][0]['joints'].append(3)
+    profile = {'source_node':1,'vertex_ids':[3,4,5],'mode':'rigid','owner_joints':[0,1,1]}
+    partition = {'new_node':4,'all_candidate_original_vertex_ids':list(range(6))}
+    witness = {'sha256':base_profile['source_sha256'],'surface_vertex_ids':[2,3,4,5],
+        'surface_skin_influences':[{'Root':1.}]*4,'surface_rest':[[7,8,9]]*4,
+        'clips':{'Walk':[{'time':.25,'surface':[[1,2,3]]*4}]}}
+    after = remap_witness(witness,d,{},partition,witness['sha256'],'f'*64,profile)
+    assert after['surface_skin_influences'] == [{'Root':1.},{'Root':1.},{'OtherBone':1.},{'OtherBone':1.}]
+    assert after['surface_rest'] == witness['surface_rest'] and after['clips'] == witness['clips']

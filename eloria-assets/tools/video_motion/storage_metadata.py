@@ -73,13 +73,16 @@ def remap_witness(witness, source_document, prune_report, partition, source_sha2
                 if isinstance(child, (dict, list)): visit(child)
     visit(result.get('clips', {}))
     selected = set()
-    owner_name = None
+    owner_names = {}
     if profile and partition and 'new_node' in partition:
         part = next(p for p in parts if p['node'] == profile['source_node'] and p['primitive'] == profile.get('primitive', 0))
         selected = {int(i) + part['begin'] for i in profile['vertex_ids']}
         if profile['mode'] == 'rigid':
             skin = source_document['skins'][source_document['nodes'][part['node']]['skin']]
-            owner_name = source_document['nodes'][skin['joints'][profile['owner_joint']]]['name']
+            owners = profile.get('owner_joints', [profile.get('owner_joint')] * len(profile['vertex_ids']))
+            if len(owners) != len(profile['vertex_ids']): raise ValueError('Rigid owner map differs from selected vertex count')
+            owner_names = {int(vertex) + part['begin']: source_document['nodes'][skin['joints'][owner]]['name']
+                           for vertex, owner in zip(profile['vertex_ids'], owners)}
     original_ids = witness.get('surface_vertex_ids', [])
     for probe, signature in enumerate(witness.get('surface_source_morph_positions', [])):
         source_id = original_ids[probe]
@@ -92,9 +95,9 @@ def remap_witness(witness, source_document, prune_report, partition, source_sha2
                 if len(signature) > row['targets_before']: raise ValueError('Unexpected original morph-signature prefix')
                 removed = set(row['removed_target_indices'])
                 result['surface_source_morph_positions'][probe] = [v for i, v in enumerate(signature) if i not in removed]
-    if owner_name is not None and 'surface_skin_influences' in result:
+    if owner_names and 'surface_skin_influences' in result:
         for probe, source_id in enumerate(original_ids):
-            if source_id in selected: result['surface_skin_influences'][probe] = {owner_name: 1.0}
+            if source_id in owner_names: result['surface_skin_influences'][probe] = {owner_names[source_id]: 1.0}
     # The transformation is intentionally limited to identity/binding metadata.
     def physical(value):
         ignored = {'sha256', 'reference_sha256', 'morph_weights', 'surface_source_morph_positions',

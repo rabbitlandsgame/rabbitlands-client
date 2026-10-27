@@ -42,7 +42,9 @@ def split_corrective_partition(document, binary, profile):
     Required profile: source_node, primitive, vertex_ids, mode and
     coat_pattern_height (the original Godot mesh AABB height, including morphs).
     Modes: preserve_skin requires exactly zero selected morph fields; rigid
-    additionally requires owner_joint and independent equivalence evidence.
+    additionally requires owner_joint or owner_joints (one per selected vertex)
+    and independent equivalence evidence. Each connected welded island must
+    have a single owner, even when several islands share the new surface.
     Optional mount_skin is an exact packed restoration record for rigid mode.
     Returns original-global vertex IDs in the output node/primitive order.
     """
@@ -98,8 +100,23 @@ def split_corrective_partition(document, binary, profile):
     if not np.isfinite(height) or height <= 0:
         raise ValueError('Invalid original coat pattern height')
     owner = int(profile.get('owner_joint', 0))
-    if mode == 'rigid' and ('skin' not in node or not 0 <= owner < len(document['skins'][node['skin']]['joints'])):
-        raise ValueError('Rigid owner must be an existing skin joint')
+    owners = np.full(len(selected), owner, dtype=np.int64)
+    if 'owner_joints' in profile:
+        values = profile['owner_joints']
+        if mode != 'rigid' or 'owner_joint' in profile or not isinstance(values, list) or len(values) != len(selected) or any(type(v) is not int for v in values):
+            raise ValueError('Per-vertex rigid owners must match the selected vertices without an ambiguous single owner')
+        owners = np.asarray(values, dtype=np.int64)
+    if mode == 'rigid':
+        if 'skin' not in node or np.any(owners < 0) or np.any(owners >= len(document['skins'][node['skin']]['joints'])):
+            raise ValueError('Rigid owner must be an existing skin joint')
+        full_owners = np.full(count, -1, dtype=np.int64)
+        full_owners[selected] = owners
+        triangle_owners = full_owners[triangles[membership == 3]]
+        if np.any(triangle_owners != triangle_owners[:, :1]):
+            raise ValueError('One rigid island cannot have different triangle owners')
+        for welded in np.unique(inverse[selected]):
+            if len(np.unique(full_owners[inverse == welded])) != 1:
+                raise ValueError('Coincident rigid vertices must retain one island owner')
     reference = copy.deepcopy(profile.get('reference_skin', profile.get('mount_skin')))
     if reference is not None:
         slots = {'godot-four-influences-u16-v1': 4, 'godot-eight-influences-u16-v1': 8}.get(reference.get('layout'))
@@ -147,7 +164,7 @@ def split_corrective_partition(document, binary, profile):
             component = None
             if not corrective and mode == 'rigid' and field.startswith('JOINTS_'):
                 values = np.zeros_like(values)
-                if field == 'JOINTS_0': values[:, 0] = owner
+                if field == 'JOINTS_0': values[:, 0] = owners
             if not corrective and mode == 'rigid' and field.startswith('WEIGHTS_'):
                 values = np.zeros_like(values)
                 if field == 'WEIGHTS_0':
@@ -207,5 +224,6 @@ def split_corrective_partition(document, binary, profile):
     return result, blob, {'mode': mode, 'source_node': node_index, 'new_node': new_node,
                           'source_vertices': count, 'corrective_vertices': len(remainder),
                           'source_triangles': len(triangles), 'selected_triangles': selected_triangles,
-                          'corrective_free_vertices': len(selected), 'owner_joint': owner if mode == 'rigid' else None,
+                          'corrective_free_vertices': len(selected), 'owner_joint': owner if mode == 'rigid' and 'owner_joints' not in profile else None,
+                          'owner_joints': owners.tolist() if mode == 'rigid' and 'owner_joints' in profile else None,
                           'all_candidate_original_vertex_ids': global_ids, 'packing': packing}
