@@ -5169,9 +5169,9 @@
       "family": "winged-humanoids",
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/gargoyle.glb",
       "animation_map": "godot-client/data/animations/humanoid-baseline/gargoyle.json",
-      "sha256": "958d4eb271eb89ce463635f51f6c725cff830d1ff892d30ced1a1ee18939b875",
+      "sha256": "f7599c02477dbd964107406214b2e9dfe83ef893529cf1a72068f441328c0feb",
       "reviewed_source_sha256": "28dc3607bab8aff50102e35d73a29f791212b65c99a48154808254e1e2114772",
-      "bytes": 53971792,
+      "bytes": 53599236,
       "height_native": 0.8144539452271918,
       "bake_fps": 4096,
       "durations": {
@@ -5204,9 +5204,9 @@
       "primary_attack": "Sword_Attack",
       "packing": {
         "source_sha256": "28dc3607bab8aff50102e35d73a29f791212b65c99a48154808254e1e2114772",
-        "runtime_sha256": "958d4eb271eb89ce463635f51f6c725cff830d1ff892d30ced1a1ee18939b875",
+        "runtime_sha256": "f7599c02477dbd964107406214b2e9dfe83ef893529cf1a72068f441328c0feb",
         "source_bytes": 45691396,
-        "runtime_bytes": 53971792,
+        "runtime_bytes": 53599236,
         "parts": [
           {
             "part": 0,
@@ -5226,12 +5226,18 @@
           "packed_buffer_bytes": 53392132
         },
         "basis_representation": "positive_affine",
-        "method": "Positive affine corrective basis over all native actions, bounded local error; compensated eight-slot skin. Original native joint curves retained."
+        "method": "Positive affine corrective basis over all native actions, bounded local error; compensated eight-slot skin. Original native joint curves retained.",
+        "storage_rebind": {
+          "previous_runtime_sha256": "958d4eb271eb89ce463635f51f6c725cff830d1ff892d30ced1a1ee18939b875",
+          "current_runtime_sha256": "f7599c02477dbd964107406214b2e9dfe83ef893529cf1a72068f441328c0feb",
+          "equivalence_report": "docs/qa/creature-storage/batch-003/gargoyle.json",
+          "interpretation": "Prior measurements retained; current binding derives through the separately qualified storage-equivalence receipt."
+        }
       },
       "native_conformance": {
         "passed": true,
         "source_sha256": "28dc3607bab8aff50102e35d73a29f791212b65c99a48154808254e1e2114772",
-        "runtime_sha256": "958d4eb271eb89ce463635f51f6c725cff830d1ff892d30ced1a1ee18939b875",
+        "runtime_sha256": "f7599c02477dbd964107406214b2e9dfe83ef893529cf1a72068f441328c0feb",
         "rest_error_over_height": 3.136681152419453e-08,
         "max_surface_error_over_height": 4.3159548543914874e-08,
         "clips": {
@@ -5295,8 +5301,15 @@
           "native non-morph curves",
           "native clip durations"
         ],
-        "interpretation": "Export fidelity and added sole velocity relative to reviewed source; not artistic acceptance."
-      }
+        "interpretation": "Export fidelity and added sole velocity relative to reviewed source; not artistic acceptance.",
+        "storage_rebind": {
+          "previous_runtime_sha256": "958d4eb271eb89ce463635f51f6c725cff830d1ff892d30ced1a1ee18939b875",
+          "current_runtime_sha256": "f7599c02477dbd964107406214b2e9dfe83ef893529cf1a72068f441328c0feb",
+          "equivalence_report": "docs/qa/creature-storage/batch-003/gargoyle.json",
+          "interpretation": "Prior measurements retained; current binding derives through the separately qualified storage-equivalence receipt."
+        }
+      },
+      "storage_equivalence_report": "docs/qa/creature-storage/batch-003/gargoyle.json"
     }
   }
 }
