@@ -13,9 +13,9 @@ tile. Entry requires a client declaring `landfall_town_v1`.
 |---|---|---|---|
 | `tavern_ground` The Unlit Boat | #14, door A (tavern) | Taproom, kitchen, stair hall with the stairs up | oak / plaster, soot brick in the kitchen |
 | `tavern_upper` The Unlit Boat, upstairs | stairs from the stair hall | Landing, three guest rooms, the Orl family room | oak / plaster |
-| `market` The avenue shops | #20 door B (general store), #19 door C (flower shop) | General store and flower shop, one floor through a wide arch | oak and cobalt tile / plaster |
+| `market` The avenue shops | #20 door B Hanne's Provisions (general store), #19 door C Bryony's Flowers (flower shop) | General store and flower shop, one floor through a wide arch | oak and cobalt tile / plaster |
 | `magic_shop` The True Note | #24, door D (magic shop) | Shop, workshop | cobalt tile / plaster |
-| `smithy` The forge | #12, door E (blacksmith) | Forge, the smith's kitchen and bedroom | packed earth and oak / soot brick and plaster |
+| `smithy` The forge | #12, door E Hild's Forge (blacksmith) | Forge, the smith's kitchen and bedroom | packed earth and oak / soot brick and plaster |
 | `clerk_house` Hemmen's house | #22, door G | Study, kitchen, bedroom | oak / plaster |
 | `weaver_house` The weaver's house | #27, door H (north wall) | Loom workroom, kitchen, bedroom | oak / plaster |
 | `watch_house` The watch house | #11, door I (west wall) | Mess, bunk room | oak / plaster |
@@ -26,9 +26,17 @@ Each street door stands in the interior wall matching its facade's direction
 (south for the avenue's north side and the SW-facing main row, north for #27, west
 for #11, #56 and the keep). Building doors use objects 59201-59210 (one id serves
 both ends), the tavern stairs 59221/59222; the keep's sealed stair is art only,
-with no portal. The first draft carries reused kit props only (barrels, crates,
-sacks, chests, pots, baskets, rope, a tool rack, a lens grinder); furniture,
-shopkeepers and interior interactives follow in the source.
+with no portal. A coloured door is named as its shopkeeper is on the map.
+
+The rooms are furnished with 264 placed pieces: the 35-piece `lf-interiors`
+furniture kit (beds, tables, benches, counters, shelves, hearths, the forge, the
+anvil, the loom, the eight high seats and the council map table; Meshy pieces
+prepared at real size) and reused kit scenery (barrels, crates, sacks, pots,
+planters, carts). 112 of them stand against an outer wall and are cut away with
+that wall (`cutawayWall`). Twenty people stand at their posts (five shopkeepers:
+Hob Tennant, Hanne Ashby, Bryony Larch, Ilka Tarn and Hild Ashlar), and 16 interior
+interactives (59251-59254, 59271-59278, 59281-59284) hold the lore objects and the
+smithy's anvil, a crafting station that publishes as `smithing`.
 
 ## Sources and rebuilding
 
@@ -48,8 +56,8 @@ that is missing, and the package's `provenance.surfaces` says which was used.
 
 ```powershell
 python -B eloria-assets/maps/continent-v2/_continent_v2/build_town_interiors.py --server ../rabbitlands-server --owner-approved "<who, when, what>"
-python -B tools/prepare_underground_scenery.py
-python -B eloria-assets/maps/continent-v2/_continent_v2/retarget_underground.py --check
+python -B tools/prepare_underground_scenery.py --map landfall_town
+python -B eloria-assets/maps/continent-v2/_continent_v2/retarget_underground.py --map landfall_town --server ../rabbitlands-server
 python -B -m pytest -p no:cacheprovider -q eloria-assets/maps/continent-v2/_continent_v2/tests/test_town_interiors_builder.py
 ```
 
@@ -61,9 +69,9 @@ pocket of floor larger than six tiles cut off from a section's arrival.
 
 ## Package
 
-10 sections, 30 rooms, 1,684 walkable tiles (tavern 162 + upstairs 155, shops 159,
-magic shop 85, smithy 117, houses 56-74, keep 743), 70 light markers. `world.glb`
-is 804 KB with its 22 images in the shared pool; `collision.bin` (EWCG-v2),
-`served-grid.escg.gz` (ESCG-v2) and `minimap.webp` beside it. Outer walls cut away
-by facing (threshold 0.35) and props against a wall drop with it; partition walls
-are left to the occluder fade.
+10 sections, 30 rooms, 1,676 walkable tiles (tavern 131 + upstairs 139, shops 147,
+magic shop 86, smithy 99, houses 78-113, keep 688), 98 light markers. `world.glb`
+is 818 KB with its 22 images in the shared pool (decals clamp to their edge,
+surfaces repeat); `collision.bin` (EWCG-v2), `served-grid.escg.gz` (ESCG-v2) and
+`minimap.webp` beside it. Outer walls cut away by facing (threshold 0.35) and props
+against a wall drop with it; partition walls are left to the occluder fade.

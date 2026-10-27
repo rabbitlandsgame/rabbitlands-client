@@ -10,7 +10,8 @@ server checkout named by ELORIA_SERVER_ROOT (its collision code and served-grid 
 Several interior sources (2026-10-27): the same built package, copied as landfall_town with a town source of building
 doors (no marker; label, exit label, category), a person and a notice, publishes beside the caves without moving a
 byte of theirs; the building door, id, builder and post rules refuse what they must. retarget_underground.py over both
-sources keeps every source's objects.json records and writes the building doors' (no server needed).
+sources keeps every source's objects.json records and writes the building doors' (with the painted door's offsets at
+both ends), and with --map rewrites one interior only (no server needed).
 """
 from __future__ import annotations
 
@@ -568,6 +569,33 @@ def test_interior_people_and_notices_keep_clear_posts(town, monkeypatch):
         publish_both(town, monkeypatch, notice(tile=[5, 300]))
 
 
+def test_publish_server_gives_a_smithy_station_its_trade(town, monkeypatch):
+    """publish_server.station_targets on the rows underground.attach writes: a crafting station whose text names its
+    trade, or that stands in the smithy, publishes that trade; a plain one keeps "crafting", a notice "notice"."""
+    import publish_server as P
+
+    def stations(style, text):
+        def change(design):
+            design["sections"][0]["style"] = style
+            design["sections"][0]["interactives"][0].update(role="crafting_station", text=text)
+        pub = publish_both(town, monkeypatch, edited(town, change))
+        lines = pub.files["interactives.txt"].count(b"\r\n")
+        P.station_targets(pub)
+        assert pub.files["interactives.txt"].count(b"\r\n") == lines      # rewritten in place, never added
+        return pub.files["interactives.txt"].decode()
+    (nx, ny) = town.notice
+    row = f"landfall_town | 59251 | {nx} | {ny} | crafting_station | "
+    smith = "The forge is hot. Open your manufacture window to smith."
+    assert f"\r\n{row}smithing | {smith}\r\n" in stations("smithy", smith)
+    assert f"\r\n{row}smithing | An anvil by the hearth.\r\n" in stations("tavern", "An anvil by the hearth.")
+    assert f"\r\n{row}smithing | A bench.\r\n" in stations("smithy", "A bench.")
+    assert f"\r\n{row}crafting | A bench.\r\n" in stations("tavern", "A bench.")
+    pub = publish_both(town, monkeypatch)
+    before = pub.files["interactives.txt"]
+    P.station_targets(pub)
+    assert pub.files["interactives.txt"] == before and b"| information | notice | A slate" in before
+
+
 # --- retarget_underground.py over both sources (2026-10-27) -------------------------------------------------------------
 
 
@@ -646,7 +674,7 @@ def retarget_tree(tmp_path, monkeypatch):
     monkeypatch.setattr(R, "HERE", here)
     monkeypatch.setattr(R, "Grids", Grids)
     monkeypatch.setattr(R.F, "load_source", lambda region, checkout: SimpleNamespace(
-        tile=lambda x, z: (int(np.floor(x)) + 2, int(np.floor(z)))))
+        tile=lambda x, z: (int(np.floor(x)) + 2, int(np.floor(z))), local=lambda tx, ty: (tx - 2 + .5, ty + .5)))
     return SimpleNamespace(R=R, U=U, checkout=checkout, package=package, objects=objects, sources=sources,
                            codes=codes, reached=reached)
 
@@ -662,12 +690,16 @@ def test_retarget_writes_building_door_records_and_keeps_every_sources_records(r
     assert outputs[t.sources["building"]] == t.sources["building"].read_bytes()
     authored = json.loads(outputs[t.objects])["authoredObjects"]
     assert authored["9100"]["exteriorTile"] == [12, 20] and authored["9100"]["label"] == "Alpha Mine"
-    assert authored["59201"] == {"entrance": True, "building": True, "exteriorTile": [30, 10], "label": "The Unlit Boat",
-                                 "exitLabel": "The avenue", "category": "tavern", "height": 3.0, "radius": 1.2}
+    assert authored["59201"] == {"entrance": True, "building": True, "exteriorTile": [30, 10],
+                                 "modelOffset": [0.0, 0.0, 0.0], "label": "The Unlit Boat", "exitLabel": "The avenue",
+                                 "exitOffset": [0.0, 0.0, 1.0], "category": "tavern", "height": 3.0, "radius": 1.2}
     assert "category" not in authored["59202"] and "scene" not in authored["59202"]
     # every source's passage ends keep their records; ones no source has any longer go, and so does a stale door
     assert {k for k, r in authored.items() if r.get("passage")} == {"9300", "9301", "59221", "59222"}
-    assert authored["59221"]["label"] == "Upstairs" and authored["59222"]["label"] == "The Unlit Boat"
+    # a labelled stair end is named by its own label, as the package and the server name it; an unlabelled end by
+    # the section it leads into, as every cave passage end is
+    assert authored["59221"]["label"] == "Upstairs: the guest rooms" and authored["59222"]["label"] == "The Unlit Boat"
+    assert authored["9300"]["label"] == "Beta Pocket" and authored["9301"]["label"] == "Alpha Mine"
     assert "59299" not in authored and "777" not in authored and authored["42"] == {"height": 1.0, "radius": 1.0}
     # the town package: its exit leads to the door's return tile under the door's exit label
     package = json.loads(outputs[t.package])
@@ -698,3 +730,64 @@ def test_retarget_refuses_a_building_door_on_closed_ground_and_a_taken_record(re
     t.objects.write_bytes(json.dumps(objects).encode("utf-8"))
     with pytest.raises(SystemExit, match="another object's record"):
         t.R.retarget(t.checkout)
+
+
+def test_retarget_puts_a_building_doors_pick_on_its_painted_door_at_both_ends(retarget_tree):
+    """modelOffset: the painted point minus the door tile's centre (the exterior's metres); exitOffset: the interior
+    street door one tile beyond the exit, the way exitFacing points (tile +y is world -Z)."""
+    t = retarget_tree
+    town = json.loads(t.sources["building"].read_bytes())
+    first, second = town["sections"][0]["entrances"]
+    first["position"] = [30 - 2 + .5 + .7, 121.49, 10 + .5 - 1.3]    # 0.7 m east of the tile's centre, 1.3 m behind
+    first["exitFacing"] = [0, -1]
+    second["exitFacing"] = [-1, 0]
+    t.sources["building"].write_bytes((json.dumps(town, indent=1) + "\n").encode("utf-8"))
+    outputs, _, _ = t.R.retarget(t.checkout)
+    authored = json.loads(outputs[t.objects])["authoredObjects"]
+    assert authored["59201"]["modelOffset"] == [0.7, 0.0, -1.3] and authored["59201"]["exitOffset"] == [0.0, 0.0, 1.0]
+    assert authored["59202"]["modelOffset"] == [0.0, 0.0, 0.0] and authored["59202"]["exitOffset"] == [-1.0, 0.0, 0.0]
+    assert list(authored["59201"]) == ["entrance", "building", "exteriorTile", "modelOffset", "label", "exitLabel",
+                                       "exitOffset", "category", "height", "radius"]
+
+
+def test_retarget_map_touches_one_interior_only(retarget_tree):
+    """--map landfall_town writes the town's source, package and records and nothing of the caves' (their source is
+    still read for its ids); a stale record no source owns is listed, not dropped. --map m (the caves) leaves the
+    town's records alone. An unknown map is refused."""
+    t = retarget_tree
+    before = json.loads(t.objects.read_bytes())["authoredObjects"]
+    notes = {}
+    outputs, changed, unbuilt = t.R.retarget(t.checkout, only="landfall_town", notes=notes)
+    assert t.sources["underground"] not in outputs and unbuilt == [] and changed == 2
+    assert set(outputs) == {t.sources["building"], t.package, t.objects}
+    authored = json.loads(outputs[t.objects])["authoredObjects"]
+    for key in ("9100", "9300", "9301", "42"):           # the caves' door and passage ends, and an unrelated record
+        assert authored[key] == before[key]
+    assert authored["59201"]["building"] and authored["59221"]["label"] == "Upstairs: the guest rooms"
+    assert notes == {"orphans": ["777", "59299"]} and authored["59299"] == before["59299"]
+    notes = {}
+    outputs, _, unbuilt = t.R.retarget(t.checkout, only="m", notes=notes)
+    assert set(outputs) == {t.sources["underground"], t.objects} and unbuilt == ["m"]
+    authored = json.loads(outputs[t.objects])["authoredObjects"]
+    assert authored["9100"]["exteriorTile"] == [12, 20] and authored["9100"]["label"] == "Alpha Mine"
+    assert "59201" not in authored and "59221" not in authored and notes == {"orphans": ["777", "59299"]}
+    with pytest.raises(SystemExit, match="no interior source authors it"):
+        t.R.retarget(t.checkout, only="nowhere")
+    # a clash with the interior --map leaves alone is still refused
+    town = json.loads(t.sources["building"].read_bytes())
+    town["passages"][0]["object"] = 9300
+    t.sources["building"].write_bytes(json.dumps(town).encode("utf-8"))
+    with pytest.raises(SystemExit, match="another interior's too"):
+        t.R.retarget(t.checkout, only="m")
+
+
+def test_retarget_check_with_map_reports_and_writes_nothing(retarget_tree, monkeypatch, capsys):
+    t = retarget_tree
+    before = {path: path.read_bytes() for path in (t.objects, t.package, *t.sources.values())}
+    monkeypatch.setattr(sys, "argv", ["retarget_underground.py", "--check", "--checkout", str(t.checkout),
+                                      "--map", "landfall_town"])
+    assert t.R.main() == 1
+    report = json.loads(capsys.readouterr().out)
+    assert {Path(p).resolve() for p in report["stale"]} == {t.objects.resolve(), t.package.resolve()}
+    assert report["orphans"] == ["777", "59299"]
+    assert {path: path.read_bytes() for path in before} == before

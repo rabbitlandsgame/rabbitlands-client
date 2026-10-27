@@ -48,7 +48,7 @@ def stand_in(tmp_path, monkeypatch):
     path.write_text(json.dumps(plan), encoding="utf-8")
     items = [{"asset": "flower_cart", "x": 10.5, "y": 20.0, "height": 0, "yaw": 90, "scale": 1},
              {"asset": "barrel_stack", "x": 12.0, "y": 22.5, "height": 0, "yaw": 0, "scale": 0.8, "outward": [0, 1],
-              "wall": True},
+              "wall": True, "side": "north", "cutawayWall": "Build_tavern_north_lime_plaster"},
              {"asset": "barrel_stack", "x": 14.0, "y": 22.5, "height": 0, "yaw": 0, "scale": 1}]
     builder = ModuleType("stand_in_town_builder")
     builder.load_design = lambda p: json.loads(Path(p).read_text(encoding="utf-8"))
@@ -68,8 +68,10 @@ def test_a_town_config_lists_the_pieces_it_places_and_keeps_its_frame(stand_in):
                                 "flower_cart": "res://assets/world/underground/flower_cart.glb"}
     first, second, third = config["placements"]
     assert first == {"asset": "flower_cart", "position": [10.5, 0, 304.0], "yaw": 90}       # z = cells - y
+    # the wall it is cut away with travels (outward, and its own wall node); the builder's flag and side stay
     assert second == {"asset": "barrel_stack", "position": [12.0, 0, 301.5], "yaw": 0, "scale": 0.8,
-                      "outward": [0, 1]}                                                   # the builder's flag stays
+                      "outward": [0, 1], "cutawayWall": "Build_tavern_north_lime_plaster"}
+    assert list(second) == ["asset", "position", "yaw", "scale", "outward", "cutawayWall"]
     assert "scale" not in third
     assert config["surfaces"] == {"tavern": {"floor": {"texture": "authored"}}}
 
@@ -94,3 +96,33 @@ def test_every_town_piece_is_a_reviewed_kit_model_and_named_once():
         document, _blob = read_glb(source)
         assert "prepare_meshy_kit" in document["asset"].get("generator", ""), name
         assert measure in ("height", "length") and 0 < size <= 6, name
+
+
+def test_a_one_interior_run_records_what_a_whole_run_would():
+    """--map packages only the interior's TOWN_SELECTION pieces; reused-scenery.json then lists the SELECTION rows'
+    records as they stand and every placed town piece in TOWN_SELECTION order, fresh or as on file: a whole run's list."""
+    cave = [{"id": name, "sha256": "cave"} for name in list(P.SELECTION)[:3]]
+    town = list(P.TOWN_SELECTION)
+    on_file = cave + [{"id": town[5], "sha256": "old"}, {"id": town[0], "sha256": "stale"}]
+    fresh = {town[2]: {"id": town[2], "sha256": "new"}, town[0]: {"id": town[0], "sha256": "new"}}
+    records = P.scenery_records(on_file, fresh, {town[0], town[2], town[5], "barrel_stack"})
+    assert records == cave + [{"id": town[0], "sha256": "new"}, {"id": town[2], "sha256": "new"},
+                              {"id": town[5], "sha256": "old"}]
+    # a piece no longer placed drops out; one placed but never packaged is refused
+    assert P.scenery_records(on_file, {}, {town[5]}) == cave + [{"id": town[5], "sha256": "old"}]
+    with pytest.raises(SystemExit, match=town[7]):
+        P.scenery_records(on_file, {}, {town[7]})
+
+
+def test_the_town_furniture_kit_is_packaged_at_its_own_size():
+    """The lf-interiors furniture was prepared at real size; each row measures it as prepared, so packaging scales by
+    one."""
+    from video_motion.asset import read_glb
+    rows = {name: spec for name, spec in P.TOWN_SELECTION.items() if spec[0] == "lf-interiors"}
+    assert len(rows) == 35 and P.KITS["lf-interiors"].endswith("kits/lf-interiors/prototypes")
+    for name, (_region, slug, measure, size) in rows.items():
+        assert slug == name.replace("_", "-") + "-1"
+        document, blob = read_glb(CHECKOUT / P.KITS["lf-interiors"] / f"kit-{slug}.glb")
+        low, high = P.bounds(document, blob)
+        extent = high - low
+        assert (extent[1] if measure == "height" else max(extent[0], extent[2])) == pytest.approx(size, abs=1e-3), name

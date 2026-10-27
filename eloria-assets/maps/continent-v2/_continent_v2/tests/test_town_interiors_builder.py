@@ -87,8 +87,19 @@ def test_the_authored_source_holds_the_spec_doors_and_the_stairs():
     castle = next(s for s in design['sections'] if s['id'] == 'castle')
     assert castle['roomNames'][:4] == ['Gate Hall', 'Hall of Eight Seats', 'Register Archive', 'Palace Chancery']
     assert castle['sealedStairs'] and not TS.passage_ends(design, 'castle')
-    for section in design['sections']:
-        assert section['npcs'] == [] and section['interactives'] == []
+    # the cast (2026-10-27): every coloured door opens on a shopkeeper of its category, who is named on the map as the
+    # door is; the lore objects keep to the interior band
+    people = TS.npcs(design)
+    assert len({p['name'] for p in people}) == len(people) == 20
+    keepers = {(p['section'], p['mapCategory']): p for p in people if p.get('mapCategory')}
+    assert all(p['role'] == 'shop' for p in keepers.values())
+    for oid, section, _tile, _back, category in table:
+        if category:
+            assert by_object[oid]['label'] == keepers[(section, category)]['mapLabel']
+    assert sorted(keepers) == sorted((row[1], row[4]) for row in table if row[4])
+    found = TS.interactives(design)
+    assert found and all(entry['object'] in TS.INTERACTIVE_IDS for entry in found)
+    assert [e['role'] for e in found if e['role'] == 'crafting_station'] == ['crafting_station']
 
 
 def mutate(change):
@@ -317,6 +328,23 @@ def test_windows_decals_doors_and_stairs_are_drawn(built):
                  'Walk_shop_oak_planks', 'Walk_shop_cobalt_tile', 'Part_shop_0_lime_plaster', 'Part_shop_0_soot_brick',
                  'Roof_shop_wall_cap', 'Build_shop_north_wall_cap', 'Build_shop_north_timber_band'):
         assert name in nodes, name
+
+
+def test_decals_clamp_to_their_edge_and_surfaces_repeat(built):
+    """A decal is one picture: its texture samples CLAMP_TO_EDGE, so its far edge never bleeds in at low mip levels;
+    the tiling surfaces repeat."""
+    data = (built.package/'world.glb').read_bytes()
+    document = json.loads(data[20:20+struct.unpack('<I', data[12:16])[0]])
+    samplers = document['samplers']
+    wraps = {}
+    for texture in document['textures']:
+        sampler = samplers[texture.get('sampler', 0)]
+        wraps[document['images'][texture['source']]['name']] = (sampler['wrapS'], sampler['wrapT'])
+    decals = {name for name in wraps if name.startswith('decal_')}
+    assert decals == {'decal_banner_orun', 'decal_rug_home', 'decal_botanical_prints'}
+    assert all(wraps[name] == (33071, 33071) for name in decals)
+    assert all(wraps[name] == (10497, 10497) for name in set(wraps) - decals)
+    assert 'oak_planks' in wraps and len(samplers) == 2
 
 
 def test_cutaway_takes_walls_by_facing_and_leaves_partitions_to_the_fade(built):

@@ -145,6 +145,12 @@ var door_label := ""
 ## Where the door's own label stands relative to the tile's centre: the
 ## painted door on the facade (`modelOffset`), or the tile.
 var _door_point := Vector3.ZERO
+## A way on inside an interior map: a passage end (objects.json
+## `passage: true`), and its record's label: the end's own for the town's
+## stairs ("Upstairs: the guest rooms"), the section it leads into for a cave
+## passage (retarget_underground.py). Empty for every other object.
+var _passage_end := false
+var _passage_label := ""
 
 ## The smallest side a footprint pick box is given, so a thin hedge or a kelp
 ## strand is still a target a player can hit.
@@ -278,8 +284,9 @@ static func from_pick_collider(collider: Variant) -> MapObject3D:
 	return null
 
 ## Where this leads, as far as the server said: an exit is named for its
-## destination, and a waygate's or a boat's text names it in a fixed phrase.
-## Empty when neither applies.
+## destination, and a waygate's, a boat's or a cave passage's text names it in
+## a fixed phrase; a building door and a town stair end are named by their
+## objects.json records. Empty when none of these applies.
 func destination() -> String:
 	if is_exit():
 		return label
@@ -291,6 +298,14 @@ func destination() -> String:
 		# not where it leads in the gates' phrase: its record names it.
 		if (building_door or building_exit) and not door_label.is_empty():
 			return door_label
+		# A town stair end's text is its own label ("Upstairs: the guest
+		# rooms."), not the caves' phrase: its passage record names it, else
+		# the text's first sentence. A cave passage end's text always holds
+		# the phrase, so it is answered above, as it always was.
+		if _passage_end and not detail.strip_edges().is_empty():
+			if not _passage_label.is_empty():
+				return _passage_label
+			return detail.get_slice(". ", 0).trim_suffix(".").strip_edges()
 	return ""
 
 ## Whether main should keep this object's label in step with the player's
@@ -505,6 +520,10 @@ func _build_visual(catalog: Dictionary) -> void:
 		model_id = "map_authored_" + str(object_id)
 		# Harvest seams retain their active ring and resource map marker.
 		_map_authored = _map_authored or not is_harvestable()
+	# A passage end inside an interior map: its record names where it leads
+	# (`destination()`, the maps' hover name for its P).
+	_passage_end = bool(authored.get("passage", false)) and is_portal()
+	_passage_label = str(authored.get("label", "")) if _passage_end else ""
 	# The server calls both ends "Portal". Scope the exterior replacement by
 	# its authored tile so the same object id does not add a second doorway
 	# inside the underground map.

@@ -8,13 +8,13 @@
 		"paint": 0
 	},
 	"props": {
-		"keep_words": ["cobalt", "gilt", "oak"],
+		"keep_words": ["cobalt", "gilt", "oak", "decal_banner_", "decal_rug_", "decal_map_", "decal_star_", "decal_botanical_"],
 		"keep_chroma_forward": 1.15
 	},
 	"notes": {
 		"origin": "Landfall Town (registry landfall_town, asset landfall_town): the building interiors behind the town's doors, one section per building. Its environment declares an enabled (dim) sun for the warm indoor key, so the look pass grades and paints it like the other sunlit interiors (crownwater_insides, ssarathi_insides). Written 2026-10-27 before the rooms' art landed: nothing here is measured yet. Measure in Forward+ against develop's frame once the shells, codex surfaces and furniture are published, and write the numbers down here.",
 		"ground": "deck_path 0: every room floor is a Walk_ deck from wall to wall (oak planks, limestone flags, cobalt-and-cream tiles, the smithy's packed earth), which LookGround would otherwise paint as road beige, as it did the tutorial courts (see bellwatch.json). At 0 each floor keeps its own colour and grain with the yard lift and no road edging. No deck_tint yet: solve it from develop's floor colour per renderer if the grade warms or greys the planks.",
 		"sky": "paint 0: the void between the rooms is meant black. With the painted sky on, the background beyond a cut-away wall would be lit sky and haze, as the Drowned Crown's and the archive's were.",
-		"props": "keep_words cobalt, gilt, oak: the town's signature pieces (the cobalt glazed tiles and fittings, the palace's gilt, the oak furniture and beams) keep their chroma under the grade's warm key, matched as words of the material names the builder and the furniture kit write. keep_chroma_forward 1.15 follows the Drowned Crown's measurement for a warm-keyed interior (the default 1.45 went cyan there); untested here, retune with the first renders."
+		"props": "keep_words cobalt, gilt, oak: the town's signature pieces (the cobalt glazed tiles and fittings, the palace's gilt, the oak furniture and beams) keep their chroma under the grade's warm key, matched as words of the material names the builder and the furniture kit write. decal_banner_, decal_rug_, decal_map_, decal_star_, decal_botanical_: the builder's decal materials (build_town_interiors.py names each `decal_<image>`: the eight peoples' banners, the tavern, runner and home rugs, the Landfall wall map, the star chart and the botanical prints; opaque or alpha-scissor, so LookFoliage.chroma_copy can draw them) keep their painted colours too: without them the saturation grade would grey the banners' heraldry and the rugs (the art role's warning, 2026-10-27; not yet measured in a render). keep_chroma_forward 1.15 follows the Drowned Crown's measurement for a warm-keyed interior (the default 1.45 went cyan there); untested here, retune with the first renders."
 	}
 }

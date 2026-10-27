@@ -24,11 +24,16 @@ lists the assets it places. A new cave's kit piece is a SELECTION row, a town
 piece a TOWN_SELECTION row (region or kit, slug, 'height' or 'length', target
 metres); only pieces whose glTF generator is prepare_meshy_kit are accepted.
 --check computes every config and compares it with its file, packaging nothing
-and writing nothing; it exits 1 when a config would change. --configs-only (or
---map <interior>, which names the configs) writes only the scenery configs: no
-model is packaged and reused-scenery.json and objects.json stay as they are (a
-config placing a piece not packaged yet is refused), so a town edit need not
-touch the caves' files.
+and writing nothing; it exits 1 when a config would change. --configs-only writes
+only the scenery configs: no model is packaged and reused-scenery.json and
+objects.json stay as they are (a config placing a piece not packaged yet is
+refused). --map <interior> (repeatable) packages the TOWN_SELECTION pieces that
+interior places, puts their records into reused-scenery.json (the SELECTION rows'
+records stay as they stand; the list is the one a whole run writes) and writes
+that interior's config only: no SELECTION piece is repackaged (one not packaged
+yet is refused), and the other interiors' configs and objects.json are left
+alone, so a town edit need not touch the caves' files. --map with
+--configs-only writes the named configs and packages nothing.
 
 Wall veins (pass 2, 2026-10-21): every node a section's `veins` names is
 presented set into its rock face, {placement: 'wall', yaw, inset, variant}
@@ -250,10 +255,11 @@ SELECTION = {
     'plank_jetty': ('sw_isle','sw-trestle-pier-span','length',4.5),
     'fish_trap_basket': ('lf-biomes','fish-trap-basket-1','height',1.1),
 }
-KITS = {'lf-biomes': 'godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes'}
+KITS = {'lf-biomes': 'godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes',
+        'lf-interiors': 'godot-client/world_authoring/continent-v2/kits/lf-interiors/prototypes'}
 # The Landfall town's rooms (owner 2026-10-27, chat: "Implement your plan"): reviewed kit pieces reused as furniture
 # and dressing, at the size they were reviewed at (the kit's own measured height or length). A row is packaged only
-# once an interior places it (main), so the shared folder holds no unused town art. No new models.
+# once an interior places it (main), so the shared folder holds no unused town art. This tool generates no models.
 TOWN_SELECTION = {
     'flower_cart': ('four_gates','flower-cart-1','length',2.4),
     'produce_stall': ('lf-biomes','produce-stall-1','length',2.4),
@@ -274,6 +280,44 @@ TOWN_SELECTION = {
     'glassware_cart': ('lf-biomes','glassware-handcart-1','length',2.4),
     'apple_cart': ('lf-biomes','apple-cart-1','length',2.4),
     'notice_board': ('lf-biomes','notice-board-1','height',2.2),
+    # The town's own furniture (owner 2026-10-27): the lf-interiors kit, 35 Meshy pieces prepared at real size
+    # (work-output/landfall-town/spec_kit.json). Each row keeps the measure and metres the kit was prepared at, so the
+    # packaged piece is the kit piece's size (factor 1).
+    'trestle_table': ('lf-interiors','trestle-table-1','length',2.2),
+    'dressed_round_table': ('lf-interiors','dressed-round-table-1','length',1.2),
+    'bench': ('lf-interiors','bench-1','length',1.8),
+    'chair': ('lf-interiors','chair-1','height',1.0),
+    'stool': ('lf-interiors','stool-1','height',.5),
+    'bed_single': ('lf-interiors','bed-single-1','length',2.0),
+    'bed_large': ('lf-interiors','bed-large-1','length',2.2),
+    'wardrobe': ('lf-interiors','wardrobe-1','height',2.0),
+    'dresser_crockery': ('lf-interiors','dresser-crockery-1','height',2.0),
+    'wall_shelf_jars_bottles': ('lf-interiors','wall-shelf-jars-bottles-1','length',1.4),
+    'bookcase': ('lf-interiors','bookcase-1','height',2.1),
+    'shop_counter': ('lf-interiors','shop-counter-1','length',2.2),
+    'stone_fireplace': ('lf-interiors','stone-fireplace-1','height',2.2),
+    'writing_desk_ledgers': ('lf-interiors','writing-desk-ledgers-1','length',1.4),
+    'wall_sconce': ('lf-interiors','wall-sconce-1','height',.5),
+    'chandelier': ('lf-interiors','chandelier-1','length',1.6),
+    'anvil_stump': ('lf-interiors','anvil-stump-1','length',.9),
+    'forge_hearth': ('lf-interiors','forge-hearth-1','height',3.0),
+    'weapon_rack_with_weapons': ('lf-interiors','weapon-rack-with-weapons-1','height',1.8),
+    'armour_stand': ('lf-interiors','armour-stand-1','height',1.8),
+    'bar_counter': ('lf-interiors','bar-counter-1','length',3.2),
+    'cask_cradle_tap': ('lf-interiors','cask-cradle-tap-1','length',1.6),
+    'kitchen_hearth_pot_spit': ('lf-interiors','kitchen-hearth-pot-spit-1','height',2.2),
+    'goods_shelf_stocked': ('lf-interiors','goods-shelf-stocked-1','height',2.0),
+    'flower_buckets': ('lf-interiors','flower-buckets-1','length',1.0),
+    'tiered_flower_stand': ('lf-interiors','tiered-flower-stand-1','length',1.4),
+    'potion_shelf': ('lf-interiors','potion-shelf-1','height',1.6),
+    'alchemy_table_alembic': ('lf-interiors','alchemy-table-alembic-1','length',1.6),
+    'crystal_ball_stand': ('lf-interiors','crystal-ball-stand-1','height',1.3),
+    'cauldron': ('lf-interiors','cauldron-1','length',1.0),
+    'lectern': ('lf-interiors','lectern-1','height',1.25),
+    'high_seat': ('lf-interiors','high-seat-1','height',2.0),
+    'council_map_table': ('lf-interiors','council-map-table-1','length',4.0),
+    'loom': ('lf-interiors','loom-1','height',1.8),
+    'bunk_bed': ('lf-interiors','bunk-bed-1','length',2.0),
 }
 OUTPUT = 'godot-client/assets/world/underground'
 CONTENT = 'eloria-assets/maps/continent-v2/_continent_v2/content'
@@ -289,9 +333,10 @@ INTERIORS = {
                       'harvest': False},
 }
 # Optional dressing keys a placement carries over, in this order: `outward` (the facing of the wall the piece is cut
-# away with: a cave's wall rock, a town prop standing against a wall) and `palette`. A dressing item's other keys (the
-# caves' `wall` flag among them) stay the builder's.
-PLACEMENT_KEYS = ('outward', 'palette')
+# away with: a cave's wall rock, a town prop standing against a wall), `cutawayWall` (a town prop's own wall node: the
+# client hides the prop exactly when that wall is cut away, underground_scenery.gd) and `palette`. A dressing item's
+# other keys (the caves' `wall` flag among them) stay the builder's.
+PLACEMENT_KEYS = ('outward', 'cutawayWall', 'palette')
 
 # The underground's laid-out nodes (Quartz, Salt, Clay, Flint, Moss, Toadstool,
 # Stormglass), presented as a continent-v2 package presents its nodes
@@ -693,11 +738,43 @@ def configs(maps=None):
             if (ROOT / spec['plan']).is_file() and (not maps or map_id in maps)}
 
 
+REPORT = 'eloria-assets/source/world_objects/underground/reused-scenery.json'
+REPORT_SCHEMA = 'rabbitlands-reused-underground-scenery-v1'
+
+
+def packaged(name):
+    """True when the piece's GLB is in the shared folder (asset_path())."""
+    return (ROOT / 'godot-client' / asset_path(name).removeprefix('res://')).is_file()
+
+
+def scenery_records(existing, fresh, placed):
+    """reused-scenery.json's `assets` after packaging `fresh` ({id: record}): every SELECTION row's record as it stands
+    in `existing` (the file's list), then each TOWN_SELECTION piece some interior places (`placed`), in TOWN_SELECTION
+    order, as just packaged or else as on file. That is the list a whole run writes, so --map and a whole run agree."""
+    on_file = {record['id']: record for record in existing}
+    result = [on_file[name] for name in SELECTION if name in on_file]
+    for name in TOWN_SELECTION:
+        if name in placed:
+            record = fresh.get(name, on_file.get(name))
+            if record is None:
+                raise SystemExit(f'{name} is placed but neither packaged now nor recorded in {REPORT}')
+            result.append(record)
+    return result
+
+
+def _checked(records):
+    for record in records:
+        if 'res://'+record['output'].split('godot-client/', 1)[1] != asset_path(record['id']):
+            raise ValueError(f"{record['id']}: packaged at {record['output']}, not {asset_path(record['id'])}")
+    return records
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--check', action='store_true', help='compare the configs with their files; write nothing')
     parser.add_argument('--map', action='append', choices=sorted(INTERIORS),
-                        help="only this interior's config (repeatable); implies --configs-only")
+                        help="only this interior (repeatable): package the TOWN_SELECTION pieces it places, record "
+                             "them in reused-scenery.json and write its config; nothing else is written")
     parser.add_argument('--configs-only', action='store_true',
                         help='write the scenery configs and nothing else: no model is packaged, reused-scenery.json '
                              'and objects.json are left as they are (refused while a config places a piece that is '
@@ -710,11 +787,33 @@ def main(argv=None):
                  or (ROOT / INTERIORS[m]['config']).read_bytes() != config_bytes(config)]
         print(json.dumps({'interiors': list(found), 'stale': stale}, indent=1))
         return 1 if stale else 0
-    if args.map or args.configs_only:
-        missing = sorted({name for config in found.values() for name in config['assets']
-                          if not (ROOT / 'godot-client' / asset_path(name).removeprefix('res://')).is_file()})
+    report = ROOT / REPORT
+    if args.map and not args.configs_only:
+        # one interior's pieces: its TOWN_SELECTION rows are packaged; the caves' SELECTION rows must be already
+        here = {name for config in found.values() for name in config['assets']}
+        missing = sorted(name for name in here - set(TOWN_SELECTION) if not packaged(name))
         if missing:
             raise SystemExit(f'not packaged yet: {missing}; run the whole tool once to package them')
+        output = ROOT / OUTPUT
+        output.mkdir(parents=True, exist_ok=True)
+        fresh = {record['id']: record for record in _checked(
+            [package(name, spec, output) for name, spec in TOWN_SELECTION.items() if name in here])}
+        placed = {name for config in configs().values() for name in config['assets']}
+        existing = json.loads(report.read_text(encoding='utf-8'))['assets'] if report.is_file() else []
+        records = scenery_records(existing, fresh, placed)
+        if records != existing:
+            report.parent.mkdir(parents=True, exist_ok=True)
+            write_json(report, {'schema': REPORT_SCHEMA, 'assets': records})
+        for map_id, config in found.items():
+            write_json(ROOT / INTERIORS[map_id]['config'], config)
+        print(json.dumps({'packaged': sorted(fresh), 'written': [INTERIORS[m]['config'] for m in found]
+                          + ([REPORT] if records != existing else [])}, indent=1))
+        return 0
+    if args.configs_only:
+        missing = sorted({name for config in found.values() for name in config['assets'] if not packaged(name)})
+        if missing:
+            raise SystemExit(f'not packaged yet: {missing}; run the whole tool once (or --map <interior>) to package '
+                             'them')
         for map_id, config in found.items():
             write_json(ROOT / INTERIORS[map_id]['config'], config)
         print(json.dumps({'written': [INTERIORS[m]['config'] for m in found]}, indent=1))
@@ -723,13 +822,9 @@ def main(argv=None):
     output.mkdir(parents=True, exist_ok=True)
     placed = {name for config in found.values() for name in config['assets']}
     rows = {**SELECTION, **{name: spec for name, spec in TOWN_SELECTION.items() if name in placed}}
-    records = [package(name, spec, output) for name, spec in rows.items()]
-    for record in records:
-        if 'res://'+record['output'].split('godot-client/', 1)[1] != asset_path(record['id']):
-            raise ValueError(f"{record['id']}: packaged at {record['output']}, not {asset_path(record['id'])}")
-    report = ROOT / 'eloria-assets/source/world_objects/underground/reused-scenery.json'
+    records = _checked([package(name, spec, output) for name, spec in rows.items()])
     report.parent.mkdir(parents=True, exist_ok=True)
-    write_json(report, {'schema': 'rabbitlands-reused-underground-scenery-v1', 'assets': records})
+    write_json(report, {'schema': REPORT_SCHEMA, 'assets': records})
     for map_id, config in found.items():
         write_json(ROOT / INTERIORS[map_id]['config'], config)
     # the objects.json harvest entries are the caves' (their minerals, laid-out organics and wall seams)

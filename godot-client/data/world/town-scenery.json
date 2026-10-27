@@ -1,17 +1,72 @@
 {
   "schemaVersion": 1,
   "map": "landfall_town",
-  "sourcePlanSha256": "8de2bebecef9ee306c3a6389fd21b7ccc3843ac28c61729ded2165586bf1e774",
+  "sourcePlanSha256": "4cdd723a1fde08c07ecc5aeee4e2e39d0cba17333562ce9347cab70fb68aab2e",
   "assets": {
+    "crystal_cluster": "res://assets/world/underground/crystal_cluster.glb",
+    "supply_crate": "res://assets/world/underground/supply_crate.glb",
     "crate_stack": "res://assets/world/underground/crate_stack.glb",
     "barrel_stack": "res://assets/world/underground/barrel_stack.glb",
     "tool_rack": "res://assets/world/underground/tool_rack.glb",
     "feed_sacks": "res://assets/world/underground/feed_sacks.glb",
     "terracotta_pots": "res://assets/world/underground/terracotta_pots.glb",
     "harvest_baskets": "res://assets/world/underground/harvest_baskets.glb",
+    "wooden_pail": "res://assets/world/underground/wooden_pail.glb",
     "supply_chest": "res://assets/world/underground/supply_chest.glb",
+    "lobster_pots": "res://assets/world/underground/lobster_pots.glb",
     "rope_coils": "res://assets/world/underground/rope_coils.glb",
-    "lens_grinder": "res://assets/world/underground/lens_grinder.glb"
+    "cargo_net": "res://assets/world/underground/cargo_net.glb",
+    "mushroom_basket": "res://assets/world/underground/mushroom_basket.glb",
+    "clay_jars": "res://assets/world/underground/clay_jars.glb",
+    "lens_tripod": "res://assets/world/underground/lens_tripod.glb",
+    "lens_grinder": "res://assets/world/underground/lens_grinder.glb",
+    "lens_crate": "res://assets/world/underground/lens_crate.glb",
+    "flower_planter": "res://assets/world/underground/flower_planter.glb",
+    "citrus_planter": "res://assets/world/underground/citrus_planter.glb",
+    "potted_cypress": "res://assets/world/underground/potted_cypress.glb",
+    "stone_bench": "res://assets/world/underground/stone_bench.glb",
+    "herb_drying_rack": "res://assets/world/underground/herb_drying_rack.glb",
+    "milk_churn": "res://assets/world/underground/milk_churn.glb",
+    "fish_crates": "res://assets/world/underground/fish_crates.glb",
+    "woodcutter_block": "res://assets/world/underground/woodcutter_block.glb",
+    "glassware_cart": "res://assets/world/underground/glassware_cart.glb",
+    "apple_cart": "res://assets/world/underground/apple_cart.glb",
+    "notice_board": "res://assets/world/underground/notice_board.glb",
+    "trestle_table": "res://assets/world/underground/trestle_table.glb",
+    "dressed_round_table": "res://assets/world/underground/dressed_round_table.glb",
+    "bench": "res://assets/world/underground/bench.glb",
+    "chair": "res://assets/world/underground/chair.glb",
+    "stool": "res://assets/world/underground/stool.glb",
+    "bed_single": "res://assets/world/underground/bed_single.glb",
+    "bed_large": "res://assets/world/underground/bed_large.glb",
+    "wardrobe": "res://assets/world/underground/wardrobe.glb",
+    "dresser_crockery": "res://assets/world/underground/dresser_crockery.glb",
+    "wall_shelf_jars_bottles": "res://assets/world/underground/wall_shelf_jars_bottles.glb",
+    "bookcase": "res://assets/world/underground/bookcase.glb",
+    "shop_counter": "res://assets/world/underground/shop_counter.glb",
+    "stone_fireplace": "res://assets/world/underground/stone_fireplace.glb",
+    "writing_desk_ledgers": "res://assets/world/underground/writing_desk_ledgers.glb",
+    "wall_sconce": "res://assets/world/underground/wall_sconce.glb",
+    "chandelier": "res://assets/world/underground/chandelier.glb",
+    "anvil_stump": "res://assets/world/underground/anvil_stump.glb",
+    "forge_hearth": "res://assets/world/underground/forge_hearth.glb",
+    "weapon_rack_with_weapons": "res://assets/world/underground/weapon_rack_with_weapons.glb",
+    "armour_stand": "res://assets/world/underground/armour_stand.glb",
+    "bar_counter": "res://assets/world/underground/bar_counter.glb",
+    "cask_cradle_tap": "res://assets/world/underground/cask_cradle_tap.glb",
+    "kitchen_hearth_pot_spit": "res://assets/world/underground/kitchen_hearth_pot_spit.glb",
+    "goods_shelf_stocked": "res://assets/world/underground/goods_shelf_stocked.glb",
+    "flower_buckets": "res://assets/world/underground/flower_buckets.glb",
+    "tiered_flower_stand": "res://assets/world/underground/tiered_flower_stand.glb",
+    "potion_shelf": "res://assets/world/underground/potion_shelf.glb",
+    "alchemy_table_alembic": "res://assets/world/underground/alchemy_table_alembic.glb",
+    "crystal_ball_stand": "res://assets/world/underground/crystal_ball_stand.glb",
+    "cauldron": "res://assets/world/underground/cauldron.glb",
+    "lectern": "res://assets/world/underground/lectern.glb",
+    "high_seat": "res://assets/world/underground/high_seat.glb",
+    "council_map_table": "res://assets/world/underground/council_map_table.glb",
+    "loom": "res://assets/world/underground/loom.glb",
+    "bunk_bed": "res://assets/world/underground/bunk_bed.glb"
   },
   "harvestPresentation": {},
   "surfaces": {
@@ -148,387 +203,1437 @@
   },
   "placements": [
     {
-      "asset": "barrel_stack",
+      "asset": "bar_counter",
       "position": [
-        30.6,
+        26.5,
         0,
-        292.6
+        296.4
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "cask_cradle_tap",
+      "position": [
+        26.5,
+        0,
+        292.19
       ],
       "yaw": 0,
       "outward": [
         0.0,
         0,
         -1.0
-      ]
+      ],
+      "cutawayWall": "Build_tavern_ground_north_lime_plaster"
     },
     {
-      "asset": "feed_sacks",
+      "asset": "wall_shelf_jars_bottles",
       "position": [
-        34.2,
-        0,
-        302.6
+        24.55,
+        1.25,
+        291.65999999999997
       ],
       "yaw": 0,
       "outward": [
         0.0,
         0,
-        1.0
-      ]
+        -1.0
+      ],
+      "cutawayWall": "Build_tavern_ground_north_lime_plaster"
     },
     {
-      "asset": "terracotta_pots",
+      "asset": "wall_shelf_jars_bottles",
       "position": [
-        38.8,
+        28.45,
+        1.25,
+        291.65999999999997
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
         0,
-        299.4
+        -1.0
+      ],
+      "cutawayWall": "Build_tavern_ground_north_lime_plaster"
+    },
+    {
+      "asset": "barrel_stack",
+      "position": [
+        31.4,
+        0,
+        292.17
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_tavern_ground_north_lime_plaster"
+    },
+    {
+      "asset": "stool",
+      "position": [
+        25.4,
+        0,
+        297.65
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "stool",
+      "position": [
+        27.6,
+        0,
+        297.65
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "stone_fireplace",
+      "position": [
+        21.13,
+        0,
+        297.5
       ],
       "yaw": 90,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_tavern_ground_west_lime_plaster"
+    },
+    {
+      "asset": "dressed_round_table",
+      "position": [
+        22.5,
+        0,
+        301.5
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "chair",
+      "position": [
+        21.5,
+        0,
+        301.6
+      ],
+      "yaw": 90
+    },
+    {
+      "asset": "chair",
+      "position": [
+        23.55,
+        0,
+        301.4
+      ],
+      "yaw": 270
+    },
+    {
+      "asset": "stool",
+      "position": [
+        22.6,
+        0,
+        300.45
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "dressed_round_table",
+      "position": [
+        22.5,
+        0,
+        294.0
+      ],
+      "yaw": 15
+    },
+    {
+      "asset": "chair",
+      "position": [
+        22.5,
+        0,
+        295.05
+      ],
+      "yaw": 180
+    },
+    {
+      "asset": "chair",
+      "position": [
+        23.55,
+        0,
+        293.9
+      ],
+      "yaw": 270
+    },
+    {
+      "asset": "dressed_round_table",
+      "position": [
+        29.5,
+        0,
+        298.5
+      ],
+      "yaw": 30
+    },
+    {
+      "asset": "chair",
+      "position": [
+        28.45,
+        0,
+        298.6
+      ],
+      "yaw": 90
+    },
+    {
+      "asset": "chair",
+      "position": [
+        29.55,
+        0,
+        297.45
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "trestle_table",
+      "position": [
+        29.6,
+        0,
+        301.95
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "bench",
+      "position": [
+        29.6,
+        0,
+        302.85
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "bench",
+      "position": [
+        29.6,
+        0,
+        301.05
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "wall_sconce",
+      "position": [
+        32.2,
+        1.75,
+        297.5
+      ],
+      "yaw": 270
+    },
+    {
+      "asset": "kitchen_hearth_pot_spit",
+      "position": [
+        34.25,
+        0,
+        298.22
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "trestle_table",
+      "position": [
+        39.04,
+        0,
+        301.1
+      ],
+      "yaw": 270,
       "outward": [
         1.0,
         0,
         0.0
-      ]
+      ],
+      "cutawayWall": "Build_tavern_ground_east_soot_brick"
+    },
+    {
+      "asset": "wooden_pail",
+      "position": [
+        38.45,
+        0,
+        299.6
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "clay_jars",
+      "position": [
+        38.9,
+        0,
+        298.25
+      ],
+      "yaw": 270,
+      "outward": [
+        1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_tavern_ground_east_soot_brick"
+    },
+    {
+      "asset": "barrel_stack",
+      "position": [
+        36.0,
+        0,
+        302.8
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "feed_sacks",
+      "position": [
+        33.45,
+        0,
+        303.0
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "harvest_baskets",
+      "position": [
+        34.5,
+        0,
+        302.55
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "mushroom_basket",
+      "position": [
+        39.0,
+        0.61,
+        300.6
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "wooden_pail",
+      "position": [
+        35.8,
+        0,
+        298.1
+      ],
+      "yaw": 0
     },
     {
       "asset": "crate_stack",
       "position": [
         38.4,
         0,
-        292.6
+        292.46
       ],
       "yaw": 0,
       "outward": [
         0.0,
         0,
         -1.0
-      ]
+      ],
+      "cutawayWall": "Build_tavern_ground_north_lime_plaster"
     },
     {
       "asset": "barrel_stack",
       "position": [
-        139.4,
+        33.7,
         0,
-        301.4
+        292.18
       ],
-      "yaw": 90,
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_tavern_ground_north_lime_plaster"
+    },
+    {
+      "asset": "bench",
+      "position": [
+        34.4,
+        0,
+        297.1
+      ],
+      "yaw": 180
+    },
+    {
+      "asset": "wall_sconce",
+      "position": [
+        39.3,
+        1.75,
+        296.4
+      ],
+      "yaw": 270
+    },
+    {
+      "asset": "shop_counter",
+      "position": [
+        135.5,
+        0,
+        297.4
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "goods_shelf_stocked",
+      "position": [
+        133.4,
+        0,
+        292.97
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_market_north_lime_plaster"
+    },
+    {
+      "asset": "goods_shelf_stocked",
+      "position": [
+        137.6,
+        0,
+        292.97
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_market_north_lime_plaster"
+    },
+    {
+      "asset": "harvest_baskets",
+      "position": [
+        140.16,
+        0,
+        302.5
+      ],
+      "yaw": 270,
       "outward": [
         1.0,
         0,
         0.0
-      ]
+      ],
+      "cutawayWall": "Build_market_east_lime_plaster"
+    },
+    {
+      "asset": "milk_churn",
+      "position": [
+        139.85,
+        0,
+        301.25
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "milk_churn",
+      "position": [
+        139.3,
+        0,
+        300.8
+      ],
+      "yaw": 0
     },
     {
       "asset": "feed_sacks",
       "position": [
-        132.2,
+        140.1,
         0,
-        302.6
+        299.54
       ],
-      "yaw": 0,
-      "outward": [
-        0.0,
-        0,
-        1.0
-      ]
-    },
-    {
-      "asset": "harvest_baskets",
-      "position": [
-        133,
-        0,
-        293.4
-      ],
-      "yaw": 0,
-      "outward": [
-        0.0,
-        0,
-        -1.0
-      ]
-    },
-    {
-      "asset": "rope_coils",
-      "position": [
-        138.6,
-        0,
-        293.8
-      ],
-      "yaw": 0,
-      "outward": [
-        0.0,
-        0,
-        -1.0
-      ]
-    },
-    {
-      "asset": "crate_stack",
-      "position": [
-        139.4,
-        0,
-        296.4
-      ],
-      "yaw": 0,
+      "yaw": 270,
       "outward": [
         1.0,
         0,
         0.0
-      ]
+      ],
+      "cutawayWall": "Build_market_east_lime_plaster"
     },
     {
-      "asset": "terracotta_pots",
+      "asset": "barrel_stack",
       "position": [
-        121.6,
+        139.83,
         0,
-        301.6
+        297.6
       ],
-      "yaw": 90,
+      "yaw": 270,
       "outward": [
-        -1.0,
+        1.0,
         0,
         0.0
-      ]
+      ],
+      "cutawayWall": "Build_market_east_lime_plaster"
     },
     {
-      "asset": "harvest_baskets",
+      "asset": "rope_coils",
       "position": [
-        128.6,
+        139.66,
         0,
-        302.6
+        295.65
+      ],
+      "yaw": 270,
+      "outward": [
+        1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_market_east_lime_plaster"
+    },
+    {
+      "asset": "crate_stack",
+      "position": [
+        139.5,
+        0,
+        293.46
       ],
       "yaw": 0,
       "outward": [
         0.0,
         0,
-        1.0
-      ]
+        -1.0
+      ],
+      "cutawayWall": "Build_market_north_lime_plaster"
+    },
+    {
+      "asset": "apple_cart",
+      "position": [
+        131.45,
+        0,
+        294.45
+      ],
+      "yaw": 90
+    },
+    {
+      "asset": "wooden_pail",
+      "position": [
+        131.35,
+        0,
+        302.7
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "wall_sconce",
+      "position": [
+        130.84,
+        1.9,
+        296.05
+      ],
+      "yaw": 90
+    },
+    {
+      "asset": "tiered_flower_stand",
+      "position": [
+        125.5,
+        0,
+        293.07
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_market_north_lime_plaster"
+    },
+    {
+      "asset": "flower_buckets",
+      "position": [
+        123.6,
+        0,
+        292.88
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_market_north_lime_plaster"
+    },
+    {
+      "asset": "flower_buckets",
+      "position": [
+        127.4,
+        0,
+        292.88
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_market_north_lime_plaster"
+    },
+    {
+      "asset": "potted_cypress",
+      "position": [
+        121.2,
+        0,
+        293.06
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_market_north_lime_plaster"
+    },
+    {
+      "asset": "citrus_planter",
+      "position": [
+        129.48,
+        0,
+        293.37
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_market_north_lime_plaster"
+    },
+    {
+      "asset": "trestle_table",
+      "position": [
+        124.2,
+        0,
+        297.45
+      ],
+      "yaw": 0
     },
     {
       "asset": "terracotta_pots",
       "position": [
-        121.6,
+        124.85,
+        0.61,
+        297.45
+      ],
+      "yaw": 0,
+      "scale": 0.7
+    },
+    {
+      "asset": "wooden_pail",
+      "position": [
+        125.95,
         0,
-        294.4
+        297.4
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "herb_drying_rack",
+      "position": [
+        121.1,
+        0,
+        296.0
       ],
       "yaw": 90,
       "outward": [
         -1.0,
         0,
         0.0
-      ]
+      ],
+      "cutawayWall": "Build_market_west_lime_plaster"
+    },
+    {
+      "asset": "flower_planter",
+      "position": [
+        121.25,
+        0,
+        301.0
+      ],
+      "yaw": 90,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_market_west_lime_plaster"
+    },
+    {
+      "asset": "terracotta_pots",
+      "position": [
+        129.55,
+        0,
+        295.25
+      ],
+      "yaw": 270
+    },
+    {
+      "asset": "terracotta_pots",
+      "position": [
+        128.5,
+        0,
+        302.5
+      ],
+      "yaw": 180
+    },
+    {
+      "asset": "wall_sconce",
+      "position": [
+        120.72,
+        1.9,
+        299.25
+      ],
+      "yaw": 90,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_market_west_lime_plaster"
+    },
+    {
+      "asset": "shop_counter",
+      "position": [
+        178.5,
+        0,
+        299.4
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "potion_shelf",
+      "position": [
+        177.75,
+        0,
+        295.83
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "potion_shelf",
+      "position": [
+        179.75,
+        0,
+        295.83
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "crystal_cluster",
+      "position": [
+        180.91,
+        0,
+        296.6
+      ],
+      "yaw": 270,
+      "outward": [
+        1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_magic_shop_east_lime_plaster"
+    },
+    {
+      "asset": "crystal_ball_stand",
+      "position": [
+        173.5,
+        0,
+        299.5
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "glassware_cart",
+      "position": [
+        171.38,
+        0,
+        302.0
+      ],
+      "yaw": 90,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_magic_shop_west_lime_plaster"
+    },
+    {
+      "asset": "lectern",
+      "position": [
+        172.4,
+        0,
+        296.7
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "wall_sconce",
+      "position": [
+        170.72,
+        1.85,
+        297.4
+      ],
+      "yaw": 90,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_magic_shop_west_lime_plaster"
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        172.2,
+        0,
+        291.8
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_magic_shop_north_lime_plaster"
+    },
+    {
+      "asset": "alchemy_table_alembic",
+      "position": [
+        174.4,
+        0,
+        291.99
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_magic_shop_north_lime_plaster"
+    },
+    {
+      "asset": "cauldron",
+      "position": [
+        176.8,
+        0,
+        292.08
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_magic_shop_north_lime_plaster"
+    },
+    {
+      "asset": "lens_tripod",
+      "position": [
+        179.4,
+        0,
+        292.05
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_magic_shop_north_lime_plaster"
     },
     {
       "asset": "lens_grinder",
       "position": [
-        172.4,
+        171.21,
         0,
-        293.6
-      ],
-      "yaw": 0,
-      "outward": [
-        0.0,
-        0,
-        -1.0
-      ]
-    },
-    {
-      "asset": "terracotta_pots",
-      "position": [
-        180.6,
-        0,
-        297.8
-      ],
-      "yaw": 90,
-      "outward": [
-        1.0,
-        0,
-        0.0
-      ]
-    },
-    {
-      "asset": "tool_rack",
-      "position": [
-        211.1,
-        0,
-        299.5
+        293.5
       ],
       "yaw": 90,
       "outward": [
         -1.0,
         0,
         0.0
-      ]
+      ],
+      "cutawayWall": "Build_magic_shop_west_lime_plaster"
     },
     {
-      "asset": "barrel_stack",
+      "asset": "lens_crate",
       "position": [
-        221.4,
+        180.75,
         0,
-        296.6
+        294.4
       ],
-      "yaw": 90,
+      "yaw": 0,
+      "scale": 0.7
+    },
+    {
+      "asset": "forge_hearth",
+      "position": [
+        218.9,
+        0,
+        296.52
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "anvil_stump",
+      "position": [
+        215.5,
+        0,
+        298.5
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "weapon_rack_with_weapons",
+      "position": [
+        222.06,
+        0,
+        297.8
+      ],
+      "yaw": 270,
       "outward": [
         1.0,
         0,
         0.0
-      ]
+      ],
+      "cutawayWall": "Build_smithy_east_soot_brick"
+    },
+    {
+      "asset": "armour_stand",
+      "position": [
+        222.05,
+        0,
+        301.0
+      ],
+      "yaw": 270,
+      "outward": [
+        1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_smithy_east_soot_brick"
+    },
+    {
+      "asset": "armour_stand",
+      "position": [
+        222.05,
+        0,
+        296.4
+      ],
+      "yaw": 270,
+      "outward": [
+        1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_smithy_east_soot_brick"
     },
     {
       "asset": "crate_stack",
       "position": [
-        221.4,
+        221.55,
         0,
-        302.4
+        302.55
       ],
-      "yaw": 0,
+      "yaw": 270,
       "outward": [
-        0.0,
+        1.0,
         0,
-        1.0
-      ]
+        0.0
+      ],
+      "cutawayWall": "Build_smithy_east_soot_brick"
     },
     {
-      "asset": "supply_chest",
+      "asset": "tool_rack",
       "position": [
-        221.4,
+        211.08,
         0,
-        290.4
+        300.0
+      ],
+      "yaw": 90,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_smithy_west_soot_brick"
+    },
+    {
+      "asset": "barrel_stack",
+      "position": [
+        211.4,
+        0,
+        296.29
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "woodcutter_block",
+      "position": [
+        211.45,
+        0,
+        302.65
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "wall_sconce",
+      "position": [
+        210.72,
+        1.85,
+        298.0
+      ],
+      "yaw": 90,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_smithy_west_soot_brick"
+    },
+    {
+      "asset": "stone_fireplace",
+      "position": [
+        211.01,
+        0,
+        292.0
+      ],
+      "yaw": 90,
+      "scale": 0.8,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_smithy_west_lime_plaster"
+    },
+    {
+      "asset": "trestle_table",
+      "position": [
+        214.0,
+        0,
+        292.5
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "stool",
+      "position": [
+        213.5,
+        0,
+        293.5
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "stool",
+      "position": [
+        214.6,
+        0,
+        291.45
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "wall_shelf_jars_bottles",
+      "position": [
+        212.4,
+        1.3,
+        289.65999999999997
       ],
       "yaw": 0,
       "outward": [
         0.0,
         0,
         -1.0
-      ]
+      ],
+      "cutawayWall": "Build_smithy_north_lime_plaster"
+    },
+    {
+      "asset": "clay_jars",
+      "position": [
+        216.6,
+        0,
+        290.1
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_smithy_north_lime_plaster"
+    },
+    {
+      "asset": "bed_single",
+      "position": [
+        221.72,
+        0,
+        290.54
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_smithy_north_lime_plaster"
+    },
+    {
+      "asset": "supply_chest",
+      "position": [
+        221.72,
+        0,
+        292.05
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "wardrobe",
+      "position": [
+        218.6,
+        0,
+        289.85
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_smithy_north_lime_plaster"
+    },
+    {
+      "asset": "wall_sconce",
+      "position": [
+        222.28,
+        1.7,
+        293.8
+      ],
+      "yaw": 270,
+      "outward": [
+        1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_smithy_east_lime_plaster"
+    },
+    {
+      "asset": "writing_desk_ledgers",
+      "position": [
+        20.91,
+        0,
+        240.5
+      ],
+      "yaw": 90,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_clerk_house_west_lime_plaster"
+    },
+    {
+      "asset": "chair",
+      "position": [
+        20.85,
+        0,
+        241.95
+      ],
+      "yaw": 90,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_clerk_house_west_lime_plaster"
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        22.45,
+        0,
+        237.91
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        23.95,
+        0,
+        237.91
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "wall_shelf_jars_bottles",
+      "position": [
+        27.23,
+        1.25,
+        239.0
+      ],
+      "yaw": 270
+    },
+    {
+      "asset": "supply_chest",
+      "position": [
+        25.9,
+        0,
+        238.01
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "wall_sconce",
+      "position": [
+        20.71,
+        1.5,
+        238.95
+      ],
+      "yaw": 90,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_clerk_house_west_lime_plaster"
+    },
+    {
+      "asset": "stone_fireplace",
+      "position": [
+        33.88,
+        0,
+        240.5
+      ],
+      "yaw": 270,
+      "outward": [
+        1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_clerk_house_east_lime_plaster"
+    },
+    {
+      "asset": "dresser_crockery",
+      "position": [
+        33.55,
+        0,
+        238.0
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "dressed_round_table",
+      "position": [
+        31.0,
+        0,
+        241.4
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "chair",
+      "position": [
+        30.05,
+        0,
+        241.4
+      ],
+      "yaw": 90
+    },
+    {
+      "asset": "chair",
+      "position": [
+        31.95,
+        0,
+        241.4
+      ],
+      "yaw": 270
+    },
+    {
+      "asset": "chair",
+      "position": [
+        31.0,
+        0,
+        240.45
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "wooden_pail",
+      "position": [
+        33.7,
+        0,
+        241.85
+      ],
+      "yaw": 0
     },
     {
       "asset": "terracotta_pots",
       "position": [
-        30.6,
+        28.25,
         0,
-        242.4
+        242.75
       ],
-      "yaw": 90,
-      "outward": [
-        1.0,
-        0,
-        0.0
-      ]
+      "yaw": 30
     },
     {
-      "asset": "supply_chest",
+      "asset": "bed_large",
       "position": [
-        30.6,
+        27.8,
         0,
-        235.4
+        232.63
       ],
       "yaw": 0,
       "outward": [
         0.0,
         0,
         -1.0
-      ]
+      ],
+      "cutawayWall": "Build_clerk_house_north_lime_plaster"
+    },
+    {
+      "asset": "supply_chest",
+      "position": [
+        27.8,
+        0,
+        234.28
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "wardrobe",
+      "position": [
+        33.55,
+        0,
+        231.84
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_clerk_house_north_lime_plaster"
+    },
+    {
+      "asset": "stool",
+      "position": [
+        26.25,
+        0,
+        232.15
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "chair",
+      "position": [
+        20.83,
+        0,
+        236.1
+      ],
+      "yaw": 100,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_clerk_house_west_lime_plaster"
+    },
+    {
+      "asset": "supply_chest",
+      "position": [
+        20.89,
+        0,
+        232.3
+      ],
+      "yaw": 90,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_clerk_house_west_lime_plaster"
+    },
+    {
+      "asset": "wall_sconce",
+      "position": [
+        25.95,
+        1.5,
+        231.70999999999998
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_clerk_house_north_lime_plaster"
+    },
+    {
+      "asset": "loom",
+      "position": [
+        69.0,
+        0,
+        233.57999999999998
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_weaver_house_north_lime_plaster"
+    },
+    {
+      "asset": "stool",
+      "position": [
+        69.0,
+        0,
+        234.9
+      ],
+      "yaw": 180
+    },
+    {
+      "asset": "harvest_baskets",
+      "position": [
+        67.4,
+        0,
+        232.81
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_weaver_house_north_lime_plaster"
     },
     {
       "asset": "harvest_baskets",
       "position": [
         70.6,
         0,
-        238.4
-      ],
-      "yaw": 90,
-      "outward": [
-        1.0,
-        0,
-        0.0
-      ]
-    },
-    {
-      "asset": "supply_chest",
-      "position": [
-        70.6,
-        0,
-        242.6
-      ],
-      "yaw": 0,
-      "outward": [
-        0.0,
-        0,
-        1.0
-      ]
-    },
-    {
-      "asset": "barrel_stack",
-      "position": [
-        101.6,
-        0,
-        233.4
+        232.81
       ],
       "yaw": 0,
       "outward": [
         0.0,
         0,
         -1.0
-      ]
+      ],
+      "cutawayWall": "Build_weaver_house_north_lime_plaster"
     },
     {
       "asset": "crate_stack",
       "position": [
-        109.4,
-        0,
-        242.4
-      ],
-      "yaw": 0,
-      "outward": [
-        0.0,
-        0,
-        1.0
-      ]
-    },
-    {
-      "asset": "supply_chest",
-      "position": [
-        109.6,
-        0,
-        233.4
-      ],
-      "yaw": 0,
-      "outward": [
-        0.0,
-        0,
-        -1.0
-      ]
-    },
-    {
-      "asset": "rope_coils",
-      "position": [
-        148.3,
-        0,
-        234.7
-      ],
-      "yaw": 0,
-      "outward": [
-        1.0,
-        0,
-        0.0
-      ]
-    },
-    {
-      "asset": "harvest_baskets",
-      "position": [
-        141.6,
-        0,
-        234.4
-      ],
-      "yaw": 0,
-      "outward": [
-        0.0,
-        0,
-        -1.0
-      ]
-    },
-    {
-      "asset": "crate_stack",
-      "position": [
-        148.4,
+        72.56,
         0,
         237.4
       ],
@@ -537,91 +1642,1616 @@
         1.0,
         0,
         0.0
-      ]
+      ],
+      "cutawayWall": "Build_weaver_house_east_lime_plaster"
+    },
+    {
+      "asset": "goods_shelf_stocked",
+      "position": [
+        60.96,
+        0,
+        237.4
+      ],
+      "yaw": 90,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_weaver_house_west_lime_plaster"
+    },
+    {
+      "asset": "trestle_table",
+      "position": [
+        67.0,
+        0,
+        237.93
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "wall_shelf_jars_bottles",
+      "position": [
+        60.65,
+        1.3,
+        233.5
+      ],
+      "yaw": 90,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_weaver_house_west_lime_plaster"
+    },
+    {
+      "asset": "wall_sconce",
+      "position": [
+        73.29,
+        1.5,
+        233.7
+      ],
+      "yaw": 270,
+      "outward": [
+        1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_weaver_house_east_lime_plaster"
+    },
+    {
+      "asset": "kitchen_hearth_pot_spit",
+      "position": [
+        61.09,
+        0,
+        241.0
+      ],
+      "yaw": 90,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_weaver_house_west_lime_plaster"
+    },
+    {
+      "asset": "trestle_table",
+      "position": [
+        64.8,
+        0,
+        242.25
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "bench",
+      "position": [
+        64.8,
+        0,
+        241.4
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "terracotta_pots",
+      "position": [
+        61.01,
+        0,
+        239.35
+      ],
+      "yaw": 90,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_weaver_house_west_lime_plaster"
+    },
+    {
+      "asset": "wooden_pail",
+      "position": [
+        61.05,
+        0,
+        242.65
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "feed_sacks",
+      "position": [
+        66.99,
+        0,
+        242.75
+      ],
+      "yaw": 270
+    },
+    {
+      "asset": "wall_shelf_jars_bottles",
+      "position": [
+        61.6,
+        1.35,
+        238.76999999999998
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "bed_single",
+      "position": [
+        72.47,
+        0,
+        241.8
+      ],
+      "yaw": 270,
+      "outward": [
+        1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_weaver_house_east_lime_plaster"
     },
     {
       "asset": "supply_chest",
       "position": [
-        31.4,
+        71.06,
         0,
-        182.6
+        241.8
       ],
-      "yaw": 0,
-      "outward": [
-        0.0,
-        0,
-        1.0
-      ]
+      "yaw": 270
     },
     {
-      "asset": "crate_stack",
+      "asset": "wardrobe",
       "position": [
-        31.2,
+        72.45,
         0,
-        156.6
+        238.97
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "stool",
+      "position": [
+        72.9,
+        0,
+        240.45
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "wall_sconce",
+      "position": [
+        73.29,
+        1.5,
+        239.6
+      ],
+      "yaw": 270,
+      "outward": [
+        1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_weaver_house_east_lime_plaster"
+    },
+    {
+      "asset": "stone_fireplace",
+      "position": [
+        103.3,
+        0,
+        233.12
       ],
       "yaw": 0,
       "outward": [
         0.0,
         0,
         -1.0
-      ]
+      ],
+      "cutawayWall": "Build_watch_house_north_lime_plaster"
     },
     {
-      "asset": "supply_chest",
+      "asset": "notice_board",
       "position": [
-        71.4,
+        106.4,
         0,
-        302.8
+        233.01
       ],
       "yaw": 0,
       "outward": [
         0.0,
         0,
-        1.0
-      ]
+        -1.0
+      ],
+      "cutawayWall": "Build_watch_house_north_lime_plaster"
     },
     {
-      "asset": "supply_chest",
+      "asset": "trestle_table",
       "position": [
-        76.4,
+        104.5,
         0,
-        302.8
+        241.4
       ],
-      "yaw": 0,
+      "yaw": 0
+    },
+    {
+      "asset": "bench",
+      "position": [
+        104.5,
+        0,
+        240.55
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "bench",
+      "position": [
+        104.5,
+        0,
+        242.25
+      ],
+      "yaw": 180
+    },
+    {
+      "asset": "barrel_stack",
+      "position": [
+        101.4,
+        0,
+        242.84
+      ],
+      "yaw": 180,
       "outward": [
         0.0,
         0,
         1.0
-      ]
-    },
-    {
-      "asset": "supply_chest",
-      "position": [
-        81.4,
-        0,
-        302.8
       ],
-      "yaw": 0,
-      "outward": [
-        0.0,
-        0,
-        1.0
-      ]
+      "cutawayWall": "Build_watch_house_south_lime_plaster"
     },
     {
-      "asset": "supply_chest",
+      "asset": "stool",
       "position": [
-        88.6,
+        102.0,
         0,
-        297.8
+        234.7
+      ],
+      "yaw": 20
+    },
+    {
+      "asset": "wooden_pail",
+      "position": [
+        101.3,
+        0,
+        233.1
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "wall_shelf_jars_bottles",
+      "position": [
+        108.23,
+        1.3,
+        241.4
+      ],
+      "yaw": 270
+    },
+    {
+      "asset": "supply_crate",
+      "position": [
+        107.81,
+        0,
+        242.6
+      ],
+      "yaw": 270
+    },
+    {
+      "asset": "cask_cradle_tap",
+      "position": [
+        107.7,
+        0,
+        240.7
+      ],
+      "yaw": 270
+    },
+    {
+      "asset": "wall_sconce",
+      "position": [
+        100.71,
+        1.6,
+        236.75
       ],
       "yaw": 90,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_watch_house_west_lime_plaster"
+    },
+    {
+      "asset": "bunk_bed",
+      "position": [
+        109.7,
+        0,
+        233.17000000000002
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_watch_house_north_lime_plaster"
+    },
+    {
+      "asset": "weapon_rack_with_weapons",
+      "position": [
+        111.65,
+        0,
+        232.93
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_watch_house_north_lime_plaster"
+    },
+    {
+      "asset": "bunk_bed",
+      "position": [
+        113.6,
+        0,
+        233.17000000000002
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_watch_house_north_lime_plaster"
+    },
+    {
+      "asset": "armour_stand",
+      "position": [
+        115.6,
+        0,
+        232.94
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_watch_house_north_lime_plaster"
+    },
+    {
+      "asset": "bunk_bed",
+      "position": [
+        115.83,
+        0,
+        238.0
+      ],
+      "yaw": 270,
       "outward": [
         1.0,
         0,
         0.0
-      ]
+      ],
+      "cutawayWall": "Build_watch_house_east_lime_plaster"
+    },
+    {
+      "asset": "supply_chest",
+      "position": [
+        109.7,
+        0,
+        234.2
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "supply_chest",
+      "position": [
+        113.6,
+        0,
+        234.2
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "supply_chest",
+      "position": [
+        114.8,
+        0,
+        238.0
+      ],
+      "yaw": 270
+    },
+    {
+      "asset": "wall_sconce",
+      "position": [
+        108.83,
+        1.6,
+        234.4
+      ],
+      "yaw": 90
+    },
+    {
+      "asset": "stool",
+      "position": [
+        110.0,
+        0,
+        242.0
+      ],
+      "yaw": 30
+    },
+    {
+      "asset": "kitchen_hearth_pot_spit",
+      "position": [
+        150.91,
+        0,
+        240.5
+      ],
+      "yaw": 270,
+      "outward": [
+        1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_netmender_house_east_lime_plaster"
+    },
+    {
+      "asset": "dresser_crockery",
+      "position": [
+        142.6,
+        0,
+        238.0
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "dressed_round_table",
+      "position": [
+        146.5,
+        0,
+        241.0
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "stool",
+      "position": [
+        145.6,
+        0,
+        241.0
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "stool",
+      "position": [
+        147.4,
+        0,
+        240.9
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "stool",
+      "position": [
+        146.6,
+        0,
+        240.05
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "terracotta_pots",
+      "position": [
+        150.99,
+        0,
+        242.7
+      ],
+      "yaw": 270,
+      "outward": [
+        1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_netmender_house_east_lime_plaster"
+    },
+    {
+      "asset": "wooden_pail",
+      "position": [
+        150.9,
+        0,
+        238.7
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "wall_shelf_jars_bottles",
+      "position": [
+        149.4,
+        1.35,
+        237.76999999999998
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "wall_sconce",
+      "position": [
+        140.71,
+        1.6,
+        242.4
+      ],
+      "yaw": 90,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_netmender_house_west_lime_plaster"
+    },
+    {
+      "asset": "harvest_baskets",
+      "position": [
+        141.35,
+        0,
+        243.0
+      ],
+      "yaw": 75
+    },
+    {
+      "asset": "bed_single",
+      "position": [
+        141.3,
+        0,
+        232.53
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_netmender_house_north_lime_plaster"
+    },
+    {
+      "asset": "supply_chest",
+      "position": [
+        141.3,
+        0,
+        234.01999999999998
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "cargo_net",
+      "position": [
+        143.5,
+        0,
+        232.26999999999998
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_netmender_house_north_lime_plaster"
+    },
+    {
+      "asset": "fish_crates",
+      "position": [
+        148.9,
+        0,
+        232.28
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_netmender_house_north_lime_plaster"
+    },
+    {
+      "asset": "lobster_pots",
+      "position": [
+        150.84,
+        0,
+        232.45
+      ],
+      "yaw": 270,
+      "outward": [
+        1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_netmender_house_east_lime_plaster"
+    },
+    {
+      "asset": "rope_coils",
+      "position": [
+        149.9,
+        0,
+        235.75
+      ],
+      "yaw": 15
+    },
+    {
+      "asset": "trestle_table",
+      "position": [
+        146.0,
+        0,
+        235.4
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "wall_sconce",
+      "position": [
+        140.71,
+        1.6,
+        232.8
+      ],
+      "yaw": 90,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_netmender_house_west_lime_plaster"
+    },
+    {
+      "asset": "writing_desk_ledgers",
+      "position": [
+        20.91,
+        0,
+        166.8
+      ],
+      "yaw": 90,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_castle_west_ashlar_wall"
+    },
+    {
+      "asset": "chair",
+      "position": [
+        21.6,
+        0,
+        166.8
+      ],
+      "yaw": 270
+    },
+    {
+      "asset": "notice_board",
+      "position": [
+        31.2,
+        0,
+        165.21
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "stone_bench",
+      "position": [
+        30.4,
+        0,
+        173.89
+      ],
+      "yaw": 180
+    },
+    {
+      "asset": "stone_bench",
+      "position": [
+        23.4,
+        0,
+        165.11
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "supply_chest",
+      "position": [
+        21.25,
+        0,
+        165.09
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "potted_cypress",
+      "position": [
+        31.75,
+        0,
+        172.8
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "potted_cypress",
+      "position": [
+        31.75,
+        0,
+        166.4
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "wall_sconce",
+      "position": [
+        20.71,
+        2.0,
+        171.7
+      ],
+      "yaw": 90,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_castle_west_ashlar_wall"
+    },
+    {
+      "asset": "wall_sconce",
+      "position": [
+        22.6,
+        2.0,
+        174.09
+      ],
+      "yaw": 180
+    },
+    {
+      "asset": "council_map_table",
+      "position": [
+        43.5,
+        0,
+        169.5
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "chandelier",
+      "position": [
+        43.5,
+        3.2,
+        169.5
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "high_seat",
+      "position": [
+        48.12,
+        0,
+        167.59
+      ],
+      "yaw": 292.5
+    },
+    {
+      "asset": "high_seat",
+      "position": [
+        45.41,
+        0,
+        164.88
+      ],
+      "yaw": 337.5
+    },
+    {
+      "asset": "high_seat",
+      "position": [
+        41.59,
+        0,
+        164.88
+      ],
+      "yaw": 22.5
+    },
+    {
+      "asset": "high_seat",
+      "position": [
+        38.88,
+        0,
+        167.59
+      ],
+      "yaw": 67.5
+    },
+    {
+      "asset": "high_seat",
+      "position": [
+        38.88,
+        0,
+        171.41
+      ],
+      "yaw": 112.5
+    },
+    {
+      "asset": "high_seat",
+      "position": [
+        41.59,
+        0,
+        174.12
+      ],
+      "yaw": 157.5
+    },
+    {
+      "asset": "high_seat",
+      "position": [
+        45.41,
+        0,
+        174.12
+      ],
+      "yaw": 202.5
+    },
+    {
+      "asset": "high_seat",
+      "position": [
+        48.12,
+        0,
+        171.41
+      ],
+      "yaw": 247.5
+    },
+    {
+      "asset": "stone_bench",
+      "position": [
+        43.5,
+        0,
+        158.91
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_castle_north_ashlar_wall"
+    },
+    {
+      "asset": "stone_bench",
+      "position": [
+        54.09,
+        0,
+        172.1
+      ],
+      "yaw": 270,
+      "outward": [
+        1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_castle_east_ashlar_wall"
+    },
+    {
+      "asset": "stone_bench",
+      "position": [
+        54.09,
+        0,
+        166.9
+      ],
+      "yaw": 270,
+      "outward": [
+        1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_castle_east_ashlar_wall"
+    },
+    {
+      "asset": "potted_cypress",
+      "position": [
+        33.15,
+        0,
+        179.9
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        1.0
+      ],
+      "cutawayWall": "Build_castle_south_ashlar_wall"
+    },
+    {
+      "asset": "potted_cypress",
+      "position": [
+        53.85,
+        0,
+        179.9
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        1.0
+      ],
+      "cutawayWall": "Build_castle_south_ashlar_wall"
+    },
+    {
+      "asset": "potted_cypress",
+      "position": [
+        53.85,
+        0,
+        159.1
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_castle_north_ashlar_wall"
+    },
+    {
+      "asset": "potted_cypress",
+      "position": [
+        33.15,
+        0,
+        159.1
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "wall_sconce",
+      "position": [
+        36.6,
+        2.2,
+        158.71
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_castle_north_ashlar_wall"
+    },
+    {
+      "asset": "wall_sconce",
+      "position": [
+        50.4,
+        2.2,
+        158.71
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_castle_north_ashlar_wall"
+    },
+    {
+      "asset": "wall_sconce",
+      "position": [
+        54.29,
+        2.2,
+        176.8
+      ],
+      "yaw": 270,
+      "outward": [
+        1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_castle_east_ashlar_wall"
+    },
+    {
+      "asset": "wall_sconce",
+      "position": [
+        54.29,
+        2.2,
+        162.2
+      ],
+      "yaw": 270,
+      "outward": [
+        1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_castle_east_ashlar_wall"
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        21.3,
+        0,
+        174.99
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        22.8,
+        0,
+        174.99
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        29.1,
+        0,
+        174.99
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        30.6,
+        0,
+        174.99
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        20.79,
+        0,
+        182.2
+      ],
+      "yaw": 90,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_castle_west_ashlar_wall"
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        20.79,
+        0,
+        180.7
+      ],
+      "yaw": 90,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_castle_west_ashlar_wall"
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        20.79,
+        0,
+        177.1
+      ],
+      "yaw": 90,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_castle_west_ashlar_wall"
+    },
+    {
+      "asset": "lectern",
+      "position": [
+        26.5,
+        0,
+        178.8
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "writing_desk_ledgers",
+      "position": [
+        31.89,
+        0,
+        177.6
+      ],
+      "yaw": 270
+    },
+    {
+      "asset": "chair",
+      "position": [
+        31.2,
+        0,
+        177.6
+      ],
+      "yaw": 90
+    },
+    {
+      "asset": "chair",
+      "position": [
+        21.75,
+        0,
+        179.0
+      ],
+      "yaw": 100
+    },
+    {
+      "asset": "trestle_table",
+      "position": [
+        29.4,
+        0,
+        181.7
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "chair",
+      "position": [
+        28.8,
+        0,
+        180.8
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "chair",
+      "position": [
+        30.1,
+        0,
+        180.8
+      ],
+      "yaw": 345
+    },
+    {
+      "asset": "wall_sconce",
+      "position": [
+        32.29,
+        2.2,
+        182.0
+      ],
+      "yaw": 270,
+      "outward": [
+        1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_castle_east_ashlar_wall"
+    },
+    {
+      "asset": "wall_sconce",
+      "position": [
+        31.85,
+        2.2,
+        174.91
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "writing_desk_ledgers",
+      "position": [
+        20.91,
+        0,
+        162.1
+      ],
+      "yaw": 90,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_castle_west_ashlar_wall"
+    },
+    {
+      "asset": "chair",
+      "position": [
+        21.6,
+        0,
+        162.1
+      ],
+      "yaw": 270
+    },
+    {
+      "asset": "writing_desk_ledgers",
+      "position": [
+        20.91,
+        0,
+        157.9
+      ],
+      "yaw": 90,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_castle_west_ashlar_wall"
+    },
+    {
+      "asset": "chair",
+      "position": [
+        21.6,
+        0,
+        157.9
+      ],
+      "yaw": 270
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        32.01,
+        0,
+        161.5
+      ],
+      "yaw": 270
+    },
+    {
+      "asset": "crate_stack",
+      "position": [
+        31.55,
+        0,
+        156.44
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_castle_north_ashlar_wall"
+    },
+    {
+      "asset": "trestle_table",
+      "position": [
+        29.9,
+        0,
+        160.0
+      ],
+      "yaw": 90
+    },
+    {
+      "asset": "stool",
+      "position": [
+        29.0,
+        0,
+        159.1
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "supply_chest",
+      "position": [
+        31.91,
+        0,
+        163.55
+      ],
+      "yaw": 270
+    },
+    {
+      "asset": "wall_sconce",
+      "position": [
+        20.71,
+        2.2,
+        163.4
+      ],
+      "yaw": 90,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_castle_west_ashlar_wall"
+    },
+    {
+      "asset": "wall_sconce",
+      "position": [
+        32.09,
+        2.2,
+        159.4
+      ],
+      "yaw": 270
+    },
+    {
+      "asset": "wall_sconce",
+      "position": [
+        23.71,
+        2.2,
+        153.0
+      ],
+      "yaw": 90,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_castle_west_ashlar_wall"
+    },
+    {
+      "asset": "bed_single",
+      "position": [
+        74.6,
+        0,
+        297.66
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "supply_chest",
+      "position": [
+        74.6,
+        0,
+        299.05
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "wardrobe",
+      "position": [
+        70.86,
+        0,
+        302.05
+      ],
+      "yaw": 90,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_tavern_upper_west_lime_plaster"
+    },
+    {
+      "asset": "stool",
+      "position": [
+        72.5,
+        0,
+        301.5
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "wall_sconce",
+      "position": [
+        70.72,
+        1.7,
+        298.4
+      ],
+      "yaw": 90,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_tavern_upper_west_lime_plaster"
+    },
+    {
+      "asset": "bed_single",
+      "position": [
+        79.6,
+        0,
+        297.66
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "supply_chest",
+      "position": [
+        79.6,
+        0,
+        299.05
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "wardrobe",
+      "position": [
+        80.03,
+        0,
+        302.05
+      ],
+      "yaw": 270
+    },
+    {
+      "asset": "stool",
+      "position": [
+        76.5,
+        0,
+        302.5
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "wall_sconce",
+      "position": [
+        75.84,
+        1.7,
+        299.4
+      ],
+      "yaw": 90
+    },
+    {
+      "asset": "bed_single",
+      "position": [
+        83.6,
+        0,
+        302.45
+      ],
+      "yaw": 180
+    },
+    {
+      "asset": "supply_chest",
+      "position": [
+        83.6,
+        0,
+        301.05
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "stool",
+      "position": [
+        81.5,
+        0,
+        302.5
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "wall_sconce",
+      "position": [
+        80.84,
+        1.7,
+        299.6
+      ],
+      "yaw": 90
+    },
+    {
+      "asset": "bed_large",
+      "position": [
+        88.36,
+        0,
+        302.4
+      ],
+      "yaw": 270,
+      "outward": [
+        1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_tavern_upper_east_lime_plaster"
+    },
+    {
+      "asset": "supply_chest",
+      "position": [
+        86.87,
+        0,
+        302.4
+      ],
+      "yaw": 90
+    },
+    {
+      "asset": "wardrobe",
+      "position": [
+        84.97,
+        0,
+        302.25
+      ],
+      "yaw": 90
+    },
+    {
+      "asset": "dresser_crockery",
+      "position": [
+        85.01,
+        0,
+        299.5
+      ],
+      "yaw": 90
+    },
+    {
+      "asset": "stool",
+      "position": [
+        87.5,
+        0,
+        298.5
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "wall_sconce",
+      "position": [
+        89.28,
+        1.7,
+        300.4
+      ],
+      "yaw": 270,
+      "outward": [
+        1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_tavern_upper_east_lime_plaster"
+    },
+    {
+      "asset": "bench",
+      "position": [
+        77.2,
+        0,
+        291.78
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_tavern_upper_north_lime_plaster"
+    },
+    {
+      "asset": "supply_chest",
+      "position": [
+        72.1,
+        0,
+        291.9
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_tavern_upper_north_lime_plaster"
+    },
+    {
+      "asset": "potted_cypress",
+      "position": [
+        71.05,
+        0,
+        295.0
+      ],
+      "yaw": 90,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_tavern_upper_west_lime_plaster"
+    },
+    {
+      "asset": "wardrobe",
+      "position": [
+        88.0,
+        0,
+        291.85
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_tavern_upper_north_lime_plaster"
+    },
+    {
+      "asset": "wall_sconce",
+      "position": [
+        77.2,
+        1.75,
+        291.72
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_tavern_upper_north_lime_plaster"
+    },
+    {
+      "asset": "wall_sconce",
+      "position": [
+        83.0,
+        1.75,
+        291.72
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_tavern_upper_north_lime_plaster"
     }
   ]
 }

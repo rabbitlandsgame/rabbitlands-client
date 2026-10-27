@@ -41,7 +41,9 @@ What it writes into --server (route B of the serve plan, section 2.3):
                                                     legacy publisher's own serializer (publish_continent_geography.
                                                     json_bytes), then LF -> CRLF; refused unless re-serializing the
                                                     file as it stands reproduces it byte for byte. diagonalContinent
-                                                    and continentGeography are never touched.
+                                                    and continentGeography are never touched; a continentV2 key this
+                                                    tool does not write (OWNED_BLOCK_KEYS; publish_npc_metadata.py's
+                                                    npcMetadataAmendments) is carried over as it stands.
 And into this checkout: _continent_v2/publication.json (--record), what was published from what, by SHA-256: isle
 facts only (every file of every stage, the inputs' digests, row counts), the same whatever the server tree's base
 tables, code or stage, so a server-only change never makes --check differ on the client's record.
@@ -103,10 +105,11 @@ The interiors (underground.py SOURCES: content/underground.json's caves, then co
 rooms; an absent source publishes nothing) follow the isles' rows in maps.txt, spawns.txt, harvesting.txt, npcs.txt and
 interactives.txt, each under its own comment, held to underground.py's rules (each package built from its source by
 the builder its provenance names; doors, passages, nodes, encounters, interior people and interactives; object ids
-unique across every interior and apart from every isle object). Their grids are vendored beside the isles'. The
-manifest block lists every interior under interiorMaps, the caves' portal rows under undergroundPortals (row counts
-undergroundRows) and the town's building doors and stairs under buildingPortals (buildingRows); the record lists
-every interior under interiors.
+unique across every interior and apart from every isle object); an interior crafting station's target is the trade
+its text or its section's style names (station_targets: the smithy's anvil is smithing), else "crafting". Their
+grids are vendored beside the isles'. The manifest block lists every interior under interiorMaps, the caves' portal
+rows under undergroundPortals (row counts undergroundRows) and the town's building doors and stairs under
+buildingPortals (buildingRows); the record lists every interior under interiors.
 
 --check builds everything and compares it with the server tree and the record, writing nothing there (the sync runs
 into a temporary folder seeded with the server's vendored manifest); it exits 1 on any difference. --apply writes.
@@ -162,6 +165,12 @@ PROFILE = "config/eloria"
 OVERLAY = "continent-v2"
 MANIFEST = "client_content_manifest.json"
 MANIFEST_BLOCK = "continentV2"
+# The continentV2 keys this tool writes (manifest_block), whether a run emits them or not (an absent interior source
+# emits no portal rows of its kind). Any other key of the server's block is another tool's and is carried over as it
+# stands, after these: rebuilding the block whole would drop publish_npc_metadata.py's npcMetadataAmendments receipts
+# (90bb8df).
+OWNED_BLOCK_KEYS = ("schema", "tool", "stage", "overlay", "maps", "crossingsSha256", "ferries", "boats", "heldBack",
+                    "rowCounts", "interiorMaps") + tuple(key for spec in U.SOURCES for key in (spec.portals, spec.rows))
 LANDING_SCHEMA = "eloria-landing-v1"
 HOMES_SCHEMA = "eloria-homes-v1"
 LANDING_TARGETS = ("olive_grove", "lemon_garden", "sage_meadow", "flint_outcrop", "bramble_edge", "resin_pines",
@@ -179,6 +188,17 @@ MAX_LEASH = 200
 AGGRESSIVE_MAPS = frozenset({"coilmere", "suncoil", "hornmere", "whitepeak"})
 INTERACTIVE_ROLES = {"storage", "crafting_station", "training", "information", "water_source", "scenery_effect",
                      "portal", "secret", "gate", "cache", "waystone"}
+# An interior crafting station's target column names the trade it serves, as the base stations name theirs
+# (config/eloria/interactives.txt, Emberhaven: smelting at the forge, smithing at the anvil, crafting at the
+# workbench, alchemy at the table). underground.py writes a station's own `target` where its source gives one
+# (town_source.py's interactives take none yet: {object, tile, role, text}) and otherwise the role's default,
+# "crafting". station_targets() then gives a station whose text names a trade (STATION_WORDS, first match) that
+# trade, else the trade of its section's style (STATION_STYLES): the smithy's anvil, "The forge is hot. Open your
+# manufacture window to smith.", publishes as smithing. A station that needs some other target needs town_source.py
+# to accept an optional `target` key (underground.py already honours one, and this rule then leaves it alone).
+STATION_WORDS = (("smelt", "smelting"), ("smith", "smithing"), ("anvil", "smithing"), ("alchem", "alchemy"),
+                 ("potion", "alchemy"))
+STATION_STYLES = {"smithy": "smithing"}
 FORBIDDEN = ("|", "#", "\n", "\r")
 # An NPC's occupation (the line a client draws under the name), as eloria/npcs.py's loader holds it: one more
 # comma-separated option in the row's portrait column, so it may not hold a separator or the brackets drawn round it.
@@ -1069,7 +1089,42 @@ def compose(ctx, *, log=say):
     # The interiors (underground.SOURCES: the caves, then the town's rooms), with this tool's field rules.
     U.attach(ctx, pub, PublishError, fields=SimpleNamespace(plain=plain_field, occupation=occupation_field,
                                                            portrait=npc_portrait))
+    station_targets(pub)
     return pub
+
+
+def station_target(item, section):
+    """The trade an interior crafting station serves (STATION_WORDS in its text, else its section's STATION_STYLES),
+    or None for neither."""
+    text = str(item.get("text", "")).casefold()
+    for word, target in STATION_WORDS:
+        if word in text:
+            return target
+    return STATION_STYLES.get(section.get("style"))
+
+
+def station_targets(pub):
+    """Give every interior crafting station that names no `target` of its own its trade (station_target): the row
+    underground.attach wrote with the role's default target is rewritten in place in interactives.txt."""
+    data = pub.files["interactives.txt"]
+    default = U.INTERACTIVE_TARGETS["crafting_station"]
+    for interior in getattr(pub, "interiors", None) or []:
+        reader = U.reader_of(interior.spec)
+        for section in interior.design["sections"]:
+            for item in U.section_interactives(reader, section):
+                if item.get("role") != "crafting_station" or "target" in item:
+                    continue
+                target = station_target(item, section)
+                if target is None or target == default:
+                    continue
+                x, y = item["tile"]
+                head = f"\n{interior.region} | {item['object']} | {x} | {y} | crafting_station | "
+                old = f"{head}{default} | {item['text']}\r".encode("utf-8")
+                if data.count(old) != 1:
+                    raise PublishError(f"{interior.region} interactive {item['object']}: its row is not in "
+                                       "interactives.txt as underground.py writes it")
+                data = data.replace(old, f"{head}{target} | {item['text']}\r".encode("utf-8"))
+    pub.files["interactives.txt"] = data
 
 
 def isle_boat(row, portal, markers):
@@ -1496,7 +1551,7 @@ def manifest_bytes(ctx, pub, stage):
             maps.append(entry)
         else:
             maps[at] = entry
-    data[MANIFEST_BLOCK] = manifest_block(ctx, pub, stage)
+    data[MANIFEST_BLOCK] = manifest_block(ctx, pub, stage, data.get(MANIFEST_BLOCK))
     for key, value in before.items():
         if data[key] != value:
             raise PublishError(f"{key} would change")
@@ -1510,7 +1565,10 @@ def boat_entries(pub):
             for b in pub.boats]
 
 
-def manifest_block(ctx, pub, stage):
+def manifest_block(ctx, pub, stage, existing=None):
+    """The manifest's continentV2 block of `stage`: the keys this tool owns (OWNED_BLOCK_KEYS), then every other key of
+    `existing` (the server's block as it stands, when given) as it stands, in its order. The record hashes the block
+    without `existing`: isle facts only."""
     block = {
         "schema": 1, "tool": TOOL, "stage": stage,
         "overlay": {"directory": f"{PROFILE}/{OVERLAY}",
@@ -1538,6 +1596,11 @@ def manifest_block(ctx, pub, stage):
     # buildingPortals and buildingRows (underground.manifest_keys): a reader tells a cave door from a building door
     # by the list it is in
     block.update(U.manifest_keys(pub))
+    unowned = sorted(set(block) - set(OWNED_BLOCK_KEYS))
+    if unowned:
+        raise PublishError(f"the continentV2 block writes {unowned}, which OWNED_BLOCK_KEYS does not list")
+    if existing:
+        block.update({key: copy.deepcopy(value) for key, value in existing.items() if key not in OWNED_BLOCK_KEYS})
     return block
 
 

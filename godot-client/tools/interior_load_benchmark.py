@@ -30,6 +30,14 @@ TARGETS = {
     "resonant_vault": "resonant_vault",
     "sunmane_wind_caves": "sunmane_wind_caves",
     "landfall_insides": "landfall-insides",
+    "landfall_town": "landfall_town",
+}
+# The interiors whose WorldLoader places imported scenery from a config (src/world/underground_scenery.gd CONFIGS):
+# map id -> (config, the number of distinct prepared assets its placements need, or None for exactly as many as
+# the config places, and the name the refusal gives them). The config is in every run's input set (input_identity).
+SCENERY = {
+    "landfall_insides": ("data/world/underground-scenery.json", 155, "underground"),
+    "landfall_town": ("data/world/town-scenery.json", None, "town scenery"),
 }
 LOCK = Path("C:/rabbitlands/.benchmark-locks/client-performance.lock")
 DEFAULT_CACHE = ROOT / ".local/geometry-cache-runtime/Godot/app_userdata/Eloria"
@@ -115,18 +123,21 @@ def cache_entries(source_root: Path, source: str) -> tuple[Path, list[tuple[Path
     if len(matches) != 1 or len(matches[0][1]) != 1:
         raise ValueError(f"need one prepared world entry/policy for {source}; got {len(matches)}")
     policy, selected = matches[0]
-    if "landfall_insides" in source:
+    scenery = next((row for map_id, row in SCENERY.items() if map_id in Path(source).parts), None)
+    if scenery is not None:
+        config_path, count, name = scenery
         assets = []
-        config = read(PROJECT / "data/world/underground-scenery.json")
+        config = read(PROJECT / config_path)
         expected = {config["assets"][row["asset"]] for row in config["placements"]}
         # Entries use portable logical paths, while config uses res:// paths.
         expected = {"godot-client/" + p[6:] if p.startswith("res://") else p for p in expected}
+        count = len(expected) if count is None else count
         for path in policy.glob("entries/*.json"):
             entry = read(path)
             if entry.get("kind") == "asset" and entry.get("source") in expected:
                 assets.append((path, entry))
-        if len(assets) != 155 or {e["source"] for _, e in assets} != expected:
-            raise ValueError(f"all 155 underground assets must be prepared; found {len(assets)}")
+        if len(assets) != count or {e["source"] for _, e in assets} != expected:
+            raise ValueError(f"all {count} {name} assets must be prepared; found {len(assets)}")
         selected += assets
     return policy, selected
 
@@ -185,7 +196,7 @@ def input_identity() -> dict:
     for pattern in ["*.gd","*.gdshader","*.gdshaderinc"]:
         paths += list((PROJECT / "src").rglob(pattern))
     paths += [PROJECT / "data/maps/geometry-cache-scope.json", PROJECT / "data/maps/registry.json",
-              PROJECT / "data/world/underground-scenery.json", Path(__file__),
+              *(PROJECT / config for config, _count, _name in SCENERY.values()), Path(__file__),
               PROJECT / "tools/interior_load_benchmark_compare.py",PROJECT / "tools/continent_stream_benchmark.py",
               PROJECT / "tests/integration/crowd_benchmark_support.py"]
     paths += list((PROJECT / "tests/integration").glob("interior_load_benchmark*"))

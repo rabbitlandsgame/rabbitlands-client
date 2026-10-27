@@ -425,6 +425,25 @@ def test_apply_check_and_a_byte_identical_rerun(tree):
             (tree / "client" / V2 / region / "client" / "served-grid.escg.gz").read_bytes()
 
 
+def test_another_tools_keys_in_the_block_survive_a_republish(tree):
+    """publish_npc_metadata.py appends its receipts to the continentV2 block (npcMetadataAmendments): a republish
+    carries every key this tool does not own over as it stands, so --check stays clean and --apply keeps it."""
+    assert publish(tree, "--apply").returncode == 0
+    path = tree / "server/config/eloria/client_content_manifest.json"
+    data = json.loads(path.read_bytes())
+    receipt = {"tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_npc_metadata.py", "region": "landfall",
+               "addedNpcMarkers": ["landfall--npc-new"], "scope": "added NPC rows only"}
+    data["continentV2"]["npcMetadataAmendments"] = [receipt]
+    path.write_bytes(manifest_bytes(data))
+    check = publish(tree, "--check")
+    assert check.returncode == 0, check.stderr + check.stdout
+    result = publish(tree, "--apply")
+    assert result.returncode == 0, result.stderr + result.stdout
+    block = json.loads(path.read_bytes())["continentV2"]
+    assert block["npcMetadataAmendments"] == [receipt] and list(block)[-1] == "npcMetadataAmendments"
+    assert set(block) - {"npcMetadataAmendments"} <= set(P.OWNED_BLOCK_KEYS)
+
+
 def test_catalog_retirements_remove_only_stale_grids_and_check_orphan_blobs(tree):
     retired = ["sw_isle", "tollholms", "gull_skerries"]  # Exact historical retirement inputs.
     catalog_path = tree / "client" / F.CATALOG

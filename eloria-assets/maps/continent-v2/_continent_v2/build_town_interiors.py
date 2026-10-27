@@ -45,6 +45,8 @@ WHAT IS DRAWN, PER SECTION (mesh node `<bucket>_<material>`):
   Door_<s>        the daylight spilling in at each street door, on the floor (not cut, so a door reads with its wall
                   gone)
   Decal_<s>       floor decals (rugs, inlays)
+Surface textures repeat (the glTF sampler 0); decal textures, wall and floor alike, clamp to their edge
+(DECAL_SAMPLER), as single pictures.
 Props that name a `wall` carry that wall's outward direction (dressing()), so the cutaway drops them with it.
 
 WALK GRID: half-metre cells are open on the floor at least the theme's margin from an outer wall or a partition's
@@ -163,6 +165,9 @@ SURFACES = {
 # a decal's placeholder colour, by id prefix (the codex art replaces it)
 DECAL_PLACEHOLDERS = (('banner_', (128, 44, 42)), ('rug_', (142, 56, 42)), ('map_', (216, 198, 152)),
                       ('star_', (38, 46, 82)), ('botanical_', (224, 214, 186)))
+# A decal is one picture, not a tile: its texture samples CLAMP_TO_EDGE (33071), so a banner's or a rug's far edge
+# never bleeds in along the near one at low mip levels. The surfaces keep the builder's REPEAT sampler 0 (10497).
+DECAL_SAMPLER = {'magFilter': 9729, 'minFilter': 9987, 'wrapS': 33071, 'wrapT': 33071}
 MAX_TEXTURE = 1024
 # the shell's own flat materials
 FLAT = {
@@ -273,7 +278,20 @@ def register_materials(builder, used):
             builder.add_material(G.Material(name, **FLAT[name]))
         else:
             raise SystemExit(f'no material {name!r} in SURFACES or FLAT')
+    clamp_decals(builder)
     return record
+
+
+def clamp_decals(builder):
+    """Give every decal texture (image `decal_<id>`) the DECAL_SAMPLER, added once after the builder's REPEAT sampler 0;
+    surface textures keep sampler 0. Runs after every material is registered."""
+    decals = {index for index, image in enumerate(builder._images) if image['name'].startswith('decal_')}
+    if not decals:
+        return
+    builder._samplers.append(dict(DECAL_SAMPLER))
+    for texture in builder._textures:
+        if texture['source'] in decals:
+            texture['sampler'] = len(builder._samplers) - 1
 
 
 # --- the source ----------------------------------------------------------------------------------------------------

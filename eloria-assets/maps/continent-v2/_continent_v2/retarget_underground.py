@@ -1,6 +1,7 @@
 """retarget_underground.py: follow a partition change at the interior doors without rebuilding the interiors.
 
-  python -B eloria-assets/maps/continent-v2/_continent_v2/retarget_underground.py [--check] [--server <checkout>]
+  python -B eloria-assets/maps/continent-v2/_continent_v2/retarget_underground.py [--check] [--server <checkout>] \
+         [--map <interior map id>]
 
 The interior sources are underground.py SOURCES: content/underground.json (the caves, landfall_insides, built by
 build_underground.py) and content/landfall_town.json (the town's rooms, landfall_town, built by
@@ -23,14 +24,26 @@ only those:
   * a section renamed in the source renames only labels: its spawn point and chambers, its exits' "Leave <name>" (a
     building door's exit is labelled by its `exitLabel`), the passage portals into it ("On into <name>") and its
     entrance art's label in objects.json (ids, geometry and collision keep the built section's);
-  * objects.json holds a record per passage end (pass 2): {passage: true, height 3.6, radius 1.6, label: the section
-    the end leads into}, so the client gives the way on a full-height pick and no stand-in model; and a record per
-    building door: {entrance: true, building: true, exteriorTile, label, exitLabel, category?, height 3.0, radius
-    1.2}, no `scene` (the door is painted on the facade; export_collision.py stands no art for it). The same id serves
-    the door's interior exit. Records of passage ends and building doors that no source has any longer are dropped;
-    a record another source owns is never touched;
+  * objects.json holds a record per passage end (pass 2): {passage: true, height 3.6, radius 1.6, label: the end's
+    own `label` (the town's stairs: "Upstairs: the guest rooms", as the package and the server name it), else the
+    section the end leads into (the caves)}, so the client gives the way on a full-height pick, no stand-in model and
+    its hover name (map_object_3d.gd destination()); and a record per building door: {entrance: true, building: true,
+    exteriorTile, modelOffset, label, exitLabel, exitOffset?, category?, height 3.0, radius 1.2}, no `scene` (the door
+    is painted on the facade; export_collision.py stands no art for it). `modelOffset` [dx, 0, dz] is the painted door
+    point (`position`) minus the door tile's centre in the exterior map's metres (its frame, frames.py), so the
+    client's pick and label stand on the painted door rather than on the step in front of it. The same id serves the
+    door's interior exit, whose street door build_town_interiors.py sets in the wall one tile beyond the exit tile,
+    the way `exitFacing` points: `exitOffset` [fx, 0, -fy] (tile +y is world -Z) moves that end's pick and label
+    into the doorway. Records of passage ends and building doors that no source has any longer are dropped; a record
+    another source owns is never touched;
   * each package's provenance.sourceSha256 becomes its source's hash. Nothing else in a package changes, and its
     builder hash must still be the builder its provenance names (the source's builder in underground.SOURCES).
+--map <id> retargets one interior only (landfall_insides, the caves; landfall_town, the town): its source, its package
+and its doors' and passage ends' records in objects.json. Every other source is still read, for its object ids (a
+clash is refused, and its records are never taken for stale), but its source, package and records stay as they are;
+a stale record no source owns any longer is listed under "orphans" and left for a run over every interior. Use it
+when another interior's package must not be rewritten here (the caves' recorded source hash drifts while their
+geometry does not: the publication decides when to rewrite it).
 --check writes nothing and exits 1 when any file would change.
 """
 from __future__ import annotations
@@ -147,6 +160,42 @@ def check_building_door(section, door, grids, checkout):
                          f"{tile}")
 
 
+def _metres(value):
+    """A record's offset component: millimetres, and never -0.0."""
+    return round(float(value), 3) + 0.0
+
+
+def door_offset(door, checkout):
+    """A building door's `modelOffset` [dx, 0, dz]: its painted point (`position`, exterior metres) minus its tile's
+    centre in the exterior map's frame (frames.py, the frame check_building_door reads the tile rule in)."""
+    frame = F.load_source(door["map"], checkout)
+    cx, cz = frame.local(*door["tile"])
+    px, _, pz = door["position"]
+    return [_metres(px - cx), 0.0, _metres(pz - cz)]
+
+
+def exit_offset(door):
+    """A building door's `exitOffset` [fx, 0, -fy] at its interior exit: the street door stands in the wall one tile
+    beyond the exit tile, the way `exitFacing` points (build_town_interiors.door_geometry; tile +y is world -Z).
+    None for a door without an exitFacing."""
+    facing = door.get("exitFacing")
+    if not facing:
+        return None
+    return [_metres(facing[0]), 0.0, _metres(-facing[1])]
+
+
+def building_record(door, checkout):
+    """objects.json's record of a building door (both ends: one id serves the street door and the interior exit)."""
+    record = {"entrance": True, "building": True, "exteriorTile": list(door["tile"]),
+              "modelOffset": door_offset(door, checkout), "label": door["label"], "exitLabel": door["exitLabel"]}
+    inside = exit_offset(door)
+    if inside is not None:
+        record["exitOffset"] = inside
+    if door.get("category"):
+        record["category"] = door["category"]
+    return {**record, **BUILDING_DOOR}
+
+
 def exit_label(section, door):
     """A door's way out, as its builder labels it: a building door's exitLabel, a cave door's "Leave <section>"."""
     return door.get("exitLabel") or f'Leave {section["name"]}'
@@ -169,13 +218,19 @@ def room_spaces(design):
     return keys
 
 
-def retarget(checkout: Path, server=None):
+def retarget(checkout: Path, server=None, only=None, notes=None):
+    """The rewritten files {path: bytes} (only those that change are written), the exits retargeted and the interiors
+    whose package is not built. `only` (an interior map id, --map) limits the rewrite to that interior; `notes` (a
+    dict, when given) receives "orphans": the stale records a run limited by `only` left in place."""
     outputs, changed, unbuilt = {}, 0, []
     grids = Grids(checkout, server)
     objects_path = checkout / "godot-client/data/world/objects.json"
     objects = json.loads(objects_path.read_bytes())
     authored = objects["authoredObjects"]
     all_doors, all_ends, buildings = {}, {}, {}
+    # every source's ids, read even when --map leaves the source alone: a clash between interiors is refused, and a
+    # record another interior owns is never stale
+    owners, building_ids, end_ids, interiors = {}, set(), set(), []
     for spec in U.SOURCES:
         path = source_path(spec)
         if not path.is_file():
@@ -183,6 +238,18 @@ def retarget(checkout: Path, server=None):
         reader = U.reader_of(spec)
         text = path.read_text(encoding="utf-8")
         design = json.loads(text)
+        region = design["map"]["id"]
+        interiors.append(region)
+        listed = [door for s in design["sections"] for door in reader.doors(s)]
+        passage_ends = [end for passage in reader.passages(design) for end in passage["ends"]]
+        for object_id in [door["object"] for door in listed] + [end["object"] for end in passage_ends]:
+            if object_id in owners:
+                raise SystemExit(f"{spec.source}: object id {object_id} is another interior's too")
+            owners[object_id] = region
+        building_ids.update(door["object"] for door in listed if door.get("kind", spec.kind) == "building")
+        end_ids.update(end["object"] for end in passage_ends)
+        if only is not None and region != only:
+            continue
         source = door_lines(text, design, checkout, spec.kind).encode("utf-8")
         if json.loads(source) != design:
             raise SystemExit("the textual edit does not match the intended source")
@@ -195,29 +262,27 @@ def retarget(checkout: Path, server=None):
                 buildings[object_id] = door
         names = {s["id"]: s["name"] for s in design["sections"]}
         ends = {end["object"]: end for passage in reader.passages(design) for end in passage["ends"]}
-        for object_id in [*doors, *ends]:
-            if object_id in all_doors or object_id in all_ends:
-                raise SystemExit(f"{spec.source}: object id {object_id} is another interior's too")
         all_doors.update({oid: (door, owner[oid]) for oid, door in doors.items()})
-        all_ends.update({oid: (end, names[end["to"]]) for oid, end in ends.items()})   # the record: where it leads
-        package_path = checkout / "eloria-assets/maps/continent-v2" / design["map"]["id"] / "client/world.json"
+        # the record's label: the end's own (the town's stairs), else the section it leads into (the caves)
+        all_ends.update({oid: (end, end.get("label") or names[end["to"]]) for oid, end in ends.items()})
+        package_path = checkout / "eloria-assets/maps/continent-v2" / region / "client/world.json"
         if not package_path.is_file():
-            unbuilt.append(design["map"]["id"])
+            unbuilt.append(region)
             continue
         raw = package_path.read_bytes()
         package = json.loads(raw)
         provenance = package.get("provenance", {})
         builder = HERE / Path(str(provenance.get("builder", ""))).name
         if builder.name != spec.builder:
-            raise SystemExit(f"the {design['map']['id']} package was built by another builder than {spec.builder}; "
+            raise SystemExit(f"the {region} package was built by another builder than {spec.builder}; "
                              "refusing to retarget it")
         if not builder.is_file() or provenance.get("builderSha256") != sha(builder.read_bytes()):
-            raise SystemExit(f"{spec.builder} changed since the {design['map']['id']} build: rebuild it with "
+            raise SystemExit(f"{spec.builder} changed since the {region} build: rebuild it with "
                              f"{spec.builder}; retargeting cannot")
         for name, digest in (provenance.get("imports") or {}).items():
             helper = HERE / Path(name).name
             if not helper.is_file() or sha(helper.read_bytes()) != digest:
-                raise SystemExit(f"{helper.name}, which {spec.builder} imports, changed since the {design['map']['id']} "
+                raise SystemExit(f"{helper.name}, which {spec.builder} imports, changed since the {region} "
                                  f"build: rebuild it with {spec.builder}; retargeting cannot")
         for key in ("portals", "interactives"):
             for item in package.get(key, []):
@@ -243,7 +308,7 @@ def retarget(checkout: Path, server=None):
             else:
                 item["name"] = rooms[item["section"]][int(str(item["id"]).rsplit("-", 1)[1])]
         if "spaces" in package and sorted(package["spaces"]) != sorted(room_spaces(design)):
-            raise SystemExit(f"the {design['map']['id']} package's rooms are not the source's roomNames (its music "
+            raise SystemExit(f"the {region} package's rooms are not the source's roomNames (its music "
                              f"spaces are keyed by them): rebuild it with {spec.builder}")
         for key in ("portals", "interactives"):
             for item in package.get(key, []):
@@ -253,6 +318,8 @@ def retarget(checkout: Path, server=None):
         indent = 1 if raw.startswith(b'{\n "') else (2 if raw.startswith(b'{\n  "') else None)
         outputs[package_path] = (json.dumps(package, indent=indent, ensure_ascii=False)
                                  + ("\n" if raw.endswith(b"\n") else "")).encode("utf-8")
+    if only is not None and only not in interiors:
+        raise SystemExit(f"--map {only}: no interior source authors it (the interiors: {', '.join(interiors)})")
     # the client's entrance art stands on each cave door's exterior tile (export_collision.py reads it there)
     for object_id, (door, section) in all_doors.items():
         record = authored.get(str(object_id))
@@ -264,21 +331,25 @@ def retarget(checkout: Path, server=None):
                                  "cannot share it")
             record["exteriorTile"] = list(door["tile"])
             record["label"] = section["name"]
-    # a building door stands no model: the door is the facade's, picked by the record (map_object_3d.gd); one id
-    # serves both ends, so the record also carries the label of the way out
-    for key in [k for k, record in authored.items() if record.get("building") and int(k) not in buildings]:
-        del authored[key]
+    # stale records: a building door's or a passage end's that no source has any longer. A run over every interior
+    # drops them; a --map run drops only those whose id its own interior now uses otherwise, and lists the rest
+    stale = [key for key, record in authored.items()
+             if (record.get("building") and int(key) not in building_ids)
+             or (record.get("passage") and int(key) not in end_ids)]
+    kept = [key for key in stale if only is not None and owners.get(int(key)) != only]
+    for key in stale:
+        if key not in kept:
+            del authored[key]
+    if notes is not None:
+        notes["orphans"] = sorted(kept, key=int)
+    # a building door stands no model: the door is the facade's, picked by the record (map_object_3d.gd) where the
+    # record's modelOffset puts the painted door; one id serves both ends, so the record also carries the way out
     for object_id, door in sorted(buildings.items()):
         record = authored.get(str(object_id))
         if record is not None and not record.get("building"):
             raise SystemExit(f"objects.json {object_id} already holds another object's record")
-        authored[str(object_id)] = {"entrance": True, "building": True, "exteriorTile": list(door["tile"]),
-                                    "label": door["label"], "exitLabel": door["exitLabel"],
-                                    **({"category": door["category"]} if door.get("category") else {}),
-                                    **BUILDING_DOOR}
+        authored[str(object_id)] = building_record(door, checkout)
     # a passage end stands no model: the way on is the builder's mouth, picked at full height (map_object_3d.gd)
-    for key in [k for k, record in authored.items() if record.get("passage") and int(k) not in all_ends]:
-        del authored[key]
     for object_id, (end, label) in sorted(all_ends.items()):
         record = authored.get(str(object_id))
         if record is not None and not record.get("passage"):
@@ -295,16 +366,21 @@ def main() -> int:
     parser.add_argument("--checkout", type=Path, default=F.DEFAULT_CHECKOUT)
     parser.add_argument("--server", type=Path, default=os.environ.get("ELORIA_SERVER_ROOT"),
                         help="the server checkout whose served-grid codec reads the exterior grids (building doors)")
+    parser.add_argument("--map", dest="only", metavar="MAP_ID",
+                        help="retarget this interior only (its source, package and objects.json records); every "
+                             "other source is read for its ids and left as it is")
     args = parser.parse_args()
-    outputs, changed, unbuilt = retarget(args.checkout.resolve(), args.server)
+    notes = {}
+    outputs, changed, unbuilt = retarget(args.checkout.resolve(), args.server, args.only, notes)
     stale = [str(p) for p, raw in outputs.items() if not p.is_file() or p.read_bytes() != raw]
+    extra = {"orphans": notes["orphans"]} if notes.get("orphans") else {}
     if args.check:
-        print(json.dumps({"stale": stale, "unbuilt": unbuilt}, indent=1))
+        print(json.dumps({"stale": stale, "unbuilt": unbuilt, **extra}, indent=1))
         return 1 if stale else 0
     for path, raw in outputs.items():
         if not path.is_file() or path.read_bytes() != raw:
             path.write_bytes(raw)
-    print(json.dumps({"written": stale, "exitsRetargeted": changed, "unbuilt": unbuilt}, indent=1))
+    print(json.dumps({"written": stale, "exitsRetargeted": changed, "unbuilt": unbuilt, **extra}, indent=1))
     return 0
 
 

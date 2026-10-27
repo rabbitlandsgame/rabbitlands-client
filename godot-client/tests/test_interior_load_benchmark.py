@@ -337,5 +337,43 @@ class OwnedProcessSupervision(unittest.TestCase):
         self.assertEqual(events[-1],"sampler_close")
 
 
+class TownTargetTests(unittest.TestCase):
+    """landfall_town (Landfall Town, 2026-10-27): a target whose scenery config is in every run's input set and
+    whose prepared closure holds exactly the assets town-scenery.json places."""
+
+    def test_town_is_a_target_with_its_scenery_in_the_input_set(self):
+        self.assertIn("landfall_town",bench.TARGETS)
+        self.assertEqual(bench.SCENERY["landfall_town"][0],"data/world/town-scenery.json")
+        inputs = bench.input_identity()
+        for config in ["godot-client/data/world/town-scenery.json","godot-client/data/world/underground-scenery.json"]:
+            self.assertIn(config,inputs)
+
+    def test_town_closure_is_its_world_and_every_placed_asset(self):
+        parent = bench.ROOT / ".local/interior-load-benchmark/unit-fixtures"
+        parent.mkdir(parents=True,exist_ok=True)
+        with tempfile.TemporaryDirectory(dir=parent) as folder:
+            root = Path(folder)
+            config = root/"town-scenery.json"
+            bench.write(config,{"map":"landfall_town","assets":{"bench":"res://assets/world/underground/bench.glb",
+                                                                "keg":"res://assets/world/underground/keg.glb"},
+                                "placements":[{"asset":"bench"},{"asset":"keg"},{"asset":"bench"}]})
+            policy = root/"source/map-geometry-cache/policy"
+            (policy/"entries").mkdir(parents=True)
+            world = "eloria-assets/maps/continent-v2/landfall_town/client/world.json"
+            bench.write(policy/"entries/world.json",{"source":world,"kind":"world","payloads":{}})
+            for name in ["bench","keg","unplaced"]:
+                bench.write(policy/f"entries/{name}.json",{"source":f"godot-client/assets/world/underground/{name}.glb",
+                                                           "kind":"asset","payloads":{}})
+            scenery = {**bench.SCENERY,"landfall_town":(str(config),None,"town scenery")}
+            with patch.object(bench,"SCENERY",scenery):
+                _, selected = bench.cache_entries(root/"source",world)
+                self.assertEqual(sorted(entry["source"] for _, entry in selected),
+                                 [world,"godot-client/assets/world/underground/bench.glb",
+                                  "godot-client/assets/world/underground/keg.glb"])
+                (policy/"entries/keg.json").unlink()
+                with self.assertRaisesRegex(ValueError,"all 2 town scenery assets must be prepared; found 1"):
+                    bench.cache_entries(root/"source",world)
+
+
 if __name__ == "__main__":
     unittest.main()
