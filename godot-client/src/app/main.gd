@@ -4131,6 +4131,7 @@ func _exit_tree() -> void:
 	if _geometry_maintenance_active:
 		# Explicit maintenance exits before these entry helpers acquire parents.
 		for helper: Variant in [remote_presentation, character_intro, campaign_scene,
+				campaign_guidance, campaign_crossing, campaign_cart, campaign_rescue, campaign_cutaway,
 				campaign_hud, campaign_works, campaign_bank_works, campaign_road_works,
 				campaign_lamps_works, arrival_curtain, quest_trail, mount_status]:
 			if is_instance_valid(helper) and helper is Node and helper.get_parent() == null:
