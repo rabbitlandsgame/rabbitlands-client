@@ -106,11 +106,20 @@ func _sample_fragments(surfaces: Array[Dictionary], total_vertices: int, rng: Ra
 				break
 			# Keep the original surface/triangle RNG ranges and call order.
 			# The chosen physical partition supplies only its corner indices.
-			var sampled := SurfaceSampling.triangle(surface,rng.randi_range(0,int(surface.triangles)-1))
-			var physical: Dictionary = sampled.surface
+			var original := rng.randi_range(0,int(surface.triangles)-1)
+			var physical: Dictionary = surface
+			var local_triangle := original
+			if surface.has("partition"):
+				var partition: Dictionary = surface.partition
+				physical = partition.remainder
+				local_triangle = original - partition.ids.bsearch(original)
+				for part: Dictionary in partition.selected:
+					var found: int = part.ids.bsearch(original)
+					if found < part.ids.size() and part.ids[found] == original:
+						physical = part.surface; local_triangle = found; break
 			var arrays: Array = physical.arrays
 			var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX] if arrays[Mesh.ARRAY_INDEX] != null else PackedInt32Array()
-			var triangle := int(sampled.triangle) * 3
+			var triangle := local_triangle * 3
 			var corners := PackedVector3Array()
 			for corner in 3:
 				var vertex := indices[triangle + corner] if not indices.is_empty() else triangle + corner

@@ -175,14 +175,41 @@ func metadata_guards() -> void:
 		selected.mesh.set_meta("extras",{Sampling.KEY:bad})
 		expect(not Sampling.virtual_surfaces(collect(b.actor,effect)).errors.is_empty(),"invalid partition record rejected: "+mutation)
 	selected.mesh.set_meta("extras",{Sampling.KEY:good})
+	expect(Sampling.virtual_surfaces(collect(b.actor,effect)).errors.is_empty(),"restoring metadata after invalidation rebuilds the correct record")
+	selected.skin.set_bind_name(0,"MissingJoint")
+	expect(not Sampling.virtual_surfaces(collect(b.actor,effect)).errors.is_empty(),"warm cache still validates instance skin bindings")
+	selected.skin.set_bind_name(0,"Joint0")
+	expect(Sampling.virtual_surfaces(collect(b.actor,effect)).errors.is_empty(),"restored instance bindings reuse static data safely")
+	var resource_weak: WeakRef = weakref(selected.mesh)
+	var actor_weak: WeakRef = weakref(b.actor)
+	var skin_weak: WeakRef = weakref(selected.skin)
+	var material_weak: WeakRef = weakref(selected.mesh.surface_get_material(0))
 	a.actor.free(); b.actor.free()
+	b.clear() # The fixture itself also owns an unsplit reference mesh/material.
+	all.clear(); sampling.clear(); repeated.clear()
+	expect(resource_weak.get_ref() == null,"sampling cache does not retain an imported mesh or actor")
+	expect(actor_weak.get_ref() == null and skin_weak.get_ref() == null and material_weak.get_ref() == null,"sampling cache retains no actors, skins or materials")
+	Sampling.clear_cache()
+	expect(Sampling._cache.is_empty(),"cache may be cleared independently of effect reset")
+	var kept: Array[Node3D] = []
+	for index in Sampling.CACHE_LIMIT + 2:
+		var fixture := make_fixture(true,4,.1)
+		kept.append(fixture.actor)
+		expect(Sampling.virtual_surfaces(collect(fixture.actor,effect)).errors.is_empty(),"bounded-cache fixture validates")
+	expect(Sampling._cache.size() <= Sampling.CACHE_LIMIT,"static sampling cache has a strict size bound")
+	for actor in kept: actor.free()
+	Sampling.clear_cache()
 
 func run() -> void:
 	var legacy: Script = Dissolve
 	var report_path := ""
+	var buffer_path := ""
+	var buffer_proofs := []
 	for argument: String in OS.get_cmdline_user_args():
 		if argument.begins_with("--legacy="): legacy = load(argument.trim_prefix("--legacy=")) as Script
 		if argument.begins_with("--report="): report_path = argument.trim_prefix("--report=")
+		if argument.begins_with("--buffers="): buffer_path = argument.trim_prefix("--buffers=")
+	if not buffer_path.is_empty(): DirAccess.make_dir_recursive_absolute(buffer_path)
 	var gpu := DisplayServer.get_name() != "headless"
 	metadata_guards()
 	for slots in [4,8]:
@@ -221,6 +248,14 @@ func run() -> void:
 						var before: PackedFloat32Array = baseline._ash.multimesh.buffer
 						var after: PackedFloat32Array = effect._ash.multimesh.buffer
 						expect(not before.is_empty() and before == after,"GPU fragment transforms/colors/custom-data preserved")
+						if not buffer_path.is_empty():
+							var label := "%s-%s-%s" % [slots,pose,seed_value]
+							var before_bytes := before.to_byte_array(); var after_bytes := after.to_byte_array()
+							FileAccess.open(buffer_path.path_join(label+"-old.f32"),FileAccess.WRITE).store_buffer(before_bytes)
+							FileAccess.open(buffer_path.path_join(label+"-new.f32"),FileAccess.WRITE).store_buffer(after_bytes)
+							var old_hash := HashingContext.new(); old_hash.start(HashingContext.HASH_SHA256); old_hash.update(before_bytes)
+							var new_hash := HashingContext.new(); new_hash.start(HashingContext.HASH_SHA256); new_hash.update(after_bytes)
+							buffer_proofs.append({"case":label,"bytes":before_bytes.size(),"old_sha256":old_hash.finish().hex_encode(),"new_sha256":new_hash.finish().hex_encode()})
 						gpu_cases += 1
 				baseline.update(1.0); effect.update(1.0)
 				expect(not baseline._ash.visible and not effect._ash.visible,"completion visibility preserved")
@@ -228,7 +263,7 @@ func run() -> void:
 				verify_resources(saved_a); verify_resources(saved_b)
 				expect(baseline._ash == null and effect._ash == null,"revival removes fragment batches")
 				a.actor.free(); b.actor.free()
-	var report := {"passed":failures.is_empty(),"checks":checks,"failures":failures,"gpu_cases":gpu_cases,"legacy_reference_supplied":legacy != Dissolve}
+	var report := {"passed":failures.is_empty(),"checks":checks,"failures":failures,"gpu_cases":gpu_cases,"legacy_reference_supplied":legacy != Dissolve,"buffer_proofs":buffer_proofs}
 	if not report_path.is_empty(): FileAccess.open(report_path,FileAccess.WRITE).store_string(JSON.stringify(report,"\t"))
 	print("CREATURE_SURFACE_SAMPLING ",JSON.stringify(report))
 	quit(0 if failures.is_empty() else 1)
