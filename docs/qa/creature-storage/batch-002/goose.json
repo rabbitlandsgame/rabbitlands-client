@@ -518,7 +518,7 @@
   },
   "mount_audit": "No active mount configuration references this actor. Original appearance mesh/material/UV attributes and full hierarchy remain exact. No coat override or new surface was introduced.",
   "visual_review": "Source/candidate gameplay, flight, side, rear and death contact boards reviewed; appearance and motion preserved. All full24fps native cycles retained as paired videos with original exact PNGs in verified archive. Existing draft review remains pending.",
-  "runtime_tradeoff": "17 fewer corrective slots and fewer animation key rows reduce imported data and GPU storage. Skin influences, vertices, surfaces and bones remain unchanged. No new recurring CPU operation. Frame-time improvement not benchmarked; existing remaining correctives still run.",
+  "runtime_tradeoff": "Removed key rows reduce the encoded file payload. The current glTF builder resamples at the unchanged declared FPS, so file reduction alone does not establish smaller retained runtime animations or lower CPU/frame cost. Corrective payload savings are measured separately; runtime animation RAM and frame time were not benchmarked. Original bones, skin influence layout and surface counts remain.",
   "reproduce": "python eloria-assets/tools/pack_creature_storage.py --source <immutable-original-goose.glb> --output <candidate.glb> --bounds eloria-assets/source/creature-storage/goose.bounds.json --report <processing.json>",
   "private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\bird-storage\\goose\\v1",
   "media": {

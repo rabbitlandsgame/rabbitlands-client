@@ -535,7 +535,7 @@
   "runtime_tradeoff": {
     "gpu_corrective_bytes_saved": 0,
     "compressed_install_bytes_saved": -6856,
-    "interpretation": "Fewer imported key rows reduce animation data. Inactive corrective slots reduce GPU storage where present. Original bone count, skin influences, vertex count and draw surfaces remain unchanged. No new recurring CPU operation; frame-time change was not benchmarked. Tiny compressed-byte increases from changed layout are reported rather than treated as install savings."
+    "interpretation": "Removed key rows reduce the encoded file payload. The current glTF builder resamples at the unchanged declared FPS, so file reduction alone does not establish smaller retained runtime animations or lower CPU/frame cost. Corrective payload savings are measured separately; runtime animation RAM and frame time were not benchmarked. Original bones, skin influence layout and surface counts remain."
   },
   "checks": {
     "source_gate_and_packer_unit_tests": "19 passed",

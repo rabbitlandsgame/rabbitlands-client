@@ -613,7 +613,7 @@
     "corrective_payload_bytes_saved": 0,
     "compressed_install_bytes_saved": -17684,
     "draw_surfaces_added": 0,
-    "interpretation": "Less imported key data and, where qualified, less corrective GPU payload. Original skeleton and skin influence count retained. Gnoll adds one mesh/draw surface, trading scene/draw overhead for fewer corrected vertices. Frame-time change not benchmarked. Small compressed-byte increases from layout changes are disclosed."
+    "interpretation": "Removed key rows reduce the encoded file payload. The current glTF builder resamples at the unchanged declared FPS, so file reduction alone does not establish smaller retained runtime animations or lower CPU/frame cost. Corrective payload savings are measured separately; runtime animation RAM and frame time were not benchmarked. Original bones, skin influence layout and surface counts remain."
   },
   "checks": {
     "targeted_packer_metadata_source_tests": "58 passed",
