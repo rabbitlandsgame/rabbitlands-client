@@ -1,0 +1,593 @@
+{
+  "schema_version": 1,
+  "batch": 3,
+  "rank": 13,
+  "actor": "saltmarsh_crocodile",
+  "status": "Qualified exact storage reduction. Existing animation draft and review status preserved; no new artistic approval.",
+  "source_sha256": "d3f5eba4815ab89a85b41b7201df152a25942decc0d5a7cf0bd3e2e32248e6c2",
+  "candidate_sha256": "d0d8ba1092eb7394cbb22cd2460ea5c8fc8c978d044568fa672c8d6258493554",
+  "source_bytes": 56864860,
+  "candidate_bytes": 56669016,
+  "source_zstd_bytes": 36454533,
+  "candidate_zstd_bytes": 36486785,
+  "shared_gpu_source_bytes": 65047080,
+  "shared_gpu_candidate_bytes": 65047080,
+  "draw_surfaces_source": 1,
+  "draw_surfaces_candidate": 1,
+  "source_lods": [
+    0
+  ],
+  "candidate_lods": [
+    0
+  ],
+  "zstd_level": 3,
+  "source_vertices": 5138,
+  "targets_before": 633,
+  "targets_after": 633,
+  "removed_target_indices": [],
+  "removed_exact_flat_keys": 18793,
+  "rig_audit": {
+    "safe_corrective_free_islands": 0,
+    "qualified_rigid_islands": 0,
+    "decision": "No additional skin or rig change qualifies under the exact-preservation test. Keep every original surface, skin influence, bone and hierarchy relationship."
+  },
+  "geometry_vertex_mapping": {
+    "kind": "identity",
+    "count": 5138,
+    "rule": "Candidate vertex i equals original vertex i; all primitives, vertex ordering and topology retained."
+  },
+  "logical_actor_bounds_preserved": {
+    "source_sha256": "d3f5eba4815ab89a85b41b7201df152a25942decc0d5a7cf0bd3e2e32248e6c2",
+    "meshes": [
+      {
+        "source_node": 52,
+        "position": [
+          -1.02798962593079,
+          -4.80609969599755e-06,
+          -4.72268295288086
+        ],
+        "size": [
+          2.06066179275513,
+          1.36263585090637,
+          7.02093172073364
+        ]
+      }
+    ]
+  },
+  "exact_source_validation": {
+    "passed": true,
+    "source_sha256": "d3f5eba4815ab89a85b41b7201df152a25942decc0d5a7cf0bd3e2e32248e6c2",
+    "candidate_sha256": "d0d8ba1092eb7394cbb22cd2460ea5c8fc8c978d044568fa672c8d6258493554",
+    "geometry_skin_binds_rest_topology_uv_material_image_bits_preserved": true,
+    "retained_key_time_and_value_bits_exact_only_flat_interiors_removed": true,
+    "every_removed_default_and_key_is_zero": true,
+    "redundant_flat_key_rows_proved": 18793,
+    "clips": {
+      "Death_A": {
+        "original_knots": 2157,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 4314
+      },
+      "Fighting_Idle": {
+        "original_knots": 589,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 1182
+      },
+      "Hit_Chest": {
+        "original_knots": 511,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 1026
+      },
+      "Idle_A": {
+        "original_knots": 1305,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 2614
+      },
+      "Jog": {
+        "original_knots": 1886,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 3776
+      },
+      "Sword_Attack": {
+        "original_knots": 813,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 1630
+      },
+      "Walk": {
+        "original_knots": 2999,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 5998
+      }
+    },
+    "proof": "Zero defaults and every LINEAR/STEP key zero prove inactive targets remain zero continuously and under crossfades. All retained accessor bytes and retained time/value rows are exact. Deleted key rows sit strictly inside three bit-identical adjacent rows; plateau boundaries and endpoints remain."
+  },
+  "numeric_source_validation": {
+    "passed": true,
+    "source_sha256": "d3f5eba4815ab89a85b41b7201df152a25942decc0d5a7cf0bd3e2e32248e6c2",
+    "candidate_sha256": "d0d8ba1092eb7394cbb22cd2460ea5c8fc8c978d044568fa672c8d6258493554",
+    "probe_vertices": 217,
+    "clips": {
+      "Death_A": {
+        "source_knots": 2157,
+        "keys_midpoints_and_offgrid_samples": 4318,
+        "maximum_position_error": 0.0,
+        "maximum_normal_vector_error": 0.0
+      },
+      "Fighting_Idle": {
+        "source_knots": 589,
+        "keys_midpoints_and_offgrid_samples": 1182,
+        "maximum_position_error": 0.0,
+        "maximum_normal_vector_error": 0.0
+      },
+      "Hit_Chest": {
+        "source_knots": 511,
+        "keys_midpoints_and_offgrid_samples": 1026,
+        "maximum_position_error": 0.0,
+        "maximum_normal_vector_error": 0.0
+      },
+      "Idle_A": {
+        "source_knots": 1305,
+        "keys_midpoints_and_offgrid_samples": 2614,
+        "maximum_position_error": 0.0,
+        "maximum_normal_vector_error": 0.0
+      },
+      "Jog": {
+        "source_knots": 1886,
+        "keys_midpoints_and_offgrid_samples": 3776,
+        "maximum_position_error": 0.0,
+        "maximum_normal_vector_error": 0.0
+      },
+      "Sword_Attack": {
+        "source_knots": 813,
+        "keys_midpoints_and_offgrid_samples": 1630,
+        "maximum_position_error": 0.0,
+        "maximum_normal_vector_error": 0.0
+      },
+      "Walk": {
+        "source_knots": 2999,
+        "keys_midpoints_and_offgrid_samples": 6002,
+        "maximum_position_error": 0.0,
+        "maximum_normal_vector_error": 0.0
+      }
+    },
+    "scope": "Independent source/candidate sampler evaluation at every original key and midpoint plus off-grid times, including skinning and morph normals; exact interval proof retained separately.",
+    "elapsed_seconds": 30.232601899886504
+  },
+  "original_physical_witness_validation": {
+    "passed": true,
+    "source_sha256": "d3f5eba4815ab89a85b41b7201df152a25942decc0d5a7cf0bd3e2e32248e6c2",
+    "candidate_sha256": "d0d8ba1092eb7394cbb22cd2460ea5c8fc8c978d044568fa672c8d6258493554",
+    "surface_probes": 159,
+    "poses": 21,
+    "source_candidate_position_error": 0.0,
+    "source_candidate_normal_vector_error": 0.0,
+    "original_surface_error_over_height_source": 0.0,
+    "original_surface_error_over_height_candidate": 0.0,
+    "original_bone_matrix_error_source": 0.0,
+    "original_bone_matrix_error_candidate": 0.0,
+    "scope": "Existing independently captured physical observations left unchanged. Native source/candidate evaluated separately; any original interpreter/reference residual is retained and must remain unchanged. Normals source/candidate reconstructed independently, including legacy witnesses without recorded normals."
+  },
+  "runtime_validation": {
+    "maximum_position_error": 0.0,
+    "maximum_normal_vector_difference": 0.0,
+    "maximum_normal_angle_degrees": 1.9090959104164224e-06,
+    "worst_position": {
+      "label": "Death_A@0.0",
+      "max_surface_error": 0.0,
+      "max_normal_vector_difference": 0.0,
+      "max_normal_degrees": 1.7075472925031877e-06,
+      "p99_normal_degrees": 1.2074182697257333e-06
+    },
+    "worst_normal": {
+      "label": "Death_A@0.139",
+      "max_surface_error": 0.0,
+      "max_normal_vector_difference": 0.0,
+      "max_normal_degrees": 1.9090959104164224e-06,
+      "p99_normal_degrees": 1.2074182697257333e-06
+    },
+    "scope": "Actual imported Godot mesh arrays, native-library sampled poses and crossfades or mounted gait samples, renderer activation cutoff, linear blended skin; image rendering remains a separate check."
+  },
+  "native_runtime_samples": 232,
+  "blender_validation": {
+    "baseline": {
+      "sha256": "d3f5eba4815ab89a85b41b7201df152a25942decc0d5a7cf0bd3e2e32248e6c2",
+      "reference_thresholds_passed": true,
+      "surface_probes": 159,
+      "clips": {
+        "Death_A": {
+          "surface_error_over_height": 2.802657398075766e-06,
+          "bone_head_error_over_height": 7.053211081318189e-07,
+          "poses": 3
+        },
+        "Fighting_Idle": {
+          "surface_error_over_height": 1.331982834920038e-06,
+          "bone_head_error_over_height": 7.053211081318189e-07,
+          "poses": 3
+        },
+        "Hit_Chest": {
+          "surface_error_over_height": 3.154291887496454e-06,
+          "bone_head_error_over_height": 7.053216456167452e-07,
+          "poses": 3
+        },
+        "Idle_A": {
+          "surface_error_over_height": 2.389265243541276e-06,
+          "bone_head_error_over_height": 7.120707462089777e-07,
+          "poses": 3
+        },
+        "Jog": {
+          "surface_error_over_height": 2.976556642880032e-06,
+          "bone_head_error_over_height": 5.321533446515797e-07,
+          "poses": 3
+        },
+        "Sword_Attack": {
+          "surface_error_over_height": 2.4504455519012363e-06,
+          "bone_head_error_over_height": 7.164499266521816e-07,
+          "poses": 3
+        },
+        "Walk": {
+          "surface_error_over_height": 2.4499513843786022e-06,
+          "bone_head_error_over_height": 4.3745575446279456e-07,
+          "poses": 3
+        }
+      },
+      "max_surface_error_over_height": 3.154291887496454e-06,
+      "max_bone_head_error_over_height": 7.164499266521816e-07,
+      "scope": "Independent fresh Blender import geometry/motion witness check. Blender is not the authority for runtime morph normal shading."
+    },
+    "candidate": {
+      "sha256": "d0d8ba1092eb7394cbb22cd2460ea5c8fc8c978d044568fa672c8d6258493554",
+      "reference_thresholds_passed": true,
+      "surface_probes": 159,
+      "clips": {
+        "Death_A": {
+          "surface_error_over_height": 2.802657398075766e-06,
+          "bone_head_error_over_height": 7.053211081318189e-07,
+          "poses": 3
+        },
+        "Fighting_Idle": {
+          "surface_error_over_height": 1.331982834920038e-06,
+          "bone_head_error_over_height": 7.053211081318189e-07,
+          "poses": 3
+        },
+        "Hit_Chest": {
+          "surface_error_over_height": 3.154291887496454e-06,
+          "bone_head_error_over_height": 7.053216456167452e-07,
+          "poses": 3
+        },
+        "Idle_A": {
+          "surface_error_over_height": 2.389265243541276e-06,
+          "bone_head_error_over_height": 7.120707462089777e-07,
+          "poses": 3
+        },
+        "Jog": {
+          "surface_error_over_height": 2.976556642880032e-06,
+          "bone_head_error_over_height": 5.321533446515797e-07,
+          "poses": 3
+        },
+        "Sword_Attack": {
+          "surface_error_over_height": 2.4504455519012363e-06,
+          "bone_head_error_over_height": 7.164499266521816e-07,
+          "poses": 3
+        },
+        "Walk": {
+          "surface_error_over_height": 2.4499513843786022e-06,
+          "bone_head_error_over_height": 4.3745575446279456e-07,
+          "poses": 3
+        }
+      },
+      "max_surface_error_over_height": 3.154291887496454e-06,
+      "max_bone_head_error_over_height": 7.164499266521816e-07,
+      "scope": "Independent fresh Blender import geometry/motion witness check. Blender is not the authority for runtime morph normal shading."
+    },
+    "fresh_import_equivalence": {
+      "passed": true,
+      "maximum_added_surface_error": 0.0,
+      "maximum_added_bone_head_error": 0.0,
+      "scope": "Independently fresh source/candidate Blender imports, identical action slots and original physical witnesses. Original importer/native reference differences retained separately."
+    }
+  },
+  "actual_actor_render": {
+    "image_pairs": 374,
+    "renderer": "forward_plus",
+    "gpu": "NVIDIA GeForce RTX 5080 Laptop GPU",
+    "full_cycle_fps": 24,
+    "clips": [
+      "Death_A",
+      "Fighting_Idle",
+      "Hit_Chest",
+      "Idle_A",
+      "Jog",
+      "Sword_Attack",
+      "Walk"
+    ],
+    "views": [
+      "gameplay",
+      "side",
+      "rear",
+      "underside"
+    ],
+    "placements": [
+      {
+        "body_bounds_position": [
+          -1.02798962593079,
+          -4.80609969599755e-06,
+          -4.72268295288086
+        ],
+        "body_bounds_size": [
+          2.06066179275513,
+          1.36263585090637,
+          7.02093172073364
+        ],
+        "model_global": [
+          [
+            0.5,
+            4.80609969599755e-06,
+            -0.365000009536743
+          ],
+          [
+            -0.295177012681961,
+            0.0,
+            2.58051944257431e-08
+          ],
+          [
+            0.0,
+            0.295177012681961,
+            0.0
+          ],
+          [
+            -2.58051944257431e-08,
+            0.0,
+            -0.295177012681961
+          ]
+        ],
+        "name": "baseline",
+        "nameplate_global": [
+          0.5,
+          1.00222218036652,
+          -0.5
+        ],
+        "overhead_height": 0.402222156524658,
+        "selection_size": [
+          1.38999998569489,
+          9.99999974737875e-06,
+          1.38999998569489
+        ],
+        "sha256": "d3f5eba4815ab89a85b41b7201df152a25942decc0d5a7cf0bd3e2e32248e6c2"
+      },
+      {
+        "body_bounds_position": [
+          -1.02798962593079,
+          -4.80609969599755e-06,
+          -4.72268295288086
+        ],
+        "body_bounds_size": [
+          2.06066179275513,
+          1.36263585090637,
+          7.02093172073364
+        ],
+        "model_global": [
+          [
+            0.5,
+            4.80609969599755e-06,
+            -0.365000009536743
+          ],
+          [
+            -0.295177012681961,
+            0.0,
+            2.58051944257431e-08
+          ],
+          [
+            0.0,
+            0.295177012681961,
+            0.0
+          ],
+          [
+            -2.58051944257431e-08,
+            0.0,
+            -0.295177012681961
+          ]
+        ],
+        "name": "candidate",
+        "nameplate_global": [
+          0.5,
+          1.00222218036652,
+          -0.5
+        ],
+        "overhead_height": 0.402222156524658,
+        "selection_size": [
+          1.38999998569489,
+          9.99999974737875e-06,
+          1.38999998569489
+        ],
+        "sha256": "d0d8ba1092eb7394cbb22cd2460ea5c8fc8c978d044568fa672c8d6258493554"
+      }
+    ],
+    "placement_and_body_bounds_exact": true,
+    "pixel_comparison": {
+      "source_sha256": "d3f5eba4815ab89a85b41b7201df152a25942decc0d5a7cf0bd3e2e32248e6c2",
+      "candidate_sha256": "d0d8ba1092eb7394cbb22cd2460ea5c8fc8c978d044568fa672c8d6258493554",
+      "image_pairs": 374,
+      "width": 512,
+      "height": 512,
+      "different_image_pairs": 0,
+      "maximum_different_pixels": 0,
+      "maximum_pixels_above_two_levels": 0,
+      "maximum_mean_channel_error": 0.0,
+      "maximum_channel_error": 0,
+      "scope": "Complete ReplicatedActor3D setup with actual display scale, grounding and body materials; identical cameras for source/candidate, four views and every full native cycle at24Hz. Numeric playback and pixel comparisons are separate reports."
+    }
+  },
+  "actual_actor_dissolve_validation": {
+    "passed": true,
+    "source_sha256": "d3f5eba4815ab89a85b41b7201df152a25942decc0d5a7cf0bd3e2e32248e6c2",
+    "candidate_sha256": "d0d8ba1092eb7394cbb22cd2460ea5c8fc8c978d044568fa672c8d6258493554",
+    "records": [
+      {
+        "seed": 77,
+        "old_code_source_ash_buffer_sha256": "fae5ad6b93def8141d29482077e69a9b64de40b18563ec50d1def605c2e5ff7f",
+        "new_code_source_ash_buffer_sha256": "fae5ad6b93def8141d29482077e69a9b64de40b18563ec50d1def605c2e5ff7f",
+        "new_code_candidate_ash_buffer_sha256": "fae5ad6b93def8141d29482077e69a9b64de40b18563ec50d1def605c2e5ff7f",
+        "ash_buffer_floats": 6400,
+        "minimum": [
+          -0.27590999007225,
+          0.00313211372122169,
+          -0.451555073261261
+        ],
+        "size": [
+          0.571090638637543,
+          0.394000470638275,
+          1.95746684074402
+        ],
+        "grain": 0.107660676240921,
+        "restoration_passed": true
+      },
+      {
+        "seed": 193,
+        "old_code_source_ash_buffer_sha256": "9aa5da0a1da8f1bbffcc8efcfab4e601c973f73b7992d510fabcf3a062255d7c",
+        "new_code_source_ash_buffer_sha256": "9aa5da0a1da8f1bbffcc8efcfab4e601c973f73b7992d510fabcf3a062255d7c",
+        "new_code_candidate_ash_buffer_sha256": "9aa5da0a1da8f1bbffcc8efcfab4e601c973f73b7992d510fabcf3a062255d7c",
+        "ash_buffer_floats": 6400,
+        "minimum": [
+          -0.265040695667267,
+          0.00406714295968413,
+          -0.439413875341415
+        ],
+        "size": [
+          0.55541729927063,
+          0.394974440336227,
+          1.94790971279144
+        ],
+        "grain": 0.107135034203529,
+        "restoration_passed": true
+      }
+    ],
+    "pixel_comparisons": [
+      {
+        "seed": 77,
+        "progress": 0,
+        "mean_channel_error": 0.0,
+        "pixels_above_two_levels": 0,
+        "maximum_channel_error": 0
+      },
+      {
+        "seed": 77,
+        "progress": 17,
+        "mean_channel_error": 0.0,
+        "pixels_above_two_levels": 0,
+        "maximum_channel_error": 0
+      },
+      {
+        "seed": 77,
+        "progress": 42,
+        "mean_channel_error": 0.0,
+        "pixels_above_two_levels": 0,
+        "maximum_channel_error": 0
+      },
+      {
+        "seed": 77,
+        "progress": 73,
+        "mean_channel_error": 0.0,
+        "pixels_above_two_levels": 0,
+        "maximum_channel_error": 0
+      },
+      {
+        "seed": 77,
+        "progress": 100,
+        "mean_channel_error": 0.0,
+        "pixels_above_two_levels": 0,
+        "maximum_channel_error": 0
+      },
+      {
+        "seed": 193,
+        "progress": 0,
+        "mean_channel_error": 0.0,
+        "pixels_above_two_levels": 0,
+        "maximum_channel_error": 0
+      },
+      {
+        "seed": 193,
+        "progress": 17,
+        "mean_channel_error": 0.0,
+        "pixels_above_two_levels": 0,
+        "maximum_channel_error": 0
+      },
+      {
+        "seed": 193,
+        "progress": 42,
+        "mean_channel_error": 0.0,
+        "pixels_above_two_levels": 0,
+        "maximum_channel_error": 0
+      },
+      {
+        "seed": 193,
+        "progress": 73,
+        "mean_channel_error": 0.0,
+        "pixels_above_two_levels": 0,
+        "maximum_channel_error": 0
+      },
+      {
+        "seed": 193,
+        "progress": 100,
+        "mean_channel_error": 0.0,
+        "pixels_above_two_levels": 0,
+        "maximum_channel_error": 0
+      }
+    ],
+    "maximum_mean_channel_error": 0.0,
+    "maximum_pixels_above_two_levels": 0,
+    "scope": "Real Forward+ renderer and complete ReplicatedActor3D configuration at actual display scale. Immutable original dissolve code and source compared to current code/source and current code/final candidate: all 320 packed ash transforms, colors, custom data, body bounds and grain match per seed; original overrides and mesh resources restore exactly. Five fade phases compared."
+  },
+  "mount_audit": "No active mount configuration references this actor. Original appearance materials, images, UVs and skin attributes remain bit-exact. No surface or coat override introduced.",
+  "visual_review": "Source/candidate gameplay, side, rear, underside and flight contact boards reviewed. All native cycles captured at 24 fps using complete game Actor configuration and current display scale. Differences limited to isolated float/raster pixels. Existing artistic review status remains unchanged.",
+  "runtime_tradeoff": {
+    "gpu_corrective_bytes_saved": 0,
+    "compressed_install_bytes_saved": -32252,
+    "interpretation": "Fewer imported key rows reduce animation data. Inactive corrective slots reduce GPU storage where present. Original bone count, skin influences, vertex count and draw surfaces remain unchanged. No new recurring CPU operation; frame-time change was not benchmarked. Tiny compressed-byte increases from changed layout are reported rather than treated as install savings."
+  },
+  "checks": {
+    "source_gate_and_packer_unit_tests": "19 passed",
+    "canonical_candidate_reproduction": "Byte exact",
+    "lossless_compression_round_trip": true
+  },
+  "reproduce": "python eloria-assets/tools/pack_creature_storage.py --source <immutable-original-saltmarsh_crocodile.glb> --output <candidate.glb> --bounds eloria-assets/source/creature-storage/saltmarsh_crocodile.bounds.json --report <processing.json>",
+  "private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\batch-003\\saltmarsh_crocodile\\v1",
+  "media": {
+    "lossless_frames": {
+      "path": "qualified-frames.zip",
+      "files": 748,
+      "bytes": 21049174,
+      "sha256": "9d34a2b3e7c9b31e7115b7eb26eff7020d36390095f437858bc7dce3f768d907"
+    },
+    "full_cycles": [
+      {
+        "path": "Death_A-comparison.webp",
+        "bytes": 984850,
+        "sha256": "b062caa026422fe184680b29fe816cd97619bedb37a8c75539ecbb243fda51ac"
+      },
+      {
+        "path": "Fighting_Idle-comparison.webp",
+        "bytes": 85434,
+        "sha256": "13b5bcf6211b1e80db42f45b01e5a2aa3f78ed3f489c4b49cee9378cf4fc50e5"
+      },
+      {
+        "path": "Hit_Chest-comparison.webp",
+        "bytes": 370850,
+        "sha256": "a24dc0657f5f73082864b9865c99ac6906ac62dea7f462f65e540c1c6ee930f5"
+      },
+      {
+        "path": "Idle_A-comparison.webp",
+        "bytes": 703000,
+        "sha256": "87f872fc54f5d560b32aa8809fc4207be6fd24e6af5b6361202642a98626942f"
+      },
+      {
+        "path": "Jog-comparison.webp",
+        "bytes": 437390,
+        "sha256": "a54317ab3dbbaf8b552725ef15de60425d0673568523698e1abadce0ce59d565"
+      },
+      {
+        "path": "Sword_Attack-comparison.webp",
+        "bytes": 557800,
+        "sha256": "61c7561ff491f318199e2b435b35e9fffe4b9b82605600d676e01a21cb350c9e"
+      },
+      {
+        "path": "Walk-comparison.webp",
+        "bytes": 641762,
+        "sha256": "bf572319eca3867a318ce3ad50a065c0208a58f274196bedf57b7b9753e3693f"
+      }
+    ],
+    "scope": "Original 512 px PNGs retained in a verified lossless ZIP. Paired lossless WebP previews retain every cycle frame at 24 fps, resized to 384 px for review."
+  }
+}
