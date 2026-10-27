@@ -203,3 +203,37 @@ def test_default_bake_cannot_silently_rebase_geometry_or_large_directions(tmp_pa
         values=np.zeros((6,3),dtype='<f4');values[3:,0]=.001
         pr['targets'][0][field]=append_array(d,b,values,'VEC3')
     with pytest.raises(ValueError):split_corrective_partition(d,b,p)
+
+
+def test_rigid_weight_bits_and_zero_weight_joint_slots_are_retained(tmp_path):
+    d,b,p = multi_owner_fixture(tmp_path)
+    pr=d['meshes'][0]['primitives'][0]
+    # Each source vertex has two half-weight slots. Godot packs each half to
+    # uint16 independently; replacing them with one unit slot changes the sum.
+    ai=pr['attributes']['WEIGHTS_0'];spec=d['accessors'][ai]
+    values=np.ndarray((9,4),'<f4',b,offset=d['bufferViews'][spec['bufferView']]['byteOffset']);values[:,0]=.5
+    for field,array,component in [('JOINTS_1',np.zeros((9,4),'u1'),5121),('WEIGHTS_1',np.tile([0,0,.5,0],(9,1)).astype('<f4'),5126)]:
+        b.extend(b'\0'*(-len(b)%4));offset=len(b);b.extend(array.tobytes())
+        d['bufferViews'].append({'buffer':0,'byteOffset':offset,'byteLength':array.nbytes})
+        d['accessors'].append({'bufferView':len(d['bufferViews'])-1,'componentType':component,'count':9,'type':'VEC4'})
+        pr['attributes'][field]=len(d['accessors'])-1
+    joints=np.zeros((6,8),'<u2');weights=np.zeros_like(joints);weights[:,0]=weights[:,6]=32767
+    p['reference_skin']={'layout':'godot-eight-influences-u16-v1','bind_names':['Root','OtherBone'],'skin_hex':np.concatenate([joints,weights],axis=1).tobytes().hex()}
+    p['preserve_rigid_weight_bits']=True
+    new,blob,report=split_corrective_partition(d,b,p);free=new['meshes'][1]['primitives'][0]
+    for key in ('WEIGHTS_0','WEIGHTS_1'):
+        assert raw_array(new,blob,free['attributes'][key]).tobytes()==raw_array(d,b,pr['attributes'][key])[3:].tobytes()
+    for key,slot in [('JOINTS_0',0),('JOINTS_1',2)]:
+        actual=raw_array(new,blob,free['attributes'][key]);expected=raw_array(d,b,pr['attributes'][key])[3:]
+        expected[:,slot]=p['owner_joints'];np.testing.assert_array_equal(actual,expected)
+    assert report['rigid_weight_sums']==[1.]*6
+    assert report['preserved_rigid_weight_bits'] is True
+
+
+@pytest.mark.parametrize('damage',['non_bool','preserve_skin','unpaired'])
+def test_rigid_weight_preservation_is_explicit_and_requires_paired_sets(tmp_path,damage):
+    d,b,p=multi_owner_fixture(tmp_path);p['preserve_rigid_weight_bits']=True
+    if damage=='non_bool':p['preserve_rigid_weight_bits']=1
+    if damage=='preserve_skin':p['mode']='preserve_skin'
+    if damage=='unpaired':d['meshes'][0]['primitives'][0]['attributes']['WEIGHTS_1']=d['meshes'][0]['primitives'][0]['attributes']['WEIGHTS_0']
+    with pytest.raises(ValueError):split_corrective_partition(d,b,p)

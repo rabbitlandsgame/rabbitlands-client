@@ -81,8 +81,10 @@ def remap_witness(witness, source_document, prune_report, partition, source_sha2
             skin = source_document['skins'][source_document['nodes'][part['node']]['skin']]
             owners = profile.get('owner_joints', [profile.get('owner_joint')] * len(profile['vertex_ids']))
             if len(owners) != len(profile['vertex_ids']): raise ValueError('Rigid owner map differs from selected vertex count')
-            owner_names = {int(vertex) + part['begin']: source_document['nodes'][skin['joints'][owner]]['name']
-                           for vertex, owner in zip(profile['vertex_ids'], owners)}
+            amounts = partition.get('rigid_weight_sums') if profile.get('preserve_rigid_weight_bits') else [1.0] * len(owners)
+            if amounts is None or len(amounts) != len(owners): raise ValueError('Rigid preserved weight sums are missing')
+            owner_names = {int(vertex) + part['begin']: (source_document['nodes'][skin['joints'][owner]]['name'], amount)
+                           for vertex, owner, amount in zip(profile['vertex_ids'], owners, amounts)}
     original_ids = witness.get('surface_vertex_ids', [])
     for probe, signature in enumerate(witness.get('surface_source_morph_positions', [])):
         source_id = original_ids[probe]
@@ -97,7 +99,9 @@ def remap_witness(witness, source_document, prune_report, partition, source_sha2
                 result['surface_source_morph_positions'][probe] = [v for i, v in enumerate(signature) if i not in removed]
     if owner_names and 'surface_skin_influences' in result:
         for probe, source_id in enumerate(original_ids):
-            if source_id in owner_names: result['surface_skin_influences'][probe] = {owner_names[source_id]: 1.0}
+            if source_id in owner_names:
+                name, amount = owner_names[source_id]
+                result['surface_skin_influences'][probe] = {name: amount}
     # The transformation is intentionally limited to identity/binding metadata.
     def physical(value):
         ignored = {'sha256', 'reference_sha256', 'morph_weights', 'surface_source_morph_positions',

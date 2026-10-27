@@ -52,3 +52,13 @@ def test_multi_owner_binding_remap_keeps_original_surface_observations(tmp_path)
     after = remap_witness(witness,d,{},partition,witness['sha256'],'f'*64,profile)
     assert after['surface_skin_influences'] == [{'Root':1.},{'Root':1.},{'OtherBone':1.},{'OtherBone':1.}]
     assert after['surface_rest'] == witness['surface_rest'] and after['clips'] == witness['clips']
+
+
+def test_preserved_weight_binding_metadata_uses_actual_source_sum(tmp_path):
+    source,base=source_fixture(tmp_path);d,_=read_glb(source)
+    profile={'source_node':1,'vertex_ids':[3,4,5],'mode':'rigid','owner_joint':0,'preserve_rigid_weight_bits':True}
+    partition={'new_node':3,'all_candidate_original_vertex_ids':list(range(6)),'rigid_weight_sums':[.99999,1.,1.]}
+    witness={'sha256':base['source_sha256'],'surface_vertex_ids':[3],'surface_skin_influences':[{'Root':.99999}],'surface_rest':[[1,2,3]]}
+    after=remap_witness(witness,d,{},partition,witness['sha256'],'f'*64,profile)
+    assert after['surface_skin_influences']==[{'Root':.99999}]
+    assert after['surface_rest']==witness['surface_rest']

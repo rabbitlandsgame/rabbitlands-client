@@ -89,6 +89,14 @@ def split_corrective_partition(document, binary, profile):
     bake_defaults = profile.get('bake_selected_defaults', False)
     if type(bake_defaults) is not bool or (bake_defaults and mode != 'rigid'):
         raise ValueError('Default baking requires an explicit rigid candidate profile')
+    preserve_weights = profile.get('preserve_rigid_weight_bits', False)
+    if type(preserve_weights) is not bool or (preserve_weights and mode != 'rigid'):
+        raise ValueError('Rigid weight preservation requires an explicit rigid candidate profile')
+    if preserve_weights:
+        joint_sets = {key.removeprefix('JOINTS_') for key in primitive['attributes'] if key.startswith('JOINTS_')}
+        weight_sets = {key.removeprefix('WEIGHTS_') for key in primitive['attributes'] if key.startswith('WEIGHTS_')}
+        if joint_sets != weight_sets:
+            raise ValueError('Rigid weight preservation requires paired influence sets')
     defaults = np.asarray(node.get('weights', mesh.get('weights', [0.] * len(primitive.get('targets', [])))))
     for target_index, target in enumerate(primitive.get('targets', [])):
         if set(target) - {'POSITION', 'NORMAL', 'TANGENT'}:
@@ -210,9 +218,22 @@ def split_corrective_partition(document, binary, profile):
             if not corrective and field in baked: values = baked[field]
             component = None
             if not corrective and mode == 'rigid' and field.startswith('JOINTS_'):
-                values = np.zeros_like(values)
-                if field == 'JOINTS_0': values[:, 0] = owners
-            if not corrective and mode == 'rigid' and field.startswith('WEIGHTS_'):
+                if preserve_weights:
+                    weight_field = field.replace('JOINTS_', 'WEIGHTS_')
+                    if weight_field not in primitive['attributes']:
+                        raise ValueError('Missing paired source weight set')
+                    weights = accessor(document, binary, primitive['attributes'][weight_field])[ids]
+                    if not np.isfinite(weights).all() or np.any(weights < 0):
+                        raise ValueError('Invalid retained rigid weights')
+                    desired = np.broadcast_to(owners[:, None], values.shape)
+                    active = weights > 0
+                    if values.dtype.kind != 'u' or np.any(desired[active] > np.iinfo(values.dtype).max):
+                        raise ValueError('Rigid owner exceeds retained joint set storage')
+                    values[active] = desired[active]
+                else:
+                    values = np.zeros_like(values)
+                    if field == 'JOINTS_0': values[:, 0] = owners
+            if not corrective and mode == 'rigid' and field.startswith('WEIGHTS_') and not preserve_weights:
                 values = np.zeros_like(values)
                 if field == 'WEIGHTS_0':
                     spec = document['accessors'][index]
@@ -268,10 +289,16 @@ def split_corrective_partition(document, binary, profile):
             cursor += length
     global_ids.extend((selected + original_start).tolist())
     result, blob, packing = compact(result, blob)
+    rigid_weight_sums = None
+    if preserve_weights:
+        fields = [index for name, index in primitive['attributes'].items() if name.startswith('WEIGHTS_')]
+        rigid_weight_sums = sum(accessor(document, binary, index)[selected].sum(1) for index in fields).tolist()
     return result, blob, {'mode': mode, 'source_node': node_index, 'new_node': new_node,
                           'source_vertices': count, 'corrective_vertices': len(remainder),
                           'source_triangles': len(triangles), 'selected_triangles': selected_triangles,
                           'corrective_free_vertices': len(selected), 'owner_joint': owner if mode == 'rigid' and 'owner_joints' not in profile else None,
                           'owner_joints': owners.tolist() if mode == 'rigid' and 'owner_joints' in profile else None,
                           'selected_default_bake': bake_report,
+                          'preserved_rigid_weight_bits': preserve_weights,
+                          'rigid_weight_sums': rigid_weight_sums,
                           'all_candidate_original_vertex_ids': global_ids, 'packing': packing}
