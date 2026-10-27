@@ -40,7 +40,8 @@ def compact(document, binary):
                 continue
             values = accessor(document, blob, sampler['output'])
             times = accessor(document, blob, sampler['input'])
-            if len(values) > 2 and len(values) == len(times) and np.all(values == values[0]):
+            bits = values.view(np.uint8).reshape(len(values), -1)
+            if len(values) > 2 and len(values) == len(times) and np.all(bits == bits[0]):
                 spec = document['accessors'][sampler['output']]
                 # Preserve non-float/normalized attributes without conversion.
                 if spec['componentType'] != 5126 or spec.get('normalized'):
