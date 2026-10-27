@@ -1,4 +1,5 @@
 import json
+import pytest
 from pathlib import Path
 
 from pack_creature_storage import prepare
@@ -34,3 +35,41 @@ def test_only_current_actor_bindings_change_and_observations_remain(tmp_path):
     assert json.loads(roster.read_text())['creatures'][1]['sha256'] == old
     assert len(changed) == 3
     assert (tmp_path/'backup/godot-client/tests/fixtures/worlds.json').is_file()
+
+
+def test_stale_roster_fails_before_writing_current_receipts(tmp_path):
+    source, _ = source_fixture(tmp_path)
+    root = tmp_path/'repo'
+    candidate = root/'assets/wolf.glb'
+    report = prepare(source, candidate)
+    qa = root/'docs/qa/family/actors.json'; qa.parent.mkdir(parents=True)
+    original = json.dumps({'wolf': {'sha256': report['source_sha256'], 'runtime_path': 'assets/wolf.glb'}})
+    qa.write_text(original)
+    roster = root/'eloria-assets/source/model-development-roster.json'; roster.parent.mkdir(parents=True)
+    roster.write_text(json.dumps({'creatures': [{'id': 'wolf', 'sha256': 'unrelated'}]}))
+    with pytest.raises(ValueError, match='newer/unrelated'):
+        update(root, 'wolf', source, candidate, report, 'receipt.json')
+    assert qa.read_text() == original
+
+
+def test_humanoid_embedded_receipts_keep_measurements_and_chain_binding(tmp_path):
+    source, _ = source_fixture(tmp_path)
+    root = tmp_path/'repo'; candidate = root/'assets/wolf.glb'
+    report = prepare(source, candidate); old, new = report['source_sha256'], report['candidate_sha256']
+    manifest = root/'docs/qa/humanoid-motion-baseline/manifest.json'; manifest.parent.mkdir(parents=True)
+    manifest.write_text(json.dumps({'actors': [{'actor': 'wolf', 'runtime_path': 'assets/wolf.glb', 'sha256': old,
+        'native_conformance': {'runtime_sha256': old, 'max_error': 0.123},
+        'packing': {'runtime_sha256': old, 'runtime_bytes': 1, 'source_sha256': 'authoring-source', 'samples': [1, 2, 3]}}]}))
+    (root/'godot-client/tests/fixtures').mkdir(parents=True)
+    roster = root/'eloria-assets/source/model-development-roster.json'; roster.parent.mkdir(parents=True)
+    roster.write_text(json.dumps({'creatures': [{'id': 'wolf', 'sha256': old, 'status': 'reviewed'}]}))
+    update(root, 'wolf', source, candidate, report, 'receipt.json')
+    row = json.loads(manifest.read_text())['actors'][0]
+    assert row['sha256'] == new
+    assert row['native_conformance']['max_error'] == 0.123
+    assert row['packing']['source_sha256'] == 'authoring-source'
+    assert row['packing']['samples'] == [1, 2, 3]
+    assert row['packing']['runtime_bytes'] == candidate.stat().st_size
+    for field in ['native_conformance', 'packing']:
+        assert row[field]['runtime_sha256'] == new
+        assert row[field]['storage_rebind']['previous_runtime_sha256'] == old

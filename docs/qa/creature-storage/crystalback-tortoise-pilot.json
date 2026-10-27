@@ -6,12 +6,12 @@
   "reference_git_commit": "159bb0c5778510655fd79671c19c365e90687b79",
   "runtime_path": "godot-client/assets/actors/native/creatures/crystalback_tortoise.glb",
   "source_sha256": "43e5a9c682c47c224c49726d23d175895c1b3ccddee26a3db85ddbfe6fc8681f",
-  "runtime_sha256": "25ee03f9717841d7f2afb931e678e4d6e2437ad75e88c5ae01a9a6c3d0b6f1ed",
+  "runtime_sha256": "fcec0718567c0f426a3ba81b7004d5b4cf39ecf60bcb94c37a6bb4cf4f12aa89",
   "storage": {
     "source_bytes": 55913280,
-    "candidate_bytes": 41893008,
+    "candidate_bytes": 41969644,
     "source_zstd_bytes": 28634978,
-    "candidate_zstd_bytes": 25063224,
+    "candidate_zstd_bytes": 25051306,
     "original_vertices": 5368,
     "soft_vertices": 3328,
     "rigid_vertices": 2040,
@@ -269,7 +269,7 @@
   },
   "tests": {
     "focused_python_checks": 28,
-    "retained_skin_engine_checks": 21,
+    "retained_skin_engine_checks": 27,
     "fresh_editor_import": "Second pass completed without script/resource/import errors; fresh-project UID fallback warnings retained in private logs."
   },
   "benchmarks": {
@@ -399,5 +399,95 @@
     "The 577 corrective channels remain for the soft body; CPU curve evaluation is not removed. Graphics corrective storage falls by 38%, but the extra draw surface can add CPU/render-pass overhead.",
     "Whole-process RAM and separate GPU frame timings were not measured.",
     "Artistic approval of the underlying creature draft remains pending."
-  ]
+  ],
+  "previous_qualified_runtime_sha256": "25ee03f9717841d7f2afb931e678e4d6e2437ad75e88c5ae01a9a6c3d0b6f1ed",
+  "secondary_effects_compatibility_revision": {
+    "passed": true,
+    "previous_animated_binary_accessors_nodes_and_animation_data_identical": true,
+    "original_surface_partition_metadata_added": true,
+    "qualification": {
+      "actor": "crystalback_tortoise",
+      "source_sha256": "43e5a9c682c47c224c49726d23d175895c1b3ccddee26a3db85ddbfe6fc8681f",
+      "runtime_sha256": "fcec0718567c0f426a3ba81b7004d5b4cf39ecf60bcb94c37a6bb4cf4f12aa89",
+      "passed": true,
+      "secondary_effects": {
+        "effective_scale": 0.587999999523163,
+        "failures": [],
+        "gpu": "NVIDIA GeForce RTX 5080 Laptop GPU",
+        "max_color_error": 0.0,
+        "max_custom_error": 0.0,
+        "max_dissolve_bounds_error": 0.0,
+        "max_fragment_transform_error": 0.0,
+        "max_grain_error": 0.0,
+        "max_silhouette_position_error": 0.0,
+        "mounted": {
+          "cases": 90,
+          "max_silhouette_position_error": 0.0,
+          "rebound_paw_vertices": [
+            964,
+            964
+          ],
+          "scope": "Mounted coat and procedural four-paw adapter on real actor; all five coats plus return to original, three gaits and five phases. Prior full rider contacts gate retained by unchanged binary data."
+        },
+        "passed": true,
+        "renderer": "forward_plus",
+        "runtime_sha256": "fcec0718567c0f426a3ba81b7004d5b4cf39ecf60bcb94c37a6bb4cf4f12aa89",
+        "seeded_cases": 15,
+        "source_sha256": "43e5a9c682c47c224c49726d23d175895c1b3ccddee26a3db85ddbfe6fc8681f"
+      },
+      "renderer": {
+        "effective_scale": 0.587999999523163,
+        "engine": {
+          "build": "official",
+          "hash": "ed1daf0bf001b61586d9930840f2f1394092c079",
+          "hex": 263938,
+          "major": 4,
+          "minor": 7,
+          "patch": 2,
+          "status": "stable",
+          "string": "4.7.2-stable (official)",
+          "timestamp": 0
+        },
+        "frames": 399,
+        "gpu": "NVIDIA GeForce RTX 5080 Laptop GPU",
+        "renderer": "forward_plus",
+        "scope": "Actual ReplicatedActor native wild paths plus15seed full ash/silhouette probes and90mounted coat/physical-paw silhouette fields. Complete paired cycles retained locally. Rendered wild scale.588; all geometric/accessor/animation bytes unchanged from prior qualified pilot. Prior wild pixel envelope0.00509847 mean/255 and42 pixels>2levels; current399pair result within it.",
+        "source_sha256": "43e5a9c682c47c224c49726d23d175895c1b3ccddee26a3db85ddbfe6fc8681f",
+        "runtime_sha256": "fcec0718567c0f426a3ba81b7004d5b4cf39ecf60bcb94c37a6bb4cf4f12aa89",
+        "pairs": 399,
+        "max_mean_channel_error_out_of_255": 0.00484619140625,
+        "max_pixels_above_two_levels": 34,
+        "views": {
+          "game": {
+            "pairs": 328,
+            "max_mean_channel_error": 0.00484619140625,
+            "max_pixels_above_two_levels": 34
+          },
+          "side": {
+            "pairs": 28,
+            "max_mean_channel_error": 0.004285481770833334,
+            "max_pixels_above_two_levels": 25
+          },
+          "rear": {
+            "pairs": 43,
+            "max_mean_channel_error": 0.0038753255208333333,
+            "max_pixels_above_two_levels": 26
+          }
+        },
+        "dissolve": {
+          "pairs": 30,
+          "max_mean_channel_error": 0.0037508138020833333,
+          "max_pixels_above_two_levels": 25
+        },
+        "visually_reviewed": [
+          "comparison.png",
+          "effects-comparison.png"
+        ]
+      },
+      "limitations": [
+        "Source-vs-candidate rasterization is not bit-identical, as in the qualified pilot.",
+        "Mounted secondary probe exercises real actor coat/physical-paw adapter, not a full rider; prior full rider contacts and mounted rendering proofs remain bound by exact unchanged binary identity."
+      ]
+    }
+  }
 }

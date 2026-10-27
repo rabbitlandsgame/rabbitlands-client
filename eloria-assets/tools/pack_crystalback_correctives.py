@@ -119,6 +119,12 @@ def pack(source, profile, output):
         raise ValueError('Invalid source coat pattern height')
     for mesh in document['meshes']:
         mesh.setdefault('extras', {})['rabbitlands_coat_pattern_height'] = height
+    selected_triangles = np.flatnonzero(membership == 3).tolist()
+    layout = {'group': profile['source_sha256'] + ':' + str(profile['mesh_node']) + ':0', 'source_vertices': count,
+              'source_triangles': len(triangles), 'selected_triangles': selected_triangles}
+    document['meshes'][0]['extras']['rabbitlands_surface_partition_v1'] = dict(layout, role='remainder', surface=0)
+    document['meshes'][1]['extras']['rabbitlands_surface_partition_v1'] = dict(
+        layout, role='selected', surface=0, reference_skin=copy.deepcopy(profile['mount_skin']))
     document['asset'].setdefault('extras', {})['rabbitlands_storage_pilot'] = (
         'Root-rigid source islands split; mounted original skin retained as metadata; source ' + profile['source_sha256'])
     document, buffer, packing = compact(document, buffer)
