@@ -1,12 +1,17 @@
 extends Control
+const Guidance := preload("res://src/world/campaign_guidance.gd")
 ## The quest's field checklist. Its controls request ordinary movement/use;
 ## only a new authoritative snapshot changes completion or available decisions.
 signal target_requested(object_id: int, tile: Vector2i, nearby: bool)
+signal actor_target_requested(actor_id: int, tile: Vector2i, nearby: bool)
 signal action_requested(action: String)
 signal decision_requested(action: String, run_id: String, revision: int)
 signal companion_requested(command: String)
 signal convoy_requested(command: String)
 signal prediction_requested(run_id: String, revision: int, candidate: int)
+signal rescue_action_requested(action: String, run_id: String)
+signal rescue_reward_requested(choice: String, run_id: String)
+signal patient_heal_requested(run_id: String, actor_id: int)
 signal transcript_requested
 signal reduced_motion_changed(value: bool)
 signal replay_requested
@@ -15,10 +20,18 @@ var _panel: PanelContainer
 var _body_scroll: ScrollContainer
 var _title: Label
 var _hint: Label
+var _guidance: Label
 var _notice: Label
+var _opening_details: Label
 var _bank: Label
 var _road: Label
 var _lamps: Label
+var _rescue: Label
+var _rescue_actions: HFlowContainer
+var _rescue_buttons: Dictionary = {}
+var _rescue_rewards: HFlowContainer
+var _rescue_reward_buttons: Dictionary = {}
+var _patient_heal: Button
 var _prediction_actions: HFlowContainer
 var _prediction_buttons: Array[Button] = []
 var _party: Label
@@ -49,7 +62,9 @@ var _current_map := ""
 var _embedded := false
 var _available := false
 var _replay_available := false
+var _replay_retry := false
 var _column: VBoxContainer
+var _opening_actions_first := false
 
 func embed_instruction(label: Label) -> void:
 	if label.get_parent() != _column:
@@ -74,10 +89,14 @@ func embed() -> void:
 func presentation_available() -> bool:
 	return _available
 
-func set_replay_available(value: bool) -> void:
+func set_replay_available(value: bool, retry := false) -> void:
 	_build()
 	_replay_available = value
+	_replay_retry = retry
 	_replay.disabled = not value
+	_replay.text = "Retry scene" if retry else "Replay scene"
+	_replay.tooltip_text = "The scene was interrupted. Retry its dialogue and choices; your progress is saved." \
+		if retry else "Watch the current scene again. Quest progress and rewards stay saved."
 
 func request_replay() -> void:
 	if _replay_available:
@@ -120,10 +139,19 @@ func _build() -> void:
 	_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_hint.add_theme_font_size_override("font_size", 16)
 	column.add_child(_hint)
+	_guidance = Label.new()
+	_guidance.name = "WorkSiteInstructions"
+	_guidance.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_guidance.add_theme_font_size_override("font_size", 14)
+	column.add_child(_guidance)
 	_notice = Label.new()
 	_notice.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_notice.add_theme_font_size_override("font_size", 14)
 	column.add_child(_notice)
+	_opening_details = Label.new()
+	_opening_details.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_opening_details.add_theme_font_size_override("font_size", 14)
+	column.add_child(_opening_details)
 	_bank = Label.new()
 	_bank.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_bank.add_theme_font_size_override("font_size", 14)
@@ -136,6 +164,38 @@ func _build() -> void:
 	_lamps.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_lamps.add_theme_font_size_override("font_size", 14)
 	column.add_child(_lamps)
+	_rescue = Label.new()
+	_rescue.name = "RescueCompanion"
+	_rescue.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_rescue.add_theme_font_size_override("font_size", 14)
+	column.add_child(_rescue)
+	_rescue_actions = HFlowContainer.new()
+	_rescue_actions.add_theme_constant_override("h_separation", 5)
+	_rescue_actions.add_theme_constant_override("v_separation", 5)
+	column.add_child(_rescue_actions)
+	_patient_heal = Button.new()
+	_patient_heal.name = "HealRescuePatient"
+	_patient_heal.pressed.connect(_request_patient_heal)
+	_rescue_actions.add_child(_patient_heal)
+	for action: String in ["accept", "defer", "supplies"]:
+		var button := Button.new()
+		button.text = {"accept": "Help rescue her daughter", "defer": "Pause and return", "supplies": "Take the offered supplies"}[action]
+		button.pressed.connect(_request_rescue_action.bind(action))
+		_rescue_actions.add_child(button)
+		_rescue_buttons[action] = button
+	_rescue_rewards = HFlowContainer.new()
+	_rescue_rewards.add_theme_constant_override("h_separation", 5)
+	_rescue_rewards.add_theme_constant_override("v_separation", 5)
+	column.add_child(_rescue_rewards)
+	for choice: String in ["sword", "bow", "wand"]:
+		var button := Button.new()
+		button.text = "Choose " + choice
+		button.tooltip_text = {"sword": "Militia Arming Sword, 10,000 Attack and 10,000 Defense experience",
+			"bow": "Amberwood Yew Longbow and 20,000 Ranging experience",
+			"wand": "Arcane Focus Wand and 20,000 Magic experience"}[choice] + ". Each choice also grants 10,000 gold. Choose once."
+		button.pressed.connect(_request_rescue_reward.bind(choice))
+		_rescue_rewards.add_child(button)
+		_rescue_reward_buttons[choice] = button
 	_prediction_actions = HFlowContainer.new()
 	_prediction_actions.add_theme_constant_override("h_separation", 5)
 	_prediction_actions.add_theme_constant_override("v_separation", 5)
@@ -265,9 +325,12 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 			+ "\nSpeak with " + str(travel.get("npc", "Odo Fenn")) + " there to continue."
 	_notice.text = str(snapshot.get("party_notice", ""))
 	_notice.visible = not _notice.text.is_empty()
+	_opening_details.text = opening_details(snapshot)
+	_opening_details.visible = not _opening_details.text.is_empty()
 	_apply_bank(snapshot.get("bank", {}))
 	_apply_road(snapshot.get("road", {}))
 	_apply_lamps(snapshot.get("lamps", {}))
+	_apply_rescue(snapshot.get("rescue", {}))
 	_apply_party(party, snapshot.get("adoption", {}))
 	_apply_companion(snapshot.get("companion", {}))
 	_entry.visible = (not active or travelling) and bool(snapshot.get("available", false)) and not can_own
@@ -281,16 +344,24 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 	_account.visible = active
 	_scroll.visible = active and not travelling
 	_reduced.set_pressed_no_signal(reduced_motion)
+	_guidance.visible = active and matches and not travelling and Guidance.is_guided(snapshot)
+	_guidance.text = Guidance.legend(snapshot) if _guidance.visible else ""
+	if _guidance.visible != _opening_actions_first:
+		_opening_actions_first = _guidance.visible
+		_column.move_child(_scroll, _hint.get_index() + 1 if _opening_actions_first else _entry.get_index() - 1)
 	_title.visible = not _embedded
 	_hint.visible = not _embedded
 	_layout()
 	var rows: Array = []
+	var source: Array = Guidance.work_targets(snapshot) if Guidance.is_guided(snapshot) else snapshot.get("targets", [])
 	# Keep the server's clue order stable within each group, including legacy
 	# encounters that have no navigation-only checkpoint.
 	for navigation: bool in [true, false]:
-		for target: Dictionary in snapshot.get("targets", []):
+		for target: Dictionary in source:
 			if (int(target.get("object_id", -1)) == 0) == navigation:
 				rows.append(target)
+	if Guidance.is_guided(snapshot):
+		_scroll.visible = _scroll.visible and not rows.is_empty()
 	var signature := str(snapshot.get("run_id", "")) + ":" + JSON.stringify(rows)
 	for target: Dictionary in rows:
 		signature += ":" + str(_nearby(target))
@@ -308,7 +379,7 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 		var completed := bool(target.get("completed", false))
 		var enabled := bool(target.get("enabled", true)) and not completed
 		var nearby := _nearby(target)
-		var navigation := int(target.get("object_id", -1)) == 0
+		var navigation := int(target.get("object_id", -1)) == 0 and not target.has("actor_id")
 		button.text = ("✓ " if completed else "Walk to · " if navigation else "" if nearby else "Go to · ") + str(target.get("label", "Work site"))
 		button.disabled = not enabled
 		button.tooltip_text = str(target.get("detail", "Use the marked place in the world."))
@@ -317,7 +388,107 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 
 func _request_entry() -> void:
 	var kind := str(_state.get("kind", ""))
-	action_requested.emit(kind if kind in ["bank", "road", "lamps"] else "resume" if bool(_state.get("started", false)) else "start")
+	action_requested.emit(kind if kind in ["bank", "road", "lamps", "rescue"] else "resume" if bool(_state.get("started", false)) else "start")
+
+func _rescue_local() -> bool:
+	return str(_state.get("kind", "")) == "rescue" and bool(_state.get("active", false)) \
+		and (_state.get("travel", {}) as Dictionary).is_empty() \
+		and EloriaProtocol.map_id_from_reference(str(_state.get("map", ""))) == _current_map
+
+func _apply_rescue(rescue: Dictionary) -> void:
+	var present := not rescue.is_empty() and str(_state.get("kind", "")) == "rescue"
+	_rescue.visible = present
+	_rescue_actions.visible = present and _rescue_local()
+	_rescue_rewards.visible = false
+	_patient_heal.hide()
+	for button: Button in _rescue_buttons.values():
+		button.hide()
+	if not present:
+		return
+	var mother: Dictionary = rescue.get("mother", {})
+	var lines: PackedStringArray = []
+	var name := "Injured woman" if bool(mother.get("downed", false)) or not bool(mother.get("configured", false)) else "Elen Reed"
+	lines.append("%s · level 10 companion\nHealth %d/%d · Mana %d/%d" % [name,
+		int(mother.get("health", 0)), int(mother.get("max_health", 1)), int(mother.get("mana", 0)), int(mother.get("max_mana", 1))])
+	lines.append("Her mana is finite. Revival casts used: %d." % int(mother.get("revives_spent", 0)))
+	if bool(mother.get("downed", false)):
+		lines.append("She is hurt. Use Heal Target on her before continuing.")
+	elif bool(mother.get("following", false)):
+		lines.append("Elen is following the rescue party.")
+	var patient: Dictionary = rescue.get("patient", {})
+	_patient_heal.visible = _rescue_local() and str(rescue.get("stage", "")) == "injured" \
+		and int(patient.get("actor_id", 0)) > 0
+	_patient_heal.disabled = not bool(patient.get("can_cast", false))
+	_patient_heal.text = "Heal Target · first lesson" if int(patient.get("lesson_remaining", 0)) > 0 else "Heal Target"
+	_patient_heal.tooltip_text = "Cast Heal Target on this patient. The first lesson supplies its cost." \
+		if int(patient.get("lesson_remaining", 0)) > 0 else "Heal Target requires Magic 0: 5 mana, one Life Distillate and one Water Distillate."
+	for action: String in ["accept", "defer", "supplies"]:
+		var allowed := bool(rescue.get("can_" + action, false)) if action != "supplies" \
+			else bool((rescue.get("supplies", {}) as Dictionary).get("can_claim", false))
+		(_rescue_buttons[action] as Button).visible = _rescue_local() and allowed
+	var reward: Dictionary = rescue.get("reward", {})
+	_rescue_rewards.visible = _rescue_local() and bool(reward.get("can_choose", false))
+	if _rescue_rewards.visible:
+		lines.append("Your reward: choose one weapon and its skill experience, plus 10,000 gold.")
+	elif bool(reward.get("claimed", false)):
+		lines.append("Your " + str(reward.get("choice", "weapon")) + " reward is recorded.")
+	if bool((rescue.get("daughter", {}) as Dictionary).get("rescued", false)):
+		lines.append("The family has reached the mine exit." if bool((rescue.get("daughter", {}) as Dictionary).get("returned", false)) \
+			else "Liora is free. Stay with the family until they reach safety.")
+	_rescue.text = "\n".join(lines)
+
+func _request_rescue_action(action: String) -> void:
+	if not _rescue_local() or action not in ["accept", "defer", "supplies"]:
+		return
+	var rescue: Dictionary = _state.get("rescue", {})
+	var allowed := bool(rescue.get("can_" + action, false)) if action != "supplies" \
+		else bool((rescue.get("supplies", {}) as Dictionary).get("can_claim", false))
+	if allowed:
+		rescue_action_requested.emit(action, str(_state.get("run_id", "")))
+
+func _request_rescue_reward(choice: String) -> void:
+	if _rescue_local() and choice in ["sword", "bow", "wand"] \
+			and bool(((_state.get("rescue", {}) as Dictionary).get("reward", {}) as Dictionary).get("can_choose", false)):
+		rescue_reward_requested.emit(choice, str(_state.get("run_id", "")))
+
+func _request_patient_heal() -> void:
+	var patient: Dictionary = (_state.get("rescue", {}) as Dictionary).get("patient", {})
+	if _rescue_local() and bool(patient.get("can_cast", false)):
+		patient_heal_requested.emit(str(_state.get("run_id", "")), int(patient.get("actor_id", 0)))
+
+static func opening_details(snapshot: Dictionary) -> String:
+	if int(snapshot.get("content_revision", 1)) != 2:
+		return ""
+	var cart: Dictionary = snapshot.get("cart", {})
+	var inquiry: Dictionary = snapshot.get("inquiry", {})
+	var lines: PackedStringArray = []
+	if not cart.is_empty():
+		lines.append({"trapped": "The worker is pinned. Keep the cart held while preparing a release.",
+			"prepared": "The release is prepared. Use the marked work site.",
+			"released": "The cart is clear. Treat the worker before escorting them.",
+			"treated": "The worker is treated. Walk with them to the shore muster.",
+			"escorting": "Stay with the worker on the marked route to shore.",
+			"safe": "The worker is safely ashore."}.get(str(cart.get("state", "")), "Follow the crew's instructions."))
+		var route := str(cart.get("route", ""))
+		if not route.is_empty() and not bool(cart.get("worker_safe", false)):
+			lines.append("Rescue plan · " + {"unload": "lighten the cart", "lever": "brace and lift", "haul": "secure and haul"}.get(route, ""))
+			if route == "unload": lines.append("Loads safely set down: %d of 2." % int(cart.get("unloaded", 0)))
+			elif route == "lever": lines.append("Fulcrum ready." if bool(cart.get("fulcrum_ready", false)) else "Place the fulcrum before lifting.")
+			elif route == "haul":
+				var holder := str(cart.get("holder", ""))
+				var held := "The cart is held." if holder.is_empty() else "Brake held by " \
+					+ ("the dock foreman" if holder == "foreman" else holder) + "."
+				lines.append("Rope anchors secured: %d of 2. " % int(cart.get("rope_ends", 0)) \
+					+ (held if bool(cart.get("holder_active", false)) else "A crew member must hold the cart."))
+	if not inquiry.is_empty() and (cart.is_empty() or bool(cart.get("worker_safe", false))):
+		var lead := str(inquiry.get("lead", ""))
+		if not lead.is_empty():
+			lines.append("Inquiry · " + {"physical": "follow the physical work", "chronology": "reconstruct the sequence", "records": "compare the completion records"}.get(lead, ""))
+		if str(inquiry.get("finding", "")) == "one_kit_two_completions":
+			lines.append("Verified: one fitting kit was recorded as completing two jobs.")
+		elif not (inquiry.get("claims", []) as Array).is_empty():
+			lines.append("Claims to check: " + "; ".join(PackedStringArray(inquiry.claims)))
+	return "\n".join(lines)
 
 func _apply_road(road: Dictionary) -> void:
 	_road.visible = not road.is_empty()
@@ -590,5 +761,8 @@ func _request_target(identity: String, object_id: int) -> void:
 		if not bool(target.get("enabled", true)) or bool(target.get("completed", false)):
 			return
 		var raw: Array = target.get("tile", [0, 0]) if _nearby(target) else target.get("approach", target.get("tile", [0, 0]))
-		target_requested.emit(object_id, Vector2i(int(raw[0]), int(raw[1])), _nearby(target))
+		if target.has("actor_id"):
+			actor_target_requested.emit(int(target.actor_id), Vector2i(int(raw[0]), int(raw[1])), _nearby(target))
+		else:
+			target_requested.emit(object_id, Vector2i(int(raw[0]), int(raw[1])), _nearby(target))
 		return

@@ -1,5 +1,22 @@
 # Client runtime performance
 
+## Startup diagnostics
+
+The rotating client log includes `startup_stage` records with a stage name,
+duration in milliseconds, and elapsed time since engine startup. These cover
+geometry preparation, catalogues, interface construction, fixed creation
+defaults, art, preferences and final setup. `startup_deferred_stage` measures
+the three deferred workspace setups. On graphical launches, `login_first_frame`
+records the first completed draw and the time since `main_scene_ready`.
+Compare both milestones: deferred theme work can delay drawing after setup
+has finished. Source launches also include script compilation and asset loading;
+compare equivalent source or exported builds with the same settings.
+
+Character creation starts with fixed Human Male choices. Its 3D preview is
+constructed when creation opens and reused when reopened without changes.
+Build the complete shared theme before installing it on the interface, and
+publish live text-colour changes together to avoid repeated tree invalidation.
+
 ## Reproducible performance checks
 
 Run `tests/integration/run_crowd_presentation_benchmark.py` from `godot-client`.

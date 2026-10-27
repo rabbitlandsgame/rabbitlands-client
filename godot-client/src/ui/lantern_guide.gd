@@ -30,6 +30,7 @@ var _body: VBoxContainer
 var _buttons: HFlowContainer
 var _pending_campaign_kind := ""
 var _pending_campaign_msec := 0
+var _rescue_return_tracking: Dictionary = {}
 
 func attach_campaign(content: Control) -> void:
 	campaign_content = content
@@ -40,6 +41,11 @@ func attach_campaign(content: Control) -> void:
 	_refresh()
 
 func apply_campaign(snapshot: Dictionary) -> void:
+	var previous_identity := campaign_identity()
+	var previous_kind := str(_campaign.get("kind", "opening"))
+	var incoming_kind := str(snapshot.get("kind", "opening"))
+	if incoming_kind == "rescue" and previous_kind != "rescue" and has_campaign():
+		_rescue_return_tracking = {"identity":previous_identity, "prefer":_prefer_campaign}
 	if not _pending_campaign_kind.is_empty() and not str(snapshot.get("run_id", "")).is_empty() \
 			and str(snapshot.get("kind", "opening")) == _pending_campaign_kind \
 			and Time.get_ticks_msec() - _pending_campaign_msec <= 30000:
@@ -50,6 +56,9 @@ func apply_campaign(snapshot: Dictionary) -> void:
 	if bool(snapshot.get("active", false)) and not _campaign_choices.has(campaign_identity()):
 		_campaign_choices[campaign_identity()] = true
 		_prefer_campaign = true
+	if incoming_kind != "rescue" and campaign_identity() == str(_rescue_return_tracking.get("identity", "")):
+		_prefer_campaign = bool(_rescue_return_tracking.get("prefer", false))
+		_rescue_return_tracking.clear()
 	var entry := campaign_entry()
 	var signature := JSON.stringify(entry)
 	_refresh()
@@ -80,10 +89,13 @@ func campaign_entry() -> Dictionary:
 		if not bool(adoption.get("can_adopt", false)):
 			objective += "\n" + str(adoption.get("reason", "Complete your own field practice first."))
 	var map := EloriaProtocol.map_id_from_reference(str(travel.get("map", _campaign.get("map", ""))))
+	var location := map.replace("_", " ").capitalize() if not map.is_empty() else "Field expedition"
+	if str(_campaign.get("kind", "")) == "rescue" and map == "landfall_insides":
+		location = "Lantern Mine"
 	return {"title":str(_campaign.get("title", "The Missing Measure")), "objective":objective,
-		"location":map.replace("_", " ").capitalize() if not map.is_empty() else "Field expedition",
+		"location":location,
 		"_campaign":true, "_campaign_identity":campaign_identity(),
-		"_exact_title":str(_campaign.get("kind", "opening")) == "opening"}
+		"_exact_title":str(_campaign.get("kind", "opening")) in ["opening", "rescue"]}
 
 func is_campaign_tracked() -> bool:
 	return has_campaign() and bool(_campaign_choices.get(campaign_identity(), false))
@@ -101,13 +113,15 @@ func set_campaign_tracked(tracked: bool) -> void:
 
 func prefer_standard_quest() -> void:
 	_prefer_campaign = false
+	if str(_campaign.get("kind", "")) == "rescue" and not _rescue_return_tracking.is_empty():
+		_rescue_return_tracking.prefer = false
 	_refresh()
 
 func follow_campaign_request(action: String) -> void:
 	# Explicitly beginning/joining from a pinned contact card follows that new
 	# run; mere availability at a contact never pins a card by itself.
 	if using_campaign() and str(_campaign.get("run_id", "")).is_empty() \
-			and action in ["start", "resume", "join", "bank", "road", "lamps"]:
+			and action in ["start", "resume", "join", "bank", "road", "lamps", "rescue"]:
 		_pending_campaign_kind = str(_campaign.get("kind", "opening"))
 		_pending_campaign_msec = Time.get_ticks_msec()
 

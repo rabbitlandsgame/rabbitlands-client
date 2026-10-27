@@ -3,6 +3,7 @@ extends RefCounted
 ## Source meshes/materials stay shared and immutable; revival restores overrides.
 
 const BODY_SHADER := preload("res://src/actors/creature_dissolve.gdshader")
+const BODY_INCLUDE := preload("res://src/actors/creature_dissolve.gdshaderinc")
 const ASH_SHADER := preload("res://src/actors/creature_ash.gdshader")
 const FRAGMENT_COUNT := 320
 
@@ -137,9 +138,17 @@ func _body_material(source: Material) -> ShaderMaterial:
 		var entry := RegEx.new()
 		entry.compile("void\\s+fragment\\s*\\(\\s*\\)\\s*\\{")
 		if entry.search(code) != null:
-			code = entry.sub(code, "void fragment() {\n dissolve_body((INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz, ALBEDO);\n")
+			# Shader.code is compiled directly; it does not resolve resource-file
+			# includes. A replay can also encounter an existing dissolve material;
+			# resolve its include and keep exactly one set of functions and calls.
+			for path: String in ["creature_dissolve.gdshaderinc", "res://src/actors/creature_dissolve.gdshaderinc"]:
+				code = code.replace("#include \"" + path + "\"", BODY_INCLUDE.code)
+			if not code.contains("void dissolve_body("):
+				code = code.replace("shader_type spatial;", "shader_type spatial;\n" + BODY_INCLUDE.code + "\n")
+			if code.count("dissolve_body(") <= 1:
+				code = entry.sub(code, "void fragment() {\n dissolve_body((INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz, ALBEDO);\n")
 			material.shader = Shader.new()
-			material.shader.code = code.replace("shader_type spatial;", "shader_type spatial;\n#include \"res://src/actors/creature_dissolve.gdshaderinc\"\n")
+			material.shader.code = code
 			material.next_pass = null
 			return material
 	material.shader = BODY_SHADER

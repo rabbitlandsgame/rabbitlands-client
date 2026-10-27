@@ -37,17 +37,88 @@ const NEAR_PLANE_MIN := 0.2
 @onready var camera: Camera3D = %Camera
 
 var focus := Vector3.ZERO
+## World-space framing retained when a cinematic hands its view to normal play.
+var follow_offset := Vector3.ZERO
+var _last_follow_position := Vector3.ZERO
+var _follow_arrival := Vector3.INF
+var _follow_arrival_until := 0.0
+const FOLLOW_ARRIVAL_SECONDS := 6.0
 var _rotating := false
 
 func _ready() -> void:
 	_update_camera()
 
 func set_focus(value: Vector3) -> void:
-	focus = value
+	_last_follow_position = value
+	if _follow_arrival.is_finite():
+		if value.distance_to(_follow_arrival) <= 0.25:
+			_follow_arrival = Vector3.INF
+		elif Time.get_ticks_msec() / 1000.0 < _follow_arrival_until:
+			# The acknowledged native run may still be reaching the staged combat
+			# post. Keep its intended framing while orbit and zoom remain usable.
+			_update_camera()
+			return
+		else:
+			# A blocked or interrupted run must not cause a delayed camera jump.
+			follow_offset = focus - value
+			_follow_arrival = Vector3.INF
+	focus = value + follow_offset
+	_update_camera()
+
+## Adopt an authored look-at view as an ordinary, controllable orbit camera.
+## arrival is a visual destination only; this never moves the followed actor.
+func adopt_world_view(view: Dictionary, followed_position: Vector3,
+		arrival := Vector3.INF) -> bool:
+	var pose: Transform3D = view.get("transform", Transform3D.IDENTITY)
+	var target: Vector3 = view.get("target", Vector3.INF)
+	if not is_instance_valid(camera) or not pose.is_finite() or not target.is_finite() \
+			or not followed_position.is_finite(): return false
+	var orbit_focus := target - Vector3.UP * 1.2
+	var offset := global_basis.inverse() * (pose.origin - orbit_focus)
+	var next_distance := offset.length()
+	if next_distance < min_distance or next_distance > max_distance: return false
+	var next_pitch := -rad_to_deg(asin(clampf(offset.y / next_distance, -1.0, 1.0)))
+	if next_pitch < -80.0 or next_pitch > -15.0: return false
+	var reference: Vector3 = arrival if arrival.is_finite() else followed_position
+	focus = orbit_focus
+	follow_offset = orbit_focus - reference
+	_last_follow_position = followed_position
+	_follow_arrival = reference if reference.distance_to(followed_position) > 0.25 else Vector3.INF
+	_follow_arrival_until = Time.get_ticks_msec() / 1000.0 + FOLLOW_ARRIVAL_SECONDS
+	distance = next_distance
+	pitch_degrees = next_pitch
+	yaw_degrees = rad_to_deg(atan2(offset.x, offset.z))
+	_rotating = false
+	_update_camera()
+	camera.fov = float(view.get("fov", camera.fov))
+	camera.near = float(view.get("near", camera.near))
+	camera.far = float(view.get("far", camera.far))
+	return true
+
+func capture_follow_state() -> Dictionary:
+	return {"offset":follow_offset, "last_position":_last_follow_position,
+		"arrival":_follow_arrival, "remaining":maxf(0.0,
+			_follow_arrival_until - Time.get_ticks_msec() / 1000.0)}
+
+func restore_follow_state(state: Dictionary) -> void:
+	follow_offset = state.get("offset", Vector3.ZERO)
+	_last_follow_position = state.get("last_position", focus - follow_offset)
+	_follow_arrival = state.get("arrival", Vector3.INF)
+	_follow_arrival_until = Time.get_ticks_msec() / 1000.0 + float(state.get("remaining", 0.0))
+
+## Explicit reset/session boundaries return the pivot to the followed actor.
+func reset_follow_offset() -> void:
+	focus -= follow_offset
+	if _follow_arrival.is_finite(): focus = _last_follow_position
+	follow_offset = Vector3.ZERO
+	_follow_arrival = Vector3.INF
 	_update_camera()
 
 func rebase_world(frame: Transform3D) -> void:
 	focus = frame * focus
+	_last_follow_position = frame * _last_follow_position
+	follow_offset = frame.basis * follow_offset
+	if _follow_arrival.is_finite(): _follow_arrival = frame * _follow_arrival
 	yaw_degrees += rad_to_deg(frame.basis.get_euler().y)
 	_update_camera()
 
@@ -103,6 +174,7 @@ func ray_direction(screen_position: Vector2) -> Vector3:
 func camera_diagnostics() -> Dictionary:
 	return {
 		"focus": focus,
+		"follow_offset": follow_offset,
 		"rig_transform": global_transform,
 		"camera_transform": camera.global_transform if is_instance_valid(camera) else Transform3D.IDENTITY,
 		"yaw_degrees": yaw_degrees,

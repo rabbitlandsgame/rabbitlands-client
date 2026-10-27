@@ -1,0 +1,517 @@
+extends Node3D
+## Reversible dressing for an owned rescue. Imported geometry and server actors
+## stay authoritative; this node never completes work or changes an actor body.
+const FencePool := preload("res://src/world/external_mesh_pool.gd")
+const Dissolve := preload("res://src/actors/creature_dissolve.gd")
+const FireVisual := preload("res://src/world/weather_3d.gd")
+const FENCE_ID := "11ec54ffb8d8eb66b5a8de1e0bdb3da278b75459c880a07fc46acfcf1e9f4c65"
+const FENCE_PATH := "res://../eloria-assets/maps/_shared/meshes/"+FENCE_ID+".glb"
+
+var cage: Node3D
+var gate: Node3D
+var panels: Array[MeshInstance3D] = []
+var points: Dictionary = {}
+var labels: Dictionary = {}
+var _snapshot: Dictionary = {}
+var _identity := ""
+var _map := ""
+var _geometry := ""
+var _sample: Callable
+var _adapter: CoordinateAdapter
+var _world: World3D
+var _readouts_visible := true
+var _gate_origin := Vector3.ZERO
+var _accepted_gate := 0.0
+var _scene_id := ""
+var _scene_elapsed := 0.0
+var _scene_replaying := false
+var _effects: Dictionary = {}
+var _arrival_effects: Dictionary = {}
+var _corpse_fires: Dictionary = {}
+var _dissolves: Dictionary = {}
+var _dissolve_targets: Dictionary = {}
+var _dissolve_progress: Dictionary = {}
+var _completed_burns: Array[Dictionary] = []
+var _clip_leases: Dictionary = {}
+var _bound_actors: Dictionary = {}
+var _downed_mother: WeakRef
+var _scales: Dictionary = {}
+var _aliases: Dictionary = {}
+var _fade_layer: CanvasLayer
+var _fade: ColorRect
+var _handoff_token := ""
+var _handoff_deadline_ms := 0
+var _expired_handoff_token := ""
+
+func apply_snapshot(snapshot: Dictionary, adapter: CoordinateAdapter, current_map: String,
+		surface_sample: Callable) -> void:
+	var map := EloriaProtocol.map_id_from_reference(current_map)
+	if not is_inside_tree() or not bool(snapshot.get("active",false)) or str(snapshot.get("kind",""))!="rescue" \
+			or str(snapshot.get("run_id","")).is_empty() or adapter==null or not surface_sample.is_valid() \
+			or map not in ["landfall","landfall_insides"] \
+			or EloriaProtocol.map_id_from_reference(str(snapshot.get("map","")))!=map:
+		clear()
+		return
+	var identity := str(snapshot.run_id)+":"+map
+	var geometry := JSON.stringify(snapshot.get("anchors",{}))
+	if identity!=_identity or _world!=get_world_3d() or geometry!=_geometry:
+		clear()
+		_identity=identity;_map=map;_geometry=geometry;_world=get_world_3d()
+	_adapter=adapter;_sample=surface_sample;_snapshot=snapshot.duplicate(true)
+	points.clear()
+	for key: String in snapshot.get("anchors",{}):
+		var tile: Variant = snapshot.anchors[key]
+		if tile is Array and tile.size()==2:
+			var at:=_ground(adapter.tile_center(int(tile[0]),int(tile[1])))
+			if at.is_finite(): points[key]=at
+	if _map=="landfall_insides":
+		if not points.has("cage"):
+			clear();return
+		if not is_instance_valid(cage):
+			if not _build_cage(points.cage):return
+		_accepted_gate=1.0 if bool(snapshot.get("rescue",{}).get("daughter",{}).get("rescued",false)) else 0.0
+		if _scene_id.is_empty():_set_gate(_accepted_gate)
+		if labels.has("cage"):
+			labels.cage.text="Liora's holding cage · "+("open" if _accepted_gate>0.5 else "locked")
+	show()
+
+func _build_cage(at: Vector3) -> bool:
+	# Each panel is the unchanged current imported split-rail mesh. The pool
+	# resolves its three shipped textures and rejects retired prototype IDs.
+	var mesh: Mesh = FencePool.acquire(FENCE_ID,ProjectSettings.globalize_path(FENCE_PATH))
+	if mesh==null:return false
+	for offset: Vector3 in [Vector3(-2,0,-2),Vector3(2,0,-2),Vector3(-2,0,2),Vector3(2,0,2)]:
+		var floor:=_ground(at+offset)
+		if not floor.is_finite() or absf(floor.y-at.y)>0.2:return false
+	cage=Node3D.new();cage.name="RescueImportedHoldingCage";add_child(cage);cage.global_position=at
+	for tier: int in range(2):
+		_panel(cage,mesh,Vector3(-2,tier*1.2,0),Vector3(0,PI/2,0))
+		_panel(cage,mesh,Vector3(2,tier*1.2,0),Vector3(0,PI/2,0))
+		_panel(cage,mesh,Vector3(0,tier*1.2,-2),Vector3.ZERO)
+	# Three complete source panels form a slatted roof. Their 1.2m source
+	# height becomes roof depth; no source vertex, UV or material is edited.
+	for offset: float in [-2.0,-0.6,0.8]:
+		_panel(cage,mesh,Vector3(0,2.5,offset),Vector3(PI/2,0,0))
+	gate=Node3D.new();gate.name="RescueLiftGate";cage.add_child(gate)
+	_gate_origin=Vector3(0,0,2)
+	for tier: int in range(2):_panel(gate,mesh,Vector3(0,tier*1.2,0),Vector3.ZERO)
+	_set_gate(_accepted_gate)
+	var label:=Label3D.new();label.name="CageStatus";label.font_size=36;label.pixel_size=0.008
+	label.billboard=BaseMaterial3D.BILLBOARD_ENABLED;label.no_depth_test=false;label.layers=2
+	cage.add_child(label);label.position=Vector3(0,3.1,0);labels.cage=label
+	set_readouts_visible(_readouts_visible)
+	return true
+
+func _panel(parent: Node3D, mesh: Mesh, at: Vector3, rotation_value: Vector3) -> void:
+	var part:=MeshInstance3D.new();part.name="ImportedFencePanel";part.mesh=mesh;part.layers=2
+	parent.add_child(part);part.position=at;part.rotation=rotation_value;panels.append(part)
+
+func apply_cinematic(state: Dictionary, actor_nodes: Dictionary) -> void:
+	if _identity.is_empty():return
+	_update_handoff_fade(state)
+	_bound_actors=state.get("actors",{}).duplicate()
+	_retire_completed_burns()
+	_apply_role_scales(actor_nodes)
+	var replaying := bool(state.get("replaying", false))
+	var active:=bool(state.get("playing",false)) and not bool(state.get("returning",false)) \
+		and str(state.get("id","")).begins_with("measure.rescue.")
+	if bool(state.get("playing",false)):
+		_downed_mother=null # The scene now owns its own bound pose.
+	else:
+		_apply_downed_mother(actor_nodes)
+	if not active:
+		if bool(state.get("playing",false)) and bool(state.get("returning",false)) \
+				and _scene_id=="measure.rescue.shadow" and _scene_replaying:
+			_clear_visual_effects()
+			_set_fade(0)
+			return # Keep its local clone dissolved until replay teardown, then restore.
+		_clear_cinematic(_scene_id=="measure.rescue.shadow" and not _scene_replaying)
+		return
+	var id:=str(state.id);var time:=maxf(0,float(state.get("elapsed",0)))
+	if id!=_scene_id or replaying!=_scene_replaying or time<_scene_elapsed-0.01:_clear_cinematic()
+	_scene_id=id;_scene_elapsed=time;_scene_replaying=replaying
+	var gate_value:=_accepted_gate
+	var fade_value:=0.0
+	var wanted_effects: Dictionary={};var wanted_dissolves: Dictionary={};var wanted_clips: Dictionary={}
+	var wanted_arrivals: Dictionary={};var wanted_fires: Dictionary={}
+	var events: Array = state.get("events",[])
+	for index: int in events.size():
+		var event: Dictionary=events[index]
+		var start:=float(event.get("at",0));var end:=maxf(start+0.001,float(event.get("until",start+1)))
+		if time<start:continue
+		if bool(event.get("replay_only",false)) and not replaying:continue
+		# CampaignScene has already filtered branch/choice conditions.
+		var duration:=maxf(0.001,float(event.get("duration",end-start)))
+		var progress:=clampf((time-start)/duration,0,1)
+		var key:=str(event.get("id",JSON.stringify(event)))
+		match str(event.get("type","")):
+			"gate":gate_value=lerpf(float(event.get("from",0)),float(event.get("to",1)),progress)
+			"fade":fade_value=lerpf(float(event.get("from",0)),float(event.get("to",1)),progress)
+			"teleport":
+				if id!="measure.rescue.shadow" or str(event.get("actor",""))!="lich" or time>=end:continue
+				var target:=_actor("lich",actor_nodes)
+				if target==null:continue
+				wanted_arrivals[key]=true
+				_apply_arrival(key,target,clampf((time-start)/(end-start),0,1))
+			"corpse_fire":
+				if id!="measure.rescue.shadow" or str(event.get("actor",""))!="goblin_boss" or time>=end:continue
+				var target:=_actor("goblin_boss",actor_nodes)
+				if target==null:continue
+				wanted_fires[key]=true
+				_apply_corpse_fire(key,target,time-start,end-start)
+			"native_clip":
+				var target:=_actor(str(event.get("actor","")),actor_nodes)
+				if target!=null:
+					wanted_clips[key]=true
+					_apply_native_clip(key,target,event,time)
+			"effect":
+				if time>end:continue
+				wanted_effects[key]=true
+				var source:=_actor(str(event.get("source","")),actor_nodes)
+				var target:=_actor(str(event.get("target","")),actor_nodes)
+				if source==null or target==null:continue
+				if not _effects.has(key) or not is_instance_valid(_effects[key]):
+					var effect:=WorldEffect3D.new();add_child(effect)
+					effect.configure(int(event.get("effect",5)),source.global_position,target.global_position,int(event.get("power",1)))
+					effect.bind_actors(source,target);effect.set_process(false);_effects[key]=effect
+				var effect:WorldEffect3D=_effects[key]
+				effect.elapsed=time-start;effect._process(0.0)
+			"dissolve":
+				var target:=_actor(str(event.get("actor","goblin_boss")),actor_nodes)
+				if target==null:continue
+				wanted_dissolves[key]=true
+				if not _dissolves.has(key):
+					var dissolve:=Dissolve.new();dissolve.begin(target,duration,int(target.get_instance_id()))
+					_dissolves[key]=dissolve
+					_dissolve_targets[key]=weakref(target)
+				_dissolves[key].update(progress)
+				_dissolve_progress[key]=progress
+	_set_gate(gate_value)
+	_set_fade(1.0 if _handoff_deadline_ms>0 else fade_value)
+	for key: String in _effects.keys():
+		if not wanted_effects.has(key):
+			if is_instance_valid(_effects[key]):_effects[key].queue_free()
+			_effects.erase(key)
+	for key: String in _dissolves.keys():
+		if not wanted_dissolves.has(key):
+			_dissolves[key].reset();_dissolves.erase(key);_dissolve_targets.erase(key);_dissolve_progress.erase(key)
+	for key: String in _clip_leases.keys():
+		if not wanted_clips.has(key):_release_native_clip(key)
+	_prune_visual_rows(_arrival_effects,wanted_arrivals)
+	_prune_visual_rows(_corpse_fires,wanted_fires)
+
+func _apply_arrival(key: String, target: Node3D, progress: float) -> void:
+	if _arrival_effects.has(key) and _arrival_effects[key].target.get_ref()!=target:
+		_release_visual_row(_arrival_effects,key)
+	if not _arrival_effects.has(key):
+		var root:=Node3D.new();root.name="RescueLichArrival";add_child(root)
+		root.global_position=target.global_position
+		# Use the game's ordinary rising arrival, with its existing rune and
+		# spark geometry. Its clock is sampled by the film instead of real time.
+		var spell:=WorldEffect3D.new();root.add_child(spell)
+		spell.configure(1,target.global_position,null,5);spell.set_process(false)
+		spell.scale=Vector3.ONE*1.4
+		spell._burst.emitting=false;spell._burst.visible=false
+		var mesh:=ImmediateMesh.new()
+		var runes:=MeshInstance3D.new();runes.name="ArrivalRunes";runes.mesh=mesh
+		runes.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF;root.add_child(runes)
+		var light:=OmniLight3D.new();light.name="ArrivalLight";root.add_child(light)
+		light.position=Vector3.UP*1.3;light.light_color=Color("83ffd0")
+		light.omni_range=8.0;light.shadow_enabled=false
+		_arrival_effects[key]={"root":root,"spell":spell,"mesh":mesh,"material":CombatEffectMesh.material(),
+			"light":light,"target":weakref(target)}
+	var row:Dictionary=_arrival_effects[key]
+	# The authored visible cue runs before this synchronous update. Install
+	# the hidden material state before the frame can render a solid newcomer.
+	# If a caller still has the actor hidden, wait for its visible meshes.
+	if not row.has("reveal") and target.is_visible_in_tree():
+		var reveal:=Dissolve.new()
+		reveal.begin(target,4.0,int(target.get_instance_id()))
+		row.reveal=reveal
+	if row.has("reveal"):
+		row.reveal.update(1.0-progress)
+		# Arrival reuses only the reversible body dissolve, never corpse dust.
+		if is_instance_valid(row.reveal._ash):row.reveal._ash.hide()
+	row.root.global_position=target.global_position+Vector3.UP*0.04
+	var envelope:=pow(maxf(0,sin(progress*PI)),0.6)
+	row.light.light_energy=5.0*envelope
+	var spell:WorldEffect3D=row.spell
+	spell.elapsed=minf(progress,0.999)*WorldEffect3D.LIFETIME_SECONDS
+	spell._process(0.0)
+	var mesh:ImmediateMesh=row.mesh
+	mesh.clear_surfaces();mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES,row.material)
+	var tint:=Color(0.45,1.0,0.74,envelope*0.9)
+	for tier:int in 3:
+		var centre:=Vector3.UP*(0.08+tier*0.55*envelope)
+		var angle:=progress*TAU*(1.0 if tier%2==0 else -1.0)+tier
+		CombatEffectMesh.arc(mesh,centre,(0.85+tier*0.15)*(0.7+envelope*0.3),0.045,tint,angle,TAU*0.88)
+	for mark:int in 12:
+		var angle:=mark*TAU/12.0+progress*0.8
+		var direction:=Vector3(cos(angle),0,sin(angle))
+		CombatEffectMesh.line(mesh,direction*1.2+Vector3.UP*0.08,direction*1.45+Vector3.UP*0.08,0.06,tint)
+	mesh.surface_end()
+
+func _apply_corpse_fire(key: String, target: Node3D, age: float, duration: float) -> void:
+	if not _corpse_fires.has(key):
+		var root:=Node3D.new();root.name="RescueCorpseFlames";add_child(root)
+		var mesh:=ImmediateMesh.new()
+		var flames:=MeshInstance3D.new();flames.name="RisingFlames";flames.mesh=mesh
+		flames.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF;root.add_child(flames)
+		# The persistent hearth's approved soft flame supplies the base glow;
+		# broad rising tongues keep the burn readable when bloom is disabled.
+		var source:=FireVisual.new()
+		var glow:=MeshInstance3D.new();glow.name="FireCore";glow.mesh=source._flame_mesh(Color(1.0,0.65,0.18))
+		glow.position=Vector3.UP*0.3;glow.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		root.add_child(glow);source.free()
+		var light:=OmniLight3D.new();light.name="CorpseFireLight";root.add_child(light)
+		light.position=Vector3.UP;light.light_color=Color(1.0,0.46,0.12)
+		light.omni_range=9.0;light.shadow_enabled=false
+		_corpse_fires[key]={"root":root,"mesh":mesh,"material":CombatEffectMesh.material(),"glow":glow,"light":light}
+	var row:Dictionary=_corpse_fires[key]
+	row.root.global_position=target.global_position+Vector3.UP*0.08
+	# Four seconds of visible ignition precede the authored dissolve. The
+	# flames and their chamber light survive while the body material vanishes.
+	var strength:=smoothstep(0.0,minf(4.0,duration*0.5),age)*(1.0-smoothstep(duration-0.8,duration,age))
+	row.light.light_energy=7.0*strength*(0.92+0.08*sin(age*13.0))
+	row.glow.scale=Vector3(3.1,1.2+0.15*sin(age*7.0),1)*maxf(0.001,strength)
+	row.glow.transparency=1.0-strength
+	var mesh:ImmediateMesh=row.mesh
+	mesh.clear_surfaces();mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES,row.material)
+	for tongue:int in 9:
+		var angle:=tongue*2.399
+		var centre:=Vector3(cos(angle)*0.55,0.03,sin(angle)*0.6)
+		var height:=(1.7+0.45*sin(age*4.3+tongue))*strength
+		for segment:int in 6:
+			var lo:=segment/6.0;var hi:=(segment+1)/6.0
+			var a:=centre+Vector3(sin(age*5.0+tongue+lo*3.0)*0.13*lo,height*lo,cos(age*4.0+tongue+lo*2.0)*0.1*lo)
+			var b:=centre+Vector3(sin(age*5.0+tongue+hi*3.0)*0.13*hi,height*hi,cos(age*4.0+tongue+hi*2.0)*0.1*hi)
+			var tint:=Color(1.0,0.88,0.28).lerp(Color(1.0,0.18,0.025),hi)
+			tint.a=strength*(1.0-hi*0.65)
+			var width:=(0.35*(1.0-lo)+0.025)*strength
+			CombatEffectMesh.line(mesh,a,b,width,tint,Vector3.FORWARD)
+			CombatEffectMesh.line(mesh,a,b,width,tint,Vector3.RIGHT)
+	for spark:int in 14:
+		var phase:=fposmod(age*0.8+spark*0.17,1.0)
+		var angle:=spark*2.399
+		CombatEffectMesh.spark(mesh,Vector3(cos(angle)*0.5,0.3+phase*2.1,sin(angle)*0.55),
+			0.045*strength*(1.0-phase),Color(1.0,0.72,0.18,strength*(1.0-phase)))
+	mesh.surface_end()
+
+func _prune_visual_rows(rows: Dictionary, wanted: Dictionary) -> void:
+	for key:String in rows.keys():
+		if wanted.has(key):continue
+		_release_visual_row(rows,key)
+
+func _release_visual_row(rows: Dictionary, key: String) -> void:
+	var row:Dictionary=rows[key]
+	if row.has("reveal"):row.reveal.reset()
+	var root:Node3D=row.root
+	if is_instance_valid(root):root.hide();root.queue_free()
+	rows.erase(key)
+
+func _clear_visual_effects() -> void:
+	for effect:Node in _effects.values():
+		if is_instance_valid(effect):effect.queue_free()
+	_effects.clear()
+	_prune_visual_rows(_arrival_effects,{})
+	_prune_visual_rows(_corpse_fires,{})
+
+func _update_handoff_fade(state: Dictionary) -> void:
+	_expire_handoff_fade()
+	var token:=str(state.get("token",""))
+	var id:=str(state.get("id",""))
+	var playing:=bool(state.get("playing",false))
+	var returning:=bool(state.get("returning",false))
+	var reason:=str(state.get("return_reason",""))
+	var same_run:=str(state.get("run_id",""))==str(_snapshot.get("run_id",""))
+	if _handoff_deadline_ms>0:
+		if not reason.is_empty() and reason not in ["finished","skipped"] \
+				or playing and not returning and token!=_handoff_token:
+			# A newly authenticated entrance film owns its own fade-in. Any
+			# other replacement/error relinquishes the local blackout as well.
+			_handoff_deadline_ms=0;_handoff_token=""
+			_set_fade(0)
+	if bool(state.get("handoff_fade",false)) and same_run and not bool(state.get("replaying",false)) \
+			and id=="measure.rescue.commitment" and not token.is_empty() and token!=_expired_handoff_token \
+			and (returning or not playing) and reason in ["finished","skipped"]:
+		if _handoff_deadline_ms==0:
+			_handoff_token=token;_handoff_deadline_ms=Time.get_ticks_msec()+12000
+		_set_fade(1)
+
+func _expire_handoff_fade() -> void:
+	if _handoff_deadline_ms>0 and Time.get_ticks_msec()>=_handoff_deadline_ms:
+		_expired_handoff_token=_handoff_token;_handoff_token="";_handoff_deadline_ms=0
+		_set_fade(0)
+
+func _process(_delta: float) -> void:
+	_expire_handoff_fade()
+
+func _actor(role: String, actor_nodes: Dictionary) -> Node3D:
+	var bound:Variant=_bound_actors.get(role)
+	if is_instance_valid(bound) and bound is Node3D:return bound as Node3D
+	var direct:Variant=actor_nodes.get(role)
+	if is_instance_valid(direct) and direct is Node3D:return direct as Node3D
+	var identity: Variant=_snapshot.get("actors",{}).get(role)
+	if identity==null:return null
+	var id:=int(identity)
+	var actor: Variant=actor_nodes.get(id,actor_nodes.get(str(id)))
+	return actor as Node3D if is_instance_valid(actor) else null
+
+func _apply_downed_mother(actor_nodes: Dictionary) -> void:
+	var actor:=_actor("mother",actor_nodes)
+	var downed:=bool(_snapshot.get("rescue",{}).get("mother",{}).get("downed",false))
+	var previous:Node3D=_downed_mother.get_ref() as Node3D if _downed_mother!=null else null
+	if not downed or actor==null or previous!=null and previous!=actor:
+		_release_downed_mother()
+	if not downed or actor==null or not actor.has_method("set_cinematic_presentation"):return
+	if actor.get("current_action")==&"death":return # Never revive a native dead actor for presentation.
+	var point:Vector3=actor.get("server_target")
+	var ground:=_ground(point)
+	if not ground.is_finite():return
+	var yaw:float=float(actor.get("_target_yaw"))
+	actor.call("set_cinematic_presentation",ground,yaw,&"injury_pinned")
+	_downed_mother=weakref(actor)
+
+func _release_downed_mother() -> void:
+	var actor:Node3D=_downed_mother.get_ref() as Node3D if _downed_mother!=null else null
+	if is_instance_valid(actor) and actor.has_method("end_cinematic_presentation"):
+		actor.call("end_cinematic_presentation")
+	_downed_mother=null
+
+func _apply_native_clip(key: String, actor: Node3D, event: Dictionary, time: float) -> void:
+	# Only an already-defeated goblin's real native death clip is leased. The
+	# scene can hold its fallen pose for last words, then finish that same fall;
+	# health, death latch, collision and server position never change.
+	if str(event.get("actor",""))!="goblin_boss" or str(event.get("clip",""))!="Death_A" \
+			or actor.get("current_action")!=&"death":return
+	var player:=actor.get("animation_player") as AnimationPlayer
+	if player==null or not player.has_animation(&"Death_A"):return
+	if not _clip_leases.has(key):
+		_clip_leases[key]={"actor":weakref(actor),"player":weakref(player),"mode":player.callback_mode_process,
+			"speed":player.speed_scale,"processing":actor.is_processing()}
+	var saved:Dictionary=_clip_leases[key]
+	if actor.is_processing():saved.processing=true
+	actor.set_process(false)
+	player.callback_mode_process=AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
+	player.speed_scale=1.0
+	var hold:=clampf(float(event.get("hold",0.35)),0.0,player.get_animation(&"Death_A").length-0.001)
+	var resume:=float(event.get("resume_at",12))
+	var pose:=minf(player.get_animation(&"Death_A").length-0.001,hold+maxf(0,time-resume))
+	player.stop(true);player.play(&"Death_A",0.0);player.seek(pose,true);player.advance(0.0);player.pause()
+
+func _release_native_clip(key: String) -> void:
+	var saved:Dictionary=_clip_leases[key]
+	var actor:Node3D=saved.actor.get_ref();var player:AnimationPlayer=saved.player.get_ref()
+	if is_instance_valid(player):player.callback_mode_process=int(saved.mode);player.speed_scale=float(saved.speed)
+	if is_instance_valid(actor):
+		if actor.get("current_action")==&"death" and actor.has_method("_hold_death_pose"):actor.call("_hold_death_pose")
+		actor.set_process(bool(saved.processing))
+	_clip_leases.erase(key)
+
+func _retire_completed_burns() -> void:
+	for index:int in range(_completed_burns.size()-1,-1,-1):
+		var row:Dictionary=_completed_burns[index]
+		var actor:Node3D=row.actor.get_ref()
+		var accepted:=bool(_snapshot.get("rescue",{}).get("burned",false)) \
+			or str(_snapshot.get("rescue",{}).get("stage",""))=="complete"
+		if not is_instance_valid(actor) or actor.is_queued_for_deletion() \
+				or (accepted and float(actor.get("_corpse_transparency"))>=0.999):
+			row.effect.reset();_completed_burns.remove_at(index)
+
+func _apply_role_scales(actor_nodes: Dictionary) -> void:
+	_ensure_mother_kneel(_actor("mother",actor_nodes))
+	var actor:=_actor("daughter",actor_nodes)
+	if actor==null or not actor.has_method("set_server_scale"):return
+	var id:=actor.get_instance_id()
+	if not _scales.has(id):_scales[id]={"actor":weakref(actor),"scale":float(actor.get("server_scale"))}
+	# Usually the actual NPC DTO already carries0.65. Reapplying it is a no-op;
+	# it scales the imported visual/nameplate only and preserves native physics.
+	actor.call("set_server_scale",0.65)
+
+func _ensure_mother_kneel(actor: Node3D) -> void:
+	if actor==null or _aliases.has(actor.get_instance_id()):return
+	var player:=actor.get("animation_player") as AnimationPlayer
+	var resolver:AnimationResolver=actor.get("resolver")
+	var skeleton:=actor.get("_native_skeleton") as Skeleton3D
+	var model:Dictionary=actor.get("_model_config")
+	if player==null or resolver==null or skeleton==null or not model.has("culture"):return
+	if not player.has_animation_library(&"rescue"):
+		var path:String=actor.call("_external_path",str(model.get("animationLibrary","")))
+		var result:=NativeAnimationImporter.import_library(actor,path,skeleton,model.get("boneAliases",{}),
+			PackedStringArray(["Kneeling_Tired"]),PackedStringArray(["Kneeling_Tired"]))
+		var extra:=result.get("player") as AnimationPlayer
+		if extra==null:return
+		if not (result.get("errors",PackedStringArray()) as PackedStringArray).is_empty():extra.free();return
+		player.add_animation_library(&"rescue",extra.get_animation_library(&""));extra.free()
+	var action:="rescue_kneel"
+	_aliases[actor.get_instance_id()]={"actor":weakref(actor),"had":resolver.action_to_clip.has(action),"old":resolver.action_to_clip.get(action)}
+	resolver.action_to_clip[action]=&"rescue/Kneeling_Tired"
+
+func apply_environment(_owner: WorldEnvironment, _sun: DirectionalLight3D = null,
+		_moon: DirectionalLight3D = null) -> void:
+	# Compatibility for callers while map lighting owns the mine's ordinary
+	# atmosphere. Quest playback/Skip/replay never changes room illumination.
+	pass
+
+func _set_gate(value: float) -> void:
+	if is_instance_valid(gate):gate.position=_gate_origin+Vector3.UP*(2.9*clampf(value,0,1))
+
+func _set_fade(value: float) -> void:
+	var alpha:=clampf(value,0,1)
+	if alpha>0 and not is_instance_valid(_fade):
+		_fade_layer=CanvasLayer.new();_fade_layer.name="RescueWorldFade";_fade_layer.layer=118;add_child(_fade_layer)
+		_fade=ColorRect.new();_fade.name="RescueBlackout";_fade.mouse_filter=Control.MOUSE_FILTER_IGNORE
+		_fade_layer.add_child(_fade);_fade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	if is_instance_valid(_fade):
+		_fade.color=Color(0,0,0,alpha);_fade.visible=alpha>0.001
+
+func set_readouts_visible(value: bool) -> void:
+	_readouts_visible=value
+	for label:Label3D in labels.values():label.visible=value
+
+func _ground(point: Vector3) -> Vector3:
+	if not _sample.is_valid():return Vector3(INF,INF,INF)
+	var height:Variant=_sample.call(point)
+	if typeof(height) not in [TYPE_FLOAT,TYPE_INT] or not is_finite(float(height)):return Vector3(INF,INF,INF)
+	point.y=float(height);return point
+
+func _clear_cinematic(preserve_completed_burn := false) -> void:
+	_clear_visual_effects()
+	for key:String in _dissolves:
+		if preserve_completed_burn and float(_dissolve_progress.get(key,0))>=0.999:
+			_completed_burns.append({"effect":_dissolves[key],"actor":_dissolve_targets[key]})
+		else:_dissolves[key].reset()
+	_dissolves.clear();_dissolve_targets.clear();_dissolve_progress.clear()
+	for key:String in _clip_leases.keys():_release_native_clip(key)
+	_scene_id="";_scene_elapsed=0;_scene_replaying=false
+	_set_gate(_accepted_gate)
+	_set_fade(1.0 if _handoff_deadline_ms>0 else 0.0)
+
+func clear() -> void:
+	_handoff_token="";_handoff_deadline_ms=0;_expired_handoff_token=""
+	_clear_cinematic()
+	_release_downed_mother()
+	for row:Dictionary in _completed_burns:row.effect.reset()
+	_completed_burns.clear();_bound_actors.clear()
+	for row:Dictionary in _aliases.values():
+		var actor:Node3D=row.actor.get_ref()
+		if not is_instance_valid(actor):continue
+		var resolver:AnimationResolver=actor.get("resolver")
+		if resolver==null:continue
+		if actor.get("current_action")==&"rescue_kneel" and not bool(actor.get("_cinematic_active")):
+			actor.call("play_action",&"idle")
+		if bool(row.had):resolver.action_to_clip["rescue_kneel"]=row.old
+		else:resolver.action_to_clip.erase("rescue_kneel")
+	_aliases.clear()
+	for row:Dictionary in _scales.values():
+		var actor:Node3D=row.actor.get_ref()
+		if is_instance_valid(actor):actor.call("set_server_scale",float(row.scale))
+	_scales.clear()
+	if is_instance_valid(cage):cage.queue_free()
+	if is_instance_valid(_fade_layer):_fade_layer.queue_free()
+	_fade=null;_fade_layer=null
+	cage=null;gate=null;panels.clear();labels.clear();points.clear()
+	_identity="";_geometry="";_map="";_snapshot.clear();_world=null;hide()
+
+func _exit_tree() -> void:
+	clear()

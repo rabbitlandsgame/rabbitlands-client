@@ -91,7 +91,7 @@ func refresh_equipment() -> void:
 		if visual == 0 or (part == 1 and visual < 160):
 			continue
 		var model := actor._equipment_model_config(part, visual)
-		if model.has("rangedAnimationScene") or model.get("attach", "") == "ranged_bow":
+		if not actor._ranged_bow_path(model).is_empty():
 			var bow_hand := skeleton.find_bone("hand_l")
 			if bow_hand >= 0:
 				_hands.append({"hand": bow_hand, "side": "l", "finger_only": true})

@@ -186,6 +186,8 @@ var party_leave_button: Button
 var party_add_bot: MenuButton
 var _party_was_joined := false
 var _party_last_inviter := ""
+var _party_rescue_present := false
+var _party_rescue_signature := ""
 var party_collapse: Button
 var party_scroll: ScrollContainer
 var _party_collapsed := false
@@ -349,6 +351,12 @@ func _on_state_changed(path: StringName) -> void:
 			if market_panel.visible and _market_tab == "sell":
 				_render_market()
 		&"party":
+			_sync_party()
+		&"campaign":
+			var signature := JSON.stringify(_rescue_party_member())
+			if signature != _party_rescue_signature:
+				_sync_party()
+		&"map":
 			_sync_party()
 		&"achievements_catalog":
 			_sync_achievements()
@@ -754,6 +762,8 @@ func sync_campaign_replay() -> void:
 		return
 	var content: Control = quest_guide.get("campaign_content") as Control
 	quest_replay_button.disabled = content == null or not bool(content.get("_replay_available"))
+	quest_replay_button.text = "Retry current scene" if content != null \
+		and bool(content.get("_replay_retry")) else "Replay current scene"
 
 # --- mail --------------------------------------------------------------------
 
@@ -1670,6 +1680,8 @@ func _market_number(value: int) -> String:
 func _sync_party(open_requested: bool = false) -> void:
 	var state: Dictionary = AppState.party
 	var members: Array = state.get("members", []) as Array
+	var companion := _rescue_party_member()
+	_party_rescue_signature = JSON.stringify(companion)
 	var invited_by: String = str(state.get("invited_by", ""))
 	var in_party: bool = bool(state.get("in_party", false))
 	var can_manage := not in_party
@@ -1681,9 +1693,11 @@ func _sync_party(open_requested: bool = false) -> void:
 	# Health and location packets refresh the roster without reopening a
 	# window the player dismissed. Joining or a new invitation can open it.
 	var open_for_change: bool = ((in_party and not _party_was_joined)
-		or (not invited_by.is_empty() and invited_by != _party_last_inviter))
+		or (not invited_by.is_empty() and invited_by != _party_last_inviter)
+		or (not companion.is_empty() and not _party_rescue_present))
 	_party_was_joined = in_party
 	_party_last_inviter = invited_by
+	_party_rescue_present = not companion.is_empty()
 
 	party_invite_label.text = "%s invited you. Accept?" % invited_by
 	party_invite_row.visible = not invited_by.is_empty()
@@ -1691,7 +1705,7 @@ func _sync_party(open_requested: bool = false) -> void:
 		party_rows.remove_child(child)
 		child.queue_free()
 
-	if not in_party and invited_by.is_empty():
+	if not in_party and invited_by.is_empty() and companion.is_empty():
 		party_header.tooltip_text = "No party"
 		_layout_party()
 		party_panel.hide()
@@ -1703,13 +1717,38 @@ func _sync_party(open_requested: bool = false) -> void:
 		if bool(member.get("online", false)):
 			online_count += 1
 		party_rows.add_child(_party_row(member))
+	if not companion.is_empty():
+		party_rows.add_child(_party_row(companion))
 	party_header.tooltip_text = ("Party - %d of %d online" % [online_count, members.size()]
 		if not members.is_empty() else "No party")
+	if not companion.is_empty():
+		party_header.tooltip_text = (party_header.tooltip_text + " · companion" if not members.is_empty() else "Quest companion")
 	party_leave_button.disabled = members.is_empty()
 	_layout_party()
 	if open_requested or open_for_change:
 		party_panel.show()
 		party_panel.move_to_front()
+
+## This run-owned NPC is displayed beside the roster without becoming a ninth
+## party member, invitation recipient or gauntlet bot command target.
+func _rescue_party_member() -> Dictionary:
+	var snapshot: Dictionary = AppState.campaign
+	if not AppState.authenticated or str(snapshot.get("kind", "")) != "rescue" or not bool(snapshot.get("active", false)) \
+			or EloriaProtocol.map_id_from_reference(str(snapshot.get("map", ""))) != EloriaProtocol.map_id_from_reference(AppState.current_map) \
+			or not EloriaProtocol.campaign_rescue_valid(snapshot.get("rescue", {})) \
+			or (snapshot.get("rescue", {}) as Dictionary).is_empty():
+		return {}
+	var actor_id := int((snapshot.get("actors", {}) as Dictionary).get("mother", 0))
+	var actor: Dictionary = AppState.actors.get(actor_id, {})
+	if actor_id <= 0 or int(actor.get("kind", 0)) != 2:
+		return {}
+	var mother: Dictionary = (snapshot.rescue as Dictionary).get("mother", {})
+	var name := str(actor.get("name", "Injured woman"))
+	return {"name":name, "narrative_companion":true, "online":true, "health":mother.health,
+		"max_health":mother.max_health, "ether":mother.mana, "max_ether":mother.max_mana,
+		"map_id":EloriaProtocol.map_id_from_reference(AppState.current_map).replace("_", " ").capitalize(),
+		"x":int(actor.get("x", 0)), "y":int(actor.get("y", 0)), "level":10,
+		"revives_spent":int(mother.get("revives_spent", 0))}
 
 func _party_row(member: Dictionary) -> Control:
 	var row := HBoxContainer.new()
@@ -1728,6 +1767,9 @@ func _party_row(member: Dictionary) -> Control:
 		int(member.get("health", 0)), int(member.get("max_health", 0)),
 		int(member.get("ether", 0)), int(member.get("max_ether", 0)),
 		str(member.get("map_id", "")), int(member.get("x", 0)), int(member.get("y", 0))]
+	if bool(member.get("narrative_companion", false)):
+		row.tooltip_text = row.tooltip_text.replace("Ether:", "Mana:") \
+			+ "\nLevel 10 quest companion · finite mana\nRevival casts used: %d\nSeparate from the eight player slots." % int(member.get("revives_spent", 0))
 	var portrait: Control = PARTY_MEDALLION.new()
 	portrait.name = "Portrait"
 	portrait.configure(member)
@@ -1744,6 +1786,8 @@ func _party_row(member: Dictionary) -> Control:
 	var title := Label.new()
 	title.name = "Name"
 	title.text = str(member.get("name", "")) + (" · you" if bool(member.get("is_self", false)) else "")
+	if bool(member.get("narrative_companion", false)):
+		title.text += " · companion"
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	title.add_theme_font_size_override("font_size", 12)
@@ -1752,6 +1796,8 @@ func _party_row(member: Dictionary) -> Control:
 	var where := Label.new()
 	where.name = "Standing"
 	where.text = "" if online else "offline"
+	if bool(member.get("narrative_companion", false)):
+		where.text = "Lv 10"
 	if bool(member.get("is_bot", false)) and str(member.get("map_id", "")).is_empty():
 		where.text = "standby"
 	where.add_theme_font_size_override("font_size", 10)
@@ -1796,6 +1842,7 @@ func _party_number(node_name: String, current: int, maximum: int, _colour: Color
 
 func _layout_party() -> void:
 	var count := (AppState.party.get("members", []) as Array).size()
+	var displayed_count := party_rows.get_child_count()
 	var bounds := get_viewport_rect().size
 	var dragger := party_panel.get_node("WindowDrag") as WindowDrag
 	var bottom := bounds.y - dragger.reserved_bottom
@@ -1812,7 +1859,7 @@ func _layout_party() -> void:
 		(row.get_node("Vitals/Identity") as Control).visible = not compact
 		if (row as Control).visible:
 			row_height = maxf(row_height, (row as Control).get_combined_minimum_size().y)
-	party_scroll.visible = not _party_collapsed and count > 0
+	party_scroll.visible = not _party_collapsed and displayed_count > 0
 	party_scroll.custom_minimum_size.y = row_height
 	var body := _window_body(party_panel)
 	(body.get_node("PartyActions") as Control).visible = _party_controls_visible and not _party_collapsed
@@ -1830,7 +1877,7 @@ func _layout_party() -> void:
 		party_panel.size = Vector2(_party_expanded_size.x, minimum.y)
 	else:
 		if not _party_custom_size:
-			_party_expanded_size.y = minimum.y + (maxf(0, minf(288, party_rows.get_combined_minimum_size().y) - row_height) if count > 0 else 0)
+			_party_expanded_size.y = minimum.y + (maxf(0, minf(288, party_rows.get_combined_minimum_size().y) - row_height) if displayed_count > 0 else 0)
 		party_panel.size = _party_expanded_size.clamp(minimum.max(PARTY_MINIMUM), maximum)
 		_party_expanded_size = party_panel.size
 	dragger.clamp_into_view()

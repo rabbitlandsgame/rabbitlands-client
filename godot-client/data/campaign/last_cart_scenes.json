@@ -1,0 +1,763 @@
+{
+  "version": 1,
+  "scenes": {
+    "measure.cart.arrival": {
+      "title": "The Last Cart",
+      "duration": 82.0,
+      "fov": 43.0,
+      "entry_seconds": 2.4,
+      "exit_seconds": 1.8,
+      "anchor": "cart_anchor",
+      "cast_roles": [
+        "odo",
+        "foreman",
+        "worker",
+        "protagonist"
+      ],
+      "required_actors": [
+        "odo",
+        "foreman",
+        "worker",
+        "protagonist"
+      ],
+      "stage_protagonist": true,
+      "inspection_id": "cart_assessment",
+      "inspection_at": 36.0,
+      "inspection_wait_at": 43.0,
+      "inspection_timeout": 30.0,
+      "choice_id": "cart_release",
+      "choice_at": 60.0,
+      "choice_response_until": 72.0,
+      "dialogue_holds": [
+        8.0,
+        16.0,
+        26.0,
+        36.0,
+        52.0,
+        60.0,
+        72.0
+      ],
+      "cart_accident": [
+        4.0,
+        6.0
+      ],
+      "shots": [
+        {
+          "t": 0.0,
+          "anchor": "cart_anchor",
+          "position": [
+            7,
+            7,
+            13
+          ],
+          "target": [
+            2.5,
+            -1,
+            0
+          ]
+        },
+        {
+          "t": 82.0,
+          "anchor": "cart_anchor",
+          "position": [
+            7,
+            7,
+            13
+          ],
+          "target": [
+            2.5,
+            -1,
+            0
+          ]
+        }
+      ],
+      "cues": [
+        {
+          "at": 0.0,
+          "actor": "odo",
+          "action": "idle",
+          "face": "cart_anchor"
+        },
+        {
+          "at": 0.0,
+          "actor": "foreman",
+          "action": "idle",
+          "face": "cart_anchor"
+        },
+        {
+          "at": 0.0,
+          "actor": "worker",
+          "action": "idle",
+          "face": "cart_anchor",
+          "destination": "worker_far"
+        },
+        {
+          "at": 0.0,
+          "actor": "protagonist",
+          "action": "idle",
+          "face": "cart_anchor"
+        },
+        {
+          "at": 4.0,
+          "actor": "foreman",
+          "action": "pickup",
+          "face": "cart_anchor"
+        },
+        {
+          "at": 4.7,
+          "actor": "worker",
+          "action": "injury_recoil",
+          "face": "cart_anchor",
+          "destination": "worker_far"
+        },
+        {
+          "at": 5.25,
+          "actor": "worker",
+          "action": "injury_pinned",
+          "face": "cart_anchor",
+          "destination": "worker_far"
+        },
+        {
+          "at": 6.0,
+          "actor": "foreman",
+          "action": "defend",
+          "face": "cart_anchor"
+        },
+        {
+          "at": 8.0,
+          "actor": "odo",
+          "action": "emote_greet",
+          "face": "foreman"
+        },
+        {
+          "at": 11.0,
+          "actor": "odo",
+          "action": "idle",
+          "face": "worker"
+        },
+        {
+          "at": 16.0,
+          "actor": "foreman",
+          "action": "defend",
+          "face": "odo"
+        },
+        {
+          "at": 26.0,
+          "actor": "odo",
+          "action": "emote_greet",
+          "face": "protagonist"
+        },
+        {
+          "at": 30.0,
+          "actor": "odo",
+          "action": "idle",
+          "face": "protagonist"
+        },
+        {
+          "at": 36.0,
+          "actor": "protagonist",
+          "action": "run",
+          "from": "protagonist_post",
+          "destination": "inspection_turn",
+          "move_seconds": 2.2,
+          "face": "inspection_turn"
+        },
+        {
+          "at": 38.2,
+          "actor": "protagonist",
+          "action": "run",
+          "from": "inspection_turn",
+          "destination": "inspection_stand",
+          "move_seconds": 3.8,
+          "face": "inspection_stand"
+        },
+        {
+          "at": 42.0,
+          "actor": "protagonist",
+          "action": "pickup",
+          "destination": "inspection_stand",
+          "face": "cart_anchor"
+        },
+        {
+          "at": 43.0,
+          "actor": "protagonist",
+          "action": "idle",
+          "destination": "inspection_stand",
+          "face": "odo"
+        },
+        {
+          "at": 52.0,
+          "actor": "odo",
+          "action": "emote_greet",
+          "face": "protagonist"
+        },
+        {
+          "at": 55.0,
+          "actor": "odo",
+          "action": "idle",
+          "face": "protagonist"
+        },
+        {
+          "at": 61.0,
+          "actor": "odo",
+          "action": "emote_nod",
+          "face": "protagonist"
+        },
+        {
+          "at": 64.0,
+          "actor": "odo",
+          "action": "idle",
+          "face": "foreman"
+        },
+        {
+          "at": 76.0,
+          "actor": "protagonist",
+          "action": "walk",
+          "from": "inspection_stand",
+          "destination": "protagonist_return",
+          "move_seconds": 4.5,
+          "face": "protagonist_return"
+        },
+        {
+          "at": 81.0,
+          "actor": "protagonist",
+          "action": "idle",
+          "destination": "protagonist_return",
+          "face": "post"
+        },
+        {
+          "at": 81.0,
+          "actor": "odo",
+          "action": "idle",
+          "face": "post"
+        },
+        {
+          "at": 81.0,
+          "actor": "foreman",
+          "action": "defend",
+          "face": "cart_anchor"
+        }
+      ],
+      "lines": [
+        {
+          "at": 0.0,
+          "speaker": "",
+          "text": "A loaded handcart rolls as its brake slips. The shaft catches a worker's ankle beneath the load."
+        },
+        {
+          "at": 8.0,
+          "speaker": "Odo Fenn",
+          "text": "Keep it steady. We will get his leg free.",
+          "speaker_actor": "odo"
+        },
+        {
+          "at": 16.0,
+          "speaker": "Dock foreman",
+          "text": "The brake gave way. His ankle is pinned by the shaft. I cannot lift the loaded cart alone.",
+          "speaker_actor": "foreman"
+        },
+        {
+          "at": 26.0,
+          "speaker": "Odo Fenn",
+          "text": "Look at the brake, the load, and the shaft before we pull. We need to move it safely.",
+          "speaker_actor": "odo"
+        },
+        {
+          "at": 36.0,
+          "speaker": "",
+          "text": "You approach the cart and examine how the shaft is holding the worker."
+        },
+        {
+          "at": 43.0,
+          "speaker": "You",
+          "text": "We can lighten the load, lift the shaft with a lever, or rig a controlled pull. The cart must stay secured.",
+          "speaker_actor": "protagonist"
+        },
+        {
+          "at": 52.0,
+          "speaker": "Odo Fenn",
+          "text": "Which method will you use? The dock tools are here, and we can help.",
+          "speaker_actor": "odo"
+        },
+        {
+          "at": 72.0,
+          "speaker": "Odo Fenn",
+          "text": "I will stay with the worker. Follow the marked task, and tell us when you are ready.",
+          "speaker_actor": "odo"
+        }
+      ]
+    },
+    "measure.cart.resolved": {
+      "title": "Safely Ashore",
+      "duration": 48.0,
+      "fov": 52.0,
+      "entry_seconds": 2.4,
+      "exit_seconds": 1.8,
+      "anchor": "muster",
+      "cast_roles": [
+        "odo",
+        "worker",
+        "protagonist"
+      ],
+      "required_actors": [
+        "odo",
+        "worker",
+        "protagonist"
+      ],
+      "stage_protagonist": true,
+      "dialogue_holds": [
+        8.0,
+        18.0,
+        30.0,
+        40.0
+      ],
+      "shots": [
+        {
+          "t": 0.0,
+          "anchor": "muster",
+          "position": [
+            7,
+            6,
+            11
+          ],
+          "target": [
+            0,
+            -0.8,
+            0
+          ]
+        },
+        {
+          "t": 48.0,
+          "anchor": "muster",
+          "position": [
+            7,
+            6,
+            11
+          ],
+          "target": [
+            0,
+            -0.8,
+            0
+          ]
+        }
+      ],
+      "cues": [
+        {
+          "at": 0.0,
+          "actor": "worker",
+          "action": "injury_standing",
+          "face": "protagonist"
+        },
+        {
+          "at": 0.0,
+          "actor": "protagonist",
+          "action": "idle",
+          "face": "worker"
+        },
+        {
+          "at": 0.0,
+          "actor": "odo",
+          "action": "run",
+          "from": "odo_post",
+          "destination": "muster_odo",
+          "move_seconds": 5.5,
+          "face": "muster_odo"
+        },
+        {
+          "at": 5.5,
+          "actor": "odo",
+          "action": "idle",
+          "destination": "muster_odo",
+          "face": "worker"
+        },
+        {
+          "at": 8.0,
+          "actor": "worker",
+          "action": "injury_standing",
+          "face": "protagonist"
+        },
+        {
+          "at": 11.0,
+          "actor": "worker",
+          "action": "injury_standing",
+          "face": "protagonist"
+        },
+        {
+          "at": 18.0,
+          "actor": "odo",
+          "action": "emote_greet",
+          "destination": "muster_odo",
+          "face": "protagonist"
+        },
+        {
+          "at": 22.0,
+          "actor": "odo",
+          "action": "idle",
+          "destination": "muster_odo",
+          "face": "worker"
+        },
+        {
+          "at": 40.0,
+          "actor": "odo",
+          "action": "run",
+          "from": "muster_odo",
+          "destination": "odo_post",
+          "move_seconds": 5,
+          "face": "odo_post"
+        },
+        {
+          "at": 46.0,
+          "actor": "odo",
+          "action": "idle",
+          "destination": "odo_post",
+          "face": "post"
+        }
+      ],
+      "lines": [
+        {
+          "at": 0.0,
+          "speaker": "",
+          "text": "The worker is free, treated, and safely ashore. The crew has secured the cart."
+        },
+        {
+          "at": 8.0,
+          "speaker": "Dock Worker",
+          "text": "Thank you. I thought the cart would move again before anyone could lift it.",
+          "speaker_actor": "worker"
+        },
+        {
+          "at": 18.0,
+          "speaker": "Odo Fenn",
+          "text": "While you were helping, the clerk checked the cargo records. There is a problem with the fitting still on that cart.",
+          "speaker_actor": "odo"
+        },
+        {
+          "at": 30.0,
+          "speaker": "Odo Fenn",
+          "text": "Its plate reads K-17. Greenlight and Twinbrook each have a work order saying that same fitting was already installed and tested.",
+          "speaker_actor": "odo"
+        },
+        {
+          "at": 40.0,
+          "speaker": "Odo Fenn",
+          "text": "When you are ready, compare the fitting with its records. Let us find out what actually came ashore.",
+          "speaker_actor": "odo"
+        }
+      ]
+    },
+    "measure.claims.inquiry": {
+      "title": "One Shipment, Two Claims",
+      "duration": 52.0,
+      "fov": 52.0,
+      "entry_seconds": 2.4,
+      "exit_seconds": 1.8,
+      "anchor": "odo",
+      "cast_roles": [
+        "odo",
+        "protagonist"
+      ],
+      "required_actors": [
+        "odo",
+        "protagonist"
+      ],
+      "stage_protagonist": true,
+      "dialogue_holds": [
+        10.0,
+        22.0,
+        32.0,
+        44.0
+      ],
+      "shots": [
+        {
+          "t": 0.0,
+          "anchor_actor": "odo",
+          "position": [
+            -7,
+            6,
+            10
+          ],
+          "target": [
+            0,
+            -0.8,
+            0
+          ],
+          "variants": {
+            "installation": {
+              "anchor_actor": "",
+              "anchor": "flow",
+              "position": [
+                -13,
+                10,
+                17
+              ],
+              "target": [
+                -1,
+                -1.2,
+                0
+              ]
+            }
+          }
+        },
+        {
+          "t": 52.0,
+          "anchor_actor": "odo",
+          "position": [
+            -7,
+            6,
+            10
+          ],
+          "target": [
+            0,
+            -0.8,
+            0
+          ],
+          "variants": {
+            "installation": {
+              "anchor_actor": "",
+              "anchor": "flow",
+              "position": [
+                -13,
+                10,
+                17
+              ],
+              "target": [
+                -1,
+                -1.2,
+                0
+              ]
+            }
+          }
+        }
+      ],
+      "cues": [
+        {
+          "at": 0.0,
+          "actor": "odo",
+          "action": "idle",
+          "face": "protagonist"
+        },
+        {
+          "at": 0.0,
+          "actor": "protagonist",
+          "action": "idle",
+          "face": "odo"
+        },
+        {
+          "at": 10.0,
+          "actor": "odo",
+          "action": "emote_greet",
+          "face": "protagonist"
+        },
+        {
+          "at": 14.0,
+          "actor": "odo",
+          "action": "idle",
+          "face": "protagonist"
+        },
+        {
+          "at": 32.0,
+          "actor": "odo",
+          "action": "emote_nod",
+          "face": "protagonist"
+        },
+        {
+          "at": 50.0,
+          "actor": "odo",
+          "action": "idle",
+          "face": "post"
+        }
+      ],
+      "lines": [
+        {
+          "at": 0.0,
+          "speaker": "Odo Fenn",
+          "text": "One numbered fitting is still here. Greenlight and Twinbrook both have records saying that same fitting was installed and tested.",
+          "speaker_actor": "odo",
+          "variants": {
+            "installation": "We have reached the Twinbrook works. Its completion record names the fitting we examined at Greenlight."
+          }
+        },
+        {
+          "at": 10.0,
+          "speaker": "Odo Fenn",
+          "text": "You can examine the kit, reconstruct the unloading with witnesses, or compare the independent records. Follow a lead you can verify.",
+          "speaker_actor": "odo",
+          "variants": {
+            "installation": "Check the installed plate and valve, then run the service test. We need to see what is fitted here, not guess from a signature."
+          }
+        },
+        {
+          "at": 22.0,
+          "speaker": "Odo Fenn",
+          "text": "A copied record, a changed destination, or a false sign-off could explain this. We do not know which yet.",
+          "speaker_actor": "odo",
+          "variants": {
+            "installation": "If the equipment and the record disagree, keep both observations. A working pump does not prove this particular fitting was installed."
+          }
+        },
+        {
+          "at": 32.0,
+          "speaker": "Odo Fenn",
+          "text": "Which lead will you start with?",
+          "speaker_actor": "odo",
+          "variants": {
+            "installation": "Record what the equipment actually shows. Then we can decide what the conflicting claims mean."
+          }
+        },
+        {
+          "at": 44.0,
+          "speaker": "Odo Fenn",
+          "speaker_actor": "odo",
+          "text": "Follow the marked lead. You can compare the other sources before returning with a finding.",
+          "variants": {
+            "installation": "Record what the installed equipment actually shows. Keep those measurements with the claim before drawing a conclusion."
+          }
+        }
+      ],
+      "choice_id": "claims_lead",
+      "choice_at": 32.0,
+      "choice_response_until": 44.0
+    },
+    "measure.claims.verified": {
+      "title": "What the Evidence Shows",
+      "duration": 34.0,
+      "fov": 52.0,
+      "entry_seconds": 2.4,
+      "exit_seconds": 1.8,
+      "anchor": "odo",
+      "cast_roles": [
+        "odo",
+        "protagonist"
+      ],
+      "required_actors": [
+        "odo",
+        "protagonist"
+      ],
+      "stage_protagonist": true,
+      "dialogue_holds": [
+        10.0,
+        22.0
+      ],
+      "shots": [
+        {
+          "t": 0.0,
+          "anchor_actor": "odo",
+          "position": [
+            -7,
+            6,
+            10
+          ],
+          "target": [
+            0,
+            -0.8,
+            0
+          ],
+          "variants": {
+            "installation": {
+              "anchor_actor": "",
+              "anchor": "flow",
+              "position": [
+                -13,
+                10,
+                17
+              ],
+              "target": [
+                -1,
+                -1.2,
+                0
+              ]
+            }
+          }
+        },
+        {
+          "t": 34.0,
+          "anchor_actor": "odo",
+          "position": [
+            -7,
+            6,
+            10
+          ],
+          "target": [
+            0,
+            -0.8,
+            0
+          ],
+          "variants": {
+            "installation": {
+              "anchor_actor": "",
+              "anchor": "flow",
+              "position": [
+                -13,
+                10,
+                17
+              ],
+              "target": [
+                -1,
+                -1.2,
+                0
+              ]
+            }
+          }
+        }
+      ],
+      "cues": [
+        {
+          "at": 0.0,
+          "actor": "odo",
+          "action": "emote_nod",
+          "face": "protagonist"
+        },
+        {
+          "at": 4.0,
+          "actor": "odo",
+          "action": "idle",
+          "face": "protagonist"
+        },
+        {
+          "at": 10.0,
+          "actor": "odo",
+          "action": "emote_greet",
+          "face": "protagonist"
+        },
+        {
+          "at": 14.0,
+          "actor": "odo",
+          "action": "idle",
+          "face": "protagonist"
+        },
+        {
+          "at": 32.0,
+          "actor": "odo",
+          "action": "idle",
+          "face": "post"
+        }
+      ],
+      "lines": [
+        {
+          "at": 0.0,
+          "speaker": "Odo Fenn",
+          "text": "Your evidence puts this fitting on the pier after the records say it was already installed. Those accounts cannot both be right.",
+          "speaker_actor": "odo",
+          "variants": {
+            "installation": "The plate and service test establish what is actually installed here. It does not match the completed work described in the record."
+          }
+        },
+        {
+          "at": 10.0,
+          "speaker": "Odo Fenn",
+          "text": "That is a discrepancy we can show. It does not tell us who caused it, or whether the mistake was deliberate.",
+          "speaker_actor": "odo"
+        },
+        {
+          "at": 22.0,
+          "speaker": "Odo Fenn",
+          "text": "Our next check is the actual installation at Twinbrook. We will travel there normally and compare the equipment with the claim.",
+          "speaker_actor": "odo",
+          "variants": {
+            "installation": "We have a physical account as well as a written one now. Keep them together as we follow the next part of the work."
+          }
+        }
+      ]
+    }
+  }
+}

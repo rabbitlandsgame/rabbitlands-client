@@ -10,6 +10,31 @@ signal magic_selection_completed
 signal coordinate_intents_invalidated
 signal coordinate_route_cancelled
 signal movement_requested(tile: Vector2i)
+signal appearance_protocol_changed(version: int)
+var _appearance_protocol_version := 1
+var appearance_error := ""
+
+func appearance_protocol_version() -> int:
+	return _appearance_protocol_version
+
+func _set_appearance_protocol(version: int) -> void:
+	if _appearance_protocol_version == version:
+		return
+	_appearance_protocol_version = version
+	appearance_protocol_changed.emit(version)
+
+func validate_creation_appearance(appearance: Dictionary) -> Error:
+	appearance_error = ""
+	var validation := PortraitCustomization.validate(appearance, _appearance_protocol_version)
+	if not validation.ok:
+		appearance_error = validation.message
+		return ERR_UNAVAILABLE if validation.error == "unsupported" else ERR_INVALID_DATA
+	if int(appearance.get("actor_type", 0)) not in [0, 1]:
+		for field: String in PortraitCustomization.FIELDS:
+			if appearance.get(field, PortraitCustomization.DEFAULTS[field]) != PortraitCustomization.DEFAULTS[field]:
+				appearance_error = "Advanced face, hair and body customization is currently available for Human characters only."
+				return ERR_INVALID_DATA
+	return OK
 const CoordinateContext = preload("res://src/network/coordinate_context.gd")
 var coordinates = CoordinateContext.new()
 var magic_pending: Dictionary = {}
@@ -76,6 +101,8 @@ func clear_coordinate_intents() -> void:
 	coordinate_intents_invalidated.emit()
 
 func _reset_coordinate_session() -> void:
+	_set_appearance_protocol(1)
+	appearance_error = ""
 	move_intent_enabled = false
 	move_intent_epoch = 0
 	coordinates.reset()
@@ -457,7 +484,34 @@ func send_client_capabilities() -> Error:
 	return send_frame(EloriaProtocol.client_capabilities(declared_actor_cap))
 
 func send_chat(text: String) -> Error:
+	if text.strip_edges().to_lower().begins_with("#appearance "):
+		var compatible := _compatible_appearance_command(text)
+		if not compatible.ok:
+			return compatible.error
+		text = compatible.text
 	return send_frame(EloriaProtocol.chat(text))
+
+func _compatible_appearance_command(text: String) -> Dictionary:
+	appearance_error = ""
+	if _appearance_protocol_version >= 2:
+		return {"ok": true, "text": text}
+	var words := text.strip_edges().to_lower().split(" ", false)
+	var retained := PackedStringArray(["#appearance"])
+	var extensions := {}
+	for word: String in words.slice(1):
+		var pair := word.split("=", true, 1)
+		if pair[0] not in PortraitCustomization.EXTRA_FIELDS:
+			retained.append(word)
+			continue
+		if pair.size() != 2 or not pair[1].is_valid_int() or extensions.has(pair[0]):
+			appearance_error = "Invalid or repeated appearance option."
+			return {"ok": false, "error": ERR_INVALID_DATA}
+		extensions[pair[0]] = int(pair[1])
+	var validation := PortraitCustomization.validate(extensions, 1)
+	if not validation.ok:
+		appearance_error = validation.message
+		return {"ok": false, "error": ERR_UNAVAILABLE if validation.error == "unsupported" else ERR_INVALID_DATA}
+	return {"ok": true, "text": " ".join(retained)}
 
 func set_active_channel(slot: int) -> Error:
 	return send_frame(EloriaProtocol.set_active_channel(slot))
@@ -518,7 +572,7 @@ func use_map_object(object_id: int) -> Error:
 	return send_frame(EloriaProtocol.use_map_object(object_id))
 
 func campaign_request(action: String) -> Error:
-	if action not in ["start", "resume", "leave", "hint", "join", "own", "bank", "road", "lamps", "continue"]:
+	if action not in ["start", "resume", "leave", "hint", "join", "own", "bank", "road", "lamps", "cart", "continue", "rescue", "rescue replay", "accept", "defer", "supplies"]:
 		return ERR_INVALID_PARAMETER
 	return send_chat("#campaign " + action)
 
@@ -531,6 +585,52 @@ func campaign_scene_done(run_id: String, token: String) -> Error:
 	if not _campaign_identifier(run_id) or not _campaign_identifier(token):
 		return ERR_INVALID_PARAMETER
 	return send_chat("#campaign scene_done %s %s" % [run_id, token])
+
+func campaign_scene_choice(run_id: String, token: String, option_id: String) -> Error:
+	if not _campaign_identifier(run_id) or not _campaign_identifier(token) \
+			or option_id not in ["defend", "repair", "evacuate", "unload", "lever", "haul", "physical", "chronology", "records"]:
+		return ERR_INVALID_PARAMETER
+	return send_chat("#campaign scene_choice %s %s %s" % [run_id, token, option_id])
+
+func campaign_scene_inspect(run_id: String, token: String, action: String) -> Error:
+	if not _campaign_identifier(run_id) or not _campaign_identifier(token) or action not in ["start", "cancel"]:
+		return ERR_INVALID_PARAMETER
+	return send_chat("#campaign scene_inspect %s %s %s" % [run_id, token, action])
+
+func campaign_rescue_choice(run_id: String, token: String, option_id: String) -> Error:
+	if not _campaign_identifier(run_id) or not _campaign_identifier(token) or option_id not in ["help", "watch"]:
+		return ERR_INVALID_PARAMETER
+	return send_chat("#campaign rescue_choice %s %s %s" % [run_id, token, option_id])
+
+func campaign_rescue_reward(choice: String) -> Error:
+	if choice not in ["sword", "bow", "wand"]:
+		return ERR_INVALID_PARAMETER
+	return send_chat("#campaign reward " + choice)
+
+func campaign_rescue_reward_choice(run_id: String, token: String, choice: String) -> Error:
+	if not _campaign_identifier(run_id) or not _campaign_identifier(token) or choice not in ["sword", "bow", "wand"]:
+		return ERR_INVALID_PARAMETER
+	return send_chat("#campaign rescue_reward %s %s %s" % [run_id, token, choice])
+
+func campaign_rescue_commit(run_id: String, token: String, option_id: String) -> Error:
+	if not _campaign_identifier(run_id) or not _campaign_identifier(token) or option_id not in ["accept", "defer"]:
+		return ERR_INVALID_PARAMETER
+	return send_chat("#campaign rescue_commit %s %s %s" % [run_id, token, option_id])
+
+func campaign_rescue_burn(run_id: String, token: String) -> Error:
+	if not _campaign_identifier(run_id) or not _campaign_identifier(token):
+		return ERR_INVALID_PARAMETER
+	return send_chat("#campaign rescue_burn %s %s" % [run_id, token])
+
+func campaign_rescue_depart(run_id: String, token: String) -> Error:
+	if not _campaign_identifier(run_id) or not _campaign_identifier(token):
+		return ERR_INVALID_PARAMETER
+	return send_chat("#campaign rescue_depart %s %s" % [run_id, token])
+
+func campaign_rescue_family(run_id: String, token: String, action: String) -> Error:
+	if not _campaign_identifier(run_id) or not _campaign_identifier(token) or action not in ["start", "cancel"]:
+		return ERR_INVALID_PARAMETER
+	return send_chat("#campaign rescue_family %s %s%s" % [run_id, token, " cancel" if action == "cancel" else ""])
 
 func campaign_companion(command: String) -> Error:
 	if command not in ["follow", "wait", "regroup", "help"]:
@@ -641,8 +741,11 @@ func tool_request(name: String) -> Error:
 
 func create_character(username: String, password: String, appearance: Dictionary,
 		class_id := 0) -> Error:
+	var validation := validate_creation_appearance(appearance)
+	if validation != OK:
+		return validation
 	return send_frame(EloriaProtocol.create_character(
-		username, password, appearance, class_id), true)
+		username, password, appearance, class_id, _appearance_protocol_version), true)
 
 func _process(_delta: float) -> void:
 	if offline_hud_preview: return
@@ -718,6 +821,7 @@ func _process(_delta: float) -> void:
 		send_frame(EloriaProtocol.version(PROTOCOL_MAJOR, PROTOCOL_MINOR, client_version))
 		_send_release_identity()
 		send_frame(EloriaProtocol.encode(EloriaProtocol.ClientMessage.SEND_OPENING_SCREEN))
+		send_frame(EloriaProtocol.appearance_protocol_probe())
 		_set_state("connected")
 		if _reconnect_enabled and can_resume_session():
 			if login(_session_username, _session_password) != OK:
@@ -828,6 +932,10 @@ func _drain_packet_buffer(started: int) -> void:
 			"ok":
 				consumed += int(decoded.consumed)
 				_dispatch_packets += 1
+				if decoded.command == EloriaProtocol.ServerMessage.ELORIA_APPEARANCE_PROTOCOL:
+					var event := EloriaProtocol.decode_server(decoded.command, decoded.payload)
+					if event.type == "appearance_protocol":
+						_set_appearance_protocol(int(event.version))
 				if decoded.command == EloriaProtocol.ServerMessage.LOG_IN_OK:
 					_session_credentials_confirmed = not _session_username.is_empty()
 					_resume_session = false
