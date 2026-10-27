@@ -1,0 +1,15 @@
+# Native mud-crab fitting
+
+Inspect the source independently of the Bronze and Crystal crabs. Delta Mud Crab has seven visible walking branches: four on the left and three on the right. Each branch has two connected rigid armor pieces; its lower leg and terminal blade are a continuous source component. Do not add a deforming ankle inside that rigid piece or invent a missing mirrored limb. Several right-anterior source bone labels instead lie in the face or raised rear lobe. Those regions remain coherent with the carapace.
+
+Fit actual hip/knee guide envelopes and the real terminal surface patch. Preserve both native segment lengths and complete rigid ownership. A two-link outer solution must not be sent through the earlier two-contact fore-fork solver merely because both have three guide controls. Use a stable outward bend plane and compensate contact height for the whole rotated rigid section. Check exported stance advances and drift on the actual source terminal patches.
+
+Support timing depends on the supplied asymmetry. In Delta's first fast scuttle, two front supports could release together and put the geometric body proxy outside the remaining support hull. More stance overlap limits the seven-group wave to one recovering branch at a time. Recheck reach, body bob, actual support margin and continuity instead of treating the duty factor as a cosmetic timing change.
+
+Assign complete pincer ornaments to the palm. The palm shell, movable finger and decorative spikes have different validation roles: the real palm and finger need terminal support, while all decorations need clearance and coherent shape. A generic list of palm components caused the first fitter to optimize a spike as if it were the finger. Use explicit anatomical support roles, and test the full decorated hand surface for floor clearance. Broad palms also need enough left/right spacing through wind-up and forward thrust.
+
+Place new registry attachment aliases at measured actor-specific facial/body landmarks. A copied hardcoded head position from another crab is not reliable. Treat these as coherent attachment frames rather than separately deforming anatomy, and version the prepared input when their placement changes.
+
+Select the body bearing from its complete rigid envelope, require actual main-carapace contact and measure front and rear shell support separately. Balance tests use an explicit source-surface centroid proxy, not an assertion about material mass. Inspect the complete released silhouette and held ending from multiple angles.
+
+Keep source geometry, topology, normals, UVs, images, materials, original node/rest prefix and original bind prefix. Validate unsigned skin storage and exact raw/full replay before fresh independent Blender/current-Godot checks. Render full native-speed multi-angle reviews and contact close-ups from each limb's actual side and own stance phases. Preserve failed diagnostics, existing reviews and feedback. All new motion stays a local unreviewed draft until promotion is explicitly authorized.
