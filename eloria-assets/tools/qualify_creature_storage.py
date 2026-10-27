@@ -389,7 +389,7 @@ def witness(job):
     ids = np.array(w["surface_vertex_ids"])
     sa, sb = surface_sampler(a, ids), surface_sampler(b, ids)
     na, nb = normal_sampler(a, ids), normal_sampler(b, ids)
-    maxpos = maxnorm = wpos = wnorm = wbone = 0.0
+    maxpos = maxnorm = wpos = wnorm = wbone = source_wpos = 0.0
     surface_points = []
     for clip, entries in w["clips"].items():
         ts = [e["time"] for e in entries]
@@ -410,6 +410,7 @@ def witness(job):
                 wpos,
                 float(np.linalg.norm(bp - e["surface"], axis=1).max() / w["height"]),
             )
+            source_wpos = max(source_wpos, float(np.linalg.norm(ap - e["surface"], axis=1).max() / w["height"]))
             if "surface_normals" in e:
                 wnorm = max(
                     wnorm,
@@ -426,7 +427,8 @@ def witness(job):
     assert (
         maxpos < 1e-12
         and maxnorm < 1e-12
-        and wpos < 1e-8
+        and source_wpos < .00025
+        and wpos <= source_wpos + 1e-12
         and wnorm < 1e-8
         and wbone < 1e-9
     )
@@ -441,6 +443,7 @@ def witness(job):
         source_candidate_position_error=maxpos,
         source_candidate_normal_vector_error=maxnorm,
         original_witness_position_error_over_height=wpos,
+        original_source_witness_position_error_over_height=source_wpos,
         original_witness_normal_vector_error=wnorm,
         original_witness_bone_matrix_error=wbone,
         witness_sha256=__import__("hashlib").sha256(wp.read_bytes()).hexdigest(),

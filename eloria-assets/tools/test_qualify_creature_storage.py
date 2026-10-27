@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from pack_creature_storage import prepare
-from qualify_creature_storage import exact_source
+from qualify_creature_storage import exact_source, witness
 from test_creature_storage import fixture
 from video_motion.asset import digest, read_glb, write_glb
 from video_motion.packing import append_array
@@ -185,3 +185,20 @@ def test_duplicate_property_occurrence_changes_are_rejected(tmp_path,damage):
     with open(job['preparation'],'w') as handle:json.dump(receipt,handle)
     with pytest.raises((AssertionError,KeyError)):
         exact_source(job)
+def test_legacy_physical_observations_keep_their_original_residual(tmp_path):
+    job = job_fixture(tmp_path)
+    job["witness"] = str(tmp_path / "frozen-source.json")
+    witness(job)
+    path = tmp_path / "frozen-source.json"
+    frozen = json.loads(path.read_text())
+    for entries in frozen["clips"].values():
+        for entry in entries:
+            entry.pop("surface_normals")
+            entry["surface"][0][0] += .000003
+    path.write_text(json.dumps(frozen))
+    original = path.read_bytes()
+    report = witness(job)
+    assert path.read_bytes() == original
+    assert report["source_candidate_position_error"] == 0
+    assert report["original_witness_position_error_over_height"] == report["original_source_witness_position_error_over_height"]
+    assert report["original_witness_position_error_over_height"] > 1e-8
