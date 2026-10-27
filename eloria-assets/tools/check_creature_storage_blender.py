@@ -20,7 +20,6 @@ for label in ["baseline", "candidate"]:
     bpy.ops.import_scene.gltf(filepath=str(path), merge_vertices=False)
     objects = list(bpy.data.objects)
     actions = list(bpy.data.actions)
-    all_bindings, default_weights, identity = imported_bindings(path, objects)
     slots_by_data = {}
     for data in list(objects) + [
         o.data.shape_keys for o in objects if o.type == "MESH" and o.data.shape_keys
@@ -49,6 +48,20 @@ for label in ["baseline", "candidate"]:
             ob.animation_data.action = None
             for track in ob.animation_data.nla_tracks:
                 track.mute = True
+    # Bone-parented static meshes must be matched in authored neutral rest,
+    # rather than the first action Blender selected during GLB import.
+    for ob in objects:
+        if ob.type == "ARMATURE":
+            for bone in ob.pose.bones:
+                bone.matrix_basis = Matrix.Identity(4)
+        if ob.type == "MESH" and ob.data.shape_keys:
+            key = ob.data.shape_keys
+            if key.animation_data:
+                key.animation_data.action = None
+                for track in key.animation_data.nla_tracks:
+                    track.mute = True
+    bpy.context.view_layer.update()
+    all_bindings, default_weights, identity = imported_bindings(path, objects)
     bone_names = list(next(iter(w["clips"].values()))[0]["bones"])
     arm = next(
         o
