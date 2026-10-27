@@ -11,11 +11,14 @@ const OPTION_LABELS := {
 var options: Dictionary = default_options()
 var status := Label.new()
 
+func _init() -> void:
+	# Own the label even if this helper is freed before entering the tree.
+	add_child(status)
+
 func _ready() -> void:
 	name = "MountStatus"
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_theme_stylebox_override("panel", StyleBoxEmpty.new())
-	add_child(status)
 	status.add_theme_font_size_override("font_size", 11)
 	status.add_theme_color_override("font_color", Color.WHITE)
 	status.add_theme_color_override("font_outline_color", Color.BLACK)
