@@ -22,6 +22,8 @@ const CREATURE_DISSOLVE := preload("res://src/actors/creature_dissolve.gd")
 const CREATURE_DISSOLVE_DELAY_SECONDS := 2.0
 const TARGET_MARKER_STYLE := preload("res://src/actors/target_marker_style.gd")
 const ServerTimePacing := preload("res://src/actors/server_time_pacing.gd")
+const CINEMATIC_INJURY := preload("res://src/actors/cinematic_injury.gd")
+var _cinematic_injury: RefCounted
 var _target_marker_style := TARGET_MARKER_STYLE.defaults()
 
 @export var walk_presentation_speed := 6.0
@@ -714,6 +716,7 @@ func apply_appearance_variants(appearance: Dictionary) -> void:
 	_apply_face_appearance(native_model, skin_tint, eye_tint, hair_tint)
 	_add_hair_variant(AppearanceVariants.hair_style(
 		int(appearance.get("hair", 0))), hair_tint)
+	_expand_animated_face_bounds(native_model)
 	_refresh_body_surface_visibility()
 	_refresh_wardrobe_cover()
 	_apply_render_quality_to_visuals()
@@ -733,6 +736,21 @@ func _set_appearance_visible(mesh_node: MeshInstance3D, visible_by_style: bool) 
 	else:
 		mesh_node.set_meta("appearance_hidden", true)
 	mesh_node.visible = visible_by_style
+
+func _animated_head_cull_margin() -> float:
+	var head := _native_skeleton.find_bone("Head") if is_instance_valid(_native_skeleton) else -1
+	return maxf(1.0, _native_skeleton.get_bone_global_rest(head).origin.length() * 1.1) if head >= 0 else 1.0
+
+func _expand_animated_face_bounds(native_model: Node3D) -> void:
+	# These small partitions retain standing-pose bounds after skinning. A
+	# tight portrait can otherwise cull the cap/eyes/brows as the head bends,
+	# leaving holes even while the larger body mesh remains in view.
+	if not is_instance_valid(native_model): return
+	var margin := _animated_head_cull_margin()
+	for node: Node in native_model.find_children("*", "MeshInstance3D", true, false):
+		var mesh := node as MeshInstance3D
+		if mesh.skin != null and str(mesh.name).to_lower() in ["scalp", "eyes", "eyebrows"]:
+			mesh.extra_cull_margin = maxf(mesh.extra_cull_margin, margin)
 
 func _apply_face_appearance(native_model: Node3D, skin: Color, eyes: Color, hair: Color) -> void:
 	var spec: Dictionary = _model_config.get("faceAppearance", {}) as Dictionary
@@ -995,6 +1013,7 @@ func _add_hair_variant(style: int, color: Color) -> void:
 			mesh.skin = skin
 			mesh.transform = piece.get("transform", Transform3D.IDENTITY)
 			_restore_piece_render_state(mesh, piece)
+			mesh.extra_cull_margin = maxf(mesh.extra_cull_margin, _animated_head_cull_margin())
 			holder.add_child(mesh)
 			mesh.skeleton = NodePath("../..")
 			_tint_mesh(mesh, color)
@@ -4069,6 +4088,15 @@ func _play_action_legacy(action: StringName, restart := false) -> void:
 		return
 	if _cinematic_active and action != _cinematic_action:
 		return
+	if _cinematic_active and CINEMATIC_INJURY.accepts(action):
+		if _cinematic_injury == null: _cinematic_injury = CINEMATIC_INJURY.new()
+		if _cinematic_injury.play(self, action, restart):
+			current_action = action
+			_facing_offset_from = _facing_offset
+			_facing_offset_to = 0.0
+			_facing_offset_elapsed = 0.0
+		return
+	if _cinematic_injury != null: _cinematic_injury.clear()
 	# A kill can turn us toward the next aggressor without ending combat.
 	# Keep both animation paths in guard until the engagement actually ends.
 	if not _cinematic_active and _in_combat and action in [&"idle", &"turn"]:
@@ -4620,6 +4648,7 @@ func _physics_process(delta: float) -> void:
 		set_physics_process(false)
 		return
 	if _cinematic_active:
+		if _cinematic_injury != null: _cinematic_injury.advance(delta)
 		global_position = _cinematic_position
 		rotation.y = rotate_toward(rotation.y, _cinematic_yaw, turn_speed_radians * delta)
 		_level_selection_ring()
@@ -4713,6 +4742,7 @@ func set_cinematic_presentation(point: Vector3, yaw: float, action: StringName, 
 	_wake()
 
 func cinematic_action_duration(action: StringName) -> float:
+	if action in [&"injury_recoil", &"injury_pinned"]: return CINEMATIC_INJURY.HOLD_SECONDS
 	if resolver == null or animation_player == null:
 		return 2.0
 	var clip := resolver.clip_for_action(action)
@@ -4721,6 +4751,7 @@ func cinematic_action_duration(action: StringName) -> float:
 	return animation_player.get_animation(clip).length / resolver.playback_speed_for_action(action)
 
 func end_cinematic_presentation() -> void:
+	if _cinematic_injury != null: _cinematic_injury.clear()
 	_cinematic_active = false
 	global_position = server_target
 	rotation.y = _target_yaw

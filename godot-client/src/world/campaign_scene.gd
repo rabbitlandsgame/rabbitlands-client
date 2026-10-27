@@ -69,6 +69,9 @@ var _line_gate := -1.0
 var _line_released: Dictionary = {}
 var _line_binding: Callable
 var _playback_generation := 0
+var _line_offer_to := -1.0
+var _line_advance_pending := false
+var _camera_entry_elapsed := 0.0
 var _skip: Button
 var _reduced: CheckButton
 var _transcript: AcceptDialog
@@ -280,17 +283,54 @@ func _line_identity(at: float) -> String:
 	return _run + "|" + _token + "|" + str(_playback_generation) + "|" + str(at)
 
 func _on_line_continue(identity: String) -> void:
-	if not is_dialogue_waiting() or identity != _line_identity(_line_gate): return
-	_line_released[str(_line_gate)] = true
-	elapsed = _line_gate
+	if not playing or _returning or _choice_waiting or _line_advance_pending \
+			or _line_offer_to < 0.0 or identity != _line_identity(_line_offer_to): return
+	var target := _line_offer_to
+	_line_released[str(target)] = true
 	_line_holding = false
+	_line_advance_pending = true
 	_line_continue.hide()
+	if target >= _duration():
+		_return_to_play("finished")
+		return
+	# Skipping speech cannot supply the server's inspection proof or decision.
+	if _has_inspection() and not _replaying and str(_inspection_state.get("status", "")) != "complete":
+		target = minf(target, float(_definition.get("inspection_wait_at", 24.0)))
+	if _has_choice() and not _choice_completed:
+		target = minf(target, float(_definition.get("choice_at", _duration())))
+	elapsed = target
 	_skip.grab_focus()
 
 func continue_dialogue() -> bool:
-	if not is_dialogue_waiting(): return false
-	_on_line_continue(_line_identity(_line_gate))
+	if not playing or _returning or _choice_waiting or _line_advance_pending or _line_offer_to < 0.0: return false
+	_on_line_continue(_line_identity(_line_offer_to))
 	return true
+
+func _offer_line_continue() -> void:
+	if not playing or _returning or _choice_waiting or _caption.text.is_empty() \
+			or (_definition.get("dialogue_holds", []) as Array).is_empty() \
+			or (_has_inspection() and not _replaying \
+				and elapsed >= float(_definition.get("inspection_wait_at", 24.0)) \
+				and str(_inspection_state.get("status", "")) != "complete"):
+		_line_offer_to = -1.0
+		_line_continue.hide()
+		return
+	var target := _line_gate if _line_holding else _duration()
+	if not _line_holding:
+		for line: Dictionary in _definition.get("lines", []):
+			var at := float(line.get("at", 0.0))
+			if at > elapsed + 0.0001: target = minf(target, at)
+		if _has_choice() and not _choice_completed:
+			target = minf(target, float(_definition.get("choice_at", _duration())))
+		if _choice_completed and elapsed < float(_definition.get("choice_response_until", 0.0)):
+			target = minf(target, float(_definition.get("choice_response_until", _duration())))
+	if not is_equal_approx(target, _line_offer_to) or not _line_binding.is_valid():
+		if _line_binding.is_valid() and _line_continue.pressed.is_connected(_line_binding):
+			_line_continue.pressed.disconnect(_line_binding)
+		_line_offer_to = target
+		_line_binding = _on_line_continue.bind(_line_identity(target))
+		_line_continue.pressed.connect(_line_binding)
+	_line_continue.show()
 
 func set_auto_dialogue(value: bool, persist := true) -> void:
 	auto_dialogue = value
@@ -315,11 +355,6 @@ func _hold_dialogue(next_elapsed: float) -> bool:
 		_line_gate = at
 		elapsed = maxf(0.0, at - 0.001)
 		_line_holding = true
-		if _line_binding.is_valid() and _line_continue.pressed.is_connected(_line_binding):
-			_line_continue.pressed.disconnect(_line_binding)
-		_line_binding = _on_line_continue.bind(_line_identity(at))
-		_line_continue.pressed.connect(_line_binding)
-		_line_continue.show()
 		_line_continue.grab_focus()
 		return true
 	return false
@@ -639,6 +674,8 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 			return
 		if is_instance_valid(_transcript) and _transcript.visible:
 			return
+		_line_advance_pending = false
+		_camera_entry_elapsed += maxf(0.0, delta)
 		var next_elapsed := minf(elapsed + maxf(0.0, delta), _duration())
 		# A local reading pause cannot advance beyond an unresolved native
 		# inspection or decision, even after a long frame or an Auto toggle.
@@ -730,6 +767,12 @@ func _start(rig: Node3D, camera: Camera3D, local: Node3D, nodes: Dictionary,
 	_line_holding = false
 	_line_gate = -1.0
 	_line_released.clear()
+	_line_offer_to = -1.0
+	_line_advance_pending = false
+	if _line_binding.is_valid() and _line_continue.pressed.is_connected(_line_binding):
+		_line_continue.pressed.disconnect(_line_binding)
+	_line_binding = Callable()
+	_camera_entry_elapsed = 0.0
 	_line_continue.hide()
 	_auto.visible = not (_definition.get("dialogue_holds", []) as Array).is_empty()
 	_auto.set_pressed_no_signal(auto_dialogue)
@@ -816,8 +859,8 @@ func _apply_camera() -> void:
 			pose.target += movement
 		else:
 			var entry := _handoff_seconds("entry_seconds")
-			if entry > 0.0 and elapsed < entry:
-				pose = _mix_camera(_gameplay_camera(), pose, smoothstep(0.0, entry, elapsed))
+			if entry > 0.0 and _camera_entry_elapsed < entry:
+				pose = _mix_camera(_gameplay_camera(), pose, smoothstep(0.0, entry, _camera_entry_elapsed))
 			var exit := _handoff_seconds("exit_seconds")
 			if exit > 0.0 and elapsed > _duration() - exit:
 				pose = _mix_camera(pose, _gameplay_camera(), smoothstep(_duration() - exit, _duration(), elapsed))
@@ -950,6 +993,7 @@ func _line_text(line: Dictionary) -> String:
 func _update_caption() -> void:
 	if _choice_waiting:
 		_dialogue.set_content(_protagonist_name, _choice_dialog, _actors.get("protagonist") as Node3D)
+		_line_continue.hide()
 		return
 	var chosen: Dictionary = {}
 	for line: Dictionary in _definition.get("lines", []):
@@ -983,6 +1027,7 @@ func _update_caption() -> void:
 					break
 	var actor: Node3D = _actors.get(role) as Node3D
 	_dialogue.set_line(speaker, text, actor if is_instance_valid(actor) else null)
+	_offer_line_continue()
 
 func _build_transcript() -> void:
 	var lines: PackedStringArray = [str(_definition.get("title", "")), ""]
@@ -1013,6 +1058,9 @@ func handle_input(event: InputEvent) -> bool:
 	return false
 
 func skip() -> void:
+	_return_to_play("skipped")
+
+func _return_to_play(reason: String) -> void:
 	_stop_inspection()
 	_line_holding = false
 	if is_instance_valid(_line_continue): _line_continue.hide()
@@ -1022,14 +1070,14 @@ func skip() -> void:
 		_returning = true
 		_return_elapsed = 0.0
 		_return_duration = minf(0.7, _handoff_seconds("exit_seconds"))
-		_return_reason = "skipped"
+		_return_reason = reason
 		_return_start = _capture_camera()
 		_choice_dialog.hide()
 		if is_instance_valid(_transcript):
 			_transcript.hide()
 		_skip.text = "Return now · Esc"
 	else:
-		cancel("skipped")
+		cancel(reason)
 
 func cancel(reason := "cancelled") -> void:
 	_stop_inspection()
@@ -1044,6 +1092,8 @@ func cancel(reason := "cancelled") -> void:
 	_line_holding = false
 	_line_gate = -1.0
 	_line_released.clear()
+	_line_offer_to = -1.0
+	_line_advance_pending = false
 	if is_instance_valid(_line_continue): _line_continue.hide()
 	if is_instance_valid(_inspection_retry): _inspection_retry.hide()
 	if is_instance_valid(_choice_dialog): _choice_dialog.reset()
@@ -1175,7 +1225,7 @@ func _update_cart_ambient(snapshot: Dictionary, actor_nodes: Dictionary, adapter
 			and not bool(cart.get("released", false)):
 		desired.foreman = &"defend"
 	if not bool(cart.get("treated", false)):
-		desired.worker = &"seated_idle"
+		desired.worker = &"injury_pinned"
 	var bindings: Dictionary = snapshot.get("actors", {})
 	for role: String in _cart_ambient.keys():
 		var previous: Node3D = _cart_ambient[role]

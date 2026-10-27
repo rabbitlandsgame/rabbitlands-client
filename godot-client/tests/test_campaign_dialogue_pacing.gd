@@ -92,6 +92,39 @@ func run() -> void:
 	expect(arrival.dialogue_holds == [8.0,16.0,26.0,36.0,52.0,60.0,72.0],"every major opening exchange has an explicit reading pause")
 	for id: String in ["measure.cart.arrival","measure.cart.resolved","measure.claims.inquiry","measure.claims.verified"]:
 		expect(definitions.has(id) and float(definitions[id].duration) <= Presentation.MAX_DURATION,"the bounded data loader retains the complete authored scene " + id)
+	var early := fixture("early-continue")
+	tick(early,0)
+	var first_view: Transform3D = early.camera.global_transform
+	expect(early.scene._line_continue.visible and not early.scene.is_dialogue_waiting(),"Continue is available when the first text appears, before its reading pause")
+	expect(early.scene.continue_dialogue() and early.scene.elapsed==8 and not early.scene.continue_dialogue(),"an immediate click skips the first line once without waiting eight seconds")
+	tick(early,0)
+	expect(early.scene._caption.text==arrival.lines[1].text and early.scene._line_continue.visible,"the next line immediately offers its own Continue")
+	expect(early.camera.global_transform.is_equal_approx(first_view),"skipping text does not cut the camera ahead of its smooth entry")
+	for next: float in [16.0,26.0,36.0]:
+		expect(early.scene.continue_dialogue(),"each briefing line may be advanced immediately to " + str(next))
+		tick(early,0)
+		expect(early.scene.elapsed==next,"the early click advances only its current spoken beat")
+	expect(early.events.inspection==["start"],"fast dialogue still requests exactly one real inspection")
+	expect(early.scene.continue_dialogue(),"the inspection narration can be advanced without a minimum reading delay")
+	tick(early,0)
+	expect(early.scene.elapsed==43 and not early.scene._line_continue.visible and early.events.choice.is_empty(),"fast reading waits for actual inspection proof before the next dialogue or decision")
+	completed_inspection(early)
+	for next: float in [52.0,60.0]:
+		expect(early.scene.continue_dialogue(),"the next confirmed exchange can advance immediately")
+		tick(early,0)
+		expect(early.scene.elapsed==next,"a confirmed line advances to its next beat")
+	expect(early.scene.choice_context().waiting and not early.scene._line_continue.visible and not early.scene.continue_dialogue(),"speech Continue cannot skip or select the live choice")
+	early.state.scene.choice.selected="unload";early.state.scene.choice.response="Unload both crates, then release the shaft.";early.state.scene.choice.can_choose=false
+	tick(early,0)
+	expect(early.scene._line_continue.visible and early.scene._caption.text==early.state.scene.choice.response,"Odo's confirmed response offers Continue as soon as it appears")
+	expect(early.scene.continue_dialogue(),"Odo's response may be skipped immediately")
+	tick(early,0)
+	expect(early.scene.elapsed==72 and early.scene._line_continue.visible,"the final instructions have their own immediate Continue")
+	var final_state:=JSON.stringify(early.state)
+	expect(early.scene.continue_dialogue() and early.scene.playing and early.scene._returning,"the final Continue starts a smooth return instead of cutting to play")
+	tick(early,.7)
+	expect(not early.scene.playing and early.events.normal==[["early-continue","finished"]] and JSON.stringify(early.state)==final_state,"fast reading completes once without supplying proof or rewards")
+	dispose(early)
 	var f := fixture("pacing-arrival")
 	tick(f,0)
 	expect(f.scene.playing and not f.scene._actors.has("voss") and not f.scene._actors.has("clerk"),"unused distant NPCs do not delay or join the new scene")
@@ -180,14 +213,14 @@ func run() -> void:
 	var worker_target: Transform3D = ambient.actors[3].server_target
 	var foreman_target: Transform3D = ambient.actors[5].server_target
 	ambient.scene.update_ambient(ambient.state,ambient.actors,ambient.adapter,func(_at: Vector3)->float:return 2.5)
-	expect(ambient.actors[5].action==&"defend" and ambient.actors[3].action==&"seated_idle","the actual foreman holds while the living injured worker sits beside the cart")
+	expect(ambient.actors[5].action==&"defend" and ambient.actors[3].action==&"injury_pinned","the actual foreman holds while the living injured worker stays pinned beside the cart")
 	expect(ambient.actors[3].position.is_equal_approx(worker_target.origin+Vector3(-0.48,0,0.32)) and ambient.actors[3].server_target==worker_target and ambient.actors[5].server_target==foreman_target and JSON.stringify(ambient.state)==source,"contact staging stays grounded and leaves server body positions and gameplay state intact")
 	ambient.state.cart.holder = "Aster"
 	ambient.scene.update_ambient(ambient.state,ambient.actors,ambient.adapter,func(_at: Vector3)->float:return 2.5)
 	expect(ambient.actors[5].action==&"idle" and ambient.actors[5].global_transform==foreman_target,"a real party brake holder releases the foreman's cosmetic hold pose")
 	ambient.state.cart.released = true
 	ambient.scene.update_ambient(ambient.state,ambient.actors,ambient.adapter,func(_at: Vector3)->float:return 2.5)
-	expect(ambient.actors[3].position.is_equal_approx(worker_target.origin) and ambient.actors[3].action==&"seated_idle","actual release removes the pin offset while leaving the untreated worker seated")
+	expect(ambient.actors[3].position.is_equal_approx(worker_target.origin) and ambient.actors[3].action==&"injury_pinned","actual release removes the pin offset while leaving the untreated worker injured")
 	ambient.actors[3].server_target.origin += Vector3(2,0,1)
 	ambient.scene.update_ambient(ambient.state,ambient.actors,ambient.adapter,func(_at: Vector3)->float:return 2.5)
 	expect(ambient.actors[3].position.is_equal_approx(ambient.actors[3].server_target.origin),"a late native worker movement updates the ambient presentation immediately")

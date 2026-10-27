@@ -104,9 +104,16 @@
           "face": "cart_anchor"
         },
         {
-          "at": 4.0,
+          "at": 4.7,
           "actor": "worker",
-          "action": "pain",
+          "action": "injury_recoil",
+          "face": "cart_anchor",
+          "destination": "worker_far"
+        },
+        {
+          "at": 5.25,
+          "actor": "worker",
+          "action": "injury_pinned",
           "face": "cart_anchor",
           "destination": "worker_far"
         },
@@ -115,13 +122,6 @@
           "actor": "foreman",
           "action": "defend",
           "face": "cart_anchor"
-        },
-        {
-          "at": 6.0,
-          "actor": "worker",
-          "action": "seated_idle",
-          "face": "cart_anchor",
-          "destination": "worker_far"
         },
         {
           "at": 8.0,
@@ -345,7 +345,7 @@
         {
           "at": 0.0,
           "actor": "worker",
-          "action": "seated_idle",
+          "action": "injury_standing",
           "face": "protagonist"
         },
         {
@@ -373,13 +373,13 @@
         {
           "at": 8.0,
           "actor": "worker",
-          "action": "seated_idle",
+          "action": "injury_standing",
           "face": "protagonist"
         },
         {
           "at": 11.0,
           "actor": "worker",
-          "action": "seated_idle",
+          "action": "injury_standing",
           "face": "protagonist"
         },
         {
