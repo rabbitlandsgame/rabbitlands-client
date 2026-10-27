@@ -13,10 +13,15 @@ extends SceneTree
 ## restore and the building door's label, ring and pick. Fix wave
 ## (2026-10-27): a parent kept while the player is inside its interior, a
 ## second park of one map frees the first, no preload before the arrival has
-## loaded, an unentered preload dropped after five minutes and not rebuilt
-## until the player walks away (a parked interior likewise), the interiors'
-## memory estimate from texture headers, pick-only lore objects, stair ends
-## picked toward their stair and exit labels kept clear of the HUD.
+## loaded, the interiors' memory estimate from texture headers, pick-only
+## lore objects and stair ends picked toward their stair. Polish (final
+## review 2026-10-27): an unentered preload (or a parked interior) is kept
+## while the player stays in its area - no timer - and let go only under
+## memory-budget pressure, then built again once the player is back within
+## 8 tiles of a door; no preload starts while its shell's shader keys are
+## still being warmed over frames (a walk-over bind); exit labels stand at
+## their door at lintel height and are lifted on screen only when they would
+## fall under the bottom HUD bar.
 const Policy := preload("res://src/world/world_park_policy.gd")
 const WorldParkScript := preload("res://src/world/world_park.gd")
 const SceneryStepper := preload("res://src/world/interior_scenery_stepper.gd")
@@ -54,10 +59,11 @@ func _run() -> void:
 	await _test_parent_kept_inside()
 	await _test_replaced_park()
 	await _test_settled_and_stale()
+	await _test_spread_warmup()
 	_test_texture_footprint()
 	_test_scenery_table()
 	_test_camera_restore()
-	_test_building_doors()
+	await _test_building_doors()
 	stage.queue_free()
 	for frame: int in 4:
 		await process_frame
@@ -216,13 +222,24 @@ func _test_policy() -> void:
 		"no preload starts while the player's arrival is still loading")
 	state = {"active": false, "stale": true}
 	_expect(Policy.preload_action(state, 10.0, 0) == "none" and bool(state.stale),
-		"a stale interior is not built again while the player stays near")
+		"a stale interior is not built again while the player lingers between 8 and 24 tiles")
 	_expect(Policy.preload_action(state, 30.0, 0) == "none" and not bool(state.stale)
 		and Policy.preload_action(state, 10.0, 0) == "start",
 		"walking away clears it, and coming back builds it again")
-	_expect(not Policy.preload_expired(-1, 10000000) and not Policy.preload_expired(0, Policy.PRELOAD_READY_TTL_MSEC)
-		and Policy.preload_expired(0, Policy.PRELOAD_READY_TTL_MSEC + 1) and Policy.PRELOAD_READY_TTL_MSEC == 300000,
-		"a finished preload is kept five minutes unentered, an unfinished one is not timed")
+	state = {"active": false, "stale": true}
+	_expect(Policy.preload_action(state, Policy.PRELOAD_REARM_TILES, 0) == "start" and not bool(state.stale)
+		and Policy.PRELOAD_REARM_TILES == 8.0,
+		"coming within 8 tiles of a door re-arms a stale interior")
+	state = {"active": false, "stale": true, "settled": false}
+	_expect(Policy.preload_action(state, 3.0, 0) == "none" and not bool(state.stale),
+		"re-armed at a door, it still waits for whatever holds a start")
+	state = {"active": true, "far_since_msec": -1}
+	_expect(Policy.preload_action(state, 2.0, 100000000) == "keep",
+		"a preload is never dropped by time alone while the player stays in its area")
+	_expect(not Policy.under_pressure({"a": {"bytes": 600}, "preload": {"bytes": 400}}, 1000)
+		and Policy.under_pressure({"a": {"bytes": 600}, "preload": {"bytes": 401}}, 1000)
+		and Policy.BUDGET_BYTES == 1536 * 1048576,
+		"memory-budget pressure is the kept worlds over the 1.5 GiB budget together")
 	_expect(Policy.interior_estimate(400 * 1048576, 1048576) == 401 * 1048576 + Policy.INTERIOR_FLOOR_BYTES,
 		"an interior's estimate is its textures, its shell and a floor")
 
@@ -543,22 +560,40 @@ func _test_settled_and_stale() -> void:
 	_expect(ready, "(fixture) the preload is ready")
 	var ready_at := int(park._preload.get("ready_msec", -1))
 	_expect(ready_at == 5000, "the preload records when it was ready")
-	park.now_override = ready_at + Policy.PRELOAD_READY_TTL_MSEC
+	# Standing by the door for an hour, unentered: kept (no timer).
+	for minute: int in range(1, 61):
+		park.now_override = ready_at + minute * 60000
+		park.observe("exterior", Vector2i(12, 22), objects, true)
+		park.tick()
+	_expect(park.preload_state("interior") == "ready" and int(park.counters.preload_drop) == 0,
+		"a finished preload nobody entered stays while the player stays near its doors (an hour)")
+	# Memory-budget pressure lets it go, and it is stale while the player stays by.
+	var budget: int = park.budget_bytes
+	park.budget_bytes = int(park._preload.bytes) - 1
 	park.tick()
-	_expect(park.preload_state("interior") == "ready", "five minutes unentered are not yet too long")
-	park.now_override = ready_at + Policy.PRELOAD_READY_TTL_MSEC + 1
-	park.tick()
-	_expect(park.preload_state() == "" and int(park.counters.preload_drop) == 1,
-		"a finished preload nobody entered is dropped after five minutes, even beside the door")
-	park.observe("exterior", Vector2i(12, 22), objects, true)
-	_expect(park.preload_state() == "" and int(park.counters.preload_start) == 1,
-		"and is not built again while the player stays by the door")
-	park.observe("exterior", Vector2i(12, 60), objects, true)
-	park.observe("exterior", Vector2i(12, 22), objects, true)
-	_expect(park.preload_state("interior") == "running" and int(park.counters.preload_start) == 2,
-		"walking away and coming back builds it again")
+	_expect(park.preload_state() == "" and int(park.counters.preload_drop) == 1
+		and park.diagnostic_snapshot().stale.has("interior"),
+		"under memory-budget pressure the unentered preload is dropped and marked stale")
+	var drops: Array = park.events.filter(func(e: Dictionary) -> bool: return str(e.event) == "preload_drop")
+	_expect(not drops.is_empty() and str(drops.back().reason) == "budget", "the drop is recorded as the budget's")
+	# Still over budget at a door: re-armed, but nothing is built that could not be kept.
+	park.observe("exterior", Vector2i(12, 20), objects, true)
+	_expect(park.preload_state() == "" and int(park.counters.preload_start) == 1
+		and park.events.any(func(e: Dictionary) -> bool: return str(e.event) == "preload_skip" and str(e.get("reason", "")) == "budget"),
+		"a preload over the whole budget is refused at the door, never built and dropped")
+	park.budget_bytes = budget
+	park._retry_at.clear()
+	park._stale["interior"] = true
+	park.observe("exterior", Vector2i(12, 30), objects, true)
+	_expect(park.preload_state() == "" and park.diagnostic_snapshot().stale.has("interior"),
+		"with the pressure gone, lingering 8-24 tiles from the doors does not rebuild it")
+	park.observe("exterior", Vector2i(12, 25), objects, true)
+	_expect(park.preload_state("interior") == "running" and int(park.counters.preload_start) == 2
+		and not park.diagnostic_snapshot().stale.has("interior")
+		and park.events.any(func(e: Dictionary) -> bool: return str(e.event) == "rearmed"),
+		"coming within 8 tiles of a door builds it again (re-armed)")
 	await _until(func() -> bool: return park.preload_state("interior") == "ready")
-	# A parked interior is not kept alive by standing near its door either.
+	# A parked interior is kept likewise while the player stays in its area.
 	var loader := _loader_with("exterior")
 	var resident: Dictionary = park.take("interior")
 	park.leave(loader, "exterior", "interior")
@@ -568,15 +603,25 @@ func _test_settled_and_stale() -> void:
 	loader.adopt_world(outside)
 	park.bind_map("exterior")
 	var parked_at: int = park._now()
-	for step: int in 12:
+	for step: int in 30:
 		park.now_override = parked_at + step * 60000
-		park.observe("exterior", Vector2i(12, 20), objects, true)
+		park.observe("exterior", Vector2i(12, 20 + step), objects, true)
 		park.tick()
-	_expect(not park.has_parked("interior") and park.preload_state() == "",
-		"a parked interior expires after ten minutes beside its door, and is not rebuilt at once (%s)"
-			% [park.diagnostic_snapshot().stale])
-	_expect(park.parked_maps().is_empty() and park.diagnostic_snapshot().stale.has("interior"),
-		"it is stale until the player walks away")
+	_expect(park.has_parked("interior") and park.preload_state() == "",
+		"a parked interior stays parked for half an hour while the player stays within 48 tiles of its doors")
+	var left_at: int = park.now_override
+	park.now_override = left_at + 60000
+	park.observe("exterior", Vector2i(12, 90), objects, true)
+	park.tick()
+	_expect(park.has_parked("interior"), "leaving its area starts its clock")
+	park.now_override = left_at + 60000 + Policy.PARK_TTL_MSEC + 1
+	park.observe("exterior", Vector2i(12, 90), objects, true)
+	park.tick()
+	_expect(not park.has_parked("interior"), "ten minutes away from its area evict it")
+	park.observe("exterior", Vector2i(12, 60), objects, true)
+	park.observe("exterior", Vector2i(12, 30), objects, true)
+	_expect(park.preload_state("interior") == "running",
+		"and coming back near its doors builds it again")
 	# The estimate a preload carries is the one it is parked with.
 	_expect(int(resident.get("park_bytes", -1)) == int(park._interior_bytes.get("interior", -2)),
 		"a preloaded world carries its interior's estimate for parking")
@@ -587,6 +632,72 @@ func _test_settled_and_stale() -> void:
 	loader.unload_world()
 	loader.queue_free()
 	park.queue_free()
+	await _frames(2)
+
+## A parent bound with no curtain up (a walk over its border) spreads its
+## interior's shader warm-up over frames, and the interior's preload waits for it.
+func _test_spread_warmup() -> void:
+	# The interior fixture's shell: a small materials-only GLB.
+	var document := {"asset": {"version": "2.0"},
+		"samplers": [{"wrapS": 10497, "wrapT": 10497}, {"wrapS": 33071, "wrapT": 33071}],
+		"images": [{"uri": "a.png"}, {"uri": "b.png"}],
+		"textures": [{"sampler": 0, "source": 0}, {"sampler": 1, "source": 1}],
+		"materials": [{"name": "wall", "pbrMetallicRoughness": {"baseColorTexture": {"index": 0}}},
+			{"name": "decal", "pbrMetallicRoughness": {"baseColorTexture": {"index": 1}}},
+			{"name": "spill", "emissiveFactor": [0.3, 0.2, 0.1], "alphaMode": "BLEND"}]}
+	var file := FileAccess.open(SCRATCH.path_join("interior/world.glb"), FileAccess.WRITE)
+	file.store_buffer(MaterialWarmup.materials_glb(document))
+	file.close()
+	var park := _park()
+	park.warm_materials = true
+	park.bind_map("exterior", false)
+	park.finish_estimates(true)
+	_expect(park.warming() == ["interior"] and not park.events.any(func(e: Dictionary) -> bool: return str(e.event) == "warm"),
+		"a bind with no curtain warms nothing on its own frame: the warm-up is spread")
+	var objects := {DOOR: {"object_id": DOOR, "x": 12, "y": 18, "label": "Portal"}}
+	park.observe("exterior", Vector2i(12, 20), objects, false)
+	for frame: int in 20:
+		park.tick()
+		await process_frame
+	_expect(park.warming() == ["interior"] and int((park._warming["interior"] as Dictionary).frames) == 0,
+		"nothing of it is built while the player's arrival is still loading")
+	park.observe("exterior", Vector2i(12, 20), objects, true)
+	_expect(park.preload_state() == "", "the interior's preload waits while its keys are still being warmed")
+	var frames := 0
+	while not park.warming().is_empty() and frames < 240:
+		park.tick()
+		frames += 1
+		await process_frame
+	var warms: Array = park.events.filter(func(e: Dictionary) -> bool: return str(e.event) == "warm")
+	_expect(warms.size() == 1 and bool(warms[0].spread) and int(warms[0].materials) >= 3
+		and int(warms[0].frames) >= int(warms[0].materials) and str(warms[0].error).is_empty(),
+		"the spread warm-up builds one material a frame (%s)" % [warms])
+	park.observe("exterior", Vector2i(12, 20), objects, true)
+	_expect(park.preload_state("interior") == "running", "once warmed, the preload starts")
+	park.bind_map("exterior", false)
+	_expect(park.warming().is_empty(), "a warmed interior is not warmed again in the session")
+	# Travel cuts a spread warm-up short; the next bind starts it again.
+	var other := _park()
+	other.warm_materials = true
+	other.bind_map("exterior", false)
+	var loader := _loader_with("exterior")
+	other.leave(loader, "exterior", "elsewhere")
+	_expect(other.warming().is_empty() and other.events.any(func(e: Dictionary) -> bool: return str(e.event) == "warm_cancelled"),
+		"travel cancels a spread warm-up")
+	var idle: bool = await _until(func() -> bool: return other.is_idle())
+	_expect(idle, "its plan worker is reaped")
+	other.bind_map("exterior", true)
+	_expect(other.events.any(func(e: Dictionary) -> bool: return str(e.event) == "warm" and not bool(e.spread)),
+		"behind a curtain the next bind warms it at once")
+	for one: Node in [park, other]:
+		one.clear()
+	await _until(func() -> bool: return park.is_idle() and other.is_idle())
+	for one: Node in [park, other]:
+		one.release_now()
+		one.queue_free()
+	loader.unload_world()
+	loader.queue_free()
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(SCRATCH.path_join("interior/world.glb")))
 	await _frames(2)
 
 func _test_texture_footprint() -> void:
@@ -741,7 +852,7 @@ func _test_building_doors() -> void:
 	var catalog := {"authoredObjects": {
 		str(DOOR): {"entrance": true, "building": true, "exteriorTile": [10, 12],
 			"label": "The Unlit Boat", "exitLabel": "The avenue", "category": "tavern",
-			"height": 3.0, "radius": 1.2, "modelOffset": [0.0, 0.0, -2.0]},
+			"height": 3.0, "radius": 1.2, "modelOffset": [0.0, 0.0, -2.0], "exitOffset": [0.0, 0.0, 1.0]},
 		"59001": {"entrance": true, "exteriorTile": [30, 30], "label": "Lantern Mine",
 			"height": 3.6, "radius": 1.6}}}
 	var adapter := CoordinateAdapter.new({})
@@ -778,14 +889,15 @@ func _test_building_doors() -> void:
 		and exit_title != null and exit_title.text.begins_with("The avenue") and not exit_title.visible,
 		"the same object on the interior's exit tile is the way out, named by exitLabel")
 	_expect(exit.destination() == "The avenue", "the exit hovers as its street")
-	_expect(is_equal_approx(exit_title.position.x, 0.0) and is_equal_approx(exit_title.position.z, 0.0)
-		and is_equal_approx(exit_title.position.y, 3.0 + MapObject3D.EXIT_LABEL_LIFT),
-		"the exit's label stands over its tile, on the room side, lifted clear of the wall")
-	exit.update_label_focus(exit.global_position + Vector3(0, 0, -5.5), false)
-	_expect(exit_title.visible, "the exit names itself within 6 m of its tile")
-	exit.update_label_focus(exit.global_position + Vector3(0, 0, -8.0), false)
-	_expect(not exit_title.visible,
-		"but not from 8 m, where its label would sink under the bottom HUD bar")
+	_expect(is_equal_approx(exit_title.position.x, 0.0) and is_equal_approx(exit_title.position.z, 1.0)
+		and is_equal_approx(exit_title.position.y, MapObject3D.EXIT_LABEL_HEIGHT)
+		and MapObject3D.EXIT_LABEL_HEIGHT >= 2.2 and MapObject3D.EXIT_LABEL_HEIGHT <= 2.4,
+		"the exit's label stands at its door in the wall (exitOffset), at lintel height")
+	exit.update_label_focus(exit.global_position + Vector3(0, 0, 1.0 - 5.5), false)
+	_expect(exit_title.visible, "the exit names itself within 6 m of its door")
+	exit.update_label_focus(exit.global_position + Vector3(0, 0, 1.0 - 6.5), false)
+	_expect(not exit_title.visible, "but not from farther than 6 m")
+	await _test_exit_label_screen(catalog, adapter)
 	var cave := MapObject3D.new()
 	cave.configure({"object_id": 59001, "kind": EloriaProtocol.MAP_OBJECT_INTERACTIVE, "x": 30, "y": 30,
 		"label": "Portal", "detail": "Beyond it lies Lantern Mine. Safe."}, adapter, catalog)
@@ -845,3 +957,88 @@ func _test_building_doors() -> void:
 	door.queue_free()
 	exit.queue_free()
 	cave.queue_free()
+
+## The highest vertex of a label's text mesh (NAN when it offers none).
+static func _label_top(title: Label3D) -> float:
+	var triangles: TriangleMesh = title.generate_triangle_mesh()
+	if triangles == null:
+		return NAN
+	var top := -INF
+	for point: Vector3 in triangles.get_faces():
+		top = maxf(top, point.y)
+	return top if is_finite(top) else NAN
+
+## An exit on the camera's side of a room, seen through the town's camera
+## (-50 degrees, 12 m, fov 50) in a 1600x900 view whose HUD bar starts at
+## y = 800: its label is lifted on screen just clear of the bar, only as far
+## as it would fall under it, and its anchor never leaves the door.
+func _test_exit_label_screen(catalog: Dictionary, adapter: CoordinateAdapter) -> void:
+	var view := SubViewport.new()
+	view.size = Vector2i(1600, 900)
+	view.own_world_3d = true
+	view.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	root.add_child(view)
+	var camera := Camera3D.new()
+	camera.fov = 50.0
+	view.add_child(camera)
+	camera.current = true
+	var exit := MapObject3D.new()
+	exit.configure({"object_id": DOOR, "kind": EloriaProtocol.MAP_OBJECT_INTERACTIVE, "x": 40, "y": 40,
+		"label": "Portal", "detail": "The avenue."}, adapter, catalog)
+	view.add_child(exit)
+	var title := exit.get_node("EntranceLabel") as Label3D
+	title.visible = true
+	await process_frame
+	var door := exit.global_position + Vector3(0.0, 0.0, 1.0)
+	var floor_y := 800.0
+	var place := func(player: Vector3) -> void:
+		var pitch := deg_to_rad(-50.0)
+		camera.global_position = player + Vector3(0.0, -sin(pitch), cos(pitch)) * 12.0
+		camera.look_at(player + Vector3.UP * 1.2, Vector3.UP)
+	var bottom_of := func() -> float:
+		var per_unit := MapObject3D.screen_pixels_per_unit(camera)
+		return camera.unproject_position(title.global_position).y - title.offset.y * title.pixel_size * per_unit \
+			+ MapObject3D.label_half_height(title) * per_unit
+	var half_px := MapObject3D.label_half_height(title) * MapObject3D.screen_pixels_per_unit(camera)
+	_expect(half_px > 10.0 and half_px < 60.0,
+		"(fixture) the exit label's two lines are %.1f px from centre to edge on this screen" % half_px)
+	var top_plain := _label_top(title)
+	# The player 5.5 m into the room from the camera-side door (inside the 6 m
+	# rule): the label at the door's lintel reaches under the bar.
+	place.call(door + Vector3(0.0, 0.0, -5.5))
+	var anchor_before := title.global_position
+	var unlifted: float = float(bottom_of.call())
+	var lift := exit.keep_label_above(camera, floor_y)
+	_expect(unlifted > floor_y and lift > 0.0 and title.offset.y > 0.0,
+		"a camera-side door's label that would reach under the HUD bar (to %.0f px) is lifted %.0f px" % [unlifted, lift])
+	_expect(absf(float(bottom_of.call()) + MapObject3D.LABEL_HUD_MARGIN - floor_y) < 1.0
+		and title.global_position == anchor_before,
+		"just clear of the bar (to %.1f px), while its anchor stays at the door" % [float(bottom_of.call())])
+	await process_frame
+	var top_lifted := _label_top(title)
+	_expect(is_nan(top_plain) or top_lifted > top_plain + 0.0001,
+		"(the lift is the label's offset, drawn upward: its mesh top %.4f -> %.4f)" % [top_plain, top_lifted])
+	# Nearer the door the label is higher on the screen; within the room's
+	# depth it is lifted only as far as the bar needs, and not at all by the door.
+	var previous := lift
+	for metres: float in [4.5, 3.5]:
+		place.call(door + Vector3(0.0, 0.0, -metres))
+		var now := exit.keep_label_above(camera, floor_y)
+		_expect(now <= previous and float(bottom_of.call()) <= floor_y - MapObject3D.LABEL_HUD_MARGIN + 1.0,
+			"%.1f m from the door it is lifted %.0f px (no more), still above the bar" % [metres, now])
+		previous = now
+	place.call(door + Vector3(0.0, 0.0, -1.0))
+	_expect(exit.keep_label_above(camera, floor_y) == 0.0 and is_equal_approx(title.offset.y, 0.0),
+		"a label already well above the bar is not lifted (anchor at %.0f px)" % [camera.unproject_position(title.global_position).y])
+	# Hidden labels are not lifted.
+	place.call(door + Vector3(0.0, 0.0, -5.5))
+	title.visible = false
+	_expect(exit.keep_label_above(camera, floor_y) == 0.0 and is_equal_approx(title.offset.y, 0.0),
+		"a hidden label is left alone")
+	_expect(MapObject3D.label_lift(1050.0, 20.0, 800.0, 900.0) == 0.0
+		and is_equal_approx(MapObject3D.label_lift(950.0, 20.0, 800.0, 900.0), 176.0)
+		and is_equal_approx(MapObject3D.label_lift(780.0, 20.0, 800.0, 900.0), 6.0)
+		and MapObject3D.label_lift(500.0, 20.0, 800.0, 900.0) == 0.0,
+		"a door more than the bar's height below the screen is not pinned to it; nearer ones are lifted to the margin")
+	view.queue_free()
+	await process_frame

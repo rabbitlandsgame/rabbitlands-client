@@ -10,7 +10,12 @@ extends SceneTree
 ## Landfall Town package: every material its shell ends up drawing with - as
 ## the preload's worker builds it, after the scenery stepper's styling - has
 ## a key the warm-up built (so the preload compiles no shader), and
-## WorldPark.bind_map warms the Town once a session.
+## WorldPark.bind_map warms the Town once a session. The warm-up spread over
+## frames (a walk over Landfall's border, final review 2026-10-27): one
+## material's GLB keeps only what that material names, re-indexed; the plan
+## and its steps bind exactly the keys `warm` binds, one material a frame; and
+## WorldPark, bound with no curtain, spreads the Town's warm-up and holds its
+## preload until it has run.
 const Warmup := preload("res://src/world/interior_material_warmup.gd")
 const Preparation := preload("res://src/world/map_material_preparation.gd")
 const UndergroundScenery := preload("res://src/world/underground_scenery.gd")
@@ -32,6 +37,7 @@ func _expect(ok: bool, message: String) -> void:
 func _run() -> void:
 	_test_glb_container()
 	_test_synthetic_keys()
+	_test_spread_synthetic()
 	await _test_town()
 	for frame: int in 4:
 		await process_frame
@@ -109,6 +115,89 @@ func _test_synthetic_keys() -> void:
 	var unreadable := Warmup.warm("user://no-such.glb")
 	_expect(str(unreadable.error) == "glb_unreadable" and (unreadable.materials as Array).is_empty(),
 		"a missing GLB warms nothing and says so")
+
+## Runs a plan's steps as WorldPark does, one material (one RID) per step,
+## the after-pass copy of a material as its own step: the materials built and
+## the most a step took (microseconds).
+static func _run_steps(plan: Dictionary) -> Dictionary:
+	var materials: Array = []
+	var slowest := 0
+	for step: Dictionary in plan.get("steps", []) as Array:
+		var began := Time.get_ticks_usec()
+		var material := Warmup.build_step(step)
+		slowest = maxi(slowest, Time.get_ticks_usec() - began)
+		if material == null:
+			continue
+		materials.append(material)
+		began = Time.get_ticks_usec()
+		var after := Warmup.after_pass(material, bool(step.get("coloured", false)))
+		if after != null:
+			after.get_rid()
+			materials.append(after)
+		slowest = maxi(slowest, Time.get_ticks_usec() - began)
+	return {"materials": materials, "slowest_usec": slowest}
+
+static func _signatures(materials: Array) -> Dictionary:
+	var keys: Dictionary = {}
+	for material: BaseMaterial3D in materials:
+		keys[Warmup.signature(material)] = true
+	return keys
+
+## A GLB holding `document`'s JSON alone (what `plan` reads).
+static func _json_glb(document: Dictionary) -> PackedByteArray:
+	var json := JSON.stringify(document).to_utf8_buffer()
+	while json.size() % 4 != 0:
+		json.append(0x20)
+	var stream := StreamPeerBuffer.new()
+	stream.put_u32(Warmup.GLB_MAGIC)
+	stream.put_u32(2)
+	stream.put_u32(12 + 8 + json.size())
+	stream.put_u32(json.size())
+	stream.put_u32(Warmup.CHUNK_JSON)
+	stream.put_data(json)
+	return stream.data_array
+
+func _test_spread_synthetic() -> void:
+	# One material's GLB: only its texture, that texture's sampler and image.
+	var bytes := Warmup.materials_glb(_document(), [1])
+	var stream := StreamPeerBuffer.new()
+	stream.data_array = bytes
+	stream.seek(12)
+	var json_length := stream.get_u32()
+	stream.get_u32()
+	var json: Dictionary = JSON.parse_string(stream.get_data(json_length)[1].get_string_from_utf8())
+	_expect((json.materials as Array).size() == 1 and str((json.materials as Array)[0].name) == "banner"
+		and int(((json.materials as Array)[0].pbrMetallicRoughness as Dictionary).baseColorTexture.index) == 0
+		and (json.textures as Array).size() == 1 and int((json.textures as Array)[0].sampler) == 0
+		and int((json.textures as Array)[0].source) == 0 and (json.samplers as Array).size() == 1
+		and int((json.samplers as Array)[0].wrapS) == 33071 and (json.images as Array).size() == 1,
+		"one material's GLB keeps only its texture, re-indexed, with that texture's clamped sampler and one image")
+	var lone := Warmup.materials_glb(_document(), [2])
+	stream.data_array = lone
+	stream.seek(12)
+	json_length = stream.get_u32()
+	stream.get_u32()
+	json = JSON.parse_string(stream.get_data(json_length)[1].get_string_from_utf8())
+	_expect((json.materials as Array).size() == 1 and (json.textures as Array).is_empty()
+		and (json.images as Array).is_empty(), "an untextured material's GLB carries no texture or image")
+	# The plan of the synthetic document, run step by step, binds warm's keys.
+	var path := ProjectSettings.globalize_path("user://warmup-spread-test.glb")
+	var file := FileAccess.open(path, FileAccess.WRITE)
+	file.store_buffer(_json_glb(_document()))
+	file.close()
+	var plan := Warmup.plan(path)
+	_expect(str(plan.error).is_empty() and (plan.steps as Array).size() == 5,
+		"the plan is one step per material and one per default material (%d)" % (plan.steps as Array).size())
+	_expect(bool((plan.steps as Array)[3].coloured) and not bool((plan.steps as Array)[0].coloured)
+		and bool((plan.steps as Array)[4].get("default", false)),
+		"a step knows whether a coloured primitive draws its material")
+	var spread := _run_steps(plan)
+	var whole := _signatures(Warmup.materials_of(_document()))
+	var stepped := _signatures(spread.materials)
+	_expect(stepped.size() == whole.size() and stepped.keys().all(func(key: String) -> bool: return whole.has(key)),
+		"the steps bind exactly the keys the whole warm-up binds (%d keys)" % whole.size())
+	_expect(str(Warmup.plan("user://no-such.glb").error) == "glb_unreadable", "a missing GLB plans nothing and says so")
+	DirAccess.remove_absolute(path)
 
 ## Every material the Town's shell draws with, as a worker builds it and the
 ## stepper styles it.
@@ -196,3 +285,64 @@ func _test_town() -> void:
 		"binding Landfall estimates the Town from its textures, not its GLB's size (GLB guess %.1f MiB; %s)" % [guess, estimates])
 	park.queue_free()
 	await process_frame
+	await _test_town_spread(registry, manifest, signatures, int(warmed.usec))
+
+## The Town's warm-up spread over frames: the same keys as `warm`, no step
+## near `warm`'s cost, and WorldPark bound with no curtain holding the Town's
+## preload until the warm-up has run.
+func _test_town_spread(registry: Dictionary, manifest: WorldManifest, signatures: Dictionary, warm_usec: int) -> void:
+	var plan := Warmup.plan(manifest.glb_path())
+	var spread := _run_steps(plan)
+	var stepped := _signatures(spread.materials)
+	_expect(stepped.size() == signatures.size() and stepped.keys().all(func(key: String) -> bool: return signatures.has(key)),
+		"the Town's steps bind exactly warm's %d keys (%d materials)" % [signatures.size(), (spread.materials as Array).size()])
+	print("town warm-up: whole %.1f ms on one frame; spread: plan %.1f ms on a worker, %d steps, slowest step %.2f ms"
+		% [warm_usec / 1000.0, float(plan.usec) / 1000.0, (plan.steps as Array).size(), int(spread.slowest_usec) / 1000.0])
+	_expect(int(spread.slowest_usec) * 4 < maxi(warm_usec, 4000),
+		"no step costs a quarter of the whole warm-up (slowest %.2f ms, whole %.1f ms)" % [int(spread.slowest_usec) / 1000.0, warm_usec / 1000.0])
+	var park: Node = WorldParkScript.new()
+	get_root().add_child(park)
+	park.configure(registry)
+	park.enabled = true
+	park.warm_materials = true
+	park.prepare_function = _no_prepare
+	var began := Time.get_ticks_usec()
+	park.bind_map("landfall", false)
+	var bind_ms := float(Time.get_ticks_usec() - began) / 1000.0
+	print("walk-over bind of Landfall (first of the session): %.1f ms" % bind_ms)
+	_expect(park.warming().has(TOWN) and not park.events.any(func(e: Dictionary) -> bool: return str(e.event) == "warm"),
+		"bound with no curtain (a walk over the border), Landfall spreads the Town's warm-up")
+	park.finish_estimates(true)
+	var doors: Dictionary = park.doors()
+	_expect(not doors.is_empty(), "(fixture) the Town's doors are indexed on Landfall")
+	var door_tile: Vector2i = park._door_tiles[doors.keys()[0]]
+	park.observe("landfall", door_tile, {}, true)
+	_expect(park.preload_state() == "" and int(park.counters.preload_start) == 0,
+		"at a Town door, no preload starts while its keys are being warmed")
+	var frames := 0
+	while park.warming().has(TOWN) and frames < 600:
+		await process_frame
+		frames += 1
+	var warms: Array = park.events.filter(func(e: Dictionary) -> bool: return str(e.event) == "warm" and str(e.map) == TOWN)
+	_expect(warms.size() == 1 and bool(warms[0].spread) and int(warms[0].keys) == signatures.size()
+		and int(warms[0].frames) >= int(warms[0].materials) and float(warms[0].max_step_ms) < 16.0,
+		"the spread warm-up ran one material a frame over %d frames (%s)" % [frames, warms])
+	park.observe("landfall", door_tile, {}, true)
+	_expect(park.preload_state(TOWN) != "", "once it has run, the Town's preload starts at the door")
+	park.clear()
+	var idle := false
+	for wait: int in 300:
+		if park.is_idle():
+			idle = true
+			break
+		await process_frame
+	_expect(idle, "(fixture) the park winds down")
+	park.release_now()
+	park.queue_free()
+	await process_frame
+
+## A preload worker that builds nothing (the preload itself is not under test).
+static func _no_prepare(_path: String, _cache: bool, _visuals: PackedStringArray) -> WorldLoader:
+	var builder := WorldLoader.new()
+	builder.detached_build = true
+	return builder

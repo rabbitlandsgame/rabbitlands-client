@@ -6272,8 +6272,10 @@ func _on_world_loaded(manifest: WorldManifest) -> void:
 	var step_started := binding_started
 	exterior_stream.activate(loaded_server_map, world_loader.world_root, manifest)
 	_watch_chunk_surfaces()
-	# The doors on this map into interiors built ahead of the player.
-	world_park.bind_map(loaded_server_map)
+	# The doors on this map into interiors built ahead of the player. Their
+	# shells' shader keys are warmed now behind the arrival curtain, or spread
+	# over the next frames when there is none (a walk over the border).
+	world_park.bind_map(loaded_server_map, arrival_curtain.is_showing())
 	_bind_minimap_span(manifest)
 	binding_steps["activate"] = (Time.get_ticks_usec() - step_started) / 1000.0; step_started = Time.get_ticks_usec()
 	_bind_shared_world()
@@ -8813,6 +8815,12 @@ func _declutter_actor_overheads(target_id: int) -> void:
 		var priority := 0 if int(raw_id) == target_id else (2 if actor_type in [&"creature", &"invasion"] else 1)
 		var screen := gameplay_camera.unproject_position(point)
 		if not Rect2(Vector2.ZERO, Vector2(main_viewport.size)).grow(80).has_point(screen):
+			actor.set_overhead_crowded(true)
+			continue
+		# Inside a building, somebody behind a standing wall between rooms is
+		# not named through it (whoever the player fights still is).
+		if int(raw_id) != target_id and interior_cutaway.screens(gameplay_camera.global_position,
+				actor.global_position + Vector3.UP * actor.head_height()):
 			actor.set_overhead_crowded(true)
 			continue
 		candidates.append({"actor": actor, "id": int(raw_id), "priority": priority,
@@ -16267,8 +16275,22 @@ func _update_door_labels() -> void:
 	var hovered: MapObject3D = null
 	if get_viewport().gui_get_hovered_control() == viewport_container:
 		hovered = _pick_map_object(_local_viewport_position(viewport_container.get_local_mouse_position()))
+	var floor_y := _label_floor_y()
 	for door: MapObject3D in doors:
 		door.update_label_focus(player, door == hovered)
+		# An interior's way out, named at its door, is lifted on screen when a
+		# camera-side door would put it under the bottom HUD bar.
+		if door.building_exit:
+			door.keep_label_above(gameplay_camera, floor_y)
+
+## The top of the bottom HUD bar (the quickbar: meters and buttons) in the 3D
+## viewport's pixels, where a world label must stay above; the viewport's own
+## bottom while the bar is hidden.
+func _label_floor_y() -> float:
+	var bar := get_node_or_null("%Quickbar") as Control
+	if bar == null or not bar.is_visible_in_tree():
+		return float(main_viewport.size.y)
+	return minf(float(main_viewport.size.y), _viewport_position(bar.get_global_rect().position).y)
 
 ## Tells WorldPark where the local character stands on the bound map, so the
 ## interior behind a nearby door is built before it is entered. Nothing new is

@@ -12,11 +12,18 @@ extends RefCounted
 ##   stays parked for as long as the player is inside one of its interiors.
 ## - Near a door of an interior flagged for it (registry preloadOnApproach),
 ##   that interior is built in the background, ready for the map change;
-##   wandering more than 48 tiles away for a minute drops it, and so does five
-##   minutes of standing by without going in (it is not built again until the
-##   player has walked away from its doors and come back).
+##   wandering more than 48 tiles away for a minute drops it. Standing by
+##   without going in does not (final review 2026-10-27: the Town is ~120 MiB
+##   against the 1.5 GiB budget, and its ten doors ring the town centre where
+##   players linger): a built interior - preloaded, or parked after a visit -
+##   is let go while the player stays in its area only under memory-budget
+##   pressure (the kept worlds' estimates over BUDGET_BYTES). One let go while
+##   the player stood by is built again once they come within
+##   PRELOAD_REARM_TILES of one of its doors (or after they have walked away).
 
-## How long a parked world is kept while the player stays away from it.
+## How long a parked world is kept while the player stays away from it (a
+## parked interior's clock only runs while the player is outside its area,
+## PRELOAD_DROP_TILES from its doors).
 const PARK_TTL_MSEC := 600000
 ## A flagged interior starts loading when the player is this close (tiles) to
 ## one of its doors...
@@ -25,9 +32,9 @@ const PRELOAD_RADIUS_TILES := 24.0
 const PRELOAD_DROP_TILES := 48.0
 ## ...for this long.
 const PRELOAD_DROP_MSEC := 60000
-## A finished preload nobody entered is dropped after this long, however near
-## the player stays: a town's interiors hold ~424 MiB of textures.
-const PRELOAD_READY_TTL_MSEC := 300000
+## A build let go while the player stood by (budget pressure) is started again
+## when the player comes this close (tiles) to one of its doors.
+const PRELOAD_REARM_TILES := 8.0
 ## A preload that failed is not tried again for this long.
 const PRELOAD_RETRY_MSEC := 30000
 ## How long a map change waits behind the curtain for a preload whose worker
@@ -110,18 +117,22 @@ static func over_budget(parked: Dictionary, incoming: int, budget: int = BUDGET_
 ## tiles to the nearest door of the interior (INF for no door in sight) and
 ## the preload's state: {"active": bool (started, running or ready),
 ## "far_since_msec": int (-1 while near), "retry_at_msec": int, "stale": bool
-## (a build of it expired while the player stood by), "settled": bool (the
-## map the player stands on has finished loading their arrival; default
-## true)}. Returns "start", "drop", "keep" or "none", and updates
-## `state.far_since_msec` and `state.stale` (cleared once the player is
-## farther than the start radius from every door).
+## (a build of it was let go while the player stood by), "settled": bool (the
+## map the player stands on has finished loading their arrival, and nothing
+## else holds the start; default true)}. Returns "start", "drop", "keep" or
+## "none", and updates `state.far_since_msec` and `state.stale` (cleared once
+## the player is farther than the start radius from every door, or re-armed
+## within PRELOAD_REARM_TILES of one).
 static func preload_action(state: Dictionary, distance_tiles: float, now_msec: int) -> String:
 	var active := bool(state.get("active", false))
 	if not active:
 		if bool(state.get("stale", false)):
 			if distance_tiles > PRELOAD_RADIUS_TILES:
 				state["stale"] = false
-			return "none"
+				return "none"
+			if distance_tiles > PRELOAD_REARM_TILES:
+				return "none"
+			state["stale"] = false # At a door again: re-armed.
 		if distance_tiles <= PRELOAD_RADIUS_TILES and now_msec >= int(state.get("retry_at_msec", 0)) \
 				and bool(state.get("settled", true)):
 			return "start"
@@ -135,10 +146,14 @@ static func preload_action(state: Dictionary, distance_tiles: float, now_msec: i
 		return "keep"
 	return "drop" if now_msec - since > PRELOAD_DROP_MSEC else "keep"
 
-## Whether a preload that finished at `ready_msec` (-1: not finished) has
-## been kept too long unentered at `now_msec`.
-static func preload_expired(ready_msec: int, now_msec: int, ttl_msec: int = PRELOAD_READY_TTL_MSEC) -> bool:
-	return ready_msec >= 0 and now_msec - ready_msec > ttl_msec
+## Whether the kept worlds (`kept`: id -> {"bytes": int}, the parked worlds
+## and a preload) are over `budget` together: memory-budget pressure, the one
+## reason a built interior is let go while the player stays in its area.
+static func under_pressure(kept: Dictionary, budget: int = BUDGET_BYTES) -> bool:
+	var total := 0
+	for map_id: Variant in kept:
+		total += int((kept[map_id] as Dictionary).get("bytes", 0))
+	return total > budget
 
 ## Straight-line distance in tiles between two server tiles.
 static func tile_distance(a: Vector2i, b: Vector2i) -> float:

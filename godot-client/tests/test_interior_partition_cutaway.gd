@@ -8,9 +8,15 @@ extends SceneTree
 ## while it stands between the camera and the player and returns when the
 ## player crosses back, with hysteresis on the side and the span; edge-on and
 ## outside its span it stands; the shelf and the decal go with it; another
-## section's partition is left alone; outer walls keep the facing rule. Then
-## the real Landfall Town package (when present): its rows group into
-## partitions that each measure a span.
+## section's partition is left alone; outer walls keep the facing rule. The
+## sightline rule (final review 2026-10-27): a partition running toward the
+## camera drops while the player stands at its end or alongside it, not
+## from beside it or past where the line rises over it; `screens` tells a
+## point behind a standing partition from one in front of it. Then the real
+## Landfall Town package (when present): its rows group into partitions that
+## each measure a span; from Hemmen's bedroom (clerk_house-b2, tile 27,88) his
+## study/kitchen wall is cut away; from the Gate Hall (castle-a, 26,154)
+## Corbin Lask in the Palace Chancery is screened and Oswin is not.
 
 const TOWN := "landfall_town"
 var failures := 0
@@ -36,6 +42,7 @@ func _box(name: String, size: Vector3, at: Vector3) -> MeshInstance3D:
 
 func _run() -> void:
 	await _test_synthetic()
+	await _test_sightline()
 	await _test_town()
 	for frame: int in 3:
 		await process_frame
@@ -115,6 +122,72 @@ func _test_synthetic() -> void:
 	world.queue_free()
 	await process_frame
 
+func _test_sightline() -> void:
+	var world := Node3D.new()
+	world.name = "ImportedWorld_sightline"
+	root.add_child(world)
+	# A partition running north-south at x = 20, z 0..6, 3 m tall on a floor
+	# at y = 0, with a shelf against its east face; and one across the view
+	# at z = 10 (x 0..8) to screen points behind.
+	var wall := _box("Part_house_1_lime_plaster", Vector3(0.2, 3, 6), Vector3(20, 1.5, 3))
+	var shelf := _box("shelf_k", Vector3(0.4, 2, 1), Vector3(20.3, 1, 4))
+	shelf.set_meta(InteriorCutaway.WALL_PROP_META, "Part_house_1_lime_plaster")
+	var across := _box("Part_house_2_lime_plaster", Vector3(8, 3, 0.2), Vector3(4, 1.5, 10))
+	for node: Node3D in [wall, shelf, across]:
+		world.add_child(node)
+	var manifest := WorldManifest.new()
+	manifest.data = {"cutaway": {"props": {"radiusMetres": 40}, "partitions": [
+		{"node": "Part_house_1_lime_plaster", "section": "house", "rooms": [0, 1], "centre": [20.0, 3.0],
+			"along": [0.0, 0, -1.0], "normal": [-1.0, 0, 0.0]},
+		{"node": "Part_house_2_lime_plaster", "section": "house", "rooms": [1, 2], "centre": [4.0, 10.0],
+			"along": [1.0, 0, 0.0], "normal": [0.0, 0, -1.0]}]}}
+	var cutaway := InteriorCutaway.new()
+	cutaway.configure(manifest, world)
+	cutaway.fallback_distance = 8.0
+	_expect(cutaway.camera_position(0.0, Vector3(20, 0, -2)).is_equal_approx(
+			Vector3(20, 0, -2) + Vector3(0, sin(deg_to_rad(50.0)), cos(deg_to_rad(50.0))) * 8.0),
+		"(fixture) with no camera in the viewport the rig's orbit stands in")
+	# yaw 0: the camera south. The player 2 m past its north end, on its line.
+	cutaway.update(0.0, true, "house", Vector3(20, 0, -2))
+	_expect(not wall.visible and not shelf.visible,
+		"a partition running toward the camera drops while the player stands 2 m past its end (its top crossed their legs)")
+	cutaway.update(0.0, true, "house", Vector3(20, 0, -3.6))
+	_expect(wall.visible and shelf.visible, "3.6 m past its end the line to the camera clears its top: it stands")
+	cutaway.update(0.0, true, "house", Vector3(20, 0, -1))
+	_expect(not wall.visible, "a metre past its end it drops again")
+	cutaway.update(0.0, true, "house", Vector3(21.3, 0, 2))
+	_expect(wall.visible, "a metre clear beside it, the line to the camera passes it by")
+	cutaway.update(0.0, true, "house", Vector3(20.65, 0, 2))
+	_expect(wall.visible, "with the body's edge just clear of its face it stands")
+	cutaway.update(0.0, true, "house", Vector3(20.38, 0, 2))
+	_expect(not wall.visible, "alongside it, with the body's edge over its top, it drops")
+	cutaway.update(0.0, true, "house", Vector3(20.65, 0, 2))
+	_expect(not wall.visible, "and stays dropped there (hysteresis)")
+	cutaway.update(0.0, true, "house", Vector3(21.3, 0, 2))
+	_expect(wall.visible, "until the body is well clear of it")
+	cutaway.update(0.0, true, "house", Vector3(20, 0, 8))
+	_expect(wall.visible, "past its camera-side end it is behind the player: it stands")
+	cutaway.update(90.0, true, "house", Vector3(14, 0, 3))
+	_expect(not wall.visible, "seen face-on (camera to the east) the facing rule still drops it for a player west of it")
+	cutaway.update(90.0, true, "house", Vector3(26, 0, 3))
+	_expect(wall.visible, "and keeps it for a player on the camera's side")
+	# `screens`: the camera south of the across-partition, the player in front of it.
+	cutaway.update(0.0, true, "house", Vector3(4, 0, 13))
+	var camera := cutaway.camera_position(0.0, Vector3(4, 0, 13))
+	_expect(across.visible and cutaway.screens(camera, Vector3(4, 1.7, 9.5)),
+		"a head half a metre behind a standing partition is screened from the camera")
+	_expect(not cutaway.screens(camera, Vector3(4, 1.7, 12)) and not cutaway.screens(camera, Vector3(4, 1.7, 4)),
+		"one in front of it is not, nor one far enough behind to be seen over its top")
+	cutaway.update(0.0, true, "house", Vector3(4, 0, 8))
+	_expect(not across.visible and not cutaway.screens(camera, Vector3(4, 1.7, 9.5)),
+		"a partition cut away screens nothing")
+	cutaway.update(0.0, true, "shop", Vector3(4, 0, 13))
+	_expect(not cutaway.screens(camera, Vector3(4, 1.7, 9.5)), "nor does another section's")
+	cutaway.reset()
+	_expect(wall.visible and shelf.visible and across.visible, "reset shows everything it hid")
+	world.queue_free()
+	await process_frame
+
 func _test_town() -> void:
 	var registry: Dictionary = (JSON.parse_string(FileAccess.get_file_as_string("res://data/maps/registry.json")) as Dictionary).get("maps", {})
 	var path := ProjectSettings.globalize_path(str(MapRegistry.resolve(registry, TOWN).get("manifest", "")))
@@ -144,5 +217,48 @@ func _test_town() -> void:
 		"every partitions row resolves and the rows group into partitions (%d rows, %d partitions)" % [rows.size(), groups.size()])
 	_expect(spans.all(func(half: float) -> bool: return half >= 1.0 and half < 30.0),
 		"every partition measures a span from its nodes (%s)" % [spans])
+	var adapter := manifest.coordinate_adapter()
+	# Hemmen's bedroom (clerk_house-b2: tile 27,88, the close camera at 8 m):
+	# his study/kitchen wall runs toward the camera and ends 2 m from him.
+	var study_wall: Dictionary = {}
+	var gate_wall: Dictionary = {}
+	for group: Dictionary in groups:
+		var first := str(((group.nodes as Array)[0] as Node3D).name)
+		if str(group.section) == "clerk_house" and first.begins_with("Part_clerk_house_0_"):
+			study_wall = group
+		if str(group.section) == "castle" and first.begins_with("Part_castle_2_"):
+			gate_wall = group
+	_expect(not study_wall.is_empty() and not gate_wall.is_empty(),
+		"(fixture) the study/kitchen wall and the Gate Hall's north wall are partitions")
+	if not study_wall.is_empty():
+		var box: AABB = study_wall.box
+		var bedroom := adapter.tile_center(27, 88)
+		bedroom.y = box.position.y
+		print("study/kitchen wall: box %s half %.2f thick %.2f; bedroom tile at %s" % [box, float(study_wall.half),
+			float(study_wall.thick), bedroom])
+		for distance: float in [8.0, 12.0]:
+			cutaway.fallback_distance = distance
+			cutaway.update(0.0, true, "clerk_house", bedroom)
+			_expect(bool(study_wall.hidden) and not ((study_wall.nodes as Array)[0] as Node3D).visible,
+				"from Hemmen's bedroom (27,88), camera at %.0f m, his study/kitchen wall is cut away" % distance)
+		cutaway.fallback_distance = 12.0
+		var study := adapter.tile_center(23, 83)
+		study.y = box.position.y
+		cutaway.update(0.0, true, "clerk_house", study)
+		_expect(not bool(study_wall.hidden), "from his study (clerk_house-a, 23,83) that wall stands")
+	if not gate_wall.is_empty():
+		var hall := adapter.tile_center(26, 154)
+		hall.y = (gate_wall.box as AABB).position.y
+		cutaway.fallback_distance = 12.0
+		cutaway.update(0.0, true, "castle", hall)
+		var camera := cutaway.camera_position(0.0, hall)
+		var corbin := adapter.tile_center(23, 164)
+		corbin.y = hall.y + 1.7
+		var oswin := adapter.tile_center(23, 156)
+		oswin.y = hall.y + 1.7
+		print("Gate Hall north wall: box %s; camera %s; Corbin's head %s" % [gate_wall.box, camera, corbin])
+		_expect(not bool(gate_wall.hidden) and cutaway.screens(camera, corbin),
+			"from the Gate Hall (26,154) Corbin Lask in the Palace Chancery is behind its standing north wall")
+		_expect(not cutaway.screens(camera, oswin), "while Oswin in the Gate Hall is in plain sight")
 	cutaway.reset()
 	shell.free()

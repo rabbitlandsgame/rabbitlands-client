@@ -59,15 +59,26 @@ static func _padded(bytes: PackedByteArray, pad: int) -> PackedByteArray:
 	return result
 
 ## A GLB holding only `document`'s materials, textures and samplers, every
-## image one 1x1 PNG, no meshes, nodes or scenes.
-static func materials_glb(document: Dictionary) -> PackedByteArray:
+## image one 1x1 PNG, no meshes, nodes or scenes. With `only` (material
+## indices), just those materials and the textures, samplers and images they
+## use, re-indexed: one material of a spread warm-up (`plan`).
+static func materials_glb(document: Dictionary, only: Array = []) -> PackedByteArray:
 	var png := _one_pixel_png()
+	var materials: Array = document.get("materials", [])
+	var textures: Array = document.get("textures", [])
+	var samplers: Array = document.get("samplers", [])
+	var image_count := (document.get("images", []) as Array).size()
+	if not only.is_empty():
+		var picked := _subset(document, only)
+		materials = picked.materials
+		textures = picked.textures
+		samplers = picked.samplers
+		image_count = int(picked.images)
 	var images: Array = []
-	for _image: Variant in document.get("images", []) as Array:
+	for _image: int in image_count:
 		images.append({"bufferView": 0, "mimeType": "image/png"})
 	var stripped := {"asset": document.get("asset", {"version": "2.0"}),
-		"materials": document.get("materials", []), "textures": document.get("textures", []),
-		"samplers": document.get("samplers", []), "images": images}
+		"materials": materials, "textures": textures, "samplers": samplers, "images": images}
 	if document.has("extensionsUsed"):
 		stripped["extensionsUsed"] = document.extensionsUsed
 	if not images.is_empty():
@@ -89,6 +100,96 @@ static func materials_glb(document: Dictionary) -> PackedByteArray:
 		stream.put_data(binary)
 	return stream.data_array
 
+## The materials at `only`, with the textures they name (every `*Texture`
+## textureInfo, at any depth: the core slots and any extension's) and those
+## textures' samplers, re-indexed in order of first use; "images" is how many
+## images the kept textures name (each becomes the one 1x1 picture).
+static func _subset(document: Dictionary, only: Array) -> Dictionary:
+	var all_materials: Array = document.get("materials", [])
+	var all_textures: Array = document.get("textures", [])
+	var all_samplers: Array = document.get("samplers", [])
+	var texture_map: Dictionary = {}
+	var materials: Array = []
+	for value: Variant in only:
+		var index := int(value)
+		if index < 0 or index >= all_materials.size():
+			continue
+		materials.append(_reindex_textures((all_materials[index] as Dictionary).duplicate(true), texture_map))
+	var textures: Array = []
+	textures.resize(texture_map.size())
+	var sampler_map: Dictionary = {}
+	var image_map: Dictionary = {}
+	for old: int in texture_map:
+		var texture: Dictionary = (all_textures[old] as Dictionary).duplicate(true) \
+			if old >= 0 and old < all_textures.size() and all_textures[old] is Dictionary else {}
+		if texture.has("sampler"):
+			var sampler := int(texture.sampler)
+			if not sampler_map.has(sampler):
+				sampler_map[sampler] = sampler_map.size()
+			texture["sampler"] = sampler_map[sampler]
+		_reindex_sources(texture, image_map)
+		textures[int(texture_map[old])] = texture
+	var samplers: Array = []
+	samplers.resize(sampler_map.size())
+	for old: int in sampler_map:
+		samplers[int(sampler_map[old])] = all_samplers[old] if old >= 0 and old < all_samplers.size() else {}
+	return {"materials": materials, "textures": textures, "samplers": samplers, "images": image_map.size()}
+
+## Rewrites every textureInfo `index` under a `*Texture` key in `value` to
+## its compact index (`texture_map`: old -> new, grown on first use).
+static func _reindex_textures(value: Variant, texture_map: Dictionary) -> Variant:
+	if value is Dictionary:
+		var row := value as Dictionary
+		for key: Variant in row.keys():
+			var child: Variant = row[key]
+			if str(key).ends_with("Texture") and child is Dictionary and (child as Dictionary).has("index"):
+				var old := int((child as Dictionary).index)
+				if not texture_map.has(old):
+					texture_map[old] = texture_map.size()
+				(child as Dictionary)["index"] = texture_map[old]
+			_reindex_textures(child, texture_map)
+	elif value is Array:
+		for child: Variant in value as Array:
+			_reindex_textures(child, texture_map)
+	return value
+
+## Rewrites a texture's image `source` (its own and any extension's) to its
+## compact index.
+static func _reindex_sources(value: Variant, image_map: Dictionary) -> void:
+	if value is Dictionary:
+		var row := value as Dictionary
+		for key: Variant in row.keys():
+			if str(key) == "source" and (row[key] is int or row[key] is float):
+				var old := int(row[key])
+				if not image_map.has(old):
+					image_map[old] = image_map.size()
+				row[key] = image_map[old]
+			else:
+				_reindex_sources(row[key], image_map)
+
+## As GLTFDocument._parse_meshes: the material indices a primitive with COLOR_0
+## draws (their vertex colours turn on), and the vertex-colour flag of each
+## default material a primitive without one gets ({true/false: true}).
+static func _mesh_use(document: Dictionary) -> Dictionary:
+	var coloured: Dictionary = {}
+	var defaults: Dictionary = {}
+	var count := (document.get("materials", []) as Array).size()
+	for mesh: Variant in document.get("meshes", []) as Array:
+		if mesh is not Dictionary:
+			continue
+		for primitive: Variant in (mesh as Dictionary).get("primitives", []) as Array:
+			if primitive is not Dictionary:
+				continue
+			var attributes: Variant = (primitive as Dictionary).get("attributes", {})
+			var has_colour := attributes is Dictionary and (attributes as Dictionary).has("COLOR_0")
+			var index: Variant = (primitive as Dictionary).get("material")
+			if (index is int or index is float) and int(index) >= 0 and int(index) < count:
+				if has_colour:
+					coloured[int(index)] = true
+			elif not defaults.has(has_colour):
+				defaults[has_colour] = true
+	return {"coloured": coloured, "defaults": defaults}
+
 ## The materials a load of the GLB `document` binds, one per shader key it
 ## takes on the way (see the header). [] when the materials do not parse.
 static func materials_of(document: Dictionary) -> Array:
@@ -101,48 +202,99 @@ static func materials_of(document: Dictionary) -> Array:
 	var parsed: Array = state.get_materials()
 	# As GLTFDocument._parse_meshes: a primitive with COLOR_0 turns its
 	# material's vertex colours on; one without a material gets a fresh one.
+	var use := _mesh_use(document)
 	var coloured_surfaces: Dictionary = {}
-	var defaults: Dictionary = {}
-	for mesh: Variant in document.get("meshes", []) as Array:
-		if mesh is not Dictionary:
-			continue
-		for primitive: Variant in (mesh as Dictionary).get("primitives", []) as Array:
-			if primitive is not Dictionary:
-				continue
-			var attributes: Variant = (primitive as Dictionary).get("attributes", {})
-			var coloured := attributes is Dictionary and (attributes as Dictionary).has("COLOR_0")
-			var index: Variant = (primitive as Dictionary).get("material")
-			if (index is int or index is float) and int(index) >= 0 and int(index) < parsed.size():
-				var material := parsed[int(index)] as BaseMaterial3D
-				if material != null and coloured:
-					material.vertex_color_use_as_albedo = true
-					coloured_surfaces[material] = true
-			elif not defaults.has(coloured):
-				var fresh := StandardMaterial3D.new()
-				fresh.vertex_color_use_as_albedo = coloured
-				defaults[coloured] = fresh
-				if coloured:
-					coloured_surfaces[fresh] = true
+	for index: int in use.coloured:
+		var material := parsed[index] as BaseMaterial3D if index < parsed.size() else null
+		if material != null:
+			material.vertex_color_use_as_albedo = true
+			coloured_surfaces[material] = true
+	var defaults: Array = []
+	for flag: bool in use.defaults:
+		var fresh := StandardMaterial3D.new()
+		fresh.vertex_color_use_as_albedo = flag
+		defaults.append(fresh)
+		if flag:
+			coloured_surfaces[fresh] = true
 	MapMaterialPreparation.prepare(state)
 	var result: Array = []
-	for value: Variant in parsed + defaults.values():
+	for value: Variant in parsed + defaults:
 		var material := value as BaseMaterial3D
 		if material == null:
 			continue
 		result.append(material)
-		# WorldLoader._apply_material_passes, after generate_scene took the RID.
-		var after := material.duplicate() as BaseMaterial3D
-		var changed := false
-		if after.texture_filter != MapMaterialPreparation.FILTER:
-			after.texture_filter = MapMaterialPreparation.FILTER
-			changed = true
-		if coloured_surfaces.has(material) and after.transparency == BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR \
-				and not after.vertex_color_use_as_albedo:
-			after.vertex_color_use_as_albedo = true
-			changed = true
-		if changed:
+		var after := after_pass(material, coloured_surfaces.has(material))
+		if after != null:
 			result.append(after)
 	return result
+
+## WorldLoader._apply_material_passes on `material` after generate_scene took
+## its RID: a copy with the loader's filter (and a coloured alpha-scissor
+## material's vertex colours), or null when the passes change nothing.
+static func after_pass(material: BaseMaterial3D, coloured: bool) -> BaseMaterial3D:
+	var changed := material.texture_filter != MapMaterialPreparation.FILTER \
+		or (coloured and material.transparency == BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
+			and not material.vertex_color_use_as_albedo)
+	if not changed:
+		return null
+	var after := material.duplicate() as BaseMaterial3D
+	after.texture_filter = MapMaterialPreparation.FILTER
+	if coloured and after.transparency == BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR:
+		after.vertex_color_use_as_albedo = true
+	return after
+
+# --------------------------------------------------------------------------
+# The warm-up spread over frames
+# --------------------------------------------------------------------------
+#
+# Binding a parent with no curtain up - a walk over its border, where the map
+# arrives as a seamless handoff (review 2026-10-27, finding 7) - must not
+# spend `warm`'s 31-93 ms on one gameplay frame, nor hand the next draw every
+# new key at once. `plan` does the file and JSON work on a worker and cuts
+# the shell's materials into one small materials-only GLB each; `build_step`
+# then builds one material a frame on the main thread and takes its RID at
+# once, so a draw compiles at most one new key. A material is never left
+# alive across a frame before its RID is taken: BaseMaterial3D would update
+# every pending material's shader at the frame's flush, all keys together.
+
+## A spread warm-up's steps, for a worker: {"steps": [{"glb", "coloured"} or
+## {"default": true, "coloured"}], "error": "", "usec": int}. Pure file and
+## data work (no Resource is created), so it is safe off the main thread.
+static func plan(glb_path: String) -> Dictionary:
+	var began := Time.get_ticks_usec()
+	var document := read_json_chunk(glb_path)
+	if document.is_empty():
+		return {"steps": [], "error": "glb_unreadable", "usec": Time.get_ticks_usec() - began}
+	var use := _mesh_use(document)
+	var steps: Array = []
+	for index: int in (document.get("materials", []) as Array).size():
+		steps.append({"glb": materials_glb(document, [index]), "coloured": (use.coloured as Dictionary).has(index)})
+	for flag: bool in use.defaults:
+		steps.append({"default": true, "coloured": flag})
+	return {"steps": steps, "error": "", "usec": Time.get_ticks_usec() - began}
+
+## One planned step on the main thread: the material the shell's load binds
+## for it, its RID taken now (its key's shader is built here and compiled at
+## the next draw). Null when the step's GLB does not parse.
+static func build_step(step: Dictionary) -> BaseMaterial3D:
+	var material: BaseMaterial3D = null
+	if bool(step.get("default", false)):
+		material = StandardMaterial3D.new()
+		material.vertex_color_use_as_albedo = bool(step.get("coloured", false))
+	else:
+		var gltf := GLTFDocument.new()
+		var state := GLTFState.new()
+		if gltf.append_from_buffer(step.get("glb", PackedByteArray()) as PackedByteArray, "", state) != OK:
+			return null
+		var parsed: Array = state.get_materials()
+		material = parsed[0] as BaseMaterial3D if not parsed.is_empty() else null
+		if material == null:
+			return null
+		if bool(step.get("coloured", false)):
+			material.vertex_color_use_as_albedo = true
+		MapMaterialPreparation.prepare(state)
+	material.get_rid()
+	return material
 
 ## Builds the shader of every key the GLB at `glb_path` binds and returns
 ## {"materials": [...] (hold them), "keys": distinct keys, "usec": int,

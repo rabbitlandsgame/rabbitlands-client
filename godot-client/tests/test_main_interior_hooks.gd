@@ -9,6 +9,8 @@ extends SceneTree
 ## - WorldPark is told the arrival has settled only once the curtain is down
 ##   and the arrival is no longer pending (no preload competes with it), and a
 ##   new map change forgets it.
+## - Exit labels are kept above the bottom HUD bar's top edge in the 3D view
+##   (`_label_floor_y`); outside an interior no partition screens a name.
 
 var failures := 0
 
@@ -66,6 +68,20 @@ func _run() -> void:
 	main.loaded_server_map = "landfall_town"
 	state.current_map = "landfall_town"
 	_expect(main._world_park_settled != main.loaded_server_map, "another map is not settled by the last one")
+	# Exit labels keep above the bottom HUD bar: its top edge in the 3D view's pixels.
+	var bar: Control = main.get_node("%Quickbar")
+	var view_height := float(main.main_viewport.size.y)
+	main.game_view.show()
+	bar.show()
+	var floor_y: float = main._label_floor_y()
+	var expected: float = main._viewport_position(bar.get_global_rect().position).y
+	_expect(floor_y > 0.0 and floor_y < view_height and is_equal_approx(floor_y, minf(view_height, expected)),
+		"the labels' floor is the quickbar's top edge in the 3D view (%.0f of %.0f px)" % [floor_y, view_height])
+	bar.hide()
+	_expect(is_equal_approx(main._label_floor_y(), view_height), "with the bar hidden it is the view's bottom")
+	bar.show()
+	_expect(main.interior_cutaway.has_method("screens") and not main.interior_cutaway.screens(Vector3.ZERO, Vector3.ONE),
+		"names are screened only by an interior's standing partitions (none outside)")
 	main.queue_free()
 	for frame: int in 3:
 		await process_frame

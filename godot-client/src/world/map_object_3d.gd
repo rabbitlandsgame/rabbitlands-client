@@ -81,15 +81,21 @@ const BUILDING_LABEL_METRES := 12.0
 ## A building door's label never draws beyond this distance from the camera,
 ## whatever the player's distance: it is a door's name, not a landmark.
 const BUILDING_LABEL_RANGE := 45.0
-## An interior's way out names itself over its exit tile (the room side of the
-## wall, not in it), this far above the wall's top, and only within this many
-## metres of that tile (or under the pointer). A label on a camera-side wall
-## sinks toward the bottom of the screen as the player walks away from it:
-## drawn in the wall at 12 m it sat under the bottom HUD bar (review captures
-## market-a-game, smithy-a-game); over the tile, lifted, within 6 m it stays at
-## least ~16 degrees above the screen's bottom edge at the town's camera.
+## An interior's way out names itself at its door - the record's `exitOffset`,
+## where the door stands in the wall - at the door's lintel
+## (EXIT_LABEL_HEIGHT), and only within EXIT_LABEL_METRES of the door (or
+## under the pointer). Drawn in the wall at 12 m a camera-side label sat under
+## the bottom HUD bar (review 2026-10-27, market-a-game); lifted 1.4 m above a
+## 3 m wall over the exit tile it looked ~3.7 m farther off than its door at
+## the town's -50 degree pitch and floated over the room (magic_shop, smithy,
+## clerk_house, weaver_house). A label that would still fall under the HUD
+## bar is lifted in screen space only (`keep_label_above`, Main), so it never
+## leaves its door in the world.
 const EXIT_LABEL_METRES := 6.0
-const EXIT_LABEL_LIFT := 1.4
+const EXIT_LABEL_HEIGHT := 2.3
+## The gap a label lifted clear of the bottom HUD bar keeps above it, in the
+## 3D viewport's pixels.
+const LABEL_HUD_MARGIN := 6.0
 
 var object_id: int = -1
 var kind: int = 0
@@ -350,21 +356,74 @@ func wants_label_focus() -> bool:
 
 ## Shows a building door's name while the player stands within
 ## BUILDING_LABEL_METRES of the door (measured flat, from the painted door), an
-## exit's within EXIT_LABEL_METRES of its tile, and either while the pointer is
-## on it; a lore object's only under the pointer. `player_position` is the
-## local character's world position (INF when there is none).
+## exit's within EXIT_LABEL_METRES of its door in the wall, and either while
+## the pointer is on it; a lore object's only under the pointer.
+## `player_position` is the local character's world position (INF when there
+## is none).
 func update_label_focus(player_position: Vector3, hovered: bool) -> void:
 	var title := get_node_or_null("ObjectLabel" if pick_only else "EntranceLabel") as Label3D
 	if title == null:
 		return
 	var near := false
 	if player_position.is_finite() and is_inside_tree() and not pick_only:
-		var door := global_position + (_door_point if building_door else _label_point)
+		var door := global_position + _door_point
 		near = Vector2(player_position.x - door.x, player_position.z - door.z).length() \
 			<= (EXIT_LABEL_METRES if building_exit else BUILDING_LABEL_METRES)
 	var shown := hovered or near
 	if title.visible != shown:
 		title.visible = shown
+
+## Keeps a shown exit label clear of the bottom HUD bar: when the label would
+## reach below `floor_y` (the bar's top edge, in `camera`'s viewport pixels),
+## it is lifted on screen just far enough (Label3D.offset, which a fixed-size
+## billboard draws in screen space); its anchor stays at the door. Returns the
+## lift in viewport pixels (0 for none).
+func keep_label_above(camera: Camera3D, floor_y: float) -> float:
+	var title := get_node_or_null("EntranceLabel") as Label3D
+	if title == null or not building_exit:
+		return 0.0
+	var lift := 0.0
+	var per_unit := 0.0
+	if title.visible and camera != null and camera.is_inside_tree() and title.is_inside_tree() \
+			and not camera.is_position_behind(title.global_position):
+		per_unit = screen_pixels_per_unit(camera)
+		var anchor := camera.unproject_position(title.global_position)
+		var half := label_half_height(title) * per_unit
+		lift = label_lift(anchor.y, half, floor_y, float(camera.get_viewport().get_visible_rect().size.y))
+	var offset_y := lift / (per_unit * title.pixel_size) if lift > 0.0 and per_unit > 0.0 else 0.0
+	if not is_equal_approx(title.offset.y, offset_y):
+		title.offset.y = offset_y
+	return lift
+
+## Half the height of a label's text block, outline included, in mesh units
+## (its lines at the font's height; the block is centred on the anchor). Not
+## the label's AABB: a billboard's is a cube around every turn it may take.
+static func label_half_height(title: Label3D) -> float:
+	var font: Font = title.font if title.font != null else ThemeDB.fallback_font
+	var lines := title.text.count("\n") + 1
+	var height := float(lines) * (font.get_height(title.font_size) + title.line_spacing) \
+		- title.line_spacing + float(title.outline_size)
+	return maxf(0.0, height) * 0.5 * title.pixel_size
+
+## How many viewport pixels one unit of a fixed-size billboard's mesh spans
+## on `camera`'s screen: the fixed-size shader scales the mesh by its view
+## depth (perspective) or by the frustum's height (orthogonal), so the answer
+## is the same everywhere on screen.
+static func screen_pixels_per_unit(camera: Camera3D) -> float:
+	var height := float(camera.get_viewport().get_visible_rect().size.y)
+	var projection := camera.get_camera_projection()
+	return height * 0.5 * (projection.y.y if camera.projection != Camera3D.PROJECTION_ORTHOGONAL else 1.0)
+
+## The lift (pixels) a label centred at screen height `anchor_y`, reaching
+## `half_height` below it, needs to keep LABEL_HUD_MARGIN above `floor_y`.
+## A door just off the bottom of the screen (`screen_bottom`) - the player
+## near 6 m from a camera-side door - is still named over the bar; one more
+## than the bar's height below it is not: a label pinned to the bar would
+## point at nothing near.
+static func label_lift(anchor_y: float, half_height: float, floor_y: float, screen_bottom: float) -> float:
+	if anchor_y > screen_bottom + maxf(0.0, screen_bottom - floor_y):
+		return 0.0
+	return maxf(0.0, anchor_y + half_height + LABEL_HUD_MARGIN - floor_y)
 
 ## The glyph the maps draw for this object, or "" for one drawn as a disc.
 func map_glyph() -> String:
@@ -626,13 +685,12 @@ func _build_visual(catalog: Dictionary) -> void:
 		if building_door or building_exit:
 			title.text = door_label + ("\nClick to enter" if building_door else "\nClick to leave")
 			var standing := float(authored.get("visualHeight", authored.get("height", 0.0)))
+			_label_point = _door_point
 			if building_door:
-				_label_point = _door_point
 				title.position = _label_point + Vector3.UP * maxf(1.8, standing + .35)
 			else:
-				# Over the exit tile, lifted clear of the wall (EXIT_LABEL_METRES).
-				_label_point = Vector3.ZERO
-				title.position = Vector3.UP * (maxf(1.8, standing) + EXIT_LABEL_LIFT)
+				# At the door in the wall, at its lintel (EXIT_LABEL_METRES).
+				title.position = _label_point + Vector3.UP * EXIT_LABEL_HEIGHT
 		else:
 			title.text = str(authored.get("label", "Underground entrance")) + "\nClick to enter"
 			title.position.y = maxf(1.8, float(authored.get("visualHeight", 0.0)) + .35)

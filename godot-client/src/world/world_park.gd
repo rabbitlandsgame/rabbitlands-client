@@ -28,11 +28,23 @@ extends Node
 ## (interior_scenery_stepper.gd). The map change then adopts it (`take`).
 ## A preload starts only once the player's own arrival on the map has loaded
 ## (`observe`'s `settled`), so it never competes with the arrival's chunks.
+## A built interior the player has not entered - preloaded, or parked after a
+## visit - stays while the player stays in its area; only memory-budget
+## pressure lets it go then, and it is built again at a door
+## (world_park_policy.gd).
 ##
 ## Shader keys. A preload must not compile shaders on the main thread mid-walk
 ## (a new material key costs one 70 ms frame cold): binding the parent builds
 ## and holds every key the interior's shell binds, behind the arrival curtain
-## (interior_material_warmup.gd).
+## (interior_material_warmup.gd). A parent bound with no curtain up (a walk
+## over its border: a seamless handoff) spreads the same work instead: its
+## file and JSON on a worker, then - once the player's arrival has loaded -
+## one material a frame, so no gameplay frame carries the whole warm-up or
+## more than one new key; the interior's preload waits until it has run.
+## Measured rendered for the Town (2026-10-27, a bare scene): whole, one
+## frame of 155-187 ms with Godot's shader cache warm (304-379 ms cold);
+## spread, its worst frames 21-55 ms warm (one cached key each), 77-274 ms on
+## a first run with an empty cache.
 ##
 ## Memory. An interior is estimated from its textures, shell and scenery:
 ## each image's pixels from its header, or its VRAM sidecar's size when the
@@ -108,6 +120,15 @@ var _portal_index: Dictionary = {}
 ## interior map id -> the materials holding its shell's shader keys for the
 ## session (_warm_interior).
 var _warmed: Dictionary = {}
+## interior map id -> its shell GLB's path (from its manifest, read once).
+var _shell_glbs: Dictionary = {}
+## interior map id -> a warm-up spread over frames (`_step_warmups`): {"glb",
+## "thread" (its plan, until collected), "plan", "next", "after_of",
+## "coloured", "materials", "keys", "began_usec", "main_usec",
+## "max_step_usec", "frames"}.
+var _warming: Dictionary = {}
+## Plan workers of cancelled warm-ups, reaped once they finish.
+var _warm_orphans: Array[Thread] = []
 var _scenery_configs: Dictionary = {}
 var _scenery_paths: Dictionary = {}
 ## interior map id -> its estimated bytes once built (textures by their
@@ -122,6 +143,10 @@ var _retry_at: Dictionary = {}
 var _waiting_since := -1
 ## The destination `take` last handed a world for (a preload hit's map).
 var _last_taken := ""
+## The bound map once `observe` has been told the player's arrival on it has
+## loaded: a spread warm-up waits for it, so its frames never stack on the
+## arrival's own chunk loads.
+var _settled_map := ""
 
 func configure(maps: Dictionary) -> void:
 	registry = maps
@@ -195,9 +220,13 @@ func preload_state(map_id := "") -> String:
 
 ## Indexes the doors on `map_id` that lead into a flagged interior of it.
 ## Called once a map is bound (Main._on_world_loaded): reads each such
-## interior's manifest portals and scenery list the first time only.
-func bind_map(map_id: String) -> int:
+## interior's manifest portals and scenery list the first time only, and warms
+## its shell's shader keys - at once behind the arrival curtain (`curtained`),
+## else spread over the frames that follow (a walk over the map's border).
+func bind_map(map_id: String, curtained := true) -> int:
 	_bound_map = MapRegistry.normalize_server_map_id(map_id)
+	if _settled_map != _bound_map:
+		_settled_map = ""
 	_doors.clear()
 	_door_tiles.clear()
 	if not enabled or _bound_map.is_empty():
@@ -213,8 +242,12 @@ func bind_map(map_id: String) -> int:
 			var manifest := _read_manifest(entry as Dictionary)
 			_portal_index[interior] = _portals_of(interior, manifest)
 			_read_scenery(interior)
-			_warm_interior(interior, manifest)
+			if not manifest.is_empty() and manifest.get("asset") is Dictionary \
+					and not str((manifest.asset as Dictionary).get("glb", "")).is_empty():
+				_shell_glbs[interior] = str(manifest._path).get_base_dir().path_join(
+					str((manifest.asset as Dictionary).glb))
 			_estimate_interior(interior, manifest)
+		_warm_interior(interior, curtained)
 		var portals: Dictionary = _portal_index[interior]
 		for object_id: int in (portals.get(_bound_map, {}) as Dictionary):
 			_doors[object_id] = interior
@@ -259,22 +292,116 @@ static func _portals_of(interior: String, manifest: Dictionary) -> Dictionary:
 			if tile is Array and (tile as Array).size() >= 2 else Vector2i(-100000, -100000)
 	return result
 
-## Builds the shader of every material key the interior's shell binds, on
-## the parent's map-load frame (bind_map: behind the arrival curtain), and
-## holds one material per key for the session, so the preload's worker shares
-## those shaders instead of compiling them mid-walk
-## (interior_material_warmup.gd has the measurements).
-func _warm_interior(interior: String, manifest: Dictionary) -> void:
-	if not warm_materials or _warmed.has(interior) or manifest.is_empty():
+## Builds the shader of every material key the interior's shell binds and
+## holds its materials for the session, so the preload's worker shares those
+## shaders instead of compiling them mid-walk (interior_material_warmup.gd has
+## the measurements). Behind the arrival curtain (`curtained`) on the parent's
+## map-load frame, all at once; without one, spread (`_step_warmups`). Once a
+## session; a spread warm-up cut short by travel starts again at the next bind.
+func _warm_interior(interior: String, curtained := true) -> void:
+	if not warm_materials or _warmed.has(interior) or _warming.has(interior):
 		return
-	var relative := str((manifest.get("asset", {}) as Dictionary).get("glb", "")) \
-		if manifest.get("asset") is Dictionary else ""
-	if relative.is_empty():
+	var glb := str(_shell_glbs.get(interior, ""))
+	if glb.is_empty():
 		return
-	var result := MaterialWarmup.warm(str(manifest._path).get_base_dir().path_join(relative))
-	_warmed[interior] = result.materials
-	_record("warm", interior, {"keys": int(result.keys), "materials": (result.materials as Array).size(),
-		"warm_ms": float(result.usec) / 1000.0, "error": str(result.error)})
+	if curtained:
+		var result := MaterialWarmup.warm(glb)
+		_warmed[interior] = result.materials
+		_record("warm", interior, {"keys": int(result.keys), "materials": (result.materials as Array).size(),
+			"warm_ms": float(result.usec) / 1000.0, "error": str(result.error), "spread": false})
+		return
+	var job := {"glb": glb, "thread": null, "plan": {}, "next": 0, "after_of": null, "coloured": false,
+		"materials": [], "keys": {}, "began_usec": Time.get_ticks_usec(), "main_usec": 0,
+		"max_step_usec": 0, "frames": 0}
+	var thread := Thread.new()
+	if thread.start(_plan_warmup.bind(glb)) == OK:
+		job["thread"] = thread
+	else:
+		job["plan"] = _plan_warmup(glb)
+	_warming[interior] = job
+	_record("warm_spread", interior, {"reason": "no_curtain"})
+
+## The spread warm-up's plan (a worker): the shell GLB read, parsed and cut
+## into one materials-only GLB per material. Reads files only.
+static func _plan_warmup(glb: String) -> Dictionary:
+	return MaterialWarmup.plan(glb)
+
+## One frame of the spread warm-ups: collects a finished plan, then builds one
+## material (so a draw compiles at most one new shader key) of the first job
+## whose plan is in, once the player's arrival on the bound map has loaded
+## (`observe`'s `settled`). A finished job holds its materials as `warm` does.
+func _step_warmups() -> void:
+	if _warming.is_empty() or _settled_map.is_empty() or _settled_map != _bound_map:
+		return
+	for interior: String in _warming.keys():
+		var job: Dictionary = _warming[interior]
+		var thread: Thread = job.thread
+		if thread != null:
+			if thread.is_alive():
+				continue
+			job["plan"] = thread.wait_to_finish()
+			job["thread"] = null
+		var plan: Dictionary = job.plan
+		var steps: Array = plan.get("steps", [])
+		var began := Time.get_ticks_usec()
+		var built: BaseMaterial3D = null
+		# The previous material's after-pass copy is its own frame's key.
+		if job.after_of != null:
+			built = MaterialWarmup.after_pass(job.after_of as BaseMaterial3D, bool(job.coloured))
+			job["after_of"] = null
+			if built != null:
+				built.get_rid()
+		while built == null and int(job.next) < steps.size():
+			var step: Dictionary = steps[int(job.next)]
+			job["next"] = int(job.next) + 1
+			built = MaterialWarmup.build_step(step)
+			if built != null:
+				job["after_of"] = built
+				job["coloured"] = bool(step.get("coloured", false))
+		if built != null:
+			(job.materials as Array).append(built)
+			(job.keys as Dictionary)[MaterialWarmup.signature(built)] = true
+		var spent := Time.get_ticks_usec() - began
+		job["main_usec"] = int(job.main_usec) + spent
+		job["max_step_usec"] = maxi(int(job.max_step_usec), spent)
+		job["frames"] = int(job.frames) + 1
+		if job.after_of == null and int(job.next) >= steps.size():
+			_warming.erase(interior)
+			_warmed[interior] = job.materials
+			_record("warm", interior, {"keys": (job.keys as Dictionary).size(),
+				"materials": (job.materials as Array).size(), "warm_ms": float(job.main_usec) / 1000.0,
+				"error": str(plan.get("error", "")), "spread": true, "frames": int(job.frames),
+				"max_step_ms": float(job.max_step_usec) / 1000.0,
+				"plan_ms": float(plan.get("usec", 0)) / 1000.0,
+				"seconds": float(Time.get_ticks_usec() - int(job.began_usec)) / 1000000.0})
+		return
+
+## Warm-ups still being spread (tests, diagnostics): their interiors.
+func warming() -> Array:
+	return _warming.keys()
+
+## Drops the spread warm-ups still running (travel, logout): a plan worker
+## only reads files, and is reaped once it finishes.
+func _cancel_warmups(reason: String) -> void:
+	for interior: String in _warming.keys():
+		var job: Dictionary = _warming[interior]
+		var thread: Thread = job.thread
+		if thread != null:
+			if thread.is_alive():
+				_warm_orphans.append(thread)
+			else:
+				thread.wait_to_finish()
+		_record("warm_cancelled", interior, {"reason": reason, "built": (job.materials as Array).size()})
+	_warming.clear()
+
+func _reap_warm_orphans(wait := false) -> void:
+	var remaining: Array[Thread] = []
+	for thread: Thread in _warm_orphans:
+		if thread.is_alive() and not wait:
+			remaining.append(thread)
+		else:
+			thread.wait_to_finish()
+	_warm_orphans = remaining
 
 ## Starts reading an interior's estimated bytes once built (once a session,
 ## from bind_map): the shell GLB's images and every scenery model's, each
@@ -355,6 +482,8 @@ func doors() -> Dictionary:
 func observe(map_id: String, tile: Vector2i, map_objects: Dictionary = {}, settled := true) -> void:
 	if not enabled or MapRegistry.normalize_server_map_id(map_id) != _bound_map:
 		return
+	if settled:
+		_settled_map = _bound_map
 	var now := _now()
 	var nearest: Dictionary = {}
 	var nearest_door: Dictionary = {}
@@ -370,8 +499,13 @@ func observe(map_id: String, tile: Vector2i, map_objects: Dictionary = {}, settl
 			nearest_door[interior] = object_id
 	for interior: String in nearest:
 		if _parked.has(interior):
-			# A parked interior is the preload already done. Standing near does
-			# not keep it: it expires as any parked world does (then is stale).
+			# A parked interior is the preload already done, and is kept as one:
+			# its clock is held while the player stays in its area (within
+			# PRELOAD_DROP_TILES of a door) and runs once they leave it.
+			var row: Dictionary = _parked[interior]
+			if float(nearest[interior]) <= Policy.PRELOAD_DROP_TILES and now - int(row.at_msec) >= 1000:
+				row["at_msec"] = now
+				counters.refresh += 1
 			continue
 		if not _preload.is_empty() and str(_preload.map) != interior:
 			continue # One preload at a time; the other is judged below.
@@ -384,15 +518,19 @@ func _judge_preload(interior: String, distance: float, door: int, now: int, sett
 		"far_since_msec": int(_preload.get("far_since_msec", -1)),
 		"retry_at_msec": int(_retry_at.get(interior, 0)),
 		"stale": _stale.has(interior), "settled": settled}
-	if _estimating.has(interior):
-		# Its size is still being read: nothing starts before the budget knows it.
+	if _estimating.has(interior) or _warming.has(interior):
+		# Its size is still being read (nothing starts before the budget knows
+		# it), or its shader keys are still being warmed over frames (the
+		# worker would compile them mid-walk).
 		state["settled"] = false
 	var action := Policy.preload_action(state, distance, now)
 	if not _preload.is_empty():
 		_preload["far_since_msec"] = int(state.far_since_msec)
 	if not bool(state.stale) and _stale.has(interior):
 		_stale.erase(interior)
-		_record("stale_cleared", interior, {"distance_tiles": snappedf(distance, 0.1)})
+		# Walked away (past the start radius), or back at one of its doors.
+		_record("rearmed" if distance <= Policy.PRELOAD_REARM_TILES else "stale_cleared",
+			interior, {"distance_tiles": snappedf(distance, 0.1)})
 	if action == "start":
 		start_preload(interior, door, distance)
 	elif action == "drop":
@@ -417,6 +555,12 @@ func start_preload(interior: String, door := -1, distance := INF) -> bool:
 	if _estimating.has(interior):
 		finish_estimates(true)
 	var bytes := int(_interior_bytes.get(interior, _estimate_package(path)))
+	if bytes > budget_bytes:
+		# It could never be kept: nothing is evicted for it and nothing built.
+		_retry_at[interior] = _now() + Policy.PRELOAD_RETRY_MSEC
+		_record("preload_skip", interior, {"reason": "budget", "estimated_mib": _mib(bytes),
+			"budget_mib": _mib(budget_bytes)})
+		return false
 	var parked_rows := {}
 	for map_id: String in _parked:
 		parked_rows[map_id] = {"at_msec": int(_parked[map_id].at_msec), "bytes": int(_parked[map_id].bytes)}
@@ -630,8 +774,14 @@ func leave(loader: WorldLoader, from: String, to: String) -> bool:
 	var kept_destination := _last_taken == to
 	_last_taken = ""
 	_bound_map = ""
+	_settled_map = ""
 	_doors.clear()
 	_door_tiles.clear()
+	# A warm-up spread over frames goes with its parent: entering the interior
+	# without its preload loads it behind the curtain, and the next bind of
+	# the parent warms it again (its keys stay compiled while anything of them
+	# lives, such as the parked interior).
+	_cancel_warmups("travel")
 	for map_id: String in Policy.evicted_by_travel(_parked.keys(), to):
 		_evict(map_id, "travel")
 	if not _preload.is_empty():
@@ -679,7 +829,9 @@ func clear() -> void:
 	for map_id: String in _parked.keys():
 		_evict(map_id, "clear")
 	_drop_preload("clear")
+	_cancel_warmups("clear")
 	_bound_map = ""
+	_settled_map = ""
 	_doors.clear()
 	_door_tiles.clear()
 	_last_taken = ""
@@ -695,9 +847,14 @@ func release_now() -> void:
 ## No worker is running for this park (closing waits for this).
 func is_idle() -> bool:
 	_reap_orphans()
+	_reap_warm_orphans()
 	finish_estimates()
 	var running: Thread = _preload.get("thread") if not _preload.is_empty() else null
-	return _orphans.is_empty() and _estimating.is_empty() and (running == null or not running.is_alive())
+	var planning := false
+	for job: Dictionary in _warming.values():
+		planning = planning or (job.thread != null and (job.thread as Thread).is_alive())
+	return _orphans.is_empty() and _estimating.is_empty() and _warm_orphans.is_empty() and not planning \
+		and (running == null or not running.is_alive())
 
 # --------------------------------------------------------------------------
 # Eviction and freeing
@@ -787,18 +944,42 @@ func tick() -> void:
 		if now - int(row.at_msec) >= 1000:
 			row["at_msec"] = now
 			counters.refresh += 1
-	if not _preload.is_empty() and str(_preload.state) == "ready" \
-			and Policy.preload_expired(int(_preload.get("ready_msec", -1)), now):
-		var interior := str(_preload.map)
-		_drop_preload("unentered")
-		_mark_stale(interior)
+	# A finished preload nobody has entered is not timed: it goes with the
+	# player leaving its area (`observe`), with travel, or under pressure.
+	_relieve_pressure()
 	for map_id: String in Policy.expired(_parked, now):
 		_evict(map_id, "ttl")
 		_mark_stale(map_id)
+	_step_warmups()
+	_reap_warm_orphans()
 	_drain_retiring()
 
-## A kept build of `interior` expired while the player may still stand by one
-## of its doors on the bound map: it is not built again until they walk away.
+## Memory-budget pressure: while the kept worlds' estimates (parked worlds and
+## a preload) are over `budget_bytes` together, the preload goes first, then
+## the oldest parked world; an interior let go while its doors are indexed is
+## not built again until the player comes back to a door.
+func _relieve_pressure() -> void:
+	var kept := {}
+	for map_id: String in _parked:
+		kept[map_id] = {"bytes": int(_parked[map_id].bytes)}
+	if not _preload.is_empty():
+		kept["preload"] = {"bytes": int(_preload.get("bytes", 0))}
+	if not Policy.under_pressure(kept, budget_bytes):
+		return
+	if not _preload.is_empty():
+		var interior := str(_preload.map)
+		_drop_preload("budget")
+		_mark_stale(interior)
+	var parked_rows := {}
+	for map_id: String in _parked:
+		parked_rows[map_id] = {"at_msec": int(_parked[map_id].at_msec), "bytes": int(_parked[map_id].bytes)}
+	for map_id: String in Policy.over_budget(parked_rows, 0, budget_bytes):
+		_evict(map_id, "budget")
+		_mark_stale(map_id)
+
+## A kept build of `interior` let go while the player may still stand by one
+## of its doors on the bound map: it is not built again until they come back
+## to a door (PRELOAD_REARM_TILES) or walk away.
 func _mark_stale(interior: String) -> void:
 	if _doors.values().has(interior):
 		_stale[interior] = true
@@ -806,8 +987,10 @@ func _mark_stale(interior: String) -> void:
 func _exit_tree() -> void:
 	# Nothing parked survives the client; a running worker is left to finish
 	# (Main._close_client waits for is_idle before quitting). An estimate's
-	# worker only reads files: it is joined here.
+	# worker and a warm-up's plan only read files: they are joined here.
 	finish_estimates(true)
+	_cancel_warmups("exit")
+	_reap_warm_orphans(true)
 	for map_id: String in _parked.keys():
 		_evict(map_id, "exit")
 	if not _preload.is_empty() and _preload.get("resident") is Dictionary:
@@ -863,7 +1046,8 @@ func diagnostic_snapshot() -> Dictionary:
 	return {"enabled": enabled, "bound_map": _bound_map, "doors": _doors.size(),
 		"parked": parked, "preload": building, "orphans": _orphans.size(),
 		"retiring": _retiring.size(), "counters": counters.duplicate(),
-		"estimated_mib": estimates, "stale": _stale.keys()}
+		"estimated_mib": estimates, "stale": _stale.keys(), "warming": _warming.keys(),
+		"warmed": _warmed.keys()}
 
 func _record(kind: String, map_id: String, details: Dictionary) -> void:
 	var event := {"event": kind, "map": map_id, "at_ms": Time.get_ticks_msec()}

@@ -54,6 +54,23 @@ extends RefCounted
 ## flicker. Outer walls never follow this rule; they keep the facing rule.
 ## Before this the partitions only faded (OccluderFade) and their decals and
 ## props stayed solid in front of the frosted pane (review, 2026-10-27).
+##
+## A partition running toward the camera is seen edge-on, so the rule above
+## passes it, yet with the player standing at its end its top runs down the
+## screen over their legs (Hemmen's study/kitchen wall from his bedroom,
+## clerk_house-b2, final review 2026-10-27). The sightline rule cuts a
+## partition too while it stands in the way of the line from the player's body
+## to the camera (sampled at shin, waist and head, half a body to either
+## side, against the partition's bounds) and the player is within its span
+## (+2 m) - except while the player stands in its own plane within its run,
+## a doorway, which the facing rule's hysteresis keeps steady. The camera is
+## the world root's viewport camera, or the rig's orbit at the town's camera
+## block when there is none.
+##
+## `screens` answers whether a standing partition of the shown section stands
+## between the camera and a point: Main keeps the name of somebody behind one
+## off the screen (a name drawn through the wall named a person the player
+## could not see: "Corbin Lask" over the Gate Hall).
 
 ## The meta a placed prop carries naming its wall's cutaway node.
 const WALL_PROP_META := "cutaway_wall"
@@ -71,14 +88,29 @@ const PARTITION_SPAN_HYSTERESIS := 1.0
 ## The player must be this far past a partition (away from the camera) for it
 ## to drop, and this far back on the camera's side for it to return.
 const PARTITION_SIDE_METRES := 0.3
-## A partition seen this nearly edge-on (|normal . to camera|) hides nothing.
+## A partition seen this nearly edge-on (|normal . to camera|) hides nothing
+## by the facing rule (the sightline rule judges it).
 const PARTITION_FACING := 0.1
+## The sightline rule's body: heights above the focus (the player's feet)...
+const SIGHTLINE_HEIGHTS: Array[float] = [0.3, 1.0, 1.7]
+## ...and how far to either side across the line (half a body's width); a
+## cut-away partition returns only once the body is this much wider clear.
+const SIGHTLINE_HALF_WIDTH := 0.3
+const SIGHTLINE_HYSTERESIS := 0.3
+
+## The camera assumed when the world root's viewport has none (tests, a build
+## off the tree): the rig's orbit at the town's camera block.
+var fallback_pitch_degrees := -50.0
+var fallback_distance := 12.0
 
 var _always_hidden: Array[Node3D] = []
 var _walls: Array[Dictionary] = []
 ## {"nodes": [Node3D], "props": [Node3D], "section", "centre": Vector2,
-## "along": Vector2, "normal": Vector2, "half": float, "hidden": bool}
+## "along": Vector2, "normal": Vector2, "half": float, "thick": float (half
+## its thickness), "box": AABB (its nodes' bounds), "hidden": bool}
 var _partitions: Array[Dictionary] = []
+## The world root configured (its viewport's camera is the sightline's end).
+var _root: WeakRef = null
 ## How many props follow a wall (WALL_PROP_META), across all walls.
 var _wall_props := 0
 var _props: Array[Dictionary] = []
@@ -108,6 +140,7 @@ func configure(manifest: WorldManifest, world_root: Node3D) -> int:
 	reset()
 	if manifest == null or world_root == null:
 		return 0
+	_root = weakref(world_root)
 	var block_value: Variant = manifest.data.get("cutaway", {})
 	if not block_value is Dictionary:
 		return 0
@@ -229,27 +262,33 @@ func _read_partitions(rows: Array, world_root: Node3D) -> void:
 		((by_key[key] as Dictionary).nodes as Array).append(node)
 	for partition: Dictionary in _partitions:
 		var half := 0.0
+		var thick := 0.0
+		var bounds := AABB()
+		var any := false
 		for node: Node3D in partition.nodes:
-			half = maxf(half, _half_span(node, world_root, partition.centre, partition.along))
+			var box := _root_box(node, world_root)
+			bounds = box if not any else bounds.merge(box)
+			any = true
+			for corner: int in 8:
+				var point := box.get_endpoint(corner)
+				var flat := Vector2(point.x, point.z) - (partition.centre as Vector2)
+				half = maxf(half, absf(flat.dot(partition.along as Vector2)))
+				thick = maxf(thick, absf(flat.dot(partition.normal as Vector2)))
 		partition["half"] = half
+		partition["thick"] = thick
+		partition["box"] = bounds
 
-## How far along `along` from `centre` the node reaches (flat, in the world
-## root's frame). A node without bounds reaches its own origin.
-static func _half_span(node: Node3D, world_root: Node3D, centre: Vector2, along: Vector2) -> float:
+## The node's bounds in the world root's frame; a node without bounds is a
+## point at its origin.
+static func _root_box(node: Node3D, world_root: Node3D) -> AABB:
 	var frame := node.transform
 	var parent := node.get_parent() as Node3D
 	while parent != null and parent != world_root:
 		frame = parent.transform * frame
 		parent = parent.get_parent() as Node3D
-	var reach := 0.0
 	if node is VisualInstance3D:
-		var box: AABB = frame * (node as VisualInstance3D).get_aabb()
-		for corner: int in 8:
-			var point := box.get_endpoint(corner)
-			reach = maxf(reach, absf((Vector2(point.x, point.z) - centre).dot(along)))
-	else:
-		reach = absf((Vector2(frame.origin.x, frame.origin.z) - centre).dot(along))
-	return reach
+		return frame * (node as VisualInstance3D).get_aabb()
+	return AABB(frame.origin, Vector3.ZERO)
 
 ## Files `entries` (props or pillar runs, each with a `position`) by grid square.
 static func _cells_of(entries: Array[Dictionary]) -> Dictionary:
@@ -303,6 +342,7 @@ func reset() -> void:
 	_last_yaw = INF
 	_last_section = ""
 	_last_focus = Vector3.INF
+	_root = null
 
 ## Hides the walls the camera is looking through. Cheap enough to call every
 ## frame, but it only touches the scene when the rig has actually turned, the
@@ -353,7 +393,8 @@ func update(camera_yaw_degrees: float, force: bool = false, section: String = ""
 	if not _pillars.is_empty() and (force or entered or turned or moved):
 		_update_pillars(to_camera, focus, section, force or entered)
 	if not _partitions.is_empty() and (force or entered or turned or moved):
-		_update_partitions(to_camera, focus, section, force or entered)
+		_update_partitions(to_camera, focus, section, force or entered,
+			camera_position(camera_yaw_degrees, focus) if focus.is_finite() else Vector3.INF)
 	if focus.is_finite() and (not _props.is_empty() or not _partitions.is_empty()):
 		_last_focus = focus
 	if not _props.is_empty() and focus.is_finite():
@@ -421,10 +462,25 @@ func _update_pillars(to_camera: Vector3, focus: Vector3, section: String, refres
 			still.append(pillar)
 	_hidden_pillars = still
 
+## Where the camera stands: the world root's viewport camera, else the rig's
+## orbit (`fallback_pitch_degrees`, `fallback_distance`) around `focus` at
+## `camera_yaw_degrees`.
+func camera_position(camera_yaw_degrees: float, focus: Vector3) -> Vector3:
+	var root: Node3D = _root.get_ref() as Node3D if _root != null else null
+	if root != null and root.is_inside_tree():
+		var camera := root.get_viewport().get_camera_3d()
+		if camera != null:
+			return camera.global_position
+	var yaw := deg_to_rad(camera_yaw_degrees)
+	var pitch := deg_to_rad(fallback_pitch_degrees)
+	return focus + Vector3(sin(yaw) * cos(pitch), -sin(pitch), cos(yaw) * cos(pitch)) * fallback_distance
+
 ## Cuts away each partition of the player's section that stands between the
-## camera and the player (see the header); another section's are left to
+## camera and the player (see the header): by the facing rule, or by the
+## sightline rule from `camera` (INF: none). Another section's are left to
 ## SecretSections, and with no focus every partition stands.
-func _update_partitions(to_camera: Vector3, focus: Vector3, section: String, refresh: bool) -> void:
+func _update_partitions(to_camera: Vector3, focus: Vector3, section: String, refresh: bool,
+		camera_at := Vector3.INF) -> void:
 	var camera := Vector2(to_camera.x, to_camera.z)
 	for partition: Dictionary in _partitions:
 		var own: String = partition.section
@@ -436,11 +492,19 @@ func _update_partitions(to_camera: Vector3, focus: Vector3, section: String, ref
 			var offset := Vector2(focus.x, focus.z) - (partition.centre as Vector2)
 			# > 0: the player stands on the side away from the camera.
 			var beyond := -offset.dot(normal) * signf(facing)
+			var along := absf(offset.dot(partition.along as Vector2))
 			var reach: float = float(partition.half) + PARTITION_SPAN_MARGIN \
 				+ (PARTITION_SPAN_HYSTERESIS if hidden else 0.0)
-			hide = absf(facing) > PARTITION_FACING \
-				and absf(offset.dot(partition.along as Vector2)) <= reach \
+			hide = absf(facing) > PARTITION_FACING and along <= reach \
 				and beyond > (-PARTITION_SIDE_METRES if hidden else PARTITION_SIDE_METRES)
+			# The sightline rule: not for a player in the partition's own plane
+			# within its run (a doorway), where the facing rule's hysteresis
+			# holds (an edge-on partition's plane is its thickness alone).
+			var doorway := along <= float(partition.half) and absf(offset.dot(normal)) \
+				<= float(partition.thick) + (PARTITION_SIDE_METRES if absf(facing) > PARTITION_FACING else 0.0)
+			if not hide and camera_at.is_finite() and along <= reach and not doorway:
+				hide = blocks_sight(partition.box as AABB, focus, camera_at,
+					SIGHTLINE_HALF_WIDTH + (SIGHTLINE_HYSTERESIS if hidden else 0.0))
 		elif not own.is_empty() and not section.is_empty() and own != section:
 			# Out of sight with its section; shown again when it is entered.
 			partition["hidden"] = false
@@ -448,6 +512,63 @@ func _update_partitions(to_camera: Vector3, focus: Vector3, section: String, ref
 		if refresh or hide != hidden:
 			partition["hidden"] = hide
 			_show_partition(partition, not hide)
+
+## Whether `box` stands in the way of the line from the body at `focus` (the
+## player's feet) to `camera`: the line from each of SIGHTLINE_HEIGHTS, and
+## from `half_width` to either side across it, meets the box.
+static func blocks_sight(box: AABB, focus: Vector3, camera: Vector3, half_width: float) -> bool:
+	if box.size == Vector3.ZERO:
+		return false
+	var flat := Vector2(camera.x - focus.x, camera.z - focus.z)
+	var side := Vector3.ZERO
+	if flat.length_squared() > 0.0001:
+		var across := Vector2(-flat.y, flat.x).normalized()
+		side = Vector3(across.x, 0.0, across.y)
+	for height: float in SIGHTLINE_HEIGHTS:
+		var body := focus + Vector3.UP * height
+		for shift: float in [-half_width, 0.0, half_width]:
+			if segment_hits(box, body + side * shift, camera + side * shift):
+				return true
+	return false
+
+## Whether the segment from `from` to `to` meets `box` (slab test).
+static func segment_hits(box: AABB, from: Vector3, to: Vector3) -> bool:
+	var enter := 0.0
+	var leave := 1.0
+	var span := to - from
+	for axis: int in 3:
+		var low: float = box.position[axis]
+		var high: float = box.end[axis]
+		if absf(span[axis]) < 0.000001:
+			if from[axis] < low or from[axis] > high:
+				return false
+			continue
+		var a: float = (low - from[axis]) / span[axis]
+		var b: float = (high - from[axis]) / span[axis]
+		enter = maxf(enter, minf(a, b))
+		leave = minf(leave, maxf(a, b))
+		if enter > leave:
+			return false
+	return true
+
+## Whether a standing partition of the shown section (one drawn now: not cut
+## away, not in another section) stands between `from` (the camera) and
+## `point`. Main hides the name over an actor's head behind one.
+func screens(from: Vector3, point: Vector3) -> bool:
+	if _partitions.is_empty() or not from.is_finite() or not point.is_finite():
+		return false
+	for partition: Dictionary in _partitions:
+		if bool(partition.hidden) or (partition.nodes as Array).is_empty():
+			continue
+		var own: String = partition.section
+		if not own.is_empty() and not _last_section.is_empty() and own != _last_section:
+			continue
+		var first: Variant = (partition.nodes as Array)[0]
+		if not is_instance_valid(first) or not (first as Node3D).is_visible_in_tree():
+			continue
+		if segment_hits(partition.box as AABB, from, point):
+			return true
+	return false
 
 ## The partitions cut away now (diagnostics and tests): their first nodes.
 func hidden_partitions() -> Array[Node3D]:
