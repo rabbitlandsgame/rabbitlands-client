@@ -26,7 +26,9 @@ What it writes into --server (route B of the serve plan, section 2.3):
                                                     harvestable marker of the bakes, by objectId
       npcs.txt                                      the new people (server-rows.json group "new") at their markers,
                                                     each with its marker's optional extras "occupation" as an
-                                                    occupation= option beside actor_type= (eloria/npcs.py)
+                                                    occupation= option beside actor_type= (eloria/npcs.py), and
+                                                    a configurable Human's server-rows.json "appearance" as its
+                                                    cosmetic options after actor_type= (APPEARANCE_FIELDS)
       interactives.txt                              every interactive marker with its server-rows.json role/target/text
       exterior_connections.json                     the land links (crossings.json exteriorConnections)
       questlines.txt                                content/questlines.txt with TX/TY/MAP resolved from uniquely owned
@@ -204,6 +206,13 @@ FORBIDDEN = ("|", "#", "\n", "\r")
 # comma-separated option in the row's portrait column, so it may not hold a separator or the brackets drawn round it.
 OCCUPATION_LIMIT = 32
 OCCUPATION_FORBIDDEN = frozenset("|#,=<>")
+# A new person's optional server-rows.json "appearance": every cosmetic byte of a configurable Human body, written
+# after actor_type= in eloria/npcs.py appearance_for's order. Only the configurable Human Female (0) and Male (1)
+# draw those bytes, and such a body replaces the race block the person's marker names (server 17d1016: Odo Fenn is
+# the configurable Human Male with skin=1,hair=106,shirt=5,pants=9,boots=0,head=0,eyes=2, as his campaign field
+# copies are).
+APPEARANCE_FIELDS = ("skin", "hair", "shirt", "pants", "boots", "head", "eyes")
+CONFIGURABLE_BODIES = (0, 1)
 RING = [(dx, dy) for dy in (-1, 0, 1) for dx in (-1, 0, 1)]
 NEIGHBOURS = [(dx, dy) for dx, dy in RING if dx or dy]
 APPROACH_SEARCH = 6
@@ -291,10 +300,28 @@ def portrait_options(text):
             if key.strip()}
 
 
-def npc_portrait(actor_type, occupation="", facing=""):
-    """The portrait column of a published npcs.txt row: the body, then the occupation when there is one."""
-    return (f"actor_type={int(actor_type)}" + (f",occupation={occupation}" if occupation else "")
+def npc_portrait(actor_type, occupation="", facing="", appearance=None):
+    """The portrait column of a published npcs.txt row: the body, its look when it sets one, then the occupation
+    when there is one."""
+    return (f"actor_type={int(actor_type)}"
+            + "".join(f",{key}={int(value)}" for key, value in (appearance or {}).items())
+            + (f",occupation={occupation}" if occupation else "")
             + (f",facing={facing}" if facing else ""))
+
+
+def npc_appearance(value, actor_type, where):
+    """A server-rows.json entry's optional "appearance" (APPEARANCE_FIELDS, each a byte) in the loader's order; {}
+    when it has none. Only a configurable Human body (CONFIGURABLE_BODIES) takes one."""
+    if value is None:
+        return {}
+    if (not isinstance(value, dict) or set(value) != set(APPEARANCE_FIELDS)
+            or any(type(value[key]) is not int or not 0 <= value[key] <= 255 for key in APPEARANCE_FIELDS)):
+        raise PublishError(f"{where}: appearance sets each of {', '.join(APPEARANCE_FIELDS)} to a byte (0-255), "
+                           f"not {value!r}")
+    if actor_type not in CONFIGURABLE_BODIES:
+        raise PublishError(f"{where}: actorType {actor_type} draws no appearance; only a configurable Human body "
+                           f"({', '.join(map(str, CONFIGURABLE_BODIES))}) takes one")
+    return {key: value[key] for key in APPEARANCE_FIELDS}
 
 
 def npc_facing(record):
@@ -840,10 +867,16 @@ def compose(ctx, *, log=say):
             rec, entry = found[identity], table[identity]
             name = plain_field(entry["name"], f"{identity} name")
             # A re-homed person's marker names its body; a new person's names the race block server-rows.json
-            # chose the body from (B3 notes 6.1).
+            # chose the body from (B3 notes 6.1), unless server-rows.json gives them a configurable Human body and
+            # its look (APPEARANCE_FIELDS).
+            appearance = npc_appearance(entry.get("appearance"), entry["actorType"], identity)
+            if appearance and entry["group"] != "new":
+                raise PublishError(f"{identity}: only a new person's look is set here; home_npcs.txt copies a moved "
+                                   "person's npcs.txt row")
             block = rec.get("actorTypeBlock")
             body_ok = (rec.get("actorType") == entry["actorType"] if "actorType" in rec
-                       else isinstance(block, list) and len(block) == 2 and block[0] <= entry["actorType"] <= block[1])
+                       else bool(appearance) or isinstance(block, list) and len(block) == 2
+                       and block[0] <= entry["actorType"] <= block[1])
             if rec.get("name", rec.get("label")) != name or not body_ok:
                 raise PublishError(f"{identity}: the marker names {rec.get('name')!r} body "
                                    f"{rec.get('actorType', block)}, server-rows.json {name!r} body {entry['actorType']}")
@@ -851,7 +884,7 @@ def compose(ctx, *, log=say):
                       "role": plain_field(entry["role"], f"{identity} role"), "actorType": int(entry["actorType"]),
                       "greeting": plain_field(entry["greeting"], f"{identity} greeting"),
                       "occupation": occupation_field(rec.get("occupation"), name, identity),
-                      "facing": npc_facing(rec)}
+                      "facing": npc_facing(rec), "appearance": appearance}
             if entry["group"] == "new":
                 if name.casefold() in ctx.server.npc_lines:
                     raise PublishError(f"{identity}: {name} is already in the base npcs.txt; a new person needs a "
@@ -1372,7 +1405,8 @@ def overlay_files(ctx, pub):
         "continent-v2 overlay: the resources the isles add, and every harvest node (from the scene's markers).",
         GENERATED, "No row may carry a '#': this table's loader does not strip an inline comment."]))
     lines = [f"npc | {p['name']} | {p['map']} | {p['tile'][0]} | {p['tile'][1]} | {p['role']} | "
-             f"{npc_portrait(p['actorType'], p.get('occupation', ''), p.get('facing', ''))} | {p['greeting']}" for p in pub.new_people]
+             f"{npc_portrait(p['actorType'], p.get('occupation', ''), p.get('facing', ''), p.get('appearance'))} | "
+             f"{p['greeting']}" for p in pub.new_people]
     files["npcs.txt"] = crlf(table_text(lines, [
         "continent-v2 overlay: the isles' new people at their scene posts.", GENERATED,
         "No row may carry a '#': this table's loader does not strip an inline comment."]))

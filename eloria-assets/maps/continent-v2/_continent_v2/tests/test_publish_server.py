@@ -635,6 +635,39 @@ def test_a_moved_person_keeps_their_occupation(tree):
     refused(publish(tree, "--check"), "a move keeps the occupation")
 
 
+LOOK = {"skin": 1, "hair": 106, "shirt": 5, "pants": 9, "boots": 0, "head": 0, "eyes": 2}
+
+
+def test_a_configurable_human_carries_its_look_after_the_body(tree):
+    """server-rows.json may give a new person the configurable Human body and its look in place of the marker's race
+    block (server 17d1016, Odo Fenn): the row carries every cosmetic byte after actor_type=, in the loader's order."""
+    path = tree / "client" / V2 / "_continent_v2" / "content" / "server-rows.json"
+    edit_json(path, lambda doc: doc["maps"]["landfall"]["npcs"]["npc-fixture-keeper"].update(
+        actorType=1, appearance=dict(reversed(list(LOOK.items())))))
+    result = publish(tree, "--apply")
+    assert result.returncode == 0, result.stderr + result.stdout
+    assert (" | dialogue | actor_type=1,skin=1,hair=106,shirt=5,pants=9,boots=0,head=0,eyes=2,"
+            "occupation=Fixture Warden | Welcome to the fixture.\r\n") in overlay(tree, "npcs.txt").decode("utf-8")
+
+
+@pytest.mark.parametrize("body,look,words", [
+    (376, LOOK, "draws no appearance"),                      # a race body inside the block takes no look
+    (1, {**LOOK, "eyes": 256}, "to a byte"),
+    (1, {key: value for key, value in LOOK.items() if key != "head"}, "to a byte"),
+])
+def test_a_look_needs_a_configurable_human_and_every_byte(tree, body, look, words):
+    path = tree / "client" / V2 / "_continent_v2" / "content" / "server-rows.json"
+    edit_json(path, lambda doc: doc["maps"]["landfall"]["npcs"]["npc-fixture-keeper"].update(
+        actorType=body, appearance=look))
+    refused(publish(tree, "--check"), words)
+
+
+def test_a_configurable_human_without_a_look_keeps_the_race_block(tree):
+    path = tree / "client" / V2 / "_continent_v2" / "content" / "server-rows.json"
+    edit_json(path, lambda doc: doc["maps"]["landfall"]["npcs"]["npc-fixture-keeper"].update(actorType=1))
+    refused(publish(tree, "--check"), "server-rows.json 'Fixture Keeper' body 1")
+
+
 def test_an_inline_comment_is_refused(tree):
     path = tree / "client" / V2 / "_continent_v2" / "content" / "server-rows.json"
     edit_json(path, lambda doc: doc["maps"]["landfall"]["npcs"]["npc-fixture-keeper"].update(

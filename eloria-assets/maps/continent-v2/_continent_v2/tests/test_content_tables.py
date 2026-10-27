@@ -176,10 +176,12 @@ def test_npc_entries_name_their_marker_and_keep_a_body_of_its_race(rows, markers
                 assert body == marker["extras"]["actorType"], rid
             else:
                 low, high = marker["extras"]["actorTypeBlock"]
-                assert entry["group"] == "new" and low <= body <= high, rid
+                # Or a configurable Human body with its look (publish_server.py APPEARANCE_FIELDS): Odo Fenn.
+                configured = "appearance" in entry and body in (0, 1)
+                assert entry["group"] == "new" and (low <= body <= high or configured), rid
     sw = {rid: e for m in MAPS for rid,e in rows["maps"][m]["npcs"].items()}
     assert Counter(e["group"] for e in sw.values()) == {"new": 13, "re-homed": 5}
-    assert sorted(e["actorType"] for e in sw.values() if e["group"] == "new") == [302, 305, 315, 323, 332, 338, 342, 348, 358, 360, 363, 375, 376]
+    assert sorted(e["actorType"] for e in sw.values() if e["group"] == "new") == [1, 302, 305, 315, 323, 332, 338, 342, 348, 358, 363, 375, 376]
     assert sorted(e["actorType"] for e in sw.values() if e["group"] == "re-homed") == [303, 307, 308, 310, 312]
 
 
