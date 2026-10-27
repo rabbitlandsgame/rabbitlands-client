@@ -45,6 +45,9 @@ const SWAYING_CAPES_DEFAULT := 8
 ## this script declares none: the global class cache is a build artifact, and
 ## this window is built before anything has forced it to be up to date.
 const MapCache := preload("res://src/world/map_scene_cache.gd")
+const GeometryCache := preload("res://src/world/map_geometry_cache.gd")
+const CollisionCache := preload("res://src/world/map_collision_cache.gd")
+const PavingCache := preload("res://src/world/map_paving_cache.gd")
 ## The look pass's switch and quality names; preloaded for the same reason.
 const LookProfileScript := preload("res://src/world/look/look_profile.gd")
 ## keys.ini, Eternal Lands-style: the file every key binding is kept in.
@@ -89,6 +92,7 @@ var binding_rows: Dictionary = {}
 var capture_label: Label
 ## What the map cache is costing on disk, refreshed when the window opens.
 var map_cache_size: Label
+var map_cache_clear: Button
 var fps_limit_option: OptionButton
 var look_option: OptionButton
 var quality_option: OptionButton
@@ -936,12 +940,8 @@ func restore_crowd_settings(bodies: int, capes: int) -> void:
 
 ## The map cache: a switch, what it is costing, and a way to be rid of it.
 ##
-## It earns a row of its own rather than a plain toggle because it is the only
-## setting in this window that spends the player's disk - 30-40 MB a region,
-## about 400 MB if they walk the whole world - and a switch that quietly does
-## that with no way to see it or undo it would be the wrong shape. The size is
-## read when the window opens rather than every frame; it changes only when a
-## region is visited for the first time.
+## The size includes both visited-map scenes and the prepared geometry shared
+## by scoped maps. Read it when the window opens rather than every frame.
 ##
 ## The row also carries the answer to "the server says my map is not the one it
 ## expects", which is the only thing the server's map digest is for. It cannot
@@ -966,14 +966,16 @@ func _add_map_cache_row(page: VBoxContainer) -> void:
 	map_cache_size.clip_text = true
 	map_cache_size.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	row.add_child(map_cache_size)
-	var clear := Button.new()
-	clear.name = "map_cache_clear"
-	clear.text = tr("ELORIA_SETTINGS_MAP_CACHE_CLEAR")
-	clear.pressed.connect(func() -> void:
-		var removed: int = MapCache.clear_disk()
+	map_cache_clear = Button.new()
+	map_cache_clear.name = "map_cache_clear"
+	map_cache_clear.text = tr("ELORIA_SETTINGS_MAP_CACHE_CLEAR")
+	map_cache_clear.pressed.connect(func() -> void:
+		if GeometryCache.cooking or CollisionCache.busy():
+			return
+		var removed: int = MapCache.clear_disk() + GeometryCache.clear_disk() + CollisionCache.clear_disk() + PavingCache.clear_disk()
 		_refresh_map_cache()
 		setting_changed.emit(page.name, "map_cache_clear", removed))
-	row.add_child(clear)
+	row.add_child(map_cache_clear)
 	_refresh_map_cache()
 
 ## What the row says: the size on disk, and whatever the server's digest had to
@@ -981,12 +983,14 @@ func _add_map_cache_row(page: VBoxContainer) -> void:
 func _refresh_map_cache() -> void:
 	if map_cache_size == null:
 		return
-	var text: String = MapCache.describe_size(MapCache.total_bytes())
+	var text: String = MapCache.describe_size(MapCache.total_bytes() + GeometryCache.total_bytes() + CollisionCache.total_bytes() + PavingCache.total_bytes())
 	var digests: String = MapCache.digest_summary()
 	if not digests.is_empty():
 		text += " - " + digests
 	map_cache_size.text = text
 	map_cache_size.tooltip_text = text
+	if map_cache_clear != null:
+		map_cache_clear.disabled = GeometryCache.cooking or CollisionCache.busy()
 
 func _build_camera() -> void:
 	var page := _new_page("Camera", tr("ELORIA_SETTINGS_CAMERA"))

@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "version": 1,
+  "maps": [
+    "boarsend", "brambleshaw", "coilmere", "greenlight", "hearthcroft",
+    "hornmere", "landfall", "pinebrow", "ravenhead", "reedfall", "ringholm",
+    "saltsound", "stagheath", "suncoil", "twinbrook", "warrenmead", "whitepeak",
+    "landfall_insides",
+    "amberwood_gauntlet", "whitehorn_gauntlet", "ssarathi_gauntlet",
+    "grey_moors_gauntlet", "crownwater_gauntlet", "sunmane_gauntlet",
+    "amethyst_gauntlet", "manymouth_gauntlet", "harrowcrag_gauntlet",
+    "resin_road_gauntlet", "drowned_arcades_gauntlet", "ice_stair_gauntlet",
+    "coil_causeway_gauntlet", "barrow_run_gauntlet", "red_canyon_gauntlet",
+    "resonant_cut_gauntlet", "bund_run_gauntlet",
+    "amberwood_amber_hall", "amberwood_cinder_chapel", "amberwood_estate",
+    "amberwood_gate_undercroft", "amberwood_motherroot", "amberwood_secrets",
+    "amethyst_barrens_secrets", "crownwater_secrets", "drowned_crown",
+    "four-gates-deposit-four-keys", "four-gates-ferrymans-rest", "four-gates-lantern-row",
+    "four-gates-mirrorsmith-forge", "four-gates-reedworks", "four-gates-stormglass-house",
+    "four_gates_secrets", "grey_moor_barrows", "grey_moors_secrets",
+    "manymouth_delta_secrets", "manymouth_flooded_labyrinth", "mirrorhold_interiors",
+    "mirrorhold_secrets", "resonant_vault", "ssarathi_royal_archive",
+    "ssarathi_ruins_secrets", "sunmane_steppe_secrets", "sunmane_wind_caves",
+    "verdant_stair_insides", "verdant_stair_secrets", "westhaven_insides",
+    "westhaven_secrets", "whitehorn_glacier_temple", "whitehorn_range_secrets"
+  ],
+  "groups": {
+    "landfall_continent": [
+      "boarsend", "brambleshaw", "coilmere", "greenlight", "hearthcroft",
+      "hornmere", "landfall", "pinebrow", "ravenhead", "reedfall", "ringholm",
+      "saltsound", "stagheath", "suncoil", "twinbrook", "warrenmead", "whitepeak"
+    ],
+    "landfall_insides": ["landfall_insides"],
+    "interiors": [
+      "landfall_insides",
+      "amberwood_amber_hall", "amberwood_cinder_chapel", "amberwood_estate",
+      "amberwood_gate_undercroft", "amberwood_motherroot", "amberwood_secrets",
+      "amethyst_barrens_secrets", "crownwater_secrets", "drowned_crown",
+      "four-gates-deposit-four-keys", "four-gates-ferrymans-rest", "four-gates-lantern-row",
+      "four-gates-mirrorsmith-forge", "four-gates-reedworks", "four-gates-stormglass-house",
+      "four_gates_secrets", "grey_moor_barrows", "grey_moors_secrets",
+      "manymouth_delta_secrets", "manymouth_flooded_labyrinth", "mirrorhold_interiors",
+      "mirrorhold_secrets", "resonant_vault", "ssarathi_royal_archive",
+      "ssarathi_ruins_secrets", "sunmane_steppe_secrets", "sunmane_wind_caves",
+      "verdant_stair_insides", "verdant_stair_secrets", "westhaven_insides",
+      "westhaven_secrets", "whitehorn_glacier_temple", "whitehorn_range_secrets"
+    ],
+    "gauntlets": [
+      "amberwood_gauntlet", "whitehorn_gauntlet", "ssarathi_gauntlet",
+      "grey_moors_gauntlet", "crownwater_gauntlet", "sunmane_gauntlet",
+      "amethyst_gauntlet", "manymouth_gauntlet", "harrowcrag_gauntlet",
+      "resin_road_gauntlet", "drowned_arcades_gauntlet", "ice_stair_gauntlet",
+      "coil_causeway_gauntlet", "barrow_run_gauntlet", "red_canyon_gauntlet",
+      "resonant_cut_gauntlet", "bund_run_gauntlet"
+    ]
+  },
+  "asset_overlays": [
+    {
+      "owner": "landfall_insides",
+      "config": "res://data/world/underground-scenery.json"
+    }
+  ]
+}

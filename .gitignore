@@ -29,6 +29,12 @@ godot-client/Godot_v*
 # in a fresh checkout, so none of them belong in the tree.
 godot-client/.godot/
 *.import
+# Shared ground-class textures ship their full lossless mip chains.
+!godot-client/src/world/look/textures/beach-sand.png.import
+!godot-client/src/world/look/textures/coastal-gravel.png.import
+!godot-client/src/world/look/textures/flagstone-paving.png.import
+!godot-client/src/world/look/textures/packed-earth-path.png.import
+!godot-client/src/world/look/textures/tilled-soil.png.import
 # Biome masks encode four independent numeric weights, including alpha.
 # Keep their import settings so Godot never bleeds RGB under zero alpha.
 !godot-client/assets/world/biome_blend/masks/*.png.import

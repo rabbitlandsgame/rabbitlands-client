@@ -7,6 +7,8 @@ const ArchivedModelPolicy := preload("res://src/actors/archived_model_policy.gd"
 const ResourceDiagnostics := preload("res://src/world/resource_diagnostics.gd")
 const PreparedContent := preload("res://src/world/prepared_content.gd")
 const PreparedSharing := preload("res://src/world/prepared_material_sharing.gd")
+const GeometrySources := preload("res://src/world/map_geometry_texture_sources.gd")
+const MapMaterialPreparation := preload("res://src/world/map_material_preparation.gd")
 
 ## Prototype meshes that map packages name instead of carrying.
 ##
@@ -84,7 +86,7 @@ static func acquire(key: String, path: String) -> Mesh:
 	if not FileAccess.file_exists(path):
 		push_error("shared_mesh missing prototype=%s path=%s" % [key, path])
 		return null
-	if PreparedContent.selected_mode() != "raw":
+	if not GeometrySources.is_recording() and PreparedContent.selected_mode() != "raw":
 		var declared: Dictionary = index_for(path).get(key, {})
 		var token := VramTextures.cache_token({"externalResources": declared.get("images", {})}, path.get_base_dir())
 		var record := PreparedContent.acquire("mesh", path, FileAccess.get_sha256(path), token)
@@ -114,6 +116,10 @@ static func acquire(key: String, path: String) -> Mesh:
 		return null
 	if images is Dictionary:
 		ExternalTexturePool.share(state, images)
+	operation_began = Time.get_ticks_usec()
+	MapMaterialPreparation.prepare(state)
+	_record_operation(&"prototype_early_material_filter", operation_began)
+	GeometrySources.note(state,path)
 	var meshes: Array[Mesh] = []
 	for imported: Variant in state.get_meshes():
 		var importer := imported as GLTFMesh
@@ -205,3 +211,13 @@ static func live_count() -> int:
 			live += 1
 	_mutex.unlock()
 	return live
+
+static func source_keys() -> Dictionary:
+	var result := {}
+	_mutex.lock()
+	for key: String in _meshes:
+		var reference: WeakRef = _meshes[key]
+		var mesh: Mesh = reference.get_ref() as Mesh if reference != null else null
+		if mesh != null: result[mesh.get_instance_id()] = key
+	_mutex.unlock()
+	return result

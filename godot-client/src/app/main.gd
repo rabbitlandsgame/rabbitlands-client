@@ -152,6 +152,9 @@ const KeyBindings := preload("res://src/ui/key_bindings.gd")
 const VramTextures := preload("res://src/world/vram_textures.gd")
 const GltfQuantization := preload("res://src/world/gltf_quantization.gd")
 const MapMeshExtension := preload("res://src/world/map_mesh_extension.gd")
+const MapGeometryCache := preload("res://src/world/map_geometry_cache.gd")
+const MapGeometryPreparer := preload("res://src/world/map_geometry_preparer.gd")
+var _geometry_maintenance_active := false
 var interior_cutaway: RefCounted = InteriorCutawayScript.new()
 var lantern_mine_lighting: RefCounted = LanternMineLightingScript.new()
 ## On a secrets map, only the secret the player stands in is drawn; the rest
@@ -1310,7 +1313,58 @@ func _log_optimization_startup() -> void:
 		"effects": RustSpellFlights.snapshot_for(world_root),
 	}))
 
+## Entry maintenance runs before preference changes, login setup or actor warmup.
+## Its own root-level canvas stays visible while this scene and its existing
+## child controls are suspended, so no unfinished game UI runs behind it.
+func _prepare_geometry_before_login() -> bool:
+	var explicit := "--prepare-map-geometry" in OS.get_cmdline_args() \
+		or "--prepare-map-geometry" in OS.get_cmdline_user_args()
+	# This harness inherits Main and starts driving it after a single frame.
+	# Maintenance is a separate setup step, never part of a timed crowd run.
+	if not explicit and not OS.get_environment("RABBITLANDS_CROWD_BENCH_START_TOKEN").is_empty():
+		return false
+	if not explicit and (not MapSceneCache.is_enabled() or MapGeometryCache.cooking \
+			or not MapGeometryCache.needs_preparation()):
+		return false
+	_geometry_maintenance_active = true
+	var previous_visibility := visible
+	var previous_process_mode := process_mode
+	hide()
+	process_mode = Node.PROCESS_MODE_DISABLED
+	var viewport_states: Array[Dictionary] = []
+	for node: Node in find_children("*", "SubViewport", true, false):
+		var child_viewport := node as SubViewport
+		viewport_states.append({"viewport": child_viewport,
+			"mode": child_viewport.render_target_update_mode})
+		child_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	var runner := MapGeometryPreparer.new()
+	runner.name = "WorldGeometryPreparation"
+	runner.process_mode = Node.PROCESS_MODE_ALWAYS
+	# The root can still be attaching this main scene during _ready().
+	get_tree().root.add_child.call_deferred(runner)
+	await runner.ready
+	var report: Dictionary = await runner.show_and_run()
+	runner.queue_free()
+	await get_tree().process_frame
+	if explicit:
+		print("MAP_GEOMETRY_PREPARE ", JSON.stringify(report))
+		get_tree().quit(0 if bool(report.get("ok", false)) else 1)
+		return true
+	if not bool(report.get("ok", false)):
+		push_warning("World data preparation did not finish; source loading remains available: %s" %
+			JSON.stringify(report.get("failed", [])))
+	for saved: Dictionary in viewport_states:
+		var child_viewport := saved.viewport as SubViewport
+		if is_instance_valid(child_viewport):
+			child_viewport.render_target_update_mode = int(saved.mode)
+	process_mode = previous_process_mode
+	visible = previous_visibility
+	_geometry_maintenance_active = false
+	return false
+
 func _ready() -> void:
+	if await _prepare_geometry_before_login():
+		return
 	TextColors.load_colors(chat_hud.preferences_path)
 	TextColors.events().changed.connect(_on_text_colors_changed)
 	map_image.set_script(preload("res://src/ui/map_text_tooltip.gd"))
@@ -4074,6 +4128,13 @@ func _exit_tree() -> void:
 	_remove_map_picture()
 	_tab_map_textures.clear()
 	_tab_map_detail_textures.clear()
+	if _geometry_maintenance_active:
+		# Explicit maintenance exits before these entry helpers acquire parents.
+		for helper: Variant in [remote_presentation, character_intro, campaign_scene,
+				campaign_hud, campaign_works, campaign_bank_works, campaign_road_works,
+				campaign_lamps_works, arrival_curtain, quest_trail, mount_status]:
+			if is_instance_valid(helper) and helper is Node and helper.get_parent() == null:
+				helper.free()
 
 func _on_login_succeeded() -> void:
 	_disconnect_console_active = false
@@ -4477,6 +4538,8 @@ func _set_attack_modifier(held: bool) -> void:
 ## Alt-tabbing away leaves the key down as far as this client is concerned,
 ## and the release lands in another window. The icon would stay on attack.
 func _notification(what: int) -> void:
+	if _geometry_maintenance_active:
+		return
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT 			or what == NOTIFICATION_WM_WINDOW_FOCUS_OUT:
 		_set_attack_modifier(false)
 		_cancel_full_map_drag()

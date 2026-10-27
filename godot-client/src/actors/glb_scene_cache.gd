@@ -40,11 +40,18 @@ const ArchivedModelPolicy := preload("res://src/actors/archived_model_policy.gd"
 const ResourceDiagnostics := preload("res://src/world/resource_diagnostics.gd")
 const PreparedContent := preload("res://src/world/prepared_content.gd")
 const PreparedLifecycle := preload("res://src/world/prepared_scene_lifecycle.gd")
+const GeometryCache := preload("res://src/world/map_geometry_cache.gd")
+const GeometrySources := preload("res://src/world/map_geometry_texture_sources.gd")
+const MapSceneCache := preload("res://src/world/map_scene_cache.gd")
+const MapMaterialPreparation := preload("res://src/world/map_material_preparation.gd")
 const WORLD_ASSET_ROOT := "res://assets/world/"
+const BOUND_MAIN_ENVIRONMENT := "ELORIA_UNDERGROUND_BOUND_PREPARE"
+const EARLY_WORLD_FILTER_ENVIRONMENT := "ELORIA_EARLY_WORLD_OBJECT_FILTER"
 
 static var _scenes: Dictionary = {}
 static var _failed: Dictionary = {}
 static var _prepared_entries: Dictionary = {}
+static var _geometry_entries: Dictionary = {}
 static var _direct_raw_scenes: Dictionary = {}
 static var _diagnostics_mutex := Mutex.new()
 static var _resource_timings: Dictionary = {}
@@ -65,6 +72,11 @@ static func prepare(paths: PackedStringArray) -> Dictionary:
 	var result: Dictionary = {}
 	for path: String in paths:
 		path = _canonical_path(path)
+		if not GeometryCache.cooking and PreparedContent.selected_mode() != "require-pilot" and GeometryCache.eligible("asset",path):
+			var geometry := GeometryCache.acquire("asset",path,FileAccess.get_sha256(path),{},MapSceneCache.is_enabled())
+			if str(geometry.status) == "hit":
+				result[path] = {"geometry_record":geometry}
+				continue
 		if PreparedContent.selected_mode() != "raw":
 			var record := PreparedContent.acquire("scene", path, FileAccess.get_sha256(path),
 				PreparedContent.scene_texture_token(path))
@@ -83,6 +95,15 @@ static func install_prepared(scenes: Dictionary) -> void:
 		if not _scenes.has(path):
 			var prepared: Variant = scenes[path]
 			if prepared is Dictionary:
+				if prepared.has("geometry_record"):
+					var geometry: Dictionary = prepared.geometry_record
+					if GeometryCache.revalidate(geometry):
+						_scenes[path] = geometry.resource
+						_geometry_entries[path] = geometry
+					else:
+						var raw := _build(path)
+						if raw != null: _scenes[path] = raw
+					continue
 				# Revalidate the current bytes/policy before publishing a worker record.
 				var began := Time.get_ticks_usec()
 				var verified := PreparedContent.acquire("scene", path, FileAccess.get_sha256(path),
@@ -98,6 +119,35 @@ static func install_prepared(scenes: Dictionary) -> void:
 			else:
 				_scenes[path] = prepared
 
+## Underground's synchronous Main arrival can bind each asset before opening
+## the next, instead of retaining every asset's decoded Images simultaneously.
+## Worker preparation/publication and non-geometry consumers keep their path.
+## True means handled (individual failures retain the ordinary raw fallback).
+static func prepare_bound_main(paths: PackedStringArray) -> bool:
+	if OS.get_thread_caller_id() != OS.get_main_thread_id() or OS.get_environment(BOUND_MAIN_ENVIRONMENT) == "0" \
+			or GeometryCache.cooking or OS.get_environment("ELORIA_NO_GEOMETRY_CACHE") == "1" \
+			or not MapSceneCache.is_enabled() or PreparedContent.selected_mode() == "require-pilot": return false
+	# Preflight before publishing anything, so an unrelated caller cannot partly
+	# switch its preparation strategy merely by including one scoped asset.
+	for path: String in paths:
+		if not GeometryCache.eligible("asset",path): return false
+	for source: String in paths:
+		var path := _canonical_path(source)
+		if not _scenes.has(path) and not _failed.has(path):
+			var prepared := prepare(PackedStringArray([path]))
+			install_prepared(prepared) # Full source/payload/current-entry revalidation.
+			prepared.clear()
+		var geometry: Dictionary = _geometry_entries.get(path,{})
+		if geometry.is_empty(): continue
+		# Installed worker completions retain their first-use revalidation.
+		var verify_again := not bool(geometry.get("bound",false)) and not bool(geometry.get("prepared_on_main",false))
+		if GeometryCache.bind(geometry,verify_again): continue
+		_geometry_entries.erase(path)
+		_scenes.erase(path)
+		var raw := _build(path)
+		if raw != null: _scenes[path] = raw
+	return true
+
 ## Returns the shared scene for `path`, or null when unavailable. Treat this
 ## scene and its subresources as immutable. Like instantiate(), call only on the
 ## main thread; worker preparation retains its separate build/publication path.
@@ -112,6 +162,20 @@ static func _packed_scene(path: String, allow_prepared: bool) -> PackedScene:
 	path = _canonical_path(path)
 	if path.is_empty() or _failed.has(path):
 		return null
+	if _geometry_entries.has(path):
+		if allow_prepared: return _scenes.get(path) as PackedScene
+		var raw := _direct_raw_scenes.get(path) as PackedScene
+		if raw == null:
+			raw = _build(path)
+			if raw != null: _direct_raw_scenes[path] = raw
+		return raw
+	if allow_prepared and not _scenes.has(path) and not GeometryCache.cooking \
+			and PreparedContent.selected_mode() != "require-pilot" and GeometryCache.eligible("asset",path):
+		var geometry := GeometryCache.acquire("asset",path,FileAccess.get_sha256(path),{},MapSceneCache.is_enabled())
+		if str(geometry.status) == "hit":
+			_scenes[path] = geometry.resource
+			_geometry_entries[path] = geometry
+			return geometry.resource as PackedScene
 	if allow_prepared and (PreparedContent.selected_mode() != "raw" or _prepared_entries.has(path)):
 		var verification_began := Time.get_ticks_usec()
 		var verified := PreparedContent.acquire("scene", path, FileAccess.get_sha256(path),
@@ -154,7 +218,17 @@ static func instantiate(path: String) -> Node3D:
 	var instantiate_began := Time.get_ticks_usec()
 	var entry: Dictionary = _prepared_entries.get(_canonical_path(path), {})
 	var instance: Node3D
-	if entry.is_empty():
+	var geometry: Dictionary = _geometry_entries.get(_canonical_path(path),{})
+	if not geometry.is_empty():
+		instance = GeometryCache.instantiate(geometry,not bool(geometry.get("bound",false)) and not bool(geometry.get("prepared_on_main",false)))
+		if instance == null:
+			_geometry_entries.erase(_canonical_path(path))
+			_scenes.erase(_canonical_path(path))
+			packed = _build(_canonical_path(path))
+			if packed != null:
+				_scenes[_canonical_path(path)] = packed
+				instance = packed.instantiate() as Node3D
+	elif entry.is_empty():
 		instance = packed.instantiate() as Node3D
 	else:
 		instance = PreparedLifecycle.instantiate({"status": "hit", "resource": packed, "entry": entry})
@@ -173,6 +247,7 @@ static func clear() -> void:
 	_scenes.clear()
 	_failed.clear()
 	_prepared_entries.clear()
+	_geometry_entries.clear()
 	_direct_raw_scenes.clear()
 
 static func cached_scene_count() -> int:
@@ -202,6 +277,7 @@ static func _canonical_path(path: String) -> String:
 static func _build(path: String) -> PackedScene:
 	if ArchivedModelPolicy.is_retired_path(path):
 		return null
+	if GeometryCache.cooking: return _build_raw(path)
 	var imported := _imported_actor_scene(path)
 	if imported != null:
 		return imported
@@ -250,6 +326,9 @@ static func _build_raw(path: String) -> PackedScene:
 		return null
 	if world_asset and int(state.get_additional_data(WorldObjectImages.PREPARED)) < state.get_images().size():
 		build_texture_mipmaps(state)
+	var early_filter := world_asset and OS.get_environment(EARLY_WORLD_FILTER_ENVIRONMENT) != "0" and MapMaterialPreparation.enabled()
+	if early_filter: MapMaterialPreparation.prepare(state)
+	GeometrySources.note(state,path)
 	operation_began = Time.get_ticks_usec()
 	var generated: Node = document.generate_scene(state, GltfAnimationFidelity.bake_fps(state))
 	_record_operation(&"gltf_generate_scene", operation_began)
@@ -259,7 +338,7 @@ static func _build_raw(path: String) -> PackedScene:
 		generated.free()
 		return null
 	if world_asset:
-		_filter_anisotropic(generated)
+		_filter_anisotropic(generated,early_filter)
 	_claim(generated, generated)
 	var packed: PackedScene = PackedScene.new()
 	operation_began = Time.get_ticks_usec()
@@ -296,15 +375,17 @@ static func build_texture_mipmaps(state: GLTFState) -> int:
 		rebuilt += 1
 	return rebuilt
 
-static func _filter_anisotropic(root: Node) -> void:
+static func _filter_anisotropic(root: Node, early_filter := false) -> void:
 	for node: Node in root.find_children("*", "MeshInstance3D", true, false):
 		var mesh: Mesh = (node as MeshInstance3D).mesh
 		if mesh == null:
 			continue
 		for surface: int in range(mesh.get_surface_count()):
 			var material := mesh.surface_get_material(surface) as BaseMaterial3D
-			if material != null:
-				material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
+			# Either opt-out restores the old unconditional late setter, so timing
+			# controls include its shader-dirty ordering as well as its final value.
+			if material != null and (not early_filter or material.texture_filter != MapMaterialPreparation.FILTER):
+				material.texture_filter = MapMaterialPreparation.FILTER
 
 # PackedScene.pack() only stores nodes owned by the packed root.
 static func _claim(node: Node, scene_owner: Node) -> void:

@@ -80,6 +80,9 @@ var _retiring: Array[Dictionary] = []
 var _retirement_scheduled := false
 var _retirement_draining := false
 var _next_update := 0
+var _import_recovery_msec := 0
+var _launch_not_before_usec := 0
+var _recovery_deferrals := 0
 var _physics_enabled := true
 var _preview_enabled := false
 ## VramTextures.budget_generation() when the entries were last corrected.
@@ -192,6 +195,10 @@ func _release_worker(position: Vector3, install_if_near: bool) -> void:
 func configure(source: WorldManifest, cache_enabled: bool) -> void:
 	territory = source
 	_cache_enabled = cache_enabled
+	var recovery := OS.get_environment("ELORIA_CHUNK_RECOVERY_MS")
+	_import_recovery_msec = clampi(int(recovery),0,500) if recovery.is_valid_int() else 0
+	_launch_not_before_usec = 0
+	_recovery_deferrals = 0
 	set_meta("shared_stream_cells", true)
 	var config: Dictionary = source.data.streamingChunks
 	preload_distance = maxf(0, float(config.get("preloadDistance", DEFAULT_PRELOAD_DISTANCE)))
@@ -549,6 +556,13 @@ func update_focus(position: Vector3) -> void:
 			continue
 		if Time.get_ticks_msec() < int(_retry_after.get(str(entry.id), 0)):
 			continue
+		# Diagnostic timing option: let the renderer settle between completed
+		# imports. Framed ground and explicit view/respawn holds take priority.
+		if Time.get_ticks_usec() < _launch_not_before_usec and float(entry.get("distance",INF)) > FRAMED_RADIUS \
+				and _preload_views.is_empty() and not _prefetched(str(entry.id)):
+			_next_update = ceili(float(_launch_not_before_usec)/1000.0)
+			_recovery_deferrals += 1
+			return
 		var request := ResourceAdmission.request(self, entry, "chunk", float(entry.get("distance", INF)) <= FRAMED_RADIUS)
 		if not bool(request.get("allowed", false)):
 			return
@@ -637,6 +651,7 @@ func _install(entry: Dictionary, builder: WorldLoader) -> void:
 	# for the focus throttle between every cell leaves visible gaps on a
 	# first traversal even while the import worker is idle.
 	_next_update = 0
+	_launch_not_before_usec = Time.get_ticks_usec()+_import_recovery_msec*1000
 	_update_resident_bytes()
 	_changed()
 	_record("ready", str(entry.id), {
@@ -765,6 +780,8 @@ func diagnostic_snapshot() -> Dictionary:
 	result["pending_cell"] = str(_pending.get("id", ""))
 	result["in_flight_age_us"] = maxi(0, Time.get_ticks_usec() - _pending_started_usec) if _thread != null else 0
 	result["soft_budget_bytes"] = maximum_resident_bytes
+	result["import_recovery_msec"] = _import_recovery_msec
+	result["recovery_deferrals"] = _recovery_deferrals
 	result["paused"] = _paused
 	result["timings"] = ResourceDiagnostics.snapshot(_resource_timings)
 	result["last_preparation"] = _last_preparation.duplicate(true)

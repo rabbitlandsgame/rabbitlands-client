@@ -7,6 +7,9 @@ static var _meshes: Dictionary = {}
 
 static func material(source: Material, images: Dictionary) -> Material:
 	var result := source.duplicate(false) as Material
+	# Split geometry has already bound canonical runtime textures. There is no
+	# native-image path mapping to resolve on each individual placement.
+	if images.is_empty(): return result
 	for property: Dictionary in result.get_property_list():
 		if (int(property.usage) & PROPERTY_USAGE_STORAGE) == 0:
 			continue
@@ -22,6 +25,7 @@ static func mesh_resource(record: Dictionary) -> Mesh:
 		return null
 	var entry: Dictionary = record.get("entry", {})
 	var images: Dictionary = entry.get("shared_images", {})
+	if images.is_empty(): return source
 	var key := str(source.get_instance_id()) + "|" + JSON.stringify(images, "", true)
 	_mutex.lock()
 	var prior: WeakRef = _meshes.get(key)

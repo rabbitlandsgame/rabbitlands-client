@@ -137,6 +137,19 @@ static func retention_snapshot() -> Dictionary:
 	_mutex.unlock()
 	return result
 
+static func source_description(texture: Texture2D) -> Dictionary:
+	# Offline origin discovery only. Never hold this lock across file IO or
+	# rendering-server calls; ordinary texture lookup keeps its existing path.
+	var path := ""
+	_mutex.lock()
+	for key: String in _image_paths:
+		var reference: WeakRef = _image_paths[key]
+		if reference != null and reference.get_ref() == texture:
+			path = key.get_slice("|mip-skip=",0)
+			break
+	_mutex.unlock()
+	return {"path":path,"sha":FileAccess.get_sha256(path)} if not path.is_empty() else {}
+
 static func share(state: GLTFState, resources: Dictionary) -> int:
 	if resources.is_empty():
 		return 0

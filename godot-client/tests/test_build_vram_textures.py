@@ -21,6 +21,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 TESTS = Path(__file__).resolve().parent
@@ -81,19 +82,201 @@ def _run_tool(maps: Path, cache: Path, *extra: str) -> tuple[int, dict, str]:
     return result.returncode, summary, text + result.stderr
 
 
+class GodotLocator(unittest.TestCase):
+    def test_worktree_can_find_primary_non_console_editor(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            worktree = root / "worktrees" / "texture-preparation"
+            client = worktree / "godot-client"
+            client.mkdir(parents=True)
+            primary = root / "rabbitlands-client" / "godot-client"
+            primary.mkdir(parents=True)
+            editor = primary / tool.GODOT_EXE.replace("_console", "")
+            editor.touch()
+            with mock.patch.object(tool, "CLIENT", client), mock.patch.object(tool, "REPO", worktree), \
+                    mock.patch.dict(os.environ, {}, clear=True), mock.patch.object(tool.shutil, "which", return_value=None):
+                self.assertEqual(tool.find_godot(None), editor)
+
+
+class ScopedInventory(unittest.TestCase):
+    @staticmethod
+    def _glb(path: Path, image: Path, role="base"):
+        uri = os.path.relpath(image, path.parent).replace(os.sep, "/")
+        slot = {"base": "baseColorTexture", "normal": "normalTexture"}[role]
+        material = {"pbrMetallicRoughness": {slot: {"index": 0}}} if role == "base" else {slot: {"index": 0}}
+        document = {"images": [{"uri": uri}], "textures": [{"source": 0}], "materials": [material]}
+        payload = json.dumps(document).encode()
+        payload += b" " * (-len(payload) % 4)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(struct.pack("<4sIII4s", b"glTF", 2, len(payload) + 20, len(payload), b"JSON") + payload)
+        return uri
+
+    def _tree(self, root: Path):
+        maps = root / "maps"
+        images = maps / "_shared" / "images"
+        images.mkdir(parents=True)
+        first, second, unrelated = [images / f"{i}.png" for i in range(3)]
+        for number, image in enumerate((first, second, unrelated)):
+            image.write_bytes(bytes([number]))
+        territory = maps / "territory"
+        leaf = territory / "chunks" / "00_00" / "world.json"
+        glb = leaf.with_suffix(".glb")
+        uri = self._glb(glb, first)
+        prototype = maps / "_shared" / "meshes" / "prop.glb"
+        prototype_uri = self._glb(prototype, second, "normal")
+        (prototype.parent / "index.json").write_text(json.dumps({"prototypes": {"prop": {"images": {
+            prototype_uri: hashlib.sha256(second.read_bytes()).hexdigest()}}}}))
+        leaf.write_text(json.dumps({"asset": {"glb": "world.glb"},
+                                   "externalResources": {uri: hashlib.sha256(first.read_bytes()).hexdigest()},
+                                   "externalMeshes": {os.path.relpath(prototype, glb.parent):
+                                                       hashlib.sha256(prototype.read_bytes()).hexdigest()}}))
+        manifest = territory / "world.json"
+        manifest.write_text(json.dumps({"asset": {"glb": "review.glb"},
+                                       "streamingChunks": {"chunks": [{"manifest": "chunks/00_00/world.json"}]}}))
+        (territory / "review.glb").write_bytes(b"preview must never be read")
+        self._glb(maps / "_shared" / "meshes" / "unused.glb", unrelated)
+        unrelated_glb = maps / "unrelated" / "world.glb"
+        unrelated_uri = self._glb(unrelated_glb, unrelated)
+        unrelated_glb.with_suffix(".json").write_text(json.dumps({
+            "asset": {"glb": "world.glb"},
+            "externalResources": {unrelated_uri: hashlib.sha256(unrelated.read_bytes()).hexdigest()}}))
+        return maps, manifest, leaf, first, second
+
+    def test_declared_leaves_and_only_reachable_prototypes(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            maps, manifest, _, first, second = self._tree(Path(temporary))
+            found = tool.inventory([maps], manifests=[manifest])
+            by_path = {record["path"]: record for record in found.values()}
+            self.assertEqual(set(by_path), {first.resolve(), second.resolve()})
+            self.assertEqual(by_path[second.resolve()]["roles"], {("normal", "OPAQUE")})
+
+    def test_dependencies_cannot_escape_maps_tree(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            maps, manifest, leaf, _, _ = self._tree(Path(temporary))
+            data = json.loads(leaf.read_text())
+            data["externalMeshes"] = {"../../../../../outside.glb": "digest"}
+            leaf.write_text(json.dumps(data))
+            with self.assertRaisesRegex(tool.BuildError, "outside every --maps root"):
+                tool.inventory([maps], manifests=[manifest])
+
+    def test_stale_prototype_file_is_rejected(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            maps, manifest, _, _, _ = self._tree(Path(temporary))
+            prototype = maps / "_shared" / "meshes" / "prop.glb"
+            prototype.write_bytes(prototype.read_bytes() + b" changed")
+            with self.assertRaisesRegex(tool.BuildError, "does not hash to its declared SHA256"):
+                tool.inventory([maps], manifests=[manifest])
+
+    def test_stale_prototype_image_index_is_rejected(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            maps, manifest, _, _, _ = self._tree(Path(temporary))
+            path = maps / "_shared" / "meshes" / "index.json"
+            data = json.loads(path.read_text())
+            images = data["prototypes"]["prop"]["images"]
+            images[next(iter(images))] = "0" * 64
+            path.write_text(json.dumps(data))
+            with self.assertRaisesRegex(tool.BuildError, "does not hash to its declared SHA256"):
+                tool.inventory([maps], manifests=[manifest])
+
+    def test_changed_prototype_image_is_rejected(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            maps, manifest, _, _, image = self._tree(Path(temporary))
+            image.write_bytes(b"changed source image")
+            with self.assertRaisesRegex(tool.BuildError, "does not hash to its declared SHA256"):
+                tool.inventory([maps], manifests=[manifest])
+
+    def test_changed_manifest_image_fails_before_any_encode(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            maps, manifest, _, image, _ = self._tree(root)
+            image.write_bytes(b"changed source image")
+            with mock.patch.object(tool, "godot_version", return_value="4.7.2.test"), \
+                    mock.patch.object(tool, "ensure_ignored"), mock.patch.object(tool, "run_encoders") as encoder:
+                with self.assertRaisesRegex(tool.BuildError, "does not hash to its manifest sha"):
+                    tool.build([maps], root / "stage", root / "cache", root / "unused-godot", 1,
+                               manifests=[manifest])
+                encoder.assert_not_called()
+
+    def test_nested_stage_link_cannot_redirect_output_into_sources(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            maps, stage = root / "maps", root / "stage"
+            images = maps / "images"
+            images.mkdir(parents=True)
+            stage.mkdir()
+            try:
+                (stage / "images").symlink_to(images, target_is_directory=True)
+            except (OSError, NotImplementedError) as error:
+                self.skipTest(f"directory symlinks unavailable: {error}")
+            with self.assertRaisesRegex(tool.BuildError, "resolved sidecar output escapes"):
+                tool.sidecar_target([maps], images, stage)
+
+    def test_scoped_build_cannot_replace_a_source_pool_index(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            maps = Path(temporary) / "maps"
+            for output in (None, maps, maps / "nested-stage"):
+                with self.subTest(output=output), mock.patch.object(tool, "godot_version") as version:
+                    with self.assertRaisesRegex(tool.BuildError, "separate|outside the source"):
+                        tool.build([maps], output, Path(temporary) / "cache", Path("unused"), 1,
+                                   manifests=[maps / "world.json"])
+                    version.assert_not_called()
+
+    def test_current_landfall_group_resolves_all_seventeen_territories(self):
+        manifests = tool.scope_group_manifests(["landfall_continent"])
+        self.assertEqual(len(manifests), 17)
+        self.assertTrue(all("continent-v2" in path.parts and path.is_file() for path in manifests))
+        self.assertEqual(tool.scope_group_manifests([]), [])
+        with self.assertRaisesRegex(tool.BuildError, "unknown or empty"):
+            tool.scope_group_manifests(["not_a_group"])
+
+
 class NoRuntimeCompression(unittest.TestCase):
     """The shipped export template has no BC encoder: Image.compress returns
     ERR_UNAVAILABLE there, so a runtime call would pass every editor-binary
     test and do nothing in the game. Compression belongs to the package tool."""
 
-    def test_client_scripts_never_compress(self):
+    @staticmethod
+    def _offenders(relative: str, source: str) -> list[str]:
         pattern = re.compile(r"\.compress\(|compress_from_channels\(")
         offenders = []
+        producer, typed_bytes = False, False
+        for number, line in enumerate(source.splitlines(), 1):
+            code = line.split("#", 1)[0]
+            if code.startswith(("func ", "static func ")):
+                producer = code.startswith("static func write_packed(")
+                typed_bytes = False
+            if producer and code.strip() == "var raw := var_to_bytes(ordered)":
+                typed_bytes = True
+            # var_to_bytes infers PackedByteArray, so this exact maintenance
+            # statement compresses serialized CPU vectors with ZSTD. It is
+            # unrelated to the Image BC encoder unavailable in export builds.
+            allowed = (relative == "src/world/map_collision_cache.gd" and producer and typed_bytes
+                       and code.strip() == "bytes.append_array(raw.compress(FileAccess.COMPRESSION_ZSTD))")
+            if pattern.search(code) and not allowed:
+                offenders.append(f"{relative}:{number}")
+        return offenders
+
+    def test_client_scripts_never_compress(self):
+        offenders = []
         for path in sorted((CLIENT / "src").rglob("*.gd")):
-            for number, line in enumerate(path.read_text(encoding="utf-8", errors="replace").splitlines(), 1):
-                if pattern.search(line.split("#", 1)[0]):
-                    offenders.append(f"{path.relative_to(CLIENT).as_posix()}:{number}")
-        self.assertEqual(offenders, [], "client code compresses at runtime")
+            offenders.extend(self._offenders(path.relative_to(CLIENT).as_posix(),
+                                            path.read_text(encoding="utf-8", errors="replace")))
+        self.assertEqual(offenders, [], "client code calls an Image compressor at runtime")
+
+    def test_only_the_typed_maintenance_byte_compressor_is_allowed(self):
+        relative = "src/world/map_collision_cache.gd"
+        prefix = "static func write_packed():\n\tvar raw := var_to_bytes(ordered)\n"
+        allowed = "\tbytes.append_array(raw.compress(FileAccess.COMPRESSION_ZSTD))\n"
+        self.assertEqual(self._offenders(relative, prefix + allowed), [])
+        forbidden = ["\timage.compress(Image.COMPRESS_BPTC)\n",
+                     "\timage.compress_from_channels(Image.COMPRESS_S3TC)\n",
+                     "\traw.compress(Image.COMPRESS_BPTC)\n"]
+        for call in forbidden:
+            with self.subTest(call=call):
+                self.assertTrue(self._offenders(relative, prefix + allowed + call))
+        self.assertTrue(self._offenders("src/world/another_file.gd", prefix + allowed))
+        self.assertTrue(self._offenders(relative, "static func write_packed():\n" + allowed))
+        self.assertTrue(self._offenders(relative, prefix + "static func another_function():\n" + allowed))
 
 
 class Recipes(unittest.TestCase):
