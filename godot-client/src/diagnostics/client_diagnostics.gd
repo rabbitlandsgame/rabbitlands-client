@@ -4,6 +4,8 @@ extends Node
 ## chat, server reply text or the full command line.
 
 var _driver_thread: Thread
+static var _startup_stage := ""
+static var _startup_stage_started := 0
 const LaunchOptions := preload("res://src/updates/launch_options.gd")
 const GraphicsOptions := preload("res://src/world/graphics_options.gd")
 
@@ -13,6 +15,15 @@ static func record(event: String, details: Dictionary = {}) -> void:
 	row["elapsed_ms"] = Time.get_ticks_msec()
 	row["time_utc"] = Time.get_datetime_string_from_system(true)
 	print("client_diagnostic ", JSON.stringify(row))
+
+## Named, non-overlapping startup intervals. No player data is recorded.
+static func startup_stage(next_stage: String) -> void:
+	var now := Time.get_ticks_usec()
+	if not _startup_stage.is_empty():
+		record("startup_stage", {"stage": _startup_stage,
+			"duration_ms": (now - _startup_stage_started) / 1000.0})
+	_startup_stage = next_stage
+	_startup_stage_started = now
 
 func _ready() -> void:
 	GraphicsOptions.active_texture_skip()

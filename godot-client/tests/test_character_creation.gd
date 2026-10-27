@@ -35,19 +35,18 @@ func run() -> void:
 	var pants := main.get_node("%CreatePants") as OptionButton
 	var boots := main.get_node("%CreateBoots") as OptionButton
 	expect(race.item_count == 8 and sex.item_count == 2, "eight races and two separate sex choices")
-	expect(race.selected >= 0 and race.selected < race.item_count and
-		sex.selected >= 0 and sex.selected < sex.item_count,
-		"the initial complete-character roll selects a valid race and sex")
+	expect(race.get_selected_metadata() == "luminous" and sex.get_selected_id() == 1,
+		"creation initially selects Human Male")
 	for selector: OptionButton in [skin, hair, hair_color, eyes, shirt, pants, boots]:
 		expect(selector.selected >= 0 and selector.selected < selector.item_count,
-			"initial appearance randomization selects a valid option")
+			"fixed initial appearance selects a valid option")
 	var class_buttons: Array[Button] = [main.get_node("%ClassChoice0"),
 		main.get_node("%ClassChoice1"), main.get_node("%ClassChoice2"),
 		main.get_node("%ClassChoice3")]
 	expect(class_buttons.size() == 4 and (main.get_node("%ClassTitle") as Label).text ==
 		"Vanguard", "four illustrated classes default to Vanguard")
 	expect(main.get("preview_actor") is ReplicatedActor3D,
-		"the one-time initial appearance roll builds the preview")
+		"opening creation builds the fixed initial preview")
 	var vanguard_loadout: Dictionary = main.call("_creation_class_loadout")
 	expect(vanguard_loadout == {0: 114, 1: 106, 2: 105, 3: 134, 4: 220, 5: 209, 6: 249},
 		"Vanguard previews the whole militia set: helm, jack, kneecops, warboots, sword and shield")

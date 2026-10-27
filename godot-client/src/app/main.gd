@@ -1363,8 +1363,11 @@ func _prepare_geometry_before_login() -> bool:
 	return false
 
 func _ready() -> void:
+	Diagnostics.startup_stage("geometry_preparation")
 	if await _prepare_geometry_before_login():
+		Diagnostics.startup_stage("")
 		return
+	Diagnostics.startup_stage("runtime_services")
 	TextColors.load_colors(chat_hud.preferences_path)
 	TextColors.events().changed.connect(_on_text_colors_changed)
 	map_image.set_script(preload("res://src/ui/map_text_tooltip.gd"))
@@ -1423,8 +1426,10 @@ func _ready() -> void:
 	character_intro.conversation_requested.connect(_request_arrival_conversation)
 	character_intro.conversation_ended.connect(_end_arrival_conversation)
 	Diagnostics.record("main_scene_initializing")
+	Diagnostics.startup_stage("update_checker")
 	var client_updates := preload("res://src/updates/client_updates.gd").new()
 	add_child(client_updates)
+	Diagnostics.startup_stage("registries_and_world_services")
 	lantern_guide = LanternGuideScript.new()
 	game_view.add_child(lantern_guide)
 	lantern_guide.configure(self)
@@ -1475,9 +1480,11 @@ func _ready() -> void:
 	minimap_marker_overlay.configure(map_camera, map_viewport.size)
 	nearby_indicator = NearbyIndicatorScript.new()
 	minimap.add_child(nearby_indicator)
+	Diagnostics.startup_stage("audio")
 	audio_director = AudioDirectorScript.new()
 	audio_director.surface_at_tile = _footstep_surface_at
 	add_child(audio_director)
+	Diagnostics.startup_stage("gameplay_windows")
 	player_info_panel = PlayerInfoPanelScript.new()
 	game_view.add_child(player_info_panel)
 	# The three legacy windows Eternal Lands opens from its icon row: the spell
@@ -1546,6 +1553,7 @@ func _ready() -> void:
 	invasion_assistant_window.coordinate_context = Network.coordinates
 	invasion_assistant_window.command_requested.connect(
 		_on_invasion_assistant_command_requested)
+	Diagnostics.startup_stage("cartography_data")
 	cartography = _json("res://data/maps/cartography.json")
 	cartography_regions = (cartography.get("regions", []) as Array).duplicate()
 	_v2_cartography = _json("res://data/maps/cartography-continent-v2.json")
@@ -1559,9 +1567,11 @@ func _ready() -> void:
 			tab_map["detail"] = detail
 	_region_polygons.clear()
 	invasion_assistant_window.configure_cartography(cartography_regions)
+	Diagnostics.startup_stage("equipment_catalogue")
 	equipment_config = preload(
 		"res://src/actors/equipment_registry_snapshot_cache.gd").prepare(
 		_json("res://data/actors/equipment.json"))
+	Diagnostics.startup_stage("item_and_spell_catalogues")
 	item_atlas.configure(_json("res://data/items/atlases.json"))
 	spell_catalog.configure(_json("res://data/spells/catalog.json"))
 	spells_window.call("configure", spell_catalog, _cast_spell_by_id)
@@ -1628,6 +1638,7 @@ func _ready() -> void:
 		if argument.begins_with("--magic-mode="):
 			spell_loadout.set_mode(argument.trim_prefix("--magic-mode="))
 
+	Diagnostics.startup_stage("reference_catalogues")
 	manufacturing_catalog.configure(_json("res://data/manufacturing/recipes.json"))
 	summoning_window.call("configure", manufacturing_catalog, item_atlas,
 		_summon_by_ingredients, _request_summon_behavior)
@@ -1642,6 +1653,7 @@ func _ready() -> void:
 		"manufacturing": manufacturing_catalog, "spells": spell_catalog,
 		"books": knowledge_catalog, "regions": cartography_regions,
 		"items": item_atlas, "skills": EXPERIENCE_SKILLS})
+	Diagnostics.startup_stage("world_bindings")
 	Network.connection_state_changed.connect(_on_connection_state_changed)
 	Network.protocol_error.connect(func(message: String) -> void:
 		status_label.text = "Protocol error: " + message
@@ -1702,18 +1714,25 @@ func _ready() -> void:
 	manufacturing_panel.hide()
 	game_view.hide()
 	creation_panel.hide()
+	Diagnostics.startup_stage("creation_controls")
 	_populate_creation_races()
 	_populate_creation_sexes()
 	_populate_creation_choices()
 	_configure_creation_classes()
 	_configure_creation_layout()
 	_creation_appearance_rng.randomize()
-	_randomize_creation_appearance()
+	Diagnostics.startup_stage("creation_defaults")
+	_initialize_creation_appearance()
+	preview_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	creation_panel.visibility_changed.connect(_on_creation_visibility_changed)
 	_update_preview_camera()
+	Diagnostics.startup_stage("interface_art")
 	_apply_eloria_art()
+	Diagnostics.startup_stage("login_backdrop")
 	start_screen_backdrop = LoginBackdropScript.new()
 	login_background.add_child(start_screen_backdrop)
 	_configure_banner_menu()
+	Diagnostics.startup_stage("interface_theme")
 	_apply_eloria_theme()
 	# The crest is deliberately outside the compact login card so the painted
 	# scene can breathe. Keep that detached overlay coupled to the card even in
@@ -1721,12 +1740,15 @@ func _ready() -> void:
 	login_panel.visibility_changed.connect(_sync_login_logo_visibility)
 	_sync_login_logo_visibility()
 	_configure_window_layers()
+	Diagnostics.startup_stage("cartography_interface")
 	_configure_cartography()
+	Diagnostics.startup_stage("saved_settings")
 	_load_hud_settings()
 	_refresh_service_tooltips()
 	# Explicit launch options select a server without changing saved settings.
 	_apply_connection_launch_options(OS.get_cmdline_user_args())
 	_configure_trailer_capture(OS.get_cmdline_user_args())
+	Diagnostics.startup_stage("inventory_interface")
 	_configure_inventory_menus()
 	_configure_minimap_menu()
 	_build_inventory_slots()
@@ -1761,6 +1783,7 @@ func _ready() -> void:
 	knowledge_known_only.toggled.connect(_on_knowledge_filter_toggled)
 	stats_tabs.tab_changed.connect(_on_stats_tab_changed)
 	stats_text.meta_clicked.connect(_on_stats_meta_clicked)
+	Diagnostics.startup_stage("statistics_interface")
 	_build_perks_tab()
 	stats_close.pressed.connect(func() -> void: stats_panel.hide())
 	stats_panel.visibility_changed.connect(_on_stats_panel_visibility_changed)
@@ -1770,14 +1793,19 @@ func _ready() -> void:
 	session_reset.pressed.connect(_reset_session_tracking)
 	manufacturing_list.item_selected.connect(_on_manufacturing_selected)
 	manufacturing_filter.text_changed.connect(_on_manufacturing_filter_changed)
+	Diagnostics.startup_stage("manufacturing_interface")
 	_build_manufacturing_window()
 	chat_hud.tab_selected.connect(_on_chat_tab_pressed)
 	chat_hud.channel_selected.connect(_on_channel_tab_pressed)
+	Diagnostics.startup_stage("chat_and_hud")
 	_build_chat_surfaces()
 	_build_hud_layout_menu()
+	Diagnostics.startup_stage("settings_interface")
 	_configure_unified_settings()
+	Diagnostics.startup_stage("hud_layout")
 	_load_hud_layout()
 	_connect_hud_context_inputs(%Quickbar)
+	Diagnostics.startup_stage("skill_interface")
 	_build_skill_rows()
 	_build_hud_indicators()
 	hud_timer_label.gui_input.connect(_on_hud_timer_gui_input)
@@ -1823,6 +1851,7 @@ func _ready() -> void:
 	harvest_banner.hide()
 	reading_panel.hide()
 	reading_close.pressed.connect(_on_reading_close_pressed)
+	Diagnostics.startup_stage("final_bindings")
 	_session_started_msec = Time.get_ticks_msec()
 	_apply_equipment_side()
 	_sync_saved_item_lists()
@@ -1831,14 +1860,33 @@ func _ready() -> void:
 	_configure_window_stack()
 	hud_workspace = preload("res://src/ui/hud_workspace.gd").new()
 	game_view.add_child(hud_workspace)
-	hud_workspace.configure.call_deferred(self)
+	_configure_startup_workspace.call_deferred(hud_workspace, "hud_workspace")
 	inventory_workspace = preload("res://src/ui/inventory_workspace.gd").new()
 	game_view.add_child(inventory_workspace)
-	inventory_workspace.configure.call_deferred(self)
+	_configure_startup_workspace.call_deferred(inventory_workspace, "inventory_workspace")
 	mixing_workspace = preload("res://src/ui/mixing_workspace.gd").new()
 	game_view.add_child(mixing_workspace)
-	mixing_workspace.configure.call_deferred(self)
+	_configure_startup_workspace.call_deferred(mixing_workspace, "mixing_workspace")
+	Diagnostics.startup_stage("")
 	_start_client_diagnostics()
+	_record_login_first_frame()
+
+func _configure_startup_workspace(workspace: Control, stage: String) -> void:
+	var began := Time.get_ticks_usec()
+	workspace.configure(self)
+	Diagnostics.record("startup_deferred_stage", {"stage": stage,
+		"duration_ms": (Time.get_ticks_usec() - began) / 1000.0})
+
+func _record_login_first_frame() -> void:
+	if DisplayServer.get_name() == "headless":
+		return
+	var started := Time.get_ticks_usec()
+	await RenderingServer.frame_post_draw
+	if not is_inside_tree():
+		return
+	Diagnostics.record("login_first_frame", {
+		"after_ready_ms": (Time.get_ticks_usec() - started) / 1000.0,
+		"login_visible": login_panel.is_visible_in_tree()})
 
 func _start_client_diagnostics() -> void:
 	Diagnostics.record("main_scene_ready")
@@ -2312,8 +2360,17 @@ func _on_new_character_pressed() -> void:
 		return
 	_set_login_screen_visible(false)
 	creation_panel.show()
-	_refresh_creation_preview()
 	character_intro.prewarm(MapRegistry.resolve(map_registry, NewCharacterIntroScript.MAP), world_root)
+
+func _on_creation_visibility_changed() -> void:
+	var showing := creation_panel.is_visible_in_tree()
+	preview_viewport.render_target_update_mode = (SubViewport.UPDATE_ALWAYS
+		if showing else SubViewport.UPDATE_DISABLED)
+	if showing and not is_instance_valid(preview_actor):
+		var began := Time.get_ticks_usec()
+		_refresh_creation_preview()
+		Diagnostics.record("creation_preview_ready", {
+			"duration_ms": (Time.get_ticks_usec() - began) / 1000.0})
 
 func _on_creation_back_pressed() -> void:
 	character_intro.cancel()
@@ -2351,12 +2408,28 @@ func _on_create_appearance_changed(_value: float) -> void:
 func _on_randomize_creation_pressed() -> void:
 	_randomize_creation_appearance()
 
+## Stable initial Human Male. Build his 3D preview only when creation is opened.
+## Use persistent option IDs so display sorting cannot change the default look.
+func _initialize_creation_appearance() -> void:
+	for index: int in range(create_race.item_count):
+		if create_race.get_item_metadata(index) == "luminous":
+			create_race.select(index)
+			break
+	_populate_creation_sexes()
+	create_gender.select(create_gender.get_item_index(1))
+	_populate_creation_choices(true)
+	var choices := {"CreateSkin": 1, "CreateHair": 4, "CreateHairColor": 1,
+		"CreateEyes": 2, "CreateShirt": 0, "CreatePants": 0, "CreateBoots": 0}
+	for key: String in choices:
+		var selector := get_node("%" + key) as OptionButton
+		selector.select(selector.get_item_index(int(choices[key])))
+
 ## Rolls race and sex before the seven appearance selectors so every press can
 ## produce a genuinely different character silhouette. Calling and account
 ## fields deliberately live outside this list, and selecting without emitting
 ## each control's signal lets the completed look rebuild the preview once.
 ## Tests can pass a seeded generator without changing the generator used by the
-## live button or the one-time initial roll.
+## live button.
 func _randomize_creation_appearance(rng: RandomNumberGenerator = null) -> void:
 	var source := rng if rng != null else _creation_appearance_rng
 	if create_race.item_count > 0:
@@ -17440,16 +17513,25 @@ static func _atlas_region(atlas: Texture2D, region: Rect2) -> AtlasTexture:
 ## inside the world viewport, so a translucent window cannot cover one: every
 ## name and health bar behind a window read straight through it and fought
 ## with the text on top. Opaque is what puts a window in front of them.
-func _apply_shared_text_theme() -> void:
-	if theme == null:
+func _apply_shared_text_theme(target: Theme = null) -> void:
+	if target == null:
+		target = theme
+	if target == null:
 		return
+	# A live theme change propagates to every descendant. Publish all text
+	# colours together rather than invalidating the whole interface 80 times.
+	var was_blocked := target.is_blocking_signals()
+	target.set_block_signals(true)
 	for type: String in ["Label", "RichTextLabel", "Button", "OptionButton", "CheckBox", "CheckButton", "LineEdit", "TextEdit", "ItemList", "TooltipLabel"]:
 		var role := "ui_button" if type in ["Button", "OptionButton", "CheckBox", "CheckButton"] else "ui_label"
 		if type in ["LineEdit", "TextEdit"]: role = "ui_input"
 		if type == "TooltipLabel": role = "ui_tooltip"
-		theme.set_color("default_color" if type == "RichTextLabel" else "font_color", type, TextColors.color(role))
+		target.set_color("default_color" if type == "RichTextLabel" else "font_color", type, TextColors.color(role))
 		for pair: Array in [["font_hover_color", "ui_hover"], ["font_focus_color", "ui_hover"], ["font_pressed_color", "ui_pressed"], ["font_disabled_color", "ui_disabled"], ["font_uneditable_color", "ui_disabled"], ["font_placeholder_color", "ui_placeholder"], ["font_selected_color", "ui_selected"]]:
-			theme.set_color(pair[0], type, TextColors.color(pair[1]))
+			target.set_color(pair[0], type, TextColors.color(pair[1]))
+	target.set_block_signals(was_blocked)
+	if not was_blocked:
+		target.emit_changed()
 
 func _on_text_colors_changed(_role: String) -> void:
 	if not is_node_ready():
@@ -17495,8 +17577,10 @@ func _apply_eloria_theme() -> void:
 	var field: StyleBoxFlat = button.duplicate() as StyleBoxFlat
 	field.bg_color = Color(0.02, 0.015, 0.01, 0.85)
 	eloria_theme.set_stylebox("normal", "LineEdit", field)
+	# Finish the theme before attaching it to the scene tree. Setting each
+	# colour on the installed theme queued seconds of redundant UI work.
+	_apply_shared_text_theme(eloria_theme)
 	theme = eloria_theme
-	_apply_shared_text_theme()
 	var map_style := panel.duplicate() as StyleBoxFlat
 	map_style.set_border_width_all(0)
 	map_style.set_content_margin_all(0.0)
