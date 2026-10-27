@@ -142,3 +142,35 @@ For Orangutan, Baboon and other primate drafts, read [native primate motion](ref
 For native Walrus broad-flipper drafts, read [native Walrus motion](references/native-walrus-motion.md). It covers coherent rear paddle lobes, soft throat/foreflipper attachments, rigid tusks and whiskers, and separate belly versus head settlement.
 
 For installing completed but unreviewed sets, packing flexible corrective surfaces, retained-flight probe identity and non-bone ancestor motion, read [runtime draft integration](references/runtime-draft-integration.md).
+
+For buoyant Manatee or Dolphin pilots, read [native swimming-mammal motion](references/native-swimming-mammal-motion.md). It covers physical tail/flipper guides, coherent paddle ownership, swimming-specific validation and separately supported bottom settlement.
+
+For Mudskipper-like pectoral crawlers, read [native amphibious fish motion](references/native-amphibious-fish-motion.md). It covers component ownership, curved-body alignment, actual fin-edge contact and velocity-matched recovery. These pilots remain local drafts until their recorded review and promotion gates pass.
+
+For selected armored or comparable fish swimming pilots, read [native fish swimming motion](references/native-fish-swimming-motion.md). It covers actual cranial/keel ownership, separate caudal centering, lateral propulsion, plated-body support and fin-root strain. Rays and seahorses require separate anatomical and movement assessments.
+
+For Octopus and other cephalopod drafts, read [native cephalopod motion](references/native-cephalopod-motion.md). It covers actual arm counts versus radial rig labels, soft web/mantle separation, coherent eyes, buoyant sculling and independently supported settlement.
+
+For buoyant Jellyfish drafts, read [native Jellyfish motion](references/native-jellyfish-motion.md). It covers soft-bell scale, actual trailing and frilled arm counts, shear-free control parenting, forward casting and complete frill contact.
+
+For native crab drafts, read [native crab motion](references/native-crab-motion.md). It covers shared fore-fork contacts, actual support polygons, rigid armor and claw ownership, missing attachment aliases and supported carapace collapse.
+
+For the eight-blade Crystal Shore Crab and braced shared inner armor, read [native shore-crab fitting](references/native-shore-crab-motion.md). It covers source-specific outer hinges, whole-body bearings, per-side pincer opening and individual stance close-ups.
+
+For the asymmetric seven-branch Delta Mud Crab, read [native mud-crab fitting](references/native-mud-crab-motion.md). It covers continuous lower-leg armor, actual support timing, decorated pincer roles and measured attachment aliases.
+
+For local review HTML fragments and corrections after sealing, read [review fragments and sealed delivery revisions](references/review-fragment-sealing.md). It covers checked links, stopped prerequisites, preserved provenance and explicit task-local catalog roots.
+
+For Glacier Crab outside walking blades and inner crescent cutters, read [native ice-blade crab motion](references/native-ice-blade-crab-motion.md). It covers source-specific roles, minimum reach, tripod support and whole-blade shears.
+
+For Manymouth Crab seven-limb anatomy, measured root caps and shared shell/limb support, read [native Manymouth Crab motion](references/native-manymouth-crab-motion.md). It covers dorsal decorations with misleading source labels, real terminal joints, body placement and tucked-pincer reach.
+
+For continuous Lobster limbs, separate inner appendages and centered tail/fan motion, read [native Lobster motion](references/native-lobster-motion.md). It covers measured pincer sockets, short anterior stance lanes, real head aliases and supported pitch-only settlement.
+
+For native beetle drafts and short armored hind limbs, read [native beetle motion](references/native-beetle-motion.md). It covers actual limb/jaw roles, minimum reach, stable hinge frames, measured head shoves and supported shell collapse.
+
+For Crystal Carapace Beetle continuous limbs and thick knee fields, read [native crystal beetle motion](references/native-crystal-beetle-motion.md). It covers six walking limbs versus palps, facial caps, continuous weight coordinates and ventral support.
+
+For composite upper-knee/whole-foot limbs, tall head horns and asymmetric mandibles, read [native stag beetle motion](references/native-stag-beetle-motion.md). It covers actual mouth-appendage roles, reachable full-stride lanes and separate horn/body settlement.
+
+For connected moth wing fans, leaf-like antenna roots and airborne movement slots, read [native moth motion](references/native-moth-motion.md). It covers geodesic socket fields, curled ventral forms and anatomy-specific supported endings.
