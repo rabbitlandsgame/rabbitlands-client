@@ -162,7 +162,7 @@
           "at": 0,
           "actor": "guard",
           "action": "combat_idle",
-          "destination": "guard_post",
+          "destination": "player_help",
           "face": "mother"
         },
         {
@@ -225,7 +225,7 @@
           "at": 4,
           "actor": "escort",
           "action": "run",
-          "destination": "escort_post",
+          "destination": "guard_strike",
           "move_seconds": 4,
           "face": "daughter_trip",
           "from": "escape_turn",
@@ -257,6 +257,13 @@
           "actor": "abductor",
           "action": "combat_idle",
           "destination": "capture",
+          "face": "daughter_trip"
+        },
+        {
+          "at": 8,
+          "actor": "escort",
+          "action": "combat_idle",
+          "destination": "guard_strike",
           "face": "daughter_trip"
         },
         {
@@ -301,7 +308,7 @@
           "at": 18,
           "actor": "escort",
           "action": "run",
-          "from": "escort_post",
+          "from": "guard_strike",
           "destination": "escape_turn_2",
           "move_seconds": 8,
           "face": "escape_turn_2"
@@ -340,10 +347,9 @@
         {
           "at": 42,
           "actor": "guard",
-          "action": "run",
-          "from": "guard_post",
-          "destination": "guard_strike",
-          "move_seconds": 5,
+          "action": "combat_idle",
+          "from": "player_help",
+          "destination": "player_help",
           "face": "mother",
           "when": "watch"
         },
@@ -351,9 +357,19 @@
           "at": 42,
           "actor": "guard",
           "action": "run",
-          "from": "guard_post",
+          "from": "player_help",
+          "destination": "daughter_trip",
+          "move_seconds": 2,
+          "face": "mother",
+          "when": "help"
+        },
+        {
+          "at": 44,
+          "actor": "guard",
+          "action": "run",
+          "from": "daughter_trip",
           "destination": "guard_combat",
-          "move_seconds": 5,
+          "move_seconds": 2,
           "face": "mother",
           "when": "help"
         },
@@ -384,10 +400,18 @@
           "when": "help"
         },
         {
+          "at": 46,
+          "actor": "guard",
+          "action": "combat_idle",
+          "destination": "guard_combat",
+          "face": "mother",
+          "when": "help"
+        },
+        {
           "at": 47,
           "actor": "guard",
           "action": "attack_primary",
-          "destination": "guard_strike",
+          "destination": "player_help",
           "face": "mother",
           "when": "watch"
         },
@@ -422,7 +446,8 @@
           "destination": "escape_turn",
           "move_seconds": 7,
           "face": "escape_turn",
-          "when": "watch"
+          "when": "watch",
+          "from": "player_help"
         },
         {
           "at": 51,
@@ -1654,7 +1679,7 @@
           "face": "lich"
         },
         {
-          "at": 4,
+          "at": 5,
           "actor": "lich",
           "action": "idle",
           "visible": true,
@@ -1683,13 +1708,13 @@
         },
         {
           "at": 13,
-          "speaker": "The lich",
+          "speaker": "???",
           "text": "Useless servant. You could not even hold one child.",
           "speaker_actor": "lich"
         },
         {
           "at": 24,
-          "speaker": "The lich",
+          "speaker": "???",
           "text": "I will find a better servant next time.",
           "speaker_actor": "lich"
         },
@@ -1711,22 +1736,28 @@
           "resume_at": 1000
         },
         {
-          "type": "effect",
-          "at": 20,
-          "until": 21.4,
-          "effect": 5,
-          "power": 3,
-          "source": "lich",
-          "target": "goblin_boss",
-          "id": "lich-corpse-fire"
+          "id": "lich-arrival",
+          "type": "teleport",
+          "actor": "lich",
+          "at": 3,
+          "until": 7
         },
         {
-          "type": "dissolve",
-          "at": 21.4,
-          "until": 40,
+          "id": "lich-corpse-fire",
+          "type": "corpse_fire",
           "actor": "goblin_boss",
+          "at": 20,
+          "until": 32,
+          "grow_seconds": 4,
+          "fade_after": 6
+        },
+        {
           "id": "goblin-ashes",
-          "duration": 5.6
+          "type": "dissolve",
+          "actor": "goblin_boss",
+          "at": 26,
+          "until": 40,
+          "duration": 6
         },
         {
           "type": "fade",

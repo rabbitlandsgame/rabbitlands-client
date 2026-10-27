@@ -3,6 +3,7 @@ extends Node3D
 ## stay authoritative; this node never completes work or changes an actor body.
 const FencePool := preload("res://src/world/external_mesh_pool.gd")
 const Dissolve := preload("res://src/actors/creature_dissolve.gd")
+const FireVisual := preload("res://src/world/weather_3d.gd")
 const FENCE_ID := "11ec54ffb8d8eb66b5a8de1e0bdb3da278b75459c880a07fc46acfcf1e9f4c65"
 const FENCE_PATH := "res://../eloria-assets/maps/_shared/meshes/"+FENCE_ID+".glb"
 const LANTERN_TILES := [[49.6,29.5],[60.4,29.5],[43,49],[67.5,54],[60,62.5],[24.5,60],[88,61],[73,70],[46.5,86],[63.5,82]]
@@ -31,6 +32,8 @@ var _scene_id := ""
 var _scene_elapsed := 0.0
 var _scene_replaying := false
 var _effects: Dictionary = {}
+var _arrival_effects: Dictionary = {}
+var _corpse_fires: Dictionary = {}
 var _dissolves: Dictionary = {}
 var _dissolve_targets: Dictionary = {}
 var _dissolve_progress: Dictionary = {}
@@ -170,6 +173,7 @@ func apply_cinematic(state: Dictionary, actor_nodes: Dictionary) -> void:
 	if not active:
 		if bool(state.get("playing",false)) and bool(state.get("returning",false)) \
 				and _scene_id=="measure.rescue.shadow" and _scene_replaying:
+			_clear_visual_effects()
 			_set_fade(0)
 			return # Keep its local clone dissolved until replay teardown, then restore.
 		_clear_cinematic(_scene_id=="measure.rescue.shadow" and not _scene_replaying)
@@ -180,6 +184,7 @@ func apply_cinematic(state: Dictionary, actor_nodes: Dictionary) -> void:
 	var gate_value:=_accepted_gate
 	var fade_value:=0.0
 	var wanted_effects: Dictionary={};var wanted_dissolves: Dictionary={};var wanted_clips: Dictionary={}
+	var wanted_arrivals: Dictionary={};var wanted_fires: Dictionary={}
 	var events: Array = state.get("events",[])
 	for index: int in events.size():
 		var event: Dictionary=events[index]
@@ -193,6 +198,18 @@ func apply_cinematic(state: Dictionary, actor_nodes: Dictionary) -> void:
 		match str(event.get("type","")):
 			"gate":gate_value=lerpf(float(event.get("from",0)),float(event.get("to",1)),progress)
 			"fade":fade_value=lerpf(float(event.get("from",0)),float(event.get("to",1)),progress)
+			"teleport":
+				if id!="measure.rescue.shadow" or str(event.get("actor",""))!="lich" or time>=end:continue
+				var target:=_actor("lich",actor_nodes)
+				if target==null:continue
+				wanted_arrivals[key]=true
+				_apply_arrival(key,target,clampf((time-start)/(end-start),0,1))
+			"corpse_fire":
+				if id!="measure.rescue.shadow" or str(event.get("actor",""))!="goblin_boss" or time>=end:continue
+				var target:=_actor("goblin_boss",actor_nodes)
+				if target==null:continue
+				wanted_fires[key]=true
+				_apply_corpse_fire(key,target,time-start,end-start)
 			"native_clip":
 				var target:=_actor(str(event.get("actor","")),actor_nodes)
 				if target!=null:
@@ -231,6 +248,105 @@ func apply_cinematic(state: Dictionary, actor_nodes: Dictionary) -> void:
 			_dissolves[key].reset();_dissolves.erase(key);_dissolve_targets.erase(key);_dissolve_progress.erase(key)
 	for key: String in _clip_leases.keys():
 		if not wanted_clips.has(key):_release_native_clip(key)
+	_prune_visual_rows(_arrival_effects,wanted_arrivals)
+	_prune_visual_rows(_corpse_fires,wanted_fires)
+
+func _apply_arrival(key: String, target: Node3D, progress: float) -> void:
+	if not _arrival_effects.has(key):
+		var root:=Node3D.new();root.name="RescueLichArrival";add_child(root)
+		root.global_position=target.global_position
+		# Use the game's ordinary rising arrival, with its existing rune and
+		# spark geometry. Its clock is sampled by the film instead of real time.
+		var spell:=WorldEffect3D.new();root.add_child(spell)
+		spell.configure(1,target.global_position,null,5);spell.set_process(false)
+		spell.scale=Vector3.ONE*1.4
+		spell._burst.emitting=false;spell._burst.visible=false
+		var mesh:=ImmediateMesh.new()
+		var runes:=MeshInstance3D.new();runes.name="ArrivalRunes";runes.mesh=mesh
+		runes.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF;root.add_child(runes)
+		var light:=OmniLight3D.new();light.name="ArrivalLight";root.add_child(light)
+		light.position=Vector3.UP*1.3;light.light_color=Color("83ffd0")
+		light.omni_range=8.0;light.shadow_enabled=false
+		_arrival_effects[key]={"root":root,"spell":spell,"mesh":mesh,"material":CombatEffectMesh.material(),"light":light}
+	var row:Dictionary=_arrival_effects[key]
+	row.root.global_position=target.global_position+Vector3.UP*0.04
+	var envelope:=pow(maxf(0,sin(progress*PI)),0.6)
+	row.light.light_energy=5.0*envelope
+	var spell:WorldEffect3D=row.spell
+	spell.elapsed=minf(progress,0.999)*WorldEffect3D.LIFETIME_SECONDS
+	spell._process(0.0)
+	var mesh:ImmediateMesh=row.mesh
+	mesh.clear_surfaces();mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES,row.material)
+	var tint:=Color(0.45,1.0,0.74,envelope*0.9)
+	for tier:int in 3:
+		var centre:=Vector3.UP*(0.08+tier*0.55*envelope)
+		var angle:=progress*TAU*(1.0 if tier%2==0 else -1.0)+tier
+		CombatEffectMesh.arc(mesh,centre,(0.85+tier*0.15)*(0.7+envelope*0.3),0.045,tint,angle,TAU*0.88)
+	for mark:int in 12:
+		var angle:=mark*TAU/12.0+progress*0.8
+		var direction:=Vector3(cos(angle),0,sin(angle))
+		CombatEffectMesh.line(mesh,direction*1.2+Vector3.UP*0.08,direction*1.45+Vector3.UP*0.08,0.06,tint)
+	mesh.surface_end()
+
+func _apply_corpse_fire(key: String, target: Node3D, age: float, duration: float) -> void:
+	if not _corpse_fires.has(key):
+		var root:=Node3D.new();root.name="RescueCorpseFlames";add_child(root)
+		var mesh:=ImmediateMesh.new()
+		var flames:=MeshInstance3D.new();flames.name="RisingFlames";flames.mesh=mesh
+		flames.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF;root.add_child(flames)
+		# The persistent hearth's approved soft flame supplies the base glow;
+		# broad rising tongues keep the burn readable when bloom is disabled.
+		var source:=FireVisual.new()
+		var glow:=MeshInstance3D.new();glow.name="FireCore";glow.mesh=source._flame_mesh(Color(1.0,0.65,0.18))
+		glow.position=Vector3.UP*0.3;glow.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		root.add_child(glow);source.free()
+		var light:=OmniLight3D.new();light.name="CorpseFireLight";root.add_child(light)
+		light.position=Vector3.UP;light.light_color=Color(1.0,0.46,0.12)
+		light.omni_range=9.0;light.shadow_enabled=false
+		_corpse_fires[key]={"root":root,"mesh":mesh,"material":CombatEffectMesh.material(),"glow":glow,"light":light}
+	var row:Dictionary=_corpse_fires[key]
+	row.root.global_position=target.global_position+Vector3.UP*0.08
+	# Four seconds of visible ignition precede the authored dissolve. The
+	# flames and their chamber light survive while the body material vanishes.
+	var strength:=smoothstep(0.0,minf(4.0,duration*0.5),age)*(1.0-smoothstep(duration-0.8,duration,age))
+	row.light.light_energy=7.0*strength*(0.92+0.08*sin(age*13.0))
+	row.glow.scale=Vector3(3.1,1.2+0.15*sin(age*7.0),1)*maxf(0.001,strength)
+	row.glow.transparency=1.0-strength
+	var mesh:ImmediateMesh=row.mesh
+	mesh.clear_surfaces();mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES,row.material)
+	for tongue:int in 9:
+		var angle:=tongue*2.399
+		var centre:=Vector3(cos(angle)*0.55,0.03,sin(angle)*0.6)
+		var height:=(1.7+0.45*sin(age*4.3+tongue))*strength
+		for segment:int in 6:
+			var lo:=segment/6.0;var hi:=(segment+1)/6.0
+			var a:=centre+Vector3(sin(age*5.0+tongue+lo*3.0)*0.13*lo,height*lo,cos(age*4.0+tongue+lo*2.0)*0.1*lo)
+			var b:=centre+Vector3(sin(age*5.0+tongue+hi*3.0)*0.13*hi,height*hi,cos(age*4.0+tongue+hi*2.0)*0.1*hi)
+			var tint:=Color(1.0,0.88,0.28).lerp(Color(1.0,0.18,0.025),hi)
+			tint.a=strength*(1.0-hi*0.65)
+			var width:=(0.35*(1.0-lo)+0.025)*strength
+			CombatEffectMesh.line(mesh,a,b,width,tint,Vector3.FORWARD)
+			CombatEffectMesh.line(mesh,a,b,width,tint,Vector3.RIGHT)
+	for spark:int in 14:
+		var phase:=fposmod(age*0.8+spark*0.17,1.0)
+		var angle:=spark*2.399
+		CombatEffectMesh.spark(mesh,Vector3(cos(angle)*0.5,0.3+phase*2.1,sin(angle)*0.55),
+			0.045*strength*(1.0-phase),Color(1.0,0.72,0.18,strength*(1.0-phase)))
+	mesh.surface_end()
+
+func _prune_visual_rows(rows: Dictionary, wanted: Dictionary) -> void:
+	for key:String in rows.keys():
+		if wanted.has(key):continue
+		var root:Node3D=rows[key].root
+		if is_instance_valid(root):root.hide();root.queue_free()
+		rows.erase(key)
+
+func _clear_visual_effects() -> void:
+	for effect:Node in _effects.values():
+		if is_instance_valid(effect):effect.queue_free()
+	_effects.clear()
+	_prune_visual_rows(_arrival_effects,{})
+	_prune_visual_rows(_corpse_fires,{})
 
 func _update_handoff_fade(state: Dictionary) -> void:
 	_expire_handoff_fade()
@@ -472,9 +588,7 @@ func _ground(point: Vector3) -> Vector3:
 	point.y=float(height);return point
 
 func _clear_cinematic(preserve_completed_burn := false) -> void:
-	for effect:Node in _effects.values():
-		if is_instance_valid(effect):effect.queue_free()
-	_effects.clear()
+	_clear_visual_effects()
 	for key:String in _dissolves:
 		if preserve_completed_burn and float(_dissolve_progress.get(key,0))>=0.999:
 			_completed_burns.append({"effect":_dissolves[key],"actor":_dissolve_targets[key]})
