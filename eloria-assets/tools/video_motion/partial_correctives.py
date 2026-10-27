@@ -5,6 +5,7 @@ bones or resample motion. Independent source/engine/render checks are still
 required before installing an ownership change.
 """
 import copy
+import hashlib
 
 import numpy as np
 
@@ -71,6 +72,9 @@ def split_corrective_partition(document, binary, profile):
     membership = marked[triangles].sum(1)
     if np.any((membership != 0) & (membership != 3)):
         raise ValueError('Selection splits a triangle')
+    selected_triangles = np.flatnonzero(membership == 3).tolist()
+    if not selected_triangles:
+        raise ValueError('Selected vertices have no complete rendered triangles')
     # Weld positions conservatively so UV/normal seams cannot be split across
     # imported tangent generation or visibly adjacent pieces.
     positions = raw_array(document, binary, primitive['attributes']['POSITION'])
@@ -96,6 +100,24 @@ def split_corrective_partition(document, binary, profile):
     owner = int(profile.get('owner_joint', 0))
     if mode == 'rigid' and ('skin' not in node or not 0 <= owner < len(document['skins'][node['skin']]['joints'])):
         raise ValueError('Rigid owner must be an existing skin joint')
+    reference = copy.deepcopy(profile.get('reference_skin', profile.get('mount_skin')))
+    if reference is not None:
+        slots = {'godot-four-influences-u16-v1': 4, 'godot-eight-influences-u16-v1': 8}.get(reference.get('layout'))
+        if slots is None: raise ValueError('Unsupported original secondary-effect skin layout')
+        payload = bytes.fromhex(reference['skin_hex'])
+        if len(payload) != len(selected) * slots * 4: raise ValueError('Original secondary-effect skin length differs')
+        values = np.frombuffer(payload, '<u2').reshape(-1, slots * 2)
+        skin = document['skins'][node['skin']]
+        names = [document['nodes'][joint]['name'] for joint in skin['joints']]
+        if reference['bind_names'] != names or np.any(values[:, :slots] >= len(names)):
+            raise ValueError('Original secondary-effect skin bindings differ')
+        sets = sorted(int(key.split('_')[1]) for key in primitive['attributes'] if key.startswith('JOINTS_'))
+        old_joints = np.concatenate([raw_array(document, binary, primitive['attributes'][f'JOINTS_{i}'])[selected] for i in sets], axis=1)
+        old_weights = np.concatenate([accessor(document, binary, primitive['attributes'][f'WEIGHTS_{i}'])[selected] for i in sets], axis=1)
+        if old_joints.shape[1] != slots or not np.array_equal(values[:, :slots], old_joints):
+            raise ValueError('Original secondary-effect joint rows differ')
+        if np.max(np.abs(values[:, slots:] / 65535. - old_weights)) > 2 / 65535.:
+            raise ValueError('Original secondary-effect weights differ')
 
     def add(values, index, component=None):
         spec = copy.deepcopy(document['accessors'][index])
@@ -131,6 +153,9 @@ def split_corrective_partition(document, binary, profile):
                 if field == 'WEIGHTS_0':
                     spec = document['accessors'][index]
                     values[:, 0] = np.iinfo(values.dtype).max if spec.get('normalized') else 1.
+            if not corrective and mode == 'rigid' and field.startswith(('JOINTS_', 'WEIGHTS_')) and reference is None:
+                if values.tobytes() != raw_array(document, binary, index)[ids].tobytes():
+                    raise ValueError('Changed skin needs its original packed reference for secondary effects')
             output['attributes'][field] = add(values, index, component)
         if corrective:
             output['targets'] = [{field: add(raw_array(document, binary, index)[ids], index)
@@ -145,6 +170,13 @@ def split_corrective_partition(document, binary, profile):
     free['extras'] = {key: copy.deepcopy(value) for key, value in mesh.get('extras', {}).items() if key != 'targetNames'}
     free['extras']['rabbitlands_coat_pattern_height'] = height
     result['meshes'][mesh_index].setdefault('extras', {})['rabbitlands_coat_pattern_height'] = height
+    group = profile.get('source_sha256', hashlib.sha256(bytes(binary)).hexdigest()) + ':' + str(node_index) + ':' + str(primitive_index)
+    layout = {'group': group, 'source_vertices': count, 'source_triangles': len(triangles),
+              'selected_triangles': selected_triangles}
+    result['meshes'][mesh_index]['extras']['rabbitlands_surface_partition_v1'] = dict(layout, role='remainder', surface=primitive_index)
+    free['extras']['rabbitlands_surface_partition_v1'] = dict(layout, role='selected', surface=0)
+    if mode == 'rigid' and reference is not None:
+        free['extras']['rabbitlands_surface_partition_v1']['reference_skin'] = reference
     if mode == 'rigid' and profile.get('mount_skin'):
         free['extras']['rabbitlands_mount_skin_v1'] = copy.deepcopy(profile['mount_skin'])
     result['meshes'].append(free)
@@ -174,5 +206,6 @@ def split_corrective_partition(document, binary, profile):
     result, blob, packing = compact(result, blob)
     return result, blob, {'mode': mode, 'source_node': node_index, 'new_node': new_node,
                           'source_vertices': count, 'corrective_vertices': len(remainder),
+                          'source_triangles': len(triangles), 'selected_triangles': selected_triangles,
                           'corrective_free_vertices': len(selected), 'owner_joint': owner if mode == 'rigid' else None,
                           'all_candidate_original_vertex_ids': global_ids, 'packing': packing}

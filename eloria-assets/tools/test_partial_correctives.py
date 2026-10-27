@@ -41,6 +41,12 @@ def test_zero_partition_preserves_geometry_skin_and_target_bits(tmp_path):
             assert raw_array(new, blob, index).tobytes() == raw_array(d, b, old_index)[ids].tobytes()
     assert 'targets' not in new['meshes'][1]['primitives'][0]
     assert 'weights' not in new['nodes'][3]
+    remainder_layout = new['meshes'][0]['extras']['rabbitlands_surface_partition_v1']
+    selected_layout = new['meshes'][1]['extras']['rabbitlands_surface_partition_v1']
+    assert remainder_layout['selected_triangles'] == selected_layout['selected_triangles'] == [1]
+    assert remainder_layout['source_vertices'] == 6 and remainder_layout['source_triangles'] == 2
+    assert remainder_layout['role'] == 'remainder' and selected_layout['role'] == 'selected'
+    assert remainder_layout['group'] == selected_layout['group']
     target = new['meshes'][0]['primitives'][0]['targets'][0]['POSITION']
     assert raw_array(new, blob, target).tobytes() == raw_array(d, b, old['targets'][0]['POSITION'])[:3].tobytes()
 
@@ -88,3 +94,12 @@ def test_eight_influence_attributes_are_retained(tmp_path):
     free = new['meshes'][1]['primitives'][0]
     assert raw_array(new, blob, free['attributes']['JOINTS_1']).dtype == np.dtype('u1')
     np.testing.assert_array_equal(raw_array(new, blob, free['attributes']['WEIGHTS_1']), np.tile([.5, 0, 0, 0], (3, 1)))
+
+
+def test_changed_skin_requires_original_secondary_effect_reference(tmp_path):
+    d, b, p = fixture(tmp_path, zero=False)
+    d['nodes'].append({'name': 'OtherBone'})
+    d['skins'][0]['joints'].append(3)
+    p.update(mode='rigid', owner_joint=1)
+    with pytest.raises(ValueError, match='secondary effects'):
+        split_corrective_partition(d, b, p)

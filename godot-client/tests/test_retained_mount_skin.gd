@@ -11,17 +11,22 @@ func check(ok: bool, message: String) -> void:
 		failures += 1
 		push_error(message)
 
-func make_mesh(joint: int) -> ArrayMesh:
+func make_mesh(joint: int, influences := 4) -> ArrayMesh:
 	var arrays := []
 	arrays.resize(Mesh.ARRAY_MAX)
 	arrays[Mesh.ARRAY_VERTEX] = PackedVector3Array([Vector3.ZERO,Vector3.RIGHT,Vector3.UP])
 	arrays[Mesh.ARRAY_NORMAL] = PackedVector3Array([Vector3.BACK,Vector3.BACK,Vector3.BACK])
 	arrays[Mesh.ARRAY_TEX_UV] = PackedVector2Array([Vector2.ZERO,Vector2.RIGHT,Vector2.DOWN])
-	arrays[Mesh.ARRAY_BONES] = PackedInt32Array([joint,0,0,0,joint,0,0,0,joint,0,0,0])
-	arrays[Mesh.ARRAY_WEIGHTS] = PackedFloat32Array([1,0,0,0,1,0,0,0,1,0,0,0])
+	var joints := PackedInt32Array(); var weights := PackedFloat32Array()
+	for vertex in 3:
+		for slot in influences:
+			joints.append(joint if slot == 0 else 0)
+			weights.append(1.0 if slot == 0 else 0.0)
+	arrays[Mesh.ARRAY_BONES] = joints
+	arrays[Mesh.ARRAY_WEIGHTS] = weights
 	arrays[Mesh.ARRAY_INDEX] = PackedInt32Array([0,1,2])
 	var mesh := ArrayMesh.new()
-	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,arrays)
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,arrays,[],{},Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS if influences == 8 else 0)
 	mesh.surface_set_material(0,StandardMaterial3D.new())
 	return mesh
 
@@ -62,6 +67,19 @@ func run() -> void:
 		if change == "influences": bad.bind_names = ["Root"]
 		source.set_meta("extras",{Retained.KEY:bad})
 		check(not Retained.for_mount(source,skin,skeleton).errors.is_empty(),"invalid record rejected: " + change)
+	var original8 := make_mesh(1,8)
+	var source8 := make_mesh(0,8)
+	var bytes8: PackedByteArray = RenderingServer.mesh_get_surface(original8.get_rid(),0).skin_data
+	check(bytes8.size() == 3*32,"eight-influence packed stride")
+	var record8 := {"layout":"godot-eight-influences-u16-v1","bind_names":["Root","Shell"],"skin_hex":bytes8.hex_encode()}
+	source8.set_meta("extras",{"rabbitlands_surface_partition_v1":{"reference_skin":record8}})
+	check(Retained.for_mount(source8,skin,skeleton).mesh == source8,"secondary references do not alter ordinary mount rendering")
+	var secondary := Retained.for_secondary(source8,skin,skeleton)
+	check(secondary.errors.is_empty(),"eight-influence secondary reference restores")
+	if secondary.errors.is_empty():
+		check(RenderingServer.mesh_get_surface(secondary.mesh.get_rid(),0).skin_data == bytes8,"eight-influence original skin exact")
+		check(secondary.mesh.surface_get_arrays(0)[Mesh.ARRAY_BONES] == original8.surface_get_arrays(0)[Mesh.ARRAY_BONES],"eight-influence CPU skin exact")
+		check(RenderingServer.mesh_get_surface(secondary.mesh.get_rid(),0).bone_aabbs == RenderingServer.mesh_get_surface(original8.get_rid(),0).bone_aabbs,"eight-influence original culling bounds")
 	skeleton.free()
 	print("RETAINED_MOUNT_SKIN ",checks," checks; failures=",failures)
 	quit(1 if failures else 0)

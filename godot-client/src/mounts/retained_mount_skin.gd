@@ -8,9 +8,22 @@ const LAYOUT := "godot-four-influences-u16-v1"
 static func for_mount(source: Mesh, skin: Skin, skeleton: Skeleton3D) -> Dictionary:
 	var extras: Variant = source.get_meta("extras",{})
 	if not extras is Dictionary or not extras.has(KEY): return {"mesh":source,"errors":[]}
-	var record: Variant = extras[KEY]
+	return for_record(source,skin,skeleton,extras[KEY])
+
+static func for_secondary(source: Mesh, skin: Skin, skeleton: Skeleton3D) -> Dictionary:
+	var extras: Variant = source.get_meta("extras",{})
+	if extras is Dictionary:
+		var partition: Variant = extras.get("rabbitlands_surface_partition_v1",{})
+		if partition is Dictionary and partition.has("reference_skin"):
+			return for_record(source,skin,skeleton,partition.reference_skin)
+	return for_mount(source,skin,skeleton)
+
+static func for_record(source: Mesh, skin: Skin, skeleton: Skeleton3D, record: Variant) -> Dictionary:
+	var influences := 0
+	if record is Dictionary:
+		influences = {LAYOUT:4,"godot-eight-influences-u16-v1":8}.get(record.get("layout",""),0)
 	if not source is ArrayMesh or source.get_surface_count() != 1 or source.get_blend_shape_count() != 0 \
-			or not record is Dictionary or record.get("layout","") != LAYOUT \
+			or influences == 0 \
 			or skin == null or skeleton == null:
 		return {"mesh":null,"errors":["Retained mount skin has an incompatible mesh/layout"]}
 	var names: Variant = record.get("bind_names")
@@ -26,13 +39,13 @@ static func for_mount(source: Mesh, skin: Skin, skeleton: Skeleton3D) -> Diction
 	var original := encoded.hex_decode() as PackedByteArray
 	var surface := RenderingServer.mesh_get_surface(source.get_rid(),0)
 	var vertices := int(surface.get("vertex_count",0))
-	if vertices <= 0 or original.size() != vertices * 16 \
-			or (int(surface.get("format",0)) & Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS) != 0 \
+	if vertices <= 0 or original.size() != vertices * influences * 4 \
+			or ((int(surface.get("format",0)) & Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS) != 0) != (influences == 8) \
 			or (surface.get("skin_data",PackedByteArray()) as PackedByteArray).size() != original.size():
 		return {"mesh":null,"errors":["Retained mount skin vertex/format size differs"]}
 	for vertex in vertices:
-		for slot in 4:
-			if original.decode_u16(vertex*16+slot*2) >= names.size():
+		for slot in influences:
+			if original.decode_u16(vertex*influences*4+slot*2) >= names.size():
 				return {"mesh":null,"errors":["Retained mount skin contains an invalid joint"]}
 	if surface.skin_data == original: return {"mesh":source,"errors":[]}
 	# Use the engine's serialized surface representation. Updating only the GPU
@@ -46,9 +59,9 @@ static func for_mount(source: Mesh, skin: Skin, skeleton: Skeleton3D) -> Diction
 	var boxes: Array[AABB] = []
 	for bind in names.size(): boxes.append(AABB(Vector3.ZERO,-Vector3.ONE))
 	for vertex in vertices:
-		for slot in 4:
-			if original.decode_u16(vertex*16+8+slot*2) == 0: continue
-			var bind := original.decode_u16(vertex*16+slot*2)
+		for slot in influences:
+			if original.decode_u16(vertex*influences*4+influences*2+slot*2) == 0: continue
+			var bind := original.decode_u16(vertex*influences*4+slot*2)
 			boxes[bind] = (AABB(points[vertex],Vector3.ONE * .00001) if boxes[bind].size.x < 0
 				else boxes[bind].expand(points[vertex]))
 	surfaces[0].bone_aabbs = boxes
