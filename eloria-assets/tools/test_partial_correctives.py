@@ -166,3 +166,40 @@ def test_rigid_owner_cannot_wrap_in_retained_eight_bit_storage(tmp_path, multi):
         p.pop('owner_joints'); p['owner_joint'] = 256
     with pytest.raises(ValueError, match='joint storage'):
         split_corrective_partition(d,b,p)
+
+
+def default_bake_fixture(tmp_path):
+    from video_motion.packing import append_array
+    d,b,p = fixture(tmp_path, zero=True)
+    pr = d['meshes'][0]['primitives'][0]
+    values = np.zeros((6,3),dtype='<f4'); values[3:,0] = 1e-19
+    pr['targets'][0]['NORMAL'] = append_array(d,b,values,'VEC3')
+    d['meshes'][0]['weights'] = [1.0]
+    p.update(mode='rigid',owner_joint=0,bake_selected_defaults=True)
+    return d,b,p
+
+
+def test_explicit_default_bake_keeps_positions_and_bakes_only_tiny_directions(tmp_path):
+    d,b,p = default_bake_fixture(tmp_path)
+    new,blob,report = split_corrective_partition(d,b,p)
+    before=d['meshes'][0]['primitives'][0];after=new['meshes'][1]['primitives'][0]
+    assert raw_array(new,blob,after['attributes']['POSITION']).tobytes() == raw_array(d,b,before['attributes']['POSITION'])[3:].tobytes()
+    normals=raw_array(new,blob,after['attributes']['NORMAL'])
+    np.testing.assert_array_equal(normals[:,0],np.full(3,np.float32(1e-19)))
+    np.testing.assert_array_equal(normals[:,2],np.ones(3))
+    assert new['meshes'][0]['weights'] == [1.0]
+    assert report['selected_default_bake'][1]['retained_bits_identical'] is True
+
+
+@pytest.mark.parametrize('damage',['not_explicit','position','direction','preserved_skin','non_bool'])
+def test_default_bake_cannot_silently_rebase_geometry_or_large_directions(tmp_path,damage):
+    from video_motion.packing import append_array
+    d,b,p = default_bake_fixture(tmp_path);pr=d['meshes'][0]['primitives'][0]
+    if damage=='not_explicit':p.pop('bake_selected_defaults')
+    if damage=='preserved_skin':p['mode']='preserve_skin'
+    if damage=='non_bool':p['bake_selected_defaults']=1
+    if damage in ('position','direction'):
+        field='POSITION' if damage=='position' else 'NORMAL'
+        values=np.zeros((6,3),dtype='<f4');values[3:,0]=.001
+        pr['targets'][0][field]=append_array(d,b,values,'VEC3')
+    with pytest.raises(ValueError):split_corrective_partition(d,b,p)

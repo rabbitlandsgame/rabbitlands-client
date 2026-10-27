@@ -86,6 +86,9 @@ def split_corrective_partition(document, binary, profile):
     mode = profile['mode']
     if mode not in ('preserve_skin', 'rigid'):
         raise ValueError('Unknown partition mode')
+    bake_defaults = profile.get('bake_selected_defaults', False)
+    if type(bake_defaults) is not bool or (bake_defaults and mode != 'rigid'):
+        raise ValueError('Default baking requires an explicit rigid candidate profile')
     defaults = np.asarray(node.get('weights', mesh.get('weights', [0.] * len(primitive.get('targets', [])))))
     for target_index, target in enumerate(primitive.get('targets', [])):
         if set(target) - {'POSITION', 'NORMAL', 'TANGENT'}:
@@ -94,8 +97,44 @@ def split_corrective_partition(document, binary, profile):
             values = raw_array(document, binary, index)[selected]
             if mode == 'preserve_skin' and np.any(values != 0):
                 raise ValueError('Preserved-skin partition contains nonzero corrective data')
-            if mode == 'rigid' and defaults[target_index] != 0 and np.any(values != 0):
+            if mode == 'rigid' and defaults[target_index] != 0 and np.any(values != 0) and not bake_defaults:
                 raise ValueError('Non-neutral source defaults need a separately qualified base bake')
+    baked, bake_report = {}, []
+    if bake_defaults:
+        # A general positional rebase would also need original secondary-effect
+        # geometry. This narrowly scoped bake retains POSITION bits exactly;
+        # only roundoff-scale default direction corrections may be baked here.
+        if not np.isfinite(defaults).all() or len(defaults) != len(primitive['targets']):
+            raise ValueError('Invalid source corrective defaults')
+        fields = {field for target in primitive['targets'] for field in target}
+        for field in sorted(fields):
+            if field not in primitive['attributes']:
+                raise ValueError('Default bake requires an explicit source base attribute')
+            index = primitive['attributes'][field]
+            if document['accessors'][index]['componentType'] != 5126:
+                raise ValueError('Default bake requires float32 base attributes')
+            original = raw_array(document, binary, index)[selected]
+            corrections = np.stack([raw_array(document, binary, target[field])[selected]
+                                    if field in target else np.zeros((len(selected), 3))
+                                    for target in primitive['targets']])
+            values = original.copy()
+            values[:, :3] = (original[:, :3].astype(float) + np.einsum('m,mvc->vc', defaults, corrections)).astype('<f4')
+            if not np.isfinite(values).all():
+                raise ValueError('Default bake produced a non-finite base')
+            same = original.tobytes() == values.tobytes()
+            difference = float(np.max(np.abs(values.astype(float) - original.astype(float))))
+            if field == 'POSITION' and not same:
+                raise ValueError('Default bake may not change POSITION bits without original secondary geometry')
+            extent = max(float(np.abs(original[:, :3]).max()), float(np.abs(values[:, :3]).max()))
+            limit = 4 * float(np.spacing(np.float32(extent)))
+            if not np.isfinite(limit) or limit <= 0:
+                raise ValueError('Default bake has an unsupported source direction magnitude')
+            if field != 'POSITION' and difference > limit:
+                raise ValueError('Default direction bake exceeds four float32 ULPs')
+            baked[field] = values
+            bake_report.append({'field': field, 'retained_bits_identical': same,
+                                'maximum_component_change': difference,
+                                'direction_component_limit': limit if field != 'POSITION' else None})
     height = float(profile['coat_pattern_height'])
     if not np.isfinite(height) or height <= 0:
         raise ValueError('Invalid original coat pattern height')
@@ -168,6 +207,7 @@ def split_corrective_partition(document, binary, profile):
         output['indices'] = add(indices, primitive['indices'], component)
         for field, index in primitive['attributes'].items():
             values = raw_array(document, binary, index)[ids]
+            if not corrective and field in baked: values = baked[field]
             component = None
             if not corrective and mode == 'rigid' and field.startswith('JOINTS_'):
                 values = np.zeros_like(values)
@@ -233,4 +273,5 @@ def split_corrective_partition(document, binary, profile):
                           'source_triangles': len(triangles), 'selected_triangles': selected_triangles,
                           'corrective_free_vertices': len(selected), 'owner_joint': owner if mode == 'rigid' and 'owner_joints' not in profile else None,
                           'owner_joints': owners.tolist() if mode == 'rigid' and 'owner_joints' in profile else None,
+                          'selected_default_bake': bake_report,
                           'all_candidate_original_vertex_ids': global_ids, 'packing': packing}
