@@ -4,11 +4,14 @@ extends SceneTree
 const EDITOR = preload("res://src/ui/appearance_editor.gd")
 const SAVE_PATH := "user://human-workshop.json"
 const POSES := [&"idle", &"walk", &"run", &"attack_primary", &"cast_channel", &"attack_secondary", &"attack_flurry", &"combat_idle"]
+const HELD_EQUIPMENT := [{}, {0: 114, 1: 106}, {0: 163}]
 var _canvas: Control
 var _header_margin: MarginContainer
 var _editor
 var _sex: OptionButton
+var _model_choice: OptionButton
 var _outfit: OptionButton
+var _held_equipment: OptionButton
 var _pose: OptionButton
 var _quality: OptionButton
 var _pause: CheckBox
@@ -81,15 +84,21 @@ func _build_ui() -> void:
 	header.add_child(toolbar)
 	_sex = _picker(toolbar, "Body", ["Human Female", "Human Male"])
 	_sex.item_selected.connect(_select_sex)
+	_model_choice = _picker(toolbar, "Model", ["Current", "MPFB prototype"])
+	_model_choice.set_item_disabled(1, not _mpfb_available())
+	_model_choice.tooltip_text = "Compare the prototype with the current game model." if _mpfb_available() else "The MPFB prototype is not available in this preview."
+	_model_choice.item_selected.connect(_select_model)
 	_outfit = _picker(toolbar, "Outfit", ["Portrait outfit", "Vanguard", "Ranger", "Arcanist", "Warden"])
 	_outfit.item_selected.connect(func(_index: int) -> void: _refresh_outfit())
+	_held_equipment = _picker(toolbar, "Equipment", ["No equipment", "Sword and shield", "Staff"])
+	_held_equipment.tooltip_text = "Choose what the character holds. Clothing and capes follow the Outfit choice."
+	_held_equipment.item_selected.connect(func(_index: int) -> void: _refresh_outfit())
 	_pose = _picker(toolbar, "Pose", ["Idle", "Walk in place", "Run in place", "Attack forehand", "Cast", "Attack backhand", "Flurry (original)", "Combat ready"])
 	_pose.item_selected.connect(func(_index: int) -> void: _play_pose())
 	_quality = _picker(toolbar, "Graphics", ["Low", "Medium", "High"])
 	_quality.select(1)
-	_quality.item_selected.connect(func(index: int) -> void:
-		_editor.set_preview_quality(index)
-		_message.text = "High uses the portrait art in development. Low and Medium use the lightweight Human appearance.")
+	_quality.tooltip_text = "MPFB study uses High; Low/Medium use the current model."
+	_quality.item_selected.connect(_select_quality)
 	_pause = CheckBox.new()
 	_pause.text = "Pause"
 	toolbar.add_child(_pause)
@@ -122,6 +131,11 @@ func _build_ui() -> void:
 	_editor = EDITOR.new()
 	_canvas.add_child(_editor)
 	_editor.set_preview_quality(_quality.selected)
+	# The workshop's explicit equipment selector owns its loadout. The live
+	# appearance editor keeps its own Show equipment switch outside this lab.
+	for node: Node in _editor.find_children("*", "CheckBox", true, false):
+		if (node as CheckBox).text == "Show equipment":
+			(node as CheckBox).hide()
 	for node: Node in _editor.find_children("*", "Button", true, false):
 		var button := node as Button
 		if button.text == "Close":
@@ -171,6 +185,47 @@ func _default_look(sex: int) -> Dictionary:
 	return preload("res://src/actors/human_portrait_presets.gd").appearance("Mira" if sex == 0 else "Rowan").merged(
 		{"shirt": 5, "pants": 2, "boots": 2})
 
+func _mpfb_scene(sex: int) -> String:
+	return OS.get_environment("RL_MPFB_PROTOTYPE_ROOT").path_join(
+		"female/luminous_female.glb" if sex == 0 else "male/luminous_male.glb")
+
+func _mpfb_available() -> bool:
+	return not OS.get_environment("RL_MPFB_PROTOTYPE_ROOT").is_empty() \
+		and FileAccess.file_exists(_mpfb_scene(0)) and FileAccess.file_exists(_mpfb_scene(1))
+
+func _preview_model(sex: int) -> Dictionary:
+	var model: Dictionary = _models["luminous_female" if sex == 0 else "luminous_male"].duplicate(true)
+	if _model_choice.selected == 1 and _mpfb_available():
+		model.scene = _mpfb_scene(sex)
+		model.geometryProfile = "mpfb"
+		model.erase("faceAppearance")
+		model.erase("skinPalette")
+		var fit_path := _mpfb_scene(sex).get_base_dir().path_join("fit.json")
+		if FileAccess.file_exists(fit_path):
+			var face_frame: Variant = _json(fit_path).get("face_frame_head_local", {})
+			if face_frame is Dictionary and not face_frame.is_empty():
+				model.mpfbFaceFrame = face_frame
+	return model
+
+func _select_model(index: int) -> void:
+	if index == 1 and not _mpfb_available():
+		_model_choice.select(0)
+		return
+	if index == 1:
+		_quality.select(2)
+	_select_sex(_sex.selected)
+	_message.text = "MPFB prototype · High graphics · Existing animations and equipment · Your live character is unchanged." if index == 1 else "Current game model · Your live character is unchanged."
+
+func _select_quality(index: int) -> void:
+	_quality.select(index)
+	if index < 2 and _model_choice.selected == 1:
+		_model_choice.select(0)
+		_select_sex(_sex.selected)
+		_message.text = "MPFB study uses High. Low and Medium use the current game model."
+		return
+	_editor.set_preview_quality(index)
+	_message.text = "MPFB prototype · High graphics · Your live character is unchanged." if _model_choice.selected == 1 else "High uses the portrait art in development. Low and Medium use the lightweight Human appearance."
+
 func _select_sex(index: int) -> void:
 	if is_instance_valid(_editor.get("_actor")) and _current_sex >= 0:
 		_looks[str(_current_sex)] = _editor.call("_values")
@@ -182,7 +237,7 @@ func _select_sex(index: int) -> void:
 	var dto := {"actor_id": 1, "actor_type": index, "kind": 1, "x": 0, "y": 0,
 		"rotation": 0, "name": "", "appearance": look, "equipment_visuals": _loadout()}
 	_editor.set_preview_quality(_quality.selected)
-	_editor.open_for(dto, _models["luminous_female" if index == 0 else "luminous_male"], _animations, _equipment, _save_preview)
+	_editor.open_for(dto, _preview_model(index), _animations, _equipment, _save_preview)
 	for node: Node in _editor.find_children("*", "CheckBox", true, false):
 		var check := node as CheckBox
 		if check.text == "Show equipment":
@@ -195,13 +250,22 @@ func _select_sex(index: int) -> void:
 	_fit.call_deferred()
 
 func _loadout() -> Dictionary:
+	var loadout: Dictionary
 	if _outfit.selected > 0:
-		return CreationArchetypes.loadout_at(_outfit.selected - 1)
-	return {5: 225, 2: 100} if _current_sex == 0 else {5: 209, 2: 105}
+		loadout = CreationArchetypes.loadout_at(_outfit.selected - 1)
+	else:
+		loadout = {5: 225, 2: 100} if _current_sex == 0 else {5: 209, 2: 105}
+	loadout.erase(0)
+	loadout.erase(1)
+	loadout.merge(HELD_EQUIPMENT[_held_equipment.selected], true)
+	return loadout
 
 func _refresh_outfit() -> void:
 	var dto: Dictionary = _editor.get("_dto")
 	dto["equipment_visuals"] = _loadout()
+	# Raised attacks extend beyond the normal appearance framing. Keep the
+	# hands and weapon tips visible while retaining the closer unarmed view.
+	(_editor.get("_camera") as Camera3D).fov = 50.0 if _held_equipment.selected > 0 else 35.0
 	var actor: ReplicatedActor3D = _editor.get("_actor")
 	if is_instance_valid(actor):
 		actor.apply_equipment_visuals(_loadout() if bool(_editor.get("_show_equipment")) else {})
@@ -261,10 +325,12 @@ func _expect(value: bool, label: String) -> void:
 
 func _run_smoke() -> void:
 	_expect(bool(root.get_node("Network").get("offline_hud_preview")), "network is blocked for this preview")
+	_expect(_model_choice.is_item_disabled(1) == not _mpfb_available(), "MPFB selection requires both prototype files")
 	for sex: int in [0, 1]:
 		_select_sex(sex)
 		_expect(ReplicatedActor3D.HIGH_PORTRAIT.cache_metrics().texture_bundles == 0, "Medium starts without High portrait textures")
 		_expect(ReplicatedActor3D.HIGH_HAIR.cache_metrics().mesh_entries == 0, "Medium starts without High hair geometry")
+		await _smoke_equipment_options()
 		var form = _editor.get("_form")
 		for preset_name: String in ["Rowan", "Mira", "Tavi"]:
 			for button: Node in form.find_children("*", "Button", true, false):
@@ -327,6 +393,8 @@ func _run_smoke() -> void:
 		for field: String in PortraitCustomization.EXTRA_FIELDS:
 			_expect(int(_json(SAVE_PATH)[str(sex)].get(field, -1)) == int(form.values()[field]), "local preview saves the new " + field + " control")
 	await process_frame
+	if _mpfb_available():
+		await _smoke_mpfb_models()
 	_fit()
 	_expect(_editor.position.y >= 100 and _editor.get_global_rect().end.y <= root.size.y, "preview fits below toolbar")
 	await RenderingServer.frame_post_draw
@@ -345,3 +413,82 @@ func _run_smoke() -> void:
 	_canvas.queue_free()
 	await process_frame
 	quit(0 if _failures == 0 else 1)
+
+func _smoke_equipment_options() -> void:
+	var actor: ReplicatedActor3D = _editor.get("_actor")
+	var outfit: Dictionary = _loadout()
+	for choice: int in HELD_EQUIPMENT.size():
+		_held_equipment.select(choice)
+		_refresh_outfit()
+		await process_frame
+		var diagnostics := actor.equipment_diagnostics()
+		_expect(diagnostics.fallback == 0, "equipment preview uses the native assets")
+		_expect(is_equal_approx((_editor.get("_camera") as Camera3D).fov, 50.0 if choice > 0 else 35.0), "armed preview uses wider framing for raised hands and weapon tips")
+		for part: int in [0, 1]:
+			var expected := int(HELD_EQUIPMENT[choice].get(part, 0))
+			_expect(int(diagnostics.visuals.get(part, 0)) == expected, "equipment selection replaces both hands without stale props")
+			var prop_exists: bool = not actor._equipment_nodes.get(part, []).is_empty()
+			_expect(prop_exists == (expected > 0), "selected hand props exist or are removed")
+		for part: Variant in outfit:
+			if int(part) > 1:
+				_expect(diagnostics.visuals.get(part) == outfit[part], "weapon selection preserves the outfit")
+		for pose: int in [3, 5, 6, 7]:
+			_pose.select(pose)
+			_play_pose()
+			_expect(actor.animation_player.is_playing(), "attack and combat poses play with every equipment option")
+			var action: StringName = POSES[pose]
+			if action in [&"attack_primary", &"attack_secondary"]:
+				var expected: StringName = StringName(_animations.meleeStyles.unarmed[String(action)])
+				if choice > 0:
+					expected = HumanAttackLibrary.normal_clips()[0 if pose == 3 else 1]
+				_expect(actor.resolver.clip_for_action(action) == expected, "equipment selects the armed cut or unarmed jab")
+				_expect(actor.animation_player.current_animation == expected, "equipment change restarts the selected attack")
+			actor.animation_player.seek(0.35, true)
+	# The independent hand choice also survives changing the clothing preset.
+	_outfit.select(1)
+	_refresh_outfit()
+	var after_outfit := actor.equipment_diagnostics()
+	_expect(int(after_outfit.visuals.get(0, 0)) == 163 and not after_outfit.visuals.has(1), "changing outfits keeps the selected staff and removes its default shield")
+	_held_equipment.select(0)
+	_outfit.select(0)
+	_refresh_outfit()
+
+func _smoke_mpfb_models() -> void:
+	var original_model: Dictionary = _models["luminous_male"].duplicate(true)
+	_model_choice.select(1)
+	_select_model(1)
+	_expect(_quality.selected == 2, "MPFB comparison begins in High graphics")
+	for sex: int in [0, 1]:
+		_select_sex(sex)
+		var actor: ReplicatedActor3D = _editor.get("_actor")
+		_expect(actor._model_config.scene == _mpfb_scene(sex), "MPFB model is loaded only for the selected body")
+		_expect(actor._model_config.get("geometryProfile") == "mpfb", "MPFB uses its own geometry profile")
+		_expect(not actor._model_config.has("faceAppearance") and not actor._model_config.has("skinPalette"), "MPFB keeps its authored textures")
+		for field: String in ["culture", "bodyTemplate", "gender", "animationLibrary"]:
+			var source: Dictionary = _models["luminous_female" if sex == 0 else "luminous_male"]
+			_expect(actor._model_config.get(field) == source.get(field), "MPFB preserves the existing " + field + " contract")
+		await _smoke_equipment_options()
+		var look: Dictionary = _editor.call("_values")
+		_held_equipment.select(1)
+		_pose.select(5)
+		_refresh_outfit()
+		_model_choice.select(0)
+		_select_model(0)
+		actor = _editor.get("_actor")
+		_expect(_editor.call("_values") == look, "switching models preserves customization choices")
+		_expect(_held_equipment.selected == 1 and _pose.selected == 5, "switching models preserves equipment and pose")
+		_expect(actor._model_config.scene == _models["luminous_female" if sex == 0 else "luminous_male"].scene, "Current restores the game model")
+		_model_choice.select(1)
+		_select_model(1)
+		for quality: int in [0, 1]:
+			_select_quality(quality)
+			actor = _editor.get("_actor")
+			_expect(_model_choice.selected == 0 and actor.render_quality() == quality, "Low and Medium restore the accepted Current model")
+			_expect(_editor.call("_values") == look and _held_equipment.selected == 1 and _pose.selected == 5, "graphics fallback preserves appearance, equipment and pose")
+			_expect(actor._model_config.get("geometryProfile", "") != "mpfb", "Low and Medium never use the MPFB geometry profile")
+			_model_choice.select(1)
+			_select_model(1)
+	_expect(_models["luminous_male"] == original_model, "prototype preview never edits the production model registry")
+	_model_choice.select(0)
+	_held_equipment.select(0)
+	_select_model(0)

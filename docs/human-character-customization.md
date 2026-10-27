@@ -141,8 +141,16 @@ and all appearance controls. Choose **Graphics → Low / Medium / High** to
 compare the two artwork paths; the workshop starts in Medium.
 **Front view** faces the model straight toward the camera for checking the
 face and elbow placement. Dragging still lets you inspect other angles.
-The pose menu includes both single-cut directions, the original Flurry, and
-the weapon-ready pose. Equip a weapon to compare the normal cuts.
+The **Equipment** menu offers **No equipment**, **Sword and shield**, and
+**Staff** independently of the chosen clothing and cape. It uses the existing
+game assets, attachment sockets and grip rules. The pose menu includes both
+single-cut directions, the original Flurry, and the weapon-ready pose.
+Changing equipment replays the selected pose, so the normal armed cuts can be
+compared with the unarmed jabs. Use **Pause** to hold a pose for inspection.
+When the local MPFB study is available, **Model → Current / MPFB prototype**
+compares the two models with the same appearance, equipment and pose. The
+prototype uses High graphics. Choosing Low or Medium returns to the Current
+model while keeping those choices.
 **Save preview** stores choices separately for
 each body on this computer. **Screenshot** saves an image in the preview's
 private user-data folder; **Open saves** opens that folder. Closing the window
@@ -160,3 +168,12 @@ production High appearance path in front and three-quarter portrait views.
 view uses soft shadows and the existing High scene occlusion settings;
 `RL_HUMAN_PORTRAIT_LIGHTING=flat` keeps a plain diagnostic light. Portraits are
 rendered from the models, with no painted retouching of the captured images.
+
+The optional `test-mpfb-prototype.bat` opens the same workshop with the locally
+authored MPFB studies available. They use new heads and upper necks on the
+accepted body and hands, preserving current motion and equipment. They are
+review candidates, outside the production registry and package. Low/Medium
+continue using the current models. The existing hairstyles are shared; study
+brows are baked, and production stubble paint has not yet been transferred.
+See the [MPFB authoring and measured budget](../eloria-assets/tools/mpfb/README.md)
+for reproducible sources, validation scope, limitations and performance results.

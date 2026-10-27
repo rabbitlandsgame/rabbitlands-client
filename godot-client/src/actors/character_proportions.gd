@@ -157,11 +157,20 @@ static func face_frame(root: Node3D, skeleton: Skeleton3D) -> Dictionary:
 	# The two retained Human sources have distinct mouth/eye spacing. These
 	# measured rest landmarks keep fullness on the lips, not the philtrum.
 	var mouth_y := lerpf(.01560,.00328,clampf((size-.8824)/(.2679),0,1))
-	return {"to_head": to_head, "eye_y": eye_y, "mouth_y": mouth_y,
+	var result := {"to_head": to_head, "eye_y": eye_y, "mouth_y": mouth_y,
 		"eye_z": (low.z + high.z) * 0.5,
 		"eye_left": (side_low[0] + side_high[0]) * 0.5,
 		"eye_right": (side_low[1] + side_high[1]) * 0.5,
 		"scale": size}
+	# The opt-in MPFB study has measured landmarks in the same canonical
+	# Head rest frame. Production Humans retain their exact original frame.
+	var authored: Dictionary = root.get_meta("mpfb_face_frame", {})
+	for key: String in ["eye_y", "mouth_y", "eye_z", "scale"]:
+		if authored.has(key): result[key] = float(authored[key])
+	for key: String in ["eye_left", "eye_right"]:
+		var values: Array = authored.get(key, [])
+		if values.size() == 3: result[key] = Vector3(float(values[0]), float(values[1]), float(values[2]))
+	return result
 
 ## Bounded shared rest field for the front face and coherent eye/lid opening.
 ## Combined normalized extremes stay below 25 mm in the sampled unit frame;

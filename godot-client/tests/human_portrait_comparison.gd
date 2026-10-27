@@ -73,7 +73,17 @@ func run() -> void:
 		stage.add_child(actor)
 		var look := PRESETS.appearance(name).merged({"shirt": 5, "pants": 2, "boots": 2})
 		look.merge(looks.get(name, {}), true)
-		var model: Dictionary = models["luminous_female" if name == "Mira" else "luminous_male"]
+		var model: Dictionary = models["luminous_female" if name == "Mira" else "luminous_male"].duplicate(true)
+		var prototype_root := OS.get_environment("RL_MPFB_PROTOTYPE_ROOT")
+		if not prototype_root.is_empty():
+			var sex := "female" if name == "Mira" else "male"
+			model.scene = prototype_root.path_join(sex).path_join("luminous_" + sex + ".glb")
+			model.geometryProfile = "mpfb"
+			var fit_path := prototype_root.path_join(sex).path_join("fit.json")
+			if FileAccess.file_exists(fit_path):
+				model.mpfbFaceFrame = JSON.parse_string(FileAccess.get_file_as_string(fit_path)).get("face_frame_head_local", {})
+			model.erase("faceAppearance")
+			model.erase("skinPalette")
 		var loadout := {5: 225, 2: 100} if name == "Mira" else {5: 209, 2: 105}
 		var errors := actor.configure({"actor_id": 9931, "x": 0, "y": 0, "rotation": 0,
 			"kind": 1, "name": "", "appearance": look, "equipment_visuals": loadout},
@@ -121,4 +131,6 @@ func run() -> void:
 		"portrait_msaa": 2 if studio else 0,
 		"reference_pose": "front and shallow three-quarter; unchanged production idle at 0.40 seconds",
 		"failures": failures, "portraits": records}, "  "))
+	NativeAnimationImporter.clear()
+	GlbSceneCache.clear()
 	quit(1 if failures else 0)

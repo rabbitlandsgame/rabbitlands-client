@@ -19,6 +19,7 @@ const STUBBLE_APPEARANCE := preload("res://src/actors/stubble_appearance.gd")
 const HUMAN_LOCOMOTION := preload("res://src/actors/human_locomotion_polish.gd")
 const HIGH_PORTRAIT := preload("res://src/actors/high_portrait_appearance.gd")
 const HIGH_HAIR := preload("res://src/actors/high_hair_appearance.gd")
+const MPFB_PROTOTYPE := preload("res://src/actors/mpfb_prototype_appearance.gd")
 const WORLD_LABEL_STYLE := preload("res://src/ui/world_label_style.gd")
 const TextColors := preload("res://src/ui/text_colors.gd")
 const ARCHIVED_MODEL_POLICY := preload("res://src/actors/archived_model_policy.gd")
@@ -692,6 +693,10 @@ func apply_appearance_variants(appearance: Dictionary) -> void:
 	for node_value: Node in native_model.find_children("*", "MeshInstance3D", true, false):
 		var mesh_node: MeshInstance3D = node_value as MeshInstance3D
 		var mesh_name: String = mesh_node.name.to_lower()
+		if MPFB_PROTOTYPE.supported(_model_config) and mesh_name in ["body", "eyes", "scalp", "eyebrows"]:
+			# The local study has its own skin/iris atlas. Its white eyes and
+			# painted features must not receive the production source UV finish.
+			continue
 		if mesh_name.begins_with(RACE_FEATURE_PREFIX):
 			# Horn, stone, glass and growth are not skin: a race feature keeps
 			# its imported material under every skin, hair and eye choice. Keep
@@ -1098,16 +1103,26 @@ func _apply_render_quality_to_visuals() -> void:
 		# finished before this stage. Fit the final wardrobe exactly once.
 		HIGH_HAIR.restore(_native_model)
 		HIGH_PORTRAIT.restore(_native_model)
+		var mpfb := MPFB_PROTOTYPE.supported(_model_config)
+		if mpfb and _model_config.has("mpfbFaceFrame"):
+			_native_model.set_meta("mpfb_face_frame", _model_config.mpfbFaceFrame)
 		if _human_shape_needs_finish:
 			# Body refinement is identical on the head. Doing it before the
 			# individual face lets all face choices reuse the same outfit fit.
+			# MPFB's study retains the accepted canonical torso and hands.
+			# This field ends below its authored head/upper-neck replacement.
 			CHARACTER_PROPORTIONS.apply_body_refinement(_native_model, _native_skeleton, _model_config)
-			CHARACTER_PROPORTIONS.apply(_native_model, _native_skeleton, _appearance)
-			PORTRAIT_GROOM.apply(_native_model, _native_skeleton, _appearance, _model_config)
+			var shaped_appearance := MPFB_PROTOTYPE.shape_appearance(_appearance, _model_config) if mpfb else _appearance
+			CHARACTER_PROPORTIONS.apply(_native_model, _native_skeleton, shaped_appearance)
+			PORTRAIT_GROOM.apply(_native_model, _native_skeleton, shaped_appearance, _model_config)
 			_human_shape_needs_finish = false
-		HIGH_PORTRAIT.apply(_native_model, _native_skeleton, _appearance, _model_config, _render_quality)
+		if not mpfb:
+			HIGH_PORTRAIT.apply(_native_model, _native_skeleton, _appearance, _model_config, _render_quality)
 		HIGH_HAIR.apply(_native_model, _native_skeleton, _appearance, _model_config, _render_quality)
-		STUBBLE_APPEARANCE.apply(_native_model, _appearance, _model_config)
+		if mpfb:
+			MPFB_PROTOTYPE.apply(_native_model, _appearance)
+		else:
+			STUBBLE_APPEARANCE.apply(_native_model, _appearance, _model_config)
 		ACTOR_RENDER_QUALITY.apply_actor(_native_model, _render_quality)
 	var fallback := get_node_or_null("MissingModelFallback") as MeshInstance3D
 	if fallback != null:
