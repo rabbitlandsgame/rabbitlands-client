@@ -78,7 +78,7 @@ func describe(fixture: Dictionary) -> void:
 					bones.append(bone if bone >= 0 else mesh.skin.get_bind_bone(bind))
 					binds.append(matrix(mesh.skin.get_bind_pose(bind)))
 			groups.append({"mesh":mesh})
-			serial.append({"name":str(mesh.name),"surface":surface,"prefix":prefix,"vertices":vertices.size(),"targets":mesh.mesh.get_blend_shape_count(),"mode":mesh.mesh.blend_shape_mode,"bones":bones,"binds":binds,"aabb":matrix(Transform3D(Basis.IDENTITY,mesh.mesh.get_aabb().position)),"blend_buffer_bytes":raw.get("blend_shape_data",PackedByteArray()).size(),"mesh_surfaces":mesh.mesh.get_surface_count()})
+			serial.append({"name":str(mesh.name),"surface":surface,"prefix":prefix,"vertices":vertices.size(),"targets":mesh.mesh.get_blend_shape_count(),"mode":mesh.mesh.blend_shape_mode,"bones":bones,"binds":binds,"aabb_position":vector(mesh.mesh.get_aabb().position),"aabb_size":vector(mesh.mesh.get_aabb().size),"blend_buffer_bytes":raw.get("blend_shape_data",PackedByteArray()).size(),"mesh_surfaces":mesh.mesh.get_surface_count()})
 	models.append({"model":holder,"skeleton":skeleton,"player":player,"groups":groups})
 	descriptions.append({"name":fixture.name,"sha256":FileAccess.get_sha256(fixture.path),"meshes":serial,"model_global":[vector(model.global_transform.origin),vector(model.global_transform.basis.x),vector(model.global_transform.basis.y),vector(model.global_transform.basis.z)]})
 

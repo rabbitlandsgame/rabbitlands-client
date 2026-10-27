@@ -144,6 +144,12 @@ func run() -> void:
 		placements.append(p.placement)
 	for property: String in ["model_global","overhead_height","nameplate_global","selection_size"]:
 		assert(placements[0][property] == placements[1][property],"Actor placement differs: "+property)
+	if "--placement-only" in OS.get_cmdline_user_args():
+		FileAccess.open(str(job.output).path_join("actor-placement.json"),FileAccess.WRITE).store_string(JSON.stringify({"passed":true,"placements":placements},"\t"))
+		for p: Dictionary in panels: p.viewport.free()
+		NativeAnimationImporter.clear(); GlbSceneCache.clear()
+		print("CREATURE_STORAGE_PLACEMENT_PASS ",job.actor)
+		quit(); return
 	var entries := []
 	var views := [{"name":"game","yaw":0.0,"pitch":30.0},{"name":"side","yaw":90.0,"pitch":10.0},{"name":"rear","yaw":180.0,"pitch":25.0},{"name":"under","yaw":30.0,"pitch":-30.0}]
 	for clip: StringName in panels[0].player.get_animation_list():

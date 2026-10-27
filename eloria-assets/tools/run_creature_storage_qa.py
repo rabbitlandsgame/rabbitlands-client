@@ -68,6 +68,7 @@ def main():
             "analyze-native",
             "analyze-imported",
             "render",
+            "placement",
             "compare",
         ),
     )
@@ -182,8 +183,9 @@ def main():
         if ".local" not in project.parts:
             parser.error("Godot QA must use an isolated ignored .local project")
         rendering = args.phase == "render"
+        actor_setup = args.phase in ("render", "placement")
         script = (
-            "render_creature_storage.gd" if rendering else "dump_creature_storage.gd"
+            "render_creature_storage.gd" if actor_setup else "dump_creature_storage.gd"
         )
         command = [str(args.godot), "--path", str(project)]
         command += (
@@ -204,7 +206,9 @@ def main():
             "--",
             str(job_path),
         ]
-        if not rendering:
+        if args.phase == "placement":
+            command.append("--placement-only")
+        elif not rendering:
             command.append(args.phase)
         child(command, output / (args.phase + "-process"), environment, args.timeout)
         if args.phase == "fit":
