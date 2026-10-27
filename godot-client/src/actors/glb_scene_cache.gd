@@ -43,7 +43,10 @@ const PreparedLifecycle := preload("res://src/world/prepared_scene_lifecycle.gd"
 const GeometryCache := preload("res://src/world/map_geometry_cache.gd")
 const GeometrySources := preload("res://src/world/map_geometry_texture_sources.gd")
 const MapSceneCache := preload("res://src/world/map_scene_cache.gd")
+const MapMaterialPreparation := preload("res://src/world/map_material_preparation.gd")
 const WORLD_ASSET_ROOT := "res://assets/world/"
+const BOUND_MAIN_ENVIRONMENT := "ELORIA_UNDERGROUND_BOUND_PREPARE"
+const EARLY_WORLD_FILTER_ENVIRONMENT := "ELORIA_EARLY_WORLD_OBJECT_FILTER"
 
 static var _scenes: Dictionary = {}
 static var _failed: Dictionary = {}
@@ -115,6 +118,35 @@ static func install_prepared(scenes: Dictionary) -> void:
 						_scenes[path] = raw
 			else:
 				_scenes[path] = prepared
+
+## Underground's synchronous Main arrival can bind each asset before opening
+## the next, instead of retaining every asset's decoded Images simultaneously.
+## Worker preparation/publication and non-geometry consumers keep their path.
+## True means handled (individual failures retain the ordinary raw fallback).
+static func prepare_bound_main(paths: PackedStringArray) -> bool:
+	if OS.get_thread_caller_id() != OS.get_main_thread_id() or OS.get_environment(BOUND_MAIN_ENVIRONMENT) == "0" \
+			or GeometryCache.cooking or OS.get_environment("ELORIA_NO_GEOMETRY_CACHE") == "1" \
+			or not MapSceneCache.is_enabled() or PreparedContent.selected_mode() == "require-pilot": return false
+	# Preflight before publishing anything, so an unrelated caller cannot partly
+	# switch its preparation strategy merely by including one scoped asset.
+	for path: String in paths:
+		if not GeometryCache.eligible("asset",path): return false
+	for source: String in paths:
+		var path := _canonical_path(source)
+		if not _scenes.has(path) and not _failed.has(path):
+			var prepared := prepare(PackedStringArray([path]))
+			install_prepared(prepared) # Full source/payload/current-entry revalidation.
+			prepared.clear()
+		var geometry: Dictionary = _geometry_entries.get(path,{})
+		if geometry.is_empty(): continue
+		# Installed worker completions retain their first-use revalidation.
+		var verify_again := not bool(geometry.get("bound",false)) and not bool(geometry.get("prepared_on_main",false))
+		if GeometryCache.bind(geometry,verify_again): continue
+		_geometry_entries.erase(path)
+		_scenes.erase(path)
+		var raw := _build(path)
+		if raw != null: _scenes[path] = raw
+	return true
 
 ## Returns the shared scene for `path`, or null when unavailable. Treat this
 ## scene and its subresources as immutable. Like instantiate(), call only on the
@@ -294,6 +326,8 @@ static func _build_raw(path: String) -> PackedScene:
 		return null
 	if world_asset and int(state.get_additional_data(WorldObjectImages.PREPARED)) < state.get_images().size():
 		build_texture_mipmaps(state)
+	var early_filter := world_asset and OS.get_environment(EARLY_WORLD_FILTER_ENVIRONMENT) != "0" and MapMaterialPreparation.enabled()
+	if early_filter: MapMaterialPreparation.prepare(state)
 	GeometrySources.note(state,path)
 	operation_began = Time.get_ticks_usec()
 	var generated: Node = document.generate_scene(state, GltfAnimationFidelity.bake_fps(state))
@@ -304,7 +338,7 @@ static func _build_raw(path: String) -> PackedScene:
 		generated.free()
 		return null
 	if world_asset:
-		_filter_anisotropic(generated)
+		_filter_anisotropic(generated,early_filter)
 	_claim(generated, generated)
 	var packed: PackedScene = PackedScene.new()
 	operation_began = Time.get_ticks_usec()
@@ -341,15 +375,17 @@ static func build_texture_mipmaps(state: GLTFState) -> int:
 		rebuilt += 1
 	return rebuilt
 
-static func _filter_anisotropic(root: Node) -> void:
+static func _filter_anisotropic(root: Node, early_filter := false) -> void:
 	for node: Node in root.find_children("*", "MeshInstance3D", true, false):
 		var mesh: Mesh = (node as MeshInstance3D).mesh
 		if mesh == null:
 			continue
 		for surface: int in range(mesh.get_surface_count()):
 			var material := mesh.surface_get_material(surface) as BaseMaterial3D
-			if material != null:
-				material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
+			# Either opt-out restores the old unconditional late setter, so timing
+			# controls include its shader-dirty ordering as well as its final value.
+			if material != null and (not early_filter or material.texture_filter != MapMaterialPreparation.FILTER):
+				material.texture_filter = MapMaterialPreparation.FILTER
 
 # PackedScene.pack() only stores nodes owned by the packed root.
 static func _claim(node: Node, scene_owner: Node) -> void:

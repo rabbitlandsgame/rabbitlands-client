@@ -12,6 +12,7 @@ const MapImages := preload("res://src/world/map_image_extension.gd")
 const POLICY := "map-geometry-texture-bindings-v1"
 const SLOT_META := &"rl_geometry_texture_slots"
 const MAX_BINDINGS := 16384
+const MAX_SHARED_CONTAINER_BYTES := 8 * 1024 * 1024
 
 static func runtime_policy() -> Array:
 	return [Graphics.active_texture_skip(), Vram.usable_formats(), Vram.mode_name()]
@@ -152,7 +153,7 @@ static func _pool_fits(texture: Texture2D, origin: Dictionary, roles: Dictionary
 		height = maxi(1, height >> skip)
 	return texture.get_width() == width and texture.get_height() == height
 
-static func prepare(bindings: Dictionary, worker: bool) -> Dictionary:
+static func prepare(bindings: Dictionary, worker: bool, container_source := "", diagnostics: Dictionary = {}) -> Dictionary:
 	if bindings.size() > MAX_BINDINGS: return _fail("texture_binding_limit")
 	var normalised := {}
 	var union_roles := {}
@@ -222,15 +223,27 @@ static func prepare(bindings: Dictionary, worker: bool) -> Dictionary:
 				Vram.note_decoded_instead(sha)
 			var job := {"origin": origin, "sha": sha, "source": source, "roles": roles,
 				"sidecar": entry, "private": pooled != null, "key": job_key}
+			if not diagnostics.is_empty(): job["diagnostic"] = true
 			jobs_by_key[job_key] = jobs.size()
 			jobs.append(job)
 		(result.by_binding as Dictionary)[id] = jobs_by_key[job_key]
+	if not container_source.is_empty():
+		var shared := _share_embedded_container(jobs,container_source,diagnostics)
+		if not bool(shared.ok): return _fail(str(shared.error))
 	if not jobs.is_empty():
 		var background := bool(result.worker)
 		var task := WorkerThreadPool.add_group_task(
 			func(index: int) -> void: _prepare_job(jobs[index]), jobs.size(),
 			MapImages.worker_import_tasks() if background else -1, not background, "Map geometry images")
 		WorkerThreadPool.wait_for_group_task_completion(task)
+	# The shared bytes belong only to this decode call. Results retain Images
+	# for publication, never an extra copy of the source container.
+	for job: Dictionary in jobs:
+		job.erase("verified_container")
+		if not diagnostics.is_empty():
+			for key: String in ["embeddedContainerReads","embeddedContainerBytes"]:
+				_diagnostic_add(diagnostics,"counts",key,int(job.get(key,0)))
+			_diagnostic_add(diagnostics,"timings_us","geometryEmbeddedContainerReadHash",int(job.get("container_read_hash_us",0)))
 	for job: Dictionary in jobs:
 		if job.get("image") == null:
 			return _fail(str(job.get("error", "texture_prepare_failed")))
@@ -248,6 +261,36 @@ static func prepare(bindings: Dictionary, worker: bool) -> Dictionary:
 		# completion graph, including these Resources, until main-thread release.
 		for job: Dictionary in jobs: job.erase("image")
 	return result
+
+static func _share_embedded_container(jobs: Array, source: String, diagnostics: Dictionary) -> Dictionary:
+	var selected: Array[Dictionary] = []
+	var expected := ""
+	for job: Dictionary in jobs:
+		var origin: Dictionary = job.origin
+		if str(origin.kind) != "gltf_image" or str(origin.file) != source or not (job.sidecar as Dictionary).is_empty(): continue
+		var sha := str(origin.file_sha256)
+		if not expected.is_empty() and expected != sha: return {"ok":false,"error":"embedded_texture_source_changed"}
+		expected = sha
+		selected.append(job)
+	if selected.size() < 2: return {"ok":true}
+	var path := Sources.source_path(source)
+	var began := Time.get_ticks_usec() if not diagnostics.is_empty() else 0
+	var file := FileAccess.open(path,FileAccess.READ)
+	if file == null: return {"ok":false,"error":"embedded_texture_source_changed"}
+	var size := file.get_length()
+	if size <= 0 or size > MAX_SHARED_CONTAINER_BYTES:
+		file.close()
+		return {"ok":true} # Oversized sources retain the original per-job path.
+	var bytes := file.get_buffer(size)
+	file.close()
+	if Sources.digest_bytes(bytes) != expected: return {"ok":false,"error":"embedded_texture_source_changed"}
+	if not diagnostics.is_empty():
+		_diagnostic_add(diagnostics,"counts","embeddedContainerReads",1)
+		_diagnostic_add(diagnostics,"counts","embeddedContainerBytes",bytes.size())
+		_diagnostic_add(diagnostics,"counts","embeddedContainerSharedJobs",selected.size())
+		_diagnostic_add(diagnostics,"timings_us","geometryEmbeddedContainerReadHash",Time.get_ticks_usec()-began)
+	for job: Dictionary in selected: job["verified_container"] = bytes
+	return {"ok":true}
 
 static func _prepare_job(job: Dictionary) -> void:
 	var origin: Dictionary = job.origin
@@ -286,10 +329,23 @@ static func _prepare_job(job: Dictionary) -> void:
 			job["error"] = "external_texture_source_changed"
 			return
 	else:
-		var container := FileAccess.get_file_as_bytes(str(job.source))
-		if Sources.digest_bytes(container) != str(origin.get("file_sha256", "")):
-			job["error"] = "embedded_texture_source_changed"
-			return
+		var container: PackedByteArray
+		if job.has("verified_container"):
+			# Immutable, call-owned bytes already checked against this origin's
+			# complete container SHA. Every extracted image is still hashed below.
+			container = job.verified_container
+		else:
+			var detailed := bool(job.get("diagnostic",false))
+			var began := Time.get_ticks_usec() if detailed else 0
+			container = FileAccess.get_file_as_bytes(str(job.source))
+			var digest := Sources.digest_bytes(container)
+			if detailed:
+				job["embeddedContainerReads"] = 1
+				job["embeddedContainerBytes"] = container.size()
+				job["container_read_hash_us"] = Time.get_ticks_usec()-began
+			if digest != str(origin.get("file_sha256", "")):
+				job["error"] = "embedded_texture_source_changed"
+				return
 		var extracted := Sources.embedded_bytes(container, int(origin.get("image_index", -1)))
 		if not bool(extracted.get("ok", false)) or Sources.digest_bytes(extracted.get("bytes", PackedByteArray())) != str(origin.image_sha256):
 			job["error"] = "embedded_texture_bytes"
@@ -324,26 +380,41 @@ static func _image_candidate(origin: Dictionary, job: Dictionary) -> ImageTextur
 		image.convert(target_format)
 	return ImageTexture.create_from_image(image)
 
+static func _diagnostic_add(diagnostics: Dictionary, section: String, key: String, value: int) -> void:
+	var values: Dictionary = diagnostics.get(section,{})
+	values[key] = int(values.get(key,0))+value
+	diagnostics[section] = values
+
 static func apply(packed: PackedScene, prepared: Dictionary) -> bool:
 	if OS.get_thread_caller_id() != OS.get_main_thread_id():
 		return _apply_error(prepared, "texture_publication_requires_main")
 	if packed == null or not bool(prepared.get("ok", false)): return false
+	# Supplied by this acquire call only. No module/global state or Resource
+	# retention is added when the optional geometry diagnostic is enabled.
+	var diagnostics: Dictionary = prepared.get("geometry_diagnostics",{})
+	var capture := not diagnostics.is_empty()
+	var began := Time.get_ticks_usec() if capture else 0
+	if capture: _diagnostic_add(diagnostics,"counts","textureApplyCalls",1)
 	var textures: Dictionary = (prepared.get("imported", {}) as Dictionary).duplicate()
 	var bindings: Dictionary = prepared.bindings
 	var ids: Array = bindings.keys()
 	ids.sort()
 	for id: String in ids:
-		if textures.has(id): continue
+		if textures.has(id):
+			if capture: _diagnostic_add(diagnostics,"counts","textureImportedBindings",1)
+			continue
 		var origin: Dictionary = bindings[id]
 		var sha := str(origin.image_sha256)
 		var roles: Dictionary = prepared.roles[sha]
 		var pooled := Pool._published(sha)
 		if str(origin.kind) in ["external", "gltf_image"] and pooled != null and _pool_fits(pooled, origin, roles):
 			textures[id] = pooled
+			if capture: _diagnostic_add(diagnostics,"counts","texturePublishedPoolHits",1)
 			continue
 		var held: Texture2D = (prepared.pooled as Dictionary).get(id)
 		if held != null and _pool_fits(held, origin, roles):
 			textures[id] = held
+			if capture: _diagnostic_add(diagnostics,"counts","textureHeldPoolHits",1)
 			continue
 		var candidate := (prepared.get("candidates", {}) as Dictionary).get(id) as ImageTexture
 		if candidate != null and not _pool_fits(candidate, origin, roles):
@@ -353,6 +424,9 @@ static func apply(packed: PackedScene, prepared: Dictionary) -> bool:
 			var job: Dictionary = prepared.jobs[int(prepared.by_binding[id])]
 			if job.get("image") == null: return _apply_error(prepared, "texture_image_missing")
 			candidate = _image_candidate(origin, job)
+			if capture: _diagnostic_add(diagnostics,"counts","textureCandidatesCreated",1)
+		elif capture:
+			_diagnostic_add(diagnostics,"counts","textureWorkerCandidates",1)
 		if candidate == null: return _apply_error(prepared, "texture_upload_failed")
 		if str(origin.kind) in ["external", "gltf_image"]:
 			# A concurrent publication may have installed another representation
@@ -363,47 +437,59 @@ static func apply(packed: PackedScene, prepared: Dictionary) -> bool:
 			textures[id] = candidate
 	prepared["textures"] = textures
 	(prepared.get("candidates", {}) as Dictionary).clear()
-	return _apply_slots(packed, textures, {}, prepared)
+	if capture:
+		_diagnostic_add(diagnostics,"timings_us","geometryTexturePoolUpload",Time.get_ticks_usec()-began)
+		began = Time.get_ticks_usec()
+	var bound := _apply_slots(packed, textures, {}, prepared, diagnostics)
+	if capture: _diagnostic_add(diagnostics,"timings_us","geometryTextureSlotGraph",Time.get_ticks_usec()-began)
+	return bound
 
 static func _apply_slots(value: Variant, textures: Dictionary,
-		visited: Dictionary, prepared: Dictionary) -> bool:
+		visited: Dictionary, prepared: Dictionary, diagnostics: Dictionary = {}) -> bool:
 	if value is Resource:
 		var resource := value as Resource
 		var identity := resource.get_instance_id()
 		if visited.has(identity): return true
 		visited[identity] = true
+		if not diagnostics.is_empty(): _diagnostic_add(diagnostics,"counts","textureGraphResources",1)
 		if resource is Texture2D: return _apply_error(prepared, "undeclared_embedded_texture")
 		if resource is Image or resource is Shader or resource is Shape3D: return true
 		if resource is Mesh:
 			for surface: int in (resource as Mesh).get_surface_count():
-				if not _apply_slots((resource as Mesh).surface_get_material(surface), textures, visited, prepared): return false
+				if not _apply_slots((resource as Mesh).surface_get_material(surface), textures, visited, prepared, diagnostics): return false
 			return true
 		if resource is MultiMesh:
-			return _apply_slots((resource as MultiMesh).mesh, textures, visited, prepared)
+			return _apply_slots((resource as MultiMesh).mesh, textures, visited, prepared, diagnostics)
 		var bound_slots := {}
 		if resource.has_meta(SLOT_META):
 			if not resource is Material or not resource.get_meta(SLOT_META) is Dictionary:
 				return _apply_error(prepared, "texture_slot_metadata")
 			var properties := {}
-			for property: Dictionary in resource.get_property_list(): properties[str(property.name)] = true
+			var slot_properties := resource.get_property_list()
+			if not diagnostics.is_empty(): _diagnostic_add(diagnostics,"counts","textureGraphProperties",slot_properties.size())
+			for property: Dictionary in slot_properties:
+				properties[str(property.name)] = true
 			var slots: Dictionary = resource.get_meta(SLOT_META)
 			for name: Variant in slots:
 				if not name is String or not properties.has(name) or not textures.has(str(slots[name])):
 					return _apply_error(prepared, "texture_slot_unresolved")
 				resource.set(str(name), textures[str(slots[name])])
+				if not diagnostics.is_empty(): _diagnostic_add(diagnostics,"counts","textureSlotsBound",1)
 				bound_slots[str(name)] = true
-		for property: Dictionary in resource.get_property_list():
+		var stored_properties := resource.get_property_list()
+		if not diagnostics.is_empty(): _diagnostic_add(diagnostics,"counts","textureGraphProperties",stored_properties.size())
+		for property: Dictionary in stored_properties:
 			var name := str(property.name)
 			if (int(property.get("usage", 0)) & PROPERTY_USAGE_STORAGE) == 0 \
 					or name in ["resource_path", "resource_name", "script"] or name.begins_with("metadata/") or bound_slots.has(name):
 				continue
-			if not _apply_slots(resource.get(name), textures, visited, prepared): return false
+			if not _apply_slots(resource.get(name), textures, visited, prepared, diagnostics): return false
 	elif value is Array:
 		for child: Variant in value:
-			if not _apply_slots(child, textures, visited, prepared): return false
+			if not _apply_slots(child, textures, visited, prepared, diagnostics): return false
 	elif value is Dictionary:
 		for key: Variant in value:
-			if not _apply_slots(value[key], textures, visited, prepared): return false
+			if not _apply_slots(value[key], textures, visited, prepared, diagnostics): return false
 	elif value is Node or value is Callable or value is Signal:
 		return _apply_error(prepared, "executable_texture_carrier")
 	return true

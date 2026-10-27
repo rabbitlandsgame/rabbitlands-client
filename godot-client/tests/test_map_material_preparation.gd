@@ -1,5 +1,27 @@
 extends SceneTree
 const Preparation := preload("res://src/world/map_material_preparation.gd")
+const Scenes := preload("res://src/actors/glb_scene_cache.gd")
+
+## Called inside generate_scene, before _build_raw's late material pass. This
+## observes the real loader boundary rather than testing a feature flag alone.
+class GenerationWitness extends GLTFDocumentExtension:
+	# Godot duplicates registered extensions for each import. Test-only shared
+	# scalar results observe those clones without retaining state or Resources.
+	static var filters: Array[int] = []
+	static var parsed_ids: Array[int] = []
+	static var generated_ids: Array[int] = []
+	func _import_preflight(_state: GLTFState,_extensions: PackedStringArray) -> Error:
+		return OK
+	func _import_post_parse(state: GLTFState) -> Error:
+		for material: Material in state.get_materials():
+			if material is BaseMaterial3D: parsed_ids.append(material.get_instance_id())
+		return OK
+	func _import_pre_generate(state: GLTFState) -> Error:
+		for material: Material in state.get_materials():
+			if material is BaseMaterial3D:
+				generated_ids.append(material.get_instance_id())
+				filters.append((material as BaseMaterial3D).texture_filter)
+		return OK
 var checks := 0
 var failures := 0
 
@@ -27,6 +49,64 @@ func importer(material: Material) -> ImporterMesh:
 	arrays[Mesh.ARRAY_TEX_UV] = PackedVector2Array([Vector2.ZERO,Vector2.RIGHT,Vector2.DOWN])
 	source.add_surface(Mesh.PRIMITIVE_TRIANGLES,arrays,[],{},material,"Fixture")
 	return source
+
+func loaded_properties(material: Material) -> Dictionary:
+	var result := stored(material)
+	for key: Variant in result:
+		if result[key] is Texture2D:
+			var texture := result[key] as Texture2D
+			result[key] = [texture.get_class(),texture.get_width(),texture.get_height(),
+				(texture as ImageTexture).get_format() if texture is ImageTexture else -1]
+	return result
+
+func capture_build(path: String) -> Dictionary:
+	GenerationWitness.filters.clear()
+	GenerationWitness.parsed_ids.clear()
+	GenerationWitness.generated_ids.clear()
+	var packed := Scenes._build_raw(path)
+	var before: Array[int] = GenerationWitness.filters.duplicate()
+	var properties: Array = []
+	var identities := GenerationWitness.parsed_ids == GenerationWitness.generated_ids
+	if packed != null:
+		var state := packed.get_state()
+		var seen := {}
+		for node: int in state.get_node_count():
+			for property: int in state.get_node_property_count(node):
+				if state.get_node_property_name(node,property) != &"mesh": continue
+				var mesh := state.get_node_property_value(node,property) as Mesh
+				if mesh == null: continue
+				for surface: int in mesh.get_surface_count():
+					var material := mesh.surface_get_material(surface) as BaseMaterial3D
+					if material == null or seen.has(material.get_instance_id()): continue
+					var id := material.get_instance_id()
+					seen[id] = true
+					properties.append(loaded_properties(material))
+	return {"ok":packed != null and not before.is_empty(),"before":before,"properties":properties,"identities":identities}
+
+func actual_world_object_boundary() -> void:
+	var old_world := OS.get_environment(Scenes.EARLY_WORLD_FILTER_ENVIRONMENT)
+	var old_map := OS.get_environment(Preparation.ENVIRONMENT)
+	var witness := GenerationWitness.new()
+	GLTFDocument.register_gltf_document_extension(witness,true)
+	OS.set_environment(Preparation.ENVIRONMENT,"1")
+	OS.set_environment(Scenes.EARLY_WORLD_FILTER_ENVIRONMENT,"0")
+	var old_world_build := capture_build("res://assets/world/underground/wooden_pail.glb")
+	var old_actor_build := capture_build("res://assets/actors/native/races/votary_male.glb")
+	OS.set_environment(Scenes.EARLY_WORLD_FILTER_ENVIRONMENT,"1")
+	var new_world_build := capture_build("res://assets/world/underground/wooden_pail.glb")
+	var new_actor_build := capture_build("res://assets/actors/native/races/votary_male.glb")
+	expect(bool(old_world_build.ok) and bool(new_world_build.ok) and bool(old_actor_build.ok) and bool(new_actor_build.ok),"actual world object and actor raw builds succeed")
+	expect(bool(new_world_build.identities) and bool(new_actor_build.identities),"raw preparation preserves material identities from completed parse to first generation")
+	expect((new_world_build.before as Array).all(func(value: int) -> bool: return value == Preparation.FILTER) \
+		and (old_world_build.before as Array).any(func(value: int) -> bool: return value != Preparation.FILTER),"world-object sampler is final inside generate_scene while the opt-out retains late ordering")
+	expect(new_world_build.properties == old_world_build.properties,"actual world-object final stored properties match legacy ordering")
+	expect(new_actor_build.before == old_actor_build.before and new_actor_build.properties == old_actor_build.properties,"actual actor material preparation is unchanged across the world-object switch")
+	OS.set_environment(Preparation.ENVIRONMENT,"0")
+	var global_disabled := capture_build("res://assets/world/underground/wooden_pail.glb")
+	expect(global_disabled.before == old_world_build.before and global_disabled.properties == old_world_build.properties,"global map-filter opt-out also restores old world-object ordering and final properties")
+	GLTFDocument.unregister_gltf_document_extension(witness)
+	OS.set_environment(Scenes.EARLY_WORLD_FILTER_ENVIRONMENT,old_world)
+	OS.set_environment(Preparation.ENVIRONMENT,old_map)
 
 func run() -> void:
 	var old := OS.get_environment(Preparation.ENVIRONMENT)
@@ -74,6 +154,7 @@ func run() -> void:
 	worker.start(func() -> int: return Preparation.prepare(state))
 	while worker.is_alive(): await process_frame
 	expect(int(worker.wait_to_finish())==1 and disabled.texture_filter==Preparation.FILTER,"owning worker can prepare Resources without Nodes or replacement")
+	actual_world_object_boundary()
 	OS.set_environment(Preparation.ENVIRONMENT,old)
 	for frame: int in 60: await process_frame
 	print("map material preparation: ","PASS" if failures==0 else "FAIL"," (",checks," checks, ",failures," failures)")

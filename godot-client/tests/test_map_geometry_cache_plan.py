@@ -172,20 +172,56 @@ def test_overlay_adds_only_used_asset_sources_once(project):
     assert cache.plan(project, include_assets=False)["summary"]["asset_targets"] == 0
 
 
-def test_declared_scope_covers_all_active_landfall_and_gauntlet_ids():
+def test_production_scope_is_retained_and_candidates_cover_registered_interiors():
     scope = cache.read_json(PROJECT / cache.SCOPE)
+    candidates = cache.read_json(PROJECT / "data/maps/geometry-cache-interior-candidates.json")
     registry = cache.read_json(PROJECT / cache.REGISTRY)["maps"]
     catalog = cache.read_json(PROJECT / "world_authoring/continent-v2/territories.json")
     landfall = {entry["id"] for entry in catalog["entries"]}
     gauntlets = {key for key, value in registry.items() if "gauntlet" in key and "manifest" in value}
+    interiors = {"landfall_insides"} | {
+        cache.resolve_alias(registry, key) for key, value in registry.items()
+        if ("interiorOf" in value or "insidesOf" in value)
+        and cache.resolve_alias(registry, key) not in gauntlets
+    }
     assert set(scope["groups"]["landfall_continent"]) == landfall
     assert len(landfall) == 17
     assert set(scope["groups"]["gauntlets"]) == gauntlets
     assert len(gauntlets) == 17
-    assert set(scope["maps"]) == landfall | gauntlets | {"landfall_insides"}
-    assert len(scope["maps"]) == 35
+    production = landfall | gauntlets | {"landfall_insides"}
+    assert set(scope["maps"]) == production
+    assert len(scope["maps"]) == len(production)
+    assert all(cache.resolve_alias(registry, key) == key for key in scope["maps"])
+    # Registered inventory and tested candidates do not imply runtime promotion.
+    # Every interior is explicitly reproducible, while slower candidates stay
+    # outside the automatic production preparation and native consumer scope.
+    assert candidates["schema"] == scope["schema"] == 1
+    assert set(candidates["groups"]["interiors"]) == interiors
+    assert len(candidates["groups"]["interiors"]) == len(interiors)
+    assert set(candidates["maps"]) == landfall | gauntlets | interiors
+    assert len(candidates["maps"]) == len(landfall | gauntlets | interiors)
+    assert all(cache.resolve_alias(registry, key) == key for key in candidates["maps"])
+    assert candidates["asset_overlays"] == scope["asset_overlays"]
+    for group in ("landfall_continent", "gauntlets", "landfall_insides"):
+        assert candidates["groups"][group] == scope["groups"][group]
+    interior_sources = [registry[key]["manifest"] for key in interiors]
+    assert len(set(interior_sources)) == len(interior_sources)
     assert len([key for key in registry if "alias" in registry[key]
                 and cache.resolve_alias(registry, key) in gauntlets]) == 34
+
+
+def test_interior_aliases_share_one_world_target_with_canonical_source(project):
+    _, source = world(project, "cave_assembly")
+    setup_scope(project, {
+        "cave": {"manifest": source, "interiorOf": "exterior"},
+        "old_cave": {"alias": "cave"},
+        "older_cave": {"alias": "old_cave"},
+    }, ["cave", "old_cave", "older_cave"])
+    result = cache.plan(project)
+    assert result["summary"]["canonical_maps"] == 1
+    assert result["summary"]["world_targets"] == 1
+    assert result["targets"][0]["source"] == source
+    assert set(result["roots"][0]["aliases"]) == {"old_cave", "older_cave"}
 
 
 def test_supplied_job_targets_are_validated_and_assets_can_be_excluded(project):

@@ -24,28 +24,56 @@ static func harvest_presentation(map_id: String) -> Dictionary:
 	var listed: Variant = (data as Dictionary).get("harvestPresentation", {})
 	return listed if listed is Dictionary else {}
 
-static func apply(manifest: WorldManifest, world: Node3D) -> int:
+static func apply(manifest: WorldManifest, world: Node3D, diagnostics: Dictionary = {}) -> int:
 	if manifest.asset_id() != "landfall_insides":
 		return 0
 	if world.has_node("UndergroundScenery"):
 		return 0
+	var detailed := OS.get_environment("ELORIA_UNDERGROUND_DIAGNOSTICS") == "1"
+	var mark := Time.get_ticks_usec() if detailed else 0
 	var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(CONFIG))
+	if detailed:
+		diagnostics[&"undergroundConfig"] = Time.get_ticks_usec()-mark
+		mark = Time.get_ticks_usec()
 	var surfaces: Variant = data.get("surfaces", {})
 	_style_surfaces(world, surfaces if surfaces is Dictionary else {})
+	if detailed:
+		diagnostics[&"undergroundStyle"] = Time.get_ticks_usec()-mark
+		mark = Time.get_ticks_usec()
 	var paths := PackedStringArray()
 	for placement: Dictionary in data.placements:
 		var source := str(data.assets[placement.asset])
 		if not paths.has(source): paths.append(source)
+	if detailed:
+		diagnostics[&"undergroundPaths"] = Time.get_ticks_usec()-mark
+		mark = Time.get_ticks_usec()
 	# Parsed once a session and shared with the harvest nodes that stand the
 	# same files (crystal_cluster): only paths the cache lacks are built.
-	GlbSceneCache.install_prepared(GlbSceneCache.prepare(GlbSceneCache.missing(paths)))
+	if GlbSceneCache.prepare_bound_main(paths):
+		# Combined decode/install/texture binding: one asset's CPU Images retire
+		# before decoding the next. The placement loop below remains unchanged.
+		if detailed: diagnostics[&"undergroundPrepareBound"] = Time.get_ticks_usec()-mark
+	else:
+		var prepared := GlbSceneCache.prepare(GlbSceneCache.missing(paths))
+		if detailed:
+			diagnostics[&"undergroundPrepare"] = Time.get_ticks_usec()-mark
+			mark = Time.get_ticks_usec()
+		GlbSceneCache.install_prepared(prepared)
+		prepared.clear()
+		if detailed: diagnostics[&"undergroundInstall"] = Time.get_ticks_usec()-mark
 	var scenery := Node3D.new()
 	scenery.name = "UndergroundScenery"
 	world.add_child(scenery)
 	var count := 0
+	var instantiate_us := 0
+	var palette_us := 0
+	var attach_us := 0
+	var loop_began := Time.get_ticks_usec() if detailed else 0
 	for placement: Dictionary in data.placements:
 		var path := str(data.assets[placement.asset])
+		if detailed: mark = Time.get_ticks_usec()
 		var model := GlbSceneCache.instantiate(path)
+		if detailed: instantiate_us += Time.get_ticks_usec()-mark
 		if model == null:
 			push_warning("Underground scenery failed to import: " + path)
 			continue
@@ -57,7 +85,9 @@ static func apply(manifest: WorldManifest, world: Node3D) -> int:
 		if placement.asset == "mine_rail":
 			model.scale.y = .1 # Thin floor dressing, clear of character feet.
 		if placement.has("palette"):
+			if detailed: mark = Time.get_ticks_usec()
 			MineralAppearance.apply(model, placement.palette)
+			if detailed: palette_us += Time.get_ticks_usec()-mark
 		# A rock set into a wall carries the wall's outward direction: the
 		# manifest's cutaway drops it near the player while that wall faces the
 		# camera (InteriorCutaway props), and OccluderFade fades any other that
@@ -65,8 +95,14 @@ static func apply(manifest: WorldManifest, world: Node3D) -> int:
 		var outward: Variant = placement.get("outward")
 		if outward is Array and (outward as Array).size() >= 3:
 			model.set_meta("cutaway_outward", Vector3(outward[0], outward[1], outward[2]))
+		if detailed: mark = Time.get_ticks_usec()
 		scenery.add_child(model)
+		if detailed: attach_us += Time.get_ticks_usec()-mark
 		count += 1
+	if detailed:
+		diagnostics.merge({&"undergroundPlacementLoop":Time.get_ticks_usec()-loop_began,
+			&"undergroundInstantiate":instantiate_us,&"undergroundPalette":palette_us,
+			&"undergroundAttach":attach_us,&"undergroundPlacements":count,&"undergroundAssets":paths.size()},true)
 	return count
 
 ## The styling of the section a shell mesh belongs to: `<prefix><section>_...`

@@ -16,6 +16,8 @@ const REGISTRY := "res://data/maps/registry.json"
 const DIRECTORY := "user://map-geometry-cache"
 const VERSION := GeometryPolicy.VERSION
 const MAX_METADATA_BYTES := 16777216
+const DIAGNOSTICS_ENVIRONMENT := "ELORIA_GEOMETRY_DIAGNOSTICS"
+const CONTAINER_REUSE_ENVIRONMENT := "ELORIA_GEOMETRY_CONTAINER_REUSE"
 const PIPELINE_INPUTS := [
 	"res://assets/world/biome_blend/catalog.json",
 	"res://assets/world/biome_blend/object-materials.json",
@@ -136,22 +138,63 @@ static func _owned_blob(path: String) -> bool:
 	return path == path.replace("\\","/").simplify_path() and path.get_base_dir() == blobs_path() \
 		and path.get_extension() in ["scn","res"] and _hash_valid(path.get_file().get_basename())
 
-static func _validate_inputs(entry: Dictionary, verified: Dictionary = {}) -> bool:
+static func _diagnostic_add(diagnostics: Dictionary, section: String, key: String, value: int) -> void:
+	var values: Dictionary = diagnostics.get(section,{})
+	values[key] = int(values.get(key,0))+value
+	diagnostics[section] = values
+
+static func _diagnostic_size(path: String, diagnostics: Dictionary) -> int:
+	# Byte accounting is diagnostic-only. Keep the extra open/length probe
+	# outside the measured native SHA call, and expose its own overhead.
+	var began := Time.get_ticks_usec()
+	var file := FileAccess.open(path,FileAccess.READ)
+	var size := 0
+	if file != null:
+		size = file.get_length()
+		file.close()
+	_diagnostic_add(diagnostics,"timings_us","geometryVerifySizeProbe",Time.get_ticks_usec()-began)
+	return size
+
+static func _copy_diagnostic_timings(timings: Dictionary, diagnostics: Dictionary) -> void:
+	for key: String in diagnostics.get("timings_us",{}):
+		timings[key] = diagnostics.timings_us[key]
+
+static func _validate_inputs(entry: Dictionary, verified: Dictionary = {}, diagnostics: Dictionary = {}) -> bool:
 	if not entry.get("inputs") is Array or entry.inputs.is_empty() or entry.inputs.size() > 65536: return false
+	var capture := not diagnostics.is_empty()
 	var seen := {}
 	for row: Variant in entry.inputs:
+		var began := Time.get_ticks_usec() if capture else 0
 		if not row is Dictionary or not row.get("path") is String or not _hash_valid(row.get("sha256")): return false
 		if seen.has(row.path) and seen[row.path] != row.sha256: return false
 		seen[row.path] = row.sha256
+		if capture:
+			_diagnostic_add(diagnostics,"timings_us","geometryVerifySourceSchema",Time.get_ticks_usec()-began)
+			began = Time.get_ticks_usec()
 		var path := Sources.source_path(str(row.path))
+		if capture: _diagnostic_add(diagnostics,"timings_us","geometryVerifySourcePath",Time.get_ticks_usec()-began)
 		if path.is_empty(): return false
-		if verified.get(str(row.path),"") == str(row.sha256): continue
-		if FileAccess.get_sha256(path) != str(row.sha256): return false
+		if verified.get(str(row.path),"") == str(row.sha256):
+			if capture: _diagnostic_add(diagnostics,"counts","sourceProofHits",1)
+			continue
+		if capture:
+			_diagnostic_add(diagnostics,"counts","sourceHashCalls",1)
+			_diagnostic_add(diagnostics,"counts","sourceHashBytes",_diagnostic_size(path,diagnostics))
+			began = Time.get_ticks_usec()
+		var digest := FileAccess.get_sha256(path)
+		if capture: _diagnostic_add(diagnostics,"timings_us","geometryVerifySourceSha",Time.get_ticks_usec()-began)
+		if digest != str(row.sha256): return false
 	return true
 
-static func _valid_entry(kind: String, path: String, source_digest: String, verified: Dictionary = {}) -> Dictionary:
+static func _valid_entry(kind: String, path: String, source_digest: String, verified: Dictionary = {}, diagnostics: Dictionary = {}) -> Dictionary:
+	var capture := not diagnostics.is_empty()
+	var began := Time.get_ticks_usec() if capture else 0
+	if capture: _diagnostic_add(diagnostics,"counts","entryValidationCalls",1)
 	if not eligible(kind,path): return _miss("outside_geometry_scope")
 	var entry := _read(entry_path(kind,path))
+	if capture:
+		_diagnostic_add(diagnostics,"timings_us","geometryVerifyMetadataRead",Time.get_ticks_usec()-began)
+		began = Time.get_ticks_usec()
 	if entry.is_empty(): return _miss("not_prepared")
 	if int(entry.get("schema",0)) != VERSION or str(entry.get("policy","")) != policy() \
 			or str(entry.get("kind","")) != kind or str(entry.get("source","")) != logical(path) \
@@ -171,10 +214,20 @@ static func _valid_entry(kind: String, path: String, source_digest: String, veri
 		for row: Variant in binding.inputs:
 			if not row is Dictionary or declared_inputs.get(str(row.get("path","")),"") != str(row.get("sha256","")):
 				return _miss("geometry_binding_input_undeclared")
-	if not _validate_inputs(entry,verified): return _miss("geometry_dependency_changed")
+	if capture: _diagnostic_add(diagnostics,"timings_us","geometryVerifyEntrySchema",Time.get_ticks_usec()-began)
+	if not _validate_inputs(entry,verified,diagnostics): return _miss("geometry_dependency_changed")
 	for blob: Variant in entry.payloads:
-		if not blob is String or not _owned_blob(blob) or not _hash_valid(entry.payloads[blob]) \
-				or FileAccess.get_sha256(blob) != str(entry.payloads[blob]): return _miss("geometry_payload_changed")
+		began = Time.get_ticks_usec() if capture else 0
+		if not blob is String or not _owned_blob(blob) or not _hash_valid(entry.payloads[blob]):
+			return _miss("geometry_payload_changed")
+		if capture:
+			_diagnostic_add(diagnostics,"timings_us","geometryVerifyPayloadSchema",Time.get_ticks_usec()-began)
+			_diagnostic_add(diagnostics,"counts","payloadHashCalls",1)
+			_diagnostic_add(diagnostics,"counts","payloadHashBytes",_diagnostic_size(blob,diagnostics))
+			began = Time.get_ticks_usec()
+		var digest := FileAccess.get_sha256(blob)
+		if capture: _diagnostic_add(diagnostics,"timings_us","geometryVerifyPayloadSha",Time.get_ticks_usec()-began)
+		if digest != str(entry.payloads[blob]): return _miss("geometry_payload_changed")
 	if not entry.payloads.has(str(entry.primary)): return _miss("geometry_primary_undeclared")
 	for mesh: Variant in entry.shared_meshes:
 		if not entry.payloads.has(mesh) or not _hash_valid(entry.shared_meshes[mesh]): return _miss("geometry_prototype_invalid")
@@ -196,9 +249,11 @@ static func acquire(kind: String, path: String, source_digest: String, verified:
 	if cooking or not allowed or OS.get_environment("ELORIA_NO_GEOMETRY_CACHE") == "1": return _miss("geometry_disabled")
 	var timings_us := {"geometryVerify":0,"geometryRead":0,"geometryImagePrepare":0,
 		"geometryTextureBind":0,"geometryInstantiate":0}
+	var diagnostics: Dictionary = {"timings_us":{},"counts":{}} if OS.get_environment(DIAGNOSTICS_ENVIRONMENT) == "1" else {}
 	var began := Time.get_ticks_usec()
-	var result := _valid_entry(kind,path,source_digest,verified)
+	var result := _valid_entry(kind,path,source_digest,verified,diagnostics)
 	timings_us["geometryVerify"] = Time.get_ticks_usec()-began
+	_copy_diagnostic_timings(timings_us,diagnostics)
 	if str(result.status) != "hit": return result
 	began = Time.get_ticks_usec()
 	var packed := ResourceLoader.load(str(result.entry.primary),"PackedScene",ResourceLoader.CACHE_MODE_IGNORE_DEEP) as PackedScene
@@ -206,8 +261,11 @@ static func acquire(kind: String, path: String, source_digest: String, verified:
 	if packed == null: return _miss("geometry_unreadable")
 	began = Time.get_ticks_usec()
 	var texture_policy := Bindings.runtime_policy()
-	var prepared := Bindings.prepare(result.entry.bindings,OS.get_thread_caller_id() != OS.get_main_thread_id())
+	var container_source := str(result.entry.source) if kind == "asset" and OS.get_environment(CONTAINER_REUSE_ENVIRONMENT) != "0" else ""
+	var prepared := Bindings.prepare(result.entry.bindings,OS.get_thread_caller_id() != OS.get_main_thread_id(),container_source,diagnostics)
+	if not diagnostics.is_empty(): prepared["geometry_diagnostics"] = diagnostics
 	timings_us["geometryImagePrepare"] = Time.get_ticks_usec()-began
+	_copy_diagnostic_timings(timings_us,diagnostics)
 	if not bool(prepared.get("ok",false)): return _miss("geometry_texture_prepare: "+str(prepared.get("error","")))
 	if texture_policy != Bindings.runtime_policy(): return _miss("geometry_texture_policy_changed")
 	_mutex.lock()
@@ -215,36 +273,49 @@ static func acquire(kind: String, path: String, source_digest: String, verified:
 	_mutex.unlock()
 	return {"status":"hit","entry":result.entry,"resource":packed,"textures":prepared,
 		"source_digest":source_digest,"prepared_on_main":OS.get_thread_caller_id() == OS.get_main_thread_id(),
-		"timings_us":timings_us,"texture_policy":texture_policy}
+		"timings_us":timings_us,"texture_policy":texture_policy,"diagnostics":diagnostics}
 
 static func revalidate(record: Dictionary) -> bool:
 	var entry: Dictionary = record.get("entry",{})
 	if entry.is_empty(): return false
 	var source := Sources.source_path(str(entry.get("source","")))
 	var began := Time.get_ticks_usec()
-	var current := _valid_entry(str(entry.get("kind","")),source,str(record.get("source_digest","")))
+	var diagnostics: Dictionary = record.get("diagnostics",{})
+	var current := _valid_entry(str(entry.get("kind","")),source,str(record.get("source_digest","")),{},diagnostics)
 	var timings_us: Dictionary = record.get("timings_us",{})
 	timings_us["geometryVerify"] = int(timings_us.get("geometryVerify",0))+Time.get_ticks_usec()-began
+	_copy_diagnostic_timings(timings_us,diagnostics)
 	record["timings_us"] = timings_us
 	return str(current.status) == "hit" and current.entry == entry
 
-static func instantiate(record: Dictionary, verify_again := true) -> Node3D:
-	if OS.get_thread_caller_id() != OS.get_main_thread_id() or str(record.get("status","")) != "hit": return null
-	if not bool(record.get("bound",false)) and record.get("texture_policy",[]) != Bindings.runtime_policy(): return null
-	if verify_again and not revalidate(record): return null
+## Main-only Resource publication. It releases decoded CPU carriers after
+## binding a private template, without creating Nodes or skipping validation.
+static func bind(record: Dictionary, verify_again := true) -> bool:
+	if OS.get_thread_caller_id() != OS.get_main_thread_id() or str(record.get("status","")) != "hit": return false
+	if not bool(record.get("bound",false)) and record.get("texture_policy",[]) != Bindings.runtime_policy(): return false
+	if verify_again and not revalidate(record): return false
 	var packed := record.get("resource") as PackedScene
-	if packed == null: return null
+	if packed == null: return false
 	var timings_us: Dictionary = record.get("timings_us",{})
+	var diagnostics: Dictionary = record.get("diagnostics",{})
 	record["timings_us"] = timings_us
 	if not bool(record.get("bound",false)):
 		var began := Time.get_ticks_usec()
 		var bound := Bindings.apply(packed,record.get("textures",{}))
 		timings_us["geometryTextureBind"] = int(timings_us.get("geometryTextureBind",0))+Time.get_ticks_usec()-began
-		if not bound: return null
+		_copy_diagnostic_timings(timings_us,diagnostics)
+		if not bound: return false
 		record["bound"] = true
 		# The bound Resource graph now owns its textures. Decoded CPU images
 		# and temporary worker carriers must not survive a cached asset session.
 		record["textures"] = {}
+	return true
+
+static func instantiate(record: Dictionary, verify_again := true) -> Node3D:
+	if not bind(record,verify_again): return null
+	var packed := record.get("resource") as PackedScene
+	var timings_us: Dictionary = record.get("timings_us",{})
+	var diagnostics: Dictionary = record.get("diagnostics",{})
 	# This graph and every native payload were verified above. Do not reload
 	# unbound dependency templates merely to inspect them a second time.
 	var entry: Dictionary = record.entry
@@ -259,7 +330,14 @@ static func instantiate(record: Dictionary, verify_again := true) -> Node3D:
 		# templates. Mineral styling and fading create their own overrides. Keep
 		# those existing ownership semantics rather than pre-copying materials
 		# for all 6,110 underground placements on every arrival.
-		if not verified and not Lifecycle._data_only(packed,{}): return null
+		if not verified:
+			var validation_began := Time.get_ticks_usec() if not diagnostics.is_empty() else 0
+			var valid := Lifecycle._data_only(packed,{})
+			if not diagnostics.is_empty():
+				_diagnostic_add(diagnostics,"timings_us","geometryTemplateDataOnly",Time.get_ticks_usec()-validation_began)
+				_diagnostic_add(diagnostics,"counts","templateDataOnlyCalls",1)
+				_copy_diagnostic_timings(timings_us,diagnostics)
+			if not valid: return null
 		var node := packed.instantiate()
 		if node is Node3D: instance = node as Node3D
 		elif node != null: node.free()

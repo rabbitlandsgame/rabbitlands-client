@@ -75,6 +75,7 @@ func _run() -> void:
 	var old_environment := OS.get_environment("ELORIA_NO_GEOMETRY_CACHE")
 	OS.unset_environment("ELORIA_NO_GEOMETRY_CACHE")
 	Cache.initialize()
+	_run_scope_contracts()
 	if str(Cache._read("res://data/client_release.json").get("platform","source")) == "source":
 		_expect(not Cache._has_release_identity(),"source release stub keeps development preparation hints enabled")
 	var old_targets: Dictionary = Cache._targets
@@ -98,6 +99,47 @@ func _run() -> void:
 	print("map geometry cache: ","PASS" if _failures == 0 else "FAIL"," (",_failures,")")
 	quit(_failures)
 
+func _run_scope_contracts() -> void:
+	var registry: Dictionary = Cache._read(Cache.REGISTRY).get("maps",{})
+	var scope := Cache._read(Cache.SCOPE)
+	var candidates := Cache._read("res://data/maps/geometry-cache-interior-candidates.json")
+	var interiors := {"landfall_insides":true}
+	for key: String in registry:
+		var row: Dictionary = registry[key]
+		if not row.has("interiorOf") and not row.has("insidesOf"): continue
+		var resolved := MapRegistry.resolve(registry,key)
+		var canonical := str(resolved.get("registryKey",""))
+		if not canonical.contains("gauntlet"): interiors[canonical] = true
+	var grouped: Array = candidates.get("groups",{}).get("interiors",[])
+	var covered := grouped.size() == interiors.size()
+	var unique_targets := true
+	var target_counts := {}
+	for row: Dictionary in Cache.targets():
+		if str(row.get("kind","")) == "world":
+			var source := str(row.get("source",""))
+			target_counts[source] = int(target_counts.get(source,0))+1
+	for canonical: String in interiors:
+		var source := str(MapRegistry.resolve(registry,canonical).get("manifest",""))
+		var admitted := canonical == "landfall_insides"
+		covered = covered and grouped.has(canonical) and (candidates.get("maps",[]) as Array).has(canonical)
+		unique_targets = unique_targets and Cache.scoped_map(source) == admitted and Cache.eligible("world",source) == admitted \
+			and int(target_counts.get(Cache.logical(source),0)) == (1 if admitted else 0)
+	_expect(covered,"candidate inventory covers every registered non-gauntlet interior and Landfall Underground")
+	_expect(unique_targets,"production admits the existing Landfall interior while extra candidates remain opt-in")
+	var production_roots := {}
+	for group: String in ["landfall_continent","gauntlets","landfall_insides"]:
+		for identity: String in scope.get("groups",{}).get(group,[]): production_roots[identity] = true
+	var production_retained := (scope.get("maps",[]) as Array).size() == production_roots.size()
+	for identity: String in scope.get("maps",[]): production_retained = production_retained and production_roots.has(identity)
+	_expect(production_retained,"automatic preparation retains the established production root groups")
+	var aliases_covered := true
+	for key: String in registry:
+		if not (registry[key] as Dictionary).has("alias"): continue
+		var resolved := MapRegistry.resolve(registry,key)
+		if interiors.has(str(resolved.get("registryKey",""))):
+			aliases_covered = aliases_covered and Cache.eligible("world",str(resolved.get("manifest",""))) == (str(resolved.registryKey) == "landfall_insides")
+	_expect(aliases_covered,"interior aliases follow their canonical production admission")
+
 func _run_contracts() -> void:
 	var metadata := Cache.entry_path("asset",SOURCE)
 	# Remove only this private test entry. Blob files remain content-addressed
@@ -115,6 +157,7 @@ func _run_contracts() -> void:
 	if instance != null:
 		_expect(instance.get_node("Landmark").position == Vector3(2,3,4),"native hierarchy and transform are preserved")
 		instance.free()
+	_run_diagnostic_contracts()
 	_expect(_miss(Cache.acquire("asset",SOURCE,_source_digest,{},false),"geometry_disabled"),"caller can explicitly bypass geometry")
 	Cache.cooking = true
 	_expect(_miss(_acquire(),"geometry_disabled"),"cooking cannot consume cached gameplay geometry")
@@ -209,3 +252,29 @@ func _run_contracts() -> void:
 	_expect(instance != null,"new generation remains playable")
 	if instance != null: instance.free()
 	_expect(_publish(_entry),"private fixture metadata restored for a repeatable test")
+
+func _run_diagnostic_contracts() -> void:
+	var old_environment := OS.get_environment(Cache.DIAGNOSTICS_ENVIRONMENT)
+	OS.unset_environment(Cache.DIAGNOSTICS_ENVIRONMENT)
+	var ordinary := _acquire()
+	_expect((ordinary.get("diagnostics",{}) as Dictionary).is_empty(),"ordinary acquisition retains no fine diagnostic counters")
+	OS.set_environment(Cache.DIAGNOSTICS_ENVIRONMENT,"1")
+	var record := _acquire()
+	var diagnostics: Dictionary = record.get("diagnostics",{})
+	var counts: Dictionary = diagnostics.get("counts",{})
+	_expect(int(counts.get("entryValidationCalls",0)) == 1 and int(counts.get("sourceHashCalls",0)) == 2 \
+		and int(counts.get("payloadHashCalls",0)) == 1,"optional diagnostic counts the existing validation operations")
+	_expect(int(counts.get("sourceHashBytes",0)) == _source_bytes.size()+_dependency_bytes.size() \
+		and int(counts.get("payloadHashBytes",0)) == _blob_bytes.size(),"optional diagnostic records exact source and payload byte totals")
+	var instance := Cache.instantiate(record)
+	counts = diagnostics.get("counts",{})
+	_expect(instance != null and int(counts.get("entryValidationCalls",0)) == 2 \
+		and int(counts.get("templateDataOnlyCalls",0)) == 1 and int(counts.get("textureApplyCalls",0)) == 1,
+		"optional publication diagnostics preserve validation and template safety checks")
+	var phases: Dictionary = record.get("timings_us",{})
+	_expect(phases.has("geometryVerifySourceSha") and phases.has("geometryVerifyPayloadSha") \
+		and phases.has("geometryTexturePoolUpload") and phases.has("geometryTextureSlotGraph") \
+		and phases.has("geometryTemplateDataOnly"),"optional diagnostic splits hashing, texture publication and template traversal")
+	if instance != null: instance.free()
+	if old_environment.is_empty(): OS.unset_environment(Cache.DIAGNOSTICS_ENVIRONMENT)
+	else: OS.set_environment(Cache.DIAGNOSTICS_ENVIRONMENT,old_environment)

@@ -14,12 +14,45 @@ World instances keep private materials and MultiMesh buffers;
 static scenery retains the existing immutable-template sharing and its consumers
 create overrides when styling or fading an instance.
 
+On a synchronous main-thread underground arrival, each scenery asset is prepared,
+installed with full revalidation and texture-bound before preparing the next asset.
+Binding creates no Nodes and drops that asset's decoded CPU image carriers;
+the ordinary placement pass then creates the real instances. Worker preparation
+keeps its private handoff and first-use validation. Embedded-image jobs can share
+one verified source GLB of at most 8 MiB for that preparation call, while still
+checking each extracted image's hash. Larger sources keep the original per-image
+read path. The container is released before preparation returns and is never
+retained globally. For controlled comparisons,
+`ELORIA_UNDERGROUND_BOUND_PREPARE=0` restores bulk main-thread preparation and
+`ELORIA_GEOMETRY_CONTAINER_REUSE=0` restores per-image container reads.
+
 Scope is declared in `godot-client/data/maps/geometry-cache-scope.json`: all 17
 Landfall continent territories, `landfall_insides`, and all 17 canonical gauntlet
 maps. Tier aliases share their canonical scene. Landfall means the complete
 `continent-v2` territory group; the region named `landfall` is only one member.
 Streaming territories prepare their declared chunk leaves, excluding review
 GLBs. Used underground scenery assets are separate preparation targets.
+The 35 production roots resolve to 1,294 world targets and 155 used scenery
+assets, or 1,449 targets in total. `landfall_insides` is one full-map
+package with 22 sections; its 6,110 scenery placements reuse those 155 assets.
+The separate collision-face and paving shortcuts below apply to streamed
+continent chunks.
+
+`godot-client/data/maps/geometry-cache-interior-candidates.json` is a separate,
+self-contained experimental scope. It retains those production roots and adds
+the other 33 registered interior packages, including regional underground
+assemblies, individual rooms and 12 secret-area assemblies. Its 68 roots resolve
+to 1,482 preparation targets. The `interiors` group contains all 34 canonical
+interiors; compatibility aliases share their canonical package. A coverage
+contract checks registry entries marked `interiorOf` or `insidesOf` against that
+inventory. These additional full-scene packages did not improve load/first-ready
+times in the qualification cohort, so they are not read from this candidate file
+by the game or automatic preparer. Reproducing the candidate requires explicitly
+activating its scope in an owned task worktree; normal users incur no extra
+preparation time or cache storage for the rejected expansion.
+See [interior preparation and benchmarks](client-interior-preparation-performance.md)
+for the expanded scope, measured storage, validation and controlled reproduction
+workflow.
 
 This path is independent of the six optional optimization-profile features.
 Normal scoped loads can consume a valid geometry entry. Missing, stale or
@@ -40,6 +73,12 @@ Raw map and prototype imports also set their final anisotropic filter before
 first mesh materialization. `ELORIA_EARLY_MAP_FILTER=0` restores the previous
 late-filter ordering for diagnostic comparisons. The final material properties
 remain the same; this does not change the cache format.
+Raw scenery imports under `assets/world/` use the same early final filter;
+actors and other GLBs retain their existing material preparation. Setting
+`ELORIA_EARLY_WORLD_OBJECT_FILTER=0` restores the old scenery-specific ordering
+and unconditional late setter. The broader `ELORIA_EARLY_MAP_FILTER=0` control
+also disables that early scenery pass. These switches affect preparation order,
+not the final sampler, texture pixels, mip chains or stored geometry.
 The shortcuts require scoped, non-capture loads. Those source fallbacks do not
 write the legacy scene cache. Full painted mode with decorative grass retains
 ordinary collision construction, because that path also supplies triangle data

@@ -523,7 +523,7 @@ func load_world(manifest_path: String, arrival := Vector3.INF, wait_for_arrival 
 	LookGround.paint_loaded(world_root, manifest)
 	LookFoliage.paint_loaded(world_root, manifest)
 	GauntletSurfaceContrast.apply(manifest, world_root)
-	UndergroundScenery.apply(manifest, world_root)
+	_apply_underground_scenery()
 	mark = _phase(&"lookBinding", mark)
 	load_phases[&"total"] = mark - began
 	load_completed.emit(manifest)
@@ -592,6 +592,15 @@ static func publish_resident_stream(resident: Dictionary) -> bool:
 	resident["resource_timings"] = timings
 	return true
 
+func _apply_underground_scenery() -> void:
+	if manifest == null or manifest.asset_id() != "landfall_insides": return
+	var began := Time.get_ticks_usec()
+	var diagnostics := {}
+	var count := UndergroundScenery.apply(manifest,world_root,diagnostics)
+	load_phases[&"undergroundTotal"] = Time.get_ticks_usec()-began
+	load_phases[&"undergroundPlacements"] = count
+	load_phases.merge(diagnostics,true)
+
 func _materialize_geometry_world() -> bool:
 	if OS.get_thread_caller_id() != OS.get_main_thread_id() or _geometry_native.is_empty(): return false
 	var began := Time.get_ticks_usec()
@@ -612,7 +621,7 @@ func _materialize_geometry_world() -> bool:
 	LookGround.paint_loaded(world_root,manifest)
 	LookFoliage.paint_loaded(world_root,manifest)
 	GauntletSurfaceContrast.apply(manifest,world_root)
-	UndergroundScenery.apply(manifest,world_root)
+	_apply_underground_scenery()
 	MaterialOwnership.refresh(world_root)
 	load_phases[&"geometryLookBinding"] = Time.get_ticks_usec()-look_began
 	loaded_from_cache = true
@@ -681,7 +690,7 @@ func _materialize_prepared_world() -> bool:
 	LookGround.paint_loaded(world_root, manifest)
 	LookFoliage.paint_loaded(world_root, manifest)
 	GauntletSurfaceContrast.apply(manifest, world_root)
-	UndergroundScenery.apply(manifest, world_root)
+	_apply_underground_scenery()
 	load_phases[&"preparedPublish"] = Time.get_ticks_usec() - began
 	load_phases[&"total"] = int(load_phases.get(&"total", 0)) + int(load_phases[&"preparedPublish"])
 	load_completed.emit(manifest)
@@ -737,7 +746,7 @@ func _load_from_cache(mark: int, began: int) -> bool:
 	LookGround.paint_loaded(world_root, manifest)
 	LookFoliage.paint_loaded(world_root, manifest)
 	GauntletSurfaceContrast.apply(manifest, world_root)
-	UndergroundScenery.apply(manifest, world_root)
+	_apply_underground_scenery()
 	mark = _phase(&"lookBinding", mark)
 	load_phases[&"total"] = mark - began
 	load_completed.emit(manifest)
