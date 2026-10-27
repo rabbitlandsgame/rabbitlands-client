@@ -5,8 +5,8 @@
   "batch_size": 5,
   "creature_count": 235,
   "batch_count": 47,
-  "completed_batches": 1,
-  "qualified_creatures": 5,
+  "completed_batches": 2,
+  "qualified_creatures": 10,
   "status": "in progress",
   "actors": [
     {
@@ -61,7 +61,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/mossbound_stone_golem.glb",
       "source_sha256": "f7ec54b8631c5c6f16fc5ccf1d74c35470d1cb0184f4c5bd62fa63b3a3e83347",
       "source_bytes": 69058448,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "2c79d105b5f8738db97427ddbc5e4e5234c0f93f85243f5d84ac12c4cb984ede",
+      "candidate_bytes": 66628348,
+      "qualification_report": "docs/qa/creature-storage/batch-002/mossbound_stone_golem.json"
     },
     {
       "actor": "goose",
@@ -70,7 +73,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/goose.glb",
       "source_sha256": "a6e8ddef1f51e09544aeab483d20b15bd3c5baa48a519468146ef427e51d9a6a",
       "source_bytes": 66559136,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "80774e4fbe9c949d53ff646e79ce31040525b83ca0183adaad38c12846f59fac",
+      "candidate_bytes": 64599584,
+      "qualification_report": "docs/qa/creature-storage/batch-002/goose.json"
     },
     {
       "actor": "mallard_duck",
@@ -79,7 +85,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/mallard_duck.glb",
       "source_sha256": "12656dd99290b4aaa942c546054706f702a317c0448c2423c3e3a9744c3d633d",
       "source_bytes": 66527052,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "46d2cdea6d9475207ebb8cdd82db15423e85dc27c394cbf421c35e3cbad0d106",
+      "candidate_bytes": 64726064,
+      "qualification_report": "docs/qa/creature-storage/batch-002/mallard_duck.json"
     },
     {
       "actor": "raven",
@@ -88,7 +97,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/raven.glb",
       "source_sha256": "5bdf6016d10e80862dfadd8d5fe3dd3fe750898731a8c600539b0c3b8aab0a30",
       "source_bytes": 60129672,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "6565a4bf894f2e0548ab0462d5ebd0ffbd82737f404983a91fde908ec5e4c742",
+      "candidate_bytes": 58089228,
+      "qualification_report": "docs/qa/creature-storage/raven.json"
     },
     {
       "actor": "tengu",
@@ -97,7 +109,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/tengu.glb",
       "source_sha256": "023a233963f85e208c8e33ef6ffb80d89692287ddcaf1226d1f6a6717e4ac850",
       "source_bytes": 58312832,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "6db47b6378dde6c6087e8c7bd9eaf19cf5376859ad660afdcc25139c27125b1f",
+      "candidate_bytes": 57765512,
+      "qualification_report": "docs/qa/creature-storage/tengu.json"
     },
     {
       "actor": "dragon_turtle",
@@ -2124,5 +2139,10 @@
       "source_bytes": 426604,
       "status": "pending"
     }
-  ]
+  ],
+  "completed_batch_numbers": [
+    1,
+    2
+  ],
+  "reviewed_creatures": 10
 }

@@ -422,7 +422,7 @@
     "maximum_mean_channel_error": 6.357828776041667e-06,
     "maximum_channel_error": 1
   },
-  "render_scope": "Godot 4.7.2 Forward+ on NVIDIA RTX 5080 Laptop GPU, actual materials and 0.45000004 gameplay scale; all 8 full native cycles at 24 Hz plus gameplay/side/rear/underside snapshots.",
+  "render_scope": "Original 346-pair Godot Forward+ comparison used normalized raw model scale 0.45000004. A separate 346-pair complete ReplicatedActor3D comparison now verifies the actual boosted model scale 0.900000095, all eight native full cycles at 24 Hz and gameplay, side, rear and underside views with identical source/candidate cameras. Both result sets are retained.",
   "fixture_metadata_update": {
     "sha256": "d9081c27122de9a0aaf860515da5f72bae9e71b62fed12ff8e813ffe742912c7",
     "morph_weight_columns": "retain original indices 0..32 and 50..1130",
@@ -434,5 +434,21 @@
     "The source motion is mathematically identical; native import/interpolation can introduce the recorded floating-point roundoff after flat-key removal.",
     "Unused target-bound Z extent shrinks 5.72e-6 source units. Grounding, root transform, overhead height, nameplate placement and selection dimensions match exactly.",
     "Underlying draft artistic approval remains pending."
-  ]
+  ],
+  "actual_actor_render_supplement": {
+    "source_sha256": "9ebfd307319cc3798e5887017e24a3d7061c057eee57810f349ef59679a8bc40",
+    "candidate_sha256": "d9081c27122de9a0aaf860515da5f72bae9e71b62fed12ff8e813ffe742912c7",
+    "image_pairs": 346,
+    "width": 512,
+    "height": 512,
+    "different_image_pairs": 16,
+    "maximum_different_pixels": 15,
+    "maximum_pixels_above_two_levels": 1,
+    "maximum_mean_channel_error": 2.5431315104166668e-05,
+    "maximum_channel_error": 4,
+    "scope": "Complete ReplicatedActor3D setup with actual display scale, grounding and body materials; identical cameras for source/candidate, four views and every full native cycle at24Hz. Numeric playback and pixel comparisons are separate reports.",
+    "status": "passed",
+    "actual_model_scale": 0.900000095367432,
+    "visual_review": "Complete motion contact board and full-cycle previews inspected; no framing clipping observed."
+  }
 }
