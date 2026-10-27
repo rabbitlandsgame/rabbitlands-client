@@ -6,7 +6,7 @@
   "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/snapping_turtle.glb",
   "source_sha256": "4dbfd46129a5bf9f19495761a2944415cbf2bd464f62ef5253b259ff6e04c9c7",
   "runtime_sha256": "47eebc50e5ea0d8f1b77d3017bd12717ea2b2bc3777ec332041b708a0c8910e8",
-  "qualification": "appearance/motion preservation passed before task-worktree replacement",
+  "qualification": "Source/motion and normalized-import-scale render checks passed; complete gameplay secondary-effect preservation pending",
   "human_approval_changed": false,
   "recipe": {
     "tool": "eloria-assets/tools/pack_creature_storage.py",
@@ -235,8 +235,10 @@
     "scope": "Actual imported Godot mesh arrays, native-library sampled poses and crossfades or mounted gait samples, renderer activation cutoff, linear blended skin; image rendering remains a separate check.",
     "samples": 232,
     "maximum_surface_error_source_units": 2.3358331485844256e-05,
-    "maximum_surface_error_mm_at_game_scale": 0.014014986278007553,
-    "maximum_normal_angle_degrees": 0.008235409609390173
+    "maximum_surface_error_mm_at_game_scale": 0.028029972556015106,
+    "maximum_normal_angle_degrees": 0.008235409609390173,
+    "maximum_surface_error_mm_at_import_scale": 0.014014986278007553,
+    "effective_runtime_model_scale": 1.19999892
   },
   "visual": {
     "method": "Fresh Godot 4.7.2 Forward+ on RTX 5080 Laptop GPU, identical cameras/lights/materials, full 7 native cycles sampled at 24 Hz and actual model scale. Stills from game overview/side/rear plus eye closeup for Snap.",
@@ -268,7 +270,8 @@
         "max_pixels_above_two_levels": 8
       }
     },
-    "review": "Paired contact boards visually reviewed; full-cycle paired GIFs retained locally. Tiny raster-edge changes, not bit-identical pixels."
+    "review": "Paired contact boards visually reviewed; full-cycle paired GIFs retained locally. Tiny raster-edge changes, not bit-identical pixels.",
+    "scale_scope": "Normalized source import scale 0.59999946. Actual ReplicatedActor applies small-creature boost 2, producing effective model scale 1.19999892; final actual-actor/VFX capture pending."
   },
   "full_actor_placement_bounds_overhead_and_raw_lods": {
     "bounds_error": 0.0,
@@ -344,6 +347,8 @@
     "Process RSS and separate CPU/GPU frame time were not measured.",
     "The original artistic approval status is unchanged.",
     "The eye binding is equivalent within source float32 and renderer skin/normal quantization, rather than identical vertex-shader arithmetic.",
-    "One additional draw surface per creature/pass; saved corrective buffers are shared per loaded model, not multiplied by actor count."
-  ]
+    "One additional draw surface per creature/pass; saved corrective buffers are shared per loaded model, not multiplied by actor count.",
+    "Mesh partition changes seeded ash emission without the original-surface grouping/reference-skin adapter. Batch qualification is held until this secondary-effect comparison passes."
+  ],
+  "secondary_effects_qualification_status": "pending original seeded dissolve and silhouette reference-skin preservation"
 }
