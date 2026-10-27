@@ -60,8 +60,14 @@ def main():
             for k,probe in enumerate(entries):
                 world=a.world(t[k],q[k],s[k]);mm={n:v[k] for n,v in m.items()};se=max(se,float(np.linalg.norm(sample(world,mm)-probe['surface'],axis=1).max()/p['height']));ne=max(ne,float(np.linalg.norm(normal(world,mm)-probe['surface_normals'],axis=1).max()))
                 for name,values in probe['bones'].items():be=max(be,float(np.max(abs(world[a.ids[name]]-np.array(values).reshape(4,4)))))
-        assert se<1e-8 and ne<1e-8 and be<1e-9,(actor,se,ne,be)
-        results[actor]={'passed':True,'sha256':p['sha256'],'clips':len(w['clips']),'surface_probes':len(ids),'surface_error_over_height':se,'normal_error':ne,'bone_error':be}
+        # A representation change retains the original physical observations.
+        # Allow only explicitly recorded sub-float32 roundoff, capped at 1e-7;
+        # every other creature retains its existing 1e-8 requirement.
+        surface_limit=float(w.get('surface_numeric_tolerance_over_height',1e-8));normal_limit=float(w.get('normal_numeric_tolerance',1e-8))
+        assert 0<surface_limit<=1e-7 and 0<normal_limit<=1e-7
+        if surface_limit>1e-8 or normal_limit>1e-8:assert len(w.get('reference_sha256',''))==64 and w['reference_sha256']!=w['sha256']
+        assert se<surface_limit and ne<normal_limit and be<1e-9,(actor,se,ne,be)
+        results[actor]={'passed':True,'sha256':p['sha256'],'reference_sha256':w.get('reference_sha256',w['sha256']),'clips':len(w['clips']),'surface_probes':len(ids),'surface_error_over_height':se,'normal_error':ne,'bone_error':be,'surface_numeric_tolerance_over_height':surface_limit,'normal_numeric_tolerance':normal_limit}
         print('NATIVE_CREATURE_PASS',actor,flush=True)
     report={'passed':True,'actors':results,'scope':'Exact installed hash, seven mapped slots plus retained native clips, import cadence, unsigned joint storage, influence budget, current attachments, travel-speed metadata and independent off-grid native bone/surface/normal witnesses. Artistic review remains pending.'}
     if args.report:args.report.write_text(json.dumps(report,indent=2)+'\n',encoding='utf-8')

@@ -1,0 +1,403 @@
+{
+  "schema_version": 1,
+  "actor": "crystalback_tortoise",
+  "date": "2026-10-27",
+  "status": "appearance-preserving pilot installed; existing artistic draft status retained",
+  "reference_git_commit": "159bb0c5778510655fd79671c19c365e90687b79",
+  "runtime_path": "godot-client/assets/actors/native/creatures/crystalback_tortoise.glb",
+  "source_sha256": "43e5a9c682c47c224c49726d23d175895c1b3ccddee26a3db85ddbfe6fc8681f",
+  "runtime_sha256": "25ee03f9717841d7f2afb931e678e4d6e2437ad75e88c5ae01a9a6c3d0b6f1ed",
+  "storage": {
+    "source_bytes": 55913280,
+    "candidate_bytes": 41893008,
+    "source_zstd_bytes": 28634978,
+    "candidate_zstd_bytes": 25063224,
+    "original_vertices": 5368,
+    "soft_vertices": 3328,
+    "rigid_vertices": 2040,
+    "targets": 577
+  },
+  "corrective_gpu_buffers": {
+    "source_bytes": 61946720,
+    "candidate_bytes": 38405120,
+    "saved_bytes": 23541600,
+    "scope": "Actual Forward+ blend_shape_data bytes on shared mesh resources; savings are per loaded model, not multiplied by actor count."
+  },
+  "draw_surfaces": {
+    "source": 1,
+    "candidate": 2
+  },
+  "method": "Complete disconnected root-rigid shell islands removed from the dense corrective mesh. Soft body, original clip curves, zero/reset keys, materials, images, UVs, binds and original bone hierarchy retained. The riding path restores exact original packed skin on an instance-owned mesh before paw fitting and coat masks; original coat pattern height is retained. Restored per-bone culling bounds are rebuilt without changing encoded geometry.",
+  "source_validation": {
+    "source_sha256": "43e5a9c682c47c224c49726d23d175895c1b3ccddee26a3db85ddbfe6fc8681f",
+    "candidate_sha256": "25ee03f9717841d7f2afb931e678e4d6e2437ad75e88c5ae01a9a6c3d0b6f1ed",
+    "soft_geometry_skin_targets_bit_exact": true,
+    "joint_and_weight_curves_bit_exact": true,
+    "textures_materials_binds_rest_and_hierarchy_preserved": true,
+    "height": 1.7000008127765271,
+    "rigid_vertices": 2040,
+    "clips": {
+      "Idle_A": {
+        "original_knots": 1305,
+        "keys_midpoints_offgrid_samples": 2614,
+        "max_surface_error_source_units": 9.353594227453498e-08,
+        "max_surface_error_over_height": 5.502111620862543e-08,
+        "max_normal_angle_degrees": 4.094554566467037e-06,
+        "max_height_difference_source_units": 9.199811867866003e-08,
+        "max_added_surface_velocity_source_units_per_second": 9.380047283062885e-11
+      },
+      "Fighting_Idle": {
+        "original_knots": 551,
+        "keys_midpoints_offgrid_samples": 1106,
+        "max_surface_error_source_units": 9.35359401185806e-08,
+        "max_surface_error_over_height": 5.502111494041757e-08,
+        "max_normal_angle_degrees": 4.00455336570039e-06,
+        "max_height_difference_source_units": 9.199789730018892e-08,
+        "max_added_surface_velocity_source_units_per_second": 3.4647417210397264e-13
+      },
+      "Walk": {
+        "original_knots": 3839,
+        "keys_midpoints_offgrid_samples": 7682,
+        "max_surface_error_source_units": 9.354453215730044e-08,
+        "max_surface_error_over_height": 5.502616907842461e-08,
+        "max_normal_angle_degrees": 4.182619578303747e-06,
+        "max_height_difference_source_units": 9.206375772841113e-08,
+        "max_added_surface_velocity_source_units_per_second": 7.512171661901138e-09
+      },
+      "Jog": {
+        "original_knots": 2399,
+        "keys_midpoints_offgrid_samples": 4802,
+        "max_surface_error_source_units": 9.354131913300005e-08,
+        "max_surface_error_over_height": 5.502427906503388e-08,
+        "max_normal_angle_degrees": 4.182619578303747e-06,
+        "max_height_difference_source_units": 9.206412654449991e-08,
+        "max_added_surface_velocity_source_units_per_second": 7.509465060602007e-09
+      },
+      "Sword_Attack": {
+        "original_knots": 1100,
+        "keys_midpoints_offgrid_samples": 2204,
+        "max_surface_error_source_units": 9.354727829849745e-08,
+        "max_surface_error_over_height": 5.5027784454827006e-08,
+        "max_normal_angle_degrees": 4.182619578303747e-06,
+        "max_height_difference_source_units": 9.200020967270461e-08,
+        "max_added_surface_velocity_source_units_per_second": 4.130434609025867e-09
+      },
+      "Hit_Chest": {
+        "original_knots": 563,
+        "keys_midpoints_offgrid_samples": 1130,
+        "max_surface_error_source_units": 9.35404122038272e-08,
+        "max_surface_error_over_height": 5.5023745577540215e-08,
+        "max_normal_angle_degrees": 4.182619578303747e-06,
+        "max_height_difference_source_units": 9.200005623988261e-08,
+        "max_added_surface_velocity_source_units_per_second": 6.623546698774422e-09
+      },
+      "Death_A": {
+        "original_knots": 1947,
+        "keys_midpoints_offgrid_samples": 3898,
+        "max_surface_error_source_units": 9.35416256914375e-08,
+        "max_surface_error_over_height": 5.502445939344029e-08,
+        "max_normal_angle_degrees": 4.182619578303747e-06,
+        "max_height_difference_source_units": 9.221295327321855e-08,
+        "max_added_surface_velocity_source_units_per_second": 3.755296681555101e-09
+      }
+    },
+    "elapsed_seconds": 204.02473359997384
+  },
+  "runtime_validation": {
+    "maximum_position_error": 4.9365546045777455e-05,
+    "maximum_normal_angle_degrees": 4.829673078902934e-06,
+    "worst_position": {
+      "label": "RESET@0.0",
+      "max_surface_error": 4.9365546045777455e-05,
+      "max_normal_degrees": 2.9575586669421963e-06,
+      "p99_normal_degrees": 2.561320938754782e-06
+    },
+    "worst_normal": {
+      "label": "Death_A@0.933",
+      "max_surface_error": 4.1072102701713815e-05,
+      "max_normal_degrees": 4.829673078902934e-06,
+      "p99_normal_degrees": 4.00455336570039e-06
+    }
+  },
+  "runtime_samples": 232,
+  "runtime_max_position_difference_mm_at_game_scale": 0.02902694107491714,
+  "mounted_validation": {
+    "samples": 260,
+    "maximum_position_error": 0.0,
+    "compressed_payload_maximum_position_error": 0.0,
+    "complete_actor_placement": {
+      "body_bounds_error": 1.19209289550781e-07,
+      "failures": [],
+      "maximum_transform_error": 0.0,
+      "mounted_samples": 260,
+      "passed": true,
+      "reference_sha256": "43e5a9c682c47c224c49726d23d175895c1b3ccddee26a3db85ddbfe6fc8681f",
+      "runtime_sha256": "25ee03f9717841d7f2afb931e678e4d6e2437ad75e88c5ae01a9a6c3d0b6f1ed"
+    }
+  },
+  "independent_blender": {
+    "baseline": {
+      "sha256": "43e5a9c682c47c224c49726d23d175895c1b3ccddee26a3db85ddbfe6fc8681f",
+      "passed": true,
+      "surface_probes": 144,
+      "clips": {
+        "Idle_A": {
+          "surface_error_over_height": 7.722451595368424e-07,
+          "bone_head_error_over_height": 2.8389564328732476e-07,
+          "poses": 3
+        },
+        "Fighting_Idle": {
+          "surface_error_over_height": 2.3519995371323637e-07,
+          "bone_head_error_over_height": 2.49505718366307e-07,
+          "poses": 3
+        },
+        "Walk": {
+          "surface_error_over_height": 6.895376093018549e-07,
+          "bone_head_error_over_height": 3.27296461693261e-07,
+          "poses": 3
+        },
+        "Jog": {
+          "surface_error_over_height": 7.248852620808907e-07,
+          "bone_head_error_over_height": 3.3701166047588165e-07,
+          "poses": 3
+        },
+        "Sword_Attack": {
+          "surface_error_over_height": 7.750280423214875e-07,
+          "bone_head_error_over_height": 2.773243619465782e-07,
+          "poses": 3
+        },
+        "Hit_Chest": {
+          "surface_error_over_height": 8.446172187090753e-07,
+          "bone_head_error_over_height": 3.160404415373333e-07,
+          "poses": 3
+        },
+        "Death_A": {
+          "surface_error_over_height": 5.782935703408657e-07,
+          "bone_head_error_over_height": 3.42022477452137e-07,
+          "poses": 3
+        }
+      },
+      "max_surface_error_over_height": 8.446172187090753e-07,
+      "max_bone_head_error_over_height": 3.42022477452137e-07,
+      "scope": "Independent fresh Blender import geometry/motion witness check. Blender is not the authority for runtime morph normal shading."
+    },
+    "candidate": {
+      "sha256": "25ee03f9717841d7f2afb931e678e4d6e2437ad75e88c5ae01a9a6c3d0b6f1ed",
+      "passed": true,
+      "surface_probes": 144,
+      "clips": {
+        "Idle_A": {
+          "surface_error_over_height": 7.722451595368424e-07,
+          "bone_head_error_over_height": 2.8389564328732476e-07,
+          "poses": 3
+        },
+        "Fighting_Idle": {
+          "surface_error_over_height": 2.3519995371323637e-07,
+          "bone_head_error_over_height": 2.49505718366307e-07,
+          "poses": 3
+        },
+        "Walk": {
+          "surface_error_over_height": 6.895376093018549e-07,
+          "bone_head_error_over_height": 3.27296461693261e-07,
+          "poses": 3
+        },
+        "Jog": {
+          "surface_error_over_height": 7.248852620808907e-07,
+          "bone_head_error_over_height": 3.3701166047588165e-07,
+          "poses": 3
+        },
+        "Sword_Attack": {
+          "surface_error_over_height": 7.750280423214875e-07,
+          "bone_head_error_over_height": 2.773243619465782e-07,
+          "poses": 3
+        },
+        "Hit_Chest": {
+          "surface_error_over_height": 8.446172187090753e-07,
+          "bone_head_error_over_height": 3.160404415373333e-07,
+          "poses": 3
+        },
+        "Death_A": {
+          "surface_error_over_height": 5.782935703408657e-07,
+          "bone_head_error_over_height": 3.42022477452137e-07,
+          "poses": 3
+        }
+      },
+      "max_surface_error_over_height": 8.446172187090753e-07,
+      "max_bone_head_error_over_height": 3.42022477452137e-07,
+      "scope": "Independent fresh Blender import geometry/motion witness check. Blender is not the authority for runtime morph normal shading."
+    }
+  },
+  "renderer": {
+    "method": "Godot 4.7.2 Forward+ on NVIDIA RTX 5080 Laptop GPU, same lights, cameras and materials. Full native cycles at 24 samples per second; stills from gameplay, side and rear. Wild scale .588, mounted scale .882.",
+    "wild": {
+      "unique_image_pairs": 369,
+      "width": 640,
+      "height": 640,
+      "worst_mean_channel_error": 0.005098470052083333,
+      "maximum_pixels_above_two_levels": 42
+    },
+    "mounted_including_all_coats": {
+      "unique_image_pairs": 240,
+      "width": 640,
+      "height": 640,
+      "worst_mean_channel_error": 0.0022550455729166666,
+      "maximum_pixels_above_two_levels": 9
+    },
+    "difference_interpretation": "Small edge rasterization changes; maximum channel error at a silhouette pixel can be large. Not pixel-bit-identical rendering."
+  },
+  "installed_native_check": {
+    "passed": true,
+    "actors": {
+      "crystalback_tortoise": {
+        "passed": true,
+        "sha256": "25ee03f9717841d7f2afb931e678e4d6e2437ad75e88c5ae01a9a6c3d0b6f1ed",
+        "reference_sha256": "43e5a9c682c47c224c49726d23d175895c1b3ccddee26a3db85ddbfe6fc8681f",
+        "clips": 7,
+        "surface_probes": 144,
+        "surface_error_over_height": 4.0060747440340843e-08,
+        "normal_error": 5.821064261429552e-08,
+        "bone_error": 0.0,
+        "surface_numeric_tolerance_over_height": 1e-07,
+        "normal_numeric_tolerance": 1e-07
+      }
+    },
+    "scope": "Exact installed hash, seven mapped slots plus retained native clips, import cadence, unsigned joint storage, influence budget, current attachments, travel-speed metadata and independent off-grid native bone/surface/normal witnesses. Artistic review remains pending."
+  },
+  "fresh_import_playback": {
+    "passed": true,
+    "failures": []
+  },
+  "tests": {
+    "focused_python_checks": 28,
+    "retained_skin_engine_checks": 21,
+    "fresh_editor_import": "Second pass completed without script/resource/import errors; fresh-project UID fallback warnings retained in private logs."
+  },
+  "benchmarks": {
+    "benchmark": {
+      "gpu": "NVIDIA GeForce RTX 5080 Laptop GPU",
+      "actors": 16,
+      "viewport": [
+        640,
+        640
+      ],
+      "samples_per_run": 140,
+      "warmup_frames": 60,
+      "order": "baseline, candidate, candidate, baseline",
+      "runs": [
+        {
+          "model": "baseline",
+          "median_cpu_animation_ms": 1.9344999999999999,
+          "median_frame_wall_ms": 2.546,
+          "p95_frame_wall_ms": 9.719949999999999,
+          "draw_calls": 16
+        },
+        {
+          "model": "candidate",
+          "median_cpu_animation_ms": 1.3559999999999999,
+          "median_frame_wall_ms": 1.8525,
+          "p95_frame_wall_ms": 5.1298999999999975,
+          "draw_calls": 32
+        },
+        {
+          "model": "candidate",
+          "median_cpu_animation_ms": 1.3860000000000001,
+          "median_frame_wall_ms": 1.771,
+          "p95_frame_wall_ms": 2.934099999999999,
+          "draw_calls": 32
+        },
+        {
+          "model": "baseline",
+          "median_cpu_animation_ms": 1.516,
+          "median_frame_wall_ms": 1.9245,
+          "p95_frame_wall_ms": 2.30205,
+          "draw_calls": 16
+        }
+      ],
+      "limitation": "Small uncapped scene; timing includes scheduling and warmup effects. No game-wide FPS or CPU/GPU split claimed."
+    },
+    "mount-benchmark": {
+      "gpu": "NVIDIA GeForce RTX 5080 Laptop GPU",
+      "actors": 16,
+      "viewport": [
+        640,
+        640
+      ],
+      "samples_per_run": 140,
+      "warmup_frames": 60,
+      "order": "baseline, candidate, candidate, baseline",
+      "runs": [
+        {
+          "model": "baseline",
+          "median_cpu_animation_ms": 0.7655000000000001,
+          "median_frame_wall_ms": 1.2534999999999998,
+          "p95_frame_wall_ms": 1.72345,
+          "draw_calls": 16
+        },
+        {
+          "model": "candidate",
+          "median_cpu_animation_ms": 0.502,
+          "median_frame_wall_ms": 0.835,
+          "p95_frame_wall_ms": 1.1844,
+          "draw_calls": 32
+        },
+        {
+          "model": "candidate",
+          "median_cpu_animation_ms": 0.5845,
+          "median_frame_wall_ms": 1.044,
+          "p95_frame_wall_ms": 2.1809499999999993,
+          "draw_calls": 32
+        },
+        {
+          "model": "baseline",
+          "median_cpu_animation_ms": 0.638,
+          "median_frame_wall_ms": 1.0665,
+          "p95_frame_wall_ms": 1.7838999999999994,
+          "draw_calls": 16
+        }
+      ],
+      "limitation": "Small uncapped scene; timing includes scheduling and warmup effects. No game-wide FPS or CPU/GPU split claimed."
+    }
+  },
+  "known_limitations": [
+    {
+      "test": "test_tortoise_mount.gd",
+      "result": "Existing supported-sole floor assertion fails on both original and candidate. No movement/grounding fix included.",
+      "original": {
+        "checks": 1354,
+        "failures": 1,
+        "max_cape_link_error": 0.0012965202331543,
+        "max_leg_reach_error": 0.0,
+        "max_rider_contact_error": 5.52951576082705e-07,
+        "max_rotation_step_radians": 0.0731069445610046,
+        "max_supported_sole_height": 0.104561418294907,
+        "max_supported_sole_speed_error": 0.000225029492867179,
+        "min_idle_cape_drop": 1.05202412605286,
+        "min_idle_drop_increase": 0.261900901794434,
+        "minimum_sole_height": 0.0996767282485962,
+        "normal_repack_error": 0.000128849787870422,
+        "rebound_paw_vertices": 964,
+        "tangent_repack_error": 5.83827495574951e-05
+      },
+      "candidate": {
+        "checks": 1396,
+        "failures": 1,
+        "max_cape_link_error": 0.0012965202331543,
+        "max_leg_reach_error": 0.0,
+        "max_rider_contact_error": 5.52951576082705e-07,
+        "max_rotation_step_radians": 0.0731069445610046,
+        "max_supported_sole_height": 0.104561418294907,
+        "max_supported_sole_speed_error": 0.000145058424095623,
+        "min_idle_cape_drop": 1.05202412605286,
+        "min_idle_drop_increase": 0.261900901794434,
+        "minimum_sole_height": 0.0996767282485962,
+        "normal_repack_error": 0.000127243067254312,
+        "rebound_paw_vertices": 964,
+        "tangent_repack_error": 0.000153005123138428
+      }
+    },
+    "This representation is visually equivalent within measured float/skin quantization error, rather than identical vertex shader arithmetic. Package compression remains byte-exact.",
+    "The 577 corrective channels remain for the soft body; CPU curve evaluation is not removed. Graphics corrective storage falls by 38%, but the extra draw surface can add CPU/render-pass overhead.",
+    "Whole-process RAM and separate GPU frame timings were not measured.",
+    "Artistic approval of the underlying creature draft remains pending."
+  ]
+}
