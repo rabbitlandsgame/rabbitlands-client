@@ -1436,16 +1436,16 @@
       "objectId": 59283,
       "role": "information",
       "position": [
-        107,
+        102,
         0,
         235
       ],
       "serverTile": [
-        107,
+        102,
         89
       ],
       "section": "watch_house",
-      "label": "The watch duty board: a column for each people that keeps the watch, names chalked in eight hands, and nobody's name at the top."
+      "label": "The watch duty board: a sheet pinned up for each people that keeps the watch, the names in eight hands, and nobody's name at the top."
     },
     {
       "id": "netmender_house-interactive0",
@@ -1461,7 +1461,7 @@
         87
       ],
       "section": "netmender_house",
-      "label": "Jessamy's net frame: a boat's net stretched over the mending table, half its knots new. She says she can tell which harbour tied the old ones."
+      "label": "Jessamy's net frame: a boat's net hung from the mending pole, half its knots new. She says she can tell which harbour tied the old ones."
     },
     {
       "id": "castle-interactive0",
@@ -1541,7 +1541,7 @@
         153
       ],
       "section": "castle",
-      "label": "The Mycelari seat. Lichen has grown over its arms; the Mycelari asked that nobody scrape it off, and nobody has."
+      "label": "The Mycelari seat. Lichen has grown over its arms and round its foot; the Mycelari asked that nobody scrape it off, and nobody has."
     },
     {
       "id": "castle-interactive5",
@@ -1557,7 +1557,7 @@
         151
       ],
       "section": "castle",
-      "label": "The Stoneborn seat. They cut the stone it stands on and sent no chair and no delegate: a cut stone, they say, keeps a place well enough."
+      "label": "The Stoneborn place. They sent no chair and no delegate, only a stone cut from their own quarry and stood where a chair would stand: a stone, they say, keeps a place well enough."
     },
     {
       "id": "castle-interactive6",
@@ -1630,7 +1630,7 @@
       "step": 0.1
     },
     "gridAlignment": "tile-centres-v1",
-    "sha256": "3d7f8fa005b8dba1128443371d09c4cc3393fd9c14fca11a0b0c93a3c2308a22",
+    "sha256": "a984437e1b7c8bd2838acdc7591b0edb4ea3f531fb6ed7794c1ad05be98caede",
     "nodeNames": [
       "Build_castle_east_ashlar_wall",
       "Build_castle_east_decal_banner_glasswarden",
@@ -1659,6 +1659,8 @@
       "Build_castle_stair0_timber_band_shade",
       "Build_castle_west_ashlar_wall",
       "Build_castle_west_door_daylight",
+      "Build_castle_west_iron",
+      "Build_castle_west_oak_planks_shade",
       "Build_castle_west_timber_band",
       "Build_castle_west_wall_cap",
       "Build_castle_west_window_leaded_tall",
@@ -1797,6 +1799,7 @@
       "Build_watch_house_east_window_leaded",
       "Build_watch_house_north_decal_banner_orun",
       "Build_watch_house_north_decal_banner_ssarathi",
+      "Build_watch_house_north_decal_map_landfall",
       "Build_watch_house_north_lime_plaster",
       "Build_watch_house_north_timber_band",
       "Build_watch_house_north_wall_cap",
@@ -1804,7 +1807,6 @@
       "Build_watch_house_south_timber_band",
       "Build_watch_house_south_wall_cap",
       "Build_watch_house_south_window_leaded",
-      "Build_watch_house_west_decal_map_landfall",
       "Build_watch_house_west_door_daylight",
       "Build_watch_house_west_lime_plaster",
       "Build_watch_house_west_timber_band",
@@ -1931,7 +1933,7 @@
     "servedGrid": {
       "binary": "served-grid.escg.gz",
       "format": "ESCG-v2",
-      "sha256": "f9f2a4a69b339108974ebe820beeae79f71ec31a05d409f97bf427f62058d313",
+      "sha256": "aee51c20296f00a7f0c602e81ac719008aace491bbfffb52fdf03da54a764312",
       "unitMetres": 0.05,
       "climbMetres": 1.0,
       "originMetres": -100.0,
@@ -3032,9 +3034,9 @@
       {
         "id": "castle-light-1",
         "position": [
-          21.0,
+          23.8,
           2.3,
-          171.7
+          165.0
         ],
         "color": [
           1.0,
@@ -3825,6 +3827,24 @@
       },
       {
         "node": "Build_castle_west_door_daylight",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "castle"
+      },
+      {
+        "node": "Build_castle_west_iron",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "castle"
+      },
+      {
+        "node": "Build_castle_west_oak_planks_shade",
         "outward": [
           -1.0,
           0,
@@ -5075,6 +5095,15 @@
         "section": "watch_house"
       },
       {
+        "node": "Build_watch_house_north_decal_map_landfall",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "watch_house"
+      },
+      {
         "node": "Build_watch_house_north_lime_plaster",
         "outward": [
           0.0,
@@ -5134,15 +5163,6 @@
           0.0,
           0,
           1.0
-        ],
-        "section": "watch_house"
-      },
-      {
-        "node": "Build_watch_house_west_decal_map_landfall",
-        "outward": [
-          -1.0,
-          0,
-          0.0
         ],
         "section": "watch_house"
       },
@@ -7580,13 +7600,14 @@
     "imageSize": [
       972,
       972
-    ]
+    ],
+    "liveSpanMetres": 40
   },
   "provenance": {
     "source": "_continent_v2/content/landfall_town.json",
-    "sourceSha256": "bb454c1c620845e8a87b6000479c0b523d2481f99d6ab46873b7f6c0a4af5881",
+    "sourceSha256": "651033ef890d8f91ef0314ddf36d047ac79a953e58392199106e29f6bf42ec81",
     "builder": "_continent_v2/build_town_interiors.py",
-    "builderSha256": "86ad2d46102926a0479f69b08a610acc29c98d5bad7e42eb0cba3786ce656ddd",
+    "builderSha256": "efc1ad30222572a77ae78d83d6ed9fff8c733880ce0183462aae7c1940a338c2",
     "imports": {
       "_continent_v2/build_underground.py": "d4ad29b2b55f51752aea4478d782915cd1b774cf59611e689b84d868468e2845",
       "_continent_v2/town_source.py": "bf9eabfb14686f95df0b95871b0798a512147e6bdd808232b358374d48ca3f84",

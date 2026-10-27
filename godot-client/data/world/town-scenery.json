@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "map": "landfall_town",
-  "sourcePlanSha256": "bb454c1c620845e8a87b6000479c0b523d2481f99d6ab46873b7f6c0a4af5881",
+  "sourcePlanSha256": "651033ef890d8f91ef0314ddf36d047ac79a953e58392199106e29f6bf42ec81",
   "assets": {
     "crystal_cluster": "res://assets/world/underground/crystal_cluster.glb",
     "supply_crate": "res://assets/world/underground/supply_crate.glb",
@@ -9,6 +9,7 @@
     "barrel_stack": "res://assets/world/underground/barrel_stack.glb",
     "tool_rack": "res://assets/world/underground/tool_rack.glb",
     "feed_sacks": "res://assets/world/underground/feed_sacks.glb",
+    "moor_stone_1": "res://assets/world/underground/moor_stone_1.glb",
     "lichen_mat": "res://assets/world/underground/lichen_mat.glb",
     "terracotta_pots": "res://assets/world/underground/terracotta_pots.glb",
     "harvest_baskets": "res://assets/world/underground/harvest_baskets.glb",
@@ -22,7 +23,6 @@
     "lens_tripod": "res://assets/world/underground/lens_tripod.glb",
     "lens_grinder": "res://assets/world/underground/lens_grinder.glb",
     "lens_crate": "res://assets/world/underground/lens_crate.glb",
-    "sundial_plinth": "res://assets/world/underground/sundial_plinth.glb",
     "flower_planter": "res://assets/world/underground/flower_planter.glb",
     "citrus_planter": "res://assets/world/underground/citrus_planter.glb",
     "potted_cypress": "res://assets/world/underground/potted_cypress.glb",
@@ -50,7 +50,6 @@
     "stone_fireplace": "res://assets/world/underground/stone_fireplace.glb",
     "writing_desk_ledgers": "res://assets/world/underground/writing_desk_ledgers.glb",
     "wall_sconce": "res://assets/world/underground/wall_sconce.glb",
-    "chandelier": "res://assets/world/underground/chandelier.glb",
     "anvil_stump": "res://assets/world/underground/anvil_stump.glb",
     "forge_hearth": "res://assets/world/underground/forge_hearth.glb",
     "weapon_rack_with_weapons": "res://assets/world/underground/weapon_rack_with_weapons.glb",
@@ -484,13 +483,31 @@
       "cutawayWall": "Build_tavern_ground_east_soot_brick"
     },
     {
-      "asset": "barrel_stack",
+      "asset": "supply_crate",
       "position": [
-        36.0,
+        36.4,
         0,
-        302.65
+        302.8
       ],
-      "yaw": 90
+      "yaw": 8
+    },
+    {
+      "asset": "milk_churn",
+      "position": [
+        35.3,
+        0,
+        303.0
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "milk_churn",
+      "position": [
+        35.38,
+        0,
+        302.48
+      ],
+      "yaw": 40
     },
     {
       "asset": "feed_sacks",
@@ -2081,17 +2098,17 @@
     {
       "asset": "notice_board",
       "position": [
-        106.4,
+        101.01,
         0,
-        233.01
+        234.6
       ],
-      "yaw": 0,
+      "yaw": 90,
       "outward": [
-        0.0,
+        -1.0,
         0,
-        -1.0
+        0.0
       ],
-      "cutawayWall": "Build_watch_house_north_lime_plaster"
+      "cutawayWall": "Build_watch_house_west_lime_plaster"
     },
     {
       "asset": "trestle_table",
@@ -2625,17 +2642,12 @@
     {
       "asset": "wall_sconce",
       "position": [
-        20.71,
+        23.8,
         2.0,
-        171.7
+        164.88
       ],
-      "yaw": 90,
-      "outward": [
-        -1.0,
-        0,
-        0.0
-      ],
-      "cutawayWall": "Build_castle_west_ashlar_wall"
+      "yaw": 0,
+      "cutawayWall": "Part_castle_2_ashlar_wall"
     },
     {
       "asset": "wall_sconce",
@@ -2652,15 +2664,6 @@
       "position": [
         43.5,
         0,
-        169.5
-      ],
-      "yaw": 0
-    },
-    {
-      "asset": "chandelier",
-      "position": [
-        43.5,
-        3.2,
         169.5
       ],
       "yaw": 0
@@ -2720,13 +2723,18 @@
       "yaw": 157.5
     },
     {
-      "asset": "sundial_plinth",
+      "asset": "moor_stone_1",
       "position": [
         45.41,
         0,
         174.12
       ],
-      "yaw": 202.5
+      "yaw": 202.5,
+      "scale": 0.5,
+      "palette": {
+        "stone": "#f2f2f2",
+        "mineral": "#f2f2f2"
+      }
     },
     {
       "asset": "high_seat",
@@ -3214,12 +3222,44 @@
     {
       "asset": "lichen_mat",
       "position": [
-        38.65,
+        38.97,
         0,
-        171.5
+        171.37
       ],
-      "yaw": 30,
-      "scale": 0.75
+      "yaw": 127.5,
+      "scale": 0.8,
+      "palette": {
+        "stone": "#d8f08a",
+        "mineral": "#ffb259"
+      }
+    },
+    {
+      "asset": "lichen_mat",
+      "position": [
+        39.28,
+        0.84,
+        171.74
+      ],
+      "yaw": 112.5,
+      "scale": 0.2,
+      "palette": {
+        "stone": "#d8f08a",
+        "mineral": "#ffb259"
+      }
+    },
+    {
+      "asset": "lichen_mat",
+      "position": [
+        38.92,
+        0.84,
+        170.88
+      ],
+      "yaw": 112.5,
+      "scale": 0.2,
+      "palette": {
+        "stone": "#d8f08a",
+        "mineral": "#ffb259"
+      }
     },
     {
       "asset": "stone_bench",

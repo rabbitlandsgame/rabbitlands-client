@@ -19,8 +19,8 @@ cutaway drops first. A wall stands on a row of tiles: room edges lie on tile-row
 
 THE THEME TABLE (THEMES): a section's `style` sets its wall height, partition height (the fallback, should fading
 partitions not read: lower it), wall and partition thickness, the walk grid's wall margin, the street door's width
-and height, the doorway lintel, the window sill and head, the trim bands and the stair material; the default floor
-and wall surfaces when a section names none.
+and height and whether its leaves stand open beside it (doorLeaves), the doorway lintel, the window sill and head, the
+trim bands and the stair material; the default floor and wall surfaces when a section names none.
 
 SURFACES (the single table to swap art in): every floor, wall, trim and decal surface id maps to its texture repeat
 and its placeholder. The builder takes the codex texture under godot-client/src/world/look/textures/interior/
@@ -34,8 +34,9 @@ WHAT IS DRAWN, PER SECTION (mesh node `<bucket>_<material>`):
   Roof_<s>        the ceiling at wall height (always hidden by the cutaway)
   Build_<s>_<side>   the outer walls facing `side`: face, top cap (wall_cap, mitred at the corners), trim bands, and
                   on them the windows (the art role's leaded glazing, the theme's `window` picture, or a flat pane
-                  until it is published; the timber frame, sill, centre mullion and transom drawn over it), wall decals and the lit street doors (soft daylight, the theme's door size);
-                  cut away by facing (cutaway.walls, threshold 0.35)
+                  until it is published; the timber frame, sill, centre mullion and transom drawn over it), wall decals and the lit street doors (soft daylight, the theme's door size;
+                  a theme with `doorLeaves`, the keep's, draws the door's two plank leaves folded back against the
+                  wall either side); cut away by facing (cutaway.walls, threshold 0.35)
   Part_<s>_<k>    partition walls (full height): a solid piece between rooms with both faces in their rooms' surfaces,
                   cap, trims, the doorway openings with timber jamb linings, casings on both faces, soffits and
                   lintels. Never cut by facing: each is its own small node; cutaway.partitions lists them (node,
@@ -67,7 +68,8 @@ covers the whole room), spaces (each room's exact rectangle, by name, for the mu
 alone, so a name without a music keyword is covered by its chamber only), portals and interactives (each door's
 exit, labelled with its exitLabel; each passage end, with its drawn stair's `modelOffset` from the end tile,
 stair_offset(); the source's interior interactives), environment and camera from
-the source, lighting.markers (the source's lights and lamp props), cutaway, sectioned + sections, interiorClass
+the source, lighting.markers (the source's lights and lamp props), cutaway, sectioned + sections, minimap (the image
+and the live minimap's span, liveSpanMetres = MINIMAP_LIVE_SPAN), interiorClass
 "insides", parentRegion "landfall", provenance (source, this builder and the helpers it imports, each with its sha256;
 the surfaces' files; the approval note).
 
@@ -138,7 +140,7 @@ write_json = B.write_json
 _BASE = {'floor': 'oak_planks', 'walls': 'lime_plaster', 'wallHeight': 3.4, 'partitionHeight': 3.4, 'margin': .55,
          'wallThickness': .3, 'partitionThickness': .24, 'doorWidth': 2.0, 'doorHeight': 2.6, 'doorwayTop': 2.5,
          'windowSill': 1.0, 'windowHead': 2.3, 'trim': ((0., .16), (3.08, 3.3)), 'stairs': 'oak_planks',
-         'stairRail': 'timber_band', 'window': 'window_leaded'}
+         'stairRail': 'timber_band', 'window': 'window_leaded', 'doorLeaves': False}
 THEMES = {
     'tavern': {**_BASE},
     'shop': {**_BASE},
@@ -147,12 +149,13 @@ THEMES = {
                'trim': ((0., .16), (3.28, 3.5))},
     'house': {**_BASE, 'wallHeight': 3.2, 'partitionHeight': 3.2, 'doorWidth': 1.6, 'doorHeight': 2.4,
               'doorwayTop': 2.3, 'windowHead': 2.2, 'trim': ((0., .14), (2.9, 3.1))},
-    # the keep's street door is the size of its painted facade door (about 2.4 x 3.2 m), not a gateway
+    # the keep's street door is the size of its painted facade door (about 2.4 x 3.2 m), not a gateway, and its two
+    # plank leaves stand folded back against the wall either side (doorLeaves: a door, not a lit panel; review 2026-10-27)
     'castle': {**_BASE, 'floor': 'limestone_flagstone', 'walls': 'ashlar_wall', 'wallHeight': 4.6,
                'partitionHeight': 4.6, 'wallThickness': .5, 'partitionThickness': .4, 'doorWidth': 2.4,
                'doorHeight': 3.2, 'doorwayTop': 3.3, 'windowSill': 1.4, 'windowHead': 3.6,
                'trim': ((0., .24), (4.16, 4.44)), 'stairs': 'limestone_flagstone', 'stairRail': 'ashlar_wall',
-               'window': 'window_leaded_tall'},
+               'window': 'window_leaded_tall', 'doorLeaves': True},
 }
 assert set(THEMES) == set(TS.STYLES)
 
@@ -204,6 +207,9 @@ FLAT = {
 PICTURES = ('door_spill',)
 assert set(TS.FLOORS) | set(TS.WALLS) <= set(SURFACES)
 
+# The live minimap's span on this map (metres across; world.json minimap.liveSpanMetres, main.gd _bind_minimap_span):
+# a building's rooms (8-22 m) fill the minimap instead of 10-20 px of a continent-sized default (review 2026-10-27).
+MINIMAP_LIVE_SPAN = 40
 # minimap colours
 MINIMAP = {'oak_planks': (124, 88, 56), 'limestone_flagstone': (136, 130, 118), 'cobalt_tile': (66, 92, 146),
            'packed_earth': (108, 90, 68), 'wall': (232, 220, 196), 'partition': (196, 182, 156),
@@ -918,8 +924,45 @@ def _door_frame(add, bucket, centre, along, inward, width, bottom, top, inset):
     add(upright(_offset(p, along, -(w+.14)), _offset(p, along, w+.14), top, top+.14, inward, 'timber_band'), bucket)
 
 
+# A door's open leaves (a theme's `doorLeaves`): each leaf is half the doorway wide and stands folded back flat against
+# the wall's inner face beside the frame, LEAF_GAP metres clear of the opening; LEAF_THICKNESS deep, in the plank
+# surface's shaded copy (vertical planks), with two iron straps across it.
+LEAF_GAP = .16
+LEAF_THICKNESS = .07
+LEAF_SURFACE = 'oak_planks_shade'
+
+
+def _door_leaves(add, bucket, wall, along, inward, half, height):
+    """Two plank leaves standing open against the wall either side of a doorway of half width `half`: each a front
+    face, its free edge and its top, with two iron straps; they stand within the wall's walk margin, so the walk grid
+    is unchanged."""
+    proud = .02+LEAF_THICKNESS
+    for sign in (-1, 1):
+        s0, s1 = sign*(half+LEAF_GAP), sign*(2*half+LEAF_GAP)
+        a0, a1 = _offset(wall, along, s0), _offset(wall, along, s1)
+        p0, p1 = _offset(a0, inward, proud), _offset(a1, inward, proud)
+        add(upright(p0, p1, .02, height, inward, LEAF_SURFACE, abs(s0)), bucket)
+        add(upright(_offset(a1, inward, .02), p1, .02, height, (along[0]*sign, along[1]*sign), LEAF_SURFACE), bucket)
+        add(upright(_offset(a0, inward, .02), p0, .02, height, (-along[0]*sign, -along[1]*sign), LEAF_SURFACE),
+            bucket)
+        add(level([_offset(a0, inward, .02), _offset(a1, inward, .02), p1, p0], height, LEAF_SURFACE), bucket)
+        q0 = _offset(_offset(a0, along, sign*.05), inward, proud+.008)
+        q1 = _offset(_offset(a1, along, -sign*.05), inward, proud+.008)
+        for strap in (.22, .74):
+            h = .02+(height-.02)*strap
+            add(upright(q0, q1, h-.045, h+.045, inward, 'iron'), bucket)
+
+
+def door_reach(theme):
+    """How far (metres) a street door's drawing reaches along its wall from the door's centre: its frame, and its
+    open leaves when the theme has them (a window closer than this refuses)."""
+    half = theme['doorWidth']/2
+    return 2*half+LEAF_GAP if theme['doorLeaves'] else half
+
+
 def door_geometry(section, add):
-    """Each street door: a lit doorway in the wall its exit faces, a timber frame, and daylight on the floor."""
+    """Each street door: a lit doorway in the wall its exit faces, a timber frame, the open leaves (a theme's
+    `doorLeaves`), and daylight on the floor."""
     theme = theme_of(section)
     sid = section['id']
     spans = []
@@ -930,9 +973,11 @@ def door_geometry(section, add):
         along, inward = (-fy, fx), (-fx, -fy)
         w = theme['doorWidth']/2
         where = f'{sid}: entrance {door["index"]}'
-        if not _on_outer(section, _offset(wall, along, -(w+.2)), _offset(wall, along, w+.2)):
-            raise SystemExit(f'{where}: the street door must stand in a straight outer wall one tile beyond its exit '
-                             f'{door["exit"]} (exitFacing {door["exitFacing"]})')
+        reach = door_reach(theme)
+        if not _on_outer(section, _offset(wall, along, -(reach+.2)), _offset(wall, along, reach+.2)):
+            raise SystemExit(f'{where}: the street door {"and its open leaves " if theme["doorLeaves"] else ""}must '
+                             f'stand in a straight outer wall one tile beyond its exit {door["exit"]} (exitFacing '
+                             f'{door["exitFacing"]})')
         side = _side_of((fx, fy))
         bucket = f'Build_{sid}_{side}'
         p = _offset(wall, inward, .025)
@@ -940,6 +985,8 @@ def door_geometry(section, add):
         add(face([world(*a, 0), world(*b, 0), world(*b, theme['doorHeight']), world(*a, theme['doorHeight'])],
                  world_dir(inward), 'door_daylight', [[0, 1], [1, 1], [1, 0], [0, 0]]), bucket)
         _door_frame(add, bucket, wall, along, inward, theme['doorWidth'], 0, theme['doorHeight'], .045)
+        if theme['doorLeaves']:
+            _door_leaves(add, bucket, wall, along, inward, w, theme['doorHeight'])
         # on the floor (never cut away, so the doorway still reads with its wall gone): a timber threshold along the
         # wall and the daylight spilling in, a soft picture fading into the room and to both sides
         sill = _offset(wall, inward, .2)
@@ -952,7 +999,7 @@ def door_geometry(section, add):
                    _offset(far, along, -(w+.9))]
         add(face([world(*p, .012) for p in corners], (0, 1, 0), 'door_spill', [[0, 0], [1, 0], [1, 1], [0, 1]]),
             f'Door_{sid}')
-        spans.append((side, wall, along, w))
+        spans.append((side, wall, along, reach))
     return spans
 
 
@@ -977,7 +1024,7 @@ def window_geometry(section, add, doors):
         for door_side, wall, door_along, dw in doors:
             if door_side == side and abs((centre[0]-wall[0])*n[0]+(centre[1]-wall[1])*n[1]) < 1e-6 and \
                     abs((centre[0]-wall[0])*door_along[0]+(centre[1]-wall[1])*door_along[1]) < w+dw+.3:
-                raise SystemExit(f'{where}: it overlaps a street door')
+                raise SystemExit(f'{where}: it overlaps a street door (or its open leaves)')
         bucket = f'Build_{sid}_{side}'
         p = _offset(centre, inward, .02)
         a, b = _offset(p, along, -w), _offset(p, along, w)
@@ -1609,7 +1656,8 @@ def _build(server, source, design, ident, cells, out, registry, approval, share_
                               'where they cover the player'},
         'sectioned': True, 'sections': [section_bounds(s) for s in design['sections']],
         'minimap': {'file': 'minimap.webp', 'image': 'minimap.webp', 'northUp': True, 'worldMin': [0, 0],
-                    'worldMax': [cells, cells], 'imageSize': [cells*pixels, cells*pixels]},
+                    'worldMax': [cells, cells], 'imageSize': [cells*pixels, cells*pixels],
+                    'liveSpanMetres': MINIMAP_LIVE_SPAN},
         'provenance': {'source': source_name, 'sourceSha256': sha(source),
                        'builder': '_continent_v2/build_town_interiors.py', 'builderSha256': sha(__file__),
                        'imports': helpers, 'surfaces': textures, 'ownerApproved': approval.strip()}}

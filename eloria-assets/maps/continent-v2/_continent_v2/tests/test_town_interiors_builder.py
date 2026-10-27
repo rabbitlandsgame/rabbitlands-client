@@ -106,6 +106,40 @@ def test_the_authored_source_holds_the_spec_doors_and_the_stairs():
     assert [e['target'] for e in found if e['role'] == 'crafting_station'] == ['smithing']
 
 
+def test_the_lore_objects_show_what_their_plaques_say():
+    """Review 2026-10-27: each place in the Hall of Eight Seats reads as its plaque says. The Stoneborn place is a
+    plain stone standing where a chair would (no sundial, no seat); the Mycelari seat carries lichen-coloured lichen
+    (a MineralAppearance palette) on both its arms and round its foot; nothing hangs from the ceiling the cutaway never
+    draws (no chandelier). The tavern kitchen's stores stand upright (its lying barrels' ends painted streaky white),
+    and the watch house's Landfall map hangs large on a wall the camera faces, the duty board on the wall beside the
+    door."""
+    design = TS.load(SOURCE)
+    castle = section(design, 'castle')
+    plaques = {entry['object']: entry for entry in castle['interactives']}
+
+    def standing(point, reach=.05):
+        return [p for p in castle['props'] if max(abs(p['at'][0]-point[0]), abs(p['at'][1]-point[1])) < reach]
+
+    stone = standing(plaques[59276]['at'])
+    assert [p['asset'] for p in stone] == ['moor_stone_1'] and set(stone[0]['palette']) == {'stone', 'mineral'}
+    assert 'stone' in plaques[59276]['text'] and 'where a chair would stand' in plaques[59276]['text']
+    for seat in (59273, 59274, 59275):
+        assert [p['asset'] for p in standing(plaques[seat]['at'])] == ['high_seat']
+    lichen = [p for p in standing(plaques[59275]['at'], 1.0) if p['asset'] == 'lichen_mat']
+    assert lichen and all(set(p.get('palette', {})) == {'stone', 'mineral'} for p in lichen)
+    assert sum(p.get('height', 0) > .7 for p in lichen) == 2 and any(p.get('height', 0) == 0 for p in lichen)
+    assert 'over its arms' in plaques[59275]['text'] and 'round its foot' in plaques[59275]['text']
+    assert not [p for s in design['sections'] for p in s['props'] if p['asset'] == 'chandelier']
+    tavern = section(design, 'tavern_ground')
+    kitchen = [p['asset'] for p in tavern['props'] if TS.room_of(tavern, *p['at']) == 1]
+    assert kitchen and 'barrel_stack' not in kitchen
+    watch = section(design, 'watch_house')
+    (wall_map,) = [d for d in watch['decals'] if d['image'] == 'map_landfall']
+    assert wall_map['side'] == 'north' and wall_map['size'][0] >= 2.0
+    board = next(e for e in watch['interactives'] if e['object'] == 59283)
+    assert [p['asset'] for p in watch['props'] if p['at'] == board['at']] == ['notice_board']
+
+
 def mutate(change):
     design = TS.load(SOURCE)
     change(design)
@@ -376,6 +410,51 @@ def test_street_doors_spill_soft_daylight_and_doorways_have_timber_jambs(built):
     alpha = np.asarray(picture)[..., 3]
     # brightest at the threshold's middle, fading into the room and to both sides
     assert alpha[0, 32] == alpha.max() > 0 and alpha[-1].max() == 0 and alpha[:, 0].max() == 0
+
+
+def test_the_keeps_street_door_stands_open_on_two_plank_leaves():
+    """A theme with doorLeaves (the keep's) draws the street door's two leaves folded back flat against the wall either
+    side of its frame, inside the wall's walk margin (the walk grid is unchanged); every other theme draws none. A
+    window within the leaves' reach is refused."""
+    import build_town_interiors as T
+
+    def drawn(style, windows=()):
+        design = synthetic()
+        design['sections'][0].update(style=style, windows=list(windows))
+        shop = T.annotate(design)['sections'][0]
+        pieces = []
+        def add(piece, bucket):
+            pieces.append(piece)
+        T.window_geometry(shop, add, T.door_geometry(shop, add))
+        return [piece for piece in pieces if piece.material in (T.LEAF_SURFACE, 'iron')]
+
+    leaves = drawn('castle')
+    assert {piece.material for piece in leaves} == {T.LEAF_SURFACE, 'iron'} and not drawn('shop')
+    assert T.THEMES['castle']['doorLeaves'] and not any(T.THEMES[s]['doorLeaves'] for s in T.THEMES if s != 'castle')
+    # the synthetic door: exit (15, 11) facing south, so its wall runs along tile y 10.5 and the doorway is centred on
+    # x 15.5 (world() puts tile y at world z = cells - y, so the room lies toward -z)
+    half, theme = T.THEMES['castle']['doorWidth']/2, T.THEMES['castle']
+    points = np.vstack([piece.positions for piece in leaves])
+    along = np.abs(points[:, 0]-15.5)
+    assert along.min() >= half+T.LEAF_GAP-1e-6 and along.max() <= 2*half+T.LEAF_GAP+1e-6
+    depth = T.world(15.5, 10.5)[2]-points[:, 2]
+    assert depth.min() >= -1e-6 and depth.max() <= T.LEAF_THICKNESS+.03 < theme['margin']
+    assert points[:, 1].max() <= theme['doorHeight']+1e-6
+    assert T.door_reach(theme) == pytest.approx(2*half+T.LEAF_GAP) and T.door_reach(T.THEMES['shop']) == 1.0
+    window = {'room': 0, 'side': 'south', 'at': 0.25, 'width': 1.0}   # centred 2.5 m from the doorway's centre
+    assert not drawn('shop', [window])
+    with pytest.raises(SystemExit, match='open leaves'):
+        drawn('castle', [window])
+
+
+def test_the_minimap_frames_a_building_at_minimap_size(built):
+    """main.gd _bind_minimap_span reads world.json minimap.liveSpanMetres: the town's live minimap shows 40 m, so its
+    rooms read at minimap size (review 2026-10-27: a section was 10-20 px at the default span)."""
+    assert built.T.MINIMAP_LIVE_SPAN == 40
+    block = built.manifest['minimap']
+    assert block['liveSpanMetres'] == 40 and block['imageSize'] == [360, 360] and block['worldMax'] == [120, 120]
+    if TOWN.is_file():
+        assert json.loads(TOWN.read_text(encoding='utf-8'))['minimap']['liveSpanMetres'] == 40
 
 
 def test_props_against_a_partition_name_it_as_their_cutaway_wall():
