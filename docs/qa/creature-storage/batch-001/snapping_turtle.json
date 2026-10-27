@@ -1,0 +1,349 @@
+{
+  "schema_version": 1,
+  "batch": 1,
+  "actor": "snapping_turtle",
+  "date": "2026-10-27",
+  "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/snapping_turtle.glb",
+  "source_sha256": "4dbfd46129a5bf9f19495761a2944415cbf2bd464f62ef5253b259ff6e04c9c7",
+  "runtime_sha256": "47eebc50e5ea0d8f1b77d3017bd12717ea2b2bc3777ec332041b708a0c8910e8",
+  "qualification": "appearance/motion preservation passed before task-worktree replacement",
+  "human_approval_changed": false,
+  "recipe": {
+    "tool": "eloria-assets/tools/pack_creature_storage.py",
+    "source_sha256": "4dbfd46129a5bf9f19495761a2944415cbf2bd464f62ef5253b259ff6e04c9c7",
+    "profile": "eloria-assets/source/creature-storage/snapping_turtle.json",
+    "steps": [
+      "prune_zero_targets",
+      "reduce_constant_runs",
+      "split_corrective_partition",
+      "compact"
+    ]
+  },
+  "bytes": {
+    "source_bytes": 102196500,
+    "candidate_bytes": 94953704,
+    "source_zstd_bytes": 74574374,
+    "candidate_zstd_bytes": 71471065
+  },
+  "method": "Bind 182 disconnected eye vertices to their existing neck_01 control and remove only their corrective fields; retain all 3498 soft-body vertices/correctives. Exact bit-identical flat-run key interiors removed.",
+  "inactive_targets_removed": 0,
+  "flat_run_key_rows_removed": 28675,
+  "animation_accessor_storage": {
+    "scope": "Logical bytes of unique referenced animation accessors; accessors may share buffer views. Not process RSS.",
+    "models": [
+      {
+        "model": "original",
+        "unique_animation_accessor_bytes": 29500784,
+        "input_key_rows": 90447
+      },
+      {
+        "model": "candidate",
+        "unique_animation_accessor_bytes": 25671496,
+        "input_key_rows": 61772
+      }
+    ]
+  },
+  "corrective_graphics_buffer_bytes": {
+    "source": 119305600,
+    "candidate": 113405160,
+    "saved": 5900440,
+    "scope": "Measured raw Godot mesh blend_shape_data bytes, common surface format also used by Forward+."
+  },
+  "draw_surfaces": {
+    "source": 1,
+    "candidate": 2
+  },
+  "source_validation": {
+    "passed": true,
+    "source_sha256": "4dbfd46129a5bf9f19495761a2944415cbf2bd464f62ef5253b259ff6e04c9c7",
+    "candidate_sha256": "47eebc50e5ea0d8f1b77d3017bd12717ea2b2bc3777ec332041b708a0c8910e8",
+    "source_geometry_normals_uv_images_binds_rest_and_retained_corrective_fields_bit_exact": true,
+    "triangle_coverage_preserved": true,
+    "source_curves_preserved_through_constant_run_reduction": true,
+    "clips": {
+      "Death_A": {
+        "source_knots_midpoints_offgrid_samples": 2364,
+        "maximum_curve_component_error": {
+          "translation": 0.0,
+          "rotation_components": 0.0,
+          "scale": 0.0,
+          "weights": 0.0
+        }
+      },
+      "Fighting_Idle": {
+        "source_knots_midpoints_offgrid_samples": 1106,
+        "maximum_curve_component_error": {
+          "translation": 0.0,
+          "rotation_components": 0.0,
+          "scale": 0.0,
+          "weights": 0.0
+        }
+      },
+      "Hit_Chest": {
+        "source_knots_midpoints_offgrid_samples": 568,
+        "maximum_curve_component_error": {
+          "translation": 0.0,
+          "rotation_components": 0.0,
+          "scale": 0.0,
+          "weights": 0.0
+        }
+      },
+      "Idle_A": {
+        "source_knots_midpoints_offgrid_samples": 1412,
+        "maximum_curve_component_error": {
+          "translation": 0.0,
+          "rotation_components": 0.0,
+          "scale": 0.0,
+          "weights": 0.0
+        }
+      },
+      "Jog": {
+        "source_knots_midpoints_offgrid_samples": 956,
+        "maximum_curve_component_error": {
+          "translation": 0.0,
+          "rotation_components": 0.0,
+          "scale": 0.0,
+          "weights": 0.0
+        }
+      },
+      "Sword_Attack": {
+        "source_knots_midpoints_offgrid_samples": 1002,
+        "maximum_curve_component_error": {
+          "translation": 0.0,
+          "rotation_components": 0.0,
+          "scale": 0.0,
+          "weights": 0.0
+        }
+      },
+      "Walk": {
+        "source_knots_midpoints_offgrid_samples": 1326,
+        "maximum_curve_component_error": {
+          "translation": 0.0,
+          "rotation_components": 0.0,
+          "scale": 0.0,
+          "weights": 0.0
+        }
+      }
+    }
+  },
+  "source_rigid_validation": {
+    "native_keys_midpoints_offgrid_poses": 8734,
+    "source_height": 0.3281249696169922,
+    "maximum_position_error": 1.4683398645057892e-07,
+    "maximum_normal_angle_degrees": 5.34887656261354e-05,
+    "budget": {
+      "source_extent": 1.0000008200309547,
+      "float32_ulp_at_extent": 1.1920928955078125e-07,
+      "source_position_absolute_limit": 4.76837158203125e-07,
+      "source_normal_angle_limit_degrees": 0.0001,
+      "reason": "Four float32 ULPs at the largest source coordinate/extent. Height-only normalization overstates roundoff for this flat creature."
+    }
+  },
+  "fresh_blender": {
+    "baseline": {
+      "sha256": "4dbfd46129a5bf9f19495761a2944415cbf2bd464f62ef5253b259ff6e04c9c7",
+      "passed": true,
+      "surface_probes": 145,
+      "clips": {
+        "Death_A": {
+          "surface_error_over_height": 1.8647373378610472e-06,
+          "bone_head_error_over_height": 2.1431141392431362e-07,
+          "poses": 3
+        },
+        "Fighting_Idle": {
+          "surface_error_over_height": 3.5396267128175707e-07,
+          "bone_head_error_over_height": 1.637401204486345e-07,
+          "poses": 3
+        },
+        "Hit_Chest": {
+          "surface_error_over_height": 1.8451852863134733e-06,
+          "bone_head_error_over_height": 2.0310653006568117e-07,
+          "poses": 3
+        },
+        "Idle_A": {
+          "surface_error_over_height": 1.8174143425749049e-06,
+          "bone_head_error_over_height": 2.2706533770826288e-07,
+          "poses": 3
+        },
+        "Jog": {
+          "surface_error_over_height": 6.357829364750174e-07,
+          "bone_head_error_over_height": 2.9078550930638663e-07,
+          "poses": 3
+        },
+        "Sword_Attack": {
+          "surface_error_over_height": 1.950681536202447e-06,
+          "bone_head_error_over_height": 2.8725454476375897e-07,
+          "poses": 3
+        },
+        "Walk": {
+          "surface_error_over_height": 1.6611168049557639e-06,
+          "bone_head_error_over_height": 2.9100706020276035e-07,
+          "poses": 3
+        }
+      },
+      "max_surface_error_over_height": 1.950681536202447e-06,
+      "max_bone_head_error_over_height": 2.9100706020276035e-07,
+      "scope": "Independent fresh Blender import geometry/motion witness check. Blender is not the authority for runtime morph normal shading."
+    },
+    "candidate": {
+      "sha256": "47eebc50e5ea0d8f1b77d3017bd12717ea2b2bc3777ec332041b708a0c8910e8",
+      "passed": true,
+      "surface_probes": 145,
+      "clips": {
+        "Death_A": {
+          "surface_error_over_height": 1.8647373378610472e-06,
+          "bone_head_error_over_height": 2.1431141392431362e-07,
+          "poses": 3
+        },
+        "Fighting_Idle": {
+          "surface_error_over_height": 3.5396267128175707e-07,
+          "bone_head_error_over_height": 1.637401204486345e-07,
+          "poses": 3
+        },
+        "Hit_Chest": {
+          "surface_error_over_height": 1.8451852863134733e-06,
+          "bone_head_error_over_height": 2.0310653006568117e-07,
+          "poses": 3
+        },
+        "Idle_A": {
+          "surface_error_over_height": 1.8174143425749049e-06,
+          "bone_head_error_over_height": 2.2706533770826288e-07,
+          "poses": 3
+        },
+        "Jog": {
+          "surface_error_over_height": 6.357829364750174e-07,
+          "bone_head_error_over_height": 2.9078550930638663e-07,
+          "poses": 3
+        },
+        "Sword_Attack": {
+          "surface_error_over_height": 1.950681536202447e-06,
+          "bone_head_error_over_height": 2.8725454476375897e-07,
+          "poses": 3
+        },
+        "Walk": {
+          "surface_error_over_height": 1.6611168049557639e-06,
+          "bone_head_error_over_height": 2.9100706020276035e-07,
+          "poses": 3
+        }
+      },
+      "max_surface_error_over_height": 1.950681536202447e-06,
+      "max_bone_head_error_over_height": 2.9100706020276035e-07,
+      "scope": "Independent fresh Blender import geometry/motion witness check. Blender is not the authority for runtime morph normal shading."
+    }
+  },
+  "runtime": {
+    "scope": "Actual imported Godot mesh arrays, native-library sampled poses and crossfades or mounted gait samples, renderer activation cutoff, linear blended skin; image rendering remains a separate check.",
+    "samples": 232,
+    "maximum_surface_error_source_units": 2.3358331485844256e-05,
+    "maximum_surface_error_mm_at_game_scale": 0.014014986278007553,
+    "maximum_normal_angle_degrees": 0.008235409609390173
+  },
+  "visual": {
+    "method": "Fresh Godot 4.7.2 Forward+ on RTX 5080 Laptop GPU, identical cameras/lights/materials, full 7 native cycles sampled at 24 Hz and actual model scale. Stills from game overview/side/rear plus eye closeup for Snap.",
+    "model_scale": 0.59999946,
+    "pairs": 376,
+    "width": 640,
+    "height": 640,
+    "max_mean_channel_error_out_of_255": 0.0004443359375,
+    "max_pixels_above_two_levels": 8,
+    "views": {
+      "game": {
+        "pairs": 292,
+        "max_mean_channel_error": 2.44140625e-06,
+        "max_pixels_above_two_levels": 0
+      },
+      "side": {
+        "pairs": 28,
+        "max_mean_channel_error": 5.0455729166666666e-05,
+        "max_pixels_above_two_levels": 2
+      },
+      "rear": {
+        "pairs": 28,
+        "max_mean_channel_error": 3.0110677083333334e-05,
+        "max_pixels_above_two_levels": 2
+      },
+      "eyes": {
+        "pairs": 28,
+        "max_mean_channel_error": 0.0004443359375,
+        "max_pixels_above_two_levels": 8
+      }
+    },
+    "review": "Paired contact boards visually reviewed; full-cycle paired GIFs retained locally. Tiny raster-edge changes, not bit-identical pixels."
+  },
+  "full_actor_placement_bounds_overhead_and_raw_lods": {
+    "bounds_error": 0.0,
+    "overhead_height_error": 0.0,
+    "passed": true,
+    "placement_error": 0.0,
+    "records": [
+      {
+        "banner_height": 0.443199872970581,
+        "name": "baseline",
+        "native_bounds_position": [
+          -0.2742058634758,
+          -0.0434258207678795,
+          -0.582657873630524
+        ],
+        "native_bounds_size": [
+          0.549504041671753,
+          0.376571148633957,
+          1.08267426490784
+        ],
+        "raw_meshes": [
+          {
+            "name": "Mesh_0",
+            "surface_lod_counts": [
+              0
+            ]
+          }
+        ],
+        "visual_root_position": [
+          0.0,
+          0.0434258207678795,
+          0.104000002145767
+        ]
+      },
+      {
+        "banner_height": 0.443199872970581,
+        "name": "candidate",
+        "native_bounds_position": [
+          -0.2742058634758,
+          -0.0434258207678795,
+          -0.582657873630524
+        ],
+        "native_bounds_size": [
+          0.549504041671753,
+          0.376571148633957,
+          1.08267426490784
+        ],
+        "raw_meshes": [
+          {
+            "name": "Mesh_0",
+            "surface_lod_counts": [
+              0
+            ]
+          },
+          {
+            "name": "RL_CorrectiveFree_19_0",
+            "surface_lod_counts": [
+              0
+            ]
+          }
+        ],
+        "visual_root_position": [
+          0.0,
+          0.0434258207678795,
+          0.104000002145767
+        ]
+      }
+    ]
+  },
+  "raw_lod_policy": "All original/candidate raw surfaces have zero generated LOD levels. Production loose native actors use this raw path; editor-generated LODs are not inferred from the tracked .import policy.",
+  "framework_tests_passed": 35,
+  "known_limitations": [
+    "Process RSS and separate CPU/GPU frame time were not measured.",
+    "The original artistic approval status is unchanged.",
+    "The eye binding is equivalent within source float32 and renderer skin/normal quantization, rather than identical vertex-shader arithmetic.",
+    "One additional draw surface per creature/pass; saved corrective buffers are shared per loaded model, not multiplied by actor count."
+  ]
+}
