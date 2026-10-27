@@ -1,0 +1,438 @@
+{
+  "schema_version": 1,
+  "actor": "magpie",
+  "date": "2026-10-27",
+  "status": "technical storage equivalence qualified; underlying creature draft artistic-review status unchanged",
+  "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/magpie.glb",
+  "source_sha256": "9ebfd307319cc3798e5887017e24a3d7061c057eee57810f349ef59679a8bc40",
+  "candidate_sha256": "d9081c27122de9a0aaf860515da5f72bae9e71b62fed12ff8e813ffe742912c7",
+  "method": "Remove 17 provably inactive correctives and 13,454 redundant interior key rows from exactly flat runs; retain run boundaries, clip endpoints, geometry, skin, binds, rest, materials and images. No rig or topology changes.",
+  "storage": {
+    "source_bytes": 77397936,
+    "candidate_bytes": 75446524,
+    "source_zstd_bytes": 54748918,
+    "candidate_zstd_bytes": 53586877
+  },
+  "correctives": {
+    "source_count": 1131,
+    "candidate_count": 1114,
+    "removed_target_indices": [
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49
+    ],
+    "shared_gpu_source_bytes": 99844680,
+    "shared_gpu_candidate_bytes": 98343920,
+    "shared_gpu_saved_bytes": 1500760,
+    "scope": "Measured Godot blend_shape_data storage on the shared mesh resource, not multiplied by creature instance count."
+  },
+  "draw_surfaces": {
+    "source": 1,
+    "candidate": 1
+  },
+  "rejected_rigid_binding_screen": {
+    "source_sha256": "9ebfd307319cc3798e5887017e24a3d7061c057eee57810f349ef59679a8bc40",
+    "vertices": 4414,
+    "targets": 1131,
+    "clips": [
+      "Death_A",
+      "Fighting_Idle",
+      "Fly",
+      "Hit_Chest",
+      "Idle_A",
+      "Jog",
+      "Sword_Attack",
+      "Walk"
+    ],
+    "sampled_poses": 112,
+    "components": [
+      {
+        "vertices": 218,
+        "bone": "wing_1_r_01",
+        "joint": 15,
+        "node": 12,
+        "max_surface_error_over_extent": 0.2509069946782059
+      },
+      {
+        "vertices": 335,
+        "bone": "wing_1_r_01",
+        "joint": 15,
+        "node": 12,
+        "max_surface_error_over_extent": 0.14426246264497974
+      },
+      {
+        "vertices": 260,
+        "bone": "wing_1_r_01",
+        "joint": 15,
+        "node": 12,
+        "max_surface_error_over_extent": 0.17067506718282982
+      },
+      {
+        "vertices": 216,
+        "bone": "wing_1_r_01",
+        "joint": 15,
+        "node": 12,
+        "max_surface_error_over_extent": 0.3281126248631733
+      },
+      {
+        "vertices": 2263,
+        "bone": "spine_01",
+        "joint": 8,
+        "node": 14,
+        "max_surface_error_over_extent": 0.2725319133422987
+      },
+      {
+        "vertices": 39,
+        "bone": "head",
+        "joint": 12,
+        "node": 6,
+        "max_surface_error_over_extent": 0.030971058066036526
+      },
+      {
+        "vertices": 217,
+        "bone": "wing_1_l_01",
+        "joint": 13,
+        "node": 10,
+        "max_surface_error_over_extent": 0.32875879613541303
+      },
+      {
+        "vertices": 231,
+        "bone": "wing_1_l_01",
+        "joint": 13,
+        "node": 10,
+        "max_surface_error_over_extent": 0.2488217697447802
+      },
+      {
+        "vertices": 635,
+        "bone": "wing_1_l_01",
+        "joint": 13,
+        "node": 10,
+        "max_surface_error_over_extent": 0.17556831684356156
+      }
+    ]
+  },
+  "source_equivalence": {
+    "passed": true,
+    "source_sha256": "9ebfd307319cc3798e5887017e24a3d7061c057eee57810f349ef59679a8bc40",
+    "candidate_sha256": "d9081c27122de9a0aaf860515da5f72bae9e71b62fed12ff8e813ffe742912c7",
+    "original_target_count": 1131,
+    "remaining_target_count": 1114,
+    "removed_zero_targets": [
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49
+    ],
+    "geometry_skin_binds_rest_topology_uv_material_image_bits_preserved": true,
+    "retained_key_time_and_value_bits_exact_only_flat_interiors_removed": true,
+    "retained_correctives_and_weight_key_columns_bit_exact": true,
+    "redundant_flat_keys_removed": 13454,
+    "every_removed_default_and_key_is_zero": true,
+    "clips": {
+      "Death_A": {
+        "original_knots": 908,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 1820
+      },
+      "Fighting_Idle": {
+        "original_knots": 408,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 813
+      },
+      "Fly": {
+        "original_knots": 225,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 454
+      },
+      "Hit_Chest": {
+        "original_knots": 289,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 582
+      },
+      "Idle_A": {
+        "original_knots": 408,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 813
+      },
+      "Jog": {
+        "original_knots": 197,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 398
+      },
+      "Sword_Attack": {
+        "original_knots": 466,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 936
+      },
+      "Walk": {
+        "original_knots": 310,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 624
+      }
+    },
+    "independent_surface_probes": 132,
+    "sampled_source_candidate_position_error": 0.0,
+    "sampled_source_candidate_normal_vector_error": 1.4457564693417308e-15,
+    "original_motion_witness_position_error_over_height": 0.0,
+    "original_motion_witness_normal_vector_error": 1.4457564693417308e-15,
+    "proof": "Zero defaults plus every LINEAR/STEP key being exactly zero prove every interior value and crossfade remains zero. Retained arrays and every retained time/value row are bit-identical. Every removed key is strictly inside three bit-identical adjacent rows; no plateau boundary or clip endpoint moves. No pose-dependent approximate fitting."
+  },
+  "native_runtime": {
+    "samples": 296,
+    "max_position_difference_source_units": 1.6935183176400978e-07,
+    "max_position_difference_mm_at_game_scale": 7.620833106787767e-05,
+    "max_normal_angle_degrees": 1.6266572668182135e-05,
+    "scope": "Actual source/candidate imported mesh arrays, sampled native clips, RESET and every directed clip crossfade."
+  },
+  "blender": {
+    "baseline": {
+      "sha256": "9ebfd307319cc3798e5887017e24a3d7061c057eee57810f349ef59679a8bc40",
+      "passed": true,
+      "surface_probes": 132,
+      "clips": {
+        "Death_A": {
+          "surface_error_over_height": 9.794517684455906e-07,
+          "bone_head_error_over_height": 2.807794240762609e-07,
+          "poses": 3
+        },
+        "Fighting_Idle": {
+          "surface_error_over_height": 1.3634131719810928e-06,
+          "bone_head_error_over_height": 2.2050628231199566e-07,
+          "poses": 3
+        },
+        "Fly": {
+          "surface_error_over_height": 6.643398356268037e-07,
+          "bone_head_error_over_height": 2.594690391642993e-07,
+          "poses": 3
+        },
+        "Hit_Chest": {
+          "surface_error_over_height": 1.3537778451076361e-06,
+          "bone_head_error_over_height": 2.2470677941182262e-07,
+          "poses": 3
+        },
+        "Idle_A": {
+          "surface_error_over_height": 9.219686776006112e-07,
+          "bone_head_error_over_height": 2.2050628231199299e-07,
+          "poses": 3
+        },
+        "Jog": {
+          "surface_error_over_height": 1.1063412838098233e-06,
+          "bone_head_error_over_height": 2.2050673726839502e-07,
+          "poses": 3
+        },
+        "Sword_Attack": {
+          "surface_error_over_height": 1.1380050311382505e-06,
+          "bone_head_error_over_height": 3.0578724882949615e-07,
+          "poses": 3
+        },
+        "Walk": {
+          "surface_error_over_height": 1.1277133677686844e-06,
+          "bone_head_error_over_height": 2.5215883555087594e-07,
+          "poses": 3
+        }
+      },
+      "max_surface_error_over_height": 1.3634131719810928e-06,
+      "max_bone_head_error_over_height": 3.0578724882949615e-07,
+      "scope": "Independent fresh Blender import geometry/motion witness check. Blender is not the authority for runtime morph normal shading."
+    },
+    "candidate": {
+      "sha256": "d9081c27122de9a0aaf860515da5f72bae9e71b62fed12ff8e813ffe742912c7",
+      "passed": true,
+      "surface_probes": 132,
+      "clips": {
+        "Death_A": {
+          "surface_error_over_height": 9.794517684455906e-07,
+          "bone_head_error_over_height": 2.807794240762609e-07,
+          "poses": 3
+        },
+        "Fighting_Idle": {
+          "surface_error_over_height": 1.3634131719810928e-06,
+          "bone_head_error_over_height": 2.2050628231199566e-07,
+          "poses": 3
+        },
+        "Fly": {
+          "surface_error_over_height": 6.643398356268037e-07,
+          "bone_head_error_over_height": 2.594690391642993e-07,
+          "poses": 3
+        },
+        "Hit_Chest": {
+          "surface_error_over_height": 1.3537778451076361e-06,
+          "bone_head_error_over_height": 2.2470677941182262e-07,
+          "poses": 3
+        },
+        "Idle_A": {
+          "surface_error_over_height": 9.219686776006112e-07,
+          "bone_head_error_over_height": 2.2050628231199299e-07,
+          "poses": 3
+        },
+        "Jog": {
+          "surface_error_over_height": 1.1063412838098233e-06,
+          "bone_head_error_over_height": 2.2050673726839502e-07,
+          "poses": 3
+        },
+        "Sword_Attack": {
+          "surface_error_over_height": 1.1380050311382505e-06,
+          "bone_head_error_over_height": 3.0578724882949615e-07,
+          "poses": 3
+        },
+        "Walk": {
+          "surface_error_over_height": 1.1277133677686844e-06,
+          "bone_head_error_over_height": 2.5215883555087594e-07,
+          "poses": 3
+        }
+      },
+      "max_surface_error_over_height": 1.3634131719810928e-06,
+      "max_bone_head_error_over_height": 3.0578724882949615e-07,
+      "scope": "Independent fresh Blender import geometry/motion witness check. Blender is not the authority for runtime morph normal shading."
+    }
+  },
+  "editor_import": {
+    "passed": true,
+    "engine": "Godot 4.7.2",
+    "script_resource_import_errors": 0
+  },
+  "fresh_import_playback": {
+    "passed": true,
+    "failures": [],
+    "scope": "Completed creature draft baseline, installed registry/maps, independent off-grid surfaces, normals and bones, loops, one-shot holds, action switches and RESET; all available native slots."
+  },
+  "complete_actor_placement": {
+    "passed": true,
+    "records": [
+      {
+        "body_bounds_position": [
+          -0.769410192966461,
+          -0.119454853236675,
+          -0.632095217704773
+        ],
+        "body_bounds_size": [
+          1.44082021713257,
+          0.982379198074341,
+          1.13210129737854
+        ],
+        "label": "baseline",
+        "model_global": [
+          [
+            0.5,
+            0.119454853236675,
+            -0.5
+          ],
+          [
+            -0.900000095367432,
+            0.0,
+            7.86805074426411e-08
+          ],
+          [
+            0.0,
+            0.900000095367432,
+            0.0
+          ],
+          [
+            -7.86805074426411e-08,
+            0.0,
+            -0.900000095367432
+          ]
+        ],
+        "nameplate_global": [
+          0.5,
+          1.49608683586121,
+          -0.5
+        ],
+        "overhead_height": 0.896086871623993,
+        "selection_size": [
+          1.38999998569489,
+          9.99999974737875e-06,
+          1.38999998569489
+        ]
+      },
+      {
+        "body_bounds_position": [
+          -0.769410192966461,
+          -0.119454853236675,
+          -0.632095217704773
+        ],
+        "body_bounds_size": [
+          1.44082021713257,
+          0.982379198074341,
+          1.13209557533264
+        ],
+        "label": "candidate",
+        "model_global": [
+          [
+            0.5,
+            0.119454853236675,
+            -0.5
+          ],
+          [
+            -0.900000095367432,
+            0.0,
+            7.86805074426411e-08
+          ],
+          [
+            0.0,
+            0.900000095367432,
+            0.0
+          ],
+          [
+            -7.86805074426411e-08,
+            0.0,
+            -0.900000095367432
+          ]
+        ],
+        "nameplate_global": [
+          0.5,
+          1.49608683586121,
+          -0.5
+        ],
+        "overhead_height": 0.896086871623993,
+        "selection_size": [
+          1.38999998569489,
+          9.99999974737875e-06,
+          1.38999998569489
+        ]
+      }
+    ]
+  },
+  "rendered_comparison": {
+    "image_pairs": 346,
+    "width": 512,
+    "height": 512,
+    "different_image_pairs": 7,
+    "maximum_different_pixels": 5,
+    "maximum_pixels_above_two_levels": 0,
+    "maximum_mean_channel_error": 6.357828776041667e-06,
+    "maximum_channel_error": 1
+  },
+  "render_scope": "Godot 4.7.2 Forward+ on NVIDIA RTX 5080 Laptop GPU, actual materials and 0.45000004 gameplay scale; all 8 full native cycles at 24 Hz plus gameplay/side/rear/underside snapshots.",
+  "fixture_metadata_update": {
+    "sha256": "d9081c27122de9a0aaf860515da5f72bae9e71b62fed12ff8e813ffe742912c7",
+    "morph_weight_columns": "retain original indices 0..32 and 50..1130",
+    "morph_position_signature_prefix": "original first 50 entries become 33 by dropping indices 33..49",
+    "physical_observations_regenerated": false
+  },
+  "runtime_cost": "No extra draw surfaces, bones or runtime adapters. 17 fewer corrective fields and fewer stored key rows. Frame time and process RAM were not separately benchmarked.",
+  "known_limits": [
+    "The source motion is mathematically identical; native import/interpolation can introduce the recorded floating-point roundoff after flat-key removal.",
+    "Unused target-bound Z extent shrinks 5.72e-6 source units. Grounding, root transform, overhead height, nameplate placement and selection dimensions match exactly.",
+    "Underlying draft artistic approval remains pending."
+  ]
+}
