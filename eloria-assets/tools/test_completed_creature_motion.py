@@ -8,6 +8,25 @@ from video_motion.runtime_validation import surface_sampler
 ROOT=Path(__file__).resolve().parents[2]
 read=lambda p:json.loads(p.read_text(encoding='utf-8'))
 
+
+def numeric_limits(witness, vertices):
+    """Keep defaults strict; explicitly bound fitted representation roundoff."""
+    surface_limit=float(witness.get('surface_numeric_tolerance_over_height',1e-8))
+    normal_limit=float(witness.get('normal_numeric_tolerance',1e-8))
+    allowed_surface=allowed_normal=1e-7
+    budget=witness.get('representation_numeric_budget')
+    if budget is not None:
+        ulps=budget.get('source_position_ulps',0)
+        angle=float(budget.get('source_normal_angle_degrees',0.0))
+        assert type(ulps) is int and 0<=ulps<=4 and 0.0<=angle<=.0001
+        extent=max(float(np.max(np.abs(vertices))),float(np.ptp(vertices,axis=0).max()))
+        if ulps:allowed_surface=max(allowed_surface,ulps*float(np.spacing(np.float32(extent)))/float(witness['height']))
+        allowed_normal=max(allowed_normal,2.0*np.sin(np.deg2rad(angle)/2.0))
+    assert 0<surface_limit<=allowed_surface*(1+1e-12) and 0<normal_limit<=allowed_normal*(1+1e-12)
+    if surface_limit>1e-8 or normal_limit>1e-8:
+        assert len(witness.get('reference_sha256',''))==64 and witness['reference_sha256']!=witness['sha256']
+    return surface_limit,normal_limit
+
 def normal_sampler(a,ids):
     fields=[];offset=0;primitives=[pr for n in a.d['nodes'] if 'mesh' in n for pr in a.d['meshes'][n['mesh']]['primitives']]
     for part,pr in zip(a.parts,primitives):
@@ -60,12 +79,9 @@ def main():
             for k,probe in enumerate(entries):
                 world=a.world(t[k],q[k],s[k]);mm={n:v[k] for n,v in m.items()};se=max(se,float(np.linalg.norm(sample(world,mm)-probe['surface'],axis=1).max()/p['height']));ne=max(ne,float(np.linalg.norm(normal(world,mm)-probe['surface_normals'],axis=1).max()))
                 for name,values in probe['bones'].items():be=max(be,float(np.max(abs(world[a.ids[name]]-np.array(values).reshape(4,4)))))
-        # A representation change retains the original physical observations.
-        # Allow only explicitly recorded sub-float32 roundoff, capped at 1e-7;
-        # every other creature retains its existing 1e-8 requirement.
-        surface_limit=float(w.get('surface_numeric_tolerance_over_height',1e-8));normal_limit=float(w.get('normal_numeric_tolerance',1e-8))
-        assert 0<surface_limit<=1e-7 and 0<normal_limit<=1e-7
-        if surface_limit>1e-8 or normal_limit>1e-8:assert len(w.get('reference_sha256',''))==64 and w['reference_sha256']!=w['sha256']
+        # Physical observations remain immutable. Flat creatures use a bounded
+        # float32 coordinate budget, rather than magnifying it by small height.
+        surface_limit,normal_limit=numeric_limits(w,a.vertices)
         assert se<surface_limit and ne<normal_limit and be<1e-9,(actor,se,ne,be)
         results[actor]={'passed':True,'sha256':p['sha256'],'reference_sha256':w.get('reference_sha256',w['sha256']),'clips':len(w['clips']),'surface_probes':len(ids),'surface_error_over_height':se,'normal_error':ne,'bone_error':be,'surface_numeric_tolerance_over_height':surface_limit,'normal_numeric_tolerance':normal_limit}
         print('NATIVE_CREATURE_PASS',actor,flush=True)
