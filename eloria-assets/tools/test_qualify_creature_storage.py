@@ -136,3 +136,16 @@ def test_new_nonzero_default_is_rejected_when_source_used_implicit_zero(
                 output=str(tmp_path / "proof"),
             )
         )
+
+
+def test_preexisting_empty_target_names_on_a_mesh_without_morphs_are_preserved(tmp_path):
+    job = job_fixture(tmp_path, "no_morph")
+    for key in ("source", "candidate"):
+        document,binary = read_glb(job[key])
+        document["meshes"][0].setdefault("extras", {})["targetNames"] = []
+        write_glb(job[key], document, binary)
+    receipt = json.loads(open(job["preparation"]).read())
+    receipt["source_sha256"] = digest(job["source"])
+    receipt["candidate_sha256"] = digest(job["candidate"])
+    with open(job["preparation"], "w") as handle: json.dump(receipt,handle)
+    assert exact_source(job)["passed"]

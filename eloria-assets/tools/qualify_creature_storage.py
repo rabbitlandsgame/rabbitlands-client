@@ -142,7 +142,7 @@ def exact_source(job):
         expected_metadata = copy.deepcopy(
             {k: v for k, v in old.items() if k not in ("weights", "primitives")}
         )
-        if "targetNames" in expected_metadata.get("extras", {}):
+        if masks[mi]["targets_before"] and "targetNames" in expected_metadata.get("extras", {}):
             names = expected_metadata["extras"]["targetNames"]
             if keep:
                 expected_metadata["extras"]["targetNames"] = [names[i] for i in keep]
