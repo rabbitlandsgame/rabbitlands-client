@@ -6,6 +6,7 @@ const GltfQuantization := preload("res://src/world/gltf_quantization.gd")
 const VramTextures := preload("res://src/world/vram_textures.gd")
 const MapMeshExtension := preload("res://src/world/map_mesh_extension.gd")
 const GltfAnimationFidelity := preload("res://src/actors/gltf_animation_fidelity.gd")
+const CreaturePayload := preload("res://src/actors/creature_payload.gd")
 const ArchivedModelPolicy := preload("res://src/actors/archived_model_policy.gd")
 const PreparedContent := preload("res://src/world/prepared_content.gd")
 const PreparedLifecycle := preload("res://src/world/prepared_scene_lifecycle.gd")
@@ -183,7 +184,7 @@ static func _publish_source(completion: Variant) -> Node:
 		var source := PreparedContent.source_path(str(entry.get("source", "")))
 		if source.is_empty():
 			return null
-		var verified := PreparedContent.acquire("scene", source, FileAccess.get_sha256(source),
+		var verified := PreparedContent.acquire("scene", source, CreaturePayload.source_sha256(source),
 			PreparedContent.scene_texture_token(source))
 		return PreparedLifecycle.instantiate(verified)
 	return completion as Node if completion is Node else null
@@ -193,7 +194,7 @@ static func _parse_library(path: String, allow_prepared := true) -> Variant:
 		push_error("animation glTF parse requires main-thread extension initialization")
 		return null
 	if allow_prepared and PreparedContent.selected_mode() != "raw":
-		var record := PreparedContent.acquire("scene", path, FileAccess.get_sha256(path),
+		var record := PreparedContent.acquire("scene", path, CreaturePayload.source_sha256(path),
 			PreparedContent.scene_texture_token(path))
 		if str(record.status) == "hit":
 			return record # Worker completion contains immutable resources, no Nodes.
@@ -202,7 +203,7 @@ static func _parse_library(path: String, allow_prepared := true) -> Variant:
 
 	var document := GLTFDocument.new()
 	var state := GLTFState.new()
-	if document.append_from_file(path, state) != OK:
+	if CreaturePayload.append(document, path, state) != OK:
 		return null
 	return document.generate_scene(state, GltfAnimationFidelity.bake_fps(state))
 
