@@ -87,6 +87,31 @@ Needs numpy and Pillow (the quality check decodes the DDS with Pillow). With
 the zstandard module, a cached encode whose measurement is out of date
 (QUALITY_VERSION, or other alpha cutoffs) is measured again from its cached
 sidecar; without it, it is encoded again.
+
+Scenery (world-object) GLBs embed their images in the GLB's BIN chunk:
+
+    python godot-client/tools/build_vram_textures.py \
+        --scenery-config godot-client/data/world/town-scenery.json \
+        --scenery-out-root STAGE/godot-client/assets/world ...
+
+--scenery-config names a scenery config (its "assets" object maps ids to
+res:// GLB paths; repeatable). Each bufferView image of those GLBs is planned
+like a map image, keyed by the sha256 of its bytes, with the roles and
+cutoffs of that GLB's materials, and its sidecar goes in the vram/ folder of
+the GLB's own directory, which is where the client looks
+(src/world/world_object_images.gd: the GLTFState's base path). The bytes are
+extracted once into the cache's _embedded/ folder for the encoder. With
+--scenery-out-root the vram/ folders are written under that root, mirroring
+the GLB directories below godot-client/assets/world; without it they are
+written beside the GLBs, which a scoped (--manifest) run refuses, as it
+refuses to replace a source pool's index. URI images of a scenery GLB are left
+alone (the client decodes them as before).
+
+--unskip-map <map dir> (relative to a --maps root, e.g.
+continent-v2/landfall_town) keeps planning the images that map's manifests
+name even inside a --skip-dir directory: the package skips the whole shared
+image pool (maps/_shared/images) but still ships sidecars for one map's images
+there.
 """
 from __future__ import annotations
 
@@ -145,6 +170,11 @@ ALPHA_GATED_MIPS = 4
 MIN_GATED_MIP = 32
 DDS_BLOCK_BYTES = {"bc1": 8, "bc5": 16, "bc7": 16}
 PILLOW_BCN = {"bc1": ("RGBA", 1), "bc5": ("RGB", 5), "bc7": ("RGBA", 7)}
+# Scenery GLBs live below this root (res://assets/world/...); --scenery-out-root mirrors their directories from it.
+SCENERY_ROOT = CLIENT / "assets" / "world"
+# Where the embedded images of scenery GLBs are extracted for the encoder, inside the (ignored) encode cache.
+EMBEDDED_DIR = "_embedded"
+EMBEDDED_TYPES = {"image/png": ".png", "image/jpeg": ".jpg", "image/webp": ".webp"}
 
 
 class BuildError(RuntimeError):
@@ -164,6 +194,75 @@ def glb_json(path: Path) -> dict:
             raise ValueError("not a GLB")
         length = struct.unpack_from("<I", header, 12)[0]
         return json.loads(handle.read(length).decode("utf-8"))
+
+
+def glb_chunks(path: Path) -> tuple[dict, bytes]:
+    """A GLB's JSON document and its BIN chunk (b"" when it has none)."""
+    data = path.read_bytes()
+    if len(data) < 20 or data[:4] != b"glTF":
+        raise ValueError("not a GLB")
+    length = struct.unpack_from("<I", data, 12)[0]
+    document = json.loads(data[20:20 + length].decode("utf-8"))
+    offset = 20 + length
+    binary = b""
+    if offset + 8 <= len(data) and struct.unpack_from("<I", data, offset + 4)[0] == 0x004E4942:
+        binary = data[offset + 8:offset + 8 + struct.unpack_from("<I", data, offset)[0]]
+    return document, binary
+
+
+def scenery_glbs(configs: list[Path]) -> list[Path]:
+    """The GLBs a scenery config's "assets" object names (res:// paths below godot-client), in order, once each."""
+    glbs: list[Path] = []
+    for config in configs:
+        try:
+            assets = json.loads(config.read_text(encoding="utf-8-sig")).get("assets")
+            if not isinstance(assets, dict) or not assets:
+                raise ValueError("no assets object")
+        except (OSError, ValueError, AttributeError) as error:
+            raise BuildError(f"cannot read scenery config {config}: {error}") from error
+        for asset, value in assets.items():
+            if not isinstance(value, str) or not value.startswith("res://") or not value.lower().endswith(".glb"):
+                raise BuildError(f"{config}: asset {asset} is not a res:// GLB path: {value!r}")
+            glb = (CLIENT / value[len("res://"):]).resolve()
+            if not glb.is_relative_to(SCENERY_ROOT.resolve()):
+                raise BuildError(f"{config}: asset {asset} is outside {SCENERY_ROOT}: {value}")
+            if not glb.is_file():
+                raise BuildError(f"{config}: asset {asset} is missing: {glb}")
+            if glb not in glbs:
+                glbs.append(glb)
+    return glbs
+
+
+def embedded_images(glb: Path, extract_dir: Path) -> list[tuple[int, str, Path]]:
+    """(image index, sha256, extracted file) for each bufferView image of a GLB. The bytes are written once, by
+    sha, into extract_dir (the encoder and the quality check read files)."""
+    document, binary = glb_chunks(glb)
+    views = document.get("bufferViews", [])
+    found = []
+    for index, image in enumerate(document.get("images", [])):
+        view_index = image.get("bufferView")
+        if not isinstance(view_index, int) or not 0 <= view_index < len(views):
+            continue
+        view = views[view_index]
+        if view.get("buffer", 0) != 0:
+            raise BuildError(f"{glb}: image {index} lives outside the GLB's BIN chunk")
+        start = view.get("byteOffset", 0)
+        payload = binary[start:start + view["byteLength"]]
+        if len(payload) != view["byteLength"]:
+            raise BuildError(f"{glb}: image {index}'s bufferView runs past the BIN chunk")
+        sha = hashlib.sha256(payload).hexdigest()
+        suffix = EMBEDDED_TYPES.get(str(image.get("mimeType", "")).lower())
+        if suffix is None:
+            suffix = ".png" if payload[:8] == b"\x89PNG\r\n\x1a\n" else (
+                ".jpg" if payload[:3] == b"\xff\xd8\xff" else (".webp" if payload[8:12] == b"WEBP" else None))
+        if suffix is None:
+            continue  # not an image this client decodes either
+        target = extract_dir / (sha + suffix)
+        if not target.is_file() or hashlib.sha256(target.read_bytes()).hexdigest() != sha:
+            extract_dir.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(payload)
+        found.append((index, sha, target))
+    return found
 
 
 def image_roles(document: dict) -> dict[int, set[tuple[str, str]]]:
@@ -335,7 +434,8 @@ def scoped_inputs(maps_roots: list[Path], manifests: list[Path],
     return sorted(leaves), sorted(prototypes)
 
 
-def inventory(maps_roots: list[Path], manifests: list[Path] | None = None) -> dict[tuple[Path, str], dict]:
+def inventory(maps_roots: list[Path], manifests: list[Path] | None = None, scenery: list[Path] | None = None,
+              extract_dir: Path | None = None) -> dict[tuple[Path, str], dict]:
     """(image directory, sha) -> {path, roles: {(role, alphaMode)}, maps: set, cutoffs: set}
 
     One record per COPY of an image: two pools can hold the same bytes (the
@@ -453,10 +553,31 @@ def inventory(maps_roots: list[Path], manifests: list[Path] | None = None) -> di
                 record["maps"].add("_shared/meshes")
                 named = True
             prototypes += 1 if named else 0
+    # Scenery GLBs (world objects) embed their images: each is keyed by the GLB's own directory, where the client
+    # looks for vram/ (world_object_images.gd), and encoded from its bytes extracted into the cache.
+    scenery_images = 0
+    for glb in scenery or []:
+        if extract_dir is None:
+            raise BuildError("scenery GLBs need an extraction directory")
+        try:
+            document = glb_json(glb)
+            extracted = embedded_images(glb, extract_dir)
+        except (OSError, ValueError, KeyError) as error:
+            raise BuildError(f"cannot read scenery GLB {glb}: {error}") from error
+        roles = image_roles(document)
+        cutoffs = image_cutoffs(document)
+        for index, sha, path in extracted:
+            record = found.setdefault((glb.parent.resolve(), sha),
+                                      {"path": path, "roles": set(), "maps": set(), "cutoffs": set()})
+            record["roles"] |= roles.get(index, set())
+            record["cutoffs"] |= cutoffs.get(index, set())
+            record["maps"].add("scenery:" + glb.name)
+            scenery_images += 1
     shas = {sha for _, sha in found}
     log(f"inventory: {len(shas)} content-addressed images ({len(found)} copies in "
         f"{len({directory for directory, _ in found})} directories) from {manifest_count} map packages "
-        f"and {prototypes} prototypes")
+        f"and {prototypes} prototypes" + (f"; {scenery_images} embedded images of {len(scenery)} scenery GLBs"
+                                            if scenery else ""))
     return found
 
 
@@ -787,20 +908,35 @@ def check_cache_budget(cache: Path, limit: int | None, additional: int = 0):
 def build(maps_roots: list[Path], out_root: Path | None, cache: Path, godot: Path, procs: int,
           prune: bool = True, floors: dict | None = None, skip: list[str] | None = None,
           link_output: bool = False, cache_budget_bytes: int | None = None,
-          manifests: list[Path] | None = None) -> dict:
+          manifests: list[Path] | None = None, scenery_configs: list[Path] | None = None,
+          scenery_out_root: Path | None = None, unskip: list[str] | None = None) -> dict:
     if manifests is not None and (out_root is None or any(
             out_root.resolve().is_relative_to(root.resolve()) for root in maps_roots)):
         raise BuildError("scoped preparation requires --out-root outside the source --maps trees; "
                          "a partial scope must not replace a shared source pool's index")
+    if scenery_configs and manifests is not None and (
+            scenery_out_root is None or scenery_out_root.resolve().is_relative_to(SCENERY_ROOT.resolve())):
+        raise BuildError("scoped preparation with --scenery-config requires --scenery-out-root outside "
+                         f"{SCENERY_ROOT}; a partial scope must not replace a scenery folder's index")
     if link_output and (out_root is None or out_root.resolve() == cache.resolve()):
         raise BuildError("--link-output requires a separate disposable output directory.")
+    if link_output and scenery_configs and scenery_out_root is None:
+        raise BuildError("--link-output with --scenery-config requires --scenery-out-root.")
     floors = dict(FLOORS, **(floors or {}))
     started = time.time()
     ensure_ignored(cache)
     version = godot_version(godot)
-    found = inventory(maps_roots, manifests=manifests)
-    targets = {source_dir: sidecar_target(maps_roots, source_dir, out_root)
-               for source_dir in {directory for directory, _ in found}}
+    scenery = scenery_glbs(scenery_configs or [])
+    scenery_dirs = {glb.parent.resolve() for glb in scenery}
+    found = inventory(maps_roots, manifests=manifests, scenery=scenery, extract_dir=cache / EMBEDDED_DIR)
+
+    def target_of(source_dir: Path) -> Path:
+        if source_dir in scenery_dirs:
+            return scenery_target(source_dir, scenery_out_root)
+        return sidecar_target(maps_roots, source_dir, out_root)
+
+    targets = {source_dir: target_of(source_dir) for source_dir in {directory for directory, _ in found}}
+    unskip = [str(name).replace(chr(92), "/").strip("/") for name in unskip or []]
     # Group by source directory: each gets its own vram/ folder.
     plans: dict[Path, dict] = {}
     for (source_dir, sha), record in sorted(found.items()):
@@ -813,14 +949,15 @@ def build(maps_roots: list[Path], out_root: Path | None, cache: Path, godot: Pat
         # sidecar and a missing reason look the same to check_vram_textures,
         # and telling them apart is how a lost sidecar gets noticed.
         if skip and any(str(source_dir).replace(chr(92), "/").endswith(str(name).replace(chr(92), "/"))
-                        for name in skip):
+                        for name in skip) and not any(
+                            used == name or used.startswith(name + "/") for used in record["maps"] for name in unskip):
             recipe, reason = None, "excluded_by_caller"
         plan = plans.setdefault(source_dir, {"images": {}, "excluded": {}})
         if recipe is None:
             plan["excluded"][sha] = reason
         else:
             plan["images"][sha] = {"recipe": recipe, "path": record["path"], "roles": role_names(record["roles"]),
-                                   "cutoffs": sorted(record.get("cutoffs") or [])}
+                                   "cutoffs": sorted(record.get("cutoffs") or []), "dir": source_dir}
 
     used_keys: set[str] = set()
     counts = {"encoded": 0, "cached": 0, "remeasured": 0, "encodeSeconds": 0.0}
@@ -940,7 +1077,7 @@ def build(maps_roots: list[Path], out_root: Path | None, cache: Path, godot: Pat
         ensure(retry)
         for item in retry:
             if "error" not in meta_of(item) and not verdict(item["recipe"], meta_of(item)["quality"], floors):
-                plans[item["path"].parent]["images"][item["sha"]] = item
+                plans[item["dir"]]["images"][item["sha"]] = item
 
     summary = {"encoder": f"godot {version} editor: Image.compress_from_channels (BPTC cvtt, S3TC etcpak)",
                "encoded": counts["encoded"], "cached": counts["cached"], "remeasured": counts["remeasured"],
@@ -951,7 +1088,7 @@ def build(maps_roots: list[Path], out_root: Path | None, cache: Path, godot: Pat
     for source_dir, plan in sorted(plans.items()):
         target = targets[source_dir]
         # Recheck after encoding in case an existing stage's directory layout changed.
-        sidecar_target(maps_roots, source_dir, out_root)
+        target_of(source_dir)
         target.mkdir(parents=True, exist_ok=True)
         index = {"schema": SCHEMA, "recipeVersion": RECIPE_VERSION, "encoder": summary["encoder"],
                  "container": CONTAINER, "images": {}, "excluded": dict(sorted(plan["excluded"].items()))}
@@ -1014,6 +1151,11 @@ def build(maps_roots: list[Path], out_root: Path | None, cache: Path, godot: Pat
                 (cache / f"{path.stem}.evt").unlink(missing_ok=True)
                 removed += 1
         summary["pruned"] = removed
+        extracted = {record["path"].name for record in found.values()
+                     if record["path"].parent == (cache / EMBEDDED_DIR)}
+        for path in (cache / EMBEDDED_DIR).glob("*"):
+            if path.is_file() and path.name not in extracted:
+                path.unlink()
     summary["seconds"] = round(time.time() - started, 1)
     return summary
 
@@ -1022,6 +1164,21 @@ def sidecar_target(maps_roots: list[Path], source_dir: Path, out_root: Path | No
     boundary = out_root.resolve() if out_root else source_dir.resolve()
     target = (boundary / source_dir.relative_to(common_root(maps_roots, source_dir)) / SIDECAR_DIR
               if out_root else boundary / SIDECAR_DIR)
+    if not target.resolve().is_relative_to(boundary):
+        raise BuildError(f"resolved sidecar output escapes its destination root: {target}")
+    return target
+
+
+def scenery_target(source_dir: Path, scenery_out_root: Path | None) -> Path:
+    """A scenery GLB directory's vram/: beside the GLBs, or below scenery_out_root mirroring SCENERY_ROOT."""
+    if scenery_out_root is None:
+        return source_dir / SIDECAR_DIR
+    boundary = scenery_out_root.resolve()
+    try:
+        relative = source_dir.resolve().relative_to(SCENERY_ROOT.resolve())
+    except ValueError as error:
+        raise BuildError(f"scenery directory {source_dir} is outside {SCENERY_ROOT}") from error
+    target = boundary / relative / SIDECAR_DIR
     if not target.resolve().is_relative_to(boundary):
         raise BuildError(f"resolved sidecar output escapes its destination root: {target}")
     return target
@@ -1066,6 +1223,16 @@ def main() -> int:
                         help="image directory (relative to a --maps root) to leave un-encoded; repeatable. "
                              "A pool whose images the client can afford to decode costs download size "
                              "it does not need to spend.")
+    parser.add_argument("--unskip-map", action="append", default=[],
+                        help="map directory (relative to a --maps root, e.g. continent-v2/landfall_town) whose "
+                             "images are planned even inside a --skip-dir directory; repeatable")
+    parser.add_argument("--scenery-config", type=Path, action="append", default=[],
+                        help="scenery config (an \"assets\" object of res:// GLB paths, e.g. "
+                             "godot-client/data/world/town-scenery.json) whose GLBs' embedded images get sidecars "
+                             "in the vram/ folder of each GLB's directory; repeatable")
+    parser.add_argument("--scenery-out-root", type=Path,
+                        help="write the scenery sidecars to <root>/<GLB dir relative to godot-client/assets/world>"
+                             "/vram instead of beside the GLBs (required with --manifest/--scope-group)")
     options = parser.parse_args()
     try:
         manifests = [path.resolve() for path in options.manifest] + scope_group_manifests(options.scope_group)
@@ -1074,7 +1241,10 @@ def main() -> int:
                         options.cache.resolve(), find_godot(options.godot), options.procs,
                         prune=not options.no_prune, floors=json.loads(options.floors) if options.floors else None,
                         skip=options.skip_dir, link_output=options.link_output, cache_budget_bytes=options.cache_budget_bytes,
-                        manifests=manifests if options.manifest or options.scope_group else None)
+                        manifests=manifests if options.manifest or options.scope_group else None,
+                        scenery_configs=[path.resolve() for path in options.scenery_config],
+                        scenery_out_root=options.scenery_out_root.resolve() if options.scenery_out_root else None,
+                        unskip=options.unskip_map)
     except BuildError as error:
         log(f"FAILED: {error}")
         return 1

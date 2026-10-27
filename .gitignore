@@ -60,6 +60,10 @@ eloria-assets/maps/*/world.glb.report.json
 # built by godot-client/tools/build_vram_textures.py at package time, never
 # tracked (the package stage gets its own copy).
 eloria-assets/maps/**/shared-assets/vram/
+# The same for one map's images in the shared image pool (--unskip-map) and for
+# the embedded images of scenery GLBs (--scenery-config; world_object_images.gd).
+eloria-assets/maps/_shared/images/vram/
+godot-client/assets/world/**/vram/
 /.vram-encode-cache/
 # The tool's per-image quality numbers (also beside the committed test sidecars).
 **/shared-assets/vram/report.json

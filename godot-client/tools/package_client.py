@@ -2114,10 +2114,18 @@ def report_duplicate_geometry(stage: Path, budget: float = DUPLICATE_SCAN_SECOND
 
 VRAM_SELF_TEST_OK = "vram_textures self_test ok"
 VRAM_SELF_TEST_POOL_OK = "vram_textures self_test pool ok"
+# Maps whose images in the skipped shared pool maps/_shared/images still ship sidecars (build_vram_textures.py
+# --unskip-map): Landfall Town's room shells, one whole-map interior whose 27 decoded images held about 90 MiB of
+# GPU memory (BC7: about 22 MiB; about 18 MB of sidecars to download).
+UNSKIPPED_SHARED_IMAGE_MAPS = ("continent-v2/landfall_town",)
+# Scenery configs whose GLBs' embedded images ship sidecars, loose beside the GLBs (app/assets/world/<dir>/vram;
+# world_object_images.gd reads them): the town's scenery held about 270 MiB decoded, about 65 MiB as sidecars
+# (about 45 MB to download). Measured 2026-10-27 with the town's scratch town_vram.gd.
+SCENERY_SIDECAR_CONFIGS = ("godot-client/data/world/town-scenery.json",)
 
 
 def stage_vram_textures(build_dir: Path, stage: Path, godot: Path, cache: Path, logs: Path,
-                        tool: Path | None = None) -> dict:
+                        tool: Path | None = None, app_dir: Path | None = None) -> dict:
     """Build the VRAM-compressed sidecars of the shared map images into the stage.
 
     The sidecars are not tracked (eloria-assets/maps/**/shared-assets/vram/ is
@@ -2149,9 +2157,19 @@ def stage_vram_textures(build_dir: Path, stage: Path, godot: Path, cache: Path, 
         # The stage is the proved shipping closure. Runner source-only map
         # inputs have retired by now, and must not add unshipped encode work.
         maps = (stage if STORAGE else build_dir) / "eloria-assets/maps"
+        # A few maps' images in that pool are worth their download (UNSKIPPED_SHARED_IMAGE_MAPS), and the
+        # scenery of SCENERY_SIDECAR_CONFIGS gets sidecars beside its loose GLBs in app/ (once app/ exists).
+        unskip = [arg for name in UNSKIPPED_SHARED_IMAGE_MAPS for arg in ("--unskip-map", name)]
+        scenery = []
+        if app_dir is not None:
+            for config in SCENERY_SIDECAR_CONFIGS:
+                if (build_dir / config).is_file():
+                    scenery += ["--scenery-config", str(build_dir / config)]
+            if scenery:
+                scenery += ["--scenery-out-root", str(app_dir / "assets" / "world")]
         result = subprocess.run([sys.executable, str(tool), "--maps", str(maps),
                                  "--out-root", str(stage / "eloria-assets" / "maps"), "--cache", str(cache),
-                                 "--godot", str(godot), "--skip-dir", "_shared/images",
+                                 "--godot", str(godot), "--skip-dir", "_shared/images", *unskip, *scenery,
                                  *runner_args],
                                 stdout=handle, stderr=subprocess.STDOUT, timeout=3600,
                                 env=dict(os.environ, PYTHONIOENCODING="utf-8"))
@@ -2165,6 +2183,17 @@ def stage_vram_textures(build_dir: Path, stage: Path, godot: Path, cache: Path, 
         pool = report.parent.parent.relative_to(stage / "eloria-assets")
         target = logs / ("vram-report-" + "__".join(pool.parts) + ".json")
         shutil.move(str(report), target)
+    scenery_files = scenery_bytes = 0
+    if app_dir is not None and (app_dir / "assets").is_dir():
+        for report in (app_dir / "assets").rglob("vram/report.json"):
+            folder = report.parent.parent.relative_to(app_dir)
+            shutil.move(str(report), logs / ("vram-report-app__" + "__".join(folder.parts) + ".json"))
+        for path in (app_dir / "assets").rglob("vram/*"):
+            if path.is_file():
+                scenery_files += 1
+                scenery_bytes += path.stat().st_size
+        if scenery_files:
+            log(f"staged {scenery_files} scenery sidecar files ({scenery_bytes / 1e6:.0f} MB) beside their GLBs in app/")
     shared = {"files": 0, "bytes": 0, "directories": []}
     if client_reads_pooled_sidecars(build_dir):
         shared = share_identical_sidecars(stage)
@@ -2178,7 +2207,33 @@ def stage_vram_textures(build_dir: Path, stage: Path, godot: Path, cache: Path, 
             size += path.stat().st_size
     log(f"staged {files} VRAM sidecar files ({size / 1e6:.0f} MB, already zstd: the zip grows by about "
         f"as much) in {time.time() - started:.0f} s")
-    return {"files": files, "bytes": size}
+    return {"files": files, "bytes": size, "sceneryFiles": scenery_files, "sceneryBytes": scenery_bytes}
+
+
+def check_scenery_vram_textures(app_dir: Path) -> None:
+    """Every scenery sidecar index in app/assets names files that are staged beside it, byte for byte, and nothing
+    else sits in its vram/ folder (world_object_images.gd reads them; a broken one only costs a decode)."""
+    import hashlib
+    problems: list[str] = []
+    sidecars = 0
+    for index_path in sorted((app_dir / "assets").rglob("vram/index.json")) if (app_dir / "assets").is_dir() else []:
+        index = json.loads(index_path.read_text(encoding="utf-8"))
+        listed = set()
+        for entry in index.get("images", {}).values():
+            path = index_path.parent / entry["file"]
+            listed.add(entry["file"])
+            if not path.is_file():
+                problems.append(f"{path.relative_to(app_dir)}: listed in the index but missing")
+            elif hashlib.sha256(path.read_bytes()).hexdigest() != entry["sha256"]:
+                problems.append(f"{path.relative_to(app_dir)}: sha256 differs from the index")
+            else:
+                sidecars += 1
+        for path in index_path.parent.iterdir():
+            if path.name != "index.json" and path.name not in listed:
+                problems.append(f"{path.relative_to(app_dir)}: not named by the index")
+    if problems:
+        raise PackageError(f"{len(problems)} scenery sidecar problems:\n  " + "\n  ".join(problems[:40]))
+    log(f"checked {sidecars} scenery sidecars in app/assets")
 
 
 def check_vram_textures(stage: Path) -> None:
@@ -3178,8 +3233,9 @@ def _main(argv=None, storage=None) -> int:
         if not options.no_vram_textures:
             if storage:
                 storage.check("before graphics encoding", 512 * 1024**2 if asset_cache and asset_cache.hit else 1024**3)
-            stage_vram_textures(build_dir, stage, godot, options.vram_cache.resolve(), logs)
+            stage_vram_textures(build_dir, stage, godot, options.vram_cache.resolve(), logs, app_dir=app_dir)
             check_vram_textures(stage)
+            check_scenery_vram_textures(app_dir)
             if storage:
                 storage.clear_cache(options.vram_cache.resolve())
                 storage.check("graphics prepared")

@@ -67,6 +67,42 @@ index describes the selected scope's use of its pool, so a small scope must not
 replace a broader pool's index accidentally. The ordinary command without a
 scope selector retains the existing whole-tree packaging behavior.
 
+## Scenery GLBs and one map's images in the shared pool
+
+Scenery (world-object) GLBs under `godot-client/assets/world/` embed their
+images. `--scenery-config` names a scenery config (its `assets` object of
+`res://` GLB paths, such as `godot-client/data/world/town-scenery.json`); each
+embedded image of those GLBs gets a sidecar in the `vram/` folder of its GLB's
+own directory, keyed by the SHA-256 of the image bytes. The client
+(`src/world/world_object_images.gd`) uploads it when the renderer samples its
+format and the GLB samples the image only in the roles it was encoded for;
+otherwise it decodes the embedded bytes as before. `--scenery-out-root`
+mirrors those folders below a stage; a scoped run requires it.
+
+Release packaging skips the whole shared image pool `maps/_shared/images`.
+`--unskip-map` keeps planning the images one map names there; the packager
+passes it for Landfall Town and also builds the town scenery's sidecars into
+the loose `app/assets/world/` folders. A Landfall Town trial in a task
+worktree:
+
+```powershell
+python $textureTool --maps $mapSources `
+  --manifest (Join-Path $mapSources 'continent-v2\landfall_town\client\world.json') `
+  --out-root .local\texture-preparation\landfall-town\maps `
+  --scenery-config godot-client\data\world\town-scenery.json `
+  --scenery-out-root .local\texture-preparation\landfall-town\world `
+  --cache $encodeCache --godot $godotEditor --procs 4 --no-prune
+```
+
+Then copy the staged `maps\_shared\images\vram` and `world\underground\vram`
+folders (index and `.evt` files only) to `eloria-assets\maps\_shared\images\`
+and `godot-client\assets\world\underground\`; both are ignored. Rebuild after
+the town or its scenery is republished: an index left from older content only
+misses the changed images, which then decode. On 2026-10-27 the town's
+textures took about 365 MiB of GPU memory decoded and about 90 MiB with these
+sidecars (shell 27 images: 90 to 22 MiB; scenery 201 images: 272 to 65 MiB,
+three below the quality floors decoded), for about 63 MB of sidecar files.
+
 ## Review and use the output
 
 The stage mirrors image-pool paths beneath `--maps`. Each `vram/` directory has
