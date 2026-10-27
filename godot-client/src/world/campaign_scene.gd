@@ -31,6 +31,8 @@ var _event_emitted: Dictionary = {}
 var _variant := ""
 var _definition: Dictionary = {}
 var _handled: Dictionary = {}
+var _failed: Dictionary = {}
+var _interactive_requested_identity := ""
 var _actors: Dictionary = {}
 var _posts: Dictionary = {}
 var _visibility_posts: Dictionary = {}
@@ -594,7 +596,56 @@ func _finish_choice() -> void:
 	_layout_presentation()
 
 func can_replay(snapshot: Dictionary, current_map: String) -> bool:
-	return _replay_requested_identity.is_empty() and _replay_allowed(snapshot, current_map)
+	return _replay_requested_identity.is_empty() and _interactive_requested_identity.is_empty() \
+		and _replay_allowed(snapshot, current_map)
+
+func needs_retry(snapshot: Dictionary) -> bool:
+	return _failed.has(str(snapshot.get("run_id", "")) + ":" \
+		+ str((snapshot.get("scene", {}) as Dictionary).get("token", "")))
+
+## Crowd promotion must finish before the establishing shot. Keep the live
+## cast's bodies through the conversation even when the camera leaves them.
+func live_actor_ids(snapshot: Dictionary, current_map: String) -> Array[int]:
+	var ids: Array[int] = []
+	if _replaying or not bool(snapshot.get("active", false)) \
+			or map_key(str(snapshot.get("map", ""))) != map_key(current_map): return ids
+	var scene: Dictionary = snapshot.get("scene", {})
+	var identity := str(snapshot.get("run_id", "")) + ":" + str(scene.get("token", ""))
+	if str(scene.get("token", "")).is_empty() or \
+			((_handled.has(identity) or _failed.has(identity)) and not is_active() \
+			and _interactive_requested_identity != identity): return ids
+	if _definitions.is_empty(): _definitions = scene_definitions()
+	var definition: Dictionary = _definitions.get(str(scene.get("id", "")), {})
+	if definition.is_empty(): return ids
+	var bindings: Dictionary = scene.get("actors", snapshot.get("actors", {}))
+	for role: String in bindings:
+		if definition.has("cast_roles") and role not in definition.cast_roles: continue
+		var id := int(bindings[role])
+		if id >= 0 and id not in ids: ids.append(id)
+	return ids
+
+func _body_ready(value: Variant) -> bool:
+	return is_instance_valid(value) and value is Node3D \
+		and (not value.has_method("is_model_deferred") or not bool(value.call("is_model_deferred")))
+
+## Retry an interrupted first viewing, or reopen an unanswered conversation.
+## This remains native play: choices and completion still go to the server.
+func request_interactive(snapshot: Dictionary, current_map: String) -> bool:
+	if is_active() or not bool(snapshot.get("active", false)) \
+			or map_key(current_map).is_empty() \
+			or map_key(str(snapshot.get("map", ""))) != map_key(current_map): return false
+	var scene: Dictionary = snapshot.get("scene", {})
+	var identity := str(snapshot.get("run_id", "")) + ":" + str(scene.get("token", ""))
+	if str(snapshot.get("run_id", "")).is_empty() or str(scene.get("token", "")).is_empty(): return false
+	if _definitions.is_empty(): _definitions = scene_definitions()
+	if not _definitions.has(str(scene.get("id", ""))): return false
+	var choice: Dictionary = scene.get("choice", {})
+	var unanswered := EloriaProtocol.campaign_scene_choice_valid(choice) and not choice.is_empty() \
+		and bool(choice.get("can_choose", false)) and str(choice.get("selected", "")).is_empty()
+	if not _failed.has(identity) and not unanswered: return false
+	_interactive_requested_identity = identity
+	_replay_requested_identity = ""
+	return true
 
 func _replay_allowed(snapshot: Dictionary, current_map: String) -> bool:
 	if is_active() or not bool(snapshot.get("active", false)):
@@ -606,7 +657,7 @@ func _replay_allowed(snapshot: Dictionary, current_map: String) -> bool:
 	var token := str(scene.get("token", ""))
 	var run := str(snapshot.get("run_id", ""))
 	var identity := run + ":" + token
-	if run.is_empty() or token.is_empty() or not _handled.has(identity):
+	if run.is_empty() or token.is_empty() or not (_handled.has(identity) or _failed.has(identity)):
 		return false
 	if _definitions.is_empty():
 		_definitions = scene_definitions()
@@ -617,12 +668,14 @@ func _replay_allowed(snapshot: Dictionary, current_map: String) -> bool:
 			and not bool((snapshot.get("lamps", {}) as Dictionary).get("evidence_secure", false)):
 		return false
 	# A replay cannot stand in for an outstanding first viewing or rejoin ack.
-	return not bool(scene.get("requires_ack", false)) or \
+	return _failed.has(identity) or not bool(scene.get("requires_ack", false)) or \
 		(_ack_identity == identity + ":" + str(scene.get("ack_revision", 0)) and _ack_requested)
 
 func request_replay(snapshot: Dictionary, current_map: String) -> bool:
 	if not can_replay(snapshot, current_map):
 		return false
+	var identity := str(snapshot.get("run_id", "")) + ":" + str(snapshot.scene.token)
+	if _failed.has(identity): return request_interactive(snapshot, current_map)
 	_replay_requested_identity = str(snapshot.get("run_id", "")) + ":" + str(snapshot.scene.token)
 	return true
 
@@ -702,6 +755,7 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 		cancel("replaced")
 	if next_token.is_empty() or scene.is_empty():
 		_replay_requested_identity = ""
+		_interactive_requested_identity = ""
 		return
 	var identity := next_run + ":" + next_token
 	var previous_selection := str(_choice_state.get("selected", ""))
@@ -717,9 +771,12 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 		_ack_identity = ack_identity
 		_ack_requested = false
 	if not is_active():
+		var interactive := _interactive_requested_identity == identity
+		_interactive_requested_identity = ""
 		var replay := _replay_requested_identity == identity and _replay_allowed(snapshot, current_map)
 		_replay_requested_identity = ""
-		if _handled.has(identity) and not replay:
+		if _failed.has(identity) and not interactive: return
+		if _handled.has(identity) and not replay and not interactive:
 			if bool(scene.get("requires_ack", false)) and not _ack_requested:
 				_ack_requested = true
 				presentation_finished.emit(next_token, "already_seen")
@@ -737,6 +794,7 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 		_map = here
 		_variant = str(scene.get("variant", snapshot.get("cargo_priority", "")))
 		_definition = (_definitions[id] as Dictionary).duplicate(true)
+		if not replay: _handled.erase(identity)
 		# The same conversation has a different physical worksite at Twinbrook.
 		# Select its authored establishing frame once, then hold that view.
 		_apply_scene_variant()
@@ -768,11 +826,10 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 	if pending:
 		_wait_elapsed += maxf(0.0, delta)
 		if _wait_elapsed >= WAIT_LIMIT:
-			_handled[identity] = true
 			cancel("loading_timeout")
 			return
 		var local_value: Variant = actor_nodes.get(local_actor_id)
-		if not world_ready or not is_instance_valid(local_value) or not local_value is Node3D or not is_instance_valid(rig):
+		if not world_ready or not _body_ready(local_value) or not is_instance_valid(rig):
 			return
 		var local: Node3D = local_value
 		var bindings: Dictionary = _scene_bindings(scene, snapshot)
@@ -780,10 +837,12 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 		# finished construction. Keep the camera with the player until it exists.
 		if not _replaying:
 			for role: String in _definition.get("required_actors", []):
-				if bindings.has(role):
-					var speaker: Variant = actor_nodes.get(int(bindings[role]))
-					if not is_instance_valid(speaker) or not speaker is Node3D:
-						return
+				if not bindings.has(role): return
+				var speaker: Variant = actor_nodes.get(int(bindings[role]))
+				if not _body_ready(speaker): return
+			for role: String in bindings:
+				var participant: Variant = actor_nodes.get(int(bindings[role]))
+				if is_instance_valid(participant) and not _body_ready(participant): return
 		if _replaying:
 			for role: String in bindings:
 				var bound: Variant = actor_nodes.get(int(bindings[role]))
@@ -809,7 +868,6 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 			for role: String in bindings:
 				var actor_id := int(bindings[role])
 				_replay_nodes[actor_id] = actor_nodes.get(actor_id)
-		_handled[identity] = true
 	if playing:
 		if _replaying:
 			if _scene_bindings(scene, snapshot) != _replay_bindings:
@@ -1410,6 +1468,13 @@ func cancel(reason := "cancelled") -> void:
 	_stop_inspection()
 	var owned := is_active()
 	var was_replay := _replaying
+	if owned and not was_replay:
+		var identity := _run + ":" + _token
+		if reason in ["finished", "skipped"]:
+			_handled[identity] = true
+			_failed.erase(identity)
+		elif reason in ["loading_timeout", "actor_lost", "camera_lost"]:
+			_failed[identity] = reason
 	var hide_departed := owned and not was_replay and reason in ["finished", "skipped"]
 	if reason not in ["finished", "skipped"]: _release_handoff_visibility()
 	var adopt := owned and reason in ["finished", "skipped"] and _keeps_exit_camera() \
@@ -1448,6 +1513,7 @@ func cancel(reason := "cancelled") -> void:
 	if is_instance_valid(_choice_dialog): _choice_dialog.reset()
 	if is_instance_valid(_choice_scroll): _choice_scroll.hide()
 	_replay_requested_identity = ""
+	_interactive_requested_identity = ""
 	_replaying = false
 	_replay_bindings.clear()
 	_replay_nodes.clear()
@@ -1517,7 +1583,7 @@ func cancel(reason := "cancelled") -> void:
 		if was_replay:
 			replay_finished.emit(_token, reason)
 		else:
-			if reason in ["finished", "skipped", "loading_timeout", "actor_lost", "camera_lost"]:
+			if reason in ["finished", "skipped"]:
 				_ack_requested = true
 			presentation_finished.emit(_token, reason)
 	if reason in ["disconnected", "map_changed", "session_ended", "unavailable", "client_closed"]:
@@ -1738,6 +1804,7 @@ func reset_session() -> void:
 	if is_instance_valid(_rig) and _rig.has_method("reset_follow_offset"):
 		_rig.call("reset_follow_offset")
 	_handled.clear()
+	_failed.clear()
 	_token = ""
 	_run = ""
 	_map = ""

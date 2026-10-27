@@ -62,6 +62,7 @@ var _current_map := ""
 var _embedded := false
 var _available := false
 var _replay_available := false
+var _replay_retry := false
 var _column: VBoxContainer
 var _opening_actions_first := false
 
@@ -88,10 +89,14 @@ func embed() -> void:
 func presentation_available() -> bool:
 	return _available
 
-func set_replay_available(value: bool) -> void:
+func set_replay_available(value: bool, retry := false) -> void:
 	_build()
 	_replay_available = value
+	_replay_retry = retry
 	_replay.disabled = not value
+	_replay.text = "Retry scene" if retry else "Replay scene"
+	_replay.tooltip_text = "The scene was interrupted. Retry its dialogue and choices; your progress is saved." \
+		if retry else "Watch the current scene again. Quest progress and rewards stay saved."
 
 func request_replay() -> void:
 	if _replay_available:

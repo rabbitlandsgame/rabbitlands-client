@@ -138,7 +138,7 @@ func run() -> void:
 	failed.prepare(state,"landfall",0)
 	expect(not str(failed.status().error).is_empty() and not failed.presenting,"an unavailable remote resource fails closed without changing the player's view or input")
 	failed.queue_free()
-	# Main's failure path acknowledges a cosmetic timeout once and stays playable.
+	# An unavailable cutaway releases controls without pretending it was viewed.
 	module.configure({},main._campaign_replay_visual)
 	app.campaign = state.duplicate(true)
 	app.campaign.run_id = "missing-room-run"
@@ -147,7 +147,14 @@ func run() -> void:
 	main.campaign_scene.presentation_finished.connect(func(_token: String,reason: String) -> void:skips.append(reason))
 	main._update_campaign(0)
 	main._update_campaign(0)
-	expect(skips == ["loading_timeout"] and not main.campaign_scene.blocks_input(),"an unavailable cutaway skips cosmetically exactly once without hanging controls")
+	expect(skips == ["loading_timeout"] and not main.campaign_scene.blocks_input() \
+		and main.campaign_scene.needs_retry(app.campaign) \
+		and main.campaign_scene.can_replay(app.campaign, "landfall"), \
+		"an unavailable cutaway releases controls once and remains retryable")
+	main._on_campaign_replay()
+	expect(module.status().identity.is_empty() and str(module.status().error).is_empty() \
+		and main.campaign_scene._interactive_requested_identity == "missing-room-run:missing-room-token", \
+		"Retry discards the failed room load and queues a fresh native viewing")
 	main._clear_campaign_cutaway()
 	app.authenticated = false
 	main.actor_nodes = {}

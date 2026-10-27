@@ -762,6 +762,8 @@ func sync_campaign_replay() -> void:
 		return
 	var content: Control = quest_guide.get("campaign_content") as Control
 	quest_replay_button.disabled = content == null or not bool(content.get("_replay_available"))
+	quest_replay_button.text = "Retry current scene" if content != null \
+		and bool(content.get("_replay_retry")) else "Replay current scene"
 
 # --- mail --------------------------------------------------------------------
 
