@@ -1,5 +1,6 @@
 shader_type spatial;
 render_mode cull_disabled, diffuse_burley, specular_schlick_ggx;
+#include "res://src/actors/stubble_pigment.gdshaderinc"
 
 uniform sampler2D base_texture : source_color, filter_linear_mipmap, repeat_enable;
 // Linear data: R protects the whole eye from skin dye, G selects the iris,
@@ -18,6 +19,7 @@ uniform vec4 skin_color : source_color = vec4(1.0);
 uniform bool recolor_skin = false;
 uniform bool use_regions = true;
 uniform vec4 eye_tint : source_color = vec4(1.0);
+uniform bool natural_iris = false;
 uniform vec4 hair_tint : source_color = vec4(1.0);
 uniform float roughness = 0.85;
 
@@ -37,10 +39,18 @@ void fragment() {
 	vec3 eye = original;
 	float peak = max(original.r, max(original.g, original.b));
 	// Neutralise the authored iris hue, retaining its pupil and highlights.
+	// Preserve the selected pigment without boosting bright iris texels into
+	// a luminous disc. The original pupil and catchlight stay in the texture.
 	vec3 iris = eye_tint.rgb * min(peak * 1.6, 1.0);
+	if (natural_iris) {
+		float eye_value = dot(eye_tint.rgb, vec3(0.2126, 0.7152, 0.0722));
+		vec3 iris_pigment = mix(eye_tint.rgb, vec3(eye_value), 0.12);
+		iris = iris_pigment * min(peak, 0.85);
+	}
 	float highlight = smoothstep(0.55, 0.9, min(original.r, min(original.g, original.b)));
 	eye = mix(eye, mix(iris, original, highlight), mask.g);
 	ALBEDO = mix(skin, eye, mask.r);
+	ALBEDO = apply_stubble(ALBEDO, UV * mask_uv_scale + mask_uv_offset);
 	ALBEDO = mix(ALBEDO, vec3(peak) * hair_tint.rgb, mask.b);
 	ROUGHNESS = roughness;
 	if (use_normal) {

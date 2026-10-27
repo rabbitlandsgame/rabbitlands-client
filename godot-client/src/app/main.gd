@@ -27,6 +27,11 @@ var window_stack: Node
 var lantern_scene: Node3D
 
 const AppearanceChoices = preload("res://src/actors/appearance_choices.gd")
+const PortraitFormScript = preload("res://src/ui/portrait_customization_form.gd")
+const AppearanceEditorScript = preload("res://src/ui/appearance_editor.gd")
+var portrait_form
+var appearance_editor
+var creation_face_focus := false
 const OldcraftEntryStyleScript = preload("res://src/ui/oldcraft_entry_style.gd")
 const OldcraftDialogueStyleScript = preload("res://src/ui/oldcraft_dialogue_style.gd")
 const CreationArchetypes = preload("res://src/ui/creation_archetypes.gd")
@@ -2137,6 +2142,8 @@ func _text_entry_active() -> bool:
 ## The new-character intro and the loading curtain both own the screen while
 ## they are up: the world takes no input and the exterior preloads wait.
 func _world_input_blocked() -> bool:
+	if is_instance_valid(appearance_editor) and appearance_editor.is_visible_in_tree():
+		return true
 	return _disconnect_console_active or character_intro.blocks_input() or campaign_scene.blocks_input() or arrival_curtain.blocks_input() \
 		or (hud_workspace != null and hud_workspace.is_open()) \
 		or (inventory_workspace != null and inventory_workspace.is_editing()) \
@@ -2467,16 +2474,21 @@ func _on_create_pressed() -> void:
 	if password != create_confirm.text:
 		create_status.text = "Passwords do not match."
 		return
+	var appearance: Dictionary = _creation_appearance()
+	appearance["actor_type"] = create_gender.get_selected_id()
+	var appearance_error := Network.validate_creation_appearance(appearance)
+	if appearance_error != OK:
+		create_status.text = Network.appearance_error
+		TextColors.bind(create_status, "login_error")
+		return
 	pending_create_username = username
 	pending_create_password = password
 	create_status.text = "Creating character…"
 	TextColors.bind(create_status, "login_status")
-	var appearance: Dictionary = _creation_appearance()
-	appearance["actor_type"] = create_gender.get_selected_id()
 	var error := Network.create_character(username, password, appearance,
 		CreationArchetypes.id_at(selected_creation_class))
 	if error != OK:
-		create_status.text = "Creation request failed: " + error_string(error)
+		create_status.text = Network.appearance_error if error == ERR_UNAVAILABLE else "Creation request failed: " + error_string(error)
 		TextColors.bind(create_status, "login_error")
 		_clear_pending_creation()
 
@@ -2580,6 +2592,8 @@ func _populate_creation_sexes() -> void:
 
 func _populate_creation_choices(reset_skin := false) -> void:
 	var culture := AppearanceVariants.culture_for_actor_type(create_gender.get_selected_id())
+	if is_instance_valid(portrait_form):
+		portrait_form.visible = culture == "luminous"
 	AppearanceChoices.populate(%CreateSkin, AppearanceChoices.options("skin", culture))
 	if reset_skin and culture != "luminous":
 		%CreateSkin.select(%CreateSkin.get_item_index(0))
@@ -2622,6 +2636,8 @@ func _configure_creation_layout() -> void:
 	var scroll := ScrollContainer.new()
 	scroll.name = "CreationFieldsScroll"
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	# Keep the form width stable when another race hides the taller Human controls.
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_RESERVE
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	form.add_child(scroll)
 	form.move_child(scroll, 0)
@@ -2629,6 +2645,29 @@ func _configure_creation_layout() -> void:
 	for child: Node in form.get_children():
 		if child != scroll and child.name != "Actions" and child != create_status:
 			child.reparent(fields)
+	portrait_form = PortraitFormScript.new()
+	fields.add_child(portrait_form)
+	portrait_form.visible = AppearanceVariants.culture_for_actor_type(create_gender.get_selected_id()) == "luminous"
+	var inspect_face := CheckButton.new()
+	inspect_face.text = "Inspect face"
+	portrait_form.add_child(inspect_face)
+	portrait_form.move_child(inspect_face, 0)
+	inspect_face.toggled.connect(func(enabled: bool) -> void:
+		creation_face_focus = enabled
+		preview_distance = 1.5 if enabled else 4.2
+		_frame_preview_actor())
+	portrait_form.changed.connect(_refresh_creation_preview)
+	portrait_form.preset_selected.connect(func(look: Dictionary) -> void:
+		%CreateHair.select(%CreateHair.get_item_index(AppearanceVariants.hair_style(look.hair)))
+		%CreateHairColor.select(%CreateHairColor.get_item_index(AppearanceVariants.hair_color_index(look.hair)))
+		%CreateSkin.select(%CreateSkin.get_item_index(look.skin))
+		%CreateEyes.select(%CreateEyes.get_item_index(look.eyes)))
+	var appearance_button := Button.new()
+	appearance_button.text = "Appearance"
+	appearance_button.tooltip_text = "Change your character's face, hair and silhouette"
+	stats_panel.get_node("Content/Header").add_child(appearance_button)
+	stats_panel.get_node("Content/Header").move_child(appearance_button, 1)
+	appearance_button.pressed.connect(_open_appearance_editor)
 	(get_node("%FormPanel") as Control).custom_minimum_size.x = 520
 	for picker: OptionButton in [get_node("%CreateSkin"), get_node("%CreateHair"),
 			get_node("%CreateEyes"), get_node("%CreateHairColor"), get_node("%CreateShirt"),
@@ -2687,7 +2726,7 @@ func _on_creation_class_gear_toggled(enabled: bool) -> void:
 		if enabled else "Class gear hidden so you can inspect wardrobe colours.")
 
 func _creation_appearance() -> Dictionary:
-	return {
+	var result := {
 		"skin": %CreateSkin.get_selected_id(),
 		"hair": AppearanceVariants.pack_hair(%CreateHair.get_selected_id(), %CreateHairColor.get_selected_id()),
 		"eyes": %CreateEyes.get_selected_id(),
@@ -2699,6 +2738,25 @@ func _creation_appearance() -> Dictionary:
 		"shirt": %CreateShirt.get_selected_id(), "pants": %CreatePants.get_selected_id(),
 		"boots": %CreateBoots.get_selected_id(),
 	}
+	if is_instance_valid(portrait_form) and create_gender.get_selected_id() in [0, 1]:
+		result.merge(portrait_form.values())
+	return result
+
+func _open_appearance_editor() -> void:
+	var dto: Dictionary = AppState.actors.get(AppState.local_actor_id, {})
+	if dto.is_empty():
+		return
+	if int(dto.get("actor_type", -1)) not in [0, 1]:
+		AppState.append_local_message("The new appearance editor currently supports Human characters.")
+		return
+	if not is_instance_valid(appearance_editor):
+		appearance_editor = AppearanceEditorScript.new()
+		game_view.add_child(appearance_editor)
+		if window_stack != null:
+			window_stack.register(appearance_editor)
+	var model_id := _model_for_actor(dto)
+	var model_config: Dictionary = models.get(model_id, {})
+	appearance_editor.open_for(dto, model_config, _animation_for_model(model_config), equipment_config, Network.send_chat)
 
 func _on_character_preview_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
@@ -2730,6 +2788,11 @@ func _frame_preview_actor() -> void:
 		return
 	var stand: Vector3 = preview_actor.position
 	preview_focus = Vector3(stand.x, 1.0, stand.z)
+	if creation_face_focus and create_gender.get_selected_id() in [0, 1]:
+		preview_focus.y = stand.y + preview_actor.head_height() * 0.88
+		preview_camera.fov = 35.0
+	else:
+		preview_camera.fov = 75.0
 	var ground: Node3D = preview_root.get_node_or_null("PreviewGround") as Node3D
 	if ground != null:
 		ground.position = Vector3(stand.x, ground.position.y, stand.z)
@@ -4727,6 +4790,10 @@ func _recenter_viewport_on_player() -> void:
 	_update_local_actor_follow()
 
 func _unhandled_input(event: InputEvent) -> void:
+	if is_instance_valid(appearance_editor) and appearance_editor.is_visible_in_tree() and event.is_action_pressed("cancel"):
+		appearance_editor.hide()
+		get_viewport().set_input_as_handled()
+		return
 	if _actor_hud_menu != null and _actor_hud_menu.visible:
 		return
 	if _world_input_blocked():
@@ -14161,6 +14228,8 @@ func _apply_actor_render_quality() -> void:
 				level, int(raw_id) == AppState.local_actor_id)
 	if is_instance_valid(preview_actor):
 		preview_actor.apply_render_quality(level, true)
+	if is_instance_valid(appearance_editor):
+		appearance_editor.refresh_render_quality()
 
 ## Active and retained territory populations have the same quality immediately.
 ## Population-local quality polling still covers a population attaching later.

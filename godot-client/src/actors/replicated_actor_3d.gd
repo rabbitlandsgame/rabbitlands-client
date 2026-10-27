@@ -13,6 +13,13 @@ const CapeEmblems := preload("res://src/actors/cape_emblems.gd")
 const GLB_MESH_EXTRAS := preload("res://src/actors/glb_mesh_extras.gd")
 const WARDROBE_SHIRT_FIT := preload("res://src/actors/wardrobe_shirt_fit.gd")
 const QUIVER_STRAP_FIT := preload("res://src/actors/quiver_strap_fit.gd")
+const CHARACTER_PROPORTIONS := preload("res://src/actors/character_proportions.gd")
+const PORTRAIT_GROOM := preload("res://src/actors/portrait_groom.gd")
+const STUBBLE_APPEARANCE := preload("res://src/actors/stubble_appearance.gd")
+const HUMAN_LOCOMOTION := preload("res://src/actors/human_locomotion_polish.gd")
+const HIGH_PORTRAIT := preload("res://src/actors/high_portrait_appearance.gd")
+const HIGH_HAIR := preload("res://src/actors/high_hair_appearance.gd")
+const MPFB_PROTOTYPE := preload("res://src/actors/mpfb_prototype_appearance.gd")
 const WORLD_LABEL_STYLE := preload("res://src/ui/world_label_style.gd")
 const TextColors := preload("res://src/ui/text_colors.gd")
 const ARCHIVED_MODEL_POLICY := preload("res://src/actors/archived_model_policy.gd")
@@ -308,6 +315,8 @@ var _weapon_carry: SkeletonModifier3D = null
 var _attachment_bones: Dictionary = {}
 var _model_config: Dictionary = {}
 var _appearance: Dictionary = {}
+var _portrait_scale := Vector3.ONE
+var _human_shape_needs_finish := false
 var _face_material: ShaderMaterial
 var _face_group_materials: Dictionary = {}
 var _skin_materials: Dictionary = {}
@@ -380,6 +389,7 @@ var _cape_cloth_allowed := true
 ## equipment created later inherit the same policy without rebuilding either
 ## resource cache.
 var _render_quality: int = ACTOR_RENDER_QUALITY.QUALITY_DEFAULT
+var _render_quality_selected := false
 var _render_quality_local_actor := false
 ## Configured without its body: identity, picking, the overhead block, the map
 ## dot and every protocol state are here, but no model, skeleton, animation or
@@ -487,6 +497,12 @@ static var _wardrobe_texture_cache: Dictionary = {}
 static func clear_wardrobe_texture_cache() -> void:
 	_wardrobe_texture_cache.clear()
 	NecklineSkin.clear()
+	CHARACTER_PROPORTIONS.clear()
+	PORTRAIT_GROOM.clear()
+	STUBBLE_APPEARANCE.clear()
+	HUMAN_LOCOMOTION.clear()
+	HIGH_PORTRAIT.clear()
+	HIGH_HAIR.clear()
 ## The speech bubble sits above the name instead, and wraps well short of the
 ## screen it is now measured against.
 const SPEECH_BUBBLE_RISE := 28.0
@@ -531,6 +547,9 @@ const RING_SEGMENT_METRES := 0.5
 func configure(dto: Dictionary, adapter: CoordinateAdapter,
 		model_config: Dictionary, animation_config: Dictionary,
 		equipment_config: Dictionary = {}, build_model := true) -> Array[String]:
+	# Choose the tier before loading any optional High-only portrait resources.
+	if not _render_quality_selected:
+		_render_quality = LookProfile.quality()
 	var remote = RemotePresentationService.current()
 	if remote != null: remote.detach(self, "reconfigured")
 	_remote_enrollment_ready = false
@@ -638,16 +657,20 @@ func configure(dto: Dictionary, adapter: CoordinateAdapter,
 					wanted_clips.append(technique_clip)
 			if model_config.has("culture") and not wanted_clips.has("Rest_Pose"):
 				wanted_clips.append("Rest_Pose")
+			if HUMAN_LOCOMOTION.supports(model_config) and not wanted_clips.has(HUMAN_LOCOMOTION.ATTACKS.SOURCE_STROKE):
+				wanted_clips.append(HUMAN_LOCOMOTION.ATTACKS.SOURCE_STROKE)
 			var imported := NativeAnimationImporter.import_library(self,
 					animation_path, skeleton, model_config.get("boneAliases", {}),
 					wanted_clips, resolver.looping_clips)
 			animation_player = imported.player
+			HUMAN_LOCOMOTION.install(animation_player, model_config)
+			_configure_human_animation_mapping()
 			errors.append_array(Array(imported.errors))
 			if animation_player != null:
 				if not animation_player.animation_finished.is_connected(
 						_on_animation_finished):
 					animation_player.animation_finished.connect(_on_animation_finished)
-				errors.append_array(resolver.validate(imported.clips))
+				errors.append_array(resolver.validate(animation_player.get_animation_list()))
 				play_action(&"idle")
 				if resolver.action_to_clip.has("cast_channel"):
 					combat_presentation = CombatPresentation3D.new()
@@ -659,6 +682,7 @@ func configure(dto: Dictionary, adapter: CoordinateAdapter,
 
 func apply_appearance_variants(appearance: Dictionary) -> void:
 	_appearance = appearance.duplicate()
+	_apply_character_proportions()
 	if _native_skeleton == null:
 		return
 	var culture: String = str(_model_config.get("culture", "luminous"))
@@ -670,9 +694,14 @@ func apply_appearance_variants(appearance: Dictionary) -> void:
 	var native_model: Node3D = get_node_or_null("NativeModel") as Node3D
 	if native_model == null:
 		return
+	HIGH_HAIR.restore(native_model)
 	for node_value: Node in native_model.find_children("*", "MeshInstance3D", true, false):
 		var mesh_node: MeshInstance3D = node_value as MeshInstance3D
 		var mesh_name: String = mesh_node.name.to_lower()
+		if MPFB_PROTOTYPE.supported(_model_config) and mesh_name in ["body", "eyes", "scalp", "eyebrows"]:
+			# The local study has its own skin/iris atlas. Its white eyes and
+			# painted features must not receive the production source UV finish.
+			continue
 		if mesh_name.begins_with(RACE_FEATURE_PREFIX):
 			# Horn, stone, glass and growth are not skin: a race feature keeps
 			# its imported material under every skin, hair and eye choice. Keep
@@ -728,6 +757,8 @@ func apply_appearance_variants(appearance: Dictionary) -> void:
 		for node: Node in nodes:
 			if node is MeshInstance3D and node.has_meta("neck_source"):
 				NecklineSkin.refresh_materials(node as MeshInstance3D)
+	if _silhouette != null and _silhouette.is_enabled():
+		_silhouette.rebuild()
 
 func _set_appearance_visible(mesh_node: MeshInstance3D, visible_by_style: bool) -> void:
 	# Appearance owns whether a wardrobe surface exists at all; equipment only
@@ -831,6 +862,7 @@ func _apply_grouped_face_appearance(native_model: Node3D, spec: Dictionary,
 			_face_material = face
 
 func _configure_skin_color(material: ShaderMaterial, part: String, surface: int) -> void:
+	material.set_shader_parameter("natural_iris", _uses_portrait_customization())
 	var palette: Dictionary = _model_config.get("skinPalette", {})
 	var refs: Array = palette.get("references", {}).get(part, [])
 	var calibrated := surface < refs.size()
@@ -1000,7 +1032,10 @@ func _add_hair_variant(style: int, color: Color) -> void:
 		return
 	var styles: Array = styles_value as Array
 	var path: String = str(styles[posmod(style, styles.size())])
-	if bool(_model_config.get("hairSkinned", false)):
+	var style_override: Dictionary = (_model_config.get("hairStyleOverrides", {}) as Dictionary).get(str(style), {})
+	if not style_override.is_empty():
+		path = str(style_override.get("scene", path))
+	if bool(style_override.get("skinned", _model_config.get("hairSkinned", false))):
 		var holder := Node3D.new()
 		holder.name = "AppearanceHair_%d" % style
 		_native_skeleton.add_child(holder)
@@ -1033,12 +1068,21 @@ func _add_hair_variant(style: int, color: Color) -> void:
 	native_hair.name = "NativeHair"
 	# Skull proportions are baked into each body. Fit shared hairstyles in
 	# Head-local space without changing the skeleton or its inverse binds.
-	var hair_fit: Dictionary = _model_config.get("hairFit", {}) as Dictionary
+	var hair_fit: Dictionary = style_override.get("fit", _model_config.get("hairFit", {})) as Dictionary
 	native_hair.scale = _vector3(hair_fit.get("scale", []), Vector3.ONE)
 	native_hair.position = _vector3(hair_fit.get("offset", []), Vector3.ZERO)
 	attachment.add_child(native_hair)
+	if bool(style_override.get("concept", false)):
+		native_hair.set_meta("rl_concept_hair", true)
 	for node_value: Node in native_hair.find_children("*", "MeshInstance3D", true, false):
-		_tint_mesh(node_value as MeshInstance3D, color)
+		if bool(style_override.get("concept", false)):
+			(node_value as MeshInstance3D).set_meta("rl_concept_hair", true)
+			(node_value as MeshInstance3D).set_meta("rl_concept_hair_reference", bool(style_override.get("painted_vertices", false)))
+			(node_value as MeshInstance3D).set_meta("rl_concept_hair_texture", bool(style_override.get("painted_texture", false)))
+			(node_value as MeshInstance3D).set_meta("authored_surface_finish", true)
+			(node_value as MeshInstance3D).extra_cull_margin = 0.04
+		else:
+			_tint_mesh(node_value as MeshInstance3D, color)
 
 func render_diagnostics() -> Dictionary:
 	var meshes: Array[Dictionary] = []
@@ -1070,6 +1114,7 @@ func render_diagnostics() -> Dictionary:
 ## they are deliberately outside this walk. The missing-model capsule is the
 ## one body-level fallback and follows explicitly.
 func apply_render_quality(level: int, is_local_actor: bool = false) -> void:
+	_render_quality_selected = true
 	_render_quality = ACTOR_RENDER_QUALITY.normalized_quality(level)
 	_render_quality_local_actor = is_local_actor
 	_apply_render_quality_to_visuals()
@@ -1088,6 +1133,30 @@ func mounted_presentation_priority() -> bool:
 
 func _apply_render_quality_to_visuals() -> void:
 	if is_instance_valid(_native_model):
+		# All authored body coverage, cape drape and quiver-strap fitting have
+		# finished before this stage. Fit the final wardrobe exactly once.
+		HIGH_HAIR.restore(_native_model)
+		HIGH_PORTRAIT.restore(_native_model)
+		var mpfb := MPFB_PROTOTYPE.supported(_model_config)
+		if mpfb and _model_config.has("mpfbFaceFrame"):
+			_native_model.set_meta("mpfb_face_frame", _model_config.mpfbFaceFrame)
+		if _human_shape_needs_finish:
+			# Body refinement is identical on the head. Doing it before the
+			# individual face lets all face choices reuse the same outfit fit.
+			# MPFB's study retains the accepted canonical torso and hands.
+			# This field ends below its authored head/upper-neck replacement.
+			CHARACTER_PROPORTIONS.apply_body_refinement(_native_model, _native_skeleton, _model_config)
+			var shaped_appearance := MPFB_PROTOTYPE.shape_appearance(_appearance, _model_config) if mpfb else _appearance
+			CHARACTER_PROPORTIONS.apply(_native_model, _native_skeleton, shaped_appearance)
+			PORTRAIT_GROOM.apply(_native_model, _native_skeleton, shaped_appearance, _model_config)
+			_human_shape_needs_finish = false
+		if not mpfb:
+			HIGH_PORTRAIT.apply(_native_model, _native_skeleton, _appearance, _model_config, _render_quality)
+		HIGH_HAIR.apply(_native_model, _native_skeleton, _appearance, _model_config, _render_quality)
+		if mpfb:
+			MPFB_PROTOTYPE.apply(_native_model, _appearance, _model_config)
+		else:
+			STUBBLE_APPEARANCE.apply(_native_model, _appearance, _model_config)
 		ACTOR_RENDER_QUALITY.apply_actor(_native_model, _render_quality)
 	var fallback := get_node_or_null("MissingModelFallback") as MeshInstance3D
 	if fallback != null:
@@ -1817,6 +1886,33 @@ func set_boss_rank(value: int) -> void:
 		_boss_rank_label.position.y = banner_head_height() + NAMEPLATE_CLEARANCE
 	_refresh_overhead()
 
+## Keep scale in the visual hierarchy, after all named rest/bind fitting.
+## Mounted seating records that hierarchy's neutral transform, so update its
+## reference too when an existing player changes proportions while riding.
+func _uses_portrait_customization() -> bool:
+	return str(_model_config.get("culture", "")) == "luminous" and str(_model_config.get("bodyTemplate", "")) in ["luminous_male", "luminous_female"]
+
+func _apply_character_proportions() -> void:
+	var next := CHARACTER_PROPORTIONS.visual_scale(_appearance) if _uses_portrait_customization() else Vector3.ONE
+	if next.is_equal_approx(_portrait_scale):
+		return
+	var ratio := next / _portrait_scale
+	_portrait_scale = next
+	if is_instance_valid(_mount_visual):
+		var seat_pose: RefCounted = _mount_visual.get("pose")
+		if seat_pose != null:
+			var rest: Transform3D = seat_pose.get("visual_rest")
+			rest.basis = rest.basis * Basis.from_scale(ratio)
+			rest.origin.y *= ratio.y
+			seat_pose.set("visual_rest", rest)
+			seat_pose.set("baseline_pelvis", (seat_pose.get("baseline_pelvis") as Vector3) * ratio)
+		# Native mounted poses retain their own copy of the seat reference.
+		# Retire it so the next gated pose registers the updated proportions.
+		var native_pose: RefCounted = _mount_visual.get("rust_pose")
+		if native_pose != null:
+			native_pose.call("close")
+	_apply_model_scale()
+
 func set_server_scale(value: float) -> void:
 	var next := maxf(0.01, value)
 	if is_equal_approx(next, server_scale):
@@ -1843,7 +1939,11 @@ func _apply_model_scale() -> void:
 	for node_name: String in ["NativeModel", "MissingModelFallback"]:
 		var model := get_node_or_null(node_name) as Node3D
 		if model != null:
-			model.scale = Vector3.ONE * total
+			model.scale = _portrait_scale * total
+			if node_name == "NativeModel" and _uses_portrait_customization() and _native_body_bounds.size.y > 0.0 and not is_instance_valid(_mount_visual):
+				# Scale around the authored sole, including source models whose
+				# floor is offset from their rig origin.
+				model.position.y = -_native_body_bounds.position.y * total * _portrait_scale.y
 			# Measured in gameplay metres after import scale. The logical tile,
 			# picking capsule and ground markers retain their server positions.
 			model.position.z = maxf(0.0, float((_model_config.get("import", {}) as Dictionary).get(
@@ -1858,7 +1958,7 @@ func _apply_model_scale() -> void:
 func head_height() -> float:
 	if is_instance_valid(_native_model) and _native_body_bounds.size.y > 0.0:
 		return (_native_model.transform * _native_body_bounds).end.y
-	return (NAMEPLATE_HEIGHT - NAMEPLATE_CLEARANCE) * server_scale
+	return (NAMEPLATE_HEIGHT - NAMEPLATE_CLEARANCE) * server_scale * _portrait_scale.y
 
 ## Mounted banners follow the actor at a fixed seat-relative height, while
 ## the visible rider continues to follow the mount's animated saddle.
@@ -2255,13 +2355,13 @@ func apply_server_state(dto: Dictionary, adapter: CoordinateAdapter, teleport :=
 		# records without command sequences retain their legacy behavior.
 		var transient := current_action in [&"cast", &"cast_channel_enter", &"cast_channel",
 			&"cast_aggressive", &"cast_defensive", &"heal", &"cast_exit", &"ranged_draw",
-			&"ranged_hold", &"ranged_attack", &"attack_primary", &"attack_secondary", &"pain"]
+			&"ranged_hold", &"ranged_attack", &"attack_primary", &"attack_secondary",
+			&"attack_flurry", &"attack_flurry_secondary", &"pain"]
 		var stale_strike := command_sequence >= 0 and not fresh_command and action in [&"attack_primary", &"pain"]
 		if not stale_strike and (fresh_command or target_changed
 				or (not transient and (combat_changed or command_sequence < 0)) or action == &"death"):
 			if action == &"attack_primary" and fresh_command and resolver.action_to_clip.has("attack_secondary"):
-				action = &"attack_primary" if _swing_index % 2 == 0 else &"attack_secondary"
-				_swing_index += 1
+				action = _next_melee_action()
 			play_action(action, fresh_command and action in [&"attack_primary", &"attack_secondary", &"pain"])
 	var aiming: bool = int(dto.get("aiming_at", -1)) >= 0 or dto.get("aiming_at_tile") is Vector2i
 	if aiming != _ranged_aiming and current_action != &"death":
@@ -2327,13 +2427,13 @@ func _apply_server_state_native(dto: Dictionary, adapter: CoordinateAdapter, tel
 			# records without command sequences retain their legacy behavior.
 			var transient := current_action in [&"cast", &"cast_channel_enter", &"cast_channel",
 				&"cast_aggressive", &"cast_defensive", &"heal", &"cast_exit", &"ranged_draw",
-				&"ranged_hold", &"ranged_attack", &"attack_primary", &"attack_secondary", &"pain"]
+				&"ranged_hold", &"ranged_attack", &"attack_primary", &"attack_secondary",
+				&"attack_flurry", &"attack_flurry_secondary", &"pain"]
 			var stale_strike := command_sequence >= 0 and not fresh_command and action in [&"attack_primary", &"pain"]
 			if not stale_strike and (fresh_command or target_changed
 					or (not transient and (combat_changed or command_sequence < 0)) or action == &"death"):
 				if action == &"attack_primary" and fresh_command and resolver.action_to_clip.has("attack_secondary"):
-					action = &"attack_primary" if _swing_index % 2 == 0 else &"attack_secondary"
-					_swing_index += 1
+					action = _next_melee_action()
 				play_action(action, fresh_command and action in [&"attack_primary", &"attack_secondary", &"pain"])
 	var aiming: bool = int(dto.get("aiming_at", -1)) >= 0 or dto.get("aiming_at_tile") is Vector2i
 	if aiming != _ranged_aiming and current_action != &"death":
@@ -2693,6 +2793,11 @@ func apply_equipment_visuals(visuals: Dictionary, fallback_parts: Array = []) ->
 		return
 	if _equipment_applied and _equipment_matches(visuals, fallback_parts):
 		return
+	if is_instance_valid(_native_model):
+		HIGH_HAIR.restore(_native_model)
+		HIGH_PORTRAIT.restore(_native_model)
+		CHARACTER_PROPORTIONS.restore(_native_model)
+		CHARACTER_PROPORTIONS.restore_body_refinement(_native_model)
 	_equipment_applied = true
 	var torso_before: int = int(_equipment_visuals.get(BODY_PART, 0))
 	var shins_before := Vector2i(int(_equipment_visuals.get(LEGS_PART, 0)),
@@ -2750,9 +2855,9 @@ func apply_equipment_visuals(visuals: Dictionary, fallback_parts: Array = []) ->
 		combat_presentation.set_equipped_bow(bow_path)
 	# Equipment adds and removes mesh instances, so the silhouette's clone set
 	# has to be built again against what the actor is now made of.
+	_apply_render_quality_to_visuals()
 	if _silhouette != null and _silhouette.is_enabled():
 		_silhouette.rebuild()
-	_apply_render_quality_to_visuals()
 	if is_instance_valid(_native_model):
 		OLDCRAFT_ACTOR_STYLE.apply_surface_finish(_native_model)
 
@@ -2778,13 +2883,70 @@ func _refresh_quiver_cape_fit() -> void:
 		if shape >= 0:
 			quiver.set_blend_shape_value(shape, 1.0 if cape_worn else 0.0)
 
+func _configure_human_animation_mapping() -> void:
+	if not HUMAN_LOCOMOTION.supports(_model_config) or animation_player == null:
+		return
+	var cuts := HUMAN_LOCOMOTION.ATTACKS.normal_clips()
+	if not animation_player.has_animation(cuts[0]):
+		return
+	_default_melee_clips = {"attack_primary": cuts[0], "attack_secondary": cuts[1]}
+	var flurries := HUMAN_LOCOMOTION.ATTACKS.flurry_clips()
+	for index: int in flurries.size():
+		if animation_player.has_animation(flurries[index]):
+			resolver.action_to_clip["attack_flurry" if index == 0 else "attack_flurry_secondary"] = flurries[index]
+	_refresh_melee_animation_mapping()
+
+## Shuffle pairs of opposing cuts, retaining both alternatives in each pair.
+## The counter is shared with native presentation, so repeated state packets
+## never select a second swing for the same server attack.
+func _melee_action_at(index: int) -> StringName:
+	var choice := index & 1
+	if HUMAN_LOCOMOTION.supports(_model_config):
+		choice = choice ^ (hash([actor_id, index >> 1]) & 1)
+	return &"attack_primary" if choice == 0 else &"attack_secondary"
+
+func _next_melee_action() -> StringName:
+	var action := _melee_action_at(_swing_index)
+	_swing_index += 1
+	return action
+
 func _refresh_melee_animation_mapping() -> void:
 	if resolver == null or not resolver.melee_styles.has("unarmed"):
+		return
+	if HUMAN_LOCOMOTION.supports(_model_config) and animation_player != null \
+			and animation_player.has_animation(HUMAN_LOCOMOTION.ATTACKS.guard_clip()):
+		var primary := int(_equipment_visuals.get(0, 0)) > 0
+		var offhand := int(_equipment_visuals.get(1, 0))
+		var armed := primary or offhand >= 160
+		var cuts := HUMAN_LOCOMOTION.ATTACKS.normal_clips("r" if primary else "l")
+		var human_style: Dictionary = resolver.melee_styles["unarmed"]
+		if armed:
+			human_style = {"attack_primary": cuts[0], "attack_secondary": cuts[1]}
+		for action: Variant in _default_melee_clips:
+			resolver.action_to_clip[action] = human_style.get(action, _default_melee_clips[action])
+		_remap_human_loop(&"combat_idle", HUMAN_LOCOMOTION.ATTACKS.guard_clip() if armed else &"Fighting_Idle")
+		var held := 1 if offhand > 0 else 0
+		if primary:
+			var weapon := _equipment_model_config(0, int(_equipment_visuals.get(0, 0)))
+			held = held | (1 if not _ranged_bow_path(weapon).is_empty() else 2)
+		_remap_human_loop(&"run", HUMAN_LOCOMOTION.run_clip_for_hands(held))
 		return
 	var style: Dictionary = (resolver.melee_styles["unarmed"]
 		if int(_equipment_visuals.get(0, 0)) <= 0 else _default_melee_clips)
 	for action: Variant in _default_melee_clips:
 		resolver.action_to_clip[action] = style.get(action, _default_melee_clips[action])
+
+## An equipment swap changes only the grip variant. Preserve the loop phase
+## so the accepted stride does not restart when a weapon is drawn or removed.
+func _remap_human_loop(action: StringName, clip: StringName) -> void:
+	var previous := resolver.clip_for_action(action)
+	resolver.action_to_clip[String(action)] = clip
+	if current_action != action or previous == clip or not animation_player.is_playing():
+		return
+	var phase := animation_player.current_animation_position / maxf(animation_player.current_animation_length, 0.001)
+	animation_player.play(clip, action_blend_seconds)
+	animation_player.seek(phase * animation_player.get_animation(clip).length, true)
+	action_crossfade_seconds = action_blend_seconds / maxf(absf(animation_player.speed_scale), 0.01)
 
 ## Whether `visuals` asks for exactly what is already worn. The part loop's own
 ## skip condition, taken over the whole request: the same visual id for every
@@ -3219,6 +3381,10 @@ func _refresh_wardrobe_cover() -> void:
 	var native_model: Node3D = get_node_or_null("NativeModel") as Node3D
 	if native_model == null:
 		return
+	HIGH_HAIR.restore(native_model)
+	HIGH_PORTRAIT.restore(native_model)
+	CHARACTER_PROPORTIONS.restore(native_model)
+	CHARACTER_PROPORTIONS.restore_body_refinement(native_model)
 	var torso_visual: int = int(_equipment_visuals.get(BODY_PART, 0))
 	var covered: bool = torso_visual != 0
 	var torso_model := {}
@@ -3315,6 +3481,11 @@ func _refresh_wardrobe_cover() -> void:
 			continue
 		material.albedo_color = want
 
+	# Fit after coverage selects the current canonical surface; grooming reads
+	# this final face and therefore follows every shape and outfit transition.
+	if _uses_portrait_customization():
+		_human_shape_needs_finish = true
+
 func _refresh_body_surface_visibility() -> void:
 	var native_model: Node3D = get_node_or_null("NativeModel") as Node3D
 	if native_model == null:
@@ -3322,6 +3493,8 @@ func _refresh_body_surface_visibility() -> void:
 	for node_value: Node in native_model.find_children("*", "MeshInstance3D", true, false):
 		var mesh_node: MeshInstance3D = node_value as MeshInstance3D
 		var surface: String = mesh_node.name.to_lower()
+		if mesh_node.has_meta("rl_concept_hair"):
+			surface = "hair"
 		if surface in ["hair", "scalp"] or surface.begins_with(RACE_FEATURE_PREFIX):
 			if not mesh_node.has_meta("uncovered_head_visible"):
 				mesh_node.set_meta("uncovered_head_visible", mesh_node.visible)
@@ -4139,11 +4312,11 @@ func _play_action_legacy(action: StringName, restart := false) -> void:
 	var blend := action_blend_seconds
 	if action in [&"ranged_attack", &"pain", &"death"]:
 		blend = 0.045
-	elif action in [&"attack_primary", &"attack_secondary", &"cast_aggressive"]:
+	elif action in [&"attack_primary", &"attack_secondary", &"attack_flurry", &"attack_flurry_secondary", &"cast_aggressive"]:
 		blend = 0.09
 	# Preview/cinematic cold starts retain their explicit reset semantics.
 	# New strikes and hit reactions instead keep the pose they blend from.
-	var cold_restart := restart and action not in [&"attack_primary", &"attack_secondary", &"pain"]
+	var cold_restart := restart and action not in [&"attack_primary", &"attack_secondary", &"attack_flurry", &"attack_flurry_secondary", &"pain"]
 	if cold_restart:
 		animation_player.stop(true)
 	var had_pose := not cold_restart and not animation_player.assigned_animation.is_empty()
@@ -4195,6 +4368,10 @@ func _playback_speed_for(action: StringName) -> float:
 		if animation_player.has_animation(clip):
 			return animation_player.get_animation(clip).length / _death_animation_seconds
 	var stride: float = resolver.stride_speed_for_action(action, _small_creature_scale * server_scale)
+	# Human breadth scales the complete visual in forward Z. It is separate
+	# from the creature profile's opt-in species/invasion scale policy.
+	if _uses_portrait_customization():
+		stride *= _portrait_scale.z
 	if stride <= 0.0:
 		return resolver.playback_speed_for_action(action)
 	var rate := clampf(_travel_speed() / stride, 0.35, 3.5)
@@ -4231,7 +4408,7 @@ func _on_animation_finished(_animation_name: StringName) -> void:
 	elif current_action == &"cast_channel_enter":
 		play_action(&"cast_channel")
 	elif current_action in [&"cast", &"cast_aggressive", &"cast_defensive", &"heal",
-		&"cast_exit", &"attack_primary", &"attack_secondary", &"defend", &"ranged_attack", &"pain"]:
+		&"cast_exit", &"attack_primary", &"attack_secondary", &"attack_flurry", &"attack_flurry_secondary", &"defend", &"ranged_attack", &"pain"]:
 		play_action(_movement_aware_action(&"combat_idle" if _in_combat else &"idle", false))
 
 func presentation_action_time() -> float:
@@ -5306,5 +5483,8 @@ func _restore_remote_pending() -> void:
 
 func _exit_tree() -> void:
 	if _cinematic_grapple != null:_cinematic_grapple.clear()
+	if is_instance_valid(_native_model):
+		HIGH_HAIR.release(_native_model)
+		HIGH_PORTRAIT.release(_native_model)
 	var remote = RemotePresentationService.current()
 	if remote != null: remote.release_departing(self)

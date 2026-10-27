@@ -41,6 +41,8 @@ static func is_glass(material: Material) -> bool:
 static func apply_mesh_finish(mesh_instance: MeshInstance3D) -> int:
 	if mesh_instance == null or mesh_instance.mesh == null:
 		return 0
+	if bool(mesh_instance.get_meta("authored_surface_finish", false)):
+		return 0
 	var changed := 0
 	var seen: Dictionary = {}
 	for surface in mesh_instance.mesh.get_surface_count():

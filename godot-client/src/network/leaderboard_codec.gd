@@ -56,6 +56,10 @@ static func _valid_portrait(value: Variant) -> bool:
 	if not value.get("appearance") is Dictionary or not value.get("equipment_visuals") is Dictionary:
 		return false
 	for key: Variant in value.appearance:
+		if key in PortraitCustomization.FIELDS:
+			if not _integer(value.appearance[key], 0) or value.appearance[key] > PortraitCustomization.maximum(key):
+				return false
+			continue
 		if key not in ["skin", "hair", "eyes", "head", "shirt", "pants", "boots"] or not _integer(value.appearance[key], 0):
 			return false
 		if value.appearance[key] > (299 if key == "hair" else 255):
