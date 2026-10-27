@@ -111,6 +111,28 @@ func panel(fixture: Dictionary) -> Dictionary:
 	var placement := {"name":fixture.name,"sha256":FileAccess.get_sha256(fixture.path),"model_global":transform(model.global_transform),"body_bounds_position":vector(actor._native_body_bounds.position),"body_bounds_size":vector(actor._native_body_bounds.size),"overhead_height":actor.banner_head_height(),"nameplate_global":vector(actor._nameplate.global_position),"selection_size":vector(actor._selection_ring.mesh.get_aabb().size)}
 	return {"viewport":viewport,"actor":actor,"model":model,"skeleton":skeleton,"player":player,"camera":camera,"name":fixture.name,"bounds":bounds,"placement":placement}
 
+func projection_axes(view: Dictionary) -> Array[Vector3]:
+	var yaw := deg_to_rad(float(view.yaw))
+	var pitch := deg_to_rad(float(view.pitch))
+	return [Vector3(cos(yaw),0.0,-sin(yaw)),Vector3(-sin(yaw)*sin(pitch),cos(pitch),-cos(yaw)*sin(pitch))]
+
+func camera_size_for_bounds(extent: Vector3, views: Array) -> float:
+	# Orthographic size is the vertical span; these square review viewports also
+	# need the horizontal span. Preserve the 30% margin after projecting the box.
+	var span := 0.0
+	for view: Dictionary in views:
+		for axis: Vector3 in projection_axes(view):
+			span = maxf(span,extent.dot(axis.abs()))
+	assert(is_finite(span) and span > 0.0,"Invalid camera projection bounds")
+	var result := span*1.3
+	for view: Dictionary in views:
+		var axes := projection_axes(view)
+		for corner in 8:
+			var signs := Vector3(1.0 if (corner & 1) != 0 else -1.0,1.0 if (corner & 2) != 0 else -1.0,1.0 if (corner & 4) != 0 else -1.0)
+			var offset := extent*signs*0.5
+			assert(absf(offset.dot(axes[0])) < result*0.5 and absf(offset.dot(axes[1])) < result*0.5,"Source bounds corner clips the review camera")
+	return result
+
 func run() -> void:
 	job = JSON.parse_string(FileAccess.get_file_as_string(OS.get_cmdline_user_args()[0]))
 	var output: String = str(job.output).path_join("actual-render")
@@ -159,7 +181,8 @@ func run() -> void:
 	var extent := Vector3(float(fit.size[0]),float(fit.size[1]),float(fit.size[2]))
 	var bounds := AABB(low,extent)
 	var target := bounds.get_center()
-	var size := maxf(bounds.size.x,maxf(bounds.size.y,bounds.size.z))*1.3
+	assert(camera_size_for_bounds(Vector3.ONE,views) > 1.3,"Rotated unit box must exceed the old axis-only camera estimate")
+	var size := camera_size_for_bounds(bounds.size,views)
 	for p: Dictionary in panels: p.camera.size = size
 	for index in 5: await process_frame
 	var labels := []
