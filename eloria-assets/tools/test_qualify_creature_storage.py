@@ -138,53 +138,6 @@ def test_new_nonzero_default_is_rejected_when_source_used_implicit_zero(
         )
 
 
-def test_preexisting_empty_target_names_on_a_mesh_without_morphs_are_preserved(tmp_path):
-    job = job_fixture(tmp_path, "no_morph")
-    for key in ("source", "candidate"):
-        document,binary = read_glb(job[key])
-        document["meshes"][0].setdefault("extras", {})["targetNames"] = []
-        write_glb(job[key], document, binary)
-    receipt = json.loads(open(job["preparation"]).read())
-    receipt["source_sha256"] = digest(job["source"])
-    receipt["candidate_sha256"] = digest(job["candidate"])
-    with open(job["preparation"], "w") as handle: json.dump(receipt,handle)
-    assert exact_source(job)["passed"]
-
-
-def duplicate_curve_job(tmp_path):
-    document,binary,_ = fixture()
-    binary = bytearray(binary)
-    channel = dict(document['animations'][0]['channels'][-1])
-    sampler = dict(document['animations'][0]['samplers'][channel['sampler']])
-    from video_motion.creature_storage import _array
-    values = _array(document,binary,sampler['output']).view('<f4') + np.float32(.125)
-    sampler['output'] = append_array(document,binary,values,document['accessors'][sampler['output']]['type'])
-    channel['sampler'] = len(document['animations'][0]['samplers'])
-    document['animations'][0]['samplers'].append(sampler)
-    document['animations'][0]['channels'].append(channel)
-    source,candidate = tmp_path/'source.glb',tmp_path/'candidate.glb'
-    write_glb(source,document,binary);report=prepare(source,candidate)
-    receipt=tmp_path/'prepare.json';receipt.write_text(json.dumps(report))
-    return dict(source=str(source),candidate=str(candidate),preparation=str(receipt),output=str(tmp_path/'proof'))
-
-
-def test_existing_duplicate_property_occurrences_are_preserved_without_repair(tmp_path):
-    job=duplicate_curve_job(tmp_path)
-    assert exact_source(job)['preexisting_duplicate_property_curves_preserved_in_occurrence_order'] == 1
-
-
-@pytest.mark.parametrize('damage',['reorder','drop','extra'])
-def test_duplicate_property_occurrence_changes_are_rejected(tmp_path,damage):
-    job=duplicate_curve_job(tmp_path);document,binary=read_glb(job['candidate'])
-    channels=document['animations'][0]['channels']
-    if damage=='reorder':channels[-2],channels[-1]=channels[-1],channels[-2]
-    if damage=='drop':channels.pop()
-    if damage=='extra':channels.append(dict(channels[-1]))
-    write_glb(job['candidate'],document,binary)
-    receipt=json.loads(open(job['preparation']).read());receipt['candidate_sha256']=digest(job['candidate'])
-    with open(job['preparation'],'w') as handle:json.dump(receipt,handle)
-    with pytest.raises((AssertionError,KeyError)):
-        exact_source(job)
 def test_legacy_physical_observations_keep_their_original_residual(tmp_path):
     job = job_fixture(tmp_path)
     job["witness"] = str(tmp_path / "frozen-source.json")
@@ -194,11 +147,87 @@ def test_legacy_physical_observations_keep_their_original_residual(tmp_path):
     for entries in frozen["clips"].values():
         for entry in entries:
             entry.pop("surface_normals")
-            entry["surface"][0][0] += .000003
+            entry["surface"][0][0] += 0.000003
     path.write_text(json.dumps(frozen))
     original = path.read_bytes()
     report = witness(job)
     assert path.read_bytes() == original
     assert report["source_candidate_position_error"] == 0
-    assert report["original_witness_position_error_over_height"] == report["original_source_witness_position_error_over_height"]
+    assert (
+        report["original_witness_position_error_over_height"]
+        == report["original_source_witness_position_error_over_height"]
+    )
     assert report["original_witness_position_error_over_height"] > 1e-8
+
+
+def test_preexisting_empty_target_names_on_a_mesh_without_morphs_are_preserved(
+    tmp_path,
+):
+    job = job_fixture(tmp_path, "no_morph")
+    for key in ("source", "candidate"):
+        document, binary = read_glb(job[key])
+        document["meshes"][0].setdefault("extras", {})["targetNames"] = []
+        write_glb(job[key], document, binary)
+    receipt = json.loads(open(job["preparation"]).read())
+    receipt["source_sha256"] = digest(job["source"])
+    receipt["candidate_sha256"] = digest(job["candidate"])
+    with open(job["preparation"], "w") as handle:
+        json.dump(receipt, handle)
+    assert exact_source(job)["passed"]
+
+
+def duplicate_curve_job(tmp_path):
+    document, binary, _ = fixture()
+    binary = bytearray(binary)
+    channel = dict(document["animations"][0]["channels"][-1])
+    sampler = dict(document["animations"][0]["samplers"][channel["sampler"]])
+    from video_motion.creature_storage import _array
+
+    values = _array(document, binary, sampler["output"]).view("<f4") + np.float32(0.125)
+    sampler["output"] = append_array(
+        document, binary, values, document["accessors"][sampler["output"]]["type"]
+    )
+    channel["sampler"] = len(document["animations"][0]["samplers"])
+    document["animations"][0]["samplers"].append(sampler)
+    document["animations"][0]["channels"].append(channel)
+    source, candidate = tmp_path / "source.glb", tmp_path / "candidate.glb"
+    write_glb(source, document, binary)
+    report = prepare(source, candidate)
+    receipt = tmp_path / "prepare.json"
+    receipt.write_text(json.dumps(report))
+    return dict(
+        source=str(source),
+        candidate=str(candidate),
+        preparation=str(receipt),
+        output=str(tmp_path / "proof"),
+    )
+
+
+def test_existing_duplicate_property_occurrences_are_preserved_without_repair(tmp_path):
+    job = duplicate_curve_job(tmp_path)
+    assert (
+        exact_source(job)[
+            "preexisting_duplicate_property_curves_preserved_in_occurrence_order"
+        ]
+        == 1
+    )
+
+
+@pytest.mark.parametrize("damage", ["reorder", "drop", "extra"])
+def test_duplicate_property_occurrence_changes_are_rejected(tmp_path, damage):
+    job = duplicate_curve_job(tmp_path)
+    document, binary = read_glb(job["candidate"])
+    channels = document["animations"][0]["channels"]
+    if damage == "reorder":
+        channels[-2], channels[-1] = channels[-1], channels[-2]
+    if damage == "drop":
+        channels.pop()
+    if damage == "extra":
+        channels.append(dict(channels[-1]))
+    write_glb(job["candidate"], document, binary)
+    receipt = json.loads(open(job["preparation"]).read())
+    receipt["candidate_sha256"] = digest(job["candidate"])
+    with open(job["preparation"], "w") as handle:
+        json.dump(receipt, handle)
+    with pytest.raises((AssertionError, KeyError)):
+        exact_source(job)

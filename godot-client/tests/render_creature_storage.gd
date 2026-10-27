@@ -13,6 +13,56 @@ func vector(value: Vector3) -> Array:
 func transform(value: Transform3D) -> Array:
 	return [vector(value.origin),vector(value.basis.x),vector(value.basis.y),vector(value.basis.z)]
 
+func pose(p: Dictionary, entry: Dictionary) -> void:
+	p.player.play("RESET",0.0)
+	p.player.seek(0.0,true)
+	p.player.play(entry.clip,0.0)
+	p.player.seek(p.player.get_animation(entry.clip).length*entry.fraction,true)
+	p.skeleton.force_update_all_bone_transforms()
+
+func geometry(p: Dictionary) -> Array[Dictionary]:
+	var groups: Array[Dictionary] = []
+	for mesh: MeshInstance3D in p.model.find_children("*","MeshInstance3D",true,false):
+		if mesh.mesh == null or not mesh.is_visible_in_tree() or mesh.layers & 1 == 0: continue
+		var skeleton := mesh.get_node_or_null(mesh.skeleton) as Skeleton3D
+		var bones := []
+		if skeleton != null and mesh.skin != null:
+			for bind in mesh.skin.get_bind_count():
+				var bone := skeleton.find_bone(mesh.skin.get_bind_name(bind))
+				bones.append(bone if bone >= 0 else mesh.skin.get_bind_bone(bind))
+		for surface in mesh.mesh.get_surface_count():
+			groups.append({"mesh":mesh,"skeleton":skeleton,"bones":bones,"arrays":mesh.mesh.surface_get_arrays(surface),"shapes":mesh.mesh.surface_get_blend_shape_arrays(surface),"relative":mesh.mesh.blend_shape_mode == Mesh.BLEND_SHAPE_MODE_RELATIVE})
+	return groups
+
+func posed_bounds(groups: Array[Dictionary], initial: AABB) -> AABB:
+	var bounds := initial
+	for group: Dictionary in groups:
+		var mesh: MeshInstance3D = group.mesh
+		var arrays: Array = group.arrays
+		var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+		var active := []
+		for shape in group.shapes.size():
+			var weight := mesh.get_blend_shape_value(shape)
+			if absf(weight) >= .0001: active.append({"vertices":group.shapes[shape][Mesh.ARRAY_VERTEX],"weight":weight})
+		var transforms: Array[Transform3D] = []
+		for bind in group.bones.size():
+			transforms.append(group.skeleton.global_transform * group.skeleton.get_bone_global_pose(group.bones[bind]) * mesh.skin.get_bind_pose(bind))
+		var joints: PackedInt32Array = arrays[Mesh.ARRAY_BONES] if arrays[Mesh.ARRAY_BONES] != null else PackedInt32Array()
+		var weights: PackedFloat32Array = arrays[Mesh.ARRAY_WEIGHTS] if arrays[Mesh.ARRAY_WEIGHTS] != null else PackedFloat32Array()
+		var stride := joints.size()/vertices.size() if not vertices.is_empty() else 0
+		for index in vertices.size():
+			var point := vertices[index]
+			for shape: Dictionary in active:
+				point += (shape.vertices[index] if group.relative else shape.vertices[index]-vertices[index])*shape.weight
+			var world := mesh.global_transform * point
+			if not transforms.is_empty():
+				world = Vector3.ZERO
+				for slot in stride:
+					var at := index*stride+slot
+					world += (transforms[joints[at]]*point)*weights[at]
+			bounds = bounds.expand(world)
+	return bounds
+
 func panel(fixture: Dictionary) -> Dictionary:
 	var viewport := SubViewport.new()
 	viewport.size = Vector2i(512,512)
@@ -72,13 +122,6 @@ func run() -> void:
 		placements.append(p.placement)
 	for property: String in ["model_global","overhead_height","nameplate_global","selection_size"]:
 		assert(placements[0][property] == placements[1][property],"Actor placement differs: "+property)
-	var bounds: AABB = panels[0].bounds
-	var target := bounds.get_center()
-	var size := maxf(bounds.size.x,maxf(bounds.size.y,bounds.size.z))*1.3
-	for p: Dictionary in panels:
-		p.camera.size = size
-	for index in 5:
-		await process_frame
 	var entries := []
 	var views := [{"name":"game","yaw":0.0,"pitch":30.0},{"name":"side","yaw":90.0,"pitch":10.0},{"name":"rear","yaw":180.0,"pitch":25.0},{"name":"under","yaw":30.0,"pitch":-30.0}]
 	for clip: StringName in panels[0].player.get_animation_list():
@@ -89,14 +132,40 @@ func run() -> void:
 		var duration: float = panels[0].player.get_animation(clip).length
 		for frame in range(ceili(duration*24.0)+1):
 			entries.append({"clip":clip,"fraction":minf(frame/24.0/duration,1.0),"frame":frame,"view":views[0],"video":true})
+	var fit_path: String = str(job.output).path_join("render-fit.json")
+	if "--fit-only" in OS.get_cmdline_user_args():
+		var bounds: AABB = panels[0].bounds
+		var groups := geometry(panels[0])
+		var seen := {}
+		for entry: Dictionary in entries:
+			var signature := str(entry.clip)+"@"+str(entry.fraction)
+			if seen.has(signature): continue
+			seen[signature] = true
+			pose(panels[0],entry)
+			bounds = posed_bounds(groups,bounds)
+		var fit := {"source_sha256":placements[0].sha256,"model_global":placements[0].model_global,"position":vector(bounds.position),"size":vector(bounds.size),"poses":seen.size(),"scope":"Every vertex of every visible body surface, all native full-cycle render frames plus each view-still pose. Uses actual Godot mesh arrays, active renderer morph cutoff, current skeleton/binds, four/eight influences and complete Actor transform."}
+		FileAccess.open(fit_path,FileAccess.WRITE).store_string(JSON.stringify(fit,"\t"))
+		for p: Dictionary in panels: p.viewport.free()
+		NativeAnimationImporter.clear(); GlbSceneCache.clear()
+		print("CREATURE_STORAGE_FIT_PASS ",job.actor," ",seen.size())
+		quit(); return
+	assert(FileAccess.file_exists(fit_path),"Run the headless --fit-only all-vertex prepass before rendering")
+	var fit: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(fit_path))
+	assert(fit.source_sha256 == placements[0].sha256,"Render fit does not match source hash")
+	for row in 4:
+		for column in 3:
+			assert(absf(float(fit.model_global[row][column])-float(placements[0].model_global[row][column])) < 1e-12,"Render fit does not match Actor transform (beyond JSON float roundtrip)")
+	var low := Vector3(float(fit.position[0]),float(fit.position[1]),float(fit.position[2]))
+	var extent := Vector3(float(fit.size[0]),float(fit.size[1]),float(fit.size[2]))
+	var bounds := AABB(low,extent)
+	var target := bounds.get_center()
+	var size := maxf(bounds.size.x,maxf(bounds.size.y,bounds.size.z))*1.3
+	for p: Dictionary in panels: p.camera.size = size
+	for index in 5: await process_frame
 	var labels := []
 	for entry: Dictionary in entries:
 		for p: Dictionary in panels:
-			p.player.play("RESET",0.0)
-			p.player.seek(0.0,true)
-			p.player.play(entry.clip,0.0)
-			p.player.seek(p.player.get_animation(entry.clip).length*entry.fraction,true)
-			p.skeleton.force_update_all_bone_transforms()
+			pose(p,entry)
 			var yaw := deg_to_rad(float(entry.view.yaw))
 			var pitch := deg_to_rad(float(entry.view.pitch))
 			p.camera.look_at_from_position(Vector3(sin(yaw)*cos(pitch),sin(pitch),cos(yaw)*cos(pitch))*10.0+target,target)

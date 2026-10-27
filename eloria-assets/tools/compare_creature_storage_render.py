@@ -22,6 +22,15 @@ def compare(job):
             dtype=np.int16,
         )
         error = np.abs(source - candidate)
+        border = np.concatenate(
+            [
+                source[:2].reshape(-1, 3),
+                source[-2:].reshape(-1, 3),
+                source[:, :2].reshape(-1, 3),
+                source[:, -2:].reshape(-1, 3),
+            ]
+        )
+        border_foreground = int((np.max(abs(border - source[0, 0]), axis=1) > 3).sum())
         samples.append(
             dict(
                 label=label,
@@ -29,6 +38,7 @@ def compare(job):
                 pixels_above_two_levels=int((error.max(2) > 2).sum()),
                 mean_channel_error=float(error.mean()),
                 maximum_channel_error=int(error.max()),
+                border_foreground_pixels=border_foreground,
             )
         )
     report = dict(
@@ -45,6 +55,13 @@ def compare(job):
         maximum_mean_channel_error=max(row["mean_channel_error"] for row in samples),
         maximum_channel_error=max(row["maximum_channel_error"] for row in samples),
         scope=capture["scope"],
+        framing_passed=all(row["border_foreground_pixels"] == 0 for row in samples),
+        clipped_frame_labels=[
+            row["label"] for row in samples if row["border_foreground_pixels"] > 0
+        ],
+        maximum_border_foreground_pixels=max(
+            row["border_foreground_pixels"] for row in samples
+        ),
         samples=samples,
     )
     labels = [label for label in capture["frames"] if "frame-" not in label]

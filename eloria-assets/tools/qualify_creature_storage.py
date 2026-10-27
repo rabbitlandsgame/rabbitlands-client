@@ -142,7 +142,9 @@ def exact_source(job):
         expected_metadata = copy.deepcopy(
             {k: v for k, v in old.items() if k not in ("weights", "primitives")}
         )
-        if masks[mi]["targets_before"] and "targetNames" in expected_metadata.get("extras", {}):
+        if masks[mi]["targets_before"] and "targetNames" in expected_metadata.get(
+            "extras", {}
+        ):
             names = expected_metadata["extras"]["targetNames"]
             if keep:
                 expected_metadata["extras"]["targetNames"] = [names[i] for i in keep]
@@ -206,7 +208,7 @@ def exact_source(job):
         for channel in new["channels"]:
             key = (channel["target"]["node"], channel["target"]["path"])
             new_channels.setdefault(key, []).append(channel)
-        duplicate_curves += sum(len(channels)-1 for channels in new_channels.values())
+        duplicate_curves += sum(len(channels) - 1 for channels in new_channels.values())
         times = []
         for oc in old["channels"]:
             oa = old["samplers"][oc["sampler"]]
@@ -229,7 +231,8 @@ def exact_source(job):
                     assert key not in new_channels
                     continue
             nc = new_channels[key].pop(0)
-            if not new_channels[key]: del new_channels[key]
+            if not new_channels[key]:
+                del new_channels[key]
             assert {k: v for k, v in oc.items() if k != "sampler"} == {
                 k: v for k, v in nc.items() if k != "sampler"
             }
@@ -272,7 +275,9 @@ def exact_source(job):
             assert np.all(eligible[deleted]), (old["name"], oc["target"])
             removed_rows += int(deleted.sum())
         for key, channels in new_channels.items():
-            assert len(channels) == 1, "A neutral duration anchor cannot add duplicate curves"
+            assert (
+                len(channels) == 1
+            ), "A neutral duration anchor cannot add duplicate curves"
             channel = channels[0]
             assert (
                 key not in all_original_targets
@@ -333,6 +338,7 @@ def witness(job):
     source = pathlib.Path(job["source"])
     candidate = pathlib.Path(job["candidate"])
     out = pathlib.Path(job["output"])
+    out.mkdir(parents=True, exist_ok=True)
     a = NativeShapeAsset(source)
     b = NativeShapeAsset(candidate)
     wp = pathlib.Path(job["witness"])
@@ -410,7 +416,10 @@ def witness(job):
                 wpos,
                 float(np.linalg.norm(bp - e["surface"], axis=1).max() / w["height"]),
             )
-            source_wpos = max(source_wpos, float(np.linalg.norm(ap - e["surface"], axis=1).max() / w["height"]))
+            source_wpos = max(
+                source_wpos,
+                float(np.linalg.norm(ap - e["surface"], axis=1).max() / w["height"]),
+            )
             if "surface_normals" in e:
                 wnorm = max(
                     wnorm,
@@ -427,7 +436,7 @@ def witness(job):
     assert (
         maxpos < 1e-12
         and maxnorm < 1e-12
-        and source_wpos < .00025
+        and source_wpos < 0.00025
         and wpos <= source_wpos + 1e-12
         and wnorm < 1e-8
         and wbone < 1e-9
