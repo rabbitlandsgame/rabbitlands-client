@@ -1,0 +1,6861 @@
+{
+  "schemaVersion": "1.1.0",
+  "assetVersion": "1.0.0",
+  "asset": {
+    "id": "landfall_town",
+    "name": "Landfall Town",
+    "glb": "world.glb",
+    "units": "meters",
+    "coordinateSystem": {
+      "handedness": "right",
+      "upAxis": "Y",
+      "northAxis": "-Z"
+    },
+    "origin": [
+      0,
+      0,
+      0
+    ],
+    "bounds": {
+      "min": [
+        20.0,
+        -1.7,
+        155.0
+      ],
+      "max": [
+        222.8,
+        4.6,
+        303.8
+      ]
+    },
+    "interiorClass": "insides",
+    "parentRegion": "landfall",
+    "serverCells": 324
+  },
+  "coordinateTransform": {
+    "metresPerTile": 1.0,
+    "serverOrigin": [
+      0,
+      324
+    ],
+    "serverCells": [
+      324,
+      324
+    ],
+    "origin": [
+      0,
+      0,
+      0
+    ],
+    "walkingHeight": 0.0,
+    "invertServerY": true,
+    "serverStorageVersion": 1,
+    "serverTileMin": [
+      0,
+      0
+    ]
+  },
+  "serverCells": [
+    324,
+    324
+  ],
+  "spawnPoints": [
+    {
+      "id": "tavern_ground",
+      "name": "The Unlit Boat",
+      "section": "tavern_ground",
+      "default": true,
+      "position": [
+        26,
+        0.05,
+        301
+      ],
+      "serverTile": [
+        26,
+        23
+      ],
+      "rotationDegrees": 180
+    },
+    {
+      "id": "market",
+      "name": "The avenue shops",
+      "section": "market",
+      "default": false,
+      "position": [
+        135,
+        0.05,
+        301
+      ],
+      "serverTile": [
+        135,
+        23
+      ],
+      "rotationDegrees": 180
+    },
+    {
+      "id": "magic_shop",
+      "name": "The True Note",
+      "section": "magic_shop",
+      "default": false,
+      "position": [
+        175,
+        0.05,
+        301
+      ],
+      "serverTile": [
+        175,
+        23
+      ],
+      "rotationDegrees": 180
+    },
+    {
+      "id": "smithy",
+      "name": "The forge",
+      "section": "smithy",
+      "default": false,
+      "position": [
+        216,
+        0.05,
+        301
+      ],
+      "serverTile": [
+        216,
+        23
+      ],
+      "rotationDegrees": 180
+    },
+    {
+      "id": "clerk_house",
+      "name": "Hemmen's house",
+      "section": "clerk_house",
+      "default": false,
+      "position": [
+        23,
+        0.05,
+        241
+      ],
+      "serverTile": [
+        23,
+        83
+      ],
+      "rotationDegrees": 180
+    },
+    {
+      "id": "weaver_house",
+      "name": "The weaver's house",
+      "section": "weaver_house",
+      "default": false,
+      "position": [
+        65,
+        0.05,
+        238
+      ],
+      "serverTile": [
+        65,
+        86
+      ],
+      "rotationDegrees": 0
+    },
+    {
+      "id": "watch_house",
+      "name": "The watch house",
+      "section": "watch_house",
+      "default": false,
+      "position": [
+        103,
+        0.05,
+        239
+      ],
+      "serverTile": [
+        103,
+        85
+      ],
+      "rotationDegrees": 90
+    },
+    {
+      "id": "netmender_house",
+      "name": "The net-mender's house",
+      "section": "netmender_house",
+      "default": false,
+      "position": [
+        143,
+        0.05,
+        242
+      ],
+      "serverTile": [
+        143,
+        82
+      ],
+      "rotationDegrees": 90
+    },
+    {
+      "id": "castle",
+      "name": "The keep",
+      "section": "castle",
+      "default": false,
+      "position": [
+        23,
+        0.05,
+        170
+      ],
+      "serverTile": [
+        23,
+        154
+      ],
+      "rotationDegrees": 90
+    },
+    {
+      "id": "tavern_upper",
+      "name": "The Unlit Boat, upstairs",
+      "section": "tavern_upper",
+      "default": false,
+      "position": [
+        85,
+        0.05,
+        296
+      ],
+      "serverTile": [
+        85,
+        28
+      ],
+      "rotationDegrees": 0
+    }
+  ],
+  "chambers": [
+    {
+      "id": "tavern_ground-0",
+      "section": "tavern_ground",
+      "position": [
+        26.5,
+        0,
+        297.5
+      ],
+      "radius": 5,
+      "name": "Taproom of the Unlit Boat"
+    },
+    {
+      "id": "tavern_ground-1",
+      "section": "tavern_ground",
+      "position": [
+        36,
+        0,
+        300.5
+      ],
+      "radius": 2.5,
+      "name": "Tavern kitchen"
+    },
+    {
+      "id": "tavern_ground-2",
+      "section": "tavern_ground",
+      "position": [
+        36,
+        0,
+        294.5
+      ],
+      "radius": 2.5,
+      "name": "Tavern stair hall"
+    },
+    {
+      "id": "market-0",
+      "section": "market",
+      "position": [
+        135.5,
+        0,
+        298
+      ],
+      "radius": 4.5,
+      "name": "General store"
+    },
+    {
+      "id": "market-1",
+      "section": "market",
+      "position": [
+        125.5,
+        0,
+        298
+      ],
+      "radius": 4.5,
+      "name": "Flower shop"
+    },
+    {
+      "id": "magic_shop-0",
+      "section": "magic_shop",
+      "position": [
+        176,
+        0,
+        300
+      ],
+      "radius": 4.5,
+      "name": "The True Note shop"
+    },
+    {
+      "id": "magic_shop-1",
+      "section": "magic_shop",
+      "position": [
+        176,
+        0,
+        294.5
+      ],
+      "radius": 4.5,
+      "name": "The True Note workshop"
+    },
+    {
+      "id": "smithy-0",
+      "section": "smithy",
+      "position": [
+        216.5,
+        0,
+        299.5
+      ],
+      "radius": 5,
+      "name": "The forge"
+    },
+    {
+      "id": "smithy-1",
+      "section": "smithy",
+      "position": [
+        214,
+        0,
+        292.5
+      ],
+      "radius": 2.5,
+      "name": "Smith's home kitchen"
+    },
+    {
+      "id": "smithy-2",
+      "section": "smithy",
+      "position": [
+        220,
+        0,
+        292.5
+      ],
+      "radius": 2,
+      "name": "Smith's home bedroom"
+    },
+    {
+      "id": "clerk_house-0",
+      "section": "clerk_house",
+      "position": [
+        23.5,
+        0,
+        241
+      ],
+      "radius": 2,
+      "name": "Hemmen's study"
+    },
+    {
+      "id": "clerk_house-1",
+      "section": "clerk_house",
+      "position": [
+        29,
+        0,
+        241
+      ],
+      "radius": 1.5,
+      "name": "Hemmen's kitchen"
+    },
+    {
+      "id": "clerk_house-2",
+      "section": "clerk_house",
+      "position": [
+        26,
+        0,
+        236.5
+      ],
+      "radius": 4.5,
+      "name": "Hemmen's bedroom"
+    },
+    {
+      "id": "weaver_house-0",
+      "section": "weaver_house",
+      "position": [
+        66,
+        0,
+        237
+      ],
+      "radius": 4.5,
+      "name": "Loom workroom"
+    },
+    {
+      "id": "weaver_house-1",
+      "section": "weaver_house",
+      "position": [
+        63.5,
+        0,
+        241.5
+      ],
+      "radius": 2,
+      "name": "Weaver's kitchen"
+    },
+    {
+      "id": "weaver_house-2",
+      "section": "weaver_house",
+      "position": [
+        69,
+        0,
+        241.5
+      ],
+      "radius": 1.5,
+      "name": "Weaver's bedroom"
+    },
+    {
+      "id": "watch_house-0",
+      "section": "watch_house",
+      "position": [
+        103,
+        0,
+        238
+      ],
+      "radius": 4.5,
+      "name": "Watch mess"
+    },
+    {
+      "id": "watch_house-1",
+      "section": "watch_house",
+      "position": [
+        108,
+        0,
+        238
+      ],
+      "radius": 4.5,
+      "name": "Watch bunk room"
+    },
+    {
+      "id": "netmender_house-0",
+      "section": "netmender_house",
+      "position": [
+        145,
+        0,
+        241
+      ],
+      "radius": 3.5,
+      "name": "Hearth kitchen"
+    },
+    {
+      "id": "netmender_house-1",
+      "section": "netmender_house",
+      "position": [
+        145,
+        0,
+        236
+      ],
+      "radius": 3.5,
+      "name": "Net loft"
+    },
+    {
+      "id": "castle-0",
+      "section": "castle",
+      "position": [
+        26.5,
+        0,
+        169.5
+      ],
+      "radius": 5,
+      "name": "Gate Hall"
+    },
+    {
+      "id": "castle-1",
+      "section": "castle",
+      "position": [
+        43.5,
+        0,
+        169.5
+      ],
+      "radius": 10,
+      "name": "Hall of Eight Seats"
+    },
+    {
+      "id": "castle-2",
+      "section": "castle",
+      "position": [
+        26.5,
+        0,
+        179
+      ],
+      "radius": 5,
+      "name": "Register Archive"
+    },
+    {
+      "id": "castle-3",
+      "section": "castle",
+      "position": [
+        26.5,
+        0,
+        160
+      ],
+      "radius": 5,
+      "name": "Palace Chancery"
+    },
+    {
+      "id": "castle-4",
+      "section": "castle",
+      "position": [
+        57.5,
+        0,
+        162.5
+      ],
+      "radius": 3,
+      "name": "Sealed stair"
+    },
+    {
+      "id": "tavern_upper-0",
+      "section": "tavern_upper",
+      "position": [
+        80,
+        0,
+        294
+      ],
+      "radius": 8.5,
+      "name": "Tavern landing"
+    },
+    {
+      "id": "tavern_upper-1",
+      "section": "tavern_upper",
+      "position": [
+        73,
+        0,
+        300
+      ],
+      "radius": 2.5,
+      "name": "Guest room"
+    },
+    {
+      "id": "tavern_upper-2",
+      "section": "tavern_upper",
+      "position": [
+        78,
+        0,
+        300
+      ],
+      "radius": 2.5,
+      "name": "Guest room"
+    },
+    {
+      "id": "tavern_upper-3",
+      "section": "tavern_upper",
+      "position": [
+        82.5,
+        0,
+        300
+      ],
+      "radius": 2.5,
+      "name": "Guest room"
+    },
+    {
+      "id": "tavern_upper-4",
+      "section": "tavern_upper",
+      "position": [
+        87,
+        0,
+        300
+      ],
+      "radius": 2.5,
+      "name": "The Orl family room"
+    }
+  ],
+  "spaces": {
+    "Taproom of the Unlit Boat": {
+      "x0": 20.5,
+      "x1": 32.5,
+      "z0": 291.5,
+      "z1": 303.5,
+      "section": "tavern_ground",
+      "room": 0
+    },
+    "Tavern kitchen": {
+      "x0": 32.5,
+      "x1": 39.5,
+      "z0": 297.5,
+      "z1": 303.5,
+      "section": "tavern_ground",
+      "room": 1
+    },
+    "Tavern stair hall": {
+      "x0": 32.5,
+      "x1": 39.5,
+      "z0": 291.5,
+      "z1": 297.5,
+      "section": "tavern_ground",
+      "room": 2
+    },
+    "General store": {
+      "x0": 130.5,
+      "x1": 140.5,
+      "z0": 292.5,
+      "z1": 303.5,
+      "section": "market",
+      "room": 0
+    },
+    "Flower shop": {
+      "x0": 120.5,
+      "x1": 130.5,
+      "z0": 292.5,
+      "z1": 303.5,
+      "section": "market",
+      "room": 1
+    },
+    "The True Note shop": {
+      "x0": 170.5,
+      "x1": 181.5,
+      "z0": 296.5,
+      "z1": 303.5,
+      "section": "magic_shop",
+      "room": 0
+    },
+    "The True Note workshop": {
+      "x0": 170.5,
+      "x1": 181.5,
+      "z0": 292.5,
+      "z1": 296.5,
+      "section": "magic_shop",
+      "room": 1
+    },
+    "The forge": {
+      "x0": 210.5,
+      "x1": 222.5,
+      "z0": 295.5,
+      "z1": 303.5,
+      "section": "smithy",
+      "room": 0
+    },
+    "Smith's home kitchen": {
+      "x0": 210.5,
+      "x1": 217.5,
+      "z0": 289.5,
+      "z1": 295.5,
+      "section": "smithy",
+      "room": 1
+    },
+    "Smith's home bedroom": {
+      "x0": 217.5,
+      "x1": 222.5,
+      "z0": 289.5,
+      "z1": 295.5,
+      "section": "smithy",
+      "room": 2
+    },
+    "Hemmen's study": {
+      "x0": 20.5,
+      "x1": 26.5,
+      "z0": 238.5,
+      "z1": 243.5,
+      "section": "clerk_house",
+      "room": 0
+    },
+    "Hemmen's kitchen": {
+      "x0": 26.5,
+      "x1": 31.5,
+      "z0": 238.5,
+      "z1": 243.5,
+      "section": "clerk_house",
+      "room": 1
+    },
+    "Hemmen's bedroom": {
+      "x0": 20.5,
+      "x1": 31.5,
+      "z0": 234.5,
+      "z1": 238.5,
+      "section": "clerk_house",
+      "room": 2
+    },
+    "Loom workroom": {
+      "x0": 60.5,
+      "x1": 71.5,
+      "z0": 234.5,
+      "z1": 239.5,
+      "section": "weaver_house",
+      "room": 0
+    },
+    "Weaver's kitchen": {
+      "x0": 60.5,
+      "x1": 66.5,
+      "z0": 239.5,
+      "z1": 243.5,
+      "section": "weaver_house",
+      "room": 1
+    },
+    "Weaver's bedroom": {
+      "x0": 66.5,
+      "x1": 71.5,
+      "z0": 239.5,
+      "z1": 243.5,
+      "section": "weaver_house",
+      "room": 2
+    },
+    "Watch mess": {
+      "x0": 100.5,
+      "x1": 105.5,
+      "z0": 232.5,
+      "z1": 243.5,
+      "section": "watch_house",
+      "room": 0
+    },
+    "Watch bunk room": {
+      "x0": 105.5,
+      "x1": 110.5,
+      "z0": 232.5,
+      "z1": 243.5,
+      "section": "watch_house",
+      "room": 1
+    },
+    "Hearth kitchen": {
+      "x0": 140.5,
+      "x1": 149.5,
+      "z0": 238.5,
+      "z1": 243.5,
+      "section": "netmender_house",
+      "room": 0
+    },
+    "Net loft": {
+      "x0": 140.5,
+      "x1": 149.5,
+      "z0": 233.5,
+      "z1": 238.5,
+      "section": "netmender_house",
+      "room": 1
+    },
+    "Gate Hall": {
+      "x0": 20.5,
+      "x1": 32.5,
+      "z0": 164.5,
+      "z1": 174.5,
+      "section": "castle",
+      "room": 0
+    },
+    "Hall of Eight Seats": {
+      "x0": 32.5,
+      "x1": 54.5,
+      "z0": 158.5,
+      "z1": 180.5,
+      "section": "castle",
+      "room": 1
+    },
+    "Register Archive": {
+      "x0": 20.5,
+      "x1": 32.5,
+      "z0": 174.5,
+      "z1": 183.5,
+      "section": "castle",
+      "room": 2
+    },
+    "Palace Chancery": {
+      "x0": 20.5,
+      "x1": 32.5,
+      "z0": 155.5,
+      "z1": 164.5,
+      "section": "castle",
+      "room": 3
+    },
+    "Sealed stair": {
+      "x0": 54.5,
+      "x1": 60.5,
+      "z0": 158.5,
+      "z1": 166.5,
+      "section": "castle",
+      "room": 4
+    },
+    "Tavern landing": {
+      "x0": 70.5,
+      "x1": 89.5,
+      "z0": 291.5,
+      "z1": 296.5,
+      "section": "tavern_upper",
+      "room": 0
+    },
+    "Guest room": {
+      "x0": 70.5,
+      "x1": 75.5,
+      "z0": 296.5,
+      "z1": 303.5,
+      "section": "tavern_upper",
+      "room": 1
+    },
+    "Guest room 2": {
+      "x0": 75.5,
+      "x1": 80.5,
+      "z0": 296.5,
+      "z1": 303.5,
+      "section": "tavern_upper",
+      "room": 2
+    },
+    "Guest room 3": {
+      "x0": 80.5,
+      "x1": 84.5,
+      "z0": 296.5,
+      "z1": 303.5,
+      "section": "tavern_upper",
+      "room": 3
+    },
+    "The Orl family room": {
+      "x0": 84.5,
+      "x1": 89.5,
+      "z0": 296.5,
+      "z1": 303.5,
+      "section": "tavern_upper",
+      "room": 4
+    }
+  },
+  "harvestables": [],
+  "portals": [
+    {
+      "id": "tavern_ground-exit",
+      "objectId": 59201,
+      "role": "portal",
+      "kind": "building",
+      "position": [
+        26,
+        0,
+        303
+      ],
+      "serverTile": [
+        26,
+        21
+      ],
+      "destinationMap": "landfall",
+      "destinationTile": [
+        104,
+        247
+      ],
+      "section": "tavern_ground",
+      "label": "The west-gate road"
+    },
+    {
+      "id": "tavern_ground-passage0-0",
+      "objectId": 59221,
+      "role": "portal",
+      "kind": "stairs_up",
+      "position": [
+        35,
+        0,
+        296
+      ],
+      "serverTile": [
+        35,
+        28
+      ],
+      "destinationMap": "landfall_town",
+      "destinationTile": [
+        85,
+        28
+      ],
+      "section": "tavern_ground",
+      "destinationSection": "tavern_upper",
+      "label": "Upstairs: the guest rooms"
+    },
+    {
+      "id": "market-exit",
+      "objectId": 59202,
+      "role": "portal",
+      "kind": "building",
+      "position": [
+        135,
+        0,
+        303
+      ],
+      "serverTile": [
+        135,
+        21
+      ],
+      "destinationMap": "landfall",
+      "destinationTile": [
+        134,
+        251
+      ],
+      "section": "market",
+      "label": "The avenue"
+    },
+    {
+      "id": "market-exit1",
+      "objectId": 59203,
+      "role": "portal",
+      "kind": "building",
+      "position": [
+        125,
+        0,
+        303
+      ],
+      "serverTile": [
+        125,
+        21
+      ],
+      "destinationMap": "landfall",
+      "destinationTile": [
+        127,
+        248
+      ],
+      "section": "market",
+      "label": "The avenue"
+    },
+    {
+      "id": "magic_shop-exit",
+      "objectId": 59204,
+      "role": "portal",
+      "kind": "building",
+      "position": [
+        175,
+        0,
+        303
+      ],
+      "serverTile": [
+        175,
+        21
+      ],
+      "destinationMap": "landfall",
+      "destinationTile": [
+        167,
+        262
+      ],
+      "section": "magic_shop",
+      "label": "The avenue"
+    },
+    {
+      "id": "smithy-exit",
+      "objectId": 59205,
+      "role": "portal",
+      "kind": "building",
+      "position": [
+        216,
+        0,
+        303
+      ],
+      "serverTile": [
+        216,
+        21
+      ],
+      "destinationMap": "landfall",
+      "destinationTile": [
+        95,
+        259
+      ],
+      "section": "smithy",
+      "label": "The west-gate road"
+    },
+    {
+      "id": "clerk_house-exit",
+      "objectId": 59206,
+      "role": "portal",
+      "kind": "building",
+      "position": [
+        23,
+        0,
+        243
+      ],
+      "serverTile": [
+        23,
+        81
+      ],
+      "destinationMap": "landfall",
+      "destinationTile": [
+        149,
+        256
+      ],
+      "section": "clerk_house",
+      "label": "The avenue"
+    },
+    {
+      "id": "weaver_house-exit",
+      "objectId": 59207,
+      "role": "portal",
+      "kind": "building",
+      "position": [
+        65,
+        0,
+        236
+      ],
+      "serverTile": [
+        65,
+        88
+      ],
+      "destinationMap": "landfall",
+      "destinationTile": [
+        149,
+        255
+      ],
+      "section": "weaver_house",
+      "label": "The avenue"
+    },
+    {
+      "id": "watch_house-exit",
+      "objectId": 59208,
+      "role": "portal",
+      "kind": "building",
+      "position": [
+        101,
+        0,
+        239
+      ],
+      "serverTile": [
+        101,
+        85
+      ],
+      "destinationMap": "landfall",
+      "destinationTile": [
+        83,
+        275
+      ],
+      "section": "watch_house",
+      "label": "The west ward"
+    },
+    {
+      "id": "netmender_house-exit",
+      "objectId": 59209,
+      "role": "portal",
+      "kind": "building",
+      "position": [
+        141,
+        0,
+        242
+      ],
+      "serverTile": [
+        141,
+        82
+      ],
+      "destinationMap": "landfall",
+      "destinationTile": [
+        234,
+        207
+      ],
+      "section": "netmender_house",
+      "label": "The south court"
+    },
+    {
+      "id": "castle-exit",
+      "objectId": 59210,
+      "role": "portal",
+      "kind": "building",
+      "position": [
+        21,
+        0,
+        170
+      ],
+      "serverTile": [
+        21,
+        154
+      ],
+      "destinationMap": "landfall",
+      "destinationTile": [
+        218,
+        273
+      ],
+      "section": "castle",
+      "label": "The keep terrace"
+    },
+    {
+      "id": "tavern_upper-passage0-1",
+      "objectId": 59222,
+      "role": "portal",
+      "kind": "stairs_down",
+      "position": [
+        85,
+        0,
+        295
+      ],
+      "serverTile": [
+        85,
+        29
+      ],
+      "destinationMap": "landfall_town",
+      "destinationTile": [
+        35,
+        27
+      ],
+      "section": "tavern_upper",
+      "destinationSection": "tavern_ground",
+      "label": "Downstairs: the taproom"
+    }
+  ],
+  "interactives": [
+    {
+      "id": "tavern_ground-exit",
+      "objectId": 59201,
+      "role": "portal",
+      "kind": "building",
+      "position": [
+        26,
+        0,
+        303
+      ],
+      "serverTile": [
+        26,
+        21
+      ],
+      "destinationMap": "landfall",
+      "destinationTile": [
+        104,
+        247
+      ],
+      "section": "tavern_ground",
+      "label": "The west-gate road"
+    },
+    {
+      "id": "tavern_ground-passage0-0",
+      "objectId": 59221,
+      "role": "portal",
+      "kind": "stairs_up",
+      "position": [
+        35,
+        0,
+        296
+      ],
+      "serverTile": [
+        35,
+        28
+      ],
+      "destinationMap": "landfall_town",
+      "destinationTile": [
+        85,
+        28
+      ],
+      "section": "tavern_ground",
+      "destinationSection": "tavern_upper",
+      "label": "Upstairs: the guest rooms"
+    },
+    {
+      "id": "market-exit",
+      "objectId": 59202,
+      "role": "portal",
+      "kind": "building",
+      "position": [
+        135,
+        0,
+        303
+      ],
+      "serverTile": [
+        135,
+        21
+      ],
+      "destinationMap": "landfall",
+      "destinationTile": [
+        134,
+        251
+      ],
+      "section": "market",
+      "label": "The avenue"
+    },
+    {
+      "id": "market-exit1",
+      "objectId": 59203,
+      "role": "portal",
+      "kind": "building",
+      "position": [
+        125,
+        0,
+        303
+      ],
+      "serverTile": [
+        125,
+        21
+      ],
+      "destinationMap": "landfall",
+      "destinationTile": [
+        127,
+        248
+      ],
+      "section": "market",
+      "label": "The avenue"
+    },
+    {
+      "id": "magic_shop-exit",
+      "objectId": 59204,
+      "role": "portal",
+      "kind": "building",
+      "position": [
+        175,
+        0,
+        303
+      ],
+      "serverTile": [
+        175,
+        21
+      ],
+      "destinationMap": "landfall",
+      "destinationTile": [
+        167,
+        262
+      ],
+      "section": "magic_shop",
+      "label": "The avenue"
+    },
+    {
+      "id": "smithy-exit",
+      "objectId": 59205,
+      "role": "portal",
+      "kind": "building",
+      "position": [
+        216,
+        0,
+        303
+      ],
+      "serverTile": [
+        216,
+        21
+      ],
+      "destinationMap": "landfall",
+      "destinationTile": [
+        95,
+        259
+      ],
+      "section": "smithy",
+      "label": "The west-gate road"
+    },
+    {
+      "id": "clerk_house-exit",
+      "objectId": 59206,
+      "role": "portal",
+      "kind": "building",
+      "position": [
+        23,
+        0,
+        243
+      ],
+      "serverTile": [
+        23,
+        81
+      ],
+      "destinationMap": "landfall",
+      "destinationTile": [
+        149,
+        256
+      ],
+      "section": "clerk_house",
+      "label": "The avenue"
+    },
+    {
+      "id": "weaver_house-exit",
+      "objectId": 59207,
+      "role": "portal",
+      "kind": "building",
+      "position": [
+        65,
+        0,
+        236
+      ],
+      "serverTile": [
+        65,
+        88
+      ],
+      "destinationMap": "landfall",
+      "destinationTile": [
+        149,
+        255
+      ],
+      "section": "weaver_house",
+      "label": "The avenue"
+    },
+    {
+      "id": "watch_house-exit",
+      "objectId": 59208,
+      "role": "portal",
+      "kind": "building",
+      "position": [
+        101,
+        0,
+        239
+      ],
+      "serverTile": [
+        101,
+        85
+      ],
+      "destinationMap": "landfall",
+      "destinationTile": [
+        83,
+        275
+      ],
+      "section": "watch_house",
+      "label": "The west ward"
+    },
+    {
+      "id": "netmender_house-exit",
+      "objectId": 59209,
+      "role": "portal",
+      "kind": "building",
+      "position": [
+        141,
+        0,
+        242
+      ],
+      "serverTile": [
+        141,
+        82
+      ],
+      "destinationMap": "landfall",
+      "destinationTile": [
+        234,
+        207
+      ],
+      "section": "netmender_house",
+      "label": "The south court"
+    },
+    {
+      "id": "castle-exit",
+      "objectId": 59210,
+      "role": "portal",
+      "kind": "building",
+      "position": [
+        21,
+        0,
+        170
+      ],
+      "serverTile": [
+        21,
+        154
+      ],
+      "destinationMap": "landfall",
+      "destinationTile": [
+        218,
+        273
+      ],
+      "section": "castle",
+      "label": "The keep terrace"
+    },
+    {
+      "id": "tavern_upper-passage0-1",
+      "objectId": 59222,
+      "role": "portal",
+      "kind": "stairs_down",
+      "position": [
+        85,
+        0,
+        295
+      ],
+      "serverTile": [
+        85,
+        29
+      ],
+      "destinationMap": "landfall_town",
+      "destinationTile": [
+        35,
+        27
+      ],
+      "section": "tavern_upper",
+      "destinationSection": "tavern_ground",
+      "label": "Downstairs: the taproom"
+    }
+  ],
+  "navigation": {
+    "surfaceNodePrefixes": [
+      "Walk_"
+    ],
+    "authority": "server",
+    "defaultSpawn": "tavern_ground"
+  },
+  "collision": {
+    "binary": "collision.bin",
+    "format": "EWCG-v2",
+    "width": 648,
+    "height": 648,
+    "cellMetres": 0.5,
+    "originMetres": [
+      0,
+      324
+    ],
+    "heightEncoding": {
+      "origin": -0.1,
+      "step": 0.1
+    },
+    "gridAlignment": "tile-centres-v1",
+    "sha256": "d62cb29a2ffb72d3c8dfad0085127c4b5db78419784df66417e287fabdca42fc",
+    "nodeNames": [
+      "Build_castle_east_ashlar_wall",
+      "Build_castle_east_decal_banner_mycelari",
+      "Build_castle_east_decal_banner_stoneborn",
+      "Build_castle_east_timber_band",
+      "Build_castle_east_wall_cap",
+      "Build_castle_north_ashlar_wall",
+      "Build_castle_north_decal_banner_glasswarden",
+      "Build_castle_north_decal_banner_greyhaven",
+      "Build_castle_north_decal_banner_orun",
+      "Build_castle_north_decal_banner_ssarathi",
+      "Build_castle_north_timber_band",
+      "Build_castle_north_wall_cap",
+      "Build_castle_north_window_glass",
+      "Build_castle_south_ashlar_wall",
+      "Build_castle_south_timber_band",
+      "Build_castle_south_wall_cap",
+      "Build_castle_south_window_glass",
+      "Build_castle_stair0_ashlar_wall",
+      "Build_castle_stair0_sealed_door",
+      "Build_castle_stair0_timber_band",
+      "Build_castle_west_ashlar_wall",
+      "Build_castle_west_door_daylight",
+      "Build_castle_west_timber_band",
+      "Build_castle_west_wall_cap",
+      "Build_castle_west_window_glass",
+      "Build_clerk_house_east_lime_plaster",
+      "Build_clerk_house_east_timber_band",
+      "Build_clerk_house_east_wall_cap",
+      "Build_clerk_house_east_window_glass",
+      "Build_clerk_house_north_lime_plaster",
+      "Build_clerk_house_north_timber_band",
+      "Build_clerk_house_north_wall_cap",
+      "Build_clerk_house_north_window_glass",
+      "Build_clerk_house_south_door_daylight",
+      "Build_clerk_house_south_lime_plaster",
+      "Build_clerk_house_south_timber_band",
+      "Build_clerk_house_south_wall_cap",
+      "Build_clerk_house_south_window_glass",
+      "Build_clerk_house_west_lime_plaster",
+      "Build_clerk_house_west_timber_band",
+      "Build_clerk_house_west_wall_cap",
+      "Build_clerk_house_west_window_glass",
+      "Build_magic_shop_east_lime_plaster",
+      "Build_magic_shop_east_timber_band",
+      "Build_magic_shop_east_wall_cap",
+      "Build_magic_shop_east_window_glass",
+      "Build_magic_shop_north_decal_star_chart",
+      "Build_magic_shop_north_lime_plaster",
+      "Build_magic_shop_north_timber_band",
+      "Build_magic_shop_north_wall_cap",
+      "Build_magic_shop_north_window_glass",
+      "Build_magic_shop_south_door_daylight",
+      "Build_magic_shop_south_lime_plaster",
+      "Build_magic_shop_south_timber_band",
+      "Build_magic_shop_south_wall_cap",
+      "Build_magic_shop_south_window_glass",
+      "Build_magic_shop_west_lime_plaster",
+      "Build_magic_shop_west_timber_band",
+      "Build_magic_shop_west_wall_cap",
+      "Build_magic_shop_west_window_glass",
+      "Build_market_east_lime_plaster",
+      "Build_market_east_timber_band",
+      "Build_market_east_wall_cap",
+      "Build_market_east_window_glass",
+      "Build_market_north_decal_botanical_prints",
+      "Build_market_north_lime_plaster",
+      "Build_market_north_timber_band",
+      "Build_market_north_wall_cap",
+      "Build_market_north_window_glass",
+      "Build_market_south_door_daylight",
+      "Build_market_south_lime_plaster",
+      "Build_market_south_timber_band",
+      "Build_market_south_wall_cap",
+      "Build_market_south_window_glass",
+      "Build_market_west_lime_plaster",
+      "Build_market_west_timber_band",
+      "Build_market_west_wall_cap",
+      "Build_market_west_window_glass",
+      "Build_netmender_house_east_lime_plaster",
+      "Build_netmender_house_east_timber_band",
+      "Build_netmender_house_east_wall_cap",
+      "Build_netmender_house_east_window_glass",
+      "Build_netmender_house_north_lime_plaster",
+      "Build_netmender_house_north_timber_band",
+      "Build_netmender_house_north_wall_cap",
+      "Build_netmender_house_north_window_glass",
+      "Build_netmender_house_south_lime_plaster",
+      "Build_netmender_house_south_timber_band",
+      "Build_netmender_house_south_wall_cap",
+      "Build_netmender_house_south_window_glass",
+      "Build_netmender_house_west_door_daylight",
+      "Build_netmender_house_west_lime_plaster",
+      "Build_netmender_house_west_timber_band",
+      "Build_netmender_house_west_wall_cap",
+      "Build_netmender_house_west_window_glass",
+      "Build_smithy_east_lime_plaster",
+      "Build_smithy_east_soot_brick",
+      "Build_smithy_east_timber_band",
+      "Build_smithy_east_wall_cap",
+      "Build_smithy_east_window_glass",
+      "Build_smithy_north_lime_plaster",
+      "Build_smithy_north_timber_band",
+      "Build_smithy_north_wall_cap",
+      "Build_smithy_north_window_glass",
+      "Build_smithy_south_door_daylight",
+      "Build_smithy_south_soot_brick",
+      "Build_smithy_south_timber_band",
+      "Build_smithy_south_wall_cap",
+      "Build_smithy_south_window_glass",
+      "Build_smithy_west_lime_plaster",
+      "Build_smithy_west_soot_brick",
+      "Build_smithy_west_timber_band",
+      "Build_smithy_west_wall_cap",
+      "Build_smithy_west_window_glass",
+      "Build_tavern_ground_east_lime_plaster",
+      "Build_tavern_ground_east_soot_brick",
+      "Build_tavern_ground_east_timber_band",
+      "Build_tavern_ground_east_wall_cap",
+      "Build_tavern_ground_east_window_glass",
+      "Build_tavern_ground_north_lime_plaster",
+      "Build_tavern_ground_north_timber_band",
+      "Build_tavern_ground_north_wall_cap",
+      "Build_tavern_ground_north_window_glass",
+      "Build_tavern_ground_south_door_daylight",
+      "Build_tavern_ground_south_lime_plaster",
+      "Build_tavern_ground_south_soot_brick",
+      "Build_tavern_ground_south_timber_band",
+      "Build_tavern_ground_south_wall_cap",
+      "Build_tavern_ground_south_window_glass",
+      "Build_tavern_ground_stair0_stair_dark",
+      "Build_tavern_ground_stair0_timber_band",
+      "Build_tavern_ground_west_lime_plaster",
+      "Build_tavern_ground_west_timber_band",
+      "Build_tavern_ground_west_wall_cap",
+      "Build_tavern_ground_west_window_glass",
+      "Build_tavern_upper_east_lime_plaster",
+      "Build_tavern_upper_east_timber_band",
+      "Build_tavern_upper_east_wall_cap",
+      "Build_tavern_upper_east_window_glass",
+      "Build_tavern_upper_north_lime_plaster",
+      "Build_tavern_upper_north_timber_band",
+      "Build_tavern_upper_north_wall_cap",
+      "Build_tavern_upper_north_window_glass",
+      "Build_tavern_upper_south_lime_plaster",
+      "Build_tavern_upper_south_timber_band",
+      "Build_tavern_upper_south_wall_cap",
+      "Build_tavern_upper_south_window_glass",
+      "Build_tavern_upper_west_lime_plaster",
+      "Build_tavern_upper_west_timber_band",
+      "Build_tavern_upper_west_wall_cap",
+      "Build_tavern_upper_west_window_glass",
+      "Build_watch_house_east_lime_plaster",
+      "Build_watch_house_east_timber_band",
+      "Build_watch_house_east_wall_cap",
+      "Build_watch_house_east_window_glass",
+      "Build_watch_house_north_decal_banner_orun",
+      "Build_watch_house_north_decal_banner_ssarathi",
+      "Build_watch_house_north_lime_plaster",
+      "Build_watch_house_north_timber_band",
+      "Build_watch_house_north_wall_cap",
+      "Build_watch_house_south_lime_plaster",
+      "Build_watch_house_south_timber_band",
+      "Build_watch_house_south_wall_cap",
+      "Build_watch_house_south_window_glass",
+      "Build_watch_house_west_door_daylight",
+      "Build_watch_house_west_lime_plaster",
+      "Build_watch_house_west_timber_band",
+      "Build_watch_house_west_wall_cap",
+      "Build_watch_house_west_window_glass",
+      "Build_weaver_house_east_lime_plaster",
+      "Build_weaver_house_east_timber_band",
+      "Build_weaver_house_east_wall_cap",
+      "Build_weaver_house_east_window_glass",
+      "Build_weaver_house_north_door_daylight",
+      "Build_weaver_house_north_lime_plaster",
+      "Build_weaver_house_north_timber_band",
+      "Build_weaver_house_north_wall_cap",
+      "Build_weaver_house_north_window_glass",
+      "Build_weaver_house_south_lime_plaster",
+      "Build_weaver_house_south_timber_band",
+      "Build_weaver_house_south_wall_cap",
+      "Build_weaver_house_south_window_glass",
+      "Build_weaver_house_west_lime_plaster",
+      "Build_weaver_house_west_timber_band",
+      "Build_weaver_house_west_wall_cap",
+      "Build_weaver_house_west_window_glass",
+      "Part_castle_0_ashlar_wall",
+      "Part_castle_0_timber_band",
+      "Part_castle_0_wall_cap",
+      "Part_castle_1_ashlar_wall",
+      "Part_castle_1_timber_band",
+      "Part_castle_1_wall_cap",
+      "Part_castle_2_ashlar_wall",
+      "Part_castle_2_decal_map_landfall",
+      "Part_castle_2_timber_band",
+      "Part_castle_2_wall_cap",
+      "Part_castle_3_ashlar_wall",
+      "Part_castle_3_decal_banner_luminous",
+      "Part_castle_3_timber_band",
+      "Part_castle_3_wall_cap",
+      "Part_castle_4_ashlar_wall",
+      "Part_castle_4_decal_banner_votary",
+      "Part_castle_4_timber_band",
+      "Part_castle_4_wall_cap",
+      "Part_castle_5_ashlar_wall",
+      "Part_castle_5_timber_band",
+      "Part_castle_5_wall_cap",
+      "Part_clerk_house_0_lime_plaster",
+      "Part_clerk_house_0_timber_band",
+      "Part_clerk_house_0_wall_cap",
+      "Part_clerk_house_1_lime_plaster",
+      "Part_clerk_house_1_timber_band",
+      "Part_clerk_house_1_wall_cap",
+      "Part_clerk_house_2_lime_plaster",
+      "Part_clerk_house_2_timber_band",
+      "Part_clerk_house_2_wall_cap",
+      "Part_magic_shop_0_lime_plaster",
+      "Part_magic_shop_0_timber_band",
+      "Part_magic_shop_0_wall_cap",
+      "Part_market_0_lime_plaster",
+      "Part_market_0_timber_band",
+      "Part_market_0_wall_cap",
+      "Part_netmender_house_0_lime_plaster",
+      "Part_netmender_house_0_timber_band",
+      "Part_netmender_house_0_wall_cap",
+      "Part_smithy_0_lime_plaster",
+      "Part_smithy_0_soot_brick",
+      "Part_smithy_0_timber_band",
+      "Part_smithy_0_wall_cap",
+      "Part_smithy_1_lime_plaster",
+      "Part_smithy_1_soot_brick",
+      "Part_smithy_1_timber_band",
+      "Part_smithy_1_wall_cap",
+      "Part_smithy_2_lime_plaster",
+      "Part_smithy_2_timber_band",
+      "Part_smithy_2_wall_cap",
+      "Part_tavern_ground_0_lime_plaster",
+      "Part_tavern_ground_0_soot_brick",
+      "Part_tavern_ground_0_timber_band",
+      "Part_tavern_ground_0_wall_cap",
+      "Part_tavern_ground_1_lime_plaster",
+      "Part_tavern_ground_1_timber_band",
+      "Part_tavern_ground_1_wall_cap",
+      "Part_tavern_ground_2_lime_plaster",
+      "Part_tavern_ground_2_soot_brick",
+      "Part_tavern_ground_2_timber_band",
+      "Part_tavern_ground_2_wall_cap",
+      "Part_tavern_upper_0_lime_plaster",
+      "Part_tavern_upper_0_timber_band",
+      "Part_tavern_upper_0_wall_cap",
+      "Part_tavern_upper_1_lime_plaster",
+      "Part_tavern_upper_1_timber_band",
+      "Part_tavern_upper_1_wall_cap",
+      "Part_tavern_upper_2_lime_plaster",
+      "Part_tavern_upper_2_timber_band",
+      "Part_tavern_upper_2_wall_cap",
+      "Part_tavern_upper_3_lime_plaster",
+      "Part_tavern_upper_3_timber_band",
+      "Part_tavern_upper_3_wall_cap",
+      "Part_tavern_upper_4_lime_plaster",
+      "Part_tavern_upper_4_timber_band",
+      "Part_tavern_upper_4_wall_cap",
+      "Part_tavern_upper_5_lime_plaster",
+      "Part_tavern_upper_5_timber_band",
+      "Part_tavern_upper_5_wall_cap",
+      "Part_tavern_upper_6_lime_plaster",
+      "Part_tavern_upper_6_timber_band",
+      "Part_tavern_upper_6_wall_cap",
+      "Part_watch_house_0_lime_plaster",
+      "Part_watch_house_0_timber_band",
+      "Part_watch_house_0_wall_cap",
+      "Part_weaver_house_0_lime_plaster",
+      "Part_weaver_house_0_timber_band",
+      "Part_weaver_house_0_wall_cap",
+      "Part_weaver_house_1_lime_plaster",
+      "Part_weaver_house_1_timber_band",
+      "Part_weaver_house_1_wall_cap",
+      "Part_weaver_house_2_lime_plaster",
+      "Part_weaver_house_2_timber_band",
+      "Part_weaver_house_2_wall_cap",
+      "Stair_tavern_upper_0_stair_dark",
+      "Stair_tavern_upper_0_timber_band"
+    ],
+    "servedGrid": {
+      "binary": "served-grid.escg.gz",
+      "format": "ESCG-v2",
+      "sha256": "e0b0073cbe0251efb4c0323a023796ddbd4cb0192020f81db4169620bdf6bc7c",
+      "unitMetres": 0.05,
+      "climbMetres": 1.0,
+      "originMetres": -100.0,
+      "width": 324,
+      "height": 324
+    }
+  },
+  "environment": {
+    "profile": "town-interior",
+    "backgroundColor": "#000000",
+    "ambient": {
+      "color": "#d9c8a8",
+      "energy": 0.6,
+      "skyContribution": 0
+    },
+    "sun": {
+      "enabled": true,
+      "energy": 0.25,
+      "color": "#ffe6c4",
+      "shadows": false
+    },
+    "fog": {
+      "enabled": false
+    },
+    "tonemap": {
+      "mode": "filmic",
+      "exposure": 1.05
+    },
+    "dayNight": {
+      "enabled": false
+    }
+  },
+  "camera": {
+    "distance": 12,
+    "minDistance": 6,
+    "maxDistance": 26,
+    "pitchDegrees": -50,
+    "zoomStep": 1.2
+  },
+  "lighting": {
+    "markers": [
+      {
+        "id": "tavern_ground-light-0",
+        "position": [
+          21.3,
+          1.0,
+          297.5
+        ],
+        "color": [
+          1.0,
+          0.6,
+          0.3
+        ],
+        "energyHint": 2.0,
+        "rangeHint": 9,
+        "section": "tavern_ground"
+      },
+      {
+        "id": "tavern_ground-light-1",
+        "position": [
+          24,
+          2.9,
+          300
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.9,
+        "rangeHint": 7,
+        "section": "tavern_ground"
+      },
+      {
+        "id": "tavern_ground-light-2",
+        "position": [
+          29,
+          2.9,
+          300
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.9,
+        "rangeHint": 7,
+        "section": "tavern_ground"
+      },
+      {
+        "id": "tavern_ground-light-3",
+        "position": [
+          26.5,
+          2.9,
+          294.5
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.9,
+        "rangeHint": 7,
+        "section": "tavern_ground"
+      },
+      {
+        "id": "tavern_ground-light-4",
+        "position": [
+          38.6,
+          1.0,
+          299.8
+        ],
+        "color": [
+          1.0,
+          0.6,
+          0.3
+        ],
+        "energyHint": 1.8,
+        "rangeHint": 7,
+        "section": "tavern_ground"
+      },
+      {
+        "id": "tavern_ground-light-5",
+        "position": [
+          35,
+          2.9,
+          300.5
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.7,
+        "rangeHint": 6,
+        "section": "tavern_ground"
+      },
+      {
+        "id": "tavern_ground-light-6",
+        "position": [
+          35.5,
+          2.9,
+          294.5
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.8,
+        "rangeHint": 6,
+        "section": "tavern_ground"
+      },
+      {
+        "id": "market-light-0",
+        "position": [
+          135.5,
+          2.9,
+          297
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 1.4,
+        "rangeHint": 8,
+        "section": "market"
+      },
+      {
+        "id": "market-light-1",
+        "position": [
+          133,
+          2.9,
+          301
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.8,
+        "rangeHint": 6,
+        "section": "market"
+      },
+      {
+        "id": "market-light-2",
+        "position": [
+          138,
+          2.9,
+          301
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.8,
+        "rangeHint": 6,
+        "section": "market"
+      },
+      {
+        "id": "market-light-3",
+        "position": [
+          125.5,
+          2.9,
+          298
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 1.3,
+        "rangeHint": 8,
+        "section": "market"
+      },
+      {
+        "id": "market-light-4",
+        "position": [
+          122.5,
+          2.9,
+          301
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.8,
+        "rangeHint": 6,
+        "section": "market"
+      },
+      {
+        "id": "market-light-5",
+        "position": [
+          128,
+          2.9,
+          295
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.8,
+        "rangeHint": 6,
+        "section": "market"
+      },
+      {
+        "id": "magic_shop-light-0",
+        "position": [
+          175.5,
+          2.9,
+          299
+        ],
+        "color": [
+          0.82,
+          0.78,
+          1.0
+        ],
+        "energyHint": 1.4,
+        "rangeHint": 8,
+        "section": "magic_shop"
+      },
+      {
+        "id": "magic_shop-light-1",
+        "position": [
+          172.5,
+          2.9,
+          301
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.8,
+        "rangeHint": 6,
+        "section": "magic_shop"
+      },
+      {
+        "id": "magic_shop-light-2",
+        "position": [
+          178.5,
+          2.9,
+          301
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.8,
+        "rangeHint": 6,
+        "section": "magic_shop"
+      },
+      {
+        "id": "magic_shop-light-3",
+        "position": [
+          173,
+          2.9,
+          294.5
+        ],
+        "color": [
+          0.82,
+          0.78,
+          1.0
+        ],
+        "energyHint": 0.9,
+        "rangeHint": 6,
+        "section": "magic_shop"
+      },
+      {
+        "id": "magic_shop-light-4",
+        "position": [
+          178.5,
+          2.9,
+          294.5
+        ],
+        "color": [
+          0.82,
+          0.78,
+          1.0
+        ],
+        "energyHint": 0.8,
+        "rangeHint": 6,
+        "section": "magic_shop"
+      },
+      {
+        "id": "smithy-light-0",
+        "position": [
+          211.5,
+          1.0,
+          297
+        ],
+        "color": [
+          1.0,
+          0.5,
+          0.2
+        ],
+        "energyHint": 2.2,
+        "rangeHint": 10,
+        "section": "smithy"
+      },
+      {
+        "id": "smithy-light-1",
+        "position": [
+          216,
+          3.1,
+          300
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.8,
+        "rangeHint": 7,
+        "section": "smithy"
+      },
+      {
+        "id": "smithy-light-2",
+        "position": [
+          220,
+          3.1,
+          300
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.8,
+        "rangeHint": 7,
+        "section": "smithy"
+      },
+      {
+        "id": "smithy-light-3",
+        "position": [
+          211.2,
+          1.0,
+          292.5
+        ],
+        "color": [
+          1.0,
+          0.6,
+          0.3
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 7,
+        "section": "smithy"
+      },
+      {
+        "id": "smithy-light-4",
+        "position": [
+          214.5,
+          3.0,
+          292
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.7,
+        "rangeHint": 6,
+        "section": "smithy"
+      },
+      {
+        "id": "smithy-light-5",
+        "position": [
+          220,
+          3.0,
+          292.5
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.8,
+        "rangeHint": 6,
+        "section": "smithy"
+      },
+      {
+        "id": "clerk_house-light-0",
+        "position": [
+          22.5,
+          2.7,
+          241
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 1.1,
+        "rangeHint": 6,
+        "section": "clerk_house"
+      },
+      {
+        "id": "clerk_house-light-1",
+        "position": [
+          25,
+          2.7,
+          240
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.6,
+        "rangeHint": 5,
+        "section": "clerk_house"
+      },
+      {
+        "id": "clerk_house-light-2",
+        "position": [
+          30.6,
+          1.0,
+          241
+        ],
+        "color": [
+          1.0,
+          0.6,
+          0.3
+        ],
+        "energyHint": 1.4,
+        "rangeHint": 7,
+        "section": "clerk_house"
+      },
+      {
+        "id": "clerk_house-light-3",
+        "position": [
+          28.5,
+          2.7,
+          241
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.6,
+        "rangeHint": 5,
+        "section": "clerk_house"
+      },
+      {
+        "id": "clerk_house-light-4",
+        "position": [
+          23,
+          2.7,
+          236.5
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.7,
+        "rangeHint": 6,
+        "section": "clerk_house"
+      },
+      {
+        "id": "clerk_house-light-5",
+        "position": [
+          29,
+          2.7,
+          236.5
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.7,
+        "rangeHint": 6,
+        "section": "clerk_house"
+      },
+      {
+        "id": "weaver_house-light-0",
+        "position": [
+          65.5,
+          2.7,
+          237.5
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 1.3,
+        "rangeHint": 8,
+        "section": "weaver_house"
+      },
+      {
+        "id": "weaver_house-light-1",
+        "position": [
+          62,
+          2.7,
+          237.5
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.7,
+        "rangeHint": 6,
+        "section": "weaver_house"
+      },
+      {
+        "id": "weaver_house-light-2",
+        "position": [
+          69.5,
+          2.7,
+          237.5
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.7,
+        "rangeHint": 6,
+        "section": "weaver_house"
+      },
+      {
+        "id": "weaver_house-light-3",
+        "position": [
+          61.2,
+          1.0,
+          241.5
+        ],
+        "color": [
+          1.0,
+          0.6,
+          0.3
+        ],
+        "energyHint": 1.4,
+        "rangeHint": 7,
+        "section": "weaver_house"
+      },
+      {
+        "id": "weaver_house-light-4",
+        "position": [
+          64.5,
+          2.7,
+          241.5
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.6,
+        "rangeHint": 5,
+        "section": "weaver_house"
+      },
+      {
+        "id": "weaver_house-light-5",
+        "position": [
+          69,
+          2.7,
+          241.5
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.7,
+        "rangeHint": 6,
+        "section": "weaver_house"
+      },
+      {
+        "id": "watch_house-light-0",
+        "position": [
+          103,
+          2.7,
+          238
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 1.3,
+        "rangeHint": 8,
+        "section": "watch_house"
+      },
+      {
+        "id": "watch_house-light-1",
+        "position": [
+          103,
+          2.7,
+          242
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.7,
+        "rangeHint": 6,
+        "section": "watch_house"
+      },
+      {
+        "id": "watch_house-light-2",
+        "position": [
+          103,
+          2.7,
+          234
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.7,
+        "rangeHint": 6,
+        "section": "watch_house"
+      },
+      {
+        "id": "watch_house-light-3",
+        "position": [
+          108,
+          2.7,
+          241
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.7,
+        "rangeHint": 6,
+        "section": "watch_house"
+      },
+      {
+        "id": "watch_house-light-4",
+        "position": [
+          108,
+          2.7,
+          235
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.7,
+        "rangeHint": 6,
+        "section": "watch_house"
+      },
+      {
+        "id": "netmender_house-light-0",
+        "position": [
+          148.6,
+          1.0,
+          241
+        ],
+        "color": [
+          1.0,
+          0.6,
+          0.3
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 7,
+        "section": "netmender_house"
+      },
+      {
+        "id": "netmender_house-light-1",
+        "position": [
+          144,
+          2.7,
+          241
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.7,
+        "rangeHint": 6,
+        "section": "netmender_house"
+      },
+      {
+        "id": "netmender_house-light-2",
+        "position": [
+          143,
+          2.7,
+          236
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.7,
+        "rangeHint": 6,
+        "section": "netmender_house"
+      },
+      {
+        "id": "netmender_house-light-3",
+        "position": [
+          147,
+          2.7,
+          236
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.7,
+        "rangeHint": 6,
+        "section": "netmender_house"
+      },
+      {
+        "id": "castle-light-0",
+        "position": [
+          26.5,
+          4.0,
+          169.5
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 10,
+        "section": "castle"
+      },
+      {
+        "id": "castle-light-1",
+        "position": [
+          23,
+          3.8,
+          173
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.9,
+        "rangeHint": 7,
+        "section": "castle"
+      },
+      {
+        "id": "castle-light-2",
+        "position": [
+          23,
+          3.8,
+          166
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.9,
+        "rangeHint": 7,
+        "section": "castle"
+      },
+      {
+        "id": "castle-light-3",
+        "position": [
+          30,
+          3.8,
+          173
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.9,
+        "rangeHint": 7,
+        "section": "castle"
+      },
+      {
+        "id": "castle-light-4",
+        "position": [
+          30,
+          3.8,
+          166
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.9,
+        "rangeHint": 7,
+        "section": "castle"
+      },
+      {
+        "id": "castle-light-5",
+        "position": [
+          43.5,
+          4.2,
+          169.5
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 2.0,
+        "rangeHint": 14,
+        "section": "castle"
+      },
+      {
+        "id": "castle-light-6",
+        "position": [
+          36,
+          4.0,
+          177
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 1.1,
+        "rangeHint": 9,
+        "section": "castle"
+      },
+      {
+        "id": "castle-light-7",
+        "position": [
+          51,
+          4.0,
+          177
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 1.1,
+        "rangeHint": 9,
+        "section": "castle"
+      },
+      {
+        "id": "castle-light-8",
+        "position": [
+          36,
+          4.0,
+          162
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 1.1,
+        "rangeHint": 9,
+        "section": "castle"
+      },
+      {
+        "id": "castle-light-9",
+        "position": [
+          51,
+          4.0,
+          162
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 1.1,
+        "rangeHint": 9,
+        "section": "castle"
+      },
+      {
+        "id": "castle-light-10",
+        "position": [
+          24,
+          3.8,
+          180
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.9,
+        "rangeHint": 7,
+        "section": "castle"
+      },
+      {
+        "id": "castle-light-11",
+        "position": [
+          29,
+          3.8,
+          180
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.9,
+        "rangeHint": 7,
+        "section": "castle"
+      },
+      {
+        "id": "castle-light-12",
+        "position": [
+          26.5,
+          3.8,
+          176.5
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.8,
+        "rangeHint": 6,
+        "section": "castle"
+      },
+      {
+        "id": "castle-light-13",
+        "position": [
+          24,
+          3.8,
+          159
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.9,
+        "rangeHint": 7,
+        "section": "castle"
+      },
+      {
+        "id": "castle-light-14",
+        "position": [
+          29,
+          3.8,
+          159
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.9,
+        "rangeHint": 7,
+        "section": "castle"
+      },
+      {
+        "id": "castle-light-15",
+        "position": [
+          26.5,
+          3.8,
+          162.5
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.8,
+        "rangeHint": 6,
+        "section": "castle"
+      },
+      {
+        "id": "castle-light-16",
+        "position": [
+          56.5,
+          3.6,
+          164.5
+        ],
+        "color": [
+          0.82,
+          0.78,
+          1.0
+        ],
+        "energyHint": 0.7,
+        "rangeHint": 6,
+        "section": "castle"
+      },
+      {
+        "id": "castle-light-17",
+        "position": [
+          56.5,
+          3.6,
+          160
+        ],
+        "color": [
+          0.82,
+          0.78,
+          1.0
+        ],
+        "energyHint": 0.7,
+        "rangeHint": 6,
+        "section": "castle"
+      },
+      {
+        "id": "tavern_upper-light-0",
+        "position": [
+          74,
+          2.9,
+          294
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.8,
+        "rangeHint": 6,
+        "section": "tavern_upper"
+      },
+      {
+        "id": "tavern_upper-light-1",
+        "position": [
+          80,
+          2.9,
+          294
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.8,
+        "rangeHint": 6,
+        "section": "tavern_upper"
+      },
+      {
+        "id": "tavern_upper-light-2",
+        "position": [
+          87.5,
+          2.9,
+          294
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.8,
+        "rangeHint": 6,
+        "section": "tavern_upper"
+      },
+      {
+        "id": "tavern_upper-light-3",
+        "position": [
+          73,
+          2.6,
+          300
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.7,
+        "rangeHint": 5,
+        "section": "tavern_upper"
+      },
+      {
+        "id": "tavern_upper-light-4",
+        "position": [
+          78,
+          2.6,
+          300
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.7,
+        "rangeHint": 5,
+        "section": "tavern_upper"
+      },
+      {
+        "id": "tavern_upper-light-5",
+        "position": [
+          82.5,
+          2.6,
+          300
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.7,
+        "rangeHint": 5,
+        "section": "tavern_upper"
+      },
+      {
+        "id": "tavern_upper-light-6",
+        "position": [
+          87,
+          2.6,
+          300
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 1.1,
+        "rangeHint": 6,
+        "section": "tavern_upper"
+      }
+    ]
+  },
+  "cutaway": {
+    "hideNodes": [
+      "Roof_castle_wall_cap",
+      "Roof_clerk_house_wall_cap",
+      "Roof_magic_shop_wall_cap",
+      "Roof_market_wall_cap",
+      "Roof_netmender_house_wall_cap",
+      "Roof_smithy_wall_cap",
+      "Roof_tavern_ground_wall_cap",
+      "Roof_tavern_upper_wall_cap",
+      "Roof_watch_house_wall_cap",
+      "Roof_weaver_house_wall_cap"
+    ],
+    "walls": [
+      {
+        "node": "Build_castle_east_ashlar_wall",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "castle"
+      },
+      {
+        "node": "Build_castle_east_decal_banner_mycelari",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "castle"
+      },
+      {
+        "node": "Build_castle_east_decal_banner_stoneborn",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "castle"
+      },
+      {
+        "node": "Build_castle_east_timber_band",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "castle"
+      },
+      {
+        "node": "Build_castle_east_wall_cap",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "castle"
+      },
+      {
+        "node": "Build_castle_north_ashlar_wall",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "castle"
+      },
+      {
+        "node": "Build_castle_north_decal_banner_glasswarden",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "castle"
+      },
+      {
+        "node": "Build_castle_north_decal_banner_greyhaven",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "castle"
+      },
+      {
+        "node": "Build_castle_north_decal_banner_orun",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "castle"
+      },
+      {
+        "node": "Build_castle_north_decal_banner_ssarathi",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "castle"
+      },
+      {
+        "node": "Build_castle_north_timber_band",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "castle"
+      },
+      {
+        "node": "Build_castle_north_wall_cap",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "castle"
+      },
+      {
+        "node": "Build_castle_north_window_glass",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "castle"
+      },
+      {
+        "node": "Build_castle_south_ashlar_wall",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "castle"
+      },
+      {
+        "node": "Build_castle_south_timber_band",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "castle"
+      },
+      {
+        "node": "Build_castle_south_wall_cap",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "castle"
+      },
+      {
+        "node": "Build_castle_south_window_glass",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "castle"
+      },
+      {
+        "node": "Build_castle_stair0_ashlar_wall",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "castle"
+      },
+      {
+        "node": "Build_castle_stair0_sealed_door",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "castle"
+      },
+      {
+        "node": "Build_castle_stair0_timber_band",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "castle"
+      },
+      {
+        "node": "Build_castle_west_ashlar_wall",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "castle"
+      },
+      {
+        "node": "Build_castle_west_door_daylight",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "castle"
+      },
+      {
+        "node": "Build_castle_west_timber_band",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "castle"
+      },
+      {
+        "node": "Build_castle_west_wall_cap",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "castle"
+      },
+      {
+        "node": "Build_castle_west_window_glass",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "castle"
+      },
+      {
+        "node": "Build_clerk_house_east_lime_plaster",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "clerk_house"
+      },
+      {
+        "node": "Build_clerk_house_east_timber_band",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "clerk_house"
+      },
+      {
+        "node": "Build_clerk_house_east_wall_cap",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "clerk_house"
+      },
+      {
+        "node": "Build_clerk_house_east_window_glass",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "clerk_house"
+      },
+      {
+        "node": "Build_clerk_house_north_lime_plaster",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "clerk_house"
+      },
+      {
+        "node": "Build_clerk_house_north_timber_band",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "clerk_house"
+      },
+      {
+        "node": "Build_clerk_house_north_wall_cap",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "clerk_house"
+      },
+      {
+        "node": "Build_clerk_house_north_window_glass",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "clerk_house"
+      },
+      {
+        "node": "Build_clerk_house_south_door_daylight",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "clerk_house"
+      },
+      {
+        "node": "Build_clerk_house_south_lime_plaster",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "clerk_house"
+      },
+      {
+        "node": "Build_clerk_house_south_timber_band",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "clerk_house"
+      },
+      {
+        "node": "Build_clerk_house_south_wall_cap",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "clerk_house"
+      },
+      {
+        "node": "Build_clerk_house_south_window_glass",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "clerk_house"
+      },
+      {
+        "node": "Build_clerk_house_west_lime_plaster",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "clerk_house"
+      },
+      {
+        "node": "Build_clerk_house_west_timber_band",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "clerk_house"
+      },
+      {
+        "node": "Build_clerk_house_west_wall_cap",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "clerk_house"
+      },
+      {
+        "node": "Build_clerk_house_west_window_glass",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "clerk_house"
+      },
+      {
+        "node": "Build_magic_shop_east_lime_plaster",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "magic_shop"
+      },
+      {
+        "node": "Build_magic_shop_east_timber_band",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "magic_shop"
+      },
+      {
+        "node": "Build_magic_shop_east_wall_cap",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "magic_shop"
+      },
+      {
+        "node": "Build_magic_shop_east_window_glass",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "magic_shop"
+      },
+      {
+        "node": "Build_magic_shop_north_decal_star_chart",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "magic_shop"
+      },
+      {
+        "node": "Build_magic_shop_north_lime_plaster",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "magic_shop"
+      },
+      {
+        "node": "Build_magic_shop_north_timber_band",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "magic_shop"
+      },
+      {
+        "node": "Build_magic_shop_north_wall_cap",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "magic_shop"
+      },
+      {
+        "node": "Build_magic_shop_north_window_glass",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "magic_shop"
+      },
+      {
+        "node": "Build_magic_shop_south_door_daylight",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "magic_shop"
+      },
+      {
+        "node": "Build_magic_shop_south_lime_plaster",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "magic_shop"
+      },
+      {
+        "node": "Build_magic_shop_south_timber_band",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "magic_shop"
+      },
+      {
+        "node": "Build_magic_shop_south_wall_cap",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "magic_shop"
+      },
+      {
+        "node": "Build_magic_shop_south_window_glass",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "magic_shop"
+      },
+      {
+        "node": "Build_magic_shop_west_lime_plaster",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "magic_shop"
+      },
+      {
+        "node": "Build_magic_shop_west_timber_band",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "magic_shop"
+      },
+      {
+        "node": "Build_magic_shop_west_wall_cap",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "magic_shop"
+      },
+      {
+        "node": "Build_magic_shop_west_window_glass",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "magic_shop"
+      },
+      {
+        "node": "Build_market_east_lime_plaster",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "market"
+      },
+      {
+        "node": "Build_market_east_timber_band",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "market"
+      },
+      {
+        "node": "Build_market_east_wall_cap",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "market"
+      },
+      {
+        "node": "Build_market_east_window_glass",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "market"
+      },
+      {
+        "node": "Build_market_north_decal_botanical_prints",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "market"
+      },
+      {
+        "node": "Build_market_north_lime_plaster",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "market"
+      },
+      {
+        "node": "Build_market_north_timber_band",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "market"
+      },
+      {
+        "node": "Build_market_north_wall_cap",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "market"
+      },
+      {
+        "node": "Build_market_north_window_glass",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "market"
+      },
+      {
+        "node": "Build_market_south_door_daylight",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "market"
+      },
+      {
+        "node": "Build_market_south_lime_plaster",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "market"
+      },
+      {
+        "node": "Build_market_south_timber_band",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "market"
+      },
+      {
+        "node": "Build_market_south_wall_cap",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "market"
+      },
+      {
+        "node": "Build_market_south_window_glass",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "market"
+      },
+      {
+        "node": "Build_market_west_lime_plaster",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "market"
+      },
+      {
+        "node": "Build_market_west_timber_band",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "market"
+      },
+      {
+        "node": "Build_market_west_wall_cap",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "market"
+      },
+      {
+        "node": "Build_market_west_window_glass",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "market"
+      },
+      {
+        "node": "Build_netmender_house_east_lime_plaster",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "netmender_house"
+      },
+      {
+        "node": "Build_netmender_house_east_timber_band",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "netmender_house"
+      },
+      {
+        "node": "Build_netmender_house_east_wall_cap",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "netmender_house"
+      },
+      {
+        "node": "Build_netmender_house_east_window_glass",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "netmender_house"
+      },
+      {
+        "node": "Build_netmender_house_north_lime_plaster",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "netmender_house"
+      },
+      {
+        "node": "Build_netmender_house_north_timber_band",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "netmender_house"
+      },
+      {
+        "node": "Build_netmender_house_north_wall_cap",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "netmender_house"
+      },
+      {
+        "node": "Build_netmender_house_north_window_glass",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "netmender_house"
+      },
+      {
+        "node": "Build_netmender_house_south_lime_plaster",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "netmender_house"
+      },
+      {
+        "node": "Build_netmender_house_south_timber_band",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "netmender_house"
+      },
+      {
+        "node": "Build_netmender_house_south_wall_cap",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "netmender_house"
+      },
+      {
+        "node": "Build_netmender_house_south_window_glass",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "netmender_house"
+      },
+      {
+        "node": "Build_netmender_house_west_door_daylight",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "netmender_house"
+      },
+      {
+        "node": "Build_netmender_house_west_lime_plaster",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "netmender_house"
+      },
+      {
+        "node": "Build_netmender_house_west_timber_band",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "netmender_house"
+      },
+      {
+        "node": "Build_netmender_house_west_wall_cap",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "netmender_house"
+      },
+      {
+        "node": "Build_netmender_house_west_window_glass",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "netmender_house"
+      },
+      {
+        "node": "Build_smithy_east_lime_plaster",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "smithy"
+      },
+      {
+        "node": "Build_smithy_east_soot_brick",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "smithy"
+      },
+      {
+        "node": "Build_smithy_east_timber_band",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "smithy"
+      },
+      {
+        "node": "Build_smithy_east_wall_cap",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "smithy"
+      },
+      {
+        "node": "Build_smithy_east_window_glass",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "smithy"
+      },
+      {
+        "node": "Build_smithy_north_lime_plaster",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "smithy"
+      },
+      {
+        "node": "Build_smithy_north_timber_band",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "smithy"
+      },
+      {
+        "node": "Build_smithy_north_wall_cap",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "smithy"
+      },
+      {
+        "node": "Build_smithy_north_window_glass",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "smithy"
+      },
+      {
+        "node": "Build_smithy_south_door_daylight",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "smithy"
+      },
+      {
+        "node": "Build_smithy_south_soot_brick",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "smithy"
+      },
+      {
+        "node": "Build_smithy_south_timber_band",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "smithy"
+      },
+      {
+        "node": "Build_smithy_south_wall_cap",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "smithy"
+      },
+      {
+        "node": "Build_smithy_south_window_glass",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "smithy"
+      },
+      {
+        "node": "Build_smithy_west_lime_plaster",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "smithy"
+      },
+      {
+        "node": "Build_smithy_west_soot_brick",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "smithy"
+      },
+      {
+        "node": "Build_smithy_west_timber_band",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "smithy"
+      },
+      {
+        "node": "Build_smithy_west_wall_cap",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "smithy"
+      },
+      {
+        "node": "Build_smithy_west_window_glass",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "smithy"
+      },
+      {
+        "node": "Build_tavern_ground_east_lime_plaster",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "tavern_ground"
+      },
+      {
+        "node": "Build_tavern_ground_east_soot_brick",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "tavern_ground"
+      },
+      {
+        "node": "Build_tavern_ground_east_timber_band",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "tavern_ground"
+      },
+      {
+        "node": "Build_tavern_ground_east_wall_cap",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "tavern_ground"
+      },
+      {
+        "node": "Build_tavern_ground_east_window_glass",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "tavern_ground"
+      },
+      {
+        "node": "Build_tavern_ground_north_lime_plaster",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "tavern_ground"
+      },
+      {
+        "node": "Build_tavern_ground_north_timber_band",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "tavern_ground"
+      },
+      {
+        "node": "Build_tavern_ground_north_wall_cap",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "tavern_ground"
+      },
+      {
+        "node": "Build_tavern_ground_north_window_glass",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "tavern_ground"
+      },
+      {
+        "node": "Build_tavern_ground_south_door_daylight",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "tavern_ground"
+      },
+      {
+        "node": "Build_tavern_ground_south_lime_plaster",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "tavern_ground"
+      },
+      {
+        "node": "Build_tavern_ground_south_soot_brick",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "tavern_ground"
+      },
+      {
+        "node": "Build_tavern_ground_south_timber_band",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "tavern_ground"
+      },
+      {
+        "node": "Build_tavern_ground_south_wall_cap",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "tavern_ground"
+      },
+      {
+        "node": "Build_tavern_ground_south_window_glass",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "tavern_ground"
+      },
+      {
+        "node": "Build_tavern_ground_stair0_stair_dark",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "tavern_ground"
+      },
+      {
+        "node": "Build_tavern_ground_stair0_timber_band",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "tavern_ground"
+      },
+      {
+        "node": "Build_tavern_ground_west_lime_plaster",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "tavern_ground"
+      },
+      {
+        "node": "Build_tavern_ground_west_timber_band",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "tavern_ground"
+      },
+      {
+        "node": "Build_tavern_ground_west_wall_cap",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "tavern_ground"
+      },
+      {
+        "node": "Build_tavern_ground_west_window_glass",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "tavern_ground"
+      },
+      {
+        "node": "Build_tavern_upper_east_lime_plaster",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "tavern_upper"
+      },
+      {
+        "node": "Build_tavern_upper_east_timber_band",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "tavern_upper"
+      },
+      {
+        "node": "Build_tavern_upper_east_wall_cap",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "tavern_upper"
+      },
+      {
+        "node": "Build_tavern_upper_east_window_glass",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "tavern_upper"
+      },
+      {
+        "node": "Build_tavern_upper_north_lime_plaster",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "tavern_upper"
+      },
+      {
+        "node": "Build_tavern_upper_north_timber_band",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "tavern_upper"
+      },
+      {
+        "node": "Build_tavern_upper_north_wall_cap",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "tavern_upper"
+      },
+      {
+        "node": "Build_tavern_upper_north_window_glass",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "tavern_upper"
+      },
+      {
+        "node": "Build_tavern_upper_south_lime_plaster",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "tavern_upper"
+      },
+      {
+        "node": "Build_tavern_upper_south_timber_band",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "tavern_upper"
+      },
+      {
+        "node": "Build_tavern_upper_south_wall_cap",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "tavern_upper"
+      },
+      {
+        "node": "Build_tavern_upper_south_window_glass",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "tavern_upper"
+      },
+      {
+        "node": "Build_tavern_upper_west_lime_plaster",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "tavern_upper"
+      },
+      {
+        "node": "Build_tavern_upper_west_timber_band",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "tavern_upper"
+      },
+      {
+        "node": "Build_tavern_upper_west_wall_cap",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "tavern_upper"
+      },
+      {
+        "node": "Build_tavern_upper_west_window_glass",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "tavern_upper"
+      },
+      {
+        "node": "Build_watch_house_east_lime_plaster",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "watch_house"
+      },
+      {
+        "node": "Build_watch_house_east_timber_band",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "watch_house"
+      },
+      {
+        "node": "Build_watch_house_east_wall_cap",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "watch_house"
+      },
+      {
+        "node": "Build_watch_house_east_window_glass",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "watch_house"
+      },
+      {
+        "node": "Build_watch_house_north_decal_banner_orun",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "watch_house"
+      },
+      {
+        "node": "Build_watch_house_north_decal_banner_ssarathi",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "watch_house"
+      },
+      {
+        "node": "Build_watch_house_north_lime_plaster",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "watch_house"
+      },
+      {
+        "node": "Build_watch_house_north_timber_band",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "watch_house"
+      },
+      {
+        "node": "Build_watch_house_north_wall_cap",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "watch_house"
+      },
+      {
+        "node": "Build_watch_house_south_lime_plaster",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "watch_house"
+      },
+      {
+        "node": "Build_watch_house_south_timber_band",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "watch_house"
+      },
+      {
+        "node": "Build_watch_house_south_wall_cap",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "watch_house"
+      },
+      {
+        "node": "Build_watch_house_south_window_glass",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "watch_house"
+      },
+      {
+        "node": "Build_watch_house_west_door_daylight",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "watch_house"
+      },
+      {
+        "node": "Build_watch_house_west_lime_plaster",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "watch_house"
+      },
+      {
+        "node": "Build_watch_house_west_timber_band",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "watch_house"
+      },
+      {
+        "node": "Build_watch_house_west_wall_cap",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "watch_house"
+      },
+      {
+        "node": "Build_watch_house_west_window_glass",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "watch_house"
+      },
+      {
+        "node": "Build_weaver_house_east_lime_plaster",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "weaver_house"
+      },
+      {
+        "node": "Build_weaver_house_east_timber_band",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "weaver_house"
+      },
+      {
+        "node": "Build_weaver_house_east_wall_cap",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "weaver_house"
+      },
+      {
+        "node": "Build_weaver_house_east_window_glass",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "weaver_house"
+      },
+      {
+        "node": "Build_weaver_house_north_door_daylight",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "weaver_house"
+      },
+      {
+        "node": "Build_weaver_house_north_lime_plaster",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "weaver_house"
+      },
+      {
+        "node": "Build_weaver_house_north_timber_band",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "weaver_house"
+      },
+      {
+        "node": "Build_weaver_house_north_wall_cap",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "weaver_house"
+      },
+      {
+        "node": "Build_weaver_house_north_window_glass",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "weaver_house"
+      },
+      {
+        "node": "Build_weaver_house_south_lime_plaster",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "weaver_house"
+      },
+      {
+        "node": "Build_weaver_house_south_timber_band",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "weaver_house"
+      },
+      {
+        "node": "Build_weaver_house_south_wall_cap",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "weaver_house"
+      },
+      {
+        "node": "Build_weaver_house_south_window_glass",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "weaver_house"
+      },
+      {
+        "node": "Build_weaver_house_west_lime_plaster",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "weaver_house"
+      },
+      {
+        "node": "Build_weaver_house_west_timber_band",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "weaver_house"
+      },
+      {
+        "node": "Build_weaver_house_west_wall_cap",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "weaver_house"
+      },
+      {
+        "node": "Build_weaver_house_west_window_glass",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "weaver_house"
+      }
+    ],
+    "facingThreshold": 0.35,
+    "props": {
+      "facingThreshold": 0.35,
+      "radiusMetres": 40
+    },
+    "partitions": [
+      {
+        "node": "Part_castle_0_ashlar_wall",
+        "section": "castle",
+        "rooms": [
+          0,
+          1
+        ],
+        "centre": [
+          32.5,
+          169.5
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
+        ]
+      },
+      {
+        "node": "Part_castle_0_timber_band",
+        "section": "castle",
+        "rooms": [
+          0,
+          1
+        ],
+        "centre": [
+          32.5,
+          169.5
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
+        ]
+      },
+      {
+        "node": "Part_castle_0_wall_cap",
+        "section": "castle",
+        "rooms": [
+          0,
+          1
+        ],
+        "centre": [
+          32.5,
+          169.5
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
+        ]
+      },
+      {
+        "node": "Part_castle_1_ashlar_wall",
+        "section": "castle",
+        "rooms": [
+          0,
+          2
+        ],
+        "centre": [
+          26.5,
+          174.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          -0.0,
+          0,
+          -1.0
+        ]
+      },
+      {
+        "node": "Part_castle_1_timber_band",
+        "section": "castle",
+        "rooms": [
+          0,
+          2
+        ],
+        "centre": [
+          26.5,
+          174.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          -0.0,
+          0,
+          -1.0
+        ]
+      },
+      {
+        "node": "Part_castle_1_wall_cap",
+        "section": "castle",
+        "rooms": [
+          0,
+          2
+        ],
+        "centre": [
+          26.5,
+          174.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          -0.0,
+          0,
+          -1.0
+        ]
+      },
+      {
+        "node": "Part_castle_2_ashlar_wall",
+        "section": "castle",
+        "rooms": [
+          0,
+          3
+        ],
+        "centre": [
+          26.5,
+          164.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          0.0,
+          0,
+          1.0
+        ]
+      },
+      {
+        "node": "Part_castle_2_decal_map_landfall",
+        "section": "castle",
+        "rooms": [
+          0,
+          3
+        ],
+        "centre": [
+          26.5,
+          164.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          0.0,
+          0,
+          1.0
+        ]
+      },
+      {
+        "node": "Part_castle_2_timber_band",
+        "section": "castle",
+        "rooms": [
+          0,
+          3
+        ],
+        "centre": [
+          26.5,
+          164.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          0.0,
+          0,
+          1.0
+        ]
+      },
+      {
+        "node": "Part_castle_2_wall_cap",
+        "section": "castle",
+        "rooms": [
+          0,
+          3
+        ],
+        "centre": [
+          26.5,
+          164.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          0.0,
+          0,
+          1.0
+        ]
+      },
+      {
+        "node": "Part_castle_3_ashlar_wall",
+        "section": "castle",
+        "rooms": [
+          1,
+          2
+        ],
+        "centre": [
+          32.5,
+          177.5
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          1.0,
+          0,
+          0.0
+        ]
+      },
+      {
+        "node": "Part_castle_3_decal_banner_luminous",
+        "section": "castle",
+        "rooms": [
+          1,
+          2
+        ],
+        "centre": [
+          32.5,
+          177.5
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          1.0,
+          0,
+          0.0
+        ]
+      },
+      {
+        "node": "Part_castle_3_timber_band",
+        "section": "castle",
+        "rooms": [
+          1,
+          2
+        ],
+        "centre": [
+          32.5,
+          177.5
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          1.0,
+          0,
+          0.0
+        ]
+      },
+      {
+        "node": "Part_castle_3_wall_cap",
+        "section": "castle",
+        "rooms": [
+          1,
+          2
+        ],
+        "centre": [
+          32.5,
+          177.5
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          1.0,
+          0,
+          0.0
+        ]
+      },
+      {
+        "node": "Part_castle_4_ashlar_wall",
+        "section": "castle",
+        "rooms": [
+          1,
+          3
+        ],
+        "centre": [
+          32.5,
+          161.5
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          1.0,
+          0,
+          0.0
+        ]
+      },
+      {
+        "node": "Part_castle_4_decal_banner_votary",
+        "section": "castle",
+        "rooms": [
+          1,
+          3
+        ],
+        "centre": [
+          32.5,
+          161.5
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          1.0,
+          0,
+          0.0
+        ]
+      },
+      {
+        "node": "Part_castle_4_timber_band",
+        "section": "castle",
+        "rooms": [
+          1,
+          3
+        ],
+        "centre": [
+          32.5,
+          161.5
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          1.0,
+          0,
+          0.0
+        ]
+      },
+      {
+        "node": "Part_castle_4_wall_cap",
+        "section": "castle",
+        "rooms": [
+          1,
+          3
+        ],
+        "centre": [
+          32.5,
+          161.5
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          1.0,
+          0,
+          0.0
+        ]
+      },
+      {
+        "node": "Part_castle_5_ashlar_wall",
+        "section": "castle",
+        "rooms": [
+          1,
+          4
+        ],
+        "centre": [
+          54.5,
+          162.5
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
+        ]
+      },
+      {
+        "node": "Part_castle_5_timber_band",
+        "section": "castle",
+        "rooms": [
+          1,
+          4
+        ],
+        "centre": [
+          54.5,
+          162.5
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
+        ]
+      },
+      {
+        "node": "Part_castle_5_wall_cap",
+        "section": "castle",
+        "rooms": [
+          1,
+          4
+        ],
+        "centre": [
+          54.5,
+          162.5
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
+        ]
+      },
+      {
+        "node": "Part_clerk_house_0_lime_plaster",
+        "section": "clerk_house",
+        "rooms": [
+          0,
+          1
+        ],
+        "centre": [
+          26.5,
+          241.0
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
+        ]
+      },
+      {
+        "node": "Part_clerk_house_0_timber_band",
+        "section": "clerk_house",
+        "rooms": [
+          0,
+          1
+        ],
+        "centre": [
+          26.5,
+          241.0
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
+        ]
+      },
+      {
+        "node": "Part_clerk_house_0_wall_cap",
+        "section": "clerk_house",
+        "rooms": [
+          0,
+          1
+        ],
+        "centre": [
+          26.5,
+          241.0
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
+        ]
+      },
+      {
+        "node": "Part_clerk_house_1_lime_plaster",
+        "section": "clerk_house",
+        "rooms": [
+          0,
+          2
+        ],
+        "centre": [
+          23.5,
+          238.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          0.0,
+          0,
+          1.0
+        ]
+      },
+      {
+        "node": "Part_clerk_house_1_timber_band",
+        "section": "clerk_house",
+        "rooms": [
+          0,
+          2
+        ],
+        "centre": [
+          23.5,
+          238.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          0.0,
+          0,
+          1.0
+        ]
+      },
+      {
+        "node": "Part_clerk_house_1_wall_cap",
+        "section": "clerk_house",
+        "rooms": [
+          0,
+          2
+        ],
+        "centre": [
+          23.5,
+          238.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          0.0,
+          0,
+          1.0
+        ]
+      },
+      {
+        "node": "Part_clerk_house_2_lime_plaster",
+        "section": "clerk_house",
+        "rooms": [
+          1,
+          2
+        ],
+        "centre": [
+          29.0,
+          238.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          0.0,
+          0,
+          1.0
+        ]
+      },
+      {
+        "node": "Part_clerk_house_2_timber_band",
+        "section": "clerk_house",
+        "rooms": [
+          1,
+          2
+        ],
+        "centre": [
+          29.0,
+          238.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          0.0,
+          0,
+          1.0
+        ]
+      },
+      {
+        "node": "Part_clerk_house_2_wall_cap",
+        "section": "clerk_house",
+        "rooms": [
+          1,
+          2
+        ],
+        "centre": [
+          29.0,
+          238.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          0.0,
+          0,
+          1.0
+        ]
+      },
+      {
+        "node": "Part_magic_shop_0_lime_plaster",
+        "section": "magic_shop",
+        "rooms": [
+          0,
+          1
+        ],
+        "centre": [
+          176.0,
+          296.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          0.0,
+          0,
+          1.0
+        ]
+      },
+      {
+        "node": "Part_magic_shop_0_timber_band",
+        "section": "magic_shop",
+        "rooms": [
+          0,
+          1
+        ],
+        "centre": [
+          176.0,
+          296.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          0.0,
+          0,
+          1.0
+        ]
+      },
+      {
+        "node": "Part_magic_shop_0_wall_cap",
+        "section": "magic_shop",
+        "rooms": [
+          0,
+          1
+        ],
+        "centre": [
+          176.0,
+          296.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          0.0,
+          0,
+          1.0
+        ]
+      },
+      {
+        "node": "Part_market_0_lime_plaster",
+        "section": "market",
+        "rooms": [
+          0,
+          1
+        ],
+        "centre": [
+          130.5,
+          298.0
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          1.0,
+          0,
+          0.0
+        ]
+      },
+      {
+        "node": "Part_market_0_timber_band",
+        "section": "market",
+        "rooms": [
+          0,
+          1
+        ],
+        "centre": [
+          130.5,
+          298.0
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          1.0,
+          0,
+          0.0
+        ]
+      },
+      {
+        "node": "Part_market_0_wall_cap",
+        "section": "market",
+        "rooms": [
+          0,
+          1
+        ],
+        "centre": [
+          130.5,
+          298.0
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          1.0,
+          0,
+          0.0
+        ]
+      },
+      {
+        "node": "Part_netmender_house_0_lime_plaster",
+        "section": "netmender_house",
+        "rooms": [
+          0,
+          1
+        ],
+        "centre": [
+          145.0,
+          238.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          0.0,
+          0,
+          1.0
+        ]
+      },
+      {
+        "node": "Part_netmender_house_0_timber_band",
+        "section": "netmender_house",
+        "rooms": [
+          0,
+          1
+        ],
+        "centre": [
+          145.0,
+          238.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          0.0,
+          0,
+          1.0
+        ]
+      },
+      {
+        "node": "Part_netmender_house_0_wall_cap",
+        "section": "netmender_house",
+        "rooms": [
+          0,
+          1
+        ],
+        "centre": [
+          145.0,
+          238.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          0.0,
+          0,
+          1.0
+        ]
+      },
+      {
+        "node": "Part_smithy_0_lime_plaster",
+        "section": "smithy",
+        "rooms": [
+          0,
+          1
+        ],
+        "centre": [
+          214.0,
+          295.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          0.0,
+          0,
+          1.0
+        ]
+      },
+      {
+        "node": "Part_smithy_0_soot_brick",
+        "section": "smithy",
+        "rooms": [
+          0,
+          1
+        ],
+        "centre": [
+          214.0,
+          295.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          0.0,
+          0,
+          1.0
+        ]
+      },
+      {
+        "node": "Part_smithy_0_timber_band",
+        "section": "smithy",
+        "rooms": [
+          0,
+          1
+        ],
+        "centre": [
+          214.0,
+          295.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          0.0,
+          0,
+          1.0
+        ]
+      },
+      {
+        "node": "Part_smithy_0_wall_cap",
+        "section": "smithy",
+        "rooms": [
+          0,
+          1
+        ],
+        "centre": [
+          214.0,
+          295.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          0.0,
+          0,
+          1.0
+        ]
+      },
+      {
+        "node": "Part_smithy_1_lime_plaster",
+        "section": "smithy",
+        "rooms": [
+          0,
+          2
+        ],
+        "centre": [
+          220.0,
+          295.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          0.0,
+          0,
+          1.0
+        ]
+      },
+      {
+        "node": "Part_smithy_1_soot_brick",
+        "section": "smithy",
+        "rooms": [
+          0,
+          2
+        ],
+        "centre": [
+          220.0,
+          295.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          0.0,
+          0,
+          1.0
+        ]
+      },
+      {
+        "node": "Part_smithy_1_timber_band",
+        "section": "smithy",
+        "rooms": [
+          0,
+          2
+        ],
+        "centre": [
+          220.0,
+          295.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          0.0,
+          0,
+          1.0
+        ]
+      },
+      {
+        "node": "Part_smithy_1_wall_cap",
+        "section": "smithy",
+        "rooms": [
+          0,
+          2
+        ],
+        "centre": [
+          220.0,
+          295.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          0.0,
+          0,
+          1.0
+        ]
+      },
+      {
+        "node": "Part_smithy_2_lime_plaster",
+        "section": "smithy",
+        "rooms": [
+          1,
+          2
+        ],
+        "centre": [
+          217.5,
+          292.5
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
+        ]
+      },
+      {
+        "node": "Part_smithy_2_timber_band",
+        "section": "smithy",
+        "rooms": [
+          1,
+          2
+        ],
+        "centre": [
+          217.5,
+          292.5
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
+        ]
+      },
+      {
+        "node": "Part_smithy_2_wall_cap",
+        "section": "smithy",
+        "rooms": [
+          1,
+          2
+        ],
+        "centre": [
+          217.5,
+          292.5
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
+        ]
+      },
+      {
+        "node": "Part_tavern_ground_0_lime_plaster",
+        "section": "tavern_ground",
+        "rooms": [
+          0,
+          1
+        ],
+        "centre": [
+          32.5,
+          300.5
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
+        ]
+      },
+      {
+        "node": "Part_tavern_ground_0_soot_brick",
+        "section": "tavern_ground",
+        "rooms": [
+          0,
+          1
+        ],
+        "centre": [
+          32.5,
+          300.5
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
+        ]
+      },
+      {
+        "node": "Part_tavern_ground_0_timber_band",
+        "section": "tavern_ground",
+        "rooms": [
+          0,
+          1
+        ],
+        "centre": [
+          32.5,
+          300.5
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
+        ]
+      },
+      {
+        "node": "Part_tavern_ground_0_wall_cap",
+        "section": "tavern_ground",
+        "rooms": [
+          0,
+          1
+        ],
+        "centre": [
+          32.5,
+          300.5
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
+        ]
+      },
+      {
+        "node": "Part_tavern_ground_1_lime_plaster",
+        "section": "tavern_ground",
+        "rooms": [
+          0,
+          2
+        ],
+        "centre": [
+          32.5,
+          294.5
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
+        ]
+      },
+      {
+        "node": "Part_tavern_ground_1_timber_band",
+        "section": "tavern_ground",
+        "rooms": [
+          0,
+          2
+        ],
+        "centre": [
+          32.5,
+          294.5
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
+        ]
+      },
+      {
+        "node": "Part_tavern_ground_1_wall_cap",
+        "section": "tavern_ground",
+        "rooms": [
+          0,
+          2
+        ],
+        "centre": [
+          32.5,
+          294.5
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
+        ]
+      },
+      {
+        "node": "Part_tavern_ground_2_lime_plaster",
+        "section": "tavern_ground",
+        "rooms": [
+          1,
+          2
+        ],
+        "centre": [
+          36.0,
+          297.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          0.0,
+          0,
+          1.0
+        ]
+      },
+      {
+        "node": "Part_tavern_ground_2_soot_brick",
+        "section": "tavern_ground",
+        "rooms": [
+          1,
+          2
+        ],
+        "centre": [
+          36.0,
+          297.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          0.0,
+          0,
+          1.0
+        ]
+      },
+      {
+        "node": "Part_tavern_ground_2_timber_band",
+        "section": "tavern_ground",
+        "rooms": [
+          1,
+          2
+        ],
+        "centre": [
+          36.0,
+          297.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          0.0,
+          0,
+          1.0
+        ]
+      },
+      {
+        "node": "Part_tavern_ground_2_wall_cap",
+        "section": "tavern_ground",
+        "rooms": [
+          1,
+          2
+        ],
+        "centre": [
+          36.0,
+          297.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          0.0,
+          0,
+          1.0
+        ]
+      },
+      {
+        "node": "Part_tavern_upper_0_lime_plaster",
+        "section": "tavern_upper",
+        "rooms": [
+          0,
+          1
+        ],
+        "centre": [
+          73.0,
+          296.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          -0.0,
+          0,
+          -1.0
+        ]
+      },
+      {
+        "node": "Part_tavern_upper_0_timber_band",
+        "section": "tavern_upper",
+        "rooms": [
+          0,
+          1
+        ],
+        "centre": [
+          73.0,
+          296.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          -0.0,
+          0,
+          -1.0
+        ]
+      },
+      {
+        "node": "Part_tavern_upper_0_wall_cap",
+        "section": "tavern_upper",
+        "rooms": [
+          0,
+          1
+        ],
+        "centre": [
+          73.0,
+          296.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          -0.0,
+          0,
+          -1.0
+        ]
+      },
+      {
+        "node": "Part_tavern_upper_1_lime_plaster",
+        "section": "tavern_upper",
+        "rooms": [
+          0,
+          2
+        ],
+        "centre": [
+          78.0,
+          296.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          -0.0,
+          0,
+          -1.0
+        ]
+      },
+      {
+        "node": "Part_tavern_upper_1_timber_band",
+        "section": "tavern_upper",
+        "rooms": [
+          0,
+          2
+        ],
+        "centre": [
+          78.0,
+          296.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          -0.0,
+          0,
+          -1.0
+        ]
+      },
+      {
+        "node": "Part_tavern_upper_1_wall_cap",
+        "section": "tavern_upper",
+        "rooms": [
+          0,
+          2
+        ],
+        "centre": [
+          78.0,
+          296.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          -0.0,
+          0,
+          -1.0
+        ]
+      },
+      {
+        "node": "Part_tavern_upper_2_lime_plaster",
+        "section": "tavern_upper",
+        "rooms": [
+          0,
+          3
+        ],
+        "centre": [
+          82.5,
+          296.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          -0.0,
+          0,
+          -1.0
+        ]
+      },
+      {
+        "node": "Part_tavern_upper_2_timber_band",
+        "section": "tavern_upper",
+        "rooms": [
+          0,
+          3
+        ],
+        "centre": [
+          82.5,
+          296.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          -0.0,
+          0,
+          -1.0
+        ]
+      },
+      {
+        "node": "Part_tavern_upper_2_wall_cap",
+        "section": "tavern_upper",
+        "rooms": [
+          0,
+          3
+        ],
+        "centre": [
+          82.5,
+          296.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          -0.0,
+          0,
+          -1.0
+        ]
+      },
+      {
+        "node": "Part_tavern_upper_3_lime_plaster",
+        "section": "tavern_upper",
+        "rooms": [
+          0,
+          4
+        ],
+        "centre": [
+          87.0,
+          296.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          -0.0,
+          0,
+          -1.0
+        ]
+      },
+      {
+        "node": "Part_tavern_upper_3_timber_band",
+        "section": "tavern_upper",
+        "rooms": [
+          0,
+          4
+        ],
+        "centre": [
+          87.0,
+          296.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          -0.0,
+          0,
+          -1.0
+        ]
+      },
+      {
+        "node": "Part_tavern_upper_3_wall_cap",
+        "section": "tavern_upper",
+        "rooms": [
+          0,
+          4
+        ],
+        "centre": [
+          87.0,
+          296.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          -0.0,
+          0,
+          -1.0
+        ]
+      },
+      {
+        "node": "Part_tavern_upper_4_lime_plaster",
+        "section": "tavern_upper",
+        "rooms": [
+          1,
+          2
+        ],
+        "centre": [
+          75.5,
+          300.0
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
+        ]
+      },
+      {
+        "node": "Part_tavern_upper_4_timber_band",
+        "section": "tavern_upper",
+        "rooms": [
+          1,
+          2
+        ],
+        "centre": [
+          75.5,
+          300.0
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
+        ]
+      },
+      {
+        "node": "Part_tavern_upper_4_wall_cap",
+        "section": "tavern_upper",
+        "rooms": [
+          1,
+          2
+        ],
+        "centre": [
+          75.5,
+          300.0
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
+        ]
+      },
+      {
+        "node": "Part_tavern_upper_5_lime_plaster",
+        "section": "tavern_upper",
+        "rooms": [
+          2,
+          3
+        ],
+        "centre": [
+          80.5,
+          300.0
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
+        ]
+      },
+      {
+        "node": "Part_tavern_upper_5_timber_band",
+        "section": "tavern_upper",
+        "rooms": [
+          2,
+          3
+        ],
+        "centre": [
+          80.5,
+          300.0
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
+        ]
+      },
+      {
+        "node": "Part_tavern_upper_5_wall_cap",
+        "section": "tavern_upper",
+        "rooms": [
+          2,
+          3
+        ],
+        "centre": [
+          80.5,
+          300.0
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
+        ]
+      },
+      {
+        "node": "Part_tavern_upper_6_lime_plaster",
+        "section": "tavern_upper",
+        "rooms": [
+          3,
+          4
+        ],
+        "centre": [
+          84.5,
+          300.0
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
+        ]
+      },
+      {
+        "node": "Part_tavern_upper_6_timber_band",
+        "section": "tavern_upper",
+        "rooms": [
+          3,
+          4
+        ],
+        "centre": [
+          84.5,
+          300.0
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
+        ]
+      },
+      {
+        "node": "Part_tavern_upper_6_wall_cap",
+        "section": "tavern_upper",
+        "rooms": [
+          3,
+          4
+        ],
+        "centre": [
+          84.5,
+          300.0
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
+        ]
+      },
+      {
+        "node": "Part_watch_house_0_lime_plaster",
+        "section": "watch_house",
+        "rooms": [
+          0,
+          1
+        ],
+        "centre": [
+          105.5,
+          238.0
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
+        ]
+      },
+      {
+        "node": "Part_watch_house_0_timber_band",
+        "section": "watch_house",
+        "rooms": [
+          0,
+          1
+        ],
+        "centre": [
+          105.5,
+          238.0
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
+        ]
+      },
+      {
+        "node": "Part_watch_house_0_wall_cap",
+        "section": "watch_house",
+        "rooms": [
+          0,
+          1
+        ],
+        "centre": [
+          105.5,
+          238.0
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
+        ]
+      },
+      {
+        "node": "Part_weaver_house_0_lime_plaster",
+        "section": "weaver_house",
+        "rooms": [
+          0,
+          1
+        ],
+        "centre": [
+          63.5,
+          239.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          -0.0,
+          0,
+          -1.0
+        ]
+      },
+      {
+        "node": "Part_weaver_house_0_timber_band",
+        "section": "weaver_house",
+        "rooms": [
+          0,
+          1
+        ],
+        "centre": [
+          63.5,
+          239.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          -0.0,
+          0,
+          -1.0
+        ]
+      },
+      {
+        "node": "Part_weaver_house_0_wall_cap",
+        "section": "weaver_house",
+        "rooms": [
+          0,
+          1
+        ],
+        "centre": [
+          63.5,
+          239.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          -0.0,
+          0,
+          -1.0
+        ]
+      },
+      {
+        "node": "Part_weaver_house_1_lime_plaster",
+        "section": "weaver_house",
+        "rooms": [
+          0,
+          2
+        ],
+        "centre": [
+          69.0,
+          239.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          -0.0,
+          0,
+          -1.0
+        ]
+      },
+      {
+        "node": "Part_weaver_house_1_timber_band",
+        "section": "weaver_house",
+        "rooms": [
+          0,
+          2
+        ],
+        "centre": [
+          69.0,
+          239.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          -0.0,
+          0,
+          -1.0
+        ]
+      },
+      {
+        "node": "Part_weaver_house_1_wall_cap",
+        "section": "weaver_house",
+        "rooms": [
+          0,
+          2
+        ],
+        "centre": [
+          69.0,
+          239.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          -0.0,
+          0,
+          -1.0
+        ]
+      },
+      {
+        "node": "Part_weaver_house_2_lime_plaster",
+        "section": "weaver_house",
+        "rooms": [
+          1,
+          2
+        ],
+        "centre": [
+          66.5,
+          241.5
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
+        ]
+      },
+      {
+        "node": "Part_weaver_house_2_timber_band",
+        "section": "weaver_house",
+        "rooms": [
+          1,
+          2
+        ],
+        "centre": [
+          66.5,
+          241.5
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
+        ]
+      },
+      {
+        "node": "Part_weaver_house_2_wall_cap",
+        "section": "weaver_house",
+        "rooms": [
+          1,
+          2
+        ],
+        "centre": [
+          66.5,
+          241.5
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
+        ]
+      }
+    ],
+    "reason": "Building interiors: roofs hidden, outer walls cut away by facing, partitions faded where they cover the player"
+  },
+  "sectioned": true,
+  "sections": [
+    {
+      "id": "tavern_ground",
+      "name": "The Unlit Boat",
+      "bounds": {
+        "min": [
+          18.5,
+          289.5
+        ],
+        "max": [
+          41.5,
+          305.5
+        ]
+      }
+    },
+    {
+      "id": "market",
+      "name": "The avenue shops",
+      "bounds": {
+        "min": [
+          118.5,
+          290.5
+        ],
+        "max": [
+          142.5,
+          305.5
+        ]
+      }
+    },
+    {
+      "id": "magic_shop",
+      "name": "The True Note",
+      "bounds": {
+        "min": [
+          168.5,
+          290.5
+        ],
+        "max": [
+          183.5,
+          305.5
+        ]
+      }
+    },
+    {
+      "id": "smithy",
+      "name": "The forge",
+      "bounds": {
+        "min": [
+          208.5,
+          287.5
+        ],
+        "max": [
+          224.5,
+          305.5
+        ]
+      }
+    },
+    {
+      "id": "clerk_house",
+      "name": "Hemmen's house",
+      "bounds": {
+        "min": [
+          18.5,
+          232.5
+        ],
+        "max": [
+          33.5,
+          245.5
+        ]
+      }
+    },
+    {
+      "id": "weaver_house",
+      "name": "The weaver's house",
+      "bounds": {
+        "min": [
+          58.5,
+          232.5
+        ],
+        "max": [
+          73.5,
+          245.5
+        ]
+      }
+    },
+    {
+      "id": "watch_house",
+      "name": "The watch house",
+      "bounds": {
+        "min": [
+          98.5,
+          230.5
+        ],
+        "max": [
+          112.5,
+          245.5
+        ]
+      }
+    },
+    {
+      "id": "netmender_house",
+      "name": "The net-mender's house",
+      "bounds": {
+        "min": [
+          138.5,
+          231.5
+        ],
+        "max": [
+          151.5,
+          245.5
+        ]
+      }
+    },
+    {
+      "id": "castle",
+      "name": "The keep",
+      "bounds": {
+        "min": [
+          18.5,
+          153.5
+        ],
+        "max": [
+          62.5,
+          185.5
+        ]
+      }
+    },
+    {
+      "id": "tavern_upper",
+      "name": "The Unlit Boat, upstairs",
+      "bounds": {
+        "min": [
+          68.5,
+          289.5
+        ],
+        "max": [
+          91.5,
+          305.5
+        ]
+      }
+    }
+  ],
+  "minimap": {
+    "file": "minimap.webp",
+    "image": "minimap.webp",
+    "northUp": true,
+    "worldMin": [
+      0,
+      0
+    ],
+    "worldMax": [
+      324,
+      324
+    ],
+    "imageSize": [
+      972,
+      972
+    ]
+  },
+  "provenance": {
+    "source": "_continent_v2/content/landfall_town.json",
+    "sourceSha256": "8de2bebecef9ee306c3a6389fd21b7ccc3843ac28c61729ded2165586bf1e774",
+    "builder": "_continent_v2/build_town_interiors.py",
+    "builderSha256": "9b216b5fcc1c8b943a48f5ba02e06881ee327b38f1ecdc8a50ab7a917a734807",
+    "imports": {
+      "_continent_v2/build_underground.py": "d4ad29b2b55f51752aea4478d782915cd1b774cf59611e689b84d868468e2845",
+      "_continent_v2/town_source.py": "33bc973e6f4b6e3e30b20daadf0480ee4d47336a68ca18cba7204c5d132a1d00",
+      "_continent_v2/underground_source.py": "1c96af628d148d491d1a5b021470bdbdbf35885ef53d605c953ce97e03f26981"
+    },
+    "surfaces": {
+      "ashlar_wall": {
+        "file": "godot-client/src/world/look/textures/interior/ashlar_wall.png",
+        "sha256": "7cdac3774eb88dfba6b2db7f2c2de3a45a94f15e05b5434f82c03e1e765193fd"
+      },
+      "cobalt_tile": {
+        "file": "godot-client/src/world/look/textures/interior/cobalt_tile.png",
+        "sha256": "ba8aa54809dcf45df767b5ffee01e08a82dcf0293f8e2a943196eb326f182263"
+      },
+      "decal_banner_glasswarden": {
+        "file": "godot-client/src/world/look/textures/interior/banner_glasswarden.png",
+        "sha256": "682543d6c83ee2d503ea804e6c4d89058baca49cbb4f17970732d650f692f761"
+      },
+      "decal_banner_greyhaven": {
+        "file": "godot-client/src/world/look/textures/interior/banner_greyhaven.png",
+        "sha256": "7fb734c32a1d3e9e51b6032df16d77f8c38beaf48e905c1fc4dd8fb5e1ca5b78"
+      },
+      "decal_banner_luminous": {
+        "file": "godot-client/src/world/look/textures/interior/banner_luminous.png",
+        "sha256": "68cc4c2b5c72aa8c9f7b7458126a1ef871a505d2dc555860f3defc09e9388ad6"
+      },
+      "decal_banner_mycelari": {
+        "file": "godot-client/src/world/look/textures/interior/banner_mycelari.png",
+        "sha256": "66fc5143c20494b6ce4dd13dc221b0374142b25dd983ddcd35bae2eea759db3a"
+      },
+      "decal_banner_orun": {
+        "file": "godot-client/src/world/look/textures/interior/banner_orun.png",
+        "sha256": "1c0c664c6fd952c03b5b44497acebe04a723bd9126e7f9159fb7d7a61918ddd3"
+      },
+      "decal_banner_ssarathi": {
+        "file": "godot-client/src/world/look/textures/interior/banner_ssarathi.png",
+        "sha256": "404bf85e230cd818243b94ad1e62ad45b9e7793090f6587df801ec1675eb5cc2"
+      },
+      "decal_banner_stoneborn": {
+        "file": "godot-client/src/world/look/textures/interior/banner_stoneborn.png",
+        "sha256": "1c22e7650b4a131f5c7229664bd3d891e75c3f71a803bcd332c66f47e1df7dd0"
+      },
+      "decal_banner_votary": {
+        "file": "godot-client/src/world/look/textures/interior/banner_votary.png",
+        "sha256": "f9d972c731c1ef9ed1a39a02f9d127d92ad76db60a56c72f7ab45104d4653a53"
+      },
+      "decal_botanical_prints": {
+        "file": "godot-client/src/world/look/textures/interior/botanical_prints.png",
+        "sha256": "634aa8ed0edac69a17f14b69c7853e59efb642de5ee9763be4af80adbb055555"
+      },
+      "decal_map_landfall": {
+        "file": "godot-client/src/world/look/textures/interior/map_landfall.png",
+        "sha256": "ae3dad1d0e38a50eb1d76b428f8d31aa915eb8666aaacd22765efa51b1fcf152"
+      },
+      "decal_rug_home": {
+        "file": "godot-client/src/world/look/textures/interior/rug_home.png",
+        "sha256": "979c0ddf2b0709117009a016a405994a4fe381339881883e224ef34f634de3d8"
+      },
+      "decal_rug_runner": {
+        "file": "godot-client/src/world/look/textures/interior/rug_runner.png",
+        "sha256": "c1b8913a8bb8973bc7e4df976bb07deadc58e81b758ce31ac88ddcb186114ab4"
+      },
+      "decal_rug_tavern": {
+        "file": "godot-client/src/world/look/textures/interior/rug_tavern.png",
+        "sha256": "19c73dae0df448d01915becab43a811cac222541f4af26dcd7da66440d40c434"
+      },
+      "decal_star_chart": {
+        "file": "godot-client/src/world/look/textures/interior/star_chart.png",
+        "sha256": "a78fb13190311d38536525cd1a076d31fa852bdca58220e046d9b09f892f140a"
+      },
+      "lime_plaster": {
+        "file": "godot-client/src/world/look/textures/interior/lime_plaster.png",
+        "sha256": "446c63a5de7f7ff9041615c5c135f032d66e309ee58b4d6bd91c03cbb38303ba"
+      },
+      "limestone_flagstone": {
+        "file": "godot-client/src/world/look/textures/interior/limestone_flagstone.png",
+        "sha256": "eb84f95d987bf6217abf20541f4da5e539b88432f112a1f15e1e3332bae550f0"
+      },
+      "oak_planks": {
+        "file": "godot-client/src/world/look/textures/interior/oak_planks.png",
+        "sha256": "c6745ae858f829376dd7d56ae5b6c6e0db9acfe7323500ba709e40f2a1ac94d4"
+      },
+      "packed_earth": {
+        "placeholder": "godot-client/src/world/look/textures/packed-earth-path.png",
+        "sha256": "a2b082adfc5e48247883414ee7d4a16195d048f2f8e77f21f0b2f3e31e58d521"
+      },
+      "soot_brick": {
+        "file": "godot-client/src/world/look/textures/interior/soot_brick.png",
+        "sha256": "1815b403523991e323d48e0194ce1691b7069bd489040bf3e975f691ce369ce6"
+      },
+      "timber_band": {
+        "file": "godot-client/src/world/look/textures/interior/timber_band.png",
+        "sha256": "92d0b330dadeae25b88e11365b9b404b18725b27204170258a2ad5bacafc899e"
+      }
+    },
+    "ownerApproved": "owner, 2026-10-27, chat: 'Implement your plan' - Landfall town interiors room shells (build_town_interiors.py)"
+  },
+  "externalResources": {
+    "../../../_shared/images/1815b403523991e323d48e0194ce1691b7069bd489040bf3e975f691ce369ce6.png": "1815b403523991e323d48e0194ce1691b7069bd489040bf3e975f691ce369ce6",
+    "../../../_shared/images/19c73dae0df448d01915becab43a811cac222541f4af26dcd7da66440d40c434.png": "19c73dae0df448d01915becab43a811cac222541f4af26dcd7da66440d40c434",
+    "../../../_shared/images/1c0c664c6fd952c03b5b44497acebe04a723bd9126e7f9159fb7d7a61918ddd3.png": "1c0c664c6fd952c03b5b44497acebe04a723bd9126e7f9159fb7d7a61918ddd3",
+    "../../../_shared/images/1c22e7650b4a131f5c7229664bd3d891e75c3f71a803bcd332c66f47e1df7dd0.png": "1c22e7650b4a131f5c7229664bd3d891e75c3f71a803bcd332c66f47e1df7dd0",
+    "../../../_shared/images/404bf85e230cd818243b94ad1e62ad45b9e7793090f6587df801ec1675eb5cc2.png": "404bf85e230cd818243b94ad1e62ad45b9e7793090f6587df801ec1675eb5cc2",
+    "../../../_shared/images/446c63a5de7f7ff9041615c5c135f032d66e309ee58b4d6bd91c03cbb38303ba.png": "446c63a5de7f7ff9041615c5c135f032d66e309ee58b4d6bd91c03cbb38303ba",
+    "../../../_shared/images/634aa8ed0edac69a17f14b69c7853e59efb642de5ee9763be4af80adbb055555.png": "634aa8ed0edac69a17f14b69c7853e59efb642de5ee9763be4af80adbb055555",
+    "../../../_shared/images/66fc5143c20494b6ce4dd13dc221b0374142b25dd983ddcd35bae2eea759db3a.png": "66fc5143c20494b6ce4dd13dc221b0374142b25dd983ddcd35bae2eea759db3a",
+    "../../../_shared/images/682543d6c83ee2d503ea804e6c4d89058baca49cbb4f17970732d650f692f761.png": "682543d6c83ee2d503ea804e6c4d89058baca49cbb4f17970732d650f692f761",
+    "../../../_shared/images/68cc4c2b5c72aa8c9f7b7458126a1ef871a505d2dc555860f3defc09e9388ad6.png": "68cc4c2b5c72aa8c9f7b7458126a1ef871a505d2dc555860f3defc09e9388ad6",
+    "../../../_shared/images/7043bc306ea3534cc7e13caed7be552a64280543fe0278b9b5880385bff7447b.png": "7043bc306ea3534cc7e13caed7be552a64280543fe0278b9b5880385bff7447b",
+    "../../../_shared/images/7cdac3774eb88dfba6b2db7f2c2de3a45a94f15e05b5434f82c03e1e765193fd.png": "7cdac3774eb88dfba6b2db7f2c2de3a45a94f15e05b5434f82c03e1e765193fd",
+    "../../../_shared/images/7fb734c32a1d3e9e51b6032df16d77f8c38beaf48e905c1fc4dd8fb5e1ca5b78.png": "7fb734c32a1d3e9e51b6032df16d77f8c38beaf48e905c1fc4dd8fb5e1ca5b78",
+    "../../../_shared/images/92d0b330dadeae25b88e11365b9b404b18725b27204170258a2ad5bacafc899e.png": "92d0b330dadeae25b88e11365b9b404b18725b27204170258a2ad5bacafc899e",
+    "../../../_shared/images/979c0ddf2b0709117009a016a405994a4fe381339881883e224ef34f634de3d8.png": "979c0ddf2b0709117009a016a405994a4fe381339881883e224ef34f634de3d8",
+    "../../../_shared/images/a78fb13190311d38536525cd1a076d31fa852bdca58220e046d9b09f892f140a.png": "a78fb13190311d38536525cd1a076d31fa852bdca58220e046d9b09f892f140a",
+    "../../../_shared/images/ae3dad1d0e38a50eb1d76b428f8d31aa915eb8666aaacd22765efa51b1fcf152.png": "ae3dad1d0e38a50eb1d76b428f8d31aa915eb8666aaacd22765efa51b1fcf152",
+    "../../../_shared/images/ba8aa54809dcf45df767b5ffee01e08a82dcf0293f8e2a943196eb326f182263.png": "ba8aa54809dcf45df767b5ffee01e08a82dcf0293f8e2a943196eb326f182263",
+    "../../../_shared/images/c1b8913a8bb8973bc7e4df976bb07deadc58e81b758ce31ac88ddcb186114ab4.png": "c1b8913a8bb8973bc7e4df976bb07deadc58e81b758ce31ac88ddcb186114ab4",
+    "../../../_shared/images/c6745ae858f829376dd7d56ae5b6c6e0db9acfe7323500ba709e40f2a1ac94d4.png": "c6745ae858f829376dd7d56ae5b6c6e0db9acfe7323500ba709e40f2a1ac94d4",
+    "../../../_shared/images/eb84f95d987bf6217abf20541f4da5e539b88432f112a1f15e1e3332bae550f0.png": "eb84f95d987bf6217abf20541f4da5e539b88432f112a1f15e1e3332bae550f0",
+    "../../../_shared/images/f9d972c731c1ef9ed1a39a02f9d127d92ad76db60a56c72f7ab45104d4653a53.png": "f9d972c731c1ef9ed1a39a02f9d127d92ad76db60a56c72f7ab45104d4653a53"
+  }
+}

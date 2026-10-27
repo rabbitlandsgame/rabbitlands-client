@@ -186,7 +186,14 @@ func _draw_waypoints(font: Font) -> void:
 			continue
 		var point: Vector2 = point_value as Vector2
 		if waypoint.get("type") == &"entrance":
-			EntranceOverlayScript.draw_marker(self, point, str(waypoint.get("label", "Entrance")))
+			# A building's door is its shop's dot, named on hover only; a cave
+			# keeps its permanent name.
+			if EntranceOverlayScript.is_building(waypoint):
+				EntranceOverlayScript.draw_dot(self, point,
+					waypoint.get("colour", EntranceOverlayScript.DOT_COLOUR) as Color,
+					LiveOverlayScript.BASE_RADIUS)
+			else:
+				EntranceOverlayScript.draw_marker(self, point, str(waypoint.get("label", "Entrance")))
 			continue
 		var glyph: String = str(waypoint.get("glyph", "X"))
 		if glyph.is_empty():

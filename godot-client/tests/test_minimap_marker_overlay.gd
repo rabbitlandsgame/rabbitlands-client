@@ -2,6 +2,8 @@ extends SceneTree
 ## The player's own mark is drawn over every other mark on the minimap and the
 ## full map, so an NPC or harvest node standing beside the player cannot hide it.
 
+const MinimapOverlay := preload("res://src/ui/minimap_marker_overlay.gd")
+const EntranceOverlay := preload("res://src/ui/entrance_map_overlay.gd")
 var failures := 0
 var checks := 0
 
@@ -9,7 +11,7 @@ func _init() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
-	var overlay: Control = load("res://src/ui/minimap_marker_overlay.gd").new() as Control
+	var overlay: Control = MinimapOverlay.new() as Control
 	var own := {"type": &"self", "colour": Color.WHITE}
 	var npc := {"type": &"npc", "colour": Color.YELLOW}
 	var harvest := {"type": &"harvest", "colour": Color.GREEN}
@@ -24,6 +26,14 @@ func _run() -> void:
 	var without_self: Array[Dictionary] = [npc, harvest]
 	_expect(overlay.call("draw_order", without_self) == without_self,
 		"a map without the player's mark draws what it was given")
+	# A building's door (main.gd gives it DOOR_RADIUS) is a dot a size down
+	# from a cave's, so the doors of a town street do not run together.
+	var door := {"type": &"entrance", "kind": "building", "radius": MinimapOverlay.DOOR_RADIUS}
+	var cave := {"type": &"entrance"}
+	_expect(EntranceOverlay.is_building(door) and not EntranceOverlay.is_building(cave),
+		"a building's door is told from a cave by its kind")
+	_expect(float(overlay.call("mark_radius", door)) < float(overlay.call("mark_radius", cave)),
+		"a building's door is drawn smaller than a cave on the minimap")
 	overlay.free()
 	print("Minimap marker overlay: %d checks, %d failures" % [checks, failures])
 	quit(1 if failures > 0 else 0)

@@ -1,0 +1,457 @@
+{
+  "schema": "eloria-landfall-town-v1",
+  "map": {
+    "id": "landfall_town",
+    "name": "Landfall Town",
+    "alias": "LFT",
+    "cells": 324,
+    "builder": "build_town_interiors",
+    "environment": {"profile": "town-interior", "backgroundColor": "#000000", "ambient": {"color": "#d9c8a8", "energy": 0.6, "skyContribution": 0}, "sun": {"enabled": true, "energy": 0.25, "color": "#ffe6c4", "shadows": false}, "fog": {"enabled": false}, "tonemap": {"mode": "filmic", "exposure": 1.05}, "dayNight": {"enabled": false}},
+    "camera": {"distance": 12, "minDistance": 6, "maxDistance": 26, "pitchDegrees": -50, "zoomStep": 1.2}
+  },
+  "sections": [
+    {
+      "id": "tavern_ground", "name": "The Unlit Boat", "style": "tavern", "danger": "Open to all",
+      "about": "The tavern in #14 on the main row facing the west-gate approach (door A, SW facade: the south wall). Taproom with the bar and the hearth, the kitchen behind a soot-brick wall, a stair hall with the stairs up to the guest rooms. Named for the boat with no lantern on the night of the first landing.",
+      "rooms": [[26.5,26.5,6,6],[36,23.5,3.5,3],[36,29.5,3.5,3]],
+      "roomNames": ["Taproom of the Unlit Boat","Tavern kitchen","Tavern stair hall"],
+      "links": [[0,1,2.4,[[32.5,23.5]]],[0,2,2.4,[[32.5,29.5]]],[1,2,2.4,[[37.5,26.5]]]],
+      "floors": ["oak_planks","oak_planks","oak_planks"],
+      "walls": ["lime_plaster","soot_brick","lime_plaster"],
+      "windows": [
+        {"room": 0, "side": "south", "at": 0.2, "width": 1.4},
+        {"room": 0, "side": "south", "at": 0.8, "width": 1.4},
+        {"room": 0, "side": "west", "at": 0.3, "width": 1.4},
+        {"room": 0, "side": "west", "at": 0.75, "width": 1.4},
+        {"room": 0, "side": "north", "at": 0.25, "width": 1.4},
+        {"room": 0, "side": "north", "at": 0.7, "width": 1.4},
+        {"room": 1, "side": "east", "at": 0.2, "width": 1.2}
+      ],
+      "decals": [
+        {"image": "rug_tavern", "room": 0, "side": "floor", "at": [0.45,0.5], "size": [3.9,2.6]},
+        {"image": "rug_runner", "room": 2, "side": "floor", "at": [0.25,0.5], "size": [1.0,3.0]}
+      ],
+      "entrances": [
+        {"map": "landfall", "kind": "building", "object": 59201, "tile": [107,250], "position": [-173.8,121.49,-3.8], "returnTile": [104,247], "arrival": [26,23], "exit": [26,21], "exitFacing": [0,-1], "category": "tavern", "label": "The Unlit Boat", "exitLabel": "The west-gate road"}
+      ],
+      "props": [
+        {"asset": "barrel_stack", "at": [30.6,31.4], "yaw": 0, "blockBox": [0.9,0.7], "wall": "north"},
+        {"asset": "feed_sacks", "at": [34.2,21.4], "yaw": 0, "blockBox": [0.7,0.4], "wall": "south"},
+        {"asset": "terracotta_pots", "at": [38.8,24.6], "yaw": 90, "blockBox": [0.6,0.5], "wall": "east"},
+        {"asset": "crate_stack", "at": [38.4,31.4], "yaw": 0, "blockBox": [0.9,0.9], "wall": "north"}
+      ],
+      "lights": [
+        {"at": [21.3,26.5], "height": 1.0, "colour": [1.0,0.6,0.3], "energy": 2.0, "range": 9},
+        {"at": [24,24], "height": 2.9, "colour": [1.0,0.82,0.6], "energy": 0.9, "range": 7},
+        {"at": [29,24], "height": 2.9, "colour": [1.0,0.82,0.6], "energy": 0.9, "range": 7},
+        {"at": [26.5,29.5], "height": 2.9, "colour": [1.0,0.82,0.6], "energy": 0.9, "range": 7},
+        {"at": [38.6,24.2], "height": 1.0, "colour": [1.0,0.6,0.3], "energy": 1.8, "range": 7},
+        {"at": [35,23.5], "height": 2.9, "colour": [1.0,0.82,0.6], "energy": 0.7, "range": 6},
+        {"at": [35.5,29.5], "height": 2.9, "colour": [1.0,0.82,0.6], "energy": 0.8, "range": 6}
+      ],
+      "npcs": [],
+      "interactives": [],
+      "nodes": [],
+      "spawns": []
+    },
+    {
+      "id": "market", "name": "The avenue shops", "style": "shop", "danger": "Open to all",
+      "about": "Two shopfronts on the avenue, #20 (general store, door B) and #19 (flower shop, door C), sharing one floor through a wide arch: provisions and tools on oak boards, cut flowers and pot plants on cobalt tile with a window onto the grove.",
+      "rooms": [[135.5,26,5,5.5],[125.5,26,5,5.5]],
+      "roomNames": ["General store","Flower shop"],
+      "links": [[0,1,3.4,[[130.5,25]]]],
+      "floors": ["oak_planks","cobalt_tile"],
+      "walls": "lime_plaster",
+      "windows": [
+        {"room": 0, "side": "south", "at": 0.2, "width": 1.4},
+        {"room": 0, "side": "south", "at": 0.8, "width": 1.4},
+        {"room": 1, "side": "south", "at": 0.2, "width": 1.4},
+        {"room": 1, "side": "south", "at": 0.8, "width": 1.4},
+        {"room": 0, "side": "north", "at": 0.5, "width": 1.4},
+        {"room": 0, "side": "east", "at": 0.5, "width": 1.4},
+        {"room": 1, "side": "north", "at": 0.25, "width": 1.4},
+        {"room": 1, "side": "north", "at": 0.75, "width": 1.4},
+        {"room": 1, "side": "west", "at": 0.5, "width": 1.4}
+      ],
+      "decals": [
+        {"image": "botanical_prints", "room": 1, "side": "north", "at": [0.5,0.55], "size": [1.6,0.8]}
+      ],
+      "entrances": [
+        {"map": "landfall", "kind": "building", "object": 59202, "tile": [131,254], "position": [-150.1,121.49,-8.0], "returnTile": [134,251], "arrival": [135,23], "exit": [135,21], "exitFacing": [0,-1], "category": "general_store", "label": "Hanne's Provisions", "exitLabel": "The avenue"},
+        {"map": "landfall", "kind": "building", "object": 59203, "tile": [124,251], "position": [-157.2,121.49,-5.1], "returnTile": [127,248], "arrival": [125,23], "exit": [125,21], "exitFacing": [0,-1], "category": "flower_shop", "label": "The flower shop", "exitLabel": "The avenue"}
+      ],
+      "props": [
+        {"asset": "barrel_stack", "at": [139.4,22.6], "yaw": 90, "blockBox": [0.9,0.7], "wall": "east"},
+        {"asset": "feed_sacks", "at": [132.2,21.4], "yaw": 0, "blockBox": [0.7,0.4], "wall": "south"},
+        {"asset": "harvest_baskets", "at": [133,30.6], "yaw": 0, "blockBox": [0.5,0.3], "wall": "north"},
+        {"asset": "rope_coils", "at": [138.6,30.2], "yaw": 0, "blockBox": [0.8,0.8], "wall": "north"},
+        {"asset": "crate_stack", "at": [139.4,27.6], "yaw": 0, "blockBox": [0.9,0.9], "wall": "east"},
+        {"asset": "terracotta_pots", "at": [121.6,22.4], "yaw": 90, "blockBox": [0.6,0.5], "wall": "west"},
+        {"asset": "harvest_baskets", "at": [128.6,21.4], "yaw": 0, "blockBox": [0.5,0.3], "wall": "south"},
+        {"asset": "terracotta_pots", "at": [121.6,29.6], "yaw": 90, "blockBox": [0.6,0.5], "wall": "west"}
+      ],
+      "lights": [
+        {"at": [135.5,27], "height": 2.9, "colour": [1.0,0.82,0.6], "energy": 1.4, "range": 8},
+        {"at": [133,23], "height": 2.9, "colour": [1.0,0.82,0.6], "energy": 0.8, "range": 6},
+        {"at": [138,23], "height": 2.9, "colour": [1.0,0.82,0.6], "energy": 0.8, "range": 6},
+        {"at": [125.5,26], "height": 2.9, "colour": [1.0,0.82,0.6], "energy": 1.3, "range": 8},
+        {"at": [122.5,23], "height": 2.9, "colour": [1.0,0.82,0.6], "energy": 0.8, "range": 6},
+        {"at": [128,29], "height": 2.9, "colour": [1.0,0.82,0.6], "energy": 0.8, "range": 6}
+      ],
+      "npcs": [],
+      "interactives": [],
+      "nodes": [],
+      "spawns": []
+    },
+    {
+      "id": "magic_shop", "name": "The True Note", "style": "magic", "danger": "Open to all",
+      "about": "The magic shop in #24 on the avenue (door D): a cobalt-tiled shop floor and a workshop behind it for the arcanist's lenses and reagents, a star chart on the back wall.",
+      "rooms": [[176,24,5.5,3.5],[176,29.5,5.5,2]],
+      "roomNames": ["The True Note shop","The True Note workshop"],
+      "links": [[0,1,2.4,[[175.5,27.5]]]],
+      "floors": ["cobalt_tile","cobalt_tile"],
+      "walls": "lime_plaster",
+      "windows": [
+        {"room": 0, "side": "south", "at": 0.2, "width": 1.2},
+        {"room": 0, "side": "south", "at": 0.8, "width": 1.2},
+        {"room": 0, "side": "west", "at": 0.5, "width": 1.2},
+        {"room": 0, "side": "east", "at": 0.5, "width": 1.2},
+        {"room": 1, "side": "north", "at": 0.2, "width": 1.0},
+        {"room": 1, "side": "north", "at": 0.8, "width": 1.0}
+      ],
+      "decals": [
+        {"image": "star_chart", "room": 1, "side": "north", "at": [0.5,0.58], "size": [1.4,1.4]}
+      ],
+      "entrances": [
+        {"map": "landfall", "kind": "building", "object": 59204, "tile": [166,265], "position": [-115.1,121.49,-18.4], "returnTile": [167,262], "arrival": [175,23], "exit": [175,21], "exitFacing": [0,-1], "category": "magic_shop", "label": "The True Note", "exitLabel": "The avenue"}
+      ],
+      "props": [
+        {"asset": "lens_grinder", "at": [172.4,30.4], "yaw": 0, "blockBox": [0.7,0.7], "wall": "north"},
+        {"asset": "terracotta_pots", "at": [180.6,26.2], "yaw": 90, "blockBox": [0.6,0.5], "wall": "east"}
+      ],
+      "lights": [
+        {"at": [175.5,25], "height": 2.9, "colour": [0.82,0.78,1.0], "energy": 1.4, "range": 8},
+        {"at": [172.5,23], "height": 2.9, "colour": [1.0,0.82,0.6], "energy": 0.8, "range": 6},
+        {"at": [178.5,23], "height": 2.9, "colour": [1.0,0.82,0.6], "energy": 0.8, "range": 6},
+        {"at": [173,29.5], "height": 2.9, "colour": [0.82,0.78,1.0], "energy": 0.9, "range": 6},
+        {"at": [178.5,29.5], "height": 2.9, "colour": [0.82,0.78,1.0], "energy": 0.8, "range": 6}
+      ],
+      "npcs": [],
+      "interactives": [],
+      "nodes": [],
+      "spawns": []
+    },
+    {
+      "id": "smithy", "name": "The forge", "style": "smithy", "danger": "Open to all",
+      "about": "The smithy in #12 on the main row (door E, SW facade: the south wall): a packed-earth forge floor inside soot-brick walls, the smith's home kitchen and bedroom behind it.",
+      "rooms": [[216.5,24.5,6,4],[214,31.5,3.5,3],[220,31.5,2.5,3]],
+      "roomNames": ["The forge","Smith's home kitchen","Smith's home bedroom"],
+      "links": [[0,1,2.4,[[214.5,28.5]]],[1,2,2.4,[[217.5,31.5]]]],
+      "floors": ["packed_earth","oak_planks","oak_planks"],
+      "walls": ["soot_brick","lime_plaster","lime_plaster"],
+      "windows": [
+        {"room": 0, "side": "east", "at": 0.5, "width": 1.4},
+        {"room": 0, "side": "south", "at": 0.2, "width": 1.4},
+        {"room": 1, "side": "west", "at": 0.5, "width": 1.0},
+        {"room": 1, "side": "north", "at": 0.5, "width": 1.0},
+        {"room": 2, "side": "east", "at": 0.5, "width": 1.0},
+        {"room": 2, "side": "north", "at": 0.5, "width": 1.0}
+      ],
+      "decals": [
+        {"image": "rug_home", "room": 2, "side": "floor", "at": [0.5,0.5], "size": [2.4,1.6]}
+      ],
+      "entrances": [
+        {"map": "landfall", "kind": "building", "object": 59205, "tile": [97,261], "position": [-183.5,121.49,-14.8], "returnTile": [95,259], "arrival": [216,23], "exit": [216,21], "exitFacing": [0,-1], "category": "blacksmith", "label": "The forge", "exitLabel": "The west-gate road"}
+      ],
+      "props": [
+        {"asset": "tool_rack", "at": [211.1,24.5], "yaw": 90, "blockBox": [1.0,0.6], "wall": "west"},
+        {"asset": "barrel_stack", "at": [221.4,27.4], "yaw": 90, "blockBox": [0.9,0.7], "wall": "east"},
+        {"asset": "crate_stack", "at": [221.4,21.6], "yaw": 0, "blockBox": [0.9,0.9], "wall": "south"},
+        {"asset": "supply_chest", "at": [221.4,33.6], "yaw": 0, "blockBox": [0.6,0.4], "wall": "north"}
+      ],
+      "lights": [
+        {"at": [211.5,27], "height": 1.0, "colour": [1.0,0.5,0.2], "energy": 2.2, "range": 10},
+        {"at": [216,24], "height": 3.1, "colour": [1.0,0.82,0.6], "energy": 0.8, "range": 7},
+        {"at": [220,24], "height": 3.1, "colour": [1.0,0.82,0.6], "energy": 0.8, "range": 7},
+        {"at": [211.2,31.5], "height": 1.0, "colour": [1.0,0.6,0.3], "energy": 1.6, "range": 7},
+        {"at": [214.5,32], "height": 3.0, "colour": [1.0,0.82,0.6], "energy": 0.7, "range": 6},
+        {"at": [220,31.5], "height": 3.0, "colour": [1.0,0.82,0.6], "energy": 0.8, "range": 6}
+      ],
+      "npcs": [],
+      "interactives": [],
+      "nodes": [],
+      "spawns": []
+    },
+    {
+      "id": "clerk_house", "name": "Hemmen's house", "style": "house", "danger": "A private home, open by day",
+      "about": "Hemmen's house in #22 on the avenue (door G): his study at the front with the register copies, the kitchen beside it, the bedroom behind.",
+      "rooms": [[23.5,83,3,2.5],[29,83,2.5,2.5],[26,87.5,5.5,2]],
+      "roomNames": ["Hemmen's study","Hemmen's kitchen","Hemmen's bedroom"],
+      "links": [[0,1,2.4,[[26.5,82.5]]],[0,2,2.4,[[23.5,85.5]]]],
+      "floors": ["oak_planks","oak_planks","oak_planks"],
+      "walls": "lime_plaster",
+      "windows": [
+        {"room": 0, "side": "south", "at": 0.85, "width": 1.0},
+        {"room": 1, "side": "south", "at": 0.5, "width": 1.0},
+        {"room": 1, "side": "east", "at": 0.5, "width": 1.0},
+        {"room": 0, "side": "west", "at": 0.5, "width": 1.0},
+        {"room": 2, "side": "north", "at": 0.3, "width": 1.0},
+        {"room": 2, "side": "north", "at": 0.7, "width": 1.0},
+        {"room": 2, "side": "west", "at": 0.5, "width": 1.0}
+      ],
+      "decals": [
+        {"image": "rug_home", "room": 2, "side": "floor", "at": [0.3,0.5], "size": [2.4,1.6]}
+      ],
+      "entrances": [
+        {"map": "landfall", "kind": "building", "object": 59206, "tile": [146,259], "position": [-135.5,121.49,-12.5], "returnTile": [149,256], "arrival": [23,83], "exit": [23,81], "exitFacing": [0,-1], "label": "Hemmen's house", "exitLabel": "The avenue"}
+      ],
+      "props": [
+        {"asset": "terracotta_pots", "at": [30.6,81.6], "yaw": 90, "blockBox": [0.6,0.5], "wall": "east"},
+        {"asset": "supply_chest", "at": [30.6,88.6], "yaw": 0, "blockBox": [0.6,0.4], "wall": "north"}
+      ],
+      "lights": [
+        {"at": [22.5,83], "height": 2.7, "colour": [1.0,0.82,0.6], "energy": 1.1, "range": 6},
+        {"at": [25,84], "height": 2.7, "colour": [1.0,0.82,0.6], "energy": 0.6, "range": 5},
+        {"at": [30.6,83], "height": 1.0, "colour": [1.0,0.6,0.3], "energy": 1.4, "range": 7},
+        {"at": [28.5,83], "height": 2.7, "colour": [1.0,0.82,0.6], "energy": 0.6, "range": 5},
+        {"at": [23,87.5], "height": 2.7, "colour": [1.0,0.82,0.6], "energy": 0.7, "range": 6},
+        {"at": [29,87.5], "height": 2.7, "colour": [1.0,0.82,0.6], "energy": 0.7, "range": 6}
+      ],
+      "npcs": [],
+      "interactives": [],
+      "nodes": [],
+      "spawns": []
+    },
+    {
+      "id": "weaver_house", "name": "The weaver's house", "style": "house", "danger": "A private home, open by day",
+      "about": "The weaver's house in #27 on the avenue's south side (door H, facing north: the north wall): the loom workroom at the front where the capes are woven, the kitchen and bedroom behind.",
+      "rooms": [[66,87,5.5,2.5],[63.5,82.5,3,2],[69,82.5,2.5,2]],
+      "roomNames": ["Loom workroom","Weaver's kitchen","Weaver's bedroom"],
+      "links": [[0,1,2.4,[[63.5,84.5]]],[0,2,2.4,[[69.5,84.5]]]],
+      "floors": ["oak_planks","oak_planks","oak_planks"],
+      "walls": "lime_plaster",
+      "windows": [
+        {"room": 0, "side": "north", "at": 0.15, "width": 1.0},
+        {"room": 0, "side": "north", "at": 0.85, "width": 1.0},
+        {"room": 0, "side": "east", "at": 0.5, "width": 1.0},
+        {"room": 0, "side": "west", "at": 0.5, "width": 1.0},
+        {"room": 1, "side": "south", "at": 0.5, "width": 1.0},
+        {"room": 2, "side": "south", "at": 0.5, "width": 1.0}
+      ],
+      "decals": [
+        {"image": "rug_home", "room": 2, "side": "floor", "at": [0.5,0.5], "size": [2.0,1.4]}
+      ],
+      "entrances": [
+        {"map": "landfall", "kind": "building", "object": 59207, "tile": [152,252], "position": [-129.7,121.49,-3.4], "returnTile": [149,255], "arrival": [65,86], "exit": [65,88], "exitFacing": [0,1], "label": "The weaver's house", "exitLabel": "The avenue"}
+      ],
+      "props": [
+        {"asset": "harvest_baskets", "at": [70.6,85.6], "yaw": 90, "blockBox": [0.3,0.5], "wall": "east"},
+        {"asset": "supply_chest", "at": [70.6,81.4], "yaw": 0, "blockBox": [0.6,0.4], "wall": "south"}
+      ],
+      "lights": [
+        {"at": [65.5,86.5], "height": 2.7, "colour": [1.0,0.82,0.6], "energy": 1.3, "range": 8},
+        {"at": [62,86.5], "height": 2.7, "colour": [1.0,0.82,0.6], "energy": 0.7, "range": 6},
+        {"at": [69.5,86.5], "height": 2.7, "colour": [1.0,0.82,0.6], "energy": 0.7, "range": 6},
+        {"at": [61.2,82.5], "height": 1.0, "colour": [1.0,0.6,0.3], "energy": 1.4, "range": 7},
+        {"at": [64.5,82.5], "height": 2.7, "colour": [1.0,0.82,0.6], "energy": 0.6, "range": 5},
+        {"at": [69,82.5], "height": 2.7, "colour": [1.0,0.82,0.6], "energy": 0.7, "range": 6}
+      ],
+      "npcs": [],
+      "interactives": [],
+      "nodes": [],
+      "spawns": []
+    },
+    {
+      "id": "watch_house", "name": "The watch house", "style": "house", "danger": "The town watch; visitors welcome",
+      "about": "The watch house in #11 by the west gate (door I, facing west: the west wall): the mess room at the front, the bunk room behind; a billet shared by the peoples who keep Landfall's watch.",
+      "rooms": [[103,86,2.5,5.5],[108,86,2.5,5.5]],
+      "roomNames": ["Watch mess","Watch bunk room"],
+      "links": [[0,1,2.4,[[105.5,88.5]]]],
+      "floors": ["oak_planks","oak_planks"],
+      "walls": "lime_plaster",
+      "windows": [
+        {"room": 0, "side": "west", "at": 0.15, "width": 1.0},
+        {"room": 0, "side": "west", "at": 0.85, "width": 1.0},
+        {"room": 1, "side": "east", "at": 0.3, "width": 1.0},
+        {"room": 1, "side": "east", "at": 0.7, "width": 1.0},
+        {"room": 0, "side": "south", "at": 0.5, "width": 1.0},
+        {"room": 1, "side": "south", "at": 0.5, "width": 1.0}
+      ],
+      "decals": [
+        {"image": "banner_orun", "room": 0, "side": "north", "at": [0.5,0.55], "size": [0.8,1.6]},
+        {"image": "banner_ssarathi", "room": 1, "side": "north", "at": [0.5,0.55], "size": [0.8,1.6]}
+      ],
+      "entrances": [
+        {"map": "landfall", "kind": "building", "object": 59208, "tile": [86,275], "position": [-194.4,121.49,-27.9], "returnTile": [83,275], "arrival": [103,85], "exit": [101,85], "exitFacing": [-1,0], "label": "The watch house", "exitLabel": "The west ward"}
+      ],
+      "props": [
+        {"asset": "barrel_stack", "at": [101.6,90.6], "yaw": 0, "blockBox": [0.9,0.7], "wall": "north"},
+        {"asset": "crate_stack", "at": [109.4,81.6], "yaw": 0, "blockBox": [0.9,0.9], "wall": "south"},
+        {"asset": "supply_chest", "at": [109.6,90.6], "yaw": 0, "blockBox": [0.6,0.4], "wall": "north"}
+      ],
+      "lights": [
+        {"at": [103,86], "height": 2.7, "colour": [1.0,0.82,0.6], "energy": 1.3, "range": 8},
+        {"at": [103,82], "height": 2.7, "colour": [1.0,0.82,0.6], "energy": 0.7, "range": 6},
+        {"at": [103,90], "height": 2.7, "colour": [1.0,0.82,0.6], "energy": 0.7, "range": 6},
+        {"at": [108,83], "height": 2.7, "colour": [1.0,0.82,0.6], "energy": 0.7, "range": 6},
+        {"at": [108,89], "height": 2.7, "colour": [1.0,0.82,0.6], "energy": 0.7, "range": 6}
+      ],
+      "npcs": [],
+      "interactives": [],
+      "nodes": [],
+      "spawns": []
+    },
+    {
+      "id": "netmender_house", "name": "The net-mender's house", "style": "house", "danger": "A private home, open by day",
+      "about": "The net-mender's house in #56 on the south court (door J, facing west: the west wall): a hearth kitchen at the front, the net loft behind it hung with nets and rope.",
+      "rooms": [[145,83,4.5,2.5],[145,88,4.5,2.5]],
+      "roomNames": ["Hearth kitchen","Net loft"],
+      "links": [[0,1,2.4,[[146.5,85.5]]]],
+      "floors": ["oak_planks","oak_planks"],
+      "walls": "lime_plaster",
+      "windows": [
+        {"room": 0, "side": "south", "at": 0.5, "width": 1.0},
+        {"room": 0, "side": "west", "at": 0.8, "width": 1.0},
+        {"room": 1, "side": "north", "at": 0.3, "width": 1.0},
+        {"room": 1, "side": "north", "at": 0.7, "width": 1.0},
+        {"room": 1, "side": "east", "at": 0.5, "width": 1.0},
+        {"room": 1, "side": "west", "at": 0.5, "width": 1.0}
+      ],
+      "decals": [
+        {"image": "rug_home", "room": 0, "side": "floor", "at": [0.5,0.5], "size": [2.0,1.4]}
+      ],
+      "entrances": [
+        {"map": "landfall", "kind": "building", "object": 59209, "tile": [239,208], "position": [-41.2,121.49,39.2], "returnTile": [234,207], "arrival": [143,82], "exit": [141,82], "exitFacing": [-1,0], "label": "The net-mender's house", "exitLabel": "The south court"}
+      ],
+      "props": [
+        {"asset": "rope_coils", "at": [148.3,89.3], "yaw": 0, "blockBox": [0.8,0.8], "wall": "east"},
+        {"asset": "harvest_baskets", "at": [141.6,89.6], "yaw": 0, "blockBox": [0.5,0.3], "wall": "north"},
+        {"asset": "crate_stack", "at": [148.4,86.6], "yaw": 0, "blockBox": [0.9,0.9], "wall": "east"}
+      ],
+      "lights": [
+        {"at": [148.6,83], "height": 1.0, "colour": [1.0,0.6,0.3], "energy": 1.6, "range": 7},
+        {"at": [144,83], "height": 2.7, "colour": [1.0,0.82,0.6], "energy": 0.7, "range": 6},
+        {"at": [143,88], "height": 2.7, "colour": [1.0,0.82,0.6], "energy": 0.7, "range": 6},
+        {"at": [147,88], "height": 2.7, "colour": [1.0,0.82,0.6], "energy": 0.7, "range": 6}
+      ],
+      "npcs": [],
+      "interactives": [],
+      "nodes": [],
+      "spawns": []
+    },
+    {
+      "id": "castle", "name": "The keep", "style": "castle", "danger": "Open to petitioners",
+      "about": "The palace keep #1 (door K, facing west: the west wall): the Gate Hall, the Hall of Eight Seats with each people's banner, the Register Archive, the Palace Chancery, and an alcove off the hall where a stair climbs to a shut door (no way through: the upper palace stays sealed).",
+      "rooms": [[26.5,154.5,6,5],[43.5,154.5,11,11],[26.5,145,6,4.5],[26.5,164,6,4.5],[57.5,161.5,3,4]],
+      "roomNames": ["Gate Hall","Hall of Eight Seats","Register Archive","Palace Chancery","Sealed stair"],
+      "links": [[0,1,4.4,[[32.5,154.5]]],[0,2,2.4,[[26.5,149.5]]],[0,3,2.4,[[26.5,159.5]]],[1,4,2.4,[[54.5,161.5]]]],
+      "floors": ["limestone_flagstone","limestone_flagstone","limestone_flagstone","limestone_flagstone","limestone_flagstone"],
+      "walls": "ashlar_wall",
+      "windows": [
+        {"room": 0, "side": "west", "at": 0.15, "width": 1.2},
+        {"room": 0, "side": "west", "at": 0.85, "width": 1.2},
+        {"room": 2, "side": "south", "at": 0.3, "width": 1.4},
+        {"room": 2, "side": "south", "at": 0.7, "width": 1.4},
+        {"room": 2, "side": "west", "at": 0.5, "width": 1.2},
+        {"room": 3, "side": "north", "at": 0.3, "width": 1.4},
+        {"room": 3, "side": "north", "at": 0.7, "width": 1.4},
+        {"room": 3, "side": "west", "at": 0.5, "width": 1.2},
+        {"room": 1, "side": "south", "at": 0.25, "width": 1.6},
+        {"room": 1, "side": "south", "at": 0.75, "width": 1.6},
+        {"room": 1, "side": "north", "at": 0.1, "width": 1.4},
+        {"room": 1, "side": "north", "at": 0.9, "width": 1.4}
+      ],
+      "decals": [
+        {"image": "banner_greyhaven", "room": 1, "side": "north", "at": [0.25,0.55], "size": [1.0,2.0]},
+        {"image": "banner_glasswarden", "room": 1, "side": "north", "at": [0.4,0.55], "size": [1.0,2.0]},
+        {"image": "banner_orun", "room": 1, "side": "north", "at": [0.6,0.55], "size": [1.0,2.0]},
+        {"image": "banner_ssarathi", "room": 1, "side": "north", "at": [0.75,0.55], "size": [1.0,2.0]},
+        {"image": "banner_luminous", "room": 1, "side": "west", "at": [0.2,0.55], "size": [1.0,2.0]},
+        {"image": "banner_votary", "room": 1, "side": "west", "at": [0.8,0.55], "size": [1.0,2.0]},
+        {"image": "banner_mycelari", "room": 1, "side": "east", "at": [0.2,0.55], "size": [1.0,2.0]},
+        {"image": "banner_stoneborn", "room": 1, "side": "east", "at": [0.45,0.55], "size": [1.0,2.0]},
+        {"image": "map_landfall", "room": 0, "side": "north", "at": [0.75,0.5], "size": [2.0,1.75]},
+        {"image": "rug_runner", "room": 0, "side": "floor", "at": [0.5,0.5], "size": [4.2,1.4]}
+      ],
+      "entrances": [
+        {"map": "landfall", "kind": "building", "object": 59210, "tile": [221,276], "position": [-59.1,122.79,-28.6], "returnTile": [218,273], "arrival": [23,154], "exit": [21,154], "exitFacing": [-1,0], "label": "The keep", "exitLabel": "The keep terrace"}
+      ],
+      "sealedStairs": [
+        {"room": 4, "side": "east", "at": 0.5}
+      ],
+      "props": [
+        {"asset": "supply_chest", "at": [31.4,141.4], "yaw": 0, "blockBox": [0.6,0.4], "wall": "south"},
+        {"asset": "crate_stack", "at": [31.2,167.4], "yaw": 0, "blockBox": [0.9,0.9], "wall": "north"}
+      ],
+      "lights": [
+        {"at": [26.5,154.5], "height": 4.0, "colour": [1.0,0.82,0.6], "energy": 1.6, "range": 10},
+        {"at": [23,151], "height": 3.8, "colour": [1.0,0.82,0.6], "energy": 0.9, "range": 7},
+        {"at": [23,158], "height": 3.8, "colour": [1.0,0.82,0.6], "energy": 0.9, "range": 7},
+        {"at": [30,151], "height": 3.8, "colour": [1.0,0.82,0.6], "energy": 0.9, "range": 7},
+        {"at": [30,158], "height": 3.8, "colour": [1.0,0.82,0.6], "energy": 0.9, "range": 7},
+        {"at": [43.5,154.5], "height": 4.2, "colour": [1.0,0.82,0.6], "energy": 2.0, "range": 14},
+        {"at": [36,147], "height": 4.0, "colour": [1.0,0.82,0.6], "energy": 1.1, "range": 9},
+        {"at": [51,147], "height": 4.0, "colour": [1.0,0.82,0.6], "energy": 1.1, "range": 9},
+        {"at": [36,162], "height": 4.0, "colour": [1.0,0.82,0.6], "energy": 1.1, "range": 9},
+        {"at": [51,162], "height": 4.0, "colour": [1.0,0.82,0.6], "energy": 1.1, "range": 9},
+        {"at": [24,144], "height": 3.8, "colour": [1.0,0.82,0.6], "energy": 0.9, "range": 7},
+        {"at": [29,144], "height": 3.8, "colour": [1.0,0.82,0.6], "energy": 0.9, "range": 7},
+        {"at": [26.5,147.5], "height": 3.8, "colour": [1.0,0.82,0.6], "energy": 0.8, "range": 6},
+        {"at": [24,165], "height": 3.8, "colour": [1.0,0.82,0.6], "energy": 0.9, "range": 7},
+        {"at": [29,165], "height": 3.8, "colour": [1.0,0.82,0.6], "energy": 0.9, "range": 7},
+        {"at": [26.5,161.5], "height": 3.8, "colour": [1.0,0.82,0.6], "energy": 0.8, "range": 6},
+        {"at": [56.5,159.5], "height": 3.6, "colour": [0.82,0.78,1.0], "energy": 0.7, "range": 6},
+        {"at": [56.5,164], "height": 3.6, "colour": [0.82,0.78,1.0], "energy": 0.7, "range": 6}
+      ],
+      "npcs": [],
+      "interactives": [],
+      "nodes": [],
+      "spawns": []
+    },
+    {
+      "id": "tavern_upper", "name": "The Unlit Boat, upstairs", "style": "tavern", "danger": "Guests and the Orl family",
+      "about": "The tavern's upper floor, reached by the stairs from the stair hall: a landing along the back, three guest rooms and the Orl family's room at the front.",
+      "rooms": [[80,30,9.5,2.5],[73,24,2.5,3.5],[78,24,2.5,3.5],[82.5,24,2,3.5],[87,24,2.5,3.5]],
+      "roomNames": ["Tavern landing","Guest room","Guest room","Guest room","The Orl family room"],
+      "links": [[0,1,2.4,[[72.5,27.5]]],[0,2,2.4,[[77.5,27.5]]],[0,3,2.4,[[82.5,27.5]]],[0,4,2.4,[[86.5,27.5]]]],
+      "floors": ["oak_planks","oak_planks","oak_planks","oak_planks","oak_planks"],
+      "walls": "lime_plaster",
+      "windows": [
+        {"room": 1, "side": "south", "at": 0.5, "width": 1.0},
+        {"room": 2, "side": "south", "at": 0.5, "width": 1.0},
+        {"room": 3, "side": "south", "at": 0.5, "width": 1.0},
+        {"room": 4, "side": "south", "at": 0.5, "width": 1.0},
+        {"room": 1, "side": "west", "at": 0.5, "width": 1.0},
+        {"room": 4, "side": "east", "at": 0.5, "width": 1.0},
+        {"room": 0, "side": "north", "at": 0.2, "width": 1.2},
+        {"room": 0, "side": "north", "at": 0.5, "width": 1.2}
+      ],
+      "decals": [
+        {"image": "rug_runner", "room": 0, "side": "floor", "at": [0.4,0.5], "size": [3.6,1.2]},
+        {"image": "rug_home", "room": 4, "side": "floor", "at": [0.5,0.5], "size": [2.4,1.6]}
+      ],
+      "props": [
+        {"asset": "supply_chest", "at": [71.4,21.2], "yaw": 0, "blockBox": [0.6,0.4], "wall": "south"},
+        {"asset": "supply_chest", "at": [76.4,21.2], "yaw": 0, "blockBox": [0.6,0.4], "wall": "south"},
+        {"asset": "supply_chest", "at": [81.4,21.2], "yaw": 0, "blockBox": [0.6,0.4], "wall": "south"},
+        {"asset": "supply_chest", "at": [88.6,26.2], "yaw": 90, "blockBox": [0.6,0.4], "wall": "east"}
+      ],
+      "lights": [
+        {"at": [74,30], "height": 2.9, "colour": [1.0,0.82,0.6], "energy": 0.8, "range": 6},
+        {"at": [80,30], "height": 2.9, "colour": [1.0,0.82,0.6], "energy": 0.8, "range": 6},
+        {"at": [87.5,30], "height": 2.9, "colour": [1.0,0.82,0.6], "energy": 0.8, "range": 6},
+        {"at": [73,24], "height": 2.6, "colour": [1.0,0.82,0.6], "energy": 0.7, "range": 5},
+        {"at": [78,24], "height": 2.6, "colour": [1.0,0.82,0.6], "energy": 0.7, "range": 5},
+        {"at": [82.5,24], "height": 2.6, "colour": [1.0,0.82,0.6], "energy": 0.7, "range": 5},
+        {"at": [87,24], "height": 2.6, "colour": [1.0,0.82,0.6], "energy": 1.1, "range": 6}
+      ],
+      "npcs": [],
+      "interactives": [],
+      "nodes": [],
+      "spawns": []
+    }
+  ],
+  "passages": [
+    {"object": 59221, "name": "The Unlit Boat stairs", "art": "stairs_up", "ends": [{"section": "tavern_ground", "tile": [35,28], "arrival": [35,27], "facing": [0,1], "label": "Upstairs: the guest rooms"},{"section": "tavern_upper", "tile": [85,29], "arrival": [85,28], "facing": [0,1], "art": "stairs_down", "label": "Downstairs: the taproom"}]}
+  ]
+}

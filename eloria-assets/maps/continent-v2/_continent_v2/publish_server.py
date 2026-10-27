@@ -99,6 +99,15 @@ Checks, all fail closed (nothing is relocated; a row is moved in its source, nev
 The 19 rows of the B14 pocket (server-tables.json holdBack) are served only if every one of them passes; otherwise
 all 19 are held back and recorded, and any other failure refuses the publish.
 
+The interiors (underground.py SOURCES: content/underground.json's caves, then content/landfall_town.json's building
+rooms; an absent source publishes nothing) follow the isles' rows in maps.txt, spawns.txt, harvesting.txt, npcs.txt and
+interactives.txt, each under its own comment, held to underground.py's rules (each package built from its source by
+the builder its provenance names; doors, passages, nodes, encounters, interior people and interactives; object ids
+unique across every interior and apart from every isle object). Their grids are vendored beside the isles'. The
+manifest block lists every interior under interiorMaps, the caves' portal rows under undergroundPortals (row counts
+undergroundRows) and the town's building doors and stairs under buildingPortals (buildingRows); the record lists
+every interior under interiors.
+
 --check builds everything and compares it with the server tree and the record, writing nothing there (the sync runs
 into a temporary folder seeded with the server's vendored manifest); it exits 1 on any difference. --apply writes.
 The server's loader counts and parser results, and the ferry landing's copies and grid, go to the run's summary
@@ -111,6 +120,7 @@ import argparse
 import ast
 from collections import Counter
 import copy
+import fnmatch
 import hashlib
 import importlib
 import json
@@ -197,6 +207,9 @@ FILES = ("README", "maps.txt", "spawns.txt", "harvesting.txt", "npcs.txt", "inte
 # Independently authored server services are loaded beside the generated roster.
 # Validate them with the server loaders, but never overwrite or retire them.
 PRESERVED_FILES = ("service_npcs.txt",)
+# The server's own campaign data stands in the overlay directory too (eloria/campaign_*runtime.py read
+# continent-v2/campaign_<name>.json): no loader table, never written, validated or removed here.
+PRESERVED_PATTERNS = ("campaign_*.json",)
 LOADER_TABLES = ("maps.txt", "spawns.txt", "harvesting.txt", "npcs.txt", "interactives.txt", "questlines.txt",
                  "exterior_connections.json")
 # The serve plan's milestones (section 5) and what each serves of the overlay (section 2.3; S5 at M1, S14 at M2).
@@ -1053,7 +1066,9 @@ def compose(ctx, *, log=say):
                           held=held, pocket_failures=pocket, arrivals=arrivals, reached=reached, codes=codes,
                           resources=tables["resources"], stage_tiles=stage_tiles)
     pub.files = overlay_files(ctx, pub)
-    U.attach(ctx, pub, PublishError)
+    # The interiors (underground.SOURCES: the caves, then the town's rooms), with this tool's field rules.
+    U.attach(ctx, pub, PublishError, fields=SimpleNamespace(plain=plain_field, occupation=occupation_field,
+                                                           portrait=npc_portrait))
     return pub
 
 
@@ -1469,8 +1484,8 @@ def manifest_bytes(ctx, pub, stage):
                         "portals": portals.get(region, [])})
     retired = set(read_json(ctx.checkout / frames.CATALOG).get("retiredMapIds", ()))
     entries.extend(U.manifest_entries(pub))
-    if pub.underground is not None:
-        for source, _object, x, y, destination, _ax, _ay in pub.underground.portals:
+    for interior in pub.interiors:
+        for source, _object, x, y, destination, _ax, _ay in interior.portals:
             entry = next(e for e in entries if e["id"] == source)
             entry["portals"].append({"server_tile": [x, y], "destination": destination})
     maps = data.setdefault("maps", [])
@@ -1519,11 +1534,10 @@ def manifest_block(ctx, pub, stage):
                       "nodes": len(pub.nodes), "newNpcs": len(pub.new_people),
                       "rehomedNpcs": len(pub.rehomed), "interactives": len(pub.interactives)},
     }
-    if getattr(pub, "underground", None) is not None:
-        u = pub.underground
-        block["interiorMaps"] = {u.region: u.metadata}
-        block["undergroundPortals"] = u.portals
-        block["undergroundRows"] = u.rows
+    # interiorMaps (every interior), then the caves' undergroundPortals and undergroundRows, then the town's
+    # buildingPortals and buildingRows (underground.manifest_keys): a reader tells a cave door from a building door
+    # by the list it is in
+    block.update(U.manifest_keys(pub))
     return block
 
 
@@ -1624,9 +1638,9 @@ def record_bytes(ctx, pub, manifest_entries):
                    "manifestEntriesSha256": sha256_bytes(json.dumps(manifest_entries, sort_keys=True).encode()),
                    "vendored": {region: ctx.packages[region]["servedGridSha256"] for region in pub.vendor_regions}},
     }
-    if pub.underground is not None:
-        record["interiors"] = {pub.underground.region: {**pub.underground.metadata,
-                              "rows": pub.underground.rows, "walkableTiles": pub.underground.walkable}}
+    if pub.interiors:
+        record["interiors"] = {u.region: {**u.metadata, "rows": u.rows, "walkableTiles": u.walkable}
+                               for u in pub.interiors}
     return (json.dumps(record, indent=1, ensure_ascii=False) + "\n").encode("utf-8")
 
 
@@ -1695,7 +1709,9 @@ def main(argv=None):
         server = ctx.server.root
         overlay_dir = server / PROFILE / OVERLAY
         unknown = sorted(p.name for p in overlay_dir.iterdir()
-                         if p.name not in FILES + PRESERVED_FILES) if overlay_dir.is_dir() else []
+                         if p.name not in FILES + PRESERVED_FILES
+                         and not any(fnmatch.fnmatchcase(p.name, pattern) for pattern in PRESERVED_PATTERNS)
+                         ) if overlay_dir.is_dir() else []
         if unknown:
             raise PublishError(f"{overlay_dir} holds files this tool does not write: {unknown}")
         later = [name for name in FILES if name not in served and (overlay_dir / name).exists()]

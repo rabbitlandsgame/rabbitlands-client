@@ -35,6 +35,9 @@ func _init() -> void:
 		"field_dispatch_v1": EloriaProtocol.ServerMessage.ELORIA_LANTERN_STATE,
 		"signed_ashore_v1": EloriaProtocol.ServerMessage.ELORIA_LANTERN_STATE,
 		"landfall_underground_v1": EloriaProtocol.ServerMessage.CHANGE_MAP,
+		# No packet of its own: the change-map message naming landfall_town,
+		# whose package and registry row this client ships.
+		"landfall_town_v1": EloriaProtocol.ServerMessage.CHANGE_MAP,
 		"tutorial_rewards_v1": EloriaProtocol.ServerMessage.ELORIA_LANTERN_STATE,
 		"spell_ring_v1": EloriaProtocol.ServerMessage.ELORIA_LANTERN_STATE,
 		"magic_book_v2": EloriaProtocol.ServerMessage.ELORIA_MAGIC_STATE,

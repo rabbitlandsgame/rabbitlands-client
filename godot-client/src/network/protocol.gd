@@ -367,6 +367,10 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	# to a client that claims this, and moves a client that does not off it.
 	"continent_v2_maps_v1",
 	"landfall_underground_v1",
+	# Draws Landfall Town (registry landfall_town: the building interiors behind
+	# the town's doors). The server sends CHANGE_MAP onto it only to a client
+	# that claims this (eloria/v2_gate.py).
+	"landfall_town_v1",
 	# The Techniques window and the real action-point pool, sent as
 	# ELORIA_MAGIC_STATE kind "techniques".
 	"techniques_v1",

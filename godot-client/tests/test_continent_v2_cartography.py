@@ -8,16 +8,27 @@ A chunk-streamed isle holds only the chunks round the player, so its Tab map and
 appends its rows after cartography.json's). This fails when a package was republished without its picture being
 drawn again, a picture or a frame moved, a boat moved or a boat route changed, cartography.json's pixel lattice
 changed, or the file was edited by hand.
+
+The marker tests check what the tool writes (compose) where they judge the rules rather than the file, so a stale file
+fails the first test alone. The map categories (map_categories.py) are one table with the client's
+(service_map_overlay.gd CATEGORY_COLOURS) and the map legend (main.tscn MapLegend).
 """
 from __future__ import annotations
 
+import functools
 import importlib.util
 import json
+import re
 import sys
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[2]
 V2 = ROOT / "eloria-assets" / "maps" / "continent-v2" / "_continent_v2"
+SERVICE_OVERLAY = ROOT / "godot-client" / "src" / "ui" / "service_map_overlay.gd"
+ENTRANCE_OVERLAY = ROOT / "godot-client" / "src" / "ui" / "entrance_map_overlay.gd"
+MAIN_SCENE = ROOT / "godot-client" / "src" / "app" / "main.tscn"
 
 
 def load(name: str):
@@ -34,6 +45,12 @@ render = load("render_minimap")
 
 def read(relative: str):
     return json.loads((ROOT / relative).read_text(encoding="utf-8"))
+
+
+@functools.lru_cache(maxsize=1)
+def composed() -> dict:
+    """What publish_cartography.py writes for this checkout (a few seconds; once per run)."""
+    return tool.compose(ROOT)
 
 
 def test_the_tab_maps_and_their_pictures_are_current():
@@ -118,30 +135,194 @@ def test_five_storage_markers_match_the_published_tiles_and_preview_positions():
             assert marker["objectId"] == chest["objectId"] == 22
 
 
-def test_entrance_markers_match_the_authored_underground_doors():
-    """One entrance marker per door of every underground section (a section may have several doors, on one map or
-    several: underground_source.doors), on the door's map, tile and object."""
+def test_entrance_markers_match_the_authored_interior_doors():
+    """One entrance marker per door of every interior section (a section may have several doors, on one map or
+    several: underground_source.doors, town_source.doors), on the door's map, tile and object. A cave's marker stands
+    on its door tile under its section's name; a building's stands at its painted door beside the door tile, under the
+    door's own label, with its kind and its shop's category."""
     import frames
-    source = load("underground_source")
-    sections = read("eloria-assets/maps/continent-v2/_continent_v2/content/underground.json")["sections"]
+    sources = tool.interior_sources(ROOT)
+    assert sources and sources[0][0] == tool.INTERIOR_SOURCES[0][0]
+    caves = sources[0][1]["sections"]
     expected = {}
-    for section in sections:
-        for door in source.doors(section):
-            expected.setdefault(door["map"], []).append((section, door))
+    for _relative, design, reader, kind in sources:
+        for section in design["sections"]:
+            for door in tool.section_doors(reader, section):
+                expected.setdefault(door["map"], []).append((section, door, door.get("kind", kind)))
     doors = sum(len(listed) for listed in expected.values())
-    assert doors >= len([s for s in sections if source.doors(s)])
-    rows = read(tool.OUTPUT)["regions"]
+    assert doors >= len([s for s in caves if tool.US.doors(s)])
+    rows = composed()["regions"]
     assert sum(len(row["entranceMarkers"]) for row in rows) == doors
     for row in rows:
         markers = row["entranceMarkers"]
         listed = expected.get(row["serverMap"], [])
         assert len(markers) == len(listed)
         by_object = {marker["objectId"]: marker for marker in markers}
-        for section, door in listed:
+        for section, door, kind in listed:
             marker = by_object[door["object"]]
-            assert marker["label"] == section["name"]
+            assert marker["kind"] == kind
             assert marker["serverTile"] == door["tile"]
-            assert list(frames.load(row["serverMap"], ROOT).tile(*marker["position"])) == door["tile"]
+            tile = list(frames.load(row["serverMap"], ROOT).tile(*marker["position"]))
+            if kind == "building":
+                assert marker["label"] == (door.get("label") or section["name"])
+                assert marker.get("category") == door.get("category")
+                # underground.py DOOR_REACH: the painted point stands within 6 tiles of the door tile
+                assert max(abs(tile[0] - door["tile"][0]), abs(tile[1] - door["tile"][1])) <= 6, marker
+            else:
+                assert marker["label"] == section["name"]
+                assert "category" not in marker
+                assert tile == door["tile"]
+
+
+class DoorReader:
+    """A synthetic source's door reader: a section's `entrances`, indexed, as town_source.doors gives them."""
+
+    @staticmethod
+    def doors(section):
+        return [{**door, "index": index} for index, door in enumerate(section.get("entrances", []))]
+
+
+def town(**door) -> dict:
+    """A one-section town source with one building door (the tavern's, Door A)."""
+    row = {"map": "landfall", "kind": "building", "object": 59201, "tile": [107, 250],
+           "position": [-174.6, 121.49, -2.1], "returnTile": [104, 247], "arrival": [40, 302], "exit": [40, 303],
+           "label": "The Unlit Boat", "exitLabel": "The avenue"}
+    row.update(door)
+    return {"map": {"id": "landfall_town", "cells": 324},
+            "sections": [{"id": "tavern_ground", "name": "The Unlit Boat", "entrances": [row], "npcs": []}]}
+
+
+def test_a_building_door_is_drawn_in_its_shops_colour_under_its_own_label():
+    sources = [("town.json", town(category="tavern", label="Corran's door"), DoorReader, "building")]
+    assert tool.entrance_markers("landfall", sources) == [
+        {"label": "Corran's door", "position": [-174.6, -2.1], "height": 121.49, "serverTile": [107, 250],
+         "objectId": 59201, "kind": "building", "category": "tavern"}]
+    assert tool.entrance_markers("pinebrow", sources) == []
+    # a house: no category (the tan entrance dot); no label of its own: its section's name
+    house = town()
+    del house["sections"][0]["entrances"][0]["label"]
+    [row] = tool.entrance_markers("landfall", [("town.json", house, DoorReader, "building")])
+    assert row["label"] == "The Unlit Boat" and "category" not in row and row["kind"] == "building"
+    assert tool.door_maps([("town.json", house, DoorReader, "building")]) == {"landfall"}
+
+
+@pytest.mark.parametrize("door, refusal", [
+    ({"category": "bookshop"}, "bookshop"),                      # unknown: refused, not dropped
+    ({"kind": "cave", "category": None}, "kind 'cave'"),
+    ({"kind": "underground", "category": "tavern"}, "only a building door"),
+])
+def test_a_door_the_maps_cannot_draw_is_refused(door, refusal):
+    design = town(**door)
+    if door.get("category") is None:
+        del design["sections"][0]["entrances"][0]["category"]
+    with pytest.raises(tool.CartographyError, match=refusal):
+        tool.entrance_markers("landfall", [("town.json", design, DoorReader, "building")])
+
+
+def test_two_doors_on_one_object_are_refused():
+    design = town()
+    design["sections"][0]["entrances"].append(dict(design["sections"][0]["entrances"][0], tile=[131, 254]))
+    with pytest.raises(tool.CartographyError, match="object 59201"):
+        tool.entrance_markers("landfall", [("town.json", design, DoorReader, "building")])
+
+
+def test_interior_shopkeepers_are_drawn_on_their_posts_in_their_sections():
+    design = town()
+    design["sections"][0]["npcs"] = [
+        {"name": "Corran Orl", "role": "shop", "tile": [40, 300], "mapCategory": "tavern", "mapLabel": "The taproom"},
+        {"name": "Wenna", "role": "dialogue", "tile": [44, 300]},
+    ]
+    design["sections"].append({"id": "smithy", "name": "The forge", "npcs": [
+        {"name": "Garrow", "role": "shop", "tile": [120, 280], "mapCategory": "blacksmith"}]})
+    sources = [("town.json", design, DoorReader, "building")]
+    block = tool.interiors(sources, {"maps": {}})
+    assert block == {"landfall_town": {"serviceMarkers": [
+        {"label": "The taproom", "name": "Corran Orl", "category": "tavern", "position": [40.5, 23.5], "height": 0.0,
+         "serverTile": [40, 300], "section": "tavern_ground"},
+        {"label": "Garrow", "name": "Garrow", "category": "blacksmith", "position": [120.5, 43.5], "height": 0.0,
+         "serverTile": [120, 280], "section": "smithy"}]}}
+    # The tile under the dot is the post: the client's godot_to_server (x, cells - z, floored).
+    for mark in block["landfall_town"]["serviceMarkers"]:
+        assert [int(mark["position"][0]), int(324 - mark["position"][1])] == mark["serverTile"]
+    # The registry row's transform is what the client places tiles by, so it wins over the builders' frame.
+    lifted = {"maps": {"landfall_town": {"coordinateTransform": {
+        "metresPerTile": 1.0, "serverOrigin": [0, 324], "origin": [0, 0, 0], "walkingHeight": 2.5,
+        "invertServerY": True}}}}
+    assert {mark["height"] for mark in tool.interiors(sources, lifted)["landfall_town"]["serviceMarkers"]} == {2.5}
+    # An interior without a shopkeeper has no block; an unknown category is refused, not dropped.
+    assert tool.interiors([("town.json", town(), DoorReader, "building")], {"maps": {}}) == {}
+    design["sections"][1]["npcs"][0]["mapCategory"] = "armoury"
+    with pytest.raises(tool.CartographyError, match="armoury"):
+        tool.interiors(sources, {"maps": {}})
+
+
+def test_the_interior_sources_are_the_publishers():
+    """publish_cartography.py reads the same interior sources, readers and door kinds, in the same order, as
+    underground.py SOURCES publishes (a source added there and not here would publish doors the maps never draw)."""
+    underground = importlib.import_module("underground")  # _continent_v2 is on the path (publish_cartography)
+    assert tool.INTERIOR_SOURCES == tuple((spec.source, spec.reader, spec.kind) for spec in underground.SOURCES)
+    assert tool.DOOR_KINDS == tuple(underground.DOOR_KINDS)
+
+
+def test_every_interior_frame_is_its_builders():
+    """The registry row an interior's tiles are placed by is the frame its builder draws (tile (x, y) at world
+    (x, h, cells - y)), so a shopkeeper's dot stands on the post the server serves."""
+    registry = read(tool.REGISTRY)
+    for _relative, design, _reader, _kind in tool.interior_sources(ROOT):
+        row = registry["maps"].get(design["map"]["id"])
+        if row is None:
+            continue
+        builders = tool.interior_transform(design, {"maps": {}})
+        for tile in ([0, 0], [17, 203], [design["map"]["cells"] - 1, 5]):
+            assert tool.tile_position(row["coordinateTransform"], tile) == tool.tile_position(builders, tile)
+
+
+def test_every_shop_door_leads_to_a_shopkeeper_of_its_colour():
+    """A building door is coloured by the shop behind it, so the section it opens into keeps a shopkeeper of that
+    category (whose dot inside is the same colour). A section may keep two shops (the market's general store and
+    flower shop), each street door naming its own."""
+    town_sources = [source for source in tool.interior_sources(ROOT) if source[3] == "building"]
+    if not town_sources:
+        pytest.skip(f"{tool.INTERIOR_SOURCES[1][0]} is not written yet")
+    # The room shells come before their cast (PLAN-DRAFT phase C writes the `npcs`): until a section of a town keeps
+    # anyone, its coloured doors have no shopkeeper to check. Once any NPC row exists, every shop door needs its own.
+    if not any(tool.section_npcs(reader, section) for _r, design, reader, _k in town_sources
+               for section in design["sections"]):
+        pytest.skip("no town section keeps an NPC yet (the cast is written after the room shells)")
+    data = composed()
+    for relative, design, reader, _kind in town_sources:
+        drawn = {(mark["section"], mark["category"])
+                 for mark in data.get("interiors", {}).get(design["map"]["id"], {}).get("serviceMarkers", [])}
+        for section in design["sections"]:
+            for door in tool.section_doors(reader, section):
+                if door.get("category"):
+                    assert (section["id"], door["category"]) in drawn, (
+                        f"{relative} {section['id']}: its door {door.get('label')!r} is drawn as a "
+                        f"{door['category']}, and no shopkeeper of that category stands inside")
+
+
+def test_one_category_table_for_the_publishers_the_client_and_the_legend():
+    """map_categories.py, service_map_overlay.gd CATEGORY_COLOURS and the legend name the same shops in the same
+    colours, each with a round dot (diamonds are the server's pins); doors without a shop are the tan entrance dot."""
+    categories = tool.MC.CATEGORIES
+    source = SERVICE_OVERLAY.read_text(encoding="utf-8")
+    block = re.search(r"\nconst CATEGORY_COLOURS := \{\n(.*?)\n\}\n", source, re.S)
+    assert block, "service_map_overlay.gd has no CATEGORY_COLOURS table"
+    client = dict(re.findall(r'^\t"(\w+)": Color\("([0-9a-f]{6})"\),$', block.group(1), re.M))
+    assert client == {key: colour for key, (colour, _legend) in categories.items()}
+    assert len(block.group(1).splitlines()) == len(categories)
+    entrance = re.search(r'\nconst DOT_COLOUR := Color\("([0-9a-f]{6})"\)', ENTRANCE_OVERLAY.read_text(encoding="utf-8"))
+    assert entrance and entrance.group(1) == tool.MC.ENTRANCE_COLOUR
+    scene = MAIN_SCENE.read_text(encoding="utf-8").split('[node name="MapLegend"', 1)[1]
+    legend = re.search(r'\ntext = "(.*?)"\n', scene, re.S).group(1).splitlines()
+    for colour, name in categories.values():
+        assert f"[color=#{colour}]●[/color] {name}" in legend
+    assert f"[color=#{tool.MC.ENTRANCE_COLOUR}]•[/color] {tool.MC.ENTRANCE_LEGEND}" in legend
+    names = {name for _colour, name in categories.values()}
+    assert not [line for line in legend if "◆" in line and line.split("[/color] ", 1)[-1] in names]
+    assert tool.MC.colour() == tool.MC.ENTRANCE_COLOUR and tool.MC.colour("blacksmith") == "9d73d8"
+    with pytest.raises(tool.MC.CategoryError):
+        tool.MC.check("books")
 
 
 def test_landfall_overview_places_all_components_in_its_own_image():

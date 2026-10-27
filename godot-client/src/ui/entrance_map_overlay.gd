@@ -1,6 +1,12 @@
 extends "res://src/ui/picture_marker_overlay.gd"
 ## Permanent tan entrance dots and names on north-up map pictures.
 ## Live map overlays share draw_marker so colour, outline and labels agree.
+##
+## A building's door (cartography `kind` "building") is a round dot in the
+## colour of the shop behind it - the mark's `colour`, which main.gd sets from
+## ServiceOverlay.door_colour - or tan, and carries no permanent name: a town's
+## doors stand a few metres apart, so they are named on hover (label_at) only.
+## A cave keeps its permanent name.
 
 const DOT_COLOUR := Color("e8d09b")
 const TEXT_COLOUR := Color("f2e4b7")
@@ -8,6 +14,15 @@ const TEXT_OUTLINE := Color(0.04, 0.04, 0.05, 0.95)
 const LABEL_SIZE := 13
 const TextColors := preload("res://src/ui/text_colors.gd")
 var _region_names: Array = []
+
+## Whether a door record or mark is a building's door rather than a cave's.
+static func is_building(mark: Dictionary) -> bool:
+	return str(mark.get("kind", "")) == "building"
+
+## An unlabelled door dot, outlined as the labelled one is.
+static func draw_dot(canvas: Control, point: Vector2, colour: Color, radius: float = 4.0) -> void:
+	canvas.draw_circle(point, radius + 1.5, TEXT_OUTLINE)
+	canvas.draw_circle(point, radius, colour)
 
 func _ready() -> void:
 	super._ready()
@@ -28,11 +43,19 @@ func _draw() -> void:
 		if point is Vector2 and font != null:
 			var width := font.get_string_size(str(value.label), HORIZONTAL_ALIGNMENT_LEFT, -1, 15).x
 			avoid.append(Rect2((point as Vector2)-Vector2(width*.5+3, 17), Vector2(width+6, 34)))
-	for value: Variant in _marks:
-		var mark: Dictionary = value as Dictionary
-		var point: Variant = mark_point(mark)
-		if point is Vector2:
-			draw_marker(self, point as Vector2, str(mark.get("label", "Entrance")), LABEL_SIZE, 4.0, avoid)
+	# Building doors first, so a cave's name is never drawn under a door dot.
+	for buildings: bool in [true, false]:
+		for value: Variant in _marks:
+			var mark: Dictionary = value as Dictionary
+			if is_building(mark) != buildings:
+				continue
+			var point: Variant = mark_point(mark)
+			if not point is Vector2:
+				continue
+			if buildings:
+				draw_dot(self, point as Vector2, mark.get("colour", DOT_COLOUR) as Color)
+			else:
+				draw_marker(self, point as Vector2, str(mark.get("label", "Entrance")), LABEL_SIZE, 4.0, avoid)
 
 static func label_lines(font: Font, text: String, font_size: int) -> PackedStringArray:
 	var lines := PackedStringArray()

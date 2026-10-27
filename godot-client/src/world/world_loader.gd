@@ -164,6 +164,9 @@ var geometry_capture := false
 var _skip_prepared_lookup := false
 var _deferred_stream_arrival := Vector3.INF
 var _main_stream_prime_requested := false
+## True when a worker build left the interior's placed scenery to its
+## publisher (`_apply_underground_scenery`); carried by `release_world`.
+var scenery_pending := false
 
 static func prepare_detached(path: String, cache_enabled: bool, visual_paths := PackedStringArray(), arrival := Vector3.INF, defer_stream_prime := false) -> WorldLoader:
 	var builder := WorldLoader.new()
@@ -214,8 +217,10 @@ func release_world(detach := true, publish_prepared := true, admission_token: Di
 		"from_cache": loaded_from_cache, "cache_status": cache_status,
 		"cache_file": cache_file, "visuals": _prepared_visuals,
 		"resource_timings": _resource_timings,
-		"deferred_stream_arrival": _deferred_stream_arrival if publish_prepared else Vector3.INF}
+		"deferred_stream_arrival": _deferred_stream_arrival if publish_prepared else Vector3.INF,
+		"scenery_pending": scenery_pending}
 	_deferred_stream_arrival = Vector3.INF
+	scenery_pending = false
 	_prepared_visuals = {}
 	if detach and is_instance_valid(world_root) and world_root.get_parent() != null:
 		world_root.get_parent().remove_child(world_root)
@@ -236,6 +241,14 @@ func adopt_world(resident: Dictionary) -> void:
 	cache_file = str(resident.cache_file)
 	load_phases = resident.phases
 	_resource_timings = resident.get("resource_timings", {})
+	if bool(resident.get("scenery_pending", false)):
+		# Built on a worker and adopted before anyone laid its scenery: lay it
+		# all now, still off the tree, rather than show bare rooms.
+		resident["scenery_pending"] = false
+		_apply_underground_scenery()
+		# As _materialize_geometry_world does after its scenery: hold the
+		# materials the styling replaced on still-detached native geometry.
+		MaterialOwnership.refresh(world_root)
 	world_root.transform = Transform3D.IDENTITY
 	# An already-resident tree stays attached. Re-entering the SceneTree would
 	# destroy and recreate thousands of renderer/physics registrations at the
@@ -592,8 +605,19 @@ static func publish_resident_stream(resident: Dictionary) -> bool:
 	resident["resource_timings"] = timings
 	return true
 
+## Placed interior scenery (underground_scenery.gd: the underground's caves,
+## the town's rooms). Its instances are main-thread work - GlbSceneCache
+## publishes and instantiates on Main only - so a detached build on a worker
+## leaves them to whoever publishes the world: `scenery_pending` travels in the
+## released resident, a preloader (WorldPark) lays it in slices, and
+## `adopt_world` finishes whatever is still pending.
 func _apply_underground_scenery() -> void:
-	if manifest == null or manifest.asset_id() != "landfall_insides": return
+	if manifest == null or not UndergroundScenery.applies_to(manifest.asset_id()): return
+	if detached_build or OS.get_thread_caller_id() != OS.get_main_thread_id():
+		# Also when a detached build is materialized on Main (release_world):
+		# its publisher lays the scenery in slices instead of in this frame.
+		scenery_pending = true
+		return
 	var began := Time.get_ticks_usec()
 	var diagnostics := {}
 	var count := UndergroundScenery.apply(manifest,world_root,diagnostics)

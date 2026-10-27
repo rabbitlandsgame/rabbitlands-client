@@ -57,6 +57,23 @@ const ArrivalPrewarmScript = preload("res://src/world/arrival_prewarm.gd")
 var respawn_prewarm := ArrivalPrewarmScript.new()
 ## The beam's ground, loaded quietly while completed gauntlet loot is split.
 var gauntlet_prewarm := ArrivalPrewarmScript.new()
+const WorldParkScript = preload("res://src/world/world_park.gd")
+## The map left for one of its interiors (or the interior left for its map),
+## kept detached for the way back, and an interior built while the player
+## walks up to its door (world_park.gd). A child of Main, never of WorldRoot.
+var world_park: Node
+## Building doors name themselves near the player or under the pointer
+## (MapObject3D.update_label_focus), refreshed this often.
+const DOOR_LABEL_REFRESH_MSEC := 100
+var _door_label_refresh_msec := 0
+## A building door clicked from afar is walked to, then used: the server's
+## reach in tiles (one inside its portal_activation_distance of 8, for the
+## step the client's record may lag), how far the walk may stray from its
+## closest approach, and how long it may take.
+const DOOR_REACH_TILES := 7
+const DOOR_APPROACH_SLACK_TILES := 6
+const DOOR_APPROACH_TIMEOUT_MSEC := 20000
+var _door_approach: Dictionary = {}
 @onready var quest_trail := preload("res://src/world/quest_trail_3d.gd").new()
 
 @onready var login_panel: Control = %LoginPanel
@@ -1425,6 +1442,11 @@ func _ready() -> void:
 	world_root.add_child(exterior_stream)
 	exterior_stream.configure(map_registry)
 	exterior_stream.coordinate_context = Network.coordinates
+	world_park = WorldParkScript.new()
+	world_park.name = "WorldPark"
+	add_child(world_park)
+	world_park.configure(map_registry)
+	Network.movement_requested.connect(_on_door_movement_requested)
 	Network.coordinate_route_cancelled.connect(func() -> void:
 		exterior_stream.pending_walk.clear()
 		_clear_map_walk_target())
@@ -1953,6 +1975,9 @@ func _process(delta: float) -> void:
 		_update_map_walk_target()
 		if AppState.actors.has(AppState.local_actor_id) and not _world_input_blocked():
 			exterior_stream.update_position(camera_rig.focus)
+			_observe_world_park()
+		_update_door_labels()
+		_update_door_approach()
 		# Look pass: a chunk or neighbour finished under the switch's old
 		# answer follows the new one as it arrives, before anything fades it.
 		_reconcile_look()
@@ -4082,6 +4107,12 @@ func _close_client() -> void:
 	exterior_stream.clear()
 	while not exterior_stream.is_idle():
 		await get_tree().process_frame
+	# A parked world and a preload worker go the same way: the worker is let
+	# finish (never joined while running), then everything kept is freed.
+	world_park.clear()
+	while not world_park.is_idle():
+		await get_tree().process_frame
+	world_park.release_now()
 	get_tree().quit()
 
 func _exit_tree() -> void:
@@ -4328,6 +4359,7 @@ func _clear_world_presentation(retain_map_resources := false) -> void:
 		GlbSceneCache.clear()
 		NativeAnimationImporter.clear()
 		exterior_stream.clear()
+		world_park.clear()
 		world_loader.unload_world()
 		loaded_server_map = ""
 	# Cancel both queued work and an old coroutine waiting on physics. A later
@@ -6075,11 +6107,25 @@ func _load_server_map() -> void:
 		else:
 			character_intro.cancel()
 	if handoff.is_empty() and not character_intro.blocks_input():
+		# The world kept for the way back through a building's door, or the
+		# interior built while the player walked up to it (WorldPark).
+		var kept: Dictionary = world_park.take(normalized_map)
+		if kept.is_empty() and world_park.should_wait(normalized_map):
+			# Its worker is still running: wait for it behind the curtain rather
+			# than build the same interior twice (bounded; then a cold load).
+			if not arrival_curtain.is_showing():
+				arrival_curtain.begin("Entering %s…" % _friendly_map_name(AppState.current_map))
+			_deferred_map_load = true
+			return
 		# A respawn onto another map adopts the ground loaded while dead.
-		var prewarmed: Dictionary = gauntlet_prewarm.take(normalized_map)
-		if prewarmed.is_empty():
+		var prewarmed: Dictionary = {} if not kept.is_empty() else gauntlet_prewarm.take(normalized_map)
+		if prewarmed.is_empty() and kept.is_empty():
 			prewarmed = respawn_prewarm.take(normalized_map)
-		if not prewarmed.is_empty():
+		if not kept.is_empty():
+			gauntlet_prewarm.discard()
+			respawn_prewarm.discard()
+			handoff = {"resident": kept, "continuous": false, "kept": true}
+		elif not prewarmed.is_empty():
 			handoff = {"resident": prewarmed, "continuous": false}
 		else:
 			# A fresh load: the arrival is built behind the curtain. A whole map is
@@ -6100,6 +6146,7 @@ func _load_server_map() -> void:
 	if _continuous_map_handoff:
 		var rebase: Transform3D = handoff.rebase
 		_rebase_streamed_world(rebase)
+	var previous_map: String = MapRegistry.normalize_server_map_id(loaded_server_map)
 	loaded_server_map = AppState.current_map
 	_actor_surface_samples.clear()
 	if not _continuous_map_handoff:
@@ -6153,12 +6200,22 @@ func _load_server_map() -> void:
 	print_debug("map_resolved server_id=", AppState.current_map,
 		" normalized=", normalized_map, " registry_key=", entry.get("registryKey", ""),
 		" manifest_resource=", manifest_resource, " manifest_path=", manifest_path)
-	if not handoff.is_empty():
-		if not _continuous_map_handoff:
-			occluder_fade.reset()
-		world_loader.adopt_world(handoff.resident)
-	else:
+	if not _continuous_map_handoff:
 		occluder_fade.reset()
+	# Through a building's door the map left is kept, detached and paused, for
+	# the way back (and the interior left for its map likewise); any other
+	# travel lets go of whatever was kept. A seamless crossing has already
+	# handed the old world to the exterior stream.
+	world_park.leave(null if _continuous_map_handoff else world_loader, previous_map, normalized_map)
+	if not handoff.is_empty():
+		var kept_world := bool(handoff.get("kept", false))
+		if kept_world:
+			exterior_stream.clear(true) # As a fresh load: the neighbours were the old map's.
+		var adopt_began := Time.get_ticks_usec()
+		world_loader.adopt_world(handoff.resident)
+		if kept_world:
+			world_park.note_adopted(normalized_map, Time.get_ticks_usec() - adopt_began)
+	else:
 		exterior_stream.clear(true) # A preload miss must not cancel the expected road continuation.
 		# CHANGE_MAP precedes the destination actor packet. Delay chunk disk
 		# reads until that packet supplies the actual login/teleport arrival.
@@ -6190,6 +6247,8 @@ func _on_world_loaded(manifest: WorldManifest) -> void:
 	var step_started := binding_started
 	exterior_stream.activate(loaded_server_map, world_loader.world_root, manifest)
 	_watch_chunk_surfaces()
+	# The doors on this map into interiors built ahead of the player.
+	world_park.bind_map(loaded_server_map)
 	binding_steps["activate"] = (Time.get_ticks_usec() - step_started) / 1000.0; step_started = Time.get_ticks_usec()
 	_bind_shared_world()
 	binding_steps["bind_shared_world"] = (Time.get_ticks_usec() - step_started) / 1000.0; step_started = Time.get_ticks_usec()
@@ -6655,6 +6714,10 @@ func _prefetch_respawn() -> void:
 		return
 	if stream != null:
 		stream.clear_prefetch()
+	if world_park.has_parked(map_id):
+		# Kept whole from before a building's door: no second copy of its ground.
+		respawn_prewarm.discard()
+		return
 	var entry: Dictionary = MapRegistry.resolve(map_registry, server_map)
 	if not entry.is_empty():
 		respawn_prewarm.prewarm(entry, map_id, tile, world_root)
@@ -8969,6 +9032,10 @@ func _configure_continent_overlay(continent: Dictionary) -> void:
 				marker_pixels.append((Vector2(float(mark.position[0]), float(mark.position[1])) - minimum)
 					/ float(continent.get("metresPerPixel", 1.0)))
 			for value: Variant in region.get("entranceMarkers", []):
+				# A town's doors stand metres apart, a pixel or two on the
+				# overview: they are left to the region's own map.
+				if EntranceOverlayScript.is_building(value as Dictionary):
+					continue
 				var mark: Dictionary = (value as Dictionary).duplicate()
 				var at: Array = mark["position"] as Array
 				mark["position"] = [float(at[0]) + float(translation[0]), float(at[1]) + float(translation[2])]
@@ -9240,7 +9307,8 @@ func _preview_region(region_index: int) -> void:
 	_storage_preview_overlay.configure(Vector2(float(low[0]), float(low[1])),
 		Vector2(float(high[0]), float(high[1])), texture.get_size(), region.get("storageMarkers", []))
 	_entrance_preview_overlay.configure(Vector2(float(low[0]), float(low[1])),
-		Vector2(float(high[0]), float(high[1])), texture.get_size(), region.get("entranceMarkers", []))
+		Vector2(float(high[0]), float(high[1])), texture.get_size(),
+		_picture_door_marks(region.get("entranceMarkers", []) as Array))
 	region_preview.show()
 	_preview_region_index = region_index
 	var entry: Dictionary = MapRegistry.resolve(map_registry, str(region.get("serverMap", "")))
@@ -9249,6 +9317,16 @@ func _preview_region(region_index: int) -> void:
 	continent_button.tooltip_text = "Show the " + _continent_name() + " continent"
 	map_title.text = str(region.get("name", "REGION")).to_upper()
 	map_coordinates.text = "Coordinates: —"
+
+## A map picture's door rows, each with the colour its dot is drawn in: the
+## shop's behind a building's door, the tan entrance dot otherwise.
+static func _picture_door_marks(rows: Array) -> Array:
+	var marks: Array = []
+	for value: Variant in rows:
+		var mark: Dictionary = (value as Dictionary).duplicate()
+		mark["colour"] = ServiceOverlayScript.door_colour(mark)
+		marks.append(mark)
+	return marks
 
 ## The server tile under a point on the preview. The image is north-up at a
 ## known world extent and the map's own transform turns metres into tiles,
@@ -10136,8 +10214,22 @@ func _presence_marks() -> Array[Dictionary]:
 func _current_service_records() -> Array:
 	var index := _region_index_for_map(AppState.current_map)
 	if index < 0:
-		return []
+		return _current_interior_service_records()
 	return (cartography_regions[index] as Dictionary).get("serviceMarkers", []) as Array
+
+## An interior has no tab map row: its shopkeepers' dots are cartography's
+## `interiors` block, and only those of the section the player stands in
+## (secret_sections.gd shows one section at a time; the others are void).
+func _current_interior_service_records() -> Array:
+	var interiors: Dictionary = _v2_cartography.get("interiors", {}) as Dictionary
+	var interior: Dictionary = interiors.get(
+		MapRegistry.normalize_server_map_id(AppState.current_map), {}) as Dictionary
+	var records: Array = interior.get("serviceMarkers", []) as Array
+	if records.is_empty() or not bool(secret_sections.call("is_active")):
+		return records
+	var section: String = secret_sections.current_section()
+	return records.filter(func(record: Variant) -> bool:
+		return str((record as Dictionary).get("section", "")) == section)
 
 func _current_service_marks() -> Array[Dictionary]:
 	var marks: Array[Dictionary] = []
@@ -10187,10 +10279,17 @@ func _current_entrance_marks() -> Array[Dictionary]:
 	for value: Variant in _current_entrance_records():
 		var record: Dictionary = value as Dictionary
 		var at: Array = record.get("position", []) as Array
-		if at.size() == 2:
-			marks.append({"position": Vector3(float(at[0]), float(record.get("height", 0.0)), float(at[1])),
-				"type": &"entrance", "colour": EntranceOverlayScript.DOT_COLOUR,
-				"glyph": "", "label": str(record.get("label", "Entrance"))})
+		if at.size() != 2:
+			continue
+		var mark := {"position": Vector3(float(at[0]), float(record.get("height", 0.0)), float(at[1])),
+			"type": &"entrance", "colour": ServiceOverlayScript.door_colour(record),
+			"glyph": "", "label": str(record.get("label", "Entrance"))}
+		# A building's door: its shop's colour (tan without one), a size down
+		# and unlabelled on the minimap, named on hover on the Tab map.
+		if EntranceOverlayScript.is_building(record):
+			mark["kind"] = "building"
+			mark["radius"] = MinimapMarkerOverlayScript.DOOR_RADIUS
+		marks.append(mark)
 	return marks
 
 ## Which switch a world object's mark answers to.
@@ -16007,6 +16106,7 @@ func _pick_map_object(viewport_position: Vector2) -> MapObject3D:
 func _activate_map_object(map_object: MapObject3D, inspect: bool) -> void:
 	_clear_map_walk_target()
 	exterior_stream.pending_walk.clear()
+	_door_approach = {}
 	if inspect:
 		var look_error: Error = Network.look_at_map_object(map_object.object_id)
 		if look_error != OK:
@@ -16019,9 +16119,62 @@ func _activate_map_object(map_object: MapObject3D, inspect: bool) -> void:
 		if harvest_error != OK:
 			push_warning("HARVEST failed: " + error_string(harvest_error))
 		return
+	if (map_object.building_door or map_object.building_exit) and _approach_door(map_object):
+		return
 	var use_error: Error = Network.use_map_object(map_object.object_id)
 	if use_error != OK:
 		push_warning("USE_MAP_OBJECT failed: " + error_string(use_error))
+
+## A building's door clicked from beyond the server's reach (its
+## portal_activation_distance, 8 tiles, answered "You are too far away to use
+## that."): walk to the door first, and use it once within reach
+## (`_update_door_approach`). Any other movement order cancels the approach.
+## Returns false when the door is already within reach.
+func _approach_door(map_object: MapObject3D) -> bool:
+	var local: Dictionary = AppState.actors.get(AppState.local_actor_id, {})
+	if local.is_empty() or _movement_locked(false):
+		return false
+	var at := Vector2i(int(local.get("x", 0)), int(local.get("y", 0)))
+	var reach := maxi(absi(at.x - map_object.server_tile.x), absi(at.y - map_object.server_tile.y))
+	if reach <= DOOR_REACH_TILES:
+		return false
+	if Network.move_to(map_object.server_tile, false) != OK:
+		return false
+	_door_approach = {"object_id": map_object.object_id, "map": AppState.current_map,
+		"tile": map_object.server_tile, "closest": reach,
+		"until_msec": Time.get_ticks_msec() + DOOR_APPROACH_TIMEOUT_MSEC}
+	return true
+
+## Uses the approached door once the local character is within reach; gives
+## up when the door is gone, the map changed, the walk wandered off or ran
+## out of time.
+func _update_door_approach() -> void:
+	if _door_approach.is_empty():
+		return
+	var object_id := int(_door_approach.object_id)
+	var local: Dictionary = AppState.actors.get(AppState.local_actor_id, {})
+	if AppState.current_map != str(_door_approach.map) or not AppState.map_objects.has(object_id) \
+			or Time.get_ticks_msec() > int(_door_approach.until_msec) or local.is_empty():
+		_door_approach = {}
+		return
+	var door: Vector2i = _door_approach.tile
+	var reach := maxi(absi(int(local.get("x", 0)) - door.x), absi(int(local.get("y", 0)) - door.y))
+	if reach > int(_door_approach.closest) + DOOR_APPROACH_SLACK_TILES:
+		_door_approach = {}
+		return
+	_door_approach["closest"] = mini(reach, int(_door_approach.closest))
+	if reach > DOOR_REACH_TILES:
+		return
+	_door_approach = {}
+	var use_error: Error = Network.use_map_object(object_id)
+	if use_error != OK:
+		push_warning("USE_MAP_OBJECT failed: " + error_string(use_error))
+
+## Another movement order replaces a door approach (the approach's own walk
+## goes to the door's tile, which is sent before the approach is recorded).
+func _on_door_movement_requested(tile: Vector2i) -> void:
+	if not _door_approach.is_empty() and tile != _door_approach.get("tile"):
+		_door_approach = {}
 
 func _sync_map_objects() -> void:
 	for raw_id: Variant in map_object_nodes.keys():
@@ -16062,6 +16215,44 @@ func _sync_map_objects() -> void:
 	map_marker_overlay.set_waypoints(_collect_map_waypoints())
 	_request_map_redraw()
 	_sync_harvest_indicator()
+	_door_label_refresh_msec = 0
+
+## Building doors (and their interior exits) show their name only while the
+## local character stands within MapObject3D.BUILDING_LABEL_METRES or the
+## pointer is on them, so a street of doors is not a wall of labels. Ten
+## refreshes a second, one extra pick ray each.
+func _update_door_labels() -> void:
+	var now := Time.get_ticks_msec()
+	if now < _door_label_refresh_msec:
+		return
+	_door_label_refresh_msec = now + DOOR_LABEL_REFRESH_MSEC
+	var doors: Array[MapObject3D] = []
+	for value: Variant in map_object_nodes.values():
+		if is_instance_valid(value) and (value as MapObject3D).wants_label_focus():
+			doors.append(value as MapObject3D)
+	if doors.is_empty():
+		return
+	var player := Vector3.INF
+	var local_value: Variant = actor_nodes.get(AppState.local_actor_id)
+	if is_instance_valid(local_value):
+		player = (local_value as Node3D).global_position
+	var hovered: MapObject3D = null
+	if get_viewport().gui_get_hovered_control() == viewport_container:
+		hovered = _pick_map_object(_local_viewport_position(viewport_container.get_local_mouse_position()))
+	for door: MapObject3D in doors:
+		door.update_label_focus(player, door == hovered)
+
+## Tells WorldPark where the local character stands on the bound map, so the
+## interior behind a nearby door is built before it is entered.
+func _observe_world_park() -> void:
+	if loaded_server_map != AppState.current_map:
+		return
+	var local: Dictionary = AppState.actors.get(AppState.local_actor_id, {})
+	# Across a seamless crossing the record names the map it came from.
+	if str(local.get("map", AppState.current_map)) != AppState.current_map:
+		return
+	world_park.observe(loaded_server_map, Vector2i(int(local.get("x", 0)), int(local.get("y", 0))),
+		AppState.map_objects)
 
 ## The lantern island's maps, whose packages author their caches, bench and
 ## chart (and, on Cinderbank and Reedway, their resources' pick shapes).

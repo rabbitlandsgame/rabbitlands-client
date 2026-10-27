@@ -34,7 +34,16 @@ extends RefCounted
 ## cost milliseconds a frame while the camera turned). A refresh (entering a
 ## section, or a forced update) still judges every pillar run, hiding the other
 ## sections' ones.
+##
+## A prop may instead name the wall it stands against (WALL_PROP_META, the
+## node name of a `walls` entry: the town's dressers, shelves and hearths,
+## underground_scenery.gd `cutawayWall`). It is shown and hidden with that
+## wall, wherever the player stands, so a room cuts away like a doll's house
+## and furniture never floats in front of a dropped wall. Linked during the
+## same walk that finds the props, so only a block with `props` links them.
 
+## The meta a placed prop carries naming its wall's cutaway node.
+const WALL_PROP_META := "cutaway_wall"
 ## How far the focus must move before the props are judged again.
 const PROP_STEP_METRES := 0.75
 ## The side of the grid squares props and pillar runs are filed in.
@@ -45,6 +54,8 @@ const PROP_HYSTERESIS_METRES := 2.0
 
 var _always_hidden: Array[Node3D] = []
 var _walls: Array[Dictionary] = []
+## How many props follow a wall (WALL_PROP_META), across all walls.
+var _wall_props := 0
 var _props: Array[Dictionary] = []
 var _pillars: Array[Dictionary] = []
 ## Grid square (Vector2i) -> the props / pillar runs standing in it.
@@ -118,7 +129,18 @@ func configure(manifest: WorldManifest, world_root: Node3D) -> int:
 		var props: Dictionary = props_value as Dictionary
 		_prop_threshold = float(props.get("facingThreshold", _prop_threshold))
 		_prop_radius = float(props.get("radiusMetres", _prop_radius))
+		var walls_by_name: Dictionary = {}
+		for wall: Dictionary in _walls:
+			walls_by_name[str((wall.node as Node3D).name)] = wall
 		for node: Node in world_root.find_children("*", "Node3D", true, false):
+			if node.has_meta(WALL_PROP_META):
+				var owner_wall: Variant = walls_by_name.get(str(node.get_meta(WALL_PROP_META)))
+				if owner_wall is Dictionary:
+					if not (owner_wall as Dictionary).has("props"):
+						(owner_wall as Dictionary)["props"] = []
+					((owner_wall as Dictionary).props as Array).append(node)
+					_wall_props += 1
+					continue
 			if not node.has_meta("cutaway_outward"):
 				continue
 			var outward: Vector3 = node.get_meta("cutaway_outward")
@@ -133,7 +155,7 @@ func configure(manifest: WorldManifest, world_root: Node3D) -> int:
 	_last_yaw = INF
 	_last_section = ""
 	_last_focus = Vector3.INF
-	return _always_hidden.size() + _walls.size() + _props.size() + _pillars.size()
+	return _always_hidden.size() + _walls.size() + _props.size() + _pillars.size() + _wall_props
 
 ## Files `entries` (props or pillar runs, each with a `position`) by grid square.
 static func _cells_of(entries: Array[Dictionary]) -> Dictionary:
@@ -167,12 +189,14 @@ func reset() -> void:
 		var value: Variant = wall.get("node")
 		if is_instance_valid(value):
 			(value as Node3D).visible = true
+		_show_wall_props(wall, true)
 	for prop: Dictionary in _props + _pillars:
 		var value: Variant = prop.get("node")
 		if is_instance_valid(value):
 			(value as Node3D).visible = true
 	_always_hidden.clear()
 	_walls.clear()
+	_wall_props = 0
 	_props.clear()
 	_pillars.clear()
 	_prop_cells.clear()
@@ -221,11 +245,13 @@ func update(camera_yaw_degrees: float, force: bool = false, section: String = ""
 			var own: String = wall.get("section", "")
 			if not own.is_empty() and not section.is_empty() and own != section:
 				node.visible = false
+				_show_wall_props(wall, false)
 				continue
 			var outward: Vector3 = wall.get("outward") as Vector3
 			# A wall whose outside faces the camera is between the camera and the
 			# room, so it is the one to drop.
 			node.visible = outward.dot(to_camera) <= _threshold
+			_show_wall_props(wall, node.visible)
 	if not _pillars.is_empty() and (force or entered or turned or moved):
 		_update_pillars(to_camera, focus, section, force or entered)
 	if not _props.is_empty() and focus.is_finite():
@@ -293,6 +319,12 @@ func _update_pillars(to_camera: Vector3, focus: Vector3, section: String, refres
 			pillar["stamp"] = _stamp
 			still.append(pillar)
 	_hidden_pillars = still
+
+## The props standing against `wall` follow its visibility.
+static func _show_wall_props(wall: Dictionary, shown: bool) -> void:
+	for value: Variant in wall.get("props", []) as Array:
+		if is_instance_valid(value):
+			(value as Node3D).visible = shown
 
 static func _find(root: Node3D, node_name: String) -> Node3D:
 	if node_name.is_empty():
