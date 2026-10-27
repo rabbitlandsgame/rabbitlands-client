@@ -8,10 +8,13 @@ extends RefCounted
 ##   way back out. Leaving an interior for its parent keeps the interior the
 ##   same way, so going back and forth is instant both ways.
 ## - At most one world is parked: the map just left. Travel anywhere else
-##   evicts it, and so do ~10 minutes away and the memory budget.
+##   evicts it, and so do ~10 minutes away and the memory budget. A parent
+##   stays parked for as long as the player is inside one of its interiors.
 ## - Near a door of an interior flagged for it (registry preloadOnApproach),
 ##   that interior is built in the background, ready for the map change;
-##   wandering more than 48 tiles away for a minute drops it.
+##   wandering more than 48 tiles away for a minute drops it, and so does five
+##   minutes of standing by without going in (it is not built again until the
+##   player has walked away from its doors and come back).
 
 ## How long a parked world is kept while the player stays away from it.
 const PARK_TTL_MSEC := 600000
@@ -22,16 +25,22 @@ const PRELOAD_RADIUS_TILES := 24.0
 const PRELOAD_DROP_TILES := 48.0
 ## ...for this long.
 const PRELOAD_DROP_MSEC := 60000
+## A finished preload nobody entered is dropped after this long, however near
+## the player stays: a town's interiors hold ~424 MiB of textures.
+const PRELOAD_READY_TTL_MSEC := 300000
 ## A preload that failed is not tried again for this long.
 const PRELOAD_RETRY_MSEC := 30000
 ## How long a map change waits behind the curtain for a preload whose worker
 ## is still running, before it gives up and loads the map itself.
 const PRELOAD_WAIT_LIMIT_MSEC := 15000
-## The estimated bytes parked and preloaded worlds may hold together. The
-## estimate is coarse (manifest and package sizes, a stream's own budget); the
-## measured figures belong to the integration run
-## (tests/integration/landfall_town_park.gd).
+## The estimated bytes parked and preloaded worlds may hold together. An
+## interior is estimated from its textures' pixels (texture_footprint.gd), a
+## streamed territory by its own budget; the measured figures belong to the
+## integration run (tests/integration/landfall_town_park.gd).
 const BUDGET_BYTES := 1536 * 1048576
+## What an interior holds beyond its textures: its geometry, collision and
+## nodes (the Town's 1,771 nodes and 818 KB shell measured ~26 MiB of RAM).
+const INTERIOR_FLOOR_BYTES := 32 * 1048576
 ## Interiors whose parking stays off until it is measured: the Landfall
 ## underground loads ~1.2 GB at its peak (docs/client-interior-preparation-
 ## performance.md), and keeping Landfall beside it, or it beside Landfall, has
@@ -100,12 +109,21 @@ static func over_budget(parked: Dictionary, incoming: int, budget: int = BUDGET_
 ## What to do about a preload this frame, given the player's distance in
 ## tiles to the nearest door of the interior (INF for no door in sight) and
 ## the preload's state: {"active": bool (started, running or ready),
-## "far_since_msec": int (-1 while near), "retry_at_msec": int}.
-## Returns "start", "drop", "keep" or "none", and updates `state.far_since_msec`.
+## "far_since_msec": int (-1 while near), "retry_at_msec": int, "stale": bool
+## (a build of it expired while the player stood by), "settled": bool (the
+## map the player stands on has finished loading their arrival; default
+## true)}. Returns "start", "drop", "keep" or "none", and updates
+## `state.far_since_msec` and `state.stale` (cleared once the player is
+## farther than the start radius from every door).
 static func preload_action(state: Dictionary, distance_tiles: float, now_msec: int) -> String:
 	var active := bool(state.get("active", false))
 	if not active:
-		if distance_tiles <= PRELOAD_RADIUS_TILES and now_msec >= int(state.get("retry_at_msec", 0)):
+		if bool(state.get("stale", false)):
+			if distance_tiles > PRELOAD_RADIUS_TILES:
+				state["stale"] = false
+			return "none"
+		if distance_tiles <= PRELOAD_RADIUS_TILES and now_msec >= int(state.get("retry_at_msec", 0)) \
+				and bool(state.get("settled", true)):
 			return "start"
 		return "none"
 	if distance_tiles <= PRELOAD_DROP_TILES:
@@ -117,12 +135,24 @@ static func preload_action(state: Dictionary, distance_tiles: float, now_msec: i
 		return "keep"
 	return "drop" if now_msec - since > PRELOAD_DROP_MSEC else "keep"
 
+## Whether a preload that finished at `ready_msec` (-1: not finished) has
+## been kept too long unentered at `now_msec`.
+static func preload_expired(ready_msec: int, now_msec: int, ttl_msec: int = PRELOAD_READY_TTL_MSEC) -> bool:
+	return ready_msec >= 0 and now_msec - ready_msec > ttl_msec
+
 ## Straight-line distance in tiles between two server tiles.
 static func tile_distance(a: Vector2i, b: Vector2i) -> float:
 	return Vector2(a).distance_to(Vector2(b))
 
 ## A coarse estimate of what a whole-map world holds once loaded: its GLB's
 ## size on disk, decoded about threefold, plus a floor for its nodes and
-## scenery. A streamed territory reports its own estimate instead.
+## scenery. Used only when an interior's textures could not be read; a
+## streamed territory reports its own estimate instead.
 static func whole_map_estimate(glb_bytes: int) -> int:
 	return maxi(0, glb_bytes) * 3 + 32 * 1048576
+
+## An interior's estimate: its textures (shell and scenery, from their image
+## headers: texture_footprint.gd) plus its shell GLB's bytes (geometry) and a
+## floor for nodes and collision.
+static func interior_estimate(texture_bytes: int, glb_bytes: int) -> int:
+	return maxi(0, texture_bytes) + maxi(0, glb_bytes) + INTERIOR_FLOOR_BYTES

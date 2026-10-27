@@ -62,6 +62,12 @@ const WorldParkScript = preload("res://src/world/world_park.gd")
 ## kept detached for the way back, and an interior built while the player
 ## walks up to its door (world_park.gd). A child of Main, never of WorldRoot.
 var world_park: Node
+## The bound map on which the player's arrival has finished loading, so
+## WorldPark may start a preload there (`_observe_world_park`); "" until then.
+var _world_park_settled := ""
+## The live minimap's span on the bound map when its manifest states one
+## (`minimap.liveSpanMetres`, an interior's rooms), else 0: the player's own.
+var _map_minimap_span := 0.0
 ## Building doors name themselves near the player or under the pointer
 ## (MapObject3D.update_label_focus), refreshed this often.
 const DOOR_LABEL_REFRESH_MSEC := 100
@@ -5250,8 +5256,25 @@ func _zoom_minimap(closer: bool) -> void:
 	_apply_minimap_zoom()
 	_save_hud_settings()
 
+## The live minimap's span on the map just bound: its manifest's
+## `minimap.liveSpanMetres` (Landfall Town: 40 m, so a room reads at minimap
+## size), else the player's own zoom unchanged.
+func _bind_minimap_span(manifest: WorldManifest) -> void:
+	var block: Variant = manifest.data.get("minimap", {}) if manifest != null else {}
+	var span: Variant = (block as Dictionary).get("liveSpanMetres", 0.0) if block is Dictionary else 0.0
+	var stated := float(span) if span is float or span is int else 0.0
+	stated = clampf(stated, 0.0, MINIMAP_ZOOM_MAX)
+	if is_equal_approx(stated, _map_minimap_span):
+		return
+	_map_minimap_span = stated
+	_apply_minimap_zoom()
+
 func _apply_minimap_zoom() -> void:
-	map_camera.size = _minimap_zoom
+	# A map that states its own span (an interior's rooms: a section is ~10 px
+	# at the outdoor 180 m) frames that span at the default zoom; the scroll
+	# wheel still scales it by the player's zoom.
+	map_camera.size = _minimap_zoom if _map_minimap_span <= 0.0 \
+		else _map_minimap_span * _minimap_zoom / MINIMAP_ZOOM_DEFAULT
 	# The minimap render is throttled, so a zoom would otherwise not be seen
 	# until the next scheduled frame.
 	if minimap_frame.visible:
@@ -6207,6 +6230,8 @@ func _load_server_map() -> void:
 	# travel lets go of whatever was kept. A seamless crossing has already
 	# handed the old world to the exterior stream.
 	world_park.leave(null if _continuous_map_handoff else world_loader, previous_map, normalized_map)
+	# A new arrival: WorldPark starts nothing here until it has loaded.
+	_world_park_settled = ""
 	if not handoff.is_empty():
 		var kept_world := bool(handoff.get("kept", false))
 		if kept_world:
@@ -6249,6 +6274,7 @@ func _on_world_loaded(manifest: WorldManifest) -> void:
 	_watch_chunk_surfaces()
 	# The doors on this map into interiors built ahead of the player.
 	world_park.bind_map(loaded_server_map)
+	_bind_minimap_span(manifest)
 	binding_steps["activate"] = (Time.get_ticks_usec() - step_started) / 1000.0; step_started = Time.get_ticks_usec()
 	_bind_shared_world()
 	binding_steps["bind_shared_world"] = (Time.get_ticks_usec() - step_started) / 1000.0; step_started = Time.get_ticks_usec()
@@ -16119,13 +16145,15 @@ func _activate_map_object(map_object: MapObject3D, inspect: bool) -> void:
 		if harvest_error != OK:
 			push_warning("HARVEST failed: " + error_string(harvest_error))
 		return
-	if (map_object.building_door or map_object.building_exit) and _approach_door(map_object):
+	if (map_object.building_door or map_object.building_exit or map_object.is_stair_end()) \
+			and _approach_door(map_object):
 		return
 	var use_error: Error = Network.use_map_object(map_object.object_id)
 	if use_error != OK:
 		push_warning("USE_MAP_OBJECT failed: " + error_string(use_error))
 
-## A building's door clicked from beyond the server's reach (its
+## A building's door, its interior exit or a stair end inside it
+## (MapObject3D.is_stair_end) clicked from beyond the server's reach (its
 ## portal_activation_distance, 8 tiles, answered "You are too far away to use
 ## that."): walk to the door first, and use it once within reach
 ## (`_update_door_approach`). Any other movement order cancels the approach.
@@ -16243,7 +16271,10 @@ func _update_door_labels() -> void:
 		door.update_label_focus(player, door == hovered)
 
 ## Tells WorldPark where the local character stands on the bound map, so the
-## interior behind a nearby door is built before it is entered.
+## interior behind a nearby door is built before it is entered. Nothing new is
+## built until the player's own arrival has loaded - the curtain is down and
+## every streamed cell framing them is resident - so a preload never competes
+## with the arrival's chunks (`_world_park_settled`, once per map).
 func _observe_world_park() -> void:
 	if loaded_server_map != AppState.current_map:
 		return
@@ -16251,8 +16282,13 @@ func _observe_world_park() -> void:
 	# Across a seamless crossing the record names the map it came from.
 	if str(local.get("map", AppState.current_map)) != AppState.current_map:
 		return
-	world_park.observe(loaded_server_map, Vector2i(int(local.get("x", 0)), int(local.get("y", 0))),
-		AppState.map_objects)
+	var tile := Vector2i(int(local.get("x", 0)), int(local.get("y", 0)))
+	if _world_park_settled != loaded_server_map and not _deferred_map_load \
+			and not _arrival_pending() and not arrival_curtain.is_showing() and adapter != null:
+		var stream := world_loader.world_root as ContinentChunkStream
+		if stream == null or stream.arrival_ready(adapter.tile_center(tile.x, tile.y)):
+			_world_park_settled = loaded_server_map
+	world_park.observe(loaded_server_map, tile, AppState.map_objects, _world_park_settled == loaded_server_map)
 
 ## The lantern island's maps, whose packages author their caches, bench and
 ## chart (and, on Cinderbank and Reedway, their resources' pick shapes).

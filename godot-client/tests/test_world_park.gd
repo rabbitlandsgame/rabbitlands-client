@@ -10,12 +10,20 @@ extends SceneTree
 ## the very same tree, preload start/keep/drop by distance and time, a preload
 ## hit (ready and still publishing), a miss, waiting on a running worker,
 ## sliced freeing of evicted trees, the interior scenery table, the map camera
-## restore and the building door's label, ring and pick.
+## restore and the building door's label, ring and pick. Fix wave
+## (2026-10-27): a parent kept while the player is inside its interior, a
+## second park of one map frees the first, no preload before the arrival has
+## loaded, an unentered preload dropped after five minutes and not rebuilt
+## until the player walks away (a parked interior likewise), the interiors'
+## memory estimate from texture headers, pick-only lore objects, stair ends
+## picked toward their stair and exit labels kept clear of the HUD.
 const Policy := preload("res://src/world/world_park_policy.gd")
 const WorldParkScript := preload("res://src/world/world_park.gd")
 const SceneryStepper := preload("res://src/world/interior_scenery_stepper.gd")
 const UndergroundScenery := preload("res://src/world/underground_scenery.gd")
 const Controller := preload("res://src/camera/isometric_camera_controller.gd")
+const TextureFootprint := preload("res://src/world/texture_footprint.gd")
+const MaterialWarmup := preload("res://src/world/interior_material_warmup.gd")
 const SCRATCH := "user://world-park-test"
 const DOOR := 59201
 
@@ -43,6 +51,10 @@ func _run() -> void:
 	await _test_eviction()
 	await _test_preload()
 	await _test_wait_and_miss()
+	await _test_parent_kept_inside()
+	await _test_replaced_park()
+	await _test_settled_and_stale()
+	_test_texture_footprint()
 	_test_scenery_table()
 	_test_camera_restore()
 	_test_building_doors()
@@ -199,6 +211,20 @@ func _test_policy() -> void:
 		"coming back near resets the clock")
 	_expect(is_equal_approx(Policy.tile_distance(Vector2i(0, 0), Vector2i(3, 4)), 5.0),
 		"tile distances are straight lines")
+	_expect(Policy.preload_action({"active": false, "settled": false}, 10.0, 0) == "none"
+		and Policy.preload_action({"active": false, "settled": true}, 10.0, 0) == "start",
+		"no preload starts while the player's arrival is still loading")
+	state = {"active": false, "stale": true}
+	_expect(Policy.preload_action(state, 10.0, 0) == "none" and bool(state.stale),
+		"a stale interior is not built again while the player stays near")
+	_expect(Policy.preload_action(state, 30.0, 0) == "none" and not bool(state.stale)
+		and Policy.preload_action(state, 10.0, 0) == "start",
+		"walking away clears it, and coming back builds it again")
+	_expect(not Policy.preload_expired(-1, 10000000) and not Policy.preload_expired(0, Policy.PRELOAD_READY_TTL_MSEC)
+		and Policy.preload_expired(0, Policy.PRELOAD_READY_TTL_MSEC + 1) and Policy.PRELOAD_READY_TTL_MSEC == 300000,
+		"a finished preload is kept five minutes unentered, an unfinished one is not timed")
+	_expect(Policy.interior_estimate(400 * 1048576, 1048576) == 401 * 1048576 + Policy.INTERIOR_FLOOR_BYTES,
+		"an interior's estimate is its textures, its shell and a floor")
 
 func _test_relations() -> void:
 	var park := _park()
@@ -327,11 +353,18 @@ func _test_eviction() -> void:
 func _test_preload() -> void:
 	var park := _park()
 	park.bind_map("exterior")
+	# The interior's size is read on a worker; nothing starts before it is in.
+	var objects := {DOOR: {"object_id": DOOR, "x": 12, "y": 18, "label": "Portal"}}
+	if park.estimates_pending() > 0:
+		park.observe("exterior", Vector2i(12, 30), objects)
+		_expect(park.preload_state() == "", "no preload starts while its interior's size is still being read")
+	park.finish_estimates(true)
+	_expect(park.estimates_pending() == 0 and park._interior_bytes.has("interior"),
+		"binding the parent reads its interior's estimate")
 	# Far from the door: nothing starts.
 	park.observe("exterior", Vector2i(60, 60), {})
 	_expect(park.preload_state() == "", "nothing preloads far from every door")
 	# The server's object list places the door; walking within 24 tiles starts it.
-	var objects := {DOOR: {"object_id": DOOR, "x": 12, "y": 18, "label": "Portal"}}
 	park.observe("exterior", Vector2i(12, 40), objects)
 	_expect(park.preload_state("interior") == "running" and int(park.counters.preload_start) == 1,
 		"walking within 24 tiles of a door starts its interior on a worker")
@@ -435,6 +468,182 @@ func _test_wait_and_miss() -> void:
 	loader.queue_free()
 	park.queue_free()
 	await _frames(2)
+
+# --------------------------------------------------------------------------
+# Fix wave: parent kept inside, replaced parks, settled arrivals, stale builds
+# --------------------------------------------------------------------------
+
+func _test_parent_kept_inside() -> void:
+	var park := _park()
+	var loader := _loader_with("exterior")
+	park.now_override = 1000
+	park.leave(loader, "exterior", "interior")
+	_give_world(loader, "interior")
+	park.bind_map("interior")
+	# Inside for twenty minutes: the parent's clock is refreshed every tick.
+	for minute: int in range(1, 21):
+		park.now_override = 1000 + minute * 60000
+		park.tick()
+	_expect(park.has_parked("exterior") and int(park.counters.refresh) >= 20,
+		"the parent stays parked while the player is inside its interior (%s)" % [park.counters])
+	# Back outside (another map bound), the parent's clock runs again.
+	var resident: Dictionary = park.take("exterior")
+	park.leave(loader, "interior", "exterior")
+	loader.adopt_world(resident)
+	park.bind_map("exterior")
+	park.now_override += Policy.PARK_TTL_MSEC + 1
+	park.tick()
+	_expect(not park.has_parked("interior"), "the interior parked outside still expires after ten minutes")
+	park.now_override = -1
+	park.clear()
+	park.release_now()
+	loader.unload_world()
+	loader.queue_free()
+	park.queue_free()
+	await _frames(2)
+
+func _test_replaced_park() -> void:
+	var park := _park()
+	var first := _loader_with("exterior")
+	var first_world: Node3D = first.world_root
+	park.leave(first, "exterior", "interior")
+	# The same map loaded again without taking the parked world back, then
+	# parked again: the first parked tree is freed, not overwritten.
+	var second := _loader_with("exterior")
+	var second_world: Node3D = second.world_root
+	var evicted: int = int(park.counters.evict)
+	_expect(park.leave(second, "exterior", "interior") and int(park.counters.evict) == evicted + 1,
+		"parking a map already parked evicts the older world first")
+	_expect(park.parked_maps() == ["exterior"], "one world of the map stays parked")
+	var freed: bool = await _until(func() -> bool: return park.retiring_count() == 0)
+	_expect(freed and not is_instance_valid(first_world) and is_instance_valid(second_world),
+		"the older world is freed in slices and the newer one stays parked")
+	var resident: Dictionary = park.take("exterior")
+	_expect(resident.get("root") == second_world, "taking the map back hands over the newer world")
+	(second_world as Node).free()
+	park.clear()
+	park.release_now()
+	first.queue_free()
+	second.queue_free()
+	park.queue_free()
+	await _frames(2)
+
+func _test_settled_and_stale() -> void:
+	var park := _park()
+	park.bind_map("exterior")
+	park.finish_estimates(true)
+	var objects := {DOOR: {"object_id": DOOR, "x": 12, "y": 18, "label": "Portal"}}
+	park.observe("exterior", Vector2i(12, 22), objects, false)
+	_expect(park.preload_state() == "" and int(park.counters.preload_start) == 0,
+		"standing by a door while the arrival still loads starts nothing")
+	park.now_override = 5000
+	park.observe("exterior", Vector2i(12, 22), objects, true)
+	_expect(park.preload_state("interior") == "running", "once the arrival has loaded the preload starts")
+	var ready: bool = await _until(func() -> bool: return park.preload_state("interior") == "ready")
+	_expect(ready, "(fixture) the preload is ready")
+	var ready_at := int(park._preload.get("ready_msec", -1))
+	_expect(ready_at == 5000, "the preload records when it was ready")
+	park.now_override = ready_at + Policy.PRELOAD_READY_TTL_MSEC
+	park.tick()
+	_expect(park.preload_state("interior") == "ready", "five minutes unentered are not yet too long")
+	park.now_override = ready_at + Policy.PRELOAD_READY_TTL_MSEC + 1
+	park.tick()
+	_expect(park.preload_state() == "" and int(park.counters.preload_drop) == 1,
+		"a finished preload nobody entered is dropped after five minutes, even beside the door")
+	park.observe("exterior", Vector2i(12, 22), objects, true)
+	_expect(park.preload_state() == "" and int(park.counters.preload_start) == 1,
+		"and is not built again while the player stays by the door")
+	park.observe("exterior", Vector2i(12, 60), objects, true)
+	park.observe("exterior", Vector2i(12, 22), objects, true)
+	_expect(park.preload_state("interior") == "running" and int(park.counters.preload_start) == 2,
+		"walking away and coming back builds it again")
+	await _until(func() -> bool: return park.preload_state("interior") == "ready")
+	# A parked interior is not kept alive by standing near its door either.
+	var loader := _loader_with("exterior")
+	var resident: Dictionary = park.take("interior")
+	park.leave(loader, "exterior", "interior")
+	loader.adopt_world(resident)
+	var outside: Dictionary = park.take("exterior")
+	park.leave(loader, "interior", "exterior")
+	loader.adopt_world(outside)
+	park.bind_map("exterior")
+	var parked_at: int = park._now()
+	for step: int in 12:
+		park.now_override = parked_at + step * 60000
+		park.observe("exterior", Vector2i(12, 20), objects, true)
+		park.tick()
+	_expect(not park.has_parked("interior") and park.preload_state() == "",
+		"a parked interior expires after ten minutes beside its door, and is not rebuilt at once (%s)"
+			% [park.diagnostic_snapshot().stale])
+	_expect(park.parked_maps().is_empty() and park.diagnostic_snapshot().stale.has("interior"),
+		"it is stale until the player walks away")
+	# The estimate a preload carries is the one it is parked with.
+	_expect(int(resident.get("park_bytes", -1)) == int(park._interior_bytes.get("interior", -2)),
+		"a preloaded world carries its interior's estimate for parking")
+	park.now_override = -1
+	park.clear()
+	await _until(func() -> bool: return park.is_idle() and park.retiring_count() == 0)
+	park.release_now()
+	loader.unload_world()
+	loader.queue_free()
+	park.queue_free()
+	await _frames(2)
+
+func _test_texture_footprint() -> void:
+	var image := Image.create(48, 20, false, Image.FORMAT_RGBA8)
+	image.fill(Color(0.4, 0.5, 0.6, 1.0))
+	_expect(TextureFootprint.header_size(image.save_png_to_buffer()) == Vector2i(48, 20),
+		"a PNG's size is read from its header")
+	_expect(TextureFootprint.header_size(image.save_jpg_to_buffer()) == Vector2i(48, 20),
+		"a JPEG's size is read from its frame header")
+	_expect(TextureFootprint.header_size(image.save_webp_to_buffer(false)) == Vector2i(48, 20)
+		and TextureFootprint.header_size(image.save_webp_to_buffer(true, 0.8)) == Vector2i(48, 20),
+		"a WebP's size is read, lossless and lossy")
+	_expect(TextureFootprint.header_size(PackedByteArray([1, 2, 3])) == Vector2i.ZERO,
+		"anything else has no size")
+	_expect(TextureFootprint.texture_bytes(Vector2i(1024, 1024)) == 1024 * 1024 * 4 * 4 / 3,
+		"a texture holds four bytes a pixel and a third more for its mips")
+	# A GLB with two embedded images and one beside it by URI.
+	var picture := Image.create(64, 32, false, Image.FORMAT_RGBA8)
+	picture.save_png(SCRATCH.path_join("beside.png"))
+	var document := {"asset": {"version": "2.0"}, "images": [{"bufferView": 0, "mimeType": "image/png"},
+		{"bufferView": 0, "mimeType": "image/png"}, {"uri": "beside.png"}]}
+	var glb := MaterialWarmup.materials_glb({"asset": {"version": "2.0"}, "images": [{}, {}]})
+	# materials_glb embeds one 1x1 picture shared by every image; add a URI image.
+	var stream := StreamPeerBuffer.new()
+	stream.data_array = glb
+	stream.seek(12)
+	var json_length := stream.get_u32()
+	var parsed: Dictionary = JSON.parse_string(glb.slice(20, 20 + json_length).get_string_from_utf8())
+	parsed.images = document.images
+	var rebuilt := _with_json(glb, parsed, json_length)
+	var path := SCRATCH.path_join("probe.glb")
+	var file := FileAccess.open(path, FileAccess.WRITE)
+	file.store_buffer(rebuilt)
+	file.close()
+	var seen := {}
+	var total := TextureFootprint.glb_texture_bytes(ProjectSettings.globalize_path(path), seen)
+	_expect(total == 2 * TextureFootprint.texture_bytes(Vector2i(1, 1)) + TextureFootprint.texture_bytes(Vector2i(64, 32))
+		and seen.size() == 3, "a GLB's embedded and neighbouring images are each counted (%d)" % total)
+	_expect(TextureFootprint.glb_texture_bytes(ProjectSettings.globalize_path(path), seen) == 0,
+		"images already counted are not counted again")
+	_expect(TextureFootprint.glb_texture_bytes("user://none.glb") == 0, "a missing GLB counts nothing")
+
+## `glb` with its JSON chunk replaced by `document` (BIN chunk kept).
+static func _with_json(glb: PackedByteArray, document: Dictionary, old_length: int) -> PackedByteArray:
+	var json := JSON.stringify(document).to_utf8_buffer()
+	while json.size() % 4 != 0:
+		json.append(0x20)
+	var binary := glb.slice(20 + old_length)
+	var stream := StreamPeerBuffer.new()
+	stream.put_u32(0x46546C67)
+	stream.put_u32(2)
+	stream.put_u32(20 + json.size() + binary.size())
+	stream.put_u32(json.size())
+	stream.put_u32(0x4E4F534A)
+	stream.put_data(json)
+	stream.put_data(binary)
+	return stream.data_array
 
 # --------------------------------------------------------------------------
 # Scenery, camera, doors
@@ -569,6 +778,14 @@ func _test_building_doors() -> void:
 		and exit_title != null and exit_title.text.begins_with("The avenue") and not exit_title.visible,
 		"the same object on the interior's exit tile is the way out, named by exitLabel")
 	_expect(exit.destination() == "The avenue", "the exit hovers as its street")
+	_expect(is_equal_approx(exit_title.position.x, 0.0) and is_equal_approx(exit_title.position.z, 0.0)
+		and is_equal_approx(exit_title.position.y, 3.0 + MapObject3D.EXIT_LABEL_LIFT),
+		"the exit's label stands over its tile, on the room side, lifted clear of the wall")
+	exit.update_label_focus(exit.global_position + Vector3(0, 0, -5.5), false)
+	_expect(exit_title.visible, "the exit names itself within 6 m of its tile")
+	exit.update_label_focus(exit.global_position + Vector3(0, 0, -8.0), false)
+	_expect(not exit_title.visible,
+		"but not from 8 m, where its label would sink under the bottom HUD bar")
 	var cave := MapObject3D.new()
 	cave.configure({"object_id": 59001, "kind": EloriaProtocol.MAP_OBJECT_INTERACTIVE, "x": 30, "y": 30,
 		"label": "Portal", "detail": "Beyond it lies Lantern Mine. Safe."}, adapter, catalog)
@@ -577,6 +794,54 @@ func _test_building_doors() -> void:
 		and (cave.get_node("EntranceLabel") as Label3D).visible and cave.get_node_or_null("Ring") != null,
 		"a cave mouth keeps its permanent label and ring")
 	_expect(cave.destination() == "Lantern Mine", "a cave mouth still hovers as where it leads")
+	# A lore object (pickOnly): no ring, no model, no map mark; a pick centred
+	# on the prop the room already stands, named under the pointer.
+	var lore_catalog := {"authoredObjects": {"59251": {"interactive": true, "pickOnly": true,
+			"label": "The unlit boat", "modelOffset": [0.5, 0.0, -1.25], "height": 1.1, "radius": 0.7},
+		"59221": {"passage": true, "height": 3.6, "radius": 1.6, "label": "Upstairs: the guest rooms",
+			"modelOffset": [0.0, 0.0, -2.4]}},
+		"interactives": {"roles": {"Information": "notice_board"},
+			"models": {"notice_board": {"scene": "res://assets/world/does-not-matter.glb", "height": 2.0}}}}
+	var lore := MapObject3D.new()
+	lore.configure({"object_id": 59251, "kind": EloriaProtocol.MAP_OBJECT_INTERACTIVE, "x": 20, "y": 20,
+		"label": "Information", "detail": "A painting of a dark boat."}, adapter, lore_catalog)
+	stage.add_child(lore)
+	var lore_pick := lore.get_node("PickShape") as CollisionShape3D
+	_expect(lore.pick_only and lore.get_node_or_null("Ring") == null and lore.get_node_or_null("Model") == null
+		and lore.get_node_or_null("MapMarker") == null,
+		"a pick-only lore object draws no ring, no catalog model and no map mark")
+	_expect(is_equal_approx(lore_pick.position.x, 0.5) and is_equal_approx(lore_pick.position.z, -1.25)
+		and is_equal_approx((lore_pick.shape as CylinderShape3D).radius, 0.7)
+		and lore.collision_layer == MapObject3D.PICK_LAYER,
+		"its pick is centred on the prop it describes, at the record's radius")
+	var lore_title := lore.get_node_or_null("ObjectLabel") as Label3D
+	_expect(lore_title != null and lore_title.text == "The unlit boat" and not lore_title.visible
+		and lore.wants_label_focus(), "it carries its short name, hidden until pointed at")
+	lore.update_label_focus(lore.global_position, false)
+	_expect(not lore_title.visible, "standing beside it does not name it")
+	lore.update_label_focus(Vector3.INF, true)
+	_expect(lore_title.visible, "the pointer names it")
+	var stair := MapObject3D.new()
+	stair.configure({"object_id": 59221, "kind": EloriaProtocol.MAP_OBJECT_INTERACTIVE, "x": 35, "y": 28,
+		"label": "Portal", "detail": "Upstairs: the guest rooms."}, adapter, lore_catalog)
+	stage.add_child(stair)
+	var stair_pick := stair.get_node("PickShape") as CollisionShape3D
+	_expect(stair.is_passage_end() and is_equal_approx(stair_pick.position.z, -1.2)
+		and (stair_pick.shape as CylinderShape3D).radius >= 1.8 and stair.get_node_or_null("Ring") == null,
+		"a stair end's pick reaches from its tile to the stair drawn beside it")
+	_expect(stair.is_stair_end() and not door.is_passage_end() and not cave.is_passage_end(),
+		"doors and cave mouths are not passage ends; a stair drawn beside its tile is a stair end")
+	var tunnel := MapObject3D.new()
+	tunnel.configure({"object_id": 59101, "kind": EloriaProtocol.MAP_OBJECT_INTERACTIVE, "x": 9, "y": 9,
+		"label": "Portal", "detail": "A way leads on into Beta Pocket. Damp."}, adapter,
+		{"authoredObjects": {"59101": {"passage": true, "height": 3.6, "radius": 1.6, "label": "Beta Pocket"}}})
+	stage.add_child(tunnel)
+	_expect(tunnel.is_passage_end() and not tunnel.is_stair_end()
+		and is_equal_approx((tunnel.get_node("PickShape") as CollisionShape3D).position.z, 0.0),
+		"a cave passage end is no stair end and keeps its pick on its tile (the caves unchanged)")
+	tunnel.queue_free()
+	lore.queue_free()
+	stair.queue_free()
 	door.queue_free()
 	exit.queue_free()
 	cave.queue_free()

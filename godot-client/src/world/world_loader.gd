@@ -148,6 +148,10 @@ var _resource_timings: Dictionary = {}
 ## bodies that hold them.
 var _collision_shapes: Dictionary = {}
 var _cached_collision_faces: Dictionary = {}
+## A worker's whole-map build (WorldPark's interior preload): generated mesh
+## (ArrayMesh instance id) -> the parsed ImporterMesh it was made from, whose
+## CPU arrays give its collision faces (`_trimesh_shape`). Empty otherwise.
+var _cpu_meshes: Dictionary = {}
 var _cached_paving: Dictionary = {}
 
 # A preloader builds a private tree on one worker. It never enters the active
@@ -462,6 +466,8 @@ func load_world(manifest_path: String, arrival := Vector3.INF, wait_for_arrival 
 		load_failed.emit(["glb_scene_root_not_node3d"])
 		return
 	mark = _phase(&"generateScene", mark)
+	if _cpu_collision_wanted():
+		load_phases[&"cpuFaceMeshes"] = _index_cpu_meshes(state)
 	# Before anything walks the import: a placement of a shared prototype is a
 	# bare node until its pooled mesh is on it, and every pass below expects
 	# the MeshInstance3D the package used to carry.
@@ -507,6 +513,7 @@ func load_world(manifest_path: String, arrival := Vector3.INF, wait_for_arrival 
 	_batch_static_instances(mesh_instances)
 	_collision_shapes.clear()
 	_cached_collision_faces.clear()
+	_cpu_meshes.clear()
 	if bool(_cached_paving.get("ok",false)):
 		var paving_began := Time.get_ticks_usec()
 		load_phases[&"cachedPavingMeshes"] = PavingCache.apply(_cached_paving,world_root)
@@ -1445,6 +1452,7 @@ func unload_world() -> void:
 	package_digest = ""
 	_collision_shapes.clear()
 	_cached_collision_faces.clear()
+	_cpu_meshes.clear()
 	_cached_paving.clear()
 	manifest = null
 	coordinate_adapter = null
@@ -1692,6 +1700,12 @@ func _trimesh_shape(mesh: Mesh, mesh_path := "") -> ConcavePolygonShape3D:
 		built = ConcavePolygonShape3D.new()
 		built.set_faces(faces)
 		load_phases[&"cachedCollisionShapes"] = int(load_phases.get(&"cachedCollisionShapes",0))+1
+	if built == null and _cpu_meshes.has(key):
+		var cpu_faces := _importer_faces(_cpu_meshes[key] as ImporterMesh)
+		if not cpu_faces.is_empty():
+			built = ConcavePolygonShape3D.new()
+			built.set_faces(cpu_faces)
+			load_phases[&"cpuCollisionShapes"] = int(load_phases.get(&"cpuCollisionShapes",0))+1
 	if built == null:
 		built = mesh.create_trimesh_shape()
 		load_phases[&"rawCollisionShapes"] = int(load_phases.get(&"rawCollisionShapes",0))+1
@@ -1699,6 +1713,72 @@ func _trimesh_shape(mesh: Mesh, mesh_path := "") -> ConcavePolygonShape3D:
 	_collision_shapes[key] = built
 	return built
 
+
+## Whether this load reads its collision faces from the parsed glTF rather
+## than from the generated meshes: a whole map built on a worker
+## (WorldLoader.prepare_detached for WorldPark's interior preloads).
+##
+## `Mesh.create_trimesh_shape()` reads a generated mesh's surfaces back from
+## the GPU (RenderingServer.mesh_surface_get_arrays). On a worker that call
+## waits for the main thread to serve it, once per mesh, and on the main
+## thread each one flushes and stalls the GPU for every frame in flight
+## (RenderingDevice.buffer_get_data). Measured on Landfall Town's preload
+## (2026-10-27, tests/integration/landfall_town_park.gd): its ~300 collision
+## meshes cost the worker a frame each - a collision phase of 1.2 s
+## uncapped and 5.0 s at a 60 fps cap (a laptop on battery) - and the one
+## main-thread stall over 50 ms left once the shader keys were warmed (92 ms,
+## one run in four at that cap) fell inside it. The ImporterMesh the parse
+## built holds the same vertices and indices on the CPU, so the faces cost a
+## copy and no round trip: the phase takes ~5 ms, the whole preload ~0.8-1.0
+## s instead of 1.6 s, and every shape's faces are the readback's
+## (tests/test_interior_preload_collision.gd). A streamed chunk keeps its own
+## path (CollisionCache, or the readback). ELORIA_CPU_COLLISION_FACES=0
+## restores the readback for comparison.
+func _cpu_collision_wanted() -> bool:
+	return detached_build and OS.get_thread_caller_id() != OS.get_main_thread_id() \
+		and manifest != null and not manifest.asset_id().contains("__chunk_") \
+		and OS.get_environment("ELORIA_CPU_COLLISION_FACES") != "0"
+
+## Maps each generated mesh a node of `state` draws to its ImporterMesh. Only
+## meshes a node references: generate_scene built (and ImporterMesh cached)
+## exactly those, so asking for one here builds nothing new.
+func _index_cpu_meshes(state: GLTFState) -> int:
+	_cpu_meshes.clear()
+	var meshes: Array[GLTFMesh] = state.get_meshes()
+	var used: Dictionary = {}
+	for node: GLTFNode in state.get_nodes():
+		if node != null and node.mesh >= 0 and node.mesh < meshes.size():
+			used[node.mesh] = true
+	for index: int in used:
+		var importer: ImporterMesh = meshes[index].mesh if meshes[index] != null else null
+		if importer == null or importer.get_surface_count() == 0:
+			continue
+		var generated: ArrayMesh = importer.get_mesh()
+		if generated != null:
+			_cpu_meshes[generated.get_instance_id()] = importer
+	return _cpu_meshes.size()
+
+## The triangle faces `Mesh.create_trimesh_shape()` would read back from the
+## generated mesh, from the ImporterMesh's own arrays: every triangle surface's
+## vertices in index order (or in order when unindexed).
+static func _importer_faces(importer: ImporterMesh) -> PackedVector3Array:
+	var faces := PackedVector3Array()
+	if importer == null:
+		return faces
+	for surface: int in importer.get_surface_count():
+		if importer.get_surface_primitive_type(surface) != Mesh.PRIMITIVE_TRIANGLES:
+			continue
+		var arrays: Array = importer.get_surface_arrays(surface)
+		if arrays.size() <= Mesh.ARRAY_INDEX or arrays[Mesh.ARRAY_VERTEX] is not PackedVector3Array:
+			continue
+		var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+		var indices: Variant = arrays[Mesh.ARRAY_INDEX]
+		if indices is PackedInt32Array and not (indices as PackedInt32Array).is_empty():
+			for index: int in indices as PackedInt32Array:
+				faces.append(vertices[index])
+		else:
+			faces.append_array(vertices)
+	return faces
 
 func _group_streaming_views() -> void:
 	if manifest.data.get("streamingBorders", []).is_empty():

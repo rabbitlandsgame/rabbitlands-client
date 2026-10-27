@@ -41,6 +41,19 @@ extends RefCounted
 ## wall, wherever the player stands, so a room cuts away like a doll's house
 ## and furniture never floats in front of a dropped wall. Linked during the
 ## same walk that finds the props, so only a block with `props` links them.
+##
+## A block with `partitions` (the town's walls between rooms: rows
+## {node, section, rooms, centre [x, z], along, normal}, one per node of a
+## partition - its wall, trim and the decals hung on it) cuts a partition away
+## while it stands between the camera and the player: the player is inside
+## its section, on its far side from the camera, and within its span (+2 m).
+## Rows sharing a centre and direction are one partition, hidden together with
+## every prop whose WALL_PROP_META names one of its nodes, so a banner or a
+## shelf never floats in front of a wall that is gone. Hysteresis on both the
+## side (0.3 m) and the span (1 m) keeps a player in a doorway from making it
+## flicker. Outer walls never follow this rule; they keep the facing rule.
+## Before this the partitions only faded (OccluderFade) and their decals and
+## props stayed solid in front of the frosted pane (review, 2026-10-27).
 
 ## The meta a placed prop carries naming its wall's cutaway node.
 const WALL_PROP_META := "cutaway_wall"
@@ -51,9 +64,21 @@ const PROP_CELL_METRES := 16.0
 ## A hidden prop comes back only this much beyond the radius, so one standing
 ## on the edge does not flicker as the player shuffles.
 const PROP_HYSTERESIS_METRES := 2.0
+## A partition is cut away while the player is within its span plus this...
+const PARTITION_SPAN_MARGIN := 2.0
+## ...and comes back only this much farther along it.
+const PARTITION_SPAN_HYSTERESIS := 1.0
+## The player must be this far past a partition (away from the camera) for it
+## to drop, and this far back on the camera's side for it to return.
+const PARTITION_SIDE_METRES := 0.3
+## A partition seen this nearly edge-on (|normal . to camera|) hides nothing.
+const PARTITION_FACING := 0.1
 
 var _always_hidden: Array[Node3D] = []
 var _walls: Array[Dictionary] = []
+## {"nodes": [Node3D], "props": [Node3D], "section", "centre": Vector2,
+## "along": Vector2, "normal": Vector2, "half": float, "hidden": bool}
+var _partitions: Array[Dictionary] = []
 ## How many props follow a wall (WALL_PROP_META), across all walls.
 var _wall_props := 0
 var _props: Array[Dictionary] = []
@@ -74,7 +99,8 @@ var _last_section := ""
 var _last_focus := Vector3.INF
 
 func is_active() -> bool:
-	return not _always_hidden.is_empty() or not _walls.is_empty() or not _props.is_empty() 		or not _pillars.is_empty()
+	return not _always_hidden.is_empty() or not _walls.is_empty() or not _props.is_empty() \
+		or not _pillars.is_empty() or not _partitions.is_empty()
 
 ## Reads the manifest's cutaway block and resolves it against the loaded scene.
 ## Returns the number of nodes it took control of.
@@ -124,6 +150,10 @@ func configure(manifest: WorldManifest, world_root: Node3D) -> int:
 			_walls.append({"node": node, "outward": outward.normalized(),
 				"section": str(entry.get("section", ""))})
 
+	var partitions_value: Variant = block.get("partitions", [])
+	if partitions_value is Array:
+		_read_partitions(partitions_value as Array, world_root)
+
 	var props_value: Variant = block.get("props", null)
 	if props_value is Dictionary:
 		var props: Dictionary = props_value as Dictionary
@@ -132,6 +162,10 @@ func configure(manifest: WorldManifest, world_root: Node3D) -> int:
 		var walls_by_name: Dictionary = {}
 		for wall: Dictionary in _walls:
 			walls_by_name[str((wall.node as Node3D).name)] = wall
+		# A prop against a partition names one of its nodes: it goes with it.
+		for partition: Dictionary in _partitions:
+			for node: Node3D in partition.nodes:
+				walls_by_name[str(node.name)] = partition
 		for node: Node in world_root.find_children("*", "Node3D", true, false):
 			if node.has_meta(WALL_PROP_META):
 				var owner_wall: Variant = walls_by_name.get(str(node.get_meta(WALL_PROP_META)))
@@ -155,7 +189,67 @@ func configure(manifest: WorldManifest, world_root: Node3D) -> int:
 	_last_yaw = INF
 	_last_section = ""
 	_last_focus = Vector3.INF
-	return _always_hidden.size() + _walls.size() + _props.size() + _pillars.size() + _wall_props
+	var partition_nodes := 0
+	for partition: Dictionary in _partitions:
+		partition_nodes += (partition.nodes as Array).size()
+	return _always_hidden.size() + _walls.size() + _props.size() + _pillars.size() + _wall_props \
+		+ partition_nodes
+
+## Groups the `partitions` rows into partitions (one per centre and direction
+## in a section) and measures each one's half span along its run from its
+## nodes' bounds (the rows carry no length).
+func _read_partitions(rows: Array, world_root: Node3D) -> void:
+	var by_key: Dictionary = {}
+	for row_value: Variant in rows:
+		if row_value is not Dictionary:
+			continue
+		var row: Dictionary = row_value
+		var node := _find(world_root, str(row.get("node", "")))
+		var centre_value: Variant = row.get("centre")
+		var normal_value: Variant = row.get("normal")
+		var along_value: Variant = row.get("along")
+		if node == null or centre_value is not Array or (centre_value as Array).size() < 2 \
+				or normal_value is not Array or (normal_value as Array).size() < 3 \
+				or along_value is not Array or (along_value as Array).size() < 3:
+			continue
+		var normal := Vector2(float(normal_value[0]), float(normal_value[2]))
+		var along := Vector2(float(along_value[0]), float(along_value[2]))
+		if normal.length_squared() < 0.0001 or along.length_squared() < 0.0001:
+			continue
+		normal = normal.normalized()
+		along = along.normalized()
+		var centre := Vector2(float(centre_value[0]), float(centre_value[1]))
+		var section := str(row.get("section", ""))
+		# One partition whichever way round its rows state the direction.
+		var key := "%s|%.2f|%.2f|%.2f" % [section, centre.x, centre.y, absf(along.x)]
+		if not by_key.has(key):
+			by_key[key] = {"nodes": [], "props": [], "section": section, "centre": centre,
+				"along": along, "normal": normal, "half": 0.0, "hidden": false}
+			_partitions.append(by_key[key])
+		((by_key[key] as Dictionary).nodes as Array).append(node)
+	for partition: Dictionary in _partitions:
+		var half := 0.0
+		for node: Node3D in partition.nodes:
+			half = maxf(half, _half_span(node, world_root, partition.centre, partition.along))
+		partition["half"] = half
+
+## How far along `along` from `centre` the node reaches (flat, in the world
+## root's frame). A node without bounds reaches its own origin.
+static func _half_span(node: Node3D, world_root: Node3D, centre: Vector2, along: Vector2) -> float:
+	var frame := node.transform
+	var parent := node.get_parent() as Node3D
+	while parent != null and parent != world_root:
+		frame = parent.transform * frame
+		parent = parent.get_parent() as Node3D
+	var reach := 0.0
+	if node is VisualInstance3D:
+		var box: AABB = frame * (node as VisualInstance3D).get_aabb()
+		for corner: int in 8:
+			var point := box.get_endpoint(corner)
+			reach = maxf(reach, absf((Vector2(point.x, point.z) - centre).dot(along)))
+	else:
+		reach = absf((Vector2(frame.origin.x, frame.origin.z) - centre).dot(along))
+	return reach
 
 ## Files `entries` (props or pillar runs, each with a `position`) by grid square.
 static func _cells_of(entries: Array[Dictionary]) -> Dictionary:
@@ -194,8 +288,11 @@ func reset() -> void:
 		var value: Variant = prop.get("node")
 		if is_instance_valid(value):
 			(value as Node3D).visible = true
+	for partition: Dictionary in _partitions:
+		_show_partition(partition, true)
 	_always_hidden.clear()
 	_walls.clear()
+	_partitions.clear()
 	_wall_props = 0
 	_props.clear()
 	_pillars.clear()
@@ -218,7 +315,8 @@ func reset() -> void:
 ## rig's focus); wall props are judged from it.
 func update(camera_yaw_degrees: float, force: bool = false, section: String = "",
 		focus: Vector3 = Vector3.INF) -> void:
-	if _walls.is_empty() and _always_hidden.is_empty() and _props.is_empty() and _pillars.is_empty():
+	if _walls.is_empty() and _always_hidden.is_empty() and _props.is_empty() and _pillars.is_empty() \
+			and _partitions.is_empty():
 		return
 	var entered := section != _last_section
 	var turned := not is_equal_approx(camera_yaw_degrees, _last_yaw)
@@ -254,8 +352,11 @@ func update(camera_yaw_degrees: float, force: bool = false, section: String = ""
 			_show_wall_props(wall, node.visible)
 	if not _pillars.is_empty() and (force or entered or turned or moved):
 		_update_pillars(to_camera, focus, section, force or entered)
-	if not _props.is_empty() and focus.is_finite():
+	if not _partitions.is_empty() and (force or entered or turned or moved):
+		_update_partitions(to_camera, focus, section, force or entered)
+	if focus.is_finite() and (not _props.is_empty() or not _partitions.is_empty()):
 		_last_focus = focus
+	if not _props.is_empty() and focus.is_finite():
 		_update_props(to_camera, focus)
 
 ## A wall prop drops out while its wall faces the camera and it stands near
@@ -319,6 +420,48 @@ func _update_pillars(to_camera: Vector3, focus: Vector3, section: String, refres
 			pillar["stamp"] = _stamp
 			still.append(pillar)
 	_hidden_pillars = still
+
+## Cuts away each partition of the player's section that stands between the
+## camera and the player (see the header); another section's are left to
+## SecretSections, and with no focus every partition stands.
+func _update_partitions(to_camera: Vector3, focus: Vector3, section: String, refresh: bool) -> void:
+	var camera := Vector2(to_camera.x, to_camera.z)
+	for partition: Dictionary in _partitions:
+		var own: String = partition.section
+		var hidden: bool = partition.hidden
+		var hide := false
+		if focus.is_finite() and (own.is_empty() or section.is_empty() or own == section):
+			var normal: Vector2 = partition.normal
+			var facing := camera.dot(normal)
+			var offset := Vector2(focus.x, focus.z) - (partition.centre as Vector2)
+			# > 0: the player stands on the side away from the camera.
+			var beyond := -offset.dot(normal) * signf(facing)
+			var reach: float = float(partition.half) + PARTITION_SPAN_MARGIN \
+				+ (PARTITION_SPAN_HYSTERESIS if hidden else 0.0)
+			hide = absf(facing) > PARTITION_FACING \
+				and absf(offset.dot(partition.along as Vector2)) <= reach \
+				and beyond > (-PARTITION_SIDE_METRES if hidden else PARTITION_SIDE_METRES)
+		elif not own.is_empty() and not section.is_empty() and own != section:
+			# Out of sight with its section; shown again when it is entered.
+			partition["hidden"] = false
+			continue
+		if refresh or hide != hidden:
+			partition["hidden"] = hide
+			_show_partition(partition, not hide)
+
+## The partitions cut away now (diagnostics and tests): their first nodes.
+func hidden_partitions() -> Array[Node3D]:
+	var result: Array[Node3D] = []
+	for partition: Dictionary in _partitions:
+		if bool(partition.hidden) and not (partition.nodes as Array).is_empty():
+			result.append((partition.nodes as Array)[0])
+	return result
+
+static func _show_partition(partition: Dictionary, shown: bool) -> void:
+	for value: Variant in partition.get("nodes", []) as Array:
+		if is_instance_valid(value):
+			(value as Node3D).visible = shown
+	_show_wall_props(partition, shown)
 
 ## The props standing against `wall` follow its visibility.
 static func _show_wall_props(wall: Dictionary, shown: bool) -> void:

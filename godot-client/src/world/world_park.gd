@@ -26,6 +26,19 @@ extends Node
 ## tree is released, the prepared models are installed one at a time and the
 ## placed scenery is instanced under the still-detached root
 ## (interior_scenery_stepper.gd). The map change then adopts it (`take`).
+## A preload starts only once the player's own arrival on the map has loaded
+## (`observe`'s `settled`), so it never competes with the arrival's chunks.
+##
+## Shader keys. A preload must not compile shaders on the main thread mid-walk
+## (a new material key costs one 70 ms frame cold): binding the parent builds
+## and holds every key the interior's shell binds, behind the arrival curtain
+## (interior_material_warmup.gd).
+##
+## Memory. An interior is estimated from its textures, shell and scenery:
+## each image's pixels from its header, or its VRAM sidecar's size when the
+## client uploads that instead (texture_footprint.gd). Read on a small worker
+## when the parent binds; a preload waits for it, and the estimate travels
+## with the built world.
 ##
 ## Policy, limits and eviction rules: world_park_policy.gd. Every park,
 ## re-attach, preload start/ready/hit/miss/drop and eviction prints one
@@ -36,6 +49,9 @@ const SceneryStepper := preload("res://src/world/interior_scenery_stepper.gd")
 const UndergroundScenery := preload("res://src/world/underground_scenery.gd")
 const ResourceAdmission := preload("res://src/runtime/resource_admission.gd")
 const RetirementBudget := preload("res://src/world/resource_retirement_budget.gd")
+const MaterialWarmup := preload("res://src/world/interior_material_warmup.gd")
+const TextureFootprint := preload("res://src/world/texture_footprint.gd")
+const VramTextures := preload("res://src/world/vram_textures.gd")
 
 ## Main-thread microseconds a preload may spend publishing in one frame.
 const PUBLISH_SLICE_USEC := 4000
@@ -44,6 +60,7 @@ const PUBLISH_SLICE_USEC := 4000
 const RETIRE_NODES_PER_FRAME := 64
 const RETIRE_BUDGET_USEC := 2000
 const SWITCH_ENVIRONMENT := "ELORIA_WORLD_PARK"
+const WARMUP_ENVIRONMENT := "ELORIA_INTERIOR_WARMUP"
 const EVENT_LIMIT := 100
 
 ## The map registry (data/maps/registry.json `maps`).
@@ -53,6 +70,9 @@ var enabled := true
 var held_interiors: Dictionary = Policy.HELD_INTERIORS.duplicate()
 var budget_bytes := Policy.BUDGET_BYTES
 var preload_slice_usec := PUBLISH_SLICE_USEC
+## Build a flagged interior's shader keys when its parent binds
+## (ELORIA_INTERIOR_WARMUP=0 turns it off, for measuring).
+var warm_materials := true
 ## The worker's entry point: (path, cache_enabled, visual_paths) -> WorldLoader.
 ## Tests substitute a builder that needs no package on disk.
 var prepare_function: Callable = WorldLoader.prepare_detached
@@ -60,14 +80,14 @@ var prepare_function: Callable = WorldLoader.prepare_detached
 var now_override := -1
 var events: Array[Dictionary] = []
 var counters := {"park": 0, "unpark": 0, "evict": 0, "preload_start": 0,
-	"preload_ready": 0, "preload_hit": 0, "preload_miss": 0, "preload_drop": 0}
+	"preload_ready": 0, "preload_hit": 0, "preload_miss": 0, "preload_drop": 0, "refresh": 0}
 
 ## map id -> {"resident": Dictionary, "at_msec": int, "bytes": int}
 var _parked: Dictionary = {}
 ## The interior building in the background: {} or {"map", "path", "state"
 ## ("running" | "publishing" | "ready"), "thread", "resident", "stepper",
 ## "started_usec", "worker_usec", "publish_usec", "max_slice_usec",
-## "far_since_msec", "bytes", "door"}.
+## "far_since_msec", "ready_msec", "bytes", "door"}.
 var _preload: Dictionary = {}
 ## Workers whose result nobody wants any more: reaped once they finish, never
 ## joined while running (a worker may wait on the main thread).
@@ -85,8 +105,19 @@ var _door_tiles: Dictionary = {}
 ## interior map id -> {object id: return tile} read from its manifest, and
 ## its scenery's model paths; read once a session.
 var _portal_index: Dictionary = {}
+## interior map id -> the materials holding its shell's shader keys for the
+## session (_warm_interior).
+var _warmed: Dictionary = {}
 var _scenery_configs: Dictionary = {}
 var _scenery_paths: Dictionary = {}
+## interior map id -> its estimated bytes once built (textures by their
+## headers or sidecars, the shell GLB, a floor); read once a session.
+var _interior_bytes: Dictionary = {}
+## interior map id -> {"thread", "began_usec"}: estimates still being read.
+var _estimating: Dictionary = {}
+## Interiors a kept build of expired while the player stood by: not preloaded
+## again until the player has walked away from their doors.
+var _stale: Dictionary = {}
 var _retry_at: Dictionary = {}
 var _waiting_since := -1
 ## The destination `take` last handed a world for (a preload hit's map).
@@ -95,10 +126,13 @@ var _last_taken := ""
 func configure(maps: Dictionary) -> void:
 	registry = maps
 	enabled = OS.get_environment(SWITCH_ENVIRONMENT) != "0"
+	warm_materials = OS.get_environment(WARMUP_ENVIRONMENT) != "0"
 	_parents.clear()
 	_portal_index.clear()
 	_scenery_configs.clear()
 	_scenery_paths.clear()
+	_interior_bytes.clear()
+	_stale.clear()
 
 func _now() -> int:
 	return now_override if now_override >= 0 else Time.get_ticks_msec()
@@ -176,26 +210,41 @@ func bind_map(map_id: String) -> int:
 		if parent_of(interior) != _bound_map:
 			continue
 		if not _portal_index.has(interior):
-			_portal_index[interior] = _read_portals(interior, (entry as Dictionary))
+			var manifest := _read_manifest(entry as Dictionary)
+			_portal_index[interior] = _portals_of(interior, manifest)
 			_read_scenery(interior)
+			_warm_interior(interior, manifest)
+			_estimate_interior(interior, manifest)
 		var portals: Dictionary = _portal_index[interior]
 		for object_id: int in (portals.get(_bound_map, {}) as Dictionary):
 			_doors[object_id] = interior
 			_door_tiles[object_id] = (portals[_bound_map] as Dictionary)[object_id]
+	# An interior entered without its parent bound first (signing in inside
+	# it) is estimated on its own load frame, for parking it on the way out.
+	if _flagged(_bound_map) and not _interior_bytes.has(_bound_map):
+		if not _scenery_paths.has(_bound_map):
+			_read_scenery(_bound_map)
+		_estimate_interior(_bound_map, _read_manifest(MapRegistry.resolve(registry, _bound_map)))
 	return _doors.size()
 
-## {exterior map id: {object id: Vector2i return tile}} from an interior's
-## manifest `portals` (its exits name the exterior map they lead to; one object
-## id serves a door's two ends).
-static func _read_portals(interior: String, entry: Dictionary) -> Dictionary:
+## An interior's manifest, parsed, with its own path under "_path"; {} when
+## it is missing or unreadable.
+static func _read_manifest(entry: Dictionary) -> Dictionary:
 	var path := ProjectSettings.globalize_path(str(entry.get("manifest", "")))
 	if path.is_empty() or not FileAccess.file_exists(path):
 		return {}
 	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
 	if parsed is not Dictionary:
 		return {}
+	(parsed as Dictionary)["_path"] = path
+	return parsed
+
+## {exterior map id: {object id: Vector2i return tile}} from an interior's
+## manifest `portals` (its exits name the exterior map they lead to; one object
+## id serves a door's two ends).
+static func _portals_of(interior: String, manifest: Dictionary) -> Dictionary:
 	var result: Dictionary = {}
-	for value: Variant in (parsed as Dictionary).get("portals", []) as Array:
+	for value: Variant in manifest.get("portals", []) as Array:
 		if value is not Dictionary:
 			continue
 		var portal := value as Dictionary
@@ -209,6 +258,80 @@ static func _read_portals(interior: String, entry: Dictionary) -> Dictionary:
 		(result[destination] as Dictionary)[int(identity)] = Vector2i(int(tile[0]), int(tile[1])) \
 			if tile is Array and (tile as Array).size() >= 2 else Vector2i(-100000, -100000)
 	return result
+
+## Builds the shader of every material key the interior's shell binds, on
+## the parent's map-load frame (bind_map: behind the arrival curtain), and
+## holds one material per key for the session, so the preload's worker shares
+## those shaders instead of compiling them mid-walk
+## (interior_material_warmup.gd has the measurements).
+func _warm_interior(interior: String, manifest: Dictionary) -> void:
+	if not warm_materials or _warmed.has(interior) or manifest.is_empty():
+		return
+	var relative := str((manifest.get("asset", {}) as Dictionary).get("glb", "")) \
+		if manifest.get("asset") is Dictionary else ""
+	if relative.is_empty():
+		return
+	var result := MaterialWarmup.warm(str(manifest._path).get_base_dir().path_join(relative))
+	_warmed[interior] = result.materials
+	_record("warm", interior, {"keys": int(result.keys), "materials": (result.materials as Array).size(),
+		"warm_ms": float(result.usec) / 1000.0, "error": str(result.error)})
+
+## Starts reading an interior's estimated bytes once built (once a session,
+## from bind_map): the shell GLB's images and every scenery model's, each
+## image counted once, plus the shell's geometry and a floor
+## (WorldParkPolicy.interior_estimate). The files are read and the embedded
+## images hashed (to find their sidecars) on a worker: ~20 MB for the Town.
+func _estimate_interior(interior: String, manifest: Dictionary) -> void:
+	if _interior_bytes.has(interior) or _estimating.has(interior) or manifest.is_empty() \
+			or manifest.get("asset") is not Dictionary:
+		return
+	var glb := str(manifest._path).get_base_dir().path_join(str((manifest.asset as Dictionary).get("glb", "world.glb")))
+	var sources := PackedStringArray()
+	for source: String in _scenery_paths.get(interior, PackedStringArray()) as PackedStringArray:
+		sources.append(ProjectSettings.globalize_path(source))
+	# Asked on the main thread first: a worker asking first is told none.
+	VramTextures.usable_formats()
+	var began := Time.get_ticks_usec()
+	var thread := Thread.new()
+	if thread.start(_measure.bind(glb, sources)) != OK:
+		_store_estimate(interior, _measure(glb, sources), began)
+		return
+	_estimating[interior] = {"thread": thread, "began_usec": began}
+
+## What `_estimate_interior` reads (any thread): texture, image and GLB bytes.
+static func _measure(glb: String, sources: PackedStringArray) -> Dictionary:
+	var seen: Dictionary = {}
+	var shell := TextureFootprint.glb_texture_bytes(glb, seen)
+	var scenery := 0
+	for source: String in sources:
+		scenery += TextureFootprint.glb_texture_bytes(source, seen)
+	var file := FileAccess.open(glb, FileAccess.READ)
+	return {"shell": shell, "scenery": scenery, "images": seen.size(),
+		"glb_bytes": file.get_length() if file != null else 0}
+
+func _store_estimate(interior: String, measured: Dictionary, began_usec: int) -> void:
+	var textures := int(measured.get("shell", 0)) + int(measured.get("scenery", 0))
+	_interior_bytes[interior] = Policy.interior_estimate(textures, int(measured.get("glb_bytes", 0))) \
+		if textures > 0 else Policy.whole_map_estimate(int(measured.get("glb_bytes", 0)))
+	_record("estimate", interior, {"shell_texture_mib": _mib(int(measured.get("shell", 0))),
+		"scenery_texture_mib": _mib(int(measured.get("scenery", 0))),
+		"estimated_mib": _mib(int(_interior_bytes[interior])), "images": int(measured.get("images", 0)),
+		"read_ms": float(Time.get_ticks_usec() - began_usec) / 1000.0})
+
+## Collects the estimates whose worker is done; with `wait`, waits for the
+## rest (they read files only and never wait on the main thread).
+func finish_estimates(wait := false) -> void:
+	for interior: String in _estimating.keys():
+		var job: Dictionary = _estimating[interior]
+		var thread: Thread = job.thread
+		if thread.is_alive() and not wait:
+			continue
+		_store_estimate(interior, thread.wait_to_finish() as Dictionary, int(job.began_usec))
+		_estimating.erase(interior)
+
+## Estimates still being read (tests, diagnostics).
+func estimates_pending() -> int:
+	return _estimating.size()
 
 ## An interior's scenery config and model list, read once (on a map-load
 ## frame, by bind_map) so no gameplay frame parses it.
@@ -225,7 +348,11 @@ func doors() -> Dictionary:
 ## the preload of the interior whose door is nearest. `map_objects` is the
 ## server's object list for the map (AppState.map_objects: id -> {x, y, ...});
 ## a door the server has not listed yet falls back to its return tile.
-func observe(map_id: String, tile: Vector2i, map_objects: Dictionary = {}) -> void:
+## `settled` is false while the player's arrival on the map is still loading
+## (Main: the curtain is up, or the streamed cells around them are not all
+## resident): nothing new starts then, so a preload never competes with the
+## arrival's own chunks.
+func observe(map_id: String, tile: Vector2i, map_objects: Dictionary = {}, settled := true) -> void:
 	if not enabled or MapRegistry.normalize_server_map_id(map_id) != _bound_map:
 		return
 	var now := _now()
@@ -243,23 +370,29 @@ func observe(map_id: String, tile: Vector2i, map_objects: Dictionary = {}) -> vo
 			nearest_door[interior] = object_id
 	for interior: String in nearest:
 		if _parked.has(interior):
-			# A parked interior is the preload already done: kept while near.
-			if float(nearest[interior]) <= Policy.PRELOAD_DROP_TILES:
-				(_parked[interior] as Dictionary)["at_msec"] = now
+			# A parked interior is the preload already done. Standing near does
+			# not keep it: it expires as any parked world does (then is stale).
 			continue
 		if not _preload.is_empty() and str(_preload.map) != interior:
 			continue # One preload at a time; the other is judged below.
-		_judge_preload(interior, float(nearest[interior]), int(nearest_door[interior]), now)
+		_judge_preload(interior, float(nearest[interior]), int(nearest_door[interior]), now, settled)
 	if not _preload.is_empty() and not nearest.has(str(_preload.map)):
-		_judge_preload(str(_preload.map), INF, -1, now)
+		_judge_preload(str(_preload.map), INF, -1, now, settled)
 
-func _judge_preload(interior: String, distance: float, door: int, now: int) -> void:
+func _judge_preload(interior: String, distance: float, door: int, now: int, settled := true) -> void:
 	var state := {"active": not _preload.is_empty(),
 		"far_since_msec": int(_preload.get("far_since_msec", -1)),
-		"retry_at_msec": int(_retry_at.get(interior, 0))}
+		"retry_at_msec": int(_retry_at.get(interior, 0)),
+		"stale": _stale.has(interior), "settled": settled}
+	if _estimating.has(interior):
+		# Its size is still being read: nothing starts before the budget knows it.
+		state["settled"] = false
 	var action := Policy.preload_action(state, distance, now)
 	if not _preload.is_empty():
 		_preload["far_since_msec"] = int(state.far_since_msec)
+	if not bool(state.stale) and _stale.has(interior):
+		_stale.erase(interior)
+		_record("stale_cleared", interior, {"distance_tiles": snappedf(distance, 0.1)})
 	if action == "start":
 		start_preload(interior, door, distance)
 	elif action == "drop":
@@ -281,7 +414,9 @@ func start_preload(interior: String, door := -1, distance := INF) -> bool:
 		_retry_at[interior] = _now() + Policy.PRELOAD_RETRY_MSEC
 		_record("preload_skip", interior, {"reason": "package_missing"})
 		return false
-	var bytes := _estimate_package(path)
+	if _estimating.has(interior):
+		finish_estimates(true)
+	var bytes := int(_interior_bytes.get(interior, _estimate_package(path)))
 	var parked_rows := {}
 	for map_id: String in _parked:
 		parked_rows[map_id] = {"at_msec": int(_parked[map_id].at_msec), "bytes": int(_parked[map_id].bytes)}
@@ -298,10 +433,11 @@ func start_preload(interior: String, door := -1, distance := INF) -> bool:
 		return false
 	_preload = {"map": interior, "path": path, "state": "running", "thread": thread,
 		"started_usec": Time.get_ticks_usec(), "worker_usec": 0, "publish_usec": 0,
-		"max_slice_usec": 0, "slices": 0, "far_since_msec": -1, "bytes": bytes, "door": door}
+		"max_slice_usec": 0, "slices": 0, "far_since_msec": -1, "ready_msec": -1,
+		"bytes": bytes, "door": door}
 	counters.preload_start += 1
 	_record("preload_start", interior, {"door": door, "distance_tiles": snappedf(distance, 0.1),
-		"models_to_prepare": visuals.size()})
+		"models_to_prepare": visuals.size(), "estimated_mib": _mib(bytes)})
 	return true
 
 ## Collects a finished worker's world, on the main thread. `force` publishes
@@ -365,6 +501,9 @@ func _publish_slice(budget_usec: int) -> void:
 
 func _ready_preload() -> void:
 	counters.preload_ready += 1
+	_preload.ready_msec = _now()
+	# The estimate travels with the world, for parking it later.
+	(_preload.resident as Dictionary)["park_bytes"] = int(_preload.bytes)
 	var stepper: SceneryStepper = _preload.get("stepper")
 	_record("preload_ready", str(_preload.map), {
 		"worker_ms": float(_preload.worker_usec) / 1000.0,
@@ -519,6 +658,11 @@ func leave(loader: WorldLoader, from: String, to: String) -> bool:
 		_retire_tree(root, from, "budget")
 		_record("park_refused", from, {"into": to, "estimated_mib": _mib(bytes)})
 		return false
+	if _parked.has(from):
+		# A world of this map already parked (one loaded again without being
+		# taken back: a seamless crossing's handoff, a character intro) is
+		# freed, never overwritten and leaked.
+		_evict(from, "replaced")
 	_parked[from] = {"resident": resident, "at_msec": _now(), "bytes": bytes}
 	counters.park += 1
 	_record("park", from, {"into": to, "detach_ms": float(detach_usec) / 1000.0,
@@ -551,8 +695,9 @@ func release_now() -> void:
 ## No worker is running for this park (closing waits for this).
 func is_idle() -> bool:
 	_reap_orphans()
+	finish_estimates()
 	var running: Thread = _preload.get("thread") if not _preload.is_empty() else null
-	return _orphans.is_empty() and (running == null or not running.is_alive())
+	return _orphans.is_empty() and _estimating.is_empty() and (running == null or not running.is_alive())
 
 # --------------------------------------------------------------------------
 # Eviction and freeing
@@ -629,15 +774,40 @@ func _process(_delta: float) -> void:
 ## evicted trees.
 func tick() -> void:
 	_reap_orphans()
+	if not _estimating.is_empty():
+		finish_estimates()
 	_poll_preload()
 	_publish_slice(preload_slice_usec)
-	for map_id: String in Policy.expired(_parked, _now()):
+	var now := _now()
+	# The parent of the interior the player is in stays parked while they are
+	# inside: going back out is the trip the park is for.
+	var parent := parent_of(_bound_map) if enabled and not _bound_map.is_empty() else ""
+	if not parent.is_empty() and _parked.has(parent):
+		var row: Dictionary = _parked[parent]
+		if now - int(row.at_msec) >= 1000:
+			row["at_msec"] = now
+			counters.refresh += 1
+	if not _preload.is_empty() and str(_preload.state) == "ready" \
+			and Policy.preload_expired(int(_preload.get("ready_msec", -1)), now):
+		var interior := str(_preload.map)
+		_drop_preload("unentered")
+		_mark_stale(interior)
+	for map_id: String in Policy.expired(_parked, now):
 		_evict(map_id, "ttl")
+		_mark_stale(map_id)
 	_drain_retiring()
+
+## A kept build of `interior` expired while the player may still stand by one
+## of its doors on the bound map: it is not built again until they walk away.
+func _mark_stale(interior: String) -> void:
+	if _doors.values().has(interior):
+		_stale[interior] = true
 
 func _exit_tree() -> void:
 	# Nothing parked survives the client; a running worker is left to finish
-	# (Main._close_client waits for is_idle before quitting).
+	# (Main._close_client waits for is_idle before quitting). An estimate's
+	# worker only reads files: it is joined here.
+	finish_estimates(true)
 	for map_id: String in _parked.keys():
 		_evict(map_id, "exit")
 	if not _preload.is_empty() and _preload.get("resident") is Dictionary:
@@ -655,13 +825,22 @@ static func _estimate_package(manifest_path: String) -> int:
 	var file := FileAccess.open(manifest_path.get_base_dir().path_join("world.glb"), FileAccess.READ)
 	return Policy.whole_map_estimate(file.get_length() if file != null else 0)
 
-static func _estimate_resident(resident: Dictionary) -> int:
+## A world about to be parked: a streamed territory's own resident bytes, an
+## interior's texture estimate (carried by a preloaded world, or read when its
+## parent bound), else the GLB-size guess.
+func _estimate_resident(resident: Dictionary) -> int:
 	var root := resident.get("root") as Node3D
 	if root is ContinentChunkStream:
 		return int((root as ContinentChunkStream).resident_bytes)
+	if resident.has("park_bytes"):
+		return int(resident.park_bytes)
 	var manifest := resident.get("manifest") as WorldManifest
 	if manifest == null:
 		return Policy.whole_map_estimate(0)
+	var known: Variant = _interior_bytes.get(MapRegistry.normalize_server_map_id(manifest.asset_id()))
+	if known != null:
+		resident["park_bytes"] = int(known)
+		return int(known)
 	var file := FileAccess.open(manifest.glb_path(), FileAccess.READ)
 	return Policy.whole_map_estimate(file.get_length() if file != null else 0)
 
@@ -678,9 +857,13 @@ func diagnostic_snapshot() -> Dictionary:
 	if not _preload.is_empty():
 		building = {"map": str(_preload.map), "state": str(_preload.state),
 			"max_slice_ms": float(_preload.max_slice_usec) / 1000.0}
+	var estimates := {}
+	for interior: String in _interior_bytes:
+		estimates[interior] = _mib(int(_interior_bytes[interior]))
 	return {"enabled": enabled, "bound_map": _bound_map, "doors": _doors.size(),
 		"parked": parked, "preload": building, "orphans": _orphans.size(),
-		"retiring": _retiring.size(), "counters": counters.duplicate()}
+		"retiring": _retiring.size(), "counters": counters.duplicate(),
+		"estimated_mib": estimates, "stale": _stale.keys()}
 
 func _record(kind: String, map_id: String, details: Dictionary) -> void:
 	var event := {"event": kind, "map": map_id, "at_ms": Time.get_ticks_msec()}
