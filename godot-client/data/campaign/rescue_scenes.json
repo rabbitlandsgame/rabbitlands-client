@@ -3,7 +3,7 @@
   "scenes": {
     "measure.rescue.abduction": {
       "title": "A Daughter in the Dark",
-      "duration": 64,
+      "duration": 68,
       "fov": 46,
       "entry_seconds": 2.4,
       "exit_seconds": 1.8,
@@ -123,13 +123,13 @@
             10
           ],
           "target": [
-            1,
-            -0.8,
+            0.8,
+            0.6,
             0
           ]
         },
         {
-          "t": 64,
+          "t": 68,
           "anchor": "mother_intercept",
           "position": [
             6,
@@ -137,8 +137,8 @@
             10
           ],
           "target": [
-            1,
-            -0.8,
+            0.8,
+            0.6,
             0
           ]
         }
@@ -149,7 +149,7 @@
         25,
         34,
         42,
-        54
+        60
       ],
       "cues": [
         {
@@ -251,10 +251,15 @@
             0,
             -4
           ],
-          "destination": "player_help",
+          "destination": "mother_intercept",
           "move_seconds": 4,
           "face": "mother",
-          "visible": true
+          "visible": true,
+          "destination_offset": [
+            -1,
+            0,
+            0
+          ]
         },
         {
           "at": 6.5,
@@ -295,8 +300,13 @@
           "at": 8,
           "actor": "guard",
           "action": "combat_idle",
-          "destination": "player_help",
-          "face": "mother"
+          "destination": "mother_intercept",
+          "face": "mother",
+          "destination_offset": [
+            -1,
+            0,
+            0
+          ]
         },
         {
           "at": 13,
@@ -306,11 +316,49 @@
           "face": "daughter"
         },
         {
+          "at": 14,
+          "actor": "guard",
+          "action": "walk",
+          "from": "mother_intercept",
+          "from_offset": [
+            -1,
+            0,
+            0
+          ],
+          "destination": "mother_intercept",
+          "destination_offset": [
+            -0.42,
+            0,
+            0
+          ],
+          "move_seconds": 1.2,
+          "face": "guard_combat"
+        },
+        {
           "at": 15,
           "actor": "abductor",
           "action": "combat_idle",
           "destination": "capture",
           "face": "daughter"
+        },
+        {
+          "at": 15.2,
+          "actor": "guard",
+          "action": "restraint_hold",
+          "destination": "mother_intercept",
+          "destination_offset": [
+            -0.42,
+            0,
+            0
+          ],
+          "face": "guard_combat"
+        },
+        {
+          "at": 15.2,
+          "actor": "mother",
+          "action": "restraint_held",
+          "destination": "mother_intercept",
+          "face": "guard_combat"
         },
         {
           "at": 16,
@@ -364,96 +412,46 @@
           "visible": false
         },
         {
-          "at": 28,
-          "actor": "mother",
-          "action": "defend",
-          "destination": "mother_intercept",
-          "face": "guard"
-        },
-        {
           "at": 42,
           "actor": "protagonist",
           "action": "idle",
           "face": "mother"
         },
         {
-          "at": 42,
-          "actor": "guard",
-          "action": "combat_idle",
-          "from": "player_help",
-          "destination": "player_help",
-          "face": "mother",
-          "when": "watch"
-        },
-        {
-          "at": 42,
-          "actor": "guard",
-          "action": "run",
-          "from": "player_help",
-          "destination": "daughter_trip",
-          "move_seconds": 2,
-          "face": "mother",
-          "when": "help"
-        },
-        {
-          "at": 44,
-          "actor": "guard",
-          "action": "run",
-          "from": "daughter_trip",
-          "destination": "guard_combat",
-          "move_seconds": 2,
-          "face": "mother",
-          "when": "help"
-        },
-        {
-          "at": 46,
-          "actor": "mother",
-          "action": "defend",
-          "destination": "mother_intercept",
-          "face": "guard",
-          "when": "help"
-        },
-        {
-          "at": 46,
-          "actor": "mother",
-          "action": "defend",
-          "destination": "mother_intercept",
-          "face": "guard",
-          "when": "watch"
-        },
-        {
           "at": 46,
           "actor": "protagonist",
           "action": "run",
           "from": "protagonist_post",
-          "destination": "player_help",
-          "move_seconds": 5,
+          "destination": "mother_intercept",
+          "destination_offset": [
+            -1.35,
+            0,
+            0.8
+          ],
+          "move_seconds": 3.5,
           "face": "guard",
           "when": "help"
         },
         {
           "at": 46,
-          "actor": "guard",
-          "action": "combat_idle",
-          "destination": "guard_combat",
-          "face": "mother",
-          "when": "help"
+          "actor": "mother",
+          "action": "defend",
+          "destination": "mother_intercept",
+          "face": "guard",
+          "when": "watch"
         },
         {
           "at": 47,
           "actor": "guard",
           "action": "attack_primary",
-          "destination": "player_help",
+          "destination": "mother_intercept",
+          "destination_offset": [
+            -0.42,
+            0,
+            0
+          ],
           "face": "mother",
           "when": "watch"
-        },
-        {
-          "at": 47,
-          "actor": "guard",
-          "action": "combat_idle",
-          "destination": "guard_combat",
-          "face": "mother",
-          "when": "help"
         },
         {
           "at": 48,
@@ -472,21 +470,240 @@
           "when": "watch"
         },
         {
-          "at": 51,
+          "at": 49.5,
+          "actor": "protagonist",
+          "action": "tackle_lunge",
+          "from": "mother_intercept",
+          "from_offset": [
+            -1.35,
+            0,
+            0.8
+          ],
+          "destination": "mother_intercept",
+          "destination_offset": [
+            -0.45,
+            0,
+            0
+          ],
+          "move_seconds": 0.7,
+          "face": "guard_combat",
+          "when": "help"
+        },
+        {
+          "at": 50.15,
           "actor": "guard",
-          "action": "run",
-          "destination": "escape_turn",
-          "move_seconds": 7,
-          "face": "escape_turn",
-          "when": "watch",
-          "from": "player_help"
+          "action": "tackle_fall",
+          "from": "mother_intercept",
+          "from_offset": [
+            -0.42,
+            0,
+            0
+          ],
+          "destination": "mother_intercept",
+          "destination_offset": [
+            1.8,
+            0,
+            0.3
+          ],
+          "move_seconds": 0.95,
+          "face": "guard_combat",
+          "when": "help"
+        },
+        {
+          "at": 50.15,
+          "actor": "mother",
+          "action": "tackle_fall",
+          "from": "mother_intercept",
+          "destination": "mother_intercept",
+          "destination_offset": [
+            0.85,
+            0,
+            -0.65
+          ],
+          "move_seconds": 0.95,
+          "face": "guard_combat",
+          "when": "help"
+        },
+        {
+          "at": 50.2,
+          "actor": "protagonist",
+          "action": "tackle_fall",
+          "from": "mother_intercept",
+          "from_offset": [
+            -0.45,
+            0,
+            0
+          ],
+          "destination": "mother_intercept",
+          "destination_offset": [
+            0.65,
+            0,
+            0.75
+          ],
+          "move_seconds": 0.9,
+          "face": "guard_combat",
+          "when": "help"
         },
         {
           "at": 51,
+          "actor": "guard",
+          "action": "run",
+          "from": "mother_intercept",
+          "from_offset": [
+            -0.42,
+            0,
+            0
+          ],
+          "destination": "escape_turn",
+          "move_seconds": 7,
+          "face": "escape_turn",
+          "when": "watch"
+        },
+        {
+          "at": 51.1,
+          "actor": "guard",
+          "action": "tackle_down",
+          "destination": "mother_intercept",
+          "destination_offset": [
+            1.8,
+            0,
+            0.3
+          ],
+          "face": "guard_combat",
+          "when": "help"
+        },
+        {
+          "at": 51.1,
+          "actor": "mother",
+          "action": "tackle_down",
+          "destination": "mother_intercept",
+          "destination_offset": [
+            0.85,
+            0,
+            -0.65
+          ],
+          "face": "guard_combat",
+          "when": "help"
+        },
+        {
+          "at": 51.1,
+          "actor": "protagonist",
+          "action": "tackle_down",
+          "destination": "mother_intercept",
+          "destination_offset": [
+            0.65,
+            0,
+            0.75
+          ],
+          "face": "guard_combat",
+          "when": "help"
+        },
+        {
+          "at": 53.4,
+          "actor": "guard",
+          "action": "tackle_rise",
+          "destination": "mother_intercept",
+          "destination_offset": [
+            1.8,
+            0,
+            0.3
+          ],
+          "face": "guard_combat",
+          "when": "help"
+        },
+        {
+          "at": 53.4,
+          "actor": "mother",
+          "action": "tackle_rise",
+          "destination": "mother_intercept",
+          "destination_offset": [
+            0.85,
+            0,
+            -0.65
+          ],
+          "face": "guard_combat",
+          "when": "help"
+        },
+        {
+          "at": 53.4,
+          "actor": "protagonist",
+          "action": "tackle_rise",
+          "destination": "mother_intercept",
+          "destination_offset": [
+            0.65,
+            0,
+            0.75
+          ],
+          "face": "guard_combat",
+          "when": "help"
+        },
+        {
+          "at": 55.6,
+          "actor": "mother",
+          "action": "walk",
+          "from": "mother_intercept",
+          "from_offset": [
+            0.85,
+            0,
+            -0.65
+          ],
+          "destination": "mother_intercept",
+          "move_seconds": 2,
+          "face": "guard_combat",
+          "when": "help"
+        },
+        {
+          "at": 55.6,
+          "actor": "guard",
+          "action": "walk",
+          "from": "mother_intercept",
+          "from_offset": [
+            1.8,
+            0,
+            0.3
+          ],
+          "destination": "guard_combat",
+          "move_seconds": 2,
+          "face": "player_help",
+          "when": "help"
+        },
+        {
+          "at": 55.6,
+          "actor": "protagonist",
+          "action": "walk",
+          "from": "mother_intercept",
+          "from_offset": [
+            0.65,
+            0,
+            0.75
+          ],
+          "destination": "player_help",
+          "move_seconds": 2.4,
+          "face": "guard_combat",
+          "when": "help"
+        },
+        {
+          "at": 57.6,
+          "actor": "mother",
+          "action": "defend",
+          "destination": "mother_intercept",
+          "face": "guard_combat",
+          "when": "help"
+        },
+        {
+          "at": 57.6,
+          "actor": "guard",
+          "action": "combat_idle",
+          "destination": "guard_combat",
+          "face": "player_help",
+          "when": "help"
+        },
+        {
+          "at": 58,
           "actor": "protagonist",
           "action": "combat_idle",
           "destination": "player_help",
-          "face": "guard",
+          "face": "guard_combat",
           "when": "help"
         },
         {
@@ -526,21 +743,34 @@
           "speaker": "Woman",
           "text": "Please. Help me stop them!",
           "speaker_actor": "mother"
+        },
+        {
+          "at": 60,
+          "speaker": "Woman",
+          "speaker_actor": "mother",
+          "text": "Thank you! Keep him away from me!",
+          "when": "help"
         }
       ],
       "events": [],
       "choice_id": "rescue_response",
       "choice_at": 42,
-      "choice_response_until": 54,
+      "choice_response_until": 60,
       "response_speaker": "Woman",
       "response_actor": "mother",
       "response_speakers": {
         "help": "Woman",
         "watch": "Injured woman"
       },
-      "native_roles_from": {
-        "protagonist": 42
-      }
+      "exit_camera": {
+        "mode": "keep_scene",
+        "when": "help"
+      },
+      "hide_on_handoff": [
+        "daughter",
+        "abductor",
+        "escort"
+      ]
     },
     "measure.rescue.injured": {
       "title": "She Is Still Alive",

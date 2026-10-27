@@ -266,7 +266,7 @@ func check_carry_and_native_handoff() -> void:
 	scene._actors = {"protagonist":hero,"abductor":carrier,"daughter":child}
 	for role: String in scene._actors: scene._posts[role] = scene._actors[role].global_transform
 	scene._anchors = {"downramp":Vector3(0,0,-5)}
-	scene._definition = {"duration":64,"native_roles_from":{"protagonist":42},"cues":[
+	scene._definition = {"duration":68,"cues":[
 		{"at":0,"actor":"protagonist","action":"idle","face":"downramp"},
 		{"at":16,"actor":"daughter","action":"injury_pinned","attach_to":"abductor",
 			"attach_bone":"spine_3","attach_yaw_degrees":90,"offset":[-.25,.10,.10]}]}
@@ -282,10 +282,10 @@ func check_carry_and_native_handoff() -> void:
 	scene.elapsed = 42
 	scene._apply_actors()
 	scene._apply_actors()
-	expect(hero.released == 1 and hero.staged == stages,"the opening releases the player's facing pose once before native combat movement")
+	expect(hero.released == 0 and hero.staged == stages+2,"the player remains staged through the Help choreography until the film hands off to native combat")
 	scene._replaying = true
 	scene._apply_actors()
-	expect(hero.staged == stages+1,"read-only replay retains authored staging after the live movement handoff")
+	expect(hero.staged == stages+3,"read-only replay retains the same authored choreography without native combat movement")
 	scene._choice_state = {"selected":"accept"}
 	scene._variant = "returned"
 	expect(not scene._beat_matches({"when":"accept","unless_variant":"returned"}),"returning at the mine cannot replay the earlier departure or its fade")

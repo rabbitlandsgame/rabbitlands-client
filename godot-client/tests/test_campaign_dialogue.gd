@@ -51,7 +51,7 @@ func _run() -> void:
 	expect(widget.speaker_label.get_theme_color("font_color") != widget.body_label.get_theme_color("font_color"), "the emphatic gold speaker differs from the white dialogue")
 	expect(widget.subtitle_text() == "Odo Fenn: Hold the approach. Tell me where you need me.", "plain complete subtitles remain available")
 	expect(widget._viewport.world_3d == actor.get_world_3d() and not widget._viewport.own_world_3d, "the portrait observes the actor's actual World3D")
-	expect(widget._camera.cull_mask == 1, "nameplates, map dots and gameplay overlays are excluded from the head camera")
+	expect(widget._camera.cull_mask != 0 and (widget._camera.cull_mask & 7) == 0, "a dedicated speaker mask excludes nearby actors, nameplates, map dots and gameplay overlays")
 	var focus: Vector3 = actor.skeleton.global_transform * actor.skeleton.get_bone_global_pose(0).origin
 	var offset: Vector3 = widget._camera.global_position - focus
 	expect(offset.dot(-actor.global_basis.z) > 0.8, "the head camera follows the actor's own front instead of viewing its back")

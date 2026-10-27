@@ -4,7 +4,7 @@ extends PanelContainer
 const Art := preload("res://src/ui/leaderboard_art.gd")
 const GOLD := Color("f1cd78")
 const TEXT := Color("fffaf0")
-const PORTRAIT_LAYER_MASK := 1 # Native models; excludes gameplay/map overlays.
+const PORTRAIT_LAYER := preload("res://src/ui/campaign_portrait_layer.gd")
 const PORTRAIT_INTERVAL := 1.0 / 30.0
 # Measured rest-space head envelopes of these existing imported rigs. Their
 # bone names are not the humanoid "Head" convention; no actor pose is changed.
@@ -31,6 +31,7 @@ var _camera: Camera3D
 var _actor: WeakRef
 var _elapsed := 0.0
 var _layout_width := -1.0
+var _portrait_layer := PORTRAIT_LAYER.new()
 
 func _init() -> void:
 	name = "CampaignDialogue"
@@ -126,7 +127,7 @@ func _init() -> void:
 	_camera.projection = Camera3D.PROJECTION_ORTHOGONAL
 	_camera.near = 0.02
 	_camera.far = 2.2
-	_camera.cull_mask = PORTRAIT_LAYER_MASK
+	_camera.cull_mask = 0 # Bound to just the current speaker's leased layer.
 	# This camera-local environment lights the real face during night scenes
 	# without changing the world's environment, lights or actor materials.
 	_camera.environment = Environment.new()
@@ -231,6 +232,8 @@ func _update_content_hint(revision: int) -> void:
 
 func reset() -> void:
 	_hide_content()
+	_portrait_layer.clear()
+	_camera.cull_mask = 0
 	_actor = null
 	speaker_label.text = ""
 	body_label.text = ""
@@ -265,6 +268,8 @@ func fit_width(width: float) -> void:
 
 func _process(delta: float) -> void:
 	if not is_visible_in_tree():
+		_portrait_layer.clear()
+		_camera.cull_mask = 0
 		_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
 		return
 	_elapsed += delta
@@ -275,6 +280,8 @@ func _process(delta: float) -> void:
 func _update_portrait() -> void:
 	var actor := _actor.get_ref() as Node3D if _actor != null else null
 	if not is_instance_valid(actor) or not actor.is_inside_tree() or not actor.has_method("get_skeleton"):
+		_portrait_layer.clear()
+		_camera.cull_mask = 0
 		_portrait_frame.hide()
 		_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
 		return
@@ -284,9 +291,16 @@ func _update_portrait() -> void:
 	if not creature_profile.is_empty():
 		head_bone = skeleton.find_bone(str(creature_profile.bone))
 	if head_bone < 0:
+		_portrait_layer.clear()
+		_camera.cull_mask = 0
 		_portrait_frame.hide()
 		_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
 		return
+	_camera.cull_mask = _portrait_layer.bind(actor)
+	if _camera.cull_mask == 0:
+		_portrait_frame.hide()
+		_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+		return # Exhausted portrait leases fail closed instead of showing a crowd.
 	_viewport.world_3d = actor.get_world_3d()
 	if not creature_profile.is_empty():
 		_frame_creature_head(actor, skeleton, head_bone, creature_profile.bounds)
@@ -342,3 +356,6 @@ func _head_turn(skeleton: Skeleton3D, bone: int) -> Basis:
 	var skeleton_basis := skeleton.global_basis.orthonormalized()
 	return skeleton_basis * skeleton.get_bone_global_pose(bone).basis.orthonormalized() \
 		* skeleton.get_bone_global_rest(bone).basis.orthonormalized().inverse() * skeleton_basis.inverse()
+
+func _exit_tree() -> void:
+	_portrait_layer.clear()

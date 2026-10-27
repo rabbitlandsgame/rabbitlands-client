@@ -47,7 +47,7 @@ func _run() -> void:
 		widget.set_line(str(spec[2]), "You have not heard the last of this.", actor)
 		expect(widget.portrait_visible(), "the native creature receives the same framed headshot")
 		expect(widget._viewport.world_3d == actor.get_world_3d(), "the portrait observes the real creature in its existing world")
-		expect(widget._camera.cull_mask == 1, "creature headshots exclude gameplay labels and selection overlays")
+		expect(widget._camera.cull_mask != 0 and (widget._camera.cull_mask & 7) == 0, "creature headshots isolate the speaker from other world actors and gameplay overlays")
 		expect(widget.speaker_label.get_theme_color("font_color") != widget.body_label.get_theme_color("font_color"), "the speaker name keeps its contrasting color")
 		var profile: Dictionary = widget._creature_head_profile(actor, skeleton)
 		expect(str(profile.bone) == str(spec[3]), "only the exact native asset selects the measured head envelope")

@@ -24,6 +24,8 @@ const TARGET_MARKER_STYLE := preload("res://src/actors/target_marker_style.gd")
 const ServerTimePacing := preload("res://src/actors/server_time_pacing.gd")
 const CINEMATIC_INJURY := preload("res://src/actors/cinematic_injury.gd")
 var _cinematic_injury: RefCounted
+const CINEMATIC_GRAPPLE := preload("res://src/actors/cinematic_grapple.gd")
+var _cinematic_grapple: RefCounted
 var _target_marker_style := TARGET_MARKER_STYLE.defaults()
 
 @export var walk_presentation_speed := 6.0
@@ -4094,6 +4096,14 @@ func _play_action_legacy(action: StringName, restart := false) -> void:
 		return
 	if _cinematic_active and action != _cinematic_action:
 		return
+	if _cinematic_active and CINEMATIC_GRAPPLE.accepts(action):
+		if _cinematic_injury != null:_cinematic_injury.clear()
+		if _cinematic_grapple == null:_cinematic_grapple=CINEMATIC_GRAPPLE.new()
+		if _cinematic_grapple.play(self,action,restart):
+			current_action=action
+			_facing_offset_from=_facing_offset;_facing_offset_to=0.0;_facing_offset_elapsed=0.0
+		return
+	if _cinematic_grapple != null:_cinematic_grapple.clear()
 	if _cinematic_active and CINEMATIC_INJURY.accepts(action):
 		if _cinematic_injury == null: _cinematic_injury = CINEMATIC_INJURY.new()
 		if _cinematic_injury.play(self, action, restart):
@@ -4235,6 +4245,12 @@ func presentation_action_length() -> float:
 	return animation_player.current_animation_length if animation_player != null else 0.0
 
 func set_hand_props_visible(enabled: bool) -> void:
+	# CombatPresentation reevaluates held props on every skeleton update, after
+	# a manually sampled cinematic pose. Keep that refresh inside the lease.
+	if _cinematic_active and _cinematic_grapple != null and _cinematic_grapple.action != &"":
+		enabled = false
+		if combat_presentation != null and is_instance_valid(combat_presentation.bow):
+			combat_presentation.bow.hide()
 	for part: int in [0, 1]:
 		for prop: Node in _equipment_nodes.get(part, []):
 			if is_instance_valid(prop) and prop is Node3D:
@@ -4655,6 +4671,7 @@ func _physics_process(delta: float) -> void:
 		return
 	if _cinematic_active:
 		if _cinematic_injury != null: _cinematic_injury.advance(delta)
+		if _cinematic_grapple != null: _cinematic_grapple.advance(delta)
 		global_position = _cinematic_position
 		rotation.y = rotate_toward(rotation.y, _cinematic_yaw, turn_speed_radians * delta)
 		_level_selection_ring()
@@ -4748,6 +4765,7 @@ func set_cinematic_presentation(point: Vector3, yaw: float, action: StringName, 
 	_wake()
 
 func cinematic_action_duration(action: StringName) -> float:
+	if CINEMATIC_GRAPPLE.accepts(action):return CINEMATIC_GRAPPLE.duration(action)
 	if action in [&"injury_recoil", &"injury_pinned"]: return CINEMATIC_INJURY.HOLD_SECONDS
 	if resolver == null or animation_player == null:
 		return 2.0
@@ -4758,11 +4776,16 @@ func cinematic_action_duration(action: StringName) -> float:
 
 func end_cinematic_presentation() -> void:
 	if _cinematic_injury != null: _cinematic_injury.clear()
+	if _cinematic_grapple != null: _cinematic_grapple.clear()
 	_cinematic_active = false
 	global_position = server_target
 	rotation.y = _target_yaw
 	play_action(&"idle")
 	_wake()
+
+## The scene owns a pose clock for seek/replay and manual dialogue holds.
+func set_cinematic_action_elapsed(seconds: float) -> void:
+	if _cinematic_active and _cinematic_grapple!=null:_cinematic_grapple.sample(seconds)
 
 ## Eases the model's facing correction toward the current action's value across
 ## the animation crossfade and writes it onto the visual root. A no-op once the
@@ -5282,5 +5305,6 @@ func _restore_remote_pending() -> void:
 	RemotePresentationService.restore_pending(self)
 
 func _exit_tree() -> void:
+	if _cinematic_grapple != null:_cinematic_grapple.clear()
 	var remote = RemotePresentationService.current()
 	if remote != null: remote.release_departing(self)

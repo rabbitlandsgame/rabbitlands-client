@@ -34,6 +34,9 @@ var _handled: Dictionary = {}
 var _actors: Dictionary = {}
 var _posts: Dictionary = {}
 var _visibility_posts: Dictionary = {}
+# Only exact departed cast nodes are hidden through an acknowledged handoff.
+# Their next native movement/identity or lifecycle change releases the lease.
+var _handoff_hidden: Dictionary = {}
 var _portrait_only_roles: Dictionary = {}
 var _staged_actor_roles: Dictionary = {}
 var _rig: Node3D
@@ -662,6 +665,7 @@ func set_reduced_motion(value: bool, persist := true) -> void:
 func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictionary,
 		local_actor_id: int, current_map: String, world_ready := true,
 		coordinate_adapter: CoordinateAdapter = null, surface_sample := Callable()) -> void:
+	_update_handoff_visibility(snapshot, actor_nodes, current_map)
 	if not bool(snapshot.get("active", false)):
 		cancel("inactive")
 		return
@@ -885,12 +889,15 @@ func _start(rig: Node3D, camera: Camera3D, local: Node3D, nodes: Dictionary,
 		_view_focus.name = "CampaignViewFocus"
 		add_child(_view_focus)
 	_release_ambient()
+	_release_handoff_visibility()
 	_rig = rig
 	_camera = camera
 	_saved = {"rig": rig.global_transform, "camera": camera.global_transform,
 		"fov": camera.fov, "near": camera.near, "far": camera.far,
 		"focus": rig.get("focus"), "distance": rig.get("distance"),
 		"pitch_degrees": rig.get("pitch_degrees"), "yaw_degrees": rig.get("yaw_degrees")}
+	if rig.has_method("capture_follow_state"):
+		_saved["follow_state"] = rig.call("capture_follow_state")
 	_local_actor = weakref(local)
 	_local_start = local.global_position
 	_returning = false
@@ -968,7 +975,7 @@ func _start(rig: Node3D, camera: Camera3D, local: Node3D, nodes: Dictionary,
 	_apply_camera()
 	_update_caption()
 
-func _apply_camera() -> void:
+func _apply_camera(exit_view := false) -> void:
 	var shots: Array = []
 	for shot: Dictionary in _definition.get("shots", []):
 		if _beat_matches(shot): shots.append(shot)
@@ -977,7 +984,7 @@ func _apply_camera() -> void:
 	var first: Dictionary = shots[0]
 	var last: Dictionary = first
 	var weight := 0.0
-	if not reduced_motion:
+	if not reduced_motion or exit_view:
 		for i in range(1, shots.size()):
 			last = shots[i]
 			if elapsed <= float(last.t):
@@ -998,7 +1005,7 @@ func _apply_camera() -> void:
 	var pose := {"transform": transform, "target": target, "near": 0.5,
 		"far": float(_saved.get("far", _camera.far)), "fov": float(_definition.get("fov", 50.0))}
 	if _camera_handoff():
-		if reduced_motion:
+		if reduced_motion and not exit_view:
 			# Reduced motion keeps the player's own framing, rather than cutting
 			# to the first authored shot or flying across the scene.
 			pose = _reduced_view.duplicate()
@@ -1009,12 +1016,12 @@ func _apply_camera() -> void:
 			pose.target += movement
 		else:
 			var entry := _handoff_seconds("entry_seconds")
-			if entry > 0.0 and _camera_entry_elapsed < entry:
+			if entry > 0.0 and _camera_entry_elapsed < entry and not exit_view:
 				pose = _mix_camera(_gameplay_camera(), pose, smoothstep(0.0, entry, _camera_entry_elapsed))
 			var exit := _handoff_seconds("exit_seconds")
-			if exit > 0.0 and elapsed > _duration() - exit:
+			if exit > 0.0 and elapsed > _duration() - exit and not _keeps_exit_camera():
 				pose = _mix_camera(pose, _gameplay_camera(), smoothstep(_duration() - exit, _duration(), elapsed))
-			if not _resume_view.is_empty():
+			if not _resume_view.is_empty() and not exit_view:
 				pose = _mix_camera(_resume_view, pose, smoothstep(_resume_at, _resume_at + _resume_seconds, elapsed))
 		var opacity := 1.0
 		var entry_fade := minf(0.6, _handoff_seconds("entry_seconds"))
@@ -1047,6 +1054,11 @@ func _handoff_seconds(key: String) -> float:
 
 func _camera_handoff() -> bool:
 	return _handoff_seconds("entry_seconds") > 0.0 or _handoff_seconds("exit_seconds") > 0.0
+
+func _keeps_exit_camera() -> bool:
+	var policy: Variant = _definition.get("exit_camera", {})
+	return not _replaying and policy is Dictionary and str(policy.get("mode", "")) == "keep_scene" \
+		and _beat_matches(policy) and is_instance_valid(_rig) and _rig.has_method("adopt_world_view")
 
 func _local_position() -> Vector3:
 	if _local_actor != null:
@@ -1135,6 +1147,7 @@ func _apply_actors() -> void:
 		var from: Vector3 = _anchors.get(str(chosen.get("from", "")), post.origin + previous_offset)
 		from += _vector(chosen.get("from_offset", [0, 0, 0]))
 		var to: Vector3 = _anchors.get(str(chosen.get("destination", "")), post.origin + destination)
+		to += _vector(chosen.get("destination_offset", [0, 0, 0]))
 		var at := _ground(from.lerp(to, progress))
 		var attached := str(chosen.get("attach_to", ""))
 		if not attached.is_empty() and _actors.has(attached):
@@ -1162,6 +1175,8 @@ func _apply_actors() -> void:
 		if actor.has_method("set_cinematic_presentation"):
 			actor.call("set_cinematic_presentation", at, yaw, action,
 				to.distance_to(from) / move_seconds if move_seconds > 0.0 and progress < 1.0 else 0.0)
+			if actor.has_method("set_cinematic_action_elapsed"):
+				actor.call("set_cinematic_action_elapsed", maxf(0.0, elapsed - float(chosen.get("at", 0.0))))
 		else:
 			actor.global_position = at
 			actor.rotation.y = yaw
@@ -1270,7 +1285,9 @@ func _return_to_play(reason: String) -> void:
 	_stop_inspection()
 	_line_holding = false
 	if is_instance_valid(_line_continue): _line_continue.hide()
-	if _returning:
+	if playing and reason in ["finished", "skipped"] and _keeps_exit_camera():
+		cancel(reason)
+	elif _returning:
 		cancel(_return_reason)
 	elif playing and _handoff_seconds("exit_seconds") > 0.0 and not reduced_motion:
 		_returning = true
@@ -1289,6 +1306,25 @@ func cancel(reason := "cancelled") -> void:
 	_stop_inspection()
 	var owned := is_active()
 	var was_replay := _replaying
+	var hide_departed := owned and not was_replay and reason in ["finished", "skipped"]
+	if reason not in ["finished", "skipped"]: _release_handoff_visibility()
+	var adopt := owned and reason in ["finished", "skipped"] and _keeps_exit_camera() \
+		and is_instance_valid(_camera)
+	if adopt and (reason == "skipped" or reduced_motion):
+		# Even an early Skip or reduced-motion film starts combat from the final
+		# static confrontation view. This samples visual cues, never events.
+		elapsed = _duration()
+		_camera_entry_elapsed = _duration()
+		_resume_view.clear()
+		_apply_actors()
+		_apply_camera(true)
+	var adopted_view := _capture_camera() if adopt else {}
+	var followed_position := _local_position()
+	var arrival := Vector3.INF
+	if adopt and _local_actor != null:
+		var local := _local_actor.get_ref() as Node3D
+		if is_instance_valid(local) and _actors.get("protagonist") == local:
+			arrival = local.global_position
 	if owned:
 		_last_return_reason = reason
 		_last_playback_replay = was_replay
@@ -1317,11 +1353,19 @@ func cancel(reason := "cancelled") -> void:
 			continue
 		if _portrait_only_roles.has(role): continue
 		var actor: Node3D = actor_value
-		actor.visible = bool(_visibility_posts.get(role, true))
+		var departed: bool = hide_departed and role in _definition.get("hide_on_handoff", [])
+		var original_visibility := bool(_visibility_posts.get(role, true))
+		# Do not restore visible=true for even one frame before releasing poses.
+		actor.visible = false if departed else original_visibility
 		if actor.has_method("end_cinematic_presentation"):
 			actor.call("end_cinematic_presentation")
 		else:
 			actor.global_transform = _posts[role]
+		if departed:
+			actor.hide()
+			_handoff_hidden[actor.get_instance_id()] = {"node":weakref(actor),
+				"visible":original_visibility,"native":_handoff_native_stamp(actor),
+				"run":_run,"map":_map}
 	_actors.clear()
 	_posts.clear()
 	_staged_actor_roles.clear()
@@ -1329,7 +1373,9 @@ func cancel(reason := "cancelled") -> void:
 		if is_instance_valid(visual):
 			visual.hide()
 			visual.process_mode = Node.PROCESS_MODE_DISABLED
-	if not _saved.is_empty():
+	if adopt:
+		adopt = bool(_rig.call("adopt_world_view", adopted_view, followed_position, arrival))
+	if not _saved.is_empty() and not adopt:
 		if is_instance_valid(_rig):
 			var rig_pose: Transform3D = _saved.rig
 			rig_pose.origin += movement
@@ -1337,6 +1383,8 @@ func cancel(reason := "cancelled") -> void:
 			for key: String in ["focus", "distance", "pitch_degrees", "yaw_degrees"]:
 				if _saved[key] != null:
 					_rig.set(key, _saved[key] + movement if key == "focus" and _saved[key] is Vector3 else _saved[key])
+			if _rig.has_method("restore_follow_state"):
+				_rig.call("restore_follow_state", _saved.get("follow_state", {}))
 		if is_instance_valid(_camera):
 			var camera_pose: Transform3D = _saved.camera
 			camera_pose.origin += movement
@@ -1374,6 +1422,53 @@ func cancel(reason := "cancelled") -> void:
 		_clear_replay_cast()
 	if reason not in ["finished", "skipped"]:
 		_release_ambient()
+
+func _handoff_native_stamp(actor: Node3D) -> Dictionary:
+	var stamp := {"position":_authoritative_position(actor),
+		"identity":actor.get_meta(&"identity_key", "")}
+	for property: Dictionary in actor.get_property_list():
+		var key := str(property.name)
+		if key in ["actor_id", "_last_command_sequence"]: stamp[key] = actor.get(key)
+	return stamp
+
+func _release_handoff_visibility(key := 0) -> void:
+	var keys: Array = [key] if key != 0 else _handoff_hidden.keys()
+	for id: int in keys:
+		if not _handoff_hidden.has(id): continue
+		var lease: Dictionary = _handoff_hidden[id]
+		var actor := (lease.node as WeakRef).get_ref() as Node3D
+		if is_instance_valid(actor) and not actor.is_queued_for_deletion():
+			actor.visible = bool(lease.visible)
+		_handoff_hidden.erase(id)
+
+func _update_handoff_visibility(snapshot: Dictionary, actor_nodes: Dictionary, current_map: String) -> void:
+	for id: int in _handoff_hidden.keys():
+		var lease: Dictionary = _handoff_hidden[id]
+		var actor := (lease.node as WeakRef).get_ref() as Node3D
+		if not is_instance_valid(actor) or actor.is_queued_for_deletion():
+			_handoff_hidden.erase(id)
+			continue
+		if actor.visible:
+			# A native owner explicitly showing this node supersedes our lease.
+			_handoff_hidden.erase(id)
+			continue
+		var present := false
+		for node: Variant in actor_nodes.values():
+			if is_instance_valid(node) and node == actor:
+				present = true
+				break
+		if not present:
+			# Native removal may park this body hidden in the world. Relinquish
+			# it without showing it; take_parked owns any later reappearance.
+			_handoff_hidden.erase(id)
+			continue
+		if not bool(snapshot.get("active", false)) \
+				or str(snapshot.get("run_id", "")) != str(lease.run) \
+				or map_key(current_map) != str(lease.map) \
+				or _handoff_native_stamp(actor) != lease.native:
+			# A still-present native actor or a presentation boundary supersedes
+			# our exact-node visibility override.
+			_release_handoff_visibility(id)
 
 func update_ambient(snapshot: Dictionary, actor_nodes: Dictionary, adapter: CoordinateAdapter,
 		surface_sample: Callable, delta := 1.0 / 60.0) -> void:
@@ -1536,6 +1631,8 @@ func _ground(point: Vector3) -> Vector3:
 
 func reset_session() -> void:
 	cancel("session_ended")
+	if is_instance_valid(_rig) and _rig.has_method("reset_follow_offset"):
+		_rig.call("reset_follow_offset")
 	_handled.clear()
 	_token = ""
 	_run = ""
