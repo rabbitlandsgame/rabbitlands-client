@@ -5,6 +5,7 @@ import os
 os.environ["OPENBLAS_NUM_THREADS"] = "2"
 os.environ["OMP_NUM_THREADS"] = "2"
 import argparse
+import copy
 import sys
 import json
 import pathlib
@@ -22,7 +23,15 @@ from test_completed_creature_motion import normal_sampler
 def same_accessor(ad, ab, old, bd, bb, new):
     """Compare raw retained values and their interpretation, not float tolerances."""
     left, right = ad["accessors"][old], bd["accessors"][new]
-    for key in ("componentType", "type", "count", "normalized", "extensions"):
+    for key in (
+        "componentType",
+        "type",
+        "count",
+        "normalized",
+        "extensions",
+        "min",
+        "max",
+    ):
         assert left.get(key) == right.get(key), (old, new, key)
     assert _array(ad, ab, old).tobytes() == _array(bd, bb, new).tobytes()
 
@@ -85,11 +94,26 @@ def exact_source(job):
         {k: v for k, v in n.items() if k != "weights"} for n in bd["nodes"]
     ]
     for ni, (old, new) in enumerate(zip(ad["nodes"], bd["nodes"])):
-        if "weights" in old:
+        if "mesh" in old:
+            mask = masks[old["mesh"]]
             assert np.array_equal(
-                np.array(old["weights"])[masks[old["mesh"]]["retained_target_indices"]],
-                new.get("weights", []),
+                np.asarray(
+                    old.get(
+                        "weights",
+                        ad["meshes"][old["mesh"]].get(
+                            "weights", [0.0] * mask["targets_before"]
+                        ),
+                    )
+                )[mask["retained_target_indices"]],
+                new.get(
+                    "weights",
+                    bd["meshes"][new["mesh"]].get(
+                        "weights", [0.0] * mask["targets_after"]
+                    ),
+                ),
             )
+        else:
+            assert old.get("weights") == new.get("weights")
     for old, new in zip(ad.get("skins", []), bd.get("skins", [])):
         assert {k: v for k, v in old.items() if k != "inverseBindMatrices"} == {
             k: v for k, v in new.items() if k != "inverseBindMatrices"
@@ -111,10 +135,34 @@ def exact_source(job):
     for mi, (old, new) in enumerate(zip(ad["meshes"], bd["meshes"])):
         keep = masks[mi]["retained_target_indices"]
         remove = masks[mi]["removed_target_indices"]
-        if "weights" in old:
-            assert np.array_equal(
-                np.array(old["weights"])[keep], new.get("weights", [])
-            )
+        assert np.array_equal(
+            np.asarray(old.get("weights", [0.0] * masks[mi]["targets_before"]))[keep],
+            new.get("weights", [0.0] * len(keep)),
+        )
+        expected_metadata = copy.deepcopy(
+            {k: v for k, v in old.items() if k not in ("weights", "primitives")}
+        )
+        if "targetNames" in expected_metadata.get("extras", {}):
+            names = expected_metadata["extras"]["targetNames"]
+            if keep:
+                expected_metadata["extras"]["targetNames"] = [names[i] for i in keep]
+            else:
+                expected_metadata["extras"].pop("targetNames")
+        bounds = build.get("logical_actor_bounds")
+        if bounds is not None:
+            assert bounds["source_sha256"] == digest(source)
+            for record in bounds["meshes"]:
+                if ad["nodes"][int(record["source_node"])].get("mesh") != mi:
+                    continue
+                extras = expected_metadata.setdefault("extras", {})
+                extras["rabbitlands_actor_bounds_v1"] = {
+                    key: record[key] for key in ("position", "size")
+                }
+                if record["size"][1] > 0:
+                    extras["rabbitlands_coat_pattern_height"] = record["size"][1]
+        assert expected_metadata == {
+            k: v for k, v in new.items() if k not in ("weights", "primitives")
+        }, "Mesh names/extras or hash-bound logical bounds differ"
         assert len(old["primitives"]) == len(new["primitives"])
         for pa, pb in zip(old["primitives"], new["primitives"]):
             assert {
@@ -159,6 +207,12 @@ def exact_source(job):
         for oc in old["channels"]:
             oa = old["samplers"][oc["sampler"]]
             t = _array(ad, ab, oa["input"])
+            assert (
+                t.shape[1:] == (1,)
+                and len(t) > 0
+                and np.isfinite(t).all()
+                and np.all(np.diff(t[:, 0]) > 0)
+            ), "Source animation clock must increase strictly"
             times.extend(t[:, 0])
             ov = _array(ad, ab, oa["output"])
             key = (oc["target"]["node"], oc["target"]["path"])
@@ -171,8 +225,13 @@ def exact_source(job):
                     assert key not in new_channels
                     continue
             nc = new_channels.pop(key)
-            assert oc["target"] == nc["target"]
+            assert {k: v for k, v in oc.items() if k != "sampler"} == {
+                k: v for k, v in nc.items() if k != "sampler"
+            }
             ba = new["samplers"][nc["sampler"]]
+            assert {k: v for k, v in oa.items() if k not in ("input", "output")} == {
+                k: v for k, v in ba.items() if k not in ("input", "output")
+            }
             for kind in ("input", "output"):
                 for field in ("componentType", "type", "normalized", "extensions"):
                     assert ad["accessors"][oa[kind]].get(field) == bd["accessors"][
@@ -181,6 +240,12 @@ def exact_source(job):
             mode = oa.get("interpolation", "LINEAR")
             assert mode == ba.get("interpolation", "LINEAR")
             nt = _array(bd, bb, ba["input"])
+            assert (
+                nt.shape[1:] == (1,)
+                and len(nt) > 0
+                and np.isfinite(nt).all()
+                and np.all(np.diff(nt[:, 0]) > 0)
+            ), "Candidate animation clock must increase strictly"
             nv = _array(bd, bb, ba["output"])
             if oc["target"]["path"] == "weights":
                 nv = nv.reshape(len(nt), mask["targets_after"])
@@ -316,7 +381,7 @@ def witness(job):
     ids = np.array(w["surface_vertex_ids"])
     sa, sb = surface_sampler(a, ids), surface_sampler(b, ids)
     na, nb = normal_sampler(a, ids), normal_sampler(b, ids)
-    maxpos = maxnorm = wpos = wnorm = 0.0
+    maxpos = maxnorm = wpos = wnorm = wbone = 0.0
     surface_points = []
     for clip, entries in w["clips"].items():
         ts = [e["time"] for e in entries]
@@ -337,11 +402,26 @@ def witness(job):
                 wpos,
                 float(np.linalg.norm(bp - e["surface"], axis=1).max() / w["height"]),
             )
-            wnorm = max(
-                wnorm, float(np.linalg.norm(bn - e["surface_normals"], axis=1).max())
-            )
+            if "surface_normals" in e:
+                wnorm = max(
+                    wnorm,
+                    float(np.linalg.norm(bn - e["surface_normals"], axis=1).max()),
+                )
+            for name, values in e["bones"].items():
+                wbone = max(
+                    wbone,
+                    float(
+                        np.max(abs(bw[b.ids[name]] - np.asarray(values).reshape(4, 4)))
+                    ),
+                )
             surface_points.append(ap)
-    assert maxpos < 1e-12 and maxnorm < 1e-12 and wpos < 1e-8 and wnorm < 1e-8
+    assert (
+        maxpos < 1e-12
+        and maxnorm < 1e-12
+        and wpos < 1e-8
+        and wnorm < 1e-8
+        and wbone < 1e-9
+    )
     pts = np.concatenate(surface_points)
     report = dict(
         passed=True,
@@ -354,6 +434,8 @@ def witness(job):
         source_candidate_normal_vector_error=maxnorm,
         original_witness_position_error_over_height=wpos,
         original_witness_normal_vector_error=wnorm,
+        original_witness_bone_matrix_error=wbone,
+        witness_sha256=__import__("hashlib").sha256(wp.read_bytes()).hexdigest(),
         sampled_motion_min=pts.min(0).tolist(),
         sampled_motion_max=pts.max(0).tolist(),
     )
