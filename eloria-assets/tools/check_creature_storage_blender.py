@@ -1,6 +1,7 @@
 """Fresh self-contained Blender imports checked against original motion witnesses."""
 
 import bpy, hashlib, json, pathlib, sys
+import numpy as np
 from mathutils import Matrix, Vector
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
@@ -12,6 +13,14 @@ job = json.loads(
 out = pathlib.Path(job["output"])
 w = json.loads(pathlib.Path(job["witness"]).read_text(encoding="utf-8"))
 results = {}
+baseline_samples = {}
+direct = {
+    "maximum_position_error": 0.0,
+    "maximum_bone_matrix_error": 0.0,
+    "maximum_float32_budget": 0.0,
+    "poses": 0,
+    "neutral_default_checked": False,
+}
 for label in ["baseline", "candidate"]:
     bpy.ops.wm.read_factory_settings(use_empty=True)
     scene = bpy.context.scene
@@ -117,6 +126,63 @@ for label in ["baseline", "candidate"]:
         int(original): binding for original, binding in zip(original_ids, all_bindings)
     }
     bindings = [by_original[int(i)] for i in w["surface_vertex_ids"]]
+
+    def compare_direct(signature, deps):
+        surface = np.array(
+            [
+                tuple(
+                    ob.evaluated_get(deps).matrix_world
+                    @ ob.evaluated_get(deps).data.vertices[vi].co
+                )
+                for ob, vi in bindings
+            ]
+        )
+        bones = {
+            bone.name: np.array(arm.matrix_world @ bone.matrix)
+            for bone in arm.pose.bones
+        }
+        if label == "baseline":
+            baseline_samples[signature] = (surface, bones)
+            return
+        old, old_bones = baseline_samples[signature]
+        assert set(bones) == set(old_bones), "Direct Blender bone identities changed"
+        position_error = float(np.linalg.norm(surface - old, axis=1).max())
+        bone_error = max(
+            float(np.abs(bones[name] - old_bones[name]).max()) for name in bones
+        )
+        magnitude = max(
+            1.0,
+            float(np.abs(old).max()),
+            max(float(np.abs(matrix).max()) for matrix in old_bones.values()),
+        )
+        budget = 16 * float(np.spacing(np.float32(magnitude)))
+        assert position_error <= budget and bone_error <= budget, (
+            "Direct Blender pose differs",
+            signature,
+            position_error,
+            bone_error,
+            budget,
+        )
+        direct["maximum_position_error"] = max(
+            direct["maximum_position_error"], position_error
+        )
+        direct["maximum_bone_matrix_error"] = max(
+            direct["maximum_bone_matrix_error"], bone_error
+        )
+        direct["maximum_float32_budget"] = max(direct["maximum_float32_budget"], budget)
+        direct["poses"] += 1
+        if signature == "neutral_default":
+            direct["neutral_default_checked"] = True
+
+    for ob in objects:
+        if ob.type == "MESH" and ob.data.shape_keys:
+            key = ob.data.shape_keys
+            for block, value in zip(
+                list(key.key_blocks)[1:], default_weights[key.as_pointer()]
+            ):
+                block.value = value
+    bpy.context.view_layer.update()
+    compare_direct("neutral_default", bpy.context.evaluated_depsgraph_get())
     metrics = {}
     maxbone = 0.0
     maxsurface = 0.0
@@ -126,6 +192,7 @@ for label in ["baseline", "candidate"]:
         surface_error = 0.0
         for entry in entries:
             deps = pose(entry["time"])
+            compare_direct((clip, float(entry["time"])), deps)
             for (ob, vi), expected in zip(bindings, entry["surface"]):
                 ev = ob.evaluated_get(deps)
                 surface_error = max(
@@ -168,5 +235,15 @@ for label in ["baseline", "candidate"]:
         "max_bone_head_error_over_height": maxbone,
         "scope": "Independent fresh Blender import geometry/motion witness check. Blender is not the authority for runtime morph normal shading.",
     }
+    if label == "candidate":
+        direct.update(
+            passed=True,
+            source_sha256=results["baseline"]["sha256"],
+            candidate_sha256=results["candidate"]["sha256"],
+            scope="Direct source/candidate frozen-ID surfaces and every bone matrix at each original witness pose plus controlled neutral/default pose. Sixteen float32 ULPs at baseline coordinate/matrix magnitude; independent of inherited source/witness residual and separate from native/source appearance budgets.",
+        )
+        (out / "blender-direct-validation.json").write_text(
+            json.dumps(direct, indent=2)
+        )
     (out / "blender-validation.json").write_text(json.dumps(results, indent=2))
     print("BLENDER_PILOT_PASS", label, maxsurface, maxbone, flush=True)

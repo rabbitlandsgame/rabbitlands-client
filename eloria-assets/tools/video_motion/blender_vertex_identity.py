@@ -139,7 +139,32 @@ def imported_bindings(path, objects):
             np.einsum("vij,vj->vi", frame[:, :3, :3], positions) + frame[:, :3, 3]
         ) @ _C.T
         extent = max(1.0, float(np.abs(expected).max()))
-        budget = 16 * float(np.spacing(np.float32(extent)))
+        # The importer accumulates rest transforms and skin influences in
+        # float32 before storing its mesh. Account for those operations when
+        # proving an ordinal; the independent posed comparison has its own
+        # much tighter total-error gate.
+        parents = {
+            child: i
+            for i, n in enumerate(doc["nodes"])
+            for child in n.get("children", [])
+        }
+
+        def depth(index):
+            steps = 1
+            while index in parents:
+                steps += 1
+                index = parents[index]
+            return steps
+
+        composition_steps = 1
+        if "skin" in node:
+            joint_depth = max(depth(i) for i in doc["skins"][node["skin"]]["joints"])
+            influences = max(
+                sum(4 for key in p["attributes"] if key.startswith("JOINTS_"))
+                for p in primitives
+            )
+            composition_steps = joint_depth + influences
+        budget = 16 * composition_steps * float(np.spacing(np.float32(extent)))
         candidates = []
         for ob in meshes:
             if ob.as_pointer() in used or len(ob.data.vertices) != count:
@@ -314,6 +339,7 @@ def imported_bindings(path, objects):
                 "normal_scope": "Recorded only; Blender custom-normal packing is not the authority for source/Godot shading. Vertex motion identity is proved by basis,UV,skin and every POSITION shape.",
                 "all_target_position_error": shape_error,
                 "position_budget": budget,
+                "rest_composition_steps": composition_steps,
             }
         )
     return bindings, defaults, records
