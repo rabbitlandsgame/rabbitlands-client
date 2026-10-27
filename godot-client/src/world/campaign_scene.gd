@@ -715,8 +715,7 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 		_definition = (_definitions[id] as Dictionary).duplicate(true)
 		# The same conversation has a different physical worksite at Twinbrook.
 		# Select its authored establishing frame once, then hold that view.
-		for shot: Dictionary in _definition.get("shots", []):
-			shot.merge((shot.get("variants", {}) as Dictionary).get(_variant, {}), true)
+		_apply_scene_variant()
 		_adapter = coordinate_adapter
 		_surface_sample = surface_sample
 		_anchors.clear()
@@ -1451,10 +1450,38 @@ func _release_ambient() -> void:
 	_ambient_actor = null
 	_ambient_elapsed = 0.0
 
+func _apply_scene_variant() -> void:
+	var first := true
+	for shot: Dictionary in _definition.get("shots", []):
+		var override: Dictionary = (shot.get("variants", {}) as Dictionary).get(_variant, {})
+		shot.merge(override, true)
+		# Returning to the rescue at the mine establishes its origin there too.
+		# The original ramp origin is only a fallback for the original shots.
+		if first and _scene_id.begins_with("measure.rescue.") and override.has("anchor"):
+			_definition["anchor"] = shot["anchor"]
+		first = false
+
+func _required_anchor_keys() -> Array[String]:
+	var keys: Array[String] = []
+	if not _scene_id.begins_with("measure.rescue."):
+		for key: String in _anchors: keys.append(key)
+		return keys
+	# A rescue snapshot includes the whole site's later quest destinations.
+	# Only the current film's camera and staging need terrain before dialogue.
+	var referenced := {str(_definition.get("anchor", "")): true}
+	for shot: Dictionary in _definition.get("shots", []):
+		referenced[str(shot.get("anchor", ""))] = true
+	for cue: Dictionary in _definition.get("cues", []):
+		for field: String in ["from", "destination", "face"]:
+			referenced[str(cue.get(field, ""))] = true
+	for key: String in referenced:
+		if _anchors.has(key): keys.append(key)
+	return keys
+
 func _anchors_ready() -> bool:
 	if not _surface_sample.is_valid():
 		return true # Legacy scenes with no coordinate anchors use live actor posts.
-	for key: String in _anchors:
+	for key: String in _required_anchor_keys():
 		var point: Vector3 = _anchors[key]
 		var height: Variant = _surface_sample.call(point)
 		if typeof(height) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(height)):

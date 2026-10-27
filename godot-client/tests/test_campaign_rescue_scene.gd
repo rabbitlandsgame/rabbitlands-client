@@ -12,6 +12,13 @@ class Actor extends Node3D:
 		global_position = point
 		rotation.y = yaw
 
+class Rig extends Node3D:
+	var camera: Camera3D
+	var focus := Vector3.ZERO
+	var distance := 26.0
+	var pitch_degrees := -60.0
+	var yaw_degrees := 0.0
+
 func _init() -> void: run.call_deferred()
 func expect(value: bool, detail: String) -> void:
 	checks += 1
@@ -148,5 +155,89 @@ func run() -> void:
 	scene.playing = false
 	scene.queue_free()
 	for actor: Actor in [mother,daughter,carrier]: actor.queue_free()
+	check_rescue_readiness()
+	check_manual_rescue_dialogue()
 	print("Rescue scene checks: ", checks, "; failures: ", failures)
 	quit(1 if failures else 0)
+
+func check_rescue_readiness() -> void:
+	var scene := Scene.new()
+	root.add_child(scene)
+	scene._scene_id = "measure.rescue.abduction"
+	scene._definition = {"anchor":"ramp","shots":[{"anchor":"ramp"}],
+		"cues":[{"from":"ramp","destination":"damage","face":"speaker_post"}]}
+	scene._anchors = {"ramp":Vector3.ZERO,"damage":Vector3(1,0,0),
+		"speaker_post":Vector3(2,0,0),"mine_entry":Vector3(100,0,0)}
+	scene._surface_sample = func(point: Vector3) -> float: return NAN if point.x > 10.0 else 3.0
+	expect(scene._anchors_ready(), "unloaded distant mine terrain cannot hold the ramp film before its dialogue")
+	scene._surface_sample = func(point: Vector3) -> float: return NAN if point.x > 0.5 else 3.0
+	expect(not scene._anchors_ready(), "a missing surface used by the current staging still waits")
+	scene._definition.cues = [{"face":"speaker_post"}]
+	expect(not scene._anchors_ready(), "a facing point used by the current conversation also needs its surface")
+	scene._scene_id = "measure.ferry.opening"
+	scene._surface_sample = func(point: Vector3) -> float: return NAN if point.x > 10.0 else 3.0
+	expect(not scene._anchors_ready(), "legacy scenes preserve their existing full-anchor readiness")
+	scene._scene_id = "measure.rescue.commitment"
+	scene._variant = "returned"
+	scene._definition = (Scene.scene_definitions()[scene._scene_id] as Dictionary).duplicate(true)
+	scene._apply_scene_variant()
+	scene._anchors = {"entrance_focus":Vector3.ZERO,"mother_intercept":Vector3(100,0,0)}
+	expect(scene._definition.anchor == "entrance_focus" and scene._anchors_ready(),
+		"returning to the mine uses its effective entrance shots and origin without waiting for ramp terrain")
+	scene._surface_sample = func(_point: Vector3) -> float: return NAN
+	expect(not scene._anchors_ready(), "the returned mine conversation still waits for its actual entrance surface")
+	scene.queue_free()
+
+func check_manual_rescue_dialogue() -> void:
+	var definitions := Scene.scene_definitions()
+	for id: String in definitions:
+		if not id.begins_with("measure.rescue."): continue
+		var definition: Dictionary = definitions[id]
+		var lines: Array = definition.get("lines", [])
+		var holds: Array = definition.get("dialogue_holds", [])
+		expect(lines.is_empty() or holds.is_empty() or float(holds[0]) > float(lines[0].at),
+			id + " lets its first caption appear before the first reading pause")
+	var scene := Scene.new()
+	root.add_child(scene)
+	scene.set_auto_dialogue(false, false)
+	var rig := Rig.new()
+	root.add_child(rig)
+	rig.camera = Camera3D.new()
+	rig.add_child(rig.camera)
+	rig.camera.position = Vector3(0,5,10)
+	rig.camera.look_at(Vector3.ZERO)
+	var bindings := {}
+	var nodes := {}
+	var id := 1
+	for role: String in definitions["measure.rescue.abduction"].required_actors:
+		var actor := Actor.new()
+		root.add_child(actor)
+		bindings[role] = id
+		nodes[id] = actor
+		id += 1
+	var anchors := {}
+	for key: String in ["entry","mother_post","daughter_start","family_turn","mother_intercept",
+		"daughter_trip","capture","escort_post","guard_post","player_help","player_watch",
+		"ramp_top","ramp_middle","ramp_toe","recovery","mother_turn","guard_strike",
+		"escape_turn","escape_turn_2","guard_combat"]:
+		anchors[key] = [anchors.size(),0]
+	anchors.mine_entry = [100,0]
+	anchors.entrance_focus = [100,0]
+	var snapshot := {"active":true,"kind":"rescue","run_id":"manual-ramp","map":"landfall",
+		"anchors":anchors,"scene":{"id":"measure.rescue.abduction","token":"manual-ramp:abduction","actors":bindings}}
+	var adapter := CoordinateAdapter.new()
+	var sample := func(point: Vector3) -> float: return NAN if point.x >= 100.0 else 0.0
+	var local_id := int(bindings.protagonist)
+	scene.update(2.1,snapshot,rig,nodes,local_id,"landfall",true,adapter,sample)
+	expect(scene.playing and scene._layer.visible and not scene._caption.text.is_empty(),
+		"manual ramp playback shows its first caption while distant mine terrain remains unloaded")
+	expect(scene._line_continue.visible and scene.continue_dialogue(),
+		"Continue is immediately available on the first actual rescue caption")
+	scene.update(0.0,snapshot,rig,nodes,local_id,"landfall",true,adapter,sample)
+	expect(scene._dialogue.speaker_label.text == "Girl" and scene._caption.text == "Mum! My foot—"
+		and scene._dialogue._actor.get_ref() == nodes[bindings.daughter],
+		"one Continue advances to the next speaker and binds her portrait without an empty pause or extra click")
+	scene.cancel("test_complete")
+	scene.queue_free()
+	rig.queue_free()
+	for actor: Actor in nodes.values(): actor.queue_free()
