@@ -1216,6 +1216,7 @@
   "known_limitations": [
     "Separate CPU/GPU frame time and resident process RAM were not measured.",
     "Original artistic review/approval status is unchanged.",
-    "Zstandard payload grows 9024 bytes despite smaller raw animation storage; this is an explicit decoded/raw storage tradeoff."
+    "Zstandard payload grows 9024 bytes despite smaller raw animation storage; this is an explicit decoded GLB input/raw storage tradeoff.",
+    "Encoded animation-key savings describe the raw file, logical source accessors and import parsing input only. The native importer can densely rebake the same generated Animation keys, so runtime Animation RAM, key search work and playback CPU may remain unchanged; no such saving was measured or claimed."
   ]
 }
