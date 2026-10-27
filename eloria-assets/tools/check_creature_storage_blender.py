@@ -2,7 +2,9 @@
 
 import bpy, hashlib, json, pathlib, sys
 from mathutils import Matrix, Vector
-from mathutils.kdtree import KDTree
+
+sys.path.insert(0, str(pathlib.Path(__file__).parent))
+from video_motion.blender_vertex_identity import imported_bindings
 
 job = json.loads(
     pathlib.Path(sys.argv[sys.argv.index("--") + 1]).read_text(encoding="utf-8")
@@ -15,9 +17,25 @@ for label in ["baseline", "candidate"]:
     scene = bpy.context.scene
     scene.render.fps = 240
     path = pathlib.Path(job["source"] if label == "baseline" else job["candidate"])
-    bpy.ops.import_scene.gltf(filepath=str(path))
+    bpy.ops.import_scene.gltf(filepath=str(path), merge_vertices=False)
     objects = list(bpy.data.objects)
     actions = list(bpy.data.actions)
+    all_bindings, default_weights, identity = imported_bindings(path, objects)
+    slots_by_data = {}
+    for data in list(objects) + [
+        o.data.shape_keys for o in objects if o.type == "MESH" and o.data.shape_keys
+    ]:
+        ad = data.animation_data
+        if ad is None:
+            continue
+        slots = {}
+        if ad.action is not None and ad.action_slot is not None:
+            slots[ad.action.as_pointer()] = ad.action_slot
+        for track in ad.nla_tracks:
+            for strip in track.strips:
+                if strip.action is not None:
+                    slots[strip.action.as_pointer()] = strip.action_slot
+        slots_by_data[data.as_pointer()] = slots
     clips = {
         cl: next(x for x in actions if x.name == cl or x.name.startswith(cl + "."))
         for cl in w["clips"]
@@ -44,9 +62,9 @@ for label in ["baseline", "candidate"]:
             bone.matrix_basis = Matrix.Identity(4)
         arm.animation_data_create()
         arm.animation_data.action = action
-        arm.animation_data.action_slot = next(
-            s for s in action.slots if s.target_id_type == "OBJECT"
-        )
+        arm.animation_data.action_slot = slots_by_data[arm.as_pointer()][
+            action.as_pointer()
+        ]
         for ob in objects:
             if ob.type != "MESH" or not ob.data.shape_keys:
                 continue
@@ -55,12 +73,14 @@ for label in ["baseline", "candidate"]:
             key.animation_data.action = None
             for track in key.animation_data.nla_tracks:
                 track.mute = True
-            for block in list(key.key_blocks)[1:]:
-                block.value = 0.0
-            slots = [s for s in action.slots if s.target_id_type == "KEY"]
-            if slots:
+            for block, value in zip(
+                list(key.key_blocks)[1:], default_weights[key.as_pointer()]
+            ):
+                block.value = value
+            slot = slots_by_data.get(key.as_pointer(), {}).get(action.as_pointer())
+            if slot is not None:
                 key.animation_data.action = action
-                key.animation_data.action_slot = slots[0]
+                key.animation_data.action_slot = slot
 
     def pose(tm):
         frame = tm * 240
@@ -71,25 +91,19 @@ for label in ["baseline", "candidate"]:
     def convert(v):
         return Vector((v[0], -v[2], v[1]))
 
-    clip = next(iter(w["clips"]))
-    entry = w["clips"][clip][0]
-    select(clip)
-    deps = pose(entry["time"])
-    points = []
-    for ob in objects:
-        if ob.type == "MESH":
-            ev = ob.evaluated_get(deps)
-            for v in ev.data.vertices:
-                points.append((ob, v.index, ev.matrix_world @ v.co))
-    kd = KDTree(len(points))
-    for i, (_, _, v) in enumerate(points):
-        kd.insert(v, i)
-    kd.balance()
-    bindings = []
-    for expected in entry["surface"]:
-        pos, index, distance = kd.find(convert(expected))
-        assert distance < 0.00015 * w["height"], (label, "binding", distance)
-        bindings.append(points[index][:2])
+    original_ids = list(range(len(all_bindings)))
+    if label == "candidate" and job.get("preparation"):
+        preparation = json.loads(pathlib.Path(job["preparation"]).read_text())
+        partition = preparation.get("partition")
+        if partition and "all_candidate_original_vertex_ids" in partition:
+            original_ids = partition["all_candidate_original_vertex_ids"]
+    assert len(original_ids) == len(all_bindings) and len(set(original_ids)) == len(
+        original_ids
+    )
+    by_original = {
+        int(original): binding for original, binding in zip(original_ids, all_bindings)
+    }
+    bindings = [by_original[int(i)] for i in w["surface_vertex_ids"]]
     metrics = {}
     maxbone = 0.0
     maxsurface = 0.0
@@ -134,6 +148,8 @@ for label in ["baseline", "candidate"]:
         "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
         "passed": True,
         "surface_probes": len(bindings),
+        "vertex_identity": identity,
+        "binding_method": "Full original GLB primitive vertex order, independently proved against basis/UV/skin/normals/all POSITION target data; frozen source IDs retained through partition mapping.",
         "clips": metrics,
         "max_surface_error_over_height": maxsurface,
         "max_bone_head_error_over_height": maxbone,
