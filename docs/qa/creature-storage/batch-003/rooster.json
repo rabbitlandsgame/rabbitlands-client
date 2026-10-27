@@ -457,13 +457,55 @@
       "image_pairs": 406,
       "width": 512,
       "height": 512,
-      "different_image_pairs": 9,
-      "maximum_different_pixels": 15,
-      "maximum_pixels_above_two_levels": 2,
-      "maximum_mean_channel_error": 6.866455078125e-05,
-      "maximum_channel_error": 28,
-      "scope": "Complete ReplicatedActor3D setup with actual display scale, grounding and body materials; identical cameras for source/candidate, four views and every full native cycle at24Hz. Numeric playback and pixel comparisons are separate reports."
-    }
+      "different_image_pairs": 8,
+      "maximum_different_pixels": 13,
+      "maximum_pixels_above_two_levels": 0,
+      "maximum_mean_channel_error": 1.6530354817708332e-05,
+      "maximum_channel_error": 1,
+      "scope": "Complete ReplicatedActor3D setup with actual display scale, grounding and body materials; identical cameras for source/candidate, four views and every full native cycle at24Hz. Numeric playback and pixel comparisons are separate reports.",
+      "framing_passed": true,
+      "clipped_frame_labels": [],
+      "maximum_border_foreground_pixels": 0
+    },
+    "full_motion_source_fit": {
+      "source_sha256": "3d960a4673f225bbc7ca26ead0ffbcb25428d9a8a8ef2de458b42a462f35921e",
+      "model_global": [
+        [
+          0.5,
+          0.000304066110402346,
+          -0.337999999523163
+        ],
+        [
+          -1.29999935626984,
+          0.0,
+          1.13649555544271e-07
+        ],
+        [
+          0.0,
+          1.29999935626984,
+          0.0
+        ],
+        [
+          -1.13649555544271e-07,
+          0.0,
+          -1.29999935626984
+        ]
+      ],
+      "position": [
+        -0.030098973382678973,
+        0.0012140823548271369,
+        -1.1617128897429527
+      ],
+      "size": [
+        1.0609853619644598,
+        1.2179672897523053,
+        1.489029905560597
+      ],
+      "poses": 294,
+      "scope": "Every vertex at every full-cycle render frame and view-still pose, using actual complete Actor Godot arrays/poses/weights/transforms, renderer morph cutoff and four/eight influence skin. Evaluated in float64 with a separate 30% camera margin."
+    },
+    "framing_passed": true,
+    "render_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\batch-003\\rooster\\framing-v2"
   },
   "actual_actor_dissolve_validation": {
     "passed": true,
@@ -603,51 +645,58 @@
     "lossless_frames": {
       "path": "qualified-frames.zip",
       "files": 812,
-      "bytes": 40726280,
-      "sha256": "db4fa80d2bbb258abeb4df66edb55ed3612293e84fa32eba830265c7c5c4dfe7"
+      "bytes": 33922336,
+      "sha256": "a1b0588acb9fabb6d9d99a00bdd3fe5c0bfb83199288b6ed8546aca6395a1384"
     },
     "full_cycles": [
       {
         "path": "Death_A-comparison.webp",
-        "bytes": 2235192,
-        "sha256": "b6b5813c76f4b9923d0c53b9414bd7434958be3b2a719d00b25b45eda2bb8bc8"
+        "bytes": 1890348,
+        "sha256": "ede1d86f852fc47a205a66d73d630f4cb4e83fab923c3265bad730f054c077bb"
       },
       {
         "path": "Fighting_Idle-comparison.webp",
-        "bytes": 960726,
-        "sha256": "47895d4a469e2f4b885975c5b68b960dbc49c8f07d7f12a603d0968fb4cfe5c4"
+        "bytes": 819078,
+        "sha256": "2b460aa994c26c10ff0b004dd20287f60844bf4309901ce0539ae6a0fb606bd7"
       },
       {
         "path": "Fly-comparison.webp",
-        "bytes": 1012264,
-        "sha256": "8bbbe4fa3224324dd820ee7a871495ba6d4d17f63e42eca38166b64f2fd72312"
+        "bytes": 895970,
+        "sha256": "fcc2071dc331d2f8cfe847d685e98bff6dba945a2934b60c7aa541e94aa418d2"
       },
       {
         "path": "Hit_Chest-comparison.webp",
-        "bytes": 820176,
-        "sha256": "b9369f5ddd63fc949ab71b4a256eeef7cf6680ce63e4b0e25a587c16726523e2"
+        "bytes": 691444,
+        "sha256": "696d37c44f782e6636695824b7881cb9315958ef63a1eeac8408be67dc03ed37"
       },
       {
         "path": "Idle_A-comparison.webp",
-        "bytes": 1105810,
-        "sha256": "22fad7520bd9e355b8db9249b7a5bf0adec52d1c1ec572cc0e92464eb153b5d4"
+        "bytes": 960788,
+        "sha256": "78945a4eee407d02edfc3edc8782b4a6160fb1337ad4d2df7a7c95f4617a3783"
       },
       {
         "path": "Jog-comparison.webp",
-        "bytes": 551526,
-        "sha256": "b412552a62de038aa557d2349100360e9031ad6cbdf03c0b10089cde415872d1"
+        "bytes": 428734,
+        "sha256": "7e493451bd12428a01abdf2f2a4b4121f2a510663a9f6d9012cba448e11b19b9"
       },
       {
         "path": "Sword_Attack-comparison.webp",
-        "bytes": 883350,
-        "sha256": "df84a432eec698658bf83ea410debed9c680d9539892c5996610438e419e6af4"
+        "bytes": 733794,
+        "sha256": "51bb6dd7e59530312569fa87f767c9f5fcf1f8d7f592d72ff49c22979ac1dab5"
       },
       {
         "path": "Walk-comparison.webp",
-        "bytes": 827388,
-        "sha256": "8049e02dc4119cc9a774613ce4d90337ee1c0b70d1f86ca3c5346e25e5c764b9"
+        "bytes": 652654,
+        "sha256": "406ba6e9a758a606b28063ff2e30b92a8fbee3d51d31296de17817a0a8afbfe2"
       }
     ],
-    "scope": "Original 512 px PNGs retained in a verified lossless ZIP. Paired lossless WebP previews retain every cycle frame at 24 fps, resized to 384 px for review."
+    "scope": "Exactoriginal512pxPNGs verified inlosslessZIP; losslessWebP pairedpreviews resized384px at24fps preserveallcycleframes forreview."
+  },
+  "prior_review_framing": {
+    "original_image_pairs": 406,
+    "clipped_frames": 31,
+    "maximum_border_foreground_pixels": 14,
+    "original_captures_retained": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\batch-003\\rooster\\v1\\actual-render\\qualified-frames.zip",
+    "resolution": "Repeated the complete paired full-cycle and four-view capture using a source-only fit over every vertex at every render pose; final border foreground count is zero. Model bytes and all original physical observations remain unchanged."
   }
 }
