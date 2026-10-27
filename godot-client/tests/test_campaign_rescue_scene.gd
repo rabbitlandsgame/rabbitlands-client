@@ -7,10 +7,14 @@ var failures := 0
 
 class Actor extends Node3D:
 	var staged := 0
-	func set_cinematic_presentation(point: Vector3, yaw: float, _action: StringName, _speed: float) -> void:
+	var released := 0
+	var last_action: StringName
+	func set_cinematic_presentation(point: Vector3, yaw: float, action: StringName, _speed: float) -> void:
 		staged += 1
+		last_action = action
 		global_position = point
 		rotation.y = yaw
+	func end_cinematic_presentation() -> void: released += 1
 
 class Rig extends Node3D:
 	var camera: Camera3D
@@ -157,6 +161,7 @@ func run() -> void:
 	for actor: Actor in [mother,daughter,carrier]: actor.queue_free()
 	check_rescue_readiness()
 	check_manual_rescue_dialogue()
+	check_carry_and_native_handoff()
 	print("Rescue scene checks: ", checks, "; failures: ", failures)
 	quit(1 if failures else 0)
 
@@ -241,3 +246,50 @@ func check_manual_rescue_dialogue() -> void:
 	scene.queue_free()
 	rig.queue_free()
 	for actor: Actor in nodes.values(): actor.queue_free()
+
+func check_carry_and_native_handoff() -> void:
+	var scene := Scene.new()
+	root.add_child(scene)
+	var hero := Actor.new()
+	var carrier := Actor.new()
+	var child := Actor.new()
+	for actor: Actor in [hero,carrier,child]: root.add_child(actor)
+	carrier.position = Vector3(4,0,3)
+	carrier.rotation.y = PI/2
+	var skeleton := Skeleton3D.new()
+	carrier.add_child(skeleton)
+	skeleton.scale = Vector3.ONE * 0.676024
+	skeleton.rotation.z = 0.5
+	skeleton.add_bone("spine_3")
+	skeleton.set_bone_rest(0,Transform3D(Basis.IDENTITY,Vector3(0,1.4,0)))
+	skeleton.force_update_all_bone_transforms()
+	scene._actors = {"protagonist":hero,"abductor":carrier,"daughter":child}
+	for role: String in scene._actors: scene._posts[role] = scene._actors[role].global_transform
+	scene._anchors = {"downramp":Vector3(0,0,-5)}
+	scene._definition = {"duration":64,"native_roles_from":{"protagonist":42},"cues":[
+		{"at":0,"actor":"protagonist","action":"idle","face":"downramp"},
+		{"at":16,"actor":"daughter","action":"injury_pinned","attach_to":"abductor",
+			"attach_bone":"spine_3","attach_yaw_degrees":90,"offset":[-.25,.10,.10]}]}
+	scene.elapsed = 20
+	scene._apply_actors()
+	var shoulder := (skeleton.global_transform * skeleton.get_bone_global_pose(0)).origin
+	var offset := carrier.global_basis.orthonormalized() * Vector3(-.25,.10,.10)
+	expect(child.global_position.is_equal_approx(shoulder+offset),"a carried child follows the real shoulder without inheriting the imported skeleton's roll or scale")
+	expect(child.last_action == &"injury_pinned" and is_equal_approx(child.rotation.y,PI),"the captive lies across the carrier instead of running beside him")
+	var center := (hero.global_position+carrier.global_position)/2
+	expect(scene._shot_anchor({"anchor_actors":["protagonist","abductor"]}).is_equal_approx(center),"the departure camera follows the actual pair's midpoint")
+	var stages := hero.staged
+	scene.elapsed = 42
+	scene._apply_actors()
+	scene._apply_actors()
+	expect(hero.released == 1 and hero.staged == stages,"the opening releases the player's facing pose once before native combat movement")
+	scene._replaying = true
+	scene._apply_actors()
+	expect(hero.staged == stages+1,"read-only replay retains authored staging after the live movement handoff")
+	scene._choice_state = {"selected":"accept"}
+	scene._variant = "returned"
+	expect(not scene._beat_matches({"when":"accept","unless_variant":"returned"}),"returning at the mine cannot replay the earlier departure or its fade")
+	scene._variant = ""
+	expect(scene._beat_matches({"when":"accept","unless_variant":"returned"}),"the original accepted rescue retains its departure")
+	scene.queue_free()
+	for actor: Actor in [hero,carrier,child]: actor.queue_free()

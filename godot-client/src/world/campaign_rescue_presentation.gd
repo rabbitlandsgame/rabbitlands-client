@@ -6,6 +6,10 @@ const Dissolve := preload("res://src/actors/creature_dissolve.gd")
 const FENCE_ID := "11ec54ffb8d8eb66b5a8de1e0bdb3da278b75459c880a07fc46acfcf1e9f4c65"
 const FENCE_PATH := "res://../eloria-assets/maps/_shared/meshes/"+FENCE_ID+".glb"
 const LANTERN_TILES := [[49.6,29.5],[60.4,29.5],[43,49],[67.5,54],[60,62.5],[24.5,60],[88,61],[73,70],[46.5,86],[63.5,82]]
+const DARK_AMBIENT_ENERGY := 0.003
+const DARK_DIRECTIONAL_ENERGY := 0.0
+const LANTERN_ENERGY := 1.6
+const LANTERN_RANGE := 12.0
 
 var cage: Node3D
 var gate: Node3D
@@ -49,6 +53,7 @@ var _saved_lights: Dictionary = {}
 var _directional_inputs: Array[WeakRef] = []
 var _darkness_started := false
 var _darkness_requested := false
+var _marker_light_leases: Dictionary = {}
 
 func apply_snapshot(snapshot: Dictionary, adapter: CoordinateAdapter, current_map: String,
 		surface_sample: Callable) -> void:
@@ -130,8 +135,11 @@ func _build_lights() -> void:
 		at=_ground(at)
 		if not at.is_finite():continue
 		var lamp:=OmniLight3D.new();lamp.name="ExistingMineLanternLight";add_child(lamp)
-		lamp.global_position=at+Vector3.UP*1.9;lamp.light_color=Color("ffd095")
-		lamp.light_energy=2.2;lamp.omni_range=11.0;lamp.omni_attenuation=0.7;lamp.shadow_enabled=false
+		lamp.global_position=at+Vector3.UP*2.1;lamp.light_color=Color(1.0,0.7,0.4)
+		# Match the existing lantern_mine-lamp marker contract exactly. These
+		# replace the leased native fills; they never stack a second copy.
+		lamp.light_energy=LANTERN_ENERGY;lamp.omni_range=LANTERN_RANGE
+		lamp.shadow_enabled=false
 		lamp.visible=_darkness_requested;lamps.append(lamp)
 
 func apply_cinematic(state: Dictionary, actor_nodes: Dictionary) -> void:
@@ -363,13 +371,18 @@ func _apply_darkness() -> void:
 		_dark_environment.background_mode=Environment.BG_COLOR
 		_dark_environment.background_color=Color("080a13")
 		_dark_environment.ambient_light_source=Environment.AMBIENT_SOURCE_COLOR
-		_dark_environment.ambient_light_color=Color("8a91a6");_dark_environment.ambient_light_energy=0.10
+		_dark_environment.ambient_light_color=Color("59616f")
 		_world.environment=_dark_environment
 	_dark_environment.background_mode=Environment.BG_COLOR
 	_dark_environment.background_color=Color("080a13")
 	_dark_environment.ambient_light_source=Environment.AMBIENT_SOURCE_COLOR
-	_dark_environment.ambient_light_energy=0.10
+	_dark_environment.ambient_light_energy=DARK_AMBIENT_ENERGY
+	_dark_environment.ambient_light_sky_contribution=0.0
+	_dark_environment.reflected_light_source=Environment.REFLECTION_SOURCE_DISABLED
+	_dark_environment.sdfgi_enabled=false
+	_dark_environment.ssil_enabled=false
 	_dark_environment.fog_enabled=false
+	_suppress_duplicate_map_fills()
 
 func apply_environment(owner: WorldEnvironment, sun: DirectionalLight3D = null,
 		moon: DirectionalLight3D = null) -> void:
@@ -393,9 +406,23 @@ func apply_environment(owner: WorldEnvironment, sun: DirectionalLight3D = null,
 	for light:DirectionalLight3D in [sun,moon]:
 		if not is_instance_valid(light):continue
 		var id:=light.get_instance_id()
-		if not _saved_lights.has(id) or not is_equal_approx(light.light_energy,0.025):
+		if not _saved_lights.has(id) or not is_equal_approx(light.light_energy,DARK_DIRECTIONAL_ENERGY):
 			_saved_lights[id]={"light":weakref(light),"energy":light.light_energy}
-		light.light_energy=0.025
+		light.light_energy=DARK_DIRECTIONAL_ENERGY
+
+func _suppress_duplicate_map_fills() -> void:
+	# Main and the native review both put the real manifest markers beside
+	# this presenter. Never search another viewport or touch portrait lights.
+	var parent:=get_parent()
+	var root:Node=parent.get_node_or_null("MapLights") if parent!=null else null
+	if root==null:return
+	for node:Node in root.get_children():
+		if not node is Light3D or not str(node.name).begins_with("lantern_mine-"):continue
+		var light:=node as Light3D
+		var id:=light.get_instance_id()
+		if not _marker_light_leases.has(id):
+			_marker_light_leases[id]={"light":weakref(light),"visible":light.visible}
+		light.visible=false
 
 func _sync_darkness() -> void:
 	for lamp:OmniLight3D in lamps:lamp.visible=_darkness_requested
@@ -417,6 +444,10 @@ func _restore_darkness() -> void:
 		var light:DirectionalLight3D=row.light.get_ref()
 		if is_instance_valid(light):light.light_energy=float(row.energy)
 	_saved_lights.clear();_saved_environment=null;_dark_environment=null;_environment_owner=null
+	for row:Dictionary in _marker_light_leases.values():
+		var light:Light3D=row.light.get_ref() as Light3D
+		if is_instance_valid(light):light.visible=bool(row.visible)
+	_marker_light_leases.clear()
 
 func _set_gate(value: float) -> void:
 	if is_instance_valid(gate):gate.position=_gate_origin+Vector3.UP*(2.9*clampf(value,0,1))

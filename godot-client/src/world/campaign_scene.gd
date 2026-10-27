@@ -35,6 +35,7 @@ var _actors: Dictionary = {}
 var _posts: Dictionary = {}
 var _visibility_posts: Dictionary = {}
 var _portrait_only_roles: Dictionary = {}
+var _staged_actor_roles: Dictionary = {}
 var _rig: Node3D
 var _camera: Camera3D
 var _saved: Dictionary = {}
@@ -216,6 +217,9 @@ func _replay_view_nodes(snapshot: Dictionary, live_nodes: Dictionary) -> Diction
 	return view
 
 func _beat_matches(beat: Dictionary) -> bool:
+	var excluded: Variant = beat.get("unless_variant", "")
+	if (excluded is String and not excluded.is_empty() and excluded == _variant) \
+			or (excluded is Array and _variant in excluded): return false
 	var condition: Variant = beat.get("when", "")
 	var branch := str(_choice_state.get("selected", ""))
 	if branch.is_empty(): branch = _variant
@@ -927,6 +931,7 @@ func _start(rig: Node3D, camera: Camera3D, local: Node3D, nodes: Dictionary,
 	_posts.clear()
 	_visibility_posts.clear()
 	_portrait_only_roles.clear()
+	_staged_actor_roles.clear()
 	for role: String in bindings:
 		var actor_value: Variant = nodes.get(int(bindings[role]))
 		if not is_instance_valid(actor_value) or not actor_value is Node3D:
@@ -964,7 +969,9 @@ func _start(rig: Node3D, camera: Camera3D, local: Node3D, nodes: Dictionary,
 	_update_caption()
 
 func _apply_camera() -> void:
-	var shots: Array = _definition.get("shots", [])
+	var shots: Array = []
+	for shot: Dictionary in _definition.get("shots", []):
+		if _beat_matches(shot): shots.append(shot)
 	if shots.is_empty():
 		return
 	var first: Dictionary = shots[0]
@@ -983,12 +990,8 @@ func _apply_camera() -> void:
 					weight = smoothstep(float(first.t), float(last.t), elapsed)
 				break
 			first = last
-	var first_anchor: Vector3 = _anchors.get(str(first.get("anchor", "")), _origin)
-	var last_anchor: Vector3 = _anchors.get(str(last.get("anchor", "")), _origin)
-	if _actors.has(str(first.get("anchor_actor", ""))):
-		first_anchor = (_actors[str(first.anchor_actor)] as Node3D).global_position
-	if _actors.has(str(last.get("anchor_actor", ""))):
-		last_anchor = (_actors[str(last.anchor_actor)] as Node3D).global_position
+	var first_anchor := _shot_anchor(first)
+	var last_anchor := _shot_anchor(last)
 	var position := (first_anchor + _vector(first.position)).lerp(last_anchor + _vector(last.position), weight)
 	var target := (first_anchor + _vector(first.target)).lerp(last_anchor + _vector(last.target), weight)
 	var transform := Transform3D(Basis.IDENTITY, position).looking_at(target, Vector3.UP)
@@ -1022,6 +1025,19 @@ func _apply_camera() -> void:
 			opacity = minf(opacity, 1.0 - smoothstep(_duration() - exit_fade, _duration(), elapsed))
 		_screen.modulate.a = opacity
 	_apply_camera_pose(pose)
+
+func _shot_anchor(shot: Dictionary) -> Vector3:
+	var center := Vector3.ZERO
+	var count := 0
+	for role: String in shot.get("anchor_actors", []):
+		var actor := _actors.get(role) as Node3D
+		if is_instance_valid(actor):
+			center += actor.global_position
+			count += 1
+	if count > 0: return center / float(count)
+	var actor := _actors.get(str(shot.get("anchor_actor", ""))) as Node3D
+	if is_instance_valid(actor): return actor.global_position
+	return _anchors.get(str(shot.get("anchor", "")), _origin)
 
 func _duration() -> float:
 	return minf(MAX_DURATION, maxf(0.0, float(_definition.get("duration", 0.0))))
@@ -1095,8 +1111,12 @@ func _apply_actors() -> void:
 	for role: String in _actors:
 		var actor: Node3D = _actors[role]
 		if _portrait_only_roles.has(role): continue
-		if not _replaying and role in _definition.get("native_roles", []):
-			continue # These roles are walking an owned, authoritative story route.
+		var native_from := float((_definition.get("native_roles_from", {}) as Dictionary).get(role, INF))
+		if not _replaying and (role in _definition.get("native_roles", []) or elapsed >= native_from):
+			if _staged_actor_roles.erase(role):
+				if actor.has_method("end_cinematic_presentation"): actor.call("end_cinematic_presentation")
+				else: actor.global_transform = _posts[role]
+			continue # Release the local pose once before the authoritative route begins.
 		var post: Transform3D = _posts[role]
 		var chosen: Dictionary = {}
 		var previous_offset := Vector3.ZERO
@@ -1118,7 +1138,7 @@ func _apply_actors() -> void:
 		var attached := str(chosen.get("attach_to", ""))
 		if not attached.is_empty() and _actors.has(attached):
 			var carrier := _actors[attached] as Node3D
-			at = carrier.global_transform * _vector(chosen.get("offset", [0, 0, 0]))
+			at = _carry_attachment_frame(carrier, str(chosen.get("attach_bone", ""))) * _vector(chosen.get("offset", [0, 0, 0]))
 			if bool(chosen.get("ground_attachment", false)): at = _ground(at)
 		if chosen.has("visible"): actor.visible = bool(chosen.visible)
 		if role == "worker" and _definition.has("cart_accident"):
@@ -1136,12 +1156,27 @@ func _apply_actors() -> void:
 			else post.basis.get_euler().y
 		var yaw := atan2(-direction.x, -direction.z) if facing != "post" \
 			and Vector2(direction.x, direction.z).length() > 0.05 else resting_yaw
+		if not attached.is_empty() and _actors.has(attached) and chosen.has("attach_yaw_degrees"):
+			yaw = (_actors[attached] as Node3D).global_rotation.y + deg_to_rad(float(chosen.attach_yaw_degrees))
 		if actor.has_method("set_cinematic_presentation"):
 			actor.call("set_cinematic_presentation", at, yaw, action,
 				to.distance_to(from) / move_seconds if move_seconds > 0.0 and progress < 1.0 else 0.0)
 		else:
 			actor.global_position = at
 			actor.rotation.y = yaw
+		_staged_actor_roles[role] = true
+
+func _carry_attachment_frame(carrier: Node3D, bone_name: String) -> Transform3D:
+	if not bone_name.is_empty():
+		for node: Node in carrier.find_children("*", "Skeleton3D", true, false):
+			var skeleton := node as Skeleton3D
+			var bone := skeleton.find_bone(bone_name)
+			if bone >= 0:
+				var bone_world := skeleton.global_transform * skeleton.get_bone_global_pose(bone)
+				# Follow the shoulder's bob without inheriting its arm swing/roll or
+				# the imported mesh scale; carry offsets are authored in metres.
+				return Transform3D(carrier.global_basis.orthonormalized(), bone_world.origin)
+	return carrier.global_transform
 
 func _line_text(line: Dictionary) -> String:
 	var branch := str(_choice_state.get("selected", ""))
@@ -1288,6 +1323,7 @@ func cancel(reason := "cancelled") -> void:
 			actor.global_transform = _posts[role]
 	_actors.clear()
 	_posts.clear()
+	_staged_actor_roles.clear()
 	for visual: Variant in _replay_visuals.values():
 		if is_instance_valid(visual):
 			visual.hide()

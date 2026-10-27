@@ -158,6 +158,10 @@ func run() -> void:
 		and frames[0] == EloriaProtocol.chat("#campaign rescue_burn rescue-run rescue-run:measure.rescue.shadow"), "the authored fire event uses a token-bound native request")
 	frames.clear()
 	expect(network.call("campaign_rescue_burn", "bad run", "token") == ERR_INVALID_PARAMETER and frames.is_empty(), "invalid fire-event identities never reach the wire")
+	expect(network.call("campaign_rescue_depart", "rescue-run", "rescue-run:measure.rescue.commitment") == OK \
+		and frames[0] == EloriaProtocol.chat("#campaign rescue_depart rescue-run rescue-run:measure.rescue.commitment"), "the spoken agreement starts only its token-bound native departure")
+	frames.clear()
+	expect(network.call("campaign_rescue_depart", "bad run", "token") == ERR_INVALID_PARAMETER and frames.is_empty(), "invalid departure identities never reach the wire")
 	main = (load("res://src/app/main.tscn") as PackedScene).instantiate()
 	root.add_child(main); main.set_process(false); main.hide()
 	var double := GDScript.new()
@@ -296,6 +300,24 @@ func run() -> void:
 			"not_rewarded": app.campaign.rescue.reward.claimed = false
 		main.call("_on_campaign_scene_event", "rescue_burn")
 		expect(frames.size() == (1 if blocker == "none" else 0), "authored fire " + blocker + " respects the current owner, epoch and actual event window")
+	for blocker: String in ["none","replay","helper","old_token","no_event","not_requested","wrong_stage","at_entrance","declined"]:
+		reset_main()
+		app.campaign.stage = "to_mine"; app.campaign.rescue.stage = "to_mine"
+		app.campaign.scene.id = "measure.rescue.commitment"; app.campaign.scene.token = "rescue-run:measure.rescue.commitment"
+		app.campaign.scene.choice.selected = "accept"
+		controller.set("test_context", {"run_id":"rescue-run","token":"rescue-run:measure.rescue.commitment","id":"measure.rescue.commitment"})
+		controller.set("test_events", [{"id":"rescue_depart","request":true}])
+		match blocker:
+			"replay": controller.set("test_replay", true)
+			"helper": app.campaign.party.role = "eligible"
+			"old_token": controller.get("test_context").token = "older"
+			"no_event": controller.set("test_events", [])
+			"not_requested": controller.get("test_events")[0].request = false
+			"wrong_stage": app.campaign.rescue.stage = "ready"
+			"at_entrance": app.campaign.rescue.at_entrance = true
+			"declined": app.campaign.scene.choice.selected = "defer"
+		main.call("_on_campaign_scene_event", "rescue_depart")
+		expect(frames.size() == (1 if blocker == "none" else 0), "departure " + blocker + " requires the accepted owner scene and cannot be sent by replay")
 	reset_main(); controller.set("playing", false)
 	app.stats = {"magic":0,"ether":5}; app.inventory = normal_reagents.duplicate(true); app.known_knowledge.clear()
 	var book: Node = main.get("spells_window")

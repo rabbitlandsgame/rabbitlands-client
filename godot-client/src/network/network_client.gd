@@ -568,6 +568,11 @@ func campaign_rescue_burn(run_id: String, token: String) -> Error:
 		return ERR_INVALID_PARAMETER
 	return send_chat("#campaign rescue_burn %s %s" % [run_id, token])
 
+func campaign_rescue_depart(run_id: String, token: String) -> Error:
+	if not _campaign_identifier(run_id) or not _campaign_identifier(token):
+		return ERR_INVALID_PARAMETER
+	return send_chat("#campaign rescue_depart %s %s" % [run_id, token])
+
 func campaign_rescue_family(run_id: String, token: String, action: String) -> Error:
 	if not _campaign_identifier(run_id) or not _campaign_identifier(token) or action not in ["start", "cancel"]:
 		return ERR_INVALID_PARAMETER

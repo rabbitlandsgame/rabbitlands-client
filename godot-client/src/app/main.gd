@@ -7543,26 +7543,34 @@ func _on_campaign_scene_finished(token: String, reason: String) -> void:
 		Network.campaign_scene_done(str(AppState.campaign.get("run_id", "")), token)
 
 func _on_campaign_scene_event(event_id: String) -> void:
-	if event_id != "rescue_burn" or not _rescue_action_ready(str(AppState.campaign.get("run_id", "")), true) \
+	if event_id not in ["rescue_burn", "rescue_depart"] or not _rescue_action_ready(str(AppState.campaign.get("run_id", "")), true) \
 			or not campaign_scene.playing or campaign_scene.is_replaying():
 		return
 	var snapshot: Dictionary = AppState.campaign
 	var scene: Dictionary = snapshot.get("scene", {})
 	var context := campaign_scene.event_context()
-	if str(scene.get("id", "")) != "measure.rescue.shadow" \
-			or str(context.get("id", "")) != str(scene.id) \
+	if str(context.get("id", "")) != str(scene.get("id", "")) \
 			or str(context.get("run_id", "")) != str(snapshot.run_id) \
 			or str(context.get("token", "")) != str(scene.get("token", "")) \
-			or str((snapshot.get("party", {}) as Dictionary).get("role", "")) != "owner" \
-			or str((snapshot.rescue as Dictionary).get("stage", "")) not in ["aftermath", "complete"] \
-			or not bool(((snapshot.rescue as Dictionary).get("reward", {}) as Dictionary).get("claimed", false)):
+			or str((snapshot.get("party", {}) as Dictionary).get("role", "")) != "owner":
 		return
+	if event_id == "rescue_burn":
+		if str(scene.get("id", "")) != "measure.rescue.shadow" \
+				or str(snapshot.rescue.get("stage", "")) not in ["aftermath", "complete"] \
+				or not bool(snapshot.rescue.get("reward", {}).get("claimed", false)): return
+	else:
+		if str(scene.get("id", "")) != "measure.rescue.commitment" \
+				or str(snapshot.rescue.get("stage", "")) != "to_mine" \
+				or bool(snapshot.rescue.get("at_entrance", false)) \
+				or str(scene.get("choice", {}).get("selected", "")) != "accept" \
+				or EloriaProtocol.map_id_from_reference(AppState.current_map) != "landfall": return
 	var active_event := false
 	for event: Dictionary in campaign_scene.presentation_state().get("events", []):
 		if str(event.get("id", "")) == event_id and bool(event.get("request", false)):
 			active_event = true
 	if active_event:
-		Network.campaign_rescue_burn(str(snapshot.run_id), str(scene.token))
+		if event_id == "rescue_depart": Network.campaign_rescue_depart(str(snapshot.run_id), str(scene.token))
+		else: Network.campaign_rescue_burn(str(snapshot.run_id), str(scene.token))
 
 func _on_campaign_scene_inspection(action: String) -> void:
 	if str(AppState.campaign.get("kind", "")) == "rescue":

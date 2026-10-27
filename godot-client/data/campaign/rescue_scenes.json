@@ -30,14 +30,14 @@
           "t": 0,
           "anchor": "player_watch",
           "position": [
-            5,
-            4.8,
-            8
+            -3,
+            5.2,
+            -5.5
           ],
           "target": [
-            0,
-            -0.4,
-            0
+            1.5,
+            0.7,
+            3
           ],
           "anchor_actor": "protagonist"
         },
@@ -45,14 +45,14 @@
           "t": 3,
           "anchor": "player_watch",
           "position": [
-            5,
-            4.8,
-            8
+            -3,
+            5.2,
+            -5.5
           ],
           "target": [
-            0,
-            -0.4,
-            0
+            1.5,
+            0.7,
+            3
           ],
           "anchor_actor": "protagonist"
         },
@@ -60,13 +60,13 @@
           "t": 7,
           "anchor": "daughter_trip",
           "position": [
-            6,
-            7,
-            12
+            -4.5,
+            5.2,
+            -8
           ],
           "target": [
-            -1,
-            -0.7,
+            0,
+            0.3,
             0
           ]
         },
@@ -74,13 +74,13 @@
           "t": 32,
           "anchor": "daughter_trip",
           "position": [
-            6,
-            7,
-            12
+            -4.5,
+            5.2,
+            -8
           ],
           "target": [
-            -1,
-            -0.7,
+            0,
+            0.3,
             0
           ]
         },
@@ -88,14 +88,14 @@
           "t": 38,
           "anchor": "player_watch",
           "position": [
-            5,
-            4.8,
-            8
+            -3,
+            5.2,
+            -5.5
           ],
           "target": [
-            0,
-            -0.4,
-            0
+            1.5,
+            0.7,
+            3
           ],
           "anchor_actor": "protagonist"
         },
@@ -104,14 +104,14 @@
           "anchor": "player_watch",
           "anchor_actor": "protagonist",
           "position": [
-            5,
-            4.8,
-            8
+            -3,
+            5.2,
+            -5.5
           ],
           "target": [
-            0,
-            -0.4,
-            0
+            1.5,
+            0.7,
+            3
           ]
         },
         {
@@ -154,20 +154,8 @@
       "cues": [
         {
           "at": 0,
-          "actor": "mother",
-          "action": "run",
-          "from": "mother_post",
-          "destination": "mother_turn",
-          "move_seconds": 4.5,
-          "face": "daughter"
-        },
-        {
-          "at": 0,
-          "actor": "daughter",
-          "action": "run",
-          "from": "daughter_start",
-          "destination": "family_turn",
-          "move_seconds": 3,
+          "actor": "protagonist",
+          "action": "idle",
           "face": "family_turn"
         },
         {
@@ -178,12 +166,49 @@
           "face": "mother"
         },
         {
-          "at": 3,
+          "at": 0,
+          "actor": "mother",
+          "action": "idle",
+          "destination": "escape_turn",
+          "face": "mother_intercept"
+        },
+        {
+          "at": 0,
+          "actor": "daughter",
+          "action": "idle",
+          "destination": "escape_turn_2",
+          "face": "daughter_trip"
+        },
+        {
+          "at": 0,
+          "actor": "abductor",
+          "action": "idle",
+          "destination": "escape_turn_2",
+          "visible": false
+        },
+        {
+          "at": 0,
+          "actor": "escort",
+          "action": "idle",
+          "destination": "escape_turn",
+          "visible": false
+        },
+        {
+          "at": 0.001,
+          "actor": "mother",
+          "action": "run",
+          "from": "escape_turn",
+          "destination": "mother_intercept",
+          "move_seconds": 7.5,
+          "face": "mother_intercept"
+        },
+        {
+          "at": 0.001,
           "actor": "daughter",
           "action": "run",
-          "from": "family_turn",
+          "from": "escape_turn_2",
           "destination": "daughter_trip",
-          "move_seconds": 3.5,
+          "move_seconds": 6.5,
           "face": "daughter_trip"
         },
         {
@@ -192,7 +217,9 @@
           "action": "run",
           "destination": "capture",
           "move_seconds": 4,
-          "face": "daughter_trip"
+          "face": "daughter_trip",
+          "from": "escape_turn_2",
+          "visible": true
         },
         {
           "at": 4,
@@ -200,7 +227,9 @@
           "action": "run",
           "destination": "escort_post",
           "move_seconds": 4,
-          "face": "daughter_trip"
+          "face": "daughter_trip",
+          "from": "escape_turn",
+          "visible": true
         },
         {
           "at": 6.5,
@@ -238,13 +267,6 @@
           "face": "daughter"
         },
         {
-          "at": 14,
-          "actor": "daughter",
-          "action": "injury_recover",
-          "destination": "daughter_trip",
-          "face": "abductor"
-        },
-        {
           "at": 15,
           "actor": "abductor",
           "action": "combat_idle",
@@ -254,15 +276,17 @@
         {
           "at": 16,
           "actor": "daughter",
-          "action": "run",
+          "action": "injury_pinned",
           "attach_to": "abductor",
           "offset": [
-            0.7,
-            0,
+            -0.25,
+            0.1,
             0.1
           ],
-          "ground_attachment": true,
-          "face": "escape_turn"
+          "ground_attachment": false,
+          "face": "escape_turn",
+          "attach_bone": "spine_3",
+          "attach_yaw_degrees": 90
         },
         {
           "at": 18,
@@ -453,12 +477,12 @@
       "choice_response_until": 54,
       "response_speaker": "Woman",
       "response_actor": "mother",
-      "native_roles": [
-        "protagonist"
-      ],
       "response_speakers": {
         "help": "Woman",
         "watch": "Injured woman"
+      },
+      "native_roles_from": {
+        "protagonist": 42
       }
     },
     "measure.rescue.injured": {
@@ -593,7 +617,7 @@
           }
         },
         {
-          "t": 52,
+          "t": 39,
           "anchor": "mother_intercept",
           "position": [
             5,
@@ -620,6 +644,66 @@
               ]
             }
           }
+        },
+        {
+          "t": 40,
+          "cut": true,
+          "anchor": "runoff_mid",
+          "anchor_actors": [
+            "mother",
+            "protagonist"
+          ],
+          "position": [
+            -7,
+            8,
+            -14
+          ],
+          "target": [
+            1,
+            0,
+            2
+          ],
+          "unless_variant": "returned"
+        },
+        {
+          "t": 45,
+          "cut": false,
+          "anchor": "runoff_mid",
+          "anchor_actors": [
+            "mother",
+            "protagonist"
+          ],
+          "position": [
+            -7,
+            8,
+            -14
+          ],
+          "target": [
+            1,
+            0,
+            2
+          ],
+          "unless_variant": "returned"
+        },
+        {
+          "t": 52,
+          "cut": false,
+          "anchor": "runoff_mid",
+          "anchor_actors": [
+            "mother",
+            "protagonist"
+          ],
+          "position": [
+            -7,
+            8,
+            -14
+          ],
+          "target": [
+            1,
+            0,
+            2
+          ],
+          "unless_variant": "returned"
         }
       ],
       "dialogue_holds": [
@@ -651,11 +735,55 @@
         {
           "at": 40,
           "actor": "mother",
-          "action": "walk",
+          "action": "run",
           "destination": "escape_turn",
           "move_seconds": 10,
           "face": "escape_turn",
           "when": "defer"
+        },
+        {
+          "at": 40,
+          "actor": "mother",
+          "action": "run",
+          "from": "runoff_start",
+          "destination": "runoff_mid",
+          "move_seconds": 2,
+          "face": "runoff_mid",
+          "when": "accept",
+          "unless_variant": "returned"
+        },
+        {
+          "at": 40,
+          "actor": "protagonist",
+          "action": "run",
+          "from": "runoff_player_start",
+          "destination": "runoff_player_mid",
+          "move_seconds": 2,
+          "face": "runoff_player_mid",
+          "when": "accept",
+          "unless_variant": "returned"
+        },
+        {
+          "at": 42,
+          "actor": "mother",
+          "action": "run",
+          "from": "runoff_mid",
+          "destination": "runoff_end",
+          "move_seconds": 3,
+          "face": "runoff_end",
+          "when": "accept",
+          "unless_variant": "returned"
+        },
+        {
+          "at": 42,
+          "actor": "protagonist",
+          "action": "run",
+          "from": "runoff_player_mid",
+          "destination": "runoff_player_end",
+          "move_seconds": 3,
+          "face": "runoff_player_end",
+          "when": "accept",
+          "unless_variant": "returned"
         }
       ],
       "lines": [
@@ -685,18 +813,37 @@
           "variants": {
             "returned": "Will you help me bring her home?"
           }
+        },
+        {
+          "at": 40,
+          "speaker": "Elen Reed",
+          "speaker_actor": "mother",
+          "text": "Stay close. The mine is this way.",
+          "when": "accept",
+          "unless_variant": "returned"
         }
       ],
       "events": [
         {
+          "id": "rescue_depart",
+          "type": "departure",
+          "at": 40,
+          "until": 52,
+          "request": true,
+          "when": "accept",
+          "unless_variant": "returned"
+        },
+        {
           "id": "accept-travel-fade",
           "handoff": true,
           "type": "fade",
-          "at": 45,
+          "at": 43,
           "until": 52,
           "from": 0,
           "to": 1,
-          "when": "accept"
+          "when": "accept",
+          "unless_variant": "returned",
+          "duration": 6
         }
       ],
       "choice_id": "rescue_accept",
@@ -734,28 +881,28 @@
           "t": 0,
           "anchor": "entrance_focus",
           "position": [
-            6,
-            5.5,
-            10
+            8,
+            7,
+            11
           ],
           "target": [
             0,
-            -0.4,
-            -2
+            1,
+            -5
           ]
         },
         {
           "t": 62,
           "anchor": "entrance_focus",
           "position": [
-            6,
-            5.5,
-            10
+            8,
+            7,
+            11
           ],
           "target": [
             0,
-            -0.4,
-            -2
+            1,
+            -5
           ]
         }
       ],
