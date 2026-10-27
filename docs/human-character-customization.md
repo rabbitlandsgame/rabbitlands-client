@@ -54,7 +54,9 @@ Both bodies keep open walking hands and use a more curled, relaxed fist when
 running. Held hands retain their equipment grip, including the left hand for
 bows and shields. The female travel arms and the accepted male elbow motion
 stay unchanged. Standing arms settle toward the midpoint of the walk while
-retaining the standing animation's breathing. The original lower body movement,
+retaining the standing animation's breathing. The male idle has a small
+shoulder extension that moves the relaxed hands about 6–7 cm farther back.
+The original lower body movement,
 travel clip lengths and spell timing stay unchanged.
 
 Normal Human weapon attacks use one deliberate cut with a windup and recovery,
@@ -70,12 +72,18 @@ adds face colour, facial regions and baked normal maps for both bodies, with
 refined head geometry recovering eyelid, nose and lip form from the retained
 high-resolution sources. The face controls deform the eyes, lids, brows and
 grooming together. High eyes add a defined pupil and limbal ring, irregular iris
-detail, shaded upper lids and a restrained corneal reflection. The mouth has a
-clearer lip seam, corners and philtrum, with bounded relief that follows the face
-controls. Eye colour retains the source iris detail. Human
+detail, a continuous upper lid and warm inner corners, with a restrained corneal
+reflection. The mouth has a defined Cupid bow, lip border, corners and philtrum.
+Bounded relief reduces the under-eye roll and adds male cheek definition while
+following the face controls. The three study presets tune eye opening, spacing,
+lip fullness, brow and jaw proportions together. Eye colour retains source iris
+detail. Human
 eye colours also have a more restrained brightness in Low and Medium.
 High hair adds overlapping tapered locks, curved edges, asymmetric sweeps and
-the female updo while reusing its existing textures and materials. The maps
+the female updo while reusing its existing textures and materials. Filtered
+strand highlights give the locks more definition. The swept female fringe sits
+lower around the forehead while its crown, buns and attached strands retain
+their positions. The maps
 follow fixed mesh UVs during animation.
 Switching back to Low or Medium restores the lightweight geometry and materials
 and releases unused High portrait resources. All graphics levels use the
@@ -89,7 +97,7 @@ match their fine painted detail.
 
 Low and Medium retain their existing triangle counts and texture set. High
 uses six shared 1024-square face maps: approximately 8 MiB of compiled texture
-data for both bodies, plus 381 KiB of compressed sculpt data (768 KiB decoded
+data for both bodies, plus 384 KiB of compressed sculpt data (768 KiB decoded
 CPU data) and 35 KiB of hair curves. These resources are shared; equipment
 files are reused.
 
@@ -113,8 +121,9 @@ on this machine; cached access took under 0.03 ms. These are estimates from the
 isolated preview, excluding source asset loading and the rest of the game.
 
 A warmed, isolated head comparison on an RTX 5080 Laptop GPU at 1280×720
-measured median GPU time of 0.226→0.241 ms for sixteen Humans sharing two faces,
-and 0.115→0.130 ms for one close-up head. Hair and other quality settings stayed
+measured median GPU time of 0.225→0.240 ms for sixteen Humans sharing two faces,
+and 0.114→0.128 ms for one close-up head, with unchanged texture and mesh memory.
+Hair and other quality settings stayed
 at Medium in that comparison, so these numbers isolate the face pass rather
 than predicting the cost of the entire High graphics setting.
 
@@ -144,3 +153,10 @@ asset cache. It runs with networking blocked and an isolated editor/user
 profile. Server account creation and online saving are tested separately.
 `-SmokeTest` runs the launcher's automatic check in a separate preview profile;
 `-Compatibility` selects the compatibility renderer when needed.
+
+`tests/human_portrait_comparison.gd` renders Rowan, Mira and Tavi through the
+production High appearance path in front and three-quarter portrait views.
+`RL_HUMAN_PORTRAIT_OUTPUT` selects the local output folder. The default studio
+view uses soft shadows and the existing High scene occlusion settings;
+`RL_HUMAN_PORTRAIT_LIGHTING=flat` keeps a plain diagnostic light. Portraits are
+rendered from the models, with no painted retouching of the captured images.

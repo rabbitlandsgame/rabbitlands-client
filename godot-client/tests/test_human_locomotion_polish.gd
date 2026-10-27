@@ -61,6 +61,27 @@ func idle_arm_target(walk: Animation, bone: String) -> Quaternion:
 	push_error("walk arm track missing: "+bone)
 	return Quaternion.IDENTITY
 
+func idle_shoulder_placement(baseline: Animation, candidate: Animation, rig: Skeleton3D) -> void:
+	var channels := {}
+	for track: int in baseline.get_track_count():
+		var bone := str(baseline.track_get_path(track).get_concatenated_subnames()).get_slice(":",0)
+		if not channels.has(bone): channels[bone] = {}
+		channels[bone][baseline.track_get_type(track)] = track
+	for sample: int in 49:
+		var time := candidate.length*float(sample)/48.0
+		var before := POLISH._pose_at(baseline,rig,channels,time)
+		var after := POLISH._pose_at(candidate,rig,channels,time)
+		for side: String in ["l","r"]:
+			var upper := rig.find_bone("upperarm_"+side)
+			var lower := rig.find_bone("lowerarm_"+side)
+			var hand := rig.find_bone("hand_"+side)
+			var shift: Vector3 = after.global[hand].origin-before.global[hand].origin
+			expect(shift.z < -0.04 and shift.z > -0.085, "male idle hands move subtly posterior through the full cycle")
+			expect(absf(shift.x) < 0.00001 and absf(shift.y) < 0.026, "male idle shoulder extension preserves hand width and nearly preserves height")
+			var original_bend: float = (before.global[lower].origin-before.global[upper].origin).angle_to(before.global[hand].origin-before.global[lower].origin)
+			var new_bend: float = (after.global[lower].origin-after.global[upper].origin).angle_to(after.global[hand].origin-after.global[lower].origin)
+			expect(absf(original_bend-new_bend) < 0.00001, "idle extension carries the native arm chain without changing elbow flexion")
+
 func held_variants(source: AnimationLibrary, result: AnimationLibrary, sex: String, rig: Skeleton3D) -> void:
 	# Reconstruct the accepted travel grip before the new free-hand fist. The
 	# baseline is independent of which run variant the actor currently plays.
@@ -146,6 +167,7 @@ func run() -> void:
 				continue
 			if slug == "luminous_female" and travel:
 				expect(arm_digest(new) == FEMALE_V1[name], "female locomotion remains exactly the accepted v1 output")
+			var idle_baseline := POLISH._idle_arms(old,result.get_animation(&"Walk")) if idle else null
 			expect(old != new and new.length == old.length and new.loop_mode == old.loop_mode and new.step == old.step, "standing/travel derivatives preserve original timing " + str(name))
 			expect(new.get_track_count() == old.get_track_count(), "no track added or removed " + str(name))
 			expect(new.get_marker_names() == old.get_marker_names(), "original event marker names persist")
@@ -182,9 +204,18 @@ func run() -> void:
 							largest_arm_step = maxf(largest_arm_step, rotation_delta(new.track_get_key_value(track, index - 1), q))
 						if idle and arm_rotation:
 							var target := idle_arm_target(result.get_animation(&"Walk"),bone)
-							expect(rotation_delta(q,target) <= rotation_delta(before,target)*0.15+0.00001, "idle arms settle close to the accepted quarter/threequarter walk midpoint")
+							var posterior_shoulder := slug == "luminous_male" and bone in ["upperarm_l","upperarm_r"]
+							var allowance := deg_to_rad(7.01) if posterior_shoulder else 0.0
+							expect(rotation_delta(q,target) <= rotation_delta(before,target)*0.15+allowance+0.00001, "idle arms settle close to the accepted walk midpoint with a bounded male shoulder extension")
 					else:
 						expect(after == before, "all protected root/leg/position/scale/other-action channels remain exact")
+					if idle:
+						var shoulder_extension := slug == "luminous_male" and arm_rotation and bone in ["upperarm_l","upperarm_r"]
+						var baseline_value: Variant = idle_baseline.track_get_key_value(track,index)
+						if shoulder_extension:
+							expect(absf(rotation_delta(baseline_value,after)-deg_to_rad(7.0)) < 0.00001, "only a seven-degree shoulder extension changes the accepted male idle")
+						else:
+							expect(after == baseline_value, "female idle and all non-shoulder male idle channels remain exact")
 				if permitted_rotation:
 					modified += int(changed)
 					var first := new.rotation_track_interpolate(track, 0.0)
@@ -194,6 +225,8 @@ func run() -> void:
 				expect(new.track_get_interpolation_type(track) == old.track_get_interpolation_type(track), "interpolation unchanged")
 			expect(modified > 0 and worst_loop < (source_worst_loop*0.15+0.0001 if idle else 0.0001), "arm polish is visible and retains cyclic continuity " + str(name))
 			expect(largest_arm_step < deg_to_rad(25), "no abrupt arm/wrist key jump " + str(name))
+			if idle and slug == "luminous_male":
+				idle_shoulder_placement(idle_baseline,new,actor.get_skeleton())
 			if slug == "luminous_male" and travel:
 				player.play(name)
 				player.pause()

@@ -12,6 +12,7 @@ const USER_META := &"rl_high_portrait_user"
 const EXIT_META := &"rl_high_portrait_exit_hook"
 const CACHE_LIMIT := 24
 const CANONICAL_CACHE_LIMIT := 8
+const ALAR_RELAX_MAX_M := .002
 const PARTS := ["body", "eyes", "eyebrows", "scalp"]
 const BEARD := "PortraitFacialHair"
 static var _meshes: Dictionary = {}
@@ -268,6 +269,7 @@ static func _project_mesh(source: Mesh, to_head: Transform3D, projection: Dictio
 			var moved := COMPACTOR.face_point(sculpted, frame, shape) if custom else sculpted
 			points[index] = from_head * moved
 			var influence := _normal_mask(canonical)
+			var authored_normal := 0.0
 			if normals.size() == points.size() and influence > 0.0 and bundle.has("sculpt"):
 				var n := _sample_sculpt(canonical, bundle, 3).normalized()
 				if custom:
@@ -280,6 +282,7 @@ static func _project_mesh(source: Mesh, to_head: Transform3D, projection: Dictio
 				# A front-projected source normal must not turn an inner mouth or
 				# rear-facing lip surface outward at a coincident UV boundary.
 				var normal_influence := influence * smoothstep(-.25,.10,original_normal.z)
+				authored_normal = 1.0 if normal_influence > .5 else 0.0
 				normals[index] = (normal_from_head * original_normal.lerp(n, normal_influence).normalized()).normalized()
 				if tangents.size() == points.size() * 4:
 					var tangent := Vector3(tangents[index * 4], tangents[index * 4 + 1], tangents[index * 4 + 2])
@@ -291,7 +294,11 @@ static func _project_mesh(source: Mesh, to_head: Transform3D, projection: Dictio
 			var mask := smoothstep(-0.065, -0.030, p.y) * (1.0 - smoothstep(0.180, 0.202, p.y))
 			mask *= 1.0 - smoothstep(0.067, 0.091, absf(p.x))
 			mask *= smoothstep(-0.020, 0.014, p.z)
-			colors[index] = Color(mask, 0, 0, 1)
+			# Imported feature cuts contain very thin triangles. The High field
+			# supplies their outward shading normal even when the sculpt or
+			# rasterization reverses their geometric facing. Keep that ownership
+			# separate from paint coverage; inner/rear source normals stay exact.
+			colors[index] = Color(mask, authored_normal, 0, 1)
 		arrays[Mesh.ARRAY_VERTEX] = points
 		if part != BEARD:
 			arrays[Mesh.ARRAY_NORMAL] = normals
@@ -300,6 +307,10 @@ static func _project_mesh(source: Mesh, to_head: Transform3D, projection: Dictio
 			arrays[Mesh.ARRAY_TEX_UV2] = uv
 			arrays[Mesh.ARRAY_COLOR] = colors
 			_finish_head_normals(arrays, to_head)
+			_orient_authored_triangles(arrays, lods)
+			if part == "body" and str(bundle.descriptor.get("sex", "")) == "female":
+				_relax_alar_surface(arrays, to_head, bundle)
+				_orient_authored_triangles(arrays, lods)
 		result.add_surface_from_arrays(source.surface_get_primitive_type(surface), arrays, blends, lods,
 			source.surface_get_format(surface) & Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS)
 		result.surface_set_material(surface, source.surface_get_material(surface))
@@ -348,6 +359,127 @@ static func _finish_head_normals(arrays: Array, to_head: Transform3D) -> void:
 	if not tangents.is_empty():
 		arrays[Mesh.ARRAY_TANGENT] = tangents
 
+## Thin triangles created by the imported feature cuts can reverse under the
+## nonlinear sculpt. Match their winding to the High-owned outward normal.
+## The fragment shader also retains that field for subpixel cuts whose facing
+## is numerically unstable after skinning/rasterization. All attributes stay
+## indexed exactly as before; source resources and unowned normals are intact.
+static func _orient_authored_triangles(arrays: Array, lods: Dictionary) -> int:
+	var points: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+	var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
+	var colors: PackedColorArray = arrays[Mesh.ARRAY_COLOR]
+	if normals.size() != points.size() or colors.size() != points.size():
+		return 0
+	var chains: Array = [arrays[Mesh.ARRAY_INDEX]]
+	chains.append_array(lods.values())
+	var changed := 0
+	for chain_id: int in chains.size():
+		var chain: PackedInt32Array = chains[chain_id]
+		for triangle: int in range(0, chain.size(), 3):
+			var a := chain[triangle]
+			var b := chain[triangle + 1]
+			var c := chain[triangle + 2]
+			if colors[a].g + colors[b].g + colors[c].g < 1.5:
+				continue
+			var geometric := (points[b] - points[a]).cross(points[c] - points[a])
+			var authored := normals[a] + normals[b] + normals[c]
+			# Godot's outward triangle order is clockwise. Avoid decisions for
+			# vanishing area or almost perpendicular normals.
+			if geometric.length_squared() > 1e-20 and geometric.dot(authored) > .05 * geometric.length() * authored.length():
+				chain[triangle + 1] = c
+				chain[triangle + 2] = b
+				changed += 1
+		chains[chain_id] = chain
+	arrays[Mesh.ARRAY_INDEX] = chains[0]
+	var chain_index := 1
+	for distance: Variant in lods:
+		lods[distance] = chains[chain_index]
+		chain_index += 1
+	return changed
+
+## Round the female source's outer alar cut on the cached canonical High surface.
+## Coincident UV vertices share one position solve; the bridge, centerline,
+## lips and rear stay fixed. The 2 mm cap is measured from each initial group,
+## rather than accumulated per pass. Only High-owned nasal normals are rebuilt.
+static func _relax_alar_surface(arrays: Array, to_head: Transform3D, bundle: Dictionary) -> float:
+	var points: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+	var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
+	var colors: PackedColorArray = arrays[Mesh.ARRAY_COLOR]
+	var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
+	if normals.size() != points.size() or colors.size() != points.size():
+		return 0.0
+	var geometry: Dictionary = bundle.descriptor.geometry
+	var nose_y := (float(geometry.get("eye_y_m", .075)) + float(geometry.get("mouth_y_m", .010))) * .5
+	var groups := {}
+	var keys: Array[Vector3i] = []
+	var inverse := to_head.affine_inverse()
+	var normal_to_head := to_head.basis.inverse().transposed()
+	var normal_from_head := inverse.basis.inverse().transposed()
+	for index: int in points.size():
+		var p := to_head * points[index]
+		var key := Vector3i(roundi(p.x*1000000), roundi(p.y*1000000), roundi(p.z*1000000))
+		keys.append(key)
+		var weight := smoothstep(.006,.010,absf(p.x)) * (1.0-smoothstep(.023,.033,absf(p.x)))
+		weight *= smoothstep(nose_y-.022,nose_y-.014,p.y) * (1.0-smoothstep(nose_y+.012,nose_y+.024,p.y))
+		weight *= smoothstep(.040,.055,p.z)
+		if not groups.has(key):
+			groups[key] = {"base":p, "point":p, "weight":0.0, "neighbors":{}, "normal":Vector3.ZERO}
+		groups[key].weight = maxf(float(groups[key].weight), weight)
+	for triangle: int in range(0, indices.size(), 3):
+		for edge: int in 3:
+			var a: Vector3i = keys[indices[triangle+edge]]
+			var b: Vector3i = keys[indices[triangle+(edge+1)%3]]
+			if a != b:
+				groups[a].neighbors[b] = true
+				groups[b].neighbors[a] = true
+	var active: Array[Vector3i] = []
+	for key: Vector3i in groups:
+		var group: Dictionary = groups[key]
+		if group.weight > 0.0 and not group.neighbors.is_empty():
+			active.append(key)
+	for _pass: int in 12:
+		var next := {}
+		for key: Vector3i in active:
+			var group: Dictionary = groups[key]
+			var sum := Vector3.ZERO
+			for other: Vector3i in group.neighbors:
+				sum += groups[other].point as Vector3
+			var target := (group.point as Vector3).lerp(sum/group.neighbors.size(), .4*float(group.weight))
+			next[key] = (group.base as Vector3) + (target-(group.base as Vector3)).limit_length(ALAR_RELAX_MAX_M)
+		for key: Vector3i in next:
+			groups[key].point = next[key]
+	var maximum := 0.0
+	for index: int in points.size():
+		var group: Dictionary = groups[keys[index]]
+		maximum = maxf(maximum, (group.point as Vector3).distance_to(group.base as Vector3))
+		if group.weight > 0.0:
+			points[index] = inverse * (group.point as Vector3)
+	for triangle: int in range(0, indices.size(), 3):
+		var a: Vector3 = groups[keys[indices[triangle]]].point
+		var b: Vector3 = groups[keys[indices[triangle+1]]].point
+		var c: Vector3 = groups[keys[indices[triangle+2]]].point
+		var normal := -(b-a).cross(c-a)
+		for corner: int in 3:
+			groups[keys[indices[triangle+corner]]].normal += normal
+	var tangents: PackedFloat32Array = arrays[Mesh.ARRAY_TANGENT] if arrays[Mesh.ARRAY_TANGENT] != null else PackedFloat32Array()
+	for index: int in points.size():
+		var group: Dictionary = groups[keys[index]]
+		var geometric: Vector3 = group.normal
+		if group.weight <= 0.0 or colors[index].g < .5 or geometric.length_squared() <= 1e-14:
+			continue
+		var original := (normal_to_head*normals[index]).normalized()
+		normals[index] = (normal_from_head*original.lerp(geometric.normalized(),float(group.weight)).normalized()).normalized()
+		if tangents.size() == points.size()*4:
+			var tangent := Vector3(tangents[index*4],tangents[index*4+1],tangents[index*4+2])
+			tangent = (tangent-normals[index]*tangent.dot(normals[index])).normalized()
+			for component: int in 3:
+				tangents[index*4+component] = tangent[component]
+	arrays[Mesh.ARRAY_VERTEX] = points
+	arrays[Mesh.ARRAY_NORMAL] = normals
+	if not tangents.is_empty():
+		arrays[Mesh.ARRAY_TANGENT] = tangents
+	return maximum
+
 ## Reuse the completed High topology and source-normal field for every slider
 ## value. Only the face's existing bounded field and its Jacobian vary here.
 static func _shape_mesh(source: Mesh, to_head: Transform3D, frame: Dictionary, shape: Variant) -> ArrayMesh:
@@ -385,8 +517,10 @@ static func _shape_mesh(source: Mesh, to_head: Transform3D, frame: Dictionary, s
 		arrays[Mesh.ARRAY_NORMAL] = normals
 		if not tangents.is_empty():
 			arrays[Mesh.ARRAY_TANGENT] = tangents
+		var lods := LODS._surface_lods(source, surface)
+		_orient_authored_triangles(arrays, lods)
 		result.add_surface_from_arrays(source.surface_get_primitive_type(surface), arrays,
-			source.surface_get_blend_shape_arrays(surface), LODS._surface_lods(source, surface),
+			source.surface_get_blend_shape_arrays(surface), lods,
 			source.surface_get_format(surface) & Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS)
 		result.surface_set_material(surface, source.surface_get_material(surface))
 		result.surface_set_name(surface, source.surface_get_name(surface))
@@ -411,7 +545,23 @@ static func _canonical(p: Vector3, frame: Dictionary, shape: Variant) -> Vector3
 static func _sculpt_point(p: Vector3, bundle: Dictionary) -> Vector3:
 	if not bundle.has("sculpt") or _sculpt_mask(p) <= 0.0:
 		return p
-	return p + _sample_sculpt(p, bundle, 0) * float(bundle.descriptor.geometry.max_delta_m) * _sculpt_mask(p)
+	var delta := _sample_sculpt(p, bundle, 0) * float(bundle.descriptor.geometry.max_delta_m) * _sculpt_mask(p)
+	var tangent_scale := _tangential_sculpt_scale(p, bundle)
+	delta.x *= tangent_scale
+	delta.y *= tangent_scale
+	return p + delta
+
+## Imported eye/brow material cuts include near-collinear triangles. Sampling
+## lateral source correspondence at each vertex can fold those cuts and expose
+## the rear head through subpixel gaps. Keep the source X/Y layout in the eye
+## band, retaining all authored depth relief. Smooth, position-only fades keep
+## duplicated UV/material boundaries exact without per-frame topology work.
+static func _tangential_sculpt_scale(p: Vector3, bundle: Dictionary) -> float:
+	var eye_y := float(bundle.descriptor.geometry.get("eye_y_m", .075))
+	var eye_band := smoothstep(eye_y-.043,eye_y-.030,p.y) * (1.0-smoothstep(eye_y+.026,eye_y+.045,p.y))
+	eye_band *= smoothstep(.004,.012,absf(p.x)) * (1.0-smoothstep(.065,.083,absf(p.x)))
+	eye_band *= smoothstep(.010,.024,p.z)
+	return 1.0-eye_band
 
 static func _sample_sculpt(p: Vector3, bundle: Dictionary, offset: int) -> Vector3:
 	var geometry: Dictionary = bundle.descriptor.geometry

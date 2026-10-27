@@ -15,15 +15,15 @@
   },
   "runtime_source_sha256": "1cc5bd8cd2761e71f711dc33aabd500ea88cb918c0806223991cb5bd87bb2d75",
   "authoring_source_sha256": "0cb1a7f78c15712872e3e9f6a1a458273a179b8d8cd8461d792ca5b915559c86",
-  "paint_recipe": "Human portrait v4: articulated iris/cornea response and measured lip seam, vermilion and corner relief",
+  "paint_recipe": "Human portrait v5: concept-guided iris crypts, continuous lid/canthus paint and bounded Cupid bow/vermilion anatomy",
   "geometry": {
     "path": "res://data/actors/portraits_high/male-sculpt.bin",
     "size": 256,
     "stride": 6,
     "max_delta_m": 0.006,
     "edge_length_m": 0.0095,
-    "bytes": 185271,
-    "sha256": "9a1be0e970281e101b10ca291a8fc3808bb9eb66c76fe30bbee698f08ebee70b",
+    "bytes": 187543,
+    "sha256": "214d69f5d7d6a63fcba42951046e2ed04e5ca99ee391d5ce32eb878020ed7e1c",
     "baked_max_displacement_m": 0.005450043649233161,
     "feature_edge_length_m": 0.0045,
     "subdivision_passes": 2,
@@ -31,7 +31,7 @@
     "mouth_y_m": 0.01559628543499511
   },
   "features": {
-    "version": 4,
+    "version": 5,
     "eyes": [
       {
         "center_m": [
@@ -48,7 +48,28 @@
         "iris_radius_m": 0.006264491074900844
       }
     ],
-    "max_lip_relief_addition_m": 0.0006166268709723341,
-    "description": "Neutral iris fibres, pupil/limbus and curved corneal normals; measured vermilion seam/corners and bounded lip relief"
-  }
+    "max_lip_relief_addition_m": 0.0008210093711813627,
+    "description": "Neutral iris fibres, pupil/limbus and curved corneal normals; measured vermilion seam/corners and bounded lip relief",
+    "male_cheek_planes": {
+      "max_rise_m": 0.0009058634476910379,
+      "max_hollow_m": -0.001248181217903157,
+      "central_zero_half_width_m": 0.03,
+      "outer_zero_x_m": 0.077
+    }
+  },
+  "source_pigment_repairs": [
+    {
+      "kind": "verified imported false-cut pigment",
+      "rgb_texels": 19,
+      "bounds_px": [
+        303,
+        491,
+        334,
+        504
+      ],
+      "alpha_unchanged": true,
+      "predicate": "audited one-pixel path plus local darkness and lost skin chroma",
+      "fill": "bilinear RGB from clean sides at +/-1.7 texels perpendicular to cut"
+    }
+  ]
 }

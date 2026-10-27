@@ -16,7 +16,7 @@ import sys
 
 import numpy as np
 from PIL import Image
-from scipy.ndimage import distance_transform_edt, gaussian_filter, map_coordinates
+from scipy.ndimage import distance_transform_edt, gaussian_filter, map_coordinates, median_filter
 from scipy.spatial import cKDTree
 
 SIZE = 1024
@@ -312,6 +312,51 @@ def smoothstep(a, b, x):
     return value*value*(3-2*value)
 
 
+def repair_source_pigment(stage, sex, paint, regions, source_projection):
+    """Remove a verified false cut glyph, without filtering surrounding skin.
+
+    GPU isolation established that these neutral-dark source texels form the
+    dashed lower-eye cut in the male paint, independently of geometry/normals.
+    The predicate is limited to its audited one-pixel path, checks both local
+    value and lost skin chroma, and must match the exact reviewed footprint.
+    """
+    if sex != "male":
+        return paint, None
+    luminance = source_projection @ np.array([.2126, .7152, .0722])
+    chroma = source_projection[..., 0]-source_projection[..., 1]
+    yy, xx = np.indices(luminance.shape)
+    cut_y = 491+(xx-303)*(13/31)
+    mask = (xx >= 302) & (xx <= 335) & (abs(yy-cut_y) < .70)
+    mask &= median_filter(luminance, size=7, mode="nearest")-luminance > .015
+    mask &= median_filter(chroma, size=7, mode="nearest")-chroma > .04
+    expected = {(491,303),(494,310),(495,312),(496,315),(497,317),
+                (498,319),(498,320),(499,321),(499,322),(500,324),
+                (501,326),(501,327),(502,328),(502,329),(503,330),
+                (503,331),(503,332),(504,333),(504,334)}
+    pixels = np.argwhere(mask)
+    if {tuple(pixel) for pixel in pixels} != expected:
+        raise ValueError("Male false-cut pigment footprint changed; re-audit source art before repair")
+    if np.max(regions[..., 0][mask]) > .01 or np.max(regions[..., 2][mask]) > .01:
+        raise ValueError("False-cut repair unexpectedly reaches an eye or eyebrow")
+    # Interpolate across the cut's normal from its immediate clean sides.
+    # Only these 19 RGB texels change; alpha and every surrounding texel stay
+    # exact. Using the immutable input avoids sequential fill propagation.
+    normal_yx = np.array([31., -13.])/np.hypot(31., 13.)
+    coordinates = pixels.T.astype(float)
+    sides = []
+    for side in (-1, 1):
+        q = coordinates+normal_yx[:, None]*side*1.7
+        sides.append(np.stack([map_coordinates(paint[..., c], q, order=1, mode="nearest")
+                               for c in range(3)], axis=-1))
+    repaired = paint.copy()
+    repaired[mask, :3] = np.mean(sides, axis=0)
+    save_png(stage/f"{sex}-pigment-repair-mask.png", mask.astype(float))
+    return repaired, {"kind": "verified imported false-cut pigment", "rgb_texels": len(pixels),
+                      "bounds_px": [303,491,334,504], "alpha_unchanged": True,
+                      "predicate": "audited one-pixel path plus local darkness and lost skin chroma",
+                      "fill": "bilinear RGB from clean sides at +/-1.7 texels perpendicular to cut"}
+
+
 def geometry_v2(stage, sex, base, region, points, low_normal, raw_delta, high_normal, valid, eye_y, reference=False, mouth_y=None):
     x, y, z = points[..., 0], points[..., 1], points[..., 2]
     weight = smoothstep(-.060, -.030, y)*(1-smoothstep(.120, .145, y))
@@ -431,7 +476,7 @@ def geometry_v2(stage, sex, base, region, points, low_normal, raw_delta, high_no
     return base, region, descriptor
 
 
-def refine_features_v4(stage, sex, paint, regions, normal, geometry, mouth_y):
+def refine_features_v4(stage, sex, paint, regions, normal, geometry, mouth_y, concept_art=False, male_cheek_planes=False):
     """Authored eye/lip finish in the existing canonical atlas, not an upscale.
 
     The iris carries neutral radial pigment so the selected eye hue remains
@@ -460,8 +505,8 @@ def refine_features_v4(stage, sex, paint, regions, normal, geometry, mouth_y):
         aperture_pixels = native_eye > .20
         width = np.clip((np.percentile(x[aperture_pixels],98)-np.percentile(x[aperture_pixels],2))*.48,.014,.022)
         along = (x-cx)/width
-        arch = np.maximum(1-along*along,0)**.65
-        upper = min(np.percentile(y[aperture_pixels],98)-cy,.0080)*.72
+        arch = np.maximum(1-along*along,0)**(.80 if concept_art else .65)
+        upper = min(np.percentile(y[aperture_pixels],98)-cy,.0080)*(.70 if concept_art else .72)
         lower = min(cy-np.percentile(y[aperture_pixels],2),.0065)*.96
         top = cy+upper*arch+side*(x-cx)*.035
         bottom = cy-lower*arch+side*(x-cx)*.035
@@ -497,6 +542,13 @@ def refine_features_v4(stage, sex, paint, regions, normal, geometry, mouth_y):
         organic = map_coordinates(old_value, coordinates, order=1, mode="nearest")
         organic = np.clip(organic,.025,.58)
         fibres = fibres*.30+organic*.70
+        if concept_art:
+            # Small branching crypts break up the even spokes. These are
+            # neutral pigment, leaving every selected iris hue editable.
+            crypts = np.maximum(np.sin(angle*19+np.sin(angle*7)*1.8+r*15),0)**9
+            crypts *= np.exp(-((r-.52)/.21)**2)
+            fibres = fibres*.93-crypts*.042
+            fibres += .025*np.sin(angle*43+r*11)*np.exp(-((r-.70)/.25)**2)
         # A defined pupil/limbus with a softly variegated mid iris. Its upper
         # shadow belongs to the lid, rather than a uniformly luminous circle.
         pupil = smoothstep(.25, .36, r)
@@ -518,17 +570,29 @@ def refine_features_v4(stage, sex, paint, regions, normal, geometry, mouth_y):
         glaze([.72, .69, .63], sclera*.16)
         upper_shadow = np.exp(-((y-cy-radius*.48)/(radius*.34))**2)
         glaze([.18, .115, .105], eye_side*upper_shadow*.18)
-        inner_x = cx-side*radius*1.65
+        inner_x = cx-side*(width*.91 if concept_art else radius*1.65)
         tear = np.exp(-((x-inner_x)/.0018)**2-((y-cy+.0007)/.0011)**2)
-        glaze([.52, .255, .235], tear*eye_side*.30)
+        glaze([.52, .255, .235], tear*eye_side*(.47 if concept_art else .30))
         rim_extent=(1-smoothstep(.87,1.04,abs(along)))*(x*side>0)
-        rim=np.exp(-((y-top)/.00050)**2)*rim_extent
-        crease=np.exp(-((y-top-.0021)/.0008)**2)*rim_extent
+        rim=np.exp(-((y-top)/(.00053 if concept_art else .00050))**2)*rim_extent
+        crease=np.exp(-((y-top-(.0025 if concept_art else .0021))/.0008)**2)*rim_extent
         waterline=np.exp(-((y-bottom-.00015)/.00038)**2)*rim_extent
-        glaze([.15,.09,.08],rim*(.45 if sex=="female" else .30))
-        glaze([.43,.29,.26],crease*.10)
-        glaze([.84,.62,.53],waterline*.13)
+        glaze([.15,.09,.08],rim*((.73 if sex=="female" else .51) if concept_art else (.45 if sex=="female" else .30)))
+        glaze([.43,.29,.26],crease*(.18 if concept_art else .10))
+        glaze([.84,.62,.53],waterline*(.22 if concept_art else .13))
+        if concept_art:
+            lower_roll=np.exp(-((y-bottom+.0011)/.0009)**2)*rim_extent
+            outer_lash=np.exp(-((y-top-.00015)/.00060)**2)*rim_extent*smoothstep(.12,.80,side*along)
+            glaze([.78,.57,.47],lower_roll*.10)
+            glaze([.12,.075,.065],outer_lash*(.26 if sex=="female" else .10))
         lid_relief += (rim*.00060+waterline*.00030-crease*.00022)*native_eye
+        if concept_art:
+            # Ease the source's swollen lower orbital roll while retaining
+            # the waterline itself. The same bounded field updates geometry
+            # and coherent normals; it is not a painted shadow correction.
+            under_roll=np.exp(-((y-bottom+.0030)/.0033)**2)
+            under_roll*=(1-smoothstep(.65,1.10,abs(along)))*(x*side>0)
+            lid_relief-=under_roll*(1-native_eye)*.00065
         # Tangent-space corneal curvature is restricted to the eye pigment.
         # Map Y runs down the atlas; canonical Y runs upward.
         curve = np.stack([np.clip(dx, -1, 1)*.53, -np.clip(dy, -1, 1)*.53,
@@ -545,14 +609,34 @@ def refine_features_v4(stage, sex, paint, regions, normal, geometry, mouth_y):
     extent = 1-smoothstep(.93, 1.04, abs(x)/width)
     upper_pigment = np.exp(-((y-upper)/.0020)**2)*extent
     lower_pigment = np.exp(-((y-lower)/.0025)**2)*extent
+    if concept_art:
+        # A bounded vermilion shape gives the Cupid bow and the rolled lower
+        # lip definite borders; translucent layers retain the source pigment.
+        upper_border=seam+(.0041+.0019*np.exp(-((abs(x)-.0065)/.0042)**2))*arch
+        lower_border=seam-.0065*arch
+        upper_pigment=smoothstep(seam-.00035,seam+.00035,y)*(1-smoothstep(upper_border-.00023,upper_border+.00028,y))*extent
+        lower_pigment=smoothstep(lower_border-.00045,lower_border+.00040,y)*(1-smoothstep(seam-.00035,seam+.00035,y))*extent
+        upper=np.minimum(upper_border-.0010,seam+.0035)
+        lower=seam-.0032*arch
     seam_line = np.exp(-((y-seam)/.00065)**2)*extent
     corners = np.exp(-((abs(x)-width*.96)/.0020)**2-((y-mouth_y+.0002)/.0012)**2)
-    glaze([.49, .225, .215] if sex == "female" else [.43, .255, .23], upper_pigment*skin*.34)
-    glaze([.66, .345, .31] if sex == "female" else [.58, .34, .29], lower_pigment*skin*.28)
-    glaze([.235, .095, .09], seam_line*skin*(.57 if sex == "female" else .46))
+    glaze([.49, .225, .215] if sex == "female" else [.43, .255, .23], upper_pigment*skin*(.42 if concept_art else .34))
+    glaze([.66, .345, .31] if sex == "female" else [.58, .34, .29], lower_pigment*skin*(.39 if concept_art else .28))
+    glaze([.235, .095, .09], seam_line*skin*((.68 if sex == "female" else .57) if concept_art else (.57 if sex == "female" else .46)))
     glaze([.27, .125, .115], corners*skin*.47)
-    cupid = np.exp(-((y-upper-.0015)/.00065)**2)*extent
-    glaze([.87, .63, .52], cupid*skin*.13)
+    cupid_center = upper_border+.00035 if concept_art else upper+.0015
+    cupid_width = .00055 if concept_art else .00065
+    cupid = np.exp(-((y-cupid_center)/cupid_width)**2)*extent
+    glaze([.87, .63, .52], cupid*skin*(.20 if concept_art else .13))
+    if concept_art:
+        vermilion_edge=np.exp(-((y-upper_border+.00012)/.00038)**2)*extent
+        glaze([.46,.205,.18] if sex=="female" else [.42,.24,.20],vermilion_edge*skin*(.24 if sex=="female" else .13))
+        # The lower lip catches a soft horizontal sheen, with irregular fine
+        # vertical furrows instead of a broad pale band around the mouth.
+        roll=np.exp(-((y-(seam-.0037*arch))/.0012)**2)*np.exp(-(x/(width*.70))**4)*lower_pigment
+        furrows=(.5+.5*np.sin(x*3700+np.sin(x*530)*1.7))**5
+        glaze([.86,.56,.45] if sex=="female" else [.74,.48,.36],roll*skin*.22)
+        glaze([.39,.19,.17],furrows*(upper_pigment+lower_pigment)*skin*.045)
     philtrum = np.exp(-(x/.004)**2-((y-mouth_y-.010)/.006)**2)
     glaze([.49, .32, .28], philtrum*skin*.065)
     lip = np.maximum(upper_pigment, lower_pigment)*skin
@@ -561,6 +645,21 @@ def refine_features_v4(stage, sex, paint, regions, normal, geometry, mouth_y):
     # Refine the actual vermilion form and corner indentation. This bounded
     # addition never reaches the skull, neck or helmet/hair seam protections.
     relief = (.00035*upper_pigment+.00040*lower_pigment-.00070*seam_line-.00055*corners)*skin+lid_relief
+    lip_lid_relief_max = float(abs(relief).max())
+    cheek_report = None
+    if concept_art and male_cheek_planes and sex == "male":
+        # Broad lateral planes give the retained imported male face a malar
+        # crest and buccal hollow. The central features, orbit, ears and neck
+        # have exact zero influence; no crease or new topology is introduced.
+        eye_y = geometry["eye_y_m"]
+        lateral = smoothstep(.030,.041,abs(x))*(1-smoothstep(.065,.077,abs(x)))
+        vertical = smoothstep(-.012,.002,y)*(1-smoothstep(eye_y-.024,eye_y-.014,y))
+        crest = np.exp(-((abs(x)-.052)/.013)**2-((y-eye_y+.031)/.010)**2)
+        hollow = np.exp(-((abs(x)-.055)/.014)**2-((y-mouth_y-.005)/.016)**2)
+        planes = (crest*.0010-hollow*.00125)*lateral*vertical
+        relief += planes
+        cheek_report = {"max_rise_m": float(planes.max()), "max_hollow_m": float(planes.min()),
+                        "central_zero_half_width_m": .030, "outer_zero_x_m": .077}
     size, stride, max_delta = geometry["size"], geometry["stride"], geometry["max_delta_m"]
     path = stage/f"{sex}-sculpt.bin"
     field = np.frombuffer(gzip.decompress(path.read_bytes()), np.uint8).reshape(size, size, stride).astype(float)/127.5-1
@@ -575,9 +674,12 @@ def refine_features_v4(stage, sex, paint, regions, normal, geometry, mouth_y):
     field[..., 3:6] = n
     path.write_bytes(gzip.compress(np.round(np.clip(field*.5+.5, 0, 1)*255).astype(np.uint8).tobytes(), compresslevel=9, mtime=0))
     geometry.update(bytes=path.stat().st_size, sha256=sha(path), baked_max_displacement_m=float(np.linalg.norm(delta, axis=-1).max()))
-    return paint, regions, normal, {"version": 4, "eyes": eyes,
-        "max_lip_relief_addition_m": float(abs(relief).max()),
+    features = {"version": 5 if concept_art else 4, "eyes": eyes,
+        "max_lip_relief_addition_m": lip_lid_relief_max,
         "description": "Neutral iris fibres, pupil/limbus and curved corneal normals; measured vermilion seam/corners and bounded lip relief"}
+    if cheek_report:
+        features["male_cheek_planes"] = cheek_report
+    return paint, regions, normal, features
 
 
 def run(args):
@@ -587,6 +689,7 @@ def run(args):
     reports = []
     for sex in ("male", "female"):
         base, region, points, normal, valid, head, eye_y, runtime, split = raster_head(root, args.sources, sex, g, ea)
+        source_projection = base.copy()
         save_png(args.stage/f"{sex}-source-projection.png", base)
         high_normal, bake, delta, coherent = bake_high_normals(args.sources, sex, points, normal, valid, head, runtime, g, ea)
         mouth_y=None
@@ -606,7 +709,10 @@ def run(args):
             high_normal if geometry else normal, high_normal, valid, eye_y, sex, source_iris=bool(geometry),reference=args.geometry_v3,mouth_y=mouth_y)
         features = None
         if args.features_v4:
-            painted, regions, detailed_normal, features = refine_features_v4(args.stage, sex, painted, regions, detailed_normal, geometry, mouth_y)
+            painted, regions, detailed_normal, features = refine_features_v4(args.stage, sex, painted, regions, detailed_normal, geometry, mouth_y, args.features_v5, args.male_cheek_planes)
+        pigment_repair = None
+        if args.repair_source_pigment:
+            painted, pigment_repair = repair_source_pigment(args.stage, sex, painted, regions, source_projection)
         save_png(args.stage/f"{sex}-paint.png", painted)
         save_png(args.stage/f"{sex}-regions.png", regions)
         save_png(args.stage/f"{sex}-normal.png", detailed_normal)
@@ -626,6 +732,10 @@ def run(args):
             descriptor["version"] = 4
             descriptor["features"] = features
             descriptor["paint_recipe"] = "Human portrait v4: articulated iris/cornea response and measured lip seam, vermilion and corner relief"
+            if args.features_v5:
+                descriptor["paint_recipe"] = "Human portrait v5: concept-guided iris crypts, continuous lid/canthus paint and bounded Cupid bow/vermilion anatomy"
+        if pigment_repair:
+            descriptor["source_pigment_repairs"] = [pigment_repair]
         (args.stage/f"{sex}.json").write_text(json.dumps(descriptor, indent=2)+"\n", newline="\n")
         report = {"sex": sex, "runtime_triangles_unchanged": not bool(geometry), "valid_head_pixels": int(valid.sum()),
                   "source_albedo_size": [4096, 4096], **bake}
@@ -654,7 +764,14 @@ if __name__ == "__main__":
     parser.add_argument("--geometry-v2", action="store_true", help="Bake bounded High-only surface conformance and lid artwork")
     parser.add_argument("--geometry-v3", action="store_true", help="Refine measured lip/lid/brow planes while preserving exact source pigment")
     parser.add_argument("--features-v4", action="store_true", help="Refine eye pigment, corneal response and mouth form over v3")
+    parser.add_argument("--features-v5", action="store_true", help="Refine lid/canthus paint and bounded vermilion anatomy against retained concepts")
+    parser.add_argument("--male-cheek-planes", action="store_true", help="Add bounded lateral malar/buccal planes to the High male sculpt")
+    parser.add_argument("--repair-source-pigment", action="store_true", help="Repair the audited false-cut RGB texels without filtering surrounding art")
     args = parser.parse_args()
+    if args.male_cheek_planes or args.repair_source_pigment:
+        args.features_v5 = True
+    if args.features_v5:
+        args.features_v4 = True
     if args.features_v4:
         args.geometry_v3 = True
     run(args)

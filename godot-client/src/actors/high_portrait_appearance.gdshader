@@ -33,6 +33,12 @@ uniform vec2 portrait_iris_radii = vec2(0.007, 0.007);
 uniform vec4 portrait_bounds = vec4(-0.105, 0.105, -0.075, 0.205);
 
 void fragment() {
+	// COLOR.g marks vertices whose High sculpt supplies an outward normal.
+	// A few near-degenerate source cuts can reverse in screen space; undo
+	// Godot's back-face normal flip only for that authored normal field.
+	if (!FRONT_FACING && COLOR.g > 0.5) {
+		NORMAL = -NORMAL;
+	}
 	vec2 atlas_uv = UV * mask_uv_scale + mask_uv_offset;
 	vec3 original = texture(base_texture, UV).rgb * base_color.rgb;
 	vec3 mask = use_regions ? texture(region_texture, atlas_uv).rgb : vec3(0.0);
@@ -69,7 +75,11 @@ void fragment() {
 		float radial = length(head_xy - center) / max(radius, 0.001);
 		float collarette = exp(-pow((radial - 0.48) / 0.16, 2.0));
 		vec3 warm_crypt = vec3(0.26, 0.16, 0.055) * clamp(eye_value / 0.17, 0.45, 1.4);
-		natural_eye = mix(natural_eye, warm_crypt, collarette * 0.28);
+		natural_eye = mix(natural_eye, warm_crypt, collarette * 0.43);
+		// The limbal edge keeps the selected hue in a darker, less saturated
+		// ring. Warm inner crypts and a cooler outer iris remain one dye.
+		float outer_iris = smoothstep(0.68, 0.98, radial);
+		natural_eye = mix(natural_eye, natural_eye * vec3(0.78, 0.82, 0.86), outer_iris * 0.45);
 	}
 	// Source iris pixels are already shaded. Restore their readable value
 	// after hue selection rather than multiplying two dark pigments together.

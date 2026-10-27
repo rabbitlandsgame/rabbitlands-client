@@ -284,9 +284,48 @@ static func _refine(source: Mesh, authored: Mesh, to_head: Transform3D, sex: Str
 				var chain: PackedInt32Array=lods[threshold]
 				chain.append_array(layer.added_indices)
 				lods[threshold]=chain
+			if sex == "female" and style == 3 and detail == 2:
+				arrays = _lower_updo_fringe(arrays,to_head)
 		result.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays, [], lods, source.surface_get_format(surface) & Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS)
 		result.surface_set_material(surface, source.surface_get_material(surface))
 	return result
+
+static func _updo_fringe_point(point: Vector3) -> Vector3:
+	var front := smoothstep(0.068,0.085,point.z)
+	var centre := 1.0-smoothstep(0.055,0.085,absf(point.x))
+	var height := smoothstep(0.075,0.135,point.y)*(1.0-smoothstep(0.155,0.175,point.y))
+	return point+Vector3(0,-0.018,0.003)*front*centre*height
+
+## Lower only the existing swept fringe islands after edge refinement. This
+## keeps all topology, crown, buns, hanging strands and scalp roots intact.
+static func _lower_updo_fringe(arrays: Array, to_head: Transform3D) -> Array:
+	var groups := _updo_groups(arrays,to_head)
+	var points: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+	var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
+	var colors: PackedColorArray = arrays[Mesh.ARRAY_COLOR]
+	var tangents: PackedFloat32Array = arrays[Mesh.ARRAY_TANGENT] if arrays[Mesh.ARRAY_TANGENT] != null else PackedFloat32Array()
+	var from_head := to_head.affine_inverse()
+	var e := 0.0001
+	for index: int in points.size():
+		var group: int = groups.vertices[index]
+		if group < 3 or group == 8 or colors[index].r>0.5: continue
+		var local := to_head*points[index]
+		var moved := _updo_fringe_point(local)
+		if moved == local: continue
+		var j := Basis((_updo_fringe_point(local+Vector3.RIGHT*e)-moved)/e,
+			(_updo_fringe_point(local+Vector3.UP*e)-moved)/e,
+			(_updo_fringe_point(local+Vector3.BACK*e)-moved)/e)
+		j = from_head.basis*j*to_head.basis
+		points[index] = from_head*moved
+		normals[index] = (j.inverse().transposed()*normals[index]).normalized()
+		if tangents.size() == points.size()*4:
+			var t := j*Vector3(tangents[index*4],tangents[index*4+1],tangents[index*4+2])
+			t = (t-normals[index]*normals[index].dot(t)).normalized()
+			for component: int in 3: tangents[index*4+component]=t[component]
+	arrays[Mesh.ARRAY_VERTEX]=points
+	arrays[Mesh.ARRAY_NORMAL]=normals
+	if not tangents.is_empty(): arrays[Mesh.ARRAY_TANGENT]=tangents
+	return arrays
 
 static func _updo_groups(arrays: Array, to_head: Transform3D) -> Dictionary:
 	var points: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]

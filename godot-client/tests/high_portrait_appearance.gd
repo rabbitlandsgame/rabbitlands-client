@@ -57,6 +57,8 @@ func run() -> void:
 	HIGH.clear()
 	check_feature_artwork()
 	check_seam_midpoints()
+	check_authored_normal_ownership()
+	check_alar_relaxation()
 	for sex: String in ["male", "female"]:
 		var slug := "luminous_" + sex
 		var actor := ReplicatedActor3D.new()
@@ -305,6 +307,23 @@ func check_geometry(source: Mesh, result: Mesh, label: String) -> void:
 				seam_positions[key] = q
 		var vertices: PackedVector3Array = b[Mesh.ARRAY_VERTEX]
 		var normals: PackedVector3Array = b[Mesh.ARRAY_NORMAL]
+		var colors: PackedColorArray = b[Mesh.ARRAY_COLOR]
+		var authored_vertices := 0
+		for color: Color in colors:
+			expect(color.g == 0.0 or color.g == 1.0, "High normal ownership uses existing binary color channel")
+			authored_vertices += int(color.g > .5)
+		var inconsistent_triangles := 0
+		for triangle: int in range(0, bi.size(), 3):
+			var ia := bi[triangle]
+			var ib := bi[triangle + 1]
+			var ic := bi[triangle + 2]
+			if colors[ia].g + colors[ib].g + colors[ic].g < 1.5:
+				continue
+			var geometric := (vertices[ib]-vertices[ia]).cross(vertices[ic]-vertices[ia])
+			var authored := normals[ia]+normals[ib]+normals[ic]
+			if geometric.length_squared() > 1e-20 and geometric.dot(authored) > .05001*geometric.length()*authored.length():
+				inconsistent_triangles += 1
+		expect(inconsistent_triangles == 0, "High-owned triangles retain coherent outward winding " + label)
 		var weights: PackedFloat32Array = b[Mesh.ARRAY_WEIGHTS]
 		var width := int(weights.size() / vertices.size())
 		var original_weights: PackedFloat32Array = a[Mesh.ARRAY_WEIGHTS]
@@ -324,7 +343,101 @@ func check_geometry(source: Mesh, result: Mesh, label: String) -> void:
 			expect(absf(sum - 1.0) < .001, "normalized canonical skin weights")
 		geometry_records.append({"part": label, "surface": surface, "source_triangles": ai.size() / 3,
 			"high_triangles": bi.size() / 3, "vertices": vertices.size(), "max_displacement_m": maximum_delta,
-			"max_original_seam_gap_m": maximum_seam_gap})
+			"max_original_seam_gap_m": maximum_seam_gap, "authored_normal_vertices": authored_vertices,
+			"inconsistent_authored_triangles": inconsistent_triangles})
+
+func check_authored_normal_ownership() -> void:
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	var points := PackedVector3Array()
+	var normals := PackedVector3Array()
+	var uv := PackedVector2Array()
+	for group: int in 3:
+		for point: Vector3 in [Vector3(-.02,.09,.05),Vector3(.02,.09,.05),Vector3(0,.06,.05)]:
+			if group == 1:
+				point.y = .015
+			points.append(point if group < 2 else point-Vector3(0,0,.12))
+			normals.append(Vector3.FORWARD if group == 1 else Vector3.BACK)
+			uv.append(Vector2.ZERO)
+	arrays[Mesh.ARRAY_VERTEX] = points
+	arrays[Mesh.ARRAY_NORMAL] = normals
+	arrays[Mesh.ARRAY_TEX_UV] = uv
+	arrays[Mesh.ARRAY_INDEX] = PackedInt32Array([0,2,1,3,5,4,6,8,7])
+	var source := ArrayMesh.new()
+	source.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	var source_normals: PackedVector3Array = source.surface_get_arrays(0)[Mesh.ARRAY_NORMAL]
+	var bundle := HIGH._bundle("male").duplicate(true)
+	bundle.descriptor.geometry.subdivision_passes = 0
+	expect(HIGH._tangential_sculpt_scale(Vector3(-.04,.07,.05),bundle) < .001,
+		"eye cut retains source lateral layout to prevent actual folded gaps")
+	for point:Vector3 in [Vector3(0,.075,.05),Vector3(.02,.015,.05),Vector3(.09,.075,.05),Vector3(.04,.075,-.01)]:
+		expect(HIGH._tangential_sculpt_scale(point,bundle) > .999,
+			"nose center, mouth, ears and rear retain original sculpt field")
+	for sex:String in ["male","female"]:
+		var sculpt_bundle := HIGH._bundle(sex)
+		var eye_y := float(sculpt_bundle.descriptor.geometry.eye_y_m)
+		var cut := [Vector3(-.04,eye_y-.008,.05),Vector3(-.03,eye_y-.008,.05),Vector3(-.035,eye_y-.007999,.05)]
+		var moved: Array[Vector3] = []
+		for point:Vector3 in cut:
+			var full := point+HIGH._sample_sculpt(point,sculpt_bundle,0)*float(sculpt_bundle.descriptor.geometry.max_delta_m)*HIGH._sculpt_mask(point)
+			var safe := HIGH._sculpt_point(point,sculpt_bundle)
+			expect(safe.x==point.x and safe.y==point.y and safe.z==full.z,
+				"thin eye cut keeps exact source X/Y and exact authored Z " + sex)
+			moved.append(safe)
+		var source_area:float = (cut[1]-cut[0]).cross(cut[2]-cut[0]).z
+		var high_area := (moved[1]-moved[0]).cross(moved[2]-moved[0]).z
+		expect(source_area*high_area>0.0, "near-collinear imported cut cannot fold in front projection " + sex)
+	var result := HIGH._project_mesh(source,Transform3D.IDENTITY,bundle.descriptor.projection,bundle,{},Vector3.ZERO,"body")
+	var fixed := result.surface_get_arrays(0)
+	var colors: PackedColorArray = fixed[Mesh.ARRAY_COLOR]
+	for index: int in colors.size():
+		expect(colors[index].g == (1.0 if index < 3 else 0.0), "normal ownership excludes original inner/rear surface")
+	expect(source.surface_get_arrays(0)[Mesh.ARRAY_INDEX] == arrays[Mesh.ARRAY_INDEX], "High winding repair retains exact source indices")
+	expect(source.surface_get_arrays(0)[Mesh.ARRAY_NORMAL] == source_normals, "High normal ownership retains exact source normals")
+	var indices: PackedInt32Array = fixed[Mesh.ARRAY_INDEX]
+	expect(indices[1] == 1 and indices[2] == 2, "High clearly reversed owned triangle is oriented outward")
+	expect(indices[4] == 5 and indices[5] == 4 and indices[7] == 8 and indices[8] == 7, "unowned triangle winding remains exact")
+	var lods := {.1:PackedInt32Array([0,2,1,3,5,4])}
+	expect(HIGH._orient_authored_triangles(fixed,lods) == 1, "High winding repair also handles existing LOD chains")
+	expect(lods[.1] == PackedInt32Array([0,1,2,3,5,4]), "LOD attributes keep original vertex ownership")
+	expect(HIGH._orient_authored_triangles(fixed,lods) == 0, "High winding repair is idempotent")
+	HIGH.clear()
+
+func check_alar_relaxation() -> void:
+	var bundle := HIGH._bundle("female")
+	var nose_y := (float(bundle.descriptor.geometry.eye_y_m)+float(bundle.descriptor.geometry.mouth_y_m))*.5
+	var a := Vector3(.015,nose_y,.075)
+	var b := Vector3(.04,nose_y+.03,.03)
+	var c := Vector3(0,nose_y-.02,.055)
+	var points := PackedVector3Array([a,b,c,a,b,c,Vector3(0,nose_y,.08),
+		Vector3(.02,float(bundle.descriptor.geometry.mouth_y_m)-.01,.065),
+		Vector3(.04,float(bundle.descriptor.geometry.eye_y_m)+.035,.05),Vector3(.015,nose_y,-.03)])
+	var original := points.duplicate()
+	var normals := PackedVector3Array()
+	var colors := PackedColorArray()
+	var uv := PackedVector2Array()
+	for index:int in points.size():
+		normals.append(Vector3.FORWARD if index==3 else Vector3.BACK)
+		colors.append(Color(1,0 if index==3 else 1,0,1))
+		uv.append(Vector2(float(index)/points.size(),.5))
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = points
+	arrays[Mesh.ARRAY_NORMAL] = normals
+	arrays[Mesh.ARRAY_COLOR] = colors
+	arrays[Mesh.ARRAY_TEX_UV] = uv
+	arrays[Mesh.ARRAY_INDEX] = PackedInt32Array([0,1,2,3,4,5])
+	var indices:PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
+	var maximum := HIGH._relax_alar_surface(arrays,Transform3D.IDENTITY,bundle)
+	var result:PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+	expect(maximum>0.0 and maximum<=.00200001, "canonical alar repair has a total two millimetre cap")
+	expect(result[0]==result[3], "inner/outer UV seam vertices share exact relaxed position")
+	for index:int in [1,2,4,5,6,7,8,9]:
+		expect(result[index]==original[index], "alar solve keeps bridge/center/lips/eyes/rear and outer boundary exact")
+	expect(arrays[Mesh.ARRAY_TEX_UV]==uv and arrays[Mesh.ARRAY_COLOR]==colors and arrays[Mesh.ARRAY_INDEX]==indices,
+		"alar geometry repair keeps UVs, pigment/normal markers and triangle membership exact")
+	expect(arrays[Mesh.ARRAY_NORMAL][3]==Vector3.FORWARD, "alar repair retains unowned inner normal")
+	HIGH.clear()
 
 func check_seam_midpoints() -> void:
 	var bundle := HIGH._bundle("male")

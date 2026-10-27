@@ -76,7 +76,7 @@ static func derive(source: AnimationLibrary, profile := "female", skeleton: Skel
 		for idle_name: StringName in IDLE_CLIPS:
 			if source.has_animation(idle_name):
 				result.remove_animation(idle_name)
-				result.add_animation(idle_name, _idle_arms(source.get_animation(idle_name), result.get_animation(&"Walk")))
+				result.add_animation(idle_name, _idle_arms(source.get_animation(idle_name), result.get_animation(&"Walk"), profile, skeleton))
 	if held_run != null:
 		for mask: int in range(1, 4):
 			var variant := held_run if mask == 3 else _copy_animation(result.get_animation(&"Run_Female"))
@@ -114,7 +114,7 @@ static func _restore_held_fingers(result: Animation, held: Animation, side: Stri
 
 ## Keep authored breathing/feet/head, settling the arms toward the two accepted
 ## mid-walk poses with a small amount of the original standing movement.
-static func _idle_arms(source: Animation, walk: Animation) -> Animation:
+static func _idle_arms(source: Animation, walk: Animation, profile := "female", skeleton: Skeleton3D = null) -> Animation:
 	var result := _copy_animation(source)
 	var walking := _rotations(walk)
 	for track: int in source.get_track_count():
@@ -125,6 +125,26 @@ static func _idle_arms(source: Animation, walk: Animation) -> Animation:
 		for key: int in result.track_get_key_count(track):
 			var original: Quaternion = source.track_get_key_value(track,key)
 			result.track_set_key_value(track,key,original.slerp(neutral,0.92).normalized())
+	if profile == "male" and skeleton != null:
+		# A small shoulder extension lets the whole relaxed arm hang farther
+		# back in side view. Keep the accepted elbow bend, wrist and fingers;
+		# equipped grips still aim afterwards through WeaponCarryPose.
+		var channels := {}
+		for track: int in result.get_track_count():
+			var bone := str(result.track_get_path(track).get_concatenated_subnames()).get_slice(":",0)
+			if not channels.has(bone): channels[bone] = {}
+			channels[bone][result.track_get_type(track)] = track
+		for name: String in ["upperarm_l", "upperarm_r"]:
+			var bone := skeleton.find_bone(name)
+			if bone < 0 or not channels.get(name,{}).has(Animation.TYPE_ROTATION_3D): continue
+			var track: int = channels[name][Animation.TYPE_ROTATION_3D]
+			var values: Array[Quaternion] = []
+			for key: int in result.track_get_key_count(track):
+				var pose := _pose_at(result,skeleton,channels,result.track_get_key_time(track,key))
+				var parent := skeleton.get_bone_parent(bone)
+				var aimed: Basis = Basis(Vector3.RIGHT,deg_to_rad(7.0))*pose.global[bone].basis
+				values.append((pose.global[parent].basis.inverse()*aimed).orthonormalized().get_rotation_quaternion().normalized())
+			for key: int in values.size(): result.track_set_key_value(track,key,values[key])
 	return result
 
 static func _target_skeleton(player: AnimationPlayer, library: AnimationLibrary) -> Skeleton3D:
