@@ -161,9 +161,9 @@
         {
           "at": 0,
           "actor": "guard",
-          "action": "combat_idle",
-          "destination": "player_help",
-          "face": "mother"
+          "action": "idle",
+          "destination": "escape_turn_2",
+          "visible": false
         },
         {
           "at": 0,
@@ -219,6 +219,11 @@
           "move_seconds": 4,
           "face": "daughter_trip",
           "from": "escape_turn_2",
+          "from_offset": [
+            0,
+            0,
+            -4
+          ],
           "visible": true
         },
         {
@@ -229,6 +234,26 @@
           "move_seconds": 4,
           "face": "daughter_trip",
           "from": "escape_turn",
+          "from_offset": [
+            1,
+            0,
+            -4
+          ],
+          "visible": true
+        },
+        {
+          "at": 4,
+          "actor": "guard",
+          "action": "run",
+          "from": "escape_turn_2",
+          "from_offset": [
+            -1,
+            0,
+            -4
+          ],
+          "destination": "player_help",
+          "move_seconds": 4,
+          "face": "mother",
           "visible": true
         },
         {
@@ -265,6 +290,13 @@
           "action": "combat_idle",
           "destination": "guard_strike",
           "face": "daughter_trip"
+        },
+        {
+          "at": 8,
+          "actor": "guard",
+          "action": "combat_idle",
+          "destination": "player_help",
+          "face": "mother"
         },
         {
           "at": 13,
@@ -1679,7 +1711,7 @@
           "face": "lich"
         },
         {
-          "at": 5,
+          "at": 3,
           "actor": "lich",
           "action": "idle",
           "visible": true,

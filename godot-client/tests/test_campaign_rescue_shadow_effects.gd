@@ -13,6 +13,10 @@ class Corpse extends Node3D:
 	var current_action := &"death"
 	var _corpse_transparency := 0.0
 
+class LivingLich extends Node3D:
+	var health := 100
+	var current_action := &"idle"
+
 func _init() -> void: run.call_deferred()
 func expect(value: bool, message: String) -> void:
 	checks += 1
@@ -34,7 +38,10 @@ func bind(presenter: Node3D) -> void:
 func run() -> void:
 	root.get_node("Network").call("block_for_hud_preview")
 	var presenter := Presentation.new();root.add_child(presenter);bind(presenter)
-	var lich := Node3D.new();root.add_child(lich);lich.position=Vector3(3,0,1);lich.hide()
+	var lich := LivingLich.new();root.add_child(lich);lich.position=Vector3(3,0,1);lich.hide()
+	var lich_body := MeshInstance3D.new();lich_body.mesh=BoxMesh.new();lich.add_child(lich_body)
+	var lich_original := StandardMaterial3D.new();lich_original.albedo_color=Color(0.1,0.5,0.6)
+	lich_body.material_override=lich_original
 	var corpse := Corpse.new();root.add_child(corpse);corpse.position=Vector3(1,0,2)
 	var body := MeshInstance3D.new();body.mesh=BoxMesh.new();corpse.add_child(body)
 	var original := StandardMaterial3D.new();original.albedo_color=Color(0.3,0.2,0.1)
@@ -44,23 +51,33 @@ func run() -> void:
 	var original_pose := corpse.global_transform
 	presenter.apply_cinematic(state(2.9,cast),cast)
 	expect(presenter._arrival_effects.is_empty(),"the arrival is absent before its authored beat")
+	lich.show();presenter.apply_cinematic(state(3.0,cast),cast)
+	var hidden_material := lich_body.get_surface_override_material(0) as ShaderMaterial
+	expect(lich.visible and hidden_material!=null and is_equal_approx(float(hidden_material.get_shader_parameter("dissolve_progress")),1.0),
+		"the first visible lich frame is fully dissolved before it can flash solid")
 	presenter.apply_cinematic(state(4.8,cast),cast)
 	var arrival: Dictionary=presenter._arrival_effects.get("lich-arrival",{})
-	expect(not arrival.is_empty(),"the lich's arrival is drawn before his reveal")
+	expect(not arrival.is_empty(),"the lich's arrival accompanies his gradual reveal")
 	if not arrival.is_empty():
-		expect(arrival.root.get_parent()==presenter and arrival.root.is_visible_in_tree() and not lich.visible,
-			"arrival runes remain visible while the server-owned lich is hidden")
+		expect(arrival.root.get_parent()==presenter and arrival.root.is_visible_in_tree(),
+			"arrival runes remain independent of the dissolving lich material")
+		var reveal_progress:=float(hidden_material.get_shader_parameter("dissolve_progress"))
+		expect(reveal_progress>0.0 and reveal_progress<1.0 and not arrival.reveal._ash.visible,
+			"the living lich material dissolves in without emitting corpse dust")
 		expect(arrival.root.global_position.distance_to(lich.global_position)<0.1 and arrival.light.light_energy>3.0,
 			"the pulse and its local chamber light mark the actual bound lich position")
 		var clock:float=arrival.spell.elapsed
 		var energy:float=arrival.light.light_energy
 		presenter.apply_cinematic(state(4.8,cast),cast)
-		expect(is_equal_approx(arrival.spell.elapsed,clock) and is_equal_approx(arrival.light.light_energy,energy),
-			"manual reading time does not advance the arrival's sampled clock")
+		expect(is_equal_approx(arrival.spell.elapsed,clock) and is_equal_approx(arrival.light.light_energy,energy)
+			and is_equal_approx(float(hidden_material.get_shader_parameter("dissolve_progress")),reveal_progress),
+			"manual reading time does not advance the arrival or body reveal")
 	lich.show();presenter.apply_cinematic(state(5.2,cast),cast)
 	expect(not presenter._arrival_effects.is_empty(),"the visible lich emerges inside the still-active arrival")
 	presenter.apply_cinematic(state(7.0,cast),cast)
 	expect(presenter._arrival_effects.is_empty(),"the arrival light and rune roots leave at the authored end")
+	expect(lich.visible and lich_body.material_override==lich_original and lich_body.get_surface_override_material(0)==null,
+		"the live lich is fully visible with his exact original materials after arrival")
 	presenter.apply_cinematic(state(20.5,cast),cast)
 	expect(not presenter._corpse_fires.is_empty() and presenter._dissolves.is_empty(),
 		"ignition is visible while the boss body is still solid")
@@ -84,6 +101,11 @@ func run() -> void:
 	expect(not presenter._arrival_effects.is_empty() and presenter._corpse_fires.is_empty()
 		and body.material_override==original and body.get_surface_override_material(0)==null,
 		"rewinding for read-only replay reconstructs arrival and restores the original corpse material")
+	var arrival_return:=state(4.8,cast,true);arrival_return.returning=true;arrival_return.return_reason="skipped"
+	presenter.apply_cinematic(arrival_return,cast)
+	expect(presenter._arrival_effects.is_empty() and lich_body.material_override==lich_original
+		and lich_body.get_surface_override_material(0)==null and lich.visible,
+		"Skip during materialization restores the living lich instead of leaving him dissolved")
 	presenter.apply_cinematic(state(24.0,cast,true),cast)
 	var returning:=state(24.0,cast,true);returning.returning=true;returning.return_reason="skipped"
 	presenter.apply_cinematic(returning,cast)
@@ -101,11 +123,47 @@ func run() -> void:
 		CoordinateAdapter.new(),"boarsend",func(_point:Vector3)->float:return 0.0)
 	expect(presenter._corpse_fires.is_empty() and presenter._arrival_effects.is_empty(),
 		"leaving the rescue map relinquishes every fire and arrival root")
+	bind(presenter);presenter.apply_cinematic(state(3.2,cast),cast)
+	presenter.apply_snapshot({},CoordinateAdapter.new(),"landfall_insides",func(_point:Vector3)->float:return 0.0)
+	expect(lich_body.material_override==lich_original and lich_body.get_surface_override_material(0)==null,
+		"disconnect during materialization restores the original living material")
 	expect(corpse.health==0 and corpse.current_action==&"death" and corpse.global_transform==original_pose
 		and original.albedo_color==Color(0.3,0.2,0.1),"the effects change neither native death/position nor the shared source material")
+	expect(lich.health==100 and lich.current_action==&"idle" and lich.position==Vector3(3,0,1)
+		and lich_original.albedo_color==Color(0.1,0.5,0.6),"materialization never changes live health, action, position or source appearance")
 	bind(presenter)
 	expect(JSON.stringify(presenter._snapshot)==original_snapshot,"visual events never add quest proof or experience")
+	check_lantern_pools(presenter)
 	presenter.clear();presenter.queue_free();lich.queue_free();corpse.queue_free()
 	await process_frame;await process_frame
 	print("Rescue shadow effects: ",checks," checks; ",failures," failures")
 	quit(1 if failures else 0)
+
+func check_lantern_pools(presenter: Node3D) -> void:
+	presenter.clear();bind(presenter)
+	presenter._adapter=CoordinateAdapter.new()
+	presenter._sample=func(_point:Vector3)->float:return 0.0
+	presenter._darkness_requested=true
+	var owner:=WorldEnvironment.new();root.add_child(owner)
+	var original:=Environment.new();original.ambient_light_energy=0.5;owner.environment=original
+	var sun:=DirectionalLight3D.new();root.add_child(sun);sun.light_energy=0.8
+	var markers:=Node3D.new();markers.name="MapLights";root.add_child(markers)
+	var native:=OmniLight3D.new();native.name="lantern_mine-native";markers.add_child(native)
+	var unrelated:=OmniLight3D.new();unrelated.name="OtherRegionLamp";markers.add_child(unrelated)
+	presenter._world=presenter.get_world_3d()
+	presenter._build_lights()
+	presenter.apply_environment(owner,sun)
+	var brighter:bool=presenter.lamps.size()==10
+	for lamp:OmniLight3D in presenter.lamps:
+		brighter=brighter and is_equal_approx(lamp.light_energy,2.4) and is_equal_approx(lamp.omni_range,16.0)
+		brighter=brighter and lamp.light_color==Color(1.0,0.7,0.4)
+	expect(brighter,"all existing warm lantern positions receive brighter, broader light pools")
+	expect(is_equal_approx(owner.environment.ambient_light_energy,0.003) and is_zero_approx(sun.light_energy)
+		and owner.environment.reflected_light_source==Environment.REFLECTION_SOURCE_DISABLED,
+		"brighter lanterns retain the cave's real ambient, sunlight and reflection blackout")
+	expect(not native.visible and unrelated.visible,"the broader lanterns still suppress duplicate native fills only")
+	presenter.clear()
+	expect(owner.environment==original and is_equal_approx(original.ambient_light_energy,0.5)
+		and is_equal_approx(sun.light_energy,0.8) and native.visible and unrelated.visible,
+		"leaving the rescue restores every leased environment and map-light setting")
+	owner.queue_free();sun.queue_free();markers.queue_free()

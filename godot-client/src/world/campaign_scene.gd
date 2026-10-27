@@ -1133,6 +1133,7 @@ func _apply_actors() -> void:
 		var progress := clampf((elapsed - float(chosen.get("at", 0.0))) / move_seconds, 0.0, 1.0) \
 			if move_seconds > 0.0 else 1.0
 		var from: Vector3 = _anchors.get(str(chosen.get("from", "")), post.origin + previous_offset)
+		from += _vector(chosen.get("from_offset", [0, 0, 0]))
 		var to: Vector3 = _anchors.get(str(chosen.get("destination", "")), post.origin + destination)
 		var at := _ground(from.lerp(to, progress))
 		var attached := str(chosen.get("attach_to", ""))

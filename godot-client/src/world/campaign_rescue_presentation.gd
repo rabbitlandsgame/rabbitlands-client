@@ -9,8 +9,8 @@ const FENCE_PATH := "res://../eloria-assets/maps/_shared/meshes/"+FENCE_ID+".glb
 const LANTERN_TILES := [[49.6,29.5],[60.4,29.5],[43,49],[67.5,54],[60,62.5],[24.5,60],[88,61],[73,70],[46.5,86],[63.5,82]]
 const DARK_AMBIENT_ENERGY := 0.003
 const DARK_DIRECTIONAL_ENERGY := 0.0
-const LANTERN_ENERGY := 1.6
-const LANTERN_RANGE := 12.0
+const LANTERN_ENERGY := 2.4
+const LANTERN_RANGE := 16.0
 
 var cage: Node3D
 var gate: Node3D
@@ -139,8 +139,8 @@ func _build_lights() -> void:
 		if not at.is_finite():continue
 		var lamp:=OmniLight3D.new();lamp.name="ExistingMineLanternLight";add_child(lamp)
 		lamp.global_position=at+Vector3.UP*2.1;lamp.light_color=Color(1.0,0.7,0.4)
-		# Match the existing lantern_mine-lamp marker contract exactly. These
-		# replace the leased native fills; they never stack a second copy.
+		# Wider, brighter pools retain the existing warm lantern positions.
+		# These replace the leased native fills; they never stack a second copy.
 		lamp.light_energy=LANTERN_ENERGY;lamp.omni_range=LANTERN_RANGE
 		lamp.shadow_enabled=false
 		lamp.visible=_darkness_requested;lamps.append(lamp)
@@ -252,6 +252,8 @@ func apply_cinematic(state: Dictionary, actor_nodes: Dictionary) -> void:
 	_prune_visual_rows(_corpse_fires,wanted_fires)
 
 func _apply_arrival(key: String, target: Node3D, progress: float) -> void:
+	if _arrival_effects.has(key) and _arrival_effects[key].target.get_ref()!=target:
+		_release_visual_row(_arrival_effects,key)
 	if not _arrival_effects.has(key):
 		var root:=Node3D.new();root.name="RescueLichArrival";add_child(root)
 		root.global_position=target.global_position
@@ -267,8 +269,20 @@ func _apply_arrival(key: String, target: Node3D, progress: float) -> void:
 		var light:=OmniLight3D.new();light.name="ArrivalLight";root.add_child(light)
 		light.position=Vector3.UP*1.3;light.light_color=Color("83ffd0")
 		light.omni_range=8.0;light.shadow_enabled=false
-		_arrival_effects[key]={"root":root,"spell":spell,"mesh":mesh,"material":CombatEffectMesh.material(),"light":light}
+		_arrival_effects[key]={"root":root,"spell":spell,"mesh":mesh,"material":CombatEffectMesh.material(),
+			"light":light,"target":weakref(target)}
 	var row:Dictionary=_arrival_effects[key]
+	# The authored visible cue runs before this synchronous update. Install
+	# the hidden material state before the frame can render a solid newcomer.
+	# If a caller still has the actor hidden, wait for its visible meshes.
+	if not row.has("reveal") and target.is_visible_in_tree():
+		var reveal:=Dissolve.new()
+		reveal.begin(target,4.0,int(target.get_instance_id()))
+		row.reveal=reveal
+	if row.has("reveal"):
+		row.reveal.update(1.0-progress)
+		# Arrival reuses only the reversible body dissolve, never corpse dust.
+		if is_instance_valid(row.reveal._ash):row.reveal._ash.hide()
 	row.root.global_position=target.global_position+Vector3.UP*0.04
 	var envelope:=pow(maxf(0,sin(progress*PI)),0.6)
 	row.light.light_energy=5.0*envelope
@@ -337,9 +351,14 @@ func _apply_corpse_fire(key: String, target: Node3D, age: float, duration: float
 func _prune_visual_rows(rows: Dictionary, wanted: Dictionary) -> void:
 	for key:String in rows.keys():
 		if wanted.has(key):continue
-		var root:Node3D=rows[key].root
-		if is_instance_valid(root):root.hide();root.queue_free()
-		rows.erase(key)
+		_release_visual_row(rows,key)
+
+func _release_visual_row(rows: Dictionary, key: String) -> void:
+	var row:Dictionary=rows[key]
+	if row.has("reveal"):row.reveal.reset()
+	var root:Node3D=row.root
+	if is_instance_valid(root):root.hide();root.queue_free()
+	rows.erase(key)
 
 func _clear_visual_effects() -> void:
 	for effect:Node in _effects.values():
