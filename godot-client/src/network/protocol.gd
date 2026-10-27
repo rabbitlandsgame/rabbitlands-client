@@ -3640,6 +3640,12 @@ static func decode_campaign(payload: PackedByteArray) -> Dictionary:
 	if scene.has("corpse_template") and int(scene.corpse_template.actor_id) \
 			!= int((scene.get("actors", {}) as Dictionary).get("goblin_boss", -1)):
 		return {"type":"invalid", "error":"campaign_corpse_binding"}
+	if scene.has("cutaway"):
+		if not campaign_cutaway_valid(scene.cutaway, value, scene):
+			return {"type":"invalid", "error":"campaign_scene_cutaway"}
+	elif str(value.get("kind", "")) == "rescue" and str(scene.get("id", "")) == "measure.rescue.shadow" \
+			and map_id_from_reference(str(value.get("map", ""))) == "landfall":
+		return {"type":"invalid", "error":"campaign_cutaway_missing"}
 	var inspection: Dictionary = scene.get("inspection", {})
 	var inspection_role := "mother" if str(inspection.get("id", "")) == "rescue_family" else "protagonist"
 	if not inspection.is_empty() and int(inspection.actor_id) > 0 \
@@ -3820,6 +3826,68 @@ static func campaign_corpse_template_valid(value: Variant) -> bool:
 				or float(seconds) < 0.0 or float(seconds) > 604800.0:
 			return false
 	return float(death.fade_seconds) > 0.0
+
+## A remote ending is a bounded visual record from the retained mine. Raw IDs
+## may have been reused outdoors; consumers isolate these records as visual
+## handles and never insert their roles or DTOs into the native actor registry.
+static func campaign_cutaway_valid(value: Variant, campaign: Dictionary, scene: Dictionary) -> bool:
+	if not campaign.get("kind") is String or not campaign.get("map") is String or not scene.get("id") is String:
+		return false
+	if campaign.kind != "rescue" or campaign.map != "landfall" \
+			or not bool(campaign.get("active", false)) or scene.get("id") != "measure.rescue.shadow" \
+			or scene.has("corpse_template") or not value is Dictionary or value.size() != 3 \
+			or not value.get("map") is String or value.map != "landfall_insides" or not value.get("actors") is Dictionary \
+			or not value.get("anchors") is Dictionary or JSON.stringify(value).to_utf8_buffer().size() > 12288:
+		return false
+	var actors: Dictionary = value.actors
+	var anchors: Dictionary = value.anchors
+	if actors.size() != 2 or not actors.has("goblin_boss") or not actors.has("lich") \
+			or anchors.size() != 2 or not anchors.has("boss_body") or not anchors.has("lich"):
+		return false
+	if not _campaign_cutaway_actor_valid(actors.goblin_boss, true) \
+			or not _campaign_cutaway_actor_valid(actors.lich, false):
+		return false
+	var boss: Dictionary = actors.goblin_boss
+	var lich: Dictionary = actors.lich
+	if int(boss.actor_id) == int(lich.actor_id): return false
+	for role: String in ["goblin_boss", "lich"]:
+		var actor: Dictionary = actors[role]
+		var point: Variant = anchors["boss_body" if role == "goblin_boss" else "lich"]
+		if not _campaign_tile(point) or int(point[0]) != int(actor.x) or int(point[1]) != int(actor.y):
+			return false
+	return true
+
+static func _campaign_cutaway_actor_valid(value: Variant, corpse: bool) -> bool:
+	if not value is Dictionary or JSON.stringify(value).to_utf8_buffer().size() > 4096: return false
+	var fields := ["actor_id", "actor_type", "kind", "name", "x", "y", "rotation", "frame", "health", "max_health",
+		"appearance", "equipment_visuals", "scale"]
+	if corpse: fields.append("death_presentation")
+	if value.size() != fields.size(): return false
+	for field: String in fields:
+		if not value.has(field): return false
+	if corpse:
+		if not campaign_corpse_template_valid(value): return false
+		var death: Dictionary = value.death_presentation
+		if death.size() != 8: return false # Exact native held-death DTO, no nested additions.
+	else:
+		var integers := {"actor_id":[1,65535], "actor_type":[671,671], "kind":[2,2], "rotation":[-32768,65535],
+			"frame":[0,255], "max_health":[1,1000000]}
+		for field: String in integers:
+			if not _campaign_integer(value.get(field), float(integers[field][0]), float(integers[field][1])): return false
+		if not value.name is String or value.name != "???" or not _campaign_integer(value.health, 1, float(value.max_health)): return false
+		if typeof(value.scale) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(value.scale)) \
+				or float(value.scale) <= 0.0 or float(value.scale) > 8.0: return false
+	# The retained rescue mine is a bounded part of the shared underground.
+	if not _campaign_integer(value.x, 19, 94) or not _campaign_integer(value.y, 22, 94): return false
+	if not value.appearance is Dictionary or value.appearance.size() > 7 \
+			or not value.equipment_visuals is Dictionary or value.equipment_visuals.size() > 8: return false
+	for key: Variant in value.appearance:
+		if key not in ["skin", "hair", "shirt", "pants", "boots", "head", "eyes"] \
+				or not _campaign_integer(value.appearance[key], 0, 255): return false
+	for key: Variant in value.equipment_visuals:
+		if key not in ["0", "1", "2", "3", "4", "5", "6", "7"] \
+				or not _campaign_integer(value.equipment_visuals[key], 0, 255): return false
+	return true
 
 static func campaign_cart_valid(cart: Variant) -> bool:
 	if not cart is Dictionary:

@@ -133,37 +133,7 @@ func run() -> void:
 		and lich_original.albedo_color==Color(0.1,0.5,0.6),"materialization never changes live health, action, position or source appearance")
 	bind(presenter)
 	expect(JSON.stringify(presenter._snapshot)==original_snapshot,"visual events never add quest proof or experience")
-	check_lantern_pools(presenter)
 	presenter.clear();presenter.queue_free();lich.queue_free();corpse.queue_free()
 	await process_frame;await process_frame
 	print("Rescue shadow effects: ",checks," checks; ",failures," failures")
 	quit(1 if failures else 0)
-
-func check_lantern_pools(presenter: Node3D) -> void:
-	presenter.clear();bind(presenter)
-	presenter._adapter=CoordinateAdapter.new()
-	presenter._sample=func(_point:Vector3)->float:return 0.0
-	presenter._darkness_requested=true
-	var owner:=WorldEnvironment.new();root.add_child(owner)
-	var original:=Environment.new();original.ambient_light_energy=0.5;owner.environment=original
-	var sun:=DirectionalLight3D.new();root.add_child(sun);sun.light_energy=0.8
-	var markers:=Node3D.new();markers.name="MapLights";root.add_child(markers)
-	var native:=OmniLight3D.new();native.name="lantern_mine-native";markers.add_child(native)
-	var unrelated:=OmniLight3D.new();unrelated.name="OtherRegionLamp";markers.add_child(unrelated)
-	presenter._world=presenter.get_world_3d()
-	presenter._build_lights()
-	presenter.apply_environment(owner,sun)
-	var brighter:bool=presenter.lamps.size()==10
-	for lamp:OmniLight3D in presenter.lamps:
-		brighter=brighter and is_equal_approx(lamp.light_energy,2.4) and is_equal_approx(lamp.omni_range,16.0)
-		brighter=brighter and lamp.light_color==Color(1.0,0.7,0.4)
-	expect(brighter,"all existing warm lantern positions receive brighter, broader light pools")
-	expect(is_equal_approx(owner.environment.ambient_light_energy,0.003) and is_zero_approx(sun.light_energy)
-		and owner.environment.reflected_light_source==Environment.REFLECTION_SOURCE_DISABLED,
-		"brighter lanterns retain the cave's real ambient, sunlight and reflection blackout")
-	expect(not native.visible and unrelated.visible,"the broader lanterns still suppress duplicate native fills only")
-	presenter.clear()
-	expect(owner.environment==original and is_equal_approx(original.ambient_light_energy,0.5)
-		and is_equal_approx(sun.light_energy,0.8) and native.visible and unrelated.visible,
-		"leaving the rescue restores every leased environment and map-light setting")
-	owner.queue_free();sun.queue_free();markers.queue_free()

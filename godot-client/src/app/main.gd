@@ -46,6 +46,7 @@ const CampaignGuidanceScript = preload("res://src/world/campaign_guidance.gd")
 const CampaignCrossingScript = preload("res://src/world/campaign_crossing.gd")
 const CampaignCartScript = preload("res://src/world/campaign_cart.gd")
 const CampaignRescueScript = preload("res://src/world/campaign_rescue_presentation.gd")
+const CampaignCutawayScript = preload("res://src/world/campaign_cutaway.gd")
 @onready var campaign_scene := CampaignSceneScript.new()
 @onready var campaign_hud := CampaignHudScript.new()
 @onready var campaign_works := CampaignWorksScript.new()
@@ -56,6 +57,7 @@ const CampaignRescueScript = preload("res://src/world/campaign_rescue_presentati
 @onready var campaign_crossing := CampaignCrossingScript.new()
 @onready var campaign_cart := CampaignCartScript.new()
 @onready var campaign_rescue := CampaignRescueScript.new()
+@onready var campaign_cutaway := CampaignCutawayScript.new()
 const ArrivalCurtainScript = preload("res://src/ui/arrival_curtain.gd")
 const ArrivalPrewarmScript = preload("res://src/world/arrival_prewarm.gd")
 ## The loading screen from signing in, or a far arrival, until the character
@@ -106,6 +108,7 @@ var _dev_plain_tcp := false
 # Godot's global class-name cache -- that cache is a build artifact and is
 # stale in a working copy until the editor next scans the project.
 const InteriorCutawayScript := preload("res://src/world/interior_cutaway.gd")
+const LanternMineLightingScript := preload("res://src/world/lantern_mine_lighting.gd")
 const SecretSectionsScript := preload("res://src/world/secret_sections.gd")
 const OccluderFadeScript := preload("res://src/world/occluder_fade_manager.gd")
 const CrowdPresentationScript := preload("res://src/world/crowd_presentation.gd")
@@ -150,6 +153,7 @@ const VramTextures := preload("res://src/world/vram_textures.gd")
 const GltfQuantization := preload("res://src/world/gltf_quantization.gd")
 const MapMeshExtension := preload("res://src/world/map_mesh_extension.gd")
 var interior_cutaway: RefCounted = InteriorCutawayScript.new()
+var lantern_mine_lighting: RefCounted = LanternMineLightingScript.new()
 ## On a secrets map, only the secret the player stands in is drawn; the rest
 ## of the map (and so the minimap and full map, which render the same world)
 ## stays black.
@@ -1342,6 +1346,7 @@ func _ready() -> void:
 	world_root.add_child(campaign_crossing)
 	world_root.add_child(campaign_cart)
 	world_root.add_child(campaign_rescue)
+	world_root.add_child(campaign_cutaway)
 	campaign_scene.configure(main_viewport)
 	campaign_scene.configure_replay_actor_factory(_campaign_replay_visual)
 	campaign_hud.target_requested.connect(_on_campaign_target)
@@ -1382,6 +1387,7 @@ func _ready() -> void:
 	animation_configs["res://data/animations/luminous.json"] = animation_config
 	var registry_document := _json("res://data/maps/registry.json")
 	map_registry = registry_document.get("maps", {})
+	campaign_cutaway.configure(map_registry, _campaign_replay_visual)
 	var coordinate_catalog: Dictionary = Network.configure_coordinate_profiles(
 		registry_document.get("coordinateProfiles", {}), registry_document.get("coordinateMapNames", {}), map_registry)
 	if not coordinate_catalog.ok:
@@ -4019,6 +4025,7 @@ func _close_ground_bag() -> void:
 
 func _on_disconnect_pressed() -> void:
 	campaign_scene.reset_session()
+	_clear_campaign_cutaway()
 	campaign_hud.hide()
 	_leaving_session = true
 	_disconnect_console_active = false
@@ -4043,6 +4050,7 @@ func _close_client() -> void:
 	while not actor_resource_warmup.is_idle():
 		await get_tree().process_frame
 	campaign_scene.cancel("client_closed")
+	_clear_campaign_cutaway()
 	gauntlet_prewarm.discard()
 	await get_tree().process_frame
 	exterior_stream.clear()
@@ -4051,6 +4059,7 @@ func _close_client() -> void:
 	get_tree().quit()
 
 func _exit_tree() -> void:
+	lantern_mine_lighting.clear()
 	actor_resource_warmup.clear()
 	RustRiderPose.close_batches()
 	RustSpellFlights.clear_for(world_root)
@@ -4134,6 +4143,7 @@ func _on_connection_state_changed(value: String) -> void:
 	if value == "disconnected":
 		character_intro.cancel()
 		campaign_scene.cancel("disconnected")
+		_clear_campaign_cutaway()
 		campaign_hud.hide()
 		campaign_works.clear()
 		campaign_bank_works.clear()
@@ -4224,6 +4234,7 @@ func _on_reconnect_progress(attempt: int, _total: int, delay_msec: int) -> void:
 	_sync_connection_banner()
 
 func _clear_world_presentation(retain_map_resources := false) -> void:
+	lantern_mine_lighting.clear()
 	campaign_rescue.clear()
 	# The disconnect console still belongs to this session. Keep its terrain,
 	# neighbours and parsed visuals ready for reconnect, but discard live
@@ -5816,6 +5827,7 @@ func _on_state_changed(path: StringName) -> void:
 			if is_instance_valid(lantern_scene): lantern_scene.apply_state(AppState.lantern_tutorial)
 		&"map":
 			campaign_scene.cancel("map_changed")
+			_clear_campaign_cutaway()
 			campaign_hud.hide()
 			campaign_works.clear()
 			campaign_bank_works.clear()
@@ -5838,6 +5850,7 @@ func _on_state_changed(path: StringName) -> void:
 		&"death":
 			if bool(AppState.death.get("dead", false)):
 				campaign_scene.cancel("death")
+				_clear_campaign_cutaway()
 			_prefetch_respawn()
 		&"gauntlet_loot":
 			_prefetch_gauntlet_exit()
@@ -6283,6 +6296,7 @@ func _update_console_location() -> void:
 func _apply_day_night() -> void:
 	if world_loader.manifest == null:
 		return
+	lantern_mine_lighting.before_regrade(world_loader.manifest, secret_sections.current_section())
 	var lighting := _lighting_manifest()
 	_day_night_active = DayNightBinder.apply(lighting,
 		world_environment, world_sun, AppState.continuous_game_minute(), world_moon)
@@ -6303,7 +6317,11 @@ func _apply_day_night() -> void:
 	LookGrade.apply(lighting, world_environment, world_sun)
 	# Look pass: and give the painted sky and its haze the hour's colours.
 	LookSky.apply(lighting, world_environment, AppState.continuous_game_minute())
-	campaign_rescue.apply_environment(world_environment, world_sun, world_moon)
+	_apply_lantern_mine_lighting()
+
+func _apply_lantern_mine_lighting() -> void:
+	lantern_mine_lighting.apply(world_loader.manifest, secret_sections.current_section(),
+		world_environment, world_sun, world_moon, map_light_root)
 
 ## The Graphics tab's "Directional shadows", held over the binders. The map's
 ## bind and the hour both decide whether the sun may cast (an interior's
@@ -7244,6 +7262,7 @@ func _update_campaign(delta: float) -> void:
 		and not bool(AppState.death.get("dead", false))
 	if not available:
 		campaign_scene.cancel("unavailable")
+		_clear_campaign_cutaway()
 		campaign_hud.hide()
 		campaign_hud.set_replay_available(false)
 		if is_instance_valid(lantern_guide):
@@ -7267,6 +7286,9 @@ func _update_campaign(delta: float) -> void:
 		return
 	var ready := not character_intro.is_active() and not arrival_curtain.blocks_input() \
 		and _grounded_actors.has(AppState.local_actor_id)
+	campaign_cutaway.prepare(AppState.campaign, AppState.current_map, delta)
+	var scene_view: Dictionary = campaign_cutaway.view_context(AppState.campaign, actor_nodes,
+		AppState.actors, adapter, _campaign_surface_height, campaign_scene.uses_replay_cast())
 	if ready:
 		campaign_works.apply_snapshot(AppState.campaign, adapter, AppState.current_map,
 			_campaign_surface_height, campaign_scene.reduced_motion)
@@ -7284,9 +7306,19 @@ func _update_campaign(delta: float) -> void:
 			_campaign_surface_height)
 		campaign_rescue.apply_environment(world_environment, world_sun, world_moon)
 	campaign_scene.update_ambient(AppState.campaign, actor_nodes, adapter, _campaign_surface_height, delta)
-	campaign_scene.remember_replay_cast(AppState.campaign, AppState.actors)
-	campaign_scene.update(delta, AppState.campaign, camera_rig, actor_nodes,
-		AppState.local_actor_id, AppState.current_map, ready, adapter, _campaign_surface_height)
+	campaign_scene.remember_replay_cast(scene_view.snapshot, scene_view.dtos)
+	var scene_delta := delta
+	if bool(scene_view.remote) and not bool(scene_view.ready):
+		scene_delta = 0.0 if str(campaign_cutaway.status().error).is_empty() else CampaignSceneScript.WAIT_LIMIT + 0.01
+	campaign_scene.update(scene_delta, scene_view.snapshot, camera_rig, scene_view.nodes,
+		AppState.local_actor_id, AppState.current_map, ready and bool(scene_view.ready), scene_view.adapter, scene_view.surface)
+	campaign_cutaway.set_presenting(bool(scene_view.remote) and campaign_scene.playing, not campaign_scene.uses_replay_cast())
+	if campaign_cutaway.presenting:
+		lantern_mine_lighting.set_cinematic_region(campaign_cutaway.manifest,
+			campaign_cutaway.focus_world, campaign_cutaway.map_lights)
+	else:
+		lantern_mine_lighting.clear_cinematic_region()
+	_apply_lantern_mine_lighting()
 	var presentation := campaign_scene.presentation_state()
 	var rescue_cast: Dictionary = presentation.get("actors", {})
 	campaign_rescue.apply_cinematic(presentation, rescue_cast if bool(presentation.get("playing", false)) and not rescue_cast.is_empty() else actor_nodes)
@@ -7315,6 +7347,12 @@ func _update_campaign(delta: float) -> void:
 		AppState.current_map, tile if tile is Vector2i else Vector2i.ZERO,
 		lantern_guide.using_campaign(), not ready or campaign_scene.is_active())
 	extension_windows.sync_campaign_replay()
+
+func _clear_campaign_cutaway() -> void:
+	if is_instance_valid(campaign_cutaway): campaign_cutaway.clear()
+	lantern_mine_lighting.clear_cinematic_region()
+	if is_instance_valid(world_loader) and is_instance_valid(world_environment):
+		_apply_lantern_mine_lighting()
 
 func _rescue_static_during_death() -> bool:
 	var snapshot: Dictionary = AppState.campaign
@@ -9184,9 +9222,11 @@ func _configure_secret_sections(manifest: WorldManifest) -> void:
 
 func _update_secret_sections(force: bool = false) -> void:
 	if not bool(secret_sections.call("is_active")):
+		_apply_lantern_mine_lighting()
 		return
 	var local_actor_node: Node3D = actor_nodes.get(AppState.local_actor_id) as Node3D
 	if local_actor_node == null:
+		_apply_lantern_mine_lighting()
 		return
 	var previous_section: String = secret_sections.current_section()
 	secret_sections.call("update", local_actor_node.global_position, force)
@@ -9194,9 +9234,11 @@ func _update_secret_sections(force: bool = false) -> void:
 		_full_map_panned = false
 		_configure_full_map(world_loader.manifest)
 		_request_map_redraw()
+		_apply_day_night()
 	# whoever and whatever stands in another secret stays unseen
 	secret_sections.call("cull_dynamic", actor_nodes.values(), local_actor_node)
 	secret_sections.call("cull_dynamic", map_object_nodes.values())
+	_apply_lantern_mine_lighting()
 
 
 func _configure_interior_cutaway(manifest: WorldManifest) -> void:

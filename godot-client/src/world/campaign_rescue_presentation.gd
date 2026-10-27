@@ -6,16 +6,10 @@ const Dissolve := preload("res://src/actors/creature_dissolve.gd")
 const FireVisual := preload("res://src/world/weather_3d.gd")
 const FENCE_ID := "11ec54ffb8d8eb66b5a8de1e0bdb3da278b75459c880a07fc46acfcf1e9f4c65"
 const FENCE_PATH := "res://../eloria-assets/maps/_shared/meshes/"+FENCE_ID+".glb"
-const LANTERN_TILES := [[49.6,29.5],[60.4,29.5],[43,49],[67.5,54],[60,62.5],[24.5,60],[88,61],[73,70],[46.5,86],[63.5,82]]
-const DARK_AMBIENT_ENERGY := 0.003
-const DARK_DIRECTIONAL_ENERGY := 0.0
-const LANTERN_ENERGY := 2.4
-const LANTERN_RANGE := 16.0
 
 var cage: Node3D
 var gate: Node3D
 var panels: Array[MeshInstance3D] = []
-var lamps: Array[OmniLight3D] = []
 var points: Dictionary = {}
 var labels: Dictionary = {}
 var _snapshot: Dictionary = {}
@@ -48,15 +42,6 @@ var _fade: ColorRect
 var _handoff_token := ""
 var _handoff_deadline_ms := 0
 var _expired_handoff_token := ""
-var _saved_environment: Environment
-var _dark_environment: Environment
-var _environment_owner: WeakRef
-var _environment_binding: WeakRef
-var _saved_lights: Dictionary = {}
-var _directional_inputs: Array[WeakRef] = []
-var _darkness_started := false
-var _darkness_requested := false
-var _marker_light_leases: Dictionary = {}
 
 func apply_snapshot(snapshot: Dictionary, adapter: CoordinateAdapter, current_map: String,
 		surface_sample: Callable) -> void:
@@ -73,11 +58,6 @@ func apply_snapshot(snapshot: Dictionary, adapter: CoordinateAdapter, current_ma
 		clear()
 		_identity=identity;_map=map;_geometry=geometry;_world=get_world_3d()
 	_adapter=adapter;_sample=surface_sample;_snapshot=snapshot.duplicate(true)
-	var stage:=str(snapshot.get("rescue",{}).get("stage",""))
-	if stage in ["boss_defeated","daughter_freed","reward","aftermath","complete"] \
-			or stage=="boss_confrontation" and not bool(snapshot.get("scene",{}).get("requires_ack",true)):
-		_darkness_started=true
-	_darkness_requested=_darkness_started
 	points.clear()
 	for key: String in snapshot.get("anchors",{}):
 		var tile: Variant = snapshot.anchors[key]
@@ -89,10 +69,8 @@ func apply_snapshot(snapshot: Dictionary, adapter: CoordinateAdapter, current_ma
 			clear();return
 		if not is_instance_valid(cage):
 			if not _build_cage(points.cage):return
-			_build_lights()
 		_accepted_gate=1.0 if bool(snapshot.get("rescue",{}).get("daughter",{}).get("rescued",false)) else 0.0
 		if _scene_id.is_empty():_set_gate(_accepted_gate)
-		_sync_darkness()
 		if labels.has("cage"):
 			labels.cage.text="Liora's holding cage · "+("open" if _accepted_gate>0.5 else "locked")
 	show()
@@ -128,42 +106,13 @@ func _panel(parent: Node3D, mesh: Mesh, at: Vector3, rotation_value: Vector3) ->
 	var part:=MeshInstance3D.new();part.name="ImportedFencePanel";part.mesh=mesh;part.layers=2
 	parent.add_child(part);part.position=at;part.rotation=rotation_value;panels.append(part)
 
-func _build_lights() -> void:
-	for tile: Array in LANTERN_TILES:
-		# These are the already-authored mine lanterns, not invented wall lamps.
-		# Source prop coordinates are fractional; preserve their half-tile detail.
-		var at:=_adapter.tile_center(int(floor(tile[0])),int(floor(tile[1])))
-		at.x+=float(tile[0])-floor(float(tile[0]))-0.5
-		at.z-=float(tile[1])-floor(float(tile[1]))-0.5
-		at=_ground(at)
-		if not at.is_finite():continue
-		var lamp:=OmniLight3D.new();lamp.name="ExistingMineLanternLight";add_child(lamp)
-		lamp.global_position=at+Vector3.UP*2.1;lamp.light_color=Color(1.0,0.7,0.4)
-		# Wider, brighter pools retain the existing warm lantern positions.
-		# These replace the leased native fills; they never stack a second copy.
-		lamp.light_energy=LANTERN_ENERGY;lamp.omni_range=LANTERN_RANGE
-		lamp.shadow_enabled=false
-		lamp.visible=_darkness_requested;lamps.append(lamp)
-
 func apply_cinematic(state: Dictionary, actor_nodes: Dictionary) -> void:
 	if _identity.is_empty():return
 	_update_handoff_fade(state)
 	_bound_actors=state.get("actors",{}).duplicate()
 	_retire_completed_burns()
 	_apply_role_scales(actor_nodes)
-	var boss_film:=str(state.get("id",""))=="measure.rescue.boss"
-	var replaying:=bool(state.get("replaying",false))
-	var closed:=str(state.get("return_reason","")) in ["finished","skipped"]
-	if boss_film and not replaying and closed:
-		_darkness_started=true # Skip enters the same dark fight as a completed film.
-	_darkness_requested=_darkness_started
-	if boss_film and replaying and bool(state.get("playing",false)) and not bool(state.get("returning",false)):
-		_darkness_requested=false # Reconstruct the taunt before its local blackout.
-	for event:Dictionary in state.get("events",[]):
-		if str(event.get("type",""))=="darkness":
-			_darkness_requested=true
-			if not replaying:_darkness_started=true
-	_sync_darkness()
+	var replaying := bool(state.get("replaying", false))
 	var active:=bool(state.get("playing",false)) and not bool(state.get("returning",false)) \
 		and str(state.get("id","")).begins_with("measure.rescue.")
 	if bool(state.get("playing",false)):
@@ -498,91 +447,11 @@ func _ensure_mother_kneel(actor: Node3D) -> void:
 	_aliases[actor.get_instance_id()]={"actor":weakref(actor),"had":resolver.action_to_clip.has(action),"old":resolver.action_to_clip.get(action)}
 	resolver.action_to_clip[action]=&"rescue/Kneeling_Tired"
 
-func _apply_darkness() -> void:
-	if _world==null:return
-	if _dark_environment==null or _world.environment!=_dark_environment:
-		_saved_environment=_world.environment
-		_dark_environment=_saved_environment.duplicate(true) if _saved_environment!=null else Environment.new()
-		_dark_environment.background_mode=Environment.BG_COLOR
-		_dark_environment.background_color=Color("080a13")
-		_dark_environment.ambient_light_source=Environment.AMBIENT_SOURCE_COLOR
-		_dark_environment.ambient_light_color=Color("59616f")
-		_world.environment=_dark_environment
-	_dark_environment.background_mode=Environment.BG_COLOR
-	_dark_environment.background_color=Color("080a13")
-	_dark_environment.ambient_light_source=Environment.AMBIENT_SOURCE_COLOR
-	_dark_environment.ambient_light_energy=DARK_AMBIENT_ENERGY
-	_dark_environment.ambient_light_sky_contribution=0.0
-	_dark_environment.reflected_light_source=Environment.REFLECTION_SOURCE_DISABLED
-	_dark_environment.sdfgi_enabled=false
-	_dark_environment.ssil_enabled=false
-	_dark_environment.fog_enabled=false
-	_suppress_duplicate_map_fills()
-
-func apply_environment(owner: WorldEnvironment, sun: DirectionalLight3D = null,
-		moon: DirectionalLight3D = null) -> void:
-	# Main calls this after its ordinary day/night grading. Restrict the lease
-	# to this owned mine; portrait lights and unrelated world lights are untouched.
-	if _identity.is_empty() or _map!="landfall_insides" or not is_instance_valid(owner):return
-	_environment_binding=weakref(owner)
-	_environment_owner=weakref(owner)
-	_directional_inputs.clear()
-	for light:DirectionalLight3D in [sun,moon]:
-		_directional_inputs.append(weakref(light) if is_instance_valid(light) else null)
-	if not _darkness_requested:
-		_restore_darkness()
-		_environment_owner=weakref(owner)
-		return
-	if owner.environment!=_dark_environment:
-		_saved_environment=owner.environment
-		_dark_environment=_saved_environment.duplicate(true) if _saved_environment!=null else Environment.new()
-	owner.environment=_dark_environment
-	_apply_darkness()
-	for light:DirectionalLight3D in [sun,moon]:
-		if not is_instance_valid(light):continue
-		var id:=light.get_instance_id()
-		if not _saved_lights.has(id) or not is_equal_approx(light.light_energy,DARK_DIRECTIONAL_ENERGY):
-			_saved_lights[id]={"light":weakref(light),"energy":light.light_energy}
-		light.light_energy=DARK_DIRECTIONAL_ENERGY
-
-func _suppress_duplicate_map_fills() -> void:
-	# Main and the native review both put the real manifest markers beside
-	# this presenter. Never search another viewport or touch portrait lights.
-	var parent:=get_parent()
-	var root:Node=parent.get_node_or_null("MapLights") if parent!=null else null
-	if root==null:return
-	for node:Node in root.get_children():
-		if not node is Light3D or not str(node.name).begins_with("lantern_mine-"):continue
-		var light:=node as Light3D
-		var id:=light.get_instance_id()
-		if not _marker_light_leases.has(id):
-			_marker_light_leases[id]={"light":weakref(light),"visible":light.visible}
-		light.visible=false
-
-func _sync_darkness() -> void:
-	for lamp:OmniLight3D in lamps:lamp.visible=_darkness_requested
-	if _map!="landfall_insides":return
-	if not _darkness_requested:
-		_restore_darkness();return
-	var owner:WorldEnvironment=_environment_binding.get_ref() as WorldEnvironment if _environment_binding!=null else null
-	if is_instance_valid(owner):
-		var sun:DirectionalLight3D=_directional_inputs[0].get_ref() as DirectionalLight3D if _directional_inputs.size()>0 and _directional_inputs[0]!=null else null
-		var moon:DirectionalLight3D=_directional_inputs[1].get_ref() as DirectionalLight3D if _directional_inputs.size()>1 and _directional_inputs[1]!=null else null
-		apply_environment(owner,sun,moon)
-	else:_apply_darkness()
-
-func _restore_darkness() -> void:
-	var owner: WorldEnvironment=_environment_owner.get_ref() as WorldEnvironment if _environment_owner!=null else null
-	if is_instance_valid(owner) and owner.environment==_dark_environment:owner.environment=_saved_environment
-	if _world!=null and _world.environment==_dark_environment:_world.environment=_saved_environment
-	for row:Dictionary in _saved_lights.values():
-		var light:DirectionalLight3D=row.light.get_ref()
-		if is_instance_valid(light):light.light_energy=float(row.energy)
-	_saved_lights.clear();_saved_environment=null;_dark_environment=null;_environment_owner=null
-	for row:Dictionary in _marker_light_leases.values():
-		var light:Light3D=row.light.get_ref() as Light3D
-		if is_instance_valid(light):light.visible=bool(row.visible)
-	_marker_light_leases.clear()
+func apply_environment(_owner: WorldEnvironment, _sun: DirectionalLight3D = null,
+		_moon: DirectionalLight3D = null) -> void:
+	# Compatibility for callers while map lighting owns the mine's ordinary
+	# atmosphere. Quest playback/Skip/replay never changes room illumination.
+	pass
 
 func _set_gate(value: float) -> void:
 	if is_instance_valid(gate):gate.position=_gate_origin+Vector3.UP*(2.9*clampf(value,0,1))
@@ -620,9 +489,7 @@ func _clear_cinematic(preserve_completed_burn := false) -> void:
 
 func clear() -> void:
 	_handoff_token="";_handoff_deadline_ms=0;_expired_handoff_token=""
-	_darkness_started=false;_darkness_requested=false
-	_clear_cinematic();_restore_darkness()
-	_directional_inputs.clear();_environment_binding=null
+	_clear_cinematic()
 	_release_downed_mother()
 	for row:Dictionary in _completed_burns:row.effect.reset()
 	_completed_burns.clear();_bound_actors.clear()
@@ -641,11 +508,9 @@ func clear() -> void:
 		if is_instance_valid(actor):actor.call("set_server_scale",float(row.scale))
 	_scales.clear()
 	if is_instance_valid(cage):cage.queue_free()
-	for lamp:OmniLight3D in lamps:
-		if is_instance_valid(lamp):lamp.queue_free()
 	if is_instance_valid(_fade_layer):_fade_layer.queue_free()
 	_fade=null;_fade_layer=null
-	cage=null;gate=null;panels.clear();lamps.clear();labels.clear();points.clear()
+	cage=null;gate=null;panels.clear();labels.clear();points.clear()
 	_identity="";_geometry="";_map="";_snapshot.clear();_world=null;hide()
 
 func _exit_tree() -> void:

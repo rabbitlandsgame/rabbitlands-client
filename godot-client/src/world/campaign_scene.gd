@@ -117,6 +117,10 @@ var _return_reason := ""
 var _last_return_reason := ""
 var _last_playback_replay := false
 var _return_start: Dictionary = {}
+var _exit_fade: Dictionary = {}
+var _exit_fade_layer: CanvasLayer
+var _exit_black: ColorRect
+var _exit_fade_committing := false
 var _reduced_view: Dictionary = {}
 var _reduced_origin := Vector3.ZERO
 var _resume_view: Dictionary = {}
@@ -226,7 +230,8 @@ func _beat_matches(beat: Dictionary) -> bool:
 	var condition: Variant = beat.get("when", "")
 	var branch := str(_choice_state.get("selected", ""))
 	if branch.is_empty(): branch = _variant
-	return condition == "" or condition == branch or (condition is Array and branch in condition)
+	if condition is Array: return branch in condition
+	return condition == "" or condition == branch
 
 func presentation_state() -> Dictionary:
 	var events: Array = []
@@ -398,6 +403,9 @@ func is_active() -> bool:
 
 func is_replaying() -> bool:
 	return _replaying
+
+func uses_replay_cast() -> bool:
+	return _replaying or not _replay_requested_identity.is_empty()
 
 func is_dialogue_waiting() -> bool:
 	return playing and not _returning and _line_holding
@@ -666,6 +674,14 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 		local_actor_id: int, current_map: String, world_ready := true,
 		coordinate_adapter: CoordinateAdapter = null, surface_sample := Callable()) -> void:
 	_update_handoff_visibility(snapshot, actor_nodes, current_map)
+	if not _exit_fade.is_empty():
+		var leaving := str(_exit_fade.phase) == "out"
+		var changed := map_key(current_map) != str(_exit_fade.map) \
+			or (not str(snapshot.get("run_id", "")).is_empty() and str(snapshot.run_id) != str(_exit_fade.run))
+		if changed or (leaving and not bool(snapshot.get("active", false))):
+			cancel("map_changed" if changed else "inactive")
+		elif _advance_exit_fade(delta):
+			return
 	if not bool(snapshot.get("active", false)):
 		cancel("inactive")
 		return
@@ -890,6 +906,7 @@ func _start(rig: Node3D, camera: Camera3D, local: Node3D, nodes: Dictionary,
 		add_child(_view_focus)
 	_release_ambient()
 	_release_handoff_visibility()
+	_clear_exit_fade()
 	_rig = rig
 	_camera = camera
 	_saved = {"rig": rig.global_transform, "camera": camera.global_transform,
@@ -999,8 +1016,19 @@ func _apply_camera(exit_view := false) -> void:
 			first = last
 	var first_anchor := _shot_anchor(first)
 	var last_anchor := _shot_anchor(last)
+	var follower := _actors.get(str(first.get("follow_actor", ""))) as Node3D
+	if is_instance_valid(follower):
+		# The outgoing transition keeps both authored offsets in one moving
+		# actor frame, rather than blending toward a future static post early.
+		first_anchor = follower.global_position
+		last_anchor = first_anchor
 	var position := (first_anchor + _vector(first.position)).lerp(last_anchor + _vector(last.position), weight)
 	var target := (first_anchor + _vector(first.target)).lerp(last_anchor + _vector(last.target), weight)
+	if bool(first.get("orbit", false)):
+		# Orbit around the interpolated look-at target. Offsets retain their
+		# authored radius/pitch; yaw takes the short arc across +/-180 degrees.
+		position = target + _orbit_offset(_vector(first.position) - _vector(first.target),
+			_vector(last.position) - _vector(last.target), weight)
 	var transform := Transform3D(Basis.IDENTITY, position).looking_at(target, Vector3.UP)
 	var pose := {"transform": transform, "target": target, "near": 0.5,
 		"far": float(_saved.get("far", _camera.far)), "fov": float(_definition.get("fov", 50.0))}
@@ -1019,7 +1047,7 @@ func _apply_camera(exit_view := false) -> void:
 			if entry > 0.0 and _camera_entry_elapsed < entry and not exit_view:
 				pose = _mix_camera(_gameplay_camera(), pose, smoothstep(0.0, entry, _camera_entry_elapsed))
 			var exit := _handoff_seconds("exit_seconds")
-			if exit > 0.0 and elapsed > _duration() - exit and not _keeps_exit_camera():
+			if exit > 0.0 and elapsed > _duration() - exit and not _keeps_exit_camera() and not _uses_exit_fade():
 				pose = _mix_camera(pose, _gameplay_camera(), smoothstep(_duration() - exit, _duration(), elapsed))
 			if not _resume_view.is_empty() and not exit_view:
 				pose = _mix_camera(_resume_view, pose, smoothstep(_resume_at, _resume_at + _resume_seconds, elapsed))
@@ -1032,6 +1060,16 @@ func _apply_camera(exit_view := false) -> void:
 			opacity = minf(opacity, 1.0 - smoothstep(_duration() - exit_fade, _duration(), elapsed))
 		_screen.modulate.a = opacity
 	_apply_camera_pose(pose)
+
+static func _orbit_offset(from: Vector3, to: Vector3, weight: float) -> Vector3:
+	var from_radius := from.length()
+	var to_radius := to.length()
+	if from_radius < 0.001 or to_radius < 0.001: return from.lerp(to, weight)
+	var yaw := lerp_angle(atan2(from.x, from.z), atan2(to.x, to.z), weight)
+	var pitch := lerpf(asin(clampf(from.y / from_radius, -1.0, 1.0)),
+		asin(clampf(to.y / to_radius, -1.0, 1.0)), weight)
+	return Vector3(sin(yaw) * cos(pitch), sin(pitch), cos(yaw) * cos(pitch)) \
+		* lerpf(from_radius, to_radius, weight)
 
 func _shot_anchor(shot: Dictionary) -> Vector3:
 	var center := Vector3.ZERO
@@ -1059,6 +1097,61 @@ func _keeps_exit_camera() -> bool:
 	var policy: Variant = _definition.get("exit_camera", {})
 	return not _replaying and policy is Dictionary and str(policy.get("mode", "")) == "keep_scene" \
 		and _beat_matches(policy) and is_instance_valid(_rig) and _rig.has_method("adopt_world_view")
+
+func _uses_exit_fade() -> bool:
+	var policy: Variant = _definition.get("exit_transition", {})
+	return policy is Dictionary and str(policy.get("mode", "")) == "fade" and _beat_matches(policy)
+
+func _set_exit_black(alpha: float) -> void:
+	if not is_instance_valid(_exit_black):
+		_exit_fade_layer = CanvasLayer.new()
+		_exit_fade_layer.name = "CampaignExitFade"
+		_exit_fade_layer.layer = 120
+		add_child(_exit_fade_layer)
+		_exit_black = ColorRect.new()
+		_exit_black.name = "ExitBlackout"
+		_exit_black.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_exit_fade_layer.add_child(_exit_black)
+		_exit_black.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_exit_black.color = Color(0, 0, 0, clampf(alpha, 0.0, 1.0))
+	_exit_black.visible = alpha > 0.0
+
+func _clear_exit_fade() -> void:
+	_exit_fade.clear()
+	if is_instance_valid(_exit_black):
+		_exit_black.color.a = 0.0
+		_exit_black.hide()
+
+func _begin_exit_fade(reason: String) -> void:
+	var policy: Dictionary = _definition.get("exit_transition", {})
+	_exit_fade = {"phase":"out", "elapsed":0.0, "reason":reason, "run":_run, "map":_map,
+		"out":clampf(float(policy.get("out_seconds", 0.6)), 0.05, 2.0),
+		"in":clampf(float(policy.get("in_seconds", 0.6)), 0.05, 2.0)}
+	_line_holding = false
+	if is_instance_valid(_line_continue): _line_continue.hide()
+	if is_instance_valid(_transcript): _transcript.hide()
+	_set_exit_black(0.0)
+
+## Returns true for the fade-out, which keeps the camera and controls leased.
+## At full black the ordinary cancellation restores gameplay and emits its one
+## completion. Fade-in is independent of the now-inactive film and never owns input.
+func _advance_exit_fade(delta: float) -> bool:
+	if _exit_fade.is_empty(): return false
+	var leaving := str(_exit_fade.phase) == "out"
+	var seconds := float(_exit_fade["out" if leaving else "in"])
+	_exit_fade.elapsed = minf(seconds, float(_exit_fade.elapsed) + maxf(0.0, delta))
+	var weight := smoothstep(0.0, seconds, float(_exit_fade.elapsed))
+	_set_exit_black(weight if leaving else 1.0 - weight)
+	if float(_exit_fade.elapsed) >= seconds:
+		if leaving:
+			_exit_fade.phase = "in"
+			_exit_fade.elapsed = 0.0
+			_exit_fade_committing = true
+			cancel(str(_exit_fade.reason))
+			_exit_fade_committing = false
+		else:
+			_clear_exit_fade()
+	return leaving
 
 func _local_position() -> Vector3:
 	if _local_actor != null:
@@ -1165,6 +1258,7 @@ func _apply_actors() -> void:
 		var facing := str(chosen.get("face", ""))
 		var face_point: Vector3 = _anchors.get(facing,
 			(_actors[facing] as Node3D).global_position if _actors.has(facing) else _origin)
+		face_point += _vector(chosen.get("face_offset", [0, 0, 0]))
 		var direction: Vector3 = face_point - at
 		var resting_yaw := _authoritative_yaw(actor, post.basis.get_euler().y) if role == "protagonist" \
 			else post.basis.get_euler().y
@@ -1282,6 +1376,9 @@ func skip() -> void:
 	_return_to_play("skipped")
 
 func _return_to_play(reason: String) -> void:
+	if playing and _uses_exit_fade():
+		cancel(reason)
+		return
 	_stop_inspection()
 	_line_holding = false
 	if is_instance_valid(_line_continue): _line_continue.hide()
@@ -1303,6 +1400,13 @@ func _return_to_play(reason: String) -> void:
 		cancel(reason)
 
 func cancel(reason := "cancelled") -> void:
+	if is_active() and reason in ["finished", "skipped"] and _uses_exit_fade() and not _exit_fade_committing:
+		if _exit_fade.is_empty(): _begin_exit_fade(reason)
+		return
+	# Completed native state may arrive during the cosmetic fade-in. It must
+	# finish revealing gameplay; explicit interruptions still clear immediately.
+	if not _exit_fade_committing and not (reason == "inactive" and str(_exit_fade.get("phase", "")) == "in"):
+		_clear_exit_fade()
 	_stop_inspection()
 	var owned := is_active()
 	var was_replay := _replaying

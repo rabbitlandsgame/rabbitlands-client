@@ -3,7 +3,7 @@
   "scenes": {
     "measure.rescue.abduction": {
       "title": "A Daughter in the Dark",
-      "duration": 68,
+      "duration": 64,
       "fov": 46,
       "entry_seconds": 2.4,
       "exit_seconds": 1.8,
@@ -100,7 +100,7 @@
           "anchor_actor": "protagonist"
         },
         {
-          "t": 44,
+          "t": 42,
           "anchor": "player_watch",
           "anchor_actor": "protagonist",
           "position": [
@@ -115,6 +115,71 @@
           ]
         },
         {
+          "t": 42,
+          "anchor": "player_watch",
+          "anchor_actor": "protagonist",
+          "follow_actor": "protagonist",
+          "orbit": true,
+          "when": "help",
+          "position": [
+            -3,
+            5.2,
+            -5.5
+          ],
+          "target": [
+            1.5,
+            0.7,
+            3
+          ]
+        },
+        {
+          "t": 44,
+          "anchor": "player_watch",
+          "anchor_actor": "protagonist",
+          "when": "watch",
+          "position": [
+            -3,
+            5.2,
+            -5.5
+          ],
+          "target": [
+            1.5,
+            0.7,
+            3
+          ]
+        },
+        {
+          "t": 46.2,
+          "anchor": "mother_intercept",
+          "anchor_actor": "protagonist",
+          "position": [
+            6.2,
+            6,
+            10.45
+          ],
+          "target": [
+            1,
+            0.6,
+            0.45
+          ],
+          "when": "help"
+        },
+        {
+          "t": 46.21,
+          "anchor": "mother_intercept",
+          "position": [
+            6,
+            6,
+            10
+          ],
+          "target": [
+            0.8,
+            0.6,
+            0
+          ],
+          "when": "help"
+        },
+        {
           "t": 47,
           "anchor": "mother_intercept",
           "position": [
@@ -126,10 +191,11 @@
             0.8,
             0.6,
             0
-          ]
+          ],
+          "when": "watch"
         },
         {
-          "t": 68,
+          "t": 64,
           "anchor": "mother_intercept",
           "position": [
             6,
@@ -140,6 +206,10 @@
             0.8,
             0.6,
             0
+          ],
+          "when": [
+            "help",
+            "watch"
           ]
         }
       ],
@@ -149,7 +219,7 @@
         25,
         34,
         42,
-        60
+        56
       ],
       "cues": [
         {
@@ -418,19 +488,49 @@
           "face": "mother"
         },
         {
-          "at": 46,
+          "at": 42,
           "actor": "protagonist",
           "action": "run",
           "from": "protagonist_post",
           "destination": "mother_intercept",
           "destination_offset": [
-            -1.35,
+            -0.2,
             0,
-            0.8
+            -1.05
           ],
           "move_seconds": 3.5,
-          "face": "guard",
-          "when": "help"
+          "face": "mother_intercept",
+          "when": "help",
+          "face_offset": [
+            0,
+            0,
+            1
+          ]
+        },
+        {
+          "at": 45.5,
+          "actor": "protagonist",
+          "action": "tackle_lunge",
+          "from": "mother_intercept",
+          "from_offset": [
+            -0.2,
+            0,
+            -1.05
+          ],
+          "destination": "mother_intercept",
+          "destination_offset": [
+            -0.2,
+            0,
+            -0.45
+          ],
+          "move_seconds": 0.7,
+          "face": "mother_intercept",
+          "when": "help",
+          "face_offset": [
+            0,
+            0,
+            1
+          ]
         },
         {
           "at": 46,
@@ -441,56 +541,7 @@
           "when": "watch"
         },
         {
-          "at": 47,
-          "actor": "guard",
-          "action": "attack_primary",
-          "destination": "mother_intercept",
-          "destination_offset": [
-            -0.42,
-            0,
-            0
-          ],
-          "face": "mother",
-          "when": "watch"
-        },
-        {
-          "at": 48,
-          "actor": "mother",
-          "action": "injury_recoil",
-          "destination": "mother_intercept",
-          "face": "guard",
-          "when": "watch"
-        },
-        {
-          "at": 48.55,
-          "actor": "mother",
-          "action": "injury_pinned",
-          "destination": "mother_intercept",
-          "face": "guard",
-          "when": "watch"
-        },
-        {
-          "at": 49.5,
-          "actor": "protagonist",
-          "action": "tackle_lunge",
-          "from": "mother_intercept",
-          "from_offset": [
-            -1.35,
-            0,
-            0.8
-          ],
-          "destination": "mother_intercept",
-          "destination_offset": [
-            -0.45,
-            0,
-            0
-          ],
-          "move_seconds": 0.7,
-          "face": "guard_combat",
-          "when": "help"
-        },
-        {
-          "at": 50.15,
+          "at": 46.15,
           "actor": "guard",
           "action": "tackle_fall",
           "from": "mother_intercept",
@@ -510,7 +561,7 @@
           "when": "help"
         },
         {
-          "at": 50.15,
+          "at": 46.15,
           "actor": "mother",
           "action": "tackle_fall",
           "from": "mother_intercept",
@@ -525,14 +576,14 @@
           "when": "help"
         },
         {
-          "at": 50.2,
+          "at": 46.22,
           "actor": "protagonist",
           "action": "tackle_fall",
           "from": "mother_intercept",
           "from_offset": [
-            -0.45,
+            -0.2,
             0,
-            0
+            -0.45
           ],
           "destination": "mother_intercept",
           "destination_offset": [
@@ -540,7 +591,114 @@
             0,
             0.75
           ],
-          "move_seconds": 0.9,
+          "move_seconds": 0.88,
+          "face": "guard_combat",
+          "when": "help"
+        },
+        {
+          "at": 47,
+          "actor": "guard",
+          "action": "attack_primary",
+          "destination": "mother_intercept",
+          "destination_offset": [
+            -0.42,
+            0,
+            0
+          ],
+          "face": "mother",
+          "when": "watch"
+        },
+        {
+          "at": 47.1,
+          "actor": "guard",
+          "action": "tackle_down",
+          "destination": "mother_intercept",
+          "destination_offset": [
+            1.8,
+            0,
+            0.3
+          ],
+          "face": "guard_combat",
+          "when": "help"
+        },
+        {
+          "at": 47.1,
+          "actor": "mother",
+          "action": "tackle_down",
+          "destination": "mother_intercept",
+          "destination_offset": [
+            0.85,
+            0,
+            -0.65
+          ],
+          "face": "guard_combat",
+          "when": "help"
+        },
+        {
+          "at": 47.1,
+          "actor": "protagonist",
+          "action": "tackle_down",
+          "destination": "mother_intercept",
+          "destination_offset": [
+            0.65,
+            0,
+            0.75
+          ],
+          "face": "guard_combat",
+          "when": "help"
+        },
+        {
+          "at": 48,
+          "actor": "mother",
+          "action": "injury_recoil",
+          "destination": "mother_intercept",
+          "face": "guard",
+          "when": "watch"
+        },
+        {
+          "at": 48.55,
+          "actor": "mother",
+          "action": "injury_pinned",
+          "destination": "mother_intercept",
+          "face": "guard",
+          "when": "watch"
+        },
+        {
+          "at": 49.4,
+          "actor": "guard",
+          "action": "tackle_rise",
+          "destination": "mother_intercept",
+          "destination_offset": [
+            1.8,
+            0,
+            0.3
+          ],
+          "face": "guard_combat",
+          "when": "help"
+        },
+        {
+          "at": 49.4,
+          "actor": "mother",
+          "action": "tackle_rise",
+          "destination": "mother_intercept",
+          "destination_offset": [
+            0.85,
+            0,
+            -0.65
+          ],
+          "face": "guard_combat",
+          "when": "help"
+        },
+        {
+          "at": 49.4,
+          "actor": "protagonist",
+          "action": "tackle_rise",
+          "destination": "mother_intercept",
+          "destination_offset": [
+            0.65,
+            0,
+            0.75
+          ],
           "face": "guard_combat",
           "when": "help"
         },
@@ -560,85 +718,7 @@
           "when": "watch"
         },
         {
-          "at": 51.1,
-          "actor": "guard",
-          "action": "tackle_down",
-          "destination": "mother_intercept",
-          "destination_offset": [
-            1.8,
-            0,
-            0.3
-          ],
-          "face": "guard_combat",
-          "when": "help"
-        },
-        {
-          "at": 51.1,
-          "actor": "mother",
-          "action": "tackle_down",
-          "destination": "mother_intercept",
-          "destination_offset": [
-            0.85,
-            0,
-            -0.65
-          ],
-          "face": "guard_combat",
-          "when": "help"
-        },
-        {
-          "at": 51.1,
-          "actor": "protagonist",
-          "action": "tackle_down",
-          "destination": "mother_intercept",
-          "destination_offset": [
-            0.65,
-            0,
-            0.75
-          ],
-          "face": "guard_combat",
-          "when": "help"
-        },
-        {
-          "at": 53.4,
-          "actor": "guard",
-          "action": "tackle_rise",
-          "destination": "mother_intercept",
-          "destination_offset": [
-            1.8,
-            0,
-            0.3
-          ],
-          "face": "guard_combat",
-          "when": "help"
-        },
-        {
-          "at": 53.4,
-          "actor": "mother",
-          "action": "tackle_rise",
-          "destination": "mother_intercept",
-          "destination_offset": [
-            0.85,
-            0,
-            -0.65
-          ],
-          "face": "guard_combat",
-          "when": "help"
-        },
-        {
-          "at": 53.4,
-          "actor": "protagonist",
-          "action": "tackle_rise",
-          "destination": "mother_intercept",
-          "destination_offset": [
-            0.65,
-            0,
-            0.75
-          ],
-          "face": "guard_combat",
-          "when": "help"
-        },
-        {
-          "at": 55.6,
+          "at": 51.6,
           "actor": "mother",
           "action": "walk",
           "from": "mother_intercept",
@@ -653,7 +733,7 @@
           "when": "help"
         },
         {
-          "at": 55.6,
+          "at": 51.6,
           "actor": "guard",
           "action": "walk",
           "from": "mother_intercept",
@@ -668,7 +748,7 @@
           "when": "help"
         },
         {
-          "at": 55.6,
+          "at": 51.6,
           "actor": "protagonist",
           "action": "walk",
           "from": "mother_intercept",
@@ -683,7 +763,7 @@
           "when": "help"
         },
         {
-          "at": 57.6,
+          "at": 53.6,
           "actor": "mother",
           "action": "defend",
           "destination": "mother_intercept",
@@ -691,7 +771,7 @@
           "when": "help"
         },
         {
-          "at": 57.6,
+          "at": 53.6,
           "actor": "guard",
           "action": "combat_idle",
           "destination": "guard_combat",
@@ -699,7 +779,7 @@
           "when": "help"
         },
         {
-          "at": 58,
+          "at": 54,
           "actor": "protagonist",
           "action": "combat_idle",
           "destination": "player_help",
@@ -745,7 +825,7 @@
           "speaker_actor": "mother"
         },
         {
-          "at": 60,
+          "at": 56,
           "speaker": "Woman",
           "speaker_actor": "mother",
           "text": "Thank you! Keep him away from me!",
@@ -755,7 +835,7 @@
       "events": [],
       "choice_id": "rescue_response",
       "choice_at": 42,
-      "choice_response_until": 60,
+      "choice_response_until": 56,
       "response_speaker": "Woman",
       "response_actor": "mother",
       "response_speakers": {
@@ -819,8 +899,7 @@
         }
       ],
       "dialogue_holds": [
-        10,
-        20
+        10
       ],
       "cues": [
         {
@@ -847,12 +926,7 @@
         {
           "at": 10,
           "speaker": "",
-          "text": "The woman is badly hurt. Select her and cast Heal Target."
-        },
-        {
-          "at": 20,
-          "speaker": "",
-          "text": "A real healing spell will get her back on her feet. The woman is a companion you can protect, heal and revive."
+          "text": "The woman is badly hurt. Select her and cast Heal Target to get her back on her feet. She is a companion you can protect, heal and revive."
         }
       ],
       "events": []
@@ -994,8 +1068,6 @@
         }
       ],
       "dialogue_holds": [
-        10,
-        19,
         28,
         40
       ],
@@ -1077,28 +1149,10 @@
         {
           "at": 2,
           "speaker": "Woman",
-          "text": "Please... they have my daughter. They took her toward Lantern Mine.",
           "speaker_actor": "mother",
+          "text": "Please… the goblins took my daughter to Lantern Mine. I cannot leave her down there. Will you help me bring her home?",
           "variants": {
-            "returned": "You came. I kept watch, but I could not reach her alone."
-          }
-        },
-        {
-          "at": 10,
-          "speaker": "Woman",
-          "text": "I cannot leave her down there. Please help me bring her home.",
-          "speaker_actor": "mother",
-          "variants": {
-            "returned": "She is still below. I can hear the goblins in the workings."
-          }
-        },
-        {
-          "at": 19,
-          "speaker": "Woman",
-          "text": "Will you come with me? I cannot leave her in there.",
-          "speaker_actor": "mother",
-          "variants": {
-            "returned": "Will you help me bring her home?"
+            "returned": "You came. I kept watch, but I could not reach her alone. She is still below—I can hear the goblins. Will you help me bring her home?"
           }
         },
         {
@@ -1196,9 +1250,7 @@
       "dialogue_holds": [
         12,
         22,
-        33,
-        44,
-        54
+        33
       ],
       "cues": [
         {
@@ -1254,20 +1306,8 @@
         {
           "at": 33,
           "speaker": "Elen Reed",
-          "text": "Heal restores your own health. Heal Target helps me or a party member. Select the person you mean to heal.",
-          "speaker_actor": "mother"
-        },
-        {
-          "at": 44,
-          "speaker": "Elen Reed",
-          "text": "Restore Ether—some call it Gain Ether—replenishes your mana. A mage who watches only their health will run dry.",
-          "speaker_actor": "mother"
-        },
-        {
-          "at": 54,
-          "speaker": "Elen Reed",
-          "text": "Stay close enough that we can help each other. If I fall, heal me and I can stand with you again.",
-          "speaker_actor": "mother"
+          "speaker_actor": "mother",
+          "text": "Heal restores your own health. Select me or a party member and use Heal Target to heal them. Restore Ether—also called Gain Ether—replenishes your mana. Stay close enough that we can help each other; if I fall, heal me and I can stand with you again."
         }
       ],
       "events": [
@@ -1430,21 +1470,14 @@
           "speaker_actor": "goblin_boss"
         }
       ],
-      "events": [
-        {
-          "id": "night-falls",
-          "type": "darkness",
-          "at": 23,
-          "until": 46
-        }
-      ]
+      "events": []
     },
     "measure.rescue.captive": {
       "title": "Liora",
-      "duration": 70,
+      "duration": 48,
       "fov": 45,
       "entry_seconds": 2.4,
-      "exit_seconds": 1.8,
+      "exit_seconds": 0,
       "anchor": "cage",
       "cast_roles": [
         "mother",
@@ -1533,7 +1566,7 @@
           ]
         },
         {
-          "t": 70,
+          "t": 48,
           "anchor": "family_exit",
           "position": [
             6,
@@ -1550,9 +1583,7 @@
       "dialogue_holds": [
         12,
         28,
-        38,
-        49,
-        60
+        38
       ],
       "cues": [
         {
@@ -1633,29 +1664,6 @@
           "action": "emote_nod",
           "face": "mother",
           "destination": "family_exit"
-        },
-        {
-          "at": 49,
-          "actor": "mother",
-          "action": "idle",
-          "face": "daughter",
-          "destination": "mother_exit_wait"
-        },
-        {
-          "at": 60,
-          "actor": "mother",
-          "action": "walk",
-          "destination": "mother_exit_wait",
-          "move_seconds": 4,
-          "face": "daughter"
-        },
-        {
-          "at": 60,
-          "actor": "daughter",
-          "action": "walk",
-          "destination": "family_exit",
-          "move_seconds": 4,
-          "face": "mother"
         }
       ],
       "lines": [
@@ -1680,19 +1688,7 @@
         {
           "at": 38,
           "speaker": "Elen Reed",
-          "text": "That's all right. You are safe now. I have you.",
-          "speaker_actor": "mother"
-        },
-        {
-          "at": 49,
-          "speaker": "Liora Reed",
-          "text": "I heard the goblins talking to someone. I could not see who it was.",
-          "speaker_actor": "daughter"
-        },
-        {
-          "at": 60,
-          "speaker": "Elen Reed",
-          "text": "We should get back to the entrance. I need to thank you properly before we go home.",
+          "text": "Stay close, Liora. We are leaving this mine together.",
           "speaker_actor": "mother"
         }
       ],
@@ -1726,7 +1722,7 @@
           "id": "cage-replay-open",
           "type": "gate",
           "at": 16,
-          "until": 70,
+          "until": 48,
           "duration": 3,
           "from": 0,
           "to": 1,
@@ -1738,7 +1734,7 @@
           "actor": "goblin_boss",
           "clip": "Death_A",
           "at": 0,
-          "until": 70,
+          "until": 48,
           "hold": 1.8,
           "resume_at": 12
         }
@@ -1750,14 +1746,19 @@
       "native_roles": [
         "mother",
         "daughter"
-      ]
+      ],
+      "exit_transition": {
+        "mode": "fade",
+        "out_seconds": 0.6,
+        "in_seconds": 0.6
+      }
     },
     "measure.rescue.resolved": {
       "title": "A Welcome in Landfall",
       "duration": 60,
       "fov": 44,
-      "entry_seconds": 2.4,
-      "exit_seconds": 1.8,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
       "anchor": "reward",
       "cast_roles": [
         "mother",
@@ -1813,14 +1814,12 @@
           "at": 0,
           "actor": "mother",
           "action": "idle",
-          "destination": "mother_exit_wait",
           "face": "protagonist"
         },
         {
           "at": 0,
           "actor": "daughter",
           "action": "idle",
-          "destination": "family_exit",
           "face": "mother"
         },
         {
@@ -1839,15 +1838,15 @@
       "lines": [
         {
           "at": 2,
-          "speaker": "Elen Reed",
-          "speaker_actor": "mother",
-          "text": "Thank you. You brought my daughter back to me. I will never forget what you did."
+          "speaker": "Liora Reed",
+          "speaker_actor": "daughter",
+          "text": "I heard the goblins talking to someone. I could not see who it was."
         },
         {
           "at": 12,
           "speaker": "Elen Reed",
           "speaker_actor": "mother",
-          "text": "Take the sword, the bow, or the wand—whichever suits you. And this purse. You have earned it."
+          "text": "That is all right, Liora. You are safe now. Thank you. You brought my daughter back to me, and I will never forget it. Take the sword, bow, or wand—whichever suits you—and this purse. You have earned them."
         },
         {
           "at": 22,
@@ -1861,24 +1860,33 @@
           "text": "Come and visit us in Landfall. Ask for Elen Reed. You will always be welcome in our home."
         }
       ],
-      "events": [],
+      "events": [
+        {
+          "type": "fade",
+          "at": 0,
+          "until": 1.2,
+          "from": 1,
+          "to": 0
+        }
+      ],
       "choice_id": "rescue_reward",
       "choice_at": 30,
       "choice_response_until": 42,
       "response_speaker": "Elen Reed",
       "response_actor": "mother",
-      "native_roles": [
-        "mother",
-        "daughter"
-      ],
-      "choice_actor": "recipient"
+      "choice_actor": "recipient",
+      "exit_transition": {
+        "mode": "fade",
+        "out_seconds": 0.6,
+        "in_seconds": 0.6
+      }
     },
     "measure.rescue.shadow": {
       "title": "No Remains",
       "duration": 40,
       "fov": 48,
-      "entry_seconds": 2.4,
-      "exit_seconds": 1.8,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
       "anchor": "boss_body",
       "cast_roles": [
         "lich",
@@ -1988,6 +1996,14 @@
       ],
       "events": [
         {
+          "id": "shadow-entry-fade",
+          "type": "fade",
+          "at": 0,
+          "until": 1.2,
+          "from": 1,
+          "to": 0
+        },
+        {
           "id": "shadow-held-remains",
           "type": "native_clip",
           "actor": "goblin_boss",
@@ -2020,15 +2036,13 @@
           "at": 26,
           "until": 40,
           "duration": 6
-        },
-        {
-          "type": "fade",
-          "at": 37,
-          "until": 40,
-          "from": 0,
-          "to": 1
         }
-      ]
+      ],
+      "exit_transition": {
+        "mode": "fade",
+        "out_seconds": 0.8,
+        "in_seconds": 0.8
+      }
     }
   }
 }

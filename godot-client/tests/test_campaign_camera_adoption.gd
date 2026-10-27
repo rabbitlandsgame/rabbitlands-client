@@ -92,6 +92,8 @@ func run() -> void:
 	check_other_exits()
 	check_cue_sampling()
 	check_departed_visibility()
+	check_follow_orbit()
+	check_exit_fade()
 	await process_frame
 	print("Campaign camera adoption checks: ",checks,"; failures: ",failures)
 	quit(1 if failures else 0)
@@ -141,6 +143,10 @@ func check_rig() -> void:
 
 func check_live_finish() -> void:
 	var f := fixture()
+	expect(f.scene._beat_matches({"when":["help","watch"]}) and not f.scene._beat_matches({"when":["watch",""]}),"array-valued branch conditions select the current answer without comparing arrays to strings")
+	f.scene._choice_state.selected = ""
+	expect(f.scene._beat_matches({"when":["watch",""]}),"array-valued branch conditions can explicitly include the pre-choice default")
+	f.scene._choice_state.selected = "help"
 	var results: Array = []
 	f.scene.presentation_finished.connect(func(token: String,reason: String) -> void: results.append([token,reason]))
 	pose_at(f,68)
@@ -245,6 +251,12 @@ func check_cue_sampling() -> void:
 	f.scene.elapsed = 4
 	f.scene._apply_actors()
 	expect(f.actor.global_position == Vector3(5,0,0),"omitting destination_offset preserves the existing cue coordinates")
+	f.scene._definition.cues = [{"at":0,"actor":"protagonist","destination":"start","face":"combat","face_offset":[0,0,2]}]
+	f.scene._apply_actors()
+	expect(is_equal_approx(f.actor.rotation.y,atan2(-10.0,-2.0)),"face_offset aims through the authored side approach without moving the face anchor")
+	f.scene._definition.cues[0].erase("face_offset")
+	f.scene._apply_actors()
+	expect(is_equal_approx(f.actor.rotation.y,-PI/2),"omitting face_offset preserves the existing facing direction")
 	dispose(f)
 
 func add_departed(f: Dictionary) -> Dictionary:
@@ -332,4 +344,150 @@ func check_departed_visibility() -> void:
 	f.scene.cancel("finished")
 	f.scene._start(f.rig,f.rig.camera,f.actor,{1:f.actor},{"protagonist":1})
 	expect(f.departed.daughter.visible and f.scene._handoff_hidden.is_empty(),"the next authenticated film owns its cast visibility without an old handoff lease")
+	dispose(f)
+
+func check_follow_orbit() -> void:
+	var f := fixture()
+	f.scene._anchors.impact = Vector3(4,0,0)
+	f.scene._definition.shots = [
+		{"t":0,"anchor_actor":"protagonist","position":[-8,5,0],"target":[0,1,0]},
+		{"t":42,"anchor_actor":"protagonist","follow_actor":"protagonist","orbit":true,"position":[-8,5,0],"target":[0,1,0]},
+		{"t":46.15,"anchor_actor":"protagonist","position":[0,5,8],"target":[0,1,0]},
+		{"t":46.16,"anchor":"combat","position":[-6,5,8],"target":[-6,1,0]},
+		{"t":68,"anchor":"combat","position":[-6,5,8],"target":[-6,1,0]}]
+	f.scene._definition.cues = [
+		{"at":0,"actor":"protagonist","destination":"start","face":"post"},
+		{"at":42,"actor":"protagonist","from":"start","destination":"impact","move_seconds":4.15,"action":"run","face":"post"}]
+	pose_at(f,42)
+	var beginning: Transform3D = f.rig.camera.global_transform
+	expect(beginning.origin.is_equal_approx(Vector3(-8,5,0)),"a follow orbit begins at the existing approach view without a cut")
+	pose_at(f,44.075)
+	var target: Vector3 = f.scene._capture_camera().target
+	var orbit: Vector3 = f.rig.camera.global_position-target
+	expect(target.is_equal_approx(f.actor.global_position+Vector3.UP),"the moving player's look-at point remains attached throughout the approach")
+	expect(is_equal_approx(orbit.length(),sqrt(80.0)) and orbit.is_equal_approx(Vector3(-sqrt(32.0),4,sqrt(32.0))),"the camera rotates at the authored radius instead of cutting a shorter chord through the action")
+	var held: Transform3D = f.rig.camera.global_transform
+	var movement := Vector3(1.7,0.3,-0.6)
+	f.actor.global_position += movement
+	f.scene._apply_camera()
+	expect(f.rig.camera.global_position.is_equal_approx(held.origin+movement) and f.scene._capture_camera().target.is_equal_approx(target+movement),"a player step moves the entire orbit frame equally with no pull toward the future combat post")
+	# Explicit follow applies to both keys, even if an endpoint's fallback anchor differs.
+	f.scene._definition.shots[2].erase("anchor_actor")
+	f.scene._definition.shots[2].anchor = "combat"
+	pose_at(f,44.075)
+	expect(f.scene._capture_camera().target.is_equal_approx(f.actor.global_position+Vector3.UP),"transition follow_actor pins both endpoint offsets to the same current player")
+	f.scene._definition.shots[2].erase("anchor")
+	f.scene._definition.shots[2].anchor_actor = "protagonist"
+	var previous_yaw := -PI/2
+	var continuous := true
+	for time: float in [42.0,42.5,43.0,43.5,44.0,44.5,45.0,45.5,46.0,46.15]:
+		pose_at(f,time)
+		var offset: Vector3 = f.rig.camera.global_position-f.scene._capture_camera().target
+		var yaw := atan2(offset.x,offset.z)
+		continuous = continuous and yaw >= previous_yaw-0.0001 and yaw-previous_yaw < deg_to_rad(18)
+		previous_yaw = yaw
+	expect(continuous and is_zero_approx(previous_yaw),"rotation progresses smoothly across the whole run and reaches the final angle at impact")
+	pose_at(f,43)
+	var early_offset: Vector3 = f.rig.camera.global_position-f.scene._capture_camera().target
+	expect(atan2(early_offset.x,early_offset.z) > deg_to_rad(-80),"rotation has already begun during the early run instead of waiting for the last second")
+	pose_at(f,46.15)
+	var impact: Transform3D = f.rig.camera.global_transform
+	pose_at(f,46.155)
+	expect(f.rig.camera.global_transform.is_equal_approx(impact),"the moving endpoint and equal static hold connect continuously without duplicate timestamps")
+	pose_at(f,46.16)
+	expect(f.rig.camera.global_transform.is_equal_approx(impact),"the final fixed confrontation view matches the orbit endpoint exactly")
+	f.actor.global_position += Vector3(2,0,1)
+	f.scene.elapsed = 50
+	f.scene._apply_camera()
+	expect(f.rig.camera.global_transform.is_equal_approx(impact),"after impact the final hold stays in world space rather than continuing to chase the actor")
+	pose_at(f,68)
+	f.scene.cancel("finished")
+	expect(f.rig.camera.global_transform.is_equal_approx(impact) and not f.scene.blocks_input(),"live Help still adopts the fixed confrontation view after an orbit transition")
+	dispose(f)
+	f = fixture()
+	f.scene._definition.shots = [
+		{"t":0,"anchor":"start","position":[-8,5,0],"target":[0,1,0]},
+		{"t":10,"anchor":"combat","position":[0,5,8],"target":[0,1,0]}]
+	pose_at(f,5)
+	expect(f.rig.camera.global_position.is_equal_approx(Vector3(1,5,4)),"ordinary shots without opt-in retain their original linear interpolation")
+	f.scene._definition.shots[0].follow_actor = "missing-role"
+	pose_at(f,5)
+	expect(f.rig.camera.global_position.is_equal_approx(Vector3(1,5,4)),"an unavailable optional follower safely retains ordinary authored anchors")
+	f.scene._replaying = true
+	f.scene._definition.shots[0].orbit = true
+	pose_at(f,5)
+	expect(f.rig.camera.global_position.is_finite() and not f.scene._ack_requested,"read-only replay can sample the same orbit without requesting gameplay acknowledgement")
+	f.scene.reduced_motion = true
+	pose_at(f,5)
+	expect(f.rig.camera.global_transform.is_equal_approx(f.original),"reduced motion suppresses the optional orbit during playback")
+	dispose(f)
+	var seam := Scene._orbit_offset(Vector3(0.01,2,-10),Vector3(-0.01,2,-10),0.5)
+	expect(seam.z < -9.99 and absf(seam.x) < 0.001,"an orbit crossing180 degrees uses the short yaw arc")
+	expect(Scene._orbit_offset(Vector3.ZERO,Vector3(4,2,8),0.5) == Vector3(2,1,4),"a zero-radius endpoint falls back to finite linear interpolation")
+
+func fade_policy(f: Dictionary) -> void:
+	f.scene._definition.erase("exit_camera")
+	f.scene._definition.exit_transition = {"mode":"fade","out_seconds":0.6,"in_seconds":0.6}
+
+func check_exit_fade() -> void:
+	var f := fixture()
+	fade_policy(f)
+	pose_at(f,68)
+	var finale: Transform3D = f.rig.camera.global_transform
+	expect(not finale.is_equal_approx(f.original),"a fade-exit film never begins the ordinary camera pan during its final shot")
+	var completed: Array = []
+	f.scene.presentation_finished.connect(func(_token: String,reason: String) -> void:
+		completed.append([reason,f.scene._exit_black.color.a,f.scene.blocks_input()]))
+	f.scene.cancel("finished")
+	expect(f.scene.blocks_input() and completed.is_empty() and f.scene._exit_fade.phase == "out","completion first reserves a fade-out while retaining the scene camera and input lease")
+	f.scene._advance_exit_fade(0.3)
+	expect(f.scene._exit_black.color.a > 0.49 and f.scene._exit_black.color.a < 0.51 and f.rig.camera.global_transform.is_equal_approx(finale),"the first half darkens the unchanged finale without visible camera travel")
+	f.scene._advance_exit_fade(0.3)
+	expect(f.rig.camera.global_transform.is_equal_approx(f.original) and f.scene._exit_black.color.a == 1 and not f.scene.blocks_input(),"only full black restores the gameplay camera and releases normal controls")
+	expect(completed == [["finished",1.0,false]] and f.scene._ack_requested,"the one normal completion is emitted after camera restoration underneath full black")
+	var yaw: float = f.rig.yaw_degrees
+	f.rig.handle_keyboard(Vector2.RIGHT,0.1)
+	expect(is_equal_approx(f.rig.yaw_degrees,yaw-9),"ordinary camera controls are available during the gameplay fade-in")
+	f.scene.update(0.3,{"active":false},f.rig,{1:f.actor},1,"landfall")
+	expect(f.scene._exit_black.color.a > 0.49 and f.scene._exit_black.color.a < 0.51 and not f.scene.blocks_input(),"the authentic completed/inactive snapshot continues revealing gameplay rather than popping the fade off")
+	f.scene.update(0.3,{"active":false},f.rig,{1:f.actor},1,"landfall")
+	expect(f.scene._exit_fade.is_empty() and not f.scene._exit_black.visible and completed.size() == 1,"the completed fade clears its overlay and cannot emit a duplicate ACK")
+	expect(f.scene._exit_black.mouse_filter == Control.MOUSE_FILTER_IGNORE,"the fade overlay never captures input after gameplay control is released")
+	dispose(f)
+	for replay: bool in [false,true]:
+		f = fixture("watch",replay)
+		fade_policy(f)
+		pose_at(f,42)
+		var before: Transform3D = f.rig.camera.global_transform
+		var normal: Array = []
+		var reviewed: Array = []
+		f.scene.presentation_finished.connect(func(_token: String,reason: String) -> void: normal.append(reason))
+		f.scene.replay_finished.connect(func(_token: String,reason: String) -> void: reviewed.append(reason))
+		f.scene.skip()
+		f.scene.skip()
+		f.scene._advance_exit_fade(0.2)
+		expect(f.rig.camera.global_transform.is_equal_approx(before) and f.scene.blocks_input(),"rapid repeated Skip retains the current camera until black in "+("replay" if replay else "live playback"))
+		f.scene._advance_exit_fade(0.4)
+		expect(f.rig.camera.global_transform.is_equal_approx(f.original) and f.scene._exit_black.color.a == 1,"Skip restores the saved camera beneath black in "+("replay" if replay else "live playback"))
+		expect((normal == [] and reviewed == ["skipped"] and not f.scene._ack_requested) if replay else (normal == ["skipped"] and reviewed == [] and f.scene._ack_requested),"fade replay remains read-only while live Skip acknowledges exactly once")
+		dispose(f)
+	f = fixture()
+	fade_policy(f)
+	pose_at(f,50)
+	f.scene.skip()
+	f.scene._advance_exit_fade(0.3)
+	f.scene.cancel("map_changed")
+	expect(not f.scene.blocks_input() and f.scene._exit_fade.is_empty() and not f.scene._exit_black.visible and f.rig.camera.global_transform.is_equal_approx(f.original),"a map interruption clears a partial blackout and restores the normal camera immediately")
+	dispose(f)
+	f = fixture()
+	fade_policy(f)
+	f.scene.reduced_motion = true
+	pose_at(f,50)
+	var still: Transform3D = f.rig.camera.global_transform
+	f.scene.skip()
+	f.scene._advance_exit_fade(0.3)
+	expect(f.rig.camera.global_transform.is_equal_approx(still),"reduced motion uses opacity alone and never adds camera movement to the exit")
+	f.scene._advance_exit_fade(0.3)
+	f.scene._start(f.rig,f.rig.camera,f.actor,{1:f.actor},{"protagonist":1})
+	expect(f.scene._exit_fade.is_empty() and not f.scene._exit_black.visible,"the next authenticated film cannot inherit an old gameplay fade overlay")
 	dispose(f)
