@@ -81,7 +81,9 @@ func run() -> void:
 			model.geometryProfile = "mpfb"
 			var fit_path := prototype_root.path_join(sex).path_join("fit.json")
 			if FileAccess.file_exists(fit_path):
-				model.mpfbFaceFrame = JSON.parse_string(FileAccess.get_file_as_string(fit_path)).get("face_frame_head_local", {})
+				var metadata: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(fit_path))
+				model.mpfbFaceFrame = metadata.get("face_frame_head_local", {})
+				MpfbPrototypeAppearance.configure_art(model, metadata, fit_path.get_base_dir())
 			model.erase("faceAppearance")
 			model.erase("skinPalette")
 		var loadout := {5: 225, 2: 100} if name == "Mira" else {5: 209, 2: 105}

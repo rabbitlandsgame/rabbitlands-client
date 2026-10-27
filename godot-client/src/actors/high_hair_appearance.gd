@@ -70,7 +70,7 @@ static func apply(native_root: Node3D, skeleton: Skeleton3D, appearance: Diction
 	var sex := str(config.get("gender", ""))
 	var head_from_root := skeleton.get_bone_global_rest(head).affine_inverse() * GROOM._to_root(skeleton, native_root).affine_inverse()
 	for hair: MeshInstance3D in _hair_nodes(native_root):
-		if hair.mesh == null or not _locally_visible(hair, native_root): continue
+		if hair.has_meta("rl_concept_hair") or hair.mesh == null or not _locally_visible(hair, native_root): continue
 		var previous: Dictionary = hair.get_meta(META, {})
 		var source := hair.mesh
 		var original_override := hair.material_override

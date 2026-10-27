@@ -57,7 +57,7 @@ try {
     Write-Host 'Choose Human Female or Male, an outfit, equipment, and a pose. Drag the character to rotate.'
     Write-Host 'Equipment offers no held gear, sword and shield, or staff. Attack forehand/backhand replay when equipment changes.'
     if ($env:RL_MPFB_PROTOTYPE_ROOT) {
-        Write-Host 'Choose Model > MPFB prototype for the High graphics study, or Current to compare. Low and Medium use Current.'
+        Write-Host 'The MPFB prototype opens in High graphics. Choose Current to compare. Low and Medium use Current.'
     }
     Write-Host 'Save preview keeps your choices locally. No account or server connection is needed.'
     Write-Host ('Log: ' + $logPath)

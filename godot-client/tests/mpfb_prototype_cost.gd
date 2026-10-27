@@ -3,6 +3,7 @@ extends SceneTree
 const PRESETS = preload("res://src/actors/human_portrait_presets.gd")
 var actors: Array[ReplicatedActor3D] = []
 var results: Array = []
+var face_edits: Array = []
 var stage: Node3D
 var camera: Camera3D
 
@@ -62,9 +63,23 @@ func used_resources() -> Dictionary:
 					if texture == null or textures.has(texture.get_instance_id()): continue
 					var image := texture.get_image()
 					textures[texture.get_instance_id()] = {"size": [texture.get_width(), texture.get_height()],
-						"image_data_bytes": image.get_data_size(), "format": image.get_format()}
+						"image_data_bytes": image.get_data_size(), "format": image.get_format(),
+						"texture_class":texture.get_class(), "mipmaps":image.has_mipmaps()}
 	return {"unique_bound_meshes": meshes.size(), "packed_mesh_bytes": bytes,
 		"unique_mesh_triangles": triangles, "bound_textures": textures.values()}
+
+func measure_face_edits(mode: String) -> void:
+	# Appearance work occurs on change, separate from steady viewport timing.
+	# Test new and cached shapes at identical user control values in both modes.
+	for index: int in 2:
+		var sex := "female" if index == 1 else "male"
+		var baseline := PRESETS.appearance("Mira" if index == 1 else "Rowan")
+		var soft := baseline.merged({"jaw":20,"cheekbones":35,"nose":24,"face_length":22,"eye_size":76,"eye_tilt":63,"eye_spacing":57,"nose_width":30,"lip_fullness":78,"brow_depth":25}, true)
+		var angular := baseline.merged({"jaw":88,"cheekbones":88,"nose":82,"face_length":84,"eye_size":25,"eye_tilt":34,"eye_spacing":35,"nose_width":76,"lip_fullness":20,"brow_depth":93}, true)
+		for entry: Array in [["soft first",soft],["baseline",baseline],["soft cached",soft],["angular first",angular],["baseline",baseline],["angular cached",angular]]:
+			var began := Time.get_ticks_usec()
+			actors[index].apply_appearance_variants(entry[1])
+			face_edits.append({"mode":mode,"sex":sex,"case":entry[0],"appearance_function_usec":Time.get_ticks_usec()-began})
 
 func run() -> void:
 	root.get_node("Network").block_for_hud_preview()
@@ -108,7 +123,9 @@ func run() -> void:
 				model.geometryProfile = "mpfb"
 				model.erase("faceAppearance")
 				model.erase("skinPalette")
-				model.mpfbFaceFrame = JSON.parse_string(FileAccess.get_file_as_string(prototype_root.path_join(sex).path_join("fit.json"))).get("face_frame_head_local", {})
+				var metadata: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(prototype_root.path_join(sex).path_join("fit.json")))
+				model.mpfbFaceFrame = metadata.get("face_frame_head_local", {})
+				MpfbPrototypeAppearance.configure_art(model, metadata, prototype_root.path_join(sex))
 			var actor := ReplicatedActor3D.new()
 			actor.apply_render_quality(2, true)
 			stage.add_child(actor)
@@ -142,6 +159,22 @@ func run() -> void:
 		camera.position = focus + Vector3(.12, .055, 1.4)
 		camera.look_at(focus)
 		await measure("one close portrait; 15 other actors hidden", mode)
+		# Include real customization diversity, rather than measuring only two
+		# shared face buffers repeated eight times each.
+		for index: int in actors.size():
+			var look := PRESETS.appearance("Mira" if index % 2 else "Rowan")
+			var variation := {"jaw":(index % 5 - 2) * 7,"cheekbones":(index * 3 % 7 - 3) * 5,
+				"nose":(index * 5 % 9 - 4) * 4,"face_length":(index * 7 % 11 - 5) * 4,
+				"eye_size":(index % 3 - 1) * 6,"lip_fullness":(index * 3 % 11 - 5) * 3}
+			for field: String in variation: look[field] = clampi(int(look[field]) + int(variation[field]), 0, 100)
+			actors[index].apply_appearance_variants(look)
+			actors[index].visible = true
+		camera.size = 3.4
+		camera.position = Vector3(0, 2.7, 9)
+		camera.look_at(Vector3(0, .9, 0))
+		await measure("16 distinct customized Human full bodies", mode)
+		resources[mode + " distinct identities"] = used_resources()
+		measure_face_edits(mode)
 		for actor: ReplicatedActor3D in actors: actor.free()
 		actors.clear()
 		await process_frame
@@ -149,6 +182,7 @@ func run() -> void:
 		"device": RenderingServer.get_video_adapter_name(), "renderer": RenderingServer.get_current_rendering_method(),
 		"viewport": [1280, 720], "quality": "High for both modes, identical light/camera/accepted frozen idle",
 		"warmup_frames": 60, "results": results, "bound_resources": resources, "configure_times": loads,
+		"face_edit_times":face_edits,"face_edit_scope":"Appearance function wall time on first/cached identities, after viewport measurements; excludes deferred GPU upload and full UI frame time.",
 		"limitations": "Viewport render timings, not full game FPS. Bound mesh/texture bytes are distinct from total process VRAM; caches from both modes coexist."}, "  "))
 	NativeAnimationImporter.clear()
 	GlbSceneCache.clear()

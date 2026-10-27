@@ -55,6 +55,8 @@ static func apply(native_root: Node3D, skeleton: Skeleton3D,
 	var updo := str(model_config.get("gender", "")) == "female" and AppearanceVariants.hair_style(int(appearance.get("hair", 0))) == 3
 	for node: Node in native_root.find_children("*", "MeshInstance3D", true, false):
 		var hair := node as MeshInstance3D
+		if hair.has_meta("rl_concept_hair"):
+			continue
 		if hair.get_parent() != null and str(hair.get_parent().name).begins_with("AppearanceHair_"):
 			_groom_hair(hair, skeleton, frame, eye_height, detail, color, native_root, updo, hair_length, hair_volume)
 	var old := native_root.get_node_or_null("PortraitFacialHair")

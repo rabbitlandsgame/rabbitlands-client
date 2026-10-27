@@ -1011,7 +1011,10 @@ func _add_hair_variant(style: int, color: Color) -> void:
 		return
 	var styles: Array = styles_value as Array
 	var path: String = str(styles[posmod(style, styles.size())])
-	if bool(_model_config.get("hairSkinned", false)):
+	var style_override: Dictionary = (_model_config.get("hairStyleOverrides", {}) as Dictionary).get(str(style), {})
+	if not style_override.is_empty():
+		path = str(style_override.get("scene", path))
+	if bool(style_override.get("skinned", _model_config.get("hairSkinned", false))):
 		var holder := Node3D.new()
 		holder.name = "AppearanceHair_%d" % style
 		_native_skeleton.add_child(holder)
@@ -1043,12 +1046,21 @@ func _add_hair_variant(style: int, color: Color) -> void:
 	native_hair.name = "NativeHair"
 	# Skull proportions are baked into each body. Fit shared hairstyles in
 	# Head-local space without changing the skeleton or its inverse binds.
-	var hair_fit: Dictionary = _model_config.get("hairFit", {}) as Dictionary
+	var hair_fit: Dictionary = style_override.get("fit", _model_config.get("hairFit", {})) as Dictionary
 	native_hair.scale = _vector3(hair_fit.get("scale", []), Vector3.ONE)
 	native_hair.position = _vector3(hair_fit.get("offset", []), Vector3.ZERO)
 	attachment.add_child(native_hair)
+	if bool(style_override.get("concept", false)):
+		native_hair.set_meta("rl_concept_hair", true)
 	for node_value: Node in native_hair.find_children("*", "MeshInstance3D", true, false):
-		_tint_mesh(node_value as MeshInstance3D, color)
+		if bool(style_override.get("concept", false)):
+			(node_value as MeshInstance3D).set_meta("rl_concept_hair", true)
+			(node_value as MeshInstance3D).set_meta("rl_concept_hair_reference", bool(style_override.get("painted_vertices", false)))
+			(node_value as MeshInstance3D).set_meta("rl_concept_hair_texture", bool(style_override.get("painted_texture", false)))
+			(node_value as MeshInstance3D).set_meta("authored_surface_finish", true)
+			(node_value as MeshInstance3D).extra_cull_margin = 0.04
+		else:
+			_tint_mesh(node_value as MeshInstance3D, color)
 
 func render_diagnostics() -> Dictionary:
 	var meshes: Array[Dictionary] = []
@@ -1120,7 +1132,7 @@ func _apply_render_quality_to_visuals() -> void:
 			HIGH_PORTRAIT.apply(_native_model, _native_skeleton, _appearance, _model_config, _render_quality)
 		HIGH_HAIR.apply(_native_model, _native_skeleton, _appearance, _model_config, _render_quality)
 		if mpfb:
-			MPFB_PROTOTYPE.apply(_native_model, _appearance)
+			MPFB_PROTOTYPE.apply(_native_model, _appearance, _model_config)
 		else:
 			STUBBLE_APPEARANCE.apply(_native_model, _appearance, _model_config)
 		ACTOR_RENDER_QUALITY.apply_actor(_native_model, _render_quality)
@@ -3454,6 +3466,8 @@ func _refresh_body_surface_visibility() -> void:
 	for node_value: Node in native_model.find_children("*", "MeshInstance3D", true, false):
 		var mesh_node: MeshInstance3D = node_value as MeshInstance3D
 		var surface: String = mesh_node.name.to_lower()
+		if mesh_node.has_meta("rl_concept_hair"):
+			surface = "hair"
 		if surface in ["hair", "scalp"] or surface.begins_with(RACE_FEATURE_PREFIX):
 			if not mesh_node.has_meta("uncovered_head_visible"):
 				mesh_node.set_meta("uncovered_head_visible", mesh_node.visible)

@@ -53,7 +53,9 @@ func model_config(sex: String, prototype: bool) -> Dictionary:
 		config.erase("skinPalette")
 		var fit_path: String = str(config.scene).get_base_dir().path_join("fit.json")
 		if FileAccess.file_exists(fit_path):
-			var frame: Variant = read_json(fit_path).get("face_frame_head_local", {})
+			var metadata := read_json(fit_path)
+			MpfbPrototypeAppearance.configure_art(config, metadata, fit_path.get_base_dir())
+			var frame: Variant = metadata.get("face_frame_head_local", {})
 			if frame is Dictionary and not frame.is_empty(): config.mpfbFaceFrame = frame
 	return config
 
@@ -288,6 +290,8 @@ func run() -> void:
 		"res://src/actors/human_locomotion_polish.gd", "res://src/actors/human_hand_pose.gd",
 		"res://src/actors/human_attack_library.gd", "res://src/actors/mpfb_prototype_appearance.gd",
 		"res://src/actors/mpfb_prototype_appearance.gdshader", "res://src/actors/high_portrait_appearance.gd",
+		"res://src/actors/mpfb_concept_hair.gdshader", "res://src/actors/high_hair_appearance.gd",
+		"res://src/actors/portrait_groom.gd", "res://src/actors/oldcraft_actor_style.gd",
 		"res://src/actors/high_portrait_appearance.gdshader"]:
 		asset_hashes[path] = FileAccess.get_sha256(path)
 	for sex: String in ["female", "male"]:
@@ -295,7 +299,7 @@ func run() -> void:
 		if not FileAccess.file_exists(prototype_path(sex)):
 			finish()
 			return
-		for path: String in [str(models["luminous_" + sex].scene), prototype_path(sex), prototype_path(sex).get_base_dir().path_join("fit.json")]:
+		for path: String in [str(models["luminous_" + sex].scene), prototype_path(sex), prototype_path(sex).get_base_dir().path_join("fit.json"), prototype_path(sex).get_base_dir().path_join("concept_hair.glb")]:
 			if FileAccess.file_exists(path): asset_hashes[path] = FileAccess.get_sha256(path)
 		var library_path := str(models["luminous_" + sex].get("animationLibrary", ""))
 		if FileAccess.file_exists(library_path): asset_hashes[library_path] = FileAccess.get_sha256(library_path)

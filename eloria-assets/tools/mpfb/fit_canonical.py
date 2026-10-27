@@ -4,8 +4,9 @@ This authoring utility never modifies a source GLB.  MPFB's anatomical game
 weights and joint-cube landmarks move its A-pose geometry to the accepted player
 rest.  The output retains every existing skeleton node and inverse bind matrix.
 Only ordinary static skinned geometry and capped baked maps reach the prototype.
-Requires NumPy, SciPy and Pillow; MPFB itself is needed only for the preceding
-authoring export, not by this fitter or by the game.
+Requires NumPy, SciPy and Pillow; Shapely 2.1 provides robust internal caps.
+MPFB itself is needed only for the preceding authoring export, not by this
+fitter or by the game.
 """
 from __future__ import annotations
 import argparse
@@ -17,7 +18,10 @@ from pathlib import Path
 import struct
 
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFilter
+from scipy.sparse import coo_matrix
+from scipy.sparse.linalg import spsolve
+from scipy.spatial import cKDTree
 from scipy.spatial.transform import Rotation
 
 COMPONENTS = {'SCALAR': 1, 'VEC2': 2, 'VEC3': 3, 'VEC4': 4, 'MAT4': 16}
@@ -394,14 +398,15 @@ def sparse_weights(weights):
     return order.astype(np.uint16),kept.astype(np.float32)
 
 
-def clipped(vertices, triangles, uv, weights, plane, above, authored_normals=None, eligible=None):
+def clipped(vertices, triangles, uv, weights, plane, above, authored_normals=None, eligible=None, track_origins=False):
     """Exact triangle/UV/weight clipping; all retained source vertices stay exact."""
-    all_vertices=[];all_weights=[];all_normals=[];out_tri=[];out_uv=[];mapping={}
+    all_vertices=[];all_weights=[];all_normals=[];out_tri=[];out_uv=[];mapping={};origins=[]
     def inside(v): return v[0][1]>=plane if above else v[0][1]<=plane
     def append(v):
         pos,weight,tex,normal,key=v
         if key not in mapping:
             mapping[key]=len(all_vertices);all_vertices.append(pos);all_weights.append(weight);all_normals.append(normal)
+            origins.append(int(key[1]) if key[0]=='v' else -1)
         return mapping[key]
     source_normals = normals(vertices,triangles) if authored_normals is None else authored_normals
     for number,(tri,tuv) in enumerate(zip(triangles,uv)):
@@ -421,8 +426,10 @@ def clipped(vertices, triangles, uv, weights, plane, above, authored_normals=Non
         for i in range(1,len(result)-1):
             corners=[result[0],result[i],result[i+1]]
             out_tri.append([append(v) for v in corners]);out_uv.append([v[2] for v in corners])
-    return {'vertices':np.array(all_vertices),'triangles':np.array(out_tri,dtype=int),
+    result={'vertices':np.array(all_vertices),'triangles':np.array(out_tri,dtype=int),
             'uv':np.array(out_uv),'weights':np.array(all_weights),'normals':np.array(all_normals)}
+    if track_origins:result['origins']=np.asarray(origins,dtype=int)
+    return result
 
 
 def neck_loop(mesh,plane,max_x=.14):
@@ -472,7 +479,38 @@ def head_component(mesh):
     return result
 
 
-def hybrid_head(source, vertices, triangles, uv, joints, weights, cut=1.50, slope=.6):
+def relax_neck_chart(original, fitted, triangles, head_weight, ring, cut=1.50):
+    """Solve the neck's full chart positions with its rim and face pinned.
+
+    The sloped MPFB boundary includes shoulder skin and is not a radial neck
+    section. Scaling that section only in X/Z leaves folded chart heights below
+    the ears. A uniform harmonic XYZ solve removes those folds without moving
+    the canonical seam or any protected face vertex. This is an offline solve.
+    """
+    unknown=(original[:,1]<cut+.05)|(head_weight<.95)
+    unknown[ring]=False
+    ids=np.flatnonzero(unknown)
+    if not len(ids): return fitted.copy(),unknown
+    lookup=np.full(len(original),-1,dtype=int);lookup[ids]=np.arange(len(ids))
+    adjacency=[set() for _ in range(len(original))]
+    for tri in triangles:
+        for a,b in zip(tri,np.roll(tri,-1)):
+            adjacency[a].add(int(b));adjacency[b].add(int(a))
+    rows=[];columns=[];values=[];rhs=np.zeros((len(ids),fitted.shape[1]))
+    for row,index in enumerate(ids):
+        if not adjacency[index]: raise ValueError('Isolated neck relaxation vertex')
+        rows.append(row);columns.append(row);values.append(len(adjacency[index]))
+        for other in adjacency[index]:
+            if unknown[other]: rows.append(row);columns.append(lookup[other]);values.append(-1)
+            else: rhs[row]+=fitted[other]
+    system=coo_matrix((values,(rows,columns)),shape=(len(ids),len(ids))).tocsr()
+    solved=np.asarray(spsolve(system,rhs)).reshape(rhs.shape)
+    if not np.isfinite(solved).all(): raise ValueError('Neck relaxation is not finite')
+    output=fitted.copy();output[ids]=solved
+    return output,unknown
+
+
+def legacy_hybrid_head(source, vertices, triangles, uv, joints, weights, cut=1.50, slope=.6, relax_neck=True):
     """MPFB head/neck with a weight-matched quarter-mm bridge to the accepted body.
 
     The full-body fit remains an experimental export mode.  Shared canonical
@@ -489,6 +527,7 @@ def hybrid_head(source, vertices, triangles, uv, joints, weights, cut=1.50, slop
     # This keeps the MPFB chin whole while making a closed source boundary.
     chart_vertices=vertices.copy();chart_vertices[:,1]+=slope*chart_vertices[:,2]
     head=head_component(clipped(chart_vertices,triangles[owned],uv[owned],dw,cut,True))
+    original_head_chart=head['vertices'].copy()
     original_node=next(n for n in d['nodes'] if n.get('name')=='body')
     p=d['meshes'][original_node['mesh']]['primitives'][0]
     attrs=p['attributes'];original_vertices=source.read(attrs['POSITION'])
@@ -514,7 +553,9 @@ def hybrid_head(source, vertices, triangles, uv, joints, weights, cut=1.50, slop
     new_angles=angles(head['vertices'][new_ring][:,[0,2]],source_center)
     def interpolate(theta, sample_angles, values):
         return np.column_stack([np.interp(theta,sample_angles,values[:,k],period=2*np.pi) for k in range(values.shape[1])])
-    head_weight=head['weights'][:,names.index('Head')]
+    # Keep the authored ownership field: the canonical weight transfer below
+    # mutates head['weights'], while relaxation must use the original domain.
+    head_weight=head['weights'][:,names.index('Head')].copy()
     near=np.flatnonzero((head['vertices'][:,1]<cut+.05)|(head_weight<.95))
     a=angles(head['vertices'][near][:,[0,2]],source_center)
     target=interpolate(a,native_angles,lower['vertices'][native_ring][:,[0,2]])
@@ -531,6 +572,12 @@ def hybrid_head(source, vertices, triangles, uv, joints, weights, cut=1.50, slop
     canonical_weights=interpolate(a,native_angles,lower['weights'][native_ring])
     head['weights'][near] = head['weights'][near]*(1-fade[:,None])+canonical_weights*fade[:,None]
     head['vertices'][near,1] += .00025*fade
+    # Keep the rim exactly where the canonical bridge expects it, while solving
+    # shoulder-derived interior positions rather than preserving folded heights.
+    relaxed=np.zeros(len(head['vertices']),dtype=bool)
+    if relax_neck:
+        head['vertices'],relaxed=relax_neck_chart(original_head_chart,head['vertices'],
+            head['triangles'],head_weight,new_ring,cut)
     # The short bridge closes differing tessellation of the two boundary rings.
     first_uv={}
     for tri,tex in zip(head['triangles'],head['uv']):
@@ -588,6 +635,8 @@ def hybrid_head(source, vertices, triangles, uv, joints, weights, cut=1.50, slop
     report={'mode':'hybrid','neck_cut_y':cut,'neck_plane':'y + %.3f*z = %.3f'%(slope,cut),'neck_bridge_height':.00025,
             'seam_topology':'one welded degree-two closed boundary on each side',
             'neck_warp_max_m':float(np.linalg.norm(neck_delta,axis=1).max()),
+            'neck_relaxation':{'method':'harmonic absolute XYZ in sloped chart' if relax_neck else 'legacy radial only',
+                               'interior_vertices':int(relaxed.sum()),'canonical_rim_and_protected_head_exact':True},
             'normal_stitch':{'native_corresponding_bottom_normals_exact':bool(np.array_equal(head['normals'][bottom_start:],lower['normals'][bottom_order])),
                              'blended_upper_band_m':.01,'upper_band_vertices':len(normal_band),
                              'maximum_authored_normal_change_degrees':normal_change,
@@ -596,6 +645,252 @@ def hybrid_head(source, vertices, triangles, uv, joints, weights, cut=1.50, slop
             'canonical_lower_triangles':len(lower['triangles']),'mpfb_head_triangles':len(head['triangles']),
             'canonical_original_material':p['material'],
             'canonical_body_below_neck':'unchanged source positions, skin ownership, UV and authored normals; only plane intersections added'}
+    return head,lower,report
+
+
+def intrinsic_ring(vertices, ring, center):
+    """Clockwise graph order, anchored at the physical anterior midline."""
+    order=ring.copy();points=vertices[order][:,[0,2]]
+    area=np.sum(points[:,0]*np.roll(points[:,1],-1)-np.roll(points[:,0],-1)*points[:,1])
+    if area>0: order=order[::-1]
+    points=vertices[order][:,[0,2]]
+    theta=np.abs(np.arctan2(points[:,0]-center[0],points[:,1]-center[1]))
+    anchor=int(np.argmin(theta));order=np.roll(order,-anchor)
+    points=vertices[order]
+    lengths=np.linalg.norm(np.roll(points,-1,axis=0)-points,axis=1)
+    if np.any(lengths<1e-9): raise ValueError('Repeated intrinsic boundary point')
+    fractions=np.r_[0.,np.cumsum(lengths[:-1])]/lengths.sum()
+    return order,fractions
+
+
+def sample_ring(fractions, values, queries):
+    indices=np.searchsorted(fractions,queries,side='right')-1
+    following=(indices+1)%len(fractions)
+    start=fractions[indices];end=np.r_[fractions[1:],1.][indices]
+    blend=((queries-start)/(end-start))[:,None]
+    return values[indices]*(1-blend)+values[following]*blend
+
+
+def welded_vertices(vertices, tolerance=1e-6):
+    parent=np.arange(len(vertices))
+    def find(i):
+        while parent[i]!=i: parent[i]=parent[parent[i]];i=parent[i]
+        return i
+    for a,b in cKDTree(vertices).query_pairs(tolerance,output_type='ndarray'):
+        a,b=find(int(a)),find(int(b))
+        if a!=b:parent[max(a,b)]=min(a,b)
+    return np.asarray([find(i) for i in range(len(vertices))])
+
+
+def plane_boundary_loops(mesh, plane):
+    vertices=mesh['vertices'];weld=welded_vertices(vertices);edges={}
+    for tri in weld[mesh['triangles']]:
+        for a,b in zip(tri,np.roll(tri,-1)):
+            if a==b:continue
+            edge=tuple(sorted((int(a),int(b))));edges[edge]=edges.get(edge,0)+1
+    graph={}
+    for (a,b),count in edges.items():
+        if count==1 and max(abs(vertices[a,1]-plane),abs(vertices[b,1]-plane))<1e-6:
+            graph.setdefault(a,[]).append(b);graph.setdefault(b,[]).append(a)
+    if any(len(neighbors)!=2 for neighbors in graph.values()):raise ValueError('Open cut boundary')
+    loops=[];remaining=set(graph)
+    while remaining:
+        start=min(remaining);order=[start];previous=None;current=start
+        while True:
+            following=next(value for value in graph[current] if value!=previous)
+            if following==start:break
+            if following in order:raise ValueError('Repeated cut boundary')
+            order.append(following);previous,current=current,following
+        remaining.difference_update(order);loops.append(np.asarray(order,dtype=int))
+    return loops,weld
+
+
+def free_neck_uv(uv, size=(1024,1024), gutter=4):
+    width,height=size;mask=Image.new('L',size,0);draw=ImageDraw.Draw(mask)
+    for triangle in uv:draw.polygon([(float(p[0])*width,float(p[1])*height) for p in triangle],fill=255)
+    occupied=np.asarray(mask.filter(ImageFilter.MaxFilter(gutter*2+1)))>0
+    occupied[:gutter]=True;occupied[-gutter:]=True;occupied[:,:gutter]=True;occupied[:,-gutter:]=True
+    integral=np.pad(occupied.astype(np.int32),((1,0),(1,0))).cumsum(0).cumsum(1)
+    for w,h in [(256,256),(256,192),(192,192),(192,128),(128,128),(128,96),(96,96),(96,64),(64,64)]:
+        if w>width or h>height:continue
+        sums=integral[h:,w:]-integral[:-h,w:]-integral[h:,:-w]+integral[:-h,:-w]
+        valid=np.argwhere(sums==0)
+        if len(valid):
+            y,x=map(int,valid[0]);tube=[(x+.5)/width,(y+.5)/height,(x+w-.5)/width,(y+h-16.5)/height]
+            cap=[(x+4.5)/width,(y+h-4.5)/height]
+            return {'pixels':[x,y,w,h],'texture_size':list(size),'gutter_pixels':gutter,
+                    'tube_rectangle':tube,'cap_sample':cap,'direction':'glTF u=clockwise anterior-anchored arc; v=top to bottom'}
+    raise ValueError('No unused neck atlas rectangle with four-pixel retained-face gutter')
+
+
+def planar_cap(vertices, order):
+    """Ear clipping of a clockwise planar loop, with a downward-facing cap."""
+    try:
+        from shapely import Polygon, constrained_delaunay_triangles, is_valid_reason
+    except ImportError:
+        Polygon=None
+    if Polygon is not None:
+        points=vertices[order][:,[0,2]]
+        polygon=Polygon(points)
+        if not polygon.is_valid:raise ValueError('Invalid internal neck cut: '+is_valid_reason(polygon))
+        result=[]
+        for triangle in constrained_delaunay_triangles(polygon).geoms:
+            corners=np.asarray(triangle.exterior.coords)[:3]
+            indices=[]
+            for point in corners:
+                distances=np.linalg.norm(points-point,axis=1);index=int(np.argmin(distances))
+                if distances[index]>1e-9:raise ValueError('Cap triangulation inserted an untracked point')
+                indices.append(int(order[index]))
+            a,b,c=vertices[indices][:,[0,2]]
+            if (b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0])<0:indices[1],indices[2]=indices[2],indices[1]
+            result.append(indices)
+        edges={(a,b) for tri in result for a,b in zip(tri,np.roll(tri,-1))}
+        if any((int(b),int(a)) not in edges for a,b in zip(order,np.roll(order,-1))):
+            raise ValueError('Cap triangulation lost a constrained boundary edge')
+        return result
+    remaining=list(map(int,order));result=[]
+    def cross(a,b):return a[0]*b[1]-a[1]*b[0]
+    while len(remaining)>3:
+        found=False
+        for i,current in enumerate(remaining):
+            previous,following=remaining[i-1],remaining[(i+1)%len(remaining)]
+            a,b,c=vertices[[previous,current,following]][:,[0,2]]
+            if cross(b-a,c-b)>=-1e-13:continue
+            blocked=False
+            for other in remaining:
+                if other in (previous,current,following):continue
+                point=vertices[other,[0,2]]
+                if max(cross(b-a,point-a),cross(c-b,point-b),cross(a-c,point-c))<=1e-13:
+                    blocked=True;break
+            if blocked:continue
+            result.append([previous,following,current]);remaining.pop(i);found=True;break
+        if not found:raise ValueError('Cannot triangulate internal neck loop without overlaps')
+    a,b,c=vertices[remaining][:,[0,2]]
+    if abs(cross(b-a,c-a))<1e-13:raise ValueError('Degenerate final internal cap triangle')
+    result.append([remaining[0],remaining[2],remaining[1]])
+    return result
+
+
+def structured_neck_loft(source_head, native_body, top_cut=1.55, bottom_cut=1.50, slope=.6,
+                         sections=4, samples=96, atlas_size=(1024,1024)):
+    """Retain the complete upper head and replace shoulder-derived neck skin.
+
+    UVs use glTF image coordinates. All retained original P/N/J/W/UV values are
+    preserved; the new annulus is a direct longitudinal loft, never a minimal
+    surface. Internal cut loops are retained and closed with planar caps.
+    """
+    chart=np.asarray(source_head['vertices'],float).copy();chart[:,1]+=slope*chart[:,2]
+    upper=clipped(chart,source_head['triangles'],source_head['uv'],source_head['weights'],
+                  top_cut,True,source_head['normals'],track_origins=True)
+    loops,weld=plane_boundary_loops(upper,top_cut)
+    if not loops:raise ValueError('True-neck trim has no closed boundary')
+    def area(ring):
+        points=upper['vertices'][ring][:,[0,2]]
+        return abs(np.sum(points[:,0]*np.roll(points[:,1],-1)-np.roll(points[:,0],-1)*points[:,1]))
+    outer=max(loops,key=area);center=upper['vertices'][outer][:,[0,2]].mean(0)
+    top,top_s=intrinsic_ring(upper['vertices'],outer,center)
+    native_chart=np.asarray(native_body['vertices'],float).copy();native_chart[:,1]+=slope*native_chart[:,2]
+    native_loops,_=plane_boundary_loops({**native_body,'vertices':native_chart},bottom_cut)
+    if len(native_loops)!=1:raise ValueError('Canonical body must expose one closed neck rim')
+    bottom,bottom_s=intrinsic_ring(native_chart,native_loops[0],native_chart[native_loops[0]][:,[0,2]].mean(0))
+    # Snap only newly inserted UV-seam cut copies to one geometric sample.
+    boundary_ids=set(int(weld[i]) for loop in loops for i in loop)
+    for i,owner in enumerate(weld):
+        if int(owner) in boundary_ids and upper['origins'][i]<0:
+            for key in ['vertices','normals','weights']:upper[key][i]=upper[key][owner]
+    upper['vertices'][:,1]-=slope*upper['vertices'][:,2]
+    retained=upper['origins']>=0
+    upper['vertices'][retained]=source_head['vertices'][upper['origins'][retained]]
+    upper['normals'][retained]=source_head['normals'][upper['origins'][retained]]
+    uv_patch=free_neck_uv(upper['uv'],atlas_size)
+    u0,v0,u1,v1=uv_patch['tube_rectangle']
+    first_uv={}
+    for tri,tex in zip(upper['triangles'],upper['uv']):
+        for index,value in zip(tri,tex):first_uv.setdefault(int(index),value)
+    vertices=list(upper['vertices']);weights=list(upper['weights']);normals_out=list(upper['normals'])
+    origins=list(upper['origins']);roles=['retained' if value>=0 else 'cut' for value in origins]
+    faces=list(upper['triangles']);texcoords=list(upper['uv']);face_roles=['retained']*len(faces)
+    rings=[]
+    start=len(vertices)
+    for index in bottom:
+        vertices.append(np.asarray(native_body['vertices'][index],float));weights.append(native_body['weights'][index]);normals_out.append(native_body['normals'][index]);origins.append(-1);roles.append('canonical_rim')
+    rings.append((np.arange(start,len(vertices)),bottom_s,0.))
+    query=np.arange(samples)/samples
+    top_points=sample_ring(top_s,upper['vertices'][top],query)
+    lower_points=sample_ring(bottom_s,native_body['vertices'][bottom],query)
+    top_weights=sample_ring(top_s,upper['weights'][top],query)
+    lower_weights=sample_ring(bottom_s,native_body['weights'][bottom],query)
+    for t in np.linspace(0,1,sections+2)[1:-1]:
+        start=len(vertices)
+        vertices.extend(lower_points*(1-t)+top_points*t)
+        weights.extend(lower_weights*(1-t)+top_weights*t)
+        normals_out.extend(np.zeros((samples,3)));origins.extend([-1]*samples);roles.extend(['loft']*samples)
+        rings.append((np.arange(start,len(vertices)),query,float(t)))
+    rings.append((top,top_s,1.))
+    for (low,low_s,low_t),(high,high_s,high_t) in zip(rings,rings[1:]):
+        i=j=0
+        for _ in range(len(high)+len(low)):
+            hi=int(high[i%len(high)]);lo=int(low[j%len(low)])
+            next_hi=high_s[(i+1)%len(high)]+(1 if i+1>=len(high) else 0)
+            next_lo=low_s[(j+1)%len(low)]+(1 if j+1>=len(low) else 0)
+            if next_hi<next_lo:
+                ni=int(high[(i+1)%len(high)]);tri=[hi,lo,ni];s=[high_s[i%len(high)],low_s[j%len(low)],high_s[(i+1)%len(high)]];height=[high_t,low_t,high_t];i+=1
+            else:
+                ni=int(low[(j+1)%len(low)]);tri=[hi,lo,ni];s=[high_s[i%len(high)],low_s[j%len(low)],low_s[(j+1)%len(low)]];height=[high_t,low_t,low_t];j+=1
+            if max(s)-min(s)>.5:s=[value+1 if value<.5 else value for value in s]
+            faces.append(tri);texcoords.append([[u0+value*(u1-u0),v1-h*(v1-v0)] for value,h in zip(s,height)]);face_roles.append('loft')
+    for loop in loops:
+        if loop is outer:continue
+        ordered,_=intrinsic_ring(np.column_stack((upper['vertices'][:,0],upper['vertices'][:,1]+slope*upper['vertices'][:,2],upper['vertices'][:,2])),loop,upper['vertices'][loop][:,[0,2]].mean(0))
+        cap=planar_cap(np.asarray(vertices),ordered)
+        faces.extend(cap);texcoords.extend([[uv_patch['cap_sample']]*3 for _ in cap]);face_roles.extend(['internal_cap']*len(cap))
+    vertices=np.asarray(vertices);weights=np.asarray(weights);faces=np.asarray(faces,dtype=int);normals_out=np.asarray(normals_out)
+    geometric=normals(vertices,faces);shared=welded_vertices(vertices)
+    summed=np.zeros_like(vertices)
+    np.add.at(summed,shared,geometric)
+    summed/=np.maximum(np.linalg.norm(summed,axis=1)[:,None],1e-12)
+    new=np.asarray(origins)<0;normals_out[new]=summed[shared[new]]
+    canonical=np.asarray(roles)=='canonical_rim';normals_out[canonical]=native_body['normals'][bottom]
+    j,w=sparse_weights(weights)
+    if 'joints' in source_head:
+        kept=np.flatnonzero(retained)
+        j[kept]=source_head['joints'][upper['origins'][kept]];w[kept]=source_head['skinweights'][upper['origins'][kept]]
+    if 'joints' in native_body:j[canonical]=native_body['joints'][bottom];w[canonical]=native_body['skinweights'][bottom]
+    report={'mode':'structured_neck_loft','neck_cut_y':bottom_cut,'upper_neck_chart_cut':top_cut,
+        'neck_plane':f'y + {slope:.3f}*z','sections':sections,'samples_per_section':samples,
+        'retained_triangle_count':len(upper['triangles']),'new_loft_triangles':face_roles.count('loft'),
+        'internal_cap_triangles':face_roles.count('internal_cap'),'internal_cut_loops':len(loops)-1,
+        'canonical_boundary_vertices':len(bottom),'upper_boundary_vertices':len(top),'neck_uv':uv_patch,
+        'top_boundary':{'positions':upper['vertices'][top].tolist(),'uv':[first_uv[int(i)].tolist() for i in top],'arc':top_s.tolist()},
+        'bottom_boundary':{'positions':native_body['vertices'][bottom].tolist(),'uv':native_body['vertex_uv'][bottom].tolist(),'arc':bottom_s.tolist()},
+        'source_vertex_origins':list(map(int,origins)),'vertex_roles':roles,'face_roles':face_roles}
+    return {'vertices':vertices,'triangles':faces,'uv':np.asarray(texcoords),'normals':normals_out,
+            'weights':weights,'joints':j,'skinweights':w,'origins':np.asarray(origins)},report
+
+
+def hybrid_head(source, vertices, triangles, uv, joints, weights, cut=1.50, slope=.6, relax_neck=True, atlas_size=(1024,1024)):
+    """Fit a true-neck loft while retaining the accepted body and complete face.
+
+    The internal smoothing stage only conditions the old shoulder-derived skin
+    above the trim. Its lower annulus is discarded, never shipped as a result.
+    """
+    conditioned,lower,old_report=legacy_hybrid_head(source,vertices,triangles,uv,joints,weights,cut,slope,relax_neck)
+    if not relax_neck:return conditioned,lower,old_report
+    upper={key:value.copy() for key,value in conditioned.items()}
+    upper['uv'][...,1]=1-upper['uv'][...,1]
+    upper['joints'],upper['skinweights']=sparse_weights(upper['weights'])
+    native={key:value.copy() for key,value in lower.items()}
+    native['uv'][...,1]=1-native['uv'][...,1]
+    native['joints'],native['skinweights']=sparse_weights(native['weights'])
+    native['vertex_uv']=np.zeros((len(native['vertices']),2))
+    assigned=set()
+    for tri,tex in zip(native['triangles'],native['uv']):
+        for index,value in zip(tri,tex):
+            if int(index) not in assigned:native['vertex_uv'][index]=value;assigned.add(int(index))
+    head,report=structured_neck_loft(upper,native,top_cut=cut+.05,bottom_cut=cut,slope=slope,atlas_size=atlas_size)
+    head['uv'][...,1]=1-head['uv'][...,1]
+    report.update(canonical_original_material=old_report['canonical_original_material'],
+                  canonical_body_below_neck=old_report['canonical_body_below_neck'])
     return head,lower,report
 
 
@@ -624,8 +919,8 @@ def main():
     skinmat = glb.material(args.skin_texture or meta['skin_texture'],args.skin_cap,'MPFB baked skin',.83)
     eyemat = glb.material(args.eye_texture or meta['eye_texture'],512,'MPFB baked eyes',.36,alpha=True)
     if args.body_mode == 'hybrid':
-        head,lower,hybrid = hybrid_head(glb,vertices,data['body_triangles'],data['body_uv'],joints,skinweights)
-        hj,hw=sparse_weights(head['weights']);lj,lw=sparse_weights(lower['weights'])
+        head,lower,hybrid = hybrid_head(glb,vertices,data['body_triangles'],data['body_uv'],joints,skinweights,atlas_size=(args.skin_cap,args.skin_cap))
+        hj,hw=head['joints'],head['skinweights'];lj,lw=sparse_weights(lower['weights'])
         bodyprimitives = [primitive(glb,head['vertices'],head['triangles'],head['uv'],hj,hw,skinmat,head['normals']),
                           primitive(glb,lower['vertices'],lower['triangles'],lower['uv'],lj,lw,
                                     hybrid['canonical_original_material'],lower['normals'])]
@@ -667,8 +962,13 @@ def main():
                                   'Existing wardrobe geometry retained; no equipment copies created.']})
     args.report.parent.mkdir(parents=True,exist_ok=True)
     args.report.write_text(json.dumps(report,indent=2)+'\n')
-    args.output.with_name('fit.json').write_text(json.dumps({k:report[k] for k in
-        ['face_frame_head_local','head_bounds','eye_bounds','head_matrix','body_fit','output_sha256']},indent=2)+'\n')
+    report['body_fit']={key:value for key,value in report['body_fit'].items() if key not in ['source_vertex_origins','vertex_roles','face_roles']}
+    fit={k:report[k] for k in
+        ['face_frame_head_local','head_bounds','eye_bounds','head_matrix','body_fit','output_sha256']}
+    shape_center=meta.get('profile',{}).get('runtime_shape_center')
+    if shape_center is not None:
+        fit['head_shape_center']=shape_center
+    args.output.with_name('fit.json').write_text(json.dumps(fit,indent=2)+'\n')
     print(json.dumps(report))
 
 

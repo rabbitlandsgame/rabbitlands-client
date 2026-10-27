@@ -43,7 +43,7 @@ func _run() -> void:
 	if FileAccess.file_exists(SAVE_PATH):
 		_looks = _json(SAVE_PATH)
 	_build_ui()
-	_select_sex(0)
+	_select_model(_model_choice.selected)
 	root.size_changed.connect(_fit)
 	await process_frame
 	await process_frame
@@ -86,6 +86,7 @@ func _build_ui() -> void:
 	_sex.item_selected.connect(_select_sex)
 	_model_choice = _picker(toolbar, "Model", ["Current", "MPFB prototype"])
 	_model_choice.set_item_disabled(1, not _mpfb_available())
+	if _mpfb_available(): _model_choice.select(1)
 	_model_choice.tooltip_text = "Compare the prototype with the current game model." if _mpfb_available() else "The MPFB prototype is not available in this preview."
 	_model_choice.item_selected.connect(_select_model)
 	_outfit = _picker(toolbar, "Outfit", ["Portrait outfit", "Vanguard", "Ranger", "Arcanist", "Warden"])
@@ -202,7 +203,9 @@ func _preview_model(sex: int) -> Dictionary:
 		model.erase("skinPalette")
 		var fit_path := _mpfb_scene(sex).get_base_dir().path_join("fit.json")
 		if FileAccess.file_exists(fit_path):
-			var face_frame: Variant = _json(fit_path).get("face_frame_head_local", {})
+			var metadata := _json(fit_path)
+			MpfbPrototypeAppearance.configure_art(model, metadata, fit_path.get_base_dir())
+			var face_frame: Variant = metadata.get("face_frame_head_local", {})
 			if face_frame is Dictionary and not face_frame.is_empty():
 				model.mpfbFaceFrame = face_frame
 	return model
@@ -324,6 +327,16 @@ func _expect(value: bool, label: String) -> void:
 		push_error(label)
 
 func _run_smoke() -> void:
+	if _mpfb_available():
+		_expect(_model_choice.selected == 1 and _quality.selected == 2, "MPFB launcher opens its High prototype immediately")
+		_expect((_editor.get("_actor") as ReplicatedActor3D)._model_config.scene == _mpfb_scene(0), "prototype startup uses the prepared female study")
+		_model_choice.select(0)
+		_quality.select(1)
+		_select_model(0)
+		# Release the startup High actor and its deferred preview children before
+		# auditing the ordinary Medium baseline.
+		await process_frame
+		await process_frame
 	_expect(bool(root.get_node("Network").get("offline_hud_preview")), "network is blocked for this preview")
 	_expect(_model_choice.is_item_disabled(1) == not _mpfb_available(), "MPFB selection requires both prototype files")
 	for sex: int in [0, 1]:

@@ -80,8 +80,8 @@ preset on the already-authored MPFB targets, with both slider endpoints retained
 
 ## Local review
 
-Run `test-mpfb-prototype.bat` from this prepared worktree. Select **MPFB
-prototype** and High graphics. Low/Medium select the current models. The
+Run `test-mpfb-prototype.bat` from this prepared worktree. It opens **MPFB
+prototype** in High graphics. Low/Medium select the current models. The
 independent Equipment menu offers **No equipment**, **Sword and shield**, and
 **Staff**, while the outfit menu retains clothing and capes. Review the two
 single cuts, original Flurry, combat ready, idle, walk and run from all sides.
@@ -102,14 +102,150 @@ The portrait output directory is `RL_HUMAN_PORTRAIT_OUTPUT`; integration/cost
 output is `RL_MPFB_REVIEW_OUTPUT`. Rendered comparisons must use the actual
 export hashes, identical cameras and lights, and unretouched game pixels.
 
-This is a geometry/material workflow prototype. Existing hair is deliberately
-shared for comparison, the study brows are baked to their chosen color, and
-the production stubble paint has not been transferred. It is not a finished
-painted portrait match or a production replacement. Shipping an MPFB target
-library, Blender, subdivision, skin microdisplacement or hair simulation is
-unnecessary; runtime consumes only the fitted static skinned mesh and atlases.
+This is a geometry/material workflow prototype, not a production replacement.
+Shipping an MPFB target library, Blender, subdivision, skin microdisplacement
+or hair simulation is unnecessary; runtime consumes fitted static skinned
+meshes and small atlases.
 
-## Measured budget
+## Concept-led High refinement
+
+The Human studies' front, side and three-quarter views define the High head,
+neck and hair direction; see [art direction](../../../docs/human-character-art-direction.md).
+Both clothing sets are useful references. There is no rear reference. The
+older Eternal Lands character style limits do not constrain these surfaces.
+
+The refinement uses `source/humans/mpfb/concept-profiles-v2.json` instead of
+the first study profiles. Its evaluated MPFB topology is shared by every
+identity of the same sex. The ten compact face parameters deform skin, lids
+and eyes coherently once when appearance changes; they do not generate new
+assets or modify animation tracks. `fit.json.head_shape_center` can specify
+the authoring preset's slider center without hardcoding a different mesh per
+identity. This is identity customization; facial expression/blink targets
+have not been authored.
+
+The additional offline stages are deliberately separate and preserve inputs:
+
+The fitter trims the source at the true neck and joins it to the exact canonical
+body rim with four rings of 96 samples. Connected edge order and a zipper join
+preserve the annulus topology. A verified empty 256-square region of the same
+skin atlas holds the new neck pigment; retained face/ear/internal UVs stay exact.
+The earlier shoulder-derived patch produced folds and an hourglass throat and
+is preserved only in ignored recovery records. Existing studies can use
+`repair_neck_topology.py --input INPUT_GLB --output NEW_GLB --report REPORT_JSON`
+before lower-face sculpting/painting; the native body already in primitive 1
+supplies the canonical rim. Never overwrite the source stage.
+
+1. `refine_concept_eyes.py` widens the eye opening with its lids and sclera,
+   preserving the nose bridge, ears and scalp. The factor used is 1.30.
+2. `refine_concept_lower_face.py` adjusts measured mouth/chin height without
+   touching the canonical neck seam. It also updates mouth landmarks in the
+   output `fit.json`, which grooming and the face controls consume.
+3. `author_concept_hair.py`, run inside Blender, builds editable opaque clump
+   curves from `source/mpfb/hair-concept-curves-v2.json`. Exported hair is one
+   Head-local mesh/material per sex. Vertex alpha pins roots during bounded
+   length/volume changes; it is not transparency. UV0 follows lock growth.
+4. `face_landmark_audit.py` measures the exported anatomical anchors.
+   `tests/mpfb_concept_portrait.gd` captures actual High portraits and projected
+   mesh coordinates with reference-framed cameras. Portrait-only head yaw,
+   pitch and roll never alter shared gameplay animations or skeleton rests.
+5. `bake_concept_reference.py` uses those projections and original reference
+   images offline. Face detail is a restrained residual over continuous skin,
+   rather than opaque captured lighting. Hair has one 1024-square map in UV2,
+   with separate guttered lock islands and directional highlights. RGB paint
+   and pinned-root alpha remain independent.
+6. `bake_neck_paint.py` uses the loft metadata to blend the retained head cut's
+   pigment into the canonical body rim in the reserved atlas patch. Supply
+   `--accepted-head-root` for an approved facial paint stage and `--hair-root`
+   for accepted painted hair. Retained face/ear/internal pixels and other
+   images stay exact; the new neck uses neutral mask alpha. No texture is
+   added. Older non-loft recovery inputs use nearest native neck pigment with
+   a protected fade below the face.
+7. `bake_head_masks.py` packs disjoint brow/lip/stubble coverage into the existing
+   skin PNG's alpha: 128 is neutral, the low range covers brows/lips and the
+   high range covers stubble. An audited lip UV rectangle separates lips from
+   brows. RGB and geometry remain exact. The opaque shader recolors brows with
+   the hair palette, gives lips a restrained satin finish, and samples stable
+   rest-UV stubble pigment. No extra map or draw is needed. Freckles and
+   complexion detail remain authored paint.
+
+Concept eyes use stronger iris recoloring with warm brown/olive defaults,
+retaining the source luminance fibers, pupil and limbus. The stock eye maps'
+two iris UV regions provide spatial coverage for dark, low-chroma pigment;
+per-sex centers and protected pupils/whites remain stable through identity
+sculpts. Linear-luminance normalization keeps the chosen color readable.
+A bounded pigment
+blend strengthens weak source brows through the existing anatomical mask;
+the inner bridge and lip region remain excluded. These material changes add
+no maps or geometry.
+
+Each command's `--help` lists explicit input/output paths. Keep the archive,
+downloads, editable Blender files, PNG studies, numbered exports, registration
+JSON and receipts in ignored `.local/` storage. Rebuild projection maps whenever
+geometry or framing changes; never reuse a stale camera map as final evidence.
+Every paint/mask stage asserts unchanged geometry/rig/accessors. Native body,
+equipment and animation sources must retain their hashes.
+
+The prototype adapter accepts the sidecar's `concept_hair.styles` overrides
+only in the opt-in preview. Other hair choices retain their existing sources.
+Authored concept hair bypasses legacy sculpt/desaturation passes. Raw GLB
+textures receive cached mipmaps once, keeping narrow painted locks and stubble
+stable as their screen size changes. Mutable raw study textures are updated in
+place to avoid retaining a second GPU allocation. There is no hair simulation.
+Godot's material-directed glTF import moves the hair atlas's `texCoord=1` to
+primary UV and retains growth coordinates in UV2. The authored shader follows
+that imported layout; the validation fixture checks both channels against the
+original GLB with a tolerance for engine vertex quantization.
+
+`tests/mpfb_identity_validation.gd` checks three identities per sex, endpoint
+and mixed fields, eye/skin correspondence, UV/weight preservation, grooming
+toggles, repeated editing and identity persistence through accepted actions.
+GPU portraits are required in addition to finite/Jacobian checks: a numerical
+pass cannot approve a visible fold or paint seam.
+
+## Refined concept study measured budget
+
+The final male/female head and hair containers total **11,670,036 bytes
+(11.13 MiB)**, an increase of **2.23 MiB** over the first MPFB pair. This includes
+duplicated canonical bodies and wardrobes for the isolated trial. A future
+head-only format reusing those assets is estimated at **5.51 MiB**, before
+headers, metadata and alignment; that format is not implemented. Authoring
+inputs and review images are excluded. Production packaging is unchanged
+because these opt-in studies remain outside its registry.
+
+On the RTX 5080 Laptop GPU, Godot 4.7.2 Forward+ at 1280x720 measured the
+following median actor-viewport GPU times with sixty warm-up and 120 measured
+frames per case. Camera, lighting, accepted idle animation and appearance
+settings matched between models.
+
+| Case | Current | Refined MPFB | Draw calls, Current / MPFB |
+| --- | ---: | ---: | ---: |
+| Sixteen bodies sharing two identities | 0.230 ms | 0.345 ms | 128 / 98 |
+| Sixteen distinct customized identities | 0.268 ms | 0.255 ms | 128 / 98 |
+| One close portrait | 0.104 ms | 0.097 ms | 8 / 7 |
+
+Grid 95th-percentile GPU times were 1.301 / 1.315 ms for shared identities and
+0.291 / 0.689 ms for distinct identities. These are isolated actor costs, not
+full-game FPS measurements or a performance guarantee for other devices.
+The larger grid renders 605,784 / 755,240 primitives. The authored hair uses
+16,660 male and 20,576 female triangles, one opaque mesh/material each, with
+no hair physics or new bones.
+
+Unique bound mesh data was 3,258,350 / 2,986,610 bytes for shared identities
+and 10,112,722 / 9,476,716 bytes for sixteen distinct identities. Bound texture
+image data was 106,605,384 / 92,274,678 bytes in both grids. These are referenced
+resource payloads, not total process VRAM; both modes' source caches coexist.
+Four first-use face edits took 97-140 ms Current / 111-125 ms MPFB; repeated edits
+took 5.3-7.1 / 4.9-6.0 ms. That appearance-function timing excludes deferred
+GPU upload and the complete UI frame. There is no MPFB evaluation per frame.
+
+The review captures cover all twelve available reference views, with actual
+unretouched High renders. Shadow-free studio comparisons isolate silhouette
+and pigment; separate shadowed captures are retained. Facial likeness and
+paint still fall short of the concept art, especially hair clump regularity,
+close-up neck shading and the eyes' expression. Expressions and blinks remain
+future work. This is a locally testable prototype, not a production replacement.
+
+## First prototype measured budget (historical)
 
 The local pair of self-contained study GLBs totals **9,328,764 bytes** (8.90 MiB),
 including copies of the existing body and wardrobe to keep the trial isolated.
