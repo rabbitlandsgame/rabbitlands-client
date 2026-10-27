@@ -5,8 +5,8 @@
   "date": "2026-10-27",
   "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/snapping_turtle.glb",
   "source_sha256": "4dbfd46129a5bf9f19495761a2944415cbf2bd464f62ef5253b259ff6e04c9c7",
-  "runtime_sha256": "47eebc50e5ea0d8f1b77d3017bd12717ea2b2bc3777ec332041b708a0c8910e8",
-  "qualification": "Source/motion and normalized-import-scale render checks passed; complete gameplay secondary-effect preservation pending",
+  "runtime_sha256": "8d904aaae134958faf91a6cff6d10706404231c4143942e1544f37b175389f53",
+  "qualification": "Passed source, Blender, all-motion/normal, actual gameplay rendering, original death dissolve and silhouette preservation gates",
   "human_approval_changed": false,
   "recipe": {
     "tool": "eloria-assets/tools/pack_creature_storage.py",
@@ -21,9 +21,9 @@
   },
   "bytes": {
     "source_bytes": 102196500,
-    "candidate_bytes": 94953704,
+    "candidate_bytes": 94962244,
     "source_zstd_bytes": 74574374,
-    "candidate_zstd_bytes": 71471065
+    "candidate_zstd_bytes": 71471682
   },
   "method": "Bind 182 disconnected eye vertices to their existing neck_01 control and remove only their corrective fields; retain all 3498 soft-body vertices/correctives. Exact bit-identical flat-run key interiors removed.",
   "inactive_targets_removed": 0,
@@ -241,37 +241,56 @@
     "effective_runtime_model_scale": 1.19999892
   },
   "visual": {
-    "method": "Fresh Godot 4.7.2 Forward+ on RTX 5080 Laptop GPU, identical cameras/lights/materials, full 7 native cycles sampled at 24 Hz and actual model scale. Stills from game overview/side/rear plus eye closeup for Snap.",
-    "model_scale": 0.59999946,
-    "pairs": 376,
+    "method": "Actual ReplicatedActor, including small-creature boost and painted material finish; seeded death dissolve at three poses and five progresses.",
+    "gpu": "NVIDIA GeForce RTX 5080 Laptop GPU",
+    "renderer": "forward_plus",
+    "engine": {
+      "build": "official",
+      "hash": "ed1daf0bf001b61586d9930840f2f1394092c079",
+      "hex": 263938,
+      "major": 4,
+      "minor": 7,
+      "patch": 2,
+      "status": "stable",
+      "string": "4.7.2-stable (official)",
+      "timestamp": 0
+    },
+    "source_sha256": "4dbfd46129a5bf9f19495761a2944415cbf2bd464f62ef5253b259ff6e04c9c7",
+    "runtime_sha256": "8d904aaae134958faf91a6cff6d10706404231c4143942e1544f37b175389f53",
+    "model_scale": 1.19999897480011,
+    "pairs": 406,
     "width": 640,
     "height": 640,
-    "max_mean_channel_error_out_of_255": 0.0004443359375,
-    "max_pixels_above_two_levels": 8,
+    "max_mean_channel_error_out_of_255": 0.0003336588541666667,
+    "max_pixels_above_two_levels": 4,
     "views": {
       "game": {
-        "pairs": 292,
-        "max_mean_channel_error": 2.44140625e-06,
-        "max_pixels_above_two_levels": 0
+        "pairs": 307,
+        "max_mean_channel_error": 5.208333333333334e-05,
+        "max_pixels_above_two_levels": 1
       },
       "side": {
         "pairs": 28,
-        "max_mean_channel_error": 5.0455729166666666e-05,
+        "max_mean_channel_error": 0.00010579427083333334,
         "max_pixels_above_two_levels": 2
       },
       "rear": {
         "pairs": 28,
-        "max_mean_channel_error": 3.0110677083333334e-05,
+        "max_mean_channel_error": 3.824869791666667e-05,
         "max_pixels_above_two_levels": 2
       },
       "eyes": {
-        "pairs": 28,
-        "max_mean_channel_error": 0.0004443359375,
-        "max_pixels_above_two_levels": 8
+        "pairs": 43,
+        "max_mean_channel_error": 0.0003336588541666667,
+        "max_pixels_above_two_levels": 4
       }
     },
-    "review": "Paired contact boards visually reviewed; full-cycle paired GIFs retained locally. Tiny raster-edge changes, not bit-identical pixels.",
-    "scale_scope": "Normalized source import scale 0.59999946. Actual ReplicatedActor applies small-creature boost 2, producing effective model scale 1.19999892; final actual-actor/VFX capture pending."
+    "dissolve": {
+      "pairs": 30,
+      "max_mean_channel_error": 0.00024007161458333332,
+      "max_pixels_above_two_levels": 4
+    },
+    "review": "Paired normal and death-effect contact boards visually reviewed. Seven full-cycle paired GIFs retained locally. Tiny raster-edge changes, not bit-identical pixels."
   },
   "full_actor_placement_bounds_overhead_and_raw_lods": {
     "bounds_error": 0.0,
@@ -347,8 +366,69 @@
     "Process RSS and separate CPU/GPU frame time were not measured.",
     "The original artistic approval status is unchanged.",
     "The eye binding is equivalent within source float32 and renderer skin/normal quantization, rather than identical vertex-shader arithmetic.",
-    "One additional draw surface per creature/pass; saved corrective buffers are shared per loaded model, not multiplied by actor count.",
-    "Mesh partition changes seeded ash emission without the original-surface grouping/reference-skin adapter. Batch qualification is held until this secondary-effect comparison passes."
+    "One additional draw surface per creature/pass; saved corrective buffers are shared per loaded model, not multiplied by actor count."
   ],
-  "secondary_effects_qualification_status": "pending original seeded dissolve and silhouette reference-skin preservation"
+  "secondary_effects_qualification_status": "passed original seeded dissolve and silhouette reference-skin preservation",
+  "metadata_only_lineage": {
+    "prior_candidate_sha256": "47eebc50e5ea0d8f1b77d3017bd12717ea2b2bc3777ec332041b708a0c8910e8",
+    "binary_accessors_animations_nodes_and_views_identical": true,
+    "change": "Mesh extras only: original surface grouping and exact original eye skin for secondary effects.",
+    "validation_scope": "All retained source/Blender/runtime proofs remain bound to the prior geometry-identical candidate. Final actual-Actor renderer and secondary-effect proofs use the current hash."
+  },
+  "normalized_import_scale_visual": {
+    "method": "Fresh Godot 4.7.2 Forward+ on RTX 5080 Laptop GPU, identical cameras/lights/materials, full 7 native cycles sampled at 24 Hz and actual model scale. Stills from game overview/side/rear plus eye closeup for Snap.",
+    "model_scale": 0.59999946,
+    "pairs": 376,
+    "width": 640,
+    "height": 640,
+    "max_mean_channel_error_out_of_255": 0.0004443359375,
+    "max_pixels_above_two_levels": 8,
+    "views": {
+      "game": {
+        "pairs": 292,
+        "max_mean_channel_error": 2.44140625e-06,
+        "max_pixels_above_two_levels": 0
+      },
+      "side": {
+        "pairs": 28,
+        "max_mean_channel_error": 5.0455729166666666e-05,
+        "max_pixels_above_two_levels": 2
+      },
+      "rear": {
+        "pairs": 28,
+        "max_mean_channel_error": 3.0110677083333334e-05,
+        "max_pixels_above_two_levels": 2
+      },
+      "eyes": {
+        "pairs": 28,
+        "max_mean_channel_error": 0.0004443359375,
+        "max_pixels_above_two_levels": 8
+      }
+    },
+    "review": "Paired contact boards visually reviewed; full-cycle paired GIFs retained locally. Tiny raster-edge changes, not bit-identical pixels.",
+    "scale_scope": "Earlier normalized source import scale only; superseded by the final actual gameplay Actor capture below."
+  },
+  "secondary_effects": {
+    "effective_scale": 1.19999897480011,
+    "failures": [],
+    "gpu": "NVIDIA GeForce RTX 5080 Laptop GPU",
+    "max_color_error": 0.0,
+    "max_custom_error": 0.0,
+    "max_dissolve_bounds_error": 1.2287812012346e-07,
+    "max_fragment_transform_error": 1.3677447441296e-07,
+    "max_grain_error": 0.0,
+    "max_silhouette_position_error": 1.37898652496915e-07,
+    "mounted": {},
+    "passed": true,
+    "renderer": "forward_plus",
+    "runtime_sha256": "8d904aaae134958faf91a6cff6d10706404231c4143942e1544f37b175389f53",
+    "seeded_cases": 15,
+    "source_sha256": "4dbfd46129a5bf9f19495761a2944415cbf2bd464f62ef5253b259ff6e04c9c7",
+    "method": "Actual ReplicatedActor with gameplay small-creature boost and painted material finish; five native Death_A poses times three RNG seeds,320 complete particle transforms/colors/custom values each, fade visibility/reset checks; complete legacy no-morph occlusion silhouette field. Real populated Forward+ MultiMesh readback required.",
+    "required_helpers": [
+      "creature_surface_sampling.gd",
+      "retained_mount_skin.gd::for_secondary",
+      "occluded_silhouette.gd"
+    ]
+  }
 }
