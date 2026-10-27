@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "actor": "autumn_bark_treant",
+  "source_sha256": "70501bc91dc87dedf3dae24d599602a6ec6d0458e6f5dd0be2ce69996960b9b0",
+  "candidate_sha256": "58637ca1b20eaff4fec264e0749bb9fb14dc67c2102ff14a382d0b75bf4d7704",
+  "pipeline": [
+    "prune_zero_targets",
+    "reduce_constant_runs",
+    "compact"
+  ],
+  "partition": null,
+  "unchanged": false,
+  "removed_zero_target_indices": [],
+  "redundant_flat_key_rows_removed": 102750,
+  "geometry_skin_rest_binds_materials_images_unchanged": true,
+  "native_clips": [
+    "Death_A",
+    "Fighting_Idle",
+    "Hit_Chest",
+    "Idle_A",
+    "Jog",
+    "Sword_Attack",
+    "Walk"
+  ],
+  "usage": "Deterministic exact preparation needs no partition --profile; frozen source/candidate hashes bind this record."
+}

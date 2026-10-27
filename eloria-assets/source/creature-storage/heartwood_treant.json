@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "actor": "heartwood_treant",
+  "source_sha256": "7dde6aa03410532e73f011a3de54106a94acc8389caa90fb25f49e25eda3d5b2",
+  "candidate_sha256": "2cc733b7021640c90837c4c37df1135ee123f9b2a890dcd7b836515647a673b5",
+  "pipeline": [
+    "prune_zero_targets",
+    "reduce_constant_runs",
+    "compact"
+  ],
+  "partition": null,
+  "unchanged": false,
+  "removed_zero_target_indices": [],
+  "redundant_flat_key_rows_removed": 60937,
+  "geometry_skin_rest_binds_materials_images_unchanged": true,
+  "native_clips": [
+    "Death_A",
+    "Fighting_Idle",
+    "Hit_Chest",
+    "Idle_A",
+    "Jog",
+    "Sword_Attack",
+    "Walk"
+  ],
+  "usage": "Deterministic exact preparation needs no partition --profile; frozen source/candidate hashes bind this record."
+}
