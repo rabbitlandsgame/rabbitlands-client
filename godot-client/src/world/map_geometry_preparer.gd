@@ -2,6 +2,8 @@ extends Node
 ## Maintenance-only producer. Runs before play (or through the explicit CLI),
 ## one source at a time; no worker is allowed to serialize GPU-backed meshes.
 const Cache := preload("res://src/world/map_geometry_cache.gd")
+const CollisionCache := preload("res://src/world/map_collision_cache.gd")
+const PavingCache := preload("res://src/world/map_paving_cache.gd")
 const Sources := preload("res://src/world/map_geometry_texture_sources.gd")
 const Writer := preload("res://src/world/map_geometry_writer.gd")
 const MeshPool := preload("res://src/world/external_mesh_pool.gd")
@@ -11,11 +13,17 @@ const Graphics := preload("res://src/world/graphics_options.gd")
 const Quantization := preload("res://src/world/gltf_quantization.gd")
 const MapMesh := preload("res://src/world/map_mesh_extension.gd")
 const MapCache := preload("res://src/world/map_scene_cache.gd")
+const GroundProfile := preload("res://src/world/look/look_profile.gd")
 signal progress(completed: int,total: int,label: String)
 var _cancelled := false
 
 func cancel() -> void:
 	_cancelled = true
+
+static func _paving_target(target: Dictionary) -> bool:
+	var id := str(target.get("id",""))
+	return str(target.get("kind","")) == "world" and id.contains("__chunk_") \
+		and not GroundProfile.kit_paving(id.get_slice("__chunk_",0)).is_empty()
 
 static func _source_input(path: String, expected := "") -> Dictionary:
 	var logical := Cache.logical(path)
@@ -209,7 +217,7 @@ func _unlock() -> void:
 	DirAccess.remove_absolute(path)
 
 func run(job: Dictionary = {}) -> Dictionary:
-	var report := {"ok":false,"prepared":0,"reused":0,"failed":[],"entries":[],"cancelled":false}
+	var report := {"ok":false,"prepared":0,"reused":0,"collisions_prepared":0,"paving_prepared":0,"failed":[],"entries":[],"cancelled":false}
 	if DisplayServer.get_name() == "headless":
 		report.failed.append({"error":"World preparation needs the normal graphics renderer."})
 		return report
@@ -252,6 +260,23 @@ func run(job: Dictionary = {}) -> Dictionary:
 				continue
 			var digest := _source_digest(kind,source)
 			if Cache.current(kind,source,digest):
+				if kind == "world" and str(target.get("id","")).contains("__chunk_") \
+						and not CollisionCache.current(source,digest):
+					var entry := Cache._read(Cache.entry_path(kind,source))
+					var faces := CollisionCache.write_from_geometry(entry)
+					if not bool(faces.ok):
+						report.failed.append({"id":label,"source":Cache.logical(source),"error":str(faces.get("error","Collision preparation failed"))})
+						await get_tree().process_frame
+						continue
+					report.collisions_prepared += 1
+				if _paving_target(target) and not PavingCache.current(source,digest):
+					var entry := Cache._read(Cache.entry_path(kind,source))
+					var paving := PavingCache.write_from_geometry(entry)
+					if not bool(paving.ok):
+						report.failed.append({"id":label,"source":Cache.logical(source),"error":str(paving.get("error","Paving preparation failed"))})
+						await get_tree().process_frame
+						continue
+					report.paving_prepared += 1
 				report.reused += 1
 				report.entries.append({"id":label,"kind":kind,"source":Cache.logical(source),"reused":true})
 				await get_tree().process_frame
@@ -259,6 +284,8 @@ func run(job: Dictionary = {}) -> Dictionary:
 			var prepared := _prepare_one(target,source,digest,writer)
 			if bool(prepared.get("ok",false)):
 				report.prepared += 1
+				if bool(prepared.entry.get("collision_prepared",false)): report.collisions_prepared += 1
+				if bool(prepared.entry.get("paving_prepared",false)): report.paving_prepared += 1
 				report.entries.append(prepared.entry)
 			else:
 				report.failed.append({"id":label,"source":Cache.logical(source),"error":str(prepared.get("error","Unknown preparation error"))})
@@ -269,7 +296,10 @@ func run(job: Dictionary = {}) -> Dictionary:
 	var expected := _target_keys(Cache.targets())
 	var complete: bool = report.failed.is_empty() and not bool(report.cancelled) and bool(expected.ok) \
 		and selected["keys"] == expected["keys"]
-	if complete: report.pruned = Cache.prune_unreferenced()
+	if complete:
+		report.pruned = Cache.prune_unreferenced()
+		report.collisions_pruned = CollisionCache.prune_unreferenced()
+		report.paving_pruned = PavingCache.prune_unreferenced()
 	Sources.set_recording(false)
 	Sources.set_external_resolver(Callable())
 	Cache.cooking = false
@@ -332,8 +362,16 @@ func _prepare_one(target: Dictionary, source: String, digest: String, writer: Re
 		"source_digest":digest,"primary":str(written.path),"payloads":written.payloads,"bindings":written.bindings,
 		"shared_meshes":shared_meshes,"inputs":rows,"id":str(target.get("id",""))}
 	if not Cache.publish(entry): return {"ok":false,"error":"Prepared world data changed or could not be recorded."}
+	if kind == "world" and str(target.get("id","")).contains("__chunk_"):
+		var faces := CollisionCache.write_packed(packed,source,digest,rows)
+		if not bool(faces.ok): return faces
+	if _paving_target(target):
+		var paving := PavingCache.write_packed(packed,source,digest,rows)
+		if not bool(paving.ok): return paving
 	return {"ok":true,"entry":{"id":entry.id,"kind":kind,"source":entry.source,"primary":entry.primary,
-		"payloads":entry.payloads.size(),"textures":entry.bindings.size(),"reused":false}}
+		"payloads":entry.payloads.size(),"textures":entry.bindings.size(),"reused":false,
+		"collision_prepared":kind == "world" and str(target.get("id","")).contains("__chunk_"),
+		"paving_prepared":_paving_target(target)}}
 
 func show_and_run(job: Dictionary = {}) -> Dictionary:
 	var canvas := CanvasLayer.new()

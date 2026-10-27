@@ -5,10 +5,12 @@ references separate from texture pixels. Normal texture loading still selects
 the current texture quality and uses existing VRAM sidecars where compatible.
 Preparing geometry does not generate textures, actors or authored map assets.
 
-Detached loading may create private texture Resources on its worker, as the raw
-loader does. The main thread alone publishes them to the weak pool, binds the
-scene and creates its Nodes. Stale completions retain no Nodes and release their
-private candidates. World instances keep private materials and MultiMesh buffers;
+Prepared-native loading may create private texture Resources on its worker, as
+the raw loader does. The main thread alone publishes them to the weak pool,
+binds the native scene and creates its Nodes. Stale native completions retain no
+Nodes and release their private candidates. The default detached raw loader can
+still build its private Node tree on its worker before main-thread attachment.
+World instances keep private materials and MultiMesh buffers;
 static scenery retains the existing immutable-template sharing and its consumers
 create overrides when styling or fading an instance.
 
@@ -27,6 +29,22 @@ rechecks each entry when resuming preparation.
 
 Continuous background continent streaming keeps the original detached raw loader:
 rendered trials found the native path's publication checks increased frame stalls.
+The preparer also saves exact collision faces and the existing kit-paving coverage
+as small, separate caches. Background source loads can reuse these without reading
+mesh data back from the renderer. Paving meshes receive the current load's private
+materials, so texture quality and compatible VRAM sidecars still apply at runtime.
+Missing or stale derived entries retain the original reconstruction path.
+For diagnostics, `ELORIA_CACHED_COLLISION=0` and `ELORIA_CACHED_PAVING=0`
+disable the corresponding shortcut without deleting its prepared files.
+Raw map and prototype imports also set their final anisotropic filter before
+first mesh materialization. `ELORIA_EARLY_MAP_FILTER=0` restores the previous
+late-filter ordering for diagnostic comparisons. The final material properties
+remain the same; this does not change the cache format.
+The shortcuts require scoped, non-capture loads. Those source fallbacks do not
+write the legacy scene cache. Full painted mode with decorative grass retains
+ordinary collision construction, because that path also supplies triangle data
+used by the grass pass.
+
 All continent chunks are still prepared for foreground loads. The diagnostic
 `ELORIA_GEOMETRY_BACKGROUND_CHUNKS=1` switch enables native background consumption
 for qualification and further performance work; it is not the default.
@@ -35,10 +53,11 @@ The commands require the matching runtime cache consumer and preparation script.
 Use a client built with these changes; generating a plan alone does not update an
 older installed client.
 
-`MapGeometryCache.VERSION` in `src/world/map_geometry_cache.gd` is the central
+`MapGeometryPolicy.VERSION` in `src/world/map_geometry_policy.gd` is the central
 format version. Bump it whenever a loader/producer change alters saved geometry,
 collision, batching, scene structure or material interpretation, even when map
-source bytes are unchanged. Update the writer, texture-source or binding policy
+source bytes are unchanged. `MapGeometryCache.VERSION` aliases this shared version;
+the collision and paving policies include it too. Update the writer, texture-source or binding policy
 identifiers as well when their contracts change. The policy key also includes
 the engine build, renderer, archived-model policy and older map-cache format.
 
@@ -80,7 +99,8 @@ After installation or an update, a normal launch prepares the scoped world data
 once before showing the login screen. Its completion marker includes the release
 identity and cache format. Later launches reuse it. Headless launches and launches
 with map/geometry caching disabled skip automatic preparation. The settings window
-includes both cache families in its displayed disk usage and Clear action.
+includes the scene, geometry, collision-face and paving caches in its displayed
+disk usage and Clear action.
 "Skip for now" retains completed entries and continues to login; a later launch
 resumes preparation. Missing entries use source loading in the meantime.
 Clear also removes older geometry-policy files and is disabled during cooking.
@@ -94,3 +114,10 @@ Python command is the isolated developer workflow and does not run an editor
 import. Missing imported dependencies, preparation failures and their logs are
 reported instead of silently qualifying a cache. Generated caches belong in local
 or installed cache storage, outside tracked source files.
+
+An update can derive the collision and paving entries from compatible existing
+native geometry without recooking the GLBs. A successful complete pass records
+the derived policy versions and regional paving profiles in its startup marker;
+a later unchanged launch skips preparation. Source and payload hashes are still
+checked when loading an entry. Clearing the caches removes these derived files
+as well as the completion marker, and a later launch can rebuild them.

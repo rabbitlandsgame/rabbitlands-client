@@ -46,6 +46,8 @@ const SWAYING_CAPES_DEFAULT := 8
 ## this window is built before anything has forced it to be up to date.
 const MapCache := preload("res://src/world/map_scene_cache.gd")
 const GeometryCache := preload("res://src/world/map_geometry_cache.gd")
+const CollisionCache := preload("res://src/world/map_collision_cache.gd")
+const PavingCache := preload("res://src/world/map_paving_cache.gd")
 ## The look pass's switch and quality names; preloaded for the same reason.
 const LookProfileScript := preload("res://src/world/look/look_profile.gd")
 ## keys.ini, Eternal Lands-style: the file every key binding is kept in.
@@ -968,9 +970,9 @@ func _add_map_cache_row(page: VBoxContainer) -> void:
 	map_cache_clear.name = "map_cache_clear"
 	map_cache_clear.text = tr("ELORIA_SETTINGS_MAP_CACHE_CLEAR")
 	map_cache_clear.pressed.connect(func() -> void:
-		if GeometryCache.cooking:
+		if GeometryCache.cooking or CollisionCache.busy():
 			return
-		var removed: int = MapCache.clear_disk() + GeometryCache.clear_disk()
+		var removed: int = MapCache.clear_disk() + GeometryCache.clear_disk() + CollisionCache.clear_disk() + PavingCache.clear_disk()
 		_refresh_map_cache()
 		setting_changed.emit(page.name, "map_cache_clear", removed))
 	row.add_child(map_cache_clear)
@@ -981,14 +983,14 @@ func _add_map_cache_row(page: VBoxContainer) -> void:
 func _refresh_map_cache() -> void:
 	if map_cache_size == null:
 		return
-	var text: String = MapCache.describe_size(MapCache.total_bytes() + GeometryCache.total_bytes())
+	var text: String = MapCache.describe_size(MapCache.total_bytes() + GeometryCache.total_bytes() + CollisionCache.total_bytes() + PavingCache.total_bytes())
 	var digests: String = MapCache.digest_summary()
 	if not digests.is_empty():
 		text += " - " + digests
 	map_cache_size.text = text
 	map_cache_size.tooltip_text = text
 	if map_cache_clear != null:
-		map_cache_clear.disabled = GeometryCache.cooking
+		map_cache_clear.disabled = GeometryCache.cooking or CollisionCache.busy()
 
 func _build_camera() -> void:
 	var page := _new_page("Camera", tr("ELORIA_SETTINGS_CAMERA"))

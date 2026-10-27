@@ -4,6 +4,10 @@
     python godot-client/tools/build_vram_textures.py                 # every map, in place
     python godot-client/tools/build_vram_textures.py --out-root DIR  # into a package stage
 
+Use --manifest PATH for one territory's declared chunks and prototypes, or
+--scope-group landfall_continent for all seventeen current territories. These
+scoped runs require a separate --out-root and keep source image pools intact.
+
 Map packages name their shared images by URI and list each one with its
 sha256 in the manifest's externalResources. The client used to decode every
 one of them to RGBA8 on the GPU (4 bytes a pixel, plus a third for mips). This
@@ -236,7 +240,102 @@ def role_names(roles: set[tuple[str, str]]) -> list[str]:
                    for role, alpha in roles})
 
 
-def inventory(maps_roots: list[Path]) -> dict[tuple[Path, str], dict]:
+def scope_group_manifests(groups: list[str]) -> list[Path]:
+    """Resolve the current registry's map groups without planning/importing scenes."""
+    if not groups:
+        return []
+    import map_geometry_cache as geometry
+    try:
+        scope = geometry.read_json(CLIENT / geometry.SCOPE)
+        registry = geometry.read_json(CLIENT / geometry.REGISTRY)["maps"]
+        paths = []
+        for group in groups:
+            identities = scope.get("groups", {}).get(group)
+            if not isinstance(identities, list) or not identities:
+                raise BuildError(f"unknown or empty map scope group: {group}")
+            for identity in identities:
+                canonical = geometry.resolve_alias(registry, identity)
+                paths.append(geometry.source_path(CLIENT, registry[canonical]["manifest"]))
+        return list(dict.fromkeys(paths))
+    except (geometry.PlanError, KeyError, TypeError) as error:
+        raise BuildError(f"cannot resolve map scope: {error}") from error
+
+
+def _source_sha(path: Path, hashes: dict[Path, str]) -> str:
+    if path not in hashes:
+        hashes[path] = hashlib.sha256(path.read_bytes()).hexdigest()
+    return hashes[path]
+
+
+def _check_source_sha(path: Path, expected: object, hashes: dict[Path, str]) -> str:
+    if not isinstance(expected, str) or not re.fullmatch(r"[0-9a-f]{64}", expected):
+        raise BuildError(f"invalid declared SHA256 for {path}: {expected!r}")
+    actual = _source_sha(path, hashes)
+    if actual != expected:
+        raise BuildError(f"{path} does not hash to its declared SHA256 {expected}")
+    return actual
+
+
+def scoped_inputs(maps_roots: list[Path], manifests: list[Path],
+                  hashes: dict[Path, str] | None = None) -> tuple[list[Path], list[Path]]:
+    """Only declared runtime leaves and their prototypes; never root preview GLBs."""
+    leaves, prototypes = set(), set()
+    maps_roots = [root.resolve() for root in maps_roots]
+    hashes = {} if hashes is None else hashes
+
+    def inside(path: Path) -> Path:
+        path = path.resolve()
+        _containing_root(maps_roots, path.parent)
+        return path
+
+    def document(path: Path) -> dict:
+        try:
+            result = json.loads(path.read_text(encoding="utf-8-sig"))
+            if not isinstance(result, dict):
+                raise ValueError("expected an object")
+            return result
+        except (OSError, ValueError) as error:
+            raise BuildError(f"cannot read scoped manifest {path}: {error}") from error
+
+    def leaf(path: Path, data: dict) -> None:
+        if "streamingChunks" in data:
+            raise BuildError(f"nested streaming manifest is not a scene leaf: {path}")
+        glb = inside(path.parent / str(data.get("asset", {}).get("glb", "world.glb")))
+        if not glb.is_file():
+            raise BuildError(f"scoped scene is missing: {glb}")
+        meshes = data.get("externalMeshes") or {}
+        if not isinstance(meshes, dict):
+            raise BuildError(f"invalid externalMeshes in {path}")
+        for uri, expected in meshes.items():
+            prototype = inside(glb.parent / str(uri))
+            if not prototype.is_file():
+                raise BuildError(f"scoped prototype is missing: {prototype}")
+            _check_source_sha(prototype, expected, hashes)
+            prototypes.add(prototype)
+        leaves.add(path)
+
+    if not manifests:
+        raise BuildError("no map manifests selected")
+    for source in manifests:
+        path = inside(source)
+        data = document(path)
+        chunks = data.get("streamingChunks")
+        if chunks is None:
+            leaf(path, data)
+            continue
+        entries = chunks.get("chunks") if isinstance(chunks, dict) else None
+        if not isinstance(entries, list) or not entries:
+            raise BuildError(f"invalid streaming chunk list in {path}")
+        for entry in entries:
+            uri = entry.get("manifest") if isinstance(entry, dict) else None
+            if not isinstance(uri, str) or not uri:
+                raise BuildError(f"invalid streaming chunk manifest in {path}")
+            child = inside(path.parent / uri)
+            leaf(child, document(child))
+    return sorted(leaves), sorted(prototypes)
+
+
+def inventory(maps_roots: list[Path], manifests: list[Path] | None = None) -> dict[tuple[Path, str], dict]:
     """(image directory, sha) -> {path, roles: {(role, alphaMode)}, maps: set, cutoffs: set}
 
     One record per COPY of an image: two pools can hold the same bytes (the
@@ -246,18 +345,30 @@ def inventory(maps_roots: list[Path]) -> dict[tuple[Path, str], dict]:
     is what it would be if the other pool were not in the tree: keyed by sha
     alone, the first manifest found named every shared image's directory, the
     other pool's index lost them and an in-place run deleted their sidecars."""
+    maps_roots = [root.resolve() for root in maps_roots]
     found: dict[tuple[Path, str], dict] = {}
-    manifests = 0
+    image_hashes: dict[Path, str] = {}
+    manifest_count = 0
+    selected = scoped_inputs(maps_roots, manifests, hashes=image_hashes) if manifests is not None else None
+    prototype_indexes: dict[Path, dict] = {}
 
     def record_for(path: Path, sha: str) -> dict:
         path = path.resolve()
+        if selected is not None:
+            _containing_root(maps_roots, path.parent)
+            if not path.is_file():
+                raise BuildError(f"scoped image is missing: {path}")
         return found.setdefault((path.parent, sha), {"path": path, "roles": set(), "maps": set(), "cutoffs": set()})
 
     for root in maps_roots:
-        for manifest_path in sorted(root.rglob("world.json")):
+        paths = ([path for path in selected[0] if _containing_root(maps_roots, path.parent) == root]
+                 if selected is not None else sorted(root.rglob("world.json")))
+        for manifest_path in paths:
             try:
                 manifest = json.loads(manifest_path.read_text(encoding="utf-8-sig"))
-            except (OSError, ValueError):
+            except (OSError, ValueError) as error:
+                if selected is not None:
+                    raise BuildError(f"cannot read scoped manifest {manifest_path}: {error}") from error
                 continue
             resources = manifest.get("externalResources") or {}
             if not isinstance(resources, dict) or not resources:
@@ -273,9 +384,11 @@ def inventory(maps_roots: list[Path]) -> dict[tuple[Path, str], dict]:
             glb = manifest_path.parent / str(manifest.get("asset", {}).get("glb", "world.glb"))
             try:
                 document = glb_json(glb)
-            except (OSError, ValueError):
+            except (OSError, ValueError) as error:
+                if selected is not None:
+                    raise BuildError(f"cannot read scoped GLB {glb}: {error}") from error
                 continue
-            manifests += 1
+            manifest_count += 1
             roles = image_roles(document)
             cutoffs = image_cutoffs(document)
             by_uri = {str(image.get("uri")): index for index, image in enumerate(document.get("images", []))
@@ -295,22 +408,46 @@ def inventory(maps_roots: list[Path]) -> dict[tuple[Path, str], dict]:
     # how nymara-regions' coverage fell from 565 MB to 52 MB.
     prototypes = 0
     for root in maps_roots:
-        for glb in sorted((root / "_shared" / "meshes").glob("*.glb")):
+        paths = ([path for path in selected[1] if _containing_root(maps_roots, path.parent) == root]
+                 if selected is not None else sorted((root / "_shared" / "meshes").glob("*.glb")))
+        for glb in paths:
             try:
                 document = glb_json(glb)
-            except (OSError, ValueError):
+            except (OSError, ValueError) as error:
+                if selected is not None:
+                    raise BuildError(f"cannot read scoped prototype {glb}: {error}") from error
                 continue
             roles = image_roles(document)
             cutoffs = image_cutoffs(document)
             named = False
+            declared_images = None
             for index, image in enumerate(document.get("images", [])):
                 uri = str(image.get("uri", ""))
                 if not uri or uri.startswith("data:"):
                     continue
                 path = (glb.parent / uri).resolve()
+                if selected is not None:
+                    _containing_root(maps_roots, path.parent)
                 if not path.is_file():
+                    if selected is not None:
+                        raise BuildError(f"scoped prototype image is missing: {path}")
                     continue
-                record = record_for(path, hashlib.sha256(path.read_bytes()).hexdigest())
+                if selected is not None:
+                    if declared_images is None:
+                        index_path = (glb.parent / "index.json").resolve()
+                        _containing_root(maps_roots, index_path.parent)
+                        try:
+                            if index_path not in prototype_indexes:
+                                prototype_indexes[index_path] = json.loads(index_path.read_text(encoding="utf-8-sig"))
+                            declared_images = prototype_indexes[index_path]["prototypes"][glb.stem]["images"]
+                            if not isinstance(declared_images, dict):
+                                raise ValueError("images must be an object")
+                        except (OSError, ValueError, KeyError, TypeError) as error:
+                            raise BuildError(f"cannot read scoped prototype image index for {glb}: {error}") from error
+                    sha = _check_source_sha(path, declared_images.get(uri), image_hashes)
+                else:
+                    sha = _source_sha(path, image_hashes)
+                record = record_for(path, sha)
                 record["roles"] |= roles.get(index, set())
                 record["cutoffs"] |= cutoffs.get(index, set())
                 record["maps"].add("_shared/meshes")
@@ -318,7 +455,7 @@ def inventory(maps_roots: list[Path]) -> dict[tuple[Path, str], dict]:
             prototypes += 1 if named else 0
     shas = {sha for _, sha in found}
     log(f"inventory: {len(shas)} content-addressed images ({len(found)} copies in "
-        f"{len({directory for directory, _ in found})} directories) from {manifests} map packages "
+        f"{len({directory for directory, _ in found})} directories) from {manifest_count} map packages "
         f"and {prototypes} prototypes")
     return found
 
@@ -358,9 +495,10 @@ def find_godot(explicit: str | None) -> Path:
         candidates.append(Path(os.environ["ELORIA_GODOT"]))
     # The checkout's own copy, else the main checkout's beside (or above) this
     # worktree: the binary is untracked and lives in rabbitlands-client only.
-    candidates.append(CLIENT / GODOT_EXE)
-    candidates.append(CLIENT / GODOT_EXE.replace("_console", ""))
-    candidates += [parent / "rabbitlands-client" / "godot-client" / GODOT_EXE for parent in REPO.parents]
+    executable_names = (GODOT_EXE, GODOT_EXE.replace("_console", ""))
+    candidates.extend(CLIENT / name for name in executable_names)
+    candidates.extend(parent / "rabbitlands-client" / "godot-client" / name
+                      for parent in REPO.parents for name in executable_names)
     on_path = shutil.which("godot")
     if on_path:
         candidates.append(Path(on_path))
@@ -648,14 +786,21 @@ def check_cache_budget(cache: Path, limit: int | None, additional: int = 0):
 
 def build(maps_roots: list[Path], out_root: Path | None, cache: Path, godot: Path, procs: int,
           prune: bool = True, floors: dict | None = None, skip: list[str] | None = None,
-          link_output: bool = False, cache_budget_bytes: int | None = None) -> dict:
+          link_output: bool = False, cache_budget_bytes: int | None = None,
+          manifests: list[Path] | None = None) -> dict:
+    if manifests is not None and (out_root is None or any(
+            out_root.resolve().is_relative_to(root.resolve()) for root in maps_roots)):
+        raise BuildError("scoped preparation requires --out-root outside the source --maps trees; "
+                         "a partial scope must not replace a shared source pool's index")
     if link_output and (out_root is None or out_root.resolve() == cache.resolve()):
         raise BuildError("--link-output requires a separate disposable output directory.")
     floors = dict(FLOORS, **(floors or {}))
     started = time.time()
     ensure_ignored(cache)
     version = godot_version(godot)
-    found = inventory(maps_roots)
+    found = inventory(maps_roots, manifests=manifests)
+    targets = {source_dir: sidecar_target(maps_roots, source_dir, out_root)
+               for source_dir in {directory for directory, _ in found}}
     # Group by source directory: each gets its own vram/ folder.
     plans: dict[Path, dict] = {}
     for (source_dir, sha), record in sorted(found.items()):
@@ -804,8 +949,9 @@ def build(maps_roots: list[Path], out_root: Path | None, cache: Path, godot: Pat
     # would weigh shared images twice in the set-level median (and make it depend on which pools are in the tree)
     base_psnr, psnr_keys = [], set()
     for source_dir, plan in sorted(plans.items()):
-        target = (out_root / source_dir.relative_to(common_root(maps_roots, source_dir)) / SIDECAR_DIR
-                  if out_root else source_dir / SIDECAR_DIR)
+        target = targets[source_dir]
+        # Recheck after encoding in case an existing stage's directory layout changed.
+        sidecar_target(maps_roots, source_dir, out_root)
         target.mkdir(parents=True, exist_ok=True)
         index = {"schema": SCHEMA, "recipeVersion": RECIPE_VERSION, "encoder": summary["encoder"],
                  "container": CONTAINER, "images": {}, "excluded": dict(sorted(plan["excluded"].items()))}
@@ -872,11 +1018,25 @@ def build(maps_roots: list[Path], out_root: Path | None, cache: Path, godot: Pat
     return summary
 
 
+def sidecar_target(maps_roots: list[Path], source_dir: Path, out_root: Path | None) -> Path:
+    boundary = out_root.resolve() if out_root else source_dir.resolve()
+    target = (boundary / source_dir.relative_to(common_root(maps_roots, source_dir)) / SIDECAR_DIR
+              if out_root else boundary / SIDECAR_DIR)
+    if not target.resolve().is_relative_to(boundary):
+        raise BuildError(f"resolved sidecar output escapes its destination root: {target}")
+    return target
+
+
 def common_root(maps_roots: list[Path], source_dir: Path) -> Path:
-    for root in maps_roots:
+    return _containing_root([root.resolve() for root in maps_roots], source_dir)
+
+
+def _containing_root(resolved_roots: list[Path], source_dir: Path) -> Path:
+    """Boundary check after canonicalization, without resolving each root per image."""
+    for root in resolved_roots:
         try:
-            source_dir.relative_to(root.resolve())
-            return root.resolve()
+            source_dir.relative_to(root)
+            return root
         except ValueError:
             continue
     raise BuildError(f"{source_dir} is outside every --maps root")
@@ -886,6 +1046,12 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("--maps", type=Path, action="append",
                         help="map tree to scan for world.json (default <repo>/eloria-assets/maps); repeatable")
+    parser.add_argument("--manifest", type=Path, action="append", default=[],
+                        help="prepare only this manifest's declared scene leaves and prototypes; repeatable; "
+                             "requires separate --out-root, with --maps still containing all dependencies")
+    parser.add_argument("--scope-group", action="append", default=[],
+                        help="select current registry map manifests from a geometry-cache-scope group "
+                             "(for example landfall_continent); repeatable; map manifests only")
     parser.add_argument("--out-root", type=Path,
                         help="write <out-root>/<image dir relative to its --maps root>/vram instead of beside the images")
     parser.add_argument("--cache", type=Path, default=REPO / ".vram-encode-cache",
@@ -902,11 +1068,13 @@ def main() -> int:
                              "it does not need to spend.")
     options = parser.parse_args()
     try:
+        manifests = [path.resolve() for path in options.manifest] + scope_group_manifests(options.scope_group)
         summary = build([p.resolve() for p in (options.maps or [REPO / "eloria-assets" / "maps"])],
                         options.out_root.resolve() if options.out_root else None,
                         options.cache.resolve(), find_godot(options.godot), options.procs,
                         prune=not options.no_prune, floors=json.loads(options.floors) if options.floors else None,
-                        skip=options.skip_dir, link_output=options.link_output, cache_budget_bytes=options.cache_budget_bytes)
+                        skip=options.skip_dir, link_output=options.link_output, cache_budget_bytes=options.cache_budget_bytes,
+                        manifests=manifests if options.manifest or options.scope_group else None)
     except BuildError as error:
         log(f"FAILED: {error}")
         return 1

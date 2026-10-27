@@ -19,8 +19,12 @@ const PreparedLifecycle := preload("res://src/world/prepared_scene_lifecycle.gd"
 const PreparedPlacements := preload("res://src/world/prepared_placements.gd")
 const GauntletSurfaceContrast := preload("res://src/world/gauntlet_surface_contrast.gd")
 const GeometryCache := preload("res://src/world/map_geometry_cache.gd")
+const CollisionCache := preload("res://src/world/map_collision_cache.gd")
+const PavingCache := preload("res://src/world/map_paving_cache.gd")
+const GraphicsOptions := preload("res://src/world/graphics_options.gd")
 const GeometrySources := preload("res://src/world/map_geometry_texture_sources.gd")
 const MaterialOwnership := preload("res://src/world/prepared_material_ownership.gd")
+const MapMaterialPreparation := preload("res://src/world/map_material_preparation.gd")
 
 # Static-instance batching. A region such as Four Gates imports ~1700 mesh
 # nodes that between them reference only 42 meshes, so almost every draw call
@@ -143,6 +147,8 @@ var _resource_timings: Dictionary = {}
 ## Cleared when the load finishes; the shapes themselves stay alive under the
 ## bodies that hold them.
 var _collision_shapes: Dictionary = {}
+var _cached_collision_faces: Dictionary = {}
+var _cached_paving: Dictionary = {}
 
 # A preloader builds a private tree on one worker. It never enters the active
 # SceneTree, writes a disk cache, or mutates the shared digest registry there.
@@ -367,6 +373,36 @@ func load_world(manifest_path: String, arrival := Vector3.INF, wait_for_arrival 
 		cache_file = ""
 	elif _load_from_cache(mark,began):
 		return
+	# Only CPU vectors are read here. Rendering still follows the original
+	# detached GLTF path; baked faces avoid downloading its new GPU meshes.
+	# Grass currently relies on Mesh's triangle memo, which the original
+	# collision builder primes, so keep that path for the full painted mode.
+	if not geometry_capture and geometry_scoped and manifest.asset_id().contains("__chunk_") \
+			and OS.get_environment("ELORIA_CACHED_COLLISION") != "0" \
+			and (detached_cache_enabled if detached_build else MapSceneCache.is_enabled()) \
+			and not (LookProfile.full_painted() and GraphicsOptions.decorative_grass):
+		var collision_began := Time.get_ticks_usec()
+		var collision := CollisionCache.acquire(manifest_path,package_digest,GeometryCache.world_proof(manifest,package_digest))
+		if bool(collision.ok):
+			_cached_collision_faces = collision.faces
+			load_phases[&"collisionFacesBytes"] = int(collision.bytes)
+		load_phases[&"collisionCacheHit"] = 1 if bool(collision.ok) else 0
+		ResourceDiagnostics.record(_resource_timings, &"collision_cache_read", collision_began)
+	if not geometry_capture and geometry_scoped and manifest.asset_id().contains("__chunk_") \
+			and OS.get_environment("ELORIA_CACHED_PAVING") != "0" and LookProfile.enabled() \
+			and not LookProfile.kit_paving(manifest.asset_id().get_slice("__chunk_",0)).is_empty() \
+			and (detached_cache_enabled if detached_build else MapSceneCache.is_enabled()):
+		var paving_began := Time.get_ticks_usec()
+		_cached_paving = PavingCache.acquire(manifest_path,package_digest,GeometryCache.world_proof(manifest,package_digest))
+		load_phases[&"pavingCacheHit"] = 1 if bool(_cached_paving.get("ok",false)) else 0
+		ResourceDiagnostics.record(_resource_timings, &"paving_cache_read", paving_began)
+		load_phases.merge(_cached_paving.get("acquire_timings_us",{}),true)
+		var paving_inputs: Dictionary = _cached_paving.get("acquire_input_diagnostics",{})
+		load_phases[&"pavingAcquireHashCalls"] = int(paving_inputs.get("hash_calls",0))
+		load_phases[&"pavingAcquireHashUs"] = int(paving_inputs.get("hash_us",0))
+		load_phases[&"pavingAcquireProofHits"] = int(paving_inputs.get("proof_hits",0))
+		load_phases[&"pavingAcquireSchemaUs"] = int(paving_inputs.get("schema_us",0))
+		load_phases[&"pavingAcquirePathsUs"] = int(paving_inputs.get("paths_us",0))
 
 	var document: GLTFDocument = GLTFDocument.new()
 	var state: GLTFState = GLTFState.new()
@@ -390,6 +426,7 @@ func load_world(manifest_path: String, arrival := Vector3.INF, wait_for_arrival 
 		for counter: String in image_stats:
 			load_phases[StringName(counter)] = int(image_stats[counter])
 	ExternalTexturePool.share(state, manifest.data.get("externalResources", {}))
+	load_phases[&"earlyFilterMaterials"] = MapMaterialPreparation.prepare(state)
 	var mipped: int = _build_texture_mipmaps(state)
 	GeometrySources.note(state,resolved_glb_path)
 	print_debug("world_load stage=texture_mipmaps rebuilt=", mipped)
@@ -456,6 +493,20 @@ func load_world(manifest_path: String, arrival := Vector3.INF, wait_for_arrival 
 	# passes above decide what stays an individually culled MeshInstance3D.
 	_batch_static_instances(mesh_instances)
 	_collision_shapes.clear()
+	_cached_collision_faces.clear()
+	if bool(_cached_paving.get("ok",false)):
+		var paving_began := Time.get_ticks_usec()
+		load_phases[&"cachedPavingMeshes"] = PavingCache.apply(_cached_paving,world_root)
+		ResourceDiagnostics.record(_resource_timings, &"paving_cache_apply", paving_began)
+		load_phases.merge(_cached_paving.get("apply_timings_us",{}),true)
+		var paving_inputs: Dictionary = _cached_paving.get("apply_input_diagnostics",{})
+		load_phases[&"pavingApplyHashCalls"] = int(paving_inputs.get("hash_calls",0))
+		load_phases[&"pavingApplyHashUs"] = int(paving_inputs.get("hash_us",0))
+		load_phases[&"pavingApplySchemaUs"] = int(paving_inputs.get("schema_us",0))
+		load_phases[&"pavingApplyPathsUs"] = int(paving_inputs.get("paths_us",0))
+		for input: Dictionary in paving_inputs.get("slow_files",[]):
+			ResourceDiagnostics.record_elapsed(_resource_timings,StringName("paving_apply_input_sha256:"+str(input.path)),int(input.us),true)
+	_cached_paving.clear()
 	mark = _phase(&"batching", mark)
 	# What the loader produced, before anything else in the client has been
 	# handed it. See `_snapshot_for_cache`.
@@ -1215,6 +1266,7 @@ func _apply_continent_water(mesh_instances: Array) -> int:
 
 func _apply_material_passes(mesh_instances: Array) -> int:
 	var applied := 0
+	var early_filter := MapMaterialPreparation.enabled()
 	var continent_colors := manifest != null and str(manifest.data.get("continentGeography", {}).get(
 		"geometryMode", "")) == "continent-chunks-v1"
 	var filtered: Dictionary = {}
@@ -1232,8 +1284,10 @@ func _apply_material_passes(mesh_instances: Array) -> int:
 			var id: int = material.get_instance_id()
 			if not filtered.has(id):
 				filtered[id] = true
-				material.texture_filter = (
-					BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC)
+				# Zero is a legacy timing control: preserve its unconditional late
+				# setter. Normal loads already have this exact final filter.
+				if not early_filter or material.texture_filter != MapMaterialPreparation.FILTER:
+					material.texture_filter = MapMaterialPreparation.FILTER
 			if (mesh.surface_get_format(surface) & Mesh.ARRAY_FORMAT_COLOR) == 0:
 				continue
 			# Optional lowland overlays retain opaque depth and framebuffer alpha.
@@ -1357,6 +1411,8 @@ func unload_world() -> void:
 	cache_file = ""
 	package_digest = ""
 	_collision_shapes.clear()
+	_cached_collision_faces.clear()
+	_cached_paving.clear()
 	manifest = null
 	coordinate_adapter = null
 
@@ -1573,7 +1629,7 @@ func _create_static_collision(mesh_instance: MeshInstance3D,
 	body.name = mesh_instance.name + suffix
 	body.collision_layer = layer
 	var shape := CollisionShape3D.new()
-	shape.shape = _trimesh_shape(mesh_instance.mesh)
+	shape.shape = _trimesh_shape(mesh_instance.mesh,str(world_root.get_path_to(mesh_instance)))
 	body.add_child(shape)
 	mesh_instance.add_child(body)
 
@@ -1591,13 +1647,21 @@ func _create_static_collision(mesh_instance: MeshInstance3D,
 ## what lets one shape stand under many bodies, and is how an instanced scene
 ## has always worked. The table is per load, so a map change does not hold the
 ## last map's geometry.
-func _trimesh_shape(mesh: Mesh) -> ConcavePolygonShape3D:
+func _trimesh_shape(mesh: Mesh, mesh_path := "") -> ConcavePolygonShape3D:
 	var key: int = mesh.get_instance_id()
 	var cached: ConcavePolygonShape3D = _collision_shapes.get(key) as ConcavePolygonShape3D
 	if cached != null:
 		return cached
 	var operation_began := Time.get_ticks_usec()
-	var built: ConcavePolygonShape3D = mesh.create_trimesh_shape()
+	var built: ConcavePolygonShape3D
+	var faces: Variant = _cached_collision_faces.get(mesh_path)
+	if faces is PackedVector3Array and not (faces as PackedVector3Array).is_empty():
+		built = ConcavePolygonShape3D.new()
+		built.set_faces(faces)
+		load_phases[&"cachedCollisionShapes"] = int(load_phases.get(&"cachedCollisionShapes",0))+1
+	if built == null:
+		built = mesh.create_trimesh_shape()
+		load_phases[&"rawCollisionShapes"] = int(load_phases.get(&"rawCollisionShapes",0))+1
 	ResourceDiagnostics.record(_resource_timings, &"trimesh_shape_build", operation_began, true)
 	_collision_shapes[key] = built
 	return built

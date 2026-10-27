@@ -8,6 +8,7 @@ const ResourceDiagnostics := preload("res://src/world/resource_diagnostics.gd")
 const PreparedContent := preload("res://src/world/prepared_content.gd")
 const PreparedSharing := preload("res://src/world/prepared_material_sharing.gd")
 const GeometrySources := preload("res://src/world/map_geometry_texture_sources.gd")
+const MapMaterialPreparation := preload("res://src/world/map_material_preparation.gd")
 
 ## Prototype meshes that map packages name instead of carrying.
 ##
@@ -115,6 +116,9 @@ static func acquire(key: String, path: String) -> Mesh:
 		return null
 	if images is Dictionary:
 		ExternalTexturePool.share(state, images)
+	operation_began = Time.get_ticks_usec()
+	MapMaterialPreparation.prepare(state)
+	_record_operation(&"prototype_early_material_filter", operation_began)
 	GeometrySources.note(state,path)
 	var meshes: Array[Mesh] = []
 	for imported: Variant in state.get_meshes():

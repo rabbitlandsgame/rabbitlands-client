@@ -856,10 +856,10 @@ static func class_slot(material: BaseMaterial3D, kind: Kind, meadow: bool, kept:
 	return ""
 
 ## The class texture `texture_name` names (LookProfile.CLASS_TEXTURES), with
-## mipmaps: .import files are not versioned, so a fresh checkout imports the
-## PNG without them and a ground texture without mipmaps shimmers. Built once
-## and shared. Loader workers call this too, so nothing is built under the
-## lock: two that race keep the first texture published.
+## mipmaps. Authored import settings provide the chain before play; older
+## import products retain the runtime fallback. Built once and shared. Loader
+## workers call this too, so nothing is built under the lock: two that race
+## keep the first texture published.
 static func class_texture(texture_name: String) -> Texture2D:
 	_class_mutex.lock()
 	var known: Variant = _class_textures.get(texture_name)
@@ -873,12 +873,7 @@ static func class_texture(texture_name: String) -> Texture2D:
 	if source == null:
 		push_warning("look_ground: class texture %s did not load" % texture_name)
 		return null
-	var built: Texture2D = source
-	var image := source.get_image()
-	if image != null and not image.has_mipmaps() \
-			and (not image.is_compressed() or image.decompress() == OK):
-		image.generate_mipmaps()
-		built = ImageTexture.create_from_image(image)
+	var built := _class_texture_with_mipmaps(source)
 	_class_mutex.lock()
 	if _class_textures.get(texture_name) is Texture2D:
 		built = _class_textures[texture_name]
@@ -886,6 +881,46 @@ static func class_texture(texture_name: String) -> Texture2D:
 		_class_textures[texture_name] = built
 	_class_mutex.unlock()
 	return built
+
+static func _class_texture_has_mipmaps(source: Texture2D) -> bool:
+	if source.has_mipmaps(): return true
+	# Godot 4.7.2 exposes Texture2D mip metadata, but CompressedTexture2D
+	# reports zero even for its complete imported chain. Inspect only the
+	# recognized native metadata header; unknown products keep the old fallback.
+	if not source is CompressedTexture2D: return false
+	var file := FileAccess.open((source as CompressedTexture2D).get_load_path(),FileAccess.READ)
+	if file == null or file.get_length() <= 52: return false
+	return _class_texture_header_has_mipmaps(file.get_buffer(52),source.get_width(),source.get_height())
+
+static func _class_texture_header_has_mipmaps(header: PackedByteArray, width: int, height: int) -> bool:
+	# CompressedTexture2D v1: GST2, version, dimensions, format flags, limit,
+	# three reserved words, then image format/dimensions/mip count/pixel format.
+	if header.size() != 52 or header.slice(0,4).get_string_from_ascii() != "GST2" \
+			or header.decode_u32(4) != 1 or width <= 0 or height <= 0 \
+			or header.decode_u32(8) != width or header.decode_u32(12) != height \
+			or (header.decode_u32(16) & (1 << 23)) == 0 \
+			or header.decode_u32(36) > 3 or header.decode_u16(40) != width or header.decode_u16(42) != height \
+			or header.decode_u32(48) >= Image.FORMAT_MAX:
+		return false
+	var maximum := 0
+	var dimension := maxi(width,height)
+	while dimension > 1:
+		dimension >>= 1
+		maximum += 1
+	return header.decode_u32(44) > 0 and header.decode_u32(44) <= maximum
+
+static func _class_texture_with_mipmaps(source: Texture2D, diagnostics: Dictionary = {}) -> Texture2D:
+	# Texture2D exposes this CPU-side metadata. Asking get_image() merely to
+	# inspect an imported chain would read its pixels back from the renderer.
+	if _class_texture_has_mipmaps(source):
+		return source
+	if not diagnostics.is_empty(): diagnostics["pixel_reads"] = int(diagnostics.get("pixel_reads",0))+1
+	var image := source.get_image()
+	if image != null and not image.has_mipmaps() \
+			and (not image.is_compressed() or image.decompress() == OK):
+		image.generate_mipmaps()
+		return ImageTexture.create_from_image(image)
+	return source
 
 ## The colour (display sRGB) a region's walk decks carry in their vertex
 ## colour where they are road (`ground.deck_road_colour`), or null.

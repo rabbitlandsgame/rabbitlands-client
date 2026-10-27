@@ -7,10 +7,14 @@ const Writer := preload("res://src/world/map_geometry_writer.gd")
 const Lifecycle := preload("res://src/world/prepared_scene_lifecycle.gd")
 const MapCache := preload("res://src/world/map_scene_cache.gd")
 const Archived := preload("res://src/actors/archived_model_policy.gd")
+const CollisionCache := preload("res://src/world/map_collision_cache.gd")
+const GeometryPolicy := preload("res://src/world/map_geometry_policy.gd")
+const PavingCache := preload("res://src/world/map_paving_cache.gd")
+const GroundProfile := preload("res://src/world/look/look_profile.gd")
 const SCOPE := "res://data/maps/geometry-cache-scope.json"
 const REGISTRY := "res://data/maps/registry.json"
 const DIRECTORY := "user://map-geometry-cache"
-const VERSION := 1
+const VERSION := GeometryPolicy.VERSION
 const MAX_METADATA_BYTES := 16777216
 const PIPELINE_INPUTS := [
 	"res://assets/world/biome_blend/catalog.json",
@@ -307,11 +311,18 @@ static func startup_signature() -> String:
 	# Development checkouts have no release identity. Modification times are
 	# only a cheap maintenance hint; runtime acceptance always hashes bytes.
 	var development_inputs: Array = []
+	var region_hashes := {}
+	for target: Dictionary in targets():
+		if str(target.get("kind","")) != "world" or not str(target.get("id","")).contains("__chunk_"): continue
+		var region := str(target.id).get_slice("__chunk_",0)
+		if not region_hashes.has(region):
+			var path := GroundProfile.region_path(region)
+			region_hashes[region] = FileAccess.get_sha256(path) if FileAccess.file_exists(path) else "missing"
 	if not _has_release_identity():
 		for target: Dictionary in targets():
 			var path := Sources.source_path(str(target.source))
 			development_inputs.append([target.source,FileAccess.get_modified_time(path)])
-	return _digest([policy(),FileAccess.get_sha256(SCOPE),FileAccess.get_sha256(REGISTRY),
+	return _digest([policy(),CollisionCache.policy(),PavingCache.policy(),region_hashes,FileAccess.get_sha256(SCOPE),FileAccess.get_sha256(REGISTRY),
 		FileAccess.get_sha256("res://data/client_release.json") if FileAccess.file_exists("res://data/client_release.json") else "source",overlay_hashes,development_inputs])
 
 static func needs_preparation() -> bool:
