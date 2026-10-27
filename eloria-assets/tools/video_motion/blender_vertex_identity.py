@@ -117,6 +117,50 @@ def source_frames(doc, blob, node_index, node, primitives, world):
     return np.concatenate(result)
 
 
+def skin_correspondence(expected, actual, positive_slots, names):
+    """Recognize Blender's repeated-slot overwrite only for a single owner.
+
+    Armature deformation must still pass the independent paired posed check.
+    No imported groups are edited, and multi-bone distributions stay bit/value
+    comparisons. A non-unit original total cannot take this exception.
+    """
+    expected = np.asarray(expected, dtype=float)
+    actual = np.asarray(actual, dtype=float)
+    assert (
+        expected.shape == actual.shape
+        and np.isfinite(expected).all()
+        and np.isfinite(actual).all()
+    )
+    assert np.all(expected >= 0) and np.all(actual >= 0)
+    raw_error = float(np.abs(expected - actual).max())
+    left, right = expected.copy(), actual.copy()
+    records = []
+    for vertex in np.flatnonzero(np.max(np.abs(left - right), axis=1) > 2e-6):
+        source_bones = np.flatnonzero(left[vertex] > 0)
+        imported_bones = np.flatnonzero(right[vertex] > 0)
+        source_sum, imported_sum = float(left[vertex].sum()), float(right[vertex].sum())
+        if (
+            positive_slots[vertex] <= 1
+            or len(source_bones) != 1
+            or not np.array_equal(source_bones, imported_bones)
+            or abs(source_sum - 1.0) > 4 * float(np.spacing(np.float32(1.0)))
+            or imported_sum <= 0
+        ):
+            continue
+        left[vertex] /= source_sum
+        right[vertex] /= imported_sum
+        records.append(
+            dict(
+                vertex=int(vertex),
+                bone=names[int(source_bones[0])],
+                source_positive_slots=int(positive_slots[vertex]),
+                source_total=source_sum,
+                blender_stored_total=imported_sum,
+            )
+        )
+    return float(np.abs(left - right).max()), raw_error, records
+
+
 def imported_bindings(path, objects):
     doc, blob = document(path)
     world = worlds(doc)
@@ -197,6 +241,8 @@ def imported_bindings(path, objects):
         normal_error = 0.0
         uv_error = 0.0
         skin_error = 0.0
+        skin_raw_error = 0.0
+        skin_normalizations = []
         shape_error = 0.0
         loop_ids = np.empty(len(data.loops), np.int32)
         data.loops.foreach_get("vertex_index", loop_ids)
@@ -246,6 +292,7 @@ def imported_bindings(path, objects):
             names = [doc["nodes"][i]["name"] for i in skin["joints"]]
             assert len(names) == len(set(names))
             expected_skin = np.zeros((count, len(names)))
+            positive_slots = np.zeros(count, dtype=int)
             offset = 0
             for primitive in primitives:
                 attributes = primitive["attributes"]
@@ -255,6 +302,9 @@ def imported_bindings(path, objects):
                 ):
                     js = array(doc, blob, attributes["JOINTS_" + str(si)]).astype(int)
                     ws = array(doc, blob, attributes["WEIGHTS_" + str(si)])
+                    positive_slots[offset : offset + n] += np.count_nonzero(
+                        ws > 0, axis=1
+                    )
                     for slot in range(js.shape[1]):
                         np.add.at(
                             expected_skin,
@@ -273,7 +323,9 @@ def imported_bindings(path, objects):
                     )
                     if name in name_to_id:
                         actual_skin[vertex.index, name_to_id[name]] += group.weight
-            skin_error = float(np.abs(expected_skin - actual_skin).max())
+            skin_error, skin_raw_error, skin_normalizations = skin_correspondence(
+                expected_skin, actual_skin, positive_slots, names
+            )
         counts = {len(p.get("targets", [])) for p in primitives}
         assert len(counts) == 1
         targets = counts.pop()
@@ -335,6 +387,8 @@ def imported_bindings(path, objects):
                 "basis_world_error": basis_error,
                 "uv_error": uv_error,
                 "skin_error": skin_error,
+                "skin_raw_group_error": skin_raw_error,
+                "skin_lone_group_normalizations": skin_normalizations,
                 "normal_vector_error": normal_error,
                 "normal_scope": "Recorded only; Blender custom-normal packing is not the authority for source/Godot shading. Vertex motion identity is proved by basis,UV,skin and every POSITION shape.",
                 "all_target_position_error": shape_error,
