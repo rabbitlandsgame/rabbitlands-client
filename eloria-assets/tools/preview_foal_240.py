@@ -49,7 +49,7 @@ renderer/rendering_method="forward_plus"
     job = {'fps': fps, 'models': [
         {'label': 'CURRENT  /  3,072 Hz runtime bake', 'path': str(SOURCE), 'sha256': SOURCE_SHA},
         {'label': f'DRAFT  /  Maximum {fps} samples per second', 'path': str(candidate), 'sha256': report['candidate_sha256']}],
-        'summary': f"Raw: {report['source_bytes']/1e6:.1f} â†’ {report['candidate_bytes']/1e6:.1f} MB    |    Packaged: {report['source_rlcz_bytes']/1e6:.1f} â†’ {report['candidate_rlcz_bytes']/1e6:.1f} MB    |    Drag / zoom either pane to move both cameras.",
+        'summary': f"Raw: {report['source_bytes']/1e6:.1f} -> {report['candidate_bytes']/1e6:.1f} MB    |    Packaged: {report['source_rlcz_bytes']/1e6:.1f} -> {report['candidate_rlcz_bytes']/1e6:.1f} MB    |    Drag / zoom either pane to move both cameras.",
         'output': str(output / 'preview-captures')}
     motion_path = output / 'motion-measurements.json'
     if motion_path.exists():
@@ -66,7 +66,7 @@ renderer/rendering_method="forward_plus"
         assert [model['sha256'] for model in runtime['models']] == [model['sha256'] for model in job['models']]
         current, draft = runtime['versions']
         changes = [100 * (draft['animation_update_usec'][name] / value - 1) for name, value in current['animation_update_usec'].items()]
-        job['runtime_summary'] = f"Isolated CPU: shared caches + first actor {current['retained_static_memory_delta_bytes']/1e6:.1f} â†’ {draft['retained_static_memory_delta_bytes']/1e6:.1f} MB  |  Load {current['load_ms']/1000:.2f} â†’ {draft['load_ms']/1000:.2f} s  |  Animation CPU cost {min(changes):+.0f}% to {max(changes):+.0f}%  |  GPU buffers unchanged"
+        job['runtime_summary'] = f"Isolated CPU: shared caches + first actor {current['retained_static_memory_delta_bytes']/1e6:.1f} -> {draft['retained_static_memory_delta_bytes']/1e6:.1f} MB  |  Load {current['load_ms']/1000:.2f} -> {draft['load_ms']/1000:.2f} s  |  Animation CPU cost {min(changes):+.0f}% to {max(changes):+.0f}%  |  GPU buffers unchanged"
     job_path = output / 'preview-job.json'
     job_path.write_text(json.dumps(job, indent=2) + '\n', encoding='utf-8', newline='\n')
     flags = subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0

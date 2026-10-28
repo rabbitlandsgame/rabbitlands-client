@@ -1,5 +1,10 @@
 # Sunmane Foal (Dun): 30 FPS evaluation draft
 
+The user has [accepted the 30 FPS sampling](foal-30-acceptance.json). They also
+identified remaining leg tearing for another agent to repair. The accepted
+sampling payload is retained separately so that work can integrate it without
+overwriting the skin/rig changes.
+
 All eight animations have a separate 30 FPS sampling draft, made directly from
 the unchanged current foal. The 240 FPS draft is retained. Both drafts preserve
 the mesh, rig, eight-influence skin, corrective shape geometry, textures, clip
