@@ -130,19 +130,9 @@ def test_the_lore_objects_show_what_their_plaques_say():
     assert lichen and all(set(p.get('palette', {})) == {'stone', 'mineral'} for p in lichen)
     assert sum(p.get('height', 0) > .7 for p in lichen) == 2 and any(p.get('height', 0) == 0 for p in lichen)
     assert 'over its arms' in plaques[59275]['text'] and 'round its foot' in plaques[59275]['text']
-    # Nothing hangs in the Hall, under the 4.6 m ceiling the cutaway never draws. A chandelier elsewhere (the library's
-    # reading tables, review 2026-10-28) hangs from the ceiling line: its hook within 0.15 m under the wall tops the
-    # camera sees, and a light marker at its candles (a lamp, not a light with no source)
-    assert not [p for p in castle['props'] if p['asset'] == 'chandelier']
-    import build_town_interiors as B
-    scenery = json.loads((HERE.parents[2]/'source/world_objects/underground/reused-scenery.json').read_text('utf-8'))
-    (drop,) = [record['bounds'][1][1] for record in scenery['assets'] if record['id'] == 'chandelier']
-    for s in design['sections']:
-        ceiling = B.THEMES[s['style']]['wallHeight']
-        for p in (p for p in s['props'] if p['asset'] == 'chandelier'):
-            assert ceiling-.15 <= p['height']+drop*p.get('scale', 1) <= ceiling-.1, p
-            assert any(max(abs(light['at'][0]-p['at'][0]), abs(light['at'][1]-p['at'][1])) < .05
-                       and p['height'] < light['height'] < ceiling-.5 for light in s['lights']), p
+    # Nothing hangs from a ceiling the cutaway never draws, anywhere (the library's reading-room chandeliers seemed to
+    # float in open floor from the game camera, review 2026-10-28: their lights stay, with no visible source)
+    assert not [p for s in design['sections'] for p in s['props'] if p['asset'] == 'chandelier']
     tavern = section(design, 'tavern_ground')
     kitchen = [p['asset'] for p in tavern['props'] if TS.room_of(tavern, *p['at']) == 1]
     assert kitchen and 'barrel_stack' not in kitchen
@@ -173,6 +163,20 @@ def test_the_library_sells_books_at_its_street_door_and_reads_fast_in_its_readin
                if p['asset'] == 'writing_desk_ledgers' and TS.room_of(library, *p['at']) == 0]
     assert ennis['tile'][1]-2 < desk['at'][1] < ennis['tile'][1]-1 and abs(desk['at'][0]-(ennis['tile'][0]+.5)) < .1
     assert not {p['asset'] for p in library['props']} & {'dressed_round_table', 'shop_counter', 'crate_stack'}
+    # Review 2026-10-28: the bookcases keep their coloured spines (no palette tint; mirroring and a few sizes vary
+    # them), books for sale and to hand are closed piles (book_stack), open books only where a reader sits and the
+    # lending-rule card on Ennis's desk, and one supply crate
+    cases = [p for p in library['props'] if p['asset'] == 'bookcase']
+    assert cases and not [p for p in cases if 'palette' in p]
+    assert len({(p.get('scale', 1), bool(p.get('mirror'))) for p in cases}) >= 6
+    assert all(.95 <= p.get('scale', 1) <= 1.05 for p in cases)
+    piles = [p for p in library['props'] if p['asset'] == 'book_stack']
+    assert len(piles) >= 20 and all(p.get('height', 0) >= 0 for p in piles)
+    open_books = [d for d in library['decals'] if d['image'] == 'book_recipes']
+    assert len(open_books) <= 6 and len(piles) > 3*len(open_books)
+    lending = next(e for e in library['interactives'] if e['object'] == 59285)
+    assert 'propped on the desk' in lending['text'] and 'counter' not in lending['text']
+    assert [p['asset'] for p in library['props']].count('supply_crate') == 1
     sys.path.insert(0, str(HERE.parents[2]/'tools'))
     import sync_music_program as music
     assert [music.room_program(name) for name in library['roomNames']] == ['shop', 'library', 'library']
@@ -255,6 +259,7 @@ REFUSALS = {
         lambda d: section(d, 'library')['specialAreas'][0].update(factor=2.5), 'factor'),
     'a special area with an unknown key': (
         lambda d: section(d, 'library')['specialAreas'][0].update(bounds=[1, 1, 2, 2]), 'unknown keys'),
+    'a prop mirrored by anything but true': (lambda d: section(d, 'library')['props'][0].update(mirror='x'), 'mirror'),
 }
 
 

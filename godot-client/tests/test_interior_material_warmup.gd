@@ -238,6 +238,20 @@ func _test_scenery_shaders() -> void:
 		and material.get_shader_parameter("base_texture") is Texture2D,
 		"the tint's warm-up material is the scenery's shader, its sampler filled, its RID taken")
 	_expect(Warmup.shader_material("res://src/world/no-such.gdshader") == null, "a path that is no shader builds nothing")
+	# A town prop drawn left for right (the source's `mirror`, review 2026-10-28) turns over only its own X: no new
+	# material or shader to warm, the same model, mirrored.
+	var shelf := {"asset": "bookcase", "position": [1, 0, 2], "yaw": 90, "scale": 1.04}
+	var mirrored := Node3D.new()
+	var unmirrored := Node3D.new()
+	UndergroundScenery.dress(mirrored, shelf.merged({"mirror": true}), 0)
+	UndergroundScenery.dress(unmirrored, shelf, 1)
+	_expect(mirrored.scale.is_equal_approx(Vector3(-1.04, 1.04, 1.04)) and mirrored.basis.determinant() < 0
+		and unmirrored.scale.is_equal_approx(Vector3.ONE*1.04) and unmirrored.basis.determinant() > 0
+		and mirrored.position == unmirrored.position and is_equal_approx(mirrored.rotation.y, unmirrored.rotation.y)
+		and Warmup.scenery_shaders({"placements": [shelf.merged({"mirror": true})]}).is_empty(),
+		"a mirrored placement is the same model at the same place and turn, drawn left for right, with nothing to warm")
+	mirrored.free()
+	unmirrored.free()
 	var path := ProjectSettings.globalize_path("user://warmup-shader-test.glb")
 	var file := FileAccess.open(path, FileAccess.WRITE)
 	file.store_buffer(_json_glb(_document()))

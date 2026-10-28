@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "map": "landfall_town",
-  "sourcePlanSha256": "fe70a298ec3b4b1abeab00d1cf88b7a6f59b4736667b3a516c9e1fd781d89c9b",
+  "sourcePlanSha256": "5054ba7bba7d020bc7dba90e897cd4b416baf18eef398589bcb1db013018b92c",
   "assets": {
     "crystal_cluster": "res://assets/world/underground/crystal_cluster.glb",
     "supply_crate": "res://assets/world/underground/supply_crate.glb",
@@ -50,7 +50,6 @@
     "stone_fireplace": "res://assets/world/underground/stone_fireplace.glb",
     "writing_desk_ledgers": "res://assets/world/underground/writing_desk_ledgers.glb",
     "wall_sconce": "res://assets/world/underground/wall_sconce.glb",
-    "chandelier": "res://assets/world/underground/chandelier.glb",
     "anvil_stump": "res://assets/world/underground/anvil_stump.glb",
     "forge_hearth": "res://assets/world/underground/forge_hearth.glb",
     "weapon_rack_with_weapons": "res://assets/world/underground/weapon_rack_with_weapons.glb",
@@ -69,7 +68,8 @@
     "high_seat": "res://assets/world/underground/high_seat.glb",
     "council_map_table": "res://assets/world/underground/council_map_table.glb",
     "loom": "res://assets/world/underground/loom.glb",
-    "bunk_bed": "res://assets/world/underground/bunk_bed.glb"
+    "bunk_bed": "res://assets/world/underground/bunk_bed.glb",
+    "book_stack": "res://assets/world/underground/book_stack.glb"
   },
   "harvestPresentation": {},
   "surfaces": {
@@ -3799,41 +3799,41 @@
         0,
         0.0
       ],
+      "cutawayWall": "Build_library_west_lime_plaster",
+      "mirror": true
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        180.898,
+        0,
+        233.3
+      ],
+      "yaw": 90,
+      "scale": 0.96,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
       "cutawayWall": "Build_library_west_lime_plaster"
     },
     {
       "asset": "bookcase",
       "position": [
-        180.908,
+        180.916,
         0,
-        233.3
+        231.8
       ],
       "yaw": 90,
+      "scale": 1.03,
       "outward": [
         -1.0,
         0,
         0.0
       ],
       "cutawayWall": "Build_library_west_lime_plaster",
-      "palette": {
-        "stone": "#c88c62",
-        "mineral": "#5a2a20"
-      }
-    },
-    {
-      "asset": "bookcase",
-      "position": [
-        180.908,
-        0,
-        231.8
-      ],
-      "yaw": 90,
-      "outward": [
-        -1.0,
-        0,
-        0.0
-      ],
-      "cutawayWall": "Build_library_west_lime_plaster"
+      "mirror": true
     },
     {
       "asset": "writing_desk_ledgers",
@@ -3848,31 +3848,35 @@
     {
       "asset": "bookcase",
       "position": [
-        189.102,
+        189.11,
         0,
         234.8
       ],
       "yaw": 270,
+      "scale": 0.97,
       "cutawayWall": "Part_library_1_lime_plaster"
     },
     {
       "asset": "bookcase",
       "position": [
-        189.102,
+        189.097,
         0,
         233.0
       ],
       "yaw": 270,
-      "cutawayWall": "Part_library_1_lime_plaster"
+      "scale": 1.02,
+      "cutawayWall": "Part_library_1_lime_plaster",
+      "mirror": true
     },
     {
       "asset": "bookcase",
       "position": [
-        189.102,
+        189.105,
         0,
         231.2
       ],
       "yaw": 270,
+      "scale": 0.99,
       "cutawayWall": "Part_library_1_lime_plaster"
     },
     {
@@ -3918,23 +3922,13 @@
       "yaw": 6
     },
     {
-      "asset": "supply_crate",
+      "asset": "stool",
       "position": [
-        182.85,
+        188.55,
         0,
-        236.6
+        236.5
       ],
-      "yaw": 352,
-      "scale": 0.7
-    },
-    {
-      "asset": "supply_crate",
-      "position": [
-        188.3,
-        0,
-        236.4
-      ],
-      "yaw": 15
+      "yaw": 25
     },
     {
       "asset": "wall_sconce",
@@ -3952,6 +3946,183 @@
       "cutawayWall": "Build_library_north_lime_plaster"
     },
     {
+      "asset": "book_stack",
+      "position": [
+        182.0,
+        0.61,
+        232.3
+      ],
+      "yaw": 14,
+      "scale": 1.08
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        182.43,
+        0.61,
+        232.51999999999998
+      ],
+      "yaw": 101
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        183.26,
+        0.61,
+        232.5
+      ],
+      "yaw": 283,
+      "scale": 1.04
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        183.66,
+        0.61,
+        232.28
+      ],
+      "yaw": 352,
+      "scale": 0.96
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        182.85,
+        0.61,
+        232.3
+      ],
+      "yaw": 196,
+      "scale": 1.1
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        182.86,
+        0.744,
+        232.31
+      ],
+      "yaw": 228
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        182.04,
+        0.61,
+        234.88
+      ],
+      "yaw": 168,
+      "scale": 1.04
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        183.08,
+        0.61,
+        234.68
+      ],
+      "yaw": 77,
+      "scale": 1.08
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        183.58,
+        0.61,
+        234.9
+      ],
+      "yaw": 323
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        182.56,
+        0.61,
+        234.72
+      ],
+      "yaw": 262,
+      "scale": 1.08
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        182.55,
+        0.742,
+        234.70999999999998
+      ],
+      "yaw": 291,
+      "scale": 0.98
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        181.54,
+        1.0,
+        236.3
+      ],
+      "yaw": 20,
+      "scale": 1.05
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        181.55,
+        1.128,
+        236.3
+      ],
+      "yaw": 61,
+      "scale": 0.95
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        181.9,
+        1.0,
+        236.51
+      ],
+      "yaw": 290,
+      "scale": 0.95
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        188.55,
+        0.5,
+        236.5
+      ],
+      "yaw": 40,
+      "scale": 0.95
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        188.0,
+        0,
+        236.65
+      ],
+      "yaw": 205,
+      "scale": 1.05
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        188.01,
+        0.128,
+        236.66
+      ],
+      "yaw": 251,
+      "scale": 0.98
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        187.99,
+        0.248,
+        236.64
+      ],
+      "yaw": 190,
+      "scale": 0.92
+    },
+    {
       "asset": "bookcase",
       "position": [
         181.95,
@@ -3964,45 +4135,46 @@
     {
       "asset": "bookcase",
       "position": [
-        187.0,
+        186.6,
         0,
-        237.898
+        237.89
       ],
       "yaw": 0,
+      "scale": 0.97,
+      "cutawayWall": "Part_library_0_lime_plaster",
+      "mirror": true
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        188.05,
+        0,
+        237.90300000000002
+      ],
+      "yaw": 0,
+      "scale": 1.02,
       "cutawayWall": "Part_library_0_lime_plaster"
     },
     {
       "asset": "bookcase",
       "position": [
-        188.6,
+        190.9,
         0,
         237.898
       ],
       "yaw": 0,
-      "cutawayWall": "Part_library_0_lime_plaster",
-      "palette": {
-        "stone": "#ffb46e",
-        "mineral": "#7a3428"
-      }
+      "cutawayWall": "Part_library_2_lime_plaster",
+      "mirror": true
     },
     {
       "asset": "bookcase",
       "position": [
-        190.4,
+        192.35,
         0,
-        237.898
+        237.888
       ],
       "yaw": 0,
-      "cutawayWall": "Part_library_2_lime_plaster"
-    },
-    {
-      "asset": "bookcase",
-      "position": [
-        192.0,
-        0,
-        237.898
-      ],
-      "yaw": 0,
+      "scale": 0.96,
       "cutawayWall": "Part_library_2_lime_plaster"
     },
     {
@@ -4010,14 +4182,23 @@
       "position": [
         197.0,
         0,
-        237.898
+        237.906
       ],
       "yaw": 0,
+      "scale": 1.03,
       "cutawayWall": "Part_library_2_lime_plaster",
-      "palette": {
-        "stone": "#c88c62",
-        "mineral": "#5a2a20"
-      }
+      "mirror": true
+    },
+    {
+      "asset": "potted_cypress",
+      "position": [
+        189.45,
+        0,
+        238.12
+      ],
+      "yaw": 0,
+      "scale": 0.7,
+      "cutawayWall": "Part_library_0_lime_plaster"
     },
     {
       "asset": "bookcase",
@@ -4032,16 +4213,18 @@
         0,
         1.0
       ],
-      "cutawayWall": "Build_library_south_lime_plaster"
+      "cutawayWall": "Build_library_south_lime_plaster",
+      "mirror": true
     },
     {
       "asset": "bookcase",
       "position": [
         187.6,
         0,
-        246.09199999999998
+        246.09699999999998
       ],
       "yaw": 180,
+      "scale": 0.98,
       "outward": [
         0.0,
         0,
@@ -4054,28 +4237,27 @@
       "position": [
         189.5,
         0,
-        246.09199999999998
+        246.084
       ],
       "yaw": 180,
+      "scale": 1.03,
       "outward": [
         0.0,
         0,
         1.0
       ],
       "cutawayWall": "Build_library_south_lime_plaster",
-      "palette": {
-        "stone": "#c88c62",
-        "mineral": "#5a2a20"
-      }
+      "mirror": true
     },
     {
       "asset": "bookcase",
       "position": [
         191.4,
         0,
-        246.09199999999998
+        246.1
       ],
       "yaw": 180,
+      "scale": 0.97,
       "outward": [
         0.0,
         0,
@@ -4088,24 +4270,27 @@
       "position": [
         195.0,
         0,
-        246.09199999999998
+        246.087
       ],
       "yaw": 180,
+      "scale": 1.02,
       "outward": [
         0.0,
         0,
         1.0
       ],
-      "cutawayWall": "Build_library_south_lime_plaster"
+      "cutawayWall": "Build_library_south_lime_plaster",
+      "mirror": true
     },
     {
       "asset": "bookcase",
       "position": [
-        198.092,
+        198.087,
         0,
         243.7
       ],
       "yaw": 270,
+      "scale": 1.02,
       "outward": [
         1.0,
         0,
@@ -4116,51 +4301,52 @@
     {
       "asset": "bookcase",
       "position": [
-        198.092,
+        198.1,
         0,
         239.6
       ],
       "yaw": 270,
+      "scale": 0.97,
       "outward": [
         1.0,
         0,
         0.0
       ],
-      "cutawayWall": "Build_library_east_lime_plaster"
+      "cutawayWall": "Build_library_east_lime_plaster",
+      "mirror": true
     },
     {
       "asset": "bookcase",
       "position": [
-        180.908,
+        180.903,
         0,
         242.65
       ],
       "yaw": 90,
-      "outward": [
-        -1.0,
-        0,
-        0.0
-      ],
-      "cutawayWall": "Build_library_west_lime_plaster"
-    },
-    {
-      "asset": "bookcase",
-      "position": [
-        180.908,
-        0,
-        238.7
-      ],
-      "yaw": 90,
+      "scale": 0.98,
       "outward": [
         -1.0,
         0,
         0.0
       ],
       "cutawayWall": "Build_library_west_lime_plaster",
-      "palette": {
-        "stone": "#ffb46e",
-        "mineral": "#7a3428"
-      }
+      "mirror": true
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        180.918,
+        0,
+        238.7
+      ],
+      "yaw": 90,
+      "scale": 1.04,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_library_west_lime_plaster"
     },
     {
       "asset": "stone_fireplace",
@@ -4203,6 +4389,16 @@
         244.7
       ],
       "yaw": 20
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        183.15,
+        0.5,
+        244.7
+      ],
+      "yaw": 335,
+      "scale": 0.95
     },
     {
       "asset": "lectern",
@@ -4364,26 +4560,6 @@
       "yaw": 180
     },
     {
-      "asset": "chandelier",
-      "position": [
-        186.0,
-        2.52,
-        242.6
-      ],
-      "yaw": 0,
-      "scale": 0.65
-    },
-    {
-      "asset": "chandelier",
-      "position": [
-        190.6,
-        2.52,
-        242.6
-      ],
-      "yaw": 0,
-      "scale": 0.65
-    },
-    {
       "asset": "bench",
       "position": [
         189.5,
@@ -4391,6 +4567,44 @@
         245.25
       ],
       "yaw": 0
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        190.0,
+        0.56,
+        245.23000000000002
+      ],
+      "yaw": 100,
+      "scale": 0.95
+    },
+    {
+      "asset": "bench",
+      "position": [
+        189.45,
+        0,
+        239.55
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        188.9,
+        0.56,
+        239.56
+      ],
+      "yaw": 170
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        188.91,
+        0.682,
+        239.55
+      ],
+      "yaw": 143,
+      "scale": 0.9
     },
     {
       "asset": "potted_cypress",
@@ -4439,6 +4653,64 @@
       "cutawayWall": "Build_library_east_lime_plaster"
     },
     {
+      "asset": "book_stack",
+      "position": [
+        186.6,
+        0.61,
+        242.74
+      ],
+      "yaw": 72
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        186.02,
+        0.61,
+        242.48000000000002
+      ],
+      "yaw": 188,
+      "scale": 0.9
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        190.6,
+        0.61,
+        242.62
+      ],
+      "yaw": 305
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        190.6,
+        0.732,
+        242.61
+      ],
+      "yaw": 338,
+      "scale": 0.92
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        189.94,
+        0.61,
+        242.44
+      ],
+      "yaw": 95,
+      "scale": 0.92
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        195.56,
+        0.61,
+        244.51999999999998
+      ],
+      "yaw": 250,
+      "scale": 0.95
+    },
+    {
       "asset": "bookcase",
       "position": [
         192.58,
@@ -4452,45 +4724,27 @@
       "position": [
         192.58,
         0,
-        235.24
+        235.248
       ],
-      "yaw": 180
+      "yaw": 180,
+      "scale": 0.97,
+      "mirror": true
     },
     {
       "asset": "bookcase",
       "position": [
         194.0,
         0,
-        235.76
-      ],
-      "yaw": 0
-    },
-    {
-      "asset": "bookcase",
-      "position": [
-        194.0,
-        0,
-        235.24
-      ],
-      "yaw": 180
-    },
-    {
-      "asset": "bookcase",
-      "position": [
-        195.42,
-        0,
-        235.76
+        235.75
       ],
       "yaw": 0,
-      "palette": {
-        "stone": "#ffb46e",
-        "mineral": "#7a3428"
-      }
+      "scale": 0.96,
+      "mirror": true
     },
     {
       "asset": "bookcase",
       "position": [
-        195.42,
+        194.0,
         0,
         235.24
       ],
@@ -4499,38 +4753,39 @@
     {
       "asset": "bookcase",
       "position": [
-        192.58,
+        195.42,
         0,
-        232.76
-      ],
-      "yaw": 0
-    },
-    {
-      "asset": "bookcase",
-      "position": [
-        192.58,
-        0,
-        232.24
-      ],
-      "yaw": 180
-    },
-    {
-      "asset": "bookcase",
-      "position": [
-        194.0,
-        0,
-        232.76
+        235.755
       ],
       "yaw": 0,
-      "palette": {
-        "stone": "#c88c62",
-        "mineral": "#5a2a20"
-      }
+      "scale": 0.98
     },
     {
       "asset": "bookcase",
       "position": [
-        194.0,
+        195.42,
+        0,
+        235.253
+      ],
+      "yaw": 180,
+      "scale": 0.95,
+      "mirror": true
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        192.58,
+        0,
+        232.752
+      ],
+      "yaw": 0,
+      "scale": 0.97,
+      "mirror": true
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        192.58,
         0,
         232.24
       ],
@@ -4539,7 +4794,7 @@
     {
       "asset": "bookcase",
       "position": [
-        195.42,
+        194.0,
         0,
         232.76
       ],
@@ -4548,20 +4803,40 @@
     {
       "asset": "bookcase",
       "position": [
-        195.42,
+        194.0,
         0,
-        232.24
+        232.25
       ],
-      "yaw": 180
+      "yaw": 180,
+      "scale": 0.96,
+      "mirror": true
     },
     {
       "asset": "bookcase",
       "position": [
-        198.092,
+        198.097,
         0,
         235.6
       ],
       "yaw": 270,
+      "scale": 0.98,
+      "outward": [
+        1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_library_east_lime_plaster",
+      "mirror": true
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        198.087,
+        0,
+        232.6
+      ],
+      "yaw": 270,
+      "scale": 1.02,
       "outward": [
         1.0,
         0,
@@ -4572,46 +4847,30 @@
     {
       "asset": "bookcase",
       "position": [
-        198.092,
-        0,
-        232.6
-      ],
-      "yaw": 270,
-      "outward": [
-        1.0,
-        0,
-        0.0
-      ],
-      "cutawayWall": "Build_library_east_lime_plaster",
-      "palette": {
-        "stone": "#c88c62",
-        "mineral": "#5a2a20"
-      }
-    },
-    {
-      "asset": "bookcase",
-      "position": [
-        189.898,
+        189.906,
         0,
         236.0
       ],
       "yaw": 90,
+      "scale": 1.03,
       "cutawayWall": "Part_library_1_lime_plaster"
     },
     {
       "asset": "bookcase",
       "position": [
-        189.898,
+        189.89,
         0,
         231.5
       ],
       "yaw": 90,
-      "cutawayWall": "Part_library_1_lime_plaster"
+      "scale": 0.97,
+      "cutawayWall": "Part_library_1_lime_plaster",
+      "mirror": true
     },
     {
       "asset": "writing_desk_ledgers",
       "position": [
-        194.0,
+        196.3,
         0,
         230.05
       ],
@@ -4626,7 +4885,7 @@
     {
       "asset": "chair",
       "position": [
-        194.0,
+        196.3,
         0,
         231.25
       ],
@@ -4645,26 +4904,27 @@
         0,
         -1.0
       ],
-      "cutawayWall": "Build_library_north_lime_plaster"
+      "cutawayWall": "Build_library_north_lime_plaster",
+      "mirror": true
     },
     {
-      "asset": "bookcase",
+      "asset": "stool",
       "position": [
-        196.7,
+        197.55,
         0,
-        229.90800000000002
+        234.1
       ],
-      "yaw": 0,
-      "outward": [
-        0.0,
-        0,
-        -1.0
+      "yaw": 340
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        197.55,
+        0.5,
+        234.1
       ],
-      "cutawayWall": "Build_library_north_lime_plaster",
-      "palette": {
-        "stone": "#ffb46e",
-        "mineral": "#7a3428"
-      }
+      "yaw": 215,
+      "scale": 0.95
     }
   ]
 }
