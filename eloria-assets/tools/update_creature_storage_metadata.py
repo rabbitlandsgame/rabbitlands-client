@@ -17,6 +17,15 @@ def update(root, actor, source, candidate, processing, receipt, profile=None, ba
     old_hash, new_hash = digest(source), digest(candidate)
     if processing['source_sha256'] != old_hash or processing['candidate_sha256'] != new_hash:
         raise ValueError('Processing receipt does not bind original and installed bytes')
+    # Default-bake field limits are not a permission to relax source-witness
+    # comparisons. Only the separately declared source comparison budget applies.
+    source_budget = None
+    budget = (profile or {}).get('numeric_budget', {})
+    source_keys = {'source_position_absolute_limit', 'source_normal_angle_limit_degrees'}
+    if source_keys.intersection(budget):
+        if not source_keys.issubset(budget):
+            raise ValueError('Source witness budget requires both position and normal limits')
+        source_budget = budget
     document, _ = read_glb(source)
     permutation = vertex_permutation(document, processing.get('partition'))
     runtime_path = candidate.resolve().relative_to(root.resolve()).as_posix()
@@ -41,8 +50,8 @@ def update(root, actor, source, candidate, processing, receipt, profile=None, ba
                 if 'clips' in value or 'surface_rest' in value:
                     result = remap_witness(value, document, processing.get('inactive_targets', {}),
                                            processing.get('partition'), old_hash, new_hash, profile)
-                    if profile and profile.get('numeric_budget') and 'height' in result:
-                        budget = profile['numeric_budget']
+                    if source_budget and 'height' in result:
+                        budget = source_budget
                         result['representation_numeric_budget'] = {'source_position_ulps': 4,
                             'source_normal_angle_degrees': float(budget['source_normal_angle_limit_degrees'])}
                         result['surface_numeric_tolerance_over_height'] = float(budget['source_position_absolute_limit'])/float(result['height'])
