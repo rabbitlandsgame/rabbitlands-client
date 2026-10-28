@@ -37,13 +37,38 @@ art exactly. No asset is replaced: the shipped bodies, hair and equipment are un
   fallback when a module file is missing. facial_hair 2-5 are the RL beards by name, 1 is
   painted stubble; women draw neither at High (their saved choice is kept). Under the
   RL head the body's face sculpt, PortraitGroom beard shell and painted stubble are off.
-* **Hair-shape contract (hair author, pending assets).** An RL hairstyle may carry blend
-  shapes `hl_length_p`, `hl_length_n`, `hl_volume_p`, `hl_volume_n` (weight 1 = the full
-  change, 0 = as authored) and `hl_detail_1`, `hl_detail_2` (the Tousled and Swept
-  finishes; 0 is the authored finish). `RLHeadRig` drives them from hair_length /
-  hair_volume (`clamp((v - preset) / 50, -1, 1)`, preset = Rowan's values for
-  `rowan_shag`, Mira's for `mira_bun`) and hair_detail; a missing shape is a no-op. The
-  animation importer keeps RESET defaults off `id_`, `ex_` and `hl_` shapes.
+* **Grooming (the hair author's contract).** Both RL hairstyles (the hair author's
+  2026-10-27 builds, fitted to the shipped heads) carry, beside the 42 `id_` shapes:
+  * **`hl_length_p` / `hl_length_n`** (each lock re-meshed along its own growth curve at
+    +60% / -40% of its length, roots pinned; Mira's locks that end in the bun keep their
+    length) and **`hl_volume_p` / `hl_volume_n`** (+80% / -50% of the stand-off above a
+    hugging base, ramped in from the root). Weight 1 is the full effect, 0 the authored
+    hair; every grooming shape stays at least 2.6 mm clear of the skin, the identity
+    extremes included. `RLHeadRig` drives them from hair_length / hair_volume as
+    `x = clamp((v - preset) / 50, -1, 1)` (`_p` for x > 0, `_n` for x < 0), preset =
+    Rowan's values (75 / 76) for `rowan_shag` and Mira's (70 / 72) for `mira_bun`, so
+    0 / 50 / 100 give Rowan length -1 / -0.5 / +0.5. A missing shape is a no-op.
+  * **Fine detail (`hair_detail`).** COLOR_0.A is each point's keep level: 1 for core
+    geometry (shell, clumps, ribbons, bun, braid, curls, baby hairs), 0.5-0.95 spread per
+    card for flyaway and wisp cards; beards and older assets carry 1. `rl_hair.gdshader`
+    drops a fragment where `A < 1 - hair_detail` (the instance uniform, 0-1) through the
+    same alpha scissor as the coverage, so the hair stays in the opaque pass in both
+    renderers. The RL face's `hair_detail` is a level 0-100 (the uniform is a hundredth
+    of it): 50, the default, is the authored look, lower drops flyaways from the lowest
+    keep level up, 0 is smooth, and above 50 nothing more appears - the strands gain up
+    to 35% contrast about the atlas's local mean instead. Beards keep 50.
+  * **From the saved finish.** A Human's hair finish (`hair_detail` 0 Classic, 1 Tousled,
+    2 Swept) gives the level `clamp(50 + 25 * (rank[finish] - rank[preset finish]), 0,
+    100)`, ranked Swept 0 < Classic 1 < Tousled 2 and centred, like length and volume, on
+    the module's own preset (Rowan is Tousled, Mira Swept): `rowan_shag` Classic 25,
+    Tousled 50, Swept 0; `mira_bun` Classic 75, Tousled 100, Swept 50
+    (`data/actors/rl_head_wire_defaults.json` `hair.detail`; a seed for owner review).
+  * **Springs** keep their authored rest lengths; extended tips stay weighted to the last
+    joint and swing with it, shortened locks use fewer joints.
+    `tests/test_rl_head.gd` swings both hairstyles at full length and volume.
+  * The animation importer keeps RESET defaults off `id_`, `ex_` and `hl_` shapes, and
+    `tests/test_rl_head.gd` pins the shipped head builds and fails when any hairstyle or
+    beard records another head build (`headSHA256`).
 * **Portraits.** `ReplicatedActor3D.hold_portrait_pose` / `release_portrait_pose`:
   while a dialogue line shows the speaker (`CampaignPortraitLayer`) or a leaderboard card
   renders, the head keeps its first level of detail, a neutral face and open eyes.
@@ -65,11 +90,9 @@ the wire never set and which is honoured at every quality.
 
 ## Known issues
 
-* `hair/mira_bun.glb` records `headSHA256` `7dc7d99a...`, a female head build older than
-  the shipped `rl_head_female.glb` (`abd93434...`); it needs a rebuild by the hair author.
-  `tests/test_rl_head.gd` reports it as a known issue and fails on any other mismatch.
-* The hl_ hair shapes are not in the hairstyle files yet, so hair length, volume and
-  finish do not change the two RL hairstyles.
+* The saved hair finish reaches the RL hairstyles only as the fine-detail level above;
+  develop's Tousled and Swept reshaping of the game's own hairstyles has no RL
+  counterpart.
 * A missing RL beard file draws the face clean-shaven (with a one-time notice): the
   body's own beard shell cannot be built on the cut body.
 * Texture loading still mipmaps and S3TC-compresses on first use; the packaging route
@@ -185,8 +208,10 @@ beards; mean frame work in ms, two runs each at 26 m.
   develop's 170-345 ms; the first preview takes 2.0-3.2 s against 1.3-2.0 s.
 * **Quality switch** with 40 Humans: Medium/Low to High 2.5-2.9 s against develop's
   4.7-6.3 s; High to Medium 1.2 s the first time (0.1 s after) against 25 ms.
-* **Repository**: the RL assets are 25.7 MB (22 files), against 3.7 MB for develop's High
-  portrait and hair data.
+* **Repository**: the RL assets are 27.0 MB (22 files; 25.7 MB before the hairstyles
+  gained their four grooming shapes), against 3.7 MB for develop's High portrait and hair
+  data. The grooming rebuild left every hairstyle level's triangle count unchanged; the
+  memory figures above predate it (four more blend shapes on each hair mesh).
 
 ## Files
 

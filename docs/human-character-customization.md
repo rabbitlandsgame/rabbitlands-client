@@ -116,9 +116,13 @@ unchanged; switching quality swaps the heads in place.
   therefore a different face from Rowan and Mira at High.
 * **Hair.** Male Parted is drawn as the RL `rowan_shag` and female Buns as the
   RL `mira_bun` hairstyle; every other hairstyle keeps its fitted Low/Medium
-  model with the High hair finish. Hair length, volume and finish apply to the
-  RL hairstyles once their hair-shape data is added (pending), and to the
-  other hairstyles as before.
+  model with the High hair finish. On the RL hairstyles, Hair length and
+  volume lengthen or shorten each lock and loft or flatten the hair around
+  the Rowan and Mira presets, which show the hairstyles as authored, and the
+  hair finish sets how many loose flyaway strands show: Swept is sleekest and
+  Tousled loosest, with the preset's own finish (Tousled for Rowan, Swept for
+  Mira) showing the authored strands. The other hairstyles take length,
+  volume and finish as before.
 * **Facial hair.** Moustache, goatee, short and full beards are RL beards that
   follow facial expressions. Stubble is painted into the RL skin. Women show
   no beard and no stubble at High for now; their saved choice is kept and shows

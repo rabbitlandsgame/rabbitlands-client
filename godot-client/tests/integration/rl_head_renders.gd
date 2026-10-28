@@ -34,6 +34,13 @@ extends SceneTree
 ##   --extremes <preset>     every identity control at +1 and at -1 on that preset
 ##   --brow-style arched --brow-thickness 0.5 --liner-wing 0.8   override the preset
 ##   --brow-grid yes         each brow style at thickness -1, 0 and +1, per preset
+##   --grooming yes          on a dev: look, hair_length and hair_volume each at
+##                           0, 50 and 100 (saved fields, the actor's own path),
+##                           the hair's fine-detail level (RLHeadAppearance
+##                           hair_detail, 0..100) at 0, 50 and 100, and the
+##                           look as saved (`authored`), one at a time
+##   --grooming-values 0,50,100   the values swept
+##   --grooming-motion no    yes lets the hair springs settle between stills
 ##   --sequence Walk         numbered frames of a clip instead of stills (at most
 ##   --frames 48 --fps 24    60), with a procedural head turn (--turn no to keep
 ##   --talk yes              still) and seeded auto-blinks; --talk loops the jaw
@@ -103,6 +110,8 @@ func _run() -> void:
 				await _extremes(actor, preset)
 			elif args.get("brow-grid", "no") == "yes":
 				await _brow_grid(actor, preset)
+			elif args.get("grooming", "no") == "yes":
+				await _grooming(actor, preset)
 			else:
 				await _stills(actor, preset, int(headwear), quality)
 			actor.queue_free()
@@ -238,6 +247,59 @@ func _brow_grid(actor: ReplicatedActor3D, preset: String) -> void:
 					["thin", "mid", "thick"][int(thickness) + 1], view],
 					{"preset": preset, "view": view, "brow_style": style, "brow_thickness": thickness},
 					actor, true)
+
+
+## A dev: look's hair groomed one choice at a time: hair_length, hair_volume
+## (saved fields, re-applied through the actor as an edit would be) and the
+## fine-detail level (set on the RL face: the saved finish has three values),
+## each at the --grooming-values; `authored` is the look as saved.
+func _grooming(actor: ReplicatedActor3D, preset: String) -> void:
+	Stage.pose(actor, str(args.get("clip", "Rest")), float(args.get("time", "0.0")))
+	var rig := actor.rl_head()
+	if rig == null or not actor.has_meta(&"appearance"):
+		push_error("RL head renders: --grooming needs a dev: look drawn with the RL head (%s)" % preset)
+		return
+	# The springs rest at their bind pose (--grooming-motion yes lets them
+	# settle), so the stills differ by the choice alone.
+	rig.set_hair_motion_allowed(args.get("grooming-motion", "no") == "yes")
+	var saved: Dictionary = (actor.get_meta(&"appearance") as Dictionary).duplicate(true)
+	var cases: Array = [["authored", -1]]
+	for field: String in ["hair_length", "hair_volume", "hair_detail"]:
+		for value: String in _list("grooming-values", "0,50,100"):
+			cases.append([field, int(value)])
+	for case: Array in cases:
+		var field: String = case[0]
+		var appearance := saved.duplicate(true)
+		if field in ["hair_length", "hair_volume"]:
+			appearance[field] = case[1]
+		actor.apply_appearance_variants(appearance)
+		actor.set_meta(&"appearance", appearance)
+		Stage.pose(actor, str(args.get("clip", "Rest")), float(args.get("time", "0.0")))
+		if field == "hair_detail":
+			rig.appearance.hair_detail = int(case[1])
+			rig.refresh_colours()
+		var label := field if field == "authored" else "%s_%03d" % [field, int(case[1])]
+		for view: String in _list("views", "front,profile"):
+			Stage.frame(camera, actor, view)
+			await _shot("%s_%s_%s" % [preset, label, view], {"preset": preset, "view": view, "grooming": field,
+				"value": case[1], "hair_detail_uniform": rig.hair_detail_uniform(),
+				"hl_weights": _hl_weights(rig)}, actor, true)
+	actor.apply_appearance_variants(saved)
+	actor.set_meta(&"appearance", saved)
+
+
+## The grooming shapes' weights on the hair's first level.
+func _hl_weights(rig: RLHeadRig) -> Dictionary:
+	var weights := {}
+	var levels: Array = rig.mesh_nodes()["hair"]
+	if levels.is_empty() or (levels[0] as Array).is_empty():
+		return weights
+	var node := (levels[0] as Array)[0] as MeshInstance3D
+	for shape: String in RLHeadRig.HAIR_LENGTH_SHAPES + RLHeadRig.HAIR_VOLUME_SHAPES:
+		var index := RLHeadRig.shape_index(node, shape)
+		if index >= 0:
+			weights[shape] = snappedf(node.get_blend_shape_value(index), 0.0001)
+	return weights
 
 
 func _sequence(actor: ReplicatedActor3D, preset: String) -> void:
