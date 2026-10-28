@@ -82,3 +82,26 @@ The one-time bake is also available through `godot-client/open-crystalback-stati
 The actual client export reproduces the predicted **97.735 mm maximum** surface difference at **Death_A, 2.55 seconds**. The preview has jump buttons for that pose and the largest sampled normal difference at **Jog, 0.2 seconds**. The maximum reset-shape difference is 88.13 mm. Its 8.86 mm RMS across all 5,368 vertices includes the unchanged shell; the earlier 11.25 mm RMS measures just the body. Static normal fitting removes runtime shading corrections too, so this candidate also exposes large localized shading differences.
 
 The fixed bake is **1.558860 MB raw / 0.998255 MB packaged**, with zero corrective GPU buffers. It passes fresh Blender import/action checks and actual-client inspection of 909 states, including 168 directed crossfade states and reset. The large shape differences are intentional evidence for this visual experiment, not an equivalence qualification. The installed asset remains unchanged. `build_tortoise_static_bake.py` exports it from the preserved private audit fits, and the JSON receipt binds the fit and output hashes.
+
+## Improved fixed bake V2
+
+V2 fits the rest mesh and skin weights together, retaining the original 21 bones, bind matrices, all seven bone animations and four influences. It still has no runtime corrective shapes. The first joint least-squares fit suggested a 39.3 mm maximum difference. A further ten offline iterations give the worst training poses greater weight using a p=6 deformation objective, rather than optimizing average error alone. A fixed normal fit is recomputed for the new weights. Coincident vertices share positions and weights throughout; UVs, triangle indices and the shell remain unchanged.
+
+| Same 4,827 client states, body only | First fixed bake | Improved V2 |
+|---|---:|---:|
+| Maximum position difference | 97.776 mm | **33.505 mm** |
+| RMS position difference | 11.447 mm | **1.561 mm** |
+| RMS normal difference | 7.367 degrees | 6.500 degrees |
+| Maximum normal difference | 178.309 degrees | 177.116 degrees |
+| Full packaged size | 998,255 bytes | 1,003,225 bytes |
+| Corrective shapes / GPU buffers | 0 / 0 bytes | 0 / 0 bytes |
+
+The first bake's exported mesh arrays are evaluated at the exact same native skeleton states for this comparison; source/V2 native bone matrices are checked equal. Thus the table excludes sampling differences and the unchanged shell. The denser sample set changes the first bake's measured maximum slightly from its earlier 97.735 mm result. V2 reduces maximum position error by about 66% and body RMS error by about 86%, for 4,970 additional packaged bytes.
+
+V2 is an improvement, not an equivalent replacement. The largest remaining sampled position difference is at **Walk, 1.2433875 seconds**. Blended-pose position error reaches 29.54 mm. Reset/neutral position difference falls from 88.13 to 15.80 mm. Shading remains a major separate limitation: the static normals do not follow every pose-dependent surface change, with the largest sampled angular error at **Jog, 0.1975542 seconds**. The average surface fit improves much more than the shading fit.
+
+Fresh Blender import checks cover 119 clip poses and unchanged bone matrices. Actual client testing covers 2,810 clip states, 2,016 directed crossfade states and reset, including shifted 240 Hz samples and off-grid queries outside the optimizer's training times. Neither this test nor visual approval is a continuous-time guarantee. The original zero-shape bake and the reviewed 30 FPS reference remain preserved.
+
+Open `godot-client/open-crystalback-improved-bake-comparison.bat`, or use `preview_tortoise_corrective_repair.py --variant bake-v2`. It shows the reviewed 30 FPS model on the left and V2 on the right, with jump buttons for remaining position and shading differences. To rebuild from the preserved private fits, use `build_tortoise_static_bake.py --fit robust`; `--fit refined` also exports the earlier joint least-squares fit. These exports do not install either asset.
+
+Further options are targeted helper joints for limb volume/contact and a small residual corrective set for the difficult poses. Helper joints would trade additional skeleton transforms and keys for per-vertex data; a residual set would trade some corrective storage/work for a closer match. Neither extension has yet been implemented or benchmarked for this bake, so their achievable quality and cost remain unmeasured. More fixed-mesh iteration alone cannot be assumed to eliminate the remaining pose-dependent deformation and shading.

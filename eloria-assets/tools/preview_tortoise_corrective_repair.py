@@ -20,7 +20,8 @@ def prepare(godot, variant='rebasis'):
     receipt = ROOT / 'docs/qa/creature-storage/crystalback-tortoise-corrective-repair.json'
     evidence = json.loads(receipt.read_text(encoding='utf-8'))
     models = []
-    records = evidence['models'] if variant == 'skin' else [evidence['models'][0], evidence['static_bake' if variant == 'bake' else 'control']]
+    record_key = {'rebasis': 'control', 'bake': 'static_bake', 'bake-v2': 'bake_v2'}
+    records = evidence['models'] if variant == 'skin' else [evidence['models'][0], evidence[record_key[variant]]]
     for record in records:
         path = ROOT / record['artifact']
         if not path.is_file() or digest(path) != record['sha256']:
@@ -51,11 +52,13 @@ renderer/rendering_method="forward_plus"
     description = f"Both use 30 FPS. Right: {count} corrective shapes; {'revised skin weights' if variant == 'skin' else 'original mesh and skin weights retained'}. Approximate draft for review."
     if variant == 'bake':
         description = 'Right: one fixed mesh + fixed normals, zero corrective shapes. Original rig and all seven bone animations retained.'
-    capture_folder = {'skin': 'preview-captures', 'rebasis': 'control-preview-captures', 'bake': 'static-bake-preview-captures'}[variant]
-    review_key = {'skin': 'preview_review_points', 'rebasis': 'control_preview_review_points', 'bake': 'bake_preview_review_points'}[variant]
+    if variant == 'bake-v2':
+        description = 'Right: improved fixed mesh + skin weights + fixed normals. Zero corrective shapes. Same bones and seven animations.'
+    capture_folder = {'skin': 'preview-captures', 'rebasis': 'control-preview-captures', 'bake': 'static-bake-preview-captures', 'bake-v2': 'bake-v2-preview-captures'}[variant]
+    review_key = {'skin': 'preview_review_points', 'rebasis': 'control_preview_review_points', 'bake': 'bake_preview_review_points', 'bake-v2': 'bake_v2_preview_review_points'}[variant]
     job = {'actor': 'crystalback_tortoise', 'display_name': 'Crystalback Tortoise', 'fps': 30,
-           'title': 'Rabbit Lands | Tortoise fixed mesh bake | No corrective shapes' if variant == 'bake' else 'Rabbit Lands | Tortoise corrective repair pilot',
-           'heading': 'Crystalback Tortoise / One-time mesh bake' if variant == 'bake' else 'Crystalback Tortoise / Corrective repair pilot',
+           'title': 'Rabbit Lands | Tortoise improved bake V2 | Zero corrective shapes' if variant == 'bake-v2' else ('Rabbit Lands | Tortoise fixed mesh bake | No corrective shapes' if variant == 'bake' else 'Rabbit Lands | Tortoise corrective repair pilot'),
+           'heading': 'Crystalback Tortoise / Improved mesh bake V2' if variant == 'bake-v2' else ('Crystalback Tortoise / One-time mesh bake' if variant == 'bake' else 'Crystalback Tortoise / Corrective repair pilot'),
            'description': description,
            'clips': evidence['clips'], 'models': models, 'output': str(output / capture_folder),
            'summary': f"Raw {a['raw_bytes']/1e6:.2f} -> {b['raw_bytes']/1e6:.2f} MB | Packaged {a['rlcz_bytes']/1e6:.2f} -> {b['rlcz_bytes']/1e6:.2f} MB | Drag / zoom either pane to move both cameras.",
@@ -78,7 +81,7 @@ def main():
     parser.add_argument('--godot', type=Path, default=Path(os.environ.get('GODOT', 'C:/rabbitlands/rabbitlands-client/godot-client/Godot_v4.7.2-stable_win64.exe')))
     parser.add_argument('--prepare-only', action='store_true')
     parser.add_argument('--smoke', action='store_true')
-    parser.add_argument('--variant', choices=['rebasis', 'skin', 'bake'], default='rebasis', help='Compare fewer shapes, repaired skin, or the fixed mesh without any runtime correctives')
+    parser.add_argument('--variant', choices=['rebasis', 'skin', 'bake', 'bake-v2'], default='rebasis', help='Compare fewer shapes, repaired skin, the fixed mesh, or the improved mesh/skin bake')
     args = parser.parse_args()
     output, project, job, environment = prepare(args.godot, args.variant)
     print('TORTOISE_REPAIR_PREVIEW_PREPARED', project, flush=True)
