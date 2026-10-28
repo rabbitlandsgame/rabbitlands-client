@@ -3751,15 +3751,9 @@ func _sync_bulk_option_menus() -> void:
 			menu.set_item_checked(index, index < values.size() and bool(values[index]))
 
 func _on_bulk_button_gui_input(event: InputEvent, kind: String) -> void:
-	if not event is InputEventMouseButton:
-		return
-	var mouse: InputEventMouseButton = event as InputEventMouseButton
-	if not mouse.pressed or mouse.button_index != MOUSE_BUTTON_RIGHT:
-		return
-	var menu: PopupMenu = _store_options_menu if kind == "store" else _drop_options_menu
-	menu.position = Vector2i(get_viewport().get_mouse_position())
-	menu.popup()
-	(inventory_store_all if kind == "store" else inventory_drop_all).accept_event()
+	if inventory_workspace != null:
+		inventory_workspace.bulk_actions.shortcut_input(event, kind,
+			inventory_store_all if kind == "store" else inventory_drop_all)
 
 func _on_bulk_option_selected(option_id: int, kind: String) -> void:
 	if option_id < 0 or option_id >= 4:
@@ -3771,12 +3765,14 @@ func _on_bulk_option_selected(option_id: int, kind: String) -> void:
 	_save_hud_settings()
 
 func _inventory_slot_is_protected(slot: int, kind: String) -> bool:
-	if slot >= 24: return false
+	if slot < 0 or slot >= 24: return false
+	var columns: int = maxi(1, inventory_grid.columns)
+	var last_row: int = (23 / columns) * columns
 	var values: Array = _bulk_exclusions.get(kind, [false, false, false, false]) as Array
-	return ((bool(values[0]) and slot < 6)
-		or (bool(values[1]) and slot >= 18)
-		or (bool(values[2]) and slot % 6 == 0)
-		or (bool(values[3]) and slot % 6 == 5))
+	return ((bool(values[0]) and slot < columns)
+		or (bool(values[1]) and slot >= last_row)
+		or (bool(values[2]) and slot % columns == 0)
+		or (bool(values[3]) and slot % columns == columns - 1))
 
 func _on_inventory_store_all_pressed() -> void:
 	if bool(AppState.storage.get("read_only", false)):

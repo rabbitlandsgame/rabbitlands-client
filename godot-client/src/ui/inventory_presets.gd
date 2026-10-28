@@ -30,6 +30,10 @@ static func preset(id: String) -> Dictionary:
 	result.parts.actions.columns = 3
 	for action: String in ["store", "get", "drop", "mix", "lists"]:
 		result.parts.actions["show_" + action] = true
+	if id in ["unified", "tabbed", "dock"]:
+		for action: String in ["store", "drop", "mix"]:
+			result.parts.actions["show_" + action] = false
+		result.parts.actions.columns = 2
 	result["show_description"] = true
 	result["show_stats"] = true
 	result["show_comparison"] = true
@@ -81,7 +85,7 @@ static func normalise(raw: Variant) -> Dictionary:
 		var input: Variant = parts.get(key, {})
 		if not input is Dictionary: continue
 		var part: Dictionary = result.parts[key]
-		part.enabled = true if key == "backpack" else input.get("enabled", true) == true
+		part.enabled = true if key == "backpack" else input.get("enabled", part.enabled) == true
 		part.cell = roundi(number(input.get("cell"), part.cell, 52 if key == "pouch" else 28, 80 if key == "pouch" else 64))
 		part.columns = roundi(number(input.get("columns"), part.columns, 1, 12 if key == "backpack" else 8))
 		part.height = roundi(number(input.get("height"), part.height, 140 if key == "inspection" else 32, 400))
@@ -91,7 +95,7 @@ static func normalise(raw: Variant) -> Dictionary:
 		if key == "actions":
 			part.columns = clampi(part.columns, 1, 5)
 			for action: String in ["store", "get", "drop", "mix", "lists"]:
-				part["show_" + action] = input.get("show_" + action, true) == true
+				part["show_" + action] = input.get("show_" + action, part["show_" + action]) == true
 		var offset: Variant = input.get("offset")
 		if offset is Vector2 and offset.is_finite(): part.offset = offset.clamp(Vector2(-500, -300), Vector2(800, 500))
 	return result

@@ -87,6 +87,13 @@ func _ready() -> void:
 	store_button = _button(action_grid, "Store · Deposit the selected quantity; open storage first", func() -> void: Network.deposit_storage(selected, _quantity()))
 	drop_button = _button(action_grid, "Drop · Drop the selected quantity", func() -> void: Network.drop_inventory_item(selected, _quantity()))
 	mix_button = _button(action_grid, "Mix · Open crafting", _open_mix)
+	for pair: Array in [[store_button, "store"], [drop_button, "drop"], [mix_button, "mix"]]:
+		var button: Button = pair[0]
+		button.gui_input.connect(_action_shortcut_input.bind(pair[1], button))
+	store_button.tooltip_text = "Store · Left: selected quantity · Right: store all · Middle: protection options"
+	drop_button.tooltip_text = "Drop · Left: selected quantity · Right: drop all · Middle: protection options"
+	mix_button.tooltip_text = "Mix · Left: crafting · Right: mix all · Middle: mixing options"
+
 	AppState.state_changed.connect(_changed)
 	sync()
 
@@ -210,3 +217,7 @@ func _sync_actions() -> void:
 	drop_button.disabled = held <= 0 or editing
 	store_button.disabled = held <= 0 or editing or not AppState.storage.get("open", false) or AppState.storage.get("read_only", false)
 	mix_button.disabled = main == null or editing or AppState.trade.get("open", false) or AppState.storage.get("open", false)
+
+func _action_shortcut_input(event: InputEvent, action: String, button: Button) -> void:
+	if main == null or main.inventory_workspace == null: return
+	main.inventory_workspace.bulk_actions.shortcut_input(event, action, button)
