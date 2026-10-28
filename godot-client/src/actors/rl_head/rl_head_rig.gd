@@ -34,10 +34,18 @@ extends Node3D
 ## fitted hairstyle (ReplicatedActor3D._add_hair_variant, the one path every
 ## quality uses), and this rig only paints the hairline under it.
 ##
-## Identity is blend-shape weights only - changing a control never rebuilds a
-## mesh - and per-actor colours are instance uniforms on shared materials.
+## Identity is blend-shape weights - changing a control never rebuilds a mesh
+## - and per-actor colours are instance uniforms on shared materials.
 ## Expressions belong to the RLFaceExpression child, which never writes `id_`
 ## shapes; this never writes `ex_` shapes.
+##
+## The levels shown are drawn with their identity baked in (RLHeadIdentityBake:
+## one cached mesh per distinct face and level, shared by every actor wearing
+## it, keeping only the `ex_` shapes live), so a crowd does not deform up to 42
+## identity shapes per part every frame. Each mesh node keeps its source mesh
+## (SOURCE_MESH_META) and falls back to it, with the identity weights set live,
+## while its bake is pending, when the bake budget is spent, for the levels not
+## shown, and for good once `set_control` edits a face interactively (the lab).
 ##
 ## Every rig counts as one user of RLHeadLibrary's shared caches from its
 ## creation to its deletion; the last one to go releases them (heads, beards,
@@ -59,6 +67,10 @@ const MESH_META := &"rl_head"
 ## review 2026-10-27). The head itself still shadows the neck.
 const HAIR_SHADOWS := GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 const REBOUND_SKIN_POOL := preload("res://src/actors/rebound_skin_pool.gd")
+const IDENTITY_BAKE := preload("res://src/actors/rl_head/rl_head_identity_bake.gd")
+## On every head, beard and hair mesh node: the shared, unbaked mesh it was
+## built with, which carries the live identity shapes.
+const SOURCE_MESH_META := &"rl_source_mesh"
 ## Where the next LOD takes over, in metres from the camera, by quality, when
 ## an asset ships more than one: HIGH draws lod0 to 10 m, lod1 to 25 m and lod2
 ## beyond; MEDIUM starts at lod1 and hands over to lod2 at 18 m; LOW is lod2.
@@ -127,6 +139,12 @@ var _body_material: Material = null
 ## neutral expression, eyes open, no blinking, no distance switching.
 var _portrait_pose := false
 var _counted := false
+## Mesh node instance id -> the RLHeadIdentityBake key it holds (shown, or
+## waiting for its bake while the source mesh draws the identity live).
+var _bakes: Dictionary = {}
+## The face is being edited control by control (`set_control`): every level
+## stays live from then on.
+var _live_identity := false
 
 ## Mesh resource id -> {blend shape name: index}, shared by every actor.
 static var _shape_indices: Dictionary = {}
@@ -170,10 +188,20 @@ static func clear_caches() -> void:
 	_shape_indices.clear()
 
 
+## Drops one mesh's blend-shape index table (a baked mesh leaving the cache).
+static func forget_mesh(mesh: Mesh) -> void:
+	if mesh != null:
+		_shape_indices.erase(mesh.get_instance_id())
+
+
 func _notification(what: int) -> void:
-	if what == NOTIFICATION_PREDELETE and _counted:
-		_counted = false
-		RLHeadLibrary.release()
+	if what == NOTIFICATION_PREDELETE:
+		for entry_key: Variant in _bakes.values():
+			IDENTITY_BAKE.release(str(entry_key))
+		_bakes.clear()
+		if _counted:
+			_counted = false
+			RLHeadLibrary.release()
 
 
 ## Applies a whole face. Only what differs is rebuilt: a new sex replaces the
@@ -202,8 +230,10 @@ func apply_appearance(face: RLHeadAppearance) -> bool:
 
 
 ## One identity control, in [-1, 1], on the head, the beard and the hair.
+## Drawn live from then on (no bake per slider step).
 func set_control(control_name: String, value: float) -> void:
 	appearance.set_control(control_name, value)
+	_go_live()
 	var amount := appearance.control(control_name)
 	for mesh_node: MeshInstance3D in identity_targets():
 		_set_shape(mesh_node, "id_%s_p" % control_name, maxf(amount, 0.0))
@@ -484,6 +514,7 @@ func _build_hair() -> void:
 			continue
 		var kept: Array[MeshInstance3D] = []
 		for mesh_node: MeshInstance3D in nodes:
+			mesh_node.set_meta(SOURCE_MESH_META, mesh_node.mesh)
 			_assign_materials(mesh_node, _hair_style)
 			mesh_node.cast_shadow = HAIR_SHADOWS
 			_present(mesh_node)
@@ -504,6 +535,7 @@ func _build_hair() -> void:
 
 
 func _free_hair() -> void:
+	_release_bakes(_hair_lods)
 	_hair_lods = []
 	_hair_motion = null
 	if is_instance_valid(_hair_attachment):
@@ -535,6 +567,7 @@ func _instance_levels(lods: Array, prefix: String, style: String) -> Array:
 			var mesh_node := MeshInstance3D.new()
 			mesh_node.name = "%s_lod%d_%s" % [prefix, level, piece["name"]]
 			mesh_node.mesh = piece["mesh"] as Mesh
+			mesh_node.set_meta(SOURCE_MESH_META, piece["mesh"])
 			mesh_node.skin = skin
 			add_child(mesh_node)
 			mesh_node.skeleton = mesh_node.get_path_to(_skeleton)
@@ -604,6 +637,7 @@ func _show_band(band: int) -> void:
 	for group: Array in [_head_lods, _beard_lods, _hair_lods]:
 		_show_levels(group, band)
 	set_process(_band_count() > 1 and not _portrait_pose)
+	_bake_shown()
 
 
 func _show_levels(levels: Array, band: int) -> void:
@@ -638,6 +672,7 @@ func _apply_portrait_pose() -> void:
 
 
 func _free_levels(levels: Array) -> void:
+	_release_bakes(levels)
 	for level: Array in levels:
 		for mesh_node: Variant in level:
 			if is_instance_valid(mesh_node):
@@ -688,34 +723,180 @@ static func _is_body_patch(material: Material) -> bool:
 # ---------------------------------------------------------------- values
 
 func _apply_controls() -> void:
+	for mesh_node: MeshInstance3D in identity_targets():
+		_apply_identity_weights(mesh_node)
+
+
+## The identity controls this head declares, plus any the face sets beyond them.
+func _control_names() -> PackedStringArray:
 	var names := PackedStringArray(_head_info.get("control_names", PackedStringArray()))
 	for control_name: Variant in appearance.controls:
 		if not names.has(str(control_name)):
 			names.append(str(control_name))
-	for mesh_node: MeshInstance3D in identity_targets():
-		for control_name: String in names:
-			var amount := appearance.control(control_name)
-			_set_shape(mesh_node, "id_%s_p" % control_name, maxf(amount, 0.0))
-			_set_shape(mesh_node, "id_%s_n" % control_name, maxf(-amount, 0.0))
+	return names
+
+
+## Every identity weight of the face on one mesh node (live; a baked mesh has
+## no `id_` shapes left and ignores them).
+func _apply_identity_weights(mesh_node: MeshInstance3D) -> void:
+	for control_name: String in _control_names():
+		var amount := appearance.control(control_name)
+		_set_shape(mesh_node, "id_%s_p" % control_name, maxf(amount, 0.0))
+		_set_shape(mesh_node, "id_%s_n" % control_name, maxf(-amount, 0.0))
 
 
 ## Hair length, volume and finish on an RL hairstyle that carries the
 ## hair-shape blend shapes; a hairstyle without them is left as authored.
 func _apply_hair_shapes() -> void:
-	var length := clampf(appearance.hair_length, -1.0, 1.0)
-	var volume := clampf(appearance.hair_volume, -1.0, 1.0)
-	var detail := clampi(appearance.hair_detail, 0, HAIR_DETAIL_SHAPES.size())
+	var weights := _hair_shape_weights()
 	for level: Array in _hair_lods:
 		for node: Variant in level:
 			if not is_instance_valid(node):
 				continue
-			var mesh_node := node as MeshInstance3D
-			_set_shape(mesh_node, HAIR_LENGTH_SHAPES[0], maxf(length, 0.0))
-			_set_shape(mesh_node, HAIR_LENGTH_SHAPES[1], maxf(-length, 0.0))
-			_set_shape(mesh_node, HAIR_VOLUME_SHAPES[0], maxf(volume, 0.0))
-			_set_shape(mesh_node, HAIR_VOLUME_SHAPES[1], maxf(-volume, 0.0))
-			for index: int in HAIR_DETAIL_SHAPES.size():
-				_set_shape(mesh_node, HAIR_DETAIL_SHAPES[index], 1.0 if detail == index + 1 else 0.0)
+			for shape: String in weights:
+				_set_shape(node as MeshInstance3D, shape, float(weights[shape]))
+
+
+## The hair-shape weights of the face: length and volume as _p/_n pairs, and
+## the chosen finish's shape at full weight.
+func _hair_shape_weights() -> Dictionary:
+	var length := clampf(appearance.hair_length, -1.0, 1.0)
+	var volume := clampf(appearance.hair_volume, -1.0, 1.0)
+	var detail := clampi(appearance.hair_detail, 0, HAIR_DETAIL_SHAPES.size())
+	var weights := {HAIR_LENGTH_SHAPES[0]: maxf(length, 0.0), HAIR_LENGTH_SHAPES[1]: maxf(-length, 0.0),
+		HAIR_VOLUME_SHAPES[0]: maxf(volume, 0.0), HAIR_VOLUME_SHAPES[1]: maxf(-volume, 0.0)}
+	for index: int in HAIR_DETAIL_SHAPES.size():
+		weights[HAIR_DETAIL_SHAPES[index]] = 1.0 if detail == index + 1 else 0.0
+	return weights
+
+
+func _is_hair_node(mesh_node: MeshInstance3D) -> bool:
+	for level: Array in _hair_lods:
+		if level.has(mesh_node):
+			return true
+	return false
+
+
+# ---------------------------------------------------------------- identity bake
+
+## What a mesh node's bake bakes in: every identity weight, and on a hair node
+## the hair-shape weights.
+func _baked_weights(mesh_node: MeshInstance3D) -> Dictionary:
+	var weights := {}
+	for control_name: String in _control_names():
+		var amount := appearance.control(control_name)
+		weights["id_%s_p" % control_name] = maxf(amount, 0.0)
+		weights["id_%s_n" % control_name] = maxf(-amount, 0.0)
+	if _is_hair_node(mesh_node):
+		weights.merge(_hair_shape_weights(), true)
+	return weights
+
+
+## The shown level of every part draws its baked mesh (or waits for it, live);
+## every other level goes back to its live source mesh and lets its bake go.
+func _bake_shown() -> void:
+	var baking := not _live_identity and IDENTITY_BAKE.enabled()
+	for group: Array in [_head_lods, _beard_lods, _hair_lods]:
+		var shown := mini(_lod_band, group.size() - 1)
+		for index: int in group.size():
+			for node: Variant in group[index]:
+				if not is_instance_valid(node):
+					continue
+				if baking and index == shown:
+					_bake(node as MeshInstance3D)
+				else:
+					_unbake(node as MeshInstance3D, true)
+
+
+func _bake(mesh_node: MeshInstance3D) -> void:
+	var source := mesh_node.get_meta(SOURCE_MESH_META, null) as ArrayMesh
+	if source == null or not IDENTITY_BAKE.has_baked_shapes(source):
+		return
+	var weights := _baked_weights(mesh_node)
+	var entry_key := IDENTITY_BAKE.key(source, weights)
+	var id := mesh_node.get_instance_id()
+	if str(_bakes.get(id, "")) == entry_key:
+		return
+	_unbake(mesh_node, true)
+	var baked := IDENTITY_BAKE.acquire(source, weights, _on_baked.bind(id, entry_key))
+	if baked == null and not IDENTITY_BAKE.holds(entry_key):
+		# No bake to be had now (budget spent): this node stays live.
+		return
+	_bakes[id] = entry_key
+	if baked != null:
+		_show_baked(mesh_node, baked)
+
+
+func _on_baked(baked: ArrayMesh, id: int, entry_key: String) -> void:
+	if str(_bakes.get(id, "")) != entry_key:
+		return
+	var mesh_node := instance_from_id(id) as MeshInstance3D
+	if mesh_node != null:
+		_show_baked(mesh_node, baked)
+
+
+func _show_baked(mesh_node: MeshInstance3D, baked: ArrayMesh) -> void:
+	if mesh_node.mesh == baked:
+		return
+	mesh_node.mesh = baked
+	_after_mesh_swap(mesh_node)
+
+
+## Lets a node's bake go; with `restore`, it draws its source mesh live again.
+func _unbake(mesh_node: MeshInstance3D, restore: bool) -> void:
+	var id := mesh_node.get_instance_id()
+	if _bakes.has(id):
+		IDENTITY_BAKE.release(str(_bakes[id]))
+		_bakes.erase(id)
+	if not restore:
+		return
+	var source := mesh_node.get_meta(SOURCE_MESH_META, null) as Mesh
+	if source != null and mesh_node.mesh != source:
+		mesh_node.mesh = source
+		_after_mesh_swap(mesh_node)
+
+
+## A node's mesh changed: MeshInstance3D keeps blend-shape weights by index
+## across meshes, so every weight is cleared and written again (identity and
+## hair shapes here, expressions by RLFaceExpression), with the colours.
+func _after_mesh_swap(mesh_node: MeshInstance3D) -> void:
+	for index: int in mesh_node.mesh.get_blend_shape_count():
+		mesh_node.set_blend_shape_value(index, 0.0)
+	_apply_identity_weights(mesh_node)
+	if _is_hair_node(mesh_node):
+		var weights := _hair_shape_weights()
+		for shape: String in weights:
+			_set_shape(mesh_node, shape, float(weights[shape]))
+	_apply_colours()
+	if _expression != null:
+		_expression.set_targets(expression_targets())
+
+
+func _release_bakes(levels: Array) -> void:
+	for level: Array in levels:
+		for node: Variant in level:
+			if is_instance_valid(node):
+				_unbake(node as MeshInstance3D, false)
+
+
+## Every level draws its live source mesh from now on (interactive editing).
+func _go_live() -> void:
+	if _live_identity:
+		return
+	_live_identity = true
+	for mesh_node: MeshInstance3D in identity_targets():
+		_unbake(mesh_node, true)
+
+
+## Whether a mesh node draws a baked identity now (diagnostics and tests).
+func is_baked(mesh_node: MeshInstance3D) -> bool:
+	return mesh_node != null and mesh_node.mesh != null \
+		and mesh_node.mesh != mesh_node.get_meta(SOURCE_MESH_META, mesh_node.mesh)
+
+
+## The unbaked mesh a node was built with (its identity shapes intact).
+static func source_mesh(mesh_node: MeshInstance3D) -> Mesh:
+	return mesh_node.get_meta(SOURCE_MESH_META, mesh_node.mesh) as Mesh if mesh_node != null else null
 
 
 func _apply_colours() -> void:

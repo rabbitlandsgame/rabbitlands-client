@@ -1148,10 +1148,12 @@ static func reload_rl_heads_switch() -> void:
 
 ## Whether this renderer draws the RL head for the game's Humans. The
 ## Compatibility renderer does not (it keeps develop's High head): there the
-## RL head's live identity blend shapes cost 2.4-3.1x develop's crowd frame
-## time and its instance uniforms overflow the 4096-item global buffer before
-## 160 Humans (.local/rl-high perf, 2026-10-27; feasibility review fix A,
-## until identity weights are baked per face). RL_HEADS=all draws it anyway.
+## RL head's live identity blend shapes cost 3.2-3.9x develop's crowd frame
+## time; with the identity baked per face (RLHeadIdentityBake, on by default
+## in that renderer) a 40/160-Human crowd still takes 1.46x/1.24x (p95
+## 1.42x/1.32x), and its instance uniforms overflow the 4096-item global
+## buffer between 40 and 160 Humans (.local/rl-high/gate, 2026-10-28;
+## feasibility review fix A). RL_HEADS=all draws it anyway, baked.
 static func rl_heads_renderer_supported() -> bool:
 	rl_heads_classic()
 	return RL_HEADS_EVERYWHERE.has(_rl_heads_switch) \
@@ -1489,8 +1491,9 @@ func _rl_headwear_sources(hair: String) -> Array:
 		if levels.is_empty():
 			continue
 		for mesh_node: MeshInstance3D in levels[0]:
+			# The unbaked source: the fits are keyed by part, not by face.
 			sources.append({"key": "%s:%s:%s:%s" % [group, _rl_head.appearance.sex,
-				hair if group == "hair" else "", mesh_node.name], "mesh": mesh_node.mesh})
+				hair if group == "hair" else "", mesh_node.name], "mesh": RLHeadRig.source_mesh(mesh_node)})
 	return sources
 
 func render_diagnostics() -> Dictionary:

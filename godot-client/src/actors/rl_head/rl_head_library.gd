@@ -16,8 +16,8 @@ extends RefCounted
 ## `release`). When the last one goes - every Human switched down from High,
 ## or the last one left the scene - `release_unused` drops the cached pieces,
 ## textures, materials and parsed documents, GlbSceneCache's scenes of the RL
-## files, the body cuts and the headwear refits, as develop's own High
-## portrait releases its caches with its last user.
+## files, the body cuts, the headwear refits and the baked identities, as
+## develop's own High portrait releases its caches with its last user.
 
 const ROOT := "res://assets/actors/rl_heads/"
 const HAIR_DIR := ROOT + "hair/"
@@ -25,6 +25,7 @@ const BEARD_DIR := ROOT + "beards/"
 const TEXTURE_DIR := ROOT + "textures/"
 const MANIFEST_PATH := TEXTURE_DIR + "manifest.json"
 const GLB_MESH_EXTRAS := preload("res://src/actors/glb_mesh_extras.gd")
+const IDENTITY_BAKE := preload("res://src/actors/rl_head/rl_head_identity_bake.gd")
 const SHADERS := {
 	"rl_skin": preload("res://src/actors/rl_head/rl_skin.gdshader"),
 	"rl_eye": preload("res://src/actors/rl_head/rl_eye.gdshader"),
@@ -128,6 +129,7 @@ static func release_unused() -> void:
 	_manifest = null
 	RLHeadBodyCut.clear()
 	RLHeadwearFit.clear_caches()
+	IDENTITY_BAKE.clear()
 	RLHeadRig.clear_caches()
 
 
