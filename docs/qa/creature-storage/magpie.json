@@ -450,5 +450,37 @@
     "status": "passed",
     "actual_model_scale": 0.900000095367432,
     "visual_review": "Complete motion contact board and full-cycle previews inspected; no framing clipping observed."
+  },
+  "strict_actual_import_numeric_budget": {
+    "actor": "magpie",
+    "source_sha256": "9ebfd307319cc3798e5887017e24a3d7061c057eee57810f349ef59679a8bc40",
+    "candidate_sha256": "d9081c27122de9a0aaf860515da5f72bae9e71b62fed12ff8e813ffe742912c7",
+    "passed": true,
+    "source_rest_largest_axis_extent": 0.9999998183336484,
+    "position_budget": 2.384185791015625e-07,
+    "normal_angle_budget_degrees": 0.0001,
+    "checks": {
+      "native": {
+        "maximum_position_error": 1.6935183176400978e-07,
+        "maximum_normal_angle_degrees": 1.6266572668182135e-05,
+        "passed": true
+      },
+      "imported": {
+        "maximum_position_error": 1.6935183176400978e-07,
+        "maximum_normal_angle_degrees": 1.6266572668182135e-05,
+        "passed": true
+      }
+    },
+    "native_original_receipt_sha256": "f342c1d3075facade95ad70437469caf018f569e97eb4717f569488224c36dfc",
+    "scope": "Original qualified native actual-arrays296pose report and new fresh editor-import actual-arrays296pose report, same canonical source/final hashes; strict model-space Euclidean4ULP and0.0001degree caps, no changed frames or thresholds."
+  },
+  "fresh_import_strict_supplement": {
+    "passed": true,
+    "source_sha256": "9ebfd307319cc3798e5887017e24a3d7061c057eee57810f349ef59679a8bc40",
+    "candidate_sha256": "d9081c27122de9a0aaf860515da5f72bae9e71b62fed12ff8e813ffe742912c7",
+    "all_native_clips": 8,
+    "actual_array_pose_and_crossfade_samples": 296,
+    "family_loops_holds_reset_playback_passed": true,
+    "scope": "Additional independent fresh editor import and actual array source/candidate comparison for original/final immutable binaries; model, previous fullRGB captures and artistic status unchanged."
   }
 }
