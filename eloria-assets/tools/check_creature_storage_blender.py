@@ -7,6 +7,7 @@ from mathutils import Matrix, Vector
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 from video_motion.blender_vertex_identity import imported_bindings, document, array
 from video_motion.blender_step_time import step_safe_frame
+from video_motion.blender_bone_identity import multiple_armature_bindings
 
 job = json.loads(
     pathlib.Path(sys.argv[sys.argv.index("--") + 1]).read_text(encoding="utf-8")
@@ -83,21 +84,48 @@ for label in ["baseline", "candidate"]:
     bpy.context.view_layer.update()
     all_bindings, default_weights, identity = imported_bindings(path, objects)
     bone_names = list(next(iter(w["clips"].values()))[0]["bones"])
-    arm = next(
-        o
-        for o in objects
-        if o.type == "ARMATURE" and set(bone_names).issubset(o.pose.bones.keys())
-    )
+    arms = [ob for ob in objects if ob.type == "ARMATURE"]
+    if len(arms) == 1:
+        arm = arms[0]
+        assert set(bone_names).issubset(arm.pose.bones.keys())
+        bone_bindings = {name: [(arm, arm.pose.bones[name])] for name in bone_names}
+        bone_identity = {"single_armature": arm.name}
+    else:
+        observations = json.loads(
+            (out / "blender-source-bone-observations.json").read_text()
+        )
+        assert (
+            observations["source_sha256"]
+            == hashlib.sha256(pathlib.Path(job["source"]).read_bytes()).hexdigest()
+        )
+        assert (
+            observations["witness_sha256"]
+            == hashlib.sha256(pathlib.Path(job["witness"]).read_bytes()).hexdigest()
+        )
+        bone_bindings, bone_identity = multiple_armature_bindings(
+            path, arms, observations["observed_original_joint_nodes"]
+        )
+        assert set(bone_names).issubset(bone_bindings)
+        bone_identity["source_observation_correspondence"] = observations
+    bone_identity["original_action_slots_present"] = {
+        clip: {
+            arm.name: action.as_pointer() in slots_by_data.get(arm.as_pointer(), {})
+            for arm in arms
+        }
+        for clip, action in clips.items()
+    }
 
     def select(clip):
         action = clips[clip]
-        for bone in arm.pose.bones:
-            bone.matrix_basis = Matrix.Identity(4)
-        arm.animation_data_create()
-        arm.animation_data.action = action
-        arm.animation_data.action_slot = slots_by_data[arm.as_pointer()][
-            action.as_pointer()
-        ]
+        for arm in arms:
+            for bone in arm.pose.bones:
+                bone.matrix_basis = Matrix.Identity(4)
+            arm.animation_data_create()
+            arm.animation_data.action = None
+            slot = slots_by_data.get(arm.as_pointer(), {}).get(action.as_pointer())
+            if slot is not None:
+                arm.animation_data.action = action
+                arm.animation_data.action_slot = slot
         for ob in objects:
             if ob.type != "MESH" or not ob.data.shape_keys:
                 continue
@@ -174,9 +202,13 @@ for label in ["baseline", "candidate"]:
             ]
         )
         bones = {
-            bone.name: np.array(arm.matrix_world @ bone.matrix)
+            arm.name + "/" + bone.name: np.array(arm.matrix_world @ bone.matrix)
+            for arm in arms
             for bone in arm.pose.bones
         }
+        if "retained_bone_matrices_per_pose" not in direct:
+            direct["retained_bone_matrices_per_pose"] = len(bones)
+        assert direct["retained_bone_matrices_per_pose"] == len(bones)
         if label == "baseline":
             baseline_samples[signature] = (surface, bones)
             return
@@ -241,10 +273,13 @@ for label in ["baseline", "candidate"]:
             for name, values in entry["bones"].items():
                 bone_error = max(
                     bone_error,
-                    (
-                        arm.matrix_world @ arm.pose.bones[name].head
-                        - convert((values[3], values[7], values[11]))
-                    ).length
+                    max(
+                        (
+                            arm.matrix_world @ bone.head
+                            - convert((values[3], values[7], values[11]))
+                        ).length
+                        for arm, bone in bone_bindings[name]
+                    )
                     / w["height"],
                 )
         assert surface_error < 0.0002 and bone_error < 0.00015, (
@@ -265,6 +300,7 @@ for label in ["baseline", "candidate"]:
         "passed": True,
         "surface_probes": len(bindings),
         "vertex_identity": identity,
+        "bone_identity": bone_identity,
         "binding_method": "Full original GLB primitive vertex order, independently proved against basis/UV/skin/normals/all POSITION target data; frozen source IDs retained through partition mapping.",
         "clips": metrics,
         "step_frame_correspondence": time_correspondence,

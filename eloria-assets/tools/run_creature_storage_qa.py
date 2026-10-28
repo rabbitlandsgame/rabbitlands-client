@@ -145,6 +145,9 @@ def main():
     elif args.phase == "blender":
         if args.blender is None:
             parser.error("--blender is required")
+        from video_motion.blender_bone_observations import prepare_bone_observations
+
+        prepare_bone_observations(job)
         child(
             [
                 str(args.blender),
