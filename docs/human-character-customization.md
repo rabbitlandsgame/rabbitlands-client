@@ -124,8 +124,8 @@ unchanged; switching quality swaps the heads in place.
   finish runs from sleek to messy: Swept is sleekest and Tousled messiest, and
   the preset's own finish (Tousled for Rowan, Swept for Mira) shows the
   authored strands. A sleeker finish drops loose flyaway strands, and a
-  messier one breaks the strands up more. The other hairstyles take length,
-  volume and finish as before.
+  messier one adds strays, frizz and loose locks and breaks the strands up
+  more. The other hairstyles take length, volume and finish as before.
 * **Facial hair.** Moustache, goatee, short and full beards are RL beards that
   follow facial expressions. Stubble is painted into the RL skin. Women show
   no beard and no stubble at High for now; their saved choice is kept and shows

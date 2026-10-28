@@ -140,8 +140,9 @@ func _check_shipping_route() -> void:
 
 ## The head builds shipped, by sex. The hairstyles and beards beside them were
 ## fitted to exactly these (2026-10-28: mira_bun and rowan_shag rebuilt with
-## the grooming shapes and keep levels). A new head build needs its hair and
-## beards rebuilt and this table changed with them.
+## the grooming shapes and keep levels, then with the messy flyaway band). A
+## new head build needs its hair and beards rebuilt and this table changed
+## with them.
 const SHIPPED_HEADS := {
 	"female": "abd93434b4d06be2f1b55ae5a71f7cc701e1abf286f4939c1f700e92cb523636",
 	"male": "cae93a7f3366c5b01fb0134d6048435602686d1eda9edc4c3e73cb9adf6ddbc6",
@@ -183,9 +184,11 @@ func _check_asset_consistency() -> void:
 
 
 ## The hair author's contract on one hairstyle as imported: every level
-## carries the head's identity shapes and the four grooming shapes, its clumps
-## are core geometry (COLOR_0.A = 1) and its cards keep levels in 0.5..1, with
-## fine detail below 1 on the first level.
+## carries the head's identity shapes and the four grooming shapes; keep levels
+## (COLOR_0.A) are core geometry (1), authored fine detail (0.5..0.95, cards
+## only) or messy extras (0.05..0.45, which appear above level 50: strays,
+## frizz, loose locks and tips, cards or clumps); the first level has both
+## fine and messy detail and the last is all core.
 func _check_hair_asset(style: String) -> void:
 	var path := RLHeadLibrary.hair_path(style)
 	var extras := RLHeadLibrary.asset_extras(path, "rlHair")
@@ -200,6 +203,7 @@ func _check_hair_asset(style: String) -> void:
 	wanted.sort()
 	var levels := {}
 	var fine_points := 0
+	var messy_points := 0
 	var bad: Array = []
 	for node: Node in scene.find_children("*", "MeshInstance3D", true, false):
 		var mesh := (node as MeshInstance3D).mesh
@@ -207,6 +211,7 @@ func _check_hair_asset(style: String) -> void:
 		levels[level] = true
 		var ids := 0
 		var grooming: Array[String] = []
+		var last := level == 2
 		for index: int in mesh.get_blend_shape_count():
 			var shape := str(mesh.get_blend_shape_name(index))
 			if shape.begins_with("id_"):
@@ -226,14 +231,21 @@ func _check_hair_asset(style: String) -> void:
 			var lowest := 1.0
 			for colour: Color in colours as PackedColorArray:
 				lowest = minf(lowest, colour.a)
-				if level == 0 and kind == "rl_hair_card" and colour.a < 0.999:
+				var core := colour.a >= 0.999
+				var fine := colour.a >= 0.495 and colour.a <= 0.955
+				var messy := colour.a >= 0.045 and colour.a <= 0.455
+				if level == 0 and kind == "rl_hair_card" and fine:
 					fine_points += 1
-			if (kind == "rl_hair_clump" and lowest < 0.999) or lowest < 0.499:
-				bad.append("%s/%s: keep level down to %.3f" % [node.name, kind, lowest])
+				if level == 0 and messy:
+					messy_points += 1
+				if not (core or fine or messy) or (fine and kind == "rl_hair_clump") or (last and not core):
+					bad.append("%s/%s: keep level %.3f outside the contract" % [node.name, kind, colour.a])
+					break
 	_expect(levels.size() == 3 and bad.is_empty(),
 		"%s: %d levels, each with %d id_ shapes and the grooming shapes, keep levels in contract %s"
 			% [style, levels.size(), head_shapes, bad])
 	_expect(fine_points > 0, "%s: its first level has fine-detail cards (%d points)" % [style, fine_points])
+	_expect(messy_points > 0, "%s: its first level has messy extras for above level 50 (%d points)" % [style, messy_points])
 	scene.free()
 
 

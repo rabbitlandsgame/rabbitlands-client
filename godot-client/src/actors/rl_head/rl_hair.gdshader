@@ -13,15 +13,17 @@
 //
 // Fine detail (the hair author's hair_detail contract): A = 1 marks core
 // geometry (shells, clumps, ribbons, bun, braid, curls, baby hairs); flyaway
-// and wisp cards carry a keep level in 0.5-0.95. A fragment with
+// and wisp cards carry a keep level in 0.5-0.95, and messy extras (strays,
+// frizz, loose locks, separated tips) one in 0.05-0.45. A fragment with
 // A < 1 - hair_detail (the instance uniform, 0..1) gets ALPHA 0 and is dropped
 // by the same alpha scissor as the coverage, so it never leaves the opaque
 // pass or its depth prepass. 0.5 (the default) shows the authored look; lower
 // drops the flyaways from the lowest keep level up, and 0 is smooth. Above 0.5
-// nothing more appears: the strands gain up to `detail_contrast` more contrast
-// about the atlas's local mean (and the per-lock variation grows) instead, so
-// the hair's overall tone and its colour calibration hold. Beards and older
-// assets carry A = 1 everywhere, and beards keep the default.
+// the messy extras fade in (0.55-0.95) and the strands gain up to
+// `detail_contrast` more contrast about the atlas's local mean (and the
+// per-lock variation grows), so the hair's overall tone and its colour
+// calibration hold. Beards and older assets carry A = 1 everywhere, and beards
+// keep the default.
 //
 // Light is a wrapped Lambert for the soft painted body of the hair plus a
 // Kajiya-Kay pair of highlights along the strands: a light primary in the

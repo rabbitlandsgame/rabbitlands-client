@@ -50,13 +50,16 @@ art exactly. No asset is replaced: the shipped bodies, hair and equipment are un
     0 / 50 / 100 give Rowan length -1 / -0.5 / +0.5. A missing shape is a no-op.
   * **Fine detail (`hair_detail`).** COLOR_0.A is each point's keep level: 1 for core
     geometry (shell, clumps, ribbons, bun, braid, curls, baby hairs), 0.5-0.95 spread per
-    card for flyaway and wisp cards; beards and older assets carry 1. `rl_hair.gdshader`
+    card for flyaway and wisp cards, 0.05-0.45 for messy extras (strays, crown and temple
+    frizz, loose locks such as Rowan's two fringe-gap locks, separated tips; owner
+    decision Q-N11, installed 2026-10-28); beards and older assets carry 1. `rl_hair.gdshader`
     drops a fragment where `A < 1 - hair_detail` (the instance uniform, 0-1) through the
     same alpha scissor as the coverage, so the hair stays in the opaque pass in both
     renderers. The RL face's `hair_detail` is a level 0-100 (the uniform is a hundredth
     of it): 50, the default, is the authored look, lower drops flyaways from the lowest
-    keep level up, 0 is smooth, and above 50 nothing more appears - the strands gain up
-    to 35% contrast about the atlas's local mean instead. Beards keep 50.
+    keep level up, 0 is smooth, and above 50 the messy extras fade in (levels 55-95)
+    while the strands gain up to 35% contrast about the atlas's local mean. Beards keep
+    50.
   * **From the saved finish** (owner decision; colour model spec revision 3, 4.7). A
     Human's hair finish (`hair_detail` 0 Classic, 1 Tousled, 2 Swept) sits on the hair
     finish slider (0 sleekest to 100 messiest) at Swept 25, Classic 50, Tousled 75.
