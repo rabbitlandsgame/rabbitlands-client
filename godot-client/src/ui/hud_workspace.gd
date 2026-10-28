@@ -331,6 +331,17 @@ static func _logo_ink_rect(image: Image) -> Rect2i:
 	if last.x <= first.x or last.y <= first.y: return Rect2i(Vector2i.ZERO, dimensions)
 	return Rect2i(first, last - first).grow(2).intersection(Rect2i(Vector2i.ZERO, dimensions))
 
+## Every part's control as the layout places it now (`_root`: the modern strip,
+## card or wrapper standing in for the original), each once; empty before
+## `configure`. Main keeps world labels above the ones along the bottom.
+func part_controls() -> Array[Control]:
+	var result: Array[Control] = []
+	for key: String in parts:
+		var control := _root(key)
+		if control != null and not result.has(control):
+			result.append(control)
+	return result
+
 func _root(key: String) -> Control:
 	if key == "target" and not bool(model.working.legacy): return target_card
 	if key == "compass" and not bool(model.working.legacy): return modern_compass

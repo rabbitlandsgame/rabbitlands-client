@@ -16978,22 +16978,64 @@ func _update_door_labels() -> void:
 	var hovered: MapObject3D = null
 	if get_viewport().gui_get_hovered_control() == viewport_container:
 		hovered = _pick_map_object(_local_viewport_position(viewport_container.get_local_mouse_position()))
-	var floor_y := _label_floor_y()
+	var hud := _bottom_hud_rects()
 	for door: MapObject3D in doors:
 		door.update_label_focus(player, door == hovered)
 		# An interior's way out, named at its door, is lifted on screen when a
-		# camera-side door would put it under the bottom HUD bar.
+		# camera-side door would put it under the bottom HUD.
 		if door.building_exit:
-			door.keep_label_above(gameplay_camera, floor_y)
+			var span := door.label_span(gameplay_camera)
+			door.keep_label_above(gameplay_camera, _label_floor_y(span.x, span.y, hud))
 
-## The top of the bottom HUD bar (the quickbar: meters and buttons) in the 3D
-## viewport's pixels, where a world label must stay above; the viewport's own
-## bottom while the bar is hidden.
-func _label_floor_y() -> float:
-	var bar := get_node_or_null("%Quickbar") as Control
-	if bar == null or not bar.is_visible_in_tree():
-		return float(main_viewport.size.y)
-	return minf(float(main_viewport.size.y), _viewport_position(bar.get_global_rect().position).y)
+## How far up from the 3D view's bottom edge (a share of its height) a HUD
+## part's bottom edge may stand and still be part of the bottom HUD.
+const BOTTOM_HUD_BAND := 0.1
+
+## Where a world label spanning `left`..`right` (the 3D viewport's pixels)
+## must stay above: the top edge of the topmost visible bottom HUD part under
+## that span (`_bottom_hud_rects`, or `hud` when the caller already has them),
+## else the viewport's own bottom. The default (heritage) layout draws the
+## meters in the HUD workspace's resource strip above the quickbar (with
+## %BottomMeters hidden), so measuring the quickbar alone left the market's
+## exit label under the strip (final review 2026-10-27, finding 2).
+func _label_floor_y(left := -INF, right := INF, hud: Variant = null) -> float:
+	var rects: Array = hud if hud is Array else _bottom_hud_rects()
+	return MapObject3D.label_floor(rects, left, right, float(main_viewport.size.y))
+
+## The bottom HUD in the 3D viewport's pixels: every visible HUD part with its
+## top in the view's lower half and its bottom edge within BOTTOM_HUD_BAND of
+## the view's bottom - in the default layout the quickbar, the status box
+## beside it, the resource strip above both and the compass in the rail's foot.
+## A window standing clear of them (the system chat, a free-standing box above
+## the strip) is not one, nor a rail running the view's height.
+func _bottom_hud_rects() -> Array[Rect2]:
+	var view := viewport_container.get_global_rect()
+	var rects: Array[Rect2] = []
+	if view.size.x <= 0.0 or view.size.y <= 0.0:
+		return rects
+	for control: Control in _hud_part_controls():
+		if not is_instance_valid(control) or not control.is_visible_in_tree():
+			continue
+		var rect := control.get_global_rect().intersection(view)
+		if rect.size.x <= 0.0 or rect.size.y <= 0.0 or rect.position.y < view.get_center().y \
+				or rect.end.y < view.end.y - view.size.y * BOTTOM_HUD_BAND:
+			continue
+		var top_left := _viewport_position(rect.position)
+		rects.append(Rect2(top_left, _viewport_position(rect.end) - top_left))
+	return rects
+
+## The controls the HUD lays out (HudWorkspace.part_controls: each part as it
+## is placed now), or the quickbar and its meters before the workspace has
+## been configured.
+func _hud_part_controls() -> Array[Control]:
+	var controls: Array[Control] = []
+	if hud_workspace != null and hud_workspace.has_method("part_controls"):
+		controls = hud_workspace.part_controls()
+	if controls.is_empty():
+		for control: Control in [get_node_or_null("%Quickbar") as Control, bottom_meters]:
+			if control != null:
+				controls.append(control)
+	return controls
 
 ## Tells WorldPark where the local character stands on the bound map, so the
 ## interior behind a nearby door is built before it is entered. Nothing new is

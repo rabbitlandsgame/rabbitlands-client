@@ -373,8 +373,9 @@ func update_label_focus(player_position: Vector3, hovered: bool) -> void:
 	if title.visible != shown:
 		title.visible = shown
 
-## Keeps a shown exit label clear of the bottom HUD bar: when the label would
-## reach below `floor_y` (the bar's top edge, in `camera`'s viewport pixels),
+## Keeps a shown exit label clear of the bottom HUD: when the label would
+## reach below `floor_y` (the top of the bottom HUD under the label's width,
+## Main._label_floor_y of its `label_span`, in `camera`'s viewport pixels),
 ## it is lifted on screen just far enough (Label3D.offset, which a fixed-size
 ## billboard draws in screen space); its anchor stays at the door. Returns the
 ## lift in viewport pixels (0 for none).
@@ -394,6 +395,41 @@ func keep_label_above(camera: Camera3D, floor_y: float) -> float:
 	if not is_equal_approx(title.offset.y, offset_y):
 		title.offset.y = offset_y
 	return lift
+
+## The exit label's extent across `camera`'s screen, in its viewport's pixels:
+## (left, right), its anchor plus and minus half its widest line. The widest
+## possible span, (-INF, INF), while it is not drawn there.
+func label_span(camera: Camera3D) -> Vector2:
+	var title := get_node_or_null("EntranceLabel") as Label3D
+	if title == null or not title.visible or camera == null or not camera.is_inside_tree() \
+			or not title.is_inside_tree() or camera.is_position_behind(title.global_position):
+		return Vector2(-INF, INF)
+	var anchor := camera.unproject_position(title.global_position)
+	var half := label_half_width(title) * screen_pixels_per_unit(camera)
+	return Vector2(anchor.x - half, anchor.x + half)
+
+## The floor a label spanning `left`..`right` (viewport pixels) keeps above:
+## the top of the highest rectangle of `hud` (the bottom HUD's, in the same
+## pixels: Main._bottom_hud_rects) reaching under that span, else
+## `screen_bottom`.
+static func label_floor(hud: Array, left: float, right: float, screen_bottom: float) -> float:
+	var floor_y := screen_bottom
+	for value: Variant in hud:
+		if value is not Rect2:
+			continue
+		var rect: Rect2 = value
+		if rect.position.x < right and rect.end.x > left:
+			floor_y = minf(floor_y, rect.position.y)
+	return floor_y
+
+## Half the width of a label's widest line, outline included, in mesh units
+## (the block is centred on the anchor; as `label_half_height`).
+static func label_half_width(title: Label3D) -> float:
+	var font: Font = title.font if title.font != null else ThemeDB.fallback_font
+	var widest := 0.0
+	for line: String in title.text.split("\n"):
+		widest = maxf(widest, font.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, title.font_size).x)
+	return (widest + float(title.outline_size)) * 0.5 * title.pixel_size
 
 ## Half the height of a label's text block, outline included, in mesh units
 ## (its lines at the font's height; the block is centred on the anchor). Not

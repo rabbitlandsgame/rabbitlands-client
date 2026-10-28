@@ -137,7 +137,12 @@ storey of one, is a section with unfloored blackspace round it, as the caves' ar
   `category` is the shop's dot colour (none for the tan entrance dot), `label` names the door outside and
   `exitLabel` the way out inside. The tavern's two storeys are joined by a passage whose ends are stairs
   (`stairs_up`/`stairs_down`), each end with its own `label`. Object ids: building doors 59201-59220 (one id serves
-  both ends), passage ends 59221-59240, interior interactives 59251-59299.
+  both ends), passage ends 59221-59240, interior interactives 59251-59299. An interactive may add `label` (its short
+  hover name, else its text's first clause), `at` [x, y] (the point of the prop or picture it describes: its click
+  shape stands there, not on its tile), `target` (the server's target column; by default `notice` for information
+  and `crafting` for a station, the smithy's anvil `smithing`) and `height`/`radius` (its pick's size, else the
+  packaged prop's at `at`). A prop may add `palette` {stone, mineral} (tinted by the client's MineralAppearance
+  shader: the Hall of Eight Seats' lichen and standing stone).
 - `town_source.py` is the only reader, checker and writer of that file (its docstring is the format); it reuses
   `underground_source.py`'s helpers without changing them.
 - `build_town_interiors.py` is the owner-approved builder of the room shells (floors, walls, partitions, doorways,
@@ -147,9 +152,14 @@ storey of one, is a section with unfloored blackspace round it, as the caves' ar
   (`--map landfall_town` packages the town's TOWN_SELECTION pieces, the `lf-interiors` furniture kit among them,
   records them in `reused-scenery.json` and writes that config only; the caves' config and pieces stay as they are).
   A prop against a wall carries its wall's node (`cutawayWall`) into the config, so it is cut away exactly with that
-  wall. Decal textures clamp to their edge; surfaces repeat. The package's provenance pins the builder and the helpers it
-  imports (`build_underground.py`, `town_source.py`, `underground_source.py`): an edit to any of them needs a town
-  rebuild before anything publishes. The map loads raw (it is a geometry-cache interior candidate, not in the
+  wall. Decal textures clamp to their edge; surfaces repeat. A theme (THEMES, by the section's `style`) with
+  `doorLeaves` - the keep's - draws its street door's two plank leaves folded back against the wall either side of
+  the opening, iron-strapped and inside the wall's walk margin (the walk grid is unchanged); a window within that
+  reach of the door (`door_reach`) is refused. The manifest's `minimap.liveSpanMetres` (MINIMAP_LIVE_SPAN, 40 m)
+  sets the live minimap's span on the map (main.gd `_bind_minimap_span`, scaled by the player's zoom), so a room
+  reads at minimap size; a map that states none keeps the player's zoom. The package's provenance pins the builder
+  and the helpers it imports (`build_underground.py`, `town_source.py`, `underground_source.py`): an edit to any of
+  them needs a town rebuild before anything publishes. The map loads raw (it is a geometry-cache interior candidate, not in the
   production scope); `godot-client/tools/interior_load_benchmark.py --target landfall_town` qualifies it.
 - `map_categories.py` is the one table of shop categories and their dot colours (tavern, general_store,
   flower_shop, magic_shop, blacksmith; the tan entrance dot for a door without one). The client's copy is
@@ -165,9 +175,9 @@ nothing. `publish_server.py` appends each interior's rows under its own heading 
 under the manifest block's `interiorMaps` (the town's entry carries `kind: "building"`): the caves' doors and
 passages under `undergroundPortals` / `undergroundRows`, the town's doors and stairs under `buildingPortals` /
 `buildingRows`. Keys of the block another tool wrote (`publish_npc_metadata.py`'s `npcMetadataAmendments`) are carried
-over as they stand. An interior crafting station's target is the trade its text or its section's style names (the
-smithy's anvil is `smithing`), else `crafting`; a station that needs another target needs `town_source.py` to accept a
-`target` key, which `underground.py` already honours. The other tools read both sources too:
+over as they stand. An interior interactive's target is its source `target` when it names one (the smithy's anvil:
+`smithing`), else its role's (`underground.py` INTERACTIVE_TARGETS: `notice`, `crafting`). The other tools read both
+sources too:
 `retarget_underground.py` (with `--map <interior>` it rewrites one interior only, its source, package and
 `objects.json` records, and leaves the other's alone), `publish_cartography.py` (door dots with `kind` and
 `category`, and the shop dots inside), `tools/prepare_underground_scenery.py` (one config per interior) and the
@@ -176,16 +186,23 @@ server's `tools/continent_v2_registry.py`.
 The town's `objects.json` records come from `retarget_underground.py`: each building door's `{entrance, building,
 exteriorTile, modelOffset, label, exitLabel, exitOffset, category?}` (no `scene`: the door is painted on the facade;
 `modelOffset` moves the pick and label from the door tile onto the painted door, `exitOffset` into the interior
-doorway) and each stair end's `{passage, label}`. Its music: the client source
-`eloria-assets/source/audio/music-program.json` gives the map `home_day`/`home_night`, and `sync_music_program.py`
-adds room zones from the package's chamber and space names; on the server copy only the `landfall_town` block
-(a full sync would revert the server-only A3 music). The server serves the map only to clients that declare
+doorway), each stair end's `{passage, label}` and each interior interactive's pick-only record `{interactive: true,
+pickOnly: true, label, modelOffset, height, radius}`: `modelOffset` is the source's `at` minus the tile's centre and
+the size is the source's or the packaged prop's, and the client stands only a click shape there, named under the
+pointer, with no ring, model or map mark (the prop is already in the room's scenery). Its music: the client source
+`eloria-assets/source/audio/music-program.json` gives the map `home_day`/`home_night`, and
+`eloria-assets/tools/sync_music_program.py` adds a zone per room from the package's chamber and space names, with the
+digest of the `world.json` they came from (`zone_source_sha256`). The server copy carries the A3 isles' music, which the
+client source does not, so the tool's whole-file run would revert it: `--map landfall_town` rewrites only that map's
+block of the server file and leaves every other byte as it stands (a map the file lacks goes where the client source
+orders it), and `--check` exits 1 while the block is stale. The server serves the map only to clients that declare
 `landfall_town_v1`.
 
 After a town source edit, in order: `build_town_interiors.py --owner-approved ...`;
 `tools/prepare_underground_scenery.py --map landfall_town`; `retarget_underground.py --map landfall_town --server
-<server checkout>`; `publish_cartography.py`; then the publication above (`publish_server.py --check`, and `--apply`
-only with the owner's approval).
+<server checkout>`; `publish_cartography.py`; `eloria-assets/tools/sync_music_program.py --server <server checkout>
+--map landfall_town` (the block records the package `world.json`'s digest, so any rebuild that changes it needs
+this); then the publication above (`publish_server.py --check`, and `--apply` only with the owner's approval).
 
 ## Boats
 

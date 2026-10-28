@@ -1035,6 +1035,30 @@ func _test_exit_label_screen(catalog: Dictionary, adapter: CoordinateAdapter) ->
 	title.visible = false
 	_expect(exit.keep_label_above(camera, floor_y) == 0.0 and is_equal_approx(title.offset.y, 0.0),
 		"a hidden label is left alone")
+	_expect(exit.label_span(camera) == Vector2(-INF, INF), "and spans the whole screen's width (no part is skipped)")
+	# Its floor is the topmost bottom HUD part under the label's own width
+	# (final review 2026-10-27, finding 2): the default layout's resource strip
+	# above the quickbar, not the quickbar.
+	title.visible = true
+	var span := exit.label_span(camera)
+	var anchor_x := camera.unproject_position(title.global_position).x
+	_expect(span.x < anchor_x and span.y > anchor_x and absf((anchor_x - span.x) - (span.y - anchor_x)) < 0.01
+		and span.y - span.x > 2.0 * half_px,
+		"a shown label spans %.0f..%.0f px, centred on its anchor and wider than tall" % [span.x, span.y])
+	var hud := [Rect2(0.0, 845.0, 1290.0, 55.0), Rect2(0.0, 795.0, 1495.0, 50.0), Rect2(1495.0, 795.0, 105.0, 105.0)]
+	_expect(MapObject3D.label_floor(hud, span.x, span.y, 900.0) == 795.0,
+		"over a strip standing on a bar, the floor is the strip's top")
+	_expect(MapObject3D.label_floor([Rect2(0.0, 845.0, 1600.0, 55.0), Rect2(span.y + 1.0, 600.0, 200.0, 300.0)],
+			span.x, span.y, 900.0) == 845.0,
+		"a taller part beside the label, not under it, sets no floor")
+	_expect(MapObject3D.label_floor([], span.x, span.y, 900.0) == 900.0
+		and MapObject3D.label_floor(["not a rect"], span.x, span.y, 900.0) == 900.0,
+		"with no part under it the floor is the screen's bottom")
+	exit.keep_label_above(camera, MapObject3D.label_floor(hud, span.x, span.y, 900.0))
+	_expect(absf(float(bottom_of.call()) + MapObject3D.LABEL_HUD_MARGIN - 795.0) < 1.0,
+		"so the label is lifted just clear of the strip (to %.1f px)" % [float(bottom_of.call())])
+	title.visible = false
+	exit.keep_label_above(camera, floor_y)
 	_expect(MapObject3D.label_lift(1050.0, 20.0, 800.0, 900.0) == 0.0
 		and is_equal_approx(MapObject3D.label_lift(950.0, 20.0, 800.0, 900.0), 176.0)
 		and is_equal_approx(MapObject3D.label_lift(780.0, 20.0, 800.0, 900.0), 6.0)

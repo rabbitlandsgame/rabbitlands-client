@@ -15,11 +15,18 @@ extends SceneTree
 ## material's GLB keeps only what that material names, re-indexed; the plan
 ## and its steps bind exactly the keys `warm` binds, one material a frame; and
 ## WorldPark, bound with no curtain, spreads the Town's warm-up and holds its
-## preload until it has run.
+## preload until it has run. The scenery's own shaders (final review
+## 2026-10-27, finding 1): an interior whose scenery tints a placement
+## (`palette`) warms MineralAppearance's shader - and a shell with Water_ or
+## Shaft_ nodes the styling's water and shaft shaders - in the whole warm-up
+## and as its own step of the spread one; on the Town, every ShaderMaterial
+## the preload's scenery stepper builds has a warmed shader.
 const Warmup := preload("res://src/world/interior_material_warmup.gd")
 const Preparation := preload("res://src/world/map_material_preparation.gd")
 const UndergroundScenery := preload("res://src/world/underground_scenery.gd")
 const WorldParkScript := preload("res://src/world/world_park.gd")
+const MineralAppearance := preload("res://src/world/mineral_appearance.gd")
+const SceneryStepper := preload("res://src/world/interior_scenery_stepper.gd")
 const TOWN := "landfall_town"
 
 var failures := 0
@@ -38,6 +45,7 @@ func _run() -> void:
 	_test_glb_container()
 	_test_synthetic_keys()
 	_test_spread_synthetic()
+	_test_scenery_shaders()
 	await _test_town()
 	for frame: int in 4:
 		await process_frame
@@ -129,8 +137,10 @@ static func _run_steps(plan: Dictionary) -> Dictionary:
 		if material == null:
 			continue
 		materials.append(material)
+		if material is not BaseMaterial3D:
+			continue # a scenery shader's step: no loader pass follows it
 		began = Time.get_ticks_usec()
-		var after := Warmup.after_pass(material, bool(step.get("coloured", false)))
+		var after := Warmup.after_pass(material as BaseMaterial3D, bool(step.get("coloured", false)))
 		if after != null:
 			after.get_rid()
 			materials.append(after)
@@ -139,9 +149,18 @@ static func _run_steps(plan: Dictionary) -> Dictionary:
 
 static func _signatures(materials: Array) -> Dictionary:
 	var keys: Dictionary = {}
-	for material: BaseMaterial3D in materials:
-		keys[Warmup.signature(material)] = true
+	for material: Variant in materials:
+		if material is BaseMaterial3D:
+			keys[Warmup.signature(material as BaseMaterial3D)] = true
 	return keys
+
+## The shaders of the ShaderMaterials among `materials`, by resource path.
+static func _shader_paths(materials: Array) -> Dictionary:
+	var paths: Dictionary = {}
+	for material: Variant in materials:
+		if material is ShaderMaterial and (material as ShaderMaterial).shader != null:
+			paths[(material as ShaderMaterial).shader.resource_path] = true
+	return paths
 
 ## A GLB holding `document`'s JSON alone (what `plan` reads).
 static func _json_glb(document: Dictionary) -> PackedByteArray:
@@ -199,6 +218,63 @@ func _test_spread_synthetic() -> void:
 	_expect(str(Warmup.plan("user://no-such.glb").error) == "glb_unreadable", "a missing GLB plans nothing and says so")
 	DirAccess.remove_absolute(path)
 
+## The scenery's own shaders, on synthetic configs: which a config and a shell
+## imply, the material built for one, and their place in `warm` and `plan`.
+func _test_scenery_shaders() -> void:
+	var tint := MineralAppearance.PAINT.resource_path
+	var tinted := {"placements": [{"asset": "rock", "position": [0, 0, 0]},
+		{"asset": "lichen_mat", "position": [1, 0, 0], "palette": {"stone": "#d8f08a", "mineral": "#ffb259"}}]}
+	var plain := {"placements": [{"asset": "rock", "position": [0, 0, 0]}]}
+	_expect(Warmup.scenery_shaders(tinted) == PackedStringArray([tint]),
+		"a scenery config with a tinted placement (a palette) needs MineralAppearance's shader")
+	_expect(Warmup.scenery_shaders(plain).is_empty() and Warmup.scenery_shaders({}, {"nodes": [{"name": "Water_a"}]}).is_empty(),
+		"one without a palette needs none, nor does an interior with no scenery config")
+	var pools := Warmup.scenery_shaders(plain, {"nodes": [{"name": "Walk_a"}, {"name": "Water_cenote_0"}, {"name": "Shaft_1"}]})
+	_expect(pools.size() == 2 and pools.has(UndergroundScenery.CENOTE_WATER.resource_path)
+		and pools.has(UndergroundScenery.DAYLIGHT_SHAFT.resource_path),
+		"a dressed shell with Water_ and Shaft_ nodes needs the styling's water and shaft shaders")
+	var material := Warmup.shader_material(tint)
+	_expect(material != null and material.shader == MineralAppearance.PAINT and material.get_rid().is_valid()
+		and material.get_shader_parameter("base_texture") is Texture2D,
+		"the tint's warm-up material is the scenery's shader, its sampler filled, its RID taken")
+	_expect(Warmup.shader_material("res://src/world/no-such.gdshader") == null, "a path that is no shader builds nothing")
+	var path := ProjectSettings.globalize_path("user://warmup-shader-test.glb")
+	var file := FileAccess.open(path, FileAccess.WRITE)
+	file.store_buffer(_json_glb(_document()))
+	file.close()
+	var whole := Warmup.warm(path, tinted)
+	_expect(int(whole.shaders) == 1 and _shader_paths(whole.materials).has(tint)
+		and int(whole.keys) == _signatures(Warmup.materials_of(_document())).size(),
+		"the whole warm-up builds the tint once beside the shell's keys (%d keys, %d shaders)" % [int(whole.keys), int(whole.shaders)])
+	_expect(int(Warmup.warm(path, plain).shaders) == 0 and int(Warmup.warm(path).shaders) == 0,
+		"and none for scenery without a palette or for no scenery")
+	var plan := Warmup.plan(path, tinted)
+	var steps: Array = plan.steps
+	_expect(steps.size() == 6 and str((steps[5] as Dictionary).get("shader", "")) == tint
+		and steps.slice(0, 5).all(func(step: Dictionary) -> bool: return not step.has("shader")),
+		"the spread plan ends with one step for the tint, after the shell's five")
+	var spread := _run_steps(plan)
+	_expect(_shader_paths(spread.materials).keys() == [tint] and Warmup.build_step(steps[5]) is ShaderMaterial,
+		"its step builds the tint's material on its own")
+	DirAccess.remove_absolute(path)
+
+## Every ShaderMaterial under `root`: material overrides, surface overrides and
+## the meshes' own surface materials.
+static func _town_shader_materials(root: Node) -> Array:
+	var found: Array = []
+	for node: Node in root.find_children("*", "GeometryInstance3D", true, false):
+		var geometry := node as GeometryInstance3D
+		if geometry.material_override is ShaderMaterial:
+			found.append(geometry.material_override)
+		if geometry is not MeshInstance3D or (geometry as MeshInstance3D).mesh == null:
+			continue
+		var instance := geometry as MeshInstance3D
+		for surface: int in instance.mesh.get_surface_count():
+			for material: Material in [instance.mesh.surface_get_material(surface), instance.get_surface_override_material(surface)]:
+				if material is ShaderMaterial:
+					found.append(material)
+	return found
+
 ## Every material the Town's shell draws with, as a worker builds it and the
 ## stepper styles it.
 func _town_materials(shell: Node) -> Array:
@@ -232,12 +308,14 @@ func _test_town() -> void:
 	preload("res://src/world/vram_textures.gd").ensure_registered()
 	preload("res://src/world/map_mesh_extension.gd").ensure_registered()
 	var manifest := WorldManifest.load_file(path)
-	var warmed := Warmup.warm(manifest.glb_path())
+	var config := UndergroundScenery.config_for(TOWN)
+	var warmed := Warmup.warm(manifest.glb_path(), config)
 	_expect(str(warmed.error).is_empty() and int(warmed.keys) >= 4,
 		"the Town's shell warms at least its four keys a fresh session lacked")
-	var signatures: Dictionary = {}
-	for material: BaseMaterial3D in warmed.materials:
-		signatures[Warmup.signature(material)] = true
+	var signatures := _signatures(warmed.materials)
+	var warmed_shaders := _shader_paths(warmed.materials)
+	_expect(int(warmed.shaders) == 1 and warmed_shaders.has(MineralAppearance.PAINT.resource_path),
+		"the Town's warm-up builds its scenery's tint shader (the Hall's lichen and stone): %s" % [warmed_shaders.keys()])
 	var builder := WorldLoader.prepare_detached(path, false)
 	var resident := builder.release_world(true, true)
 	builder.free()
@@ -245,7 +323,6 @@ func _test_town() -> void:
 	_expect(shell != null, "the Town's shell builds as the preload's worker builds it")
 	if shell == null:
 		return
-	var config := UndergroundScenery.config_for(TOWN)
 	var surfaces: Variant = config.get("surfaces", {})
 	UndergroundScenery.style_surfaces(shell, surfaces if surfaces is Dictionary else {},
 		UndergroundScenery.floor_default(TOWN, config))
@@ -257,6 +334,14 @@ func _test_town() -> void:
 			missing.append(material.resource_name)
 	_expect(drawn.size() > 20 and missing.is_empty(),
 		"every material the shell draws with has a warmed key (%d drawn; unwarmed: %s)" % [drawn.size(), missing])
+	# The preload's main-thread dressing (InteriorSceneryStepper, all its
+	# slices at once): every ShaderMaterial it builds uses a warmed shader.
+	var stepper := SceneryStepper.new(TOWN, shell)
+	stepper.step(0)
+	var dressed := _shader_paths(_town_shader_materials(shell))
+	var unwarmed := dressed.keys().filter(func(key: String) -> bool: return not warmed_shaders.has(key))
+	_expect(stepper.count > 300 and stepper.failed == 0 and not dressed.is_empty() and unwarmed.is_empty(),
+		"every shader the Town's %d placed pieces are dressed with was warmed (%s; unwarmed: %s)" % [stepper.count, dressed.keys(), unwarmed])
 	shell.free()
 	# WorldPark warms a flagged interior once, when its parent binds.
 	var park: Node = WorldParkScript.new()
@@ -268,8 +353,9 @@ func _test_town() -> void:
 	park.bind_map("landfall")
 	park.finish_estimates(true)
 	var warms: Array = park.events.filter(func(e: Dictionary) -> bool: return str(e.event) == "warm" and str(e.map) == TOWN)
-	_expect(warms.size() == 1 and int(warms[0].keys) == int(warmed.keys) and str(warms[0].error).is_empty(),
-		"binding Landfall warms the Town once a session (%s)" % [warms])
+	_expect(warms.size() == 1 and int(warms[0].keys) == int(warmed.keys) and int(warms[0].shaders) == 1
+		and str(warms[0].error).is_empty(),
+		"binding Landfall warms the Town once a session, its scenery's tint included (%s)" % [warms])
 	# The same bind estimates the Town from its textures: the review measured
 	# +424 MiB of texture memory once it was built (2026-10-27), where the
 	# GLB-size guess said 34 MiB; with the kits halved and its images
@@ -291,11 +377,14 @@ func _test_town() -> void:
 ## near `warm`'s cost, and WorldPark bound with no curtain holding the Town's
 ## preload until the warm-up has run.
 func _test_town_spread(registry: Dictionary, manifest: WorldManifest, signatures: Dictionary, warm_usec: int) -> void:
-	var plan := Warmup.plan(manifest.glb_path())
+	var plan := Warmup.plan(manifest.glb_path(), UndergroundScenery.config_for(TOWN))
 	var spread := _run_steps(plan)
 	var stepped := _signatures(spread.materials)
 	_expect(stepped.size() == signatures.size() and stepped.keys().all(func(key: String) -> bool: return signatures.has(key)),
 		"the Town's steps bind exactly warm's %d keys (%d materials)" % [signatures.size(), (spread.materials as Array).size()])
+	_expect(_shader_paths(spread.materials).keys() == [MineralAppearance.PAINT.resource_path]
+		and (plan.steps as Array).filter(func(step: Dictionary) -> bool: return step.has("shader")).size() == 1,
+		"and build its scenery's tint in a step of its own")
 	print("town warm-up: whole %.1f ms on one frame; spread: plan %.1f ms on a worker, %d steps, slowest step %.2f ms"
 		% [warm_usec / 1000.0, float(plan.usec) / 1000.0, (plan.steps as Array).size(), int(spread.slowest_usec) / 1000.0])
 	_expect(int(spread.slowest_usec) * 4 < maxi(warm_usec, 4000),
@@ -325,6 +414,7 @@ func _test_town_spread(registry: Dictionary, manifest: WorldManifest, signatures
 		frames += 1
 	var warms: Array = park.events.filter(func(e: Dictionary) -> bool: return str(e.event) == "warm" and str(e.map) == TOWN)
 	_expect(warms.size() == 1 and bool(warms[0].spread) and int(warms[0].keys) == signatures.size()
+		and int(warms[0].shaders) == 1
 		and int(warms[0].frames) >= int(warms[0].materials) and float(warms[0].max_step_ms) < 16.0,
 		"the spread warm-up ran one material a frame over %d frames (%s)" % [frames, warms])
 	park.observe("landfall", door_tile, {}, true)

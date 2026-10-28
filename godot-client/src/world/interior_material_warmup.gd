@@ -25,7 +25,25 @@ extends RefCounted
 ## WorldLoader._apply_material_passes after it), are applied as the real load
 ## applies them; a pass that changes a material after its RID was taken keeps
 ## both keys, as the real load briefly does.
+##
+## The scenery's own shaders (final review 2026-10-27, finding 1). The preload
+## also dresses the interior on the main thread (InteriorSceneryStepper): a
+## placement with a `palette` is tinted by MineralAppearance's ShaderMaterial,
+## and the styling gives a shell's Water_ and Shaft_ meshes the cenote water
+## and daylight shaft shaders. Those are custom shaders, not BaseMaterial3D
+## keys, so warming the shell builds none of them. Measured on the Town once
+## its Hall of Eight Seats gained three lichen crusts and a tinted standing
+## stone (`town-scenery.json`): the first tint material of a session cost
+## 23.9 ms on the main thread inside a preload step, and with Godot's shader
+## cache empty the preload had one 67-79 ms frame (landfall_town_park.gd
+## failing its 50 ms check); with the tint shader drawn once when Landfall
+## bound, the same runs' worst frames were 24.5 and 8.6 ms. So the warm-up
+## also builds one ShaderMaterial of each such shader the interior's scenery
+## config and shell imply (`scenery_shaders`), its samplers filled with the
+## 1x1 picture, takes its RID and holds it for the session with the rest.
 const MapMaterialPreparation := preload("res://src/world/map_material_preparation.gd")
+const MineralAppearance := preload("res://src/world/mineral_appearance.gd")
+const UndergroundScenery := preload("res://src/world/underground_scenery.gd")
 
 const GLB_MAGIC := 0x46546C67
 const CHUNK_JSON := 0x4E4F534A
@@ -47,10 +65,13 @@ static func read_json_chunk(path: String) -> Dictionary:
 	var parsed: Variant = JSON.parse_string(file.get_buffer(length).get_string_from_utf8())
 	return parsed if parsed is Dictionary else {}
 
-static func _one_pixel_png() -> PackedByteArray:
+static func _one_pixel() -> Image:
 	var image := Image.create(1, 1, false, Image.FORMAT_RGBA8)
 	image.fill(Color.WHITE)
-	return image.save_png_to_buffer()
+	return image
+
+static func _one_pixel_png() -> PackedByteArray:
+	return _one_pixel().save_png_to_buffer()
 
 static func _padded(bytes: PackedByteArray, pad: int) -> PackedByteArray:
 	var result := bytes.duplicate()
@@ -228,6 +249,50 @@ static func materials_of(document: Dictionary) -> Array:
 			result.append(after)
 	return result
 
+## The custom shaders (res:// paths) the dressing of an interior adds, from
+## its scenery `config` (UndergroundScenery.config_for: placements, read
+## only) and its shell GLB's JSON `document`: MineralAppearance's tint when a
+## placement carries a `palette`, and the styling's cenote water and daylight
+## shaft shaders for a shell with Water_ or Shaft_ nodes. None for an interior
+## without a scenery config (nothing dresses it). Pure data: safe on a worker.
+static func scenery_shaders(config: Dictionary, document: Dictionary = {}) -> PackedStringArray:
+	var paths := PackedStringArray()
+	if config.is_empty():
+		return paths
+	for placement: Variant in config.get("placements", []) as Array:
+		if placement is Dictionary and (placement as Dictionary).get("palette") is Dictionary:
+			paths.append(MineralAppearance.PAINT.resource_path)
+			break
+	var water := false
+	var shaft := false
+	for node: Variant in document.get("nodes", []) as Array:
+		var name := str((node as Dictionary).get("name", "")) if node is Dictionary else ""
+		water = water or name.begins_with("Water_")
+		shaft = shaft or name.begins_with("Shaft_")
+	if water:
+		paths.append(UndergroundScenery.CENOTE_WATER.resource_path)
+	if shaft:
+		paths.append(UndergroundScenery.DAYLIGHT_SHAFT.resource_path)
+	return paths
+
+## A ShaderMaterial of the shader at `path`, as the dressing builds one: every
+## sampler uniform given the 1x1 picture, its RID taken now (the shader is
+## readied at this frame's material update). Null when `path` is no shader.
+static func shader_material(path: String) -> ShaderMaterial:
+	var shader := load(path) as Shader if ResourceLoader.exists(path) else null
+	if shader == null:
+		return null
+	var material := ShaderMaterial.new()
+	material.shader = shader
+	var picture: ImageTexture = null
+	for uniform: Dictionary in shader.get_shader_uniform_list():
+		if int(uniform.get("type", TYPE_NIL)) == TYPE_OBJECT and str(uniform.get("hint_string", "")).contains("Texture"):
+			if picture == null:
+				picture = ImageTexture.create_from_image(_one_pixel())
+			material.set_shader_parameter(str(uniform.name), picture)
+	material.get_rid()
+	return material
+
 ## WorldLoader._apply_material_passes on `material` after generate_scene took
 ## its RID: a copy with the loader's filter (and a coloured alpha-scissor
 ## material's vertex colours), or null when the passes change nothing.
@@ -258,9 +323,11 @@ static func after_pass(material: BaseMaterial3D, coloured: bool) -> BaseMaterial
 # every pending material's shader at the frame's flush, all keys together.
 
 ## A spread warm-up's steps, for a worker: {"steps": [{"glb", "coloured"} or
-## {"default": true, "coloured"}], "error": "", "usec": int}. Pure file and
-## data work (no Resource is created), so it is safe off the main thread.
-static func plan(glb_path: String) -> Dictionary:
+## {"default": true, "coloured"} or {"shader": path}], "error": "", "usec":
+## int}; the scenery's shaders (`scenery_shaders` of `config`, which is only
+## read) come last, one step each. Pure file and data work (no Resource is
+## created), so it is safe off the main thread.
+static func plan(glb_path: String, config: Dictionary = {}) -> Dictionary:
 	var began := Time.get_ticks_usec()
 	var document := read_json_chunk(glb_path)
 	if document.is_empty():
@@ -271,12 +338,17 @@ static func plan(glb_path: String) -> Dictionary:
 		steps.append({"glb": materials_glb(document, [index]), "coloured": (use.coloured as Dictionary).has(index)})
 	for flag: bool in use.defaults:
 		steps.append({"default": true, "coloured": flag})
+	for path: String in scenery_shaders(config, document):
+		steps.append({"shader": path})
 	return {"steps": steps, "error": "", "usec": Time.get_ticks_usec() - began}
 
-## One planned step on the main thread: the material the shell's load binds
-## for it, its RID taken now (its key's shader is built here and compiled at
-## the next draw). Null when the step's GLB does not parse.
-static func build_step(step: Dictionary) -> BaseMaterial3D:
+## One planned step on the main thread: the material the shell's load (or,
+## for a {"shader"} step, the scenery's dressing) binds for it, its RID taken
+## now (its shader is built here and readied at this frame's material update).
+## Null when the step's GLB does not parse or its shader does not load.
+static func build_step(step: Dictionary) -> Material:
+	if step.has("shader"):
+		return shader_material(str(step.shader))
 	var material: BaseMaterial3D = null
 	if bool(step.get("default", false)):
 		material = StandardMaterial3D.new()
@@ -296,20 +368,30 @@ static func build_step(step: Dictionary) -> BaseMaterial3D:
 	material.get_rid()
 	return material
 
-## Builds the shader of every key the GLB at `glb_path` binds and returns
-## {"materials": [...] (hold them), "keys": distinct keys, "usec": int,
-## "error": ""}. The compiles themselves land in the next draw.
-static func warm(glb_path: String) -> Dictionary:
+## Builds the shader of every key the GLB at `glb_path` binds, and one
+## material of each shader the dressing with scenery `config` adds
+## (`scenery_shaders`), and returns {"materials": [...] (hold them), "keys":
+## distinct BaseMaterial3D keys, "shaders": scenery shaders built, "usec":
+## int, "error": ""}. The compiles themselves land in the next draw.
+static func warm(glb_path: String, config: Dictionary = {}) -> Dictionary:
 	var began := Time.get_ticks_usec()
 	var document := read_json_chunk(glb_path)
 	if document.is_empty():
-		return {"materials": [], "keys": 0, "usec": Time.get_ticks_usec() - began, "error": "glb_unreadable"}
+		return {"materials": [], "keys": 0, "shaders": 0, "usec": Time.get_ticks_usec() - began,
+			"error": "glb_unreadable"}
 	var materials := materials_of(document)
 	var keys: Dictionary = {}
 	for material: BaseMaterial3D in materials:
 		material.get_rid() # BaseMaterial3D builds (or shares) its key's shader here.
 		keys[signature(material)] = true
-	return {"materials": materials, "keys": keys.size(), "usec": Time.get_ticks_usec() - began, "error": ""}
+	var shaders := 0
+	for path: String in scenery_shaders(config, document):
+		var tinted := shader_material(path)
+		if tinted != null:
+			materials.append(tinted)
+			shaders += 1
+	return {"materials": materials, "keys": keys.size(), "shaders": shaders,
+		"usec": Time.get_ticks_usec() - began, "error": ""}
 
 ## A string equal for two BaseMaterial3Ds whose shader keys are equal (a
 ## superset of the key: every stored bool and int property - features, flags,

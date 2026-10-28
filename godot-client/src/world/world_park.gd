@@ -35,12 +35,14 @@ extends Node
 ##
 ## Shader keys. A preload must not compile shaders on the main thread mid-walk
 ## (a new material key costs one 70 ms frame cold): binding the parent builds
-## and holds every key the interior's shell binds, behind the arrival curtain
-## (interior_material_warmup.gd). A parent bound with no curtain up (a walk
-## over its border: a seamless handoff) spreads the same work instead: its
-## file and JSON on a worker, then - once the player's arrival has loaded -
-## one material a frame, so no gameplay frame carries the whole warm-up or
-## more than one new key; the interior's preload waits until it has run.
+## and holds every key the interior's shell binds, and one material of each
+## custom shader its scenery's dressing adds (the Town's palette tint),
+## behind the arrival curtain (interior_material_warmup.gd). A parent bound
+## with no curtain up (a walk over its border: a seamless handoff) spreads the
+## same work instead: its file and JSON on a worker, then - once the player's
+## arrival has loaded - one material a frame, so no gameplay frame carries the
+## whole warm-up or more than one new key or shader; the interior's preload
+## waits until it has run.
 ## Measured rendered for the Town (2026-10-27, a bare scene): whole, one
 ## frame of 155-187 ms with Godot's shader cache warm (304-379 ms cold);
 ## spread, its worst frames 21-55 ms warm (one cached key each), 77-274 ms on
@@ -304,27 +306,32 @@ func _warm_interior(interior: String, curtained := true) -> void:
 	var glb := str(_shell_glbs.get(interior, ""))
 	if glb.is_empty():
 		return
+	# The scenery's config (read at bind) names the shaders its dressing adds:
+	# the tint of a placement with a palette (the Town's lichen and stone).
+	var config: Dictionary = _scenery_configs.get(interior, {})
 	if curtained:
-		var result := MaterialWarmup.warm(glb)
+		var result := MaterialWarmup.warm(glb, config)
 		_warmed[interior] = result.materials
-		_record("warm", interior, {"keys": int(result.keys), "materials": (result.materials as Array).size(),
+		_record("warm", interior, {"keys": int(result.keys), "shaders": int(result.shaders),
+			"materials": (result.materials as Array).size(),
 			"warm_ms": float(result.usec) / 1000.0, "error": str(result.error), "spread": false})
 		return
 	var job := {"glb": glb, "thread": null, "plan": {}, "next": 0, "after_of": null, "coloured": false,
-		"materials": [], "keys": {}, "began_usec": Time.get_ticks_usec(), "main_usec": 0,
+		"materials": [], "keys": {}, "shaders": 0, "began_usec": Time.get_ticks_usec(), "main_usec": 0,
 		"max_step_usec": 0, "frames": 0}
 	var thread := Thread.new()
-	if thread.start(_plan_warmup.bind(glb)) == OK:
+	if thread.start(_plan_warmup.bind(glb, config)) == OK:
 		job["thread"] = thread
 	else:
-		job["plan"] = _plan_warmup(glb)
+		job["plan"] = _plan_warmup(glb, config)
 	_warming[interior] = job
 	_record("warm_spread", interior, {"reason": "no_curtain"})
 
 ## The spread warm-up's plan (a worker): the shell GLB read, parsed and cut
-## into one materials-only GLB per material. Reads files only.
-static func _plan_warmup(glb: String) -> Dictionary:
-	return MaterialWarmup.plan(glb)
+## into one materials-only GLB per material, then a step per shader the
+## scenery `config` (only read) adds. Reads files only.
+static func _plan_warmup(glb: String, config: Dictionary = {}) -> Dictionary:
+	return MaterialWarmup.plan(glb, config)
 
 ## One frame of the spread warm-ups: collects a finished plan, then builds one
 ## material (so a draw compiles at most one new shader key) of the first job
@@ -344,7 +351,7 @@ func _step_warmups() -> void:
 		var plan: Dictionary = job.plan
 		var steps: Array = plan.get("steps", [])
 		var began := Time.get_ticks_usec()
-		var built: BaseMaterial3D = null
+		var built: Material = null
 		# The previous material's after-pass copy is its own frame's key.
 		if job.after_of != null:
 			built = MaterialWarmup.after_pass(job.after_of as BaseMaterial3D, bool(job.coloured))
@@ -355,12 +362,16 @@ func _step_warmups() -> void:
 			var step: Dictionary = steps[int(job.next)]
 			job["next"] = int(job.next) + 1
 			built = MaterialWarmup.build_step(step)
-			if built != null:
+			if built is BaseMaterial3D:
 				job["after_of"] = built
 				job["coloured"] = bool(step.get("coloured", false))
+		if built is BaseMaterial3D:
+			(job.keys as Dictionary)[MaterialWarmup.signature(built as BaseMaterial3D)] = true
+		elif built != null:
+			# A scenery shader's material (a {"shader"} step): its own frame too.
+			job["shaders"] = int(job.shaders) + 1
 		if built != null:
 			(job.materials as Array).append(built)
-			(job.keys as Dictionary)[MaterialWarmup.signature(built)] = true
 		var spent := Time.get_ticks_usec() - began
 		job["main_usec"] = int(job.main_usec) + spent
 		job["max_step_usec"] = maxi(int(job.max_step_usec), spent)
@@ -368,7 +379,7 @@ func _step_warmups() -> void:
 		if job.after_of == null and int(job.next) >= steps.size():
 			_warming.erase(interior)
 			_warmed[interior] = job.materials
-			_record("warm", interior, {"keys": (job.keys as Dictionary).size(),
+			_record("warm", interior, {"keys": (job.keys as Dictionary).size(), "shaders": int(job.shaders),
 				"materials": (job.materials as Array).size(), "warm_ms": float(job.main_usec) / 1000.0,
 				"error": str(plan.get("error", "")), "spread": true, "frames": int(job.frames),
 				"max_step_ms": float(job.max_step_usec) / 1000.0,
