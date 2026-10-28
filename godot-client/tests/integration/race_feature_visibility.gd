@@ -207,7 +207,7 @@ func _check_headwear(models: Dictionary, equipment: Dictionary) -> void:
 	# of the (hidden) scalp under every piece: hoods, open-faced and closed helms.
 	var human := _configure("luminous_male", models, equipment, {"hair": 1})
 	var closed := func() -> bool:
-		if human.rl_head() == null:
+		if not rl_heads_on() or human.rl_head() == null:
 			return _mesh(human, "scalp").visible
 		var head: Array = human.rl_head().mesh_nodes()["head"]
 		return not _mesh(human, "scalp").visible and not head.is_empty() \
@@ -267,6 +267,12 @@ func _check_shoulders(models: Dictionary, equipment: Dictionary) -> void:
 	actor.apply_equipment_visuals({5: KIT_TORSOS[1]})
 	expect(not growths.visible, "the next torso without the mark hides them")
 	actor.free()
+
+## Whether this run draws the RL head for a Human at High (the renderer
+## supports it and RL_HEADS is not classic). Otherwise develop's expectations
+## hold unchanged, whatever the actor built.
+static func rl_heads_on() -> bool:
+	return ReplicatedActor3D.rl_heads_renderer_supported() and not ReplicatedActor3D.rl_heads_classic()
 
 func run() -> void:
 	var models: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/models.json"))["models"]

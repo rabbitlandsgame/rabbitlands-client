@@ -127,6 +127,12 @@ func verify_body(actor: ReplicatedActor3D, active: Dictionary, label: String) ->
 	if not regions.is_empty():
 		expect(changed > 0 and removed > 20 and retained > 20, label + " has active, bounded clothing replacement")
 
+## Whether this run draws the RL head for a Human at High (the renderer
+## supports it and RL_HEADS is not classic). Otherwise develop's expectations
+## hold unchanged, whatever the actor built.
+static func rl_heads_on() -> bool:
+	return ReplicatedActor3D.rl_heads_renderer_supported() and not ReplicatedActor3D.rl_heads_classic()
+
 func run() -> void:
 	var models: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/models.json"))["models"]
 	var equipment: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/equipment.json"))
@@ -195,7 +201,7 @@ func run() -> void:
 						expect(mesh.visible == (bool(initial_hair[mesh.get_instance_id()]) and not covered), race + " restores sculpted hair visibility")
 					if mesh.name.to_lower() == "eyes":
 						# Under the RL head (a Human at High) the head draws its own eyes.
-						var rl_head := actor.rl_head()
+						var rl_head: RLHeadRig = actor.rl_head() if rl_heads_on() else null
 						expect(mesh.visible != (rl_head != null), race + " preserves eyes")
 						if rl_head != null:
 							var head: Array = rl_head.mesh_nodes()["head"]

@@ -2,8 +2,10 @@ extends SceneTree
 ## Native small facial partitions must stay renderable when a living actor
 ## bends below its resting AABB. No geometry, materials or poses are replaced.
 ## At High a Human draws the RL head instead of the body's scalp, eyes and
-## brows (hidden, still present and bounded): its head, beard and hair meshes
-## must carry the same animated-head envelope.
+## brows (hidden, still present and bounded) where the renderer draws it
+## (ReplicatedActor3D.rl_heads_renderer_supported, not RL_HEADS=classic): its
+## head, beard and hair meshes must carry the same animated-head envelope.
+## Elsewhere develop's expectations hold unchanged.
 var checks := 0
 var failures := 0
 func _init() -> void: run.call_deferred()
@@ -42,10 +44,11 @@ func run() -> void:
 	actor.animation_player.seek(bent_time,true);actor.animation_player.advance(0)
 	skeleton.force_update_all_bone_transforms()
 	expect(movement>.2,"the actual defend clip bends the head away from its standing bounds")
-	var rl:=actor.rl_head()!=null
-	expect(rl==(actor.render_quality()==ActorRenderQuality.Quality.HIGH and not ReplicatedActor3D.rl_heads_classic()),
-		"the foreman draws the RL head exactly at High")
-	if rl:
+	var rl_heads:=ReplicatedActor3D.rl_heads_renderer_supported() and not ReplicatedActor3D.rl_heads_classic()
+	var rl:=rl_heads and actor.render_quality()==ActorRenderQuality.Quality.HIGH
+	if rl_heads:
+		expect((actor.rl_head()!=null)==rl,"the foreman draws the RL head exactly at High")
+	if rl and actor.rl_head()!=null:
 		var rl_meshes:=actor.rl_head().all_meshes()
 		expect(not rl_meshes.is_empty(),"the RL head has meshes")
 		for mesh:MeshInstance3D in rl_meshes:
@@ -94,10 +97,11 @@ func run() -> void:
 	actor.apply_render_quality(ActorRenderQuality.Quality.HIGH)
 	expect(scalp.extra_cull_margin==4,"graphics-quality changes preserve the safe facial bounds")
 	actor.apply_appearance_variants({"hair":0})
-	rl=actor.rl_head()!=null
+	rl=rl_heads and actor.render_quality()==ActorRenderQuality.Quality.HIGH
 	expect(scalp.visible!=rl and scalp.extra_cull_margin==4,"returning to bald appearance preserves the closed scalp and its bounds")
 	if rl:
-		var cranium:=actor.rl_head().mesh_nodes()["head"] as Array
+		var cranium:Array=[]
+		if actor.rl_head()!=null:cranium=actor.rl_head().mesh_nodes()["head"]
 		expect(not cranium.is_empty() and (cranium[0][0] as MeshInstance3D).visible,"bald under the RL head shows the RL cranium")
 	expect(FileAccess.get_sha256(model.scene)==source_hash,"the approved source model remains byte-identical")
 	actor.queue_free()

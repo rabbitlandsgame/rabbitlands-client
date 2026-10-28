@@ -21,9 +21,15 @@ func expect(ok: bool, message: String) -> void:
 ## RL hairstyle module (a Human at High) the game hairstyle it replaces stays
 ## built but hidden, and is not one of them.
 func hairs(actor: ReplicatedActor3D) -> Array[Node]:
-	var module := actor.rl_head() != null and actor.rl_head().draws_module_hair()
+	var module := rl_heads_on() and actor.rl_head() != null and actor.rl_head().draws_module_hair()
 	return actor.get_skeleton().get_children().filter(func(n: Node) -> bool:
 		return n.name.begins_with("AppearanceHair_") and (not module or n.name == RLHeadRig.HAIR_NODE_NAME))
+
+## Whether this run draws the RL head for a Human at High (the renderer
+## supports it and RL_HEADS is not classic). Otherwise develop's expectations
+## hold unchanged, whatever the actor built.
+static func rl_heads_on() -> bool:
+	return ReplicatedActor3D.rl_heads_renderer_supported() and not ReplicatedActor3D.rl_heads_classic()
 
 func capture(actor: ReplicatedActor3D, name: String, back: bool, clip := "Idle_Subtle", time := 0.3) -> void:
 	if output.is_empty():
@@ -104,7 +110,7 @@ func run() -> void:
 			for headgear: int in [122, 159]:
 				actor.apply_equipment_visuals({3: headgear})
 				# Under the RL head its cranium closes the head in place of the scalp.
-				var rl := actor.rl_head() != null
+				var rl := rl_heads_on() and actor.rl_head() != null
 				for scalp: Node in actor.find_children("scalp", "MeshInstance3D", true, false):
 					expect((scalp as MeshInstance3D).visible != rl, slug + " headgear preserves the scalp " + str(headgear))
 				if rl:

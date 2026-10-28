@@ -1,10 +1,12 @@
 extends SceneTree
 ## Shared Human face fields: coherent head parts, neutral restoration and a
 ## source-preserving High finish. Run with the production renderer for final QA.
-## High draws the RL head (src/actors/rl_head/): its in-place switch is checked
-## to restore the exact Medium head parts. The classic High portrait finish
-## (HighPortraitAppearance), kept dormant behind RL_HEADS=classic, is checked
-## with that switch set.
+## Where the renderer draws the RL head (src/actors/rl_head/;
+## ReplicatedActor3D.rl_heads_renderer_supported, not RL_HEADS=classic) High
+## draws it: its in-place switch is checked to restore the exact Medium head
+## parts, then the classic High portrait finish (HighPortraitAppearance), kept
+## dormant behind RL_HEADS=classic, with that switch set for the check and
+## restored afterwards. Elsewhere develop's checks run unchanged.
 const FIT := preload("res://src/actors/character_proportions.gd")
 const HIGH := preload("res://src/actors/high_portrait_appearance.gd")
 var checks := 0
@@ -97,21 +99,25 @@ func run() -> void:
 		for part: String in HIGH.PARTS:
 			var node := native.find_child(part,true,false) as MeshInstance3D
 			shaped[part] = {"mesh":node.mesh,"material":node.material_override}
-		# High: the RL head replaces the head parts in place, and going back to
-		# Medium gives the exact selected parts back.
-		actor.apply_render_quality(2,true)
-		expect(actor.rl_head() != null, sex + " High draws the RL head in place")
-		for part: String in ["eyes", "eyebrows", "scalp"]:
-			var node := native.find_child(part,true,false) as MeshInstance3D
-			expect(not node.visible and not node.has_meta(HIGH.META), "RL head hides the body " + part + " without a High portrait")
-		actor.apply_render_quality(1,true)
-		for part: String in HIGH.PARTS:
-			var node := native.find_child(part,true,false) as MeshInstance3D
-			expect(node.mesh == shaped[part].mesh and node.material_override == shaped[part].material and node.visible,
-				"High with the RL head restores exact selected head part "+part)
-		# The dormant classic High portrait (RL_HEADS=classic).
-		OS.set_environment("RL_HEADS", "classic")
-		ReplicatedActor3D.reload_rl_heads_switch()
+		# High with the RL head: it replaces the head parts in place, and going
+		# back to Medium gives the exact selected parts back. Then the dormant
+		# classic High portrait, with RL_HEADS=classic until it is checked.
+		var rl_heads := ReplicatedActor3D.rl_heads_renderer_supported() and not ReplicatedActor3D.rl_heads_classic()
+		var had_switch := OS.has_environment("RL_HEADS")
+		var previous_switch := OS.get_environment("RL_HEADS")
+		if rl_heads:
+			actor.apply_render_quality(2,true)
+			expect(actor.rl_head() != null, sex + " High draws the RL head in place")
+			for part: String in ["eyes", "eyebrows", "scalp"]:
+				var node := native.find_child(part,true,false) as MeshInstance3D
+				expect(not node.visible and not node.has_meta(HIGH.META), "RL head hides the body " + part + " without a High portrait")
+			actor.apply_render_quality(1,true)
+			for part: String in HIGH.PARTS:
+				var node := native.find_child(part,true,false) as MeshInstance3D
+				expect(node.mesh == shaped[part].mesh and node.material_override == shaped[part].material and node.visible,
+					"High with the RL head restores exact selected head part "+part)
+			OS.set_environment("RL_HEADS", "classic")
+			ReplicatedActor3D.reload_rl_heads_switch()
 		actor.apply_render_quality(2,true)
 		for part: String in HIGH.PARTS:
 			var node := native.find_child(part,true,false) as MeshInstance3D
@@ -122,8 +128,12 @@ func run() -> void:
 		for part: String in HIGH.PARTS:
 			var node := native.find_child(part,true,false) as MeshInstance3D
 			expect(node.mesh == shaped[part].mesh and node.material_override == shaped[part].material,"High restores exact selected head part "+part)
-		OS.set_environment("RL_HEADS", "")
-		ReplicatedActor3D.reload_rl_heads_switch()
+		if rl_heads:
+			if had_switch:
+				OS.set_environment("RL_HEADS", previous_switch)
+			else:
+				OS.unset_environment("RL_HEADS")
+			ReplicatedActor3D.reload_rl_heads_switch()
 		actor.apply_appearance_variants({})
 		for part: String in HIGH.PARTS:
 			var node := native.find_child(part,true,false) as MeshInstance3D
