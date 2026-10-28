@@ -1,0 +1,357 @@
+{
+  "actor": "sunmane_foal_dun",
+  "status": "complete_eight_clip_draft_for_user_comparison_not_promoted",
+  "date": "2026-10-28",
+  "source_sha256": "b15e77e1b20a7eb768e0313fe4a49518b9b3e8403e0b429d61cc741706426f8a",
+  "candidate_sha256": "0896f731de6e0d3d441887d7f49e27c64dea3a52891a35450a6e2ad24844ca32",
+  "source_unchanged": true,
+  "maximum_samples_per_second": 240,
+  "largest_stored_float32_interval_rate": 239.6197440585009,
+  "method": "Resample every LINEAR animation sampler: shortest-arc quaternion SLERP, linear vector and corrective activation weights. At most floor(duration*240-0.0001) intervals per sampler to keep float32 intervals below the cap; preserve original first/last timestamps and values. Exact constant-track collapse and binary deduplication afterward. Native asset bake FPS set to 240. No runtime/global policy change.",
+  "preserved": "All mesh geometry/UV/indices, 180-joint hierarchy, skin including eight influences, bind/rest transforms, 130 corrective POSITION/NORMAL targets, materials, embedded images, clip/channel names, durations, endpoints and gameplay action/event map. Between-key transforms and corrective weights are approximate.",
+  "clips": [
+    {
+      "name": "Fighting_Idle",
+      "source_sampler_keys": 439166,
+      "draft_sampler_keys": 53912,
+      "channels_by_path": {
+        "translation": 181,
+        "rotation": 181,
+        "scale": 181,
+        "weights": 1
+      },
+      "packed_draft_sampler_keys": 53912,
+      "duration_seconds": 1.0416666269302368
+    },
+    {
+      "name": "Hit_Chest",
+      "source_sampler_keys": 352131,
+      "draft_sampler_keys": 46472,
+      "channels_by_path": {
+        "translation": 181,
+        "rotation": 181,
+        "scale": 181,
+        "weights": 1
+      },
+      "packed_draft_sampler_keys": 46472,
+      "duration_seconds": 1.0416666269302368
+    },
+    {
+      "name": "Idle_A",
+      "source_sampler_keys": 439613,
+      "draft_sampler_keys": 47712,
+      "channels_by_path": {
+        "translation": 181,
+        "rotation": 181,
+        "scale": 181,
+        "weights": 1
+      },
+      "packed_draft_sampler_keys": 47712,
+      "duration_seconds": 1.0416666269302368
+    },
+    {
+      "name": "Walk",
+      "source_sampler_keys": 512809,
+      "draft_sampler_keys": 61964,
+      "channels_by_path": {
+        "translation": 181,
+        "rotation": 181,
+        "scale": 181,
+        "weights": 1
+      },
+      "packed_draft_sampler_keys": 61964,
+      "duration_seconds": 1.1200000047683716
+    },
+    {
+      "name": "Jog",
+      "source_sampler_keys": 304769,
+      "draft_sampler_keys": 36884,
+      "channels_by_path": {
+        "translation": 181,
+        "rotation": 181,
+        "scale": 181,
+        "weights": 1
+      },
+      "packed_draft_sampler_keys": 36884,
+      "duration_seconds": 0.6600000262260437
+    },
+    {
+      "name": "Sword_Attack",
+      "source_sampler_keys": 520213,
+      "draft_sampler_keys": 74050,
+      "channels_by_path": {
+        "translation": 181,
+        "rotation": 181,
+        "scale": 181,
+        "weights": 1
+      },
+      "packed_draft_sampler_keys": 74050,
+      "duration_seconds": 1.600000023841858
+    },
+    {
+      "name": "Gallop",
+      "source_sampler_keys": 1773007,
+      "draft_sampler_keys": 49234,
+      "channels_by_path": {
+        "translation": 181,
+        "rotation": 181,
+        "scale": 181,
+        "weights": 1
+      },
+      "packed_draft_sampler_keys": 49101,
+      "duration_seconds": 0.5600000023841858
+    },
+    {
+      "name": "Death_A",
+      "source_sampler_keys": 313352,
+      "draft_sampler_keys": 145392,
+      "channels_by_path": {
+        "translation": 181,
+        "rotation": 181,
+        "scale": 181,
+        "weights": 1
+      },
+      "packed_draft_sampler_keys": 145392,
+      "duration_seconds": 2.5999999046325684
+    }
+  ],
+  "disk": {
+    "source_bytes": 96538140,
+    "candidate_bytes": 38926312,
+    "source_rlcz_bytes": 57579453,
+    "candidate_rlcz_bytes": 15586840
+  },
+  "runtime": {
+    "repeats_per_version": 3,
+    "source_retained_static_cpu_bytes": 510199534,
+    "candidate_retained_static_cpu_bytes": 126685650,
+    "source_load_ms": 8069.036,
+    "candidate_load_ms": 1933.036,
+    "source_runtime_keys": 3973403,
+    "candidate_runtime_keys": 312221,
+    "source_tracks": 1797,
+    "candidate_tracks": 1797,
+    "per_clip_cpu_microseconds": {
+      "Death_A": {
+        "source": 78.4233333333333,
+        "candidate": 56.5366666666667,
+        "percent_change": -27.908360606962145
+      },
+      "Fighting_Idle": {
+        "source": 45.97,
+        "candidate": 35.295,
+        "percent_change": -23.221666304111377
+      },
+      "Gallop": {
+        "source": 119.524166666667,
+        "candidate": 99.2541666666667,
+        "percent_change": -16.958913469382264
+      },
+      "Hit_Chest": {
+        "source": 34.3275,
+        "candidate": 31.6358333333333,
+        "percent_change": -7.841138057437047
+      },
+      "Idle_A": {
+        "source": 38.9975,
+        "candidate": 31.4708333333333,
+        "percent_change": -19.300382503152
+      },
+      "Jog": {
+        "source": 62.94,
+        "candidate": 57.6458333333333,
+        "percent_change": -8.411450058256587
+      },
+      "Sword_Attack": {
+        "source": 63.2191666666667,
+        "candidate": 54.1791666666667,
+        "percent_change": -14.299460870252945
+      },
+      "Walk": {
+        "source": 70.6283333333333,
+        "candidate": 53.6175,
+        "percent_change": -24.084998938103187
+      }
+    },
+    "scope": "Fresh-process real GlbSceneCache._build_raw + ReplicatedActor3D + NativeAnimationImporter, warm OS file cache. Retained Godot static CPU allocations include scene and library caches, meshes, textures and actor. AnimationPlayer advance plus forced skeleton global transforms at 240 updates/s; nine batches of 1200 updates per clip after warmup. Excludes GPU rendering/skinning, whole-game logic and frame-rate claims.",
+    "memory_scope": "Shared scene/source/retarget-library caches plus one actual client Actor, Godot static CPU allocation delta. Savings primarily once per loaded foal asset type, not this many bytes for each additional instance. Not OS RSS or VRAM.",
+    "gpu_corrective_buffer_payload_bytes_each": 24759800,
+    "gpu_scope": "Both actual native scenes expose identical mesh/skin/morph byte arrays and binds; same 180 bones, two surfaces and corrective payload. No GPU time, whole-game FPS, or additional-instance load benchmark claimed.",
+    "load_scope": "Loose GLB, warm OS file cache, isolated fresh process. Release payload decode and complete map/client startup were not timed."
+  },
+  "motion": {
+    "vertices": 10521,
+    "poses": 4922,
+    "maximum_surface_error_mm": 2.424072763649488,
+    "maximum_normal_error_degrees": 44.89417091739085,
+    "worst_position": {
+      "label": "Gallop@0.07708333333333",
+      "maximum_surface_error_mm": 2.424072763649488,
+      "rms_surface_error_mm": 0.08044866239200563,
+      "maximum_normal_error_degrees": 15.925187567045016,
+      "p99_normal_error_degrees": 0.19406415938963167,
+      "maximum_vertical_error_mm": 0.6943751622561778,
+      "vertex": 4304
+    },
+    "worst_normal": {
+      "label": "Gallop@0.48333333333333",
+      "maximum_surface_error_mm": 0.8283649798789376,
+      "rms_surface_error_mm": 0.14098335558950686,
+      "maximum_normal_error_degrees": 44.89417091739085,
+      "p99_normal_error_degrees": 0.1259636426878214,
+      "maximum_vertical_error_mm": 0.6309883110138248
+    },
+    "reset": {
+      "label": "RESET",
+      "maximum_surface_error_mm": 0.0,
+      "rms_surface_error_mm": 0.0,
+      "maximum_normal_error_degrees": 1.7075472925031877e-06,
+      "p99_normal_error_degrees": 1.4787793334710982e-06,
+      "maximum_vertical_error_mm": 0.0
+    },
+    "clips": {
+      "Idle_A": {
+        "poses": 507,
+        "maximum_surface_error_mm": 0.2891609599487617,
+        "maximum_normal_error_degrees": 0.004113211890901462
+      },
+      "Fighting_Idle": {
+        "poses": 507,
+        "maximum_surface_error_mm": 0.43026315035769375,
+        "maximum_normal_error_degrees": 0.006510805114228964
+      },
+      "Walk": {
+        "poses": 545,
+        "maximum_surface_error_mm": 0.1121694361841295,
+        "maximum_normal_error_degrees": 0.019076176589384125
+      },
+      "Jog": {
+        "poses": 324,
+        "maximum_surface_error_mm": 0.24971571480026805,
+        "maximum_normal_error_degrees": 0.03096715209494014
+      },
+      "Gallop": {
+        "poses": 276,
+        "maximum_surface_error_mm": 2.424072763649488,
+        "maximum_normal_error_degrees": 44.89417091739085
+      },
+      "Sword_Attack": {
+        "poses": 776,
+        "maximum_surface_error_mm": 0.7785366961118521,
+        "maximum_normal_error_degrees": 0.23817077379529158
+      },
+      "Hit_Chest": {
+        "poses": 507,
+        "maximum_surface_error_mm": 0.5290321451333035,
+        "maximum_normal_error_degrees": 0.08317851965581056
+      },
+      "Death_A": {
+        "poses": 1255,
+        "maximum_surface_error_mm": 0.41909885980529193,
+        "maximum_normal_error_degrees": 0.05132462347735771
+      }
+    },
+    "combined_world_bounds": {
+      "minimum": [
+        -0.09234199723213583,
+        -0.09525049814034597,
+        -1.2131032998126619
+      ],
+      "maximum": [
+        0.9150805577926494,
+        1.2437965656325978,
+        0.17706655691514486
+      ]
+    },
+    "scope": "Actual complete client Actor / native importer. All 10521 vertices and reconstructed linearly blended normals at 480 Hz plus 6 off-grid timestamps per clip, exact endpoints, all 56 directed crossfade pairs at 4 steps, and RESET. Static Godot mesh/skin/shape arrays and binds byte-identical. Positions include existing import.scale 0.65. Not an all-time error bound, independent contact-solve certification, or visual/user approval."
+  },
+  "blender": {
+    "maximum_sampled_surface_error_mm": 0.9265397824641739,
+    "worst": {
+      "clip": "Gallop",
+      "phase": 0.625,
+      "maximum_surface_error_mm": 0.9265397824641739
+    },
+    "scope": "Independent fresh Blender imports of both self-contained files. All 10521 original vertex IDs proved by source basis/skin/UV/POSITION target identity and compared at 33 full-cycle samples per clip. All eight original action slots; source animated armature object rest restored, NLA muted and bone/shape defaults reset. Existing gameplay scale 0.65. Position-only diagnostic, not runtime normal shading or artistic approval."
+  },
+  "preview": {
+    "renderer": "forward_plus",
+    "all_eight_clips_exercised": true,
+    "keyboard_mouse_orbit_zoom_input_delivered": true,
+    "directed_switches_exercised": 64,
+    "terminal_hold_and_idle_reset": true,
+    "components": "Actual ReplicatedActor3D, GlbSceneCache._build_raw and NativeAnimationImporter in an isolated client-script project. Synchronized cameras, animation/time/speed, pause/restart, absolute scrubbing, 0.15 second optional switches, one-shot holds/repeat, named camera views and two measured Gallop hotspot buttons.",
+    "artistic_acceptance": "Pending user review. No production asset/roster/import policy changed."
+  },
+  "normal_diagnostic": {
+    "label": "Gallop@0.48333333333333",
+    "vertex": 4309,
+    "normal_error_degrees": 44.89417091739078,
+    "world_position_source": [
+      0.4613382660768211,
+      0.4791117669302548,
+      -0.43945296878207935
+    ],
+    "vertices_above_degrees": {
+      "0.1": 138,
+      "1": 18,
+      "5": 3,
+      "10": 3,
+      "30": 1
+    },
+    "post_morph_normal_source": [
+      -0.09966731454142819,
+      -0.13403327689082883,
+      -0.03295457321205651
+    ],
+    "post_morph_normal_candidate": [
+      -0.09860296653505851,
+      -0.01932601412430318,
+      0.00908795034825538
+    ],
+    "post_morph_normal_length_source": 0.17024833860447028,
+    "post_morph_normal_length_candidate": 0.10088919998185628
+  },
+  "software": {
+    "numpy": "2.5.2",
+    "scipy": "1.18.1",
+    "zstandard": "0.25.0",
+    "godot": {
+      "build": "official",
+      "hash": "ed1daf0bf001b61586d9930840f2f1394092c079",
+      "hex": 263938,
+      "major": 4,
+      "minor": 7,
+      "patch": 2,
+      "status": "stable",
+      "string": "4.7.2-stable (official)",
+      "timestamp": 0
+    }
+  },
+  "evidence_sha256": {
+    "build-report.json": "cd098e2905d977cf9398666c1748fa1d6a0be0b0d21b1dc261dc6fe463679d15",
+    "runtime-measurements.json": "bf55f240e2df329647d8169f12c186c594d7e36003c674994c85569959d4078d",
+    "motion-measurements.json": "f5b6a4d47c1e60254c09e3e1ec715658b9ebf70ae9daac10e3ff454946ef3d10",
+    "blender-measurements.json": "28f46b32b22786ee4e125c94814358f4861da5424192c190ca204df5093a94cb",
+    "normal-diagnostic.json": "6b28b58d36ae3e53f68487037199eef61edbfa07236b07830b88e39e2b2ace01",
+    "preview-captures/preview-smoke.json": "3fb3e12f59e2b2309d725b948f324ec70718ac638f03bf6e9946f22241a6f5c8",
+    "preview.stdout.log": "4cdb5d002686c33e300c4cb31333472a25c6627c6b20ac17fef2da2dcb043642",
+    "preview.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "preview-import.stdout.log": "b728de0c23f24d9aa31bc7608b177d7ca13857d7c3aca862a08506d00675123b",
+    "preview-import.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "limitations": [
+    "Not lossless or a pass under the previous exactness budgets. Maximum observed native surface displacement 2.4241 mm.",
+    "At the worst angular-normal Gallop pose, 18 of 10521 vertices differ by more than one degree; three by more than ten degrees and one by more than thirty degrees. Largest angle 44.8942 degrees near a foreleg. Corrective normal contributions strongly cancel there (post-morph vector lengths 0.1702 and 0.1009), making shading sensitive to activation resampling. Review the shading hotspot.",
+    "Dense temporal sampling is not a continuous-time error bound or separate contact/foot-slide certification. No broad artistic approval or full client/server session claimed.",
+    "This is a separate local draft. Asset savings apply when selecting this version, not to the unchanged current installed model. Comparison/cache/evidence files deliberately retain both versions."
+  ],
+  "implementation_sha256": {
+    "eloria-assets/tools/build_foal_240_draft.py": "60aa2267cbe9cebbebb0b7c93f1a03b247dd0a989e4bd72e970b1166c0302305",
+    "eloria-assets/tools/preview_foal_240.py": "bcc5afc335e2d273541aa667a2c4ce933699dd490970c12fd549b0c6d9f7f581",
+    "eloria-assets/tools/measure_foal_240.py": "35c82d32de5f5948109b3f5005a58253cada0f62a5bc37084886f140784a6055",
+    "godot-client/prototypes/foal_animation_comparison.gd": "7db73fd42cd85ea8614d1723e95fb1386d867004bd8f596f0518a6d18246aef2",
+    "godot-client/tests/benchmark_foal_animation.gd": "37b37599696faaab5c5ec64d1ff3c981d5e26b52e94c49cec8e22a7c0846e6b1",
+    "godot-client/open-foal-animation-comparison.bat": "d5873f10d1d4de6832c43244fabedb0de56816146dd3faf42c38ecf9b3fbba3c"
+  }
+}
