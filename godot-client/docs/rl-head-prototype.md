@@ -228,8 +228,12 @@ beards; mean frame work in ms, two runs each at 26 m.
   default in the Compatibility renderer only (`RL_HEAD_BAKE=1`/`0` forces it): Forward+
   deforms the shapes in one compute pass and measured no gain while the cache would cost
   memory. Baked vertices are within 1e-5 m of the live result
-  (`tests/test_rl_head_identity_bake.gd`, worst 9.6e-7 m) and render the same silhouettes
-  (`tests/integration/rl_head_bake_silhouette.gd`). A crowd of 16 looks holds about
+  (`tests/test_rl_head_identity_bake.gd`, worst 4.9e-6 m) and render the same silhouettes
+  and view depth as the live shapes apart from rasteriser ties
+  (`tests/integration/rl_head_bake_silhouette.gd`, 2026-10-28: all 56 views of seven
+  faces pass in Forward+ and in Compatibility; at most 36 tie pixels in a view, 72% of
+  its allowance, each alone or, on the female all-100 face, in one diagonal pair a view
+  along a 45-degree edge; no strip of 3 or more). A crowd of 16 looks holds about
   50 MB of baked meshes.
 * **Still open in Compatibility.** The baked crowd is 1.46x/1.24x develop's frame time
   (p95 1.42x/1.32x), and at 10 m 1.42x/1.66x; each RL mesh instance also takes a
