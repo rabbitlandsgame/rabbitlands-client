@@ -263,16 +263,32 @@ func _check_hair_shapes() -> void:
 				preset[field], edges])
 		var default := Map.face({"hair": AppearanceVariants.pack_hair(pair[1], 0)}, pair[0])
 		_expect(default.hair_length < 0.0, "%s: the default 50 is shorter than the preset (%.2f)" % [pair[2], default.hair_length])
-	# The finish -> fine-detail level (data hair.detail), centred on each
-	# module's preset finish: Swept < Classic < Tousled, 25 a step.
-	for row: Array in [["male", 1, "rowan_shag", [25, 50, 0]], ["female", 3, "mira_bun", [75, 100, 50]]]:
+	# The finish -> fine-detail level (data hair.detail; owner decision, colour
+	# model spec revision 3, 4.7): the saved finishes sit at slider positions
+	# Swept 25, Classic 50, Tousled 75, mapped piecewise linearly through
+	# (0, 0), (the module's preset finish, 50) and (100, 100).
+	_expect(Map.finish_slider(0) == 50 and Map.finish_slider(1) == 75 and Map.finish_slider(2) == 25,
+		"the saved finishes sit at slider positions Classic 50, Tousled 75, Swept 25")
+	for row: Array in [["male", 1, "rowan_shag", "Rowan", [33, 50, 17]], ["female", 3, "mira_bun", "Mira", [67, 83, 50]]]:
 		var levels := []
 		for finish: int in 3:
 			levels.append(Map.face({"hair": AppearanceVariants.pack_hair(row[1], 0), "hair_detail": finish},
 				row[0]).hair_detail)
-		_expect(levels == row[3], "%s: Classic, Tousled, Swept give detail levels %s" % [row[2], levels])
-	_expect(Map.face({"hair": AppearanceVariants.pack_hair(1, 0), "hair_detail": 7}, "male").hair_detail == 0
-		and Map.face({"hair": AppearanceVariants.pack_hair(1, 0), "hair_detail": 1.5}, "male").hair_detail == 25,
+		_expect(levels == row[4], "%s: Classic, Tousled, Swept give detail levels %s" % [row[2], levels])
+		var preset_finish := Map.finish_slider(int(PRESETS.shape(row[3]).hair_detail))
+		var listed: Variant = ((Map.data().get("hair", {}) as Dictionary).get("detail", {}) as Dictionary).get("sliderPresetFinish")
+		_expect(listed is Dictionary and int((listed as Dictionary).get(row[2], -1)) == preset_finish,
+			"%s: the data's preset finish is %s's own (slider %d)" % [row[2], row[3], preset_finish])
+		var curve: Array[int] = []
+		for s: int in 101:
+			curve.append(Map.detail_level(s, row[2]))
+		var steady := true
+		for s: int in 100:
+			steady = steady and curve[s + 1] >= curve[s] and curve[s + 1] - curve[s] <= 2
+		_expect(curve[0] == 0 and curve[preset_finish] == RLHeadAppearance.DEFAULT_HAIR_DETAIL and curve[100] == 100
+			and steady, "%s: slider 0, the preset finish and 100 give 0, 50 and 100, rising without a jump" % row[2])
+	_expect(Map.face({"hair": AppearanceVariants.pack_hair(1, 0), "hair_detail": 7}, "male").hair_detail == 17
+		and Map.face({"hair": AppearanceVariants.pack_hair(1, 0), "hair_detail": 1.5}, "male").hair_detail == 33,
 		"an out-of-range finish clamps and a non-integer one counts as Classic")
 	var legacy := Map.face({"hair": AppearanceVariants.pack_hair(2, 0), "hair_length": 100, "hair_detail": 2}, "male")
 	_expect(legacy.hair_length == 0.0 and legacy.hair_detail == RLHeadAppearance.DEFAULT_HAIR_DETAIL,

@@ -118,10 +118,11 @@ unchanged; switching quality swaps the heads in place.
   RL `mira_bun` hairstyle; every other hairstyle keeps its fitted Low/Medium
   model with the High hair finish. On the RL hairstyles, Hair length and
   volume lengthen or shorten each lock and loft or flatten the hair around
-  the Rowan and Mira presets, which show the hairstyles as authored, and the
-  hair finish sets how many loose flyaway strands show: Swept is sleekest and
-  Tousled loosest, with the preset's own finish (Tousled for Rowan, Swept for
-  Mira) showing the authored strands. The other hairstyles take length,
+  the Rowan and Mira presets, which show the hairstyles as authored. The hair
+  finish runs from sleek to messy: Swept is sleekest and Tousled messiest, and
+  the preset's own finish (Tousled for Rowan, Swept for Mira) shows the
+  authored strands. A sleeker finish drops loose flyaway strands, and a
+  messier one breaks the strands up more. The other hairstyles take length,
   volume and finish as before.
 * **Facial hair.** Moustache, goatee, short and full beards are RL beards that
   follow facial expressions. Stubble is painted into the RL skin. Women show

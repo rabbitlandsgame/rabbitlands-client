@@ -31,9 +31,8 @@
 		"about": "An RL module's hl_length/hl_volume weights: clamp(shapeGain * (v - preset) / 50, -1, 1), preset = Rowan's values for rowan_shag, Mira's for mira_bun.",
 		"shapeGain": 1.0,
 		"detail": {
-			"about": "An RL module's fine-detail level (0-100; 50 = authored, lower drops flyaway and wisp cards, 0 smooth, above 50 only adds strand contrast) from the saved hair finish (hair_detail 0 Classic, 1 Tousled, 2 Swept): clamp(50 + step * (finishRank[finish] - finishRank[preset finish]), 0, 100), finishRank indexed by finish and ordered by how much loose hair a finish suggests (Swept < Classic < Tousled), centred like length and volume on the module's own preset (Rowan Tousled for rowan_shag, Mira Swept for mira_bun). Gives rowan_shag Classic 25 / Tousled 50 / Swept 0 and mira_bun Classic 75 / Tousled 100 / Swept 50. Seed for owner review.",
-			"finishRank": [1, 2, 0],
-			"step": 25
+			"about": "An RL module's fine-detail level (0-100; 50 = authored, lower drops flyaway and wisp cards, 0 smooth, above 50 only adds strand contrast) from the hair finish's slider position s (0 sleekest .. 100 messiest; the saved finishes sit at Swept 25, Classic 50, Tousled 75): piecewise linear through (0, 0), (sliderPresetFinish, 50) and (100, 100), rounded, sliderPresetFinish = the slider position of the module's own preset finish (Rowan Tousled for rowan_shag, Mira Swept for mira_bun), so each preset finish is the authored look. Owner decision (colour model spec revision 3, 4.7). Gives rowan_shag Swept 17 / Classic 33 / Tousled 50 and mira_bun Swept 50 / Classic 67 / Tousled 83.",
+			"sliderPresetFinish": {"rowan_shag": 75, "mira_bun": 25}
 		}
 	},
 	"colours": {

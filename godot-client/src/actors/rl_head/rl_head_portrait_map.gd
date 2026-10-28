@@ -24,7 +24,8 @@ extends RefCounted
 ## with its High finish), Bald is none. hair_length / hair_volume drive an RL
 ## module's hl_ shapes centred on its own preset's values; the hair finish
 ## (hair_detail 0 Classic, 1 Tousled, 2 Swept) becomes the module's fine-detail
-## level, centred the same way (`detail_level`).
+## level through its slider position, the module's preset finish being the
+## authored look (`detail_level`).
 ##
 ## Colours: skin, eye and hair palette indices through calibrated RL-side
 ## tables, so a lit RL head matches what Low/Medium show for the same index;
@@ -60,6 +61,10 @@ const HAIR_MODULES := {2: {"name": "rowan_shag", "sex": "male"}, 3: {"name": "mi
 const HAIR_RULES := {"male": {1: "rowan_shag"}, "female": {3: "mira_bun"}}
 ## Each RL module's length and volume are centred on its own likeness preset.
 const MODULE_PRESETS := {"rowan_shag": "Rowan", "mira_bun": "Mira"}
+## The hair finish slider positions (0 sleekest .. 100 messiest) of the saved
+## finishes, by hair_detail 0 Classic, 1 Tousled, 2 Swept: frozen (colour model
+## spec revision 3, 2.9).
+const FINISH_SLIDER: Array[int] = [50, 75, 25]
 const BROW_FROM_HAIR := 0.65
 
 static var _data: Dictionary = {}
@@ -254,25 +259,38 @@ static func hair_shapes(appearance: Dictionary, hair_name: String) -> Dictionary
 	for pair: Array in [["length", "hair_length"], ["volume", "hair_volume"]]:
 		var offset := (float(field(appearance, pair[1])) - float(preset.get(pair[1], 50))) / 50.0
 		result[pair[0]] = clampf(hair_gain * offset, -1.0, 1.0)
-	result["detail"] = detail_level(field(appearance, "hair_detail", 0, 2),
-		clampi(int(preset.get("hair_detail", 0)), 0, 2))
+	result["detail"] = detail_level(finish_slider(field(appearance, "hair_detail", 0, 2)), hair_name)
 	return result
 
 
-## The fine-detail level (0..100) for a saved hair finish on a module whose
-## likeness preset has `preset_finish`:
-##     clamp(50 + step * (rank[finish] - rank[preset_finish]), 0, 100)
-## with the finishes ranked by how much loose hair they suggest (data
-## `hair.detail.finishRank`, by finish 0 Classic, 1 Tousled, 2 Swept; default
-## Swept 0 < Classic 1 < Tousled 2) and `hair.detail.step` (default 25). The
-## preset's own finish is the authored look, as for length and volume.
-static func detail_level(finish: int, preset_finish: int) -> int:
+## The hair finish slider position (0 sleekest .. 100 messiest) of a saved
+## finish (hair_detail 0 Classic, 1 Tousled, 2 Swept): FINISH_SLIDER.
+static func finish_slider(finish: int) -> int:
+	return FINISH_SLIDER[clampi(finish, 0, 2)]
+
+
+## The fine-detail level (0..100) of RL module `module` at hair finish slider
+## position `s` (owner decision, colour model spec revision 3, 4.7): piecewise
+## linear through (0, 0), (s_p, 50) and (100, 100),
+##     level = 50 * s / s_p                         for s <= s_p
+##     level = 50 + 50 * (s - s_p) / (100 - s_p)    above,
+## rounded, where s_p is the slider position of the module's preset finish
+## (data `hair.detail.sliderPresetFinish`, else its likeness preset's saved
+## finish). So the preset finish is the module's authored look (50), and 0 and
+## 100 are the sleekest and messiest. Develop's finishes give rowan_shag
+## (Tousled, s_p 75) Swept 17, Classic 33, Tousled 50 and mira_bun (Swept,
+## s_p 25) Swept 50, Classic 67, Tousled 83.
+static func detail_level(s: float, module: String) -> int:
 	var entry: Dictionary = (data().get("hair", {}) as Dictionary).get("detail", {}) as Dictionary
-	var listed: Variant = entry.get("finishRank")
-	var ranks: Array = listed as Array if listed is Array and (listed as Array).size() >= 3 else [1, 2, 0]
-	var step := float(entry.get("step", 25.0))
-	var difference := float(ranks[clampi(finish, 0, 2)]) - float(ranks[clampi(preset_finish, 0, 2)])
-	return clampi(roundi(RLHeadAppearance.DEFAULT_HAIR_DETAIL + step * difference), 0, 100)
+	var listed: Variant = entry.get("sliderPresetFinish")
+	var preset_finish := finish_slider(int(PRESETS.shape(str(MODULE_PRESETS.get(module, "Rowan"))).get("hair_detail", 0)))
+	var value: Variant = (listed as Dictionary).get(module, preset_finish) if listed is Dictionary else preset_finish
+	var at_preset := clampf(float(value) if typeof(value) in [TYPE_INT, TYPE_FLOAT] else float(preset_finish), 1.0, 99.0)
+	var position := clampf(s, 0.0, 100.0)
+	var middle := float(RLHeadAppearance.DEFAULT_HAIR_DETAIL)
+	var level := middle * position / at_preset if position <= at_preset \
+		else middle + (100.0 - middle) * (position - at_preset) / (100.0 - at_preset)
+	return clampi(roundi(level), 0, 100)
 
 
 ## The RL beard; none on a female head at High.

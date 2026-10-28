@@ -57,12 +57,16 @@ art exactly. No asset is replaced: the shipped bodies, hair and equipment are un
     of it): 50, the default, is the authored look, lower drops flyaways from the lowest
     keep level up, 0 is smooth, and above 50 nothing more appears - the strands gain up
     to 35% contrast about the atlas's local mean instead. Beards keep 50.
-  * **From the saved finish.** A Human's hair finish (`hair_detail` 0 Classic, 1 Tousled,
-    2 Swept) gives the level `clamp(50 + 25 * (rank[finish] - rank[preset finish]), 0,
-    100)`, ranked Swept 0 < Classic 1 < Tousled 2 and centred, like length and volume, on
-    the module's own preset (Rowan is Tousled, Mira Swept): `rowan_shag` Classic 25,
-    Tousled 50, Swept 0; `mira_bun` Classic 75, Tousled 100, Swept 50
-    (`data/actors/rl_head_wire_defaults.json` `hair.detail`; a seed for owner review).
+  * **From the saved finish** (owner decision; colour model spec revision 3, 4.7). A
+    Human's hair finish (`hair_detail` 0 Classic, 1 Tousled, 2 Swept) sits on the hair
+    finish slider (0 sleekest to 100 messiest) at Swept 25, Classic 50, Tousled 75.
+    `RLHeadPortraitMap.detail_level(s, module)` maps slider position `s` to the level
+    piecewise linearly through (0, 0), (`s_p`, 50) and (100, 100), rounded, where `s_p`
+    is the slider position of the module's own preset finish (Rowan is Tousled, 75; Mira
+    Swept, 25), so each preset finish is the authored look: `rowan_shag` Swept 17,
+    Classic 33, Tousled 50; `mira_bun` Swept 50, Classic 67, Tousled 83
+    (`data/actors/rl_head_wire_defaults.json` `hair.detail.sliderPresetFinish`). A later
+    PC/3 `hair_finish` slider value feeds the same function.
   * **Springs** keep their authored rest lengths; extended tips stay weighted to the last
     joint and swing with it, shortened locks use fewer joints.
     `tests/test_rl_head.gd` swings both hairstyles at full length and volume.

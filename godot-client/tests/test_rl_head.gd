@@ -584,7 +584,7 @@ func _check_grooming(sex: String, look: String, module: String, other_finish: in
 		var volume := clampf((float(case[1]) - float(preset.hair_volume)) / 50.0, -1.0, 1.0)
 		var expected := {"hl_length_p": snappedf(maxf(length, 0.0), 0.0001), "hl_length_n": snappedf(maxf(-length, 0.0), 0.0001),
 			"hl_volume_p": snappedf(maxf(volume, 0.0), 0.0001), "hl_volume_n": snappedf(maxf(-volume, 0.0), 0.0001)}
-		var detail := snappedf(float(RLHeadPortraitMap.detail_level(case[2], preset.hair_detail)) / 100.0, 0.0001)
+		var detail := snappedf(float(RLHeadPortraitMap.detail_level(RLHeadPortraitMap.finish_slider(case[2]), module)) / 100.0, 0.0001)
 		_expect(_grooming_weights(rig) == expected and _hair_detail_values(rig) == [detail]
 			and rig.identity_targets() == nodes_before,
 			"%s length %d, volume %d, finish %d: hl_ weights %s, detail %.2f, same meshes" % [module, case[0],
