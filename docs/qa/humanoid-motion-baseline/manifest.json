@@ -3429,9 +3429,9 @@
       "family": "giants",
       "runtime_path": "godot-client/assets/actors/native/creatures/verdant_cyclops.glb",
       "animation_map": "godot-client/data/animations/humanoid-baseline/verdant_cyclops.json",
-      "sha256": "1939d03d166b45d81c06ec0721d70be633b85594c20dbc5e79a0870979b738e5",
+      "sha256": "6e001f2fa2f5d8eee8e637c0cde28a2a513d442150e5d263018b70cdd3d87aa7",
       "reviewed_source_sha256": "32db7b8226353545f94ee2dbf44691d2c02116996b29eb507865cf289e51c6f2",
-      "bytes": 10753496,
+      "bytes": 8410696,
       "height_native": 1.7407686125371054,
       "bake_fps": 4096,
       "durations": {
@@ -3473,9 +3473,9 @@
       "primary_attack": "Sword_Attack",
       "packing": {
         "source_sha256": "32db7b8226353545f94ee2dbf44691d2c02116996b29eb507865cf289e51c6f2",
-        "runtime_sha256": "1939d03d166b45d81c06ec0721d70be633b85594c20dbc5e79a0870979b738e5",
+        "runtime_sha256": "6e001f2fa2f5d8eee8e637c0cde28a2a513d442150e5d263018b70cdd3d87aa7",
         "source_bytes": 12520660,
-        "runtime_bytes": 10753496,
+        "runtime_bytes": 8410696,
         "parts": [
           {
             "part": 0,
@@ -3495,12 +3495,18 @@
           "packed_buffer_bytes": 9891964
         },
         "basis_representation": "positive_affine",
-        "method": "Positive affine corrective basis over all native actions, bounded local error; compensated eight-slot skin. Original native joint curves retained."
+        "method": "Positive affine corrective basis over all native actions, bounded local error; compensated eight-slot skin. Original native joint curves retained.",
+        "storage_rebind": {
+          "previous_runtime_sha256": "1939d03d166b45d81c06ec0721d70be633b85594c20dbc5e79a0870979b738e5",
+          "current_runtime_sha256": "6e001f2fa2f5d8eee8e637c0cde28a2a513d442150e5d263018b70cdd3d87aa7",
+          "equivalence_report": "docs/qa/creature-storage/verdant_cyclops.json",
+          "interpretation": "Prior measurements retained; current binding derives through the separately qualified storage-equivalence receipt."
+        }
       },
       "native_conformance": {
         "passed": true,
         "source_sha256": "32db7b8226353545f94ee2dbf44691d2c02116996b29eb507865cf289e51c6f2",
-        "runtime_sha256": "1939d03d166b45d81c06ec0721d70be633b85594c20dbc5e79a0870979b738e5",
+        "runtime_sha256": "6e001f2fa2f5d8eee8e637c0cde28a2a513d442150e5d263018b70cdd3d87aa7",
         "rest_error_over_height": 2.341611587650088e-10,
         "max_surface_error_over_height": 9.443949766823513e-07,
         "clips": {
@@ -3560,8 +3566,15 @@
           "native non-morph curves",
           "native clip durations"
         ],
-        "interpretation": "Export fidelity and added sole velocity relative to reviewed source; not artistic acceptance."
-      }
+        "interpretation": "Export fidelity and added sole velocity relative to reviewed source; not artistic acceptance.",
+        "storage_rebind": {
+          "previous_runtime_sha256": "1939d03d166b45d81c06ec0721d70be633b85594c20dbc5e79a0870979b738e5",
+          "current_runtime_sha256": "6e001f2fa2f5d8eee8e637c0cde28a2a513d442150e5d263018b70cdd3d87aa7",
+          "equivalence_report": "docs/qa/creature-storage/verdant_cyclops.json",
+          "interpretation": "Prior measurements retained; current binding derives through the separately qualified storage-equivalence receipt."
+        }
+      },
+      "storage_equivalence_report": "docs/qa/creature-storage/verdant_cyclops.json"
     },
     "snow_yeti": {
       "family": "giants",

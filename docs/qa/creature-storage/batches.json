@@ -5,8 +5,8 @@
   "batch_size": 5,
   "creature_count": 235,
   "batch_count": 47,
-  "completed_batches": 14,
-  "qualified_creatures": 65,
+  "completed_batches": 15,
+  "qualified_creatures": 70,
   "status": "in progress",
   "actors": [
     {
@@ -841,7 +841,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/cuttlefish.glb",
       "source_sha256": "0af98400d4f41def465f62fbe637fc7bf33f28318457426a1ac7e6f34726dade",
       "source_bytes": 10866436,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "734cca99c10097005aa0165bc62fa30201b1dbbe558cb5c8d18592b1c4ebd6a4",
+      "candidate_bytes": 10526364,
+      "qualification_report": "docs/qa/creature-storage/cuttlefish.json"
     },
     {
       "actor": "stormmane_lion",
@@ -850,7 +853,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/stormmane_lion.glb",
       "source_sha256": "0aefe7490edecdae8720be283dda2d29809106d277890266269fbbd201504b38",
       "source_bytes": 10770368,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "21c0890a27e736d04d616c71f839b5b6df30f53a72bcd0bcec9b7fddf891148a",
+      "candidate_bytes": 8896384,
+      "qualification_report": "docs/qa/creature-storage/stormmane_lion.json"
     },
     {
       "actor": "verdant_cyclops",
@@ -859,7 +865,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/verdant_cyclops.glb",
       "source_sha256": "1939d03d166b45d81c06ec0721d70be633b85594c20dbc5e79a0870979b738e5",
       "source_bytes": 10753496,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "6e001f2fa2f5d8eee8e637c0cde28a2a513d442150e5d263018b70cdd3d87aa7",
+      "candidate_bytes": 8410696,
+      "qualification_report": "docs/qa/creature-storage/verdant_cyclops.json"
     },
     {
       "actor": "coal_kobold",
@@ -868,7 +877,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/coal_kobold.glb",
       "source_sha256": "958d55a66d93fcb8984c33a92a6bed8413a5120bd44a93e2d2bb5be4f20614c4",
       "source_bytes": 10554380,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "adb849c87f8970711f100ddbfe31edd45db0586e323fa904a952284b5e15cb8d",
+      "candidate_bytes": 8396964,
+      "qualification_report": "docs/qa/creature-storage/coal_kobold.json"
     },
     {
       "actor": "squirrel",
@@ -877,7 +889,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/squirrel.glb",
       "source_sha256": "60a9d6d96e27ea95ac59863eb87b9b802a543cc11234964c37a2a44b0c677a2d",
       "source_bytes": 10500176,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "6003cfc5288cc5c5547ba876b0d3fbb5fe2dc5fc862c43d4b5c32e30c01a18c4",
+      "candidate_bytes": 8314940,
+      "qualification_report": "docs/qa/creature-storage/squirrel.json"
     },
     {
       "actor": "iguana",
@@ -2334,17 +2349,18 @@
     11,
     12,
     13,
-    14
+    14,
+    15
   ],
-  "reviewed_creatures": 70,
+  "reviewed_creatures": 75,
   "selection_policy": {
     "raw_asset_priority": "Prefer smaller qualified raw development models; small measured increases in packaged RLCZ size are accepted and recorded per actor and batch.",
     "runtime_claims": "Encoded input-key savings do not establish retained animation memory or frame-time savings because Godot rebakes curves at the declared cadence. Shared corrective GPU buffer savings are measured separately.",
     "approximation": "Exact batches retain their existing bounded float32/native/pixel gates. Approximate joint-curve trials are private and uninstalled."
   },
   "totals_reviewed": {
-    "raw_saved_bytes": 178715452,
-    "compressed_saved_bytes": 18869349,
+    "raw_saved_bytes": 187614960,
+    "compressed_saved_bytes": 18705438,
     "shared_gpu_saved_bytes": 36009320
   }
 }
