@@ -1853,8 +1853,8 @@
       "source_sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9",
       "source_bytes": 5075744,
       "status": "qualified",
-      "candidate_sha256": "6240f7c590d3ae673dedebeb6a88ef740d8ef371716b3d7c1266871ee2472afe",
-      "candidate_bytes": 4865020,
+      "candidate_sha256": "a4af22643ac3a46c79cd237322589f320feed3cad9e7400ad6f9c609fe339430",
+      "candidate_bytes": 3903964,
       "qualification_report": "docs/qa/creature-storage/batch-031/frost_stone_golem.json"
     },
     {
@@ -2886,9 +2886,9 @@
     "approximation": "Exact batches retain their existing bounded float32/native/pixel gates. Approximate joint-curve trials are private and uninstalled."
   },
   "totals_reviewed": {
-    "raw_saved_bytes": 297841336,
-    "compressed_saved_bytes": 19448769,
-    "shared_gpu_saved_bytes": 39397800
+    "raw_saved_bytes": 298802392,
+    "compressed_saved_bytes": 20040460,
+    "shared_gpu_saved_bytes": 41044500
   },
   "independent_editor_verification": {
     "status": "corrected for all changed creatures through batch36; later batches require explicit Editor proof at qualification",
@@ -2899,6 +2899,17 @@
     "artistic_approval_unchanged": true,
     "corrected_numeric_captures": 168,
     "pilot_verified_separately": true,
-    "audit": "docs/qa/creature-storage/editor-verification-audit.json"
+    "audit": "docs/qa/creature-storage/editor-verification-audit.json",
+    "all_current_qualified_creatures_verified": 205,
+    "all_current_source_and_scene_freshness_provenance_verified": true,
+    "final_provenance_audit_sha256": "6bb63bb94e9cfd949c37224c269c8978ee46da1beb13d1c808b855d55cf25b01"
+  },
+  "runtime_qualification_limits": {
+    "shared_GPU_savings_are_per_loaded_unique_model": true,
+    "frame_rate_or_frame_CPU_gain_claimed": false,
+    "retained_animation_memory_gain_claimed": false,
+    "original_artist_review_status_unchanged": true,
+    "rig_partition_models_with_extra_draw": 6,
+    "additional_draw_surfaces_per_partition_model": 1
   }
 }

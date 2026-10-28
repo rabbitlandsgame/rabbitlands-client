@@ -53,17 +53,17 @@
     {
       "actor": "frost_stone_golem",
       "source_sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9",
-      "candidate_sha256": "6240f7c590d3ae673dedebeb6a88ef740d8ef371716b3d7c1266871ee2472afe",
+      "candidate_sha256": "a4af22643ac3a46c79cd237322589f320feed3cad9e7400ad6f9c609fe339430",
       "status": "qualified",
       "qualification_report": "docs/qa/creature-storage/batch-031/frost_stone_golem.json",
       "source_bytes": 5075744,
-      "candidate_bytes": 4865020,
+      "candidate_bytes": 3903964,
       "source_zstd_bytes": 3390603,
-      "candidate_zstd_bytes": 3395330,
+      "candidate_zstd_bytes": 2803639,
       "shared_gpu_source_bytes": 2740320,
-      "shared_gpu_candidate_bytes": 2740320,
+      "shared_gpu_candidate_bytes": 1093620,
       "draw_surfaces_source": 1,
-      "draw_surfaces_candidate": 1
+      "draw_surfaces_candidate": 2
     },
     {
       "actor": "red_fox",
@@ -84,27 +84,37 @@
   "totals": {
     "source_bytes": 25630224,
     "source_bytes_unknown_actors": 0,
-    "candidate_bytes": 21136368,
+    "candidate_bytes": 20175312,
     "candidate_bytes_unknown_actors": 0,
     "source_zstd_bytes": 14948199,
     "source_zstd_bytes_unknown_actors": 0,
-    "candidate_zstd_bytes": 14996132,
+    "candidate_zstd_bytes": 14404441,
     "candidate_zstd_bytes_unknown_actors": 0,
     "shared_gpu_source_bytes": 2740320,
     "shared_gpu_source_bytes_unknown_actors": 0,
-    "shared_gpu_candidate_bytes": 2740320,
+    "shared_gpu_candidate_bytes": 1093620,
     "shared_gpu_candidate_bytes_unknown_actors": 0,
-    "raw_saved_bytes": 4493856,
-    "compressed_saved_bytes": -47933,
-    "shared_gpu_saved_bytes": 0
+    "raw_saved_bytes": 5454912,
+    "compressed_saved_bytes": 543758,
+    "shared_gpu_saved_bytes": 1646700
   },
   "checks": [
     {}
   ],
   "independent_editor_verification": {
     "passed": true,
-    "method": "Both fixtures explicitly ResourceLoader.load(PackedScene); current source and generated scene MD5 freshness plus SHA256; all source clips, RESET and directed transitions, typed geometry/morphs/materials. Original per-stage budgets unchanged.",
+    "method": "Explicit imported PackedScene with source/destination MD5 freshness and SCN SHA256; all source clips, RESET, directed transitions, full typed skin/geometry/retained PNT/material proofs.",
     "retrospective_audit": "docs/qa/creature-storage/editor-verification-audit.json",
+    "Frost_followup_fully_requalified": true,
     "artistic_approval_changed": false
+  },
+  "Frost_followup": {
+    "superseded_main_sha256": "6240f7c590d3ae673dedebeb6a88ef740d8ef371716b3d7c1266871ee2472afe",
+    "new_sha256": "a4af22643ac3a46c79cd237322589f320feed3cad9e7400ad6f9c609fe339430",
+    "additional_raw_bytes_saved": 961056,
+    "additional_packaged_bytes_saved": 591691,
+    "additional_shared_corrective_GPU_bytes_saved": 1646700,
+    "additional_draw_surfaces": 1,
+    "original_physical_observations_and_review_status_preserved": true
   }
 }
