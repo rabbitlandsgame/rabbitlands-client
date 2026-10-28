@@ -233,7 +233,15 @@ static func _blend_shape_defaults(owner: Node) -> Dictionary:
 		if mesh_node.mesh is not ArrayMesh:
 			continue
 		for index: int in mesh_node.mesh.get_blend_shape_count():
-			var path := "%s:%s" % [owner.get_path_to(mesh_node), mesh_node.mesh.get_blend_shape_name(index)]
+			var shape_name: StringName = mesh_node.mesh.get_blend_shape_name(index)
+			# RL head identity (id_), expression (ex_) and hair length/volume/
+			# detail (hl_) shapes are driven by RLHeadRig and RLFaceExpression. A
+			# RESET default would hold each at its import-time value on every
+			# animated frame of every clip.
+			if shape_name.begins_with("id_") or shape_name.begins_with("ex_") \
+					or shape_name.begins_with("hl_"):
+				continue
+			var path := "%s:%s" % [owner.get_path_to(mesh_node), shape_name]
 			defaults[path] = mesh_node.get_blend_shape_value(index)
 	return defaults
 
