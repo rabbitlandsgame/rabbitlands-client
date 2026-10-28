@@ -52,7 +52,7 @@ const COMBAT_PANEL_SIZE := Vector2(240.0, 76.0)
 const COMBAT_FONT_SIZE := 13
 const MARKET_SIZE := Vector2(840.0, 600.0)
 ## The pack, not the worn slots the inventory packet also carries.
-const MARKET_PACK_SLOTS := 36
+const MARKET_PACK_SLOTS := 24
 ## The server's own ceiling on a unit price.
 const MARKET_PRICE_LIMIT := 2000000000
 ## A refused request is answered too; this only frees the buttons if neither
@@ -1269,7 +1269,7 @@ func _market_sell_entries() -> Array[Dictionary]:
 	slots.sort()
 	for raw_slot: Variant in slots:
 		var slot: int = int(raw_slot)
-		if slot < 0 or (slot >= MARKET_PACK_SLOTS and slot < 128):
+		if slot < 0 or (slot >= MARKET_PACK_SLOTS and slot < 127):
 			continue
 		var item: Dictionary = AppState.inventory[raw_slot] as Dictionary
 		var quantity: int = int(item.get("quantity", 0))

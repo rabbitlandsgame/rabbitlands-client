@@ -6,7 +6,7 @@ const DEFAULT := "unified"
 const MAX_CUSTOM := 5
 const BUILT_INS := {"unified": "Unified compact", "tabbed": "Tabbed satchel",
 	"dock": "Edge dock", "popover": "Adaptive inspect", "tray": "Shallow bottom tray"}
-const PARTS := {"backpack": "Backpack", "equipment": "Equipment", "preview": "Text preview", "inspection": "Inspection", "actions": "Action bar"}
+const PARTS := {"backpack": "Backpack", "equipment": "Equipment", "pouch": "Pouch", "preview": "Text preview", "inspection": "Inspection", "actions": "Action bar"}
 const PLACEMENTS := ["inline", "replace", "side", "popover"]
 var active := DEFAULT
 var working := preset(DEFAULT)
@@ -23,6 +23,8 @@ static func preset(id: String) -> Dictionary:
 		result.parts[key] = {"enabled": true, "offset": Vector2.ZERO, "cell": 36, "columns": 6,
 			"height": 48, "width": 250, "show_quantity": true, "icon_opacity": 1.0}
 	result.parts.equipment.columns = 2
+	result.parts.pouch.columns = 4
+	result.parts.pouch.cell = 52
 	result.parts.inspection.height = 150
 	result.parts.inspection.width = 250
 	result.parts.actions.columns = 3
@@ -40,6 +42,7 @@ static func preset(id: String) -> Dictionary:
 			result.anchor = "right"
 		"popover": result.inspection_mode = "popover"
 		"tray":
+			result.parts.pouch.columns = 8
 			result.parts.backpack.columns = 12
 			result.parts.backpack.cell = 32
 			result.parts.equipment.cell = 32
@@ -79,7 +82,7 @@ static func normalise(raw: Variant) -> Dictionary:
 		if not input is Dictionary: continue
 		var part: Dictionary = result.parts[key]
 		part.enabled = true if key == "backpack" else input.get("enabled", true) == true
-		part.cell = roundi(number(input.get("cell"), part.cell, 28, 64))
+		part.cell = roundi(number(input.get("cell"), part.cell, 52 if key == "pouch" else 28, 80 if key == "pouch" else 64))
 		part.columns = roundi(number(input.get("columns"), part.columns, 1, 12 if key == "backpack" else 8))
 		part.height = roundi(number(input.get("height"), part.height, 140 if key == "inspection" else 32, 400))
 		part.width = roundi(number(input.get("width"), part.width, 200, 500))

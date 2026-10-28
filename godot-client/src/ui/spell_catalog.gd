@@ -188,7 +188,7 @@ func reagent_quantity(reagent: Dictionary, inventory: Dictionary) -> int:
 func inventory_quantity(image_id: int, inventory: Dictionary) -> int:
 	var total := 0
 	for raw_slot: Variant in inventory:
-		if int(raw_slot) >= 36 and int(raw_slot) < 128:
+		if int(raw_slot) >= 24 and int(raw_slot) < 127:
 			continue
 		var raw_item: Variant = inventory[raw_slot]
 		if raw_item is Dictionary:
