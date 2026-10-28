@@ -2201,5 +2201,97 @@
     "Original artistic approval status is unchanged.",
     "Exact source curve equality can still cause tiny floating-point differences in Godot interpolation after redundant segment boundaries are removed.",
     "Encoded animation-key savings describe the raw file, logical source accessors and import parsing input only. The native importer can densely rebake the same generated Animation keys, so runtime Animation RAM, key search work and playback CPU may remain unchanged; no such saving was measured or claimed."
-  ]
+  ],
+  "full_body_framing_revision": {
+    "source_sha256": "f7ec54b8631c5c6f16fc5ccf1d74c35470d1cb0184f4c5bd62fa63b3a3e83347",
+    "candidate_sha256": "2c79d105b5f8738db97427ddbc5e4e5234c0f93f85243f5d84ac12c4cb984ede",
+    "kind": "Legacy framing revision only; model/native motion/Blender/physical/FX proofs unchanged",
+    "source_clips": [
+      "Attack_Ground_Pound",
+      "Death_A",
+      "Fighting_Idle",
+      "Hit_Chest",
+      "Idle_A",
+      "Jog",
+      "Sword_Attack",
+      "Walk"
+    ],
+    "captured_clip_counts": {
+      "Attack_Ground_Pound": 81,
+      "Death_A": 87,
+      "Fighting_Idle": 83,
+      "Hit_Chest": 43,
+      "Idle_A": 94,
+      "Jog": 51,
+      "Sword_Attack": 68,
+      "Walk": 70
+    },
+    "fit_poses": 465,
+    "all_source_clips_captured": true,
+    "source_Actor_transform": [
+      [
+        0.5,
+        0.552330374717712,
+        -0.5
+      ],
+      [
+        -2.96208500862122,
+        0.0,
+        2.58953690490671e-07
+      ],
+      [
+        0.0,
+        2.96208500862122,
+        0.0
+      ],
+      [
+        -2.58953690490671e-07,
+        0.0,
+        -2.96208500862122
+      ]
+    ],
+    "RGB": {
+      "source_sha256": "f7ec54b8631c5c6f16fc5ccf1d74c35470d1cb0184f4c5bd62fa63b3a3e83347",
+      "candidate_sha256": "2c79d105b5f8738db97427ddbc5e4e5234c0f93f85243f5d84ac12c4cb984ede",
+      "image_pairs": 577,
+      "width": 512,
+      "height": 512,
+      "different_image_pairs": 59,
+      "maximum_different_pixels": 14,
+      "maximum_pixels_above_two_levels": 1,
+      "maximum_mean_channel_error": 0.00018183390299479166,
+      "maximum_channel_error": 49,
+      "scope": "Complete ReplicatedActor3D setup with actual display scale, grounding and body materials; identical cameras for source/candidate, four views and every full native cycle at24Hz. Numeric playback and pixel comparisons are separate reports.",
+      "framing_passed": true,
+      "clipped_frame_labels": [],
+      "maximum_border_foreground_pixels": 0
+    },
+    "RGBA": {
+      "source_sha256": "f7ec54b8631c5c6f16fc5ccf1d74c35470d1cb0184f4c5bd62fa63b3a3e83347",
+      "candidate_sha256": "2c79d105b5f8738db97427ddbc5e4e5234c0f93f85243f5d84ac12c4cb984ede",
+      "pairs": 577,
+      "width": 512,
+      "height": 512,
+      "maximum_different_RGBA_pixels": 14,
+      "maximum_RGBA_pixels_above_two_levels": 1,
+      "maximum_RGBA_channel_error": 49,
+      "maximum_mean_RGBA_channel_error": 0.00013637542724609375,
+      "maximum_alpha_error": 0,
+      "all_frames_alpha_opaque_255": true,
+      "scope": "Full-resolution RGBA PNG values; no palette, resize or alignment. Existing strict RGB qualification is separately retained, not weakened by dividing means over4channels."
+    },
+    "normal_scale_review": "Reviewed fitted paired whole-body and attack board; original actual Actor scale and transforms retained, raised club fully visible, no camera/actor alignment patch. Four views and every full native cycle.",
+    "evidence_sha256": {
+      "qualification-job.json": "9388b4d25cd76651722171f28682980a778b1f25c8c11af8019eae3052cd7bea",
+      "source-fit-inventory.json": "a9e7f2169365af8b7bd8385d65e67425c1896bb6edf9d7603e2d5cd6079f3777",
+      "render-fit.json": "cb90daab53ffe237a8cc17927bdd7fbdaab8675245d9e5d1091fd9df17362ea7",
+      "actual-render/render.json": "926a810c32b25d3eafe681acacd18c7f4135ab6cd4564edae001587a9081c30c",
+      "actual-render/pixel-comparison.json": "2d7e931d664b08b0ecb09ccf93801060e3731bc8707650b24755993676feb581",
+      "actual-render/RGBA-comparison.json": "6b6db0ca2206119fa8ada50fb146b235a9a4a65f1819d8686f781d5d9b4eb2f2",
+      "actual-render/comparison.png": "b4b41bef0fd9ae0db0e3c5f71171abc315a537646ce7c84ed962c6ba5b56f2ce"
+    },
+    "revision": "Fresh full-resolution framing after legacy raised-club clipping was discovered. Older palette GIF cycles are previews, not full-resolution pixel evidence.",
+    "summary_sha256": "6062299c1c09df9d07caf26f027ef022becfe3547cf46f299b9269e80df99ee8",
+    "asset_witness_and_approval_changes": false
+  }
 }
