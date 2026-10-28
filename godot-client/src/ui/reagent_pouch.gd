@@ -126,6 +126,10 @@ func apply_style(config: Dictionary, side_width: float = 75, actions_right := fa
 		button.add_theme_color_override("font_color", config.text)
 	for button: Button in [look_button, store_button, drop_button, mix_button]:
 		Chrome.button(button)
+		if button != drop_button:
+			# Give these smaller silhouettes more room inside the same button footprint.
+			for state: String in ["normal", "hover", "pressed"]:
+				button.get_theme_stylebox(state).set_content_margin_all(3)
 		# A disabled action keeps the same frame; the icon still conveys availability.
 		button.add_theme_stylebox_override("disabled", button.get_theme_stylebox("normal"))
 	gold_count.visible = part.show_quantity
