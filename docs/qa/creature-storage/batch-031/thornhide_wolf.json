@@ -389,7 +389,9 @@
     },
     "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
     "source_sha256": "218a8896ff65b74f7a524f467792302a2d526c3428f2aa758d07e54769b2a97b",
-    "candidate_sha256": "7800bebe2240582916b27981f755c5be5ed75fd8a2eaf64961cee5625491d72e"
+    "candidate_sha256": "7800bebe2240582916b27981f755c5be5ed75fd8a2eaf64961cee5625491d72e",
+    "actual_loader": "ResourceLoader.load(PackedScene)",
+    "numeric_runtime_sha256": "9c4cd8f8a784cbdfe96508b5d43866bd09d5a1158dc9c309c2f12eea05ee3d0f"
   },
   "actual_actor_dissolve_validation": {
     "passed": true,
@@ -1563,5 +1565,92 @@
     "repository_revision": "23e8b8e0bbcca029648423788c2dbe6c84ed6dee",
     "captured_at_utc": "2026-10-28T04:03:53.444445+00:00",
     "approval": "Existing authored bone observations retained; additional source geometry is not new artistic approval."
+  },
+  "editor_cache_mode_correction": {
+    "status": "Previous Cache-based Editor-mode qualification claims withdrawn and superseded by the explicit ResourceLoader supplement below.",
+    "reason": "Earlier public imported-phase dumper called GlbSceneCache.instantiate; aliases could select raw or imported resources. The earlier route did not enforce matched actual Editor scenes.",
+    "immutable_prior_receipt_sha256": "f313a3bdc3065f78e46e8b20e7deb83dfef5e6c50bc3fcc68f9cc4bd54cbe383",
+    "immutable_prior_receipt_private_path": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\thornhide_wolf\\receipt-before-editor-mode-correction.json",
+    "previous_supplement_withdrawn": null,
+    "old_captures_preserved": true,
+    "original_model_and_observations_preserved": true,
+    "raw_actual_actor_and_source_data_evidence_unchanged": true,
+    "no_model_bytes_changed_by_this_correction": true
+  },
+  "fresh_editor_numeric_supplement": {
+    "actor": "thornhide_wolf",
+    "source_sha256": "218a8896ff65b74f7a524f467792302a2d526c3428f2aa758d07e54769b2a97b",
+    "candidate_sha256": "7800bebe2240582916b27981f755c5be5ed75fd8a2eaf64961cee5625491d72e",
+    "maximum_position_error": 5.418556384633011e-07,
+    "maximum_normal_angle_degrees": 3.267845816718501e-05,
+    "position_budget": 9.5367431640625e-07,
+    "normal_budget_degrees": 0.0001,
+    "actual_editor_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/thornhide_wolf.glb-14d18f563d0fd5acbd64ee0426b7fab1.md5",
+        "import_metadata_sha256": "edf13d6c41948700027d4f04aeb5a4b659a36de56db457238dc6ef2dc96a0fdd",
+        "imported_resource_path": "res://.godot/imported/thornhide_wolf.glb-14d18f563d0fd5acbd64ee0426b7fab1.scn",
+        "imported_resource_sha256": "1a01ec200667d7d0edf47159e51db34179db07d38cc914e6a596107d043fdb6a",
+        "packed_scene_resource_path": "res://assets/storage-baseline/thornhide_wolf.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "17934a6702fa4363bce7c1994c3ca0c6",
+        "source_path": "res://assets/storage-baseline/thornhide_wolf.glb",
+        "source_sha256": "218a8896ff65b74f7a524f467792302a2d526c3428f2aa758d07e54769b2a97b",
+        "import_policy_sha256": "97ff67847348f327eb9738082b99e017547b45e4e55b4202c7dfefbc3efad0ac",
+        "single_destination_scene_md5_checked": true,
+        "post_capture_same_source_scene_sha256": true
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/thornhide_wolf.glb-97a343096683453024e4860b414ccfa9.md5",
+        "import_metadata_sha256": "c79080d26d05e69c683674d1141ec641e11176266f508a7aba5739f928edba72",
+        "imported_resource_path": "res://.godot/imported/thornhide_wolf.glb-97a343096683453024e4860b414ccfa9.scn",
+        "imported_resource_sha256": "abe2a2f6ad3ac0aae7c095fd3e03debae803f18dda2cf4e08bb4e3bd1e3aba52",
+        "packed_scene_resource_path": "res://assets/storage-candidate/thornhide_wolf.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "ccacd7b18f8c5989922a311d6d51fc91",
+        "source_path": "res://assets/storage-candidate/thornhide_wolf.glb",
+        "source_sha256": "7800bebe2240582916b27981f755c5be5ed75fd8a2eaf64961cee5625491d72e",
+        "import_policy_sha256": "bc989d6126fe6b4e298710fbfe74c51c1f23eb6558be164f6548ff07f21be03d",
+        "single_destination_scene_md5_checked": true,
+        "post_capture_same_source_scene_sha256": true
+      }
+    ],
+    "strict_passed": true,
+    "numeric_report_sha256": "24eb2c9662d1f2df37535bd5beb164249e58da46dd16aae1d0eacc187aa063ea",
+    "numeric_runtime_sha256": "9c4cd8f8a784cbdfe96508b5d43866bd09d5a1158dc9c309c2f12eea05ee3d0f",
+    "private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\thornhide_wolf",
+    "passed": true,
+    "sampled_states": 232,
+    "all_original_native_clips": [
+      "Walk",
+      "Death_A",
+      "Sword_Attack",
+      "Idle_A",
+      "Fighting_Idle",
+      "Hit_Chest",
+      "Jog"
+    ],
+    "position_metric": "Total Euclidean source/current world position distance; no inherited/additional-error waiver.",
+    "complete_oriented_triangle_payloads_identical": true,
+    "all_joint_index_bits_identical": true,
+    "declared_zero_weight_joint_routing_validation": null,
+    "static_report_sha256": "41410039d20ccf6eab14c0b26519a0cb1d2d59811992aa7ed18b1c27ee32cb3b",
+    "static_private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\thornhide_wolf\\allfields",
+    "numeric_method": "Both models explicitly ResourceLoader.load(PackedScene), generated SCN required; actual Editor primary mesh arrays with native-library all-clip playback, RESET and directed crossfades.",
+    "freshness_method": "Current source GLB MD5 equals import metadata source_md5; source/SCN/metadata/policy SHA256 retained, single-destination SCN MD5 checked. Earliest captures additionally validated after capture with unchanged source+SCN byte hashes.",
+    "source_authored_morph_tangent_target_count": 0,
+    "actual_editor_generated_morph_tangent_array_target_count": 0,
+    "source_editor_lod_counts": [
+      2
+    ],
+    "candidate_editor_lod_counts": [
+      2
+    ],
+    "scope": "CPU-only actual Editor primary-surface numerical and complete typed vertex/morph P/N/T and oriented-triangle equivalence. Raw source-data/Blender/actualActor whole-cycle/effects evidence remains independent. Generated Editor distant LOD appearance is not separately approved.",
+    "original_observations_and_artistic_review_status_unchanged": true,
+    "all_non_joint_static_fields_and_retained_morph_pnt_bits_identical": true,
+    "joint_index_bits_match_or_only_declared_positive_zero_weight_slots_change": true
   }
 }

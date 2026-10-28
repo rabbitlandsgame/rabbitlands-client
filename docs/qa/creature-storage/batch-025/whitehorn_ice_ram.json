@@ -334,7 +334,9 @@
     },
     "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
     "source_sha256": "a4566d82e8573bddeabcf9a64f20def0f52a890a6588befc6989f9a958e76116",
-    "candidate_sha256": "aa36840101705943e74b450a9fff0aeea8a16b21e6338ad60feb04efc703f496"
+    "candidate_sha256": "aa36840101705943e74b450a9fff0aeea8a16b21e6338ad60feb04efc703f496",
+    "actual_loader": "ResourceLoader.load(PackedScene)",
+    "numeric_runtime_sha256": "26842186b104a91bacf76c28261792a51fe8b3816e30d858e8b92f8603680a83"
   },
   "actual_actor_dissolve_validation": {
     "passed": true,
@@ -1472,5 +1474,92 @@
     "surface_ids_alias": "surface_vertex_ids is the exact existing surface_ids array; no observation changes.",
     "height_source": "docs/qa/caprine-motion/actors.json:whitehorn_ice_ram.height",
     "height": 1.6998738332244832
+  },
+  "editor_cache_mode_correction": {
+    "status": "Previous Cache-based Editor-mode qualification claims withdrawn and superseded by the explicit ResourceLoader supplement below.",
+    "reason": "Earlier public imported-phase dumper called GlbSceneCache.instantiate; aliases could select raw or imported resources. The earlier route did not enforce matched actual Editor scenes.",
+    "immutable_prior_receipt_sha256": "1eac8aed35623ad833b7dc79e7274709b0b509ac8719ce14cdde7a14ea400189",
+    "immutable_prior_receipt_private_path": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\whitehorn_ice_ram\\receipt-before-editor-mode-correction.json",
+    "previous_supplement_withdrawn": null,
+    "old_captures_preserved": true,
+    "original_model_and_observations_preserved": true,
+    "raw_actual_actor_and_source_data_evidence_unchanged": true,
+    "no_model_bytes_changed_by_this_correction": true
+  },
+  "fresh_editor_numeric_supplement": {
+    "actor": "whitehorn_ice_ram",
+    "source_sha256": "a4566d82e8573bddeabcf9a64f20def0f52a890a6588befc6989f9a958e76116",
+    "candidate_sha256": "aa36840101705943e74b450a9fff0aeea8a16b21e6338ad60feb04efc703f496",
+    "maximum_position_error": 1.5310808150203995e-07,
+    "maximum_normal_angle_degrees": 2.206637408534863e-05,
+    "position_budget": 4.76837158203125e-07,
+    "normal_budget_degrees": 0.0001,
+    "actual_editor_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/whitehorn_ice_ram.glb-1a54cad1cf120b4340de457e36e8921b.md5",
+        "import_metadata_sha256": "f9fc63aae72c973a86087f6dcb24b62fa114eced57ca135e5acbd1700f9f0135",
+        "imported_resource_path": "res://.godot/imported/whitehorn_ice_ram.glb-1a54cad1cf120b4340de457e36e8921b.scn",
+        "imported_resource_sha256": "9a6b4729fa382c7e620a719b5c60336786540dbc9e755759ebeb9b6af9c08d5f",
+        "packed_scene_resource_path": "res://assets/storage-baseline/whitehorn_ice_ram.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "86ec136c551915a2ea9921532a5ea8f1",
+        "source_path": "res://assets/storage-baseline/whitehorn_ice_ram.glb",
+        "source_sha256": "a4566d82e8573bddeabcf9a64f20def0f52a890a6588befc6989f9a958e76116",
+        "import_policy_sha256": "46157488e5e93fc90844f4c6631a3cc16f1d9e8b6efe0718381a3a2b7f0f06a4",
+        "single_destination_scene_md5_checked": true,
+        "post_capture_same_source_scene_sha256": true
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/whitehorn_ice_ram.glb-ef76dbafc55cf0d2be4101972ada3256.md5",
+        "import_metadata_sha256": "beb7bcf9c50bfa18da4ea4c8e81ea9190863d58ec0ecdeb3bfd7288af55d51e4",
+        "imported_resource_path": "res://.godot/imported/whitehorn_ice_ram.glb-ef76dbafc55cf0d2be4101972ada3256.scn",
+        "imported_resource_sha256": "dc1fd0cabf95f5141a32cc7e25f709acb9873954652b7c1a10ace5eee64d8316",
+        "packed_scene_resource_path": "res://assets/storage-candidate/whitehorn_ice_ram.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "2e6d34a3a2498483a8a511fad0f0ae3a",
+        "source_path": "res://assets/storage-candidate/whitehorn_ice_ram.glb",
+        "source_sha256": "aa36840101705943e74b450a9fff0aeea8a16b21e6338ad60feb04efc703f496",
+        "import_policy_sha256": "0e4751e9f43e44c89491ff7708ecde522410baf9a3fa251be2b93264c46580cd",
+        "single_destination_scene_md5_checked": true,
+        "post_capture_same_source_scene_sha256": true
+      }
+    ],
+    "strict_passed": true,
+    "numeric_report_sha256": "177fa4fd770d5bc07139399a885a04719d4631998adc82c2a57451b89c0ffc16",
+    "numeric_runtime_sha256": "26842186b104a91bacf76c28261792a51fe8b3816e30d858e8b92f8603680a83",
+    "private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\whitehorn_ice_ram",
+    "passed": true,
+    "sampled_states": 232,
+    "all_original_native_clips": [
+      "Fighting_Idle",
+      "Hit_Chest",
+      "Idle_A",
+      "Walk",
+      "Jog",
+      "Sword_Attack",
+      "Death_A"
+    ],
+    "position_metric": "Total Euclidean source/current world position distance; no inherited/additional-error waiver.",
+    "complete_oriented_triangle_payloads_identical": true,
+    "all_joint_index_bits_identical": true,
+    "declared_zero_weight_joint_routing_validation": null,
+    "static_report_sha256": "e1c621ab6286bc7b1230fed8c5f7baa68d465b64bdb1c0a38ead790e88241111",
+    "static_private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\whitehorn_ice_ram\\allfields",
+    "numeric_method": "Both models explicitly ResourceLoader.load(PackedScene), generated SCN required; actual Editor primary mesh arrays with native-library all-clip playback, RESET and directed crossfades.",
+    "freshness_method": "Current source GLB MD5 equals import metadata source_md5; source/SCN/metadata/policy SHA256 retained, single-destination SCN MD5 checked. Earliest captures additionally validated after capture with unchanged source+SCN byte hashes.",
+    "source_authored_morph_tangent_target_count": 0,
+    "actual_editor_generated_morph_tangent_array_target_count": 0,
+    "source_editor_lod_counts": [
+      2
+    ],
+    "candidate_editor_lod_counts": [
+      2
+    ],
+    "scope": "CPU-only actual Editor primary-surface numerical and complete typed vertex/morph P/N/T and oriented-triangle equivalence. Raw source-data/Blender/actualActor whole-cycle/effects evidence remains independent. Generated Editor distant LOD appearance is not separately approved.",
+    "original_observations_and_artistic_review_status_unchanged": true,
+    "all_non_joint_static_fields_and_retained_morph_pnt_bits_identical": true,
+    "joint_index_bits_match_or_only_declared_positive_zero_weight_slots_change": true
   }
 }

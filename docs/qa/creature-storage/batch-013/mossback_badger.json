@@ -334,7 +334,9 @@
     },
     "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
     "source_sha256": "7c90b9bfcd2d9256f24e7e871bfa06d67211e670cfb6f28ac613acd30d3c14bb",
-    "candidate_sha256": "b8c1f4f9421de51703c176f68ce6dc667865f6b774c279824cb9b68bc882d946"
+    "candidate_sha256": "b8c1f4f9421de51703c176f68ce6dc667865f6b774c279824cb9b68bc882d946",
+    "actual_loader": "ResourceLoader.load(PackedScene)",
+    "numeric_runtime_sha256": "70d0414f08d39623e720c465364e86cfe557979b9dec74b97482dedf88daa387"
   },
   "editor_import_policy": "Original tracked glb.import params copied exactly to source/candidate aliases in an ignored isolated project; fresh editor import completed without errors. Imported primary geometry/animation arrays checked, not a new generated-LOD visual approval. Production native surfaces have zero LODs.",
   "actual_actor_render": {
@@ -1421,5 +1423,84 @@
     "border_foreground_pixels_maximum": 0,
     "runtime_normal_angle_degrees_maximum": 0.0001
   },
-  "raw_development_preference": "Accepted small RLCZ shipping increase for smaller raw source models, per explicit user preference."
+  "raw_development_preference": "Accepted small RLCZ shipping increase for smaller raw source models, per explicit user preference.",
+  "editor_cache_mode_correction": {
+    "status": "Previous Cache-based Editor-mode qualification claims withdrawn and superseded by the explicit ResourceLoader supplement below.",
+    "reason": "Earlier public imported-phase dumper called GlbSceneCache.instantiate; aliases could select raw or imported resources. The earlier route did not enforce matched actual Editor scenes.",
+    "immutable_prior_receipt_sha256": "c31cb6e0f729c0dd56bab52e51bcb9b61e0e9c51e12197545530feab7fc5d382",
+    "immutable_prior_receipt_private_path": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\mossback_badger\\receipt-before-editor-mode-correction.json",
+    "previous_supplement_withdrawn": null,
+    "old_captures_preserved": true,
+    "original_model_and_observations_preserved": true,
+    "raw_actual_actor_and_source_data_evidence_unchanged": true,
+    "no_model_bytes_changed_by_this_correction": true
+  },
+  "fresh_editor_numeric_supplement": {
+    "actor": "mossback_badger",
+    "source_sha256": "7c90b9bfcd2d9256f24e7e871bfa06d67211e670cfb6f28ac613acd30d3c14bb",
+    "candidate_sha256": "b8c1f4f9421de51703c176f68ce6dc667865f6b774c279824cb9b68bc882d946",
+    "maximum_position_error": 1.2838549330312123e-07,
+    "maximum_normal_angle_degrees": 2.532701929461308e-05,
+    "position_budget": 4.76837158203125e-07,
+    "normal_budget_degrees": 0.0001,
+    "actual_editor_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/mossback_badger.glb-dc43596caeea500ade64b0c7110ecdfb.md5",
+        "import_metadata_sha256": "7e8de62179b892ac28f4d58742db25b3c161576087ee8acdcdd5aa1dd27ded01",
+        "imported_resource_path": "res://.godot/imported/mossback_badger.glb-dc43596caeea500ade64b0c7110ecdfb.scn",
+        "imported_resource_sha256": "8a411afdf97b488860e98a190c9e10e47271a48387cc53fdcf9bf36da581d965",
+        "packed_scene_resource_path": "res://assets/storage-baseline/mossback_badger.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "5db9ccae51aadea39f4817f285318386",
+        "source_path": "res://assets/storage-baseline/mossback_badger.glb",
+        "source_sha256": "7c90b9bfcd2d9256f24e7e871bfa06d67211e670cfb6f28ac613acd30d3c14bb",
+        "import_policy_sha256": "14deda5283bde37f8c366276dd9e026967418142d9be831a9c9c1d411c302902",
+        "single_destination_scene_md5_checked": true,
+        "post_capture_same_source_scene_sha256": true
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/mossback_badger.glb-ffcb3d71e206118e94662e8508ee8706.md5",
+        "import_metadata_sha256": "1514a80812bd2f3969207a8570ecb3abbefc689e322ee06661882d85433bc96d",
+        "imported_resource_path": "res://.godot/imported/mossback_badger.glb-ffcb3d71e206118e94662e8508ee8706.scn",
+        "imported_resource_sha256": "bdb39e24726d400a3bbc1d10eb85b062bf6787e97fa519613b1328ce39df31b4",
+        "packed_scene_resource_path": "res://assets/storage-candidate/mossback_badger.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "005e5e531655b37d2814ad6327d4f5be",
+        "source_path": "res://assets/storage-candidate/mossback_badger.glb",
+        "source_sha256": "b8c1f4f9421de51703c176f68ce6dc667865f6b774c279824cb9b68bc882d946",
+        "import_policy_sha256": "d3b79dc4d57af3abf3712f3ad2e88268b0bfdd007ab4f2ffea3bdb1f16d8552b",
+        "single_destination_scene_md5_checked": true,
+        "post_capture_same_source_scene_sha256": true
+      }
+    ],
+    "strict_passed": true,
+    "numeric_report_sha256": "876880d546d300d8f853f2b9a01650c9eee46ce7a6f8477b507dd11c967ab16d",
+    "numeric_runtime_sha256": "70d0414f08d39623e720c465364e86cfe557979b9dec74b97482dedf88daa387",
+    "private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\mossback_badger",
+    "passed": true,
+    "sampled_states": 232,
+    "all_original_native_clips": [],
+    "position_metric": "Total Euclidean source/current world position distance; no inherited/additional-error waiver.",
+    "complete_oriented_triangle_payloads_identical": true,
+    "all_joint_index_bits_identical": true,
+    "declared_zero_weight_joint_routing_validation": null,
+    "static_report_sha256": "4a82f31c676d7ffe78b51724888657aa74a6da8a109a85a20cd3bd5607609adc",
+    "static_private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\mossback_badger\\allfields",
+    "numeric_method": "Both models explicitly ResourceLoader.load(PackedScene), generated SCN required; actual Editor primary mesh arrays with native-library all-clip playback, RESET and directed crossfades.",
+    "freshness_method": "Current source GLB MD5 equals import metadata source_md5; source/SCN/metadata/policy SHA256 retained, single-destination SCN MD5 checked. Earliest captures additionally validated after capture with unchanged source+SCN byte hashes.",
+    "source_authored_morph_tangent_target_count": 0,
+    "actual_editor_generated_morph_tangent_array_target_count": 0,
+    "source_editor_lod_counts": [
+      0
+    ],
+    "candidate_editor_lod_counts": [
+      0
+    ],
+    "scope": "CPU-only actual Editor primary-surface numerical and complete typed vertex/morph P/N/T and oriented-triangle equivalence. Raw source-data/Blender/actualActor whole-cycle/effects evidence remains independent. Generated Editor distant LOD appearance is not separately approved.",
+    "original_observations_and_artistic_review_status_unchanged": true,
+    "all_non_joint_static_fields_and_retained_morph_pnt_bits_identical": true,
+    "joint_index_bits_match_or_only_declared_positive_zero_weight_slots_change": true
+  }
 }

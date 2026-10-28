@@ -334,7 +334,9 @@
     },
     "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
     "source_sha256": "bb0470c18918a50e75b701a070728eb0c8c6fcfb6b3aca88c2fe04ffe4e1c870",
-    "candidate_sha256": "7739417f9be3e1347e806cbb3defdf29de621e53dbd60ffe2c3ae6681dc9618c"
+    "candidate_sha256": "7739417f9be3e1347e806cbb3defdf29de621e53dbd60ffe2c3ae6681dc9618c",
+    "actual_loader": "ResourceLoader.load(PackedScene)",
+    "numeric_runtime_sha256": "9710225061234079da021c4e135217fd24c8edeaa2c23ee7bb865633d649c693"
   },
   "actual_actor_dissolve_validation": {
     "passed": true,
@@ -1466,5 +1468,92 @@
     "config_animationMap_unchanged": true
   },
   "original_motion_review_status": "pending",
-  "original_native_bake_fps": 3072
+  "original_native_bake_fps": 3072,
+  "editor_cache_mode_correction": {
+    "status": "Previous Cache-based Editor-mode qualification claims withdrawn and superseded by the explicit ResourceLoader supplement below.",
+    "reason": "Earlier public imported-phase dumper called GlbSceneCache.instantiate; aliases could select raw or imported resources. The earlier route did not enforce matched actual Editor scenes.",
+    "immutable_prior_receipt_sha256": "353183d1f5dc02abcdbed9ac6b5dd21350c9b5839695641221194abb929b72b7",
+    "immutable_prior_receipt_private_path": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\moorland_dire_wolf\\receipt-before-editor-mode-correction.json",
+    "previous_supplement_withdrawn": null,
+    "old_captures_preserved": true,
+    "original_model_and_observations_preserved": true,
+    "raw_actual_actor_and_source_data_evidence_unchanged": true,
+    "no_model_bytes_changed_by_this_correction": true
+  },
+  "fresh_editor_numeric_supplement": {
+    "actor": "moorland_dire_wolf",
+    "source_sha256": "bb0470c18918a50e75b701a070728eb0c8c6fcfb6b3aca88c2fe04ffe4e1c870",
+    "candidate_sha256": "7739417f9be3e1347e806cbb3defdf29de621e53dbd60ffe2c3ae6681dc9618c",
+    "maximum_position_error": 4.508709440753666e-07,
+    "maximum_normal_angle_degrees": 2.2781522350186147e-05,
+    "position_budget": 9.5367431640625e-07,
+    "normal_budget_degrees": 0.0001,
+    "actual_editor_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/moorland_dire_wolf.glb-6b67552694788c11822706a1ac524286.md5",
+        "import_metadata_sha256": "6648c14a139bfe4c55d4aa017f3eb2595c739def4ed96252fbb56ee6dee5e248",
+        "imported_resource_path": "res://.godot/imported/moorland_dire_wolf.glb-6b67552694788c11822706a1ac524286.scn",
+        "imported_resource_sha256": "413584cae082f9fba546dc9ab3b6db361a67a8ed28b456ea5ff674f88815a7c5",
+        "packed_scene_resource_path": "res://assets/storage-baseline/moorland_dire_wolf.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "41dd7d3cb006607e372adf63bcf84a8d",
+        "source_path": "res://assets/storage-baseline/moorland_dire_wolf.glb",
+        "source_sha256": "bb0470c18918a50e75b701a070728eb0c8c6fcfb6b3aca88c2fe04ffe4e1c870",
+        "import_policy_sha256": "22fe5e4fb8cff21e3a9b12cd5c20da971f7e2170ae711a3aa87cd7a3dccd7879",
+        "single_destination_scene_md5_checked": true,
+        "post_capture_same_source_scene_sha256": true
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/moorland_dire_wolf.glb-ffa5b258782dc9401e752153cdcca756.md5",
+        "import_metadata_sha256": "9c5eddc60310c9501bf21ebcc13f094a5866da3b45fecbe1394f59e43053735c",
+        "imported_resource_path": "res://.godot/imported/moorland_dire_wolf.glb-ffa5b258782dc9401e752153cdcca756.scn",
+        "imported_resource_sha256": "31c0dd67326b29366ece31f9cf1b6e54ac6c4769a29b6024b8ecda5533b124e6",
+        "packed_scene_resource_path": "res://assets/storage-candidate/moorland_dire_wolf.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "4945a26a63468cff759f64e9efd66642",
+        "source_path": "res://assets/storage-candidate/moorland_dire_wolf.glb",
+        "source_sha256": "7739417f9be3e1347e806cbb3defdf29de621e53dbd60ffe2c3ae6681dc9618c",
+        "import_policy_sha256": "946f25abfa7d566bdeab61770405e574242acddbcc3ac391500808bfdbbf5cd6",
+        "single_destination_scene_md5_checked": true,
+        "post_capture_same_source_scene_sha256": true
+      }
+    ],
+    "strict_passed": true,
+    "numeric_report_sha256": "27ffcd1544753c3d7491c4680cbfde6babc0f8edd84744eff92f943320f635eb",
+    "numeric_runtime_sha256": "9710225061234079da021c4e135217fd24c8edeaa2c23ee7bb865633d649c693",
+    "private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\moorland_dire_wolf",
+    "passed": true,
+    "sampled_states": 232,
+    "all_original_native_clips": [
+      "Walk",
+      "Sword_Attack",
+      "Death_A",
+      "Idle_A",
+      "Fighting_Idle",
+      "Hit_Chest",
+      "Jog"
+    ],
+    "position_metric": "Total Euclidean source/current world position distance; no inherited/additional-error waiver.",
+    "complete_oriented_triangle_payloads_identical": true,
+    "all_joint_index_bits_identical": true,
+    "declared_zero_weight_joint_routing_validation": null,
+    "static_report_sha256": "c0206e19ebe8dcc07b3d9a136c392e204e51409e646b22adbbba09e066766b61",
+    "static_private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\moorland_dire_wolf\\allfields",
+    "numeric_method": "Both models explicitly ResourceLoader.load(PackedScene), generated SCN required; actual Editor primary mesh arrays with native-library all-clip playback, RESET and directed crossfades.",
+    "freshness_method": "Current source GLB MD5 equals import metadata source_md5; source/SCN/metadata/policy SHA256 retained, single-destination SCN MD5 checked. Earliest captures additionally validated after capture with unchanged source+SCN byte hashes.",
+    "source_authored_morph_tangent_target_count": 0,
+    "actual_editor_generated_morph_tangent_array_target_count": 0,
+    "source_editor_lod_counts": [
+      2
+    ],
+    "candidate_editor_lod_counts": [
+      2
+    ],
+    "scope": "CPU-only actual Editor primary-surface numerical and complete typed vertex/morph P/N/T and oriented-triangle equivalence. Raw source-data/Blender/actualActor whole-cycle/effects evidence remains independent. Generated Editor distant LOD appearance is not separately approved.",
+    "original_observations_and_artistic_review_status_unchanged": true,
+    "all_non_joint_static_fields_and_retained_morph_pnt_bits_identical": true,
+    "joint_index_bits_match_or_only_declared_positive_zero_weight_slots_change": true
+  }
 }

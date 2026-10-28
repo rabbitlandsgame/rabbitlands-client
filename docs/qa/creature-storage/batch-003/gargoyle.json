@@ -665,18 +665,92 @@
     "original_captures_retained": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\batch-003\\gargoyle\\v1\\actual-render\\qualified-frames.zip",
     "resolution": "Repeated the complete paired full-cycle and four-view capture using a source-only fit over every vertex at every render pose; final border foreground count is zero. Model bytes and all original physical observations remain unchanged."
   },
+  "editor_cache_mode_correction": {
+    "status": "Previous Cache-based Editor-mode qualification claims withdrawn and superseded by the explicit ResourceLoader supplement below.",
+    "reason": "Earlier public imported-phase dumper called GlbSceneCache.instantiate; aliases could select raw or imported resources. The earlier route did not enforce matched actual Editor scenes.",
+    "immutable_prior_receipt_sha256": "d8a3113b70924bef160b53f3a8b93e3d8c746f0bf50964947755fe79504f3985",
+    "immutable_prior_receipt_private_path": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\retrospective-editor\\gargoyle\\actual-editor-v2\\receipt-before-editor-mode-correction.json",
+    "previous_supplement_withdrawn": {
+      "actor": "gargoyle",
+      "source_sha256": "958d4eb271eb89ce463635f51f6c725cff830d1ff892d30ced1a1ee18939b875",
+      "candidate_sha256": "f7599c02477dbd964107406214b2e9dfe83ef893529cf1a72068f441328c0feb",
+      "fresh_editor_original_current_position_maximum": 1.5186449745785275e-07,
+      "position_metric": "Total Euclidean world position source/current distance. No inherited/additional error waiver.",
+      "original_rest_coordinate_or_extent_maximum": 1.0000005158969922,
+      "position_limit_four_float32_ulps": 4.76837158203125e-07,
+      "normal_angle_degrees_maximum": 2.0383566426149207e-05,
+      "normal_angle_limit_degrees": 0.0001,
+      "sampled_states": 296,
+      "all_source_clips": [
+        "Death_A",
+        "Fighting_Idle",
+        "Fly",
+        "Hit_Chest",
+        "Idle_A",
+        "Jog",
+        "Sword_Attack",
+        "Walk"
+      ],
+      "source_current_mesh_id_bijection": "Every row matched to same-model raw native position/NORMAL/joints/weights and every POSITION/NORMAL target payload, then original source IDs. UV/tangent visual behavior remains covered by existing source-data and renderer evidence.",
+      "passed": true,
+      "original_observations_and_old_evidence_retained": true,
+      "scope": "Fresh isolated editor imports of immutable original and current qualified model; actual primary surface arrays, native library clips, RESET and directed crossfades. CPU-only supplemental numeric check; no new GPU or generated-editor-LOD appearance approval.",
+      "private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\retrospective-editor\\gargoyle",
+      "imported_report_sha256": "4202a9046b78c50e609b541e171316ca4d88b550895604f3141560eaa8fb6fc6",
+      "binding_report_sha256": "f524a5d20b89ca0da6220872b9e09c1798765723aea1113d0ca1935946669bea"
+    },
+    "old_captures_preserved": true,
+    "original_model_and_observations_preserved": true,
+    "raw_actual_actor_and_source_data_evidence_unchanged": true,
+    "no_model_bytes_changed_by_this_correction": true
+  },
   "fresh_editor_numeric_supplement": {
     "actor": "gargoyle",
     "source_sha256": "958d4eb271eb89ce463635f51f6c725cff830d1ff892d30ced1a1ee18939b875",
     "candidate_sha256": "f7599c02477dbd964107406214b2e9dfe83ef893529cf1a72068f441328c0feb",
-    "fresh_editor_original_current_position_maximum": 1.5186449745785275e-07,
-    "position_metric": "Total Euclidean world position source/current distance. No inherited/additional error waiver.",
-    "original_rest_coordinate_or_extent_maximum": 1.0000005158969922,
-    "position_limit_four_float32_ulps": 4.76837158203125e-07,
-    "normal_angle_degrees_maximum": 2.0383566426149207e-05,
-    "normal_angle_limit_degrees": 0.0001,
+    "maximum_position_error": 1.5186449745785275e-07,
+    "maximum_normal_angle_degrees": 2.0383566426149207e-05,
+    "position_budget": 4.76837158203125e-07,
+    "normal_budget_degrees": 0.0001,
+    "strict_passed": true,
+    "actual_editor_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/gargoyle.glb-319f1c626e4a81d40ce7cd3eb58865ed.md5",
+        "import_metadata_sha256": "18b15a47d36de52dd4dc822e08d8711b828deffd273f6f68f85cdfb9ff529019",
+        "imported_resource_path": "res://.godot/imported/gargoyle.glb-319f1c626e4a81d40ce7cd3eb58865ed.scn",
+        "imported_resource_sha256": "e367804326cbe966f69e14123ae1a720ee25e29edabb0989653ba8db8a6de602",
+        "packed_scene_resource_path": "res://assets/storage-baseline/gargoyle.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "c478fb252c2e43001dc160f5d5d77864",
+        "source_path": "res://assets/storage-baseline/gargoyle.glb",
+        "source_sha256": "958d4eb271eb89ce463635f51f6c725cff830d1ff892d30ced1a1ee18939b875",
+        "import_policy_sha256": "71d88872a3d2a841579204c4f51e5e6ec1b440fcbfe22a6750be608a3329fbf6",
+        "single_destination_scene_md5_checked": true,
+        "post_capture_same_source_scene_sha256": true
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/gargoyle.glb-7287328e82e38e711866b0eb96937d19.md5",
+        "import_metadata_sha256": "232e8803308b0cfb47cc8b7be9f85260fa298bb22a32b581bee6921548c23acb",
+        "imported_resource_path": "res://.godot/imported/gargoyle.glb-7287328e82e38e711866b0eb96937d19.scn",
+        "imported_resource_sha256": "0d31ed29067fb41d1748bb843640963dcd85fc804dea82421d3d079d959e3cba",
+        "packed_scene_resource_path": "res://assets/storage-candidate/gargoyle.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "c421ee50cad5a9f5b72f479b4b4810b9",
+        "source_path": "res://assets/storage-candidate/gargoyle.glb",
+        "source_sha256": "f7599c02477dbd964107406214b2e9dfe83ef893529cf1a72068f441328c0feb",
+        "import_policy_sha256": "0012956f95dba64742d309370473d0c7eb2e2e0cef932fbde3782df31e317535",
+        "single_destination_scene_md5_checked": true,
+        "post_capture_same_source_scene_sha256": true
+      }
+    ],
+    "numeric_report_sha256": "4202a9046b78c50e609b541e171316ca4d88b550895604f3141560eaa8fb6fc6",
+    "numeric_runtime_sha256": "a91bb38f93f6df3f58197b2f9d8d84209302cba761685b8716aa0c13f714f482",
+    "private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\retrospective-editor\\gargoyle\\actual-editor-v2",
+    "passed": true,
     "sampled_states": 296,
-    "all_source_clips": [
+    "all_original_native_clips": [
       "Death_A",
       "Fighting_Idle",
       "Fly",
@@ -686,12 +760,25 @@
       "Sword_Attack",
       "Walk"
     ],
-    "source_current_mesh_id_bijection": "Every row matched to same-model raw native position/NORMAL/joints/weights and every POSITION/NORMAL target payload, then original source IDs. UV/tangent visual behavior remains covered by existing source-data and renderer evidence.",
-    "passed": true,
-    "original_observations_and_old_evidence_retained": true,
-    "scope": "Fresh isolated editor imports of immutable original and current qualified model; actual primary surface arrays, native library clips, RESET and directed crossfades. CPU-only supplemental numeric check; no new GPU or generated-editor-LOD appearance approval.",
-    "private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\retrospective-editor\\gargoyle",
-    "imported_report_sha256": "4202a9046b78c50e609b541e171316ca4d88b550895604f3141560eaa8fb6fc6",
-    "binding_report_sha256": "f524a5d20b89ca0da6220872b9e09c1798765723aea1113d0ca1935946669bea"
+    "position_metric": "Total Euclidean source/current world position distance; no inherited/additional-error waiver.",
+    "complete_oriented_triangle_payloads_identical": true,
+    "all_joint_index_bits_identical": true,
+    "declared_zero_weight_joint_routing_validation": null,
+    "static_report_sha256": "a9c8ef7deed22bac2d25d800babfdd5d0943fe2f40e8a50d4f2e285deed83d06",
+    "static_private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\retrospective-editor\\gargoyle\\actual-editor-v2\\allfields",
+    "numeric_method": "Both models explicitly ResourceLoader.load(PackedScene), generated SCN required; actual Editor primary mesh arrays with native-library all-clip playback, RESET and directed crossfades.",
+    "freshness_method": "Current source GLB MD5 equals import metadata source_md5; source/SCN/metadata/policy SHA256 retained, single-destination SCN MD5 checked. Earliest captures additionally validated after capture with unchanged source+SCN byte hashes.",
+    "source_authored_morph_tangent_target_count": 0,
+    "actual_editor_generated_morph_tangent_array_target_count": 513,
+    "source_editor_lod_counts": [
+      3
+    ],
+    "candidate_editor_lod_counts": [
+      3
+    ],
+    "scope": "CPU-only actual Editor primary-surface numerical and complete typed vertex/morph P/N/T and oriented-triangle equivalence. Raw source-data/Blender/actualActor whole-cycle/effects evidence remains independent. Generated Editor distant LOD appearance is not separately approved.",
+    "original_observations_and_artistic_review_status_unchanged": true,
+    "all_non_joint_static_fields_and_retained_morph_pnt_bits_identical": true,
+    "joint_index_bits_match_or_only_declared_positive_zero_weight_slots_change": true
   }
 }

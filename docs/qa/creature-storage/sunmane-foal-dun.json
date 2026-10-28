@@ -10987,18 +10987,88 @@
     ],
     "scope": "Every actual raw Godot triangle ordinal matches its GLB triangle ordinal, with the engine-standard winding conversion (0,2,1) applied identically to source and both partitions. Partition triangle IDs address the original runtime order."
   },
+  "editor_cache_mode_correction": {
+    "status": "Previous Cache-based Editor-mode qualification claims withdrawn and superseded by the explicit ResourceLoader supplement below.",
+    "reason": "Earlier public imported-phase dumper called GlbSceneCache.instantiate; aliases could select raw or imported resources. The earlier route did not enforce matched actual Editor scenes.",
+    "immutable_prior_receipt_sha256": "8a78b2203fd480a3af917d2ce702e50d76d8488665d4571dcdd7f5a031d308ab",
+    "immutable_prior_receipt_private_path": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\retrospective-editor\\sunmane_foal_dun\\actual-editor-v2\\receipt-before-editor-mode-correction.json",
+    "previous_supplement_withdrawn": {
+      "actor": "sunmane_foal_dun",
+      "source_sha256": "77e7ce55c7aa77b99eb84f3395896630267219150f0a33a02dc800b7910090a1",
+      "candidate_sha256": "b15e77e1b20a7eb768e0313fe4a49518b9b3e8403e0b429d61cc741706426f8a",
+      "fresh_editor_original_current_position_maximum": 0.0,
+      "position_metric": "Total Euclidean world position source/current distance. No inherited/additional error waiver.",
+      "original_rest_coordinate_or_extent_maximum": 1.7263498828949053,
+      "position_limit_four_float32_ulps": 4.76837158203125e-07,
+      "normal_angle_degrees_maximum": 1.9090959104164224e-06,
+      "normal_angle_limit_degrees": 0.0001,
+      "sampled_states": 296,
+      "all_source_clips": [
+        "Fighting_Idle",
+        "Hit_Chest",
+        "Idle_A",
+        "Walk",
+        "Jog",
+        "Sword_Attack",
+        "Gallop",
+        "Death_A"
+      ],
+      "source_current_mesh_id_bijection": "Every row matched to same-model raw native position/NORMAL/joints/weights and every POSITION/NORMAL target payload, then original source IDs. UV/tangent visual behavior remains covered by existing source-data and renderer evidence.",
+      "passed": true,
+      "original_observations_and_old_evidence_retained": true,
+      "scope": "Fresh isolated editor imports of immutable original and current qualified model; actual primary surface arrays, native library clips, RESET and directed crossfades. CPU-only supplemental numeric check; no new GPU or generated-editor-LOD appearance approval.",
+      "private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\retrospective-editor\\sunmane_foal_dun",
+      "imported_report_sha256": "416fc273ff71753f7f5f0eb747091ea4482f244da719d6621c08c02a91e69290",
+      "binding_report_sha256": "369298a37b53f417c99ff09aa0aae7e637c89249c6cd114339f3c9bbfbf52454"
+    },
+    "old_captures_preserved": true,
+    "original_model_and_observations_preserved": true,
+    "raw_actual_actor_and_source_data_evidence_unchanged": true,
+    "no_model_bytes_changed_by_this_correction": true
+  },
   "fresh_editor_numeric_supplement": {
     "actor": "sunmane_foal_dun",
     "source_sha256": "77e7ce55c7aa77b99eb84f3395896630267219150f0a33a02dc800b7910090a1",
     "candidate_sha256": "b15e77e1b20a7eb768e0313fe4a49518b9b3e8403e0b429d61cc741706426f8a",
-    "fresh_editor_original_current_position_maximum": 0.0,
-    "position_metric": "Total Euclidean world position source/current distance. No inherited/additional error waiver.",
-    "original_rest_coordinate_or_extent_maximum": 1.7263498828949053,
-    "position_limit_four_float32_ulps": 4.76837158203125e-07,
-    "normal_angle_degrees_maximum": 1.9090959104164224e-06,
-    "normal_angle_limit_degrees": 0.0001,
+    "maximum_position_error": 0.0,
+    "maximum_normal_angle_degrees": 1.9090959104164224e-06,
+    "position_budget": 4.76837158203125e-07,
+    "normal_budget_degrees": 0.0001,
+    "strict_passed": true,
+    "actual_editor_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "imported_resource_path": "res://.godot/imported/sunmane_foal_dun.glb-782a49eaedd50a3b733b009b65117887.scn",
+        "imported_resource_sha256": "ecfc1527b7b3416db82eeca6435afd9d1e3237c6092b8a513c145bdb6be393ef",
+        "packed_scene_resource_path": "res://assets/storage-baseline/sunmane_foal_dun.glb",
+        "source_path": "res://assets/storage-baseline/sunmane_foal_dun.glb",
+        "source_sha256": "77e7ce55c7aa77b99eb84f3395896630267219150f0a33a02dc800b7910090a1",
+        "source_md5": "112f5e5394a9f0aab5fe9222b1c6977d",
+        "import_metadata_sha256": "86280e9a7f6dab5735df12e614438286e93ca4dcfe68f0f71e85f4b79fd62813",
+        "import_policy_sha256": "c7e99168bdb8d78abaca25f4ff5fc4501311e4736d9b40ece988a8c14e30ff3f",
+        "single_destination_scene_md5_checked": true,
+        "post_capture_same_source_scene_sha256": true
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "imported_resource_path": "res://.godot/imported/sunmane_foal_dun.glb-fc3e7ed06f621e51a5a270dacb0f4ed6.scn",
+        "imported_resource_sha256": "adea4b7504f417979a74344e832c92ab2fdbf38c47f9a991b7ecb167a6d7b3d5",
+        "packed_scene_resource_path": "res://assets/storage-candidate/sunmane_foal_dun.glb",
+        "source_path": "res://assets/storage-candidate/sunmane_foal_dun.glb",
+        "source_sha256": "b15e77e1b20a7eb768e0313fe4a49518b9b3e8403e0b429d61cc741706426f8a",
+        "source_md5": "5c63277a7bcbae79f183b704e2b39d7c",
+        "import_metadata_sha256": "5c10830e2fa187858b2d862b652487fedca105ba74ceb62113541b1ddbbb47ff",
+        "import_policy_sha256": "e9032e11607943bb7938ed033e03f930b4ce6ab3a7a98e483981e5ee207f495d",
+        "single_destination_scene_md5_checked": true,
+        "post_capture_same_source_scene_sha256": true
+      }
+    ],
+    "numeric_report_sha256": "416fc273ff71753f7f5f0eb747091ea4482f244da719d6621c08c02a91e69290",
+    "numeric_runtime_sha256": "8972eace9d5411d53128a04f3f4c14902593f5081a8bde739afa4056e09f3d33",
+    "private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\retrospective-editor\\sunmane_foal_dun\\actual-editor-v2",
+    "passed": true,
     "sampled_states": 296,
-    "all_source_clips": [
+    "all_original_native_clips": [
       "Fighting_Idle",
       "Hit_Chest",
       "Idle_A",
@@ -11008,12 +11078,26 @@
       "Gallop",
       "Death_A"
     ],
-    "source_current_mesh_id_bijection": "Every row matched to same-model raw native position/NORMAL/joints/weights and every POSITION/NORMAL target payload, then original source IDs. UV/tangent visual behavior remains covered by existing source-data and renderer evidence.",
-    "passed": true,
-    "original_observations_and_old_evidence_retained": true,
-    "scope": "Fresh isolated editor imports of immutable original and current qualified model; actual primary surface arrays, native library clips, RESET and directed crossfades. CPU-only supplemental numeric check; no new GPU or generated-editor-LOD appearance approval.",
-    "private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\retrospective-editor\\sunmane_foal_dun",
-    "imported_report_sha256": "416fc273ff71753f7f5f0eb747091ea4482f244da719d6621c08c02a91e69290",
-    "binding_report_sha256": "369298a37b53f417c99ff09aa0aae7e637c89249c6cd114339f3c9bbfbf52454"
+    "position_metric": "Total Euclidean source/current world position distance; no inherited/additional-error waiver.",
+    "complete_oriented_triangle_payloads_identical": true,
+    "all_joint_index_bits_identical": true,
+    "declared_zero_weight_joint_routing_validation": null,
+    "static_report_sha256": "fd0bc805efb88739b71641777ade2aafe6d3e8ac2393048a51d85f6908a50c11",
+    "static_private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\retrospective-editor\\sunmane_foal_dun\\actual-editor-v2\\allfields-v2",
+    "numeric_method": "Both models explicitly ResourceLoader.load(PackedScene), generated SCN required; actual Editor primary mesh arrays with native-library all-clip playback, RESET and directed crossfades.",
+    "freshness_method": "Current source GLB MD5 equals import metadata source_md5; source/SCN/metadata/policy SHA256 retained, single-destination SCN MD5 checked. Earliest captures additionally validated after capture with unchanged source+SCN byte hashes.",
+    "source_authored_morph_tangent_target_count": 0,
+    "actual_editor_generated_morph_tangent_array_target_count": 260,
+    "source_editor_lod_counts": [
+      3
+    ],
+    "candidate_editor_lod_counts": [
+      3,
+      1
+    ],
+    "scope": "CPU-only actual Editor primary-surface numerical and complete typed vertex/morph P/N/T and oriented-triangle equivalence. Raw source-data/Blender/actualActor whole-cycle/effects evidence remains independent. Generated Editor distant LOD appearance is not separately approved.",
+    "original_observations_and_artistic_review_status_unchanged": true,
+    "all_non_joint_static_fields_and_retained_morph_pnt_bits_identical": true,
+    "joint_index_bits_match_or_only_declared_positive_zero_weight_slots_change": true
   }
 }

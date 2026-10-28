@@ -334,7 +334,9 @@
     },
     "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
     "source_sha256": "fc874a283e736e9a3e8030ec5119d11924c745e01de58d4b37b4f33ff8b3d4ad",
-    "candidate_sha256": "77292511e8e8fbd1c13e3aba15394cfd9c1fe892ecde6cc2294f7cb095fb8bf2"
+    "candidate_sha256": "77292511e8e8fbd1c13e3aba15394cfd9c1fe892ecde6cc2294f7cb095fb8bf2",
+    "actual_loader": "ResourceLoader.load(PackedScene)",
+    "numeric_runtime_sha256": "5c2c0b36942b4cb0e95cfac71cb4c6e2aa845ec03b609124d4989a55fd6c3b1b"
   },
   "actual_actor_dissolve_validation": {
     "passed": true,
@@ -1465,5 +1467,92 @@
     "all_original_fields_and_actions_unchanged": true,
     "config_animationMap_unchanged": true
   },
-  "original_motion_review_status": "pending"
+  "original_motion_review_status": "pending",
+  "editor_cache_mode_correction": {
+    "status": "Previous Cache-based Editor-mode qualification claims withdrawn and superseded by the explicit ResourceLoader supplement below.",
+    "reason": "Earlier public imported-phase dumper called GlbSceneCache.instantiate; aliases could select raw or imported resources. The earlier route did not enforce matched actual Editor scenes.",
+    "immutable_prior_receipt_sha256": "2c0c657893c989da48fe31048cb573aa95adefe589adccb69d79743933ba09de",
+    "immutable_prior_receipt_private_path": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\skunk\\receipt-before-editor-mode-correction.json",
+    "previous_supplement_withdrawn": null,
+    "old_captures_preserved": true,
+    "original_model_and_observations_preserved": true,
+    "raw_actual_actor_and_source_data_evidence_unchanged": true,
+    "no_model_bytes_changed_by_this_correction": true
+  },
+  "fresh_editor_numeric_supplement": {
+    "actor": "skunk",
+    "source_sha256": "fc874a283e736e9a3e8030ec5119d11924c745e01de58d4b37b4f33ff8b3d4ad",
+    "candidate_sha256": "77292511e8e8fbd1c13e3aba15394cfd9c1fe892ecde6cc2294f7cb095fb8bf2",
+    "maximum_position_error": 1.2581367023989512e-07,
+    "maximum_normal_angle_degrees": 1.7580275371856632e-05,
+    "position_budget": 4.76837158203125e-07,
+    "normal_budget_degrees": 0.0001,
+    "actual_editor_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/skunk.glb-bb490487362ae43712ad0252c467666c.md5",
+        "import_metadata_sha256": "cb8ea4001f52a23fbd8cd134a67253d5286a39ef4a9bc62adda5a8f7dd4366d0",
+        "imported_resource_path": "res://.godot/imported/skunk.glb-bb490487362ae43712ad0252c467666c.scn",
+        "imported_resource_sha256": "f0c8b8c16559c27c5bbfef30ac6b13f008f9d151dc138ed5fc0bec4976f38dd9",
+        "packed_scene_resource_path": "res://assets/storage-baseline/skunk.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "241958dcd37ec8b4311c95ab8fda92d1",
+        "source_path": "res://assets/storage-baseline/skunk.glb",
+        "source_sha256": "fc874a283e736e9a3e8030ec5119d11924c745e01de58d4b37b4f33ff8b3d4ad",
+        "import_policy_sha256": "5a64b713944173ee06c3a6fcb4a4cac21c17029ebef82720e3d93b58243657e1",
+        "single_destination_scene_md5_checked": true,
+        "post_capture_same_source_scene_sha256": true
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/skunk.glb-b12945464ea3c329ee5e723e88555e73.md5",
+        "import_metadata_sha256": "17c461f80102372f1ad6108e516ab4169d5ca24c0066557ecea7c958a00c0bbf",
+        "imported_resource_path": "res://.godot/imported/skunk.glb-b12945464ea3c329ee5e723e88555e73.scn",
+        "imported_resource_sha256": "a91fdf1fbccf7db14be5e108e3b483344a6f6a6992e7f33d4f49fca22ab0f56a",
+        "packed_scene_resource_path": "res://assets/storage-candidate/skunk.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "f7c9604bf8723bea7efed6c3e4a34064",
+        "source_path": "res://assets/storage-candidate/skunk.glb",
+        "source_sha256": "77292511e8e8fbd1c13e3aba15394cfd9c1fe892ecde6cc2294f7cb095fb8bf2",
+        "import_policy_sha256": "148f17e5247508de43736a017dd7a44a8fb7b96064813053339f8d6161c71017",
+        "single_destination_scene_md5_checked": true,
+        "post_capture_same_source_scene_sha256": true
+      }
+    ],
+    "strict_passed": true,
+    "numeric_report_sha256": "2e721e9b3ef72c085631e83b4ef5e49d106c1f7d38e7f7717f536b2d612baa4e",
+    "numeric_runtime_sha256": "5c2c0b36942b4cb0e95cfac71cb4c6e2aa845ec03b609124d4989a55fd6c3b1b",
+    "private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\skunk",
+    "passed": true,
+    "sampled_states": 232,
+    "all_original_native_clips": [
+      "Walk",
+      "Jog",
+      "Sword_Attack",
+      "Death_A",
+      "Idle_A",
+      "Fighting_Idle",
+      "Hit_Chest"
+    ],
+    "position_metric": "Total Euclidean source/current world position distance; no inherited/additional-error waiver.",
+    "complete_oriented_triangle_payloads_identical": true,
+    "all_joint_index_bits_identical": true,
+    "declared_zero_weight_joint_routing_validation": null,
+    "static_report_sha256": "c94d0af4a27be625c5ffe66859e8ca3772f905a2029879cf68c360e29a7ec931",
+    "static_private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\skunk\\allfields",
+    "numeric_method": "Both models explicitly ResourceLoader.load(PackedScene), generated SCN required; actual Editor primary mesh arrays with native-library all-clip playback, RESET and directed crossfades.",
+    "freshness_method": "Current source GLB MD5 equals import metadata source_md5; source/SCN/metadata/policy SHA256 retained, single-destination SCN MD5 checked. Earliest captures additionally validated after capture with unchanged source+SCN byte hashes.",
+    "source_authored_morph_tangent_target_count": 0,
+    "actual_editor_generated_morph_tangent_array_target_count": 0,
+    "source_editor_lod_counts": [
+      3
+    ],
+    "candidate_editor_lod_counts": [
+      3
+    ],
+    "scope": "CPU-only actual Editor primary-surface numerical and complete typed vertex/morph P/N/T and oriented-triangle equivalence. Raw source-data/Blender/actualActor whole-cycle/effects evidence remains independent. Generated Editor distant LOD appearance is not separately approved.",
+    "original_observations_and_artistic_review_status_unchanged": true,
+    "all_non_joint_static_fields_and_retained_morph_pnt_bits_identical": true,
+    "joint_index_bits_match_or_only_declared_positive_zero_weight_slots_change": true
+  }
 }

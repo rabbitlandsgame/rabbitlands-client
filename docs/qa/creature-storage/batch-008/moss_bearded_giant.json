@@ -318,7 +318,9 @@
     },
     "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
     "source_sha256": "80431d8da74df783a011c7f063bb6cb6cc0f6a4e46dd496c0815ea67ecdbb5db",
-    "candidate_sha256": "f7ae098fd896298b0bc825b59a2a031a4aa6eca3bfcc4722d9eb4a2c888642b0"
+    "candidate_sha256": "f7ae098fd896298b0bc825b59a2a031a4aa6eca3bfcc4722d9eb4a2c888642b0",
+    "actual_loader": "ResourceLoader.load(PackedScene)",
+    "numeric_runtime_sha256": "e704884c34c6e15f9d051646fa31cd5687c3f35b5842d2ecf3f19cc9066be12f"
   },
   "editor_import_policy": "Original tracked glb.import params copied exactly to source/candidate aliases in an ignored isolated project; fresh editor import completed without errors. Imported primary geometry/animation arrays checked, not a new generated-LOD visual approval. Production native surfaces have zero LODs.",
   "actual_actor_render": {
@@ -1561,5 +1563,80 @@
         "duplicated_properties": []
       }
     ]
+  },
+  "editor_cache_mode_correction": {
+    "status": "Previous Cache-based Editor-mode qualification claims withdrawn and superseded by the explicit ResourceLoader supplement below.",
+    "reason": "Earlier public imported-phase dumper called GlbSceneCache.instantiate; aliases could select raw or imported resources. The earlier route did not enforce matched actual Editor scenes.",
+    "immutable_prior_receipt_sha256": "ef2da07492091ebab98779e06a8deae6c07ddfc3992503eb6f3eca05fce3bd74",
+    "immutable_prior_receipt_private_path": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\moss_bearded_giant\\receipt-before-editor-mode-correction.json",
+    "previous_supplement_withdrawn": null,
+    "old_captures_preserved": true,
+    "original_model_and_observations_preserved": true,
+    "raw_actual_actor_and_source_data_evidence_unchanged": true,
+    "no_model_bytes_changed_by_this_correction": true
+  },
+  "fresh_editor_numeric_supplement": {
+    "actor": "moss_bearded_giant",
+    "source_sha256": "80431d8da74df783a011c7f063bb6cb6cc0f6a4e46dd496c0815ea67ecdbb5db",
+    "candidate_sha256": "f7ae098fd896298b0bc825b59a2a031a4aa6eca3bfcc4722d9eb4a2c888642b0",
+    "maximum_position_error": 3.645403395050335e-07,
+    "maximum_normal_angle_degrees": 1.666499673782919e-05,
+    "position_budget": 4.76837158203125e-07,
+    "normal_budget_degrees": 0.0001,
+    "actual_editor_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "imported_resource_path": "res://.godot/imported/moss_bearded_giant.glb-70a7dc88221e2889b4127b10ecd908dc.scn",
+        "imported_resource_sha256": "0a8a5815c303bd0fb347151f90a89f35207d8c3372e787f63d54c0b11025edfd",
+        "packed_scene_resource_path": "res://assets/storage-baseline/moss_bearded_giant.glb",
+        "source_path": "res://assets/storage-baseline/moss_bearded_giant.glb",
+        "source_sha256": "80431d8da74df783a011c7f063bb6cb6cc0f6a4e46dd496c0815ea67ecdbb5db",
+        "source_md5": "4ea9d25d252e1f1e7b0f8783ef7b0bc9",
+        "import_metadata_sha256": "42a19e8479d03c5c81b47b88c7f060a0c4924426c53d9e0045f4367738abbf41",
+        "import_policy_sha256": "570bc918e3706f6ccd67dc5487b18e080983c84f4f82227081d2e540371abde4",
+        "single_destination_scene_md5_checked": true,
+        "post_capture_same_source_scene_sha256": true
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "imported_resource_path": "res://.godot/imported/moss_bearded_giant.glb-05b42eef70297cff63050503a638e325.scn",
+        "imported_resource_sha256": "da7aca5b9fac9a80a06731c8bf3ed6d2cfc8a3769a80cfde49f9f727b404da51",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/moss_bearded_giant.glb",
+        "source_path": "res://assets/actors/native/creatures/moss_bearded_giant.glb",
+        "source_sha256": "f7ae098fd896298b0bc825b59a2a031a4aa6eca3bfcc4722d9eb4a2c888642b0",
+        "source_md5": "9dcfbcf491e6df285abbd6f1b831b992",
+        "import_metadata_sha256": "eff4e61b88e2f22c8762c805d9a62d37b91a63c671e12cb4711a2aa9b9671ddf",
+        "import_policy_sha256": "4258e656bd0cd2293a7f6044587cd2d264f0316097993fbc9871ccec01430163",
+        "single_destination_scene_md5_checked": true,
+        "post_capture_same_source_scene_sha256": true
+      }
+    ],
+    "strict_passed": true,
+    "numeric_report_sha256": "e942e50aff7b93a2404d2d4d8d23fb6a751367531924719fed5b37dc61e7fb8b",
+    "numeric_runtime_sha256": "e704884c34c6e15f9d051646fa31cd5687c3f35b5842d2ecf3f19cc9066be12f",
+    "private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\moss_bearded_giant",
+    "passed": true,
+    "sampled_states": 232,
+    "all_original_native_clips": [],
+    "position_metric": "Total Euclidean source/current world position distance; no inherited/additional-error waiver.",
+    "complete_oriented_triangle_payloads_identical": true,
+    "all_joint_index_bits_identical": true,
+    "declared_zero_weight_joint_routing_validation": null,
+    "static_report_sha256": "de5422536fedfb8f6e02025c256469865058914efde36f0942476bd949e23a71",
+    "static_private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\moss_bearded_giant\\allfields",
+    "numeric_method": "Both models explicitly ResourceLoader.load(PackedScene), generated SCN required; actual Editor primary mesh arrays with native-library all-clip playback, RESET and directed crossfades.",
+    "freshness_method": "Current source GLB MD5 equals import metadata source_md5; source/SCN/metadata/policy SHA256 retained, single-destination SCN MD5 checked. Earliest captures additionally validated after capture with unchanged source+SCN byte hashes.",
+    "source_authored_morph_tangent_target_count": 0,
+    "actual_editor_generated_morph_tangent_array_target_count": 0,
+    "source_editor_lod_counts": [
+      2
+    ],
+    "candidate_editor_lod_counts": [
+      2
+    ],
+    "scope": "CPU-only actual Editor primary-surface numerical and complete typed vertex/morph P/N/T and oriented-triangle equivalence. Raw source-data/Blender/actualActor whole-cycle/effects evidence remains independent. Generated Editor distant LOD appearance is not separately approved.",
+    "original_observations_and_artistic_review_status_unchanged": true,
+    "all_non_joint_static_fields_and_retained_morph_pnt_bits_identical": true,
+    "joint_index_bits_match_or_only_declared_positive_zero_weight_slots_change": true
   }
 }

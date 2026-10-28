@@ -324,7 +324,9 @@
     },
     "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
     "source_sha256": "d782aff7f7f0e8646c5719505662542e8d9db97ae3cda610834e95e34fd2a07e",
-    "candidate_sha256": "a2b0c62675764f258e1ade983efa761d996133b567846d653849181a49dd7169"
+    "candidate_sha256": "a2b0c62675764f258e1ade983efa761d996133b567846d653849181a49dd7169",
+    "actual_loader": "ResourceLoader.load(PackedScene)",
+    "numeric_runtime_sha256": "4aa871712fcc897f309fca364968efca14c1b69f23d8a4c9af12c58a7b532e00"
   },
   "editor_import_policy": "Original tracked glb.import params copied exactly to source/candidate aliases in an ignored isolated project; fresh editor import completed without errors. Imported primary geometry/animation arrays checked, not a new generated-LOD visual approval. Production native surfaces have zero LODs.",
   "actual_actor_render": {
@@ -1405,5 +1407,84 @@
     "border_foreground_pixels_maximum": 0,
     "runtime_normal_angle_degrees_maximum": 0.0001,
     "scope": "Existing conservative raster and native-normal limits retained. Exact-only source interpolation is independently proved continuously; native sample differences record float32 rebake arithmetic."
+  },
+  "editor_cache_mode_correction": {
+    "status": "Previous Cache-based Editor-mode qualification claims withdrawn and superseded by the explicit ResourceLoader supplement below.",
+    "reason": "Earlier public imported-phase dumper called GlbSceneCache.instantiate; aliases could select raw or imported resources. The earlier route did not enforce matched actual Editor scenes.",
+    "immutable_prior_receipt_sha256": "94c6e596f42f2479de386436cfdac58b1c451fb1126977ccdb4f5ac5d6d48111",
+    "immutable_prior_receipt_private_path": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\riverglass_otter\\receipt-before-editor-mode-correction.json",
+    "previous_supplement_withdrawn": null,
+    "old_captures_preserved": true,
+    "original_model_and_observations_preserved": true,
+    "raw_actual_actor_and_source_data_evidence_unchanged": true,
+    "no_model_bytes_changed_by_this_correction": true
+  },
+  "fresh_editor_numeric_supplement": {
+    "actor": "riverglass_otter",
+    "source_sha256": "d782aff7f7f0e8646c5719505662542e8d9db97ae3cda610834e95e34fd2a07e",
+    "candidate_sha256": "a2b0c62675764f258e1ade983efa761d996133b567846d653849181a49dd7169",
+    "maximum_position_error": 4.113915748533632e-07,
+    "maximum_normal_angle_degrees": 3.0509718019773804e-05,
+    "position_budget": 1.9073486328125e-06,
+    "normal_budget_degrees": 0.0001,
+    "actual_editor_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/riverglass_otter.glb-085764b727ab07126e7b0d99db7e1bb3.md5",
+        "import_metadata_sha256": "375ec78297a4aacc4601185ab4765d158f2568faecf73b10d8546810d858ef4a",
+        "imported_resource_path": "res://.godot/imported/riverglass_otter.glb-085764b727ab07126e7b0d99db7e1bb3.scn",
+        "imported_resource_sha256": "7a5f744b31508e5a6f7545d7e7c7ae0648150c44e97987bcd3692adad4f6226e",
+        "packed_scene_resource_path": "res://assets/storage-baseline/riverglass_otter.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "4ccc45441a35afe85a3a3c6a067b566d",
+        "source_path": "res://assets/storage-baseline/riverglass_otter.glb",
+        "source_sha256": "d782aff7f7f0e8646c5719505662542e8d9db97ae3cda610834e95e34fd2a07e",
+        "import_policy_sha256": "2943f4c4264520e45c8366fba6970c1853089f71650c13811f6c376181d7c70c",
+        "single_destination_scene_md5_checked": true,
+        "post_capture_same_source_scene_sha256": true
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/riverglass_otter.glb-04190376e9123c7de110ec91a0b307ce.md5",
+        "import_metadata_sha256": "5b155dc727f1e34c925245739279f431fe0a86c291ef886c101a048e120fd658",
+        "imported_resource_path": "res://.godot/imported/riverglass_otter.glb-04190376e9123c7de110ec91a0b307ce.scn",
+        "imported_resource_sha256": "17e4d390e57637d54aff10ac926ab4565f7df788080f0f21a6663f42dc10f224",
+        "packed_scene_resource_path": "res://assets/storage-candidate/riverglass_otter.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "e1c0c599f57bf350f8249fe22624d326",
+        "source_path": "res://assets/storage-candidate/riverglass_otter.glb",
+        "source_sha256": "a2b0c62675764f258e1ade983efa761d996133b567846d653849181a49dd7169",
+        "import_policy_sha256": "4db32660cf1a144a7d6dd96e6d5281ca5c0393d510bc8b7c81bda56b0b3f5f05",
+        "single_destination_scene_md5_checked": true,
+        "post_capture_same_source_scene_sha256": true
+      }
+    ],
+    "strict_passed": true,
+    "numeric_report_sha256": "8a43eeaaa8989e426856289ba3b75dd7dfe87c057d6c1ebb8461bdd35ae69e44",
+    "numeric_runtime_sha256": "4aa871712fcc897f309fca364968efca14c1b69f23d8a4c9af12c58a7b532e00",
+    "private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\riverglass_otter",
+    "passed": true,
+    "sampled_states": 232,
+    "all_original_native_clips": [],
+    "position_metric": "Total Euclidean source/current world position distance; no inherited/additional-error waiver.",
+    "complete_oriented_triangle_payloads_identical": true,
+    "all_joint_index_bits_identical": true,
+    "declared_zero_weight_joint_routing_validation": null,
+    "static_report_sha256": "5cb0c78cf8b487557801ce44891e7104d5f2bc71f8ac4483f5a0e08cac2f2750",
+    "static_private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\riverglass_otter\\allfields",
+    "numeric_method": "Both models explicitly ResourceLoader.load(PackedScene), generated SCN required; actual Editor primary mesh arrays with native-library all-clip playback, RESET and directed crossfades.",
+    "freshness_method": "Current source GLB MD5 equals import metadata source_md5; source/SCN/metadata/policy SHA256 retained, single-destination SCN MD5 checked. Earliest captures additionally validated after capture with unchanged source+SCN byte hashes.",
+    "source_authored_morph_tangent_target_count": 0,
+    "actual_editor_generated_morph_tangent_array_target_count": 0,
+    "source_editor_lod_counts": [
+      3
+    ],
+    "candidate_editor_lod_counts": [
+      3
+    ],
+    "scope": "CPU-only actual Editor primary-surface numerical and complete typed vertex/morph P/N/T and oriented-triangle equivalence. Raw source-data/Blender/actualActor whole-cycle/effects evidence remains independent. Generated Editor distant LOD appearance is not separately approved.",
+    "original_observations_and_artistic_review_status_unchanged": true,
+    "all_non_joint_static_fields_and_retained_morph_pnt_bits_identical": true,
+    "joint_index_bits_match_or_only_declared_positive_zero_weight_slots_change": true
   }
 }

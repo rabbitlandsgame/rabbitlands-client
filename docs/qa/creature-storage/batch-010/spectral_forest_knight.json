@@ -368,7 +368,9 @@
     },
     "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
     "source_sha256": "fb74e2c12520d3b5a71660e8977385162e8ff1bd20577699ee1e75a2935302f8",
-    "candidate_sha256": "774d07ad4290d21a2e21493ac6627d75830636b7c196d4552e06613397d25d52"
+    "candidate_sha256": "774d07ad4290d21a2e21493ac6627d75830636b7c196d4552e06613397d25d52",
+    "actual_loader": "ResourceLoader.load(PackedScene)",
+    "numeric_runtime_sha256": "e39613b9f0bc9129b7057c71fe3781b94e64a7db4daeacae2be306d928350066"
   },
   "editor_import_policy": "Original tracked glb.import params copied exactly to source/candidate aliases in an ignored isolated project; fresh editor import completed without errors. Imported primary geometry/animation arrays checked, not a new generated-LOD visual approval. Production native surfaces have zero LODs.",
   "actual_actor_render": {
@@ -1462,5 +1464,86 @@
     "border_foreground_pixels_maximum": 0,
     "runtime_normal_angle_degrees_maximum": 0.0001,
     "scope": "Existing conservative raster and native-normal limits retained. Exact-only source interpolation is independently proved continuously; native sample differences record float32 rebake arithmetic."
+  },
+  "editor_cache_mode_correction": {
+    "status": "Previous Cache-based Editor-mode qualification claims withdrawn and superseded by the explicit ResourceLoader supplement below.",
+    "reason": "Earlier public imported-phase dumper called GlbSceneCache.instantiate; aliases could select raw or imported resources. The earlier route did not enforce matched actual Editor scenes.",
+    "immutable_prior_receipt_sha256": "ee7dc5acf60a7ceef481f70ea616a06c5683d1126ba968f1f9baafaa9ce4dfbf",
+    "immutable_prior_receipt_private_path": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\spectral_forest_knight\\receipt-before-editor-mode-correction.json",
+    "previous_supplement_withdrawn": null,
+    "old_captures_preserved": true,
+    "original_model_and_observations_preserved": true,
+    "raw_actual_actor_and_source_data_evidence_unchanged": true,
+    "no_model_bytes_changed_by_this_correction": true
+  },
+  "fresh_editor_numeric_supplement": {
+    "actor": "spectral_forest_knight",
+    "source_sha256": "fb74e2c12520d3b5a71660e8977385162e8ff1bd20577699ee1e75a2935302f8",
+    "candidate_sha256": "774d07ad4290d21a2e21493ac6627d75830636b7c196d4552e06613397d25d52",
+    "maximum_position_error": 1.2217854762375368e-07,
+    "maximum_normal_angle_degrees": 2.9278337048126537e-05,
+    "position_budget": 4.76837158203125e-07,
+    "normal_budget_degrees": 0.0001,
+    "actual_editor_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/spectral_forest_knight.glb-3b1046266e9cd5b6a232babcab2519aa.md5",
+        "import_metadata_sha256": "4fbff9cc2529db9a46e66aec09ae12995261cb985a91752087beaa8e1795dcea",
+        "imported_resource_path": "res://.godot/imported/spectral_forest_knight.glb-3b1046266e9cd5b6a232babcab2519aa.scn",
+        "imported_resource_sha256": "71126ad806a2a807e7f1890edec1a0bd6bc17d7722963717a696dd4623ddb051",
+        "packed_scene_resource_path": "res://assets/storage-baseline/spectral_forest_knight.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "6e64042566f71207b5f350f5712b2bcc",
+        "source_path": "res://assets/storage-baseline/spectral_forest_knight.glb",
+        "source_sha256": "fb74e2c12520d3b5a71660e8977385162e8ff1bd20577699ee1e75a2935302f8",
+        "import_policy_sha256": "2e92e7bd020aff5cb26e69dfe6963801d2d13aec7d1b098946df45d9cabd18c1",
+        "single_destination_scene_md5_checked": true,
+        "post_capture_same_source_scene_sha256": true
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/spectral_forest_knight.glb-69ffae51220ea3de26fe110e41be16ee.md5",
+        "import_metadata_sha256": "a210305df89cf4d1c61ffed8913dbb31302d298285c9a4e5a9beb3bbf651f407",
+        "imported_resource_path": "res://.godot/imported/spectral_forest_knight.glb-69ffae51220ea3de26fe110e41be16ee.scn",
+        "imported_resource_sha256": "eb82130d1a2604380d4b6af054221b87c3ba1bd63e637a96bf197425b587953e",
+        "packed_scene_resource_path": "res://assets/storage-candidate/spectral_forest_knight.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "f723de11c4a08221a0d89ee3be25f595",
+        "source_path": "res://assets/storage-candidate/spectral_forest_knight.glb",
+        "source_sha256": "774d07ad4290d21a2e21493ac6627d75830636b7c196d4552e06613397d25d52",
+        "import_policy_sha256": "a185d4c51377e10a7f360707baf3b3bc6ce08cf68ae19d218a26f6058f0fe3dc",
+        "single_destination_scene_md5_checked": true,
+        "post_capture_same_source_scene_sha256": true
+      }
+    ],
+    "strict_passed": true,
+    "numeric_report_sha256": "37c5d3ab20588058146e33ae692d202c0bec6bd7ffa417e1dd8ff02b5f466fd2",
+    "numeric_runtime_sha256": "e39613b9f0bc9129b7057c71fe3781b94e64a7db4daeacae2be306d928350066",
+    "private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\spectral_forest_knight",
+    "passed": true,
+    "sampled_states": 232,
+    "all_original_native_clips": [],
+    "position_metric": "Total Euclidean source/current world position distance; no inherited/additional-error waiver.",
+    "complete_oriented_triangle_payloads_identical": true,
+    "all_joint_index_bits_identical": true,
+    "declared_zero_weight_joint_routing_validation": null,
+    "static_report_sha256": "58bfa2004f2b2a388f8bdc44a087d0cd067b8c81c15a6d82b5f8b1f276c9f070",
+    "static_private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\spectral_forest_knight\\allfields",
+    "numeric_method": "Both models explicitly ResourceLoader.load(PackedScene), generated SCN required; actual Editor primary mesh arrays with native-library all-clip playback, RESET and directed crossfades.",
+    "freshness_method": "Current source GLB MD5 equals import metadata source_md5; source/SCN/metadata/policy SHA256 retained, single-destination SCN MD5 checked. Earliest captures additionally validated after capture with unchanged source+SCN byte hashes.",
+    "source_authored_morph_tangent_target_count": 0,
+    "actual_editor_generated_morph_tangent_array_target_count": 65,
+    "source_editor_lod_counts": [
+      3,
+      2
+    ],
+    "candidate_editor_lod_counts": [
+      3,
+      2
+    ],
+    "scope": "CPU-only actual Editor primary-surface numerical and complete typed vertex/morph P/N/T and oriented-triangle equivalence. Raw source-data/Blender/actualActor whole-cycle/effects evidence remains independent. Generated Editor distant LOD appearance is not separately approved.",
+    "original_observations_and_artistic_review_status_unchanged": true,
+    "all_non_joint_static_fields_and_retained_morph_pnt_bits_identical": true,
+    "joint_index_bits_match_or_only_declared_positive_zero_weight_slots_change": true
   }
 }

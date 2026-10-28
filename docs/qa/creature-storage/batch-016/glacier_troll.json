@@ -334,7 +334,9 @@
     },
     "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
     "source_sha256": "a30c0870069490fd0d1bace8f562bc27883028762d9d82ae6dfec5e31d0ebcfc",
-    "candidate_sha256": "3ca4e8b343636071ab558e62034eae68ca33718f93d82b6fa781c105497bc21c"
+    "candidate_sha256": "3ca4e8b343636071ab558e62034eae68ca33718f93d82b6fa781c105497bc21c",
+    "actual_loader": "ResourceLoader.load(PackedScene)",
+    "numeric_runtime_sha256": "6e2019b15693e1a2f81fa698650df63a523aca9e15125da7102f787e63862b01"
   },
   "editor_import_policy": "Original tracked glb.import params copied exactly to source/candidate aliases in an ignored isolated project; fresh editor import completed without errors. Imported primary geometry/animation arrays checked, not a new generated-LOD visual approval. Production native surfaces have zero LODs.",
   "actual_actor_render": {
@@ -1448,5 +1450,92 @@
     "all_original_fields_and_actions_unchanged": true,
     "config_animationMap_unchanged": true
   },
-  "original_motion_review_status": "pending"
+  "original_motion_review_status": "pending",
+  "editor_cache_mode_correction": {
+    "status": "Previous Cache-based Editor-mode qualification claims withdrawn and superseded by the explicit ResourceLoader supplement below.",
+    "reason": "Earlier public imported-phase dumper called GlbSceneCache.instantiate; aliases could select raw or imported resources. The earlier route did not enforce matched actual Editor scenes.",
+    "immutable_prior_receipt_sha256": "e7d91a7a1cfdd5e68f659935c4fd0435964cd2824d810450aee5d5a16fe7d26e",
+    "immutable_prior_receipt_private_path": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\glacier_troll\\receipt-before-editor-mode-correction.json",
+    "previous_supplement_withdrawn": null,
+    "old_captures_preserved": true,
+    "original_model_and_observations_preserved": true,
+    "raw_actual_actor_and_source_data_evidence_unchanged": true,
+    "no_model_bytes_changed_by_this_correction": true
+  },
+  "fresh_editor_numeric_supplement": {
+    "actor": "glacier_troll",
+    "source_sha256": "a30c0870069490fd0d1bace8f562bc27883028762d9d82ae6dfec5e31d0ebcfc",
+    "candidate_sha256": "3ca4e8b343636071ab558e62034eae68ca33718f93d82b6fa781c105497bc21c",
+    "maximum_position_error": 3.703621228552184e-07,
+    "maximum_normal_angle_degrees": 2.5910307087143672e-05,
+    "position_budget": 4.76837158203125e-07,
+    "normal_budget_degrees": 0.0001,
+    "actual_editor_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/glacier_troll.glb-aa1c3fc08ec5fef2e5a1109acc73e679.md5",
+        "import_metadata_sha256": "02a9578d97edbe5d860d136f6463816d46f8402233ce384a1de9645239538a5e",
+        "imported_resource_path": "res://.godot/imported/glacier_troll.glb-aa1c3fc08ec5fef2e5a1109acc73e679.scn",
+        "imported_resource_sha256": "64e8bdfb9fa8161a44b8e41a0cfc6aab9a243851b5e11fa05f4f3b15dda90768",
+        "packed_scene_resource_path": "res://assets/storage-baseline/glacier_troll.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "9a83c573135edcb36b03bd4fb7ecac02",
+        "source_path": "res://assets/storage-baseline/glacier_troll.glb",
+        "source_sha256": "a30c0870069490fd0d1bace8f562bc27883028762d9d82ae6dfec5e31d0ebcfc",
+        "import_policy_sha256": "c527e52b61f4ab0a0d96e5025aed4a417c4a58f64398c1a8ae55f33b97c2f4aa",
+        "single_destination_scene_md5_checked": true,
+        "post_capture_same_source_scene_sha256": true
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/glacier_troll.glb-281ae113a92aa2dc4ab4146344b7c889.md5",
+        "import_metadata_sha256": "97eb4ad09bc999dc3a27af649052b14f62e0248a70d1fb60eb0019a386dd2a80",
+        "imported_resource_path": "res://.godot/imported/glacier_troll.glb-281ae113a92aa2dc4ab4146344b7c889.scn",
+        "imported_resource_sha256": "61ec1fd55b635a157a1854b5b4a9ae76fc241c0a9e9626544691d1988fbbf1b6",
+        "packed_scene_resource_path": "res://assets/storage-candidate/glacier_troll.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "b6311d7a24bb4052ff71db715e4f6f54",
+        "source_path": "res://assets/storage-candidate/glacier_troll.glb",
+        "source_sha256": "3ca4e8b343636071ab558e62034eae68ca33718f93d82b6fa781c105497bc21c",
+        "import_policy_sha256": "808b480bcee5711281686f3d7c0710126db7e75e2131f76584a923210c3a7ecd",
+        "single_destination_scene_md5_checked": true,
+        "post_capture_same_source_scene_sha256": true
+      }
+    ],
+    "strict_passed": true,
+    "numeric_report_sha256": "8e80ad62e0d87510cafd5c45733244b786eb7c4634eb69f50ca0e84608dd2a3a",
+    "numeric_runtime_sha256": "6e2019b15693e1a2f81fa698650df63a523aca9e15125da7102f787e63862b01",
+    "private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\glacier_troll",
+    "passed": true,
+    "sampled_states": 232,
+    "all_original_native_clips": [
+      "Fighting_Idle",
+      "Hit_Chest",
+      "Idle_A",
+      "Walk",
+      "Jog",
+      "Sword_Attack",
+      "Death_A"
+    ],
+    "position_metric": "Total Euclidean source/current world position distance; no inherited/additional-error waiver.",
+    "complete_oriented_triangle_payloads_identical": true,
+    "all_joint_index_bits_identical": true,
+    "declared_zero_weight_joint_routing_validation": null,
+    "static_report_sha256": "555ed36df8b5b6431f7054fb1470f86b19517e2d20d8be58ebff65ef6796791f",
+    "static_private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\glacier_troll\\allfields",
+    "numeric_method": "Both models explicitly ResourceLoader.load(PackedScene), generated SCN required; actual Editor primary mesh arrays with native-library all-clip playback, RESET and directed crossfades.",
+    "freshness_method": "Current source GLB MD5 equals import metadata source_md5; source/SCN/metadata/policy SHA256 retained, single-destination SCN MD5 checked. Earliest captures additionally validated after capture with unchanged source+SCN byte hashes.",
+    "source_authored_morph_tangent_target_count": 0,
+    "actual_editor_generated_morph_tangent_array_target_count": 0,
+    "source_editor_lod_counts": [
+      2
+    ],
+    "candidate_editor_lod_counts": [
+      2
+    ],
+    "scope": "CPU-only actual Editor primary-surface numerical and complete typed vertex/morph P/N/T and oriented-triangle equivalence. Raw source-data/Blender/actualActor whole-cycle/effects evidence remains independent. Generated Editor distant LOD appearance is not separately approved.",
+    "original_observations_and_artistic_review_status_unchanged": true,
+    "all_non_joint_static_fields_and_retained_morph_pnt_bits_identical": true,
+    "joint_index_bits_match_or_only_declared_positive_zero_weight_slots_change": true
+  }
 }

@@ -325,7 +325,9 @@
     },
     "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
     "source_sha256": "7ab7f6530f5e4bb1b883067280643b2714265526b9dab411b0fe4e7ee848bd75",
-    "candidate_sha256": "d05cea22c6282fcc0a95a16545f8e221cd062b269d9c8b0abc7d71751a4257c2"
+    "candidate_sha256": "d05cea22c6282fcc0a95a16545f8e221cd062b269d9c8b0abc7d71751a4257c2",
+    "actual_loader": "ResourceLoader.load(PackedScene)",
+    "numeric_runtime_sha256": "6f2be92c2da82230df0dfdd16cf2c96c3042ef24ff00ef6d86f17fc05c354d86"
   },
   "editor_import_policy": "Original tracked glb.import params copied exactly to source/candidate aliases in an ignored isolated project; fresh editor import completed without errors. Imported primary geometry/animation arrays checked, not a new generated-LOD visual approval. Production native surfaces have zero LODs.",
   "actual_actor_render": {
@@ -1396,5 +1398,80 @@
       }
     ],
     "scope": "Original512px PNGs retained in verified lossless ZIP; paired lossless WebP previews retain every full native cycle frame at24fps, resized to384px for review."
+  },
+  "editor_cache_mode_correction": {
+    "status": "Previous Cache-based Editor-mode qualification claims withdrawn and superseded by the explicit ResourceLoader supplement below.",
+    "reason": "Earlier public imported-phase dumper called GlbSceneCache.instantiate; aliases could select raw or imported resources. The earlier route did not enforce matched actual Editor scenes.",
+    "immutable_prior_receipt_sha256": "faf1eead27513a50e3b3ab71117d4b7fb232e17c6c977e3dea574a2250e289c2",
+    "immutable_prior_receipt_private_path": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\sapphire_peafowl\\receipt-before-editor-mode-correction.json",
+    "previous_supplement_withdrawn": null,
+    "old_captures_preserved": true,
+    "original_model_and_observations_preserved": true,
+    "raw_actual_actor_and_source_data_evidence_unchanged": true,
+    "no_model_bytes_changed_by_this_correction": true
+  },
+  "fresh_editor_numeric_supplement": {
+    "actor": "sapphire_peafowl",
+    "source_sha256": "7ab7f6530f5e4bb1b883067280643b2714265526b9dab411b0fe4e7ee848bd75",
+    "candidate_sha256": "d05cea22c6282fcc0a95a16545f8e221cd062b269d9c8b0abc7d71751a4257c2",
+    "maximum_position_error": 6.899441387695399e-07,
+    "maximum_normal_angle_degrees": 2.077320937910124e-05,
+    "position_budget": 9.5367431640625e-07,
+    "normal_budget_degrees": 0.0001,
+    "actual_editor_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "imported_resource_path": "res://.godot/imported/sapphire_peafowl.glb-3dd52dbb37765fb58ce2612b18353b95.scn",
+        "imported_resource_sha256": "f953552ffaa2b316886124611ec3775cdab2feff0b4b4ccd17b826cbcb10358d",
+        "packed_scene_resource_path": "res://assets/storage-baseline/sapphire_peafowl.glb",
+        "source_path": "res://assets/storage-baseline/sapphire_peafowl.glb",
+        "source_sha256": "7ab7f6530f5e4bb1b883067280643b2714265526b9dab411b0fe4e7ee848bd75",
+        "source_md5": "1e919f3be696e5f2938ebede9ff67168",
+        "import_metadata_sha256": "2ae1b2fe0cc82c412666f72263ef9af3251f08b0d3fdac1ce4859d8957e60bae",
+        "import_policy_sha256": "3031c5c8f5c072c181399bd904e759ad7a4089273aa68ce92fb695c1dff8ba32",
+        "single_destination_scene_md5_checked": true,
+        "post_capture_same_source_scene_sha256": true
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "imported_resource_path": "res://.godot/imported/sapphire_peafowl.glb-db30f5d1c8148dee78a21802d6d4f56e.scn",
+        "imported_resource_sha256": "8506fe9ae99921d9fed0f455378ad1c909a45254e22212ad902fa814a9e5c98e",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/sapphire_peafowl.glb",
+        "source_path": "res://assets/actors/native/creatures/sapphire_peafowl.glb",
+        "source_sha256": "d05cea22c6282fcc0a95a16545f8e221cd062b269d9c8b0abc7d71751a4257c2",
+        "source_md5": "14fa9e41f2a964472993cc2afbcb30fc",
+        "import_metadata_sha256": "361309f6ae237ef36e8c2bac5f567e7d3cc1b7dd198cb8ad6acc615f51018243",
+        "import_policy_sha256": "f99d5054c6cb6584b316558875baad130b8ca1c54bc25a6f31a66313edd4620d",
+        "single_destination_scene_md5_checked": true,
+        "post_capture_same_source_scene_sha256": true
+      }
+    ],
+    "strict_passed": true,
+    "numeric_report_sha256": "6fad71f9e3e4bfefd786f04b30fd478a88f0482d12cd643ac0e6e8e43ec39ec7",
+    "numeric_runtime_sha256": "6f2be92c2da82230df0dfdd16cf2c96c3042ef24ff00ef6d86f17fc05c354d86",
+    "private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\sapphire_peafowl",
+    "passed": true,
+    "sampled_states": 232,
+    "all_original_native_clips": [],
+    "position_metric": "Total Euclidean source/current world position distance; no inherited/additional-error waiver.",
+    "complete_oriented_triangle_payloads_identical": true,
+    "all_joint_index_bits_identical": true,
+    "declared_zero_weight_joint_routing_validation": null,
+    "static_report_sha256": "e462908a9cd202473d6c773c31f3413e2c6862153c10b04ba438f244179d067f",
+    "static_private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\sapphire_peafowl\\allfields",
+    "numeric_method": "Both models explicitly ResourceLoader.load(PackedScene), generated SCN required; actual Editor primary mesh arrays with native-library all-clip playback, RESET and directed crossfades.",
+    "freshness_method": "Current source GLB MD5 equals import metadata source_md5; source/SCN/metadata/policy SHA256 retained, single-destination SCN MD5 checked. Earliest captures additionally validated after capture with unchanged source+SCN byte hashes.",
+    "source_authored_morph_tangent_target_count": 0,
+    "actual_editor_generated_morph_tangent_array_target_count": 370,
+    "source_editor_lod_counts": [
+      2
+    ],
+    "candidate_editor_lod_counts": [
+      2
+    ],
+    "scope": "CPU-only actual Editor primary-surface numerical and complete typed vertex/morph P/N/T and oriented-triangle equivalence. Raw source-data/Blender/actualActor whole-cycle/effects evidence remains independent. Generated Editor distant LOD appearance is not separately approved.",
+    "original_observations_and_artistic_review_status_unchanged": true,
+    "all_non_joint_static_fields_and_retained_morph_pnt_bits_identical": true,
+    "joint_index_bits_match_or_only_declared_positive_zero_weight_slots_change": true
   }
 }

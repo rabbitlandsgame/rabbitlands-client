@@ -651,7 +651,9 @@
     },
     "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
     "source_sha256": "9dfbdab43c1ecdfae9bfe8da48d5f02ac4a5fbaf948b9a48b7356708e8fb4260",
-    "candidate_sha256": "f86c6cdd6ffc83f01bbbd641e4ac31caa6af6e5cff74933e26d23a1e36dcce3a"
+    "candidate_sha256": "f86c6cdd6ffc83f01bbbd641e4ac31caa6af6e5cff74933e26d23a1e36dcce3a",
+    "actual_loader": "ResourceLoader.load(PackedScene)",
+    "numeric_runtime_sha256": "7bc5f3c24ac69ed1ad61e3e2a745b9157a2f4893ff6c664903fbc668efd5ac2d"
   },
   "editor_import_policy": "Original tracked .glb.import params copied unchanged to isolated source/candidate aliases, fresh import completed without script/resource/import errors. Production raw surfaces have no generated LODs; editor LOD appearance is not approved separately.",
   "actual_actor_render": {
@@ -1814,5 +1816,90 @@
     "baseline_passed": true,
     "candidate_passed": true,
     "original_observations_and_limits_unchanged": true
+  },
+  "editor_cache_mode_correction": {
+    "status": "Previous Cache-based Editor-mode qualification claims withdrawn and superseded by the explicit ResourceLoader supplement below.",
+    "reason": "Earlier public imported-phase dumper called GlbSceneCache.instantiate; aliases could select raw or imported resources. The earlier route did not enforce matched actual Editor scenes.",
+    "immutable_prior_receipt_sha256": "99c49aae0da33d6adb34019c705d71ea93160bbbe016cf47487a232bb7fd4ad5",
+    "immutable_prior_receipt_private_path": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\moors_spectral_knight\\receipt-before-editor-mode-correction.json",
+    "previous_supplement_withdrawn": null,
+    "old_captures_preserved": true,
+    "original_model_and_observations_preserved": true,
+    "raw_actual_actor_and_source_data_evidence_unchanged": true,
+    "no_model_bytes_changed_by_this_correction": true
+  },
+  "fresh_editor_numeric_supplement": {
+    "actor": "moors_spectral_knight",
+    "source_sha256": "9dfbdab43c1ecdfae9bfe8da48d5f02ac4a5fbaf948b9a48b7356708e8fb4260",
+    "candidate_sha256": "f86c6cdd6ffc83f01bbbd641e4ac31caa6af6e5cff74933e26d23a1e36dcce3a",
+    "maximum_position_error": 0.0,
+    "maximum_normal_angle_degrees": 1.9090959104164224e-06,
+    "position_budget": 4.76837158203125e-07,
+    "normal_budget_degrees": 0.0001,
+    "actual_editor_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "imported_resource_path": "res://.godot/imported/moors_spectral_knight.glb-3f8e82d1b5f7658dc5fd7d5b05031e0a.scn",
+        "imported_resource_sha256": "35faf7971f8744b30030e8c7c85f1f5a97a30b1b45fea802d5b8e6a77585d3fd",
+        "packed_scene_resource_path": "res://assets/storage-baseline/moors_spectral_knight.glb",
+        "source_path": "res://assets/storage-baseline/moors_spectral_knight.glb",
+        "source_sha256": "9dfbdab43c1ecdfae9bfe8da48d5f02ac4a5fbaf948b9a48b7356708e8fb4260",
+        "source_md5": "82b344a151eb0b6437113931afb37f68",
+        "import_metadata_sha256": "9d6759353d770874b36a2a4a0968f9d5e734601fa0f33acc4315389ea7a713e5",
+        "import_policy_sha256": "94af8f6e986319c7d9394b94e1c84a9e164c294ff54848e4bcd3fffb2be0501e",
+        "single_destination_scene_md5_checked": true,
+        "post_capture_same_source_scene_sha256": true
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "imported_resource_path": "res://.godot/imported/moors_spectral_knight.glb-66ce2bb4315dcbfe0e4a102a8a819155.scn",
+        "imported_resource_sha256": "b18521a351e8e0fb5131004bc17c74b9671a475353744a8d4634c17e2d8a1f1c",
+        "packed_scene_resource_path": "res://assets/storage-candidate/moors_spectral_knight.glb",
+        "source_path": "res://assets/storage-candidate/moors_spectral_knight.glb",
+        "source_sha256": "f86c6cdd6ffc83f01bbbd641e4ac31caa6af6e5cff74933e26d23a1e36dcce3a",
+        "source_md5": "b09622f5c1e74ce99d4e71856d237c0a",
+        "import_metadata_sha256": "d32d579671811bee1dea5eca263173cbcab14980d9c7565c9ac565655121d9b1",
+        "import_policy_sha256": "dfac925533fa66e93a6d66b81eaab4195ad4e7c0478eb755d441a68ba5005829",
+        "single_destination_scene_md5_checked": true,
+        "post_capture_same_source_scene_sha256": true
+      }
+    ],
+    "strict_passed": true,
+    "numeric_report_sha256": "df6c789e9a3d2d2fd1097fbd8fdd7df858df8223fe08388442e1ef2b2a8427b4",
+    "numeric_runtime_sha256": "7bc5f3c24ac69ed1ad61e3e2a745b9157a2f4893ff6c664903fbc668efd5ac2d",
+    "private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\moors_spectral_knight",
+    "passed": true,
+    "sampled_states": 232,
+    "all_original_native_clips": [
+      "Death_A",
+      "Fighting_Idle",
+      "Hit_Chest",
+      "Idle_A",
+      "Jog",
+      "Sword_Attack",
+      "Walk"
+    ],
+    "position_metric": "Total Euclidean source/current world position distance; no inherited/additional-error waiver.",
+    "complete_oriented_triangle_payloads_identical": true,
+    "all_joint_index_bits_identical": true,
+    "declared_zero_weight_joint_routing_validation": null,
+    "static_report_sha256": "2e42d4c137aa875a1a5d6a46772efe5cb7e3af9691109ce6409312349986cf92",
+    "static_private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\moors_spectral_knight\\allfields",
+    "numeric_method": "Both models explicitly ResourceLoader.load(PackedScene), generated SCN required; actual Editor primary mesh arrays with native-library all-clip playback, RESET and directed crossfades.",
+    "freshness_method": "Current source GLB MD5 equals import metadata source_md5; source/SCN/metadata/policy SHA256 retained, single-destination SCN MD5 checked. Earliest captures additionally validated after capture with unchanged source+SCN byte hashes.",
+    "source_authored_morph_tangent_target_count": 0,
+    "actual_editor_generated_morph_tangent_array_target_count": 129,
+    "source_editor_lod_counts": [
+      2,
+      3
+    ],
+    "candidate_editor_lod_counts": [
+      2,
+      3
+    ],
+    "scope": "CPU-only actual Editor primary-surface numerical and complete typed vertex/morph P/N/T and oriented-triangle equivalence. Raw source-data/Blender/actualActor whole-cycle/effects evidence remains independent. Generated Editor distant LOD appearance is not separately approved.",
+    "original_observations_and_artistic_review_status_unchanged": true,
+    "all_non_joint_static_fields_and_retained_morph_pnt_bits_identical": true,
+    "joint_index_bits_match_or_only_declared_positive_zero_weight_slots_change": true
   }
 }

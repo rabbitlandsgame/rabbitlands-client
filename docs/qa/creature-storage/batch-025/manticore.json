@@ -502,7 +502,9 @@
     },
     "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
     "source_sha256": "919c26bc7ccac14ff566efb544022cec0c9e1b64e2a6dcd48ff584df5627adc7",
-    "candidate_sha256": "e09fdda919c632a7898a6e9908a2ce81de499741d3fa3bf5568ba0771e398b7c"
+    "candidate_sha256": "e09fdda919c632a7898a6e9908a2ce81de499741d3fa3bf5568ba0771e398b7c",
+    "actual_loader": "ResourceLoader.load(PackedScene)",
+    "numeric_runtime_sha256": "ff7b1962256ae109e5ab5555ce407b6f6679ad5c22526520633a8d858a70a557"
   },
   "actual_actor_dissolve_validation": {
     "passed": true,
@@ -1659,5 +1661,93 @@
     "captured_before_first_candidate_pack": true,
     "captured_at_utc": "2026-10-28T03:25:55.235087+00:00",
     "approval": "No artistic approval; preserves the original model and motion as observed."
+  },
+  "editor_cache_mode_correction": {
+    "status": "Previous Cache-based Editor-mode qualification claims withdrawn and superseded by the explicit ResourceLoader supplement below.",
+    "reason": "Earlier public imported-phase dumper called GlbSceneCache.instantiate; aliases could select raw or imported resources. The earlier route did not enforce matched actual Editor scenes.",
+    "immutable_prior_receipt_sha256": "7a4e8d78923b80bcd5d07f36004102ffd6cd0bd69106e147f12de499d3d658d2",
+    "immutable_prior_receipt_private_path": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\manticore\\receipt-before-editor-mode-correction.json",
+    "previous_supplement_withdrawn": null,
+    "old_captures_preserved": true,
+    "original_model_and_observations_preserved": true,
+    "raw_actual_actor_and_source_data_evidence_unchanged": true,
+    "no_model_bytes_changed_by_this_correction": true
+  },
+  "fresh_editor_numeric_supplement": {
+    "actor": "manticore",
+    "source_sha256": "919c26bc7ccac14ff566efb544022cec0c9e1b64e2a6dcd48ff584df5627adc7",
+    "candidate_sha256": "e09fdda919c632a7898a6e9908a2ce81de499741d3fa3bf5568ba0771e398b7c",
+    "maximum_position_error": 1.2776608487988506e-07,
+    "maximum_normal_angle_degrees": 2.122447627911835e-05,
+    "position_budget": 4.76837158203125e-07,
+    "normal_budget_degrees": 0.0001,
+    "actual_editor_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/manticore.glb-7cec7b5b89ef6cce584ba7fc0286bb07.md5",
+        "import_metadata_sha256": "333de61438c95352cae54684f26183f42434d0e023852428124feb57f4036461",
+        "imported_resource_path": "res://.godot/imported/manticore.glb-7cec7b5b89ef6cce584ba7fc0286bb07.scn",
+        "imported_resource_sha256": "7ff90d0125e2645aadd25cd60c70651ed30fa897446e22fd5aaf7901ab4c9994",
+        "packed_scene_resource_path": "res://assets/storage-baseline/manticore.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "d8ace135928be6b72a82e65455b2abea",
+        "source_path": "res://assets/storage-baseline/manticore.glb",
+        "source_sha256": "919c26bc7ccac14ff566efb544022cec0c9e1b64e2a6dcd48ff584df5627adc7",
+        "import_policy_sha256": "d0a5b81eabd8e03fc159a5aa9b1002749894eeb5cbb0767eb09f1db242f04336",
+        "single_destination_scene_md5_checked": true,
+        "post_capture_same_source_scene_sha256": true
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/manticore.glb-aab3234cfaf6f2dfcfa0ad7c8d7f951d.md5",
+        "import_metadata_sha256": "4f05ab5c9f4620d1ef9db1e33525e0aef86f7470d1cf79069c56bef9cb853524",
+        "imported_resource_path": "res://.godot/imported/manticore.glb-aab3234cfaf6f2dfcfa0ad7c8d7f951d.scn",
+        "imported_resource_sha256": "15bc561d3cba15bb157bd23a428aa20bd9fb82a293f9734675c8e1cfb6c6c03e",
+        "packed_scene_resource_path": "res://assets/storage-candidate/manticore.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "5aea286034cbb60983e618e9bffa888b",
+        "source_path": "res://assets/storage-candidate/manticore.glb",
+        "source_sha256": "e09fdda919c632a7898a6e9908a2ce81de499741d3fa3bf5568ba0771e398b7c",
+        "import_policy_sha256": "ff08b7e442bd84bf76ace2c60f1b04c8b2b36063551e53b32465f0d26dcf708c",
+        "single_destination_scene_md5_checked": true,
+        "post_capture_same_source_scene_sha256": true
+      }
+    ],
+    "strict_passed": true,
+    "numeric_report_sha256": "68df55e396fe4b5418b714b976420540dbf8d1f92a12f02c7bf2c9bed0d086f8",
+    "numeric_runtime_sha256": "ff7b1962256ae109e5ab5555ce407b6f6679ad5c22526520633a8d858a70a557",
+    "private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\manticore",
+    "passed": true,
+    "sampled_states": 296,
+    "all_original_native_clips": [
+      "Death_A",
+      "Fighting_Idle",
+      "Fly",
+      "Hit_Chest",
+      "Idle_A",
+      "Jog",
+      "Sword_Attack",
+      "Walk"
+    ],
+    "position_metric": "Total Euclidean source/current world position distance; no inherited/additional-error waiver.",
+    "complete_oriented_triangle_payloads_identical": true,
+    "all_joint_index_bits_identical": true,
+    "declared_zero_weight_joint_routing_validation": null,
+    "static_report_sha256": "6617dc72aaaedfad3413653e660a7b663ec4522f0f62c39385c4c705b6ed3240",
+    "static_private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\manticore\\allfields",
+    "numeric_method": "Both models explicitly ResourceLoader.load(PackedScene), generated SCN required; actual Editor primary mesh arrays with native-library all-clip playback, RESET and directed crossfades.",
+    "freshness_method": "Current source GLB MD5 equals import metadata source_md5; source/SCN/metadata/policy SHA256 retained, single-destination SCN MD5 checked. Earliest captures additionally validated after capture with unchanged source+SCN byte hashes.",
+    "source_authored_morph_tangent_target_count": 0,
+    "actual_editor_generated_morph_tangent_array_target_count": 65,
+    "source_editor_lod_counts": [
+      3
+    ],
+    "candidate_editor_lod_counts": [
+      3
+    ],
+    "scope": "CPU-only actual Editor primary-surface numerical and complete typed vertex/morph P/N/T and oriented-triangle equivalence. Raw source-data/Blender/actualActor whole-cycle/effects evidence remains independent. Generated Editor distant LOD appearance is not separately approved.",
+    "original_observations_and_artistic_review_status_unchanged": true,
+    "all_non_joint_static_fields_and_retained_morph_pnt_bits_identical": true,
+    "joint_index_bits_match_or_only_declared_positive_zero_weight_slots_change": true
   }
 }

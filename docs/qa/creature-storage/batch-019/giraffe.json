@@ -334,7 +334,9 @@
     },
     "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
     "source_sha256": "b0db2e9b39384507bcf9df3a9add7a5e7baf91bf51fa419a38321453abfe6653",
-    "candidate_sha256": "b52ff7868b7415c4655d9f63d021867bb83ba6f2b4928d0bd87559b8c18e9c73"
+    "candidate_sha256": "b52ff7868b7415c4655d9f63d021867bb83ba6f2b4928d0bd87559b8c18e9c73",
+    "actual_loader": "ResourceLoader.load(PackedScene)",
+    "numeric_runtime_sha256": "d4e00957079b9685140b6a56fb2b6bcb2cebd46ebab9c994ea624a6791fe71aa"
   },
   "actual_actor_dissolve_validation": {
     "passed": true,
@@ -1465,5 +1467,92 @@
     "all_original_fields_and_actions_unchanged": true,
     "config_animationMap_unchanged": true
   },
-  "original_motion_review_status": "pending"
+  "original_motion_review_status": "pending",
+  "editor_cache_mode_correction": {
+    "status": "Previous Cache-based Editor-mode qualification claims withdrawn and superseded by the explicit ResourceLoader supplement below.",
+    "reason": "Earlier public imported-phase dumper called GlbSceneCache.instantiate; aliases could select raw or imported resources. The earlier route did not enforce matched actual Editor scenes.",
+    "immutable_prior_receipt_sha256": "fc8db72639e4c7c584882f68ea2542b7e7d760bb02042f4d019236a6f1a60c42",
+    "immutable_prior_receipt_private_path": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\giraffe\\receipt-before-editor-mode-correction.json",
+    "previous_supplement_withdrawn": null,
+    "old_captures_preserved": true,
+    "original_model_and_observations_preserved": true,
+    "raw_actual_actor_and_source_data_evidence_unchanged": true,
+    "no_model_bytes_changed_by_this_correction": true
+  },
+  "fresh_editor_numeric_supplement": {
+    "actor": "giraffe",
+    "source_sha256": "b0db2e9b39384507bcf9df3a9add7a5e7baf91bf51fa419a38321453abfe6653",
+    "candidate_sha256": "b52ff7868b7415c4655d9f63d021867bb83ba6f2b4928d0bd87559b8c18e9c73",
+    "maximum_position_error": 6.980594463960074e-08,
+    "maximum_normal_angle_degrees": 1.8311404696405027e-05,
+    "position_budget": 4.76837158203125e-07,
+    "normal_budget_degrees": 0.0001,
+    "actual_editor_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/giraffe.glb-5da1bbde21b8089dcdcb022fadc49981.md5",
+        "import_metadata_sha256": "d6d03eee2129697894f869b7c58d00aa73d1f68f6116c49c53e681154917a814",
+        "imported_resource_path": "res://.godot/imported/giraffe.glb-5da1bbde21b8089dcdcb022fadc49981.scn",
+        "imported_resource_sha256": "a812370815b1d14fb4bb2ecc3e77c7238bd1fb2a0c72fa7e5df9bd59c35d92b7",
+        "packed_scene_resource_path": "res://assets/storage-baseline/giraffe.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "8115cff926f728b71a9029ca46ac234a",
+        "source_path": "res://assets/storage-baseline/giraffe.glb",
+        "source_sha256": "b0db2e9b39384507bcf9df3a9add7a5e7baf91bf51fa419a38321453abfe6653",
+        "import_policy_sha256": "d422fd4d99271e1824b377c5eafb748bbb30fad246e41a3a41c600dcd5c5f60f",
+        "single_destination_scene_md5_checked": true,
+        "post_capture_same_source_scene_sha256": true
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/giraffe.glb-b22f874e4b1f96c64f8488fe218f0f56.md5",
+        "import_metadata_sha256": "cff498295d9fbe7670e3d60d281011b73ccde99d465b52b3e1ecb290b98d24c3",
+        "imported_resource_path": "res://.godot/imported/giraffe.glb-b22f874e4b1f96c64f8488fe218f0f56.scn",
+        "imported_resource_sha256": "cf80d4924b2f6e45ebe5866a2c262556295b5206254b9ef846b427933127280b",
+        "packed_scene_resource_path": "res://assets/storage-candidate/giraffe.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "6d88202b226ac49c5577da969f2ccbc8",
+        "source_path": "res://assets/storage-candidate/giraffe.glb",
+        "source_sha256": "b52ff7868b7415c4655d9f63d021867bb83ba6f2b4928d0bd87559b8c18e9c73",
+        "import_policy_sha256": "3102756c780337f73f16af774c57f2878bf614a4f172cdcd15c663bb822ca1eb",
+        "single_destination_scene_md5_checked": true,
+        "post_capture_same_source_scene_sha256": true
+      }
+    ],
+    "strict_passed": true,
+    "numeric_report_sha256": "5565cfed4440b8cbd9d2f5fbcc069960bd241c32a19f87da1a6ae9dbe183552a",
+    "numeric_runtime_sha256": "d4e00957079b9685140b6a56fb2b6bcb2cebd46ebab9c994ea624a6791fe71aa",
+    "private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\giraffe",
+    "passed": true,
+    "sampled_states": 232,
+    "all_original_native_clips": [
+      "Walk",
+      "Jog",
+      "Sword_Attack",
+      "Idle_A",
+      "Fighting_Idle",
+      "Hit_Chest",
+      "Death_A"
+    ],
+    "position_metric": "Total Euclidean source/current world position distance; no inherited/additional-error waiver.",
+    "complete_oriented_triangle_payloads_identical": true,
+    "all_joint_index_bits_identical": true,
+    "declared_zero_weight_joint_routing_validation": null,
+    "static_report_sha256": "1b36cba72bb0f09e2ad57638ddc53934f7eeea94894d8204d736445314d4c926",
+    "static_private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\giraffe\\allfields",
+    "numeric_method": "Both models explicitly ResourceLoader.load(PackedScene), generated SCN required; actual Editor primary mesh arrays with native-library all-clip playback, RESET and directed crossfades.",
+    "freshness_method": "Current source GLB MD5 equals import metadata source_md5; source/SCN/metadata/policy SHA256 retained, single-destination SCN MD5 checked. Earliest captures additionally validated after capture with unchanged source+SCN byte hashes.",
+    "source_authored_morph_tangent_target_count": 0,
+    "actual_editor_generated_morph_tangent_array_target_count": 0,
+    "source_editor_lod_counts": [
+      3
+    ],
+    "candidate_editor_lod_counts": [
+      3
+    ],
+    "scope": "CPU-only actual Editor primary-surface numerical and complete typed vertex/morph P/N/T and oriented-triangle equivalence. Raw source-data/Blender/actualActor whole-cycle/effects evidence remains independent. Generated Editor distant LOD appearance is not separately approved.",
+    "original_observations_and_artistic_review_status_unchanged": true,
+    "all_non_joint_static_fields_and_retained_morph_pnt_bits_identical": true,
+    "joint_index_bits_match_or_only_declared_positive_zero_weight_slots_change": true
+  }
 }

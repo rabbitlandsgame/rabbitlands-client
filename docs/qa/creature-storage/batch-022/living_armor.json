@@ -490,7 +490,9 @@
     },
     "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
     "source_sha256": "d925be00085402f7769d161991b01648a3bb8378642b8c8c0af3dbfba24c8414",
-    "candidate_sha256": "562cd153c133c345ce9223995a15db8ebac534d58e48ec6395df565396fa2dd8"
+    "candidate_sha256": "562cd153c133c345ce9223995a15db8ebac534d58e48ec6395df565396fa2dd8",
+    "actual_loader": "ResourceLoader.load(PackedScene)",
+    "numeric_runtime_sha256": "6237d4b6f6a024ec75307a6745ad2aa497a7d5638cd895e327935ed831c35c5c"
   },
   "actual_actor_dissolve_validation": {
     "passed": true,
@@ -1626,5 +1628,92 @@
     "baseline_passed": true,
     "candidate_passed": true,
     "original_observations_and_limits_unchanged": true
+  },
+  "editor_cache_mode_correction": {
+    "status": "Previous Cache-based Editor-mode qualification claims withdrawn and superseded by the explicit ResourceLoader supplement below.",
+    "reason": "Earlier public imported-phase dumper called GlbSceneCache.instantiate; aliases could select raw or imported resources. The earlier route did not enforce matched actual Editor scenes.",
+    "immutable_prior_receipt_sha256": "01bbf810c542ed87f33880366f7d51e3ac1e1fe86372434bbd204754a2ecf6b9",
+    "immutable_prior_receipt_private_path": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\living_armor\\receipt-before-editor-mode-correction.json",
+    "previous_supplement_withdrawn": null,
+    "old_captures_preserved": true,
+    "original_model_and_observations_preserved": true,
+    "raw_actual_actor_and_source_data_evidence_unchanged": true,
+    "no_model_bytes_changed_by_this_correction": true
+  },
+  "fresh_editor_numeric_supplement": {
+    "actor": "living_armor",
+    "source_sha256": "d925be00085402f7769d161991b01648a3bb8378642b8c8c0af3dbfba24c8414",
+    "candidate_sha256": "562cd153c133c345ce9223995a15db8ebac534d58e48ec6395df565396fa2dd8",
+    "maximum_position_error": 6.442351649865948e-08,
+    "maximum_normal_angle_degrees": 2.0347774359157065e-05,
+    "position_budget": 4.76837158203125e-07,
+    "normal_budget_degrees": 0.0001,
+    "actual_editor_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/living_armor.glb-95cc1b655451ed3c2d8d0d5e90833a11.md5",
+        "import_metadata_sha256": "39f3ce384e4dc5515001788046576a7a2dcae04da7c815358236b5f65f86557e",
+        "imported_resource_path": "res://.godot/imported/living_armor.glb-95cc1b655451ed3c2d8d0d5e90833a11.scn",
+        "imported_resource_sha256": "9bfef03493002ca984ac8e3dc4098ac91b3776f94625c3e46e141594308ac8ac",
+        "packed_scene_resource_path": "res://assets/storage-baseline/living_armor.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "33fee2b9a7c5c8af43ad937ae3ade3a5",
+        "source_path": "res://assets/storage-baseline/living_armor.glb",
+        "source_sha256": "d925be00085402f7769d161991b01648a3bb8378642b8c8c0af3dbfba24c8414",
+        "import_policy_sha256": "e471a03223841d46e641d6cec511151764a7426424ca7e6dc4d8d721368dd83a",
+        "single_destination_scene_md5_checked": true,
+        "post_capture_same_source_scene_sha256": true
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/living_armor.glb-aa36fcdd45ee98fd968d14005fcbbfc4.md5",
+        "import_metadata_sha256": "3373174d5c51b11c172f1c1947a0e7fc21475ab0d8cdf8e98dd9498e488641dd",
+        "imported_resource_path": "res://.godot/imported/living_armor.glb-aa36fcdd45ee98fd968d14005fcbbfc4.scn",
+        "imported_resource_sha256": "87fec5277b10f8dc94e475041a5dcde5fe98b371ffa41017e67da09d2161b5d8",
+        "packed_scene_resource_path": "res://assets/storage-candidate/living_armor.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "a4011dae79799c9bbeb365e62f6e584b",
+        "source_path": "res://assets/storage-candidate/living_armor.glb",
+        "source_sha256": "562cd153c133c345ce9223995a15db8ebac534d58e48ec6395df565396fa2dd8",
+        "import_policy_sha256": "fd60099030f70fd07251cc5821324063c2f9b45617c3f2d78ae84c4d7cdbcdf9",
+        "single_destination_scene_md5_checked": true,
+        "post_capture_same_source_scene_sha256": true
+      }
+    ],
+    "strict_passed": true,
+    "numeric_report_sha256": "1aa9e9e5e6906db40716b88a31941ab1468d68fab06f36bf7d76458c43ff7f2b",
+    "numeric_runtime_sha256": "6237d4b6f6a024ec75307a6745ad2aa497a7d5638cd895e327935ed831c35c5c",
+    "private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\living_armor",
+    "passed": true,
+    "sampled_states": 232,
+    "all_original_native_clips": [
+      "Death_A",
+      "Fighting_Idle",
+      "Hit_Chest",
+      "Idle_A",
+      "Jog",
+      "Sword_Attack",
+      "Walk"
+    ],
+    "position_metric": "Total Euclidean source/current world position distance; no inherited/additional-error waiver.",
+    "complete_oriented_triangle_payloads_identical": true,
+    "all_joint_index_bits_identical": true,
+    "declared_zero_weight_joint_routing_validation": null,
+    "static_report_sha256": "9794c815694b08a8495732b4ff4b9d278c8ce2a4b610a8e768fbcdcddee08176",
+    "static_private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\living_armor\\allfields",
+    "numeric_method": "Both models explicitly ResourceLoader.load(PackedScene), generated SCN required; actual Editor primary mesh arrays with native-library all-clip playback, RESET and directed crossfades.",
+    "freshness_method": "Current source GLB MD5 equals import metadata source_md5; source/SCN/metadata/policy SHA256 retained, single-destination SCN MD5 checked. Earliest captures additionally validated after capture with unchanged source+SCN byte hashes.",
+    "source_authored_morph_tangent_target_count": 0,
+    "actual_editor_generated_morph_tangent_array_target_count": 65,
+    "source_editor_lod_counts": [
+      4
+    ],
+    "candidate_editor_lod_counts": [
+      4
+    ],
+    "scope": "CPU-only actual Editor primary-surface numerical and complete typed vertex/morph P/N/T and oriented-triangle equivalence. Raw source-data/Blender/actualActor whole-cycle/effects evidence remains independent. Generated Editor distant LOD appearance is not separately approved.",
+    "original_observations_and_artistic_review_status_unchanged": true,
+    "all_non_joint_static_fields_and_retained_morph_pnt_bits_identical": true,
+    "joint_index_bits_match_or_only_declared_positive_zero_weight_slots_change": true
   }
 }

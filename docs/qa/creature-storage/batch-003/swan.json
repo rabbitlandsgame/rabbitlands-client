@@ -634,18 +634,92 @@
     ],
     "scope": "Original 512 px PNGs retained in a verified lossless ZIP. Paired lossless WebP previews retain every cycle frame at 24 fps, resized to 384 px for review."
   },
+  "editor_cache_mode_correction": {
+    "status": "Previous Cache-based Editor-mode qualification claims withdrawn and superseded by the explicit ResourceLoader supplement below.",
+    "reason": "Earlier public imported-phase dumper called GlbSceneCache.instantiate; aliases could select raw or imported resources. The earlier route did not enforce matched actual Editor scenes.",
+    "immutable_prior_receipt_sha256": "7245f645f9bec461889bf8dc011ed65d7a0ff65d1100743d11ede2041e8d3698",
+    "immutable_prior_receipt_private_path": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\retrospective-editor\\swan\\actual-editor-v2\\receipt-before-editor-mode-correction.json",
+    "previous_supplement_withdrawn": {
+      "actor": "swan",
+      "source_sha256": "d7895ef8bdc6b53b014aacb295cec1fc6914538bd233210bb2a808690eeed144",
+      "candidate_sha256": "55dba90a3f158fbd5a27246d599b3ff896e834b03c72afc44d36f04644a9066c",
+      "fresh_editor_original_current_position_maximum": 1.0652054368695534e-07,
+      "position_metric": "Total Euclidean world position source/current distance. No inherited/additional error waiver.",
+      "original_rest_coordinate_or_extent_maximum": 0.9960945822759403,
+      "position_limit_four_float32_ulps": 2.384185791015625e-07,
+      "normal_angle_degrees_maximum": 1.8976067634857116e-05,
+      "normal_angle_limit_degrees": 0.0001,
+      "sampled_states": 296,
+      "all_source_clips": [
+        "Death_A",
+        "Fighting_Idle",
+        "Fly",
+        "Hit_Chest",
+        "Idle_A",
+        "Jog",
+        "Sword_Attack",
+        "Walk"
+      ],
+      "source_current_mesh_id_bijection": "Every row matched to same-model raw native position/NORMAL/joints/weights and every POSITION/NORMAL target payload, then original source IDs. UV/tangent visual behavior remains covered by existing source-data and renderer evidence.",
+      "passed": true,
+      "original_observations_and_old_evidence_retained": true,
+      "scope": "Fresh isolated editor imports of immutable original and current qualified model; actual primary surface arrays, native library clips, RESET and directed crossfades. CPU-only supplemental numeric check; no new GPU or generated-editor-LOD appearance approval.",
+      "private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\retrospective-editor\\swan",
+      "imported_report_sha256": "7d657ead0541ec93143f9c449e8b8e9a0f81eaf39db6e5b602acb93c6ebe303a",
+      "binding_report_sha256": "0dd300596dc473968aff8bc1c85f0aa294b2cf334aeedc9b8f505d9cb5054592"
+    },
+    "old_captures_preserved": true,
+    "original_model_and_observations_preserved": true,
+    "raw_actual_actor_and_source_data_evidence_unchanged": true,
+    "no_model_bytes_changed_by_this_correction": true
+  },
   "fresh_editor_numeric_supplement": {
     "actor": "swan",
     "source_sha256": "d7895ef8bdc6b53b014aacb295cec1fc6914538bd233210bb2a808690eeed144",
     "candidate_sha256": "55dba90a3f158fbd5a27246d599b3ff896e834b03c72afc44d36f04644a9066c",
-    "fresh_editor_original_current_position_maximum": 1.0652054368695534e-07,
-    "position_metric": "Total Euclidean world position source/current distance. No inherited/additional error waiver.",
-    "original_rest_coordinate_or_extent_maximum": 0.9960945822759403,
-    "position_limit_four_float32_ulps": 2.384185791015625e-07,
-    "normal_angle_degrees_maximum": 1.8976067634857116e-05,
-    "normal_angle_limit_degrees": 0.0001,
+    "maximum_position_error": 1.0652054368695534e-07,
+    "maximum_normal_angle_degrees": 1.8976067634857116e-05,
+    "position_budget": 2.384185791015625e-07,
+    "normal_budget_degrees": 0.0001,
+    "strict_passed": true,
+    "actual_editor_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/swan.glb-29809f41957fca67846ff1fd3a6480b3.md5",
+        "import_metadata_sha256": "e7409208dca46ffcc8ae69a12a990b0c617560a1b24bfd640ac6ce8b0ce540f5",
+        "imported_resource_path": "res://.godot/imported/swan.glb-29809f41957fca67846ff1fd3a6480b3.scn",
+        "imported_resource_sha256": "59359a55fe74cddfa4015133b8b7d943c9e2a205271c19b351d61adc67c141b2",
+        "packed_scene_resource_path": "res://assets/storage-baseline/swan.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "3dbcab4275313ead85f1a343045a715c",
+        "source_path": "res://assets/storage-baseline/swan.glb",
+        "source_sha256": "d7895ef8bdc6b53b014aacb295cec1fc6914538bd233210bb2a808690eeed144",
+        "import_policy_sha256": "a3f5514ff79537c4818f69c76e782aeb9d55f274b5b5111d71da0a79cec1d93a",
+        "single_destination_scene_md5_checked": true,
+        "post_capture_same_source_scene_sha256": true
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/swan.glb-1e0122927a2bf8f935dc09f4e06d9de1.md5",
+        "import_metadata_sha256": "62cc36fa302519034f69736a6f9e44ec8e56ef69f6df1bb413a7ada06a1e32dc",
+        "imported_resource_path": "res://.godot/imported/swan.glb-1e0122927a2bf8f935dc09f4e06d9de1.scn",
+        "imported_resource_sha256": "597082489fe48671e544e26095c1bad07a944d048e662497e0b6e37e671657f3",
+        "packed_scene_resource_path": "res://assets/storage-candidate/swan.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "8ae5e742b4c74590c88ce6116840471b",
+        "source_path": "res://assets/storage-candidate/swan.glb",
+        "source_sha256": "55dba90a3f158fbd5a27246d599b3ff896e834b03c72afc44d36f04644a9066c",
+        "import_policy_sha256": "d3518e1c8047578b2c8af4bb46518cb268fe34aeed5cec9a8ca28fb1888bffc7",
+        "single_destination_scene_md5_checked": true,
+        "post_capture_same_source_scene_sha256": true
+      }
+    ],
+    "numeric_report_sha256": "7d657ead0541ec93143f9c449e8b8e9a0f81eaf39db6e5b602acb93c6ebe303a",
+    "numeric_runtime_sha256": "1af1395d3c4e7d3b7d186bfa68ac238dab14f1c04259807d2facaadbb5b76087",
+    "private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\retrospective-editor\\swan\\actual-editor-v2",
+    "passed": true,
     "sampled_states": 296,
-    "all_source_clips": [
+    "all_original_native_clips": [
       "Death_A",
       "Fighting_Idle",
       "Fly",
@@ -655,12 +729,25 @@
       "Sword_Attack",
       "Walk"
     ],
-    "source_current_mesh_id_bijection": "Every row matched to same-model raw native position/NORMAL/joints/weights and every POSITION/NORMAL target payload, then original source IDs. UV/tangent visual behavior remains covered by existing source-data and renderer evidence.",
-    "passed": true,
-    "original_observations_and_old_evidence_retained": true,
-    "scope": "Fresh isolated editor imports of immutable original and current qualified model; actual primary surface arrays, native library clips, RESET and directed crossfades. CPU-only supplemental numeric check; no new GPU or generated-editor-LOD appearance approval.",
-    "private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\retrospective-editor\\swan",
-    "imported_report_sha256": "7d657ead0541ec93143f9c449e8b8e9a0f81eaf39db6e5b602acb93c6ebe303a",
-    "binding_report_sha256": "0dd300596dc473968aff8bc1c85f0aa294b2cf334aeedc9b8f505d9cb5054592"
+    "position_metric": "Total Euclidean source/current world position distance; no inherited/additional-error waiver.",
+    "complete_oriented_triangle_payloads_identical": true,
+    "all_joint_index_bits_identical": true,
+    "declared_zero_weight_joint_routing_validation": null,
+    "static_report_sha256": "8479dda7a61422582f26b20a5a36c7627c6d2fae0b143810f019fd1fb9502011",
+    "static_private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\retrospective-editor\\swan\\actual-editor-v2\\allfields",
+    "numeric_method": "Both models explicitly ResourceLoader.load(PackedScene), generated SCN required; actual Editor primary mesh arrays with native-library all-clip playback, RESET and directed crossfades.",
+    "freshness_method": "Current source GLB MD5 equals import metadata source_md5; source/SCN/metadata/policy SHA256 retained, single-destination SCN MD5 checked. Earliest captures additionally validated after capture with unchanged source+SCN byte hashes.",
+    "source_authored_morph_tangent_target_count": 0,
+    "actual_editor_generated_morph_tangent_array_target_count": 758,
+    "source_editor_lod_counts": [
+      2
+    ],
+    "candidate_editor_lod_counts": [
+      2
+    ],
+    "scope": "CPU-only actual Editor primary-surface numerical and complete typed vertex/morph P/N/T and oriented-triangle equivalence. Raw source-data/Blender/actualActor whole-cycle/effects evidence remains independent. Generated Editor distant LOD appearance is not separately approved.",
+    "original_observations_and_artistic_review_status_unchanged": true,
+    "all_non_joint_static_fields_and_retained_morph_pnt_bits_identical": true,
+    "joint_index_bits_match_or_only_declared_positive_zero_weight_slots_change": true
   }
 }

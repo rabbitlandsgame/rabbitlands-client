@@ -4873,7 +4873,9 @@
     },
     "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
     "source_sha256": "5c361bb28c41c76934618c142ac134478c0633340e5639f82f45636a12d71608",
-    "candidate_sha256": "b3dca1938545e137d3ae8263148f0871ca13166480c59d2c01801c6273e3eaa7"
+    "candidate_sha256": "b3dca1938545e137d3ae8263148f0871ca13166480c59d2c01801c6273e3eaa7",
+    "actual_loader": "ResourceLoader.load(PackedScene)",
+    "numeric_runtime_sha256": "6d7c0d7a0dcbf83fb8d3d2580392b97f568632dac3b3007c23ffbd8c2474e4ed"
   },
   "actual_actor_dissolve_validation": {
     "passed": true,
@@ -6047,5 +6049,92 @@
     "repository_revision": "23e8b8e0bbcca029648423788c2dbe6c84ed6dee",
     "captured_at_utc": "2026-10-28T04:03:54.368445+00:00",
     "approval": "Existing authored bone observations retained; additional source geometry is not new artistic approval."
+  },
+  "editor_cache_mode_correction": {
+    "status": "Previous Cache-based Editor-mode qualification claims withdrawn and superseded by the explicit ResourceLoader supplement below.",
+    "reason": "Earlier public imported-phase dumper called GlbSceneCache.instantiate; aliases could select raw or imported resources. The earlier route did not enforce matched actual Editor scenes.",
+    "immutable_prior_receipt_sha256": "4c026ee3704ac3c443b6e9119a58aa5e05c003edaf5750f36ffb2726e13547b6",
+    "immutable_prior_receipt_private_path": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\moss_armored_hound\\receipt-before-editor-mode-correction.json",
+    "previous_supplement_withdrawn": null,
+    "old_captures_preserved": true,
+    "original_model_and_observations_preserved": true,
+    "raw_actual_actor_and_source_data_evidence_unchanged": true,
+    "no_model_bytes_changed_by_this_correction": true
+  },
+  "fresh_editor_numeric_supplement": {
+    "actor": "moss_armored_hound",
+    "source_sha256": "5c361bb28c41c76934618c142ac134478c0633340e5639f82f45636a12d71608",
+    "candidate_sha256": "b3dca1938545e137d3ae8263148f0871ca13166480c59d2c01801c6273e3eaa7",
+    "maximum_position_error": 3.4365793141366543e-07,
+    "maximum_normal_angle_degrees": 2.3287840231354886e-05,
+    "position_budget": 9.5367431640625e-07,
+    "normal_budget_degrees": 0.0001,
+    "actual_editor_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/moss_armored_hound.glb-cf2bc0437f43fec5cbd099660e3396d3.md5",
+        "import_metadata_sha256": "2db2762e4ecdc52c371fbac021592d131204c3f24a873c1b3cac98d09c08da4c",
+        "imported_resource_path": "res://.godot/imported/moss_armored_hound.glb-cf2bc0437f43fec5cbd099660e3396d3.scn",
+        "imported_resource_sha256": "c394d587ede264052c7ad2600ff524e4897ad7eb89a97fbb53af8cd88a7021a3",
+        "packed_scene_resource_path": "res://assets/storage-baseline/moss_armored_hound.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "0eb3505fac7131c99de6a7d7365c5c60",
+        "source_path": "res://assets/storage-baseline/moss_armored_hound.glb",
+        "source_sha256": "5c361bb28c41c76934618c142ac134478c0633340e5639f82f45636a12d71608",
+        "import_policy_sha256": "f0ab7103def0391fa380c2439eeff8e153ab8cce33eea7fa77b005e865136862",
+        "single_destination_scene_md5_checked": true,
+        "post_capture_same_source_scene_sha256": true
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/moss_armored_hound.glb-14279e785b97d2a800aa3d05de38d9a0.md5",
+        "import_metadata_sha256": "aa5f864d17efe4df918231372f53e03a92786b5201ac14395f3be8b382e18aa1",
+        "imported_resource_path": "res://.godot/imported/moss_armored_hound.glb-14279e785b97d2a800aa3d05de38d9a0.scn",
+        "imported_resource_sha256": "b8edb838d3b33c91d5f9a84a29ba63f3223d83d9a6ed0940610726cb5bd637e9",
+        "packed_scene_resource_path": "res://assets/storage-candidate/moss_armored_hound.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "9c66778676c193b68358b4692fbc3202",
+        "source_path": "res://assets/storage-candidate/moss_armored_hound.glb",
+        "source_sha256": "b3dca1938545e137d3ae8263148f0871ca13166480c59d2c01801c6273e3eaa7",
+        "import_policy_sha256": "6125c9786c71d887b50a3a2e7b4b215ab09cf3d4f12933e86a83f2e33eb7b426",
+        "single_destination_scene_md5_checked": true,
+        "post_capture_same_source_scene_sha256": true
+      }
+    ],
+    "strict_passed": true,
+    "numeric_report_sha256": "ceed8e2bdb09d850cdc4778fd665d17db4dffe06400220f1fbc96c2ae1251e2a",
+    "numeric_runtime_sha256": "6d7c0d7a0dcbf83fb8d3d2580392b97f568632dac3b3007c23ffbd8c2474e4ed",
+    "private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\moss_armored_hound",
+    "passed": true,
+    "sampled_states": 232,
+    "all_original_native_clips": [
+      "Walk",
+      "Death_A",
+      "Sword_Attack",
+      "Idle_A",
+      "Fighting_Idle",
+      "Hit_Chest",
+      "Jog"
+    ],
+    "position_metric": "Total Euclidean source/current world position distance; no inherited/additional-error waiver.",
+    "complete_oriented_triangle_payloads_identical": true,
+    "all_joint_index_bits_identical": true,
+    "declared_zero_weight_joint_routing_validation": null,
+    "static_report_sha256": "32c6cf0a5fbad78a829a8a7e20a2c2520ac18ce87c9916f52112d161bc0b40d7",
+    "static_private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\moss_armored_hound\\allfields",
+    "numeric_method": "Both models explicitly ResourceLoader.load(PackedScene), generated SCN required; actual Editor primary mesh arrays with native-library all-clip playback, RESET and directed crossfades.",
+    "freshness_method": "Current source GLB MD5 equals import metadata source_md5; source/SCN/metadata/policy SHA256 retained, single-destination SCN MD5 checked. Earliest captures additionally validated after capture with unchanged source+SCN byte hashes.",
+    "source_authored_morph_tangent_target_count": 0,
+    "actual_editor_generated_morph_tangent_array_target_count": 0,
+    "source_editor_lod_counts": [
+      1
+    ],
+    "candidate_editor_lod_counts": [
+      1
+    ],
+    "scope": "CPU-only actual Editor primary-surface numerical and complete typed vertex/morph P/N/T and oriented-triangle equivalence. Raw source-data/Blender/actualActor whole-cycle/effects evidence remains independent. Generated Editor distant LOD appearance is not separately approved.",
+    "original_observations_and_artistic_review_status_unchanged": true,
+    "all_non_joint_static_fields_and_retained_morph_pnt_bits_identical": true,
+    "joint_index_bits_match_or_only_declared_positive_zero_weight_slots_change": true
   }
 }
