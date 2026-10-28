@@ -482,5 +482,60 @@
     "actual_array_pose_and_crossfade_samples": 296,
     "family_loops_holds_reset_playback_passed": true,
     "scope": "Additional independent fresh editor import and actual array source/candidate comparison for original/final immutable binaries; model, previous fullRGB captures and artistic status unchanged."
-  }
+  },
+  "death_dissolve_gpu_supplement": {
+    "effective_scale": 0.900000095367432,
+    "failures": [],
+    "gpu": "NVIDIA GeForce RTX 5080 Laptop GPU",
+    "max_color_error": 0.0,
+    "max_custom_error": 0.0,
+    "max_dissolve_bounds_error": 6.6640019724673e-08,
+    "max_fragment_transform_error": 1.49011611938477e-07,
+    "max_grain_error": 0.0,
+    "max_silhouette_position_error": 8.56006536764653e-08,
+    "mounted": {},
+    "old_dissolve_code_binding": {
+      "current_dissolve_sha256": "52e180bd81c7070a0c5a1a9365fe8db339e9502ab23e1b07d490eda9c13a7242",
+      "old_dissolve_sha256": "06a439005ec2d3929f1e8e4853bb3f8274b28944066935caa8572f10db815119",
+      "old_dissolve_task_revision": "66b07096^",
+      "scope": "Original unmodified pre-helper dissolve implementation for immutable original source actor versus current implementation for unchanged canonical compressed final; source/current CPU and shared ordinary-surface bit-parity unit proofs remain separate.",
+      "shader_dependencies": {
+        "creature_ash.gdshader": {
+          "normalized_sha256": "fd03bc5c65ef50679781f70b343613ded16384518b04738c874793b5ef91c804",
+          "original_and_current_semantics_identical": true
+        },
+        "creature_dissolve.gdshader": {
+          "normalized_sha256": "4de8b3a4cebecde0876ad62df66697b0b99fada26691bc603289466ea9a148bb",
+          "original_and_current_semantics_identical": true
+        },
+        "creature_dissolve.gdshaderinc": {
+          "normalized_sha256": "d74a6f01e2919030d1649ca519dd2261e85715e8158f597b5b83469b27da6d7c",
+          "original_and_current_semantics_identical": true
+        }
+      }
+    },
+    "passed": true,
+    "renderer": "forward_plus",
+    "runtime_sha256": "d9081c27122de9a0aaf860515da5f72bae9e71b62fed12ff8e813ffe742912c7",
+    "seeded_cases": 15,
+    "source_sha256": "9ebfd307319cc3798e5887017e24a3d7061c057eee57810f349ef59679a8bc40",
+    "scope": "Actual complete Actor at0.900000095 display scale. Immutable original with unmodified pre-helper dissolve implementation versus canonical compressed final with current implementation. Five death poses times three seeds,320realGPU fragment transforms/colors/custom-data per case; shader bounds/grain, CPU silhouette and revival/shared-resource restoration also checked. No asset revision or threshold adjustment."
+  },
+  "death_dissolve_render_supplement": {
+    "source_sha256": "9ebfd307319cc3798e5887017e24a3d7061c057eee57810f349ef59679a8bc40",
+    "candidate_sha256": "d9081c27122de9a0aaf860515da5f72bae9e71b62fed12ff8e813ffe742912c7",
+    "image_pairs": 30,
+    "width": 640,
+    "height": 640,
+    "different_image_pairs": 0,
+    "maximum_different_pixels": 0,
+    "maximum_pixels_above_two_levels": 0,
+    "maximum_mean_channel_error": 0.0,
+    "maximum_channel_error": 0,
+    "scope": "Actual complete Actor0.900000095 scale, immutable original/pre-helper dissolve code versus unchanged compressed final/current dissolve. Three Death_A poses, five fade progresses, two views, seed42. Full body8clips/346pairs retained separately;15realGPU seeded scenarios reported independently.",
+    "framing_passed": true,
+    "clipped_frame_labels": [],
+    "maximum_border_foreground_pixels": 0
+  },
+  "death_dissolve_supplement_evidence": "Task-owned ignored.local/magpie-storage/v2/fx-supplement retains original code snapshot/binding, separate current-source CPU preflight, realGPU reports, full640RGB fade captures and lossless previews."
 }
