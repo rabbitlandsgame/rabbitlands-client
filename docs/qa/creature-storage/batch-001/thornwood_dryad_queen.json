@@ -330,5 +330,65 @@
     "best_owner": "head",
     "best_max_position_error_over_height": 1.0116844487634857,
     "best_max_position_error_source_units": 1.01898862637654
+  },
+  "fresh_editor_numeric_supplement": {
+    "source_sha256": "643502582c8b7ef8d2fa4ebcd0d18b8035685f844099b2c8db0ade561314b735",
+    "current_canonical_sha256": "37ef36bb5b26e87594409136ed8892c88fbc408bdb6cba9ea24718ed3c38496d",
+    "engine": "Godot4.7.2stable",
+    "source_and_canonical_fixture_hashes_checked_before_launch": true,
+    "editor_policy": "Fresh editor-imported isolated copies with original per-actor import parameters; production native loose assets remain outside editor importing.",
+    "numeric_reports": {
+      "native": {
+        "all_source_clips": [
+          "Death_A",
+          "Fighting_Idle",
+          "Hit_Chest",
+          "Idle_A",
+          "Jog",
+          "Sword_Attack",
+          "Walk"
+        ],
+        "directed_transition_pairs": 42,
+        "poses": 232,
+        "maximum_Euclidean_position_error": 1.8652729183486763e-07,
+        "maximum_normal_angle_degrees": 0.00016669370178859738,
+        "numeric_report_sha256": "93017b697adbacdc1de2b53a65261e7aa1a6c5220c5ac9efb97b2322f8e64309",
+        "runtime_dump_sha256": "cac0006ffdc5eafa37be20b2b1e5ac2fe0ae6c56ed198a6b02eb68cb3ea5b959",
+        "RESET_checked": true,
+        "later_strict_cap_comparison": {
+          "four_float32_ULP_position_budget": 4.76837158203125e-07,
+          "position_within_later_cap": true,
+          "normal_degrees_budget": 0.0001,
+          "normal_within_later_cap": false
+        }
+      },
+      "imported": {
+        "all_source_clips": [
+          "Death_A",
+          "Fighting_Idle",
+          "Hit_Chest",
+          "Idle_A",
+          "Jog",
+          "Sword_Attack",
+          "Walk"
+        ],
+        "directed_transition_pairs": 42,
+        "poses": 232,
+        "maximum_Euclidean_position_error": 1.8652729183486763e-07,
+        "maximum_normal_angle_degrees": 0.00016669370178859738,
+        "numeric_report_sha256": "93017b697adbacdc1de2b53a65261e7aa1a6c5220c5ac9efb97b2322f8e64309",
+        "runtime_dump_sha256": "ecdcf6242d091a0cdfa5f011cfa306f1977e884dfc16b3f78d922ba7535c4aa4",
+        "RESET_checked": true,
+        "later_strict_cap_comparison": {
+          "four_float32_ULP_position_budget": 4.76837158203125e-07,
+          "position_within_later_cap": true,
+          "normal_degrees_budget": 0.0001,
+          "normal_within_later_cap": false
+        }
+      }
+    },
+    "legacy_decision": "Existing accepted asset-specific float/GPU quantization qualification retained. These measured maxima are not presented as passing the newer4ULP/.0001degree strict caps; this supplement adds independent Editor evidence without defining a new tolerance or changing the prior quality decision.",
+    "preserved_evidence": "Existing source/all-key proof, original frozen physical observations, fresh Blender checks, graphics and secondary-effect proof retained. No model, action, observation, placement, physical behavior or artistic approval changes.",
+    "supplemental_summary_sha256": "0f29dbb3aef641450a562bba2fede2daf26c7d2e73e9c056b47eb67eb1d86c79"
   }
 }
