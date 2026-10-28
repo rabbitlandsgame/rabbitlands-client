@@ -5,8 +5,8 @@
   "batch_size": 5,
   "creature_count": 235,
   "batch_count": 47,
-  "completed_batches": 9,
-  "qualified_creatures": 42,
+  "completed_batches": 10,
+  "qualified_creatures": 46,
   "status": "in progress",
   "actors": [
     {
@@ -541,7 +541,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/donkey.glb",
       "source_sha256": "784ec9719754b38f832f8deca1b3eaac64c0d9aa4ad22a0155b06fa2b791e1d2",
       "source_bytes": 20634984,
-      "status": "pending"
+      "status": "unchanged",
+      "candidate_sha256": "784ec9719754b38f832f8deca1b3eaac64c0d9aa4ad22a0155b06fa2b791e1d2",
+      "candidate_bytes": 20634984,
+      "qualification_report": "docs/qa/creature-storage/batch-010/donkey.json"
     },
     {
       "actor": "riverglass_otter",
@@ -550,7 +553,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/riverglass_otter.glb",
       "source_sha256": "d782aff7f7f0e8646c5719505662542e8d9db97ae3cda610834e95e34fd2a07e",
       "source_bytes": 19224200,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "a2b0c62675764f258e1ade983efa761d996133b567846d653849181a49dd7169",
+      "candidate_bytes": 14456764,
+      "qualification_report": "docs/qa/creature-storage/batch-010/riverglass_otter.json"
     },
     {
       "actor": "glacier_paladin",
@@ -559,7 +565,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/glacier_paladin.glb",
       "source_sha256": "9dfb0ed2241e94a99dfa351df52ce0ac9c94427c02f7a1f6218c295f07c291c7",
       "source_bytes": 17584308,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "f4b724e3ae99663ce5ae93152a625f3cf6342decb14940575b3215b1c6f7615f",
+      "candidate_bytes": 16995112,
+      "qualification_report": "docs/qa/creature-storage/batch-010/glacier_paladin.json"
     },
     {
       "actor": "spectral_forest_knight",
@@ -568,7 +577,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/spectral_forest_knight.glb",
       "source_sha256": "fb74e2c12520d3b5a71660e8977385162e8ff1bd20577699ee1e75a2935302f8",
       "source_bytes": 16731356,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "774d07ad4290d21a2e21493ac6627d75830636b7c196d4552e06613397d25d52",
+      "candidate_bytes": 16019676,
+      "qualification_report": "docs/qa/creature-storage/batch-010/spectral_forest_knight.json"
     },
     {
       "actor": "giant_badger",
@@ -577,7 +589,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/giant_badger.glb",
       "source_sha256": "bab6f11f9644956472c5cdd0da6df0600deb1d6fb3f4778a4248fb50790600a0",
       "source_bytes": 16703936,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "b013e30e704083237e9f767bc3088b511f85335213e8b7b434ba31cd2700f8a4",
+      "candidate_bytes": 11088304,
+      "qualification_report": "docs/qa/creature-storage/batch-010/giant_badger.json"
     },
     {
       "actor": "crimson_duelist",
@@ -2254,7 +2269,13 @@
     6,
     7,
     8,
-    9
+    9,
+    10
   ],
-  "reviewed_creatures": 45
+  "reviewed_creatures": 50,
+  "selection_policy": {
+    "raw_asset_priority": "Prefer smaller qualified raw development models; small measured increases in packaged RLCZ size are accepted and recorded per actor and batch.",
+    "runtime_claims": "Encoded input-key savings do not establish retained animation memory or frame-time savings because Godot rebakes curves at the declared cadence. Shared corrective GPU buffer savings are measured separately.",
+    "approximation": "Exact batches retain their existing bounded float32/native/pixel gates. Approximate joint-curve trials are private and uninstalled."
+  }
 }
