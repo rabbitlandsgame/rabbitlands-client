@@ -3,6 +3,7 @@ from pathlib import Path
 import argparse
 import json
 from video_motion.asset import digest, read_glb
+from order_creature_runtime_review import ordered
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -103,6 +104,7 @@ def build(manifest, worker_roots, output, *, complete=False, blender_index=None,
     catalog = {'schema': 1, 'complete': complete, 'progress': progress, 'entries': entries,
                'review_store': '.local/review-events.jsonl', 'manifest_sha256': digest(manifest),
                'scope': 'Reference versus exact candidate. Approval is per creature/version and covers its full clip set. No runtime installation is performed by the viewer.'}
+    catalog = ordered(catalog)
     output.parent.mkdir(parents=True, exist_ok=True)
     temporary = output.with_suffix('.tmp')
     temporary.write_text(json.dumps(catalog, indent=2) + '\n', encoding='utf-8', newline='\n')

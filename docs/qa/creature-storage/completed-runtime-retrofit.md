@@ -22,6 +22,8 @@ The four-bone Magpie pilot improved independent clip poses but increased transit
 
 Run `godot-client/open-creature-optimization-review.bat` in the task checkout. Both models remain visible with synchronized cameras and playback. Left/right changes creature; up/down changes animation; Space approves the exact displayed version across all clips; T opens a comment window, Ctrl+Enter saves, and Escape cancels. Drag to orbit, wheel to zoom, and P to pause. A variant selector provides the 30 Hz, fixed-bake and qualified higher-rate controls. Decisions append to an ignored local journal bound to source/candidate hashes. The viewer never installs assets. Smoke tests use a separate test catalog and journal.
 
+The review queue puts the 131 creatures with a differing 30 fps draft and a close 120/240 fps alternative first, then the other 74 drafts. Within each group, maximum original-to-30-fps-bake position error sorts worst-first, followed by RMS position error and normal error. The previously accepted tortoise is last. All variants and saved approvals/comments remain available. `order_creature_runtime_review.py --catalog CATALOG.json --apply` reorders an existing local catalog without editing models or the journal. Live reload preserves the currently displayed creature; reopening starts at the front of the reordered queue.
+
 The [machine-readable receipt](completed-runtime-retrofit.json) records per-creature hashes, sizes and measured differences. Private intermediate data, original sources and review journals remain outside Git. Historical authoring observations remain unchanged. The separate runtime-delivery receipt identifies any conservative replacements; visual acceptance of the aggressive drafts remains pending.
 
 ## Conservative runtime selections
