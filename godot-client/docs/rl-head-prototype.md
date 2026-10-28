@@ -76,6 +76,31 @@ art exactly. No asset is replaced: the shipped bodies, hair and equipment are un
   render layers, and are skipped by the body refinement (`rl_head` meta). Each rig counts
   as a user of `RLHeadLibrary`'s caches; the last one to go releases them (heads, beards,
   textures, materials, GlbSceneCache entries, body cuts, headwear refits).
+* **Packaging** (`tools/package_client.py`; the route develop ships its native actors
+  by). The head, hair and beard GLBs are the loose-only actor folder
+  `assets/actors/native/rl_heads/`: never imported (the local `.gdignore` AGENTS.md
+  prepares for every `actor_shipping()` loose folder), staged beside the executable, and
+  parsed raw by `GLTFDocument` through `GlbSceneCache` from the globalized path, in a
+  checkout and a package alike; their only LODs are the authored `_lod<k>` levels. The
+  maps and `manifest.json` are `assets/actors/native/rl_head_textures/`
+  (`LOADED_IMAGE_FOLDERS`), in the PCK only, each PNG imported by the settings committed
+  beside it: VRAM-compressed with mipmaps; BPTC without the alpha-border fix for the
+  channel-packed masks (features, features2, brows, eye), DXT1 for the albedo and DXT5
+  for the hair, beard and lash atlases; features2 limited to 1024 px. Against the PNGs
+  uncompressed, in nine close stills of Rowan, Mira and Tavi, they halve the large errors
+  of the old runtime-DXT route (pixels more than 12/255 off: 14,579 against 28,694): the
+  light ring the border fix painted round each iris and the bleed along the brow strokes
+  are gone, while the skin carries slightly more fine noise (mean error 0.3-2.3/255
+  against 0.2-1.6). `RLHeadLibrary` uses such an import as it is (no GPU readback, no
+  runtime mip build; a raw file not imported yet still gets one). `check_actor_imports` refuses a map without VRAM
+  compression, mipmaps or an S3TC/BPTC product and `check_actor_pack` holds every RL
+  file to one place; `tests/test_package_client.py` and `tests/test_rl_head.gd` check the
+  route. The lab (`prototypes/rl_heads`) and the RL tests and evidence scripts are not
+  exported. A Windows package carries 54.2 MB of RL head: the GLBs loose (17.1 MB), the
+  maps in the PCK (36.7 MB: VRAM-compressed, as large on disk as in video memory), code
+  and data 0.3 MB. Exported unchanged, the old layout (`assets/actors/rl_heads`) would
+  have carried about 104 MB: imported scenes the game never reads and lossless maps
+  without mipmaps in the PCK, and every GLB and PNG loose as well.
 * **Open headwear.** RL heads take the RL fits of pieces 111/112/114/119. The data's
   shipped-head fits (`shippedBodies`) would change Low/Medium heads, so they are off
   unless `RL_HEADWEAR_FIT=shipped` (owner decision pending); `=0` draws every piece as
@@ -95,8 +120,10 @@ the wire never set and which is honoured at every quality.
   counterpart.
 * A missing RL beard file draws the face clean-shaven (with a one-time notice): the
   body's own beard shell cannot be built on the cut body.
-* Texture loading still mipmaps and S3TC-compresses on first use; the packaging route
-  (step 8 of the integration plan) is open.
+* The channel-packed masks are imported as BPTC (BC7) only. Every desktop GPU that runs
+  Forward+ (Vulkan or D3D12) samples it; on a Compatibility (OpenGL) driver without
+  BPTC, where the RL head draws only with `RL_HEADS=all`, those maps would not load and
+  the head would draw without them.
 
 ## What it is
 
@@ -170,6 +197,23 @@ beards; mean frame work in ms, two runs each at 26 m.
 | Compatibility (RL_HEADS=all), 26 m, live shapes | 15.1 / 59.2 (3.9x) | 43.5 / 140.4 (3.2x) |
 | Compatibility (RL_HEADS=all), 26 m, baked | 16.2 / 23.7 (1.46x) | 49.1 / 60.8 (1.24x) |
 
+* **Packaged route** (2026-10-28, after the move to `native/`). The gate above ran on the
+  editor's imports of the RL GLBs, which added automatic index LODs to every level (each
+  halved four or five times); a package never had them, and a checkout now parses the
+  GLBs raw as a package does. Two runs per cell on that route, Forward+, against the
+  classic head of the same session: 26 m 1.09x / 1.02x (40 / 160 Humans), 10 m
+  1.22x / 1.32x. World GPU time is unchanged (160 Humans: 2.70 ms against the imported
+  route's 2.60 and the classic head's 2.94 at 26 m; 2.10 against 1.98 and 2.05 at 10 m);
+  the ratios moved because that session's classic runs were 10-25% faster than the gate's
+  (`.local/rl-high/package/perf*`). Loading costs more on this route (one run): the RL GLBs
+  are parsed again whenever the last RL head released them, so switching 40 Humans up to
+  High takes 5.0-5.3 s (imported route 2.7-2.9 s, classic head 6.0-6.3 s) and the first
+  creation preview opens in 4.0-5.1 s (3.0-3.2 s; classic 2.0 s); the first switch down
+  takes 1.8 s. In an exported build the first High Human's four GLB parses (the RL head
+  and hair among them) took 1.0-1.3 s in all, the largest 0.5 s. Keeping the parsed RL
+  scenes across a switch down, or parsing them on a worker (they name no URI textures),
+  would win this back.
+
 * **Identity bake** (`RLHeadIdentityBake`). A face's identity (`id_` and the hairstyle's
   `hl_` shapes) is baked into one cached mesh per source mesh and quantised weights,
   keeping only the `ex_` shapes live and the source's materials, names and LODs; actors
@@ -205,9 +249,11 @@ beards; mean frame work in ms, two runs each at 26 m.
   (kept at 1024 px; the feature and brow maps visibly soften at 1024), plus eye, lash,
   hair and beard maps, about 37 MB in all.
 * **Creation preview** (a new actor per debounced edit): RL rebuilds in 70-160 ms against
-  develop's 170-345 ms; the first preview takes 2.0-3.2 s against 1.3-2.0 s.
+  develop's 170-345 ms; the first preview takes 2.0-3.2 s against 1.3-2.0 s (4.0-5.1 s on
+  the packaged route, above).
 * **Quality switch** with 40 Humans: Medium/Low to High 2.5-2.9 s against develop's
-  4.7-6.3 s; High to Medium 1.2 s the first time (0.1 s after) against 25 ms.
+  4.7-6.3 s (5.0-5.3 s on the packaged route); High to Medium 1.2 s the first time (0.1 s
+  after) against 25 ms.
 * **Repository**: the RL assets are 27.0 MB (22 files; 25.7 MB before the hairstyles
   gained their four grooming shapes), against 3.7 MB for develop's High portrait and hair
   data. The grooming rebuild left every hairstyle level's triangle count unchanged; the
@@ -217,15 +263,15 @@ beards; mean frame work in ms, two runs each at 26 m.
 
 | Path | What |
 |---|---|
-| `assets/actors/rl_heads/rl_head_<sex>.glb` | head module (skinned to `spine_03/neck_01/Head`, LODs, morphs, `asset.extras.rlHead`) |
-| `assets/actors/rl_heads/textures/` | painted maps + `manifest.json` (channel meanings, skin reference) |
-| `assets/actors/rl_heads/hair/<style>.glb` | hair module with its own small skeleton for spring locks |
-| `assets/actors/rl_heads/beards/<style>.glb` | facial hair skinned like the head, with all `id_*` and `ex_*` shapes |
+| `assets/actors/native/rl_heads/rl_head_<sex>.glb` | head module (skinned to `spine_03/neck_01/Head`, LODs, morphs, `asset.extras.rlHead`) |
+| `assets/actors/native/rl_head_textures/` | painted maps + `manifest.json` (channel meanings, skin reference) + each map's committed `.import` settings |
+| `assets/actors/native/rl_heads/hair/<style>.glb` | hair module with its own small skeleton for spring locks |
+| `assets/actors/native/rl_heads/beards/<style>.glb` | facial hair skinned like the head, with all `id_*` and `ex_*` shapes |
 | `data/actors/rl_head_presets.json` | identity presets (lab) |
 | `data/actors/rl_head_wire_defaults.json` | appearance-to-RL mapping data: gains, couplings, colour tables, per-sex defaults |
 | `data/actors/rl_head_headwear_fit.json` | per-piece fit of the open head pieces on RL and shipped luminous heads (generated) |
 | `src/actors/rl_head/` | runtime: appearance data, rig, identity bake, body cut, expressions, hair motion, shaders |
-| `prototypes/rl_heads/` + `open-rl-head-lab.bat` | interactive lab |
+| `prototypes/rl_heads/` + `open-rl-head-lab.bat` | interactive lab (not exported) |
 | `tests/integration/rl_head_renders.gd`, `tests/test_rl_head.gd`, `tests/integration/rl_head_metrics.gd` | evidence and checks |
 | `tests/test_rl_head_portrait_map.gd`, `tests/test_rl_head_quality_switch.gd` | mapping and tier-switch checks |
 | `tests/test_rl_head_identity_bake.gd`, `tests/integration/rl_head_bake_silhouette.gd` | identity bake against the live shapes (vertices; rendered silhouettes) |

@@ -151,14 +151,16 @@ match their fine painted detail.
 
 The RL head at High (measured 2026-10-28; details and method in
 [the RL head notes](../godot-client/docs/rl-head-prototype.md#cost-at-high-perf-gate-2026-10-28)):
-crowds of 40 and 160 Humans run within a few percent of the classic High head in
-Forward+ at the gameplay camera (1.14-1.25 times at a 10 m camera). Up close a Human
+crowds of 40 and 160 Humans run within about 10% of the classic High head in
+Forward+ at the gameplay camera (about 1.15-1.3 times at a 10 m camera). Up close a Human
 draws about 25,000-30,000 head, hair and beard triangles against about 17,000-23,500,
 and about two more draw calls. Its maps take about 37 MB of video memory with both
 sexes loaded, and its meshes about 55 MB more than the classic head, because the
-shared source meshes carry every face shape; the RL files are 25.7 MB in the
-repository. Rebuilding the creation preview takes 70-160 ms, and switching 40 Humans
-up to High 2.5-2.9 seconds.
+shared source meshes carry every face shape; the RL files are 27.0 MB in the
+repository, and a game package carries 54.2 MB of them: 17.1 MB of models beside the
+game and 36.7 MB of maps compressed for the graphics card inside its data pack.
+Rebuilding the creation preview takes 70-160 ms, and switching 40 Humans up to High
+about 5 seconds (the classic High head takes about 6).
 
 The classic High head (kept for `RL_HEADS=classic` and the Compatibility renderer):
 Low and Medium retain their existing triangle counts and texture set. High
