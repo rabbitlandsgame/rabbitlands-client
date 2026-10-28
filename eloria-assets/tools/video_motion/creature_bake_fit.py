@@ -199,6 +199,24 @@ def _skin(part, states):
     return (states['world'][:, part['nodes']] @ part['bind'])[:, :, :3]
 
 
+def _blend(weights, skin):
+    """Dense VxJ by Jx(TAB) contraction using BLAS, bounded by pose chunks."""
+    times, joints, rows, columns = skin.shape
+    flat = skin.transpose(1, 0, 2, 3).reshape(joints, -1)
+    return (weights @ flat).reshape(len(weights), times, rows, columns).transpose(1, 0, 2, 3)
+
+
+def _vertex_blend(weights, skin):
+    # Four/eight positive slots, not every unused palette joint, participate.
+    active = np.flatnonzero(weights)
+    return np.einsum('j,tjab->tab', weights[active], skin[:, active])
+
+
+def _predict_vertex(skin, weights, position):
+    active = np.flatnonzero(weights)
+    return np.einsum('j,tjab,b->ta', weights[active], skin[:, active], np.r_[position, 1.])
+
+
 def _target(data, part, states, skin, field):
     """Float64 native TRS/relative-morph reference, not GPU-quantized readback."""
     base = data[{'POSITION': 'base', 'NORMAL': 'normal', 'TANGENT': 'tangent'}[field]]
@@ -212,8 +230,8 @@ def _target(data, part, states, skin, field):
         local = np.broadcast_to(base, (end - start, *base.shape)).copy()
         if count:
             mw = np.asarray([s[part['node']][:count] for s in states['morph'][start:end]])
-            local += np.einsum('tm,mvc->tvc', mw, data['targets'][field])
-        blend = np.einsum('vj,tjab->tvab', data['weights'], skin[start:end])
+            local += (mw @ data['targets'][field].reshape(count, -1)).reshape(end - start, len(base), 3)
+        blend = _blend(data['weights'], skin[start:end])
         value = np.einsum('tvab,tvb->tva', blend[..., :3], local)
         result[start:end] = value + blend[..., 3] if field == 'POSITION' else _unit(value)
     return result
@@ -269,7 +287,7 @@ def _allowed(asset, part, weights):
 
 
 def _fit_position(skin, target, weights, base, importance=None):
-    blend = np.einsum('j,tjab->tab', weights, skin)
+    blend = _vertex_blend(weights, skin)
     if importance is None:
         importance = np.full(len(skin), 1 / len(skin))
     matrix = blend[..., :3]
@@ -280,13 +298,13 @@ def _fit_position(skin, target, weights, base, importance=None):
 
 
 def _score(skin, target, weights, position, radius):
-    error = np.einsum('j,tjab,b->ta', weights, skin, np.r_[position, 1.]) - target
+    error = _predict_vertex(skin, weights, position) - target
     # Scale by radius to avoid sixth powers of large/small world units.
     return float(np.mean((1 + np.sum(error * error, axis=1) / radius**2)**3))
 
 
 def _ordinary_score(skin, target, weights, position):
-    error = np.einsum('j,tjab,b->ta', weights, skin, np.r_[position, 1.]) - target
+    error = _predict_vertex(skin, weights, position) - target
     return float(np.mean(np.sum(error * error, axis=1)))
 
 
@@ -341,7 +359,7 @@ def _fit_directions(skin, weights, target, original):
         return None
     h = np.zeros((len(weights), 3, 3))
     for start in range(0, len(skin), 16):
-        c = np.einsum('vj,tjab->tvab', weights, skin[start:start + 16, :, :, :3])
+        c = _blend(weights, skin[start:start + 16, :, :, :3])
         n = target[start:start + 16]
         projected = c - np.einsum('tvi,tvj->tvij', n, np.einsum('tvab,tva->tvb', c, n))
         h += np.einsum('tvai,tvaj->vij', c, projected)
@@ -349,7 +367,7 @@ def _fit_directions(skin, weights, target, original):
     result = vectors[:, :, 0]
     dot = np.zeros(len(weights))
     for start in range(0, len(skin), 16):
-        c = np.einsum('vj,tjab->tvab', weights, skin[start:start + 16, :, :, :3])
+        c = _blend(weights, skin[start:start + 16, :, :, :3])
         dot += np.einsum('tvi,tvi->v', np.einsum('tvab,vb->tva', c, result),
                          target[start:start + 16])
     result[dot < 0] *= -1
@@ -364,12 +382,20 @@ def _fit(asset, part, data, skin, targets, height, iterations, fit_skin):
     positions = data['base'].copy()
     original_fixed = positions.copy()
     groups = _groups(data)
+    # Complete raw POSITION-column equality is an all-time/crossfade proof;
+    # sampled equality alone would not justify skipping a position solve. The
+    # exact sum condition also avoids changing an inherited weight-sum defect.
+    fixed = (np.all(data['targets']['POSITION'] == 0, axis=(0, 2))
+             & (weights.sum(1) == 1.))
+    active_groups = [ids for ids in groups if not fixed[ids[0]]]
     allowed = _allowed(asset, part, weights)
     budget = part['joints'].shape[1] if 'joints' in part else 1
     radius = max(height * .00015, 1e-12)
     uniform = np.full(len(skin), 1 / len(skin))
     for ids in groups:
         i = ids[0]
+        if fixed[i]:
+            continue
         original_fixed[ids] = _fit_position(skin, targets[:, i], weights[i], data['base'][i])
         if fit_skin:
             weights[ids] /= weights[i].sum()
@@ -385,7 +411,7 @@ def _fit(asset, part, data, skin, targets, height, iterations, fit_skin):
             positions[ids] = original_fixed[ids]
     ordinary_iterations = 12 if fit_skin and iterations else 0
     for _ in range(ordinary_iterations):
-        for ids in groups:
+        for ids in active_groups:
             i = ids[0]
             y, w, x = targets[:, i], weights[i].copy(), positions[i].copy()
             proposed = _fit_weights(skin, y, x, w, allowed[i], budget, uniform)
@@ -394,14 +420,14 @@ def _fit(asset, part, data, skin, targets, height, iterations, fit_skin):
             x = _fit_position(skin, y, w, data['base'][i])
             weights[ids], positions[ids] = w, x
     if fit_skin and not ordinary_iterations:
-        for ids in groups:
+        for ids in active_groups:
             i = ids[0]
             positions[ids] = _fit_position(skin, targets[:, i], weights[i], data['base'][i])
     for _ in range(iterations):
-        for ids in groups:
+        for ids in active_groups:
             i = ids[0]
             y, w, x = targets[:, i], weights[i].copy(), positions[i].copy()
-            prediction = np.einsum('j,tjab,b->ta', w, skin, np.r_[x, 1.])
+            prediction = _predict_vertex(skin, w, x)
             error2 = np.sum((prediction - y)**2, axis=1)
             importance = (error2 + radius**2)**2
             importance = np.maximum(importance / max(float(importance.max()), _EPS), 1e-6)
@@ -429,7 +455,7 @@ def _fit(asset, part, data, skin, targets, height, iterations, fit_skin):
         # never as the weight solver's initial displaced base. A perfectly
         # static correction should not become worse merely because we also
         # tried to explain it with joint motion.
-        for ids in groups:
+        for ids in active_groups:
             i = ids[0]
             old = data['weights'][i] / data['weights'][i].sum()
             fixed = _fit_position(skin, targets[:, i], old, data['base'][i])
@@ -440,6 +466,7 @@ def _fit(asset, part, data, skin, targets, height, iterations, fit_skin):
     return positions, weights, original_fixed, {
         'coincident_certified_groups': sum(len(g) > 1 for g in groups),
         'independent_fit_groups': len(groups), 'influence_budget': budget,
+        'position_fit_skipped_exact_groups': len(groups) - len(active_groups),
         'local_joint_policy': 'original positive support, immediate palette parents/children, '
                               'and three nearest anatomical rest segments in mesh-local space',
         'segment_distance_space': 'inverse(mesh.rest) applied to joint/parent rest world positions',
@@ -499,7 +526,7 @@ def _evaluate(data, part, states, skin, position, weights, normal, tangent, heig
     errors = {field: [] for field in reference}
     for start in range(0, len(skin), 16):
         end = min(start + 16, len(skin))
-        blend = np.einsum('vj,tjab->tvab', weights, skin[start:end])
+        blend = _blend(weights, skin[start:end])
         predicted = np.einsum('tvab,vb->tva', blend[..., :3], position) + blend[..., 3]
         errors['POSITION'].append(np.linalg.norm(predicted - reference['POSITION'][start:end], axis=2))
         for field, local in (('NORMAL', normal), ('TANGENT', tangent)):

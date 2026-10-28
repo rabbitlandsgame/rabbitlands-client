@@ -8,7 +8,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from video_motion.asset import accessor, digest, read_glb, write_glb
-from video_motion.creature_bake_fit import bake, _allowed
+from video_motion.creature_bake_fit import bake, _allowed, _blend, _target, _vertex_blend, _predict_vertex
 from video_motion.packing import append_array
 
 
@@ -245,3 +245,52 @@ def test_new_logical_bounds_include_original_morph_endpoint_envelope(tmp_path):
     bounds = mesh['extras']['rabbitlands_actor_bounds_v1']
     assert bounds['position'][1] == float(np.float32(-.3))
     assert bounds['size'][1] == float(np.float32(1.3))
+
+
+def test_blas_targets_match_dense_reference_positions_and_directions():
+    rng = np.random.default_rng(19)
+    times, vertices, joints, morphs = 19, 11, 7, 9
+    weights = rng.random((vertices, joints))
+    weights /= weights.sum(1, keepdims=True)
+    skin = rng.normal(size=(times, joints, 3, 4))
+    shape_weights = rng.random((times, morphs))
+    states = {'morph': [{3: row} for row in shape_weights]}
+    data = {'base': rng.normal(size=(vertices, 3)), 'normal': rng.normal(size=(vertices, 3)),
+            'tangent': rng.normal(size=(vertices, 4)), 'weights': weights,
+            'targets': {field: rng.normal(size=(morphs, vertices, 3))
+                        for field in ('POSITION', 'NORMAL', 'TANGENT')}}
+    dense_blend = np.einsum('vj,tjab->tvab', weights, skin)
+    assert np.allclose(_blend(weights, skin), dense_blend, atol=2e-13, rtol=2e-13)
+    for field, base in (('POSITION', data['base']), ('NORMAL', data['normal']), ('TANGENT', data['tangent'])):
+        local = base[None, :, :3] + np.einsum('tm,mvc->tvc', shape_weights, data['targets'][field])
+        expected = np.einsum('tvab,tvb->tva', dense_blend[..., :3], local)
+        if field == 'POSITION':
+            expected += dense_blend[..., 3]
+        else:
+            expected /= np.linalg.norm(expected, axis=2, keepdims=True)
+        assert np.allclose(_target(data, {'node': 3}, states, skin, field), expected,
+                           atol=2e-13, rtol=2e-13)
+    sparse = np.array([.2, 0, 0, .3, 0, .5, 0])
+    point = rng.normal(size=3)
+    assert np.allclose(_vertex_blend(sparse, skin), np.einsum('j,tjab->tab', sparse, skin), atol=2e-13, rtol=2e-13)
+    assert np.allclose(_predict_vertex(skin, sparse, point),
+                       np.einsum('j,tjab,b->ta', sparse, skin, np.r_[point, 1]), atol=2e-13, rtol=2e-13)
+
+
+def test_exact_zero_position_columns_skip_skin_solves_but_still_fit_normals(tmp_path):
+    source = fixture(tmp_path / 'source.glb')
+    doc, raw = read_glb(source)
+    blob = bytearray(raw)
+    prim = doc['meshes'][0]['primitives'][0]
+    prim['attributes']['WEIGHTS_0'] = append_array(doc, blob, np.tile([1., 0, 0, 0], (3, 1)), 'VEC4')
+    prim['targets'][0]['POSITION'] = append_array(doc, blob, np.zeros((3, 3)), 'VEC3')
+    prim['targets'][0]['NORMAL'] = append_array(doc, blob, np.tile([.2, 0, 0], (3, 1)), 'VEC3')
+    write_glb(source, doc, blob)
+    report = bake(source, tmp_path / 'candidate.glb', iterations=1)
+    row = report['primitive_reports'][0]
+    assert row['fit']['position_fit_skipped_exact_groups'] == 3
+    assert row['independent']['all']['maximum_position'] == 0
+    assert row['independent']['all']['maximum_normal_degrees'] < 1e-5
+    candidate, raw = read_glb(tmp_path / 'candidate.glb')
+    attrs = candidate['meshes'][candidate['nodes'][2]['mesh']]['primitives'][0]['attributes']
+    assert np.all(accessor(candidate, raw, attrs['NORMAL'])[:, 0] > .19)
