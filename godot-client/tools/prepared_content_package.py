@@ -2,8 +2,8 @@
 
 Run against an isolated disposable package project after its imports and map
 sidecars match the final package. The caller owns engine scheduling. Source and
-logical source files remain present (release creatures may be losslessly
-compressed and are verified against decoded identity). Exact imports/products are snapshotted only
+logical source files remain present. Creatures currently ship as ordinary GLBs;
+legacy compressed payloads are still verified against decoded identity. Exact imports/products are snapshotted only
 inside an explicitly marked disposable cook project; authored trees stay out
 of the preparation/export workflow.
 """
