@@ -1,5 +1,7 @@
 # Local asset-authoring workspace
 
+Creature runtime sampling, fixed mesh/skin fitting and approval follow the maintained [creature runtime optimization skill](../.agents/skills/rabbitlands-creature-runtime-optimization/SKILL.md). The [completed retrofit report](qa/creature-storage/completed-runtime-retrofit.md) explains the review browser and separate draft/delivery choices. For optimized installed assets, [runtime-delivery.json](qa/creature-storage/runtime-delivery.json) records current hashes and cadence; frozen authoring observations remain historical evidence.
+
 Regional map detail images are rendered from the current published chunk GLBs,
 including shared mesh placements, with `eloria-assets/tools/render_region_map_details.py`.
 The maintained chunk reader and native cartography rasterizer are reused; no map
