@@ -4,6 +4,8 @@ Creature runtime sampling, fixed mesh/skin fitting and approval follow the maint
 
 The [visually accepted delivery registry](qa/creature-storage/visually-accepted-delivery.json) now supersedes overlapping conservative selections. See the [191-model installation report](qa/creature-storage/accepted-creature-delivery.md) for exact-version acceptance, qualified local-draft metadata and retained repair notes.
 
+The later [accepted repair delivery registry](qa/creature-storage/accepted-repair-delivery.json) takes precedence for Skeleton, Tengu, Giant Wasp, Heartwood Treant and Nightweave Spider. Their new exact-version acceptance retains the earlier draft findings and known limits.
+
 Regional map detail images are rendered from the current published chunk GLBs,
 including shared mesh placements, with `eloria-assets/tools/render_region_map_details.py`.
 The maintained chunk reader and native cartography rasterizer are reused; no map

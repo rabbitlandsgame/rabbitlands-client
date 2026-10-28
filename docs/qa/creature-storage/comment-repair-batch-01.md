@@ -1,5 +1,7 @@
 # Comment repair batch 01 — review drafts
 
+Update, 2026-10-28: the user accepted all five exact versions below and requested installation. They are now installed; [accepted-repair-delivery.json](accepted-repair-delivery.json) binds their hashes, approval events, qualified metadata and retained limitations. The following review-stage findings remain historical evidence, including the original pre-acceptance status.
+
 These five candidates are **new, unapproved review drafts**. They have not replaced the installed models. Their local repairs intentionally change selected geometry, skinning or animation, so none is described as a universal fidelity pass or lossless conversion.
 
 Separately, 191 previously approved models were installed in commits `fb61cb2d` and `1b5002ec`: their raw GLBs fell from **1,985,636,548 to 259,808,988 bytes**. That installation does not approve these five repairs. **22 of the 27 commented actors remain queued.**

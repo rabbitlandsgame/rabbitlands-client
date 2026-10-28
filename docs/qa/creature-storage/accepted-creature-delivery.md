@@ -1,5 +1,7 @@
 # Accepted creature bake installation
 
+The five subsequently accepted comment repairs are installed as well. Their [delivery registry](accepted-repair-delivery.json) supersedes overlapping earlier selections, including Heartwood Treant. Those five runtime files fell from 97,614,044 to 5,992,016 bytes; see the [repair findings and measured CPU costs](comment-repair-batch-01.md). Earlier receipts below retain the installation history.
+
 On 2026-10-28, 191 exact reviewed 30 fps, zero-corrective GLBs replaced their prior models in the creature-storage task checkout. This includes 89 button approvals, one explicit acceptance in a saved comment, and the 101 later close-alternative bakes separately authorized by the user's current instruction. Removing an entry from the review queue alone was not treated as installation approval.
 
 | These 191 installed files | Raw bytes |

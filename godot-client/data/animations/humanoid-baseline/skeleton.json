@@ -91,12 +91,40 @@
     "reset_to_authored_defaults": true
   },
   "runtimeOptimization": {
-    "receipt": "docs/qa/creature-storage/runtime-delivery.json",
-    "actor": "skeleton",
+    "receipt": "docs/qa/creature-storage/accepted-repair-delivery.json",
     "sourceSHA256": "ceda2fd85bff7d67917f8fdffef5e916e8dd5f3e7d9161154257f812b6133d45",
-    "runtimeSHA256": "0c0d18686d55b1f8e83534c796805023ff6efa35a3b65a004c6fdf01b68e7465",
-    "method": "close_match_animation_resampling",
-    "bakeFPS": 240,
-    "artisticAcceptanceChanged": false
+    "previousRuntimeSHA256": "0c0d18686d55b1f8e83534c796805023ff6efa35a3b65a004c6fdf01b68e7465",
+    "runtimeSHA256": "4f5c4b538e047b116c40cdac29becaa6734d507090079a7a02c26f22f5837da0",
+    "method": "visually_accepted_creature_repair",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "skeleton",
+      "sourceSHA256": "ceda2fd85bff7d67917f8fdffef5e916e8dd5f3e7d9161154257f812b6133d45",
+      "runtimeSHA256": "0c0d18686d55b1f8e83534c796805023ff6efa35a3b65a004c6fdf01b68e7465",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 240,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "reviewStatus": "accepted",
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/accepted-repair-delivery.json",
+    "actor": "skeleton",
+    "appliesToSHA256": "4f5c4b538e047b116c40cdac29becaa6734d507090079a7a02c26f22f5837da0",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_repair_instruction",
+      "instruction_summary": "The user reviewed and accepted these five exact repair drafts, then explicitly instructed their installation and merge/push to develop. Five saved exact-version reviewer approvals corroborate this current instruction.",
+      "catalog_sha256": "c1fe36a4d450c06a16adb3fffe76d466778deff9fc6d060ff0db9dd3ae31142b",
+      "authorization_sha256": "88814c13afb22d45bb78cd3a9547d6b4ae70521b847f1d20aacd588171454bb5",
+      "not_a_historical_journal_event": true,
+      "saved_reviewer_approval": {
+        "event_id": "cfdfcb81-42f6-4924-b445-5bcaf6ffc627",
+        "event_sha256": "fa8c3b0b460f6996a735c3f781ca0bbbcc0babc48aa23b7e9d07af37053023ce",
+        "utc": "2026-10-28T23:31:48.281071+00:00"
+      }
+    },
+    "previousAuthoringReviewStatus": null
   }
 }
