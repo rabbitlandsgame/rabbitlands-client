@@ -4614,9 +4614,9 @@
       "family": "woodland-humanoids",
       "runtime_path": "godot-client/assets/actors/native/creatures/ember_leaf_spirit.glb",
       "animation_map": "godot-client/data/animations/humanoid-baseline/ember_leaf_spirit.json",
-      "sha256": "69d376701b83c1c439f41cf7ac86bbf1fd9cbce8bd9daad5e9644e2da829d7eb",
+      "sha256": "dbc4e531e945b8e263e3935098699ccf1ccb3aa9a6bda9123796ef30670b81e9",
       "reviewed_source_sha256": "4b9ba19d96045603b1d2d1463806565d1d978e1ce8d77cc7c5e46cb4cc0711e7",
-      "bytes": 3078292,
+      "bytes": 2835012,
       "height_native": 1.7000004907659447,
       "bake_fps": 4096,
       "durations": {
@@ -4642,9 +4642,9 @@
       "primary_attack": "Sword_Attack",
       "packing": {
         "source_sha256": "4b9ba19d96045603b1d2d1463806565d1d978e1ce8d77cc7c5e46cb4cc0711e7",
-        "runtime_sha256": "69d376701b83c1c439f41cf7ac86bbf1fd9cbce8bd9daad5e9644e2da829d7eb",
+        "runtime_sha256": "dbc4e531e945b8e263e3935098699ccf1ccb3aa9a6bda9123796ef30670b81e9",
         "source_bytes": 3045044,
-        "runtime_bytes": 3078292,
+        "runtime_bytes": 2835012,
         "parts": [
           {
             "part": 0,
@@ -4664,12 +4664,18 @@
           "packed_buffer_bytes": 2811332
         },
         "basis_representation": "positive_affine",
-        "method": "Positive affine corrective basis over all native actions, bounded local error; compensated eight-slot skin. Original native joint curves retained."
+        "method": "Positive affine corrective basis over all native actions, bounded local error; compensated eight-slot skin. Original native joint curves retained.",
+        "storage_rebind": {
+          "previous_runtime_sha256": "69d376701b83c1c439f41cf7ac86bbf1fd9cbce8bd9daad5e9644e2da829d7eb",
+          "current_runtime_sha256": "dbc4e531e945b8e263e3935098699ccf1ccb3aa9a6bda9123796ef30670b81e9",
+          "equivalence_report": "docs/qa/creature-storage/batch-037/ember_leaf_spirit.json",
+          "interpretation": "Prior measurements retained; current binding derives through the separately qualified storage-equivalence receipt."
+        }
       },
       "native_conformance": {
         "passed": true,
         "source_sha256": "4b9ba19d96045603b1d2d1463806565d1d978e1ce8d77cc7c5e46cb4cc0711e7",
-        "runtime_sha256": "69d376701b83c1c439f41cf7ac86bbf1fd9cbce8bd9daad5e9644e2da829d7eb",
+        "runtime_sha256": "dbc4e531e945b8e263e3935098699ccf1ccb3aa9a6bda9123796ef30670b81e9",
         "rest_error_over_height": 0.0,
         "max_surface_error_over_height": 0.0,
         "clips": {
@@ -4714,8 +4720,15 @@
           "native non-morph curves",
           "native clip durations"
         ],
-        "interpretation": "Export fidelity and added sole velocity relative to reviewed source; not artistic acceptance."
-      }
+        "interpretation": "Export fidelity and added sole velocity relative to reviewed source; not artistic acceptance.",
+        "storage_rebind": {
+          "previous_runtime_sha256": "69d376701b83c1c439f41cf7ac86bbf1fd9cbce8bd9daad5e9644e2da829d7eb",
+          "current_runtime_sha256": "dbc4e531e945b8e263e3935098699ccf1ccb3aa9a6bda9123796ef30670b81e9",
+          "equivalence_report": "docs/qa/creature-storage/batch-037/ember_leaf_spirit.json",
+          "interpretation": "Prior measurements retained; current binding derives through the separately qualified storage-equivalence receipt."
+        }
+      },
+      "storage_equivalence_report": "docs/qa/creature-storage/batch-037/ember_leaf_spirit.json"
     },
     "autumn_bark_treant": {
       "family": "treants",
