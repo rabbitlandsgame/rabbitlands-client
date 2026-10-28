@@ -108,8 +108,11 @@ func reload_catalog() -> bool:
 	entries=catalog.entries
 	index=clampi(index,0,maxi(0,entries.size()-1))
 	if not loaded_entry.is_empty():
+		var retained := false
 		for i in entries.size():
-			if entries[i].id==loaded_entry.id: index=i; break
+			if entries[i].id==loaded_entry.id: index=i; retained=true; break
+		if not retained and not entries.is_empty():
+			load_entry.call_deferred(0,"")
 		# Refresh choices only; the displayed actor/version stays pinned.
 		refresh_variant_picker()
 		notice="Catalog refreshed. Displayed files stay pinned; choose a variant or Reload displayed to load a newer version."
