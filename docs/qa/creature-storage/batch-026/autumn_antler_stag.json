@@ -1,0 +1,276 @@
+{
+  "schema_version": 1,
+  "batch": 26,
+  "actor": "autumn_antler_stag",
+  "date": "2026-10-27",
+  "runtime_path": "godot-client/assets/actors/native/creatures/autumn_antler_stag.glb",
+  "source_sha256": "8eb3f54fed102a5380d9788c1f3c3a523ae0edd753b55c23a0d9ce8b58c17408",
+  "runtime_sha256": "82411d998c8f00ae5728778cf1203185a436fd11d4db845089db183f668fee15",
+  "qualification": "Passed exact source/continuous curves, original physical observations, paired fresh Blender poses/default, native and fresh editor-imported playback/transitions, fully fitted actual-Actor cycles/four views, seeded dissolve/silhouette/reset checks.",
+  "human_approval_changed": false,
+  "recipe": {
+    "tool": "eloria-assets/tools/pack_creature_storage.py",
+    "tool_commit": "5bdd51c3",
+    "steps": [
+      "prune_zero_targets",
+      "reduce_constant_runs",
+      "compact"
+    ],
+    "profile": null,
+    "bounds": null,
+    "preserve_trs_keys": false
+  },
+  "bytes": {
+    "source_bytes": 7231020,
+    "candidate_bytes": 5316052,
+    "source_zstd_bytes": 3944023,
+    "candidate_zstd_bytes": 3945259
+  },
+  "inactive_targets_removed": 0,
+  "flat_run_key_rows_removed": 149045,
+  "corrective_graphics_buffer_bytes": {
+    "source": 0,
+    "candidate": 0,
+    "saved": 0,
+    "scope": "Actual Godot raw blend_shape_data byte totals over all mesh surfaces; shared per loaded model."
+  },
+  "draw_surfaces": {
+    "source": 1,
+    "candidate": 1
+  },
+  "source_validation": {
+    "passed": true,
+    "source_sha256": "8eb3f54fed102a5380d9788c1f3c3a523ae0edd753b55c23a0d9ce8b58c17408",
+    "candidate_sha256": "82411d998c8f00ae5728778cf1203185a436fd11d4db845089db183f668fee15",
+    "geometry_skin_binds_rest_topology_uv_material_image_bits_preserved": true,
+    "retained_key_time_and_value_bits_exact_only_flat_interiors_removed": true,
+    "every_removed_default_and_key_is_zero": true,
+    "redundant_flat_key_rows_proved": 149045,
+    "preexisting_duplicate_property_curves_preserved_in_occurrence_order": 0,
+    "meshes": [],
+    "clips": {
+      "Fighting_Idle": {
+        "original_knots": 4,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 12
+      },
+      "Hit_Chest": {
+        "original_knots": 14,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 32
+      },
+      "Idle_A": {
+        "original_knots": 17,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 38
+      },
+      "Walk": {
+        "original_knots": 3439,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 6882
+      },
+      "Jog": {
+        "original_knots": 2029,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 4062
+      },
+      "Sword_Attack": {
+        "original_knots": 4913,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 9830
+      },
+      "Death_A": {
+        "original_knots": 7987,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 15978
+      }
+    },
+    "proof": "Zero defaults and every LINEAR/STEP key zero prove inactive targets remain zero continuously and under crossfades. All retained accessor bytes and retained time/value rows are exact. Deleted key rows sit strictly inside three bit-identical adjacent rows; plateau boundaries and endpoints remain."
+  },
+  "physical_observations": {
+    "passed": true,
+    "source_sha256": "8eb3f54fed102a5380d9788c1f3c3a523ae0edd753b55c23a0d9ce8b58c17408",
+    "candidate_sha256": "82411d998c8f00ae5728778cf1203185a436fd11d4db845089db183f668fee15",
+    "surface_probes": 166,
+    "poses": 133,
+    "clips": 7,
+    "source_candidate_position_error": 0.0,
+    "source_candidate_normal_vector_error": 0.0,
+    "original_witness_position_error_over_height": 0.0,
+    "original_source_witness_position_error_over_height": 0.0,
+    "original_witness_normal_vector_error": 0.0,
+    "original_witness_bone_matrix_error": 0.0,
+    "witness_sha256": "b8c7ff4ee0fd6746058751a2bcae36bbe03284c731b457c2754ce8ad810de6df",
+    "sampled_motion_min": [
+      -0.7041799105717036,
+      0.0033995876829313516,
+      -0.8781890809785897
+    ],
+    "sampled_motion_max": [
+      0.6786214476569743,
+      1.7652995945271321,
+      1.4500277318731525
+    ]
+  },
+  "paired_fresh_blender": {
+    "maximum_position_error": 0.0,
+    "maximum_bone_matrix_error": 0.0,
+    "maximum_float32_budget": 1.9073486328125e-06,
+    "poses": 134,
+    "neutral_default_checked": true,
+    "passed": true,
+    "source_sha256": "8eb3f54fed102a5380d9788c1f3c3a523ae0edd753b55c23a0d9ce8b58c17408",
+    "candidate_sha256": "82411d998c8f00ae5728778cf1203185a436fd11d4db845089db183f668fee15",
+    "scope": "Direct source/candidate frozen-ID surfaces and every bone matrix at each original witness pose plus controlled neutral/default pose. Sixteen float32 ULPs at baseline coordinate/matrix magnitude; independent of inherited source/witness residual and separate from native/source appearance budgets."
+  },
+  "native_and_editor_imported": {
+    "native": {
+      "samples": 232,
+      "maximum_position_error": 3.237515431222569e-07,
+      "maximum_normal_angle_degrees": 2.0419295754930057e-05
+    },
+    "imported": {
+      "samples": 232,
+      "maximum_position_error": 3.237515431222569e-07,
+      "maximum_normal_angle_degrees": 2.0419295754930057e-05
+    }
+  },
+  "editor_import_policy": {
+    "source_sidecar_exists": true,
+    "policy": "Original per-actor editor parameters retained"
+  },
+  "native_numeric_budget": {
+    "actor": "autumn_antler_stag",
+    "source_coordinate_or_extent_magnitude": 1.6999965538654398,
+    "four_float32_ULPs": 4.76837158203125e-07,
+    "runtime_position_error": 3.237515431222569e-07,
+    "runtime_normal_degrees": 2.0419295754930057e-05,
+    "imported_position_error": 3.237515431222569e-07,
+    "imported_normal_degrees": 2.0419295754930057e-05,
+    "normal_degrees_budget": 0.0001,
+    "scope": "Four float32 ULPs at maximum original source coordinate/extent magnitude; original source mathematical equality remains exact. Native normal screen 1e-4 degrees."
+  },
+  "placement": {
+    "passed": true,
+    "bounds_error": 0.0,
+    "placement_error": 0.0,
+    "overhead_height_error": 0.0
+  },
+  "render_fit": {
+    "source_sha256": "8eb3f54fed102a5380d9788c1f3c3a523ae0edd753b55c23a0d9ce8b58c17408",
+    "model_global": [
+      [
+        0.5,
+        -5.07353320244874e-07,
+        -0.282000005245209
+      ],
+      [
+        -0.941175997257233,
+        0.0,
+        8.22802164179848e-08
+      ],
+      [
+        0.0,
+        0.941175997257233,
+        0.0
+      ],
+      [
+        -8.22802164179848e-08,
+        0.0,
+        -0.941175997257233
+      ]
+    ],
+    "position": [
+      -0.19853571825025537,
+      0.003199072553092661,
+      -1.6501845425263302
+    ],
+    "size": [
+      1.4468496873944268,
+      1.6575012774590943,
+      2.207261326451262
+    ],
+    "poses": 301,
+    "scope": "Every vertex at every full-cycle render frame and view-still pose, using actual complete Actor Godot arrays/poses/weights/transforms, renderer morph cutoff and four/eight influence skin. Evaluated in float64 with a separate 30% camera margin."
+  },
+  "source_fit_inventory": {
+    "passed": true,
+    "source_sha256": "8eb3f54fed102a5380d9788c1f3c3a523ae0edd753b55c23a0d9ce8b58c17408",
+    "candidate_sha256": "82411d998c8f00ae5728778cf1203185a436fd11d4db845089db183f668fee15",
+    "source_clips": [
+      "Death_A",
+      "Fighting_Idle",
+      "Hit_Chest",
+      "Idle_A",
+      "Jog",
+      "Sword_Attack",
+      "Walk"
+    ],
+    "actual_Actor_fit_clips": [
+      "Death_A",
+      "Fighting_Idle",
+      "Hit_Chest",
+      "Idle_A",
+      "Jog",
+      "Sword_Attack",
+      "Walk"
+    ],
+    "fit_runtime_sha256": "807b915de04330d3fbec28b6cd036a3edbdd4d7e44b09561b8e42770d1a16cc1",
+    "poses": 301,
+    "fit_lineage": null,
+    "scope": "Actual Actor source-pose capture inventory, not merely requested QA aliases. Every source clip is present in fitted playback data."
+  },
+  "appearance": {
+    "source_sha256": "8eb3f54fed102a5380d9788c1f3c3a523ae0edd753b55c23a0d9ce8b58c17408",
+    "candidate_sha256": "82411d998c8f00ae5728778cf1203185a436fd11d4db845089db183f668fee15",
+    "image_pairs": 399,
+    "width": 512,
+    "height": 512,
+    "different_image_pairs": 25,
+    "maximum_different_pixels": 15,
+    "maximum_pixels_above_two_levels": 1,
+    "maximum_mean_channel_error": 0.000118255615234375,
+    "maximum_channel_error": 44,
+    "scope": "Complete ReplicatedActor3D setup with actual display scale, grounding and body materials; identical cameras for source/candidate, four views and every full native cycle at24Hz. Numeric playback and pixel comparisons are separate reports.",
+    "framing_passed": true,
+    "clipped_frame_labels": [],
+    "maximum_border_foreground_pixels": 0
+  },
+  "secondary_effects": {
+    "effective_scale": 0.941175997257233,
+    "failures": [],
+    "gpu": "NVIDIA GeForce RTX 5080 Laptop GPU",
+    "max_color_error": 0.0,
+    "max_custom_error": 0.0,
+    "max_dissolve_bounds_error": 1.68587391158326e-07,
+    "max_fragment_transform_error": 2.99509622436744e-07,
+    "max_grain_error": 6.5565109313992e-09,
+    "max_silhouette_position_error": 3.44342595326452e-07,
+    "mounted": {},
+    "passed": true,
+    "renderer": "forward_plus",
+    "runtime_sha256": "82411d998c8f00ae5728778cf1203185a436fd11d4db845089db183f668fee15",
+    "seeded_cases": 15,
+    "source_sha256": "8eb3f54fed102a5380d9788c1f3c3a523ae0edd753b55c23a0d9ce8b58c17408"
+  },
+  "rig_investigation": {
+    "decision": "Original rig, skin and topology retained; this candidate uses exact storage reductions only."
+  },
+  "evidence_sha256": {
+    "qualification-job.json": "c2cb2a9764d0478813c3f45e7ce8bb9282044d24e6e354d2892d643396bc4f3d",
+    "processing.json": "617d397d168e4bfbafd28c63aa5fbb36fec2f089e3f71b0ce9288a0af962e120",
+    "exact-source-validation.json": "ba033c0409e7f2269367d2abc74822289042e95d61021c8c9d7604628012844b",
+    "physical-witness-validation.json": "dfa2e9994965e1501a88eb243afc998a03e1f8c1ba9d14cfee7ba4075fc0178b",
+    "blender-validation.json": "22d501ff3fcb3d426d81b4c11da9c90cb6038f1ca5d3bfde0b1852347d8c1d11",
+    "blender-direct-validation.json": "585ed76553b64a443534e55d9cf3da59927fb5b928a4b34d0ac4d2c1f866aada",
+    "native-validation.json": "d7770926cf10a816142095510bd09ee688279edaf90e10e6cbdf45f95745dc87",
+    "imported-validation.json": "d7770926cf10a816142095510bd09ee688279edaf90e10e6cbdf45f95745dc87",
+    "render-fit.json": "45392d966c70cd47403af371bd0704dd4c01001fdb18c2d3d320d5c54905e4c5",
+    "placement.json": "9dd01680f7103167ce3f4b04e89f9e12c99f5b649792fe7423302769d234e3ec",
+    "effects-validation.json": "911fa5b366114ad4a9782339bfd0dd56958080846d0c907686d15966b7988161",
+    "source-fit-inventory.json": "cddeff970f922d736e07250bc4212533a24a18c9c7a11fd40ba3624a85c48bce",
+    "actual-render/render.json": "3b2dab8e20cb4cf7d8f5777643026921c69f313a864f87d401b13544f9ef6dc1",
+    "actual-render/pixel-comparison.json": "7c57f74ef50efefba563b8b99cf9f9930c45037e2906d59d0e48f4dfb9444f49",
+    "editor-import-policy.json": "4af712005813107dca040e472e35b06d3d55cebda5bcf80f7a5bf7065332123c"
+  },
+  "visual_review": "Paired normal contact boards and complete native-cycle previews reviewed. Every four-view/full-cycle frame has zero foreground pixels in its border two pixels wide.",
+  "known_limitations": [
+    "Separate resident RAM and frame-time benchmarks were not measured.",
+    "Encoded animation-key savings describe raw files, logical source accessors and import parsing input only. Native importing may densely rebake identical generated Animation keys; no runtime Animation RAM, key-search or playback CPU saving is claimed.",
+    "Original artistic review/approval status is unchanged.",
+    "Compressed shipping data increases by 1236 bytes despite smaller decoded GLB. This tradeoff is explicit; no unmeasured runtime-memory saving offsets it in this receipt."
+  ]
+}
