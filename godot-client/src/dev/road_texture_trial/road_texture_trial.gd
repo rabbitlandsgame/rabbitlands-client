@@ -228,6 +228,9 @@ static func _fields(directory: String, layer: Dictionary) -> Dictionary:
 		if error != OK or image.get_width() != w or image.get_height() != h:
 			return {"ok": false, "error": "field_coverage_decode"}
 		image.convert(Image.FORMAT_R8)
+		if str(mip.get("coverage_decoded_sha256", "")).length() != 64 or \
+				MATERIAL._sha(image.get_data()) != str(mip.coverage_decoded_sha256):
+			return {"ok": false, "error": "field_coverage_decoded_hash"}
 		if level == 0:
 			base_image = image
 		coverage_bytes.append_array(image.get_data())
@@ -340,16 +343,45 @@ static func _source_material(layer: Dictionary) -> Dictionary:
 	var document := GLTFDocument.new()
 	var state := GLTFState.new()
 	var resources: Dictionary = layer.get("externalResources", {})
+	var source_directory: String = str(layer.get("source_directory", "")).replace("\\", "/").trim_suffix("/") + "/"
+	for image: Dictionary in source.get("images", []):
+		var uri: String = str(image.get("uri", ""))
+		var expected: String = str(resources.get(uri, ""))
+		if uri.is_empty() or expected.length() != 64 or \
+				FileAccess.get_sha256(source_directory.path_join(uri).simplify_path()) != expected:
+			return {"ok": false, "error": "material_source_image_hash: " + uri}
 	state.set_additional_data(Vram.PLAN_KEY, Vram.plan_for({"externalResources": resources}))
-	var error: Error = document.append_from_buffer(_material_glb(source), str(layer.get("source_directory", "")), state)
+	# Godot resolves an unterminated base path like a file path. Keep the
+	# directory slash, otherwise every source URI loses one path component.
+	var error: Error = document.append_from_buffer(_material_glb(source), source_directory, state)
 	if error != OK or state.get_meshes().size() != 1:
 		return {"ok": false, "error": "material_gltf_parse: " + error_string(error)}
 	TexturePool.share(state, resources)
-	var imported: GLTFMesh = state.get_meshes()[0]
-	var mesh: ArrayMesh = imported.mesh.get_mesh()
-	var material := mesh.surface_get_material(0) as BaseMaterial3D
+	# Resolve the same scene-level material copies the production loader sees.
+	# In particular, do not invent a vertex-albedo flag: painted alpha coverage
+	# uses the actual colour attribute independently of that flag.
+	var generated: Node = document.generate_scene(state)
+	if generated == null:
+		return {"ok": false, "error": "material_gltf_scene"}
+	var instance := generated as MeshInstance3D
+	if instance == null:
+		var matches: Array[Node] = generated.find_children("*", "MeshInstance3D", true, false)
+		if matches.size() == 1:
+			instance = matches[0] as MeshInstance3D
+	if instance == null or instance.mesh == null:
+		generated.free()
+		return {"ok": false, "error": "material_gltf_instance"}
+	var mesh: Mesh = instance.mesh
+	var material := instance.get_active_material(0) as BaseMaterial3D
+	generated.free()
 	if material == null:
 		return {"ok": false, "error": "material_gltf_not_pbr"}
+	var authored: Dictionary = source.materials[0]
+	var pbr: Dictionary = authored.get("pbrMetallicRoughness", {})
+	if pbr.has("baseColorTexture") and material.albedo_texture == null:
+		return {"ok": false, "error": "material_gltf_lost_base_texture"}
+	if authored.has("normalTexture") and (not material.normal_enabled or material.normal_texture == null):
+		return {"ok": false, "error": "material_gltf_lost_normal_texture"}
 	return {"ok": true, "material": material, "mesh": mesh}
 
 static func _prune_material_images(document: Dictionary) -> void:

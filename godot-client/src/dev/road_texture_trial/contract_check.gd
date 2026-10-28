@@ -6,6 +6,7 @@ const Trial := preload("res://src/dev/road_texture_trial/road_texture_trial.gd")
 const TrialMaterial := preload("res://src/dev/road_texture_trial/trial_material.gd")
 var _failures: Array[String] = []
 var _checks := 0
+var _materials_checked: Dictionary = {}
 
 func _init() -> void:
 	var baseline: Dictionary = Trial.apply(null, "", "baseline")
@@ -55,6 +56,16 @@ func _check_trial(path: String) -> void:
 		var glb: PackedByteArray = Trial._material_glb(material)
 		_expect(glb.decode_u32(0) == 0x46546c67 and glb.decode_u32(8) == glb.size(), "material_glb_container_length")
 		_expect(material.images.size() <= 3, "material_load_omits_unrelated_images")
+		var material_key: String = str(layer.get("source_directory", "")) + ":" + str(layer.get("original_material_name", ""))
+		if not _materials_checked.has(material_key):
+			_materials_checked[material_key] = true
+			var loaded: Dictionary = Trial._source_material(layer)
+			_expect(bool(loaded.get("ok", false)), "source_material_gltf_parse: " + str(loaded.get("error", "")))
+			if bool(loaded.get("ok", false)):
+				var pbr: BaseMaterial3D = loaded.material
+				var mesh: Mesh = loaded.mesh
+				_expect(pbr.normal_enabled and (mesh.surface_get_format(0) & Mesh.ARRAY_FORMAT_COLOR) != 0,
+					"source_normal_and_coverage_attribute")
 	for value: Variant in parsed.get("nodes", []):
 		var collider: Dictionary = Trial._collider(directory, value)
 		_expect(bool(collider.get("ok", false)), "exact_collision: " + str(value.get("road_node_name", "")))
