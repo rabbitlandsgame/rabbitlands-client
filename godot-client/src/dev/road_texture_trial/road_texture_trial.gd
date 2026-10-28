@@ -11,6 +11,7 @@ const Graphics := preload("res://src/world/graphics_options.gd")
 const Vram := preload("res://src/world/vram_textures.gd")
 const Quantization := preload("res://src/world/gltf_quantization.gd")
 const TexturePool := preload("res://src/world/external_texture_pool.gd")
+const MaterialOwnership := preload("res://src/world/prepared_material_ownership.gd")
 const MAX_PIXELS := 4194304
 const MAX_LAYERS := 32
 const WALK_LAYER := 8
@@ -187,6 +188,7 @@ static func _prepare_chunk(root: Node3D, chunk: Dictionary) -> Dictionary:
 			overlay.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 			overlay.extra_cull_margin = 0.1
 			overlay.set_meta(&"road_texture_trial_visual", true)
+			MaterialOwnership.attach(overlay)
 			overlays.append({"terrain": terrain, "node": overlay, "grid": layer.grid,
 				"coverage_image": fields.coverage_image, "road_node_name": layer.road_node_name})
 		texture_bytes += int(fields.bytes)
@@ -330,6 +332,7 @@ static func _collider(directory: String, row: Dictionary) -> Dictionary:
 	shape.shape = concave
 	body.add_child(shape)
 	carrier.add_child(body)
+	MaterialOwnership.attach(carrier)
 	return {"ok": true, "node": carrier, "bytes": positions.size() + indices.size()}
 
 static func _source_material(layer: Dictionary) -> Dictionary:
