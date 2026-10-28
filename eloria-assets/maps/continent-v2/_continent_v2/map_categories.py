@@ -24,6 +24,8 @@ CATEGORIES = {
     "flower_shop": ("e687da", "Flower shop"),
     "magic_shop": ("e2cf48", "Magic shop"),
     "blacksmith": ("9d73d8", "Blacksmith"),
+    # the Landfall bookseller (owner 2026-10-28): the legend's Books colour, now a round shop dot
+    "bookshop": ("e75252", "Books"),
 }
 # A door without a category (a cave mouth, a house, the keep): the tan entrance dot, and its legend line.
 ENTRANCE_COLOUR = "e8d09b"

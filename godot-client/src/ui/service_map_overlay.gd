@@ -17,6 +17,7 @@ const CATEGORY_COLOURS := {
 	"flower_shop": Color("e687da"),
 	"magic_shop": Color("e2cf48"),
 	"blacksmith": Color("9d73d8"),
+	"bookshop": Color("e75252"),
 }
 const SHOP_COLOUR := Color("4fc67a")
 const TAVERN_COLOUR := Color("ef795f")

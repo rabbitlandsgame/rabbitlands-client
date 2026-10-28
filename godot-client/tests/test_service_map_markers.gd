@@ -37,7 +37,7 @@ func run() -> void:
 		captures = args[1]
 		DirAccess.make_dir_recursive_absolute(captures)
 	# One table: every category a dot is drawn in, and the doors of the shops.
-	expect(ServiceOverlay.CATEGORY_COLOURS.size() == 5, "Five shop categories have a colour")
+	expect(ServiceOverlay.CATEGORY_COLOURS.size() == 6, "Six shop categories have a colour")
 	expect(ServiceOverlay.CATEGORY_COLOURS.tavern == ServiceOverlay.TAVERN_COLOUR
 		and ServiceOverlay.CATEGORY_COLOURS.general_store == ServiceOverlay.SHOP_COLOUR,
 		"The tavern and general store keep their colours")
@@ -45,6 +45,9 @@ func run() -> void:
 	expect(ServiceOverlay.dot_colour({"category": "magic_shop"}) == Color("e2cf48"), "A magic shop dot is yellow")
 	expect(ServiceOverlay.dot_colour({"category": "blacksmith"}) == Color("9d73d8"), "A blacksmith dot is purple")
 	expect(ServiceOverlay.door_colour({"category": "blacksmith"}) == Color("9d73d8"), "A smithy's door is purple")
+	expect(ServiceOverlay.dot_colour({"category": "bookshop"}) == Color("e75252")
+		and ServiceOverlay.door_colour({"category": "bookshop"}) == Color("e75252"),
+		"A bookshop and its door take the legend's red Books dot")
 	expect(ServiceOverlay.door_colour({}) == EntranceOverlay.DOT_COLOUR, "A door into no shop is the tan entrance dot")
 	var main: Control = load("res://src/app/main.tscn").instantiate()
 	root.add_child(main)
