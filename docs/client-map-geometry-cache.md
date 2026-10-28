@@ -5,6 +5,25 @@ references separate from texture pixels. Normal texture loading still selects
 the current texture quality and uses existing VRAM sidecars where compatible.
 Preparing geometry does not generate textures, actors or authored map assets.
 
+Published static map GLBs also consolidate byte-identical complete vertex records
+with `eloria-assets/tools/consolidate_map_vertices.py`, called by
+`publish_finish.py` after normal/tangent quantization and before prototype hash
+reconciliation, resident-size figures and cartography rendering. This preserves
+triangle order, component precision, every expanded triangle attribute, mesh/node
+identities, material bindings and position bounds. It does not join across UV,
+normal, tangent or colour seams. Unsupported deformation/extension contracts and
+import-generated shading attributes retain their original storage; files are
+written only when the complete verified GLB is smaller.
+
+Consolidation changes source hashes, so affected geometry, collision and paving
+entries naturally rebuild through the existing source-closure validation. It
+does not change the native cache format or preparation scope. Prototype names
+remain stable; their index and every consuming manifest must record the new file
+hash. Map-picture source digests must follow too: ordinary publication renders
+after finishing geometry. Carrying an existing picture forward is justified only
+by a complete geometry/material/placement equivalence check and unchanged image
+bytes, not merely by a smaller file or a matching triangle count.
+
 Prepared-native loading may create private texture Resources on its worker, as
 the raw loader does. The main thread alone publishes them to the weak pool,
 binds the native scene and creates its Nodes. Stale native completions retain no

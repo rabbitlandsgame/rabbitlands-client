@@ -63,6 +63,7 @@ for extra in (HERE, REPO / "godot-client" / "tools"):
 import quantise_geometry as QG  # noqa: E402
 import shared_images as SI  # noqa: E402
 import shared_meshes as SM  # noqa: E402
+import consolidate_map_vertices as CV  # noqa: E402
 
 MAPS = SM.MAPS
 POOL = SM.POOL
@@ -173,6 +174,30 @@ def quantise(files: list[Path], dry_run: bool) -> dict:
         if not dry_run:
             SM.write_package_glb(glb, result["data"])
     return {"files": touched, "bytes": saved, "accessors": counts}
+
+
+def consolidate_vertices(files: list[Path], dry_run: bool) -> dict:
+    """Exact complete-vertex sharing, after quantization and before hashes.
+
+    The verifier retains triangle order, every attribute's represented bytes,
+    placement/material identity and position bounds. Unsupported contracts keep
+    their original file. This is static map storage processing, never actors.
+    """
+    touched = saved = triangles = 0
+    skipped: dict[str, int] = {}
+    for glb in files:
+        result = CV.process(glb)
+        if result['status'] != 'changed':
+            if result['status'] == 'skipped':
+                key = result['reason']
+                skipped[key] = skipped.get(key, 0) + 1
+            continue
+        touched += 1
+        saved += result['savedBytes']
+        triangles += result['triangles']
+        if not dry_run:
+            SM.write_package_glb(glb, result['data'])
+    return {'files': touched, 'bytes': saved, 'verifiedTriangles': triangles, 'skipped': skipped}
 
 
 # --- the figures a manifest records about its own GLB ------------------------
@@ -350,6 +375,13 @@ def _restate_publication(record_path: Path, cells: list, dry_run: bool) -> bool:
             if recorded[identity] != value:
                 recorded[identity] = value
                 changed = True
+    sizes = [cell['glbBytes'] for cell in cells if isinstance(cell.get('glbBytes'), int)]
+    summary = loaded[0].get('chunkGlbBytes')
+    if isinstance(summary, dict) and len(sizes) == len(cells):
+        for key, value in (('total', sum(sizes)), ('max', max(sizes, default=0))):
+            if summary.get(key) != value:
+                summary[key] = value
+                changed = True
     if changed and not dry_run:
         SM.write_manifest(record_path, loaded[0], loaded[1])
     return changed
@@ -374,7 +406,7 @@ def package_manifests(files: list[Path]) -> list[Path]:
 
 def finish(paths, *, dry_run: bool = False, quantise_pass: bool = True,
            factor: float | None = None, log=print) -> dict:
-    """Run the three passes over the files under `paths`, then restate figures.
+    """Finish sharing, images, precision and exact vertices, then restate figures.
 
     `factor` is the resident bytes a byte of GLB is taken to cost, for a
     publisher whose publication record is not on disk yet.
@@ -391,17 +423,19 @@ def finish(paths, *, dry_run: bool = False, quantise_pass: bool = True,
     if not dry_run:
         _save_index(index)
     quantised = quantise(files + fresh, dry_run) if quantise_pass else {"files": 0, "bytes": 0, "accessors": {}}
+    vertices = consolidate_vertices(files + fresh, dry_run)
     manifests = package_manifests(files)
     reconciled = SM.reconcile(dry_run, prototypes={path.stem for path in fresh}, manifests=manifests)
     restated = restamp(manifests, dry_run, factor)
     verb = "would finish" if dry_run else "finished"
     log(f"{verb} {len(files)} files: "
         f"{shared['meshes']} meshes pooled ({len(fresh)} new prototypes), "
-        f"{images['images']} images externalised, {quantised['files']} files quantised; "
-        f"{(shared['bytes'] + images['bytes'] + quantised['bytes']) / 1e6:.0f} MB smaller")
+        f"{images['images']} images externalised, {quantised['files']} files quantised, "
+        f"{vertices['files']} files consolidated; "
+        f"{(shared['bytes'] + images['bytes'] + quantised['bytes'] + vertices['bytes']) / 1e6:.0f} MB smaller")
     if reconciled or restated:
         log(f"  restated {len(set(restated))} manifests and {len(reconciled)} prototype hashes")
-    return {"files": len(files), "shared": shared, "images": images, "quantised": quantised,
+    return {"files": len(files), "shared": shared, "images": images, "quantised": quantised, "vertices": vertices,
             "prototypes": [path.name for path in fresh], "reconciled": reconciled,
             "restamped": sorted(set(restated))}
 
