@@ -272,5 +272,192 @@
     "Encoded animation-key savings describe raw files, logical source accessors and import parsing input only. Native importing may densely rebake identical generated Animation keys; no runtime Animation RAM, key-search or playback CPU saving is claimed.",
     "Original artistic review/approval status is unchanged.",
     "Compressed shipping data increases by 13180 bytes despite smaller decoded GLB. This tradeoff is explicit; no unmeasured runtime-memory saving offsets it in this receipt."
-  ]
+  ],
+  "legacy_canine_runtime_supplement": {
+    "passed": true,
+    "source_sha256": "02b616da6ca426c842fb2b2de0ac661c09f51d1eeae6207e6600b08f34efff9c",
+    "candidate_sha256": "3f7d05ce08591529a1205f8604cecbac686532f2064d5adf3786023ddc1d6bc8",
+    "validator": "godot-client/tests/test_canine_video_motion.gd",
+    "validator_sha256": "4b55e7496db1171f64a4c6402f0f03d4087544d15209ee8613c5e8c8e81497a9",
+    "immutable_original_frame_keyed_fixture_sha256": "4c84d08cdd12cac7580304c9ec7430dcec0202f55fccb46235dd2861e48f91e1",
+    "targeted_after_harness_sha256": "90159b6d9c0564c918e117d47fc18bc12a007d54f3524ac745c8de9b09b9c8a8",
+    "before_failure_report_sha256": "509d60b9779ba80330e6e0e9fe25808a894b615daaef63068121926b2015fd76",
+    "after_passing_report_sha256": "cee4cffb92ca52365dc90f2fa51de58f4886232af0f1f429954485ec6c8d9087",
+    "unchanged_caps": {
+      "imported_native": 0.0001,
+      "frozen_world_guides": 3e-05,
+      "terminal_hold": 0.0001,
+      "idle_restore": 0.0001
+    },
+    "source_and_candidate": {
+      "source": {
+        "queried_clips": 7,
+        "independent_queries_per_clip": 97,
+        "maximum_imported_native_error": 2.66976257989882e-07,
+        "maximum_frozen_world_guide_error": 8.7012135696618e-07,
+        "maximum_terminal_hold_error": 1.9371509552002e-07,
+        "maximum_idle_restore_error": 0.0,
+        "skin_influences": [
+          8
+        ],
+        "actions": [
+          {
+            "clip": "Idle_A",
+            "finite": true,
+            "glb_world_max_error": 0.0,
+            "glb_world_witnesses": 0,
+            "hold_error": 0.0,
+            "idle_restore_error": 0.0,
+            "imported_native_max_error": 1.66600049311683e-08,
+            "seconds": 2.59999990463257
+          },
+          {
+            "clip": "Fighting_Idle",
+            "finite": true,
+            "glb_world_max_error": 0.0,
+            "glb_world_witnesses": 0,
+            "hold_error": 0.0,
+            "idle_restore_error": 0.0,
+            "imported_native_max_error": 2.66976257989882e-07,
+            "seconds": 2.20833325386047
+          },
+          {
+            "clip": "Hit_Chest",
+            "finite": true,
+            "glb_world_max_error": 0.0,
+            "glb_world_witnesses": 0,
+            "hold_error": 0.0,
+            "idle_restore_error": 0.0,
+            "imported_native_max_error": 0.0,
+            "seconds": 0.783333361148834
+          },
+          {
+            "clip": "Jog",
+            "finite": true,
+            "glb_world_max_error": 0.0,
+            "glb_world_witnesses": 0,
+            "hold_error": 0.0,
+            "idle_restore_error": 0.0,
+            "imported_native_max_error": 2.49900068638453e-07,
+            "seconds": 0.491666674613953
+          },
+          {
+            "clip": "Walk",
+            "finite": true,
+            "glb_world_max_error": 8.7012135696618e-07,
+            "glb_world_witnesses": 351,
+            "hold_error": 0.0,
+            "idle_restore_error": 0.0,
+            "imported_native_max_error": 2.45869159698486e-07,
+            "seconds": 1.41666662693024
+          },
+          {
+            "clip": "Sword_Attack",
+            "finite": true,
+            "glb_world_max_error": 6.77582609798222e-07,
+            "glb_world_witnesses": 351,
+            "hold_error": 1.9371509552002e-07,
+            "idle_restore_error": 0.0,
+            "imported_native_max_error": 0.0,
+            "seconds": 5.0
+          },
+          {
+            "clip": "Death_A",
+            "finite": true,
+            "glb_world_max_error": 6.52083277263849e-07,
+            "glb_world_witnesses": 351,
+            "hold_error": 1.19209289550781e-07,
+            "idle_restore_error": 0.0,
+            "imported_native_max_error": 0.0,
+            "seconds": 5.0
+          }
+        ]
+      },
+      "candidate": {
+        "queried_clips": 7,
+        "independent_queries_per_clip": 97,
+        "maximum_imported_native_error": 2.66976257989882e-07,
+        "maximum_frozen_world_guide_error": 8.7012135696618e-07,
+        "maximum_terminal_hold_error": 1.9371509552002e-07,
+        "maximum_idle_restore_error": 0.0,
+        "skin_influences": [
+          8
+        ],
+        "actions": [
+          {
+            "clip": "Idle_A",
+            "finite": true,
+            "glb_world_max_error": 0.0,
+            "glb_world_witnesses": 0,
+            "hold_error": 0.0,
+            "idle_restore_error": 0.0,
+            "imported_native_max_error": 1.66600049311683e-08,
+            "seconds": 2.59999990463257
+          },
+          {
+            "clip": "Fighting_Idle",
+            "finite": true,
+            "glb_world_max_error": 0.0,
+            "glb_world_witnesses": 0,
+            "hold_error": 0.0,
+            "idle_restore_error": 0.0,
+            "imported_native_max_error": 2.66976257989882e-07,
+            "seconds": 2.20833325386047
+          },
+          {
+            "clip": "Hit_Chest",
+            "finite": true,
+            "glb_world_max_error": 0.0,
+            "glb_world_witnesses": 0,
+            "hold_error": 0.0,
+            "idle_restore_error": 0.0,
+            "imported_native_max_error": 0.0,
+            "seconds": 0.783333361148834
+          },
+          {
+            "clip": "Jog",
+            "finite": true,
+            "glb_world_max_error": 0.0,
+            "glb_world_witnesses": 0,
+            "hold_error": 0.0,
+            "idle_restore_error": 0.0,
+            "imported_native_max_error": 2.49900068638453e-07,
+            "seconds": 0.491666674613953
+          },
+          {
+            "clip": "Walk",
+            "finite": true,
+            "glb_world_max_error": 8.7012135696618e-07,
+            "glb_world_witnesses": 351,
+            "hold_error": 0.0,
+            "idle_restore_error": 0.0,
+            "imported_native_max_error": 2.45869159698486e-07,
+            "seconds": 1.41666662693024
+          },
+          {
+            "clip": "Sword_Attack",
+            "finite": true,
+            "glb_world_max_error": 6.77582609798222e-07,
+            "glb_world_witnesses": 351,
+            "hold_error": 1.9371509552002e-07,
+            "idle_restore_error": 0.0,
+            "imported_native_max_error": 0.0,
+            "seconds": 5.0
+          },
+          {
+            "clip": "Death_A",
+            "finite": true,
+            "glb_world_max_error": 6.52083277263849e-07,
+            "glb_world_witnesses": 351,
+            "hold_error": 1.1944189282076e-07,
+            "idle_restore_error": 0.0,
+            "imported_native_max_error": 0.0,
+            "seconds": 5.0
+          }
+        ]
+      }
+    },
+    "reference_initial_state_fix": "Original uncontrolled reference sampling inherited prior clips on unkeyed bones and failed on unchanged sources and candidates equally. Resetting each independent builtin/native query to authored neutral bone poses resolves those false comparisons. All original frame stamps, guides and caps are unchanged; before-failure and after-pass evidence retained.",
+    "scope": "Targeted CPU-only real scene-cache/native-library integration for both original and canonical inputs, including cadence, loop flags, all seven clips, eight influences, terminal holds, idle restoration and published frame-keyed world observations. No runtime asset, observation value or artistic approval changes."
+  }
 }
