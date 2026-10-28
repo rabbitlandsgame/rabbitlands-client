@@ -203,7 +203,9 @@
     "imported": {
       "samples": 296,
       "maximum_position_error": 4.718716730544748e-08,
-      "maximum_normal_angle_degrees": 1.5007971104097566e-05
+      "maximum_normal_angle_degrees": 1.5007971104097566e-05,
+      "actual_loader": "ResourceLoader.load(PackedScene)",
+      "authoritative_SCN_provenance": "genuine_editor_verification_revision.load_proofs"
     }
   },
   "editor_import_policy": {
@@ -351,5 +353,191 @@
     "Separate resident RAM and frame-time benchmarks were not measured.",
     "Encoded animation-key savings describe raw files, logical source accessors and import parsing input only. Native importing may densely rebake identical generated Animation keys; no runtime Animation RAM, key-search or playback CPU saving is claimed.",
     "Original artistic review/approval status is unchanged."
-  ]
+  ],
+  "genuine_editor_verification_revision": {
+    "status": "Corrected independent actual Editor verification passed within applicable unchanged modern or legacy scope",
+    "date": "2026-10-28",
+    "source_original_sha256": "94d9ec343d5a0a387f48a5928c7b26137661d94424bfd8af14792a483870eb04",
+    "current_canonical_sha256": "81ccee7deb2c6518a5d8a1d8731dfe4ce2e3256654d32746c8da78ce4cb45328",
+    "loader": "ResourceLoader.load(PackedScene)",
+    "load_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/sphinx.glb-e6849541e7cfef605a94b08dd11e260c.md5",
+        "import_metadata_sha256": "6fe49e24c23ba2f0076715a4a9e5ef8d6ae9583dc0a25183943ab1f74b8f1b11",
+        "imported_resource_path": "res://.godot/imported/sphinx.glb-e6849541e7cfef605a94b08dd11e260c.scn",
+        "imported_resource_sha256": "cbb783a06a3cc4651ecbb6cd94146eb28c4599f7602a34e604d51f2df9de5be9",
+        "packed_scene_resource_path": "res://assets/qa/sphinx/v2/baseline/sphinx.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "cd12314c5fc03de43d326d6bfa597819",
+        "source_path": "res://assets/qa/sphinx/v2/baseline/sphinx.glb",
+        "source_sha256": "94d9ec343d5a0a387f48a5928c7b26137661d94424bfd8af14792a483870eb04"
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/sphinx.glb-970292b5b28d82bdeab53ca2032209db.md5",
+        "import_metadata_sha256": "690d83f5cc190e0f80eacb841ee1e206670dd72ed1456370fb83fb863ebdba86",
+        "imported_resource_path": "res://.godot/imported/sphinx.glb-970292b5b28d82bdeab53ca2032209db.scn",
+        "imported_resource_sha256": "5b4448ca0160cff2ddc6de7708e6559d214e201491e11761710ba81f10db0207",
+        "packed_scene_resource_path": "res://assets/qa/sphinx/v2/candidate/sphinx.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "853625d1c291f703c051c7ce073fd5cf",
+        "source_path": "res://assets/qa/sphinx/v2/candidate/sphinx.glb",
+        "source_sha256": "81ccee7deb2c6518a5d8a1d8731dfe4ce2e3256654d32746c8da78ce4cb45328"
+      }
+    ],
+    "source_aliases_and_SCNs_have_current_source_and_destination_MD5_freshness": true,
+    "numeric": {
+      "poses": 296,
+      "all_source_clips": [
+        "Death_A",
+        "Fighting_Idle",
+        "Fly",
+        "Hit_Chest",
+        "Idle_A",
+        "Jog",
+        "Sword_Attack",
+        "Walk"
+      ],
+      "RESET_checked": true,
+      "maximum_Euclidean_position_error_source_units": 4.718716730544748e-08,
+      "maximum_normal_angle_degrees": 1.5007971104097566e-05
+    },
+    "applicable_quality_budget": {
+      "position_four_float32_ULPs": 4.76837158203125e-07,
+      "source_coordinate_or_rest_axis_extent_magnitude": 1.0000027123709057,
+      "normal_degrees": 0.0001,
+      "both_passed": true
+    },
+    "full_typed_static_attributes_material_storage_texture_pixels_and_mips": {
+      "actor": "sphinx",
+      "source_sha256": "94d9ec343d5a0a387f48a5928c7b26137661d94424bfd8af14792a483870eb04",
+      "candidate_sha256": "81ccee7deb2c6518a5d8a1d8731dfe4ce2e3256654d32746c8da78ce4cb45328",
+      "surfaces": [
+        {
+          "all_typed_arrays": [
+            {
+              "slot": 0,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 1,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 2,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 4,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 10,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 11,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 12,
+              "exact_after_proven_vertex_bijection": true
+            }
+          ],
+          "full_material_storage_fields_and_texture_pixels_mips_exact": true,
+          "format_exact": true,
+          "lods": [
+            {
+              "lod": 0,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            },
+            {
+              "lod": 1,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            }
+          ],
+          "bounds_component_max_delta": 0.0,
+          "lod_capture_present": true
+        }
+      ],
+      "passed": true,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/sphinx.glb-e6849541e7cfef605a94b08dd11e260c.md5",
+          "import_metadata_sha256": "6fe49e24c23ba2f0076715a4a9e5ef8d6ae9583dc0a25183943ab1f74b8f1b11",
+          "imported_resource_path": "res://.godot/imported/sphinx.glb-e6849541e7cfef605a94b08dd11e260c.scn",
+          "imported_resource_sha256": "cbb783a06a3cc4651ecbb6cd94146eb28c4599f7602a34e604d51f2df9de5be9",
+          "packed_scene_resource_path": "res://assets/qa/sphinx/v2/baseline/sphinx.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "cd12314c5fc03de43d326d6bfa597819",
+          "source_path": "res://assets/qa/sphinx/v2/baseline/sphinx.glb",
+          "source_sha256": "94d9ec343d5a0a387f48a5928c7b26137661d94424bfd8af14792a483870eb04"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/sphinx.glb-970292b5b28d82bdeab53ca2032209db.md5",
+          "import_metadata_sha256": "690d83f5cc190e0f80eacb841ee1e206670dd72ed1456370fb83fb863ebdba86",
+          "imported_resource_path": "res://.godot/imported/sphinx.glb-970292b5b28d82bdeab53ca2032209db.scn",
+          "imported_resource_sha256": "5b4448ca0160cff2ddc6de7708e6559d214e201491e11761710ba81f10db0207",
+          "packed_scene_resource_path": "res://assets/qa/sphinx/v2/candidate/sphinx.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "853625d1c291f703c051c7ce073fd5cf",
+          "source_path": "res://assets/qa/sphinx/v2/candidate/sphinx.glb",
+          "source_sha256": "81ccee7deb2c6518a5d8a1d8731dfe4ce2e3256654d32746c8da78ce4cb45328"
+        }
+      ]
+    },
+    "retained_Editor_morph_fields": {
+      "actor": "sphinx",
+      "source_sha256": "94d9ec343d5a0a387f48a5928c7b26137661d94424bfd8af14792a483870eb04",
+      "candidate_sha256": "81ccee7deb2c6518a5d8a1d8731dfe4ce2e3256654d32746c8da78ce4cb45328",
+      "all_retained_editor_POSITION_NORMAL_TANGENT_typed_bits_exact": true,
+      "retained_targets": 65,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/sphinx.glb-e6849541e7cfef605a94b08dd11e260c.md5",
+          "import_metadata_sha256": "6fe49e24c23ba2f0076715a4a9e5ef8d6ae9583dc0a25183943ab1f74b8f1b11",
+          "imported_resource_path": "res://.godot/imported/sphinx.glb-e6849541e7cfef605a94b08dd11e260c.scn",
+          "imported_resource_sha256": "cbb783a06a3cc4651ecbb6cd94146eb28c4599f7602a34e604d51f2df9de5be9",
+          "packed_scene_resource_path": "res://assets/qa/sphinx/v2/baseline/sphinx.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "cd12314c5fc03de43d326d6bfa597819",
+          "source_path": "res://assets/qa/sphinx/v2/baseline/sphinx.glb",
+          "source_sha256": "94d9ec343d5a0a387f48a5928c7b26137661d94424bfd8af14792a483870eb04"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/sphinx.glb-970292b5b28d82bdeab53ca2032209db.md5",
+          "import_metadata_sha256": "690d83f5cc190e0f80eacb841ee1e206670dd72ed1456370fb83fb863ebdba86",
+          "imported_resource_path": "res://.godot/imported/sphinx.glb-970292b5b28d82bdeab53ca2032209db.scn",
+          "imported_resource_sha256": "5b4448ca0160cff2ddc6de7708e6559d214e201491e11761710ba81f10db0207",
+          "packed_scene_resource_path": "res://assets/qa/sphinx/v2/candidate/sphinx.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "853625d1c291f703c051c7ce073fd5cf",
+          "source_path": "res://assets/qa/sphinx/v2/candidate/sphinx.glb",
+          "source_sha256": "81ccee7deb2c6518a5d8a1d8731dfe4ce2e3256654d32746c8da78ce4cb45328"
+        }
+      ],
+      "scope": "Direct actual Editor source/candidate retained morph P/N/T byte digests after independently proved complete static-attribute vertex bijection. Exact target mask from source packing lineage; no morph field omitted.",
+      "passed": true
+    },
+    "withdrawn_prior_loader_claim": "Prior shared dumper captures labelled imported used GlbSceneCache for these outside-actor aliases and therefore were raw-cache comparisons. They remain retained private raw/native evidence, but their independent Editor claim is withdrawn and superseded by these explicitly loaded SCNs.",
+    "unchanged_other_evidence": "Original independent physical observations, exact source curves, Blender, actual native gameplay body rendering, placement, mounted/cinematic dependencies and secondary effects remain hash-bound and unchanged. No artistic approval, model, action, cap or witness change in this QA revision.",
+    "production_scope": "Production actor_shipping loose folders remain raw/native and are not Editor-imported. Per-surface Editor-generated LODs are verification representation metadata, not a claim of new gameplay LODs.",
+    "evidence_sha256": {
+      ".local/heavy-batch/sphinx/v2/editor-real-v1/qualification-job.json": "c55fe8a544c14c3d8a31010d5b00678e467ffee9d01989f9e07e89e98d0d2a7c",
+      ".local/heavy-batch/sphinx/v2/editor-real-v1/imported/runtime.json": "c77607d996b9247137ea8060eecf703cab86a94b34ed4a57d800f530c130d838",
+      ".local/heavy-batch/sphinx/v2/editor-real-v1/imported-validation.json": "ae10815081b0e299aa11ec2dd8a0141a21ef2434e720d4e60f3cd96bc8703494",
+      ".local/heavy-batch/sphinx/v2/editor-real-v1/imported-static-mesh-bits.json": "852e07fe3937e73334a0f358339e520d1aeec3a9b47ac02c4d1d1fafae6a58f9",
+      ".local/heavy-batch/sphinx/v2/editor-real-v1/imported-typed-validation.json": "462066f5460e17ebbe18711237d99a08ec0c1ea1e9dd8a79e306682cd2fed419",
+      ".local/heavy-batch/sphinx/v2/editor-real-v1/morph-digest-job.json": "0420c464ad5848bbe20595231d42724673872ac92ad7fd1750963a54338064a5",
+      ".local/heavy-batch/sphinx/v2/editor-real-v1/imported-morph-digests.json": "c69ac43a8772f9cec2bd6cc30b5ee12681356fa180dd14dfe0b9fb0e28e412e3",
+      ".local/heavy-batch/sphinx/v2/editor-real-v1/imported-morph-validation.json": "f1360c7f6ea13c9121f0b4694e87894b637fe81885064c9f78be949c58fa59a7"
+    }
+  }
 }

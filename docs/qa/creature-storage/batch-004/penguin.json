@@ -1218,5 +1218,190 @@
     "Original artistic review/approval status is unchanged.",
     "Zstandard payload grows 9024 bytes despite smaller raw animation storage; this is an explicit decoded GLB input/raw storage tradeoff.",
     "Encoded animation-key savings describe the raw file, logical source accessors and import parsing input only. The native importer can densely rebake the same generated Animation keys, so runtime Animation RAM, key search work and playback CPU may remain unchanged; no such saving was measured or claimed."
-  ]
+  ],
+  "genuine_editor_verification_revision": {
+    "status": "Corrected independent actual Editor verification passed within applicable unchanged modern or legacy scope",
+    "date": "2026-10-28",
+    "source_original_sha256": "8b8d248c108a2f444caa54a6cd9b04e43945d3674025da72c7a5d252bf152e4c",
+    "current_canonical_sha256": "81410ec2bf9b54211d52cd5ea7642c4762b3e7d52194f083365ff0068658f342",
+    "loader": "ResourceLoader.load(PackedScene)",
+    "load_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/penguin.glb-c33f3559231c940c5e1e63c09986a960.md5",
+        "import_metadata_sha256": "c83ef7784146b5dc257e5ed2fe9edca15f0a5f8511b893d83dbdc7cf55c9ea1d",
+        "imported_resource_path": "res://.godot/imported/penguin.glb-c33f3559231c940c5e1e63c09986a960.scn",
+        "imported_resource_sha256": "e68081dc3bc33bb53210adf3a99a34bb28b974e5b08a43157bf1ffce4721ce93",
+        "packed_scene_resource_path": "res://assets/qa/penguin/baseline/penguin.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "f44d60224dfb8b9b0638a7485485adfa",
+        "source_path": "res://assets/qa/penguin/baseline/penguin.glb",
+        "source_sha256": "8b8d248c108a2f444caa54a6cd9b04e43945d3674025da72c7a5d252bf152e4c"
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/penguin.glb-f303041fcada6454575b4b50a2471abf.md5",
+        "import_metadata_sha256": "e2c09d50685a8a99371f0ea7e0bc013f4bb645ce8195f082b5c6ddfa4865d027",
+        "imported_resource_path": "res://.godot/imported/penguin.glb-f303041fcada6454575b4b50a2471abf.scn",
+        "imported_resource_sha256": "186c1ef1ab4653bef75f573f05505c266cfea18779967053a6c37c9e9124d4c7",
+        "packed_scene_resource_path": "res://assets/qa/penguin/candidate/penguin.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "5fde3893d1bb63b22cd15c0e9471c649",
+        "source_path": "res://assets/qa/penguin/candidate/penguin.glb",
+        "source_sha256": "81410ec2bf9b54211d52cd5ea7642c4762b3e7d52194f083365ff0068658f342"
+      }
+    ],
+    "source_aliases_and_SCNs_have_current_source_and_destination_MD5_freshness": true,
+    "numeric": {
+      "poses": 232,
+      "all_source_clips": [
+        "Death_A",
+        "Fighting_Idle",
+        "Hit_Chest",
+        "Idle_A",
+        "Jog",
+        "Sword_Attack",
+        "Walk"
+      ],
+      "RESET_checked": true,
+      "maximum_Euclidean_position_error_source_units": 7.104186458335488e-08,
+      "maximum_normal_angle_degrees": 1.4106655764433061e-05
+    },
+    "applicable_quality_budget": {
+      "position_four_float32_ULPs": 4.76837158203125e-07,
+      "source_coordinate_or_rest_axis_extent_magnitude": 1.0000020992930891,
+      "normal_degrees": 0.0001,
+      "both_passed": true
+    },
+    "full_typed_static_attributes_material_storage_texture_pixels_and_mips": {
+      "actor": "penguin",
+      "source_sha256": "8b8d248c108a2f444caa54a6cd9b04e43945d3674025da72c7a5d252bf152e4c",
+      "candidate_sha256": "81410ec2bf9b54211d52cd5ea7642c4762b3e7d52194f083365ff0068658f342",
+      "surfaces": [
+        {
+          "all_typed_arrays": [
+            {
+              "slot": 0,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 1,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 2,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 4,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 10,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 11,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 12,
+              "exact_after_proven_vertex_bijection": true
+            }
+          ],
+          "full_material_storage_fields_and_texture_pixels_mips_exact": true,
+          "format_exact": true,
+          "lods": [
+            {
+              "lod": 0,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            },
+            {
+              "lod": 1,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            }
+          ],
+          "bounds_component_max_delta": 0.0,
+          "lod_capture_present": true
+        }
+      ],
+      "passed": true,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/penguin.glb-c33f3559231c940c5e1e63c09986a960.md5",
+          "import_metadata_sha256": "c83ef7784146b5dc257e5ed2fe9edca15f0a5f8511b893d83dbdc7cf55c9ea1d",
+          "imported_resource_path": "res://.godot/imported/penguin.glb-c33f3559231c940c5e1e63c09986a960.scn",
+          "imported_resource_sha256": "e68081dc3bc33bb53210adf3a99a34bb28b974e5b08a43157bf1ffce4721ce93",
+          "packed_scene_resource_path": "res://assets/qa/penguin/baseline/penguin.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "f44d60224dfb8b9b0638a7485485adfa",
+          "source_path": "res://assets/qa/penguin/baseline/penguin.glb",
+          "source_sha256": "8b8d248c108a2f444caa54a6cd9b04e43945d3674025da72c7a5d252bf152e4c"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/penguin.glb-f303041fcada6454575b4b50a2471abf.md5",
+          "import_metadata_sha256": "e2c09d50685a8a99371f0ea7e0bc013f4bb645ce8195f082b5c6ddfa4865d027",
+          "imported_resource_path": "res://.godot/imported/penguin.glb-f303041fcada6454575b4b50a2471abf.scn",
+          "imported_resource_sha256": "186c1ef1ab4653bef75f573f05505c266cfea18779967053a6c37c9e9124d4c7",
+          "packed_scene_resource_path": "res://assets/qa/penguin/candidate/penguin.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "5fde3893d1bb63b22cd15c0e9471c649",
+          "source_path": "res://assets/qa/penguin/candidate/penguin.glb",
+          "source_sha256": "81410ec2bf9b54211d52cd5ea7642c4762b3e7d52194f083365ff0068658f342"
+        }
+      ]
+    },
+    "retained_Editor_morph_fields": {
+      "actor": "penguin",
+      "source_sha256": "8b8d248c108a2f444caa54a6cd9b04e43945d3674025da72c7a5d252bf152e4c",
+      "candidate_sha256": "81410ec2bf9b54211d52cd5ea7642c4762b3e7d52194f083365ff0068658f342",
+      "all_retained_editor_POSITION_NORMAL_TANGENT_typed_bits_exact": true,
+      "retained_targets": 752,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/penguin.glb-c33f3559231c940c5e1e63c09986a960.md5",
+          "import_metadata_sha256": "c83ef7784146b5dc257e5ed2fe9edca15f0a5f8511b893d83dbdc7cf55c9ea1d",
+          "imported_resource_path": "res://.godot/imported/penguin.glb-c33f3559231c940c5e1e63c09986a960.scn",
+          "imported_resource_sha256": "e68081dc3bc33bb53210adf3a99a34bb28b974e5b08a43157bf1ffce4721ce93",
+          "packed_scene_resource_path": "res://assets/qa/penguin/baseline/penguin.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "f44d60224dfb8b9b0638a7485485adfa",
+          "source_path": "res://assets/qa/penguin/baseline/penguin.glb",
+          "source_sha256": "8b8d248c108a2f444caa54a6cd9b04e43945d3674025da72c7a5d252bf152e4c"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/penguin.glb-f303041fcada6454575b4b50a2471abf.md5",
+          "import_metadata_sha256": "e2c09d50685a8a99371f0ea7e0bc013f4bb645ce8195f082b5c6ddfa4865d027",
+          "imported_resource_path": "res://.godot/imported/penguin.glb-f303041fcada6454575b4b50a2471abf.scn",
+          "imported_resource_sha256": "186c1ef1ab4653bef75f573f05505c266cfea18779967053a6c37c9e9124d4c7",
+          "packed_scene_resource_path": "res://assets/qa/penguin/candidate/penguin.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "5fde3893d1bb63b22cd15c0e9471c649",
+          "source_path": "res://assets/qa/penguin/candidate/penguin.glb",
+          "source_sha256": "81410ec2bf9b54211d52cd5ea7642c4762b3e7d52194f083365ff0068658f342"
+        }
+      ],
+      "scope": "Direct actual Editor source/candidate retained morph P/N/T byte digests after independently proved complete static-attribute vertex bijection. Exact target mask from source packing lineage; no morph field omitted.",
+      "passed": true
+    },
+    "withdrawn_prior_loader_claim": "Prior shared dumper captures labelled imported used GlbSceneCache for these outside-actor aliases and therefore were raw-cache comparisons. They remain retained private raw/native evidence, but their independent Editor claim is withdrawn and superseded by these explicitly loaded SCNs.",
+    "unchanged_other_evidence": "Original independent physical observations, exact source curves, Blender, actual native gameplay body rendering, placement, mounted/cinematic dependencies and secondary effects remain hash-bound and unchanged. No artistic approval, model, action, cap or witness change in this QA revision.",
+    "production_scope": "Production actor_shipping loose folders remain raw/native and are not Editor-imported. Per-surface Editor-generated LODs are verification representation metadata, not a claim of new gameplay LODs.",
+    "evidence_sha256": {
+      ".local/heavy-batch/penguin/v2/editor-real-v1/qualification-job.json": "60637e16ee609814c7856c50d76f7cb69a0072be274f56fdaf4c2c0fd1b8fc9b",
+      ".local/heavy-batch/penguin/v2/editor-real-v1/imported/runtime.json": "529198eab45ec2881ef515fcf53219d89cfed5e47b10f2408920a500e031078c",
+      ".local/heavy-batch/penguin/v2/editor-real-v1/imported-validation.json": "454419bfd7155751d53172be35ad9cc1931ad47ddbcf79e5c0ef65c511e2642e",
+      ".local/heavy-batch/penguin/v2/editor-real-v1/imported-static-mesh-bits.json": "6eeaa21c439a77d11aac64ca3e454b1d8e97d1f30c13a3f58dc66fdd8ffdfcbb",
+      ".local/heavy-batch/penguin/v2/editor-real-v1/imported-typed-validation.json": "2556ba1efbb8ef0e3f4390779a0a33c629a50c259a60784bbdc3078f3e3a8f5e",
+      ".local/heavy-batch/penguin/v2/editor-real-v1/morph-digest-job.json": "bbb583f3818d49a9253aa616edfc40a8f85d2631cafbc2f11de716280e2435ce",
+      ".local/heavy-batch/penguin/v2/editor-real-v1/imported-morph-digests.json": "457ae3f43de793d859e4a45c557c26d4f7cb7eb584c8959b0c9a2abe527ad203",
+      ".local/heavy-batch/penguin/v2/editor-real-v1/imported-morph-validation.json": "a6c6457d0d009131703fc2700029ac30ea4bbca914940006e61f5b64850e76b8"
+    }
+  }
 }

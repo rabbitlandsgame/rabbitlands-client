@@ -199,7 +199,9 @@
     "imported": {
       "samples": 232,
       "maximum_position_error": 7.009540280681704e-08,
-      "maximum_normal_angle_degrees": 9.391510108767544e-06
+      "maximum_normal_angle_degrees": 9.391510108767544e-06,
+      "actual_loader": "ResourceLoader.load(PackedScene)",
+      "authoritative_SCN_provenance": "genuine_editor_verification_revision.load_proofs"
     }
   },
   "editor_import_policy": {
@@ -349,5 +351,195 @@
     "Encoded animation-key savings describe raw files, logical source accessors and import parsing input only. Native importing may densely rebake identical generated Animation keys; no runtime Animation RAM, key-search or playback CPU saving is claimed.",
     "Original artistic review/approval status is unchanged.",
     "Compressed shipping data increases by 8776 bytes despite smaller decoded GLB. This tradeoff is explicit; no unmeasured runtime-memory saving offsets it in this receipt."
-  ]
+  ],
+  "genuine_editor_verification_revision": {
+    "status": "Corrected independent actual Editor verification passed within applicable unchanged modern or legacy scope",
+    "date": "2026-10-28",
+    "source_original_sha256": "4511869ca07785ebd8d236f57610feb8310eeec445af8ffa29319696393a353a",
+    "current_canonical_sha256": "fdc5a70e061bafab406c3c454993af5a6f2bb050b60166ad24f8d5d393589b00",
+    "loader": "ResourceLoader.load(PackedScene)",
+    "load_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/mummy.glb-17f404d2e08d1fe125d4b94f39e68fcd.md5",
+        "import_metadata_sha256": "e93d8e9e8a7a7090f9bda369a74f30a471510c59e65e20d4f0d536556bc6dfe2",
+        "imported_resource_path": "res://.godot/imported/mummy.glb-17f404d2e08d1fe125d4b94f39e68fcd.scn",
+        "imported_resource_sha256": "f20ddc200e3369593fe4a4741c680a3185b9b67fc2d3bd9c770b2ffb1154f233",
+        "packed_scene_resource_path": "res://assets/qa/mummy/v2/baseline/mummy.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "6a5bda242d40d3b7e46c1cabdbb26117",
+        "source_path": "res://assets/qa/mummy/v2/baseline/mummy.glb",
+        "source_sha256": "4511869ca07785ebd8d236f57610feb8310eeec445af8ffa29319696393a353a"
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/mummy.glb-27f3c13f364b87269e596b1396c53cc0.md5",
+        "import_metadata_sha256": "d93cd2555f66378a49bb983006ecee582d8724d97f9f8ca57d47d857359e0bf5",
+        "imported_resource_path": "res://.godot/imported/mummy.glb-27f3c13f364b87269e596b1396c53cc0.scn",
+        "imported_resource_sha256": "98e29ddd3e82380cc099ca2729d74ce13ea5d07570fd9e6fc64dc91d5122f3cc",
+        "packed_scene_resource_path": "res://assets/qa/mummy/v2/candidate/mummy.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "39e6d217963c4d0e5703b9f217f31572",
+        "source_path": "res://assets/qa/mummy/v2/candidate/mummy.glb",
+        "source_sha256": "fdc5a70e061bafab406c3c454993af5a6f2bb050b60166ad24f8d5d393589b00"
+      }
+    ],
+    "source_aliases_and_SCNs_have_current_source_and_destination_MD5_freshness": true,
+    "numeric": {
+      "poses": 232,
+      "all_source_clips": [
+        "Death_A",
+        "Fighting_Idle",
+        "Hit_Chest",
+        "Idle_A",
+        "Jog",
+        "Sword_Attack",
+        "Walk"
+      ],
+      "RESET_checked": true,
+      "maximum_Euclidean_position_error_source_units": 7.009540280681704e-08,
+      "maximum_normal_angle_degrees": 9.391510108767544e-06
+    },
+    "applicable_quality_budget": {
+      "position_four_float32_ULPs": 4.76837158203125e-07,
+      "source_coordinate_or_rest_axis_extent_magnitude": 1.000001418210611,
+      "normal_degrees": 0.0001,
+      "both_passed": true
+    },
+    "full_typed_static_attributes_material_storage_texture_pixels_and_mips": {
+      "actor": "mummy",
+      "source_sha256": "4511869ca07785ebd8d236f57610feb8310eeec445af8ffa29319696393a353a",
+      "candidate_sha256": "fdc5a70e061bafab406c3c454993af5a6f2bb050b60166ad24f8d5d393589b00",
+      "surfaces": [
+        {
+          "all_typed_arrays": [
+            {
+              "slot": 0,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 1,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 2,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 4,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 10,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 11,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 12,
+              "exact_after_proven_vertex_bijection": true
+            }
+          ],
+          "full_material_storage_fields_and_texture_pixels_mips_exact": true,
+          "format_exact": true,
+          "lods": [
+            {
+              "lod": 0,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            },
+            {
+              "lod": 1,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            },
+            {
+              "lod": 2,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            }
+          ],
+          "bounds_component_max_delta": 0.0,
+          "lod_capture_present": true
+        }
+      ],
+      "passed": true,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/mummy.glb-17f404d2e08d1fe125d4b94f39e68fcd.md5",
+          "import_metadata_sha256": "e93d8e9e8a7a7090f9bda369a74f30a471510c59e65e20d4f0d536556bc6dfe2",
+          "imported_resource_path": "res://.godot/imported/mummy.glb-17f404d2e08d1fe125d4b94f39e68fcd.scn",
+          "imported_resource_sha256": "f20ddc200e3369593fe4a4741c680a3185b9b67fc2d3bd9c770b2ffb1154f233",
+          "packed_scene_resource_path": "res://assets/qa/mummy/v2/baseline/mummy.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "6a5bda242d40d3b7e46c1cabdbb26117",
+          "source_path": "res://assets/qa/mummy/v2/baseline/mummy.glb",
+          "source_sha256": "4511869ca07785ebd8d236f57610feb8310eeec445af8ffa29319696393a353a"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/mummy.glb-27f3c13f364b87269e596b1396c53cc0.md5",
+          "import_metadata_sha256": "d93cd2555f66378a49bb983006ecee582d8724d97f9f8ca57d47d857359e0bf5",
+          "imported_resource_path": "res://.godot/imported/mummy.glb-27f3c13f364b87269e596b1396c53cc0.scn",
+          "imported_resource_sha256": "98e29ddd3e82380cc099ca2729d74ce13ea5d07570fd9e6fc64dc91d5122f3cc",
+          "packed_scene_resource_path": "res://assets/qa/mummy/v2/candidate/mummy.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "39e6d217963c4d0e5703b9f217f31572",
+          "source_path": "res://assets/qa/mummy/v2/candidate/mummy.glb",
+          "source_sha256": "fdc5a70e061bafab406c3c454993af5a6f2bb050b60166ad24f8d5d393589b00"
+        }
+      ]
+    },
+    "retained_Editor_morph_fields": {
+      "actor": "mummy",
+      "source_sha256": "4511869ca07785ebd8d236f57610feb8310eeec445af8ffa29319696393a353a",
+      "candidate_sha256": "fdc5a70e061bafab406c3c454993af5a6f2bb050b60166ad24f8d5d393589b00",
+      "all_retained_editor_POSITION_NORMAL_TANGENT_typed_bits_exact": true,
+      "retained_targets": 65,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/mummy.glb-17f404d2e08d1fe125d4b94f39e68fcd.md5",
+          "import_metadata_sha256": "e93d8e9e8a7a7090f9bda369a74f30a471510c59e65e20d4f0d536556bc6dfe2",
+          "imported_resource_path": "res://.godot/imported/mummy.glb-17f404d2e08d1fe125d4b94f39e68fcd.scn",
+          "imported_resource_sha256": "f20ddc200e3369593fe4a4741c680a3185b9b67fc2d3bd9c770b2ffb1154f233",
+          "packed_scene_resource_path": "res://assets/qa/mummy/v2/baseline/mummy.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "6a5bda242d40d3b7e46c1cabdbb26117",
+          "source_path": "res://assets/qa/mummy/v2/baseline/mummy.glb",
+          "source_sha256": "4511869ca07785ebd8d236f57610feb8310eeec445af8ffa29319696393a353a"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/mummy.glb-27f3c13f364b87269e596b1396c53cc0.md5",
+          "import_metadata_sha256": "d93cd2555f66378a49bb983006ecee582d8724d97f9f8ca57d47d857359e0bf5",
+          "imported_resource_path": "res://.godot/imported/mummy.glb-27f3c13f364b87269e596b1396c53cc0.scn",
+          "imported_resource_sha256": "98e29ddd3e82380cc099ca2729d74ce13ea5d07570fd9e6fc64dc91d5122f3cc",
+          "packed_scene_resource_path": "res://assets/qa/mummy/v2/candidate/mummy.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "39e6d217963c4d0e5703b9f217f31572",
+          "source_path": "res://assets/qa/mummy/v2/candidate/mummy.glb",
+          "source_sha256": "fdc5a70e061bafab406c3c454993af5a6f2bb050b60166ad24f8d5d393589b00"
+        }
+      ],
+      "scope": "Direct actual Editor source/candidate retained morph P/N/T byte digests after independently proved complete static-attribute vertex bijection. Exact target mask from source packing lineage; no morph field omitted.",
+      "passed": true
+    },
+    "withdrawn_prior_loader_claim": "Prior shared dumper captures labelled imported used GlbSceneCache for these outside-actor aliases and therefore were raw-cache comparisons. They remain retained private raw/native evidence, but their independent Editor claim is withdrawn and superseded by these explicitly loaded SCNs.",
+    "unchanged_other_evidence": "Original independent physical observations, exact source curves, Blender, actual native gameplay body rendering, placement, mounted/cinematic dependencies and secondary effects remain hash-bound and unchanged. No artistic approval, model, action, cap or witness change in this QA revision.",
+    "production_scope": "Production actor_shipping loose folders remain raw/native and are not Editor-imported. Per-surface Editor-generated LODs are verification representation metadata, not a claim of new gameplay LODs.",
+    "evidence_sha256": {
+      ".local/heavy-batch/mummy/v2/editor-real-v1/qualification-job.json": "cb3b9b081d02ce741782257edf70e577ea60abb304ebeeecbc6570090bcf5744",
+      ".local/heavy-batch/mummy/v2/editor-real-v1/imported/runtime.json": "da9002a3ccb9b5ae148957bf29f7a14b42dfc2dfe4948b648a5ac02a94385f1f",
+      ".local/heavy-batch/mummy/v2/editor-real-v1/imported-validation.json": "17f4bb7a916b47c00238c3d88cb195a22878b844590351274772754b36bd0f50",
+      ".local/heavy-batch/mummy/v2/editor-real-v1/imported-static-mesh-bits.json": "3e2d12031835994f90001110d7e2e315f720112368e7ad8fbfbf27595dcf965f",
+      ".local/heavy-batch/mummy/v2/editor-real-v1/imported-typed-validation.json": "017ef0edecbbf9a1a8b8b68059d4c30ea30be62b9430c7d4f0a01aa49f9b781b",
+      ".local/heavy-batch/mummy/v2/editor-real-v1/morph-digest-job.json": "9354c4a7459d9255e37a349ee1b4f7ed6f214710442a25443692c7610ab11255",
+      ".local/heavy-batch/mummy/v2/editor-real-v1/imported-morph-digests.json": "fc4a28ace5ae64caa347718b7bfc08a417b0273b39aa79eda302573ad393beb4",
+      ".local/heavy-batch/mummy/v2/editor-real-v1/imported-morph-validation.json": "019839e96d93fa1b94db38671707805ddadd3fdb9afd11d14a676ab9894c4b9a"
+    }
+  }
 }

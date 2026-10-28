@@ -168,7 +168,9 @@
     "imported": {
       "samples": 232,
       "maximum_position_error": 1.3973236026514083e-07,
-      "maximum_normal_angle_degrees": 9.2743557084027e-06
+      "maximum_normal_angle_degrees": 9.2743557084027e-06,
+      "actual_loader": "ResourceLoader.load(PackedScene)",
+      "authoritative_SCN_provenance": "genuine_editor_verification_revision.load_proofs"
     }
   },
   "editor_import_policy": {
@@ -320,5 +322,190 @@
     "Encoded animation-key savings describe raw files, logical source accessors and import parsing input only. Native importing may densely rebake identical generated Animation keys; no runtime Animation RAM, key-search or playback CPU saving is claimed.",
     "Original artistic review/approval status is unchanged.",
     "Compressed shipping data increases by 8730 bytes despite smaller decoded GLB. This tradeoff is explicit; no unmeasured runtime-memory saving offsets it in this receipt."
-  ]
+  ],
+  "genuine_editor_verification_revision": {
+    "status": "Corrected independent actual Editor verification passed within applicable unchanged modern or legacy scope",
+    "date": "2026-10-28",
+    "source_original_sha256": "73cc7499547456283bd55c61ae59d045f77827621b369e6eaa5d70da7b2ecde0",
+    "current_canonical_sha256": "b207c992216c841ac0ad21b909a547d62a35985691225bc07bf5a8e17d351eeb",
+    "loader": "ResourceLoader.load(PackedScene)",
+    "load_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/zombie.glb-35c38f560d5351658081c804bb867eec.md5",
+        "import_metadata_sha256": "ed0412bd834baf883f44e58fd60f6084b6e11499b8300291fa898dcdded76050",
+        "imported_resource_path": "res://.godot/imported/zombie.glb-35c38f560d5351658081c804bb867eec.scn",
+        "imported_resource_sha256": "84ebfa5b4a0a4b08d5ab14ab4c82887d1b533be3f46bbd79c3b8b62b83d22d1c",
+        "packed_scene_resource_path": "res://assets/qa/zombie/v2/baseline/zombie.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "439fc5fe358ea5403aa767059db57154",
+        "source_path": "res://assets/qa/zombie/v2/baseline/zombie.glb",
+        "source_sha256": "73cc7499547456283bd55c61ae59d045f77827621b369e6eaa5d70da7b2ecde0"
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/zombie.glb-f494b1b319d5f60eb780d07693ef8dd0.md5",
+        "import_metadata_sha256": "2fbdb4f9e06012ce2f5c88870d3748d579faaa9a7777c451ce0f5c69f1e0ac0f",
+        "imported_resource_path": "res://.godot/imported/zombie.glb-f494b1b319d5f60eb780d07693ef8dd0.scn",
+        "imported_resource_sha256": "8658425f2a8f68f6f151f5f7091383f1917056eee2c5a2351443eb10bc501ddf",
+        "packed_scene_resource_path": "res://assets/qa/zombie/v2/candidate/zombie.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "b6a6d5c75c0bfaf4019ea2e41a261c58",
+        "source_path": "res://assets/qa/zombie/v2/candidate/zombie.glb",
+        "source_sha256": "b207c992216c841ac0ad21b909a547d62a35985691225bc07bf5a8e17d351eeb"
+      }
+    ],
+    "source_aliases_and_SCNs_have_current_source_and_destination_MD5_freshness": true,
+    "numeric": {
+      "poses": 232,
+      "all_source_clips": [
+        "Death_A",
+        "Fighting_Idle",
+        "Hit_Chest",
+        "Idle_A",
+        "Sword_Attack",
+        "Walk",
+        "Jog"
+      ],
+      "RESET_checked": true,
+      "maximum_Euclidean_position_error_source_units": 1.3973236026514083e-07,
+      "maximum_normal_angle_degrees": 9.2743557084027e-06
+    },
+    "applicable_quality_budget": {
+      "position_four_float32_ULPs": 4.76837158203125e-07,
+      "source_coordinate_or_rest_axis_extent_magnitude": 1.0000006280070486,
+      "normal_degrees": 0.0001,
+      "both_passed": true
+    },
+    "full_typed_static_attributes_material_storage_texture_pixels_and_mips": {
+      "actor": "zombie",
+      "source_sha256": "73cc7499547456283bd55c61ae59d045f77827621b369e6eaa5d70da7b2ecde0",
+      "candidate_sha256": "b207c992216c841ac0ad21b909a547d62a35985691225bc07bf5a8e17d351eeb",
+      "surfaces": [
+        {
+          "all_typed_arrays": [
+            {
+              "slot": 0,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 1,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 2,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 4,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 10,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 11,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 12,
+              "exact_after_proven_vertex_bijection": true
+            }
+          ],
+          "full_material_storage_fields_and_texture_pixels_mips_exact": true,
+          "format_exact": true,
+          "lods": [
+            {
+              "lod": 0,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            },
+            {
+              "lod": 1,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            }
+          ],
+          "bounds_component_max_delta": 0.0,
+          "lod_capture_present": true
+        }
+      ],
+      "passed": true,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/zombie.glb-35c38f560d5351658081c804bb867eec.md5",
+          "import_metadata_sha256": "ed0412bd834baf883f44e58fd60f6084b6e11499b8300291fa898dcdded76050",
+          "imported_resource_path": "res://.godot/imported/zombie.glb-35c38f560d5351658081c804bb867eec.scn",
+          "imported_resource_sha256": "84ebfa5b4a0a4b08d5ab14ab4c82887d1b533be3f46bbd79c3b8b62b83d22d1c",
+          "packed_scene_resource_path": "res://assets/qa/zombie/v2/baseline/zombie.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "439fc5fe358ea5403aa767059db57154",
+          "source_path": "res://assets/qa/zombie/v2/baseline/zombie.glb",
+          "source_sha256": "73cc7499547456283bd55c61ae59d045f77827621b369e6eaa5d70da7b2ecde0"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/zombie.glb-f494b1b319d5f60eb780d07693ef8dd0.md5",
+          "import_metadata_sha256": "2fbdb4f9e06012ce2f5c88870d3748d579faaa9a7777c451ce0f5c69f1e0ac0f",
+          "imported_resource_path": "res://.godot/imported/zombie.glb-f494b1b319d5f60eb780d07693ef8dd0.scn",
+          "imported_resource_sha256": "8658425f2a8f68f6f151f5f7091383f1917056eee2c5a2351443eb10bc501ddf",
+          "packed_scene_resource_path": "res://assets/qa/zombie/v2/candidate/zombie.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "b6a6d5c75c0bfaf4019ea2e41a261c58",
+          "source_path": "res://assets/qa/zombie/v2/candidate/zombie.glb",
+          "source_sha256": "b207c992216c841ac0ad21b909a547d62a35985691225bc07bf5a8e17d351eeb"
+        }
+      ]
+    },
+    "retained_Editor_morph_fields": {
+      "actor": "zombie",
+      "source_sha256": "73cc7499547456283bd55c61ae59d045f77827621b369e6eaa5d70da7b2ecde0",
+      "candidate_sha256": "b207c992216c841ac0ad21b909a547d62a35985691225bc07bf5a8e17d351eeb",
+      "all_retained_editor_POSITION_NORMAL_TANGENT_typed_bits_exact": true,
+      "retained_targets": 33,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/zombie.glb-35c38f560d5351658081c804bb867eec.md5",
+          "import_metadata_sha256": "ed0412bd834baf883f44e58fd60f6084b6e11499b8300291fa898dcdded76050",
+          "imported_resource_path": "res://.godot/imported/zombie.glb-35c38f560d5351658081c804bb867eec.scn",
+          "imported_resource_sha256": "84ebfa5b4a0a4b08d5ab14ab4c82887d1b533be3f46bbd79c3b8b62b83d22d1c",
+          "packed_scene_resource_path": "res://assets/qa/zombie/v2/baseline/zombie.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "439fc5fe358ea5403aa767059db57154",
+          "source_path": "res://assets/qa/zombie/v2/baseline/zombie.glb",
+          "source_sha256": "73cc7499547456283bd55c61ae59d045f77827621b369e6eaa5d70da7b2ecde0"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/zombie.glb-f494b1b319d5f60eb780d07693ef8dd0.md5",
+          "import_metadata_sha256": "2fbdb4f9e06012ce2f5c88870d3748d579faaa9a7777c451ce0f5c69f1e0ac0f",
+          "imported_resource_path": "res://.godot/imported/zombie.glb-f494b1b319d5f60eb780d07693ef8dd0.scn",
+          "imported_resource_sha256": "8658425f2a8f68f6f151f5f7091383f1917056eee2c5a2351443eb10bc501ddf",
+          "packed_scene_resource_path": "res://assets/qa/zombie/v2/candidate/zombie.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "b6a6d5c75c0bfaf4019ea2e41a261c58",
+          "source_path": "res://assets/qa/zombie/v2/candidate/zombie.glb",
+          "source_sha256": "b207c992216c841ac0ad21b909a547d62a35985691225bc07bf5a8e17d351eeb"
+        }
+      ],
+      "scope": "Direct actual Editor source/candidate retained morph P/N/T byte digests after independently proved complete static-attribute vertex bijection. Exact target mask from source packing lineage; no morph field omitted.",
+      "passed": true
+    },
+    "withdrawn_prior_loader_claim": "Prior shared dumper captures labelled imported used GlbSceneCache for these outside-actor aliases and therefore were raw-cache comparisons. They remain retained private raw/native evidence, but their independent Editor claim is withdrawn and superseded by these explicitly loaded SCNs.",
+    "unchanged_other_evidence": "Original independent physical observations, exact source curves, Blender, actual native gameplay body rendering, placement, mounted/cinematic dependencies and secondary effects remain hash-bound and unchanged. No artistic approval, model, action, cap or witness change in this QA revision.",
+    "production_scope": "Production actor_shipping loose folders remain raw/native and are not Editor-imported. Per-surface Editor-generated LODs are verification representation metadata, not a claim of new gameplay LODs.",
+    "evidence_sha256": {
+      ".local/heavy-batch/zombie/v2/editor-real-v1/qualification-job.json": "a3fb4a53fe906cde799c0f5ca02b61fb1de576922aeceec6e74a77baa14295fd",
+      ".local/heavy-batch/zombie/v2/editor-real-v1/imported/runtime.json": "14fa49cef024bc2cde691885e0231f7a18fc6a86357c80f57be28cda59e5a8f9",
+      ".local/heavy-batch/zombie/v2/editor-real-v1/imported-validation.json": "720908843b544a02cca1f31f1220caa928b53afb81ef8958ca40826d8a930b09",
+      ".local/heavy-batch/zombie/v2/editor-real-v1/imported-static-mesh-bits.json": "f252ddc87cc8ed14b09b68c2c3049ea41478ad0492585606108faf04844b77d7",
+      ".local/heavy-batch/zombie/v2/editor-real-v1/imported-typed-validation.json": "346dbcd02cf3593a9224d63dab6d95118f8d6e192104dbb6c62dcc4a65f6f9f9",
+      ".local/heavy-batch/zombie/v2/editor-real-v1/morph-digest-job.json": "202190568f36bf70405050bda7ca7ca1c7eb4fef99374b47e5c19ccddd73e154",
+      ".local/heavy-batch/zombie/v2/editor-real-v1/imported-morph-digests.json": "7c9e0372d27e242957b6adc132fa8f4c835a1242f4e12223b221260f26ab242b",
+      ".local/heavy-batch/zombie/v2/editor-real-v1/imported-morph-validation.json": "b94e42853c663607c9a6599df300b2c987bd98a8bbadcf980b7861e1a26ea2c3"
+    }
+  }
 }

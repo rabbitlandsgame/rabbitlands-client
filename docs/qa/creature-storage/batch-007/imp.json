@@ -395,7 +395,9 @@
     "imported": {
       "samples": 296,
       "maximum_position_error": 2.2364528133390455e-07,
-      "maximum_normal_angle_degrees": 1.8070981951380476e-05
+      "maximum_normal_angle_degrees": 1.8070981951380476e-05,
+      "actual_loader": "ResourceLoader.load(PackedScene)",
+      "authoritative_SCN_provenance": "genuine_editor_verification_revision.load_proofs"
     }
   },
   "native_numeric_budget": {
@@ -508,5 +510,196 @@
     "Encoded animation-key savings describe raw files, logical source accessors and import parsing input only. Native importing may densely rebake identical generated Animation keys; no runtime Animation RAM, key-search or playback CPU saving is claimed.",
     "Original artistic review/approval status is unchanged.",
     "Compressed shipping data increases by 7114 bytes despite smaller decoded GLB. This tradeoff is explicit; no unmeasured runtime-memory saving offsets it in this receipt."
-  ]
+  ],
+  "genuine_editor_verification_revision": {
+    "status": "Corrected independent actual Editor verification passed within applicable unchanged modern or legacy scope",
+    "date": "2026-10-28",
+    "source_original_sha256": "526c874dfe58055cc71393f76073ef6125a8c185605f6ba39375c40366846e01",
+    "current_canonical_sha256": "a4f67844f97f53253820046fcd11cd5f2fab5c320f6285e13dcb5612bcd0408d",
+    "loader": "ResourceLoader.load(PackedScene)",
+    "load_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/imp.glb-bf4b7e71150d8bc0bb0ad1790d78fbdd.md5",
+        "import_metadata_sha256": "02ec3bf0ce3888cfe9279d22fb56635ce75c8707cf7336b81be4773b37752531",
+        "imported_resource_path": "res://.godot/imported/imp.glb-bf4b7e71150d8bc0bb0ad1790d78fbdd.scn",
+        "imported_resource_sha256": "d391a1999c04d41bd4d67313f79e4367a1991ddf8763f668d29de5063e851195",
+        "packed_scene_resource_path": "res://assets/qa/imp/v2/baseline/imp.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "7499c1ed7df8ea7e06a0749610a8fac5",
+        "source_path": "res://assets/qa/imp/v2/baseline/imp.glb",
+        "source_sha256": "526c874dfe58055cc71393f76073ef6125a8c185605f6ba39375c40366846e01"
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/imp.glb-576aa08f2801ff702a006ee66bc1ecbd.md5",
+        "import_metadata_sha256": "836c07feebb4a22490c01134e10d2cb4a9a2832ac53e7e5efe6d0e184400f5b2",
+        "imported_resource_path": "res://.godot/imported/imp.glb-576aa08f2801ff702a006ee66bc1ecbd.scn",
+        "imported_resource_sha256": "4d02937fb78b7dffcddc312a41aea40e83d9a79ad862bb2810c509066d1a3a1a",
+        "packed_scene_resource_path": "res://assets/qa/imp/v2/candidate/imp.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "b7049d24b41609571e2d1ecdcce3695d",
+        "source_path": "res://assets/qa/imp/v2/candidate/imp.glb",
+        "source_sha256": "a4f67844f97f53253820046fcd11cd5f2fab5c320f6285e13dcb5612bcd0408d"
+      }
+    ],
+    "source_aliases_and_SCNs_have_current_source_and_destination_MD5_freshness": true,
+    "numeric": {
+      "poses": 296,
+      "all_source_clips": [
+        "Death_A",
+        "Fighting_Idle",
+        "Fly",
+        "Hit_Chest",
+        "Idle_A",
+        "Jog",
+        "Sword_Attack",
+        "Walk"
+      ],
+      "RESET_checked": true,
+      "maximum_Euclidean_position_error_source_units": 2.2364528133390455e-07,
+      "maximum_normal_angle_degrees": 1.8070981951380476e-05
+    },
+    "applicable_quality_budget": {
+      "position_four_float32_ULPs": 4.76837158203125e-07,
+      "source_coordinate_or_rest_axis_extent_magnitude": 1.0000013665968082,
+      "normal_degrees": 0.0001,
+      "both_passed": true
+    },
+    "full_typed_static_attributes_material_storage_texture_pixels_and_mips": {
+      "actor": "imp",
+      "source_sha256": "526c874dfe58055cc71393f76073ef6125a8c185605f6ba39375c40366846e01",
+      "candidate_sha256": "a4f67844f97f53253820046fcd11cd5f2fab5c320f6285e13dcb5612bcd0408d",
+      "surfaces": [
+        {
+          "all_typed_arrays": [
+            {
+              "slot": 0,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 1,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 2,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 4,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 10,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 11,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 12,
+              "exact_after_proven_vertex_bijection": true
+            }
+          ],
+          "full_material_storage_fields_and_texture_pixels_mips_exact": true,
+          "format_exact": true,
+          "lods": [
+            {
+              "lod": 0,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            },
+            {
+              "lod": 1,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            },
+            {
+              "lod": 2,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            }
+          ],
+          "bounds_component_max_delta": 0.0,
+          "lod_capture_present": true
+        }
+      ],
+      "passed": true,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/imp.glb-bf4b7e71150d8bc0bb0ad1790d78fbdd.md5",
+          "import_metadata_sha256": "02ec3bf0ce3888cfe9279d22fb56635ce75c8707cf7336b81be4773b37752531",
+          "imported_resource_path": "res://.godot/imported/imp.glb-bf4b7e71150d8bc0bb0ad1790d78fbdd.scn",
+          "imported_resource_sha256": "d391a1999c04d41bd4d67313f79e4367a1991ddf8763f668d29de5063e851195",
+          "packed_scene_resource_path": "res://assets/qa/imp/v2/baseline/imp.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "7499c1ed7df8ea7e06a0749610a8fac5",
+          "source_path": "res://assets/qa/imp/v2/baseline/imp.glb",
+          "source_sha256": "526c874dfe58055cc71393f76073ef6125a8c185605f6ba39375c40366846e01"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/imp.glb-576aa08f2801ff702a006ee66bc1ecbd.md5",
+          "import_metadata_sha256": "836c07feebb4a22490c01134e10d2cb4a9a2832ac53e7e5efe6d0e184400f5b2",
+          "imported_resource_path": "res://.godot/imported/imp.glb-576aa08f2801ff702a006ee66bc1ecbd.scn",
+          "imported_resource_sha256": "4d02937fb78b7dffcddc312a41aea40e83d9a79ad862bb2810c509066d1a3a1a",
+          "packed_scene_resource_path": "res://assets/qa/imp/v2/candidate/imp.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "b7049d24b41609571e2d1ecdcce3695d",
+          "source_path": "res://assets/qa/imp/v2/candidate/imp.glb",
+          "source_sha256": "a4f67844f97f53253820046fcd11cd5f2fab5c320f6285e13dcb5612bcd0408d"
+        }
+      ]
+    },
+    "retained_Editor_morph_fields": {
+      "actor": "imp",
+      "source_sha256": "526c874dfe58055cc71393f76073ef6125a8c185605f6ba39375c40366846e01",
+      "candidate_sha256": "a4f67844f97f53253820046fcd11cd5f2fab5c320f6285e13dcb5612bcd0408d",
+      "all_retained_editor_POSITION_NORMAL_TANGENT_typed_bits_exact": true,
+      "retained_targets": 257,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/imp.glb-bf4b7e71150d8bc0bb0ad1790d78fbdd.md5",
+          "import_metadata_sha256": "02ec3bf0ce3888cfe9279d22fb56635ce75c8707cf7336b81be4773b37752531",
+          "imported_resource_path": "res://.godot/imported/imp.glb-bf4b7e71150d8bc0bb0ad1790d78fbdd.scn",
+          "imported_resource_sha256": "d391a1999c04d41bd4d67313f79e4367a1991ddf8763f668d29de5063e851195",
+          "packed_scene_resource_path": "res://assets/qa/imp/v2/baseline/imp.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "7499c1ed7df8ea7e06a0749610a8fac5",
+          "source_path": "res://assets/qa/imp/v2/baseline/imp.glb",
+          "source_sha256": "526c874dfe58055cc71393f76073ef6125a8c185605f6ba39375c40366846e01"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/imp.glb-576aa08f2801ff702a006ee66bc1ecbd.md5",
+          "import_metadata_sha256": "836c07feebb4a22490c01134e10d2cb4a9a2832ac53e7e5efe6d0e184400f5b2",
+          "imported_resource_path": "res://.godot/imported/imp.glb-576aa08f2801ff702a006ee66bc1ecbd.scn",
+          "imported_resource_sha256": "4d02937fb78b7dffcddc312a41aea40e83d9a79ad862bb2810c509066d1a3a1a",
+          "packed_scene_resource_path": "res://assets/qa/imp/v2/candidate/imp.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "b7049d24b41609571e2d1ecdcce3695d",
+          "source_path": "res://assets/qa/imp/v2/candidate/imp.glb",
+          "source_sha256": "a4f67844f97f53253820046fcd11cd5f2fab5c320f6285e13dcb5612bcd0408d"
+        }
+      ],
+      "scope": "Direct actual Editor source/candidate retained morph P/N/T byte digests after independently proved complete static-attribute vertex bijection. Exact target mask from source packing lineage; no morph field omitted.",
+      "passed": true
+    },
+    "withdrawn_prior_loader_claim": "Prior shared dumper captures labelled imported used GlbSceneCache for these outside-actor aliases and therefore were raw-cache comparisons. They remain retained private raw/native evidence, but their independent Editor claim is withdrawn and superseded by these explicitly loaded SCNs.",
+    "unchanged_other_evidence": "Original independent physical observations, exact source curves, Blender, actual native gameplay body rendering, placement, mounted/cinematic dependencies and secondary effects remain hash-bound and unchanged. No artistic approval, model, action, cap or witness change in this QA revision.",
+    "production_scope": "Production actor_shipping loose folders remain raw/native and are not Editor-imported. Per-surface Editor-generated LODs are verification representation metadata, not a claim of new gameplay LODs.",
+    "evidence_sha256": {
+      ".local/heavy-batch/imp/v2/editor-real-v1/qualification-job.json": "3320b6483d74f2b8721fe39e075e9fa68098600a2d9cd991d55b76ee9bb563f8",
+      ".local/heavy-batch/imp/v2/editor-real-v1/imported/runtime.json": "0f4ef73fa30e6a79218047a2df98604dd59bd200a39a5b4e4d1bc76e2f033656",
+      ".local/heavy-batch/imp/v2/editor-real-v1/imported-validation.json": "f84176f2399ec46163dbe8520c7d529c436fbc5e5d4b74c8cb2bd70ae287eebb",
+      ".local/heavy-batch/imp/v2/editor-real-v1/imported-static-mesh-bits.json": "0562ab997f0dee24e1f6ff8096025b8dd694a077e92cc41cbfabc4d46bb92d97",
+      ".local/heavy-batch/imp/v2/editor-real-v1/imported-typed-validation.json": "b070be59217e9008cacd75e84210db1343e852b1503fd3bc785bbfa220e63cb8",
+      ".local/heavy-batch/imp/v2/editor-real-v1/morph-digest-job.json": "c00f1b56dfce7a92f2caa3f5ed5f8735e0a68470c39c6bb1bd2d42015a301f30",
+      ".local/heavy-batch/imp/v2/editor-real-v1/imported-morph-digests.json": "47bf72b34dfe6a6e685cf8cca88014b4cb2cc4bbe779fc0c8c3ef4c9aeac301d",
+      ".local/heavy-batch/imp/v2/editor-real-v1/imported-morph-validation.json": "0bb595cbbdec3f5fe023d8308c4e6383fed1edb2bb7950bcd823470447250a77"
+    }
+  }
 }

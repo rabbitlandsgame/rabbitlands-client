@@ -159,7 +159,9 @@
     "imported": {
       "samples": 232,
       "maximum_position_error": 1.5268913550697522e-07,
-      "maximum_normal_angle_degrees": 3.092499675040067e-05
+      "maximum_normal_angle_degrees": 3.092499675040067e-05,
+      "actual_loader": "ResourceLoader.load(PackedScene)",
+      "authoritative_SCN_provenance": "genuine_editor_verification_revision.load_proofs"
     }
   },
   "editor_import_policy": {
@@ -305,5 +307,195 @@
     "Separate resident RAM and frame-time benchmarks were not measured.",
     "Encoded animation-key savings describe raw files, logical source accessors and import parsing input only. Native importing may densely rebake identical generated Animation keys; no runtime Animation RAM, key-search or playback CPU saving is claimed.",
     "Original artistic review/approval status is unchanged."
-  ]
+  ],
+  "genuine_editor_verification_revision": {
+    "status": "Corrected independent actual Editor verification passed within applicable unchanged modern or legacy scope",
+    "date": "2026-10-28",
+    "source_original_sha256": "0de34ad9e4a2225190c382577c4b42e916cb32b517d96d9bab8490355e0cf38c",
+    "current_canonical_sha256": "a849f7e27220ad7b4cc9ae5cc8f8ad0b78b2c9761fffb9ffa5198ecfa43aac2e",
+    "loader": "ResourceLoader.load(PackedScene)",
+    "load_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/jackalope.glb-a2db8ae971e94b0eb7f1cd2cbacd031f.md5",
+        "import_metadata_sha256": "30f7a19b01c86a5a7cf10f87d2d0eef674f8ad4861d83c7331c4f5da18948890",
+        "imported_resource_path": "res://.godot/imported/jackalope.glb-a2db8ae971e94b0eb7f1cd2cbacd031f.scn",
+        "imported_resource_sha256": "65c43b3e47bd061705f721622a0e73877e341f2ca253d1b04219975b65fd32a1",
+        "packed_scene_resource_path": "res://assets/qa/jackalope/v2/baseline/jackalope.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "28340d8d431d5820244bcefba51b1d66",
+        "source_path": "res://assets/qa/jackalope/v2/baseline/jackalope.glb",
+        "source_sha256": "0de34ad9e4a2225190c382577c4b42e916cb32b517d96d9bab8490355e0cf38c"
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/jackalope.glb-57f2ec027d5986292caa331164897f5a.md5",
+        "import_metadata_sha256": "e8bb55fe70f8d8eda8831713e2aa7244122cb35043aab39651cb52c807dd4827",
+        "imported_resource_path": "res://.godot/imported/jackalope.glb-57f2ec027d5986292caa331164897f5a.scn",
+        "imported_resource_sha256": "0c176dcaedf18107c15bdc6f269090a4dc896b42a27afcccce2554c1c09843c7",
+        "packed_scene_resource_path": "res://assets/qa/jackalope/v2/candidate/jackalope.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "8a407f67bf22d41a626ea2f3b6e5ce97",
+        "source_path": "res://assets/qa/jackalope/v2/candidate/jackalope.glb",
+        "source_sha256": "a849f7e27220ad7b4cc9ae5cc8f8ad0b78b2c9761fffb9ffa5198ecfa43aac2e"
+      }
+    ],
+    "source_aliases_and_SCNs_have_current_source_and_destination_MD5_freshness": true,
+    "numeric": {
+      "poses": 232,
+      "all_source_clips": [
+        "Fighting_Idle",
+        "Hit_Chest",
+        "Idle_A",
+        "Walk",
+        "Jog",
+        "Sword_Attack",
+        "Death_A"
+      ],
+      "RESET_checked": true,
+      "maximum_Euclidean_position_error_source_units": 1.5268913550697522e-07,
+      "maximum_normal_angle_degrees": 3.092499675040067e-05
+    },
+    "applicable_quality_budget": {
+      "position_four_float32_ULPs": 4.76837158203125e-07,
+      "source_coordinate_or_rest_axis_extent_magnitude": 1.0000011371652924,
+      "normal_degrees": 0.0001,
+      "both_passed": true
+    },
+    "full_typed_static_attributes_material_storage_texture_pixels_and_mips": {
+      "actor": "jackalope",
+      "source_sha256": "0de34ad9e4a2225190c382577c4b42e916cb32b517d96d9bab8490355e0cf38c",
+      "candidate_sha256": "a849f7e27220ad7b4cc9ae5cc8f8ad0b78b2c9761fffb9ffa5198ecfa43aac2e",
+      "surfaces": [
+        {
+          "all_typed_arrays": [
+            {
+              "slot": 0,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 1,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 2,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 4,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 10,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 11,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 12,
+              "exact_after_proven_vertex_bijection": true
+            }
+          ],
+          "full_material_storage_fields_and_texture_pixels_mips_exact": true,
+          "format_exact": true,
+          "lods": [
+            {
+              "lod": 0,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            },
+            {
+              "lod": 1,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            },
+            {
+              "lod": 2,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            }
+          ],
+          "bounds_component_max_delta": 0.0,
+          "lod_capture_present": true
+        }
+      ],
+      "passed": true,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/jackalope.glb-a2db8ae971e94b0eb7f1cd2cbacd031f.md5",
+          "import_metadata_sha256": "30f7a19b01c86a5a7cf10f87d2d0eef674f8ad4861d83c7331c4f5da18948890",
+          "imported_resource_path": "res://.godot/imported/jackalope.glb-a2db8ae971e94b0eb7f1cd2cbacd031f.scn",
+          "imported_resource_sha256": "65c43b3e47bd061705f721622a0e73877e341f2ca253d1b04219975b65fd32a1",
+          "packed_scene_resource_path": "res://assets/qa/jackalope/v2/baseline/jackalope.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "28340d8d431d5820244bcefba51b1d66",
+          "source_path": "res://assets/qa/jackalope/v2/baseline/jackalope.glb",
+          "source_sha256": "0de34ad9e4a2225190c382577c4b42e916cb32b517d96d9bab8490355e0cf38c"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/jackalope.glb-57f2ec027d5986292caa331164897f5a.md5",
+          "import_metadata_sha256": "e8bb55fe70f8d8eda8831713e2aa7244122cb35043aab39651cb52c807dd4827",
+          "imported_resource_path": "res://.godot/imported/jackalope.glb-57f2ec027d5986292caa331164897f5a.scn",
+          "imported_resource_sha256": "0c176dcaedf18107c15bdc6f269090a4dc896b42a27afcccce2554c1c09843c7",
+          "packed_scene_resource_path": "res://assets/qa/jackalope/v2/candidate/jackalope.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "8a407f67bf22d41a626ea2f3b6e5ce97",
+          "source_path": "res://assets/qa/jackalope/v2/candidate/jackalope.glb",
+          "source_sha256": "a849f7e27220ad7b4cc9ae5cc8f8ad0b78b2c9761fffb9ffa5198ecfa43aac2e"
+        }
+      ]
+    },
+    "retained_Editor_morph_fields": {
+      "actor": "jackalope",
+      "source_sha256": "0de34ad9e4a2225190c382577c4b42e916cb32b517d96d9bab8490355e0cf38c",
+      "candidate_sha256": "a849f7e27220ad7b4cc9ae5cc8f8ad0b78b2c9761fffb9ffa5198ecfa43aac2e",
+      "all_retained_editor_POSITION_NORMAL_TANGENT_typed_bits_exact": true,
+      "retained_targets": 0,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/jackalope.glb-a2db8ae971e94b0eb7f1cd2cbacd031f.md5",
+          "import_metadata_sha256": "30f7a19b01c86a5a7cf10f87d2d0eef674f8ad4861d83c7331c4f5da18948890",
+          "imported_resource_path": "res://.godot/imported/jackalope.glb-a2db8ae971e94b0eb7f1cd2cbacd031f.scn",
+          "imported_resource_sha256": "65c43b3e47bd061705f721622a0e73877e341f2ca253d1b04219975b65fd32a1",
+          "packed_scene_resource_path": "res://assets/qa/jackalope/v2/baseline/jackalope.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "28340d8d431d5820244bcefba51b1d66",
+          "source_path": "res://assets/qa/jackalope/v2/baseline/jackalope.glb",
+          "source_sha256": "0de34ad9e4a2225190c382577c4b42e916cb32b517d96d9bab8490355e0cf38c"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/jackalope.glb-57f2ec027d5986292caa331164897f5a.md5",
+          "import_metadata_sha256": "e8bb55fe70f8d8eda8831713e2aa7244122cb35043aab39651cb52c807dd4827",
+          "imported_resource_path": "res://.godot/imported/jackalope.glb-57f2ec027d5986292caa331164897f5a.scn",
+          "imported_resource_sha256": "0c176dcaedf18107c15bdc6f269090a4dc896b42a27afcccce2554c1c09843c7",
+          "packed_scene_resource_path": "res://assets/qa/jackalope/v2/candidate/jackalope.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "8a407f67bf22d41a626ea2f3b6e5ce97",
+          "source_path": "res://assets/qa/jackalope/v2/candidate/jackalope.glb",
+          "source_sha256": "a849f7e27220ad7b4cc9ae5cc8f8ad0b78b2c9761fffb9ffa5198ecfa43aac2e"
+        }
+      ],
+      "scope": "Direct actual Editor source/candidate retained morph P/N/T byte digests after independently proved complete static-attribute vertex bijection. Exact target mask from source packing lineage; no morph field omitted.",
+      "passed": true
+    },
+    "withdrawn_prior_loader_claim": "Prior shared dumper captures labelled imported used GlbSceneCache for these outside-actor aliases and therefore were raw-cache comparisons. They remain retained private raw/native evidence, but their independent Editor claim is withdrawn and superseded by these explicitly loaded SCNs.",
+    "unchanged_other_evidence": "Original independent physical observations, exact source curves, Blender, actual native gameplay body rendering, placement, mounted/cinematic dependencies and secondary effects remain hash-bound and unchanged. No artistic approval, model, action, cap or witness change in this QA revision.",
+    "production_scope": "Production actor_shipping loose folders remain raw/native and are not Editor-imported. Per-surface Editor-generated LODs are verification representation metadata, not a claim of new gameplay LODs.",
+    "evidence_sha256": {
+      ".local/heavy-batch/jackalope/v2/editor-real-v1/qualification-job.json": "6898ed26bc8bb6b59390ab7d2cbbb4ec928b138a7cada496680210a170f48203",
+      ".local/heavy-batch/jackalope/v2/editor-real-v1/imported/runtime.json": "5dc454f6a6c95d8d8e9c62787f75455ceaa2e3812264f206756add6faaac2ad3",
+      ".local/heavy-batch/jackalope/v2/editor-real-v1/imported-validation.json": "a5217b2cff003f4c4890340370052fcebd65dae0c8ea916add0cd794456c9641",
+      ".local/heavy-batch/jackalope/v2/editor-real-v1/imported-static-mesh-bits.json": "0e9f3711987b405f699fbe67c36a53211c19164e612b3b5a1d23f8cf0d822fb6",
+      ".local/heavy-batch/jackalope/v2/editor-real-v1/imported-typed-validation.json": "59596dadb13e80cb260437c5fd4b53843bd8f0654d1249f82e1b49df31b7f677",
+      ".local/heavy-batch/jackalope/v2/editor-real-v1/morph-digest-job.json": "83a435ebabdb097282d5edc50ea9cacdc914516293fff032f11cb7911692f715",
+      ".local/heavy-batch/jackalope/v2/editor-real-v1/imported-morph-digests.json": "c63bf69da79f8c11983a91ccde65c275f22471e12b586209ada3a3d4e8165337",
+      ".local/heavy-batch/jackalope/v2/editor-real-v1/imported-morph-validation.json": "80c89c532f065c9a898d9c315083f0fd2ff5625adce15f034ef803fd07c4a8d1"
+    }
+  }
 }

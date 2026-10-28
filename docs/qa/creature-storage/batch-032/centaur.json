@@ -177,7 +177,9 @@
     "imported": {
       "samples": 232,
       "maximum_position_error": 1.6761633125341624e-07,
-      "maximum_normal_angle_degrees": 1.0029569411827041e-05
+      "maximum_normal_angle_degrees": 1.0029569411827041e-05,
+      "actual_loader": "ResourceLoader.load(PackedScene)",
+      "authoritative_SCN_provenance": "genuine_editor_verification_revision.load_proofs"
     }
   },
   "editor_import_policy": {
@@ -328,5 +330,195 @@
     "Separate resident RAM and frame-time benchmarks were not measured.",
     "Encoded animation-key savings describe raw files, logical source accessors and import parsing input only. Native importing may densely rebake identical generated Animation keys; no runtime Animation RAM, key-search or playback CPU saving is claimed.",
     "Original artistic review/approval status is unchanged."
-  ]
+  ],
+  "genuine_editor_verification_revision": {
+    "status": "Corrected independent actual Editor verification passed within applicable unchanged modern or legacy scope",
+    "date": "2026-10-28",
+    "source_original_sha256": "e500b26a17d4416d17364e949a9521f5ccbf331d0b0cc61b4a435489733587fb",
+    "current_canonical_sha256": "f6ffb941c25c694696e53c7f60c3243f7ac051176e366482b60e55463b6651e0",
+    "loader": "ResourceLoader.load(PackedScene)",
+    "load_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/centaur.glb-6f190823eb696d0168656e57730d2026.md5",
+        "import_metadata_sha256": "af32b93a17bc841f6a75cd9d9b14babf6143c69cd1b9aff9f782f08dab2e9fe6",
+        "imported_resource_path": "res://.godot/imported/centaur.glb-6f190823eb696d0168656e57730d2026.scn",
+        "imported_resource_sha256": "ec531a3e360084b36e4ab49048dd140f051d5809578da73d37e767794e2f584e",
+        "packed_scene_resource_path": "res://assets/qa/centaur/v2/baseline/centaur.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "2dcd32b0fd9626720cf08ef9e37d254e",
+        "source_path": "res://assets/qa/centaur/v2/baseline/centaur.glb",
+        "source_sha256": "e500b26a17d4416d17364e949a9521f5ccbf331d0b0cc61b4a435489733587fb"
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/centaur.glb-712a474aa39783a6d3373b88e999df08.md5",
+        "import_metadata_sha256": "d66b5cbf2a7212ecf34cf141506121a1e2610313ca51ca117c1c068bf55f1fca",
+        "imported_resource_path": "res://.godot/imported/centaur.glb-712a474aa39783a6d3373b88e999df08.scn",
+        "imported_resource_sha256": "5ae6bab9f5cb4aeb42c81d7840b3d7a376ef4df2f6652d3ca95cc2b18db7d9c0",
+        "packed_scene_resource_path": "res://assets/qa/centaur/v2/candidate/centaur.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "a47cc1572eac61aa0342fbb944b66983",
+        "source_path": "res://assets/qa/centaur/v2/candidate/centaur.glb",
+        "source_sha256": "f6ffb941c25c694696e53c7f60c3243f7ac051176e366482b60e55463b6651e0"
+      }
+    ],
+    "source_aliases_and_SCNs_have_current_source_and_destination_MD5_freshness": true,
+    "numeric": {
+      "poses": 232,
+      "all_source_clips": [
+        "Death_A",
+        "Fighting_Idle",
+        "Hit_Chest",
+        "Idle_A",
+        "Jog",
+        "Sword_Attack",
+        "Walk"
+      ],
+      "RESET_checked": true,
+      "maximum_Euclidean_position_error_source_units": 1.6761633125341624e-07,
+      "maximum_normal_angle_degrees": 1.0029569411827041e-05
+    },
+    "applicable_quality_budget": {
+      "position_four_float32_ULPs": 4.76837158203125e-07,
+      "source_coordinate_or_rest_axis_extent_magnitude": 1.0000014798274048,
+      "normal_degrees": 0.0001,
+      "both_passed": true
+    },
+    "full_typed_static_attributes_material_storage_texture_pixels_and_mips": {
+      "actor": "centaur",
+      "source_sha256": "e500b26a17d4416d17364e949a9521f5ccbf331d0b0cc61b4a435489733587fb",
+      "candidate_sha256": "f6ffb941c25c694696e53c7f60c3243f7ac051176e366482b60e55463b6651e0",
+      "surfaces": [
+        {
+          "all_typed_arrays": [
+            {
+              "slot": 0,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 1,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 2,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 4,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 10,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 11,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 12,
+              "exact_after_proven_vertex_bijection": true
+            }
+          ],
+          "full_material_storage_fields_and_texture_pixels_mips_exact": true,
+          "format_exact": true,
+          "lods": [
+            {
+              "lod": 0,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            },
+            {
+              "lod": 1,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            },
+            {
+              "lod": 2,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            }
+          ],
+          "bounds_component_max_delta": 0.0,
+          "lod_capture_present": true
+        }
+      ],
+      "passed": true,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/centaur.glb-6f190823eb696d0168656e57730d2026.md5",
+          "import_metadata_sha256": "af32b93a17bc841f6a75cd9d9b14babf6143c69cd1b9aff9f782f08dab2e9fe6",
+          "imported_resource_path": "res://.godot/imported/centaur.glb-6f190823eb696d0168656e57730d2026.scn",
+          "imported_resource_sha256": "ec531a3e360084b36e4ab49048dd140f051d5809578da73d37e767794e2f584e",
+          "packed_scene_resource_path": "res://assets/qa/centaur/v2/baseline/centaur.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "2dcd32b0fd9626720cf08ef9e37d254e",
+          "source_path": "res://assets/qa/centaur/v2/baseline/centaur.glb",
+          "source_sha256": "e500b26a17d4416d17364e949a9521f5ccbf331d0b0cc61b4a435489733587fb"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/centaur.glb-712a474aa39783a6d3373b88e999df08.md5",
+          "import_metadata_sha256": "d66b5cbf2a7212ecf34cf141506121a1e2610313ca51ca117c1c068bf55f1fca",
+          "imported_resource_path": "res://.godot/imported/centaur.glb-712a474aa39783a6d3373b88e999df08.scn",
+          "imported_resource_sha256": "5ae6bab9f5cb4aeb42c81d7840b3d7a376ef4df2f6652d3ca95cc2b18db7d9c0",
+          "packed_scene_resource_path": "res://assets/qa/centaur/v2/candidate/centaur.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "a47cc1572eac61aa0342fbb944b66983",
+          "source_path": "res://assets/qa/centaur/v2/candidate/centaur.glb",
+          "source_sha256": "f6ffb941c25c694696e53c7f60c3243f7ac051176e366482b60e55463b6651e0"
+        }
+      ]
+    },
+    "retained_Editor_morph_fields": {
+      "actor": "centaur",
+      "source_sha256": "e500b26a17d4416d17364e949a9521f5ccbf331d0b0cc61b4a435489733587fb",
+      "candidate_sha256": "f6ffb941c25c694696e53c7f60c3243f7ac051176e366482b60e55463b6651e0",
+      "all_retained_editor_POSITION_NORMAL_TANGENT_typed_bits_exact": true,
+      "retained_targets": 42,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/centaur.glb-6f190823eb696d0168656e57730d2026.md5",
+          "import_metadata_sha256": "af32b93a17bc841f6a75cd9d9b14babf6143c69cd1b9aff9f782f08dab2e9fe6",
+          "imported_resource_path": "res://.godot/imported/centaur.glb-6f190823eb696d0168656e57730d2026.scn",
+          "imported_resource_sha256": "ec531a3e360084b36e4ab49048dd140f051d5809578da73d37e767794e2f584e",
+          "packed_scene_resource_path": "res://assets/qa/centaur/v2/baseline/centaur.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "2dcd32b0fd9626720cf08ef9e37d254e",
+          "source_path": "res://assets/qa/centaur/v2/baseline/centaur.glb",
+          "source_sha256": "e500b26a17d4416d17364e949a9521f5ccbf331d0b0cc61b4a435489733587fb"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/centaur.glb-712a474aa39783a6d3373b88e999df08.md5",
+          "import_metadata_sha256": "d66b5cbf2a7212ecf34cf141506121a1e2610313ca51ca117c1c068bf55f1fca",
+          "imported_resource_path": "res://.godot/imported/centaur.glb-712a474aa39783a6d3373b88e999df08.scn",
+          "imported_resource_sha256": "5ae6bab9f5cb4aeb42c81d7840b3d7a376ef4df2f6652d3ca95cc2b18db7d9c0",
+          "packed_scene_resource_path": "res://assets/qa/centaur/v2/candidate/centaur.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "a47cc1572eac61aa0342fbb944b66983",
+          "source_path": "res://assets/qa/centaur/v2/candidate/centaur.glb",
+          "source_sha256": "f6ffb941c25c694696e53c7f60c3243f7ac051176e366482b60e55463b6651e0"
+        }
+      ],
+      "scope": "Direct actual Editor source/candidate retained morph P/N/T byte digests after independently proved complete static-attribute vertex bijection. Exact target mask from source packing lineage; no morph field omitted.",
+      "passed": true
+    },
+    "withdrawn_prior_loader_claim": "Prior shared dumper captures labelled imported used GlbSceneCache for these outside-actor aliases and therefore were raw-cache comparisons. They remain retained private raw/native evidence, but their independent Editor claim is withdrawn and superseded by these explicitly loaded SCNs.",
+    "unchanged_other_evidence": "Original independent physical observations, exact source curves, Blender, actual native gameplay body rendering, placement, mounted/cinematic dependencies and secondary effects remain hash-bound and unchanged. No artistic approval, model, action, cap or witness change in this QA revision.",
+    "production_scope": "Production actor_shipping loose folders remain raw/native and are not Editor-imported. Per-surface Editor-generated LODs are verification representation metadata, not a claim of new gameplay LODs.",
+    "evidence_sha256": {
+      ".local/heavy-batch/centaur/v2/editor-real-v1/qualification-job.json": "46cb1cbf1c5e07b7feed3e7494176be50dbc02504269a7308c0401d4d6a5f897",
+      ".local/heavy-batch/centaur/v2/editor-real-v1/imported/runtime.json": "b5e461599e025c7527eac6850dd517867e9226df3ac25f76208fa0621f425bba",
+      ".local/heavy-batch/centaur/v2/editor-real-v1/imported-validation.json": "0f7cc0590f8fee4abb1220fdd67dba2c6ce8c1cfacf34a59e7994d2eb3d95673",
+      ".local/heavy-batch/centaur/v2/editor-real-v1/imported-static-mesh-bits.json": "7d249273020bbf87ad313b27919baadde4c98a13fcfd6fe0fab314df545c46bb",
+      ".local/heavy-batch/centaur/v2/editor-real-v1/imported-typed-validation.json": "c9e21b747e6d9c7735309af801f986dd99fc0196a01fdd9815e1ba0825841802",
+      ".local/heavy-batch/centaur/v2/editor-real-v1/morph-digest-job.json": "7fa04764461b5d480e6f4965b6b0f13ba0d99e5e0889a74c87e4fefb29f01101",
+      ".local/heavy-batch/centaur/v2/editor-real-v1/imported-morph-digests.json": "daa73beb0f7e312aab5eaf5fa9f83d03dda7a096d2895e2875f14ffbf7c6d867",
+      ".local/heavy-batch/centaur/v2/editor-real-v1/imported-morph-validation.json": "0d21f570874dec913003f8e3d02dacb66c0b16195094837f777e3251b72c980b"
+    }
+  }
 }

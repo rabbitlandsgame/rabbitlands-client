@@ -177,7 +177,9 @@
     "imported": {
       "samples": 232,
       "maximum_position_error": 1.0393562727729485e-07,
-      "maximum_normal_angle_degrees": 1.0900252224719401e-05
+      "maximum_normal_angle_degrees": 1.0900252224719401e-05,
+      "actual_loader": "ResourceLoader.load(PackedScene)",
+      "authoritative_SCN_provenance": "genuine_editor_verification_revision.load_proofs"
     }
   },
   "editor_import_policy": {
@@ -323,5 +325,195 @@
     "Separate resident RAM and frame-time benchmarks were not measured.",
     "Encoded animation-key savings describe raw files, logical source accessors and import parsing input only. Native importing may densely rebake identical generated Animation keys; no runtime Animation RAM, key-search or playback CPU saving is claimed.",
     "Original artistic review/approval status is unchanged."
-  ]
+  ],
+  "genuine_editor_verification_revision": {
+    "status": "Corrected independent actual Editor verification passed within applicable unchanged modern or legacy scope",
+    "date": "2026-10-28",
+    "source_original_sha256": "260e8229f61686c4d862b8c142edf9dc5f863a5f5889d2fa1115fdbed0538d6d",
+    "current_canonical_sha256": "c778038cf37f7f654f00b14b3d52cbb16447d79c035ff863d2d3752f06f17adb",
+    "loader": "ResourceLoader.load(PackedScene)",
+    "load_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/merfolk.glb-de4b4e5725ee3ec57cc9b63f3f50ad06.md5",
+        "import_metadata_sha256": "1c14f939d5a24f0c687e27439c77c94bd7ea1e2d9b6f6d5c19cc17404d0f19c6",
+        "imported_resource_path": "res://.godot/imported/merfolk.glb-de4b4e5725ee3ec57cc9b63f3f50ad06.scn",
+        "imported_resource_sha256": "17a0ac13012940276ca38f6c67e4d47180071d0ce58d979285c02ca9d91661fe",
+        "packed_scene_resource_path": "res://assets/qa/merfolk/v2/baseline/merfolk.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "5dbd67283dfc666ea7187c9048984eb7",
+        "source_path": "res://assets/qa/merfolk/v2/baseline/merfolk.glb",
+        "source_sha256": "260e8229f61686c4d862b8c142edf9dc5f863a5f5889d2fa1115fdbed0538d6d"
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/merfolk.glb-b09164753762769e90a5e348fae943f8.md5",
+        "import_metadata_sha256": "1078c6c57edac97009161ae75fd5f933dd99143629e5c49abe53c3ba3d7419d1",
+        "imported_resource_path": "res://.godot/imported/merfolk.glb-b09164753762769e90a5e348fae943f8.scn",
+        "imported_resource_sha256": "d0cd69d96d72fe0b23f5da6e2e998e97423c6c39dc59032218b553c059b20877",
+        "packed_scene_resource_path": "res://assets/qa/merfolk/v2/candidate/merfolk.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "55addea0bad5961c974259919a892731",
+        "source_path": "res://assets/qa/merfolk/v2/candidate/merfolk.glb",
+        "source_sha256": "c778038cf37f7f654f00b14b3d52cbb16447d79c035ff863d2d3752f06f17adb"
+      }
+    ],
+    "source_aliases_and_SCNs_have_current_source_and_destination_MD5_freshness": true,
+    "numeric": {
+      "poses": 232,
+      "all_source_clips": [
+        "Death_A",
+        "Fighting_Idle",
+        "Hit_Chest",
+        "Idle_A",
+        "Jog",
+        "Sword_Attack",
+        "Walk"
+      ],
+      "RESET_checked": true,
+      "maximum_Euclidean_position_error_source_units": 1.0393562727729485e-07,
+      "maximum_normal_angle_degrees": 1.0900252224719401e-05
+    },
+    "applicable_quality_budget": {
+      "position_four_float32_ULPs": 4.76837158203125e-07,
+      "source_coordinate_or_rest_axis_extent_magnitude": 1.0000008397439426,
+      "normal_degrees": 0.0001,
+      "both_passed": true
+    },
+    "full_typed_static_attributes_material_storage_texture_pixels_and_mips": {
+      "actor": "merfolk",
+      "source_sha256": "260e8229f61686c4d862b8c142edf9dc5f863a5f5889d2fa1115fdbed0538d6d",
+      "candidate_sha256": "c778038cf37f7f654f00b14b3d52cbb16447d79c035ff863d2d3752f06f17adb",
+      "surfaces": [
+        {
+          "all_typed_arrays": [
+            {
+              "slot": 0,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 1,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 2,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 4,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 10,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 11,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 12,
+              "exact_after_proven_vertex_bijection": true
+            }
+          ],
+          "full_material_storage_fields_and_texture_pixels_mips_exact": true,
+          "format_exact": true,
+          "lods": [
+            {
+              "lod": 0,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            },
+            {
+              "lod": 1,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            },
+            {
+              "lod": 2,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            }
+          ],
+          "bounds_component_max_delta": 0.0,
+          "lod_capture_present": true
+        }
+      ],
+      "passed": true,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/merfolk.glb-de4b4e5725ee3ec57cc9b63f3f50ad06.md5",
+          "import_metadata_sha256": "1c14f939d5a24f0c687e27439c77c94bd7ea1e2d9b6f6d5c19cc17404d0f19c6",
+          "imported_resource_path": "res://.godot/imported/merfolk.glb-de4b4e5725ee3ec57cc9b63f3f50ad06.scn",
+          "imported_resource_sha256": "17a0ac13012940276ca38f6c67e4d47180071d0ce58d979285c02ca9d91661fe",
+          "packed_scene_resource_path": "res://assets/qa/merfolk/v2/baseline/merfolk.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "5dbd67283dfc666ea7187c9048984eb7",
+          "source_path": "res://assets/qa/merfolk/v2/baseline/merfolk.glb",
+          "source_sha256": "260e8229f61686c4d862b8c142edf9dc5f863a5f5889d2fa1115fdbed0538d6d"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/merfolk.glb-b09164753762769e90a5e348fae943f8.md5",
+          "import_metadata_sha256": "1078c6c57edac97009161ae75fd5f933dd99143629e5c49abe53c3ba3d7419d1",
+          "imported_resource_path": "res://.godot/imported/merfolk.glb-b09164753762769e90a5e348fae943f8.scn",
+          "imported_resource_sha256": "d0cd69d96d72fe0b23f5da6e2e998e97423c6c39dc59032218b553c059b20877",
+          "packed_scene_resource_path": "res://assets/qa/merfolk/v2/candidate/merfolk.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "55addea0bad5961c974259919a892731",
+          "source_path": "res://assets/qa/merfolk/v2/candidate/merfolk.glb",
+          "source_sha256": "c778038cf37f7f654f00b14b3d52cbb16447d79c035ff863d2d3752f06f17adb"
+        }
+      ]
+    },
+    "retained_Editor_morph_fields": {
+      "actor": "merfolk",
+      "source_sha256": "260e8229f61686c4d862b8c142edf9dc5f863a5f5889d2fa1115fdbed0538d6d",
+      "candidate_sha256": "c778038cf37f7f654f00b14b3d52cbb16447d79c035ff863d2d3752f06f17adb",
+      "all_retained_editor_POSITION_NORMAL_TANGENT_typed_bits_exact": true,
+      "retained_targets": 42,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/merfolk.glb-de4b4e5725ee3ec57cc9b63f3f50ad06.md5",
+          "import_metadata_sha256": "1c14f939d5a24f0c687e27439c77c94bd7ea1e2d9b6f6d5c19cc17404d0f19c6",
+          "imported_resource_path": "res://.godot/imported/merfolk.glb-de4b4e5725ee3ec57cc9b63f3f50ad06.scn",
+          "imported_resource_sha256": "17a0ac13012940276ca38f6c67e4d47180071d0ce58d979285c02ca9d91661fe",
+          "packed_scene_resource_path": "res://assets/qa/merfolk/v2/baseline/merfolk.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "5dbd67283dfc666ea7187c9048984eb7",
+          "source_path": "res://assets/qa/merfolk/v2/baseline/merfolk.glb",
+          "source_sha256": "260e8229f61686c4d862b8c142edf9dc5f863a5f5889d2fa1115fdbed0538d6d"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/merfolk.glb-b09164753762769e90a5e348fae943f8.md5",
+          "import_metadata_sha256": "1078c6c57edac97009161ae75fd5f933dd99143629e5c49abe53c3ba3d7419d1",
+          "imported_resource_path": "res://.godot/imported/merfolk.glb-b09164753762769e90a5e348fae943f8.scn",
+          "imported_resource_sha256": "d0cd69d96d72fe0b23f5da6e2e998e97423c6c39dc59032218b553c059b20877",
+          "packed_scene_resource_path": "res://assets/qa/merfolk/v2/candidate/merfolk.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "55addea0bad5961c974259919a892731",
+          "source_path": "res://assets/qa/merfolk/v2/candidate/merfolk.glb",
+          "source_sha256": "c778038cf37f7f654f00b14b3d52cbb16447d79c035ff863d2d3752f06f17adb"
+        }
+      ],
+      "scope": "Direct actual Editor source/candidate retained morph P/N/T byte digests after independently proved complete static-attribute vertex bijection. Exact target mask from source packing lineage; no morph field omitted.",
+      "passed": true
+    },
+    "withdrawn_prior_loader_claim": "Prior shared dumper captures labelled imported used GlbSceneCache for these outside-actor aliases and therefore were raw-cache comparisons. They remain retained private raw/native evidence, but their independent Editor claim is withdrawn and superseded by these explicitly loaded SCNs.",
+    "unchanged_other_evidence": "Original independent physical observations, exact source curves, Blender, actual native gameplay body rendering, placement, mounted/cinematic dependencies and secondary effects remain hash-bound and unchanged. No artistic approval, model, action, cap or witness change in this QA revision.",
+    "production_scope": "Production actor_shipping loose folders remain raw/native and are not Editor-imported. Per-surface Editor-generated LODs are verification representation metadata, not a claim of new gameplay LODs.",
+    "evidence_sha256": {
+      ".local/heavy-batch/merfolk/v2/editor-real-v1/qualification-job.json": "2188d3ee8714a356344e1dd6b82872a5136077fa88e747addf3157a6d5363b86",
+      ".local/heavy-batch/merfolk/v2/editor-real-v1/imported/runtime.json": "632f9f765db6cc3712ca76d8ba36c85c25a9d3da45b8f08833a4e13f97fbc6f8",
+      ".local/heavy-batch/merfolk/v2/editor-real-v1/imported-validation.json": "81f54ab28d9b546ce03924f3df324463304108ec46ced34e7cac17367e25f61b",
+      ".local/heavy-batch/merfolk/v2/editor-real-v1/imported-static-mesh-bits.json": "8056f6f92cd0d2ac52fa87d79dfe95465fa8bbc9d6d8254f6e60efd1fb96d769",
+      ".local/heavy-batch/merfolk/v2/editor-real-v1/imported-typed-validation.json": "e7641fd3ba58d3d1df8dc322ea6ec0e8aa80b559e0807ee64c48a91355e22676",
+      ".local/heavy-batch/merfolk/v2/editor-real-v1/morph-digest-job.json": "145a72a99616a61b1123ba804630af4b03afab3785185a0b8b4edfd1ce314ac8",
+      ".local/heavy-batch/merfolk/v2/editor-real-v1/imported-morph-digests.json": "23d2d5ce413cf0500c36c936e0a0e63dc3650fba7ef21250458984beb814182c",
+      ".local/heavy-batch/merfolk/v2/editor-real-v1/imported-morph-validation.json": "e867f5da12afeef2769d19067d41eb97f714f81369bd09cd500a0ae99ee7b955"
+    }
+  }
 }

@@ -125,7 +125,9 @@
     "imported": {
       "samples": 232,
       "maximum_position_error": 4.2195206967856877e-07,
-      "maximum_normal_angle_degrees": 2.9906461203131697e-05
+      "maximum_normal_angle_degrees": 2.9906461203131697e-05,
+      "actual_loader": "ResourceLoader.load(PackedScene)",
+      "authoritative_SCN_provenance": "genuine_editor_verification_revision.load_proofs"
     }
   },
   "native_numeric_budget": {
@@ -267,5 +269,190 @@
     "Encoded animation-key savings describe raw files, logical source accessors and import parsing input only. Native importing may densely rebake identical generated Animation keys; no runtime Animation RAM, key-search or playback CPU saving is claimed.",
     "Original artistic review/approval status is unchanged.",
     "Compressed shipping data increases by 16505 bytes despite smaller decoded GLB. This tradeoff is explicit; no unmeasured runtime-memory saving offsets it in this receipt."
-  ]
+  ],
+  "genuine_editor_verification_revision": {
+    "status": "Corrected independent actual Editor verification passed within applicable unchanged modern or legacy scope",
+    "date": "2026-10-28",
+    "source_original_sha256": "1f5b69776d58d50a80935e576655bc1661cd4e982abe647c989f59b7711cf6c9",
+    "current_canonical_sha256": "732091464534c186f24a8244abe98327e5a05ad83eb4cb624f20ada38dfd9831",
+    "loader": "ResourceLoader.load(PackedScene)",
+    "load_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/dire_wolf.glb-d30e87db2b863486148be93c3b048c01.md5",
+        "import_metadata_sha256": "c4716b5be1c770695cc105ad5a8a55a9a411b01d4ff7686a26afd843fd18c18f",
+        "imported_resource_path": "res://.godot/imported/dire_wolf.glb-d30e87db2b863486148be93c3b048c01.scn",
+        "imported_resource_sha256": "f411032d78e51b46199ea95b278f3992729d38d50bab9ba15b7d89f2f2c3b200",
+        "packed_scene_resource_path": "res://assets/qa/dire_wolf/v2/baseline/dire_wolf.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "66a38ae097b3036300c2838d7f5a1976",
+        "source_path": "res://assets/qa/dire_wolf/v2/baseline/dire_wolf.glb",
+        "source_sha256": "1f5b69776d58d50a80935e576655bc1661cd4e982abe647c989f59b7711cf6c9"
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/dire_wolf.glb-ebb058542e96b2f50b1cb4189c4a645b.md5",
+        "import_metadata_sha256": "22ccfdd2c1bd6100828c8d307496271c87d31511cf415023a6113bc386ce7058",
+        "imported_resource_path": "res://.godot/imported/dire_wolf.glb-ebb058542e96b2f50b1cb4189c4a645b.scn",
+        "imported_resource_sha256": "3469df29b2b367f88e093ee3301ef2546e9fe5976b6e1cedba6d3e96e4d938a9",
+        "packed_scene_resource_path": "res://assets/qa/dire_wolf/v2/candidate/dire_wolf.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "5b6ee2eafa40b14a855a0366540066a9",
+        "source_path": "res://assets/qa/dire_wolf/v2/candidate/dire_wolf.glb",
+        "source_sha256": "732091464534c186f24a8244abe98327e5a05ad83eb4cb624f20ada38dfd9831"
+      }
+    ],
+    "source_aliases_and_SCNs_have_current_source_and_destination_MD5_freshness": true,
+    "numeric": {
+      "poses": 232,
+      "all_source_clips": [
+        "Walk",
+        "Sword_Attack",
+        "Death_A",
+        "Idle_A",
+        "Fighting_Idle",
+        "Hit_Chest",
+        "Jog"
+      ],
+      "RESET_checked": true,
+      "maximum_Euclidean_position_error_source_units": 4.2195206967856877e-07,
+      "maximum_normal_angle_degrees": 2.9906461203131697e-05
+    },
+    "applicable_quality_budget": {
+      "position_four_float32_ULPs": 9.5367431640625e-07,
+      "source_coordinate_or_rest_axis_extent_magnitude": 2.6699417598705617,
+      "normal_degrees": 0.0001,
+      "both_passed": true
+    },
+    "full_typed_static_attributes_material_storage_texture_pixels_and_mips": {
+      "actor": "dire_wolf",
+      "source_sha256": "1f5b69776d58d50a80935e576655bc1661cd4e982abe647c989f59b7711cf6c9",
+      "candidate_sha256": "732091464534c186f24a8244abe98327e5a05ad83eb4cb624f20ada38dfd9831",
+      "surfaces": [
+        {
+          "all_typed_arrays": [
+            {
+              "slot": 0,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 1,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 2,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 4,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 10,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 11,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 12,
+              "exact_after_proven_vertex_bijection": true
+            }
+          ],
+          "full_material_storage_fields_and_texture_pixels_mips_exact": true,
+          "format_exact": true,
+          "lods": [
+            {
+              "lod": 0,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            },
+            {
+              "lod": 1,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            }
+          ],
+          "bounds_component_max_delta": 0.0,
+          "lod_capture_present": true
+        }
+      ],
+      "passed": true,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/dire_wolf.glb-d30e87db2b863486148be93c3b048c01.md5",
+          "import_metadata_sha256": "c4716b5be1c770695cc105ad5a8a55a9a411b01d4ff7686a26afd843fd18c18f",
+          "imported_resource_path": "res://.godot/imported/dire_wolf.glb-d30e87db2b863486148be93c3b048c01.scn",
+          "imported_resource_sha256": "f411032d78e51b46199ea95b278f3992729d38d50bab9ba15b7d89f2f2c3b200",
+          "packed_scene_resource_path": "res://assets/qa/dire_wolf/v2/baseline/dire_wolf.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "66a38ae097b3036300c2838d7f5a1976",
+          "source_path": "res://assets/qa/dire_wolf/v2/baseline/dire_wolf.glb",
+          "source_sha256": "1f5b69776d58d50a80935e576655bc1661cd4e982abe647c989f59b7711cf6c9"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/dire_wolf.glb-ebb058542e96b2f50b1cb4189c4a645b.md5",
+          "import_metadata_sha256": "22ccfdd2c1bd6100828c8d307496271c87d31511cf415023a6113bc386ce7058",
+          "imported_resource_path": "res://.godot/imported/dire_wolf.glb-ebb058542e96b2f50b1cb4189c4a645b.scn",
+          "imported_resource_sha256": "3469df29b2b367f88e093ee3301ef2546e9fe5976b6e1cedba6d3e96e4d938a9",
+          "packed_scene_resource_path": "res://assets/qa/dire_wolf/v2/candidate/dire_wolf.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "5b6ee2eafa40b14a855a0366540066a9",
+          "source_path": "res://assets/qa/dire_wolf/v2/candidate/dire_wolf.glb",
+          "source_sha256": "732091464534c186f24a8244abe98327e5a05ad83eb4cb624f20ada38dfd9831"
+        }
+      ]
+    },
+    "retained_Editor_morph_fields": {
+      "actor": "dire_wolf",
+      "source_sha256": "1f5b69776d58d50a80935e576655bc1661cd4e982abe647c989f59b7711cf6c9",
+      "candidate_sha256": "732091464534c186f24a8244abe98327e5a05ad83eb4cb624f20ada38dfd9831",
+      "all_retained_editor_POSITION_NORMAL_TANGENT_typed_bits_exact": true,
+      "retained_targets": 0,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/dire_wolf.glb-d30e87db2b863486148be93c3b048c01.md5",
+          "import_metadata_sha256": "c4716b5be1c770695cc105ad5a8a55a9a411b01d4ff7686a26afd843fd18c18f",
+          "imported_resource_path": "res://.godot/imported/dire_wolf.glb-d30e87db2b863486148be93c3b048c01.scn",
+          "imported_resource_sha256": "f411032d78e51b46199ea95b278f3992729d38d50bab9ba15b7d89f2f2c3b200",
+          "packed_scene_resource_path": "res://assets/qa/dire_wolf/v2/baseline/dire_wolf.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "66a38ae097b3036300c2838d7f5a1976",
+          "source_path": "res://assets/qa/dire_wolf/v2/baseline/dire_wolf.glb",
+          "source_sha256": "1f5b69776d58d50a80935e576655bc1661cd4e982abe647c989f59b7711cf6c9"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/dire_wolf.glb-ebb058542e96b2f50b1cb4189c4a645b.md5",
+          "import_metadata_sha256": "22ccfdd2c1bd6100828c8d307496271c87d31511cf415023a6113bc386ce7058",
+          "imported_resource_path": "res://.godot/imported/dire_wolf.glb-ebb058542e96b2f50b1cb4189c4a645b.scn",
+          "imported_resource_sha256": "3469df29b2b367f88e093ee3301ef2546e9fe5976b6e1cedba6d3e96e4d938a9",
+          "packed_scene_resource_path": "res://assets/qa/dire_wolf/v2/candidate/dire_wolf.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "5b6ee2eafa40b14a855a0366540066a9",
+          "source_path": "res://assets/qa/dire_wolf/v2/candidate/dire_wolf.glb",
+          "source_sha256": "732091464534c186f24a8244abe98327e5a05ad83eb4cb624f20ada38dfd9831"
+        }
+      ],
+      "scope": "Direct actual Editor source/candidate retained morph P/N/T byte digests after independently proved complete static-attribute vertex bijection. Exact target mask from source packing lineage; no morph field omitted.",
+      "passed": true
+    },
+    "withdrawn_prior_loader_claim": "Prior shared dumper captures labelled imported used GlbSceneCache for these outside-actor aliases and therefore were raw-cache comparisons. They remain retained private raw/native evidence, but their independent Editor claim is withdrawn and superseded by these explicitly loaded SCNs.",
+    "unchanged_other_evidence": "Original independent physical observations, exact source curves, Blender, actual native gameplay body rendering, placement, mounted/cinematic dependencies and secondary effects remain hash-bound and unchanged. No artistic approval, model, action, cap or witness change in this QA revision.",
+    "production_scope": "Production actor_shipping loose folders remain raw/native and are not Editor-imported. Per-surface Editor-generated LODs are verification representation metadata, not a claim of new gameplay LODs.",
+    "evidence_sha256": {
+      ".local/heavy-batch/dire_wolf/v2/editor-real-v1/qualification-job.json": "5950d9519af92ee19498b370b9830dba8ceee9346563dc46559f3f2286eac840",
+      ".local/heavy-batch/dire_wolf/v2/editor-real-v1/imported/runtime.json": "0ca386d12047ac0ce3fc62bd964f1aedca196fc48e669372f51f6d5ffe294090",
+      ".local/heavy-batch/dire_wolf/v2/editor-real-v1/imported-validation.json": "896b25ef51183e3f4ee4db033a55afb6ca85d8bc9326d8ae814577aef47b633c",
+      ".local/heavy-batch/dire_wolf/v2/editor-real-v1/imported-static-mesh-bits.json": "743de2c1a1727d728cfb9ebed05aaa5477b5305e09188427d3c3bfdfeb98b087",
+      ".local/heavy-batch/dire_wolf/v2/editor-real-v1/imported-typed-validation.json": "17ae95e4c306ae7b002f69a63fc8d2e6b5a26ae93d139753a4122e1906ca7a67",
+      ".local/heavy-batch/dire_wolf/v2/editor-real-v1/morph-digest-job.json": "6cc90b1395f2b8660900bcce83c26f96d221c8cd6d420cae4a76ea45cfed3312",
+      ".local/heavy-batch/dire_wolf/v2/editor-real-v1/imported-morph-digests.json": "886b3f7555e52b1cd3b8d88aa9a05ce298d23c0d31ff39ce8b1d95f0117776a6",
+      ".local/heavy-batch/dire_wolf/v2/editor-real-v1/imported-morph-validation.json": "88811327e665986e082735080da7f6d9ec6229d3dd404d6823675366bfc801e4"
+    }
+  }
 }

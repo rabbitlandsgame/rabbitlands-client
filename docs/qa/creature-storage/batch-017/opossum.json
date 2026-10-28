@@ -125,7 +125,9 @@
     "imported": {
       "samples": 232,
       "maximum_position_error": 9.978066933262644e-08,
-      "maximum_normal_angle_degrees": 1.8151476701449225e-05
+      "maximum_normal_angle_degrees": 1.8151476701449225e-05,
+      "actual_loader": "ResourceLoader.load(PackedScene)",
+      "authoritative_SCN_provenance": "genuine_editor_verification_revision.load_proofs"
     }
   },
   "native_numeric_budget": {
@@ -266,5 +268,190 @@
     "Encoded animation-key savings describe raw files, logical source accessors and import parsing input only. Native importing may densely rebake identical generated Animation keys; no runtime Animation RAM, key-search or playback CPU saving is claimed.",
     "Original artistic review/approval status is unchanged.",
     "Compressed shipping data increases by 21902 bytes despite smaller decoded GLB. This tradeoff is explicit; no unmeasured runtime-memory saving offsets it in this receipt."
-  ]
+  ],
+  "genuine_editor_verification_revision": {
+    "status": "Corrected independent actual Editor verification passed within applicable unchanged modern or legacy scope",
+    "date": "2026-10-28",
+    "source_original_sha256": "552dce800379cdd7a8df33c07dfd32d91aedb799e82cefaa8620262d2c6f4eb3",
+    "current_canonical_sha256": "6daeb140a6cd34d6e86c33142d6d35ab181f39b7ec3dbfc53e516981eae5046d",
+    "loader": "ResourceLoader.load(PackedScene)",
+    "load_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/opossum.glb-d214d40da193c569d49215f3692b2b68.md5",
+        "import_metadata_sha256": "caa0c993f3595f29b0ad59bf9eaea50e5961e6dba6b6bff637406c2f822faf2c",
+        "imported_resource_path": "res://.godot/imported/opossum.glb-d214d40da193c569d49215f3692b2b68.scn",
+        "imported_resource_sha256": "9f4aee21db1c4123f7850133a27384546cc61bec93a49c066a5a47954a4632d2",
+        "packed_scene_resource_path": "res://assets/qa/opossum/v2/baseline/opossum.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "00fa8d8367c8d9f4c1b338bf15b17397",
+        "source_path": "res://assets/qa/opossum/v2/baseline/opossum.glb",
+        "source_sha256": "552dce800379cdd7a8df33c07dfd32d91aedb799e82cefaa8620262d2c6f4eb3"
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/opossum.glb-f5ab90c0529a29251b96bfa8a16a0255.md5",
+        "import_metadata_sha256": "d1cb502eebf14f9413955681787430071348eaeab3f77e93781818ce72ee2548",
+        "imported_resource_path": "res://.godot/imported/opossum.glb-f5ab90c0529a29251b96bfa8a16a0255.scn",
+        "imported_resource_sha256": "9fcc16c3f8a074712061361ddcf089c8116622e431c72de75aacff5bb49414ff",
+        "packed_scene_resource_path": "res://assets/qa/opossum/v2/candidate/opossum.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "eb3fee492a025a6608021b3fbced3228",
+        "source_path": "res://assets/qa/opossum/v2/candidate/opossum.glb",
+        "source_sha256": "6daeb140a6cd34d6e86c33142d6d35ab181f39b7ec3dbfc53e516981eae5046d"
+      }
+    ],
+    "source_aliases_and_SCNs_have_current_source_and_destination_MD5_freshness": true,
+    "numeric": {
+      "poses": 232,
+      "all_source_clips": [
+        "Walk",
+        "Jog",
+        "Sword_Attack",
+        "Idle_A",
+        "Fighting_Idle",
+        "Hit_Chest",
+        "Death_A"
+      ],
+      "RESET_checked": true,
+      "maximum_Euclidean_position_error_source_units": 9.978066933262644e-08,
+      "maximum_normal_angle_degrees": 1.8151476701449225e-05
+    },
+    "applicable_quality_budget": {
+      "position_four_float32_ULPs": 4.76837158203125e-07,
+      "source_coordinate_or_rest_axis_extent_magnitude": 1.0000006934139958,
+      "normal_degrees": 0.0001,
+      "both_passed": true
+    },
+    "full_typed_static_attributes_material_storage_texture_pixels_and_mips": {
+      "actor": "opossum",
+      "source_sha256": "552dce800379cdd7a8df33c07dfd32d91aedb799e82cefaa8620262d2c6f4eb3",
+      "candidate_sha256": "6daeb140a6cd34d6e86c33142d6d35ab181f39b7ec3dbfc53e516981eae5046d",
+      "surfaces": [
+        {
+          "all_typed_arrays": [
+            {
+              "slot": 0,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 1,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 2,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 4,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 10,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 11,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 12,
+              "exact_after_proven_vertex_bijection": true
+            }
+          ],
+          "full_material_storage_fields_and_texture_pixels_mips_exact": true,
+          "format_exact": true,
+          "lods": [
+            {
+              "lod": 0,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            },
+            {
+              "lod": 1,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            }
+          ],
+          "bounds_component_max_delta": 0.0,
+          "lod_capture_present": true
+        }
+      ],
+      "passed": true,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/opossum.glb-d214d40da193c569d49215f3692b2b68.md5",
+          "import_metadata_sha256": "caa0c993f3595f29b0ad59bf9eaea50e5961e6dba6b6bff637406c2f822faf2c",
+          "imported_resource_path": "res://.godot/imported/opossum.glb-d214d40da193c569d49215f3692b2b68.scn",
+          "imported_resource_sha256": "9f4aee21db1c4123f7850133a27384546cc61bec93a49c066a5a47954a4632d2",
+          "packed_scene_resource_path": "res://assets/qa/opossum/v2/baseline/opossum.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "00fa8d8367c8d9f4c1b338bf15b17397",
+          "source_path": "res://assets/qa/opossum/v2/baseline/opossum.glb",
+          "source_sha256": "552dce800379cdd7a8df33c07dfd32d91aedb799e82cefaa8620262d2c6f4eb3"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/opossum.glb-f5ab90c0529a29251b96bfa8a16a0255.md5",
+          "import_metadata_sha256": "d1cb502eebf14f9413955681787430071348eaeab3f77e93781818ce72ee2548",
+          "imported_resource_path": "res://.godot/imported/opossum.glb-f5ab90c0529a29251b96bfa8a16a0255.scn",
+          "imported_resource_sha256": "9fcc16c3f8a074712061361ddcf089c8116622e431c72de75aacff5bb49414ff",
+          "packed_scene_resource_path": "res://assets/qa/opossum/v2/candidate/opossum.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "eb3fee492a025a6608021b3fbced3228",
+          "source_path": "res://assets/qa/opossum/v2/candidate/opossum.glb",
+          "source_sha256": "6daeb140a6cd34d6e86c33142d6d35ab181f39b7ec3dbfc53e516981eae5046d"
+        }
+      ]
+    },
+    "retained_Editor_morph_fields": {
+      "actor": "opossum",
+      "source_sha256": "552dce800379cdd7a8df33c07dfd32d91aedb799e82cefaa8620262d2c6f4eb3",
+      "candidate_sha256": "6daeb140a6cd34d6e86c33142d6d35ab181f39b7ec3dbfc53e516981eae5046d",
+      "all_retained_editor_POSITION_NORMAL_TANGENT_typed_bits_exact": true,
+      "retained_targets": 0,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/opossum.glb-d214d40da193c569d49215f3692b2b68.md5",
+          "import_metadata_sha256": "caa0c993f3595f29b0ad59bf9eaea50e5961e6dba6b6bff637406c2f822faf2c",
+          "imported_resource_path": "res://.godot/imported/opossum.glb-d214d40da193c569d49215f3692b2b68.scn",
+          "imported_resource_sha256": "9f4aee21db1c4123f7850133a27384546cc61bec93a49c066a5a47954a4632d2",
+          "packed_scene_resource_path": "res://assets/qa/opossum/v2/baseline/opossum.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "00fa8d8367c8d9f4c1b338bf15b17397",
+          "source_path": "res://assets/qa/opossum/v2/baseline/opossum.glb",
+          "source_sha256": "552dce800379cdd7a8df33c07dfd32d91aedb799e82cefaa8620262d2c6f4eb3"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/opossum.glb-f5ab90c0529a29251b96bfa8a16a0255.md5",
+          "import_metadata_sha256": "d1cb502eebf14f9413955681787430071348eaeab3f77e93781818ce72ee2548",
+          "imported_resource_path": "res://.godot/imported/opossum.glb-f5ab90c0529a29251b96bfa8a16a0255.scn",
+          "imported_resource_sha256": "9fcc16c3f8a074712061361ddcf089c8116622e431c72de75aacff5bb49414ff",
+          "packed_scene_resource_path": "res://assets/qa/opossum/v2/candidate/opossum.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "eb3fee492a025a6608021b3fbced3228",
+          "source_path": "res://assets/qa/opossum/v2/candidate/opossum.glb",
+          "source_sha256": "6daeb140a6cd34d6e86c33142d6d35ab181f39b7ec3dbfc53e516981eae5046d"
+        }
+      ],
+      "scope": "Direct actual Editor source/candidate retained morph P/N/T byte digests after independently proved complete static-attribute vertex bijection. Exact target mask from source packing lineage; no morph field omitted.",
+      "passed": true
+    },
+    "withdrawn_prior_loader_claim": "Prior shared dumper captures labelled imported used GlbSceneCache for these outside-actor aliases and therefore were raw-cache comparisons. They remain retained private raw/native evidence, but their independent Editor claim is withdrawn and superseded by these explicitly loaded SCNs.",
+    "unchanged_other_evidence": "Original independent physical observations, exact source curves, Blender, actual native gameplay body rendering, placement, mounted/cinematic dependencies and secondary effects remain hash-bound and unchanged. No artistic approval, model, action, cap or witness change in this QA revision.",
+    "production_scope": "Production actor_shipping loose folders remain raw/native and are not Editor-imported. Per-surface Editor-generated LODs are verification representation metadata, not a claim of new gameplay LODs.",
+    "evidence_sha256": {
+      ".local/heavy-batch/opossum/v2/editor-real-v1/qualification-job.json": "efc9545529d2b91e3859dc645b57bba5b08f3cc4ac0f2b2fa1ead30dbefd6bed",
+      ".local/heavy-batch/opossum/v2/editor-real-v1/imported/runtime.json": "fecabc7e4e9a6159a04547047c222005a93ab02f05798e741cb67e85d0ab89f2",
+      ".local/heavy-batch/opossum/v2/editor-real-v1/imported-validation.json": "983f892016fcf58a15dac026a18fc46a4ab0b3b565e3efba9cef1feb77b7ecf8",
+      ".local/heavy-batch/opossum/v2/editor-real-v1/imported-static-mesh-bits.json": "01395e14d3ab9e47ea605a427faaaac6de2b066da1891fae8aec9e58ff3821b1",
+      ".local/heavy-batch/opossum/v2/editor-real-v1/imported-typed-validation.json": "eeeb7b5d7a2cb1dfda0e18f7a743ee03e0181d62243640250d260e332aa49231",
+      ".local/heavy-batch/opossum/v2/editor-real-v1/morph-digest-job.json": "698542b550c9837cb365cb67d78b1bd89e39e6ed8a2f1d134ace5f0caa09436f",
+      ".local/heavy-batch/opossum/v2/editor-real-v1/imported-morph-digests.json": "b46785d405cf8c1afcc022b9f1e317b27432f5a544a81cf02f14f67745181f48",
+      ".local/heavy-batch/opossum/v2/editor-real-v1/imported-morph-validation.json": "8bd87eb45c660142bf44fc1e7bfd8e62f5da0b7f9f10e8b83a15dd34e8799fee"
+    }
+  }
 }
