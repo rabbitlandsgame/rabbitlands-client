@@ -473,13 +473,13 @@ static func texture(file: String) -> Texture2D:
 	if not _textures.has(path):
 		var loaded: Texture2D = null
 		if ResourceLoader.exists(path):
-			loaded = _with_mipmaps(load(path) as Texture2D, _is_colour(path))
+			loaded = _with_mipmaps(load(path) as Texture2D, _is_colour(path), _size_cap(path))
 		elif FileAccess.file_exists(path):
 			# Not imported yet (a file the lead just dropped in): read it raw so
 			# the lab shows it before the next editor import.
 			var image := Image.load_from_file(ProjectSettings.globalize_path(path))
 			if image != null and not image.is_empty():
-				loaded = _with_mipmaps(ImageTexture.create_from_image(image), _is_colour(path))
+				loaded = _with_mipmaps(ImageTexture.create_from_image(image), _is_colour(path), _size_cap(path))
 		if loaded == null:
 			warn_once("texture:" + path, "texture %s not there yet, drawing without it" % path, true)
 		_textures[path] = loaded
@@ -488,10 +488,11 @@ static func texture(file: String) -> Texture2D:
 
 ## Head textures are minified hard at gameplay distance. An import without a
 ## mip chain (the editor's default for a PNG it has not seen used in 3D) gets
-## one built here, once per texture, and is block-compressed where the GPU
-## takes S3TC so a 2048 px map costs a quarter of the video memory. The
-## proper fix is import settings (mipmaps, VRAM compressed) on these files.
-static func _with_mipmaps(source: Texture2D, colour: bool) -> Texture2D:
+## one built here, once per texture, first scaled down to its map's
+## MAP_SIZE_CAPS size, and is block-compressed where the GPU takes S3TC so a
+## 2048 px map costs a quarter of the video memory. The proper fix is import
+## settings (mipmaps, VRAM compressed, size limit) on these files.
+static func _with_mipmaps(source: Texture2D, colour: bool, max_size: int = 0) -> Texture2D:
 	if source == null:
 		return null
 	var image := source.get_image()
@@ -499,11 +500,34 @@ static func _with_mipmaps(source: Texture2D, colour: bool) -> Texture2D:
 		return source
 	if image.is_compressed() and image.decompress() != OK:
 		return source
+	if max_size > 0 and maxi(image.get_width(), image.get_height()) > max_size:
+		var scale := float(max_size) / float(maxi(image.get_width(), image.get_height()))
+		image.resize(maxi(1, roundi(image.get_width() * scale)), maxi(1, roundi(image.get_height() * scale)),
+			Image.INTERPOLATE_LANCZOS)
 	image.generate_mipmaps()
 	if RenderingServer.get_rendering_device() != null or OS.has_feature("s3tc"):
 		image.compress(Image.COMPRESS_S3TC,
 			Image.COMPRESS_SOURCE_SRGB if colour else Image.COMPRESS_SOURCE_GENERIC)
 	return ImageTexture.create_from_image(image)
+
+
+## The largest size a mask keeps when it is mipmapped here, by map (the file
+## name's suffix). features2 holds only soft masks (stubble, blush, scalp and
+## the face/neck split): at 1024 px close renders match 2048 px within 11/255
+## on 0.03% of the pixels (perf gate 2026-10-28, .local/rl-high/evidence/
+## texcap-*), and each sex saves 4.2 MB of video memory. The feature and brow
+## maps stay at 2048 px: at 1024 the brow strokes and freckles visibly soften.
+## An import that brings its own mipmaps keeps its size (set the same limit
+## there when the texture route is settled).
+const MAP_SIZE_CAPS := {"features2": 1024}
+
+
+static func _size_cap(path: String) -> int:
+	var file := path.get_file().get_basename()
+	for map: String in MAP_SIZE_CAPS:
+		if file.ends_with("_" + map):
+			return int(MAP_SIZE_CAPS[map])
+	return 0
 
 
 ## Colour maps are sRGB; masks and normal maps are data.
