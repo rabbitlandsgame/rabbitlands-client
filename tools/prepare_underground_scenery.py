@@ -1,6 +1,7 @@
 """Package reviewed Meshy scenery for underground use without rebuilding models.
 
-Reuses source geometry and UVs. Selected lantern faces remove the unused post;
+Reuses source geometry and UVs. Selected lantern faces remove the unused post,
+and the writing desk's own closed books make a book pile (FACE_SELECTIONS);
 stone material variants use generated atlases. An outer transform sets gameplay
 size and aligns the physical passage or base with the floor.
 
@@ -321,6 +322,33 @@ TOWN_SELECTION = {
     'council_map_table': ('lf-interiors','council-map-table-1','length',4.0),
     'loom': ('lf-interiors','loom-1','height',1.8),
     'bunk_bed': ('lf-interiors','bunk-bed-1','length',2.0),
+    # Calloway's Books (review 2026-10-28, M3): a pile of closed books to stand on tables, crates and the floor, the
+    # two-book stack at the writing desk's left end (FACE_SELECTIONS), at a book pile's real size. No model is made.
+    'book_stack': ('lf-interiors','writing-desk-ledgers-1','length',.35),
+}
+
+
+def _lantern_head(positions, faces):
+    """The lantern post's upper faces: its head and bracket (every corner above 63% of the post's height)."""
+    threshold = positions[:,1].min()+np.ptp(positions[:,1])*.63
+    return (positions[faces,1] >= threshold).all(axis=1)
+
+
+def _desk_book_stack(positions, faces):
+    """The two closed books lying at the writing desk's left end (source frame: x across the desk, y up, +z its front):
+    every corner inside the books' box over the worktop, less the faces of the left rail post that reaches into it."""
+    corners = positions[faces]
+    inside = ((corners >= (-.62, .57, -.215)) & (corners <= (-.2, .8, .235))).all(axis=(1, 2))
+    post = ((corners[:, :, 0] < -.585) & (corners[:, :, 2] < -.15)).all(axis=1)
+    return inside & ~post
+
+
+# Pieces packaged from part of their source model: name -> (the record's geometrySelection, a rule choosing the faces
+# kept, from the source's positions and its triangles). Only the index list changes: the source's vertices, UVs and
+# textures stay as they are (the binary prefix check holds) and the faces left out are simply not drawn.
+FACE_SELECTIONS = {
+    'wall_lantern': ('Original upper lantern/bracket faces only', _lantern_head),
+    'book_stack': ("Original closed-book stack faces only (the writing desk's left end)", _desk_book_stack),
 }
 OUTPUT = 'godot-client/assets/world/underground'
 CONTENT = 'eloria-assets/maps/continent-v2/_continent_v2/content'
@@ -604,16 +632,17 @@ def package(name, spec, output):
                     primitive['attributes'][key] = expanded[index]
         for key in ('extensionsRequired','extensionsUsed'):
             document[key] = [v for v in document.get(key,[]) if v != 'KHR_mesh_quantization']
-    if name == 'wall_lantern':
-        # Reuse the imported lantern head and its bracket. The tall freestanding
-        # post cannot sit outside a cutaway wall without appearing to float.
+    if name in FACE_SELECTIONS:
+        # Reuse part of the imported model (FACE_SELECTIONS): the lantern head and
+        # its bracket (the tall freestanding post cannot sit outside a cutaway wall
+        # without appearing to float), the closed books off the writing desk.
+        _description, chosen = FACE_SELECTIONS[name]
         for mesh in document['meshes']:
             for primitive in mesh['primitives']:
                 positions = accessor(document, blob, primitive['attributes']['POSITION'])
                 indices = accessor(document, blob, primitive['indices']).astype(int).reshape(-1,3)
-                threshold = positions[:,1].min()+np.ptp(positions[:,1])*.63
-                kept = indices[(positions[indices,1] >= threshold).all(axis=1)].astype('<u4').ravel()
-                if not len(kept): raise ValueError('Lantern head selection is empty')
+                kept = indices[chosen(positions, indices)].astype('<u4').ravel()
+                if not len(kept): raise ValueError(f'{name}: the face selection is empty')
                 blob.extend(b'\0'*(-len(blob)%4))
                 document['bufferViews'].append({'buffer':0,'byteOffset':len(blob),'byteLength':kept.nbytes,'target':34963})
                 blob.extend(kept.tobytes())
@@ -674,7 +703,7 @@ def package(name, spec, output):
             'bounds': [low.tolist(), high.tolist()], 'images': images,
             'sourceBinaryPrefixPreserved': True, 'newModelGeneration': False,
             'materialVariant': 'Generated matte stone atlas; reduced normal strength' if changed_material else None,
-            'geometrySelection': 'Original upper lantern/bracket faces only' if name == 'wall_lantern' else 'Complete source model'}
+            'geometrySelection': FACE_SELECTIONS[name][0] if name in FACE_SELECTIONS else 'Complete source model'}
 
 
 def asset_path(name):

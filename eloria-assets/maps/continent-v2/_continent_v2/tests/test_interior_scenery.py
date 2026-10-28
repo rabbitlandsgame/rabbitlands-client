@@ -118,7 +118,8 @@ def test_the_town_furniture_kit_is_packaged_at_its_own_size():
     """The lf-interiors furniture was prepared at real size; each row measures it as prepared, so packaging scales by
     one."""
     from video_motion.asset import read_glb
-    rows = {name: spec for name, spec in P.TOWN_SELECTION.items() if spec[0] == "lf-interiors"}
+    rows = {name: spec for name, spec in P.TOWN_SELECTION.items()
+            if spec[0] == "lf-interiors" and name not in P.FACE_SELECTIONS}
     assert len(rows) == 35 and P.KITS["lf-interiors"].endswith("kits/lf-interiors/prototypes")
     for name, (_region, slug, measure, size) in rows.items():
         assert slug == name.replace("_", "-") + "-1"
@@ -126,3 +127,32 @@ def test_the_town_furniture_kit_is_packaged_at_its_own_size():
         low, high = P.bounds(document, blob)
         extent = high - low
         assert (extent[1] if measure == "height" else max(extent[0], extent[2])) == pytest.approx(size, abs=1e-3), name
+
+
+def test_the_book_pile_is_the_writing_desks_own_closed_books():
+    """Review 2026-10-28 (M3): the kit has no pile of closed books, so book_stack is the two closed books lying on the
+    writing desk's left end, chosen by face as the wall lantern's head is (FACE_SELECTIONS), from the same reviewed
+    kit model (its glTF generator is prepare_meshy_kit) and at a book pile's real size. Only the face list changes:
+    the selection keeps no face of the desk, its rail or its other dressing."""
+    from video_motion.asset import accessor, read_glb
+    region, slug, measure, size = P.TOWN_SELECTION["book_stack"]
+    assert (region, slug, measure, size) == ("lf-interiors", "writing-desk-ledgers-1", "length", .35)
+    assert set(P.FACE_SELECTIONS) == {"wall_lantern", "book_stack"}
+    document, blob = read_glb(CHECKOUT / P.KITS[region] / f"kit-{slug}.glb")
+    assert "prepare_meshy_kit" in document["asset"].get("generator", "")
+    (primitive,) = document["meshes"][0]["primitives"]
+    positions = accessor(document, blob, primitive["attributes"]["POSITION"])
+    faces = accessor(document, blob, primitive["indices"]).astype(int).reshape(-1, 3)
+    kept = P.FACE_SELECTIONS["book_stack"][1](positions, faces)
+    corners = positions[faces[kept]].reshape(-1, 3)
+    low, high = corners.min(0), corners.max(0)
+    # two books on the worktop at the desk's left end: a little over a hundredth of the desk's faces, 0.38 x 0.42 m
+    # across and 0.15 m high in the kit's own size, none of them reaching the rail behind or the left post
+    assert 150 < kept.sum() < 300 < len(faces)
+    assert low[1] > .57 and high[1]-low[1] < .16 and high[0] < -.2 and low[0] > -.61 and low[2] > -.21
+    assert max(high[0]-low[0], high[2]-low[2]) == pytest.approx(.417, abs=.01)
+    record = json.loads((CHECKOUT / P.REPORT).read_text(encoding="utf-8"))
+    (pile,) = [entry for entry in record["assets"] if entry["id"] == "book_stack"]
+    assert pile["geometrySelection"] == P.FACE_SELECTIONS["book_stack"][0] and not pile["newModelGeneration"]
+    extent = [pile["bounds"][1][k]-pile["bounds"][0][k] for k in range(3)]
+    assert max(extent[0], extent[2]) == pytest.approx(size, abs=1e-3) and extent[1] < .13

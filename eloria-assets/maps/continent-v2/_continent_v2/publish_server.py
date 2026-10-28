@@ -39,6 +39,9 @@ What it writes into --server (route B of the serve plan, section 2.3):
       homes.json                                    the home's points (eloria-homes-v1; eloria/home.py)
       home_npcs.txt                                 the re-homed people at their isle posts: each one's npcs.txt row
                                                     with only the map, the tile and the greeting changed
+      special_areas.txt                             the interiors' special areas: an area row per room a source's
+                                                    `specialAreas` names (town_source.special_areas, underground.py;
+                                                    the server's eloria/areas.py reads it after the base rows)
   config/eloria/client_content_manifest.json       the isles' maps[] entries and a continentV2 block, through the
                                                     legacy publisher's own serializer (publish_continent_geography.
                                                     json_bytes), then LF -> CRLF; refused unless re-serializing the
@@ -111,7 +114,7 @@ unique across every interior and apart from every isle object); an interior craf
 its text or its section's style names (station_targets: the smithy's anvil is smithing), else "crafting". Their
 grids are vendored beside the isles'. The manifest block lists every interior under interiorMaps, the caves' portal
 rows under undergroundPortals (row counts undergroundRows) and the town's building doors and stairs under
-buildingPortals (buildingRows); the record lists every interior under interiors.
+buildingPortals (buildingRows, its special areas counted); the record lists every interior under interiors.
 
 --check builds everything and compares it with the server tree and the record, writing nothing there (the sync runs
 into a temporary folder seeded with the server's vendored manifest); it exits 1 on any difference. --apply writes.
@@ -232,7 +235,8 @@ SERVER_FREE_TILE_RADIUS = 19
 HARVEST_ROAD_CHECK = True
 # The overlay's files, in the order the README lists them and this tool writes them.
 FILES = ("README", "maps.txt", "spawns.txt", "harvesting.txt", "npcs.txt", "interactives.txt",
-         "exterior_connections.json", "questlines.txt", "landing.json", "homes.json", "home_npcs.txt")
+         "exterior_connections.json", "questlines.txt", "landing.json", "homes.json", "home_npcs.txt",
+         "special_areas.txt")
 # Independently authored server services are loaded beside the generated roster.
 # Validate them with the server loaders, but never overwrite or retire them.
 PRESERVED_FILES = ("service_npcs.txt",)
@@ -240,7 +244,7 @@ PRESERVED_FILES = ("service_npcs.txt",)
 # continent-v2/campaign_<name>.json): no loader table, never written, validated or removed here.
 PRESERVED_PATTERNS = ("campaign_*.json",)
 LOADER_TABLES = ("maps.txt", "spawns.txt", "harvesting.txt", "npcs.txt", "interactives.txt", "questlines.txt",
-                 "exterior_connections.json")
+                 "exterior_connections.json", "special_areas.txt")
 # The serve plan's milestones (section 5) and what each serves of the overlay (section 2.3; S5 at M1, S14 at M2).
 # Every file is S5's at M1, the inert landing.json, homes.json and home_npcs.txt included (nothing reads them until
 # the chapter's and the home's code arrive), except questlines.txt: the overlay loader reads it the moment it exists,
@@ -1344,6 +1348,7 @@ here and appends its rows after every base row (eloria/content_overlay.py holds 
   landing.json                Signed Ashore's places (eloria/landing.py)
   homes.json                  the home's points, read only while home_map moves the home (eloria/home.py)
   home_npcs.txt               the people the home migration moves, read only while home_map moves the home
+  special_areas.txt           the interior rooms with a special area (Landfall Town's reading room: fast_reading)
 
 Every position comes from the client's scene markers and content tables through the territory frame
 (eloria-assets/maps/continent-v2/_continent_v2/frames.py); the client records what it published from in
@@ -1436,6 +1441,9 @@ def overlay_files(ctx, pub):
         "Read before npcs.txt, and only while home_map names a map other than four_gates (eloria/home.py): each row is",
         "the person's npcs.txt row with only the map, the tile, facing and the greeting changed.",
         "No row may carry a '#': the NPC loader does not strip an inline comment."]))
+    files["special_areas.txt"] = crlf(table_text([], [
+        "continent-v2 overlay: the special areas of the interiors' rooms (a room's floor inside its walls).", GENERATED,
+        "area | kind | map | min x | min y | max x | max y | multiplier, as config/eloria/special_areas.txt."]))
     for name in ("harvesting.txt", "npcs.txt", "interactives.txt", "questlines.txt", "home_npcs.txt"):
         for number, line in enumerate(files[name].decode("utf-8").splitlines(), 1):
             if line.strip() and not line.lstrip().startswith("#") and "#" in line:
@@ -1478,6 +1486,7 @@ def validate_with_server(ctx, pub):
         report["resources"], report["nodes"] = len(resources), len(nodes)
         report["npcs"] = len(load_npcs(profile / "npcs.txt", overlay=True))
         report["interactives"] = len(load_interactives(profile / "interactives.txt", overlay=True))
+        report["specialAreas"] = special_areas_read(profile, pub)
         report["questlines"] = len(load_questlines(profile / "questlines.txt", overlay=True))
         land = load_land_connections(profile / "exterior_connections.json", overlay=True)
         frames_ = load_land_frames(profile / "exterior_connections.json", overlay=True)
@@ -1517,6 +1526,28 @@ def validate_with_server(ctx, pub):
                                               base=load_npcs(profile / "npcs.txt", overlay=False), allowed_maps=pub.regions)
             report["homesParser"] = f"eloria.home.parse_homes: {sorted(homes)}; read_home_npcs: {len(rows)} rows"
     return report
+
+
+def special_areas_read(profile, pub):
+    """How many special areas of the interiors the server's eloria/areas.py reads from the overlay's special_areas.txt
+    (refused unless it reads every row this run publishes: a server whose loader reads no overlay serves none)."""
+    import inspect
+    from eloria.areas import load_special_areas
+    base = profile / "special_areas.txt"
+    if not base.is_file():
+        base.write_bytes(b"")
+    rows = list(getattr(pub, "special_areas", None) or [])
+    if "overlay" not in inspect.signature(load_special_areas).parameters:
+        if rows:
+            raise PublishError(f"the server's eloria/areas.py reads no {OVERLAY}/special_areas.txt: its "
+                               f"{len(rows)} interior special areas would not be served")
+        return 0
+    interiors = {u.region for u in getattr(pub, "interiors", None) or []}
+    read = sum(1 for area in load_special_areas(base, overlay=True) if area.map_id in interiors)
+    if read != len(rows):
+        raise PublishError(f"the server reads {read} interior special areas from {OVERLAY}/special_areas.txt, "
+                           f"not {len(rows)}")
+    return read
 
 
 def own_rules(pub):

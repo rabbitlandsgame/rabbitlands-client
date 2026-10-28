@@ -5,6 +5,7 @@
 manifest_block writes the keys it owns (OWNED_BLOCK_KEYS) and carries every other key of the server's block over as
 it stands (publish_npc_metadata.py's npcMetadataAmendments); the record's hash of the block stays isle facts only.
 station_targets gives an interior crafting station the trade its text or its section's style names.
+the interiors' special areas are the overlay's own special_areas.txt, which the server's loader must read.
 """
 from __future__ import annotations
 
@@ -22,6 +23,54 @@ import underground as U  # noqa: E402
 
 AMENDMENTS = [{"tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_npc_metadata.py", "region": "landfall",
                "addedNpcMarkers": ["landfall--npc-cape-seller-mara-vell"], "scope": "added NPC rows only"}]
+
+
+ROW = "area | fast_reading | landfall_town | 181 | 78 | 197 | 85 | 3"
+OVERLAY_MAPS = "map | landfall_town | Landfall Town | maps/nymara/landfall_town.elm | LFT\r\n"
+
+
+def overlay_profile(tmp_path, areas):
+    """A profile holding a base special_areas.txt and the overlay's maps.txt and special_areas.txt (`areas` its rows
+    under the publisher's header, or no overlay file when None)."""
+    profile = tmp_path / "eloria"
+    (profile / P.OVERLAY).mkdir(parents=True)
+    (profile / "special_areas.txt").write_bytes(b"area | fast_reading | emberhaven | 55 | 59 | 61 | 65 | 3\r\n")
+    (profile / P.OVERLAY / "maps.txt").write_bytes(OVERLAY_MAPS.encode())
+    if areas is not None:
+        text = P.table_text([], ["the overlay's special areas, as publish_server.py heads them"]) + "".join(
+            line + "\n" for line in areas)
+        (profile / P.OVERLAY / "special_areas.txt").write_bytes(P.crlf(text))
+    return profile
+
+
+def test_the_interiors_special_areas_are_an_overlay_file_of_their_own():
+    """The server's eloria/areas.py reads continent-v2/special_areas.txt after the base rows (a base row may not name
+    an overlay map), so the interiors' rows are that overlay file's, served from M1 and recorded with the others."""
+    assert "special_areas.txt" in P.FILES and "special_areas.txt" in P.LOADER_TABLES
+    assert all("special_areas.txt" in P.stage_files(stage) for stage in P.STAGES)
+    assert "special_areas.txt" in P.README and "special_areas.txt" in P.__doc__
+
+
+def test_the_server_reads_every_special_area_the_run_publishes(tmp_path):
+    areas_module = pytest.importorskip("eloria.areas")
+    if "overlay" not in __import__("inspect").signature(areas_module.load_special_areas).parameters:
+        pytest.skip("this server's eloria/areas.py reads no overlay")
+    pub = SimpleNamespace(special_areas=[ROW], interiors=[SimpleNamespace(region="landfall_town")])
+    assert P.special_areas_read(overlay_profile(tmp_path / "one", [ROW]), pub) == 1
+    with pytest.raises(P.PublishError, match="reads 0 interior special areas"):
+        P.special_areas_read(overlay_profile(tmp_path / "none", None), pub)
+    nothing = SimpleNamespace(special_areas=[], interiors=[])
+    assert P.special_areas_read(overlay_profile(tmp_path / "empty", []), nothing) == 0
+
+
+def test_a_server_whose_loader_reads_no_overlay_serves_no_special_area(tmp_path, monkeypatch):
+    areas_module = pytest.importorskip("eloria.areas")
+    monkeypatch.setattr(areas_module, "load_special_areas", lambda path: ())
+    pub = SimpleNamespace(special_areas=[ROW], interiors=[SimpleNamespace(region="landfall_town")])
+    with pytest.raises(P.PublishError, match="reads no continent-v2/special_areas.txt"):
+        P.special_areas_read(overlay_profile(tmp_path, [ROW]), pub)
+    assert P.special_areas_read(overlay_profile(tmp_path / "none", []),
+                                SimpleNamespace(special_areas=[], interiors=[])) == 0
 
 
 def interior(region, kind, rows):

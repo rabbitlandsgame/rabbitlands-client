@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "map": "landfall_town",
-  "sourcePlanSha256": "651033ef890d8f91ef0314ddf36d047ac79a953e58392199106e29f6bf42ec81",
+  "sourcePlanSha256": "d84e09ec09e5d8fa1f302c5c4e5c954be3106bfe95d6b858da78f24dc4f703ab",
   "assets": {
     "crystal_cluster": "res://assets/world/underground/crystal_cluster.glb",
     "supply_crate": "res://assets/world/underground/supply_crate.glb",
@@ -68,7 +68,8 @@
     "high_seat": "res://assets/world/underground/high_seat.glb",
     "council_map_table": "res://assets/world/underground/council_map_table.glb",
     "loom": "res://assets/world/underground/loom.glb",
-    "bunk_bed": "res://assets/world/underground/bunk_bed.glb"
+    "bunk_bed": "res://assets/world/underground/bunk_bed.glb",
+    "book_stack": "res://assets/world/underground/book_stack.glb"
   },
   "harvestPresentation": {},
   "surfaces": {
@@ -191,6 +192,19 @@
     },
     "tavern_upper": {
       "theme": "tavern",
+      "floor": {
+        "texture": "authored",
+        "tint": [
+          1,
+          1,
+          1
+        ]
+      },
+      "rockLift": null,
+      "water": null
+    },
+    "library": {
+      "theme": "shop",
       "floor": {
         "texture": "authored",
         "tint": [
@@ -3771,6 +3785,1136 @@
         -1.0
       ],
       "cutawayWall": "Build_tavern_upper_north_lime_plaster"
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        180.898,
+        0,
+        234.8
+      ],
+      "yaw": 90,
+      "scale": 0.96,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_library_west_lime_plaster"
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        180.921,
+        0,
+        233.3
+      ],
+      "yaw": 90,
+      "scale": 1.05,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_library_west_lime_plaster"
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        180.895,
+        0,
+        231.8
+      ],
+      "yaw": 90,
+      "scale": 0.95,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_library_west_lime_plaster"
+    },
+    {
+      "asset": "writing_desk_ledgers",
+      "position": [
+        187.5,
+        0,
+        233.01
+      ],
+      "yaw": 0,
+      "scale": 1.25
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        189.089,
+        0,
+        234.8
+      ],
+      "yaw": 270,
+      "scale": 1.05,
+      "cutawayWall": "Part_library_1_lime_plaster"
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        189.115,
+        0,
+        233.0
+      ],
+      "yaw": 270,
+      "scale": 0.95,
+      "cutawayWall": "Part_library_1_lime_plaster"
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        189.095,
+        0,
+        231.2
+      ],
+      "yaw": 270,
+      "scale": 1.03,
+      "cutawayWall": "Part_library_1_lime_plaster"
+    },
+    {
+      "asset": "trestle_table",
+      "position": [
+        182.8,
+        0,
+        232.4
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "trestle_table",
+      "position": [
+        182.8,
+        0,
+        234.8
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "notice_board",
+      "position": [
+        182.0,
+        0,
+        230.15
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_library_north_lime_plaster"
+    },
+    {
+      "asset": "supply_crate",
+      "position": [
+        181.66,
+        0,
+        236.34
+      ],
+      "yaw": 6
+    },
+    {
+      "asset": "stool",
+      "position": [
+        188.55,
+        0,
+        236.5
+      ],
+      "yaw": 25
+    },
+    {
+      "asset": "wall_sconce",
+      "position": [
+        186.1,
+        1.85,
+        229.72
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_library_north_lime_plaster"
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        182.0,
+        0.61,
+        232.3
+      ],
+      "yaw": 14,
+      "scale": 1.08
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        182.43,
+        0.61,
+        232.51999999999998
+      ],
+      "yaw": 101
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        183.26,
+        0.61,
+        232.5
+      ],
+      "yaw": 283,
+      "scale": 1.04
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        183.66,
+        0.61,
+        232.28
+      ],
+      "yaw": 352,
+      "scale": 0.96
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        182.85,
+        0.61,
+        232.3
+      ],
+      "yaw": 196,
+      "scale": 1.1
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        182.86,
+        0.744,
+        232.31
+      ],
+      "yaw": 228
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        182.04,
+        0.61,
+        234.88
+      ],
+      "yaw": 168,
+      "scale": 1.04
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        183.08,
+        0.61,
+        234.68
+      ],
+      "yaw": 77,
+      "scale": 1.08
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        183.58,
+        0.61,
+        234.9
+      ],
+      "yaw": 323
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        182.56,
+        0.61,
+        234.72
+      ],
+      "yaw": 262,
+      "scale": 1.08
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        182.55,
+        0.742,
+        234.70999999999998
+      ],
+      "yaw": 291,
+      "scale": 0.98
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        181.54,
+        1.0,
+        236.3
+      ],
+      "yaw": 20,
+      "scale": 1.05
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        181.55,
+        1.128,
+        236.3
+      ],
+      "yaw": 61,
+      "scale": 0.95
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        181.9,
+        1.0,
+        236.51
+      ],
+      "yaw": 290,
+      "scale": 0.95
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        188.55,
+        0.5,
+        236.5
+      ],
+      "yaw": 40,
+      "scale": 0.95
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        188.0,
+        0,
+        236.65
+      ],
+      "yaw": 205,
+      "scale": 1.05
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        188.01,
+        0.128,
+        236.66
+      ],
+      "yaw": 251,
+      "scale": 0.98
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        187.99,
+        0.248,
+        236.64
+      ],
+      "yaw": 190,
+      "scale": 0.92
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        181.95,
+        0,
+        237.90800000000002
+      ],
+      "yaw": 0,
+      "scale": 1.04,
+      "cutawayWall": "Part_library_0_lime_plaster"
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        186.6,
+        0,
+        237.885
+      ],
+      "yaw": 0,
+      "scale": 0.95,
+      "cutawayWall": "Part_library_0_lime_plaster"
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        188.05,
+        0,
+        237.911
+      ],
+      "yaw": 0,
+      "scale": 1.05,
+      "cutawayWall": "Part_library_0_lime_plaster"
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        190.9,
+        0,
+        237.888
+      ],
+      "yaw": 0,
+      "scale": 0.96,
+      "cutawayWall": "Part_library_2_lime_plaster"
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        192.35,
+        0,
+        237.909
+      ],
+      "yaw": 0,
+      "scale": 1.04,
+      "cutawayWall": "Part_library_2_lime_plaster"
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        197.0,
+        0,
+        237.89100000000002
+      ],
+      "yaw": 0,
+      "scale": 0.97,
+      "cutawayWall": "Part_library_2_lime_plaster"
+    },
+    {
+      "asset": "potted_cypress",
+      "position": [
+        189.45,
+        0,
+        238.12
+      ],
+      "yaw": 0,
+      "scale": 0.7,
+      "cutawayWall": "Part_library_0_lime_plaster"
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        184.3,
+        0,
+        246.102
+      ],
+      "yaw": 180,
+      "scale": 0.96,
+      "outward": [
+        0.0,
+        0,
+        1.0
+      ],
+      "cutawayWall": "Build_library_south_lime_plaster"
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        187.6,
+        0,
+        246.082
+      ],
+      "yaw": 180,
+      "scale": 1.04,
+      "outward": [
+        0.0,
+        0,
+        1.0
+      ],
+      "cutawayWall": "Build_library_south_lime_plaster"
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        189.5,
+        0,
+        246.10500000000002
+      ],
+      "yaw": 180,
+      "scale": 0.95,
+      "outward": [
+        0.0,
+        0,
+        1.0
+      ],
+      "cutawayWall": "Build_library_south_lime_plaster"
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        191.4,
+        0,
+        246.079
+      ],
+      "yaw": 180,
+      "scale": 1.05,
+      "outward": [
+        0.0,
+        0,
+        1.0
+      ],
+      "cutawayWall": "Build_library_south_lime_plaster"
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        195.0,
+        0,
+        246.1
+      ],
+      "yaw": 180,
+      "scale": 0.97,
+      "outward": [
+        0.0,
+        0,
+        1.0
+      ],
+      "cutawayWall": "Build_library_south_lime_plaster"
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        198.082,
+        0,
+        243.7
+      ],
+      "yaw": 270,
+      "scale": 1.04,
+      "outward": [
+        1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_library_east_lime_plaster"
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        198.105,
+        0,
+        239.6
+      ],
+      "yaw": 270,
+      "scale": 0.95,
+      "outward": [
+        1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_library_east_lime_plaster"
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        180.898,
+        0,
+        242.65
+      ],
+      "yaw": 90,
+      "scale": 0.96,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_library_west_lime_plaster"
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        180.921,
+        0,
+        238.7
+      ],
+      "yaw": 90,
+      "scale": 1.05,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_library_west_lime_plaster"
+    },
+    {
+      "asset": "stone_fireplace",
+      "position": [
+        181.241,
+        0,
+        244.7
+      ],
+      "yaw": 90,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_library_west_lime_plaster"
+    },
+    {
+      "asset": "chair",
+      "position": [
+        183.3,
+        0,
+        245.4
+      ],
+      "yaw": 240
+    },
+    {
+      "asset": "chair",
+      "position": [
+        183.3,
+        0,
+        244.0
+      ],
+      "yaw": 300
+    },
+    {
+      "asset": "stool",
+      "position": [
+        183.15,
+        0,
+        244.7
+      ],
+      "yaw": 20
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        183.15,
+        0.5,
+        244.7
+      ],
+      "yaw": 335,
+      "scale": 0.95
+    },
+    {
+      "asset": "lectern",
+      "position": [
+        181.6,
+        0,
+        240.4
+      ],
+      "yaw": 90,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_library_west_lime_plaster"
+    },
+    {
+      "asset": "lectern",
+      "position": [
+        196.9,
+        0,
+        242.0
+      ],
+      "yaw": 270
+    },
+    {
+      "asset": "trestle_table",
+      "position": [
+        186.0,
+        0,
+        242.6
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "chair",
+      "position": [
+        185.4,
+        0,
+        241.8
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "chair",
+      "position": [
+        185.4,
+        0,
+        243.4
+      ],
+      "yaw": 180
+    },
+    {
+      "asset": "chair",
+      "position": [
+        186.6,
+        0,
+        241.8
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "chair",
+      "position": [
+        186.6,
+        0,
+        243.4
+      ],
+      "yaw": 180
+    },
+    {
+      "asset": "trestle_table",
+      "position": [
+        190.6,
+        0,
+        242.6
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "chair",
+      "position": [
+        190.0,
+        0,
+        241.8
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "chair",
+      "position": [
+        190.0,
+        0,
+        243.4
+      ],
+      "yaw": 180
+    },
+    {
+      "asset": "chair",
+      "position": [
+        191.2,
+        0,
+        241.8
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "chair",
+      "position": [
+        191.2,
+        0,
+        243.4
+      ],
+      "yaw": 180
+    },
+    {
+      "asset": "trestle_table",
+      "position": [
+        195.0,
+        0,
+        244.4
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "chair",
+      "position": [
+        194.4,
+        0,
+        243.6
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "chair",
+      "position": [
+        194.4,
+        0,
+        245.2
+      ],
+      "yaw": 180
+    },
+    {
+      "asset": "chair",
+      "position": [
+        195.6,
+        0,
+        243.6
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "chair",
+      "position": [
+        195.6,
+        0,
+        245.2
+      ],
+      "yaw": 180
+    },
+    {
+      "asset": "bench",
+      "position": [
+        189.5,
+        0,
+        245.25
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        190.0,
+        0.56,
+        245.23000000000002
+      ],
+      "yaw": 100,
+      "scale": 0.95
+    },
+    {
+      "asset": "bench",
+      "position": [
+        189.45,
+        0,
+        239.55
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        188.9,
+        0.56,
+        239.56
+      ],
+      "yaw": 170
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        188.91,
+        0.682,
+        239.55
+      ],
+      "yaw": 143,
+      "scale": 0.9
+    },
+    {
+      "asset": "potted_cypress",
+      "position": [
+        197.55,
+        0,
+        245.55
+      ],
+      "yaw": 0,
+      "scale": 0.8,
+      "outward": [
+        1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_library_east_lime_plaster"
+    },
+    {
+      "asset": "wall_sconce",
+      "position": [
+        180.72,
+        1.85,
+        241.55
+      ],
+      "yaw": 90,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_library_west_lime_plaster"
+    },
+    {
+      "asset": "wall_sconce",
+      "position": [
+        198.28,
+        1.85,
+        240.8
+      ],
+      "yaw": 270,
+      "outward": [
+        1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_library_east_lime_plaster"
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        186.6,
+        0.61,
+        242.74
+      ],
+      "yaw": 72
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        186.02,
+        0.61,
+        242.48000000000002
+      ],
+      "yaw": 188,
+      "scale": 0.9
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        190.6,
+        0.61,
+        242.62
+      ],
+      "yaw": 305
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        190.6,
+        0.732,
+        242.61
+      ],
+      "yaw": 338,
+      "scale": 0.92
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        189.94,
+        0.61,
+        242.44
+      ],
+      "yaw": 95,
+      "scale": 0.92
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        195.56,
+        0.61,
+        244.51999999999998
+      ],
+      "yaw": 250,
+      "scale": 0.95
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        192.58,
+        0,
+        235.747
+      ],
+      "yaw": 0,
+      "scale": 0.95
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        192.58,
+        0,
+        235.23000000000002
+      ],
+      "yaw": 180,
+      "scale": 1.04
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        194.0,
+        0,
+        235.77100000000002
+      ],
+      "yaw": 0,
+      "scale": 1.04
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        194.0,
+        0,
+        235.253
+      ],
+      "yaw": 180,
+      "scale": 0.95
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        195.42,
+        0,
+        235.747
+      ],
+      "yaw": 0,
+      "scale": 0.95
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        195.42,
+        0,
+        235.23000000000002
+      ],
+      "yaw": 180,
+      "scale": 1.04
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        192.58,
+        0,
+        232.76999999999998
+      ],
+      "yaw": 0,
+      "scale": 1.04
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        192.58,
+        0,
+        232.253
+      ],
+      "yaw": 180,
+      "scale": 0.95
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        194.0,
+        0,
+        232.747
+      ],
+      "yaw": 0,
+      "scale": 0.95
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        194.0,
+        0,
+        232.22899999999998
+      ],
+      "yaw": 180,
+      "scale": 1.04
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        198.082,
+        0,
+        235.6
+      ],
+      "yaw": 270,
+      "scale": 1.04,
+      "outward": [
+        1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_library_east_lime_plaster"
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        198.102,
+        0,
+        232.6
+      ],
+      "yaw": 270,
+      "scale": 0.96,
+      "outward": [
+        1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_library_east_lime_plaster"
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        189.891,
+        0,
+        236.0
+      ],
+      "yaw": 90,
+      "scale": 0.97,
+      "cutawayWall": "Part_library_1_lime_plaster"
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        189.908,
+        0,
+        231.5
+      ],
+      "yaw": 90,
+      "scale": 1.04,
+      "cutawayWall": "Part_library_1_lime_plaster"
+    },
+    {
+      "asset": "writing_desk_ledgers",
+      "position": [
+        196.3,
+        0,
+        230.05
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_library_north_lime_plaster"
+    },
+    {
+      "asset": "chair",
+      "position": [
+        196.3,
+        0,
+        231.25
+      ],
+      "yaw": 180
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        191.3,
+        0,
+        229.9
+      ],
+      "yaw": 0,
+      "scale": 0.97,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_library_north_lime_plaster"
+    },
+    {
+      "asset": "stool",
+      "position": [
+        197.55,
+        0,
+        234.1
+      ],
+      "yaw": 340
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        197.55,
+        0.5,
+        234.1
+      ],
+      "yaw": 215,
+      "scale": 0.95
     }
   ]
 }

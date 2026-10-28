@@ -38,7 +38,11 @@ interior people and interactives, several sources):
     passage end, interactive, spawn or other post; the name is new (not in the base npcs.txt, not an isle person's,
     not another interior person's); the body is an actor type 300-377; facing is a compass point;
   * interior interactives: role information or crafting_station; the tile is reached or a reached tile lies within
-    INTERACTIVE_REACH (Chebyshev) of it; it is no arrival, exit, passage end or post.
+    INTERACTIVE_REACH (Chebyshev) of it; it is no arrival, exit, passage end or post;
+  * special areas (the town's `specialAreas`, town_source.special_areas: a server special area over one room's
+    floor): a kind of eloria/areas.py, a whole multiplier, and floor reached inside the rectangle; rows of the
+    overlay's special_areas.txt (eloria/areas.py reads it after the base rows), also kept as the interior's
+    `special_areas` and pub.special_areas, in SOURCES order.
 Rows: a portal pair and an interactive per door end (caves: "Beyond it lies <section>. <danger>." outside, "Beyond it
 lies <map>." inside; buildings: "<label>. <danger>." outside, "<exitLabel>." inside), a same-map portal and an
 interactive ("A way leads on into <section>. <danger>.", or the end's own "<label>.") per passage end, the nodes,
@@ -97,7 +101,7 @@ def reader_of(spec):
                               ('check', 'doors', 'passages', 'passage_ends', 'arrivals', 'primary_arrival',
                                'primary_exit', 'object_ids')},
                            npcs=getattr(module, 'npcs', None), interactives=getattr(module, 'interactives', None),
-                           module=module)
+                           special_areas=getattr(module, 'special_areas', None), module=module)
 
 
 def section_npcs(reader, section):
@@ -108,6 +112,13 @@ def section_npcs(reader, section):
 def section_interactives(reader, section):
     found = getattr(reader, 'interactives', None)
     return list(found(section)) if found else list(section.get('interactives', []))
+
+
+def section_special_areas(reader, section):
+    """A section's special areas as the reader gives them ({kind, room, factor, bounds}); none for a reader without
+    any (the caves)."""
+    found = getattr(reader, 'special_areas', None)
+    return list(found(section)) if found else []
 
 
 class Fields:
@@ -197,6 +208,7 @@ def attach(ctx, pub, error=ValueError, fields=None):
     interior, in SOURCES order), pub.underground (the caves', or None) and pub.vendor_regions."""
     fields = fields or Fields(error)
     pub.interiors = []
+    pub.special_areas = []
     pub.underground = None
     pub.vendor_regions = list(pub.regions)
     loaded = load(ctx, error)
@@ -205,6 +217,7 @@ def attach(ctx, pub, error=ValueError, fields=None):
     for spec, reader, path, design in loaded:
         interior = attach_one(ctx, pub, spec, reader, path, design, error, fields, door_tiles)
         pub.interiors.append(interior)
+        pub.special_areas.extend(interior.special_areas)
         if spec.kind == 'underground' and pub.underground is None:
             pub.underground = interior
         pub.vendor_regions.append(interior.region)
@@ -424,6 +437,20 @@ def attach_one(ctx, pub, spec, reader, path, design, error, fields, door_tiles):
         npc_rows.append(f'npc | {name} | {region} | {x} | {y} | {role} | {fields.portrait(actor,occupation,facing)} | {greeting}')
     covered=set().union(*reaches)
     if len(covered)+len(posts)!=int(np.count_nonzero(walk_codes)): raise error(f'{spec.label} has a stranded walkable pocket')
+    # special areas: a server area over one room's floor (the overlay's special_areas.txt)
+    from eloria.areas import VALID_KINDS
+    area_rows=[]
+    for section in design['sections']:
+        sid=section['id']; reach=reach_of[sid]
+        for area in section_special_areas(reader,section):
+            tag=f'{sid} special area {area["index"]}'
+            kind=area['kind']; factor=area['factor']; x0,y0,x1,y1=area['bounds']
+            if kind not in VALID_KINDS: raise error(f'{tag}: kind {kind!r} is not one the server reads ({sorted(VALID_KINDS)})')
+            if type(factor) is not int or factor<1: raise error(f'{tag}: factor {factor!r} is not a whole multiplier')
+            if not (0<=x0<=x1<cells and 0<=y0<=y1<cells): raise error(f'{tag}: bounds {[x0,y0,x1,y1]} leave the map')
+            if not any((x,y) in reach for x in range(x0,x1+1) for y in range(y0,y1+1)):
+                raise error(f'{tag}: no reached floor inside {[x0,y0,x1,y1]}')
+            area_rows.append(f'area | {kind} | {region} | {x0} | {y0} | {x1} | {y1} | {factor}')
     def summary(s):
         # the old keys, then (pass 2) every way in: doors [object, map, arrival, exit], passage ends [object, arrival]
         return {'id':s['id'],'name':s['name'],'danger':s['danger'],'arrival':reader.primary_arrival(design,s),
@@ -442,8 +469,9 @@ def attach_one(ctx, pub, spec, reader, path, design, error, fields, door_tiles):
     rows={'nodes':len(nodes),'spawns':len(spawns),'interactives':len(objects)}
     if spec.kind!='underground':
         rows['npcs']=len(npc_rows)
+        rows['specialAreas']=len(area_rows)
     interior=SimpleNamespace(region=region,kind=spec.kind,spec=spec,metadata=metadata,portals=portals,design=design,
-                             rows=rows,walkable=int(np.count_nonzero(walk_codes)))
+                             rows=rows,walkable=int(np.count_nonzero(walk_codes)),special_areas=area_rows)
     def append(name,lines,always=spec.kind=='underground'):
         # the caves' four tables take their block as they always have, empty or not; any other table only with rows
         if lines or always:
@@ -452,6 +480,9 @@ def attach_one(ctx, pub, spec, reader, path, design, error, fields, door_tiles):
                        *['portal | '+' | '.join(map(str,p)) for p in portals]])
     append('spawns.txt',spawns);append('harvesting.txt',nodes);append('interactives.txt',objects)
     append('npcs.txt',npc_rows,always=False)
+    if area_rows:
+        pub.files.setdefault('special_areas.txt',b'')
+        append('special_areas.txt',area_rows,always=False)
     return interior
 
 

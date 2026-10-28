@@ -207,7 +207,7 @@ def test_a_building_door_is_drawn_in_its_shops_colour_under_its_own_label():
 
 
 @pytest.mark.parametrize("door, refusal", [
-    ({"category": "bookshop"}, "bookshop"),                      # unknown: refused, not dropped
+    ({"category": "bakery"}, "bakery"),                          # unknown: refused, not dropped
     ({"kind": "cave", "category": None}, "kind 'cave'"),
     ({"kind": "underground", "category": "tavern"}, "only a building door"),
 ])
@@ -321,8 +321,10 @@ def test_one_category_table_for_the_publishers_the_client_and_the_legend():
     names = {name for _colour, name in categories.values()}
     assert not [line for line in legend if "◆" in line and line.split("[/color] ", 1)[-1] in names]
     assert tool.MC.colour() == tool.MC.ENTRANCE_COLOUR and tool.MC.colour("blacksmith") == "9d73d8"
+    # the bookseller (2026-10-28) took the legend's Books colour, and its line is a round shop dot now
+    assert tool.MC.CATEGORIES["bookshop"] == ("e75252", "Books") and "[color=#e75252]●[/color] Books" in legend
     with pytest.raises(tool.MC.CategoryError):
-        tool.MC.check("books")
+        tool.MC.check("bakery")
 
 
 def test_landfall_overview_places_all_components_in_its_own_image():
