@@ -74,18 +74,6 @@ func run() -> void:
 		var look := PRESETS.appearance(name).merged({"shirt": 5, "pants": 2, "boots": 2})
 		look.merge(looks.get(name, {}), true)
 		var model: Dictionary = models["luminous_female" if name == "Mira" else "luminous_male"].duplicate(true)
-		var prototype_root := OS.get_environment("RL_MPFB_PROTOTYPE_ROOT")
-		if not prototype_root.is_empty():
-			var sex := "female" if name == "Mira" else "male"
-			model.scene = prototype_root.path_join(sex).path_join("luminous_" + sex + ".glb")
-			model.geometryProfile = "mpfb"
-			var fit_path := prototype_root.path_join(sex).path_join("fit.json")
-			if FileAccess.file_exists(fit_path):
-				var metadata: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(fit_path))
-				model.mpfbFaceFrame = metadata.get("face_frame_head_local", {})
-				MpfbPrototypeAppearance.configure_art(model, metadata, fit_path.get_base_dir())
-			model.erase("faceAppearance")
-			model.erase("skinPalette")
 		var loadout := {5: 225, 2: 100} if name == "Mira" else {5: 209, 2: 105}
 		var errors := actor.configure({"actor_id": 9931, "x": 0, "y": 0, "rotation": 0,
 			"kind": 1, "name": "", "appearance": look, "equipment_visuals": loadout},

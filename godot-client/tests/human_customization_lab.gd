@@ -9,7 +9,9 @@ var _canvas: Control
 var _header_margin: MarginContainer
 var _editor
 var _sex: OptionButton
-var _model_choice: OptionButton
+var _head_choice: OptionButton
+## RL_HEADS as the lab was started with (the RL choice restores it).
+var _rl_heads_env := ""
 var _outfit: OptionButton
 var _held_equipment: OptionButton
 var _pose: OptionButton
@@ -43,7 +45,7 @@ func _run() -> void:
 	if FileAccess.file_exists(SAVE_PATH):
 		_looks = _json(SAVE_PATH)
 	_build_ui()
-	_select_model(_model_choice.selected)
+	_select_head(_head_choice.selected)
 	root.size_changed.connect(_fit)
 	await process_frame
 	await process_frame
@@ -84,11 +86,11 @@ func _build_ui() -> void:
 	header.add_child(toolbar)
 	_sex = _picker(toolbar, "Body", ["Human Female", "Human Male"])
 	_sex.item_selected.connect(_select_sex)
-	_model_choice = _picker(toolbar, "Model", ["Current", "MPFB prototype"])
-	_model_choice.set_item_disabled(1, not _mpfb_available())
-	if _mpfb_available(): _model_choice.select(1)
-	_model_choice.tooltip_text = "Compare the prototype with the current game model." if _mpfb_available() else "The MPFB prototype is not available in this preview."
-	_model_choice.item_selected.connect(_select_model)
+	_head_choice = _picker(toolbar, "High head", ["RL head", "Classic head"])
+	_rl_heads_env = OS.get_environment("RL_HEADS")
+	_head_choice.select(1 if ReplicatedActor3D.rl_heads_classic() else 0)
+	_head_choice.tooltip_text = "High graphics draws the RL head; Classic shows the previous High head for comparison. Low and Medium use the lightweight Human head with either."
+	_head_choice.item_selected.connect(_select_head)
 	_outfit = _picker(toolbar, "Outfit", ["Portrait outfit", "Vanguard", "Ranger", "Arcanist", "Warden"])
 	_outfit.item_selected.connect(func(_index: int) -> void: _refresh_outfit())
 	_held_equipment = _picker(toolbar, "Equipment", ["No equipment", "Sword and shield", "Staff"])
@@ -98,7 +100,7 @@ func _build_ui() -> void:
 	_pose.item_selected.connect(func(_index: int) -> void: _play_pose())
 	_quality = _picker(toolbar, "Graphics", ["Low", "Medium", "High"])
 	_quality.select(1)
-	_quality.tooltip_text = "MPFB study uses High; Low/Medium use the current model."
+	_quality.tooltip_text = "High draws the chosen High head; Low and Medium use the lightweight Human head."
 	_quality.item_selected.connect(_select_quality)
 	_pause = CheckBox.new()
 	_pause.text = "Pause"
@@ -186,48 +188,34 @@ func _default_look(sex: int) -> Dictionary:
 	return preload("res://src/actors/human_portrait_presets.gd").appearance("Mira" if sex == 0 else "Rowan").merged(
 		{"shirt": 5, "pants": 2, "boots": 2})
 
-func _mpfb_scene(sex: int) -> String:
-	return OS.get_environment("RL_MPFB_PROTOTYPE_ROOT").path_join(
-		"female/luminous_female.glb" if sex == 0 else "male/luminous_male.glb")
-
-func _mpfb_available() -> bool:
-	return not OS.get_environment("RL_MPFB_PROTOTYPE_ROOT").is_empty() \
-		and FileAccess.file_exists(_mpfb_scene(0)) and FileAccess.file_exists(_mpfb_scene(1))
-
 func _preview_model(sex: int) -> Dictionary:
-	var model: Dictionary = _models["luminous_female" if sex == 0 else "luminous_male"].duplicate(true)
-	if _model_choice.selected == 1 and _mpfb_available():
-		model.scene = _mpfb_scene(sex)
-		model.geometryProfile = "mpfb"
-		model.erase("faceAppearance")
-		model.erase("skinPalette")
-		var fit_path := _mpfb_scene(sex).get_base_dir().path_join("fit.json")
-		if FileAccess.file_exists(fit_path):
-			var metadata := _json(fit_path)
-			MpfbPrototypeAppearance.configure_art(model, metadata, fit_path.get_base_dir())
-			var face_frame: Variant = metadata.get("face_frame_head_local", {})
-			if face_frame is Dictionary and not face_frame.is_empty():
-				model.mpfbFaceFrame = face_frame
-	return model
+	return _models["luminous_female" if sex == 0 else "luminous_male"].duplicate(true)
 
-func _select_model(index: int) -> void:
-	if index == 1 and not _mpfb_available():
-		_model_choice.select(0)
-		return
-	if index == 1:
-		_quality.select(2)
-	_select_sex(_sex.selected)
-	_message.text = "MPFB prototype · High graphics · Existing animations and equipment · Your live character is unchanged." if index == 1 else "Current game model · Your live character is unchanged."
+## The High head: the RL head, or develop's classic High head for comparison
+## (RL_HEADS=classic for this lab session). The actor is rebuilt with the same
+## appearance, equipment and pose; Low and Medium are the same with either.
+func _select_head(index: int) -> void:
+	_head_choice.select(index)
+	var wanted := "classic" if index == 1 else ("" if ReplicatedActor3D.RL_HEADS_CLASSIC.has(_rl_heads_env.strip_edges().to_lower()) else _rl_heads_env)
+	if OS.get_environment("RL_HEADS") != wanted:
+		OS.set_environment("RL_HEADS", wanted)
+		ReplicatedActor3D.reload_rl_heads_switch()
+	_select_sex(_sex.selected if _current_sex >= 0 else 0)
+	_message.text = _head_message()
+
+func _head_message() -> String:
+	if _quality.selected < 2:
+		return "High head: %s at High graphics. Low and Medium use the lightweight Human head. Your live character is unchanged." % _head_choice.get_item_text(_head_choice.selected)
+	if _head_choice.selected == 1:
+		return "Classic High head · Your live character is unchanged."
+	if not ReplicatedActor3D.rl_heads_renderer_supported():
+		return "This renderer draws the classic High head. Your live character is unchanged."
+	return "RL head · High graphics · Your live character is unchanged."
 
 func _select_quality(index: int) -> void:
 	_quality.select(index)
-	if index < 2 and _model_choice.selected == 1:
-		_model_choice.select(0)
-		_select_sex(_sex.selected)
-		_message.text = "MPFB study uses High. Low and Medium use the current game model."
-		return
 	_editor.set_preview_quality(index)
-	_message.text = "MPFB prototype · High graphics · Your live character is unchanged." if _model_choice.selected == 1 else "High uses the portrait art in development. Low and Medium use the lightweight Human appearance."
+	_message.text = _head_message()
 
 func _select_sex(index: int) -> void:
 	if is_instance_valid(_editor.get("_actor")) and _current_sex >= 0:
@@ -327,18 +315,8 @@ func _expect(value: bool, label: String) -> void:
 		push_error(label)
 
 func _run_smoke() -> void:
-	if _mpfb_available():
-		_expect(_model_choice.selected == 1 and _quality.selected == 2, "MPFB launcher opens its High prototype immediately")
-		_expect((_editor.get("_actor") as ReplicatedActor3D)._model_config.scene == _mpfb_scene(0), "prototype startup uses the prepared female study")
-		_model_choice.select(0)
-		_quality.select(1)
-		_select_model(0)
-		# Release the startup High actor and its deferred preview children before
-		# auditing the ordinary Medium baseline.
-		await process_frame
-		await process_frame
 	_expect(bool(root.get_node("Network").get("offline_hud_preview")), "network is blocked for this preview")
-	_expect(_model_choice.is_item_disabled(1) == not _mpfb_available(), "MPFB selection requires both prototype files")
+	_expect(_head_choice.selected == (1 if ReplicatedActor3D.rl_heads_classic() else 0), "the High head choice starts from RL_HEADS")
 	for sex: int in [0, 1]:
 		_select_sex(sex)
 		_expect(ReplicatedActor3D.HIGH_PORTRAIT.cache_metrics().texture_bundles == 0, "Medium starts without High portrait textures")
@@ -418,8 +396,7 @@ func _run_smoke() -> void:
 		for field: String in PortraitCustomization.EXTRA_FIELDS:
 			_expect(int(_json(SAVE_PATH)[str(sex)].get(field, -1)) == int(form.values()[field]), "local preview saves the new " + field + " control")
 	await process_frame
-	if _mpfb_available():
-		await _smoke_mpfb_models()
+	await _smoke_head_choice()
 	_fit()
 	_expect(_editor.position.y >= 100 and _editor.get_global_rect().end.y <= root.size.y, "preview fits below toolbar")
 	await RenderingServer.frame_post_draw
@@ -478,42 +455,30 @@ func _smoke_equipment_options() -> void:
 	_outfit.select(0)
 	_refresh_outfit()
 
-func _smoke_mpfb_models() -> void:
-	var original_model: Dictionary = _models["luminous_male"].duplicate(true)
-	_model_choice.select(1)
-	_select_model(1)
-	_expect(_quality.selected == 2, "MPFB comparison begins in High graphics")
+## Classic and RL at High for both bodies: the same appearance, equipment and
+## pose survive the switch, Classic draws develop's High portrait and no RL head,
+## RL draws the RL head where this renderer does; then the choice is restored.
+func _smoke_head_choice() -> void:
+	var started := _head_choice.selected
+	_select_quality(2)
 	for sex: int in [0, 1]:
 		_select_sex(sex)
-		var actor: ReplicatedActor3D = _editor.get("_actor")
-		_expect(actor._model_config.scene == _mpfb_scene(sex), "MPFB model is loaded only for the selected body")
-		_expect(actor._model_config.get("geometryProfile") == "mpfb", "MPFB uses its own geometry profile")
-		_expect(not actor._model_config.has("faceAppearance") and not actor._model_config.has("skinPalette"), "MPFB keeps its authored textures")
-		for field: String in ["culture", "bodyTemplate", "gender", "animationLibrary"]:
-			var source: Dictionary = _models["luminous_female" if sex == 0 else "luminous_male"]
-			_expect(actor._model_config.get(field) == source.get(field), "MPFB preserves the existing " + field + " contract")
-		await _smoke_equipment_options()
 		var look: Dictionary = _editor.call("_values")
 		_held_equipment.select(1)
 		_pose.select(5)
 		_refresh_outfit()
-		_model_choice.select(0)
-		_select_model(0)
+		_select_head(1)
+		var actor: ReplicatedActor3D = _editor.get("_actor")
+		_expect(actor.rl_head() == null and actor.render_quality() == 2, "Classic draws no RL head at High")
+		_expect(ReplicatedActor3D.HIGH_PORTRAIT.cache_metrics().texture_bundles == 1, "Classic draws the classic High portrait")
+		_expect(_editor.call("_values") == look and _held_equipment.selected == 1 and _pose.selected == 5,
+			"switching the High head preserves appearance, equipment and pose")
+		_select_head(0)
 		actor = _editor.get("_actor")
-		_expect(_editor.call("_values") == look, "switching models preserves customization choices")
-		_expect(_held_equipment.selected == 1 and _pose.selected == 5, "switching models preserves equipment and pose")
-		_expect(actor._model_config.scene == _models["luminous_female" if sex == 0 else "luminous_male"].scene, "Current restores the game model")
-		_model_choice.select(1)
-		_select_model(1)
-		for quality: int in [0, 1]:
-			_select_quality(quality)
-			actor = _editor.get("_actor")
-			_expect(_model_choice.selected == 0 and actor.render_quality() == quality, "Low and Medium restore the accepted Current model")
-			_expect(_editor.call("_values") == look and _held_equipment.selected == 1 and _pose.selected == 5, "graphics fallback preserves appearance, equipment and pose")
-			_expect(actor._model_config.get("geometryProfile", "") != "mpfb", "Low and Medium never use the MPFB geometry profile")
-			_model_choice.select(1)
-			_select_model(1)
-	_expect(_models["luminous_male"] == original_model, "prototype preview never edits the production model registry")
-	_model_choice.select(0)
-	_held_equipment.select(0)
-	_select_model(0)
+		_expect((actor.rl_head() != null) == ReplicatedActor3D.rl_heads_renderer_supported(),
+			"RL draws the RL head where this renderer does")
+		_expect(_editor.call("_values") == look, "switching back keeps the appearance")
+		_held_equipment.select(0)
+		_refresh_outfit()
+	_select_head(started)
+	_select_quality(1)

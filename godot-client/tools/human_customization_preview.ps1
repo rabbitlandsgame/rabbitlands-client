@@ -56,9 +56,7 @@ try {
     Write-Host 'Opening the Rabbit Lands Human workshop...'
     Write-Host 'Choose Human Female or Male, an outfit, equipment, and a pose. Drag the character to rotate.'
     Write-Host 'Equipment offers no held gear, sword and shield, or staff. Attack forehand/backhand replay when equipment changes.'
-    if ($env:RL_MPFB_PROTOTYPE_ROOT) {
-        Write-Host 'The MPFB prototype opens in High graphics. Choose Current to compare. Low and Medium use Current.'
-    }
+    Write-Host 'At High graphics, High head chooses the RL head or the classic High head for comparison.'
     Write-Host 'Save preview keeps your choices locally. No account or server connection is needed.'
     Write-Host ('Log: ' + $logPath)
     $windowStyle = if ($SmokeTest) { 'Hidden' } else { 'Normal' }

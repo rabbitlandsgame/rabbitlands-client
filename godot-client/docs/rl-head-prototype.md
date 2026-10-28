@@ -246,7 +246,7 @@ beards; mean frame work in ms, two runs each at 26 m.
 * **Per-frame scripts** (blink, expressions, LOD, spring ranking): 0.73 ms a frame for 160
   Humans at 26 m (4.5 us an actor), 0.82 ms at 10 m with eight spring-hair actors.
 * **Draw calls**: about two more per Human (Forward+ 26 m: 635 against 559 at 40, 2,414
-  against 2,103 at 160). **Close portrait** (`mpfb_prototype_cost.gd` method, one head):
+  against 2,103 at 160). **Close portrait** (the method of the former `mpfb_prototype_cost.gd`, one head):
   GPU 0.14 against 0.10 ms in Forward+, 0.09 against 0.05 ms in Compatibility.
 * **Triangles up close** (level 0): head 12,152 (male) / 12,077 (female), rowan_shag
   12,908, mira_bun 17,976, beards 872-4,536: Rowan 25,060 and Tavi with a full beard

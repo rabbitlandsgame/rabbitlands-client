@@ -19,7 +19,6 @@ const STUBBLE_APPEARANCE := preload("res://src/actors/stubble_appearance.gd")
 const HUMAN_LOCOMOTION := preload("res://src/actors/human_locomotion_polish.gd")
 const HIGH_PORTRAIT := preload("res://src/actors/high_portrait_appearance.gd")
 const HIGH_HAIR := preload("res://src/actors/high_hair_appearance.gd")
-const MPFB_PROTOTYPE := preload("res://src/actors/mpfb_prototype_appearance.gd")
 const WORLD_LABEL_STYLE := preload("res://src/ui/world_label_style.gd")
 const TextColors := preload("res://src/ui/text_colors.gd")
 const ARCHIVED_MODEL_POLICY := preload("res://src/actors/archived_model_policy.gd")
@@ -733,10 +732,6 @@ func apply_appearance_variants(appearance: Dictionary) -> void:
 	for node_value: Node in native_model.find_children("*", "MeshInstance3D", true, false):
 		var mesh_node: MeshInstance3D = node_value as MeshInstance3D
 		var mesh_name: String = mesh_node.name.to_lower()
-		if MPFB_PROTOTYPE.supported(_model_config) and mesh_name in ["body", "eyes", "scalp", "eyebrows"]:
-			# The local study has its own skin/iris atlas. Its white eyes and
-			# painted features must not receive the production source UV finish.
-			continue
 		if mesh_name.begins_with(RACE_FEATURE_PREFIX):
 			# Horn, stone, glass and growth are not skin: a race feature keeps
 			# its imported material under every skin, hair and eye choice. Keep
@@ -1171,12 +1166,11 @@ static func _rl_head_override(appearance: Dictionary) -> Variant:
 	return null
 
 ## Whether this actor draws an RL head now: a Human, RL heads not switched to
-## classic, not the MPFB study body, and either the lab's override or High
+## classic, and either the lab's override or High
 ## quality in a renderer that draws it, with the head module for its sex on
 ## disk. Low and Medium never read an RL asset.
 func _rl_head_wanted() -> bool:
-	if _native_skeleton == null or not _uses_portrait_customization() or rl_heads_classic() \
-			or MPFB_PROTOTYPE.supported(_model_config):
+	if _native_skeleton == null or not _uses_portrait_customization() or rl_heads_classic():
 		return false
 	if _appearance.has("rl_head"):
 		return _rl_head_override(_appearance) != null
@@ -1559,13 +1553,9 @@ func _apply_render_quality_to_visuals() -> void:
 		# no stubble on it, and no classic High portrait. Its legacy hairstyle,
 		# when one is drawn, keeps the High hair finish.
 		var rl := _rl_head != null or _rl_head_pending != null
-		var mpfb := MPFB_PROTOTYPE.supported(_model_config)
-		if mpfb and _model_config.has("mpfbFaceFrame"):
-			_native_model.set_meta("mpfb_face_frame", _model_config.mpfbFaceFrame)
 		if _human_shape_needs_finish:
 			# Body refinement is identical on the head. Doing it before the
 			# individual face lets all face choices reuse the same outfit fit.
-			# MPFB's study retains the accepted canonical torso and hands.
 			# This field ends below its authored head/upper-neck replacement.
 			CHARACTER_PROPORTIONS.apply_body_refinement(_native_model, _native_skeleton, _model_config)
 			if rl:
@@ -1573,13 +1563,12 @@ func _apply_render_quality_to_visuals() -> void:
 				if not _rl_switching:
 					PORTRAIT_GROOM.apply(_native_model, _native_skeleton, _rl_groom_appearance(), _model_config)
 			else:
-				var shaped_appearance := MPFB_PROTOTYPE.shape_appearance(_appearance, _model_config) if mpfb else _appearance
-				CHARACTER_PROPORTIONS.apply(_native_model, _native_skeleton, shaped_appearance)
+				CHARACTER_PROPORTIONS.apply(_native_model, _native_skeleton, _appearance)
 				# A switch down from the RL head grooms again only to build a
 				# beard shell the RL head went without; otherwise the hair keeps
 				# the grooming and finish it had, as in develop's own switch.
 				if not _rl_switching or _beard_shell_missing():
-					PORTRAIT_GROOM.apply(_native_model, _native_skeleton, shaped_appearance, _model_config)
+					PORTRAIT_GROOM.apply(_native_model, _native_skeleton, _appearance, _model_config)
 			_human_shape_needs_finish = false
 		if rl:
 			if _native_model.has_meta(HIGH_PORTRAIT.USER_META):
@@ -1589,13 +1578,9 @@ func _apply_render_quality_to_visuals() -> void:
 			if _rl_head != null:
 				_rl_head.set_quality(_render_quality)
 		else:
-			if not mpfb:
-				HIGH_PORTRAIT.apply(_native_model, _native_skeleton, _appearance, _model_config, _render_quality)
+			HIGH_PORTRAIT.apply(_native_model, _native_skeleton, _appearance, _model_config, _render_quality)
 			HIGH_HAIR.apply(_native_model, _native_skeleton, _appearance, _model_config, _render_quality)
-			if mpfb:
-				MPFB_PROTOTYPE.apply(_native_model, _appearance, _model_config)
-			else:
-				STUBBLE_APPEARANCE.apply(_native_model, _appearance, _model_config)
+			STUBBLE_APPEARANCE.apply(_native_model, _appearance, _model_config)
 		ACTOR_RENDER_QUALITY.apply_actor(_native_model, _render_quality)
 	var fallback := get_node_or_null("MissingModelFallback") as MeshInstance3D
 	if fallback != null:

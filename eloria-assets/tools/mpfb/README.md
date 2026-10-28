@@ -80,22 +80,15 @@ preset on the already-authored MPFB targets, with both slider endpoints retained
 
 ## Local review
 
-Run `test-mpfb-prototype.bat` from this prepared worktree. It opens **MPFB
-prototype** in High graphics. Low/Medium select the current models. The
-independent Equipment menu offers **No equipment**, **Sword and shield**, and
-**Staff**, while the outfit menu retains clothing and capes. Review the two
-single cuts, original Flurry, combat ready, idle, walk and run from all sides.
-
-`test-human-customization.bat` remains the ordinary preview. Neither launcher
-connects to a server or changes production/player assets.
-
-Focused evidence fixtures:
-
-- `tests/human_portrait_comparison.gd`: identical studio portraits, with
-  `RL_MPFB_PROTOTYPE_ROOT` set only for the prototype captures.
-- `tests/test_mpfb_prototype_integration.gd`: actual rig/action/equipment checks.
-- `tests/mpfb_prototype_cost.gd`: Current High versus MPFB High at the same
-  1280x720 viewport, both a 16-character grid and a close portrait.
+The game no longer draws these studies (owner decision D2, 2026-10-28): the
+MPFB High runtime (`mpfb_prototype_appearance.gd` and its shaders, the
+`geometryProfile: "mpfb"` branches, `test-mpfb-prototype.bat`, the workshop's
+MPFB model choice and the MPFB-only tests) was removed once the RL head, built
+from the same MPFB/MakeHuman authoring (`eloria-assets/tools/rl_heads/`),
+became the High Human head. These tools remain for authoring and reproducing
+the studies; their outputs stay local, and earlier revisions keep the removed
+preview and evidence fixtures. `test-human-customization.bat` remains the
+ordinary preview; its workshop compares the RL head with the classic High head.
 
 Use an isolated guarded Godot project/profile and `--offline-hud-preview`.
 The portrait output directory is `RL_HUMAN_PORTRAIT_OUTPUT`; integration/cost
