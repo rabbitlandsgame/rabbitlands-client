@@ -66,6 +66,17 @@ func run() -> void:
 		expect(workspace.bulk_actions.buttons.store.visible == not compact and workspace.bulk_actions.buttons.drop.visible == not compact and workspace.bulk_actions.buttons.mix.visible == not compact, id + " has the intended default text shortcuts")
 		expect(main.inventory_slot_buttons.size() == 24 and main.equipment_slot_buttons.size() == 8, id + " retains all 24 pack and 8 wear slots")
 		expect(main.inventory_slot_buttons == pack_buttons and main.equipment_slot_buttons == worn_buttons, id + " reuses live controls and their signals")
+
+		if id == "tabbed":
+			expect(main.inventory_slot_buttons[0].custom_minimum_size.x >= 48, "Tabbed satchel uses larger item icons")
+			var pack_end: float = workspace.groups.backpack.position.y + workspace.groups.backpack.size.y
+			expect(is_equal_approx(workspace.groups.pouch.position.y - pack_end, 8.0), "Tabbed satchel places the pouch directly after the backpack without reserved blank space")
+		if id == "dock":
+			expect(main.inventory_slot_buttons[0].custom_minimum_size.x >= 60 and main.equipment_slot_buttons[0].custom_minimum_size.x >= 44, "Edge dock uses larger backpack and equipment icons")
+			var equipment_rect: Rect2 = workspace.groups.equipment.get_rect()
+			var pouch_rect: Rect2 = workspace.groups.pouch.get_rect()
+			expect(is_equal_approx(equipment_rect.position.y, pouch_rect.position.y) and pouch_rect.position.x >= equipment_rect.end.x + 8, "Edge dock puts the pouch at the top right beside equipment")
+			expect(workspace.groups.backpack.position.y >= maxf(equipment_rect.end.y, pouch_rect.end.y) + 8, "Edge dock keeps the backpack clear of both top-row sections")
 		var bounds: Rect2 = main.inventory_panel.get_global_rect()
 		expect(bounds.position.x >= -1 and bounds.position.y >= -1 and bounds.end.x <= main.game_view.size.x + 1 and bounds.end.y <= main.game_view.size.y + 1, id + " fits 1280x720")
 		workspace.request_inspection(0, true)

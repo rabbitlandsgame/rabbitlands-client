@@ -38,11 +38,16 @@ static func preset(id: String) -> Dictionary:
 	result["show_stats"] = true
 	result["show_comparison"] = true
 	match id:
-		"tabbed": result.inspection_mode = "replace"
+		"tabbed":
+			result.inspection_mode = "replace"
+			result.parts.backpack.cell = 48
+			result.parts.equipment.cell = 48
 		"dock":
 			result.equipment_side = "top"
 			result.parts.equipment.columns = 4
-			result.parts.backpack.cell = 34
+			result.parts.backpack.cell = 60
+			result.parts.backpack.columns = 8
+			result.parts.equipment.cell = 44
 			result.anchor = "right"
 		"popover": result.inspection_mode = "popover"
 		"tray":

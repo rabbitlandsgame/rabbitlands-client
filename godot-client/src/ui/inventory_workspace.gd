@@ -55,6 +55,7 @@ var _resizing := false
 var _drag_cell := 36.0
 var _drag_dimensions := Vector2.ZERO
 var reagent_pouch
+var _pouch_side_width := 75.0
 
 func configure(owner_main: Control) -> void:
 	main = owner_main
@@ -401,7 +402,6 @@ func apply_layout() -> void:
 	var pack_grid := _grid_extent("backpack", 24)
 	var pack := pack_grid
 	var worn := _grid_extent("equipment", 8)
-	var pouch: Vector2 = reagent_pouch.extent(options.parts.pouch, options.gap, worn.x)
 	var replace: bool = options.inspection_mode == "replace"
 	tabs.set_tab_disabled(1, not options.parts.equipment.enabled)
 	tabs.set_tab_disabled(2, not options.parts.inspection.enabled)
@@ -409,6 +409,10 @@ func apply_layout() -> void:
 	var show_detail: bool = _inspection_open or is_editing() or options.inspection_mode == "side"
 	var worn_visible: bool = options.parts.equipment.enabled and (not replace or _tab == 1)
 	var pack_visible: bool = not replace or _tab == 0
+	var top_pouch: bool = options.recipe == "dock" and options.equipment_side == "top" and worn_visible and pack_visible and options.parts.pouch.enabled
+	_pouch_side_width = 75.0 if top_pouch else worn.x
+	var pouch: Vector2 = reagent_pouch.extent(options.parts.pouch, options.gap, _pouch_side_width)
+
 	var top := 32.0 + (30.0 if replace else 0.0)
 	var pack_at := Vector2.ZERO
 	var worn_at := Vector2.ZERO
@@ -422,15 +426,21 @@ func apply_layout() -> void:
 		body_size = Vector2(pack.x + worn.x + 10, maxf(pack.y, worn.y)) if options.equipment_side != "top" else Vector2(maxf(pack.x, worn.x), pack.y + worn.y + 8)
 	elif worn_visible: body_size = worn
 	# All tab pages share the full pack dimensions, so inspecting never grows a tabbed window.
-	if replace: body_size = pack.max(Vector2(260, 240))
-	var pouch_y: float = top + body_size.y + 8
-	if options.parts.pouch.enabled:
+	if replace: body_size = pack.max(Vector2(260, options.parts.inspection.height))
+	var pouch_at := Vector2(0, top + body_size.y + 8)
+	if top_pouch:
+		# Equipment and pouch share the top row; the larger backpack fills the row below.
+		pouch_at = Vector2(worn.x + 10, top)
+		var top_height := maxf(worn.y, pouch.y)
+		pack_at = Vector2(0, top_height + 8)
+		body_size = Vector2(maxf(pack.x, worn.x + 10 + pouch.x), top_height + 8 + pack.y)
+	elif options.parts.pouch.enabled:
 		body_size.x = maxf(body_size.x, pouch.x)
 		body_size.y += pouch.y + 8
 	body_size.x = maxf(body_size.x, 224)
-	pouch.x = body_size.x
+	if not top_pouch: pouch.x = body_size.x
 	_place("backpack", pack_at + Vector2(0, top), pack_grid)
-	_place("pouch", Vector2(0, pouch_y), pouch)
+	_place("pouch", pouch_at, pouch)
 	groups.pouch.visible = pack_visible and options.parts.pouch.enabled
 	_place("equipment", worn_at + Vector2(0, top), worn)
 	groups.backpack.visible = pack_visible
@@ -545,7 +555,7 @@ func _layout_contents() -> void:
 		(groups[key].get_node("Heading") as Label).size = Vector2(groups[key].size.x, 18)
 	reagent_pouch.position = Vector2.ZERO
 	reagent_pouch.size = groups.pouch.size
-	reagent_pouch.apply_style(model.working, _grid_extent("equipment", 8).x, model.working.equipment_side == "right")
+	reagent_pouch.apply_style(model.working, _pouch_side_width, model.working.equipment_side == "right")
 	var preview_size: Vector2 = groups.preview.size
 	preview_icon.position = Vector2(4, 4)
 	preview_icon.size = Vector2.ONE * minf(36, preview_size.y - 8)
