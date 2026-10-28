@@ -1,0 +1,143 @@
+{
+ "_doc": "Moustache only: the band between the nose and the upper lip, drooping a little past the mouth corners. Rigid with the upper lip (follow_mm small).",
+ "name": "moustache",
+ "seed": 9,
+ "color": [
+  0.12,
+  0.075,
+  0.042
+ ],
+ "region": {
+  "top": [
+   [
+    0,
+    3.8
+   ],
+   [
+    8,
+    4.2
+   ],
+   [
+    14,
+    5.0
+   ],
+   [
+    22,
+    5.0
+   ],
+   [
+    26,
+    0
+   ]
+  ],
+  "bottom": [
+   [
+    0,
+    -0.5
+   ],
+   [
+    14,
+    -2.5
+   ],
+   [
+    22,
+    -7
+   ],
+   [
+    26,
+    -9
+   ]
+  ],
+  "lon_max": 26,
+  "mouth_mm": 2.0,
+  "soft_deg": 6
+ },
+ "mass": {
+  "mouth_side": "upper",
+  "fade_deg": 6,
+  "thickness_mm": 4.0,
+  "edge_mm": 2.4,
+  "smooth": 2,
+  "strip_mm": 28
+ },
+ "morph": {
+  "follow_mm": 4,
+  "fade_mm": 5,
+  "lip_follow_mm": [
+   40.0,
+   10.0
+  ]
+ },
+ "cards": [
+  {
+   "name": "moustache",
+   "count": 130,
+   "length": [
+    0.014,
+    0.021
+   ],
+   "width": 0.008,
+   "lift": 16,
+   "gravity": 0.65,
+   "stiffness": 0.6,
+   "jitter": 9,
+   "segs": 3,
+   "flow": {
+    "type": "side",
+    "vec": [
+     0.6,
+     -1,
+     0.25
+    ]
+   },
+   "col": [
+    2,
+    2,
+    0
+   ],
+   "follow_mm": 3,
+   "fade_mm": 4,
+   "lod": {
+    "1": {
+     "keep": 0.4,
+     "segs": 0.67,
+     "width_mul": 1.4
+    },
+    "2": {
+     "keep": 0.15,
+     "segs": 0.67,
+     "width_mul": 2.0
+    }
+   },
+   "region": {
+    "exclude": [
+     {
+      "at": [
+       17.0,
+       -6.5
+      ],
+      "deg": 6.5
+     }
+    ]
+   }
+  }
+ ],
+ "shade": {
+  "ao_shell": [
+   0.6,
+   0.85
+  ],
+  "ao_card_floor": 0.55,
+  "v_start": 0.2
+ },
+ "keep_out": [
+  {
+   "at": [
+    17.0,
+    -6.5
+   ],
+   "deg": 6.0
+  }
+ ],
+ "keep_out_min": 0.25
+}

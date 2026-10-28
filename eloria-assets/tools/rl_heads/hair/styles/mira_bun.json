@@ -1,0 +1,2118 @@
+{
+ "_doc": "Mira v4: copper-red hair swept up into a big, loose, messy bun on the crown (slightly back) with a small braid round its base. ASYMMETRIC FRINGE: parting off-centre on her RIGHT (viewer's left); a soft, thin sheet of separated ribbon locks falls from the parting across the forehead and DOWN to her left temple / brow tail (lower edge diagonal: high at the parting, ~brow-tail height at her left temple), then sweeps back over the ear to the bun; on the parting side the hair lifts up and back more steeply with two short wavy strands over her right temple; loose wisps over the forehead and her left brow. Lowered front hairline; natural U-shaped nape hairline under baby hairs; the swept surface is wide soft ribbons over low bulk tubes; fuller, looser sides with free curls; ringlets at the temples, behind the ears and the nape; flyaways round the bun and crown. Schema: build_hair.py docstring. Positions [lon, lat(, h_mm)]: lon 0 face, +90 her LEFT, 180 back; lat from the scalp-sphere centre.",
+ "name": "mira_bun",
+ "sex": "female",
+ "seed": 21,
+ "color": [
+  0.56,
+  0.14,
+  0.05
+ ],
+ "clearance_mm": 2.6,
+ "morph": {
+  "follow_mm": 15,
+  "fade_mm": 15,
+  "stretch": 0.5,
+  "keep_clear": true
+ },
+ "hairline": {
+  "_doc": "lowered and asymmetric at the front (more on her left, less on the parting side), U-shaped nape (corners raised, centre lower), soft noise",
+  "ear_margin": 1.5,
+  "nape_below_lobe_mm": 20,
+  "noise": 1.5,
+  "adjust": [
+   [
+    0,
+    -8.5
+   ],
+   [
+    15,
+    -8.5
+   ],
+   [
+    35,
+    -7.5
+   ],
+   [
+    50,
+    -5.5
+   ],
+   [
+    65,
+    -3.0
+   ],
+   [
+    88,
+    0
+   ],
+   [
+    105,
+    2.0
+   ],
+   [
+    125,
+    5.0
+   ],
+   [
+    145,
+    3.0
+   ],
+   [
+    165,
+    -1.0
+   ],
+   [
+    180,
+    -2.5
+   ],
+   [
+    -165,
+    -1.0
+   ],
+   [
+    -145,
+    3.0
+   ],
+   [
+    -125,
+    5.0
+   ],
+   [
+    -105,
+    2.0
+   ],
+   [
+    -88,
+    0
+   ],
+   [
+    -65,
+    -2.5
+   ],
+   [
+    -45,
+    -4.5
+   ],
+   [
+    -25,
+    -5.0
+   ],
+   [
+    -12,
+    -6.5
+   ]
+  ]
+ },
+ "shell": {
+  "_doc": "under-shell round the pole (bun direction) in seamless sectors of the clump texture window; opaque edge kept 1.5 deg inside the hairline, hidden under the baby-hair cards",
+  "pole": [
+   180,
+   62
+  ],
+  "v": "from_pole",
+  "tip_band": 0.0,
+  "v_start": 0.3,
+  "offset_mm": [
+   3.8,
+   2.6
+  ],
+  "u_repeat": 12,
+  "ao": 0.6,
+  "lod": {
+   "0": [
+    14,
+    40
+   ],
+   "1": [
+    9,
+    24
+   ],
+   "2": [
+    7,
+    24
+   ]
+  },
+  "edge_inset": -1.5,
+  "face_clear": 0.85
+ },
+ "groups": [
+  {
+   "name": "bun",
+   "type": "bun",
+   "_doc": "big messy bun (outer diameter ~2*(major+minor) ~ 10 cm, ~58% head width): flattened ribbon locks wound round a torus, loose ends lifting off, loops of different sizes (loop_size range), plus a core",
+   "center": [
+    180,
+    64,
+    44
+   ],
+   "tilt": [
+    0,
+    0.15,
+    0.1
+   ],
+   "major_mm": 31,
+   "minor_mm": 21,
+   "clumps": 12,
+   "sweep_deg": [
+    150,
+    280
+   ],
+   "turns": [
+    0.45,
+    0.9
+   ],
+   "messy": 0.65,
+   "loose_ends": 0.85,
+   "loops": 8,
+   "loop_size": [
+    0.4,
+    1.4
+   ],
+   "loop_width": 0.75,
+   "section": {
+    "kind": "ribbon",
+    "width": 0.04,
+    "thick": 0.012,
+    "cup": 0.4,
+    "across": 5,
+    "segs": 20,
+    "twist": 30,
+    "profile": {
+     "root": 0.6,
+     "belly": 0.15,
+     "tip_start": 0.6,
+     "tip_pow": 1.0
+    }
+   },
+   "core": {
+    "scale": [
+     1.0,
+     1.0,
+     0.92
+    ],
+    "res": {
+     "0": [
+      14,
+      8
+     ],
+     "1": [
+      10,
+      6
+     ],
+     "2": [
+      8,
+      5
+     ]
+    }
+   },
+   "lod": {
+    "1": {
+     "keep": 0.75,
+     "across": 3,
+     "segs": 0.6,
+     "width_mul": 1.1
+    },
+    "2": {
+     "keep": 0.45,
+     "across": 3,
+     "segs": 0.4,
+     "width_mul": 1.3
+    }
+   }
+  },
+  {
+   "name": "braid",
+   "type": "braid",
+   "around": "bun",
+   "_doc": "small 3-strand braid round the bun base (arc in degrees round the bun axis)",
+   "arc": [
+    -130,
+    210
+   ],
+   "radius_mm": 38,
+   "z_mm": -15,
+   "width_mm": 13,
+   "depth_mm": 6.5,
+   "period_mm": 25,
+   "segs_per_period": 4,
+   "section": {
+    "width": 0.0082,
+    "thick": 0.006,
+    "sides": 4
+   },
+   "lod": {
+    "1": {
+     "sides": 3,
+     "segs": 0.6
+    },
+    "2": {
+     "drop": true
+    }
+   }
+  },
+  {
+   "name": "bulk",
+   "type": "locks",
+   "kind": "clump",
+   "_doc": "low tubes under the ribbons: soft bulk over the parietal area and occiput (hair mass ~1.25x head width at temple height)",
+   "roots": {
+    "region": {
+     "lon": [
+      -180,
+      180
+     ],
+     "lat": [
+      -50,
+      30
+     ]
+    },
+    "count": 16,
+    "margin": 1.5
+   },
+   "length": [
+    0.16,
+    0.2
+   ],
+   "grow": {
+    "hug": 1.0,
+    "height_mm": [
+     3.5,
+     13.0,
+     15.0,
+     11.0,
+     9.0
+    ],
+    "cross": 8,
+    "jitter": 6,
+    "steps": 36
+   },
+   "flow": {
+    "type": "toward",
+    "point": "@bun"
+   },
+   "end_near": {
+    "point": "@bun",
+    "radius_mm": 48,
+    "min_frac": 0.45
+   },
+   "shape": {
+    "noise_mm": 1.5,
+    "attract": {
+     "point": "@bun",
+     "from": 0.75,
+     "strength": 0.55
+    }
+   },
+   "width_jitter": 0.25,
+   "section": {
+    "width": 0.034,
+    "thick": 0.012,
+    "sides": 4,
+    "segs": 11,
+    "twist": 10,
+    "inner_flat": 0.5,
+    "troot": 0.15,
+    "profile": {
+     "root": 0.5,
+     "belly": 0.3,
+     "tip_start": 0.75,
+     "tip_pow": 1.0
+    }
+   },
+   "lod": {
+    "1": {
+     "keep": 0.5,
+     "sides": 3,
+     "segs": 0.6,
+     "width_mul": 1.3
+    },
+    "2": {
+     "keep": 0.35,
+     "sides": 3,
+     "segs": 0.5,
+     "width_mul": 1.6
+    }
+   },
+   "groom": {
+    "length": false,
+    "volume": true
+   }
+  },
+  {
+   "name": "ribbons_back",
+   "type": "locks",
+   "kind": "ribbon",
+   "_doc": "wide soft ribbons rooted right at the nape hairline, visibly lifting off the nape and sweeping up to the bun",
+   "roots": {
+    "region": {
+     "lon": [
+      112,
+      248
+     ],
+     "lat": [
+      -62,
+      -10
+     ]
+    },
+    "count": 13,
+    "margin": 0.2
+   },
+   "length": [
+    0.16,
+    0.2
+   ],
+   "grow": {
+    "hug": 1.0,
+    "height_mm": [
+     3.0,
+     8.0,
+     11.0,
+     10.0,
+     9.0
+    ],
+    "cross": 12,
+    "jitter": 6,
+    "steps": 36
+   },
+   "flow": {
+    "type": "toward",
+    "point": "@bun"
+   },
+   "end_near": {
+    "point": "@bun",
+    "radius_mm": 46,
+    "min_frac": 0.45
+   },
+   "shape": {
+    "noise_mm": 1.5,
+    "wave": {
+     "amp_mm": 3,
+     "cycles": 1.2
+    },
+    "attract": {
+     "point": "@bun",
+     "from": 0.78,
+     "strength": 0.5
+    }
+   },
+   "width_jitter": 0.25,
+   "section": {
+    "width": 0.027,
+    "thick": 0.008,
+    "cup": 0.22,
+    "across": 5,
+    "droop": 0.5,
+    "segs": 14,
+    "twist": 12,
+    "profile": {
+     "root": 0.8,
+     "belly": 0.2,
+     "tip_start": 0.65,
+     "tip_pow": 1.1
+    }
+   },
+   "lod": {
+    "1": {
+     "keep": 0.55,
+     "across": 3,
+     "segs": 0.6,
+     "width_mul": 1.3
+    },
+    "2": {
+     "keep": 0.3,
+     "across": 3,
+     "segs": 0.45,
+     "width_mul": 1.7
+    }
+   },
+   "groom": {
+    "length": false,
+    "volume": true
+   }
+  },
+  {
+   "name": "ribbons_sides",
+   "type": "locks",
+   "kind": "ribbon",
+   "_doc": "side ribbons from just above / behind the ears, swept UP over the bulk tubes (higher heights) and partly over the ear tops",
+   "roots": {
+    "region": {
+     "lon": [
+      50,
+      115
+     ],
+     "lat": [
+      -18,
+      26
+     ],
+     "mirror": true
+    },
+    "count": 14,
+    "margin": 0.3
+   },
+   "length": [
+    0.17,
+    0.21
+   ],
+   "grow": {
+    "hug": 1.0,
+    "height_mm": [
+     5.0,
+     19.0,
+     22.0,
+     15.0,
+     10.0
+    ],
+    "cross": 12,
+    "jitter": 6,
+    "steps": 38
+   },
+   "flow": {
+    "type": "toward",
+    "point": "@bun"
+   },
+   "end_near": {
+    "point": "@bun",
+    "radius_mm": 46,
+    "min_frac": 0.45
+   },
+   "shape": {
+    "noise_mm": 2.0,
+    "wave": {
+     "amp_mm": 3,
+     "cycles": 1.3
+    },
+    "attract": {
+     "point": "@bun",
+     "from": 0.78,
+     "strength": 0.5
+    }
+   },
+   "width_jitter": 0.25,
+   "section": {
+    "width": 0.028,
+    "thick": 0.008,
+    "cup": 0.22,
+    "across": 5,
+    "droop": 0.5,
+    "segs": 14,
+    "twist": 15,
+    "profile": {
+     "root": 0.8,
+     "belly": 0.2,
+     "tip_start": 0.65,
+     "tip_pow": 1.1
+    }
+   },
+   "lod": {
+    "1": {
+     "keep": 0.55,
+     "across": 3,
+     "segs": 0.6,
+     "width_mul": 1.3
+    },
+    "2": {
+     "keep": 0.3,
+     "across": 3,
+     "segs": 0.45,
+     "width_mul": 1.7
+    }
+   },
+   "groom": {
+    "length": false,
+    "volume": true
+   }
+  },
+  {
+   "name": "ribbons_front",
+   "type": "locks",
+   "kind": "ribbon",
+   "_doc": "her LEFT temple swept back and up under the end of the fringe sheet",
+   "roots": {
+    "region": {
+     "lon": [
+      40,
+      82
+     ],
+     "lat": [
+      -6,
+      36
+     ]
+    },
+    "count": 6,
+    "margin": 0.6
+   },
+   "length": [
+    0.16,
+    0.2
+   ],
+   "grow": {
+    "hug": 1.0,
+    "height_mm": [
+     3.0,
+     5.0,
+     7.0,
+     8.0
+    ],
+    "cross": 10,
+    "jitter": 5,
+    "steps": 34
+   },
+   "flow": {
+    "type": "toward",
+    "point": "@bun"
+   },
+   "end_near": {
+    "point": "@bun",
+    "radius_mm": 46,
+    "min_frac": 0.45
+   },
+   "shape": {
+    "noise_mm": 1.5,
+    "wave": {
+     "amp_mm": 2.5,
+     "cycles": 1.1
+    },
+    "attract": {
+     "point": "@bun",
+     "from": 0.75,
+     "strength": 0.55
+    }
+   },
+   "width_jitter": 0.25,
+   "section": {
+    "width": 0.025,
+    "thick": 0.008,
+    "cup": 0.2,
+    "across": 5,
+    "droop": 0.5,
+    "segs": 13,
+    "twist": 10,
+    "profile": {
+     "root": 0.8,
+     "belly": 0.2,
+     "tip_start": 0.65,
+     "tip_pow": 1.1
+    }
+   },
+   "lod": {
+    "1": {
+     "keep": 0.6,
+     "across": 3,
+     "segs": 0.6,
+     "width_mul": 1.3
+    },
+    "2": {
+     "keep": 0.3,
+     "across": 3,
+     "segs": 0.45,
+     "width_mul": 1.7
+    }
+   },
+   "groom": {
+    "length": false,
+    "volume": true
+   }
+  },
+  {
+   "name": "parting_lift",
+   "type": "locks",
+   "kind": "ribbon",
+   "_doc": "parting side (her RIGHT, viewer's left): hair lifts up and back more steeply from the hairline to the bun, showing a little more forehead",
+   "roots": {
+    "region": {
+     "lon": [
+      -82,
+      -28
+     ],
+     "lat": [
+      2,
+      40
+     ]
+    },
+    "count": 9,
+    "margin": 0.6
+   },
+   "length": [
+    0.16,
+    0.2
+   ],
+   "grow": {
+    "hug": 1.0,
+    "height_mm": [
+     4.0,
+     12.0,
+     14.0,
+     11.0,
+     8.0
+    ],
+    "cross": 10,
+    "jitter": 5,
+    "steps": 34
+   },
+   "flow": {
+    "type": "toward",
+    "point": "@bun"
+   },
+   "end_near": {
+    "point": "@bun",
+    "radius_mm": 46,
+    "min_frac": 0.45
+   },
+   "shape": {
+    "noise_mm": 1.5,
+    "wave": {
+     "amp_mm": 2.5,
+     "cycles": 1.1
+    },
+    "attract": {
+     "point": "@bun",
+     "from": 0.75,
+     "strength": 0.55
+    }
+   },
+   "width_jitter": 0.25,
+   "section": {
+    "width": 0.025,
+    "thick": 0.008,
+    "cup": 0.2,
+    "across": 5,
+    "droop": 0.5,
+    "segs": 13,
+    "twist": 10,
+    "profile": {
+     "root": 0.8,
+     "belly": 0.2,
+     "tip_start": 0.65,
+     "tip_pow": 1.1
+    }
+   },
+   "lod": {
+    "1": {
+     "keep": 0.6,
+     "across": 3,
+     "segs": 0.6,
+     "width_mul": 1.3
+    },
+    "2": {
+     "keep": 0.3,
+     "across": 3,
+     "segs": 0.45,
+     "width_mul": 1.7
+    }
+   },
+   "groom": {
+    "length": false,
+    "volume": true
+   }
+  },
+  {
+   "name": "fringe",
+   "type": "locks",
+   "kind": "ribbon",
+   "_doc": "asymmetric fringe: a soft, thin sheet of separated ribbon locks from the parting (her right) across the forehead and DOWN to her left temple / brow tail, then back over the ear to the bun (via waypoints; via_stack keeps the locks stacked so the lower edge runs diagonally)",
+   "roots": {
+    "points": [
+     [
+      -42,
+      28
+     ],
+     [
+      -38,
+      31
+     ],
+     [
+      -34,
+      34
+     ],
+     [
+      -30,
+      36.5
+     ],
+     [
+      -26,
+      39
+     ],
+     [
+      -22,
+      41
+     ],
+     [
+      -18,
+      43
+     ],
+     [
+      -36,
+      37
+     ],
+     [
+      -28,
+      40
+     ]
+    ],
+    "jitter": 0.8
+   },
+   "length": [
+    0.28,
+    0.32
+   ],
+   "grow": {
+    "hug": 1.0,
+    "height_mm": [
+     3.5,
+     5.5,
+     6.0,
+     6.0,
+     7.0,
+     9.0,
+     12.0,
+     10.0
+    ],
+    "cross": 6,
+    "jitter": 3,
+    "steps": 60,
+    "via": [
+     [
+      -10,
+      26,
+      6
+     ],
+     [
+      15,
+      19,
+      6
+     ],
+     [
+      38,
+      10,
+      6
+     ],
+     [
+      57,
+      4,
+      6
+     ],
+     [
+      78,
+      9,
+      6
+     ]
+    ],
+    "via_radius_mm": 16,
+    "via_jitter_mm": 5,
+    "via_stack": 0.8
+   },
+   "flow": {
+    "type": "toward",
+    "point": "@bun"
+   },
+   "end_near": {
+    "point": "@bun",
+    "radius_mm": 46,
+    "min_frac": 0.45
+   },
+   "shape": {
+    "noise_mm": 1.5,
+    "wave": {
+     "amp_mm": 3.0,
+     "cycles": 1.8
+    },
+    "attract": {
+     "point": "@bun",
+     "from": 0.9,
+     "strength": 0.4
+    }
+   },
+   "width_jitter": 0.35,
+   "section": {
+    "width": 0.023,
+    "thick": 0.006,
+    "cup": 0.2,
+    "across": 5,
+    "segs": 24,
+    "twist": 10,
+    "profile": {
+     "root": 0.75,
+     "belly": 0.15,
+     "tip_start": 0.75,
+     "tip_pow": 1.1
+    }
+   },
+   "lod": {
+    "1": {
+     "keep": 0.7,
+     "across": 3,
+     "segs": 0.6
+    },
+    "2": {
+     "keep": 0.45,
+     "across": 3,
+     "segs": 0.45,
+     "width_mul": 1.4
+    }
+   },
+   "groom": {
+    "length": false,
+    "volume": true
+   }
+  },
+  {
+   "name": "fringe_wisps",
+   "type": "locks",
+   "kind": "card",
+   "_doc": "strand cards along the lower edge of the fringe sheet (same path, lower rows): feathered, separated edge",
+   "roots": {
+    "points": [
+     [
+      -44,
+      27
+     ],
+     [
+      -40,
+      29.5
+     ],
+     [
+      -36,
+      32
+     ],
+     [
+      -42,
+      31
+     ],
+     [
+      -38,
+      33
+     ],
+     [
+      -46,
+      30
+     ]
+    ],
+    "jitter": 0.8
+   },
+   "length": [
+    0.1,
+    0.17
+   ],
+   "grow": {
+    "hug": 1.0,
+    "height_mm": [
+     4.5,
+     6.0
+    ],
+    "cross": 6,
+    "jitter": 3,
+    "steps": 40,
+    "via": [
+     [
+      -10,
+      26,
+      6
+     ],
+     [
+      15,
+      19,
+      6
+     ],
+     [
+      38,
+      10,
+      6
+     ],
+     [
+      57,
+      4,
+      6
+     ],
+     [
+      78,
+      9,
+      6
+     ]
+    ],
+    "via_radius_mm": 16,
+    "via_jitter_mm": 5,
+    "via_stack": 0.8
+   },
+   "flow": {
+    "type": "toward",
+    "point": "@bun"
+   },
+   "shape": {
+    "noise_mm": 1.5,
+    "wave": {
+     "amp_mm": 3.0,
+     "cycles": 1.8
+    },
+    "attract": {
+     "point": "@bun",
+     "from": 0.9,
+     "strength": 0.4
+    }
+   },
+   "width_jitter": 0.3,
+   "section": {
+    "width": 0.016,
+    "segs": 10,
+    "twist": 10
+   },
+   "lod": {
+    "1": {
+     "keep": 0.5,
+     "segs": 0.6
+    },
+    "2": {
+     "drop": true
+    }
+   },
+   "col": [
+    3,
+    4
+   ],
+   "groom": {
+    "length": false,
+    "volume": true
+   }
+  },
+  {
+   "name": "forehead_strands",
+   "type": "locks",
+   "kind": "card",
+   "_doc": "loose wisps along the fringe edge falling over the middle of the forehead and her left brow",
+   "roots": {
+    "points": [
+     [
+      -26,
+      30
+     ],
+     [
+      -14,
+      26
+     ],
+     [
+      -2,
+      22
+     ],
+     [
+      10,
+      18
+     ],
+     [
+      22,
+      13
+     ],
+     [
+      32,
+      8
+     ],
+     [
+      42,
+      4
+     ],
+     [
+      50,
+      2
+     ]
+    ],
+    "jitter": 1.0
+   },
+   "length": [
+    0.04,
+    0.07
+   ],
+   "grow": {
+    "hug": 0.35,
+    "height_mm": [
+     6.0,
+     10.0
+    ],
+    "gravity": 0.9,
+    "stiffness": 0.5,
+    "jitter": 12,
+    "steps": 10,
+    "min_mm": 4
+   },
+   "flow": {
+    "type": "mix",
+    "fields": [
+     [
+      1.0,
+      {
+       "type": "dir",
+       "vec": [
+        0.6,
+        0,
+        0.6
+       ]
+      }
+     ],
+     [
+      0.7,
+      {
+       "type": "down"
+      }
+     ]
+    ]
+   },
+   "shape": {
+    "wave": {
+     "amp_mm": 4,
+     "cycles": 1.2
+    }
+   },
+   "col": [
+    4,
+    5,
+    7
+   ],
+   "width_jitter": 0.3,
+   "section": {
+    "width": 0.014,
+    "segs": 6,
+    "twist": 25
+   },
+   "lod": {
+    "1": {
+     "keep": 0.4,
+     "segs": 0.6
+    },
+    "2": {
+     "drop": true
+    }
+   }
+  },
+  {
+   "name": "parting_temple_strands",
+   "type": "locks",
+   "kind": "curl",
+   "_doc": "one or two short wavy strands dropping over her right temple (parting side)",
+   "roots": {
+    "points": [
+     [
+      -63,
+      12
+     ],
+     [
+      -56,
+      20
+     ]
+    ],
+    "jitter": 0.8
+   },
+   "length": [
+    0.06,
+    0.08
+   ],
+   "grow": {
+    "hug": 0.15,
+    "height_mm": [
+     3.5,
+     5.0
+    ],
+    "gravity": 0.95,
+    "stiffness": 0.6,
+    "jitter": 6,
+    "steps": 20,
+    "min_mm": 6
+   },
+   "flow": {
+    "type": "down"
+   },
+   "shape": {
+    "noise_mm": 2.0
+   },
+   "curl": {
+    "radius_mm": 4.5,
+    "pitch_mm": 24,
+    "start": 0.15,
+    "grow": 0.3,
+    "flatten": 0.8
+   },
+   "section": {
+    "width": 0.008,
+    "thick": 0.003,
+    "cup": 0.35,
+    "across": 3,
+    "curl_mesh": "ribbon",
+    "profile": {
+     "root": 1.0,
+     "belly": 0.05,
+     "tip_start": 0.3,
+     "tip_pow": 1.6,
+     "tip_min": 0.03
+    }
+   },
+   "lod": {
+    "1": {
+     "segs_mul": 0.6
+    },
+    "2": {
+     "drop": true
+    }
+   }
+  },
+  {
+   "name": "tendrils_temple",
+   "type": "locks",
+   "kind": "curl",
+   "_doc": "loose ringlets at the temples in front of the ears, falling past the jaw to chin level: helix radius 5-8 mm, pitch 2.5-3.5 cm, wide at the root tapering to fine tips; spring chains",
+   "roots": {
+    "points": [
+     [
+      64,
+      4
+     ],
+     [
+      57,
+      12
+     ]
+    ],
+    "mirror": true,
+    "jitter": 1.0
+   },
+   "length": [
+    0.14,
+    0.16
+   ],
+   "grow": {
+    "hug": 0.1,
+    "height_mm": [
+     3.5,
+     5.0
+    ],
+    "gravity": 0.95,
+    "stiffness": 0.6,
+    "jitter": 6,
+    "steps": 28,
+    "min_mm": 7
+   },
+   "flow": {
+    "type": "mix",
+    "fields": [
+     [
+      1.0,
+      {
+       "type": "down"
+      }
+     ],
+     [
+      0.3,
+      {
+       "type": "side",
+       "vec": [
+        0.6,
+        0,
+        0.6
+       ]
+      }
+     ]
+    ]
+   },
+   "shape": {
+    "noise_mm": 3.0
+   },
+   "curl": {
+    "radius_mm": 6.5,
+    "pitch_mm": 30,
+    "start": 0.1,
+    "grow": 0.3,
+    "flatten": 0.85
+   },
+   "section": {
+    "width": 0.013,
+    "thick": 0.004,
+    "cup": 0.4,
+    "across": 3,
+    "curl_mesh": "ribbon",
+    "profile": {
+     "root": 1.0,
+     "belly": 0.05,
+     "tip_start": 0.3,
+     "tip_pow": 1.6,
+     "tip_min": 0.03
+    }
+   },
+   "spring": {
+    "joints": 4,
+    "from": 0.1,
+    "stiffness": 0.45,
+    "damping": 0.35,
+    "gravity": 0.8,
+    "drag": 0.45,
+    "radius": 0.008
+   },
+   "lod": {
+    "1": {
+     "segs_mul": 0.6
+    },
+    "2": {
+     "kind": "card"
+    }
+   }
+  },
+  {
+   "name": "side_curls",
+   "type": "locks",
+   "kind": "curl",
+   "_doc": "free curls above / behind the ears for looser, fuller sides",
+   "roots": {
+    "points": [
+     [
+      86,
+      8
+     ],
+     [
+      98,
+      -4
+     ]
+    ],
+    "mirror": true,
+    "jitter": 1.5
+   },
+   "length": [
+    0.07,
+    0.1
+   ],
+   "grow": {
+    "hug": 0.15,
+    "height_mm": [
+     3.5,
+     5.0
+    ],
+    "gravity": 0.95,
+    "stiffness": 0.5,
+    "jitter": 8,
+    "steps": 24,
+    "min_mm": 7
+   },
+   "flow": {
+    "type": "down"
+   },
+   "shape": {
+    "noise_mm": 3.0
+   },
+   "curl": {
+    "radius_mm": 6.0,
+    "pitch_mm": 26,
+    "start": 0.15,
+    "grow": 0.3,
+    "flatten": 0.85
+   },
+   "section": {
+    "width": 0.012,
+    "thick": 0.004,
+    "cup": 0.4,
+    "across": 3,
+    "curl_mesh": "ribbon",
+    "profile": {
+     "root": 1.0,
+     "belly": 0.05,
+     "tip_start": 0.3,
+     "tip_pow": 1.6,
+     "tip_min": 0.03
+    }
+   },
+   "spring": {
+    "joints": 3,
+    "from": 0.15,
+    "stiffness": 0.5,
+    "damping": 0.35,
+    "gravity": 0.8,
+    "drag": 0.45,
+    "radius": 0.007
+   },
+   "lod": {
+    "1": {
+     "keep": 0.6,
+     "segs_mul": 0.6
+    },
+    "2": {
+     "drop": true
+    }
+   }
+  },
+  {
+   "name": "tendrils_back",
+   "type": "locks",
+   "kind": "curl",
+   "_doc": "loose ringlets behind the ears and at the nape",
+   "roots": {
+    "points": [
+     [
+      106,
+      -20
+     ],
+     [
+      -108,
+      -22
+     ],
+     [
+      150,
+      -46
+     ],
+     [
+      -152,
+      -44
+     ]
+    ],
+    "jitter": 1.5
+   },
+   "length": [
+    0.1,
+    0.13
+   ],
+   "grow": {
+    "hug": 0.15,
+    "height_mm": [
+     3.5,
+     5.0
+    ],
+    "gravity": 0.95,
+    "stiffness": 0.5,
+    "jitter": 8,
+    "steps": 24,
+    "min_mm": 7
+   },
+   "flow": {
+    "type": "down"
+   },
+   "shape": {
+    "noise_mm": 3.0
+   },
+   "curl": {
+    "radius_mm": 6.0,
+    "pitch_mm": 28,
+    "start": 0.15,
+    "grow": 0.3,
+    "flatten": 0.85
+   },
+   "section": {
+    "width": 0.012,
+    "thick": 0.004,
+    "cup": 0.4,
+    "across": 3,
+    "curl_mesh": "ribbon",
+    "profile": {
+     "root": 1.0,
+     "belly": 0.05,
+     "tip_start": 0.3,
+     "tip_pow": 1.6,
+     "tip_min": 0.03
+    }
+   },
+   "spring": {
+    "joints": 3,
+    "from": 0.15,
+    "stiffness": 0.5,
+    "damping": 0.35,
+    "gravity": 0.8,
+    "drag": 0.45,
+    "radius": 0.007
+   },
+   "lod": {
+    "1": {
+     "keep": 0.6,
+     "segs_mul": 0.6
+    },
+    "2": {
+     "drop": true
+    }
+   }
+  },
+  {
+   "name": "baby_hairs",
+   "type": "locks",
+   "kind": "card",
+   "_doc": "dense short baby-hair cards along the FRONT hairline (temple to temple), rooted at the hairline and lying over it in the hair direction: they hide the shell edge (which sits 1.5 deg inside)",
+   "roots": {
+    "hairline": {
+     "lon": [
+      -90,
+      90
+     ],
+     "inset_deg": 0.0,
+     "depth_deg": 1.8,
+     "jitter": 0.35
+    },
+    "count": 56
+   },
+   "length": [
+    0.013,
+    0.026
+   ],
+   "grow": {
+    "hug": 1.0,
+    "height_mm": [
+     3.3,
+     4.6
+    ],
+    "jitter": 15,
+    "steps": 6
+   },
+   "flow": {
+    "type": "toward",
+    "point": "@bun"
+   },
+   "shape": {
+    "wave": {
+     "amp_mm": 1.5,
+     "cycles": 1.0
+    }
+   },
+   "col": [
+    3,
+    4,
+    5
+   ],
+   "width_jitter": 0.3,
+   "section": {
+    "width": 0.012,
+    "segs": 3,
+    "twist": 0
+   },
+   "lod": {
+    "1": {
+     "keep": 0.25
+    },
+    "2": {
+     "drop": true
+    }
+   },
+   "groom": {
+    "length": false,
+    "volume": false
+   },
+   "detail": "core"
+  },
+  {
+   "name": "baby_hairs_back",
+   "type": "locks",
+   "kind": "card",
+   "_doc": "soft short hairs round the ears and along the U-shaped nape hairline, pointing up toward the bun: they hide the shell edge",
+   "roots": {
+    "hairline": {
+     "lon": [
+      90,
+      270
+     ],
+     "inset_deg": 0.0,
+     "depth_deg": 1.8,
+     "jitter": 0.35
+    },
+    "count": 70
+   },
+   "length": [
+    0.015,
+    0.03
+   ],
+   "grow": {
+    "hug": 1.0,
+    "height_mm": [
+     3.3,
+     5.0
+    ],
+    "jitter": 15,
+    "steps": 6
+   },
+   "flow": {
+    "type": "toward",
+    "point": "@bun"
+   },
+   "shape": {
+    "wave": {
+     "amp_mm": 1.5,
+     "cycles": 1.0
+    }
+   },
+   "col": [
+    3,
+    4,
+    5
+   ],
+   "width_jitter": 0.3,
+   "section": {
+    "width": 0.012,
+    "segs": 3,
+    "twist": 0
+   },
+   "lod": {
+    "1": {
+     "keep": 0.25
+    },
+    "2": {
+     "drop": true
+    }
+   },
+   "groom": {
+    "length": false,
+    "volume": false
+   },
+   "detail": "core"
+  },
+  {
+   "name": "bun_flyaways",
+   "type": "locks",
+   "kind": "card",
+   "_doc": "lots of fine flyaway cards round the bun: they define the painted silhouette",
+   "roots": {
+    "on": "bun",
+    "count": 64
+   },
+   "length": [
+    0.04,
+    0.1
+   ],
+   "grow": {
+    "hug": 0.0,
+    "gravity": 0.35,
+    "stiffness": 0.6,
+    "jitter": 40,
+    "steps": 10,
+    "min_mm": 8
+   },
+   "flow": {
+    "type": "away",
+    "point": "@bun"
+   },
+   "center": "@bun",
+   "shape": {
+    "wave": {
+     "amp_mm": 6,
+     "cycles": 1.3
+    }
+   },
+   "col": [
+    4,
+    5,
+    7
+   ],
+   "width_jitter": 0.35,
+   "section": {
+    "width": 0.02,
+    "segs": 6,
+    "twist": 40
+   },
+   "lod": {
+    "1": {
+     "keep": 0.3,
+     "segs": 0.6
+    },
+    "2": {
+     "drop": true
+    }
+   }
+  },
+  {
+   "name": "crown_flyaways",
+   "type": "locks",
+   "kind": "card",
+   "_doc": "flyaways lifting off the crown and the swept sides",
+   "roots": {
+    "region": {
+     "lon": [
+      -180,
+      180
+     ],
+     "lat": [
+      -20,
+      70
+     ]
+    },
+    "count": 40,
+    "margin": 2.0
+   },
+   "length": [
+    0.05,
+    0.09
+   ],
+   "grow": {
+    "hug": 0.35,
+    "height_mm": [
+     6.0,
+     14.0
+    ],
+    "gravity": 0.25,
+    "stiffness": 0.55,
+    "jitter": 30,
+    "steps": 10,
+    "min_mm": 10
+   },
+   "flow": {
+    "type": "toward",
+    "point": "@bun"
+   },
+   "shape": {
+    "wave": {
+     "amp_mm": 5,
+     "cycles": 1.2
+    },
+    "flick": {
+     "angle": 30,
+     "from": 0.5,
+     "dir": "out"
+    }
+   },
+   "col": [
+    4,
+    5
+   ],
+   "width_jitter": 0.35,
+   "section": {
+    "width": 0.018,
+    "segs": 6,
+    "twist": 35
+   },
+   "lod": {
+    "1": {
+     "keep": 0.25,
+     "segs": 0.6
+    },
+    "2": {
+     "drop": true
+    }
+   }
+  },
+  {
+   "name": "temple_wisps",
+   "type": "locks",
+   "kind": "card",
+   "_doc": "short flyaways at the temples and sideburn wisps in front of the ear top",
+   "roots": {
+    "points": [
+     [
+      70,
+      -6
+     ],
+     [
+      67,
+      2
+     ],
+     [
+      62,
+      10
+     ],
+     [
+      73,
+      -12
+     ],
+     [
+      76,
+      4
+     ],
+     [
+      60,
+      16
+     ]
+    ],
+    "mirror": true,
+    "jitter": 1.5
+   },
+   "length": [
+    0.03,
+    0.055
+   ],
+   "grow": {
+    "hug": 0.25,
+    "height_mm": [
+     3.0,
+     4.0
+    ],
+    "gravity": 0.9,
+    "stiffness": 0.5,
+    "jitter": 15,
+    "steps": 10,
+    "min_mm": 4
+   },
+   "flow": {
+    "type": "down"
+   },
+   "shape": {
+    "wave": {
+     "amp_mm": 3,
+     "cycles": 1.3
+    }
+   },
+   "col": [
+    5,
+    7
+   ],
+   "width_jitter": 0.3,
+   "section": {
+    "width": 0.012,
+    "segs": 5,
+    "twist": 20
+   },
+   "lod": {
+    "1": {
+     "keep": 0.5,
+     "segs": 0.6
+    },
+    "2": {
+     "drop": true
+    }
+   }
+  },
+  {
+   "name": "messy_bun",
+   "type": "locks",
+   "kind": "card",
+   "_doc": "messy extra (hair_detail > 50): more wisps escaping the bun",
+   "detail": "messy",
+   "avoid_eyes": true,
+   "roots": {
+    "on": "bun",
+    "count": 40
+   },
+   "length": [
+    0.04,
+    0.09
+   ],
+   "grow": {
+    "hug": 0.0,
+    "gravity": 0.35,
+    "stiffness": 0.6,
+    "jitter": 40,
+    "steps": 10,
+    "min_mm": 8
+   },
+   "flow": {
+    "type": "away",
+    "point": "@bun"
+   },
+   "shape": {
+    "wave": {
+     "amp_mm": 6,
+     "cycles": 1.3
+    }
+   },
+   "col": [
+    4,
+    5,
+    7
+   ],
+   "width_jitter": 0.35,
+   "rand_range": [
+    0.4,
+    1.0
+   ],
+   "section": {
+    "width": 0.018,
+    "segs": 6,
+    "twist": 35
+   },
+   "lod": {
+    "1": {
+     "keep": 0.4,
+     "segs": 0.6
+    },
+    "2": {
+     "drop": true
+    }
+   },
+   "center": "@bun"
+  },
+  {
+   "name": "messy_frizz_crown",
+   "type": "locks",
+   "kind": "card",
+   "_doc": "messy extra (hair_detail > 50): frizz lifting off the swept crown",
+   "detail": "messy",
+   "avoid_eyes": true,
+   "roots": {
+    "region": {
+     "lon": [
+      -180,
+      180
+     ],
+     "lat": [
+      30,
+      80
+     ]
+    },
+    "count": 26,
+    "margin": 2.0
+   },
+   "length": [
+    0.015,
+    0.035
+   ],
+   "grow": {
+    "hug": 0.3,
+    "height_mm": [
+     6.0,
+     12.0
+    ],
+    "gravity": 0.25,
+    "stiffness": 0.6,
+    "jitter": 45,
+    "steps": 8,
+    "min_mm": 10
+   },
+   "flow": {
+    "type": "toward",
+    "point": "@bun"
+   },
+   "shape": {
+    "wave": {
+     "amp_mm": 3,
+     "cycles": 1.5
+    },
+    "flick": {
+     "angle": 40,
+     "from": 0.5,
+     "dir": "out"
+    }
+   },
+   "col": [
+    7,
+    5
+   ],
+   "width_jitter": 0.35,
+   "rand_range": [
+    0.4,
+    1.0
+   ],
+   "section": {
+    "width": 0.014,
+    "segs": 4,
+    "twist": 35
+   },
+   "lod": {
+    "1": {
+     "keep": 0.4,
+     "segs": 0.6
+    },
+    "2": {
+     "drop": true
+    }
+   }
+  },
+  {
+   "name": "messy_temples",
+   "type": "locks",
+   "kind": "card",
+   "_doc": "messy extra (hair_detail > 50): escaped wisps at the temples (kept out of the eyes)",
+   "detail": "messy",
+   "avoid_eyes": true,
+   "roots": {
+    "region": {
+     "lon": [
+      50,
+      85
+     ],
+     "lat": [
+      -10,
+      25
+     ],
+     "mirror": true
+    },
+    "count": 16,
+    "margin": 0.5
+   },
+   "length": [
+    0.03,
+    0.06
+   ],
+   "grow": {
+    "hug": 0.25,
+    "height_mm": [
+     3.5,
+     6.0
+    ],
+    "gravity": 0.8,
+    "stiffness": 0.5,
+    "jitter": 20,
+    "steps": 10,
+    "min_mm": 5
+   },
+   "flow": {
+    "type": "down"
+   },
+   "shape": {
+    "wave": {
+     "amp_mm": 3,
+     "cycles": 1.3
+    }
+   },
+   "col": [
+    5,
+    7
+   ],
+   "width_jitter": 0.35,
+   "rand_range": [
+    0.4,
+    1.0
+   ],
+   "section": {
+    "width": 0.012,
+    "segs": 6,
+    "twist": 35
+   },
+   "lod": {
+    "1": {
+     "keep": 0.4,
+     "segs": 0.6
+    },
+    "2": {
+     "drop": true
+    }
+   },
+   "spring_follow": true
+  },
+  {
+   "name": "messy_nape",
+   "type": "locks",
+   "kind": "card",
+   "_doc": "messy extra (hair_detail > 50): strays falling at the nape (swing with the nape curls)",
+   "detail": "messy",
+   "avoid_eyes": true,
+   "roots": {
+    "region": {
+     "lon": [
+      120,
+      240
+     ],
+     "lat": [
+      -60,
+      -20
+     ]
+    },
+    "count": 18,
+    "margin": 0.3
+   },
+   "length": [
+    0.03,
+    0.06
+   ],
+   "grow": {
+    "hug": 0.3,
+    "height_mm": [
+     3.5,
+     6.0
+    ],
+    "gravity": 0.85,
+    "stiffness": 0.5,
+    "jitter": 20,
+    "steps": 10,
+    "min_mm": 5
+   },
+   "flow": {
+    "type": "down"
+   },
+   "shape": {
+    "wave": {
+     "amp_mm": 4,
+     "cycles": 1.2
+    }
+   },
+   "col": [
+    4,
+    5,
+    7
+   ],
+   "width_jitter": 0.35,
+   "rand_range": [
+    0.4,
+    1.0
+   ],
+   "section": {
+    "width": 0.012,
+    "segs": 6,
+    "twist": 35
+   },
+   "lod": {
+    "1": {
+     "keep": 0.4,
+     "segs": 0.6
+    },
+    "2": {
+     "drop": true
+    }
+   },
+   "spring_follow": true
+  },
+  {
+   "name": "messy_locks",
+   "type": "locks",
+   "kind": "card",
+   "_doc": "messy extra (hair_detail > 50): a few loose locks escaping the updo at the sides",
+   "detail": "messy",
+   "avoid_eyes": true,
+   "roots": {
+    "region": {
+     "lon": [
+      60,
+      120
+     ],
+     "lat": [
+      -15,
+      30
+     ],
+     "mirror": true
+    },
+    "count": 10,
+    "margin": 0.5
+   },
+   "length": [
+    0.07,
+    0.11
+   ],
+   "grow": {
+    "hug": 0.3,
+    "height_mm": [
+     4.0,
+     8.0
+    ],
+    "gravity": 0.85,
+    "stiffness": 0.5,
+    "jitter": 15,
+    "steps": 12,
+    "min_mm": 6
+   },
+   "flow": {
+    "type": "down"
+   },
+   "shape": {
+    "wave": {
+     "amp_mm": 5,
+     "cycles": 1.2
+    }
+   },
+   "col": [
+    2,
+    3
+   ],
+   "width_jitter": 0.35,
+   "rand_range": [
+    0.4,
+    1.0
+   ],
+   "section": {
+    "width": 0.018,
+    "segs": 8,
+    "twist": 35
+   },
+   "lod": {
+    "1": {
+     "keep": 0.4,
+     "segs": 0.6
+    },
+    "2": {
+     "drop": true
+    }
+   },
+   "spring_follow": true
+  }
+ ],
+ "groom": {
+  "_doc": "grooming shapes hl_length_p/_n and hl_volume_p/_n (weight 1 = full): length fractions [n, p] of each lock, volume fractions of the stand-off. Swept-up locks that end in the bun keep their length (groom.length false); loose locks, curls and flyaways change length.",
+  "length": [
+   -0.4,
+   0.6
+  ],
+  "volume": [
+   -0.5,
+   0.8
+  ]
+ }
+}

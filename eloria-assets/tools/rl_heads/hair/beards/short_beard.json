@@ -1,0 +1,350 @@
+{
+ "_doc": "Trimmed boxed beard ~1 cm: same layout as the full beard but a cleaner, higher neck line, a lower cheek line, thinner mass and short cards. v2: more and slightly longer short cards that break the shell surface; wider soft fall-off at the cheeks (soft_deg / fade_deg) so it does not read as a flat shell.",
+ "name": "short_beard",
+ "seed": 5,
+ "color": [
+  0.12,
+  0.075,
+  0.042
+ ],
+ "region": {
+  "top": [
+   [
+    0,
+    3.6
+   ],
+   [
+    8,
+    4.0
+   ],
+   [
+    12,
+    4.6
+   ],
+   [
+    22,
+    6
+   ],
+   [
+    34,
+    10
+   ],
+   [
+    48,
+    16
+   ],
+   [
+    58,
+    23
+   ],
+   [
+    64,
+    30
+   ]
+  ],
+  "bottom": [
+   [
+    0,
+    -48
+   ],
+   [
+    30,
+    -46
+   ],
+   [
+    48,
+    -40
+   ],
+   [
+    58,
+    -30
+   ],
+   [
+    63,
+    -14
+   ],
+   [
+    64,
+    10
+   ]
+  ],
+  "lon_max": 64,
+  "mouth_mm": 2.5,
+  "soft_deg": 8
+ },
+ "mass": {
+  "fade_deg": 9,
+  "thickness_mm": 4.5,
+  "edge_mm": 2.5,
+  "smooth": 3,
+  "strip_mm": 28,
+  "bulges": [
+   {
+    "at": [
+     0,
+     -28
+    ],
+    "deg": 22,
+    "mm": 2
+   }
+  ]
+ },
+ "cards": [
+  {
+   "name": "beard",
+   "region": {
+    "mouth_mm": 6.5,
+    "exclude": [
+     {
+      "at": [
+       16.5,
+       -6.0
+      ],
+      "deg": 5.5
+     },
+     {
+      "at": [
+       15.0,
+       -12.0
+      ],
+      "deg": 4.5
+     }
+    ]
+   },
+   "count": 460,
+   "length": [
+    0.008,
+    0.014
+   ],
+   "width": 0.008,
+   "lift": 28,
+   "gravity": 0.3,
+   "stiffness": 0.7,
+   "jitter": 14,
+   "segs": 2,
+   "flow": {
+    "type": "dir",
+    "vec": [
+     0,
+     -1,
+     0.3
+    ]
+   },
+   "col": [
+    0,
+    0,
+    1
+   ],
+   "follow_mm": 10,
+   "fade_mm": 8,
+   "lod": {
+    "1": {
+     "keep": 0.3,
+     "width_mul": 1.5
+    },
+    "2": {
+     "drop": true
+    }
+   }
+  },
+  {
+   "name": "moustache",
+   "region": {
+    "top": [
+     [
+      0,
+      3.8
+     ],
+     [
+      8,
+      4.2
+     ],
+     [
+      14,
+      5.0
+     ],
+     [
+      22,
+      6
+     ]
+    ],
+    "bottom": [
+     [
+      0,
+      -1
+     ],
+     [
+      14,
+      -3
+     ],
+     [
+      22,
+      -8
+     ]
+    ],
+    "lon_max": 24,
+    "soft_deg": 1.5,
+    "exclude": [
+     {
+      "at": [
+       16.5,
+       -6.0
+      ],
+      "deg": 5.5
+     },
+     {
+      "at": [
+       15.0,
+       -12.0
+      ],
+      "deg": 4.5
+     }
+    ]
+   },
+   "count": 80,
+   "length": [
+    0.008,
+    0.012
+   ],
+   "width": 0.007,
+   "lift": 15,
+   "gravity": 0.5,
+   "stiffness": 0.7,
+   "jitter": 10,
+   "segs": 2,
+   "flow": {
+    "type": "side",
+    "vec": [
+     0.55,
+     -1,
+     0.25
+    ]
+   },
+   "col": [
+    2
+   ],
+   "follow_mm": 3,
+   "fade_mm": 4,
+   "lod": {
+    "1": {
+     "keep": 0.4,
+     "width_mul": 1.4
+    },
+    "2": {
+     "drop": true
+    }
+   }
+  },
+  {
+   "name": "corner_fill",
+   "_doc": "short cards (~25-40% of the beard length) round the mouth corners, rooted outside the small corner keep-out and following the lip skin fully: connect the moustache to the chin beard past the corners",
+   "region": {
+    "top": [
+     [
+      0,
+      3.0
+     ],
+     [
+      30,
+      3.0
+     ]
+    ],
+    "bottom": [
+     [
+      0,
+      -16.0
+     ],
+     [
+      30,
+      -16.0
+     ]
+    ],
+    "lon_max": 28,
+    "mouth_mm": 2.0,
+    "soft_deg": 2.0,
+    "exclude": [
+     {
+      "at": [
+       16.5,
+       -6.0
+      ],
+      "deg": 5.5
+     },
+     {
+      "at": [
+       15.0,
+       -12.0
+      ],
+      "deg": 4.5
+     }
+    ]
+   },
+   "count": 70,
+   "length": [
+    0.0035,
+    0.0055
+   ],
+   "width": 0.007,
+   "lift": 12,
+   "gravity": 0.6,
+   "stiffness": 0.6,
+   "jitter": 12,
+   "segs": 2,
+   "flow": {
+    "type": "side",
+    "vec": [
+     0.35,
+     -1,
+     0.2
+    ]
+   },
+   "col": [
+    0,
+    1
+   ],
+   "follow_mm": 40,
+   "fade_mm": 10,
+   "lod": {
+    "1": {
+     "keep": 0.4,
+     "width_mul": 1.4
+    },
+    "2": {
+     "drop": true
+    }
+   }
+  }
+ ],
+ "morph": {
+  "lip_follow_mm": [
+   40.0,
+   10.0
+  ]
+ },
+ "shade": {
+  "_doc": "short beard: light like the hair -- high AO floor, shell AO high, cards start past the root-darkening ramp",
+  "ao_shell": [
+   0.75,
+   0.9
+  ],
+  "ao_card_floor": 0.75,
+  "v_start": 0.35
+ },
+ "keep_out": [
+  {
+   "at": [
+    16.5,
+    -6.0
+   ],
+   "deg": 4.5
+  },
+  {
+   "at": [
+    15.0,
+    -12.0
+   ],
+   "deg": 4.0
+  }
+ ],
+ "keep_out_min": 0.25
+}

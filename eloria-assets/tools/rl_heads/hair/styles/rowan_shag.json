@@ -1,0 +1,1698 @@
+{
+ "_doc": "Rowan v7: soft, tousled, layered medium-short warm chestnut hair built from MANY MID-SIZED, THICK, ROUND clumps (closed pentagonal tubes, thickness ~0.6 x width) with tapered, separated tips (split into 2 sub-tips on the top / front / mid layers), layered from the crown whorl over a darker underlayer -- after the sculpted look of the approved Meshy pilot. The fringe ends ABOVE the brow line (more on his left, more open on his right); front / top clumps are pulled up and back; side locks fall BEHIND the cheekbone to about the jaw line; nape locks reach the collar and curl out (spring chains). Volume at circlet-band height stays moderate. Schema: build_hair.py docstring.",
+ "name": "rowan_shag",
+ "sex": "male",
+ "seed": 11,
+ "color": [
+  0.19,
+  0.105,
+  0.055
+ ],
+ "clearance_mm": 2.6,
+ "ao_floor": 0.45,
+ "morph": {
+  "follow_mm": 15,
+  "fade_mm": 15,
+  "stretch": 0.5,
+  "keep_clear": true
+ },
+ "points": {
+  "whorl": [
+   175,
+   60
+  ]
+ },
+ "hairline": {
+  "ear_margin": 2.5,
+  "nape_below_lobe_mm": 18,
+  "noise": 2.0,
+  "adjust": [
+   [
+    0,
+    -1.5
+   ],
+   [
+    45,
+    -2
+   ],
+   [
+    -45,
+    -2
+   ]
+  ]
+ },
+ "shell": {
+  "_doc": "pole at the crown whorl; v from the whorl (starting past the root-darkening ramp); the hairline band frays",
+  "pole": [
+   175,
+   60
+  ],
+  "v": "from_pole",
+  "tip_band": 0.04,
+  "v_start": 0.4,
+  "offset_mm": [
+   4.0,
+   2.6
+  ],
+  "u_repeat": 12,
+  "ao": 0.7,
+  "lod": {
+   "0": [
+    14,
+    40
+   ],
+   "1": [
+    9,
+    24
+   ],
+   "2": [
+    7,
+    24
+   ]
+  },
+  "face_clear": 0.85
+ },
+ "groups": [
+  {
+   "name": "body",
+   "type": "locks",
+   "kind": "clump",
+   "_doc": "darker underlayer of rounded tubes radiating from the whorl (ao_mul 0.6, low COLOR_0.R)",
+   "roots": {
+    "region": {
+     "lon": [
+      -180,
+      180
+     ],
+     "lat": [
+      5,
+      85
+     ]
+    },
+    "exclude": [
+     {
+      "point": "@whorl",
+      "deg": 10
+     }
+    ],
+    "count": 14,
+    "margin": 3.0
+   },
+   "length_table": {
+    "by": "abslon",
+    "points": [
+     [
+      0,
+      0.05
+     ],
+     [
+      45,
+      0.065
+     ],
+     [
+      90,
+      0.075
+     ],
+     [
+      180,
+      0.085
+     ]
+    ],
+    "jitter": 0.15
+   },
+   "grow": {
+    "hug": 0.7,
+    "height_mm": [
+     4.0,
+     9.0,
+     11.0
+    ],
+    "gravity": 0.5,
+    "stiffness": 0.5,
+    "cross": 10,
+    "jitter": 8,
+    "steps": 30,
+    "min_mm": 6
+   },
+   "flow": {
+    "type": "away",
+    "point": "@whorl"
+   },
+   "shape": {
+    "noise_mm": 2.0,
+    "flick": {
+     "angle": 20,
+     "from": 0.7,
+     "dir": "out"
+    }
+   },
+   "width_jitter": 0.25,
+   "section": {
+    "width": 0.042,
+    "thick": 0.016,
+    "sides": 5,
+    "segs": 9,
+    "twist": 15,
+    "inner_flat": 0.55,
+    "troot": 0.3,
+    "profile": {
+     "root": 0.6,
+     "belly": 0.25,
+     "tip_start": 0.65,
+     "tip_pow": 0.7,
+     "tip_min": 0.3
+    }
+   },
+   "lod": {
+    "1": {
+     "keep": 0.6,
+     "sides": 4,
+     "segs": 0.7,
+     "width_mul": 1.25
+    },
+    "2": {
+     "keep": 0.4,
+     "sides": 3,
+     "segs": 0.6,
+     "width_mul": 1.5
+    }
+   },
+   "ao_mul": 0.6,
+   "rand_range": [
+    0.0,
+    0.3
+   ]
+  },
+  {
+   "name": "mid",
+   "type": "locks",
+   "kind": "clump",
+   "_doc": "middle layer: mid-sized round clumps radiating from the whorl, gently S-curved, split tapered tips",
+   "roots": {
+    "region": {
+     "lon": [
+      -180,
+      180
+     ],
+     "lat": [
+      15,
+      82
+     ]
+    },
+    "exclude": [
+     {
+      "point": "@whorl",
+      "deg": 9
+     }
+    ],
+    "count": 18,
+    "margin": 3.0
+   },
+   "length_table": {
+    "by": "abslon",
+    "points": [
+     [
+      0,
+      0.07
+     ],
+     [
+      45,
+      0.08
+     ],
+     [
+      90,
+      0.085
+     ],
+     [
+      180,
+      0.085
+     ]
+    ],
+    "jitter": 0.15
+   },
+   "grow": {
+    "hug": 0.6,
+    "height_mm": [
+     5.0,
+     12.0,
+     16.0
+    ],
+    "gravity": 0.45,
+    "stiffness": 0.55,
+    "cross": 12,
+    "jitter": 9,
+    "steps": 30,
+    "min_mm": 8
+   },
+   "flow": {
+    "type": "away",
+    "point": "@whorl"
+   },
+   "shape": {
+    "noise_mm": 2.0,
+    "wave": {
+     "amp_mm": 2.5,
+     "cycles": 0.9
+    },
+    "flick": {
+     "angle": 28,
+     "from": 0.65,
+     "dir": "out"
+    }
+   },
+   "width_jitter": 0.25,
+   "rand_range": [
+    0.25,
+    0.85
+   ],
+   "section": {
+    "width": 0.03,
+    "thick": 0.018,
+    "sides": 5,
+    "segs": 12,
+    "twist": 6,
+    "inner_flat": 0.8,
+    "troot": 0.35,
+    "profile": {
+     "root": 0.7,
+     "belly": 0.3,
+     "tip_start": 0.68,
+     "tip_pow": 1.0,
+     "tip_min": 0.05
+    },
+    "split": 2,
+    "split_at": 0.72,
+    "split_spread": 0.9
+   },
+   "lod": {
+    "1": {
+     "keep": 0.55,
+     "sides": 4,
+     "segs": 0.65,
+     "width_mul": 1.25,
+     "no_split": true
+    },
+    "2": {
+     "keep": 0.35,
+     "sides": 3,
+     "segs": 0.5,
+     "width_mul": 1.5,
+     "no_split": true
+    }
+   },
+   "ao_mul": 0.85
+  },
+  {
+   "name": "top_front",
+   "type": "locks",
+   "kind": "clump",
+   "_doc": "top / front clumps pulled UP and BACK: they hug longer, lift for volume and flick up at the tips instead of drooping over the brow",
+   "roots": {
+    "region": {
+     "lon": [
+      -100,
+      100
+     ],
+     "lat": [
+      40,
+      88
+     ]
+    },
+    "exclude": [
+     {
+      "point": "@whorl",
+      "deg": 8
+     }
+    ],
+    "count": 12,
+    "margin": 3.0
+   },
+   "length": [
+    0.09,
+    0.115
+   ],
+   "grow": {
+    "hug": 0.72,
+    "height_mm": [
+     5.0,
+     15.0,
+     21.0
+    ],
+    "gravity": 0.3,
+    "stiffness": 0.55,
+    "cross": 14,
+    "jitter": 10,
+    "steps": 30,
+    "min_mm": 10
+   },
+   "flow": {
+    "type": "away",
+    "point": "@whorl"
+   },
+   "shape": {
+    "noise_mm": 2.5,
+    "wave": {
+     "amp_mm": 2.5,
+     "cycles": 0.9
+    },
+    "flick": {
+     "angle": 28,
+     "from": 0.62,
+     "dir": "up"
+    }
+   },
+   "width_jitter": 0.25,
+   "rand_range": [
+    0.5,
+    1.0
+   ],
+   "section": {
+    "width": 0.031,
+    "thick": 0.0186,
+    "sides": 5,
+    "segs": 12,
+    "twist": 6,
+    "inner_flat": 0.8,
+    "troot": 0.35,
+    "profile": {
+     "root": 0.7,
+     "belly": 0.3,
+     "tip_start": 0.68,
+     "tip_pow": 1.0,
+     "tip_min": 0.05
+    },
+    "split": 2,
+    "split_at": 0.72,
+    "split_spread": 0.9
+   },
+   "lod": {
+    "1": {
+     "keep": 0.55,
+     "sides": 4,
+     "segs": 0.65,
+     "width_mul": 1.25,
+     "no_split": true
+    },
+    "2": {
+     "keep": 0.35,
+     "sides": 3,
+     "segs": 0.5,
+     "width_mul": 1.5,
+     "no_split": true
+    }
+   }
+  },
+  {
+   "name": "crown_back",
+   "type": "locks",
+   "kind": "clump",
+   "_doc": "outer layer over the back crown: moderate lift so the silhouette stays rounded (no crest at the whorl)",
+   "roots": {
+    "region": {
+     "lon": [
+      100,
+      260
+     ],
+     "lat": [
+      35,
+      80
+     ]
+    },
+    "exclude": [
+     {
+      "point": "@whorl",
+      "deg": 12
+     }
+    ],
+    "count": 10,
+    "margin": 3.0
+   },
+   "length": [
+    0.09,
+    0.115
+   ],
+   "grow": {
+    "hug": 0.6,
+    "height_mm": [
+     4.5,
+     9.0,
+     12.0
+    ],
+    "gravity": 0.4,
+    "stiffness": 0.55,
+    "cross": 14,
+    "jitter": 10,
+    "steps": 30,
+    "min_mm": 10
+   },
+   "flow": {
+    "type": "mix",
+    "fields": [
+     [
+      1.0,
+      {
+       "type": "away",
+       "point": "@whorl"
+      }
+     ],
+     [
+      0.25,
+      {
+       "type": "dir",
+       "vec": [
+        0,
+        0,
+        1
+       ]
+      }
+     ]
+    ]
+   },
+   "shape": {
+    "noise_mm": 2.5,
+    "wave": {
+     "amp_mm": 2.5,
+     "cycles": 0.9
+    },
+    "flick": {
+     "angle": 12,
+     "from": 0.7,
+     "dir": "out"
+    }
+   },
+   "width_jitter": 0.25,
+   "rand_range": [
+    0.5,
+    1.0
+   ],
+   "section": {
+    "width": 0.03,
+    "thick": 0.018,
+    "sides": 5,
+    "segs": 12,
+    "twist": 6,
+    "inner_flat": 0.8,
+    "troot": 0.35,
+    "profile": {
+     "root": 0.7,
+     "belly": 0.3,
+     "tip_start": 0.68,
+     "tip_pow": 1.0,
+     "tip_min": 0.05
+    },
+    "split": 2,
+    "split_at": 0.72,
+    "split_spread": 0.9
+   },
+   "lod": {
+    "1": {
+     "keep": 0.55,
+     "sides": 4,
+     "segs": 0.65,
+     "width_mul": 1.25,
+     "no_split": true
+    },
+    "2": {
+     "keep": 0.35,
+     "sides": 3,
+     "segs": 0.5,
+     "width_mul": 1.5,
+     "no_split": true
+    }
+   }
+  },
+  {
+   "name": "top_curls",
+   "type": "locks",
+   "kind": "clump",
+   "_doc": "a few locks curling up and out of the top silhouette",
+   "roots": {
+    "points": [
+     [
+      25,
+      70
+     ],
+     [
+      -35,
+      68
+     ]
+    ],
+    "jitter": 3
+   },
+   "length": [
+    0.08,
+    0.1
+   ],
+   "grow": {
+    "hug": 0.45,
+    "height_mm": [
+     6.0,
+     16.0,
+     22.0
+    ],
+    "gravity": 0.3,
+    "stiffness": 0.6,
+    "jitter": 12,
+    "steps": 28,
+    "min_mm": 12
+   },
+   "flow": {
+    "type": "away",
+    "point": "@whorl"
+   },
+   "shape": {
+    "noise_mm": 2.0,
+    "flick": {
+     "angle": 38,
+     "from": 0.55,
+     "dir": "out"
+    }
+   },
+   "rand_range": [
+    0.6,
+    1.0
+   ],
+   "section": {
+    "width": 0.02,
+    "thick": 0.012,
+    "sides": 5,
+    "segs": 12,
+    "twist": 6,
+    "inner_flat": 0.8,
+    "troot": 0.35,
+    "profile": {
+     "root": 0.7,
+     "belly": 0.3,
+     "tip_start": 0.68,
+     "tip_pow": 1.0,
+     "tip_min": 0.05
+    }
+   },
+   "lod": {
+    "1": {
+     "keep": 0.6,
+     "sides": 4,
+     "segs": 0.65,
+     "width_mul": 1.25,
+     "no_split": true
+    },
+    "2": {
+     "keep": 0.4,
+     "sides": 3,
+     "segs": 0.5,
+     "width_mul": 1.5,
+     "no_split": true
+    }
+   }
+  },
+  {
+   "name": "fringe_left",
+   "type": "locks",
+   "kind": "clump",
+   "_doc": "fringe on his LEFT: separate clumps ending ~1-2 cm ABOVE the brow (shorter, hugging longer, tips flicking up)",
+   "roots": {
+    "region": {
+     "lon": [
+      -15,
+      40
+     ],
+     "lat": [
+      46,
+      68
+     ]
+    },
+    "count": 7,
+    "margin": 2.0
+   },
+   "length": [
+    0.055,
+    0.066
+   ],
+   "grow": {
+    "hug": 0.62,
+    "height_mm": [
+     4.0,
+     7.0,
+     8.0
+    ],
+    "gravity": 0.5,
+    "stiffness": 0.45,
+    "cross": 14,
+    "jitter": 8,
+    "steps": 28,
+    "min_mm": 6
+   },
+   "flow": {
+    "type": "mix",
+    "fields": [
+     [
+      1.0,
+      {
+       "type": "away",
+       "point": "@whorl"
+      }
+     ],
+     [
+      0.7,
+      {
+       "type": "dir",
+       "vec": [
+        0.15,
+        -0.1,
+        1
+       ]
+      }
+     ]
+    ]
+   },
+   "shape": {
+    "noise_mm": 2.5,
+    "wave": {
+     "amp_mm": 2.5,
+     "cycles": 0.9
+    },
+    "flick": {
+     "angle": 24,
+     "from": 0.6,
+     "dir": "up"
+    }
+   },
+   "width_jitter": 0.3,
+   "rand_range": [
+    0.35,
+    0.95
+   ],
+   "section": {
+    "width": 0.024,
+    "thick": 0.0144,
+    "sides": 5,
+    "segs": 12,
+    "twist": 6,
+    "inner_flat": 0.8,
+    "troot": 0.35,
+    "profile": {
+     "root": 0.7,
+     "belly": 0.3,
+     "tip_start": 0.68,
+     "tip_pow": 1.0,
+     "tip_min": 0.05
+    },
+    "split": 2,
+    "split_at": 0.72,
+    "split_spread": 0.9
+   },
+   "lod": {
+    "1": {
+     "keep": 0.67,
+     "sides": 4,
+     "segs": 0.65,
+     "width_mul": 1.25,
+     "no_split": true
+    },
+    "2": {
+     "keep": 0.5,
+     "sides": 3,
+     "segs": 0.5,
+     "width_mul": 1.5,
+     "no_split": true
+    }
+   }
+  },
+  {
+   "name": "fringe_right",
+   "type": "locks",
+   "kind": "clump",
+   "_doc": "fringe on his RIGHT: shorter and more open",
+   "roots": {
+    "region": {
+     "lon": [
+      -45,
+      -15
+     ],
+     "lat": [
+      48,
+      66
+     ]
+    },
+    "count": 3,
+    "margin": 2.0
+   },
+   "length": [
+    0.05,
+    0.06
+   ],
+   "grow": {
+    "hug": 0.62,
+    "height_mm": [
+     4.0,
+     7.0,
+     8.0
+    ],
+    "gravity": 0.5,
+    "stiffness": 0.5,
+    "cross": 14,
+    "jitter": 8,
+    "steps": 26,
+    "min_mm": 7
+   },
+   "flow": {
+    "type": "mix",
+    "fields": [
+     [
+      1.0,
+      {
+       "type": "away",
+       "point": "@whorl"
+      }
+     ],
+     [
+      0.3,
+      {
+       "type": "dir",
+       "vec": [
+        -0.3,
+        0.2,
+        1
+       ]
+      }
+     ]
+    ]
+   },
+   "shape": {
+    "noise_mm": 2.5,
+    "wave": {
+     "amp_mm": 2.5,
+     "cycles": 0.9
+    },
+    "flick": {
+     "angle": 24,
+     "from": 0.6,
+     "dir": "up"
+    }
+   },
+   "width_jitter": 0.3,
+   "rand_range": [
+    0.35,
+    0.95
+   ],
+   "section": {
+    "width": 0.024,
+    "thick": 0.0144,
+    "sides": 5,
+    "segs": 12,
+    "twist": 6,
+    "inner_flat": 0.8,
+    "troot": 0.35,
+    "profile": {
+     "root": 0.7,
+     "belly": 0.3,
+     "tip_start": 0.68,
+     "tip_pow": 1.0,
+     "tip_min": 0.05
+    },
+    "split": 2,
+    "split_at": 0.72,
+    "split_spread": 0.9
+   },
+   "lod": {
+    "1": {
+     "keep": 0.6,
+     "sides": 4,
+     "segs": 0.65,
+     "width_mul": 1.25,
+     "no_split": true
+    },
+    "2": {
+     "keep": 0.5,
+     "sides": 3,
+     "segs": 0.5,
+     "width_mul": 1.5,
+     "no_split": true
+    }
+   }
+  },
+  {
+   "name": "temples",
+   "type": "locks",
+   "kind": "clump",
+   "_doc": "side locks rooted behind the temple, falling BEHIND the cheekbone to about the jaw line (no forward pull)",
+   "roots": {
+    "region": {
+     "lon": [
+      72,
+      128
+     ],
+     "lat": [
+      -6,
+      34
+     ],
+     "mirror": true
+    },
+    "count": 16,
+    "margin": 1.0
+   },
+   "length": [
+    0.095,
+    0.115
+   ],
+   "grow": {
+    "hug": 0.45,
+    "height_mm": [
+     4.0,
+     9.0,
+     11.0
+    ],
+    "gravity": 0.7,
+    "stiffness": 0.5,
+    "cross": 12,
+    "jitter": 8,
+    "steps": 28,
+    "min_mm": 6
+   },
+   "flow": {
+    "type": "mix",
+    "fields": [
+     [
+      1.0,
+      {
+       "type": "away",
+       "point": "@whorl"
+      }
+     ],
+     [
+      0.5,
+      {
+       "type": "dir",
+       "vec": [
+        0,
+        -1,
+        -0.15
+       ]
+      }
+     ]
+    ]
+   },
+   "shape": {
+    "noise_mm": 2.5,
+    "wave": {
+     "amp_mm": 2.5,
+     "cycles": 0.9
+    },
+    "flick": {
+     "angle": 22,
+     "from": 0.72,
+     "dir": "out"
+    }
+   },
+   "width_jitter": 0.25,
+   "rand_range": [
+    0.3,
+    0.9
+   ],
+   "section": {
+    "width": 0.028,
+    "thick": 0.0168,
+    "sides": 5,
+    "segs": 12,
+    "twist": 6,
+    "inner_flat": 0.8,
+    "troot": 0.35,
+    "profile": {
+     "root": 0.7,
+     "belly": 0.3,
+     "tip_start": 0.68,
+     "tip_pow": 1.0,
+     "tip_min": 0.05
+    }
+   },
+   "lod": {
+    "1": {
+     "keep": 0.55,
+     "sides": 4,
+     "segs": 0.65,
+     "width_mul": 1.25,
+     "no_split": true
+    },
+    "2": {
+     "keep": 0.35,
+     "sides": 3,
+     "segs": 0.5,
+     "width_mul": 1.5,
+     "no_split": true
+    }
+   }
+  },
+  {
+   "name": "nape",
+   "type": "locks",
+   "kind": "clump",
+   "_doc": "nape locks reaching the collar and curling outward; the longest carry spring chains",
+   "roots": {
+    "region": {
+     "lon": [
+      125,
+      235
+     ],
+     "lat": [
+      -48,
+      5
+     ]
+    },
+    "count": 14,
+    "margin": 0.5
+   },
+   "length": [
+    0.1,
+    0.12
+   ],
+   "grow": {
+    "hug": 0.5,
+    "height_mm": [
+     3.5,
+     8.0,
+     10.0
+    ],
+    "gravity": 0.7,
+    "stiffness": 0.5,
+    "cross": 10,
+    "jitter": 8,
+    "steps": 28,
+    "min_mm": 6
+   },
+   "flow": {
+    "type": "mix",
+    "fields": [
+     [
+      1.0,
+      {
+       "type": "away",
+       "point": "@whorl"
+      }
+     ],
+     [
+      0.6,
+      {
+       "type": "down"
+      }
+     ]
+    ]
+   },
+   "shape": {
+    "noise_mm": 2.5,
+    "wave": {
+     "amp_mm": 2.5,
+     "cycles": 0.9
+    },
+    "flick": {
+     "angle": 32,
+     "from": 0.68,
+     "dir": "out"
+    }
+   },
+   "width_jitter": 0.25,
+   "rand_range": [
+    0.25,
+    0.85
+   ],
+   "section": {
+    "width": 0.03,
+    "thick": 0.018,
+    "sides": 5,
+    "segs": 12,
+    "twist": 6,
+    "inner_flat": 0.8,
+    "troot": 0.35,
+    "profile": {
+     "root": 0.7,
+     "belly": 0.3,
+     "tip_start": 0.68,
+     "tip_pow": 1.0,
+     "tip_min": 0.05
+    }
+   },
+   "spring": {
+    "count": 6,
+    "joints": 3,
+    "from": 0.45,
+    "stiffness": 0.6,
+    "damping": 0.35,
+    "gravity": 0.6,
+    "drag": 0.4,
+    "radius": 0.009
+   },
+   "lod": {
+    "1": {
+     "keep": 0.6,
+     "sides": 4,
+     "segs": 0.65,
+     "width_mul": 1.25,
+     "no_split": true
+    },
+    "2": {
+     "keep": 0.4,
+     "sides": 3,
+     "segs": 0.5,
+     "width_mul": 1.5,
+     "no_split": true
+    }
+   }
+  },
+  {
+   "name": "flyaways",
+   "type": "locks",
+   "kind": "card",
+   "_doc": "soft strand cards breaking the silhouette on top and at the sides",
+   "roots": {
+    "region": {
+     "lon": [
+      -180,
+      180
+     ],
+     "lat": [
+      5,
+      85
+     ]
+    },
+    "count": 12,
+    "margin": 3.0,
+    "exclude": [
+     {
+      "point": "@whorl",
+      "deg": 14
+     }
+    ]
+   },
+   "length": [
+    0.035,
+    0.06
+   ],
+   "grow": {
+    "hug": 0.35,
+    "height_mm": [
+     5.0,
+     15.0
+    ],
+    "gravity": 0.45,
+    "stiffness": 0.55,
+    "jitter": 25,
+    "steps": 10,
+    "min_mm": 10
+   },
+   "flow": {
+    "type": "away",
+    "point": "@whorl"
+   },
+   "shape": {
+    "wave": {
+     "amp_mm": 4,
+     "cycles": 1.0
+    },
+    "flick": {
+     "angle": 18,
+     "from": 0.6,
+     "dir": "out"
+    }
+   },
+   "col": [
+    3,
+    4,
+    5
+   ],
+   "width_jitter": 0.3,
+   "rand_range": [
+    0.4,
+    1.0
+   ],
+   "section": {
+    "width": 0.02,
+    "segs": 6,
+    "twist": 30
+   },
+   "lod": {
+    "1": {
+     "keep": 0.3,
+     "segs": 0.6
+    },
+    "2": {
+     "drop": true
+    }
+   }
+  },
+  {
+   "name": "messy_strays",
+   "type": "locks",
+   "kind": "card",
+   "_doc": "messy extra (hair_detail > 50): short-to-mid strays lifting off the whole crown and sides along the whorl flow",
+   "detail": "messy",
+   "avoid_eyes": true,
+   "roots": {
+    "region": {
+     "lon": [
+      -180,
+      180
+     ],
+     "lat": [
+      10,
+      85
+     ]
+    },
+    "exclude": [
+     {
+      "point": "@whorl",
+      "deg": 8
+     }
+    ],
+    "count": 60,
+    "margin": 2.5
+   },
+   "length": [
+    0.03,
+    0.07
+   ],
+   "grow": {
+    "hug": 0.3,
+    "height_mm": [
+     6.0,
+     18.0
+    ],
+    "gravity": 0.4,
+    "stiffness": 0.55,
+    "jitter": 30,
+    "steps": 10,
+    "min_mm": 10
+   },
+   "flow": {
+    "type": "away",
+    "point": "@whorl"
+   },
+   "shape": {
+    "wave": {
+     "amp_mm": 4,
+     "cycles": 1.0
+    },
+    "flick": {
+     "angle": 45,
+     "from": 0.5,
+     "dir": "out"
+    }
+   },
+   "col": [
+    3,
+    2,
+    4
+   ],
+   "width_jitter": 0.35,
+   "rand_range": [
+    0.4,
+    1.0
+   ],
+   "section": {
+    "width": 0.022,
+    "segs": 6,
+    "twist": 35
+   },
+   "lod": {
+    "1": {
+     "keep": 0.4,
+     "segs": 0.6
+    },
+    "2": {
+     "drop": true
+    }
+   }
+  },
+  {
+   "name": "messy_frizz_crown",
+   "type": "locks",
+   "kind": "card",
+   "_doc": "messy extra (hair_detail > 50): short frizz at the crown",
+   "detail": "messy",
+   "avoid_eyes": true,
+   "roots": {
+    "region": {
+     "lon": [
+      -180,
+      180
+     ],
+     "lat": [
+      50,
+      88
+     ]
+    },
+    "exclude": [
+     {
+      "point": "@whorl",
+      "deg": 6
+     }
+    ],
+    "count": 28,
+    "margin": 3.0
+   },
+   "length": [
+    0.02,
+    0.045
+   ],
+   "grow": {
+    "hug": 0.2,
+    "height_mm": [
+     6.0,
+     12.0
+    ],
+    "gravity": 0.2,
+    "stiffness": 0.6,
+    "jitter": 45,
+    "steps": 8,
+    "min_mm": 10
+   },
+   "flow": {
+    "type": "away",
+    "point": "@whorl"
+   },
+   "shape": {
+    "wave": {
+     "amp_mm": 3,
+     "cycles": 1.5
+    },
+    "flick": {
+     "angle": 40,
+     "from": 0.5,
+     "dir": "up"
+    }
+   },
+   "col": [
+    7,
+    3
+   ],
+   "width_jitter": 0.35,
+   "rand_range": [
+    0.4,
+    1.0
+   ],
+   "section": {
+    "width": 0.018,
+    "segs": 4,
+    "twist": 35
+   },
+   "lod": {
+    "1": {
+     "keep": 0.4,
+     "segs": 0.6
+    },
+    "2": {
+     "drop": true
+    }
+   }
+  },
+  {
+   "name": "messy_frizz_temples",
+   "type": "locks",
+   "kind": "card",
+   "_doc": "messy extra (hair_detail > 50): short frizz at the temples (kept out of the eyes)",
+   "detail": "messy",
+   "avoid_eyes": true,
+   "roots": {
+    "region": {
+     "lon": [
+      55,
+      95
+     ],
+     "lat": [
+      0,
+      35
+     ],
+     "mirror": true
+    },
+    "count": 16,
+    "margin": 1.0
+   },
+   "length": [
+    0.015,
+    0.035
+   ],
+   "grow": {
+    "hug": 0.3,
+    "height_mm": [
+     5.0,
+     10.0
+    ],
+    "gravity": 0.5,
+    "stiffness": 0.6,
+    "jitter": 40,
+    "steps": 8,
+    "min_mm": 8
+   },
+   "flow": {
+    "type": "away",
+    "point": "@whorl"
+   },
+   "shape": {
+    "wave": {
+     "amp_mm": 3,
+     "cycles": 1.5
+    },
+    "flick": {
+     "angle": 35,
+     "from": 0.5,
+     "dir": "out"
+    }
+   },
+   "col": [
+    7,
+    3
+   ],
+   "width_jitter": 0.35,
+   "rand_range": [
+    0.4,
+    1.0
+   ],
+   "section": {
+    "width": 0.018,
+    "segs": 4,
+    "twist": 35
+   },
+   "lod": {
+    "1": {
+     "keep": 0.4,
+     "segs": 0.6
+    },
+    "2": {
+     "drop": true
+    }
+   }
+  },
+  {
+   "name": "messy_locks",
+   "type": "locks",
+   "kind": "card",
+   "_doc": "messy extra (hair_detail > 50): a few loose locks breaking the silhouette; they swing with nearby sprung locks",
+   "detail": "messy",
+   "avoid_eyes": true,
+   "roots": {
+    "region": {
+     "lon": [
+      -180,
+      180
+     ],
+     "lat": [
+      20,
+      75
+     ]
+    },
+    "exclude": [
+     {
+      "point": "@whorl",
+      "deg": 8
+     }
+    ],
+    "count": 12,
+    "margin": 2.5
+   },
+   "length": [
+    0.07,
+    0.1
+   ],
+   "grow": {
+    "hug": 0.4,
+    "height_mm": [
+     6.0,
+     20.0
+    ],
+    "gravity": 0.5,
+    "stiffness": 0.55,
+    "jitter": 20,
+    "steps": 12,
+    "min_mm": 10
+   },
+   "flow": {
+    "type": "away",
+    "point": "@whorl"
+   },
+   "shape": {
+    "wave": {
+     "amp_mm": 4,
+     "cycles": 1.0
+    },
+    "flick": {
+     "angle": 30,
+     "from": 0.6,
+     "dir": "out"
+    }
+   },
+   "col": [
+    2,
+    3
+   ],
+   "width_jitter": 0.35,
+   "rand_range": [
+    0.4,
+    1.0
+   ],
+   "section": {
+    "width": 0.026,
+    "segs": 8,
+    "twist": 35
+   },
+   "lod": {
+    "1": {
+     "keep": 0.4,
+     "segs": 0.6
+    },
+    "2": {
+     "drop": true
+    }
+   },
+   "spring_follow": true
+  },
+  {
+   "name": "messy_tips",
+   "type": "locks",
+   "kind": "card",
+   "_doc": "messy extra (hair_detail > 50): separated tips poking past the side / nape lock ends (swing with the nape springs)",
+   "detail": "messy",
+   "avoid_eyes": true,
+   "roots": {
+    "region": {
+     "lon": [
+      60,
+      300
+     ],
+     "lat": [
+      -35,
+      30
+     ]
+    },
+    "count": 20,
+    "margin": 1.0
+   },
+   "length": [
+    0.06,
+    0.09
+   ],
+   "grow": {
+    "hug": 0.45,
+    "height_mm": [
+     4.0,
+     10.0
+    ],
+    "gravity": 0.65,
+    "stiffness": 0.5,
+    "jitter": 15,
+    "steps": 10,
+    "min_mm": 7
+   },
+   "flow": {
+    "type": "mix",
+    "fields": [
+     [
+      1.0,
+      {
+       "type": "away",
+       "point": "@whorl"
+      }
+     ],
+     [
+      0.5,
+      {
+       "type": "down"
+      }
+     ]
+    ]
+   },
+   "shape": {
+    "wave": {
+     "amp_mm": 3,
+     "cycles": 1.0
+    },
+    "flick": {
+     "angle": 50,
+     "from": 0.55,
+     "dir": "out"
+    }
+   },
+   "col": [
+    3,
+    2
+   ],
+   "width_jitter": 0.35,
+   "rand_range": [
+    0.4,
+    1.0
+   ],
+   "section": {
+    "width": 0.02,
+    "segs": 6,
+    "twist": 35
+   },
+   "lod": {
+    "1": {
+     "keep": 0.4,
+     "segs": 0.6
+    },
+    "2": {
+     "drop": true
+    }
+   },
+   "spring_follow": true
+  },
+  {
+   "name": "messy_fringe_gap",
+   "type": "locks",
+   "kind": "clump",
+   "detail": "messy",
+   "detail_values": [
+    0.38,
+    0.22
+   ],
+   "_doc": "messy extra: two larger front clumps (same kind/section as the fringe) rooted in the fringe gap just right of centre (his right) at the hairline, falling forward and down about half as far as the neighbouring front locks so the lower forehead stays visible; A 0.38 (appears at hair_detail ~62) and 0.22 (~78)",
+   "roots": {
+    "points": [
+     [
+      -16,
+      36
+     ],
+     [
+      -24,
+      33
+     ]
+    ],
+    "jitter": 0.0
+   },
+   "grow": {
+    "hug": 0.55,
+    "height_mm": [
+     4.0,
+     7.0,
+     8.0
+    ],
+    "gravity": 0.5,
+    "stiffness": 0.5,
+    "cross": 14,
+    "jitter": 8,
+    "steps": 26,
+    "min_mm": 7
+   },
+   "flow": {
+    "type": "mix",
+    "fields": [
+     [
+      1.0,
+      {
+       "type": "away",
+       "point": "@whorl"
+      }
+     ],
+     [
+      0.6,
+      {
+       "type": "dir",
+       "vec": [
+        0.0,
+        -0.3,
+        1.0
+       ]
+      }
+     ]
+    ]
+   },
+   "shape": {
+    "noise_mm": 2.5,
+    "wave": {
+     "amp_mm": 2.0,
+     "cycles": 0.8
+    },
+    "flick": {
+     "angle": 16,
+     "from": 0.62,
+     "dir": "up"
+    }
+   },
+   "width_jitter": 0.0,
+   "rand_range": [
+    0.35,
+    0.95
+   ],
+   "section": {
+    "width": 0.026,
+    "thick": 0.0156,
+    "sides": 5,
+    "segs": 12,
+    "twist": 6,
+    "inner_flat": 0.8,
+    "troot": 0.35,
+    "profile": {
+     "root": 0.7,
+     "belly": 0.3,
+     "tip_start": 0.68,
+     "tip_pow": 1.0,
+     "tip_min": 0.05
+    },
+    "split": 2,
+    "split_at": 0.72,
+    "split_spread": 0.9
+   },
+   "avoid_eyes": true,
+   "avoid_eyes_pad_mm": [
+    20,
+    18
+   ],
+   "spring_follow": true,
+   "lod": {
+    "1": {
+     "keep": 1.0,
+     "sides": 4,
+     "segs": 0.65,
+     "width_mul": 1.15,
+     "no_split": true
+    },
+    "2": {
+     "drop": true
+    }
+   },
+   "length_table": {
+    "by": "lon",
+    "points": [
+     [
+      -24,
+      0.037
+     ],
+     [
+      -16,
+      0.047
+     ]
+    ],
+    "jitter": 0.0
+   }
+  }
+ ],
+ "groom": {
+  "_doc": "grooming shapes hl_length_p/_n and hl_volume_p/_n (weight 1 = full): every lock group changes length along its own growth curve and stand-off.",
+  "length": [
+   -0.4,
+   0.6
+  ],
+  "volume": [
+   -0.5,
+   0.8
+  ]
+ }
+}

@@ -1,0 +1,350 @@
+{
+ "controls": [
+  {
+   "name": "eye_size",
+   "label": "Eye size",
+   "group": "Eyes",
+   "pos": {
+    "eyes/l-eye-scale-incr": 1.0,
+    "eyes/r-eye-scale-incr": 1.0
+   },
+   "neg": {
+    "eyes/l-eye-scale-decr": 1.0,
+    "eyes/r-eye-scale-decr": 1.0
+   }
+  },
+  {
+   "name": "eye_tilt",
+   "label": "Eye tilt",
+   "group": "Eyes",
+   "pos": {
+    "eyes/l-eye-corner2-up": 1.0,
+    "eyes/r-eye-corner2-up": 1.0,
+    "eyes/l-eye-eyefold-angle-up": 0.5,
+    "eyes/r-eye-eyefold-angle-up": 0.5
+   },
+   "neg": {
+    "eyes/l-eye-corner2-down": 1.0,
+    "eyes/r-eye-corner2-down": 1.0,
+    "eyes/l-eye-eyefold-angle-down": 0.5,
+    "eyes/r-eye-eyefold-angle-down": 0.5
+   }
+  },
+  {
+   "name": "eye_spacing",
+   "label": "Eye spacing",
+   "group": "Eyes",
+   "pos": {
+    "eyes/l-eye-trans-out": 1.0,
+    "eyes/r-eye-trans-out": 1.0
+   },
+   "neg": {
+    "eyes/l-eye-trans-in": 1.0,
+    "eyes/r-eye-trans-in": 1.0
+   }
+  },
+  {
+   "name": "eyelid",
+   "label": "Eyelid (open / hooded)",
+   "group": "Eyes",
+   "pos": {
+    "eyes/l-eye-height2-incr": 1.0,
+    "eyes/r-eye-height2-incr": 1.0
+   },
+   "neg": {
+    "eyes/l-eye-eyefold-down": 1.0,
+    "eyes/r-eye-eyefold-down": 1.0,
+    "eyes/l-eye-height2-decr": 0.35,
+    "eyes/r-eye-height2-decr": 0.35
+   }
+  },
+  {
+   "name": "brow_height",
+   "label": "Brow height",
+   "group": "Brows",
+   "pos": {
+    "eyebrows/eyebrows-trans-up": 1
+   },
+   "neg": {
+    "eyebrows/eyebrows-trans-down": 1
+   }
+  },
+  {
+   "name": "brow_ridge",
+   "label": "Brow ridge",
+   "group": "Brows",
+   "pos": {
+    "eyebrows/eyebrows-trans-forward": 0.7,
+    "forehead/forehead-nubian-incr": 0.06
+   },
+   "neg": {
+    "eyebrows/eyebrows-trans-backward": 0.7,
+    "forehead/forehead-nubian-decr": 0.06
+   }
+  },
+  {
+   "name": "nose_width",
+   "label": "Nose width",
+   "group": "Nose",
+   "pos": {
+    "nose/nose-scale-horiz-incr": 1,
+    "nose/nose-nostrils-width-incr": 0.5
+   },
+   "neg": {
+    "nose/nose-scale-horiz-decr": 1,
+    "nose/nose-nostrils-width-decr": 0.5
+   }
+  },
+  {
+   "name": "nose_length",
+   "label": "Nose length",
+   "group": "Nose",
+   "pos": {
+    "nose/nose-scale-vert-incr": 1
+   },
+   "neg": {
+    "nose/nose-scale-vert-decr": 1
+   }
+  },
+  {
+   "name": "nose_bridge",
+   "label": "Nose bridge (hump / scoop)",
+   "group": "Nose",
+   "pos": {
+    "nose/nose-hump-incr": 1
+   },
+   "neg": {
+    "nose/nose-curve-concave": 1
+   }
+  },
+  {
+   "name": "nose_tip",
+   "label": "Nose tip (up / down)",
+   "group": "Nose",
+   "pos": {
+    "nose/nose-point-up": 1
+   },
+   "neg": {
+    "nose/nose-point-down": 1
+   }
+  },
+  {
+   "name": "nose_depth",
+   "label": "Nose projection",
+   "group": "Nose",
+   "pos": {
+    "nose/nose-scale-depth-incr": 1
+   },
+   "neg": {
+    "nose/nose-scale-depth-decr": 1
+   }
+  },
+  {
+   "name": "lip_fullness",
+   "label": "Lip fullness",
+   "group": "Lips",
+   "pos": {
+    "mouth/mouth-upperlip-volume-incr": 1,
+    "mouth/mouth-lowerlip-volume-incr": 1
+   },
+   "neg": {
+    "mouth/mouth-upperlip-volume-decr": 1,
+    "mouth/mouth-lowerlip-volume-decr": 1
+   }
+  },
+  {
+   "name": "mouth_width",
+   "label": "Mouth width",
+   "group": "Lips",
+   "pos": {
+    "mouth/mouth-scale-horiz-incr": 1
+   },
+   "neg": {
+    "mouth/mouth-scale-horiz-decr": 1
+   }
+  },
+  {
+   "name": "cupid_bow",
+   "label": "Cupid's bow",
+   "group": "Lips",
+   "pos": {
+    "mouth/mouth-cupidsbow-incr": 1
+   },
+   "neg": {
+    "mouth/mouth-cupidsbow-decr": 1
+   }
+  },
+  {
+   "name": "cheekbones",
+   "label": "Cheekbones",
+   "group": "Cheeks",
+   "pos": {
+    "cheek/l-cheek-bones-incr": 1.0,
+    "cheek/r-cheek-bones-incr": 1.0
+   },
+   "neg": {
+    "cheek/l-cheek-bones-decr": 1.0,
+    "cheek/r-cheek-bones-decr": 1.0
+   }
+  },
+  {
+   "name": "cheek_fullness",
+   "label": "Cheek fullness",
+   "group": "Cheeks",
+   "pos": {
+    "cheek/l-cheek-volume-incr": 1.0,
+    "cheek/r-cheek-volume-incr": 1.0
+   },
+   "neg": {
+    "cheek/l-cheek-volume-decr": 1.0,
+    "cheek/r-cheek-volume-decr": 1.0,
+    "cheek/l-cheek-inner-decr": 0.5,
+    "cheek/r-cheek-inner-decr": 0.5
+   }
+  },
+  {
+   "name": "jaw_width",
+   "label": "Jaw width",
+   "group": "Jaw & chin",
+   "pos": {
+    "chin/chin-bones-incr": 1
+   },
+   "neg": {
+    "chin/chin-bones-decr": 1
+   }
+  },
+  {
+   "name": "chin_length",
+   "label": "Chin length",
+   "group": "Jaw & chin",
+   "pos": {
+    "chin/chin-height-incr": 1
+   },
+   "neg": {
+    "chin/chin-height-decr": 1
+   }
+  },
+  {
+   "name": "chin_projection",
+   "label": "Chin projection",
+   "group": "Jaw & chin",
+   "pos": {
+    "chin/chin-prominent-incr": 1
+   },
+   "neg": {
+    "chin/chin-prominent-decr": 1
+   }
+  },
+  {
+   "name": "chin_width",
+   "label": "Chin width",
+   "group": "Jaw & chin",
+   "pos": {
+    "chin/chin-width-incr": 1
+   },
+   "neg": {
+    "chin/chin-width-decr": 1
+   }
+  },
+  {
+   "name": "ear_size",
+   "label": "Ear size",
+   "group": "Ears",
+   "pos": {
+    "ears/l-ear-scale-incr": 1.0,
+    "ears/r-ear-scale-incr": 1.0
+   },
+   "neg": {
+    "ears/l-ear-scale-decr": 1.0,
+    "ears/r-ear-scale-decr": 1.0
+   }
+  }
+ ],
+ "expressions": [
+  {
+   "name": "blink_l",
+   "targets": {
+    "expression/units/eye-left-closure": 1
+   }
+  },
+  {
+   "name": "blink_r",
+   "targets": {
+    "expression/units/eye-right-closure": 1
+   }
+  },
+  {
+   "name": "squint",
+   "targets": {
+    "expression/units/eye-left-slit": 0.8,
+    "expression/units/eye-right-slit": 0.8
+   }
+  },
+  {
+   "name": "eyes_wide",
+   "targets": {
+    "expression/units/eye-left-opened-up": 1,
+    "expression/units/eye-right-opened-up": 1
+   }
+  },
+  {
+   "name": "brow_up",
+   "targets": {
+    "expression/units/eyebrows-left-up": 1,
+    "expression/units/eyebrows-right-up": 1
+   }
+  },
+  {
+   "name": "brow_sad",
+   "targets": {
+    "expression/units/eyebrows-left-inner-up": 1,
+    "expression/units/eyebrows-right-inner-up": 1
+   }
+  },
+  {
+   "name": "brow_down",
+   "targets": {
+    "expression/units/eyebrows-left-down": 1,
+    "expression/units/eyebrows-right-down": 1
+   }
+  },
+  {
+   "name": "smile",
+   "targets": {
+    "expression/units/mouth-corner-puller": 1
+   }
+  },
+  {
+   "name": "grin",
+   "targets": {
+    "expression/units/mouth-upward-retraction": 1
+   }
+  },
+  {
+   "name": "frown",
+   "targets": {
+    "expression/units/mouth-depression": 1
+   }
+  },
+  {
+   "name": "jaw_open",
+   "targets": {
+    "expression/units/mouth-open": 1
+   }
+  },
+  {
+   "name": "pucker",
+   "targets": {
+    "expression/units/mouth-pursing": 1
+   }
+  },
+  {
+   "name": "sneer",
+   "targets": {
+    "expression/units/nose-left-elevation": 0.7,
+    "expression/units/nose-right-elevation": 0.7,
+    "expression/units/mouth-elevation": 0.4
+   }
+  }
+ ]
+}

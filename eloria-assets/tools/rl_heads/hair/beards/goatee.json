@@ -1,0 +1,266 @@
+{
+ "_doc": "Goatee (circle beard): moustache joined round the mouth to a chin beard; cheeks and neck clean. The ring is open at the mouth corners (region exclude) so open-mouth / smile expressions never fold the corner skin over it.",
+ "name": "goatee",
+ "seed": 13,
+ "color": [
+  0.12,
+  0.075,
+  0.042
+ ],
+ "region": {
+  "top": [
+   [
+    0,
+    3.0
+   ],
+   [
+    8,
+    3.6
+   ],
+   [
+    14,
+    4.6
+   ],
+   [
+    20,
+    4.0
+   ],
+   [
+    26,
+    -6
+   ]
+  ],
+  "bottom": [
+   [
+    0,
+    -46
+   ],
+   [
+    12,
+    -44
+   ],
+   [
+    20,
+    -36
+   ],
+   [
+    26,
+    -20
+   ]
+  ],
+  "lon_max": 26,
+  "mouth_mm": 2.0,
+  "soft_deg": 6,
+  "exclude": [
+   {
+    "at": [
+     15.5,
+     -5.0
+    ],
+    "deg": 7.0
+   }
+  ]
+ },
+ "mass": {
+  "fade_deg": 6,
+  "thickness_mm": 6.0,
+  "edge_mm": 2.4,
+  "smooth": 3,
+  "strip_mm": 28,
+  "bulges": [
+   {
+    "at": [
+     0,
+     -26
+    ],
+    "deg": 16,
+    "mm": 5
+   }
+  ]
+ },
+ "cards": [
+  {
+   "name": "chin",
+   "region": {
+    "top": [
+     [
+      0,
+      -12
+     ],
+     [
+      26,
+      -8
+     ]
+    ],
+    "mouth_mm": 5.5,
+    "exclude": [
+     {
+      "at": [
+       16.5,
+       -6.0
+      ],
+      "deg": 9.0
+     }
+    ]
+   },
+   "count": 190,
+   "length_table": {
+    "points": [
+     [
+      -46,
+      0.018
+     ],
+     [
+      -30,
+      0.024
+     ],
+     [
+      -15,
+      0.018
+     ],
+     [
+      -8,
+      0.012
+     ]
+    ]
+   },
+   "width": 0.009,
+   "lift": 26,
+   "gravity": 0.45,
+   "stiffness": 0.6,
+   "jitter": 12,
+   "segs": 3,
+   "flow": {
+    "type": "dir",
+    "vec": [
+     0,
+     -1,
+     0.3
+    ]
+   },
+   "col": [
+    0,
+    1
+   ],
+   "follow_mm": 8,
+   "fade_mm": 8,
+   "lod": {
+    "1": {
+     "keep": 0.35,
+     "segs": 0.67,
+     "width_mul": 1.5
+    },
+    "2": {
+     "keep": 0.1,
+     "width_mul": 2.0
+    }
+   }
+  },
+  {
+   "name": "moustache",
+   "region": {
+    "top": [
+     [
+      0,
+      3.0
+     ],
+     [
+      8,
+      3.6
+     ],
+     [
+      14,
+      4.6
+     ],
+     [
+      22,
+      5
+     ]
+    ],
+    "bottom": [
+     [
+      0,
+      -1
+     ],
+     [
+      14,
+      -3
+     ],
+     [
+      22,
+      -8
+     ]
+    ],
+    "lon_max": 24,
+    "soft_deg": 1.5,
+    "exclude": [
+     {
+      "at": [
+       16.5,
+       -6.0
+      ],
+      "deg": 9.0
+     }
+    ]
+   },
+   "count": 95,
+   "length": [
+    0.012,
+    0.018
+   ],
+   "width": 0.008,
+   "lift": 16,
+   "gravity": 0.6,
+   "stiffness": 0.6,
+   "jitter": 10,
+   "segs": 3,
+   "flow": {
+    "type": "side",
+    "vec": [
+     0.6,
+     -1,
+     0.25
+    ]
+   },
+   "col": [
+    2
+   ],
+   "follow_mm": 3,
+   "fade_mm": 4,
+   "lod": {
+    "1": {
+     "keep": 0.4,
+     "segs": 0.67,
+     "width_mul": 1.4
+    },
+    "2": {
+     "keep": 0.12,
+     "width_mul": 2.0
+    }
+   }
+  }
+ ],
+ "morph": {
+  "lip_follow_mm": [
+   40.0,
+   10.0
+  ]
+ },
+ "shade": {
+  "ao_shell": [
+   0.6,
+   0.85
+  ],
+  "ao_card_floor": 0.55,
+  "v_start": 0.2
+ },
+ "keep_out": [
+  {
+   "at": [
+    16.5,
+    -6.0
+   ],
+   "deg": 7.5
+  }
+ ]
+}
