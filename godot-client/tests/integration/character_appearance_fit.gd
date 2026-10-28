@@ -17,9 +17,19 @@ func expect(ok: bool, message: String) -> void:
 		failures += 1
 		push_error(message)
 
+## The hairstyle holders an actor shows unless headwear hides them. Under an
+## RL hairstyle module (a Human at High) the game hairstyle it replaces stays
+## built but hidden, and is not one of them.
 func hairs(actor: ReplicatedActor3D) -> Array[Node]:
+	var module := rl_heads_on() and actor.rl_head() != null and actor.rl_head().draws_module_hair()
 	return actor.get_skeleton().get_children().filter(func(n: Node) -> bool:
-		return n.name.begins_with("AppearanceHair_"))
+		return n.name.begins_with("AppearanceHair_") and (not module or n.name == RLHeadRig.HAIR_NODE_NAME))
+
+## Whether this run draws the RL head for a Human at High (the renderer
+## supports it and RL_HEADS is not classic). Otherwise develop's expectations
+## hold unchanged, whatever the actor built.
+static func rl_heads_on() -> bool:
+	return ReplicatedActor3D.rl_heads_renderer_supported() and not ReplicatedActor3D.rl_heads_classic()
 
 func capture(actor: ReplicatedActor3D, name: String, back: bool, clip := "Idle_Subtle", time := 0.3) -> void:
 	if output.is_empty():
@@ -99,8 +109,14 @@ func run() -> void:
 				expect(not (attachment as Node3D).visible, slug + " helmet covers hair")
 			for headgear: int in [122, 159]:
 				actor.apply_equipment_visuals({3: headgear})
+				# Under the RL head its cranium closes the head in place of the scalp.
+				var rl := rl_heads_on() and actor.rl_head() != null
 				for scalp: Node in actor.find_children("scalp", "MeshInstance3D", true, false):
-					expect((scalp as MeshInstance3D).visible, slug + " headgear preserves the scalp " + str(headgear))
+					expect((scalp as MeshInstance3D).visible != rl, slug + " headgear preserves the scalp " + str(headgear))
+				if rl:
+					var cranium: Array = actor.rl_head().mesh_nodes()["head"]
+					expect(not cranium.is_empty() and (cranium[0][0] as MeshInstance3D).is_visible_in_tree(),
+						slug + " headgear keeps the RL cranium " + str(headgear))
 			actor.apply_equipment_visuals({})
 			expect(hairs(actor).size() == (0 if bald else 1), slug + " helmet removal preserves bald choice")
 			for attachment: Node in hairs(actor):

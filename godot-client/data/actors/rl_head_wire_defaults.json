@@ -1,0 +1,65 @@
+{
+	"version": 1,
+	"about": "Renderer data for RLHeadPortraitMap: how a Human's saved appearance (PortraitCustomization PC/1-PC/2 fields and palette indices) becomes the RL head at High. Changing it changes every Human at High equally (players, NPCs, legacy saves); it is never sent on the wire.",
+	"controls": {
+		"about": "x = clamp(gain * (v - c) / 50, -cap, cap), c = the field's value in HumanPortraitPresets Rowan (male) / Mira (female). Gains per body sex from tests/rl_head_gain_probe.gd (2026-10-27): |gain| matches the RL control's displacement per slider unit to the Low/Medium sculpt's near the centre (95th-percentile magnitudes, mean of both directions); eye_size and its eyelid coupling by joint least squares. eye_tilt is negative: RL eye_tilt + raises the inner corners, the Low/Medium slider the outer ones. Secondary couplings are the plan's (jaw, nose, face_length, brow_depth) and the probe's (eye_size -> eyelid).",
+		"cap": 1.0,
+		"primary": {
+			"jaw": {"control": "jaw_width", "gain": {"female": 0.99, "male": 0.95}},
+			"cheekbones": {"control": "cheekbones", "gain": {"female": 1.8, "male": 1.72}},
+			"nose": {"control": "nose_depth", "gain": {"female": 1.07, "male": 0.96}},
+			"face_length": {"control": "chin_length", "gain": {"female": 0.9, "male": 1.01}},
+			"eye_size": {"control": "eye_size", "gain": {"female": 0.99, "male": 1.09}},
+			"eye_tilt": {"control": "eye_tilt", "gain": {"female": -0.93, "male": -0.85}},
+			"eye_spacing": {"control": "eye_spacing", "gain": {"female": 1.21, "male": 1.08}},
+			"nose_width": {"control": "nose_width", "gain": {"female": 0.58, "male": 0.6}},
+			"lip_fullness": {"control": "lip_fullness", "gain": {"female": 1.21, "male": 1.06}},
+			"brow_depth": {"control": "brow_ridge", "gain": {"female": 1.15, "male": 1.09}}
+		},
+		"secondary": [
+			{"field": "jaw", "control": "chin_width", "gain": 0.3},
+			{"field": "nose", "control": "nose_bridge", "gain": 0.4},
+			{"field": "face_length", "control": "nose_length", "gain": 0.5},
+			{"field": "brow_depth", "control": "brow_height", "gain": -0.2},
+			{"field": "eye_size", "control": "eyelid", "gain": 0.98}
+		],
+		"v3Gains": {"eyelid": 1.0, "brow_height": 1.0, "nose_length": 1.0, "nose_bridge": 1.0, "nose_tip": 1.0,
+			"mouth_width": 1.0, "cupid_bow": 1.0, "cheek_fullness": 1.0, "chin_projection": 1.0, "chin_width": 1.0,
+			"ear_size": 1.0}
+	},
+	"hair": {
+		"about": "An RL module's hl_length/hl_volume weights: clamp(shapeGain * (v - preset) / 50, -1, 1), preset = Rowan's values for rowan_shag, Mira's for mira_bun.",
+		"shapeGain": 1.0,
+		"detail": {
+			"about": "An RL module's fine-detail level (0-100; 50 = authored, lower drops flyaway and wisp cards, 0 smooth, above 50 only adds strand contrast) from the hair finish's slider position s (0 sleekest .. 100 messiest; the saved finishes sit at Swept 25, Classic 50, Tousled 75): piecewise linear through (0, 0), (sliderPresetFinish, 50) and (100, 100), rounded, sliderPresetFinish = the slider position of the module's own preset finish (Rowan Tousled for rowan_shag, Mira Swept for mira_bun), so each preset finish is the authored look. Owner decision (colour model spec revision 3, 4.7). Gives rowan_shag Swept 17 / Classic 33 / Tousled 50 and mira_bun Swept 50 / Classic 67 / Tousled 83.",
+			"sliderPresetFinish": {"rowan_shag": 75, "mira_bun": 25}
+		}
+	},
+	"colours": {
+		"about": "sRGB per palette index (skin 0-9, hair colour 0-19, eyes 0-11; beards by hair colour, male only) per body sex, so the lit RL head matches what Low/Medium show for the same index: tests/integration/rl_head_colour_calibration.gd (2026-10-27, Forward+, neutral stage light), 3 linear-light iterations. Residuals (max sRGB channel): skin 0.0002, eyes 0.0001, hair 0.09 - the darkest hair colours (0, 1, 19) stay lighter than Low/Medium because the RL hair shader's strand highlights add light whatever the albedo - and beards 0.27: the RL beard renders no brighter than about 0.46 sRGB even in white, so blond, grey, white, pink and other light beards (3, 4, 5, 6, 10, 14, 16, 17, 18) stay darker than develop's beard shell. Brows are the hair colour x browFromHair.",
+		"browFromHair": 0.65,
+		"skin": {"female": [[0.8815, 0.7322, 0.6210], [0.9009, 0.8315, 0.7259], [0.8364, 0.6848, 0.4522], [0.6763, 0.4898, 0.3387], [0.4449, 0.3097, 0.2271], [0.2704, 0.2071, 0.1690], [0.6130, 0.8091, 0.9209], [0.5117, 0.6848, 0.4477], [0.6677, 0.5737, 0.8279], [0.6296, 0.6623, 0.6772]],
+			"male": [[0.8541, 0.6812, 0.5606], [0.8555, 0.7714, 0.6789], [0.7945, 0.6341, 0.4198], [0.6410, 0.4509, 0.3117], [0.4193, 0.2812, 0.2042], [0.2507, 0.1825, 0.1465], [0.5806, 0.7508, 0.8630], [0.4841, 0.6341, 0.4155], [0.6332, 0.5302, 0.7750], [0.5966, 0.6132, 0.6329]]},
+		"hair": {"female": [[0.0048, 0.0041, 0.0036], [0.1479, 0.0625, 0.0233], [0.5350, 0.3002, 0.0807], [0.8420, 0.7120, 0.3447], [0.7655, 0.2087, 0.0862], [0.6890, 0.7212, 0.7688], [0.9122, 0.9138, 0.8927], [0.2343, 0.4238, 0.6821], [0.2495, 0.5811, 0.4493], [0.5608, 0.3100, 0.6822], [0.7815, 0.3897, 0.6249], [0.1219, 0.6310, 0.6822], [0.6422, 0.4993, 0.3025], [0.3073, 0.3069, 0.3254], [0.8562, 0.5579, 0.2372], [0.3608, 0.1401, 0.0718], [0.9360, 0.8236, 0.8796], [0.1828, 0.7664, 0.6061], [0.8973, 0.8736, 0.5026], [0.0343, 0.0529, 0.1140]],
+			"male": [[0.0034, 0.0029, 0.0025], [0.1047, 0.0420, 0.0160], [0.4290, 0.2304, 0.0593], [0.7152, 0.6020, 0.2740], [0.6467, 0.1617, 0.0645], [0.5793, 0.6084, 0.6516], [0.7742, 0.7764, 0.7600], [0.1818, 0.3400, 0.5713], [0.1917, 0.4735, 0.3582], [0.4613, 0.2425, 0.5713], [0.6612, 0.3125, 0.5236], [0.0948, 0.5245, 0.5713], [0.5315, 0.4046, 0.2349], [0.2293, 0.2291, 0.2438], [0.7277, 0.4645, 0.1840], [0.2728, 0.1032, 0.0510], [0.7956, 0.7009, 0.7506], [0.1422, 0.6482, 0.5062], [0.7631, 0.7437, 0.4158], [0.0231, 0.0340, 0.0781]]},
+		"beard": {"male": [[0.0037, 0.0023, 0.0018], [0.4735, 0.1890, 0.0428], [0.8580, 0.5238, 0.1828], [1.0000, 1.0000, 0.5432], [1.0000, 0.3681, 0.1870], [1.0000, 1.0000, 1.0000], [1.0000, 1.0000, 1.0000], [0.4066, 0.6684, 1.0000], [0.4404, 0.9131, 0.7217], [0.8667, 0.5111, 1.0000], [1.0000, 0.6079, 0.9391], [0.2416, 0.9585, 1.0000], [0.9759, 0.7821, 0.5092], [0.6271, 0.6266, 0.6551], [1.0000, 0.8409, 0.4046], [0.6859, 0.3198, 0.1744], [1.0000, 1.0000, 1.0000], [0.3294, 1.0000, 0.9184], [1.0000, 1.0000, 0.7565], [0.0784, 0.1691, 0.4096]]},
+		"eyes": {"female": [[0.4237, 0.4978, 0.6407], [0.4197, 0.5708, 0.4294], [0.5219, 0.3885, 0.3254], [0.6760, 0.5773, 0.3714], [0.4948, 0.3828, 0.5745], [0.4205, 0.6217, 0.6257], [0.6050, 0.3495, 0.3258], [0.6474, 0.6272, 0.6428], [0.3759, 0.3446, 0.3419], [0.7168, 0.4684, 0.3457], [0.5429, 0.6352, 0.3904], [0.6667, 0.4051, 0.5337]],
+			"male": [[0.3769, 0.4552, 0.5994], [0.3727, 0.5281, 0.3883], [0.4766, 0.3438, 0.2793], [0.6292, 0.5345, 0.3283], [0.4495, 0.3378, 0.5340], [0.3735, 0.5784, 0.5846], [0.5594, 0.3028, 0.2797], [0.6012, 0.5836, 0.6015], [0.3269, 0.2975, 0.2973], [0.6694, 0.4258, 0.3013], [0.4977, 0.5915, 0.3483], [0.6201, 0.3610, 0.4936]]}
+	},
+	"defaults": {
+		"about": "Seed values for owner review (PC/3 spec 2.5). Arrays are indexed by skin index (freckles, liner, lip_tint wire value 1-12 into lipTints) or by facial_hair (stubble).",
+		"female": {"brow_style": 0.0, "brow_thickness": 0.2,
+			"freckles": [0.30, 0.35, 0.25, 0.10, 0.0, 0.0, 0.10, 0.10, 0.10, 0.10],
+			"liner": [0.30, 0.30, 0.30, 0.30, 0.40, 0.40, 0.30, 0.30, 0.30, 0.30],
+			"liner_wing": 0.0, "stubble": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+			"lip_tint": [2, 1, 2, 5, 6, 7, 12, 8, 8, 8]},
+		"male": {"brow_style": 1.0, "brow_thickness": 0.6,
+			"freckles": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+			"liner": [0.15, 0.15, 0.15, 0.15, 0.15, 0.15, 0.15, 0.15, 0.15, 0.15],
+			"liner_wing": 0.0, "stubble": [0.0, 0.6, 0.3, 0.3, 0.3, 0.3],
+			"lip_tint": [4, 3, 4, 4, 6, 7, 8, 8, 8, 8]}
+	},
+	"lipTints": [[0.76, 0.52, 0.52], [0.80, 0.44, 0.38], [0.70, 0.46, 0.42], [0.70, 0.44, 0.36],
+		[0.62, 0.36, 0.33], [0.50, 0.31, 0.27], [0.41, 0.24, 0.22], [0.60, 0.40, 0.45],
+		[0.56, 0.22, 0.30], [0.64, 0.28, 0.22], [0.40, 0.20, 0.28], [0.66, 0.58, 0.74]]
+}

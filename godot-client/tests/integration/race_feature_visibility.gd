@@ -203,18 +203,26 @@ func _check_headwear(models: Dictionary, equipment: Dictionary) -> void:
 	actor.free()
 	# Human bodies need their scalp to close the visible head inside a hood,
 	# including when they have no separate race-feature node.
+	# At High a Human draws the RL head, whose cranium closes the head in place
+	# of the (hidden) scalp under every piece: hoods, open-faced and closed helms.
 	var human := _configure("luminous_male", models, equipment, {"hair": 1})
+	var closed := func() -> bool:
+		if not rl_heads_on() or human.rl_head() == null:
+			return _mesh(human, "scalp").visible
+		var head: Array = human.rl_head().mesh_nodes()["head"]
+		return not _mesh(human, "scalp").visible and not head.is_empty() \
+			and (head[0][0] as MeshInstance3D).is_visible_in_tree()
 	expect(_mesh(human, "race_feature_head") == null, "the Human body carries no race_feature_head")
 	human.apply_equipment_visuals({3: BUCKLED_HOOD})
-	expect(_mesh(human, "scalp").visible and not _hair_shown(human),
+	expect(closed.call() and not _hair_shown(human),
 		"a show hood on a body without features preserves the scalp and hides hair")
 	human.apply_equipment_visuals({3: PHOENIX_HELM})
 	expect(not _mesh(human, "scalp").visible, "a closed helm still hides a Human scalp")
 	human.apply_equipment_visuals({3: LEATHER_HELM})
-	expect(_mesh(human, "scalp").visible and not _hair_shown(human),
+	expect(closed.call() and not _hair_shown(human),
 		"an open-faced helm (scalp show) keeps the Human scalp and hides hair")
 	human.apply_equipment_visuals({})
-	expect(_mesh(human, "scalp").visible and _hair_shown(human), "bare-headed the Human scalp and hair return")
+	expect(closed.call() and _hair_shown(human), "bare-headed the Human scalp and hair return")
 	human.free()
 
 func _check_shoulders(models: Dictionary, equipment: Dictionary) -> void:
@@ -259,6 +267,12 @@ func _check_shoulders(models: Dictionary, equipment: Dictionary) -> void:
 	actor.apply_equipment_visuals({5: KIT_TORSOS[1]})
 	expect(not growths.visible, "the next torso without the mark hides them")
 	actor.free()
+
+## Whether this run draws the RL head for a Human at High (the renderer
+## supports it and RL_HEADS is not classic). Otherwise develop's expectations
+## hold unchanged, whatever the actor built.
+static func rl_heads_on() -> bool:
+	return ReplicatedActor3D.rl_heads_renderer_supported() and not ReplicatedActor3D.rl_heads_classic()
 
 func run() -> void:
 	var models: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/models.json"))["models"]

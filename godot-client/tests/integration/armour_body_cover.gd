@@ -127,6 +127,12 @@ func verify_body(actor: ReplicatedActor3D, active: Dictionary, label: String) ->
 	if not regions.is_empty():
 		expect(changed > 0 and removed > 20 and retained > 20, label + " has active, bounded clothing replacement")
 
+## Whether this run draws the RL head for a Human at High (the renderer
+## supports it and RL_HEADS is not classic). Otherwise develop's expectations
+## hold unchanged, whatever the actor built.
+static func rl_heads_on() -> bool:
+	return ReplicatedActor3D.rl_heads_renderer_supported() and not ReplicatedActor3D.rl_heads_classic()
+
 func run() -> void:
 	var models: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/models.json"))["models"]
 	var equipment: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/equipment.json"))
@@ -194,7 +200,13 @@ func run() -> void:
 						var covered := covered_scalp if mesh.name.to_lower() == "scalp" else covered_hair
 						expect(mesh.visible == (bool(initial_hair[mesh.get_instance_id()]) and not covered), race + " restores sculpted hair visibility")
 					if mesh.name.to_lower() == "eyes":
-						expect(mesh.visible, race + " preserves eyes")
+						# Under the RL head (a Human at High) the head draws its own eyes.
+						var rl_head: RLHeadRig = actor.rl_head() if rl_heads_on() else null
+						expect(mesh.visible != (rl_head != null), race + " preserves eyes")
+						if rl_head != null:
+							var head: Array = rl_head.mesh_nodes()["head"]
+							expect(not head.is_empty() and (head[0][0] as MeshInstance3D).is_visible_in_tree(),
+								race + " keeps the RL head's eyes")
 				for node: Node in actor._native_skeleton.get_children():
 					if node.name.begins_with("AppearanceHair_"):
 						expect((node as Node3D).visible != covered_hair, race + " restores chosen hairstyle for circlets and unequip")

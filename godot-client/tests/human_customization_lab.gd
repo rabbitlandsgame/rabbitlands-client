@@ -389,13 +389,25 @@ func _run_smoke() -> void:
 		_expect(ReplicatedActor3D.HIGH_PORTRAIT.cache_metrics().texture_bundles == 0, "Low loads no High portrait textures")
 		_expect(ReplicatedActor3D.HIGH_HAIR.cache_metrics().mesh_entries == 0, "Low loads no High hair geometry")
 		_editor.set_preview_quality(2)
-		_expect(ReplicatedActor3D.HIGH_PORTRAIT.cache_metrics().texture_bundles == 1, "High activates only the selected body's portrait artwork")
+		# At High a Human draws the RL head where the renderer supports it
+		# (develop's classic High portrait with RL_HEADS=classic and in the
+		# Compatibility renderer): no classic portrait artwork, and the hair is
+		# the RL hairstyle module or develop's refined hairstyle.
+		if ReplicatedActor3D.rl_heads_renderer_supported() and not ReplicatedActor3D.rl_heads_classic():
+			var rig := actor.rl_head()
+			_expect(rig != null, "High draws the selected Human's RL head")
+			_expect(ReplicatedActor3D.HIGH_PORTRAIT.cache_metrics().texture_bundles == 0, "the RL head loads no classic High portrait artwork")
+			_expect(rig != null and (rig.draws_module_hair() or ReplicatedActor3D.HIGH_HAIR.cache_metrics().mesh_entries > 0),
+				"High draws an RL hairstyle or refines the visible Human hair")
+		else:
+			_expect(ReplicatedActor3D.HIGH_PORTRAIT.cache_metrics().texture_bundles == 1, "High activates only the selected body's portrait artwork")
+			_expect(ReplicatedActor3D.HIGH_HAIR.cache_metrics().mesh_entries > 0, "High refines visible Human hair")
 		_expect(body.mesh != medium_mesh, "High uses its anchored portrait UVs")
-		_expect(ReplicatedActor3D.HIGH_HAIR.cache_metrics().mesh_entries > 0, "High refines visible Human hair")
 		_editor.set_preview_quality(1)
 		_expect(body.mesh == medium_mesh, "Medium restores the exact lightweight mesh")
 		_expect(ReplicatedActor3D.HIGH_PORTRAIT.cache_metrics().texture_bundles == 0, "returning to Medium releases High resources")
 		_expect(ReplicatedActor3D.HIGH_HAIR.cache_metrics().mesh_entries == 0, "returning to Medium releases High hair resources")
+		_expect(actor.rl_head() == null, "returning to Medium removes the RL head")
 		for source: Dictionary in hair_sources:
 			var hair: MeshInstance3D = source.node
 			_expect(hair.mesh == source.mesh and hair.material_override == source.override, "Medium restores exact hair geometry and material")

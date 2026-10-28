@@ -1,0 +1,37 @@
+{
+ "female": {
+  "albedo": "head_female_albedo.png",
+  "features": "head_female_features.png",
+  "features2": "head_female_features2.png",
+  "skin_reference_srgb": [
+   0.9184889031454287,
+   0.6968352630560304,
+   0.5716434960506792
+  ],
+  "texels_per_cm_face": 48.67602818882729,
+  "size": 2048,
+  "brows": "head_female_brows.png"
+ },
+ "male": {
+  "albedo": "head_male_albedo.png",
+  "features": "head_male_features.png",
+  "features2": "head_male_features2.png",
+  "skin_reference_srgb": [
+   0.8561957178317628,
+   0.6256585663693701,
+   0.4928155056823841
+  ],
+  "texels_per_cm_face": 51.47523608020762,
+  "size": 2048,
+  "brows": "head_male_brows.png"
+ },
+ "eye": "eye.png",
+ "lash": "lash.png",
+ "channels": {
+  "features": "R freckle dots, G lips mask, B liner wing (player option), A upper/lower lash line + liner",
+  "features2": "R stubble (male only), G blush zones, B scalp/hairline, A face (1) vs neck painted to continue the body tone (0): the shader lights A=0 with the body parameters",
+  "eye": "RGB sclera + neutral iris detail, A iris tint mask (pupil excluded)",
+  "brows": "RGBA = brow styles arched, straight, soft, angled (hair-stroke masks; the runtime picks one and shapes thickness)"
+ },
+ "shader_notes": "skin = skin_color * mix(value, detail, k) with detail = albedo_lin / skin_reference_lin and value = luminance ratio (same formula as face_appearance.gdshader; k ~0.55 on the face). Apply freckles (darker warm tone x amount), stubble (towards darkened skin + hair colour), lips (lip tint scaled by skin luminance), liner (near-black brown), brows (brow colour, default hair colour x0.75) in that order."
+}
