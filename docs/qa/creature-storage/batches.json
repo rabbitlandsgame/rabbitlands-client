@@ -5,8 +5,8 @@
   "batch_size": 5,
   "creature_count": 235,
   "batch_count": 47,
-  "completed_batches": 10,
-  "qualified_creatures": 46,
+  "completed_batches": 11,
+  "qualified_creatures": 50,
   "status": "in progress",
   "actors": [
     {
@@ -601,7 +601,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/crimson_duelist.glb",
       "source_sha256": "c668c327def990c32b4ad804ad83b52b46cf6bc2384357e62c66bb77a05d2394",
       "source_bytes": 16338320,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "db806412154881f1c8dbee98b247d5584a16af11cfaaf5acff43b2763af123c8",
+      "candidate_bytes": 15630688,
+      "qualification_report": "docs/qa/creature-storage/batch-011/crimson_duelist.json"
     },
     {
       "actor": "dusk_camel",
@@ -610,7 +613,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/dusk_camel.glb",
       "source_sha256": "e197dc42cf07ee88ef14ba35fe1e5c2747d1297c97dd6ab0343935c909ed9506",
       "source_bytes": 16100152,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "94cf5e3b1b5df549a69f6c123db618b22981c53eecf35d0dfb9c65057b7c8126",
+      "candidate_bytes": 14447244,
+      "qualification_report": "docs/qa/creature-storage/batch-011/dusk_camel.json"
     },
     {
       "actor": "ice_wolverine",
@@ -619,7 +625,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/ice_wolverine.glb",
       "source_sha256": "3d6bd984630ea4f868c7fcf99ae2da13260d1023721c93e27a417afabae71209",
       "source_bytes": 16037876,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "d8d6a39b0185164881474a940a36d581ceff630b2047e2625e4aeec7db826a53",
+      "candidate_bytes": 11533336,
+      "qualification_report": "docs/qa/creature-storage/batch-011/ice_wolverine.json"
     },
     {
       "actor": "azure_hyena",
@@ -628,7 +637,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/azure_hyena.glb",
       "source_sha256": "005d318ba700f0f9330585aee900e7268b6b72f60073f2ab3258a4bed0e531f9",
       "source_bytes": 15963088,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "f5a4c1592c8a6a973fce6ae838315c9b2cc7ba5af639a74a78bbe772786c3d78",
+      "candidate_bytes": 12527048,
+      "qualification_report": "docs/qa/creature-storage/batch-011/azure_hyena.json"
     },
     {
       "actor": "golden_plains_horse",
@@ -637,7 +649,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/golden_plains_horse.glb",
       "source_sha256": "90d0af6f4bfd639b5edbeaecca7be7114a0ad91281a3128cc04ba88cac05b336",
       "source_bytes": 14969276,
-      "status": "pending"
+      "status": "unchanged",
+      "candidate_sha256": "90d0af6f4bfd639b5edbeaecca7be7114a0ad91281a3128cc04ba88cac05b336",
+      "candidate_bytes": 14969276,
+      "qualification_report": "docs/qa/creature-storage/batch-011/golden_plains_horse.json"
     },
     {
       "actor": "glacier_titan",
@@ -2270,12 +2285,18 @@
     7,
     8,
     9,
-    10
+    10,
+    11
   ],
-  "reviewed_creatures": 50,
+  "reviewed_creatures": 55,
   "selection_policy": {
     "raw_asset_priority": "Prefer smaller qualified raw development models; small measured increases in packaged RLCZ size are accepted and recorded per actor and batch.",
     "runtime_claims": "Encoded input-key savings do not establish retained animation memory or frame-time savings because Godot rebakes curves at the declared cadence. Shared corrective GPU buffer savings are measured separately.",
     "approximation": "Exact batches retain their existing bounded float32/native/pixel gates. Approximate joint-curve trials are private and uninstalled."
+  },
+  "totals_reviewed": {
+    "raw_saved_bytes": 148482264,
+    "compressed_saved_bytes": 19313600,
+    "shared_gpu_saved_bytes": 36009320
   }
 }
