@@ -305,8 +305,21 @@ static func _collider(directory: String, row: Dictionary) -> Dictionary:
 			return {"ok": false, "error": "collision_index_bounds"}
 		element_indices[i] = index
 		faces[i] = vertices[index]
-	if MATERIAL._sha(faces.to_byte_array()) != str(record.get("expanded_triangle_positions_sha256", "")):
+	var raw_faces_sha: String = MATERIAL._sha(faces.to_byte_array())
+	if raw_faces_sha != str(record.get("expanded_triangle_positions_sha256", "")):
 		return {"ok": false, "error": "collision_expanded_geometry_changed"}
+	# The proof above is in glTF source order. Godot's glTF importer exchanges
+	# triangle corners 1 and 2 before producing its Mesh/ImporterMesh. Concave
+	# collision must receive that SAME front-face order, not the raw glTF order.
+	# Keep backface collision at its production default instead of hiding this
+	# conversion error by making a one-sided road double-sided.
+	for triangle: int in range(0, index_count, 3):
+		var old_index: int = element_indices[triangle + 1]
+		element_indices[triangle + 1] = element_indices[triangle + 2]
+		element_indices[triangle + 2] = old_index
+		var old_corner: Vector3 = faces[triangle + 1]
+		faces[triangle + 1] = faces[triangle + 2]
+		faces[triangle + 2] = old_corner
 	var arrays: Array = []
 	arrays.resize(Mesh.ARRAY_MAX)
 	arrays[Mesh.ARRAY_VERTEX] = vertices
@@ -322,6 +335,8 @@ static func _collider(directory: String, row: Dictionary) -> Dictionary:
 	carrier.mesh = mesh
 	carrier.visible = false
 	carrier.set_meta(&"road_texture_trial_collision_only", true)
+	carrier.set_meta(&"road_texture_trial_gltf_faces_sha256", raw_faces_sha)
+	carrier.set_meta(&"road_texture_trial_godot_faces_sha256", MATERIAL._sha(faces.to_byte_array()))
 	var body := StaticBody3D.new()
 	body.name = name + "_WalkSurfaceCollision"
 	body.collision_layer = WALK_LAYER

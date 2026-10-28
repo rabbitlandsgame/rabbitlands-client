@@ -35,6 +35,9 @@ derived from terrain geometry and the sampled flow UVs.
 
 Invisible compact collision meshes retain the old road node/material naming,
 layer-8 collision, source-local positions and expanded triangle byte hashes.
+After checking the source-order hash, their triangle corners 1 and 2 are
+exchanged exactly as Godot's glTF importer does. Both the compact mesh and its
+one-sided collision use that engine winding; backface collision stays disabled.
 This keeps road height, grounding, and the existing footstep parent-material
 lookup. It does not make the original visual mesh available for fallback.
 
@@ -49,3 +52,9 @@ anchors, the material GLB container, decoded field layout/hashes and rejection
 of a wrong decoded size, plus the exact collision triangle hash. Pass a variant
 or chunk metadata file after `-- --trial PATH`. A passing headless check is not
 a shader-compilation, screenshot or frame-time qualification.
+
+`collision_contract_check.gd` separately imports the actual source chunk with
+Godot, compares its CPU ImporterMesh triangle bytes with every compact collider,
+waits four physics ticks and compares downward ray heights/normals on twelve
+deterministic road witnesses. This guards the glTF-to-engine winding conversion,
+which a raw source-byte check alone cannot establish.
