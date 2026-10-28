@@ -13,11 +13,14 @@ extends RefCounted
 ## ribbons stand stiffly beside the face. See .local/rl-heads/evidence/
 ## headwear_audit for the numbers.
 ##
-## For an actor with an RL head, and - a separate switch, the data's
-## `shippedBodies` - for the shipped luminous heads (ReplicatedActor3D calls
-## this from its head-piece hook; nothing here runs for any other actor), a
-## piece listed in data/actors/rl_head_headwear_fit.json is rebuilt once per
-## piece, head and outfit, never per identity:
+## For an actor with an RL head (ReplicatedActor3D calls this from its
+## head-piece hook; nothing here runs for any other actor), a piece listed in
+## data/actors/rl_head_headwear_fit.json is rebuilt once per piece, head and
+## outfit, never per identity. The data also carries fits for the shipped
+## luminous heads (`shippedBodies`, fits keyed by body and hairstyle file);
+## those would change Low and Medium Humans too, so they stay OFF unless the
+## RL_HEADWEAR_FIT developer variable is `shipped` (owner decision pending,
+## D8). The fit:
 ##
 ##   * Fit. The piece as the runtime places it (socket, rest pose) takes a
 ##     similarity - scale, a mild width/depth ratio, a pitch about the band's
@@ -75,20 +78,21 @@ const ENVELOPE_CACHE_LIMIT := 16
 
 static var _data: Dictionary = {}
 static var _loaded := false
-static var _shipped := true
+static var _shipped := false
 static var _meshes: Dictionary = {}
 static var _envelopes: Dictionary = {}
 static var _skins: Dictionary = {}
 
 
 ## The fit data; empty - every piece as shipped - while the RL_HEADWEAR_FIT
-## developer variable is 0/off/no (before-and-after evidence renders). "rl"
-## keeps the RL-head fits and leaves the shipped heads as shipped.
+## developer variable is 0/off/no (before-and-after evidence renders). Unset
+## or "rl" refits pieces on RL heads only; "shipped" also refits them on the
+## shipped luminous heads the data lists (`shippedBodies`), at every quality.
 static func data() -> Dictionary:
 	if not _loaded:
 		_loaded = true
 		var switch := OS.get_environment("RL_HEADWEAR_FIT").strip_edges().to_lower()
-		_shipped = switch != "rl"
+		_shipped = switch in ["shipped", "all"]
 		if switch in ["0", "off", "no"]:
 			return _data
 		if FileAccess.file_exists(DATA_PATH):
@@ -108,10 +112,24 @@ static func has_piece(visual_id: int) -> bool:
 	return not piece(visual_id).is_empty()
 
 
+## Drops the refitted meshes, envelopes and skins (RLHeadLibrary.release_unused).
+static func clear_caches() -> void:
+	_meshes.clear()
+	_envelopes.clear()
+	_skins.clear()
+
+
+## Reads the developer variable and the data again (tests switch them).
+static func reload() -> void:
+	_loaded = false
+	_data = {}
+	clear_caches()
+
+
 ## Whether a shipped head (no RL head) of `body` - a model scene name such as
-## luminous_female - takes the fits too: the data's `shippedBodies`. A separate
-## switch from the RL-head fits: other race bodies wear their own variants on
-## their own heads and are not listed.
+## luminous_female - takes the fits too: the data's `shippedBodies`, and only
+## while RL_HEADWEAR_FIT=shipped (off by default; D8). Other race bodies wear
+## their own variants on their own heads and are never listed.
 static func fits_shipped_body(body: String) -> bool:
 	var bodies: Variant = data().get("shippedBodies", [])
 	return _shipped and bodies is Array and (bodies as Array).has(body)

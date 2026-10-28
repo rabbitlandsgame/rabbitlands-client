@@ -1,13 +1,14 @@
 class_name RLHeadRig
 extends Node3D
-## The RL head prototype on one actor's skeleton: the head module, its hair
-## and facial hair, their identity shapes, materials and level of detail.
+## The RL head on one actor's skeleton: the head module, its hair and facial
+## hair, their identity shapes, materials and level of detail.
 ##
 ## Built by `attach` as a child of the actor's Skeleton3D, after the actor's
 ## animation import (NativeAnimationImporter folds every blend shape present at
 ## import time into its RESET defaults; see its `_blend_shape_defaults`, which
-## also skips `id_`/`ex_` shapes as a second guard). Opt-in: an actor without
-## `appearance.rl_head` never builds one, and nothing here runs for it.
+## also skips `id_`/`ex_`/`hl_` shapes as a second guard). ReplicatedActor3D
+## builds one for a Human at High quality (and for the lab's `rl_head`
+## override at any quality); nothing here runs for any other actor.
 ##
 ## Asset contract (assets/actors/rl_heads/, read by RLHeadLibrary):
 ##   * rl_head_<sex>.glb: a mesh skinned to spine_03, neck_01 and Head with the
@@ -19,15 +20,30 @@ extends Node3D
 ##   * hair/<style>.glb: its own skeleton, rooted at `hair_root` on the body's
 ##     Head rest, plus optional spring chains; meshes `hair_lod<k>` or `hair`,
 ##     materials rl_hair_clump and rl_hair_card; `asset.extras.rlHair` for the
-##     springs (RLHairMotion).
+##     springs (RLHairMotion). Optional hair-shape blend shapes, read when
+##     present and a no-op when absent: `hl_length_p/_n` and `hl_volume_p/_n`
+##     (weight 1 = the full change, 0 = as authored) for the hair length and
+##     volume choices, and `hl_detail_1` / `hl_detail_2` for the second and
+##     third hair finishes (PortraitCustomization `hair_detail`; 0 is the
+##     authored finish).
 ##   * beards/<style>.glb: skinned like the head, meshes `beard_lod<k>` or
 ##     `beard`, material rl_beard, and the head's `id_` and `ex_` shape names.
 ##     `stubble` with no file is painted by the skin shader.
+##
+## A `legacy:<style>` hairstyle is not built here: the actor draws its own
+## fitted hairstyle (ReplicatedActor3D._add_hair_variant, the one path every
+## quality uses), and this rig only paints the hairline under it.
 ##
 ## Identity is blend-shape weights only - changing a control never rebuilds a
 ## mesh - and per-actor colours are instance uniforms on shared materials.
 ## Expressions belong to the RLFaceExpression child, which never writes `id_`
 ## shapes; this never writes `ex_` shapes.
+##
+## Every rig counts as one user of RLHeadLibrary's shared caches from its
+## creation to its deletion; the last one to go releases them (heads, beards,
+## textures, materials, the body cuts and the headwear refits), so switching
+## every Human down from High frees the High head's memory as develop's own
+## High portrait does.
 
 signal changed
 
@@ -35,6 +51,9 @@ const NODE_NAME := "RLHead"
 ## The BoneAttachment3D the hair hangs from. ReplicatedActor3D hides every
 ## skeleton child named AppearanceHair_* under hair-covering headwear.
 const HAIR_NODE_NAME := "AppearanceHair_RL"
+## On every head, beard and hair mesh this rig makes: CharacterProportions'
+## body refinement and the other legacy finishing passes leave such meshes alone.
+const MESH_META := &"rl_head"
 ## Hair and facial hair cast no shadows: at the game's shadow-map resolution
 ## locks and cards shadow the face and neck as hard, splotchy shapes (owner
 ## review 2026-10-27). The head itself still shadows the neck.
@@ -43,6 +62,7 @@ const REBOUND_SKIN_POOL := preload("res://src/actors/rebound_skin_pool.gd")
 ## Where the next LOD takes over, in metres from the camera, by quality, when
 ## an asset ships more than one: HIGH draws lod0 to 10 m, lod1 to 25 m and lod2
 ## beyond; MEDIUM starts at lod1 and hands over to lod2 at 18 m; LOW is lod2.
+## (The game builds the RL head only at HIGH; MEDIUM and LOW are the lab's.)
 ## Every level of the head carries the same rim and the same shapes, so a
 ## hand-over never opens the neck seam.
 ##
@@ -67,12 +87,21 @@ const INSTANCE_UNIFORMS := ["skin_color", "lip_tint", "brow_color", "hair_color"
 ## hairstyle is drawn (features2 B); none on a bald head, nor while the chosen
 ## hairstyle's file is missing.
 const HAIRLINE_UNDER_HAIR := 0.35
+## The hair-shape blend shapes (see the asset contract above).
+const HAIR_LENGTH_SHAPES := ["hl_length_p", "hl_length_n"]
+const HAIR_VOLUME_SHAPES := ["hl_volume_p", "hl_volume_n"]
+const HAIR_DETAIL_SHAPES := ["hl_detail_1", "hl_detail_2"]
 
 var appearance: RLHeadAppearance
 var quality: int = ActorRenderQuality.QUALITY_DEFAULT
 ## The lab's switch for secondary hair motion. RLHairMotion still applies its
 ## own quality, distance and count limits on top.
 var hair_motion_allowed := true
+## The actor's animated-head culling envelope, set on every mesh made here.
+var cull_margin := 0.0
+## The render layers of the actor's body, given to every mesh made here so the
+## dialogue portrait's layer lease and the cameras see the head as the body.
+var mesh_layers := 1
 
 var _skeleton: Skeleton3D
 var _head_info: Dictionary = {}
@@ -81,11 +110,11 @@ var _beard_lods: Array = []
 var _beard_style := ""
 var _hair_lods: Array = []
 var _hair_style := ""
-## The hair's root on the skeleton: a BoneAttachment3D on Head for an RL
-## hairstyle, a plain holder of skinned meshes for a `legacy:` one.
+## The actor draws this face's hair itself (a `legacy:` style, or the
+## fallback when an RL hairstyle's file is missing): only the hairline here.
+var _hair_external := false
+## The hair's root on the skeleton: a BoneAttachment3D on Head.
 var _hair_attachment: Node3D
-## Per-actor tinted copies of a legacy hairstyle's materials, by mesh node.
-var _legacy_hair_materials: Dictionary = {}
 var _hair_motion: RLHairMotion
 var _expression: RLFaceExpression
 var _rim_roughness := -1.0
@@ -94,6 +123,10 @@ var _lod_band := 0
 var _lod_countdown := 0
 ## The actor's body material, which the head's body patch is drawn with.
 var _body_material: Material = null
+## A portrait (dialogue line, leaderboard card) is being taken: first level,
+## neutral expression, eyes open, no blinking, no distance switching.
+var _portrait_pose := false
+var _counted := false
 
 ## Mesh resource id -> {blend shape name: index}, shared by every actor.
 static var _shape_indices: Dictionary = {}
@@ -103,7 +136,8 @@ static var _shape_indices: Dictionary = {}
 ## form or an RLHeadAppearance). Null, with nothing left behind, when the
 ## value names no face or the head module for its sex is missing.
 static func attach(skeleton: Skeleton3D, value: Variant,
-		level: int = ActorRenderQuality.QUALITY_DEFAULT) -> RLHeadRig:
+		level: int = ActorRenderQuality.QUALITY_DEFAULT, margin: float = 0.0,
+		layers: int = 1) -> RLHeadRig:
 	var face := RLHeadAppearance.from_value(value)
 	if face == null or skeleton == null:
 		if face == null:
@@ -112,7 +146,11 @@ static func attach(skeleton: Skeleton3D, value: Variant,
 	var rig := RLHeadRig.new()
 	rig.name = NODE_NAME
 	rig.quality = ActorRenderQuality.normalized_quality(level)
+	rig.cull_margin = margin
+	rig.mesh_layers = layers
 	rig._skeleton = skeleton
+	rig._counted = true
+	RLHeadLibrary.acquire()
 	skeleton.add_child(rig)
 	if not rig.apply_appearance(face):
 		rig.teardown()
@@ -125,6 +163,17 @@ static func find_on(skeleton: Skeleton3D) -> RLHeadRig:
 	if skeleton == null:
 		return null
 	return skeleton.get_node_or_null(NODE_NAME) as RLHeadRig
+
+
+## Drops the shared blend-shape index tables (RLHeadLibrary.release_unused).
+static func clear_caches() -> void:
+	_shape_indices.clear()
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PREDELETE and _counted:
+		_counted = false
+		RLHeadLibrary.release()
 
 
 ## Applies a whole face. Only what differs is rebuilt: a new sex replaces the
@@ -144,8 +193,10 @@ func apply_appearance(face: RLHeadAppearance) -> bool:
 	if appearance.beard != _beard_style:
 		_build_beard()
 	_apply_controls()
+	_apply_hair_shapes()
 	_apply_colours()
-	_show_band(mini(_lod_band, _band_count() - 1))
+	_show_band(0 if _portrait_pose else mini(_lod_band, _band_count() - 1))
+	_apply_portrait_pose()
 	changed.emit()
 	return true
 
@@ -167,6 +218,7 @@ func refresh_colours() -> void:
 
 
 ## Picks the LOD meshes for a quality (ActorRenderQuality / LookProfile order).
+## The game keeps the rig at HIGH; the lab's override previews the others.
 func set_quality(level: int) -> void:
 	level = ActorRenderQuality.normalized_quality(level)
 	if level == quality:
@@ -178,14 +230,48 @@ func set_quality(level: int) -> void:
 	_build_hair()
 	_build_beard()
 	_apply_controls()
+	_apply_hair_shapes()
 	_apply_colours()
-	_show_band(mini(_lod_band, _band_count() - 1))
+	_show_band(0 if _portrait_pose else mini(_lod_band, _band_count() - 1))
+	_apply_portrait_pose()
 	changed.emit()
 
 
 func set_hair_motion_allowed(allowed: bool) -> void:
 	hair_motion_allowed = allowed
 	_refresh_hair_motion()
+
+
+## Whether the actor draws this face's hair (a `legacy:` style, or the
+## fallback for a missing RL hairstyle). Only the hairline changes here.
+func set_hair_external(external: bool) -> void:
+	if external == _hair_external:
+		return
+	_hair_external = external
+	_apply_colours()
+
+
+func hair_external() -> bool:
+	return _hair_external
+
+
+## True when this rig draws an RL hairstyle of its own (a module that loaded).
+func draws_module_hair() -> bool:
+	return not _hair_lods.is_empty()
+
+
+## Holds the portrait pose (see `_portrait_pose`) while `held`.
+func set_portrait_pose(held: bool) -> void:
+	if held == _portrait_pose:
+		return
+	_portrait_pose = held
+	if held:
+		_show_band(0)
+	_apply_portrait_pose()
+
+
+func portrait_pose() -> bool:
+	return _portrait_pose
 
 
 func expression() -> RLFaceExpression:
@@ -214,9 +300,9 @@ func identity_targets() -> Array[MeshInstance3D]:
 	var result: Array[MeshInstance3D] = []
 	for group: Array in [_head_lods, _beard_lods, _hair_lods]:
 		for level: Array in group:
-			for mesh_node: MeshInstance3D in level:
+			for mesh_node: Variant in level:
 				if is_instance_valid(mesh_node):
-					result.append(mesh_node)
+					result.append(mesh_node as MeshInstance3D)
 	return result
 
 
@@ -225,15 +311,20 @@ func expression_targets() -> Array[MeshInstance3D]:
 	var result: Array[MeshInstance3D] = []
 	for group: Array in [_head_lods, _beard_lods]:
 		for level: Array in group:
-			for mesh_node: MeshInstance3D in level:
+			for mesh_node: Variant in level:
 				if is_instance_valid(mesh_node):
-					result.append(mesh_node)
+					result.append(mesh_node as MeshInstance3D)
 	return result
 
 
 ## The head, beard and hair mesh nodes by part, for diagnostics and the lab.
 func mesh_nodes() -> Dictionary:
 	return {"head": _head_lods, "beard": _beard_lods, "hair": _hair_lods}
+
+
+## Every mesh node this rig made, all parts and levels.
+func all_meshes() -> Array[MeshInstance3D]:
+	return identity_targets()
 
 
 ## Triangles drawn up close: the first level of each part, summed over surfaces.
@@ -279,6 +370,14 @@ func set_body_material(material: Material) -> void:
 	for level: Array in _head_lods:
 		for mesh_node: MeshInstance3D in level:
 			_assign_body_patch(mesh_node)
+
+
+## The actor's culling envelope and render layers, on every mesh made here.
+func set_mesh_presentation(margin: float, layers: int) -> void:
+	cull_margin = margin
+	mesh_layers = layers
+	for mesh_node: MeshInstance3D in identity_targets():
+		_present(mesh_node)
 
 
 ## Frees every node this rig made, the hair attachment on the skeleton too.
@@ -341,10 +440,12 @@ func _build_beard() -> void:
 func _build_hair() -> void:
 	_free_hair()
 	_hair_style = appearance.hair
+	_hair_external = false
 	if _hair_style == RLHeadAppearance.NONE or _skeleton.find_bone("Head") < 0:
 		return
 	if _hair_style.begins_with(RLHeadLibrary.LEGACY_PREFIX):
-		_build_legacy_hair(_hair_style.trim_prefix(RLHeadLibrary.LEGACY_PREFIX))
+		# The actor's own fitted hairstyle (ReplicatedActor3D._add_hair_variant).
+		_hair_external = true
 		return
 	var instance := RLHeadLibrary.instantiate_hair(_hair_style)
 	if instance == null:
@@ -385,6 +486,7 @@ func _build_hair() -> void:
 		for mesh_node: MeshInstance3D in nodes:
 			_assign_materials(mesh_node, _hair_style)
 			mesh_node.cast_shadow = HAIR_SHADOWS
+			_present(mesh_node)
 			kept.append(mesh_node)
 		_hair_lods.append(kept)
 	_show_band(_lod_band)
@@ -401,51 +503,8 @@ func _build_hair() -> void:
 		_refresh_hair_motion()
 
 
-## The game's own fitted hairstyle for this body, skinned to the skeleton the
-## way ReplicatedActor3D draws it, and tinted the way it tints it.
-func _build_legacy_hair(style: String) -> void:
-	var path := RLHeadLibrary.legacy_hair_path(appearance.sex, style)
-	var pieces: Array = ReplicatedActor3D._equipment_pieces(path) \
-		if FileAccess.file_exists(path) else []
-	if pieces.is_empty():
-		RLHeadLibrary.warn_once("legacy hair:" + path,
-			"legacy hairstyle %s missing, drawing the head bald" % path, true)
-		return
-	_hair_attachment = Node3D.new()
-	_hair_attachment.name = HAIR_NODE_NAME
-	_skeleton.add_child(_hair_attachment)
-	var nodes: Array[MeshInstance3D] = []
-	for piece: Dictionary in pieces:
-		var skin := _rebind(piece.get("bones", PackedStringArray()) as PackedStringArray,
-			piece.get("binds", [] as Array[Transform3D]) as Array[Transform3D])
-		if skin == null:
-			continue
-		var mesh_node := MeshInstance3D.new()
-		mesh_node.name = "RLHair_" + str(piece.get("name", "legacy"))
-		mesh_node.mesh = piece.get("mesh") as Mesh
-		mesh_node.skin = skin
-		mesh_node.transform = piece.get("transform", Transform3D.IDENTITY)
-		ReplicatedActor3D._restore_piece_render_state(mesh_node, piece)
-		mesh_node.cast_shadow = HAIR_SHADOWS
-		_hair_attachment.add_child(mesh_node)
-		mesh_node.skeleton = mesh_node.get_path_to(_skeleton)
-		var tinted: Array = []
-		for surface: int in mesh_node.mesh.get_surface_count():
-			var source := mesh_node.mesh.surface_get_material(surface) as StandardMaterial3D
-			if source == null:
-				continue
-			var copy := source.duplicate() as StandardMaterial3D
-			copy.set_meta(&"rl_source_colour", source.albedo_color)
-			mesh_node.set_surface_override_material(surface, copy)
-			tinted.append(copy)
-		_legacy_hair_materials[mesh_node] = tinted
-		nodes.append(mesh_node)
-	_hair_lods = [nodes] if not nodes.is_empty() else []
-
-
 func _free_hair() -> void:
 	_hair_lods = []
-	_legacy_hair_materials.clear()
 	_hair_motion = null
 	if is_instance_valid(_hair_attachment):
 		if _hair_attachment.get_parent() != null:
@@ -480,11 +539,19 @@ func _instance_levels(lods: Array, prefix: String, style: String) -> Array:
 			add_child(mesh_node)
 			mesh_node.skeleton = mesh_node.get_path_to(_skeleton)
 			_assign_materials(mesh_node, style)
+			_present(mesh_node)
 			nodes.append(mesh_node)
 		if not nodes.is_empty():
 			result.append(nodes)
 	_show_levels(result, _lod_band)
 	return result
+
+
+## The marks and presentation every mesh made here carries.
+func _present(mesh_node: MeshInstance3D) -> void:
+	mesh_node.set_meta(MESH_META, true)
+	mesh_node.extra_cull_margin = maxf(mesh_node.extra_cull_margin, cull_margin)
+	mesh_node.layers = mesh_layers
 
 
 ## glTF's inverse binds are in model space, which is the actor skeleton's
@@ -514,8 +581,11 @@ func lod_band_for(distance: float, current: int = -1) -> int:
 	return mini(band, _band_count() - 1)
 
 
-## Shows the levels of `band` (each part clamps to the levels it has).
+## Shows the levels of `band` (each part clamps to the levels it has). A held
+## portrait pose keeps the first level whatever the distance.
 func update_lod(distance: float) -> void:
+	if _portrait_pose:
+		return
 	var band := lod_band_for(distance, _lod_band)
 	if band != _lod_band:
 		_show_band(band)
@@ -533,20 +603,21 @@ func _show_band(band: int) -> void:
 	_lod_band = band
 	for group: Array in [_head_lods, _beard_lods, _hair_lods]:
 		_show_levels(group, band)
-	set_process(_band_count() > 1)
+	set_process(_band_count() > 1 and not _portrait_pose)
 
 
 func _show_levels(levels: Array, band: int) -> void:
 	var shown := mini(band, levels.size() - 1)
 	for index: int in levels.size():
-		for mesh_node: MeshInstance3D in levels[index]:
-			mesh_node.visible = index == shown
+		for mesh_node: Variant in levels[index]:
+			if is_instance_valid(mesh_node):
+				(mesh_node as MeshInstance3D).visible = index == shown
 
 
 func _ready() -> void:
 	# Spread the actors' distance checks over LOD_CHECK_FRAMES.
 	_lod_countdown = get_instance_id() % LOD_CHECK_FRAMES
-	set_process(_band_count() > 1)
+	set_process(_band_count() > 1 and not _portrait_pose)
 
 
 func _process(_delta: float) -> void:
@@ -560,13 +631,20 @@ func _process(_delta: float) -> void:
 			_skeleton.global_transform * _skeleton.get_bone_global_rest(_skeleton.find_bone("Head")).origin))
 
 
+func _apply_portrait_pose() -> void:
+	set_process(_band_count() > 1 and not _portrait_pose)
+	if _expression != null:
+		_expression.hold_neutral(_portrait_pose)
+
+
 func _free_levels(levels: Array) -> void:
 	for level: Array in levels:
-		for mesh_node: MeshInstance3D in level:
+		for mesh_node: Variant in level:
 			if is_instance_valid(mesh_node):
-				if mesh_node.get_parent() != null:
-					mesh_node.get_parent().remove_child(mesh_node)
-				mesh_node.queue_free()
+				var node := mesh_node as Node
+				if node.get_parent() != null:
+					node.get_parent().remove_child(node)
+				node.queue_free()
 
 
 ## Replaces each surface's imported material with the shared shader material
@@ -621,31 +699,49 @@ func _apply_controls() -> void:
 			_set_shape(mesh_node, "id_%s_n" % control_name, maxf(-amount, 0.0))
 
 
+## Hair length, volume and finish on an RL hairstyle that carries the
+## hair-shape blend shapes; a hairstyle without them is left as authored.
+func _apply_hair_shapes() -> void:
+	var length := clampf(appearance.hair_length, -1.0, 1.0)
+	var volume := clampf(appearance.hair_volume, -1.0, 1.0)
+	var detail := clampi(appearance.hair_detail, 0, HAIR_DETAIL_SHAPES.size())
+	for level: Array in _hair_lods:
+		for node: Variant in level:
+			if not is_instance_valid(node):
+				continue
+			var mesh_node := node as MeshInstance3D
+			_set_shape(mesh_node, HAIR_LENGTH_SHAPES[0], maxf(length, 0.0))
+			_set_shape(mesh_node, HAIR_LENGTH_SHAPES[1], maxf(-length, 0.0))
+			_set_shape(mesh_node, HAIR_VOLUME_SHAPES[0], maxf(volume, 0.0))
+			_set_shape(mesh_node, HAIR_VOLUME_SHAPES[1], maxf(-volume, 0.0))
+			for index: int in HAIR_DETAIL_SHAPES.size():
+				_set_shape(mesh_node, HAIR_DETAIL_SHAPES[index], 1.0 if detail == index + 1 else 0.0)
+
+
 func _apply_colours() -> void:
+	var haired := not _hair_lods.is_empty() or _hair_external
 	var values := {
 		"skin_color": appearance.skin, "lip_tint": appearance.lip_tint,
 		"brow_color": appearance.brow_color, "hair_color": appearance.hair_color,
 		"freckles": appearance.freckles, "liner": appearance.liner,
 		"stubble": appearance.stubble_amount(), "eye_color": appearance.eyes,
-		"hairline": HAIRLINE_UNDER_HAIR if not _hair_lods.is_empty() else 0.0,
+		"hairline": HAIRLINE_UNDER_HAIR if haired else 0.0,
 		"brow_style": appearance.brow_style, "brow_thickness": appearance.brow_thickness,
 		"liner_wing": appearance.liner_wing,
 	}
 	# The head's surfaces read all of them; hair and beard read the hair colour.
-	for tinted: Variant in _legacy_hair_materials.values():
-		for material: StandardMaterial3D in tinted as Array:
-			material.albedo_color = (material.get_meta(&"rl_source_colour") as Color) * appearance.hair_color
-	var shader_hair: Array = [] if not _legacy_hair_materials.is_empty() else _hair_lods
 	for part: Array in [[_head_lods, INSTANCE_UNIFORMS], [_beard_lods, ["hair_color"]],
-			[shader_hair, ["hair_color"]]]:
+			[_hair_lods, ["hair_color"]]]:
 		for level: Array in part[0]:
-			for mesh_node: MeshInstance3D in level:
+			for node: Variant in level:
+				if not is_instance_valid(node):
+					continue
 				for uniform_name: String in part[1]:
-					mesh_node.set_instance_shader_parameter(uniform_name, values[uniform_name])
+					(node as MeshInstance3D).set_instance_shader_parameter(uniform_name, values[uniform_name])
 
 
-## Sets a blend shape by name where the mesh has it. Identity only: an `ex_`
-## shape is the expression node's, and is refused here.
+## Sets a blend shape by name where the mesh has it. Identity and hair shapes
+## only: an `ex_` shape is the expression node's, and is refused here.
 static func _set_shape(mesh_node: MeshInstance3D, shape: String, value: float) -> void:
 	if shape.begins_with("ex_"):
 		return

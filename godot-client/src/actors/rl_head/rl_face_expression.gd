@@ -14,6 +14,8 @@ extends Node
 ## and actors beyond FAR_METRES not at all (eyes left open). An actor the
 ## animation gate pauses has its model's processing switched off, this node's
 ## with it. `advance` steps the face by hand, for deterministic renders.
+## `hold_neutral` keeps the face neutral with the eyes open and no blink while
+## a portrait (dialogue line, leaderboard card) is taken of it.
 
 signal weights_changed
 
@@ -63,6 +65,8 @@ var _stride_count := 0
 var _pending_delta := 0.0
 var _random := RandomNumberGenerator.new()
 var _look := Vector2.ZERO
+var _held := false
+var _held_auto_blink := true
 
 
 func _ready() -> void:
@@ -107,6 +111,8 @@ func has_shape(shape: String) -> bool:
 ## held shapes fade out unless `additive`. A name that is neither is ignored.
 func set_expression(expression_name: String, amount: float = 1.0, fade: float = 0.2,
 		additive: bool = false) -> void:
+	if _held:
+		return
 	var wanted := {}
 	if PRESETS.has(expression_name):
 		var preset: Dictionary = PRESETS[expression_name]
@@ -139,6 +145,8 @@ func set_seed(value: int) -> void:
 
 ## Starts a blink now (if one is not already under way).
 func blink() -> void:
+	if _held:
+		return
 	if _blink_phase < 0.0 and _blink_pause <= 0.0:
 		_blink_phase = 0.0
 		_blink_again = _random.randf() < DOUBLE_BLINK_CHANCE
@@ -148,8 +156,37 @@ func set_auto_blink(enabled: bool) -> void:
 	auto_blink = enabled
 
 
+## Holds the face neutral - no expression, the jaw shut, the eyes open and
+## looking ahead, no blinking - until released, when blinking resumes as it
+## was. Expressions asked for while held are ignored.
+func hold_neutral(held: bool) -> void:
+	if held == _held:
+		return
+	_held = held
+	if held:
+		_held_auto_blink = auto_blink
+		auto_blink = false
+		_blink_phase = -1.0
+		_blink_pause = 0.0
+		_blink_again = false
+		_talking = false
+		_current.clear()
+		_goal.clear()
+		_rate.clear()
+		_look = Vector2.ZERO
+		_write()
+		_write_look()
+	else:
+		auto_blink = _held_auto_blink
+		_blink_wait = _random.randf_range(BLINK_GAP.x, BLINK_GAP.y)
+
+
+func is_held_neutral() -> bool:
+	return _held
+
+
 func set_talking(enabled: bool) -> void:
-	_talking = enabled
+	_talking = enabled and not _held
 	_talk_time = 0.0
 	if not enabled:
 		_fade("ex_jaw_open", float(_goal.get("ex_jaw_open", 0.0)), 0.1)
@@ -214,6 +251,8 @@ func blink_amount() -> float:
 
 
 func _process(delta: float) -> void:
+	if _held:
+		return
 	var stride := 1 if always_update else _stride()
 	if stride <= 0:
 		if _blink_phase >= 0.0 or _blink_pause > 0.0:

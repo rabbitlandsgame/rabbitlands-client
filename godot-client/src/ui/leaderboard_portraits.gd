@@ -133,6 +133,9 @@ func _render(look: Dictionary, generation: int) -> Texture2D:
 	if not model.has("culture") or bool(model.get("retired", false)):
 		return null
 	var actor := ReplicatedActor3D.new()
+	# Cards are always High: choosing it before the build avoids building the
+	# player's own tier first and then the High head in place.
+	actor.apply_render_quality(2, true)
 	_stage.add_child(actor)
 	var animation: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(str(model.animationMap)))
 	var dto := {"actor_id":0, "kind":1, "name":"", "x":0, "y":0, "rotation":0,
@@ -148,6 +151,8 @@ func _render(look: Dictionary, generation: int) -> Texture2D:
 	actor.set_hand_props_visible(false)
 	actor.set_cape_cloth_allowed(false)
 	actor.apply_render_quality(2, true)
+	# One still: the RL head at its first level, neutral, eyes open.
+	actor.hold_portrait_pose(self)
 	if actor.animation_player != null:
 		actor.animation_player.advance(0)
 		actor.animation_player.pause()

@@ -1,10 +1,13 @@
 extends SceneTree
-## Headless contract for the RL head prototype (src/actors/rl_head/): the
-## assets against their own extras, the appearance byte form, identity and
-## expression kept apart through animation, the body cut through torso and
-## cape changes, the importer's shape filter, LOD choice per quality, the
-## opt-in hooks on the real ReplicatedActor3D, the hair-motion budget and the
-## open-headwear refit (RLHeadwearFit) against the shipped placement.
+## Headless contract for the RL head (src/actors/rl_head/): the assets against
+## their own extras and each other (every hair and beard fitted to the head
+## shipped beside it), the appearance byte form, identity and expression kept
+## apart through animation, the body cut through torso and cape changes, the
+## importer's shape filter, LOD choice per quality, the hooks on the real
+## ReplicatedActor3D - activated by tier for every Human at High, with the
+## lab's `rl_head` override and the RL_HEADS=classic switch - the hair-motion
+## budget and the open-headwear refit (RLHeadwearFit) against the shipped
+## placement, which the shipped heads keep unless RL_HEADWEAR_FIT=shipped.
 ##
 ##   Godot --headless --path godot-client --script res://tests/test_rl_head.gd
 
@@ -83,6 +86,37 @@ func _check_assets() -> void:
 		_expect(eye.has("right") and eye.has("left")
 			and float((eye["right"] as Dictionary)["iris_radius"]) > 0.01,
 			"%s iris centres measured off the eye surface" % sex)
+	_check_asset_consistency()
+
+
+## Hair and facial hair are fitted to one build of a head: each records the
+## SHA-256 of the head GLB it was fitted to, which must be the head shipped for
+## its sex. KNOWN_STALE lists an asset known to be fitted to an older head
+## (reported, not failed, while its recorded hash is exactly that one; it must
+## be rebuilt by the hair author - see docs/rl-head-prototype.md).
+const KNOWN_STALE := {"hair/mira_bun.glb": "7dc7d99a549dbab2d06559ad1211a6a70db54d544da634bb0c91ea1ba0ebb966"}
+
+func _check_asset_consistency() -> void:
+	var heads := {}
+	for sex: String in ["female", "male"]:
+		heads[sex] = FileAccess.get_sha256(RLHeadLibrary.head_path(sex))
+	for folder: Array in [["hair/", "rlHair"], ["beards/", "rlBeard"]]:
+		for file: String in DirAccess.get_files_at(RLHeadLibrary.ROOT + folder[0]):
+			if file.get_extension() != "glb":
+				continue
+			var relative: String = folder[0] + file
+			var extras := RLHeadLibrary.asset_extras(RLHeadLibrary.ROOT + relative, folder[1])
+			var sex := str(extras.get("sex", ""))
+			var recorded := str(extras.get("headSHA256", ""))
+			_expect(heads.has(sex), "%s names the head sex it was fitted to (%s)" % [relative, sex])
+			if not heads.has(sex):
+				continue
+			if recorded != heads[sex] and KNOWN_STALE.get(relative, "") == recorded:
+				print("KNOWN ISSUE %s was fitted to head %s, not the shipped %s head %s" % [relative,
+					recorded.left(12), sex, str(heads[sex]).left(12)])
+				continue
+			_expect(recorded == heads[sex], "%s was fitted to the shipped %s head (%s against %s)" % [relative,
+				sex, recorded.left(12), str(heads[sex]).left(12)])
 
 
 # ---------------------------------------------------------------- encoding
@@ -236,9 +270,10 @@ func _check_actor(sex: String, preset: String) -> void:
 		_expect(node != null and not node.visible, "%s: body %s hidden" % [preset, hidden])
 	var legacy_hair := 0
 	for child: Node in actor.get_skeleton().get_children():
-		if child.name.begins_with("AppearanceHair_") and child.name != RLHeadRig.HAIR_NODE_NAME:
+		if child.name.begins_with("AppearanceHair_") and child.name != RLHeadRig.HAIR_NODE_NAME \
+				and (child as Node3D).visible:
 			legacy_hair += 1
-	_expect(legacy_hair == 0, "%s: no legacy hairstyle under the RL head" % preset)
+	_expect(legacy_hair == 0, "%s: no legacy hairstyle shows under the RL head" % preset)
 	var body := native.find_child("body", true, false) as MeshInstance3D
 	var cut := RLHeadBodyCut.describe(body.get_meta(&"uncovered_body_mesh") as Mesh,
 		str(rig.head_info()["path"]))
@@ -333,8 +368,8 @@ func _hidden_triplets(original: Mesh, head_path: String) -> Dictionary:
 	return plan.get("hidden", {}) as Dictionary
 
 
-func _cut_is_clean(body: MeshInstance3D, hidden: Dictionary) -> bool:
-	var arrays := body.mesh.surface_get_arrays(0)
+func _cut_is_clean(mesh: Mesh, hidden: Dictionary) -> bool:
+	var arrays := mesh.surface_get_arrays(0)
 	var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
 	for index: int in range(0, indices.size(), 3):
 		if hidden.has(RLHeadBodyCut._triplet(indices[index], indices[index + 1], indices[index + 2])):
@@ -342,18 +377,29 @@ func _cut_is_clean(body: MeshInstance3D, hidden: Dictionary) -> bool:
 	return true
 
 
+## A body mesh before Human body refinement (which compacts its arrays).
+func _unrefined(body: MeshInstance3D) -> Mesh:
+	if body.has_meta(CharacterProportions.BODY_RESULT_META) \
+			and body.mesh == body.get_meta(CharacterProportions.BODY_RESULT_META):
+		return body.get_meta(CharacterProportions.BODY_SOURCE_META) as Mesh
+	return body.mesh
+
+
 func _check_body_cut_composition(sex: String) -> void:
 	var actor := _rl_actor(sex, "mira" if sex == "female" else "rowan")
-	var plain := Stage.spawn(_stage, sex, {}, {}, ActorRenderQuality.Quality.HIGH, 9301)
+	# The plain actor below High: develop's head, the same shared body.
+	var plain := Stage.spawn(_stage, sex, {}, {}, ActorRenderQuality.Quality.MEDIUM, 9301)
 	await process_frame
 	var body := actor.get_node("NativeModel").find_child("body", true, false) as MeshInstance3D
 	var plain_body := plain.get_node("NativeModel").find_child("body", true, false) as MeshInstance3D
 	var original := body.get_meta(&"uncovered_body_mesh") as Mesh
-	_expect(original == plain_body.mesh, "%s: the cut starts from the shared imported body" % sex)
+	_expect(original == _unrefined(plain_body), "%s: the cut starts from the shared imported body" % sex)
+	_expect(_unrefined(body) == body.get_meta(RLHeadBodyCut.CUT_META),
+		"%s: body refinement fits the cut mesh, not the other way round" % sex)
 	var hidden := _hidden_triplets(original, str(actor.rl_head().head_info()["path"]))
-	var bare_cut := body.mesh
+	var bare_cut := _unrefined(body)
 	var bare_count := RLHeadRig.mesh_triangles(bare_cut)
-	_expect(bare_count == RLHeadRig.mesh_triangles(original) - hidden.size() and _cut_is_clean(body, hidden),
+	_expect(bare_count == RLHeadRig.mesh_triangles(original) - hidden.size() and _cut_is_clean(bare_cut, hidden),
 		"%s: bare body loses exactly the listed triangles (%d)" % [sex, hidden.size()])
 	var orders: Array = [
 		[{5: Stage.TORSO}, {5: Stage.TORSO, 2: Stage.CAPE}, {2: Stage.CAPE}, {}],
@@ -366,15 +412,15 @@ func _check_body_cut_composition(sex: String) -> void:
 			plain.apply_equipment_visuals(visuals)
 			await process_frame
 			var torso_worn := visuals.has(5)
-			var plain_mesh := plain_body.mesh
+			var plain_mesh := _unrefined(plain_body)
 			var source := body.get_meta(RLHeadBodyCut.SOURCE_META) as Mesh
-			_expect(_cut_is_clean(body, hidden) and source == plain_mesh,
+			_expect(_cut_is_clean(_unrefined(body), hidden) and source == plain_mesh,
 				"%s %s: head cut taken from the same torso cover a plain actor wears" % [sex, visuals])
 			if not torso_worn:
-				_expect(body.mesh == bare_cut, "%s %s: the bare head cut comes back" % [sex, visuals])
+				_expect(_unrefined(body) == bare_cut, "%s %s: the bare head cut comes back" % [sex, visuals])
 			var scalp := actor.get_node("NativeModel").find_child("scalp", true, false) as MeshInstance3D
 			_expect(not scalp.visible, "%s %s: the scalp stays hidden" % [sex, visuals])
-	var plain_cover := plain_body.get_meta(&"uncovered_body_mesh", plain_body.mesh) as Mesh
+	var plain_cover := plain_body.get_meta(&"uncovered_body_mesh", _unrefined(plain_body)) as Mesh
 	_expect(plain_cover == original, "%s: TorsoBodyCover still restores the untouched body" % sex)
 	actor.queue_free()
 	plain.queue_free()
@@ -387,10 +433,16 @@ func _check_removal(sex: String) -> void:
 	var native := actor.get_node("NativeModel") as Node3D
 	var body := native.find_child("body", true, false) as MeshInstance3D
 	var with_head := RLHeadRig.mesh_triangles(body.mesh)
+	# Without the lab's override a High Human draws its own derived RL head...
 	actor.apply_appearance_variants({"skin": 2, "hair": 1})
 	await process_frame
+	_expect(actor.rl_head() != null and actor.rl_head().appearance.preset.is_empty(),
+		"%s: dropping rl_head at High draws the face the appearance asks for" % sex)
+	# ...and below High none: develop's own head.
+	actor.apply_render_quality(ActorRenderQuality.Quality.MEDIUM, false)
+	await process_frame
 	_expect(actor.rl_head() == null and RLHeadRig.find_on(actor.get_skeleton()) == null,
-		"%s: dropping rl_head removes the rig" % sex)
+		"%s: switching to Medium removes the rig" % sex)
 	_expect(not body.has_meta(RLHeadBodyCut.CUT_META)
 		and RLHeadRig.mesh_triangles(body.mesh) > with_head,
 		"%s: the body gets its head back under the torso cover" % sex)
@@ -402,32 +454,44 @@ func _check_removal(sex: String) -> void:
 		if child.name.begins_with("AppearanceHair_"):
 			legacy += 1
 	_expect(legacy == 1, "%s: the legacy hairstyle returns" % sex)
-	actor.apply_appearance_variants({"rl_head": "rowan"})
+	actor.apply_render_quality(ActorRenderQuality.Quality.HIGH, false)
 	await process_frame
 	_expect(actor.rl_head() != null and body.has_meta(RLHeadBodyCut.CUT_META),
-		"%s: an RL head can be put back on a live actor" % sex)
+		"%s: back at High the RL head is put back on the live actor" % sex)
 	actor.queue_free()
 	await process_frame
 
 
 func _check_dev_switch() -> void:
-	OS.set_environment("RL_HEADS", "mira")
-	ReplicatedActor3D._rl_head_forced_read = false
+	# The default: every Human at High draws the RL head; Medium and Low do not.
 	var female := Stage.spawn(_stage, "female", {"skin": 1})
 	var male := Stage.spawn(_stage, "male", {"skin": 1})
+	var medium := Stage.spawn(_stage, "female", {"skin": 1}, {}, ActorRenderQuality.Quality.MEDIUM, 9302)
 	await process_frame
-	_expect(female.rl_head() != null and female.rl_head().appearance.preset == "mira",
-		"RL_HEADS=mira puts Mira on a luminous female")
+	_expect(female.rl_head() != null and female.rl_head().appearance.sex == "female",
+		"a luminous female at High draws the RL head")
 	_expect(male.rl_head() != null and male.rl_head().appearance.sex == "male",
-		"RL_HEADS on a male body picks a male preset")
+		"a luminous male at High draws the male RL head")
+	_expect(medium.rl_head() == null, "a luminous female at Medium keeps develop's head")
 	female.queue_free()
 	male.queue_free()
-	OS.set_environment("RL_HEADS", "")
-	ReplicatedActor3D._rl_head_forced_read = false
+	medium.queue_free()
+	# RL_HEADS=classic keeps develop's classic High head, the lab override too.
+	OS.set_environment("RL_HEADS", "classic")
+	ReplicatedActor3D.reload_rl_heads_switch()
 	var plain := Stage.spawn(_stage, "female", {"skin": 1})
+	var lab := _rl_actor("female", "mira")
 	await process_frame
-	_expect(plain.rl_head() == null, "without RL_HEADS or rl_head nothing is built")
+	_expect(plain.rl_head() == null and lab.rl_head() == null, "RL_HEADS=classic builds no RL head")
 	plain.queue_free()
+	lab.queue_free()
+	OS.set_environment("RL_HEADS", "")
+	ReplicatedActor3D.reload_rl_heads_switch()
+	# The lab's empty override means no RL head, at any quality.
+	var bare := Stage.spawn(_stage, "female", {"skin": 1, "rl_head": ""})
+	await process_frame
+	_expect(bare.rl_head() == null, "an empty rl_head override builds no RL head")
+	bare.queue_free()
 	await process_frame
 
 
@@ -641,9 +705,9 @@ func _check_headwear_fit() -> void:
 		"an unfitted hairstyle takes the fallback fit")
 	_expect(RLHeadwearFit.fit_name(circlet, "luminous_female", "") == "luminous_female",
 		"the shipped luminous head has a bald fit of its own")
-	_expect(RLHeadwearFit.fits_shipped_body("luminous_male")
-		and not RLHeadwearFit.fits_shipped_body("greyhaven_female"),
-		"shipped heads: luminous refitted, other races left as shipped")
+	_expect(not RLHeadwearFit.fits_shipped_body("luminous_male")
+		and not RLHeadwearFit.fits_shipped_body("luminous_female"),
+		"shipped heads keep the shipped placement by default (D8)")
 	# another race's head wears its own variant exactly as before
 	var race := _race_actor("greyhaven_female", {3: 111, 5: Stage.TORSO})
 	await process_frame
@@ -652,14 +716,29 @@ func _check_headwear_fit() -> void:
 		and (plain["attachment"] as Node).get_child_count() == 1,
 		"a greyhaven head wears the circlet exactly as before")
 	race.queue_free()
-	# the shipped luminous head (no RL head) is refitted from its own fits
-	var legacy := Stage.spawn(_stage, "female", {"skin": 1, "hair": 0}, {3: 111, 5: Stage.TORSO})
+	# a Human below High (no RL head) wears it as shipped
+	var medium := Stage.spawn(_stage, "female", {"skin": 1, "hair": 0}, {3: 111, 5: Stage.TORSO},
+		ActorRenderQuality.Quality.MEDIUM, 9303)
+	await process_frame
+	var shipped_piece := _head_piece(medium)
+	_expect(shipped_piece["attachment"] != null and (shipped_piece["refits"] as Array).is_empty()
+		and (shipped_piece["attachment"] as Node).get_child_count() == 1,
+		"a luminous head below High wears the circlet as shipped")
+	medium.queue_free()
+	# RL_HEADWEAR_FIT=shipped turns the shipped-head fits on (owner decision pending)
+	OS.set_environment("RL_HEADWEAR_FIT", "shipped")
+	RLHeadwearFit.reload()
+	_expect(RLHeadwearFit.fits_shipped_body("luminous_male")
+		and not RLHeadwearFit.fits_shipped_body("greyhaven_female"),
+		"RL_HEADWEAR_FIT=shipped: luminous refitted, other races left as shipped")
+	var legacy := Stage.spawn(_stage, "female", {"skin": 1, "hair": 0}, {3: 111, 5: Stage.TORSO},
+		ActorRenderQuality.Quality.MEDIUM, 9304)
 	await process_frame
 	var shipped := _head_piece(legacy)
 	var shipped_key := str((shipped["attachment"] as Node).get_meta(ReplicatedActor3D.RL_HEADWEAR_META, "")) \
 		if shipped["attachment"] != null else ""
 	_expect(not (shipped["refits"] as Array).is_empty() and shipped_key.begins_with("111|luminous_female||"),
-		"the shipped luminous head takes its own circlet fit (%s)" % shipped_key)
+		"the shipped luminous head takes its own circlet fit when switched on (%s)" % shipped_key)
 	legacy.apply_appearance_variants({"skin": 1, "hair": 2})
 	await process_frame
 	var haired := _head_piece(legacy)
@@ -668,6 +747,8 @@ func _check_headwear_fit() -> void:
 	_expect(haired_key.begins_with("111|luminous_female|luminous_female_"),
 		"a shipped hairstyle refits the circlet over it (%s)" % haired_key)
 	legacy.queue_free()
+	OS.set_environment("RL_HEADWEAR_FIT", "")
+	RLHeadwearFit.reload()
 	var shipped_extent := 0.327  # the human_female variant as shipped, model space
 	# an RL head refits it
 	var actor := _rl_actor("female", "mira", {3: 111, 5: Stage.TORSO})
@@ -711,13 +792,22 @@ func _check_headwear_fit() -> void:
 		if bald["attachment"] != null else ""
 	_expect(not (bald["refits"] as Array).is_empty() and bald_key.begins_with("111|female||"),
 		"mira bald: the circlet is refitted to the bare head (%s)" % bald_key)
-	# dropping the RL head gives the shipped head's own fit
-	actor.apply_appearance_variants({"skin": 1, "hair": 0})
+	# a game hairstyle under the RL head: the fit follows it
+	actor.apply_appearance_variants({"skin": 1, "hair": AppearanceVariants.pack_hair(2, 4)})
+	await process_frame
+	var long_hair := _head_piece(actor)
+	var long_key := str((long_hair["attachment"] as Node).get_meta(ReplicatedActor3D.RL_HEADWEAR_META, "")) \
+		if long_hair["attachment"] != null else ""
+	_expect(not (long_hair["refits"] as Array).is_empty() and long_key.begins_with("111|female|legacy:long|"),
+		"a game hairstyle under the RL head refits the circlet over it (%s)" % long_key)
+	# below High the shipped head wears the shipped circlet again
+	actor.apply_render_quality(ActorRenderQuality.Quality.MEDIUM, false)
 	await process_frame
 	var restored := _head_piece(actor)
 	var restored_key := str((restored["attachment"] as Node).get_meta(ReplicatedActor3D.RL_HEADWEAR_META, "")) \
 		if restored["attachment"] != null else ""
-	_expect(not (restored["refits"] as Array).is_empty() and restored_key.begins_with("111|luminous_female||"),
-		"without the RL head the circlet takes the shipped head's fit (%s)" % restored_key)
+	_expect((restored["refits"] as Array).is_empty() and restored_key.is_empty()
+		and restored["attachment"] != null and (restored["attachment"] as Node).get_child_count() == 1,
+		"without the RL head the circlet is the shipped one (%s)" % restored_key)
 	actor.queue_free()
 	await process_frame

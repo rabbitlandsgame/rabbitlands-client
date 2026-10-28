@@ -1,6 +1,6 @@
 class_name RLHeadLibrary
 extends RefCounted
-## Finds and reads the RL head prototype's assets, once per session.
+## Finds and reads the RL head's assets, once while any RL head is drawn.
 ##
 ## Everything under assets/actors/rl_heads/ is read through GlbSceneCache, so
 ## an imported checkout and an export use Godot's imported scenes (with their
@@ -11,6 +11,13 @@ extends RefCounted
 ##
 ## The asset contract (see RLHeadRig) is read leniently: a missing hairstyle,
 ## beard or texture is logged once and drawn without, never an error.
+##
+## Every RLHeadRig is a user from its creation to its deletion (`acquire` /
+## `release`). When the last one goes - every Human switched down from High,
+## or the last one left the scene - `release_unused` drops the cached pieces,
+## textures, materials and parsed documents, GlbSceneCache's scenes of the RL
+## files, the body cuts and the headwear refits, as develop's own High
+## portrait releases its caches with its last user.
 
 const ROOT := "res://assets/actors/rl_heads/"
 const HAIR_DIR := ROOT + "hair/"
@@ -67,10 +74,51 @@ static var _textures: Dictionary = {}
 static var _materials: Dictionary = {}
 static var _manifest: Variant = null
 static var _warned: Dictionary = {}
+static var _users := 0
 
 
-## Drops every cached piece, texture and material, for a reload in the lab.
+## Drops every cached piece, texture and material, for a reload in the lab
+## and at the end of a session (ReplicatedActor3D.clear_wardrobe_texture_cache).
 static func clear() -> void:
+	release_unused()
+	_warned.clear()
+
+
+## One more RL head drawn (RLHeadRig.attach).
+static func acquire() -> void:
+	_users += 1
+
+
+## One RL head fewer (an RLHeadRig deleted); the last one releases the caches.
+static func release() -> void:
+	_users = maxi(0, _users - 1)
+	if _users == 0:
+		release_unused()
+
+
+## How many RL heads hold the caches.
+static func users() -> int:
+	return _users
+
+
+## Whether anything is cached (heads, beards, textures, materials).
+static func is_loaded() -> bool:
+	return not (_heads.is_empty() and _beards.is_empty() and _textures.is_empty()
+		and _materials.is_empty() and _hair_info.is_empty())
+
+
+## Drops every shared RL resource; the next RL head loads them again.
+static func release_unused() -> void:
+	var paths: Array = _documents.keys()
+	for info: Variant in _heads.values():
+		if info is Dictionary and (info as Dictionary).has("path"):
+			paths.append(str((info as Dictionary)["path"]))
+	for style: Variant in _beards.keys():
+		paths.append(beard_path(str(style)))
+	for style: Variant in _hair_info.keys():
+		paths.append(hair_path(str(style)))
+	for path: Variant in paths:
+		_forget_scene(str(path))
 	_documents.clear()
 	_heads.clear()
 	_beards.clear()
@@ -78,7 +126,20 @@ static func clear() -> void:
 	_textures.clear()
 	_materials.clear()
 	_manifest = null
-	_warned.clear()
+	RLHeadBodyCut.clear()
+	RLHeadwearFit.clear_caches()
+	RLHeadRig.clear_caches()
+
+
+## GlbSceneCache keeps each scene it loaded for the session; an RL file it no
+## longer needs to hold is let go here (its other entries are untouched).
+static func _forget_scene(path: String) -> void:
+	if not path.begins_with(ROOT):
+		return
+	var key := ProjectSettings.globalize_path(path)
+	for cache: Dictionary in [GlbSceneCache._scenes, GlbSceneCache._direct_raw_scenes,
+			GlbSceneCache._failed, GlbSceneCache._prepared_entries, GlbSceneCache._geometry_entries]:
+		cache.erase(key)
 
 
 ## Logs `message` the first time `key` is seen this session: a warning, or a

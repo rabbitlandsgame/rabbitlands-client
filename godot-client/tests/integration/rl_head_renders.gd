@@ -1,5 +1,5 @@
 extends SceneTree
-## Evidence renders of the RL head prototype on the real client actor.
+## Evidence renders of the RL head on the real client actor.
 ##
 ## Windowed (it needs a GPU); serialise with gpu_lock.sh. Every framing is
 ## fixed to the Head bone's rest (rl_head_stage.gd VIEWS: narrow FOV, yaw
@@ -14,8 +14,15 @@ extends SceneTree
 ## Options (all optional):
 ##   --set <name>            output folder under .local/rl-heads/evidence/godot/
 ##   --out <dir>             write there instead
-##   --presets mira,rowan    preset names, or `all`; legacy_female / legacy_male
-##                           draw today's head for comparison
+##   --presets mira,rowan    RL preset names (the lab's rl_head override), or
+##                           `all`; legacy_female / legacy_male draw develop's
+##                           head (at --quality medium, or classic High with
+##                           RL_HEADS=classic); dev:<look> draws the RL head a
+##                           saved appearance derives at High (RLHeadPortraitMap):
+##                           dev:Rowan, dev:Mira, dev:Tavi (develop's presets as
+##                           field values) and dev:default_male / dev:default_female
+##                           (every field 50); dev:<look>@<sex> picks the body
+##   --appearance '{"skin":3}'  JSON merged into a dev: look
 ##   --views front,profile   rl_head_stage.gd VIEWS names
 ##   --expressions neutral   RLFaceExpression presets or ex_ shapes, comma separated
 ##   --quality high          low | medium | high
@@ -36,6 +43,7 @@ extends SceneTree
 ## Writes <out>/renders.json and prints RL_HEAD_RENDERS_DONE.
 
 const Stage := preload("res://prototypes/rl_heads/rl_head_stage.gd")
+const PRESETS := preload("res://src/actors/human_portrait_presets.gd")
 
 var args: Dictionary = {}
 var stage: Node3D
@@ -112,6 +120,26 @@ func _spawn(preset: String, headwear: int, quality: int) -> ReplicatedActor3D:
 		visuals[3] = headwear
 	if args.get("torso", "no") == "yes":
 		visuals[5] = Stage.TORSO
+	if preset.begins_with("dev:"):
+		var look := preset.trim_prefix("dev:")
+		var sex := "female" if look in ["Mira", "default_female"] else "male"
+		if look.contains("@"):
+			sex = look.get_slice("@", 1)
+			look = look.get_slice("@", 0)
+		var appearance := {} if look.begins_with("default") else PRESETS.appearance(look)
+		var extra: Variant = JSON.parse_string(str(args.get("appearance", "{}")))
+		if extra is Dictionary:
+			appearance.merge(extra as Dictionary, true)
+		var dev_actor := Stage.spawn(stage, sex, appearance, visuals, quality)
+		dev_actor.set_meta(&"rl_sex", sex)
+		dev_actor.set_meta(&"appearance", appearance)
+		if dev_actor.rl_head() != null:
+			dev_actor.rl_head().expression().set_process(false)
+			dev_actor.rl_head().expression().auto_blink = false
+			dev_actor.rl_head().expression().set_seed(7)
+		elif quality == ActorRenderQuality.Quality.HIGH and not ReplicatedActor3D.rl_heads_classic():
+			push_error("RL head renders: %s built no RL head" % preset)
+		return dev_actor
 	if preset.begins_with("legacy_"):
 		var sex := preset.trim_prefix("legacy_")
 		var actor := Stage.spawn(stage, sex, {"skin": 1, "eyes": 2,
@@ -246,7 +274,12 @@ func _shot(name: String, info: Dictionary, actor: ReplicatedActor3D, sidecar: bo
 	root.get_texture().get_image().save_png(path)
 	info["file"] = path.get_file()
 	var rig := actor.rl_head()
+	if actor.has_meta(&"appearance"):
+		info["appearance"] = actor.get_meta(&"appearance")
+	info["sources"] = _sources(rig)
 	if rig != null:
+		info["rl_face"] = rig.appearance.to_dict()
+		info["lod_band"] = rig.lod_band()
 		info["near_triangles"] = rig.near_triangle_count()
 		info["expression_weights"] = rig.expression().weights()
 		var body := actor.get_node("NativeModel").find_child("body", true, false) as MeshInstance3D
@@ -270,6 +303,23 @@ func _shot(name: String, info: Dictionary, actor: ReplicatedActor3D, sidecar: bo
 		file.store_string(JSON.stringify(side, "\t"))
 		file.close()
 	(report["renders"] as Array).append(info)
+
+
+## SHA-256 of what the still was made from: the head, hair and beard files the
+## rig draws, and the mapping data.
+func _sources(rig: RLHeadRig) -> Dictionary:
+	var files := ["res://data/actors/rl_head_wire_defaults.json", "res://src/actors/rl_head/rl_head_portrait_map.gd"]
+	if rig != null:
+		files.append(str(rig.head_info().get("path", "")))
+		if RLHeadPortraitMap.is_module(rig.appearance.hair):
+			files.append(RLHeadLibrary.hair_path(rig.appearance.hair))
+		if rig.appearance.beard not in [RLHeadAppearance.NONE, RLHeadAppearance.STUBBLE]:
+			files.append(RLHeadLibrary.beard_path(rig.appearance.beard))
+	var result := {}
+	for file: String in files:
+		if FileAccess.file_exists(file):
+			result[file] = FileAccess.get_sha256(file)
+	return result
 
 
 func _canvas_to_image() -> Vector2:
