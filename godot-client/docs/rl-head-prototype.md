@@ -1,7 +1,7 @@
 # RL head (MPFB-based heads, hair and facial customisation)
 
-Status: **the High Human head, on the task branch `feature/rl-heads-high`** (from
-origin/develop `159bb0c5`; the prototype was `concept/rl-heads-claude-20261027`). Every
+Status: **the High Human head, on the task branch `feature/rl-heads-high`** (on
+origin/develop `98c76adf`; the prototype was `concept/rl-heads-claude-20261027`). Every
 Human (culture `luminous`, bodyTemplate `luminous_male` / `luminous_female`) at High
 quality draws it, players and NPCs alike; Low, Medium and every other race keep their
 art exactly. No asset is replaced: the shipped bodies, hair and equipment are untouched.
