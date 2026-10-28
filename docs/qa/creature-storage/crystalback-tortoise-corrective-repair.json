@@ -472,6 +472,42 @@
     ".local/tortoise-corrective-repair/control-preview-captures/preview-smoke.json": {
       "sha256": "f4ff314596a0a27913d1c388c75b186f551c5e140981308add167949a8c1783e",
       "bytes": 1605
+    },
+    ".local/tortoise-corrective-repair/static-bake-build.json": {
+      "sha256": "89b3cd46663e13eaac93e2d36e9e6ea2ba0da7385255c5caf43d02385bed5998",
+      "bytes": 1546
+    },
+    ".local/tortoise-corrective-repair/static-bake-motion.json": {
+      "sha256": "b6fd636301b549ebc60c2367e43e24ca074935f9b385d6fb66afe76a6afd84ce",
+      "bytes": 3105
+    },
+    ".local/tortoise-corrective-repair/static-bake-blender.json": {
+      "sha256": "8307f96e3a3f13bfcfacb065fdf113b8f70a092bc1d138ac46108d4b085e4e2d",
+      "bytes": 5482
+    },
+    ".local/tortoise-corrective-repair/fit-data.npz": {
+      "sha256": "93f0eee14270ad78bd3277c08a41b37e2761af291eef9611630567a3a2eba86e",
+      "bytes": 74048610
+    },
+    ".local/tortoise-corrective-repair/original-normal-fit.npz": {
+      "sha256": "f1449ce97724497122e9e8deea8abc1fbf3fc18d1153525a441f4cc10be98601",
+      "bytes": 66097
+    },
+    ".local/tortoise-corrective-repair/run_static_probe.py": {
+      "sha256": "3991dcbdba22794d8ac4ee5f32c5e639089497a338fb19b9a6942a4127826f93",
+      "bytes": 1407
+    },
+    ".local/tortoise-corrective-repair/analyze_static_probe.py": {
+      "sha256": "8bfb064fe7e96ba5ce700eaaf2d91f55da156416f68b6b358f8e0a09efa1cf01",
+      "bytes": 3898
+    },
+    ".local/tortoise-corrective-repair/check_static_blender.py": {
+      "sha256": "9d3fbca9ac31eb00fd9e4d8ee954e6b9f7959ae1979202ed47409c04cfcf39e1",
+      "bytes": 4170
+    },
+    ".local/tortoise-corrective-repair/static-bake-preview-captures/preview-smoke.json": {
+      "sha256": "e61d6ae67679e5444b9c15541a1477249b676f49e06731babad633b3093632f0",
+      "bytes": 1613
     }
   },
   "limits": [
@@ -803,6 +839,232 @@
       ],
       "renderer": "forward_plus",
       "terminal_hold_and_idle_reset": true
+    },
+    "static_bake": {
+      "clips": [
+        {
+          "clip": "Idle_A",
+          "length": 2.0,
+          "synchronized_time": 0.94
+        },
+        {
+          "clip": "Fighting_Idle",
+          "length": 1.39999997615814,
+          "synchronized_time": 0.657999988794327
+        },
+        {
+          "clip": "Walk",
+          "length": 1.85000002384186,
+          "synchronized_time": 0.869500011205673
+        },
+        {
+          "clip": "Jog",
+          "length": 1.14999997615814,
+          "synchronized_time": 0.540499988794327
+        },
+        {
+          "clip": "Sword_Attack",
+          "length": 1.39999997615814,
+          "synchronized_time": 0.657999988794327
+        },
+        {
+          "clip": "Hit_Chest",
+          "length": 0.699999988079071,
+          "synchronized_time": 0.328999994397163
+        },
+        {
+          "clip": "Death_A",
+          "length": 3.0,
+          "synchronized_time": 1.41
+        }
+      ],
+      "directed_switches_exercised": 49,
+      "keyboard_mouse_orbit_zoom_input_delivered": true,
+      "models": [
+        {
+          "label": "REFERENCE / Reviewed 30 FPS / 577 shapes",
+          "sha256": "01b3a309b5fe61ed6c7845aee5bd9552df62496af9d205928b72381a2aeeaf9c"
+        },
+        {
+          "label": "MESH BAKE / Fixed mesh and normals / No corrective shapes",
+          "sha256": "1fcc5087fec71c5f1dcc852e745e97c190ac186c10f4945f81383346f4097127"
+        }
+      ],
+      "renderer": "forward_plus",
+      "terminal_hold_and_idle_reset": true
     }
+  },
+  "static_bake": {
+    "artifact": ".local/tortoise-corrective-repair/crystalback_tortoise_static_bake.glb",
+    "sha256": "1fcc5087fec71c5f1dcc852e745e97c190ac186c10f4945f81383346f4097127",
+    "label": "MESH BAKE / Fixed mesh and normals / No corrective shapes",
+    "source_sha256": "01b3a309b5fe61ed6c7845aee5bd9552df62496af9d205928b72381a2aeeaf9c",
+    "fit_sha256": "93f0eee14270ad78bd3277c08a41b37e2761af291eef9611630567a3a2eba86e",
+    "normal_fit_sha256": "f1449ce97724497122e9e8deea8abc1fbf3fc18d1153525a441f4cc10be98601",
+    "raw_bytes": 1558860,
+    "rlcz_bytes": 998255,
+    "corrective_targets": 0,
+    "corrective_gpu_buffer_bytes": 0,
+    "roundtrip_verified": true,
+    "status": "visual_experiment_not_installed",
+    "method": "Best constant local vertex displacement from the prior audit, with original-skin fixed normal fit. This is a least-squares mesh across training poses, not a selected single animation frame.",
+    "preserved": [
+      "original skin weights and joints",
+      "all original bones, binds and hierarchy",
+      "all seven bone animation curves and timing",
+      "shell, textures, materials, UVs and triangle indices"
+    ],
+    "changed": [
+      "body rest positions and normals",
+      "all runtime morph targets and weight channels removed"
+    ],
+    "expected_surface_error": {
+      "maximum_residual_mm": 97.73521155502793,
+      "rms_residual_mm": 11.253461010358144,
+      "maximum_base_displacement_mm": 149.88475345303624
+    },
+    "packing": {
+      "constant_samplers_collapsed": 0,
+      "original_buffer_bytes": 25171204,
+      "packed_buffer_bytes": 1209756
+    }
+  },
+  "static_bake_qualification": {
+    "all": {
+      "poses": 909,
+      "maximum_position_mm": 97.73522078860155,
+      "rms_position_mm": 8.8607710973866,
+      "worst_position": {
+        "label": "Death_A@2.55",
+        "vertex": 2911,
+        "source_world_position": [
+          0.9040849819710632,
+          0.3894247291629227,
+          -0.5314473854924934
+        ]
+      },
+      "maximum_normal_degrees": 177.08735789892495,
+      "rms_normal_degrees": 6.0710800777405405,
+      "worst_normal": {
+        "label": "Jog@0.2",
+        "vertex": 1586,
+        "source_world_position": [
+          0.8323500325899997,
+          0.17145390151582687,
+          -0.5445501860978765
+        ]
+      }
+    },
+    "clip": {
+      "poses": 740,
+      "maximum_position_mm": 97.73522078860155,
+      "rms_position_mm": 8.67511123757261,
+      "worst_position": {
+        "label": "Death_A@2.55",
+        "vertex": 2911,
+        "source_world_position": [
+          0.9040849819710632,
+          0.3894247291629227,
+          -0.5314473854924934
+        ]
+      },
+      "maximum_normal_degrees": 177.08735789892495,
+      "rms_normal_degrees": 6.160205243846615,
+      "worst_normal": {
+        "label": "Jog@0.2",
+        "vertex": 1586,
+        "source_world_position": [
+          0.8323500325899997,
+          0.17145390151582687,
+          -0.5445501860978765
+        ]
+      }
+    },
+    "crossfade": {
+      "poses": 168,
+      "maximum_position_mm": 77.47647836399167,
+      "rms_position_mm": 9.589567371696782,
+      "worst_position": {
+        "label": "Idle_A->Fighting_Idle@0.21",
+        "vertex": 3058,
+        "source_world_position": [
+          0.8437264657114341,
+          0.41411606737300755,
+          -0.6091196861828645
+        ]
+      },
+      "maximum_normal_degrees": 173.7249005711926,
+      "rms_normal_degrees": 5.652810057445314,
+      "worst_normal": {
+        "label": "Death_A->Idle_A@0.09",
+        "vertex": 1586,
+        "source_world_position": [
+          0.8560000436254406,
+          0.16576201120209832,
+          -0.5150209166158454
+        ]
+      }
+    },
+    "RESET": {
+      "poses": 1,
+      "maximum_position_mm": 88.13088025324527,
+      "rms_position_mm": 15.123487978783015,
+      "worst_position": {
+        "label": "RESET",
+        "vertex": 3058,
+        "source_world_position": [
+          0.8332847698861406,
+          0.412796027121802,
+          -0.6164670908326595
+        ]
+      },
+      "maximum_normal_degrees": 73.04743293324596,
+      "rms_normal_degrees": 7.348670707736887,
+      "worst_normal": {
+        "label": "RESET",
+        "vertex": 2170,
+        "source_world_position": [
+          0.22811456778478573,
+          0.24293592887612198,
+          -0.5682422127334846
+        ]
+      }
+    }
+  },
+  "static_bake_blender": {
+    "poses": 119,
+    "maximum_displayed_position_difference_mm": 97.70950806994432,
+    "maximum_bone_matrix_difference": 0.0
+  },
+  "bake_preview_review_points": [
+    {
+      "id": "worst_position",
+      "caption": "Maximum surface difference: Death A",
+      "clip": "Death_A",
+      "time": 2.55,
+      "focus": [
+        0.40408498197106324,
+        0.3894247291629227,
+        -0.031447385492493374
+      ]
+    },
+    {
+      "id": "worst_normal",
+      "caption": "Shading difference: Jog",
+      "clip": "Jog",
+      "time": 0.2,
+      "focus": [
+        0.33235003258999973,
+        0.17145390151582687,
+        -0.04455018609787653
+      ]
+    }
+  ],
+  "static_bake_scope_proof": {
+    "all_bone_animation_input_output_arrays_exact": true,
+    "skin_weights_joints_and_binds_exact": true,
+    "uvs_and_indices_exact": true,
+    "shell_geometry_exact": true,
+    "no_runtime_morphs": true
   }
 }

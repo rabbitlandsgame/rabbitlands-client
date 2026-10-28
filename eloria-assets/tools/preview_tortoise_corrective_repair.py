@@ -20,7 +20,7 @@ def prepare(godot, variant='rebasis'):
     receipt = ROOT / 'docs/qa/creature-storage/crystalback-tortoise-corrective-repair.json'
     evidence = json.loads(receipt.read_text(encoding='utf-8'))
     models = []
-    records = evidence['models'] if variant == 'skin' else [evidence['models'][0], evidence['control']]
+    records = evidence['models'] if variant == 'skin' else [evidence['models'][0], evidence['static_bake' if variant == 'bake' else 'control']]
     for record in records:
         path = ROOT / record['artifact']
         if not path.is_file() or digest(path) != record['sha256']:
@@ -48,14 +48,19 @@ renderer/rendering_method="forward_plus"
         Path(environment[key]).mkdir(parents=True, exist_ok=True)
     a, b = records
     count = b['corrective_targets']
+    description = f"Both use 30 FPS. Right: {count} corrective shapes; {'revised skin weights' if variant == 'skin' else 'original mesh and skin weights retained'}. Approximate draft for review."
+    if variant == 'bake':
+        description = 'Right: one fixed mesh + fixed normals, zero corrective shapes. Original rig and all seven bone animations retained.'
+    capture_folder = {'skin': 'preview-captures', 'rebasis': 'control-preview-captures', 'bake': 'static-bake-preview-captures'}[variant]
+    review_key = {'skin': 'preview_review_points', 'rebasis': 'control_preview_review_points', 'bake': 'bake_preview_review_points'}[variant]
     job = {'actor': 'crystalback_tortoise', 'display_name': 'Crystalback Tortoise', 'fps': 30,
-           'title': 'Rabbit Lands | Tortoise corrective repair pilot',
-           'heading': 'Crystalback Tortoise / Corrective repair pilot',
-           'description': f"Both use 30 FPS. Right: {count} corrective shapes; {'revised skin weights' if variant == 'skin' else 'original mesh and skin weights retained'}. Approximate draft for review.",
-           'clips': evidence['clips'], 'models': models, 'output': str(output / ('preview-captures' if variant == 'skin' else 'control-preview-captures')),
+           'title': 'Rabbit Lands | Tortoise fixed mesh bake | No corrective shapes' if variant == 'bake' else 'Rabbit Lands | Tortoise corrective repair pilot',
+           'heading': 'Crystalback Tortoise / One-time mesh bake' if variant == 'bake' else 'Crystalback Tortoise / Corrective repair pilot',
+           'description': description,
+           'clips': evidence['clips'], 'models': models, 'output': str(output / capture_folder),
            'summary': f"Raw {a['raw_bytes']/1e6:.2f} -> {b['raw_bytes']/1e6:.2f} MB | Packaged {a['rlcz_bytes']/1e6:.2f} -> {b['rlcz_bytes']/1e6:.2f} MB | Drag / zoom either pane to move both cameras.",
            'runtime_summary': f"21 bones and four skin influences retained. Corrective GPU buffers: {a['corrective_gpu_buffer_bytes']/1e6:.2f} -> {b['corrective_gpu_buffer_bytes']/1e6:.2f} MB. Installed model unchanged.",
-           'review_points': evidence.get('preview_review_points' if variant == 'skin' else 'control_preview_review_points', [])}
+           'review_points': evidence.get(review_key, [])}
     job_path = output / f'preview-job-{variant}.json'
     job_path.write_text(json.dumps(job, indent=2) + '\n', encoding='utf-8', newline='\n')
     with (output / 'preview-import.stdout.log').open('w') as stdout, (output / 'preview-import.stderr.log').open('w') as stderr:
@@ -73,7 +78,7 @@ def main():
     parser.add_argument('--godot', type=Path, default=Path(os.environ.get('GODOT', 'C:/rabbitlands/rabbitlands-client/godot-client/Godot_v4.7.2-stable_win64.exe')))
     parser.add_argument('--prepare-only', action='store_true')
     parser.add_argument('--smoke', action='store_true')
-    parser.add_argument('--variant', choices=['rebasis', 'skin'], default='rebasis', help='Compare fewer shapes with the original skin, or the skin repair experiment')
+    parser.add_argument('--variant', choices=['rebasis', 'skin', 'bake'], default='rebasis', help='Compare fewer shapes, repaired skin, or the fixed mesh without any runtime correctives')
     args = parser.parse_args()
     output, project, job, environment = prepare(args.godot, args.variant)
     print('TORTOISE_REPAIR_PREVIEW_PREPARED', project, flush=True)
@@ -82,14 +87,16 @@ def main():
     command = [str(args.godot), '--path', str(project), '--script', 'res://prototypes/creature_animation_comparison.gd', '--', str(job)]
     if args.smoke:
         command.append('--smoke')
-    with (output / 'preview.stdout.log').open('w') as stdout, (output / 'preview.stderr.log').open('w') as stderr:
+    stdout_path = output / f'preview-{args.variant}.stdout.log'
+    stderr_path = output / f'preview-{args.variant}.stderr.log'
+    with stdout_path.open('w') as stdout, stderr_path.open('w') as stderr:
         subprocess.run(command, env=environment, stdout=stdout, stderr=stderr,
                        creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0,
                        check=True, timeout=180 if args.smoke else None)
-    errors = (output / 'preview.stderr.log').read_text(encoding='utf-8')
+    errors = stderr_path.read_text(encoding='utf-8')
     assert 'ERROR:' not in errors, errors[-3000:]
     if args.smoke:
-        assert 'CREATURE_COMPARISON_SMOKE_PASS' in (output / 'preview.stdout.log').read_text(encoding='utf-8')
+        assert 'CREATURE_COMPARISON_SMOKE_PASS' in stdout_path.read_text(encoding='utf-8')
 
 
 if __name__ == '__main__':
