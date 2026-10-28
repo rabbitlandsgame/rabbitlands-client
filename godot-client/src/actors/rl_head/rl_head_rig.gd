@@ -90,7 +90,8 @@ const LOD_DISTANCES := {
 }
 ## Hysteresis either side of a hand-over, so an actor on the line does not flicker.
 const LOD_MARGIN := 1.0
-## Frames between distance checks; actors are spread over them by id.
+## Frames between distance checks. One per-frame callback checks the rigs in
+## turn, a sixth of them each frame, instead of a _process on every rig.
 const LOD_CHECK_FRAMES := 6
 const INSTANCE_UNIFORMS := ["skin_color", "lip_tint", "brow_color", "hair_color",
 	"freckles", "liner", "stubble", "eye_color", "hairline", "brow_style", "brow_thickness",
@@ -132,7 +133,8 @@ var _expression: RLFaceExpression
 var _rim_roughness := -1.0
 ## The visible band: 0 is the quality's first instanced level.
 var _lod_band := 0
-var _lod_countdown := 0
+## In _lod_rigs (several levels and no portrait pose held).
+var _lod_listed := false
 ## The actor's body material, which the head's body patch is drawn with.
 var _body_material: Material = null
 ## A portrait (dialogue line, leaderboard card) is being taken: first level,
@@ -148,6 +150,10 @@ var _live_identity := false
 
 ## Mesh resource id -> {blend shape name: index}, shared by every actor.
 static var _shape_indices: Dictionary = {}
+## The rigs whose level follows the camera, checked in turn by _check_lods.
+static var _lod_rigs: Array[RLHeadRig] = []
+static var _lod_cursor := 0
+static var _lod_ticking := false
 
 
 ## Builds an RL head on `skeleton` from `value` (a preset name, the dictionary
@@ -636,7 +642,7 @@ func _show_band(band: int) -> void:
 	_lod_band = band
 	for group: Array in [_head_lods, _beard_lods, _hair_lods]:
 		_show_levels(group, band)
-	set_process(_band_count() > 1 and not _portrait_pose)
+	_refresh_lod_listing()
 	_bake_shown()
 
 
@@ -648,17 +654,51 @@ func _show_levels(levels: Array, band: int) -> void:
 				(mesh_node as MeshInstance3D).visible = index == shown
 
 
-func _ready() -> void:
-	# Spread the actors' distance checks over LOD_CHECK_FRAMES.
-	_lod_countdown = get_instance_id() % LOD_CHECK_FRAMES
-	set_process(_band_count() > 1 and not _portrait_pose)
+func _enter_tree() -> void:
+	_refresh_lod_listing()
 
 
-func _process(_delta: float) -> void:
-	_lod_countdown -= 1
-	if _lod_countdown > 0:
+func _exit_tree() -> void:
+	_refresh_lod_listing(false)
+
+
+## Lists the rig for camera-distance checks while it has several levels, no
+## portrait pose is held and it is in the tree.
+func _refresh_lod_listing(in_tree: bool = true) -> void:
+	var wanted := in_tree and is_inside_tree() and _band_count() > 1 and not _portrait_pose
+	if wanted == _lod_listed:
 		return
-	_lod_countdown = LOD_CHECK_FRAMES
+	_lod_listed = wanted
+	if wanted:
+		_lod_rigs.append(self)
+		if not _lod_ticking:
+			_lod_ticking = true
+			(Engine.get_main_loop() as SceneTree).process_frame.connect(_check_lods)
+	else:
+		_lod_rigs.erase(self)
+
+
+## A sixth of the listed rigs each frame look at their camera. A rig whose
+## processing is off (its actor paused by the animation gate) keeps its level.
+static func _check_lods() -> void:
+	var count := _lod_rigs.size()
+	if count == 0:
+		var tree := Engine.get_main_loop() as SceneTree
+		if tree != null and tree.process_frame.is_connected(_check_lods):
+			tree.process_frame.disconnect(_check_lods)
+		_lod_ticking = false
+		return
+	for step: int in ceili(float(count) / LOD_CHECK_FRAMES):
+		if _lod_rigs.is_empty():
+			return
+		_lod_cursor = _lod_cursor % _lod_rigs.size()
+		var rig := _lod_rigs[_lod_cursor]
+		_lod_cursor += 1
+		if is_instance_valid(rig) and rig.can_process():
+			rig._check_lod()
+
+
+func _check_lod() -> void:
 	var camera := get_viewport().get_camera_3d()
 	if camera != null:
 		update_lod(camera.global_position.distance_to(
@@ -666,7 +706,7 @@ func _process(_delta: float) -> void:
 
 
 func _apply_portrait_pose() -> void:
-	set_process(_band_count() > 1 and not _portrait_pose)
+	_refresh_lod_listing()
 	if _expression != null:
 		_expression.hold_neutral(_portrait_pose)
 

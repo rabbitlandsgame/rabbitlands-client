@@ -13,7 +13,10 @@ extends Node
 ## Near actors are updated every frame, the rest every third or fourth frame,
 ## and actors beyond FAR_METRES not at all (eyes left open). An actor the
 ## animation gate pauses has its model's processing switched off, this node's
-## with it. `advance` steps the face by hand, for deterministic renders.
+## with it. The stride is chosen once per update cycle (a far actor looks
+## again every FAR_RECHECK_FRAMES), and a face with nothing to show - no
+## expression, no blink under way, not talking - only counts down to its next
+## blink: a crowd's idle faces cost a few microseconds a frame each. `advance` steps the face by hand, for deterministic renders.
 ## `hold_neutral` keeps the face neutral with the eyes open and no blink while
 ## a portrait (dialogue line, leaderboard card) is taken of it.
 
@@ -23,6 +26,7 @@ const NEAR_METRES := 12.0
 const FAR_METRES := 40.0
 const MID_STRIDE := 3
 const QUARTER_STRIDE := 4
+const FAR_RECHECK_FRAMES := 8
 const BLINK_CLOSE := 0.12
 const BLINK_OPEN := 0.16
 const BLINK_GAP := Vector2(2.0, 6.0)
@@ -67,6 +71,13 @@ var _random := RandomNumberGenerator.new()
 var _look := Vector2.ZERO
 var _held := false
 var _held_auto_blink := true
+## The stride chosen for the current update cycle, and the frames a far
+## actor waits before it looks again.
+var _cycle_stride := 1
+var _far_wait := 0
+## The actor (the CharacterBody3D above), found once.
+var _actor_node: Node = null
+var _actor_found := false
 
 
 func _ready() -> void:
@@ -209,6 +220,15 @@ func weights() -> Dictionary:
 
 ## Steps blink, fades and talk by `delta` seconds and writes the result.
 func advance(delta: float) -> void:
+	var idle := _goal.is_empty() and _written.is_empty() and not _talking
+	if idle and _blink_phase < 0.0 and _blink_pause <= 0.0:
+		# Nothing shows: only the wait for the next blink runs. A blink started
+		# here writes nothing until it has closed the eyes a little.
+		if auto_blink:
+			_blink_wait -= delta
+			if _blink_wait <= 0.0:
+				blink()
+		return
 	for shape: Variant in _goal.keys():
 		var now := float(_current.get(shape, 0.0))
 		var goal := float(_goal[shape])
@@ -253,8 +273,16 @@ func blink_amount() -> float:
 func _process(delta: float) -> void:
 	if _held:
 		return
-	var stride := 1 if always_update else _stride()
+	if _far_wait > 0:
+		_far_wait -= 1
+		return
+	if always_update:
+		_cycle_stride = 1
+	elif _stride_count == 0:
+		_cycle_stride = _stride()
+	var stride := _cycle_stride
 	if stride <= 0:
+		_far_wait = FAR_RECHECK_FRAMES - 1
 		if _blink_phase >= 0.0 or _blink_pause > 0.0:
 			_blink_phase = -1.0
 			_blink_pause = 0.0
@@ -288,10 +316,18 @@ func _stride() -> int:
 
 
 func _actor() -> Node:
-	var walker := get_parent()
-	while walker != null and walker is not CharacterBody3D:
-		walker = walker.get_parent()
-	return walker
+	if not _actor_found or (_actor_node != null and not is_instance_valid(_actor_node)):
+		_actor_found = true
+		var walker := get_parent()
+		while walker != null and walker is not CharacterBody3D:
+			walker = walker.get_parent()
+		_actor_node = walker
+	return _actor_node
+
+
+func _exit_tree() -> void:
+	_actor_found = false
+	_actor_node = null
 
 
 func _fade(shape: String, goal: float, fade: float) -> void:

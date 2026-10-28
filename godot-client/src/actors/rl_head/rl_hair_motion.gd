@@ -41,6 +41,9 @@ var _simulator: SpringBoneSimulator3D
 var _skeleton: Skeleton3D
 var _running := false
 var _allowed := false
+## The actor (the CharacterBody3D above), found once.
+var _actor_node: Node = null
+var _actor_found := false
 
 
 ## Builds the simulator on the hair skeleton. False when the style declares no
@@ -127,6 +130,8 @@ func _enter_tree() -> void:
 
 func _exit_tree() -> void:
 	_members.erase(self)
+	_actor_found = false
+	_actor_node = null
 
 
 func _process(_delta: float) -> void:
@@ -170,12 +175,15 @@ func _set_running(running: bool) -> void:
 
 
 func _mounted() -> bool:
-	var walker := get_parent()
-	while walker != null and walker is not CharacterBody3D:
-		walker = walker.get_parent()
-	if walker == null:
+	if not _actor_found or (_actor_node != null and not is_instance_valid(_actor_node)):
+		_actor_found = true
+		var walker := get_parent()
+		while walker != null and walker is not CharacterBody3D:
+			walker = walker.get_parent()
+		_actor_node = walker
+	if _actor_node == null:
 		return false
-	var mount: Variant = walker.get("_mount_visual")
+	var mount: Variant = _actor_node.get("_mount_visual")
 	return mount != null and is_instance_valid(mount)
 
 
