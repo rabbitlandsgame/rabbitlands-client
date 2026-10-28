@@ -1,190 +1,63 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "batch": 31,
-  "rank": 154,
   "actor": "frost_stone_golem",
-  "status": "Qualified exact encoded-storage reduction; original motion and review status preserved.",
+  "runtime_path": "godot-client/assets/actors/native/creatures/frost_stone_golem.glb",
   "source_sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9",
-  "candidate_sha256": "6240f7c590d3ae673dedebeb6a88ef740d8ef371716b3d7c1266871ee2472afe",
-  "source_bytes": 5075744,
-  "candidate_bytes": 4865020,
-  "source_zstd_bytes": 3390603,
-  "candidate_zstd_bytes": 3395330,
-  "source_rlcz_bytes": 3390659,
-  "candidate_rlcz_bytes": 3395386,
-  "shared_gpu_source_bytes": 2740320,
-  "shared_gpu_candidate_bytes": 2740320,
-  "draw_surfaces_source": 1,
-  "draw_surfaces_candidate": 1,
-  "source_lods": [
-    0
-  ],
-  "candidate_lods": [
-    0
-  ],
-  "zstd_level": 3,
-  "rlcz_header_bytes": 56,
-  "rlcz_roundtrip_bit_exact": true,
-  "source_vertices": 4152,
-  "source_target_slots": 33,
-  "removed_flat_keys": 23820,
-  "inactive_target_mesh_counts": [
-    {
-      "mesh": 0,
-      "targets_before": 33,
-      "targets_after": 33,
-      "removed_target_indices": [],
-      "retained_target_indices": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11,
-        12,
-        13,
-        14,
-        15,
-        16,
-        17,
-        18,
-        19,
-        20,
-        21,
-        22,
-        23,
-        24,
-        25,
-        26,
-        27,
-        28,
-        29,
-        30,
-        31,
-        32
-      ]
-    }
-  ],
-  "geometry_vertex_mapping": {
-    "kind": "identity",
-    "count": 4152,
-    "rule": "All original node/primitive vertex ordering and topology retained."
+  "runtime_sha256": "a4af22643ac3a46c79cd237322589f320feed3cad9e7400ad6f9c609fe339430",
+  "qualification": "Qualified partial corrective storage elimination under unchanged strict source, fresh Blender, native, genuine Editor, full-cycle/four-view gameplay and original/current-helper secondary-effect gates.",
+  "human_approval_changed": false,
+  "recipe": {
+    "tool": "eloria-assets/tools/pack_creature_storage.py",
+    "profile": "eloria-assets/source/creature-storage/frost_stone_golem.json",
+    "bounds": "eloria-assets/source/creature-storage/frost_stone_golem-bounds.json",
+    "byte_exact_reproduction": true,
+    "preserve_trs_keys": false,
+    "steps": [
+      "prune_zero_targets",
+      "reduce_constant_runs",
+      "split_corrective_partition",
+      "compact"
+    ]
   },
-  "preserve_trs_keys": false,
-  "rig_audit": {
-    "decision": "Exact-only main installed. Separate promising rigid-component candidate remains private pending full graphics/effects qualification.",
-    "optional_candidate_sha256": "a4af22643ac3a46c79cd237322589f320feed3cad9e7400ad6f9c609fe339430",
-    "selected_vertices": 2495,
-    "selected_welded_components": 13,
-    "selected_unique_triangles": 2629,
-    "potential_shared_corrective_bytes_saved": 1646700,
-    "additional_draw_surfaces": 1,
-    "skin_joint_and_weight_bits_unchanged": true,
-    "raw_position_delta_maximum": 5.827843433971723e-16,
-    "raw_position_deltas_literal_zero": false,
-    "original_godot_selected_all33_target_position_normal_tangent_rows_bit_identical_to_base": true,
-    "source_all_time_world_position_difference_bound": 4.381140450657284e-15,
-    "private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\batch-031\\frost_stone_golem\\rigid-v2"
+  "bytes": {
+    "source_bytes": 5075744,
+    "candidate_bytes": 3903964,
+    "source_zstd_bytes": 3390659,
+    "candidate_zstd_bytes": 2803695
   },
-  "exact_source_validation": {
-    "passed": true,
-    "source_sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9",
-    "candidate_sha256": "6240f7c590d3ae673dedebeb6a88ef740d8ef371716b3d7c1266871ee2472afe",
-    "geometry_skin_binds_rest_topology_uv_material_image_bits_preserved": true,
-    "retained_key_time_and_value_bits_exact_only_flat_interiors_removed": true,
-    "every_removed_default_and_key_is_zero": true,
-    "redundant_flat_key_rows_proved": 23820,
-    "preexisting_duplicate_property_curves_preserved_in_occurrence_order": 0,
-    "meshes": [
-      {
-        "mesh": 0,
-        "targets_before": 33,
-        "targets_after": 33,
-        "removed_target_indices": [],
-        "retained_target_indices": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          9,
-          10,
-          11,
-          12,
-          13,
-          14,
-          15,
-          16,
-          17,
-          18,
-          19,
-          20,
-          21,
-          22,
-          23,
-          24,
-          25,
-          26,
-          27,
-          28,
-          29,
-          30,
-          31,
-          32
-        ]
-      }
-    ],
-    "clips": {
-      "Death_A": {
-        "original_knots": 2706,
-        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 5416
-      },
-      "Fighting_Idle": {
-        "original_knots": 642,
-        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 1271
-      },
-      "Hit_Chest": {
-        "original_knots": 220,
-        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 441
-      },
-      "Idle_A": {
-        "original_knots": 876,
-        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 1745
-      },
-      "Jog": {
-        "original_knots": 787,
-        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 1560
-      },
-      "Sword_Attack": {
-        "original_knots": 989,
-        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 1982
-      },
-      "Walk": {
-        "original_knots": 1205,
-        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 2386
-      },
-      "Attack_Ground_Pound": {
-        "original_knots": 1769,
-        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 3536
-      }
+  "storage_comparison": {
+    "original": {
+      "sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9",
+      "raw_bytes": 5075744,
+      "shipping_RLCZ_bytes": 3390659
     },
-    "proof": "Zero defaults and every LINEAR/STEP key zero prove inactive targets remain zero continuously and under crossfades. All retained accessor bytes and retained time/value rows are exact. Deleted key rows sit strictly inside three bit-identical adjacent rows; plateau boundaries and endpoints remain."
+    "superseded_main": {
+      "sha256": "6240f7c590d3ae673dedebeb6a88ef740d8ef371716b3d7c1266871ee2472afe",
+      "raw_bytes": 4865020,
+      "shipping_RLCZ_bytes": 3395386
+    },
+    "candidate": {
+      "sha256": "a4af22643ac3a46c79cd237322589f320feed3cad9e7400ad6f9c609fe339430",
+      "raw_bytes": 3903964,
+      "shipping_RLCZ_bytes": 2803695
+    }
   },
-  "numeric_all_key_validation": {
+  "corrective_graphics_buffer_bytes": {
+    "source": 2740320,
+    "candidate": 1093620,
+    "saved": 1646700,
+    "scope": "Actual raw native Godot blend_shape_data, shared per loaded model."
+  },
+  "draw_surfaces": {
+    "source": 1,
+    "candidate": 2
+  },
+  "source_validation": {
     "passed": true,
     "source_sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9",
-    "candidate_sha256": "6240f7c590d3ae673dedebeb6a88ef740d8ef371716b3d7c1266871ee2472afe",
-    "probe_vertices": 242,
+    "candidate_sha256": "a4af22643ac3a46c79cd237322589f320feed3cad9e7400ad6f9c609fe339430",
+    "probe_vertices": 4152,
     "clips": {
       "Death_A": {
         "source_knots": 2706,
@@ -213,7 +86,7 @@
       "Jog": {
         "source_knots": 787,
         "keys_midpoints_and_offgrid_samples": 1578,
-        "maximum_position_error": 0.0,
+        "maximum_position_error": 5.578801654593729e-16,
         "maximum_normal_vector_error": 0.0
       },
       "Sword_Attack": {
@@ -225,7 +98,7 @@
       "Walk": {
         "source_knots": 1205,
         "keys_midpoints_and_offgrid_samples": 2414,
-        "maximum_position_error": 0.0,
+        "maximum_position_error": 6.843874359417885e-16,
         "maximum_normal_vector_error": 0.0
       },
       "Attack_Ground_Pound": {
@@ -235,20 +108,136 @@
         "maximum_normal_vector_error": 0.0
       }
     },
-    "scope": "Independent source/candidate sampler evaluation at every original key and midpoint plus off-grid times, including skinning and morph normals; exact interval proof retained separately.",
+    "scope": "Independent ALL-4152-VERTEX source/candidate sampler evaluation at every original key and midpoint plus off-grid times, including skinning and morph normals; exact interval proof retained separately.",
     "default_pose": {
       "maximum_position_error": 0.0,
       "maximum_normal_vector_error": 0.0
     },
-    "elapsed_seconds": 27.548634300008416
+    "complete": true,
+    "completed_in_two_runs": true,
+    "original_controller_timeout_after_completed_seven_clips_seconds": 600,
+    "ground_pound_completion_elapsed_seconds": 121.01554220006801
   },
-  "original_physical_witness_validation": {
+  "source_continuous_bound": {
+    "source_sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9",
+    "candidate_sha256": "a4af22643ac3a46c79cd237322589f320feed3cad9e7400ad6f9c609fe339430",
+    "selected_vertices": 2495,
+    "raw_selected_position_deltas_are_literal_zero": false,
+    "maximum_raw_selected_position_delta": 5.827843433971723e-16,
+    "source_world_position_difference_upper_bound_all_clip_times_and_convex_crossfades": 4.381140450657284e-15,
+    "maximum_skin_linear_operator_bound": 1.0000009069325189,
+    "source_morph_weight_absolute_bounds": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "method": "Triangle inequality per vertex: sum(abs(weight_j)*norm(raw omitted position delta_j)) times the unchanged skinned linear operator bound. LINEAR/STEP weights/scales stay inside key/default extrema. Each ancestor unit rotation has norm one; local scale/matrix operator bounds multiply through the full hierarchy. Skin coefficients/binds/joints and base float32 attributes remain unchanged. No sampled-time extrapolation or approximate curve fitting.",
+    "normal_tangent_source_changes": "None; all selected raw NORMAL/TANGENT deltas are positive zero and original skin/base direction attributes are unchanged.",
+    "original_native_target_row_proof": {
+      "full_native_deformation_payload_proof": {
+        "source_sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9",
+        "candidate_sha256": "a4af22643ac3a46c79cd237322589f320feed3cad9e7400ad6f9c609fe339430",
+        "load_proofs": [
+          {
+            "actual_loader": "GlbSceneCache._build_raw via GLTFDocument",
+            "source_path": "C:\\rabbitlands\\worktrees\\client-creature-batch-heavy-20261027\\.local\\batch-031\\frost_stone_golem\\baseline.glb",
+            "source_sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9"
+          },
+          {
+            "actual_loader": "GlbSceneCache._build_raw via GLTFDocument",
+            "source_path": "C:\\rabbitlands\\worktrees\\client-creature-batch-heavy-20261027\\.local\\batch-031\\frost_stone_golem\\rigid-v2\\candidate.glb",
+            "source_sha256": "a4af22643ac3a46c79cd237322589f320feed3cad9e7400ad6f9c609fe339430"
+          }
+        ],
+        "all_typed_base_attributes_including_tangent_uv_color_custom_skin_bit_exact": true,
+        "all_33_morph_POSITION_NORMAL_TANGENT_columns_bit_exact": true,
+        "selected_zero_targets_expand_to_base_POSITION_NORMAL_TANGENT": true,
+        "complete_oriented_triangle_payload_multiset_exact": true,
+        "vertices": 4152,
+        "triangles": 4310,
+        "source_surfaces": 1,
+        "candidate_surfaces": 2,
+        "scope": "Direct actual raw native GLTFDocument source/candidate full typed row and oriented triangle payload proof; every base attribute and all33 corrective P/N/T columns included. Candidate corrective-free surface expanded with its base P/N/T, requiring exact source equality; no original ordinal or arbitrary seam correspondence assumed. Materials independently exact in native and genuine Editor typed captures.",
+        "passed": true
+      },
+      "packed_skin_and_order_proof": "C:\\rabbitlands\\worktrees\\client-creature-batch-heavy-20261027\\.local\\batch-031\\frost_stone_golem\\rigid-v2\\parallel-cpu\\native-payload-order-and-skin-proof.json"
+    },
+    "scope": "Raw source has microscopic nonzero POSITION residue, distinct from the original Godot native selected POSITION/NORMAL/TANGENT target rows that are bit-identical to base. Final numeric, fresh import, graphics and effects gates remain required."
+  },
+  "raw_selected_attribute_bits": {
+    "POSITION": {
+      "bit_exact": true,
+      "different_components": 0,
+      "maximum_component_difference": 0.0
+    },
+    "NORMAL": {
+      "bit_exact": true,
+      "different_components": 0,
+      "maximum_component_difference": 0.0
+    },
+    "TEXCOORD_0": {
+      "bit_exact": true,
+      "different_components": 0,
+      "maximum_component_difference": 0.0
+    },
+    "JOINTS_0": {
+      "bit_exact": true,
+      "different_components": 0,
+      "maximum_component_difference": 0.0
+    },
+    "WEIGHTS_0": {
+      "bit_exact": true,
+      "different_components": 0,
+      "maximum_component_difference": 0.0
+    },
+    "JOINTS_1": {
+      "bit_exact": true,
+      "different_components": 0,
+      "maximum_component_difference": 0.0
+    },
+    "WEIGHTS_1": {
+      "bit_exact": true,
+      "different_components": 0,
+      "maximum_component_difference": 0.0
+    }
+  },
+  "physical_observations": {
     "passed": true,
     "source_sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9",
-    "candidate_sha256": "6240f7c590d3ae673dedebeb6a88ef740d8ef371716b3d7c1266871ee2472afe",
+    "candidate_sha256": "a4af22643ac3a46c79cd237322589f320feed3cad9e7400ad6f9c609fe339430",
     "surface_probes": 180,
     "poses": 48,
-    "source_candidate_position_error": 0.0,
+    "source_candidate_position_error": 4.652682298944613e-16,
     "source_candidate_normal_vector_error": 0.0,
     "original_surface_error_over_height_source": 5.026496293931731e-07,
     "original_surface_error_over_height_candidate": 5.026496293931731e-07,
@@ -256,213 +245,7 @@
     "original_bone_matrix_error_candidate": 0.0,
     "scope": "Existing independently captured physical observations left unchanged. Native source/candidate evaluated separately; any original interpreter/reference residual is retained and must remain unchanged. Normals source/candidate reconstructed independently, including legacy witnesses without recorded normals."
   },
-  "blender_validation": {
-    "baseline": {
-      "sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9",
-      "passed": true,
-      "surface_probes": 180,
-      "vertex_identity": [
-        {
-          "source_node": 24,
-          "object": "mesh",
-          "vertices": 4152,
-          "position_targets": 33,
-          "basis_world_error": 6.140643790896702e-07,
-          "basis_world_component_error": 4.748672664534048e-07,
-          "basis_strategy": "authored_joint_rest_skin",
-          "authored_rest_skin_component_error": 4.748672664534048e-07,
-          "uv_error": 0.0,
-          "skin_error": 0.0,
-          "skin_raw_group_error": 0.0,
-          "skin_lone_group_normalizations": [],
-          "normal_vector_error": 0.00015764551515946742,
-          "normal_scope": "Recorded only; Blender custom-normal packing is not the authority for source/Godot shading. Vertex motion identity is proved by basis,UV,skin and every POSITION shape.",
-          "all_target_position_error": 7.077072942495063e-08,
-          "position_budget": 3.24249267578125e-05,
-          "rest_composition_steps": 17
-        }
-      ],
-      "bone_identity": {
-        "single_armature": "UniRigArmature",
-        "original_action_slots_present": {
-          "Death_A": {
-            "UniRigArmature": true
-          },
-          "Fighting_Idle": {
-            "UniRigArmature": true
-          },
-          "Hit_Chest": {
-            "UniRigArmature": true
-          },
-          "Idle_A": {
-            "UniRigArmature": true
-          },
-          "Jog": {
-            "UniRigArmature": true
-          },
-          "Sword_Attack": {
-            "UniRigArmature": true
-          },
-          "Walk": {
-            "UniRigArmature": true
-          },
-          "Attack_Ground_Pound": {
-            "UniRigArmature": true
-          }
-        }
-      },
-      "binding_method": "Full original GLB primitive vertex order, independently proved against basis/UV/skin/normals/all POSITION target data; frozen source IDs retained through partition mapping.",
-      "clips": {
-        "Death_A": {
-          "surface_error_over_height": 2.150951884358897e-06,
-          "bone_head_error_over_height": 1.9564347665764654e-06,
-          "poses": 6
-        },
-        "Fighting_Idle": {
-          "surface_error_over_height": 5.03227932628802e-07,
-          "bone_head_error_over_height": 4.088844395828177e-07,
-          "poses": 6
-        },
-        "Hit_Chest": {
-          "surface_error_over_height": 5.739823344921499e-07,
-          "bone_head_error_over_height": 3.614061999383395e-07,
-          "poses": 6
-        },
-        "Idle_A": {
-          "surface_error_over_height": 4.442763447371431e-07,
-          "bone_head_error_over_height": 3.3492499983679545e-07,
-          "poses": 6
-        },
-        "Jog": {
-          "surface_error_over_height": 5.984032535622128e-07,
-          "bone_head_error_over_height": 4.479790704251779e-07,
-          "poses": 6
-        },
-        "Sword_Attack": {
-          "surface_error_over_height": 4.5478765318010887e-07,
-          "bone_head_error_over_height": 3.2346361503501777e-07,
-          "poses": 6
-        },
-        "Walk": {
-          "surface_error_over_height": 6.138901199059005e-07,
-          "bone_head_error_over_height": 4.53857529647231e-07,
-          "poses": 6
-        },
-        "Attack_Ground_Pound": {
-          "surface_error_over_height": 1.5704483375324347e-06,
-          "bone_head_error_over_height": 1.4786315606740005e-06,
-          "poses": 6
-        }
-      },
-      "step_frame_correspondence": [],
-      "max_surface_error_over_height": 2.150951884358897e-06,
-      "max_bone_head_error_over_height": 1.9564347665764654e-06,
-      "scope": "Independent fresh Blender import geometry/motion witness check. Blender is not the authority for runtime morph normal shading."
-    },
-    "candidate": {
-      "sha256": "6240f7c590d3ae673dedebeb6a88ef740d8ef371716b3d7c1266871ee2472afe",
-      "passed": true,
-      "surface_probes": 180,
-      "vertex_identity": [
-        {
-          "source_node": 24,
-          "object": "mesh",
-          "vertices": 4152,
-          "position_targets": 33,
-          "basis_world_error": 6.140643790896702e-07,
-          "basis_world_component_error": 4.748672664534048e-07,
-          "basis_strategy": "authored_joint_rest_skin",
-          "authored_rest_skin_component_error": 4.748672664534048e-07,
-          "uv_error": 0.0,
-          "skin_error": 0.0,
-          "skin_raw_group_error": 0.0,
-          "skin_lone_group_normalizations": [],
-          "normal_vector_error": 0.00015764551515946742,
-          "normal_scope": "Recorded only; Blender custom-normal packing is not the authority for source/Godot shading. Vertex motion identity is proved by basis,UV,skin and every POSITION shape.",
-          "all_target_position_error": 7.077072942495063e-08,
-          "position_budget": 3.24249267578125e-05,
-          "rest_composition_steps": 17
-        }
-      ],
-      "bone_identity": {
-        "single_armature": "UniRigArmature",
-        "original_action_slots_present": {
-          "Death_A": {
-            "UniRigArmature": true
-          },
-          "Fighting_Idle": {
-            "UniRigArmature": true
-          },
-          "Hit_Chest": {
-            "UniRigArmature": true
-          },
-          "Idle_A": {
-            "UniRigArmature": true
-          },
-          "Jog": {
-            "UniRigArmature": true
-          },
-          "Sword_Attack": {
-            "UniRigArmature": true
-          },
-          "Walk": {
-            "UniRigArmature": true
-          },
-          "Attack_Ground_Pound": {
-            "UniRigArmature": true
-          }
-        }
-      },
-      "binding_method": "Full original GLB primitive vertex order, independently proved against basis/UV/skin/normals/all POSITION target data; frozen source IDs retained through partition mapping.",
-      "clips": {
-        "Death_A": {
-          "surface_error_over_height": 2.150951884358897e-06,
-          "bone_head_error_over_height": 1.9564347665764654e-06,
-          "poses": 6
-        },
-        "Fighting_Idle": {
-          "surface_error_over_height": 5.03227932628802e-07,
-          "bone_head_error_over_height": 4.088844395828177e-07,
-          "poses": 6
-        },
-        "Hit_Chest": {
-          "surface_error_over_height": 5.739823344921499e-07,
-          "bone_head_error_over_height": 3.614061999383395e-07,
-          "poses": 6
-        },
-        "Idle_A": {
-          "surface_error_over_height": 4.442763447371431e-07,
-          "bone_head_error_over_height": 3.3492499983679545e-07,
-          "poses": 6
-        },
-        "Jog": {
-          "surface_error_over_height": 5.984032535622128e-07,
-          "bone_head_error_over_height": 4.479790704251779e-07,
-          "poses": 6
-        },
-        "Sword_Attack": {
-          "surface_error_over_height": 4.5478765318010887e-07,
-          "bone_head_error_over_height": 3.2346361503501777e-07,
-          "poses": 6
-        },
-        "Walk": {
-          "surface_error_over_height": 6.138901199059005e-07,
-          "bone_head_error_over_height": 4.53857529647231e-07,
-          "poses": 6
-        },
-        "Attack_Ground_Pound": {
-          "surface_error_over_height": 1.5704483375324347e-06,
-          "bone_head_error_over_height": 1.4786315606740005e-06,
-          "poses": 6
-        }
-      },
-      "step_frame_correspondence": [],
-      "max_surface_error_over_height": 2.150951884358897e-06,
-      "max_bone_head_error_over_height": 1.9564347665764654e-06,
-      "scope": "Independent fresh Blender import geometry/motion witness check. Blender is not the authority for runtime morph normal shading."
-    }
-  },
-  "direct_fresh_blender_comparison": {
+  "paired_fresh_blender": {
     "maximum_position_error": 0.0,
     "maximum_bone_matrix_error": 0.0,
     "maximum_float32_budget": 1.9073486328125e-06,
@@ -471,1297 +254,3126 @@
     "retained_bone_matrices_per_pose": 24,
     "passed": true,
     "source_sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9",
-    "candidate_sha256": "6240f7c590d3ae673dedebeb6a88ef740d8ef371716b3d7c1266871ee2472afe",
+    "candidate_sha256": "a4af22643ac3a46c79cd237322589f320feed3cad9e7400ad6f9c609fe339430",
     "scope": "Direct source/candidate frozen-ID surfaces and every bone matrix at each original witness pose plus controlled neutral/default pose. Sixteen float32 ULPs at baseline coordinate/matrix magnitude; independent of inherited source/witness residual and separate from native/source appearance budgets."
   },
-  "native_runtime_validation": {
-    "maximum_position_error": 3.3144875262601044e-07,
-    "maximum_normal_vector_difference": 2.936636457895325e-07,
-    "maximum_normal_angle_degrees": 2.2148803860924733e-05,
-    "worst_position": {
-      "label": "Death_A@0.037",
-      "max_surface_error": 3.3144875262601044e-07,
-      "max_normal_vector_difference": 2.702355944989021e-07,
-      "max_normal_degrees": 1.628896300592164e-05,
-      "p99_normal_degrees": 1.52483881583848e-05
+  "native_and_editor_imported": {
+    "native": {
+      "source_sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9",
+      "candidate_sha256": "a4af22643ac3a46c79cd237322589f320feed3cad9e7400ad6f9c609fe339430",
+      "samples": 296,
+      "maximum_position_error": 3.3144875262601044e-07,
+      "maximum_normal_angle_degrees": 2.2148803860924733e-05
     },
-    "worst_normal": {
-      "label": "Death_A@0.933",
-      "max_surface_error": 2.028140099701501e-07,
-      "max_normal_vector_difference": 2.936636457895325e-07,
-      "max_normal_degrees": 2.2148803860924733e-05,
-      "p99_normal_degrees": 1.6859758471908546e-05
-    },
-    "scope": "Actual imported Godot mesh arrays, native-library sampled poses and crossfades or mounted gait samples, renderer activation cutoff, linear blended skin; image rendering remains a separate check."
+    "imported": {
+      "source_sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9",
+      "candidate_sha256": "a4af22643ac3a46c79cd237322589f320feed3cad9e7400ad6f9c609fe339430",
+      "samples": 296,
+      "maximum_position_error": 3.3144875262601044e-07,
+      "maximum_normal_angle_degrees": 2.2148803860924733e-05
+    }
   },
-  "fresh_editor_imported_validation": {
-    "maximum_position_error": 3.3144875262601044e-07,
-    "maximum_normal_angle_degrees": 2.2148803860924733e-05,
-    "worst_position": {
-      "label": "Death_A@0.037",
-      "max_surface_error": 3.3144875262601044e-07,
-      "max_normal_degrees": 1.628896300592164e-05,
-      "p99_normal_degrees": 1.52483881583848e-05
-    },
-    "worst_normal": {
-      "label": "Death_A@0.933",
-      "max_surface_error": 2.028140099701501e-07,
-      "max_normal_degrees": 2.2148803860924733e-05,
-      "p99_normal_degrees": 1.6859758471908546e-05
-    },
-    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
-    "source_sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9",
-    "candidate_sha256": "6240f7c590d3ae673dedebeb6a88ef740d8ef371716b3d7c1266871ee2472afe",
+  "strict_numeric_budgets": {
+    "position_four_float32_ULPs_at_original_coordinate_or_axis_extent": 4.76837158203125e-07,
+    "normal_degrees": 0.0001,
+    "secondary_effects_position_and_uniform": 1e-06
+  },
+  "genuine_editor_provenance": {
     "actual_loader": "ResourceLoader.load(PackedScene)",
-    "numeric_runtime_sha256": "c3fadeb1c1f57d7b39a0e384a00a73303aa428c66b48ef60810d83050c96895e"
+    "load_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/frost_stone_golem.glb-7397e4408fc9546583eed014e88a9f24.md5",
+        "import_metadata_sha256": "417394a00d88dc5b225aa12f628f5c145b77d3a3f23836c873e52c6ea17c97b5",
+        "imported_resource_path": "res://.godot/imported/frost_stone_golem.glb-7397e4408fc9546583eed014e88a9f24.scn",
+        "imported_resource_sha256": "6f7ab2a4ccdbb82da547f0b7db9764dfda5d34f92392593e836ca835af4980f1",
+        "packed_scene_resource_path": "res://assets/qa/frost_stone_golem/baseline/frost_stone_golem.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "24fd8129c46b575ee0b29040babdcb24",
+        "source_path": "res://assets/qa/frost_stone_golem/baseline/frost_stone_golem.glb",
+        "source_sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9"
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/frost_stone_golem.glb-d84f22714942a602a89ac2fb24dfd0cb.md5",
+        "import_metadata_sha256": "1cdc7d6f0e1316539c7b1e593cdef931d9c4cae700ef00ff70cc53934d56d5b1",
+        "imported_resource_path": "res://.godot/imported/frost_stone_golem.glb-d84f22714942a602a89ac2fb24dfd0cb.scn",
+        "imported_resource_sha256": "bffe2920249ce99c33299354b2a21cca490a8f6f90dd2db4efc1be27b371dd30",
+        "packed_scene_resource_path": "res://assets/qa/frost_stone_golem/candidate/frost_stone_golem.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "60985d78d3b4f113a3447f5e69c27b7b",
+        "source_path": "res://assets/qa/frost_stone_golem/candidate/frost_stone_golem.glb",
+        "source_sha256": "a4af22643ac3a46c79cd237322589f320feed3cad9e7400ad6f9c609fe339430"
+      }
+    ],
+    "same_SCNs_for_numeric_full_static_all33PNT_oriented_triangles_and_materials": true,
+    "direct_complete_payload": {
+      "source_sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9",
+      "candidate_sha256": "a4af22643ac3a46c79cd237322589f320feed3cad9e7400ad6f9c609fe339430",
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/frost_stone_golem.glb-7397e4408fc9546583eed014e88a9f24.md5",
+          "import_metadata_sha256": "417394a00d88dc5b225aa12f628f5c145b77d3a3f23836c873e52c6ea17c97b5",
+          "imported_resource_path": "res://.godot/imported/frost_stone_golem.glb-7397e4408fc9546583eed014e88a9f24.scn",
+          "imported_resource_sha256": "6f7ab2a4ccdbb82da547f0b7db9764dfda5d34f92392593e836ca835af4980f1",
+          "packed_scene_resource_path": "res://assets/qa/frost_stone_golem/baseline/frost_stone_golem.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "24fd8129c46b575ee0b29040babdcb24",
+          "source_path": "res://assets/qa/frost_stone_golem/baseline/frost_stone_golem.glb",
+          "source_sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/frost_stone_golem.glb-d84f22714942a602a89ac2fb24dfd0cb.md5",
+          "import_metadata_sha256": "1cdc7d6f0e1316539c7b1e593cdef931d9c4cae700ef00ff70cc53934d56d5b1",
+          "imported_resource_path": "res://.godot/imported/frost_stone_golem.glb-d84f22714942a602a89ac2fb24dfd0cb.scn",
+          "imported_resource_sha256": "bffe2920249ce99c33299354b2a21cca490a8f6f90dd2db4efc1be27b371dd30",
+          "packed_scene_resource_path": "res://assets/qa/frost_stone_golem/candidate/frost_stone_golem.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "60985d78d3b4f113a3447f5e69c27b7b",
+          "source_path": "res://assets/qa/frost_stone_golem/candidate/frost_stone_golem.glb",
+          "source_sha256": "a4af22643ac3a46c79cd237322589f320feed3cad9e7400ad6f9c609fe339430"
+        }
+      ],
+      "all_typed_base_attributes_including_tangent_uv_color_custom_skin_bit_exact": true,
+      "all_33_morph_POSITION_NORMAL_TANGENT_columns_bit_exact": true,
+      "selected_zero_targets_expand_to_base_POSITION_NORMAL_TANGENT": true,
+      "complete_oriented_triangle_payload_multiset_exact": true,
+      "vertices": 4152,
+      "triangles": 4310,
+      "source_surfaces": 1,
+      "candidate_surfaces": 2,
+      "scope": "Direct actual ResourceLoader Editor source/candidate full typed row and oriented triangle payload proof; every base attribute and all33 corrective P/N/T columns included. Candidate corrective-free surface expanded with its base P/N/T, requiring exact source equality; no original ordinal or arbitrary seam correspondence assumed. Materials independently exact in fixed-loader typed capture.",
+      "passed": true
+    },
+    "materials": {
+      "passed": true,
+      "all_material_STORAGE_typed_fields_and_texture_pixels_mips_exact": true,
+      "same_SCN_numeric_static_PNT_and_material_proofs": true,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/frost_stone_golem.glb-7397e4408fc9546583eed014e88a9f24.md5",
+          "import_metadata_sha256": "417394a00d88dc5b225aa12f628f5c145b77d3a3f23836c873e52c6ea17c97b5",
+          "imported_resource_path": "res://.godot/imported/frost_stone_golem.glb-7397e4408fc9546583eed014e88a9f24.scn",
+          "imported_resource_sha256": "6f7ab2a4ccdbb82da547f0b7db9764dfda5d34f92392593e836ca835af4980f1",
+          "packed_scene_resource_path": "res://assets/qa/frost_stone_golem/baseline/frost_stone_golem.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "24fd8129c46b575ee0b29040babdcb24",
+          "source_path": "res://assets/qa/frost_stone_golem/baseline/frost_stone_golem.glb",
+          "source_sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/frost_stone_golem.glb-d84f22714942a602a89ac2fb24dfd0cb.md5",
+          "import_metadata_sha256": "1cdc7d6f0e1316539c7b1e593cdef931d9c4cae700ef00ff70cc53934d56d5b1",
+          "imported_resource_path": "res://.godot/imported/frost_stone_golem.glb-d84f22714942a602a89ac2fb24dfd0cb.scn",
+          "imported_resource_sha256": "bffe2920249ce99c33299354b2a21cca490a8f6f90dd2db4efc1be27b371dd30",
+          "packed_scene_resource_path": "res://assets/qa/frost_stone_golem/candidate/frost_stone_golem.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "60985d78d3b4f113a3447f5e69c27b7b",
+          "source_path": "res://assets/qa/frost_stone_golem/candidate/frost_stone_golem.glb",
+          "source_sha256": "a4af22643ac3a46c79cd237322589f320feed3cad9e7400ad6f9c609fe339430"
+        }
+      ]
+    }
   },
-  "actual_actor_dissolve_validation": {
+  "placement": {
+    "bounds_error": 0.0,
+    "overhead_height_error": 0.0,
     "passed": true,
-    "source_sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9",
-    "candidate_sha256": "6240f7c590d3ae673dedebeb6a88ef740d8ef371716b3d7c1266871ee2472afe",
+    "placement_error": 0.0,
     "records": [
       {
-        "seed": 0,
-        "old_code_source_ash_buffer_sha256": "e81337e2e7a2df636cae9fd14cabc1def6d2637e29ac18b8cc43056c21930569",
-        "new_code_source_ash_buffer_sha256": "e81337e2e7a2df636cae9fd14cabc1def6d2637e29ac18b8cc43056c21930569",
-        "new_code_candidate_ash_buffer_sha256": "e81337e2e7a2df636cae9fd14cabc1def6d2637e29ac18b8cc43056c21930569",
-        "ash_buffer_floats": 6400,
-        "minimum": [
-          -1.83033490180969,
-          0.0450267381966114,
-          -2.96247506141663
+        "banner_height": 4.00000143051147,
+        "effective_scale": 2.35294198989868,
+        "name": "baseline",
+        "native_bounds_position": [
+          -0.850000023841858,
+          4.06150402199046e-09,
+          -0.441602200269699
         ],
-        "size": [
-          3.895587682724,
-          1.76081013679504,
-          4.24754810333252
+        "native_bounds_size": [
+          1.70000004768372,
+          1.69999992847443,
+          0.886524498462677
         ],
-        "grain": 0.18,
-        "restoration_passed": true
+        "raw_meshes": [
+          {
+            "buffer_bytes": [
+              {
+                "attribute_data": 33216,
+                "blend_shape_data": 2740320,
+                "index_data": 25860,
+                "skin_data": 132864,
+                "vertex_data": 83040
+              }
+            ],
+            "local_mesh_bounds_position": [
+              -0.850000083446503,
+              4.06150446607967e-09,
+              -0.441602230072021
+            ],
+            "local_mesh_bounds_size": [
+              1.70000016689301,
+              1.70000004768372,
+              0.886524558067322
+            ],
+            "name": "mesh_node",
+            "surface_lod_counts": [
+              0
+            ]
+          }
+        ],
+        "visual_root_position": [
+          0.0,
+          -4.06150402199046e-09,
+          0.0
+        ]
       },
       {
+        "banner_height": 4.00000143051147,
+        "effective_scale": 2.35294198989868,
+        "name": "candidate",
+        "native_bounds_position": [
+          -0.850000023841858,
+          4.06150402199046e-09,
+          -0.441602200269699
+        ],
+        "native_bounds_size": [
+          1.70000004768372,
+          1.69999992847443,
+          0.886524498462677
+        ],
+        "raw_meshes": [
+          {
+            "buffer_bytes": [
+              {
+                "attribute_data": 13256,
+                "blend_shape_data": 1093620,
+                "index_data": 10086,
+                "skin_data": 53024,
+                "vertex_data": 33140
+              }
+            ],
+            "local_mesh_bounds_position": [
+              -0.850000083446503,
+              4.06150446607967e-09,
+              -0.38017612695694
+            ],
+            "local_mesh_bounds_size": [
+              1.70000016689301,
+              1.0757805109024,
+              0.82509845495224
+            ],
+            "name": "mesh_node",
+            "surface_lod_counts": [
+              0
+            ]
+          },
+          {
+            "buffer_bytes": [
+              {
+                "attribute_data": 19960,
+                "index_data": 15774,
+                "skin_data": 79840,
+                "vertex_data": 49900
+              }
+            ],
+            "local_mesh_bounds_position": [
+              -0.7105473279953,
+              0.33535224199295,
+              -0.441602230072021
+            ],
+            "local_mesh_bounds_size": [
+              1.47753977775574,
+              1.36464786529541,
+              0.753712058067322
+            ],
+            "name": "RL_CorrectiveFree_24_0",
+            "surface_lod_counts": [
+              0
+            ]
+          }
+        ],
+        "visual_root_position": [
+          0.0,
+          -4.06150402199046e-09,
+          0.0
+        ]
+      }
+    ]
+  },
+  "render_fit": {
+    "source_sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9",
+    "model_global": [
+      [
+        0.5,
+        -4.06150402199046e-09,
+        -0.5
+      ],
+      [
+        -2.35294198989868,
+        0.0,
+        2.05700715127932e-07
+      ],
+      [
+        0.0,
+        2.35294198989868,
+        0.0
+      ],
+      [
+        -2.05700715127932e-07,
+        0.0,
+        -2.35294198989868
+      ]
+    ],
+    "position": [
+      -2.6240403105482994,
+      -0.0021930214975939464,
+      -3.5061598207671083
+    ],
+    "size": [
+      6.137051167102163,
+      4.66667429339434,
+      4.586379476779353
+    ],
+    "poses": 492,
+    "scope": "Every vertex at every full-cycle render frame and view-still pose, using actual complete Actor Godot arrays/poses/weights/transforms, renderer morph cutoff and four/eight influence skin. Evaluated in float64 with a separate 30% camera margin."
+  },
+  "appearance": {
+    "source_sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9",
+    "candidate_sha256": "a4af22643ac3a46c79cd237322589f320feed3cad9e7400ad6f9c609fe339430",
+    "image_pairs": 604,
+    "width": 512,
+    "height": 512,
+    "different_image_pairs": 604,
+    "maximum_different_pixels": 255,
+    "maximum_pixels_above_two_levels": 4,
+    "maximum_mean_channel_error": 0.0017191569010416667,
+    "maximum_channel_error": 234,
+    "scope": "Complete ReplicatedActor3D setup with actual display scale, grounding and body materials; identical cameras for source/candidate, four views and every full native cycle at24Hz. Numeric playback and pixel comparisons are separate reports.",
+    "framing_passed": true,
+    "clipped_frame_labels": [],
+    "maximum_border_foreground_pixels": 0
+  },
+  "secondary_effects": {
+    "passed": true,
+    "source_sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9",
+    "candidate_sha256": "a4af22643ac3a46c79cd237322589f320feed3cad9e7400ad6f9c609fe339430",
+    "immutable_old_helper_sha256": "06a439005ec2d3929f1e8e4853bb3f8274b28944066935caa8572f10db815119",
+    "current_helper_sha256": "52e180bd81c7070a0c5a1a9365fe8db339e9502ab23e1b07d490eda9c13a7242",
+    "source_fit_sha256": "4eee4bb9ef4d73092321f255dd1c2fc94daaaea71a45f764dcd87a1ad0cdc925",
+    "source_old_vs_current_source_materials_and_full_ash_byte_exact": true,
+    "current_candidate_maximum_ash_transform_vector_error": 7.539457556049456e-07,
+    "maximum_material_uniform_vector_or_scalar_error": 4.768371599794818e-07,
+    "maximum_different_pixels": 54,
+    "maximum_pixels_above_two_levels": 2,
+    "maximum_mean_channel_error": 0.00042399088541666665,
+    "all_RGBA_alpha_channels_equal": true,
+    "all_225_captured_images_zero_border_foreground": true,
+    "old_and_new_cameras": {
+      "old": [
+        {
+          "name": "baseline",
+          "size": 16.1989841461182,
+          "target": [
+            0.444485187530518,
+            2.33114409446716,
+            -1.21297001838684
+          ]
+        }
+      ],
+      "new": [
+        {
+          "name": "baseline",
+          "size": 16.1989841461182,
+          "target": [
+            0.444485187530518,
+            2.33114409446716,
+            -1.21297001838684
+          ]
+        },
+        {
+          "name": "candidate",
+          "size": 16.1989841461182,
+          "target": [
+            0.444485187530518,
+            2.33114409446716,
+            -1.21297001838684
+          ]
+        }
+      ]
+    },
+    "cases": [
+      {
+        "role": "baseline",
+        "fraction": 0.0,
         "seed": 1,
-        "old_code_source_ash_buffer_sha256": "3eb5977616d3849ee55795c744886051fffeb3da2c2961692036c2e0dcce00e8",
-        "new_code_source_ash_buffer_sha256": "3eb5977616d3849ee55795c744886051fffeb3da2c2961692036c2e0dcce00e8",
-        "new_code_candidate_ash_buffer_sha256": "3eb5977616d3849ee55795c744886051fffeb3da2c2961692036c2e0dcce00e8",
-        "ash_buffer_floats": 6400,
-        "minimum": [
-          -1.69150376319885,
-          0.131217494606972,
-          -2.89870452880859
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
         ],
-        "size": [
-          3.81860828399658,
-          1.79068577289581,
-          4.30263948440552
-        ],
-        "grain": 0.18,
-        "restoration_passed": true
+        "reset_resources_exact": true
       },
       {
-        "seed": 7,
-        "old_code_source_ash_buffer_sha256": "98ed764b99da0ac42b53834c361f449d7b76660eccbcb62b6a12c87c732439c8",
-        "new_code_source_ash_buffer_sha256": "98ed764b99da0ac42b53834c361f449d7b76660eccbcb62b6a12c87c732439c8",
-        "new_code_candidate_ash_buffer_sha256": "98ed764b99da0ac42b53834c361f449d7b76660eccbcb62b6a12c87c732439c8",
-        "ash_buffer_floats": 6400,
-        "minimum": [
-          -1.8430917263031,
-          0.0795177072286606,
-          -2.98595643043518
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 1,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 3
+          }
         ],
-        "size": [
-          3.94679260253906,
-          1.80299639701843,
-          4.22998428344727
-        ],
-        "grain": 0.18,
-        "restoration_passed": true
+        "reset_resources_exact": true
       },
       {
-        "seed": 17,
-        "old_code_source_ash_buffer_sha256": "33ad157f9cde53ba038a383c3598088a834500d9937555cd360848335f22c358",
-        "new_code_source_ash_buffer_sha256": "33ad157f9cde53ba038a383c3598088a834500d9937555cd360848335f22c358",
-        "new_code_candidate_ash_buffer_sha256": "33ad157f9cde53ba038a383c3598088a834500d9937555cd360848335f22c358",
-        "ash_buffer_floats": 6400,
-        "minimum": [
-          -1.84536564350128,
-          0.0766964852809906,
-          -2.93086767196655
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 42,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
         ],
-        "size": [
-          3.95647287368774,
-          1.80259990692139,
-          4.22362804412842
-        ],
-        "grain": 0.18,
-        "restoration_passed": true
+        "reset_resources_exact": true
       },
       {
-        "seed": 31,
-        "old_code_source_ash_buffer_sha256": "3c3ee0a7f186cb33517a5c67ec6327236176272180cf8a5209dbd9515d8d9621",
-        "new_code_source_ash_buffer_sha256": "3c3ee0a7f186cb33517a5c67ec6327236176272180cf8a5209dbd9515d8d9621",
-        "new_code_candidate_ash_buffer_sha256": "3c3ee0a7f186cb33517a5c67ec6327236176272180cf8a5209dbd9515d8d9621",
-        "ash_buffer_floats": 6400,
-        "minimum": [
-          -1.80219566822052,
-          0.0648419186472893,
-          -2.80122327804565
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 42,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 3
+          }
         ],
-        "size": [
-          3.89028120040894,
-          1.77565109729767,
-          4.27348375320435
-        ],
-        "grain": 0.18,
-        "restoration_passed": true
+        "reset_resources_exact": true
       },
       {
-        "seed": 53,
-        "old_code_source_ash_buffer_sha256": "c4f6e626b6526beeedc35422a2a46d0ee1e0354059a5023ca820a6991ca494b9",
-        "new_code_source_ash_buffer_sha256": "c4f6e626b6526beeedc35422a2a46d0ee1e0354059a5023ca820a6991ca494b9",
-        "new_code_candidate_ash_buffer_sha256": "c4f6e626b6526beeedc35422a2a46d0ee1e0354059a5023ca820a6991ca494b9",
-        "ash_buffer_floats": 6400,
-        "minimum": [
-          -1.84929490089417,
-          0.102948911488056,
-          -2.92975997924805
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 7654321,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
         ],
-        "size": [
-          3.87943005561829,
-          1.77727508544922,
-          4.15254640579224
-        ],
-        "grain": 0.18,
-        "restoration_passed": true
+        "reset_resources_exact": true
       },
       {
-        "seed": 77,
-        "old_code_source_ash_buffer_sha256": "a81d776bf93513fbf1a1476e59f825813104832d41719099f8466c69b4cc611d",
-        "new_code_source_ash_buffer_sha256": "a81d776bf93513fbf1a1476e59f825813104832d41719099f8466c69b4cc611d",
-        "new_code_candidate_ash_buffer_sha256": "a81d776bf93513fbf1a1476e59f825813104832d41719099f8466c69b4cc611d",
-        "ash_buffer_floats": 6400,
-        "minimum": [
-          -1.74262404441834,
-          0.03989577293396,
-          -2.97913861274719
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 7654321,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 3
+          }
         ],
-        "size": [
-          3.83390116691589,
-          1.82529258728027,
-          4.18982267379761
-        ],
-        "grain": 0.18,
-        "restoration_passed": true
+        "reset_resources_exact": true
       },
       {
-        "seed": 97,
-        "old_code_source_ash_buffer_sha256": "18ab6a6bb3924ef54cf1014e3f00faa8fe04e526608afc631e6a332aa4996735",
-        "new_code_source_ash_buffer_sha256": "18ab6a6bb3924ef54cf1014e3f00faa8fe04e526608afc631e6a332aa4996735",
-        "new_code_candidate_ash_buffer_sha256": "18ab6a6bb3924ef54cf1014e3f00faa8fe04e526608afc631e6a332aa4996735",
-        "ash_buffer_floats": 6400,
-        "minimum": [
-          -1.76880884170532,
-          0.0814614072442055,
-          -2.9655647277832
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 1,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
         ],
-        "size": [
-          3.67476749420166,
-          1.75756454467773,
-          4.36191082000732
-        ],
-        "grain": 0.18,
-        "restoration_passed": true
+        "reset_resources_exact": true
       },
       {
-        "seed": 131,
-        "old_code_source_ash_buffer_sha256": "f14e3e874e58c10848f3463499b47998114fb99447b4ca543fd1ab99995d2e9d",
-        "new_code_source_ash_buffer_sha256": "f14e3e874e58c10848f3463499b47998114fb99447b4ca543fd1ab99995d2e9d",
-        "new_code_candidate_ash_buffer_sha256": "f14e3e874e58c10848f3463499b47998114fb99447b4ca543fd1ab99995d2e9d",
-        "ash_buffer_floats": 6400,
-        "minimum": [
-          -1.69669020175934,
-          0.0243181884288788,
-          -2.95177173614502
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 1,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 3
+          }
         ],
-        "size": [
-          3.75273132324219,
-          1.78612649440765,
-          4.20569562911987
-        ],
-        "grain": 0.18,
-        "restoration_passed": true
+        "reset_resources_exact": true
       },
       {
-        "seed": 193,
-        "old_code_source_ash_buffer_sha256": "f687166ed1f8f5143c6c370fc509a25b163ee5a111199197e476618a27ba9b9d",
-        "new_code_source_ash_buffer_sha256": "f687166ed1f8f5143c6c370fc509a25b163ee5a111199197e476618a27ba9b9d",
-        "new_code_candidate_ash_buffer_sha256": "f687166ed1f8f5143c6c370fc509a25b163ee5a111199197e476618a27ba9b9d",
-        "ash_buffer_floats": 6400,
-        "minimum": [
-          -1.77013456821442,
-          0.055074293166399,
-          -2.94906830787659
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 42,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
         ],
-        "size": [
-          3.88324689865112,
-          1.76945531368256,
-          4.26692581176758
-        ],
-        "grain": 0.18,
-        "restoration_passed": true
+        "reset_resources_exact": true
       },
       {
-        "seed": 257,
-        "old_code_source_ash_buffer_sha256": "00e47b90cc7f7576d42b25d7c155d36adee89b2d298a6b1a47a5cca813ab859c",
-        "new_code_source_ash_buffer_sha256": "00e47b90cc7f7576d42b25d7c155d36adee89b2d298a6b1a47a5cca813ab859c",
-        "new_code_candidate_ash_buffer_sha256": "00e47b90cc7f7576d42b25d7c155d36adee89b2d298a6b1a47a5cca813ab859c",
-        "ash_buffer_floats": 6400,
-        "minimum": [
-          -1.82878994941711,
-          0.0341891795396805,
-          -2.9479660987854
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 42,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 3
+          }
         ],
-        "size": [
-          3.86121439933777,
-          1.80207991600037,
-          4.32927799224854
-        ],
-        "grain": 0.18,
-        "restoration_passed": true
+        "reset_resources_exact": true
       },
       {
-        "seed": 509,
-        "old_code_source_ash_buffer_sha256": "87b8e4d5bdb545ea1a3983955610ece268ca23e629069efe485ce7ec0fd1d5ec",
-        "new_code_source_ash_buffer_sha256": "87b8e4d5bdb545ea1a3983955610ece268ca23e629069efe485ce7ec0fd1d5ec",
-        "new_code_candidate_ash_buffer_sha256": "87b8e4d5bdb545ea1a3983955610ece268ca23e629069efe485ce7ec0fd1d5ec",
-        "ash_buffer_floats": 6400,
-        "minimum": [
-          -1.86295390129089,
-          0.0752902328968048,
-          -2.90173864364624
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 7654321,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
         ],
-        "size": [
-          3.94170117378235,
-          1.74970746040344,
-          4.1780743598938
-        ],
-        "grain": 0.18,
-        "restoration_passed": true
+        "reset_resources_exact": true
       },
       {
-        "seed": 1021,
-        "old_code_source_ash_buffer_sha256": "999084296ea2fd47c9983f267ec7191ecd78748f3f7deb30d23efc63a908ecc1",
-        "new_code_source_ash_buffer_sha256": "999084296ea2fd47c9983f267ec7191ecd78748f3f7deb30d23efc63a908ecc1",
-        "new_code_candidate_ash_buffer_sha256": "999084296ea2fd47c9983f267ec7191ecd78748f3f7deb30d23efc63a908ecc1",
-        "ash_buffer_floats": 6400,
-        "minimum": [
-          -1.81197023391724,
-          0.0938417091965675,
-          -2.96900582313538
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 7654321,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 3
+          }
         ],
-        "size": [
-          3.74732780456543,
-          1.83694970607758,
-          4.39693737030029
-        ],
-        "grain": 0.18,
-        "restoration_passed": true
+        "reset_resources_exact": true
       },
       {
-        "seed": 4093,
-        "old_code_source_ash_buffer_sha256": "29a599011871085577c9c38e5064b90a91eb7e0f628a404910745fa6fac04f13",
-        "new_code_source_ash_buffer_sha256": "29a599011871085577c9c38e5064b90a91eb7e0f628a404910745fa6fac04f13",
-        "new_code_candidate_ash_buffer_sha256": "29a599011871085577c9c38e5064b90a91eb7e0f628a404910745fa6fac04f13",
-        "ash_buffer_floats": 6400,
-        "minimum": [
-          -1.84270000457764,
-          0.0745791494846344,
-          -2.96529412269592
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 1,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
         ],
-        "size": [
-          3.95180702209473,
-          1.81273853778839,
-          4.31900691986084
-        ],
-        "grain": 0.18,
-        "restoration_passed": true
+        "reset_resources_exact": true
       },
       {
-        "seed": 65521,
-        "old_code_source_ash_buffer_sha256": "ae9d77da2815120591063b4e00e73f43810a768176bb8de179c3761fbfdaee9c",
-        "new_code_source_ash_buffer_sha256": "ae9d77da2815120591063b4e00e73f43810a768176bb8de179c3761fbfdaee9c",
-        "new_code_candidate_ash_buffer_sha256": "ae9d77da2815120591063b4e00e73f43810a768176bb8de179c3761fbfdaee9c",
-        "ash_buffer_floats": 6400,
-        "minimum": [
-          -1.82568681240082,
-          0.0990117192268372,
-          -2.93754196166992
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 1,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 3
+          }
         ],
-        "size": [
-          3.77122020721436,
-          1.83168792724609,
-          4.23448038101196
+        "reset_resources_exact": true
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 42,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
         ],
-        "grain": 0.18,
-        "restoration_passed": true
+        "reset_resources_exact": true
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 42,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 3
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 7654321,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 7654321,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 3
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 1,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 1,
+        "maximum_ash_transform_vector_error": 7.539457556049456e-07,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 3
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 42,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 42,
+        "maximum_ash_transform_vector_error": 5.623090828521526e-07,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 3
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 7654321,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 7654321,
+        "maximum_ash_transform_vector_error": 6.14390614828153e-07,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 3
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 1,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 1,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 3
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 42,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 42,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 3
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 7654321,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 7654321,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 3
+          }
+        ],
+        "reset_resources_exact": true
       }
     ],
     "pixel_comparisons": [
       {
-        "seed": 0,
-        "progress": 0,
-        "mean_channel_error": 0.0,
-        "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
-      },
-      {
-        "seed": 0,
-        "progress": 17,
-        "mean_channel_error": 0.0,
-        "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
-      },
-      {
-        "seed": 0,
-        "progress": 42,
-        "mean_channel_error": 0.0,
-        "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
-      },
-      {
-        "seed": 0,
-        "progress": 73,
-        "mean_channel_error": 0.0,
-        "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
-      },
-      {
-        "seed": 0,
-        "progress": 100,
-        "mean_channel_error": 0.0,
-        "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
-      },
-      {
+        "role": "baseline",
+        "fraction": 0.0,
         "seed": 1,
         "progress": 0,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
+        "role": "baseline",
+        "fraction": 0.0,
         "seed": 1,
         "progress": 17,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
+        "role": "baseline",
+        "fraction": 0.0,
         "seed": 1,
         "progress": 42,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
+        "role": "baseline",
+        "fraction": 0.0,
         "seed": 1,
         "progress": 73,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
+        "role": "baseline",
+        "fraction": 0.0,
         "seed": 1,
         "progress": 100,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 7,
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 1,
         "progress": 0,
-        "mean_channel_error": 0.0,
-        "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "different_pixels": 54,
+        "pixels_above_two_levels": 1,
+        "mean_channel_error": 0.0002726236979166667,
+        "maximum_channel_error": 109,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 7,
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 1,
         "progress": 17,
-        "mean_channel_error": 0.0,
-        "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "different_pixels": 48,
+        "pixels_above_two_levels": 1,
+        "mean_channel_error": 0.00026611328125,
+        "maximum_channel_error": 109,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 7,
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 1,
         "progress": 42,
-        "mean_channel_error": 0.0,
+        "different_pixels": 11,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 1.3020833333333334e-05,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 7,
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 1,
         "progress": 73,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 7,
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 1,
         "progress": 100,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 17,
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 42,
         "progress": 0,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 17,
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 42,
         "progress": 17,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 17,
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 42,
         "progress": 42,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 17,
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 42,
         "progress": 73,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 17,
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 42,
         "progress": 100,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 31,
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 42,
         "progress": 0,
-        "mean_channel_error": 0.0,
+        "different_pixels": 53,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 4.8828125e-05,
+        "maximum_channel_error": 2,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 31,
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 42,
         "progress": 17,
-        "mean_channel_error": 0.0,
+        "different_pixels": 44,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 3.987630208333333e-05,
+        "maximum_channel_error": 2,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 31,
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 42,
         "progress": 42,
-        "mean_channel_error": 0.0,
-        "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "different_pixels": 11,
+        "pixels_above_two_levels": 1,
+        "mean_channel_error": 0.00013997395833333334,
+        "maximum_channel_error": 58,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 31,
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 42,
         "progress": 73,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 31,
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 42,
         "progress": 100,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 53,
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 7654321,
         "progress": 0,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 53,
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 7654321,
         "progress": 17,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 53,
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 7654321,
         "progress": 42,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 53,
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 7654321,
         "progress": 73,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 53,
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 7654321,
         "progress": 100,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 77,
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 7654321,
         "progress": 0,
-        "mean_channel_error": 0.0,
-        "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "different_pixels": 54,
+        "pixels_above_two_levels": 1,
+        "mean_channel_error": 0.0002726236979166667,
+        "maximum_channel_error": 109,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 77,
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 7654321,
         "progress": 17,
-        "mean_channel_error": 0.0,
-        "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "different_pixels": 54,
+        "pixels_above_two_levels": 2,
+        "mean_channel_error": 0.00042399088541666665,
+        "maximum_channel_error": 109,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 77,
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 7654321,
         "progress": 42,
-        "mean_channel_error": 0.0,
+        "different_pixels": 9,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 9.765625e-06,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 77,
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 7654321,
         "progress": 73,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 77,
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 7654321,
         "progress": 100,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 97,
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 1,
         "progress": 0,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 97,
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 1,
         "progress": 17,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 97,
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 1,
         "progress": 42,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 97,
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 1,
         "progress": 73,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 97,
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 1,
         "progress": 100,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 131,
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 1,
         "progress": 0,
-        "mean_channel_error": 0.0,
+        "different_pixels": 25,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 2.0345052083333332e-05,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 131,
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 1,
         "progress": 17,
-        "mean_channel_error": 0.0,
+        "different_pixels": 21,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 1.708984375e-05,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 131,
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 1,
         "progress": 42,
-        "mean_channel_error": 0.0,
+        "different_pixels": 3,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 2.44140625e-06,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 131,
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 1,
         "progress": 73,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 131,
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 1,
         "progress": 100,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 193,
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 42,
         "progress": 0,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 193,
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 42,
         "progress": 17,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 193,
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 42,
         "progress": 42,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 193,
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 42,
         "progress": 73,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 193,
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 42,
         "progress": 100,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 257,
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 42,
         "progress": 0,
-        "mean_channel_error": 0.0,
+        "different_pixels": 25,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 2.0345052083333332e-05,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 257,
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 42,
         "progress": 17,
-        "mean_channel_error": 0.0,
+        "different_pixels": 14,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 1.1393229166666667e-05,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 257,
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 42,
         "progress": 42,
-        "mean_channel_error": 0.0,
+        "different_pixels": 6,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 4.8828125e-06,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 257,
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 42,
         "progress": 73,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 257,
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 42,
         "progress": 100,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 509,
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 7654321,
         "progress": 0,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 509,
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 7654321,
         "progress": 17,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 509,
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 7654321,
         "progress": 42,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 509,
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 7654321,
         "progress": 73,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 509,
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 7654321,
         "progress": 100,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 1021,
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 7654321,
         "progress": 0,
-        "mean_channel_error": 0.0,
+        "different_pixels": 25,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 2.0345052083333332e-05,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 1021,
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 7654321,
         "progress": 17,
-        "mean_channel_error": 0.0,
-        "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "different_pixels": 22,
+        "pixels_above_two_levels": 1,
+        "mean_channel_error": 3.255208333333333e-05,
+        "maximum_channel_error": 7,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 1021,
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 7654321,
         "progress": 42,
-        "mean_channel_error": 0.0,
-        "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "different_pixels": 5,
+        "pixels_above_two_levels": 1,
+        "mean_channel_error": 0.0001025390625,
+        "maximum_channel_error": 56,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 1021,
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 7654321,
         "progress": 73,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 1021,
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 7654321,
         "progress": 100,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 4093,
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 1,
         "progress": 0,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 4093,
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 1,
         "progress": 17,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 4093,
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 1,
         "progress": 42,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 4093,
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 1,
         "progress": 73,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 4093,
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 1,
         "progress": 100,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 65521,
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 1,
         "progress": 0,
-        "mean_channel_error": 0.0,
+        "different_pixels": 21,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 1.7903645833333333e-05,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 65521,
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 1,
         "progress": 17,
-        "mean_channel_error": 0.0,
-        "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "different_pixels": 30,
+        "pixels_above_two_levels": 1,
+        "mean_channel_error": 0.0002001953125,
+        "maximum_channel_error": 82,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 65521,
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 1,
         "progress": 42,
-        "mean_channel_error": 0.0,
+        "different_pixels": 5,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 4.069010416666667e-06,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 65521,
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 1,
         "progress": 73,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       },
       {
-        "seed": 65521,
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 1,
         "progress": 100,
-        "mean_channel_error": 0.0,
+        "different_pixels": 0,
         "pixels_above_two_levels": 0,
-        "maximum_channel_error": 0
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 42,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 42,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 42,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 42,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 42,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 42,
+        "progress": 0,
+        "different_pixels": 21,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 1.7903645833333333e-05,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 42,
+        "progress": 17,
+        "different_pixels": 28,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 2.2786458333333334e-05,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 42,
+        "progress": 42,
+        "different_pixels": 7,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 6.510416666666667e-06,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 42,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 42,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 7654321,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 7654321,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 7654321,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 7654321,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 7654321,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 7654321,
+        "progress": 0,
+        "different_pixels": 21,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 1.7903645833333333e-05,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 7654321,
+        "progress": 17,
+        "different_pixels": 28,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 2.2786458333333334e-05,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 7654321,
+        "progress": 42,
+        "different_pixels": 9,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 7.32421875e-06,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 7654321,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 7654321,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 1,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 1,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 1,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 1,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 1,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 1,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 1,
+        "progress": 17,
+        "different_pixels": 1,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 8.138020833333334e-07,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 1,
+        "progress": 42,
+        "different_pixels": 5,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 4.069010416666667e-06,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 1,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 1,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 42,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 42,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 42,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 42,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 42,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 42,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 42,
+        "progress": 17,
+        "different_pixels": 1,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 8.138020833333334e-07,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 42,
+        "progress": 42,
+        "different_pixels": 7,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 6.510416666666667e-06,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 42,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 42,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 7654321,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 7654321,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 7654321,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 7654321,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 7654321,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 7654321,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 7654321,
+        "progress": 17,
+        "different_pixels": 1,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 8.138020833333334e-07,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 7654321,
+        "progress": 42,
+        "different_pixels": 6,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 5.696614583333334e-06,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 7654321,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 7654321,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 1,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 1,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 1,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 1,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 1,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 1,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 1,
+        "progress": 17,
+        "different_pixels": 1,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 8.138020833333334e-07,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 1,
+        "progress": 42,
+        "different_pixels": 5,
+        "pixels_above_two_levels": 1,
+        "mean_channel_error": 1.6276041666666666e-05,
+        "maximum_channel_error": 6,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 1,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 1,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 42,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 42,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 42,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 42,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 42,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 42,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 42,
+        "progress": 17,
+        "different_pixels": 1,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 8.138020833333334e-07,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 42,
+        "progress": 42,
+        "different_pixels": 5,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 4.069010416666667e-06,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 42,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 42,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 7654321,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 7654321,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 7654321,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 7654321,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 7654321,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 7654321,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 7654321,
+        "progress": 17,
+        "different_pixels": 1,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 8.138020833333334e-07,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 7654321,
+        "progress": 42,
+        "different_pixels": 7,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 6.510416666666667e-06,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 7654321,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 7654321,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
       }
     ],
-    "maximum_mean_channel_error": 0.0,
-    "maximum_pixels_above_two_levels": 0,
-    "all_active_body_materials_and_five_progress_uniforms_equal": true,
-    "scope": "Real Forward+ renderer. Immutable original code/source compared to updated code/original and updated code/final candidate: complete320instance packed ash transforms/colors/custom-data and body bounds/grain identical per seed; actual override reset verified. Five fade phases compared."
+    "scope": "Real Forward+640px source-fit full-body/fade images. Immutable old implementation/original compared to current/original and current/private candidate at five Death fractions, three seeds and five fade phases. Complete packed320-instance transforms/colors/custom, every body+ash material shader/uniform/texture-pixel value and exact resource restoration. Candidate keeps1e-6effect numeric and unchanged strict pixel caps. No asset/artistic change.",
+    "original_ID_mapped_all4152_silhouette_position_error": 7.74860382080078e-07,
+    "original_ID_mapping_proof_sha256": "f48589252984fc4f1ab8949bc2297ced20cfd5d98d4fd3a29dbc3955e1be1d93"
   },
-  "editor_import_policy": "Original tracked .glb.import params copied unchanged to isolated source/candidate aliases, fresh import completed without script/resource/import errors. Production raw surfaces have no generated LODs; editor LOD appearance is not approved separately.",
-  "actual_actor_render": {
-    "image_pairs": 604,
-    "renderer": "forward_plus",
-    "gpu": "NVIDIA GeForce RTX 5080 Laptop GPU",
-    "full_cycle_fps": 24,
-    "clips": [
-      "Attack_Ground_Pound",
-      "Death_A",
-      "Fighting_Idle",
-      "Hit_Chest",
-      "Idle_A",
-      "Jog",
-      "Sword_Attack",
-      "Walk"
-    ],
-    "views": [
-      "gameplay",
-      "side",
-      "rear",
-      "underside"
-    ],
-    "placements": [
-      {
-        "body_bounds_position": [
-          -0.850000023841858,
-          4.06150402199046e-09,
-          -0.441602200269699
-        ],
-        "body_bounds_size": [
-          1.70000004768372,
-          1.69999992847443,
-          0.886524498462677
-        ],
-        "model_global": [
-          [
-            0.5,
-            -4.06150402199046e-09,
-            -0.5
-          ],
-          [
-            -2.35294198989868,
-            0.0,
-            2.05700715127932e-07
-          ],
-          [
-            0.0,
-            2.35294198989868,
-            0.0
-          ],
-          [
-            -2.05700715127932e-07,
-            0.0,
-            -2.35294198989868
-          ]
-        ],
-        "name": "baseline",
-        "nameplate_global": [
-          0.5,
-          4.60000133514404,
-          -0.5
-        ],
-        "overhead_height": 4.00000143051147,
-        "selection_size": [
-          1.38999998569489,
-          9.99999974737875e-06,
-          1.38999998569489
-        ],
-        "sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9"
-      },
-      {
-        "body_bounds_position": [
-          -0.850000023841858,
-          4.06150402199046e-09,
-          -0.441602200269699
-        ],
-        "body_bounds_size": [
-          1.70000004768372,
-          1.69999992847443,
-          0.886524498462677
-        ],
-        "model_global": [
-          [
-            0.5,
-            -4.06150402199046e-09,
-            -0.5
-          ],
-          [
-            -2.35294198989868,
-            0.0,
-            2.05700715127932e-07
-          ],
-          [
-            0.0,
-            2.35294198989868,
-            0.0
-          ],
-          [
-            -2.05700715127932e-07,
-            0.0,
-            -2.35294198989868
-          ]
-        ],
-        "name": "candidate",
-        "nameplate_global": [
-          0.5,
-          4.60000133514404,
-          -0.5
-        ],
-        "overhead_height": 4.00000143051147,
-        "selection_size": [
-          1.38999998569489,
-          9.99999974737875e-06,
-          1.38999998569489
-        ],
-        "sha256": "6240f7c590d3ae673dedebeb6a88ef740d8ef371716b3d7c1266871ee2472afe"
-      }
-    ],
-    "full_motion_source_fit": {
-      "source_sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9",
-      "model_global": [
-        [
-          0.5,
-          -4.06150402199046e-09,
-          -0.5
-        ],
-        [
-          -2.35294198989868,
-          0.0,
-          2.05700715127932e-07
-        ],
-        [
-          0.0,
-          2.35294198989868,
-          0.0
-        ],
-        [
-          -2.05700715127932e-07,
-          0.0,
-          -2.35294198989868
-        ]
-      ],
-      "position": [
-        -2.6240403105482994,
-        -0.0021930214975939464,
-        -3.5061598207671083
-      ],
-      "size": [
-        6.137051167102163,
-        4.66667429339434,
-        4.586379476779353
-      ],
-      "poses": 492,
-      "scope": "Every vertex at every full-cycle render frame and view-still pose, using actual complete Actor Godot arrays/poses/weights/transforms, renderer morph cutoff and four/eight influence skin. Evaluated in float64 with a separate 30% camera margin."
+  "replacement_control_only": {
+    "label": "Superseded installed main6240 to newa4af, separate from original-reference qualification",
+    "source_sha256": "6240f7c590d3ae673dedebeb6a88ef740d8ef371716b3d7c1266871ee2472afe",
+    "candidate_sha256": "a4af22643ac3a46c79cd237322589f320feed3cad9e7400ad6f9c609fe339430",
+    "maximum_position_error": 0.0,
+    "maximum_normal_angle_degrees": 1.9090959104164224e-06,
+    "worst_position": {
+      "label": "Attack_Ground_Pound@0.0",
+      "max_surface_error": 0.0,
+      "max_normal_degrees": 1.9090959104164224e-06,
+      "p99_normal_degrees": 1.4787793334710982e-06
     },
-    "pixel_comparison": {
-      "source_sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9",
-      "candidate_sha256": "6240f7c590d3ae673dedebeb6a88ef740d8ef371716b3d7c1266871ee2472afe",
-      "image_pairs": 604,
-      "width": 512,
-      "height": 512,
-      "different_image_pairs": 70,
-      "maximum_different_pixels": 37,
-      "maximum_pixels_above_two_levels": 1,
-      "maximum_mean_channel_error": 0.0003573099772135417,
-      "maximum_channel_error": 100,
-      "scope": "Complete ReplicatedActor3D setup with actual display scale, grounding and body materials; identical cameras for source/candidate, four views and every full native cycle at24Hz. Numeric playback and pixel comparisons are separate reports.",
-      "framing_passed": true,
-      "clipped_frame_labels": [],
-      "maximum_border_foreground_pixels": 0
+    "worst_normal": {
+      "label": "Attack_Ground_Pound@0.0",
+      "max_surface_error": 0.0,
+      "max_normal_degrees": 1.9090959104164224e-06,
+      "p99_normal_degrees": 1.4787793334710982e-06
     },
-    "source_native_clips": [
-      "Death_A",
-      "Fighting_Idle",
-      "Hit_Chest",
-      "Idle_A",
-      "Jog",
-      "Sword_Attack",
-      "Walk",
-      "Attack_Ground_Pound"
-    ]
+    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check."
   },
-  "logical_actor_bounds_preserved": {
-    "source_sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9",
-    "meshes": [
-      {
-        "source_node": 24,
-        "position": [
-          -0.850000083446503,
-          4.06150446607967e-09,
-          -0.441602230072021
-        ],
-        "size": [
-          1.70000016689301,
-          1.70000004768372,
-          0.886524558067322
-        ]
-      }
-    ]
+  "superseded_previous_main": {
+    "status": "Superseded; previous GLB/SCN/capture hashes are not current qualification subtrees",
+    "git_revision": "1f2f3ad6",
+    "runtime_sha256": "6240f7c590d3ae673dedebeb6a88ef740d8ef371716b3d7c1266871ee2472afe",
+    "prior_receipt_path": "docs/qa/creature-storage/batch-031/frost_stone_golem.json",
+    "archived_prior_receipt_sha256": "fdf654e8eb4498ef940d46c36a79bd1d0574601571a16afeb36c3224ea5f8153",
+    "private_exact_archive": ".local/batch-031/frost_stone_golem/rigid-v2/prior-main-receipt-1f2f3ad6.json"
   },
-  "visual_review": "Paired full-cycle gameplay boards and four gameplay/side/rear/underside original/candidate views reviewed, including every original native slot. Shapes, posed motion, materials and placement agree; all512px RGB comparisons pass strict caps with zero border foreground. Source-only full-motion fitted640px effects retain the full body and ash field at all15seeds/fivephases,1125images audited border0; all active body-material/progress uniforms and complete GPU ash buffers match. Original artistic approval and physical observation status retained.",
-  "media": {
-    "lossless_frames": {
-      "path": "qualified-frames.zip",
-      "files": 1208,
-      "bytes": 62902874,
-      "sha256": "01af2e886164cd7363998fe7cfdcc0c7457f0429cf57c1335529641cb7066bd0"
-    },
-    "full_cycles": [
-      {
-        "path": "Attack_Ground_Pound-comparison.webp",
-        "bytes": 1892116,
-        "sha256": "d06ebc30ce2c2c1981ace8c5fa71bfa828d475cc9e231767540acf66cafe7a13"
-      },
-      {
-        "path": "Death_A-comparison.webp",
-        "bytes": 2408156,
-        "sha256": "26a9aa8456c12ed21293ed6f0d7ac667641dc2ba400eb987e43fda708711f6cb"
-      },
-      {
-        "path": "Fighting_Idle-comparison.webp",
-        "bytes": 1902602,
-        "sha256": "2f6f42592de62e67aef85b00f15432a000770b21400a6a4857bf8b173661ba28"
-      },
-      {
-        "path": "Hit_Chest-comparison.webp",
-        "bytes": 692224,
-        "sha256": "f35e2714437ce89bad643aa6b60490d747cd0f1d6bec6b50b8658c272648c6d3"
-      },
-      {
-        "path": "Idle_A-comparison.webp",
-        "bytes": 2923342,
-        "sha256": "8e13918003d52f02577b58d0686dd696877be7b581875c25bf317f34712e2ef5"
-      },
-      {
-        "path": "Jog-comparison.webp",
-        "bytes": 1002948,
-        "sha256": "7f55cb3b649e8ea87185c096f56b2b89cfc9179a9a10bc471b938d965287ed5a"
-      },
-      {
-        "path": "Sword_Attack-comparison.webp",
-        "bytes": 1858250,
-        "sha256": "85dd4faf1992b01655bafc1689cc82e5ed0ce55eb2f53698fd83a7250239040a"
-      },
-      {
-        "path": "Walk-comparison.webp",
-        "bytes": 1683040,
-        "sha256": "3ade45bee2655b60ace3a2f05c9525a52dda936832c8156a793f091ef31d284f"
-      }
-    ],
-    "scope": "Exactoriginal512pxPNGs verified inlosslessZIP; losslessWebP pairedpreviews resized384px at24fps preserveallcycleframes forreview."
+  "evidence_sha256": {
+    ".local/batch-031/frost_stone_golem/rigid-v2/canonical-reproduction.json": "35a0fc3019460d3a614c47b5825832f8cbd03c8962ee43c5578080aa1c714785",
+    ".local/batch-031/frost_stone_golem/rigid-v2/selected-static-raw-bits.json": "c89d38d262de9d699a5384ca484f04903d6440386e9337aab9c74758c839d7a4",
+    ".local/batch-031/frost_stone_golem/rigid-v2/partition-structure-validation.json": "4d49a5feb4d5baba5890e28143aea42e6b4a504d4b2bddf97e6ac9d9829fc1d1",
+    ".local/batch-031/frost_stone_golem/rigid-v2/complete-all-vertex-source-validation.json": "99cc57dd2549e3795e6e43d51c4f2b99c234e1858038ac32e80e1bf5aa0ee923",
+    ".local/batch-031/frost_stone_golem/rigid-v2/all-time-source-bound.json": "bd8c88ff6253c0748a6abcd46ca77f66aa65da566d5ee1dcc0b74b478fa46a1d",
+    ".local/batch-031/frost_stone_golem/rigid-v2/physical-witness-validation.json": "03dba56cc1a784c0a09aab2a6af751b466bedf809f7b61dbbe661bf547f7fbbd",
+    ".local/batch-031/frost_stone_golem/rigid-v2/placement.json": "b8caab1feb63b90cc2710b08e9152f1745ff54db1ebdc9ce0beb05af9e03e42c",
+    ".local/batch-031/frost_stone_golem/rigid-v2/original-reference-effects-validation.json": "2a4b4fe06a8373e4d2bfe3b1efea0cbfcb7808fe743d23ebe880f8d64ad5e3e0",
+    ".local/batch-031/frost_stone_golem/rigid-v2/parallel-cpu/blender-validation.json": "d025a037bc9f24db987bf9aa9e41ba01c4b4b015d1339e7251e6beea326700c8",
+    ".local/batch-031/frost_stone_golem/rigid-v2/parallel-cpu/blender-direct-validation.json": "bb7390bbb5448c74ac0eb0022bf1fa191b0b94d7079b692967d4525ff73bdd66",
+    ".local/batch-031/frost_stone_golem/rigid-v2/parallel-cpu/native-validation.json": "f6f4009e1653d6042ff16726aef64b15c8f77193e7d073a456e9803032ba1c1b",
+    ".local/batch-031/frost_stone_golem/rigid-v2/parallel-cpu/imported-validation.json": "f6f4009e1653d6042ff16726aef64b15c8f77193e7d073a456e9803032ba1c1b",
+    ".local/batch-031/frost_stone_golem/rigid-v2/parallel-cpu/imported/runtime.json": "c784b9e2f0ebe0c7f44dc5bd01e80a4bd8c0f53a59eb405f415cc3f47b873d61",
+    ".local/batch-031/frost_stone_golem/rigid-v2/parallel-cpu/material-validation.json": "27d1ca565c897f12537ae682e586f071d03d0637aa3d411db5015c125c46edee",
+    ".local/batch-031/frost_stone_golem/rigid-v2/parallel-cpu/native-payload-order-and-skin-proof.json": "f48589252984fc4f1ab8949bc2297ced20cfd5d98d4fd3a29dbc3955e1be1d93",
+    ".local/batch-031/frost_stone_golem/rigid-v2/parallel-cpu/allfields/direct-native-payload-validation.json": "d4ef1b9f660041c54cfbc9b259ab8e0c04e6deafac806d0a4a28ce1c834d35d8",
+    ".local/batch-031/frost_stone_golem/rigid-v2/parallel-cpu/allfields/direct-editor-payload-validation.json": "6653b8473b1ad1c56c67b2dd374669bfcab6e400d4f1f1c7cba6818e5cbbb2ab",
+    ".local/batch-031/frost_stone_golem/rigid-v2/parallel-cpu/render-fit.json": "4eee4bb9ef4d73092321f255dd1c2fc94daaaea71a45f764dcd87a1ad0cdc925",
+    ".local/batch-031/frost_stone_golem/rigid-v2/parallel-cpu/actual-render/render.json": "c6f2aaeb9ea55df7381f83b1210881a989e393c5aedef853adaa0ba8aee844c5",
+    ".local/batch-031/frost_stone_golem/rigid-v2/parallel-cpu/actual-render/pixel-comparison.json": "9a21058e2b94d44463a1ca9ef3b2f2066bc2d8d8079153d79cada7db93ba456c",
+    ".local/batch-031/frost_stone_golem/rigid-v2/effects-old/dissolve.json": "0c70b75ab5e33583167df9fffa232d0ef8576bb76c3918370355e7f477de2982",
+    ".local/batch-031/frost_stone_golem/rigid-v2/effects-new/dissolve.json": "0ef3c0fbfc300af9deb030d56d9c59129a7821a5f722c24e0a4eedf253bc52c9",
+    ".local/batch-031/frost_stone_golem/rigid-v2/profile.json": "d5d634bafcba2af3841565586c10efeb1e4563cfe7aa94b5380be304eb3f69eb",
+    ".local/batch-031/frost_stone_golem/rigid-v2/processing.json": "ac198844c51204de908459b305602196ab8d17b69902871ece6c21857bbbff40",
+    ".local/batch-031/frost_stone_golem/rigid-v2/build.json": "52d28999e3f0d8f11edc19e836948d36924b3d3acfe813c505419933b57fef97"
   },
-  "checks": {
-    "targeted_storage_tests": "65 passed",
-    "canonical_reproduction": "Byte exact",
-    "native_and_imported_playback": "296 states each including RESET and every directed clip crossfade",
-    "death_effect_seeds": 15,
-    "current_bone_step_skin_tests": "20 passed",
-    "all_active_body_material_progress_uniforms": "Exactly equal across original code/source and current source/candidate, all15seeds/fivephases."
-  },
-  "qualification_limits": {
-    "total_position_4_float32_ulp": 4.76837158203125e-07,
-    "source_rest_extent": 1.7000002954706892,
-    "position_extent_definition": "max(abs(original rest world vertices), largest original rest axis extent)",
-    "position_metric": "Total source/candidate Euclidean distance; no inherited/additional-error waiver.",
-    "runtime_normal_angle_degrees_maximum": 0.0001,
-    "raster_any_changed_pixels_maximum": 256,
-    "raster_pixels_above_two_levels_maximum": 32,
-    "raster_mean_channel_error_maximum": 0.01,
-    "border_foreground_pixels_maximum": 0
-  },
-  "strict_engine_limits": {
-    "native": {
-      "maximum_euclidean_position_error": 3.3144875262601044e-07,
-      "maximum_normal_degrees": 2.2148803860924733e-05,
-      "passed": true
-    },
-    "imported": {
-      "maximum_euclidean_position_error": 3.3144875262601044e-07,
-      "maximum_normal_degrees": 2.2148803860924733e-05,
-      "passed": true
-    }
-  },
-  "runtime_tradeoff": {
-    "measured_corrective_payload_bytes_saved": 0,
-    "compressed_install_bytes_saved": -4727,
-    "compressed_install_growth_bytes": 4727,
-    "interpretation": "Encoded GLB data shrinks. Original glTF importer FPS is unchanged and rebakes dense runtime curves; file savings do not establish lower retained animation RAM or frame time. Corrective GPU buffers, draw surfaces, bones and influence count are unchanged. Loading cost not benchmarked here."
-  },
-  "raw_development_preference": "User accepts small RLCZ packaged increases for smaller source models.",
-  "private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\batch-031\\frost_stone_golem\\v1",
-  "original_witness_binding": {
-    "path": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\godot-client\\tests\\fixtures\\humanoid-baseline\\frost_stone_golem.json",
-    "record_key": null,
-    "sha256_of_frozen_record": "7208fa2935b8b8ab901013a6821c5bc9c8ac33e6ea7eff74dafb9a9eee5624ec",
-    "source_sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9",
-    "frozen_authored_record": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\batch-031\\frost_stone_golem\\original-witness.json",
-    "frozen_authored_record_sha256": "7208fa2935b8b8ab901013a6821c5bc9c8ac33e6ea7eff74dafb9a9eee5624ec"
-  },
-  "qa_animation_map_provenance": {
-    "original_path": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\godot-client\\data\\animations\\humanoid-baseline\\frost_stone_golem.json",
-    "original_sha256": "52c61a294a072be08ea2914b9a96e8474dce029ec1885ed7c65c5de54ea8c1ba",
-    "immutable_original_copy": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\batch-031\\frost_stone_golem\\original-animation-map.json",
-    "qa_map_sha256": "b2ec07b496be925028d0cc6ba0bb09dc96a0388d391c9219ce8989fcf6be83f5",
-    "additional_aliases": {
-      "__storage_qa_native_0": "Death_A",
-      "__storage_qa_native_1": "Fighting_Idle",
-      "__storage_qa_native_2": "Hit_Chest",
-      "__storage_qa_native_3": "Idle_A",
-      "__storage_qa_native_4": "Jog",
-      "__storage_qa_native_5": "Sword_Attack",
-      "__storage_qa_native_6": "Walk",
-      "__storage_qa_native_7": "Attack_Ground_Pound"
-    },
-    "all_original_fields_and_actions_unchanged": true,
-    "config_animationMap_unchanged": true
-  },
-  "original_motion_review_status": "pending",
-  "original_motion_validator": {
-    "script": "tests/test_humanoid_baseline.gd",
-    "baseline_passed": true,
-    "candidate_passed": true,
-    "original_observations_and_limits_unchanged": true
-  },
-  "actual_actor_route": "Both source/candidate actor fixtures are absolute loose GLB aliases outside res://assets/actors and have no .import sidecars; both use the raw GLTF scene cache. Fresh editor numeric checks load both imported resources explicitly in a separate phase.",
-  "effects_framing": {
-    "passed": true,
-    "actor_images": 225,
-    "total_batch_images": 1125,
-    "maximum_border_foreground_pixels": 0,
-    "viewport": [
-      640,
-      640
-    ],
-    "source_only_camera_fit": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\batch-031\\frost_stone_golem\\v1\\render-fit.json",
-    "audit_sha256": "ce78233ae0fe017015500d854ab7c3b2677dcaacfc46ddbbcee669500088a2e4",
-    "scope": "All15seeds\u00d7fivephases across old-source/current-source/current-candidate. Body/ash camera derives solely from original full-motion world bounds; no crop allowance."
-  },
-  "editor_cache_mode_correction": {
-    "status": "Previous Cache-based Editor-mode qualification claims withdrawn and superseded by the explicit ResourceLoader supplement below.",
-    "reason": "Earlier public imported-phase dumper called GlbSceneCache.instantiate; aliases could select raw or imported resources. The earlier route did not enforce matched actual Editor scenes.",
-    "immutable_prior_receipt_sha256": "9a6001da0456b66d22646aaf9895ec347064c14fd5bc39a63005b9d7e5200b78",
-    "immutable_prior_receipt_private_path": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\frost_stone_golem\\receipt-before-editor-mode-correction.json",
-    "previous_supplement_withdrawn": null,
-    "old_captures_preserved": true,
-    "original_model_and_observations_preserved": true,
-    "raw_actual_actor_and_source_data_evidence_unchanged": true,
-    "no_model_bytes_changed_by_this_correction": true
-  },
-  "fresh_editor_numeric_supplement": {
-    "actor": "frost_stone_golem",
-    "source_sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9",
-    "candidate_sha256": "6240f7c590d3ae673dedebeb6a88ef740d8ef371716b3d7c1266871ee2472afe",
-    "maximum_position_error": 3.3144875262601044e-07,
-    "maximum_normal_angle_degrees": 2.2148803860924733e-05,
-    "position_budget": 4.76837158203125e-07,
-    "normal_budget_degrees": 0.0001,
-    "actual_editor_proofs": [
-      {
-        "actual_loader": "ResourceLoader.load(PackedScene)",
-        "import_metadata_path": "res://.godot/imported/frost_stone_golem.glb-620c7103a0e97d3e7dbd1832d0ac4d2e.md5",
-        "import_metadata_sha256": "4bfa9cb16a04fa5dbcf709ad10cc67df07a918d4dec1df1d384d9e132242a5ab",
-        "imported_resource_path": "res://.godot/imported/frost_stone_golem.glb-620c7103a0e97d3e7dbd1832d0ac4d2e.scn",
-        "imported_resource_sha256": "fb86b35a6e619b17fccb3b3ef3ad0f59849eef13bf80b4be4249ae4cff16be3d",
-        "packed_scene_resource_path": "res://assets/storage-baseline/frost_stone_golem.glb",
-        "single_scene_destination_md5_checked": true,
-        "source_md5": "24fd8129c46b575ee0b29040babdcb24",
-        "source_path": "res://assets/storage-baseline/frost_stone_golem.glb",
-        "source_sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9",
-        "import_policy_sha256": "ea784f126b285dff945832fa107d2617b6681dfb5c8ccdd23d4636ec22a5738e",
-        "single_destination_scene_md5_checked": true,
-        "post_capture_same_source_scene_sha256": true
-      },
-      {
-        "actual_loader": "ResourceLoader.load(PackedScene)",
-        "import_metadata_path": "res://.godot/imported/frost_stone_golem.glb-d320c5035075daeb0c115e56ddef1b35.md5",
-        "import_metadata_sha256": "273afb0c8b2ea7b9d4950f147c20df2f6753b8b0b1e034bbb06bad4204469df5",
-        "imported_resource_path": "res://.godot/imported/frost_stone_golem.glb-d320c5035075daeb0c115e56ddef1b35.scn",
-        "imported_resource_sha256": "2883a8d2bece93a4a5c2e5e88b3859ffc6a8737a3c2e0a02fa25d5982ef348ab",
-        "packed_scene_resource_path": "res://assets/storage-candidate/frost_stone_golem.glb",
-        "single_scene_destination_md5_checked": true,
-        "source_md5": "065a4a6eeac8d56218f4fc4752088fd2",
-        "source_path": "res://assets/storage-candidate/frost_stone_golem.glb",
-        "source_sha256": "6240f7c590d3ae673dedebeb6a88ef740d8ef371716b3d7c1266871ee2472afe",
-        "import_policy_sha256": "a8201c956786d1dc243c940911ccbcad5f5e6dc0fd50d4a8eb441d4bd2072f8f",
-        "single_destination_scene_md5_checked": true,
-        "post_capture_same_source_scene_sha256": true
-      }
-    ],
-    "strict_passed": true,
-    "numeric_report_sha256": "d76a63d199d85789ae6870b9910edc06e2dd7302f7a9940c798ed607ec8a8aeb",
-    "numeric_runtime_sha256": "c3fadeb1c1f57d7b39a0e384a00a73303aa428c66b48ef60810d83050c96895e",
-    "private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\frost_stone_golem",
-    "passed": true,
-    "sampled_states": 296,
-    "all_original_native_clips": [
-      "Death_A",
-      "Fighting_Idle",
-      "Hit_Chest",
-      "Idle_A",
-      "Jog",
-      "Sword_Attack",
-      "Walk",
-      "Attack_Ground_Pound"
-    ],
-    "position_metric": "Total Euclidean source/current world position distance; no inherited/additional-error waiver.",
-    "complete_oriented_triangle_payloads_identical": true,
-    "all_joint_index_bits_identical": true,
-    "declared_zero_weight_joint_routing_validation": null,
-    "static_report_sha256": "bc97217f169bedf3f621000dffb321ddeafedce242da45df00b8d35d3775eccb",
-    "static_private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\actual-editor-backfill\\frost_stone_golem\\allfields",
-    "numeric_method": "Both models explicitly ResourceLoader.load(PackedScene), generated SCN required; actual Editor primary mesh arrays with native-library all-clip playback, RESET and directed crossfades.",
-    "freshness_method": "Current source GLB MD5 equals import metadata source_md5; source/SCN/metadata/policy SHA256 retained, single-destination SCN MD5 checked. Earliest captures additionally validated after capture with unchanged source+SCN byte hashes.",
-    "source_authored_morph_tangent_target_count": 0,
-    "actual_editor_generated_morph_tangent_array_target_count": 33,
-    "source_editor_lod_counts": [
-      2
-    ],
-    "candidate_editor_lod_counts": [
-      2
-    ],
-    "scope": "CPU-only actual Editor primary-surface numerical and complete typed vertex/morph P/N/T and oriented-triangle equivalence. Raw source-data/Blender/actualActor whole-cycle/effects evidence remains independent. Generated Editor distant LOD appearance is not separately approved.",
-    "original_observations_and_artistic_review_status_unchanged": true,
-    "all_non_joint_static_fields_and_retained_morph_pnt_bits_identical": true,
-    "joint_index_bits_match_or_only_declared_positive_zero_weight_slots_change": true
-  }
+  "visual_review": "All eight native clips checked through complete paired cycles and four views; normal-scale paired stills for every clip and original/current five-phase death-effect boards reviewed. Same framing/cameras, all foreground borders clear. Artistic approval status unchanged.",
+  "known_limitations": [
+    "Raw selected POSITION deltas include microscopic authored residue up to5.83e-16; source-space continuous bound4.381e-15 is explicit. Actual original native P/N/T target rows and complete native/Editor deformation payloads are bit-identical under the proved partition mapping.",
+    "One extra draw surface per instance/pass; no net FPS or playback CPU improvement is claimed.",
+    "Additional raw development bytes saved versus superseded main; small packaged changes measured explicitly.",
+    "Resident Animation RAM and key-search savings are not inferred from encoded key reductions; dense importer behavior remains unchanged."
+  ]
 }
