@@ -5,8 +5,8 @@
   "batch_size": 5,
   "creature_count": 235,
   "batch_count": 47,
-  "completed_batches": 39,
-  "qualified_creatures": 183,
+  "completed_batches": 40,
+  "qualified_creatures": 187,
   "status": "in progress",
   "actors": [
     {
@@ -2296,7 +2296,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/baboon.glb",
       "source_sha256": "70642dc46ec409454d14974b14180c593bcc7792071481c08ba54d67e8106330",
       "source_bytes": 2520436,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "450a8b1ce98a8698fac32ea929053962b7183dbe94c1f47ef0f1b14471265083",
+      "candidate_bytes": 2328340,
+      "qualification_report": "docs/qa/creature-storage/baboon.json"
     },
     {
       "actor": "reed_mask_hunter",
@@ -2305,7 +2308,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/reed_mask_hunter.glb",
       "source_sha256": "930b830093d49fc88060e4b9844954412176c0818efbc1c6e55f62a2fe126d85",
       "source_bytes": 2446392,
-      "status": "pending"
+      "status": "held",
+      "candidate_sha256": "930b830093d49fc88060e4b9844954412176c0818efbc1c6e55f62a2fe126d85",
+      "candidate_bytes": 2446392,
+      "qualification_report": "docs/qa/creature-storage/reed_mask_hunter.json"
     },
     {
       "actor": "swamp_heron",
@@ -2314,7 +2320,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/swamp_heron.glb",
       "source_sha256": "1a36c9c45746eee5ed9ad08fb38388ff11719ca96198661ea077d41035595f29",
       "source_bytes": 2301260,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "f8b1b2b6800a23524186548af3b524ff4ce28d79e45b105c873b477c5995a55b",
+      "candidate_bytes": 1994640,
+      "qualification_report": "docs/qa/creature-storage/swamp_heron.json"
     },
     {
       "actor": "suncrest_heron",
@@ -2323,7 +2332,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/suncrest_heron.glb",
       "source_sha256": "b26736a55d415dcdee7e4e6b17aa551197fd97b74bb517f5e9c753ca481c0fa1",
       "source_bytes": 2261356,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "ab84703466346a88a4c1655fe75715d185c184181641225e81f987ac5c6f583b",
+      "candidate_bytes": 2119552,
+      "qualification_report": "docs/qa/creature-storage/suncrest_heron.json"
     },
     {
       "actor": "drowned_lich_king",
@@ -2332,7 +2344,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/drowned_lich_king.glb",
       "source_sha256": "2e64a12d91c0beee75d844d60c836d2d3c782f2bdc35e870e35f9e26b6bd79eb",
       "source_bytes": 2251616,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "6a7adb7d3dccf682404eadba4cbfcba083cdfd14d5a8d2918401cfef9365a8f1",
+      "candidate_bytes": 2042588,
+      "qualification_report": "docs/qa/creature-storage/drowned_lich_king.json"
     },
     {
       "actor": "dolphin",
@@ -2749,17 +2764,18 @@
     36,
     37,
     38,
+    39,
     40
   ],
-  "reviewed_creatures": 195,
+  "reviewed_creatures": 200,
   "selection_policy": {
     "raw_asset_priority": "Prefer smaller qualified raw development models; small measured increases in packaged RLCZ size are accepted and recorded per actor and batch.",
     "runtime_claims": "Encoded input-key savings do not establish retained animation memory or frame-time savings because Godot rebakes curves at the declared cadence. Shared corrective GPU buffer savings are measured separately.",
     "approximation": "Exact batches retain their existing bounded float32/native/pixel gates. Approximate joint-curve trials are private and uninstalled."
   },
   "totals_reviewed": {
-    "raw_saved_bytes": 295500836,
-    "compressed_saved_bytes": 19460628,
+    "raw_saved_bytes": 296350384,
+    "compressed_saved_bytes": 19452508,
     "shared_gpu_saved_bytes": 39397800
   },
   "independent_editor_verification": {
