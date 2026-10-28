@@ -323,7 +323,7 @@ static func _collider(directory: String, row: Dictionary) -> Dictionary:
 	var body := StaticBody3D.new()
 	body.name = name + "_WalkSurfaceCollision"
 	body.collision_layer = WALK_LAYER
-	body.collision_mask = 0
+	body.collision_mask = 1 # WorldLoader._create_static_collision keeps this default.
 	var shape := CollisionShape3D.new()
 	var concave := ConcavePolygonShape3D.new()
 	concave.set_faces(faces)
