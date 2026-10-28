@@ -126,7 +126,34 @@
     "imported": {
       "samples": 232,
       "maximum_position_error": 1.955928812984384e-07,
-      "maximum_normal_angle_degrees": 3.157808532191564e-05
+      "maximum_normal_angle_degrees": 3.157808532191564e-05,
+      "actual_loader": "ResourceLoader.load(PackedScene)",
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/jadefeather_raptor.glb-c4afccbcbbab51e9dc690767146a999b.md5",
+          "import_metadata_sha256": "2a8c0d15577781958da125b7833b6bc0a79a262863c359715dc33d9d27b22313",
+          "imported_resource_path": "res://.godot/imported/jadefeather_raptor.glb-c4afccbcbbab51e9dc690767146a999b.scn",
+          "imported_resource_sha256": "ce3f2c9cce2375af82627cc242a00d376846017314e421b9c5dd653346eb14e6",
+          "packed_scene_resource_path": "res://assets/qa/jadefeather_raptor/v2/baseline/jadefeather_raptor.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "fd6eb73d998ac7e57d424d27746b0f52",
+          "source_path": "res://assets/qa/jadefeather_raptor/v2/baseline/jadefeather_raptor.glb",
+          "source_sha256": "4f7f93223afe19c9b24030646e4622f742568390d821f935bbd4dd7f2fef4a1e"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/jadefeather_raptor.glb-7b1b33c0ab52376e5bd43e4346498b17.md5",
+          "import_metadata_sha256": "a90afa92df0595b26e9d8a72c91491770320d6cd426f0eac9bf8c99768b05e84",
+          "imported_resource_path": "res://.godot/imported/jadefeather_raptor.glb-7b1b33c0ab52376e5bd43e4346498b17.scn",
+          "imported_resource_sha256": "89d1e0081488267a11ccb5ea0998529eb851b60c9c62c935fc7e55dc896402ec",
+          "packed_scene_resource_path": "res://assets/qa/jadefeather_raptor/v2/candidate/jadefeather_raptor.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "9131ff81871e48b719ad0d816e0652ce",
+          "source_path": "res://assets/qa/jadefeather_raptor/v2/candidate/jadefeather_raptor.glb",
+          "source_sha256": "d6355029073f9e98fa49066067b803e165530b38968352dc3ec7740644ca09b8"
+        }
+      ]
     }
   },
   "editor_import_policy": {
@@ -245,48 +272,6 @@
     "maximum_mean_channel_error": 0.0,
     "all_RGBA_alpha_channels_equal": true,
     "all_150_captured_images_zero_border_foreground": true,
-    "old_and_new_cameras": {
-      "old": [
-        {
-          "name": "baseline",
-          "size": 8.06127738952637,
-          "target": [
-            0.81834077835083,
-            1.47817444801331,
-            -0.151787519454956
-          ]
-        },
-        {
-          "name": "candidate",
-          "size": 8.06127738952637,
-          "target": [
-            0.81834077835083,
-            1.47817444801331,
-            -0.151787519454956
-          ]
-        }
-      ],
-      "new": [
-        {
-          "name": "baseline",
-          "size": 8.06127738952637,
-          "target": [
-            0.81834077835083,
-            1.47817444801331,
-            -0.151787519454956
-          ]
-        },
-        {
-          "name": "candidate",
-          "size": 8.06127738952637,
-          "target": [
-            0.81834077835083,
-            1.47817444801331,
-            -0.151787519454956
-          ]
-        }
-      ]
-    },
     "cases": [
       {
         "role": "baseline",
@@ -2995,7 +2980,27 @@
     "maximum_complete_secondary_silhouette_position_error": 0.0,
     "real_source_candidate_fade_pairs": 75,
     "all_body_ash_uniforms_and_texture_pixels_mips_compared": true,
-    "actual_original_helper_reference_claimed": false
+    "actual_original_helper_reference_claimed": false,
+    "current_helper_cameras": [
+      {
+        "name": "baseline",
+        "size": 8.06127738952637,
+        "target": [
+          0.81834077835083,
+          1.47817444801331,
+          -0.151787519454956
+        ]
+      },
+      {
+        "name": "candidate",
+        "size": 8.06127738952637,
+        "target": [
+          0.81834077835083,
+          1.47817444801331,
+          -0.151787519454956
+        ]
+      }
+    ]
   },
   "rig_investigation": {
     "decision": "Original rig, skin and topology retained; this candidate uses exact storage reductions only."
@@ -3011,16 +3016,177 @@
     "imported-validation.json": "88bd90e18ab1150370b21d187fb906c6e469f05f71718b26b4507baa901cb8c5",
     "render-fit.json": "2dd31d596e45ac35d64f61eeb2996965d855a91897e4fd3f96990c2049b8a78f",
     "placement.json": "a4ff8283d8529593ea5029df360c2c995191f5b1a64617fd2afa4e572200dcad",
-    "effects-validation.json": "c0742d34552d46ba26180a9a6ca9a7ba948d318aba149730057040dc26272343",
+    "effects-validation.json": "ed0e4241d3dadf1c00a1a75986392e9daa16e2353eca8140ea97ef37bde64b8c",
     "source-fit-inventory.json": "f8f53d5fd5cf9afe1b7e1eb39a3f11da5d787b1eb8baf5e7e9ea7fe806f00841",
     "actual-render/render.json": "120fb4cc5b8b4827d7f896ce8cc24983d68c44c0621f4d0e8b473ed8d6e2b942",
     "actual-render/pixel-comparison.json": "d0fdd6252a9559a37d994fb6d5a0221c59b2d5808f456169bc9db43f3347bb63",
-    "editor-import-policy.json": "4474c4227bc14e85a4ec6097ce722f82eb5d3ade27c5307152e30519d4a46203"
+    "editor-import-policy.json": "4474c4227bc14e85a4ec6097ce722f82eb5d3ade27c5307152e30519d4a46203",
+    "full-effects/job.json": "ca14caa448fe6a229d51ae61fa296311c981d0664ef0b382b0a3d38fc02f9375",
+    "full-effects/dissolve.json": "a8a4904882964ba1564f6784491dfed70dbdd633dacf85e6e202c272c5ecfba7",
+    "full-effects/image-sha256.json": "54d86f1706fd6842e7fb827f1360bf7959394531a0b5f7029b98b02e75116fee",
+    "freshness-lineage.json": "24b9a10fb7117462bdb9f0a4a91a37c75d54714422b45e493949649cb640925b"
   },
-  "visual_review": "Paired normal contact boards and complete native-cycle previews reviewed. Every four-view/full-cycle frame has zero foreground pixels in its border two pixels wide.",
+  "visual_review": "Normal-scale native body and five-progress seeded fade contact boards reviewed; complete models and effects remain in frame. All750batch fade images have zero foreground border pixels; all375real source/candidate fade pairs are pixel-exact.",
   "known_limitations": [
     "Separate resident RAM and frame-time benchmarks were not measured.",
     "Encoded animation-key savings describe raw files, logical source accessors and import parsing input only. Native importing may densely rebake identical generated Animation keys; no runtime Animation RAM, key-search or playback CPU saving is claimed.",
     "Original artistic review/approval status is unchanged."
-  ]
+  ],
+  "independent_editor_verification": {
+    "source_original_sha256": "4f7f93223afe19c9b24030646e4622f742568390d821f935bbd4dd7f2fef4a1e",
+    "canonical_sha256": "d6355029073f9e98fa49066067b803e165530b38968352dc3ec7740644ca09b8",
+    "actual_loader": "ResourceLoader.load(PackedScene)",
+    "load_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/jadefeather_raptor.glb-c4afccbcbbab51e9dc690767146a999b.md5",
+        "import_metadata_sha256": "2a8c0d15577781958da125b7833b6bc0a79a262863c359715dc33d9d27b22313",
+        "imported_resource_path": "res://.godot/imported/jadefeather_raptor.glb-c4afccbcbbab51e9dc690767146a999b.scn",
+        "imported_resource_sha256": "ce3f2c9cce2375af82627cc242a00d376846017314e421b9c5dd653346eb14e6",
+        "packed_scene_resource_path": "res://assets/qa/jadefeather_raptor/v2/baseline/jadefeather_raptor.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "fd6eb73d998ac7e57d424d27746b0f52",
+        "source_path": "res://assets/qa/jadefeather_raptor/v2/baseline/jadefeather_raptor.glb",
+        "source_sha256": "4f7f93223afe19c9b24030646e4622f742568390d821f935bbd4dd7f2fef4a1e"
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/jadefeather_raptor.glb-7b1b33c0ab52376e5bd43e4346498b17.md5",
+        "import_metadata_sha256": "a90afa92df0595b26e9d8a72c91491770320d6cd426f0eac9bf8c99768b05e84",
+        "imported_resource_path": "res://.godot/imported/jadefeather_raptor.glb-7b1b33c0ab52376e5bd43e4346498b17.scn",
+        "imported_resource_sha256": "89d1e0081488267a11ccb5ea0998529eb851b60c9c62c935fc7e55dc896402ec",
+        "packed_scene_resource_path": "res://assets/qa/jadefeather_raptor/v2/candidate/jadefeather_raptor.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "9131ff81871e48b719ad0d816e0652ce",
+        "source_path": "res://assets/qa/jadefeather_raptor/v2/candidate/jadefeather_raptor.glb",
+        "source_sha256": "d6355029073f9e98fa49066067b803e165530b38968352dc3ec7740644ca09b8"
+      }
+    ],
+    "typed_static_material_texture_mips_lod_and_triangle_proof": {
+      "actor": "jadefeather_raptor",
+      "source_sha256": "4f7f93223afe19c9b24030646e4622f742568390d821f935bbd4dd7f2fef4a1e",
+      "candidate_sha256": "d6355029073f9e98fa49066067b803e165530b38968352dc3ec7740644ca09b8",
+      "surfaces": [
+        {
+          "all_typed_arrays": [
+            {
+              "slot": 0,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 1,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 2,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 4,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 10,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 11,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 12,
+              "exact_after_proven_vertex_bijection": true
+            }
+          ],
+          "full_material_storage_fields_and_texture_pixels_mips_exact": true,
+          "format_exact": true,
+          "lods": [
+            {
+              "lod": 0,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            },
+            {
+              "lod": 1,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            }
+          ],
+          "bounds_component_max_delta": 0.0,
+          "lod_capture_present": true
+        }
+      ],
+      "passed": true,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/jadefeather_raptor.glb-c4afccbcbbab51e9dc690767146a999b.md5",
+          "import_metadata_sha256": "2a8c0d15577781958da125b7833b6bc0a79a262863c359715dc33d9d27b22313",
+          "imported_resource_path": "res://.godot/imported/jadefeather_raptor.glb-c4afccbcbbab51e9dc690767146a999b.scn",
+          "imported_resource_sha256": "ce3f2c9cce2375af82627cc242a00d376846017314e421b9c5dd653346eb14e6",
+          "packed_scene_resource_path": "res://assets/qa/jadefeather_raptor/v2/baseline/jadefeather_raptor.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "fd6eb73d998ac7e57d424d27746b0f52",
+          "source_path": "res://assets/qa/jadefeather_raptor/v2/baseline/jadefeather_raptor.glb",
+          "source_sha256": "4f7f93223afe19c9b24030646e4622f742568390d821f935bbd4dd7f2fef4a1e"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/jadefeather_raptor.glb-7b1b33c0ab52376e5bd43e4346498b17.md5",
+          "import_metadata_sha256": "a90afa92df0595b26e9d8a72c91491770320d6cd426f0eac9bf8c99768b05e84",
+          "imported_resource_path": "res://.godot/imported/jadefeather_raptor.glb-7b1b33c0ab52376e5bd43e4346498b17.scn",
+          "imported_resource_sha256": "89d1e0081488267a11ccb5ea0998529eb851b60c9c62c935fc7e55dc896402ec",
+          "packed_scene_resource_path": "res://assets/qa/jadefeather_raptor/v2/candidate/jadefeather_raptor.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "9131ff81871e48b719ad0d816e0652ce",
+          "source_path": "res://assets/qa/jadefeather_raptor/v2/candidate/jadefeather_raptor.glb",
+          "source_sha256": "d6355029073f9e98fa49066067b803e165530b38968352dc3ec7740644ca09b8"
+        }
+      ]
+    },
+    "all_retained_morph_POSITION_NORMAL_TANGENT_typed_fields": {
+      "actor": "jadefeather_raptor",
+      "source_sha256": "4f7f93223afe19c9b24030646e4622f742568390d821f935bbd4dd7f2fef4a1e",
+      "candidate_sha256": "d6355029073f9e98fa49066067b803e165530b38968352dc3ec7740644ca09b8",
+      "all_retained_editor_POSITION_NORMAL_TANGENT_typed_bits_exact": true,
+      "retained_targets": 0,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/jadefeather_raptor.glb-c4afccbcbbab51e9dc690767146a999b.md5",
+          "import_metadata_sha256": "2a8c0d15577781958da125b7833b6bc0a79a262863c359715dc33d9d27b22313",
+          "imported_resource_path": "res://.godot/imported/jadefeather_raptor.glb-c4afccbcbbab51e9dc690767146a999b.scn",
+          "imported_resource_sha256": "ce3f2c9cce2375af82627cc242a00d376846017314e421b9c5dd653346eb14e6",
+          "packed_scene_resource_path": "res://assets/qa/jadefeather_raptor/v2/baseline/jadefeather_raptor.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "fd6eb73d998ac7e57d424d27746b0f52",
+          "source_path": "res://assets/qa/jadefeather_raptor/v2/baseline/jadefeather_raptor.glb",
+          "source_sha256": "4f7f93223afe19c9b24030646e4622f742568390d821f935bbd4dd7f2fef4a1e"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/jadefeather_raptor.glb-7b1b33c0ab52376e5bd43e4346498b17.md5",
+          "import_metadata_sha256": "a90afa92df0595b26e9d8a72c91491770320d6cd426f0eac9bf8c99768b05e84",
+          "imported_resource_path": "res://.godot/imported/jadefeather_raptor.glb-7b1b33c0ab52376e5bd43e4346498b17.scn",
+          "imported_resource_sha256": "89d1e0081488267a11ccb5ea0998529eb851b60c9c62c935fc7e55dc896402ec",
+          "packed_scene_resource_path": "res://assets/qa/jadefeather_raptor/v2/candidate/jadefeather_raptor.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "9131ff81871e48b719ad0d816e0652ce",
+          "source_path": "res://assets/qa/jadefeather_raptor/v2/candidate/jadefeather_raptor.glb",
+          "source_sha256": "d6355029073f9e98fa49066067b803e165530b38968352dc3ec7740644ca09b8"
+        }
+      ],
+      "scope": "Direct actual Editor source/candidate retained morph P/N/T byte digests after independently proved complete static-attribute vertex bijection. Exact target mask from source packing lineage; no morph field omitted.",
+      "passed": true
+    },
+    "evidence_sha256": {
+      "imported/runtime.json": "d5972b7888d1f26db467c5e019bfae14c14da8f6240a4ddcc6cec76cacf1db36",
+      "imported-validation.json": "88bd90e18ab1150370b21d187fb906c6e469f05f71718b26b4507baa901cb8c5",
+      "imported-static-mesh-bits.json": "44fb3820f448b2b63dd674fd0cc98fc40d319653eda8b1c0c700e4d75c99222a",
+      "imported-typed-validation.json": "8918d15087f3bef900f4ca8bc5f4d2cfb5eb30b4434bba718335c0faff245302",
+      "imported-morph-digests.json": "81ca1beb292a894773755384de39447901b47630ba93c27292de23516ea00a56",
+      "imported-morph-validation.json": "878e0330ec717c745df9e1ef8b1ec08cef17cd75ddb6a543427f762f198b9a39"
+    },
+    "scope": "Genuine independent Editor verification from the first capture. Both current GLBs bind generatedSCNs plus source/destinationMD5 freshness. Numeric/static/material/morph proofs use exactly those sameSCNs. Original observations and production loose-folder native mode remain unchanged."
+  }
 }

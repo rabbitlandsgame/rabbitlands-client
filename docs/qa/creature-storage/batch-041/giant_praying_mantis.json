@@ -126,7 +126,34 @@
     "imported": {
       "samples": 232,
       "maximum_position_error": 4.711534781680568e-07,
-      "maximum_normal_angle_degrees": 2.911605978830686e-05
+      "maximum_normal_angle_degrees": 2.911605978830686e-05,
+      "actual_loader": "ResourceLoader.load(PackedScene)",
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/giant_praying_mantis.glb-4f7c6f0f48892f22fbd7c2cf68f34826.md5",
+          "import_metadata_sha256": "3c96304fdab78e03e425da22b115f3457d70608a959f623d9b2ebac6026aebec",
+          "imported_resource_path": "res://.godot/imported/giant_praying_mantis.glb-4f7c6f0f48892f22fbd7c2cf68f34826.scn",
+          "imported_resource_sha256": "9d66dfa5185591a7c873e02a40e7342071f9cca3d56b64afdb03ced54536c174",
+          "packed_scene_resource_path": "res://assets/qa/giant_praying_mantis/v2/baseline/giant_praying_mantis.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "9c34183b32e64b216ec7e7adde576d67",
+          "source_path": "res://assets/qa/giant_praying_mantis/v2/baseline/giant_praying_mantis.glb",
+          "source_sha256": "4de575176b126cf2462bffec0abac969e27a43c9df59aa4d426d3d8af507b23f"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/giant_praying_mantis.glb-7bb3fb7225d15f224c760d8447a6d7a7.md5",
+          "import_metadata_sha256": "f557d70247abba9099b06120e1b94218d7ed83cd198c76d1cca57309dba5efda",
+          "imported_resource_path": "res://.godot/imported/giant_praying_mantis.glb-7bb3fb7225d15f224c760d8447a6d7a7.scn",
+          "imported_resource_sha256": "19cd9756b03713f5518ae873103814da7139551bc8a32826f17efbefc1c80275",
+          "packed_scene_resource_path": "res://assets/qa/giant_praying_mantis/v2/candidate/giant_praying_mantis.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "0949b71fdb8c312ea372ce581c6c3996",
+          "source_path": "res://assets/qa/giant_praying_mantis/v2/candidate/giant_praying_mantis.glb",
+          "source_sha256": "5aaac7414422fb84a8f054d32ff4449c81b187addfc304f16129a0647a8be491"
+        }
+      ]
     }
   },
   "editor_import_policy": {
@@ -245,48 +272,6 @@
     "maximum_mean_channel_error": 0.0,
     "all_RGBA_alpha_channels_equal": true,
     "all_150_captured_images_zero_border_foreground": true,
-    "old_and_new_cameras": {
-      "old": [
-        {
-          "name": "baseline",
-          "size": 4.60871028900146,
-          "target": [
-            0.558334589004517,
-            0.414220362901688,
-            -0.523143291473389
-          ]
-        },
-        {
-          "name": "candidate",
-          "size": 4.60871028900146,
-          "target": [
-            0.558334589004517,
-            0.414220362901688,
-            -0.523143291473389
-          ]
-        }
-      ],
-      "new": [
-        {
-          "name": "baseline",
-          "size": 4.60871028900146,
-          "target": [
-            0.558334589004517,
-            0.414220362901688,
-            -0.523143291473389
-          ]
-        },
-        {
-          "name": "candidate",
-          "size": 4.60871028900146,
-          "target": [
-            0.558334589004517,
-            0.414220362901688,
-            -0.523143291473389
-          ]
-        }
-      ]
-    },
     "cases": [
       {
         "role": "baseline",
@@ -2995,7 +2980,27 @@
     "maximum_complete_secondary_silhouette_position_error": 0.0,
     "real_source_candidate_fade_pairs": 75,
     "all_body_ash_uniforms_and_texture_pixels_mips_compared": true,
-    "actual_original_helper_reference_claimed": false
+    "actual_original_helper_reference_claimed": false,
+    "current_helper_cameras": [
+      {
+        "name": "baseline",
+        "size": 4.60871028900146,
+        "target": [
+          0.558334589004517,
+          0.414220362901688,
+          -0.523143291473389
+        ]
+      },
+      {
+        "name": "candidate",
+        "size": 4.60871028900146,
+        "target": [
+          0.558334589004517,
+          0.414220362901688,
+          -0.523143291473389
+        ]
+      }
+    ]
   },
   "rig_investigation": {
     "decision": "Original rig, skin and topology retained; this candidate uses exact storage reductions only."
@@ -3011,16 +3016,182 @@
     "imported-validation.json": "e6c8fba02736c8f6bab95e3be5acaaec0844fb0b5167f46c8e8642572fb468b0",
     "render-fit.json": "970bfe47a3022f781386ddadc3682c9732af1eaadc33bdc77652ff639ff8bd68",
     "placement.json": "0ecb68a2f58e628cb91a23b7509e8267286fee56226a1643d7a4fde78741a15a",
-    "effects-validation.json": "cd8fcc0b8a0b04d623279ee8bbab9594cbda95a956eb114522436be41257b366",
+    "effects-validation.json": "9a7c6c7f0db8e6915427a8fd9bfa7a8728a22133302d65ea749ee8d995045f49",
     "source-fit-inventory.json": "2b64d1724b6c132873a038c8ccb22d8f15cac0f61c951c7e5d8ec1fc2e99d4d3",
     "actual-render/render.json": "db1ae9c754b019684701071cfd352f5525cdf3f61addd14c5d53a562b4fb34ec",
     "actual-render/pixel-comparison.json": "599c107d15d739699778c8822df0f543f7b76eb17edab40bf7377d2c3b20b006",
-    "editor-import-policy.json": "4474c4227bc14e85a4ec6097ce722f82eb5d3ade27c5307152e30519d4a46203"
+    "editor-import-policy.json": "4474c4227bc14e85a4ec6097ce722f82eb5d3ade27c5307152e30519d4a46203",
+    "full-effects/job.json": "a14832107cf227c6ffe7ef90eae400cbcc37fa69334c0620b9e5e8144d2be50d",
+    "full-effects/dissolve.json": "fdd4202ac42f2e18bbffa2adeeffcd94f4f7865526d0e0bb72ad2a425c227997",
+    "full-effects/image-sha256.json": "95208ea9021a9fbfe215ff810e6abf5c224962f4c687d0628d64fb75a4ec822f",
+    "freshness-lineage.json": "ce2df441b32441e495c0831a3e6ac12f3e5c2aad073e27bbc96f425a6b889fb1"
   },
-  "visual_review": "Paired normal contact boards and complete native-cycle previews reviewed. Every four-view/full-cycle frame has zero foreground pixels in its border two pixels wide.",
+  "visual_review": "Normal-scale native body and five-progress seeded fade contact boards reviewed; complete models and effects remain in frame. All750batch fade images have zero foreground border pixels; all375real source/candidate fade pairs are pixel-exact.",
   "known_limitations": [
     "Separate resident RAM and frame-time benchmarks were not measured.",
     "Encoded animation-key savings describe raw files, logical source accessors and import parsing input only. Native importing may densely rebake identical generated Animation keys; no runtime Animation RAM, key-search or playback CPU saving is claimed.",
     "Original artistic review/approval status is unchanged."
-  ]
+  ],
+  "independent_editor_verification": {
+    "source_original_sha256": "4de575176b126cf2462bffec0abac969e27a43c9df59aa4d426d3d8af507b23f",
+    "canonical_sha256": "5aaac7414422fb84a8f054d32ff4449c81b187addfc304f16129a0647a8be491",
+    "actual_loader": "ResourceLoader.load(PackedScene)",
+    "load_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/giant_praying_mantis.glb-4f7c6f0f48892f22fbd7c2cf68f34826.md5",
+        "import_metadata_sha256": "3c96304fdab78e03e425da22b115f3457d70608a959f623d9b2ebac6026aebec",
+        "imported_resource_path": "res://.godot/imported/giant_praying_mantis.glb-4f7c6f0f48892f22fbd7c2cf68f34826.scn",
+        "imported_resource_sha256": "9d66dfa5185591a7c873e02a40e7342071f9cca3d56b64afdb03ced54536c174",
+        "packed_scene_resource_path": "res://assets/qa/giant_praying_mantis/v2/baseline/giant_praying_mantis.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "9c34183b32e64b216ec7e7adde576d67",
+        "source_path": "res://assets/qa/giant_praying_mantis/v2/baseline/giant_praying_mantis.glb",
+        "source_sha256": "4de575176b126cf2462bffec0abac969e27a43c9df59aa4d426d3d8af507b23f"
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/giant_praying_mantis.glb-7bb3fb7225d15f224c760d8447a6d7a7.md5",
+        "import_metadata_sha256": "f557d70247abba9099b06120e1b94218d7ed83cd198c76d1cca57309dba5efda",
+        "imported_resource_path": "res://.godot/imported/giant_praying_mantis.glb-7bb3fb7225d15f224c760d8447a6d7a7.scn",
+        "imported_resource_sha256": "19cd9756b03713f5518ae873103814da7139551bc8a32826f17efbefc1c80275",
+        "packed_scene_resource_path": "res://assets/qa/giant_praying_mantis/v2/candidate/giant_praying_mantis.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "0949b71fdb8c312ea372ce581c6c3996",
+        "source_path": "res://assets/qa/giant_praying_mantis/v2/candidate/giant_praying_mantis.glb",
+        "source_sha256": "5aaac7414422fb84a8f054d32ff4449c81b187addfc304f16129a0647a8be491"
+      }
+    ],
+    "typed_static_material_texture_mips_lod_and_triangle_proof": {
+      "actor": "giant_praying_mantis",
+      "source_sha256": "4de575176b126cf2462bffec0abac969e27a43c9df59aa4d426d3d8af507b23f",
+      "candidate_sha256": "5aaac7414422fb84a8f054d32ff4449c81b187addfc304f16129a0647a8be491",
+      "surfaces": [
+        {
+          "all_typed_arrays": [
+            {
+              "slot": 0,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 1,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 2,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 4,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 10,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 11,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 12,
+              "exact_after_proven_vertex_bijection": true
+            }
+          ],
+          "full_material_storage_fields_and_texture_pixels_mips_exact": true,
+          "format_exact": true,
+          "lods": [
+            {
+              "lod": 0,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            },
+            {
+              "lod": 1,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            },
+            {
+              "lod": 2,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            }
+          ],
+          "bounds_component_max_delta": 0.0,
+          "lod_capture_present": true
+        }
+      ],
+      "passed": true,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/giant_praying_mantis.glb-4f7c6f0f48892f22fbd7c2cf68f34826.md5",
+          "import_metadata_sha256": "3c96304fdab78e03e425da22b115f3457d70608a959f623d9b2ebac6026aebec",
+          "imported_resource_path": "res://.godot/imported/giant_praying_mantis.glb-4f7c6f0f48892f22fbd7c2cf68f34826.scn",
+          "imported_resource_sha256": "9d66dfa5185591a7c873e02a40e7342071f9cca3d56b64afdb03ced54536c174",
+          "packed_scene_resource_path": "res://assets/qa/giant_praying_mantis/v2/baseline/giant_praying_mantis.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "9c34183b32e64b216ec7e7adde576d67",
+          "source_path": "res://assets/qa/giant_praying_mantis/v2/baseline/giant_praying_mantis.glb",
+          "source_sha256": "4de575176b126cf2462bffec0abac969e27a43c9df59aa4d426d3d8af507b23f"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/giant_praying_mantis.glb-7bb3fb7225d15f224c760d8447a6d7a7.md5",
+          "import_metadata_sha256": "f557d70247abba9099b06120e1b94218d7ed83cd198c76d1cca57309dba5efda",
+          "imported_resource_path": "res://.godot/imported/giant_praying_mantis.glb-7bb3fb7225d15f224c760d8447a6d7a7.scn",
+          "imported_resource_sha256": "19cd9756b03713f5518ae873103814da7139551bc8a32826f17efbefc1c80275",
+          "packed_scene_resource_path": "res://assets/qa/giant_praying_mantis/v2/candidate/giant_praying_mantis.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "0949b71fdb8c312ea372ce581c6c3996",
+          "source_path": "res://assets/qa/giant_praying_mantis/v2/candidate/giant_praying_mantis.glb",
+          "source_sha256": "5aaac7414422fb84a8f054d32ff4449c81b187addfc304f16129a0647a8be491"
+        }
+      ]
+    },
+    "all_retained_morph_POSITION_NORMAL_TANGENT_typed_fields": {
+      "actor": "giant_praying_mantis",
+      "source_sha256": "4de575176b126cf2462bffec0abac969e27a43c9df59aa4d426d3d8af507b23f",
+      "candidate_sha256": "5aaac7414422fb84a8f054d32ff4449c81b187addfc304f16129a0647a8be491",
+      "all_retained_editor_POSITION_NORMAL_TANGENT_typed_bits_exact": true,
+      "retained_targets": 0,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/giant_praying_mantis.glb-4f7c6f0f48892f22fbd7c2cf68f34826.md5",
+          "import_metadata_sha256": "3c96304fdab78e03e425da22b115f3457d70608a959f623d9b2ebac6026aebec",
+          "imported_resource_path": "res://.godot/imported/giant_praying_mantis.glb-4f7c6f0f48892f22fbd7c2cf68f34826.scn",
+          "imported_resource_sha256": "9d66dfa5185591a7c873e02a40e7342071f9cca3d56b64afdb03ced54536c174",
+          "packed_scene_resource_path": "res://assets/qa/giant_praying_mantis/v2/baseline/giant_praying_mantis.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "9c34183b32e64b216ec7e7adde576d67",
+          "source_path": "res://assets/qa/giant_praying_mantis/v2/baseline/giant_praying_mantis.glb",
+          "source_sha256": "4de575176b126cf2462bffec0abac969e27a43c9df59aa4d426d3d8af507b23f"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/giant_praying_mantis.glb-7bb3fb7225d15f224c760d8447a6d7a7.md5",
+          "import_metadata_sha256": "f557d70247abba9099b06120e1b94218d7ed83cd198c76d1cca57309dba5efda",
+          "imported_resource_path": "res://.godot/imported/giant_praying_mantis.glb-7bb3fb7225d15f224c760d8447a6d7a7.scn",
+          "imported_resource_sha256": "19cd9756b03713f5518ae873103814da7139551bc8a32826f17efbefc1c80275",
+          "packed_scene_resource_path": "res://assets/qa/giant_praying_mantis/v2/candidate/giant_praying_mantis.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "0949b71fdb8c312ea372ce581c6c3996",
+          "source_path": "res://assets/qa/giant_praying_mantis/v2/candidate/giant_praying_mantis.glb",
+          "source_sha256": "5aaac7414422fb84a8f054d32ff4449c81b187addfc304f16129a0647a8be491"
+        }
+      ],
+      "scope": "Direct actual Editor source/candidate retained morph P/N/T byte digests after independently proved complete static-attribute vertex bijection. Exact target mask from source packing lineage; no morph field omitted.",
+      "passed": true
+    },
+    "evidence_sha256": {
+      "imported/runtime.json": "cb246d35070d67fb598888b6c573d316c1cc057ae3d3af0aa0998daff217ffb4",
+      "imported-validation.json": "e6c8fba02736c8f6bab95e3be5acaaec0844fb0b5167f46c8e8642572fb468b0",
+      "imported-static-mesh-bits.json": "92c2df5330b241939611d832257d3e6bdd2dd339f528610f945cc5db358728e6",
+      "imported-typed-validation.json": "2cbceffc76ff447c012d81b179f742378a2b620f90ed7679e915f0388fd81c7d",
+      "imported-morph-digests.json": "d739bd82e973dae53bc675be7aacd63f4b076b5d53954cdab6a45a94bdf89e37",
+      "imported-morph-validation.json": "bdd3b575f3ddced002781d55f1b92c04fdc948769823cf8aad848d0479701366"
+    },
+    "scope": "Genuine independent Editor verification from the first capture. Both current GLBs bind generatedSCNs plus source/destinationMD5 freshness. Numeric/static/material/morph proofs use exactly those sameSCNs. Original observations and production loose-folder native mode remain unchanged."
+  }
 }

@@ -126,7 +126,34 @@
     "imported": {
       "samples": 232,
       "maximum_position_error": 6.198906819435692e-08,
-      "maximum_normal_angle_degrees": 7.588506156264597e-06
+      "maximum_normal_angle_degrees": 7.588506156264597e-06,
+      "actual_loader": "ResourceLoader.load(PackedScene)",
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/seahorse.glb-80a74858e3ba3667b0f7988050efbd07.md5",
+          "import_metadata_sha256": "2f2852eae5345989d277e440d41346cd4f0b27d7fe875553cf9c2f8099eeeb69",
+          "imported_resource_path": "res://.godot/imported/seahorse.glb-80a74858e3ba3667b0f7988050efbd07.scn",
+          "imported_resource_sha256": "6980a9a7efb1c37781e8694ddd57e147e07e1c542e5dbb0f6e071f82468bc571",
+          "packed_scene_resource_path": "res://assets/qa/seahorse/v2/baseline/seahorse.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "a1decc2c17b64b76203540bf9ffda2b5",
+          "source_path": "res://assets/qa/seahorse/v2/baseline/seahorse.glb",
+          "source_sha256": "27c94e1343cd96eb23b81cee83bb7f489e97b87a6951a6ffceb55a30f01acaf0"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/seahorse.glb-fb156c172eb9454bcad7712c24ca50e5.md5",
+          "import_metadata_sha256": "ecb511615a4070f740d9ed25f79386d98e0c0f8ab5c423523203bdbc34513def",
+          "imported_resource_path": "res://.godot/imported/seahorse.glb-fb156c172eb9454bcad7712c24ca50e5.scn",
+          "imported_resource_sha256": "8439fc741f067e674fce106e5cb01625bbdb0f5b9d4a70c37e1857c529be438d",
+          "packed_scene_resource_path": "res://assets/qa/seahorse/v2/candidate/seahorse.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "d13dceaef0d6ef09150e5c06e71c618d",
+          "source_path": "res://assets/qa/seahorse/v2/candidate/seahorse.glb",
+          "source_sha256": "b690de8a6e47ebaf20258d2eda2bc666e9d8bb59d99b0af83d049b236172b418"
+        }
+      ]
     }
   },
   "editor_import_policy": {
@@ -245,48 +272,6 @@
     "maximum_mean_channel_error": 0.0,
     "all_RGBA_alpha_channels_equal": true,
     "all_150_captured_images_zero_border_foreground": true,
-    "old_and_new_cameras": {
-      "old": [
-        {
-          "name": "baseline",
-          "size": 2.42056894302368,
-          "target": [
-            0.499864310026169,
-            0.376836091279984,
-            -0.631435394287109
-          ]
-        },
-        {
-          "name": "candidate",
-          "size": 2.42056894302368,
-          "target": [
-            0.499864310026169,
-            0.376836091279984,
-            -0.631435394287109
-          ]
-        }
-      ],
-      "new": [
-        {
-          "name": "baseline",
-          "size": 2.42056894302368,
-          "target": [
-            0.499864310026169,
-            0.376836091279984,
-            -0.631435394287109
-          ]
-        },
-        {
-          "name": "candidate",
-          "size": 2.42056894302368,
-          "target": [
-            0.499864310026169,
-            0.376836091279984,
-            -0.631435394287109
-          ]
-        }
-      ]
-    },
     "cases": [
       {
         "role": "baseline",
@@ -2995,7 +2980,27 @@
     "maximum_complete_secondary_silhouette_position_error": 1.26055809346326e-07,
     "real_source_candidate_fade_pairs": 75,
     "all_body_ash_uniforms_and_texture_pixels_mips_compared": true,
-    "actual_original_helper_reference_claimed": false
+    "actual_original_helper_reference_claimed": false,
+    "current_helper_cameras": [
+      {
+        "name": "baseline",
+        "size": 2.42056894302368,
+        "target": [
+          0.499864310026169,
+          0.376836091279984,
+          -0.631435394287109
+        ]
+      },
+      {
+        "name": "candidate",
+        "size": 2.42056894302368,
+        "target": [
+          0.499864310026169,
+          0.376836091279984,
+          -0.631435394287109
+        ]
+      }
+    ]
   },
   "rig_investigation": {
     "decision": "Original rig, skin and topology retained; this candidate uses exact storage reductions only."
@@ -3011,17 +3016,183 @@
     "imported-validation.json": "97886285466a744c2725d0ef36a155ab7914aeab87fe5068d099ad1c19a0ebdf",
     "render-fit.json": "f40bf6f20d2c01d0639a5e0f5c1cce7c99c88054ff113033660ebb20cf23debf",
     "placement.json": "19f2a99f949179b3558f69aeef9c968657883ef8f909056cdd6076e166454f3f",
-    "effects-validation.json": "90ae9da54f252cd843acc73334edfc965e7a834fbe2ca36d167897b9ab0ee5e5",
+    "effects-validation.json": "8862832008ae0478a17b19b6d102dedd578ee418fe2cf10ca8e895994c70874d",
     "source-fit-inventory.json": "9b03dd098969e40abac775d74e03789575eefb63494d0b692196aa1fa366c6bd",
     "actual-render/render.json": "c28b147fa8525e14d71920b592c0344ae14d4247fb998a59935e56942319f59a",
     "actual-render/pixel-comparison.json": "e5a1ca458a5fd16ecfe696e5362a213dc8d15fcde1516c7e4a76dce5bdefbbe4",
-    "editor-import-policy.json": "4af712005813107dca040e472e35b06d3d55cebda5bcf80f7a5bf7065332123c"
+    "editor-import-policy.json": "4af712005813107dca040e472e35b06d3d55cebda5bcf80f7a5bf7065332123c",
+    "full-effects/job.json": "60368d5321c1f0c4aaf774d8c802e1ca01d8066e223cd5931a940ce10ee20572",
+    "full-effects/dissolve.json": "d9166b6a49106ba172bd2c75a3f15ae56fe83e0189d2d3dca639d65cd606ddf7",
+    "full-effects/image-sha256.json": "81cc0d2e7b2ce8fb66d7eaeee02a80efd5935d94e25c3e04bcf93ffcd8e6decc",
+    "freshness-lineage.json": "f22984cb9ac9b9b124f52cf333e8ca479e292efe9fcc0585357f92aca71e1570"
   },
-  "visual_review": "Paired normal contact boards and complete native-cycle previews reviewed. Every four-view/full-cycle frame has zero foreground pixels in its border two pixels wide.",
+  "visual_review": "Normal-scale native body and five-progress seeded fade contact boards reviewed; complete models and effects remain in frame. All750batch fade images have zero foreground border pixels; all375real source/candidate fade pairs are pixel-exact.",
   "known_limitations": [
     "Separate resident RAM and frame-time benchmarks were not measured.",
     "Encoded animation-key savings describe raw files, logical source accessors and import parsing input only. Native importing may densely rebake identical generated Animation keys; no runtime Animation RAM, key-search or playback CPU saving is claimed.",
     "Original artistic review/approval status is unchanged.",
     "Compressed shipping data increases by 4135 bytes despite smaller decoded GLB. This tradeoff is explicit; no unmeasured runtime-memory saving offsets it in this receipt."
-  ]
+  ],
+  "independent_editor_verification": {
+    "source_original_sha256": "27c94e1343cd96eb23b81cee83bb7f489e97b87a6951a6ffceb55a30f01acaf0",
+    "canonical_sha256": "b690de8a6e47ebaf20258d2eda2bc666e9d8bb59d99b0af83d049b236172b418",
+    "actual_loader": "ResourceLoader.load(PackedScene)",
+    "load_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/seahorse.glb-80a74858e3ba3667b0f7988050efbd07.md5",
+        "import_metadata_sha256": "2f2852eae5345989d277e440d41346cd4f0b27d7fe875553cf9c2f8099eeeb69",
+        "imported_resource_path": "res://.godot/imported/seahorse.glb-80a74858e3ba3667b0f7988050efbd07.scn",
+        "imported_resource_sha256": "6980a9a7efb1c37781e8694ddd57e147e07e1c542e5dbb0f6e071f82468bc571",
+        "packed_scene_resource_path": "res://assets/qa/seahorse/v2/baseline/seahorse.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "a1decc2c17b64b76203540bf9ffda2b5",
+        "source_path": "res://assets/qa/seahorse/v2/baseline/seahorse.glb",
+        "source_sha256": "27c94e1343cd96eb23b81cee83bb7f489e97b87a6951a6ffceb55a30f01acaf0"
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/seahorse.glb-fb156c172eb9454bcad7712c24ca50e5.md5",
+        "import_metadata_sha256": "ecb511615a4070f740d9ed25f79386d98e0c0f8ab5c423523203bdbc34513def",
+        "imported_resource_path": "res://.godot/imported/seahorse.glb-fb156c172eb9454bcad7712c24ca50e5.scn",
+        "imported_resource_sha256": "8439fc741f067e674fce106e5cb01625bbdb0f5b9d4a70c37e1857c529be438d",
+        "packed_scene_resource_path": "res://assets/qa/seahorse/v2/candidate/seahorse.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "d13dceaef0d6ef09150e5c06e71c618d",
+        "source_path": "res://assets/qa/seahorse/v2/candidate/seahorse.glb",
+        "source_sha256": "b690de8a6e47ebaf20258d2eda2bc666e9d8bb59d99b0af83d049b236172b418"
+      }
+    ],
+    "typed_static_material_texture_mips_lod_and_triangle_proof": {
+      "actor": "seahorse",
+      "source_sha256": "27c94e1343cd96eb23b81cee83bb7f489e97b87a6951a6ffceb55a30f01acaf0",
+      "candidate_sha256": "b690de8a6e47ebaf20258d2eda2bc666e9d8bb59d99b0af83d049b236172b418",
+      "surfaces": [
+        {
+          "all_typed_arrays": [
+            {
+              "slot": 0,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 1,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 2,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 4,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 10,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 11,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 12,
+              "exact_after_proven_vertex_bijection": true
+            }
+          ],
+          "full_material_storage_fields_and_texture_pixels_mips_exact": true,
+          "format_exact": true,
+          "lods": [
+            {
+              "lod": 0,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            },
+            {
+              "lod": 1,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            },
+            {
+              "lod": 2,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            }
+          ],
+          "bounds_component_max_delta": 0.0,
+          "lod_capture_present": true
+        }
+      ],
+      "passed": true,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/seahorse.glb-80a74858e3ba3667b0f7988050efbd07.md5",
+          "import_metadata_sha256": "2f2852eae5345989d277e440d41346cd4f0b27d7fe875553cf9c2f8099eeeb69",
+          "imported_resource_path": "res://.godot/imported/seahorse.glb-80a74858e3ba3667b0f7988050efbd07.scn",
+          "imported_resource_sha256": "6980a9a7efb1c37781e8694ddd57e147e07e1c542e5dbb0f6e071f82468bc571",
+          "packed_scene_resource_path": "res://assets/qa/seahorse/v2/baseline/seahorse.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "a1decc2c17b64b76203540bf9ffda2b5",
+          "source_path": "res://assets/qa/seahorse/v2/baseline/seahorse.glb",
+          "source_sha256": "27c94e1343cd96eb23b81cee83bb7f489e97b87a6951a6ffceb55a30f01acaf0"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/seahorse.glb-fb156c172eb9454bcad7712c24ca50e5.md5",
+          "import_metadata_sha256": "ecb511615a4070f740d9ed25f79386d98e0c0f8ab5c423523203bdbc34513def",
+          "imported_resource_path": "res://.godot/imported/seahorse.glb-fb156c172eb9454bcad7712c24ca50e5.scn",
+          "imported_resource_sha256": "8439fc741f067e674fce106e5cb01625bbdb0f5b9d4a70c37e1857c529be438d",
+          "packed_scene_resource_path": "res://assets/qa/seahorse/v2/candidate/seahorse.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "d13dceaef0d6ef09150e5c06e71c618d",
+          "source_path": "res://assets/qa/seahorse/v2/candidate/seahorse.glb",
+          "source_sha256": "b690de8a6e47ebaf20258d2eda2bc666e9d8bb59d99b0af83d049b236172b418"
+        }
+      ]
+    },
+    "all_retained_morph_POSITION_NORMAL_TANGENT_typed_fields": {
+      "actor": "seahorse",
+      "source_sha256": "27c94e1343cd96eb23b81cee83bb7f489e97b87a6951a6ffceb55a30f01acaf0",
+      "candidate_sha256": "b690de8a6e47ebaf20258d2eda2bc666e9d8bb59d99b0af83d049b236172b418",
+      "all_retained_editor_POSITION_NORMAL_TANGENT_typed_bits_exact": true,
+      "retained_targets": 0,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/seahorse.glb-80a74858e3ba3667b0f7988050efbd07.md5",
+          "import_metadata_sha256": "2f2852eae5345989d277e440d41346cd4f0b27d7fe875553cf9c2f8099eeeb69",
+          "imported_resource_path": "res://.godot/imported/seahorse.glb-80a74858e3ba3667b0f7988050efbd07.scn",
+          "imported_resource_sha256": "6980a9a7efb1c37781e8694ddd57e147e07e1c542e5dbb0f6e071f82468bc571",
+          "packed_scene_resource_path": "res://assets/qa/seahorse/v2/baseline/seahorse.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "a1decc2c17b64b76203540bf9ffda2b5",
+          "source_path": "res://assets/qa/seahorse/v2/baseline/seahorse.glb",
+          "source_sha256": "27c94e1343cd96eb23b81cee83bb7f489e97b87a6951a6ffceb55a30f01acaf0"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/seahorse.glb-fb156c172eb9454bcad7712c24ca50e5.md5",
+          "import_metadata_sha256": "ecb511615a4070f740d9ed25f79386d98e0c0f8ab5c423523203bdbc34513def",
+          "imported_resource_path": "res://.godot/imported/seahorse.glb-fb156c172eb9454bcad7712c24ca50e5.scn",
+          "imported_resource_sha256": "8439fc741f067e674fce106e5cb01625bbdb0f5b9d4a70c37e1857c529be438d",
+          "packed_scene_resource_path": "res://assets/qa/seahorse/v2/candidate/seahorse.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "d13dceaef0d6ef09150e5c06e71c618d",
+          "source_path": "res://assets/qa/seahorse/v2/candidate/seahorse.glb",
+          "source_sha256": "b690de8a6e47ebaf20258d2eda2bc666e9d8bb59d99b0af83d049b236172b418"
+        }
+      ],
+      "scope": "Direct actual Editor source/candidate retained morph P/N/T byte digests after independently proved complete static-attribute vertex bijection. Exact target mask from source packing lineage; no morph field omitted.",
+      "passed": true
+    },
+    "evidence_sha256": {
+      "imported/runtime.json": "1aba6535405d677fdbaafcdfb4b9586b7691b09efa8dedbd14cdaefe9575df34",
+      "imported-validation.json": "97886285466a744c2725d0ef36a155ab7914aeab87fe5068d099ad1c19a0ebdf",
+      "imported-static-mesh-bits.json": "cc231a4c9339246434b3524ae96a960b5d933e7d9cc7cf0b7e659169b64a2efc",
+      "imported-typed-validation.json": "18eaf673d412e357a440bb37ab026fadbc4c63c3a7bbfc2eae1de660fd0cee27",
+      "imported-morph-digests.json": "32cdde7b2910b26f7c498dcef092719c479aea7f64f2237627283460dea4b655",
+      "imported-morph-validation.json": "38fdcd5530b4f56606d4ccce092a334a93af4f26a34372b004c552f19e0b1d45"
+    },
+    "scope": "Genuine independent Editor verification from the first capture. Both current GLBs bind generatedSCNs plus source/destinationMD5 freshness. Numeric/static/material/morph proofs use exactly those sameSCNs. Original observations and production loose-folder native mode remain unchanged."
+  }
 }

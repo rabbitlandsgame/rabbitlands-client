@@ -126,7 +126,34 @@
     "imported": {
       "samples": 232,
       "maximum_position_error": 1.2567914484419673e-07,
-      "maximum_normal_angle_degrees": 2.2765518468793925e-05
+      "maximum_normal_angle_degrees": 2.2765518468793925e-05,
+      "actual_loader": "ResourceLoader.load(PackedScene)",
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/amberwood_owl.glb-3aa0e115bac6dafb0635fccffe48508b.md5",
+          "import_metadata_sha256": "ca9fe6809fb3e8e7dc5b12de85209b694eecd9092130647441515e6ac0ad0b02",
+          "imported_resource_path": "res://.godot/imported/amberwood_owl.glb-3aa0e115bac6dafb0635fccffe48508b.scn",
+          "imported_resource_sha256": "8ce1364b56123a2db17a8ce9e03a046c6fc7300cdb467f66be424acedeb9c74f",
+          "packed_scene_resource_path": "res://assets/qa/amberwood_owl/v2/baseline/amberwood_owl.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "f13408b4e6a4eb19277a9e4e14b622a1",
+          "source_path": "res://assets/qa/amberwood_owl/v2/baseline/amberwood_owl.glb",
+          "source_sha256": "6edee7b9cbb3f0107c1e62fcb917b360b54438cef2b4d188c81dd2df1b96c5f7"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/amberwood_owl.glb-77a11f3c66a5be48f94b5b43ee1612f6.md5",
+          "import_metadata_sha256": "febfb1f9f0450dc2bed512c6b87fbc811d80856147e7b6618395543b7687eb6d",
+          "imported_resource_path": "res://.godot/imported/amberwood_owl.glb-77a11f3c66a5be48f94b5b43ee1612f6.scn",
+          "imported_resource_sha256": "fd6ee609285f5e4053c215e1b4789bcf339ee5e1e5a4d6b735ca478798171a7d",
+          "packed_scene_resource_path": "res://assets/qa/amberwood_owl/v2/candidate/amberwood_owl.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "c14b72c94c4c01b396e0c5e50ad155e9",
+          "source_path": "res://assets/qa/amberwood_owl/v2/candidate/amberwood_owl.glb",
+          "source_sha256": "7d91701171fb31a109874b888dcda98e3209f87538c389ef6f52fda7c90da928"
+        }
+      ]
     }
   },
   "editor_import_policy": {
@@ -245,48 +272,6 @@
     "maximum_mean_channel_error": 0.0,
     "all_RGBA_alpha_channels_equal": true,
     "all_150_captured_images_zero_border_foreground": true,
-    "old_and_new_cameras": {
-      "old": [
-        {
-          "name": "baseline",
-          "size": 4.01219081878662,
-          "target": [
-            0.583935976028442,
-            0.607243716716766,
-            -0.483884274959564
-          ]
-        },
-        {
-          "name": "candidate",
-          "size": 4.01219081878662,
-          "target": [
-            0.583935976028442,
-            0.607243716716766,
-            -0.483884274959564
-          ]
-        }
-      ],
-      "new": [
-        {
-          "name": "baseline",
-          "size": 4.01219081878662,
-          "target": [
-            0.583935976028442,
-            0.607243716716766,
-            -0.483884274959564
-          ]
-        },
-        {
-          "name": "candidate",
-          "size": 4.01219081878662,
-          "target": [
-            0.583935976028442,
-            0.607243716716766,
-            -0.483884274959564
-          ]
-        }
-      ]
-    },
     "cases": [
       {
         "role": "baseline",
@@ -2995,7 +2980,27 @@
     "maximum_complete_secondary_silhouette_position_error": 1.27315573195119e-07,
     "real_source_candidate_fade_pairs": 75,
     "all_body_ash_uniforms_and_texture_pixels_mips_compared": true,
-    "actual_original_helper_reference_claimed": false
+    "actual_original_helper_reference_claimed": false,
+    "current_helper_cameras": [
+      {
+        "name": "baseline",
+        "size": 4.01219081878662,
+        "target": [
+          0.583935976028442,
+          0.607243716716766,
+          -0.483884274959564
+        ]
+      },
+      {
+        "name": "candidate",
+        "size": 4.01219081878662,
+        "target": [
+          0.583935976028442,
+          0.607243716716766,
+          -0.483884274959564
+        ]
+      }
+    ]
   },
   "rig_investigation": {
     "decision": "Original rig, skin and topology retained; this candidate uses exact storage reductions only."
@@ -3011,16 +3016,182 @@
     "imported-validation.json": "9881327aa0c1f70b1fede197842ab51ea04da997f03ed1c6c58d6c890d551085",
     "render-fit.json": "e7db1d968a68c068d6d9f2642ffced3be6ac44620b4fa005b9152076e81058dd",
     "placement.json": "94446792b4d7316858591e4e4516bcdc8296947314ecab10933277951317ebb2",
-    "effects-validation.json": "b906a9a40810c2d6396d577fa94efeeb61c2c023c4e05f5d4211ec109feceb25",
+    "effects-validation.json": "9b65984051650097cfba7c5f8993c945eb1ea3472c2eef8d5c06914f644826f0",
     "source-fit-inventory.json": "e7a589d7092ec433bfc77921f1ab4160deb123b7c0f72af1377630cc84a3bed8",
     "actual-render/render.json": "12b8c4626fc78d4966975e277405e051c583ae58c4582b408ae84b1c6f758156",
     "actual-render/pixel-comparison.json": "1b879998c6443d0469e93cfc34cdd7f49d79aa625e4ca1352017d05064f7ea95",
-    "editor-import-policy.json": "4af712005813107dca040e472e35b06d3d55cebda5bcf80f7a5bf7065332123c"
+    "editor-import-policy.json": "4af712005813107dca040e472e35b06d3d55cebda5bcf80f7a5bf7065332123c",
+    "full-effects/job.json": "09050793751442d1b4355c27a4fe243c9d7a24abeb6e586cb7c4a94e08d7ee72",
+    "full-effects/dissolve.json": "5ea2d573c7a23826150d6e3152b29697c9ff71d5f6a84947af1e0eb560c93bce",
+    "full-effects/image-sha256.json": "a8eeabe3748dcb006f39c2a5ca20fb57b8c7e52d81134a394fba523f488daba2",
+    "freshness-lineage.json": "c473377f2961325dd956de50d2bce6231240e6b7311979dbb2c8aac1079f2319"
   },
-  "visual_review": "Paired normal contact boards and complete native-cycle previews reviewed. Every four-view/full-cycle frame has zero foreground pixels in its border two pixels wide.",
+  "visual_review": "Normal-scale native body and five-progress seeded fade contact boards reviewed; complete models and effects remain in frame. All750batch fade images have zero foreground border pixels; all375real source/candidate fade pairs are pixel-exact.",
   "known_limitations": [
     "Separate resident RAM and frame-time benchmarks were not measured.",
     "Encoded animation-key savings describe raw files, logical source accessors and import parsing input only. Native importing may densely rebake identical generated Animation keys; no runtime Animation RAM, key-search or playback CPU saving is claimed.",
     "Original artistic review/approval status is unchanged."
-  ]
+  ],
+  "independent_editor_verification": {
+    "source_original_sha256": "6edee7b9cbb3f0107c1e62fcb917b360b54438cef2b4d188c81dd2df1b96c5f7",
+    "canonical_sha256": "7d91701171fb31a109874b888dcda98e3209f87538c389ef6f52fda7c90da928",
+    "actual_loader": "ResourceLoader.load(PackedScene)",
+    "load_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/amberwood_owl.glb-3aa0e115bac6dafb0635fccffe48508b.md5",
+        "import_metadata_sha256": "ca9fe6809fb3e8e7dc5b12de85209b694eecd9092130647441515e6ac0ad0b02",
+        "imported_resource_path": "res://.godot/imported/amberwood_owl.glb-3aa0e115bac6dafb0635fccffe48508b.scn",
+        "imported_resource_sha256": "8ce1364b56123a2db17a8ce9e03a046c6fc7300cdb467f66be424acedeb9c74f",
+        "packed_scene_resource_path": "res://assets/qa/amberwood_owl/v2/baseline/amberwood_owl.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "f13408b4e6a4eb19277a9e4e14b622a1",
+        "source_path": "res://assets/qa/amberwood_owl/v2/baseline/amberwood_owl.glb",
+        "source_sha256": "6edee7b9cbb3f0107c1e62fcb917b360b54438cef2b4d188c81dd2df1b96c5f7"
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/amberwood_owl.glb-77a11f3c66a5be48f94b5b43ee1612f6.md5",
+        "import_metadata_sha256": "febfb1f9f0450dc2bed512c6b87fbc811d80856147e7b6618395543b7687eb6d",
+        "imported_resource_path": "res://.godot/imported/amberwood_owl.glb-77a11f3c66a5be48f94b5b43ee1612f6.scn",
+        "imported_resource_sha256": "fd6ee609285f5e4053c215e1b4789bcf339ee5e1e5a4d6b735ca478798171a7d",
+        "packed_scene_resource_path": "res://assets/qa/amberwood_owl/v2/candidate/amberwood_owl.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "c14b72c94c4c01b396e0c5e50ad155e9",
+        "source_path": "res://assets/qa/amberwood_owl/v2/candidate/amberwood_owl.glb",
+        "source_sha256": "7d91701171fb31a109874b888dcda98e3209f87538c389ef6f52fda7c90da928"
+      }
+    ],
+    "typed_static_material_texture_mips_lod_and_triangle_proof": {
+      "actor": "amberwood_owl",
+      "source_sha256": "6edee7b9cbb3f0107c1e62fcb917b360b54438cef2b4d188c81dd2df1b96c5f7",
+      "candidate_sha256": "7d91701171fb31a109874b888dcda98e3209f87538c389ef6f52fda7c90da928",
+      "surfaces": [
+        {
+          "all_typed_arrays": [
+            {
+              "slot": 0,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 1,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 2,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 4,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 10,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 11,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 12,
+              "exact_after_proven_vertex_bijection": true
+            }
+          ],
+          "full_material_storage_fields_and_texture_pixels_mips_exact": true,
+          "format_exact": true,
+          "lods": [
+            {
+              "lod": 0,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            },
+            {
+              "lod": 1,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            },
+            {
+              "lod": 2,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            }
+          ],
+          "bounds_component_max_delta": 0.0,
+          "lod_capture_present": true
+        }
+      ],
+      "passed": true,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/amberwood_owl.glb-3aa0e115bac6dafb0635fccffe48508b.md5",
+          "import_metadata_sha256": "ca9fe6809fb3e8e7dc5b12de85209b694eecd9092130647441515e6ac0ad0b02",
+          "imported_resource_path": "res://.godot/imported/amberwood_owl.glb-3aa0e115bac6dafb0635fccffe48508b.scn",
+          "imported_resource_sha256": "8ce1364b56123a2db17a8ce9e03a046c6fc7300cdb467f66be424acedeb9c74f",
+          "packed_scene_resource_path": "res://assets/qa/amberwood_owl/v2/baseline/amberwood_owl.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "f13408b4e6a4eb19277a9e4e14b622a1",
+          "source_path": "res://assets/qa/amberwood_owl/v2/baseline/amberwood_owl.glb",
+          "source_sha256": "6edee7b9cbb3f0107c1e62fcb917b360b54438cef2b4d188c81dd2df1b96c5f7"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/amberwood_owl.glb-77a11f3c66a5be48f94b5b43ee1612f6.md5",
+          "import_metadata_sha256": "febfb1f9f0450dc2bed512c6b87fbc811d80856147e7b6618395543b7687eb6d",
+          "imported_resource_path": "res://.godot/imported/amberwood_owl.glb-77a11f3c66a5be48f94b5b43ee1612f6.scn",
+          "imported_resource_sha256": "fd6ee609285f5e4053c215e1b4789bcf339ee5e1e5a4d6b735ca478798171a7d",
+          "packed_scene_resource_path": "res://assets/qa/amberwood_owl/v2/candidate/amberwood_owl.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "c14b72c94c4c01b396e0c5e50ad155e9",
+          "source_path": "res://assets/qa/amberwood_owl/v2/candidate/amberwood_owl.glb",
+          "source_sha256": "7d91701171fb31a109874b888dcda98e3209f87538c389ef6f52fda7c90da928"
+        }
+      ]
+    },
+    "all_retained_morph_POSITION_NORMAL_TANGENT_typed_fields": {
+      "actor": "amberwood_owl",
+      "source_sha256": "6edee7b9cbb3f0107c1e62fcb917b360b54438cef2b4d188c81dd2df1b96c5f7",
+      "candidate_sha256": "7d91701171fb31a109874b888dcda98e3209f87538c389ef6f52fda7c90da928",
+      "all_retained_editor_POSITION_NORMAL_TANGENT_typed_bits_exact": true,
+      "retained_targets": 0,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/amberwood_owl.glb-3aa0e115bac6dafb0635fccffe48508b.md5",
+          "import_metadata_sha256": "ca9fe6809fb3e8e7dc5b12de85209b694eecd9092130647441515e6ac0ad0b02",
+          "imported_resource_path": "res://.godot/imported/amberwood_owl.glb-3aa0e115bac6dafb0635fccffe48508b.scn",
+          "imported_resource_sha256": "8ce1364b56123a2db17a8ce9e03a046c6fc7300cdb467f66be424acedeb9c74f",
+          "packed_scene_resource_path": "res://assets/qa/amberwood_owl/v2/baseline/amberwood_owl.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "f13408b4e6a4eb19277a9e4e14b622a1",
+          "source_path": "res://assets/qa/amberwood_owl/v2/baseline/amberwood_owl.glb",
+          "source_sha256": "6edee7b9cbb3f0107c1e62fcb917b360b54438cef2b4d188c81dd2df1b96c5f7"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/amberwood_owl.glb-77a11f3c66a5be48f94b5b43ee1612f6.md5",
+          "import_metadata_sha256": "febfb1f9f0450dc2bed512c6b87fbc811d80856147e7b6618395543b7687eb6d",
+          "imported_resource_path": "res://.godot/imported/amberwood_owl.glb-77a11f3c66a5be48f94b5b43ee1612f6.scn",
+          "imported_resource_sha256": "fd6ee609285f5e4053c215e1b4789bcf339ee5e1e5a4d6b735ca478798171a7d",
+          "packed_scene_resource_path": "res://assets/qa/amberwood_owl/v2/candidate/amberwood_owl.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "c14b72c94c4c01b396e0c5e50ad155e9",
+          "source_path": "res://assets/qa/amberwood_owl/v2/candidate/amberwood_owl.glb",
+          "source_sha256": "7d91701171fb31a109874b888dcda98e3209f87538c389ef6f52fda7c90da928"
+        }
+      ],
+      "scope": "Direct actual Editor source/candidate retained morph P/N/T byte digests after independently proved complete static-attribute vertex bijection. Exact target mask from source packing lineage; no morph field omitted.",
+      "passed": true
+    },
+    "evidence_sha256": {
+      "imported/runtime.json": "f5654ddecbc6261951adab7ac76cf4a286a4140f19a43a6c4cf6f5ae8a946382",
+      "imported-validation.json": "9881327aa0c1f70b1fede197842ab51ea04da997f03ed1c6c58d6c890d551085",
+      "imported-static-mesh-bits.json": "1e2bb6b0f9150d86fe3c92210fb320d492cd4fafd57998135a41362544e63bae",
+      "imported-typed-validation.json": "11ab97e7cfa66a228af79f4a305007194ad8cc00a8afbdb59f8101b07251aa6f",
+      "imported-morph-digests.json": "a25172231706bb18b2beed5356428975063a4f5bdd0ccf4c27642cfe9030d36b",
+      "imported-morph-validation.json": "2ec74cbd7e11550d7f6bd340e6acb3f79e899d528d35bfca00c454b9aa286990"
+    },
+    "scope": "Genuine independent Editor verification from the first capture. Both current GLBs bind generatedSCNs plus source/destinationMD5 freshness. Numeric/static/material/morph proofs use exactly those sameSCNs. Original observations and production loose-folder native mode remain unchanged."
+  }
 }
