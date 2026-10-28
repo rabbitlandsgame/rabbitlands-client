@@ -2,18 +2,18 @@
   "schema_version": 1,
   "actor": "moss_stone_troll",
   "source_sha256": "652ec7bd7fad1aa712c6098ba9a7c653644ad9def6bf0d73ba5d691e033bfef1",
-  "candidate_sha256": "fbc213a26c60c09c3687e27071acd9ff0a2fa76acb6ad442df7f8122d0546ced",
+  "candidate_sha256": "652ec7bd7fad1aa712c6098ba9a7c653644ad9def6bf0d73ba5d691e033bfef1",
   "pipeline": [
     "prune_zero_targets",
     "reduce_constant_runs",
     "compact"
   ],
   "partition": null,
-  "unchanged": false,
+  "unchanged": true,
   "removed_zero_target_indices": [],
-  "redundant_flat_key_rows_removed": 396146,
+  "redundant_flat_key_rows_removed": 0,
   "geometry_skin_rest_binds_materials_images_unchanged": true,
-  "preserve_trs_keys": false,
+  "preserve_trs_keys": true,
   "native_clips": [
     "Fighting_Idle",
     "Hit_Chest",
@@ -23,5 +23,5 @@
     "Sword_Attack",
     "Death_A"
   ],
-  "usage": "Deterministic exact preparation needs no partition --profile; frozen source/candidate hashes bind this record."
+  "usage": "Canonical pack_creature_storage.py --preserve-trs-keys reproduces original byte-for-byte. No partition; previous flat-key reduction withdrawn by strict native/editor4ULP position gate."
 }
