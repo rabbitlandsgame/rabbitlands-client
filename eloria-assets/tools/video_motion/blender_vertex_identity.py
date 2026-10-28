@@ -214,6 +214,8 @@ def imported_bindings(path, objects):
             composition_steps = joint_depth + influences
         budget = 16 * composition_steps * float(np.spacing(np.float32(extent)))
         candidates = []
+        basis_strategy = "authored_joint_rest_skin"
+        rest_skin_errors = []
         for ob in meshes:
             if ob.as_pointer() in used or len(ob.data.vertices) != count:
                 continue
@@ -228,10 +230,37 @@ def imported_bindings(path, objects):
             difference = actual - expected
             error = float(np.linalg.norm(difference, axis=1).max())
             component_error = float(np.abs(difference).max())
+            rest_skin_errors.append(component_error)
             # A coordinate ULP allowance applies to each coordinate. Retain
             # Euclidean error for diagnostics without comparing different units.
             if component_error <= budget:
                 candidates.append((ob, error, component_error))
+        if not candidates and "skin" in node:
+            # Blender can choose the inverse-bind rest instead of the authored
+            # joint rest. Its undeformed mesh then retains the original node's
+            # raw basis. Prove every original row in that explicit space; UV,
+            # skin, all POSITION targets and posed comparisons remain required.
+            raw_frame = np.broadcast_to(world[node_index], (count, 4, 4)).copy()
+            raw_expected = (
+                positions @ world[node_index][:3, :3].T + world[node_index][:3, 3]
+            ) @ _C.T
+            raw_extent = max(1.0, float(np.abs(raw_expected).max()))
+            raw_budget = 16 * composition_steps * float(np.spacing(np.float32(raw_extent)))
+            for ob in meshes:
+                if ob.as_pointer() in used or len(ob.data.vertices) != count:
+                    continue
+                values = np.empty((count, 3), np.float32)
+                ob.data.vertices.foreach_get("co", values.ravel())
+                matrix = np.array(ob.matrix_world)
+                actual = values @ matrix[:3, :3].T + matrix[:3, 3]
+                difference = actual - raw_expected
+                error = float(np.linalg.norm(difference, axis=1).max())
+                component_error = float(np.abs(difference).max())
+                if component_error <= raw_budget:
+                    candidates.append((ob, error, component_error))
+            if candidates:
+                frame, budget = raw_frame, raw_budget
+                basis_strategy = "authored_mesh_node_raw_basis"
         named = [
             row
             for row in candidates
@@ -398,6 +427,8 @@ def imported_bindings(path, objects):
                 "position_targets": targets,
                 "basis_world_error": basis_error,
                 "basis_world_component_error": basis_component_error,
+                "basis_strategy": basis_strategy,
+                "authored_rest_skin_component_error": min(rest_skin_errors),
                 "uv_error": uv_error,
                 "skin_error": skin_error,
                 "skin_raw_group_error": skin_raw_error,
