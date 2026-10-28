@@ -5,8 +5,8 @@
   "batch_size": 5,
   "creature_count": 235,
   "batch_count": 47,
-  "completed_batches": 44,
-  "qualified_creatures": 201,
+  "completed_batches": 45,
+  "qualified_creatures": 203,
   "status": "in progress",
   "actors": [
     {
@@ -2596,7 +2596,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/arcane_core_colossus.glb",
       "source_sha256": "92e19d5573a838bde4f5d406675c6a558e32a1624db6de5d69c518da9fd3f581",
       "source_bytes": 1376196,
-      "status": "pending"
+      "status": "unchanged",
+      "candidate_sha256": "92e19d5573a838bde4f5d406675c6a558e32a1624db6de5d69c518da9fd3f581",
+      "candidate_bytes": 1376196,
+      "qualification_report": "docs/qa/creature-storage/batch-044/arcane_core_colossus.json"
     },
     {
       "actor": "giant_centipede",
@@ -2605,7 +2608,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/giant_centipede.glb",
       "source_sha256": "c7311a398f94902cec6c7921bbf26374405dbfcac9c8af5c4f33372e0bf21bc0",
       "source_bytes": 1301548,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "a7995c4793f0a12d1c43c5e204821d51fbef1f3896734220047e73806b223449",
+      "candidate_bytes": 1300752,
+      "qualification_report": "docs/qa/creature-storage/batch-044/giant_centipede.json"
     },
     {
       "actor": "whitehorn_ice_griffin",
@@ -2614,7 +2620,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/whitehorn_ice_griffin.glb",
       "source_sha256": "99b505d8fc7a20bf4b4ff77caadb1fe280a94115158311b3eb9276ba1f03b681",
       "source_bytes": 1279788,
-      "status": "pending"
+      "status": "unchanged",
+      "candidate_sha256": "99b505d8fc7a20bf4b4ff77caadb1fe280a94115158311b3eb9276ba1f03b681",
+      "candidate_bytes": 1279788,
+      "qualification_report": "docs/qa/creature-storage/batch-044/whitehorn_ice_griffin.json"
     },
     {
       "actor": "mire_kelpie",
@@ -2623,7 +2632,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/mire_kelpie.glb",
       "source_sha256": "47fbdbfa1b621696e84d021c774d0becb8020652b8c69aa53f08b20e8bd57cca",
       "source_bytes": 1140360,
-      "status": "pending"
+      "status": "unchanged",
+      "candidate_sha256": "47fbdbfa1b621696e84d021c774d0becb8020652b8c69aa53f08b20e8bd57cca",
+      "candidate_bytes": 1140360,
+      "qualification_report": "docs/qa/creature-storage/batch-044/mire_kelpie.json"
     },
     {
       "actor": "tidal_claw_construct",
@@ -2632,7 +2644,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/tidal_claw_construct.glb",
       "source_sha256": "aa55d5c3d16d9464460af4f0d70fa00fc96542701600043b31bc069230981f76",
       "source_bytes": 1100616,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "e4057165e9550459792f32baab1f5cd023227cfcada0e0b36e36ecae9880efdf",
+      "candidate_bytes": 1014268,
+      "qualification_report": "docs/qa/creature-storage/batch-044/tidal_claw_construct.json"
     },
     {
       "actor": "arcane_crystal_automaton",
@@ -2829,17 +2844,18 @@
     41,
     42,
     43,
+    44,
     45
   ],
-  "reviewed_creatures": 220,
+  "reviewed_creatures": 225,
   "selection_policy": {
     "raw_asset_priority": "Prefer smaller qualified raw development models; small measured increases in packaged RLCZ size are accepted and recorded per actor and batch.",
     "runtime_claims": "Encoded input-key savings do not establish retained animation memory or frame-time savings because Godot rebakes curves at the declared cadence. Shared corrective GPU buffer savings are measured separately.",
     "approximation": "Exact batches retain their existing bounded float32/native/pixel gates. Approximate joint-curve trials are private and uninstalled."
   },
   "totals_reviewed": {
-    "raw_saved_bytes": 297753448,
-    "compressed_saved_bytes": 19449580,
+    "raw_saved_bytes": 297840592,
+    "compressed_saved_bytes": 19448998,
     "shared_gpu_saved_bytes": 39397800
   },
   "independent_editor_verification": {
