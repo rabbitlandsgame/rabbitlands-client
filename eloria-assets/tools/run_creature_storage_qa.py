@@ -14,6 +14,7 @@ ignored storage. The script never installs a candidate or grants artistic review
 """
 
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -22,6 +23,23 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[2]
 TOOLS = Path(__file__).resolve().parent
+
+
+def validate_fixture_hashes(job, project=None):
+    """Bind every engine fixture copy to the exact independently checked bytes."""
+    expected = {name: hashlib.sha256(Path(job[key]).read_bytes()).hexdigest()
+                for name, key in (("baseline", "source"), ("candidate", "candidate"))}
+    for field in ("actor_fixtures", "native_fixtures", "imported_fixtures"):
+        for fixture in job.get(field, []):
+            name, path = fixture["name"], str(fixture["path"])
+            if name not in expected:
+                raise ValueError(f"Unknown fixture role {name!r} in {field}")
+            if path.startswith("res://"):
+                if project is None:
+                    continue
+                path = Path(project) / path.removeprefix("res://")
+            if hashlib.sha256(Path(path).read_bytes()).hexdigest() != expected[name]:
+                raise ValueError(f"Stale {field} {name} fixture: {path}")
 
 
 def child(arguments, folder, environment, timeout):
@@ -182,6 +200,7 @@ def main():
         project = args.project.resolve()
         if ".local" not in project.parts:
             parser.error("Godot QA must use an isolated ignored .local project")
+        validate_fixture_hashes(job, project)
         rendering = args.phase == "render"
         actor_setup = args.phase in ("render", "placement")
         script = (
