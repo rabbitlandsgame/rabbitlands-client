@@ -70,5 +70,37 @@
   "strideMetresPerSecond": {
     "walk": 0.37507990424525856,
     "run": 0.9699035907756182
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "thunder_ram",
+    "sourceSHA256": "c5efcd82a53abb6250a4504bb21e4daa06e7cf266f47f29b3aa2c1751e75b2e4",
+    "previousRuntimeSHA256": "b87ea1eb2b98d05dabb0d5be75f6ea70328dd70ec0a8a4cd53a4fb52e61973ed",
+    "runtimeSHA256": "fe6a40970324645f272ca9e26868aa7ce6dd69f9e8ad31788f0b868c6be136c3",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "thunder_ram",
+      "sourceSHA256": "c5efcd82a53abb6250a4504bb21e4daa06e7cf266f47f29b3aa2c1751e75b2e4",
+      "runtimeSHA256": "b87ea1eb2b98d05dabb0d5be75f6ea70328dd70ec0a8a4cd53a4fb52e61973ed",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 120,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "reviewStatus": "accepted",
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "thunder_ram",
+    "appliesToSHA256": "fe6a40970324645f272ca9e26868aa7ce6dd69f9e8ad31788f0b868c6be136c3",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": null,
+    "repairNoteEvents": []
   }
 }

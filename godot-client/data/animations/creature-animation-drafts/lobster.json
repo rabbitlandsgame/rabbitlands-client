@@ -73,12 +73,43 @@
     "walk": 0.041307875753925985,
     "run": 0.09300686311054762
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "A low bronze lobster creeps on an overlapping eight-leg wave. Its carapace stays steady, rounded feet take clear equal advances, the centered segmented tail follows with restrained pitch and the four antennae make small independent sweeps.",
     "attack": "The large asymmetric pincers open, reach forward and snap in a braced right-left sequence. Whole bent forearms and palms rotate around measured sockets; the genuine fingers close without stretching.",
     "death": "The carapace settles forward/down onto its actual underside; outer limbs relax, eight inner pendant appendages fold aside, both pincers and the centered tail/fan find support. The final pose holds still."
   },
   "motionStyle": "grounded eight-leg lobster wave",
-  "locomotionMode": "grounded"
+  "locomotionMode": "grounded",
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "lobster",
+    "sourceSHA256": "47fe345c23c7a5f6f4f5536eb742483a04b9899e8c11bb7e558a8b059f498413",
+    "previousRuntimeSHA256": "577dba077a3fe43b348886ddbc24bdbc100f9c0347de9ea499cc2a4fd1435cc2",
+    "runtimeSHA256": "bdbdccdfc1244b655245fd48c3cbaa4874c5d432e522d34599f94a5a00d92277",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "lobster",
+      "sourceSHA256": "47fe345c23c7a5f6f4f5536eb742483a04b9899e8c11bb7e558a8b059f498413",
+      "runtimeSHA256": "577dba077a3fe43b348886ddbc24bdbc100f9c0347de9ea499cc2a4fd1435cc2",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 120,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "lobster",
+    "appliesToSHA256": "bdbdccdfc1244b655245fd48c3cbaa4874c5d432e522d34599f94a5a00d92277",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
+  }
 }

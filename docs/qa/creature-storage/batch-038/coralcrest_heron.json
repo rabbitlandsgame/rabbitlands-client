@@ -1,0 +1,469 @@
+{
+  "schema_version": 1,
+  "batch": 38,
+  "actor": "coralcrest_heron",
+  "date": "2026-10-28",
+  "runtime_path": "godot-client/assets/actors/native/creatures/coralcrest_heron.glb",
+  "source_sha256": "bca26898450cf1451850a009c5c196ab9555c9d5395bdb2f89ba3fbc882d7062",
+  "runtime_sha256": "a8698248a9ede4907ba3840fbd2acce099b4623eb3aff2b8d086ae9ee5fb6621",
+  "qualification": "Passed exact source/continuous curves, original physical observations, paired fresh Blender poses/default, native and fresh editor-imported playback/transitions, fully fitted actual-Actor cycles/four views, seeded dissolve/silhouette/reset checks.",
+  "human_approval_changed": false,
+  "recipe": {
+    "tool": "eloria-assets/tools/pack_creature_storage.py",
+    "tool_commit": "5bdd51c3",
+    "steps": [
+      "prune_zero_targets",
+      "reduce_constant_runs",
+      "compact"
+    ],
+    "profile": null,
+    "bounds": null,
+    "preserve_trs_keys": false
+  },
+  "bytes": {
+    "source_bytes": 2565196,
+    "candidate_bytes": 2411412,
+    "source_zstd_bytes": 1235136,
+    "candidate_zstd_bytes": 1236445
+  },
+  "inactive_targets_removed": 0,
+  "flat_run_key_rows_removed": 17521,
+  "corrective_graphics_buffer_bytes": {
+    "source": 0,
+    "candidate": 0,
+    "saved": 0,
+    "scope": "Actual Godot raw blend_shape_data byte totals over all mesh surfaces; shared per loaded model."
+  },
+  "draw_surfaces": {
+    "source": 1,
+    "candidate": 1
+  },
+  "source_validation": {
+    "passed": true,
+    "source_sha256": "bca26898450cf1451850a009c5c196ab9555c9d5395bdb2f89ba3fbc882d7062",
+    "candidate_sha256": "a8698248a9ede4907ba3840fbd2acce099b4623eb3aff2b8d086ae9ee5fb6621",
+    "geometry_skin_binds_rest_topology_uv_material_image_bits_preserved": true,
+    "retained_key_time_and_value_bits_exact_only_flat_interiors_removed": true,
+    "every_removed_default_and_key_is_zero": true,
+    "redundant_flat_key_rows_proved": 17521,
+    "preexisting_duplicate_property_curves_preserved_in_occurrence_order": 0,
+    "meshes": [],
+    "clips": {
+      "Idle_A": {
+        "original_knots": 769,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 1542
+      },
+      "Fighting_Idle": {
+        "original_knots": 577,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 1158
+      },
+      "Walk": {
+        "original_knots": 999,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 2002
+      },
+      "Jog": {
+        "original_knots": 600,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 1204
+      },
+      "Sword_Attack": {
+        "original_knots": 539,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 1082
+      },
+      "Hit_Chest": {
+        "original_knots": 327,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 658
+      },
+      "Death_A": {
+        "original_knots": 1038,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 2080
+      }
+    },
+    "proof": "Zero defaults and every LINEAR/STEP key zero prove inactive targets remain zero continuously and under crossfades. All retained accessor bytes and retained time/value rows are exact. Deleted key rows sit strictly inside three bit-identical adjacent rows; plateau boundaries and endpoints remain."
+  },
+  "physical_observations": {
+    "passed": true,
+    "source_sha256": "bca26898450cf1451850a009c5c196ab9555c9d5395bdb2f89ba3fbc882d7062",
+    "candidate_sha256": "a8698248a9ede4907ba3840fbd2acce099b4623eb3aff2b8d086ae9ee5fb6621",
+    "surface_probes": 113,
+    "poses": 21,
+    "clips": 7,
+    "source_candidate_position_error": 0.0,
+    "source_candidate_normal_vector_error": 0.0,
+    "original_witness_position_error_over_height": 0.0,
+    "original_source_witness_position_error_over_height": 0.0,
+    "original_witness_normal_vector_error": 0.0,
+    "original_witness_bone_matrix_error": 0.0,
+    "witness_sha256": "898479d969abf44caf9cf1e19ac330773159b1b3911a5f5df6040fa9379f21b8",
+    "sampled_motion_min": [
+      -0.35553690076719624,
+      0.0016990630305950202,
+      -1.2282757174359547
+    ],
+    "sampled_motion_max": [
+      0.2683086353979729,
+      1.3399634603003372,
+      1.0178360768087884
+    ]
+  },
+  "paired_fresh_blender": {
+    "maximum_position_error": 0.0,
+    "maximum_bone_matrix_error": 0.0,
+    "maximum_float32_budget": 1.9073486328125e-06,
+    "poses": 22,
+    "neutral_default_checked": true,
+    "retained_bone_matrices_per_pose": 75,
+    "passed": true,
+    "source_sha256": "bca26898450cf1451850a009c5c196ab9555c9d5395bdb2f89ba3fbc882d7062",
+    "candidate_sha256": "a8698248a9ede4907ba3840fbd2acce099b4623eb3aff2b8d086ae9ee5fb6621",
+    "scope": "Direct source/candidate frozen-ID surfaces and every bone matrix at each original witness pose plus controlled neutral/default pose. Sixteen float32 ULPs at baseline coordinate/matrix magnitude; independent of inherited source/witness residual and separate from native/source appearance budgets."
+  },
+  "native_and_editor_imported": {
+    "native": {
+      "samples": 232,
+      "maximum_position_error": 2.3961153265658697e-07,
+      "maximum_normal_angle_degrees": 1.2489631698061449e-05
+    },
+    "imported": {
+      "samples": 232,
+      "maximum_position_error": 2.3961153265658697e-07,
+      "maximum_normal_angle_degrees": 1.2489631698061449e-05,
+      "actual_loader": "ResourceLoader.load(PackedScene)",
+      "authoritative_SCN_provenance": "genuine_editor_verification_revision.load_proofs"
+    }
+  },
+  "editor_import_policy": {
+    "source_sidecar_exists": true,
+    "policy": "Original per-actor editor parameters retained"
+  },
+  "native_numeric_budget": {
+    "actor": "coralcrest_heron",
+    "source_coordinate_or_extent_magnitude": 1.7066674943775795,
+    "four_float32_ULPs": 4.76837158203125e-07,
+    "runtime_position_error": 2.3961153265658697e-07,
+    "runtime_normal_degrees": 1.2489631698061449e-05,
+    "imported_position_error": 2.3961153265658697e-07,
+    "imported_normal_degrees": 1.2489631698061449e-05,
+    "normal_degrees_budget": 0.0001,
+    "scope": "Four float32 ULPs at maximum original source coordinate/extent magnitude; original source mathematical equality remains exact. Native normal screen 1e-4 degrees."
+  },
+  "placement": {
+    "passed": true,
+    "bounds_error": 0.0,
+    "placement_error": 0.0,
+    "overhead_height_error": 0.0
+  },
+  "render_fit": {
+    "source_sha256": "bca26898450cf1451850a009c5c196ab9555c9d5395bdb2f89ba3fbc882d7062",
+    "model_global": [
+      [
+        0.5,
+        -1.77222568709112e-06,
+        -0.245000004768372
+      ],
+      [
+        -0.882353007793427,
+        0.0,
+        7.71377486330493e-08
+      ],
+      [
+        0.0,
+        0.882353007793427,
+        0.0
+      ],
+      [
+        -7.71377486330493e-08,
+        0.0,
+        -0.882353007793427
+      ]
+    ],
+    "position": [
+      0.15587702766527428,
+      0.0014972784173653856,
+      -1.3762133665599157
+    ],
+    "size": [
+      0.6749122277116952,
+      1.4680978624441745,
+      2.2641309011002617
+    ],
+    "poses": 276,
+    "scope": "Every vertex at every full-cycle render frame and view-still pose, using actual complete Actor Godot arrays/poses/weights/transforms, renderer morph cutoff and four/eight influence skin. Evaluated in float64 with a separate 30% camera margin."
+  },
+  "source_fit_inventory": {
+    "passed": true,
+    "source_sha256": "bca26898450cf1451850a009c5c196ab9555c9d5395bdb2f89ba3fbc882d7062",
+    "candidate_sha256": "a8698248a9ede4907ba3840fbd2acce099b4623eb3aff2b8d086ae9ee5fb6621",
+    "source_clips": [
+      "Death_A",
+      "Fighting_Idle",
+      "Hit_Chest",
+      "Idle_A",
+      "Jog",
+      "Sword_Attack",
+      "Walk"
+    ],
+    "actual_Actor_fit_clips": [
+      "Death_A",
+      "Fighting_Idle",
+      "Hit_Chest",
+      "Idle_A",
+      "Jog",
+      "Sword_Attack",
+      "Walk"
+    ],
+    "fit_runtime_sha256": "97463f9b62823d288057178919b2071bf0d5c995aad666d3f82c625f58d669a2",
+    "poses": 276,
+    "fit_lineage": null,
+    "scope": "Actual Actor source-pose capture inventory, not merely requested QA aliases. Every source clip is present in fitted playback data."
+  },
+  "appearance": {
+    "source_sha256": "bca26898450cf1451850a009c5c196ab9555c9d5395bdb2f89ba3fbc882d7062",
+    "candidate_sha256": "a8698248a9ede4907ba3840fbd2acce099b4623eb3aff2b8d086ae9ee5fb6621",
+    "image_pairs": 374,
+    "width": 512,
+    "height": 512,
+    "different_image_pairs": 13,
+    "maximum_different_pixels": 44,
+    "maximum_pixels_above_two_levels": 2,
+    "maximum_mean_channel_error": 0.000957489013671875,
+    "maximum_channel_error": 219,
+    "scope": "Complete ReplicatedActor3D setup with actual display scale, grounding and body materials; identical cameras for source/candidate, four views and every full native cycle at24Hz. Numeric playback and pixel comparisons are separate reports.",
+    "framing_passed": true,
+    "clipped_frame_labels": [],
+    "maximum_border_foreground_pixels": 0
+  },
+  "secondary_effects": {
+    "effective_scale": 0.882353007793427,
+    "failures": [],
+    "gpu": "NVIDIA GeForce RTX 5080 Laptop GPU",
+    "max_color_error": 0.0,
+    "max_custom_error": 0.0,
+    "max_dissolve_bounds_error": 1.49011611938477e-07,
+    "max_fragment_transform_error": 2.51560550168506e-07,
+    "max_grain_error": 0.0,
+    "max_silhouette_position_error": 3.00988688195503e-07,
+    "mounted": {},
+    "passed": true,
+    "renderer": "forward_plus",
+    "runtime_sha256": "a8698248a9ede4907ba3840fbd2acce099b4623eb3aff2b8d086ae9ee5fb6621",
+    "seeded_cases": 15,
+    "source_sha256": "bca26898450cf1451850a009c5c196ab9555c9d5395bdb2f89ba3fbc882d7062"
+  },
+  "rig_investigation": {
+    "decision": "Original rig, skin and topology retained; this candidate uses exact storage reductions only."
+  },
+  "evidence_sha256": {
+    "qualification-job.json": "228e11d78ffb2cef856972ca9f4fa2d4f53a2c94ab4e88c5f4c3f0bb52e1cc8c",
+    "processing.json": "f40bfbfbf392c6d923bfadf6edc57902d059614c5d5a8e5d00685ffec5544578",
+    "exact-source-validation.json": "64f7beea8f0644e40d2dca15a24ab50ab4644d3adfa0b9213340a7761bd3486b",
+    "physical-witness-validation.json": "709e13a35a9e202715adf4aa59994737efec9834446b05853dd4930472e2ad5a",
+    "blender-validation.json": "f5edaa921f3a771205142a0e0fdc5528ca3391abbd15d33d5cdf7fbd6840497b",
+    "blender-direct-validation.json": "c1abb749b4f1ea36cad8eed721b2cb5b579719aef5a2f49ee27daffc2f79b59e",
+    "native-validation.json": "b222f3744685339894530b8bf44787274059e86a16cc36e6487f8aace598870d",
+    "imported-validation.json": "b222f3744685339894530b8bf44787274059e86a16cc36e6487f8aace598870d",
+    "render-fit.json": "f0e2705e446bc6df1834d2bf130027a83cb47ebd65c493a03d8cc018bb00f9d1",
+    "placement.json": "a9f8920fac2c3d30503285eeb781b715ee16d6d34d27895bf5bd740d67d1d2f8",
+    "effects-validation.json": "24a4ff50062b8fa2fc69a1ccb398137b0fadf7ba7e0eb0a5daab9fe3a1334394",
+    "source-fit-inventory.json": "88ca0cf6030c2c723b5aed2ee81ca3f2788c10fc4f05ee508e848d31e4cebd98",
+    "actual-render/render.json": "d97c83557f66e5aab7524bcb55da9fdef9920f4bd4179a14e51b96928e943216",
+    "actual-render/pixel-comparison.json": "ce5c2a19a7d76c5cbdddeeeabdf7d80e1f564e7a9c26cfc64c7c6ae80515c77e",
+    "editor-import-policy.json": "4af712005813107dca040e472e35b06d3d55cebda5bcf80f7a5bf7065332123c"
+  },
+  "visual_review": "Paired normal contact boards and complete native-cycle previews reviewed. Every four-view/full-cycle frame has zero foreground pixels in its border two pixels wide.",
+  "known_limitations": [
+    "Separate resident RAM and frame-time benchmarks were not measured.",
+    "Encoded animation-key savings describe raw files, logical source accessors and import parsing input only. Native importing may densely rebake identical generated Animation keys; no runtime Animation RAM, key-search or playback CPU saving is claimed.",
+    "Original artistic review/approval status is unchanged.",
+    "Compressed shipping data increases by 1309 bytes despite smaller decoded GLB. This tradeoff is explicit; no unmeasured runtime-memory saving offsets it in this receipt."
+  ],
+  "genuine_editor_verification_revision": {
+    "status": "Corrected independent actual Editor verification passed within applicable unchanged modern or legacy scope",
+    "date": "2026-10-28",
+    "source_original_sha256": "bca26898450cf1451850a009c5c196ab9555c9d5395bdb2f89ba3fbc882d7062",
+    "current_canonical_sha256": "a8698248a9ede4907ba3840fbd2acce099b4623eb3aff2b8d086ae9ee5fb6621",
+    "loader": "ResourceLoader.load(PackedScene)",
+    "load_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/coralcrest_heron.glb-92f0ef8cfb8c98a05db266c9b29f29ba.md5",
+        "import_metadata_sha256": "ae05499291ccecc5ce6cc6f629aa8c17e21ba0286a230734c931a343c8fe8036",
+        "imported_resource_path": "res://.godot/imported/coralcrest_heron.glb-92f0ef8cfb8c98a05db266c9b29f29ba.scn",
+        "imported_resource_sha256": "0c918f659bf2a19c8f5382911bfd42db69b6b5eb0c4427c788d595231e19f8f2",
+        "packed_scene_resource_path": "res://assets/qa/coralcrest_heron/v2/baseline/coralcrest_heron.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "8588d10c826046ce096164854efa3baa",
+        "source_path": "res://assets/qa/coralcrest_heron/v2/baseline/coralcrest_heron.glb",
+        "source_sha256": "bca26898450cf1451850a009c5c196ab9555c9d5395bdb2f89ba3fbc882d7062"
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/coralcrest_heron.glb-e449022c73c168e6c717d7c8bc7d125d.md5",
+        "import_metadata_sha256": "5ec317817e277aa5825252a6424d2eab4e260c1af66208092161bed83263ea83",
+        "imported_resource_path": "res://.godot/imported/coralcrest_heron.glb-e449022c73c168e6c717d7c8bc7d125d.scn",
+        "imported_resource_sha256": "3abab3634c1628c95aff439a6ec7a4044acf0c2734c2426963776c344a826cc2",
+        "packed_scene_resource_path": "res://assets/qa/coralcrest_heron/v2/candidate/coralcrest_heron.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "9599c62199877fc25049093725ffbe6c",
+        "source_path": "res://assets/qa/coralcrest_heron/v2/candidate/coralcrest_heron.glb",
+        "source_sha256": "a8698248a9ede4907ba3840fbd2acce099b4623eb3aff2b8d086ae9ee5fb6621"
+      }
+    ],
+    "source_aliases_and_SCNs_have_current_source_and_destination_MD5_freshness": true,
+    "numeric": {
+      "poses": 232,
+      "all_source_clips": [
+        "Idle_A",
+        "Fighting_Idle",
+        "Walk",
+        "Jog",
+        "Sword_Attack",
+        "Hit_Chest",
+        "Death_A"
+      ],
+      "RESET_checked": true,
+      "maximum_Euclidean_position_error_source_units": 2.3961153265658697e-07,
+      "maximum_normal_angle_degrees": 1.2489631698061449e-05
+    },
+    "applicable_quality_budget": {
+      "position_four_float32_ULPs": 4.76837158203125e-07,
+      "source_coordinate_or_rest_axis_extent_magnitude": 1.7066674943775795,
+      "normal_degrees": 0.0001,
+      "both_passed": true
+    },
+    "full_typed_static_attributes_material_storage_texture_pixels_and_mips": {
+      "actor": "coralcrest_heron",
+      "source_sha256": "bca26898450cf1451850a009c5c196ab9555c9d5395bdb2f89ba3fbc882d7062",
+      "candidate_sha256": "a8698248a9ede4907ba3840fbd2acce099b4623eb3aff2b8d086ae9ee5fb6621",
+      "surfaces": [
+        {
+          "all_typed_arrays": [
+            {
+              "slot": 0,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 1,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 2,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 4,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 10,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 11,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 12,
+              "exact_after_proven_vertex_bijection": true
+            }
+          ],
+          "full_material_storage_fields_and_texture_pixels_mips_exact": true,
+          "format_exact": true,
+          "lods": [
+            {
+              "lod": 0,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            },
+            {
+              "lod": 1,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            },
+            {
+              "lod": 2,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            }
+          ],
+          "bounds_component_max_delta": 0.0,
+          "lod_capture_present": true
+        }
+      ],
+      "passed": true,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/coralcrest_heron.glb-92f0ef8cfb8c98a05db266c9b29f29ba.md5",
+          "import_metadata_sha256": "ae05499291ccecc5ce6cc6f629aa8c17e21ba0286a230734c931a343c8fe8036",
+          "imported_resource_path": "res://.godot/imported/coralcrest_heron.glb-92f0ef8cfb8c98a05db266c9b29f29ba.scn",
+          "imported_resource_sha256": "0c918f659bf2a19c8f5382911bfd42db69b6b5eb0c4427c788d595231e19f8f2",
+          "packed_scene_resource_path": "res://assets/qa/coralcrest_heron/v2/baseline/coralcrest_heron.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "8588d10c826046ce096164854efa3baa",
+          "source_path": "res://assets/qa/coralcrest_heron/v2/baseline/coralcrest_heron.glb",
+          "source_sha256": "bca26898450cf1451850a009c5c196ab9555c9d5395bdb2f89ba3fbc882d7062"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/coralcrest_heron.glb-e449022c73c168e6c717d7c8bc7d125d.md5",
+          "import_metadata_sha256": "5ec317817e277aa5825252a6424d2eab4e260c1af66208092161bed83263ea83",
+          "imported_resource_path": "res://.godot/imported/coralcrest_heron.glb-e449022c73c168e6c717d7c8bc7d125d.scn",
+          "imported_resource_sha256": "3abab3634c1628c95aff439a6ec7a4044acf0c2734c2426963776c344a826cc2",
+          "packed_scene_resource_path": "res://assets/qa/coralcrest_heron/v2/candidate/coralcrest_heron.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "9599c62199877fc25049093725ffbe6c",
+          "source_path": "res://assets/qa/coralcrest_heron/v2/candidate/coralcrest_heron.glb",
+          "source_sha256": "a8698248a9ede4907ba3840fbd2acce099b4623eb3aff2b8d086ae9ee5fb6621"
+        }
+      ]
+    },
+    "retained_Editor_morph_fields": {
+      "actor": "coralcrest_heron",
+      "source_sha256": "bca26898450cf1451850a009c5c196ab9555c9d5395bdb2f89ba3fbc882d7062",
+      "candidate_sha256": "a8698248a9ede4907ba3840fbd2acce099b4623eb3aff2b8d086ae9ee5fb6621",
+      "all_retained_editor_POSITION_NORMAL_TANGENT_typed_bits_exact": true,
+      "retained_targets": 0,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/coralcrest_heron.glb-92f0ef8cfb8c98a05db266c9b29f29ba.md5",
+          "import_metadata_sha256": "ae05499291ccecc5ce6cc6f629aa8c17e21ba0286a230734c931a343c8fe8036",
+          "imported_resource_path": "res://.godot/imported/coralcrest_heron.glb-92f0ef8cfb8c98a05db266c9b29f29ba.scn",
+          "imported_resource_sha256": "0c918f659bf2a19c8f5382911bfd42db69b6b5eb0c4427c788d595231e19f8f2",
+          "packed_scene_resource_path": "res://assets/qa/coralcrest_heron/v2/baseline/coralcrest_heron.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "8588d10c826046ce096164854efa3baa",
+          "source_path": "res://assets/qa/coralcrest_heron/v2/baseline/coralcrest_heron.glb",
+          "source_sha256": "bca26898450cf1451850a009c5c196ab9555c9d5395bdb2f89ba3fbc882d7062"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/coralcrest_heron.glb-e449022c73c168e6c717d7c8bc7d125d.md5",
+          "import_metadata_sha256": "5ec317817e277aa5825252a6424d2eab4e260c1af66208092161bed83263ea83",
+          "imported_resource_path": "res://.godot/imported/coralcrest_heron.glb-e449022c73c168e6c717d7c8bc7d125d.scn",
+          "imported_resource_sha256": "3abab3634c1628c95aff439a6ec7a4044acf0c2734c2426963776c344a826cc2",
+          "packed_scene_resource_path": "res://assets/qa/coralcrest_heron/v2/candidate/coralcrest_heron.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "9599c62199877fc25049093725ffbe6c",
+          "source_path": "res://assets/qa/coralcrest_heron/v2/candidate/coralcrest_heron.glb",
+          "source_sha256": "a8698248a9ede4907ba3840fbd2acce099b4623eb3aff2b8d086ae9ee5fb6621"
+        }
+      ],
+      "scope": "Direct actual Editor source/candidate retained morph P/N/T byte digests after independently proved complete static-attribute vertex bijection. Exact target mask from source packing lineage; no morph field omitted.",
+      "passed": true
+    },
+    "withdrawn_prior_loader_claim": "Prior shared dumper captures labelled imported used GlbSceneCache for these outside-actor aliases and therefore were raw-cache comparisons. They remain retained private raw/native evidence, but their independent Editor claim is withdrawn and superseded by these explicitly loaded SCNs.",
+    "unchanged_other_evidence": "Original independent physical observations, exact source curves, Blender, actual native gameplay body rendering, placement, mounted/cinematic dependencies and secondary effects remain hash-bound and unchanged. No artistic approval, model, action, cap or witness change in this QA revision.",
+    "production_scope": "Production actor_shipping loose folders remain raw/native and are not Editor-imported. Per-surface Editor-generated LODs are verification representation metadata, not a claim of new gameplay LODs.",
+    "evidence_sha256": {
+      ".local/heavy-batch/coralcrest_heron/v2/editor-real-v1/qualification-job.json": "ff311861d2a85140bde4caaeb7f1e2e8f4a788baca94e70bf3f910414af60c78",
+      ".local/heavy-batch/coralcrest_heron/v2/editor-real-v1/imported/runtime.json": "8bbc859ab96f2d70e099258d326a297999dbc59c101fcea7393fa2da61e73369",
+      ".local/heavy-batch/coralcrest_heron/v2/editor-real-v1/imported-validation.json": "b222f3744685339894530b8bf44787274059e86a16cc36e6487f8aace598870d",
+      ".local/heavy-batch/coralcrest_heron/v2/editor-real-v1/imported-static-mesh-bits.json": "8de64d9944f7f27a3d8912a755191dc1174c9a4ad54b201c1a37a0efd9b1aa53",
+      ".local/heavy-batch/coralcrest_heron/v2/editor-real-v1/imported-typed-validation.json": "68f1cde30c619b0afc5cf8c5dc4910b15efb71e744be9f4e9e05930d6a1b00c0",
+      ".local/heavy-batch/coralcrest_heron/v2/editor-real-v1/morph-digest-job.json": "ab8fc1eae86213df72d71061cd05d2429ff92262058a476c79982d23a6123d26",
+      ".local/heavy-batch/coralcrest_heron/v2/editor-real-v1/imported-morph-digests.json": "7226db38c4083091af238cbd90af941bcbdce8d74e106d108313f6aa0d8a1ff3",
+      ".local/heavy-batch/coralcrest_heron/v2/editor-real-v1/imported-morph-validation.json": "887c4bb24d946a44493c4342f0b2924ebb4af5e761cdd5316a760cdba2ae2c56"
+    }
+  }
+}

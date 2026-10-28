@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "actor": "macaw",
+  "source_sha256": "213d8c13c5bea2f4dadc0d04cb78ae17a00c1982a98ed88cc49b2d1f30d6b035",
+  "candidate_sha256": "fd8be70fdd7dc694176b3bd25f741dedaa9bd5f5e83e02fc2060b4b6ad42f092",
+  "pipeline": [
+    "prune_zero_targets",
+    "reduce_constant_runs",
+    "compact"
+  ],
+  "partition": null,
+  "unchanged": false,
+  "removed_zero_target_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16
+  ],
+  "redundant_flat_key_rows_removed": 16376,
+  "geometry_skin_rest_binds_materials_images_unchanged": true,
+  "native_clips": [
+    "Death_A",
+    "Fighting_Idle",
+    "Fly",
+    "Hit_Chest",
+    "Idle_A",
+    "Jog",
+    "Sword_Attack",
+    "Walk"
+  ],
+  "usage": "Deterministic exact preparation needs no partition --profile; frozen source/candidate hashes bind this record."
+}

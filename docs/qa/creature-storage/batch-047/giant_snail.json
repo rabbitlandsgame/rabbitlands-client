@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "batch": 47,
+  "rank": 232,
+  "actor": "giant_snail",
+  "status": "Original bytes retained; exact-storage proposal not installed. Original fallback reason recorded.",
+  "source_sha256": "da9718c830eb4993fc93e58538b8107e82de30b78842a545a2ccc15d51cd82ee",
+  "candidate_sha256": "da9718c830eb4993fc93e58538b8107e82de30b78842a545a2ccc15d51cd82ee",
+  "source_bytes": 511500,
+  "candidate_bytes": 511500,
+  "source_zstd_bytes": 362008,
+  "candidate_zstd_bytes": 362008,
+  "shared_gpu_source_bytes": 0,
+  "draw_surfaces_source": 1,
+  "source_lods": [
+    0
+  ],
+  "shared_gpu_candidate_bytes": 0,
+  "draw_surfaces_candidate": 1,
+  "candidate_lods": [
+    0
+  ],
+  "canonical_pipeline_byte_identical": false,
+  "human_approval_changed": false,
+  "new_inactive_targets": 0,
+  "new_flat_key_reductions": 0,
+  "physical_observations": {
+    "passed": true,
+    "source_sha256": "da9718c830eb4993fc93e58538b8107e82de30b78842a545a2ccc15d51cd82ee",
+    "candidate_sha256": "da9718c830eb4993fc93e58538b8107e82de30b78842a545a2ccc15d51cd82ee",
+    "surface_probes": 166,
+    "poses": 133,
+    "clips": 7,
+    "source_candidate_position_error": 0.0,
+    "source_candidate_normal_vector_error": 0.0,
+    "original_witness_position_error_over_height": 0.0,
+    "original_source_witness_position_error_over_height": 0.0,
+    "original_witness_normal_vector_error": 0.0,
+    "original_witness_bone_matrix_error": 0.0,
+    "witness_sha256": "0ed6bf79fe1b9090905ae39b988ccd8dcf2cceaad7411083df8afc7a3acda6b6",
+    "sampled_motion_min": [
+      -0.4458683723343974,
+      -0.04609076385460054,
+      -0.5233400375660269
+    ],
+    "sampled_motion_max": [
+      0.30088008933673666,
+      0.48149734782966136,
+      0.5693752431492285
+    ]
+  },
+  "native_unchanged_validation": {
+    "maximum_position_error": 0.0,
+    "maximum_normal_angle_degrees": 1.7075472925031877e-06,
+    "worst_position": {
+      "label": "Death_A@0.0",
+      "max_surface_error": 0.0,
+      "max_normal_degrees": 1.4787793334710982e-06,
+      "p99_normal_degrees": 1.2074182697257333e-06
+    },
+    "worst_normal": {
+      "label": "Death_A@0.25",
+      "max_surface_error": 0.0,
+      "max_normal_degrees": 1.7075472925031877e-06,
+      "p99_normal_degrees": 1.2074182697257333e-06
+    },
+    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "source_sha256": "da9718c830eb4993fc93e58538b8107e82de30b78842a545a2ccc15d51cd82ee",
+    "candidate_sha256": "da9718c830eb4993fc93e58538b8107e82de30b78842a545a2ccc15d51cd82ee"
+  },
+  "native_runtime_samples": 232,
+  "scope": "Original bytes, skin, rig, corrective data, materials, motions and approval status retained. A duplicate graphics comparison is unnecessary for identical input bytes.",
+  "evidence_sha256": {
+    "processing.json": "83bba047b1c0aae1a767ced2dc2c2b69d7f1ea499ad015b4057f88b8d6b6e91d",
+    "exact-source-validation.json": "994e8da8ee939a2f8fca0df95cc9b0226e4cd540a3d6268f57efb98167bfcd41",
+    "physical-witness-validation.json": "1ab0f4516379217bde763ac94ce22e76778676494922d6252538bb6f42f31be9",
+    "native-validation.json": "8ac07269fd1fcb6107ba0710aae0fb6c9ad9b2ab3bd7cf04a6fb98fc7702c094",
+    "placement.json": "b0a4689dfa0c1b257da708c00cf40375dcb3f52236d46719799ed2a459cd8349"
+  },
+  "original_byte_fallback_reason": {
+    "reason": "Exact preparation increases the raw development model and provides no measured GPU/draw benefit; original retained under user raw-source priority.",
+    "source_bytes": 511500,
+    "proposal_bytes": 511900,
+    "proposal_sha256": "90840b0bb3232ce33bb7eae2db48be6025ac915503f9208133cf2ba1da6db73d"
+  }
+}

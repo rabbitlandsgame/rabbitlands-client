@@ -1,0 +1,458 @@
+{
+  "schema_version": 1,
+  "batch": 20,
+  "actor": "lantern_stag",
+  "date": "2026-10-27",
+  "runtime_path": "godot-client/assets/actors/native/creatures/lantern_stag.glb",
+  "source_sha256": "74033f3d4ce80c6ce66bcc4d62f57c76b8cec07475a675896d372f9692ed29b3",
+  "runtime_sha256": "b1e365a6e3c6651590aa8e47e2045b40ec46d87d293d55bdf91674d45d72ccf6",
+  "qualification": "Passed exact source/continuous curves, original physical observations, paired fresh Blender poses/default, native and fresh editor-imported playback/transitions, fully fitted actual-Actor cycles/four views, seeded dissolve/silhouette/reset checks.",
+  "human_approval_changed": false,
+  "recipe": {
+    "tool": "eloria-assets/tools/pack_creature_storage.py",
+    "tool_commit": "5bdd51c3",
+    "steps": [
+      "prune_zero_targets",
+      "reduce_constant_runs",
+      "compact"
+    ],
+    "profile": null,
+    "bounds": null,
+    "preserve_trs_keys": false
+  },
+  "bytes": {
+    "source_bytes": 8521856,
+    "candidate_bytes": 5962428,
+    "source_zstd_bytes": 3959456,
+    "candidate_zstd_bytes": 3970180
+  },
+  "inactive_targets_removed": 0,
+  "flat_run_key_rows_removed": 211800,
+  "corrective_graphics_buffer_bytes": {
+    "source": 0,
+    "candidate": 0,
+    "saved": 0,
+    "scope": "Actual Godot raw blend_shape_data byte totals over all mesh surfaces; shared per loaded model."
+  },
+  "draw_surfaces": {
+    "source": 1,
+    "candidate": 1
+  },
+  "source_validation": {
+    "passed": true,
+    "source_sha256": "74033f3d4ce80c6ce66bcc4d62f57c76b8cec07475a675896d372f9692ed29b3",
+    "candidate_sha256": "b1e365a6e3c6651590aa8e47e2045b40ec46d87d293d55bdf91674d45d72ccf6",
+    "geometry_skin_binds_rest_topology_uv_material_image_bits_preserved": true,
+    "retained_key_time_and_value_bits_exact_only_flat_interiors_removed": true,
+    "every_removed_default_and_key_is_zero": true,
+    "redundant_flat_key_rows_proved": 211800,
+    "preexisting_duplicate_property_curves_preserved_in_occurrence_order": 0,
+    "meshes": [],
+    "clips": {
+      "Fighting_Idle": {
+        "original_knots": 4,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 12
+      },
+      "Hit_Chest": {
+        "original_knots": 17,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 38
+      },
+      "Idle_A": {
+        "original_knots": 14,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 32
+      },
+      "Walk": {
+        "original_knots": 3439,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 6882
+      },
+      "Jog": {
+        "original_knots": 2029,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 4062
+      },
+      "Sword_Attack": {
+        "original_knots": 4913,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 9830
+      },
+      "Death_A": {
+        "original_knots": 7987,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 15978
+      }
+    },
+    "proof": "Zero defaults and every LINEAR/STEP key zero prove inactive targets remain zero continuously and under crossfades. All retained accessor bytes and retained time/value rows are exact. Deleted key rows sit strictly inside three bit-identical adjacent rows; plateau boundaries and endpoints remain."
+  },
+  "physical_observations": {
+    "passed": true,
+    "source_sha256": "74033f3d4ce80c6ce66bcc4d62f57c76b8cec07475a675896d372f9692ed29b3",
+    "candidate_sha256": "b1e365a6e3c6651590aa8e47e2045b40ec46d87d293d55bdf91674d45d72ccf6",
+    "surface_probes": 166,
+    "poses": 133,
+    "clips": 7,
+    "source_candidate_position_error": 0.0,
+    "source_candidate_normal_vector_error": 0.0,
+    "original_witness_position_error_over_height": 0.0,
+    "original_source_witness_position_error_over_height": 0.0,
+    "original_witness_normal_vector_error": 0.0,
+    "original_witness_bone_matrix_error": 0.0,
+    "witness_sha256": "2c8e52b9dac27cab5653555629d1a94835ff4589d856e9fa75985290ffafab5e",
+    "sampled_motion_min": [
+      -0.8221705830743029,
+      0.0006136131599149563,
+      -0.8624837949065126
+    ],
+    "sampled_motion_max": [
+      0.7073703822446069,
+      1.7868821154206473,
+      1.4834364176547183
+    ]
+  },
+  "paired_fresh_blender": {
+    "maximum_position_error": 0.0,
+    "maximum_bone_matrix_error": 0.0,
+    "maximum_float32_budget": 1.9073486328125e-06,
+    "poses": 134,
+    "neutral_default_checked": true,
+    "passed": true,
+    "source_sha256": "74033f3d4ce80c6ce66bcc4d62f57c76b8cec07475a675896d372f9692ed29b3",
+    "candidate_sha256": "b1e365a6e3c6651590aa8e47e2045b40ec46d87d293d55bdf91674d45d72ccf6",
+    "scope": "Direct source/candidate frozen-ID surfaces and every bone matrix at each original witness pose plus controlled neutral/default pose. Sixteen float32 ULPs at baseline coordinate/matrix magnitude; independent of inherited source/witness residual and separate from native/source appearance budgets."
+  },
+  "native_and_editor_imported": {
+    "native": {
+      "samples": 232,
+      "maximum_position_error": 3.517807906557282e-07,
+      "maximum_normal_angle_degrees": 2.2165253030559974e-05
+    },
+    "imported": {
+      "samples": 232,
+      "maximum_position_error": 3.517807906557282e-07,
+      "maximum_normal_angle_degrees": 2.2165253030559974e-05,
+      "actual_loader": "ResourceLoader.load(PackedScene)",
+      "authoritative_SCN_provenance": "genuine_editor_verification_revision.load_proofs"
+    }
+  },
+  "native_numeric_budget": {
+    "actor": "lantern_stag",
+    "source_coordinate_or_extent_magnitude": 1.7000039419307251,
+    "four_float32_ULPs": 4.76837158203125e-07,
+    "runtime_position_error": 3.517807906557282e-07,
+    "runtime_normal_degrees": 2.2165253030559974e-05,
+    "imported_position_error": 3.517807906557282e-07,
+    "imported_normal_degrees": 2.2165253030559974e-05,
+    "normal_degrees_budget": 0.0001,
+    "scope": "Four float32 ULPs at maximum original source coordinate/extent magnitude; original source mathematical equality remains exact. Native normal screen 1e-4 degrees."
+  },
+  "placement": {
+    "passed": true,
+    "bounds_error": 0.0,
+    "placement_error": 0.0,
+    "overhead_height_error": 0.0
+  },
+  "render_fit": {
+    "source_sha256": "74033f3d4ce80c6ce66bcc4d62f57c76b8cec07475a675896d372f9692ed29b3",
+    "model_global": [
+      [
+        0.5,
+        3.7058389352751e-06,
+        -0.305999994277954
+      ],
+      [
+        -0.941175997257233,
+        0.0,
+        8.22802164179848e-08
+      ],
+      [
+        0.0,
+        0.941175997257233,
+        0.0
+      ],
+      [
+        -8.22802164179848e-08,
+        0.0,
+        -0.941175997257233
+      ]
+    ],
+    "position": [
+      -0.1740669804058744,
+      0.0005818820702153083,
+      -1.7046429603275568
+    ],
+    "size": [
+      1.4485140390941587,
+      1.681845401956806,
+      2.2150990388282
+    ],
+    "poses": 301,
+    "scope": "Every vertex at every full-cycle render frame and view-still pose, using actual complete Actor Godot arrays/poses/weights/transforms, renderer morph cutoff and four/eight influence skin. Evaluated in float64 with a separate 30% camera margin."
+  },
+  "source_fit_inventory": {
+    "passed": true,
+    "source_sha256": "74033f3d4ce80c6ce66bcc4d62f57c76b8cec07475a675896d372f9692ed29b3",
+    "candidate_sha256": "b1e365a6e3c6651590aa8e47e2045b40ec46d87d293d55bdf91674d45d72ccf6",
+    "source_clips": [
+      "Death_A",
+      "Fighting_Idle",
+      "Hit_Chest",
+      "Idle_A",
+      "Jog",
+      "Sword_Attack",
+      "Walk"
+    ],
+    "actual_Actor_fit_clips": [
+      "Death_A",
+      "Fighting_Idle",
+      "Hit_Chest",
+      "Idle_A",
+      "Jog",
+      "Sword_Attack",
+      "Walk"
+    ],
+    "fit_runtime_sha256": "cb52472da472f5ccfff35ca1a4d4885650c5ad6002fac54f55f301c9c171d14c",
+    "poses": 301,
+    "fit_lineage": null,
+    "scope": "Actual Actor source-pose capture inventory, not merely requested QA aliases. Every source clip is present in fitted playback data."
+  },
+  "appearance": {
+    "source_sha256": "74033f3d4ce80c6ce66bcc4d62f57c76b8cec07475a675896d372f9692ed29b3",
+    "candidate_sha256": "b1e365a6e3c6651590aa8e47e2045b40ec46d87d293d55bdf91674d45d72ccf6",
+    "image_pairs": 399,
+    "width": 512,
+    "height": 512,
+    "different_image_pairs": 29,
+    "maximum_different_pixels": 33,
+    "maximum_pixels_above_two_levels": 1,
+    "maximum_mean_channel_error": 8.392333984375e-05,
+    "maximum_channel_error": 25,
+    "scope": "Complete ReplicatedActor3D setup with actual display scale, grounding and body materials; identical cameras for source/candidate, four views and every full native cycle at24Hz. Numeric playback and pixel comparisons are separate reports.",
+    "framing_passed": true,
+    "clipped_frame_labels": [],
+    "maximum_border_foreground_pixels": 0
+  },
+  "secondary_effects": {
+    "effective_scale": 0.941175997257233,
+    "failures": [],
+    "gpu": "NVIDIA GeForce RTX 5080 Laptop GPU",
+    "max_color_error": 0.0,
+    "max_custom_error": 0.0,
+    "max_dissolve_bounds_error": 1.33280039449346e-07,
+    "max_fragment_transform_error": 1.90827975643515e-07,
+    "max_grain_error": 6.55651091752141e-09,
+    "max_silhouette_position_error": 1.78969088437952e-07,
+    "mounted": {},
+    "passed": true,
+    "renderer": "forward_plus",
+    "runtime_sha256": "b1e365a6e3c6651590aa8e47e2045b40ec46d87d293d55bdf91674d45d72ccf6",
+    "seeded_cases": 15,
+    "source_sha256": "74033f3d4ce80c6ce66bcc4d62f57c76b8cec07475a675896d372f9692ed29b3"
+  },
+  "rig_investigation": {
+    "decision": "Original rig, skin and topology retained; this candidate uses exact storage reductions only."
+  },
+  "evidence_sha256": {
+    "qualification-job.json": "8bc4130c215206661d7c6978d738fb9ea227a31c2f97bc8625296093ef78b1a1",
+    "processing.json": "792321fa2486073faf4ba3e681b76e047ebb14202976ad04d267653aee8c1e03",
+    "exact-source-validation.json": "ed9e171c576cbbbafc7184f4d3165622ce967e298c5d5cffb01f7c33522d30e8",
+    "physical-witness-validation.json": "35f30750e5db436219eb1205bd3e705573c73142919624730bcf4d08582b4056",
+    "blender-validation.json": "80c56a606f9ca0478e4b7738d01fc397763947cc875f7debb9adeccdf1077efe",
+    "blender-direct-validation.json": "bb4d9498a177f1e69d8f42f8455b9d4be881a3b6006d21aa49b545cd0d0881e3",
+    "native-validation.json": "b6dfd14601ffe13781a8b73d458cec32058a4ac7645f3e26e7ee02ac64838476",
+    "imported-validation.json": "b6dfd14601ffe13781a8b73d458cec32058a4ac7645f3e26e7ee02ac64838476",
+    "render-fit.json": "eebf27171b3db96e42547da371cad6ab8b192f5febad05a58a520ae358ff37e2",
+    "placement.json": "52464cfc4ec024d9929217c832b413bc7846e61ece51ab855c39958d551af522",
+    "effects-validation.json": "4cfab9a4566a268e2763e99e5207acaf54b07e1d9c411b440f43ba1d1e7105b4",
+    "source-fit-inventory.json": "9adff238ad3475bda1f5a9adcfb34abdb6772e2cf771b77bc34744e90c763cae",
+    "actual-render/render.json": "a8f6f10f17739e9477a1c9991b57ec643506e010feae9f1aec7f3853dcc78086",
+    "actual-render/pixel-comparison.json": "24503a19d950bb37c0a8c250a42a94dbef5236268e52e487cbf7acd541aeefec"
+  },
+  "visual_review": "Paired normal contact boards and complete native-cycle previews reviewed. Every four-view/full-cycle frame has zero foreground pixels in its border two pixels wide.",
+  "known_limitations": [
+    "Separate resident RAM and frame-time benchmarks were not measured.",
+    "Encoded animation-key savings describe raw files, logical source accessors and import parsing input only. Native importing may densely rebake identical generated Animation keys; no runtime Animation RAM, key-search or playback CPU saving is claimed.",
+    "Original artistic review/approval status is unchanged.",
+    "Compressed shipping data increases by 10724 bytes despite smaller decoded GLB. This tradeoff is explicit; no unmeasured runtime-memory saving offsets it in this receipt."
+  ],
+  "genuine_editor_verification_revision": {
+    "status": "Corrected independent actual Editor verification passed within applicable unchanged modern or legacy scope",
+    "date": "2026-10-28",
+    "source_original_sha256": "74033f3d4ce80c6ce66bcc4d62f57c76b8cec07475a675896d372f9692ed29b3",
+    "current_canonical_sha256": "b1e365a6e3c6651590aa8e47e2045b40ec46d87d293d55bdf91674d45d72ccf6",
+    "loader": "ResourceLoader.load(PackedScene)",
+    "load_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/lantern_stag.glb-08531f26307f04ae7c3700b9657c9849.md5",
+        "import_metadata_sha256": "17e9ed7c6eaad79b40cf2a5a62bd70d90bf58b7e6367bc13e618784a0a5b7413",
+        "imported_resource_path": "res://.godot/imported/lantern_stag.glb-08531f26307f04ae7c3700b9657c9849.scn",
+        "imported_resource_sha256": "c186878ea017f39fda47baae287a1f49e56346b93cc42072346deb2440e080ce",
+        "packed_scene_resource_path": "res://assets/qa/lantern_stag/v2/baseline/lantern_stag.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "14c8b9df8f53023495144b4c5842b11e",
+        "source_path": "res://assets/qa/lantern_stag/v2/baseline/lantern_stag.glb",
+        "source_sha256": "74033f3d4ce80c6ce66bcc4d62f57c76b8cec07475a675896d372f9692ed29b3"
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/lantern_stag.glb-ac19a3bb11d0c521e7c9b154bb0bd4c7.md5",
+        "import_metadata_sha256": "1200da91131546a6e7ced9fc343bdd142e0fec3ece829e4193284fe9b98ae896",
+        "imported_resource_path": "res://.godot/imported/lantern_stag.glb-ac19a3bb11d0c521e7c9b154bb0bd4c7.scn",
+        "imported_resource_sha256": "ca868cd43ca8221284609ba87e60c4167c1235082b3729c12d9a429d64ee5704",
+        "packed_scene_resource_path": "res://assets/qa/lantern_stag/v2/candidate/lantern_stag.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "099c022d1446dc4ff98967650e3e7a53",
+        "source_path": "res://assets/qa/lantern_stag/v2/candidate/lantern_stag.glb",
+        "source_sha256": "b1e365a6e3c6651590aa8e47e2045b40ec46d87d293d55bdf91674d45d72ccf6"
+      }
+    ],
+    "source_aliases_and_SCNs_have_current_source_and_destination_MD5_freshness": true,
+    "numeric": {
+      "poses": 232,
+      "all_source_clips": [
+        "Fighting_Idle",
+        "Hit_Chest",
+        "Idle_A",
+        "Walk",
+        "Jog",
+        "Sword_Attack",
+        "Death_A"
+      ],
+      "RESET_checked": true,
+      "maximum_Euclidean_position_error_source_units": 3.517807906557282e-07,
+      "maximum_normal_angle_degrees": 2.2165253030559974e-05
+    },
+    "applicable_quality_budget": {
+      "position_four_float32_ULPs": 4.76837158203125e-07,
+      "source_coordinate_or_rest_axis_extent_magnitude": 1.7000039419307251,
+      "normal_degrees": 0.0001,
+      "both_passed": true
+    },
+    "full_typed_static_attributes_material_storage_texture_pixels_and_mips": {
+      "actor": "lantern_stag",
+      "source_sha256": "74033f3d4ce80c6ce66bcc4d62f57c76b8cec07475a675896d372f9692ed29b3",
+      "candidate_sha256": "b1e365a6e3c6651590aa8e47e2045b40ec46d87d293d55bdf91674d45d72ccf6",
+      "surfaces": [
+        {
+          "all_typed_arrays": [
+            {
+              "slot": 0,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 1,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 2,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 4,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 10,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 11,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 12,
+              "exact_after_proven_vertex_bijection": true
+            }
+          ],
+          "full_material_storage_fields_and_texture_pixels_mips_exact": true,
+          "format_exact": true,
+          "lods": [
+            {
+              "lod": 0,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            },
+            {
+              "lod": 1,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            }
+          ],
+          "bounds_component_max_delta": 0.0,
+          "lod_capture_present": true
+        }
+      ],
+      "passed": true,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/lantern_stag.glb-08531f26307f04ae7c3700b9657c9849.md5",
+          "import_metadata_sha256": "17e9ed7c6eaad79b40cf2a5a62bd70d90bf58b7e6367bc13e618784a0a5b7413",
+          "imported_resource_path": "res://.godot/imported/lantern_stag.glb-08531f26307f04ae7c3700b9657c9849.scn",
+          "imported_resource_sha256": "c186878ea017f39fda47baae287a1f49e56346b93cc42072346deb2440e080ce",
+          "packed_scene_resource_path": "res://assets/qa/lantern_stag/v2/baseline/lantern_stag.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "14c8b9df8f53023495144b4c5842b11e",
+          "source_path": "res://assets/qa/lantern_stag/v2/baseline/lantern_stag.glb",
+          "source_sha256": "74033f3d4ce80c6ce66bcc4d62f57c76b8cec07475a675896d372f9692ed29b3"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/lantern_stag.glb-ac19a3bb11d0c521e7c9b154bb0bd4c7.md5",
+          "import_metadata_sha256": "1200da91131546a6e7ced9fc343bdd142e0fec3ece829e4193284fe9b98ae896",
+          "imported_resource_path": "res://.godot/imported/lantern_stag.glb-ac19a3bb11d0c521e7c9b154bb0bd4c7.scn",
+          "imported_resource_sha256": "ca868cd43ca8221284609ba87e60c4167c1235082b3729c12d9a429d64ee5704",
+          "packed_scene_resource_path": "res://assets/qa/lantern_stag/v2/candidate/lantern_stag.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "099c022d1446dc4ff98967650e3e7a53",
+          "source_path": "res://assets/qa/lantern_stag/v2/candidate/lantern_stag.glb",
+          "source_sha256": "b1e365a6e3c6651590aa8e47e2045b40ec46d87d293d55bdf91674d45d72ccf6"
+        }
+      ]
+    },
+    "retained_Editor_morph_fields": {
+      "actor": "lantern_stag",
+      "source_sha256": "74033f3d4ce80c6ce66bcc4d62f57c76b8cec07475a675896d372f9692ed29b3",
+      "candidate_sha256": "b1e365a6e3c6651590aa8e47e2045b40ec46d87d293d55bdf91674d45d72ccf6",
+      "all_retained_editor_POSITION_NORMAL_TANGENT_typed_bits_exact": true,
+      "retained_targets": 0,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/lantern_stag.glb-08531f26307f04ae7c3700b9657c9849.md5",
+          "import_metadata_sha256": "17e9ed7c6eaad79b40cf2a5a62bd70d90bf58b7e6367bc13e618784a0a5b7413",
+          "imported_resource_path": "res://.godot/imported/lantern_stag.glb-08531f26307f04ae7c3700b9657c9849.scn",
+          "imported_resource_sha256": "c186878ea017f39fda47baae287a1f49e56346b93cc42072346deb2440e080ce",
+          "packed_scene_resource_path": "res://assets/qa/lantern_stag/v2/baseline/lantern_stag.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "14c8b9df8f53023495144b4c5842b11e",
+          "source_path": "res://assets/qa/lantern_stag/v2/baseline/lantern_stag.glb",
+          "source_sha256": "74033f3d4ce80c6ce66bcc4d62f57c76b8cec07475a675896d372f9692ed29b3"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/lantern_stag.glb-ac19a3bb11d0c521e7c9b154bb0bd4c7.md5",
+          "import_metadata_sha256": "1200da91131546a6e7ced9fc343bdd142e0fec3ece829e4193284fe9b98ae896",
+          "imported_resource_path": "res://.godot/imported/lantern_stag.glb-ac19a3bb11d0c521e7c9b154bb0bd4c7.scn",
+          "imported_resource_sha256": "ca868cd43ca8221284609ba87e60c4167c1235082b3729c12d9a429d64ee5704",
+          "packed_scene_resource_path": "res://assets/qa/lantern_stag/v2/candidate/lantern_stag.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "099c022d1446dc4ff98967650e3e7a53",
+          "source_path": "res://assets/qa/lantern_stag/v2/candidate/lantern_stag.glb",
+          "source_sha256": "b1e365a6e3c6651590aa8e47e2045b40ec46d87d293d55bdf91674d45d72ccf6"
+        }
+      ],
+      "scope": "Direct actual Editor source/candidate retained morph P/N/T byte digests after independently proved complete static-attribute vertex bijection. Exact target mask from source packing lineage; no morph field omitted.",
+      "passed": true
+    },
+    "withdrawn_prior_loader_claim": "Prior shared dumper captures labelled imported used GlbSceneCache for these outside-actor aliases and therefore were raw-cache comparisons. They remain retained private raw/native evidence, but their independent Editor claim is withdrawn and superseded by these explicitly loaded SCNs.",
+    "unchanged_other_evidence": "Original independent physical observations, exact source curves, Blender, actual native gameplay body rendering, placement, mounted/cinematic dependencies and secondary effects remain hash-bound and unchanged. No artistic approval, model, action, cap or witness change in this QA revision.",
+    "production_scope": "Production actor_shipping loose folders remain raw/native and are not Editor-imported. Per-surface Editor-generated LODs are verification representation metadata, not a claim of new gameplay LODs.",
+    "evidence_sha256": {
+      ".local/heavy-batch/lantern_stag/v2/editor-real-v1/qualification-job.json": "4eb4a4c069ab9c6e5c96675fa7f006342434e6afc2f64af00e1ed92ceec92f6a",
+      ".local/heavy-batch/lantern_stag/v2/editor-real-v1/imported/runtime.json": "2893bd2e631961abf5b0d88fc17915922847fd691ce9a91c5d7a3bed2dffaec2",
+      ".local/heavy-batch/lantern_stag/v2/editor-real-v1/imported-validation.json": "b6dfd14601ffe13781a8b73d458cec32058a4ac7645f3e26e7ee02ac64838476",
+      ".local/heavy-batch/lantern_stag/v2/editor-real-v1/imported-static-mesh-bits.json": "0ae0a1e54f2f3853f84ad1936fb8edc62c3981e6a6167d9731e5a83c43eb0a09",
+      ".local/heavy-batch/lantern_stag/v2/editor-real-v1/imported-typed-validation.json": "2eb4d15af2b3abfd2aa15d618f03a904462e0347cdda14d953c68693cd9b6ce8",
+      ".local/heavy-batch/lantern_stag/v2/editor-real-v1/morph-digest-job.json": "f029f5c79efccae9fe2da55a6e3eba9f5aeb43b821b1314eb909c6d691c01411",
+      ".local/heavy-batch/lantern_stag/v2/editor-real-v1/imported-morph-digests.json": "bff4a78a8b545932e5fc55351c0a6839a3025e45b5ecb737557626750cdcfaa0",
+      ".local/heavy-batch/lantern_stag/v2/editor-real-v1/imported-morph-validation.json": "9dba9f7f2409d4ca65b1f9dccce5f4777755286eb57833a28829caaa7f263ba6"
+    }
+  }
+}

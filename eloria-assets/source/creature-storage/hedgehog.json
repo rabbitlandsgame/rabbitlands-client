@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "actor": "hedgehog",
+  "source_sha256": "cf0f924389c09ed34ee037b06ca12781f37a1ced720553be79681210f4dcab5c",
+  "candidate_sha256": "3955c6cca3a09383be1689f02d94bc1b634f7e4b1914eaef7a3de539f3de51a9",
+  "pipeline": [
+    "prune_zero_targets",
+    "reduce_constant_runs",
+    "compact"
+  ],
+  "partition": null,
+  "unchanged": false,
+  "removed_zero_target_indices": [],
+  "redundant_flat_key_rows_removed": 180100,
+  "geometry_skin_rest_binds_materials_images_unchanged": true,
+  "preserve_trs_keys": false,
+  "native_clips": [
+    "Fighting_Idle",
+    "Hit_Chest",
+    "Idle_A",
+    "Walk",
+    "Jog",
+    "Sword_Attack",
+    "Death_A"
+  ],
+  "usage": "Deterministic exact preparation needs no partition --profile; frozen source/candidate hashes bind this record."
+}

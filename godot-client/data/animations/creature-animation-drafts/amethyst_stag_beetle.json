@@ -73,12 +73,43 @@
     "walk": 0.10956576324155358,
     "run": 0.25833462034136145
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "An armored amethyst stag beetle carries its tall head horn steadily over six deliberate pointed-foot steps in alternating tripods. Scurry increases cadence and full common advance without wobbling the iridescent shell.",
     "attack": "The six feet brace as the beetle draws its horn and asymmetric mandibles back, then drives its head forward and down into a broad horn-led shove and closing bite. The complete hooked jaws open and close independently of the facial caps.",
     "death": "The thorax and abdomen settle forward onto the ground. The six legs unfold outward, the head and rigid tall horn tip forward, and both whole mandibles and the small ventral appendage settle into a held supported ending."
   },
   "motionStyle": "grounded six-leg stag beetle tripod",
-  "locomotionMode": "grounded"
+  "locomotionMode": "grounded",
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "amethyst_stag_beetle",
+    "sourceSHA256": "96c1b31f29dad4e83a46db1922452c6271eb62c05e99dcaaf34b06e03274d7ae",
+    "previousRuntimeSHA256": "fb8b476dea2c149b1ce4bd873a317a3ef405a875a0dccc3b59a6704c1d62ea17",
+    "runtimeSHA256": "5effd45e63a7b5e3feab80caf3277fa8d2428035d3887b689e77b4f427bb7de8",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "amethyst_stag_beetle",
+      "sourceSHA256": "96c1b31f29dad4e83a46db1922452c6271eb62c05e99dcaaf34b06e03274d7ae",
+      "runtimeSHA256": "fb8b476dea2c149b1ce4bd873a317a3ef405a875a0dccc3b59a6704c1d62ea17",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 120,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "amethyst_stag_beetle",
+    "appliesToSHA256": "5effd45e63a7b5e3feab80caf3277fa8d2428035d3887b689e77b4f427bb7de8",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
+  }
 }

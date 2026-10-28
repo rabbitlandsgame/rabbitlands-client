@@ -1,0 +1,3382 @@
+{
+  "schema_version": 2,
+  "batch": 31,
+  "actor": "frost_stone_golem",
+  "runtime_path": "godot-client/assets/actors/native/creatures/frost_stone_golem.glb",
+  "source_sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9",
+  "runtime_sha256": "a4af22643ac3a46c79cd237322589f320feed3cad9e7400ad6f9c609fe339430",
+  "qualification": "Qualified partial corrective storage elimination under unchanged strict source, fresh Blender, native, genuine Editor, full-cycle/four-view gameplay and original/current-helper secondary-effect gates.",
+  "human_approval_changed": false,
+  "recipe": {
+    "tool": "eloria-assets/tools/pack_creature_storage.py",
+    "profile": "eloria-assets/source/creature-storage/frost_stone_golem.json",
+    "bounds": "eloria-assets/source/creature-storage/frost_stone_golem-bounds.json",
+    "byte_exact_reproduction": true,
+    "preserve_trs_keys": false,
+    "steps": [
+      "prune_zero_targets",
+      "reduce_constant_runs",
+      "split_corrective_partition",
+      "compact"
+    ]
+  },
+  "bytes": {
+    "source_bytes": 5075744,
+    "candidate_bytes": 3903964,
+    "source_zstd_bytes": 3390603,
+    "candidate_zstd_bytes": 2803639,
+    "source_rlcz_bytes": 3390659,
+    "candidate_rlcz_bytes": 2803695,
+    "rlcz_header_bytes": 56
+  },
+  "storage_comparison": {
+    "original": {
+      "sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9",
+      "raw_bytes": 5075744,
+      "shipping_RLCZ_bytes": 3390659
+    },
+    "superseded_main": {
+      "sha256": "6240f7c590d3ae673dedebeb6a88ef740d8ef371716b3d7c1266871ee2472afe",
+      "raw_bytes": 4865020,
+      "shipping_RLCZ_bytes": 3395386
+    },
+    "candidate": {
+      "sha256": "a4af22643ac3a46c79cd237322589f320feed3cad9e7400ad6f9c609fe339430",
+      "raw_bytes": 3903964,
+      "shipping_RLCZ_bytes": 2803695
+    }
+  },
+  "corrective_graphics_buffer_bytes": {
+    "source": 2740320,
+    "candidate": 1093620,
+    "saved": 1646700,
+    "scope": "Actual raw native Godot blend_shape_data, shared per loaded model."
+  },
+  "draw_surfaces": {
+    "source": 1,
+    "candidate": 2
+  },
+  "source_validation": {
+    "passed": true,
+    "source_sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9",
+    "candidate_sha256": "a4af22643ac3a46c79cd237322589f320feed3cad9e7400ad6f9c609fe339430",
+    "probe_vertices": 4152,
+    "clips": {
+      "Death_A": {
+        "source_knots": 2706,
+        "keys_midpoints_and_offgrid_samples": 5416,
+        "maximum_position_error": 0.0,
+        "maximum_normal_vector_error": 0.0
+      },
+      "Fighting_Idle": {
+        "source_knots": 642,
+        "keys_midpoints_and_offgrid_samples": 1288,
+        "maximum_position_error": 0.0,
+        "maximum_normal_vector_error": 0.0
+      },
+      "Hit_Chest": {
+        "source_knots": 220,
+        "keys_midpoints_and_offgrid_samples": 444,
+        "maximum_position_error": 0.0,
+        "maximum_normal_vector_error": 0.0
+      },
+      "Idle_A": {
+        "source_knots": 876,
+        "keys_midpoints_and_offgrid_samples": 1756,
+        "maximum_position_error": 0.0,
+        "maximum_normal_vector_error": 0.0
+      },
+      "Jog": {
+        "source_knots": 787,
+        "keys_midpoints_and_offgrid_samples": 1578,
+        "maximum_position_error": 5.578801654593729e-16,
+        "maximum_normal_vector_error": 0.0
+      },
+      "Sword_Attack": {
+        "source_knots": 989,
+        "keys_midpoints_and_offgrid_samples": 1982,
+        "maximum_position_error": 0.0,
+        "maximum_normal_vector_error": 0.0
+      },
+      "Walk": {
+        "source_knots": 1205,
+        "keys_midpoints_and_offgrid_samples": 2414,
+        "maximum_position_error": 6.843874359417885e-16,
+        "maximum_normal_vector_error": 0.0
+      },
+      "Attack_Ground_Pound": {
+        "source_knots": 1769,
+        "keys_midpoints_and_offgrid_samples": 3542,
+        "maximum_position_error": 0.0,
+        "maximum_normal_vector_error": 0.0
+      }
+    },
+    "scope": "Independent ALL-4152-VERTEX source/candidate sampler evaluation at every original key and midpoint plus off-grid times, including skinning and morph normals; exact interval proof retained separately.",
+    "default_pose": {
+      "maximum_position_error": 0.0,
+      "maximum_normal_vector_error": 0.0
+    },
+    "complete": true,
+    "completed_in_two_runs": true,
+    "original_controller_timeout_after_completed_seven_clips_seconds": 600,
+    "ground_pound_completion_elapsed_seconds": 121.01554220006801
+  },
+  "source_continuous_bound": {
+    "source_sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9",
+    "candidate_sha256": "a4af22643ac3a46c79cd237322589f320feed3cad9e7400ad6f9c609fe339430",
+    "selected_vertices": 2495,
+    "raw_selected_position_deltas_are_literal_zero": false,
+    "maximum_raw_selected_position_delta": 5.827843433971723e-16,
+    "source_world_position_difference_upper_bound_all_clip_times_and_convex_crossfades": 4.381140450657284e-15,
+    "maximum_skin_linear_operator_bound": 1.0000009069325189,
+    "source_morph_weight_absolute_bounds": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "method": "Triangle inequality per vertex: sum(abs(weight_j)*norm(raw omitted position delta_j)) times the unchanged skinned linear operator bound. LINEAR/STEP weights/scales stay inside key/default extrema. Each ancestor unit rotation has norm one; local scale/matrix operator bounds multiply through the full hierarchy. Skin coefficients/binds/joints and base float32 attributes remain unchanged. No sampled-time extrapolation or approximate curve fitting.",
+    "normal_tangent_source_changes": "None; all selected raw NORMAL/TANGENT deltas are positive zero and original skin/base direction attributes are unchanged.",
+    "original_native_target_row_proof": {
+      "full_native_deformation_payload_proof": {
+        "source_sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9",
+        "candidate_sha256": "a4af22643ac3a46c79cd237322589f320feed3cad9e7400ad6f9c609fe339430",
+        "load_proofs": [
+          {
+            "actual_loader": "GlbSceneCache._build_raw via GLTFDocument",
+            "source_path": "C:\\rabbitlands\\worktrees\\client-creature-batch-heavy-20261027\\.local\\batch-031\\frost_stone_golem\\baseline.glb",
+            "source_sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9"
+          },
+          {
+            "actual_loader": "GlbSceneCache._build_raw via GLTFDocument",
+            "source_path": "C:\\rabbitlands\\worktrees\\client-creature-batch-heavy-20261027\\.local\\batch-031\\frost_stone_golem\\rigid-v2\\candidate.glb",
+            "source_sha256": "a4af22643ac3a46c79cd237322589f320feed3cad9e7400ad6f9c609fe339430"
+          }
+        ],
+        "all_typed_base_attributes_including_tangent_uv_color_custom_skin_bit_exact": true,
+        "all_33_morph_POSITION_NORMAL_TANGENT_columns_bit_exact": true,
+        "selected_zero_targets_expand_to_base_POSITION_NORMAL_TANGENT": true,
+        "complete_oriented_triangle_payload_multiset_exact": true,
+        "vertices": 4152,
+        "triangles": 4310,
+        "source_surfaces": 1,
+        "candidate_surfaces": 2,
+        "scope": "Direct actual raw native GLTFDocument source/candidate full typed row and oriented triangle payload proof; every base attribute and all33 corrective P/N/T columns included. Candidate corrective-free surface expanded with its base P/N/T, requiring exact source equality; no original ordinal or arbitrary seam correspondence assumed. Materials independently exact in native and genuine Editor typed captures.",
+        "passed": true
+      },
+      "packed_skin_and_order_proof": "C:\\rabbitlands\\worktrees\\client-creature-batch-heavy-20261027\\.local\\batch-031\\frost_stone_golem\\rigid-v2\\parallel-cpu\\native-payload-order-and-skin-proof.json"
+    },
+    "scope": "Raw source has microscopic nonzero POSITION residue, distinct from the original Godot native selected POSITION/NORMAL/TANGENT target rows that are bit-identical to base. Final numeric, fresh import, graphics and effects gates remain required."
+  },
+  "raw_selected_attribute_bits": {
+    "POSITION": {
+      "bit_exact": true,
+      "different_components": 0,
+      "maximum_component_difference": 0.0
+    },
+    "NORMAL": {
+      "bit_exact": true,
+      "different_components": 0,
+      "maximum_component_difference": 0.0
+    },
+    "TEXCOORD_0": {
+      "bit_exact": true,
+      "different_components": 0,
+      "maximum_component_difference": 0.0
+    },
+    "JOINTS_0": {
+      "bit_exact": true,
+      "different_components": 0,
+      "maximum_component_difference": 0.0
+    },
+    "WEIGHTS_0": {
+      "bit_exact": true,
+      "different_components": 0,
+      "maximum_component_difference": 0.0
+    },
+    "JOINTS_1": {
+      "bit_exact": true,
+      "different_components": 0,
+      "maximum_component_difference": 0.0
+    },
+    "WEIGHTS_1": {
+      "bit_exact": true,
+      "different_components": 0,
+      "maximum_component_difference": 0.0
+    }
+  },
+  "physical_observations": {
+    "passed": true,
+    "source_sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9",
+    "candidate_sha256": "a4af22643ac3a46c79cd237322589f320feed3cad9e7400ad6f9c609fe339430",
+    "surface_probes": 180,
+    "poses": 48,
+    "source_candidate_position_error": 4.652682298944613e-16,
+    "source_candidate_normal_vector_error": 0.0,
+    "original_surface_error_over_height_source": 5.026496293931731e-07,
+    "original_surface_error_over_height_candidate": 5.026496293931731e-07,
+    "original_bone_matrix_error_source": 0.0,
+    "original_bone_matrix_error_candidate": 0.0,
+    "scope": "Existing independently captured physical observations left unchanged. Native source/candidate evaluated separately; any original interpreter/reference residual is retained and must remain unchanged. Normals source/candidate reconstructed independently, including legacy witnesses without recorded normals."
+  },
+  "paired_fresh_blender": {
+    "maximum_position_error": 0.0,
+    "maximum_bone_matrix_error": 0.0,
+    "maximum_float32_budget": 1.9073486328125e-06,
+    "poses": 49,
+    "neutral_default_checked": true,
+    "retained_bone_matrices_per_pose": 24,
+    "passed": true,
+    "source_sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9",
+    "candidate_sha256": "a4af22643ac3a46c79cd237322589f320feed3cad9e7400ad6f9c609fe339430",
+    "scope": "Direct source/candidate frozen-ID surfaces and every bone matrix at each original witness pose plus controlled neutral/default pose. Sixteen float32 ULPs at baseline coordinate/matrix magnitude; independent of inherited source/witness residual and separate from native/source appearance budgets."
+  },
+  "native_and_editor_imported": {
+    "native": {
+      "source_sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9",
+      "candidate_sha256": "a4af22643ac3a46c79cd237322589f320feed3cad9e7400ad6f9c609fe339430",
+      "samples": 296,
+      "maximum_position_error": 3.3144875262601044e-07,
+      "maximum_normal_angle_degrees": 2.2148803860924733e-05
+    },
+    "imported": {
+      "source_sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9",
+      "candidate_sha256": "a4af22643ac3a46c79cd237322589f320feed3cad9e7400ad6f9c609fe339430",
+      "samples": 296,
+      "maximum_position_error": 3.3144875262601044e-07,
+      "maximum_normal_angle_degrees": 2.2148803860924733e-05
+    }
+  },
+  "strict_numeric_budgets": {
+    "position_four_float32_ULPs_at_original_coordinate_or_axis_extent": 4.76837158203125e-07,
+    "normal_degrees": 0.0001,
+    "secondary_effects_position_and_uniform": 1e-06
+  },
+  "genuine_editor_provenance": {
+    "actual_loader": "ResourceLoader.load(PackedScene)",
+    "load_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/frost_stone_golem.glb-7397e4408fc9546583eed014e88a9f24.md5",
+        "import_metadata_sha256": "417394a00d88dc5b225aa12f628f5c145b77d3a3f23836c873e52c6ea17c97b5",
+        "imported_resource_path": "res://.godot/imported/frost_stone_golem.glb-7397e4408fc9546583eed014e88a9f24.scn",
+        "imported_resource_sha256": "6f7ab2a4ccdbb82da547f0b7db9764dfda5d34f92392593e836ca835af4980f1",
+        "packed_scene_resource_path": "res://assets/qa/frost_stone_golem/baseline/frost_stone_golem.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "24fd8129c46b575ee0b29040babdcb24",
+        "source_path": "res://assets/qa/frost_stone_golem/baseline/frost_stone_golem.glb",
+        "source_sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9"
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/frost_stone_golem.glb-d84f22714942a602a89ac2fb24dfd0cb.md5",
+        "import_metadata_sha256": "1cdc7d6f0e1316539c7b1e593cdef931d9c4cae700ef00ff70cc53934d56d5b1",
+        "imported_resource_path": "res://.godot/imported/frost_stone_golem.glb-d84f22714942a602a89ac2fb24dfd0cb.scn",
+        "imported_resource_sha256": "bffe2920249ce99c33299354b2a21cca490a8f6f90dd2db4efc1be27b371dd30",
+        "packed_scene_resource_path": "res://assets/qa/frost_stone_golem/candidate/frost_stone_golem.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "60985d78d3b4f113a3447f5e69c27b7b",
+        "source_path": "res://assets/qa/frost_stone_golem/candidate/frost_stone_golem.glb",
+        "source_sha256": "a4af22643ac3a46c79cd237322589f320feed3cad9e7400ad6f9c609fe339430"
+      }
+    ],
+    "same_SCNs_for_numeric_full_static_all33PNT_oriented_triangles_and_materials": true,
+    "direct_complete_payload": {
+      "source_sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9",
+      "candidate_sha256": "a4af22643ac3a46c79cd237322589f320feed3cad9e7400ad6f9c609fe339430",
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/frost_stone_golem.glb-7397e4408fc9546583eed014e88a9f24.md5",
+          "import_metadata_sha256": "417394a00d88dc5b225aa12f628f5c145b77d3a3f23836c873e52c6ea17c97b5",
+          "imported_resource_path": "res://.godot/imported/frost_stone_golem.glb-7397e4408fc9546583eed014e88a9f24.scn",
+          "imported_resource_sha256": "6f7ab2a4ccdbb82da547f0b7db9764dfda5d34f92392593e836ca835af4980f1",
+          "packed_scene_resource_path": "res://assets/qa/frost_stone_golem/baseline/frost_stone_golem.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "24fd8129c46b575ee0b29040babdcb24",
+          "source_path": "res://assets/qa/frost_stone_golem/baseline/frost_stone_golem.glb",
+          "source_sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/frost_stone_golem.glb-d84f22714942a602a89ac2fb24dfd0cb.md5",
+          "import_metadata_sha256": "1cdc7d6f0e1316539c7b1e593cdef931d9c4cae700ef00ff70cc53934d56d5b1",
+          "imported_resource_path": "res://.godot/imported/frost_stone_golem.glb-d84f22714942a602a89ac2fb24dfd0cb.scn",
+          "imported_resource_sha256": "bffe2920249ce99c33299354b2a21cca490a8f6f90dd2db4efc1be27b371dd30",
+          "packed_scene_resource_path": "res://assets/qa/frost_stone_golem/candidate/frost_stone_golem.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "60985d78d3b4f113a3447f5e69c27b7b",
+          "source_path": "res://assets/qa/frost_stone_golem/candidate/frost_stone_golem.glb",
+          "source_sha256": "a4af22643ac3a46c79cd237322589f320feed3cad9e7400ad6f9c609fe339430"
+        }
+      ],
+      "all_typed_base_attributes_including_tangent_uv_color_custom_skin_bit_exact": true,
+      "all_33_morph_POSITION_NORMAL_TANGENT_columns_bit_exact": true,
+      "selected_zero_targets_expand_to_base_POSITION_NORMAL_TANGENT": true,
+      "complete_oriented_triangle_payload_multiset_exact": true,
+      "vertices": 4152,
+      "triangles": 4310,
+      "source_surfaces": 1,
+      "candidate_surfaces": 2,
+      "scope": "Direct actual ResourceLoader Editor source/candidate full typed row and oriented triangle payload proof; every base attribute and all33 corrective P/N/T columns included. Candidate corrective-free surface expanded with its base P/N/T, requiring exact source equality; no original ordinal or arbitrary seam correspondence assumed. Materials independently exact in fixed-loader typed capture.",
+      "passed": true
+    },
+    "materials": {
+      "passed": true,
+      "all_material_STORAGE_typed_fields_and_texture_pixels_mips_exact": true,
+      "same_SCN_numeric_static_PNT_and_material_proofs": true,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/frost_stone_golem.glb-7397e4408fc9546583eed014e88a9f24.md5",
+          "import_metadata_sha256": "417394a00d88dc5b225aa12f628f5c145b77d3a3f23836c873e52c6ea17c97b5",
+          "imported_resource_path": "res://.godot/imported/frost_stone_golem.glb-7397e4408fc9546583eed014e88a9f24.scn",
+          "imported_resource_sha256": "6f7ab2a4ccdbb82da547f0b7db9764dfda5d34f92392593e836ca835af4980f1",
+          "packed_scene_resource_path": "res://assets/qa/frost_stone_golem/baseline/frost_stone_golem.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "24fd8129c46b575ee0b29040babdcb24",
+          "source_path": "res://assets/qa/frost_stone_golem/baseline/frost_stone_golem.glb",
+          "source_sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/frost_stone_golem.glb-d84f22714942a602a89ac2fb24dfd0cb.md5",
+          "import_metadata_sha256": "1cdc7d6f0e1316539c7b1e593cdef931d9c4cae700ef00ff70cc53934d56d5b1",
+          "imported_resource_path": "res://.godot/imported/frost_stone_golem.glb-d84f22714942a602a89ac2fb24dfd0cb.scn",
+          "imported_resource_sha256": "bffe2920249ce99c33299354b2a21cca490a8f6f90dd2db4efc1be27b371dd30",
+          "packed_scene_resource_path": "res://assets/qa/frost_stone_golem/candidate/frost_stone_golem.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "60985d78d3b4f113a3447f5e69c27b7b",
+          "source_path": "res://assets/qa/frost_stone_golem/candidate/frost_stone_golem.glb",
+          "source_sha256": "a4af22643ac3a46c79cd237322589f320feed3cad9e7400ad6f9c609fe339430"
+        }
+      ]
+    }
+  },
+  "placement": {
+    "bounds_error": 0.0,
+    "overhead_height_error": 0.0,
+    "passed": true,
+    "placement_error": 0.0,
+    "records": [
+      {
+        "banner_height": 4.00000143051147,
+        "effective_scale": 2.35294198989868,
+        "name": "baseline",
+        "native_bounds_position": [
+          -0.850000023841858,
+          4.06150402199046e-09,
+          -0.441602200269699
+        ],
+        "native_bounds_size": [
+          1.70000004768372,
+          1.69999992847443,
+          0.886524498462677
+        ],
+        "raw_meshes": [
+          {
+            "buffer_bytes": [
+              {
+                "attribute_data": 33216,
+                "blend_shape_data": 2740320,
+                "index_data": 25860,
+                "skin_data": 132864,
+                "vertex_data": 83040
+              }
+            ],
+            "local_mesh_bounds_position": [
+              -0.850000083446503,
+              4.06150446607967e-09,
+              -0.441602230072021
+            ],
+            "local_mesh_bounds_size": [
+              1.70000016689301,
+              1.70000004768372,
+              0.886524558067322
+            ],
+            "name": "mesh_node",
+            "surface_lod_counts": [
+              0
+            ]
+          }
+        ],
+        "visual_root_position": [
+          0.0,
+          -4.06150402199046e-09,
+          0.0
+        ]
+      },
+      {
+        "banner_height": 4.00000143051147,
+        "effective_scale": 2.35294198989868,
+        "name": "candidate",
+        "native_bounds_position": [
+          -0.850000023841858,
+          4.06150402199046e-09,
+          -0.441602200269699
+        ],
+        "native_bounds_size": [
+          1.70000004768372,
+          1.69999992847443,
+          0.886524498462677
+        ],
+        "raw_meshes": [
+          {
+            "buffer_bytes": [
+              {
+                "attribute_data": 13256,
+                "blend_shape_data": 1093620,
+                "index_data": 10086,
+                "skin_data": 53024,
+                "vertex_data": 33140
+              }
+            ],
+            "local_mesh_bounds_position": [
+              -0.850000083446503,
+              4.06150446607967e-09,
+              -0.38017612695694
+            ],
+            "local_mesh_bounds_size": [
+              1.70000016689301,
+              1.0757805109024,
+              0.82509845495224
+            ],
+            "name": "mesh_node",
+            "surface_lod_counts": [
+              0
+            ]
+          },
+          {
+            "buffer_bytes": [
+              {
+                "attribute_data": 19960,
+                "index_data": 15774,
+                "skin_data": 79840,
+                "vertex_data": 49900
+              }
+            ],
+            "local_mesh_bounds_position": [
+              -0.7105473279953,
+              0.33535224199295,
+              -0.441602230072021
+            ],
+            "local_mesh_bounds_size": [
+              1.47753977775574,
+              1.36464786529541,
+              0.753712058067322
+            ],
+            "name": "RL_CorrectiveFree_24_0",
+            "surface_lod_counts": [
+              0
+            ]
+          }
+        ],
+        "visual_root_position": [
+          0.0,
+          -4.06150402199046e-09,
+          0.0
+        ]
+      }
+    ]
+  },
+  "render_fit": {
+    "source_sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9",
+    "model_global": [
+      [
+        0.5,
+        -4.06150402199046e-09,
+        -0.5
+      ],
+      [
+        -2.35294198989868,
+        0.0,
+        2.05700715127932e-07
+      ],
+      [
+        0.0,
+        2.35294198989868,
+        0.0
+      ],
+      [
+        -2.05700715127932e-07,
+        0.0,
+        -2.35294198989868
+      ]
+    ],
+    "position": [
+      -2.6240403105482994,
+      -0.0021930214975939464,
+      -3.5061598207671083
+    ],
+    "size": [
+      6.137051167102163,
+      4.66667429339434,
+      4.586379476779353
+    ],
+    "poses": 492,
+    "scope": "Every vertex at every full-cycle render frame and view-still pose, using actual complete Actor Godot arrays/poses/weights/transforms, renderer morph cutoff and four/eight influence skin. Evaluated in float64 with a separate 30% camera margin."
+  },
+  "appearance": {
+    "source_sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9",
+    "candidate_sha256": "a4af22643ac3a46c79cd237322589f320feed3cad9e7400ad6f9c609fe339430",
+    "image_pairs": 604,
+    "width": 512,
+    "height": 512,
+    "different_image_pairs": 604,
+    "maximum_different_pixels": 255,
+    "maximum_pixels_above_two_levels": 4,
+    "maximum_mean_channel_error": 0.0017191569010416667,
+    "maximum_channel_error": 234,
+    "scope": "Complete ReplicatedActor3D setup with actual display scale, grounding and body materials; identical cameras for source/candidate, four views and every full native cycle at24Hz. Numeric playback and pixel comparisons are separate reports.",
+    "framing_passed": true,
+    "clipped_frame_labels": [],
+    "maximum_border_foreground_pixels": 0
+  },
+  "secondary_effects": {
+    "passed": true,
+    "source_sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9",
+    "candidate_sha256": "a4af22643ac3a46c79cd237322589f320feed3cad9e7400ad6f9c609fe339430",
+    "immutable_old_helper_sha256": "06a439005ec2d3929f1e8e4853bb3f8274b28944066935caa8572f10db815119",
+    "current_helper_sha256": "52e180bd81c7070a0c5a1a9365fe8db339e9502ab23e1b07d490eda9c13a7242",
+    "source_fit_sha256": "4eee4bb9ef4d73092321f255dd1c2fc94daaaea71a45f764dcd87a1ad0cdc925",
+    "source_old_vs_current_source_materials_and_full_ash_byte_exact": true,
+    "current_candidate_maximum_ash_transform_vector_error": 7.539457556049456e-07,
+    "maximum_material_uniform_vector_or_scalar_error": 4.768371599794818e-07,
+    "maximum_different_pixels": 54,
+    "maximum_pixels_above_two_levels": 2,
+    "maximum_mean_channel_error": 0.00042399088541666665,
+    "all_RGBA_alpha_channels_equal": true,
+    "all_225_captured_images_zero_border_foreground": true,
+    "old_and_new_cameras": {
+      "old": [
+        {
+          "name": "baseline",
+          "size": 16.1989841461182,
+          "target": [
+            0.444485187530518,
+            2.33114409446716,
+            -1.21297001838684
+          ]
+        }
+      ],
+      "new": [
+        {
+          "name": "baseline",
+          "size": 16.1989841461182,
+          "target": [
+            0.444485187530518,
+            2.33114409446716,
+            -1.21297001838684
+          ]
+        },
+        {
+          "name": "candidate",
+          "size": 16.1989841461182,
+          "target": [
+            0.444485187530518,
+            2.33114409446716,
+            -1.21297001838684
+          ]
+        }
+      ]
+    },
+    "cases": [
+      {
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 1,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 1,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 3
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 42,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 42,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 3
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 7654321,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 7654321,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 3
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 1,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 1,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 3
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 42,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 42,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 3
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 7654321,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 7654321,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 3
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 1,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 1,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 3
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 42,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 42,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 3
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 7654321,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 7654321,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 3
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 1,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 1,
+        "maximum_ash_transform_vector_error": 7.539457556049456e-07,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 3
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 42,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 42,
+        "maximum_ash_transform_vector_error": 5.623090828521526e-07,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 3
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 7654321,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 7654321,
+        "maximum_ash_transform_vector_error": 6.14390614828153e-07,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 3
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 1,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 1,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 3
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 42,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 42,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 3
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 7654321,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 7654321,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 3
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 3
+          }
+        ],
+        "reset_resources_exact": true
+      }
+    ],
+    "pixel_comparisons": [
+      {
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 1,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 1,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 1,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 1,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 1,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 1,
+        "progress": 0,
+        "different_pixels": 54,
+        "pixels_above_two_levels": 1,
+        "mean_channel_error": 0.0002726236979166667,
+        "maximum_channel_error": 109,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 1,
+        "progress": 17,
+        "different_pixels": 48,
+        "pixels_above_two_levels": 1,
+        "mean_channel_error": 0.00026611328125,
+        "maximum_channel_error": 109,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 1,
+        "progress": 42,
+        "different_pixels": 11,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 1.3020833333333334e-05,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 1,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 1,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 42,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 42,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 42,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 42,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 42,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 42,
+        "progress": 0,
+        "different_pixels": 53,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 4.8828125e-05,
+        "maximum_channel_error": 2,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 42,
+        "progress": 17,
+        "different_pixels": 44,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 3.987630208333333e-05,
+        "maximum_channel_error": 2,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 42,
+        "progress": 42,
+        "different_pixels": 11,
+        "pixels_above_two_levels": 1,
+        "mean_channel_error": 0.00013997395833333334,
+        "maximum_channel_error": 58,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 42,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 42,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 7654321,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 7654321,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 7654321,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 7654321,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 7654321,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 7654321,
+        "progress": 0,
+        "different_pixels": 54,
+        "pixels_above_two_levels": 1,
+        "mean_channel_error": 0.0002726236979166667,
+        "maximum_channel_error": 109,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 7654321,
+        "progress": 17,
+        "different_pixels": 54,
+        "pixels_above_two_levels": 2,
+        "mean_channel_error": 0.00042399088541666665,
+        "maximum_channel_error": 109,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 7654321,
+        "progress": 42,
+        "different_pixels": 9,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 9.765625e-06,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 7654321,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 7654321,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 1,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 1,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 1,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 1,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 1,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 1,
+        "progress": 0,
+        "different_pixels": 25,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 2.0345052083333332e-05,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 1,
+        "progress": 17,
+        "different_pixels": 21,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 1.708984375e-05,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 1,
+        "progress": 42,
+        "different_pixels": 3,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 2.44140625e-06,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 1,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 1,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 42,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 42,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 42,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 42,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 42,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 42,
+        "progress": 0,
+        "different_pixels": 25,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 2.0345052083333332e-05,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 42,
+        "progress": 17,
+        "different_pixels": 14,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 1.1393229166666667e-05,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 42,
+        "progress": 42,
+        "different_pixels": 6,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 4.8828125e-06,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 42,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 42,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 7654321,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 7654321,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 7654321,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 7654321,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 7654321,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 7654321,
+        "progress": 0,
+        "different_pixels": 25,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 2.0345052083333332e-05,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 7654321,
+        "progress": 17,
+        "different_pixels": 22,
+        "pixels_above_two_levels": 1,
+        "mean_channel_error": 3.255208333333333e-05,
+        "maximum_channel_error": 7,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 7654321,
+        "progress": 42,
+        "different_pixels": 5,
+        "pixels_above_two_levels": 1,
+        "mean_channel_error": 0.0001025390625,
+        "maximum_channel_error": 56,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 7654321,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 7654321,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 1,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 1,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 1,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 1,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 1,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 1,
+        "progress": 0,
+        "different_pixels": 21,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 1.7903645833333333e-05,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 1,
+        "progress": 17,
+        "different_pixels": 30,
+        "pixels_above_two_levels": 1,
+        "mean_channel_error": 0.0002001953125,
+        "maximum_channel_error": 82,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 1,
+        "progress": 42,
+        "different_pixels": 5,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 4.069010416666667e-06,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 1,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 1,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 42,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 42,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 42,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 42,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 42,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 42,
+        "progress": 0,
+        "different_pixels": 21,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 1.7903645833333333e-05,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 42,
+        "progress": 17,
+        "different_pixels": 28,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 2.2786458333333334e-05,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 42,
+        "progress": 42,
+        "different_pixels": 7,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 6.510416666666667e-06,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 42,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 42,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 7654321,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 7654321,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 7654321,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 7654321,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 7654321,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 7654321,
+        "progress": 0,
+        "different_pixels": 21,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 1.7903645833333333e-05,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 7654321,
+        "progress": 17,
+        "different_pixels": 28,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 2.2786458333333334e-05,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 7654321,
+        "progress": 42,
+        "different_pixels": 9,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 7.32421875e-06,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 7654321,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 7654321,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 1,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 1,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 1,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 1,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 1,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 1,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 1,
+        "progress": 17,
+        "different_pixels": 1,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 8.138020833333334e-07,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 1,
+        "progress": 42,
+        "different_pixels": 5,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 4.069010416666667e-06,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 1,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 1,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 42,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 42,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 42,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 42,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 42,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 42,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 42,
+        "progress": 17,
+        "different_pixels": 1,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 8.138020833333334e-07,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 42,
+        "progress": 42,
+        "different_pixels": 7,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 6.510416666666667e-06,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 42,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 42,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 7654321,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 7654321,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 7654321,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 7654321,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 7654321,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 7654321,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 7654321,
+        "progress": 17,
+        "different_pixels": 1,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 8.138020833333334e-07,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 7654321,
+        "progress": 42,
+        "different_pixels": 6,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 5.696614583333334e-06,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 7654321,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 7654321,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 1,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 1,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 1,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 1,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 1,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 1,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 1,
+        "progress": 17,
+        "different_pixels": 1,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 8.138020833333334e-07,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 1,
+        "progress": 42,
+        "different_pixels": 5,
+        "pixels_above_two_levels": 1,
+        "mean_channel_error": 1.6276041666666666e-05,
+        "maximum_channel_error": 6,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 1,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 1,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 42,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 42,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 42,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 42,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 42,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 42,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 42,
+        "progress": 17,
+        "different_pixels": 1,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 8.138020833333334e-07,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 42,
+        "progress": 42,
+        "different_pixels": 5,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 4.069010416666667e-06,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 42,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 42,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 7654321,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 7654321,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 7654321,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 7654321,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 7654321,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 7654321,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 7654321,
+        "progress": 17,
+        "different_pixels": 1,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 8.138020833333334e-07,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 7654321,
+        "progress": 42,
+        "different_pixels": 7,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 6.510416666666667e-06,
+        "maximum_channel_error": 1,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 7654321,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 7654321,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      }
+    ],
+    "scope": "Real Forward+640px source-fit full-body/fade images. Immutable old implementation/original compared to current/original and current/private candidate at five Death fractions, three seeds and five fade phases. Complete packed320-instance transforms/colors/custom, every body+ash material shader/uniform/texture-pixel value and exact resource restoration. Candidate keeps1e-6effect numeric and unchanged strict pixel caps. No asset/artistic change.",
+    "original_ID_mapped_all4152_silhouette_position_error": 7.74860382080078e-07,
+    "original_ID_mapping_proof_sha256": "f48589252984fc4f1ab8949bc2297ced20cfd5d98d4fd3a29dbc3955e1be1d93"
+  },
+  "replacement_control_only": {
+    "label": "Superseded installed main6240 to newa4af, separate from original-reference qualification",
+    "source_sha256": "6240f7c590d3ae673dedebeb6a88ef740d8ef371716b3d7c1266871ee2472afe",
+    "candidate_sha256": "a4af22643ac3a46c79cd237322589f320feed3cad9e7400ad6f9c609fe339430",
+    "maximum_position_error": 0.0,
+    "maximum_normal_angle_degrees": 1.9090959104164224e-06,
+    "worst_position": {
+      "label": "Attack_Ground_Pound@0.0",
+      "max_surface_error": 0.0,
+      "max_normal_degrees": 1.9090959104164224e-06,
+      "p99_normal_degrees": 1.4787793334710982e-06
+    },
+    "worst_normal": {
+      "label": "Attack_Ground_Pound@0.0",
+      "max_surface_error": 0.0,
+      "max_normal_degrees": 1.9090959104164224e-06,
+      "p99_normal_degrees": 1.4787793334710982e-06
+    },
+    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check."
+  },
+  "superseded_previous_main": {
+    "status": "Superseded; previous GLB/SCN/capture hashes are not current qualification subtrees",
+    "git_revision": "1f2f3ad6",
+    "runtime_sha256": "6240f7c590d3ae673dedebeb6a88ef740d8ef371716b3d7c1266871ee2472afe",
+    "prior_receipt_path": "docs/qa/creature-storage/batch-031/frost_stone_golem.json",
+    "archived_prior_receipt_sha256": "fdf654e8eb4498ef940d46c36a79bd1d0574601571a16afeb36c3224ea5f8153",
+    "private_exact_archive": ".local/batch-031/frost_stone_golem/rigid-v2/prior-main-receipt-1f2f3ad6.json"
+  },
+  "evidence_sha256": {
+    ".local/batch-031/frost_stone_golem/rigid-v2/canonical-reproduction.json": "35a0fc3019460d3a614c47b5825832f8cbd03c8962ee43c5578080aa1c714785",
+    ".local/batch-031/frost_stone_golem/rigid-v2/selected-static-raw-bits.json": "c89d38d262de9d699a5384ca484f04903d6440386e9337aab9c74758c839d7a4",
+    ".local/batch-031/frost_stone_golem/rigid-v2/partition-structure-validation.json": "4d49a5feb4d5baba5890e28143aea42e6b4a504d4b2bddf97e6ac9d9829fc1d1",
+    ".local/batch-031/frost_stone_golem/rigid-v2/complete-all-vertex-source-validation.json": "99cc57dd2549e3795e6e43d51c4f2b99c234e1858038ac32e80e1bf5aa0ee923",
+    ".local/batch-031/frost_stone_golem/rigid-v2/all-time-source-bound.json": "bd8c88ff6253c0748a6abcd46ca77f66aa65da566d5ee1dcc0b74b478fa46a1d",
+    ".local/batch-031/frost_stone_golem/rigid-v2/physical-witness-validation.json": "03dba56cc1a784c0a09aab2a6af751b466bedf809f7b61dbbe661bf547f7fbbd",
+    ".local/batch-031/frost_stone_golem/rigid-v2/placement.json": "b8caab1feb63b90cc2710b08e9152f1745ff54db1ebdc9ce0beb05af9e03e42c",
+    ".local/batch-031/frost_stone_golem/rigid-v2/original-reference-effects-validation.json": "2a4b4fe06a8373e4d2bfe3b1efea0cbfcb7808fe743d23ebe880f8d64ad5e3e0",
+    ".local/batch-031/frost_stone_golem/rigid-v2/parallel-cpu/blender-validation.json": "d025a037bc9f24db987bf9aa9e41ba01c4b4b015d1339e7251e6beea326700c8",
+    ".local/batch-031/frost_stone_golem/rigid-v2/parallel-cpu/blender-direct-validation.json": "bb7390bbb5448c74ac0eb0022bf1fa191b0b94d7079b692967d4525ff73bdd66",
+    ".local/batch-031/frost_stone_golem/rigid-v2/parallel-cpu/native-validation.json": "f6f4009e1653d6042ff16726aef64b15c8f77193e7d073a456e9803032ba1c1b",
+    ".local/batch-031/frost_stone_golem/rigid-v2/parallel-cpu/imported-validation.json": "f6f4009e1653d6042ff16726aef64b15c8f77193e7d073a456e9803032ba1c1b",
+    ".local/batch-031/frost_stone_golem/rigid-v2/parallel-cpu/imported/runtime.json": "c784b9e2f0ebe0c7f44dc5bd01e80a4bd8c0f53a59eb405f415cc3f47b873d61",
+    ".local/batch-031/frost_stone_golem/rigid-v2/parallel-cpu/material-validation.json": "27d1ca565c897f12537ae682e586f071d03d0637aa3d411db5015c125c46edee",
+    ".local/batch-031/frost_stone_golem/rigid-v2/parallel-cpu/native-payload-order-and-skin-proof.json": "f48589252984fc4f1ab8949bc2297ced20cfd5d98d4fd3a29dbc3955e1be1d93",
+    ".local/batch-031/frost_stone_golem/rigid-v2/parallel-cpu/allfields/direct-native-payload-validation.json": "d4ef1b9f660041c54cfbc9b259ab8e0c04e6deafac806d0a4a28ce1c834d35d8",
+    ".local/batch-031/frost_stone_golem/rigid-v2/parallel-cpu/allfields/direct-editor-payload-validation.json": "6653b8473b1ad1c56c67b2dd374669bfcab6e400d4f1f1c7cba6818e5cbbb2ab",
+    ".local/batch-031/frost_stone_golem/rigid-v2/parallel-cpu/render-fit.json": "4eee4bb9ef4d73092321f255dd1c2fc94daaaea71a45f764dcd87a1ad0cdc925",
+    ".local/batch-031/frost_stone_golem/rigid-v2/parallel-cpu/actual-render/render.json": "c6f2aaeb9ea55df7381f83b1210881a989e393c5aedef853adaa0ba8aee844c5",
+    ".local/batch-031/frost_stone_golem/rigid-v2/parallel-cpu/actual-render/pixel-comparison.json": "9a21058e2b94d44463a1ca9ef3b2f2066bc2d8d8079153d79cada7db93ba456c",
+    ".local/batch-031/frost_stone_golem/rigid-v2/effects-old/dissolve.json": "0c70b75ab5e33583167df9fffa232d0ef8576bb76c3918370355e7f477de2982",
+    ".local/batch-031/frost_stone_golem/rigid-v2/effects-new/dissolve.json": "0ef3c0fbfc300af9deb030d56d9c59129a7821a5f722c24e0a4eedf253bc52c9",
+    ".local/batch-031/frost_stone_golem/rigid-v2/profile.json": "d5d634bafcba2af3841565586c10efeb1e4563cfe7aa94b5380be304eb3f69eb",
+    ".local/batch-031/frost_stone_golem/rigid-v2/processing.json": "ac198844c51204de908459b305602196ab8d17b69902871ece6c21857bbbff40",
+    ".local/batch-031/frost_stone_golem/rigid-v2/build.json": "52d28999e3f0d8f11edc19e836948d36924b3d3acfe813c505419933b57fef97"
+  },
+  "visual_review": "All eight native clips checked through complete paired cycles and four views; normal-scale paired stills for every clip and original/current five-phase death-effect boards reviewed. Same framing/cameras, all foreground borders clear. Artistic approval status unchanged.",
+  "known_limitations": [
+    "Raw selected POSITION deltas include microscopic authored residue up to5.83e-16; source-space continuous bound4.381e-15 is explicit. Actual original native P/N/T target rows and complete native/Editor deformation payloads are bit-identical under the proved partition mapping.",
+    "One extra draw surface per instance/pass; no net FPS or playback CPU improvement is claimed.",
+    "Additional raw development bytes saved versus superseded main; small packaged changes measured explicitly.",
+    "Resident Animation RAM and key-search savings are not inferred from encoded key reductions; dense importer behavior remains unchanged."
+  ]
+}

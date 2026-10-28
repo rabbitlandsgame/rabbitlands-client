@@ -1,0 +1,1301 @@
+{
+  "schema_version": 1,
+  "actor": "arcane_crystal_automaton",
+  "date": "2026-10-27",
+  "runtime_path": "godot-client/assets/actors/native/creatures/arcane_crystal_automaton.glb",
+  "status": "Technical exact storage reduction qualified; existing artistic-review status unchanged",
+  "source_sha256": "326fbbc89633331ec3210e988bbe98c38c2b3000df4cf1b7233fc98ae55ecc32",
+  "candidate_sha256": "52b8b968dc5b204f652337f433977d1e0454a799f72d13444f476775f1d20af8",
+  "storage": {
+    "source_bytes": 1076436,
+    "candidate_bytes": 1059816,
+    "source_zstd_bytes": 810358,
+    "candidate_zstd_bytes": 811285
+  },
+  "raw_bytes_saved": 16620,
+  "compressed_bytes_saved": -927,
+  "compression_scope": "RLCZ level 3 release envelope including fixed 56-byte header; encoded/install sizes, not live-process memory.",
+  "correctives": {
+    "source_count": 0,
+    "candidate_count": 0,
+    "removed_target_indices": [],
+    "shared_gpu_source_bytes": 0,
+    "shared_gpu_candidate_bytes": 0,
+    "shared_gpu_saved_bytes": 0,
+    "scope": "Measured shared Godot blend_shape_data bytes, not per-actor totals."
+  },
+  "draw_surfaces": {
+    "source": 1,
+    "candidate": 1
+  },
+  "exact_source_proof": {
+    "passed": true,
+    "source_sha256": "326fbbc89633331ec3210e988bbe98c38c2b3000df4cf1b7233fc98ae55ecc32",
+    "candidate_sha256": "52b8b968dc5b204f652337f433977d1e0454a799f72d13444f476775f1d20af8",
+    "geometry_skin_binds_rest_topology_uv_material_image_bits_preserved": true,
+    "retained_key_time_and_value_bits_exact_only_flat_interiors_removed": true,
+    "every_removed_default_and_key_is_zero": true,
+    "redundant_flat_key_rows_proved": 1538,
+    "preexisting_duplicate_property_curves_preserved_in_occurrence_order": 0,
+    "clips": {
+      "Death_A": {
+        "original_knots": 31,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 66
+      },
+      "Fighting_Idle": {
+        "original_knots": 4,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 12
+      },
+      "Hit_Chest": {
+        "original_knots": 16,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 36
+      },
+      "Idle_A": {
+        "original_knots": 29,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 62
+      },
+      "Jog": {
+        "original_knots": 98,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 200
+      },
+      "Sword_Attack": {
+        "original_knots": 29,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 62
+      },
+      "Walk": {
+        "original_knots": 92,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 188
+      }
+    },
+    "proof": "Zero defaults and every LINEAR/STEP key zero prove inactive targets remain zero continuously and under crossfades. All retained accessor bytes and retained time/value rows are exact. Deleted key rows sit strictly inside three bit-identical adjacent rows; plateau boundaries and endpoints remain."
+  },
+  "rigidity_preflight": {
+    "actor": "arcane_crystal_automaton",
+    "survivor_triangles": 0,
+    "reason": "Source has no corrective shapes; existing skin retained."
+  },
+  "runtime_scope": "No procedural generation or new runtime algorithm. Smaller GLB accessor/key storage is proved; fixed Godot rebaking may restore the same retained Animation key count. These qualification checks do not establish retained Animation RAM, CPU lookup or FPS changes; separate loading benchmarks may measure startup time or peak-memory effects.",
+  "effects_scope": "Original topology, skin, binds, material/texture bytes and current clips retained; no runtime rig replacement.",
+  "evidence": "Immutable source/final, private versioned candidates, source/import/renderer receipts, full-resolution captures and lossless cycle previews retained in task-owned ignored .local/batch-045/arcane_crystal_automaton",
+  "source_clip_coverage": {
+    "source_clips": [
+      "Death_A",
+      "Fighting_Idle",
+      "Hit_Chest",
+      "Idle_A",
+      "Jog",
+      "Sword_Attack",
+      "Walk"
+    ],
+    "all_source_clips_full_cycle_rendered": true,
+    "private_qa_aliases_preserve_original_configuration_map": true
+  },
+  "visual_contact_sheet_review": "Source/candidate comparison sheets inspected: no visible appearance difference; numeric full-cycle and multi-view gates passed separately.",
+  "fixture_copy_hash_guard": {
+    "actor": "arcane_crystal_automaton",
+    "passed": true,
+    "source_and_candidate_copies": "All actor/native/imported fixtures SHA256 match canonical originals and final candidates.",
+    "source_clip_inventory_verified": true
+  },
+  "supplemental_source_observations": {
+    "passed": true,
+    "source_sha256": "326fbbc89633331ec3210e988bbe98c38c2b3000df4cf1b7233fc98ae55ecc32",
+    "candidate_sha256": "52b8b968dc5b204f652337f433977d1e0454a799f72d13444f476775f1d20af8",
+    "surface_probes": 166,
+    "poses": 133,
+    "clips": 7,
+    "source_candidate_position_error": 0.0,
+    "source_candidate_normal_vector_error": 0.0,
+    "original_witness_position_error_over_height": 0.0,
+    "original_source_witness_position_error_over_height": 0.0,
+    "original_witness_normal_vector_error": 0.0,
+    "original_witness_bone_matrix_error": 0.0,
+    "witness_sha256": "161d2a9d9b0ff15c445286d4e6f626fe020290b6f7fcda4a2c69c7095d4f9a8a",
+    "sampled_motion_min": [
+      -0.7423674510134773,
+      -0.0012200689312710632,
+      -0.7631195109088295
+    ],
+    "sampled_motion_max": [
+      0.6867330902715755,
+      1.7484590361298047,
+      1.2260634653772264
+    ]
+  },
+  "blender": {
+    "baseline": {
+      "sha256": "326fbbc89633331ec3210e988bbe98c38c2b3000df4cf1b7233fc98ae55ecc32",
+      "passed": true,
+      "surface_probes": 166,
+      "vertex_identity": [
+        {
+          "source_node": 19,
+          "object": "mesh_node",
+          "vertices": 4532,
+          "position_targets": 0,
+          "basis_world_error": 2.9215862780451e-07,
+          "basis_world_component_error": 2.909997154354471e-07,
+          "basis_strategy": "authored_joint_rest_skin",
+          "authored_rest_skin_component_error": 2.909997154354471e-07,
+          "uv_error": 0.0,
+          "skin_error": 0.0,
+          "skin_raw_group_error": 0.0,
+          "skin_lone_group_normalizations": [],
+          "normal_vector_error": 0.00015035571808627755,
+          "normal_scope": "Recorded only; Blender custom-normal packing is not the authority for source/Godot shading. Vertex motion identity is proved by basis,UV,skin and every POSITION shape.",
+          "all_target_position_error": 0.0,
+          "position_budget": 1.71661376953125e-05,
+          "rest_composition_steps": 9
+        }
+      ],
+      "bone_identity": {
+        "single_armature": "UniRigArmature",
+        "original_action_slots_present": {
+          "Death_A": {
+            "UniRigArmature": true
+          },
+          "Fighting_Idle": {
+            "UniRigArmature": true
+          },
+          "Hit_Chest": {
+            "UniRigArmature": true
+          },
+          "Idle_A": {
+            "UniRigArmature": true
+          },
+          "Jog": {
+            "UniRigArmature": true
+          },
+          "Sword_Attack": {
+            "UniRigArmature": true
+          },
+          "Walk": {
+            "UniRigArmature": true
+          }
+        },
+        "animated_armature_object_rest": [
+          {
+            "original_node": 20,
+            "original_name": "UniRigArmature",
+            "blender_object": "UniRigArmature",
+            "authored_local_matrix": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "blender_local_matrix": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "proof_scope": "Unique original animated non-joint node and imported armature object name; subsequent full rest/UV/skin/morph and posed identity checks remain required."
+          }
+        ],
+        "animated_object_original_skin_rest_proof": {
+          "original_skin_and_joint_node_bindings": [
+            {
+              "source_skin": 0,
+              "source_joint_node": 18,
+              "imported_armature": "UniRigArmature",
+              "bone": "root",
+              "parent": null,
+              "rest_head_error": 0.0,
+              "rest_head_maximum_component_error": 0.0,
+              "rest_hierarchy_composition_steps": 2,
+              "rest_identity_component_budget": 3.814697265625e-06
+            },
+            {
+              "source_skin": 0,
+              "source_joint_node": 17,
+              "imported_armature": "UniRigArmature",
+              "bone": "spine_1",
+              "parent": "root",
+              "rest_head_error": 1.3078464114919684e-09,
+              "rest_head_maximum_component_error": 1.3066297130642085e-09,
+              "rest_hierarchy_composition_steps": 3,
+              "rest_identity_component_budget": 5.7220458984375e-06
+            },
+            {
+              "source_skin": 0,
+              "source_joint_node": 1,
+              "imported_armature": "UniRigArmature",
+              "bone": "back_leg_lower_r",
+              "parent": "spine_1",
+              "rest_head_error": 2.1233429532384702e-07,
+              "rest_head_maximum_component_error": 2.0190413324572276e-07,
+              "rest_hierarchy_composition_steps": 4,
+              "rest_identity_component_budget": 7.62939453125e-06
+            },
+            {
+              "source_skin": 0,
+              "source_joint_node": 0,
+              "imported_armature": "UniRigArmature",
+              "bone": "back_leg_ankle_r",
+              "parent": "back_leg_lower_r",
+              "rest_head_error": 2.7929840119223867e-07,
+              "rest_head_maximum_component_error": 2.2776219815723309e-07,
+              "rest_hierarchy_composition_steps": 5,
+              "rest_identity_component_budget": 9.5367431640625e-06
+            },
+            {
+              "source_skin": 0,
+              "source_joint_node": 2,
+              "imported_armature": "UniRigArmature",
+              "bone": "fin_1_l",
+              "parent": "spine_1",
+              "rest_head_error": 2.387522099108417e-07,
+              "rest_head_maximum_component_error": 2.384185788795179e-07,
+              "rest_hierarchy_composition_steps": 4,
+              "rest_identity_component_budget": 7.62939453125e-06
+            },
+            {
+              "source_skin": 0,
+              "source_joint_node": 4,
+              "imported_armature": "UniRigArmature",
+              "bone": "front_leg_upper_l",
+              "parent": "spine_1",
+              "rest_head_error": 1.3088233430000013e-07,
+              "rest_head_maximum_component_error": 1.2068471044734963e-07,
+              "rest_hierarchy_composition_steps": 4,
+              "rest_identity_component_budget": 7.62939453125e-06
+            },
+            {
+              "source_skin": 0,
+              "source_joint_node": 3,
+              "imported_armature": "UniRigArmature",
+              "bone": "front_leg_ankle_l",
+              "parent": "front_leg_upper_l",
+              "rest_head_error": 2.2597751822801546e-07,
+              "rest_head_maximum_component_error": 1.9278623031304676e-07,
+              "rest_hierarchy_composition_steps": 5,
+              "rest_identity_component_budget": 9.5367431640625e-06
+            },
+            {
+              "source_skin": 0,
+              "source_joint_node": 6,
+              "imported_armature": "UniRigArmature",
+              "bone": "front_leg_upper_r",
+              "parent": "spine_1",
+              "rest_head_error": 1.524381369910948e-07,
+              "rest_head_maximum_component_error": 1.2760038614612057e-07,
+              "rest_hierarchy_composition_steps": 4,
+              "rest_identity_component_budget": 7.62939453125e-06
+            },
+            {
+              "source_skin": 0,
+              "source_joint_node": 5,
+              "imported_armature": "UniRigArmature",
+              "bone": "front_leg_ankle_r",
+              "parent": "front_leg_upper_r",
+              "rest_head_error": 2.455065334453595e-07,
+              "rest_head_maximum_component_error": 1.7906213511942326e-07,
+              "rest_hierarchy_composition_steps": 5,
+              "rest_identity_component_budget": 9.5367431640625e-06
+            },
+            {
+              "source_skin": 0,
+              "source_joint_node": 8,
+              "imported_armature": "UniRigArmature",
+              "bone": "neck_1",
+              "parent": "spine_1",
+              "rest_head_error": 1.1987516285156151e-07,
+              "rest_head_maximum_component_error": 1.1920929243736111e-07,
+              "rest_hierarchy_composition_steps": 4,
+              "rest_identity_component_budget": 7.62939453125e-06
+            },
+            {
+              "source_skin": 0,
+              "source_joint_node": 7,
+              "imported_armature": "UniRigArmature",
+              "bone": "head",
+              "parent": "neck_1",
+              "rest_head_error": 1.7565661919527788e-07,
+              "rest_head_maximum_component_error": 1.389739985313554e-07,
+              "rest_hierarchy_composition_steps": 5,
+              "rest_identity_component_budget": 9.5367431640625e-06
+            },
+            {
+              "source_skin": 0,
+              "source_joint_node": 10,
+              "imported_armature": "UniRigArmature",
+              "bone": "tail_1",
+              "parent": "spine_1",
+              "rest_head_error": 1.8706253172565392e-07,
+              "rest_head_maximum_component_error": 1.7884437542026177e-07,
+              "rest_hierarchy_composition_steps": 4,
+              "rest_identity_component_budget": 7.62939453125e-06
+            },
+            {
+              "source_skin": 0,
+              "source_joint_node": 9,
+              "imported_armature": "UniRigArmature",
+              "bone": "tail_2",
+              "parent": "tail_1",
+              "rest_head_error": 2.7397653452720807e-07,
+              "rest_head_maximum_component_error": 2.3750595057325796e-07,
+              "rest_hierarchy_composition_steps": 5,
+              "rest_identity_component_budget": 9.5367431640625e-06
+            },
+            {
+              "source_skin": 0,
+              "source_joint_node": 12,
+              "imported_armature": "UniRigArmature",
+              "bone": "teeth_1_l",
+              "parent": "spine_1",
+              "rest_head_error": 1.4903755019988156e-07,
+              "rest_head_maximum_component_error": 1.4901161182745426e-07,
+              "rest_hierarchy_composition_steps": 4,
+              "rest_identity_component_budget": 7.62939453125e-06
+            },
+            {
+              "source_skin": 0,
+              "source_joint_node": 11,
+              "imported_armature": "UniRigArmature",
+              "bone": "teeth_2_l",
+              "parent": "teeth_1_l",
+              "rest_head_error": 1.4903602183939468e-07,
+              "rest_head_maximum_component_error": 1.4901161182745426e-07,
+              "rest_hierarchy_composition_steps": 5,
+              "rest_identity_component_budget": 9.5367431640625e-06
+            },
+            {
+              "source_skin": 0,
+              "source_joint_node": 14,
+              "imported_armature": "UniRigArmature",
+              "bone": "wing_1_l",
+              "parent": "spine_1",
+              "rest_head_error": 2.409374407379224e-07,
+              "rest_head_maximum_component_error": 2.3841857732520566e-07,
+              "rest_hierarchy_composition_steps": 4,
+              "rest_identity_component_budget": 7.62939453125e-06
+            },
+            {
+              "source_skin": 0,
+              "source_joint_node": 13,
+              "imported_armature": "UniRigArmature",
+              "bone": "wing_2_l",
+              "parent": "wing_1_l",
+              "rest_head_error": 5.7027448806280686e-08,
+              "rest_head_maximum_component_error": 4.325908209423801e-08,
+              "rest_hierarchy_composition_steps": 5,
+              "rest_identity_component_budget": 9.5367431640625e-06
+            },
+            {
+              "source_skin": 0,
+              "source_joint_node": 16,
+              "imported_armature": "UniRigArmature",
+              "bone": "wing_1_r",
+              "parent": "spine_1",
+              "rest_head_error": 1.5453156162439422e-07,
+              "rest_head_maximum_component_error": 1.192092915491827e-07,
+              "rest_hierarchy_composition_steps": 4,
+              "rest_identity_component_budget": 7.62939453125e-06
+            },
+            {
+              "source_skin": 0,
+              "source_joint_node": 15,
+              "imported_armature": "UniRigArmature",
+              "bone": "wing_2_r",
+              "parent": "wing_1_r",
+              "rest_head_error": 1.4205112267474568e-07,
+              "rest_head_maximum_component_error": 1.0339293976535657e-07,
+              "rest_hierarchy_composition_steps": 5,
+              "rest_identity_component_budget": 9.5367431640625e-06
+            }
+          ],
+          "duplicate_names_proved_identical_at_all_times": [],
+          "frozen_observation_original_joint_nodes": {},
+          "scope": "Original skin identity, full nearest-joint hierarchy and neutral rest heads establish correspondence. All matched bones remain checked at every frozen pose; every imported bone matrix is also compared directly between source and candidate."
+        }
+      },
+      "binding_method": "Full original GLB primitive vertex order, independently proved against basis/UV/skin/normals/all POSITION target data; frozen source IDs retained through partition mapping.",
+      "clips": {
+        "Death_A": {
+          "surface_error_over_height": 6.698211692870874e-06,
+          "bone_head_error_over_height": 5.10033884328185e-06,
+          "poses": 19
+        },
+        "Fighting_Idle": {
+          "surface_error_over_height": 2.3280408485217694e-07,
+          "bone_head_error_over_height": 2.1913459897080678e-07,
+          "poses": 19
+        },
+        "Hit_Chest": {
+          "surface_error_over_height": 8.275399877549681e-07,
+          "bone_head_error_over_height": 3.919999414496922e-07,
+          "poses": 19
+        },
+        "Idle_A": {
+          "surface_error_over_height": 2.2174871817067295e-07,
+          "bone_head_error_over_height": 2.1055175912385664e-07,
+          "poses": 19
+        },
+        "Jog": {
+          "surface_error_over_height": 5.857375601396995e-06,
+          "bone_head_error_over_height": 2.5385738391675886e-06,
+          "poses": 19
+        },
+        "Sword_Attack": {
+          "surface_error_over_height": 1.572552450427497e-05,
+          "bone_head_error_over_height": 6.915060245804597e-06,
+          "poses": 19
+        },
+        "Walk": {
+          "surface_error_over_height": 1.0099454134327179e-05,
+          "bone_head_error_over_height": 8.22763315087309e-06,
+          "poses": 19
+        }
+      },
+      "step_frame_correspondence": [],
+      "max_surface_error_over_height": 1.572552450427497e-05,
+      "max_bone_head_error_over_height": 8.22763315087309e-06,
+      "scope": "Independent fresh Blender import geometry/motion witness check. Blender is not the authority for runtime morph normal shading."
+    },
+    "candidate": {
+      "sha256": "52b8b968dc5b204f652337f433977d1e0454a799f72d13444f476775f1d20af8",
+      "passed": true,
+      "surface_probes": 166,
+      "vertex_identity": [
+        {
+          "source_node": 19,
+          "object": "mesh_node",
+          "vertices": 4532,
+          "position_targets": 0,
+          "basis_world_error": 2.9215862780451e-07,
+          "basis_world_component_error": 2.909997154354471e-07,
+          "basis_strategy": "authored_joint_rest_skin",
+          "authored_rest_skin_component_error": 2.909997154354471e-07,
+          "uv_error": 0.0,
+          "skin_error": 0.0,
+          "skin_raw_group_error": 0.0,
+          "skin_lone_group_normalizations": [],
+          "normal_vector_error": 0.00015035571808627755,
+          "normal_scope": "Recorded only; Blender custom-normal packing is not the authority for source/Godot shading. Vertex motion identity is proved by basis,UV,skin and every POSITION shape.",
+          "all_target_position_error": 0.0,
+          "position_budget": 1.71661376953125e-05,
+          "rest_composition_steps": 9
+        }
+      ],
+      "bone_identity": {
+        "single_armature": "UniRigArmature",
+        "original_action_slots_present": {
+          "Death_A": {
+            "UniRigArmature": true
+          },
+          "Fighting_Idle": {
+            "UniRigArmature": true
+          },
+          "Hit_Chest": {
+            "UniRigArmature": true
+          },
+          "Idle_A": {
+            "UniRigArmature": true
+          },
+          "Jog": {
+            "UniRigArmature": true
+          },
+          "Sword_Attack": {
+            "UniRigArmature": true
+          },
+          "Walk": {
+            "UniRigArmature": true
+          }
+        },
+        "animated_armature_object_rest": [
+          {
+            "original_node": 20,
+            "original_name": "UniRigArmature",
+            "blender_object": "UniRigArmature",
+            "authored_local_matrix": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "blender_local_matrix": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "proof_scope": "Unique original animated non-joint node and imported armature object name; subsequent full rest/UV/skin/morph and posed identity checks remain required."
+          }
+        ],
+        "animated_object_original_skin_rest_proof": {
+          "original_skin_and_joint_node_bindings": [
+            {
+              "source_skin": 0,
+              "source_joint_node": 18,
+              "imported_armature": "UniRigArmature",
+              "bone": "root",
+              "parent": null,
+              "rest_head_error": 0.0,
+              "rest_head_maximum_component_error": 0.0,
+              "rest_hierarchy_composition_steps": 2,
+              "rest_identity_component_budget": 3.814697265625e-06
+            },
+            {
+              "source_skin": 0,
+              "source_joint_node": 17,
+              "imported_armature": "UniRigArmature",
+              "bone": "spine_1",
+              "parent": "root",
+              "rest_head_error": 1.3078464114919684e-09,
+              "rest_head_maximum_component_error": 1.3066297130642085e-09,
+              "rest_hierarchy_composition_steps": 3,
+              "rest_identity_component_budget": 5.7220458984375e-06
+            },
+            {
+              "source_skin": 0,
+              "source_joint_node": 1,
+              "imported_armature": "UniRigArmature",
+              "bone": "back_leg_lower_r",
+              "parent": "spine_1",
+              "rest_head_error": 2.1233429532384702e-07,
+              "rest_head_maximum_component_error": 2.0190413324572276e-07,
+              "rest_hierarchy_composition_steps": 4,
+              "rest_identity_component_budget": 7.62939453125e-06
+            },
+            {
+              "source_skin": 0,
+              "source_joint_node": 0,
+              "imported_armature": "UniRigArmature",
+              "bone": "back_leg_ankle_r",
+              "parent": "back_leg_lower_r",
+              "rest_head_error": 2.7929840119223867e-07,
+              "rest_head_maximum_component_error": 2.2776219815723309e-07,
+              "rest_hierarchy_composition_steps": 5,
+              "rest_identity_component_budget": 9.5367431640625e-06
+            },
+            {
+              "source_skin": 0,
+              "source_joint_node": 2,
+              "imported_armature": "UniRigArmature",
+              "bone": "fin_1_l",
+              "parent": "spine_1",
+              "rest_head_error": 2.387522099108417e-07,
+              "rest_head_maximum_component_error": 2.384185788795179e-07,
+              "rest_hierarchy_composition_steps": 4,
+              "rest_identity_component_budget": 7.62939453125e-06
+            },
+            {
+              "source_skin": 0,
+              "source_joint_node": 4,
+              "imported_armature": "UniRigArmature",
+              "bone": "front_leg_upper_l",
+              "parent": "spine_1",
+              "rest_head_error": 1.3088233430000013e-07,
+              "rest_head_maximum_component_error": 1.2068471044734963e-07,
+              "rest_hierarchy_composition_steps": 4,
+              "rest_identity_component_budget": 7.62939453125e-06
+            },
+            {
+              "source_skin": 0,
+              "source_joint_node": 3,
+              "imported_armature": "UniRigArmature",
+              "bone": "front_leg_ankle_l",
+              "parent": "front_leg_upper_l",
+              "rest_head_error": 2.2597751822801546e-07,
+              "rest_head_maximum_component_error": 1.9278623031304676e-07,
+              "rest_hierarchy_composition_steps": 5,
+              "rest_identity_component_budget": 9.5367431640625e-06
+            },
+            {
+              "source_skin": 0,
+              "source_joint_node": 6,
+              "imported_armature": "UniRigArmature",
+              "bone": "front_leg_upper_r",
+              "parent": "spine_1",
+              "rest_head_error": 1.524381369910948e-07,
+              "rest_head_maximum_component_error": 1.2760038614612057e-07,
+              "rest_hierarchy_composition_steps": 4,
+              "rest_identity_component_budget": 7.62939453125e-06
+            },
+            {
+              "source_skin": 0,
+              "source_joint_node": 5,
+              "imported_armature": "UniRigArmature",
+              "bone": "front_leg_ankle_r",
+              "parent": "front_leg_upper_r",
+              "rest_head_error": 2.455065334453595e-07,
+              "rest_head_maximum_component_error": 1.7906213511942326e-07,
+              "rest_hierarchy_composition_steps": 5,
+              "rest_identity_component_budget": 9.5367431640625e-06
+            },
+            {
+              "source_skin": 0,
+              "source_joint_node": 8,
+              "imported_armature": "UniRigArmature",
+              "bone": "neck_1",
+              "parent": "spine_1",
+              "rest_head_error": 1.1987516285156151e-07,
+              "rest_head_maximum_component_error": 1.1920929243736111e-07,
+              "rest_hierarchy_composition_steps": 4,
+              "rest_identity_component_budget": 7.62939453125e-06
+            },
+            {
+              "source_skin": 0,
+              "source_joint_node": 7,
+              "imported_armature": "UniRigArmature",
+              "bone": "head",
+              "parent": "neck_1",
+              "rest_head_error": 1.7565661919527788e-07,
+              "rest_head_maximum_component_error": 1.389739985313554e-07,
+              "rest_hierarchy_composition_steps": 5,
+              "rest_identity_component_budget": 9.5367431640625e-06
+            },
+            {
+              "source_skin": 0,
+              "source_joint_node": 10,
+              "imported_armature": "UniRigArmature",
+              "bone": "tail_1",
+              "parent": "spine_1",
+              "rest_head_error": 1.8706253172565392e-07,
+              "rest_head_maximum_component_error": 1.7884437542026177e-07,
+              "rest_hierarchy_composition_steps": 4,
+              "rest_identity_component_budget": 7.62939453125e-06
+            },
+            {
+              "source_skin": 0,
+              "source_joint_node": 9,
+              "imported_armature": "UniRigArmature",
+              "bone": "tail_2",
+              "parent": "tail_1",
+              "rest_head_error": 2.7397653452720807e-07,
+              "rest_head_maximum_component_error": 2.3750595057325796e-07,
+              "rest_hierarchy_composition_steps": 5,
+              "rest_identity_component_budget": 9.5367431640625e-06
+            },
+            {
+              "source_skin": 0,
+              "source_joint_node": 12,
+              "imported_armature": "UniRigArmature",
+              "bone": "teeth_1_l",
+              "parent": "spine_1",
+              "rest_head_error": 1.4903755019988156e-07,
+              "rest_head_maximum_component_error": 1.4901161182745426e-07,
+              "rest_hierarchy_composition_steps": 4,
+              "rest_identity_component_budget": 7.62939453125e-06
+            },
+            {
+              "source_skin": 0,
+              "source_joint_node": 11,
+              "imported_armature": "UniRigArmature",
+              "bone": "teeth_2_l",
+              "parent": "teeth_1_l",
+              "rest_head_error": 1.4903602183939468e-07,
+              "rest_head_maximum_component_error": 1.4901161182745426e-07,
+              "rest_hierarchy_composition_steps": 5,
+              "rest_identity_component_budget": 9.5367431640625e-06
+            },
+            {
+              "source_skin": 0,
+              "source_joint_node": 14,
+              "imported_armature": "UniRigArmature",
+              "bone": "wing_1_l",
+              "parent": "spine_1",
+              "rest_head_error": 2.409374407379224e-07,
+              "rest_head_maximum_component_error": 2.3841857732520566e-07,
+              "rest_hierarchy_composition_steps": 4,
+              "rest_identity_component_budget": 7.62939453125e-06
+            },
+            {
+              "source_skin": 0,
+              "source_joint_node": 13,
+              "imported_armature": "UniRigArmature",
+              "bone": "wing_2_l",
+              "parent": "wing_1_l",
+              "rest_head_error": 5.7027448806280686e-08,
+              "rest_head_maximum_component_error": 4.325908209423801e-08,
+              "rest_hierarchy_composition_steps": 5,
+              "rest_identity_component_budget": 9.5367431640625e-06
+            },
+            {
+              "source_skin": 0,
+              "source_joint_node": 16,
+              "imported_armature": "UniRigArmature",
+              "bone": "wing_1_r",
+              "parent": "spine_1",
+              "rest_head_error": 1.5453156162439422e-07,
+              "rest_head_maximum_component_error": 1.192092915491827e-07,
+              "rest_hierarchy_composition_steps": 4,
+              "rest_identity_component_budget": 7.62939453125e-06
+            },
+            {
+              "source_skin": 0,
+              "source_joint_node": 15,
+              "imported_armature": "UniRigArmature",
+              "bone": "wing_2_r",
+              "parent": "wing_1_r",
+              "rest_head_error": 1.4205112267474568e-07,
+              "rest_head_maximum_component_error": 1.0339293976535657e-07,
+              "rest_hierarchy_composition_steps": 5,
+              "rest_identity_component_budget": 9.5367431640625e-06
+            }
+          ],
+          "duplicate_names_proved_identical_at_all_times": [],
+          "frozen_observation_original_joint_nodes": {},
+          "scope": "Original skin identity, full nearest-joint hierarchy and neutral rest heads establish correspondence. All matched bones remain checked at every frozen pose; every imported bone matrix is also compared directly between source and candidate."
+        }
+      },
+      "binding_method": "Full original GLB primitive vertex order, independently proved against basis/UV/skin/normals/all POSITION target data; frozen source IDs retained through partition mapping.",
+      "clips": {
+        "Death_A": {
+          "surface_error_over_height": 6.698211692870874e-06,
+          "bone_head_error_over_height": 5.10033884328185e-06,
+          "poses": 19
+        },
+        "Fighting_Idle": {
+          "surface_error_over_height": 2.3280408485217694e-07,
+          "bone_head_error_over_height": 2.1913459897080678e-07,
+          "poses": 19
+        },
+        "Hit_Chest": {
+          "surface_error_over_height": 8.275399877549681e-07,
+          "bone_head_error_over_height": 3.919999414496922e-07,
+          "poses": 19
+        },
+        "Idle_A": {
+          "surface_error_over_height": 2.2174871817067295e-07,
+          "bone_head_error_over_height": 2.1055175912385664e-07,
+          "poses": 19
+        },
+        "Jog": {
+          "surface_error_over_height": 5.857375601396995e-06,
+          "bone_head_error_over_height": 2.5385738391675886e-06,
+          "poses": 19
+        },
+        "Sword_Attack": {
+          "surface_error_over_height": 1.572552450427497e-05,
+          "bone_head_error_over_height": 6.915060245804597e-06,
+          "poses": 19
+        },
+        "Walk": {
+          "surface_error_over_height": 1.0099454134327179e-05,
+          "bone_head_error_over_height": 8.22763315087309e-06,
+          "poses": 19
+        }
+      },
+      "step_frame_correspondence": [],
+      "max_surface_error_over_height": 1.572552450427497e-05,
+      "max_bone_head_error_over_height": 8.22763315087309e-06,
+      "scope": "Independent fresh Blender import geometry/motion witness check. Blender is not the authority for runtime morph normal shading."
+    }
+  },
+  "blender_direct": {
+    "maximum_position_error": 0.0,
+    "maximum_bone_matrix_error": 0.0,
+    "maximum_float32_budget": 1.9073486328125e-06,
+    "poses": 134,
+    "neutral_default_checked": true,
+    "retained_bone_matrices_per_pose": 19,
+    "passed": true,
+    "source_sha256": "326fbbc89633331ec3210e988bbe98c38c2b3000df4cf1b7233fc98ae55ecc32",
+    "candidate_sha256": "52b8b968dc5b204f652337f433977d1e0454a799f72d13444f476775f1d20af8",
+    "scope": "Direct source/candidate frozen-ID surfaces and every bone matrix at each original witness pose plus controlled neutral/default pose. Sixteen float32 ULPs at baseline coordinate/matrix magnitude; independent of inherited source/witness residual and separate from native/source appearance budgets."
+  },
+  "native_playback": {
+    "maximum_position_error": 1.8943722458752976e-14,
+    "maximum_normal_angle_degrees": 1.9090959104164224e-06,
+    "worst_position": {
+      "label": "Hit_Chest@0.037",
+      "max_surface_error": 1.8943722458752976e-14,
+      "max_normal_degrees": 1.4787793334710982e-06,
+      "p99_normal_degrees": 1.2074182697257333e-06
+    },
+    "worst_normal": {
+      "label": "Walk@0.139",
+      "max_surface_error": 0.0,
+      "max_normal_degrees": 1.9090959104164224e-06,
+      "p99_normal_degrees": 1.2074182697257333e-06
+    },
+    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "source_sha256": "326fbbc89633331ec3210e988bbe98c38c2b3000df4cf1b7233fc98ae55ecc32",
+    "candidate_sha256": "52b8b968dc5b204f652337f433977d1e0454a799f72d13444f476775f1d20af8"
+  },
+  "fresh_editor_import_playback": {
+    "maximum_position_error": 1.8943722458752976e-14,
+    "maximum_normal_angle_degrees": 1.9090959104164224e-06,
+    "worst_position": {
+      "label": "Hit_Chest@0.037",
+      "max_surface_error": 1.8943722458752976e-14,
+      "max_normal_degrees": 1.4787793334710982e-06,
+      "p99_normal_degrees": 1.2074182697257333e-06
+    },
+    "worst_normal": {
+      "label": "Walk@0.139",
+      "max_surface_error": 0.0,
+      "max_normal_degrees": 1.9090959104164224e-06,
+      "p99_normal_degrees": 1.2074182697257333e-06
+    },
+    "scope": "Matched explicit ResourceLoader original/current editor SCNs, current GLB sourceMD5 andSCN/freshnessmetadataSHA guarded, fullnativeclips/crossfades/RESET, unchanged4ULP Euclidean/.0001degree caps.",
+    "source_sha256": "326fbbc89633331ec3210e988bbe98c38c2b3000df4cf1b7233fc98ae55ecc32",
+    "candidate_sha256": "52b8b968dc5b204f652337f433977d1e0454a799f72d13444f476775f1d20af8",
+    "actual_editor_scene_loads": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/arcane_crystal_automaton.glb-0c51f1bee2de7fa51834fb5d45615e6f.md5",
+        "import_metadata_sha256": "486b48518f0f9b4dc194074e5a1f709ede39f04b191d8a478aafe4c6856eba58",
+        "imported_resource_path": "res://.godot/imported/arcane_crystal_automaton.glb-0c51f1bee2de7fa51834fb5d45615e6f.scn",
+        "imported_resource_sha256": "abec24add6ba09e46da5836b69fe67b0d1123e9020ec1d01e16a591dc3743a58",
+        "packed_scene_resource_path": "res://assets/storage-baseline/arcane_crystal_automaton.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "e22a0d2dc462d988400535f9ae907b86",
+        "source_path": "res://assets/storage-baseline/arcane_crystal_automaton.glb",
+        "source_sha256": "326fbbc89633331ec3210e988bbe98c38c2b3000df4cf1b7233fc98ae55ecc32"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/arcane_crystal_automaton.glb-f14b3814405b9b4cbfbe3cd3d67879e5.md5",
+        "import_metadata_sha256": "f373d3aadc7f470f0fa6fe0cadf0fab7bab2fc70d7fbd9f737f65fa42ef4a975",
+        "imported_resource_path": "res://.godot/imported/arcane_crystal_automaton.glb-f14b3814405b9b4cbfbe3cd3d67879e5.scn",
+        "imported_resource_sha256": "a627352d61a99e390964d1a5cd4e4154edec7a5ef077cffc8ceba9613d12ddea",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/arcane_crystal_automaton.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "78622998dcb8ae1967ecfa4b342ab101",
+        "source_path": "res://assets/actors/native/creatures/arcane_crystal_automaton.glb",
+        "source_sha256": "52b8b968dc5b204f652337f433977d1e0454a799f72d13444f476775f1d20af8"
+      }
+    ]
+  },
+  "actor_placement": {
+    "passed": true,
+    "placements": [
+      {
+        "body_bounds_position": [
+          -0.689841389656067,
+          -2.37843750028333e-07,
+          -0.713993012905121
+        ],
+        "body_bounds_size": [
+          1.3749897480011,
+          1.70000112056732,
+          1.43450033664703
+        ],
+        "model_global": [
+          [
+            0.5,
+            2.37843750028333e-07,
+            -0.5
+          ],
+          [
+            -1.05882394313812,
+            0.0,
+            9.25653296235396e-08
+          ],
+          [
+            0.0,
+            1.05882394313812,
+            0.0
+          ],
+          [
+            -9.25653296235396e-08,
+            0.0,
+            -1.05882394313812
+          ]
+        ],
+        "name": "baseline",
+        "nameplate_global": [
+          0.5,
+          2.40000176429749,
+          -0.5
+        ],
+        "overhead_height": 1.80000185966492,
+        "selection_size": [
+          1.38999998569489,
+          9.99999974737875e-06,
+          1.38999998569489
+        ],
+        "sha256": "326fbbc89633331ec3210e988bbe98c38c2b3000df4cf1b7233fc98ae55ecc32"
+      },
+      {
+        "body_bounds_position": [
+          -0.689841389656067,
+          -2.37843750028333e-07,
+          -0.713993012905121
+        ],
+        "body_bounds_size": [
+          1.3749897480011,
+          1.70000112056732,
+          1.43450033664703
+        ],
+        "model_global": [
+          [
+            0.5,
+            2.37843750028333e-07,
+            -0.5
+          ],
+          [
+            -1.05882394313812,
+            0.0,
+            9.25653296235396e-08
+          ],
+          [
+            0.0,
+            1.05882394313812,
+            0.0
+          ],
+          [
+            -9.25653296235396e-08,
+            0.0,
+            -1.05882394313812
+          ]
+        ],
+        "name": "candidate",
+        "nameplate_global": [
+          0.5,
+          2.40000176429749,
+          -0.5
+        ],
+        "overhead_height": 1.80000185966492,
+        "selection_size": [
+          1.38999998569489,
+          9.99999974737875e-06,
+          1.38999998569489
+        ],
+        "sha256": "52b8b968dc5b204f652337f433977d1e0454a799f72d13444f476775f1d20af8"
+      }
+    ]
+  },
+  "actual_actor_render": {
+    "source_sha256": "326fbbc89633331ec3210e988bbe98c38c2b3000df4cf1b7233fc98ae55ecc32",
+    "candidate_sha256": "52b8b968dc5b204f652337f433977d1e0454a799f72d13444f476775f1d20af8",
+    "image_pairs": 381,
+    "width": 512,
+    "height": 512,
+    "different_image_pairs": 0,
+    "maximum_different_pixels": 0,
+    "maximum_pixels_above_two_levels": 0,
+    "maximum_mean_channel_error": 0.0,
+    "maximum_channel_error": 0,
+    "scope": "Complete ReplicatedActor3D setup with actual display scale, grounding and body materials; identical cameras for source/candidate, four views and every full native cycle at24Hz. Numeric playback and pixel comparisons are separate reports.",
+    "framing_passed": true,
+    "clipped_frame_labels": [],
+    "maximum_border_foreground_pixels": 0
+  },
+  "death_dissolve_gpu": {
+    "all_body_and_ash_uniform_comparisons": 1875,
+    "effective_scale": 1.05882394313812,
+    "failures": [],
+    "gpu": "NVIDIA GeForce RTX 5080 Laptop GPU",
+    "max_color_error": 0.0,
+    "max_custom_error": 0.0,
+    "max_dissolve_bounds_error": 0.0,
+    "max_fragment_transform_error": 0.0,
+    "max_grain_error": 0.0,
+    "max_silhouette_position_error": 0.0,
+    "mounted": {},
+    "passed": true,
+    "renderer": "forward_plus",
+    "runtime_sha256": "52b8b968dc5b204f652337f433977d1e0454a799f72d13444f476775f1d20af8",
+    "seeded_cases": 15,
+    "source_sha256": "326fbbc89633331ec3210e988bbe98c38c2b3000df4cf1b7233fc98ae55ecc32"
+  },
+  "death_dissolve_render": {
+    "source_sha256": "326fbbc89633331ec3210e988bbe98c38c2b3000df4cf1b7233fc98ae55ecc32",
+    "candidate_sha256": "52b8b968dc5b204f652337f433977d1e0454a799f72d13444f476775f1d20af8",
+    "image_pairs": 30,
+    "width": 640,
+    "height": 640,
+    "different_image_pairs": 0,
+    "maximum_different_pixels": 0,
+    "maximum_pixels_above_two_levels": 0,
+    "maximum_mean_channel_error": 0.0,
+    "maximum_channel_error": 0,
+    "scope": "Complete Actor death dissolve, source/candidate both at preview origin and actual species scale/materials. Three Death_A poses, five fade progresses, two views, fixed seed42. Full pose/skin/resources and15seeded cases recorded separately.",
+    "framing_passed": true,
+    "clipped_frame_labels": [],
+    "maximum_border_foreground_pixels": 0
+  },
+  "import_scale": 1.058824,
+  "actual_actor_display_scale": 1.0588239431381241,
+  "historical_physical_fixture_available": false,
+  "historical_fixture_search": {
+    "source_sha256": "326fbbc89633331ec3210e988bbe98c38c2b3000df4cf1b7233fc98ae55ecc32",
+    "searched": [
+      "godot-client/tests/fixtures",
+      "docs/qa"
+    ],
+    "result": "No historical physical fixture by actor name or complete source SHA; catalog entry only. New source-only observations are supplemental technical evidence, not historical fitness/artistic approval."
+  },
+  "new_frozen_source_observations": {
+    "passed": true,
+    "source_sha256": "326fbbc89633331ec3210e988bbe98c38c2b3000df4cf1b7233fc98ae55ecc32",
+    "candidate_sha256": "52b8b968dc5b204f652337f433977d1e0454a799f72d13444f476775f1d20af8",
+    "surface_probes": 166,
+    "poses": 133,
+    "clips": 7,
+    "source_candidate_position_error": 0.0,
+    "source_candidate_normal_vector_error": 0.0,
+    "original_witness_position_error_over_height": 0.0,
+    "original_source_witness_position_error_over_height": 0.0,
+    "original_witness_normal_vector_error": 0.0,
+    "original_witness_bone_matrix_error": 0.0,
+    "witness_sha256": "161d2a9d9b0ff15c445286d4e6f626fe020290b6f7fcda4a2c69c7095d4f9a8a",
+    "sampled_motion_min": [
+      -0.7423674510134773,
+      -0.0012200689312710632,
+      -0.7631195109088295
+    ],
+    "sampled_motion_max": [
+      0.6867330902715755,
+      1.7484590361298047,
+      1.2260634653772264
+    ],
+    "historical_fixture_available": false,
+    "scope": "New immutable source-only supplemental observations; no historical fitness or artistic approval implied."
+  },
+  "actual_actor_component_playback": {
+    "candidate_sha256": "52b8b968dc5b204f652337f433977d1e0454a799f72d13444f476775f1d20af8",
+    "clips": [
+      {
+        "clip": "Death_A",
+        "duration": 2.0,
+        "loop_mode": 0,
+        "loop_wrap_error": 0.0,
+        "maximum_source_candidate_bone_morph_error": 0.0,
+        "reset_restore_error": 0.0,
+        "terminal_hold_error": 0.0
+      },
+      {
+        "clip": "Fighting_Idle",
+        "duration": 2.20833325386047,
+        "loop_mode": 1,
+        "loop_wrap_error": 0.0,
+        "maximum_source_candidate_bone_morph_error": 0.0,
+        "reset_restore_error": 0.0,
+        "terminal_hold_error": 0.0
+      },
+      {
+        "clip": "Hit_Chest",
+        "duration": 0.783333361148834,
+        "loop_mode": 0,
+        "loop_wrap_error": 0.0,
+        "maximum_source_candidate_bone_morph_error": 0.0,
+        "reset_restore_error": 0.0,
+        "terminal_hold_error": 0.0
+      },
+      {
+        "clip": "Idle_A",
+        "duration": 2.59999990463257,
+        "loop_mode": 1,
+        "loop_wrap_error": 0.0,
+        "maximum_source_candidate_bone_morph_error": 0.0,
+        "reset_restore_error": 0.0,
+        "terminal_hold_error": 0.0
+      },
+      {
+        "clip": "Jog",
+        "duration": 1.08333337306976,
+        "loop_mode": 1,
+        "loop_wrap_error": 0.0,
+        "maximum_source_candidate_bone_morph_error": 0.0,
+        "reset_restore_error": 0.0,
+        "terminal_hold_error": 0.0
+      },
+      {
+        "clip": "Sword_Attack",
+        "duration": 1.04166662693024,
+        "loop_mode": 0,
+        "loop_wrap_error": 0.0,
+        "maximum_source_candidate_bone_morph_error": 0.0,
+        "reset_restore_error": 0.0,
+        "terminal_hold_error": 0.0
+      },
+      {
+        "clip": "Walk",
+        "duration": 1.08333337306976,
+        "loop_mode": 1,
+        "loop_wrap_error": 0.0,
+        "maximum_source_candidate_bone_morph_error": 0.0,
+        "reset_restore_error": 0.0,
+        "terminal_hold_error": 0.0
+      }
+    ],
+    "failures": [],
+    "historical_fixture_available": false,
+    "maximum_error": 0.0,
+    "passed": true,
+    "scope": "Freshly imported source/candidate through actual complete Actor, scene cache/native animation importer, every authored clip, exact duration/loop policy, off-grid bones/morphs, one-shot holds, loop wraps and RESET/action restoration. No historical physical fitness or artistic approval inferred; independent source-only geometry and default/imported checks are separate.",
+    "source_sha256": "326fbbc89633331ec3210e988bbe98c38c2b3000df4cf1b7233fc98ae55ecc32"
+  },
+  "editor_qa_policy": {
+    "tracked_policy_available": false,
+    "fps": 30.0,
+    "scope": "Private symmetric source/candidate editor-import QA policy, Private cadence matches immutable original source declaration, default30Hz when undeclared. Not a new production import policy."
+  },
+  "historical_fitness_scope": "No historical physical fitness or artistic approval claimed. Exact preservation qualified against immutable current-source observations and independent format/import/gameplay/render/effects gates.",
+  "strict_actual_import_numeric_budget": {
+    "actor": "arcane_crystal_automaton",
+    "source_sha256": "326fbbc89633331ec3210e988bbe98c38c2b3000df4cf1b7233fc98ae55ecc32",
+    "candidate_sha256": "52b8b968dc5b204f652337f433977d1e0454a799f72d13444f476775f1d20af8",
+    "passed": true,
+    "source_rest_largest_axis_extent": 1.7000009655974953,
+    "source_extent_float32_ulp": 1.1920928955078125e-07,
+    "position_budget": 4.76837158203125e-07,
+    "normal_angle_budget_degrees": 0.0001,
+    "checks": {
+      "native": {
+        "maximum_position_error": 1.8943722458752976e-14,
+        "maximum_normal_angle_degrees": 1.9090959104164224e-06,
+        "passed": true
+      },
+      "imported": {
+        "maximum_position_error": 1.8943722458752976e-14,
+        "maximum_normal_angle_degrees": 1.9090959104164224e-06,
+        "passed": true
+      }
+    },
+    "scope": "Additional strict model-space actual-native/fresh-editor-import surface equivalence gate, source-size-dependent4float32ULP Euclidean position and0.0001degree direction caps. Does not relax original source observations, Blender16ULP or raster/effects gates."
+  },
+  "death_dissolve_source_framing": {
+    "actor": "arcane_crystal_automaton",
+    "source_sha256": "326fbbc89633331ec3210e988bbe98c38c2b3000df4cf1b7233fc98ae55ecc32",
+    "candidate_sha256": "52b8b968dc5b204f652337f433977d1e0454a799f72d13444f476775f1d20af8",
+    "passed": true,
+    "original_full_motion_bbox_all8corners_checked": true,
+    "source_actor_translation_removed": [
+      0.5,
+      0,
+      -0.5
+    ],
+    "views": [
+      {
+        "view": "game",
+        "minimum_body_bbox_pixel_border_margin": 187.8932423449988,
+        "minimum_camera_depth": 3.5475943159551706,
+        "maximum_camera_depth": 6.452405684044829
+      },
+      {
+        "view": "under",
+        "minimum_body_bbox_pixel_border_margin": 177.07620458034285,
+        "minimum_camera_depth": 3.3407309608067584,
+        "maximum_camera_depth": 6.659269039193242
+      }
+    ],
+    "scope": "All8corners of original full-motion actualActor fit after exact preview translation, both640square orthographic FX cameras, near/far planes and minimum2pixel margin. Actual source/candidate fade PNG foreground borders remain a separate required post-capture check."
+  },
+  "actual_editor_all_fields_preservation": {
+    "passed": true,
+    "actual_editor_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/arcane_crystal_automaton.glb-0c51f1bee2de7fa51834fb5d45615e6f.md5",
+        "import_metadata_sha256": "486b48518f0f9b4dc194074e5a1f709ede39f04b191d8a478aafe4c6856eba58",
+        "imported_resource_path": "res://.godot/imported/arcane_crystal_automaton.glb-0c51f1bee2de7fa51834fb5d45615e6f.scn",
+        "imported_resource_sha256": "abec24add6ba09e46da5836b69fe67b0d1123e9020ec1d01e16a591dc3743a58",
+        "packed_scene_resource_path": "res://assets/storage-baseline/arcane_crystal_automaton.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "e22a0d2dc462d988400535f9ae907b86",
+        "source_path": "res://assets/storage-baseline/arcane_crystal_automaton.glb",
+        "source_sha256": "326fbbc89633331ec3210e988bbe98c38c2b3000df4cf1b7233fc98ae55ecc32"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/arcane_crystal_automaton.glb-f14b3814405b9b4cbfbe3cd3d67879e5.md5",
+        "import_metadata_sha256": "f373d3aadc7f470f0fa6fe0cadf0fab7bab2fc70d7fbd9f737f65fa42ef4a975",
+        "imported_resource_path": "res://.godot/imported/arcane_crystal_automaton.glb-f14b3814405b9b4cbfbe3cd3d67879e5.scn",
+        "imported_resource_sha256": "a627352d61a99e390964d1a5cd4e4154edec7a5ef077cffc8ceba9613d12ddea",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/arcane_crystal_automaton.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "78622998dcb8ae1967ecfa4b342ab101",
+        "source_path": "res://assets/actors/native/creatures/arcane_crystal_automaton.glb",
+        "source_sha256": "52b8b968dc5b204f652337f433977d1e0454a799f72d13444f476775f1d20af8"
+      }
+    ],
+    "static_typed_attributes_UV_tangent_color_4or8skin_and_retained_morph_PNT_identical": true,
+    "material_typed_storage_texture_pixels_and_mips_identical": true,
+    "independent_complete_vertex_oriented_triangle_payload_multisets_identical": true,
+    "numeric_static_material_SCNs_identical": true,
+    "static_report_sha256": "2c52997bb532f7eb05fcfeaf976b50fd45d9f8654b166cbee6c6b7c40b30fa13",
+    "direct_report_sha256": "a3ae31414b9a0bcff8432ae45ff1f2ac07fa2f08a4f43dc03722c8a88d18dd68",
+    "material_report_sha256": "1d9986ff663d0b936846ddce44ce1ec3f0212571a65091053631bb835d9e9cdf",
+    "scope": "Same CURRENT source/candidate actualEditor resources as numeric proof. Every vertex static typed attribute including UV/tangent/color/4or8skin, every retained morph POSITION/NORMAL/TANGENT bit, complete oriented triangles and all material typed storage/texture pixels+mips identical. Raw/editor tangents excluded only from ID binding; generatedEditorLOD counts reported, no distant-LOD identity claim. Independent actualEditor source/current complete typed vertex payload and cyclic-oriented triangle payload multisets per mesh/surface, preserving multiplicities. All static fields and retained morph P/N/T included. No raw ordinal/coincident-ID assumption. No partitions; retained source columns from exact preparation are independently verified against authored P/N/T accessor bits, then normalized only to retained column ordinal. Materials separate; generated distant LOD identity not claimed."
+  }
+}

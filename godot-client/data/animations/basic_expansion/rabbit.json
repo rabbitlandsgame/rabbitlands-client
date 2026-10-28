@@ -88,5 +88,37 @@
     "walk": 1.8,
     "run": 2.6
   },
-  "motionRevision": "leporid-authored-1"
+  "motionRevision": "leporid-authored-1",
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "rabbit",
+    "sourceSHA256": "9b7a5109960c246e4bea7aa69d2fc90036cda6d4774c96afbaa9fd47cfd42f0c",
+    "previousRuntimeSHA256": "2aa8351614f223854d03416dee72512ef472ec455fa4772e23cf8cfececc58fb",
+    "runtimeSHA256": "09e231dac14079eef7b2930287e9991a4b7c75ecf0b80c85cfb8bdb0d1795b79",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "rabbit",
+      "sourceSHA256": "9b7a5109960c246e4bea7aa69d2fc90036cda6d4774c96afbaa9fd47cfd42f0c",
+      "runtimeSHA256": "2aa8351614f223854d03416dee72512ef472ec455fa4772e23cf8cfececc58fb",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 120,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "reviewStatus": "accepted",
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "rabbit",
+    "appliesToSHA256": "09e231dac14079eef7b2930287e9991a4b7c75ecf0b80c85cfb8bdb0d1795b79",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": null,
+    "repairNoteEvents": []
+  }
 }

@@ -75,10 +75,34 @@
     "walk": 0.2865211766896134,
     "run": 0.6625847923720095
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "A purposeful heavy-bodied strut with alternating clawed steps, a restrained neck bob and quiet tail-fan balance. The run lowers the body and lengthens the quick stepping cycle.",
     "attack": "A brief head recoil followed by a decisive forward and downward peck, with a small folded-wing flare and both feet braced.",
     "death": "The breast drops forward, the neck folds low and the feet release outward as the heavy body settles into a still supported pose."
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "turkey",
+    "appliesToSHA256": "e4a3ecf5b96e2ac65e2939464e1cd01a0427995136d9cc90e842c7a9e8f060e7",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "saved_button_approval",
+      "event_id": "85539252-499e-402f-9a3f-fe00e418849e",
+      "event_sha256": "56d6f4d52eba5e5e831c38c97a65379a4e8f948f3a50095b98a7481fe245a153",
+      "utc": "2026-10-28T21:33:49.900830+00:00"
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "turkey",
+    "sourceSHA256": "c2a57db4411e48e14f1bdb4e09e1988a4e46f400981e867897af7fbf202a4687",
+    "previousRuntimeSHA256": "c2a57db4411e48e14f1bdb4e09e1988a4e46f400981e867897af7fbf202a4687",
+    "runtimeSHA256": "e4a3ecf5b96e2ac65e2939464e1cd01a0427995136d9cc90e842c7a9e8f060e7",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": null
   }
 }

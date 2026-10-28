@@ -1,5 +1,11 @@
 # Local asset-authoring workspace
 
+Creature runtime sampling, fixed mesh/skin fitting and approval follow the maintained [creature runtime optimization skill](../.agents/skills/rabbitlands-creature-runtime-optimization/SKILL.md). The [completed retrofit report](qa/creature-storage/completed-runtime-retrofit.md) explains the review browser and separate draft/delivery choices. For optimized installed assets, [runtime-delivery.json](qa/creature-storage/runtime-delivery.json) records current hashes and cadence; frozen authoring observations remain historical evidence.
+
+The [visually accepted delivery registry](qa/creature-storage/visually-accepted-delivery.json) now supersedes overlapping conservative selections. See the [191-model installation report](qa/creature-storage/accepted-creature-delivery.md) for exact-version acceptance, qualified local-draft metadata and retained repair notes.
+
+The later [accepted repair delivery registry](qa/creature-storage/accepted-repair-delivery.json) takes precedence for Skeleton, Tengu, Giant Wasp, Heartwood Treant and Nightweave Spider. Their new exact-version acceptance retains the earlier draft findings and known limits.
+
 Regional map detail images are rendered from the current published chunk GLBs,
 including shared mesh placements, with `eloria-assets/tools/render_region_map_details.py`.
 The maintained chunk reader and native cartography rasterizer are reused; no map
@@ -31,6 +37,8 @@ and approved models remain active. Historical receipts below describe completed
 verification and do not reactivate retired generators.
 
 The complete concept-art, Meshy model-generation, rigging/animation and video-motion-fitting skills live under `.agents/skills/rabbitlands-*`. Their references and UI metadata are included. The existing video-generation and creature-integration skills remain available.
+
+Completed creature deliveries also use the [creature runtime optimization skill](../.agents/skills/rabbitlands-creature-runtime-optimization/SKILL.md): 30-sample/second delivery candidates, offline mesh/skin corrective reduction, independent shading and blend checks, and ordinary uncompressed creature GLBs. Dense private authoring evidence remains preserved. Actor-specific visual acceptance controls approximate runtime replacement.
 
 Original high-resolution models, full-resolution textures, concept inputs, animation libraries, generated source stages and processing scripts are consolidated under:
 

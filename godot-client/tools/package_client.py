@@ -56,6 +56,10 @@ What goes in, and why it is more than an export:
       source, no other text the package carries; the editor's extracted
       copies of embedded glTF images and the race and neck texture sources
       the race models were built from - ship nowhere.
+      Creature GLBs ship as verified ordinary uncompressed GLBs after native
+      cooking. Their optimized meshes and curves reduce storage without a
+      per-load decompression step. Legacy compressed payload readers remain
+      compatible with older installs.
       The RL head (the High Human head) ships the same two ways: its head,
       hair and beard GLBs (native/rl_heads) loose only, and its maps
       (native/rl_head_textures, LOADED_IMAGE_FOLDERS) in the PCK only, each
@@ -137,6 +141,7 @@ import runner_source
 import benchmark_package
 import client_runtime_package
 import prepared_content_package
+import creature_compression
 import full_optimization_package
 from pathlib import Path, PurePosixPath
 from urllib.parse import unquote
@@ -192,7 +197,7 @@ SMOKE_FAILURES = ("SCRIPT ERROR", "Parse Error", "Failed to load script",
                   "Failed loading resource",
                   "Ignoring torso cover profile", "glb cache: pack failed",
                   "Native hairstyle failed to load",
-                  "Fitted hairstyle has an incompatible skeleton")
+                  "Fitted hairstyle has an incompatible skeleton", "Creature payload rejected")
 
 ACTOR_ROOT = "godot-client/assets/actors/native"
 ACTOR_CATALOGS = ("godot-client/data/actors/models.json", "godot-client/data/actors/equipment.json")
@@ -465,17 +470,24 @@ def _catalog_strings(value):
 
 
 def gltf_document(path: Path) -> dict:
-    """The JSON of a .glb/.gltf (a .glb's JSON chunk only); {} for a file that is not glTF."""
+    """glTF JSON; raw GLBs read only JSON, compressed creatures verify/decode first."""
     try:
         if path.suffix.lower() == ".glb":
             with open(path, "rb") as handle:
                 header = handle.read(20)
-                if len(header) < 20 or header[:4] != b"glTF":
-                    return {}
-                length = struct.unpack("<I", header[12:16])[0]
-                document = json.loads(handle.read(length).rstrip(b"\0 ").decode("utf-8"))
+                if header.startswith(creature_compression.MAGIC[:4]):
+                    raw = creature_compression.read_bytes(path)
+                    length = struct.unpack_from("<I", raw, 12)[0]
+                    document = json.loads(raw[20:20 + length].rstrip(b"\0 ").decode("utf-8"))
+                else:
+                    if len(header) < 20 or header[:4] != b"glTF":
+                        return {}
+                    length = struct.unpack("<I", header[12:16])[0]
+                    document = json.loads(handle.read(length).rstrip(b"\0 ").decode("utf-8"))
         else:
             document = json.loads(path.read_text(encoding="utf-8"))
+    except creature_compression.PayloadError as error:
+        raise PackageError(f"Invalid compressed creature {path}: {error}") from error
     except (OSError, ValueError, struct.error):
         return {}
     return document if isinstance(document, dict) else {}
@@ -3293,6 +3305,20 @@ def _main(argv=None, storage=None) -> int:
                 (logs / "prepared-content.json").write_text(json.dumps(prepared_receipt, indent=2), encoding="utf-8")
             except prepared_content_package.PreparedError as error:
                 raise PackageError(str(error)) from error
+        # Keep loose creatures as ordinary GLBs after native cooking. Optimized
+        # meshes/curves are already smaller; avoid per-load RLCZ decoding.
+        try:
+            # Actor GLBs always ship loose. A scoped tracked-file list avoids
+            # repeating the full actor/image dependency scan after cooking.
+            creature_files = set(tracked(build_dir, creature_compression.CREATURE_ROOT.rstrip("/")))
+            creature_receipt = creature_compression.stage(build_dir, app_dir, creature_files, compress=False)
+        except creature_compression.PayloadError as error:
+            raise PackageError(str(error)) from error
+        (logs / "creature-compression.json").write_text(json.dumps(creature_receipt, indent=2), encoding="utf-8")
+        log(f"creature GLBs: {creature_receipt['source_bytes'] / 1e9:.2f} GB -> "
+            f"{creature_receipt['installed_bytes'] / 1e9:.2f} GB, ordinary uncompressed GLBs verified")
+        if options.prepared_catalog:
+            prepared_content_package.check_export(project / "prepared-content/index.json", stage)
         check_registry(build_dir, stage)
         check_glb_textures(app_dir)
         check_shared_meshes(build_dir, stage)

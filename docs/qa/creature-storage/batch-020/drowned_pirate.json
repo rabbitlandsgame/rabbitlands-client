@@ -1,0 +1,582 @@
+{
+  "schema_version": 1,
+  "batch": 20,
+  "actor": "drowned_pirate",
+  "date": "2026-10-27",
+  "runtime_path": "godot-client/assets/actors/native/creatures/drowned_pirate.glb",
+  "source_sha256": "bfc2ed88903f3a18650f400bddd483a34170bfed2935ab4296adaa4af1cebeaf",
+  "runtime_sha256": "c653c43d7203f1234f486cdc9f003a169e64e767664793ee4a75a0ce33a3257e",
+  "qualification": "Passed exact source/continuous curves, original physical observations, paired fresh Blender poses/default, native and fresh editor-imported playback/transitions, fully fitted actual-Actor cycles/four views, seeded dissolve/silhouette/reset checks.",
+  "human_approval_changed": false,
+  "recipe": {
+    "tool": "eloria-assets/tools/pack_creature_storage.py",
+    "tool_commit": "5bdd51c3",
+    "steps": [
+      "prune_zero_targets",
+      "reduce_constant_runs",
+      "compact"
+    ],
+    "profile": null,
+    "bounds": null,
+    "preserve_trs_keys": false
+  },
+  "bytes": {
+    "source_bytes": 8613580,
+    "candidate_bytes": 8460024,
+    "source_zstd_bytes": 5452533,
+    "candidate_zstd_bytes": 5464103
+  },
+  "inactive_targets_removed": 0,
+  "flat_run_key_rows_removed": 35679,
+  "corrective_graphics_buffer_bytes": {
+    "source": 5380700,
+    "candidate": 5380700,
+    "saved": 0,
+    "scope": "Actual Godot raw blend_shape_data byte totals over all mesh surfaces; shared per loaded model."
+  },
+  "draw_surfaces": {
+    "source": 2,
+    "candidate": 2
+  },
+  "source_validation": {
+    "passed": true,
+    "source_sha256": "bfc2ed88903f3a18650f400bddd483a34170bfed2935ab4296adaa4af1cebeaf",
+    "candidate_sha256": "c653c43d7203f1234f486cdc9f003a169e64e767664793ee4a75a0ce33a3257e",
+    "geometry_skin_binds_rest_topology_uv_material_image_bits_preserved": true,
+    "retained_key_time_and_value_bits_exact_only_flat_interiors_removed": true,
+    "every_removed_default_and_key_is_zero": true,
+    "redundant_flat_key_rows_proved": 35679,
+    "preexisting_duplicate_property_curves_preserved_in_occurrence_order": 0,
+    "meshes": [
+      {
+        "mesh": 0,
+        "targets_before": 65,
+        "targets_after": 65,
+        "removed_target_indices": [],
+        "retained_target_indices": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31,
+          32,
+          33,
+          34,
+          35,
+          36,
+          37,
+          38,
+          39,
+          40,
+          41,
+          42,
+          43,
+          44,
+          45,
+          46,
+          47,
+          48,
+          49,
+          50,
+          51,
+          52,
+          53,
+          54,
+          55,
+          56,
+          57,
+          58,
+          59,
+          60,
+          61,
+          62,
+          63,
+          64
+        ]
+      }
+    ],
+    "clips": {
+      "Death_A": {
+        "original_knots": 3667,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 7308
+      },
+      "Fighting_Idle": {
+        "original_knots": 16,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 36
+      },
+      "Hit_Chest": {
+        "original_knots": 19,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 42
+      },
+      "Idle_A": {
+        "original_knots": 16,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 36
+      },
+      "Jog": {
+        "original_knots": 627,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 1254
+      },
+      "Sword_Attack": {
+        "original_knots": 1159,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 2322
+      },
+      "Walk": {
+        "original_knots": 894,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 1791
+      }
+    },
+    "proof": "Zero defaults and every LINEAR/STEP key zero prove inactive targets remain zero continuously and under crossfades. All retained accessor bytes and retained time/value rows are exact. Deleted key rows sit strictly inside three bit-identical adjacent rows; plateau boundaries and endpoints remain."
+  },
+  "physical_observations": {
+    "passed": true,
+    "source_sha256": "bfc2ed88903f3a18650f400bddd483a34170bfed2935ab4296adaa4af1cebeaf",
+    "candidate_sha256": "c653c43d7203f1234f486cdc9f003a169e64e767664793ee4a75a0ce33a3257e",
+    "surface_probes": 180,
+    "poses": 42,
+    "clips": 7,
+    "source_candidate_position_error": 0.0,
+    "source_candidate_normal_vector_error": 0.0,
+    "original_witness_position_error_over_height": 7.070215996558879e-08,
+    "original_source_witness_position_error_over_height": 7.070215996558879e-08,
+    "original_witness_normal_vector_error": 0.0,
+    "original_witness_bone_matrix_error": 0.0,
+    "witness_sha256": "26f696839c81c5020f96425630d2951fe707f9cc5a6cb58bd4247441a50a3d8c",
+    "sampled_motion_min": [
+      -1.3782177512412024,
+      0.0026597704372481787,
+      -0.5791338465363016
+    ],
+    "sampled_motion_max": [
+      0.5773650469898862,
+      2.176637659050738,
+      1.3544079291331839
+    ]
+  },
+  "paired_fresh_blender": {
+    "maximum_position_error": 0.0,
+    "maximum_bone_matrix_error": 0.0,
+    "maximum_float32_budget": 3.814697265625e-06,
+    "poses": 43,
+    "neutral_default_checked": true,
+    "passed": true,
+    "source_sha256": "bfc2ed88903f3a18650f400bddd483a34170bfed2935ab4296adaa4af1cebeaf",
+    "candidate_sha256": "c653c43d7203f1234f486cdc9f003a169e64e767664793ee4a75a0ce33a3257e",
+    "scope": "Direct source/candidate frozen-ID surfaces and every bone matrix at each original witness pose plus controlled neutral/default pose. Sixteen float32 ULPs at baseline coordinate/matrix magnitude; independent of inherited source/witness residual and separate from native/source appearance budgets."
+  },
+  "native_and_editor_imported": {
+    "native": {
+      "samples": 232,
+      "maximum_position_error": 2.2151110405335057e-07,
+      "maximum_normal_angle_degrees": 2.5882158999434726e-05
+    },
+    "imported": {
+      "samples": 232,
+      "maximum_position_error": 2.2151110405335057e-07,
+      "maximum_normal_angle_degrees": 2.5882158999434726e-05,
+      "actual_loader": "ResourceLoader.load(PackedScene)",
+      "authoritative_SCN_provenance": "genuine_editor_verification_revision.load_proofs"
+    }
+  },
+  "native_numeric_budget": {
+    "actor": "drowned_pirate",
+    "source_coordinate_or_extent_magnitude": 1.6999998784676016,
+    "four_float32_ULPs": 4.76837158203125e-07,
+    "runtime_position_error": 2.2151110405335057e-07,
+    "runtime_normal_degrees": 2.5882158999434726e-05,
+    "imported_position_error": 2.2151110405335057e-07,
+    "imported_normal_degrees": 2.5882158999434726e-05,
+    "normal_degrees_budget": 0.0001,
+    "scope": "Four float32 ULPs at maximum original source coordinate/extent magnitude; original source mathematical equality remains exact. Native normal screen 1e-4 degrees."
+  },
+  "placement": {
+    "passed": true,
+    "bounds_error": 0.0,
+    "placement_error": 0.0,
+    "overhead_height_error": 0.0
+  },
+  "render_fit": {
+    "source_sha256": "bfc2ed88903f3a18650f400bddd483a34170bfed2935ab4296adaa4af1cebeaf",
+    "model_global": [
+      [
+        0.5,
+        0.0226202178746462,
+        -0.5
+      ],
+      [
+        -1.05882394313812,
+        0.0,
+        9.25653296235396e-08
+      ],
+      [
+        0.0,
+        1.05882394313812,
+        0.0
+      ],
+      [
+        -9.25653296235396e-08,
+        0.0,
+        -1.05882394313812
+      ]
+    ],
+    "position": [
+      -0.12675570178784148,
+      0.02449064906436138,
+      -1.7270086091850574
+    ],
+    "size": [
+      1.3066948328190693,
+      1.76703978386396,
+      2.006197809085088
+    ],
+    "poses": 414,
+    "scope": "Every vertex at every full-cycle render frame and view-still pose, using actual complete Actor Godot arrays/poses/weights/transforms, renderer morph cutoff and four/eight influence skin. Evaluated in float64 with a separate 30% camera margin."
+  },
+  "source_fit_inventory": {
+    "passed": true,
+    "source_sha256": "bfc2ed88903f3a18650f400bddd483a34170bfed2935ab4296adaa4af1cebeaf",
+    "candidate_sha256": "c653c43d7203f1234f486cdc9f003a169e64e767664793ee4a75a0ce33a3257e",
+    "source_clips": [
+      "Death_A",
+      "Fighting_Idle",
+      "Hit_Chest",
+      "Idle_A",
+      "Jog",
+      "Sword_Attack",
+      "Walk"
+    ],
+    "actual_Actor_fit_clips": [
+      "Death_A",
+      "Fighting_Idle",
+      "Hit_Chest",
+      "Idle_A",
+      "Jog",
+      "Sword_Attack",
+      "Walk"
+    ],
+    "fit_runtime_sha256": "0d20de9c0c2fbb1f6b1576c20f438b45f5233286571ae9285a2b47a840afc0bc",
+    "poses": 414,
+    "fit_lineage": null,
+    "scope": "Actual Actor source-pose capture inventory, not merely requested QA aliases. Every source clip is present in fitted playback data."
+  },
+  "appearance": {
+    "source_sha256": "bfc2ed88903f3a18650f400bddd483a34170bfed2935ab4296adaa4af1cebeaf",
+    "candidate_sha256": "c653c43d7203f1234f486cdc9f003a169e64e767664793ee4a75a0ce33a3257e",
+    "image_pairs": 512,
+    "width": 512,
+    "height": 512,
+    "different_image_pairs": 19,
+    "maximum_different_pixels": 24,
+    "maximum_pixels_above_two_levels": 1,
+    "maximum_mean_channel_error": 0.00012079874674479167,
+    "maximum_channel_error": 32,
+    "scope": "Complete ReplicatedActor3D setup with actual display scale, grounding and body materials; identical cameras for source/candidate, four views and every full native cycle at24Hz. Numeric playback and pixel comparisons are separate reports.",
+    "framing_passed": true,
+    "clipped_frame_labels": [],
+    "maximum_border_foreground_pixels": 0
+  },
+  "secondary_effects": {
+    "effective_scale": 1.05882394313812,
+    "failures": [],
+    "gpu": "NVIDIA GeForce RTX 5080 Laptop GPU",
+    "max_color_error": 0.0,
+    "max_custom_error": 0.0,
+    "max_dissolve_bounds_error": 2.73142802598159e-07,
+    "max_fragment_transform_error": 3.57938176875905e-07,
+    "max_grain_error": 1.31130218489206e-08,
+    "max_silhouette_position_error": 4.26248760732051e-07,
+    "mounted": {},
+    "passed": true,
+    "renderer": "forward_plus",
+    "runtime_sha256": "c653c43d7203f1234f486cdc9f003a169e64e767664793ee4a75a0ce33a3257e",
+    "seeded_cases": 15,
+    "source_sha256": "bfc2ed88903f3a18650f400bddd483a34170bfed2935ab4296adaa4af1cebeaf"
+  },
+  "rig_investigation": {
+    "decision": "Original rig, skin and two draw surfaces retained in the main. A separate 875-vertex source-equivalent candidate remains private and unpromoted: adding a third surface for at most 1,137,500 shared GPU bytes requires complete native/graphics/secondary-effect qualification and a justified runtime tradeoff.",
+    "source_pose_samples": 12824,
+    "source_equivalent_vertices": 875,
+    "default_POSITION_bake_bit_exact": true,
+    "possible_corrective_GPU_bytes_saved": 1137500,
+    "scope": "Optional source/CPU study remains separate; no shader/FX qualification or rig replacement claimed for it."
+  },
+  "evidence_sha256": {
+    "qualification-job.json": "8a08c46e7cf69036dd14e903cac458ad6ac385c7ce07ebb90833e79c6451a763",
+    "processing.json": "dadf3a281c065fe698d0ffb51152432a3e46b86fceab49daf46d35a773293027",
+    "exact-source-validation.json": "56c2b4a6b301f94321186c6dbb046427b4db73a6dc0277f85ddd23b9e962c2ed",
+    "physical-witness-validation.json": "aae663504a916df192adb3ec70d35fdda15b0f3ab80cc6164c4f1e1bc3f64ac0",
+    "blender-validation.json": "d93977f3887c37a13b9aada767f34f081b012dd4865743cb8f62e2d8f9adb467",
+    "blender-direct-validation.json": "b11d3c800630b320df7c990be079ca486f50c49744d4b688001bf941fc1aa3a0",
+    "native-validation.json": "8217323182b8cbe8ee3940177603aa18d53ee8bcb731b79fe4b023578faa81c6",
+    "imported-validation.json": "8217323182b8cbe8ee3940177603aa18d53ee8bcb731b79fe4b023578faa81c6",
+    "render-fit.json": "e94acd6cafecf323d82d295386b08e5d2a7925b6a1bea70b48de3d1b14ec2606",
+    "placement.json": "77411688e461b26f7e7e34c9951b366ccd9855f90075a020b5b98b8df42439c4",
+    "effects-validation.json": "a954d9a75b01d52f493386c0902965a889617e39be819b37e82dc5551bba403d",
+    "source-fit-inventory.json": "32a16eb0c651483e2a59b803adeada0dc7a5d80670cd47361c82702f4693347e",
+    "actual-render/render.json": "4d4425f673d38ed717b0493eeef30b7f62f543c565aea33fc09ec52344a448a4",
+    "actual-render/pixel-comparison.json": "c80c22d523e75245a7b1c62ba330b83257375db530ba0ca9b98d037ce1aac0e5"
+  },
+  "visual_review": "Paired normal contact boards and complete native-cycle previews reviewed. Every four-view/full-cycle frame has zero foreground pixels in its border two pixels wide.",
+  "known_limitations": [
+    "Separate resident RAM and frame-time benchmarks were not measured.",
+    "Encoded animation-key savings describe raw files, logical source accessors and import parsing input only. Native importing may densely rebake identical generated Animation keys; no runtime Animation RAM, key-search or playback CPU saving is claimed.",
+    "Original artistic review/approval status is unchanged.",
+    "Compressed shipping data increases by 11570 bytes despite smaller decoded GLB. This tradeoff is explicit; no unmeasured runtime-memory saving offsets it in this receipt."
+  ],
+  "genuine_editor_verification_revision": {
+    "status": "Corrected independent actual Editor verification passed within applicable unchanged modern or legacy scope",
+    "date": "2026-10-28",
+    "source_original_sha256": "bfc2ed88903f3a18650f400bddd483a34170bfed2935ab4296adaa4af1cebeaf",
+    "current_canonical_sha256": "c653c43d7203f1234f486cdc9f003a169e64e767664793ee4a75a0ce33a3257e",
+    "loader": "ResourceLoader.load(PackedScene)",
+    "load_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/drowned_pirate.glb-9f8e5bcd1940f401d879065df5407b6f.md5",
+        "import_metadata_sha256": "9c37a0019a8eb8b4ed49a06e1c822333487c3e7dc2d1406e0a3248beabbe8bda",
+        "imported_resource_path": "res://.godot/imported/drowned_pirate.glb-9f8e5bcd1940f401d879065df5407b6f.scn",
+        "imported_resource_sha256": "31ea0811fdd7e3d2a55b4822bc1b856df88359fa3b6d9d41a08cae2cd3ac8a3b",
+        "packed_scene_resource_path": "res://assets/qa/drowned_pirate/v2/baseline/drowned_pirate.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "59b9ae3a7af94db94eba293672b05b23",
+        "source_path": "res://assets/qa/drowned_pirate/v2/baseline/drowned_pirate.glb",
+        "source_sha256": "bfc2ed88903f3a18650f400bddd483a34170bfed2935ab4296adaa4af1cebeaf"
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/drowned_pirate.glb-96a506bd12e9cddbd844ed4adc3473b9.md5",
+        "import_metadata_sha256": "6a9812cf06e81c1895b64952fde3b417f721a4af7ec78388fd6293a4e00dd46f",
+        "imported_resource_path": "res://.godot/imported/drowned_pirate.glb-96a506bd12e9cddbd844ed4adc3473b9.scn",
+        "imported_resource_sha256": "4284bb9c38c4815973c02bb15a7384796a3d9372ddbe0765a359ea5ee19a4bd4",
+        "packed_scene_resource_path": "res://assets/qa/drowned_pirate/v2/candidate/drowned_pirate.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "e80954299cc0927e5c5ba035c56d037e",
+        "source_path": "res://assets/qa/drowned_pirate/v2/candidate/drowned_pirate.glb",
+        "source_sha256": "c653c43d7203f1234f486cdc9f003a169e64e767664793ee4a75a0ce33a3257e"
+      }
+    ],
+    "source_aliases_and_SCNs_have_current_source_and_destination_MD5_freshness": true,
+    "numeric": {
+      "poses": 232,
+      "all_source_clips": [
+        "Death_A",
+        "Fighting_Idle",
+        "Hit_Chest",
+        "Idle_A",
+        "Jog",
+        "Sword_Attack",
+        "Walk"
+      ],
+      "RESET_checked": true,
+      "maximum_Euclidean_position_error_source_units": 2.2151110405335057e-07,
+      "maximum_normal_angle_degrees": 2.5882158999434726e-05
+    },
+    "applicable_quality_budget": {
+      "position_four_float32_ULPs": 4.76837158203125e-07,
+      "source_coordinate_or_rest_axis_extent_magnitude": 1.6999998784676016,
+      "normal_degrees": 0.0001,
+      "both_passed": true
+    },
+    "full_typed_static_attributes_material_storage_texture_pixels_and_mips": {
+      "actor": "drowned_pirate",
+      "source_sha256": "bfc2ed88903f3a18650f400bddd483a34170bfed2935ab4296adaa4af1cebeaf",
+      "candidate_sha256": "c653c43d7203f1234f486cdc9f003a169e64e767664793ee4a75a0ce33a3257e",
+      "surfaces": [
+        {
+          "all_typed_arrays": [
+            {
+              "slot": 0,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 1,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 2,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 4,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 12,
+              "exact_after_proven_vertex_bijection": true
+            }
+          ],
+          "full_material_storage_fields_and_texture_pixels_mips_exact": true,
+          "format_exact": true,
+          "lods": [
+            {
+              "lod": 0,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            },
+            {
+              "lod": 1,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            },
+            {
+              "lod": 2,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            }
+          ],
+          "bounds_component_max_delta": 0.0,
+          "lod_capture_present": true
+        },
+        {
+          "all_typed_arrays": [
+            {
+              "slot": 0,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 1,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 2,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 4,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 10,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 11,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 12,
+              "exact_after_proven_vertex_bijection": true
+            }
+          ],
+          "full_material_storage_fields_and_texture_pixels_mips_exact": true,
+          "format_exact": true,
+          "lods": [
+            {
+              "lod": 0,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            },
+            {
+              "lod": 1,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            }
+          ],
+          "bounds_component_max_delta": 0.0,
+          "lod_capture_present": true
+        }
+      ],
+      "passed": true,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/drowned_pirate.glb-9f8e5bcd1940f401d879065df5407b6f.md5",
+          "import_metadata_sha256": "9c37a0019a8eb8b4ed49a06e1c822333487c3e7dc2d1406e0a3248beabbe8bda",
+          "imported_resource_path": "res://.godot/imported/drowned_pirate.glb-9f8e5bcd1940f401d879065df5407b6f.scn",
+          "imported_resource_sha256": "31ea0811fdd7e3d2a55b4822bc1b856df88359fa3b6d9d41a08cae2cd3ac8a3b",
+          "packed_scene_resource_path": "res://assets/qa/drowned_pirate/v2/baseline/drowned_pirate.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "59b9ae3a7af94db94eba293672b05b23",
+          "source_path": "res://assets/qa/drowned_pirate/v2/baseline/drowned_pirate.glb",
+          "source_sha256": "bfc2ed88903f3a18650f400bddd483a34170bfed2935ab4296adaa4af1cebeaf"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/drowned_pirate.glb-96a506bd12e9cddbd844ed4adc3473b9.md5",
+          "import_metadata_sha256": "6a9812cf06e81c1895b64952fde3b417f721a4af7ec78388fd6293a4e00dd46f",
+          "imported_resource_path": "res://.godot/imported/drowned_pirate.glb-96a506bd12e9cddbd844ed4adc3473b9.scn",
+          "imported_resource_sha256": "4284bb9c38c4815973c02bb15a7384796a3d9372ddbe0765a359ea5ee19a4bd4",
+          "packed_scene_resource_path": "res://assets/qa/drowned_pirate/v2/candidate/drowned_pirate.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "e80954299cc0927e5c5ba035c56d037e",
+          "source_path": "res://assets/qa/drowned_pirate/v2/candidate/drowned_pirate.glb",
+          "source_sha256": "c653c43d7203f1234f486cdc9f003a169e64e767664793ee4a75a0ce33a3257e"
+        }
+      ]
+    },
+    "retained_Editor_morph_fields": {
+      "actor": "drowned_pirate",
+      "source_sha256": "bfc2ed88903f3a18650f400bddd483a34170bfed2935ab4296adaa4af1cebeaf",
+      "candidate_sha256": "c653c43d7203f1234f486cdc9f003a169e64e767664793ee4a75a0ce33a3257e",
+      "all_retained_editor_POSITION_NORMAL_TANGENT_typed_bits_exact": true,
+      "retained_targets": 65,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/drowned_pirate.glb-9f8e5bcd1940f401d879065df5407b6f.md5",
+          "import_metadata_sha256": "9c37a0019a8eb8b4ed49a06e1c822333487c3e7dc2d1406e0a3248beabbe8bda",
+          "imported_resource_path": "res://.godot/imported/drowned_pirate.glb-9f8e5bcd1940f401d879065df5407b6f.scn",
+          "imported_resource_sha256": "31ea0811fdd7e3d2a55b4822bc1b856df88359fa3b6d9d41a08cae2cd3ac8a3b",
+          "packed_scene_resource_path": "res://assets/qa/drowned_pirate/v2/baseline/drowned_pirate.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "59b9ae3a7af94db94eba293672b05b23",
+          "source_path": "res://assets/qa/drowned_pirate/v2/baseline/drowned_pirate.glb",
+          "source_sha256": "bfc2ed88903f3a18650f400bddd483a34170bfed2935ab4296adaa4af1cebeaf"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/drowned_pirate.glb-96a506bd12e9cddbd844ed4adc3473b9.md5",
+          "import_metadata_sha256": "6a9812cf06e81c1895b64952fde3b417f721a4af7ec78388fd6293a4e00dd46f",
+          "imported_resource_path": "res://.godot/imported/drowned_pirate.glb-96a506bd12e9cddbd844ed4adc3473b9.scn",
+          "imported_resource_sha256": "4284bb9c38c4815973c02bb15a7384796a3d9372ddbe0765a359ea5ee19a4bd4",
+          "packed_scene_resource_path": "res://assets/qa/drowned_pirate/v2/candidate/drowned_pirate.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "e80954299cc0927e5c5ba035c56d037e",
+          "source_path": "res://assets/qa/drowned_pirate/v2/candidate/drowned_pirate.glb",
+          "source_sha256": "c653c43d7203f1234f486cdc9f003a169e64e767664793ee4a75a0ce33a3257e"
+        }
+      ],
+      "scope": "Direct actual Editor source/candidate retained morph P/N/T byte digests after independently proved complete static-attribute vertex bijection. Exact target mask from source packing lineage; no morph field omitted.",
+      "passed": true
+    },
+    "withdrawn_prior_loader_claim": "Prior shared dumper captures labelled imported used GlbSceneCache for these outside-actor aliases and therefore were raw-cache comparisons. They remain retained private raw/native evidence, but their independent Editor claim is withdrawn and superseded by these explicitly loaded SCNs.",
+    "unchanged_other_evidence": "Original independent physical observations, exact source curves, Blender, actual native gameplay body rendering, placement, mounted/cinematic dependencies and secondary effects remain hash-bound and unchanged. No artistic approval, model, action, cap or witness change in this QA revision.",
+    "production_scope": "Production actor_shipping loose folders remain raw/native and are not Editor-imported. Per-surface Editor-generated LODs are verification representation metadata, not a claim of new gameplay LODs.",
+    "evidence_sha256": {
+      ".local/heavy-batch/drowned_pirate/v2/editor-real-v1/qualification-job.json": "0920f7b906357a47ca6d58ab29d99f6916cfb0a4e4b14fa0a126648127c139fd",
+      ".local/heavy-batch/drowned_pirate/v2/editor-real-v1/imported/runtime.json": "273c2e2521594f1b90c1dd1769e917f0910ac9f9a984af781c3237e9c2c2ef82",
+      ".local/heavy-batch/drowned_pirate/v2/editor-real-v1/imported-validation.json": "8217323182b8cbe8ee3940177603aa18d53ee8bcb731b79fe4b023578faa81c6",
+      ".local/heavy-batch/drowned_pirate/v2/editor-real-v1/imported-static-mesh-bits.json": "de2b304523cec732c84e5bd1766286d93609c1950f3fdc3275110bf83d71208a",
+      ".local/heavy-batch/drowned_pirate/v2/editor-real-v1/imported-typed-validation.json": "6dc5d64df4dcbcb20ffdbea7d3083635e1372750a2effb610be2633c8b97c205",
+      ".local/heavy-batch/drowned_pirate/v2/editor-real-v1/morph-digest-job.json": "b732c865943299e1de9c1c2932d258c2f5875dc4e692a4abf410e4c9a4d5521a",
+      ".local/heavy-batch/drowned_pirate/v2/editor-real-v1/imported-morph-digests.json": "7d1d588ec2d4d31e39a3eeef607202579907c78c7fa2988a4fbdaa5429642f02",
+      ".local/heavy-batch/drowned_pirate/v2/editor-real-v1/imported-morph-validation.json": "0f9ff1a36d0092ed1ad1d6c7a339389de772cb6b07307735ceea3405f9ac1f94"
+    }
+  }
+}

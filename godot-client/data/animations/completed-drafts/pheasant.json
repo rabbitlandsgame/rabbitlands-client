@@ -75,10 +75,34 @@
     "walk": 0.175123788818661,
     "run": 0.4114249954529291
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "A low, watchful stalking step with long alternating advances and quiet long-tail balance; a quick level-bodied escape run.",
     "attack": "A compact neck coil and darting beak strike with minimal wing opening, returning quickly to an alert stance.",
     "death": "The narrow breast slumps forward, the neck folds and the long tail remains attached as the legs release into a still grounded collapse."
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "pheasant",
+    "appliesToSHA256": "30e420173b9a51c33b171bdf10a608d1b2e4898b1fae890df4c7ca6b0dd89365",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "saved_button_approval",
+      "event_id": "d4a1f29b-2946-42ed-9c3d-413ca9c406b5",
+      "event_sha256": "3aa91b82bef23f872540a69cb42b768448ce2cb500485f7279e749543f718f74",
+      "utc": "2026-10-28T21:39:43.385684+00:00"
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "pheasant",
+    "sourceSHA256": "0a4bc08b640631656ae91f5e305c5055dda5d4c97aa52aa63ff122d8b9bb806d",
+    "previousRuntimeSHA256": "0a4bc08b640631656ae91f5e305c5055dda5d4c97aa52aa63ff122d8b9bb806d",
+    "runtimeSHA256": "30e420173b9a51c33b171bdf10a608d1b2e4898b1fae890df4c7ca6b0dd89365",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": null
   }
 }

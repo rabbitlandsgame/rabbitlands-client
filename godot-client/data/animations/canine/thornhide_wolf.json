@@ -69,5 +69,38 @@
   "strideMetresPerSecond": {
     "walk": 0.4992373532741986
   },
-  "strideScalesWithActor": true
+  "strideScalesWithActor": true,
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "thornhide_wolf",
+    "sourceSHA256": "7800bebe2240582916b27981f755c5be5ed75fd8a2eaf64961cee5625491d72e",
+    "previousRuntimeSHA256": "8d73d96fda42452ef916439d9334fb5e644dbaecfdc5b35f6fa76df1f043e4bd",
+    "runtimeSHA256": "4424276d555b9f27b87584ce8414bb96a1684c8a8aa2291253722cb8e11d74de",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "thornhide_wolf",
+      "sourceSHA256": "7800bebe2240582916b27981f755c5be5ed75fd8a2eaf64961cee5625491d72e",
+      "runtimeSHA256": "8d73d96fda42452ef916439d9334fb5e644dbaecfdc5b35f6fa76df1f043e4bd",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 240,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "reviewStatus": "accepted",
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "thornhide_wolf",
+    "appliesToSHA256": "4424276d555b9f27b87584ce8414bb96a1684c8a8aa2291253722cb8e11d74de",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "saved_button_approval",
+      "event_id": "cbf3bdbf-d759-4aa1-b833-0faf351e3d63",
+      "event_sha256": "b4da36dee47315ec37ecacdf2fc9315270e999a6756a82e8a34fa32d65c7342d",
+      "utc": "2026-10-28T21:15:00.957319+00:00"
+    },
+    "previousAuthoringReviewStatus": null,
+    "repairNoteEvents": []
+  }
 }

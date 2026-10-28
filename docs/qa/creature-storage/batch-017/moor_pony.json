@@ -1,0 +1,475 @@
+{
+  "schema_version": 1,
+  "batch": 17,
+  "actor": "moor_pony",
+  "date": "2026-10-27",
+  "runtime_path": "godot-client/assets/actors/native/creatures/moor_pony.glb",
+  "source_sha256": "bdd63c1e7593f763cbfaca344999cdd006513231bf3a74954532323dfbea8902",
+  "runtime_sha256": "2142b182f305c38c439dc0d037e06d3f367fba6f0d60dc4bd31371b30487b8d5",
+  "qualification": "Passed exact source/continuous curves, original physical observations, paired fresh Blender poses/default, native and fresh editor-imported playback/transitions, fully fitted actual-Actor cycles/four views, seeded dissolve/silhouette/reset checks.",
+  "human_approval_changed": false,
+  "recipe": {
+    "tool": "eloria-assets/tools/pack_creature_storage.py",
+    "tool_commit": "5bdd51c3",
+    "steps": [
+      "prune_zero_targets",
+      "reduce_constant_runs",
+      "compact"
+    ],
+    "profile": null,
+    "bounds": null,
+    "preserve_trs_keys": false
+  },
+  "bytes": {
+    "source_bytes": 9776016,
+    "candidate_bytes": 8057364,
+    "source_zstd_bytes": 5851897,
+    "candidate_zstd_bytes": 5860631
+  },
+  "inactive_targets_removed": 0,
+  "flat_run_key_rows_removed": 157199,
+  "corrective_graphics_buffer_bytes": {
+    "source": 0,
+    "candidate": 0,
+    "saved": 0,
+    "scope": "Actual Godot raw blend_shape_data byte totals over all mesh surfaces; shared per loaded model."
+  },
+  "draw_surfaces": {
+    "source": 1,
+    "candidate": 1
+  },
+  "source_validation": {
+    "passed": true,
+    "source_sha256": "bdd63c1e7593f763cbfaca344999cdd006513231bf3a74954532323dfbea8902",
+    "candidate_sha256": "2142b182f305c38c439dc0d037e06d3f367fba6f0d60dc4bd31371b30487b8d5",
+    "geometry_skin_binds_rest_topology_uv_material_image_bits_preserved": true,
+    "retained_key_time_and_value_bits_exact_only_flat_interiors_removed": true,
+    "every_removed_default_and_key_is_zero": true,
+    "redundant_flat_key_rows_proved": 157199,
+    "preexisting_duplicate_property_curves_preserved_in_occurrence_order": 0,
+    "meshes": [],
+    "clips": {
+      "Fighting_Idle": {
+        "original_knots": 4,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 12
+      },
+      "Hit_Chest": {
+        "original_knots": 16,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 36
+      },
+      "Idle_A": {
+        "original_knots": 33,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 70
+      },
+      "Walk": {
+        "original_knots": 3447,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 6898
+      },
+      "Jog": {
+        "original_knots": 2029,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 4062
+      },
+      "Sword_Attack": {
+        "original_knots": 19673,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 39350
+      },
+      "Death_A": {
+        "original_knots": 3999,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 8002
+      },
+      "Gallop": {
+        "original_knots": 15469,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 30941
+      }
+    },
+    "proof": "Zero defaults and every LINEAR/STEP key zero prove inactive targets remain zero continuously and under crossfades. All retained accessor bytes and retained time/value rows are exact. Deleted key rows sit strictly inside three bit-identical adjacent rows; plateau boundaries and endpoints remain."
+  },
+  "physical_observations": {
+    "passed": true,
+    "source_sha256": "bdd63c1e7593f763cbfaca344999cdd006513231bf3a74954532323dfbea8902",
+    "candidate_sha256": "2142b182f305c38c439dc0d037e06d3f367fba6f0d60dc4bd31371b30487b8d5",
+    "surface_probes": 165,
+    "poses": 152,
+    "clips": 8,
+    "source_candidate_position_error": 0.0,
+    "source_candidate_normal_vector_error": 0.0,
+    "original_witness_position_error_over_height": 0.0,
+    "original_source_witness_position_error_over_height": 0.0,
+    "original_witness_normal_vector_error": 0.0,
+    "original_witness_bone_matrix_error": 0.0,
+    "witness_sha256": "6465ed2a79348655cb2e6c46107b0bc8ec5cc41c2dd05a2b6fab65f84befa592",
+    "sampled_motion_min": [
+      -0.5035169494604501,
+      0.003399510489454291,
+      -1.5840793357430092
+    ],
+    "sampled_motion_max": [
+      1.0300599118312759,
+      2.382189624004018,
+      1.419102947974161
+    ]
+  },
+  "paired_fresh_blender": {
+    "maximum_position_error": 0.0,
+    "maximum_bone_matrix_error": 0.0,
+    "maximum_float32_budget": 3.814697265625e-06,
+    "poses": 153,
+    "neutral_default_checked": true,
+    "passed": true,
+    "source_sha256": "bdd63c1e7593f763cbfaca344999cdd006513231bf3a74954532323dfbea8902",
+    "candidate_sha256": "2142b182f305c38c439dc0d037e06d3f367fba6f0d60dc4bd31371b30487b8d5",
+    "scope": "Direct source/candidate frozen-ID surfaces and every bone matrix at each original witness pose plus controlled neutral/default pose. Sixteen float32 ULPs at baseline coordinate/matrix magnitude; independent of inherited source/witness residual and separate from native/source appearance budgets."
+  },
+  "native_and_editor_imported": {
+    "native": {
+      "samples": 296,
+      "maximum_position_error": 6.201755454307414e-07,
+      "maximum_normal_angle_degrees": 3.0414001021467728e-05
+    },
+    "imported": {
+      "samples": 296,
+      "maximum_position_error": 6.201755454307414e-07,
+      "maximum_normal_angle_degrees": 3.0414001021467728e-05,
+      "actual_loader": "ResourceLoader.load(PackedScene)",
+      "authoritative_SCN_provenance": "genuine_editor_verification_revision.load_proofs"
+    }
+  },
+  "native_numeric_budget": {
+    "actor": "moor_pony",
+    "source_coordinate_or_extent_magnitude": 2.5011540620633106,
+    "four_float32_ULPs": 9.5367431640625e-07,
+    "runtime_position_error": 6.201755454307414e-07,
+    "runtime_normal_degrees": 3.0414001021467728e-05,
+    "imported_position_error": 6.201755454307414e-07,
+    "imported_normal_degrees": 3.0414001021467728e-05,
+    "normal_degrees_budget": 0.0001,
+    "scope": "Four float32 ULPs at maximum original source coordinate/extent magnitude; original source mathematical equality remains exact. Native normal screen 1e-4 degrees."
+  },
+  "placement": {
+    "passed": true,
+    "bounds_error": 0.0,
+    "placement_error": 0.0,
+    "overhead_height_error": 0.0
+  },
+  "render_fit": {
+    "source_sha256": "bdd63c1e7593f763cbfaca344999cdd006513231bf3a74954532323dfbea8902",
+    "model_global": [
+      [
+        0.5,
+        2.54669748755987e-06,
+        0.163999974727631
+      ],
+      [
+        -0.882353007793427,
+        0.0,
+        7.71377486330493e-08
+      ],
+      [
+        0.0,
+        0.882353007793427,
+        0.0
+      ],
+      [
+        -7.71377486330493e-08,
+        0.0,
+        -0.882353007793427
+      ]
+    ],
+    "position": [
+      -0.509388566387266,
+      0.003001895449118133,
+      -1.1147806827205888
+    ],
+    "size": [
+      1.4815680074264308,
+      2.1072033059563693,
+      2.811177404742315
+    ],
+    "poses": 318,
+    "scope": "Every vertex at every full-cycle render frame and view-still pose, using actual complete Actor Godot arrays/poses/weights/transforms, renderer morph cutoff and four/eight influence skin. Evaluated in float64 with a separate 30% camera margin."
+  },
+  "source_fit_inventory": {
+    "passed": true,
+    "source_sha256": "bdd63c1e7593f763cbfaca344999cdd006513231bf3a74954532323dfbea8902",
+    "candidate_sha256": "2142b182f305c38c439dc0d037e06d3f367fba6f0d60dc4bd31371b30487b8d5",
+    "source_clips": [
+      "Death_A",
+      "Fighting_Idle",
+      "Gallop",
+      "Hit_Chest",
+      "Idle_A",
+      "Jog",
+      "Sword_Attack",
+      "Walk"
+    ],
+    "actual_Actor_fit_clips": [
+      "Death_A",
+      "Fighting_Idle",
+      "Gallop",
+      "Hit_Chest",
+      "Idle_A",
+      "Jog",
+      "Sword_Attack",
+      "Walk"
+    ],
+    "fit_runtime_sha256": "23496542d2c1b038b33b9a3d9de29295b9dad8a4abcfaceb26800ef68538e179",
+    "poses": 318,
+    "scope": "Actual Actor source-pose capture inventory, not merely requested QA aliases. Every source clip is present in fitted playback data."
+  },
+  "appearance": {
+    "source_sha256": "bdd63c1e7593f763cbfaca344999cdd006513231bf3a74954532323dfbea8902",
+    "candidate_sha256": "2142b182f305c38c439dc0d037e06d3f367fba6f0d60dc4bd31371b30487b8d5",
+    "image_pairs": 430,
+    "width": 512,
+    "height": 512,
+    "different_image_pairs": 20,
+    "maximum_different_pixels": 10,
+    "maximum_pixels_above_two_levels": 1,
+    "maximum_mean_channel_error": 1.52587890625e-05,
+    "maximum_channel_error": 5,
+    "scope": "Complete ReplicatedActor3D setup with actual display scale, grounding and body materials; identical cameras for source/candidate, four views and every full native cycle at24Hz. Numeric playback and pixel comparisons are separate reports.",
+    "framing_passed": true,
+    "clipped_frame_labels": [],
+    "maximum_border_foreground_pixels": 0
+  },
+  "secondary_effects": {
+    "effective_scale": 0.882353007793427,
+    "failures": [],
+    "gpu": "NVIDIA GeForce RTX 5080 Laptop GPU",
+    "max_color_error": 0.0,
+    "max_custom_error": 0.0,
+    "max_dissolve_bounds_error": 3.99840104137184e-07,
+    "max_fragment_transform_error": 5.96232666794094e-07,
+    "max_grain_error": 1.31130218627984e-08,
+    "max_silhouette_position_error": 6.39183838302415e-07,
+    "mounted": {},
+    "passed": true,
+    "renderer": "forward_plus",
+    "runtime_sha256": "2142b182f305c38c439dc0d037e06d3f367fba6f0d60dc4bd31371b30487b8d5",
+    "seeded_cases": 15,
+    "source_sha256": "bdd63c1e7593f763cbfaca344999cdd006513231bf3a74954532323dfbea8902"
+  },
+  "rig_investigation": {
+    "decision": "Original rig, skin and topology retained; this candidate uses exact storage reductions only."
+  },
+  "evidence_sha256": {
+    "qualification-job.json": "a2e611c863cc5e192a5557b51cc485c467aa17d0b0559efa86647cadca070db0",
+    "processing.json": "162365931c232a6c5465f99331030d289f8dcf29026ba9892718025999841d03",
+    "exact-source-validation.json": "28cdc3a8ec81b7557dec793d4dbfc54c0090f7d8ce38d6f34b8baf57f74e30c7",
+    "physical-witness-validation.json": "c6b1859438801a5aedf851c0932269390d75e71a8b27b25ad486925b33a29055",
+    "blender-validation.json": "8d76cc49549aeb31abcbf5d9966f628c948492fddd0a1b91ca42d596437195c9",
+    "blender-direct-validation.json": "980370c778f836bd65b5402e72d81556cc7ec67cf76f0a9d46607844489deff8",
+    "native-validation.json": "bb34711f5a94b0e9e123916ceebc439cde6693ce841a20d064c926fc5ae3d874",
+    "imported-validation.json": "bb34711f5a94b0e9e123916ceebc439cde6693ce841a20d064c926fc5ae3d874",
+    "render-fit.json": "ddb01c289177ac1de8b416aab24af4d4f1da74a1537379d9340de2775a28e6c4",
+    "placement.json": "0740341e21e37614639ae631e9b62e9431887bd4d6d56c298b0a97429ee55da2",
+    "effects-validation.json": "f5d98e924e35e62fa754bcd2f1dd290012bbce45f3210bacabe2e6a2b6c6805d",
+    "source-fit-inventory.json": "a04f2b3f697927735ec3dab69a0576afc3cf53cc6d2363007f17f30df59b7edc",
+    "actual-render/render.json": "1412a786a56e901a69cde5af3cb67baa2dbf46e5cd563c821e78759976562a70",
+    "actual-render/pixel-comparison.json": "0b1ebb24ff64409b2e5264e81e10e657824978a2b99dd015635c1fa1049955f4"
+  },
+  "visual_review": "Paired normal contact boards and complete native-cycle previews reviewed. Every four-view/full-cycle frame has zero foreground pixels in its border two pixels wide.",
+  "known_limitations": [
+    "Separate resident RAM and frame-time benchmarks were not measured.",
+    "Encoded animation-key savings describe raw files, logical source accessors and import parsing input only. Native importing may densely rebake identical generated Animation keys; no runtime Animation RAM, key-search or playback CPU saving is claimed.",
+    "Original artistic review/approval status is unchanged.",
+    "Compressed shipping data increases by 8734 bytes despite smaller decoded GLB. This tradeoff is explicit; no unmeasured runtime-memory saving offsets it in this receipt."
+  ],
+  "physical_observation_provenance": {
+    "kind": "New immutable source-only observations for the frozen current original, captured before candidate imports.",
+    "source_sha256": "bdd63c1e7593f763cbfaca344999cdd006513231bf3a74954532323dfbea8902",
+    "witness_sha256": "6465ed2a79348655cb2e6c46107b0bc8ec5cc41c2dd05a2b6fab65f84befa592",
+    "scope": "This receipt proves preservation of the current original. It does not revalidate or retag the historical equid-motion authored-fitness profile/observations bound to the different50589ff source. Historical rows and observation values remain unchanged; their preexisting source-hash mismatch is separate."
+  },
+  "genuine_editor_verification_revision": {
+    "status": "Corrected independent actual Editor verification passed within applicable unchanged modern or legacy scope",
+    "date": "2026-10-28",
+    "source_original_sha256": "bdd63c1e7593f763cbfaca344999cdd006513231bf3a74954532323dfbea8902",
+    "current_canonical_sha256": "2142b182f305c38c439dc0d037e06d3f367fba6f0d60dc4bd31371b30487b8d5",
+    "loader": "ResourceLoader.load(PackedScene)",
+    "load_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/moor_pony.glb-069d2de14a68dd12f3a884dce6d2a457.md5",
+        "import_metadata_sha256": "7c82babaaa41e8bd25f98aba3c7e76423388d846c18db737de8138b274a3cc47",
+        "imported_resource_path": "res://.godot/imported/moor_pony.glb-069d2de14a68dd12f3a884dce6d2a457.scn",
+        "imported_resource_sha256": "474f841899ba6848eb8c89227a98d932d96ed98731804fbe8323c4a8cb4a9bca",
+        "packed_scene_resource_path": "res://assets/qa/moor_pony/v2/baseline/moor_pony.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "8ab115efd7926a5aa4d80da568ae0b9d",
+        "source_path": "res://assets/qa/moor_pony/v2/baseline/moor_pony.glb",
+        "source_sha256": "bdd63c1e7593f763cbfaca344999cdd006513231bf3a74954532323dfbea8902"
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/moor_pony.glb-01f5fe32ee0c7278ced7172c2cee10b1.md5",
+        "import_metadata_sha256": "ff273f34c68d7e2176957100afd5d914b88e61c944f856b68321bf7a8cc5d5c2",
+        "imported_resource_path": "res://.godot/imported/moor_pony.glb-01f5fe32ee0c7278ced7172c2cee10b1.scn",
+        "imported_resource_sha256": "3fc884dbef5809dd17f0d31ed6753edfac12b329181eadfb72fa5bdb9c44ffe8",
+        "packed_scene_resource_path": "res://assets/qa/moor_pony/v2/candidate/moor_pony.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "a100d6c2f3af6b854176fe1af9682134",
+        "source_path": "res://assets/qa/moor_pony/v2/candidate/moor_pony.glb",
+        "source_sha256": "2142b182f305c38c439dc0d037e06d3f367fba6f0d60dc4bd31371b30487b8d5"
+      }
+    ],
+    "source_aliases_and_SCNs_have_current_source_and_destination_MD5_freshness": true,
+    "numeric": {
+      "poses": 296,
+      "all_source_clips": [
+        "Fighting_Idle",
+        "Hit_Chest",
+        "Idle_A",
+        "Walk",
+        "Jog",
+        "Sword_Attack",
+        "Death_A",
+        "Gallop"
+      ],
+      "RESET_checked": true,
+      "maximum_Euclidean_position_error_source_units": 6.201755454307414e-07,
+      "maximum_normal_angle_degrees": 3.0414001021467728e-05
+    },
+    "applicable_quality_budget": {
+      "position_four_float32_ULPs": 9.5367431640625e-07,
+      "source_coordinate_or_rest_axis_extent_magnitude": 2.5011540620633106,
+      "normal_degrees": 0.0001,
+      "both_passed": true
+    },
+    "full_typed_static_attributes_material_storage_texture_pixels_and_mips": {
+      "actor": "moor_pony",
+      "source_sha256": "bdd63c1e7593f763cbfaca344999cdd006513231bf3a74954532323dfbea8902",
+      "candidate_sha256": "2142b182f305c38c439dc0d037e06d3f367fba6f0d60dc4bd31371b30487b8d5",
+      "surfaces": [
+        {
+          "all_typed_arrays": [
+            {
+              "slot": 0,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 1,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 2,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 4,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 10,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 11,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 12,
+              "exact_after_proven_vertex_bijection": true
+            }
+          ],
+          "full_material_storage_fields_and_texture_pixels_mips_exact": true,
+          "format_exact": true,
+          "lods": [
+            {
+              "lod": 0,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            },
+            {
+              "lod": 1,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            },
+            {
+              "lod": 2,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            }
+          ],
+          "bounds_component_max_delta": 0.0,
+          "lod_capture_present": true
+        }
+      ],
+      "passed": true,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/moor_pony.glb-069d2de14a68dd12f3a884dce6d2a457.md5",
+          "import_metadata_sha256": "7c82babaaa41e8bd25f98aba3c7e76423388d846c18db737de8138b274a3cc47",
+          "imported_resource_path": "res://.godot/imported/moor_pony.glb-069d2de14a68dd12f3a884dce6d2a457.scn",
+          "imported_resource_sha256": "474f841899ba6848eb8c89227a98d932d96ed98731804fbe8323c4a8cb4a9bca",
+          "packed_scene_resource_path": "res://assets/qa/moor_pony/v2/baseline/moor_pony.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "8ab115efd7926a5aa4d80da568ae0b9d",
+          "source_path": "res://assets/qa/moor_pony/v2/baseline/moor_pony.glb",
+          "source_sha256": "bdd63c1e7593f763cbfaca344999cdd006513231bf3a74954532323dfbea8902"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/moor_pony.glb-01f5fe32ee0c7278ced7172c2cee10b1.md5",
+          "import_metadata_sha256": "ff273f34c68d7e2176957100afd5d914b88e61c944f856b68321bf7a8cc5d5c2",
+          "imported_resource_path": "res://.godot/imported/moor_pony.glb-01f5fe32ee0c7278ced7172c2cee10b1.scn",
+          "imported_resource_sha256": "3fc884dbef5809dd17f0d31ed6753edfac12b329181eadfb72fa5bdb9c44ffe8",
+          "packed_scene_resource_path": "res://assets/qa/moor_pony/v2/candidate/moor_pony.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "a100d6c2f3af6b854176fe1af9682134",
+          "source_path": "res://assets/qa/moor_pony/v2/candidate/moor_pony.glb",
+          "source_sha256": "2142b182f305c38c439dc0d037e06d3f367fba6f0d60dc4bd31371b30487b8d5"
+        }
+      ]
+    },
+    "retained_Editor_morph_fields": {
+      "actor": "moor_pony",
+      "source_sha256": "bdd63c1e7593f763cbfaca344999cdd006513231bf3a74954532323dfbea8902",
+      "candidate_sha256": "2142b182f305c38c439dc0d037e06d3f367fba6f0d60dc4bd31371b30487b8d5",
+      "all_retained_editor_POSITION_NORMAL_TANGENT_typed_bits_exact": true,
+      "retained_targets": 0,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/moor_pony.glb-069d2de14a68dd12f3a884dce6d2a457.md5",
+          "import_metadata_sha256": "7c82babaaa41e8bd25f98aba3c7e76423388d846c18db737de8138b274a3cc47",
+          "imported_resource_path": "res://.godot/imported/moor_pony.glb-069d2de14a68dd12f3a884dce6d2a457.scn",
+          "imported_resource_sha256": "474f841899ba6848eb8c89227a98d932d96ed98731804fbe8323c4a8cb4a9bca",
+          "packed_scene_resource_path": "res://assets/qa/moor_pony/v2/baseline/moor_pony.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "8ab115efd7926a5aa4d80da568ae0b9d",
+          "source_path": "res://assets/qa/moor_pony/v2/baseline/moor_pony.glb",
+          "source_sha256": "bdd63c1e7593f763cbfaca344999cdd006513231bf3a74954532323dfbea8902"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/moor_pony.glb-01f5fe32ee0c7278ced7172c2cee10b1.md5",
+          "import_metadata_sha256": "ff273f34c68d7e2176957100afd5d914b88e61c944f856b68321bf7a8cc5d5c2",
+          "imported_resource_path": "res://.godot/imported/moor_pony.glb-01f5fe32ee0c7278ced7172c2cee10b1.scn",
+          "imported_resource_sha256": "3fc884dbef5809dd17f0d31ed6753edfac12b329181eadfb72fa5bdb9c44ffe8",
+          "packed_scene_resource_path": "res://assets/qa/moor_pony/v2/candidate/moor_pony.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "a100d6c2f3af6b854176fe1af9682134",
+          "source_path": "res://assets/qa/moor_pony/v2/candidate/moor_pony.glb",
+          "source_sha256": "2142b182f305c38c439dc0d037e06d3f367fba6f0d60dc4bd31371b30487b8d5"
+        }
+      ],
+      "scope": "Direct actual Editor source/candidate retained morph P/N/T byte digests after independently proved complete static-attribute vertex bijection. Exact target mask from source packing lineage; no morph field omitted.",
+      "passed": true
+    },
+    "withdrawn_prior_loader_claim": "Prior shared dumper captures labelled imported used GlbSceneCache for these outside-actor aliases and therefore were raw-cache comparisons. They remain retained private raw/native evidence, but their independent Editor claim is withdrawn and superseded by these explicitly loaded SCNs.",
+    "unchanged_other_evidence": "Original independent physical observations, exact source curves, Blender, actual native gameplay body rendering, placement, mounted/cinematic dependencies and secondary effects remain hash-bound and unchanged. No artistic approval, model, action, cap or witness change in this QA revision.",
+    "production_scope": "Production actor_shipping loose folders remain raw/native and are not Editor-imported. Per-surface Editor-generated LODs are verification representation metadata, not a claim of new gameplay LODs.",
+    "evidence_sha256": {
+      ".local/heavy-batch/moor_pony/v2/editor-real-v1/qualification-job.json": "a69aa83418defc72793f1ebc330db099208f13f4bacb3bad50e3ca48a5e4a653",
+      ".local/heavy-batch/moor_pony/v2/editor-real-v1/imported/runtime.json": "f4d3576d2f388306b2304fd48b836d360053359f6dafb240f4aea37ee3b1395c",
+      ".local/heavy-batch/moor_pony/v2/editor-real-v1/imported-validation.json": "bb34711f5a94b0e9e123916ceebc439cde6693ce841a20d064c926fc5ae3d874",
+      ".local/heavy-batch/moor_pony/v2/editor-real-v1/imported-static-mesh-bits.json": "1be98ad6880778affc4f106a980f5741617bd3e29fae1702efa6cdf0fd4e6b32",
+      ".local/heavy-batch/moor_pony/v2/editor-real-v1/imported-typed-validation.json": "c7740360955d66af8e9502b2466e96b8f91f79a150aa419bc03a9ec7a03c9c5c",
+      ".local/heavy-batch/moor_pony/v2/editor-real-v1/morph-digest-job.json": "95c4442d485f61bf3126cd3bc53d54a5d7c8252ca6ed7120d810dbd24216c150",
+      ".local/heavy-batch/moor_pony/v2/editor-real-v1/imported-morph-digests.json": "a5392584fbbe32a372cc892ba58854844500cbb398a93758ba8fb338559821aa",
+      ".local/heavy-batch/moor_pony/v2/editor-real-v1/imported-morph-validation.json": "7896fde7bb556d44654ec22c765732619a96ae47c43fe4baad185786efe63956"
+    }
+  }
+}

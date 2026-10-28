@@ -125,6 +125,7 @@ def _skip_equipment(build: Path) -> None:
     "WARNING: glb cache: pack failed for assets/actors/native/races/hero.glb (Unconfigured)",
     "WARNING: Native hairstyle failed to load: res://assets/actors/native/hair/a.glb",
     "WARNING: Fitted hairstyle has an incompatible skeleton: res://assets/actors/native/hair/a.glb",
+    "ERROR: Creature payload rejected (decoded SHA-256): assets/actors/native/creatures/a.glb",
 ])
 def test_the_smoke_launch_fails_on_an_actor_part_that_fell_back(tmp_path, monkeypatch, line):
     """A fallback is a warning, not a load error, and the packaged Orun male's

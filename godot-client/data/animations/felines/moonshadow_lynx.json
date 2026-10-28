@@ -70,5 +70,44 @@
   "strideMetresPerSecond": {
     "walk": 0.4642792036981643,
     "run": 1.2121042147830863
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "moonshadow_lynx",
+    "sourceSHA256": "cbc147ac6ace8da81d491b12a665b028fb925edf14819542164b3067acfe3cf3",
+    "previousRuntimeSHA256": "d3bc8342fab8fa1c8bf65ed727b15a21af7bf4743f2d40033b407a97b8d4f943",
+    "runtimeSHA256": "6d6ffd6ee79a264af82cfe1a8f14c8672b5243ef48aacc742cbc987630bcca53",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "moonshadow_lynx",
+      "sourceSHA256": "cbc147ac6ace8da81d491b12a665b028fb925edf14819542164b3067acfe3cf3",
+      "runtimeSHA256": "d3bc8342fab8fa1c8bf65ed727b15a21af7bf4743f2d40033b407a97b8d4f943",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 240,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "reviewStatus": "accepted",
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "moonshadow_lynx",
+    "appliesToSHA256": "6d6ffd6ee79a264af82cfe1a8f14c8672b5243ef48aacc742cbc987630bcca53",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "saved_button_approval",
+      "event_id": "6691c16c-4bb3-40d9-8f83-f6d85af41de9",
+      "event_sha256": "cbad62ef782137d8b5d8582c8caaf981310fa3b71c4ee73a890c2cf5965bd2c7",
+      "utc": "2026-10-28T21:15:59.548564+00:00"
+    },
+    "previousAuthoringReviewStatus": null,
+    "repairNoteEvents": [
+      {
+        "event_id": "d44b7d82-043a-4816-9100-0ef57b02ff87",
+        "event_sha256": "cc5092e62b90b0f08ce853c1c1db97e682ed5bed480d97aad09d2b4a8ff8f01e",
+        "candidate_sha256": "6d6ffd6ee79a264af82cfe1a8f14c8672b5243ef48aacc742cbc987630bcca53"
+      }
+    ]
   }
 }

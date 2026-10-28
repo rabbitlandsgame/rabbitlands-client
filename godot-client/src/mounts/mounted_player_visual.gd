@@ -63,7 +63,8 @@ func configure(player: ReplicatedActor3D, models: Dictionary, mount_id := "moor_
 		"rotation": 0, "kind": 5, "name": "", "scale": 1.0}, CoordinateAdapter.new(), config, mapping)
 	if not errors.is_empty():
 		return errors
-	coat.configure(pony,mount_id,profile)
+	var coat_errors := coat.configure(pony,mount_id,profile)
+	if not coat_errors.is_empty(): return coat_errors
 	var offset: Array = profile.get("visualOffsetMetres", [0.0, 0.0, 0.0])
 	pony.position = Vector3(float(offset[0]), float(offset[1]), float(offset[2]))
 	pony.server_target = Vector3.ZERO

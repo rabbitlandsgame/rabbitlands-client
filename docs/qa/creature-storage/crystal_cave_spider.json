@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "actor": "crystal_cave_spider",
+  "date": "2026-10-27",
+  "runtime_path": "godot-client/assets/actors/native/creatures/crystal_cave_spider.glb",
+  "status": "Unchanged: no qualified storage reduction found",
+  "source_sha256": "8dda51c7c617e40be1b130a2482acf48bc43ea737d377114d0290fac31cc723c",
+  "candidate_sha256": "8dda51c7c617e40be1b130a2482acf48bc43ea737d377114d0290fac31cc723c",
+  "storage": {
+    "source_bytes": 42201764,
+    "candidate_bytes": 42201764,
+    "source_zstd_bytes": 20427412,
+    "candidate_zstd_bytes": 20427412
+  },
+  "raw_bytes_saved": 0,
+  "compressed_bytes_saved": 0,
+  "compression_scope": "RLCZ level3 release envelope including fixed56-byte header; encoded/install sizes, not live-process memory.",
+  "correctives": {
+    "source_count": 395,
+    "candidate_count": 395,
+    "removed_target_indices": [],
+    "shared_gpu_source_bytes": 32050300,
+    "shared_gpu_candidate_bytes": 32050300,
+    "shared_gpu_saved_bytes": 0,
+    "scope": "Measured shared Godot blend_shape_data bytes, not per-actor totals."
+  },
+  "draw_surfaces": {
+    "source": 1,
+    "candidate": 1
+  },
+  "exact_source_proof": {
+    "passed": true,
+    "source_sha256": "8dda51c7c617e40be1b130a2482acf48bc43ea737d377114d0290fac31cc723c",
+    "candidate_sha256": "8dda51c7c617e40be1b130a2482acf48bc43ea737d377114d0290fac31cc723c",
+    "geometry_skin_binds_rest_topology_uv_material_image_bits_preserved": true,
+    "retained_key_time_and_value_bits_exact_only_flat_interiors_removed": true,
+    "every_removed_default_and_key_is_zero": true,
+    "redundant_flat_key_rows_proved": 0,
+    "preexisting_duplicate_property_curves_preserved_in_occurrence_order": 0,
+    "clips": {
+      "Death_A": {
+        "original_knots": 8734,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 17458
+      },
+      "Fighting_Idle": {
+        "original_knots": 1242,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 2488
+      },
+      "Hit_Chest": {
+        "original_knots": 1023,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 2050
+      },
+      "Idle_A": {
+        "original_knots": 2585,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 5174
+      },
+      "Jog": {
+        "original_knots": 1421,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 2846
+      },
+      "Sword_Attack": {
+        "original_knots": 1579,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 3161
+      },
+      "Walk": {
+        "original_knots": 2279,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 4554
+      }
+    },
+    "proof": "Zero defaults and every LINEAR/STEP key zero prove inactive targets remain zero continuously and under crossfades. All retained accessor bytes and retained time/value rows are exact. Deleted key rows sit strictly inside three bit-identical adjacent rows; plateau boundaries and endpoints remain."
+  },
+  "rigidity_preflight": {
+    "actor": "crystal_cave_spider",
+    "batch": 5,
+    "rank": 23,
+    "source_sha256": "8dda51c7c617e40be1b130a2482acf48bc43ea737d377114d0290fac31cc723c",
+    "survivor_triangles": 0,
+    "elapsed_seconds": 11.911802800139412
+  },
+  "runtime_scope": "No procedural generation or new runtime algorithm. Smaller GLB accessor/key storage is proved; fixed Godot rebaking may restore the same retained Animation key count. Process RAM, Animation resource RAM, CPU lookup time and FPS were not measured and are not claimed to improve.",
+  "effects_scope": "Original topology, skin, binds, material/texture bytes and current clips retained; no runtime rig replacement.",
+  "evidence": "Immutable source/final, private versioned candidates, source/import/renderer receipts, full-resolution captures and lossless cycle previews retained in task-owned ignored .local/batch-005/crystal_cave_spider",
+  "unchanged_reason": "Exact pruning/flat-run/reachable packing returns byte-identical GLB. Whole-component source rigidity screening finds zero surviving triangles; no replacement or approximation installed. Byte identity preserves every current visual, motion and runtime requirement without needing a changed-model render gate."
+}

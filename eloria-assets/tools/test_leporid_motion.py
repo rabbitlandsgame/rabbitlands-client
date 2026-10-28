@@ -13,7 +13,17 @@ expected=json.loads((ROOT/'godot-client/tests/fixtures/leporid_motion_worlds.jso
 report={'passed':True,'actors':{}}
 for actor,profile in profiles.items():
  a=Native(ROOT/f'godot-client/assets/actors/native/creatures/basic_expansion/{actor}.glb');assert digest(a.path)==profile['sha256'];assert a.d['asset']['extras']['rabbitlands_animation_bake_fps']==3072
- assert len(a.joints)==25 and max((len(x['targets']) for x in a.parts),default=0)==(25 if actor=='jackalope' else 0)
+ target_count=max((len(x['targets']) for x in a.parts),default=0)
+ expected_targets=25 if actor=='jackalope' else 0
+ if actor=='jackalope' and target_count==0:
+  # The current representation removes all 25 never-active corrections. Keep
+  # accepting the historical source form, and bind the zero-target form to its
+  # independent storage proof instead of weakening any motion/contact limit.
+  receipt=json.loads((ROOT/'docs/qa/creature-storage/batch-026/jackalope.json').read_text(encoding='utf-8'))
+  assert receipt['runtime_sha256']==digest(a.path)==expected[actor]['sha256']
+  assert receipt['source_sha256']==expected[actor]['reference_sha256'] and receipt['inactive_targets_removed']==25
+  expected_targets=0
+ assert len(a.joints)==25 and target_count==expected_targets
  row={'sha256':digest(a.path),'clips':{}}
  witness={'sha256':digest(a.path),'clips':{}}
  for clip in a.animations:

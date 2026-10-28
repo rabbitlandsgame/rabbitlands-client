@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "actor": "amberwood_great_owl",
+  "source_sha256": "ecbdc3f1603eb127490356e2400507057b4307e340452674705d8377289cfb6d",
+  "candidate_sha256": "76312d78f59cc7b16d6cb481e6996327392c745429deffe4df2f584e0386e12c",
+  "pipeline": [
+    "prune_zero_targets",
+    "reduce_constant_runs",
+    "compact"
+  ],
+  "partition": null,
+  "unchanged": false,
+  "removed_zero_target_indices": [],
+  "redundant_flat_key_rows_removed": 9644,
+  "geometry_skin_rest_binds_materials_images_unchanged": true,
+  "preserve_trs_keys": false,
+  "native_clips": [
+    "Idle_A",
+    "Fighting_Idle",
+    "Walk",
+    "Jog",
+    "Sword_Attack",
+    "Hit_Chest",
+    "Death_A"
+  ],
+  "usage": "Deterministic exact preparation needs no partition --profile; frozen source/candidate hashes bind this record."
+}

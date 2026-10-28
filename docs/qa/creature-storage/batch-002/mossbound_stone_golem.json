@@ -1,0 +1,2472 @@
+{
+  "schema_version": 1,
+  "batch": 2,
+  "actor": "mossbound_stone_golem",
+  "date": "2026-10-27",
+  "runtime_path": "godot-client/assets/actors/native/creatures/mossbound_stone_golem.glb",
+  "source_sha256": "f7ec54b8631c5c6f16fc5ccf1d74c35470d1cb0184f4c5bd62fa63b3a3e83347",
+  "runtime_sha256": "2c79d105b5f8738db97427ddbc5e4e5234c0f93f85243f5d84ac12c4cb984ede",
+  "qualification": "Passed exact source curves, independent Blender motion/physical witnesses, all native runtime poses/transitions, actual gameplay full-cycle renderer and original secondary-effect gates",
+  "human_approval_changed": false,
+  "recipe": {
+    "tool": "eloria-assets/tools/pack_creature_storage.py",
+    "steps": [
+      "prune_zero_targets",
+      "reduce_constant_runs",
+      "compact"
+    ],
+    "profile": null,
+    "exact_cli_reproduction_verified": true
+  },
+  "bytes": {
+    "source_bytes": 69058448,
+    "candidate_bytes": 66628348,
+    "source_zstd_bytes": 17480688,
+    "candidate_zstd_bytes": 17502954
+  },
+  "method": "Remove only redundant bit-identical constant-run animation key interiors. Original geometry, normal, UV, image, material, skin, rest/bind and every corrective target stay unchanged.",
+  "flat_run_key_rows_removed": 130148,
+  "inactive_targets_removed": 0,
+  "animation_accessor_storage": {
+    "scope": "Unique referenced source animation accessor logical bytes; shared buffer views may overlap. Not a process RSS claim.",
+    "models": [
+      {
+        "label": "source",
+        "unique_animation_accessor_logical_bytes": 12867240,
+        "input_key_rows": 344359
+      },
+      {
+        "label": "candidate",
+        "unique_animation_accessor_logical_bytes": 9835604,
+        "input_key_rows": 214211
+      }
+    ]
+  },
+  "corrective_graphics_buffer_bytes": {
+    "source": 92340000,
+    "candidate": 92340000,
+    "saved": 0,
+    "scope": "Raw imported Godot blend_shape_data byte count in the common runtime mesh surface format."
+  },
+  "draw_surfaces": {
+    "source": 1,
+    "candidate": 1
+  },
+  "source_validation": {
+    "passed": true,
+    "source_sha256": "f7ec54b8631c5c6f16fc5ccf1d74c35470d1cb0184f4c5bd62fa63b3a3e83347",
+    "candidate_sha256": "2c79d105b5f8738db97427ddbc5e4e5234c0f93f85243f5d84ac12c4cb984ede",
+    "source_geometry_normals_uv_images_binds_rest_and_retained_corrective_fields_bit_exact": true,
+    "triangle_coverage_preserved": true,
+    "source_curves_preserved_through_constant_run_reduction": true,
+    "clips": {
+      "Death_A": {
+        "source_knots_midpoints_offgrid_samples": 4152,
+        "maximum_curve_component_error": {
+          "translation": 0.0,
+          "rotation_components": 0.0,
+          "scale": 0.0,
+          "weights": 0.0
+        }
+      },
+      "Fighting_Idle": {
+        "source_knots_midpoints_offgrid_samples": 2092,
+        "maximum_curve_component_error": {
+          "translation": 0.0,
+          "rotation_components": 0.0,
+          "scale": 0.0,
+          "weights": 0.0
+        }
+      },
+      "Hit_Chest": {
+        "source_knots_midpoints_offgrid_samples": 1314,
+        "maximum_curve_component_error": {
+          "translation": 0.0,
+          "rotation_components": 0.0,
+          "scale": 0.0,
+          "weights": 0.0
+        }
+      },
+      "Idle_A": {
+        "source_knots_midpoints_offgrid_samples": 4074,
+        "maximum_curve_component_error": {
+          "translation": 0.0,
+          "rotation_components": 0.0,
+          "scale": 0.0,
+          "weights": 0.0
+        }
+      },
+      "Jog": {
+        "source_knots_midpoints_offgrid_samples": 4792,
+        "maximum_curve_component_error": {
+          "translation": 0.0,
+          "rotation_components": 0.0,
+          "scale": 0.0,
+          "weights": 0.0
+        }
+      },
+      "Sword_Attack": {
+        "source_knots_midpoints_offgrid_samples": 3250,
+        "maximum_curve_component_error": {
+          "translation": 0.0,
+          "rotation_components": 0.0,
+          "scale": 0.0,
+          "weights": 0.0
+        }
+      },
+      "Walk": {
+        "source_knots_midpoints_offgrid_samples": 4538,
+        "maximum_curve_component_error": {
+          "translation": 0.0,
+          "rotation_components": 0.0,
+          "scale": 0.0,
+          "weights": 0.0
+        }
+      },
+      "Attack_Ground_Pound": {
+        "source_knots_midpoints_offgrid_samples": 5530,
+        "maximum_curve_component_error": {
+          "translation": 0.0,
+          "rotation_components": 0.0,
+          "scale": 0.0,
+          "weights": 0.0
+        }
+      }
+    },
+    "source_rigid_change": null
+  },
+  "fresh_blender": {
+    "baseline": {
+      "sha256": "f7ec54b8631c5c6f16fc5ccf1d74c35470d1cb0184f4c5bd62fa63b3a3e83347",
+      "passed": true,
+      "surface_probes": 180,
+      "clips": {
+        "Death_A": {
+          "surface_error_over_height": 1.4582083609704248e-06,
+          "bone_head_error_over_height": 1.1445475410997095e-06,
+          "poses": 6
+        },
+        "Fighting_Idle": {
+          "surface_error_over_height": 1.2516450555258983e-06,
+          "bone_head_error_over_height": 1.0427271321948963e-06,
+          "poses": 6
+        },
+        "Hit_Chest": {
+          "surface_error_over_height": 1.2605295153954137e-06,
+          "bone_head_error_over_height": 1.0427271321948963e-06,
+          "poses": 6
+        },
+        "Idle_A": {
+          "surface_error_over_height": 8.058498498786775e-07,
+          "bone_head_error_over_height": 3.363136756257904e-07,
+          "poses": 6
+        },
+        "Jog": {
+          "surface_error_over_height": 9.330607853828655e-06,
+          "bone_head_error_over_height": 4.785603486422527e-06,
+          "poses": 6
+        },
+        "Sword_Attack": {
+          "surface_error_over_height": 1.4632978139832556e-06,
+          "bone_head_error_over_height": 1.0332461482793788e-06,
+          "poses": 6
+        },
+        "Walk": {
+          "surface_error_over_height": 1.0482840763796724e-06,
+          "bone_head_error_over_height": 3.157876866956412e-07,
+          "poses": 6
+        },
+        "Attack_Ground_Pound": {
+          "surface_error_over_height": 1.8781455253663898e-06,
+          "bone_head_error_over_height": 1.0427919981255828e-06,
+          "poses": 6
+        }
+      },
+      "max_surface_error_over_height": 9.330607853828655e-06,
+      "max_bone_head_error_over_height": 4.785603486422527e-06,
+      "scope": "Independent fresh Blender import geometry/motion witness check. Blender is not the authority for runtime morph normal shading."
+    },
+    "candidate": {
+      "sha256": "2c79d105b5f8738db97427ddbc5e4e5234c0f93f85243f5d84ac12c4cb984ede",
+      "passed": true,
+      "surface_probes": 180,
+      "clips": {
+        "Death_A": {
+          "surface_error_over_height": 1.4582083609704248e-06,
+          "bone_head_error_over_height": 1.1445475410997095e-06,
+          "poses": 6
+        },
+        "Fighting_Idle": {
+          "surface_error_over_height": 1.2516450555258983e-06,
+          "bone_head_error_over_height": 1.0427271321948963e-06,
+          "poses": 6
+        },
+        "Hit_Chest": {
+          "surface_error_over_height": 1.2605295153954137e-06,
+          "bone_head_error_over_height": 1.0427271321948963e-06,
+          "poses": 6
+        },
+        "Idle_A": {
+          "surface_error_over_height": 8.058498498786775e-07,
+          "bone_head_error_over_height": 3.363136756257904e-07,
+          "poses": 6
+        },
+        "Jog": {
+          "surface_error_over_height": 9.330607853828655e-06,
+          "bone_head_error_over_height": 4.785603486422527e-06,
+          "poses": 6
+        },
+        "Sword_Attack": {
+          "surface_error_over_height": 1.4632978139832556e-06,
+          "bone_head_error_over_height": 1.0332461482793788e-06,
+          "poses": 6
+        },
+        "Walk": {
+          "surface_error_over_height": 1.0482840763796724e-06,
+          "bone_head_error_over_height": 3.157876866956412e-07,
+          "poses": 6
+        },
+        "Attack_Ground_Pound": {
+          "surface_error_over_height": 1.8781455253663898e-06,
+          "bone_head_error_over_height": 1.0427919981255828e-06,
+          "poses": 6
+        }
+      },
+      "max_surface_error_over_height": 9.330607853828655e-06,
+      "max_bone_head_error_over_height": 4.785603486422527e-06,
+      "scope": "Independent fresh Blender import geometry/motion witness check. Blender is not the authority for runtime morph normal shading."
+    }
+  },
+  "runtime": {
+    "samples": [
+      {
+        "label": "Attack_Ground_Pound@0.0",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Attack_Ground_Pound@0.037",
+        "max_surface_error": 6.029018108718762e-08,
+        "max_normal_degrees": 8.365239156607497e-06,
+        "p99_normal_degrees": 6.097163388881822e-06
+      },
+      {
+        "label": "Attack_Ground_Pound@0.139",
+        "max_surface_error": 1.324343090261975e-07,
+        "max_normal_degrees": 2.9869878362278614e-05,
+        "p99_normal_degrees": 1.1675179017869926e-05
+      },
+      {
+        "label": "Attack_Ground_Pound@0.25",
+        "max_surface_error": 6.418127684807832e-08,
+        "max_normal_degrees": 1.3793135379158992e-05,
+        "p99_normal_degrees": 1.1675490772203752e-05
+      },
+      {
+        "label": "Attack_Ground_Pound@0.499",
+        "max_surface_error": 1.6038699977790083e-07,
+        "max_normal_degrees": 2.4283820049125425e-05,
+        "p99_normal_degrees": 1.9655345397318433e-05
+      },
+      {
+        "label": "Attack_Ground_Pound@0.731",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Attack_Ground_Pound@0.933",
+        "max_surface_error": 5.961219153392983e-08,
+        "max_normal_degrees": 9.734517300533532e-06,
+        "p99_normal_degrees": 8.79013768592829e-06
+      },
+      {
+        "label": "Attack_Ground_Pound@1.0",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Death_A@0.0",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Death_A@0.037",
+        "max_surface_error": 1.736787810038236e-07,
+        "max_normal_degrees": 1.7949563004511183e-05,
+        "p99_normal_degrees": 1.574280817616329e-05
+      },
+      {
+        "label": "Death_A@0.139",
+        "max_surface_error": 1.8144876088560617e-07,
+        "max_normal_degrees": 2.532701929461308e-05,
+        "p99_normal_degrees": 2.020433249538845e-05
+      },
+      {
+        "label": "Death_A@0.25",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.9090959104164224e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Death_A@0.499",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Death_A@0.731",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Death_A@0.933",
+        "max_surface_error": 1.2390613932294375e-07,
+        "max_normal_degrees": 2.8636438656246633e-05,
+        "p99_normal_degrees": 2.5124746649533215e-05
+      },
+      {
+        "label": "Death_A@1.0",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Fighting_Idle@0.0",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2101318803632461e-06
+      },
+      {
+        "label": "Fighting_Idle@0.037",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.4787793334710982e-06
+      },
+      {
+        "label": "Fighting_Idle@0.139",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Fighting_Idle@0.25",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Fighting_Idle@0.499",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Fighting_Idle@0.731",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Fighting_Idle@0.933",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Fighting_Idle@1.0",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Hit_Chest@0.0",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2101318803632461e-06
+      },
+      {
+        "label": "Hit_Chest@0.037",
+        "max_surface_error": 1.9965993577171696e-09,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Hit_Chest@0.139",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Hit_Chest@0.25",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.9090959104164224e-06,
+        "p99_normal_degrees": 1.4787793334710982e-06
+      },
+      {
+        "label": "Hit_Chest@0.499",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Hit_Chest@0.731",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Hit_Chest@0.933",
+        "max_surface_error": 8.154867504316392e-08,
+        "max_normal_degrees": 1.319902026398418e-05,
+        "p99_normal_degrees": 1.010198601586461e-05
+      },
+      {
+        "label": "Hit_Chest@1.0",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Idle_A@0.0",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Idle_A@0.037",
+        "max_surface_error": 2.4167843592631133e-08,
+        "max_normal_degrees": 1.0173887179578492e-05,
+        "p99_normal_degrees": 6.557959812547711e-06
+      },
+      {
+        "label": "Idle_A@0.139",
+        "max_surface_error": 2.6605293882212882e-08,
+        "max_normal_degrees": 9.507220963046152e-06,
+        "p99_normal_degrees": 6.037091348628668e-06
+      },
+      {
+        "label": "Idle_A@0.25",
+        "max_surface_error": 3.0665232150509316e-08,
+        "max_normal_degrees": 7.636383641665695e-06,
+        "p99_normal_degrees": 6.037091348628668e-06
+      },
+      {
+        "label": "Idle_A@0.499",
+        "max_surface_error": 2.1675539768202367e-08,
+        "max_normal_degrees": 7.636383641665695e-06,
+        "p99_normal_degrees": 5.263014220319208e-06
+      },
+      {
+        "label": "Idle_A@0.731",
+        "max_surface_error": 8.480586638020787e-09,
+        "max_normal_degrees": 3.306651113363206e-06,
+        "p99_normal_degrees": 2.091309789151873e-06
+      },
+      {
+        "label": "Idle_A@0.933",
+        "max_surface_error": 4.7671296739086975e-08,
+        "max_normal_degrees": 1.3004292747236537e-05,
+        "p99_normal_degrees": 9.35262170110869e-06
+      },
+      {
+        "label": "Idle_A@1.0",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Jog@0.0",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Jog@0.037",
+        "max_surface_error": 2.799214373621352e-08,
+        "max_normal_degrees": 7.244509618354405e-06,
+        "p99_normal_degrees": 5.193302344775284e-06
+      },
+      {
+        "label": "Jog@0.139",
+        "max_surface_error": 2.919680138484253e-08,
+        "max_normal_degrees": 1.4688877218970437e-05,
+        "p99_normal_degrees": 1.0138359208880038e-05
+      },
+      {
+        "label": "Jog@0.25",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2101318803632461e-06
+      },
+      {
+        "label": "Jog@0.499",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Jog@0.731",
+        "max_surface_error": 2.37260200125663e-08,
+        "max_normal_degrees": 9.234973977599935e-06,
+        "p99_normal_degrees": 6.668185343934157e-06
+      },
+      {
+        "label": "Jog@0.933",
+        "max_surface_error": 1.729079157777055e-08,
+        "max_normal_degrees": 3.7215130446689415e-06,
+        "p99_normal_degrees": 2.091309789151873e-06
+      },
+      {
+        "label": "Jog@1.0",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "RESET@0.0",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.4787793334710982e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "RESET@0.037",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.4787793334710982e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "RESET@0.139",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.4787793334710982e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "RESET@0.25",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.4787793334710982e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "RESET@0.499",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.4787793334710982e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "RESET@0.731",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.4787793334710982e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "RESET@0.933",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.4787793334710982e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "RESET@1.0",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.4787793334710982e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Sword_Attack@0.0",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Sword_Attack@0.037",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Sword_Attack@0.139",
+        "max_surface_error": 6.386402332823273e-09,
+        "max_normal_degrees": 1.9090959104164224e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Sword_Attack@0.25",
+        "max_surface_error": 8.965379608276433e-09,
+        "max_normal_degrees": 3.4150945850063763e-06,
+        "p99_normal_degrees": 1.7075472925031877e-06
+      },
+      {
+        "label": "Sword_Attack@0.499",
+        "max_surface_error": 1.6758440455457955e-08,
+        "max_normal_degrees": 4.9783130603797145e-06,
+        "p99_normal_degrees": 2.831646840510158e-06
+      },
+      {
+        "label": "Sword_Attack@0.731",
+        "max_surface_error": 6.173190188536498e-08,
+        "max_normal_degrees": 1.010198601586461e-05,
+        "p99_normal_degrees": 8.278081750769294e-06
+      },
+      {
+        "label": "Sword_Attack@0.933",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2101318803632461e-06
+      },
+      {
+        "label": "Sword_Attack@1.0",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Walk@0.0",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Walk@0.037",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Walk@0.139",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Walk@0.25",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Walk@0.499",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Walk@0.731",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Walk@0.933",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.4787793334710982e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Walk@1.0",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Attack_Ground_Pound->Death_A@0.03",
+        "max_surface_error": 4.62255452664881e-08,
+        "max_normal_degrees": 7.636383641665695e-06,
+        "p99_normal_degrees": 6.613302226726415e-06
+      },
+      {
+        "label": "Attack_Ground_Pound->Death_A@0.09",
+        "max_surface_error": 1.5071968042657797e-08,
+        "max_normal_degrees": 3.1945284701301985e-06,
+        "p99_normal_degrees": 2.4148365394514667e-06
+      },
+      {
+        "label": "Attack_Ground_Pound->Death_A@0.15",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.4787793334710982e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Attack_Ground_Pound->Death_A@0.21",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Attack_Ground_Pound->Fighting_Idle@0.03",
+        "max_surface_error": 4.62255452664881e-08,
+        "max_normal_degrees": 7.636383641665695e-06,
+        "p99_normal_degrees": 6.613302226726415e-06
+      },
+      {
+        "label": "Attack_Ground_Pound->Fighting_Idle@0.09",
+        "max_surface_error": 1.5071968042657797e-08,
+        "max_normal_degrees": 3.1945284701301985e-06,
+        "p99_normal_degrees": 2.4148365394514667e-06
+      },
+      {
+        "label": "Attack_Ground_Pound->Fighting_Idle@0.15",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.4787793334710982e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Attack_Ground_Pound->Fighting_Idle@0.21",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Attack_Ground_Pound->Hit_Chest@0.03",
+        "max_surface_error": 4.62255452664881e-08,
+        "max_normal_degrees": 7.636383641665695e-06,
+        "p99_normal_degrees": 6.613302226726415e-06
+      },
+      {
+        "label": "Attack_Ground_Pound->Hit_Chest@0.09",
+        "max_surface_error": 1.5071968042657797e-08,
+        "max_normal_degrees": 3.1945284701301985e-06,
+        "p99_normal_degrees": 2.4148365394514667e-06
+      },
+      {
+        "label": "Attack_Ground_Pound->Hit_Chest@0.15",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.4787793334710982e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Attack_Ground_Pound->Hit_Chest@0.21",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Attack_Ground_Pound->Idle_A@0.03",
+        "max_surface_error": 4.62255452664881e-08,
+        "max_normal_degrees": 7.636383641665695e-06,
+        "p99_normal_degrees": 6.613302226726415e-06
+      },
+      {
+        "label": "Attack_Ground_Pound->Idle_A@0.09",
+        "max_surface_error": 1.5071968042657797e-08,
+        "max_normal_degrees": 3.1945284701301985e-06,
+        "p99_normal_degrees": 2.4148365394514667e-06
+      },
+      {
+        "label": "Attack_Ground_Pound->Idle_A@0.15",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.4787793334710982e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Attack_Ground_Pound->Idle_A@0.21",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Attack_Ground_Pound->Jog@0.03",
+        "max_surface_error": 4.62255452664881e-08,
+        "max_normal_degrees": 7.636383641665695e-06,
+        "p99_normal_degrees": 6.613302226726415e-06
+      },
+      {
+        "label": "Attack_Ground_Pound->Jog@0.09",
+        "max_surface_error": 1.5071968042657797e-08,
+        "max_normal_degrees": 3.1945284701301985e-06,
+        "p99_normal_degrees": 2.4148365394514667e-06
+      },
+      {
+        "label": "Attack_Ground_Pound->Jog@0.15",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.4787793334710982e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Attack_Ground_Pound->Jog@0.21",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Attack_Ground_Pound->Sword_Attack@0.03",
+        "max_surface_error": 4.62255452664881e-08,
+        "max_normal_degrees": 7.636383641665695e-06,
+        "p99_normal_degrees": 6.613302226726415e-06
+      },
+      {
+        "label": "Attack_Ground_Pound->Sword_Attack@0.09",
+        "max_surface_error": 1.5071968042657797e-08,
+        "max_normal_degrees": 3.1945284701301985e-06,
+        "p99_normal_degrees": 2.4148365394514667e-06
+      },
+      {
+        "label": "Attack_Ground_Pound->Sword_Attack@0.15",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.4787793334710982e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Attack_Ground_Pound->Sword_Attack@0.21",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Attack_Ground_Pound->Walk@0.03",
+        "max_surface_error": 4.62255452664881e-08,
+        "max_normal_degrees": 7.636383641665695e-06,
+        "p99_normal_degrees": 6.613302226726415e-06
+      },
+      {
+        "label": "Attack_Ground_Pound->Walk@0.09",
+        "max_surface_error": 1.5071968042657797e-08,
+        "max_normal_degrees": 3.1945284701301985e-06,
+        "p99_normal_degrees": 2.4148365394514667e-06
+      },
+      {
+        "label": "Attack_Ground_Pound->Walk@0.15",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.4787793334710982e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Attack_Ground_Pound->Walk@0.21",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Death_A->Attack_Ground_Pound@0.03",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Death_A->Attack_Ground_Pound@0.09",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Death_A->Attack_Ground_Pound@0.15",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Death_A->Attack_Ground_Pound@0.21",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Death_A->Fighting_Idle@0.03",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Death_A->Fighting_Idle@0.09",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Death_A->Fighting_Idle@0.15",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Death_A->Fighting_Idle@0.21",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Death_A->Hit_Chest@0.03",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Death_A->Hit_Chest@0.09",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Death_A->Hit_Chest@0.15",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Death_A->Hit_Chest@0.21",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Death_A->Idle_A@0.03",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Death_A->Idle_A@0.09",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Death_A->Idle_A@0.15",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Death_A->Idle_A@0.21",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Death_A->Jog@0.03",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Death_A->Jog@0.09",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Death_A->Jog@0.15",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Death_A->Jog@0.21",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Death_A->Sword_Attack@0.03",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Death_A->Sword_Attack@0.09",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Death_A->Sword_Attack@0.15",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Death_A->Sword_Attack@0.21",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Death_A->Walk@0.03",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Death_A->Walk@0.09",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Death_A->Walk@0.15",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Death_A->Walk@0.21",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Fighting_Idle->Attack_Ground_Pound@0.03",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Fighting_Idle->Attack_Ground_Pound@0.09",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Fighting_Idle->Attack_Ground_Pound@0.15",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Fighting_Idle->Attack_Ground_Pound@0.21",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Fighting_Idle->Death_A@0.03",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Fighting_Idle->Death_A@0.09",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Fighting_Idle->Death_A@0.15",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Fighting_Idle->Death_A@0.21",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Fighting_Idle->Hit_Chest@0.03",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Fighting_Idle->Hit_Chest@0.09",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Fighting_Idle->Hit_Chest@0.15",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Fighting_Idle->Hit_Chest@0.21",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Fighting_Idle->Idle_A@0.03",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Fighting_Idle->Idle_A@0.09",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Fighting_Idle->Idle_A@0.15",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Fighting_Idle->Idle_A@0.21",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Fighting_Idle->Jog@0.03",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Fighting_Idle->Jog@0.09",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Fighting_Idle->Jog@0.15",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Fighting_Idle->Jog@0.21",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Fighting_Idle->Sword_Attack@0.03",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Fighting_Idle->Sword_Attack@0.09",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Fighting_Idle->Sword_Attack@0.15",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Fighting_Idle->Sword_Attack@0.21",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Fighting_Idle->Walk@0.03",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Fighting_Idle->Walk@0.09",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Fighting_Idle->Walk@0.15",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Fighting_Idle->Walk@0.21",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Hit_Chest->Attack_Ground_Pound@0.03",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.4787793334710982e-06
+      },
+      {
+        "label": "Hit_Chest->Attack_Ground_Pound@0.09",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Hit_Chest->Attack_Ground_Pound@0.15",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Hit_Chest->Attack_Ground_Pound@0.21",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Hit_Chest->Death_A@0.03",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.4787793334710982e-06
+      },
+      {
+        "label": "Hit_Chest->Death_A@0.09",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Hit_Chest->Death_A@0.15",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Hit_Chest->Death_A@0.21",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Hit_Chest->Fighting_Idle@0.03",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.4787793334710982e-06
+      },
+      {
+        "label": "Hit_Chest->Fighting_Idle@0.09",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Hit_Chest->Fighting_Idle@0.15",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Hit_Chest->Fighting_Idle@0.21",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Hit_Chest->Idle_A@0.03",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.4787793334710982e-06
+      },
+      {
+        "label": "Hit_Chest->Idle_A@0.09",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Hit_Chest->Idle_A@0.15",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Hit_Chest->Idle_A@0.21",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Hit_Chest->Jog@0.03",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.4787793334710982e-06
+      },
+      {
+        "label": "Hit_Chest->Jog@0.09",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Hit_Chest->Jog@0.15",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Hit_Chest->Jog@0.21",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Hit_Chest->Sword_Attack@0.03",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.4787793334710982e-06
+      },
+      {
+        "label": "Hit_Chest->Sword_Attack@0.09",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Hit_Chest->Sword_Attack@0.15",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Hit_Chest->Sword_Attack@0.21",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Hit_Chest->Walk@0.03",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.4787793334710982e-06
+      },
+      {
+        "label": "Hit_Chest->Walk@0.09",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Hit_Chest->Walk@0.15",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Hit_Chest->Walk@0.21",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Idle_A->Attack_Ground_Pound@0.03",
+        "max_surface_error": 2.1720712657763e-08,
+        "max_normal_degrees": 5.663293681020318e-06,
+        "p99_normal_degrees": 3.6222548091772e-06
+      },
+      {
+        "label": "Idle_A->Attack_Ground_Pound@0.09",
+        "max_surface_error": 1.4707936552038738e-08,
+        "max_normal_degrees": 5.915117333884395e-06,
+        "p99_normal_degrees": 3.818191820832846e-06
+      },
+      {
+        "label": "Idle_A->Attack_Ground_Pound@0.15",
+        "max_surface_error": 3.1696362013751505e-08,
+        "max_normal_degrees": 8.2776426154535e-06,
+        "p99_normal_degrees": 5.0509930079323e-06
+      },
+      {
+        "label": "Idle_A->Attack_Ground_Pound@0.21",
+        "max_surface_error": 2.6301393664350937e-08,
+        "max_normal_degrees": 7.588506156264597e-06,
+        "p99_normal_degrees": 4.182619578303747e-06
+      },
+      {
+        "label": "Idle_A->Death_A@0.03",
+        "max_surface_error": 2.1720712657763e-08,
+        "max_normal_degrees": 5.663293681020318e-06,
+        "p99_normal_degrees": 3.6222548091772e-06
+      },
+      {
+        "label": "Idle_A->Death_A@0.09",
+        "max_surface_error": 1.4707936552038738e-08,
+        "max_normal_degrees": 5.915117333884395e-06,
+        "p99_normal_degrees": 3.818191820832846e-06
+      },
+      {
+        "label": "Idle_A->Death_A@0.15",
+        "max_surface_error": 3.1696362013751505e-08,
+        "max_normal_degrees": 8.2776426154535e-06,
+        "p99_normal_degrees": 5.0509930079323e-06
+      },
+      {
+        "label": "Idle_A->Death_A@0.21",
+        "max_surface_error": 2.6301393664350937e-08,
+        "max_normal_degrees": 7.588506156264597e-06,
+        "p99_normal_degrees": 4.182619578303747e-06
+      },
+      {
+        "label": "Idle_A->Fighting_Idle@0.03",
+        "max_surface_error": 2.1720712657763e-08,
+        "max_normal_degrees": 5.663293681020318e-06,
+        "p99_normal_degrees": 3.6222548091772e-06
+      },
+      {
+        "label": "Idle_A->Fighting_Idle@0.09",
+        "max_surface_error": 1.4707936552038738e-08,
+        "max_normal_degrees": 5.915117333884395e-06,
+        "p99_normal_degrees": 3.818191820832846e-06
+      },
+      {
+        "label": "Idle_A->Fighting_Idle@0.15",
+        "max_surface_error": 3.1696362013751505e-08,
+        "max_normal_degrees": 8.2776426154535e-06,
+        "p99_normal_degrees": 5.0509930079323e-06
+      },
+      {
+        "label": "Idle_A->Fighting_Idle@0.21",
+        "max_surface_error": 2.6301393664350937e-08,
+        "max_normal_degrees": 7.588506156264597e-06,
+        "p99_normal_degrees": 4.182619578303747e-06
+      },
+      {
+        "label": "Idle_A->Hit_Chest@0.03",
+        "max_surface_error": 2.1720712657763e-08,
+        "max_normal_degrees": 5.663293681020318e-06,
+        "p99_normal_degrees": 3.6222548091772e-06
+      },
+      {
+        "label": "Idle_A->Hit_Chest@0.09",
+        "max_surface_error": 1.4707936552038738e-08,
+        "max_normal_degrees": 5.915117333884395e-06,
+        "p99_normal_degrees": 3.818191820832846e-06
+      },
+      {
+        "label": "Idle_A->Hit_Chest@0.15",
+        "max_surface_error": 3.1696362013751505e-08,
+        "max_normal_degrees": 8.2776426154535e-06,
+        "p99_normal_degrees": 5.0509930079323e-06
+      },
+      {
+        "label": "Idle_A->Hit_Chest@0.21",
+        "max_surface_error": 2.6301393664350937e-08,
+        "max_normal_degrees": 7.588506156264597e-06,
+        "p99_normal_degrees": 4.182619578303747e-06
+      },
+      {
+        "label": "Idle_A->Jog@0.03",
+        "max_surface_error": 2.1720712657763e-08,
+        "max_normal_degrees": 5.663293681020318e-06,
+        "p99_normal_degrees": 3.6222548091772e-06
+      },
+      {
+        "label": "Idle_A->Jog@0.09",
+        "max_surface_error": 1.4707936552038738e-08,
+        "max_normal_degrees": 5.915117333884395e-06,
+        "p99_normal_degrees": 3.818191820832846e-06
+      },
+      {
+        "label": "Idle_A->Jog@0.15",
+        "max_surface_error": 3.1696362013751505e-08,
+        "max_normal_degrees": 8.2776426154535e-06,
+        "p99_normal_degrees": 5.0509930079323e-06
+      },
+      {
+        "label": "Idle_A->Jog@0.21",
+        "max_surface_error": 2.6301393664350937e-08,
+        "max_normal_degrees": 7.588506156264597e-06,
+        "p99_normal_degrees": 4.182619578303747e-06
+      },
+      {
+        "label": "Idle_A->Sword_Attack@0.03",
+        "max_surface_error": 2.1720712657763e-08,
+        "max_normal_degrees": 5.663293681020318e-06,
+        "p99_normal_degrees": 3.6222548091772e-06
+      },
+      {
+        "label": "Idle_A->Sword_Attack@0.09",
+        "max_surface_error": 1.4707936552038738e-08,
+        "max_normal_degrees": 5.915117333884395e-06,
+        "p99_normal_degrees": 3.818191820832846e-06
+      },
+      {
+        "label": "Idle_A->Sword_Attack@0.15",
+        "max_surface_error": 3.1696362013751505e-08,
+        "max_normal_degrees": 8.2776426154535e-06,
+        "p99_normal_degrees": 5.0509930079323e-06
+      },
+      {
+        "label": "Idle_A->Sword_Attack@0.21",
+        "max_surface_error": 2.6301393664350937e-08,
+        "max_normal_degrees": 7.588506156264597e-06,
+        "p99_normal_degrees": 4.182619578303747e-06
+      },
+      {
+        "label": "Idle_A->Walk@0.03",
+        "max_surface_error": 2.1720712657763e-08,
+        "max_normal_degrees": 5.663293681020318e-06,
+        "p99_normal_degrees": 3.6222548091772e-06
+      },
+      {
+        "label": "Idle_A->Walk@0.09",
+        "max_surface_error": 1.4707936552038738e-08,
+        "max_normal_degrees": 5.915117333884395e-06,
+        "p99_normal_degrees": 3.818191820832846e-06
+      },
+      {
+        "label": "Idle_A->Walk@0.15",
+        "max_surface_error": 3.1696362013751505e-08,
+        "max_normal_degrees": 8.2776426154535e-06,
+        "p99_normal_degrees": 5.0509930079323e-06
+      },
+      {
+        "label": "Idle_A->Walk@0.21",
+        "max_surface_error": 2.6301393664350937e-08,
+        "max_normal_degrees": 7.588506156264597e-06,
+        "p99_normal_degrees": 4.182619578303747e-06
+      },
+      {
+        "label": "Jog->Attack_Ground_Pound@0.03",
+        "max_surface_error": 3.855922575368315e-08,
+        "max_normal_degrees": 7.73124918760008e-06,
+        "p99_normal_degrees": 4.905293765490738e-06
+      },
+      {
+        "label": "Jog->Attack_Ground_Pound@0.09",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Jog->Attack_Ground_Pound@0.15",
+        "max_surface_error": 2.092369989482402e-08,
+        "max_normal_degrees": 7.73124918760008e-06,
+        "p99_normal_degrees": 5.399738656763834e-06
+      },
+      {
+        "label": "Jog->Attack_Ground_Pound@0.21",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.4787793334710982e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Jog->Death_A@0.03",
+        "max_surface_error": 3.855922575368315e-08,
+        "max_normal_degrees": 7.73124918760008e-06,
+        "p99_normal_degrees": 4.905293765490738e-06
+      },
+      {
+        "label": "Jog->Death_A@0.09",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Jog->Death_A@0.15",
+        "max_surface_error": 2.092369989482402e-08,
+        "max_normal_degrees": 7.73124918760008e-06,
+        "p99_normal_degrees": 5.399738656763834e-06
+      },
+      {
+        "label": "Jog->Death_A@0.21",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.4787793334710982e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Jog->Fighting_Idle@0.03",
+        "max_surface_error": 3.855922575368315e-08,
+        "max_normal_degrees": 7.73124918760008e-06,
+        "p99_normal_degrees": 4.905293765490738e-06
+      },
+      {
+        "label": "Jog->Fighting_Idle@0.09",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Jog->Fighting_Idle@0.15",
+        "max_surface_error": 2.092369989482402e-08,
+        "max_normal_degrees": 7.73124918760008e-06,
+        "p99_normal_degrees": 5.399738656763834e-06
+      },
+      {
+        "label": "Jog->Fighting_Idle@0.21",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.4787793334710982e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Jog->Hit_Chest@0.03",
+        "max_surface_error": 3.855922575368315e-08,
+        "max_normal_degrees": 7.73124918760008e-06,
+        "p99_normal_degrees": 4.905293765490738e-06
+      },
+      {
+        "label": "Jog->Hit_Chest@0.09",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Jog->Hit_Chest@0.15",
+        "max_surface_error": 2.092369989482402e-08,
+        "max_normal_degrees": 7.73124918760008e-06,
+        "p99_normal_degrees": 5.399738656763834e-06
+      },
+      {
+        "label": "Jog->Hit_Chest@0.21",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.4787793334710982e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Jog->Idle_A@0.03",
+        "max_surface_error": 3.855922575368315e-08,
+        "max_normal_degrees": 7.73124918760008e-06,
+        "p99_normal_degrees": 4.905293765490738e-06
+      },
+      {
+        "label": "Jog->Idle_A@0.09",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Jog->Idle_A@0.15",
+        "max_surface_error": 2.092369989482402e-08,
+        "max_normal_degrees": 7.73124918760008e-06,
+        "p99_normal_degrees": 5.399738656763834e-06
+      },
+      {
+        "label": "Jog->Idle_A@0.21",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.4787793334710982e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Jog->Sword_Attack@0.03",
+        "max_surface_error": 3.855922575368315e-08,
+        "max_normal_degrees": 7.73124918760008e-06,
+        "p99_normal_degrees": 4.905293765490738e-06
+      },
+      {
+        "label": "Jog->Sword_Attack@0.09",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Jog->Sword_Attack@0.15",
+        "max_surface_error": 2.092369989482402e-08,
+        "max_normal_degrees": 7.73124918760008e-06,
+        "p99_normal_degrees": 5.399738656763834e-06
+      },
+      {
+        "label": "Jog->Sword_Attack@0.21",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.4787793334710982e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Jog->Walk@0.03",
+        "max_surface_error": 3.855922575368315e-08,
+        "max_normal_degrees": 7.73124918760008e-06,
+        "p99_normal_degrees": 4.905293765490738e-06
+      },
+      {
+        "label": "Jog->Walk@0.09",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Jog->Walk@0.15",
+        "max_surface_error": 2.092369989482402e-08,
+        "max_normal_degrees": 7.73124918760008e-06,
+        "p99_normal_degrees": 5.399738656763834e-06
+      },
+      {
+        "label": "Jog->Walk@0.21",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.4787793334710982e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Sword_Attack->Attack_Ground_Pound@0.03",
+        "max_surface_error": 1.2460958662903066e-07,
+        "max_normal_degrees": 1.7497153036827848e-05,
+        "p99_normal_degrees": 1.6333874588052534e-05
+      },
+      {
+        "label": "Sword_Attack->Attack_Ground_Pound@0.09",
+        "max_surface_error": 7.60104904520649e-09,
+        "max_normal_degrees": 2.561320938754782e-06,
+        "p99_normal_degrees": 1.4787793334710982e-06
+      },
+      {
+        "label": "Sword_Attack->Attack_Ground_Pound@0.15",
+        "max_surface_error": 9.336498428675371e-08,
+        "max_normal_degrees": 9.195423586105984e-06,
+        "p99_normal_degrees": 8.45192788808014e-06
+      },
+      {
+        "label": "Sword_Attack->Attack_Ground_Pound@0.21",
+        "max_surface_error": 1.44818261678906e-07,
+        "max_normal_degrees": 1.5152979023796936e-05,
+        "p99_normal_degrees": 1.1799386545725382e-05
+      },
+      {
+        "label": "Sword_Attack->Death_A@0.03",
+        "max_surface_error": 1.2460958662903066e-07,
+        "max_normal_degrees": 1.7497153036827848e-05,
+        "p99_normal_degrees": 1.6333874588052534e-05
+      },
+      {
+        "label": "Sword_Attack->Death_A@0.09",
+        "max_surface_error": 7.60104904520649e-09,
+        "max_normal_degrees": 2.561320938754782e-06,
+        "p99_normal_degrees": 1.4787793334710982e-06
+      },
+      {
+        "label": "Sword_Attack->Death_A@0.15",
+        "max_surface_error": 9.336498428675371e-08,
+        "max_normal_degrees": 9.195423586105984e-06,
+        "p99_normal_degrees": 8.45192788808014e-06
+      },
+      {
+        "label": "Sword_Attack->Death_A@0.21",
+        "max_surface_error": 1.44818261678906e-07,
+        "max_normal_degrees": 1.5152979023796936e-05,
+        "p99_normal_degrees": 1.1799386545725382e-05
+      },
+      {
+        "label": "Sword_Attack->Fighting_Idle@0.03",
+        "max_surface_error": 1.2460958662903066e-07,
+        "max_normal_degrees": 1.7497153036827848e-05,
+        "p99_normal_degrees": 1.6333874588052534e-05
+      },
+      {
+        "label": "Sword_Attack->Fighting_Idle@0.09",
+        "max_surface_error": 7.60104904520649e-09,
+        "max_normal_degrees": 2.561320938754782e-06,
+        "p99_normal_degrees": 1.4787793334710982e-06
+      },
+      {
+        "label": "Sword_Attack->Fighting_Idle@0.15",
+        "max_surface_error": 9.336498428675371e-08,
+        "max_normal_degrees": 9.195423586105984e-06,
+        "p99_normal_degrees": 8.45192788808014e-06
+      },
+      {
+        "label": "Sword_Attack->Fighting_Idle@0.21",
+        "max_surface_error": 1.44818261678906e-07,
+        "max_normal_degrees": 1.5152979023796936e-05,
+        "p99_normal_degrees": 1.1799386545725382e-05
+      },
+      {
+        "label": "Sword_Attack->Hit_Chest@0.03",
+        "max_surface_error": 1.2460958662903066e-07,
+        "max_normal_degrees": 1.7497153036827848e-05,
+        "p99_normal_degrees": 1.6333874588052534e-05
+      },
+      {
+        "label": "Sword_Attack->Hit_Chest@0.09",
+        "max_surface_error": 7.60104904520649e-09,
+        "max_normal_degrees": 2.561320938754782e-06,
+        "p99_normal_degrees": 1.4787793334710982e-06
+      },
+      {
+        "label": "Sword_Attack->Hit_Chest@0.15",
+        "max_surface_error": 9.336498428675371e-08,
+        "max_normal_degrees": 9.195423586105984e-06,
+        "p99_normal_degrees": 8.45192788808014e-06
+      },
+      {
+        "label": "Sword_Attack->Hit_Chest@0.21",
+        "max_surface_error": 1.44818261678906e-07,
+        "max_normal_degrees": 1.5152979023796936e-05,
+        "p99_normal_degrees": 1.1799386545725382e-05
+      },
+      {
+        "label": "Sword_Attack->Idle_A@0.03",
+        "max_surface_error": 1.2460958662903066e-07,
+        "max_normal_degrees": 1.7497153036827848e-05,
+        "p99_normal_degrees": 1.6333874588052534e-05
+      },
+      {
+        "label": "Sword_Attack->Idle_A@0.09",
+        "max_surface_error": 7.60104904520649e-09,
+        "max_normal_degrees": 2.561320938754782e-06,
+        "p99_normal_degrees": 1.4787793334710982e-06
+      },
+      {
+        "label": "Sword_Attack->Idle_A@0.15",
+        "max_surface_error": 9.336498428675371e-08,
+        "max_normal_degrees": 9.195423586105984e-06,
+        "p99_normal_degrees": 8.45192788808014e-06
+      },
+      {
+        "label": "Sword_Attack->Idle_A@0.21",
+        "max_surface_error": 1.44818261678906e-07,
+        "max_normal_degrees": 1.5152979023796936e-05,
+        "p99_normal_degrees": 1.1799386545725382e-05
+      },
+      {
+        "label": "Sword_Attack->Jog@0.03",
+        "max_surface_error": 1.2460958662903066e-07,
+        "max_normal_degrees": 1.7497153036827848e-05,
+        "p99_normal_degrees": 1.6333874588052534e-05
+      },
+      {
+        "label": "Sword_Attack->Jog@0.09",
+        "max_surface_error": 7.60104904520649e-09,
+        "max_normal_degrees": 2.561320938754782e-06,
+        "p99_normal_degrees": 1.4787793334710982e-06
+      },
+      {
+        "label": "Sword_Attack->Jog@0.15",
+        "max_surface_error": 9.336498428675371e-08,
+        "max_normal_degrees": 9.195423586105984e-06,
+        "p99_normal_degrees": 8.45192788808014e-06
+      },
+      {
+        "label": "Sword_Attack->Jog@0.21",
+        "max_surface_error": 1.44818261678906e-07,
+        "max_normal_degrees": 1.5152979023796936e-05,
+        "p99_normal_degrees": 1.1799386545725382e-05
+      },
+      {
+        "label": "Sword_Attack->Walk@0.03",
+        "max_surface_error": 1.2460958662903066e-07,
+        "max_normal_degrees": 1.7497153036827848e-05,
+        "p99_normal_degrees": 1.6333874588052534e-05
+      },
+      {
+        "label": "Sword_Attack->Walk@0.09",
+        "max_surface_error": 7.60104904520649e-09,
+        "max_normal_degrees": 2.561320938754782e-06,
+        "p99_normal_degrees": 1.4787793334710982e-06
+      },
+      {
+        "label": "Sword_Attack->Walk@0.15",
+        "max_surface_error": 9.336498428675371e-08,
+        "max_normal_degrees": 9.195423586105984e-06,
+        "p99_normal_degrees": 8.45192788808014e-06
+      },
+      {
+        "label": "Sword_Attack->Walk@0.21",
+        "max_surface_error": 1.44818261678906e-07,
+        "max_normal_degrees": 1.5152979023796936e-05,
+        "p99_normal_degrees": 1.1799386545725382e-05
+      },
+      {
+        "label": "Walk->Attack_Ground_Pound@0.03",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Walk->Attack_Ground_Pound@0.09",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Walk->Attack_Ground_Pound@0.15",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Walk->Attack_Ground_Pound@0.21",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Walk->Death_A@0.03",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Walk->Death_A@0.09",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Walk->Death_A@0.15",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Walk->Death_A@0.21",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Walk->Fighting_Idle@0.03",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Walk->Fighting_Idle@0.09",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Walk->Fighting_Idle@0.15",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Walk->Fighting_Idle@0.21",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Walk->Hit_Chest@0.03",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Walk->Hit_Chest@0.09",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Walk->Hit_Chest@0.15",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Walk->Hit_Chest@0.21",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Walk->Idle_A@0.03",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Walk->Idle_A@0.09",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Walk->Idle_A@0.15",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Walk->Idle_A@0.21",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Walk->Jog@0.03",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Walk->Jog@0.09",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Walk->Jog@0.15",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Walk->Jog@0.21",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Walk->Sword_Attack@0.03",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Walk->Sword_Attack@0.09",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Walk->Sword_Attack@0.15",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      },
+      {
+        "label": "Walk->Sword_Attack@0.21",
+        "max_surface_error": 0.0,
+        "max_normal_degrees": 1.7075472925031877e-06,
+        "p99_normal_degrees": 1.2074182697257333e-06
+      }
+    ],
+    "maximum_position_error": 1.8144876088560617e-07,
+    "maximum_normal_angle_degrees": 2.9869878362278614e-05,
+    "worst_position": {
+      "label": "Death_A@0.139",
+      "max_surface_error": 1.8144876088560617e-07,
+      "max_normal_degrees": 2.532701929461308e-05,
+      "p99_normal_degrees": 2.020433249538845e-05
+    },
+    "worst_normal": {
+      "label": "Attack_Ground_Pound@0.139",
+      "max_surface_error": 1.324343090261975e-07,
+      "max_normal_degrees": 2.9869878362278614e-05,
+      "p99_normal_degrees": 1.1675179017869926e-05
+    },
+    "scope": "Actual imported Godot mesh arrays, native-library sampled poses and crossfades or mounted gait samples, renderer activation cutoff, linear blended skin; image rendering remains a separate check."
+  },
+  "runtime_max_position_error_mm_at_game_scale": 0.0005374666544521505,
+  "full_actor_placement_bounds_overhead_and_raw_lods": {
+    "bounds_error": 0.0,
+    "overhead_height_error": 0.0,
+    "passed": true,
+    "placement_error": 0.0,
+    "records": [
+      {
+        "banner_height": 2.05413866043091,
+        "effective_scale": 2.96208500862122,
+        "name": "baseline",
+        "native_bounds_position": [
+          -3.03195834159851,
+          -0.552330374717712,
+          -0.448333591222763
+        ],
+        "native_bounds_size": [
+          5.41518545150757,
+          1.0593409538269,
+          1.1280425786972
+        ],
+        "raw_meshes": [
+          {
+            "buffer_bytes": [
+              {
+                "attribute_data": 72000,
+                "blend_shape_data": 92340000,
+                "index_data": 18000,
+                "skin_data": 288000,
+                "vertex_data": 180000
+              }
+            ],
+            "name": "target",
+            "surface_lod_counts": [
+              0
+            ]
+          }
+        ],
+        "visual_root_position": [
+          0.0,
+          0.552330374717712,
+          0.0
+        ]
+      },
+      {
+        "banner_height": 2.05413866043091,
+        "effective_scale": 2.96208500862122,
+        "name": "candidate",
+        "native_bounds_position": [
+          -3.03195834159851,
+          -0.552330374717712,
+          -0.448333591222763
+        ],
+        "native_bounds_size": [
+          5.41518545150757,
+          1.0593409538269,
+          1.1280425786972
+        ],
+        "raw_meshes": [
+          {
+            "buffer_bytes": [
+              {
+                "attribute_data": 72000,
+                "blend_shape_data": 92340000,
+                "index_data": 18000,
+                "skin_data": 288000,
+                "vertex_data": 180000
+              }
+            ],
+            "name": "target",
+            "surface_lod_counts": [
+              0
+            ]
+          }
+        ],
+        "visual_root_position": [
+          0.0,
+          0.552330374717712,
+          0.0
+        ]
+      }
+    ]
+  },
+  "rig_investigation": {
+    "welded_components": 1,
+    "component_sizes": [
+      9000
+    ],
+    "corrective_position_targets": 513,
+    "exact_zero_corrective_vertices": 0,
+    "rigidity_screen_samples": 112,
+    "existing_owner_joints_tested": 30,
+    "qualified_whole_component_triangles": 0,
+    "source_position_budget": 4.76837158203125e-07,
+    "source_direction_budget_degrees": 0.0001,
+    "best_whole_component_owner": "ball_leaf_r",
+    "best_whole_component_max_position_error": 0.9802536112856983,
+    "decision": "Retain original skin and all correctives. Triangle fragments passing individual tests are part of one connected welded body; extracting them would divide coincident seams. No seam guard was relaxed."
+  },
+  "visual": {
+    "method": "Actual ReplicatedActor scale/material/placement; all eight preserved clips requested via QA aliases, including retained Sword_Attack and gameplay GroundPound. Full cycles24Hz, three views and30seeded fade stills.",
+    "gpu": "NVIDIA GeForce RTX 5080 Laptop GPU",
+    "renderer": "forward_plus",
+    "engine": {
+      "build": "official",
+      "hash": "ed1daf0bf001b61586d9930840f2f1394092c079",
+      "hex": 263938,
+      "major": 4,
+      "minor": 7,
+      "patch": 2,
+      "status": "stable",
+      "string": "4.7.2-stable (official)",
+      "timestamp": 0
+    },
+    "model_scale": 2.96208500862122,
+    "source_sha256": "f7ec54b8631c5c6f16fc5ccf1d74c35470d1cb0184f4c5bd62fa63b3a3e83347",
+    "runtime_sha256": "2c79d105b5f8738db97427ddbc5e4e5234c0f93f85243f5d84ac12c4cb984ede",
+    "pairs": 575,
+    "width": 640,
+    "height": 640,
+    "max_mean_channel_error_out_of_255": 0.00017659505208333335,
+    "max_pixels_above_two_levels": 2,
+    "views": {
+      "game": {
+        "pairs": 496,
+        "max_mean_channel_error": 0.00017659505208333335,
+        "max_pixels_above_two_levels": 2
+      },
+      "side": {
+        "pairs": 32,
+        "max_mean_channel_error": 2.8483072916666667e-05,
+        "max_pixels_above_two_levels": 1
+      },
+      "rear": {
+        "pairs": 47,
+        "max_mean_channel_error": 1.953125e-05,
+        "max_pixels_above_two_levels": 0
+      }
+    },
+    "dissolve": {
+      "pairs": 30,
+      "max_mean_channel_error": 7.242838541666667e-05,
+      "max_pixels_above_two_levels": 1
+    },
+    "review": "Normal, GroundPound and effect contact boards reviewed visually. All eight full-cycle paired GIFs retained locally; tiny raster-edge differences."
+  },
+  "secondary_effects": {
+    "effective_scale": 2.96208500862122,
+    "failures": [],
+    "gpu": "NVIDIA GeForce RTX 5080 Laptop GPU",
+    "max_color_error": 0.0,
+    "max_custom_error": 0.0,
+    "max_dissolve_bounds_error": 7.15255737304688e-07,
+    "max_fragment_transform_error": 7.27567396552331e-07,
+    "max_grain_error": 0.0,
+    "max_silhouette_position_error": 6.07850495271123e-07,
+    "mounted": {},
+    "passed": true,
+    "renderer": "forward_plus",
+    "runtime_sha256": "2c79d105b5f8738db97427ddbc5e4e5234c0f93f85243f5d84ac12c4cb984ede",
+    "seeded_cases": 15,
+    "source_sha256": "f7ec54b8631c5c6f16fc5ccf1d74c35470d1cb0184f4c5bd62fa63b3a3e83347"
+  },
+  "known_limitations": [
+    "Zstandard payload grows22,266bytes despite the raw file shrinking2,430,100bytes and130,148fewer source key rows. This is an explicit decoded GLB input/raw storage tradeoff.",
+    "CPU/GPU frame time and resident process RAM were not measured.",
+    "Original artistic approval status is unchanged.",
+    "Exact source curve equality can still cause tiny floating-point differences in Godot interpolation after redundant segment boundaries are removed.",
+    "Encoded animation-key savings describe the raw file, logical source accessors and import parsing input only. The native importer can densely rebake the same generated Animation keys, so runtime Animation RAM, key search work and playback CPU may remain unchanged; no such saving was measured or claimed."
+  ],
+  "full_body_framing_revision": {
+    "source_sha256": "f7ec54b8631c5c6f16fc5ccf1d74c35470d1cb0184f4c5bd62fa63b3a3e83347",
+    "candidate_sha256": "2c79d105b5f8738db97427ddbc5e4e5234c0f93f85243f5d84ac12c4cb984ede",
+    "kind": "Legacy framing revision only; model/native motion/Blender/physical/FX proofs unchanged",
+    "source_clips": [
+      "Attack_Ground_Pound",
+      "Death_A",
+      "Fighting_Idle",
+      "Hit_Chest",
+      "Idle_A",
+      "Jog",
+      "Sword_Attack",
+      "Walk"
+    ],
+    "captured_clip_counts": {
+      "Attack_Ground_Pound": 81,
+      "Death_A": 87,
+      "Fighting_Idle": 83,
+      "Hit_Chest": 43,
+      "Idle_A": 94,
+      "Jog": 51,
+      "Sword_Attack": 68,
+      "Walk": 70
+    },
+    "fit_poses": 465,
+    "all_source_clips_captured": true,
+    "source_Actor_transform": [
+      [
+        0.5,
+        0.552330374717712,
+        -0.5
+      ],
+      [
+        -2.96208500862122,
+        0.0,
+        2.58953690490671e-07
+      ],
+      [
+        0.0,
+        2.96208500862122,
+        0.0
+      ],
+      [
+        -2.58953690490671e-07,
+        0.0,
+        -2.96208500862122
+      ]
+    ],
+    "RGB": {
+      "source_sha256": "f7ec54b8631c5c6f16fc5ccf1d74c35470d1cb0184f4c5bd62fa63b3a3e83347",
+      "candidate_sha256": "2c79d105b5f8738db97427ddbc5e4e5234c0f93f85243f5d84ac12c4cb984ede",
+      "image_pairs": 577,
+      "width": 512,
+      "height": 512,
+      "different_image_pairs": 59,
+      "maximum_different_pixels": 14,
+      "maximum_pixels_above_two_levels": 1,
+      "maximum_mean_channel_error": 0.00018183390299479166,
+      "maximum_channel_error": 49,
+      "scope": "Complete ReplicatedActor3D setup with actual display scale, grounding and body materials; identical cameras for source/candidate, four views and every full native cycle at24Hz. Numeric playback and pixel comparisons are separate reports.",
+      "framing_passed": true,
+      "clipped_frame_labels": [],
+      "maximum_border_foreground_pixels": 0
+    },
+    "RGBA": {
+      "source_sha256": "f7ec54b8631c5c6f16fc5ccf1d74c35470d1cb0184f4c5bd62fa63b3a3e83347",
+      "candidate_sha256": "2c79d105b5f8738db97427ddbc5e4e5234c0f93f85243f5d84ac12c4cb984ede",
+      "pairs": 577,
+      "width": 512,
+      "height": 512,
+      "maximum_different_RGBA_pixels": 14,
+      "maximum_RGBA_pixels_above_two_levels": 1,
+      "maximum_RGBA_channel_error": 49,
+      "maximum_mean_RGBA_channel_error": 0.00013637542724609375,
+      "maximum_alpha_error": 0,
+      "all_frames_alpha_opaque_255": true,
+      "scope": "Full-resolution RGBA PNG values; no palette, resize or alignment. Existing strict RGB qualification is separately retained, not weakened by dividing means over4channels."
+    },
+    "normal_scale_review": "Reviewed fitted paired whole-body and attack board; original actual Actor scale and transforms retained, raised club fully visible, no camera/actor alignment patch. Four views and every full native cycle.",
+    "evidence_sha256": {
+      "qualification-job.json": "9388b4d25cd76651722171f28682980a778b1f25c8c11af8019eae3052cd7bea",
+      "source-fit-inventory.json": "a9e7f2169365af8b7bd8385d65e67425c1896bb6edf9d7603e2d5cd6079f3777",
+      "render-fit.json": "cb90daab53ffe237a8cc17927bdd7fbdaab8675245d9e5d1091fd9df17362ea7",
+      "actual-render/render.json": "926a810c32b25d3eafe681acacd18c7f4135ab6cd4564edae001587a9081c30c",
+      "actual-render/pixel-comparison.json": "2d7e931d664b08b0ecb09ccf93801060e3731bc8707650b24755993676feb581",
+      "actual-render/RGBA-comparison.json": "6b6db0ca2206119fa8ada50fb146b235a9a4a65f1819d8686f781d5d9b4eb2f2",
+      "actual-render/comparison.png": "b4b41bef0fd9ae0db0e3c5f71171abc315a537646ce7c84ed962c6ba5b56f2ce"
+    },
+    "revision": "Fresh full-resolution framing after legacy raised-club clipping was discovered. Older palette GIF cycles are previews, not full-resolution pixel evidence.",
+    "summary_sha256": "6062299c1c09df9d07caf26f027ef022becfe3547cf46f299b9269e80df99ee8",
+    "asset_witness_and_approval_changes": false
+  },
+  "genuine_editor_verification_revision": {
+    "status": "Corrected independent actual Editor verification passed within applicable unchanged modern or legacy scope",
+    "date": "2026-10-28",
+    "source_original_sha256": "f7ec54b8631c5c6f16fc5ccf1d74c35470d1cb0184f4c5bd62fa63b3a3e83347",
+    "current_canonical_sha256": "2c79d105b5f8738db97427ddbc5e4e5234c0f93f85243f5d84ac12c4cb984ede",
+    "loader": "ResourceLoader.load(PackedScene)",
+    "load_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/mossbound_stone_golem.glb-cf5df728c8efd9f19c1f267e47797d3d.md5",
+        "import_metadata_sha256": "6244711104dd665fe2e9509fc16886ddecffd4eb0a5644d21b3bb36921873b0a",
+        "imported_resource_path": "res://.godot/imported/mossbound_stone_golem.glb-cf5df728c8efd9f19c1f267e47797d3d.scn",
+        "imported_resource_sha256": "32d7ded97f4df6a2c96387f685755df42b98613d5f791b9aac1ca80717269648",
+        "packed_scene_resource_path": "res://assets/qa/mossbound_stone_golem/editor-real-v1/baseline/mossbound_stone_golem.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "f16efbf32652baef1711d7eb11329943",
+        "source_path": "res://assets/qa/mossbound_stone_golem/editor-real-v1/baseline/mossbound_stone_golem.glb",
+        "source_sha256": "f7ec54b8631c5c6f16fc5ccf1d74c35470d1cb0184f4c5bd62fa63b3a3e83347"
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/mossbound_stone_golem.glb-cee25039bbfda9d11f4980517b745569.md5",
+        "import_metadata_sha256": "fb5662f407bad78324407a41a059847d4c5259dab05bace807b24801455a4b37",
+        "imported_resource_path": "res://.godot/imported/mossbound_stone_golem.glb-cee25039bbfda9d11f4980517b745569.scn",
+        "imported_resource_sha256": "3b6d31242631b7f30f95c1ff562c60c838bcc9214de38b4a842c11c1a4410978",
+        "packed_scene_resource_path": "res://assets/qa/mossbound_stone_golem/editor-real-v1/candidate/mossbound_stone_golem.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "b7c1939ccd7c47e5b14c6c4f88e3c7a5",
+        "source_path": "res://assets/qa/mossbound_stone_golem/editor-real-v1/candidate/mossbound_stone_golem.glb",
+        "source_sha256": "2c79d105b5f8738db97427ddbc5e4e5234c0f93f85243f5d84ac12c4cb984ede"
+      }
+    ],
+    "source_aliases_and_SCNs_have_current_source_and_destination_MD5_freshness": true,
+    "numeric": {
+      "poses": 296,
+      "all_source_clips": [
+        "Death_A",
+        "Fighting_Idle",
+        "Hit_Chest",
+        "Idle_A",
+        "Jog",
+        "Sword_Attack",
+        "Walk",
+        "Attack_Ground_Pound"
+      ],
+      "RESET_checked": true,
+      "maximum_Euclidean_position_error_source_units": 1.8144876088560617e-07,
+      "maximum_normal_angle_degrees": 2.9869878362278614e-05
+    },
+    "applicable_quality_budget": {
+      "position_four_float32_ULPs": 4.76837158203125e-07,
+      "source_coordinate_or_rest_axis_extent_magnitude": 1.012848976000177,
+      "normal_degrees": 0.0001,
+      "both_passed": true
+    },
+    "full_typed_static_attributes_material_storage_texture_pixels_and_mips": {
+      "actor": "mossbound_stone_golem",
+      "source_sha256": "f7ec54b8631c5c6f16fc5ccf1d74c35470d1cb0184f4c5bd62fa63b3a3e83347",
+      "candidate_sha256": "2c79d105b5f8738db97427ddbc5e4e5234c0f93f85243f5d84ac12c4cb984ede",
+      "surfaces": [
+        {
+          "all_typed_arrays": [
+            {
+              "slot": 0,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 1,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 2,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 4,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 10,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 11,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 12,
+              "exact_after_proven_vertex_bijection": true
+            }
+          ],
+          "full_material_storage_fields_and_texture_pixels_mips_exact": true,
+          "format_exact": true,
+          "lods": [],
+          "bounds_component_max_delta": 0.0,
+          "lod_capture_present": true
+        }
+      ],
+      "passed": true,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/mossbound_stone_golem.glb-cf5df728c8efd9f19c1f267e47797d3d.md5",
+          "import_metadata_sha256": "6244711104dd665fe2e9509fc16886ddecffd4eb0a5644d21b3bb36921873b0a",
+          "imported_resource_path": "res://.godot/imported/mossbound_stone_golem.glb-cf5df728c8efd9f19c1f267e47797d3d.scn",
+          "imported_resource_sha256": "32d7ded97f4df6a2c96387f685755df42b98613d5f791b9aac1ca80717269648",
+          "packed_scene_resource_path": "res://assets/qa/mossbound_stone_golem/editor-real-v1/baseline/mossbound_stone_golem.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "f16efbf32652baef1711d7eb11329943",
+          "source_path": "res://assets/qa/mossbound_stone_golem/editor-real-v1/baseline/mossbound_stone_golem.glb",
+          "source_sha256": "f7ec54b8631c5c6f16fc5ccf1d74c35470d1cb0184f4c5bd62fa63b3a3e83347"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/mossbound_stone_golem.glb-cee25039bbfda9d11f4980517b745569.md5",
+          "import_metadata_sha256": "fb5662f407bad78324407a41a059847d4c5259dab05bace807b24801455a4b37",
+          "imported_resource_path": "res://.godot/imported/mossbound_stone_golem.glb-cee25039bbfda9d11f4980517b745569.scn",
+          "imported_resource_sha256": "3b6d31242631b7f30f95c1ff562c60c838bcc9214de38b4a842c11c1a4410978",
+          "packed_scene_resource_path": "res://assets/qa/mossbound_stone_golem/editor-real-v1/candidate/mossbound_stone_golem.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "b7c1939ccd7c47e5b14c6c4f88e3c7a5",
+          "source_path": "res://assets/qa/mossbound_stone_golem/editor-real-v1/candidate/mossbound_stone_golem.glb",
+          "source_sha256": "2c79d105b5f8738db97427ddbc5e4e5234c0f93f85243f5d84ac12c4cb984ede"
+        }
+      ]
+    },
+    "retained_Editor_morph_fields": {
+      "actor": "mossbound_stone_golem",
+      "source_sha256": "f7ec54b8631c5c6f16fc5ccf1d74c35470d1cb0184f4c5bd62fa63b3a3e83347",
+      "candidate_sha256": "2c79d105b5f8738db97427ddbc5e4e5234c0f93f85243f5d84ac12c4cb984ede",
+      "all_retained_editor_POSITION_NORMAL_TANGENT_typed_bits_exact": true,
+      "retained_targets": 513,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/mossbound_stone_golem.glb-cf5df728c8efd9f19c1f267e47797d3d.md5",
+          "import_metadata_sha256": "6244711104dd665fe2e9509fc16886ddecffd4eb0a5644d21b3bb36921873b0a",
+          "imported_resource_path": "res://.godot/imported/mossbound_stone_golem.glb-cf5df728c8efd9f19c1f267e47797d3d.scn",
+          "imported_resource_sha256": "32d7ded97f4df6a2c96387f685755df42b98613d5f791b9aac1ca80717269648",
+          "packed_scene_resource_path": "res://assets/qa/mossbound_stone_golem/editor-real-v1/baseline/mossbound_stone_golem.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "f16efbf32652baef1711d7eb11329943",
+          "source_path": "res://assets/qa/mossbound_stone_golem/editor-real-v1/baseline/mossbound_stone_golem.glb",
+          "source_sha256": "f7ec54b8631c5c6f16fc5ccf1d74c35470d1cb0184f4c5bd62fa63b3a3e83347"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/mossbound_stone_golem.glb-cee25039bbfda9d11f4980517b745569.md5",
+          "import_metadata_sha256": "fb5662f407bad78324407a41a059847d4c5259dab05bace807b24801455a4b37",
+          "imported_resource_path": "res://.godot/imported/mossbound_stone_golem.glb-cee25039bbfda9d11f4980517b745569.scn",
+          "imported_resource_sha256": "3b6d31242631b7f30f95c1ff562c60c838bcc9214de38b4a842c11c1a4410978",
+          "packed_scene_resource_path": "res://assets/qa/mossbound_stone_golem/editor-real-v1/candidate/mossbound_stone_golem.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "b7c1939ccd7c47e5b14c6c4f88e3c7a5",
+          "source_path": "res://assets/qa/mossbound_stone_golem/editor-real-v1/candidate/mossbound_stone_golem.glb",
+          "source_sha256": "2c79d105b5f8738db97427ddbc5e4e5234c0f93f85243f5d84ac12c4cb984ede"
+        }
+      ],
+      "scope": "Direct actual Editor source/candidate retained morph P/N/T byte digests after independently proved complete static-attribute vertex bijection. Exact target mask from source packing lineage; no morph field omitted.",
+      "passed": true
+    },
+    "withdrawn_prior_loader_claim": "Prior shared dumper captures labelled imported used GlbSceneCache for these outside-actor aliases and therefore were raw-cache comparisons. They remain retained private raw/native evidence, but their independent Editor claim is withdrawn and superseded by these explicitly loaded SCNs.",
+    "unchanged_other_evidence": "Original independent physical observations, exact source curves, Blender, actual native gameplay body rendering, placement, mounted/cinematic dependencies and secondary effects remain hash-bound and unchanged. No artistic approval, model, action, cap or witness change in this QA revision.",
+    "production_scope": "Production actor_shipping loose folders remain raw/native and are not Editor-imported. Per-surface Editor-generated LODs are verification representation metadata, not a claim of new gameplay LODs.",
+    "evidence_sha256": {
+      ".local/heavy-batch/mossbound_stone_golem/framing-v3/editor-real-v1/qualification-job.json": "e6cf1e97e99840a417ea61c0ab2bd5d5bb8d664b72995bfd276d34ecf1b9d695",
+      ".local/heavy-batch/mossbound_stone_golem/framing-v3/editor-real-v1/imported/runtime.json": "92e3d25ca69170bf95be5703c3b8dcb2ce12a5dfec0ab51249c9d49ed4e6eb89",
+      ".local/heavy-batch/mossbound_stone_golem/framing-v3/editor-real-v1/imported-validation.json": "2b861d11253ea13c5c4202ea19017328dd9054e59f634b4bfba021add69d9351",
+      ".local/heavy-batch/mossbound_stone_golem/framing-v3/editor-real-v1/imported-static-mesh-bits.json": "3c038295c28d6d6b99a7926b37b8d8703dc026064f43851c65d9834887c76073",
+      ".local/heavy-batch/mossbound_stone_golem/framing-v3/editor-real-v1/imported-typed-validation.json": "e3a6cf5b1a2b1aba4030af1149cf6c3e8ee8aa0f1be2cd9858df975dd5049244",
+      ".local/heavy-batch/mossbound_stone_golem/framing-v3/editor-real-v1/morph-digest-job.json": "626268edb4f9cb4ad383c502a9185a498737d0b928f370c898de84fb217dc9ee",
+      ".local/heavy-batch/mossbound_stone_golem/framing-v3/editor-real-v1/imported-morph-digests.json": "56527ae9222a9ebe7c61193f7f34594379e4b3f454d379ed6bc645ff0bc5c708",
+      ".local/heavy-batch/mossbound_stone_golem/framing-v3/editor-real-v1/imported-morph-validation.json": "3856e45ccf22a2f969e9f7ec89d03b911ae008154b5e10e6e5b5940e87bab72c"
+    }
+  }
+}

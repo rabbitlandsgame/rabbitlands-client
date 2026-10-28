@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "actor": "peryton",
+  "source_sha256": "02a77ca8a19c01161f72e2449c3fea4a428babefdd1ce957794bca30e57c5251",
+  "candidate_sha256": "240ceca4e9d73559eed3bb3e808f03a8ff9c134bcab566706f7dff538d856392",
+  "pipeline": [
+    "prune_zero_targets",
+    "reduce_constant_runs",
+    "compact"
+  ],
+  "partition": null,
+  "unchanged": false,
+  "removed_zero_target_indices": [],
+  "redundant_flat_key_rows_removed": 6758,
+  "geometry_skin_rest_binds_materials_images_unchanged": true,
+  "preserve_trs_keys": false,
+  "native_clips": [
+    "Death_A",
+    "Fighting_Idle",
+    "Fly",
+    "Hit_Chest",
+    "Idle_A",
+    "Jog",
+    "Sword_Attack",
+    "Walk"
+  ],
+  "usage": "Deterministic exact preparation needs no partition --profile; frozen source/candidate hashes bind this record."
+}

@@ -1,0 +1,586 @@
+{
+  "schema_version": 1,
+  "batch": 26,
+  "actor": "elderwood_dryad_queen",
+  "date": "2026-10-27",
+  "runtime_path": "godot-client/assets/actors/native/creatures/elderwood_dryad_queen.glb",
+  "source_sha256": "acc71918137543500b40ae3ebb541b6c852402310ce27aed26bd775ea7efbabf",
+  "runtime_sha256": "30d5c342ba9532d02890a7961d24ab94a0d97bdd6069c43c9aa4e9916728388e",
+  "qualification": "Passed exact source/continuous-curve lineage, independent all-key zero-island reconstruction, original physical observations, fresh Blender/default, native and fresh editor playback/transitions, source-fitted actual-Actor body/fade captures, immutable original-implementation dissolve reference, complete silhouette and reset checks.",
+  "human_approval_changed": false,
+  "recipe": {
+    "tool": "eloria-assets/tools/pack_creature_storage.py",
+    "tool_commit": "5bdd51c3",
+    "steps": [
+      "prune_zero_targets",
+      "reduce_constant_runs",
+      "split_corrective_partition",
+      "compact"
+    ],
+    "profile": "eloria-assets/source/creature-storage/elderwood_dryad_queen.json",
+    "bounds": "eloria-assets/source/creature-storage/elderwood_dryad_queen-bounds.json",
+    "preserve_trs_keys": false
+  },
+  "bytes": {
+    "source_bytes": 7154016,
+    "candidate_bytes": 5547180,
+    "source_zstd_bytes": 2977351,
+    "candidate_zstd_bytes": 2996769
+  },
+  "inactive_targets_removed": 0,
+  "flat_run_key_rows_removed": 70124,
+  "corrective_graphics_buffer_bytes": {
+    "source": 1810840,
+    "candidate": 358360,
+    "saved": 1452480,
+    "scope": "Actual Godot raw blend_shape_data totals; shared per loaded model."
+  },
+  "draw_surfaces": {
+    "source": 1,
+    "candidate": 2
+  },
+  "source_validation": {
+    "passed": true,
+    "source_sha256": "acc71918137543500b40ae3ebb541b6c852402310ce27aed26bd775ea7efbabf",
+    "candidate_sha256": "30d5c342ba9532d02890a7961d24ab94a0d97bdd6069c43c9aa4e9916728388e",
+    "exact_intermediate_sha256": "745adffff23934e9b8142af34b45e4e57794e29484e023e65055e1bddf09965a",
+    "exact_intermediate_continuous_curve_validation_sha256": "77b0435a06c56aa539da32f184c2fc309d3180e144540ce004876f6a974c39bd",
+    "partition_structure_validation": {
+      "passed": true,
+      "source_sha256": "acc71918137543500b40ae3ebb541b6c852402310ce27aed26bd775ea7efbabf",
+      "exact_intermediate_sha256": "745adffff23934e9b8142af34b45e4e57794e29484e023e65055e1bddf09965a",
+      "candidate_sha256": "30d5c342ba9532d02890a7961d24ab94a0d97bdd6069c43c9aa4e9916728388e",
+      "selected_vertices": 4272,
+      "selected_triangles": 3203,
+      "all_selected_base_skin_and_other_attribute_bits_exact": true,
+      "all_remainder_corrective_and_attribute_bits_exact": true,
+      "all_selected_POSITION_NORMAL_TANGENT_correctives_zero": true,
+      "original_hierarchy_rest_bind_material_images_unchanged": true,
+      "all_animation_channels_times_values_bit_exact_to_proven_exact_intermediate": true,
+      "all_triangles_once_original_winding_and_welded_seams": true,
+      "all_time_equivalence": "Original attributes and all4/8 skin influences remain bit-identical. Every removed selected corrective field is exactly zero; therefore arbitrary poses/defaults/blends reconstruct identical positions/normals/tangents. Source exact intermediate continuous-curve proof remains independently hash-bound. Actual engine packing/shader and effects are separate gates."
+    },
+    "all_original_keys_midpoints_offgrid": {
+      "passed": true,
+      "source_sha256": "acc71918137543500b40ae3ebb541b6c852402310ce27aed26bd775ea7efbabf",
+      "candidate_sha256": "30d5c342ba9532d02890a7961d24ab94a0d97bdd6069c43c9aa4e9916728388e",
+      "preserve_skin_and_all_other_attributes_bit_exact": true,
+      "selected_corrective_position_normal_tangent_values_all_zero": true,
+      "unchanged_original_bone_hierarchy_rest_binds_curves_images_materials_uvs": true,
+      "all_triangle_winding_and_coverage_preserved": true,
+      "all_time_equivalence": "Zero source corrective deltas plus bit-identical original skin/base/curve data establish equality for every vertex at arbitrary poses and blend weights. Numeric all-key/midpoint probes independently reconstruct source skin and normals.",
+      "probe_vertices": 5326,
+      "clips": {
+        "Death_A": {
+          "source_knots": 2075,
+          "keys_midpoints_and_offgrid_samples": 4154,
+          "maximum_position_error": 0.0,
+          "maximum_normal_vector_error": 0.0
+        },
+        "Fighting_Idle": {
+          "source_knots": 533,
+          "keys_midpoints_and_offgrid_samples": 1070,
+          "maximum_position_error": 0.0,
+          "maximum_normal_vector_error": 0.0
+        },
+        "Hit_Chest": {
+          "source_knots": 222,
+          "keys_midpoints_and_offgrid_samples": 448,
+          "maximum_position_error": 0.0,
+          "maximum_normal_vector_error": 0.0
+        },
+        "Idle_A": {
+          "source_knots": 637,
+          "keys_midpoints_and_offgrid_samples": 1278,
+          "maximum_position_error": 0.0,
+          "maximum_normal_vector_error": 0.0
+        },
+        "Jog": {
+          "source_knots": 860,
+          "keys_midpoints_and_offgrid_samples": 1724,
+          "maximum_position_error": 0.0,
+          "maximum_normal_vector_error": 0.0
+        },
+        "Sword_Attack": {
+          "source_knots": 782,
+          "keys_midpoints_and_offgrid_samples": 1568,
+          "maximum_position_error": 0.0,
+          "maximum_normal_vector_error": 0.0
+        },
+        "Walk": {
+          "source_knots": 916,
+          "keys_midpoints_and_offgrid_samples": 1836,
+          "maximum_position_error": 0.0,
+          "maximum_normal_vector_error": 0.0
+        }
+      },
+      "elapsed_seconds": 627.3361794999801
+    }
+  },
+  "physical_observations": {
+    "passed": true,
+    "source_sha256": "acc71918137543500b40ae3ebb541b6c852402310ce27aed26bd775ea7efbabf",
+    "candidate_sha256": "30d5c342ba9532d02890a7961d24ab94a0d97bdd6069c43c9aa4e9916728388e",
+    "surface_probes": 180,
+    "poses": 42,
+    "clips": 7,
+    "source_candidate_position_error": 0.0,
+    "source_candidate_normal_vector_error": 0.0,
+    "original_witness_position_error_over_height": 1.3779583736771089e-06,
+    "original_source_witness_position_error_over_height": 1.3779583736771089e-06,
+    "original_witness_normal_vector_error": 0.0,
+    "original_witness_bone_matrix_error": 0.0,
+    "witness_sha256": "5e43f54395999249ca945205566a2b9bebaf64900bb75e698b01ed75a9589c19",
+    "sampled_motion_min": [
+      -1.0461770163825352,
+      0.007739751971442055,
+      -1.1063502717360871
+    ],
+    "sampled_motion_max": [
+      1.128975173238781,
+      2.065545690733276,
+      1.25910432803343
+    ]
+  },
+  "paired_fresh_blender": {
+    "maximum_position_error": 0.0,
+    "maximum_bone_matrix_error": 0.0,
+    "maximum_float32_budget": 3.814697265625e-06,
+    "poses": 43,
+    "neutral_default_checked": true,
+    "passed": true,
+    "source_sha256": "acc71918137543500b40ae3ebb541b6c852402310ce27aed26bd775ea7efbabf",
+    "candidate_sha256": "30d5c342ba9532d02890a7961d24ab94a0d97bdd6069c43c9aa4e9916728388e",
+    "scope": "Direct source/candidate frozen-ID surfaces and every bone matrix at each original witness pose plus controlled neutral/default pose. Sixteen float32 ULPs at baseline coordinate/matrix magnitude; independent of inherited source/witness residual and separate from native/source appearance budgets."
+  },
+  "native_and_editor_imported": {
+    "native": {
+      "samples": 232,
+      "maximum_position_error": 5.514026074245234e-07,
+      "maximum_normal_angle_degrees": 1.9186176448475686e-05
+    },
+    "imported": {
+      "samples": 232,
+      "maximum_position_error": 5.514026074245234e-07,
+      "maximum_normal_angle_degrees": 1.9186176448475686e-05,
+      "actual_loader": "ResourceLoader.load(PackedScene)",
+      "authoritative_SCN_provenance": "genuine_editor_verification_revision.load_proofs"
+    }
+  },
+  "editor_import_policy": {
+    "source_sidecar_exists": true,
+    "policy": "Original per-actor editor parameters retained"
+  },
+  "native_numeric_budget": {
+    "actor": "elderwood_dryad_queen",
+    "source_coordinate_or_extent_magnitude": 2.1126210732216926,
+    "four_float32_ULPs": 9.5367431640625e-07,
+    "runtime_position_error": 5.514026074245234e-07,
+    "runtime_normal_degrees": 1.9186176448475686e-05,
+    "imported_position_error": 5.514026074245234e-07,
+    "imported_normal_degrees": 1.9186176448475686e-05,
+    "normal_degrees_budget": 0.0001,
+    "scope": "Unchanged four float32 ULPs at max(abs(original rest coordinates), original largest rest-axis extent); Euclidean final engine position error. Original-only magnitude and strict 0.0001 degree normal cap retained."
+  },
+  "placement": {
+    "passed": true,
+    "bounds_error": 0.0,
+    "placement_error": 0.0,
+    "overhead_height_error": 0.0
+  },
+  "render_fit": {
+    "source_sha256": "acc71918137543500b40ae3ebb541b6c852402310ce27aed26bd775ea7efbabf",
+    "model_global": [
+      [
+        0.5,
+        3.13085251946177e-07,
+        -0.5
+      ],
+      [
+        -1.52941203117371,
+        0.0,
+        1.33705441385246e-07
+      ],
+      [
+        0.0,
+        1.52941203117371,
+        0.0
+      ],
+      [
+        -1.33705441385246e-07,
+        0.0,
+        -1.52941203117371
+      ]
+    ],
+    "position": [
+      -1.2350815776851527,
+      0.0009043141502664016,
+      -2.542244295264611
+    ],
+    "size": [
+      3.4348298485288513,
+      3.3345514537436514,
+      4.103291309470371
+    ],
+    "poses": 299,
+    "scope": "Every vertex at every full-cycle render frame and view-still pose, using actual complete Actor Godot arrays/poses/weights/transforms, renderer morph cutoff and four/eight influence skin. Evaluated in float64 with a separate 30% camera margin."
+  },
+  "source_fit_inventory": {
+    "passed": true,
+    "source_sha256": "acc71918137543500b40ae3ebb541b6c852402310ce27aed26bd775ea7efbabf",
+    "candidate_sha256": "30d5c342ba9532d02890a7961d24ab94a0d97bdd6069c43c9aa4e9916728388e",
+    "source_clips": [
+      "Death_A",
+      "Fighting_Idle",
+      "Hit_Chest",
+      "Idle_A",
+      "Jog",
+      "Sword_Attack",
+      "Walk"
+    ],
+    "actual_Actor_fit_clips": [
+      "Death_A",
+      "Fighting_Idle",
+      "Hit_Chest",
+      "Idle_A",
+      "Jog",
+      "Sword_Attack",
+      "Walk"
+    ],
+    "fit_runtime_sha256": "f76432de6bd5d9a8531bb9c3acff0451ea0bd26117e36d28d4525dd80587be0b",
+    "poses": 299,
+    "fit_lineage": {
+      "source_sha256": "acc71918137543500b40ae3ebb541b6c852402310ce27aed26bd775ea7efbabf",
+      "copied_from": "../v2/render-fit.json",
+      "scope": "Identical source model and actualActor source-only fit. Original logical bounds retained on both partitions; placement gate independently required."
+    },
+    "scope": "Actual Actor source-pose capture inventory, not merely requested QA aliases. Every source clip is present in fitted playback data."
+  },
+  "appearance": {
+    "source_sha256": "acc71918137543500b40ae3ebb541b6c852402310ce27aed26bd775ea7efbabf",
+    "candidate_sha256": "30d5c342ba9532d02890a7961d24ab94a0d97bdd6069c43c9aa4e9916728388e",
+    "image_pairs": 397,
+    "width": 512,
+    "height": 512,
+    "different_image_pairs": 397,
+    "maximum_different_pixels": 102,
+    "maximum_pixels_above_two_levels": 11,
+    "maximum_mean_channel_error": 0.0010350545247395833,
+    "maximum_channel_error": 188,
+    "scope": "Complete ReplicatedActor3D setup with actual display scale, grounding and body materials; identical cameras for source/candidate, four views and every full native cycle at24Hz. Numeric playback and pixel comparisons are separate reports.",
+    "framing_passed": true,
+    "clipped_frame_labels": [],
+    "maximum_border_foreground_pixels": 0
+  },
+  "secondary_effects": {
+    "effective_scale": 1.52941203117371,
+    "failures": [],
+    "gpu": "NVIDIA GeForce RTX 5080 Laptop GPU",
+    "max_color_error": 0.0,
+    "max_custom_error": 0.0,
+    "max_dissolve_bounds_error": 5.33120157797384e-07,
+    "max_fragment_transform_error": 6.39883012354403e-07,
+    "max_grain_error": 2.62260436978412e-08,
+    "max_silhouette_position_error": 7.34855404971313e-07,
+    "mounted": {},
+    "passed": true,
+    "renderer": "forward_plus",
+    "runtime_sha256": "30d5c342ba9532d02890a7961d24ab94a0d97bdd6069c43c9aa4e9916728388e",
+    "seeded_cases": 15,
+    "source_sha256": "acc71918137543500b40ae3ebb541b6c852402310ce27aed26bd775ea7efbabf"
+  },
+  "rig_investigation": {
+    "decision": "Remove corrective storage from 4,272 complete zero-delta islands while preserving every original skin influence. No bone rebind or default bake.",
+    "mode": "preserve_skin",
+    "source_node": 63,
+    "new_node": 69,
+    "selected_vertices": 4272,
+    "selected_triangles": 3203,
+    "retained_corrective_vertices": 1054,
+    "retained_targets": 17,
+    "all_original_vertices_triangles_attributes_UVs_images_materials_rest_binds_and_eight_influences_retained": true,
+    "all_authored_POSITION_NORMAL_TANGENT_target_fields_checked": true,
+    "authored_corrective_field_types": [
+      "POSITION"
+    ],
+    "source_all_key_midpoint_offgrid_poses": 12078,
+    "source_position_and_normal_added_error": 0,
+    "original_packed_GPU_skin_bytes_exact": {
+      "passed": true,
+      "source_sha256": "acc71918137543500b40ae3ebb541b6c852402310ce27aed26bd775ea7efbabf",
+      "candidate_sha256": "30d5c342ba9532d02890a7961d24ab94a0d97bdd6069c43c9aa4e9916728388e",
+      "bytes_per_vertex": 32,
+      "skin_slots": 8,
+      "all_original_packed_GPU_skin_bytes_exact_after_original_ID_reconstruction": true,
+      "source_packed_skin_sha256": "69a1dd5d01ec89fe8fa3ac2a7ffc9826f9afb907f8e4fa60ebe6b27441d0eff3"
+    }
+  },
+  "evidence_sha256": {
+    "qualification-job.json": "65c30dee77a9d4640c5620bb4a2c772fd55179d5b3f06214930cccf7000f38c1",
+    "processing.json": "0b14ad1cf093950afecf49d77f53af15467f2d04edccfe1e32cfa61e720086f7",
+    "profile.json": "fddbf28e2258f5444ca1ce445b8956c866805760614b6f7626ceff12bf8c0575",
+    "bounds.json": "2bda6083157ad00b1ecddf957454dcbb6ec1d04fff59b5bf8086170c079804d5",
+    "partition-structure-validation.json": "b7d36a8365e3e8392471951a68b1bb8629056ecc2f3bc865a2f1ba1f5895a108",
+    "source-validation.json": "cd7531770aea8fc8ab32aaba774a9554f9f945fba0312011aa371432419a1c84",
+    "physical-witness-validation.json": "cdc71ff1fba51e31bcf58b5bde0f8c8d58d83973cb591f0542a4ab21506955fc",
+    "blender-validation.json": "e08eafc2769b1860d3167cc0db0835809aee2dabe18446c7c9e753965e9f545d",
+    "blender-direct-validation.json": "31fae7f571cd09f4186adde4769ebbb34cafb08de190f2a8a6e9df182fc8f561",
+    "native-validation.json": "66b5bd230a2f81b72f4a0b9f4c566c43317664e56e3068e8e91068e689d25685",
+    "imported-validation.json": "66b5bd230a2f81b72f4a0b9f4c566c43317664e56e3068e8e91068e689d25685",
+    "mapping.json": "8d2a574a0ddd32bd43c885408f610fabfcfbf340feaf8d9dbe81d462237b715d",
+    "imported-mapping.json": "88001edd8ae8a09c98698a1174e0c14c907c698b6b5f74ff7b57c96b5250682d",
+    "packed-skin-validation.json": "046271a843834f7a5b74b0f60d583f76360d544ad8b859784411b8dc5aafb9db",
+    "placement.json": "e162e6cbb304e903b5e667cff7e4aaa746705a02f7513874db86d588c49b7270",
+    "render-fit.json": "c7fdc4bba90f6c129d031ac6a1b024fd140633904590ea4a37bc4077da4a4732",
+    "fit-lineage.json": "50ad229d0c60e1875beffd9b75995dd595ba5ea809e03fb6fdf7df93e25330b6",
+    "source-fit-inventory.json": "eaf10afd5a296ee3d660301737eacb7fad59cf93041553bc8651b22f7a6beca0",
+    "effects-validation.json": "61acfe2b6fb5d4e93a69709088bf9b4f37d8d4c5f602277ced450ba2517a7f21",
+    "original-reference-effects-validation.json": "e27d1c5ed47f2a6543cf160af08a3667d462dd97bcc82a707513845d0aa8d2f0",
+    "reference-image-manifest.json": "c7c783b2da6822778c3c150c4bce92698f6bddbea3708278b91501e1430144bf",
+    "original-runtime-reference/lineage.json": "da2492202f8bc282059259a19913c0e63e46ffa411bbf20f7cc723d461367287",
+    "reference-old/dissolve.json": "88f5c8b470d260d7b7b0f08560a5fa23ddf444e09488fa684d73057432e731dc",
+    "reference-new/dissolve.json": "764e9d412441df6d8e644e418646f723683dd514c749f922f9260cdba4759182",
+    "actual-render/render.json": "2f3d9a8732cc4de9171e25db787e3d9175b3d90a3692d413675286fd619ce73e",
+    "actual-render/pixel-comparison.json": "375a34f37c247ff46a92426bd8a7c9e9e590aea9d1a67c73410e732ca62e1a24",
+    "previous-v2-exact-source-validation.json": "77b0435a06c56aa539da32f184c2fc309d3180e144540ce004876f6a974c39bd"
+  },
+  "visual_review": "Normal full-body/cycle comparison board and immutable-original/current fade board reviewed. Every one of 397 body pairs and all 225 reference images has zero border foreground; no pose alignment or image correction. Source-only full-motion fit controls identical 640px fade cameras.",
+  "known_limitations": [
+    "One added draw surface per actor/render pass; runtime frame-time and resident Animation RAM were not benchmarked.",
+    "Encoded flat-key savings concern raw/logical accessor/import input only. Native importing may densely rebake the same generated Animation keys.",
+    "Compressed shipping data grows by 19,418 bytes compared to the original, consistent with the accepted raw-development preference.",
+    "Original artistic approval and frozen observations remain unchanged."
+  ],
+  "original_implementation_effects": {
+    "passed": true,
+    "source_sha256": "acc71918137543500b40ae3ebb541b6c852402310ce27aed26bd775ea7efbabf",
+    "candidate_sha256": "30d5c342ba9532d02890a7961d24ab94a0d97bdd6069c43c9aa4e9916728388e",
+    "immutable_old_helper_sha256": "06a439005ec2d3929f1e8e4853bb3f8274b28944066935caa8572f10db815119",
+    "current_helper_sha256": "52e180bd81c7070a0c5a1a9365fe8db339e9502ab23e1b07d490eda9c13a7242",
+    "source_fit_sha256": "c7fdc4bba90f6c129d031ac6a1b024fd140633904590ea4a37bc4077da4a4732",
+    "source_old_vs_current_source_materials_and_full_ash_byte_exact": true,
+    "current_candidate_maximum_ash_transform_vector_error": 6.39883012354403e-07,
+    "maximum_material_uniform_vector_or_scalar_error": 5.331201519560318e-07,
+    "maximum_different_pixels": 19,
+    "maximum_pixels_above_two_levels": 4,
+    "maximum_mean_channel_error": 0.00024007161458333332,
+    "all_RGBA_alpha_channels_equal": true,
+    "all_225_captured_images_zero_border_foreground": true,
+    "old_and_new_cameras": {
+      "old": [
+        {
+          "name": "baseline",
+          "size": 11.5339260101318,
+          "target": [
+            0.482333421707153,
+            1.66818010807037,
+            -0.490598440170288
+          ]
+        }
+      ],
+      "new": [
+        {
+          "name": "baseline",
+          "size": 11.5339260101318,
+          "target": [
+            0.482333421707153,
+            1.66818010807037,
+            -0.490598440170288
+          ]
+        },
+        {
+          "name": "candidate",
+          "size": 11.5339260101318,
+          "target": [
+            0.482333421707153,
+            1.66818010807037,
+            -0.490598440170288
+          ]
+        }
+      ]
+    },
+    "scope": "Real Forward+640px source-fit full-body/fade images. Immutable old implementation/original compared to current/original and current/private candidate at five Death fractions, three seeds and five fade phases. Complete packed320-instance transforms/colors/custom, every body+ash material shader/uniform/texture-pixel value and exact resource restoration. Candidate keeps1e-6effect numeric and unchanged strict pixel caps. No asset/artistic change."
+  },
+  "runtime_tradeoff": "One additional mesh draw surface per actor/render pass. Shared corrective GPU data falls by 1,452,480 bytes. Compared to the previous exact-only main, raw data falls by 838,764 bytes while compressed data grows by 4,330 bytes. No new bones; total original geometry and skin data remains unchanged. Frame-time, resident Animation RAM and playback/key-search CPU were not measured; no net FPS improvement claimed.",
+  "genuine_editor_verification_revision": {
+    "status": "Corrected independent actual Editor verification passed within applicable unchanged modern or legacy scope",
+    "date": "2026-10-28",
+    "source_original_sha256": "acc71918137543500b40ae3ebb541b6c852402310ce27aed26bd775ea7efbabf",
+    "current_canonical_sha256": "30d5c342ba9532d02890a7961d24ab94a0d97bdd6069c43c9aa4e9916728388e",
+    "loader": "ResourceLoader.load(PackedScene)",
+    "load_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/elderwood_dryad_queen.glb-8a8cedaceee24bf9dc8e802317403e66.md5",
+        "import_metadata_sha256": "611328dafc0913763d20c6f23fa607e08bfeaf7acb85e16c77df9fc5494984d3",
+        "imported_resource_path": "res://.godot/imported/elderwood_dryad_queen.glb-8a8cedaceee24bf9dc8e802317403e66.scn",
+        "imported_resource_sha256": "946c03fd63c4afe16a311b423a78281006a1bed1a1c3dfa780bed2f217725e61",
+        "packed_scene_resource_path": "res://assets/qa/elderwood_dryad_queen/v3-optional/baseline/elderwood_dryad_queen.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "e4aac721192f3c879d93618ca9374694",
+        "source_path": "res://assets/qa/elderwood_dryad_queen/v3-optional/baseline/elderwood_dryad_queen.glb",
+        "source_sha256": "acc71918137543500b40ae3ebb541b6c852402310ce27aed26bd775ea7efbabf"
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/elderwood_dryad_queen.glb-10e57485197a21766b40c69203f2e3b8.md5",
+        "import_metadata_sha256": "a611732c66a7fc95b289680e611138bc92c61a90425be3cfd1146fa9fe4b0104",
+        "imported_resource_path": "res://.godot/imported/elderwood_dryad_queen.glb-10e57485197a21766b40c69203f2e3b8.scn",
+        "imported_resource_sha256": "f8a9f66902304976e22891db049961baa7a358d3d007b148795061369dc4503b",
+        "packed_scene_resource_path": "res://assets/qa/elderwood_dryad_queen/v3-optional/candidate/elderwood_dryad_queen.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "7fe4748aa8ef0f4e4a77eb4013bfbd9e",
+        "source_path": "res://assets/qa/elderwood_dryad_queen/v3-optional/candidate/elderwood_dryad_queen.glb",
+        "source_sha256": "30d5c342ba9532d02890a7961d24ab94a0d97bdd6069c43c9aa4e9916728388e"
+      }
+    ],
+    "source_aliases_and_SCNs_have_current_source_and_destination_MD5_freshness": true,
+    "numeric": {
+      "poses": 232,
+      "all_source_clips": [
+        "Death_A",
+        "Fighting_Idle",
+        "Hit_Chest",
+        "Idle_A",
+        "Jog",
+        "Sword_Attack",
+        "Walk"
+      ],
+      "RESET_checked": true,
+      "maximum_Euclidean_position_error_source_units": 5.514026074245234e-07,
+      "maximum_normal_angle_degrees": 1.9186176448475686e-05
+    },
+    "applicable_quality_budget": {
+      "position_four_float32_ULPs": 9.5367431640625e-07,
+      "source_coordinate_or_rest_axis_extent_magnitude": 2.1126210732216926,
+      "normal_degrees": 0.0001,
+      "both_passed": true
+    },
+    "full_typed_static_attributes_material_storage_texture_pixels_and_mips": {
+      "actor": "elderwood_dryad_queen",
+      "source_sha256": "acc71918137543500b40ae3ebb541b6c852402310ce27aed26bd775ea7efbabf",
+      "candidate_sha256": "30d5c342ba9532d02890a7961d24ab94a0d97bdd6069c43c9aa4e9916728388e",
+      "all_original_triangles_and_winding_exact": true,
+      "all_material_typed_storage_texture_pixels_and_mips_exact": true,
+      "attributes": [
+        {
+          "slot": 0,
+          "exact_after_original_vertex_map": true
+        },
+        {
+          "slot": 1,
+          "exact_after_original_vertex_map": true
+        },
+        {
+          "slot": 2,
+          "exact_after_original_vertex_map": true
+        },
+        {
+          "slot": 4,
+          "exact_after_original_vertex_map": true
+        },
+        {
+          "slot": 10,
+          "exact_after_original_vertex_map": true
+        },
+        {
+          "slot": 11,
+          "exact_after_original_vertex_map": true
+        }
+      ],
+      "editor_generated_lod_counts": [
+        [
+          3
+        ],
+        [
+          2,
+          2
+        ]
+      ],
+      "scope": "Actual Editor ResourceLoader typed-array comparison through full basis/normal/skin/all-morph original vertex bijection. Approved rigid skin/default differences recorded rather than mislabeled bit-exact; independent full-pose numeric gate remains separate. Editor-generated per-surface LODs recorded; production loose-folder models use raw import with separately recorded zero LODs.",
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/elderwood_dryad_queen.glb-8a8cedaceee24bf9dc8e802317403e66.md5",
+          "import_metadata_sha256": "611328dafc0913763d20c6f23fa607e08bfeaf7acb85e16c77df9fc5494984d3",
+          "imported_resource_path": "res://.godot/imported/elderwood_dryad_queen.glb-8a8cedaceee24bf9dc8e802317403e66.scn",
+          "imported_resource_sha256": "946c03fd63c4afe16a311b423a78281006a1bed1a1c3dfa780bed2f217725e61",
+          "packed_scene_resource_path": "res://assets/qa/elderwood_dryad_queen/v3-optional/baseline/elderwood_dryad_queen.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "e4aac721192f3c879d93618ca9374694",
+          "source_path": "res://assets/qa/elderwood_dryad_queen/v3-optional/baseline/elderwood_dryad_queen.glb",
+          "source_sha256": "acc71918137543500b40ae3ebb541b6c852402310ce27aed26bd775ea7efbabf"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/elderwood_dryad_queen.glb-10e57485197a21766b40c69203f2e3b8.md5",
+          "import_metadata_sha256": "a611732c66a7fc95b289680e611138bc92c61a90425be3cfd1146fa9fe4b0104",
+          "imported_resource_path": "res://.godot/imported/elderwood_dryad_queen.glb-10e57485197a21766b40c69203f2e3b8.scn",
+          "imported_resource_sha256": "f8a9f66902304976e22891db049961baa7a358d3d007b148795061369dc4503b",
+          "packed_scene_resource_path": "res://assets/qa/elderwood_dryad_queen/v3-optional/candidate/elderwood_dryad_queen.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "7fe4748aa8ef0f4e4a77eb4013bfbd9e",
+          "source_path": "res://assets/qa/elderwood_dryad_queen/v3-optional/candidate/elderwood_dryad_queen.glb",
+          "source_sha256": "30d5c342ba9532d02890a7961d24ab94a0d97bdd6069c43c9aa4e9916728388e"
+        }
+      ]
+    },
+    "retained_Editor_morph_fields": {
+      "source_sha256": "acc71918137543500b40ae3ebb541b6c852402310ce27aed26bd775ea7efbabf",
+      "candidate_sha256": "30d5c342ba9532d02890a7961d24ab94a0d97bdd6069c43c9aa4e9916728388e",
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/elderwood_dryad_queen.glb-8a8cedaceee24bf9dc8e802317403e66.md5",
+          "import_metadata_sha256": "611328dafc0913763d20c6f23fa607e08bfeaf7acb85e16c77df9fc5494984d3",
+          "imported_resource_path": "res://.godot/imported/elderwood_dryad_queen.glb-8a8cedaceee24bf9dc8e802317403e66.scn",
+          "imported_resource_sha256": "946c03fd63c4afe16a311b423a78281006a1bed1a1c3dfa780bed2f217725e61",
+          "packed_scene_resource_path": "res://assets/qa/elderwood_dryad_queen/v3-optional/baseline/elderwood_dryad_queen.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "e4aac721192f3c879d93618ca9374694",
+          "source_path": "res://assets/qa/elderwood_dryad_queen/v3-optional/baseline/elderwood_dryad_queen.glb",
+          "source_sha256": "acc71918137543500b40ae3ebb541b6c852402310ce27aed26bd775ea7efbabf"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/elderwood_dryad_queen.glb-10e57485197a21766b40c69203f2e3b8.md5",
+          "import_metadata_sha256": "a611732c66a7fc95b289680e611138bc92c61a90425be3cfd1146fa9fe4b0104",
+          "imported_resource_path": "res://.godot/imported/elderwood_dryad_queen.glb-10e57485197a21766b40c69203f2e3b8.scn",
+          "imported_resource_sha256": "f8a9f66902304976e22891db049961baa7a358d3d007b148795061369dc4503b",
+          "packed_scene_resource_path": "res://assets/qa/elderwood_dryad_queen/v3-optional/candidate/elderwood_dryad_queen.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "7fe4748aa8ef0f4e4a77eb4013bfbd9e",
+          "source_path": "res://assets/qa/elderwood_dryad_queen/v3-optional/candidate/elderwood_dryad_queen.glb",
+          "source_sha256": "30d5c342ba9532d02890a7961d24ab94a0d97bdd6069c43c9aa4e9916728388e"
+        }
+      ],
+      "all_typed_base_attributes_including_tangent_uv_color_custom_skin_bit_exact": true,
+      "all_17_morph_POSITION_NORMAL_TANGENT_columns_bit_exact": true,
+      "selected_zero_targets_expand_to_base_POSITION_NORMAL_TANGENT": true,
+      "complete_oriented_triangle_payload_multiset_exact": true,
+      "vertices": 5326,
+      "triangles": 4066,
+      "source_surfaces": 1,
+      "candidate_surfaces": 2,
+      "scope": "Direct actual ResourceLoader Editor source/candidate full typed row and oriented triangle payload proof; every base attribute and all17 corrective P/N/T columns included. Candidate corrective-free surface expanded with its base P/N/T, requiring exact source equality; no original ordinal or arbitrary seam correspondence assumed. Materials independently exact in fixed-loader typed capture.",
+      "passed": true
+    },
+    "withdrawn_prior_loader_claim": "Prior shared dumper captures labelled imported used GlbSceneCache for these outside-actor aliases and therefore were raw-cache comparisons. They remain retained private raw/native evidence, but their independent Editor claim is withdrawn and superseded by these explicitly loaded SCNs.",
+    "unchanged_other_evidence": "Original independent physical observations, exact source curves, Blender, actual native gameplay body rendering, placement, mounted/cinematic dependencies and secondary effects remain hash-bound and unchanged. No artistic approval, model, action, cap or witness change in this QA revision.",
+    "production_scope": "Production actor_shipping loose folders remain raw/native and are not Editor-imported. Per-surface Editor-generated LODs are verification representation metadata, not a claim of new gameplay LODs.",
+    "evidence_sha256": {
+      ".local/heavy-batch/elderwood_dryad_queen/v3-optional/editor-real-v1/qualification-job.json": "9872d77e6e70f2018e06818c966abbe8100f56c2f143deef3ccedc317f29621c",
+      ".local/heavy-batch/elderwood_dryad_queen/v3-optional/editor-real-v1/imported/runtime.json": "47d19a44dd05a572e9d677ebd2821a53abcf5e19a8e09f69570894e9467ec628",
+      ".local/heavy-batch/elderwood_dryad_queen/v3-optional/editor-real-v1/imported-validation.json": "66b5bd230a2f81b72f4a0b9f4c566c43317664e56e3068e8e91068e689d25685",
+      ".local/heavy-batch/elderwood_dryad_queen/v3-optional/editor-real-v1/imported-static-mesh-bits.json": "726277a2efdb75c931783267b3ed7d72de00362c06e31a72c93790a36ef32fba",
+      ".local/heavy-batch/elderwood_dryad_queen/v3-optional/editor-real-v1/imported-typed-validation.json": "8153d9e4954335429f270ff912380666c4ac4e1bcb0d7182f1b0c528e99788d6",
+      ".local/heavy-batch/elderwood_dryad_queen/v3-optional/editor-real-v1/imported-mapping.json": "5bcbb44b23113fa6b8653dc25be53fb0a8c00f6ff483af949148f1a3be77b508",
+      ".local/heavy-batch/elderwood_dryad_queen/v3-optional/editor-real-v1/imported-uv-aware-mapping.json": "5bcbb44b23113fa6b8653dc25be53fb0a8c00f6ff483af949148f1a3be77b508",
+      ".local/heavy-batch/elderwood_dryad_queen/v3-optional/editor-real-v1/native-static-mesh-bits.json": "f4fca3d85fa94557c5b01a5fce67b7e2885bdba44d577d89207042305bb2ecaf",
+      ".local/heavy-batch/elderwood_dryad_queen/v3-optional/editor-real-v1/allfields/job.json": "a66e37019a4e4cfa55d36b7f60bac278a082567bc3b7b040f83ffa66023c2fd7",
+      ".local/heavy-batch/elderwood_dryad_queen/v3-optional/editor-real-v1/allfields/allfields.json": "a005b17a3d5b73d96e863e5df0a279733eacd6bd1270b6e600d8a9e7332f6cda",
+      ".local/heavy-batch/elderwood_dryad_queen/v3-optional/editor-real-v1/allfields/allfields.bin": "a51bb30d433e868a2b7a07eefb44c6f5a4811400f9afda7277cd2f367c339d75",
+      ".local/heavy-batch/elderwood_dryad_queen/v3-optional/editor-real-v1/allfields/direct-editor-payload-validation.json": "6aebe0f3913a97e5c7dcddbc7477b4e64c05a0344012e915726b03b0b15b5ef6"
+    }
+  }
+}

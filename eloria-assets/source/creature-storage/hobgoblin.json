@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "actor": "hobgoblin",
+  "source_sha256": "85a9fff675419447c7364f3a7f7d71c96ef93103baeec6ddc821f5fbe425f074",
+  "candidate_sha256": "b94d48826a524f6c8cdff91c3d36e5b7cd81d7381ab2fd2c3c2724a5de46d678",
+  "pipeline": [
+    "prune_zero_targets",
+    "reduce_constant_runs",
+    "compact"
+  ],
+  "partition": null,
+  "unchanged": false,
+  "removed_zero_target_indices": [
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41
+  ],
+  "redundant_flat_key_rows_removed": 348902,
+  "geometry_skin_rest_binds_materials_images_unchanged": true,
+  "native_clips": [
+    "Fighting_Idle",
+    "Hit_Chest",
+    "Idle_A",
+    "Walk",
+    "Jog",
+    "Sword_Attack",
+    "Death_A"
+  ],
+  "usage": "Use canonical pack_creature_storage.py with --bounds eloria-assets/source/creature-storage/hobgoblin.bounds.json. No partition profile.",
+  "logical_actor_bounds_path": "eloria-assets/source/creature-storage/hobgoblin.bounds.json"
+}

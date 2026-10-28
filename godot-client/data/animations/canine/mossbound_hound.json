@@ -69,5 +69,36 @@
   "strideMetresPerSecond": {
     "walk": 0.41829153880229364
   },
-  "strideScalesWithActor": true
+  "strideScalesWithActor": true,
+  "reviewStatus": "accepted",
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "mossbound_hound",
+    "appliesToSHA256": "6acc1dd4464ca04ae26089ede8abe5b2e8ae9153c267195d912d7fc3adafe91e",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "saved_button_approval",
+      "event_id": "e67ab674-29d9-4fbb-b83a-1851bea44270",
+      "event_sha256": "e2101f415c6af6233f16e01fcb633cdd5e97f8988658a2ce3cf21d4742467ff0",
+      "utc": "2026-10-28T21:45:11.923361+00:00"
+    },
+    "previousAuthoringReviewStatus": null,
+    "repairNoteEvents": [
+      {
+        "event_id": "61082244-a740-408a-a173-5006673a703e",
+        "event_sha256": "06ac87d7d793df86206ba295a1b6d16bd9987714b486d9571019b433d67af651",
+        "candidate_sha256": "6acc1dd4464ca04ae26089ede8abe5b2e8ae9153c267195d912d7fc3adafe91e"
+      }
+    ]
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "mossbound_hound",
+    "sourceSHA256": "d28d553338321d47e504a68c6cd4041edcac78de89dab82d3eac18e7d1417d82",
+    "previousRuntimeSHA256": "d28d553338321d47e504a68c6cd4041edcac78de89dab82d3eac18e7d1417d82",
+    "runtimeSHA256": "6acc1dd4464ca04ae26089ede8abe5b2e8ae9153c267195d912d7fc3adafe91e",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": null
+  }
 }

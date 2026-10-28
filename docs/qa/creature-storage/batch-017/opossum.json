@@ -1,0 +1,457 @@
+{
+  "schema_version": 1,
+  "batch": 17,
+  "actor": "opossum",
+  "date": "2026-10-27",
+  "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/opossum.glb",
+  "source_sha256": "552dce800379cdd7a8df33c07dfd32d91aedb799e82cefaa8620262d2c6f4eb3",
+  "runtime_sha256": "6daeb140a6cd34d6e86c33142d6d35ab181f39b7ec3dbfc53e516981eae5046d",
+  "qualification": "Passed exact source/continuous curves, original physical observations, paired fresh Blender poses/default, native and fresh editor-imported playback/transitions, fully fitted actual-Actor cycles/four views, seeded dissolve/silhouette/reset checks.",
+  "human_approval_changed": false,
+  "recipe": {
+    "tool": "eloria-assets/tools/pack_creature_storage.py",
+    "tool_commit": "5bdd51c3",
+    "steps": [
+      "prune_zero_targets",
+      "reduce_constant_runs",
+      "compact"
+    ],
+    "profile": null,
+    "bounds": null,
+    "preserve_trs_keys": false
+  },
+  "bytes": {
+    "source_bytes": 9865400,
+    "candidate_bytes": 8561052,
+    "source_zstd_bytes": 4725537,
+    "candidate_zstd_bytes": 4747439
+  },
+  "inactive_targets_removed": 0,
+  "flat_run_key_rows_removed": 125097,
+  "corrective_graphics_buffer_bytes": {
+    "source": 0,
+    "candidate": 0,
+    "saved": 0,
+    "scope": "Actual Godot raw blend_shape_data byte totals over all mesh surfaces; shared per loaded model."
+  },
+  "draw_surfaces": {
+    "source": 1,
+    "candidate": 1
+  },
+  "source_validation": {
+    "passed": true,
+    "source_sha256": "552dce800379cdd7a8df33c07dfd32d91aedb799e82cefaa8620262d2c6f4eb3",
+    "candidate_sha256": "6daeb140a6cd34d6e86c33142d6d35ab181f39b7ec3dbfc53e516981eae5046d",
+    "geometry_skin_binds_rest_topology_uv_material_image_bits_preserved": true,
+    "retained_key_time_and_value_bits_exact_only_flat_interiors_removed": true,
+    "every_removed_default_and_key_is_zero": true,
+    "redundant_flat_key_rows_proved": 125097,
+    "preexisting_duplicate_property_curves_preserved_in_occurrence_order": 0,
+    "meshes": [],
+    "clips": {
+      "Walk": {
+        "original_knots": 3131,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 6266
+      },
+      "Jog": {
+        "original_knots": 1721,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 3446
+      },
+      "Sword_Attack": {
+        "original_knots": 4912,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 9828
+      },
+      "Idle_A": {
+        "original_knots": 801,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 1606
+      },
+      "Fighting_Idle": {
+        "original_knots": 801,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 1606
+      },
+      "Hit_Chest": {
+        "original_knots": 801,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 1606
+      },
+      "Death_A": {
+        "original_knots": 3993,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 7990
+      }
+    },
+    "proof": "Zero defaults and every LINEAR/STEP key zero prove inactive targets remain zero continuously and under crossfades. All retained accessor bytes and retained time/value rows are exact. Deleted key rows sit strictly inside three bit-identical adjacent rows; plateau boundaries and endpoints remain."
+  },
+  "physical_observations": {
+    "passed": true,
+    "source_sha256": "552dce800379cdd7a8df33c07dfd32d91aedb799e82cefaa8620262d2c6f4eb3",
+    "candidate_sha256": "6daeb140a6cd34d6e86c33142d6d35ab181f39b7ec3dbfc53e516981eae5046d",
+    "surface_probes": 155,
+    "poses": 21,
+    "clips": 7,
+    "source_candidate_position_error": 0.0,
+    "source_candidate_normal_vector_error": 0.0,
+    "original_witness_position_error_over_height": 0.0,
+    "original_source_witness_position_error_over_height": 0.0,
+    "original_witness_normal_vector_error": 0.0,
+    "original_witness_bone_matrix_error": 0.0,
+    "witness_sha256": "9a7ce38ec6e959e7a65707137176c8ca2429938ee5bbc3c759d6f6223b06d58a",
+    "sampled_motion_min": [
+      -0.14487454511963646,
+      0.0006913797651103529,
+      -0.6934719556617598
+    ],
+    "sampled_motion_max": [
+      0.20983480489607872,
+      0.3330215963654331,
+      0.35301977536706214
+    ]
+  },
+  "paired_fresh_blender": {
+    "maximum_position_error": 0.0,
+    "maximum_bone_matrix_error": 0.0,
+    "maximum_float32_budget": 1.9073486328125e-06,
+    "poses": 22,
+    "neutral_default_checked": true,
+    "passed": true,
+    "source_sha256": "552dce800379cdd7a8df33c07dfd32d91aedb799e82cefaa8620262d2c6f4eb3",
+    "candidate_sha256": "6daeb140a6cd34d6e86c33142d6d35ab181f39b7ec3dbfc53e516981eae5046d",
+    "scope": "Direct source/candidate frozen-ID surfaces and every bone matrix at each original witness pose plus controlled neutral/default pose. Sixteen float32 ULPs at baseline coordinate/matrix magnitude; independent of inherited source/witness residual and separate from native/source appearance budgets."
+  },
+  "native_and_editor_imported": {
+    "native": {
+      "samples": 232,
+      "maximum_position_error": 9.978066933262644e-08,
+      "maximum_normal_angle_degrees": 1.8151476701449225e-05
+    },
+    "imported": {
+      "samples": 232,
+      "maximum_position_error": 9.978066933262644e-08,
+      "maximum_normal_angle_degrees": 1.8151476701449225e-05,
+      "actual_loader": "ResourceLoader.load(PackedScene)",
+      "authoritative_SCN_provenance": "genuine_editor_verification_revision.load_proofs"
+    }
+  },
+  "native_numeric_budget": {
+    "actor": "opossum",
+    "source_coordinate_or_extent_magnitude": 1.0000006934139958,
+    "four_float32_ULPs": 4.76837158203125e-07,
+    "runtime_position_error": 9.978066933262644e-08,
+    "runtime_normal_degrees": 1.8151476701449225e-05,
+    "imported_position_error": 9.978066933262644e-08,
+    "imported_normal_degrees": 1.8151476701449225e-05,
+    "normal_degrees_budget": 0.0001,
+    "scope": "Four float32 ULPs at maximum original source coordinate/extent magnitude; original source mathematical equality remains exact. Native normal screen 1e-4 degrees."
+  },
+  "placement": {
+    "passed": true,
+    "bounds_error": 0.0,
+    "placement_error": 0.0,
+    "overhead_height_error": 0.0
+  },
+  "render_fit": {
+    "source_sha256": "552dce800379cdd7a8df33c07dfd32d91aedb799e82cefaa8620262d2c6f4eb3",
+    "model_global": [
+      [
+        0.5,
+        3.65410926406184e-07,
+        -0.5
+      ],
+      [
+        -0.699999570846558,
+        0.0,
+        6.11959052321254e-08
+      ],
+      [
+        0.0,
+        0.699999570846558,
+        0.0
+      ],
+      [
+        -6.11959052321254e-08,
+        0.0,
+        -0.699999570846558
+      ]
+    ],
+    "position": [
+      0.34395212065577635,
+      0.00048425700159637004,
+      -0.7688177401006719
+    ],
+    "size": [
+      0.30636938522027773,
+      0.25447131543284063,
+      0.7543007528770064
+    ],
+    "poses": 240,
+    "scope": "Every vertex at every full-cycle render frame and view-still pose, using actual complete Actor Godot arrays/poses/weights/transforms, renderer morph cutoff and four/eight influence skin. Evaluated in float64 with a separate 30% camera margin."
+  },
+  "source_fit_inventory": {
+    "passed": true,
+    "source_sha256": "552dce800379cdd7a8df33c07dfd32d91aedb799e82cefaa8620262d2c6f4eb3",
+    "candidate_sha256": "6daeb140a6cd34d6e86c33142d6d35ab181f39b7ec3dbfc53e516981eae5046d",
+    "source_clips": [
+      "Death_A",
+      "Fighting_Idle",
+      "Hit_Chest",
+      "Idle_A",
+      "Jog",
+      "Sword_Attack",
+      "Walk"
+    ],
+    "actual_Actor_fit_clips": [
+      "Death_A",
+      "Fighting_Idle",
+      "Hit_Chest",
+      "Idle_A",
+      "Jog",
+      "Sword_Attack",
+      "Walk"
+    ],
+    "fit_runtime_sha256": "005252e44945807bc8719ec62372e6f73a726d674fcdbddd076ca72b6988cd06",
+    "poses": 240,
+    "scope": "Actual Actor source-pose capture inventory, not merely requested QA aliases. Every source clip is present in fitted playback data."
+  },
+  "appearance": {
+    "source_sha256": "552dce800379cdd7a8df33c07dfd32d91aedb799e82cefaa8620262d2c6f4eb3",
+    "candidate_sha256": "6daeb140a6cd34d6e86c33142d6d35ab181f39b7ec3dbfc53e516981eae5046d",
+    "image_pairs": 338,
+    "width": 512,
+    "height": 512,
+    "different_image_pairs": 24,
+    "maximum_different_pixels": 12,
+    "maximum_pixels_above_two_levels": 1,
+    "maximum_mean_channel_error": 4.1961669921875e-05,
+    "maximum_channel_error": 13,
+    "scope": "Complete ReplicatedActor3D setup with actual display scale, grounding and body materials; identical cameras for source/candidate, four views and every full native cycle at24Hz. Numeric playback and pixel comparisons are separate reports.",
+    "framing_passed": true,
+    "clipped_frame_labels": [],
+    "maximum_border_foreground_pixels": 0
+  },
+  "secondary_effects": {
+    "effective_scale": 0.699999570846558,
+    "failures": [],
+    "gpu": "NVIDIA GeForce RTX 5080 Laptop GPU",
+    "max_color_error": 0.0,
+    "max_custom_error": 0.0,
+    "max_dissolve_bounds_error": 3.79513949155808e-08,
+    "max_fragment_transform_error": 1.23977073940296e-07,
+    "max_grain_error": 0.0,
+    "max_silhouette_position_error": 9.80722916210652e-08,
+    "mounted": {},
+    "passed": true,
+    "renderer": "forward_plus",
+    "runtime_sha256": "6daeb140a6cd34d6e86c33142d6d35ab181f39b7ec3dbfc53e516981eae5046d",
+    "seeded_cases": 15,
+    "source_sha256": "552dce800379cdd7a8df33c07dfd32d91aedb799e82cefaa8620262d2c6f4eb3"
+  },
+  "rig_investigation": {
+    "decision": "Original rig, skin and topology retained; this candidate uses exact storage reductions only."
+  },
+  "evidence_sha256": {
+    "qualification-job.json": "a9590cede01df05ce8b00be0aa5cb4f93ebe25e5bd2c3aa02ee7ba3233b0d076",
+    "processing.json": "a70ea0503e8f5e6ce1d29fcdafb3ea4a717aa0064ea3e18c50c7d8205f2d3125",
+    "exact-source-validation.json": "40a57811d26ba4ce7460739e7a9f47245f18892e1d1fa9ec79cde162eb13baa2",
+    "physical-witness-validation.json": "87ed4462d73b307a2cdfbbfc9fb1fad1e632d843ac27c03c5e58430a49d98598",
+    "blender-validation.json": "5fcc141cf089e77e27e011f2fa67ec0a528e9914dc212ecc301fc57c77167c9d",
+    "blender-direct-validation.json": "b22f5c4d46f1d021353c0d03fd9c3ad1cf0afca0438034c15e5df8f372dcfc22",
+    "native-validation.json": "983f892016fcf58a15dac026a18fc46a4ab0b3b565e3efba9cef1feb77b7ecf8",
+    "imported-validation.json": "983f892016fcf58a15dac026a18fc46a4ab0b3b565e3efba9cef1feb77b7ecf8",
+    "render-fit.json": "7d752834d7a2dd8af1bea7f1b24509cc87afd0c396bca125d7920f8b6960b454",
+    "placement.json": "14c70be0206dadc731eda8dce21cb172cdb21d727d782cd39c53f419d1ccc8d5",
+    "effects-validation.json": "1abfaade5d0ce981e7d19b0138dae86f85c4b89a2b437c1a7035ec7b0add8e86",
+    "source-fit-inventory.json": "9d9b2dda52bbc3d9a2cb331754b882cee9e4e9c86a42311da623454e16139a1e",
+    "actual-render/render.json": "560f74a3f50c299249a786cb8ad595eae07f8568b1291940ff30968babddacee",
+    "actual-render/pixel-comparison.json": "8786b1bcb90892e63ac3f1e34bd2aaf84f075ed461111e6a312350b7058ee9a2"
+  },
+  "visual_review": "Paired normal contact boards and complete native-cycle previews reviewed. Every four-view/full-cycle frame has zero foreground pixels in its border two pixels wide.",
+  "known_limitations": [
+    "Separate resident RAM and frame-time benchmarks were not measured.",
+    "Encoded animation-key savings describe raw files, logical source accessors and import parsing input only. Native importing may densely rebake identical generated Animation keys; no runtime Animation RAM, key-search or playback CPU saving is claimed.",
+    "Original artistic review/approval status is unchanged.",
+    "Compressed shipping data increases by 21902 bytes despite smaller decoded GLB. This tradeoff is explicit; no unmeasured runtime-memory saving offsets it in this receipt."
+  ],
+  "genuine_editor_verification_revision": {
+    "status": "Corrected independent actual Editor verification passed within applicable unchanged modern or legacy scope",
+    "date": "2026-10-28",
+    "source_original_sha256": "552dce800379cdd7a8df33c07dfd32d91aedb799e82cefaa8620262d2c6f4eb3",
+    "current_canonical_sha256": "6daeb140a6cd34d6e86c33142d6d35ab181f39b7ec3dbfc53e516981eae5046d",
+    "loader": "ResourceLoader.load(PackedScene)",
+    "load_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/opossum.glb-d214d40da193c569d49215f3692b2b68.md5",
+        "import_metadata_sha256": "caa0c993f3595f29b0ad59bf9eaea50e5961e6dba6b6bff637406c2f822faf2c",
+        "imported_resource_path": "res://.godot/imported/opossum.glb-d214d40da193c569d49215f3692b2b68.scn",
+        "imported_resource_sha256": "9f4aee21db1c4123f7850133a27384546cc61bec93a49c066a5a47954a4632d2",
+        "packed_scene_resource_path": "res://assets/qa/opossum/v2/baseline/opossum.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "00fa8d8367c8d9f4c1b338bf15b17397",
+        "source_path": "res://assets/qa/opossum/v2/baseline/opossum.glb",
+        "source_sha256": "552dce800379cdd7a8df33c07dfd32d91aedb799e82cefaa8620262d2c6f4eb3"
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/opossum.glb-f5ab90c0529a29251b96bfa8a16a0255.md5",
+        "import_metadata_sha256": "d1cb502eebf14f9413955681787430071348eaeab3f77e93781818ce72ee2548",
+        "imported_resource_path": "res://.godot/imported/opossum.glb-f5ab90c0529a29251b96bfa8a16a0255.scn",
+        "imported_resource_sha256": "9fcc16c3f8a074712061361ddcf089c8116622e431c72de75aacff5bb49414ff",
+        "packed_scene_resource_path": "res://assets/qa/opossum/v2/candidate/opossum.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "eb3fee492a025a6608021b3fbced3228",
+        "source_path": "res://assets/qa/opossum/v2/candidate/opossum.glb",
+        "source_sha256": "6daeb140a6cd34d6e86c33142d6d35ab181f39b7ec3dbfc53e516981eae5046d"
+      }
+    ],
+    "source_aliases_and_SCNs_have_current_source_and_destination_MD5_freshness": true,
+    "numeric": {
+      "poses": 232,
+      "all_source_clips": [
+        "Walk",
+        "Jog",
+        "Sword_Attack",
+        "Idle_A",
+        "Fighting_Idle",
+        "Hit_Chest",
+        "Death_A"
+      ],
+      "RESET_checked": true,
+      "maximum_Euclidean_position_error_source_units": 9.978066933262644e-08,
+      "maximum_normal_angle_degrees": 1.8151476701449225e-05
+    },
+    "applicable_quality_budget": {
+      "position_four_float32_ULPs": 4.76837158203125e-07,
+      "source_coordinate_or_rest_axis_extent_magnitude": 1.0000006934139958,
+      "normal_degrees": 0.0001,
+      "both_passed": true
+    },
+    "full_typed_static_attributes_material_storage_texture_pixels_and_mips": {
+      "actor": "opossum",
+      "source_sha256": "552dce800379cdd7a8df33c07dfd32d91aedb799e82cefaa8620262d2c6f4eb3",
+      "candidate_sha256": "6daeb140a6cd34d6e86c33142d6d35ab181f39b7ec3dbfc53e516981eae5046d",
+      "surfaces": [
+        {
+          "all_typed_arrays": [
+            {
+              "slot": 0,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 1,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 2,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 4,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 10,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 11,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 12,
+              "exact_after_proven_vertex_bijection": true
+            }
+          ],
+          "full_material_storage_fields_and_texture_pixels_mips_exact": true,
+          "format_exact": true,
+          "lods": [
+            {
+              "lod": 0,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            },
+            {
+              "lod": 1,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            }
+          ],
+          "bounds_component_max_delta": 0.0,
+          "lod_capture_present": true
+        }
+      ],
+      "passed": true,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/opossum.glb-d214d40da193c569d49215f3692b2b68.md5",
+          "import_metadata_sha256": "caa0c993f3595f29b0ad59bf9eaea50e5961e6dba6b6bff637406c2f822faf2c",
+          "imported_resource_path": "res://.godot/imported/opossum.glb-d214d40da193c569d49215f3692b2b68.scn",
+          "imported_resource_sha256": "9f4aee21db1c4123f7850133a27384546cc61bec93a49c066a5a47954a4632d2",
+          "packed_scene_resource_path": "res://assets/qa/opossum/v2/baseline/opossum.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "00fa8d8367c8d9f4c1b338bf15b17397",
+          "source_path": "res://assets/qa/opossum/v2/baseline/opossum.glb",
+          "source_sha256": "552dce800379cdd7a8df33c07dfd32d91aedb799e82cefaa8620262d2c6f4eb3"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/opossum.glb-f5ab90c0529a29251b96bfa8a16a0255.md5",
+          "import_metadata_sha256": "d1cb502eebf14f9413955681787430071348eaeab3f77e93781818ce72ee2548",
+          "imported_resource_path": "res://.godot/imported/opossum.glb-f5ab90c0529a29251b96bfa8a16a0255.scn",
+          "imported_resource_sha256": "9fcc16c3f8a074712061361ddcf089c8116622e431c72de75aacff5bb49414ff",
+          "packed_scene_resource_path": "res://assets/qa/opossum/v2/candidate/opossum.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "eb3fee492a025a6608021b3fbced3228",
+          "source_path": "res://assets/qa/opossum/v2/candidate/opossum.glb",
+          "source_sha256": "6daeb140a6cd34d6e86c33142d6d35ab181f39b7ec3dbfc53e516981eae5046d"
+        }
+      ]
+    },
+    "retained_Editor_morph_fields": {
+      "actor": "opossum",
+      "source_sha256": "552dce800379cdd7a8df33c07dfd32d91aedb799e82cefaa8620262d2c6f4eb3",
+      "candidate_sha256": "6daeb140a6cd34d6e86c33142d6d35ab181f39b7ec3dbfc53e516981eae5046d",
+      "all_retained_editor_POSITION_NORMAL_TANGENT_typed_bits_exact": true,
+      "retained_targets": 0,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/opossum.glb-d214d40da193c569d49215f3692b2b68.md5",
+          "import_metadata_sha256": "caa0c993f3595f29b0ad59bf9eaea50e5961e6dba6b6bff637406c2f822faf2c",
+          "imported_resource_path": "res://.godot/imported/opossum.glb-d214d40da193c569d49215f3692b2b68.scn",
+          "imported_resource_sha256": "9f4aee21db1c4123f7850133a27384546cc61bec93a49c066a5a47954a4632d2",
+          "packed_scene_resource_path": "res://assets/qa/opossum/v2/baseline/opossum.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "00fa8d8367c8d9f4c1b338bf15b17397",
+          "source_path": "res://assets/qa/opossum/v2/baseline/opossum.glb",
+          "source_sha256": "552dce800379cdd7a8df33c07dfd32d91aedb799e82cefaa8620262d2c6f4eb3"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/opossum.glb-f5ab90c0529a29251b96bfa8a16a0255.md5",
+          "import_metadata_sha256": "d1cb502eebf14f9413955681787430071348eaeab3f77e93781818ce72ee2548",
+          "imported_resource_path": "res://.godot/imported/opossum.glb-f5ab90c0529a29251b96bfa8a16a0255.scn",
+          "imported_resource_sha256": "9fcc16c3f8a074712061361ddcf089c8116622e431c72de75aacff5bb49414ff",
+          "packed_scene_resource_path": "res://assets/qa/opossum/v2/candidate/opossum.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "eb3fee492a025a6608021b3fbced3228",
+          "source_path": "res://assets/qa/opossum/v2/candidate/opossum.glb",
+          "source_sha256": "6daeb140a6cd34d6e86c33142d6d35ab181f39b7ec3dbfc53e516981eae5046d"
+        }
+      ],
+      "scope": "Direct actual Editor source/candidate retained morph P/N/T byte digests after independently proved complete static-attribute vertex bijection. Exact target mask from source packing lineage; no morph field omitted.",
+      "passed": true
+    },
+    "withdrawn_prior_loader_claim": "Prior shared dumper captures labelled imported used GlbSceneCache for these outside-actor aliases and therefore were raw-cache comparisons. They remain retained private raw/native evidence, but their independent Editor claim is withdrawn and superseded by these explicitly loaded SCNs.",
+    "unchanged_other_evidence": "Original independent physical observations, exact source curves, Blender, actual native gameplay body rendering, placement, mounted/cinematic dependencies and secondary effects remain hash-bound and unchanged. No artistic approval, model, action, cap or witness change in this QA revision.",
+    "production_scope": "Production actor_shipping loose folders remain raw/native and are not Editor-imported. Per-surface Editor-generated LODs are verification representation metadata, not a claim of new gameplay LODs.",
+    "evidence_sha256": {
+      ".local/heavy-batch/opossum/v2/editor-real-v1/qualification-job.json": "efc9545529d2b91e3859dc645b57bba5b08f3cc4ac0f2b2fa1ead30dbefd6bed",
+      ".local/heavy-batch/opossum/v2/editor-real-v1/imported/runtime.json": "fecabc7e4e9a6159a04547047c222005a93ab02f05798e741cb67e85d0ab89f2",
+      ".local/heavy-batch/opossum/v2/editor-real-v1/imported-validation.json": "983f892016fcf58a15dac026a18fc46a4ab0b3b565e3efba9cef1feb77b7ecf8",
+      ".local/heavy-batch/opossum/v2/editor-real-v1/imported-static-mesh-bits.json": "01395e14d3ab9e47ea605a427faaaac6de2b066da1891fae8aec9e58ff3821b1",
+      ".local/heavy-batch/opossum/v2/editor-real-v1/imported-typed-validation.json": "eeeb7b5d7a2cb1dfda0e18f7a743ee03e0181d62243640250d260e332aa49231",
+      ".local/heavy-batch/opossum/v2/editor-real-v1/morph-digest-job.json": "698542b550c9837cb365cb67d78b1bd89e39e6ed8a2f1d134ace5f0caa09436f",
+      ".local/heavy-batch/opossum/v2/editor-real-v1/imported-morph-digests.json": "b46785d405cf8c1afcc022b9f1e317b27432f5a544a81cf02f14f67745181f48",
+      ".local/heavy-batch/opossum/v2/editor-real-v1/imported-morph-validation.json": "8bd87eb45c660142bf44fc1e7bfd8e62f5da0b7f9f10e8b83a15dd34e8799fee"
+    }
+  }
+}

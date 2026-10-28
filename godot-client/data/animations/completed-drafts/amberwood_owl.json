@@ -73,10 +73,41 @@
     "walk": 0.4000011515962421,
     "run": 0.8000023031924842
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "Hovering owl with tucked talons; broad deliberate wingbeats for slow travel, faster beats and a forward body pitch for fast flight. No planted-foot gait is claimed.",
     "attack": "Short recoil into a forward beak-and-talon swoop; the legs reach forward and the toe branches open slightly, then recover to hover.",
     "death": "Wings stop beating as the owl drops forward, opens its wings to settle, relaxes its talons and rests on the breast with a quiet tail."
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "amberwood_owl",
+    "sourceSHA256": "7d91701171fb31a109874b888dcda98e3209f87538c389ef6f52fda7c90da928",
+    "previousRuntimeSHA256": "8f60c17735ab83086c06920899d047aeb414fef4e9a1843d638bc1e4e617e971",
+    "runtimeSHA256": "9f60b969de165b9bacbc3ce08e225ef979db7598aa51e62aa363e5cf25160881",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "amberwood_owl",
+      "sourceSHA256": "7d91701171fb31a109874b888dcda98e3209f87538c389ef6f52fda7c90da928",
+      "runtimeSHA256": "8f60c17735ab83086c06920899d047aeb414fef4e9a1843d638bc1e4e617e971",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 120,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "amberwood_owl",
+    "appliesToSHA256": "9f60b969de165b9bacbc3ce08e225ef979db7598aa51e62aa363e5cf25160881",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
   }
 }

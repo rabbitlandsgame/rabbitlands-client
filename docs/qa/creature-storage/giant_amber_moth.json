@@ -1,0 +1,134 @@
+{
+  "schema_version": 1,
+  "actor": "giant_amber_moth",
+  "date": "2026-10-27",
+  "runtime_path": "godot-client/assets/actors/native/creatures/giant_amber_moth.glb",
+  "status": "Original retained: no changed model qualified",
+  "source_sha256": "dedfb3e569edb22233823b879e28e9b8ab860971785ff7e2f267f125034dea45",
+  "candidate_sha256": "dedfb3e569edb22233823b879e28e9b8ab860971785ff7e2f267f125034dea45",
+  "storage": {
+    "source_bytes": 1553256,
+    "candidate_bytes": 1553256,
+    "source_zstd_bytes": 768973,
+    "candidate_zstd_bytes": 768973
+  },
+  "raw_bytes_saved": 0,
+  "compressed_bytes_saved": 0,
+  "compression_scope": "RLCZ level 3 release envelope including fixed 56-byte header; encoded/install sizes, not live-process memory.",
+  "correctives": {
+    "source_count": 0,
+    "candidate_count": 0,
+    "removed_target_indices": [],
+    "shared_gpu_source_bytes": 0,
+    "shared_gpu_candidate_bytes": 0,
+    "shared_gpu_saved_bytes": 0,
+    "scope": "Measured shared Godot blend_shape_data bytes, not per-actor totals."
+  },
+  "draw_surfaces": {
+    "source": 1,
+    "candidate": 1
+  },
+  "exact_source_proof": {
+    "passed": true,
+    "source_sha256": "dedfb3e569edb22233823b879e28e9b8ab860971785ff7e2f267f125034dea45",
+    "candidate_sha256": "dedfb3e569edb22233823b879e28e9b8ab860971785ff7e2f267f125034dea45",
+    "geometry_skin_binds_rest_topology_uv_material_image_bits_preserved": true,
+    "retained_key_time_and_value_bits_exact_only_flat_interiors_removed": true,
+    "every_removed_default_and_key_is_zero": true,
+    "redundant_flat_key_rows_proved": 0,
+    "preexisting_duplicate_property_curves_preserved_in_occurrence_order": 0,
+    "clips": {
+      "Death_A": {
+        "original_knots": 82,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 168
+      },
+      "Fighting_Idle": {
+        "original_knots": 11,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 26
+      },
+      "Hit_Chest": {
+        "original_knots": 15,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 34
+      },
+      "Idle_A": {
+        "original_knots": 10,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 24
+      },
+      "Jog": {
+        "original_knots": 39,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 82
+      },
+      "Sword_Attack": {
+        "original_knots": 67,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 138
+      },
+      "Walk": {
+        "original_knots": 40,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 84
+      }
+    },
+    "proof": "Zero defaults and every LINEAR/STEP key zero prove inactive targets remain zero continuously and under crossfades. All retained accessor bytes and retained time/value rows are exact. Deleted key rows sit strictly inside three bit-identical adjacent rows; plateau boundaries and endpoints remain."
+  },
+  "rigidity_preflight": {
+    "actor": "giant_amber_moth",
+    "survivor_triangles": 0,
+    "reason": "Source has no corrective shapes; existing skin retained."
+  },
+  "runtime_scope": "No procedural generation or new runtime algorithm. Smaller GLB accessor/key storage is proved; fixed Godot rebaking may restore the same retained Animation key count. These qualification checks do not establish retained Animation RAM, CPU lookup or FPS changes; separate loading benchmarks may measure startup time or peak-memory effects.",
+  "effects_scope": "Original topology, skin, binds, material/texture bytes and current clips retained; no runtime rig replacement.",
+  "evidence": "Immutable source/final, private versioned candidates, source/import/renderer receipts, full-resolution captures and lossless cycle previews retained in task-owned ignored .local/batch-042/giant_amber_moth",
+  "unchanged_reason": "Original fresh Blender Jog fidelity exceeds existing source caps; authored-object-rest reset also reproduces original residual. Retain all original bytes without source-cap waiver or changed-model promotion.",
+  "strict_actual_import_numeric_budget": {
+    "actor": "giant_amber_moth",
+    "source_sha256": "dedfb3e569edb22233823b879e28e9b8ab860971785ff7e2f267f125034dea45",
+    "candidate_sha256": "dedfb3e569edb22233823b879e28e9b8ab860971785ff7e2f267f125034dea45",
+    "passed": true,
+    "source_rest_largest_axis_extent": null,
+    "source_extent_float32_ulp": null,
+    "position_budget": null,
+    "normal_angle_budget_degrees": 0.0001,
+    "checks": {
+      "byte_identical_original": {
+        "passed": true
+      }
+    },
+    "scope": "Full source/candidate byte identity preserves original native/editor behavior, including original clock and float32 interpolation. No changed-model precision claim required."
+  },
+  "death_dissolve_source_framing": {
+    "actor": "giant_amber_moth",
+    "source_sha256": "dedfb3e569edb22233823b879e28e9b8ab860971785ff7e2f267f125034dea45",
+    "candidate_sha256": "dedfb3e569edb22233823b879e28e9b8ab860971785ff7e2f267f125034dea45",
+    "passed": true,
+    "original_full_motion_bbox_all8corners_checked": true,
+    "source_actor_translation_removed": [
+      0.5,
+      0,
+      -0.5
+    ],
+    "views": [
+      {
+        "view": "game",
+        "minimum_body_bbox_pixel_border_margin": 211.66907455548497,
+        "minimum_camera_depth": 4.012760398176425,
+        "maximum_camera_depth": 5.987239601823575
+      },
+      {
+        "view": "under",
+        "minimum_body_bbox_pixel_border_margin": 194.96652321864465,
+        "minimum_camera_depth": 3.724104069475481,
+        "maximum_camera_depth": 6.275895930524519
+      }
+    ],
+    "scope": "All8corners of original full-motion actualActor fit after exact preview translation, both640square orthographic FX cameras, near/far planes and minimum2pixel margin. Actual source/candidate fade PNG foreground borders remain a separate required post-capture check."
+  },
+  "original_blender_fidelity_hold": {
+    "original_sha256": "dedfb3e569edb22233823b879e28e9b8ab860971785ff7e2f267f125034dea45",
+    "clip": "Jog",
+    "original_surface_residual_over_height": 0.0005171791803459697,
+    "original_bone_residual_over_height": 0.0004916755787421085,
+    "existing_source_surface_cap": 0.0002,
+    "existing_source_bone_cap": 0.00015,
+    "authored_armature_object_reset_diagnostic_still_reproduces_original_residual": true,
+    "decision": "Byte-original retained. No source-cap waiver, changed-model promotion or new fitness/artistic approval."
+  }
+}

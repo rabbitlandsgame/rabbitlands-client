@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "actor": "river_lizardfolk",
+  "source_sha256": "75598c8a0f0f1906f53b086c97f610ddcf050306fa7aad8b054a5dc6c71c0b52",
+  "candidate_sha256": "d95eeab4946e931fe3cadec214ad778af216adb526196b147220b5fbaebb9d26",
+  "pipeline": [
+    "prune_zero_targets",
+    "reduce_constant_runs",
+    "compact"
+  ],
+  "partition": null,
+  "unchanged": false,
+  "removed_zero_target_indices": [],
+  "redundant_flat_key_rows_removed": 61250,
+  "geometry_skin_rest_binds_materials_images_unchanged": true,
+  "preserve_trs_keys": false,
+  "native_clips": [
+    "Death_A",
+    "Fighting_Idle",
+    "Hit_Chest",
+    "Idle_A",
+    "Jog",
+    "Sword_Attack",
+    "Walk"
+  ],
+  "usage": "Deterministic exact preparation needs no partition --profile; frozen source/candidate hashes bind this record."
+}

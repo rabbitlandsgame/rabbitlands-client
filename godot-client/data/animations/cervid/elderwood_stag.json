@@ -70,5 +70,37 @@
   "strideMetresPerSecond": {
     "walk": 0.59999234539939,
     "run": 1.5514953578004427
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "elderwood_stag",
+    "sourceSHA256": "9b3881300731c2b17c59405d7c3e9fc161f4744232f8cb3e3040e072d597d8cb",
+    "previousRuntimeSHA256": "3dfeb59ae10659a0ea41e11cba18d86104ca58a738d4869bde5a07c5ef113554",
+    "runtimeSHA256": "79044239940596780b2903295498c9eb525b88f5a2c0135cfdd51a47dd461ce7",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "elderwood_stag",
+      "sourceSHA256": "9b3881300731c2b17c59405d7c3e9fc161f4744232f8cb3e3040e072d597d8cb",
+      "runtimeSHA256": "3dfeb59ae10659a0ea41e11cba18d86104ca58a738d4869bde5a07c5ef113554",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 240,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "reviewStatus": "accepted",
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "elderwood_stag",
+    "appliesToSHA256": "79044239940596780b2903295498c9eb525b88f5a2c0135cfdd51a47dd461ce7",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": null,
+    "repairNoteEvents": []
   }
 }

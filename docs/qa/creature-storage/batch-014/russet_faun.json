@@ -1,0 +1,508 @@
+{
+  "schema_version": 1,
+  "batch": 14,
+  "actor": "russet_faun",
+  "date": "2026-10-27",
+  "runtime_path": "godot-client/assets/actors/native/creatures/russet_faun.glb",
+  "source_sha256": "5235d504feae43a67b63445628c44191efda80376086ef98ab0536926a32da7b",
+  "runtime_sha256": "d65e5477db565c641ff84cb8d3216f2d8b11e6351f30b910e72b2e00d05a0c39",
+  "qualification": "Passed exact source/continuous curves, original physical observations, paired fresh Blender poses/default, native and fresh editor-imported playback/transitions, fully fitted actual-Actor cycles/four views, seeded dissolve/silhouette/reset checks.",
+  "human_approval_changed": false,
+  "recipe": {
+    "tool": "eloria-assets/tools/pack_creature_storage.py",
+    "tool_commit": "5bdd51c3",
+    "steps": [
+      "prune_zero_targets",
+      "reduce_constant_runs",
+      "compact"
+    ],
+    "profile": null,
+    "bounds": null,
+    "preserve_trs_keys": false
+  },
+  "bytes": {
+    "source_bytes": 11824720,
+    "candidate_bytes": 10714968,
+    "source_zstd_bytes": 6550055,
+    "candidate_zstd_bytes": 6592449
+  },
+  "inactive_targets_removed": 0,
+  "flat_run_key_rows_removed": 103080,
+  "corrective_graphics_buffer_bytes": {
+    "source": 5155800,
+    "candidate": 5155800,
+    "saved": 0,
+    "scope": "Actual Godot raw blend_shape_data byte totals over all mesh surfaces; shared per loaded model."
+  },
+  "draw_surfaces": {
+    "source": 1,
+    "candidate": 1
+  },
+  "source_validation": {
+    "passed": true,
+    "source_sha256": "5235d504feae43a67b63445628c44191efda80376086ef98ab0536926a32da7b",
+    "candidate_sha256": "d65e5477db565c641ff84cb8d3216f2d8b11e6351f30b910e72b2e00d05a0c39",
+    "geometry_skin_binds_rest_topology_uv_material_image_bits_preserved": true,
+    "retained_key_time_and_value_bits_exact_only_flat_interiors_removed": true,
+    "every_removed_default_and_key_is_zero": true,
+    "redundant_flat_key_rows_proved": 103080,
+    "preexisting_duplicate_property_curves_preserved_in_occurrence_order": 0,
+    "meshes": [
+      {
+        "mesh": 0,
+        "targets_before": 65,
+        "targets_after": 65,
+        "removed_target_indices": [],
+        "retained_target_indices": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31,
+          32,
+          33,
+          34,
+          35,
+          36,
+          37,
+          38,
+          39,
+          40,
+          41,
+          42,
+          43,
+          44,
+          45,
+          46,
+          47,
+          48,
+          49,
+          50,
+          51,
+          52,
+          53,
+          54,
+          55,
+          56,
+          57,
+          58,
+          59,
+          60,
+          61,
+          62,
+          63,
+          64
+        ]
+      }
+    ],
+    "clips": {
+      "Death_A": {
+        "original_knots": 1875,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 3754
+      },
+      "Fighting_Idle": {
+        "original_knots": 2125,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 4253
+      },
+      "Hit_Chest": {
+        "original_knots": 787,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 1578
+      },
+      "Idle_A": {
+        "original_knots": 2631,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 5259
+      },
+      "Jog": {
+        "original_knots": 1680,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 3329
+      },
+      "Sword_Attack": {
+        "original_knots": 1875,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 3734
+      },
+      "Walk": {
+        "original_knots": 1725,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 3417
+      }
+    },
+    "proof": "Zero defaults and every LINEAR/STEP key zero prove inactive targets remain zero continuously and under crossfades. All retained accessor bytes and retained time/value rows are exact. Deleted key rows sit strictly inside three bit-identical adjacent rows; plateau boundaries and endpoints remain."
+  },
+  "physical_observations": {
+    "passed": true,
+    "source_sha256": "5235d504feae43a67b63445628c44191efda80376086ef98ab0536926a32da7b",
+    "candidate_sha256": "d65e5477db565c641ff84cb8d3216f2d8b11e6351f30b910e72b2e00d05a0c39",
+    "surface_probes": 177,
+    "poses": 42,
+    "clips": 7,
+    "source_candidate_position_error": 0.0,
+    "source_candidate_normal_vector_error": 0.0,
+    "original_witness_position_error_over_height": 7.79177649076593e-07,
+    "original_source_witness_position_error_over_height": 7.79177649076593e-07,
+    "original_witness_normal_vector_error": 0.0,
+    "original_witness_bone_matrix_error": 0.0,
+    "witness_sha256": "26f59e6f6badd9418858e8816589161bf42c53e3efff8355eaa646927ece307d",
+    "sampled_motion_min": [
+      -0.7507267666109649,
+      0.004371306363684546,
+      -0.9908964251300487
+    ],
+    "sampled_motion_max": [
+      0.5972364437323738,
+      1.9782584018910947,
+      0.9386628495438529
+    ]
+  },
+  "paired_fresh_blender": {
+    "maximum_position_error": 0.0,
+    "maximum_bone_matrix_error": 0.0,
+    "maximum_float32_budget": 1.9073486328125e-06,
+    "poses": 43,
+    "neutral_default_checked": true,
+    "passed": true,
+    "source_sha256": "5235d504feae43a67b63445628c44191efda80376086ef98ab0536926a32da7b",
+    "candidate_sha256": "d65e5477db565c641ff84cb8d3216f2d8b11e6351f30b910e72b2e00d05a0c39",
+    "scope": "Direct source/candidate frozen-ID surfaces and every bone matrix at each original witness pose plus controlled neutral/default pose. Sixteen float32 ULPs at baseline coordinate/matrix magnitude; independent of inherited source/witness residual and separate from native/source appearance budgets."
+  },
+  "native_and_editor_imported": {
+    "native": {
+      "samples": 232,
+      "maximum_position_error": 3.7516171759072545e-07,
+      "maximum_normal_angle_degrees": 3.67717841477353e-05
+    },
+    "imported": {
+      "samples": 232,
+      "maximum_position_error": 3.7516171759072545e-07,
+      "maximum_normal_angle_degrees": 3.67717841477353e-05,
+      "actual_loader": "ResourceLoader.load(PackedScene)",
+      "authoritative_SCN_provenance": "genuine_editor_verification_revision.load_proofs"
+    }
+  },
+  "native_numeric_budget": {
+    "actor": "russet_faun",
+    "source_coordinate_or_extent_magnitude": 1.7362537140677,
+    "four_float32_ULPs": 4.76837158203125e-07,
+    "runtime_position_error": 3.7516171759072545e-07,
+    "runtime_normal_degrees": 3.67717841477353e-05,
+    "imported_position_error": 3.7516171759072545e-07,
+    "imported_normal_degrees": 3.67717841477353e-05,
+    "normal_degrees_budget": 0.0001,
+    "scope": "Four float32 ULPs at maximum original source coordinate/extent magnitude; original source mathematical equality remains exact. Native normal screen 1e-4 degrees."
+  },
+  "placement": {
+    "passed": true,
+    "bounds_error": 0.0,
+    "placement_error": 0.0,
+    "overhead_height_error": 0.0
+  },
+  "render_fit": {
+    "source_sha256": "5235d504feae43a67b63445628c44191efda80376086ef98ab0536926a32da7b",
+    "model_global": [
+      [
+        0.5,
+        0.0362526662647724,
+        -0.5
+      ],
+      [
+        -0.806393027305603,
+        0.0,
+        7.04971157006185e-08
+      ],
+      [
+        0.0,
+        0.806393027305603,
+        0.0
+      ],
+      [
+        -7.04971157006185e-08,
+        0.0,
+        -0.806393027305603
+      ]
+    ],
+    "position": [
+      -0.015387757647914703,
+      0.037650814762770476,
+      -1.3037628250660598
+    ],
+    "size": [
+      1.204657394634396,
+      1.6004474667659048,
+      1.6351752790920406
+    ],
+    "poses": 278,
+    "scope": "Every vertex at every full-cycle render frame and view-still pose, using actual complete Actor Godot arrays/poses/weights/transforms, renderer morph cutoff and four/eight influence skin. Evaluated in float64 with a separate 30% camera margin."
+  },
+  "appearance": {
+    "source_sha256": "5235d504feae43a67b63445628c44191efda80376086ef98ab0536926a32da7b",
+    "candidate_sha256": "d65e5477db565c641ff84cb8d3216f2d8b11e6351f30b910e72b2e00d05a0c39",
+    "image_pairs": 376,
+    "width": 512,
+    "height": 512,
+    "different_image_pairs": 32,
+    "maximum_different_pixels": 14,
+    "maximum_pixels_above_two_levels": 1,
+    "maximum_mean_channel_error": 3.814697265625e-05,
+    "maximum_channel_error": 19,
+    "scope": "Complete ReplicatedActor3D setup with actual display scale, grounding and body materials; identical cameras for source/candidate, four views and every full native cycle at24Hz. Numeric playback and pixel comparisons are separate reports.",
+    "framing_passed": true,
+    "clipped_frame_labels": [],
+    "maximum_border_foreground_pixels": 0
+  },
+  "secondary_effects": {
+    "effective_scale": 0.806393027305603,
+    "failures": [],
+    "gpu": "NVIDIA GeForce RTX 5080 Laptop GPU",
+    "max_color_error": 0.0,
+    "max_custom_error": 0.0,
+    "max_dissolve_bounds_error": 2.73142802598159e-07,
+    "max_fragment_transform_error": 2.98023223876953e-07,
+    "max_grain_error": 1.31130218489206e-08,
+    "max_silhouette_position_error": 3.07195307414077e-07,
+    "mounted": {},
+    "passed": true,
+    "renderer": "forward_plus",
+    "runtime_sha256": "d65e5477db565c641ff84cb8d3216f2d8b11e6351f30b910e72b2e00d05a0c39",
+    "seeded_cases": 15,
+    "source_sha256": "5235d504feae43a67b63445628c44191efda80376086ef98ab0536926a32da7b"
+  },
+  "rig_investigation": {
+    "decision": "Original skin, rig and single draw surface retained. The rejection screen suggests at most 125 complete-island vertices, or 162,500 shared corrective GPU bytes at 65 targets, for an additional draw call per instance and pass. This modest upper bound does not justify a partition without a measured runtime benefit.",
+    "provisional_screen_triangles": 152,
+    "provisional_screen_unique_vertices": 125,
+    "maximum_possible_corrective_GPU_bytes_saved": 162500,
+    "scope": "Screening and cost decision only; no full all-key/native/raster rigid qualification or rig replacement claimed."
+  },
+  "evidence_sha256": {
+    "qualification-job.json": "12cdc536ae09b7f0e52f65f16be7a287757d6dc7f6943e744d302152eb8191a9",
+    "processing.json": "52b4e11894725ddda469b00ceba9dda1c098afcf66ee6524098881e4be49bc65",
+    "exact-source-validation.json": "76ee0ec8c613dda474c0dd8db635e14efe47c799b9a48e863efd013e3cf9a5b4",
+    "physical-witness-validation.json": "a8cf920baeb2c1f6515c336ac849ec33c4fe50b537b90b030c3a6010d0324197",
+    "blender-validation.json": "2350d44952e7d7b7f31397ef162048e8efd65345c4cbf39e15bbadeeaec0bef7",
+    "blender-direct-validation.json": "fe91f47780523f3b8bf2989c33093556adbe697ee006b8706987c77b6b42253f",
+    "native-validation.json": "ed9ce780b5f0bb37b2adb0dbc4831070a17070bb971fd1b5594308c7a8604803",
+    "imported-validation.json": "ed9ce780b5f0bb37b2adb0dbc4831070a17070bb971fd1b5594308c7a8604803",
+    "render-fit.json": "666d44b6a8f56b20ea86c66c393ab14b302e577a589ecfc839ec26c50a4d1680",
+    "placement.json": "78d52ee56e7c2913e9539a9b367bc949b0d9f392494bf9d0172ad22e489774df",
+    "effects-validation.json": "70918e5d10af5662840a634898111856070a4258a431dc3206687c6c884ded71",
+    "actual-render/render.json": "4281f09041dea00eeadc84f84efd1bc0114ccf3002aeb367d4f886a4dc4d1e3c",
+    "actual-render/pixel-comparison.json": "8de90f4a3536d9d9d559bd31672ef15056f946271cad7c713c7112bb462da6fc"
+  },
+  "visual_review": "Paired normal contact boards and complete native-cycle previews reviewed. Every four-view/full-cycle frame has zero foreground pixels in its border two pixels wide.",
+  "known_limitations": [
+    "Separate resident RAM and frame-time benchmarks were not measured.",
+    "Encoded animation-key savings describe raw files, logical source accessors and import parsing input only. Native importing may densely rebake identical generated Animation keys; no runtime Animation RAM, key-search or playback CPU saving is claimed.",
+    "Original artistic review/approval status is unchanged.",
+    "Compressed shipping data increases by 42394 bytes despite smaller decoded GLB. This tradeoff is explicit; no unmeasured runtime-memory saving offsets it in this receipt."
+  ],
+  "genuine_editor_verification_revision": {
+    "status": "Corrected independent actual Editor verification passed within applicable unchanged modern or legacy scope",
+    "date": "2026-10-28",
+    "source_original_sha256": "5235d504feae43a67b63445628c44191efda80376086ef98ab0536926a32da7b",
+    "current_canonical_sha256": "d65e5477db565c641ff84cb8d3216f2d8b11e6351f30b910e72b2e00d05a0c39",
+    "loader": "ResourceLoader.load(PackedScene)",
+    "load_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/russet_faun.glb-b1c408e2232d1b09eb548919782dffa8.md5",
+        "import_metadata_sha256": "d891315de35c6627af2e51fdb6b51d5ce13e11a284f5cc291b17d4eb7e83422a",
+        "imported_resource_path": "res://.godot/imported/russet_faun.glb-b1c408e2232d1b09eb548919782dffa8.scn",
+        "imported_resource_sha256": "0d35a04f68498eb5ce0baa474e14f60a6dba0a8d71ee75c3c265fe6ae6832e46",
+        "packed_scene_resource_path": "res://assets/qa/russet_faun/v2/baseline/russet_faun.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "858df27540bf1cc0fdbeb948f1c1d2e8",
+        "source_path": "res://assets/qa/russet_faun/v2/baseline/russet_faun.glb",
+        "source_sha256": "5235d504feae43a67b63445628c44191efda80376086ef98ab0536926a32da7b"
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/russet_faun.glb-4926fe8acc349ebc2ed3d9d44aa86bb2.md5",
+        "import_metadata_sha256": "92b745fe986fe43b8f7180f91bf9bc9e2ad5f298a2936d001ecbb45b76ead842",
+        "imported_resource_path": "res://.godot/imported/russet_faun.glb-4926fe8acc349ebc2ed3d9d44aa86bb2.scn",
+        "imported_resource_sha256": "bc3422bb645026ea4c40beaa9a7a513b1c49d8647b4109109e0f1e2ecd59ea48",
+        "packed_scene_resource_path": "res://assets/qa/russet_faun/v2/candidate/russet_faun.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "ebaed43ea27126a54846685a1cecd04a",
+        "source_path": "res://assets/qa/russet_faun/v2/candidate/russet_faun.glb",
+        "source_sha256": "d65e5477db565c641ff84cb8d3216f2d8b11e6351f30b910e72b2e00d05a0c39"
+      }
+    ],
+    "source_aliases_and_SCNs_have_current_source_and_destination_MD5_freshness": true,
+    "numeric": {
+      "poses": 232,
+      "all_source_clips": [
+        "Death_A",
+        "Fighting_Idle",
+        "Hit_Chest",
+        "Idle_A",
+        "Jog",
+        "Sword_Attack",
+        "Walk"
+      ],
+      "RESET_checked": true,
+      "maximum_Euclidean_position_error_source_units": 3.7516171759072545e-07,
+      "maximum_normal_angle_degrees": 3.67717841477353e-05
+    },
+    "applicable_quality_budget": {
+      "position_four_float32_ULPs": 4.76837158203125e-07,
+      "source_coordinate_or_rest_axis_extent_magnitude": 1.7362537140677,
+      "normal_degrees": 0.0001,
+      "both_passed": true
+    },
+    "full_typed_static_attributes_material_storage_texture_pixels_and_mips": {
+      "actor": "russet_faun",
+      "source_sha256": "5235d504feae43a67b63445628c44191efda80376086ef98ab0536926a32da7b",
+      "candidate_sha256": "d65e5477db565c641ff84cb8d3216f2d8b11e6351f30b910e72b2e00d05a0c39",
+      "surfaces": [
+        {
+          "all_typed_arrays": [
+            {
+              "slot": 0,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 1,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 2,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 4,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 10,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 11,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 12,
+              "exact_after_proven_vertex_bijection": true
+            }
+          ],
+          "full_material_storage_fields_and_texture_pixels_mips_exact": true,
+          "format_exact": true,
+          "lods": [
+            {
+              "lod": 0,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            },
+            {
+              "lod": 1,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            }
+          ],
+          "bounds_component_max_delta": 0.0,
+          "lod_capture_present": true
+        }
+      ],
+      "passed": true,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/russet_faun.glb-b1c408e2232d1b09eb548919782dffa8.md5",
+          "import_metadata_sha256": "d891315de35c6627af2e51fdb6b51d5ce13e11a284f5cc291b17d4eb7e83422a",
+          "imported_resource_path": "res://.godot/imported/russet_faun.glb-b1c408e2232d1b09eb548919782dffa8.scn",
+          "imported_resource_sha256": "0d35a04f68498eb5ce0baa474e14f60a6dba0a8d71ee75c3c265fe6ae6832e46",
+          "packed_scene_resource_path": "res://assets/qa/russet_faun/v2/baseline/russet_faun.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "858df27540bf1cc0fdbeb948f1c1d2e8",
+          "source_path": "res://assets/qa/russet_faun/v2/baseline/russet_faun.glb",
+          "source_sha256": "5235d504feae43a67b63445628c44191efda80376086ef98ab0536926a32da7b"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/russet_faun.glb-4926fe8acc349ebc2ed3d9d44aa86bb2.md5",
+          "import_metadata_sha256": "92b745fe986fe43b8f7180f91bf9bc9e2ad5f298a2936d001ecbb45b76ead842",
+          "imported_resource_path": "res://.godot/imported/russet_faun.glb-4926fe8acc349ebc2ed3d9d44aa86bb2.scn",
+          "imported_resource_sha256": "bc3422bb645026ea4c40beaa9a7a513b1c49d8647b4109109e0f1e2ecd59ea48",
+          "packed_scene_resource_path": "res://assets/qa/russet_faun/v2/candidate/russet_faun.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "ebaed43ea27126a54846685a1cecd04a",
+          "source_path": "res://assets/qa/russet_faun/v2/candidate/russet_faun.glb",
+          "source_sha256": "d65e5477db565c641ff84cb8d3216f2d8b11e6351f30b910e72b2e00d05a0c39"
+        }
+      ]
+    },
+    "retained_Editor_morph_fields": {
+      "actor": "russet_faun",
+      "source_sha256": "5235d504feae43a67b63445628c44191efda80376086ef98ab0536926a32da7b",
+      "candidate_sha256": "d65e5477db565c641ff84cb8d3216f2d8b11e6351f30b910e72b2e00d05a0c39",
+      "all_retained_editor_POSITION_NORMAL_TANGENT_typed_bits_exact": true,
+      "retained_targets": 65,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/russet_faun.glb-b1c408e2232d1b09eb548919782dffa8.md5",
+          "import_metadata_sha256": "d891315de35c6627af2e51fdb6b51d5ce13e11a284f5cc291b17d4eb7e83422a",
+          "imported_resource_path": "res://.godot/imported/russet_faun.glb-b1c408e2232d1b09eb548919782dffa8.scn",
+          "imported_resource_sha256": "0d35a04f68498eb5ce0baa474e14f60a6dba0a8d71ee75c3c265fe6ae6832e46",
+          "packed_scene_resource_path": "res://assets/qa/russet_faun/v2/baseline/russet_faun.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "858df27540bf1cc0fdbeb948f1c1d2e8",
+          "source_path": "res://assets/qa/russet_faun/v2/baseline/russet_faun.glb",
+          "source_sha256": "5235d504feae43a67b63445628c44191efda80376086ef98ab0536926a32da7b"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/russet_faun.glb-4926fe8acc349ebc2ed3d9d44aa86bb2.md5",
+          "import_metadata_sha256": "92b745fe986fe43b8f7180f91bf9bc9e2ad5f298a2936d001ecbb45b76ead842",
+          "imported_resource_path": "res://.godot/imported/russet_faun.glb-4926fe8acc349ebc2ed3d9d44aa86bb2.scn",
+          "imported_resource_sha256": "bc3422bb645026ea4c40beaa9a7a513b1c49d8647b4109109e0f1e2ecd59ea48",
+          "packed_scene_resource_path": "res://assets/qa/russet_faun/v2/candidate/russet_faun.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "ebaed43ea27126a54846685a1cecd04a",
+          "source_path": "res://assets/qa/russet_faun/v2/candidate/russet_faun.glb",
+          "source_sha256": "d65e5477db565c641ff84cb8d3216f2d8b11e6351f30b910e72b2e00d05a0c39"
+        }
+      ],
+      "scope": "Direct actual Editor source/candidate retained morph P/N/T byte digests after independently proved complete static-attribute vertex bijection. Exact target mask from source packing lineage; no morph field omitted.",
+      "passed": true
+    },
+    "withdrawn_prior_loader_claim": "Prior shared dumper captures labelled imported used GlbSceneCache for these outside-actor aliases and therefore were raw-cache comparisons. They remain retained private raw/native evidence, but their independent Editor claim is withdrawn and superseded by these explicitly loaded SCNs.",
+    "unchanged_other_evidence": "Original independent physical observations, exact source curves, Blender, actual native gameplay body rendering, placement, mounted/cinematic dependencies and secondary effects remain hash-bound and unchanged. No artistic approval, model, action, cap or witness change in this QA revision.",
+    "production_scope": "Production actor_shipping loose folders remain raw/native and are not Editor-imported. Per-surface Editor-generated LODs are verification representation metadata, not a claim of new gameplay LODs.",
+    "evidence_sha256": {
+      ".local/heavy-batch/russet_faun/v2/editor-real-v1/qualification-job.json": "bd9259693240cc2c7959663fefc73d316a6508f86b1a375eaedea5aa1ac29ab8",
+      ".local/heavy-batch/russet_faun/v2/editor-real-v1/imported/runtime.json": "0805036d769a43f482181cc956ca0ce45300149ad2b47b67a738384274b7a4dd",
+      ".local/heavy-batch/russet_faun/v2/editor-real-v1/imported-validation.json": "ed9ce780b5f0bb37b2adb0dbc4831070a17070bb971fd1b5594308c7a8604803",
+      ".local/heavy-batch/russet_faun/v2/editor-real-v1/imported-static-mesh-bits.json": "c95935c505deba0689dbd4e72a9a7c7686e39ebba57ec5b06001e4c3dfbaeedd",
+      ".local/heavy-batch/russet_faun/v2/editor-real-v1/imported-typed-validation.json": "9c9b762f699cb4e0cfa6604f5c4677c9828ee667abdf03d77e80cfd8fa75dab1",
+      ".local/heavy-batch/russet_faun/v2/editor-real-v1/morph-digest-job.json": "b713faf11eb20c711360d596c72d2b955a343fc56d2a949910a3f80e49d6c8b6",
+      ".local/heavy-batch/russet_faun/v2/editor-real-v1/imported-morph-digests.json": "7ec8cf11f3d266b0567457b3f0d4aaca41b342507f12d8c7190840e895de6423",
+      ".local/heavy-batch/russet_faun/v2/editor-real-v1/imported-morph-validation.json": "c9ae1e4c3e9f4d5e70e567c968888c9ee1686e4d123f602b6d1dede906ea36a6"
+    }
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "batch": 22,
+  "rank": 108,
+  "actor": "moonshadow_lynx",
+  "status": "Unchanged original retained; nonstrict duplicate animation clocks are outside this exact-reduction program.",
+  "unchanged": true,
+  "source_sha256": "cbc147ac6ace8da81d491b12a665b028fb925edf14819542164b3067acfe3cf3",
+  "candidate_sha256": "cbc147ac6ace8da81d491b12a665b028fb925edf14819542164b3067acfe3cf3",
+  "source_bytes": 8136212,
+  "candidate_bytes": 8136212,
+  "source_zstd_bytes": 4291723,
+  "candidate_zstd_bytes": 4291723,
+  "source_rlcz_bytes": 4291779,
+  "candidate_rlcz_bytes": 4291779,
+  "shared_gpu_source_bytes": 0,
+  "shared_gpu_candidate_bytes": 0,
+  "draw_surfaces_source": 1,
+  "draw_surfaces_candidate": 1,
+  "source_target_slots": 0,
+  "original_motion_review_status": "pending",
+  "original_roster_status": "current imported model; reviewed feline walk, trot, pounce and death integrated",
+  "clock_audit": {
+    "source_sha256": "cbc147ac6ace8da81d491b12a665b028fb925edf14819542164b3067acfe3cf3",
+    "unchanged": true,
+    "nonstrict_sampler_clocks": [
+      {
+        "clip": "Fighting_Idle",
+        "sampler": 137,
+        "nonincreasing_rows": [
+          961
+        ],
+        "times": [
+          [
+            0.625,
+            0.625
+          ]
+        ]
+      },
+      {
+        "clip": "Fighting_Idle",
+        "sampler": 158,
+        "nonincreasing_rows": [
+          961
+        ],
+        "times": [
+          [
+            0.625,
+            0.625
+          ]
+        ]
+      }
+    ],
+    "decision": "Preserve original bytes. Nonstrict duplicate clocks require separate investigation; no normalization or replacement."
+  },
+  "rig_audit": {
+    "decision": "No corrective data and no qualifying rig reduction. Original mesh, skin, animation clocks and all native bytes retained."
+  },
+  "original_witness_binding": {
+    "path": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\godot-client\\tests\\fixtures\\felid_motion_worlds.json",
+    "record_key": "moonshadow_lynx",
+    "source_sha256": "cbc147ac6ace8da81d491b12a665b028fb925edf14819542164b3067acfe3cf3"
+  },
+  "checks": {
+    "unchanged_binary_sha256_verified": true,
+    "rlcz_roundtrip_bit_exact": true,
+    "replacement_or_clock_normalization_performed": false,
+    "changed_model_gpu_qualification_claimed": false
+  },
+  "runtime_tradeoff": "No file, runtime, memory or draw-count change.",
+  "private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\batch-022\\moonshadow_lynx"
+}

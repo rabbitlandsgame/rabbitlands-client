@@ -73,10 +73,42 @@
     "walk": 1.8799998649173408,
     "run": 4.423529093923155
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "A long balanced lateral four-beat walk, with visible upper-leg motion and a quiet back. Faster travel becomes a brisk grounded pace, with gentle neck following and a centered hanging tail.",
     "attack": "A deliberate neck-and-head sweep loads to the right, then cuts fully across to the left from a braced stance. The body supports the neck arc before the head and forefeet recover together.",
     "death": "The knees fold under the tall body before it rolls onto a supported flank. The long articulated neck and skull settle with the torso; released hooves relax into a still hold, and the tail follows the rump coherently."
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "giraffe",
+    "sourceSHA256": "b52ff7868b7415c4655d9f63d021867bb83ba6f2b4928d0bd87559b8c18e9c73",
+    "previousRuntimeSHA256": "b2c391c0dcac2d2274ebb8675785608577bb11ffbaa10d41b2d6edb8d8b1679c",
+    "runtimeSHA256": "a997257679fa8359a3843cdb20e192a98620c277af81cb4ad9d359dddcd02fb6",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "giraffe",
+      "sourceSHA256": "b52ff7868b7415c4655d9f63d021867bb83ba6f2b4928d0bd87559b8c18e9c73",
+      "runtimeSHA256": "b2c391c0dcac2d2274ebb8675785608577bb11ffbaa10d41b2d6edb8d8b1679c",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 240,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "giraffe",
+    "appliesToSHA256": "a997257679fa8359a3843cdb20e192a98620c277af81cb4ad9d359dddcd02fb6",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "saved_button_approval",
+      "event_id": "0da76669-2210-47c1-9f95-81644fce0b61",
+      "event_sha256": "6724169257d83c278fd7ba5624de285cd3257e8ba42df7a0166d09baab5f6eaf",
+      "utc": "2026-10-28T21:14:01.914135+00:00"
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
   }
 }

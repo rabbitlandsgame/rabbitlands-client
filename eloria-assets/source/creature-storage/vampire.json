@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "actor": "vampire",
+  "source_sha256": "fff9fb0a66847c2067412267af1b13c60d6ba9c31e0ba5b8d063e4c6590e3801",
+  "candidate_sha256": "d772de9390366685e262fa63135fa380014c19f164d1b90fa5b84a9033610fc9",
+  "pipeline": [
+    "prune_zero_targets",
+    "reduce_constant_runs",
+    "compact"
+  ],
+  "partition": null,
+  "unchanged": false,
+  "removed_zero_target_indices": [],
+  "redundant_flat_key_rows_removed": 13038,
+  "geometry_skin_rest_binds_materials_images_unchanged": true,
+  "preserve_trs_keys": false,
+  "native_clips": [
+    "Death_A",
+    "Fighting_Idle",
+    "Hit_Chest",
+    "Idle_A",
+    "Jog",
+    "Sword_Attack",
+    "Walk"
+  ],
+  "usage": "Deterministic exact preparation needs no partition --profile; frozen source/candidate hashes bind this record."
+}

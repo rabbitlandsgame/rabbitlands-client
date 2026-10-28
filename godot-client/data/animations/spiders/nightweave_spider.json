@@ -73,10 +73,46 @@
     "walk": 0.2392453188602442,
     "run": 0.5713383349950149
   },
-  "reviewStatus": "approved",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "A long-limbed, deliberate alternating-tripod stalk with six large walking limbs, separate front palps and a steady patterned abdomen. The faster skitter increases reach and cadence without bouncing the body.",
     "attack": "The legs brace as the body coils briefly, then drives the face and palps straight forward in a venomous bite thrust. The small fangs close inward and the spider recovers to its stance.",
     "death": "The patterned body sinks onto the ground while the six legs curl inward in a staggered release; the front palps relax, then the corpse holds still."
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/accepted-repair-delivery.json",
+    "sourceSHA256": "0ef5b7de82333e980941d60a2b8bd4985c17a1fdf9f7d78e087816af63197e24",
+    "previousRuntimeSHA256": "b164ade0bd1814a3f7d13579381c0ee1636456a7a612ce727b98c828e94f91d2",
+    "runtimeSHA256": "3155e74a9021e04f42cb8c5968398af34e4359ff3521e101bfdfec9ef472aa19",
+    "method": "visually_accepted_creature_repair",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "nightweave_spider",
+      "sourceSHA256": "0ef5b7de82333e980941d60a2b8bd4985c17a1fdf9f7d78e087816af63197e24",
+      "runtimeSHA256": "b164ade0bd1814a3f7d13579381c0ee1636456a7a612ce727b98c828e94f91d2",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 120,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/accepted-repair-delivery.json",
+    "actor": "nightweave_spider",
+    "appliesToSHA256": "3155e74a9021e04f42cb8c5968398af34e4359ff3521e101bfdfec9ef472aa19",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_repair_instruction",
+      "instruction_summary": "The user reviewed and accepted these five exact repair drafts, then explicitly instructed their installation and merge/push to develop. Five saved exact-version reviewer approvals corroborate this current instruction.",
+      "catalog_sha256": "c1fe36a4d450c06a16adb3fffe76d466778deff9fc6d060ff0db9dd3ae31142b",
+      "authorization_sha256": "88814c13afb22d45bb78cd3a9547d6b4ae70521b847f1d20aacd588171454bb5",
+      "not_a_historical_journal_event": true,
+      "saved_reviewer_approval": {
+        "event_id": "9f3b3aee-6f44-43a3-b785-50361242e215",
+        "event_sha256": "912de6588c2283050fcfb2b86c3dc570361eace53427a44db938d413213597b1",
+        "utc": "2026-10-28T23:33:10.466434+00:00"
+      }
+    },
+    "previousAuthoringReviewStatus": "approved"
   }
 }

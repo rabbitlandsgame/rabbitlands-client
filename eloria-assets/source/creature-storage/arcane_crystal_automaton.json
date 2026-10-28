@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "actor": "arcane_crystal_automaton",
+  "source_sha256": "326fbbc89633331ec3210e988bbe98c38c2b3000df4cf1b7233fc98ae55ecc32",
+  "candidate_sha256": "52b8b968dc5b204f652337f433977d1e0454a799f72d13444f476775f1d20af8",
+  "pipeline": [
+    "prune_zero_targets",
+    "reduce_constant_runs",
+    "compact"
+  ],
+  "partition": null,
+  "unchanged": false,
+  "removed_zero_target_indices": [],
+  "redundant_flat_key_rows_removed": 1538,
+  "geometry_skin_rest_binds_materials_images_unchanged": true,
+  "preserve_trs_keys": false,
+  "native_clips": [
+    "Death_A",
+    "Fighting_Idle",
+    "Hit_Chest",
+    "Idle_A",
+    "Jog",
+    "Sword_Attack",
+    "Walk"
+  ],
+  "usage": "Deterministic exact preparation needs no partition --profile; frozen source/candidate hashes bind this record."
+}

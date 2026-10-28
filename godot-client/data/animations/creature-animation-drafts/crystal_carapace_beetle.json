@@ -73,12 +73,43 @@
     "walk": 0.10956517264075333,
     "run": 0.25833322782029466
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "A blue-violet crystal beetle carries a steady faceted shell on alternating support tripods. Six pointed feet make deliberate equal advances; the faster scurry quickens the same pattern while two small frontal palps hover clear.",
     "attack": "The beetle lowers and braces its shell, draws its head and palps back, then thrusts forward with a crystalline beak-and-mandible bite. Its two true curved mandibles spread and close, while the smaller palps flare clear of the face.",
     "death": "The ventral shield and abdomen settle forward/down. Six walking limbs release into a relaxed outward fold; the head, curved mandibles and small palps lower into a supported still ending while the crystal plates remain intact."
   },
   "motionStyle": "grounded six-leg crystal beetle tripod",
-  "locomotionMode": "grounded"
+  "locomotionMode": "grounded",
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "crystal_carapace_beetle",
+    "sourceSHA256": "65dd61f3def376725a71b7f4845c1bd1b83dd787226c114b2e4c209b1c03877f",
+    "previousRuntimeSHA256": "fb32c64344d102c734c729d33bdf31026b35c020f1d691345eae334e47365f72",
+    "runtimeSHA256": "ec9cee7102861ac30058769fe0500d1b3efb7bca7c51663e87dc6960dd3dd5eb",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "crystal_carapace_beetle",
+      "sourceSHA256": "65dd61f3def376725a71b7f4845c1bd1b83dd787226c114b2e4c209b1c03877f",
+      "runtimeSHA256": "fb32c64344d102c734c729d33bdf31026b35c020f1d691345eae334e47365f72",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 120,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "crystal_carapace_beetle",
+    "appliesToSHA256": "ec9cee7102861ac30058769fe0500d1b3efb7bca7c51663e87dc6960dd3dd5eb",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
+  }
 }
