@@ -8,6 +8,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).parent))
 from video_motion.blender_vertex_identity import imported_bindings, document, array
 from video_motion.blender_step_time import step_safe_frame
 from video_motion.blender_bone_identity import multiple_armature_bindings
+from video_motion.blender_object_rest import animated_armature_rest
 
 job = json.loads(
     pathlib.Path(sys.argv[sys.argv.index("--") + 1]).read_text(encoding="utf-8")
@@ -60,7 +61,19 @@ for label in ["baseline", "candidate"]:
         cl: next(x for x in actions if x.name == cl or x.name.startswith(cl + "."))
         for cl in w["clips"]
     }
+    current_document, _ = document(path)
+    object_rest = animated_armature_rest(
+        current_document, [{"name": ob.name, "type": ob.type} for ob in objects]
+    )
+    armature_object_defaults = {
+        ob.as_pointer(): Matrix(record["blender_local_matrix"])
+        for record in object_rest
+        for ob in objects
+        if ob.name == record["blender_object"]
+    }
     for ob in objects:
+        if ob.as_pointer() in armature_object_defaults:
+            ob.matrix_basis = armature_object_defaults[ob.as_pointer()]
         if ob.type == "MESH" and ob.data.shape_keys:
             for block in list(ob.data.shape_keys.key_blocks)[1:]:
                 block.slider_min = -10.0
@@ -85,6 +98,11 @@ for label in ["baseline", "candidate"]:
     all_bindings, default_weights, identity = imported_bindings(path, objects)
     bone_names = list(next(iter(w["clips"].values()))[0]["bones"])
     arms = [ob for ob in objects if ob.type == "ARMATURE"]
+    object_rest_proof = None
+    if object_rest:
+        # Names select a provisional reset only. Original skin membership,
+        # every joint parent/rest head and full vertex identity must prove it.
+        _, object_rest_proof = multiple_armature_bindings(path, arms, {})
     if len(arms) == 1:
         arm = arms[0]
         assert set(bone_names).issubset(arm.pose.bones.keys())
@@ -114,10 +132,14 @@ for label in ["baseline", "candidate"]:
         }
         for clip, action in clips.items()
     }
+    bone_identity["animated_armature_object_rest"] = object_rest
+    bone_identity["animated_object_original_skin_rest_proof"] = object_rest_proof
 
     def select(clip):
         action = clips[clip]
         for arm in arms:
+            if arm.as_pointer() in armature_object_defaults:
+                arm.matrix_basis = armature_object_defaults[arm.as_pointer()]
             for bone in arm.pose.bones:
                 bone.matrix_basis = Matrix.Identity(4)
             arm.animation_data_create()
