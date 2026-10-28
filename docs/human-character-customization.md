@@ -68,6 +68,10 @@ clearance. These are presentation changes; server damage, attack rounds and
 skill rules are unchanged.
 
 Low and Medium graphics use the lightweight Human appearance. High graphics
+draws the RL head (see **High graphics: the RL head** below). The earlier
+High portrait pass described next is kept, dormant, behind the developer
+switch `RL_HEADS=classic` for side-by-side checks and rollback, until the RL
+head is accepted in game. That classic High pass
 adds face colour, facial regions and baked normal maps for both bodies, with
 refined head geometry recovering eyelid, nose and lip form from the retained
 high-resolution sources. The face controls deform the eyes, lids, brows and
@@ -87,7 +91,46 @@ their positions. The maps
 follow fixed mesh UVs during animation.
 Switching back to Low or Medium restores the lightweight geometry and materials
 and releases unused High portrait resources. All graphics levels use the
-same body proportions, facial settings, grooming choices and animation controls.
+same body proportions, facial settings and animation controls, and the same
+saved grooming choices; the RL head at High shows two of them differently
+(see below).
+
+## High graphics: the RL head
+
+At High every Human - players, NPCs and leaderboard and dialogue portraits -
+draws the RL head: a new head, upper neck and eyes fitted to the shipped Human
+bodies, with painted skin, freckles, liner and brows, blinking, and
+spring-lock hair on the two RL hairstyles. It is derived entirely from the
+saved appearance, so no new data is saved or sent and every older save and
+server shows it. Low and Medium, other races and every saved value are
+unchanged; switching quality swaps the heads in place.
+
+* **Face.** The ten face controls drive the RL head's matching shape controls
+  around the Rowan (male) and Mira (female) presets: those presets reproduce
+  the authored RL faces, and moving a slider moves the RL face about as far per
+  step as the Low/Medium face moves. The default face (every slider at 50) is
+  therefore a different face from Rowan and Mira at High.
+* **Hair.** Male Parted is drawn as the RL `rowan_shag` and female Buns as the
+  RL `mira_bun` hairstyle; every other hairstyle keeps its fitted Low/Medium
+  model with the High hair finish. Hair length, volume and finish apply to the
+  RL hairstyles once their hair-shape data is added (pending), and to the
+  other hairstyles as before.
+* **Facial hair.** Moustache, goatee, short and full beards are RL beards that
+  follow facial expressions. Stubble is painted into the RL skin. Women show
+  no beard and no stubble at High for now; their saved choice is kept and shows
+  at Low and Medium.
+* **Colour.** Skin, eye and hair colour use the same palette choices, tuned so
+  the High head matches what Low and Medium show for the same choice (the
+  darkest hair colours stay slightly lighter on the RL hairstyles). Freckles,
+  liner, brow shape and lip colour follow per-sex defaults by skin tone.
+* **Portraits.** Dialogue and leaderboard portraits show the full-detail head
+  with a neutral expression and open eyes.
+
+Developer switches: `RL_HEADS=classic` draws the classic High head instead;
+`RL_HEADWEAR_FIT=shipped` also refits open headwear on the Low/Medium heads
+(off by default, pending an owner decision). Mapping data is
+`data/actors/rl_head_wire_defaults.json`; see
+[the RL head notes](../godot-client/docs/rl-head-prototype.md).
 
 The High pass is a foundation for further painting and anatomy work. The
 leaderboard portraits remain the art direction; the current models do not yet
