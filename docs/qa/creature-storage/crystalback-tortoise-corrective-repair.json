@@ -1,6 +1,6 @@
 {
   "actor": "crystalback_tortoise",
-  "status": "approximate_skin_repair_pilot_not_installed_or_artist_approved",
+  "status": "accepted_v2_installed_other_candidates_preserved_for_review",
   "reference_acceptance": "User visually accepted the 30 FPS tortoise in this task; this repair is a separate unaccepted draft.",
   "models": [
     {
@@ -1188,7 +1188,7 @@
     "corrective_targets": 0,
     "corrective_gpu_buffer_bytes": 0,
     "roundtrip_verified": true,
-    "status": "visual_experiment_not_installed",
+    "status": "user_accepted_and_installed_in_task_worktree",
     "method": "Robust constant mesh and four-influence skin fit across training poses; fixed normal fit for the resulting skin.",
     "fit_mode": "robust",
     "preserved": [
@@ -1207,7 +1207,12 @@
       "constant_samplers_collapsed": 0,
       "original_buffer_bytes": 25237764,
       "packed_buffer_bytes": 1209756
-    }
+    },
+    "runtime_path": "godot-client/assets/actors/native/creatures/crystalback_tortoise.glb",
+    "human_approved": true,
+    "runtime_installed": true,
+    "release_encoding": "ordinary_uncompressed_glb",
+    "acceptance": "User accepted the V2 bake after side-by-side review and explicitly requested replacement in this conversation."
   },
   "bake_v2_qualification": {
     "all": {
@@ -1364,5 +1369,17 @@
     "maximum_local_coincident_position_spread": 0.0,
     "bones": 21,
     "maximum_influences": 4
+  },
+  "installation": {
+    "runtime_path": "godot-client/assets/actors/native/creatures/crystalback_tortoise.glb",
+    "sha256": "53ae0f505843d9835224452ee860a662b2ed0ecbcad659654af966ca28412938",
+    "raw_bytes": 1558840,
+    "runtime_bake_fps": 30,
+    "encoding": "ordinary_uncompressed_glb",
+    "native_regression_check": "passed",
+    "raw_stage_check": "passed",
+    "original_physical_witness_preserved": true,
+    "regression_witness": "godot-client/tests/fixtures/creature-runtime-optimization/crystalback_tortoise.json",
+    "push_or_release_performed": false
   }
 }

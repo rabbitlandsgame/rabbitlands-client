@@ -1,6 +1,8 @@
 # Crystalback Tortoise: corrective shape and skin audit
 
-The reviewed 30 FPS tortoise is the reference. Neither experiment replaces the installed creature. The best storage result keeps the original base mesh and skin weights: it reduces 577 corrective shapes to 328 and the packaged model from 13.06 MB to 6.90 MB. This is a measured approximation requiring visual acceptance, not a lossless replacement.
+The user accepted the zero-corrective V2 bake after side-by-side review and explicitly requested replacement. That exact 1,558,840-byte GLB is now installed in the task worktree, with 30 Hz import policy and ordinary uncompressed release staging. No push or release is implied. The earlier audit below retains the rejected and alternative candidates so the quality/storage tradeoffs remain reviewable.
+
+The reviewed 30 FPS tortoise was the audit reference. The earlier high-fidelity storage control kept the original base mesh and skin weights: it reduced 577 corrective shapes to 328 and the RLCZ model from 13.06 MB to 6.90 MB. That separate approximate control remains unapproved; it was superseded for installation by the visually accepted smaller zero-shape V2.
 
 The skin experiments show that better weights can explain much of the deformation, but ordinary reweighting or a single baked mesh cannot safely replace the whole corrective system. Keeping the original weights gives a smaller, closer matching compression draft than the conservative skin repair. We should take the storage reduction separately from further rig development.
 
@@ -73,7 +75,7 @@ For a larger structural reduction, the next useful rig experiment is targeted vo
 
 Open `godot-client/open-crystalback-corrective-comparison.bat` for the reviewed 30 FPS model beside the 328-shape original-skin draft. To inspect the separate skin experiment, run `python eloria-assets/tools/preview_tortoise_corrective_repair.py --variant skin` from the worktree. Both support synchronized orbit/zoom, all seven clips, scrubbing, speed and blended switches. Inputs are hash checked against the accompanying JSON receipt. Generated models and detailed authoring evidence remain in ignored `.local/tortoise-corrective-repair/` storage.
 
-The [machine-readable receipt](crystalback-tortoise-corrective-repair.json) records exact input/output hashes, scope checks, per-category errors, runtime measurements and private evidence hashes. No native asset was replaced, and no changes were pushed.
+The [machine-readable receipt](crystalback-tortoise-corrective-repair.json) records exact input/output hashes, scope checks, per-category errors, runtime measurements and private evidence hashes. Only the explicitly accepted V2 has now replaced the native asset in the task worktree. No changes were pushed.
 
 ## Fixed mesh bake review
 

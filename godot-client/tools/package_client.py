@@ -3220,19 +3220,18 @@ def _main(argv=None, storage=None) -> int:
                 (logs / "prepared-content.json").write_text(json.dumps(prepared_receipt, indent=2), encoding="utf-8")
             except prepared_content_package.PreparedError as error:
                 raise PackageError(str(error)) from error
-        # Finish native cooking against authored GLBs first. Replace only staged
-        # loose creatures, including hardlinked stages, before final validation
-        # and smoke launches; source GLBs and their logical hashes stay intact.
+        # Keep loose creatures as ordinary GLBs after native cooking. Optimized
+        # meshes/curves are already smaller; avoid per-load RLCZ decoding.
         try:
             # Actor GLBs always ship loose. A scoped tracked-file list avoids
             # repeating the full actor/image dependency scan after cooking.
             creature_files = set(tracked(build_dir, creature_compression.CREATURE_ROOT.rstrip("/")))
-            creature_receipt = creature_compression.stage(build_dir, app_dir, creature_files)
+            creature_receipt = creature_compression.stage(build_dir, app_dir, creature_files, compress=False)
         except creature_compression.PayloadError as error:
             raise PackageError(str(error)) from error
         (logs / "creature-compression.json").write_text(json.dumps(creature_receipt, indent=2), encoding="utf-8")
         log(f"creature GLBs: {creature_receipt['source_bytes'] / 1e9:.2f} GB -> "
-            f"{creature_receipt['installed_bytes'] / 1e9:.2f} GB, verified lossless")
+            f"{creature_receipt['installed_bytes'] / 1e9:.2f} GB, ordinary uncompressed GLBs verified")
         if options.prepared_catalog:
             prepared_content_package.check_export(project / "prepared-content/index.json", stage)
         check_registry(build_dir, stage)

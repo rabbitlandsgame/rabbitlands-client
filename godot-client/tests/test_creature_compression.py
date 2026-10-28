@@ -51,7 +51,7 @@ def test_staging_breaks_hardlinks_and_preserves_sources_and_texture_resolution(t
     target = app / relative.removeprefix("godot-client/")
     source.parent.mkdir(parents=True); target.parent.mkdir(parents=True)
     raw = glb("../textures/skin.png"); source.write_bytes(raw); os.link(source, target)
-    receipt = codec.stage(build, app, {relative})
+    receipt = codec.stage(build, app, {relative}, compress=True)
     assert source.read_bytes() == raw
     assert target.read_bytes().startswith(codec.MAGIC)
     assert not os.path.samefile(source, target)
@@ -74,7 +74,7 @@ def test_incompressible_file_stays_raw_and_other_actor_types_are_untouched(tmp_p
     original = codec.encode
     try:
         codec.encode = lambda raw: raw + b"larger"
-        result = codec.stage(build, app, set(names))
+        result = codec.stage(build, app, set(names), compress=True)
     finally:
         codec.encode = original
     assert len(result["files"]) == 1 and not result["files"][0]["compressed"]
@@ -89,6 +89,22 @@ def test_staging_cannot_be_pointed_at_the_authored_source_itself(tmp_path):
     with pytest.raises(codec.PayloadError, match="staging path"):
         codec.stage(tmp_path, tmp_path / "godot-client", {relative})
     assert source.read_bytes() == raw
+
+
+def test_default_staging_keeps_raw_glbs_without_encoder_or_source_mutation(tmp_path, monkeypatch):
+    build, app = tmp_path / "source", tmp_path / "stage/app"
+    relative = codec.CREATURE_ROOT + "raw.glb"
+    source, target = build / relative, app / relative.removeprefix("godot-client/")
+    source.parent.mkdir(parents=True); target.parent.mkdir(parents=True)
+    raw = glb(); source.write_bytes(raw); os.link(source, target)
+    def forbidden_encode(_raw):
+        raise AssertionError("Raw production staging must not encode or load zstandard")
+    monkeypatch.setattr(codec, "encode", forbidden_encode)
+    receipt = codec.stage(build, app, {relative})
+    assert source.read_bytes() == target.read_bytes() == raw
+    assert receipt["format"] == "glTF-2.0" and not receipt["compression_requested"]
+    assert receipt["source_bytes"] == receipt["installed_bytes"] == len(raw)
+    assert not receipt["files"][0]["compressed"]
 
 
 def test_prepared_source_identity_comes_from_decoded_content_not_header(tmp_path, monkeypatch):

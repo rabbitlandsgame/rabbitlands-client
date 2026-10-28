@@ -10,6 +10,8 @@ description: Author, fit, audit, transfer and integrate creature motion on Rabbi
 
 # Rabbit Lands creature animation
 
+After creature motion is complete, use the [creature runtime optimization skill](../rabbitlands-creature-runtime-optimization/SKILL.md) for delivery candidates with at most 30 samples/second, offline mesh/skin corrective reduction and ordinary uncompressed GLBs. Preserve dense authoring evidence, qualify sampling and rebaking separately in the actual client, compare reduced-basis controls, and retain measured residual corrections/helpers where needed. Acceptance remains actor-specific.
+
 
 
 For a canine continuation, read `docs/creature-video-motion.md` and `eloria-assets/source/animations/canine/manifest.json` before selecting a fit. Seven reviewed canine profiles, prepared inputs and native curves are packaged there. Their replay command is offline; it does not infer anatomy for a new actor. Use `eloria-assets/tools/video_motion` for native fitting, surface/contact evaluation, temporal regularization and physical chain diagnostics.

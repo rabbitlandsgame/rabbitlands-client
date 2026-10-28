@@ -1,0 +1,33 @@
+---
+name: rabbitlands-creature-runtime-optimization
+description: Reduce Rabbit Lands creature animation sampling and corrective-shape storage, fit fixed meshes and skin weights offline, and compare runtime delivery candidates against the selected animation set. Use after creature authoring or when shrinking completed creature assets.
+---
+
+# Creature runtime optimization
+
+Optimize the selected animation set, preserving its authoring evidence. Delivery candidates normally use at most **30 samples/second** and **ordinary uncompressed GLBs**. Dense fitting/reference samples may remain private. The current policy avoids release RLCZ encoding; existing codec readers remain compatible with older installs. A 240 FPS renderer does not require 240 animation samples: skin and morph curves interpolate between keys.
+
+Read `docs/asset-authoring.md` and the creature-animation skill for anatomy and motion authoring. This skill adds a delivery optimization stage; it does not authorize regenerating retired assets, replacing unrelated motion, or publishing. Respect the current task's requested installation scope and prior actor-specific approvals.
+
+## Select and freeze
+
+Obtain the owning agent's selected paths and hashes. Completed local drafts can differ from the older runtime GLBs. Keep those states separate; never optimize an old installed file while claiming to retrofit its newer draft. Freeze inputs and record full clip names/durations, looping/held behavior, events, root/forward/scale, skin influence count, materials and mounted-skin metadata. Work in a task-owned worktree and ignored versioned output directory. Recheck hashes before installation.
+
+## Optimize and compare
+
+1. Audit **physical unique bytes** for curves, corrective POSITION, corrective NORMAL, geometry, skin, textures and metadata with `eloria-assets/tools/video_motion/storage_components.py`. Shape count alone is misleading: basis shapes can encode many poses, and normals often dominate storage.
+2. Create a full-clip 30 Hz draft. Preserve exact endpoints/durations and reset/default state. LINEAR translations/scales/morph weights use linear interpolation; quaternions use SLERP. Spread the fractional endpoint remainder across the whole clip so a short tail interval does not exceed the cap. Preserve existing sparse clocks at or below the cap. STEP discontinuities and cubic tangents need explicit handling. Set both asset bake metadata and `.glb.import` animation FPS; disabling import optimization alone does not prevent Godot rebaking at the wrong cadence.
+3. Use that sampled draft as the reference for corrective reduction, so sampling error and bake error remain separate. Compare a no-skin-change reduced-basis control against structural fits; do not credit all representation savings to weight repair.
+4. Test the fixed mesh with original weights, then fit rest mesh **and** nonnegative normalized skin weights on anatomically nearby existing joints. Keep the supported influence budget (four or eight); eight is not automatically better. Tie true coincident surface vertices after confirming their corrected motion matches, but preserve distinct UV/normal corners and intentionally separate anatomy. Fit the worst poses as well as average error; a robust objective can reduce outliers while modestly increasing RMS. Include explicit neutral/reset evaluation and report any rest-shape change.
+5. Fit shading independently. A small position error does not imply correct normals, tangents or normal-map appearance. If a fixed bake fails, retain a measured residual corrective set or test local helper joints rather than claiming the dynamic deformation can be baked once into a universal rest mesh. Helper joints need neutral keys in every clip, unchanged original binds/hierarchy where required and independent blend testing.
+6. Pack away unreachable data and exactly constant interior keys. Preserve unsigned integer VEC4 JOINTS accessors: the float-only `packing.append_array` helper is unsuitable for them. Preserve both influence sets, shell partitions and mounted original-skin records. Keep the original logical actor bounds when a smaller morph envelope would otherwise change grounding/picking; record actual renderer bounds separately.
+
+For the fitting mathematics, engine-specific traps and the accepted tortoise precedent, read [the delivery reference](references/fitting-and-validation.md). `build_tortoise_static_bake.py` and `preview_tortoise_corrective_repair.py` provide a concrete versioned pilot, not a universal anatomy recipe.
+
+## Qualify the combined output
+
+Bind reports to the final combined-file hash. Measure maximum and RMS whole-body surface error, localized outliers, normals, contacts, defaults and all directed switches. Use actual current Godot client actors, independent GLB evaluation and fresh Blender import; include between-key and off-grid times, held endings and retained native clips such as Fly/Gallop. Fit/training samples are not independent validation. Godot imports outside `assets/actors` may silently use the raw loader: distinguish genuine editor PackedScene proof from raw-client proof.
+
+Provide a synchronized two-model in-client preview with clip selection, orbit, zoom, scrub and speed. Include jump points for measured failures. Visual acceptance is per actor and exact candidate hash; numerical completion or another actor's accepted tolerance is not approval. Keep new drafts available for review when they exceed the established visual contract, while completing authorized safe changes. Quantify raw GLB bytes, installed encoding, shared corrective GPU buffers, draw surfaces and scoped CPU measurements; do not turn a component benchmark into a whole-game FPS claim.
+
+Install only the selected/authorized result, preserve recoverable original files and immutable witnesses, update runtime identity/import/selection receipts and run the checks relevant to the combined result. Historical exact-equivalence witnesses must not be silently relaxed to pass a new approximate asset. Public reports should identify the new acceptance contract while keeping original witnesses intact.

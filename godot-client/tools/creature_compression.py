@@ -1,4 +1,4 @@
-"""Lossless release-only creature GLBs, retaining logical paths and decoded hashes.
+"""Raw creature staging by default, plus the optional legacy lossless codec.
 
 RLCZ0001 | uint64 decoded bytes | uint64 encoded bytes | SHA-256 decoded | zstd
 All integers are little endian. Authored GLBs remain ordinary glTF files.
@@ -87,11 +87,11 @@ def source_digest(path: Path) -> str:
         return hashlib.file_digest(stream, "sha256").hexdigest()
 
 
-def stage(build: Path, app: Path, loose: set[str]) -> dict:
-    """Replace only staged creature files atomically, breaking staging hardlinks.
+def stage(build: Path, app: Path, loose: set[str], *, compress: bool = False) -> dict:
+    """Verify ordinary GLBs, optionally encode packaging-owned staged copies.
 
-    Validation uses the authored file and decoded staged bytes. A larger encoded
-    representation remains raw. No alternate copy/index is needed at runtime.
+    The production policy keeps GLBs raw to avoid runtime decompression. Legacy
+    encoding is explicit and breaks hardlinks atomically before replacing bytes.
     """
     rows = []
     for relative in sorted(loose):
@@ -105,10 +105,11 @@ def stage(build: Path, app: Path, loose: set[str]) -> dict:
                 or target.resolve() == source.resolve()):
             raise PayloadError("Creature staging path escaped the package")
         raw = source.read_bytes()
+        _validate_glb(raw)
         if target.read_bytes() != raw:
             raise PayloadError(f"Staged creature differs from authored input: {inside}")
-        encoded = encode(raw)
-        compressed = len(encoded) < len(raw)
+        encoded = encode(raw) if compress else None
+        compressed = encoded is not None and len(encoded) < len(raw)
         if compressed:
             if decode(encoded) != raw:
                 raise PayloadError(f"Creature round-trip failed: {inside}")
@@ -126,6 +127,7 @@ def stage(build: Path, app: Path, loose: set[str]) -> dict:
         rows.append({"path": inside, "source_sha256": hashlib.sha256(raw).hexdigest(),
                      "source_bytes": len(raw), "installed_bytes": target.stat().st_size,
                      "compressed": compressed})
-    return {"format": MAGIC.decode(), "files": rows,
+    return {"format": MAGIC.decode() if compress else "glTF-2.0",
+            "compression_requested": compress, "files": rows,
             "source_bytes": sum(row["source_bytes"] for row in rows),
             "installed_bytes": sum(row["installed_bytes"] for row in rows)}

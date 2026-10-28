@@ -32,6 +32,8 @@ verification and do not reactivate retired generators.
 
 The complete concept-art, Meshy model-generation, rigging/animation and video-motion-fitting skills live under `.agents/skills/rabbitlands-*`. Their references and UI metadata are included. The existing video-generation and creature-integration skills remain available.
 
+Completed creature deliveries also use the [creature runtime optimization skill](../.agents/skills/rabbitlands-creature-runtime-optimization/SKILL.md): 30-sample/second delivery candidates, offline mesh/skin corrective reduction, independent shading and blend checks, and ordinary uncompressed creature GLBs. Dense private authoring evidence remains preserved. Actor-specific visual acceptance controls approximate runtime replacement.
+
 Original high-resolution models, full-resolution textures, concept inputs, animation libraries, generated source stages and processing scripts are consolidated under:
 
 ```text

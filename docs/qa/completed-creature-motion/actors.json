@@ -982,14 +982,14 @@
   },
   "crystalback_tortoise": {
     "runtime_path": "godot-client/assets/actors/native/creatures/crystalback_tortoise.glb",
-    "sha256": "fcec0718567c0f426a3ba81b7004d5b4cf39ecf60bcb94c37a6bb4cf4f12aa89",
-    "reviewed_candidate_sha256": "038b2414fe3c30ebb11bb8b1188fa35d6d475b8fcaed89c368567d320682bf08",
+    "sha256": "53ae0f505843d9835224452ee860a662b2ed0ecbcad659654af966ca28412938",
+    "reviewed_candidate_sha256": "53ae0f505843d9835224452ee860a662b2ed0ecbcad659654af966ca28412938",
     "baseline_sha256": "eaa9da0596d861961bb4ad2eeab991b4f3fe6c42553e8ba7678f0b29a7f44348",
     "height": 1.7000008127765271,
-    "bake_fps": 4096,
-    "bytes": 41969644,
+    "bake_fps": 30,
+    "bytes": 1558840,
     "source_bytes": 167549508,
-    "human_approved": false,
+    "human_approved": true,
     "runtime_installed": true,
     "concept": {
       "movement": "A weighty four-beat crawl with short, purposeful clawed-foot steps and a solid crystal shell. The quicker scramble increases leg recovery while keeping the heavy torso steady.",
@@ -1027,7 +1027,13 @@
       }
     },
     "source_family": "chelonians",
-    "storage_equivalence_report": "docs/qa/creature-storage/crystalback-tortoise-pilot.json"
+    "runtime_optimization": {
+      "method": "accepted_static_mesh_and_skin_bake_v2",
+      "reference_sha256": "01b3a309b5fe61ed6c7845aee5bd9552df62496af9d205928b72381a2aeeaf9c",
+      "receipt": "docs/qa/creature-storage/crystalback-tortoise-corrective-repair.json",
+      "approximate": true
+    },
+    "runtime_witness": "godot-client/tests/fixtures/creature-runtime-optimization/crystalback_tortoise.json"
   },
   "dragon_turtle": {
     "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/dragon_turtle.glb",

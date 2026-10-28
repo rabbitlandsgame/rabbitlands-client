@@ -54,8 +54,12 @@ def main():
     assert len(actors)==47
     for actor,p in actors.items():
         if args.actor and args.actor!=actor:continue
-        a=NativeShapeAsset(ROOT/p['runtime_path']);w=read(ROOT/f'godot-client/tests/fixtures/completed-creature-motion/{actor}.json');entry=registry[actor];mapping=read(ROOT/'godot-client'/entry['animationMap'].removeprefix('res://'))
-        assert digest(a.path)==p['sha256']==w['sha256'];assert p['human_approved'] is False and mapping['reviewStatus']=='draft_needs_review'
+        a=NativeShapeAsset(ROOT/p['runtime_path']);w=read(ROOT/p.get('runtime_witness',f'godot-client/tests/fixtures/completed-creature-motion/{actor}.json'));entry=registry[actor];mapping=read(ROOT/'godot-client'/entry['animationMap'].removeprefix('res://'))
+        assert digest(a.path)==p['sha256']==w['sha256']
+        if p['human_approved']:
+            assert p.get('runtime_optimization') and mapping['reviewStatus']=='accepted'
+        else:
+            assert p['human_approved'] is False and mapping['reviewStatus']=='draft_needs_review'
         assert {'Idle_A','Fighting_Idle','Hit_Chest','Walk','Jog','Sword_Attack','Death_A'}<=set(a.animations)
         assert set(a.animations)==set(w['clips']);assert all(c in a.animations for c in mapping['actions'].values())
         assert entry['scene']==entry['animationLibrary'];assert all(v in a.ids for v in entry['attachments'].values())
