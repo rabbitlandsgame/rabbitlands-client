@@ -1,6 +1,6 @@
 class_name RLHeadAppearance
 extends RefCounted
-## One RL head prototype face: the sex of the head module, the identity
+## One RL head face: the sex of the head module, the identity
 ## controls that drive its `id_*` blend shapes, the colours and painted
 ## features of its skin, eyes and hair, and the hair and facial-hair styles.
 ##
@@ -90,6 +90,12 @@ var brow_style := DEFAULT_BROW_STYLE
 var brow_thickness := 0.0
 ## 0 to 1: how far the liner flicks out past the outer corner of the eye.
 var liner_wing := 0.0
+## An RL hairstyle's length and volume, -1 to 1 (0 as authored), and its
+## finish 0..2 (PortraitCustomization `hair_detail`), through the hairstyle's
+## optional `hl_` blend shapes (RLHeadRig). Not part of the byte form.
+var hair_length := 0.0
+var hair_volume := 0.0
+var hair_detail := 0
 
 static var _presets: Dictionary = {}
 static var _presets_loaded := false
@@ -187,6 +193,9 @@ func to_dict() -> Dictionary:
 		"brow_style": brow_style_value(),
 		"brow_thickness": snappedf(brow_thickness, 0.0001),
 		"liner_wing": snappedf(liner_wing, 0.0001),
+		"hair_length": snappedf(hair_length, 0.0001),
+		"hair_volume": snappedf(hair_volume, 0.0001),
+		"hair_detail": hair_detail,
 	}
 
 
@@ -259,6 +268,9 @@ func _merge(data: Dictionary) -> void:
 		brow_style = brow_style_from(data["brow_style"], brow_style)
 	brow_thickness = clampf(float(data.get("brow_thickness", brow_thickness)), -1.0, 1.0)
 	liner_wing = clampf(float(data.get("liner_wing", liner_wing)), 0.0, 1.0)
+	hair_length = clampf(float(data.get("hair_length", hair_length)), -1.0, 1.0)
+	hair_volume = clampf(float(data.get("hair_volume", hair_volume)), -1.0, 1.0)
+	hair_detail = clampi(int(data.get("hair_detail", hair_detail)), 0, 2)
 
 
 static func _style_name(value: Variant) -> String:
