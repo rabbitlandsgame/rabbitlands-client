@@ -24,9 +24,24 @@ Obtain the owning agent's selected paths and hashes. Completed local drafts can 
 
 For the fitting mathematics, engine-specific traps and the accepted tortoise precedent, read [the delivery reference](references/fitting-and-validation.md). `build_tortoise_static_bake.py` and `preview_tortoise_corrective_repair.py` provide a concrete versioned pilot, not a universal anatomy recipe.
 
+The reusable tools under `eloria-assets/tools/` take explicit source/output paths:
+
+- `optimize_creature_sampling.py --source SOURCE.glb --output sampled.glb --report sampling.json --expected-sha256 HASH` creates and measures the 30 Hz candidate. It preserves unused curves, certifies only bit-identical duplicate-time repairs in a separate source evaluation view, and rejects conflicting timestamps. Variable STEP boundaries remain exact and are reported separately from the continuous-curve cadence cap.
+- `optimize_creature_bake.py --source sampled.glb --output baked.glb --report baking.json` fits a fixed mesh, local four/eight-influence weights and shading. `--original-skin` is the control. Use `--allow-step-exceptions` only for declared exact STEP cases from sampling; do not guess their semantics.
+- `check_creature_runtime_client.py --actor ID --source SOURCE.glb --candidate DRAFT.glb --output QA_FOLDER` measures actual client inputs. Prepare its isolated project once and use `--reuse-project` for subsequent jobs. No numeric limits are assumed unless explicitly provided.
+- `preview_creature_runtime_optimization.py --actor ID --source SOURCE.glb --candidate DRAFT.glb` opens synchronized review of all native clips. It does not install the draft.
+- `run_creature_runtime_retrofit.py` runs a frozen handoff manifest in size-ordered batches of five, with per-actor checkpoints; it writes only candidates/evidence. Promotion is separate.
+- `check_creature_runtime_blender.py` runs through a fresh Blender process with a hash-bound job list. Successful imports and finite poses establish loadability, not a match to the reference.
+- `catalog_creature_runtime_retrofit.py` builds the private review catalog. Enable `--complete` only with final original-to-candidate client reports and fresh Blender proofs for every offered version. Identical-byte variants can reuse the exact same input proof.
+- `review_creature_runtime_optimization.py --catalog CATALOG.json` opens the multi-creature approval browser. Left/right changes creature; up/down changes animation; Space approves the exact displayed version across all clips; T opens comments, Ctrl+Enter saves and Escape cancels. Drag to orbit, wheel to zoom, P to pause. The viewer records append-only hash-bound decisions and never installs a model. Use its isolated `--smoke` or `--visual-smoke` for testing, never the real review journal.
+
 ## Qualify the combined output
 
 Bind reports to the final combined-file hash. Measure maximum and RMS whole-body surface error, localized outliers, normals, contacts, defaults and all directed switches. Use actual current Godot client actors, independent GLB evaluation and fresh Blender import; include between-key and off-grid times, held endings and retained native clips such as Fly/Gallop. Fit/training samples are not independent validation. Godot imports outside `assets/actors` may silently use the raw loader: distinguish genuine editor PackedScene proof from raw-client proof.
+
+Check active clip duration after removing weight channels. A constant bone pose may have only a time-zero key while a removed corrective track supplied the held ending. Do not shorten that animation or invent new motion. A separately certified duplicate terminal key on an existing held LINEAR/STEP node curve can retain the ending; preserve the original curve prefix and defaults, version the repair, and repeat client/Blender checks. Reject ambiguous or unsupported curves.
+
+Compare topology through referenced node/primitive instances, including exact triangle index order. An unused mesh-library entry disappearing during compaction is not an anatomical change. Retain strict runtime surface-path/count correspondence, or supply an independently proven complete vertex mapping for a helper-rig scene change.
 
 Provide a synchronized two-model in-client preview with clip selection, orbit, zoom, scrub and speed. Include jump points for measured failures. Visual acceptance is per actor and exact candidate hash; numerical completion or another actor's accepted tolerance is not approval. Keep new drafts available for review when they exceed the established visual contract, while completing authorized safe changes. Quantify raw GLB bytes, installed encoding, shared corrective GPU buffers, draw surfaces and scoped CPU measurements; do not turn a component benchmark into a whole-game FPS claim.
 

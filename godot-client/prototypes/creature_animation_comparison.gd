@@ -55,6 +55,7 @@ func run() -> void:
 		return
 	job = JSON.parse_string(FileAccess.get_file_as_string(args[0]))
 	clips.assign(job.clips)
+	if not clips.has(clip): clip = clips[0]
 	root.title = job.get("title", "Rabbit Lands | %s comparison | %d FPS draft" % [job.display_name, int(job.fps)])
 	set_auto_accept_quit(false)
 	root.close_requested.connect(close_preview)
@@ -107,6 +108,8 @@ func run() -> void:
 	var models: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/models.json")).models
 	var config: Dictionary = models[str(job.actor)]
 	var animation_map: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(config.animationMap))
+	# Inspection also exposes retained clips not used by the current gameplay map.
+	for index in clips.size(): animation_map.actions["__preview_native_" + str(index)] = clips[index]
 	for index in 2:
 		var fixture: Dictionary = job.models[index]
 		if FileAccess.get_sha256(str(fixture.path)) != str(fixture.sha256):

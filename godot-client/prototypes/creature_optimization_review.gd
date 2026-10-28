@@ -264,6 +264,9 @@ func run() -> void:
 	reload_catalog()
 	if not entries.is_empty(): await load_entry(0,"")
 	print("CREATURE_OPTIMIZATION_REVIEW_READY")
+	if job.get("capture",false):
+		await RenderingServer.frame_post_draw
+		root.get_texture().get_image().save_png(str(job.output).path_join("review.png"))
 	if job.get("smoke",false): await smoke_test()
 
 func make_stage(viewport: SubViewport) -> Node3D:
@@ -290,6 +293,7 @@ func make_stage(viewport: SubViewport) -> Node3D:
 	floor_mesh.mesh=plane
 	stage.add_child(floor_mesh)
 	var camera := Camera3D.new()
+	camera.cull_mask=1 # Body/floor only; gameplay overhead furniture uses layer 20.
 	camera.fov=38
 	camera.near=.02
 	camera.current=true
@@ -361,7 +365,12 @@ func load_entry(next_index: int, wanted_variant: String) -> void:
 		actor.rotation=Vector3.ZERO
 		actor.set_process(false)
 		actor.set_physics_process(false)
+		actor.set_nameplate_visible(false)
+		actor.set_health_visible(true)
 		actor.set_health_visible(false)
+		for furniture in ["HealthBarBackground","HealthBarFill","HealthNumbers","OverheadBackground","BossRank","StatusIcons"]:
+			var overhead := actor.get_node_or_null(furniture) as Node3D
+			if overhead: overhead.visible=false
 		var player := actor.animation_player
 		if player.animation_finished.is_connected(actor._on_animation_finished): player.animation_finished.disconnect(actor._on_animation_finished)
 		for node in actor.find_children("*","AnimationPlayer",true,false):

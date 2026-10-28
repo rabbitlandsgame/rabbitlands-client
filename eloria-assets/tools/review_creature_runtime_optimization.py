@@ -261,6 +261,7 @@ def main():
     parser.add_argument("--output", type=Path, default=ROOT / ".local/creature-optimization-review/sessions")
     parser.add_argument("--prepare-only", action="store_true")
     parser.add_argument("--smoke", action="store_true")
+    parser.add_argument("--visual-smoke", action="store_true", help="Run the isolated TEST smoke with Forward+ and capture its initial view")
     parser.add_argument("--reuse-project", action="store_true")
     parser.add_argument("--append-event", type=Path, help=argparse.SUPPRESS)
     args = parser.parse_args()
@@ -276,22 +277,24 @@ def main():
         raise ValueError("Session output must stay in ignored .local")
     output = args.output.resolve() / (dt.datetime.now().strftime("%Y%m%d-%H%M%S-") + uuid.uuid4().hex[:8])
     output.mkdir(parents=True)
-    catalog_path = smoke_catalog(args.catalog, output) if args.smoke else args.catalog.resolve()
+    smoke = args.smoke or args.visual_smoke
+    catalog_path = smoke_catalog(args.catalog, output) if smoke else args.catalog.resolve()
     if not args.reuse_project:
         prepare(args.project.resolve(), args.client_root.resolve(), args.godot)
     elif digest(args.project / "prototypes" / SCRIPT.name) != digest(SCRIPT):
         raise ValueError("Prepared reviewer differs; prepare again")
     job = {"catalog": str(catalog_path), "output": str(output), "python": sys.executable,
-           "helper": str(Path(__file__).resolve()), "prototype_sha256": digest(SCRIPT), "smoke": args.smoke}
+           "helper": str(Path(__file__).resolve()), "prototype_sha256": digest(SCRIPT), "smoke": smoke,
+           "capture": args.visual_smoke}
     save(output / "job.json", job)
     print(json.dumps({"job": str(output / "job.json"), "entries": len(catalog["entries"]), "complete": catalog["complete"],
-                      "review_store": str(journal_path(catalog_path, load_catalog(catalog_path))), "test_only": args.smoke}), flush=True)
+                      "review_store": str(journal_path(catalog_path, load_catalog(catalog_path))), "test_only": smoke}), flush=True)
     if not args.prepare_only:
         run_engine(args.godot, args.project.resolve(), output / "review", (["--headless"] if args.smoke else []) +
                    ["--script", "res://prototypes/" + SCRIPT.name, "--", str(output / "job.json")])
-        if args.smoke:
+        if smoke:
             result = json.loads((output / "review-smoke.json").read_text(encoding="utf-8"))
-            if not result.get("headless") or result.get("prototype_sha256") != job["prototype_sha256"]:
+            if result.get("headless") != (not args.visual_smoke) or result.get("prototype_sha256") != job["prototype_sha256"]:
                 raise RuntimeError("Missing or stale headless smoke receipt")
             events = [json.loads(line) for line in Path(result["journal"]).read_text(encoding="utf-8").splitlines()]
             if not events or not all(event.get("test_only") is True for event in events):
