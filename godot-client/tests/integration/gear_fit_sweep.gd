@@ -101,8 +101,14 @@ func run() -> void:
 			expect(diagnostics["visuals"] == kit[1] and diagnostics["fallback"] == 0,
 				slug + " complete " + str(kit[0]) + " kit")
 			if equipment["models"]["3:" + str(kit[1][3])].get("raceFeatures", "") == "show":
+				# Under the RL head (a Human at High) its cranium closes the head.
+				var rl_head := actor.rl_head()
 				for scalp: Node in actor.find_children("scalp", "MeshInstance3D", true, false):
-					expect((scalp as MeshInstance3D).visible, slug + " " + str(kit[0]) + " preserves the head")
+					expect((scalp as MeshInstance3D).visible != (rl_head != null), slug + " " + str(kit[0]) + " preserves the head")
+				if rl_head != null:
+					var head: Array = rl_head.mesh_nodes()["head"]
+					expect(not head.is_empty() and (head[0][0] as MeshInstance3D).is_visible_in_tree(),
+						slug + " " + str(kit[0]) + " keeps the RL cranium")
 			for hair: Node in actor.get_skeleton().get_children():
 				if hair.name.begins_with("AppearanceHair_"):
 					expect(not (hair as Node3D).visible, slug + " headgear covers hair")

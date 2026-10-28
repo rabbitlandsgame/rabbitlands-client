@@ -194,7 +194,13 @@ func run() -> void:
 						var covered := covered_scalp if mesh.name.to_lower() == "scalp" else covered_hair
 						expect(mesh.visible == (bool(initial_hair[mesh.get_instance_id()]) and not covered), race + " restores sculpted hair visibility")
 					if mesh.name.to_lower() == "eyes":
-						expect(mesh.visible, race + " preserves eyes")
+						# Under the RL head (a Human at High) the head draws its own eyes.
+						var rl_head := actor.rl_head()
+						expect(mesh.visible != (rl_head != null), race + " preserves eyes")
+						if rl_head != null:
+							var head: Array = rl_head.mesh_nodes()["head"]
+							expect(not head.is_empty() and (head[0][0] as MeshInstance3D).is_visible_in_tree(),
+								race + " keeps the RL head's eyes")
 				for node: Node in actor._native_skeleton.get_children():
 					if node.name.begins_with("AppearanceHair_"):
 						expect((node as Node3D).visible != covered_hair, race + " restores chosen hairstyle for circlets and unequip")

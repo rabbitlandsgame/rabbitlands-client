@@ -1,6 +1,9 @@
 extends SceneTree
 ## Native small facial partitions must stay renderable when a living actor
 ## bends below its resting AABB. No geometry, materials or poses are replaced.
+## At High a Human draws the RL head instead of the body's scalp, eyes and
+## brows (hidden, still present and bounded): its head, beard and hair meshes
+## must carry the same animated-head envelope.
 var checks := 0
 var failures := 0
 func _init() -> void: run.call_deferred()
@@ -39,10 +42,18 @@ func run() -> void:
 	actor.animation_player.seek(bent_time,true);actor.animation_player.advance(0)
 	skeleton.force_update_all_bone_transforms()
 	expect(movement>.2,"the actual defend clip bends the head away from its standing bounds")
+	var rl:=actor.rl_head()!=null
+	expect(rl==(actor.render_quality()==ActorRenderQuality.Quality.HIGH and not ReplicatedActor3D.rl_heads_classic()),
+		"the foreman draws the RL head exactly at High")
+	if rl:
+		var rl_meshes:=actor.rl_head().all_meshes()
+		expect(not rl_meshes.is_empty(),"the RL head has meshes")
+		for mesh:MeshInstance3D in rl_meshes:
+			expect(mesh.skin!=null and mesh.extra_cull_margin>movement+.1,"RL "+str(mesh.name)+" bounds cover the real bent-head displacement")
 	var face:Dictionary={}
 	for name:String in ["scalp","eyes","eyebrows"]:
 		var mesh:=native.find_child(name,true,false) as MeshInstance3D
-		expect(mesh!=null and mesh.skin!=null and mesh.visible,"the actual "+name+" partition remains present and skinned")
+		expect(mesh!=null and mesh.skin!=null and mesh.visible!=rl,"the actual "+name+" partition remains present and skinned"+(" (hidden under the RL head)" if rl else ""))
 		if mesh!=null:
 			face[name]=mesh
 			expect(mesh.extra_cull_margin>movement+.1,"the "+name+" bounds cover the real bent-head displacement")
@@ -63,7 +74,7 @@ func run() -> void:
 	expect(scalp.extra_cull_margin==4,"larger authored or existing facial margins are never reduced or compounded")
 	expect(body.extra_cull_margin==.125,"the large body mesh keeps its existing culling policy")
 	expect(scalp.mesh==source_mesh and scalp.skin==source_skin and scalp.get_active_material(0)==source_material \
-		and scalp.get_aabb()==source_bounds and scalp.layers==source_layers and scalp.visible,"bound expansion preserves native geometry, skin, material, visibility and render layers")
+		and scalp.get_aabb()==source_bounds and scalp.layers==source_layers and scalp.visible!=rl,"bound expansion preserves native geometry, skin, material, visibility and render layers")
 	expect(skeleton.get_bone_global_pose(head)==pose and actor.global_transform==world and actor.server_target==server,"culling bounds never pose or move the authoritative actor")
 	var non_skinned:=MeshInstance3D.new();non_skinned.name="scalp";native.add_child(non_skinned)
 	actor.call("_expand_animated_face_bounds",native)
@@ -83,7 +94,11 @@ func run() -> void:
 	actor.apply_render_quality(ActorRenderQuality.Quality.HIGH)
 	expect(scalp.extra_cull_margin==4,"graphics-quality changes preserve the safe facial bounds")
 	actor.apply_appearance_variants({"hair":0})
-	expect(scalp.visible and scalp.extra_cull_margin==4,"returning to bald appearance preserves the closed scalp and its bounds")
+	rl=actor.rl_head()!=null
+	expect(scalp.visible!=rl and scalp.extra_cull_margin==4,"returning to bald appearance preserves the closed scalp and its bounds")
+	if rl:
+		var cranium:=actor.rl_head().mesh_nodes()["head"] as Array
+		expect(not cranium.is_empty() and (cranium[0][0] as MeshInstance3D).visible,"bald under the RL head shows the RL cranium")
 	expect(FileAccess.get_sha256(model.scene)==source_hash,"the approved source model remains byte-identical")
 	actor.queue_free()
 	await process_frame
