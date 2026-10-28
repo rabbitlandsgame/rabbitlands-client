@@ -73,19 +73,41 @@
     "walk": 0.08811598821685873,
     "run": 0.23182896899911642
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "A watchful, low mongoose amble with visible thigh motion and full alternating steps. Faster travel becomes a quick diagonal dart with small paw clearance, a quiet back and a trailing centered tail.",
     "attack": "A sharp low dart and head-led nip: load briefly backward, drive the shoulders and muzzle forward over a quick forepaw step, brace, then recover the hind feet and forefeet in sequence.",
     "death": "The alert head dips as the forelegs buckle, the short body yields into a supported flank, and the released limbs and low tail relax into a still grounded finish."
   },
   "runtimeOptimization": {
-    "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
     "actor": "mongoose",
     "sourceSHA256": "79a896095aa8298ebf1878c434246dfe2b7f85f8f6f2148c7dde0f85cc4fb3f9",
-    "runtimeSHA256": "ee4024ca70d360f4f0d891dfb7ad2a40d71612f635ff6a9c85bdf0b7b8108170",
-    "method": "close_match_animation_resampling",
-    "bakeFPS": 240,
-    "artisticAcceptanceChanged": false
+    "previousRuntimeSHA256": "ee4024ca70d360f4f0d891dfb7ad2a40d71612f635ff6a9c85bdf0b7b8108170",
+    "runtimeSHA256": "55cc2e01bc766222bdb7dbf9db607c0fe028e8c142727e50ea9b94cdb1bb5ca2",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "mongoose",
+      "sourceSHA256": "79a896095aa8298ebf1878c434246dfe2b7f85f8f6f2148c7dde0f85cc4fb3f9",
+      "runtimeSHA256": "ee4024ca70d360f4f0d891dfb7ad2a40d71612f635ff6a9c85bdf0b7b8108170",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 240,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "mongoose",
+    "appliesToSHA256": "55cc2e01bc766222bdb7dbf9db607c0fe028e8c142727e50ea9b94cdb1bb5ca2",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
   }
 }

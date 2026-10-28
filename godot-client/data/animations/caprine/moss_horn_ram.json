@@ -72,12 +72,35 @@
     "run": 0.9696913369290754
   },
   "runtimeOptimization": {
-    "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
     "actor": "moss_horn_ram",
     "sourceSHA256": "795c8379ade90cadde2ac2a106aa24cfeab693425325e9708c6cca1ba733cc7b",
-    "runtimeSHA256": "1f9b43c72ffdeac2ad18e21a4dbda1241bad3b0a905a915eb9484ba526f0edc5",
-    "method": "close_match_animation_resampling",
-    "bakeFPS": 120,
-    "artisticAcceptanceChanged": false
+    "previousRuntimeSHA256": "1f9b43c72ffdeac2ad18e21a4dbda1241bad3b0a905a915eb9484ba526f0edc5",
+    "runtimeSHA256": "4a78c5b6e99a32e1c17f67ea95964c3ef8c47a555adedf4f1528b2ae3c67babe",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "moss_horn_ram",
+      "sourceSHA256": "795c8379ade90cadde2ac2a106aa24cfeab693425325e9708c6cca1ba733cc7b",
+      "runtimeSHA256": "1f9b43c72ffdeac2ad18e21a4dbda1241bad3b0a905a915eb9484ba526f0edc5",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 120,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "reviewStatus": "accepted",
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "moss_horn_ram",
+    "appliesToSHA256": "4a78c5b6e99a32e1c17f67ea95964c3ef8c47a555adedf4f1528b2ae3c67babe",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": null,
+    "repairNoteEvents": []
   }
 }

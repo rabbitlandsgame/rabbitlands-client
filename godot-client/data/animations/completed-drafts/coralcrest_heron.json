@@ -73,19 +73,41 @@
     "walk": 0.4615010785035053,
     "run": 1.1656744727904707
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "A low stalking hunter, with separated stepping lanes, an alert swept crest and a quick downward beak strike. Deliberate alternating steps, visible knee and hock articulation, stable toe contact and restrained wings. The faster gait lengthens and quickens the steps without turning into flight.",
     "attack": "A short neck recoil into a long forward and downward beak stab, with both feet planted, then a quick recovery.",
     "death": "A forward breast-first collapse. The long neck folds, the legs release behind the body and the feather skirt settles without a beak-supported hover."
   },
   "runtimeOptimization": {
-    "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
     "actor": "coralcrest_heron",
     "sourceSHA256": "a8698248a9ede4907ba3840fbd2acce099b4623eb3aff2b8d086ae9ee5fb6621",
-    "runtimeSHA256": "e706d495013111cc272981f493041e1069192a3461bc6b0d77848fdfe7fc0aba",
-    "method": "close_match_animation_resampling",
-    "bakeFPS": 120,
-    "artisticAcceptanceChanged": false
+    "previousRuntimeSHA256": "e706d495013111cc272981f493041e1069192a3461bc6b0d77848fdfe7fc0aba",
+    "runtimeSHA256": "ee3d57aeb18f1f085d638ea17feee5d38e45b9955fd97c745dcc78f6b292d321",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "coralcrest_heron",
+      "sourceSHA256": "a8698248a9ede4907ba3840fbd2acce099b4623eb3aff2b8d086ae9ee5fb6621",
+      "runtimeSHA256": "e706d495013111cc272981f493041e1069192a3461bc6b0d77848fdfe7fc0aba",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 120,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "coralcrest_heron",
+    "appliesToSHA256": "ee3d57aeb18f1f085d638ea17feee5d38e45b9955fd97c745dcc78f6b292d321",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
   }
 }

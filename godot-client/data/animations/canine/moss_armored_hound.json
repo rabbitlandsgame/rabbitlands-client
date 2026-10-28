@@ -71,12 +71,36 @@
   },
   "strideScalesWithActor": true,
   "runtimeOptimization": {
-    "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
     "actor": "moss_armored_hound",
     "sourceSHA256": "b3dca1938545e137d3ae8263148f0871ca13166480c59d2c01801c6273e3eaa7",
-    "runtimeSHA256": "3573530c0668f1d90978c3dedb4a4cc467c338b68c537663b89299d489d43e8f",
-    "method": "close_match_animation_resampling",
-    "bakeFPS": 240,
-    "artisticAcceptanceChanged": false
+    "previousRuntimeSHA256": "3573530c0668f1d90978c3dedb4a4cc467c338b68c537663b89299d489d43e8f",
+    "runtimeSHA256": "93e31d03be665c3ae161f05c560c9ad3494ccba93023263e51ca7f3fd0edcea7",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "moss_armored_hound",
+      "sourceSHA256": "b3dca1938545e137d3ae8263148f0871ca13166480c59d2c01801c6273e3eaa7",
+      "runtimeSHA256": "3573530c0668f1d90978c3dedb4a4cc467c338b68c537663b89299d489d43e8f",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 240,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "reviewStatus": "accepted",
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "moss_armored_hound",
+    "appliesToSHA256": "93e31d03be665c3ae161f05c560c9ad3494ccba93023263e51ca7f3fd0edcea7",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "saved_button_approval",
+      "event_id": "8406cc0a-f8dc-4668-be07-8b95f589e015",
+      "event_sha256": "e4f1d9f320cf66226ec7243d3ee1a767468dfb62f128357e071d06058a239f2a",
+      "utc": "2026-10-28T21:12:28.521641+00:00"
+    },
+    "previousAuthoringReviewStatus": null,
+    "repairNoteEvents": []
   }
 }

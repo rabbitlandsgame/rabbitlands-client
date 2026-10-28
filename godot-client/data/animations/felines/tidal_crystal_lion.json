@@ -72,12 +72,36 @@
     "run": 1.8181843135243525
   },
   "runtimeOptimization": {
-    "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
     "actor": "tidal_crystal_lion",
     "sourceSHA256": "6c9da23b8bc3fc9b5458ccff73778ea83428867d7869b9b0ebb8dfc65c46e301",
-    "runtimeSHA256": "cfbc722db00d7053db768473821362e39b1fea3a73bed6a38e4caad8e756907b",
-    "method": "close_match_animation_resampling",
-    "bakeFPS": 240,
-    "artisticAcceptanceChanged": false
+    "previousRuntimeSHA256": "cfbc722db00d7053db768473821362e39b1fea3a73bed6a38e4caad8e756907b",
+    "runtimeSHA256": "359ef0a88179ff1a3113ca364b14b94c428841a0976616728ea8d47a06407f80",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "tidal_crystal_lion",
+      "sourceSHA256": "6c9da23b8bc3fc9b5458ccff73778ea83428867d7869b9b0ebb8dfc65c46e301",
+      "runtimeSHA256": "cfbc722db00d7053db768473821362e39b1fea3a73bed6a38e4caad8e756907b",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 240,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "reviewStatus": "accepted",
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "tidal_crystal_lion",
+    "appliesToSHA256": "359ef0a88179ff1a3113ca364b14b94c428841a0976616728ea8d47a06407f80",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "saved_button_approval",
+      "event_id": "eacea99d-5584-48aa-8843-b631d9ed3d19",
+      "event_sha256": "634c41cb5503fdc141b51f4db53e227f014ab3f12ae2ea103f1486416286c13f",
+      "utc": "2026-10-28T21:13:49.856398+00:00"
+    },
+    "previousAuthoringReviewStatus": null,
+    "repairNoteEvents": []
   }
 }

@@ -73,7 +73,7 @@
     "walk": 0.10048832464834122,
     "run": 0.28835780116480525
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "A calm buoyant glide driven by traveling waves along both lateral fin ribbons. Faster travel increases fin-wave cadence and amplitude while the mantle stays quiet and all eleven visible source arms follow with restrained lag.",
     "attack": "The two measured clubbed tentacles draw up, then extend into a paired forward snap with a short mantle surge. The shorter arms open slightly, while the complete eyes and cranial cap stay coherent.",
@@ -82,12 +82,34 @@
   "motionStyle": "buoyant lateral ribbon-fin swimming",
   "locomotionMode": "swimming",
   "runtimeOptimization": {
-    "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
     "actor": "cuttlefish",
     "sourceSHA256": "734cca99c10097005aa0165bc62fa30201b1dbbe558cb5c8d18592b1c4ebd6a4",
-    "runtimeSHA256": "02b08491adc99a2de40e571a07d28d631157e7b893b4991bb2520afcbb08b24a",
-    "method": "close_match_animation_resampling",
-    "bakeFPS": 120,
-    "artisticAcceptanceChanged": false
+    "previousRuntimeSHA256": "02b08491adc99a2de40e571a07d28d631157e7b893b4991bb2520afcbb08b24a",
+    "runtimeSHA256": "817171f7bb3995d44e590c002dddcce2d782424159afdc92c532cde29e40774a",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "cuttlefish",
+      "sourceSHA256": "734cca99c10097005aa0165bc62fa30201b1dbbe558cb5c8d18592b1c4ebd6a4",
+      "runtimeSHA256": "02b08491adc99a2de40e571a07d28d631157e7b893b4991bb2520afcbb08b24a",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 120,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "cuttlefish",
+    "appliesToSHA256": "817171f7bb3995d44e590c002dddcce2d782424159afdc92c532cde29e40774a",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
   }
 }

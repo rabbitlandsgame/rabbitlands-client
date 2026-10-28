@@ -73,7 +73,7 @@
     "walk": 0.5100844803556654,
     "run": 1.2948298347489973
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "Quiet buoyant swimming, driven by a coherent dorsoventral tail stroke, with restrained body pitch and relaxed steering flippers; faster travel increases the tail beat rather than adding a ground gait.",
     "attack": "A defensive forward shoulder and muzzle shove, with the flippers bracing laterally and the tail providing the impulse, followed by a smooth recoil.",
@@ -82,12 +82,34 @@
   "motionStyle": "swimming",
   "locomotionMode": "swimming",
   "runtimeOptimization": {
-    "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
     "actor": "manatee",
     "sourceSHA256": "f5451f227f020e3b0a244d73b4a3874d3b4afcf111aa78e1b33f471b99401d9e",
-    "runtimeSHA256": "783377fe0c6f357a1e02a27c5f122dbd5b92e68a9285bd60fdec023e5d50ffea",
-    "method": "close_match_animation_resampling",
-    "bakeFPS": 120,
-    "artisticAcceptanceChanged": false
+    "previousRuntimeSHA256": "783377fe0c6f357a1e02a27c5f122dbd5b92e68a9285bd60fdec023e5d50ffea",
+    "runtimeSHA256": "85efe951c2867933cc12bb78f5b0b74747fc83ef806f1fc31e44e83a68d1a86e",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "manatee",
+      "sourceSHA256": "f5451f227f020e3b0a244d73b4a3874d3b4afcf111aa78e1b33f471b99401d9e",
+      "runtimeSHA256": "783377fe0c6f357a1e02a27c5f122dbd5b92e68a9285bd60fdec023e5d50ffea",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 120,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "manatee",
+    "appliesToSHA256": "85efe951c2867933cc12bb78f5b0b74747fc83ef806f1fc31e44e83a68d1a86e",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
   }
 }

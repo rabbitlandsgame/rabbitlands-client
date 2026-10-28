@@ -71,12 +71,36 @@
   },
   "strideScalesWithActor": true,
   "runtimeOptimization": {
-    "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
     "actor": "crystal_dire_wolf",
     "sourceSHA256": "ee8b2185637c8e7a15a50c487fe0227a0e5d0e69c188e127fd5db21e1739051e",
-    "runtimeSHA256": "382c31e0600315390ac87e326cebafefadf3219a3868fb8ac29cabdfb1e81c2e",
-    "method": "close_match_animation_resampling",
-    "bakeFPS": 240,
-    "artisticAcceptanceChanged": false
+    "previousRuntimeSHA256": "382c31e0600315390ac87e326cebafefadf3219a3868fb8ac29cabdfb1e81c2e",
+    "runtimeSHA256": "d780280c6ae56dbb222bc1de87542db94ab5f2b86753568228580c6fed45d89b",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "crystal_dire_wolf",
+      "sourceSHA256": "ee8b2185637c8e7a15a50c487fe0227a0e5d0e69c188e127fd5db21e1739051e",
+      "runtimeSHA256": "382c31e0600315390ac87e326cebafefadf3219a3868fb8ac29cabdfb1e81c2e",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 240,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "reviewStatus": "accepted",
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "crystal_dire_wolf",
+    "appliesToSHA256": "d780280c6ae56dbb222bc1de87542db94ab5f2b86753568228580c6fed45d89b",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "saved_button_approval",
+      "event_id": "6f7a80ab-a408-4160-b016-a6ebdb0db134",
+      "event_sha256": "316f60c7948cf727bc6ef837ba2d8c8e74c192a8fa88dd5b1be19cdf27614eb3",
+      "utc": "2026-10-28T21:10:32.278221+00:00"
+    },
+    "previousAuthoringReviewStatus": null,
+    "repairNoteEvents": []
   }
 }

@@ -73,19 +73,41 @@
     "walk": 0.11381806643295178,
     "run": 0.30670973691405956
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "A low, heavy four-beat flipper shuffle becomes a quicker diagonal hustle. Broad front paddles step and brace while each multi-lobed rear flipper stays coherent; the belly, neck folds, tusks and whiskers retain their own shape.",
     "attack": "All four flippers brace a short forward body-and-neck shove. The head loads back then drives the tusks forward and down before recovering; the source has no independent jaw control.",
     "death": "The front support folds as the heavy trunk settles forward onto its belly and pelvis. The neck lowers into a tusk-supported rest, the paddles relax beside the body, and the complete pose holds without flipper or wrist spins."
   },
   "runtimeOptimization": {
-    "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
     "actor": "walrus",
     "sourceSHA256": "534e8fe378788ed12f64451551b6e33cbc76ab77afc252a25b72d13e9ef26628",
-    "runtimeSHA256": "7b68713fbb1c910ed1a4252d616cec4e054893c4bc0e86bbd8f167101b059113",
-    "method": "close_match_animation_resampling",
-    "bakeFPS": 120,
-    "artisticAcceptanceChanged": false
+    "previousRuntimeSHA256": "7b68713fbb1c910ed1a4252d616cec4e054893c4bc0e86bbd8f167101b059113",
+    "runtimeSHA256": "04a0e0542e07f97d066f6f1df1d489d39aef9e2029b840310c5576c4fea3eb28",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "walrus",
+      "sourceSHA256": "534e8fe378788ed12f64451551b6e33cbc76ab77afc252a25b72d13e9ef26628",
+      "runtimeSHA256": "7b68713fbb1c910ed1a4252d616cec4e054893c4bc0e86bbd8f167101b059113",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 120,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "walrus",
+    "appliesToSHA256": "04a0e0542e07f97d066f6f1df1d489d39aef9e2029b840310c5576c4fea3eb28",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
   }
 }

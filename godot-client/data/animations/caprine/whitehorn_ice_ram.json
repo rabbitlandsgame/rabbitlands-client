@@ -72,12 +72,36 @@
     "run": 0.9696822107839677
   },
   "runtimeOptimization": {
-    "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
     "actor": "whitehorn_ice_ram",
     "sourceSHA256": "aa36840101705943e74b450a9fff0aeea8a16b21e6338ad60feb04efc703f496",
-    "runtimeSHA256": "aa6f9e2d7e6c76dcbdd44e677cc8c749d5d629e97f5a9e17b098511b1db4ed60",
-    "method": "close_match_animation_resampling",
-    "bakeFPS": 240,
-    "artisticAcceptanceChanged": false
+    "previousRuntimeSHA256": "aa6f9e2d7e6c76dcbdd44e677cc8c749d5d629e97f5a9e17b098511b1db4ed60",
+    "runtimeSHA256": "2aa14844f8f751d42304fcefc3009a9150b14237f4e313056b62761469e978e4",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "whitehorn_ice_ram",
+      "sourceSHA256": "aa36840101705943e74b450a9fff0aeea8a16b21e6338ad60feb04efc703f496",
+      "runtimeSHA256": "aa6f9e2d7e6c76dcbdd44e677cc8c749d5d629e97f5a9e17b098511b1db4ed60",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 240,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "reviewStatus": "accepted",
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "whitehorn_ice_ram",
+    "appliesToSHA256": "2aa14844f8f751d42304fcefc3009a9150b14237f4e313056b62761469e978e4",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "saved_button_approval",
+      "event_id": "3b535547-31cb-4de7-be7d-1caf08bfbc60",
+      "event_sha256": "0d9afffa26477624c53ad9b7d0ebd3f4973595b975d2fb4b169eb658a5c5489f",
+      "utc": "2026-10-28T21:14:13.196247+00:00"
+    },
+    "previousAuthoringReviewStatus": null,
+    "repairNoteEvents": []
   }
 }

@@ -73,7 +73,7 @@
     "walk": 0.11341326627227225,
     "run": 0.2736320075140536
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "A low, steady annulated body crawl driven by a traveling lateral wave. Faster travel increases the wave cadence and sweep while the skull remains forward and the underside stays supported.",
     "attack": "A short front-body coil and lifted head lead to a forward nose/body jab and smooth recovery. The source has no independent jaw control, so no fabricated opening bite is used.",
@@ -82,12 +82,34 @@
   "motionStyle": "legless crawling",
   "locomotionMode": "grounded",
   "runtimeOptimization": {
-    "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
     "actor": "caecilian",
     "sourceSHA256": "f29a0fe404aa1b10077a5ce6aad995e2e440e2cfbd9778abc3bc93cd702c376e",
-    "runtimeSHA256": "6c687741120beb39b1014f478d5d45439e3bde0e8dc41e3cdcb3d258de156015",
-    "method": "close_match_animation_resampling",
-    "bakeFPS": 120,
-    "artisticAcceptanceChanged": false
+    "previousRuntimeSHA256": "6c687741120beb39b1014f478d5d45439e3bde0e8dc41e3cdcb3d258de156015",
+    "runtimeSHA256": "5b90e54bb3fa86c600602beefeb5ad7615ca73aa3a3126db5463bce37fca234b",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "caecilian",
+      "sourceSHA256": "f29a0fe404aa1b10077a5ce6aad995e2e440e2cfbd9778abc3bc93cd702c376e",
+      "runtimeSHA256": "6c687741120beb39b1014f478d5d45439e3bde0e8dc41e3cdcb3d258de156015",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 120,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "caecilian",
+    "appliesToSHA256": "5b90e54bb3fa86c600602beefeb5ad7615ca73aa3a3126db5463bce37fca234b",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
   }
 }

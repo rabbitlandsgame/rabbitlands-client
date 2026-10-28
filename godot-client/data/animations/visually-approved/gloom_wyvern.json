@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "fallbackAction": "idle",
+  "playbackSpeeds": {
+    "walk": 1.0,
+    "run": 1.0,
+    "attack_primary": 1.0,
+    "death": 1.0
+  },
+  "actions": {
+    "idle": "Idle_A",
+    "alternate_idle": "Idle_A",
+    "combat_idle": "Fighting_Idle",
+    "walk": "Walk",
+    "run": "Jog",
+    "turn": "Idle_A",
+    "sit": "Idle_A",
+    "seated_idle": "Idle_A",
+    "stand": "Idle_A",
+    "death": "Death_A",
+    "pain": "Hit_Chest",
+    "attack_primary": "Sword_Attack",
+    "ranged_attack": "Sword_Attack",
+    "cast": "Sword_Attack",
+    "harvest": "Sword_Attack",
+    "pickup": "Idle_A",
+    "drop": "Idle_A",
+    "emote_greeting": "Idle_A"
+  },
+  "serverCommands": {
+    "3": "death",
+    "5": "pain",
+    "7": "idle",
+    "13": "sit",
+    "14": "stand",
+    "15": "combat_idle",
+    "18": "combat_idle",
+    "19": "idle",
+    "20": "walk",
+    "21": "walk",
+    "22": "walk",
+    "23": "walk",
+    "24": "walk",
+    "25": "walk",
+    "26": "walk",
+    "27": "walk",
+    "30": "run",
+    "31": "run",
+    "32": "run",
+    "33": "run",
+    "34": "run",
+    "35": "run",
+    "36": "run",
+    "37": "run",
+    "38": "turn",
+    "39": "turn",
+    "40": "turn",
+    "41": "turn",
+    "42": "turn",
+    "43": "turn",
+    "44": "turn",
+    "45": "turn",
+    "46": "attack_primary"
+  },
+  "loopingClips": [
+    "Idle_A",
+    "Fighting_Idle",
+    "Walk",
+    "Jog"
+  ],
+  "strideScalesWithActor": true,
+  "strideMetresPerSecond": {
+    "walk": 1.8003006160642552,
+    "run": 3.913696991444033
+  },
+  "reviewStatus": "accepted",
+  "concept": {
+    "movement": "A low, predatory aerial Wyvern. Paired membrane wings drive deliberate hovering and forward flight, with a restrained torso and two tucked grasping hind talons. The long spear-tipped tail stays horizontally centered and follows the surrounding serial sections rather than flicking independently.",
+    "attack": "A gathering wing stroke braces a forward neck-and-body snap. The complete horned head reaches toward the target and the hind talons advance below it, then recover coherently. This is an airborne bite/talon threat, not a transferred four-legged foreclaw rake. Independent jaw movement requires demonstrated jaw/teeth ownership first.",
+    "death": "Forward loss of lift, then a controlled drop onto actual lower chest and pelvic belly. Wings slacken outside the neck, legs and tail; both hind chains release before talons relax. The serial tail lowers toward the floor while the whole body holds a stable supported ending."
+  },
+  "locomotionMode": "airborne",
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "gloom_wyvern",
+    "appliesToSHA256": "e2a8938ae28dacd14b521ad60323de701395b9d149d4b61949baa3ea4c5ca887",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "saved_button_approval",
+      "event_id": "1273f3a3-38e5-4ac8-8f66-2c7adde13362",
+      "event_sha256": "9d06d06b7d4fbc105e87b7858fddd4729c65e4137cee45765fb0ba842b688e9c",
+      "utc": "2026-10-28T21:09:06.325887+00:00"
+    },
+    "previousAuthoringReviewStatus": "draft",
+    "repairNoteEvents": []
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "gloom_wyvern",
+    "sourceSHA256": "8ee52c3d2f0469d9e008129fe15813925720b3d0aba6e5b2de9b356864e92b4a",
+    "previousRuntimeSHA256": "53d6d3e4a89b60d460eeb461d2bfe1014d1aa6726b10b67086ac3be227c762d2",
+    "runtimeSHA256": "e2a8938ae28dacd14b521ad60323de701395b9d149d4b61949baa3ea4c5ca887",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": null
+  }
+}

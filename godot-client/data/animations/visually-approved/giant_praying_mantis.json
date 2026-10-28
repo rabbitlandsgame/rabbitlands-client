@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "fallbackAction": "idle",
+  "playbackSpeeds": {
+    "walk": 1.0,
+    "run": 1.0,
+    "attack_primary": 1.0,
+    "death": 1.0
+  },
+  "actions": {
+    "idle": "Idle_A",
+    "alternate_idle": "Idle_A",
+    "combat_idle": "Fighting_Idle",
+    "walk": "Walk",
+    "run": "Jog",
+    "turn": "Idle_A",
+    "sit": "Idle_A",
+    "seated_idle": "Idle_A",
+    "stand": "Idle_A",
+    "death": "Death_A",
+    "pain": "Hit_Chest",
+    "attack_primary": "Sword_Attack",
+    "ranged_attack": "Sword_Attack",
+    "cast": "Sword_Attack",
+    "harvest": "Sword_Attack",
+    "pickup": "Idle_A",
+    "drop": "Idle_A",
+    "emote_greeting": "Idle_A"
+  },
+  "serverCommands": {
+    "3": "death",
+    "5": "pain",
+    "7": "idle",
+    "13": "sit",
+    "14": "stand",
+    "15": "combat_idle",
+    "18": "combat_idle",
+    "19": "idle",
+    "20": "walk",
+    "21": "walk",
+    "22": "walk",
+    "23": "walk",
+    "24": "walk",
+    "25": "walk",
+    "26": "walk",
+    "27": "walk",
+    "30": "run",
+    "31": "run",
+    "32": "run",
+    "33": "run",
+    "34": "run",
+    "35": "run",
+    "36": "run",
+    "37": "run",
+    "38": "turn",
+    "39": "turn",
+    "40": "turn",
+    "41": "turn",
+    "42": "turn",
+    "43": "turn",
+    "44": "turn",
+    "45": "turn",
+    "46": "attack_primary"
+  },
+  "loopingClips": [
+    "Idle_A",
+    "Fighting_Idle",
+    "Walk",
+    "Jog"
+  ],
+  "strideScalesWithActor": true,
+  "strideMetresPerSecond": {
+    "walk": 0.15999992763577692,
+    "run": 0.39999981908944227
+  },
+  "reviewStatus": "accepted",
+  "concept": {
+    "movement": "A deliberate ambush hunter holds its long abdomen and folded covers steady over four pointed walking feet. The two serrated raptorial arms stay lifted in a loose hunting guard. Walk uses an even four-beat creeping advance; run lengthens and quickens the same balanced stepping without jerking the high head or antennae.",
+    "attack": "Both scythes draw back and flare safely beside the face, then snap forward and down in a short staggered double snatch. The thorax leans into the reach while four feet brace. The curved blades remain whole and recover into the hunting guard.",
+    "death": "The hunter sinks forward as the neck and head bow. Its long abdomen and thorax settle onto their real undersides, the walking limbs release outward and the scythes open beside the body. Antennae droop and the corpse holds without rolling onto a horn or blade tip."
+  },
+  "locomotionMode": "grounded",
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "giant_praying_mantis",
+    "appliesToSHA256": "ee628d0ef112e52ff2c7f39e8ce7bd9fba254e9854316705aeec591463ba8c5c",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": "draft",
+    "repairNoteEvents": []
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "giant_praying_mantis",
+    "sourceSHA256": "a0a9256d83b082c983eb7d469421fe305f1fa005c0d75c0f09f731adf34f9258",
+    "previousRuntimeSHA256": "5aaac7414422fb84a8f054d32ff4449c81b187addfc304f16129a0647a8be491",
+    "runtimeSHA256": "ee628d0ef112e52ff2c7f39e8ce7bd9fba254e9854316705aeec591463ba8c5c",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": null
+  }
+}

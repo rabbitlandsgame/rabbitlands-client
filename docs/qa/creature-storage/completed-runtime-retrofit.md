@@ -1,5 +1,7 @@
 # Completed creature delivery retrofit
 
+**Current selection:** [191 accepted 30 fps zero-corrective versions are now installed in the task checkout](accepted-creature-delivery.md). The figures below retain the complete candidate study and earlier conservative selection history. [visually-accepted-delivery.json](visually-accepted-delivery.json) records the current accepted hashes and supersedes overlapping close-match entries.
+
 The 205 remaining completed animation sets have full 30 Hz and zero-corrective review candidates. Together with the already accepted Crystalback Tortoise V2, the local approval browser contains 206 creatures. The original selected sets are frozen separately; 17 are newer local drafts and retain that status. Larger differences require visual review. Successful loading and measurement do not establish an appearance match.
 
 | Raw GLB storage, 205 sets | Bytes | Decimal GB |

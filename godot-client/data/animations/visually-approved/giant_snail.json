@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "fallbackAction": "idle",
+  "playbackSpeeds": {
+    "walk": 1.0,
+    "run": 1.0,
+    "attack_primary": 1.0,
+    "death": 1.0
+  },
+  "actions": {
+    "idle": "Idle_A",
+    "alternate_idle": "Idle_A",
+    "combat_idle": "Fighting_Idle",
+    "walk": "Walk",
+    "run": "Jog",
+    "turn": "Idle_A",
+    "sit": "Idle_A",
+    "seated_idle": "Idle_A",
+    "stand": "Idle_A",
+    "death": "Death_A",
+    "pain": "Hit_Chest",
+    "attack_primary": "Sword_Attack",
+    "ranged_attack": "Sword_Attack",
+    "cast": "Sword_Attack",
+    "harvest": "Sword_Attack",
+    "pickup": "Idle_A",
+    "drop": "Idle_A",
+    "emote_greeting": "Idle_A"
+  },
+  "serverCommands": {
+    "3": "death",
+    "5": "pain",
+    "7": "idle",
+    "13": "sit",
+    "14": "stand",
+    "15": "combat_idle",
+    "18": "combat_idle",
+    "19": "idle",
+    "20": "walk",
+    "21": "walk",
+    "22": "walk",
+    "23": "walk",
+    "24": "walk",
+    "25": "walk",
+    "26": "walk",
+    "27": "walk",
+    "30": "run",
+    "31": "run",
+    "32": "run",
+    "33": "run",
+    "34": "run",
+    "35": "run",
+    "36": "run",
+    "37": "run",
+    "38": "turn",
+    "39": "turn",
+    "40": "turn",
+    "41": "turn",
+    "42": "turn",
+    "43": "turn",
+    "44": "turn",
+    "45": "turn",
+    "46": "attack_primary"
+  },
+  "loopingClips": [
+    "Idle_A",
+    "Fighting_Idle",
+    "Walk",
+    "Jog"
+  ],
+  "strideScalesWithActor": true,
+  "strideMetresPerSecond": {
+    "walk": 0.01463133119878945,
+    "run": 0.05016456411013524
+  },
+  "reviewStatus": "accepted",
+  "concept": {
+    "movement": "A heavy shelled snail glides deliberately with a small traveling contraction through its broad pedal foot and mantle. The complete spiral shell stays quiet and rigid while the raised head probes forward and the two tall eyestalks track gently. Faster movement quickens the same low crawl with a somewhat stronger visible tissue wave, without hopping or swinging the shell.",
+    "attack": "The broad foot braces as the head and short oral feelers gather back, then the anterior mantle drives a short forward head-and-body thrust. The eyestalks withdraw slightly with the head. No new jaw, limbs or shell deformation is invented.",
+    "death": "The anterior soft body slackens forward and low over the grounded pedal foot; the head and both eyestalks droop while the shell settles only slightly and remains whole. Several disjoint foot/body underside regions support the long animal, and the ending holds still with a centered posterior taper."
+  },
+  "locomotionMode": "grounded",
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "giant_snail",
+    "appliesToSHA256": "5765f5890495efc8c8d46d41113faba92566744040b16291d8193f64657775ea",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": "draft",
+    "repairNoteEvents": []
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "giant_snail",
+    "sourceSHA256": "0af57d91f618db4f40e05a9caa57a747cd245889a589d16cb9d818483acd0abe",
+    "previousRuntimeSHA256": "da9718c830eb4993fc93e58538b8107e82de30b78842a545a2ccc15d51cd82ee",
+    "runtimeSHA256": "5765f5890495efc8c8d46d41113faba92566744040b16291d8193f64657775ea",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": null
+  }
+}

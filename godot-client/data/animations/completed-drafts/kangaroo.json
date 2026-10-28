@@ -73,19 +73,41 @@
     "walk": 0.341378411507072,
     "run": 1.0823247364826485
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "A compact paired hind-foot hop at slow speed, opening into a faster bound. Both feet advance together in matching lanes, the haunches crouch and extend, the hands stay clear of the thighs, and a coherent centered tail balances the body.",
     "attack": "A guarded backward load, one forceful forward hind-foot kick while the other foot stays braced, then a controlled recovery. The long tail counterbalances without claiming weight-bearing support.",
     "death": "A brief forward gathering with the feet planted, followed by a forward chest-and-pelvis collapse. The neck settles with the skull, the released legs and hands relax and the tail follows into a supported still hold."
   },
   "runtimeOptimization": {
-    "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
     "actor": "kangaroo",
     "sourceSHA256": "98dbffa96487f0dc4dd1c62a13cfd0ccb7397e46b0bd8995333f10c522f797b7",
-    "runtimeSHA256": "cc0e669bf4df013c27e4af02ae894c45be2a543d589a298480125398cbfa5796",
-    "method": "close_match_animation_resampling",
-    "bakeFPS": 240,
-    "artisticAcceptanceChanged": false
+    "previousRuntimeSHA256": "cc0e669bf4df013c27e4af02ae894c45be2a543d589a298480125398cbfa5796",
+    "runtimeSHA256": "4c86fdfe09120d36d969705f42791da25440ad8a180ccb99334f6c051f0b79eb",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "kangaroo",
+      "sourceSHA256": "98dbffa96487f0dc4dd1c62a13cfd0ccb7397e46b0bd8995333f10c522f797b7",
+      "runtimeSHA256": "cc0e669bf4df013c27e4af02ae894c45be2a543d589a298480125398cbfa5796",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 240,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "kangaroo",
+    "appliesToSHA256": "4c86fdfe09120d36d969705f42791da25440ad8a180ccb99334f6c051f0b79eb",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
   }
 }

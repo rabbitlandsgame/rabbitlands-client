@@ -73,10 +73,34 @@
     "walk": 0.6383307489444962,
     "run": 1.4998540674500047
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "A grounded four-beat canine walk and diagonal trot, with full balanced strides, a quiet back and aligned mirrored paw lanes. Azure Hyena keeps its naturally taller shoulders and sloping back.",
     "attack": "A clear backward load followed by a forward lunge, head-led bite, supported landing and recovery. Upper snout stays with the skull; only valid lower-jaw branches articulate.",
     "death": "The head drops as the forelegs fold, the body rolls into supported flank/head contact, the paws release and relax, and the tail follows into a still grounded hold."
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "azure_hyena",
+    "appliesToSHA256": "747d0a08fe5f37f5ef6df601b6d5c78b5aee6b02a701faf46bf4d5aa576ce270",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "saved_button_approval",
+      "event_id": "39c103b4-3e86-45fd-b01a-38507a29c6ca",
+      "event_sha256": "7fcf42b45bfc39ee4f09414e5253eef533da5c80bdfdc0a71f31e3795eb6b058",
+      "utc": "2026-10-28T21:48:12.649779+00:00"
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "azure_hyena",
+    "sourceSHA256": "f5a4c1592c8a6a973fce6ae838315c9b2cc7ba5af639a74a78bbe772786c3d78",
+    "previousRuntimeSHA256": "f5a4c1592c8a6a973fce6ae838315c9b2cc7ba5af639a74a78bbe772786c3d78",
+    "runtimeSHA256": "747d0a08fe5f37f5ef6df601b6d5c78b5aee6b02a701faf46bf4d5aa576ce270",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": null
   }
 }

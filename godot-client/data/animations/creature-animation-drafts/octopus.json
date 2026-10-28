@@ -73,7 +73,7 @@
     "walk": 0.21218786539776655,
     "run": 0.6992554655153669
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "Buoyant ten-arm sculling: a restrained mantle pulse accompanies staggered soft arm waves. Faster travel increases the arm wave and cadence, while the face stays forward and the mantle keeps its volume. This is aquatic swimming rather than a planted terrestrial walk.",
     "attack": "The forward pair of arms coil upward in preparation, then extend into a broad forward grasp with a short mantle surge; the other six arms brace and trail without passing through the head.",
@@ -82,12 +82,34 @@
   "motionStyle": "buoyant ten-arm sculling",
   "locomotionMode": "swimming",
   "runtimeOptimization": {
-    "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
     "actor": "octopus",
     "sourceSHA256": "2203e1c803bf998da2764593e78bd817f89a06de0307ffa96de839f9193fe1e4",
-    "runtimeSHA256": "0b2d550581663276792697229a0bc2021e31d0dac84d0cb12e9d9c095f55cbcb",
-    "method": "close_match_animation_resampling",
-    "bakeFPS": 120,
-    "artisticAcceptanceChanged": false
+    "previousRuntimeSHA256": "0b2d550581663276792697229a0bc2021e31d0dac84d0cb12e9d9c095f55cbcb",
+    "runtimeSHA256": "0b6a55d57a9be024efed227170fce7a4b0f2886dfa647fa19e7db9b73a66f2a4",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "octopus",
+      "sourceSHA256": "2203e1c803bf998da2764593e78bd817f89a06de0307ffa96de839f9193fe1e4",
+      "runtimeSHA256": "0b2d550581663276792697229a0bc2021e31d0dac84d0cb12e9d9c095f55cbcb",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 120,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "octopus",
+    "appliesToSHA256": "0b6a55d57a9be024efed227170fce7a4b0f2886dfa647fa19e7db9b73a66f2a4",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
   }
 }

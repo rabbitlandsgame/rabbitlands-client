@@ -88,12 +88,35 @@
     "reset_to_authored_defaults": true
   },
   "runtimeOptimization": {
-    "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
     "actor": "spectral_forest_duelist",
     "sourceSHA256": "ca32439ca18f54f48756b65f7ac5972a1dcf2e54e82320aef015a640c30cd66d",
-    "runtimeSHA256": "036afb4837cc5888fefb9f10f9a86e620cfe7c178bd007d2d921b2cfefbb2a9e",
-    "method": "close_match_animation_resampling",
-    "bakeFPS": 240,
-    "artisticAcceptanceChanged": false
+    "previousRuntimeSHA256": "036afb4837cc5888fefb9f10f9a86e620cfe7c178bd007d2d921b2cfefbb2a9e",
+    "runtimeSHA256": "ff89d82183b26ff5fcd129d4f9d939ceaf7234b6dbbb055c8bb45481308711fa",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "spectral_forest_duelist",
+      "sourceSHA256": "ca32439ca18f54f48756b65f7ac5972a1dcf2e54e82320aef015a640c30cd66d",
+      "runtimeSHA256": "036afb4837cc5888fefb9f10f9a86e620cfe7c178bd007d2d921b2cfefbb2a9e",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 240,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "reviewStatus": "accepted",
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "spectral_forest_duelist",
+    "appliesToSHA256": "ff89d82183b26ff5fcd129d4f9d939ceaf7234b6dbbb055c8bb45481308711fa",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": null,
+    "repairNoteEvents": []
   }
 }

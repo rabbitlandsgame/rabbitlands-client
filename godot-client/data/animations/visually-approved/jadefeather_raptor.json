@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "fallbackAction": "idle",
+  "playbackSpeeds": {
+    "walk": 1.0,
+    "run": 1.0,
+    "attack_primary": 1.0,
+    "death": 1.0
+  },
+  "actions": {
+    "idle": "Idle_A",
+    "alternate_idle": "Idle_A",
+    "combat_idle": "Fighting_Idle",
+    "walk": "Walk",
+    "run": "Jog",
+    "turn": "Idle_A",
+    "sit": "Idle_A",
+    "seated_idle": "Idle_A",
+    "stand": "Idle_A",
+    "death": "Death_A",
+    "pain": "Hit_Chest",
+    "attack_primary": "Sword_Attack",
+    "ranged_attack": "Sword_Attack",
+    "cast": "Sword_Attack",
+    "harvest": "Sword_Attack",
+    "pickup": "Idle_A",
+    "drop": "Idle_A",
+    "emote_greeting": "Idle_A"
+  },
+  "serverCommands": {
+    "3": "death",
+    "5": "pain",
+    "7": "idle",
+    "13": "sit",
+    "14": "stand",
+    "15": "combat_idle",
+    "18": "combat_idle",
+    "19": "idle",
+    "20": "walk",
+    "21": "walk",
+    "22": "walk",
+    "23": "walk",
+    "24": "walk",
+    "25": "walk",
+    "26": "walk",
+    "27": "walk",
+    "30": "run",
+    "31": "run",
+    "32": "run",
+    "33": "run",
+    "34": "run",
+    "35": "run",
+    "36": "run",
+    "37": "run",
+    "38": "turn",
+    "39": "turn",
+    "40": "turn",
+    "41": "turn",
+    "42": "turn",
+    "43": "turn",
+    "44": "turn",
+    "45": "turn",
+    "46": "attack_primary"
+  },
+  "loopingClips": [
+    "Idle_A",
+    "Fighting_Idle",
+    "Walk",
+    "Jog"
+  ],
+  "strideScalesWithActor": true,
+  "strideMetresPerSecond": {
+    "walk": 1.118180560458681,
+    "run": 2.071675426277628
+  },
+  "reviewStatus": "accepted",
+  "concept": {
+    "movement": "An alert ground-running feathered hunter. A poised walk keeps the head forward, the clawed forearms clear of the thighs, and the long feather fan balanced behind the body. Running lowers the chest slightly into a faster, purposeful alternating stride with matched foot release and a restrained torso.",
+    "attack": "A quick forward gathering crouch leads into two alternating diagonal claw rakes, with the second strike following promptly. The shoulders and torso carry the short arms forward and outside the beak, and the spare hand follows naturally before the guard returns. A small forward head thrust reinforces the attack without relying on an unverified jaw hinge.",
+    "death": "The knees yield and the breast drops forward onto the actual lower torso. The forearms relax toward the ground, both hind feet release coherently behind the body, and the feathered tail lowers with its serial sections. The settled body remains supported and still."
+  },
+  "locomotionMode": "grounded_biped",
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "jadefeather_raptor",
+    "appliesToSHA256": "a3cec2242b28d0a2ea5969613add119c09c562b6ba1c671f3ebe73f455764cad",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "saved_button_approval",
+      "event_id": "cb76028d-a49d-4c65-b197-2751a3527eb6",
+      "event_sha256": "af5e3951f38de02010e7065fa2823f435a5fb7c340bd0fc90d20608c0a56df4c",
+      "utc": "2026-10-28T20:45:50.436690+00:00"
+    },
+    "previousAuthoringReviewStatus": "draft",
+    "repairNoteEvents": []
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "jadefeather_raptor",
+    "sourceSHA256": "0ac5b4c3e124071404ea168b31ba33f14aaf5422d3c3e95d152d84059f409a9e",
+    "previousRuntimeSHA256": "d6355029073f9e98fa49066067b803e165530b38968352dc3ec7740644ca09b8",
+    "runtimeSHA256": "a3cec2242b28d0a2ea5969613add119c09c562b6ba1c671f3ebe73f455764cad",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": null
+  }
+}

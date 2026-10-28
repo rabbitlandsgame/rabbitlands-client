@@ -73,7 +73,7 @@
     "walk": 0.05600017368068247,
     "run": 0.1250003876800948
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "A broad, coral-encrusted seven-limbed crab advances with a low overlapping wave. The shell and watchful face remain steady while the orange terminal claws take equal measured steps; faster scuttle increases reach and cadence.",
     "attack": "Two heavy forward pincer snaps, right then left: the thick arms open the real blue fingers, thrust and close, then recover while the walking limbs brace. Coral ornaments and central mandibles stay with the shell.",
@@ -82,12 +82,34 @@
   "motionStyle": "grounded seven-limb Manymouth Crab wave gait",
   "locomotionMode": "grounded",
   "runtimeOptimization": {
-    "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
     "actor": "manymouth_crab",
     "sourceSHA256": "7d55d862dba153ba1c28285d4908fe5c17386dd7860fd0538a7b70461a93c1d2",
-    "runtimeSHA256": "abe92abd3e3011758c4faec54a65a44f6b0bebc0a6f98c95172ed8551fd825ff",
-    "method": "close_match_animation_resampling",
-    "bakeFPS": 240,
-    "artisticAcceptanceChanged": false
+    "previousRuntimeSHA256": "abe92abd3e3011758c4faec54a65a44f6b0bebc0a6f98c95172ed8551fd825ff",
+    "runtimeSHA256": "727c8fa0b57a4f0f039e7f76b8fabc012bed210851ba4ede4101d817cf4554fd",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "manymouth_crab",
+      "sourceSHA256": "7d55d862dba153ba1c28285d4908fe5c17386dd7860fd0538a7b70461a93c1d2",
+      "runtimeSHA256": "abe92abd3e3011758c4faec54a65a44f6b0bebc0a6f98c95172ed8551fd825ff",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 240,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "manymouth_crab",
+    "appliesToSHA256": "727c8fa0b57a4f0f039e7f76b8fabc012bed210851ba4ede4101d817cf4554fd",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
   }
 }

@@ -73,7 +73,7 @@
     "walk": 0.031217495317377733,
     "run": 0.10924374481792717
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "A low, inquisitive fish uses alternating pectoral-fin crutches for a deliberate crawl. Faster travel becomes a compact paired-fin skip with a small body lift and restrained lateral tail assistance. The wide eyes and head stay forward.",
     "attack": "A quick pectoral brace, raised front body and short forward head/body bump, followed by a low recovery. No independent jaw is assumed.",
@@ -82,12 +82,34 @@
   "motionStyle": "pectoral fin crawl",
   "locomotionMode": "grounded",
   "runtimeOptimization": {
-    "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
     "actor": "mudskipper",
     "sourceSHA256": "4db0c8e76181529569cdb1a30af48958e2b77f15c5a7f9f6a06727e2a01c955b",
-    "runtimeSHA256": "5fc502a44935d7647e483b9ba7a5fc78ba06b27a2319333001a0151cc3b6e62f",
-    "method": "close_match_animation_resampling",
-    "bakeFPS": 120,
-    "artisticAcceptanceChanged": false
+    "previousRuntimeSHA256": "5fc502a44935d7647e483b9ba7a5fc78ba06b27a2319333001a0151cc3b6e62f",
+    "runtimeSHA256": "5e915ec89bf43aef4c1c60c466edc9308d9d19b517c01a8bcbe03c2b745866cd",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "mudskipper",
+      "sourceSHA256": "4db0c8e76181529569cdb1a30af48958e2b77f15c5a7f9f6a06727e2a01c955b",
+      "runtimeSHA256": "5fc502a44935d7647e483b9ba7a5fc78ba06b27a2319333001a0151cc3b6e62f",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 120,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "mudskipper",
+    "appliesToSHA256": "5e915ec89bf43aef4c1c60c466edc9308d9d19b517c01a8bcbe03c2b745866cd",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
   }
 }

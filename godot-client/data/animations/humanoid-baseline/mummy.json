@@ -88,12 +88,36 @@
     "reset_to_authored_defaults": true
   },
   "runtimeOptimization": {
-    "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
     "actor": "mummy",
     "sourceSHA256": "fdc5a70e061bafab406c3c454993af5a6f2bb050b60166ad24f8d5d393589b00",
-    "runtimeSHA256": "0faac5cd01fd4ba7db3d616f6ddd1da64d62ec0af6150252c98421661c10ec86",
-    "method": "close_match_animation_resampling",
-    "bakeFPS": 240,
-    "artisticAcceptanceChanged": false
+    "previousRuntimeSHA256": "0faac5cd01fd4ba7db3d616f6ddd1da64d62ec0af6150252c98421661c10ec86",
+    "runtimeSHA256": "be9f39d222404ec71c70bac4e8ac01e6d1b39d9a68a19d530f049f7554982900",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "mummy",
+      "sourceSHA256": "fdc5a70e061bafab406c3c454993af5a6f2bb050b60166ad24f8d5d393589b00",
+      "runtimeSHA256": "0faac5cd01fd4ba7db3d616f6ddd1da64d62ec0af6150252c98421661c10ec86",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 240,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "reviewStatus": "accepted",
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "mummy",
+    "appliesToSHA256": "be9f39d222404ec71c70bac4e8ac01e6d1b39d9a68a19d530f049f7554982900",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "saved_button_approval",
+      "event_id": "dd8a49ee-a934-4d93-8c78-3226420f0a14",
+      "event_sha256": "fdafdecf1fdac2eac2fd911ca701308488db5ab9372dd25fc499e8380d08f73d",
+      "utc": "2026-10-28T21:12:09.659152+00:00"
+    },
+    "previousAuthoringReviewStatus": null,
+    "repairNoteEvents": []
   }
 }

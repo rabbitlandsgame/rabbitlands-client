@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "fallbackAction": "idle",
+  "playbackSpeeds": {
+    "walk": 1.0,
+    "run": 1.0,
+    "attack_primary": 1.0,
+    "death": 1.0
+  },
+  "actions": {
+    "idle": "Idle_A",
+    "alternate_idle": "Idle_A",
+    "combat_idle": "Fighting_Idle",
+    "walk": "Walk",
+    "run": "Jog",
+    "turn": "Idle_A",
+    "sit": "Idle_A",
+    "seated_idle": "Idle_A",
+    "stand": "Idle_A",
+    "death": "Death_A",
+    "pain": "Hit_Chest",
+    "attack_primary": "Sword_Attack",
+    "ranged_attack": "Sword_Attack",
+    "cast": "Sword_Attack",
+    "harvest": "Sword_Attack",
+    "pickup": "Idle_A",
+    "drop": "Idle_A",
+    "emote_greeting": "Idle_A"
+  },
+  "serverCommands": {
+    "3": "death",
+    "5": "pain",
+    "7": "idle",
+    "13": "sit",
+    "14": "stand",
+    "15": "combat_idle",
+    "18": "combat_idle",
+    "19": "idle",
+    "20": "walk",
+    "21": "walk",
+    "22": "walk",
+    "23": "walk",
+    "24": "walk",
+    "25": "walk",
+    "26": "walk",
+    "27": "walk",
+    "30": "run",
+    "31": "run",
+    "32": "run",
+    "33": "run",
+    "34": "run",
+    "35": "run",
+    "36": "run",
+    "37": "run",
+    "38": "turn",
+    "39": "turn",
+    "40": "turn",
+    "41": "turn",
+    "42": "turn",
+    "43": "turn",
+    "44": "turn",
+    "45": "turn",
+    "46": "attack_primary"
+  },
+  "loopingClips": [
+    "Idle_A",
+    "Fighting_Idle",
+    "Walk",
+    "Jog"
+  ],
+  "strideScalesWithActor": true,
+  "strideMetresPerSecond": {
+    "walk": 1.3333331860553448,
+    "run": 3.217390948959636
+  },
+  "reviewStatus": "accepted",
+  "concept": {
+    "movement": "A reared canopy guardian walks on its two hind feet. Its independent foreclaws hang clear of the floor while matched full steps balance the heavy belly. The face stays forward, the membrane wings brace gently, and the long centered tail counterbalances the torso.",
+    "attack": "The right foreclaw gathers outward and upward, then reaches forward and down in a broad rake as the torso and neck press forward. The left claw follows in a guard, and both hind paws stay planted. The complete skull, teeth and jaw remain coherent.",
+    "death": "The limbs release before the torso settles forward onto its actual central breast and pelvic belly. The whole membrane wings lower outside the body, the feet relax with their legs, and the six-section tail settles near the floor without a sideways lean or an independent tip flick."
+  },
+  "locomotionMode": "grounded",
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "emerald_canopy_dragon",
+    "appliesToSHA256": "9a1b5a43cac55a51fcf6f527d91c99a39f85ec7bfaf3241746758202d479c7cc",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "saved_button_approval",
+      "event_id": "8836a559-90c5-40de-ac52-c12ae244cef6",
+      "event_sha256": "b85dd4889233193937793a1e32ebf27e1d587457233d55982cdf75d8bcff1fdd",
+      "utc": "2026-10-28T21:32:27.054956+00:00"
+    },
+    "previousAuthoringReviewStatus": "draft",
+    "repairNoteEvents": []
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "emerald_canopy_dragon",
+    "sourceSHA256": "5d10ff63a6d510e3ce12ba9e68b602b2968cfc672a4fc25effa3d3bd6d34c099",
+    "previousRuntimeSHA256": "65e29ffd7822510357673f7db9b1c72830fe2772a5e00d062e9f450e18310685",
+    "runtimeSHA256": "9a1b5a43cac55a51fcf6f527d91c99a39f85ec7bfaf3241746758202d479c7cc",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": null
+  }
+}

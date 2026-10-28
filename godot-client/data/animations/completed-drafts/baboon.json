@@ -73,19 +73,41 @@
     "walk": 0.2193750714711781,
     "run": 0.4857956128149632
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "A brisk four-beat palm-supported walk changes to agile diagonal travel. Hind knees fold forward and fore elbows fold back, broad palms and heels remain coherent, the forward muzzle and chest mane stay steady, and the centered tail flexes as one continuous shape.",
     "attack": "The body gathers into a small forward lunge while the right forehand lifts outside the mane and rakes forward, downward and across the front. The left palm and both hind feet brace the motion; the complete hand turns with the forearm and returns to support. No independent jaw movement is invented.",
     "death": "The head and forequarters sag with all four supports planted, then the limbs release and fold into a forward chest-led collapse. Pelvis, thorax and complete muzzle settle together, released palms and feet relax, and the centered tail follows the body into a stable grounded hold."
   },
   "runtimeOptimization": {
-    "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
     "actor": "baboon",
     "sourceSHA256": "450a8b1ce98a8698fac32ea929053962b7183dbe94c1f47ef0f1b14471265083",
-    "runtimeSHA256": "a087dc0ce8b2863e211cb14a93b466ddb66948da8bca2f4b027d33cfe1e9c320",
-    "method": "close_match_animation_resampling",
-    "bakeFPS": 240,
-    "artisticAcceptanceChanged": false
+    "previousRuntimeSHA256": "a087dc0ce8b2863e211cb14a93b466ddb66948da8bca2f4b027d33cfe1e9c320",
+    "runtimeSHA256": "9d54379d901ef89e9d2d1dfd6ab63126b60bce1f42db83220bd5bc69fc49dcf2",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "baboon",
+      "sourceSHA256": "450a8b1ce98a8698fac32ea929053962b7183dbe94c1f47ef0f1b14471265083",
+      "runtimeSHA256": "a087dc0ce8b2863e211cb14a93b466ddb66948da8bca2f4b027d33cfe1e9c320",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 240,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "baboon",
+    "appliesToSHA256": "9d54379d901ef89e9d2d1dfd6ab63126b60bce1f42db83220bd5bc69fc49dcf2",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
   }
 }

@@ -71,12 +71,36 @@
   },
   "strideScalesWithActor": true,
   "runtimeOptimization": {
-    "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
     "actor": "thornbark_wolf",
     "sourceSHA256": "cbe4d17ef5e4d666f7e2ca4b59c6adca60f364457271cf49c8a059784f9ce3af",
-    "runtimeSHA256": "69f1ad264570c80303b8b5537c3ef0416eef9fa8c2d142caa05423f04fa0c582",
-    "method": "close_match_animation_resampling",
-    "bakeFPS": 240,
-    "artisticAcceptanceChanged": false
+    "previousRuntimeSHA256": "69f1ad264570c80303b8b5537c3ef0416eef9fa8c2d142caa05423f04fa0c582",
+    "runtimeSHA256": "435493edcb0b5e713d879fad078235e30ce4b0a967341a82a5d595739b80cb92",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "thornbark_wolf",
+      "sourceSHA256": "cbe4d17ef5e4d666f7e2ca4b59c6adca60f364457271cf49c8a059784f9ce3af",
+      "runtimeSHA256": "69f1ad264570c80303b8b5537c3ef0416eef9fa8c2d142caa05423f04fa0c582",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 240,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "reviewStatus": "accepted",
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "thornbark_wolf",
+    "appliesToSHA256": "435493edcb0b5e713d879fad078235e30ce4b0a967341a82a5d595739b80cb92",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "saved_button_approval",
+      "event_id": "01034f05-60fa-4a0c-8293-1f97aa0f7ca0",
+      "event_sha256": "9ae8cf31eecc1a2052c63514821d013df7b7990d5c57d0f0889d1f900ac847ec",
+      "utc": "2026-10-28T21:11:36.172696+00:00"
+    },
+    "previousAuthoringReviewStatus": null,
+    "repairNoteEvents": []
   }
 }

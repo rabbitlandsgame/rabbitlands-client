@@ -71,12 +71,36 @@
   },
   "strideScalesWithActor": true,
   "runtimeOptimization": {
-    "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
     "actor": "briarhide_wolf",
     "sourceSHA256": "3f7d05ce08591529a1205f8604cecbac686532f2064d5adf3786023ddc1d6bc8",
-    "runtimeSHA256": "5af6e7670b04bbe699beeffcce2affb16024ecabba8e2dfaf141c8229f2443e0",
-    "method": "close_match_animation_resampling",
-    "bakeFPS": 240,
-    "artisticAcceptanceChanged": false
+    "previousRuntimeSHA256": "5af6e7670b04bbe699beeffcce2affb16024ecabba8e2dfaf141c8229f2443e0",
+    "runtimeSHA256": "741b1a1e14a877168f0f588e42bc6a72686ea69c7c8150e5d6269da6117f4cfe",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "briarhide_wolf",
+      "sourceSHA256": "3f7d05ce08591529a1205f8604cecbac686532f2064d5adf3786023ddc1d6bc8",
+      "runtimeSHA256": "5af6e7670b04bbe699beeffcce2affb16024ecabba8e2dfaf141c8229f2443e0",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 240,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "reviewStatus": "accepted",
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "briarhide_wolf",
+    "appliesToSHA256": "741b1a1e14a877168f0f588e42bc6a72686ea69c7c8150e5d6269da6117f4cfe",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "saved_button_approval",
+      "event_id": "0a6dc4ef-9f1a-48f8-b171-e57de8a47b65",
+      "event_sha256": "f58e6776d0af9f5b7197a575253640e6c0c2fc7acbe90854f06f9724143b8058",
+      "utc": "2026-10-28T21:09:23.850673+00:00"
+    },
+    "previousAuthoringReviewStatus": null,
+    "repairNoteEvents": []
   }
 }

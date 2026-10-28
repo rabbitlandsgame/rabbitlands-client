@@ -73,7 +73,7 @@
     "walk": 0.05571456166329774,
     "run": 0.11368477359636461
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "A tall faceted ice crab advances on alternating support tripods with a steady layered shell. Sharp outside blades take equal steps; the faster scuttle increases cadence and reach.",
     "attack": "The two inner crescent cutters spread and lift before thrusting forward and down in a quick right-left ice-blade shear. Whole curved blades move around their actual hinges; no extra finger motion is invented.",
@@ -82,12 +82,34 @@
   "motionStyle": "grounded six-blade tripod gait",
   "locomotionMode": "grounded",
   "runtimeOptimization": {
-    "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
     "actor": "glacier_crab",
     "sourceSHA256": "ab621dbed0ae6b383bffc3a043b05751d8a37e084608e39ed7f94b839e247939",
-    "runtimeSHA256": "c04d7b59164887ad00913cb81e082f59acf62c20a4c65dbea2fda9cd418b7a2c",
-    "method": "close_match_animation_resampling",
-    "bakeFPS": 120,
-    "artisticAcceptanceChanged": false
+    "previousRuntimeSHA256": "c04d7b59164887ad00913cb81e082f59acf62c20a4c65dbea2fda9cd418b7a2c",
+    "runtimeSHA256": "d176296cadaf400ff5b27a565b12b356e1be0097e4796f123b5d08e34931e199",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "glacier_crab",
+      "sourceSHA256": "ab621dbed0ae6b383bffc3a043b05751d8a37e084608e39ed7f94b839e247939",
+      "runtimeSHA256": "c04d7b59164887ad00913cb81e082f59acf62c20a4c65dbea2fda9cd418b7a2c",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 120,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "glacier_crab",
+    "appliesToSHA256": "d176296cadaf400ff5b27a565b12b356e1be0097e4796f123b5d08e34931e199",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
   }
 }

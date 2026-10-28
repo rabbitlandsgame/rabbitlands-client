@@ -72,12 +72,35 @@
     "run": 0.20141730949547837
   },
   "runtimeOptimization": {
-    "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
     "actor": "squirrel",
     "sourceSHA256": "6003cfc5288cc5c5547ba876b0d3fbb5fe2dc5fc862c43d4b5c32e30c01a18c4",
-    "runtimeSHA256": "f9b62cb3bbf4927e0e3798e9680dfba1c66294a7dcb931b3eaef3c12dac1feeb",
-    "method": "close_match_animation_resampling",
-    "bakeFPS": 120,
-    "artisticAcceptanceChanged": false
+    "previousRuntimeSHA256": "f9b62cb3bbf4927e0e3798e9680dfba1c66294a7dcb931b3eaef3c12dac1feeb",
+    "runtimeSHA256": "98b1ae699f5494e2a7944b1be5dac532ccd259a1d938c88d3338b39577bd4755",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "squirrel",
+      "sourceSHA256": "6003cfc5288cc5c5547ba876b0d3fbb5fe2dc5fc862c43d4b5c32e30c01a18c4",
+      "runtimeSHA256": "f9b62cb3bbf4927e0e3798e9680dfba1c66294a7dcb931b3eaef3c12dac1feeb",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 120,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "reviewStatus": "accepted",
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "squirrel",
+    "appliesToSHA256": "98b1ae699f5494e2a7944b1be5dac532ccd259a1d938c88d3338b39577bd4755",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": null,
+    "repairNoteEvents": []
   }
 }

@@ -88,12 +88,35 @@
     "reset_to_authored_defaults": true
   },
   "runtimeOptimization": {
-    "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
     "actor": "spectral_moors_knight",
     "sourceSHA256": "0ef445634c13387611df3eed0cce708bff44b365412cc8d678ed3664d738b610",
-    "runtimeSHA256": "660d5421cb279ef8909662e5c8afd34a0dead290723e570e03065e1d46203a80",
-    "method": "close_match_animation_resampling",
-    "bakeFPS": 120,
-    "artisticAcceptanceChanged": false
+    "previousRuntimeSHA256": "660d5421cb279ef8909662e5c8afd34a0dead290723e570e03065e1d46203a80",
+    "runtimeSHA256": "f68b8675eb7ecc121f1d98e39bf1f82803e40edd5dd1d3587ece3dcedc5345f1",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "spectral_moors_knight",
+      "sourceSHA256": "0ef445634c13387611df3eed0cce708bff44b365412cc8d678ed3664d738b610",
+      "runtimeSHA256": "660d5421cb279ef8909662e5c8afd34a0dead290723e570e03065e1d46203a80",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 120,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "reviewStatus": "accepted",
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "spectral_moors_knight",
+    "appliesToSHA256": "f68b8675eb7ecc121f1d98e39bf1f82803e40edd5dd1d3587ece3dcedc5345f1",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": null,
+    "repairNoteEvents": []
   }
 }

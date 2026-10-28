@@ -88,12 +88,35 @@
     "reset_to_authored_defaults": true
   },
   "runtimeOptimization": {
-    "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
     "actor": "river_stone_golem",
     "sourceSHA256": "fd8d41797ccbbc32a2b8f7fbbfa94b6d8cfbba947971f17f8eeae8a3af0dd7a7",
-    "runtimeSHA256": "fb722fd654bb196fb0b8ebb587399f3a45a09e9d3649aa5a48ddad45f7abfdcd",
-    "method": "close_match_animation_resampling",
-    "bakeFPS": 240,
-    "artisticAcceptanceChanged": false
+    "previousRuntimeSHA256": "fb722fd654bb196fb0b8ebb587399f3a45a09e9d3649aa5a48ddad45f7abfdcd",
+    "runtimeSHA256": "62bb1bd2c0fa95105becaa66d857d1f17312219754f8a7f2dbf8adbb9f29c65a",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "river_stone_golem",
+      "sourceSHA256": "fd8d41797ccbbc32a2b8f7fbbfa94b6d8cfbba947971f17f8eeae8a3af0dd7a7",
+      "runtimeSHA256": "fb722fd654bb196fb0b8ebb587399f3a45a09e9d3649aa5a48ddad45f7abfdcd",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 240,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "reviewStatus": "accepted",
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "river_stone_golem",
+    "appliesToSHA256": "62bb1bd2c0fa95105becaa66d857d1f17312219754f8a7f2dbf8adbb9f29c65a",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": null,
+    "repairNoteEvents": []
   }
 }

@@ -72,12 +72,36 @@
     "run": 1.8181799871835547
   },
   "runtimeOptimization": {
-    "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
     "actor": "stormmane_lion",
     "sourceSHA256": "21c0890a27e736d04d616c71f839b5b6df30f53a72bcd0bcec9b7fddf891148a",
-    "runtimeSHA256": "ccb765e135caf818ea913ce428425f69d59c8c6e204edb58dff4f9e1cef0414b",
-    "method": "close_match_animation_resampling",
-    "bakeFPS": 240,
-    "artisticAcceptanceChanged": false
+    "previousRuntimeSHA256": "ccb765e135caf818ea913ce428425f69d59c8c6e204edb58dff4f9e1cef0414b",
+    "runtimeSHA256": "a1d0a4ae87fed26ac875ce712e9369572b0c815d229190725ead03f93df2c9a4",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "stormmane_lion",
+      "sourceSHA256": "21c0890a27e736d04d616c71f839b5b6df30f53a72bcd0bcec9b7fddf891148a",
+      "runtimeSHA256": "ccb765e135caf818ea913ce428425f69d59c8c6e204edb58dff4f9e1cef0414b",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 240,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "reviewStatus": "accepted",
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "stormmane_lion",
+    "appliesToSHA256": "a1d0a4ae87fed26ac875ce712e9369572b0c815d229190725ead03f93df2c9a4",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "saved_button_approval",
+      "event_id": "4493f491-e66d-42a6-a7ec-004654891d1f",
+      "event_sha256": "feed983ae19f84e24bf94c3ed30d2167fa33ec34435fb39a1d83add733483492",
+      "utc": "2026-10-28T21:10:58.226814+00:00"
+    },
+    "previousAuthoringReviewStatus": null,
+    "repairNoteEvents": []
   }
 }

@@ -73,7 +73,7 @@
     "walk": 0.1100006760760824,
     "run": 0.27500169019020604
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "A compact bronze-and-patina shell moves with a low steady eight-leg wave. Complete pointed feet take clear equal steps; the faster scurry increases cadence and reach without bouncing or stretching the armor.",
     "attack": "The beetle braces its eight feet, pulls its head back, then drives forward into a short armored head-and-mandible shove. Its three real curved jaws flare and clamp while the shell remains whole.",
@@ -82,12 +82,34 @@
   "motionStyle": "grounded eight-leg armored wave",
   "locomotionMode": "grounded",
   "runtimeOptimization": {
-    "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
     "actor": "bronze_diving_beetle",
     "sourceSHA256": "ca7f92c44bc8711fe3aaf4bae6edfa07ce4c555e9bd00a93fde2f019dfdf1ef4",
-    "runtimeSHA256": "44e51de7e6f6e7e7fd1902efa1de6eb6236b1132f0169b252ad7f9c2072c2552",
-    "method": "close_match_animation_resampling",
-    "bakeFPS": 240,
-    "artisticAcceptanceChanged": false
+    "previousRuntimeSHA256": "44e51de7e6f6e7e7fd1902efa1de6eb6236b1132f0169b252ad7f9c2072c2552",
+    "runtimeSHA256": "a8492e12f2b6b4414654218a9b5265814f8d7e81b6b79944c690680e5028578d",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "bronze_diving_beetle",
+      "sourceSHA256": "ca7f92c44bc8711fe3aaf4bae6edfa07ce4c555e9bd00a93fde2f019dfdf1ef4",
+      "runtimeSHA256": "44e51de7e6f6e7e7fd1902efa1de6eb6236b1132f0169b252ad7f9c2072c2552",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 240,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "bronze_diving_beetle",
+    "appliesToSHA256": "a8492e12f2b6b4414654218a9b5265814f8d7e81b6b79944c690680e5028578d",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
   }
 }

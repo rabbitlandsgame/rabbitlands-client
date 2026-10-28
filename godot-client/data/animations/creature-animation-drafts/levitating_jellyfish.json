@@ -73,7 +73,7 @@
     "walk": 0.4899999861920152,
     "run": 1.5826086510549562
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "Soft bell contraction and recovery drive a buoyant forward glide, with low trailing tentacle lag. Faster travel has stronger shorter pulses, not a planted walking step.",
     "attack": "A short braced bell contraction drives a forward-reaching cast of the front trailing tentacles, with a coherent inner-arm recoil.",
@@ -82,12 +82,34 @@
   "motionStyle": "buoyant soft-bell pulsed glide",
   "locomotionMode": "swimming",
   "runtimeOptimization": {
-    "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
     "actor": "levitating_jellyfish",
     "sourceSHA256": "3f7499f95141e7dce3d0e61e3bd0d3e7cd2e331a4d0c2a54ba033dc9f41842e1",
-    "runtimeSHA256": "c2bec16fabc2ca4ab4b6a1b8439fa3fb4208a09536e800b3e42538804b360ca1",
-    "method": "close_match_animation_resampling",
-    "bakeFPS": 120,
-    "artisticAcceptanceChanged": false
+    "previousRuntimeSHA256": "c2bec16fabc2ca4ab4b6a1b8439fa3fb4208a09536e800b3e42538804b360ca1",
+    "runtimeSHA256": "fd4fe6507d007202b8c0cc06a1e12ab097d589aa9c508f67c594bffeea2aeef1",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "levitating_jellyfish",
+      "sourceSHA256": "3f7499f95141e7dce3d0e61e3bd0d3e7cd2e331a4d0c2a54ba033dc9f41842e1",
+      "runtimeSHA256": "c2bec16fabc2ca4ab4b6a1b8439fa3fb4208a09536e800b3e42538804b360ca1",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 120,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "levitating_jellyfish",
+    "appliesToSHA256": "fd4fe6507d007202b8c0cc06a1e12ab097d589aa9c508f67c594bffeea2aeef1",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
   }
 }

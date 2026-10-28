@@ -72,12 +72,35 @@
     "run": 1.5515106199516513
   },
   "runtimeOptimization": {
-    "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
     "actor": "autumn_antler_stag",
     "sourceSHA256": "82411d998c8f00ae5728778cf1203185a436fd11d4db845089db183f668fee15",
-    "runtimeSHA256": "d28cd3f053ed2ce9ef8d8b7cd9b24668feb405b14e69140824d8e01e516aebbf",
-    "method": "close_match_animation_resampling",
-    "bakeFPS": 240,
-    "artisticAcceptanceChanged": false
+    "previousRuntimeSHA256": "d28cd3f053ed2ce9ef8d8b7cd9b24668feb405b14e69140824d8e01e516aebbf",
+    "runtimeSHA256": "8bfda56d818ee70400df82a8809494f478720fad0635e0997e1b64b74c69316b",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "autumn_antler_stag",
+      "sourceSHA256": "82411d998c8f00ae5728778cf1203185a436fd11d4db845089db183f668fee15",
+      "runtimeSHA256": "d28cd3f053ed2ce9ef8d8b7cd9b24668feb405b14e69140824d8e01e516aebbf",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 240,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "reviewStatus": "accepted",
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "autumn_antler_stag",
+    "appliesToSHA256": "8bfda56d818ee70400df82a8809494f478720fad0635e0997e1b64b74c69316b",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": null,
+    "repairNoteEvents": []
   }
 }

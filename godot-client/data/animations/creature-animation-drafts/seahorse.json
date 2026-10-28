@@ -73,7 +73,7 @@
     "walk": 0.0720000016854421,
     "run": 0.24000000561814033
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "Upright buoyant hover and gentle forward drift with paired side-fin fanning, quiet plated trunk and a small sagittal tail curl. Faster travel leans forward and increases fin cadence rather than adopting a lateral fish tail stroke.",
     "attack": "A short upper-body load followed by a quick forward snout jab and recovery, keeping the tubular muzzle and eyes coherent.",
@@ -82,12 +82,34 @@
   "motionStyle": "upright buoyant paired-fin swimming",
   "locomotionMode": "swimming",
   "runtimeOptimization": {
-    "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
     "actor": "seahorse",
     "sourceSHA256": "b690de8a6e47ebaf20258d2eda2bc666e9d8bb59d99b0af83d049b236172b418",
-    "runtimeSHA256": "bd091dc1e15c7e0951cdc9c20855c53fbd1632262ee8cbe08629f902633458ad",
-    "method": "close_match_animation_resampling",
-    "bakeFPS": 120,
-    "artisticAcceptanceChanged": false
+    "previousRuntimeSHA256": "bd091dc1e15c7e0951cdc9c20855c53fbd1632262ee8cbe08629f902633458ad",
+    "runtimeSHA256": "f8bfe7b0a60811a6a96a464d278fb4922a1a6f8f025753eb82ff72fe6414ed08",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "seahorse",
+      "sourceSHA256": "b690de8a6e47ebaf20258d2eda2bc666e9d8bb59d99b0af83d049b236172b418",
+      "runtimeSHA256": "bd091dc1e15c7e0951cdc9c20855c53fbd1632262ee8cbe08629f902633458ad",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 120,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "seahorse",
+    "appliesToSHA256": "f8bfe7b0a60811a6a96a464d278fb4922a1a6f8f025753eb82ff72fe6414ed08",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
   }
 }

@@ -75,10 +75,34 @@
     "walk": 0.20883511303617353,
     "run": 0.487349723213646
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "A measured broad-bodied walk with quiet long-neck balance, low webbed-foot recovery and restrained sway. The run stays low and deliberate with folded wings.",
     "attack": "A deliberate S-neck recoil followed by an extended forward bill jab and a small balanced wing flare.",
     "death": "The breast settles first, the curved neck folds forward in a continuous arc, and the wings and released feet settle into a supported held pose."
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "swan",
+    "appliesToSHA256": "60bc59a8e3ecfe0e88a94ffccb9689156a6a929b676c13016539bbf0ce30b4f9",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "saved_button_approval",
+      "event_id": "5a113cd6-d539-4ac8-b9e1-41ade843c34b",
+      "event_sha256": "d446b1533f99fe65360b7497d7fc1f6ff46eac99169e51062a435b8ba6aa736a",
+      "utc": "2026-10-28T21:36:54.298006+00:00"
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "swan",
+    "sourceSHA256": "55dba90a3f158fbd5a27246d599b3ff896e834b03c72afc44d36f04644a9066c",
+    "previousRuntimeSHA256": "55dba90a3f158fbd5a27246d599b3ff896e834b03c72afc44d36f04644a9066c",
+    "runtimeSHA256": "60bc59a8e3ecfe0e88a94ffccb9689156a6a929b676c13016539bbf0ce30b4f9",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": null
   }
 }

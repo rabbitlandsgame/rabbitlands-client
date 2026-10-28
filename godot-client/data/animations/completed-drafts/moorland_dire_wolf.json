@@ -69,7 +69,7 @@
     "Jog"
   ],
   "strideScalesWithActor": true,
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "Reviewed authored wolf walk; current unrelated native idles and run preserved.",
     "attack": "Forward lunge and bite, followed by recovery.",
@@ -77,5 +77,29 @@
   },
   "strideMetresPerSecond": {
     "walk": 0.8823525
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "moorland_dire_wolf",
+    "appliesToSHA256": "68eefe5dbe60c1ee0ccf040dacc02ab40eaa6ab2d857d76b590622629260c7ea",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "saved_button_approval",
+      "event_id": "ee5154fa-c0e8-4f81-83b5-f158e59a50cf",
+      "event_sha256": "6a08fafb28b3c13bea3612a8ab5800c0e5c673705e924085fe8fb661a75dfaca",
+      "utc": "2026-10-28T21:37:13.413166+00:00"
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "moorland_dire_wolf",
+    "sourceSHA256": "7739417f9be3e1347e806cbb3defdf29de621e53dbd60ffe2c3ae6681dc9618c",
+    "previousRuntimeSHA256": "7739417f9be3e1347e806cbb3defdf29de621e53dbd60ffe2c3ae6681dc9618c",
+    "runtimeSHA256": "68eefe5dbe60c1ee0ccf040dacc02ab40eaa6ab2d857d76b590622629260c7ea",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": null
   }
 }
