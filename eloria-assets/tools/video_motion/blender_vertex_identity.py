@@ -200,7 +200,11 @@ def imported_bindings(path, objects):
                 index = parents[index]
             return steps
 
-        composition_steps = 1
+        # Unskinned attachments still inherit every authored parent transform
+        # (including bone and grip nodes), rounded by Blender to float32.
+        # Their local vertex rows remain exact and are checked below; only
+        # this initial world-space identity comparison has composition error.
+        composition_steps = depth(node_index)
         if "skin" in node:
             joint_depth = max(depth(i) for i in doc["skins"][node["skin"]]["joints"])
             influences = max(
@@ -215,6 +219,10 @@ def imported_bindings(path, objects):
                 continue
             values = np.empty((count, 3), np.float32)
             ob.data.vertices.foreach_get("co", values.ravel())
+            if "skin" not in node and not np.array_equal(
+                values, (positions @ _C.T).astype(np.float32)
+            ):
+                continue
             matrix = np.array(ob.matrix_world)
             actual = values @ matrix[:3, :3].T + matrix[:3, 3]
             error = float(np.linalg.norm(actual - expected, axis=1).max())
