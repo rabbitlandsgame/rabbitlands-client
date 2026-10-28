@@ -25,6 +25,17 @@ static func imported_fixture(path: String) -> Dictionary:
 	var resource_path := str(policy.get_value("remap","path",""))
 	if not resource_path.begins_with("res://.godot/imported/") or resource_path.get_extension() != "scn" or not FileAccess.file_exists(resource_path):
 		return {"errors":["Editor fixture has no generated scene cache: " + path]}
+	var metadata_path := resource_path.get_basename()+".md5"
+	var metadata := ConfigFile.new()
+	if metadata.load(metadata_path) != OK:
+		return {"errors":["Editor fixture has no import freshness metadata: " + path]}
+	var source_md5 := FileAccess.get_md5(path)
+	if str(metadata.get_value("","source_md5","")) != source_md5:
+		return {"errors":["Editor fixture scene cache is stale for current source: " + path]}
+	var destinations: PackedStringArray = policy.get_value("deps","dest_files",PackedStringArray())
+	var single_scene_destination := destinations.size()==1 and destinations[0]==resource_path
+	if single_scene_destination and str(metadata.get_value("","dest_md5","")) != FileAccess.get_md5(resource_path):
+		return {"errors":["Editor fixture scene cache bytes differ from imported destination: " + path]}
 	var scene := ResourceLoader.load(path,"PackedScene",ResourceLoader.CACHE_MODE_REUSE) as PackedScene
 	if scene == null or scene.resource_path.is_empty():
 		return {"errors":["Editor fixture PackedScene could not be loaded: " + path]}
@@ -32,6 +43,8 @@ static func imported_fixture(path: String) -> Dictionary:
 		"actual_loader":"ResourceLoader.load(PackedScene)",
 		"source_path":path,"source_sha256":FileAccess.get_sha256(path),
 		"imported_resource_path":resource_path,"imported_resource_sha256":FileAccess.get_sha256(resource_path),
+		"source_md5":source_md5,"import_metadata_path":metadata_path,"import_metadata_sha256":FileAccess.get_sha256(metadata_path),
+		"single_scene_destination_md5_checked":single_scene_destination,
 		"packed_scene_resource_path":scene.resource_path}}
 
 func _init() -> void:

@@ -2,10 +2,13 @@ extends SceneTree
 ## Run in an ignored QA project with an already editor-imported fixture outside
 ## assets/actors. Arguments: absolute dumper script path, fixture res:// alias.
 var checks := 0
+var failures := 0
 func _init() -> void: run.call_deferred()
 func check(value: bool, message: String) -> void:
 	checks += 1
-	assert(value,message)
+	if not value:
+		failures += 1
+		push_error(message)
 func run() -> void:
 	var arguments := OS.get_cmdline_user_args()
 	assert(arguments.size()==2)
@@ -19,6 +22,8 @@ func run() -> void:
 	check(imported.proof.actual_loader=="ResourceLoader.load(PackedScene)","actual loader recorded")
 	check(imported.proof.source_sha256==FileAccess.get_sha256(path),"source hash recorded")
 	check(imported.proof.imported_resource_sha256==FileAccess.get_sha256(imported.proof.imported_resource_path),"generated editor resource hash recorded")
+	check(imported.proof.source_md5==FileAccess.get_md5(path),"cache freshness is bound to current source bytes")
+	check(imported.proof.import_metadata_sha256==FileAccess.get_sha256(imported.proof.import_metadata_path),"cache freshness metadata hash recorded")
 	check(not imported.proof.packed_scene_resource_path.is_empty(),"editor scene retains its source resource identity")
 	var raw: Node3D = GlbSceneCache.instantiate(path)
 	check(raw!=null,"the same alias could silently fall back to raw in the old code")
@@ -43,7 +48,17 @@ func run() -> void:
 	policy.set_value("deps","source_file",path)
 	policy.save(missing+".import")
 	check(not script.imported_fixture(missing).errors.is_empty(),"policy for a different source fails closed")
+	policy.set_value("deps","source_file",missing)
+	policy.set_value("deps","dest_files",PackedStringArray([imported.proof.imported_resource_path]))
+	policy.save(missing+".import")
+	check(FileAccess.get_md5(missing)==imported.proof.source_md5,"negative fixture initially has the current source bytes before changing them")
+	var changed := FileAccess.open(missing,FileAccess.READ_WRITE)
+	changed.seek_end()
+	changed.store_8(0)
+	changed.close()
+	var stale: Dictionary = script.imported_fixture(missing)
+	check(not stale.errors.is_empty() and str(stale.errors[0]).contains("stale"),"changed source rejects existing stale scene before loading or raw fallback")
 	check(not script.imported_fixture(ProjectSettings.globalize_path(path)).errors.is_empty(),"absolute native paths are not accepted as editor fixtures")
 	GlbSceneCache.clear()
-	print("CREATURE_STORAGE_IMPORT_MODE_PASS ",checks)
-	quit()
+	print("CREATURE_STORAGE_IMPORT_MODE_", "PASS" if failures==0 else "FAIL", " ",checks)
+	quit(1 if failures else 0)
