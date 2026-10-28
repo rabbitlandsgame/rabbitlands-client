@@ -329,9 +329,37 @@
       "max_normal_degrees": 3.323143241174159e-05,
       "p99_normal_degrees": 2.8927181445436437e-05
     },
-    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "scope": "Both original and CURRENT final meshes loaded explicitly through ResourceLoader from fresh editor SCNs, bound to source/current GLB +SCN +freshness metadata hashes. All source clips, directed crossfades and RESET; independent retained-static/morph bijection and unchanged4float32ULP Euclidean/.0001degree caps. Earlier Cache-route imported labels are withdrawn, not treated as editor evidence.",
     "source_sha256": "0af98400d4f41def465f62fbe637fc7bf33f28318457426a1ac7e6f34726dade",
-    "candidate_sha256": "734cca99c10097005aa0165bc62fa30201b1dbbe558cb5c8d18592b1c4ebd6a4"
+    "candidate_sha256": "734cca99c10097005aa0165bc62fa30201b1dbbe558cb5c8d18592b1c4ebd6a4",
+    "actual_editor_scene_loads": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/cuttlefish.glb-ac77f829e60b32a6883b6fff247a7638.md5",
+        "import_metadata_sha256": "714160b69e5c047993f6d4285e7b40cc7e2cbd8fc3ac7e789bad5dced9c5b37b",
+        "imported_resource_path": "res://.godot/imported/cuttlefish.glb-ac77f829e60b32a6883b6fff247a7638.scn",
+        "imported_resource_sha256": "764c21e0f756bca9d2b2a0df05db8c68287d20c9c1b39b1c9f29acfe81ef224d",
+        "packed_scene_resource_path": "res://assets/storage-baseline/cuttlefish.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "78e13b856e632a21740417b57b37cd53",
+        "source_path": "res://assets/storage-baseline/cuttlefish.glb",
+        "source_sha256": "0af98400d4f41def465f62fbe637fc7bf33f28318457426a1ac7e6f34726dade"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/cuttlefish.glb-cd2a571fe02ab058698dc3b9249c722b.md5",
+        "import_metadata_sha256": "bc528d0a84f024ff58f524127ab628183b133af94a4aad41d5607fbdf25a3426",
+        "imported_resource_path": "res://.godot/imported/cuttlefish.glb-cd2a571fe02ab058698dc3b9249c722b.scn",
+        "imported_resource_sha256": "1a3bfff7aca144197386b39d78e9b538705f9c783d8c2c04631957044eda67d1",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/cuttlefish.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "242f5453f3a98214eea25d6703397cf7",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/cuttlefish.glb",
+        "source_sha256": "734cca99c10097005aa0165bc62fa30201b1dbbe558cb5c8d18592b1c4ebd6a4"
+      }
+    ]
   },
   "existing_family_playback": {
     "actors": {
@@ -617,5 +645,54 @@
     "maximum_border_foreground_pixels": 0
   },
   "import_scale": 0.59999954,
-  "actual_actor_display_scale": 1.1999990940094047
+  "actual_actor_display_scale": 1.1999990940094047,
+  "actual_editor_mode_correction": {
+    "passed": true,
+    "source_sha256": "0af98400d4f41def465f62fbe637fc7bf33f28318457426a1ac7e6f34726dade",
+    "candidate_sha256": "734cca99c10097005aa0165bc62fa30201b1dbbe558cb5c8d18592b1c4ebd6a4",
+    "prior_cache_route_editor_comparison_labels_withdrawn": true,
+    "previous_public_receipt_sha256": "60d0e787bd8c3677fef7091639f7477f1035c0810e381dfc16cc4350a5ca5f60",
+    "source_and_current_actual_editor_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/cuttlefish.glb-ac77f829e60b32a6883b6fff247a7638.md5",
+        "import_metadata_sha256": "714160b69e5c047993f6d4285e7b40cc7e2cbd8fc3ac7e789bad5dced9c5b37b",
+        "imported_resource_path": "res://.godot/imported/cuttlefish.glb-ac77f829e60b32a6883b6fff247a7638.scn",
+        "imported_resource_sha256": "764c21e0f756bca9d2b2a0df05db8c68287d20c9c1b39b1c9f29acfe81ef224d",
+        "packed_scene_resource_path": "res://assets/storage-baseline/cuttlefish.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "78e13b856e632a21740417b57b37cd53",
+        "source_path": "res://assets/storage-baseline/cuttlefish.glb",
+        "source_sha256": "0af98400d4f41def465f62fbe637fc7bf33f28318457426a1ac7e6f34726dade"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/cuttlefish.glb-cd2a571fe02ab058698dc3b9249c722b.md5",
+        "import_metadata_sha256": "bc528d0a84f024ff58f524127ab628183b133af94a4aad41d5607fbdf25a3426",
+        "imported_resource_path": "res://.godot/imported/cuttlefish.glb-cd2a571fe02ab058698dc3b9249c722b.scn",
+        "imported_resource_sha256": "1a3bfff7aca144197386b39d78e9b538705f9c783d8c2c04631957044eda67d1",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/cuttlefish.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "242f5453f3a98214eea25d6703397cf7",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/cuttlefish.glb",
+        "source_sha256": "734cca99c10097005aa0165bc62fa30201b1dbbe558cb5c8d18592b1c4ebd6a4"
+      }
+    ],
+    "source_size_position_budget": 4.76837158203125e-07,
+    "maximum_position_error": 9.78247601537145e-08,
+    "normal_angle_budget_degrees": 0.0001,
+    "maximum_normal_angle_degrees": 3.323143241174159e-05,
+    "all_typed_static_attributes_retained_morph_PNT_oriented_triangles_material_storage_and_texture_mips_identical": true,
+    "independent_complete_editor_vertex_and_oriented_triangle_payload_multisets_identical": true,
+    "independent_payload_source_retained_column_mapping": "No partitions. Exact preparation retained indices independently checked against raw authored POSITION/NORMAL/TANGENT accessor bits; no raw vertex ordinal or arbitrary coincident-ID assumption.",
+    "numeric_static_material_SCNs_identical": true,
+    "numeric_report_sha256": "7b56cdf68d0ef398c204f3b0239313377dc807d7c298ca82e0f86ce7840530ec",
+    "static_report_sha256": "c29a4c7d1eb24219de53ca784c1fa89bbf6c56dc94dbaa6609f9d24e4a35c749",
+    "direct_payload_report_sha256": "58d54f60186b94fb6976eb17be8b43e9dc814413a0125c47b8f0f646d591f0b1",
+    "material_report_sha256": "1edac97ee0fa26072e94108d2716f174a7abe1587c817d481794fff34ca7ce2c",
+    "loader_guard": "Public dump_creature_storage.gd explicit ResourceLoader imported branch; scene policy/current-source MD5/cache destination MD5 where single destination, source/SCN/freshness metadata SHA-bound.",
+    "scope": "Corrected matched actualEditor source/current comparison. Prior raw-Cache-source versus editor-current comparison labels are withdrawn; prior source/native/Blender/fullbody/seededFX/render evidence unchanged. All original caps and frozen source observations unchanged. Complete typed static attributes, retained morph P/N/T and oriented triangle payloads match. Material typed storage and texture pixels/mips match; generated distant LOD identity is not claimed."
+  }
 }

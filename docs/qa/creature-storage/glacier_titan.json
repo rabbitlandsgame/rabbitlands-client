@@ -319,9 +319,37 @@
       "max_normal_degrees": 1.9090959104164224e-06,
       "p99_normal_degrees": 1.2074182697257333e-06
     },
-    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "scope": "Both original and CURRENT final meshes loaded explicitly through ResourceLoader from fresh editor SCNs, bound to source/current GLB +SCN +freshness metadata hashes. All source clips, directed crossfades and RESET; independent retained-static/morph bijection and unchanged4float32ULP Euclidean/.0001degree caps. Earlier Cache-route imported labels are withdrawn, not treated as editor evidence.",
     "source_sha256": "ffe24b475a19611cf40c7a2b436b26442b7c86cfff70d55577403b8a57162c2c",
-    "candidate_sha256": "a55b425ab2c88f6bcc3626fb7565b16d83160a2f48aaaa1e874951b4a021b1f1"
+    "candidate_sha256": "a55b425ab2c88f6bcc3626fb7565b16d83160a2f48aaaa1e874951b4a021b1f1",
+    "actual_editor_scene_loads": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/glacier_titan.glb-7bc5c11169acfc10f7587e662c2ab196.md5",
+        "import_metadata_sha256": "4558f54230de55d8c3ba2d4414a5148927b53d870d2db86e9df6f5fd86ca9c67",
+        "imported_resource_path": "res://.godot/imported/glacier_titan.glb-7bc5c11169acfc10f7587e662c2ab196.scn",
+        "imported_resource_sha256": "c6668f632f87513f0554b97291ec2d3d3a12ac807e05d25fa53ace733ebcfcd5",
+        "packed_scene_resource_path": "res://assets/storage-baseline/glacier_titan.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "48a9afc20c9449f5609c6f464a8c34c3",
+        "source_path": "res://assets/storage-baseline/glacier_titan.glb",
+        "source_sha256": "ffe24b475a19611cf40c7a2b436b26442b7c86cfff70d55577403b8a57162c2c"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/glacier_titan.glb-1e19a7e03247e595ddbc6b5b7f673270.md5",
+        "import_metadata_sha256": "46c1daf439a42ca177d6ef96551e105e0154a76ee50292bf24b3a389b5e73c29",
+        "imported_resource_path": "res://.godot/imported/glacier_titan.glb-1e19a7e03247e595ddbc6b5b7f673270.scn",
+        "imported_resource_sha256": "50cb063c44da4ca0a6e885f0d350d0ae445574bac558367c95497dac5f6b8c0e",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/glacier_titan.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "1468a910bf435ced2a2e2ece9de89e84",
+        "source_path": "res://assets/actors/native/creatures/glacier_titan.glb",
+        "source_sha256": "a55b425ab2c88f6bcc3626fb7565b16d83160a2f48aaaa1e874951b4a021b1f1"
+      }
+    ]
   },
   "existing_family_playback": {
     "actors": {
@@ -680,5 +708,54 @@
     ],
     "passed": true,
     "all_source_clips_full_cycle_rendered": true
+  },
+  "actual_editor_mode_correction": {
+    "passed": true,
+    "source_sha256": "ffe24b475a19611cf40c7a2b436b26442b7c86cfff70d55577403b8a57162c2c",
+    "candidate_sha256": "a55b425ab2c88f6bcc3626fb7565b16d83160a2f48aaaa1e874951b4a021b1f1",
+    "prior_cache_route_editor_comparison_labels_withdrawn": true,
+    "previous_public_receipt_sha256": "97ffbd993ae6742479db7769e81b1d52a088ec1a443fd25d6a4e81f92c02e37d",
+    "source_and_current_actual_editor_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/glacier_titan.glb-7bc5c11169acfc10f7587e662c2ab196.md5",
+        "import_metadata_sha256": "4558f54230de55d8c3ba2d4414a5148927b53d870d2db86e9df6f5fd86ca9c67",
+        "imported_resource_path": "res://.godot/imported/glacier_titan.glb-7bc5c11169acfc10f7587e662c2ab196.scn",
+        "imported_resource_sha256": "c6668f632f87513f0554b97291ec2d3d3a12ac807e05d25fa53ace733ebcfcd5",
+        "packed_scene_resource_path": "res://assets/storage-baseline/glacier_titan.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "48a9afc20c9449f5609c6f464a8c34c3",
+        "source_path": "res://assets/storage-baseline/glacier_titan.glb",
+        "source_sha256": "ffe24b475a19611cf40c7a2b436b26442b7c86cfff70d55577403b8a57162c2c"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/glacier_titan.glb-1e19a7e03247e595ddbc6b5b7f673270.md5",
+        "import_metadata_sha256": "46c1daf439a42ca177d6ef96551e105e0154a76ee50292bf24b3a389b5e73c29",
+        "imported_resource_path": "res://.godot/imported/glacier_titan.glb-1e19a7e03247e595ddbc6b5b7f673270.scn",
+        "imported_resource_sha256": "50cb063c44da4ca0a6e885f0d350d0ae445574bac558367c95497dac5f6b8c0e",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/glacier_titan.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "1468a910bf435ced2a2e2ece9de89e84",
+        "source_path": "res://assets/actors/native/creatures/glacier_titan.glb",
+        "source_sha256": "a55b425ab2c88f6bcc3626fb7565b16d83160a2f48aaaa1e874951b4a021b1f1"
+      }
+    ],
+    "source_size_position_budget": 4.76837158203125e-07,
+    "maximum_position_error": 0.0,
+    "normal_angle_budget_degrees": 0.0001,
+    "maximum_normal_angle_degrees": 1.9090959104164224e-06,
+    "all_typed_static_attributes_retained_morph_PNT_oriented_triangles_material_storage_and_texture_mips_identical": true,
+    "independent_complete_editor_vertex_and_oriented_triangle_payload_multisets_identical": true,
+    "independent_payload_source_retained_column_mapping": "No partitions. Exact preparation retained indices independently checked against raw authored POSITION/NORMAL/TANGENT accessor bits; no raw vertex ordinal or arbitrary coincident-ID assumption.",
+    "numeric_static_material_SCNs_identical": true,
+    "numeric_report_sha256": "5d251edd69c557ef53311c5534619f129f5e1fe9ffbedc140dd1fb16c21d7d81",
+    "static_report_sha256": "c8d7db9267fdaacf07412b45fdf43b631f3b623409965d7c7306df1072b3b90e",
+    "direct_payload_report_sha256": "b571c8dbf175ce739784b23e8432c89e3f6d9b6ce400a440d4e817ffc2f0c866",
+    "material_report_sha256": "31199413e538f0563aaf95e746c9a7100578be6d8a1e35014e2058b7ebadd388",
+    "loader_guard": "Public dump_creature_storage.gd explicit ResourceLoader imported branch; scene policy/current-source MD5/cache destination MD5 where single destination, source/SCN/freshness metadata SHA-bound.",
+    "scope": "Corrected matched actualEditor source/current comparison. Prior raw-Cache-source versus editor-current comparison labels are withdrawn; prior source/native/Blender/fullbody/seededFX/render evidence unchanged. All original caps and frozen source observations unchanged. Complete typed static attributes, retained morph P/N/T and oriented triangle payloads match. Material typed storage and texture pixels/mips match; generated distant LOD identity is not claimed."
   }
 }

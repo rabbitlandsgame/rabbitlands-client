@@ -723,9 +723,37 @@
       "max_normal_degrees": 1.9090959104164224e-06,
       "p99_normal_degrees": 1.4787793334710982e-06
     },
-    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "scope": "Both original and CURRENT final meshes loaded explicitly through ResourceLoader from fresh editor SCNs, bound to source/current GLB +SCN +freshness metadata hashes. All source clips, directed crossfades and RESET; independent retained-static/morph bijection and unchanged4float32ULP Euclidean/.0001degree caps. Earlier Cache-route imported labels are withdrawn, not treated as editor evidence.",
     "source_sha256": "fd47bbed351db8671b30b94ccee269fc53f4008db1f492bcbc3547fa5dc634a7",
-    "candidate_sha256": "8cafdcc937096063fbf899913a42edf321a6fa115c563a6c8ce71119e610e4c6"
+    "candidate_sha256": "8cafdcc937096063fbf899913a42edf321a6fa115c563a6c8ce71119e610e4c6",
+    "actual_editor_scene_loads": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/cerberus.glb-1d1dab3d63f70920986a033031c95219.md5",
+        "import_metadata_sha256": "5af937cc914ba468658b2d1d8bcc1d97a5a8a7ab552d74f95e78a1044449db1a",
+        "imported_resource_path": "res://.godot/imported/cerberus.glb-1d1dab3d63f70920986a033031c95219.scn",
+        "imported_resource_sha256": "ec9dfee834620799ce598608916ddcf0d9dc61038c0a05863e75d077991b4ac4",
+        "packed_scene_resource_path": "res://assets/storage-baseline/cerberus.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "334cf0551d9825c751467207fd2d00ce",
+        "source_path": "res://assets/storage-baseline/cerberus.glb",
+        "source_sha256": "fd47bbed351db8671b30b94ccee269fc53f4008db1f492bcbc3547fa5dc634a7"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/cerberus.glb-371d04bc2cf5ced045636cd59bcc4d3a.md5",
+        "import_metadata_sha256": "8877c52b04d957907cb10eea6a3aeb6ea7b5f064c3e0d98fb717c761a63e1555",
+        "imported_resource_path": "res://.godot/imported/cerberus.glb-371d04bc2cf5ced045636cd59bcc4d3a.scn",
+        "imported_resource_sha256": "2322a68afbecbdea04a9c9905904270f6494dc388d06f37d869d4212c22fe944",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/cerberus.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "17d387af74b2cc825202feb692d9cadf",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/cerberus.glb",
+        "source_sha256": "8cafdcc937096063fbf899913a42edf321a6fa115c563a6c8ce71119e610e4c6"
+      }
+    ]
   },
   "actor_placement": {
     "passed": true,
@@ -1036,7 +1064,35 @@
         "passed": true
       }
     },
-    "scope": "Additional strict model-space actual-native/fresh-editor-import surface equivalence gate, source-size-dependent4float32ULP Euclidean position and0.0001degree direction caps. Does not relax original source observations, Blender16ULP or raster/effects gates."
+    "scope": "Unchanged source-size-dependent4float32ULP Euclidean/.0001degree caps. Native original proof retained; editor pair now explicitly loads BOTH fresh ResourceLoader SCNs, bound to canonical GLB/SCN/sourceMD5/freshness metadata hashes. Earlier Cache-route editor labels withdrawn.",
+    "actual_editor_resource_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/cerberus.glb-1d1dab3d63f70920986a033031c95219.md5",
+        "import_metadata_sha256": "5af937cc914ba468658b2d1d8bcc1d97a5a8a7ab552d74f95e78a1044449db1a",
+        "imported_resource_path": "res://.godot/imported/cerberus.glb-1d1dab3d63f70920986a033031c95219.scn",
+        "imported_resource_sha256": "ec9dfee834620799ce598608916ddcf0d9dc61038c0a05863e75d077991b4ac4",
+        "packed_scene_resource_path": "res://assets/storage-baseline/cerberus.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "334cf0551d9825c751467207fd2d00ce",
+        "source_path": "res://assets/storage-baseline/cerberus.glb",
+        "source_sha256": "fd47bbed351db8671b30b94ccee269fc53f4008db1f492bcbc3547fa5dc634a7"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/cerberus.glb-371d04bc2cf5ced045636cd59bcc4d3a.md5",
+        "import_metadata_sha256": "8877c52b04d957907cb10eea6a3aeb6ea7b5f064c3e0d98fb717c761a63e1555",
+        "imported_resource_path": "res://.godot/imported/cerberus.glb-371d04bc2cf5ced045636cd59bcc4d3a.scn",
+        "imported_resource_sha256": "2322a68afbecbdea04a9c9905904270f6494dc388d06f37d869d4212c22fe944",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/cerberus.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "17d387af74b2cc825202feb692d9cadf",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/cerberus.glb",
+        "source_sha256": "8cafdcc937096063fbf899913a42edf321a6fa115c563a6c8ce71119e610e4c6"
+      }
+    ]
   },
   "death_dissolve_source_framing": {
     "actor": "cerberus",
@@ -1091,5 +1147,54 @@
       "path": "docs/qa/undead-gaits/manifest.json",
       "sha256": "c6fb9822c3dce37f82d8bcadcc97b902137aa0ac79272380a5baf61f2074d2a2"
     }
-  ]
+  ],
+  "actual_editor_mode_correction": {
+    "passed": true,
+    "source_sha256": "fd47bbed351db8671b30b94ccee269fc53f4008db1f492bcbc3547fa5dc634a7",
+    "candidate_sha256": "8cafdcc937096063fbf899913a42edf321a6fa115c563a6c8ce71119e610e4c6",
+    "prior_cache_route_editor_comparison_labels_withdrawn": true,
+    "previous_public_receipt_sha256": "ca7721faf6e469625b367485e4803f430ba4e3dc7423175fc1ee53b70d46195e",
+    "source_and_current_actual_editor_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/cerberus.glb-1d1dab3d63f70920986a033031c95219.md5",
+        "import_metadata_sha256": "5af937cc914ba468658b2d1d8bcc1d97a5a8a7ab552d74f95e78a1044449db1a",
+        "imported_resource_path": "res://.godot/imported/cerberus.glb-1d1dab3d63f70920986a033031c95219.scn",
+        "imported_resource_sha256": "ec9dfee834620799ce598608916ddcf0d9dc61038c0a05863e75d077991b4ac4",
+        "packed_scene_resource_path": "res://assets/storage-baseline/cerberus.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "334cf0551d9825c751467207fd2d00ce",
+        "source_path": "res://assets/storage-baseline/cerberus.glb",
+        "source_sha256": "fd47bbed351db8671b30b94ccee269fc53f4008db1f492bcbc3547fa5dc634a7"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/cerberus.glb-371d04bc2cf5ced045636cd59bcc4d3a.md5",
+        "import_metadata_sha256": "8877c52b04d957907cb10eea6a3aeb6ea7b5f064c3e0d98fb717c761a63e1555",
+        "imported_resource_path": "res://.godot/imported/cerberus.glb-371d04bc2cf5ced045636cd59bcc4d3a.scn",
+        "imported_resource_sha256": "2322a68afbecbdea04a9c9905904270f6494dc388d06f37d869d4212c22fe944",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/cerberus.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "17d387af74b2cc825202feb692d9cadf",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/cerberus.glb",
+        "source_sha256": "8cafdcc937096063fbf899913a42edf321a6fa115c563a6c8ce71119e610e4c6"
+      }
+    ],
+    "source_size_position_budget": 4.76837158203125e-07,
+    "maximum_position_error": 0.0,
+    "normal_angle_budget_degrees": 0.0001,
+    "maximum_normal_angle_degrees": 1.9090959104164224e-06,
+    "all_typed_static_attributes_retained_morph_PNT_oriented_triangles_material_storage_and_texture_mips_identical": true,
+    "independent_complete_editor_vertex_and_oriented_triangle_payload_multisets_identical": true,
+    "independent_payload_source_retained_column_mapping": "No partitions. Exact preparation retained indices independently checked against raw authored POSITION/NORMAL/TANGENT accessor bits; no raw vertex ordinal or arbitrary coincident-ID assumption.",
+    "numeric_static_material_SCNs_identical": true,
+    "numeric_report_sha256": "337d76ad60564569c1b0c44774cb2c41bf193003766252336998d59a15bfbc2f",
+    "static_report_sha256": "381e6ac2d2ac571f159b715a92991f23d06c3c273e13e1780699e733e4cf4c9d",
+    "direct_payload_report_sha256": "b1791f492fe9525a86698dc0412767881c213284dd48f88b5902cddef4297151",
+    "material_report_sha256": "33cd2605490d7fb582cb597c199a2ea6c4890ed19498e44e93c5c60cb8d14e27",
+    "loader_guard": "Public dump_creature_storage.gd explicit ResourceLoader imported branch; scene policy/current-source MD5/cache destination MD5 where single destination, source/SCN/freshness metadata SHA-bound.",
+    "scope": "Corrected matched actualEditor source/current comparison. Prior raw-Cache-source versus editor-current comparison labels are withdrawn; prior source/native/Blender/fullbody/seededFX/render evidence unchanged. All original caps and frozen source observations unchanged. Complete typed static attributes, retained morph P/N/T and oriented triangle payloads match. Material typed storage and texture pixels/mips match; generated distant LOD identity is not claimed."
+  }
 }

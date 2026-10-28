@@ -385,9 +385,37 @@
       "max_normal_degrees": 7.963470424126384e-06,
       "p99_normal_degrees": 7.399647598202746e-06
     },
-    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "scope": "Both original and CURRENT final meshes loaded explicitly through ResourceLoader from fresh editor SCNs, bound to source/current GLB +SCN +freshness metadata hashes. All source clips, directed crossfades and RESET; independent retained-static/morph bijection and unchanged4float32ULP Euclidean/.0001degree caps. Earlier Cache-route imported labels are withdrawn, not treated as editor evidence.",
     "source_sha256": "502b8abb61884f32a0733043f92bd7ca2005911a9e91c48a67caee0ecc0dd620",
-    "candidate_sha256": "96c1b31f29dad4e83a46db1922452c6271eb62c05e99dcaaf34b06e03274d7ae"
+    "candidate_sha256": "96c1b31f29dad4e83a46db1922452c6271eb62c05e99dcaaf34b06e03274d7ae",
+    "actual_editor_scene_loads": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/amethyst_stag_beetle.glb-352274ea6334105c0635dddeaac5eabd.md5",
+        "import_metadata_sha256": "8bc3f5d1e5129f82202f585e385f8405f91e0dbb0d18775209fd6d95d8da99f2",
+        "imported_resource_path": "res://.godot/imported/amethyst_stag_beetle.glb-352274ea6334105c0635dddeaac5eabd.scn",
+        "imported_resource_sha256": "c548d1552725e7f20706192f5a85f0abfa56926c9511aed4fe28f11b3d8c1b0c",
+        "packed_scene_resource_path": "res://assets/storage-baseline/amethyst_stag_beetle.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "1d129d0d8fc28f6713c7a57acb168f2b",
+        "source_path": "res://assets/storage-baseline/amethyst_stag_beetle.glb",
+        "source_sha256": "502b8abb61884f32a0733043f92bd7ca2005911a9e91c48a67caee0ecc0dd620"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/amethyst_stag_beetle.glb-384a43defbb1e1f99c8adba760be3b44.md5",
+        "import_metadata_sha256": "8d5900608c027b68b39f5e818e0a17f2d0b1fea976d2e13d9ef7682dbfb2f4ea",
+        "imported_resource_path": "res://.godot/imported/amethyst_stag_beetle.glb-384a43defbb1e1f99c8adba760be3b44.scn",
+        "imported_resource_sha256": "ac7dc83ecd25762e0c10e5e1987c28e442f91990f1c254e78bee8b884d398635",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/amethyst_stag_beetle.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "ff99fd1f62ba8c9442b69ecf19b7ced9",
+        "source_path": "res://assets/actors/native/creatures/amethyst_stag_beetle.glb",
+        "source_sha256": "96c1b31f29dad4e83a46db1922452c6271eb62c05e99dcaaf34b06e03274d7ae"
+      }
+    ]
   },
   "existing_family_playback": {
     "actors": {
@@ -695,7 +723,35 @@
         "passed": true
       }
     },
-    "scope": "Additional strict model-space actual-native/fresh-editor-import surface equivalence gate, source-size-dependent4float32ULP Euclidean position and0.0001degree direction caps. Does not relax original source observations, Blender16ULP or raster/effects gates."
+    "scope": "Unchanged source-size-dependent4float32ULP Euclidean/.0001degree caps. Native original proof retained; editor pair now explicitly loads BOTH fresh ResourceLoader SCNs, bound to canonical GLB/SCN/sourceMD5/freshness metadata hashes. Earlier Cache-route editor labels withdrawn.",
+    "actual_editor_resource_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/amethyst_stag_beetle.glb-352274ea6334105c0635dddeaac5eabd.md5",
+        "import_metadata_sha256": "8bc3f5d1e5129f82202f585e385f8405f91e0dbb0d18775209fd6d95d8da99f2",
+        "imported_resource_path": "res://.godot/imported/amethyst_stag_beetle.glb-352274ea6334105c0635dddeaac5eabd.scn",
+        "imported_resource_sha256": "c548d1552725e7f20706192f5a85f0abfa56926c9511aed4fe28f11b3d8c1b0c",
+        "packed_scene_resource_path": "res://assets/storage-baseline/amethyst_stag_beetle.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "1d129d0d8fc28f6713c7a57acb168f2b",
+        "source_path": "res://assets/storage-baseline/amethyst_stag_beetle.glb",
+        "source_sha256": "502b8abb61884f32a0733043f92bd7ca2005911a9e91c48a67caee0ecc0dd620"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/amethyst_stag_beetle.glb-384a43defbb1e1f99c8adba760be3b44.md5",
+        "import_metadata_sha256": "8d5900608c027b68b39f5e818e0a17f2d0b1fea976d2e13d9ef7682dbfb2f4ea",
+        "imported_resource_path": "res://.godot/imported/amethyst_stag_beetle.glb-384a43defbb1e1f99c8adba760be3b44.scn",
+        "imported_resource_sha256": "ac7dc83ecd25762e0c10e5e1987c28e442f91990f1c254e78bee8b884d398635",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/amethyst_stag_beetle.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "ff99fd1f62ba8c9442b69ecf19b7ced9",
+        "source_path": "res://assets/actors/native/creatures/amethyst_stag_beetle.glb",
+        "source_sha256": "96c1b31f29dad4e83a46db1922452c6271eb62c05e99dcaaf34b06e03274d7ae"
+      }
+    ]
   },
   "death_dissolve_source_framing": {
     "actor": "amethyst_stag_beetle",
@@ -723,5 +779,54 @@
       }
     ],
     "scope": "All8corners of original full-motion actualActor fit after exact preview translation, both640square orthographic FX cameras, near/far planes and minimum2pixel margin. Actual source/candidate fade PNG foreground borders remain a separate required post-capture check."
+  },
+  "actual_editor_mode_correction": {
+    "passed": true,
+    "source_sha256": "502b8abb61884f32a0733043f92bd7ca2005911a9e91c48a67caee0ecc0dd620",
+    "candidate_sha256": "96c1b31f29dad4e83a46db1922452c6271eb62c05e99dcaaf34b06e03274d7ae",
+    "prior_cache_route_editor_comparison_labels_withdrawn": true,
+    "previous_public_receipt_sha256": "c49ae54a5e5f21f684823be025351210e40e5efd176db76b13761e812acc3408",
+    "source_and_current_actual_editor_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/amethyst_stag_beetle.glb-352274ea6334105c0635dddeaac5eabd.md5",
+        "import_metadata_sha256": "8bc3f5d1e5129f82202f585e385f8405f91e0dbb0d18775209fd6d95d8da99f2",
+        "imported_resource_path": "res://.godot/imported/amethyst_stag_beetle.glb-352274ea6334105c0635dddeaac5eabd.scn",
+        "imported_resource_sha256": "c548d1552725e7f20706192f5a85f0abfa56926c9511aed4fe28f11b3d8c1b0c",
+        "packed_scene_resource_path": "res://assets/storage-baseline/amethyst_stag_beetle.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "1d129d0d8fc28f6713c7a57acb168f2b",
+        "source_path": "res://assets/storage-baseline/amethyst_stag_beetle.glb",
+        "source_sha256": "502b8abb61884f32a0733043f92bd7ca2005911a9e91c48a67caee0ecc0dd620"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/amethyst_stag_beetle.glb-384a43defbb1e1f99c8adba760be3b44.md5",
+        "import_metadata_sha256": "8d5900608c027b68b39f5e818e0a17f2d0b1fea976d2e13d9ef7682dbfb2f4ea",
+        "imported_resource_path": "res://.godot/imported/amethyst_stag_beetle.glb-384a43defbb1e1f99c8adba760be3b44.scn",
+        "imported_resource_sha256": "ac7dc83ecd25762e0c10e5e1987c28e442f91990f1c254e78bee8b884d398635",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/amethyst_stag_beetle.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "ff99fd1f62ba8c9442b69ecf19b7ced9",
+        "source_path": "res://assets/actors/native/creatures/amethyst_stag_beetle.glb",
+        "source_sha256": "96c1b31f29dad4e83a46db1922452c6271eb62c05e99dcaaf34b06e03274d7ae"
+      }
+    ],
+    "source_size_position_budget": 9.5367431640625e-07,
+    "maximum_position_error": 1.224942599900321e-07,
+    "normal_angle_budget_degrees": 0.0001,
+    "maximum_normal_angle_degrees": 7.963470424126384e-06,
+    "all_typed_static_attributes_retained_morph_PNT_oriented_triangles_material_storage_and_texture_mips_identical": true,
+    "independent_complete_editor_vertex_and_oriented_triangle_payload_multisets_identical": true,
+    "independent_payload_source_retained_column_mapping": "No partitions. Exact preparation retained indices independently checked against raw authored POSITION/NORMAL/TANGENT accessor bits; no raw vertex ordinal or arbitrary coincident-ID assumption.",
+    "numeric_static_material_SCNs_identical": true,
+    "numeric_report_sha256": "f91f3ed2f6326ac5b0e8e280e01b9ed68c2ddeed6956c9d4c31ac71682f4dda1",
+    "static_report_sha256": "1f2a97c7afed1c84e526ad4a66cb66702257bd7c2efab4ce5f917abd27ee9a1f",
+    "direct_payload_report_sha256": "d36562165b2a422ef1a8b285ce52edc2b6a98b8901839e3fd1dc76abbc8d0666",
+    "material_report_sha256": "3815e03e42b9cbf0003ca0e392129abaeb2363df26f1ff4d093fd5989ab9aecd",
+    "loader_guard": "Public dump_creature_storage.gd explicit ResourceLoader imported branch; scene policy/current-source MD5/cache destination MD5 where single destination, source/SCN/freshness metadata SHA-bound.",
+    "scope": "Corrected matched actualEditor source/current comparison. Prior raw-Cache-source versus editor-current comparison labels are withdrawn; prior source/native/Blender/fullbody/seededFX/render evidence unchanged. All original caps and frozen source observations unchanged. Complete typed static attributes, retained morph P/N/T and oriented triangle payloads match. Material typed storage and texture pixels/mips match; generated distant LOD identity is not claimed."
   }
 }

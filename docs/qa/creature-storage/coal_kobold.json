@@ -329,9 +329,37 @@
       "max_normal_degrees": 3.2589111566168693e-05,
       "p99_normal_degrees": 2.4710369894045703e-05
     },
-    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "scope": "Both original and CURRENT final meshes loaded explicitly through ResourceLoader from fresh editor SCNs, bound to source/current GLB +SCN +freshness metadata hashes. All source clips, directed crossfades and RESET; independent retained-static/morph bijection and unchanged4float32ULP Euclidean/.0001degree caps. Earlier Cache-route imported labels are withdrawn, not treated as editor evidence.",
     "source_sha256": "958d55a66d93fcb8984c33a92a6bed8413a5120bd44a93e2d2bb5be4f20614c4",
-    "candidate_sha256": "adb849c87f8970711f100ddbfe31edd45db0586e323fa904a952284b5e15cb8d"
+    "candidate_sha256": "adb849c87f8970711f100ddbfe31edd45db0586e323fa904a952284b5e15cb8d",
+    "actual_editor_scene_loads": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/coal_kobold.glb-4949bc45f30691a5e877d6b731fbb473.md5",
+        "import_metadata_sha256": "38e63e23806d15e9e2db297552f8e53035c0a0a6c6e7a930c5a3297916e87ca0",
+        "imported_resource_path": "res://.godot/imported/coal_kobold.glb-4949bc45f30691a5e877d6b731fbb473.scn",
+        "imported_resource_sha256": "907612c3ca403dff13dd3de6535e00a7f6d9e6c372a238a7acc0cc4be3649fb2",
+        "packed_scene_resource_path": "res://assets/storage-baseline/coal_kobold.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "91372b653db8fa56a48c0f89e4374138",
+        "source_path": "res://assets/storage-baseline/coal_kobold.glb",
+        "source_sha256": "958d55a66d93fcb8984c33a92a6bed8413a5120bd44a93e2d2bb5be4f20614c4"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/coal_kobold.glb-23cbf5d5e411df0f7b7df50fa00d4bee.md5",
+        "import_metadata_sha256": "8674f4a33ae14f852e5b33abeb140acd8feb23e0d51e1f5d3422d857885308c4",
+        "imported_resource_path": "res://.godot/imported/coal_kobold.glb-23cbf5d5e411df0f7b7df50fa00d4bee.scn",
+        "imported_resource_sha256": "a3a49269380fabf554889a7c948725add68a1d85488546ab1406d22409ca5d04",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/coal_kobold.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "d79f44235d573fb899612a5f6c5ac987",
+        "source_path": "res://assets/actors/native/creatures/coal_kobold.glb",
+        "source_sha256": "adb849c87f8970711f100ddbfe31edd45db0586e323fa904a952284b5e15cb8d"
+      }
+    ]
   },
   "existing_family_playback": {
     "actors": {
@@ -607,5 +635,54 @@
     "maximum_border_foreground_pixels": 0
   },
   "import_scale": 0.626003,
-  "actual_actor_display_scale": 0.6260030269622825
+  "actual_actor_display_scale": 0.6260030269622825,
+  "actual_editor_mode_correction": {
+    "passed": true,
+    "source_sha256": "958d55a66d93fcb8984c33a92a6bed8413a5120bd44a93e2d2bb5be4f20614c4",
+    "candidate_sha256": "adb849c87f8970711f100ddbfe31edd45db0586e323fa904a952284b5e15cb8d",
+    "prior_cache_route_editor_comparison_labels_withdrawn": true,
+    "previous_public_receipt_sha256": "cbfc26a23ef2041b40df161284592ed23c263e912826cb3eb8efd4ad88873438",
+    "source_and_current_actual_editor_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/coal_kobold.glb-4949bc45f30691a5e877d6b731fbb473.md5",
+        "import_metadata_sha256": "38e63e23806d15e9e2db297552f8e53035c0a0a6c6e7a930c5a3297916e87ca0",
+        "imported_resource_path": "res://.godot/imported/coal_kobold.glb-4949bc45f30691a5e877d6b731fbb473.scn",
+        "imported_resource_sha256": "907612c3ca403dff13dd3de6535e00a7f6d9e6c372a238a7acc0cc4be3649fb2",
+        "packed_scene_resource_path": "res://assets/storage-baseline/coal_kobold.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "91372b653db8fa56a48c0f89e4374138",
+        "source_path": "res://assets/storage-baseline/coal_kobold.glb",
+        "source_sha256": "958d55a66d93fcb8984c33a92a6bed8413a5120bd44a93e2d2bb5be4f20614c4"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/coal_kobold.glb-23cbf5d5e411df0f7b7df50fa00d4bee.md5",
+        "import_metadata_sha256": "8674f4a33ae14f852e5b33abeb140acd8feb23e0d51e1f5d3422d857885308c4",
+        "imported_resource_path": "res://.godot/imported/coal_kobold.glb-23cbf5d5e411df0f7b7df50fa00d4bee.scn",
+        "imported_resource_sha256": "a3a49269380fabf554889a7c948725add68a1d85488546ab1406d22409ca5d04",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/coal_kobold.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "d79f44235d573fb899612a5f6c5ac987",
+        "source_path": "res://assets/actors/native/creatures/coal_kobold.glb",
+        "source_sha256": "adb849c87f8970711f100ddbfe31edd45db0586e323fa904a952284b5e15cb8d"
+      }
+    ],
+    "source_size_position_budget": 9.5367431640625e-07,
+    "maximum_position_error": 3.972645801541692e-07,
+    "normal_angle_budget_degrees": 0.0001,
+    "maximum_normal_angle_degrees": 3.2589111566168693e-05,
+    "all_typed_static_attributes_retained_morph_PNT_oriented_triangles_material_storage_and_texture_mips_identical": true,
+    "independent_complete_editor_vertex_and_oriented_triangle_payload_multisets_identical": true,
+    "independent_payload_source_retained_column_mapping": "No partitions. Exact preparation retained indices independently checked against raw authored POSITION/NORMAL/TANGENT accessor bits; no raw vertex ordinal or arbitrary coincident-ID assumption.",
+    "numeric_static_material_SCNs_identical": true,
+    "numeric_report_sha256": "21d110cc6fd9b4c19ac95883fd0189052405cea836c8fbc2147e346cb8d5eb9d",
+    "static_report_sha256": "820b76139c38e423fc38ee87919afbb419c3a99daf7a90810080071b130851ba",
+    "direct_payload_report_sha256": "7df7279845aff6be19c6545c265c0bb4c832438290fef27bae3ff578d98bc986",
+    "material_report_sha256": "a1bfb23d2d19d4a78cfaca4a12fc89363c391ec587058c28cc2f0c0c2830f3bf",
+    "loader_guard": "Public dump_creature_storage.gd explicit ResourceLoader imported branch; scene policy/current-source MD5/cache destination MD5 where single destination, source/SCN/freshness metadata SHA-bound.",
+    "scope": "Corrected matched actualEditor source/current comparison. Prior raw-Cache-source versus editor-current comparison labels are withdrawn; prior source/native/Blender/fullbody/seededFX/render evidence unchanged. All original caps and frozen source observations unchanged. Complete typed static attributes, retained morph P/N/T and oriented triangle payloads match. Material typed storage and texture pixels/mips match; generated distant LOD identity is not claimed."
+  }
 }

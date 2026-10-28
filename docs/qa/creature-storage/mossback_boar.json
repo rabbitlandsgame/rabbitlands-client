@@ -316,9 +316,37 @@
       "max_normal_degrees": 2.3859880382880394e-05,
       "p99_normal_degrees": 1.1145557312429296e-05
     },
-    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "scope": "Both original and CURRENT final meshes loaded explicitly through ResourceLoader from fresh editor SCNs, bound to source/current GLB +SCN +freshness metadata hashes. All source clips, directed crossfades and RESET; independent retained-static/morph bijection and unchanged4float32ULP Euclidean/.0001degree caps. Earlier Cache-route imported labels are withdrawn, not treated as editor evidence.",
     "source_sha256": "94a62bc79d316815202f7049bebf5fab584b64f4b645a78603c90d1f4c8caf08",
-    "candidate_sha256": "dc193500a6258c516efff2d2ae0d6a8ad875c921eb0ead4d5c67b4748536d1fd"
+    "candidate_sha256": "dc193500a6258c516efff2d2ae0d6a8ad875c921eb0ead4d5c67b4748536d1fd",
+    "actual_editor_scene_loads": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/mossback_boar.glb-5a5743d40b7b2a0ffb56504e6035acb6.md5",
+        "import_metadata_sha256": "65acc7157f73227c1d4e508bd170fc8cca2c0a6a3d375851dc668bbc50125ef5",
+        "imported_resource_path": "res://.godot/imported/mossback_boar.glb-5a5743d40b7b2a0ffb56504e6035acb6.scn",
+        "imported_resource_sha256": "7fe92fb6da6ccea20a37101e8b8b520f58a7ef072515d68fb2ef504b14f227b8",
+        "packed_scene_resource_path": "res://assets/storage-baseline/mossback_boar.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "2cc4e4398939cb15f30e6bc4acb61aed",
+        "source_path": "res://assets/storage-baseline/mossback_boar.glb",
+        "source_sha256": "94a62bc79d316815202f7049bebf5fab584b64f4b645a78603c90d1f4c8caf08"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/mossback_boar.glb-504f9c9a31ea040a7aca75ab40e7b2aa.md5",
+        "import_metadata_sha256": "ff25f697424ca2a3837142687c64d9a6d41a26d0e0345e6b1fa3decc30cd7fef",
+        "imported_resource_path": "res://.godot/imported/mossback_boar.glb-504f9c9a31ea040a7aca75ab40e7b2aa.scn",
+        "imported_resource_sha256": "80e9f3b311f813dd842893339a5c0141cad29e15e5246d27387650e9a088c9bc",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/mossback_boar.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "3265df3c195a71770b84f820cdbbaf9a",
+        "source_path": "res://assets/actors/native/creatures/mossback_boar.glb",
+        "source_sha256": "dc193500a6258c516efff2d2ae0d6a8ad875c921eb0ead4d5c67b4748536d1fd"
+      }
+    ]
   },
   "existing_family_playback": {
     "actors": {
@@ -609,6 +637,83 @@
         "passed": true
       }
     },
-    "scope": "Additional strict model-space actual-native/fresh-editor-import surface equivalence gate, source-size-dependent4float32ULP Euclidean position and0.0001degree direction caps. Does not relax original source observations, Blender16ULP or raster/effects gates."
+    "scope": "Unchanged source-size-dependent4float32ULP Euclidean/.0001degree caps. Native original proof retained; editor pair now explicitly loads BOTH fresh ResourceLoader SCNs, bound to canonical GLB/SCN/sourceMD5/freshness metadata hashes. Earlier Cache-route editor labels withdrawn.",
+    "actual_editor_resource_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/mossback_boar.glb-5a5743d40b7b2a0ffb56504e6035acb6.md5",
+        "import_metadata_sha256": "65acc7157f73227c1d4e508bd170fc8cca2c0a6a3d375851dc668bbc50125ef5",
+        "imported_resource_path": "res://.godot/imported/mossback_boar.glb-5a5743d40b7b2a0ffb56504e6035acb6.scn",
+        "imported_resource_sha256": "7fe92fb6da6ccea20a37101e8b8b520f58a7ef072515d68fb2ef504b14f227b8",
+        "packed_scene_resource_path": "res://assets/storage-baseline/mossback_boar.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "2cc4e4398939cb15f30e6bc4acb61aed",
+        "source_path": "res://assets/storage-baseline/mossback_boar.glb",
+        "source_sha256": "94a62bc79d316815202f7049bebf5fab584b64f4b645a78603c90d1f4c8caf08"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/mossback_boar.glb-504f9c9a31ea040a7aca75ab40e7b2aa.md5",
+        "import_metadata_sha256": "ff25f697424ca2a3837142687c64d9a6d41a26d0e0345e6b1fa3decc30cd7fef",
+        "imported_resource_path": "res://.godot/imported/mossback_boar.glb-504f9c9a31ea040a7aca75ab40e7b2aa.scn",
+        "imported_resource_sha256": "80e9f3b311f813dd842893339a5c0141cad29e15e5246d27387650e9a088c9bc",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/mossback_boar.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "3265df3c195a71770b84f820cdbbaf9a",
+        "source_path": "res://assets/actors/native/creatures/mossback_boar.glb",
+        "source_sha256": "dc193500a6258c516efff2d2ae0d6a8ad875c921eb0ead4d5c67b4748536d1fd"
+      }
+    ]
+  },
+  "actual_editor_mode_correction": {
+    "passed": true,
+    "source_sha256": "94a62bc79d316815202f7049bebf5fab584b64f4b645a78603c90d1f4c8caf08",
+    "candidate_sha256": "dc193500a6258c516efff2d2ae0d6a8ad875c921eb0ead4d5c67b4748536d1fd",
+    "prior_cache_route_editor_comparison_labels_withdrawn": true,
+    "previous_public_receipt_sha256": "57dd608e9e743463bae33c4323f2342f8ad107a0cea0a643190e52e13da4ed33",
+    "source_and_current_actual_editor_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/mossback_boar.glb-5a5743d40b7b2a0ffb56504e6035acb6.md5",
+        "import_metadata_sha256": "65acc7157f73227c1d4e508bd170fc8cca2c0a6a3d375851dc668bbc50125ef5",
+        "imported_resource_path": "res://.godot/imported/mossback_boar.glb-5a5743d40b7b2a0ffb56504e6035acb6.scn",
+        "imported_resource_sha256": "7fe92fb6da6ccea20a37101e8b8b520f58a7ef072515d68fb2ef504b14f227b8",
+        "packed_scene_resource_path": "res://assets/storage-baseline/mossback_boar.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "2cc4e4398939cb15f30e6bc4acb61aed",
+        "source_path": "res://assets/storage-baseline/mossback_boar.glb",
+        "source_sha256": "94a62bc79d316815202f7049bebf5fab584b64f4b645a78603c90d1f4c8caf08"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/mossback_boar.glb-504f9c9a31ea040a7aca75ab40e7b2aa.md5",
+        "import_metadata_sha256": "ff25f697424ca2a3837142687c64d9a6d41a26d0e0345e6b1fa3decc30cd7fef",
+        "imported_resource_path": "res://.godot/imported/mossback_boar.glb-504f9c9a31ea040a7aca75ab40e7b2aa.scn",
+        "imported_resource_sha256": "80e9f3b311f813dd842893339a5c0141cad29e15e5246d27387650e9a088c9bc",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/mossback_boar.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "3265df3c195a71770b84f820cdbbaf9a",
+        "source_path": "res://assets/actors/native/creatures/mossback_boar.glb",
+        "source_sha256": "dc193500a6258c516efff2d2ae0d6a8ad875c921eb0ead4d5c67b4748536d1fd"
+      }
+    ],
+    "source_size_position_budget": 9.5367431640625e-07,
+    "maximum_position_error": 2.878618519363789e-07,
+    "normal_angle_budget_degrees": 0.0001,
+    "maximum_normal_angle_degrees": 2.3859880382880394e-05,
+    "all_typed_static_attributes_retained_morph_PNT_oriented_triangles_material_storage_and_texture_mips_identical": true,
+    "independent_complete_editor_vertex_and_oriented_triangle_payload_multisets_identical": true,
+    "independent_payload_source_retained_column_mapping": "No partitions. Exact preparation retained indices independently checked against raw authored POSITION/NORMAL/TANGENT accessor bits; no raw vertex ordinal or arbitrary coincident-ID assumption.",
+    "numeric_static_material_SCNs_identical": true,
+    "numeric_report_sha256": "3b7abd2e53f9bba4ea4d7e1fdda10dd4f4b8c7e31c4f0aabc34afc34c4752cf4",
+    "static_report_sha256": "004220aa3e7dfb4d2c1c6ae87bdc774dd8ddbda9cca4cccf5230d3ba10638a89",
+    "direct_payload_report_sha256": "9f8df7e11f8b91aa387aced7ad91ac92159dc2be018ae017b88382181421db57",
+    "material_report_sha256": "3a78a4f846118579cb6aebae8546a0d01b63d50c42f31d07efa5fe5c54a157f9",
+    "loader_guard": "Public dump_creature_storage.gd explicit ResourceLoader imported branch; scene policy/current-source MD5/cache destination MD5 where single destination, source/SCN/freshness metadata SHA-bound.",
+    "scope": "Corrected matched actualEditor source/current comparison. Prior raw-Cache-source versus editor-current comparison labels are withdrawn; prior source/native/Blender/fullbody/seededFX/render evidence unchanged. All original caps and frozen source observations unchanged. Complete typed static attributes, retained morph P/N/T and oriented triangle payloads match. Material typed storage and texture pixels/mips match; generated distant LOD identity is not claimed."
   }
 }

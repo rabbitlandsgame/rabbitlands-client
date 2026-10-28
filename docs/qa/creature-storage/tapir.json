@@ -315,9 +315,37 @@
       "max_normal_degrees": 2.106936231525657e-05,
       "p99_normal_degrees": 1.9385675643307827e-05
     },
-    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "scope": "Both original and CURRENT final meshes loaded explicitly through ResourceLoader from fresh editor SCNs, bound to source/current GLB +SCN +freshness metadata hashes. All source clips, directed crossfades and RESET; independent retained-static/morph bijection and unchanged4float32ULP Euclidean/.0001degree caps. Earlier Cache-route imported labels are withdrawn, not treated as editor evidence.",
     "source_sha256": "d84ddff26f57dd5b89e2146f2080214f06fb39e0271727becb1b7b719159d5da",
-    "candidate_sha256": "5bd461b3f450b6a785972ed987e5db2c9d2260b8a549f8b4b39c207f48ef8130"
+    "candidate_sha256": "5bd461b3f450b6a785972ed987e5db2c9d2260b8a549f8b4b39c207f48ef8130",
+    "actual_editor_scene_loads": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/tapir.glb-d10a5f72f36e89b6fa9b35259c785bd2.md5",
+        "import_metadata_sha256": "a5eead299c136bde403a5a86ae3a064c8aae5c962299e4961e0c09ca945a2a21",
+        "imported_resource_path": "res://.godot/imported/tapir.glb-d10a5f72f36e89b6fa9b35259c785bd2.scn",
+        "imported_resource_sha256": "411ebe14ce05deb3c17b0b831be7f9862d05831eebfb664afefc786de94a436b",
+        "packed_scene_resource_path": "res://assets/storage-baseline/tapir.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "00d2cdfbf201b92de1220f75261625d1",
+        "source_path": "res://assets/storage-baseline/tapir.glb",
+        "source_sha256": "d84ddff26f57dd5b89e2146f2080214f06fb39e0271727becb1b7b719159d5da"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/tapir.glb-9d3e9567a4749decdaab527d723b3bdd.md5",
+        "import_metadata_sha256": "1b9f209ae061e49c23607703df9b9c0150d095d81c203fbf41b3db4bd3c249a6",
+        "imported_resource_path": "res://.godot/imported/tapir.glb-9d3e9567a4749decdaab527d723b3bdd.scn",
+        "imported_resource_sha256": "3c65d2216ca2a385bc31d69b6e5b542676b711987235bc64e343f89169097f9f",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/tapir.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "077afe12c83a6ac0e45806ffd3e6c757",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/tapir.glb",
+        "source_sha256": "5bd461b3f450b6a785972ed987e5db2c9d2260b8a549f8b4b39c207f48ef8130"
+      }
+    ]
   },
   "existing_family_playback": {
     "actors": {
@@ -608,6 +636,83 @@
         "passed": true
       }
     },
-    "scope": "Additional strict model-space actual-native/fresh-editor-import surface equivalence gate, source-size-dependent4float32ULP Euclidean position and0.0001degree direction caps. Does not relax original source observations, Blender16ULP or raster/effects gates."
+    "scope": "Unchanged source-size-dependent4float32ULP Euclidean/.0001degree caps. Native original proof retained; editor pair now explicitly loads BOTH fresh ResourceLoader SCNs, bound to canonical GLB/SCN/sourceMD5/freshness metadata hashes. Earlier Cache-route editor labels withdrawn.",
+    "actual_editor_resource_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/tapir.glb-d10a5f72f36e89b6fa9b35259c785bd2.md5",
+        "import_metadata_sha256": "a5eead299c136bde403a5a86ae3a064c8aae5c962299e4961e0c09ca945a2a21",
+        "imported_resource_path": "res://.godot/imported/tapir.glb-d10a5f72f36e89b6fa9b35259c785bd2.scn",
+        "imported_resource_sha256": "411ebe14ce05deb3c17b0b831be7f9862d05831eebfb664afefc786de94a436b",
+        "packed_scene_resource_path": "res://assets/storage-baseline/tapir.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "00d2cdfbf201b92de1220f75261625d1",
+        "source_path": "res://assets/storage-baseline/tapir.glb",
+        "source_sha256": "d84ddff26f57dd5b89e2146f2080214f06fb39e0271727becb1b7b719159d5da"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/tapir.glb-9d3e9567a4749decdaab527d723b3bdd.md5",
+        "import_metadata_sha256": "1b9f209ae061e49c23607703df9b9c0150d095d81c203fbf41b3db4bd3c249a6",
+        "imported_resource_path": "res://.godot/imported/tapir.glb-9d3e9567a4749decdaab527d723b3bdd.scn",
+        "imported_resource_sha256": "3c65d2216ca2a385bc31d69b6e5b542676b711987235bc64e343f89169097f9f",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/tapir.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "077afe12c83a6ac0e45806ffd3e6c757",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/tapir.glb",
+        "source_sha256": "5bd461b3f450b6a785972ed987e5db2c9d2260b8a549f8b4b39c207f48ef8130"
+      }
+    ]
+  },
+  "actual_editor_mode_correction": {
+    "passed": true,
+    "source_sha256": "d84ddff26f57dd5b89e2146f2080214f06fb39e0271727becb1b7b719159d5da",
+    "candidate_sha256": "5bd461b3f450b6a785972ed987e5db2c9d2260b8a549f8b4b39c207f48ef8130",
+    "prior_cache_route_editor_comparison_labels_withdrawn": true,
+    "previous_public_receipt_sha256": "821c022023d38a83f534265dc20f58b3f4be0dfd5b5ffb3a7018e683f5b63a10",
+    "source_and_current_actual_editor_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/tapir.glb-d10a5f72f36e89b6fa9b35259c785bd2.md5",
+        "import_metadata_sha256": "a5eead299c136bde403a5a86ae3a064c8aae5c962299e4961e0c09ca945a2a21",
+        "imported_resource_path": "res://.godot/imported/tapir.glb-d10a5f72f36e89b6fa9b35259c785bd2.scn",
+        "imported_resource_sha256": "411ebe14ce05deb3c17b0b831be7f9862d05831eebfb664afefc786de94a436b",
+        "packed_scene_resource_path": "res://assets/storage-baseline/tapir.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "00d2cdfbf201b92de1220f75261625d1",
+        "source_path": "res://assets/storage-baseline/tapir.glb",
+        "source_sha256": "d84ddff26f57dd5b89e2146f2080214f06fb39e0271727becb1b7b719159d5da"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/tapir.glb-9d3e9567a4749decdaab527d723b3bdd.md5",
+        "import_metadata_sha256": "1b9f209ae061e49c23607703df9b9c0150d095d81c203fbf41b3db4bd3c249a6",
+        "imported_resource_path": "res://.godot/imported/tapir.glb-9d3e9567a4749decdaab527d723b3bdd.scn",
+        "imported_resource_sha256": "3c65d2216ca2a385bc31d69b6e5b542676b711987235bc64e343f89169097f9f",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/tapir.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "077afe12c83a6ac0e45806ffd3e6c757",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/tapir.glb",
+        "source_sha256": "5bd461b3f450b6a785972ed987e5db2c9d2260b8a549f8b4b39c207f48ef8130"
+      }
+    ],
+    "source_size_position_budget": 4.76837158203125e-07,
+    "maximum_position_error": 1.0776076322117382e-07,
+    "normal_angle_budget_degrees": 0.0001,
+    "maximum_normal_angle_degrees": 2.106936231525657e-05,
+    "all_typed_static_attributes_retained_morph_PNT_oriented_triangles_material_storage_and_texture_mips_identical": true,
+    "independent_complete_editor_vertex_and_oriented_triangle_payload_multisets_identical": true,
+    "independent_payload_source_retained_column_mapping": "No partitions. Exact preparation retained indices independently checked against raw authored POSITION/NORMAL/TANGENT accessor bits; no raw vertex ordinal or arbitrary coincident-ID assumption.",
+    "numeric_static_material_SCNs_identical": true,
+    "numeric_report_sha256": "9ee645fda250908036d3bff0c0737e138a60cb2bbb9f2c990880c228aeb9746c",
+    "static_report_sha256": "ffa8ed88cd749376600141ca1d5f4c24221e3d96cf5a95c20845802767ff2dc0",
+    "direct_payload_report_sha256": "5d6e4a39eca46d9079a2f51c74c06451cf1f1bfca8af516305e2803d06a5545f",
+    "material_report_sha256": "cee6b78ebeeb468a2d3b2a7f18f6ece3447a72eca07ec0eedb8cde44ec75b2f7",
+    "loader_guard": "Public dump_creature_storage.gd explicit ResourceLoader imported branch; scene policy/current-source MD5/cache destination MD5 where single destination, source/SCN/freshness metadata SHA-bound.",
+    "scope": "Corrected matched actualEditor source/current comparison. Prior raw-Cache-source versus editor-current comparison labels are withdrawn; prior source/native/Blender/fullbody/seededFX/render evidence unchanged. All original caps and frozen source observations unchanged. Complete typed static attributes, retained morph P/N/T and oriented triangle payloads match. Material typed storage and texture pixels/mips match; generated distant LOD identity is not claimed."
   }
 }

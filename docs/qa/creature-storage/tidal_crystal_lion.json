@@ -315,9 +315,37 @@
       "max_normal_degrees": 3.573631734226621e-05,
       "p99_normal_degrees": 2.7782690789685686e-05
     },
-    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "scope": "Both original and CURRENT final meshes loaded explicitly through ResourceLoader from fresh editor SCNs, bound to source/current GLB +SCN +freshness metadata hashes. All source clips, directed crossfades and RESET; independent retained-static/morph bijection and unchanged4float32ULP Euclidean/.0001degree caps. Earlier Cache-route imported labels are withdrawn, not treated as editor evidence.",
     "source_sha256": "ba107b81be64fe16a6a9025d697371d5379b8a9fb907223ef19c685d9f2f33b9",
-    "candidate_sha256": "6c9da23b8bc3fc9b5458ccff73778ea83428867d7869b9b0ebb8dfc65c46e301"
+    "candidate_sha256": "6c9da23b8bc3fc9b5458ccff73778ea83428867d7869b9b0ebb8dfc65c46e301",
+    "actual_editor_scene_loads": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/tidal_crystal_lion.glb-41cf60a20a235269575b55a48d90f8b4.md5",
+        "import_metadata_sha256": "859c1b7f2aeb40c0a4a12ad40718e65652f29eac6fb2be0e713a0563a654e5f4",
+        "imported_resource_path": "res://.godot/imported/tidal_crystal_lion.glb-41cf60a20a235269575b55a48d90f8b4.scn",
+        "imported_resource_sha256": "b56eefd995f216ad5ee5be55c83e0abe4b8de5b824f36e82f454328a0fc7ac2f",
+        "packed_scene_resource_path": "res://assets/storage-baseline/tidal_crystal_lion.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "f4a22a4ae77929c0db77697476fe65f1",
+        "source_path": "res://assets/storage-baseline/tidal_crystal_lion.glb",
+        "source_sha256": "ba107b81be64fe16a6a9025d697371d5379b8a9fb907223ef19c685d9f2f33b9"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/tidal_crystal_lion.glb-cf767890d584bb5662be5817ab771f29.md5",
+        "import_metadata_sha256": "9e318911498b97d94dd8d50dbf30e82e5d1b58785ab8082ffe058b7851113808",
+        "imported_resource_path": "res://.godot/imported/tidal_crystal_lion.glb-cf767890d584bb5662be5817ab771f29.scn",
+        "imported_resource_sha256": "9f301f3eb2b84cb30f4ceb8639f9f7f69ccff80ca658e34b3229d968fc66926c",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/tidal_crystal_lion.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "ef3645d0f5290d8312d3d2f373912870",
+        "source_path": "res://assets/actors/native/creatures/tidal_crystal_lion.glb",
+        "source_sha256": "6c9da23b8bc3fc9b5458ccff73778ea83428867d7869b9b0ebb8dfc65c46e301"
+      }
+    ]
   },
   "existing_family_playback": {
     "actors": {
@@ -586,5 +614,54 @@
     "maximum_border_foreground_pixels": 0
   },
   "import_scale": 0.705882,
-  "actual_actor_display_scale": 0.7058820128440887
+  "actual_actor_display_scale": 0.7058820128440887,
+  "actual_editor_mode_correction": {
+    "passed": true,
+    "source_sha256": "ba107b81be64fe16a6a9025d697371d5379b8a9fb907223ef19c685d9f2f33b9",
+    "candidate_sha256": "6c9da23b8bc3fc9b5458ccff73778ea83428867d7869b9b0ebb8dfc65c46e301",
+    "prior_cache_route_editor_comparison_labels_withdrawn": true,
+    "previous_public_receipt_sha256": "ec3317dbb4b270accb8161a08aefef1a1579b6b3407b19fbc5ea01b029e474d3",
+    "source_and_current_actual_editor_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/tidal_crystal_lion.glb-41cf60a20a235269575b55a48d90f8b4.md5",
+        "import_metadata_sha256": "859c1b7f2aeb40c0a4a12ad40718e65652f29eac6fb2be0e713a0563a654e5f4",
+        "imported_resource_path": "res://.godot/imported/tidal_crystal_lion.glb-41cf60a20a235269575b55a48d90f8b4.scn",
+        "imported_resource_sha256": "b56eefd995f216ad5ee5be55c83e0abe4b8de5b824f36e82f454328a0fc7ac2f",
+        "packed_scene_resource_path": "res://assets/storage-baseline/tidal_crystal_lion.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "f4a22a4ae77929c0db77697476fe65f1",
+        "source_path": "res://assets/storage-baseline/tidal_crystal_lion.glb",
+        "source_sha256": "ba107b81be64fe16a6a9025d697371d5379b8a9fb907223ef19c685d9f2f33b9"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/tidal_crystal_lion.glb-cf767890d584bb5662be5817ab771f29.md5",
+        "import_metadata_sha256": "9e318911498b97d94dd8d50dbf30e82e5d1b58785ab8082ffe058b7851113808",
+        "imported_resource_path": "res://.godot/imported/tidal_crystal_lion.glb-cf767890d584bb5662be5817ab771f29.scn",
+        "imported_resource_sha256": "9f301f3eb2b84cb30f4ceb8639f9f7f69ccff80ca658e34b3229d968fc66926c",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/tidal_crystal_lion.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "ef3645d0f5290d8312d3d2f373912870",
+        "source_path": "res://assets/actors/native/creatures/tidal_crystal_lion.glb",
+        "source_sha256": "6c9da23b8bc3fc9b5458ccff73778ea83428867d7869b9b0ebb8dfc65c46e301"
+      }
+    ],
+    "source_size_position_budget": 9.5367431640625e-07,
+    "maximum_position_error": 7.965648059215294e-07,
+    "normal_angle_budget_degrees": 0.0001,
+    "maximum_normal_angle_degrees": 3.573631734226621e-05,
+    "all_typed_static_attributes_retained_morph_PNT_oriented_triangles_material_storage_and_texture_mips_identical": true,
+    "independent_complete_editor_vertex_and_oriented_triangle_payload_multisets_identical": true,
+    "independent_payload_source_retained_column_mapping": "No partitions. Exact preparation retained indices independently checked against raw authored POSITION/NORMAL/TANGENT accessor bits; no raw vertex ordinal or arbitrary coincident-ID assumption.",
+    "numeric_static_material_SCNs_identical": true,
+    "numeric_report_sha256": "59cbdccc1c5cd6d202612035eff129c0663cc6c4246447a7bcc7b715719ef791",
+    "static_report_sha256": "c69d83e12c55d6f95cdd516304b387a9b82c328223d7693f70355e89fba757ff",
+    "direct_payload_report_sha256": "6cc3a9dcaf59a6617c70aaf137b01466502610c1997c8df4f272a521b9185329",
+    "material_report_sha256": "52482ee0cb5450e89194ae96ab8f6a868b968cabd57ae3caffede29f1bd15a20",
+    "loader_guard": "Public dump_creature_storage.gd explicit ResourceLoader imported branch; scene policy/current-source MD5/cache destination MD5 where single destination, source/SCN/freshness metadata SHA-bound.",
+    "scope": "Corrected matched actualEditor source/current comparison. Prior raw-Cache-source versus editor-current comparison labels are withdrawn; prior source/native/Blender/fullbody/seededFX/render evidence unchanged. All original caps and frozen source observations unchanged. Complete typed static attributes, retained morph P/N/T and oriented triangle payloads match. Material typed storage and texture pixels/mips match; generated distant LOD identity is not claimed."
+  }
 }

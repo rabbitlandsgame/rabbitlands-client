@@ -329,9 +329,37 @@
       "max_normal_degrees": 2.2524095754713237e-05,
       "p99_normal_degrees": 1.8582846624598264e-05
     },
-    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "scope": "Both original and CURRENT final meshes loaded explicitly through ResourceLoader from fresh editor SCNs, bound to source/current GLB +SCN +freshness metadata hashes. All source clips, directed crossfades and RESET; independent retained-static/morph bijection and unchanged4float32ULP Euclidean/.0001degree caps. Earlier Cache-route imported labels are withdrawn, not treated as editor evidence.",
     "source_sha256": "ec8285ba0059b02a27fe779d44419889c4884b1afe091eb37cb12d89d145b64d",
-    "candidate_sha256": "206de89967ee2ac21acf7528c30ff810cb9e7a87c168da2bb1effaade83754d2"
+    "candidate_sha256": "206de89967ee2ac21acf7528c30ff810cb9e7a87c168da2bb1effaade83754d2",
+    "actual_editor_scene_loads": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/dormouse.glb-43afdc51d05140476fa3446b55ee9f44.md5",
+        "import_metadata_sha256": "25c14636442be261ce30a2cb6ee7de9ae6827a722506de551b64d5f533ecfcc0",
+        "imported_resource_path": "res://.godot/imported/dormouse.glb-43afdc51d05140476fa3446b55ee9f44.scn",
+        "imported_resource_sha256": "0ba57df1b05bee189ee54da19df006db36e08f1ad46287e325e072d82f4c83aa",
+        "packed_scene_resource_path": "res://assets/storage-baseline/dormouse.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "7304c616ee2b61eef469915490828509",
+        "source_path": "res://assets/storage-baseline/dormouse.glb",
+        "source_sha256": "ec8285ba0059b02a27fe779d44419889c4884b1afe091eb37cb12d89d145b64d"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/dormouse.glb-a85c8e607ce421d4db501d1da5a842e3.md5",
+        "import_metadata_sha256": "73fb0bf9dfa9184db064035db229df824a6b3f012ec6f00e650daae9d84d8da9",
+        "imported_resource_path": "res://.godot/imported/dormouse.glb-a85c8e607ce421d4db501d1da5a842e3.scn",
+        "imported_resource_sha256": "d23a21f962ca54d7bcee3ebbab0bf78c597a5c9ec201fb0bb8bfe070148579a8",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/dormouse.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "619003ee5f7fcc16142d7b7bef75918d",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/dormouse.glb",
+        "source_sha256": "206de89967ee2ac21acf7528c30ff810cb9e7a87c168da2bb1effaade83754d2"
+      }
+    ]
   },
   "existing_family_playback": {
     "actors": {
@@ -607,5 +635,54 @@
     "maximum_border_foreground_pixels": 0
   },
   "import_scale": 0.14999979,
-  "actual_actor_display_scale": 0.6995391845703157
+  "actual_actor_display_scale": 0.6995391845703157,
+  "actual_editor_mode_correction": {
+    "passed": true,
+    "source_sha256": "ec8285ba0059b02a27fe779d44419889c4884b1afe091eb37cb12d89d145b64d",
+    "candidate_sha256": "206de89967ee2ac21acf7528c30ff810cb9e7a87c168da2bb1effaade83754d2",
+    "prior_cache_route_editor_comparison_labels_withdrawn": true,
+    "previous_public_receipt_sha256": "e04a9563c480330077ffc57117e2f7cf0f329d3f5bf4891d7a6905013642f7ed",
+    "source_and_current_actual_editor_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/dormouse.glb-43afdc51d05140476fa3446b55ee9f44.md5",
+        "import_metadata_sha256": "25c14636442be261ce30a2cb6ee7de9ae6827a722506de551b64d5f533ecfcc0",
+        "imported_resource_path": "res://.godot/imported/dormouse.glb-43afdc51d05140476fa3446b55ee9f44.scn",
+        "imported_resource_sha256": "0ba57df1b05bee189ee54da19df006db36e08f1ad46287e325e072d82f4c83aa",
+        "packed_scene_resource_path": "res://assets/storage-baseline/dormouse.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "7304c616ee2b61eef469915490828509",
+        "source_path": "res://assets/storage-baseline/dormouse.glb",
+        "source_sha256": "ec8285ba0059b02a27fe779d44419889c4884b1afe091eb37cb12d89d145b64d"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/dormouse.glb-a85c8e607ce421d4db501d1da5a842e3.md5",
+        "import_metadata_sha256": "73fb0bf9dfa9184db064035db229df824a6b3f012ec6f00e650daae9d84d8da9",
+        "imported_resource_path": "res://.godot/imported/dormouse.glb-a85c8e607ce421d4db501d1da5a842e3.scn",
+        "imported_resource_sha256": "d23a21f962ca54d7bcee3ebbab0bf78c597a5c9ec201fb0bb8bfe070148579a8",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/dormouse.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "619003ee5f7fcc16142d7b7bef75918d",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/dormouse.glb",
+        "source_sha256": "206de89967ee2ac21acf7528c30ff810cb9e7a87c168da2bb1effaade83754d2"
+      }
+    ],
+    "source_size_position_budget": 4.76837158203125e-07,
+    "maximum_position_error": 5.970412418252278e-08,
+    "normal_angle_budget_degrees": 0.0001,
+    "maximum_normal_angle_degrees": 2.2524095754713237e-05,
+    "all_typed_static_attributes_retained_morph_PNT_oriented_triangles_material_storage_and_texture_mips_identical": true,
+    "independent_complete_editor_vertex_and_oriented_triangle_payload_multisets_identical": true,
+    "independent_payload_source_retained_column_mapping": "No partitions. Exact preparation retained indices independently checked against raw authored POSITION/NORMAL/TANGENT accessor bits; no raw vertex ordinal or arbitrary coincident-ID assumption.",
+    "numeric_static_material_SCNs_identical": true,
+    "numeric_report_sha256": "97c6c0efcc3d92d7a47d972f729a7a64a0265f67cb45a08fee0d4b1a09207834",
+    "static_report_sha256": "0f77f69f5f726aef653999321ae2fac854119926f5a55bb7c64074de62e729a3",
+    "direct_payload_report_sha256": "83a23b1478b1065c82ecdec899e1890d9a90d692bc0e12e1287c93ba02fa3669",
+    "material_report_sha256": "c3522210da1979b030ccf6abffdea5ade6bdf0000fba2d812ed0d1a35dd198ca",
+    "loader_guard": "Public dump_creature_storage.gd explicit ResourceLoader imported branch; scene policy/current-source MD5/cache destination MD5 where single destination, source/SCN/freshness metadata SHA-bound.",
+    "scope": "Corrected matched actualEditor source/current comparison. Prior raw-Cache-source versus editor-current comparison labels are withdrawn; prior source/native/Blender/fullbody/seededFX/render evidence unchanged. All original caps and frozen source observations unchanged. Complete typed static attributes, retained morph P/N/T and oriented triangle payloads match. Material typed storage and texture pixels/mips match; generated distant LOD identity is not claimed."
+  }
 }

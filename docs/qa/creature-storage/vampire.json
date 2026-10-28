@@ -313,9 +313,37 @@
       "max_normal_degrees": 8.408695236852925e-06,
       "p99_normal_degrees": 6.156649318399953e-06
     },
-    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "scope": "Both original and CURRENT final meshes loaded explicitly through ResourceLoader from fresh editor SCNs, bound to source/current GLB +SCN +freshness metadata hashes. All source clips, directed crossfades and RESET; independent retained-static/morph bijection and unchanged4float32ULP Euclidean/.0001degree caps. Earlier Cache-route imported labels are withdrawn, not treated as editor evidence.",
     "source_sha256": "fff9fb0a66847c2067412267af1b13c60d6ba9c31e0ba5b8d063e4c6590e3801",
-    "candidate_sha256": "d772de9390366685e262fa63135fa380014c19f164d1b90fa5b84a9033610fc9"
+    "candidate_sha256": "d772de9390366685e262fa63135fa380014c19f164d1b90fa5b84a9033610fc9",
+    "actual_editor_scene_loads": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/vampire.glb-3edf5a1f9d151fe046435a6ffdf18aa6.md5",
+        "import_metadata_sha256": "0270bf1ab76ea306087952fe5dd0b550d3056d2fc8a299205ef35bdeaf7a604c",
+        "imported_resource_path": "res://.godot/imported/vampire.glb-3edf5a1f9d151fe046435a6ffdf18aa6.scn",
+        "imported_resource_sha256": "572c64180ac3a06dd1900026f7bedcbb9dbc435e98a7686edc327806a43ebffa",
+        "packed_scene_resource_path": "res://assets/storage-baseline/vampire.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "da9403dbaef305beb1bb74b31bee9dd7",
+        "source_path": "res://assets/storage-baseline/vampire.glb",
+        "source_sha256": "fff9fb0a66847c2067412267af1b13c60d6ba9c31e0ba5b8d063e4c6590e3801"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/vampire.glb-4eaec8ffa4b773f28c70b4d350e8b4aa.md5",
+        "import_metadata_sha256": "f5f3b55e8e4f180d28ca576ca149020a7382a987ebd5045f1482917af70bc4c2",
+        "imported_resource_path": "res://.godot/imported/vampire.glb-4eaec8ffa4b773f28c70b4d350e8b4aa.scn",
+        "imported_resource_sha256": "cf234dafe4ce84798627129b74e59170046afb40ddac2758d29a738a7be6f7a3",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/vampire.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "dc772584e24757bfffd3b4981dda5c8b",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/vampire.glb",
+        "source_sha256": "d772de9390366685e262fa63135fa380014c19f164d1b90fa5b84a9033610fc9"
+      }
+    ]
   },
   "existing_family_playback": {
     "actors": {
@@ -617,5 +645,54 @@
     ],
     "passed": true,
     "all_source_clips_full_cycle_rendered": true
+  },
+  "actual_editor_mode_correction": {
+    "passed": true,
+    "source_sha256": "fff9fb0a66847c2067412267af1b13c60d6ba9c31e0ba5b8d063e4c6590e3801",
+    "candidate_sha256": "d772de9390366685e262fa63135fa380014c19f164d1b90fa5b84a9033610fc9",
+    "prior_cache_route_editor_comparison_labels_withdrawn": true,
+    "previous_public_receipt_sha256": "9363b3d804d3d7c0bf57995e896a5b5516cc788956d75d0e27059cea01de81ae",
+    "source_and_current_actual_editor_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/vampire.glb-3edf5a1f9d151fe046435a6ffdf18aa6.md5",
+        "import_metadata_sha256": "0270bf1ab76ea306087952fe5dd0b550d3056d2fc8a299205ef35bdeaf7a604c",
+        "imported_resource_path": "res://.godot/imported/vampire.glb-3edf5a1f9d151fe046435a6ffdf18aa6.scn",
+        "imported_resource_sha256": "572c64180ac3a06dd1900026f7bedcbb9dbc435e98a7686edc327806a43ebffa",
+        "packed_scene_resource_path": "res://assets/storage-baseline/vampire.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "da9403dbaef305beb1bb74b31bee9dd7",
+        "source_path": "res://assets/storage-baseline/vampire.glb",
+        "source_sha256": "fff9fb0a66847c2067412267af1b13c60d6ba9c31e0ba5b8d063e4c6590e3801"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/vampire.glb-4eaec8ffa4b773f28c70b4d350e8b4aa.md5",
+        "import_metadata_sha256": "f5f3b55e8e4f180d28ca576ca149020a7382a987ebd5045f1482917af70bc4c2",
+        "imported_resource_path": "res://.godot/imported/vampire.glb-4eaec8ffa4b773f28c70b4d350e8b4aa.scn",
+        "imported_resource_sha256": "cf234dafe4ce84798627129b74e59170046afb40ddac2758d29a738a7be6f7a3",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/vampire.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "dc772584e24757bfffd3b4981dda5c8b",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/vampire.glb",
+        "source_sha256": "d772de9390366685e262fa63135fa380014c19f164d1b90fa5b84a9033610fc9"
+      }
+    ],
+    "source_size_position_budget": 4.76837158203125e-07,
+    "maximum_position_error": 1.1830643127318286e-07,
+    "normal_angle_budget_degrees": 0.0001,
+    "maximum_normal_angle_degrees": 8.408695236852925e-06,
+    "all_typed_static_attributes_retained_morph_PNT_oriented_triangles_material_storage_and_texture_mips_identical": true,
+    "independent_complete_editor_vertex_and_oriented_triangle_payload_multisets_identical": true,
+    "independent_payload_source_retained_column_mapping": "No partitions. Exact preparation retained indices independently checked against raw authored POSITION/NORMAL/TANGENT accessor bits; no raw vertex ordinal or arbitrary coincident-ID assumption.",
+    "numeric_static_material_SCNs_identical": true,
+    "numeric_report_sha256": "e68e72b0ff4464f0711147c1b04a064468829e9397e0f44cc05a66c40f60ebe3",
+    "static_report_sha256": "ebd17a60aeabb5f01ac78a0b012d6f368130f54ccf93b5a4b9769eef3fd475d3",
+    "direct_payload_report_sha256": "ef05800490b97a76f92adeb7dc822e594e3f20699343654884ebcecc2bb97121",
+    "material_report_sha256": "2a07b5c98b866948d94e009bd0b4610c371139d59f85cd8577044df0f4bde42c",
+    "loader_guard": "Public dump_creature_storage.gd explicit ResourceLoader imported branch; scene policy/current-source MD5/cache destination MD5 where single destination, source/SCN/freshness metadata SHA-bound.",
+    "scope": "Corrected matched actualEditor source/current comparison. Prior raw-Cache-source versus editor-current comparison labels are withdrawn; prior source/native/Blender/fullbody/seededFX/render evidence unchanged. All original caps and frozen source observations unchanged. Complete typed static attributes, retained morph P/N/T and oriented triangle payloads match. Material typed storage and texture pixels/mips match; generated distant LOD identity is not claimed."
   }
 }

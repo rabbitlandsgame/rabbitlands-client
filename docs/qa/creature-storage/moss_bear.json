@@ -371,9 +371,37 @@
       "max_normal_degrees": 5.156679739517735e-05,
       "p99_normal_degrees": 1.8271553931657168e-05
     },
-    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "scope": "Both original and CURRENT final meshes loaded explicitly through ResourceLoader from fresh editor SCNs, bound to source/current GLB +SCN +freshness metadata hashes. All source clips, directed crossfades and RESET; independent retained-static/morph bijection and unchanged4float32ULP Euclidean/.0001degree caps. Earlier Cache-route imported labels are withdrawn, not treated as editor evidence.",
     "source_sha256": "e27a2fedbfa57da44c0f3ff6ca10511f321367b63b0bbb69dfebcc30e498231c",
-    "candidate_sha256": "b7297bb872a7cf2ddc23731efa1427554b6762eac8538295a2f9c21aadc75247"
+    "candidate_sha256": "b7297bb872a7cf2ddc23731efa1427554b6762eac8538295a2f9c21aadc75247",
+    "actual_editor_scene_loads": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/moss_bear.glb-adcd6aacca01817c3651229078b2888b.md5",
+        "import_metadata_sha256": "ee9cc5143598e2d2ef8bff1282b518e0c85564d1f75919e5fdf3e41b251c7810",
+        "imported_resource_path": "res://.godot/imported/moss_bear.glb-adcd6aacca01817c3651229078b2888b.scn",
+        "imported_resource_sha256": "827691e48a9f5fd85f5be162ec1774ec62c88f1edc5539415ca59f3941e6559a",
+        "packed_scene_resource_path": "res://assets/storage-baseline/moss_bear.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "1a7a188246d1efa336975313f12e412c",
+        "source_path": "res://assets/storage-baseline/moss_bear.glb",
+        "source_sha256": "e27a2fedbfa57da44c0f3ff6ca10511f321367b63b0bbb69dfebcc30e498231c"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/moss_bear.glb-fb9e6090dd82836c7fb3ac4823049b63.md5",
+        "import_metadata_sha256": "4e57be2480d744da0ed59409efac5739d13afb90431842fe2104541d79a2d13a",
+        "imported_resource_path": "res://.godot/imported/moss_bear.glb-fb9e6090dd82836c7fb3ac4823049b63.scn",
+        "imported_resource_sha256": "32bd143155f28ea41b93d181fb6e06e143855240b4883b31a88fc8023f03ca0f",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/moss_bear.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "5054617e0c4134aefd37e52094e8f7d8",
+        "source_path": "res://assets/actors/native/creatures/moss_bear.glb",
+        "source_sha256": "b7297bb872a7cf2ddc23731efa1427554b6762eac8538295a2f9c21aadc75247"
+      }
+    ]
   },
   "existing_family_playback": {
     "candidate_sha256": "b7297bb872a7cf2ddc23731efa1427554b6762eac8538295a2f9c21aadc75247",
@@ -639,7 +667,35 @@
         "passed": true
       }
     },
-    "scope": "Additional strict model-space actual-native/fresh-editor-import surface equivalence gate, source-size-dependent4float32ULP Euclidean position and0.0001degree direction caps. Does not relax original source observations, Blender16ULP or raster/effects gates."
+    "scope": "Unchanged source-size-dependent4float32ULP Euclidean/.0001degree caps. Native original proof retained; editor pair now explicitly loads BOTH fresh ResourceLoader SCNs, bound to canonical GLB/SCN/sourceMD5/freshness metadata hashes. Earlier Cache-route editor labels withdrawn.",
+    "actual_editor_resource_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/moss_bear.glb-adcd6aacca01817c3651229078b2888b.md5",
+        "import_metadata_sha256": "ee9cc5143598e2d2ef8bff1282b518e0c85564d1f75919e5fdf3e41b251c7810",
+        "imported_resource_path": "res://.godot/imported/moss_bear.glb-adcd6aacca01817c3651229078b2888b.scn",
+        "imported_resource_sha256": "827691e48a9f5fd85f5be162ec1774ec62c88f1edc5539415ca59f3941e6559a",
+        "packed_scene_resource_path": "res://assets/storage-baseline/moss_bear.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "1a7a188246d1efa336975313f12e412c",
+        "source_path": "res://assets/storage-baseline/moss_bear.glb",
+        "source_sha256": "e27a2fedbfa57da44c0f3ff6ca10511f321367b63b0bbb69dfebcc30e498231c"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/moss_bear.glb-fb9e6090dd82836c7fb3ac4823049b63.md5",
+        "import_metadata_sha256": "4e57be2480d744da0ed59409efac5739d13afb90431842fe2104541d79a2d13a",
+        "imported_resource_path": "res://.godot/imported/moss_bear.glb-fb9e6090dd82836c7fb3ac4823049b63.scn",
+        "imported_resource_sha256": "32bd143155f28ea41b93d181fb6e06e143855240b4883b31a88fc8023f03ca0f",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/moss_bear.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "5054617e0c4134aefd37e52094e8f7d8",
+        "source_path": "res://assets/actors/native/creatures/moss_bear.glb",
+        "source_sha256": "b7297bb872a7cf2ddc23731efa1427554b6762eac8538295a2f9c21aadc75247"
+      }
+    ]
   },
   "death_dissolve_source_framing": {
     "actor": "moss_bear",
@@ -676,5 +732,54 @@
     "source_candidate_matrix_error": 0.0,
     "original_historical_runtime_cap": 0.0001,
     "scope": "Original historical fitness cap is unchanged. Exact current-source preservation, Blender and actual native/editor precision gates are independent."
+  },
+  "actual_editor_mode_correction": {
+    "passed": true,
+    "source_sha256": "e27a2fedbfa57da44c0f3ff6ca10511f321367b63b0bbb69dfebcc30e498231c",
+    "candidate_sha256": "b7297bb872a7cf2ddc23731efa1427554b6762eac8538295a2f9c21aadc75247",
+    "prior_cache_route_editor_comparison_labels_withdrawn": true,
+    "previous_public_receipt_sha256": "b6d73aca96e10dd788c7d7dcc90c075546c749e90d7e34bb0fe5f3c94150dd64",
+    "source_and_current_actual_editor_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/moss_bear.glb-adcd6aacca01817c3651229078b2888b.md5",
+        "import_metadata_sha256": "ee9cc5143598e2d2ef8bff1282b518e0c85564d1f75919e5fdf3e41b251c7810",
+        "imported_resource_path": "res://.godot/imported/moss_bear.glb-adcd6aacca01817c3651229078b2888b.scn",
+        "imported_resource_sha256": "827691e48a9f5fd85f5be162ec1774ec62c88f1edc5539415ca59f3941e6559a",
+        "packed_scene_resource_path": "res://assets/storage-baseline/moss_bear.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "1a7a188246d1efa336975313f12e412c",
+        "source_path": "res://assets/storage-baseline/moss_bear.glb",
+        "source_sha256": "e27a2fedbfa57da44c0f3ff6ca10511f321367b63b0bbb69dfebcc30e498231c"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/moss_bear.glb-fb9e6090dd82836c7fb3ac4823049b63.md5",
+        "import_metadata_sha256": "4e57be2480d744da0ed59409efac5739d13afb90431842fe2104541d79a2d13a",
+        "imported_resource_path": "res://.godot/imported/moss_bear.glb-fb9e6090dd82836c7fb3ac4823049b63.scn",
+        "imported_resource_sha256": "32bd143155f28ea41b93d181fb6e06e143855240b4883b31a88fc8023f03ca0f",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/moss_bear.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "5054617e0c4134aefd37e52094e8f7d8",
+        "source_path": "res://assets/actors/native/creatures/moss_bear.glb",
+        "source_sha256": "b7297bb872a7cf2ddc23731efa1427554b6762eac8538295a2f9c21aadc75247"
+      }
+    ],
+    "source_size_position_budget": 9.5367431640625e-07,
+    "maximum_position_error": 2.8801454436700886e-07,
+    "normal_angle_budget_degrees": 0.0001,
+    "maximum_normal_angle_degrees": 5.156679739517735e-05,
+    "all_typed_static_attributes_retained_morph_PNT_oriented_triangles_material_storage_and_texture_mips_identical": true,
+    "independent_complete_editor_vertex_and_oriented_triangle_payload_multisets_identical": true,
+    "independent_payload_source_retained_column_mapping": "No partitions. Exact preparation retained indices independently checked against raw authored POSITION/NORMAL/TANGENT accessor bits; no raw vertex ordinal or arbitrary coincident-ID assumption.",
+    "numeric_static_material_SCNs_identical": true,
+    "numeric_report_sha256": "2140ad061173072bcd2ac0e7fcccc1f0cde0e9e3dd0600934805c89ef832a827",
+    "static_report_sha256": "adbd97ced71ae1cfaa368757bad19d6d4899fae15bcb32aa0fafbc383b5b912a",
+    "direct_payload_report_sha256": "017341950a728b33fcf885e72425947786c3b2e6c46204976494d22a21b51ae8",
+    "material_report_sha256": "5c7c2e147981be39825ebde4873aafd562f2b442933a4cbc470df044906c8cc0",
+    "loader_guard": "Public dump_creature_storage.gd explicit ResourceLoader imported branch; scene policy/current-source MD5/cache destination MD5 where single destination, source/SCN/freshness metadata SHA-bound.",
+    "scope": "Corrected matched actualEditor source/current comparison. Prior raw-Cache-source versus editor-current comparison labels are withdrawn; prior source/native/Blender/fullbody/seededFX/render evidence unchanged. All original caps and frozen source observations unchanged. Complete typed static attributes, retained morph P/N/T and oriented triangle payloads match. Material typed storage and texture pixels/mips match; generated distant LOD identity is not claimed."
   }
 }

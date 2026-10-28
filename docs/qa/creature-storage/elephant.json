@@ -316,9 +316,37 @@
       "max_normal_degrees": 1.6221699278780337e-05,
       "p99_normal_degrees": 1.2547858734911261e-05
     },
-    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "scope": "Both original and CURRENT final meshes loaded explicitly through ResourceLoader from fresh editor SCNs, bound to source/current GLB +SCN +freshness metadata hashes. All source clips, directed crossfades and RESET; independent retained-static/morph bijection and unchanged4float32ULP Euclidean/.0001degree caps. Earlier Cache-route imported labels are withdrawn, not treated as editor evidence.",
     "source_sha256": "63055d1e7651a94b63274c67821ca49f3c64a4b6a0a456a8322a2e708824c57e",
-    "candidate_sha256": "d16491f1d78ea9b5d7a525c1e67dfb372ad24d7a1d9d47eb42b5ef28eea7cf01"
+    "candidate_sha256": "d16491f1d78ea9b5d7a525c1e67dfb372ad24d7a1d9d47eb42b5ef28eea7cf01",
+    "actual_editor_scene_loads": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/elephant.glb-bc1fffe57e07fba325fd2c489ccddc18.md5",
+        "import_metadata_sha256": "b3f2369d9a030c99fdb8300a912eab6656d9fbd32204b173ec2aee6558a42238",
+        "imported_resource_path": "res://.godot/imported/elephant.glb-bc1fffe57e07fba325fd2c489ccddc18.scn",
+        "imported_resource_sha256": "73a0dc53dedc5bfe53b9c9e2bfda87760ffbff628f9ce083942510e29cd2cd64",
+        "packed_scene_resource_path": "res://assets/storage-baseline/elephant.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "bc04fede8cad544e9c16fb94ee54f828",
+        "source_path": "res://assets/storage-baseline/elephant.glb",
+        "source_sha256": "63055d1e7651a94b63274c67821ca49f3c64a4b6a0a456a8322a2e708824c57e"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/elephant.glb-a402349a38d494d3aab888f2fe4b4ea2.md5",
+        "import_metadata_sha256": "cc42e9576d84ff7fbfd623c3ae7e3a2cd3d513bfd923eacfff8d99a7a473be27",
+        "imported_resource_path": "res://.godot/imported/elephant.glb-a402349a38d494d3aab888f2fe4b4ea2.scn",
+        "imported_resource_sha256": "ca646bc876f53d4c35de40d1aad32c8f00cc8da299be3b8c396da9fb9b6d4f40",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/elephant.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "f27f97ada0f2f3200b1e6077b10f0366",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/elephant.glb",
+        "source_sha256": "d16491f1d78ea9b5d7a525c1e67dfb372ad24d7a1d9d47eb42b5ef28eea7cf01"
+      }
+    ]
   },
   "existing_family_playback": {
     "actors": {
@@ -627,5 +655,54 @@
     ],
     "passed": true,
     "all_source_clips_full_cycle_rendered": true
+  },
+  "actual_editor_mode_correction": {
+    "passed": true,
+    "source_sha256": "63055d1e7651a94b63274c67821ca49f3c64a4b6a0a456a8322a2e708824c57e",
+    "candidate_sha256": "d16491f1d78ea9b5d7a525c1e67dfb372ad24d7a1d9d47eb42b5ef28eea7cf01",
+    "prior_cache_route_editor_comparison_labels_withdrawn": true,
+    "previous_public_receipt_sha256": "ab50e316e49a1bfecb579f7b43b3a93568d53670b0267b69fdbdb0f2bc91f04c",
+    "source_and_current_actual_editor_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/elephant.glb-bc1fffe57e07fba325fd2c489ccddc18.md5",
+        "import_metadata_sha256": "b3f2369d9a030c99fdb8300a912eab6656d9fbd32204b173ec2aee6558a42238",
+        "imported_resource_path": "res://.godot/imported/elephant.glb-bc1fffe57e07fba325fd2c489ccddc18.scn",
+        "imported_resource_sha256": "73a0dc53dedc5bfe53b9c9e2bfda87760ffbff628f9ce083942510e29cd2cd64",
+        "packed_scene_resource_path": "res://assets/storage-baseline/elephant.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "bc04fede8cad544e9c16fb94ee54f828",
+        "source_path": "res://assets/storage-baseline/elephant.glb",
+        "source_sha256": "63055d1e7651a94b63274c67821ca49f3c64a4b6a0a456a8322a2e708824c57e"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/elephant.glb-a402349a38d494d3aab888f2fe4b4ea2.md5",
+        "import_metadata_sha256": "cc42e9576d84ff7fbfd623c3ae7e3a2cd3d513bfd923eacfff8d99a7a473be27",
+        "imported_resource_path": "res://.godot/imported/elephant.glb-a402349a38d494d3aab888f2fe4b4ea2.scn",
+        "imported_resource_sha256": "ca646bc876f53d4c35de40d1aad32c8f00cc8da299be3b8c396da9fb9b6d4f40",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/elephant.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "f27f97ada0f2f3200b1e6077b10f0366",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/elephant.glb",
+        "source_sha256": "d16491f1d78ea9b5d7a525c1e67dfb372ad24d7a1d9d47eb42b5ef28eea7cf01"
+      }
+    ],
+    "source_size_position_budget": 4.76837158203125e-07,
+    "maximum_position_error": 7.92765394458405e-08,
+    "normal_angle_budget_degrees": 0.0001,
+    "maximum_normal_angle_degrees": 1.6221699278780337e-05,
+    "all_typed_static_attributes_retained_morph_PNT_oriented_triangles_material_storage_and_texture_mips_identical": true,
+    "independent_complete_editor_vertex_and_oriented_triangle_payload_multisets_identical": true,
+    "independent_payload_source_retained_column_mapping": "No partitions. Exact preparation retained indices independently checked against raw authored POSITION/NORMAL/TANGENT accessor bits; no raw vertex ordinal or arbitrary coincident-ID assumption.",
+    "numeric_static_material_SCNs_identical": true,
+    "numeric_report_sha256": "5f41aaf2e786dd0ae13ed97fc8c931ca0cefdef30bc312bf189115b165ed67a9",
+    "static_report_sha256": "01f69f9807992ea7f65df16d1e597e70cb65b5a6d63496a009864a5a700d8da9",
+    "direct_payload_report_sha256": "9490d3aaeb80d5796d19c6b6c19a0886bf90d3d86ecbe31c19b6f2a2a78cdc65",
+    "material_report_sha256": "c8794426b5d1873f17ef73c94f13e2afc53bf98a25af608e51b14c4cbb7b5fee",
+    "loader_guard": "Public dump_creature_storage.gd explicit ResourceLoader imported branch; scene policy/current-source MD5/cache destination MD5 where single destination, source/SCN/freshness metadata SHA-bound.",
+    "scope": "Corrected matched actualEditor source/current comparison. Prior raw-Cache-source versus editor-current comparison labels are withdrawn; prior source/native/Blender/fullbody/seededFX/render evidence unchanged. All original caps and frozen source observations unchanged. Complete typed static attributes, retained morph P/N/T and oriented triangle payloads match. Material typed storage and texture pixels/mips match; generated distant LOD identity is not claimed."
   }
 }

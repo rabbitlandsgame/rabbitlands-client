@@ -409,9 +409,37 @@
       "max_normal_degrees": 4.180876456920236e-05,
       "p99_normal_degrees": 2.9162946461158954e-05
     },
-    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "scope": "Both original and CURRENT final meshes loaded explicitly through ResourceLoader from fresh editor SCNs, bound to source/current GLB +SCN +freshness metadata hashes. All source clips, directed crossfades and RESET; independent retained-static/morph bijection and unchanged4float32ULP Euclidean/.0001degree caps. Earlier Cache-route imported labels are withdrawn, not treated as editor evidence.",
     "source_sha256": "c7f6ba5c84435c270983f95abdb60954bb1edd518ad9c5864e11411681ef6828",
-    "candidate_sha256": "b28330b15981cd8ceae723dd686c88ad528f643c97a3d375896c5176853d6508"
+    "candidate_sha256": "b28330b15981cd8ceae723dd686c88ad528f643c97a3d375896c5176853d6508",
+    "actual_editor_scene_loads": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/rune_stone_golem.glb-945e97794cc867822ae96384fe6c76c6.md5",
+        "import_metadata_sha256": "b39719cab1ccf5b50aaa30c49131f5057df970ff3e123a2b64c5e6fde301108d",
+        "imported_resource_path": "res://.godot/imported/rune_stone_golem.glb-945e97794cc867822ae96384fe6c76c6.scn",
+        "imported_resource_sha256": "16869ed9205e252c5725076c77f46ca5acea8bb07135b08e43360190d2669594",
+        "packed_scene_resource_path": "res://assets/storage-baseline/rune_stone_golem.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "83c146bdea7a0ddd7c2a202f588e9f74",
+        "source_path": "res://assets/storage-baseline/rune_stone_golem.glb",
+        "source_sha256": "c7f6ba5c84435c270983f95abdb60954bb1edd518ad9c5864e11411681ef6828"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/rune_stone_golem.glb-fe474f1fa868f895d2f151a84b6053da.md5",
+        "import_metadata_sha256": "f2fdd169fddde1d76c96c10855519d59d42e831f3925797d58688448b74affb9",
+        "imported_resource_path": "res://.godot/imported/rune_stone_golem.glb-fe474f1fa868f895d2f151a84b6053da.scn",
+        "imported_resource_sha256": "53c07de38c060162826db5d2a2e618855fc19288714a6f0f0afe066f9fddc040",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/rune_stone_golem.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "4a460f1411943121b3007320254dd90b",
+        "source_path": "res://assets/actors/native/creatures/rune_stone_golem.glb",
+        "source_sha256": "b28330b15981cd8ceae723dd686c88ad528f643c97a3d375896c5176853d6508"
+      }
+    ]
   },
   "existing_family_playback": {
     "actors": {
@@ -724,7 +752,35 @@
         "passed": true
       }
     },
-    "scope": "Additional strict model-space actual-native/fresh-editor-import surface equivalence gate, source-size-dependent4float32ULP Euclidean position and0.0001degree direction caps. Does not relax original source observations, Blender16ULP or raster/effects gates."
+    "scope": "Unchanged source-size-dependent4float32ULP Euclidean/.0001degree caps. Native original proof retained; editor pair now explicitly loads BOTH fresh ResourceLoader SCNs, bound to canonical GLB/SCN/sourceMD5/freshness metadata hashes. Earlier Cache-route editor labels withdrawn.",
+    "actual_editor_resource_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/rune_stone_golem.glb-945e97794cc867822ae96384fe6c76c6.md5",
+        "import_metadata_sha256": "b39719cab1ccf5b50aaa30c49131f5057df970ff3e123a2b64c5e6fde301108d",
+        "imported_resource_path": "res://.godot/imported/rune_stone_golem.glb-945e97794cc867822ae96384fe6c76c6.scn",
+        "imported_resource_sha256": "16869ed9205e252c5725076c77f46ca5acea8bb07135b08e43360190d2669594",
+        "packed_scene_resource_path": "res://assets/storage-baseline/rune_stone_golem.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "83c146bdea7a0ddd7c2a202f588e9f74",
+        "source_path": "res://assets/storage-baseline/rune_stone_golem.glb",
+        "source_sha256": "c7f6ba5c84435c270983f95abdb60954bb1edd518ad9c5864e11411681ef6828"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/rune_stone_golem.glb-fe474f1fa868f895d2f151a84b6053da.md5",
+        "import_metadata_sha256": "f2fdd169fddde1d76c96c10855519d59d42e831f3925797d58688448b74affb9",
+        "imported_resource_path": "res://.godot/imported/rune_stone_golem.glb-fe474f1fa868f895d2f151a84b6053da.scn",
+        "imported_resource_sha256": "53c07de38c060162826db5d2a2e618855fc19288714a6f0f0afe066f9fddc040",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/rune_stone_golem.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "4a460f1411943121b3007320254dd90b",
+        "source_path": "res://assets/actors/native/creatures/rune_stone_golem.glb",
+        "source_sha256": "b28330b15981cd8ceae723dd686c88ad528f643c97a3d375896c5176853d6508"
+      }
+    ]
   },
   "death_dissolve_source_framing": {
     "actor": "rune_stone_golem",
@@ -752,5 +808,54 @@
       }
     ],
     "scope": "All8corners of original full-motion actualActor fit after exact preview translation, both640square orthographic FX cameras, near/far planes and minimum2pixel margin. Actual source/candidate fade PNG foreground borders remain a separate required post-capture check."
+  },
+  "actual_editor_mode_correction": {
+    "passed": true,
+    "source_sha256": "c7f6ba5c84435c270983f95abdb60954bb1edd518ad9c5864e11411681ef6828",
+    "candidate_sha256": "b28330b15981cd8ceae723dd686c88ad528f643c97a3d375896c5176853d6508",
+    "prior_cache_route_editor_comparison_labels_withdrawn": true,
+    "previous_public_receipt_sha256": "930e3a479f82f2ca152d7f40f98cc2da6c5a906f50b6d2fcd452a74aeb38c54c",
+    "source_and_current_actual_editor_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/rune_stone_golem.glb-945e97794cc867822ae96384fe6c76c6.md5",
+        "import_metadata_sha256": "b39719cab1ccf5b50aaa30c49131f5057df970ff3e123a2b64c5e6fde301108d",
+        "imported_resource_path": "res://.godot/imported/rune_stone_golem.glb-945e97794cc867822ae96384fe6c76c6.scn",
+        "imported_resource_sha256": "16869ed9205e252c5725076c77f46ca5acea8bb07135b08e43360190d2669594",
+        "packed_scene_resource_path": "res://assets/storage-baseline/rune_stone_golem.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "83c146bdea7a0ddd7c2a202f588e9f74",
+        "source_path": "res://assets/storage-baseline/rune_stone_golem.glb",
+        "source_sha256": "c7f6ba5c84435c270983f95abdb60954bb1edd518ad9c5864e11411681ef6828"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/rune_stone_golem.glb-fe474f1fa868f895d2f151a84b6053da.md5",
+        "import_metadata_sha256": "f2fdd169fddde1d76c96c10855519d59d42e831f3925797d58688448b74affb9",
+        "imported_resource_path": "res://.godot/imported/rune_stone_golem.glb-fe474f1fa868f895d2f151a84b6053da.scn",
+        "imported_resource_sha256": "53c07de38c060162826db5d2a2e618855fc19288714a6f0f0afe066f9fddc040",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/rune_stone_golem.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "4a460f1411943121b3007320254dd90b",
+        "source_path": "res://assets/actors/native/creatures/rune_stone_golem.glb",
+        "source_sha256": "b28330b15981cd8ceae723dd686c88ad528f643c97a3d375896c5176853d6508"
+      }
+    ],
+    "source_size_position_budget": 4.76837158203125e-07,
+    "maximum_position_error": 3.8153761933659274e-07,
+    "normal_angle_budget_degrees": 0.0001,
+    "maximum_normal_angle_degrees": 4.180876456920236e-05,
+    "all_typed_static_attributes_retained_morph_PNT_oriented_triangles_material_storage_and_texture_mips_identical": true,
+    "independent_complete_editor_vertex_and_oriented_triangle_payload_multisets_identical": true,
+    "independent_payload_source_retained_column_mapping": "No partitions. Exact preparation retained indices independently checked against raw authored POSITION/NORMAL/TANGENT accessor bits; no raw vertex ordinal or arbitrary coincident-ID assumption.",
+    "numeric_static_material_SCNs_identical": true,
+    "numeric_report_sha256": "c0e9f1a597a40e94b1fd22b5a75fbd18e498bf4521eef8eb7a960117361daca8",
+    "static_report_sha256": "a493310d7e56c217903041647d153a31d53a9e8de2da4202455ee4a0fdf091b1",
+    "direct_payload_report_sha256": "f2fae2cba9ccbc04b300c07de2f53020db6e85e43c3f511f21d985f22e4a895a",
+    "material_report_sha256": "74efd7e3fc689f3c8b9bc3800684bf0c712b35b4a84995c794ea089fd00e6e2a",
+    "loader_guard": "Public dump_creature_storage.gd explicit ResourceLoader imported branch; scene policy/current-source MD5/cache destination MD5 where single destination, source/SCN/freshness metadata SHA-bound.",
+    "scope": "Corrected matched actualEditor source/current comparison. Prior raw-Cache-source versus editor-current comparison labels are withdrawn; prior source/native/Blender/fullbody/seededFX/render evidence unchanged. All original caps and frozen source observations unchanged. Complete typed static attributes, retained morph P/N/T and oriented triangle payloads match. Material typed storage and texture pixels/mips match; generated distant LOD identity is not claimed."
   }
 }

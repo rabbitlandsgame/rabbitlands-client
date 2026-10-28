@@ -379,9 +379,37 @@
       "max_normal_degrees": 1.911004052732249e-05,
       "p99_normal_degrees": 1.728759873446386e-05
     },
-    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "scope": "Both original and CURRENT final meshes loaded explicitly through ResourceLoader from fresh editor SCNs, bound to source/current GLB +SCN +freshness metadata hashes. All source clips, directed crossfades and RESET; independent retained-static/morph bijection and unchanged4float32ULP Euclidean/.0001degree caps. Earlier Cache-route imported labels are withdrawn, not treated as editor evidence.",
     "source_sha256": "0f316cbf766798cbaa0e677d81014df243803bdbf813c915dd8572d2ecfdcc58",
-    "candidate_sha256": "cbe4d17ef5e4d666f7e2ca4b59c6adca60f364457271cf49c8a059784f9ce3af"
+    "candidate_sha256": "cbe4d17ef5e4d666f7e2ca4b59c6adca60f364457271cf49c8a059784f9ce3af",
+    "actual_editor_scene_loads": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/thornbark_wolf.glb-532b0a5ec42a4cd0fe931982d799bd8a.md5",
+        "import_metadata_sha256": "62823337b30093fc9ac451f71ba84f6d10dfd6b6ff24fcf3b30256848ff88188",
+        "imported_resource_path": "res://.godot/imported/thornbark_wolf.glb-532b0a5ec42a4cd0fe931982d799bd8a.scn",
+        "imported_resource_sha256": "20e80e4f473c5f1c28e07cd9f21e51b429996814676ac7f06d695920fd892596",
+        "packed_scene_resource_path": "res://assets/storage-baseline/thornbark_wolf.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "b117ced70de4e42d60c46f11c5e793e2",
+        "source_path": "res://assets/storage-baseline/thornbark_wolf.glb",
+        "source_sha256": "0f316cbf766798cbaa0e677d81014df243803bdbf813c915dd8572d2ecfdcc58"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/thornbark_wolf.glb-7683b080fe1f23d045d6f5472c25cd54.md5",
+        "import_metadata_sha256": "d6732b008fee64ef83f020f573b18431f301e4d618468afa84d4455ba92d7f34",
+        "imported_resource_path": "res://.godot/imported/thornbark_wolf.glb-7683b080fe1f23d045d6f5472c25cd54.scn",
+        "imported_resource_sha256": "5e225cce14c36fc52956f8d45e6bc4d6877b3fde0597d019e1d83faf25944931",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/thornbark_wolf.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "8e1792f2b2e3d5a7e9fe7933a9763697",
+        "source_path": "res://assets/actors/native/creatures/thornbark_wolf.glb",
+        "source_sha256": "cbe4d17ef5e4d666f7e2ca4b59c6adca60f364457271cf49c8a059784f9ce3af"
+      }
+    ]
   },
   "existing_family_playback": {
     "actors": [
@@ -649,7 +677,35 @@
         "passed": true
       }
     },
-    "scope": "Additional strict model-space actual-native/fresh-editor-import surface equivalence gate, source-size-dependent4float32ULP Euclidean position and0.0001degree direction caps. Does not relax original source observations, Blender16ULP or raster/effects gates."
+    "scope": "Unchanged source-size-dependent4float32ULP Euclidean/.0001degree caps. Native original proof retained; editor pair now explicitly loads BOTH fresh ResourceLoader SCNs, bound to canonical GLB/SCN/sourceMD5/freshness metadata hashes. Earlier Cache-route editor labels withdrawn.",
+    "actual_editor_resource_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/thornbark_wolf.glb-532b0a5ec42a4cd0fe931982d799bd8a.md5",
+        "import_metadata_sha256": "62823337b30093fc9ac451f71ba84f6d10dfd6b6ff24fcf3b30256848ff88188",
+        "imported_resource_path": "res://.godot/imported/thornbark_wolf.glb-532b0a5ec42a4cd0fe931982d799bd8a.scn",
+        "imported_resource_sha256": "20e80e4f473c5f1c28e07cd9f21e51b429996814676ac7f06d695920fd892596",
+        "packed_scene_resource_path": "res://assets/storage-baseline/thornbark_wolf.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "b117ced70de4e42d60c46f11c5e793e2",
+        "source_path": "res://assets/storage-baseline/thornbark_wolf.glb",
+        "source_sha256": "0f316cbf766798cbaa0e677d81014df243803bdbf813c915dd8572d2ecfdcc58"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/thornbark_wolf.glb-7683b080fe1f23d045d6f5472c25cd54.md5",
+        "import_metadata_sha256": "d6732b008fee64ef83f020f573b18431f301e4d618468afa84d4455ba92d7f34",
+        "imported_resource_path": "res://.godot/imported/thornbark_wolf.glb-7683b080fe1f23d045d6f5472c25cd54.scn",
+        "imported_resource_sha256": "5e225cce14c36fc52956f8d45e6bc4d6877b3fde0597d019e1d83faf25944931",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/thornbark_wolf.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "8e1792f2b2e3d5a7e9fe7933a9763697",
+        "source_path": "res://assets/actors/native/creatures/thornbark_wolf.glb",
+        "source_sha256": "cbe4d17ef5e4d666f7e2ca4b59c6adca60f364457271cf49c8a059784f9ce3af"
+      }
+    ]
   },
   "death_dissolve_source_framing": {
     "actor": "thornbark_wolf",
@@ -677,5 +733,54 @@
       }
     ],
     "scope": "All8corners of original full-motion actualActor fit after exact preview translation, both640square orthographic FX cameras, near/far planes and minimum2pixel margin. Actual source/candidate fade PNG foreground borders remain a separate required post-capture check."
+  },
+  "actual_editor_mode_correction": {
+    "passed": true,
+    "source_sha256": "0f316cbf766798cbaa0e677d81014df243803bdbf813c915dd8572d2ecfdcc58",
+    "candidate_sha256": "cbe4d17ef5e4d666f7e2ca4b59c6adca60f364457271cf49c8a059784f9ce3af",
+    "prior_cache_route_editor_comparison_labels_withdrawn": true,
+    "previous_public_receipt_sha256": "743258cadfff6bd8c42033e781711d57394979b9bea368bf5a41eba1ed67aedc",
+    "source_and_current_actual_editor_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/thornbark_wolf.glb-532b0a5ec42a4cd0fe931982d799bd8a.md5",
+        "import_metadata_sha256": "62823337b30093fc9ac451f71ba84f6d10dfd6b6ff24fcf3b30256848ff88188",
+        "imported_resource_path": "res://.godot/imported/thornbark_wolf.glb-532b0a5ec42a4cd0fe931982d799bd8a.scn",
+        "imported_resource_sha256": "20e80e4f473c5f1c28e07cd9f21e51b429996814676ac7f06d695920fd892596",
+        "packed_scene_resource_path": "res://assets/storage-baseline/thornbark_wolf.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "b117ced70de4e42d60c46f11c5e793e2",
+        "source_path": "res://assets/storage-baseline/thornbark_wolf.glb",
+        "source_sha256": "0f316cbf766798cbaa0e677d81014df243803bdbf813c915dd8572d2ecfdcc58"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/thornbark_wolf.glb-7683b080fe1f23d045d6f5472c25cd54.md5",
+        "import_metadata_sha256": "d6732b008fee64ef83f020f573b18431f301e4d618468afa84d4455ba92d7f34",
+        "imported_resource_path": "res://.godot/imported/thornbark_wolf.glb-7683b080fe1f23d045d6f5472c25cd54.scn",
+        "imported_resource_sha256": "5e225cce14c36fc52956f8d45e6bc4d6877b3fde0597d019e1d83faf25944931",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/thornbark_wolf.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "8e1792f2b2e3d5a7e9fe7933a9763697",
+        "source_path": "res://assets/actors/native/creatures/thornbark_wolf.glb",
+        "source_sha256": "cbe4d17ef5e4d666f7e2ca4b59c6adca60f364457271cf49c8a059784f9ce3af"
+      }
+    ],
+    "source_size_position_budget": 9.5367431640625e-07,
+    "maximum_position_error": 2.2678542200089208e-07,
+    "normal_angle_budget_degrees": 0.0001,
+    "maximum_normal_angle_degrees": 1.911004052732249e-05,
+    "all_typed_static_attributes_retained_morph_PNT_oriented_triangles_material_storage_and_texture_mips_identical": true,
+    "independent_complete_editor_vertex_and_oriented_triangle_payload_multisets_identical": true,
+    "independent_payload_source_retained_column_mapping": "No partitions. Exact preparation retained indices independently checked against raw authored POSITION/NORMAL/TANGENT accessor bits; no raw vertex ordinal or arbitrary coincident-ID assumption.",
+    "numeric_static_material_SCNs_identical": true,
+    "numeric_report_sha256": "f505fd3a10b91b50770afc1667830985e62b0a5737c9c1c99232de288bae523a",
+    "static_report_sha256": "3eb962eb73df5d594cf6d3f433dcd770c79ba583d734cb3e8e812de89539d961",
+    "direct_payload_report_sha256": "567f5665f0f12832a42f9f39c5884ea7c42c63473fa9daa31cb4257e0ca55dcc",
+    "material_report_sha256": "4f95f6338520ee409a1d260237cd8baab034d863bc8772ca45fdb7d65df3f7df",
+    "loader_guard": "Public dump_creature_storage.gd explicit ResourceLoader imported branch; scene policy/current-source MD5/cache destination MD5 where single destination, source/SCN/freshness metadata SHA-bound.",
+    "scope": "Corrected matched actualEditor source/current comparison. Prior raw-Cache-source versus editor-current comparison labels are withdrawn; prior source/native/Blender/fullbody/seededFX/render evidence unchanged. All original caps and frozen source observations unchanged. Complete typed static attributes, retained morph P/N/T and oriented triangle payloads match. Material typed storage and texture pixels/mips match; generated distant LOD identity is not claimed."
   }
 }

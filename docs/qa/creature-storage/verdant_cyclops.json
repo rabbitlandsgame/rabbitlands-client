@@ -332,9 +332,37 @@
       "max_normal_degrees": 2.077320937910124e-05,
       "p99_normal_degrees": 1.565016215405956e-05
     },
-    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "scope": "Both original and CURRENT final meshes loaded explicitly through ResourceLoader from fresh editor SCNs, bound to source/current GLB +SCN +freshness metadata hashes. All source clips, directed crossfades and RESET; independent retained-static/morph bijection and unchanged4float32ULP Euclidean/.0001degree caps. Earlier Cache-route imported labels are withdrawn, not treated as editor evidence.",
     "source_sha256": "1939d03d166b45d81c06ec0721d70be633b85594c20dbc5e79a0870979b738e5",
-    "candidate_sha256": "6e001f2fa2f5d8eee8e637c0cde28a2a513d442150e5d263018b70cdd3d87aa7"
+    "candidate_sha256": "6e001f2fa2f5d8eee8e637c0cde28a2a513d442150e5d263018b70cdd3d87aa7",
+    "actual_editor_scene_loads": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/verdant_cyclops.glb-bd8cf8f458e991d2ece74e47fbe90490.md5",
+        "import_metadata_sha256": "ef2a5e83df731fece38e4484f9873f50caa60c066136b20be1b5b0cd30c2449f",
+        "imported_resource_path": "res://.godot/imported/verdant_cyclops.glb-bd8cf8f458e991d2ece74e47fbe90490.scn",
+        "imported_resource_sha256": "b19cbef04858f0d88abf0a5273f91a33f9cfb94185cc62c251c691a8194781e5",
+        "packed_scene_resource_path": "res://assets/storage-baseline/verdant_cyclops.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "e852d911ff230eff203227bf0d65f999",
+        "source_path": "res://assets/storage-baseline/verdant_cyclops.glb",
+        "source_sha256": "1939d03d166b45d81c06ec0721d70be633b85594c20dbc5e79a0870979b738e5"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/verdant_cyclops.glb-b5a5bd69767daf57bb0d0cbd34b1b4e7.md5",
+        "import_metadata_sha256": "17c2d98e31f99b37f061eca60939442ad6763129e4ca16f5b9cfe8de0c1f216d",
+        "imported_resource_path": "res://.godot/imported/verdant_cyclops.glb-b5a5bd69767daf57bb0d0cbd34b1b4e7.scn",
+        "imported_resource_sha256": "dab29cc25a20b26abbc5acd5a29f90e9639a75b52af5747d64ca30d32b792c2c",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/verdant_cyclops.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "b048eb2a2ebd33a8a20da4bfe3c43d30",
+        "source_path": "res://assets/actors/native/creatures/verdant_cyclops.glb",
+        "source_sha256": "6e001f2fa2f5d8eee8e637c0cde28a2a513d442150e5d263018b70cdd3d87aa7"
+      }
+    ]
   },
   "existing_family_playback": {
     "actors": {
@@ -613,5 +641,54 @@
     "maximum_border_foreground_pixels": 0
   },
   "import_scale": 1.895565,
-  "actual_actor_display_scale": 1.8955650329589873
+  "actual_actor_display_scale": 1.8955650329589873,
+  "actual_editor_mode_correction": {
+    "passed": true,
+    "source_sha256": "1939d03d166b45d81c06ec0721d70be633b85594c20dbc5e79a0870979b738e5",
+    "candidate_sha256": "6e001f2fa2f5d8eee8e637c0cde28a2a513d442150e5d263018b70cdd3d87aa7",
+    "prior_cache_route_editor_comparison_labels_withdrawn": true,
+    "previous_public_receipt_sha256": "da8ebd3bf2e6bf526d65874ff4d87112bb8cc8bdf14cf2eda2a184a343c87ebd",
+    "source_and_current_actual_editor_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/verdant_cyclops.glb-bd8cf8f458e991d2ece74e47fbe90490.md5",
+        "import_metadata_sha256": "ef2a5e83df731fece38e4484f9873f50caa60c066136b20be1b5b0cd30c2449f",
+        "imported_resource_path": "res://.godot/imported/verdant_cyclops.glb-bd8cf8f458e991d2ece74e47fbe90490.scn",
+        "imported_resource_sha256": "b19cbef04858f0d88abf0a5273f91a33f9cfb94185cc62c251c691a8194781e5",
+        "packed_scene_resource_path": "res://assets/storage-baseline/verdant_cyclops.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "e852d911ff230eff203227bf0d65f999",
+        "source_path": "res://assets/storage-baseline/verdant_cyclops.glb",
+        "source_sha256": "1939d03d166b45d81c06ec0721d70be633b85594c20dbc5e79a0870979b738e5"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/verdant_cyclops.glb-b5a5bd69767daf57bb0d0cbd34b1b4e7.md5",
+        "import_metadata_sha256": "17c2d98e31f99b37f061eca60939442ad6763129e4ca16f5b9cfe8de0c1f216d",
+        "imported_resource_path": "res://.godot/imported/verdant_cyclops.glb-b5a5bd69767daf57bb0d0cbd34b1b4e7.scn",
+        "imported_resource_sha256": "dab29cc25a20b26abbc5acd5a29f90e9639a75b52af5747d64ca30d32b792c2c",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/verdant_cyclops.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "b048eb2a2ebd33a8a20da4bfe3c43d30",
+        "source_path": "res://assets/actors/native/creatures/verdant_cyclops.glb",
+        "source_sha256": "6e001f2fa2f5d8eee8e637c0cde28a2a513d442150e5d263018b70cdd3d87aa7"
+      }
+    ],
+    "source_size_position_budget": 4.76837158203125e-07,
+    "maximum_position_error": 2.48556723470431e-07,
+    "normal_angle_budget_degrees": 0.0001,
+    "maximum_normal_angle_degrees": 2.077320937910124e-05,
+    "all_typed_static_attributes_retained_morph_PNT_oriented_triangles_material_storage_and_texture_mips_identical": true,
+    "independent_complete_editor_vertex_and_oriented_triangle_payload_multisets_identical": true,
+    "independent_payload_source_retained_column_mapping": "No partitions. Exact preparation retained indices independently checked against raw authored POSITION/NORMAL/TANGENT accessor bits; no raw vertex ordinal or arbitrary coincident-ID assumption.",
+    "numeric_static_material_SCNs_identical": true,
+    "numeric_report_sha256": "f1e2692fabcfda3246110038d60e49a266003575a8c1dd2f243ca9c1f61493ef",
+    "static_report_sha256": "ab69b9ad1f229a4156c6ea572248e5cc727af9979230754dad49cda58b302619",
+    "direct_payload_report_sha256": "15578aafb08e6be0c6c16daf0c933358d7eacd1cdb1ad10fdf331396e749db18",
+    "material_report_sha256": "bc1fc622234b92ce54be942964561a7c71aef70f9881b7b279bfa894f76009bb",
+    "loader_guard": "Public dump_creature_storage.gd explicit ResourceLoader imported branch; scene policy/current-source MD5/cache destination MD5 where single destination, source/SCN/freshness metadata SHA-bound.",
+    "scope": "Corrected matched actualEditor source/current comparison. Prior raw-Cache-source versus editor-current comparison labels are withdrawn; prior source/native/Blender/fullbody/seededFX/render evidence unchanged. All original caps and frozen source observations unchanged. Complete typed static attributes, retained morph P/N/T and oriented triangle payloads match. Material typed storage and texture pixels/mips match; generated distant LOD identity is not claimed."
+  }
 }

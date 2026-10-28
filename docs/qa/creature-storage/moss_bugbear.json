@@ -310,9 +310,37 @@
       "max_normal_degrees": 2.338155425277186e-05,
       "p99_normal_degrees": 2.1768046658767296e-05
     },
-    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "scope": "Both original and CURRENT final meshes loaded explicitly through ResourceLoader from fresh editor SCNs, bound to source/current GLB +SCN +freshness metadata hashes. All source clips, directed crossfades and RESET; independent retained-static/morph bijection and unchanged4float32ULP Euclidean/.0001degree caps. Earlier Cache-route imported labels are withdrawn, not treated as editor evidence.",
     "source_sha256": "7724d868c29240a4e3a1705850a2b7f23c5c6573157d016d7173518c37e05a3c",
-    "candidate_sha256": "2cc2f0a1c1aa77f3edb889105091161779b85749cc00aa721c02ddfc551381e2"
+    "candidate_sha256": "2cc2f0a1c1aa77f3edb889105091161779b85749cc00aa721c02ddfc551381e2",
+    "actual_editor_scene_loads": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/moss_bugbear.glb-90b9c1c9acf12106a784c7503fdd1656.md5",
+        "import_metadata_sha256": "a187ec4cf0a724759420fa2999bb7c1de217c5df2afe5f25c23c2adb5c3cf50f",
+        "imported_resource_path": "res://.godot/imported/moss_bugbear.glb-90b9c1c9acf12106a784c7503fdd1656.scn",
+        "imported_resource_sha256": "ca422d097472cd46a50b9b45753f506f5a87daef7c8e69163196a976ed98b1d2",
+        "packed_scene_resource_path": "res://assets/storage-baseline/moss_bugbear.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "084bc9c9e88166c98343d6ce0d37337b",
+        "source_path": "res://assets/storage-baseline/moss_bugbear.glb",
+        "source_sha256": "7724d868c29240a4e3a1705850a2b7f23c5c6573157d016d7173518c37e05a3c"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/moss_bugbear.glb-8af19fb09abf2156b0f7f8df8f53982e.md5",
+        "import_metadata_sha256": "3270507a11aa711913d77094e8489bded9129cf48364d24ae0e4df5701d95a84",
+        "imported_resource_path": "res://.godot/imported/moss_bugbear.glb-8af19fb09abf2156b0f7f8df8f53982e.scn",
+        "imported_resource_sha256": "751fc6f876d3e44e2f61f08d654ccf44595bd8961b2d78f608595a31af19bd58",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/moss_bugbear.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "3c25e66bbedc7a8d1e2b3cce50ffcbfa",
+        "source_path": "res://assets/actors/native/creatures/moss_bugbear.glb",
+        "source_sha256": "2cc2f0a1c1aa77f3edb889105091161779b85749cc00aa721c02ddfc551381e2"
+      }
+    ]
   },
   "existing_family_playback": {
     "actors": {
@@ -588,5 +616,54 @@
     "maximum_border_foreground_pixels": 0
   },
   "import_scale": 1.209943,
-  "actual_actor_display_scale": 1.2099430561065747
+  "actual_actor_display_scale": 1.2099430561065747,
+  "actual_editor_mode_correction": {
+    "passed": true,
+    "source_sha256": "7724d868c29240a4e3a1705850a2b7f23c5c6573157d016d7173518c37e05a3c",
+    "candidate_sha256": "2cc2f0a1c1aa77f3edb889105091161779b85749cc00aa721c02ddfc551381e2",
+    "prior_cache_route_editor_comparison_labels_withdrawn": true,
+    "previous_public_receipt_sha256": "807fd827bf0a3b6e223d34e2ce8c88a869076b9b6d4a4f8ff8c0c753fc511813",
+    "source_and_current_actual_editor_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/moss_bugbear.glb-90b9c1c9acf12106a784c7503fdd1656.md5",
+        "import_metadata_sha256": "a187ec4cf0a724759420fa2999bb7c1de217c5df2afe5f25c23c2adb5c3cf50f",
+        "imported_resource_path": "res://.godot/imported/moss_bugbear.glb-90b9c1c9acf12106a784c7503fdd1656.scn",
+        "imported_resource_sha256": "ca422d097472cd46a50b9b45753f506f5a87daef7c8e69163196a976ed98b1d2",
+        "packed_scene_resource_path": "res://assets/storage-baseline/moss_bugbear.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "084bc9c9e88166c98343d6ce0d37337b",
+        "source_path": "res://assets/storage-baseline/moss_bugbear.glb",
+        "source_sha256": "7724d868c29240a4e3a1705850a2b7f23c5c6573157d016d7173518c37e05a3c"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/moss_bugbear.glb-8af19fb09abf2156b0f7f8df8f53982e.md5",
+        "import_metadata_sha256": "3270507a11aa711913d77094e8489bded9129cf48364d24ae0e4df5701d95a84",
+        "imported_resource_path": "res://.godot/imported/moss_bugbear.glb-8af19fb09abf2156b0f7f8df8f53982e.scn",
+        "imported_resource_sha256": "751fc6f876d3e44e2f61f08d654ccf44595bd8961b2d78f608595a31af19bd58",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/moss_bugbear.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "3c25e66bbedc7a8d1e2b3cce50ffcbfa",
+        "source_path": "res://assets/actors/native/creatures/moss_bugbear.glb",
+        "source_sha256": "2cc2f0a1c1aa77f3edb889105091161779b85749cc00aa721c02ddfc551381e2"
+      }
+    ],
+    "source_size_position_budget": 4.76837158203125e-07,
+    "maximum_position_error": 3.153904538712315e-07,
+    "normal_angle_budget_degrees": 0.0001,
+    "maximum_normal_angle_degrees": 2.338155425277186e-05,
+    "all_typed_static_attributes_retained_morph_PNT_oriented_triangles_material_storage_and_texture_mips_identical": true,
+    "independent_complete_editor_vertex_and_oriented_triangle_payload_multisets_identical": true,
+    "independent_payload_source_retained_column_mapping": "No partitions. Exact preparation retained indices independently checked against raw authored POSITION/NORMAL/TANGENT accessor bits; no raw vertex ordinal or arbitrary coincident-ID assumption.",
+    "numeric_static_material_SCNs_identical": true,
+    "numeric_report_sha256": "c8c8236c4c981fcd079ac58b9e8d24a99e7155b1bb21553317aa0e3691ca8523",
+    "static_report_sha256": "f355f1886880a4e0c1c67a37350433112ad1b0478f8dda938b61abae9b5b812b",
+    "direct_payload_report_sha256": "8e46fab86cbcc170c7fcfafad78ab7dfa6cf262fa15aa9bd183752c5a7ecb84f",
+    "material_report_sha256": "c51129da21268ba8a45202568fb780d5b48799406439dadcd61cfcc52a1bfb34",
+    "loader_guard": "Public dump_creature_storage.gd explicit ResourceLoader imported branch; scene policy/current-source MD5/cache destination MD5 where single destination, source/SCN/freshness metadata SHA-bound.",
+    "scope": "Corrected matched actualEditor source/current comparison. Prior raw-Cache-source versus editor-current comparison labels are withdrawn; prior source/native/Blender/fullbody/seededFX/render evidence unchanged. All original caps and frozen source observations unchanged. Complete typed static attributes, retained morph P/N/T and oriented triangle payloads match. Material typed storage and texture pixels/mips match; generated distant LOD identity is not claimed."
+  }
 }

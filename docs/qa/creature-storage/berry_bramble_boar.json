@@ -315,9 +315,37 @@
       "max_normal_degrees": 2.5456203002431588e-05,
       "p99_normal_degrees": 2.0311919222296604e-05
     },
-    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "scope": "Both original and CURRENT final meshes loaded explicitly through ResourceLoader from fresh editor SCNs, bound to source/current GLB +SCN +freshness metadata hashes. All source clips, directed crossfades and RESET; independent retained-static/morph bijection and unchanged4float32ULP Euclidean/.0001degree caps. Earlier Cache-route imported labels are withdrawn, not treated as editor evidence.",
     "source_sha256": "8bed4dfcfa0c296698b3c873d4d8ebb751f84f7a134190af8eb417151d120655",
-    "candidate_sha256": "21d919d10cff396ab585acf8e6d900e76fb12f14eeb906b44db2f776ca84ff8b"
+    "candidate_sha256": "21d919d10cff396ab585acf8e6d900e76fb12f14eeb906b44db2f776ca84ff8b",
+    "actual_editor_scene_loads": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/berry_bramble_boar.glb-f1f5ba848322e3e0e816343c4d00eb7d.md5",
+        "import_metadata_sha256": "b680effbba0deb0a4d01c34f37f7b339139783aa43750423d9b8a73b714bfa0c",
+        "imported_resource_path": "res://.godot/imported/berry_bramble_boar.glb-f1f5ba848322e3e0e816343c4d00eb7d.scn",
+        "imported_resource_sha256": "c8cede816c1c7a69ce230d27d246284d441682f35fdeb5dd562a2e46a4d08b6e",
+        "packed_scene_resource_path": "res://assets/storage-baseline/berry_bramble_boar.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "b7173c06353341389092caf8b80c9f5d",
+        "source_path": "res://assets/storage-baseline/berry_bramble_boar.glb",
+        "source_sha256": "8bed4dfcfa0c296698b3c873d4d8ebb751f84f7a134190af8eb417151d120655"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/berry_bramble_boar.glb-af3f9468de848e8256066c506b7f17bd.md5",
+        "import_metadata_sha256": "dece0dc2463d4ffa146331f81c0d1f42cd220ea296a0f9e8e0876ef1eec73a33",
+        "imported_resource_path": "res://.godot/imported/berry_bramble_boar.glb-af3f9468de848e8256066c506b7f17bd.scn",
+        "imported_resource_sha256": "5a437c56a1e47a91a18282b7b5cae426c35cb8d6afcaf243b83bf65c7d5ee2ae",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/berry_bramble_boar.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "5aa7a3bfcdfe7c6b33b16bff128900e2",
+        "source_path": "res://assets/actors/native/creatures/berry_bramble_boar.glb",
+        "source_sha256": "21d919d10cff396ab585acf8e6d900e76fb12f14eeb906b44db2f776ca84ff8b"
+      }
+    ]
   },
   "existing_family_playback": {
     "actors": {
@@ -608,6 +636,83 @@
         "passed": true
       }
     },
-    "scope": "Additional strict model-space actual-native/fresh-editor-import surface equivalence gate, source-size-dependent4float32ULP Euclidean position and0.0001degree direction caps. Does not relax original source observations, Blender16ULP or raster/effects gates."
+    "scope": "Unchanged source-size-dependent4float32ULP Euclidean/.0001degree caps. Native original proof retained; editor pair now explicitly loads BOTH fresh ResourceLoader SCNs, bound to canonical GLB/SCN/sourceMD5/freshness metadata hashes. Earlier Cache-route editor labels withdrawn.",
+    "actual_editor_resource_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/berry_bramble_boar.glb-f1f5ba848322e3e0e816343c4d00eb7d.md5",
+        "import_metadata_sha256": "b680effbba0deb0a4d01c34f37f7b339139783aa43750423d9b8a73b714bfa0c",
+        "imported_resource_path": "res://.godot/imported/berry_bramble_boar.glb-f1f5ba848322e3e0e816343c4d00eb7d.scn",
+        "imported_resource_sha256": "c8cede816c1c7a69ce230d27d246284d441682f35fdeb5dd562a2e46a4d08b6e",
+        "packed_scene_resource_path": "res://assets/storage-baseline/berry_bramble_boar.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "b7173c06353341389092caf8b80c9f5d",
+        "source_path": "res://assets/storage-baseline/berry_bramble_boar.glb",
+        "source_sha256": "8bed4dfcfa0c296698b3c873d4d8ebb751f84f7a134190af8eb417151d120655"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/berry_bramble_boar.glb-af3f9468de848e8256066c506b7f17bd.md5",
+        "import_metadata_sha256": "dece0dc2463d4ffa146331f81c0d1f42cd220ea296a0f9e8e0876ef1eec73a33",
+        "imported_resource_path": "res://.godot/imported/berry_bramble_boar.glb-af3f9468de848e8256066c506b7f17bd.scn",
+        "imported_resource_sha256": "5a437c56a1e47a91a18282b7b5cae426c35cb8d6afcaf243b83bf65c7d5ee2ae",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/berry_bramble_boar.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "5aa7a3bfcdfe7c6b33b16bff128900e2",
+        "source_path": "res://assets/actors/native/creatures/berry_bramble_boar.glb",
+        "source_sha256": "21d919d10cff396ab585acf8e6d900e76fb12f14eeb906b44db2f776ca84ff8b"
+      }
+    ]
+  },
+  "actual_editor_mode_correction": {
+    "passed": true,
+    "source_sha256": "8bed4dfcfa0c296698b3c873d4d8ebb751f84f7a134190af8eb417151d120655",
+    "candidate_sha256": "21d919d10cff396ab585acf8e6d900e76fb12f14eeb906b44db2f776ca84ff8b",
+    "prior_cache_route_editor_comparison_labels_withdrawn": true,
+    "previous_public_receipt_sha256": "176df560e790b9c59bed59b512e1424bb4121cb22df76303e6bea2f1f9e153be",
+    "source_and_current_actual_editor_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/berry_bramble_boar.glb-f1f5ba848322e3e0e816343c4d00eb7d.md5",
+        "import_metadata_sha256": "b680effbba0deb0a4d01c34f37f7b339139783aa43750423d9b8a73b714bfa0c",
+        "imported_resource_path": "res://.godot/imported/berry_bramble_boar.glb-f1f5ba848322e3e0e816343c4d00eb7d.scn",
+        "imported_resource_sha256": "c8cede816c1c7a69ce230d27d246284d441682f35fdeb5dd562a2e46a4d08b6e",
+        "packed_scene_resource_path": "res://assets/storage-baseline/berry_bramble_boar.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "b7173c06353341389092caf8b80c9f5d",
+        "source_path": "res://assets/storage-baseline/berry_bramble_boar.glb",
+        "source_sha256": "8bed4dfcfa0c296698b3c873d4d8ebb751f84f7a134190af8eb417151d120655"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/berry_bramble_boar.glb-af3f9468de848e8256066c506b7f17bd.md5",
+        "import_metadata_sha256": "dece0dc2463d4ffa146331f81c0d1f42cd220ea296a0f9e8e0876ef1eec73a33",
+        "imported_resource_path": "res://.godot/imported/berry_bramble_boar.glb-af3f9468de848e8256066c506b7f17bd.scn",
+        "imported_resource_sha256": "5a437c56a1e47a91a18282b7b5cae426c35cb8d6afcaf243b83bf65c7d5ee2ae",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/berry_bramble_boar.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "5aa7a3bfcdfe7c6b33b16bff128900e2",
+        "source_path": "res://assets/actors/native/creatures/berry_bramble_boar.glb",
+        "source_sha256": "21d919d10cff396ab585acf8e6d900e76fb12f14eeb906b44db2f776ca84ff8b"
+      }
+    ],
+    "source_size_position_budget": 9.5367431640625e-07,
+    "maximum_position_error": 5.287469916411101e-07,
+    "normal_angle_budget_degrees": 0.0001,
+    "maximum_normal_angle_degrees": 2.5456203002431588e-05,
+    "all_typed_static_attributes_retained_morph_PNT_oriented_triangles_material_storage_and_texture_mips_identical": true,
+    "independent_complete_editor_vertex_and_oriented_triangle_payload_multisets_identical": true,
+    "independent_payload_source_retained_column_mapping": "No partitions. Exact preparation retained indices independently checked against raw authored POSITION/NORMAL/TANGENT accessor bits; no raw vertex ordinal or arbitrary coincident-ID assumption.",
+    "numeric_static_material_SCNs_identical": true,
+    "numeric_report_sha256": "e312d30856947af6b462c79aae31e264ffe14e5720b6c67d792feff08a3bebd3",
+    "static_report_sha256": "9826de1f8056180130a596bef8532f9116406c4edc851f0bea4288bb3808972d",
+    "direct_payload_report_sha256": "b15d12610e4d942508979925a387268434f55a1adef1ff9a19be156a82099e3c",
+    "material_report_sha256": "35eeb509af6f8bc3caf1552ba9fa35f8c11f3324abe3a494e6dfe4a7c1974ada",
+    "loader_guard": "Public dump_creature_storage.gd explicit ResourceLoader imported branch; scene policy/current-source MD5/cache destination MD5 where single destination, source/SCN/freshness metadata SHA-bound.",
+    "scope": "Corrected matched actualEditor source/current comparison. Prior raw-Cache-source versus editor-current comparison labels are withdrawn; prior source/native/Blender/fullbody/seededFX/render evidence unchanged. All original caps and frozen source observations unchanged. Complete typed static attributes, retained morph P/N/T and oriented triangle payloads match. Material typed storage and texture pixels/mips match; generated distant LOD identity is not claimed."
   }
 }

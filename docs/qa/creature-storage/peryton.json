@@ -320,9 +320,37 @@
       "max_normal_degrees": 1.5128907556614795e-05,
       "p99_normal_degrees": 8.857875278885181e-06
     },
-    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "scope": "Both original and CURRENT final meshes loaded explicitly through ResourceLoader from fresh editor SCNs, bound to source/current GLB +SCN +freshness metadata hashes. All source clips, directed crossfades and RESET; independent retained-static/morph bijection and unchanged4float32ULP Euclidean/.0001degree caps. Earlier Cache-route imported labels are withdrawn, not treated as editor evidence.",
     "source_sha256": "02a77ca8a19c01161f72e2449c3fea4a428babefdd1ce957794bca30e57c5251",
-    "candidate_sha256": "240ceca4e9d73559eed3bb3e808f03a8ff9c134bcab566706f7dff538d856392"
+    "candidate_sha256": "240ceca4e9d73559eed3bb3e808f03a8ff9c134bcab566706f7dff538d856392",
+    "actual_editor_scene_loads": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/peryton.glb-4881ef7f6673fd590d0ae7ce6603a69a.md5",
+        "import_metadata_sha256": "98a710b51cab6cf7a12cb61988bae2fde100a8d78f090650b1f9ff2e8dd67821",
+        "imported_resource_path": "res://.godot/imported/peryton.glb-4881ef7f6673fd590d0ae7ce6603a69a.scn",
+        "imported_resource_sha256": "1cd7461d64f529d37f83c8e72a8697de9537a30ed56d0f03f2240ae2fd042102",
+        "packed_scene_resource_path": "res://assets/storage-baseline/peryton.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "fac9b224d4f3541d1dd71cf97110de2a",
+        "source_path": "res://assets/storage-baseline/peryton.glb",
+        "source_sha256": "02a77ca8a19c01161f72e2449c3fea4a428babefdd1ce957794bca30e57c5251"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/peryton.glb-f65fdefc7b8f5253f69eab00e759d494.md5",
+        "import_metadata_sha256": "24b4cde65cb3b008b102e1771de80705042e73fb3659178c60aff9563c74e20b",
+        "imported_resource_path": "res://.godot/imported/peryton.glb-f65fdefc7b8f5253f69eab00e759d494.scn",
+        "imported_resource_sha256": "3c581eba4f7aa66c25ebadc773460d0043715c29c2448cc2f836b186fe486ffc",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/peryton.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "e1311b35c0e3d1d742e560e5b391c176",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/peryton.glb",
+        "source_sha256": "240ceca4e9d73559eed3bb3e808f03a8ff9c134bcab566706f7dff538d856392"
+      }
+    ]
   },
   "actor_placement": {
     "passed": true,
@@ -598,5 +626,54 @@
     "fps": 30.0,
     "scope": "Private symmetric source/candidate editor-import QA policy, native original source declares no custom bake cadence and uses production native30Hz. Not a new production import policy."
   },
-  "historical_fitness_scope": "No historical physical fitness or artistic approval claimed. Exact preservation qualified against immutable current-source observations and independent format/import/gameplay/render/effects gates."
+  "historical_fitness_scope": "No historical physical fitness or artistic approval claimed. Exact preservation qualified against immutable current-source observations and independent format/import/gameplay/render/effects gates.",
+  "actual_editor_mode_correction": {
+    "passed": true,
+    "source_sha256": "02a77ca8a19c01161f72e2449c3fea4a428babefdd1ce957794bca30e57c5251",
+    "candidate_sha256": "240ceca4e9d73559eed3bb3e808f03a8ff9c134bcab566706f7dff538d856392",
+    "prior_cache_route_editor_comparison_labels_withdrawn": true,
+    "previous_public_receipt_sha256": "155c7b0bdf5643e50060e8a1927437258c36b9df573e0095380a9bd2f0329a3d",
+    "source_and_current_actual_editor_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/peryton.glb-4881ef7f6673fd590d0ae7ce6603a69a.md5",
+        "import_metadata_sha256": "98a710b51cab6cf7a12cb61988bae2fde100a8d78f090650b1f9ff2e8dd67821",
+        "imported_resource_path": "res://.godot/imported/peryton.glb-4881ef7f6673fd590d0ae7ce6603a69a.scn",
+        "imported_resource_sha256": "1cd7461d64f529d37f83c8e72a8697de9537a30ed56d0f03f2240ae2fd042102",
+        "packed_scene_resource_path": "res://assets/storage-baseline/peryton.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "fac9b224d4f3541d1dd71cf97110de2a",
+        "source_path": "res://assets/storage-baseline/peryton.glb",
+        "source_sha256": "02a77ca8a19c01161f72e2449c3fea4a428babefdd1ce957794bca30e57c5251"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/peryton.glb-f65fdefc7b8f5253f69eab00e759d494.md5",
+        "import_metadata_sha256": "24b4cde65cb3b008b102e1771de80705042e73fb3659178c60aff9563c74e20b",
+        "imported_resource_path": "res://.godot/imported/peryton.glb-f65fdefc7b8f5253f69eab00e759d494.scn",
+        "imported_resource_sha256": "3c581eba4f7aa66c25ebadc773460d0043715c29c2448cc2f836b186fe486ffc",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/peryton.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "e1311b35c0e3d1d742e560e5b391c176",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/peryton.glb",
+        "source_sha256": "240ceca4e9d73559eed3bb3e808f03a8ff9c134bcab566706f7dff538d856392"
+      }
+    ],
+    "source_size_position_budget": 4.76837158203125e-07,
+    "maximum_position_error": 1.6382679696038208e-07,
+    "normal_angle_budget_degrees": 0.0001,
+    "maximum_normal_angle_degrees": 1.5128907556614795e-05,
+    "all_typed_static_attributes_retained_morph_PNT_oriented_triangles_material_storage_and_texture_mips_identical": true,
+    "independent_complete_editor_vertex_and_oriented_triangle_payload_multisets_identical": true,
+    "independent_payload_source_retained_column_mapping": "No partitions. Exact preparation retained indices independently checked against raw authored POSITION/NORMAL/TANGENT accessor bits; no raw vertex ordinal or arbitrary coincident-ID assumption.",
+    "numeric_static_material_SCNs_identical": true,
+    "numeric_report_sha256": "d29e26bf6a4ccd2539cee3563663d7addf4eb325ca502f1f9f340c5adedc3d84",
+    "static_report_sha256": "15cd6b95a2905c2818f96e4da022261fd294cbe06b01149393daf833f5815e92",
+    "direct_payload_report_sha256": "d14c9e51fc01937403073e0ec30e3d13accd5f319f53653ed53837c47a698271",
+    "material_report_sha256": "4ee8180b859f705736e6b823ba33e516891142b2d12d7369d567cb28491967e3",
+    "loader_guard": "Public dump_creature_storage.gd explicit ResourceLoader imported branch; scene policy/current-source MD5/cache destination MD5 where single destination, source/SCN/freshness metadata SHA-bound.",
+    "scope": "Corrected matched actualEditor source/current comparison. Prior raw-Cache-source versus editor-current comparison labels are withdrawn; prior source/native/Blender/fullbody/seededFX/render evidence unchanged. All original caps and frozen source observations unchanged. Complete typed static attributes, retained morph P/N/T and oriented triangle payloads match. Material typed storage and texture pixels/mips match; generated distant LOD identity is not claimed."
+  }
 }

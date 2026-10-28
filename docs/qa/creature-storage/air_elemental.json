@@ -361,9 +361,37 @@
       "max_normal_degrees": 1.7075472925031877e-06,
       "p99_normal_degrees": 1.2074182697257333e-06
     },
-    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "scope": "Both original and CURRENT final meshes loaded explicitly through ResourceLoader from fresh editor SCNs, bound to source/current GLB +SCN +freshness metadata hashes. All source clips, directed crossfades and RESET; independent retained-static/morph bijection and unchanged4float32ULP Euclidean/.0001degree caps. Earlier Cache-route imported labels are withdrawn, not treated as editor evidence.",
     "source_sha256": "ed39dc649586c494d7d3d1b89377c2e3a9ed0d1e4693f1d25b7a419703158ea0",
-    "candidate_sha256": "272d2d55513c24dafbe3ee0e39205ad99cb74356be2e9b1875501d84fd063dce"
+    "candidate_sha256": "272d2d55513c24dafbe3ee0e39205ad99cb74356be2e9b1875501d84fd063dce",
+    "actual_editor_scene_loads": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/air_elemental.glb-356309e9e7ac23e23cc8ca673a7ea7de.md5",
+        "import_metadata_sha256": "1b524a3d2d04b3be83f874344138acc8e15f535f5be9014e4cc4c52c74d65fa7",
+        "imported_resource_path": "res://.godot/imported/air_elemental.glb-356309e9e7ac23e23cc8ca673a7ea7de.scn",
+        "imported_resource_sha256": "ec4669da3609a6a19ad0d0bcc12a68d4958c73c40766927921728a9310951576",
+        "packed_scene_resource_path": "res://assets/storage-baseline/air_elemental.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "626a3fb3cdf3cd4872939d85a833f21e",
+        "source_path": "res://assets/storage-baseline/air_elemental.glb",
+        "source_sha256": "ed39dc649586c494d7d3d1b89377c2e3a9ed0d1e4693f1d25b7a419703158ea0"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/air_elemental.glb-0a5927e6fbbf8d59fa4c802f103ca68a.md5",
+        "import_metadata_sha256": "4cb31b620c003235c4dc952c05b96f64298cb1dc4be06fa7d97b1d18aeada1ee",
+        "imported_resource_path": "res://.godot/imported/air_elemental.glb-0a5927e6fbbf8d59fa4c802f103ca68a.scn",
+        "imported_resource_sha256": "f4bb5446a7b7ede20809e32b4c93521024e7b7b1728e0971fe4b470dc9bcca6c",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/air_elemental.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "1af77bdddc2cbe5b71a9deb52ba6807a",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/air_elemental.glb",
+        "source_sha256": "272d2d55513c24dafbe3ee0e39205ad99cb74356be2e9b1875501d84fd063dce"
+      }
+    ]
   },
   "actor_placement": {
     "passed": true,
@@ -652,7 +680,35 @@
         "passed": true
       }
     },
-    "scope": "Additional strict model-space actual-native/fresh-editor-import surface equivalence gate, source-size-dependent4float32ULP Euclidean position and0.0001degree direction caps. Does not relax original source observations, Blender16ULP or raster/effects gates."
+    "scope": "Unchanged source-size-dependent4float32ULP Euclidean/.0001degree caps. Native original proof retained; editor pair now explicitly loads BOTH fresh ResourceLoader SCNs, bound to canonical GLB/SCN/sourceMD5/freshness metadata hashes. Earlier Cache-route editor labels withdrawn.",
+    "actual_editor_resource_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/air_elemental.glb-356309e9e7ac23e23cc8ca673a7ea7de.md5",
+        "import_metadata_sha256": "1b524a3d2d04b3be83f874344138acc8e15f535f5be9014e4cc4c52c74d65fa7",
+        "imported_resource_path": "res://.godot/imported/air_elemental.glb-356309e9e7ac23e23cc8ca673a7ea7de.scn",
+        "imported_resource_sha256": "ec4669da3609a6a19ad0d0bcc12a68d4958c73c40766927921728a9310951576",
+        "packed_scene_resource_path": "res://assets/storage-baseline/air_elemental.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "626a3fb3cdf3cd4872939d85a833f21e",
+        "source_path": "res://assets/storage-baseline/air_elemental.glb",
+        "source_sha256": "ed39dc649586c494d7d3d1b89377c2e3a9ed0d1e4693f1d25b7a419703158ea0"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/air_elemental.glb-0a5927e6fbbf8d59fa4c802f103ca68a.md5",
+        "import_metadata_sha256": "4cb31b620c003235c4dc952c05b96f64298cb1dc4be06fa7d97b1d18aeada1ee",
+        "imported_resource_path": "res://.godot/imported/air_elemental.glb-0a5927e6fbbf8d59fa4c802f103ca68a.scn",
+        "imported_resource_sha256": "f4bb5446a7b7ede20809e32b4c93521024e7b7b1728e0971fe4b470dc9bcca6c",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/air_elemental.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "1af77bdddc2cbe5b71a9deb52ba6807a",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/air_elemental.glb",
+        "source_sha256": "272d2d55513c24dafbe3ee0e39205ad99cb74356be2e9b1875501d84fd063dce"
+      }
+    ]
   },
   "death_dissolve_source_framing": {
     "actor": "air_elemental",
@@ -680,5 +736,54 @@
       }
     ],
     "scope": "All8corners of original full-motion actualActor fit after exact preview translation, both640square orthographic FX cameras, near/far planes and minimum2pixel margin. Actual source/candidate fade PNG foreground borders remain a separate required post-capture check."
+  },
+  "actual_editor_mode_correction": {
+    "passed": true,
+    "source_sha256": "ed39dc649586c494d7d3d1b89377c2e3a9ed0d1e4693f1d25b7a419703158ea0",
+    "candidate_sha256": "272d2d55513c24dafbe3ee0e39205ad99cb74356be2e9b1875501d84fd063dce",
+    "prior_cache_route_editor_comparison_labels_withdrawn": true,
+    "previous_public_receipt_sha256": "e77a1cac94c28ab8c828855b9de1b632a0ab4ef188a3ecf6c8aeb355f0742091",
+    "source_and_current_actual_editor_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/air_elemental.glb-356309e9e7ac23e23cc8ca673a7ea7de.md5",
+        "import_metadata_sha256": "1b524a3d2d04b3be83f874344138acc8e15f535f5be9014e4cc4c52c74d65fa7",
+        "imported_resource_path": "res://.godot/imported/air_elemental.glb-356309e9e7ac23e23cc8ca673a7ea7de.scn",
+        "imported_resource_sha256": "ec4669da3609a6a19ad0d0bcc12a68d4958c73c40766927921728a9310951576",
+        "packed_scene_resource_path": "res://assets/storage-baseline/air_elemental.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "626a3fb3cdf3cd4872939d85a833f21e",
+        "source_path": "res://assets/storage-baseline/air_elemental.glb",
+        "source_sha256": "ed39dc649586c494d7d3d1b89377c2e3a9ed0d1e4693f1d25b7a419703158ea0"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/air_elemental.glb-0a5927e6fbbf8d59fa4c802f103ca68a.md5",
+        "import_metadata_sha256": "4cb31b620c003235c4dc952c05b96f64298cb1dc4be06fa7d97b1d18aeada1ee",
+        "imported_resource_path": "res://.godot/imported/air_elemental.glb-0a5927e6fbbf8d59fa4c802f103ca68a.scn",
+        "imported_resource_sha256": "f4bb5446a7b7ede20809e32b4c93521024e7b7b1728e0971fe4b470dc9bcca6c",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/air_elemental.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "1af77bdddc2cbe5b71a9deb52ba6807a",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/air_elemental.glb",
+        "source_sha256": "272d2d55513c24dafbe3ee0e39205ad99cb74356be2e9b1875501d84fd063dce"
+      }
+    ],
+    "source_size_position_budget": 2.384185791015625e-07,
+    "maximum_position_error": 8.368306048112117e-15,
+    "normal_angle_budget_degrees": 0.0001,
+    "maximum_normal_angle_degrees": 1.7075472925031877e-06,
+    "all_typed_static_attributes_retained_morph_PNT_oriented_triangles_material_storage_and_texture_mips_identical": true,
+    "independent_complete_editor_vertex_and_oriented_triangle_payload_multisets_identical": true,
+    "independent_payload_source_retained_column_mapping": "No partitions. Exact preparation retained indices independently checked against raw authored POSITION/NORMAL/TANGENT accessor bits; no raw vertex ordinal or arbitrary coincident-ID assumption.",
+    "numeric_static_material_SCNs_identical": true,
+    "numeric_report_sha256": "ba7ebcb7afcaa51ab60ceff4e4885e2259c8359d8cd18aff0ce1e8ec041cd3ac",
+    "static_report_sha256": "6321dd1be7df8e763be3dad35200566d1eeab0a29ec66d45a2aee98f442d2755",
+    "direct_payload_report_sha256": "147f72457359f436b7401dc171096523a1e5ad05b4617ea6a9fcbc2159ce1375",
+    "material_report_sha256": "7adad998dbc1740ace44c66b93b826b272f1543d31396a4a68fe199a769d0efd",
+    "loader_guard": "Public dump_creature_storage.gd explicit ResourceLoader imported branch; scene policy/current-source MD5/cache destination MD5 where single destination, source/SCN/freshness metadata SHA-bound.",
+    "scope": "Corrected matched actualEditor source/current comparison. Prior raw-Cache-source versus editor-current comparison labels are withdrawn; prior source/native/Blender/fullbody/seededFX/render evidence unchanged. All original caps and frozen source observations unchanged. Complete typed static attributes, retained morph P/N/T and oriented triangle payloads match. Material typed storage and texture pixels/mips match; generated distant LOD identity is not claimed."
   }
 }

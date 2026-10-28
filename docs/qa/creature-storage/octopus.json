@@ -329,9 +329,37 @@
       "max_normal_degrees": 3.4150945850063763e-06,
       "p99_normal_degrees": 2.561320938754782e-06
     },
-    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "scope": "Both original and CURRENT final meshes loaded explicitly through ResourceLoader from fresh editor SCNs, bound to source/current GLB +SCN +freshness metadata hashes. All source clips, directed crossfades and RESET; independent retained-static/morph bijection and unchanged4float32ULP Euclidean/.0001degree caps. Earlier Cache-route imported labels are withdrawn, not treated as editor evidence.",
     "source_sha256": "db11fdb99503896770892d3a3514a8e8dd3063610ff12fa697ba33f608f9520f",
-    "candidate_sha256": "2203e1c803bf998da2764593e78bd817f89a06de0307ffa96de839f9193fe1e4"
+    "candidate_sha256": "2203e1c803bf998da2764593e78bd817f89a06de0307ffa96de839f9193fe1e4",
+    "actual_editor_scene_loads": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/octopus.glb-5d63e271e7c445efe9d31fe9ec0732b6.md5",
+        "import_metadata_sha256": "e31ad2c0e2d40aa22dc1df31b7e33920b6ff3595d8b8aa2daf71248ac08e832c",
+        "imported_resource_path": "res://.godot/imported/octopus.glb-5d63e271e7c445efe9d31fe9ec0732b6.scn",
+        "imported_resource_sha256": "72b678a8c993cd76a21284830cb88c04917da1569b9e948adb40b76a3bddd9a3",
+        "packed_scene_resource_path": "res://assets/storage-baseline/octopus.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "020905fc77d6b317f4e6846524c242e6",
+        "source_path": "res://assets/storage-baseline/octopus.glb",
+        "source_sha256": "db11fdb99503896770892d3a3514a8e8dd3063610ff12fa697ba33f608f9520f"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/octopus.glb-2a98e729b17837dc69a874005922b890.md5",
+        "import_metadata_sha256": "5b685768fdab77b8b3c064ed63b40dbe8b080a9b6c6c18a6ed16666f774c8998",
+        "imported_resource_path": "res://.godot/imported/octopus.glb-2a98e729b17837dc69a874005922b890.scn",
+        "imported_resource_sha256": "8b5be414b2e9002bb4add50d0d471f045b71778f74e1f27a9e1d7e320a999eba",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/octopus.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "8b18f507ca0739601a0043ef32346b0b",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/octopus.glb",
+        "source_sha256": "2203e1c803bf998da2764593e78bd817f89a06de0307ffa96de839f9193fe1e4"
+      }
+    ]
   },
   "existing_family_playback": {
     "actors": {
@@ -617,5 +645,54 @@
     "maximum_border_foreground_pixels": 0
   },
   "import_scale": 1.39999892,
-  "actual_actor_display_scale": 1.3999989032745452
+  "actual_actor_display_scale": 1.3999989032745452,
+  "actual_editor_mode_correction": {
+    "passed": true,
+    "source_sha256": "db11fdb99503896770892d3a3514a8e8dd3063610ff12fa697ba33f608f9520f",
+    "candidate_sha256": "2203e1c803bf998da2764593e78bd817f89a06de0307ffa96de839f9193fe1e4",
+    "prior_cache_route_editor_comparison_labels_withdrawn": true,
+    "previous_public_receipt_sha256": "15cd58d58fd81c79d1c30301224447376582aa7cf238b8a97dd900d14b058e07",
+    "source_and_current_actual_editor_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/octopus.glb-5d63e271e7c445efe9d31fe9ec0732b6.md5",
+        "import_metadata_sha256": "e31ad2c0e2d40aa22dc1df31b7e33920b6ff3595d8b8aa2daf71248ac08e832c",
+        "imported_resource_path": "res://.godot/imported/octopus.glb-5d63e271e7c445efe9d31fe9ec0732b6.scn",
+        "imported_resource_sha256": "72b678a8c993cd76a21284830cb88c04917da1569b9e948adb40b76a3bddd9a3",
+        "packed_scene_resource_path": "res://assets/storage-baseline/octopus.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "020905fc77d6b317f4e6846524c242e6",
+        "source_path": "res://assets/storage-baseline/octopus.glb",
+        "source_sha256": "db11fdb99503896770892d3a3514a8e8dd3063610ff12fa697ba33f608f9520f"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/octopus.glb-2a98e729b17837dc69a874005922b890.md5",
+        "import_metadata_sha256": "5b685768fdab77b8b3c064ed63b40dbe8b080a9b6c6c18a6ed16666f774c8998",
+        "imported_resource_path": "res://.godot/imported/octopus.glb-2a98e729b17837dc69a874005922b890.scn",
+        "imported_resource_sha256": "8b5be414b2e9002bb4add50d0d471f045b71778f74e1f27a9e1d7e320a999eba",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/octopus.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "8b18f507ca0739601a0043ef32346b0b",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/octopus.glb",
+        "source_sha256": "2203e1c803bf998da2764593e78bd817f89a06de0307ffa96de839f9193fe1e4"
+      }
+    ],
+    "source_size_position_budget": 4.76837158203125e-07,
+    "maximum_position_error": 2.0023514955638584e-08,
+    "normal_angle_budget_degrees": 0.0001,
+    "maximum_normal_angle_degrees": 3.4150945850063763e-06,
+    "all_typed_static_attributes_retained_morph_PNT_oriented_triangles_material_storage_and_texture_mips_identical": true,
+    "independent_complete_editor_vertex_and_oriented_triangle_payload_multisets_identical": true,
+    "independent_payload_source_retained_column_mapping": "No partitions. Exact preparation retained indices independently checked against raw authored POSITION/NORMAL/TANGENT accessor bits; no raw vertex ordinal or arbitrary coincident-ID assumption.",
+    "numeric_static_material_SCNs_identical": true,
+    "numeric_report_sha256": "115e712f16e4e40a0e357edee68c59797dfcfced6518fd6b60f1bb13104bacbf",
+    "static_report_sha256": "b13aeebbab319a95d21cc8e6fad1148a0f8a3829fd6e2715d67454cdd2163522",
+    "direct_payload_report_sha256": "5622485c462079312ab4afd7e5f5be8ab2b33a9be12669a3283c05767672ce3d",
+    "material_report_sha256": "bda0b09bf92329ef357ee81d43e5b68c882785b6239d9d22a67c85c286744f3f",
+    "loader_guard": "Public dump_creature_storage.gd explicit ResourceLoader imported branch; scene policy/current-source MD5/cache destination MD5 where single destination, source/SCN/freshness metadata SHA-bound.",
+    "scope": "Corrected matched actualEditor source/current comparison. Prior raw-Cache-source versus editor-current comparison labels are withdrawn; prior source/native/Blender/fullbody/seededFX/render evidence unchanged. All original caps and frozen source observations unchanged. Complete typed static attributes, retained morph P/N/T and oriented triangle payloads match. Material typed storage and texture pixels/mips match; generated distant LOD identity is not claimed."
+  }
 }

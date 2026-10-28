@@ -316,9 +316,37 @@
       "max_normal_degrees": 2.1683161397194114e-05,
       "p99_normal_degrees": 1.650544963096014e-05
     },
-    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "scope": "Both original and CURRENT final meshes loaded explicitly through ResourceLoader from fresh editor SCNs, bound to source/current GLB +SCN +freshness metadata hashes. All source clips, directed crossfades and RESET; independent retained-static/morph bijection and unchanged4float32ULP Euclidean/.0001degree caps. Earlier Cache-route imported labels are withdrawn, not treated as editor evidence.",
     "source_sha256": "ce539149989c9eea1bd6bbf1671f8b2e003baefac7c692a75d31e9600c329deb",
-    "candidate_sha256": "8ad247e9cd1d8ee3fe2f9125844880101149847498a44835c099a808c772dbbd"
+    "candidate_sha256": "8ad247e9cd1d8ee3fe2f9125844880101149847498a44835c099a808c772dbbd",
+    "actual_editor_scene_loads": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/golden_bison.glb-b8f5b5c82ab93627dbe13aa3cfc87513.md5",
+        "import_metadata_sha256": "cb86ae1622cde02f9d7821a02d1cb7a86ab2f08e920604e4b05e28ce0b0124f3",
+        "imported_resource_path": "res://.godot/imported/golden_bison.glb-b8f5b5c82ab93627dbe13aa3cfc87513.scn",
+        "imported_resource_sha256": "9f08a8a6bd32fb167b9b1e236515d0c5f0c0db65e0f6e8bd60ca8424c77fff0a",
+        "packed_scene_resource_path": "res://assets/storage-baseline/golden_bison.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "4a6e74bc013bb8b4353618b6d19da021",
+        "source_path": "res://assets/storage-baseline/golden_bison.glb",
+        "source_sha256": "ce539149989c9eea1bd6bbf1671f8b2e003baefac7c692a75d31e9600c329deb"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/golden_bison.glb-f15dea1872f09e890af897bcd052fb3e.md5",
+        "import_metadata_sha256": "96c927d7bb2cba12cc1392c0dd5ed21ba6efaac44823f0b5f2df5cb2399b5cd1",
+        "imported_resource_path": "res://.godot/imported/golden_bison.glb-f15dea1872f09e890af897bcd052fb3e.scn",
+        "imported_resource_sha256": "74bfbf43edac30ad9e3a5989c720c08b4cda38128254b10b140735f5f10bb185",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/golden_bison.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "949cd0ade596b43dd5f0054b2c1edd09",
+        "source_path": "res://assets/actors/native/creatures/golden_bison.glb",
+        "source_sha256": "8ad247e9cd1d8ee3fe2f9125844880101149847498a44835c099a808c772dbbd"
+      }
+    ]
   },
   "existing_family_playback": {
     "actors": {
@@ -609,6 +637,83 @@
         "passed": true
       }
     },
-    "scope": "Additional strict model-space actual-native/fresh-editor-import surface equivalence gate, source-size-dependent4float32ULP Euclidean position and0.0001degree direction caps. Does not relax original source observations, Blender16ULP or raster/effects gates."
+    "scope": "Unchanged source-size-dependent4float32ULP Euclidean/.0001degree caps. Native original proof retained; editor pair now explicitly loads BOTH fresh ResourceLoader SCNs, bound to canonical GLB/SCN/sourceMD5/freshness metadata hashes. Earlier Cache-route editor labels withdrawn.",
+    "actual_editor_resource_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/golden_bison.glb-b8f5b5c82ab93627dbe13aa3cfc87513.md5",
+        "import_metadata_sha256": "cb86ae1622cde02f9d7821a02d1cb7a86ab2f08e920604e4b05e28ce0b0124f3",
+        "imported_resource_path": "res://.godot/imported/golden_bison.glb-b8f5b5c82ab93627dbe13aa3cfc87513.scn",
+        "imported_resource_sha256": "9f08a8a6bd32fb167b9b1e236515d0c5f0c0db65e0f6e8bd60ca8424c77fff0a",
+        "packed_scene_resource_path": "res://assets/storage-baseline/golden_bison.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "4a6e74bc013bb8b4353618b6d19da021",
+        "source_path": "res://assets/storage-baseline/golden_bison.glb",
+        "source_sha256": "ce539149989c9eea1bd6bbf1671f8b2e003baefac7c692a75d31e9600c329deb"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/golden_bison.glb-f15dea1872f09e890af897bcd052fb3e.md5",
+        "import_metadata_sha256": "96c927d7bb2cba12cc1392c0dd5ed21ba6efaac44823f0b5f2df5cb2399b5cd1",
+        "imported_resource_path": "res://.godot/imported/golden_bison.glb-f15dea1872f09e890af897bcd052fb3e.scn",
+        "imported_resource_sha256": "74bfbf43edac30ad9e3a5989c720c08b4cda38128254b10b140735f5f10bb185",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/golden_bison.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "949cd0ade596b43dd5f0054b2c1edd09",
+        "source_path": "res://assets/actors/native/creatures/golden_bison.glb",
+        "source_sha256": "8ad247e9cd1d8ee3fe2f9125844880101149847498a44835c099a808c772dbbd"
+      }
+    ]
+  },
+  "actual_editor_mode_correction": {
+    "passed": true,
+    "source_sha256": "ce539149989c9eea1bd6bbf1671f8b2e003baefac7c692a75d31e9600c329deb",
+    "candidate_sha256": "8ad247e9cd1d8ee3fe2f9125844880101149847498a44835c099a808c772dbbd",
+    "prior_cache_route_editor_comparison_labels_withdrawn": true,
+    "previous_public_receipt_sha256": "cbd544db8ff0c95b36eaae121b5f0fcef95654798d2f9dc7daadbc789239e6fd",
+    "source_and_current_actual_editor_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/golden_bison.glb-b8f5b5c82ab93627dbe13aa3cfc87513.md5",
+        "import_metadata_sha256": "cb86ae1622cde02f9d7821a02d1cb7a86ab2f08e920604e4b05e28ce0b0124f3",
+        "imported_resource_path": "res://.godot/imported/golden_bison.glb-b8f5b5c82ab93627dbe13aa3cfc87513.scn",
+        "imported_resource_sha256": "9f08a8a6bd32fb167b9b1e236515d0c5f0c0db65e0f6e8bd60ca8424c77fff0a",
+        "packed_scene_resource_path": "res://assets/storage-baseline/golden_bison.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "4a6e74bc013bb8b4353618b6d19da021",
+        "source_path": "res://assets/storage-baseline/golden_bison.glb",
+        "source_sha256": "ce539149989c9eea1bd6bbf1671f8b2e003baefac7c692a75d31e9600c329deb"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/golden_bison.glb-f15dea1872f09e890af897bcd052fb3e.md5",
+        "import_metadata_sha256": "96c927d7bb2cba12cc1392c0dd5ed21ba6efaac44823f0b5f2df5cb2399b5cd1",
+        "imported_resource_path": "res://.godot/imported/golden_bison.glb-f15dea1872f09e890af897bcd052fb3e.scn",
+        "imported_resource_sha256": "74bfbf43edac30ad9e3a5989c720c08b4cda38128254b10b140735f5f10bb185",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/golden_bison.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "949cd0ade596b43dd5f0054b2c1edd09",
+        "source_path": "res://assets/actors/native/creatures/golden_bison.glb",
+        "source_sha256": "8ad247e9cd1d8ee3fe2f9125844880101149847498a44835c099a808c772dbbd"
+      }
+    ],
+    "source_size_position_budget": 9.5367431640625e-07,
+    "maximum_position_error": 3.318745926817198e-07,
+    "normal_angle_budget_degrees": 0.0001,
+    "maximum_normal_angle_degrees": 2.1683161397194114e-05,
+    "all_typed_static_attributes_retained_morph_PNT_oriented_triangles_material_storage_and_texture_mips_identical": true,
+    "independent_complete_editor_vertex_and_oriented_triangle_payload_multisets_identical": true,
+    "independent_payload_source_retained_column_mapping": "No partitions. Exact preparation retained indices independently checked against raw authored POSITION/NORMAL/TANGENT accessor bits; no raw vertex ordinal or arbitrary coincident-ID assumption.",
+    "numeric_static_material_SCNs_identical": true,
+    "numeric_report_sha256": "a455c2f3892c751ab3d1e8ba52baa0b2131c8a5f7afc46a847ff346b23b33ea5",
+    "static_report_sha256": "b026630c03253d1a506fcbd779d5940b297ef73d31817714eb7fe6311ed898df",
+    "direct_payload_report_sha256": "2404502832be971ba5da93ed45c7b8ca8dd18f35d5f3a3fce0cc44d07122e5be",
+    "material_report_sha256": "71d09fe470581a94f15249c6490060c563c0eb25dc6abe1dddbe46023a8ee2f6",
+    "loader_guard": "Public dump_creature_storage.gd explicit ResourceLoader imported branch; scene policy/current-source MD5/cache destination MD5 where single destination, source/SCN/freshness metadata SHA-bound.",
+    "scope": "Corrected matched actualEditor source/current comparison. Prior raw-Cache-source versus editor-current comparison labels are withdrawn; prior source/native/Blender/fullbody/seededFX/render evidence unchanged. All original caps and frozen source observations unchanged. Complete typed static attributes, retained morph P/N/T and oriented triangle payloads match. Material typed storage and texture pixels/mips match; generated distant LOD identity is not claimed."
   }
 }

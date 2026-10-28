@@ -305,9 +305,37 @@
       "max_normal_degrees": 2.1327258847706145e-05,
       "p99_normal_degrees": 1.905388610723494e-05
     },
-    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "scope": "Both original and CURRENT final meshes loaded explicitly through ResourceLoader from fresh editor SCNs, bound to source/current GLB +SCN +freshness metadata hashes. All source clips, directed crossfades and RESET; independent retained-static/morph bijection and unchanged4float32ULP Euclidean/.0001degree caps. Earlier Cache-route imported labels are withdrawn, not treated as editor evidence.",
     "source_sha256": "43244838a5c86302fbce4a5ea2d1b98f55f6414d666017076dc5abcc7e01e6bc",
-    "candidate_sha256": "8146626dc00fbb9ab05184f5d449ac7583f7109e7107764f40f9c1d498d618ab"
+    "candidate_sha256": "8146626dc00fbb9ab05184f5d449ac7583f7109e7107764f40f9c1d498d618ab",
+    "actual_editor_scene_loads": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/snow_yeti.glb-b5b6da177826dbc06bad9ea4e8d48313.md5",
+        "import_metadata_sha256": "e14e534714a733599cf48ecc253a256fc610489e015659e943e7e11e0d879287",
+        "imported_resource_path": "res://.godot/imported/snow_yeti.glb-b5b6da177826dbc06bad9ea4e8d48313.scn",
+        "imported_resource_sha256": "9bcc960508b76f03a2fe1d85aa24040a1eb3c0acb657a8f1457aec2d100b2469",
+        "packed_scene_resource_path": "res://assets/storage-baseline/snow_yeti.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "b7501680bdef7588cc0e22149f56ad25",
+        "source_path": "res://assets/storage-baseline/snow_yeti.glb",
+        "source_sha256": "43244838a5c86302fbce4a5ea2d1b98f55f6414d666017076dc5abcc7e01e6bc"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/snow_yeti.glb-a57f9a1cd947a559ef1e772af0e12356.md5",
+        "import_metadata_sha256": "6a50a35ab76a0f33ab02009e45dcf3662ac60650b878a91755adb2d72e925bec",
+        "imported_resource_path": "res://.godot/imported/snow_yeti.glb-a57f9a1cd947a559ef1e772af0e12356.scn",
+        "imported_resource_sha256": "267c4b7e129bee3495cea3dbcaf43516617eb8bf80b5de01e57e325713e885b5",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/snow_yeti.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "2757b50dc8117b90034eaf7f5f7b2f63",
+        "source_path": "res://assets/actors/native/creatures/snow_yeti.glb",
+        "source_sha256": "8146626dc00fbb9ab05184f5d449ac7583f7109e7107764f40f9c1d498d618ab"
+      }
+    ]
   },
   "existing_family_playback": {
     "actors": {
@@ -587,5 +615,54 @@
   },
   "import_scale": 1.549893,
   "actual_actor_display_scale": 1.5498930215835658,
-  "visual_contact_sheet_review": "Source/candidate comparison sheets inspected: no visible appearance difference; numeric full-cycle and multi-view pixel gates passed separately."
+  "visual_contact_sheet_review": "Source/candidate comparison sheets inspected: no visible appearance difference; numeric full-cycle and multi-view pixel gates passed separately.",
+  "actual_editor_mode_correction": {
+    "passed": true,
+    "source_sha256": "43244838a5c86302fbce4a5ea2d1b98f55f6414d666017076dc5abcc7e01e6bc",
+    "candidate_sha256": "8146626dc00fbb9ab05184f5d449ac7583f7109e7107764f40f9c1d498d618ab",
+    "prior_cache_route_editor_comparison_labels_withdrawn": true,
+    "previous_public_receipt_sha256": "32ad9ab7aedcffca80cae2e83351417006098e98c661554fc3c3f15847725ea8",
+    "source_and_current_actual_editor_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/snow_yeti.glb-b5b6da177826dbc06bad9ea4e8d48313.md5",
+        "import_metadata_sha256": "e14e534714a733599cf48ecc253a256fc610489e015659e943e7e11e0d879287",
+        "imported_resource_path": "res://.godot/imported/snow_yeti.glb-b5b6da177826dbc06bad9ea4e8d48313.scn",
+        "imported_resource_sha256": "9bcc960508b76f03a2fe1d85aa24040a1eb3c0acb657a8f1457aec2d100b2469",
+        "packed_scene_resource_path": "res://assets/storage-baseline/snow_yeti.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "b7501680bdef7588cc0e22149f56ad25",
+        "source_path": "res://assets/storage-baseline/snow_yeti.glb",
+        "source_sha256": "43244838a5c86302fbce4a5ea2d1b98f55f6414d666017076dc5abcc7e01e6bc"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/snow_yeti.glb-a57f9a1cd947a559ef1e772af0e12356.md5",
+        "import_metadata_sha256": "6a50a35ab76a0f33ab02009e45dcf3662ac60650b878a91755adb2d72e925bec",
+        "imported_resource_path": "res://.godot/imported/snow_yeti.glb-a57f9a1cd947a559ef1e772af0e12356.scn",
+        "imported_resource_sha256": "267c4b7e129bee3495cea3dbcaf43516617eb8bf80b5de01e57e325713e885b5",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/snow_yeti.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "2757b50dc8117b90034eaf7f5f7b2f63",
+        "source_path": "res://assets/actors/native/creatures/snow_yeti.glb",
+        "source_sha256": "8146626dc00fbb9ab05184f5d449ac7583f7109e7107764f40f9c1d498d618ab"
+      }
+    ],
+    "source_size_position_budget": 4.76837158203125e-07,
+    "maximum_position_error": 4.72727042729793e-07,
+    "normal_angle_budget_degrees": 0.0001,
+    "maximum_normal_angle_degrees": 2.1327258847706145e-05,
+    "all_typed_static_attributes_retained_morph_PNT_oriented_triangles_material_storage_and_texture_mips_identical": true,
+    "independent_complete_editor_vertex_and_oriented_triangle_payload_multisets_identical": true,
+    "independent_payload_source_retained_column_mapping": "No partitions. Exact preparation retained indices independently checked against raw authored POSITION/NORMAL/TANGENT accessor bits; no raw vertex ordinal or arbitrary coincident-ID assumption.",
+    "numeric_static_material_SCNs_identical": true,
+    "numeric_report_sha256": "26fd69e4a1a342c79f8e6e395190841da0fab4b8d34d8e910df42bff42ecdd82",
+    "static_report_sha256": "93739591292be354e4bfab73c48697ddc17f1840a7c345282acea7a47d3dd6d3",
+    "direct_payload_report_sha256": "45b52bd04e43144106620f632279ec922f687801e81c9b120c011bb5b3bdc629",
+    "material_report_sha256": "fab71368beabf12c93966ca99de19de8767b4ad98479ae8e8a5818c6943356e7",
+    "loader_guard": "Public dump_creature_storage.gd explicit ResourceLoader imported branch; scene policy/current-source MD5/cache destination MD5 where single destination, source/SCN/freshness metadata SHA-bound.",
+    "scope": "Corrected matched actualEditor source/current comparison. Prior raw-Cache-source versus editor-current comparison labels are withdrawn; prior source/native/Blender/fullbody/seededFX/render evidence unchanged. All original caps and frozen source observations unchanged. Complete typed static attributes, retained morph P/N/T and oriented triangle payloads match. Material typed storage and texture pixels/mips match; generated distant LOD identity is not claimed."
+  }
 }

@@ -310,9 +310,37 @@
       "max_normal_degrees": 2.836790617393655e-05,
       "p99_normal_degrees": 2.3041122436593408e-05
     },
-    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "scope": "Both original and CURRENT final meshes loaded explicitly through ResourceLoader from fresh editor SCNs, bound to source/current GLB +SCN +freshness metadata hashes. All source clips, directed crossfades and RESET; independent retained-static/morph bijection and unchanged4float32ULP Euclidean/.0001degree caps. Earlier Cache-route imported labels are withdrawn, not treated as editor evidence.",
     "source_sha256": "3f22bf843edc883567043b52cf494bc207413e8b1b05bbdbf593090e305e0858",
-    "candidate_sha256": "fcfb179b78861561e62150e6e516eb6cd7e900bf3c194eb0c0ce1b034e8c40f6"
+    "candidate_sha256": "fcfb179b78861561e62150e6e516eb6cd7e900bf3c194eb0c0ce1b034e8c40f6",
+    "actual_editor_scene_loads": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/cave_salamander.glb-ddbbbf9e209410e2d8d101c870247d32.md5",
+        "import_metadata_sha256": "c428d9325b11ce6a1a4f189f9f077cf4950918170b93d3883a693672ac34c9a8",
+        "imported_resource_path": "res://.godot/imported/cave_salamander.glb-ddbbbf9e209410e2d8d101c870247d32.scn",
+        "imported_resource_sha256": "8478ab770651e95aac446534679cbd33c84e8a64b34dc85d5e879759287510c9",
+        "packed_scene_resource_path": "res://assets/storage-baseline/cave_salamander.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "ff58db0ca809b9aa205385b7e391b0d5",
+        "source_path": "res://assets/storage-baseline/cave_salamander.glb",
+        "source_sha256": "3f22bf843edc883567043b52cf494bc207413e8b1b05bbdbf593090e305e0858"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/cave_salamander.glb-65a31d0b5d3b230ebd16222dd032d07b.md5",
+        "import_metadata_sha256": "acce7bf69ac305153ce9a0be5e28154be70aa1c632a7154b71063f87ae3adb38",
+        "imported_resource_path": "res://.godot/imported/cave_salamander.glb-65a31d0b5d3b230ebd16222dd032d07b.scn",
+        "imported_resource_sha256": "bf2a31ee509eeeeaef0f799c6e77b1bfd293c05b959b8533af5db84c58da535e",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/cave_salamander.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "e18b8eba3de354693b9b4d3d668ad62f",
+        "source_path": "res://assets/actors/native/creatures/cave_salamander.glb",
+        "source_sha256": "fcfb179b78861561e62150e6e516eb6cd7e900bf3c194eb0c0ce1b034e8c40f6"
+      }
+    ]
   },
   "existing_family_playback": {
     "actors": {
@@ -596,5 +624,54 @@
     "maximum_border_foreground_pixels": 0
   },
   "import_scale": 0.411412,
-  "actual_actor_display_scale": 0.4114120006561296
+  "actual_actor_display_scale": 0.4114120006561296,
+  "actual_editor_mode_correction": {
+    "passed": true,
+    "source_sha256": "3f22bf843edc883567043b52cf494bc207413e8b1b05bbdbf593090e305e0858",
+    "candidate_sha256": "fcfb179b78861561e62150e6e516eb6cd7e900bf3c194eb0c0ce1b034e8c40f6",
+    "prior_cache_route_editor_comparison_labels_withdrawn": true,
+    "previous_public_receipt_sha256": "8291e1e8724e7ba3985c0cfe29793cba96d469be16728ba6df718ab31f7a1de0",
+    "source_and_current_actual_editor_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/cave_salamander.glb-ddbbbf9e209410e2d8d101c870247d32.md5",
+        "import_metadata_sha256": "c428d9325b11ce6a1a4f189f9f077cf4950918170b93d3883a693672ac34c9a8",
+        "imported_resource_path": "res://.godot/imported/cave_salamander.glb-ddbbbf9e209410e2d8d101c870247d32.scn",
+        "imported_resource_sha256": "8478ab770651e95aac446534679cbd33c84e8a64b34dc85d5e879759287510c9",
+        "packed_scene_resource_path": "res://assets/storage-baseline/cave_salamander.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "ff58db0ca809b9aa205385b7e391b0d5",
+        "source_path": "res://assets/storage-baseline/cave_salamander.glb",
+        "source_sha256": "3f22bf843edc883567043b52cf494bc207413e8b1b05bbdbf593090e305e0858"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/cave_salamander.glb-65a31d0b5d3b230ebd16222dd032d07b.md5",
+        "import_metadata_sha256": "acce7bf69ac305153ce9a0be5e28154be70aa1c632a7154b71063f87ae3adb38",
+        "imported_resource_path": "res://.godot/imported/cave_salamander.glb-65a31d0b5d3b230ebd16222dd032d07b.scn",
+        "imported_resource_sha256": "bf2a31ee509eeeeaef0f799c6e77b1bfd293c05b959b8533af5db84c58da535e",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/cave_salamander.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "e18b8eba3de354693b9b4d3d668ad62f",
+        "source_path": "res://assets/actors/native/creatures/cave_salamander.glb",
+        "source_sha256": "fcfb179b78861561e62150e6e516eb6cd7e900bf3c194eb0c0ce1b034e8c40f6"
+      }
+    ],
+    "source_size_position_budget": 1.9073486328125e-06,
+    "maximum_position_error": 4.2320584753642423e-07,
+    "normal_angle_budget_degrees": 0.0001,
+    "maximum_normal_angle_degrees": 2.836790617393655e-05,
+    "all_typed_static_attributes_retained_morph_PNT_oriented_triangles_material_storage_and_texture_mips_identical": true,
+    "independent_complete_editor_vertex_and_oriented_triangle_payload_multisets_identical": true,
+    "independent_payload_source_retained_column_mapping": "No partitions. Exact preparation retained indices independently checked against raw authored POSITION/NORMAL/TANGENT accessor bits; no raw vertex ordinal or arbitrary coincident-ID assumption.",
+    "numeric_static_material_SCNs_identical": true,
+    "numeric_report_sha256": "ca368d264f935a35399cc5da357dc891ad6a1d62cbcb8684507c21c9e63e6572",
+    "static_report_sha256": "202a15cc5560e9424056ef5fbd92b288bee17fdae68677412cd4df3f90bae9ac",
+    "direct_payload_report_sha256": "00abf79a6a7a313708e939e77786d744fccf923167e395b9169607b27f217dd2",
+    "material_report_sha256": "312a3638d955cfa73919a06d53241a60441966d8ae845b4d872469ad41e08f79",
+    "loader_guard": "Public dump_creature_storage.gd explicit ResourceLoader imported branch; scene policy/current-source MD5/cache destination MD5 where single destination, source/SCN/freshness metadata SHA-bound.",
+    "scope": "Corrected matched actualEditor source/current comparison. Prior raw-Cache-source versus editor-current comparison labels are withdrawn; prior source/native/Blender/fullbody/seededFX/render evidence unchanged. All original caps and frozen source observations unchanged. Complete typed static attributes, retained morph P/N/T and oriented triangle payloads match. Material typed storage and texture pixels/mips match; generated distant LOD identity is not claimed."
+  }
 }

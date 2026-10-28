@@ -337,9 +337,37 @@
       "max_normal_degrees": 1.2313298636799924e-05,
       "p99_normal_degrees": 1.1066171232981577e-05
     },
-    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "scope": "Both original and CURRENT final meshes loaded explicitly through ResourceLoader from fresh editor SCNs, bound to source/current GLB +SCN +freshness metadata hashes. All source clips, directed crossfades and RESET; independent retained-static/morph bijection and unchanged4float32ULP Euclidean/.0001degree caps. Earlier Cache-route imported labels are withdrawn, not treated as editor evidence.",
     "source_sha256": "213d8c13c5bea2f4dadc0d04cb78ae17a00c1982a98ed88cc49b2d1f30d6b035",
-    "candidate_sha256": "fd8be70fdd7dc694176b3bd25f741dedaa9bd5f5e83e02fc2060b4b6ad42f092"
+    "candidate_sha256": "fd8be70fdd7dc694176b3bd25f741dedaa9bd5f5e83e02fc2060b4b6ad42f092",
+    "actual_editor_scene_loads": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/macaw.glb-aac2f3a24e86d81aedfe903b41905ea5.md5",
+        "import_metadata_sha256": "2de9edfadaaa26bc090c69974101119bab67e33744d95619127140cdec0747ae",
+        "imported_resource_path": "res://.godot/imported/macaw.glb-aac2f3a24e86d81aedfe903b41905ea5.scn",
+        "imported_resource_sha256": "1fc8ce45df517003a4609a459a167562d4927234cc4086351f6d372e2beae381",
+        "packed_scene_resource_path": "res://assets/storage-baseline/macaw.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "67b1bc2ad3a817d69357f73bf4279487",
+        "source_path": "res://assets/storage-baseline/macaw.glb",
+        "source_sha256": "213d8c13c5bea2f4dadc0d04cb78ae17a00c1982a98ed88cc49b2d1f30d6b035"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/macaw.glb-0081c242048845519bcbc261d0512a70.md5",
+        "import_metadata_sha256": "1054f587d16e60310c728381ca51647c2ae28e0771f9fd5de68b283f043e82ea",
+        "imported_resource_path": "res://.godot/imported/macaw.glb-0081c242048845519bcbc261d0512a70.scn",
+        "imported_resource_sha256": "96ad5c2314301a86c6fcc9f1e3e58fc22f3c8c2845d8dae148d7259471381f8b",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/macaw.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "557204d207af271a4e827c3fdacd514e",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/macaw.glb",
+        "source_sha256": "fd8be70fdd7dc694176b3bd25f741dedaa9bd5f5e83e02fc2060b4b6ad42f092"
+      }
+    ]
   },
   "existing_family_playback": {
     "actors": {
@@ -639,5 +667,54 @@
   },
   "import_scale": 0.8499997,
   "actual_actor_display_scale": 1.6999994516372765,
-  "visual_contact_sheet_review": "Source/candidate comparison sheets inspected: no visible appearance difference; numeric full-cycle and multi-view pixel gates passed separately."
+  "visual_contact_sheet_review": "Source/candidate comparison sheets inspected: no visible appearance difference; numeric full-cycle and multi-view pixel gates passed separately.",
+  "actual_editor_mode_correction": {
+    "passed": true,
+    "source_sha256": "213d8c13c5bea2f4dadc0d04cb78ae17a00c1982a98ed88cc49b2d1f30d6b035",
+    "candidate_sha256": "fd8be70fdd7dc694176b3bd25f741dedaa9bd5f5e83e02fc2060b4b6ad42f092",
+    "prior_cache_route_editor_comparison_labels_withdrawn": true,
+    "previous_public_receipt_sha256": "53d4c7aa909b90dda7149b23a9a187f28ff05cc0b7962065ef248d19cc5689b1",
+    "source_and_current_actual_editor_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/macaw.glb-aac2f3a24e86d81aedfe903b41905ea5.md5",
+        "import_metadata_sha256": "2de9edfadaaa26bc090c69974101119bab67e33744d95619127140cdec0747ae",
+        "imported_resource_path": "res://.godot/imported/macaw.glb-aac2f3a24e86d81aedfe903b41905ea5.scn",
+        "imported_resource_sha256": "1fc8ce45df517003a4609a459a167562d4927234cc4086351f6d372e2beae381",
+        "packed_scene_resource_path": "res://assets/storage-baseline/macaw.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "67b1bc2ad3a817d69357f73bf4279487",
+        "source_path": "res://assets/storage-baseline/macaw.glb",
+        "source_sha256": "213d8c13c5bea2f4dadc0d04cb78ae17a00c1982a98ed88cc49b2d1f30d6b035"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/macaw.glb-0081c242048845519bcbc261d0512a70.md5",
+        "import_metadata_sha256": "1054f587d16e60310c728381ca51647c2ae28e0771f9fd5de68b283f043e82ea",
+        "imported_resource_path": "res://.godot/imported/macaw.glb-0081c242048845519bcbc261d0512a70.scn",
+        "imported_resource_sha256": "96ad5c2314301a86c6fcc9f1e3e58fc22f3c8c2845d8dae148d7259471381f8b",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/macaw.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "557204d207af271a4e827c3fdacd514e",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/macaw.glb",
+        "source_sha256": "fd8be70fdd7dc694176b3bd25f741dedaa9bd5f5e83e02fc2060b4b6ad42f092"
+      }
+    ],
+    "source_size_position_budget": 4.76837158203125e-07,
+    "maximum_position_error": 3.2882484961962095e-08,
+    "normal_angle_budget_degrees": 0.0001,
+    "maximum_normal_angle_degrees": 1.2313298636799924e-05,
+    "all_typed_static_attributes_retained_morph_PNT_oriented_triangles_material_storage_and_texture_mips_identical": true,
+    "independent_complete_editor_vertex_and_oriented_triangle_payload_multisets_identical": true,
+    "independent_payload_source_retained_column_mapping": "No partitions. Exact preparation retained indices independently checked against raw authored POSITION/NORMAL/TANGENT accessor bits; no raw vertex ordinal or arbitrary coincident-ID assumption.",
+    "numeric_static_material_SCNs_identical": true,
+    "numeric_report_sha256": "d69aad8dfe84905bc28b3aa23628e73651b18044e480e036987547f43539ae25",
+    "static_report_sha256": "316e4626d2f1665b818d9f2111670a7f41f3d66c26274c22e5fbd9d5130cc011",
+    "direct_payload_report_sha256": "4fc35acb1ead59f96d2410ead237895ddc13fd2fcd6efe4e9488981993b38c16",
+    "material_report_sha256": "8f947976cf096bd99afc5df5c7d0a22708e4584e5a3151b37a98bd8425942ba7",
+    "loader_guard": "Public dump_creature_storage.gd explicit ResourceLoader imported branch; scene policy/current-source MD5/cache destination MD5 where single destination, source/SCN/freshness metadata SHA-bound.",
+    "scope": "Corrected matched actualEditor source/current comparison. Prior raw-Cache-source versus editor-current comparison labels are withdrawn; prior source/native/Blender/fullbody/seededFX/render evidence unchanged. All original caps and frozen source observations unchanged. Complete typed static attributes, retained morph P/N/T and oriented triangle payloads match. Material typed storage and texture pixels/mips match; generated distant LOD identity is not claimed."
+  }
 }

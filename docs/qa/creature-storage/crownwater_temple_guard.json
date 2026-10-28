@@ -464,9 +464,37 @@
       "max_normal_degrees": 2.3521425216738414e-05,
       "p99_normal_degrees": 1.4269002384079591e-05
     },
-    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "scope": "Both original and CURRENT final meshes loaded explicitly through ResourceLoader from fresh editor SCNs, bound to source/current GLB +SCN +freshness metadata hashes. All source clips, directed crossfades and RESET; independent retained-static/morph bijection and unchanged4float32ULP Euclidean/.0001degree caps. Earlier Cache-route imported labels are withdrawn, not treated as editor evidence.",
     "source_sha256": "83295660e07440b89ec06ab92a6b3310ce8b5a82043f352751623f5ca736e33e",
-    "candidate_sha256": "fcc3381d9a2e991e6ff09c7f49b74a3ee4816d6d47c5b831921bda6c34356f8d"
+    "candidate_sha256": "fcc3381d9a2e991e6ff09c7f49b74a3ee4816d6d47c5b831921bda6c34356f8d",
+    "actual_editor_scene_loads": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/crownwater_temple_guard.glb-979999c9e826bd7f6ebb17e4beee8979.md5",
+        "import_metadata_sha256": "d2f4ddcd9f3f1aac34b4288875f66692a62c6c3fc272d2cd03eb10451ed77a58",
+        "imported_resource_path": "res://.godot/imported/crownwater_temple_guard.glb-979999c9e826bd7f6ebb17e4beee8979.scn",
+        "imported_resource_sha256": "16b66e02934441f1b44e65d43dc2c550685169163f72821ed831a67e931146d1",
+        "packed_scene_resource_path": "res://assets/storage-baseline/crownwater_temple_guard.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "91a4d49c90e5cbf10c7eec2cda83b780",
+        "source_path": "res://assets/storage-baseline/crownwater_temple_guard.glb",
+        "source_sha256": "83295660e07440b89ec06ab92a6b3310ce8b5a82043f352751623f5ca736e33e"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/crownwater_temple_guard.glb-243803b6ff633bbefb94f9256e74d609.md5",
+        "import_metadata_sha256": "0f61a64336a26ac01fe05de2cf637f045ba14cbc4951f67215f48b52ce21013b",
+        "imported_resource_path": "res://.godot/imported/crownwater_temple_guard.glb-243803b6ff633bbefb94f9256e74d609.scn",
+        "imported_resource_sha256": "6cedc6f3d827c3fc25b14c98b71cc9980e96bab5d22374f802e810fa96c98302",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/crownwater_temple_guard.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "d9bf42a72e56dc63e751c7faf820ca23",
+        "source_path": "res://assets/actors/native/creatures/crownwater_temple_guard.glb",
+        "source_sha256": "fcc3381d9a2e991e6ff09c7f49b74a3ee4816d6d47c5b831921bda6c34356f8d"
+      }
+    ]
   },
   "existing_family_playback": {
     "actors": {
@@ -767,7 +795,35 @@
         "passed": true
       }
     },
-    "scope": "Additional strict model-space actual-native/fresh-editor-import surface equivalence gate, source-size-dependent4float32ULP Euclidean position and0.0001degree direction caps. Does not relax original source observations, Blender16ULP or raster/effects gates."
+    "scope": "Unchanged source-size-dependent4float32ULP Euclidean/.0001degree caps. Native original proof retained; editor pair now explicitly loads BOTH fresh ResourceLoader SCNs, bound to canonical GLB/SCN/sourceMD5/freshness metadata hashes. Earlier Cache-route editor labels withdrawn.",
+    "actual_editor_resource_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/crownwater_temple_guard.glb-979999c9e826bd7f6ebb17e4beee8979.md5",
+        "import_metadata_sha256": "d2f4ddcd9f3f1aac34b4288875f66692a62c6c3fc272d2cd03eb10451ed77a58",
+        "imported_resource_path": "res://.godot/imported/crownwater_temple_guard.glb-979999c9e826bd7f6ebb17e4beee8979.scn",
+        "imported_resource_sha256": "16b66e02934441f1b44e65d43dc2c550685169163f72821ed831a67e931146d1",
+        "packed_scene_resource_path": "res://assets/storage-baseline/crownwater_temple_guard.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "91a4d49c90e5cbf10c7eec2cda83b780",
+        "source_path": "res://assets/storage-baseline/crownwater_temple_guard.glb",
+        "source_sha256": "83295660e07440b89ec06ab92a6b3310ce8b5a82043f352751623f5ca736e33e"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/crownwater_temple_guard.glb-243803b6ff633bbefb94f9256e74d609.md5",
+        "import_metadata_sha256": "0f61a64336a26ac01fe05de2cf637f045ba14cbc4951f67215f48b52ce21013b",
+        "imported_resource_path": "res://.godot/imported/crownwater_temple_guard.glb-243803b6ff633bbefb94f9256e74d609.scn",
+        "imported_resource_sha256": "6cedc6f3d827c3fc25b14c98b71cc9980e96bab5d22374f802e810fa96c98302",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/crownwater_temple_guard.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "d9bf42a72e56dc63e751c7faf820ca23",
+        "source_path": "res://assets/actors/native/creatures/crownwater_temple_guard.glb",
+        "source_sha256": "fcc3381d9a2e991e6ff09c7f49b74a3ee4816d6d47c5b831921bda6c34356f8d"
+      }
+    ]
   },
   "death_dissolve_source_framing": {
     "actor": "crownwater_temple_guard",
@@ -808,5 +864,54 @@
     "potential_shared_gpu_saved_bytes": 596360,
     "additional_draw_surfaces": 1,
     "decision": "Exact-only main retained. SharedGPU saving596360B does not establish a runtime win against an extra draw per actor/pass; no rig/skin candidate developed, installed or GPU-qualified."
+  },
+  "actual_editor_mode_correction": {
+    "passed": true,
+    "source_sha256": "83295660e07440b89ec06ab92a6b3310ce8b5a82043f352751623f5ca736e33e",
+    "candidate_sha256": "fcc3381d9a2e991e6ff09c7f49b74a3ee4816d6d47c5b831921bda6c34356f8d",
+    "prior_cache_route_editor_comparison_labels_withdrawn": true,
+    "previous_public_receipt_sha256": "59692dff66d48662e77108fdeca5be6ef664ea6fdb06a06a63037537a7083821",
+    "source_and_current_actual_editor_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/crownwater_temple_guard.glb-979999c9e826bd7f6ebb17e4beee8979.md5",
+        "import_metadata_sha256": "d2f4ddcd9f3f1aac34b4288875f66692a62c6c3fc272d2cd03eb10451ed77a58",
+        "imported_resource_path": "res://.godot/imported/crownwater_temple_guard.glb-979999c9e826bd7f6ebb17e4beee8979.scn",
+        "imported_resource_sha256": "16b66e02934441f1b44e65d43dc2c550685169163f72821ed831a67e931146d1",
+        "packed_scene_resource_path": "res://assets/storage-baseline/crownwater_temple_guard.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "91a4d49c90e5cbf10c7eec2cda83b780",
+        "source_path": "res://assets/storage-baseline/crownwater_temple_guard.glb",
+        "source_sha256": "83295660e07440b89ec06ab92a6b3310ce8b5a82043f352751623f5ca736e33e"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/crownwater_temple_guard.glb-243803b6ff633bbefb94f9256e74d609.md5",
+        "import_metadata_sha256": "0f61a64336a26ac01fe05de2cf637f045ba14cbc4951f67215f48b52ce21013b",
+        "imported_resource_path": "res://.godot/imported/crownwater_temple_guard.glb-243803b6ff633bbefb94f9256e74d609.scn",
+        "imported_resource_sha256": "6cedc6f3d827c3fc25b14c98b71cc9980e96bab5d22374f802e810fa96c98302",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/crownwater_temple_guard.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "d9bf42a72e56dc63e751c7faf820ca23",
+        "source_path": "res://assets/actors/native/creatures/crownwater_temple_guard.glb",
+        "source_sha256": "fcc3381d9a2e991e6ff09c7f49b74a3ee4816d6d47c5b831921bda6c34356f8d"
+      }
+    ],
+    "source_size_position_budget": 4.76837158203125e-07,
+    "maximum_position_error": 1.9689711127436395e-07,
+    "normal_angle_budget_degrees": 0.0001,
+    "maximum_normal_angle_degrees": 2.3521425216738414e-05,
+    "all_typed_static_attributes_retained_morph_PNT_oriented_triangles_material_storage_and_texture_mips_identical": true,
+    "independent_complete_editor_vertex_and_oriented_triangle_payload_multisets_identical": true,
+    "independent_payload_source_retained_column_mapping": "No partitions. Exact preparation retained indices independently checked against raw authored POSITION/NORMAL/TANGENT accessor bits; no raw vertex ordinal or arbitrary coincident-ID assumption.",
+    "numeric_static_material_SCNs_identical": true,
+    "numeric_report_sha256": "c49ab09999450b6e4bf8ae0e3f3ef725447d7a487de01f75504c1cd98ee4c03c",
+    "static_report_sha256": "6aa4d3d4a94ae50e9732c295abf13b40e2bccd6286a595ff81a89fb4299b1185",
+    "direct_payload_report_sha256": "c8240f0d27c345225381f85bd91fa86614dd361fbd7ae0583f6c74420fcf295c",
+    "material_report_sha256": "8fdfc18f8a795bf9724087eae919311424974d1e895ece7f0bcb60633875e3d0",
+    "loader_guard": "Public dump_creature_storage.gd explicit ResourceLoader imported branch; scene policy/current-source MD5/cache destination MD5 where single destination, source/SCN/freshness metadata SHA-bound.",
+    "scope": "Corrected matched actualEditor source/current comparison. Prior raw-Cache-source versus editor-current comparison labels are withdrawn; prior source/native/Blender/fullbody/seededFX/render evidence unchanged. All original caps and frozen source observations unchanged. Complete typed static attributes, retained morph P/N/T and oriented triangle payloads match. Material typed storage and texture pixels/mips match; generated distant LOD identity is not claimed."
   }
 }

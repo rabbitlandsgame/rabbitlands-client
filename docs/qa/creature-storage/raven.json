@@ -510,9 +510,37 @@
       "max_normal_degrees": 2.4208661032430873e-05,
       "p99_normal_degrees": 1.836800497985768e-05
     },
-    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "scope": "Both original and CURRENT final meshes loaded explicitly through ResourceLoader from fresh editor SCNs, bound to source/current GLB +SCN +freshness metadata hashes. All source clips, directed crossfades and RESET; independent retained-static/morph bijection and unchanged4float32ULP Euclidean/.0001degree caps. Earlier Cache-route imported labels are withdrawn, not treated as editor evidence.",
     "source_sha256": "5bdf6016d10e80862dfadd8d5fe3dd3fe750898731a8c600539b0c3b8aab0a30",
-    "candidate_sha256": "6565a4bf894f2e0548ab0462d5ebd0ffbd82737f404983a91fde908ec5e4c742"
+    "candidate_sha256": "6565a4bf894f2e0548ab0462d5ebd0ffbd82737f404983a91fde908ec5e4c742",
+    "actual_editor_scene_loads": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/raven.glb-2f0e5091e2fcb54bc34bc26436fe93a4.md5",
+        "import_metadata_sha256": "79c7f514fecd677ace4d685db48b545771df42fcbc88afa211cee84e4066b0a3",
+        "imported_resource_path": "res://.godot/imported/raven.glb-2f0e5091e2fcb54bc34bc26436fe93a4.scn",
+        "imported_resource_sha256": "eb012f26094d2e2b6d6d6ddeb0dddb3f9ddaa9f695398bef284042f691a29a9e",
+        "packed_scene_resource_path": "res://assets/storage-baseline/raven.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "e2dd4bebf7d6bc873d229c4fc1d2cfaf",
+        "source_path": "res://assets/storage-baseline/raven.glb",
+        "source_sha256": "5bdf6016d10e80862dfadd8d5fe3dd3fe750898731a8c600539b0c3b8aab0a30"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/raven.glb-9377202e6334be4fd2c1d184df81c573.md5",
+        "import_metadata_sha256": "27e55cce346d3b79bce57ee91358013c4643c78d5a6c158b1ef019f6e5839e91",
+        "imported_resource_path": "res://.godot/imported/raven.glb-9377202e6334be4fd2c1d184df81c573.scn",
+        "imported_resource_sha256": "5a8f30ccc8ca81dac65bb5d9ab4e6cad85dfba6f43d61b2e30040c676511f750",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/raven.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "9dc05d528fdf8ac1a75f85d7aecd3955",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/raven.glb",
+        "source_sha256": "6565a4bf894f2e0548ab0462d5ebd0ffbd82737f404983a91fde908ec5e4c742"
+      }
+    ]
   },
   "existing_imported_playback_gate": {
     "actors": {
@@ -787,5 +815,101 @@
   "runtime_cost": "No new runtime algorithm or draw surface. Inactive target buffers and flat key rows are removed. Tiny existing engine interpolation roundoff after key removal is quantified by native/imported/renderer reports; no approximate fitting or resampling.",
   "effect_invariants": "Original triangle order/count, vertex weighting, binds and original skin bits retained. No surface split or rigid reskin; corpse sampling ranges and secondary skin inputs unchanged.",
   "evidence": "Ignored immutable source/candidate, original and supplemental physical observations, all-key proof, Blender/current-engine reports, full-resolution captures and lossless WebP full-cycle comparisons retained in task-owned .local/batch2-audit/raven",
-  "compression_note": "Release RLCZ level3 envelope includes a 56-byte header. Both raw and compressed storage shrink."
+  "compression_note": "Release RLCZ level3 envelope includes a 56-byte header. Both raw and compressed storage shrink.",
+  "fresh_editor_import_playback": {
+    "maximum_position_error": 6.628022133332524e-08,
+    "maximum_normal_angle_degrees": 2.4208661032430873e-05,
+    "worst_position": {
+      "label": "Death_A@0.933",
+      "max_surface_error": 6.628022133332524e-08,
+      "max_normal_degrees": 2.4208661032430873e-05,
+      "p99_normal_degrees": 1.836800497985768e-05
+    },
+    "worst_normal": {
+      "label": "Death_A@0.933",
+      "max_surface_error": 6.628022133332524e-08,
+      "max_normal_degrees": 2.4208661032430873e-05,
+      "p99_normal_degrees": 1.836800497985768e-05
+    },
+    "scope": "Both original and CURRENT final meshes loaded explicitly through ResourceLoader from fresh editor SCNs, bound to source/current GLB +SCN +freshness metadata hashes. All source clips, directed crossfades and RESET; independent retained-static/morph bijection and unchanged4float32ULP Euclidean/.0001degree caps. Earlier Cache-route imported labels are withdrawn, not treated as editor evidence.",
+    "source_sha256": "5bdf6016d10e80862dfadd8d5fe3dd3fe750898731a8c600539b0c3b8aab0a30",
+    "candidate_sha256": "6565a4bf894f2e0548ab0462d5ebd0ffbd82737f404983a91fde908ec5e4c742",
+    "actual_editor_scene_loads": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/raven.glb-2f0e5091e2fcb54bc34bc26436fe93a4.md5",
+        "import_metadata_sha256": "79c7f514fecd677ace4d685db48b545771df42fcbc88afa211cee84e4066b0a3",
+        "imported_resource_path": "res://.godot/imported/raven.glb-2f0e5091e2fcb54bc34bc26436fe93a4.scn",
+        "imported_resource_sha256": "eb012f26094d2e2b6d6d6ddeb0dddb3f9ddaa9f695398bef284042f691a29a9e",
+        "packed_scene_resource_path": "res://assets/storage-baseline/raven.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "e2dd4bebf7d6bc873d229c4fc1d2cfaf",
+        "source_path": "res://assets/storage-baseline/raven.glb",
+        "source_sha256": "5bdf6016d10e80862dfadd8d5fe3dd3fe750898731a8c600539b0c3b8aab0a30"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/raven.glb-9377202e6334be4fd2c1d184df81c573.md5",
+        "import_metadata_sha256": "27e55cce346d3b79bce57ee91358013c4643c78d5a6c158b1ef019f6e5839e91",
+        "imported_resource_path": "res://.godot/imported/raven.glb-9377202e6334be4fd2c1d184df81c573.scn",
+        "imported_resource_sha256": "5a8f30ccc8ca81dac65bb5d9ab4e6cad85dfba6f43d61b2e30040c676511f750",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/raven.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "9dc05d528fdf8ac1a75f85d7aecd3955",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/raven.glb",
+        "source_sha256": "6565a4bf894f2e0548ab0462d5ebd0ffbd82737f404983a91fde908ec5e4c742"
+      }
+    ]
+  },
+  "actual_editor_mode_correction": {
+    "passed": true,
+    "source_sha256": "5bdf6016d10e80862dfadd8d5fe3dd3fe750898731a8c600539b0c3b8aab0a30",
+    "candidate_sha256": "6565a4bf894f2e0548ab0462d5ebd0ffbd82737f404983a91fde908ec5e4c742",
+    "prior_cache_route_editor_comparison_labels_withdrawn": true,
+    "previous_public_receipt_sha256": "1194f0dfba9a9f9d72d6301b7555165746d8e147bf13788d594f95ab7f6461f5",
+    "source_and_current_actual_editor_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/raven.glb-2f0e5091e2fcb54bc34bc26436fe93a4.md5",
+        "import_metadata_sha256": "79c7f514fecd677ace4d685db48b545771df42fcbc88afa211cee84e4066b0a3",
+        "imported_resource_path": "res://.godot/imported/raven.glb-2f0e5091e2fcb54bc34bc26436fe93a4.scn",
+        "imported_resource_sha256": "eb012f26094d2e2b6d6d6ddeb0dddb3f9ddaa9f695398bef284042f691a29a9e",
+        "packed_scene_resource_path": "res://assets/storage-baseline/raven.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "e2dd4bebf7d6bc873d229c4fc1d2cfaf",
+        "source_path": "res://assets/storage-baseline/raven.glb",
+        "source_sha256": "5bdf6016d10e80862dfadd8d5fe3dd3fe750898731a8c600539b0c3b8aab0a30"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/raven.glb-9377202e6334be4fd2c1d184df81c573.md5",
+        "import_metadata_sha256": "27e55cce346d3b79bce57ee91358013c4643c78d5a6c158b1ef019f6e5839e91",
+        "imported_resource_path": "res://.godot/imported/raven.glb-9377202e6334be4fd2c1d184df81c573.scn",
+        "imported_resource_sha256": "5a8f30ccc8ca81dac65bb5d9ab4e6cad85dfba6f43d61b2e30040c676511f750",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/raven.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "9dc05d528fdf8ac1a75f85d7aecd3955",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/raven.glb",
+        "source_sha256": "6565a4bf894f2e0548ab0462d5ebd0ffbd82737f404983a91fde908ec5e4c742"
+      }
+    ],
+    "source_size_position_budget": 4.76837158203125e-07,
+    "maximum_position_error": 6.628022133332524e-08,
+    "normal_angle_budget_degrees": 0.0001,
+    "maximum_normal_angle_degrees": 2.4208661032430873e-05,
+    "all_typed_static_attributes_retained_morph_PNT_oriented_triangles_material_storage_and_texture_mips_identical": true,
+    "independent_complete_editor_vertex_and_oriented_triangle_payload_multisets_identical": true,
+    "independent_payload_source_retained_column_mapping": "No partitions. Exact preparation retained indices independently checked against raw authored POSITION/NORMAL/TANGENT accessor bits; no raw vertex ordinal or arbitrary coincident-ID assumption.",
+    "numeric_static_material_SCNs_identical": true,
+    "numeric_report_sha256": "a6dab1dea48f9fccdffd0871ca47f3e561a71621c8a1b9701d423e1e73ab9c2e",
+    "static_report_sha256": "b39c02d52da317b9be8b2777c20d9a50c9250398b34a5a708fd19fd393cb8bd2",
+    "direct_payload_report_sha256": "13f2b26d4a0eba96cc91503fcda4aecfde8353b8cb43445e0b7208cda001d69f",
+    "material_report_sha256": "6a3eb3c10743a9531113f19a5e750bbe520faba8198354222fe75fe8c7258d52",
+    "loader_guard": "Public dump_creature_storage.gd explicit ResourceLoader imported branch; scene policy/current-source MD5/cache destination MD5 where single destination, source/SCN/freshness metadata SHA-bound.",
+    "scope": "Corrected matched actualEditor source/current comparison. Prior raw-Cache-source versus editor-current comparison labels are withdrawn; prior source/native/Blender/fullbody/seededFX/render evidence unchanged. All original caps and frozen source observations unchanged. Complete typed static attributes, retained morph P/N/T and oriented triangle payloads match. Material typed storage and texture pixels/mips match; generated distant LOD identity is not claimed."
+  }
 }

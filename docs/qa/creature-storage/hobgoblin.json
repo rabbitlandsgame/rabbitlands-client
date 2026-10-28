@@ -339,9 +339,37 @@
       "max_normal_degrees": 1.5579907034325894e-05,
       "p99_normal_degrees": 1.1637625919892692e-05
     },
-    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "scope": "Both original and CURRENT final meshes loaded explicitly through ResourceLoader from fresh editor SCNs, bound to source/current GLB +SCN +freshness metadata hashes. All source clips, directed crossfades and RESET; independent retained-static/morph bijection and unchanged4float32ULP Euclidean/.0001degree caps. Earlier Cache-route imported labels are withdrawn, not treated as editor evidence.",
     "source_sha256": "85a9fff675419447c7364f3a7f7d71c96ef93103baeec6ddc821f5fbe425f074",
-    "candidate_sha256": "b94d48826a524f6c8cdff91c3d36e5b7cd81d7381ab2fd2c3c2724a5de46d678"
+    "candidate_sha256": "b94d48826a524f6c8cdff91c3d36e5b7cd81d7381ab2fd2c3c2724a5de46d678",
+    "actual_editor_scene_loads": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/hobgoblin.glb-c8f424be4b3dd9e5e7d8b4593ecc4780.md5",
+        "import_metadata_sha256": "24afc1067b04e72e530144d5677064e6a392e6295b2e8dc226445c04af1806e8",
+        "imported_resource_path": "res://.godot/imported/hobgoblin.glb-c8f424be4b3dd9e5e7d8b4593ecc4780.scn",
+        "imported_resource_sha256": "06780195d9ac9d54fc3d7f7e116ea604f663c90987ed4a65aeb4d911fdb161af",
+        "packed_scene_resource_path": "res://assets/storage-baseline/hobgoblin.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "a4f9343fe652acc8e36524d2bed99243",
+        "source_path": "res://assets/storage-baseline/hobgoblin.glb",
+        "source_sha256": "85a9fff675419447c7364f3a7f7d71c96ef93103baeec6ddc821f5fbe425f074"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/hobgoblin.glb-54d7f21f73476812f1fc7ee84dc5927a.md5",
+        "import_metadata_sha256": "e2c7749c440a9f59ede82ed37eb9251a1ec39df804ba44493b6eeee826339fb5",
+        "imported_resource_path": "res://.godot/imported/hobgoblin.glb-54d7f21f73476812f1fc7ee84dc5927a.scn",
+        "imported_resource_sha256": "7d10c66e5c880fae12e6a523518b5f389afb5d2f5adcf385c52b3eee71f1b707",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/hobgoblin.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "bfa1337189df2558f4736f39f512f58e",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/hobgoblin.glb",
+        "source_sha256": "b94d48826a524f6c8cdff91c3d36e5b7cd81d7381ab2fd2c3c2724a5de46d678"
+      }
+    ]
   },
   "existing_family_playback": {
     "actors": {
@@ -629,5 +657,54 @@
     "additional_shared_gpu_saved_bytes": 222360,
     "additional_draw_surfaces": 1,
     "decision": "Kept private and uninstalled. Marginal additional storage saving does not establish a net runtime benefit against one extra surface per actor/render pass; GPU raster/effects qualification was not pursued."
+  },
+  "actual_editor_mode_correction": {
+    "passed": true,
+    "source_sha256": "85a9fff675419447c7364f3a7f7d71c96ef93103baeec6ddc821f5fbe425f074",
+    "candidate_sha256": "b94d48826a524f6c8cdff91c3d36e5b7cd81d7381ab2fd2c3c2724a5de46d678",
+    "prior_cache_route_editor_comparison_labels_withdrawn": true,
+    "previous_public_receipt_sha256": "19e5ecbc70b96f670c4c17cf98b8ed735fd499c90941d5ab4a27ad2a32b374ff",
+    "source_and_current_actual_editor_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/hobgoblin.glb-c8f424be4b3dd9e5e7d8b4593ecc4780.md5",
+        "import_metadata_sha256": "24afc1067b04e72e530144d5677064e6a392e6295b2e8dc226445c04af1806e8",
+        "imported_resource_path": "res://.godot/imported/hobgoblin.glb-c8f424be4b3dd9e5e7d8b4593ecc4780.scn",
+        "imported_resource_sha256": "06780195d9ac9d54fc3d7f7e116ea604f663c90987ed4a65aeb4d911fdb161af",
+        "packed_scene_resource_path": "res://assets/storage-baseline/hobgoblin.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "a4f9343fe652acc8e36524d2bed99243",
+        "source_path": "res://assets/storage-baseline/hobgoblin.glb",
+        "source_sha256": "85a9fff675419447c7364f3a7f7d71c96ef93103baeec6ddc821f5fbe425f074"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/hobgoblin.glb-54d7f21f73476812f1fc7ee84dc5927a.md5",
+        "import_metadata_sha256": "e2c7749c440a9f59ede82ed37eb9251a1ec39df804ba44493b6eeee826339fb5",
+        "imported_resource_path": "res://.godot/imported/hobgoblin.glb-54d7f21f73476812f1fc7ee84dc5927a.scn",
+        "imported_resource_sha256": "7d10c66e5c880fae12e6a523518b5f389afb5d2f5adcf385c52b3eee71f1b707",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/hobgoblin.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "bfa1337189df2558f4736f39f512f58e",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/hobgoblin.glb",
+        "source_sha256": "b94d48826a524f6c8cdff91c3d36e5b7cd81d7381ab2fd2c3c2724a5de46d678"
+      }
+    ],
+    "source_size_position_budget": 4.76837158203125e-07,
+    "maximum_position_error": 9.138847168793557e-08,
+    "normal_angle_budget_degrees": 0.0001,
+    "maximum_normal_angle_degrees": 1.5579907034325894e-05,
+    "all_typed_static_attributes_retained_morph_PNT_oriented_triangles_material_storage_and_texture_mips_identical": true,
+    "independent_complete_editor_vertex_and_oriented_triangle_payload_multisets_identical": true,
+    "independent_payload_source_retained_column_mapping": "No partitions. Exact preparation retained indices independently checked against raw authored POSITION/NORMAL/TANGENT accessor bits; no raw vertex ordinal or arbitrary coincident-ID assumption.",
+    "numeric_static_material_SCNs_identical": true,
+    "numeric_report_sha256": "076791851d3c36e352905c49b07fe9af55fe1a3c479166b2bf802aa01635f538",
+    "static_report_sha256": "d9d2f2f365bc17a254350d753912d04668d5ac7035f19cb88ba4cf6c4d3fadfe",
+    "direct_payload_report_sha256": "4d5671d44c1ad98e195216f2e7ab9189385d2b171d0cbab76a05db7990ffe44c",
+    "material_report_sha256": "c660af9d2bf152f05676a2ed5ab56b36a96bace751c3c01b31a50cf5f006b190",
+    "loader_guard": "Public dump_creature_storage.gd explicit ResourceLoader imported branch; scene policy/current-source MD5/cache destination MD5 where single destination, source/SCN/freshness metadata SHA-bound.",
+    "scope": "Corrected matched actualEditor source/current comparison. Prior raw-Cache-source versus editor-current comparison labels are withdrawn; prior source/native/Blender/fullbody/seededFX/render evidence unchanged. All original caps and frozen source observations unchanged. Complete typed static attributes, retained morph P/N/T and oriented triangle payloads match. Material typed storage and texture pixels/mips match; generated distant LOD identity is not claimed."
   }
 }

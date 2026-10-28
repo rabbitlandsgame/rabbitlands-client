@@ -316,9 +316,37 @@
       "max_normal_degrees": 1.3226604453452851e-05,
       "p99_normal_degrees": 8.664856156940838e-06
     },
-    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "scope": "Both original and CURRENT final meshes loaded explicitly through ResourceLoader from fresh editor SCNs, bound to source/current GLB +SCN +freshness metadata hashes. All source clips, directed crossfades and RESET; independent retained-static/morph bijection and unchanged4float32ULP Euclidean/.0001degree caps. Earlier Cache-route imported labels are withdrawn, not treated as editor evidence.",
     "source_sha256": "023a233963f85e208c8e33ef6ffb80d89692287ddcaf1226d1f6a6717e4ac850",
-    "candidate_sha256": "6db47b6378dde6c6087e8c7bd9eaf19cf5376859ad660afdcc25139c27125b1f"
+    "candidate_sha256": "6db47b6378dde6c6087e8c7bd9eaf19cf5376859ad660afdcc25139c27125b1f",
+    "actual_editor_scene_loads": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/tengu.glb-0fe31e39539b86275ef38dbee1539344.md5",
+        "import_metadata_sha256": "07ca03ec5292d798dbf9ed2513a37c81341ab8037d21a118b0254540afeada6d",
+        "imported_resource_path": "res://.godot/imported/tengu.glb-0fe31e39539b86275ef38dbee1539344.scn",
+        "imported_resource_sha256": "a8583a4afe8b90883fc3fe3fd11554593e105592cc126bf6532cfb83e508ad8f",
+        "packed_scene_resource_path": "res://assets/storage-baseline/tengu.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "077e355c0037a8a40afb33c0c30f7ca6",
+        "source_path": "res://assets/storage-baseline/tengu.glb",
+        "source_sha256": "023a233963f85e208c8e33ef6ffb80d89692287ddcaf1226d1f6a6717e4ac850"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/tengu.glb-2c9626cc58868df9f749a4a3ee116e8f.md5",
+        "import_metadata_sha256": "7bc678b297310b46bed0a4f223e3d4c7a5df06588a0b7b777c87509b1fed2c78",
+        "imported_resource_path": "res://.godot/imported/tengu.glb-2c9626cc58868df9f749a4a3ee116e8f.scn",
+        "imported_resource_sha256": "518cc73a85b56086a080e421e774aed68bb677bde96eb51f2a5b391bac252dd0",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/tengu.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "47de0832deeba55f4935ffbc421c7539",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/tengu.glb",
+        "source_sha256": "6db47b6378dde6c6087e8c7bd9eaf19cf5376859ad660afdcc25139c27125b1f"
+      }
+    ]
   },
   "existing_imported_playback_gate": {
     "actors": {
@@ -585,5 +613,101 @@
   "runtime_cost": "No new runtime algorithm or draw surface. Inactive target buffers and flat key rows are removed. Tiny existing engine interpolation roundoff after key removal is quantified by native/imported/renderer reports; no approximate fitting or resampling.",
   "effect_invariants": "Original triangle order/count, vertex weighting, binds and original skin bits retained. No surface split or rigid reskin; corpse sampling ranges and secondary skin inputs unchanged.",
   "evidence": "Ignored immutable source/candidate, original and supplemental physical observations, all-key proof, Blender/current-engine reports, full-resolution captures and lossless WebP full-cycle comparisons retained in task-owned .local/batch2-audit/tengu",
-  "compression_note": "Release RLCZ level3 envelope includes a 56-byte header. Tengu compressed install grows 19,212 bytes (0.045%) while raw/key storage shrinks 547,320 bytes; GPU corrective storage unchanged. Qualified tradeoff retained."
+  "compression_note": "Release RLCZ level3 envelope includes a 56-byte header. Tengu compressed install grows 19,212 bytes (0.045%) while raw/key storage shrinks 547,320 bytes; GPU corrective storage unchanged. Qualified tradeoff retained.",
+  "fresh_editor_import_playback": {
+    "maximum_position_error": 7.230752089217903e-08,
+    "maximum_normal_angle_degrees": 1.3226604453452851e-05,
+    "worst_position": {
+      "label": "Death_A@0.933",
+      "max_surface_error": 7.230752089217903e-08,
+      "max_normal_degrees": 1.1197136397927998e-05,
+      "p99_normal_degrees": 9.507220963046152e-06
+    },
+    "worst_normal": {
+      "label": "Death_A->Fighting_Idle@0.03",
+      "max_surface_error": 2.8812729156910565e-08,
+      "max_normal_degrees": 1.3226604453452851e-05,
+      "p99_normal_degrees": 8.664856156940838e-06
+    },
+    "scope": "Both original and CURRENT final meshes loaded explicitly through ResourceLoader from fresh editor SCNs, bound to source/current GLB +SCN +freshness metadata hashes. All source clips, directed crossfades and RESET; independent retained-static/morph bijection and unchanged4float32ULP Euclidean/.0001degree caps. Earlier Cache-route imported labels are withdrawn, not treated as editor evidence.",
+    "source_sha256": "023a233963f85e208c8e33ef6ffb80d89692287ddcaf1226d1f6a6717e4ac850",
+    "candidate_sha256": "6db47b6378dde6c6087e8c7bd9eaf19cf5376859ad660afdcc25139c27125b1f",
+    "actual_editor_scene_loads": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/tengu.glb-0fe31e39539b86275ef38dbee1539344.md5",
+        "import_metadata_sha256": "07ca03ec5292d798dbf9ed2513a37c81341ab8037d21a118b0254540afeada6d",
+        "imported_resource_path": "res://.godot/imported/tengu.glb-0fe31e39539b86275ef38dbee1539344.scn",
+        "imported_resource_sha256": "a8583a4afe8b90883fc3fe3fd11554593e105592cc126bf6532cfb83e508ad8f",
+        "packed_scene_resource_path": "res://assets/storage-baseline/tengu.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "077e355c0037a8a40afb33c0c30f7ca6",
+        "source_path": "res://assets/storage-baseline/tengu.glb",
+        "source_sha256": "023a233963f85e208c8e33ef6ffb80d89692287ddcaf1226d1f6a6717e4ac850"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/tengu.glb-2c9626cc58868df9f749a4a3ee116e8f.md5",
+        "import_metadata_sha256": "7bc678b297310b46bed0a4f223e3d4c7a5df06588a0b7b777c87509b1fed2c78",
+        "imported_resource_path": "res://.godot/imported/tengu.glb-2c9626cc58868df9f749a4a3ee116e8f.scn",
+        "imported_resource_sha256": "518cc73a85b56086a080e421e774aed68bb677bde96eb51f2a5b391bac252dd0",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/tengu.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "47de0832deeba55f4935ffbc421c7539",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/tengu.glb",
+        "source_sha256": "6db47b6378dde6c6087e8c7bd9eaf19cf5376859ad660afdcc25139c27125b1f"
+      }
+    ]
+  },
+  "actual_editor_mode_correction": {
+    "passed": true,
+    "source_sha256": "023a233963f85e208c8e33ef6ffb80d89692287ddcaf1226d1f6a6717e4ac850",
+    "candidate_sha256": "6db47b6378dde6c6087e8c7bd9eaf19cf5376859ad660afdcc25139c27125b1f",
+    "prior_cache_route_editor_comparison_labels_withdrawn": true,
+    "previous_public_receipt_sha256": "abcc179c678998bbed770a386a06f43ea3eaf62db748374fe5609433eb2f724a",
+    "source_and_current_actual_editor_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/tengu.glb-0fe31e39539b86275ef38dbee1539344.md5",
+        "import_metadata_sha256": "07ca03ec5292d798dbf9ed2513a37c81341ab8037d21a118b0254540afeada6d",
+        "imported_resource_path": "res://.godot/imported/tengu.glb-0fe31e39539b86275ef38dbee1539344.scn",
+        "imported_resource_sha256": "a8583a4afe8b90883fc3fe3fd11554593e105592cc126bf6532cfb83e508ad8f",
+        "packed_scene_resource_path": "res://assets/storage-baseline/tengu.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "077e355c0037a8a40afb33c0c30f7ca6",
+        "source_path": "res://assets/storage-baseline/tengu.glb",
+        "source_sha256": "023a233963f85e208c8e33ef6ffb80d89692287ddcaf1226d1f6a6717e4ac850"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/tengu.glb-2c9626cc58868df9f749a4a3ee116e8f.md5",
+        "import_metadata_sha256": "7bc678b297310b46bed0a4f223e3d4c7a5df06588a0b7b777c87509b1fed2c78",
+        "imported_resource_path": "res://.godot/imported/tengu.glb-2c9626cc58868df9f749a4a3ee116e8f.scn",
+        "imported_resource_sha256": "518cc73a85b56086a080e421e774aed68bb677bde96eb51f2a5b391bac252dd0",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/tengu.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "47de0832deeba55f4935ffbc421c7539",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/tengu.glb",
+        "source_sha256": "6db47b6378dde6c6087e8c7bd9eaf19cf5376859ad660afdcc25139c27125b1f"
+      }
+    ],
+    "source_size_position_budget": 4.76837158203125e-07,
+    "maximum_position_error": 7.230752089217903e-08,
+    "normal_angle_budget_degrees": 0.0001,
+    "maximum_normal_angle_degrees": 1.3226604453452851e-05,
+    "all_typed_static_attributes_retained_morph_PNT_oriented_triangles_material_storage_and_texture_mips_identical": true,
+    "independent_complete_editor_vertex_and_oriented_triangle_payload_multisets_identical": true,
+    "independent_payload_source_retained_column_mapping": "No partitions. Exact preparation retained indices independently checked against raw authored POSITION/NORMAL/TANGENT accessor bits; no raw vertex ordinal or arbitrary coincident-ID assumption.",
+    "numeric_static_material_SCNs_identical": true,
+    "numeric_report_sha256": "5147fd790f731cc86b4b71bc0d9160c02c3c34376ca221d7bc4e7d21dbf07f28",
+    "static_report_sha256": "7b6762191f3a7df119fcd22fce838838f1eff99ab633c2ffa47e0dedbf264a1f",
+    "direct_payload_report_sha256": "1d70f0b4a236ac39507cc6fc0944d5b7ef8d7d656f11430c4b94c732860d40b8",
+    "material_report_sha256": "f29ea489b93afec4a415e822c4a76e7729e2cdb46018033e472f6abd4f7dad3b",
+    "loader_guard": "Public dump_creature_storage.gd explicit ResourceLoader imported branch; scene policy/current-source MD5/cache destination MD5 where single destination, source/SCN/freshness metadata SHA-bound.",
+    "scope": "Corrected matched actualEditor source/current comparison. Prior raw-Cache-source versus editor-current comparison labels are withdrawn; prior source/native/Blender/fullbody/seededFX/render evidence unchanged. All original caps and frozen source observations unchanged. Complete typed static attributes, retained morph P/N/T and oriented triangle payloads match. Material typed storage and texture pixels/mips match; generated distant LOD identity is not claimed."
+  }
 }

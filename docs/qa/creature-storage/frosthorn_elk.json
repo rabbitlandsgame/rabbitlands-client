@@ -332,9 +332,37 @@
       "max_normal_degrees": 2.4744711127599622e-05,
       "p99_normal_degrees": 2.110160379350746e-05
     },
-    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "scope": "Both original and CURRENT final meshes loaded explicitly through ResourceLoader from fresh editor SCNs, bound to source/current GLB +SCN +freshness metadata hashes. All source clips, directed crossfades and RESET; independent retained-static/morph bijection and unchanged4float32ULP Euclidean/.0001degree caps. Earlier Cache-route imported labels are withdrawn, not treated as editor evidence.",
     "source_sha256": "f3965ded399467bb3c1ea6e5c5c088f3e4d6fcfd7d823563d8ceaf9123e24d9b",
-    "candidate_sha256": "ffefc304b8183ff63439033af4d1a11e2dc8f0a23d4529554cb8fbefe213e3ba"
+    "candidate_sha256": "ffefc304b8183ff63439033af4d1a11e2dc8f0a23d4529554cb8fbefe213e3ba",
+    "actual_editor_scene_loads": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/frosthorn_elk.glb-a5e8d649f3fe46e1d050ad46147558ed.md5",
+        "import_metadata_sha256": "541295a79a7a6e31eb88f8210396d9c836b7cfcf70af76f85319834c423ac9a3",
+        "imported_resource_path": "res://.godot/imported/frosthorn_elk.glb-a5e8d649f3fe46e1d050ad46147558ed.scn",
+        "imported_resource_sha256": "476c49281d381464a9ad976a2bdb49fc10180b614e969ab617a9fbeffd85ce68",
+        "packed_scene_resource_path": "res://assets/storage-baseline/frosthorn_elk.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "564268946ef81cac945ec288a4f9479e",
+        "source_path": "res://assets/storage-baseline/frosthorn_elk.glb",
+        "source_sha256": "f3965ded399467bb3c1ea6e5c5c088f3e4d6fcfd7d823563d8ceaf9123e24d9b"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/frosthorn_elk.glb-d8b5b2c9611a8a79bd62c821fb99f5e6.md5",
+        "import_metadata_sha256": "7d64ac98d0d20074189508450b83eb645cf5225d912021972a26924016e6b203",
+        "imported_resource_path": "res://.godot/imported/frosthorn_elk.glb-d8b5b2c9611a8a79bd62c821fb99f5e6.scn",
+        "imported_resource_sha256": "7e4cbfc67de166a0d375ad4831cba9aee3d9fdbf9bcc976755fe5a1cdd858da6",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/frosthorn_elk.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "ccc4e97fc2022da8f52343f2fb939af1",
+        "source_path": "res://assets/actors/native/creatures/frosthorn_elk.glb",
+        "source_sha256": "ffefc304b8183ff63439033af4d1a11e2dc8f0a23d4529554cb8fbefe213e3ba"
+      }
+    ]
   },
   "existing_family_playback": {
     "actors": {
@@ -632,6 +660,83 @@
         "passed": true
       }
     },
-    "scope": "Additional strict model-space actual-native/fresh-editor-import surface equivalence gate, source-size-dependent4float32ULP Euclidean position and0.0001degree direction caps. Does not relax original source observations, Blender16ULP or raster/effects gates."
+    "scope": "Unchanged source-size-dependent4float32ULP Euclidean/.0001degree caps. Native original proof retained; editor pair now explicitly loads BOTH fresh ResourceLoader SCNs, bound to canonical GLB/SCN/sourceMD5/freshness metadata hashes. Earlier Cache-route editor labels withdrawn.",
+    "actual_editor_resource_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/frosthorn_elk.glb-a5e8d649f3fe46e1d050ad46147558ed.md5",
+        "import_metadata_sha256": "541295a79a7a6e31eb88f8210396d9c836b7cfcf70af76f85319834c423ac9a3",
+        "imported_resource_path": "res://.godot/imported/frosthorn_elk.glb-a5e8d649f3fe46e1d050ad46147558ed.scn",
+        "imported_resource_sha256": "476c49281d381464a9ad976a2bdb49fc10180b614e969ab617a9fbeffd85ce68",
+        "packed_scene_resource_path": "res://assets/storage-baseline/frosthorn_elk.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "564268946ef81cac945ec288a4f9479e",
+        "source_path": "res://assets/storage-baseline/frosthorn_elk.glb",
+        "source_sha256": "f3965ded399467bb3c1ea6e5c5c088f3e4d6fcfd7d823563d8ceaf9123e24d9b"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/frosthorn_elk.glb-d8b5b2c9611a8a79bd62c821fb99f5e6.md5",
+        "import_metadata_sha256": "7d64ac98d0d20074189508450b83eb645cf5225d912021972a26924016e6b203",
+        "imported_resource_path": "res://.godot/imported/frosthorn_elk.glb-d8b5b2c9611a8a79bd62c821fb99f5e6.scn",
+        "imported_resource_sha256": "7e4cbfc67de166a0d375ad4831cba9aee3d9fdbf9bcc976755fe5a1cdd858da6",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/frosthorn_elk.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "ccc4e97fc2022da8f52343f2fb939af1",
+        "source_path": "res://assets/actors/native/creatures/frosthorn_elk.glb",
+        "source_sha256": "ffefc304b8183ff63439033af4d1a11e2dc8f0a23d4529554cb8fbefe213e3ba"
+      }
+    ]
+  },
+  "actual_editor_mode_correction": {
+    "passed": true,
+    "source_sha256": "f3965ded399467bb3c1ea6e5c5c088f3e4d6fcfd7d823563d8ceaf9123e24d9b",
+    "candidate_sha256": "ffefc304b8183ff63439033af4d1a11e2dc8f0a23d4529554cb8fbefe213e3ba",
+    "prior_cache_route_editor_comparison_labels_withdrawn": true,
+    "previous_public_receipt_sha256": "9d7667f9c0b9004570af8cd91e7fbb8c32ec54dedb0ab40ac15fbcf6922bdc77",
+    "source_and_current_actual_editor_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/frosthorn_elk.glb-a5e8d649f3fe46e1d050ad46147558ed.md5",
+        "import_metadata_sha256": "541295a79a7a6e31eb88f8210396d9c836b7cfcf70af76f85319834c423ac9a3",
+        "imported_resource_path": "res://.godot/imported/frosthorn_elk.glb-a5e8d649f3fe46e1d050ad46147558ed.scn",
+        "imported_resource_sha256": "476c49281d381464a9ad976a2bdb49fc10180b614e969ab617a9fbeffd85ce68",
+        "packed_scene_resource_path": "res://assets/storage-baseline/frosthorn_elk.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "564268946ef81cac945ec288a4f9479e",
+        "source_path": "res://assets/storage-baseline/frosthorn_elk.glb",
+        "source_sha256": "f3965ded399467bb3c1ea6e5c5c088f3e4d6fcfd7d823563d8ceaf9123e24d9b"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/frosthorn_elk.glb-d8b5b2c9611a8a79bd62c821fb99f5e6.md5",
+        "import_metadata_sha256": "7d64ac98d0d20074189508450b83eb645cf5225d912021972a26924016e6b203",
+        "imported_resource_path": "res://.godot/imported/frosthorn_elk.glb-d8b5b2c9611a8a79bd62c821fb99f5e6.scn",
+        "imported_resource_sha256": "7e4cbfc67de166a0d375ad4831cba9aee3d9fdbf9bcc976755fe5a1cdd858da6",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/frosthorn_elk.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "ccc4e97fc2022da8f52343f2fb939af1",
+        "source_path": "res://assets/actors/native/creatures/frosthorn_elk.glb",
+        "source_sha256": "ffefc304b8183ff63439033af4d1a11e2dc8f0a23d4529554cb8fbefe213e3ba"
+      }
+    ],
+    "source_size_position_budget": 4.76837158203125e-07,
+    "maximum_position_error": 3.021043502743573e-07,
+    "normal_angle_budget_degrees": 0.0001,
+    "maximum_normal_angle_degrees": 2.4744711127599622e-05,
+    "all_typed_static_attributes_retained_morph_PNT_oriented_triangles_material_storage_and_texture_mips_identical": true,
+    "independent_complete_editor_vertex_and_oriented_triangle_payload_multisets_identical": true,
+    "independent_payload_source_retained_column_mapping": "No partitions. Exact preparation retained indices independently checked against raw authored POSITION/NORMAL/TANGENT accessor bits; no raw vertex ordinal or arbitrary coincident-ID assumption.",
+    "numeric_static_material_SCNs_identical": true,
+    "numeric_report_sha256": "5dc7084817da2cc435f7cd63431ba46f32b1554ba95dcef2e8fd922ddeec63e1",
+    "static_report_sha256": "2c2ca0e95d40711d9e97d2fd0eb93a60623b720ba2ffd2a849c861caf8876fb2",
+    "direct_payload_report_sha256": "49d01323424d9a22fd71fb17d832f854a921d317de04887cdac7bfd67352152e",
+    "material_report_sha256": "c39cbbc25b56ff92148a65c953c8d07f276bb7687bdadaaba37e7516906fdddf",
+    "loader_guard": "Public dump_creature_storage.gd explicit ResourceLoader imported branch; scene policy/current-source MD5/cache destination MD5 where single destination, source/SCN/freshness metadata SHA-bound.",
+    "scope": "Corrected matched actualEditor source/current comparison. Prior raw-Cache-source versus editor-current comparison labels are withdrawn; prior source/native/Blender/fullbody/seededFX/render evidence unchanged. All original caps and frozen source observations unchanged. Complete typed static attributes, retained morph P/N/T and oriented triangle payloads match. Material typed storage and texture pixels/mips match; generated distant LOD identity is not claimed."
   }
 }

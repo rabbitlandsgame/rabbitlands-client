@@ -371,9 +371,37 @@
       "max_normal_degrees": 2.0095444986978942e-05,
       "p99_normal_degrees": 1.632739948457473e-05
     },
-    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "scope": "Both original and CURRENT final meshes loaded explicitly through ResourceLoader from fresh editor SCNs, bound to source/current GLB +SCN +freshness metadata hashes. All source clips, directed crossfades and RESET; independent retained-static/morph bijection and unchanged4float32ULP Euclidean/.0001degree caps. Earlier Cache-route imported labels are withdrawn, not treated as editor evidence.",
     "source_sha256": "bc2a83e4af3d03e53d597e1b89fbff06f8db2bb3c9f6d0458a4c7025d2fdfa16",
-    "candidate_sha256": "e1f2b2d5a914e626d3370338f489863c0640c8ac10bac172839a262e4f24d9a6"
+    "candidate_sha256": "e1f2b2d5a914e626d3370338f489863c0640c8ac10bac172839a262e4f24d9a6",
+    "actual_editor_scene_loads": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/puma.glb-58afee099bc2bbfb5b165096d55f5403.md5",
+        "import_metadata_sha256": "c431b9104182f99f14d94968b52e596aa7003fea978b3c46e4bd49745bf97fb6",
+        "imported_resource_path": "res://.godot/imported/puma.glb-58afee099bc2bbfb5b165096d55f5403.scn",
+        "imported_resource_sha256": "b488da5e5dfcd50e04b46d58896a37525451eeb8c0b421bdda77953001e8a513",
+        "packed_scene_resource_path": "res://assets/storage-baseline/puma.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "f18ada0bd8e7b9d42b2c29d53bcd01cb",
+        "source_path": "res://assets/storage-baseline/puma.glb",
+        "source_sha256": "bc2a83e4af3d03e53d597e1b89fbff06f8db2bb3c9f6d0458a4c7025d2fdfa16"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/puma.glb-dea26748aee4ab485b40a18ca67fca2b.md5",
+        "import_metadata_sha256": "d41e2bd96ff66a00aae24de4984dc8ce69417c2f6b66f6958584affff4db8824",
+        "imported_resource_path": "res://.godot/imported/puma.glb-dea26748aee4ab485b40a18ca67fca2b.scn",
+        "imported_resource_sha256": "3c8c04c6c4f4996e57641d8ceb96c9d46ed619468f384c05cb2f92894e8e7f81",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/puma.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "bf2fa96738eb9e9df86f679d40723f13",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/puma.glb",
+        "source_sha256": "e1f2b2d5a914e626d3370338f489863c0640c8ac10bac172839a262e4f24d9a6"
+      }
+    ]
   },
   "existing_family_playback": {
     "actors": {
@@ -664,7 +692,35 @@
         "passed": true
       }
     },
-    "scope": "Additional strict model-space actual-native/fresh-editor-import surface equivalence gate, source-size-dependent4float32ULP Euclidean position and0.0001degree direction caps. Does not relax original source observations, Blender16ULP or raster/effects gates."
+    "scope": "Unchanged source-size-dependent4float32ULP Euclidean/.0001degree caps. Native original proof retained; editor pair now explicitly loads BOTH fresh ResourceLoader SCNs, bound to canonical GLB/SCN/sourceMD5/freshness metadata hashes. Earlier Cache-route editor labels withdrawn.",
+    "actual_editor_resource_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/puma.glb-58afee099bc2bbfb5b165096d55f5403.md5",
+        "import_metadata_sha256": "c431b9104182f99f14d94968b52e596aa7003fea978b3c46e4bd49745bf97fb6",
+        "imported_resource_path": "res://.godot/imported/puma.glb-58afee099bc2bbfb5b165096d55f5403.scn",
+        "imported_resource_sha256": "b488da5e5dfcd50e04b46d58896a37525451eeb8c0b421bdda77953001e8a513",
+        "packed_scene_resource_path": "res://assets/storage-baseline/puma.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "f18ada0bd8e7b9d42b2c29d53bcd01cb",
+        "source_path": "res://assets/storage-baseline/puma.glb",
+        "source_sha256": "bc2a83e4af3d03e53d597e1b89fbff06f8db2bb3c9f6d0458a4c7025d2fdfa16"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/puma.glb-dea26748aee4ab485b40a18ca67fca2b.md5",
+        "import_metadata_sha256": "d41e2bd96ff66a00aae24de4984dc8ce69417c2f6b66f6958584affff4db8824",
+        "imported_resource_path": "res://.godot/imported/puma.glb-dea26748aee4ab485b40a18ca67fca2b.scn",
+        "imported_resource_sha256": "3c8c04c6c4f4996e57641d8ceb96c9d46ed619468f384c05cb2f92894e8e7f81",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/puma.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "bf2fa96738eb9e9df86f679d40723f13",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/puma.glb",
+        "source_sha256": "e1f2b2d5a914e626d3370338f489863c0640c8ac10bac172839a262e4f24d9a6"
+      }
+    ]
   },
   "death_dissolve_source_framing": {
     "actor": "puma",
@@ -692,5 +748,54 @@
       }
     ],
     "scope": "All8corners of original full-motion actualActor fit after exact preview translation, both640square orthographic FX cameras, near/far planes and minimum2pixel margin. Actual source/candidate fade PNG foreground borders remain a separate required post-capture check."
+  },
+  "actual_editor_mode_correction": {
+    "passed": true,
+    "source_sha256": "bc2a83e4af3d03e53d597e1b89fbff06f8db2bb3c9f6d0458a4c7025d2fdfa16",
+    "candidate_sha256": "e1f2b2d5a914e626d3370338f489863c0640c8ac10bac172839a262e4f24d9a6",
+    "prior_cache_route_editor_comparison_labels_withdrawn": true,
+    "previous_public_receipt_sha256": "f379f342b9e3392cb2554f340b2179b6b0b1018825ee7176b1b1aa9170bb0f6c",
+    "source_and_current_actual_editor_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/puma.glb-58afee099bc2bbfb5b165096d55f5403.md5",
+        "import_metadata_sha256": "c431b9104182f99f14d94968b52e596aa7003fea978b3c46e4bd49745bf97fb6",
+        "imported_resource_path": "res://.godot/imported/puma.glb-58afee099bc2bbfb5b165096d55f5403.scn",
+        "imported_resource_sha256": "b488da5e5dfcd50e04b46d58896a37525451eeb8c0b421bdda77953001e8a513",
+        "packed_scene_resource_path": "res://assets/storage-baseline/puma.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "f18ada0bd8e7b9d42b2c29d53bcd01cb",
+        "source_path": "res://assets/storage-baseline/puma.glb",
+        "source_sha256": "bc2a83e4af3d03e53d597e1b89fbff06f8db2bb3c9f6d0458a4c7025d2fdfa16"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/puma.glb-dea26748aee4ab485b40a18ca67fca2b.md5",
+        "import_metadata_sha256": "d41e2bd96ff66a00aae24de4984dc8ce69417c2f6b66f6958584affff4db8824",
+        "imported_resource_path": "res://.godot/imported/puma.glb-dea26748aee4ab485b40a18ca67fca2b.scn",
+        "imported_resource_sha256": "3c8c04c6c4f4996e57641d8ceb96c9d46ed619468f384c05cb2f92894e8e7f81",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/puma.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "bf2fa96738eb9e9df86f679d40723f13",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/puma.glb",
+        "source_sha256": "e1f2b2d5a914e626d3370338f489863c0640c8ac10bac172839a262e4f24d9a6"
+      }
+    ],
+    "source_size_position_budget": 4.76837158203125e-07,
+    "maximum_position_error": 6.868866315883972e-08,
+    "normal_angle_budget_degrees": 0.0001,
+    "maximum_normal_angle_degrees": 2.0095444986978942e-05,
+    "all_typed_static_attributes_retained_morph_PNT_oriented_triangles_material_storage_and_texture_mips_identical": true,
+    "independent_complete_editor_vertex_and_oriented_triangle_payload_multisets_identical": true,
+    "independent_payload_source_retained_column_mapping": "No partitions. Exact preparation retained indices independently checked against raw authored POSITION/NORMAL/TANGENT accessor bits; no raw vertex ordinal or arbitrary coincident-ID assumption.",
+    "numeric_static_material_SCNs_identical": true,
+    "numeric_report_sha256": "147d9046704be783949c0c4635e3bd5ef727781c28aeb581a167028cf6b2e7d8",
+    "static_report_sha256": "14d113961497046e408a360264c4458b12fa65c7553f8ae89bc9624f110c672a",
+    "direct_payload_report_sha256": "87ae44870b209d0cff554d7fd2887e6ea84fa53270f3aae34ce42453e2db43f4",
+    "material_report_sha256": "42b4fed5264eaf156fcd3e6e320ecabcfaa8d3c873439d0dc2d24f279acf103f",
+    "loader_guard": "Public dump_creature_storage.gd explicit ResourceLoader imported branch; scene policy/current-source MD5/cache destination MD5 where single destination, source/SCN/freshness metadata SHA-bound.",
+    "scope": "Corrected matched actualEditor source/current comparison. Prior raw-Cache-source versus editor-current comparison labels are withdrawn; prior source/native/Blender/fullbody/seededFX/render evidence unchanged. All original caps and frozen source observations unchanged. Complete typed static attributes, retained morph P/N/T and oriented triangle payloads match. Material typed storage and texture pixels/mips match; generated distant LOD identity is not claimed."
   }
 }

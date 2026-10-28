@@ -329,9 +329,37 @@
       "max_normal_degrees": 2.161582222402456e-05,
       "p99_normal_degrees": 1.9277100244368594e-05
     },
-    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "scope": "Both original and CURRENT final meshes loaded explicitly through ResourceLoader from fresh editor SCNs, bound to source/current GLB +SCN +freshness metadata hashes. All source clips, directed crossfades and RESET; independent retained-static/morph bijection and unchanged4float32ULP Euclidean/.0001degree caps. Earlier Cache-route imported labels are withdrawn, not treated as editor evidence.",
     "source_sha256": "5c14d308f997fea6ede6eb5c3c3fba6f3f65e9b31fc27546062ce3b3cd368670",
-    "candidate_sha256": "192de018fe15d2883648f1a45c68266d479163f62292b11d126401a1affe26e3"
+    "candidate_sha256": "192de018fe15d2883648f1a45c68266d479163f62292b11d126401a1affe26e3",
+    "actual_editor_scene_loads": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/river_capybara.glb-d37021c9c09a5bc584ce22798b13a1c4.md5",
+        "import_metadata_sha256": "2f53817f31957567223a34b69b29700e2922055ece00d97936bbb440bd985802",
+        "imported_resource_path": "res://.godot/imported/river_capybara.glb-d37021c9c09a5bc584ce22798b13a1c4.scn",
+        "imported_resource_sha256": "eaa217374e859629dd6b7b9c47cdb92e5d8cdaa3ec71dabb4b3df0b27748a28b",
+        "packed_scene_resource_path": "res://assets/storage-baseline/river_capybara.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "ab870d3b9ab52c72e0b23da4e27bdc94",
+        "source_path": "res://assets/storage-baseline/river_capybara.glb",
+        "source_sha256": "5c14d308f997fea6ede6eb5c3c3fba6f3f65e9b31fc27546062ce3b3cd368670"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/river_capybara.glb-d043e3c4c3d8d2ae6f3d2095664839bd.md5",
+        "import_metadata_sha256": "d187330f478753224d66210d4deec5633736efb28177df9d80db0339c692e808",
+        "imported_resource_path": "res://.godot/imported/river_capybara.glb-d043e3c4c3d8d2ae6f3d2095664839bd.scn",
+        "imported_resource_sha256": "87a0cceae46d55dc2caf7586272682099e0b31e2cdb1cbd5f19d172588a068c1",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/river_capybara.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "25f5d294b243c402f4fa3d962a08b6a1",
+        "source_path": "res://assets/actors/native/creatures/river_capybara.glb",
+        "source_sha256": "192de018fe15d2883648f1a45c68266d479163f62292b11d126401a1affe26e3"
+      }
+    ]
   },
   "existing_family_playback": {
     "actors": {
@@ -639,6 +667,83 @@
         "passed": true
       }
     },
-    "scope": "Additional strict model-space actual-native/fresh-editor-import surface equivalence gate, source-size-dependent4float32ULP Euclidean position and0.0001degree direction caps. Does not relax original source observations, Blender16ULP or raster/effects gates."
+    "scope": "Unchanged source-size-dependent4float32ULP Euclidean/.0001degree caps. Native original proof retained; editor pair now explicitly loads BOTH fresh ResourceLoader SCNs, bound to canonical GLB/SCN/sourceMD5/freshness metadata hashes. Earlier Cache-route editor labels withdrawn.",
+    "actual_editor_resource_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/river_capybara.glb-d37021c9c09a5bc584ce22798b13a1c4.md5",
+        "import_metadata_sha256": "2f53817f31957567223a34b69b29700e2922055ece00d97936bbb440bd985802",
+        "imported_resource_path": "res://.godot/imported/river_capybara.glb-d37021c9c09a5bc584ce22798b13a1c4.scn",
+        "imported_resource_sha256": "eaa217374e859629dd6b7b9c47cdb92e5d8cdaa3ec71dabb4b3df0b27748a28b",
+        "packed_scene_resource_path": "res://assets/storage-baseline/river_capybara.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "ab870d3b9ab52c72e0b23da4e27bdc94",
+        "source_path": "res://assets/storage-baseline/river_capybara.glb",
+        "source_sha256": "5c14d308f997fea6ede6eb5c3c3fba6f3f65e9b31fc27546062ce3b3cd368670"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/river_capybara.glb-d043e3c4c3d8d2ae6f3d2095664839bd.md5",
+        "import_metadata_sha256": "d187330f478753224d66210d4deec5633736efb28177df9d80db0339c692e808",
+        "imported_resource_path": "res://.godot/imported/river_capybara.glb-d043e3c4c3d8d2ae6f3d2095664839bd.scn",
+        "imported_resource_sha256": "87a0cceae46d55dc2caf7586272682099e0b31e2cdb1cbd5f19d172588a068c1",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/river_capybara.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "25f5d294b243c402f4fa3d962a08b6a1",
+        "source_path": "res://assets/actors/native/creatures/river_capybara.glb",
+        "source_sha256": "192de018fe15d2883648f1a45c68266d479163f62292b11d126401a1affe26e3"
+      }
+    ]
+  },
+  "actual_editor_mode_correction": {
+    "passed": true,
+    "source_sha256": "5c14d308f997fea6ede6eb5c3c3fba6f3f65e9b31fc27546062ce3b3cd368670",
+    "candidate_sha256": "192de018fe15d2883648f1a45c68266d479163f62292b11d126401a1affe26e3",
+    "prior_cache_route_editor_comparison_labels_withdrawn": true,
+    "previous_public_receipt_sha256": "f7ce24ad5aee14015b6f5bb0049b58c12b28dbc83f625d4408e0a520acdf079c",
+    "source_and_current_actual_editor_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/river_capybara.glb-d37021c9c09a5bc584ce22798b13a1c4.md5",
+        "import_metadata_sha256": "2f53817f31957567223a34b69b29700e2922055ece00d97936bbb440bd985802",
+        "imported_resource_path": "res://.godot/imported/river_capybara.glb-d37021c9c09a5bc584ce22798b13a1c4.scn",
+        "imported_resource_sha256": "eaa217374e859629dd6b7b9c47cdb92e5d8cdaa3ec71dabb4b3df0b27748a28b",
+        "packed_scene_resource_path": "res://assets/storage-baseline/river_capybara.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "ab870d3b9ab52c72e0b23da4e27bdc94",
+        "source_path": "res://assets/storage-baseline/river_capybara.glb",
+        "source_sha256": "5c14d308f997fea6ede6eb5c3c3fba6f3f65e9b31fc27546062ce3b3cd368670"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/river_capybara.glb-d043e3c4c3d8d2ae6f3d2095664839bd.md5",
+        "import_metadata_sha256": "d187330f478753224d66210d4deec5633736efb28177df9d80db0339c692e808",
+        "imported_resource_path": "res://.godot/imported/river_capybara.glb-d043e3c4c3d8d2ae6f3d2095664839bd.scn",
+        "imported_resource_sha256": "87a0cceae46d55dc2caf7586272682099e0b31e2cdb1cbd5f19d172588a068c1",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/river_capybara.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "25f5d294b243c402f4fa3d962a08b6a1",
+        "source_path": "res://assets/actors/native/creatures/river_capybara.glb",
+        "source_sha256": "192de018fe15d2883648f1a45c68266d479163f62292b11d126401a1affe26e3"
+      }
+    ],
+    "source_size_position_budget": 9.5367431640625e-07,
+    "maximum_position_error": 3.0843512515374397e-07,
+    "normal_angle_budget_degrees": 0.0001,
+    "maximum_normal_angle_degrees": 2.161582222402456e-05,
+    "all_typed_static_attributes_retained_morph_PNT_oriented_triangles_material_storage_and_texture_mips_identical": true,
+    "independent_complete_editor_vertex_and_oriented_triangle_payload_multisets_identical": true,
+    "independent_payload_source_retained_column_mapping": "No partitions. Exact preparation retained indices independently checked against raw authored POSITION/NORMAL/TANGENT accessor bits; no raw vertex ordinal or arbitrary coincident-ID assumption.",
+    "numeric_static_material_SCNs_identical": true,
+    "numeric_report_sha256": "6ae3517042df0486674c38e450fad7dcfbc55c254f1972ba0fbf96433c2e9868",
+    "static_report_sha256": "a1084ddd54a739aa538bc789cd348632357e5a94364fd9ff864222b7d53dfd58",
+    "direct_payload_report_sha256": "f943f3288c2b986c7b3bffa04a7c4ec9e7234511ed6a610e9cc8404f4f1a205e",
+    "material_report_sha256": "bd9e19b82c2bb5db1fffccf237fec0c7046d1e3d666bfa30a9e50dbe030be9cf",
+    "loader_guard": "Public dump_creature_storage.gd explicit ResourceLoader imported branch; scene policy/current-source MD5/cache destination MD5 where single destination, source/SCN/freshness metadata SHA-bound.",
+    "scope": "Corrected matched actualEditor source/current comparison. Prior raw-Cache-source versus editor-current comparison labels are withdrawn; prior source/native/Blender/fullbody/seededFX/render evidence unchanged. All original caps and frozen source observations unchanged. Complete typed static attributes, retained morph P/N/T and oriented triangle payloads match. Material typed storage and texture pixels/mips match; generated distant LOD identity is not claimed."
   }
 }

@@ -329,9 +329,37 @@
       "max_normal_degrees": 2.9178580924908405e-05,
       "p99_normal_degrees": 2.508612809609644e-05
     },
-    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "scope": "Both original and CURRENT final meshes loaded explicitly through ResourceLoader from fresh editor SCNs, bound to source/current GLB +SCN +freshness metadata hashes. All source clips, directed crossfades and RESET; independent retained-static/morph bijection and unchanged4float32ULP Euclidean/.0001degree caps. Earlier Cache-route imported labels are withdrawn, not treated as editor evidence.",
     "source_sha256": "191a024c6586f578dda73a8cf00f92454631561bf81d7a5274f03e058a5787f6",
-    "candidate_sha256": "d88dcd368ba4041475881d6fa6567a3ddad7edc40f33b7b0798f9c4030e2de0c"
+    "candidate_sha256": "d88dcd368ba4041475881d6fa6567a3ddad7edc40f33b7b0798f9c4030e2de0c",
+    "actual_editor_scene_loads": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/beaver.glb-e6a9af8cdf2c173dce81f36b7b53e13e.md5",
+        "import_metadata_sha256": "1f22cf356e648f631efb73f049c65a361e0e0905e7bd829e36fcf6471f3768f2",
+        "imported_resource_path": "res://.godot/imported/beaver.glb-e6a9af8cdf2c173dce81f36b7b53e13e.scn",
+        "imported_resource_sha256": "c9436a2ecc107493c619f3667caa3bb9757a8d87768cc610cfec2a4ddfbf85b5",
+        "packed_scene_resource_path": "res://assets/storage-baseline/beaver.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "78e55dc4901d53626ecc05918b61f09c",
+        "source_path": "res://assets/storage-baseline/beaver.glb",
+        "source_sha256": "191a024c6586f578dda73a8cf00f92454631561bf81d7a5274f03e058a5787f6"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/beaver.glb-932f192ff8a7c24f6ced62ec78d7a009.md5",
+        "import_metadata_sha256": "8f7fd05503621d352ffc2f2defe92f2878b7bad49ee9fc4b6aa0200afedb4499",
+        "imported_resource_path": "res://.godot/imported/beaver.glb-932f192ff8a7c24f6ced62ec78d7a009.scn",
+        "imported_resource_sha256": "7ffe92d1de8c5cbc19d8cab95b677bec9ad7abd9e3cb7a1cb0be085b12f5a218",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/beaver.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "e865676673d493e5a51042fe6bd11b6a",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/beaver.glb",
+        "source_sha256": "d88dcd368ba4041475881d6fa6567a3ddad7edc40f33b7b0798f9c4030e2de0c"
+      }
+    ]
   },
   "existing_family_playback": {
     "actors": {
@@ -607,5 +635,54 @@
     "maximum_border_foreground_pixels": 0
   },
   "import_scale": 0.41231509,
-  "actual_actor_display_scale": 0.8246302008628882
+  "actual_actor_display_scale": 0.8246302008628882,
+  "actual_editor_mode_correction": {
+    "passed": true,
+    "source_sha256": "191a024c6586f578dda73a8cf00f92454631561bf81d7a5274f03e058a5787f6",
+    "candidate_sha256": "d88dcd368ba4041475881d6fa6567a3ddad7edc40f33b7b0798f9c4030e2de0c",
+    "prior_cache_route_editor_comparison_labels_withdrawn": true,
+    "previous_public_receipt_sha256": "43c8a65288d1e3fb8a0ff1651c6115c332e11b109bb28c73d3be5ac4dbe25d3f",
+    "source_and_current_actual_editor_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/beaver.glb-e6a9af8cdf2c173dce81f36b7b53e13e.md5",
+        "import_metadata_sha256": "1f22cf356e648f631efb73f049c65a361e0e0905e7bd829e36fcf6471f3768f2",
+        "imported_resource_path": "res://.godot/imported/beaver.glb-e6a9af8cdf2c173dce81f36b7b53e13e.scn",
+        "imported_resource_sha256": "c9436a2ecc107493c619f3667caa3bb9757a8d87768cc610cfec2a4ddfbf85b5",
+        "packed_scene_resource_path": "res://assets/storage-baseline/beaver.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "78e55dc4901d53626ecc05918b61f09c",
+        "source_path": "res://assets/storage-baseline/beaver.glb",
+        "source_sha256": "191a024c6586f578dda73a8cf00f92454631561bf81d7a5274f03e058a5787f6"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/beaver.glb-932f192ff8a7c24f6ced62ec78d7a009.md5",
+        "import_metadata_sha256": "8f7fd05503621d352ffc2f2defe92f2878b7bad49ee9fc4b6aa0200afedb4499",
+        "imported_resource_path": "res://.godot/imported/beaver.glb-932f192ff8a7c24f6ced62ec78d7a009.scn",
+        "imported_resource_sha256": "7ffe92d1de8c5cbc19d8cab95b677bec9ad7abd9e3cb7a1cb0be085b12f5a218",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/beaver.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "e865676673d493e5a51042fe6bd11b6a",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/beaver.glb",
+        "source_sha256": "d88dcd368ba4041475881d6fa6567a3ddad7edc40f33b7b0798f9c4030e2de0c"
+      }
+    ],
+    "source_size_position_budget": 4.76837158203125e-07,
+    "maximum_position_error": 1.1857370528959529e-07,
+    "normal_angle_budget_degrees": 0.0001,
+    "maximum_normal_angle_degrees": 2.9178580924908405e-05,
+    "all_typed_static_attributes_retained_morph_PNT_oriented_triangles_material_storage_and_texture_mips_identical": true,
+    "independent_complete_editor_vertex_and_oriented_triangle_payload_multisets_identical": true,
+    "independent_payload_source_retained_column_mapping": "No partitions. Exact preparation retained indices independently checked against raw authored POSITION/NORMAL/TANGENT accessor bits; no raw vertex ordinal or arbitrary coincident-ID assumption.",
+    "numeric_static_material_SCNs_identical": true,
+    "numeric_report_sha256": "281fab53b78fa93daea2e783cebb1df57b1738854a3b1e81b5c99c31725e778a",
+    "static_report_sha256": "bd259f085455b713c16beb0b15ec9a62501185021c3542774e644a2e40020daa",
+    "direct_payload_report_sha256": "e5d784973de19f8b86e7d0b853814f58e411aa4fa61a2fc6dc8ae2909f166e7b",
+    "material_report_sha256": "061c49d7820b0780e1ee5648c800e20bbf756e5287f9ae11efc762834c675ae8",
+    "loader_guard": "Public dump_creature_storage.gd explicit ResourceLoader imported branch; scene policy/current-source MD5/cache destination MD5 where single destination, source/SCN/freshness metadata SHA-bound.",
+    "scope": "Corrected matched actualEditor source/current comparison. Prior raw-Cache-source versus editor-current comparison labels are withdrawn; prior source/native/Blender/fullbody/seededFX/render evidence unchanged. All original caps and frozen source observations unchanged. Complete typed static attributes, retained morph P/N/T and oriented triangle payloads match. Material typed storage and texture pixels/mips match; generated distant LOD identity is not claimed."
+  }
 }

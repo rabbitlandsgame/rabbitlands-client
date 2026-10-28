@@ -333,9 +333,37 @@
       "max_normal_degrees": 2.8187463322313956e-05,
       "p99_normal_degrees": 2.459164143967272e-05
     },
-    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "scope": "Both original and CURRENT final meshes loaded explicitly through ResourceLoader from fresh editor SCNs, bound to source/current GLB +SCN +freshness metadata hashes. All source clips, directed crossfades and RESET; independent retained-static/morph bijection and unchanged4float32ULP Euclidean/.0001degree caps. Earlier Cache-route imported labels are withdrawn, not treated as editor evidence.",
     "source_sha256": "75598c8a0f0f1906f53b086c97f610ddcf050306fa7aad8b054a5dc6c71c0b52",
-    "candidate_sha256": "d95eeab4946e931fe3cadec214ad778af216adb526196b147220b5fbaebb9d26"
+    "candidate_sha256": "d95eeab4946e931fe3cadec214ad778af216adb526196b147220b5fbaebb9d26",
+    "actual_editor_scene_loads": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/river_lizardfolk.glb-92e51f45efbc562f9c6936f1f2f729bc.md5",
+        "import_metadata_sha256": "09e1d839304c12b9e32a7c3d1797bf735d475a7f5457b5b46b4055b37899cf79",
+        "imported_resource_path": "res://.godot/imported/river_lizardfolk.glb-92e51f45efbc562f9c6936f1f2f729bc.scn",
+        "imported_resource_sha256": "8cbf34df4d16ff30a54ca507b38d5ae605b5384f2723c08ed35b6270b75d59ba",
+        "packed_scene_resource_path": "res://assets/storage-baseline/river_lizardfolk.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "c8f455bda44675d30efc74735056aece",
+        "source_path": "res://assets/storage-baseline/river_lizardfolk.glb",
+        "source_sha256": "75598c8a0f0f1906f53b086c97f610ddcf050306fa7aad8b054a5dc6c71c0b52"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/river_lizardfolk.glb-6a7ec16848e0fc05e2972714a3b5908b.md5",
+        "import_metadata_sha256": "d021096b45a2440ce041fd4617a8f403b83e6110dcef8cfa2208430937a28184",
+        "imported_resource_path": "res://.godot/imported/river_lizardfolk.glb-6a7ec16848e0fc05e2972714a3b5908b.scn",
+        "imported_resource_sha256": "9fb3b5edc022677544a2f5c43b8f9477ff843c22e22585208ad25726826653eb",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/river_lizardfolk.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "4ecea5f4df6651c8db458f943e9c8ced",
+        "source_path": "res://assets/actors/native/creatures/river_lizardfolk.glb",
+        "source_sha256": "d95eeab4946e931fe3cadec214ad778af216adb526196b147220b5fbaebb9d26"
+      }
+    ]
   },
   "existing_family_playback": {
     "actors": {
@@ -636,7 +664,35 @@
         "passed": true
       }
     },
-    "scope": "Additional strict model-space actual-native/fresh-editor-import surface equivalence gate, source-size-dependent4float32ULP Euclidean position and0.0001degree direction caps. Does not relax original source observations, Blender16ULP or raster/effects gates."
+    "scope": "Unchanged source-size-dependent4float32ULP Euclidean/.0001degree caps. Native original proof retained; editor pair now explicitly loads BOTH fresh ResourceLoader SCNs, bound to canonical GLB/SCN/sourceMD5/freshness metadata hashes. Earlier Cache-route editor labels withdrawn.",
+    "actual_editor_resource_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/river_lizardfolk.glb-92e51f45efbc562f9c6936f1f2f729bc.md5",
+        "import_metadata_sha256": "09e1d839304c12b9e32a7c3d1797bf735d475a7f5457b5b46b4055b37899cf79",
+        "imported_resource_path": "res://.godot/imported/river_lizardfolk.glb-92e51f45efbc562f9c6936f1f2f729bc.scn",
+        "imported_resource_sha256": "8cbf34df4d16ff30a54ca507b38d5ae605b5384f2723c08ed35b6270b75d59ba",
+        "packed_scene_resource_path": "res://assets/storage-baseline/river_lizardfolk.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "c8f455bda44675d30efc74735056aece",
+        "source_path": "res://assets/storage-baseline/river_lizardfolk.glb",
+        "source_sha256": "75598c8a0f0f1906f53b086c97f610ddcf050306fa7aad8b054a5dc6c71c0b52"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/river_lizardfolk.glb-6a7ec16848e0fc05e2972714a3b5908b.md5",
+        "import_metadata_sha256": "d021096b45a2440ce041fd4617a8f403b83e6110dcef8cfa2208430937a28184",
+        "imported_resource_path": "res://.godot/imported/river_lizardfolk.glb-6a7ec16848e0fc05e2972714a3b5908b.scn",
+        "imported_resource_sha256": "9fb3b5edc022677544a2f5c43b8f9477ff843c22e22585208ad25726826653eb",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/river_lizardfolk.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "4ecea5f4df6651c8db458f943e9c8ced",
+        "source_path": "res://assets/actors/native/creatures/river_lizardfolk.glb",
+        "source_sha256": "d95eeab4946e931fe3cadec214ad778af216adb526196b147220b5fbaebb9d26"
+      }
+    ]
   },
   "rig_island_preflight_tradeoff": {
     "preflight_only": true,
@@ -648,5 +704,54 @@
     "potential_shared_gpu_saved_bytes": 21120,
     "additional_draw_surfaces": 1,
     "decision": "Original skin retained. Tail island already fully owned by its current joint; splitting it would save only21120B shared corrective GPU data while adding a draw per actor/pass. No clear runtime benefit established; rejection-only preflight, no rig proposal developed or installed."
+  },
+  "actual_editor_mode_correction": {
+    "passed": true,
+    "source_sha256": "75598c8a0f0f1906f53b086c97f610ddcf050306fa7aad8b054a5dc6c71c0b52",
+    "candidate_sha256": "d95eeab4946e931fe3cadec214ad778af216adb526196b147220b5fbaebb9d26",
+    "prior_cache_route_editor_comparison_labels_withdrawn": true,
+    "previous_public_receipt_sha256": "7c56fa4ea8ff8a265baecb4f650638152ec4c21dbdb44d2e7a7e3e13bb51ca53",
+    "source_and_current_actual_editor_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/river_lizardfolk.glb-92e51f45efbc562f9c6936f1f2f729bc.md5",
+        "import_metadata_sha256": "09e1d839304c12b9e32a7c3d1797bf735d475a7f5457b5b46b4055b37899cf79",
+        "imported_resource_path": "res://.godot/imported/river_lizardfolk.glb-92e51f45efbc562f9c6936f1f2f729bc.scn",
+        "imported_resource_sha256": "8cbf34df4d16ff30a54ca507b38d5ae605b5384f2723c08ed35b6270b75d59ba",
+        "packed_scene_resource_path": "res://assets/storage-baseline/river_lizardfolk.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "c8f455bda44675d30efc74735056aece",
+        "source_path": "res://assets/storage-baseline/river_lizardfolk.glb",
+        "source_sha256": "75598c8a0f0f1906f53b086c97f610ddcf050306fa7aad8b054a5dc6c71c0b52"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/river_lizardfolk.glb-6a7ec16848e0fc05e2972714a3b5908b.md5",
+        "import_metadata_sha256": "d021096b45a2440ce041fd4617a8f403b83e6110dcef8cfa2208430937a28184",
+        "imported_resource_path": "res://.godot/imported/river_lizardfolk.glb-6a7ec16848e0fc05e2972714a3b5908b.scn",
+        "imported_resource_sha256": "9fb3b5edc022677544a2f5c43b8f9477ff843c22e22585208ad25726826653eb",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/river_lizardfolk.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "4ecea5f4df6651c8db458f943e9c8ced",
+        "source_path": "res://assets/actors/native/creatures/river_lizardfolk.glb",
+        "source_sha256": "d95eeab4946e931fe3cadec214ad778af216adb526196b147220b5fbaebb9d26"
+      }
+    ],
+    "source_size_position_budget": 9.5367431640625e-07,
+    "maximum_position_error": 4.903544525159676e-07,
+    "normal_angle_budget_degrees": 0.0001,
+    "maximum_normal_angle_degrees": 2.8187463322313956e-05,
+    "all_typed_static_attributes_retained_morph_PNT_oriented_triangles_material_storage_and_texture_mips_identical": true,
+    "independent_complete_editor_vertex_and_oriented_triangle_payload_multisets_identical": true,
+    "independent_payload_source_retained_column_mapping": "No partitions. Exact preparation retained indices independently checked against raw authored POSITION/NORMAL/TANGENT accessor bits; no raw vertex ordinal or arbitrary coincident-ID assumption.",
+    "numeric_static_material_SCNs_identical": true,
+    "numeric_report_sha256": "5c3fbfad3d4036f9276a8b83660d4e22e990473e2d26aecebe412e4f46fc8d3f",
+    "static_report_sha256": "a731d46e2f56803473d04ae8b60af87059914242e17ca8d81e824e368616e047",
+    "direct_payload_report_sha256": "3a276008753eaa3ee78c51ca02c70fbc00e488da1287283184d741fa61eeed8e",
+    "material_report_sha256": "4cfaf00a3b740317317ba5d557378ccd137da6c30713c03d8814f656709dbac3",
+    "loader_guard": "Public dump_creature_storage.gd explicit ResourceLoader imported branch; scene policy/current-source MD5/cache destination MD5 where single destination, source/SCN/freshness metadata SHA-bound.",
+    "scope": "Corrected matched actualEditor source/current comparison. Prior raw-Cache-source versus editor-current comparison labels are withdrawn; prior source/native/Blender/fullbody/seededFX/render evidence unchanged. All original caps and frozen source observations unchanged. Complete typed static attributes, retained morph P/N/T and oriented triangle payloads match. Material typed storage and texture pixels/mips match; generated distant LOD identity is not claimed."
   }
 }

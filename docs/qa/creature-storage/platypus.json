@@ -332,9 +332,37 @@
       "max_normal_degrees": 1.3845881787227385e-05,
       "p99_normal_degrees": 1.0559159901546355e-05
     },
-    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "scope": "Both original and CURRENT final meshes loaded explicitly through ResourceLoader from fresh editor SCNs, bound to source/current GLB +SCN +freshness metadata hashes. All source clips, directed crossfades and RESET; independent retained-static/morph bijection and unchanged4float32ULP Euclidean/.0001degree caps. Earlier Cache-route imported labels are withdrawn, not treated as editor evidence.",
     "source_sha256": "271b55813201faf9a1083d2d0cefea16edc20b1bceccc3a8ea426b4585a6bd35",
-    "candidate_sha256": "b08d59ed3e4b7f6c86605e47bc4e53825b91ada4eb17b1d25e7575efbc10b905"
+    "candidate_sha256": "b08d59ed3e4b7f6c86605e47bc4e53825b91ada4eb17b1d25e7575efbc10b905",
+    "actual_editor_scene_loads": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/platypus.glb-68521d17ed1a3aba2ff50890041296e1.md5",
+        "import_metadata_sha256": "28451669f777d13bbe9a807b3006079f5f1bcd95675bac48a2e8fed6da171c3c",
+        "imported_resource_path": "res://.godot/imported/platypus.glb-68521d17ed1a3aba2ff50890041296e1.scn",
+        "imported_resource_sha256": "3a0b7a31f495b57456d93650c2d7492472975236e21cfbb7d81c15ebbc2195cf",
+        "packed_scene_resource_path": "res://assets/storage-baseline/platypus.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "c8a1cecb805c6e27c08b91eba983f822",
+        "source_path": "res://assets/storage-baseline/platypus.glb",
+        "source_sha256": "271b55813201faf9a1083d2d0cefea16edc20b1bceccc3a8ea426b4585a6bd35"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/platypus.glb-21fc8504535205bd98db7a5e1740e0c2.md5",
+        "import_metadata_sha256": "47c1278cbcd1c26bd0120bf01c0922130b6a2deec0f9c984de447b85ec0f9bca",
+        "imported_resource_path": "res://.godot/imported/platypus.glb-21fc8504535205bd98db7a5e1740e0c2.scn",
+        "imported_resource_sha256": "edb5da45a05d07ca10643e957c081a9960f364622c47911977dbf264391c1331",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/platypus.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "a1882e3ade66a081628a228deb96696d",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/platypus.glb",
+        "source_sha256": "b08d59ed3e4b7f6c86605e47bc4e53825b91ada4eb17b1d25e7575efbc10b905"
+      }
+    ]
   },
   "existing_family_playback": {
     "actors": {
@@ -642,6 +670,83 @@
         "passed": true
       }
     },
-    "scope": "Additional strict model-space actual-native/fresh-editor-import surface equivalence gate, source-size-dependent4float32ULP Euclidean position and0.0001degree direction caps. Does not relax original source observations, Blender16ULP or raster/effects gates."
+    "scope": "Unchanged source-size-dependent4float32ULP Euclidean/.0001degree caps. Native original proof retained; editor pair now explicitly loads BOTH fresh ResourceLoader SCNs, bound to canonical GLB/SCN/sourceMD5/freshness metadata hashes. Earlier Cache-route editor labels withdrawn.",
+    "actual_editor_resource_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/platypus.glb-68521d17ed1a3aba2ff50890041296e1.md5",
+        "import_metadata_sha256": "28451669f777d13bbe9a807b3006079f5f1bcd95675bac48a2e8fed6da171c3c",
+        "imported_resource_path": "res://.godot/imported/platypus.glb-68521d17ed1a3aba2ff50890041296e1.scn",
+        "imported_resource_sha256": "3a0b7a31f495b57456d93650c2d7492472975236e21cfbb7d81c15ebbc2195cf",
+        "packed_scene_resource_path": "res://assets/storage-baseline/platypus.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "c8a1cecb805c6e27c08b91eba983f822",
+        "source_path": "res://assets/storage-baseline/platypus.glb",
+        "source_sha256": "271b55813201faf9a1083d2d0cefea16edc20b1bceccc3a8ea426b4585a6bd35"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/platypus.glb-21fc8504535205bd98db7a5e1740e0c2.md5",
+        "import_metadata_sha256": "47c1278cbcd1c26bd0120bf01c0922130b6a2deec0f9c984de447b85ec0f9bca",
+        "imported_resource_path": "res://.godot/imported/platypus.glb-21fc8504535205bd98db7a5e1740e0c2.scn",
+        "imported_resource_sha256": "edb5da45a05d07ca10643e957c081a9960f364622c47911977dbf264391c1331",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/platypus.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "a1882e3ade66a081628a228deb96696d",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/platypus.glb",
+        "source_sha256": "b08d59ed3e4b7f6c86605e47bc4e53825b91ada4eb17b1d25e7575efbc10b905"
+      }
+    ]
+  },
+  "actual_editor_mode_correction": {
+    "passed": true,
+    "source_sha256": "271b55813201faf9a1083d2d0cefea16edc20b1bceccc3a8ea426b4585a6bd35",
+    "candidate_sha256": "b08d59ed3e4b7f6c86605e47bc4e53825b91ada4eb17b1d25e7575efbc10b905",
+    "prior_cache_route_editor_comparison_labels_withdrawn": true,
+    "previous_public_receipt_sha256": "403f2d155365e906e98ea97fa1cba8a2b28ffdbaab4d242cabd105ff84b84a0b",
+    "source_and_current_actual_editor_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/platypus.glb-68521d17ed1a3aba2ff50890041296e1.md5",
+        "import_metadata_sha256": "28451669f777d13bbe9a807b3006079f5f1bcd95675bac48a2e8fed6da171c3c",
+        "imported_resource_path": "res://.godot/imported/platypus.glb-68521d17ed1a3aba2ff50890041296e1.scn",
+        "imported_resource_sha256": "3a0b7a31f495b57456d93650c2d7492472975236e21cfbb7d81c15ebbc2195cf",
+        "packed_scene_resource_path": "res://assets/storage-baseline/platypus.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "c8a1cecb805c6e27c08b91eba983f822",
+        "source_path": "res://assets/storage-baseline/platypus.glb",
+        "source_sha256": "271b55813201faf9a1083d2d0cefea16edc20b1bceccc3a8ea426b4585a6bd35"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/platypus.glb-21fc8504535205bd98db7a5e1740e0c2.md5",
+        "import_metadata_sha256": "47c1278cbcd1c26bd0120bf01c0922130b6a2deec0f9c984de447b85ec0f9bca",
+        "imported_resource_path": "res://.godot/imported/platypus.glb-21fc8504535205bd98db7a5e1740e0c2.scn",
+        "imported_resource_sha256": "edb5da45a05d07ca10643e957c081a9960f364622c47911977dbf264391c1331",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/platypus.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "a1882e3ade66a081628a228deb96696d",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/platypus.glb",
+        "source_sha256": "b08d59ed3e4b7f6c86605e47bc4e53825b91ada4eb17b1d25e7575efbc10b905"
+      }
+    ],
+    "source_size_position_budget": 4.76837158203125e-07,
+    "maximum_position_error": 3.7283140200756975e-08,
+    "normal_angle_budget_degrees": 0.0001,
+    "maximum_normal_angle_degrees": 1.3845881787227385e-05,
+    "all_typed_static_attributes_retained_morph_PNT_oriented_triangles_material_storage_and_texture_mips_identical": true,
+    "independent_complete_editor_vertex_and_oriented_triangle_payload_multisets_identical": true,
+    "independent_payload_source_retained_column_mapping": "No partitions. Exact preparation retained indices independently checked against raw authored POSITION/NORMAL/TANGENT accessor bits; no raw vertex ordinal or arbitrary coincident-ID assumption.",
+    "numeric_static_material_SCNs_identical": true,
+    "numeric_report_sha256": "93b623fd2dda766d9782f419a63e6b4ba55071a6811ad21541178e3fca81d904",
+    "static_report_sha256": "8168121591e8fe2a96b492d9ee5ee64e519fbbbe80b7612fd648e7f97151b44b",
+    "direct_payload_report_sha256": "0572e47775fec2d1990a3b90357919edd4a99047cfd6ed5afe19d94ecb4c22df",
+    "material_report_sha256": "c1eb75699cbcc72bab16bdbe95c0c15c1d3664c33e826aea4117e13b6f8c6c62",
+    "loader_guard": "Public dump_creature_storage.gd explicit ResourceLoader imported branch; scene policy/current-source MD5/cache destination MD5 where single destination, source/SCN/freshness metadata SHA-bound.",
+    "scope": "Corrected matched actualEditor source/current comparison. Prior raw-Cache-source versus editor-current comparison labels are withdrawn; prior source/native/Blender/fullbody/seededFX/render evidence unchanged. All original caps and frozen source observations unchanged. Complete typed static attributes, retained morph P/N/T and oriented triangle payloads match. Material typed storage and texture pixels/mips match; generated distant LOD identity is not claimed."
   }
 }

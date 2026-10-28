@@ -305,9 +305,37 @@
       "max_normal_degrees": 2.094792405701141e-05,
       "p99_normal_degrees": 1.882062566532583e-05
     },
-    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "scope": "Both original and CURRENT final meshes loaded explicitly through ResourceLoader from fresh editor SCNs, bound to source/current GLB +SCN +freshness metadata hashes. All source clips, directed crossfades and RESET; independent retained-static/morph bijection and unchanged4float32ULP Euclidean/.0001degree caps. Earlier Cache-route imported labels are withdrawn, not treated as editor evidence.",
     "source_sha256": "7dde6aa03410532e73f011a3de54106a94acc8389caa90fb25f49e25eda3d5b2",
-    "candidate_sha256": "2cc733b7021640c90837c4c37df1135ee123f9b2a890dcd7b836515647a673b5"
+    "candidate_sha256": "2cc733b7021640c90837c4c37df1135ee123f9b2a890dcd7b836515647a673b5",
+    "actual_editor_scene_loads": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/heartwood_treant.glb-f096761f25eda4a5884f960396d81ffb.md5",
+        "import_metadata_sha256": "94f658f0e73539af9ee9fc061f117f70f9dfed254010e836095754ff69e56117",
+        "imported_resource_path": "res://.godot/imported/heartwood_treant.glb-f096761f25eda4a5884f960396d81ffb.scn",
+        "imported_resource_sha256": "67e4d2458948c828714264bef0d0a93a1410f8757af09bc11f39a1299de336b0",
+        "packed_scene_resource_path": "res://assets/storage-baseline/heartwood_treant.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "05f5bf3327af8ea9c4ea0bb93b568370",
+        "source_path": "res://assets/storage-baseline/heartwood_treant.glb",
+        "source_sha256": "7dde6aa03410532e73f011a3de54106a94acc8389caa90fb25f49e25eda3d5b2"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/heartwood_treant.glb-6e3d38f2b6c8b6ca312739907a62fedb.md5",
+        "import_metadata_sha256": "39bcdf4ac052e7c4f92b4ee28dd0d97681f2aa4014e7508b488c1166ed901db7",
+        "imported_resource_path": "res://.godot/imported/heartwood_treant.glb-6e3d38f2b6c8b6ca312739907a62fedb.scn",
+        "imported_resource_sha256": "7d2d842900232b79c13fa1107ca17d4d94226dafaff4c4b60878f5df9beb9193",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/heartwood_treant.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "0530a16b31841ffbda0ab65a69c48406",
+        "source_path": "res://assets/actors/native/creatures/heartwood_treant.glb",
+        "source_sha256": "2cc733b7021640c90837c4c37df1135ee123f9b2a890dcd7b836515647a673b5"
+      }
+    ]
   },
   "existing_family_playback": {
     "actors": {
@@ -587,5 +615,54 @@
   },
   "import_scale": 2,
   "actual_actor_display_scale": 2.0000000000000075,
-  "visual_contact_sheet_review": "Source/candidate comparison sheets inspected: no visible appearance difference; numeric full-cycle and multi-view pixel gates passed separately."
+  "visual_contact_sheet_review": "Source/candidate comparison sheets inspected: no visible appearance difference; numeric full-cycle and multi-view pixel gates passed separately.",
+  "actual_editor_mode_correction": {
+    "passed": true,
+    "source_sha256": "7dde6aa03410532e73f011a3de54106a94acc8389caa90fb25f49e25eda3d5b2",
+    "candidate_sha256": "2cc733b7021640c90837c4c37df1135ee123f9b2a890dcd7b836515647a673b5",
+    "prior_cache_route_editor_comparison_labels_withdrawn": true,
+    "previous_public_receipt_sha256": "df0092c615f32d01b24ae60825227ed60ceba30d69289803f6aabb254200b28b",
+    "source_and_current_actual_editor_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/heartwood_treant.glb-f096761f25eda4a5884f960396d81ffb.md5",
+        "import_metadata_sha256": "94f658f0e73539af9ee9fc061f117f70f9dfed254010e836095754ff69e56117",
+        "imported_resource_path": "res://.godot/imported/heartwood_treant.glb-f096761f25eda4a5884f960396d81ffb.scn",
+        "imported_resource_sha256": "67e4d2458948c828714264bef0d0a93a1410f8757af09bc11f39a1299de336b0",
+        "packed_scene_resource_path": "res://assets/storage-baseline/heartwood_treant.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "05f5bf3327af8ea9c4ea0bb93b568370",
+        "source_path": "res://assets/storage-baseline/heartwood_treant.glb",
+        "source_sha256": "7dde6aa03410532e73f011a3de54106a94acc8389caa90fb25f49e25eda3d5b2"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/heartwood_treant.glb-6e3d38f2b6c8b6ca312739907a62fedb.md5",
+        "import_metadata_sha256": "39bcdf4ac052e7c4f92b4ee28dd0d97681f2aa4014e7508b488c1166ed901db7",
+        "imported_resource_path": "res://.godot/imported/heartwood_treant.glb-6e3d38f2b6c8b6ca312739907a62fedb.scn",
+        "imported_resource_sha256": "7d2d842900232b79c13fa1107ca17d4d94226dafaff4c4b60878f5df9beb9193",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/heartwood_treant.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "0530a16b31841ffbda0ab65a69c48406",
+        "source_path": "res://assets/actors/native/creatures/heartwood_treant.glb",
+        "source_sha256": "2cc733b7021640c90837c4c37df1135ee123f9b2a890dcd7b836515647a673b5"
+      }
+    ],
+    "source_size_position_budget": 4.76837158203125e-07,
+    "maximum_position_error": 3.810090525740795e-07,
+    "normal_angle_budget_degrees": 0.0001,
+    "maximum_normal_angle_degrees": 2.094792405701141e-05,
+    "all_typed_static_attributes_retained_morph_PNT_oriented_triangles_material_storage_and_texture_mips_identical": true,
+    "independent_complete_editor_vertex_and_oriented_triangle_payload_multisets_identical": true,
+    "independent_payload_source_retained_column_mapping": "No partitions. Exact preparation retained indices independently checked against raw authored POSITION/NORMAL/TANGENT accessor bits; no raw vertex ordinal or arbitrary coincident-ID assumption.",
+    "numeric_static_material_SCNs_identical": true,
+    "numeric_report_sha256": "07c7409b8f4d04db6b403b46ea4bb9182b15fe0681b2d157fbdf4e86bd815b8a",
+    "static_report_sha256": "7329552fefae637b8c2c4977d92adbeb7850acb8348c61c5ff51019f3f92df24",
+    "direct_payload_report_sha256": "370e2265408d045b6bbd1924f7841b25d0371afeb238e49205eccd70941d5b14",
+    "material_report_sha256": "068f4538a7ffe50ca7d67a1a7fdb5c5e7cdb5aab73d435b731a8eaced880d664",
+    "loader_guard": "Public dump_creature_storage.gd explicit ResourceLoader imported branch; scene policy/current-source MD5/cache destination MD5 where single destination, source/SCN/freshness metadata SHA-bound.",
+    "scope": "Corrected matched actualEditor source/current comparison. Prior raw-Cache-source versus editor-current comparison labels are withdrawn; prior source/native/Blender/fullbody/seededFX/render evidence unchanged. All original caps and frozen source observations unchanged. Complete typed static attributes, retained morph P/N/T and oriented triangle payloads match. Material typed storage and texture pixels/mips match; generated distant LOD identity is not claimed."
+  }
 }

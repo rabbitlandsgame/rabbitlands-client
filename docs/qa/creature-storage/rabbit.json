@@ -371,9 +371,37 @@
       "max_normal_degrees": 1.5177012312529227e-05,
       "p99_normal_degrees": 1.1675179017869926e-05
     },
-    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "scope": "Both original and CURRENT final meshes loaded explicitly through ResourceLoader from fresh editor SCNs, bound to source/current GLB +SCN +freshness metadata hashes. All source clips, directed crossfades and RESET; independent retained-static/morph bijection and unchanged4float32ULP Euclidean/.0001degree caps. Earlier Cache-route imported labels are withdrawn, not treated as editor evidence.",
     "source_sha256": "2c23a31766f672eb3d78d2f74e7016546451dd5acbdc8631268be5b3883e1d99",
-    "candidate_sha256": "9b7a5109960c246e4bea7aa69d2fc90036cda6d4774c96afbaa9fd47cfd42f0c"
+    "candidate_sha256": "9b7a5109960c246e4bea7aa69d2fc90036cda6d4774c96afbaa9fd47cfd42f0c",
+    "actual_editor_scene_loads": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/rabbit.glb-f8bebba9152e038ec0f58a4327eda951.md5",
+        "import_metadata_sha256": "bced10bfb993c9911efa146a3de2081667b1bd3e4960a6a9c08a5c0979f77bb9",
+        "imported_resource_path": "res://.godot/imported/rabbit.glb-f8bebba9152e038ec0f58a4327eda951.scn",
+        "imported_resource_sha256": "a092d08be35f794a9a1f943832a1b81ea7c92d7258c3bc515a2dca27871e0243",
+        "packed_scene_resource_path": "res://assets/storage-baseline/rabbit.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "9311444ef384bc32dd8742cc3b3818f9",
+        "source_path": "res://assets/storage-baseline/rabbit.glb",
+        "source_sha256": "2c23a31766f672eb3d78d2f74e7016546451dd5acbdc8631268be5b3883e1d99"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/rabbit.glb-aab762aaeb75a117433ffab947c37755.md5",
+        "import_metadata_sha256": "67bdbbf4dd05b71c5bd3ab86a38888c0132a47aa00a23c11aef5a1e7927124ed",
+        "imported_resource_path": "res://.godot/imported/rabbit.glb-aab762aaeb75a117433ffab947c37755.scn",
+        "imported_resource_sha256": "fa5aeab6732b4bb96c826894616ea0ee520a245b31a9fc49934211b784e57d2a",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/rabbit.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "cf5921ea9d0f0ea5ec54d83f925cdf28",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/rabbit.glb",
+        "source_sha256": "9b7a5109960c246e4bea7aa69d2fc90036cda6d4774c96afbaa9fd47cfd42f0c"
+      }
+    ]
   },
   "existing_family_playback": {
     "actors": {
@@ -664,7 +692,35 @@
         "passed": true
       }
     },
-    "scope": "Additional strict model-space actual-native/fresh-editor-import surface equivalence gate, source-size-dependent4float32ULP Euclidean position and0.0001degree direction caps. Does not relax original source observations, Blender16ULP or raster/effects gates."
+    "scope": "Unchanged source-size-dependent4float32ULP Euclidean/.0001degree caps. Native original proof retained; editor pair now explicitly loads BOTH fresh ResourceLoader SCNs, bound to canonical GLB/SCN/sourceMD5/freshness metadata hashes. Earlier Cache-route editor labels withdrawn.",
+    "actual_editor_resource_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/rabbit.glb-f8bebba9152e038ec0f58a4327eda951.md5",
+        "import_metadata_sha256": "bced10bfb993c9911efa146a3de2081667b1bd3e4960a6a9c08a5c0979f77bb9",
+        "imported_resource_path": "res://.godot/imported/rabbit.glb-f8bebba9152e038ec0f58a4327eda951.scn",
+        "imported_resource_sha256": "a092d08be35f794a9a1f943832a1b81ea7c92d7258c3bc515a2dca27871e0243",
+        "packed_scene_resource_path": "res://assets/storage-baseline/rabbit.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "9311444ef384bc32dd8742cc3b3818f9",
+        "source_path": "res://assets/storage-baseline/rabbit.glb",
+        "source_sha256": "2c23a31766f672eb3d78d2f74e7016546451dd5acbdc8631268be5b3883e1d99"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/rabbit.glb-aab762aaeb75a117433ffab947c37755.md5",
+        "import_metadata_sha256": "67bdbbf4dd05b71c5bd3ab86a38888c0132a47aa00a23c11aef5a1e7927124ed",
+        "imported_resource_path": "res://.godot/imported/rabbit.glb-aab762aaeb75a117433ffab947c37755.scn",
+        "imported_resource_sha256": "fa5aeab6732b4bb96c826894616ea0ee520a245b31a9fc49934211b784e57d2a",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/rabbit.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "cf5921ea9d0f0ea5ec54d83f925cdf28",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/rabbit.glb",
+        "source_sha256": "9b7a5109960c246e4bea7aa69d2fc90036cda6d4774c96afbaa9fd47cfd42f0c"
+      }
+    ]
   },
   "death_dissolve_source_framing": {
     "actor": "rabbit",
@@ -793,5 +849,54 @@
       },
       "proof_sha256": "e5b7e788eda15459a5f42a9151ee260b0d3e574702aa2f029a07b3a9bd33716c"
     }
+  },
+  "actual_editor_mode_correction": {
+    "passed": true,
+    "source_sha256": "2c23a31766f672eb3d78d2f74e7016546451dd5acbdc8631268be5b3883e1d99",
+    "candidate_sha256": "9b7a5109960c246e4bea7aa69d2fc90036cda6d4774c96afbaa9fd47cfd42f0c",
+    "prior_cache_route_editor_comparison_labels_withdrawn": true,
+    "previous_public_receipt_sha256": "d6feff5005a16327b9727794c709ac50cf9a5cd5a5d2c9a4a6a808c546365519",
+    "source_and_current_actual_editor_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/rabbit.glb-f8bebba9152e038ec0f58a4327eda951.md5",
+        "import_metadata_sha256": "bced10bfb993c9911efa146a3de2081667b1bd3e4960a6a9c08a5c0979f77bb9",
+        "imported_resource_path": "res://.godot/imported/rabbit.glb-f8bebba9152e038ec0f58a4327eda951.scn",
+        "imported_resource_sha256": "a092d08be35f794a9a1f943832a1b81ea7c92d7258c3bc515a2dca27871e0243",
+        "packed_scene_resource_path": "res://assets/storage-baseline/rabbit.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "9311444ef384bc32dd8742cc3b3818f9",
+        "source_path": "res://assets/storage-baseline/rabbit.glb",
+        "source_sha256": "2c23a31766f672eb3d78d2f74e7016546451dd5acbdc8631268be5b3883e1d99"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/rabbit.glb-aab762aaeb75a117433ffab947c37755.md5",
+        "import_metadata_sha256": "67bdbbf4dd05b71c5bd3ab86a38888c0132a47aa00a23c11aef5a1e7927124ed",
+        "imported_resource_path": "res://.godot/imported/rabbit.glb-aab762aaeb75a117433ffab947c37755.scn",
+        "imported_resource_sha256": "fa5aeab6732b4bb96c826894616ea0ee520a245b31a9fc49934211b784e57d2a",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/rabbit.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "cf5921ea9d0f0ea5ec54d83f925cdf28",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/rabbit.glb",
+        "source_sha256": "9b7a5109960c246e4bea7aa69d2fc90036cda6d4774c96afbaa9fd47cfd42f0c"
+      }
+    ],
+    "source_size_position_budget": 4.76837158203125e-07,
+    "maximum_position_error": 1.3323727075541404e-07,
+    "normal_angle_budget_degrees": 0.0001,
+    "maximum_normal_angle_degrees": 1.5177012312529227e-05,
+    "all_typed_static_attributes_retained_morph_PNT_oriented_triangles_material_storage_and_texture_mips_identical": true,
+    "independent_complete_editor_vertex_and_oriented_triangle_payload_multisets_identical": true,
+    "independent_payload_source_retained_column_mapping": "No partitions. Exact preparation retained indices independently checked against raw authored POSITION/NORMAL/TANGENT accessor bits; no raw vertex ordinal or arbitrary coincident-ID assumption.",
+    "numeric_static_material_SCNs_identical": true,
+    "numeric_report_sha256": "e77f1179c46c8d90f9f6273660c2aea95b3912e97a5f3acc313a70611ca5a05b",
+    "static_report_sha256": "3482dda02aed65bd0ecdd467abdc02b5794ed9e9bd6d56426569cd4e9eaffd7d",
+    "direct_payload_report_sha256": "d53a31355a413724794baa8a3896ba98b01d55d3a6f5fea70440436bfc7945ea",
+    "material_report_sha256": "d4b7b8056d6dc84b4fe3381bfbe9652e570cbac45e8eb9a2d6a39ff6096b2779",
+    "loader_guard": "Public dump_creature_storage.gd explicit ResourceLoader imported branch; scene policy/current-source MD5/cache destination MD5 where single destination, source/SCN/freshness metadata SHA-bound.",
+    "scope": "Corrected matched actualEditor source/current comparison. Prior raw-Cache-source versus editor-current comparison labels are withdrawn; prior source/native/Blender/fullbody/seededFX/render evidence unchanged. All original caps and frozen source observations unchanged. Complete typed static attributes, retained morph P/N/T and oriented triangle payloads match. Material typed storage and texture pixels/mips match; generated distant LOD identity is not claimed."
   }
 }

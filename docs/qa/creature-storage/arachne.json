@@ -675,9 +675,37 @@
       "max_normal_degrees": 1.1358719589327517e-05,
       "p99_normal_degrees": 9.2743557084027e-06
     },
-    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "scope": "Both original and CURRENT final meshes loaded explicitly through ResourceLoader from fresh editor SCNs, bound to source/current GLB +SCN +freshness metadata hashes. All source clips, directed crossfades and RESET; independent retained-static/morph bijection and unchanged4float32ULP Euclidean/.0001degree caps. Earlier Cache-route imported labels are withdrawn, not treated as editor evidence.",
     "source_sha256": "cdaa3b7dca5d3c9adca4f807739fbfe83d541e4cfae2758cb9ab5f595e212460",
-    "candidate_sha256": "153e652c1df5808e628796562e32aba23bc38be37c271a89e217e0bb39d5936d"
+    "candidate_sha256": "153e652c1df5808e628796562e32aba23bc38be37c271a89e217e0bb39d5936d",
+    "actual_editor_scene_loads": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/arachne.glb-d50e84c38af748eba9e490a768745e9e.md5",
+        "import_metadata_sha256": "d0655f2ff06cf40e45d14c649c83561db05c95af9ae780808cfd590a5308dea5",
+        "imported_resource_path": "res://.godot/imported/arachne.glb-d50e84c38af748eba9e490a768745e9e.scn",
+        "imported_resource_sha256": "d5f671fc782e70d0d699a7a7ad05b59541fb2d35162e6ba59d3b025503955f30",
+        "packed_scene_resource_path": "res://assets/storage-baseline/arachne.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "3c12284dd48334baefe30d6c90074ee2",
+        "source_path": "res://assets/storage-baseline/arachne.glb",
+        "source_sha256": "cdaa3b7dca5d3c9adca4f807739fbfe83d541e4cfae2758cb9ab5f595e212460"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/arachne.glb-daf0bd00bbc45e6161d9a18f2728665d.md5",
+        "import_metadata_sha256": "5fe26bd2e34576340a9b83f48f303bce5164d5ff8f783ba56e463c617b138f27",
+        "imported_resource_path": "res://.godot/imported/arachne.glb-daf0bd00bbc45e6161d9a18f2728665d.scn",
+        "imported_resource_sha256": "0da484d1860f735e2e3f85758298ffe055f2f2432b66a69e2e9ec3851f069237",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/arachne.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "1510fb24df7268c6c8a9d4ff4b3b4f12",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/arachne.glb",
+        "source_sha256": "153e652c1df5808e628796562e32aba23bc38be37c271a89e217e0bb39d5936d"
+      }
+    ]
   },
   "actor_placement": {
     "passed": true,
@@ -966,7 +994,35 @@
         "passed": true
       }
     },
-    "scope": "Additional strict model-space actual-native/fresh-editor-import surface equivalence gate, source-size-dependent4float32ULP Euclidean position and0.0001degree direction caps. Does not relax original source observations, Blender16ULP or raster/effects gates."
+    "scope": "Unchanged source-size-dependent4float32ULP Euclidean/.0001degree caps. Native original proof retained; editor pair now explicitly loads BOTH fresh ResourceLoader SCNs, bound to canonical GLB/SCN/sourceMD5/freshness metadata hashes. Earlier Cache-route editor labels withdrawn.",
+    "actual_editor_resource_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/arachne.glb-d50e84c38af748eba9e490a768745e9e.md5",
+        "import_metadata_sha256": "d0655f2ff06cf40e45d14c649c83561db05c95af9ae780808cfd590a5308dea5",
+        "imported_resource_path": "res://.godot/imported/arachne.glb-d50e84c38af748eba9e490a768745e9e.scn",
+        "imported_resource_sha256": "d5f671fc782e70d0d699a7a7ad05b59541fb2d35162e6ba59d3b025503955f30",
+        "packed_scene_resource_path": "res://assets/storage-baseline/arachne.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "3c12284dd48334baefe30d6c90074ee2",
+        "source_path": "res://assets/storage-baseline/arachne.glb",
+        "source_sha256": "cdaa3b7dca5d3c9adca4f807739fbfe83d541e4cfae2758cb9ab5f595e212460"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/arachne.glb-daf0bd00bbc45e6161d9a18f2728665d.md5",
+        "import_metadata_sha256": "5fe26bd2e34576340a9b83f48f303bce5164d5ff8f783ba56e463c617b138f27",
+        "imported_resource_path": "res://.godot/imported/arachne.glb-daf0bd00bbc45e6161d9a18f2728665d.scn",
+        "imported_resource_sha256": "0da484d1860f735e2e3f85758298ffe055f2f2432b66a69e2e9ec3851f069237",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/arachne.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "1510fb24df7268c6c8a9d4ff4b3b4f12",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/arachne.glb",
+        "source_sha256": "153e652c1df5808e628796562e32aba23bc38be37c271a89e217e0bb39d5936d"
+      }
+    ]
   },
   "death_dissolve_source_framing": {
     "actor": "arachne",
@@ -994,5 +1050,54 @@
       }
     ],
     "scope": "All8corners of original full-motion actualActor fit after exact preview translation, both640square orthographic FX cameras, near/far planes and minimum2pixel margin. Actual source/candidate fade PNG foreground borders remain a separate required post-capture check."
+  },
+  "actual_editor_mode_correction": {
+    "passed": true,
+    "source_sha256": "cdaa3b7dca5d3c9adca4f807739fbfe83d541e4cfae2758cb9ab5f595e212460",
+    "candidate_sha256": "153e652c1df5808e628796562e32aba23bc38be37c271a89e217e0bb39d5936d",
+    "prior_cache_route_editor_comparison_labels_withdrawn": true,
+    "previous_public_receipt_sha256": "286ac151825ad6ca0c5d7f2cba71fa8381981ad21749df3c2daa355dfb8e55fe",
+    "source_and_current_actual_editor_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/arachne.glb-d50e84c38af748eba9e490a768745e9e.md5",
+        "import_metadata_sha256": "d0655f2ff06cf40e45d14c649c83561db05c95af9ae780808cfd590a5308dea5",
+        "imported_resource_path": "res://.godot/imported/arachne.glb-d50e84c38af748eba9e490a768745e9e.scn",
+        "imported_resource_sha256": "d5f671fc782e70d0d699a7a7ad05b59541fb2d35162e6ba59d3b025503955f30",
+        "packed_scene_resource_path": "res://assets/storage-baseline/arachne.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "3c12284dd48334baefe30d6c90074ee2",
+        "source_path": "res://assets/storage-baseline/arachne.glb",
+        "source_sha256": "cdaa3b7dca5d3c9adca4f807739fbfe83d541e4cfae2758cb9ab5f595e212460"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/arachne.glb-daf0bd00bbc45e6161d9a18f2728665d.md5",
+        "import_metadata_sha256": "5fe26bd2e34576340a9b83f48f303bce5164d5ff8f783ba56e463c617b138f27",
+        "imported_resource_path": "res://.godot/imported/arachne.glb-daf0bd00bbc45e6161d9a18f2728665d.scn",
+        "imported_resource_sha256": "0da484d1860f735e2e3f85758298ffe055f2f2432b66a69e2e9ec3851f069237",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/arachne.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "1510fb24df7268c6c8a9d4ff4b3b4f12",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/arachne.glb",
+        "source_sha256": "153e652c1df5808e628796562e32aba23bc38be37c271a89e217e0bb39d5936d"
+      }
+    ],
+    "source_size_position_budget": 4.76837158203125e-07,
+    "maximum_position_error": 7.964049278837091e-08,
+    "normal_angle_budget_degrees": 0.0001,
+    "maximum_normal_angle_degrees": 1.1358719589327517e-05,
+    "all_typed_static_attributes_retained_morph_PNT_oriented_triangles_material_storage_and_texture_mips_identical": true,
+    "independent_complete_editor_vertex_and_oriented_triangle_payload_multisets_identical": true,
+    "independent_payload_source_retained_column_mapping": "No partitions. Exact preparation retained indices independently checked against raw authored POSITION/NORMAL/TANGENT accessor bits; no raw vertex ordinal or arbitrary coincident-ID assumption.",
+    "numeric_static_material_SCNs_identical": true,
+    "numeric_report_sha256": "7b45fabc37221fbd105b914403f613b0ef03a32e397b9726bd59294ab2bbc39e",
+    "static_report_sha256": "8f1b919e5487e40d814b56c23883b7cae8957c534cd44e8ab2d3ff0d34b638d2",
+    "direct_payload_report_sha256": "616d0319b7e7659e34ba7a7e41b37146db5f1ea544a3b3f015f3d9db69e3e608",
+    "material_report_sha256": "d2230325c422964a2a18a3f4363803facd6df30c00359969050de832766d9d82",
+    "loader_guard": "Public dump_creature_storage.gd explicit ResourceLoader imported branch; scene policy/current-source MD5/cache destination MD5 where single destination, source/SCN/freshness metadata SHA-bound.",
+    "scope": "Corrected matched actualEditor source/current comparison. Prior raw-Cache-source versus editor-current comparison labels are withdrawn; prior source/native/Blender/fullbody/seededFX/render evidence unchanged. All original caps and frozen source observations unchanged. Complete typed static attributes, retained morph P/N/T and oriented triangle payloads match. Material typed storage and texture pixels/mips match; generated distant LOD identity is not claimed."
   }
 }

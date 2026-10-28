@@ -472,16 +472,82 @@
       }
     },
     "native_original_receipt_sha256": "f342c1d3075facade95ad70437469caf018f569e97eb4717f569488224c36dfc",
-    "scope": "Original qualified native actual-arrays296pose report and new fresh editor-import actual-arrays296pose report, same canonical source/final hashes; strict model-space Euclidean4ULP and0.0001degree caps, no changed frames or thresholds."
+    "scope": "Unchanged source-size-dependent4float32ULP Euclidean/.0001degree caps. Native original proof retained; editor pair now explicitly loads BOTH fresh ResourceLoader SCNs, bound to canonical GLB/SCN/sourceMD5/freshness metadata hashes. Earlier Cache-route editor labels withdrawn.",
+    "actual_editor_resource_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/magpie.glb-26eb4b2b1b720141d16df8fc229557bb.md5",
+        "import_metadata_sha256": "85d783aa30963430fee539c9f4a89fdab1781afd19502613b4f03c8a273ff552",
+        "imported_resource_path": "res://.godot/imported/magpie.glb-26eb4b2b1b720141d16df8fc229557bb.scn",
+        "imported_resource_sha256": "c8c274de01ef2cbde4109273c9bb25d4a412d5816515858c1f726f2e41676d3d",
+        "packed_scene_resource_path": "res://assets/storage-baseline/magpie.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "2de6fa4027bf6f12c15449c47c03c285",
+        "source_path": "res://assets/storage-baseline/magpie.glb",
+        "source_sha256": "9ebfd307319cc3798e5887017e24a3d7061c057eee57810f349ef59679a8bc40"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/magpie.glb-117ee93531b16e4453b780ae9e55303d.md5",
+        "import_metadata_sha256": "ceee31bf39dddb12b6f7d120f4e2d4d1cbf6d88a22b158f7652c3bb7e4c6fa5f",
+        "imported_resource_path": "res://.godot/imported/magpie.glb-117ee93531b16e4453b780ae9e55303d.scn",
+        "imported_resource_sha256": "ca7356c2d77b245217c98af232eb76d6b880de117fa951bdaf274f3b944cb117",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/magpie.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "94b4917a033a266247163f2a06b4d3fb",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/magpie.glb",
+        "source_sha256": "d9081c27122de9a0aaf860515da5f72bae9e71b62fed12ff8e813ffe742912c7"
+      }
+    ]
   },
   "fresh_import_strict_supplement": {
-    "passed": true,
+    "maximum_position_error": 1.6935183176400978e-07,
+    "maximum_normal_angle_degrees": 1.6266572668182135e-05,
+    "worst_position": {
+      "label": "Death_A@0.933",
+      "max_surface_error": 1.6935183176400978e-07,
+      "max_normal_degrees": 1.6266572668182135e-05,
+      "p99_normal_degrees": 9.873520309573232e-06
+    },
+    "worst_normal": {
+      "label": "Death_A@0.933",
+      "max_surface_error": 1.6935183176400978e-07,
+      "max_normal_degrees": 1.6266572668182135e-05,
+      "p99_normal_degrees": 9.873520309573232e-06
+    },
+    "scope": "Both original and CURRENT final meshes loaded explicitly through ResourceLoader from fresh editor SCNs, bound to source/current GLB +SCN +freshness metadata hashes. All source clips, directed crossfades and RESET; independent retained-static/morph bijection and unchanged4float32ULP Euclidean/.0001degree caps. Earlier Cache-route imported labels are withdrawn, not treated as editor evidence.",
     "source_sha256": "9ebfd307319cc3798e5887017e24a3d7061c057eee57810f349ef59679a8bc40",
     "candidate_sha256": "d9081c27122de9a0aaf860515da5f72bae9e71b62fed12ff8e813ffe742912c7",
-    "all_native_clips": 8,
-    "actual_array_pose_and_crossfade_samples": 296,
-    "family_loops_holds_reset_playback_passed": true,
-    "scope": "Additional independent fresh editor import and actual array source/candidate comparison for original/final immutable binaries; model, previous fullRGB captures and artistic status unchanged."
+    "actual_editor_scene_loads": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/magpie.glb-26eb4b2b1b720141d16df8fc229557bb.md5",
+        "import_metadata_sha256": "85d783aa30963430fee539c9f4a89fdab1781afd19502613b4f03c8a273ff552",
+        "imported_resource_path": "res://.godot/imported/magpie.glb-26eb4b2b1b720141d16df8fc229557bb.scn",
+        "imported_resource_sha256": "c8c274de01ef2cbde4109273c9bb25d4a412d5816515858c1f726f2e41676d3d",
+        "packed_scene_resource_path": "res://assets/storage-baseline/magpie.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "2de6fa4027bf6f12c15449c47c03c285",
+        "source_path": "res://assets/storage-baseline/magpie.glb",
+        "source_sha256": "9ebfd307319cc3798e5887017e24a3d7061c057eee57810f349ef59679a8bc40"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/magpie.glb-117ee93531b16e4453b780ae9e55303d.md5",
+        "import_metadata_sha256": "ceee31bf39dddb12b6f7d120f4e2d4d1cbf6d88a22b158f7652c3bb7e4c6fa5f",
+        "imported_resource_path": "res://.godot/imported/magpie.glb-117ee93531b16e4453b780ae9e55303d.scn",
+        "imported_resource_sha256": "ca7356c2d77b245217c98af232eb76d6b880de117fa951bdaf274f3b944cb117",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/magpie.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "94b4917a033a266247163f2a06b4d3fb",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/magpie.glb",
+        "source_sha256": "d9081c27122de9a0aaf860515da5f72bae9e71b62fed12ff8e813ffe742912c7"
+      }
+    ]
   },
   "death_dissolve_gpu_supplement": {
     "effective_scale": 0.900000095367432,
@@ -537,5 +603,101 @@
     "clipped_frame_labels": [],
     "maximum_border_foreground_pixels": 0
   },
-  "death_dissolve_supplement_evidence": "Task-owned ignored.local/magpie-storage/v2/fx-supplement retains original code snapshot/binding, separate current-source CPU preflight, realGPU reports, full640RGB fade captures and lossless previews."
+  "death_dissolve_supplement_evidence": "Task-owned ignored.local/magpie-storage/v2/fx-supplement retains original code snapshot/binding, separate current-source CPU preflight, realGPU reports, full640RGB fade captures and lossless previews.",
+  "fresh_editor_import_playback": {
+    "maximum_position_error": 1.6935183176400978e-07,
+    "maximum_normal_angle_degrees": 1.6266572668182135e-05,
+    "worst_position": {
+      "label": "Death_A@0.933",
+      "max_surface_error": 1.6935183176400978e-07,
+      "max_normal_degrees": 1.6266572668182135e-05,
+      "p99_normal_degrees": 9.873520309573232e-06
+    },
+    "worst_normal": {
+      "label": "Death_A@0.933",
+      "max_surface_error": 1.6935183176400978e-07,
+      "max_normal_degrees": 1.6266572668182135e-05,
+      "p99_normal_degrees": 9.873520309573232e-06
+    },
+    "scope": "Both original and CURRENT final meshes loaded explicitly through ResourceLoader from fresh editor SCNs, bound to source/current GLB +SCN +freshness metadata hashes. All source clips, directed crossfades and RESET; independent retained-static/morph bijection and unchanged4float32ULP Euclidean/.0001degree caps. Earlier Cache-route imported labels are withdrawn, not treated as editor evidence.",
+    "source_sha256": "9ebfd307319cc3798e5887017e24a3d7061c057eee57810f349ef59679a8bc40",
+    "candidate_sha256": "d9081c27122de9a0aaf860515da5f72bae9e71b62fed12ff8e813ffe742912c7",
+    "actual_editor_scene_loads": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/magpie.glb-26eb4b2b1b720141d16df8fc229557bb.md5",
+        "import_metadata_sha256": "85d783aa30963430fee539c9f4a89fdab1781afd19502613b4f03c8a273ff552",
+        "imported_resource_path": "res://.godot/imported/magpie.glb-26eb4b2b1b720141d16df8fc229557bb.scn",
+        "imported_resource_sha256": "c8c274de01ef2cbde4109273c9bb25d4a412d5816515858c1f726f2e41676d3d",
+        "packed_scene_resource_path": "res://assets/storage-baseline/magpie.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "2de6fa4027bf6f12c15449c47c03c285",
+        "source_path": "res://assets/storage-baseline/magpie.glb",
+        "source_sha256": "9ebfd307319cc3798e5887017e24a3d7061c057eee57810f349ef59679a8bc40"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/magpie.glb-117ee93531b16e4453b780ae9e55303d.md5",
+        "import_metadata_sha256": "ceee31bf39dddb12b6f7d120f4e2d4d1cbf6d88a22b158f7652c3bb7e4c6fa5f",
+        "imported_resource_path": "res://.godot/imported/magpie.glb-117ee93531b16e4453b780ae9e55303d.scn",
+        "imported_resource_sha256": "ca7356c2d77b245217c98af232eb76d6b880de117fa951bdaf274f3b944cb117",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/magpie.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "94b4917a033a266247163f2a06b4d3fb",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/magpie.glb",
+        "source_sha256": "d9081c27122de9a0aaf860515da5f72bae9e71b62fed12ff8e813ffe742912c7"
+      }
+    ]
+  },
+  "actual_editor_mode_correction": {
+    "passed": true,
+    "source_sha256": "9ebfd307319cc3798e5887017e24a3d7061c057eee57810f349ef59679a8bc40",
+    "candidate_sha256": "d9081c27122de9a0aaf860515da5f72bae9e71b62fed12ff8e813ffe742912c7",
+    "prior_cache_route_editor_comparison_labels_withdrawn": true,
+    "previous_public_receipt_sha256": "c6c950d1cfc594cace0930df3c7164d0ca345596476b91f50b5c068833f3e6a0",
+    "source_and_current_actual_editor_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/magpie.glb-26eb4b2b1b720141d16df8fc229557bb.md5",
+        "import_metadata_sha256": "85d783aa30963430fee539c9f4a89fdab1781afd19502613b4f03c8a273ff552",
+        "imported_resource_path": "res://.godot/imported/magpie.glb-26eb4b2b1b720141d16df8fc229557bb.scn",
+        "imported_resource_sha256": "c8c274de01ef2cbde4109273c9bb25d4a412d5816515858c1f726f2e41676d3d",
+        "packed_scene_resource_path": "res://assets/storage-baseline/magpie.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "2de6fa4027bf6f12c15449c47c03c285",
+        "source_path": "res://assets/storage-baseline/magpie.glb",
+        "source_sha256": "9ebfd307319cc3798e5887017e24a3d7061c057eee57810f349ef59679a8bc40"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/magpie.glb-117ee93531b16e4453b780ae9e55303d.md5",
+        "import_metadata_sha256": "ceee31bf39dddb12b6f7d120f4e2d4d1cbf6d88a22b158f7652c3bb7e4c6fa5f",
+        "imported_resource_path": "res://.godot/imported/magpie.glb-117ee93531b16e4453b780ae9e55303d.scn",
+        "imported_resource_sha256": "ca7356c2d77b245217c98af232eb76d6b880de117fa951bdaf274f3b944cb117",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/basic_expansion/magpie.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "94b4917a033a266247163f2a06b4d3fb",
+        "source_path": "res://assets/actors/native/creatures/basic_expansion/magpie.glb",
+        "source_sha256": "d9081c27122de9a0aaf860515da5f72bae9e71b62fed12ff8e813ffe742912c7"
+      }
+    ],
+    "source_size_position_budget": 2.384185791015625e-07,
+    "maximum_position_error": 1.6935183176400978e-07,
+    "normal_angle_budget_degrees": 0.0001,
+    "maximum_normal_angle_degrees": 1.6266572668182135e-05,
+    "all_typed_static_attributes_retained_morph_PNT_oriented_triangles_material_storage_and_texture_mips_identical": true,
+    "independent_complete_editor_vertex_and_oriented_triangle_payload_multisets_identical": true,
+    "independent_payload_source_retained_column_mapping": "No partitions. Exact preparation retained indices independently checked against raw authored POSITION/NORMAL/TANGENT accessor bits; no raw vertex ordinal or arbitrary coincident-ID assumption.",
+    "numeric_static_material_SCNs_identical": true,
+    "numeric_report_sha256": "2483ec9246724c3237fc6a6018c2f43b684b6b5355c0c5ac43498c08e75cb9f3",
+    "static_report_sha256": "e69a52280f0ba3df94c5dac403a6507297eac1dda38d31574a1e697108c18b67",
+    "direct_payload_report_sha256": "805defc6949173e94fd1733074c33ce5c5368cd6a14cc650d8510e2e99084b88",
+    "material_report_sha256": "3416d63fc04a6157cceefdad168ed2828591a1cbd75ee9f880ed5fd16d89d326",
+    "loader_guard": "Public dump_creature_storage.gd explicit ResourceLoader imported branch; scene policy/current-source MD5/cache destination MD5 where single destination, source/SCN/freshness metadata SHA-bound.",
+    "scope": "Corrected matched actualEditor source/current comparison. Prior raw-Cache-source versus editor-current comparison labels are withdrawn; prior source/native/Blender/fullbody/seededFX/render evidence unchanged. All original caps and frozen source observations unchanged. Complete typed static attributes, retained morph P/N/T and oriented triangle payloads match. Material typed storage and texture pixels/mips match; generated distant LOD identity is not claimed."
+  }
 }
