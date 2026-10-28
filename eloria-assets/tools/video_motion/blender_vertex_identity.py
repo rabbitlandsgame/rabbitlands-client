@@ -225,9 +225,13 @@ def imported_bindings(path, objects):
                 continue
             matrix = np.array(ob.matrix_world)
             actual = values @ matrix[:3, :3].T + matrix[:3, 3]
-            error = float(np.linalg.norm(actual - expected, axis=1).max())
-            if error <= budget:
-                candidates.append((ob, error))
+            difference = actual - expected
+            error = float(np.linalg.norm(difference, axis=1).max())
+            component_error = float(np.abs(difference).max())
+            # A coordinate ULP allowance applies to each coordinate. Retain
+            # Euclidean error for diagnostics without comparing different units.
+            if component_error <= budget:
+                candidates.append((ob, error, component_error))
         named = [
             row
             for row in candidates
@@ -240,9 +244,9 @@ def imported_bindings(path, objects):
             "Unproved Blender mesh identity",
             node_index,
             node.get("name"),
-            [(o.name, e) for o, e in candidates],
+            [(o.name, e, c) for o, e, c in candidates],
         )
-        ob, basis_error = candidates[0]
+        ob, basis_error, basis_component_error = candidates[0]
         used.add(ob.as_pointer())
         data = ob.data
         matrix = np.array(ob.matrix_world)
@@ -393,6 +397,7 @@ def imported_bindings(path, objects):
                 "vertices": count,
                 "position_targets": targets,
                 "basis_world_error": basis_error,
+                "basis_world_component_error": basis_component_error,
                 "uv_error": uv_error,
                 "skin_error": skin_error,
                 "skin_raw_group_error": skin_raw_error,

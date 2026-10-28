@@ -18,7 +18,7 @@ def bind(monkeypatch, *, depth=8, world_error=0., local_error=0.):
     monkeypatch.setattr(identity, 'document', lambda path: (doc,b''))
     monkeypatch.setattr(identity, 'array', lambda *args: positions.astype(float))
     local = (positions @ identity._C.T).astype(np.float32);local[0,0] += local_error
-    matrix=np.eye(4);matrix[0,3]=world_error
+    matrix=np.eye(4);matrix[:3,3]=world_error
     ob=SimpleNamespace(type='MESH',name='Sword',as_pointer=lambda:1,
         matrix_world=matrix,data=SimpleNamespace(vertices=Rows(local),loops=Rows([]),shape_keys=None))
     return identity.imported_bindings('unused',[ob])
@@ -45,3 +45,18 @@ def test_world_mismatch_beyond_composed_budget_rejected(monkeypatch):
         bind(monkeypatch,depth=8,world_error=1e-3)
 
 
+
+
+def test_diagonal_within_each_coordinate_budget(monkeypatch):
+    budget=16*8*float(np.spacing(np.float32(1.)))
+    _,_,records=bind(monkeypatch,depth=8,world_error=np.full(3,budget*.8))
+    row=records[0]
+    assert row['basis_world_component_error'] <= row['position_budget']
+    assert row['basis_world_error'] > row['position_budget']
+
+
+@pytest.mark.parametrize('axis', [0,1,2])
+def test_each_coordinate_over_budget_rejected(monkeypatch, axis):
+    error=np.zeros(3);error[axis]=16*8*float(np.spacing(np.float32(1.)))*1.1
+    with pytest.raises(AssertionError,match='Unproved Blender mesh identity'):
+        bind(monkeypatch,depth=8,world_error=error)
