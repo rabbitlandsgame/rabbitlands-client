@@ -16,21 +16,26 @@ from video_motion.partial_correctives import split_corrective_partition
 from video_motion.packing import compact
 
 
-def prepare(source, output, profile=None, bounds=None):
+def prepare(source, output, profile=None, bounds=None, preserve_trs_keys=False):
     if source.resolve() == output.resolve():
         raise ValueError('The original source must remain immutable')
     source_hash = digest(source)
     if profile is not None and profile.get('source_sha256') != source_hash:
         raise ValueError('Partition profile does not match source SHA256')
+    profile_preserve = profile.get('preserve_trs_keys', False) if profile else False
+    if type(preserve_trs_keys) is not bool or type(profile_preserve) is not bool:
+        raise ValueError('preserve_trs_keys requires an explicit boolean')
+    preserve_trs_keys = preserve_trs_keys or profile_preserve
+    paths = {'weights'} if preserve_trs_keys else None
     document, binary = read_glb(source)
     document, binary, inactive = prune_zero_targets(document, binary)
-    document, binary, runs = reduce_constant_runs(document, binary)
+    document, binary, runs = reduce_constant_runs(document, binary, paths=paths)
     partition = None
     if profile is not None:
         node = document['nodes'][int(profile['source_node'])]
         primitive = document['meshes'][node['mesh']]['primitives'][int(profile.get('primitive', 0))]
         if primitive.get('targets'):
-            document, binary, partition = split_corrective_partition(document, binary, profile)
+            document, binary, partition = split_corrective_partition(document, binary, profile, collapse_paths=paths)
         else:
             partition = {'skipped': 'Exact pruning already removed all corrective storage; original skin retained'}
     if bounds is not None:
@@ -49,13 +54,14 @@ def prepare(source, output, profile=None, bounds=None):
                 extras['rabbitlands_actor_bounds_v1'] = {key: record[key] for key in ('position', 'size')}
                 if record['size'][1] > 0:
                     extras['rabbitlands_coat_pattern_height'] = record['size'][1]
-    document, binary, packing = compact(document, binary)
+    document, binary, packing = compact(document, binary, collapse_paths=paths)
     output.parent.mkdir(parents=True, exist_ok=True)
     write_glb(output, document, binary)
     return {'source_sha256': source_hash, 'candidate_sha256': digest(output),
             'source_bytes': source.stat().st_size, 'candidate_bytes': output.stat().st_size,
             'inactive_targets': inactive, 'constant_runs': runs,
             'partition': partition, 'logical_actor_bounds': bounds, 'packing': packing,
+            'preserve_trs_keys': preserve_trs_keys,
             'qualification': 'candidate only; source, independent import and runtime visual checks required'}
 
 
@@ -65,11 +71,12 @@ def main():
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--profile', type=Path)
     parser.add_argument('--bounds', type=Path, help='Hash-bound original Godot mesh bounds; preserves actor placement after unused envelopes are removed')
+    parser.add_argument('--preserve-trs-keys', action='store_true', help='Retain all original joint key rows while packing morph weights and unreachable storage')
     parser.add_argument('--report', type=Path, required=True)
     args = parser.parse_args()
     profile = json.loads(args.profile.read_text(encoding='utf-8')) if args.profile else None
     bounds = json.loads(args.bounds.read_text(encoding='utf-8')) if args.bounds else None
-    report = prepare(args.source, args.output, profile, bounds)
+    report = prepare(args.source, args.output, profile, bounds, args.preserve_trs_keys)
     args.report.parent.mkdir(parents=True, exist_ok=True)
     args.report.write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8', newline='\n')
     print('CREATURE_STORAGE_CANDIDATE', report['source_bytes'], report['candidate_bytes'])

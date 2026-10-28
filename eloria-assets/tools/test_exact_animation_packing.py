@@ -60,6 +60,25 @@ def test_flattened_morph_weights_are_compared_as_complete_frames():
     assert report['removed_keys'] == 2
 
 
+@pytest.mark.parametrize('path,expected', [('translation', 0), ('rotation', 0), ('scale', 0), ('weights', 3)])
+def test_path_filter_preserves_original_trs_rows(path, expected):
+    values = np.ones((5, 4 if path == 'rotation' else 3), '<f4')
+    d, b = fixture(values, path=path)
+    packed, blob, report = reduce_constant_runs(d, b, paths={'weights'})
+    assert report['removed_keys'] == expected
+    sampler = packed['animations'][0]['samplers'][0]
+    if not expected:
+        assert packed == d and bytes(blob) == bytes(b)
+        assert sampler['input'] == 0 and sampler['output'] == 1
+
+
+def test_path_filter_does_not_reduce_sampler_shared_with_joint_path():
+    d, b = fixture(np.ones((5, 3), '<f4'), path='translation')
+    d['animations'][0]['channels'].append({'sampler': 0, 'target': {'node': 1, 'path': 'weights'}})
+    packed, blob, report = reduce_constant_runs(d, b, paths={'weights'})
+    assert report['removed_keys'] == 0 and packed == d and bytes(blob) == bytes(b)
+
+
 def test_signed_zero_transition_is_preserved_bit_for_bit():
     d, b = fixture(np.array([0., 0., -0., -0., -0., 1.], '<f4'))
     packed, blob, report = reduce_constant_runs(d, b)

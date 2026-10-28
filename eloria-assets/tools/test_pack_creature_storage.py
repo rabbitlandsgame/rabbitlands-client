@@ -61,3 +61,36 @@ def test_invalid_original_presentation_bounds_are_rejected(tmp_path):
         bounds = {'source_sha256': profile['source_sha256'], 'meshes': [
             {'source_node': 1, 'position': [0, 0, 0], 'size': span}]}
         with pytest.raises(ValueError): prepare(source, tmp_path / 'bad.glb', bounds=bounds)
+
+
+@pytest.mark.parametrize('use_profile', [False, True])
+def test_preserve_trs_option_survives_all_compaction_stages(tmp_path, use_profile):
+    from test_partial_correctives import fixture
+    from video_motion.asset import digest
+    d, b, profile = fixture(tmp_path)
+    clock = append_array(d, b, np.arange(5, dtype='<f4')[:, None], 'SCALAR')
+    value = append_array(d, b, np.zeros((5, 3), '<f4'), 'VEC3')
+    weights = append_array(d, b, np.ones((5, 1), '<f4'), 'SCALAR')
+    d['animations'] = [{'name': 'Held', 'channels': [
+        {'target': {'node': 0, 'path': 'translation'}, 'sampler': 0},
+        {'target': {'node': 1, 'path': 'weights'}, 'sampler': 1}],
+        'samplers': [{'input': clock, 'output': value}, {'input': clock, 'output': weights}]}]
+    d['buffers'][0]['byteLength'] = len(b)
+    source = tmp_path / 'animated.glb'
+    write_glb(source, d, b)
+    profile['source_sha256'] = digest(source)
+    profile['preserve_trs_keys'] = use_profile
+    result = tmp_path / 'result.glb'
+    report = prepare(source, result, profile, preserve_trs_keys=not use_profile)
+    nd, nb = read_glb(result)
+    samplers = nd['animations'][0]['samplers']
+    assert len(accessor(nd, nb, samplers[0]['input'])) == 5
+    assert len(accessor(nd, nb, samplers[1]['input'])) == 2
+    assert report['preserve_trs_keys'] and report['partition']
+    assert report['partition']['packing']['constant_samplers_collapsed'] == 0
+    assert report['packing']['constant_samplers_collapsed'] == 0
+    ordinary = tmp_path / 'ordinary.glb'
+    profile.pop('preserve_trs_keys')
+    prepare(source, ordinary, profile)
+    od, ob = read_glb(ordinary)
+    assert len(accessor(od, ob, od['animations'][0]['samplers'][0]['input'])) == 2

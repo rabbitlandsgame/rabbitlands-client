@@ -36,13 +36,17 @@ def _float_bits(document, binary, index):
                       offset=absolute, strides=(stride, 4)).copy()
 
 
-def reduce_constant_runs(document, binary):
+def reduce_constant_runs(document, binary, *, paths=None):
     """Return a copy with redundant LINEAR/STEP flat-run interiors removed.
 
     Morph samplers use a SCALAR accessor flattened over all target weights;
     their complete per-frame vectors are compared together. CUBICSPLINE and
     unsupported encodings are kept unchanged, rather than guessing tangents.
+    ``paths`` optionally limits reduction to samplers used exclusively by those
+    target paths. This can retain original joint-key spacing for importers whose
+    float interpolation depends on that spacing.
     """
+    allowed_paths = None if paths is None else frozenset(paths)
     if len(document.get('buffers', [])) != 1 or document['buffers'][0].get('uri'):
         raise ValueError('Animation packing requires one embedded buffer')
     result = copy.deepcopy(document)
@@ -65,6 +69,11 @@ def reduce_constant_runs(document, binary):
 
     for animation in result.get('animations', []):
         for index, sampler in enumerate(animation['samplers']):
+            target_paths = {channel['target']['path'] for channel in animation['channels']
+                            if channel['sampler'] == index}
+            if allowed_paths is not None and (not target_paths or not target_paths <= allowed_paths):
+                skipped += 1
+                continue
             if sampler.get('interpolation', 'LINEAR') not in ('LINEAR', 'STEP'):
                 skipped += 1
                 continue

@@ -36,7 +36,7 @@ def raw_array(document, binary, index):
                       strides=(stride, dtype.itemsize)).copy()
 
 
-def split_corrective_partition(document, binary, profile):
+def split_corrective_partition(document, binary, profile, *, collapse_paths=None):
     """Split one source primitive's complete islands into one additional mesh.
 
     Required profile: source_node, primitive, vertex_ids, mode and
@@ -48,6 +48,11 @@ def split_corrective_partition(document, binary, profile):
     Optional mount_skin is an exact packed restoration record for rigid mode.
     Returns original-global vertex IDs in the output node/primitive order.
     """
+    preserve_trs = profile.get('preserve_trs_keys', False)
+    if type(preserve_trs) is not bool:
+        raise ValueError('preserve_trs_keys requires an explicit boolean')
+    if preserve_trs:
+        collapse_paths = {'weights'}
     result, blob = copy.deepcopy(document), bytearray(binary)
     node_index = int(profile['source_node'])
     node = document['nodes'][node_index]
@@ -288,7 +293,7 @@ def split_corrective_partition(document, binary, profile):
             else: global_ids.extend(range(cursor, cursor + length))
             cursor += length
     global_ids.extend((selected + original_start).tolist())
-    result, blob, packing = compact(result, blob)
+    result, blob, packing = compact(result, blob, collapse_paths=collapse_paths)
     rigid_weight_sums = None
     if preserve_weights:
         fields = [index for name, index in primitive['attributes'].items() if name.startswith('WEIGHTS_')]
