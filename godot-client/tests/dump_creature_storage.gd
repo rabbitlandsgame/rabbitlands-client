@@ -8,6 +8,31 @@ var descriptions := []
 var samples := []
 var output: String
 var mode: String
+var fixture_failed := false
+
+static func imported_fixture(path: String) -> Dictionary:
+	# Cache deliberately treats resources outside assets/actors as raw glTF.
+	# Editor QA must bypass that production fallback for BOTH fixture aliases.
+	if not path.begins_with("res://"):
+		return {"errors":["Editor fixture must use its res:// source alias"]}
+	var policy := ConfigFile.new()
+	if policy.load(path + ".import") != OK:
+		return {"errors":["Editor fixture has no import policy: " + path]}
+	if str(policy.get_value("remap","importer","")) != "scene":
+		return {"errors":["Editor fixture importer is not scene: " + path]}
+	if str(policy.get_value("deps","source_file","")) != path:
+		return {"errors":["Editor fixture import policy names a different source: " + path]}
+	var resource_path := str(policy.get_value("remap","path",""))
+	if not resource_path.begins_with("res://.godot/imported/") or resource_path.get_extension() != "scn" or not FileAccess.file_exists(resource_path):
+		return {"errors":["Editor fixture has no generated scene cache: " + path]}
+	var scene := ResourceLoader.load(path,"PackedScene",ResourceLoader.CACHE_MODE_REUSE) as PackedScene
+	if scene == null or scene.resource_path.is_empty():
+		return {"errors":["Editor fixture PackedScene could not be loaded: " + path]}
+	return {"errors":[],"scene":scene,"proof":{
+		"actual_loader":"ResourceLoader.load(PackedScene)",
+		"source_path":path,"source_sha256":FileAccess.get_sha256(path),
+		"imported_resource_path":resource_path,"imported_resource_sha256":FileAccess.get_sha256(resource_path),
+		"packed_scene_resource_path":scene.resource_path}}
 
 func _init() -> void:
 	run.call_deferred()
@@ -30,6 +55,7 @@ func describe(fixture: Dictionary) -> void:
 	var model: Node3D
 	var holder: Node3D
 	var player: AnimationPlayer
+	var load_proof := {"actual_loader":"ReplicatedActor3D" if mode == "fit" else "GlbSceneCache.instantiate"}
 	if mode == "fit":
 		var actor := ReplicatedActor3D.new()
 		root.add_child(actor)
@@ -47,7 +73,17 @@ func describe(fixture: Dictionary) -> void:
 		for clip: String in expected:
 			assert(player.has_animation(clip),"Actor QA fit map omits original native clip: "+clip)
 	else:
-		model = Cache.instantiate(fixture.path)
+		if mode == "imported":
+			var imported_scene := imported_fixture(fixture.path)
+			if not imported_scene.errors.is_empty():
+				fixture_failed = true
+				push_error(str(imported_scene.errors))
+				quit(1)
+				return
+			model = (imported_scene.scene as PackedScene).instantiate() as Node3D
+			load_proof = imported_scene.proof
+		else:
+			model = Cache.instantiate(fixture.path)
 		assert(model != null)
 		root.add_child(model)
 		holder = model
@@ -90,7 +126,7 @@ func describe(fixture: Dictionary) -> void:
 			groups.append({"mesh":mesh})
 			serial.append({"name":str(mesh.name),"surface":surface,"prefix":prefix,"vertices":vertices.size(),"targets":mesh.mesh.get_blend_shape_count(),"mode":mesh.mesh.blend_shape_mode,"bones":bones,"binds":binds,"aabb_position":vector(mesh.mesh.get_aabb().position),"aabb_size":vector(mesh.mesh.get_aabb().size),"blend_buffer_bytes":raw.get("blend_shape_data",PackedByteArray()).size(),"mesh_surfaces":mesh.mesh.get_surface_count()})
 	models.append({"model":holder,"skeleton":skeleton,"player":player,"groups":groups})
-	descriptions.append({"name":fixture.name,"sha256":FileAccess.get_sha256(fixture.path),"meshes":serial,"model_global":[vector(model.global_transform.origin),vector(model.global_transform.basis.x),vector(model.global_transform.basis.y),vector(model.global_transform.basis.z)]})
+	descriptions.append({"name":fixture.name,"sha256":FileAccess.get_sha256(fixture.path),"load_proof":load_proof,"meshes":serial,"model_global":[vector(model.global_transform.origin),vector(model.global_transform.basis.x),vector(model.global_transform.basis.y),vector(model.global_transform.basis.z)]})
 
 func snapshot(label: String) -> void:
 	var state := {"label":label,"models":[]}
@@ -118,7 +154,9 @@ func run() -> void:
 	var fixtures: Array = job.get("native_fixtures",[]) if mode == "native" else job.get("imported_fixtures",[])
 	if mode == "fit": fixtures = [job.actor_fixtures[0]]
 	assert(fixtures.size() == (1 if mode == "fit" else 2))
-	for fixture: Dictionary in fixtures: describe(fixture)
+	for fixture: Dictionary in fixtures:
+		describe(fixture)
+		if fixture_failed: return
 	if mode == "fit":
 		for clip: StringName in models[0].player.get_animation_list():
 			if clip == &"RESET": continue
