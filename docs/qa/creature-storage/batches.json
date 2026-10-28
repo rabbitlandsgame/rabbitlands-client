@@ -5,8 +5,8 @@
   "batch_size": 5,
   "creature_count": 235,
   "batch_count": 47,
-  "completed_batches": 42,
-  "qualified_creatures": 196,
+  "completed_batches": 43,
+  "qualified_creatures": 199,
   "status": "in progress",
   "actors": [
     {
@@ -2536,7 +2536,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/amethyst_moth.glb",
       "source_sha256": "887a1084b5101b17a96d444f7440763b1a63c25585a85fe1e3c95169c592203c",
       "source_bytes": 1513720,
-      "status": "pending"
+      "status": "unchanged",
+      "candidate_sha256": "887a1084b5101b17a96d444f7440763b1a63c25585a85fe1e3c95169c592203c",
+      "candidate_bytes": 1513720,
+      "qualification_report": "docs/qa/creature-storage/batch-043/amethyst_moth.json"
     },
     {
       "actor": "emerald_canopy_dragon",
@@ -2545,7 +2548,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/emerald_canopy_dragon.glb",
       "source_sha256": "0d12a23679466a272d6a9917f9032709114e39a978b7b904e1e0fb83ade711a2",
       "source_bytes": 1494492,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "65e29ffd7822510357673f7db9b1c72830fe2772a5e00d062e9f450e18310685",
+      "candidate_bytes": 1492148,
+      "qualification_report": "docs/qa/creature-storage/batch-043/emerald_canopy_dragon.json"
     },
     {
       "actor": "crystal_wing_griffin",
@@ -2554,7 +2560,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/crystal_wing_griffin.glb",
       "source_sha256": "385452c28809358f80e9621ca65a793a65839da4dc73d3a442ef76aff4d04e13",
       "source_bytes": 1490828,
-      "status": "pending"
+      "status": "unchanged",
+      "candidate_sha256": "385452c28809358f80e9621ca65a793a65839da4dc73d3a442ef76aff4d04e13",
+      "candidate_bytes": 1490828,
+      "qualification_report": "docs/qa/creature-storage/batch-043/crystal_wing_griffin.json"
     },
     {
       "actor": "gloom_wyvern",
@@ -2563,7 +2572,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/gloom_wyvern.glb",
       "source_sha256": "df60163933fa673c94d52dbb04196b3fef45010a72736464d43643f90046fd61",
       "source_bytes": 1472324,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "53d6d3e4a89b60d460eeb461d2bfe1014d1aa6726b10b67086ac3be227c762d2",
+      "candidate_bytes": 1425844,
+      "qualification_report": "docs/qa/creature-storage/batch-043/gloom_wyvern.json"
     },
     {
       "actor": "plains_griffin",
@@ -2572,7 +2584,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/plains_griffin.glb",
       "source_sha256": "7451e4b599a2de5af6f023302ad9a2ef60426d80d25769bc1ac401bac3abe078",
       "source_bytes": 1406656,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "53dfed9268760c31c6c541cb720dcbabdec5e7ae8894a1357db6fa5cda531059",
+      "candidate_bytes": 1353488,
+      "qualification_report": "docs/qa/creature-storage/batch-043/plains_griffin.json"
     },
     {
       "actor": "arcane_core_colossus",
@@ -2797,17 +2812,18 @@
     39,
     40,
     41,
-    42
+    42,
+    43
   ],
-  "reviewed_creatures": 210,
+  "reviewed_creatures": 215,
   "selection_policy": {
     "raw_asset_priority": "Prefer smaller qualified raw development models; small measured increases in packaged RLCZ size are accepted and recorded per actor and batch.",
     "runtime_claims": "Encoded input-key savings do not establish retained animation memory or frame-time savings because Godot rebakes curves at the declared cadence. Shared corrective GPU buffer savings are measured separately.",
     "approximation": "Exact batches retain their existing bounded float32/native/pixel gates. Approximate joint-curve trials are private and uninstalled."
   },
   "totals_reviewed": {
-    "raw_saved_bytes": 297634800,
-    "compressed_saved_bytes": 19452305,
+    "raw_saved_bytes": 297736792,
+    "compressed_saved_bytes": 19450723,
     "shared_gpu_saved_bytes": 39397800
   },
   "independent_editor_verification": {
