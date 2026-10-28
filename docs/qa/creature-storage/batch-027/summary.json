@@ -1,0 +1,111 @@
+{
+  "schema_version": 1,
+  "batch": 27,
+  "date": "2026-10-28",
+  "status": "reviewed and integrated locally; not pushed or released",
+  "human_approval_changed": false,
+  "actors": [
+    {
+      "actor": "platypus",
+      "source_sha256": "271b55813201faf9a1083d2d0cefea16edc20b1bceccc3a8ea426b4585a6bd35",
+      "candidate_sha256": "b08d59ed3e4b7f6c86605e47bc4e53825b91ada4eb17b1d25e7575efbc10b905",
+      "status": "qualified",
+      "qualification_report": "docs/qa/creature-storage/platypus.json",
+      "source_bytes": 7123768,
+      "candidate_bytes": 5642672,
+      "source_zstd_bytes": 3317260,
+      "candidate_zstd_bytes": 3332927,
+      "shared_gpu_source_bytes": 0,
+      "shared_gpu_candidate_bytes": 0,
+      "draw_surfaces_source": 1,
+      "draw_surfaces_candidate": 1
+    },
+    {
+      "actor": "frosthorn_elk",
+      "source_sha256": "f3965ded399467bb3c1ea6e5c5c088f3e4d6fcfd7d823563d8ceaf9123e24d9b",
+      "candidate_sha256": "ffefc304b8183ff63439033af4d1a11e2dc8f0a23d4529554cb8fbefe213e3ba",
+      "status": "qualified",
+      "qualification_report": "docs/qa/creature-storage/frosthorn_elk.json",
+      "source_bytes": 7078964,
+      "candidate_bytes": 5735176,
+      "source_zstd_bytes": 4207008,
+      "candidate_zstd_bytes": 4214816,
+      "shared_gpu_source_bytes": 0,
+      "shared_gpu_candidate_bytes": 0,
+      "draw_surfaces_source": 1,
+      "draw_surfaces_candidate": 1
+    },
+    {
+      "actor": "giant_wasp",
+      "source_sha256": "8795cee2ec803e093b6f9298150665034fb5620badcaa337a2f4a358da7a160f",
+      "candidate_sha256": "68028bae7e8bcc57118e94b446db12b239bacf4612835ba1f200a98d8b23c0e8",
+      "status": "qualified",
+      "qualification_report": "docs/qa/creature-storage/giant_wasp.json",
+      "source_bytes": 6957568,
+      "candidate_bytes": 6766240,
+      "source_zstd_bytes": 3705643,
+      "candidate_zstd_bytes": 3634714,
+      "shared_gpu_source_bytes": 5021900,
+      "shared_gpu_candidate_bytes": 5021900,
+      "draw_surfaces_source": 1,
+      "draw_surfaces_candidate": 1
+    },
+    {
+      "actor": "glowhorn_sheep",
+      "source_sha256": "e6fe15a1dcfa53f0ebe815404f1afa8c4282a8801a8d57673947869ad7461132",
+      "candidate_sha256": "6fbbdab486fa3853ae84dc716871cbb4dd4c9b04a86834bef3045e3b1b17b8dc",
+      "status": "qualified",
+      "qualification_report": "docs/qa/creature-storage/glowhorn_sheep.json",
+      "source_bytes": 6643968,
+      "candidate_bytes": 5588024,
+      "source_zstd_bytes": 4007758,
+      "candidate_zstd_bytes": 4005882,
+      "shared_gpu_source_bytes": 0,
+      "shared_gpu_candidate_bytes": 0,
+      "draw_surfaces_source": 1,
+      "draw_surfaces_candidate": 1
+    },
+    {
+      "actor": "brambleback_boar",
+      "source_sha256": "32b094b165b592c72e75fa13049778e8155c82243a3705b86a33c277b51d3e96",
+      "candidate_sha256": "32b094b165b592c72e75fa13049778e8155c82243a3705b86a33c277b51d3e96",
+      "status": "held",
+      "qualification_report": "docs/qa/creature-storage/brambleback_boar.json",
+      "source_bytes": 6643700,
+      "candidate_bytes": 6643700,
+      "source_zstd_bytes": 3748265,
+      "candidate_zstd_bytes": 3748265,
+      "shared_gpu_source_bytes": 0,
+      "shared_gpu_candidate_bytes": 0,
+      "draw_surfaces_source": 1,
+      "draw_surfaces_candidate": 1,
+      "reason": "Existing duplicate animation timestamps retained exactly; unsupported by strict source-sampler contract, no clock normalization or repacking."
+    }
+  ],
+  "totals": {
+    "source_bytes": 34447968,
+    "source_bytes_unknown_actors": 0,
+    "candidate_bytes": 30375812,
+    "candidate_bytes_unknown_actors": 0,
+    "source_zstd_bytes": 18985934,
+    "source_zstd_bytes_unknown_actors": 0,
+    "candidate_zstd_bytes": 18936604,
+    "candidate_zstd_bytes_unknown_actors": 0,
+    "shared_gpu_source_bytes": 5021900,
+    "shared_gpu_source_bytes_unknown_actors": 0,
+    "shared_gpu_candidate_bytes": 5021900,
+    "shared_gpu_candidate_bytes_unknown_actors": 0,
+    "raw_saved_bytes": 4072156,
+    "compressed_saved_bytes": 49330,
+    "shared_gpu_saved_bytes": 0
+  },
+  "checks": [
+    {}
+  ],
+  "independent_editor_verification": {
+    "passed": true,
+    "method": "Both fixtures explicitly ResourceLoader.load(PackedScene); current source and generated scene MD5 freshness plus SHA256; all source clips, RESET and directed transitions, typed geometry/morphs/materials. Original per-stage budgets unchanged.",
+    "retrospective_audit": "docs/qa/creature-storage/editor-verification-audit.json",
+    "artistic_approval_changed": false
+  }
+}

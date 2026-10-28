@@ -5,8 +5,8 @@
   "batch_size": 5,
   "creature_count": 235,
   "batch_count": 47,
-  "completed_batches": 24,
-  "qualified_creatures": 112,
+  "completed_batches": 39,
+  "qualified_creatures": 183,
   "status": "in progress",
   "actors": [
     {
@@ -16,7 +16,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/snapping_turtle.glb",
       "source_sha256": "4dbfd46129a5bf9f19495761a2944415cbf2bd464f62ef5253b259ff6e04c9c7",
       "source_bytes": 102196500,
-      "status": "qualified"
+      "status": "qualified",
+      "candidate_sha256": "8d904aaae134958faf91a6cff6d10706404231c4143942e1544f37b175389f53",
+      "candidate_bytes": 94962244,
+      "qualification_report": "docs/qa/creature-storage/batch-001/snapping_turtle.json"
     },
     {
       "actor": "sunmane_foal_dun",
@@ -25,7 +28,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/sunmane_foal_dun.glb",
       "source_sha256": "77e7ce55c7aa77b99eb84f3395896630267219150f0a33a02dc800b7910090a1",
       "source_bytes": 99641988,
-      "status": "qualified"
+      "status": "qualified",
+      "candidate_sha256": "b15e77e1b20a7eb768e0313fe4a49518b9b3e8403e0b429d61cc741706426f8a",
+      "candidate_bytes": 96538140,
+      "qualification_report": "docs/qa/creature-storage/sunmane-foal-dun.json"
     },
     {
       "actor": "thornwood_dryad_queen",
@@ -34,7 +40,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/thornwood_dryad_queen.glb",
       "source_sha256": "643502582c8b7ef8d2fa4ebcd0d18b8035685f844099b2c8db0ade561314b735",
       "source_bytes": 85298756,
-      "status": "qualified"
+      "status": "qualified",
+      "candidate_sha256": "37ef36bb5b26e87594409136ed8892c88fbc408bdb6cba9ea24718ed3c38496d",
+      "candidate_bytes": 83389388,
+      "qualification_report": "docs/qa/creature-storage/batch-001/thornwood_dryad_queen.json"
     },
     {
       "actor": "magpie",
@@ -43,7 +52,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/magpie.glb",
       "source_sha256": "9ebfd307319cc3798e5887017e24a3d7061c057eee57810f349ef59679a8bc40",
       "source_bytes": 77397936,
-      "status": "qualified"
+      "status": "qualified",
+      "candidate_sha256": "d9081c27122de9a0aaf860515da5f72bae9e71b62fed12ff8e813ffe742912c7",
+      "candidate_bytes": 75446524,
+      "qualification_report": "docs/qa/creature-storage/magpie.json"
     },
     {
       "actor": "sunmane_foal_grey",
@@ -52,7 +64,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/sunmane_foal_grey.glb",
       "source_sha256": "c44d6fa3f3857b06037aba8d790ed631996360473ad06b4a210290c409d1b4b0",
       "source_bytes": 73440584,
-      "status": "qualified"
+      "status": "qualified",
+      "candidate_sha256": "0bf68e9a0888fb77614497d41a2ce47edbec82d28bcadce4a3c36be60ec9433c",
+      "candidate_bytes": 70271408,
+      "qualification_report": "docs/qa/creature-storage/sunmane-foal-grey.json"
     },
     {
       "actor": "mossbound_stone_golem",
@@ -1441,7 +1456,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/manticore.glb",
       "source_sha256": "919c26bc7ccac14ff566efb544022cec0c9e1b64e2a6dcd48ff584df5627adc7",
       "source_bytes": 7416564,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "e09fdda919c632a7898a6e9908a2ce81de499741d3fa3bf5568ba0771e398b7c",
+      "candidate_bytes": 5857064,
+      "qualification_report": "docs/qa/creature-storage/batch-025/manticore.json"
     },
     {
       "actor": "whitehorn_ice_ram",
@@ -1450,7 +1468,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/whitehorn_ice_ram.glb",
       "source_sha256": "a4566d82e8573bddeabcf9a64f20def0f52a890a6588befc6989f9a958e76116",
       "source_bytes": 7395232,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "aa36840101705943e74b450a9fff0aeea8a16b21e6338ad60feb04efc703f496",
+      "candidate_bytes": 5944256,
+      "qualification_report": "docs/qa/creature-storage/batch-025/whitehorn_ice_ram.json"
     },
     {
       "actor": "moonlit_unicorn",
@@ -1459,7 +1480,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/moonlit_unicorn.glb",
       "source_sha256": "d547956007d124159904321735c4dcb2ba81070eb0856ebda5ba077417988d4f",
       "source_bytes": 7394208,
-      "status": "pending"
+      "status": "unchanged",
+      "candidate_sha256": "d547956007d124159904321735c4dcb2ba81070eb0856ebda5ba077417988d4f",
+      "candidate_bytes": 7394208,
+      "qualification_report": "docs/qa/creature-storage/batch-025/moonlit_unicorn.json"
     },
     {
       "actor": "crown_antler_stag",
@@ -1468,7 +1492,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/crown_antler_stag.glb",
       "source_sha256": "6a6fa1cfeec38fbe96d4fee06047d89ce4502623c1e9373b76f59fe369fc602c",
       "source_bytes": 7280780,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "e09a914a95010033be3b249f906139f374cf687b0ff530809ecbde032ddfd3f7",
+      "candidate_bytes": 5757284,
+      "qualification_report": "docs/qa/creature-storage/batch-025/crown_antler_stag.json"
     },
     {
       "actor": "moorland_dire_wolf",
@@ -1477,7 +1504,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/moorland_dire_wolf.glb",
       "source_sha256": "bb0470c18918a50e75b701a070728eb0c8c6fcfb6b3aca88c2fe04ffe4e1c870",
       "source_bytes": 7264508,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "7739417f9be3e1347e806cbb3defdf29de621e53dbd60ffe2c3ae6681dc9618c",
+      "candidate_bytes": 5332972,
+      "qualification_report": "docs/qa/creature-storage/batch-025/moorland_dire_wolf.json"
     },
     {
       "actor": "winged_serpent",
@@ -1486,7 +1516,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/winged_serpent.glb",
       "source_sha256": "e6eb83cadbabb753fba02315b56be5038a1dc11e2a1042ea2d99b1f0ab9c21e0",
       "source_bytes": 7233380,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "d6f2772b400869cd5b5ae9bd6209f2611325aef1bad951ae5204ffe124781aa3",
+      "candidate_bytes": 5717040,
+      "qualification_report": "docs/qa/creature-storage/batch-026/winged_serpent.json"
     },
     {
       "actor": "autumn_antler_stag",
@@ -1495,7 +1528,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/autumn_antler_stag.glb",
       "source_sha256": "8eb3f54fed102a5380d9788c1f3c3a523ae0edd753b55c23a0d9ce8b58c17408",
       "source_bytes": 7231020,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "82411d998c8f00ae5728778cf1203185a436fd11d4db845089db183f668fee15",
+      "candidate_bytes": 5316052,
+      "qualification_report": "docs/qa/creature-storage/batch-026/autumn_antler_stag.json"
     },
     {
       "actor": "elderwood_stag",
@@ -1504,7 +1540,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/elderwood_stag.glb",
       "source_sha256": "ff12aa932a9cae5686b9ae6f0df291d976d2df7da5c656c4411685bc86f35df5",
       "source_bytes": 7230856,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "9b3881300731c2b17c59405d7c3e9fc161f4744232f8cb3e3040e072d597d8cb",
+      "candidate_bytes": 5592756,
+      "qualification_report": "docs/qa/creature-storage/batch-026/elderwood_stag.json"
     },
     {
       "actor": "jackalope",
@@ -1513,7 +1552,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/jackalope.glb",
       "source_sha256": "0de34ad9e4a2225190c382577c4b42e916cb32b517d96d9bab8490355e0cf38c",
       "source_bytes": 7209008,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "a849f7e27220ad7b4cc9ae5cc8f8ad0b78b2c9761fffb9ffa5198ecfa43aac2e",
+      "candidate_bytes": 2769500,
+      "qualification_report": "docs/qa/creature-storage/batch-026/jackalope.json"
     },
     {
       "actor": "elderwood_dryad_queen",
@@ -1522,7 +1564,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/elderwood_dryad_queen.glb",
       "source_sha256": "acc71918137543500b40ae3ebb541b6c852402310ce27aed26bd775ea7efbabf",
       "source_bytes": 7154016,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "30d5c342ba9532d02890a7961d24ab94a0d97bdd6069c43c9aa4e9916728388e",
+      "candidate_bytes": 5547180,
+      "qualification_report": "docs/qa/creature-storage/batch-026/elderwood_dryad_queen.json"
     },
     {
       "actor": "platypus",
@@ -1531,7 +1576,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/platypus.glb",
       "source_sha256": "271b55813201faf9a1083d2d0cefea16edc20b1bceccc3a8ea426b4585a6bd35",
       "source_bytes": 7123768,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "b08d59ed3e4b7f6c86605e47bc4e53825b91ada4eb17b1d25e7575efbc10b905",
+      "candidate_bytes": 5642672,
+      "qualification_report": "docs/qa/creature-storage/platypus.json"
     },
     {
       "actor": "frosthorn_elk",
@@ -1540,7 +1588,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/frosthorn_elk.glb",
       "source_sha256": "f3965ded399467bb3c1ea6e5c5c088f3e4d6fcfd7d823563d8ceaf9123e24d9b",
       "source_bytes": 7078964,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "ffefc304b8183ff63439033af4d1a11e2dc8f0a23d4529554cb8fbefe213e3ba",
+      "candidate_bytes": 5735176,
+      "qualification_report": "docs/qa/creature-storage/frosthorn_elk.json"
     },
     {
       "actor": "giant_wasp",
@@ -1549,7 +1600,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/giant_wasp.glb",
       "source_sha256": "8795cee2ec803e093b6f9298150665034fb5620badcaa337a2f4a358da7a160f",
       "source_bytes": 6957568,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "68028bae7e8bcc57118e94b446db12b239bacf4612835ba1f200a98d8b23c0e8",
+      "candidate_bytes": 6766240,
+      "qualification_report": "docs/qa/creature-storage/giant_wasp.json"
     },
     {
       "actor": "glowhorn_sheep",
@@ -1558,7 +1612,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/glowhorn_sheep.glb",
       "source_sha256": "e6fe15a1dcfa53f0ebe815404f1afa8c4282a8801a8d57673947869ad7461132",
       "source_bytes": 6643968,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "6fbbdab486fa3853ae84dc716871cbb4dd4c9b04a86834bef3045e3b1b17b8dc",
+      "candidate_bytes": 5588024,
+      "qualification_report": "docs/qa/creature-storage/glowhorn_sheep.json"
     },
     {
       "actor": "brambleback_boar",
@@ -1567,7 +1624,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/brambleback_boar.glb",
       "source_sha256": "32b094b165b592c72e75fa13049778e8155c82243a3705b86a33c277b51d3e96",
       "source_bytes": 6643700,
-      "status": "pending"
+      "status": "held",
+      "candidate_sha256": "32b094b165b592c72e75fa13049778e8155c82243a3705b86a33c277b51d3e96",
+      "candidate_bytes": 6643700,
+      "qualification_report": "docs/qa/creature-storage/brambleback_boar.json"
     },
     {
       "actor": "flesh_golem",
@@ -1576,7 +1636,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/flesh_golem.glb",
       "source_sha256": "446428190e78d3534de3ec3184e046f2a70a81162974824a379a5cf7e0be68c0",
       "source_bytes": 6560200,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "58ef506bfbaef05352c95826fff3b6f26013251af44ec3f384605c5b0644e665",
+      "candidate_bytes": 6317628,
+      "qualification_report": "docs/qa/creature-storage/batch-028/flesh_golem.json"
     },
     {
       "actor": "thunder_ram",
@@ -1585,7 +1648,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/thunder_ram.glb",
       "source_sha256": "6b2d946abffe08641cadc9cc16d3fc1fa3e716a8038178e09080d8e679b5c102",
       "source_bytes": 6476444,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "c5efcd82a53abb6250a4504bb21e4daa06e7cf266f47f29b3aa2c1751e75b2e4",
+      "candidate_bytes": 5710752,
+      "qualification_report": "docs/qa/creature-storage/batch-028/thunder_ram.json"
     },
     {
       "actor": "moss_horn_ram",
@@ -1594,7 +1660,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/moss_horn_ram.glb",
       "source_sha256": "3901ec78176a635bc776b8a93934f3760e155419f1782d4a6362af96ca4f13ea",
       "source_bytes": 6309924,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "795c8379ade90cadde2ac2a106aa24cfeab693425325e9708c6cca1ba733cc7b",
+      "candidate_bytes": 5255624,
+      "qualification_report": "docs/qa/creature-storage/batch-028/moss_horn_ram.json"
     },
     {
       "actor": "cobalt_ibex",
@@ -1603,7 +1672,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/cobalt_ibex.glb",
       "source_sha256": "30bf95721ad6fc43ad391326feb14c072fe6517837d7933a2cfa46d1828764c0",
       "source_bytes": 6224024,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "d36101262f9551a082303f67152122c3cf966c351317e6d7b964f534b4cd50c4",
+      "candidate_bytes": 4996916,
+      "qualification_report": "docs/qa/creature-storage/batch-028/cobalt_ibex.json"
     },
     {
       "actor": "cheetah",
@@ -1612,7 +1684,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/cheetah.glb",
       "source_sha256": "7cd5593eb836745f7cc21c6573f38571a475ee5c9ac1103eca16c3b6e0290dbd",
       "source_bytes": 6025044,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "bbbd6ef4a09a39f18b44c9d183e72b59ed5bd33b69be2502bb2a37c38176893f",
+      "candidate_bytes": 4610740,
+      "qualification_report": "docs/qa/creature-storage/batch-028/cheetah.json"
     },
     {
       "actor": "spectral_moors_knight",
@@ -1621,7 +1696,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/spectral_moors_knight.glb",
       "source_sha256": "369b36a18de34ee972965e52bebc31db9476ce1e1ee80cf1a7efb87258948514",
       "source_bytes": 5944864,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "0ef445634c13387611df3eed0cce708bff44b365412cc8d678ed3664d738b610",
+      "candidate_bytes": 5821304,
+      "qualification_report": "docs/qa/creature-storage/batch-029/spectral_moors_knight.json"
     },
     {
       "actor": "leopard",
@@ -1630,7 +1708,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/leopard.glb",
       "source_sha256": "d4f4df9bd9d38db7ac2c4d262d22bda84eed28cd5d393f146d91402c37bc77a9",
       "source_bytes": 5926652,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "e6059cc441d5a18db76edcc50597591a22e4e2fdbdc73535683a8548205c6725",
+      "candidate_bytes": 4343140,
+      "qualification_report": "docs/qa/creature-storage/batch-029/leopard.json"
     },
     {
       "actor": "ice_snow_leopard",
@@ -1639,7 +1720,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/ice_snow_leopard.glb",
       "source_sha256": "a544755545503f970e1bd9d60e05c4ef11353f85da69b569ecc33c5e742b88f1",
       "source_bytes": 5849020,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "8b01bc8ca93689d076357559603129820aca6e8bf9cb95291f666a9e127138b1",
+      "candidate_bytes": 4631172,
+      "qualification_report": "docs/qa/creature-storage/batch-029/ice_snow_leopard.json"
     },
     {
       "actor": "crystal_dire_wolf",
@@ -1648,7 +1732,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/crystal_dire_wolf.glb",
       "source_sha256": "93f6db6903a0aef063012e3046619cc59f0fdfe68014b8f4a20b2027bf1570cc",
       "source_bytes": 5589160,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "ee8b2185637c8e7a15a50c487fe0227a0e5d0e69c188e127fd5db21e1739051e",
+      "candidate_bytes": 4445976,
+      "qualification_report": "docs/qa/creature-storage/batch-029/crystal_dire_wolf.json"
     },
     {
       "actor": "briarhide_wolf",
@@ -1657,7 +1744,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/briarhide_wolf.glb",
       "source_sha256": "02b616da6ca426c842fb2b2de0ac661c09f51d1eeae6207e6600b08f34efff9c",
       "source_bytes": 5459920,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "3f7d05ce08591529a1205f8604cecbac686532f2064d5adf3786023ddc1d6bc8",
+      "candidate_bytes": 4437256,
+      "qualification_report": "docs/qa/creature-storage/batch-029/briarhide_wolf.json"
     },
     {
       "actor": "puma",
@@ -1666,7 +1756,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/puma.glb",
       "source_sha256": "bc2a83e4af3d03e53d597e1b89fbff06f8db2bb3c9f6d0458a4c7025d2fdfa16",
       "source_bytes": 5376864,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "e1f2b2d5a914e626d3370338f489863c0640c8ac10bac172839a262e4f24d9a6",
+      "candidate_bytes": 3981776,
+      "qualification_report": "docs/qa/creature-storage/puma.json"
     },
     {
       "actor": "arachne",
@@ -1675,7 +1768,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/arachne.glb",
       "source_sha256": "cdaa3b7dca5d3c9adca4f807739fbfe83d541e4cfae2758cb9ab5f595e212460",
       "source_bytes": 5370408,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "153e652c1df5808e628796562e32aba23bc38be37c271a89e217e0bb39d5936d",
+      "candidate_bytes": 5081940,
+      "qualification_report": "docs/qa/creature-storage/arachne.json"
     },
     {
       "actor": "air_elemental",
@@ -1684,7 +1780,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/air_elemental.glb",
       "source_sha256": "ed39dc649586c494d7d3d1b89377c2e3a9ed0d1e4693f1d25b7a419703158ea0",
       "source_bytes": 5341328,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "272d2d55513c24dafbe3ee0e39205ad99cb74356be2e9b1875501d84fd063dce",
+      "candidate_bytes": 5242476,
+      "qualification_report": "docs/qa/creature-storage/air_elemental.json"
     },
     {
       "actor": "crownwater_temple_guard",
@@ -1693,7 +1792,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/crownwater_temple_guard.glb",
       "source_sha256": "83295660e07440b89ec06ab92a6b3310ce8b5a82043f352751623f5ca736e33e",
       "source_bytes": 5330644,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "fcc3381d9a2e991e6ff09c7f49b74a3ee4816d6d47c5b831921bda6c34356f8d",
+      "candidate_bytes": 4854552,
+      "qualification_report": "docs/qa/creature-storage/crownwater_temple_guard.json"
     },
     {
       "actor": "thornbark_wolf",
@@ -1702,7 +1804,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/thornbark_wolf.glb",
       "source_sha256": "0f316cbf766798cbaa0e677d81014df243803bdbf813c915dd8572d2ecfdcc58",
       "source_bytes": 5298644,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "cbe4d17ef5e4d666f7e2ca4b59c6adca60f364457271cf49c8a059784f9ce3af",
+      "candidate_bytes": 4104096,
+      "qualification_report": "docs/qa/creature-storage/thornbark_wolf.json"
     },
     {
       "actor": "thornhide_wolf",
@@ -1711,7 +1816,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/thornhide_wolf.glb",
       "source_sha256": "218a8896ff65b74f7a524f467792302a2d526c3428f2aa758d07e54769b2a97b",
       "source_bytes": 5277024,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "7800bebe2240582916b27981f755c5be5ed75fd8a2eaf64961cee5625491d72e",
+      "candidate_bytes": 4348812,
+      "qualification_report": "docs/qa/creature-storage/batch-031/thornhide_wolf.json"
     },
     {
       "actor": "moss_armored_hound",
@@ -1720,7 +1828,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/moss_armored_hound.glb",
       "source_sha256": "5c361bb28c41c76934618c142ac134478c0633340e5639f82f45636a12d71608",
       "source_bytes": 5145880,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "b3dca1938545e137d3ae8263148f0871ca13166480c59d2c01801c6273e3eaa7",
+      "candidate_bytes": 4058476,
+      "qualification_report": "docs/qa/creature-storage/batch-031/moss_armored_hound.json"
     },
     {
       "actor": "mossbound_hound",
@@ -1729,7 +1840,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/mossbound_hound.glb",
       "source_sha256": "c979deea33759c615a2617bdd36e3c676ac52efea9cabda25895f3dade0f5eee",
       "source_bytes": 5112064,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "d28d553338321d47e504a68c6cd4041edcac78de89dab82d3eac18e7d1417d82",
+      "candidate_bytes": 3982796,
+      "qualification_report": "docs/qa/creature-storage/batch-031/mossbound_hound.json"
     },
     {
       "actor": "frost_stone_golem",
@@ -1738,7 +1852,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/frost_stone_golem.glb",
       "source_sha256": "e8210ded5e42ff8e64105707ac01aa97c56e07ab1b19d8a1b5018595bc72efc9",
       "source_bytes": 5075744,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "6240f7c590d3ae673dedebeb6a88ef740d8ef371716b3d7c1266871ee2472afe",
+      "candidate_bytes": 4865020,
+      "qualification_report": "docs/qa/creature-storage/batch-031/frost_stone_golem.json"
     },
     {
       "actor": "red_fox",
@@ -1747,7 +1864,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/red_fox.glb",
       "source_sha256": "679a1fda06ceac14944f80a9a2dde89c7adab5bbeccd60075f5183244d3188c8",
       "source_bytes": 5019512,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "b8dce60f1236bde7bf5caf451a6781ee9b3b0352671f9752769a23ddc4949a0a",
+      "candidate_bytes": 3881264,
+      "qualification_report": "docs/qa/creature-storage/batch-031/red_fox.json"
     },
     {
       "actor": "centaur",
@@ -1756,7 +1876,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/centaur.glb",
       "source_sha256": "e500b26a17d4416d17364e949a9521f5ccbf331d0b0cc61b4a435489733587fb",
       "source_bytes": 4708816,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "f6ffb941c25c694696e53c7f60c3243f7ac051176e366482b60e55463b6651e0",
+      "candidate_bytes": 4416340,
+      "qualification_report": "docs/qa/creature-storage/batch-032/centaur.json"
     },
     {
       "actor": "four_armed_guardian",
@@ -1765,7 +1888,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/four_armed_guardian.glb",
       "source_sha256": "4339198fb5079e271815af3103520f13e03e4ac3aeef7a5cb23a202f3fadb990",
       "source_bytes": 4707180,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "cf8ed55bdfbd1781ceedd7dc42258892f402b631a130864440955d9511f0050e",
+      "candidate_bytes": 4417416,
+      "qualification_report": "docs/qa/creature-storage/batch-032/four_armed_guardian.json"
     },
     {
       "actor": "merfolk",
@@ -1774,7 +1900,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/merfolk.glb",
       "source_sha256": "260e8229f61686c4d862b8c142edf9dc5f863a5f5889d2fa1115fdbed0538d6d",
       "source_bytes": 4694812,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "c778038cf37f7f654f00b14b3d52cbb16447d79c035ff863d2d3752f06f17adb",
+      "candidate_bytes": 4402752,
+      "qualification_report": "docs/qa/creature-storage/batch-032/merfolk.json"
     },
     {
       "actor": "zombie",
@@ -1783,7 +1912,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/zombie.glb",
       "source_sha256": "73cc7499547456283bd55c61ae59d045f77827621b369e6eaa5d70da7b2ecde0",
       "source_bytes": 4679096,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "b207c992216c841ac0ad21b909a547d62a35985691225bc07bf5a8e17d351eeb",
+      "candidate_bytes": 4530848,
+      "qualification_report": "docs/qa/creature-storage/batch-032/zombie.json"
     },
     {
       "actor": "moor_heron",
@@ -1792,7 +1924,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/moor_heron.glb",
       "source_sha256": "0806c01219e711bcedbdabe64b048e94b73a1a17258cd43496d886d1371e8748",
       "source_bytes": 4665020,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "1d2189856fb6b2b0dafce2f26619ebabe1914af5e53f0b176746d66c9dae6138",
+      "candidate_bytes": 3442784,
+      "qualification_report": "docs/qa/creature-storage/batch-032/moor_heron.json"
     },
     {
       "actor": "crystal_polar_bear",
@@ -1801,7 +1936,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/crystal_polar_bear.glb",
       "source_sha256": "6c37fff7783d149c69053bf69cd3dbfe700a8eb92a34a60ff1f78ee103b17f91",
       "source_bytes": 4629748,
-      "status": "pending"
+      "status": "unchanged",
+      "candidate_sha256": "6c37fff7783d149c69053bf69cd3dbfe700a8eb92a34a60ff1f78ee103b17f91",
+      "candidate_bytes": 4629748,
+      "qualification_report": "docs/qa/creature-storage/crystal_polar_bear.json"
     },
     {
       "actor": "rune_stone_golem",
@@ -1810,7 +1948,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/rune_stone_golem.glb",
       "source_sha256": "c7f6ba5c84435c270983f95abdb60954bb1edd518ad9c5864e11411681ef6828",
       "source_bytes": 4538324,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "b28330b15981cd8ceae723dd686c88ad528f643c97a3d375896c5176853d6508",
+      "candidate_bytes": 4057272,
+      "qualification_report": "docs/qa/creature-storage/rune_stone_golem.json"
     },
     {
       "actor": "moss_bear",
@@ -1819,7 +1960,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/moss_bear.glb",
       "source_sha256": "e27a2fedbfa57da44c0f3ff6ca10511f321367b63b0bbb69dfebcc30e498231c",
       "source_bytes": 4471968,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "b7297bb872a7cf2ddc23731efa1427554b6762eac8538295a2f9c21aadc75247",
+      "candidate_bytes": 1669948,
+      "qualification_report": "docs/qa/creature-storage/moss_bear.json"
     },
     {
       "actor": "obsidian_bear",
@@ -1828,7 +1972,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/obsidian_bear.glb",
       "source_sha256": "fd819ce5b6a3248f0e3bdc3f9353e9a3a19169b4a5749ceb0a36bc7a4b881b70",
       "source_bytes": 4308216,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "7d714db4858766d3de21e75cd6ab4fcceb5120965fecf2b98ff597273c094bad",
+      "candidate_bytes": 3505248,
+      "qualification_report": "docs/qa/creature-storage/obsidian_bear.json"
     },
     {
       "actor": "rabbit",
@@ -1837,7 +1984,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/rabbit.glb",
       "source_sha256": "2c23a31766f672eb3d78d2f74e7016546451dd5acbdc8631268be5b3883e1d99",
       "source_bytes": 4268312,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "9b7a5109960c246e4bea7aa69d2fc90036cda6d4774c96afbaa9fd47cfd42f0c",
+      "candidate_bytes": 2934744,
+      "qualification_report": "docs/qa/creature-storage/rabbit.json"
     },
     {
       "actor": "sporefolk",
@@ -1846,7 +1996,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/sporefolk.glb",
       "source_sha256": "3906d08fca5ede5c4826de2840879b865b498372e3ac4acb14847cccdd378675",
       "source_bytes": 4147088,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "c76815dda713eca954ef00ab458b3c2c06463fdfe21db992666a627831447bd7",
+      "candidate_bytes": 3872088,
+      "qualification_report": "docs/qa/creature-storage/batch-034/sporefolk.json"
     },
     {
       "actor": "amethyst_scorpion",
@@ -1855,7 +2008,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/amethyst_scorpion.glb",
       "source_sha256": "29d33e489be741986fcb050d23328bb478bf4ca30244bb435bf252f908c6d9d4",
       "source_bytes": 4135408,
-      "status": "pending"
+      "status": "unchanged",
+      "candidate_sha256": "29d33e489be741986fcb050d23328bb478bf4ca30244bb435bf252f908c6d9d4",
+      "candidate_bytes": 4135408,
+      "qualification_report": "docs/qa/creature-storage/batch-034/amethyst_scorpion.json"
     },
     {
       "actor": "lobster",
@@ -1864,7 +2020,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/lobster.glb",
       "source_sha256": "e3eba2f6b39be47bc01faee73c8992f1f74d47d821f249c8e7868ecf605ad099",
       "source_bytes": 4024380,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "47fe345c23c7a5f6f4f5536eb742483a04b9899e8c11bb7e558a8b059f498413",
+      "candidate_bytes": 3962056,
+      "qualification_report": "docs/qa/creature-storage/batch-034/lobster.json"
     },
     {
       "actor": "river_stone_golem",
@@ -1873,7 +2032,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/river_stone_golem.glb",
       "source_sha256": "4e9e137743f96c1e2f3921798b132af1f5d715332b2a29357f60eb871dd186f7",
       "source_bytes": 3943560,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "fd8d41797ccbbc32a2b8f7fbbfa94b6d8cfbba947971f17f8eeae8a3af0dd7a7",
+      "candidate_bytes": 3732816,
+      "qualification_report": "docs/qa/creature-storage/batch-034/river_stone_golem.json"
     },
     {
       "actor": "manymouth_crab",
@@ -1882,7 +2044,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/manymouth_crab.glb",
       "source_sha256": "18e0d318ea63fba19306fa0638404b43a38c409f5325062dd747fb8207ff1fbc",
       "source_bytes": 3797940,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "7d55d862dba153ba1c28285d4908fe5c17386dd7860fd0538a7b70461a93c1d2",
+      "candidate_bytes": 3617408,
+      "qualification_report": "docs/qa/creature-storage/batch-034/manymouth_crab.json"
     },
     {
       "actor": "crystal_shore_crab",
@@ -1891,7 +2056,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/crystal_shore_crab.glb",
       "source_sha256": "a56b2eab67b659dfbd27055b5b4c6d2862590e4142505e3556f8228981e05565",
       "source_bytes": 3776580,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "e73d3ff8897de0321d3f584178135dda932cb055a5b3e39489eb312b21ec1fc4",
+      "candidate_bytes": 3573072,
+      "qualification_report": "docs/qa/creature-storage/batch-035/crystal_shore_crab.json"
     },
     {
       "actor": "caecilian",
@@ -1900,7 +2068,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/caecilian.glb",
       "source_sha256": "63b741a78e8fb4b470090416e65ff335777d5534dd5335793399fdaacc061ec0",
       "source_bytes": 3729584,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "f29a0fe404aa1b10077a5ce6aad995e2e440e2cfbd9778abc3bc93cd702c376e",
+      "candidate_bytes": 3651476,
+      "qualification_report": "docs/qa/creature-storage/batch-035/caecilian.json"
     },
     {
       "actor": "bronze_diving_beetle",
@@ -1909,7 +2080,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/bronze_diving_beetle.glb",
       "source_sha256": "47cb33d9ddb38b02f011c11e42195d66e83f2a0d988b3e5f889e5343a7d043a5",
       "source_bytes": 3709100,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "ca7f92c44bc8711fe3aaf4bae6edfa07ce4c555e9bd00a93fde2f019dfdf1ef4",
+      "candidate_bytes": 3632492,
+      "qualification_report": "docs/qa/creature-storage/batch-035/bronze_diving_beetle.json"
     },
     {
       "actor": "delta_mud_crab",
@@ -1918,7 +2092,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/delta_mud_crab.glb",
       "source_sha256": "6c22642c12db8c5f84adc1ffd07e9c0acc05e3f102e51b59435b3fe78752c1e2",
       "source_bytes": 3486492,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "e95f5d89bff7788fbea419642c3f418842ffa4b1dfcc6099cca470806cf6dfb3",
+      "candidate_bytes": 3406192,
+      "qualification_report": "docs/qa/creature-storage/batch-035/delta_mud_crab.json"
     },
     {
       "actor": "sturgeon",
@@ -1927,7 +2104,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/sturgeon.glb",
       "source_sha256": "6aa18dd1ba2d77901c72545abaee4e0a0706161cc74d5dfb530cc84e1eaa194e",
       "source_bytes": 3274764,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "0200c0d0b64ae0349fdf0a8a93751c7f9db72e2f056feb6d480b93e83c244ad7",
+      "candidate_bytes": 3222140,
+      "qualification_report": "docs/qa/creature-storage/batch-035/sturgeon.json"
     },
     {
       "actor": "cerberus",
@@ -1936,7 +2116,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/cerberus.glb",
       "source_sha256": "fd47bbed351db8671b30b94ccee269fc53f4008db1f492bcbc3547fa5dc634a7",
       "source_bytes": 3170152,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "8cafdcc937096063fbf899913a42edf321a6fa115c563a6c8ce71119e610e4c6",
+      "candidate_bytes": 2899824,
+      "qualification_report": "docs/qa/creature-storage/cerberus.json"
     },
     {
       "actor": "bronze_tide_crab",
@@ -1945,7 +2128,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/bronze_tide_crab.glb",
       "source_sha256": "706a3f5f574789caac86f7b5a89f29254b07df263773f8d202734ea955c068ad",
       "source_bytes": 3160520,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "4914d7a1b4599fd00827beeb70b1b94d68cf618bc84449ae53697c43387a054b",
+      "candidate_bytes": 3030452,
+      "qualification_report": "docs/qa/creature-storage/bronze_tide_crab.json"
     },
     {
       "actor": "owlbear",
@@ -1954,7 +2140,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/owlbear.glb",
       "source_sha256": "4f2dc759b46e504acbd9f9debebaa31ca8cd68fa26b15ec94e252196bd3d87f0",
       "source_bytes": 3093952,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "ddf6be51508a4ebeb4864a9fdbc23fa4411f354c9c9f4ea18ca63e451ff0b36c",
+      "candidate_bytes": 2708284,
+      "qualification_report": "docs/qa/creature-storage/owlbear.json"
     },
     {
       "actor": "amethyst_stag_beetle",
@@ -1963,7 +2152,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/amethyst_stag_beetle.glb",
       "source_sha256": "502b8abb61884f32a0733043f92bd7ca2005911a9e91c48a67caee0ecc0dd620",
       "source_bytes": 3092468,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "96c1b31f29dad4e83a46db1922452c6271eb62c05e99dcaaf34b06e03274d7ae",
+      "candidate_bytes": 3071356,
+      "qualification_report": "docs/qa/creature-storage/amethyst_stag_beetle.json"
     },
     {
       "actor": "qilin",
@@ -1972,7 +2164,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/qilin.glb",
       "source_sha256": "d5c3e065bf108ae0da80e861a4de6a630a131dce6cf76c7f0012060e74a42646",
       "source_bytes": 3083268,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "0901513e511cc5d081b4bcbfb4cfd93e68544acad3a3797a3a778c28c0c657c9",
+      "candidate_bytes": 2985536,
+      "qualification_report": "docs/qa/creature-storage/qilin.json"
     },
     {
       "actor": "ember_leaf_spirit",
@@ -1981,7 +2176,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/ember_leaf_spirit.glb",
       "source_sha256": "69d376701b83c1c439f41cf7ac86bbf1fd9cbce8bd9daad5e9644e2da829d7eb",
       "source_bytes": 3078292,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "dbc4e531e945b8e263e3935098699ccf1ccb3aa9a6bda9123796ef30670b81e9",
+      "candidate_bytes": 2835012,
+      "qualification_report": "docs/qa/creature-storage/batch-037/ember_leaf_spirit.json"
     },
     {
       "actor": "crystal_carapace_beetle",
@@ -1990,7 +2188,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/crystal_carapace_beetle.glb",
       "source_sha256": "251227e4c652fd6716a22b000a083cadb18865487d5d534785eead597109dadc",
       "source_bytes": 3019128,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "65dd61f3def376725a71b7f4845c1bd1b83dd787226c114b2e4c209b1c03877f",
+      "candidate_bytes": 3006652,
+      "qualification_report": "docs/qa/creature-storage/batch-037/crystal_carapace_beetle.json"
     },
     {
       "actor": "glacier_crab",
@@ -1999,7 +2200,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/glacier_crab.glb",
       "source_sha256": "7260cc6c8ef7e6dacad168512244e91bb9731395b0b3ac3be19728d76dda0410",
       "source_bytes": 2935892,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "ab621dbed0ae6b383bffc3a043b05751d8a37e084608e39ed7f94b839e247939",
+      "candidate_bytes": 2905744,
+      "qualification_report": "docs/qa/creature-storage/batch-037/glacier_crab.json"
     },
     {
       "actor": "luminous_manta_ray",
@@ -2008,7 +2212,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/luminous_manta_ray.glb",
       "source_sha256": "928ca234659593d12392067b539517ebf7c322ff312dbb633980881afb511e01",
       "source_bytes": 2843656,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "033a32bd360d4f582b5a4fbaaddeefca2f0cf08ea9b214cf44086a1fa0458730",
+      "candidate_bytes": 2831896,
+      "qualification_report": "docs/qa/creature-storage/batch-037/luminous_manta_ray.json"
     },
     {
       "actor": "abyssal_armored_fish",
@@ -2017,7 +2224,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/abyssal_armored_fish.glb",
       "source_sha256": "e381cfec066a6018550852d93b2cd1d1adf1250dca2c7061b5e974b6c761a7be",
       "source_bytes": 2760452,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "6c75023cfaeaa8bf6c06dcf76287ef3ccb8e01484c788bbde95717fb93d970d7",
+      "candidate_bytes": 2692812,
+      "qualification_report": "docs/qa/creature-storage/batch-037/abyssal_armored_fish.json"
     },
     {
       "actor": "manatee",
@@ -2026,7 +2236,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/manatee.glb",
       "source_sha256": "87b87a7d20718e7090a6fe0e17cb1a4a57ab2a9c3fdb8cfe90a3bcbd9c6e31f8",
       "source_bytes": 2607548,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "f5451f227f020e3b0a244d73b4a3874d3b4afcf111aa78e1b33f471b99401d9e",
+      "candidate_bytes": 2535944,
+      "qualification_report": "docs/qa/creature-storage/batch-038/manatee.json"
     },
     {
       "actor": "frost_wraith_queen",
@@ -2035,7 +2248,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/frost_wraith_queen.glb",
       "source_sha256": "2325d6fd059ef3d1bc27b86596aaa61edbf3e16bbc68347aeba01ef8e0251328",
       "source_bytes": 2606540,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "4b4e9fd62801fc9d7f4aedac76c56fd44050495a0f57f3c89359b6ca462c770b",
+      "candidate_bytes": 2365300,
+      "qualification_report": "docs/qa/creature-storage/batch-038/frost_wraith_queen.json"
     },
     {
       "actor": "kangaroo",
@@ -2044,7 +2260,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/kangaroo.glb",
       "source_sha256": "7fa13e08511cd38f90cb36321227eb6eca9c0327a1732e70dfc7bdaf11e59104",
       "source_bytes": 2579292,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "98dbffa96487f0dc4dd1c62a13cfd0ccb7397e46b0bd8995333f10c522f797b7",
+      "candidate_bytes": 2341428,
+      "qualification_report": "docs/qa/creature-storage/batch-038/kangaroo.json"
     },
     {
       "actor": "coralcrest_heron",
@@ -2053,7 +2272,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/coralcrest_heron.glb",
       "source_sha256": "bca26898450cf1451850a009c5c196ab9555c9d5395bdb2f89ba3fbc882d7062",
       "source_bytes": 2565196,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "a8698248a9ede4907ba3840fbd2acce099b4623eb3aff2b8d086ae9ee5fb6621",
+      "candidate_bytes": 2411412,
+      "qualification_report": "docs/qa/creature-storage/batch-038/coralcrest_heron.json"
     },
     {
       "actor": "amber_lantern_moth",
@@ -2062,7 +2284,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/amber_lantern_moth.glb",
       "source_sha256": "ab2ac357c494244e928572cc84ccca021e1c41b36b7a6f9deeace892d49320a5",
       "source_bytes": 2523920,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "ec7af15b4dbfe1aaf3e2eb7b962900d4411f314ffcf9c97e01be6359566e3432",
+      "candidate_bytes": 2456252,
+      "qualification_report": "docs/qa/creature-storage/batch-038/amber_lantern_moth.json"
     },
     {
       "actor": "baboon",
@@ -2116,7 +2341,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/dolphin.glb",
       "source_sha256": "b932f5a8aebd7c6702163e1eb07510e92fff9954028111901d842eb56158c49a",
       "source_bytes": 2227280,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "f3096eb3ec9db12e53456c8bc7ce3746760f9a66df8d82823e118dd50135f427",
+      "candidate_bytes": 2163152,
+      "qualification_report": "docs/qa/creature-storage/batch-040/dolphin.json"
     },
     {
       "actor": "sunken_stone_colossus",
@@ -2125,7 +2353,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/sunken_stone_colossus.glb",
       "source_sha256": "79da8f390f2da00c3f85313260dc6b8d70e202684249bab089491381e7e2276d",
       "source_bytes": 2117732,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "e70991dd3fde9ae3f2f7ed66953086a7dc4131f608d56f2bc262082e8ff719cb",
+      "candidate_bytes": 2005700,
+      "qualification_report": "docs/qa/creature-storage/batch-040/sunken_stone_colossus.json"
     },
     {
       "actor": "orangutan",
@@ -2134,7 +2365,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/orangutan.glb",
       "source_sha256": "829095a9b5a6e7f39142252e9e61cdf5c86a3a45b6139a767dcab8a843d4a099",
       "source_bytes": 2008312,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "8646c1ea2bdc9948665759701e90f1a187405b00ba7f5dd27dd228c8a4c79fb2",
+      "candidate_bytes": 1831816,
+      "qualification_report": "docs/qa/creature-storage/batch-040/orangutan.json"
     },
     {
       "actor": "walrus",
@@ -2143,7 +2377,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/walrus.glb",
       "source_sha256": "1cb9e6ee267424988004da727b3e6356705d2c668d4de19b6753675b6672a0d6",
       "source_bytes": 1903576,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "534e8fe378788ed12f64451551b6e33cbc76ab77afc252a25b72d13e9ef26628",
+      "candidate_bytes": 1778736,
+      "qualification_report": "docs/qa/creature-storage/batch-040/walrus.json"
     },
     {
       "actor": "hammerhead_shark",
@@ -2152,7 +2389,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/hammerhead_shark.glb",
       "source_sha256": "136ef7219ad52f72e90ac0ca065abe6a7095c18db6ff4629e1cd08dbd12cf59d",
       "source_bytes": 1848728,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "16e19c9c5c66c284b8dea4712aa923fed773e9ab52a408ab8bf62f17c6f62dcd",
+      "candidate_bytes": 1808232,
+      "qualification_report": "docs/qa/creature-storage/batch-040/hammerhead_shark.json"
     },
     {
       "actor": "mudskipper",
@@ -2494,26 +2734,43 @@
     21,
     22,
     23,
-    24
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    40
   ],
-  "reviewed_creatures": 120,
+  "reviewed_creatures": 195,
   "selection_policy": {
     "raw_asset_priority": "Prefer smaller qualified raw development models; small measured increases in packaged RLCZ size are accepted and recorded per actor and batch.",
     "runtime_claims": "Encoded input-key savings do not establish retained animation memory or frame-time savings because Godot rebakes curves at the declared cadence. Shared corrective GPU buffer savings are measured separately.",
     "approximation": "Exact batches retain their existing bounded float32/native/pixel gates. Approximate joint-curve trials are private and uninstalled."
   },
   "totals_reviewed": {
-    "raw_saved_bytes": 244661268,
-    "compressed_saved_bytes": 18576043,
-    "shared_gpu_saved_bytes": 36009320
+    "raw_saved_bytes": 295500836,
+    "compressed_saved_bytes": 19460628,
+    "shared_gpu_saved_bytes": 39397800
   },
   "independent_editor_verification": {
-    "status": "correction in progress",
+    "status": "corrected for all changed creatures through batch36; later batches require explicit Editor proof at qualification",
     "claim_withdrawal": "Previous imported-mode evidence could route through raw scene cache. Independent Editor claims require replacement with explicit imported PackedScene captures; source, fresh Blender, native, actual-Actor and effects proofs are unaffected.",
     "required_changed_creatures": 168,
-    "corrected_creatures": 9,
+    "corrected_creatures": 168,
     "legacy_stage_budgets_unchanged": true,
     "artistic_approval_unchanged": true,
-    "corrected_numeric_captures": 9
+    "corrected_numeric_captures": 168,
+    "pilot_verified_separately": true,
+    "audit": "docs/qa/creature-storage/editor-verification-audit.json"
   }
 }

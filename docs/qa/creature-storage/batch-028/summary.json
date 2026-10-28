@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "batch": 28,
+  "date": "2026-10-28",
+  "status": "reviewed and integrated locally; not pushed or released",
+  "human_approval_changed": false,
+  "actors": [
+    {
+      "actor": "flesh_golem",
+      "source_sha256": "446428190e78d3534de3ec3184e046f2a70a81162974824a379a5cf7e0be68c0",
+      "candidate_sha256": "58ef506bfbaef05352c95826fff3b6f26013251af44ec3f384605c5b0644e665",
+      "status": "qualified",
+      "qualification_report": "docs/qa/creature-storage/batch-028/flesh_golem.json",
+      "source_bytes": 6560200,
+      "candidate_bytes": 6317628,
+      "source_zstd_bytes": 4431819,
+      "candidate_zstd_bytes": 4387269,
+      "shared_gpu_source_bytes": 4914360,
+      "shared_gpu_candidate_bytes": 4914360,
+      "draw_surfaces_source": 1,
+      "draw_surfaces_candidate": 1
+    },
+    {
+      "actor": "thunder_ram",
+      "source_sha256": "6b2d946abffe08641cadc9cc16d3fc1fa3e716a8038178e09080d8e679b5c102",
+      "candidate_sha256": "c5efcd82a53abb6250a4504bb21e4daa06e7cf266f47f29b3aa2c1751e75b2e4",
+      "status": "qualified",
+      "qualification_report": "docs/qa/creature-storage/batch-028/thunder_ram.json",
+      "source_bytes": 6476444,
+      "candidate_bytes": 5710752,
+      "source_zstd_bytes": 3920837,
+      "candidate_zstd_bytes": 3945792,
+      "shared_gpu_source_bytes": 0,
+      "shared_gpu_candidate_bytes": 0,
+      "draw_surfaces_source": 1,
+      "draw_surfaces_candidate": 1
+    },
+    {
+      "actor": "moss_horn_ram",
+      "source_sha256": "3901ec78176a635bc776b8a93934f3760e155419f1782d4a6362af96ca4f13ea",
+      "candidate_sha256": "795c8379ade90cadde2ac2a106aa24cfeab693425325e9708c6cca1ba733cc7b",
+      "status": "qualified",
+      "qualification_report": "docs/qa/creature-storage/batch-028/moss_horn_ram.json",
+      "source_bytes": 6309924,
+      "candidate_bytes": 5255624,
+      "source_zstd_bytes": 3802852,
+      "candidate_zstd_bytes": 3808753,
+      "shared_gpu_source_bytes": 0,
+      "shared_gpu_candidate_bytes": 0,
+      "draw_surfaces_source": 1,
+      "draw_surfaces_candidate": 1
+    },
+    {
+      "actor": "cobalt_ibex",
+      "source_sha256": "30bf95721ad6fc43ad391326feb14c072fe6517837d7933a2cfa46d1828764c0",
+      "candidate_sha256": "d36101262f9551a082303f67152122c3cf966c351317e6d7b964f534b4cd50c4",
+      "status": "qualified",
+      "qualification_report": "docs/qa/creature-storage/batch-028/cobalt_ibex.json",
+      "source_bytes": 6224024,
+      "candidate_bytes": 4996916,
+      "source_zstd_bytes": 3662214,
+      "candidate_zstd_bytes": 3653830,
+      "shared_gpu_source_bytes": 0,
+      "shared_gpu_candidate_bytes": 0,
+      "draw_surfaces_source": 1,
+      "draw_surfaces_candidate": 1
+    },
+    {
+      "actor": "cheetah",
+      "source_sha256": "7cd5593eb836745f7cc21c6573f38571a475ee5c9ac1103eca16c3b6e0290dbd",
+      "candidate_sha256": "bbbd6ef4a09a39f18b44c9d183e72b59ed5bd33b69be2502bb2a37c38176893f",
+      "status": "qualified",
+      "qualification_report": "docs/qa/creature-storage/batch-028/cheetah.json",
+      "source_bytes": 6025044,
+      "candidate_bytes": 4610740,
+      "source_zstd_bytes": 2854134,
+      "candidate_zstd_bytes": 2866248,
+      "shared_gpu_source_bytes": 0,
+      "shared_gpu_candidate_bytes": 0,
+      "draw_surfaces_source": 1,
+      "draw_surfaces_candidate": 1
+    }
+  ],
+  "totals": {
+    "source_bytes": 31595636,
+    "source_bytes_unknown_actors": 0,
+    "candidate_bytes": 26891660,
+    "candidate_bytes_unknown_actors": 0,
+    "source_zstd_bytes": 18671856,
+    "source_zstd_bytes_unknown_actors": 0,
+    "candidate_zstd_bytes": 18661892,
+    "candidate_zstd_bytes_unknown_actors": 0,
+    "shared_gpu_source_bytes": 4914360,
+    "shared_gpu_source_bytes_unknown_actors": 0,
+    "shared_gpu_candidate_bytes": 4914360,
+    "shared_gpu_candidate_bytes_unknown_actors": 0,
+    "raw_saved_bytes": 4703976,
+    "compressed_saved_bytes": 9964,
+    "shared_gpu_saved_bytes": 0
+  },
+  "checks": [
+    {}
+  ],
+  "independent_editor_verification": {
+    "passed": true,
+    "method": "Both fixtures explicitly ResourceLoader.load(PackedScene); current source and generated scene MD5 freshness plus SHA256; all source clips, RESET and directed transitions, typed geometry/morphs/materials. Original per-stage budgets unchanged.",
+    "retrospective_audit": "docs/qa/creature-storage/editor-verification-audit.json",
+    "artistic_approval_changed": false
+  }
+}

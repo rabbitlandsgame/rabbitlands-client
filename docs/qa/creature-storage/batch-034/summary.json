@@ -1,0 +1,111 @@
+{
+  "schema_version": 1,
+  "batch": 34,
+  "date": "2026-10-28",
+  "status": "reviewed and integrated locally; not pushed or released",
+  "human_approval_changed": false,
+  "actors": [
+    {
+      "actor": "sporefolk",
+      "source_sha256": "3906d08fca5ede5c4826de2840879b865b498372e3ac4acb14847cccdd378675",
+      "candidate_sha256": "c76815dda713eca954ef00ab458b3c2c06463fdfe21db992666a627831447bd7",
+      "status": "qualified",
+      "qualification_report": "docs/qa/creature-storage/batch-034/sporefolk.json",
+      "source_bytes": 4147088,
+      "candidate_bytes": 3872088,
+      "source_zstd_bytes": 2515245,
+      "candidate_zstd_bytes": 2529584,
+      "shared_gpu_source_bytes": 1296080,
+      "shared_gpu_candidate_bytes": 1296080,
+      "draw_surfaces_source": 1,
+      "draw_surfaces_candidate": 1
+    },
+    {
+      "actor": "amethyst_scorpion",
+      "source_sha256": "29d33e489be741986fcb050d23328bb478bf4ca30244bb435bf252f908c6d9d4",
+      "candidate_sha256": "29d33e489be741986fcb050d23328bb478bf4ca30244bb435bf252f908c6d9d4",
+      "status": "unchanged",
+      "qualification_report": "docs/qa/creature-storage/batch-034/amethyst_scorpion.json",
+      "source_bytes": 4135408,
+      "candidate_bytes": 4135408,
+      "source_zstd_bytes": 2348038,
+      "candidate_zstd_bytes": 2348038,
+      "shared_gpu_source_bytes": 0,
+      "shared_gpu_candidate_bytes": 0,
+      "draw_surfaces_source": 1,
+      "draw_surfaces_candidate": 1,
+      "reason": "Canonical exact compression produced the identical original file. Existing rigid conversion, reference skin, clips, original authored observations and review status remain unchanged. No model replacement or new visual/artistic qualification is asserted."
+    },
+    {
+      "actor": "lobster",
+      "source_sha256": "e3eba2f6b39be47bc01faee73c8992f1f74d47d821f249c8e7868ecf605ad099",
+      "candidate_sha256": "47fe345c23c7a5f6f4f5536eb742483a04b9899e8c11bb7e558a8b059f498413",
+      "status": "qualified",
+      "qualification_report": "docs/qa/creature-storage/batch-034/lobster.json",
+      "source_bytes": 4024380,
+      "candidate_bytes": 3962056,
+      "source_zstd_bytes": 1814145,
+      "candidate_zstd_bytes": 1821067,
+      "shared_gpu_source_bytes": 0,
+      "shared_gpu_candidate_bytes": 0,
+      "draw_surfaces_source": 1,
+      "draw_surfaces_candidate": 1
+    },
+    {
+      "actor": "river_stone_golem",
+      "source_sha256": "4e9e137743f96c1e2f3921798b132af1f5d715332b2a29357f60eb871dd186f7",
+      "candidate_sha256": "fd8d41797ccbbc32a2b8f7fbbfa94b6d8cfbba947971f17f8eeae8a3af0dd7a7",
+      "status": "qualified",
+      "qualification_report": "docs/qa/creature-storage/batch-034/river_stone_golem.json",
+      "source_bytes": 3943560,
+      "candidate_bytes": 3732816,
+      "source_zstd_bytes": 2568041,
+      "candidate_zstd_bytes": 2577412,
+      "shared_gpu_source_bytes": 1436840,
+      "shared_gpu_candidate_bytes": 1436840,
+      "draw_surfaces_source": 1,
+      "draw_surfaces_candidate": 1
+    },
+    {
+      "actor": "manymouth_crab",
+      "source_sha256": "18e0d318ea63fba19306fa0638404b43a38c409f5325062dd747fb8207ff1fbc",
+      "candidate_sha256": "7d55d862dba153ba1c28285d4908fe5c17386dd7860fd0538a7b70461a93c1d2",
+      "status": "qualified",
+      "qualification_report": "docs/qa/creature-storage/batch-034/manymouth_crab.json",
+      "source_bytes": 3797940,
+      "candidate_bytes": 3617408,
+      "source_zstd_bytes": 1927895,
+      "candidate_zstd_bytes": 1931530,
+      "shared_gpu_source_bytes": 0,
+      "shared_gpu_candidate_bytes": 0,
+      "draw_surfaces_source": 1,
+      "draw_surfaces_candidate": 1
+    }
+  ],
+  "totals": {
+    "source_bytes": 20048376,
+    "source_bytes_unknown_actors": 0,
+    "candidate_bytes": 19319776,
+    "candidate_bytes_unknown_actors": 0,
+    "source_zstd_bytes": 11173364,
+    "source_zstd_bytes_unknown_actors": 0,
+    "candidate_zstd_bytes": 11207631,
+    "candidate_zstd_bytes_unknown_actors": 0,
+    "shared_gpu_source_bytes": 2732920,
+    "shared_gpu_source_bytes_unknown_actors": 0,
+    "shared_gpu_candidate_bytes": 2732920,
+    "shared_gpu_candidate_bytes_unknown_actors": 0,
+    "raw_saved_bytes": 728600,
+    "compressed_saved_bytes": -34267,
+    "shared_gpu_saved_bytes": 0
+  },
+  "checks": [
+    {}
+  ],
+  "independent_editor_verification": {
+    "passed": true,
+    "method": "Both fixtures explicitly ResourceLoader.load(PackedScene); current source and generated scene MD5 freshness plus SHA256; all source clips, RESET and directed transitions, typed geometry/morphs/materials. Original per-stage budgets unchanged.",
+    "retrospective_audit": "docs/qa/creature-storage/editor-verification-audit.json",
+    "artistic_approval_changed": false
+  }
+}
