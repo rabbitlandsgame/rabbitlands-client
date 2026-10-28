@@ -15,10 +15,10 @@ art exactly. No asset is replaced: the shipped bodies, hair and equipment are un
   (`HighPortraitAppearance`) is kept dormant: `RL_HEADS=classic` (or `off`, `0`, `no`)
   draws it instead, for side-by-side checks and rollback. The Compatibility renderer
   also keeps the classic head (`ReplicatedActor3D.rl_heads_renderer_supported`): there the
-  RL head's live identity blend shapes cost 2.4-3.1x develop's crowd frame time (40 and
-  160 Humans) and its instance uniforms overflowed the 4096-item global buffer before 160
-  Humans; `RL_HEADS=all` draws it anyway. Baking the identity weights into a per-face mesh
-  (only the `ex_` shapes left live) is the fix that would let Compatibility draw it.
+  RL head's live identity blend shapes cost 3.2-3.9x develop's crowd frame time (40 and
+  160 Humans); with the identity baked per face (below) it still costs 1.46x/1.24x, and
+  its instance uniforms overflow the 4096-item global buffer between 40 and 160 Humans.
+  `RL_HEADS=all` draws it anyway, baked. See *Cost at High* below.
 * **Face from the saved appearance.** `RLHeadPortraitMap` derives the face from the
   PortraitCustomization fields and palette indices (nothing new is saved or sent):
   `x = clamp(g * (v - c) / 50, -1, 1)` per face field, `c` from the Rowan (male) / Mira
@@ -131,6 +131,63 @@ topology and fitted to the shipped Human bodies (`luminous_female`, `luminous_ma
   `RL_HEADWEAR_FIT=0` draws every shipped placement; the default refits only RL
   heads; `=shipped` adds the shipped luminous heads.
 
+## Cost at High (perf gate, 2026-10-28)
+
+Measured on the development laptop (RTX 5080 Laptop GPU, shared with other jobs, so
+repeats differ by up to about 10%) against develop's own High head (`RL_HEADS=classic`,
+which the parity capture shows is develop's High exactly). Crowds: the all-Human
+wrapper of `crowd_presentation_benchmark.gd` on four_gates, 1280x720, a third of the
+crowd moving or fighting, presets, all-50 and extreme faces, both RL hairstyles and
+beards; mean frame work in ms, two runs each at 26 m.
+
+| Renderer, camera | 40 Humans: develop / RL | 160 Humans: develop / RL |
+|---|---|---|
+| Forward+, 26 m | 12.2 / 12.5 (1.02x) | 28.4 / 26.6 (0.94x) |
+| Forward+, 10 m | 10.7 / 12.2 (1.14x) | 20.1 / 25.2 (1.25x) |
+| Compatibility (RL_HEADS=all), 26 m, live shapes | 15.1 / 59.2 (3.9x) | 43.5 / 140.4 (3.2x) |
+| Compatibility (RL_HEADS=all), 26 m, baked | 16.2 / 23.7 (1.46x) | 49.1 / 60.8 (1.24x) |
+
+* **Identity bake** (`RLHeadIdentityBake`). A face's identity (`id_` and the hairstyle's
+  `hl_` shapes) is baked into one cached mesh per source mesh and quantised weights,
+  keeping only the `ex_` shapes live and the source's materials, names and LODs; actors
+  with the same face share it. Requests wait 400 ms, run on the WorkerThreadPool and are
+  built within 3 ms a frame; the cache keeps 48 idle entries and 192 MB in all, beyond
+  which faces draw live. Only the shown level is baked; `set_control` goes live. On by
+  default in the Compatibility renderer only (`RL_HEAD_BAKE=1`/`0` forces it): Forward+
+  deforms the shapes in one compute pass and measured no gain while the cache would cost
+  memory. Baked vertices are within 1e-5 m of the live result
+  (`tests/test_rl_head_identity_bake.gd`, worst 9.6e-7 m) and render the same silhouettes
+  (`tests/integration/rl_head_bake_silhouette.gd`). A crowd of 16 looks holds about
+  50 MB of baked meshes.
+* **Still open in Compatibility.** The baked crowd is 1.46x/1.24x develop's frame time
+  (p95 1.42x/1.32x), and at 10 m 1.42x/1.66x; each RL mesh instance also takes a
+  16-slot block of the 4096-item instance-uniform buffer whether it is shown or not
+  (head, beard and hair at three levels), which runs out between 40 and 160 Humans.
+  Options: keep develop's High head there (current); per-face materials instead of
+  instance uniforms there; one mesh instance per part with the level's mesh swapped in;
+  no blend shapes on the baked mesh while the face is neutral; fewer head surfaces at the
+  far levels.
+* **Per-frame scripts** (blink, expressions, LOD, spring ranking): 0.73 ms a frame for 160
+  Humans at 26 m (4.5 us an actor), 0.82 ms at 10 m with eight spring-hair actors.
+* **Draw calls**: about two more per Human (Forward+ 26 m: 635 against 559 at 40, 2,414
+  against 2,103 at 160). **Close portrait** (`mpfb_prototype_cost.gd` method, one head):
+  GPU 0.14 against 0.10 ms in Forward+, 0.09 against 0.05 ms in Compatibility.
+* **Triangles up close** (level 0): head 12,152 (male) / 12,077 (female), rowan_shag
+  12,908, mira_bun 17,976, beards 872-4,536: Rowan 25,060 and Tavi with a full beard
+  29,596 against develop's 17,408 and 19,886; Mira 30,053 against 23,496 (develop's head
+  share of the body plus eyes, brows and scalp, its hairstyle and beard shell).
+* **Video memory**, both sexes loaded (Rowan and Mira, Forward+): develop +200 MB, RL
+  +311 MB (textures +56 MB, mesh buffers +55 MB: the source meshes carry all 55 shapes).
+  RL maps: per sex albedo 2.8 MB, features and brows 5.6 MB each, features2 1.4 MB
+  (kept at 1024 px; the feature and brow maps visibly soften at 1024), plus eye, lash,
+  hair and beard maps, about 37 MB in all.
+* **Creation preview** (a new actor per debounced edit): RL rebuilds in 70-160 ms against
+  develop's 170-345 ms; the first preview takes 2.0-3.2 s against 1.3-2.0 s.
+* **Quality switch** with 40 Humans: Medium/Low to High 2.5-2.9 s against develop's
+  4.7-6.3 s; High to Medium 1.2 s the first time (0.1 s after) against 25 ms.
+* **Repository**: the RL assets are 25.7 MB (22 files), against 3.7 MB for develop's High
+  portrait and hair data.
+
 ## Files
 
 | Path | What |
@@ -142,10 +199,11 @@ topology and fitted to the shipped Human bodies (`luminous_female`, `luminous_ma
 | `data/actors/rl_head_presets.json` | identity presets (lab) |
 | `data/actors/rl_head_wire_defaults.json` | appearance-to-RL mapping data: gains, couplings, colour tables, per-sex defaults |
 | `data/actors/rl_head_headwear_fit.json` | per-piece fit of the open head pieces on RL and shipped luminous heads (generated) |
-| `src/actors/rl_head/` | runtime: appearance data, rig, body cut, expressions, hair motion, shaders |
+| `src/actors/rl_head/` | runtime: appearance data, rig, identity bake, body cut, expressions, hair motion, shaders |
 | `prototypes/rl_heads/` + `open-rl-head-lab.bat` | interactive lab |
 | `tests/integration/rl_head_renders.gd`, `tests/test_rl_head.gd`, `tests/integration/rl_head_metrics.gd` | evidence and checks |
 | `tests/test_rl_head_portrait_map.gd`, `tests/test_rl_head_quality_switch.gd` | mapping and tier-switch checks |
+| `tests/test_rl_head_identity_bake.gd`, `tests/integration/rl_head_bake_silhouette.gd` | identity bake against the live shapes (vertices; rendered silhouettes) |
 | `tests/rl_head_gain_probe.gd`, `tests/integration/rl_head_colour_calibration.gd` | calibration probes behind the mapping data |
 | `eloria-assets/tools/rl_heads/` | authoring/build scripts, not yet synced to this branch (inputs and outputs stay in ignored `.local/rl-heads/`) |
 

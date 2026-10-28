@@ -99,8 +99,10 @@ saved grooming choices; the RL head at High shows two of them differently
 
 At High every Human - players, NPCs and leaderboard and dialogue portraits -
 draws the RL head in the Forward+ and Mobile renderers (the Compatibility
-renderer keeps the classic High head for now: the RL head cost it 2.4-3 times
-the crowd frame time): a new head, upper neck and eyes fitted to the shipped Human
+renderer keeps the classic High head for now: even with its face shapes baked
+the RL head costs that renderer 1.2-1.5 times the crowd frame time, and large
+crowds run out of its per-instance colour slots): a new head, upper neck and
+eyes fitted to the shipped Human
 bodies, with painted skin, freckles, liner and brows, blinking, and
 spring-lock hair on the two RL hairstyles. It is derived entirely from the
 saved appearance, so no new data is saved or sent and every older save and
@@ -129,7 +131,9 @@ unchanged; switching quality swaps the heads in place.
   with a neutral expression and open eyes.
 
 Developer switches: `RL_HEADS=classic` draws the classic High head instead,
-`RL_HEADS=all` draws the RL head in the Compatibility renderer too;
+`RL_HEADS=all` draws the RL head in the Compatibility renderer too (its face
+shapes baked per face there; `RL_HEAD_BAKE=1`/`0` bakes in every renderer or
+none);
 `RL_HEADWEAR_FIT=shipped` also refits open headwear on the Low/Medium heads
 (off by default, pending an owner decision). Mapping data is
 `data/actors/rl_head_wire_defaults.json`; see
@@ -141,6 +145,18 @@ match their fine painted detail.
 
 ## Resource budget
 
+The RL head at High (measured 2026-10-28; details and method in
+[the RL head notes](../godot-client/docs/rl-head-prototype.md#cost-at-high-perf-gate-2026-10-28)):
+crowds of 40 and 160 Humans run within a few percent of the classic High head in
+Forward+ at the gameplay camera (1.14-1.25 times at a 10 m camera). Up close a Human
+draws about 25,000-30,000 head, hair and beard triangles against about 17,000-23,500,
+and about two more draw calls. Its maps take about 37 MB of video memory with both
+sexes loaded, and its meshes about 55 MB more than the classic head, because the
+shared source meshes carry every face shape; the RL files are 25.7 MB in the
+repository. Rebuilding the creation preview takes 70-160 ms, and switching 40 Humans
+up to High 2.5-2.9 seconds.
+
+The classic High head (kept for `RL_HEADS=classic` and the Compatibility renderer):
 Low and Medium retain their existing triangle counts and texture set. High
 uses six shared 1024-square face maps: approximately 8 MiB of compiled texture
 data for both bodies, plus 384 KiB of compressed sculpt data (768 KiB decoded
