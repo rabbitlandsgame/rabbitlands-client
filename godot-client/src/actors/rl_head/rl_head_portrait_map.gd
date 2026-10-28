@@ -395,21 +395,24 @@ static func details(appearance: Dictionary, sex: String) -> Dictionary:
 		"stubble": _indexed(seeds.get("stubble"), facial, 0.0),
 		"lip_tint": lip_tint_color(int(_indexed(seeds.get("lip_tint"), skin, 2.0))),
 	}
-	var explicit := func(name: String) -> int:
-		return field(appearance, name, 0, int(V3_MAXIMA[name])) if appearance.has(name) else 0
-	if explicit.call("brow_style") > 0:
-		result["brow_style"] = float(explicit.call("brow_style") - 1) / 4.0
-	if explicit.call("brow_thickness") > 0:
-		result["brow_thickness"] = float(explicit.call("brow_thickness") - 51) / 50.0
+	if _explicit_detail(appearance, "brow_style") > 0:
+		result["brow_style"] = float(_explicit_detail(appearance, "brow_style") - 1) / 4.0
+	if _explicit_detail(appearance, "brow_thickness") > 0:
+		result["brow_thickness"] = float(_explicit_detail(appearance, "brow_thickness") - 51) / 50.0
 	for name: String in ["freckles", "liner", "liner_wing", "stubble"]:
-		if explicit.call(name) > 0:
-			result[name] = float(explicit.call(name) - 1) / 100.0
-	if explicit.call("lip_tint") > 0:
-		result["lip_tint"] = lip_tint_color(explicit.call("lip_tint"))
+		if _explicit_detail(appearance, name) > 0:
+			result[name] = float(_explicit_detail(appearance, name) - 1) / 100.0
+	if _explicit_detail(appearance, "lip_tint") > 0:
+		result["lip_tint"] = lip_tint_color(_explicit_detail(appearance, "lip_tint"))
 	if sex != "male":
 		# No stubble on a female head at High; the saved value is kept.
 		result["stubble"] = 0.0
 	return result
+
+
+## A PC/3 detail field as saved (0 = Auto, also when the field is absent).
+static func _explicit_detail(appearance: Dictionary, name: String) -> int:
+	return field(appearance, name, 0, int(V3_MAXIMA[name])) if appearance.has(name) else 0
 
 
 # ---------------------------------------------------------------- inverse
