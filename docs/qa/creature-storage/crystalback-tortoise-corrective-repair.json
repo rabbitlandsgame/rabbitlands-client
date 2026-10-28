@@ -1,0 +1,808 @@
+{
+  "actor": "crystalback_tortoise",
+  "status": "approximate_skin_repair_pilot_not_installed_or_artist_approved",
+  "reference_acceptance": "User visually accepted the 30 FPS tortoise in this task; this repair is a separate unaccepted draft.",
+  "models": [
+    {
+      "sha256": "01b3a309b5fe61ed6c7845aee5bd9552df62496af9d205928b72381a2aeeaf9c",
+      "raw_bytes": 25686684,
+      "rlcz_bytes": 13063531,
+      "roundtrip_verified": true,
+      "load_ms": 1750.5585,
+      "retained_static_memory_delta_bytes": 116759171.0,
+      "load_peak_static_memory_increase_bytes": 82944934.0,
+      "retargeted_keys": 190405.0,
+      "retargeted_tracks": 4423.0,
+      "bones": 21.0,
+      "animation_update_usec": {
+        "Death_A": 63.24041666666665,
+        "Fighting_Idle": 42.17708333333336,
+        "Hit_Chest": 55.56625,
+        "Idle_A": 59.71,
+        "Jog": 59.31583333333335,
+        "Sword_Attack": 58.3045833333333,
+        "Walk": 61.34666666666665
+      },
+      "artifact": ".local/creature-sampling/crystalback_tortoise/fps-30/crystalback_tortoise_30.glb",
+      "label": "REFERENCE / Reviewed 30 FPS / 577 shapes",
+      "corrective_gpu_buffer_bytes": 38405120,
+      "corrective_targets": 577
+    },
+    {
+      "sha256": "2c837c1b3b7b080cadf22438130ec7ca9d29b711f18815f6582e773d17bcdd15",
+      "raw_bytes": 15444868,
+      "rlcz_bytes": 7491126,
+      "roundtrip_verified": true,
+      "load_ms": 1046.6405,
+      "retained_static_memory_delta_bytes": 82531129.0,
+      "load_peak_static_memory_increase_bytes": 18289572.0,
+      "retargeted_keys": 120300.0,
+      "retargeted_tracks": 2818.0,
+      "bones": 21.0,
+      "animation_update_usec": {
+        "Death_A": 40.06416666666665,
+        "Fighting_Idle": 37.142083333333346,
+        "Hit_Chest": 35.5916666666667,
+        "Idle_A": 36.572500000000005,
+        "Jog": 38.71791666666665,
+        "Sword_Attack": 35.29166666666665,
+        "Walk": 39.62041666666665
+      },
+      "artifact": ".local/tortoise-corrective-repair/crystalback_tortoise_reweighted_residual.glb",
+      "label": "PILOT / Repaired skin / 332 residual shapes",
+      "corrective_gpu_buffer_bytes": 22097920,
+      "corrective_targets": 332
+    }
+  ],
+  "clips": [
+    "Idle_A",
+    "Fighting_Idle",
+    "Walk",
+    "Jog",
+    "Sword_Attack",
+    "Hit_Chest",
+    "Death_A"
+  ],
+  "correctives": {
+    "source": {
+      "position": 221,
+      "normal": 356,
+      "total": 577,
+      "physical_bytes": 23083008
+    },
+    "candidate": {
+      "position": 156,
+      "normal": 176,
+      "total": 332,
+      "physical_bytes": 13298688
+    }
+  },
+  "body_vertices": 3328,
+  "reweight_fit_allowed_vertices": 962,
+  "original_weight_region_vertices": 2366,
+  "base_position_and_normal_arrays": "exactly unchanged",
+  "maximum_influences": 4,
+  "bones": 21,
+  "qualification": {
+    "all": {
+      "poses": 4827,
+      "maximum_position_mm": 0.25265038669626866,
+      "rms_position_mm": 0.007886030856380488,
+      "worst_position": {
+        "label": "Sword_Attack@0.4",
+        "vertex": 1156,
+        "source_world_position": [
+          0.6131280982522757,
+          0.30739060756024217,
+          -0.5459590055474992
+        ]
+      },
+      "maximum_normal_degrees": 0.24881527150794602,
+      "rms_normal_degrees": 0.0026313768525561016,
+      "worst_normal": {
+        "label": "Jog->Idle_A@0.15:0.819:0.43",
+        "vertex": 590,
+        "source_world_position": [
+          0.2871634656291281,
+          0.17777679957172743,
+          0.26724072115452296
+        ]
+      }
+    },
+    "clip": {
+      "poses": 2810,
+      "maximum_position_mm": 0.25265038669626866,
+      "rms_position_mm": 0.004128966497262347,
+      "worst_position": {
+        "label": "Sword_Attack@0.4",
+        "vertex": 1156,
+        "source_world_position": [
+          0.6131280982522757,
+          0.30739060756024217,
+          -0.5459590055474992
+        ]
+      },
+      "maximum_normal_degrees": 0.20519453698745616,
+      "rms_normal_degrees": 0.0023180254719314033,
+      "worst_normal": {
+        "label": "Death_A@1.32916666666667",
+        "vertex": 140,
+        "source_world_position": [
+          0.8201990309025556,
+          0.19208327760372357,
+          0.1597721172742402
+        ]
+      }
+    },
+    "crossfade": {
+      "poses": 2016,
+      "maximum_position_mm": 0.23583258136409704,
+      "rms_position_mm": 0.011180829397339054,
+      "worst_position": {
+        "label": "Death_A->Idle_A@0.5:0.819:0.43",
+        "vertex": 1156,
+        "source_world_position": [
+          0.6131280955312548,
+          0.2557746197155745,
+          -0.4985416912687279
+        ]
+      },
+      "maximum_normal_degrees": 0.24881527150794602,
+      "rms_normal_degrees": 0.003014846982707693,
+      "worst_normal": {
+        "label": "Jog->Idle_A@0.15:0.819:0.43",
+        "vertex": 590,
+        "source_world_position": [
+          0.2871634656291281,
+          0.17777679957172743,
+          0.26724072115452296
+        ]
+      }
+    },
+    "RESET": {
+      "poses": 1,
+      "maximum_position_mm": 0.051990165799622456,
+      "rms_position_mm": 0.0161450268999861,
+      "worst_position": {
+        "label": "RESET",
+        "vertex": 1242,
+        "source_world_position": [
+          0.580113543270267,
+          0.5054593047870067,
+          -0.8353275085011533
+        ]
+      },
+      "maximum_normal_degrees": 1.7075472925031877e-06,
+      "rms_normal_degrees": 5.408282154792521e-07,
+      "worst_normal": {
+        "label": "RESET",
+        "vertex": 3420,
+        "source_world_position": [
+          0.346966423743828,
+          0.601947036648453,
+          -0.6236119534503984
+        ]
+      }
+    }
+  },
+  "independent_holdout": {
+    "all": {
+      "poses": 4827,
+      "maximum_position_mm": 0.23706512487765524,
+      "rms_position_mm": 0.00712777481724698,
+      "worst_position": {
+        "label": "Death_A->Idle_A@0.19:0.943:0.57",
+        "vertex": 1156,
+        "source_world_position": [
+          0.6131280954247441,
+          0.28055051633624134,
+          -0.5000968069101054
+        ]
+      },
+      "maximum_normal_degrees": 0.20355074685414218,
+      "rms_normal_degrees": 0.002497088455687765,
+      "worst_normal": {
+        "label": "Death_A@1.3308875",
+        "vertex": 140,
+        "source_world_position": [
+          0.8203393333507294,
+          0.19195788523677648,
+          0.1598460062471646
+        ]
+      }
+    },
+    "clip": {
+      "poses": 2810,
+      "maximum_position_mm": 0.22722865623784413,
+      "rms_position_mm": 0.004141750547343241,
+      "worst_position": {
+        "label": "Sword_Attack@0.39755416666667",
+        "vertex": 1156,
+        "source_world_position": [
+          0.6131280981423228,
+          0.30746851565983374,
+          -0.5454050750509296
+        ]
+      },
+      "maximum_normal_degrees": 0.20355074685414218,
+      "rms_normal_degrees": 0.0023281805345140585,
+      "worst_normal": {
+        "label": "Death_A@1.3308875",
+        "vertex": 140,
+        "source_world_position": [
+          0.8203393333507294,
+          0.19195788523677648,
+          0.1598460062471646
+        ]
+      }
+    },
+    "crossfade": {
+      "poses": 2016,
+      "maximum_position_mm": 0.23706512487765524,
+      "rms_position_mm": 0.009879554857010298,
+      "worst_position": {
+        "label": "Death_A->Idle_A@0.19:0.943:0.57",
+        "vertex": 1156,
+        "source_world_position": [
+          0.6131280954247441,
+          0.28055051633624134,
+          -0.5000968069101054
+        ]
+      },
+      "maximum_normal_degrees": 0.19644709292649065,
+      "rms_normal_degrees": 0.0027156154542109555,
+      "worst_normal": {
+        "label": "Death_A->Idle_A@0.07:0.943:0.57",
+        "vertex": 1157,
+        "source_world_position": [
+          0.6131280954247441,
+          0.28055051633624134,
+          -0.5000968069101054
+        ]
+      }
+    },
+    "RESET": {
+      "poses": 1,
+      "maximum_position_mm": 0.051990165799622456,
+      "rms_position_mm": 0.0161450268999861,
+      "worst_position": {
+        "label": "RESET",
+        "vertex": 1242,
+        "source_world_position": [
+          0.580113543270267,
+          0.5054593047870067,
+          -0.8353275085011533
+        ]
+      },
+      "maximum_normal_degrees": 1.7075472925031877e-06,
+      "rms_normal_degrees": 5.408282154792521e-07,
+      "worst_normal": {
+        "label": "RESET",
+        "vertex": 3420,
+        "source_world_position": [
+          0.346966423743828,
+          0.601947036648453,
+          -0.6236119534503984
+        ]
+      }
+    }
+  },
+  "blender": {
+    "poses": 119,
+    "maximum_displayed_position_difference_mm": 0.20525940578194352,
+    "maximum_bone_matrix_difference": 0.0
+  },
+  "preview_review_points": [
+    {
+      "id": "worst_position",
+      "caption": "Largest clip surface difference",
+      "clip": "Sword_Attack",
+      "time": 0.4,
+      "focus": [
+        0.11312809825227566,
+        0.30739060756024217,
+        -0.04595900554749921
+      ]
+    },
+    {
+      "id": "worst_normal",
+      "caption": "Shading difference hotspot",
+      "clip": "Death_A",
+      "time": 1.3308875,
+      "focus": [
+        0.3203393333507294,
+        0.19195788523677648,
+        0.6598460062471646
+      ]
+    }
+  ],
+  "private_evidence": {
+    ".local/tortoise-corrective-repair/prepare_fit_data.py": {
+      "sha256": "f8fb06fb72d7c109f2930d01175dab03ed0c87577846119309c5d5113ea62b90",
+      "bytes": 5592
+    },
+    ".local/tortoise-corrective-repair/fit_skin.py": {
+      "sha256": "9a5eec961f288e6cf392700ac61749f7bc1b18252a48628b60bd70eefdfa85ff",
+      "bytes": 4409
+    },
+    ".local/tortoise-corrective-repair/fit_skin_refined.py": {
+      "sha256": "f2a564a620727dc6fbb28421cbec0ab155ecdb355b5b069ac51fa0ad73bf6fb5",
+      "bytes": 4431
+    },
+    ".local/tortoise-corrective-repair/fit_normals.py": {
+      "sha256": "2963ad29c6703de0087527e8a3b37a94295b66e92f42237b6f0a7d1f2634ef3c",
+      "bytes": 2231
+    },
+    ".local/tortoise-corrective-repair/build_residual.py": {
+      "sha256": "f442f6fe90fc1c4ab9e69f7655aaccc1a9aed039a72ece68dd4502777d25be01",
+      "bytes": 6920
+    },
+    ".local/tortoise-corrective-repair/run_probe.py": {
+      "sha256": "d7ea6f11a2575d97fccc4253440da991b994f7a3a47ff12e8c0f74ddc6153715",
+      "bytes": 1326
+    },
+    ".local/tortoise-corrective-repair/analyze_probe.py": {
+      "sha256": "ed817981fd570775fc9e3d88222f9da820cef83b8986f54e18d7876cffd3d534",
+      "bytes": 3874
+    },
+    ".local/tortoise-corrective-repair/run_validation.py": {
+      "sha256": "7090dac24d8f7597675427eabe976a02ad029cbdc64223a1762562a3dbf43d54",
+      "bytes": 1348
+    },
+    ".local/tortoise-corrective-repair/analyze_validation.py": {
+      "sha256": "0c84172fff4a2e5e92c32132317146e3489997318b50b938941726c53e45b4f9",
+      "bytes": 3893
+    },
+    ".local/tortoise-corrective-repair/run_holdout.py": {
+      "sha256": "46d3e09069182d108ee12b749811a741cd381690cabb18fbc6abecac82319c46",
+      "bytes": 1333
+    },
+    ".local/tortoise-corrective-repair/analyze_holdout.py": {
+      "sha256": "6936df16a2f9d789c870cf9dae5a30f5783b3b82a613f2444f5a9a98cd6038a3",
+      "bytes": 3891
+    },
+    ".local/tortoise-corrective-repair/check_blender.py": {
+      "sha256": "796231ae2daba219eafb567fddf9cb9e5503f7bc77336127418317131785d004",
+      "bytes": 4166
+    },
+    ".local/tortoise-corrective-repair/measure_runtime.py": {
+      "sha256": "5ac13c16469640ef7948b391732e781c7825b138c786132f108162589af52e27",
+      "bytes": 2562
+    },
+    ".local/tortoise-corrective-repair/revert-vertices.npy": {
+      "sha256": "204074a6a57a19a23462e08af285ec8dd51eb669c72bdfce76b3cab0050c2ad6",
+      "bytes": 3456
+    },
+    ".local/tortoise-corrective-repair/deformation-audit.json": {
+      "sha256": "001d5067c2358994fc785fbd69be24ebf8cfe8c56afa90ae0847643f05ca5074",
+      "bytes": 157358
+    },
+    ".local/tortoise-corrective-repair/skin-fit-results.json": {
+      "sha256": "79750b1cc1a2846943bbc25fd400e4c6497848331487551ce0bbd248ac0fc81d",
+      "bytes": 2414
+    },
+    ".local/tortoise-corrective-repair/normal-fit-results.json": {
+      "sha256": "d89842c17baaad3461fbc15700daabbd0ab1b713a6ba26c79c90cae63c839abb",
+      "bytes": 1069
+    },
+    ".local/tortoise-corrective-repair/refined-skin-fit-results.json": {
+      "sha256": "96b621b166677960b3aa673fb82fd3bf0c738502ed6c7b14e2bbae4e565f4c93",
+      "bytes": 1001
+    },
+    ".local/tortoise-corrective-repair/residual-build.json": {
+      "sha256": "79bd03142c92db9112867087b270d9bb2bf24f53eac31eba5fd95c2a085b4e8b",
+      "bytes": 929
+    },
+    ".local/tortoise-corrective-repair/independent-motion.json": {
+      "sha256": "f9f0779f6b3718fe64e9155ce6d336ccdb1a27238f101a22ddf9147dee34e5fc",
+      "bytes": 3209
+    },
+    ".local/tortoise-corrective-repair/holdout-motion-results.json": {
+      "sha256": "d8d5d65af4a7c85864bdfa7db770fb737c6d505a25624e54a881bcd27184d679",
+      "bytes": 3225
+    },
+    ".local/tortoise-corrective-repair/blender.json": {
+      "sha256": "9566f56522eab9949ae14aa8a351c900ccb1d24c6691e6124ce2cc9414fcefc3",
+      "bytes": 5519
+    },
+    ".local/tortoise-corrective-repair/runtime.json": {
+      "sha256": "15446d819d9f4732fe5f1e5aba6bdedd6c999ce181dfe100fffe9eafdb7627ca",
+      "bytes": 2252
+    },
+    ".local/tortoise-corrective-repair/key-job.json": {
+      "sha256": "e4b5be548cff69dd7518758a619af870f61940978d7dd971c5fa7a3decbe05cc",
+      "bytes": 10159
+    },
+    ".local/tortoise-corrective-repair/probe-job.json": {
+      "sha256": "8b6e67f4dffcc71211aa9e8b336dc0541dd6e63bc0b02d05e6add011eee8af02",
+      "bytes": 1302
+    },
+    ".local/tortoise-corrective-repair/build_control.py": {
+      "sha256": "af90245bbaa97c08f96b03ca03ae7ad88ca5ac7829f068470614a19c6e3132ac",
+      "bytes": 6173
+    },
+    ".local/tortoise-corrective-repair/run_control_probe.py": {
+      "sha256": "474d936e318f5301b810eec3e933961282e577e609f8d2ceed21c0429bde6b21",
+      "bytes": 1387
+    },
+    ".local/tortoise-corrective-repair/analyze_control.py": {
+      "sha256": "66b5d27094a2a38519175b56c4a12dfa18de81e17c2b51cd2e85d3e80faa6470",
+      "bytes": 3891
+    },
+    ".local/tortoise-corrective-repair/control-build.json": {
+      "sha256": "e1adf131e27ccbe7e734ecea48ecf5c3ee3ee78117840b1b630aad69cfc658ce",
+      "bytes": 893
+    },
+    ".local/tortoise-corrective-repair/control-motion.json": {
+      "sha256": "5af86f41f8ddbd09925831829f62f894da3eef0e881b2a89e188da32801513ed",
+      "bytes": 3189
+    },
+    ".local/tortoise-corrective-repair/scope-proof.json": {
+      "sha256": "205011e176c51b352a243ba87c5ac6b179d78000cd531ea69447b13e6e778bee",
+      "bytes": 667
+    },
+    ".local/tortoise-corrective-repair/attribution.json": {
+      "sha256": "fdb4e5ba807b270e40924a279be63f425696899f6d0b4fa76e999bfa9eceab3d",
+      "bytes": 445
+    },
+    ".local/tortoise-corrective-repair/check_control_blender.py": {
+      "sha256": "429b72d846dd44f5ecb8d9cea3f8b663d2dad1a2a4ada3f30368f6637640589b",
+      "bytes": 4170
+    },
+    ".local/tortoise-corrective-repair/control-blender.json": {
+      "sha256": "9bb9d083824ef48ab1d61c877bd767344602fabf7784b0fa1843671b97399b57",
+      "bytes": 5520
+    },
+    ".local/tortoise-corrective-repair/measure_control_runtime.py": {
+      "sha256": "b95cd5ef26c62f029d550f26d2641849bb1a011bc384889079c56311e8447dfd",
+      "bytes": 2630
+    },
+    ".local/tortoise-corrective-repair/control-runtime.json": {
+      "sha256": "1320c1da4361b9d1326700bf2101c39b9c9628eee84df3adcaaa23bcba56dfe6",
+      "bytes": 2237
+    },
+    ".local/tortoise-corrective-repair/control-components-1.json": {
+      "sha256": "5f47c94ce24aaefc1172c8d537a521e29f65778511e6fe518b2b47efa4c66a81",
+      "bytes": 4322
+    },
+    ".local/tortoise-corrective-repair/preview-captures/preview-smoke.json": {
+      "sha256": "5050888c892e778151ead7e48c80000d5388dbe21ef7ec5d734d9f3714255c70",
+      "bytes": 1607
+    },
+    ".local/tortoise-corrective-repair/control-preview-captures/preview-smoke.json": {
+      "sha256": "f4ff314596a0a27913d1c388c75b186f551c5e140981308add167949a8c1783e",
+      "bytes": 1605
+    }
+  },
+  "limits": [
+    "Approximate draft; sampled evidence is not a proof over continuous time or every possible blended pose.",
+    "CPU measurements are two fresh-process runs per version, order reference/draft/draft/reference; warm OS file cache; no whole-game FPS claim.",
+    "GPU number is the corrective blend-shape buffer payload, not total VRAM.",
+    "Rendered normal maps/tangents require visual inspection; normal angular metrics alone do not prove pixel equality.",
+    "Skin changes and corrective re-basing are combined; the total byte saving cannot all be attributed to skin repair."
+  ],
+  "control": {
+    "artifact": ".local/tortoise-corrective-repair/crystalback_tortoise_rebasis_control.glb",
+    "sha256": "f6e46c724e4b5d565b5056ff7397ef48aa2c13472e1b3f59300d3f07c7d62d98",
+    "label": "PILOT / Original skin / 328 corrective shapes",
+    "raw_bytes": 15270560,
+    "rlcz_bytes": 6895690,
+    "corrective_targets": 328,
+    "position_shapes": 154,
+    "normal_shapes": 174,
+    "corrective_gpu_buffer_bytes": 21831680,
+    "roundtrip_verified": true
+  },
+  "control_qualification": {
+    "all": {
+      "poses": 4827,
+      "maximum_position_mm": 0.10305259829104436,
+      "rms_position_mm": 0.0028106310683584912,
+      "worst_position": {
+        "label": "Sword_Attack@0.59755416666667",
+        "vertex": 3058,
+        "source_world_position": [
+          0.9401981234170871,
+          0.41227186329709326,
+          -0.5911778515150129
+        ]
+      },
+      "maximum_normal_degrees": 0.20369951599789532,
+      "rms_normal_degrees": 0.0023950880631406148,
+      "worst_normal": {
+        "label": "Death_A@1.3308875",
+        "vertex": 140,
+        "source_world_position": [
+          0.8203393333507294,
+          0.19195788523677648,
+          0.1598460062471646
+        ]
+      }
+    },
+    "clip": {
+      "poses": 2810,
+      "maximum_position_mm": 0.10305259829104436,
+      "rms_position_mm": 0.002749304799563946,
+      "worst_position": {
+        "label": "Sword_Attack@0.59755416666667",
+        "vertex": 3058,
+        "source_world_position": [
+          0.9401981234170871,
+          0.41227186329709326,
+          -0.5911778515150129
+        ]
+      },
+      "maximum_normal_degrees": 0.20369951599789532,
+      "rms_normal_degrees": 0.0023438750556870887,
+      "worst_normal": {
+        "label": "Death_A@1.3308875",
+        "vertex": 140,
+        "source_world_position": [
+          0.8203393333507294,
+          0.19195788523677648,
+          0.1598460062471646
+        ]
+      }
+    },
+    "crossfade": {
+      "poses": 2016,
+      "maximum_position_mm": 0.07661979123619518,
+      "rms_position_mm": 0.0028946202533980873,
+      "worst_position": {
+        "label": "Walk->Idle_A@0.61:0.483:0.57",
+        "vertex": 3058,
+        "source_world_position": [
+          0.8695291472433369,
+          0.4157404181800433,
+          -0.5914027285590475
+        ]
+      },
+      "maximum_normal_degrees": 0.1888213156343655,
+      "rms_normal_degrees": 0.002465273755239958,
+      "worst_normal": {
+        "label": "Death_A->Idle_A@0.07:0.943:0.57",
+        "vertex": 1582,
+        "source_world_position": [
+          0.8209641530322447,
+          0.16887745281861183,
+          -0.5853900037967978
+        ]
+      }
+    },
+    "RESET": {
+      "poses": 1,
+      "maximum_position_mm": 0.0,
+      "rms_position_mm": 0.0,
+      "worst_position": {
+        "label": "RESET",
+        "vertex": 0,
+        "source_world_position": [
+          0.9362938444201051,
+          0.12898065670238515,
+          0.31086318731766904
+        ]
+      },
+      "maximum_normal_degrees": 1.7075472925031877e-06,
+      "rms_normal_degrees": 5.982864878570606e-07,
+      "worst_normal": {
+        "label": "RESET",
+        "vertex": 146,
+        "source_world_position": [
+          0.6985703544958624,
+          0.23441354958748928,
+          0.1725732729393058
+        ]
+      }
+    }
+  },
+  "weight_attribution": {
+    "body_vertices_with_weight_change_above_0_001": 116,
+    "candidate_without_any_correctives_maximum_mm": 163.88808875485282,
+    "candidate_without_any_correctives_rms_mm": 20.241239879174785
+  },
+  "scope_proof": {
+    "skin": {
+      "sha256": "2c837c1b3b7b080cadf22438130ec7ca9d29b711f18815f6582e773d17bcdd15",
+      "all_base_geometry_uv_indices_exact": true,
+      "skin_exact": false,
+      "all_original_bones_hierarchy_rest_and_bone_sampler_arrays_exact": true,
+      "all_embedded_images_exact": true,
+      "shell_and_mount_metadata_exact": true
+    },
+    "control": {
+      "sha256": "f6e46c724e4b5d565b5056ff7397ef48aa2c13472e1b3f59300d3f07c7d62d98",
+      "all_base_geometry_uv_indices_exact": true,
+      "skin_exact": true,
+      "all_original_bones_hierarchy_rest_and_bone_sampler_arrays_exact": true,
+      "all_embedded_images_exact": true,
+      "shell_and_mount_metadata_exact": true
+    }
+  },
+  "recommendation": "Prefer the 328-shape control for visual review: original mesh and skin exact, smaller and closer sampled match than the 332-shape skin repair. Do not install either without review.",
+  "control_runtime": {
+    "runs_per_version": 2,
+    "scope": "Fresh-process real GlbSceneCache._build_raw + ReplicatedActor3D + NativeAnimationImporter, warm OS file cache. Retained Godot static CPU allocations include scene and library caches, meshes, textures and actor. AnimationPlayer advance plus forced skeleton global transforms at 240 updates/s; nine batches of 1200 updates per clip after warmup. Excludes GPU rendering/skinning, whole-game logic and frame-rate claims.",
+    "models": [
+      {
+        "sha256": "01b3a309b5fe61ed6c7845aee5bd9552df62496af9d205928b72381a2aeeaf9c",
+        "raw_bytes": 25686684,
+        "rlcz_bytes": 13063531,
+        "roundtrip_verified": true,
+        "load_ms": 1553.5585,
+        "retained_static_memory_delta_bytes": 116759139.0,
+        "load_peak_static_memory_increase_bytes": 82944934.0,
+        "retargeted_keys": 190405.0,
+        "retargeted_tracks": 4423.0,
+        "bones": 21.0,
+        "animation_update_usec": {
+          "Death_A": 54.256666666666646,
+          "Fighting_Idle": 35.1558333333333,
+          "Hit_Chest": 45.89291666666665,
+          "Idle_A": 51.49041666666665,
+          "Jog": 53.0179166666667,
+          "Sword_Attack": 48.64916666666665,
+          "Walk": 52.09291666666665
+        }
+      },
+      {
+        "sha256": "f6e46c724e4b5d565b5056ff7397ef48aa2c13472e1b3f59300d3f07c7d62d98",
+        "raw_bytes": 15270560,
+        "rlcz_bytes": 6895690,
+        "roundtrip_verified": true,
+        "load_ms": 815.6,
+        "retained_static_memory_delta_bytes": 82385993.0,
+        "load_peak_static_memory_increase_bytes": 17665596.0,
+        "retargeted_keys": 118912.0,
+        "retargeted_tracks": 2786.0,
+        "bones": 21.0,
+        "animation_update_usec": {
+          "Death_A": 31.039583333333347,
+          "Fighting_Idle": 30.349166666666648,
+          "Hit_Chest": 27.8475,
+          "Idle_A": 28.28416666666665,
+          "Jog": 30.6725,
+          "Sword_Attack": 29.74875,
+          "Walk": 32.19166666666665
+        }
+      }
+    ]
+  },
+  "control_blender": {
+    "poses": 119,
+    "maximum_source_position_difference_mm": 0.10885578830929349,
+    "maximum_displayed_position_difference_mm": 0.06400720352586457,
+    "maximum_bone_matrix_difference": 0.0
+  },
+  "control_preview_review_points": [
+    {
+      "id": "worst_position",
+      "caption": "Largest clip surface difference",
+      "clip": "Sword_Attack",
+      "time": 0.59755416666667,
+      "focus": [
+        0.4401981234170871,
+        0.41227186329709326,
+        -0.0911778515150129
+      ]
+    },
+    {
+      "id": "worst_normal",
+      "caption": "Shading difference hotspot",
+      "clip": "Death_A",
+      "time": 1.3308875,
+      "focus": [
+        0.3203393333507294,
+        0.19195788523677648,
+        0.6598460062471646
+      ]
+    }
+  ],
+  "preview_smoke": {
+    "skin": {
+      "clips": [
+        {
+          "clip": "Idle_A",
+          "length": 2.0,
+          "synchronized_time": 0.94
+        },
+        {
+          "clip": "Fighting_Idle",
+          "length": 1.39999997615814,
+          "synchronized_time": 0.657999988794327
+        },
+        {
+          "clip": "Walk",
+          "length": 1.85000002384186,
+          "synchronized_time": 0.869500011205673
+        },
+        {
+          "clip": "Jog",
+          "length": 1.14999997615814,
+          "synchronized_time": 0.540499988794327
+        },
+        {
+          "clip": "Sword_Attack",
+          "length": 1.39999997615814,
+          "synchronized_time": 0.657999988794327
+        },
+        {
+          "clip": "Hit_Chest",
+          "length": 0.699999988079071,
+          "synchronized_time": 0.328999994397163
+        },
+        {
+          "clip": "Death_A",
+          "length": 3.0,
+          "synchronized_time": 1.41
+        }
+      ],
+      "directed_switches_exercised": 49,
+      "keyboard_mouse_orbit_zoom_input_delivered": true,
+      "models": [
+        {
+          "label": "REFERENCE / Reviewed 30 FPS / 577 shapes",
+          "sha256": "01b3a309b5fe61ed6c7845aee5bd9552df62496af9d205928b72381a2aeeaf9c"
+        },
+        {
+          "label": "PILOT / Repaired skin / 332 residual shapes",
+          "sha256": "2c837c1b3b7b080cadf22438130ec7ca9d29b711f18815f6582e773d17bcdd15"
+        }
+      ],
+      "renderer": "forward_plus",
+      "terminal_hold_and_idle_reset": true
+    },
+    "control": {
+      "clips": [
+        {
+          "clip": "Idle_A",
+          "length": 2.0,
+          "synchronized_time": 0.94
+        },
+        {
+          "clip": "Fighting_Idle",
+          "length": 1.39999997615814,
+          "synchronized_time": 0.657999988794327
+        },
+        {
+          "clip": "Walk",
+          "length": 1.85000002384186,
+          "synchronized_time": 0.869500011205673
+        },
+        {
+          "clip": "Jog",
+          "length": 1.14999997615814,
+          "synchronized_time": 0.540499988794327
+        },
+        {
+          "clip": "Sword_Attack",
+          "length": 1.39999997615814,
+          "synchronized_time": 0.657999988794327
+        },
+        {
+          "clip": "Hit_Chest",
+          "length": 0.699999988079071,
+          "synchronized_time": 0.328999994397163
+        },
+        {
+          "clip": "Death_A",
+          "length": 3.0,
+          "synchronized_time": 1.41
+        }
+      ],
+      "directed_switches_exercised": 49,
+      "keyboard_mouse_orbit_zoom_input_delivered": true,
+      "models": [
+        {
+          "label": "REFERENCE / Reviewed 30 FPS / 577 shapes",
+          "sha256": "01b3a309b5fe61ed6c7845aee5bd9552df62496af9d205928b72381a2aeeaf9c"
+        },
+        {
+          "label": "PILOT / Original skin / 328 corrective shapes",
+          "sha256": "f6e46c724e4b5d565b5056ff7397ef48aa2c13472e1b3f59300d3f07c7d62d98"
+        }
+      ],
+      "renderer": "forward_plus",
+      "terminal_hold_and_idle_reset": true
+    }
+  }
+}

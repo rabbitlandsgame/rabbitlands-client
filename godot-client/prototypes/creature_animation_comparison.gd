@@ -55,7 +55,7 @@ func run() -> void:
 		return
 	job = JSON.parse_string(FileAccess.get_file_as_string(args[0]))
 	clips.assign(job.clips)
-	root.title = "Rabbit Lands | %s comparison | %d FPS draft" % [job.display_name, int(job.fps)]
+	root.title = job.get("title", "Rabbit Lands | %s comparison | %d FPS draft" % [job.display_name, int(job.fps)])
 	set_auto_accept_quit(false)
 	root.close_requested.connect(close_preview)
 	root.size = Vector2i(1440, 920)
@@ -75,8 +75,8 @@ func run() -> void:
 	var layout := VBoxContainer.new()
 	layout.add_theme_constant_override("separation", 12)
 	margin.add_child(layout)
-	layout.add_child(label_for("%s  /  %d FPS animation draft" % [job.display_name, int(job.fps)], 25))
-	layout.add_child(label_for("Same model, materials and corrective shapes. Both actors share time, speed and camera. Draft awaits your review.", 16))
+	layout.add_child(label_for(job.get("heading", "%s  /  %d FPS animation draft" % [job.display_name, int(job.fps)]), 25))
+	layout.add_child(label_for(job.get("description", "Same model, materials and corrective shapes. Both actors share time, speed and camera. Draft awaits your review."), 16))
 	var row := HBoxContainer.new()
 	layout.add_child(row)
 	row.add_child(label_for("Animation  "))
