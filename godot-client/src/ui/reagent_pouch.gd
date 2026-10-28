@@ -25,7 +25,7 @@ func configure(owner_main: Control) -> void:
 	look_button.icon = main._external_texture("res://assets/ui/cursors/cursor_eye.png")
 	store_button.icon = main._external_texture("res://assets/ui/inventory-actions/store-painted.png")
 	drop_button.icon = main._external_texture("res://assets/ui/cursors/cursor_pick.png")
-	mix_button.icon = main.item_atlas.icon_for(8) # Mortar and Pestle
+	mix_button.icon = main._external_texture("res://assets/ui/inventory-actions/mix-painted.png")
 	sync()
 
 func _ready() -> void:
@@ -124,7 +124,10 @@ func apply_style(config: Dictionary, side_width: float = 75, actions_right := fa
 		button.add_theme_stylebox_override("normal", Chrome.box(Color("181713"), Color("e2b854") if active else config.border.darkened(0.35), 3))
 		button.add_theme_stylebox_override("hover", Chrome.box(Color("30291c"), config.border.lightened(0.3), 3))
 		button.add_theme_color_override("font_color", config.text)
-	for button: Button in [look_button, store_button, drop_button, mix_button]: Chrome.button(button)
+	for button: Button in [look_button, store_button, drop_button, mix_button]:
+		Chrome.button(button)
+		# A disabled action keeps the same frame; the icon still conveys availability.
+		button.add_theme_stylebox_override("disabled", button.get_theme_stylebox("normal"))
 	gold_count.visible = part.show_quantity
 	_sync_actions()
 
