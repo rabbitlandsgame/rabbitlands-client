@@ -101,15 +101,15 @@ through the actual book button, Left Shift, class shortcut and Shift release.
 
 | Experiment | Practice |
 | --- | --- |
-| A — Living equations | Regeneration's real tick; Life Drain's actual damage/healing; Ether Drain against a consenting non-ally inside the private PK arena; an empty target; up to three genuine low-Magic Heal attempts to observe success/fizzle spending |
+| A — Living equations | Regeneration's real tick; Life Drain's actual damage/healing; Ether Drain against a consenting non-ally inside the private PK arena; an empty target; three low-Magic Heal casts to compare potency and quoted spending |
 | B — Prism and steel | Four damage types; separate borrowed Magic Offense and Defense changes; Cold, Radiation and Elemental Wards; each weakening spell followed by its matching bolt; Cripple, Accuracy and Elemental Weapon followed by real equipped weapon hits |
 | C — The unbroken circle | Magic Immunity rejects the prism's hostile cast; Disrupt damages a hostile summon; Shield Burst applies around the apprentices |
 | D — Fold and value | P5 Recall's actual portal chooser; Blink out of the annex; charged Hearthstone Focus; deposit it and compare a mismatched Riftglass Focus; common Transmute; inspect an Uncommon vessel's P3 requirement, then convert it at P3 |
 
 Together these routes exercise all **31 spell families** in the current
-86-variant book. They do not require casting every scope variant. The fizzle
-exercise never forces a random failure: it ends after the first fizzle or three
-attempts and reports which happened. Later rarity thresholds remain visible in
+86-variant book. They do not require casting every scope variant. The potency
+exercise uses three valid casts; each pays its quote and healing has a narrow
+spread. Later rarity thresholds remain visible in
 the normal Transmute chooser and are covered by spell-system tests.
 
 ## Practice isolation and recovery

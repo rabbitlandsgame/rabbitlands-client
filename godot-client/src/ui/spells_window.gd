@@ -52,6 +52,7 @@ var panel: PanelContainer
 var name_label: Label
 var description_label: Label
 var numbers_label: Label
+var potency_label: Label
 var knowledge_label: Label
 var reagents_label: Label
 var reagents_rows: VBoxContainer
@@ -339,6 +340,7 @@ func _refresh_details() -> void:
 		name_label.text = "Select a spell"
 		description_label.text = "Select an icon to inspect its target, cost and requirements."
 		numbers_label.text = ""
+		potency_label.text = ""
 		knowledge_label.text = ""
 		reagents_label.text = ""
 		selected_icon.texture = null
@@ -363,6 +365,8 @@ func _refresh_details() -> void:
 	numbers_label.text = "%s · Base ether %d" % [str(definition.get("scope", "self")).capitalize(), int(definition.get("mana", 0))]
 	var magic := int(AppState.stats.get("magic", 0))
 	var level := int(definition.get("level", 0))
+	var recommended := int(definition.get("recommended_level", level))
+	potency_label.text = "Unlock %d · Recommended %d" % [level, recommended]
 	UI.requirement(requirements_rows, "Magic %d" % level, "Current %d" % magic, magic >= level)
 	var tome := catalog.knowledge_for(selected_spell_id)
 	var known := catalog.knows(selected_spell_id, AppState.known_knowledge)
@@ -373,7 +377,7 @@ func _refresh_details() -> void:
 	# design prioritizes consumables over repeating satisfied prerequisites.
 	requirements_rows.visible = magic < level and not _short
 	knowledge_label.visible = not known and not _short
-	name_label.tooltip_text = "Magic %d (current %d)\n%s" % [level, magic, knowledge_label.text]
+	name_label.tooltip_text = "Unlock Magic %d · Recommended %d (current %d)\n%s" % [level, recommended, magic, knowledge_label.text]
 	reagents_label.text = "Reagents required"
 	for reagent: Dictionary in definition.get("reagents", []):
 		var quantity := int(reagent.get("quantity", 0))
@@ -410,6 +414,11 @@ func _quote_state(data: Dictionary) -> void:
 	_last_quote = data.duplicate(true)
 	effect_preview.set_spell(catalog.spell(selected_spell_id), int(data.get("power", 1)))
 	numbers_label.text = "%s · Power %d / %d · Ether %d" % [str(catalog.spell(selected_spell_id).get("scope", "self")).capitalize(), int(data.get("power", 1)), int(data.get("limit", 1)), int(data.get("mana", 0))]
+	var quality: Dictionary = data.get("potency", {})
+	if not quality.is_empty():
+		var label := "Duration" if str(data.get("potency_applies_to", "amount")) == "duration" else "Potency"
+		potency_label.text = "Unlock %d · Recommended %d\n%s %.0f%% average (%.0f–%.0f%%)" % [int(data.get("unlock_level", 0)), int(data.get("recommended_level", 0)), label, float(quality.get("mean", 100)), float(quality.get("minimum", 100)), float(quality.get("maximum", 100))]
+		potency_label.tooltip_text = "Eligible spells do not fizzle. Average potency reaches 100% at the recommended level and 200% at twice that level. Utility outcomes stay fixed. Selected power controls ether and material costs."
 	UI.clear(reagents_rows)
 	for reagent: Dictionary in data.get("reagents", []):
 		if int(reagent.get("quantity", 0)) > 0:
@@ -645,6 +654,10 @@ func _build_details() -> void:
 	numbers_label.name = "SpellNumbers"
 	TextColors.bind(numbers_label, "spell_cost")
 	info.add_child(numbers_label)
+	potency_label = UI.label("", 13, true)
+	potency_label.name = "SpellPotency"
+	TextColors.bind(potency_label, "spell_text")
+	info.add_child(potency_label)
 	requirements_rows = VBoxContainer.new()
 	info.add_child(requirements_rows)
 	knowledge_label = UI.label("", 12, true)
