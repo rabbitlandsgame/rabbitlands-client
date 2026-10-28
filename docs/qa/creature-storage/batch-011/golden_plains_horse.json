@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "batch": 11,
+  "rank": 55,
+  "actor": "golden_plains_horse",
+  "status": "Audited unchanged; no model replacement. Canonical exact preparation reproduces the original bytes.",
+  "source_sha256": "90d0af6f4bfd639b5edbeaecca7be7114a0ad91281a3128cc04ba88cac05b336",
+  "candidate_sha256": "90d0af6f4bfd639b5edbeaecca7be7114a0ad91281a3128cc04ba88cac05b336",
+  "source_bytes": 14969276,
+  "candidate_bytes": 14969276,
+  "source_zstd_bytes": 9546947,
+  "candidate_zstd_bytes": 9546947,
+  "shared_gpu_source_bytes": 0,
+  "draw_surfaces_source": 1,
+  "source_lods": [
+    0
+  ],
+  "shared_gpu_candidate_bytes": 0,
+  "draw_surfaces_candidate": 1,
+  "candidate_lods": [
+    0
+  ],
+  "canonical_pipeline_byte_identical": true,
+  "human_approval_changed": false,
+  "new_inactive_targets": 0,
+  "new_flat_key_reductions": 0,
+  "physical_observations": {
+    "passed": true,
+    "source_sha256": "90d0af6f4bfd639b5edbeaecca7be7114a0ad91281a3128cc04ba88cac05b336",
+    "candidate_sha256": "90d0af6f4bfd639b5edbeaecca7be7114a0ad91281a3128cc04ba88cac05b336",
+    "surface_probes": 166,
+    "poses": 152,
+    "clips": 8,
+    "source_candidate_position_error": 0.0,
+    "source_candidate_normal_vector_error": 0.0,
+    "original_witness_position_error_over_height": 0.0,
+    "original_source_witness_position_error_over_height": 0.0,
+    "original_witness_normal_vector_error": 0.0,
+    "original_witness_bone_matrix_error": 0.0,
+    "witness_sha256": "0dc807940509bd66f74588e5ce7017a3a304b44cbeb567da001c6d285d0bb48e",
+    "sampled_motion_min": [
+      -0.47124748100941455,
+      0.0033981195239386475,
+      -1.452155765472659
+    ],
+    "sampled_motion_max": [
+      1.0046950662856564,
+      2.186383009741242,
+      1.3803387756003935
+    ]
+  },
+  "native_unchanged_validation": {
+    "maximum_position_error": 0.0,
+    "maximum_normal_angle_degrees": 1.9090959104164224e-06,
+    "worst_position": {
+      "label": "Death_A@0.0",
+      "max_surface_error": 0.0,
+      "max_normal_degrees": 1.7075472925031877e-06,
+      "p99_normal_degrees": 1.2074182697257333e-06
+    },
+    "worst_normal": {
+      "label": "Gallop->Death_A@0.09",
+      "max_surface_error": 0.0,
+      "max_normal_degrees": 1.9090959104164224e-06,
+      "p99_normal_degrees": 1.2074182697257333e-06
+    },
+    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "source_sha256": "90d0af6f4bfd639b5edbeaecca7be7114a0ad91281a3128cc04ba88cac05b336",
+    "candidate_sha256": "90d0af6f4bfd639b5edbeaecca7be7114a0ad91281a3128cc04ba88cac05b336"
+  },
+  "native_runtime_samples": 296,
+  "scope": "Original bytes, skin, rig, corrective data, materials, motions and approval status retained. A duplicate graphics comparison is unnecessary for identical input bytes.",
+  "evidence_sha256": {
+    "processing.json": "4a8feead9c4f6c04cbe323ed4fe19b1318939670a18d91b9c81039403760ffcb",
+    "exact-source-validation.json": "51d4c8c52ad32dbcebfba9d55f00b3f543d9244d3419e1fe3a7a00613034ce4d",
+    "physical-witness-validation.json": "1fc354f844dc8724e314685bd2e13dff01dd06ac03511fd3a2a95e71c5551e75",
+    "native-validation.json": "b56b1a49a8d49db74a0ebf153c1ed80d13bb50f4febea1514812b330cf1a652b",
+    "placement.json": "cd9ad0900f521cb90a58697b13a5467812ac02d4d7aa2c9ec7e7479df6d863a6"
+  }
+}
