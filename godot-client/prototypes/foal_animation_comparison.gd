@@ -24,6 +24,7 @@ var distance := 3.0
 var focus := Vector3(0, 0.6, 0)
 var dragging := false
 var ready_to_play := false
+var closing := false
 var job: Dictionary
 var clip := "Walk"
 var clock := 0.0
@@ -51,7 +52,9 @@ func run() -> void:
 		quit(1)
 		return
 	job = JSON.parse_string(FileAccess.get_file_as_string(args[0]))
-	root.title = "Rabbit Lands | Sunmane Foal animation comparison"
+	root.title = "Rabbit Lands | Sunmane Foal animation comparison | %s FPS draft" % job.get("fps", 240)
+	set_auto_accept_quit(false)
+	root.close_requested.connect(close_preview)
 	root.size = Vector2i(1440, 920)
 	Engine.max_fps = 240
 	var input_relay := InputRelay.new()
@@ -69,7 +72,7 @@ func run() -> void:
 	var layout := VBoxContainer.new()
 	layout.add_theme_constant_override("separation", 12)
 	margin.add_child(layout)
-	layout.add_child(label_for("Sunmane Foal (Dun)  /  Animation sampling pilot", 25))
+	layout.add_child(label_for("Sunmane Foal (Dun)  /  %s FPS animation draft" % job.get("fps", 240), 25))
 	layout.add_child(label_for("Same model, materials and corrective shapes. Both actors share time, speed and camera. Draft awaits your review.", 16))
 	var row := HBoxContainer.new()
 	layout.add_child(row)
@@ -298,6 +301,19 @@ func _process(delta: float) -> bool:
 		refresh_time()
 	return false
 
+func close_preview() -> void:
+	if closing: return
+	closing = true
+	ready_to_play = false
+	for actor in actors: actor.queue_free()
+	actors.clear()
+	players.clear()
+	await process_frame
+	NativeAnimationImporter.clear()
+	GlbSceneCache.clear()
+	await process_frame
+	quit()
+
 func smoke_test() -> void:
 	running = false
 	pause_button.text = "Play"
@@ -373,8 +389,4 @@ func smoke_test() -> void:
 	assert(distance < old_distance, "Mouse wheel did not zoom")
 	FileAccess.open(output.path_join("preview-smoke.json"), FileAccess.WRITE).store_string(JSON.stringify({"clips": records, "directed_switches_exercised": 64, "terminal_hold_and_idle_reset": true, "keyboard_mouse_orbit_zoom_input_delivered": true, "models": job.models, "renderer": RenderingServer.get_current_rendering_method()}, "  "))
 	print("FOAL_COMPARISON_SMOKE_PASS")
-	for actor in actors: actor.queue_free()
-	await process_frame
-	GlbSceneCache.clear()
-	NativeAnimationImporter.clear()
-	quit()
+	await close_preview()

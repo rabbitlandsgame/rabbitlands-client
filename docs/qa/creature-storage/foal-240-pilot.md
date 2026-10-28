@@ -132,3 +132,8 @@ The builder requires NumPy, SciPy and Zstandard and is bound to the current
 baseline SHA-256. The launcher accepts `--godot PATH` or the `GODOT` environment
 variable. The [machine-readable receipt](foal-240-pilot.json) binds measurements
 and limitations to the exact source/draft and ignored evidence hashes.
+
+The shared tools now also accept `--fps 30`; see the [30 FPS evaluation
+draft](foal-30-pilot.md). The original 240 FPS implementation receipt is bound
+to commit `5e7db3dc`. Its source and ignored evidence snapshot are retained in
+`.local/foal-240-draft/qa-5e7db3dc/` as the shared previewer evolves.

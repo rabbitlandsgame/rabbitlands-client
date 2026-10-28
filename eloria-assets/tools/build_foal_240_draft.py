@@ -72,7 +72,9 @@ def verify_static(a, ab, b, bb):
         assert {k:v for k,v in ia.items() if k != 'bufferView'} == {k:v for k,v in ib.items() if k != 'bufferView'}
 
 
-def build(source=SOURCE, output=OUTPUT):
+def build(source=SOURCE, output=None, fps=240):
+    assert fps in (30, 240)
+    output = output or ROOT / f'.local/foal-{fps}-draft'
     assert digest(source) == SOURCE_SHA, 'Baseline changed; review and rebind this pilot explicitly.'
     output.mkdir(parents=True, exist_ok=True)
     a, ab = read_glb(source)
@@ -90,7 +92,7 @@ def build(source=SOURCE, output=OUTPUT):
             ts = accessor(a, ab, old['input']).ravel()
             values = accessor(a, ab, old['output']).reshape(len(ts), -1)
             assert np.all(np.diff(ts) > 0) and np.isfinite(values).all()
-            query = uniform_clock(float(ts[0]), float(ts[-1]), 240)
+            query = uniform_clock(float(ts[0]), float(ts[-1]), fps)
             if np.array_equal(values, np.repeat(values[:1], len(values), axis=0)):
                 query = ts[[0, -1]].astype(np.float32)
                 v = values[[0, -1]]
@@ -103,10 +105,10 @@ def build(source=SOURCE, output=OUTPUT):
             before += len(ts); after += len(query)
             paths[kind] = paths.get(kind, 0) + 1
         clips.append({'name': animation['name'], 'source_sampler_keys': before, 'draft_sampler_keys': after, 'channels_by_path': paths})
-    d['asset'].setdefault('extras', {})['rabbitlands_animation_bake_fps'] = 240
-    d['asset']['extras']['rabbitlands_sampling_pilot'] = {'status': 'draft_for_comparison', 'source_sha256': SOURCE_SHA, 'maximum_samples_per_second': 240, 'method': 'uniform per-sampler LINEAR / quaternion SLERP; preserve endpoints and all channels'}
+    d['asset'].setdefault('extras', {})['rabbitlands_animation_bake_fps'] = fps
+    d['asset']['extras']['rabbitlands_sampling_pilot'] = {'status': 'draft_for_comparison', 'source_sha256': SOURCE_SHA, 'maximum_samples_per_second': fps, 'method': 'uniform per-sampler LINEAR / quaternion SLERP; preserve endpoints and all channels'}
     d, blob, packing = compact(d, blob)
-    candidate = output / 'sunmane_foal_dun_240.glb'
+    candidate = output / f'sunmane_foal_dun_{fps}.glb'
     write_glb(candidate, d, blob)
     b, bb = read_glb(candidate)
     verify_static(a, ab, b, bb)
@@ -122,10 +124,10 @@ def build(source=SOURCE, output=OUTPUT):
             assert np.array_equal(va[[0, -1]], vb[[0, -1]])
             assert np.isfinite(vb).all() and np.all(np.diff(tb) > 0)
             maximum_rate = max(maximum_rate, float(1 / np.diff(tb).min()))
-    assert maximum_rate <= 240
+    assert maximum_rate <= fps
     source_raw, draft_raw = source.stat().st_size, candidate.stat().st_size
     package = lambda p: len(zstandard.ZstdCompressor(level=3).compress(p.read_bytes())) + 56
-    report = {'actor': 'sunmane_foal_dun', 'status': 'draft_not_installed_or_artist_approved', 'source_sha256': digest(source), 'candidate_sha256': digest(candidate), 'maximum_nominal_samples_per_second': 240, 'maximum_float32_interval_rate': maximum_rate, 'source_bytes': source_raw, 'candidate_bytes': draft_raw, 'source_rlcz_bytes': package(source), 'candidate_rlcz_bytes': package(candidate), 'clips': clips, 'static_mesh_skin_skeleton_rest_morph_targets_material_images': 'exactly preserved', 'runtime_bake_fps': 240, 'packing': packing, 'limits': 'Approximate animation draft. Surface/contact/normal and runtime measurements are separate evidence; no old lossless acceptance claimed. RLCZ bytes include the 56-byte header, using packaging Zstandard level 3.'}
+    report = {'actor': 'sunmane_foal_dun', 'status': 'draft_not_installed_or_artist_approved', 'source_sha256': digest(source), 'candidate_sha256': digest(candidate), 'maximum_nominal_samples_per_second': fps, 'maximum_float32_interval_rate': maximum_rate, 'source_bytes': source_raw, 'candidate_bytes': draft_raw, 'source_rlcz_bytes': package(source), 'candidate_rlcz_bytes': package(candidate), 'clips': clips, 'static_mesh_skin_skeleton_rest_morph_targets_material_images': 'exactly preserved', 'runtime_bake_fps': fps, 'packing': packing, 'limits': 'Approximate animation draft. Surface/contact/normal and runtime measurements are separate evidence; no old lossless acceptance claimed. RLCZ bytes include the 56-byte header, using packaging Zstandard level 3.'}
     (output / 'build-report.json').write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8', newline='\n')
     print(json.dumps(report, indent=2))
     return report
@@ -133,6 +135,7 @@ def build(source=SOURCE, output=OUTPUT):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--output', type=Path, default=OUTPUT)
+    parser.add_argument('--fps', type=int, choices=[30, 240], default=240)
+    parser.add_argument('--output', type=Path)
     args = parser.parse_args()
-    build(output=args.output)
+    build(output=args.output, fps=args.fps)

@@ -1,7 +1,7 @@
 """Measure the foal draft in fresh isolated client-component processes.
 
 Uses a headless renderer; results describe CPU animation work and Godot memory,
-not whole-client FPS or GPU time. Output stays in .local/foal-240-draft.
+not whole-client FPS or GPU time. Output stays in .local/foal-<fps>-draft.
 """
 import argparse
 import json
@@ -10,20 +10,22 @@ from pathlib import Path
 import statistics
 import subprocess
 
-from preview_foal_240 import OUTPUT, prepare
+from preview_foal_240 import prepare
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--godot', type=Path, default=Path(os.environ.get('GODOT', 'C:/rabbitlands/rabbitlands-client/godot-client/Godot_v4.7.2-stable_win64.exe')))
+    parser.add_argument('--fps', type=int, choices=[30, 240], default=240)
     parser.add_argument('--repeats', type=int, default=3)
     args = parser.parse_args()
-    project, job_path, environment = prepare(args.godot)
+    project, job_path, environment = prepare(args.godot, args.fps)
+    output = project.parent
     fixtures = json.loads(job_path.read_text())['models']
     records = [[], []]
     for repeat in range(args.repeats):
         for index in ([0, 1] if repeat % 2 == 0 else [1, 0]):
-            prefix = OUTPUT / f'benchmark-{index}-{repeat}'
+            prefix = output / f'benchmark-{index}-{repeat}'
             job = {**fixtures[index], 'report': str(prefix.with_suffix('.json'))}
             prefix.with_name(prefix.name + '-job.json').write_text(json.dumps(job))
             with prefix.with_suffix('.stdout.log').open('w') as out, prefix.with_suffix('.stderr.log').open('w') as err:
@@ -40,7 +42,7 @@ def main():
         entry['raw_runs'] = rows
         summary['versions'].append(entry)
     summary['scope'] = records[0][0]['scope']
-    (OUTPUT / 'runtime-measurements.json').write_text(json.dumps(summary, indent=2) + '\n', encoding='utf-8', newline='\n')
+    (output / 'runtime-measurements.json').write_text(json.dumps(summary, indent=2) + '\n', encoding='utf-8', newline='\n')
     print(json.dumps({k:v for k,v in summary.items() if k != 'versions'}, indent=2))
     for entry in summary['versions']: print({k:v for k,v in entry.items() if k != 'raw_runs'})
 

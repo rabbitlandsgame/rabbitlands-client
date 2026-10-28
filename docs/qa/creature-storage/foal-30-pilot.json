@@ -1,0 +1,199 @@
+{
+  "actor": "sunmane_foal_dun",
+  "status": "complete_eight_clip_30_fps_draft_for_user_evaluation_not_installed",
+  "source_sha256": "b15e77e1b20a7eb768e0313fe4a49518b9b3e8403e0b429d61cc741706426f8a",
+  "candidate_sha256": "ac7f808f05f08fba9ed0265412b356880dde72bfde4295bb98c836e589291ad9",
+  "maximum_nominal_samples_per_second": 30,
+  "maximum_float32_interval_rate": 29.760028381374724,
+  "source_bytes": 96538140,
+  "candidate_bytes": 33907032,
+  "source_rlcz_bytes": 57579453,
+  "candidate_rlcz_bytes": 13454758,
+  "clips": [
+    {
+      "name": "Fighting_Idle",
+      "source_sampler_keys": 439166,
+      "draft_sampler_keys": 7478,
+      "channels_by_path": {
+        "translation": 181,
+        "rotation": 181,
+        "scale": 181,
+        "weights": 1
+      },
+      "packed_draft_sampler_keys": 7478,
+      "duration_seconds": 1.0416666269302368
+    },
+    {
+      "name": "Hit_Chest",
+      "source_sampler_keys": 352131,
+      "draft_sampler_keys": 6578,
+      "channels_by_path": {
+        "translation": 181,
+        "rotation": 181,
+        "scale": 181,
+        "weights": 1
+      },
+      "packed_draft_sampler_keys": 6578,
+      "duration_seconds": 1.0416666269302368
+    },
+    {
+      "name": "Idle_A",
+      "source_sampler_keys": 439613,
+      "draft_sampler_keys": 6728,
+      "channels_by_path": {
+        "translation": 181,
+        "rotation": 181,
+        "scale": 181,
+        "weights": 1
+      },
+      "packed_draft_sampler_keys": 6728,
+      "duration_seconds": 1.0416666269302368
+    },
+    {
+      "name": "Walk",
+      "source_sampler_keys": 512809,
+      "draft_sampler_keys": 8384,
+      "channels_by_path": {
+        "translation": 181,
+        "rotation": 181,
+        "scale": 181,
+        "weights": 1
+      },
+      "packed_draft_sampler_keys": 8352,
+      "duration_seconds": 1.1200000047683716
+    },
+    {
+      "name": "Jog",
+      "source_sampler_keys": 304769,
+      "draft_sampler_keys": 5192,
+      "channels_by_path": {
+        "translation": 181,
+        "rotation": 181,
+        "scale": 181,
+        "weights": 1
+      },
+      "packed_draft_sampler_keys": 5174,
+      "duration_seconds": 0.6600000262260437
+    },
+    {
+      "name": "Sword_Attack",
+      "source_sampler_keys": 520213,
+      "draft_sampler_keys": 9874,
+      "channels_by_path": {
+        "translation": 181,
+        "rotation": 181,
+        "scale": 181,
+        "weights": 1
+      },
+      "packed_draft_sampler_keys": 9828,
+      "duration_seconds": 1.600000023841858
+    },
+    {
+      "name": "Gallop",
+      "source_sampler_keys": 1773007,
+      "draft_sampler_keys": 6518,
+      "channels_by_path": {
+        "translation": 181,
+        "rotation": 181,
+        "scale": 181,
+        "weights": 1
+      },
+      "packed_draft_sampler_keys": 6503,
+      "duration_seconds": 0.5600000023841858
+    },
+    {
+      "name": "Death_A",
+      "source_sampler_keys": 313352,
+      "draft_sampler_keys": 18720,
+      "channels_by_path": {
+        "translation": 181,
+        "rotation": 181,
+        "scale": 181,
+        "weights": 1
+      },
+      "packed_draft_sampler_keys": 18568,
+      "duration_seconds": 2.5999999046325684
+    }
+  ],
+  "static_mesh_skin_skeleton_rest_morph_targets_material_images": "exactly preserved",
+  "runtime_bake_fps": 30,
+  "packing": {
+    "constant_samplers_collapsed": 6,
+    "original_buffer_bytes": 95840412,
+    "packed_buffer_bytes": 31832540
+  },
+  "limits": "Approximate animation draft. Surface/contact/normal and runtime measurements are separate evidence; no old lossless acceptance claimed. RLCZ bytes include the 56-byte header, using packaging Zstandard level 3.",
+  "based_directly_on_original": true,
+  "previous_240_fps_draft_preserved": true,
+  "source_and_240_draft_unchanged": true,
+  "preview": {
+    "renderer": "forward_plus",
+    "all_eight_clips": true,
+    "directed_switches": 64,
+    "scrub_pause_restart_speed_end_holds_repeats_reset_keyboard_orbit_zoom": true,
+    "cache_cleanup_on_close_tested": true,
+    "components": "Actual client ReplicatedActor3D, GlbSceneCache raw path and NativeAnimationImporter; isolated local profile."
+  },
+  "runtime_measurements": {
+    "repeats_per_version": 1,
+    "versions": [
+      {
+        "load_ms": 6315.559,
+        "retained_static_memory_delta_bytes": 510199538,
+        "load_peak_static_memory_increase_bytes": 526826961,
+        "retargeted_keys": 3973403,
+        "retargeted_tracks": 1797,
+        "bones": 180,
+        "animation_update_usec": {
+          "Death_A": 70.4016666666667,
+          "Fighting_Idle": 44.2191666666667,
+          "Gallop": 104.9725,
+          "Hit_Chest": 34.2316666666667,
+          "Idle_A": 38.3858333333333,
+          "Jog": 58.7391666666667,
+          "Sword_Attack": 54.6175,
+          "Walk": 61.0016666666667
+        }
+      },
+      {
+        "load_ms": 1272.919,
+        "retained_static_memory_delta_bytes": 96529230,
+        "load_peak_static_memory_increase_bytes": 86878597,
+        "retargeted_keys": 40785,
+        "retargeted_tracks": 1797,
+        "bones": 180,
+        "animation_update_usec": {
+          "Death_A": 40.2616666666667,
+          "Fighting_Idle": 24.62,
+          "Gallop": 73.6933333333333,
+          "Hit_Chest": 23.0633333333333,
+          "Idle_A": 24.035,
+          "Jog": 51.2166666666667,
+          "Sword_Attack": 44.2016666666667,
+          "Walk": 48.4008333333333
+        }
+      }
+    ],
+    "scope": "Fresh-process real GlbSceneCache._build_raw + ReplicatedActor3D + NativeAnimationImporter, warm OS file cache. Retained Godot static CPU allocations include scene and library caches, meshes, textures and actor. AnimationPlayer advance plus forced skeleton global transforms at 240 updates/s; nine batches of 1200 updates per clip after warmup. Excludes GPU rendering/skinning, whole-game logic and frame-rate claims.",
+    "limits": "One fresh-process run per version; static CPU allocations include shared caches + first Actor. Loose GLBs and warm file cache. Not RSS/VRAM, whole-client FPS or packaged decode timing. GPU buffers unchanged."
+  },
+  "qualification_scope": "Static payload and exported clip endpoints/inventory verified; all eight clips and preview controls exercised. Approximate 30 FPS evaluation draft. Earlier 240 FPS dense surface/normal results do not apply. No new dense positional/normal error envelope or artist approval claimed.",
+  "evidence_sha256": {
+    "build-report.json": "6064405263fb3e52973239e1222173b0a4af5fdf89fd9ffe3286828141c72b58",
+    "runtime-measurements.json": "d3c358656826eab7ab144446fde25205e2a5051f63bb4b8a28b2694be77fe3ad",
+    "preview-captures/preview-smoke.json": "1d3c65b8a546fcb311a8545e8675533f24dd42fd7aa186a21ba71ed63e19aee7",
+    "preview.stdout.log": "4cdb5d002686c33e300c4cb31333472a25c6627c6b20ac17fef2da2dcb043642",
+    "preview.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "preview-import.stdout.log": "b728de0c23f24d9aa31bc7608b177d7ca13857d7c3aca862a08506d00675123b",
+    "preview-import.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "evidence_snapshot": ".local/foal-30-draft/qa-draft1",
+  "implementation_sha256": {
+    "eloria-assets/tools/build_foal_240_draft.py": "a2ff574c90caf9b422f6dbfc29010c2662d04d5e240a439310105fbde79f45f5",
+    "eloria-assets/tools/preview_foal_240.py": "319051d2f2cfec2f43aefb491f2c6b828bb9f1c86b6b02833d7f18eb2975c6d2",
+    "eloria-assets/tools/measure_foal_240.py": "44b28e4ca3bf984cd8c5a6f77dbbf6fe242554188f62771be031828d2a254cdf",
+    "godot-client/prototypes/foal_animation_comparison.gd": "f597a18c92634d7b90ece88ff26385dd9a722103d2d9c7a68569367124fe9706",
+    "godot-client/tests/benchmark_foal_animation.gd": "37b37599696faaab5c5ec64d1ff3c981d5e26b52e94c49cec8e22a7c0846e6b1",
+    "godot-client/open-foal-30fps-comparison.bat": "d125d4843ecf6e74065ed0346e1009dbb5b215f746c866284762f985be76ee89"
+  }
+}
