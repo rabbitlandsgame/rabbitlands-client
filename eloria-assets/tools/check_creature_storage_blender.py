@@ -5,7 +5,8 @@ import numpy as np
 from mathutils import Matrix, Vector
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
-from video_motion.blender_vertex_identity import imported_bindings
+from video_motion.blender_vertex_identity import imported_bindings, document, array
+from video_motion.blender_step_time import step_safe_frame
 
 job = json.loads(
     pathlib.Path(sys.argv[sys.argv.index("--") + 1]).read_text(encoding="utf-8")
@@ -14,12 +15,22 @@ out = pathlib.Path(job["output"])
 w = json.loads(pathlib.Path(job["witness"]).read_text(encoding="utf-8"))
 results = {}
 baseline_samples = {}
+baseline_query_frames = {}
 direct = {
     "maximum_position_error": 0.0,
     "maximum_bone_matrix_error": 0.0,
     "maximum_float32_budget": 0.0,
     "poses": 0,
     "neutral_default_checked": False,
+}
+source_document, source_buffer = document(pathlib.Path(job["source"]))
+step_times = {
+    clip["name"]: [
+        array(source_document, source_buffer, sampler["input"]).ravel()
+        for sampler in clip["samplers"]
+        if sampler.get("interpolation") == "STEP"
+    ]
+    for clip in source_document.get("animations", [])
 }
 for label in ["baseline", "candidate"]:
     bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -104,8 +115,33 @@ for label in ["baseline", "candidate"]:
                 key.animation_data.action = action
                 key.animation_data.action_slot = slot
 
-    def pose(tm):
-        frame = tm * 240
+    time_correspondence = []
+
+    def pose(tm, clip):
+        curves = [
+            curve
+            for layer in clips[clip].layers
+            for strip in layer.strips
+            for bag in strip.channelbags
+            for curve in bag.fcurves
+            if any(key.interpolation == "CONSTANT" for key in curve.keyframe_points)
+        ]
+        frame, correspondence = step_safe_frame(
+            tm,
+            240,
+            step_times.get(clip, []),
+            evaluate=lambda value: tuple(curve.evaluate(value) for curve in curves),
+        )
+        signature = (clip, float(tm))
+        if label == "baseline":
+            baseline_query_frames[signature] = frame
+        else:
+            assert frame == baseline_query_frames[signature], (
+                "Source/candidate Blender query correspondence differs",
+                signature,
+            )
+        if correspondence:
+            time_correspondence.append(dict(clip=clip, **correspondence))
         scene.frame_set(int(frame), subframe=frame - int(frame))
         bpy.context.view_layer.update()
         return bpy.context.evaluated_depsgraph_get()
@@ -191,7 +227,7 @@ for label in ["baseline", "candidate"]:
         bone_error = 0.0
         surface_error = 0.0
         for entry in entries:
-            deps = pose(entry["time"])
+            deps = pose(entry["time"], clip)
             compare_direct((clip, float(entry["time"])), deps)
             for (ob, vi), expected in zip(bindings, entry["surface"]):
                 ev = ob.evaluated_get(deps)
@@ -231,6 +267,7 @@ for label in ["baseline", "candidate"]:
         "vertex_identity": identity,
         "binding_method": "Full original GLB primitive vertex order, independently proved against basis/UV/skin/normals/all POSITION target data; frozen source IDs retained through partition mapping.",
         "clips": metrics,
+        "step_frame_correspondence": time_correspondence,
         "max_surface_error_over_height": maxsurface,
         "max_bone_head_error_over_height": maxbone,
         "scope": "Independent fresh Blender import geometry/motion witness check. Blender is not the authority for runtime morph normal shading.",
