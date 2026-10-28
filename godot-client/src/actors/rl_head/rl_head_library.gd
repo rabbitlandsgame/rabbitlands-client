@@ -2,12 +2,23 @@ class_name RLHeadLibrary
 extends RefCounted
 ## Finds and reads the RL head's assets, once while any RL head is drawn.
 ##
-## Everything under assets/actors/rl_heads/ is read through GlbSceneCache, so
-## an imported checkout and an export use Godot's imported scenes (with their
-## generated mesh LODs) and a lean checkout parses the raw file. The pieces of
-## a head or a beard, and the shared ShaderMaterials every actor draws them
-## with, are cached here; a hairstyle is instanced per actor because each
-## actor's hair has a skeleton of its own for its springs.
+## The files ship the way develop ships its native actors
+## (tools/package_client.py, actor_shipping):
+## * The head, hair and beard GLBs (assets/actors/native/rl_heads/) are a
+##   loose-only actor folder: never imported (the local .gdignore AGENTS.md
+##   prepares for every loose actor folder keeps them out of a checkout's
+##   import, as for races/ and hair/), shipped beside the executable, and read
+##   through GlbSceneCache from the globalized path, which GLTFDocument parses
+##   raw in a checkout and an export alike. Their only LODs are the authored
+##   `_lod<k>` levels.
+## * The maps (assets/actors/native/rl_head_textures/) are load()ed through
+##   ResourceLoader, from the PCK in an export: each PNG's import settings are
+##   committed beside it (VRAM-compressed with mipmaps, BPTC for the
+##   channel-packed masks, features2 limited to 1024 px), so a checkout draws
+##   what a package ships. manifest.json is packed as a plain file.
+## The pieces of a head or a beard, and the shared ShaderMaterials every actor
+## draws them with, are cached here; a hairstyle is instanced per actor because
+## each actor's hair has a skeleton of its own for its springs.
 ##
 ## The asset contract (see RLHeadRig) is read leniently: a missing hairstyle,
 ## beard or texture is logged once and drawn without, never an error.
@@ -19,10 +30,10 @@ extends RefCounted
 ## files, the body cuts, the headwear refits and the baked identities, as
 ## develop's own High portrait releases its caches with its last user.
 
-const ROOT := "res://assets/actors/rl_heads/"
+const ROOT := "res://assets/actors/native/rl_heads/"
 const HAIR_DIR := ROOT + "hair/"
 const BEARD_DIR := ROOT + "beards/"
-const TEXTURE_DIR := ROOT + "textures/"
+const TEXTURE_DIR := "res://assets/actors/native/rl_head_textures/"
 const MANIFEST_PATH := TEXTURE_DIR + "manifest.json"
 const GLB_MESH_EXTRAS := preload("res://src/actors/glb_mesh_extras.gd")
 const IDENTITY_BAKE := preload("res://src/actors/rl_head/rl_head_identity_bake.gd")
@@ -195,24 +206,32 @@ static func beard_styles() -> PackedStringArray:
 	return names
 
 
+## The GLBs in a loose folder. The folder is listed on disk at its globalized
+## path, beside the executable in an export: res:// lists only the PCK there,
+## which holds none of them.
 static func _glb_names(folder: String) -> PackedStringArray:
 	var names := PackedStringArray()
-	if not DirAccess.dir_exists_absolute(folder):
+	var on_disk := ProjectSettings.globalize_path(folder)
+	if not DirAccess.dir_exists_absolute(on_disk):
 		return names
-	for file: String in DirAccess.get_files_at(folder):
-		# An export lists the import remap rather than the source file.
-		var name := file.trim_suffix(".remap").trim_suffix(".import")
-		if name.get_extension().to_lower() == "glb" and not names.has(name.get_basename()):
-			names.append(name.get_basename())
+	for file: String in DirAccess.get_files_at(on_disk):
+		if file.get_extension().to_lower() == "glb":
+			names.append(file.get_basename())
 	names.sort()
 	return names
+
+
+## Whether a loose GLB is on disk (beside the executable in an export), where
+## GlbSceneCache and the readers here open it.
+static func glb_exists(path: String) -> bool:
+	return FileAccess.file_exists(ProjectSettings.globalize_path(path))
 
 
 ## The parsed glTF JSON of a GLB (only the JSON chunk is read), or {}.
 static func glb_document(path: String) -> Dictionary:
 	if not _documents.has(path):
 		var parsed: Variant = GLB_MESH_EXTRAS._read_glb_json(ProjectSettings.globalize_path(path)) \
-			if FileAccess.file_exists(path) else null
+			if glb_exists(path) else null
 		_documents[path] = parsed if parsed is Dictionary else {}
 	return _documents[path] as Dictionary
 
@@ -245,7 +264,7 @@ static func head(sex: String) -> Dictionary:
 		return _heads[sex] as Dictionary
 	var path := head_path(sex)
 	var info := {}
-	var lods := _skinned_lods(path, "rl_head")
+	var lods := _skinned_lods(path, "rl_head") if glb_exists(path) else []
 	if lods.is_empty():
 		warn_once("head:" + sex, "no head module at " + path)
 	else:
@@ -272,7 +291,7 @@ static func beard(style: String) -> Array:
 	if not _beards.has(style):
 		var path := beard_path(style)
 		var lods: Array = []
-		if FileAccess.file_exists(path) or ResourceLoader.exists(path):
+		if glb_exists(path):
 			lods = _skinned_lods(path, "beard")
 		_beards[style] = lods
 	return _beards[style] as Array
@@ -283,7 +302,7 @@ static func hair_info(style: String) -> Dictionary:
 	if not _hair_info.has(style):
 		var path := hair_path(style)
 		var info := {}
-		if FileAccess.file_exists(path) or ResourceLoader.exists(path):
+		if glb_exists(path):
 			info = {"path": path, "extras": asset_extras(path, "rlHair")}
 		else:
 			warn_once("hair:" + style, "hairstyle %s missing, drawing the head bald" % style, true)
@@ -439,7 +458,7 @@ static func _read_manifest() -> Dictionary:
 	return _manifest as Dictionary
 
 
-## A value from textures/manifest.json, tolerant of its exact shape: the first
+## A value from rl_head_textures/manifest.json, tolerant of its exact shape: the first
 ## of `keys` (most specific first) found at the top level or under `materials`
 ## whose entry has `slot`. A per-quality entry ({"high": ..., "low": ...,
 ## "default": ...}) resolves for `quality`.
@@ -465,7 +484,10 @@ static func manifest_value(keys: Array[String], slot: String, quality: int) -> V
 	return null
 
 
-## A texture under textures/, or null when the file is absent (logged once).
+## A map under rl_head_textures/, or null when the file is absent (logged
+## once). The maps are imported with the settings committed beside them
+## (VRAM-compressed, mipmapped, features2 at 1024 px) and used as imported, in
+## a checkout and from a package's PCK alike.
 static func texture(file: String) -> Texture2D:
 	if file.is_empty():
 		return null
@@ -486,15 +508,22 @@ static func texture(file: String) -> Texture2D:
 	return _textures[path] as Texture2D
 
 
-## Head textures are minified hard at gameplay distance. An import without a
-## mip chain (the editor's default for a PNG it has not seen used in 3D) gets
-## one built here, once per texture, first scaled down to its map's
-## MAP_SIZE_CAPS size, and is block-compressed where the GPU takes S3TC so a
-## 2048 px map costs a quarter of the video memory. The proper fix is import
-## settings (mipmaps, VRAM compressed, size limit) on these files.
+## Head textures are minified hard at gameplay distance. A block-compressed
+## import is what the committed import settings make (VRAM-compressed with
+## its mip chain; tools/package_client.py and the tests hold every map to
+## that) and is used as it is, never read back from the GPU. Anything else -
+## a raw file not imported yet, or an import that lost its committed settings
+## - gets a mip chain built here, once per texture, first scaled down to its
+## map's MAP_SIZE_CAPS size, and is block-compressed where the GPU takes S3TC
+## so a 2048 px map costs a quarter of the video memory.
 static func _with_mipmaps(source: Texture2D, colour: bool, max_size: int = 0) -> Texture2D:
 	if source == null:
 		return null
+	if source is CompressedTexture2D:
+		if _block_compressed(source.get_format()):
+			return source
+		warn_once("mips:" + source.resource_path, "%s is imported without VRAM compression; "
+			% source.resource_path + "building its mip chain at runtime (commit its import settings)")
 	var image := source.get_image()
 	if image == null or image.is_empty() or image.has_mipmaps():
 		return source
@@ -512,14 +541,19 @@ static func _with_mipmaps(source: Texture2D, colour: bool, max_size: int = 0) ->
 
 
 ## The largest size a mask keeps when it is mipmapped here, by map (the file
-## name's suffix). features2 holds only soft masks (stubble, blush, scalp and
-## the face/neck split): at 1024 px close renders match 2048 px within 11/255
-## on 0.03% of the pixels (perf gate 2026-10-28, .local/rl-high/evidence/
-## texcap-*), and each sex saves 4.2 MB of video memory. The feature and brow
-## maps stay at 2048 px: at 1024 the brow strokes and freckles visibly soften.
-## An import that brings its own mipmaps keeps its size (set the same limit
-## there when the texture route is settled).
+## name's suffix); the committed imports set the same `process/size_limit`.
+## features2 holds only soft masks (stubble, blush, scalp and the face/neck
+## split): at 1024 px close renders match 2048 px within 11/255 on 0.03% of the
+## pixels (perf gate 2026-10-28, .local/rl-high/evidence/texcap-*), and each
+## sex saves 4.2 MB of video memory. The feature and brow maps stay at 2048 px:
+## at 1024 the brow strokes and freckles visibly soften.
 const MAP_SIZE_CAPS := {"features2": 1024}
+
+
+## Whether `format` is a GPU block format (S3TC, RGTC, BPTC, ETC, ASTC): what a
+## VRAM-compressed import gives.
+static func _block_compressed(format: int) -> bool:
+	return format >= Image.FORMAT_DXT1 and format <= Image.FORMAT_ASTC_8x8_HDR
 
 
 static func _size_cap(path: String) -> int:

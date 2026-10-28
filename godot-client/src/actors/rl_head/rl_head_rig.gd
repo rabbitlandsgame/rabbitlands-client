@@ -10,7 +10,8 @@ extends Node3D
 ## builds one for a Human at High quality (and for the lab's `rl_head`
 ## override at any quality); nothing here runs for any other actor.
 ##
-## Asset contract (assets/actors/rl_heads/, read by RLHeadLibrary):
+## Asset contract (assets/actors/native/rl_heads/ and the maps in
+## assets/actors/native/rl_head_textures/, read by RLHeadLibrary):
 ##   * rl_head_<sex>.glb: a mesh skinned to spine_03, neck_01 and Head with the
 ##     body's inverse binds, at the scene root. Mesh nodes `rl_head_lod<k>`
 ##     (or one `rl_head`, which is LOD 0); materials rl_skin, rl_eye, rl_lash,

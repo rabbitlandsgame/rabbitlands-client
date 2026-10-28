@@ -2,7 +2,9 @@ extends SceneTree
 ## Headless contract for the RL head (src/actors/rl_head/): the assets against
 ## their own extras and each other (the shipped head builds pinned, every hair
 ## and beard fitted to the head shipped beside it, the hairstyles' grooming
-## shapes and fine-detail keep levels, beards whole), the hair detail uniform
+## shapes and fine-detail keep levels, beards whole), the packaged route
+## (loose, never-imported GLBs; imported block-compressed, mipmapped maps used
+## as they are), the hair detail uniform
 ## and the grooming from saved fields with the springs still swinging, the
 ## appearance byte form, identity and expression kept
 ## apart through animation, the body cut through torso and cape changes, the
@@ -92,6 +94,48 @@ func _check_assets() -> void:
 			and float((eye["right"] as Dictionary)["iris_radius"]) > 0.01,
 			"%s iris centres measured off the eye surface" % sex)
 	_check_asset_consistency()
+	_check_shipping_route()
+
+
+## The route a package ships (tools/package_client.py, actor_shipping), taken
+## by the checkout too: the GLBs are never imported, so GlbSceneCache parses
+## them raw from their globalized path, and the maps come from ResourceLoader
+## as their committed imports make them - block-compressed, with a mip chain,
+## features2 at 1024 px - used as they are.
+func _check_shipping_route() -> void:
+	var glbs := 0
+	for folder: String in ["", "hair/", "beards/"]:
+		for file: String in DirAccess.get_files_at(ProjectSettings.globalize_path(RLHeadLibrary.ROOT + folder)):
+			if file.get_extension() == "glb":
+				glbs += 1
+				var path := RLHeadLibrary.ROOT + folder + file
+				_expect(not FileAccess.file_exists(path + ".import"),
+					"%s is not editor-imported (loose-only actor)" % path.get_file())
+	_expect(glbs >= 8, "the RL GLBs are found on disk (%d)" % glbs)
+	_expect(FileAccess.file_exists(RLHeadLibrary.ROOT.path_join(".gdignore")),
+		"the RL GLB folder carries its local import guard (AGENTS.md: actor_shipping loose folders)")
+	_expect(RLHeadLibrary.hair_styles().size() >= 2 and RLHeadLibrary.beard_styles().size() >= 5,
+		"hairstyles and beards are listed from disk %s %s" % [RLHeadLibrary.hair_styles(),
+			RLHeadLibrary.beard_styles()])
+	var maps := 0
+	for file: String in DirAccess.get_files_at(ProjectSettings.globalize_path(RLHeadLibrary.TEXTURE_DIR)):
+		if file.get_extension() != "png":
+			continue
+		maps += 1
+		var path := RLHeadLibrary.TEXTURE_DIR + file
+		var texture := RLHeadLibrary.texture(file)
+		var size := texture.get_size() if texture != null else Vector2.ZERO
+		var cap := 1024.0 if file.contains("features2") else 4096.0
+		_expect(texture is CompressedTexture2D and texture.resource_path == path,
+			"%s is the imported texture, used as it is" % file)
+		# CompressedTexture2D does not report its mip chain (has_mipmaps() is
+		# false); the image it uploaded does.
+		var image := texture.get_image() if texture != null else null
+		_expect(image != null and image.has_mipmaps() and Image.FORMAT_DXT1 <= texture.get_format()
+			and texture.get_format() <= Image.FORMAT_BPTC_RGBFU and maxf(size.x, size.y) <= cap,
+			"%s is block-compressed with mipmaps, %s (format %d, %d mip levels)" % [file, size,
+				texture.get_format() if texture != null else -1, image.get_mipmap_count() if image != null else -1])
+	_expect(maps >= 13, "every RL map was checked (%d)" % maps)
 
 
 ## The head builds shipped, by sex. The hairstyles and beards beside them were

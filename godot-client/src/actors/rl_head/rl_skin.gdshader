@@ -4,7 +4,7 @@
 // way face_appearance.gdshader recolours the body: the reference divided out,
 // the chosen colour multiplied in, and a share of the local detail kept. That
 // share is the body's (a fifth) on the neck rim and the head's own on the face
-// (textures/manifest.json: about 0.55), blended by the Head joint's skin
+// (rl_head_textures/manifest.json: about 0.55), blended by the Head joint's skin
 // weight, so a recoloured neck meets a recoloured body without a seam.
 // Lighting is the body's own model (Burley diffuse, Schlick-GGX specular,
 // the body's roughness on the rim); the head's own roughness and an optional
