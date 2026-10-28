@@ -13,6 +13,11 @@ func vector(value: Vector3) -> Array:
 func transform(value: Transform3D) -> Array:
 	return [vector(value.origin),vector(value.basis.x),vector(value.basis.y),vector(value.basis.z)]
 
+func source_clip_inventory() -> PackedStringArray:
+	if job.has("all_native_clips"): return PackedStringArray(job.all_native_clips)
+	var witness: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(job.witness))
+	return PackedStringArray(witness.clips.keys())
+
 func pose(p: Dictionary, entry: Dictionary) -> void:
 	p.player.play("RESET",0.0)
 	p.player.seek(0.0,true)
@@ -92,7 +97,10 @@ func panel(fixture: Dictionary) -> Dictionary:
 	config.animationLibrary = fixture.path
 	var actor := ReplicatedActor3D.new()
 	world.add_child(actor)
-	var mapping: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(config.animationMap))
+	# The private QA copy adds unreachable action aliases for unused native slots.
+	# Keep config.animationMap unchanged for Actor classification and placement.
+	var map_path: String = str(job.get("qa_animation_map_path",config.animationMap))
+	var mapping: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(map_path))
 	var errors := actor.configure({"actor_id":5,"x":0,"y":0,"rotation":0,"kind":5,"name":job.actor},CoordinateAdapter.new(),config,mapping)
 	assert(errors.is_empty(),str(errors))
 	actor.set_process(false)
@@ -101,6 +109,10 @@ func panel(fixture: Dictionary) -> Dictionary:
 	var skeleton := model.find_children("*","Skeleton3D",true,false)[0] as Skeleton3D
 	var player := actor.animation_player
 	assert(player != null)
+	var expected := source_clip_inventory()
+	assert(not expected.is_empty(),"Missing original source clip inventory")
+	for clip: String in expected:
+		assert(player.has_animation(clip),"Actor QA map omits original native clip: "+clip)
 	player.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 	var camera := Camera3D.new()
 	camera.projection = Camera3D.PROJECTION_ORTHOGONAL
@@ -207,7 +219,7 @@ func run() -> void:
 			picture.save_png(output.path_join(str(p.name)+"-"+label+".png"))
 		labels.append(label)
 		if labels.size()%50 == 0: print("CREATURE_STORAGE_RENDER ",job.actor," ",labels.size(),"/",entries.size())
-	FileAccess.open(output.path_join("render.json"),FileAccess.WRITE).store_string(JSON.stringify({"passed":true,"actor":job.actor,"frames":labels,"placements":placements,"engine":Engine.get_version_info(),"gpu":RenderingServer.get_video_adapter_name(),"method":RenderingServer.get_current_rendering_method(),"camera_size":size,"camera_target":vector(target),"scope":"Complete ReplicatedActor3D setup with actual display scale, grounding and body materials; identical cameras for source/candidate, four views and every full native cycle at24Hz. Numeric playback and pixel comparisons are separate reports."},"\t"))
+	FileAccess.open(output.path_join("render.json"),FileAccess.WRITE).store_string(JSON.stringify({"passed":true,"source_native_clips":source_clip_inventory(),"actor":job.actor,"frames":labels,"placements":placements,"engine":Engine.get_version_info(),"gpu":RenderingServer.get_video_adapter_name(),"method":RenderingServer.get_current_rendering_method(),"camera_size":size,"camera_target":vector(target),"scope":"Complete ReplicatedActor3D setup with actual display scale, grounding and body materials; identical cameras for source/candidate, four views and every full native cycle at24Hz. Numeric playback and pixel comparisons are separate reports."},"\t"))
 	for p: Dictionary in panels: p.viewport.free()
 	NativeAnimationImporter.clear()
 	GlbSceneCache.clear()

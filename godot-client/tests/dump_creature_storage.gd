@@ -21,6 +21,11 @@ func save(path: String, bytes: PackedByteArray) -> void:
 func vector(value: Vector3) -> Array:
 	return [value.x,value.y,value.z]
 
+func source_clip_inventory() -> PackedStringArray:
+	if job.has("all_native_clips"): return PackedStringArray(job.all_native_clips)
+	var witness: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(job.witness))
+	return PackedStringArray(witness.clips.keys())
+
 func describe(fixture: Dictionary) -> void:
 	var model: Node3D
 	var holder: Node3D
@@ -30,12 +35,17 @@ func describe(fixture: Dictionary) -> void:
 		root.add_child(actor)
 		var config: Dictionary = job.config.duplicate(true)
 		config.scene = fixture.path; config.animationLibrary = fixture.path
-		var mapping: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(config.animationMap))
+		var map_path: String = str(job.get("qa_animation_map_path",config.animationMap))
+		var mapping: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(map_path))
 		assert(actor.configure({"actor_id":5,"x":0,"y":0,"rotation":0,"kind":5,"name":job.actor},CoordinateAdapter.new(),config,mapping).is_empty())
 		actor.set_process(false); actor.set_physics_process(false)
 		model = actor.get_node("NativeModel") as Node3D
 		holder = actor
 		player = actor.animation_player
+		var expected := source_clip_inventory()
+		assert(not expected.is_empty(),"Missing original source clip inventory")
+		for clip: String in expected:
+			assert(player.has_animation(clip),"Actor QA fit map omits original native clip: "+clip)
 	else:
 		model = Cache.instantiate(fixture.path)
 		assert(model != null)
@@ -143,7 +153,7 @@ func run() -> void:
 	write_report()
 
 func write_report() -> void:
-	FileAccess.open(output.path_join("runtime.json"),FileAccess.WRITE).store_string(JSON.stringify({"descriptions":descriptions,"samples":samples,"mode":mode,"engine":Engine.get_version_info()}))
+	FileAccess.open(output.path_join("runtime.json"),FileAccess.WRITE).store_string(JSON.stringify({"descriptions":descriptions,"samples":samples,"mode":mode,"source_native_clips":source_clip_inventory() if mode == "fit" else PackedStringArray(),"engine":Engine.get_version_info()}))
 	for model: Dictionary in models: model.model.free()
 	Importer.clear(); Cache.clear()
 	print("CREATURE_STORAGE_DUMP_PASS ",job.actor," ",mode," ",samples.size())

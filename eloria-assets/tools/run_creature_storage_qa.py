@@ -42,6 +42,25 @@ def validate_fixture_hashes(job, project=None):
                 raise ValueError(f"Stale {field} {name} fixture: {path}")
 
 
+def validate_source_clip_inventory(job):
+    """The Actor comparison must include source slots unused by its gameplay map."""
+    from video_motion.asset import read_glb
+
+    document, _ = read_glb(Path(job["source"]))
+    expected = [row.get("name") for row in document.get("animations", [])]
+    if not expected or any(not isinstance(name, str) or not name for name in expected):
+        raise ValueError("Source animations need an explicit native clip inventory")
+    if len(expected) != len(set(expected)):
+        raise ValueError("Duplicate source clip names cannot identify native coverage")
+    stated = job.get("all_native_clips")
+    if stated is None:
+        witness = json.loads(Path(job["witness"]).read_text(encoding="utf-8"))
+        stated = list(witness["clips"])
+    if len(stated) != len(expected) or set(stated) != set(expected):
+        raise ValueError("QA clip inventory differs from the original GLB native slots")
+    return expected
+
+
 def child(arguments, folder, environment, timeout):
     folder.mkdir(parents=True, exist_ok=True)
     stdout, stderr = folder / "stdout.log", folder / "stderr.log"
@@ -201,6 +220,8 @@ def main():
         if ".local" not in project.parts:
             parser.error("Godot QA must use an isolated ignored .local project")
         validate_fixture_hashes(job, project)
+        if args.phase in ("fit", "render", "placement"):
+            validate_source_clip_inventory(job)
         rendering = args.phase == "render"
         actor_setup = args.phase in ("render", "placement")
         script = (
