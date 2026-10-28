@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "actor": "drowned_lich_king",
+  "source_sha256": "2e64a12d91c0beee75d844d60c836d2d3c782f2bdc35e870e35f9e26b6bd79eb",
+  "candidate_sha256": "6a7adb7d3dccf682404eadba4cbfcba083cdfd14d5a8d2918401cfef9365a8f1",
+  "pipeline": [
+    "prune_zero_targets",
+    "reduce_constant_runs",
+    "compact"
+  ],
+  "partition": null,
+  "unchanged": false,
+  "removed_zero_target_indices": [],
+  "redundant_flat_key_rows_removed": 14046,
+  "geometry_skin_rest_binds_materials_images_unchanged": true,
+  "preserve_trs_keys": false,
+  "native_clips": [
+    "Death_A",
+    "Fighting_Idle",
+    "Hit_Chest",
+    "Idle_A",
+    "Jog",
+    "Sword_Attack",
+    "Walk"
+  ],
+  "usage": "Deterministic exact preparation needs no partition --profile; frozen source/candidate hashes bind this record."
+}
