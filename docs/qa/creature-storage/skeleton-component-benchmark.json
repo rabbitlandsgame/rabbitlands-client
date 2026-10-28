@@ -1,0 +1,160 @@
+{
+  "actor": "skeleton",
+  "status": "component_benchmark_measured_not_approval",
+  "script_sha256": "250f072b41238675d5f7a779b932f8bd29564a7e5f5f57e72f269f5accffb4c4",
+  "variants": {
+    "sampled30": {
+      "source_sha256": "6dcb2808d5eca57e0bc8f12ef134d910f8d5ac0b16c6a98a638ef5c662145bb6",
+      "bones": 19,
+      "skeletons": 1,
+      "retained_static_memory_delta_bytes": 40988937,
+      "load_peak_static_memory_increase_bytes": 0,
+      "warm_os_file_cache_load_ms": 551.43,
+      "retargeted_keys": 22086,
+      "retargeted_tracks": 1161,
+      "animation_update": {
+        "Death_A": {
+          "batch_means_usec": [
+            13.8141666666667,
+            13.9425,
+            14.0483333333333,
+            14.1025,
+            14.1625,
+            14.2925,
+            14.6225,
+            15.6266666666667,
+            16.345
+          ],
+          "median_usec_per_update": 14.1625,
+          "minimum_usec_per_update": 13.8141666666667
+        },
+        "Jog": {
+          "batch_means_usec": [
+            15.3875,
+            15.5441666666667,
+            16.1825,
+            16.3583333333333,
+            16.8608333333333,
+            16.9575,
+            17.2466666666667,
+            17.5558333333333,
+            17.7166666666667
+          ],
+          "median_usec_per_update": 16.8608333333333,
+          "minimum_usec_per_update": 15.3875
+        }
+      }
+    },
+    "rejected_zero": {
+      "source_sha256": "174ca49692dee42cf66bad4b1fb5bd7adf7ee9afd3bdce646f940be84df6a17a",
+      "bones": 19,
+      "skeletons": 1,
+      "retained_static_memory_delta_bytes": 10173243,
+      "load_peak_static_memory_increase_bytes": 0,
+      "warm_os_file_cache_load_ms": 70.592,
+      "retargeted_keys": 2264,
+      "retargeted_tracks": 129,
+      "animation_update": {
+        "Death_A": {
+          "batch_means_usec": [
+            3.555,
+            3.55666666666667,
+            3.56166666666667,
+            3.5675,
+            3.59583333333333,
+            3.61083333333333,
+            3.6425,
+            3.81333333333333,
+            4.16666666666667
+          ],
+          "median_usec_per_update": 3.59583333333333,
+          "minimum_usec_per_update": 3.555
+        },
+        "Jog": {
+          "batch_means_usec": [
+            5.43583333333333,
+            5.7475,
+            5.8425,
+            6.1375,
+            6.21916666666667,
+            6.28666666666667,
+            6.43,
+            6.75333333333333,
+            7.175
+          ],
+          "median_usec_per_update": 6.21916666666667,
+          "minimum_usec_per_update": 5.43583333333333
+        }
+      }
+    },
+    "repair30": {
+      "source_sha256": "4f5c4b538e047b116c40cdac29becaa6734d507090079a7a02c26f22f5837da0",
+      "bones": 58,
+      "skeletons": 1,
+      "retained_static_memory_delta_bytes": 12460386,
+      "load_peak_static_memory_increase_bytes": 0,
+      "warm_os_file_cache_load_ms": 137.554,
+      "retargeted_keys": 17761,
+      "retargeted_tracks": 706,
+      "animation_update": {
+        "Death_A": {
+          "batch_means_usec": [
+            22.8583333333333,
+            23.3491666666667,
+            23.7666666666667,
+            23.85,
+            25.3375,
+            25.7333333333333,
+            26.0866666666667,
+            28.2566666666667,
+            36.2158333333333
+          ],
+          "median_usec_per_update": 25.3375,
+          "minimum_usec_per_update": 22.8583333333333
+        },
+        "Jog": {
+          "batch_means_usec": [
+            25.6566666666667,
+            26.145,
+            26.4458333333333,
+            26.9166666666667,
+            27.3833333333333,
+            28.635,
+            29.4583333333333,
+            30.0341666666667,
+            30.9625
+          ],
+          "median_usec_per_update": 27.3833333333333,
+          "minimum_usec_per_update": 25.6566666666667
+        }
+      }
+    }
+  },
+  "scope": "Fresh-process real GlbSceneCache._build_raw + ReplicatedActor3D + NativeAnimationImporter, warm OS file cache. Retained Godot static CPU allocations include scene and library caches, meshes, textures and actor. AnimationPlayer advance plus forced skeleton global transforms at 240 updates/s; nine batches of 1200 updates per clip after warmup. Excludes GPU rendering/skinning, whole-game logic and frame-rate claims.",
+  "conditions": "One isolated fresh process per variant, sequential order sampled30/rejected/repair30. OS file cache warmed by source hashing. Nine1200-update batches after240 warmup per clip. No GPU child or FPS inference.",
+  "runtime_fingerprints": {
+    "tests\\benchmark_creature_animation.gd": "250f072b41238675d5f7a779b932f8bd29564a7e5f5f57e72f269f5accffb4c4",
+    "src\\actors\\replicated_actor_3d.gd": "34701b2512974c5b7135393c1e8d816a3ffe209bb015917f24b48865bc981d5b",
+    "src\\actors\\glb_scene_cache.gd": "22e74849783571f75cc85b6e8bbc54e10dbd119f185fb9fa2c41e6f86ffe541e",
+    "src\\actors\\native_animation_importer.gd": "08673da7492b30ae0ca2135d0706758c9bfd2a4ff8369eeafe199f0d1ef97447",
+    "data\\actors\\models.json": "fcb52db5ae44c724da4bee80bdd6af1020ac677f1107fd0ce6e842c0927a5f88",
+    "data\\animations\\humanoid-baseline\\skeleton.json": "e3d009ad9d6d7b803841bff59c0c5f808808a74e8b8c9c17ceecb13371291e1c"
+  },
+  "engine": {
+    "build": "official",
+    "hash": "ed1daf0bf001b61586d9930840f2f1394092c079",
+    "hex": 263938,
+    "major": 4,
+    "minor": 7,
+    "patch": 2,
+    "status": "stable",
+    "string": "4.7.2-stable (official)",
+    "timestamp": 0
+  },
+  "candidate_status": "Unapproved Skeleton repair draft; benchmark is not artistic acceptance or runtime promotion.",
+  "interpretation": [
+    "The added rigid controls raise CPU animation update cost compared with both the corrected source and rejected zero-bake.",
+    "The corrected source retains substantially more static Godot allocation due to corrective and animation data; allocation includes library and scene caches and is not process resident RAM.",
+    "Nine within-process batch medians from one fresh process per variant; no cross-process confidence interval or whole-game FPS claim."
+  ]
+}
