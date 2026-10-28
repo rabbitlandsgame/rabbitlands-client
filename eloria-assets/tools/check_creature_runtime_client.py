@@ -67,9 +67,19 @@ def glb(path):
 
 
 def topology(document, binary):
+    """Rendered primitive identities, independent of unused mesh-library entries.
+
+    Lossless packing can remove an unreferenced mesh and renumber mesh IDs.
+    Each node reference is still a distinct instance; its node identity,
+    primitive count/order, vertex count and complete index order must survive.
+    Native surface/path identity is independently checked after client loading.
+    """
     result = []
-    for mesh in document.get("meshes", []):
-        for primitive in mesh["primitives"]:
+    for node_index, node in enumerate(document.get("nodes", [])):
+        if "mesh" not in node:
+            continue
+        primitives = document["meshes"][node["mesh"]]["primitives"]
+        for primitive_index, primitive in enumerate(primitives):
             n = document["accessors"][primitive["attributes"]["POSITION"]]["count"]
             if "indices" not in primitive:
                 values = np.arange(n, dtype=np.int64)
@@ -83,7 +93,8 @@ def topology(document, binary):
                 values = np.ndarray((accessor["count"],), dtype=dtype, buffer=binary,
                                     offset=view.get("byteOffset", 0) + accessor.get("byteOffset", 0),
                                     strides=(stride,)).astype(np.int64)
-            result.append((n, primitive.get("mode", 4), digest_bytes(values.astype("<i8").tobytes())))
+            result.append((node_index, node.get("name", ""), len(primitives), primitive_index,
+                           n, primitive.get("mode", 4), digest_bytes(values.astype("<i8").tobytes())))
     return result
 
 
@@ -391,8 +402,32 @@ def self_test():
         unskinned["sn"] = np.zeros((1, 3))
         _, n = evaluate([unskinned], np.r_[world.ravel(), 0, transform], 30)
         np.testing.assert_allclose(n[0], unit(np.array([[.5, 1., 0.]]))[0], atol=1e-12)
+    # A mesh library is not the scene. Ignore unused entries while retaining
+    # instance identity and every referenced primitive/index in strict order.
+    original = {"nodes": [{"name": "Root"}, {"name": "Body", "mesh": 1}],
+                "meshes": [{"primitives": []}, {"primitives": [{"attributes": {"POSITION": 0}, "indices": 1}]}],
+                "accessors": [{"count": 3}, {"count": 3, "componentType": 5123, "bufferView": 0}],
+                "bufferViews": [{"byteLength": 6}]}
+    compacted = json.loads(json.dumps(original))
+    compacted["meshes"].pop(0)
+    compacted["nodes"][1]["mesh"] = 0
+    indices = np.array([0, 1, 2], dtype="<u2").tobytes()
+    assert topology(original, indices) == topology(compacted, indices)
+    assert topology(original, indices) != topology(compacted, np.array([0, 2, 1], dtype="<u2").tobytes())
+    changed = json.loads(json.dumps(compacted))
+    changed["meshes"][0]["primitives"].append(changed["meshes"][0]["primitives"][0].copy())
+    assert topology(original, indices) != topology(changed, indices)
+    instanced = json.loads(json.dumps(compacted))
+    instanced["nodes"].append({"name": "Second instance", "mesh": 0})
+    assert len(topology(instanced, indices)) == 2
+    assert topology(compacted, indices) != topology(instanced, indices)
+    moved = json.loads(json.dumps(compacted))
+    moved["nodes"].reverse()
+    assert topology(compacted, indices) != topology(moved, indices)
     return {"passed": True, "checks": ["four/eight packed influences", "30 bone palette", "multiple surfaces",
-            "float32 cutoff equality and below", "normalized normal endpoints", "unrenormalized quantized weights", "unskinned inverse-transpose normals"]}
+            "float32 cutoff equality and below", "normalized normal endpoints", "unrenormalized quantized weights", "unskinned inverse-transpose normals",
+            "unused mesh removal preserves referenced topology", "changed index order rejected", "primitive count guarded",
+            "multiple node instances counted", "node identity/order guarded"]}
 
 
 def main():
