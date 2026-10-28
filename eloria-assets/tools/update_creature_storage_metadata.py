@@ -13,10 +13,24 @@ from video_motion.asset import digest, read_glb
 from video_motion.storage_metadata import remap_witness, remap_vertex_fields, vertex_permutation
 
 
-def update(root, actor, source, candidate, processing, receipt, profile=None, backup=None, source_revision=None):
+def update(root, actor, source, candidate, processing, receipt, profile=None, backup=None, source_revision=None, root_witness=None):
     old_hash, new_hash = digest(source), digest(candidate)
     if processing['source_sha256'] != old_hash or processing['candidate_sha256'] != new_hash:
         raise ValueError('Processing receipt does not bind original and installed bytes')
+    # Some historical witnesses are a single record without an actor wrapper or
+    # actor-specific filename. Require an explicit, hash-bound fixture selector;
+    # matching a hash alone must never rebind another actor's observations.
+    if root_witness is not None:
+        root_witness = Path(root_witness)
+        if not root_witness.is_absolute(): root_witness = root/root_witness
+        root_witness = root_witness.resolve()
+        try:
+            root_witness.relative_to((root/'godot-client/tests/fixtures').resolve())
+        except ValueError:
+            raise ValueError('Explicit root witness must be a repository fixture') from None
+        frozen = json.loads(root_witness.read_text(encoding='utf-8'))
+        if frozen.get('sha256') not in (old_hash, new_hash) or not isinstance(frozen.get('clips'), dict):
+            raise ValueError('Explicit root witness does not bind this source and clip record')
     # Default-bake field limits are not a permission to relax source-witness
     # comparisons. Only the separately declared source comparison budget applies.
     source_budget = None
@@ -81,7 +95,7 @@ def update(root, actor, source, candidate, processing, receipt, profile=None, ba
         text = path.read_text(encoding='utf-8')
         if old_hash not in text: continue
         data = json.loads(text)
-        result = transform(data, path.stem == actor)
+        result = transform(data, path.stem == actor or path.resolve() == root_witness)
         if result == data: continue
         if backup is not None:
             destination = backup/path.relative_to(root); destination.parent.mkdir(parents=True, exist_ok=True)
@@ -113,10 +127,11 @@ def main():
     parser.add_argument('--receipt', required=True)
     parser.add_argument('--backup', type=Path, required=True)
     parser.add_argument('--source-revision', help='Explicit Git revision used only to prove and reconcile a stale roster hash')
+    parser.add_argument('--root-witness', type=Path, help='Explicit single-record repository fixture; source hash and clips are verified before writing')
     args = parser.parse_args()
     processing = json.loads(args.processing.read_text(encoding='utf-8'))
     profile = json.loads(args.profile.read_text(encoding='utf-8')) if args.profile else None
-    print(json.dumps(update(args.root, args.actor, args.source, args.candidate, processing, args.receipt, profile, args.backup, args.source_revision), indent=2))
+    print(json.dumps(update(args.root, args.actor, args.source, args.candidate, processing, args.receipt, profile, args.backup, args.source_revision, args.root_witness), indent=2))
 
 
 if __name__ == '__main__': main()

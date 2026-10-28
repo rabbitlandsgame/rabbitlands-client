@@ -7,6 +7,43 @@ from test_crystalback_correctives import source_fixture
 from update_creature_storage_metadata import update
 
 
+def test_explicit_single_record_witness_preserves_affine_bones_and_other_actor(tmp_path):
+    source, _ = source_fixture(tmp_path)
+    root = tmp_path/'repo'; candidate = root/'assets/wolf.glb'
+    report = prepare(source, candidate); old, new = report['source_sha256'], report['candidate_sha256']
+    roster = root/'eloria-assets/source/model-development-roster.json'; roster.parent.mkdir(parents=True)
+    roster.write_text(json.dumps({'creatures': [{'id': 'wolf', 'sha256': old, 'status': 'current'}]}))
+    fixtures = root/'godot-client/tests/fixtures'; fixtures.mkdir(parents=True)
+    record = {'sha256': old, 'clips': {'Walk': [{'time': .123,
+        'bones': {'Root': [1., 0., 0., 2., 0., 1., 0., 3., 0., 0., 1., 4.]}}]}}
+    witness = fixtures/'historical_single_root.json'; witness.write_text(json.dumps(record))
+    other = fixtures/'unrelated_single_root.json'; other.write_text(json.dumps(record))
+    # There is deliberately no actor key or filename inference to rely upon.
+    update(root, 'wolf', source, candidate, report, 'receipt.json')
+    assert json.loads(witness.read_text()) == record
+    update(root, 'wolf', source, candidate, report, 'receipt.json', root_witness=witness)
+    after = json.loads(witness.read_text())
+    assert after == dict(record, sha256=new, reference_sha256=old)
+    assert json.loads(other.read_text()) == record
+
+
+@pytest.mark.parametrize('invalid', ['outside', 'wrong_source', 'not_a_clip_record'])
+def test_invalid_explicit_root_witness_fails_before_metadata_writes(tmp_path, invalid):
+    source, _ = source_fixture(tmp_path)
+    root = tmp_path/'repo'; candidate = root/'assets/wolf.glb'
+    report = prepare(source, candidate); old = report['source_sha256']
+    roster = root/'eloria-assets/source/model-development-roster.json'; roster.parent.mkdir(parents=True)
+    original = json.dumps({'creatures': [{'id': 'wolf', 'sha256': old, 'status': 'current'}]})
+    roster.write_text(original)
+    witness = tmp_path/'outside.json' if invalid == 'outside' else root/'godot-client/tests/fixtures/single.json'
+    witness.parent.mkdir(parents=True, exist_ok=True)
+    witness.write_text(json.dumps({'sha256': 'unrelated' if invalid == 'wrong_source' else old,
+                                   'clips': [] if invalid == 'not_a_clip_record' else {}}))
+    with pytest.raises(ValueError, match='Explicit root witness'):
+        update(root, 'wolf', source, candidate, report, 'receipt.json', root_witness=witness)
+    assert roster.read_text() == original
+
+
 @pytest.mark.parametrize('profile', [None, {'numeric_budget': {
     'position_absolute_limit': 4.76837158203125e-7,
     'normal_direction_vector_limit': 4.76837158203125e-7}}])
