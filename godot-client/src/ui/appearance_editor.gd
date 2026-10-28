@@ -5,6 +5,7 @@ extends PanelContainer
 const FORM = preload("res://src/ui/portrait_customization_form.gd")
 const CHOICES = preload("res://src/actors/appearance_choices.gd")
 const CUSTOMIZATION = preload("res://src/actors/portrait_customization.gd")
+const COLOURS = preload("res://src/actors/appearance_colours.gd")
 var _form
 var _pickers: Dictionary = {}
 var _viewport: SubViewport
@@ -182,7 +183,8 @@ func _values() -> Dictionary:
 	for category: String in ["skin", "eyes", "shirt", "pants", "boots"]:
 		result[category] = (_pickers[category] as OptionButton).get_selected_id()
 	result.hair = AppearanceVariants.pack_hair((_pickers.hair as OptionButton).get_selected_id(), (_pickers.hair_color as OptionButton).get_selected_id())
-	return result
+	# A palette pick replaces a custom colour or slider position it opened with.
+	return COLOURS.clear_replaced(_dto.get("appearance", {}) as Dictionary, result)
 
 func _refresh() -> void:
 	if not is_visible_in_tree():

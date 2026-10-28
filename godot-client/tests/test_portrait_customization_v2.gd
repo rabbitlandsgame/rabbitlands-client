@@ -23,7 +23,8 @@ func expect(condition: bool, label: String) -> void:
 func run() -> void:
 	var encoded := Custom.encode(LOOK, 2)
 	expect(encoded.hex_encode() == FIXTURE and encoded.size() == 19, "Python/Godot PC/2 fixed fixture matches all sixteen selections")
-	expect(Custom.decode(encoded, 0) == LOOK, "PC/2 roundtrip")
+	# PC/3 decoders return every field (V3 neutral here): compare normalised.
+	expect(Custom.decode(encoded, 0) == Custom.normalized(LOOK), "PC/2 roundtrip")
 	var old := Custom.normalized(LOOK)
 	for field: String in Custom.EXTRA_FIELDS:
 		old[field] = 50
@@ -47,7 +48,7 @@ func run() -> void:
 		var packet := Wire.create_character("Portrait", "secret", LOOK.merged({"actor_type": 1, "hair": 299}), 2, version)
 		var nul := packet.find(0, 3)
 		expect(packet[nul + 9] == 2, "class stays at creation suffix8")
-		expect(Custom.decode(packet, nul + 10) == (LOOK if version == 2 else old), "creation trailer roundtrip version %d" % version)
+		expect(Custom.decode(packet, nul + 10) == (Custom.normalized(LOOK) if version == 2 else old), "creation trailer roundtrip version %d" % version)
 		for wardrobe: bool in [false, true]:
 			var body := PackedByteArray()
 			body.resize(28)
@@ -59,7 +60,7 @@ func run() -> void:
 			body.append_array(Custom.encode(LOOK, version))
 			var actor := Wire.decode_actor(body, true)
 			for field: String in Custom.FIELDS:
-				expect(actor.appearance.get(field) == (LOOK if version == 2 else old)[field], "spawn version%d wardrobe%s %s" % [version, wardrobe, field])
+				expect(actor.appearance.get(field) == (Custom.normalized(LOOK) if version == 2 else old)[field], "spawn version%d wardrobe%s %s" % [version, wardrobe, field])
 	var portrait := {"actor_type": 1, "appearance": LOOK.duplicate(), "equipment_visuals": {"0": 20}}
 	expect(Ranking._valid_portrait(portrait), "offline ranking accepts all PC/2 fields")
 	for field: String in Custom.EXTRA_FIELDS:
@@ -139,7 +140,8 @@ func check_real_connection_probe() -> void:
 					var decoded := Wire.try_decode(received)
 					if decoded.status != "ok": break
 					if decoded.command == 190:
-						found = decoded.payload == PackedByteArray([80, 67, 2])
+						# The PC/3 probe follows the PC/2 one in the same flush.
+						found = found or decoded.payload == PackedByteArray([80, 67, 2])
 					received = received.slice(decoded.consumed)
 			await process_frame
 		expect(found and network.appearance_protocol_version() == 1, "connection %d probes before choosing PC/2" % attempt)

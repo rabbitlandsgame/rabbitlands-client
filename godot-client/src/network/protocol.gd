@@ -233,8 +233,11 @@ static func create_character(username: String, password: String, appearance: Dic
 	payload.append_array(PortraitCustomization.encode(appearance, appearance_version))
 	return encode(ClientMessage.CREATE_CHAR, payload)
 
-static func appearance_protocol_probe() -> PackedByteArray:
-	return encode(ClientMessage.ELORIA_APPEARANCE_PROTOCOL, PackedByteArray(PortraitCustomization.V2_TAG))
+## One probe frame per appearance protocol version from 2 up: a server echoes
+## each tag it supports (a PC/2 server only PC\x02), and the client keeps the
+## highest echoed (pc3 spec 4.1). The default keeps the PC/2 fixture.
+static func appearance_protocol_probe(version := 2) -> PackedByteArray:
+	return encode(ClientMessage.ELORIA_APPEARANCE_PROTOCOL, PackedByteArray(PortraitCustomization.tag(version)))
 
 static func version(protocol_major: int, protocol_minor: int,
 		client_version: PackedByteArray, host := PackedByteArray([0, 0, 0, 0]),
@@ -357,6 +360,7 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"actor_wardrobe_v1",
 	"actor_customization_v1",
 	"actor_customization_v2",
+	"actor_customization_v3",
 	"weather_state_v1",
 	"attribute_state_v1",
 	"counter_layout_v1",
@@ -737,9 +741,11 @@ static func decode_leaderboard_state(payload: PackedByteArray) -> Dictionary:
 
 static func decode_server(command: int, payload: PackedByteArray, logical_coordinates := false) -> Dictionary:
 	if command == ServerMessage.ELORIA_APPEARANCE_PROTOCOL:
-		return ({"type": "appearance_protocol", "version": 2}
-			if payload == PackedByteArray(PortraitCustomization.V2_TAG)
-			else {"type": "invalid", "error": "appearance_protocol"})
+		if payload == PackedByteArray(PortraitCustomization.V2_TAG):
+			return {"type": "appearance_protocol", "version": 2}
+		if payload == PackedByteArray(PortraitCustomization.V3_TAG):
+			return {"type": "appearance_protocol", "version": 3}
+		return {"type": "invalid", "error": "appearance_protocol"}
 	match command:
 		ServerMessage.ELORIA_INVASION_ASSISTANT_STATE:
 			var parsed: Variant = JSON.parse_string(payload.get_string_from_utf8())

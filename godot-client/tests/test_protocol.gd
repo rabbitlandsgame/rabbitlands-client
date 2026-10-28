@@ -30,6 +30,7 @@ func _init() -> void:
 	var decoded_extensions: Dictionary = {
 		"actor_customization_v1": EloriaProtocol.ServerMessage.ADD_NEW_ENHANCED_ACTOR,
 		"actor_customization_v2": EloriaProtocol.ServerMessage.ADD_NEW_ENHANCED_ACTOR,
+		"actor_customization_v3": EloriaProtocol.ServerMessage.ADD_NEW_ENHANCED_ACTOR,
 		"lantern_tutorial_v1": EloriaProtocol.ServerMessage.ELORIA_LANTERN_STATE,
 		"second_bell_v1": EloriaProtocol.ServerMessage.ELORIA_LANTERN_STATE,
 		"borrowed_sky_v1": EloriaProtocol.ServerMessage.ELORIA_LANTERN_STATE,

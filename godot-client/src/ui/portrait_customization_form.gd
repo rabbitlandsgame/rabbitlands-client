@@ -6,6 +6,10 @@ signal preset_selected(appearance: Dictionary)
 const CUSTOMIZATION = preload("res://src/actors/portrait_customization.gd")
 const PRESETS = preload("res://src/actors/human_portrait_presets.gd")
 var controls: Dictionary = {}
+## Saved fields this form has no control for yet (PC/3's High face detail,
+## hair finish slider and colour fields): kept as opened and returned by
+## values(), so an Apply or a preset never drops them (pc3 spec 8.2).
+var _carried: Dictionary = {}
 var _timer: Timer
 
 func _init() -> void:
@@ -63,6 +67,7 @@ func _init() -> void:
 	hint.text = "Appearance only. Your movement, reach and equipment stats stay the same."
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	add_child(hint)
+	_carry(CUSTOMIZATION.normalized({}))
 
 func _label(grid: GridContainer, text: String) -> void:
 	var label := Label.new()
@@ -78,7 +83,12 @@ func _add_choice(grid: GridContainer, field: String, title: String, entries: Arr
 		control.add_item(entry)
 	grid.add_child(control)
 	controls[field] = control
-	control.item_selected.connect(func(_index: int) -> void: changed.emit())
+	control.item_selected.connect(func(_index: int) -> void:
+		if field == "hair_detail":
+			# Picking a saved finish replaces a slider position (as the server's
+			# clearing rule does for an older client).
+			_carried["hair_finish"] = 0
+		changed.emit())
 
 func _add_slider(grid: GridContainer, field: String, title: String, low: String, high: String) -> void:
 	_label(grid, title)
@@ -111,8 +121,14 @@ func _readout(field: String, value: float) -> String:
 		return "%d%%" % roundi(85 + value * 0.3)
 	return str(roundi(value))
 
+func _carry(normalized: Dictionary) -> void:
+	_carried.clear()
+	for field: String in CUSTOMIZATION.FIELDS:
+		if not controls.has(field):
+			_carried[field] = normalized[field]
+
 func values() -> Dictionary:
-	var result := {}
+	var result := _carried.duplicate()
 	for field: String in controls:
 		var control: Control = controls[field]
 		result[field] = (control as OptionButton).selected if control is OptionButton else roundi((control as Range).value)
@@ -120,6 +136,7 @@ func values() -> Dictionary:
 
 func set_values(appearance: Dictionary) -> void:
 	var normalized := CUSTOMIZATION.normalized(appearance)
+	_carry(normalized)
 	for field: String in controls:
 		var control: Control = controls[field]
 		if control is OptionButton:

@@ -491,23 +491,26 @@ func send_chat(text: String) -> Error:
 		text = compatible.text
 	return send_frame(EloriaProtocol.chat(text))
 
+## An Apply for the negotiated version: tokens for fields the server cannot
+## save (field_version above it) are dropped when neutral; any non-neutral one
+## refuses the whole command, never silently lost (pc3 spec 4.6).
 func _compatible_appearance_command(text: String) -> Dictionary:
 	appearance_error = ""
-	if _appearance_protocol_version >= 2:
+	if _appearance_protocol_version >= PortraitCustomization.LATEST:
 		return {"ok": true, "text": text}
 	var words := text.strip_edges().to_lower().split(" ", false)
 	var retained := PackedStringArray(["#appearance"])
 	var extensions := {}
 	for word: String in words.slice(1):
 		var pair := word.split("=", true, 1)
-		if pair[0] not in PortraitCustomization.EXTRA_FIELDS:
+		if PortraitCustomization.field_version(pair[0]) <= _appearance_protocol_version:
 			retained.append(word)
 			continue
 		if pair.size() != 2 or not pair[1].is_valid_int() or extensions.has(pair[0]):
 			appearance_error = "Invalid or repeated appearance option."
 			return {"ok": false, "error": ERR_INVALID_DATA}
 		extensions[pair[0]] = int(pair[1])
-	var validation := PortraitCustomization.validate(extensions, 1)
+	var validation := PortraitCustomization.validate(extensions, _appearance_protocol_version)
 	if not validation.ok:
 		appearance_error = validation.message
 		return {"ok": false, "error": ERR_UNAVAILABLE if validation.error == "unsupported" else ERR_INVALID_DATA}
@@ -821,7 +824,10 @@ func _process(_delta: float) -> void:
 		send_frame(EloriaProtocol.version(PROTOCOL_MAJOR, PROTOCOL_MINOR, client_version))
 		_send_release_identity()
 		send_frame(EloriaProtocol.encode(EloriaProtocol.ClientMessage.SEND_OPENING_SCREEN))
-		send_frame(EloriaProtocol.appearance_protocol_probe())
+		# PC/2 first, then PC/3: a deployed PC/2 server answers only the PC/2 tag
+		# and ignores the second, so the client still saves V2 there.
+		for probe_version: int in range(2, PortraitCustomization.LATEST + 1):
+			send_frame(EloriaProtocol.appearance_protocol_probe(probe_version))
 		_set_state("connected")
 		if _reconnect_enabled and can_resume_session():
 			if login(_session_username, _session_password) != OK:
@@ -935,7 +941,8 @@ func _drain_packet_buffer(started: int) -> void:
 				if decoded.command == EloriaProtocol.ServerMessage.ELORIA_APPEARANCE_PROTOCOL:
 					var event := EloriaProtocol.decode_server(decoded.command, decoded.payload)
 					if event.type == "appearance_protocol":
-						_set_appearance_protocol(int(event.version))
+						# A reply never lowers the version within a connection.
+						_set_appearance_protocol(maxi(_appearance_protocol_version, int(event.version)))
 				if decoded.command == EloriaProtocol.ServerMessage.LOG_IN_OK:
 					_session_credentials_confirmed = not _session_username.is_empty()
 					_resume_session = false
