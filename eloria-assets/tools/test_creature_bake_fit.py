@@ -294,3 +294,50 @@ def test_exact_zero_position_columns_skip_skin_solves_but_still_fit_normals(tmp_
     candidate, raw = read_glb(tmp_path / 'candidate.glb')
     attrs = candidate['meshes'][candidate['nodes'][2]['mesh']]['primitives'][0]['attributes']
     assert np.all(accessor(candidate, raw, attrs['NORMAL'])[:, 0] > .19)
+
+
+def test_unreferenced_samplers_keep_exact_clocks_values_and_specifications(tmp_path):
+    source = fixture(tmp_path / 'source.glb')
+    doc, raw = read_glb(source)
+    blob = bytearray(raw)
+    # Its dense clock is NOT an active curve or a fitting/training clock.
+    clock = append_array(doc, blob, np.arange(20)[:, None] / 90, 'SCALAR')
+    values = append_array(doc, blob, np.arange(60)[:, None] / 11, 'SCALAR')
+    for animation in doc['animations']:
+        animation['samplers'].append({'input': clock, 'output': values,
+            'interpolation': 'CUBICSPLINE', 'extras': {'opaque_unused': 'preserve'}})
+    write_glb(source, doc, blob)
+    report = bake(source, tmp_path / 'candidate.glb', iterations=0)
+    assert report['training_poses'] == 9
+    assert len(report['sampling']['unreferenced_samplers']) == 2
+    assert report['sampling']['all_source_keys_at_most_30_hz'] is None
+    assert report['sampling']['all_active_keys_at_most_30_hz']
+    assert not report['preservation_scope']['function_only_preservation_exceptions']
+    candidate, binary = read_glb(tmp_path / 'candidate.glb')
+    for old, new in zip(doc['animations'], candidate['animations']):
+        used = {c['sampler'] for c in new['channels']}
+        unused = set(range(len(new['samplers']))) - used
+        assert len(unused) == 1
+        sampler = new['samplers'][unused.pop()]
+        assert sampler['interpolation'] == 'CUBICSPLINE'
+        assert sampler['extras'] == {'opaque_unused': 'preserve'}
+        for field in ('input', 'output'):
+            assert np.array_equal(accessor(doc, blob, old['samplers'][-1][field]),
+                                  accessor(candidate, binary, sampler[field]))
+    from video_motion.native_shapes import NativeShapeAsset
+    assert NativeShapeAsset(source).duration('Fly') == NativeShapeAsset(tmp_path / 'candidate.glb').duration('Fly')
+
+
+def test_weight_only_duration_tail_fails_closed_without_guessing_new_bone_keys(tmp_path):
+    source = fixture(tmp_path / 'source.glb')
+    doc, raw = read_glb(source)
+    blob = bytearray(raw)
+    tail = append_array(doc, blob, np.array([[0.], [1 / 30], [3 / 30]]), 'SCALAR')
+    for animation in doc['animations']:
+        animation['samplers'][1]['input'] = tail
+    write_glb(source, doc, blob)
+    before = source.read_bytes()
+    with pytest.raises(ValueError, match='shorten active clip duration'):
+        bake(source, tmp_path / 'candidate.glb')
+    assert not (tmp_path / 'candidate.glb').exists()
+    assert source.read_bytes() == before

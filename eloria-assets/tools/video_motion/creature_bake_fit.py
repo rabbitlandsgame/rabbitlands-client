@@ -40,20 +40,38 @@ def _unit(values):
 
 def _preflight(document, blob, allow_step_exceptions=False):
     """Reject dense/cubic/ambiguous input rather than silently changing it."""
-    names, maximum_hz, continuous_hz, exceptions = [], 0., 0., []
+    names, maximum_hz, continuous_hz, exceptions, unused, durations = [], 0., 0., [], [], []
     for animation in document.get('animations', []):
         name = animation.get('name')
         if not name or name in names:
             raise ValueError('Unique explicit clip names are required')
         names.append(name)
-        if not any(c['target']['path'] != 'weights' for c in animation['channels']):
+        used = {c['sampler'] for c in animation['channels']}
+        retained = {c['sampler'] for c in animation['channels'] if c['target']['path'] != 'weights'}
+        if not retained:
             raise ValueError('A morph-only clip cannot retain its duration without adding a node curve')
+        active_end = max(float(accessor(document, blob, animation['samplers'][i]['input'])[-1, 0]) for i in used)
+        retained_end = max(float(accessor(document, blob, animation['samplers'][i]['input'])[-1, 0]) for i in retained)
+        if active_end != retained_end:
+            raise ValueError(f'Removing correctives would shorten active clip duration for {name!r}: '
+                             f'{active_end:.17g} -> {retained_end:.17g}; no node/TRS endpoint was guessed')
+        durations.append({'clip': name, 'original_active_end': active_end,
+                          'retained_active_end': retained_end, 'bone_key_extension': False})
         for si, sampler in enumerate(animation['samplers']):
-            if sampler.get('interpolation', 'LINEAR') not in ('LINEAR', 'STEP'):
+            if si in used and sampler.get('interpolation', 'LINEAR') not in ('LINEAR', 'STEP'):
                 raise ValueError('Only LINEAR/STEP source interpolation is supported')
             times = accessor(document, blob, sampler['input']).ravel()
             if not len(times) or not np.isfinite(times).all():
                 raise ValueError('Empty or nonfinite animation times')
+            if si not in used:
+                # No path can be inferred for an unused sampler. Preserve it
+                # without treating its private clock as a continuous bone or
+                # corrective cadence, or using it as the training clock.
+                unused.append({'clip': name, 'sampler': si, 'target': None,
+                    'input_sha256': _hash_array(times),
+                    'output_sha256': _hash_array(accessor(document, blob, sampler['output'])),
+                    'preserved_exactly': True, 'cadence_evaluated': False})
+                continue
             if len(times) > 1:
                 delta = np.diff(times)
                 if (delta <= 0).any():
@@ -91,7 +109,10 @@ def _preflight(document, blob, allow_step_exceptions=False):
             'clips': names, 'continuous_training_hz': FPS,
             'training_clock': 'densest original continuous clock plus exact STEP knots and endpoints',
             'allow_step_exceptions': allow_step_exceptions, 'step_exceptions': exceptions,
-            'all_source_keys_at_most_30_hz': not exceptions,
+            'all_source_keys_at_most_30_hz': None if unused else not exceptions,
+            'maximum_source_knot_hz_scope': 'active samplers; unreferenced clocks are not evaluated',
+            'all_active_keys_at_most_30_hz': not exceptions,
+            'active_clip_durations': durations, 'unreferenced_samplers': unused,
             'dense_source_was_resampled': False}
 
 
@@ -121,7 +142,9 @@ def _states(asset, *, training):
 
     for clip in asset.animations:
         duration = asset.duration(clip)
-        samplers = asset.animations[clip]['samplers']
+        animation = asset.animations[clip]
+        used = sorted({c['sampler'] for c in animation['channels']})
+        samplers = [animation['samplers'][i] for i in used]
         continuous = [accessor(asset.d, asset.b, sm['input']).ravel() for sm in samplers
                       if sm.get('interpolation', 'LINEAR') == 'LINEAR']
         steps = [accessor(asset.d, asset.b, sm['input']).ravel() for sm in samplers
@@ -571,6 +594,7 @@ def _preservation(asset, output):
             arrays.append({'array': f'skin:{i}:inverseBindMatrices', 'sha256': _hash_array(a)})
     assert len(original.get('animations', [])) == len(document.get('animations', []))
     for old, new in zip(original.get('animations', []), document.get('animations', [])):
+        assert old.get('name') == new.get('name')
         old_channels = [c for c in old['channels'] if c['target']['path'] != 'weights']
         assert len(old_channels) == len(new['channels'])
         for a, b in zip(old_channels, new['channels']):
@@ -583,6 +607,27 @@ def _preservation(asset, output):
                 assert _hash_array(va) == _hash_array(vb)
                 arrays.append({'array': f"{old['name']}:{a['target']['node']}:{a['target']['path']}:{field}",
                                'sha256': _hash_array(va)})
+        old_used = {c['sampler'] for c in old['channels']}
+        new_used = {c['sampler'] for c in new['channels']}
+        old_unused = sorted(set(range(len(old['samplers']))) - old_used)
+        new_unused = sorted(set(range(len(new['samplers']))) - new_used)
+        assert len(old_unused) == len(new_unused)
+        for oi, ni in zip(old_unused, new_unused):
+            a, b = old['samplers'][oi], new['samplers'][ni]
+            assert {k: v for k, v in a.items() if k not in ('input', 'output')} == {
+                k: v for k, v in b.items() if k not in ('input', 'output')}
+            for field in ('input', 'output'):
+                va, vb = accessor(original, asset.b, a[field]), accessor(document, blob, b[field])
+                assert _hash_array(va) == _hash_array(vb)
+                assert {k: v for k, v in original['accessors'][a[field]].items() if k != 'bufferView'} == {
+                    k: v for k, v in document['accessors'][b[field]].items() if k != 'bufferView'}
+                arrays.append({'array': f"{old['name']}:unreferenced_sampler:{oi}:{field}",
+                               'sha256': _hash_array(va)})
+        original_end = max(float(accessor(original, asset.b, old['samplers'][i]['input'])[-1, 0])
+                           for i in old_used)
+        new_end = max(float(accessor(document, blob, new['samplers'][i]['input'])[-1, 0])
+                      for i in new_used)
+        assert original_end == new_end, 'Active clip duration changed'
     for i, old_node in enumerate(original['nodes']):
         assert {k: v for k, v in old_node.items() if k not in ('mesh', 'weights')} == {
             k: v for k, v in document['nodes'][i].items() if k not in ('mesh', 'weights')}
@@ -799,8 +844,10 @@ def bake(source: Path, output: Path, *, iterations=6, report: Path = None,
         if 'mesh' in node:
             node['mesh'] = remap[node['mesh']]
     for animation in document.get('animations', []):
+        used_before = {c['sampler'] for c in animation['channels']}
+        unreferenced = set(range(len(animation['samplers']))) - used_before
         channels = [c for c in animation['channels'] if c['target']['path'] != 'weights']
-        used = sorted({c['sampler'] for c in channels})
+        used = sorted({c['sampler'] for c in channels} | unreferenced)
         remap = {old: new for new, old in enumerate(used)}
         for channel in channels:
             channel['sampler'] = remap[channel['sampler']]
@@ -830,6 +877,12 @@ def bake(source: Path, output: Path, *, iterations=6, report: Path = None,
                   'original_skin_fallback': _summary(rows, len(validation['labels']), height,
                                                       'original_skin_fallback')},
               'preserved_arrays': preserved, 'packing': packing,
+              'preservation_scope': {
+                  'bone_and_node_sampler_arrays': 'bit-exact original knots/values/interpolation',
+                  'unreferenced_sampler_arrays': 'bit-exact clocks/values/specifications, no guessed target',
+                  'active_clip_duration': 'unchanged; fails closed if a removed morph tail alone carries duration',
+                  'function_only_preservation_exceptions': [],
+                  'bone_key_extension_exceptions': []},
               'evaluator_scope': 'float64 native TRS/relative morph conventions, float32 fitted arrays; '
                   'all raw morph weights included; no GPU weight/vertex quantization or engine import',
               'actual_engine_validated': False, 'acceptance_threshold_assumed': None,
