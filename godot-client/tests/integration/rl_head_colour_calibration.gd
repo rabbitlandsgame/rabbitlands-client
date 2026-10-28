@@ -12,6 +12,7 @@ extends SceneTree
 ##     the pixels that are the same over a black and a white backdrop; the
 ##     Medium hairstyle in the slot the RL module replaces (male Parted,
 ##     female Buns) against the module;
+##   * beard (male): develop's full beard shell against the RL full beard, alone;
 ##   * eyes: the iris pixels (those that change between a red and a green eye)
 ##     in the close eye framing, averaged over both eyes.
 ## Each RL colour starts from RLHeadPortraitMap's palette fallback and is
@@ -122,6 +123,34 @@ func _calibrate(sex: String) -> void:
 	(_report.colours.hair as Dictionary)[sex] = hairs
 	(_report.residuals as Dictionary)[sex + "_hair_max"] = hair_residual
 	print("RL colour %s hair residual %.4f" % [sex, hair_residual])
+	# ---- beard (male only at High): the beard alone over two backdrops,
+	# develop's PortraitGroom full beard against the RL full beard, bald
+	if sex == "male":
+		var beards: Array = []
+		var beard_residual := 0.0
+		for index: int in 20:
+			var look := {"facial_hair": 5, "hair": AppearanceVariants.pack_hair(0, index)}
+			medium.apply_appearance_variants(look)
+			Stage.pose(medium, "Rest", 0.0)
+			var target := await _part_sample(medium, func(mesh: MeshInstance3D) -> bool:
+				return str(mesh.name) == "PortraitFacialHair")
+			var colour := RLHeadPortraitMap.hair_color(index, sex)
+			var face := RLHeadPortraitMap.face(look, sex)
+			var measured := Color.BLACK
+			for step: int in ITERATIONS + 1:
+				face.beard_color = colour
+				face.beard_color_set = true
+				rig.apply_appearance(face)
+				measured = await _part_sample(high, func(mesh: MeshInstance3D) -> bool:
+					return str(mesh.name).begins_with("RLBeard"))
+				if step < ITERATIONS:
+					colour = _correct(colour, target, measured)
+			beards.append(_rgb(colour))
+			beard_residual = maxf(beard_residual, _error(target, measured))
+			(_report.targets as Dictionary)["%s_beard_%d" % [sex, index]] = [_rgb(target), _rgb(measured)]
+		_report.colours["beard"] = {"male": beards}
+		(_report.residuals as Dictionary)[sex + "_beard_max"] = beard_residual
+		print("RL colour %s beard residual %.4f" % [sex, beard_residual])
 	# ---- eyes: iris pixels, close framing
 	medium.apply_appearance_variants({})
 	rig.apply_appearance(RLHeadPortraitMap.face({}, sex))
@@ -260,8 +289,7 @@ func _restore_others(hidden: Array) -> void:
 
 
 func _hair_sample(actor: ReplicatedActor3D, rl: bool) -> Color:
-	var other := _others(actor)
-	var saved := _show_only(actor, func(mesh: MeshInstance3D) -> bool:
+	return await _part_sample(actor, func(mesh: MeshInstance3D) -> bool:
 		var walker: Node = mesh
 		while walker != null and walker != actor:
 			var name := str(walker.name)
@@ -269,6 +297,13 @@ func _hair_sample(actor: ReplicatedActor3D, rl: bool) -> Color:
 				return (name == RLHeadRig.HAIR_NODE_NAME) == rl
 			walker = walker.get_parent()
 		return false)
+
+
+## The mean colour of the meshes `keep` picks, alone, over two backdrops.
+func _part_sample(actor: ReplicatedActor3D, keep: Callable) -> Color:
+	var other := _others(actor)
+	Stage.frame(_camera, actor, "front")
+	var saved := _show_only(actor, keep)
 	var environment := _environment.environment
 	var backdrop := environment.background_color
 	environment.background_color = Color.BLACK

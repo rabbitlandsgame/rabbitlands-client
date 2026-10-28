@@ -267,6 +267,8 @@ func _sequence(actor: ReplicatedActor3D, preset: String) -> void:
 
 
 func _shot(name: String, info: Dictionary, actor: ReplicatedActor3D, sidecar: bool) -> void:
+	# File names: dev:<look>@<sex> carries characters Windows does not allow.
+	name = name.replace(":", "-").replace("@", "_")
 	await process_frame
 	await process_frame
 	await RenderingServer.frame_post_draw

@@ -720,6 +720,7 @@ func _apply_hair_shapes() -> void:
 
 func _apply_colours() -> void:
 	var haired := not _hair_lods.is_empty() or _hair_external
+	var beard_colour := appearance.beard_color if appearance.beard_color_set else appearance.hair_color
 	var values := {
 		"skin_color": appearance.skin, "lip_tint": appearance.lip_tint,
 		"brow_color": appearance.brow_color, "hair_color": appearance.hair_color,
@@ -730,14 +731,15 @@ func _apply_colours() -> void:
 		"liner_wing": appearance.liner_wing,
 	}
 	# The head's surfaces read all of them; hair and beard read the hair colour.
-	for part: Array in [[_head_lods, INSTANCE_UNIFORMS], [_beard_lods, ["hair_color"]],
-			[_hair_lods, ["hair_color"]]]:
+	var beard_values := {"hair_color": beard_colour}
+	for part: Array in [[_head_lods, INSTANCE_UNIFORMS, values], [_beard_lods, ["hair_color"], beard_values],
+			[_hair_lods, ["hair_color"], values]]:
 		for level: Array in part[0]:
 			for node: Variant in level:
 				if not is_instance_valid(node):
 					continue
 				for uniform_name: String in part[1]:
-					(node as MeshInstance3D).set_instance_shader_parameter(uniform_name, values[uniform_name])
+					(node as MeshInstance3D).set_instance_shader_parameter(uniform_name, (part[2] as Dictionary)[uniform_name])
 
 
 ## Sets a blend shape by name where the mesh has it. Identity and hair shapes

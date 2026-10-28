@@ -207,6 +207,11 @@ func _check_palettes() -> void:
 		for sex: String in ["female", "male"]:
 			_expect(Map._table(category, sex).size() == {"skin": 10, "hair": 20, "eyes": 12}[category],
 				"%s %s colours come from the calibrated table" % [sex, category])
+	_expect(Map._table("beard", "male").size() == 20, "male beard colours come from their own calibrated table")
+	for index: int in 20:
+		var face := Map.face({"facial_hair": 5, "hair": AppearanceVariants.pack_hair(1, index)}, "male")
+		_expect(face.beard_color_set and face.beard_color == Map._colour(Map._table("beard", "male")[index], Color.BLACK),
+			"male beard colour %d through its table" % index)
 	_expect(Map.skin_color(13, "male") == Map.skin_color(3, "male"), "palette indices wrap as AppearanceVariants does")
 
 

@@ -95,6 +95,11 @@ static func face(appearance: Dictionary, sex: String) -> RLHeadAppearance:
 	result.hair_color = hair_color(AppearanceVariants.hair_color_index(int(appearance.get("hair", 0))), sex)
 	result.brow_color = result.hair_color * BROW_FROM_HAIR
 	result.brow_color.a = 1.0
+	var beard_table := _table("beard", sex)
+	if not beard_table.is_empty():
+		var hair_index := posmod(AppearanceVariants.hair_color_index(int(appearance.get("hair", 0))), 20)
+		result.beard_color = _colour(beard_table[mini(hair_index, beard_table.size() - 1)], result.hair_color)
+		result.beard_color_set = true
 	var detail := details(appearance, sex)
 	result.brow_style = float(detail["brow_style"])
 	result.brow_thickness = float(detail["brow_thickness"])

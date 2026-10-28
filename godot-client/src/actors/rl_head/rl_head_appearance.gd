@@ -96,6 +96,11 @@ var liner_wing := 0.0
 var hair_length := 0.0
 var hair_volume := 0.0
 var hair_detail := 0
+## The facial hair's own colour when `beard_color_set` (a beard card texture
+## lights differently from a hairstyle's), else the hair colour. Not part of
+## the byte form.
+var beard_color := Color(0.25, 0.14, 0.08)
+var beard_color_set := false
 
 static var _presets: Dictionary = {}
 static var _presets_loaded := false
@@ -196,6 +201,7 @@ func to_dict() -> Dictionary:
 		"hair_length": snappedf(hair_length, 0.0001),
 		"hair_volume": snappedf(hair_volume, 0.0001),
 		"hair_detail": hair_detail,
+		"beard_color": _color_array(beard_color) if beard_color_set else null,
 	}
 
 
@@ -271,6 +277,9 @@ func _merge(data: Dictionary) -> void:
 	hair_length = clampf(float(data.get("hair_length", hair_length)), -1.0, 1.0)
 	hair_volume = clampf(float(data.get("hair_volume", hair_volume)), -1.0, 1.0)
 	hair_detail = clampi(int(data.get("hair_detail", hair_detail)), 0, 2)
+	if data.get("beard_color") != null and data.has("beard_color"):
+		beard_color = _color(data["beard_color"], beard_color)
+		beard_color_set = true
 
 
 static func _style_name(value: Variant) -> String:
