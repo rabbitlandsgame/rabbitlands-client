@@ -2,6 +2,9 @@ class_name PortraitHairLocks
 extends RefCounted
 ## Explicitly authored opaque clump curves, sampled once into the existing hair
 ## surface. The imported cap, bind/rest data and all source files stay intact.
+## A lock set can be grown in (hair finish slider, colour model spec revision 3,
+## 4.7): at growth g < 1 each lock is sampled over [0, g] of its curve from the
+## root and its radius scaled by sqrt(g); at g = 1 it is the authored lock.
 const GROOM := preload("res://src/actors/portrait_groom.gd")
 const PATH := "res://data/actors/hair_high/hero-locks.json"
 const SIDES := 6
@@ -24,8 +27,15 @@ static func _bezier(p: Array[Vector3], segment: int, t: float) -> Vector3:
 	var a := segment*3
 	var u := 1.0-t
 	return p[a]*u*u*u+p[a+1]*3.0*u*u*t+p[a+2]*3.0*u*t*t+p[a+3]*t*t*t
+## Linear interpolation along a fitted [[x, y, z], ...] sample list.
+static func _sample(samples: Array, at: float) -> Vector3:
+	var low := clampi(int(floor(at)), 0, samples.size() - 1)
+	var high := mini(low + 1, samples.size() - 1)
+	var a := Vector3(samples[low][0], samples[low][1], samples[low][2])
+	var b := Vector3(samples[high][0], samples[high][1], samples[high][2])
+	return a.lerp(b, clampf(at - float(low), 0.0, 1.0))
 static func append(arrays: Array, from_head: Transform3D, sex: String, style: int, detail: int,
-		head_bind: int, neck_bind: int, eye_y: float, length: int, volume: int) -> Dictionary:
+		head_bind: int, neck_bind: int, eye_y: float, length: int, volume: int, growth: float = 1.0) -> Dictionary:
 	var points: PackedVector3Array=arrays[Mesh.ARRAY_VERTEX]
 	var colors := PackedColorArray()
 	colors.resize(points.size())
@@ -45,6 +55,8 @@ static func append(arrays: Array, from_head: Transform3D, sex: String, style: in
 	var weights := PackedFloat32Array()
 	var indices := PackedInt32Array()
 	var normal_from_head := from_head.basis.inverse().transposed()
+	var grown := growth < 1.0
+	growth = clampf(growth, 0.0, 1.0)
 	for definition: Dictionary in definitions:
 		for mirror: int in (2 if bool(definition.get("mirror",false)) else 1):
 			var control: Array[Vector3]=[]
@@ -60,13 +72,20 @@ static func append(arrays: Array, from_head: Transform3D, sex: String, style: in
 			var seed:=float(definition.get("seed",0.5))+(0.09 if mirror else 0.0)
 			for ring: int in rings:
 				var progress:=float(ring)/float(rings-1)
-				var scaled:=progress*segments
+				# The fraction of the authored lock this ring reaches.
+				var along:=progress*growth if grown else progress
+				var scaled:=along*segments
 				var segment:=mini(int(scaled),segments-1)
 				var t:=scaled-segment
 				var centre:=_bezier(control,segment,t)
 				var next:=_bezier(control,segment,minf(t+0.001,1.0))
 				var previous:=_bezier(control,segment,maxf(t-0.001,0.0))
-				if not fitted.is_empty():
+				var at:=along*float(rings-1)
+				if not fitted.is_empty() and grown:
+					centre=_sample(fitted,at)
+					next=_sample(fitted,minf(at+1.0,float(rings-1)))
+					previous=_sample(fitted,maxf(at-1.0,0.0))
+				elif not fitted.is_empty():
 					centre=Vector3(fitted[ring][0],fitted[ring][1],fitted[ring][2])
 					var ni:=mini(ring+1,rings-1)
 					var pi:=maxi(ring-1,0)
@@ -79,7 +98,7 @@ static func append(arrays: Array, from_head: Transform3D, sex: String, style: in
 				var direction: Vector3=(next-previous).normalized()
 				var outward:=Vector3(centre.x/0.085,(centre.y-0.08)/0.11,(centre.z+0.025)/0.10).normalized()
 				if not fitted_normals.is_empty():
-					outward=Vector3(fitted_normals[ring][0],fitted_normals[ring][1],fitted_normals[ring][2])
+					outward=_sample(fitted_normals,at).normalized() if grown else Vector3(fitted_normals[ring][0],fitted_normals[ring][1],fitted_normals[ring][2])
 					outward=(size_j.inverse().transposed()*outward).normalized()
 				var across:=direction.cross(outward).normalized()
 				if across.length_squared()<0.1: across=Vector3.RIGHT
@@ -88,6 +107,8 @@ static func append(arrays: Array, from_head: Transform3D, sex: String, style: in
 					raised=-raised
 					across=-across
 				var radius:=maxf(width*(0.55*(1.0-progress)+0.65*sin(progress*PI)),0.00004)
+				if grown:
+					radius=maxf(radius*sqrt(growth),0.00004)
 				for side: int in SIDES+1:
 					var u:=float(side)/SIDES
 					var angle:=u*TAU
@@ -97,7 +118,7 @@ static func append(arrays: Array, from_head: Transform3D, sex: String, style: in
 					normal.append((normal_from_head*n).normalized())
 					var tang:Vector3=(from_head.basis*(-across*sin(angle)+raised*cos(angle)*depth)).normalized()
 					tangent.append_array(PackedFloat32Array([tang.x,tang.y,tang.z,1.0]))
-					uv.append(Vector2(u,progress))
+					uv.append(Vector2(u,along))
 					color.append(Color(1,seed,progress,1))
 					var neck_weight:=0.20*(1.0-smoothstep(-0.08,0.025,p.y))*(1.0-smoothstep(-0.03,0.025,p.z)) if neck_bind>=0 else 0.0
 					for influence: int in influences:

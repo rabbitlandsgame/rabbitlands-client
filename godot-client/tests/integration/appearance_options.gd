@@ -14,7 +14,9 @@ func _init() -> void:
 
 func run() -> void:
 	var skins := AppearanceChoices.options("skin")
-	expect(skins.size() == 9 and not skins.any(func(row: Dictionary) -> bool: return row.id == 0), "human creation offers the nine named skin colors")
+	# Ten: skin 0, the authored "Soft tan" the Rowan and Tavi presets use, is
+	# offered too (colour model spec F1).
+	expect(skins.size() == 10 and skins[1].id == 0 and skins[1].label == "Soft tan", "human creation offers the ten named skin colors, Soft tan included")
 	var control := OptionButton.new()
 	AppearanceChoices.populate(control, skins)
 	expect(control.get_selected_id() == 1, "skin has a valid pale beige default")

@@ -32,9 +32,26 @@ extends RefCounted
 ## freckles, liner, brows and lip tint from per-sex defaults keyed by skin
 ## index. A missing or invalid field counts as its neutral value (50 for the
 ## sliders, 0 for facial_hair and hair_detail), as PortraitCustomization does.
+##
+## PC/3 colour fields (colour model spec revision 3, 4.3), resolved by
+## AppearanceColours, so the palette path - neutral, typed frozen or guarded -
+## is the table path above, unchanged. A custom skin tone and undertone draw
+## the final skin times the per-stop RL gain interpolated by slider position;
+## custom hair, beard and eye colours scale the reference dye (or the iris
+## pigment) by the per-channel RL/palette ratio of the table entries, inverse
+## distance weighted in OKLab, so they are exact at every palette entry.
+## INTERIM until the calibration phase writes `skinTone`, `hairLut`,
+## `beardLut` and `eyeLut` into the data file (spec 4.3-4.4). A custom skin
+## tone interpolates freckles, liner and the lip tint between the neighbouring
+## slider stops. The hair finish slider (hair_finish) gives the module's
+## detail level (detail_level).
 
 const DATA_PATH := "res://data/actors/rl_head_wire_defaults.json"
 const PRESETS := preload("res://src/actors/human_portrait_presets.gd")
+const COLOURS := preload("res://src/actors/appearance_colours.gd")
+const HAIR_FINISH := preload("res://src/actors/hair_finish.gd")
+## Inverse distance weighting power for the interim custom-colour ratios.
+const IDW_POWER := 2.0
 const SEX_PRESETS := {"female": "Mira", "male": "Rowan"}
 const FACE_FIELDS: Array[String] = ["jaw", "cheekbones", "nose", "face_length", "eye_size",
 	"eye_tilt", "eye_spacing", "nose_width", "lip_fullness", "brow_depth"]
@@ -96,15 +113,22 @@ static func face(appearance: Dictionary, sex: String) -> RLHeadAppearance:
 	for control: String in values:
 		result.set_control(control, float(values[control]))
 	var skin_index := palette_index(appearance, "skin", 10)
-	result.skin = skin_color(skin_index, sex)
-	result.eyes = eye_color(palette_index(appearance, "eyes", 12), sex)
-	result.hair_color = hair_color(AppearanceVariants.hair_color_index(int(appearance.get("hair", 0))), sex)
+	var config := human_config(sex)
+	var custom_skin := COLOURS.skin(appearance, config)
+	result.skin = custom_skin_color(custom_skin, sex) if custom_skin.custom else skin_color(skin_index, sex)
+	var custom_eyes := COLOURS.eyes(appearance, config)
+	result.eyes = custom_eye_color(custom_eyes.pigment, sex) if custom_eyes.custom \
+		else eye_color(palette_index(appearance, "eyes", 12), sex)
+	var custom_hair := COLOURS.hair(appearance, config)
+	result.hair_color = custom_table_color("hair", custom_hair, sex) if custom_hair.custom \
+		else hair_color(AppearanceVariants.hair_color_index(int(appearance.get("hair", 0))), sex)
 	result.brow_color = result.hair_color * BROW_FROM_HAIR
 	result.brow_color.a = 1.0
 	var beard_table := _table("beard", sex)
 	if not beard_table.is_empty():
 		var hair_index := posmod(AppearanceVariants.hair_color_index(int(appearance.get("hair", 0))), 20)
-		result.beard_color = _colour(beard_table[mini(hair_index, beard_table.size() - 1)], result.hair_color)
+		result.beard_color = custom_table_color("beard", custom_hair, sex) if custom_hair.custom \
+			else _colour(beard_table[mini(hair_index, beard_table.size() - 1)], result.hair_color)
 		result.beard_color_set = true
 	var detail := details(appearance, sex)
 	result.brow_style = float(detail["brow_style"])
@@ -259,7 +283,7 @@ static func hair_shapes(appearance: Dictionary, hair_name: String) -> Dictionary
 	for pair: Array in [["length", "hair_length"], ["volume", "hair_volume"]]:
 		var offset := (float(field(appearance, pair[1])) - float(preset.get(pair[1], 50))) / 50.0
 		result[pair[0]] = clampf(hair_gain * offset, -1.0, 1.0)
-	result["detail"] = detail_level(finish_slider(field(appearance, "hair_detail", 0, 2)), hair_name)
+	result["detail"] = detail_level(float(HAIR_FINISH.resolve(appearance).s), hair_name)
 	return result
 
 
@@ -352,6 +376,103 @@ static func eye_color(index: int, sex: String = "female") -> Color:
 	return natural_iris(AppearanceVariants.eye_color(index))
 
 
+## The model config AppearanceColours reads for a Human body of `sex`.
+static func human_config(sex: String) -> Dictionary:
+	sex = "male" if sex == "male" else "female"
+	return {"culture": "luminous", "bodyTemplate": "luminous_" + sex, "gender": sex}
+
+
+## The per-channel RL gain (linear RL table / linear palette colour) of a
+## natural skin slider stop, from the calibrated table.
+static func skin_stop_gain(index: int, sex: String) -> Vector3:
+	var table := COLOURS.to_linear(skin_color(index, sex))
+	var palette := COLOURS.to_linear(COLOURS.skin_stop_colour(index, sex))
+	return Vector3(table.x / maxf(palette.x, 1e-6), table.y / maxf(palette.y, 1e-6), table.z / maxf(palette.z, 1e-6))
+
+
+## The RL skin (sRGB) for a custom skin tone and undertone (AppearanceColours.
+## skin): the final skin times the RL gain interpolated linearly by slider
+## position between the stops (spec 4.3; INTERIM until `skinTone` knots).
+static func custom_skin_color(resolved: Dictionary, sex: String) -> Color:
+	var position := clampf(float(resolved.get("position", 1.0)), 1.0, 201.0)
+	var stops := COLOURS.SKIN_STOP_POSITION
+	var gain := skin_stop_gain(COLOURS.SKIN_STOP_INDEX[-1], sex)
+	for stop: int in range(stops.size() - 1):
+		if position <= stops[stop + 1]:
+			var u := (position - stops[stop]) / float(stops[stop + 1] - stops[stop])
+			gain = skin_stop_gain(COLOURS.SKIN_STOP_INDEX[stop], sex).lerp(
+				skin_stop_gain(COLOURS.SKIN_STOP_INDEX[stop + 1], sex), u)
+			break
+	var shown := COLOURS.to_linear(resolved.get("colour", Color.WHITE) as Color) * gain
+	return COLOURS.to_srgb(shown.clamp(Vector3.ZERO, Vector3.ONE))
+
+
+## Inverse distance weights (OKLab) of `target` against `references`; an exact
+## match takes all the weight.
+static func _idw(target: Color, references: Array[Color]) -> PackedFloat64Array:
+	var weights := PackedFloat64Array()
+	weights.resize(references.size())
+	var lab := COLOURS.oklab(target)
+	var total := 0.0
+	for index: int in references.size():
+		var distance := lab.distance_to(COLOURS.oklab(references[index]))
+		if distance < 1e-6:
+			weights.fill(0.0)
+			weights[index] = 1.0
+			return weights
+		weights[index] = 1.0 / pow(distance, IDW_POWER)
+		total += weights[index]
+	for index: int in references.size():
+		weights[index] /= total
+	return weights
+
+
+## `base` (linear) times exp(sum w_i log(table_i / palette_i)), per channel.
+static func _ratio_blend(base: Vector3, weights: PackedFloat64Array, table: Array[Color], palette: Array[Color]) -> Vector3:
+	var log_ratio := Vector3.ZERO
+	for index: int in weights.size():
+		if weights[index] <= 0.0:
+			continue
+		var t := COLOURS.to_linear(table[index]).max(Vector3.ONE * 1e-6)
+		var p := COLOURS.to_linear(palette[index]).max(Vector3.ONE * 1e-6)
+		log_ratio += Vector3(log(t.x / p.x), log(t.y / p.y), log(t.z / p.z)) * float(weights[index])
+	return base * Vector3(exp(log_ratio.x), exp(log_ratio.y), exp(log_ratio.z))
+
+
+## The RL eye colour (sRGB) for a custom iris pigment: the pigment times the
+## IDW of the table entries' RL/pigment ratios (INTERIM until `eyeLut`).
+static func custom_eye_color(pigment: Color, sex: String) -> Color:
+	var table: Array[Color] = []
+	var palette: Array[Color] = []
+	for index: int in 12:
+		table.append(eye_color(index, sex))
+		palette.append(AppearanceVariants.eye_color(index))
+	var shown := _ratio_blend(COLOURS.to_linear(pigment), _idw(pigment, palette), table, palette)
+	return COLOURS.to_srgb(shown.clamp(Vector3.ZERO, Vector3.ONE))
+
+
+## The RL hair or beard colour (sRGB) for a custom apparent hair colour
+## (AppearanceColours.hair): the reference dye times the IDW, by apparent
+## colour, of the table entries' RL/palette-dye ratios, at most 1 per channel
+## (scaled uniformly; INTERIM until `hairLut` / `beardLut`).
+static func custom_table_color(category: String, resolved: Dictionary, sex: String) -> Color:
+	var listed := _table(category, sex)
+	var table: Array[Color] = []
+	var palette: Array[Color] = []
+	var apparent: Array[Color] = []
+	for index: int in 20:
+		var dye := AppearanceVariants.hair_color(index)
+		table.append(_colour(listed[mini(index, listed.size() - 1)], dye) if not listed.is_empty() else dye)
+		palette.append(dye)
+		apparent.append(COLOURS.palette_apparent(index, sex))
+	var weights := _idw(resolved.get("apparent", Color.BLACK) as Color, apparent)
+	var shown := _ratio_blend(COLOURS.to_linear(resolved.get("dye", Color.BLACK) as Color), weights, table, palette)
+	var peak := maxf(shown.x, maxf(shown.y, shown.z))
+	if peak > 1.0:
+		shown /= peak
+	return COLOURS.to_srgb(shown.max(Vector3.ZERO))
+
+
 static func natural_iris(tint: Color) -> Color:
 	var value := tint.r * 0.2126 + tint.g * 0.7152 + tint.b * 0.0722
 	return Color(lerpf(tint.r, value, 0.12), lerpf(tint.g, value, 0.12), lerpf(tint.b, value, 0.12))
@@ -413,6 +534,22 @@ static func details(appearance: Dictionary, sex: String) -> Dictionary:
 		"stubble": _indexed(seeds.get("stubble"), facial, 0.0),
 		"lip_tint": lip_tint_color(int(_indexed(seeds.get("lip_tint"), skin, 2.0))),
 	}
+	var custom_skin := COLOURS.skin(appearance, human_config(sex))
+	if custom_skin.custom:
+		# A custom skin tone: freckles, liner and lip tint between the two
+		# neighbouring slider stops by position; the undertone leaves them.
+		var position := float(custom_skin.position)
+		var stops := COLOURS.SKIN_STOP_POSITION
+		for stop: int in range(stops.size() - 1):
+			if position <= stops[stop + 1]:
+				var u := (position - stops[stop]) / float(stops[stop + 1] - stops[stop])
+				var low := COLOURS.SKIN_STOP_INDEX[stop]
+				var high := COLOURS.SKIN_STOP_INDEX[stop + 1]
+				for name: String in ["freckles", "liner"]:
+					result[name] = lerpf(_indexed(seeds.get(name), low, 0.0), _indexed(seeds.get(name), high, 0.0), u)
+				result["lip_tint"] = lip_tint_color(int(_indexed(seeds.get("lip_tint"), low, 2.0))).lerp(
+					lip_tint_color(int(_indexed(seeds.get("lip_tint"), high, 2.0))), u)
+				break
 	if _explicit_detail(appearance, "brow_style") > 0:
 		result["brow_style"] = float(_explicit_detail(appearance, "brow_style") - 1) / 4.0
 	if _explicit_detail(appearance, "brow_thickness") > 0:

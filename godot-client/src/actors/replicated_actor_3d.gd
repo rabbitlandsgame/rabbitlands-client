@@ -19,6 +19,7 @@ const STUBBLE_APPEARANCE := preload("res://src/actors/stubble_appearance.gd")
 const HUMAN_LOCOMOTION := preload("res://src/actors/human_locomotion_polish.gd")
 const HIGH_PORTRAIT := preload("res://src/actors/high_portrait_appearance.gd")
 const HIGH_HAIR := preload("res://src/actors/high_hair_appearance.gd")
+const APPEARANCE_COLOURS := preload("res://src/actors/appearance_colours.gd")
 const MPFB_PROTOTYPE := preload("res://src/actors/mpfb_prototype_appearance.gd")
 const WORLD_LABEL_STYLE := preload("res://src/ui/world_label_style.gd")
 const TextColors := preload("res://src/ui/text_colors.gd")
@@ -321,6 +322,10 @@ var _face_material: ShaderMaterial
 var _face_group_materials: Dictionary = {}
 var _skin_materials: Dictionary = {}
 var _skin_choice := 0
+## The skin AppearanceColours resolved for this appearance: the palette entry
+## (develop's path) or a custom slider and undertone colour, recoloured.
+var _skin_custom := false
+var _skin_colour := Color.WHITE
 var _equipment_config: Dictionary = {}
 var _equipment_visuals: Dictionary = {}
 var _equipment_nodes: Dictionary = {}
@@ -725,6 +730,23 @@ func apply_appearance_variants(appearance: Dictionary) -> void:
 	var skin_tint: Color = AppearanceVariants.skin_tint(int(appearance.get("skin", 0)))
 	var hair_tint: Color = AppearanceVariants.hair_color(int(appearance.get("hair", 0)))
 	var eye_tint: Color = AppearanceVariants.eye_color(int(appearance.get("eyes", 0)))
+	# PC/3 colour fields (colour model spec revision 3): every value is the
+	# palette's - develop's own - unless a Human's custom value survives Rule A,
+	# Rule C and the guard. Brows (and stubble) take the hair's reference dye
+	# clamped to 1; the hair meshes get their per-path dyes from the groom.
+	var colours := APPEARANCE_COLOURS.resolve(appearance, _model_config)
+	_skin_custom = bool(colours.skin.custom)
+	_skin_colour = colours.skin.colour if _skin_custom else AppearanceVariants.skin_color(_skin_choice)
+	var brow_tint := hair_tint
+	if bool(colours.hair.custom):
+		hair_tint = colours.hair.dye
+		brow_tint = colours.hair.brow
+	if bool(colours.eyes.custom):
+		eye_tint = colours.eyes.pigment
+	var garments := {}
+	for part: String in ["shirt", "pants", "boots"]:
+		if bool(colours[part].custom):
+			garments[part] = colours[part].colour
 	var head_style: int = AppearanceVariants.head_style(int(appearance.get("head", 0)))
 	var native_model: Node3D = get_node_or_null("NativeModel") as Node3D
 	if native_model == null:
@@ -745,7 +767,7 @@ func apply_appearance_variants(appearance: Dictionary) -> void:
 		if mesh_name == "eyes":
 			_tint_mesh(mesh_node, eye_tint, true)
 		elif mesh_name == "eyebrows":
-			_tint_mesh(mesh_node, hair_tint)
+			_tint_mesh(mesh_node, brow_tint)
 		elif mesh_name == "body":
 			_apply_skin_materials(mesh_node, skin_tint)
 		elif mesh_name == "hair":
@@ -755,19 +777,19 @@ func apply_appearance_variants(appearance: Dictionary) -> void:
 		elif mesh_name in SHIRT_SURFACES:
 			# Kept on the node so equipping and unequipping a cuirass can put
 			# the character's own colour back without the appearance dictionary.
-			var shirt_color: Color = AppearanceVariants.wardrobe_color(
+			var shirt_color: Color = garments.get("shirt", AppearanceVariants.wardrobe_color(
 				culture, AppearanceVariants.PART_SHIRT,
-				int(appearance.get("shirt", 0)))
+				int(appearance.get("shirt", 0))))
 			if mesh_name == "wardrobe_shirt_trim":
 				shirt_color = shirt_color.lightened(0.18)
 			mesh_node.set_meta("wardrobe_color", shirt_color)
 			_set_mesh_color(mesh_node, shirt_color)
 		elif mesh_name == "wardrobe_pants":
-			_set_mesh_color(mesh_node, AppearanceVariants.wardrobe_color(
-				culture, AppearanceVariants.PART_PANTS, int(appearance.get("pants", 0))))
+			_set_mesh_color(mesh_node, garments.get("pants", AppearanceVariants.wardrobe_color(
+				culture, AppearanceVariants.PART_PANTS, int(appearance.get("pants", 0)))))
 		elif mesh_name == "wardrobe_boots":
-			_set_mesh_color(mesh_node, AppearanceVariants.wardrobe_color(
-				culture, AppearanceVariants.PART_BOOTS, int(appearance.get("boots", 0))))
+			_set_mesh_color(mesh_node, garments.get("boots", AppearanceVariants.wardrobe_color(
+				culture, AppearanceVariants.PART_BOOTS, int(appearance.get("boots", 0)))))
 		elif mesh_name == "wardrobe_head_band":
 			_set_appearance_visible(mesh_node, head_style == 1 or head_style == 3)
 			_set_mesh_color(mesh_node, AppearanceVariants.wardrobe_color(
@@ -780,7 +802,7 @@ func apply_appearance_variants(appearance: Dictionary) -> void:
 			var baked: Array = _model_config.get("wardrobeBakedGrow", []) as Array
 			if not baked.has(mesh_name):
 				_grow_mesh(mesh_node, float(WARDROBE_GROW[mesh_name]))
-	_apply_face_appearance(native_model, skin_tint, eye_tint, hair_tint)
+	_apply_face_appearance(native_model, skin_tint, eye_tint, brow_tint)
 	_apply_rl_head_and_hair(appearance, hair_tint)
 	_expand_animated_face_bounds(native_model)
 	_refresh_body_surface_visibility()
@@ -903,8 +925,8 @@ func _configure_skin_color(material: ShaderMaterial, part: String, surface: int)
 	var palette: Dictionary = _model_config.get("skinPalette", {})
 	var refs: Array = palette.get("references", {}).get(part, [])
 	var calibrated := surface < refs.size()
-	material.set_shader_parameter("recolor_skin", calibrated and _skin_choice != 0)
-	material.set_shader_parameter("skin_color", AppearanceVariants.skin_color(_skin_choice))
+	material.set_shader_parameter("recolor_skin", calibrated and (_skin_choice != 0 or _skin_custom))
+	material.set_shader_parameter("skin_color", _skin_colour if _skin_custom else AppearanceVariants.skin_color(_skin_choice))
 	if calibrated:
 		var rgb: Array = refs[surface]
 		material.set_shader_parameter("skin_reference", Color(float(rgb[0]), float(rgb[1]), float(rgb[2])))

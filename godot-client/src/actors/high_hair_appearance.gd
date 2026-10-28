@@ -2,10 +2,22 @@ class_name HighHairAppearance
 extends RefCounted
 ## Optional source-derived Human hair finish. All processing is once on change;
 ## Low/Medium restore the exact incoming mesh/material references.
+##
+## The hair finish slider (colour model spec revision 3, 4.7): a saved finish
+## runs develop's code exactly; any other position s blends male Parted's own
+## Swept and Tousled flows by HairFinish.weights(s), regroups the female Buns
+## updo, collapses its central needle-bangs toward their roots and lowers its
+## fringe by min(w_swept, 1) (the bangs go, as develop's Swept, at 1), and grows
+## the Swept or Tousled hero-lock layer in by min(w, 1). Custom colours
+## (AppearanceColours) give the hair (P4) and beard (B2) their dyes.
 const HIGH := 2
 const SHADER := preload("res://src/actors/high_hair_appearance.gdshader")
 const LOCKS := preload("res://src/actors/portrait_hair_locks.gd")
 const GROOM := preload("res://src/actors/portrait_groom.gd")
+const HAIR_FINISH := preload("res://src/actors/hair_finish.gd")
+const COLOURS := preload("res://src/actors/appearance_colours.gd")
+## The two imported central needle-bang islands of the female Buns hairstyle.
+const NEEDLE_BANG_SIZE := 264
 const META := &"rl_high_hair"
 const USER_META := &"rl_high_hair_user"
 const EXIT_META := &"rl_high_hair_exit"
@@ -62,12 +74,28 @@ static func apply(native_root: Node3D, skeleton: Skeleton3D, appearance: Diction
 		native_root.tree_exiting.connect(func() -> void: release(native_root), CONNECT_ONE_SHOT)
 		native_root.set_meta(EXIT_META, true)
 	var detail := clampi(int(appearance.get("hair_detail", 0)), 0, 2)
+	var finish := HAIR_FINISH.resolve(appearance)
+	var finish_s := int(finish.s) if bool(finish.custom) else -1
+	var finish_key := str(detail) if finish_s < 0 else "s%d" % finish_s
 	var style := AppearanceVariants.hair_style(int(appearance.get("hair", 0)))
 	var length := roundi(CharacterProportions.value(appearance,"hair_length"))
 	var volume := roundi(CharacterProportions.value(appearance,"hair_volume"))
 	var eye_y := GROOM._eye_height(native_root.find_child("eyes",true,false) as MeshInstance3D,skeleton,skeleton.get_bone_global_rest(head),native_root)
 	var color := AppearanceVariants.hair_color(int(appearance.get("hair", 0)))
+	if bool(COLOURS.hair(appearance, config).custom):
+		color = COLOURS.hair_dye(appearance, config, "P4", style,
+			float(finish_s if finish_s >= 0 else HAIR_FINISH.enum_slider(detail)))
 	var sex := str(config.get("gender", ""))
+	# The hero-lock layer drawn: the saved finish's, or for a slider position
+	# the Swept (below Classic) or Tousled (above) layer grown in by min(w, 1).
+	var lock_detail := detail
+	var growth := 1.0
+	if finish_s >= 0:
+		var weights := HAIR_FINISH.weights(finish_s)
+		lock_detail = 2 if finish_s < 50 else 1
+		growth = minf(weights.x if finish_s < 50 else weights.y, 1.0)
+		if growth <= 0.0:
+			lock_detail = 0
 	var head_from_root := skeleton.get_bone_global_rest(head).affine_inverse() * GROOM._to_root(skeleton, native_root).affine_inverse()
 	for hair: MeshInstance3D in _hair_nodes(native_root):
 		if hair.has_meta("rl_concept_hair") or hair.mesh == null or not _locally_visible(hair, native_root): continue
@@ -87,20 +115,20 @@ static func apply(native_root: Node3D, skeleton: Skeleton3D, appearance: Diction
 		var head_bind := LOCKS.binding(hair.skin,skeleton,&"Head")
 		var neck_name: StringName = skeleton.get_bone_name(skeleton.get_bone_parent(head)) if skeleton.get_bone_parent(head)>=0 else &"Head"
 		var neck_bind := LOCKS.binding(hair.skin,skeleton,neck_name)
-		var key := "%d:%d:%s:%d:%d:%s:%d:%d:%d:%d" % [source.get_instance_id(), authored.get_instance_id(), sex, style, detail, transform,length,volume,head_bind,neck_bind]
+		var key := "%d:%d:%s:%d:%s:%s:%d:%d:%d:%d" % [source.get_instance_id(), authored.get_instance_id(), sex, style, finish_key, transform,length,volume,head_bind,neck_bind]
 		var result := _meshes.get(key) as Mesh
 		if result == null:
 			var started := Time.get_ticks_usec()
-			result = _refine(source, authored, transform, sex, style, detail,eye_y,length,volume,head_bind,neck_bind)
+			result = _refine(source, authored, transform, sex, style, detail,eye_y,length,volume,head_bind,neck_bind,finish_s)
 			_cold_usec += Time.get_ticks_usec() - started
 			if _meshes.size() >= CACHE_LIMIT: _meshes.erase(_meshes.keys()[0])
 			_meshes[key] = result
 		else: _hits += 1
-		var layered := not LOCKS.curves(sex,style,detail).is_empty() and result != source
+		var layered := not LOCKS.curves(sex,style,lock_detail).is_empty() and result != source
 		var high_materials: Array[Material] = []
 		for surface: int in source.get_surface_count():
 			var original := authored.surface_get_material(surface) as StandardMaterial3D
-			var material_key := "%d:%s:%d:%d:%s" % [original.get_instance_id() if original != null else 0, color.to_html(), style, detail,layered]
+			var material_key := "%d:%s:%d:%s:%s" % [original.get_instance_id() if original != null else 0, color.to_html(), style, finish_key,layered]
 			var material := _materials.get(material_key) as ShaderMaterial
 			if material == null:
 				material = ShaderMaterial.new()
@@ -121,7 +149,7 @@ static func apply(native_root: Node3D, skeleton: Skeleton3D, appearance: Diction
 		for surface: int in high_materials.size(): hair.set_surface_override_material(surface, high_materials[surface])
 		hair.set_meta(META, {"source":source, "result":result, "override":original_override, "surfaces":originals, "materials":high_materials})
 	if visible_beard:
-		_apply_beard(beard,skeleton,native_root,appearance,eye_y)
+		_apply_beard(beard,skeleton,native_root,appearance,eye_y,config)
 	_prune_users()
 
 static func restore(native_root: Node3D) -> void:
@@ -197,6 +225,23 @@ static func _flow(point: Vector3, detail: int, style: int, sex: String) -> Vecto
 			sin(point.x * 42.0) * 0.003 * crown)
 	return point + Vector3(0.010 * fringe, 0.005 * crown + 0.0025 * crown * sin(point.x * 30.0 + point.z * 20.0), -0.006 * fringe)
 
+## Male Parted's flow at a hair finish slider position: its own Swept and
+## Tousled offsets blended by HairFinish.weights.
+static func _flow_finish(point: Vector3, weights: Vector2, style: int, sex: String) -> Vector3:
+	var moved := point
+	if weights.x > 0.0:
+		moved += (_flow(point, 2, style, sex) - point) * weights.x
+	if weights.y > 0.0:
+		moved += (_flow(point, 1, style, sex) - point) * weights.y
+	return moved
+
+static func _jacobian_finish(point: Vector3, weights: Vector2, style: int, sex: String) -> Basis:
+	var e := 0.0001
+	var centre := _flow_finish(point, weights, style, sex)
+	return Basis((_flow_finish(point + Vector3.RIGHT * e, weights, style, sex) - centre) / e,
+		(_flow_finish(point + Vector3.UP * e, weights, style, sex) - centre) / e,
+		(_flow_finish(point + Vector3.BACK * e, weights, style, sex) - centre) / e)
+
 static func _jacobian(point: Vector3, detail: int, high: bool, style: int, sex: String) -> Basis:
 	var e := 0.0001
 	var centre := _flow(point, detail, style, sex) if high else GROOM._hair_point(point, 0.075, detail)
@@ -205,7 +250,9 @@ static func _jacobian(point: Vector3, detail: int, high: bool, style: int, sex: 
 		axes.append(((_flow(point + axis * e, detail, style, sex) if high else GROOM._hair_point(point + axis * e, 0.075, detail)) - centre) / e)
 	return Basis(axes[0], axes[1], axes[2])
 
-static func _refine(source: Mesh, authored: Mesh, to_head: Transform3D, sex: String, style: int, detail: int, eye_y: float = 0.075, length: int = 50, volume: int = 50, head_bind: int = -1, neck_bind: int = -1) -> Mesh:
+static func _refine(source: Mesh, authored: Mesh, to_head: Transform3D, sex: String, style: int, detail: int, eye_y: float = 0.075, length: int = 50, volume: int = 50, head_bind: int = -1, neck_bind: int = -1, finish_s: int = -1) -> Mesh:
+	if finish_s >= 0:
+		return _refine_finish(source, authored, to_head, sex, style, finish_s, eye_y, length, volume, head_bind, neck_bind)
 	# Unknown custom or morph channels retain authored geometry; shading still
 	# improves. Production Human hair has neither, but future assets stay safe.
 	if source.get_blend_shape_count() > 0: return source
@@ -290,6 +337,130 @@ static func _refine(source: Mesh, authored: Mesh, to_head: Transform3D, sex: Str
 		result.surface_set_material(surface, source.surface_get_material(surface))
 	return result
 
+## _refine at a hair finish slider position s (not a saved finish): the same
+## refinement with the finish continuous. Male Parted blends its flows;
+## the female Buns updo regroups, its needle-bangs collapse toward their roots
+## and its fringe lowers by g = min(w_swept, 1), the bangs going at g = 1 as in
+## develop's Swept; the Swept or Tousled hero-lock layer grows in by min(w, 1).
+static func _refine_finish(source: Mesh, authored: Mesh, to_head: Transform3D, sex: String, style: int, s: int, eye_y: float = 0.075, length: int = 50, volume: int = 50, head_bind: int = -1, neck_bind: int = -1) -> Mesh:
+	if source.get_blend_shape_count() > 0: return source
+	var weights := HAIR_FINISH.weights(s)
+	var gather := minf(weights.x, 1.0)
+	var lock_detail := 2 if s < 50 else 1
+	var growth := minf(weights.x if s < 50 else weights.y, 1.0)
+	if growth <= 0.0:
+		lock_detail = 0
+		growth = 1.0
+	var updo := sex == "female" and style == 3 and gather > 0.0
+	var result := ArrayMesh.new()
+	var from_head := to_head.affine_inverse()
+	for surface: int in source.get_surface_count():
+		var arrays := source.surface_get_arrays(surface).duplicate(true)
+		if source.surface_get_primitive_type(surface) != Mesh.PRIMITIVE_TRIANGLES: return source
+		for slot: int in range(Mesh.ARRAY_CUSTOM0, Mesh.ARRAY_CUSTOM3 + 1):
+			if arrays[slot] != null: return source
+		var points: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+		var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
+		var tangents: PackedFloat32Array = arrays[Mesh.ARRAY_TANGENT] if arrays[Mesh.ARRAY_TANGENT] != null else PackedFloat32Array()
+		var input := authored.surface_get_arrays(surface)
+		var original_points: PackedVector3Array = input[Mesh.ARRAY_VERTEX]
+		var original_normals: PackedVector3Array = input[Mesh.ARRAY_NORMAL]
+		if sex == "male" and style == 1 and original_points.size() == points.size():
+			for index: int in points.size():
+				var local := to_head * original_points[index]
+				var flowing := _flow_finish(local, weights, style, sex)
+				points[index] = from_head * GROOM._size_hair_point(flowing,eye_y,length,volume)
+				var high_j := _jacobian_finish(local, weights, style, sex)
+				high_j = GROOM._size_hair_jacobian(flowing,eye_y,length,volume)*high_j
+				var jacobian := from_head.basis * high_j * to_head.basis
+				normals[index] = (jacobian.inverse().transposed() * original_normals[index]).normalized()
+				if tangents.size() == points.size() * 4:
+					var t := Vector3(tangents[index * 4], tangents[index * 4 + 1], tangents[index * 4 + 2])
+					t = (jacobian * t).normalized()
+					t = (t - normals[index] * normals[index].dot(t)).normalized()
+					for component: int in 3: tangents[index * 4 + component] = t[component]
+		if updo:
+			var groups := _updo_groups(arrays, to_head)
+			var roots := _bang_roots(points, groups, to_head)
+			for index: int in points.size():
+				var group: int = groups.vertices[index]
+				if group == 0: continue
+				var centre: Vector3 = groups.centres[group]
+				var local := to_head * points[index]
+				if roots.has(group) and gather < 1.0:
+					# A needle-bang collapses toward its root; at gather 1 it is
+					# regrouped as develop's Swept does and its triangles go.
+					points[index] = from_head * local.lerp(roots[group], gather)
+					continue
+				var scale := Vector3(0.92,0.85,0.86) if group == 1 else (Vector3(0.74,0.65,0.74) if group == 2 else Vector3(1.08,0.98,1.18))
+				var target := Vector3(-0.014,0.216,-0.082) if group == 1 else (Vector3(0.027,0.216,-0.113) if group == 2 else centre + Vector3(0,0.001,0.001))
+				var local_point := target + (local - centre) * scale
+				if group == 8:
+					var tail:=1.0-smoothstep(0.04,0.11,local_point.y)
+					var side_centre:=signf(local_point.x)*0.085
+					local_point.x=lerpf(local_point.x,side_centre+(local_point.x-side_centre)*0.60,tail)
+					local_point.z=lerpf(local_point.z,0.035+(local_point.z-0.035)*0.70,tail)
+					local_point.y+=0.015*tail
+				if group >= 3 and group != 8 and centre.y>0.13 and absf(centre.x)<0.045:
+					var swept := 1.0-smoothstep(0.135,0.170,local_point.y)
+					local_point += Vector3(signf(centre.x)*0.020,0.025,-0.004)*swept
+				points[index] = from_head * local.lerp(local_point, gather)
+				var j := from_head.basis * GROOM._lerp_basis(Basis.IDENTITY, Basis.from_scale(scale), gather) * to_head.basis
+				normals[index] = (j.inverse().transposed() * normals[index]).normalized()
+				if tangents.size() == points.size()*4:
+					var t := Vector3(tangents[index*4],tangents[index*4+1],tangents[index*4+2])
+					t = j*t
+					t = (t-normals[index]*normals[index].dot(t)).normalized()
+					for component: int in 3: tangents[index*4+component]=t[component]
+			if gather >= 1.0:
+				var kept:=PackedInt32Array()
+				var original_indices:PackedInt32Array=arrays[Mesh.ARRAY_INDEX]
+				for triangle: int in range(0,original_indices.size(),3):
+					var group:int=groups.vertices[original_indices[triangle]]
+					if int(groups.sizes.get(group,0)) == NEEDLE_BANG_SIZE:continue
+					kept.append_array(original_indices.slice(triangle,triangle+3))
+				arrays[Mesh.ARRAY_INDEX]=kept
+		arrays[Mesh.ARRAY_VERTEX] = points
+		arrays[Mesh.ARRAY_NORMAL] = normals
+		if not tangents.is_empty(): arrays[Mesh.ARRAY_TANGENT] = tangents
+		arrays = _refine_edges(arrays, to_head, 0.012)
+		var lods := GROOM._lods(source,surface)
+		if surface == 0:
+			var layer := LOCKS.append(arrays,from_head,sex,style,lock_detail,head_bind,neck_bind,eye_y,length,volume,growth)
+			arrays=layer.arrays
+			for threshold: Variant in lods:
+				var chain: PackedInt32Array=lods[threshold]
+				chain.append_array(layer.added_indices)
+				lods[threshold]=chain
+			if updo:
+				arrays = _lower_updo_fringe(arrays,to_head,gather)
+		result.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays, [], lods, source.surface_get_format(surface) & Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS)
+		result.surface_set_material(surface, source.surface_get_material(surface))
+	return result
+
+## Each central needle-bang's root (head space): the mean of its highest fifth.
+static func _bang_roots(points: PackedVector3Array, groups: Dictionary, to_head: Transform3D) -> Dictionary:
+	var spans: Dictionary = {}
+	for index: int in points.size():
+		var group: int = groups.vertices[index]
+		if group == 0 or int(groups.sizes.get(group, 0)) != NEEDLE_BANG_SIZE: continue
+		var y := (to_head * points[index]).y
+		var span: Vector2 = spans.get(group, Vector2(y, y))
+		spans[group] = Vector2(minf(span.x, y), maxf(span.y, y))
+	var sums: Dictionary = {}
+	for index: int in points.size():
+		var group: int = groups.vertices[index]
+		if not spans.has(group): continue
+		var local := to_head * points[index]
+		var span: Vector2 = spans[group]
+		if local.y < span.y - 0.2 * (span.y - span.x): continue
+		var entry: Array = sums.get(group, [Vector3.ZERO, 0])
+		sums[group] = [entry[0] + local, entry[1] + 1]
+	var roots: Dictionary = {}
+	for group: Variant in sums:
+		roots[group] = (sums[group][0] as Vector3) / float(maxi(int(sums[group][1]), 1))
+	return roots
+
 static func _updo_fringe_point(point: Vector3) -> Vector3:
 	var front := smoothstep(0.068,0.085,point.z)
 	var centre := 1.0-smoothstep(0.055,0.085,absf(point.x))
@@ -298,7 +469,8 @@ static func _updo_fringe_point(point: Vector3) -> Vector3:
 
 ## Lower only the existing swept fringe islands after edge refinement. This
 ## keeps all topology, crown, buns, hanging strands and scalp roots intact.
-static func _lower_updo_fringe(arrays: Array, to_head: Transform3D) -> Array:
+## `amount` scales the lowering (a hair finish slider position; 1 = Swept).
+static func _lower_updo_fringe(arrays: Array, to_head: Transform3D, amount: float = 1.0) -> Array:
 	var groups := _updo_groups(arrays,to_head)
 	var points: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
 	var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
@@ -310,11 +482,15 @@ static func _lower_updo_fringe(arrays: Array, to_head: Transform3D) -> Array:
 		var group: int = groups.vertices[index]
 		if group < 3 or group == 8 or colors[index].r>0.5: continue
 		var local := to_head*points[index]
-		var moved := _updo_fringe_point(local)
+		var moved := _updo_fringe_point(local) if amount >= 1.0 else _updo_fringe_scaled(local, amount)
 		if moved == local: continue
 		var j := Basis((_updo_fringe_point(local+Vector3.RIGHT*e)-moved)/e,
 			(_updo_fringe_point(local+Vector3.UP*e)-moved)/e,
 			(_updo_fringe_point(local+Vector3.BACK*e)-moved)/e)
+		if amount < 1.0:
+			j = Basis((_updo_fringe_scaled(local+Vector3.RIGHT*e, amount)-moved)/e,
+				(_updo_fringe_scaled(local+Vector3.UP*e, amount)-moved)/e,
+				(_updo_fringe_scaled(local+Vector3.BACK*e, amount)-moved)/e)
 		j = from_head.basis*j*to_head.basis
 		points[index] = from_head*moved
 		normals[index] = (j.inverse().transposed()*normals[index]).normalized()
@@ -326,6 +502,9 @@ static func _lower_updo_fringe(arrays: Array, to_head: Transform3D) -> Array:
 	arrays[Mesh.ARRAY_NORMAL]=normals
 	if not tangents.is_empty(): arrays[Mesh.ARRAY_TANGENT]=tangents
 	return arrays
+
+static func _updo_fringe_scaled(point: Vector3, amount: float) -> Vector3:
+	return point + (_updo_fringe_point(point) - point) * amount
 
 static func _updo_groups(arrays: Array, to_head: Transform3D) -> Dictionary:
 	var points: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
@@ -384,7 +563,7 @@ static func _updo_groups(arrays: Array, to_head: Transform3D) -> Dictionary:
 	for index: int in points.size(): vertices[index]=int(selected.get(GROOM._component_root(parents,index),0))
 	return {"vertices":vertices,"centres":centres,"sizes":sizes}
 
-static func _apply_beard(beard: MeshInstance3D, skeleton: Skeleton3D, root: Node3D, appearance: Dictionary, eye_y: float) -> void:
+static func _apply_beard(beard: MeshInstance3D, skeleton: Skeleton3D, root: Node3D, appearance: Dictionary, eye_y: float, config: Dictionary = {}) -> void:
 	var previous: Dictionary=beard.get_meta(META,{})
 	var source:=beard.mesh
 	var original:=beard.material_override as ShaderMaterial
@@ -406,6 +585,8 @@ static func _apply_beard(beard: MeshInstance3D, skeleton: Skeleton3D, root: Node
 		if _meshes.size()>=CACHE_LIMIT:_meshes.erase(_meshes.keys()[0])
 		_meshes[key]=result
 	var color:=AppearanceVariants.hair_color(int(appearance.get("hair",0)))
+	if bool(COLOURS.hair(appearance, config).custom):
+		color = COLOURS.hair_dye(appearance, config, "B2", clampi(int(appearance.get("facial_hair", 0)), 0, 5))
 	var material_key:="beard:%d:%s" % [original.get_instance_id(),color.to_html()]
 	var material:=_materials.get(material_key) as ShaderMaterial
 	if material==null:

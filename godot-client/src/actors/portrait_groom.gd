@@ -2,10 +2,24 @@ class_name PortraitGroom
 extends RefCounted
 ## Once-on-change grooming of imported geometry. No rest pose, animation,
 ## equipment asset or source Mesh is modified. Bounded caches share derivatives.
+##
+## The hair finish is continuous (colour model spec revision 3, 2.9 and 4.7):
+## a saved finish (hair_finish 0, typed on its own slider position, or
+## guarded) runs develop's code exactly; any other slider position s blends
+## the Swept and Tousled offsets by HairFinish.weights(s), gathers the female
+## Buns updo by min(w_swept, 1), and draws portrait_hair.gdshader with its
+## finish uniforms between the GLB material's Classic shading and Tousled /
+## Swept's. Custom colours (AppearanceColours) give each draw path its dye.
 
 const PROPORTIONS := preload("res://src/actors/character_proportions.gd")
 const HAIR_SHADER := preload("res://src/actors/portrait_hair.gdshader")
 const BEARD_SHADER := preload("res://src/actors/portrait_beard.gdshader")
+const HAIR_FINISH := preload("res://src/actors/hair_finish.gd")
+const COLOURS := preload("res://src/actors/appearance_colours.gd")
+## Tousled / Swept's portrait_hair.gdshader shading (the uniforms' defaults).
+const FINISH_ROUGHNESS := 0.76
+const FINISH_SPECULAR := 0.24
+const FINISH_GRAIN := 0.05
 const HAIR_CACHE_LIMIT := 40
 const BEARD_CACHE_LIMIT := 32
 const SOURCE_META := "portrait_groom_source"
@@ -53,12 +67,25 @@ static func apply(native_root: Node3D, skeleton: Skeleton3D,
 	var hair_length := roundi(PROPORTIONS.value(appearance,"hair_length"))
 	var hair_volume := roundi(PROPORTIONS.value(appearance,"hair_volume"))
 	var updo := str(model_config.get("gender", "")) == "female" and AppearanceVariants.hair_style(int(appearance.get("hair", 0))) == 3
+	var finish := HAIR_FINISH.resolve(appearance)
+	var finish_s := int(finish.s) if bool(finish.custom) else -1
+	var custom_colour := bool(COLOURS.hair(appearance, model_config).custom)
+	var style_slot := AppearanceVariants.hair_style(int(appearance.get("hair", 0)))
+	var hair_color := color
+	if custom_colour:
+		# P1 Classic at length and volume 50, P2 Classic shaped, P3 a finish.
+		var path := "P3" if finish_s >= 0 or detail != 0 else ("P1" if hair_length == 50 and hair_volume == 50 else "P2")
+		hair_color = COLOURS.hair_dye(appearance, model_config, path, style_slot,
+			float(finish_s if finish_s >= 0 else HAIR_FINISH.enum_slider(detail)))
 	for node: Node in native_root.find_children("*", "MeshInstance3D", true, false):
 		var hair := node as MeshInstance3D
 		if hair.has_meta("rl_concept_hair"):
 			continue
 		if hair.get_parent() != null and str(hair.get_parent().name).begins_with("AppearanceHair_"):
-			_groom_hair(hair, skeleton, frame, eye_height, detail, color, native_root, updo, hair_length, hair_volume)
+			if finish_s >= 0:
+				_groom_hair_finish(hair, skeleton, frame, eye_height, finish_s, hair_color, native_root, updo, hair_length, hair_volume)
+			else:
+				_groom_hair(hair, skeleton, frame, eye_height, detail, hair_color, native_root, updo, hair_length, hair_volume)
 	var old := native_root.get_node_or_null("PortraitFacialHair")
 	if old != null:
 		native_root.remove_child(old)
@@ -80,6 +107,9 @@ static func apply(native_root: Node3D, skeleton: Skeleton3D,
 	beard.name = "PortraitFacialHair"
 	var canonical_frame:=PROPORTIONS.face_frame(native_root,skeleton)
 	var mouth_y:float=canonical_frame.get("mouth_y",eye_height-0.063)
+	if custom_colour:
+		# B1: a custom beard shows the hair's apparent colour (owner Q-N4).
+		color = COLOURS.hair_dye(appearance, model_config, "B1", style)
 	var material_key := "%s:%d:%.5f:%.5f" % [color.to_html(), style, eye_height,mouth_y]
 	var material := _beard_materials.get(material_key) as ShaderMaterial
 	if material == null:
@@ -248,6 +278,125 @@ static func _hair_point(point: Vector3, eye_height: float, detail: int) -> Vecto
 		offset.x += sin(point.y * 44.0) * 0.004 * fringe
 		return point + offset
 	return point + Vector3(0.012 * fringe, 0.005 * crown, -0.008 * fringe)
+
+## Tousled's offset from the point (develop's _hair_point detail 1, as an offset).
+static func _tousled_offset(point: Vector3, eye_height: float) -> Vector3:
+	var crown := smoothstep(eye_height - 0.005, eye_height + 0.07, point.y)
+	var fringe := smoothstep(-0.01, 0.065, point.z) * crown
+	var lock := 0.5 + 0.5 * sin(point.x * 125.0 + point.z * 78.0)
+	var offset := Vector3(sin(point.z * 63.0 + point.x * 31.0) * 0.004,
+		0.004 + lock * 0.012, sin(point.x * 107.0) * 0.004) * crown
+	offset.y -= fringe * (0.004 + 0.010 * pow(sin(point.x * 120.0 + 0.8), 2.0))
+	offset.x += sin(point.y * 44.0) * 0.004 * fringe
+	return offset
+
+## Swept's offset from the point (develop's _hair_point detail 2, as an offset).
+static func _swept_offset(point: Vector3, eye_height: float) -> Vector3:
+	var crown := smoothstep(eye_height - 0.005, eye_height + 0.07, point.y)
+	var fringe := smoothstep(-0.01, 0.065, point.z) * crown
+	return Vector3(0.012 * fringe, 0.005 * crown, -0.008 * fringe)
+
+## A slider position's blended finish: the point plus w_swept Swept offsets and
+## w_tousled Tousled offsets (HairFinish.weights).
+static func _finish_point(point: Vector3, eye_height: float, weights: Vector2) -> Vector3:
+	var moved := point
+	if weights.x > 0.0:
+		moved += _swept_offset(point, eye_height) * weights.x
+	if weights.y > 0.0:
+		moved += _tousled_offset(point, eye_height) * weights.y
+	return moved
+
+static func _lerp_basis(a: Basis, b: Basis, weight: float) -> Basis:
+	return Basis(a.x.lerp(b.x, weight), a.y.lerp(b.y, weight), a.z.lerp(b.z, weight))
+
+## A custom hair finish slider position s (not one of the three saved
+## finishes): develop's grooming with the finish blended continuously, the
+## female Buns updo gathered by min(w_swept, 1), and portrait_hair.gdshader with
+## its finish uniforms between the GLB material's own (Classic) shading and
+## Tousled / Swept's by w = min(1, w_swept + w_tousled). Length and volume
+## apply after the blend, as for the saved finishes.
+static func _groom_hair_finish(hair: MeshInstance3D, skeleton: Skeleton3D, frame: Transform3D,
+		eye_height: float, s: int, color: Color, native_root: Node3D, updo: bool,
+		hair_length: int = 50, hair_volume: int = 50) -> void:
+	if hair.mesh == null:
+		return
+	if not hair.has_meta(SOURCE_META):
+		hair.set_meta(SOURCE_META, hair.mesh)
+	var source := hair.get_meta(SOURCE_META) as Mesh
+	hair.material_override = null
+	var weights := HAIR_FINISH.weights(s)
+	var gather := minf(weights.x, 1.0)
+	var to_head := frame.affine_inverse() * _to_root(skeleton, native_root).affine_inverse() * _to_root(hair, native_root)
+	var from_head := to_head.affine_inverse()
+	var key := "%d:s%d:%s:%d:%d:%.5f" % [source.get_instance_id(), s, to_head, hair_length, hair_volume, eye_height]
+	var groomed := _hair_meshes.get(key) as ArrayMesh
+	if groomed == null:
+		groomed = ArrayMesh.new()
+		for surface: int in source.get_surface_count():
+			var arrays := source.surface_get_arrays(surface).duplicate(true)
+			var positions: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+			var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
+			var tangents: PackedFloat32Array = arrays[Mesh.ARRAY_TANGENT] if arrays[Mesh.ARRAY_TANGENT] != null else PackedFloat32Array()
+			var buns := _bun_groups(arrays, to_head) if updo and gather > 0.0 else {}
+			var normal_to_head := to_head.basis.inverse().transposed()
+			var normal_from_head := from_head.basis.inverse().transposed()
+			var epsilon := 0.0001
+			for index: int in positions.size():
+				var local := to_head * positions[index]
+				var moved := _finish_point(local, eye_height, weights)
+				var jacobian := Basis((_finish_point(local + Vector3.RIGHT * epsilon, eye_height, weights) - moved) / epsilon,
+					(_finish_point(local + Vector3.UP * epsilon, eye_height, weights) - moved) / epsilon,
+					(_finish_point(local + Vector3.BACK * epsilon, eye_height, weights) - moved) / epsilon)
+				var bun := int(buns.vertices[index]) if not buns.is_empty() else 0
+				if bun > 0:
+					moved = moved.lerp(_bun_point(local, bun, buns.centres[bun]), gather)
+					jacobian = _lerp_basis(jacobian, Basis.from_scale(Vector3(0.82, 0.90, 0.82) if bun == 1 else Vector3(0.64, 0.75, 0.70)), gather)
+				var groomed_point := moved
+				moved = _size_hair_point(moved, eye_height, hair_length, hair_volume)
+				positions[index] = from_head * moved
+				if hair_length != 50 or hair_volume != 50:
+					jacobian = _size_hair_jacobian(groomed_point, eye_height, hair_length, hair_volume) * jacobian
+				if normals.size() == positions.size():
+					normals[index] = (normal_from_head * jacobian.inverse().transposed() * normal_to_head * normals[index]).normalized()
+				if tangents.size() == positions.size() * 4:
+					var tangent := Vector3(tangents[index * 4], tangents[index * 4 + 1], tangents[index * 4 + 2])
+					tangent = (from_head.basis * jacobian * to_head.basis * tangent).normalized()
+					for component: int in 3:
+						tangents[index * 4 + component] = tangent[component]
+			arrays[Mesh.ARRAY_VERTEX] = positions
+			arrays[Mesh.ARRAY_NORMAL] = normals
+			if not tangents.is_empty():
+				arrays[Mesh.ARRAY_TANGENT] = tangents
+			groomed.add_surface_from_arrays(source.surface_get_primitive_type(surface), arrays,
+				[], _lods(source, surface), source.surface_get_format(surface) & Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS)
+			groomed.surface_set_material(surface, source.surface_get_material(surface))
+		_cache(_hair_meshes, key, groomed, HAIR_CACHE_LIMIT)
+	hair.mesh = groomed
+	var w := HAIR_FINISH.material_weight(s)
+	for surface: int in source.get_surface_count():
+		var original := source.surface_get_material(surface) as StandardMaterial3D
+		if original == null:
+			continue
+		var material_key := "%d:%s:s%d" % [original.get_instance_id(), color.to_html(), s]
+		var material := _hair_materials.get(material_key) as ShaderMaterial
+		if material == null:
+			material = ShaderMaterial.new()
+			material.shader = HAIR_SHADER
+			if original.albedo_texture != null:
+				material.set_shader_parameter("base_texture", original.albedo_texture)
+			material.set_shader_parameter("use_texture", original.albedo_texture != null)
+			material.set_shader_parameter("hair_color", color * original.albedo_color)
+			if original.normal_texture != null:
+				material.set_shader_parameter("normal_texture", original.normal_texture)
+			material.set_shader_parameter("use_normal", original.normal_enabled and original.normal_texture != null)
+			material.set_shader_parameter("normal_scale", minf(original.normal_scale, 0.8))
+			# Classic is the GLB material's own shading; Tousled / Swept the
+			# shader's defaults; between them by the finish weight.
+			material.set_shader_parameter("finish_roughness", lerpf(original.roughness, FINISH_ROUGHNESS, w))
+			material.set_shader_parameter("finish_specular", lerpf(original.metallic_specular, FINISH_SPECULAR, w))
+			material.set_shader_parameter("grain_amount", FINISH_GRAIN * w)
+			_cache(_hair_materials, material_key, material, 128)
+		hair.set_surface_override_material(surface, material)
 
 static func _build_beard(source: Mesh, mesh_to_skeleton: Transform3D,
 		frame: Transform3D, eye_height: float, style: int, face_frame: Dictionary = {}, face_shape: Variant = Vector3.ZERO) -> ArrayMesh:

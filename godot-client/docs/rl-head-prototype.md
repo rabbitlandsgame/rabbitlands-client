@@ -65,8 +65,19 @@ art exactly. No asset is replaced: the shipped bodies, hair and equipment are un
     is the slider position of the module's own preset finish (Rowan is Tousled, 75; Mira
     Swept, 25), so each preset finish is the authored look: `rowan_shag` Swept 17,
     Classic 33, Tousled 50; `mira_bun` Swept 50, Classic 67, Tousled 83
-    (`data/actors/rl_head_wire_defaults.json` `hair.detail.sliderPresetFinish`). A later
-    PC/3 `hair_finish` slider value feeds the same function.
+    (`data/actors/rl_head_wire_defaults.json` `hair.detail.sliderPresetFinish`). A PC/3
+    `hair_finish` slider value (1-101 = s + 1; 0 uses the saved finish) feeds the same
+    function (`HairFinish.resolve`), as do Low/Medium and classic High, which blend the
+    game hairstyles' Swept and Tousled grooming continuously.
+  * **PC/3 colour fields** (`AppearanceColours`, colour model spec revision 3). The palette
+    path - every colour field 0, a typed value equal to the palette entry's frozen value,
+    or a custom value whose nearest palette entry is not the saved byte - is the table
+    path above, unchanged. A custom skin tone and undertone draw the final skin times the
+    RL gain of the neighbouring stops by slider position; custom hair, beard and iris
+    colours scale the reference dye (or pigment) by the inverse-distance-weighted RL /
+    palette ratio of the table entries, exact at every palette entry. These are interim
+    models until the calibration phase adds `skinTone`, `hairLut`, `beardLut` and
+    `eyeLut`. Freckles, liner and lip tint interpolate between the neighbouring stops.
   * **Springs** keep their authored rest lengths; extended tips stay weighted to the last
     joint and swing with it, shortened locks use fewer joints.
     `tests/test_rl_head.gd` swings both hairstyles at full length and volume.
