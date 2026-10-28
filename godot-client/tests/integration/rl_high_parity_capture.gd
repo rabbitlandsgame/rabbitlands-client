@@ -6,7 +6,7 @@ extends SceneTree
 ## fixed animation time and writes a canonical, deterministic JSON of every
 ## MeshInstance3D under each actor: node path, mesh content (surface arrays,
 ## blend-shape arrays and the renderer's packed buffers and LODs, hashed),
-## material class, shader path and every parameter value (never identities),
+## material class, shader path and every set parameter value (never identities),
 ## visibility, shadows, LOD bias, layers, cull margin, instance uniforms and
 ## blend-shape weights, plus the skeleton pose. Meshes, materials, skins and
 ## textures are content-addressed in shared tables.
@@ -21,6 +21,20 @@ extends SceneTree
 ##                                    High: identical.
 ##   luminous_high_classic            Humans at High: identical only with the
 ##                                    dormant classic head (RL_HEADS=classic).
+##   luminous_finish                  Humans at Low/Medium, every hairstyle and
+##                                    saved finish, length and volume at and off
+##                                    50, with hair_finish 0 or typed on the
+##                                    finish's slider position: identical.
+##   luminous_finish_classic          The same at High: identical only with
+##                                    RL_HEADS=classic.
+##
+## Looks carry every PC/3 field (colour model spec revision 3: 53) as literals,
+## so a build that does not know a field ignores it and a later build must draw
+## the same thing: the V3 face and detail fields only ever change the RL head,
+## colour fields equal to a palette entry's frozen value (Rule C) or guarded
+## by a disagreeing palette byte, and a hair_finish typed on its saved
+## finish's position or guarded, draw the palette path. A look with "sex" is
+## captured only on bodies of that sex (frozen hair values are per sex).
 ##
 ## Usage (headless, after an import):
 ##   Godot --headless --path godot-client --script res://tests/integration/rl_high_parity_capture.gd
@@ -49,8 +63,26 @@ const SKIPPED_MATERIAL_PROPERTIES := ["resource_local_to_scene", "resource_path"
 	"resource_name", "resource_scene_unique_id", "script", "next_pass", "render_priority"]
 const OTHER_RACES := ["votary", "orun", "glasswarden", "greyhaven"]
 const FROM_HIGH_LOOKS := ["default", "rowan", "mira", "tavi", "facial_hair_5", "bald",
-	"closed_helmet", "band_111", "band_114"]
-const EDITED_LOOKS := ["rowan", "mira", "extreme_100", "facial_hair_3", "band_111", "torso_armour"]
+	"closed_helmet", "band_111", "band_114", "v3_details", "colour_guarded"]
+const EDITED_LOOKS := ["rowan", "mira", "extreme_100", "facial_hair_3", "band_111", "torso_armour",
+	"v3_details", "colour_guarded", "typed_frozen_female", "typed_frozen_male"]
+## Every PC/3 field and its wire maximum, literally (PC/1, PC/2, then V3: the
+## 11 face offsets, 9 details ending with hair_finish, the 17 colour fields).
+const ALL_FIELD_MAXIMA := {"facial_hair": 5, "jaw": 100, "cheekbones": 100, "nose": 100,
+	"height": 100, "build": 100, "hair_detail": 2, "face_length": 100, "eye_size": 100,
+	"eye_tilt": 100, "eye_spacing": 100, "nose_width": 100, "lip_fullness": 100,
+	"brow_depth": 100, "hair_length": 100, "hair_volume": 100,
+	"eyelid": 100, "brow_height": 100, "nose_length": 100, "nose_bridge": 100, "nose_tip": 100,
+	"mouth_width": 100, "cupid_bow": 100, "cheek_fullness": 100, "chin_projection": 100,
+	"chin_width": 100, "ear_size": 100, "brow_style": 13, "brow_thickness": 101, "freckles": 101,
+	"liner": 101, "liner_wing": 101, "stubble": 101, "lip_tint": 12, "hair_module": 31,
+	"hair_finish": 101, "skin_tone": 201, "skin_undertone": 201,
+	"hair_hue": 240, "hair_sat": 101, "hair_light": 101, "eye_hue": 240, "eye_sat": 101, "eye_light": 101,
+	"shirt_hue": 240, "shirt_sat": 101, "shirt_light": 101, "pants_hue": 240, "pants_sat": 101,
+	"pants_light": 101, "boots_hue": 240, "boots_sat": 101, "boots_light": 101}
+## hair_detail 0 Classic, 1 Tousled, 2 Swept -> hair_finish wire value on the
+## finish's slider position (Classic 50, Tousled 75, Swept 25; wire = s + 1).
+const FINISH_WIRE := [51, 76, 26]
 
 var checks := 0
 var failures := 0
@@ -84,10 +116,19 @@ func expect(ok: bool, label: String) -> bool:
 static func looks() -> Dictionary:
 	var all_min := {}
 	var all_max := {}
-	for field: String in PortraitCustomization.FIELDS:
+	for field: String in ALL_FIELD_MAXIMA:
 		all_min[field] = 0
-		all_max[field] = PortraitCustomization.maximum(field)
+		all_max[field] = ALL_FIELD_MAXIMA[field]
 	var hair := func(style: int, colour: int) -> int: return AppearanceVariants.pack_hair(style, colour)
+	# Typed frozen palette values (colour model spec revision 3, Appendix A):
+	# skin golden tan 43, eyes emerald (104,87,63), luminous shirt crimson
+	# (19,84,37), pants navy (180,56,25), boots walnut (38,37,27); chestnut hair
+	# apparent on the reference path, per sex; Tousled typed on 75 (wire 76).
+	var frozen := {"skin": 2, "skin_tone": 43, "skin_undertone": 0, "eyes": 1,
+		"eye_hue": 104, "eye_sat": 87, "eye_light": 63, "shirt": 4, "shirt_hue": 19, "shirt_sat": 84,
+		"shirt_light": 37, "pants": 6, "pants_hue": 180, "pants_sat": 56, "pants_light": 25,
+		"boots": 0, "boots_hue": 38, "boots_sat": 37, "boots_light": 27, "hair_detail": 1,
+		"hair_finish": 76, "hair": hair.call(1, 2)}
 	return {
 		"default": {"appearance": {}, "equipment": {}},
 		"rowan": {"appearance": PRESETS.appearance("Rowan"), "equipment": {}},
@@ -117,29 +158,92 @@ static func looks() -> Dictionary:
 		"hood_159": {"appearance": PRESETS.appearance("Rowan"), "equipment": {3: 159}},
 		"torso_armour": {"appearance": {"facial_hair": 2, "hair": hair.call(2, 5), "skin": 3, "eyes": 2},
 			"equipment": {5: 184, 4: 171, 6: 192, 0: 114, 1: 106}},
+		# Non-neutral V3 face and detail fields (High-only) on a stubbled,
+		# moustached Parted look with every hair module id in turn elsewhere.
+		"v3_details": {"appearance": {"facial_hair": 2, "hair": hair.call(1, 4), "skin": 3, "eyes": 6,
+			"eyelid": 0, "brow_height": 100, "nose_length": 7, "nose_bridge": 93, "nose_tip": 0,
+			"mouth_width": 100, "cupid_bow": 12, "cheek_fullness": 88, "chin_projection": 0,
+			"chin_width": 100, "ear_size": 100, "brow_style": 13, "brow_thickness": 1, "freckles": 101,
+			"liner": 101, "liner_wing": 51, "stubble": 101, "lip_tint": 12, "hair_module": 3},
+			"equipment": {}},
+		"typed_frozen_female": {"sex": "female", "appearance": frozen.merged({"hair_hue": 36, "hair_sat": 79,
+			"hair_light": 19}), "equipment": {}},
+		"typed_frozen_male": {"sex": "male", "appearance": frozen.merged({"hair_hue": 36, "hair_sat": 79,
+			"hair_light": 18}), "equipment": {}},
+		# Custom values whose nearest palette entry disagrees with the saved
+		# palette byte (an old client's edit): the palette wins (guard).
+		"colour_guarded": {"appearance": {"skin": 3, "skin_tone": 10, "skin_undertone": 30,
+			"hair": hair.call(5, 4), "hair_hue": 174, "hair_sat": 11, "hair_light": 40, "eyes": 0,
+			"eye_hue": 104, "eye_sat": 87, "eye_light": 63, "shirt": 1, "shirt_hue": 192, "shirt_sat": 6,
+			"shirt_light": 24, "pants": 2, "pants_hue": 61, "pants_sat": 70, "pants_light": 79,
+			"boots": 3, "boots_hue": 19, "boots_sat": 84, "boots_light": 37, "hair_detail": 0,
+			"hair_finish": 91}, "equipment": {}},
+		# An undertone on an Eloria tone is ignored; a partly set triple is
+		# palette (Rule A).
+		"eloria_undertone": {"appearance": {"skin": 7, "skin_undertone": 30, "hair": hair.call(3, 9),
+			"hair_hue": 50, "hair_sat": 0, "hair_light": 50, "eyes": 4, "eye_hue": 0, "eye_sat": 50,
+			"eye_light": 50, "hair_detail": 2, "hair_finish": 26}, "equipment": {}},
 	}
+
+## R14: every hairstyle 1-9 and saved finish, length and volume at 50 and off
+## it, with hair_finish 0 and typed on the finish's own slider position.
+static func finish_looks() -> Dictionary:
+	var result := {}
+	for style: int in range(1, 10):
+		for finish: int in 3:
+			for shaped: bool in [false, true]:
+				for typed: bool in [false, true]:
+					var appearance := {"hair": AppearanceVariants.pack_hair(style, (style * 3 + finish) % 20),
+						"hair_detail": finish, "skin": style % 6, "eyes": style % 12, "hair_finish": 0}
+					if shaped:
+						appearance.merge({"hair_length": 18 + style * 7, "hair_volume": 90 - style * 6}, true)
+					if typed:
+						appearance["hair_finish"] = FINISH_WIRE[finish]
+					var name := "finish_s%d_f%d_%s_%s" % [style, finish, "shaped" if shaped else "50",
+						"typed" if typed else "zero"]
+					result[name] = {"appearance": appearance, "equipment": {}}
+	return result
+
+static func all_looks() -> Dictionary:
+	return looks().merged(finish_looks())
+
+## A look with "sex" belongs only on bodies of that sex.
+static func _fits(look: Dictionary, model: String) -> bool:
+	return not look.has("sex") or model.ends_with("_" + str(look["sex"]))
 
 ## Every case, in a fixed order: id, group, model slug, quality, build path, look.
 static func cases() -> Array:
 	var result: Array = []
-	var names: Array = looks().keys()
+	var all := looks()
+	var names: Array = all.keys()
+	var finishes: Array = finish_looks().keys()
+	var add := func(group: String, model: String, quality: int, path: String, look: String) -> void:
+		if _fits(all.get(look, {}) as Dictionary, model):
+			result.append(_case(group, model, quality, path, look))
 	for quality: int in [0, 1]:
 		for sex: String in ["male", "female"]:
 			for look: String in names:
-				result.append(_case("luminous_" + QUALITY_NAMES[quality], "luminous_" + sex, quality, "direct", look))
+				add.call("luminous_" + QUALITY_NAMES[quality], "luminous_" + sex, quality, "direct", look)
 	for quality: int in [0, 1]:
 		for sex: String in ["male", "female"]:
 			for look: String in FROM_HIGH_LOOKS:
-				result.append(_case("luminous_from_high", "luminous_" + sex, quality, "from_high", look))
+				add.call("luminous_from_high", "luminous_" + sex, quality, "from_high", look)
 			for look: String in EDITED_LOOKS:
-				result.append(_case("luminous_edited", "luminous_" + sex, quality, "edited", look))
+				add.call("luminous_edited", "luminous_" + sex, quality, "edited", look)
 	for race: String in OTHER_RACES:
 		for sex: String in ["male", "female"]:
 			for look: String in names:
-				result.append(_case("other_races_high", race + "_" + sex, 2, "direct", look))
+				add.call("other_races_high", race + "_" + sex, 2, "direct", look)
 	for sex: String in ["male", "female"]:
 		for look: String in names:
-			result.append(_case("luminous_high_classic", "luminous_" + sex, 2, "direct", look))
+			add.call("luminous_high_classic", "luminous_" + sex, 2, "direct", look)
+	for quality: int in [0, 1]:
+		for sex: String in ["male", "female"]:
+			for look: String in finishes:
+				add.call("luminous_finish", "luminous_" + sex, quality, "direct", look)
+	for sex: String in ["male", "female"]:
+		for look: String in finishes:
+			add.call("luminous_finish_classic", "luminous_" + sex, 2, "direct", look)
 	return result
 
 static func _case(group: String, model: String, quality: int, path: String, look: String) -> Dictionary:
@@ -229,9 +333,14 @@ func _material_digest(material: Material) -> String:
 		else:
 			record["shader"] = "code:" + _sha(shader.code.to_utf8_buffer())
 		if shader != null:
+			# Unset uniforms (null) are left out: they draw the shader's own
+			# default, so a uniform added with today's constant as its default
+			# leaves every material that never sets it unchanged.
 			for uniform: Dictionary in shader.get_shader_uniform_list():
 				var name := str(uniform.get("name", ""))
-				parameters[name] = _value((material as ShaderMaterial).get_shader_parameter(name))
+				var value: Variant = (material as ShaderMaterial).get_shader_parameter(name)
+				if value != null:
+					parameters[name] = _value(value)
 	else:
 		for property: Dictionary in material.get_property_list():
 			var name := str(property.name)
@@ -520,7 +629,7 @@ static func compare(a: Dictionary, b: Dictionary, all_instances: bool, limit_lin
 		var case_a: Dictionary = left[id]
 		if not captured_groups.has("all") and not captured_groups.has(str(case_a.group)):
 			continue
-		var must_match := str(case_a.group) != "luminous_high_classic" or classic
+		var must_match := not str(case_a.group).ends_with("_classic") or classic
 		if not right.has(id):
 			lines.append("MISSING %s" % id)
 			if must_match: required += 1
@@ -621,7 +730,7 @@ func run() -> void:
 	var limit := int(arguments.get("limit", "0"))
 	_models = (JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/models.json")) as Dictionary).models
 	_equipment = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/equipment.json"))
-	var all_looks := looks()
+	var look_table := all_looks()
 	var captured: Array = []
 	var started := Time.get_ticks_msec()
 	for spec: Dictionary in cases():
@@ -631,7 +740,7 @@ func run() -> void:
 			break
 		if not expect(_models.has(spec.model), "model %s exists" % spec.model):
 			continue
-		captured.append(await _capture_case(spec, all_looks[spec.look]))
+		captured.append(await _capture_case(spec, look_table[spec.look]))
 		if captured.size() % 25 == 0:
 			print("RL_HIGH_PARITY: %d cases captured" % captured.size())
 	var environment := {}
@@ -646,7 +755,7 @@ func run() -> void:
 		"environment": environment,
 		"look_quality": LookProfile.quality_name(LookProfile.quality()),
 		"pose_time": POSE_TIME,
-		"looks": all_looks.keys(),
+		"looks": look_table.keys(),
 		"groups": wanted_groups.keys() if not wanted_groups.is_empty() else ["all"],
 		"cases": captured,
 		"meshes": _mesh_table,
