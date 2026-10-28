@@ -473,6 +473,11 @@ func _check_dev_switch() -> void:
 	_expect(male.rl_head() != null and male.rl_head().appearance.sex == "male",
 		"a luminous male at High draws the male RL head")
 	_expect(medium.rl_head() == null, "a luminous female at Medium keeps develop's head")
+	# Headless reports the Forward+ method; the Compatibility renderer keeps
+	# develop's High head unless RL_HEADS=all.
+	_expect(ReplicatedActor3D.rl_heads_renderer_supported()
+		== (RenderingServer.get_current_rendering_method() != "gl_compatibility"),
+		"the RL head is drawn in every renderer but Compatibility")
 	female.queue_free()
 	male.queue_free()
 	medium.queue_free()

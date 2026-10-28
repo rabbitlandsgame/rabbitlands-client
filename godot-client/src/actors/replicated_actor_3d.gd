@@ -357,6 +357,8 @@ const RL_HEAD_SHOWN_META := &"rl_head_shown"
 const RL_HEADWEAR_META := &"rl_headwear_key"
 ## RL_HEADS values that keep develop's classic High head.
 const RL_HEADS_CLASSIC: Array[String] = ["classic", "off", "0", "no", "false"]
+## RL_HEADS values that draw the RL head in every renderer (see rl_heads_renderer_supported).
+const RL_HEADS_EVERYWHERE: Array[String] = ["all", "force"]
 var _nameplate: Label3D
 var _guild_nameplate: Label3D
 var _name_dto: Dictionary = {}
@@ -1144,6 +1146,17 @@ static func rl_heads_classic() -> bool:
 static func reload_rl_heads_switch() -> void:
 	_rl_heads_switch_read = false
 
+## Whether this renderer draws the RL head for the game's Humans. The
+## Compatibility renderer does not (it keeps develop's High head): there the
+## RL head's live identity blend shapes cost 2.4-3.1x develop's crowd frame
+## time and its instance uniforms overflow the 4096-item global buffer before
+## 160 Humans (.local/rl-high perf, 2026-10-27; feasibility review fix A,
+## until identity weights are baked per face). RL_HEADS=all draws it anyway.
+static func rl_heads_renderer_supported() -> bool:
+	rl_heads_classic()
+	return RL_HEADS_EVERYWHERE.has(_rl_heads_switch) \
+		or RenderingServer.get_current_rendering_method() != "gl_compatibility"
+
 ## The lab's explicit face, `appearance.rl_head` (a preset name or
 ## RLHeadAppearance's dictionary form), or null. Neither the game nor the wire
 ## ever sets it; the lab and the evidence scripts use it to show a chosen face,
@@ -1157,15 +1170,16 @@ static func _rl_head_override(appearance: Dictionary) -> Variant:
 
 ## Whether this actor draws an RL head now: a Human, RL heads not switched to
 ## classic, not the MPFB study body, and either the lab's override or High
-## quality with the head module for its sex on disk. Low and Medium never
-## read an RL asset.
+## quality in a renderer that draws it, with the head module for its sex on
+## disk. Low and Medium never read an RL asset.
 func _rl_head_wanted() -> bool:
 	if _native_skeleton == null or not _uses_portrait_customization() or rl_heads_classic() \
 			or MPFB_PROTOTYPE.supported(_model_config):
 		return false
 	if _appearance.has("rl_head"):
 		return _rl_head_override(_appearance) != null
-	if _render_quality != ActorRenderQuality.Quality.HIGH or _rl_head_failed:
+	if _render_quality != ActorRenderQuality.Quality.HIGH or _rl_head_failed \
+			or not rl_heads_renderer_supported():
 		return false
 	return not RLHeadLibrary.head(str(_model_config.get("gender", "female"))).is_empty()
 

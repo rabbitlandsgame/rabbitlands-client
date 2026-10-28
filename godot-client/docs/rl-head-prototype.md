@@ -13,7 +13,12 @@ art exactly. No asset is replaced: the shipped bodies, hair and equipment are un
   High (down from High the actor ends exactly as develop's own in-place switch leaves
   it; `tests/test_rl_head_quality_switch.gd`). Develop's classic High head
   (`HighPortraitAppearance`) is kept dormant: `RL_HEADS=classic` (or `off`, `0`, `no`)
-  draws it instead, for side-by-side checks and rollback.
+  draws it instead, for side-by-side checks and rollback. The Compatibility renderer
+  also keeps the classic head (`ReplicatedActor3D.rl_heads_renderer_supported`): there the
+  RL head's live identity blend shapes cost 2.4-3.1x develop's crowd frame time (40 and
+  160 Humans) and its instance uniforms overflowed the 4096-item global buffer before 160
+  Humans; `RL_HEADS=all` draws it anyway. Baking the identity weights into a per-face mesh
+  (only the `ex_` shapes left live) is the fix that would let Compatibility draw it.
 * **Face from the saved appearance.** `RLHeadPortraitMap` derives the face from the
   PortraitCustomization fields and palette indices (nothing new is saved or sent):
   `x = clamp(g * (v - c) / 50, -1, 1)` per face field, `c` from the Rowan (male) / Mira

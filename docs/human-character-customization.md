@@ -98,7 +98,9 @@ saved grooming choices; the RL head at High shows two of them differently
 ## High graphics: the RL head
 
 At High every Human - players, NPCs and leaderboard and dialogue portraits -
-draws the RL head: a new head, upper neck and eyes fitted to the shipped Human
+draws the RL head in the Forward+ and Mobile renderers (the Compatibility
+renderer keeps the classic High head for now: the RL head cost it 2.4-3 times
+the crowd frame time): a new head, upper neck and eyes fitted to the shipped Human
 bodies, with painted skin, freckles, liner and brows, blinking, and
 spring-lock hair on the two RL hairstyles. It is derived entirely from the
 saved appearance, so no new data is saved or sent and every older save and
@@ -126,7 +128,8 @@ unchanged; switching quality swaps the heads in place.
 * **Portraits.** Dialogue and leaderboard portraits show the full-detail head
   with a neutral expression and open eyes.
 
-Developer switches: `RL_HEADS=classic` draws the classic High head instead;
+Developer switches: `RL_HEADS=classic` draws the classic High head instead,
+`RL_HEADS=all` draws the RL head in the Compatibility renderer too;
 `RL_HEADWEAR_FIT=shipped` also refits open headwear on the Low/Medium heads
 (off by default, pending an owner decision). Mapping data is
 `data/actors/rl_head_wire_defaults.json`; see
