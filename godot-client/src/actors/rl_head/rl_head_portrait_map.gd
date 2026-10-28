@@ -22,8 +22,9 @@ extends RefCounted
 ## rowan_shag module, female Buns the mira_bun module, every other style and
 ## sex the game's own fitted hairstyle (`legacy:<style>`, drawn by the actor
 ## with its High finish), Bald is none. hair_length / hair_volume drive an RL
-## module's hl_ shapes centred on its own preset's values; hair_detail picks
-## its finish.
+## module's hl_ shapes centred on its own preset's values; the hair finish
+## (hair_detail 0 Classic, 1 Tousled, 2 Swept) becomes the module's fine-detail
+## level, centred the same way (`detail_level`).
 ##
 ## Colours: skin, eye and hair palette indices through calibrated RL-side
 ## tables, so a lit RL head matches what Low/Medium show for the same index;
@@ -240,10 +241,12 @@ static func is_module(hair_name: String) -> bool:
 	return hair_name != RLHeadAppearance.NONE and not hair_name.begins_with(RLHeadLibrary.LEGACY_PREFIX)
 
 
-## Length, volume (-1..1, 0 at the module's preset) and finish for an RL
-## module; zeros for the game's own hairstyles, which the actor grooms.
+## Length, volume (-1..1, 0 at the module's preset) and the fine-detail level
+## (0..100, RLHeadAppearance.DEFAULT_HAIR_DETAIL at the module's preset) for an
+## RL module; the neutral values for the game's own hairstyles, which the
+## actor grooms.
 static func hair_shapes(appearance: Dictionary, hair_name: String) -> Dictionary:
-	var result := {"length": 0.0, "volume": 0.0, "detail": 0}
+	var result := {"length": 0.0, "volume": 0.0, "detail": RLHeadAppearance.DEFAULT_HAIR_DETAIL}
 	if not is_module(hair_name):
 		return result
 	var preset := PRESETS.shape(str(MODULE_PRESETS.get(hair_name, "Rowan")))
@@ -251,8 +254,25 @@ static func hair_shapes(appearance: Dictionary, hair_name: String) -> Dictionary
 	for pair: Array in [["length", "hair_length"], ["volume", "hair_volume"]]:
 		var offset := (float(field(appearance, pair[1])) - float(preset.get(pair[1], 50))) / 50.0
 		result[pair[0]] = clampf(hair_gain * offset, -1.0, 1.0)
-	result["detail"] = field(appearance, "hair_detail", 0, 2)
+	result["detail"] = detail_level(field(appearance, "hair_detail", 0, 2),
+		clampi(int(preset.get("hair_detail", 0)), 0, 2))
 	return result
+
+
+## The fine-detail level (0..100) for a saved hair finish on a module whose
+## likeness preset has `preset_finish`:
+##     clamp(50 + step * (rank[finish] - rank[preset_finish]), 0, 100)
+## with the finishes ranked by how much loose hair they suggest (data
+## `hair.detail.finishRank`, by finish 0 Classic, 1 Tousled, 2 Swept; default
+## Swept 0 < Classic 1 < Tousled 2) and `hair.detail.step` (default 25). The
+## preset's own finish is the authored look, as for length and volume.
+static func detail_level(finish: int, preset_finish: int) -> int:
+	var entry: Dictionary = (data().get("hair", {}) as Dictionary).get("detail", {}) as Dictionary
+	var listed: Variant = entry.get("finishRank")
+	var ranks: Array = listed as Array if listed is Array and (listed as Array).size() >= 3 else [1, 2, 0]
+	var step := float(entry.get("step", 25.0))
+	var difference := float(ranks[clampi(finish, 0, 2)]) - float(ranks[clampi(preset_finish, 0, 2)])
+	return clampi(roundi(RLHeadAppearance.DEFAULT_HAIR_DETAIL + step * difference), 0, 100)
 
 
 ## The RL beard; none on a female head at High.

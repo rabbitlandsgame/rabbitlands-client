@@ -29,7 +29,12 @@
 	},
 	"hair": {
 		"about": "An RL module's hl_length/hl_volume weights: clamp(shapeGain * (v - preset) / 50, -1, 1), preset = Rowan's values for rowan_shag, Mira's for mira_bun.",
-		"shapeGain": 1.0
+		"shapeGain": 1.0,
+		"detail": {
+			"about": "An RL module's fine-detail level (0-100; 50 = authored, lower drops flyaway and wisp cards, 0 smooth, above 50 only adds strand contrast) from the saved hair finish (hair_detail 0 Classic, 1 Tousled, 2 Swept): clamp(50 + step * (finishRank[finish] - finishRank[preset finish]), 0, 100), finishRank indexed by finish and ordered by how much loose hair a finish suggests (Swept < Classic < Tousled), centred like length and volume on the module's own preset (Rowan Tousled for rowan_shag, Mira Swept for mira_bun). Gives rowan_shag Classic 25 / Tousled 50 / Swept 0 and mira_bun Classic 75 / Tousled 100 / Swept 50. Seed for owner review.",
+			"finishRank": [1, 2, 0],
+			"step": 25
+		}
 	},
 	"colours": {
 		"about": "sRGB per palette index (skin 0-9, hair colour 0-19, eyes 0-11; beards by hair colour, male only) per body sex, so the lit RL head matches what Low/Medium show for the same index: tests/integration/rl_head_colour_calibration.gd (2026-10-27, Forward+, neutral stage light), 3 linear-light iterations. Residuals (max sRGB channel): skin 0.0002, eyes 0.0001, hair 0.09 - the darkest hair colours (0, 1, 19) stay lighter than Low/Medium because the RL hair shader's strand highlights add light whatever the albedo - and beards 0.27: the RL beard renders no brighter than about 0.46 sRGB even in white, so blond, grey, white, pink and other light beards (3, 4, 5, 6, 10, 14, 16, 17, 18) stay darker than develop's beard shell. Brows are the hair colour x browFromHair.",

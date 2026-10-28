@@ -20,12 +20,14 @@ extends Node3D
 ##   * hair/<style>.glb: its own skeleton, rooted at `hair_root` on the body's
 ##     Head rest, plus optional spring chains; meshes `hair_lod<k>` or `hair`,
 ##     materials rl_hair_clump and rl_hair_card; `asset.extras.rlHair` for the
-##     springs (RLHairMotion). Optional hair-shape blend shapes, read when
-##     present and a no-op when absent: `hl_length_p/_n` and `hl_volume_p/_n`
-##     (weight 1 = the full change, 0 = as authored) for the hair length and
-##     volume choices, and `hl_detail_1` / `hl_detail_2` for the second and
-##     third hair finishes (PortraitCustomization `hair_detail`; 0 is the
-##     authored finish).
+##     springs (RLHairMotion) and `headSHA256`, the head build it was fitted
+##     to. Grooming blend shapes, read when present and a no-op when absent:
+##     `hl_length_p/_n` and `hl_volume_p/_n` (weight 1 = the full change, 0 =
+##     as authored) for the hair length and volume. COLOR_0.A is each point's
+##     keep level for the hair's fine detail (1 core geometry, flyaway and wisp
+##     cards 0.5-0.95), which the hair shader compares with the `hair_detail`
+##     instance uniform (RLHeadAppearance.hair_detail / 100; see
+##     rl_hair.gdshader).
 ##   * beards/<style>.glb: skinned like the head, meshes `beard_lod<k>` or
 ##     `beard`, material rl_beard, and the head's `id_` and `ex_` shape names.
 ##     `stubble` with no file is painted by the skin shader.
@@ -103,7 +105,9 @@ const HAIRLINE_UNDER_HAIR := 0.35
 ## The hair-shape blend shapes (see the asset contract above).
 const HAIR_LENGTH_SHAPES := ["hl_length_p", "hl_length_n"]
 const HAIR_VOLUME_SHAPES := ["hl_volume_p", "hl_volume_n"]
-const HAIR_DETAIL_SHAPES := ["hl_detail_1", "hl_detail_2"]
+## The instance uniforms on an RL hairstyle's meshes. A beard keeps the
+## shader's default `hair_detail` (0.5, nothing dropped).
+const HAIR_INSTANCE_UNIFORMS := ["hair_color", "hair_detail"]
 
 var appearance: RLHeadAppearance
 var quality: int = ActorRenderQuality.QUALITY_DEFAULT
@@ -785,8 +789,9 @@ func _apply_identity_weights(mesh_node: MeshInstance3D) -> void:
 		_set_shape(mesh_node, "id_%s_n" % control_name, maxf(-amount, 0.0))
 
 
-## Hair length, volume and finish on an RL hairstyle that carries the
-## hair-shape blend shapes; a hairstyle without them is left as authored.
+## Hair length and volume on an RL hairstyle that carries the hair-shape blend
+## shapes; a hairstyle without them is left as authored. (Its fine detail is an
+## instance uniform, set with the colours.)
 func _apply_hair_shapes() -> void:
 	var weights := _hair_shape_weights()
 	for level: Array in _hair_lods:
@@ -797,17 +802,17 @@ func _apply_hair_shapes() -> void:
 				_set_shape(node as MeshInstance3D, shape, float(weights[shape]))
 
 
-## The hair-shape weights of the face: length and volume as _p/_n pairs, and
-## the chosen finish's shape at full weight.
+## The hair-shape weights of the face: length and volume as _p/_n pairs.
 func _hair_shape_weights() -> Dictionary:
 	var length := clampf(appearance.hair_length, -1.0, 1.0)
 	var volume := clampf(appearance.hair_volume, -1.0, 1.0)
-	var detail := clampi(appearance.hair_detail, 0, HAIR_DETAIL_SHAPES.size())
-	var weights := {HAIR_LENGTH_SHAPES[0]: maxf(length, 0.0), HAIR_LENGTH_SHAPES[1]: maxf(-length, 0.0),
+	return {HAIR_LENGTH_SHAPES[0]: maxf(length, 0.0), HAIR_LENGTH_SHAPES[1]: maxf(-length, 0.0),
 		HAIR_VOLUME_SHAPES[0]: maxf(volume, 0.0), HAIR_VOLUME_SHAPES[1]: maxf(-volume, 0.0)}
-	for index: int in HAIR_DETAIL_SHAPES.size():
-		weights[HAIR_DETAIL_SHAPES[index]] = 1.0 if detail == index + 1 else 0.0
-	return weights
+
+
+## The `hair_detail` instance uniform: the face's level as 0..1.
+func hair_detail_uniform() -> float:
+	return clampf(float(appearance.hair_detail) / 100.0, 0.0, 1.0)
 
 
 func _is_hair_node(mesh_node: MeshInstance3D) -> bool:
@@ -949,12 +954,13 @@ func _apply_colours() -> void:
 		"stubble": appearance.stubble_amount(), "eye_color": appearance.eyes,
 		"hairline": HAIRLINE_UNDER_HAIR if haired else 0.0,
 		"brow_style": appearance.brow_style, "brow_thickness": appearance.brow_thickness,
-		"liner_wing": appearance.liner_wing,
+		"liner_wing": appearance.liner_wing, "hair_detail": hair_detail_uniform(),
 	}
-	# The head's surfaces read all of them; hair and beard read the hair colour.
+	# The head's surfaces read all but the hair's detail; the beard reads its
+	# colour, the hair its colour and detail.
 	var beard_values := {"hair_color": beard_colour}
 	for part: Array in [[_head_lods, INSTANCE_UNIFORMS, values], [_beard_lods, ["hair_color"], beard_values],
-			[_hair_lods, ["hair_color"], values]]:
+			[_hair_lods, HAIR_INSTANCE_UNIFORMS, values]]:
 		for level: Array in part[0]:
 			for node: Variant in level:
 				if not is_instance_valid(node):

@@ -10,7 +10,8 @@ extends SceneTree
 ## invalid fields count as 50. Grooming: every hair style x sex (D5 modules,
 ## legacy names, bald), every facial_hair x sex (beards by name, none and no
 ## stubble on women), every palette index (skin, eyes, hair). The hl_ hair
-## shapes centre on each module's preset; PC/3 fields slot in over the derived
+## shapes and the hair finish's fine-detail level centre on each module's
+## preset; PC/3 fields slot in over the derived
 ## values; the inverse map round-trips the presets.
 
 const PRESETS := preload("res://src/actors/human_portrait_presets.gd")
@@ -240,18 +241,46 @@ func _check_hair_shapes() -> void:
 	for pair: Array in [["male", 1, "rowan_shag", "Rowan"], ["female", 3, "mira_bun", "Mira"]]:
 		var preset := PRESETS.shape(pair[3])
 		var at_preset := Map.face({"hair": AppearanceVariants.pack_hair(pair[1], 0),
-			"hair_length": preset.hair_length, "hair_volume": preset.hair_volume}, pair[0])
-		_expect(at_preset.hair == pair[2] and at_preset.hair_length == 0.0 and at_preset.hair_volume == 0.0,
-			"%s at %s's length and volume draws the module as authored" % [pair[2], pair[3]])
+			"hair_length": preset.hair_length, "hair_volume": preset.hair_volume,
+			"hair_detail": preset.hair_detail}, pair[0])
+		_expect(at_preset.hair == pair[2] and at_preset.hair_length == 0.0 and at_preset.hair_volume == 0.0
+			and at_preset.hair_detail == RLHeadAppearance.DEFAULT_HAIR_DETAIL,
+			"%s at %s's length, volume and finish draws the module as authored" % [pair[2], pair[3]])
 		var longer := Map.face({"hair": AppearanceVariants.pack_hair(pair[1], 0), "hair_length": 100,
-			"hair_volume": 0, "hair_detail": 2}, pair[0])
-		_expect(longer.hair_length > 0.0 and longer.hair_volume < 0.0 and longer.hair_detail == 2,
-			"%s: longer, thinner, swept move the hl_ shapes (%.2f, %.2f, %d)" % [pair[2], longer.hair_length,
-				longer.hair_volume, longer.hair_detail])
+			"hair_volume": 0}, pair[0])
+		_expect(longer.hair_length > 0.0 and longer.hair_volume < 0.0,
+			"%s: longer and thinner move the hl_ shapes (%.2f, %.2f)" % [pair[2], longer.hair_length,
+				longer.hair_volume])
+		for field: String in ["hair_length", "hair_volume"]:
+			var edges := []
+			for value: int in [0, 50, 100]:
+				var face := Map.face({"hair": AppearanceVariants.pack_hair(pair[1], 0), field: value}, pair[0])
+				edges.append(face.get(field))
+			var expected := []
+			for value: int in [0, 50, 100]:
+				expected.append(clampf((float(value) - float(preset[field])) / 50.0, -1.0, 1.0))
+			_expect(edges == expected, "%s: %s 0/50/100 is (v - %d) / 50 clamped %s" % [pair[2], field,
+				preset[field], edges])
 		var default := Map.face({"hair": AppearanceVariants.pack_hair(pair[1], 0)}, pair[0])
 		_expect(default.hair_length < 0.0, "%s: the default 50 is shorter than the preset (%.2f)" % [pair[2], default.hair_length])
-	var legacy := Map.face({"hair": AppearanceVariants.pack_hair(2, 0), "hair_length": 100}, "male")
-	_expect(legacy.hair_length == 0.0, "a game hairstyle is groomed by the actor, not by hl_ shapes")
+	# The finish -> fine-detail level (data hair.detail), centred on each
+	# module's preset finish: Swept < Classic < Tousled, 25 a step.
+	for row: Array in [["male", 1, "rowan_shag", [25, 50, 0]], ["female", 3, "mira_bun", [75, 100, 50]]]:
+		var levels := []
+		for finish: int in 3:
+			levels.append(Map.face({"hair": AppearanceVariants.pack_hair(row[1], 0), "hair_detail": finish},
+				row[0]).hair_detail)
+		_expect(levels == row[3], "%s: Classic, Tousled, Swept give detail levels %s" % [row[2], levels])
+	_expect(Map.face({"hair": AppearanceVariants.pack_hair(1, 0), "hair_detail": 7}, "male").hair_detail == 0
+		and Map.face({"hair": AppearanceVariants.pack_hair(1, 0), "hair_detail": 1.5}, "male").hair_detail == 25,
+		"an out-of-range finish clamps and a non-integer one counts as Classic")
+	var legacy := Map.face({"hair": AppearanceVariants.pack_hair(2, 0), "hair_length": 100, "hair_detail": 2}, "male")
+	_expect(legacy.hair_length == 0.0 and legacy.hair_detail == RLHeadAppearance.DEFAULT_HAIR_DETAIL,
+		"a game hairstyle is groomed by the actor, not by hl_ shapes or the detail level")
+	var rl_face := RLHeadAppearance.from_dict({"preset": "rowan", "hair_detail": 140})
+	_expect(rl_face.hair_detail == 100 and RLHeadAppearance.from_dict(rl_face.to_dict()).hair_detail == 100
+		and RLHeadAppearance.from_preset("mira").hair_detail == RLHeadAppearance.DEFAULT_HAIR_DETAIL,
+		"the RL face's detail level is 0..100, 50 unless set, and survives the dictionary form")
 
 
 func _check_v3() -> void:

@@ -1,7 +1,10 @@
 extends SceneTree
 ## Headless contract for the RL head (src/actors/rl_head/): the assets against
-## their own extras and each other (every hair and beard fitted to the head
-## shipped beside it), the appearance byte form, identity and expression kept
+## their own extras and each other (the shipped head builds pinned, every hair
+## and beard fitted to the head shipped beside it, the hairstyles' grooming
+## shapes and fine-detail keep levels, beards whole), the hair detail uniform
+## and the grooming from saved fields with the springs still swinging, the
+## appearance byte form, identity and expression kept
 ## apart through animation, the body cut through torso and cape changes, the
 ## importer's shape filter, LOD choice per quality, the hooks on the real
 ## ReplicatedActor3D - activated by tier for every Human at High, with the
@@ -34,6 +37,8 @@ func _run() -> void:
 	await _check_dev_switch()
 	_check_lod_selection()
 	await _check_hair_motion()
+	await _check_grooming("male", "Rowan", "rowan_shag", 2)
+	await _check_grooming("female", "Mira", "mira_bun", 1)
 	await _check_headwear_fit()
 	print("rl head: ", "PASS" if _failures == 0 else "FAIL (%d)" % _failures)
 	quit(1 if _failures > 0 else 0)
@@ -89,21 +94,32 @@ func _check_assets() -> void:
 	_check_asset_consistency()
 
 
-## Hair and facial hair are fitted to one build of a head: each records the
-## SHA-256 of the head GLB it was fitted to, which must be the head shipped for
-## its sex. KNOWN_STALE lists an asset known to be fitted to an older head
-## (reported, not failed, while its recorded hash is exactly that one; it must
-## be rebuilt by the hair author - see docs/rl-head-prototype.md).
-const KNOWN_STALE := {"hair/mira_bun.glb": "7dc7d99a549dbab2d06559ad1211a6a70db54d544da634bb0c91ea1ba0ebb966"}
+## The head builds shipped, by sex. The hairstyles and beards beside them were
+## fitted to exactly these (2026-10-28: mira_bun and rowan_shag rebuilt with
+## the grooming shapes and keep levels). A new head build needs its hair and
+## beards rebuilt and this table changed with them.
+const SHIPPED_HEADS := {
+	"female": "abd93434b4d06be2f1b55ae5a71f7cc701e1abf286f4939c1f700e92cb523636",
+	"male": "cae93a7f3366c5b01fb0134d6048435602686d1eda9edc4c3e73cb9adf6ddbc6",
+}
+## Every RL hairstyle carries these grooming shapes beside its `id_` shapes.
+const GROOMING_SHAPES: Array[String] = ["hl_length_p", "hl_length_n", "hl_volume_p", "hl_volume_n"]
 
+## Hair and facial hair are fitted to one build of a head: each records the
+## SHA-256 of the head GLB it was fitted to (`headSHA256`), which must be the
+## head shipped for its sex, with no exceptions.
 func _check_asset_consistency() -> void:
 	var heads := {}
 	for sex: String in ["female", "male"]:
 		heads[sex] = FileAccess.get_sha256(RLHeadLibrary.head_path(sex))
+		_expect(heads[sex] == SHIPPED_HEADS[sex], "the shipped %s head is build %s (%s)" % [sex,
+			str(SHIPPED_HEADS[sex]).left(12), str(heads[sex]).left(12)])
+	var counted := {"hair/": 0, "beards/": 0}
 	for folder: Array in [["hair/", "rlHair"], ["beards/", "rlBeard"]]:
 		for file: String in DirAccess.get_files_at(RLHeadLibrary.ROOT + folder[0]):
 			if file.get_extension() != "glb":
 				continue
+			counted[folder[0]] = int(counted[folder[0]]) + 1
 			var relative: String = folder[0] + file
 			var extras := RLHeadLibrary.asset_extras(RLHeadLibrary.ROOT + relative, folder[1])
 			var sex := str(extras.get("sex", ""))
@@ -111,12 +127,89 @@ func _check_asset_consistency() -> void:
 			_expect(heads.has(sex), "%s names the head sex it was fitted to (%s)" % [relative, sex])
 			if not heads.has(sex):
 				continue
-			if recorded != heads[sex] and KNOWN_STALE.get(relative, "") == recorded:
-				print("KNOWN ISSUE %s was fitted to head %s, not the shipped %s head %s" % [relative,
-					recorded.left(12), sex, str(heads[sex]).left(12)])
-				continue
 			_expect(recorded == heads[sex], "%s was fitted to the shipped %s head (%s against %s)" % [relative,
 				sex, recorded.left(12), str(heads[sex]).left(12)])
+	_expect(int(counted["hair/"]) >= 2 and int(counted["beards/"]) >= 4,
+		"every shipped hairstyle and beard was checked %s" % counted)
+	for style: String in RLHeadLibrary.hair_styles():
+		_check_hair_asset(style)
+	for style: String in RLHeadLibrary.beard_styles():
+		if style != RLHeadAppearance.STUBBLE:
+			_check_beard_asset(style)
+
+
+## The hair author's contract on one hairstyle as imported: every level
+## carries the head's identity shapes and the four grooming shapes, its clumps
+## are core geometry (COLOR_0.A = 1) and its cards keep levels in 0.5..1, with
+## fine detail below 1 on the first level.
+func _check_hair_asset(style: String) -> void:
+	var path := RLHeadLibrary.hair_path(style)
+	var extras := RLHeadLibrary.asset_extras(path, "rlHair")
+	var head_shapes: int = 2 * (RLHeadLibrary.head(str(extras.get("sex", "female"))).get("controls", []) as Array).size()
+	var declared: Array = (extras.get("grooming", {}) as Dictionary).get("shapes", []) as Array
+	_expect(declared == GROOMING_SHAPES, "%s declares the grooming shapes %s" % [style, declared])
+	var scene := GlbSceneCache.instantiate(path)
+	_expect(scene != null, "%s loads" % style)
+	if scene == null:
+		return
+	var wanted := GROOMING_SHAPES.duplicate()
+	wanted.sort()
+	var levels := {}
+	var fine_points := 0
+	var bad: Array = []
+	for node: Node in scene.find_children("*", "MeshInstance3D", true, false):
+		var mesh := (node as MeshInstance3D).mesh
+		var level := RLHeadLibrary.lod_level(str(node.name))
+		levels[level] = true
+		var ids := 0
+		var grooming: Array[String] = []
+		for index: int in mesh.get_blend_shape_count():
+			var shape := str(mesh.get_blend_shape_name(index))
+			if shape.begins_with("id_"):
+				ids += 1
+			elif shape.begins_with("hl_"):
+				grooming.append(shape)
+		grooming.sort()
+		if ids != head_shapes or grooming != wanted:
+			bad.append("%s: %d id_, %s" % [node.name, ids, grooming])
+		for surface: int in mesh.get_surface_count():
+			var material := mesh.surface_get_material(surface)
+			var kind := material.resource_name if material != null else ""
+			var colours: Variant = mesh.surface_get_arrays(surface)[Mesh.ARRAY_COLOR]
+			if colours is not PackedColorArray or (colours as PackedColorArray).is_empty():
+				bad.append("%s/%s: no COLOR_0" % [node.name, kind])
+				continue
+			var lowest := 1.0
+			for colour: Color in colours as PackedColorArray:
+				lowest = minf(lowest, colour.a)
+				if level == 0 and kind == "rl_hair_card" and colour.a < 0.999:
+					fine_points += 1
+			if (kind == "rl_hair_clump" and lowest < 0.999) or lowest < 0.499:
+				bad.append("%s/%s: keep level down to %.3f" % [node.name, kind, lowest])
+	_expect(levels.size() == 3 and bad.is_empty(),
+		"%s: %d levels, each with %d id_ shapes and the grooming shapes, keep levels in contract %s"
+			% [style, levels.size(), head_shapes, bad])
+	_expect(fine_points > 0, "%s: its first level has fine-detail cards (%d points)" % [style, fine_points])
+	scene.free()
+
+
+## Beards stay whole at every hair detail: COLOR_0.A = 1 everywhere.
+func _check_beard_asset(style: String) -> void:
+	var lowest := 1.0
+	var surfaces := 0
+	for level: Array in RLHeadLibrary.beard(style):
+		for piece: Dictionary in level:
+			var mesh := piece["mesh"] as Mesh
+			for surface: int in mesh.get_surface_count():
+				surfaces += 1
+				var colours: Variant = mesh.surface_get_arrays(surface)[Mesh.ARRAY_COLOR]
+				if colours is not PackedColorArray or (colours as PackedColorArray).is_empty():
+					lowest = -1.0
+					continue
+				for colour: Color in colours as PackedColorArray:
+					lowest = minf(lowest, colour.a)
+	_expect(surfaces > 0 and lowest >= 0.999, "beard %s is all core geometry (lowest keep level %.3f)"
+		% [style, lowest])
 
 
 # ---------------------------------------------------------------- encoding
@@ -344,6 +437,22 @@ func _check_actor(sex: String, preset: String) -> void:
 		var hair_nodes: Array = rig.mesh_nodes()["hair"]
 		_expect(not hair_nodes.is_empty() and rig.hair_motion() != null and rig.hair_motion().has_springs(),
 			"%s: hairstyle %s drawn with its springs" % [preset, hair_style])
+		# Fine detail is one instance uniform on the hair's meshes: the head's
+		# uniforms, every blend shape and every mesh node stay as they were.
+		_expect(_hair_detail_values(rig) == [0.5], "%s: the authored hair detail (0.5) on every hair level %s"
+			% [preset, _hair_detail_values(rig)])
+		for level: int in [0, 100, 50]:
+			var head_before := _instance_values(head_node)
+			var shapes_before := _shape_values(rig.identity_targets(), "")
+			var nodes_before := rig.identity_targets()
+			var face := rig.appearance.duplicate_appearance()
+			face.hair_detail = level
+			actor.apply_appearance_variants({"rl_head": face.to_dict()})
+			_expect(_hair_detail_values(rig) == [float(level) / 100.0] and _instance_values(head_node) == head_before
+				and _shape_values(rig.identity_targets(), "") == shapes_before
+				and rig.identity_targets() == nodes_before,
+				"%s: hair detail %d is the hair's hair_detail uniform alone %s" % [preset, level,
+					_hair_detail_values(rig)])
 		var attachment := actor.get_skeleton().get_node_or_null(RLHeadRig.HAIR_NODE_NAME)
 		actor.apply_equipment_visuals({3: 134})
 		await process_frame
@@ -361,6 +470,128 @@ func _instance_values(mesh_node: MeshInstance3D) -> Dictionary:
 	for uniform_name: String in RLHeadRig.INSTANCE_UNIFORMS:
 		values[uniform_name] = mesh_node.get_instance_shader_parameter(uniform_name)
 	return values
+
+
+func _hair_nodes(rig: RLHeadRig) -> Array[MeshInstance3D]:
+	var result: Array[MeshInstance3D] = []
+	for level: Array in rig.mesh_nodes()["hair"] as Array:
+		for node: Variant in level:
+			if is_instance_valid(node):
+				result.append(node as MeshInstance3D)
+	return result
+
+
+## The distinct `hair_detail` values on the hair's meshes, rounded to 1e-4.
+func _hair_detail_values(rig: RLHeadRig) -> Array:
+	var values: Array = []
+	for node: MeshInstance3D in _hair_nodes(rig):
+		var value: Variant = node.get_instance_shader_parameter("hair_detail")
+		var rounded: Variant = snappedf(float(value), 0.0001) if value != null else null
+		if not values.has(rounded):
+			values.append(rounded)
+	return values
+
+
+## {shape: weight} of the grooming shapes, when every hair mesh agrees; else
+## {"disagree": ...}.
+func _grooming_weights(rig: RLHeadRig) -> Dictionary:
+	var result := {}
+	for node: MeshInstance3D in _hair_nodes(rig):
+		var weights := {}
+		for shape: String in GROOMING_SHAPES:
+			var index := RLHeadRig.shape_index(node, shape)
+			weights[shape] = snappedf(node.get_blend_shape_value(index), 0.0001) if index >= 0 else null
+		if result.is_empty():
+			result = weights
+		elif weights != result:
+			return {"disagree": [result, weights]}
+	return result
+
+
+# ---------------------------------------------------------------- grooming
+
+## The real RL hairstyles groomed from a Human's saved fields: hair_length and
+## hair_volume centred on the module's likeness preset drive its hl_ shapes on
+## every level, the hair finish becomes the fine-detail level, nothing is
+## rebuilt, beards keep the default detail, and the springs still swing.
+func _check_grooming(sex: String, look: String, module: String, other_finish: int) -> void:
+	var appearance := HumanPortraitPresets.appearance(look)
+	var preset := HumanPortraitPresets.shape(look)
+	var actor := Stage.spawn(_stage, sex, appearance)
+	await process_frame
+	var rig := actor.rl_head()
+	_expect(rig != null and rig.appearance.hair == module and rig.draws_module_hair(),
+		"%s's saved look draws %s" % [look, module])
+	if rig == null or not rig.draws_module_hair():
+		actor.queue_free()
+		await process_frame
+		return
+	var authored := {"hl_length_p": 0.0, "hl_length_n": 0.0, "hl_volume_p": 0.0, "hl_volume_n": 0.0}
+	_expect(_grooming_weights(rig) == authored and _hair_detail_values(rig) == [0.5],
+		"%s at %s's own length, volume and finish draws it as authored %s %s" % [module, look,
+			_grooming_weights(rig), _hair_detail_values(rig)])
+	var nodes_before := rig.identity_targets()
+	for case: Array in [[100, 0, 0], [0, 100, other_finish], [preset.hair_length, preset.hair_volume, preset.hair_detail]]:
+		var edited := appearance.duplicate()
+		edited.merge({"hair_length": case[0], "hair_volume": case[1], "hair_detail": case[2]}, true)
+		actor.apply_appearance_variants(edited)
+		await process_frame
+		var length := clampf((float(case[0]) - float(preset.hair_length)) / 50.0, -1.0, 1.0)
+		var volume := clampf((float(case[1]) - float(preset.hair_volume)) / 50.0, -1.0, 1.0)
+		var expected := {"hl_length_p": snappedf(maxf(length, 0.0), 0.0001), "hl_length_n": snappedf(maxf(-length, 0.0), 0.0001),
+			"hl_volume_p": snappedf(maxf(volume, 0.0), 0.0001), "hl_volume_n": snappedf(maxf(-volume, 0.0), 0.0001)}
+		var detail := snappedf(float(RLHeadPortraitMap.detail_level(case[2], preset.hair_detail)) / 100.0, 0.0001)
+		_expect(_grooming_weights(rig) == expected and _hair_detail_values(rig) == [detail]
+			and rig.identity_targets() == nodes_before,
+			"%s length %d, volume %d, finish %d: hl_ weights %s, detail %.2f, same meshes" % [module, case[0],
+				case[1], case[2], _grooming_weights(rig), detail])
+	# Longest and fullest, then the springs: the locks still swing off rest
+	# when the head moves.
+	var edited := appearance.duplicate()
+	edited.merge({"hair_length": 100, "hair_volume": 100}, true)
+	actor.apply_appearance_variants(edited)
+	await process_frame
+	var motion := rig.hair_motion()
+	_expect(motion != null and motion.has_springs(), "%s keeps its springs at full length" % module)
+	if motion != null and motion.has_springs():
+		var skeleton: Skeleton3D = motion._skeleton
+		var tips: Array[int] = []
+		for spring: Variant in (RLHeadLibrary.hair_info(module).get("extras", {}) as Dictionary).get("springs", []) as Array:
+			var bones: Array = (spring as Dictionary).get("bones", []) as Array
+			if not bones.is_empty():
+				tips.append(skeleton.find_bone(str(bones.back())))
+		var furthest := [0.0]
+		var probe := func() -> void:
+			for tip: int in tips:
+				furthest[0] = maxf(float(furthest[0]), skeleton.get_bone_global_pose(tip).origin.distance_to(
+					skeleton.get_bone_global_rest(tip).origin))
+		motion._simulator.modification_processed.connect(probe)
+		for step: int in 8:
+			actor.global_position.x += 0.25
+			await process_frame
+		motion._simulator.modification_processed.disconnect(probe)
+		_expect(motion.is_running() and float(furthest[0]) > 0.001 and not tips.has(-1),
+			"%s at full length and volume: %d spring chains swing (%.1f mm off rest)" % [module, tips.size(),
+				float(furthest[0]) * 1000.0])
+	actor.queue_free()
+	await process_frame
+	if sex == "male":
+		# A beard is drawn by the same shader and keeps the default detail.
+		var bearded := Stage.spawn(_stage, sex, HumanPortraitPresets.appearance("Tavi"))
+		await process_frame
+		var beard_rig := bearded.rl_head()
+		var beard_values: Array = []
+		if beard_rig != null:
+			for level: Array in beard_rig.mesh_nodes()["beard"] as Array:
+				for node: MeshInstance3D in level:
+					var value: Variant = node.get_instance_shader_parameter("hair_detail")
+					if not beard_values.has(value):
+						beard_values.append(value)
+		_expect(beard_rig != null and beard_rig.appearance.beard == "full_beard" and not beard_values.is_empty()
+			and beard_values.all(func(value: Variant) -> bool: return value == null or is_equal_approx(float(value), 0.5)),
+			"Tavi's full beard keeps the default hair detail %s" % [beard_values])
+		bearded.queue_free()
+		await process_frame
 
 
 func _hidden_triplets(original: Mesh, head_path: String) -> Dictionary:

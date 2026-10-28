@@ -66,6 +66,8 @@ const BEARD_STYLES: Array[String] = [NONE, STUBBLE, "full_beard", "short_beard",
 ## head_<sex>_brows.png. A fractional style blends its two neighbours.
 const BROW_STYLES: Array[String] = ["arched", "straight", "soft", "angled"]
 const DEFAULT_BROW_STYLE := 2.0
+## The hair detail level that shows an RL hairstyle as authored (0..100).
+const DEFAULT_HAIR_DETAIL := 50
 const INLINE_STYLE := 255
 const CONTROL_STEPS := 7.0
 
@@ -90,12 +92,16 @@ var brow_style := DEFAULT_BROW_STYLE
 var brow_thickness := 0.0
 ## 0 to 1: how far the liner flicks out past the outer corner of the eye.
 var liner_wing := 0.0
-## An RL hairstyle's length and volume, -1 to 1 (0 as authored), and its
-## finish 0..2 (PortraitCustomization `hair_detail`), through the hairstyle's
-## optional `hl_` blend shapes (RLHeadRig). Not part of the byte form.
+## An RL hairstyle's length and volume, -1 to 1 (0 as authored), through the
+## hairstyle's optional `hl_` blend shapes, and its fine detail 0..100
+## (DEFAULT_HAIR_DETAIL, 50, is the authored look; lower drops its flyaway and
+## wisp cards, 0 is smooth, above 50 adds strand contrast), the hair shader's
+## `hair_detail` instance uniform at a hundredth of it (RLHeadRig). A Human's
+## saved finish (PortraitCustomization `hair_detail` 0..2) becomes this level
+## through RLHeadPortraitMap. Not part of the byte form.
 var hair_length := 0.0
 var hair_volume := 0.0
-var hair_detail := 0
+var hair_detail := DEFAULT_HAIR_DETAIL
 ## The facial hair's own colour when `beard_color_set` (a beard card texture
 ## lights differently from a hairstyle's), else the hair colour. Not part of
 ## the byte form.
@@ -276,7 +282,7 @@ func _merge(data: Dictionary) -> void:
 	liner_wing = clampf(float(data.get("liner_wing", liner_wing)), 0.0, 1.0)
 	hair_length = clampf(float(data.get("hair_length", hair_length)), -1.0, 1.0)
 	hair_volume = clampf(float(data.get("hair_volume", hair_volume)), -1.0, 1.0)
-	hair_detail = clampi(int(data.get("hair_detail", hair_detail)), 0, 2)
+	hair_detail = clampi(int(data.get("hair_detail", hair_detail)), 0, 100)
 	if data.get("beard_color") != null and data.has("beard_color"):
 		beard_color = _color(data["beard_color"], beard_color)
 		beard_color_set = true
