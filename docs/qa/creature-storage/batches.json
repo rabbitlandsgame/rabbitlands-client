@@ -5,8 +5,8 @@
   "batch_size": 5,
   "creature_count": 235,
   "batch_count": 47,
-  "completed_batches": 40,
-  "qualified_creatures": 187,
+  "completed_batches": 41,
+  "qualified_creatures": 191,
   "status": "in progress",
   "actors": [
     {
@@ -2461,7 +2461,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/storm_chimera.glb",
       "source_sha256": "a55951ffff9b7080b3be257b1c79a98f8856230abc69f31b4e6b468567f53171",
       "source_bytes": 1680156,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "308a44dd4e9ade94bb37544169bb3ebc2138ba947ba7ac1d16f85322fade47f1",
+      "candidate_bytes": 1571288,
+      "qualification_report": "docs/qa/creature-storage/storm_chimera.json"
     },
     {
       "actor": "amberwood_great_owl",
@@ -2470,7 +2473,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/amberwood_great_owl.glb",
       "source_sha256": "ecbdc3f1603eb127490356e2400507057b4307e340452674705d8377289cfb6d",
       "source_bytes": 1674528,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "76312d78f59cc7b16d6cb481e6996327392c745429deffe4df2f584e0386e12c",
+      "candidate_bytes": 1579624,
+      "qualification_report": "docs/qa/creature-storage/amberwood_great_owl.json"
     },
     {
       "actor": "void_tentacle_construct",
@@ -2479,7 +2485,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/void_tentacle_construct.glb",
       "source_sha256": "760401d2e2c6580d6206135dccfa5956a74f2802200dd207db4b2e30b8122f54",
       "source_bytes": 1610548,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "88c45e81cebd70f4e3d89aeeb033449c3d59de168d0d4e6423e72ab78b26644e",
+      "candidate_bytes": 1265856,
+      "qualification_report": "docs/qa/creature-storage/void_tentacle_construct.json"
     },
     {
       "actor": "leafwing_owl",
@@ -2488,7 +2497,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/leafwing_owl.glb",
       "source_sha256": "2e382f1d626076d60bb818e762ac0ebce0c804626acc51dc9d6a242ea643bbef",
       "source_bytes": 1558712,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "4f2c2b55911319d81600c9016755bdd8a4bb5315e4ba13b26648e88028cb8227",
+      "candidate_bytes": 1507796,
+      "qualification_report": "docs/qa/creature-storage/leafwing_owl.json"
     },
     {
       "actor": "giant_amber_moth",
@@ -2497,7 +2509,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/giant_amber_moth.glb",
       "source_sha256": "dedfb3e569edb22233823b879e28e9b8ab860971785ff7e2f267f125034dea45",
       "source_bytes": 1553256,
-      "status": "pending"
+      "status": "unchanged",
+      "candidate_sha256": "dedfb3e569edb22233823b879e28e9b8ab860971785ff7e2f267f125034dea45",
+      "candidate_bytes": 1553256,
+      "qualification_report": "docs/qa/creature-storage/giant_amber_moth.json"
     },
     {
       "actor": "amethyst_moth",
@@ -2765,17 +2780,18 @@
     37,
     38,
     39,
-    40
+    40,
+    42
   ],
-  "reviewed_creatures": 200,
+  "reviewed_creatures": 205,
   "selection_policy": {
     "raw_asset_priority": "Prefer smaller qualified raw development models; small measured increases in packaged RLCZ size are accepted and recorded per actor and batch.",
     "runtime_claims": "Encoded input-key savings do not establish retained animation memory or frame-time savings because Godot rebakes curves at the declared cadence. Shared corrective GPU buffer savings are measured separately.",
     "approximation": "Exact batches retain their existing bounded float32/native/pixel gates. Approximate joint-curve trials are private and uninstalled."
   },
   "totals_reviewed": {
-    "raw_saved_bytes": 296350384,
-    "compressed_saved_bytes": 19452508,
+    "raw_saved_bytes": 296949764,
+    "compressed_saved_bytes": 19453880,
     "shared_gpu_saved_bytes": 39397800
   },
   "independent_editor_verification": {
