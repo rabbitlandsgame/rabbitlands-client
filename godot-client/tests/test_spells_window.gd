@@ -88,7 +88,7 @@ func run() -> void:
 	check(book.effect_preview.power_level == 2, "preview uses the effective power from the server quote")
 	book._quote_state({"kind": "preview", "id": 1, "requested": 3, "power": 2, "limit": 2, "mana": 17, "ready": false, "reagents": [], "unlock_level": 0, "recommended_level": 10, "potency": {"mean": 200.0, "minimum": 196.0, "maximum": 204.0}})
 	check(book.potency_label.text.contains("Recommended 10") and book.potency_label.text.contains("200% average"), "potency and recommendation come from the authoritative quote")
-	book._quote_state({"kind": "preview", "id": 1, "requested": 3, "power": 2, "limit": 2, "mana": 17, "ready": true, "reagents": [], "casts_remaining": 2, "reagent_casts": 300})
+	book._quote_state({"kind": "preview", "id": 1, "requested": 3, "power": 2, "limit": 2, "mana": 17, "ready": true, "reagents": [], "casts_remaining": 2.0, "reagent_casts": 300.0})
 	check(book.casts_label.text == "Casts now: 2 · Supplies: 300", "selected-power cast reserves separate current ether from supplies")
 	book._quote_state({"kind": "preview", "id": 1, "requested": 3, "power": 2, "limit": 2, "mana": 17, "ready": false, "reason": "Missing materials.", "reagents": [{"name": "Life Distillate", "quantity": 20, "have": 12}]})
 	check(book.reagents_rows.get_child_count() == 1 and book.reagents_rows.get_child(0).get_meta("reagent").required == 20, "quote replaces base quantities")

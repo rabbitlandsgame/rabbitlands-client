@@ -419,7 +419,7 @@ func _quote_state(data: Dictionary) -> void:
 	numbers_label.text = "%s · Power %d / %d · Ether %d" % [str(catalog.spell(selected_spell_id).get("scope", "self")).capitalize(), int(data.get("power", 1)), int(data.get("limit", 1)), int(data.get("mana", 0))]
 	var quality: Dictionary = data.get("potency", {})
 	if data.has("casts_remaining"):
-		casts_label.text = "Casts now: %s · Supplies: %s" % [str(data.casts_remaining) if data.casts_remaining != null else "Unlimited", str(data.get("reagent_casts")) if data.get("reagent_casts") != null else "Unlimited"]
+		casts_label.text = "Casts now: %s · Supplies: %s" % [str(int(data.casts_remaining)) if data.casts_remaining != null else "Unlimited", str(int(data.get("reagent_casts"))) if data.get("reagent_casts") != null else "Unlimited"]
 		casts_label.tooltip_text = "Casts now includes current ether and the selected power's reagent costs. Supplies includes usable anchors after focus charges run out. Ether recovery is not predicted."
 	if not quality.is_empty():
 		var label := "Duration" if str(data.get("potency_applies_to", "amount")) == "duration" else "Potency"
