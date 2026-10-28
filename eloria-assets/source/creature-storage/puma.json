@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "actor": "puma",
+  "source_sha256": "bc2a83e4af3d03e53d597e1b89fbff06f8db2bb3c9f6d0458a4c7025d2fdfa16",
+  "candidate_sha256": "e1f2b2d5a914e626d3370338f489863c0640c8ac10bac172839a262e4f24d9a6",
+  "pipeline": [
+    "prune_zero_targets",
+    "reduce_constant_runs",
+    "compact"
+  ],
+  "partition": null,
+  "unchanged": false,
+  "removed_zero_target_indices": [],
+  "redundant_flat_key_rows_removed": 122063,
+  "geometry_skin_rest_binds_materials_images_unchanged": true,
+  "preserve_trs_keys": false,
+  "native_clips": [
+    "Fighting_Idle",
+    "Hit_Chest",
+    "Idle_A",
+    "Walk",
+    "Sword_Attack",
+    "Death_A",
+    "Jog"
+  ],
+  "usage": "Deterministic exact preparation needs no partition --profile; frozen source/candidate hashes bind this record."
+}
