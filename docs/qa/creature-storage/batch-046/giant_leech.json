@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "batch": 46,
+  "actor": "giant_leech",
+  "status": "Original retained; proposed canonical storage rewrite increases raw source size.",
+  "source_sha256": "c6d713e9b71c618c5d7726a204f0fec1d3708165b1eb9a1dc72783445cc63855",
+  "candidate_sha256": "c6d713e9b71c618c5d7726a204f0fec1d3708165b1eb9a1dc72783445cc63855",
+  "source_bytes": 579000,
+  "candidate_bytes": 579000,
+  "source_zstd_bytes": 369711,
+  "candidate_zstd_bytes": 369711,
+  "shared_gpu_source_bytes": 0,
+  "shared_gpu_candidate_bytes": 0,
+  "draw_surfaces_source": 1,
+  "draw_surfaces_candidate": 1,
+  "reason": "Canonical exact packing including original-source logical bounds grows raw GLB bytes and has no corrective-GPU or draw benefit. User preference accepts packaged growth only for smaller source files; original bytes retained.",
+  "rejected_proposal": {
+    "sha256": "b916e21cd3df6c237e93775a6705418075c2738f4dc4ba0c92f26701eadd592c",
+    "bytes": 580064,
+    "raw_growth_bytes": 1064,
+    "private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-storage-20261027\\.local\\batch-046\\giant_leech\\v1",
+    "scope": "Size rejection only. No full replacement qualification or new authored fitness/art approval is claimed."
+  },
+  "rig_investigation": "Original has zero corrective targets; no corrective buffer or draw-call reduction from this proposed rewrite. Original rig and skin unchanged.",
+  "human_approval_changed": false,
+  "original_bytes_verified_identical": true
+}

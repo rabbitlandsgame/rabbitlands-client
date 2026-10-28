@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "batch": 46,
+  "actor": "floating_eye",
+  "status": "Original retained; proposed canonical storage rewrite increases raw source size.",
+  "source_sha256": "29db5d7efb46c3cc957f410b346353d7da4de5ee3a348ef012b90f79202e6ab3",
+  "candidate_sha256": "29db5d7efb46c3cc957f410b346353d7da4de5ee3a348ef012b90f79202e6ab3",
+  "source_bytes": 567664,
+  "candidate_bytes": 567664,
+  "source_zstd_bytes": 377119,
+  "candidate_zstd_bytes": 377119,
+  "shared_gpu_source_bytes": 0,
+  "shared_gpu_candidate_bytes": 0,
+  "draw_surfaces_source": 1,
+  "draw_surfaces_candidate": 1,
+  "reason": "Canonical exact packing including original-source logical bounds grows raw GLB bytes and has no corrective-GPU or draw benefit. User preference accepts packaged growth only for smaller source files; original bytes retained.",
+  "rejected_proposal": {
+    "sha256": "828dee0a9cf258ee2e06389b726531883646a3c434b8a3a5dac9e686cbcc7dbb",
+    "bytes": 567840,
+    "raw_growth_bytes": 176,
+    "private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-storage-20261027\\.local\\batch-046\\floating_eye\\v1",
+    "scope": "Size rejection only. No full replacement qualification or new authored fitness/art approval is claimed."
+  },
+  "rig_investigation": "Original has zero corrective targets; no corrective buffer or draw-call reduction from this proposed rewrite. Original rig and skin unchanged.",
+  "human_approval_changed": false,
+  "original_bytes_verified_identical": true
+}

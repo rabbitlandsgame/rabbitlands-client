@@ -5,9 +5,9 @@
   "batch_size": 5,
   "creature_count": 235,
   "batch_count": 47,
-  "completed_batches": 46,
-  "qualified_creatures": 204,
-  "status": "in progress",
+  "completed_batches": 47,
+  "qualified_creatures": 205,
+  "status": "complete",
   "actors": [
     {
       "actor": "snapping_turtle",
@@ -2716,7 +2716,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/stalactite_maw.glb",
       "source_sha256": "3214c4f25833cd3f32464965be3b2b33a284162c4ddda9ce2a7231da9cff69e4",
       "source_bytes": 625360,
-      "status": "pending"
+      "status": "unchanged",
+      "candidate_sha256": "3214c4f25833cd3f32464965be3b2b33a284162c4ddda9ce2a7231da9cff69e4",
+      "candidate_bytes": 625360,
+      "qualification_report": "docs/qa/creature-storage/batch-046/stalactite_maw.json"
     },
     {
       "actor": "giant_leech",
@@ -2725,7 +2728,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/giant_leech.glb",
       "source_sha256": "c6d713e9b71c618c5d7726a204f0fec1d3708165b1eb9a1dc72783445cc63855",
       "source_bytes": 579000,
-      "status": "pending"
+      "status": "unchanged",
+      "candidate_sha256": "c6d713e9b71c618c5d7726a204f0fec1d3708165b1eb9a1dc72783445cc63855",
+      "candidate_bytes": 579000,
+      "qualification_report": "docs/qa/creature-storage/batch-046/giant_leech.json"
     },
     {
       "actor": "burrowing_landshark",
@@ -2734,7 +2740,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/burrowing_landshark.glb",
       "source_sha256": "bfc2f1b9c0a0b84bdbc6fa1817a196b82234d656a4b921026ec799941b6b9730",
       "source_bytes": 578076,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "dbcbd10240a192e589c4b7828a094fde7be51fc25792e61ad70f1f6714f4a21f",
+      "candidate_bytes": 577808,
+      "qualification_report": "docs/qa/creature-storage/batch-046/burrowing_landshark.json"
     },
     {
       "actor": "living_spellbook",
@@ -2743,7 +2752,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/living_spellbook.glb",
       "source_sha256": "0ac27a79533006dff6b50ae2e3bdc75e23290524e1f9dc7f589a36291df42618",
       "source_bytes": 575260,
-      "status": "pending"
+      "status": "unchanged",
+      "candidate_sha256": "0ac27a79533006dff6b50ae2e3bdc75e23290524e1f9dc7f589a36291df42618",
+      "candidate_bytes": 575260,
+      "qualification_report": "docs/qa/creature-storage/batch-046/living_spellbook.json"
     },
     {
       "actor": "floating_eye",
@@ -2752,7 +2764,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/floating_eye.glb",
       "source_sha256": "29db5d7efb46c3cc957f410b346353d7da4de5ee3a348ef012b90f79202e6ab3",
       "source_bytes": 567664,
-      "status": "pending"
+      "status": "unchanged",
+      "candidate_sha256": "29db5d7efb46c3cc957f410b346353d7da4de5ee3a348ef012b90f79202e6ab3",
+      "candidate_bytes": 567664,
+      "qualification_report": "docs/qa/creature-storage/batch-046/floating_eye.json"
     },
     {
       "actor": "giant_ant",
@@ -2861,17 +2876,18 @@
     43,
     44,
     45,
+    46,
     47
   ],
-  "reviewed_creatures": 230,
+  "reviewed_creatures": 235,
   "selection_policy": {
     "raw_asset_priority": "Prefer smaller qualified raw development models; small measured increases in packaged RLCZ size are accepted and recorded per actor and batch.",
     "runtime_claims": "Encoded input-key savings do not establish retained animation memory or frame-time savings because Godot rebakes curves at the declared cadence. Shared corrective GPU buffer savings are measured separately.",
     "approximation": "Exact batches retain their existing bounded float32/native/pixel gates. Approximate joint-curve trials are private and uninstalled."
   },
   "totals_reviewed": {
-    "raw_saved_bytes": 297841068,
-    "compressed_saved_bytes": 19449045,
+    "raw_saved_bytes": 297841336,
+    "compressed_saved_bytes": 19448769,
     "shared_gpu_saved_bytes": 39397800
   },
   "independent_editor_verification": {
