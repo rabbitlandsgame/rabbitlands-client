@@ -92,7 +92,8 @@ art exactly. No asset is replaced: the shipped bodies, hair and equipment are un
   light ring the border fix painted round each iris and the bleed along the brow strokes
   are gone, while the skin carries slightly more fine noise (mean error 0.3-2.3/255
   against 0.2-1.6). `RLHeadLibrary` uses such an import as it is (no GPU readback, no
-  runtime mip build; a raw file not imported yet still gets one). `check_actor_imports` refuses a map without VRAM
+  runtime mip build; a raw file not imported yet still gets one, left uncompressed: client
+  code never calls an Image compressor, `tests/test_build_vram_textures.py`). `check_actor_imports` refuses a map without VRAM
   compression, mipmaps or an S3TC/BPTC product and `check_actor_pack` holds every RL
   file to one place; `tests/test_package_client.py` and `tests/test_rl_head.gd` check the
   route. The lab (`prototypes/rl_heads`) and the RL tests and evidence scripts are not

@@ -495,13 +495,13 @@ static func texture(file: String) -> Texture2D:
 	if not _textures.has(path):
 		var loaded: Texture2D = null
 		if ResourceLoader.exists(path):
-			loaded = _with_mipmaps(load(path) as Texture2D, _is_colour(path), _size_cap(path))
+			loaded = _with_mipmaps(load(path) as Texture2D, _size_cap(path))
 		elif FileAccess.file_exists(path):
 			# Not imported yet (a file the lead just dropped in): read it raw so
 			# the lab shows it before the next editor import.
 			var image := Image.load_from_file(ProjectSettings.globalize_path(path))
 			if image != null and not image.is_empty():
-				loaded = _with_mipmaps(ImageTexture.create_from_image(image), _is_colour(path), _size_cap(path))
+				loaded = _with_mipmaps(ImageTexture.create_from_image(image), _size_cap(path))
 		if loaded == null:
 			warn_once("texture:" + path, "texture %s not there yet, drawing without it" % path, true)
 		_textures[path] = loaded
@@ -514,9 +514,10 @@ static func texture(file: String) -> Texture2D:
 ## that) and is used as it is, never read back from the GPU. Anything else -
 ## a raw file not imported yet, or an import that lost its committed settings
 ## - gets a mip chain built here, once per texture, first scaled down to its
-## map's MAP_SIZE_CAPS size, and is block-compressed where the GPU takes S3TC
-## so a 2048 px map costs a quarter of the video memory.
-static func _with_mipmaps(source: Texture2D, colour: bool, max_size: int = 0) -> Texture2D:
+## map's MAP_SIZE_CAPS size. It stays uncompressed: client code never calls an
+## Image compressor (export templates have no BC encoder; compression belongs
+## to the committed imports and the package tool, test_build_vram_textures.py).
+static func _with_mipmaps(source: Texture2D, max_size: int = 0) -> Texture2D:
 	if source == null:
 		return null
 	if source is CompressedTexture2D:
@@ -534,9 +535,6 @@ static func _with_mipmaps(source: Texture2D, colour: bool, max_size: int = 0) ->
 		image.resize(maxi(1, roundi(image.get_width() * scale)), maxi(1, roundi(image.get_height() * scale)),
 			Image.INTERPOLATE_LANCZOS)
 	image.generate_mipmaps()
-	if RenderingServer.get_rendering_device() != null or OS.has_feature("s3tc"):
-		image.compress(Image.COMPRESS_S3TC,
-			Image.COMPRESS_SOURCE_SRGB if colour else Image.COMPRESS_SOURCE_GENERIC)
 	return ImageTexture.create_from_image(image)
 
 
@@ -562,13 +560,6 @@ static func _size_cap(path: String) -> int:
 		if file.ends_with("_" + map):
 			return int(MAP_SIZE_CAPS[map])
 	return 0
-
-
-## Colour maps are sRGB; masks and normal maps are data.
-static func _is_colour(path: String) -> bool:
-	var file := path.get_file()
-	return file.contains("albedo") or file.begins_with("eye") or file.begins_with("hair") \
-		or file.begins_with("beard") or file.begins_with("lash") or file.begins_with("brow")
 
 
 ## The texture for one material slot: the manifest's choice, else `fallback`.
