@@ -77,14 +77,16 @@ def test_mips_keep_large_unwrapped_uv_at_alpha_edge():
     assert levels[-1][1][0,0] == 1/16
 
 
-def test_storage_inventory_counts_actual_mips_and_identical_tiles_once(tmp_path):
+def test_storage_inventory_counts_actual_mips_and_each_referenced_file_once(tmp_path):
     (tmp_path/"tile-a").write_bytes(b"same detail tile")
     (tmp_path/"tile-b").write_bytes(b"same detail tile")
     (tmp_path/"mip-0").write_bytes(b"base")
     (tmp_path/"mip-1").write_bytes(b"mip")
-    result = TRIAL.inventory(tmp_path.iterdir())
-    assert result["unique_files"] == 3
-    assert result["bytes"] == len(b"same detail tile")+len(b"base")+len(b"mip")
+    result = TRIAL.inventory([*tmp_path.iterdir(),tmp_path/"tile-a",tmp_path/"mip-1"])
+    assert result["unique_files"] == 4
+    assert result["unique_contents"] == 3
+    assert result["bytes"] == 2*len(b"same detail tile")+len(b"base")+len(b"mip")
+    assert result["content_deduplicated_bytes"] == len(b"same detail tile")+len(b"base")+len(b"mip")
 
 
 def test_sparse_sheet_crop_preserves_world_pixel_centres():

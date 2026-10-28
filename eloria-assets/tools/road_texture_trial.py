@@ -405,15 +405,25 @@ def source_closure(root, region, chunks):
 
 
 def inventory(paths):
-    unique = {}
+    unique, seen = {}, set()
+    stored_bytes = compressed_bytes = 0
     for path in paths:
+        canonical = os.path.normcase(os.path.abspath(path))
+        if canonical in seen:
+            continue
+        seen.add(canonical)
         data = path.read_bytes()
+        compressed = len(zlib.compress(data, 6))
+        stored_bytes += len(data)
+        compressed_bytes += compressed
         key = sha(data)
-        entry = unique.setdefault(key, dict(bytes=len(data), zlib6_bytes=len(zlib.compress(data, 6)), paths=[]))
+        entry = unique.setdefault(key, dict(bytes=len(data), zlib6_bytes=compressed, paths=[]))
         entry["paths"].append(str(path))
-    return dict(unique_files=len(unique), bytes=sum(r["bytes"] for r in unique.values()),
-                zlib6_bytes=sum(r["zlib6_bytes"] for r in unique.values()),
-                policy="content_identical_dependencies_counted_once;fullfiles,zlib6_eachfile;includesallstoredmips",
+    return dict(unique_files=len(seen), unique_contents=len(unique), bytes=stored_bytes,
+                zlib6_bytes=compressed_bytes,
+                content_deduplicated_bytes=sum(r["bytes"] for r in unique.values()),
+                content_deduplicated_zlib6_bytes=sum(r["zlib6_bytes"] for r in unique.values()),
+                policy="each_normalized_file_path_once;fullfiles,zlib6_eachfile;all_stored_mips_counted;content_dedup_is_separate_potential",
                 files=unique)
 
 
