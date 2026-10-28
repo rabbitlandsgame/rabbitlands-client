@@ -50,13 +50,17 @@ def prepare_bone_observations(job):
                 expected[name].append(np.asarray(entry["bones"][name]).reshape(4, 4))
                 for node in nodes:
                     actual[node].append(world[node])
-    selected, aliases = {}, []
+    selected, aliases, unobserved = {}, [], []
     for name, nodes in groups.items():
         if len(nodes) == 1:
             selected[name] = nodes
             continue
         if not expected[name]:
-            raise ValueError("Duplicate source joint has no frozen matrix observation")
+            # A frozen name lookup is unnecessary for an unobserved name.
+            # The importer still binds every original skin/joint by node and
+            # hierarchy, and the direct comparison checks every imported bone.
+            unobserved.append({"name": name, "original_joint_nodes": nodes})
+            continue
         matching = exact_observation_matches(
             {node: actual[node] for node in nodes}, expected[name]
         )
@@ -69,8 +73,9 @@ def prepare_bone_observations(job):
         "source_sha256": digest(source),
         "witness_sha256": hashlib.sha256(witness.read_bytes()).hexdigest(),
         "observed_original_joint_nodes": selected,
+        "unobserved_duplicate_joint_groups": unobserved,
         "all_time_identical_aliases": aliases,
-        "scope": "Duplicate names resolved through exact full original world-matrix observations at every frozen time; multiple matches require independent all-time ancestor/rest/curve identity. No witness values or names are rewritten. Unobserved retained bones are still included in every direct Blender pose comparison.",
+        "scope": "Observed duplicate names resolved through exact full original world-matrix observations at every frozen time; multiple matches require independent all-time ancestor/rest/curve identity. Unobserved duplicate groups retain every original node ID without selecting a named reference. Every original skin/joint remains bound independently and every imported bone is included in direct Blender pose comparisons. No witness values or names are rewritten.",
     }
     output = Path(job["output"]) / "blender-source-bone-observations.json"
     output.write_text(json.dumps(report, indent=2) + "\n")

@@ -74,6 +74,12 @@ def test_skin_identity_rest_and_every_duplicate_binding_are_retained(monkeypatch
     assert len(report["original_skin_and_joint_node_bindings"]) == 2
     mapped, _ = identity.multiple_armature_bindings("unused", arms, {"Bone": [3]})
     assert mapped["Bone"] == [(arms[1], arms[1].pose.bones["Bone"])]
+    unobserved, full_report = identity.multiple_armature_bindings("unused", arms, {})
+    assert unobserved == {}
+    assert {
+        row["source_joint_node"]
+        for row in full_report["original_skin_and_joint_node_bindings"]
+    } == {1, 3}
     with pytest.raises(ValueError, match="original named skin"):
         identity.multiple_armature_bindings("unused", arms, {"Bone": [0]})
     arms[1].name = "Unrelated"
@@ -89,3 +95,53 @@ def test_observation_matching_requires_entire_immutable_matrix_sequence():
     other[1, 0, 3] = 1e-9
     assert exact_observation_matches({1: old, 2: other}, old) == [1]
     assert exact_observation_matches({2: other}, old) == []
+
+
+def test_unobserved_duplicate_names_keep_all_nodes_without_a_named_reference(
+    tmp_path, monkeypatch
+):
+    import json
+    from video_motion import blender_bone_observations as observations
+    from video_motion import native_shapes, asset
+
+    doc, blob = fixture()
+    doc["nodes"].append({"name": "Observed"})
+    source, witness = tmp_path / "original.glb", tmp_path / "witness.json"
+    source.write_bytes(b"immutable original")
+    digest = "a" * 64
+    frozen = {
+        "sha256": digest,
+        "clips": {"Move": [{"time": 0.25, "bones": {"Observed": np.eye(4).ravel().tolist()}}]},
+    }
+    witness.write_text(json.dumps(frozen))
+    original_bytes = witness.read_bytes()
+
+    class Source:
+        joints = [1, 3, 4]
+        names = [node["name"] for node in doc["nodes"]]
+        d, b = doc, blob
+
+        def __init__(self, _):
+            pass
+
+        def sample(self, *_):
+            return np.zeros(1), np.zeros(1), np.zeros(1), {}
+
+        def world(self, *_):
+            return np.tile(np.eye(4), (5, 1, 1))
+
+    monkeypatch.setattr(native_shapes, "NativeShapeAsset", Source)
+    monkeypatch.setattr(asset, "digest", lambda _: digest)
+
+    def unexpected_alias_proof(*_):
+        pytest.fail("An unobserved duplicate name must not choose or prove an alias")
+
+    monkeypatch.setattr(identity, "prove_duplicate_joint_motion", unexpected_alias_proof)
+    report = observations.prepare_bone_observations(
+        {"source": str(source), "witness": str(witness), "output": str(tmp_path)}
+    )
+    assert "Bone" not in report["observed_original_joint_nodes"]
+    assert report["unobserved_duplicate_joint_groups"] == [
+        {"name": "Bone", "original_joint_nodes": [1, 3]}
+    ]
+    assert witness.read_bytes() == original_bytes
