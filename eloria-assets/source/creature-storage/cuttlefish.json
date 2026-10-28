@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "actor": "cuttlefish",
+  "source_sha256": "0af98400d4f41def465f62fbe637fc7bf33f28318457426a1ac7e6f34726dade",
+  "candidate_sha256": "734cca99c10097005aa0165bc62fa30201b1dbbe558cb5c8d18592b1c4ebd6a4",
+  "pipeline": [
+    "prune_zero_targets",
+    "reduce_constant_runs",
+    "compact"
+  ],
+  "partition": null,
+  "unchanged": false,
+  "removed_zero_target_indices": [],
+  "redundant_flat_key_rows_removed": 29576,
+  "geometry_skin_rest_binds_materials_images_unchanged": true,
+  "preserve_trs_keys": false,
+  "native_clips": [
+    "Idle_A",
+    "Fighting_Idle",
+    "Hit_Chest",
+    "Death_A",
+    "Sword_Attack",
+    "Walk",
+    "Jog"
+  ],
+  "usage": "Deterministic exact preparation needs no partition --profile; frozen source/candidate hashes bind this record."
+}
