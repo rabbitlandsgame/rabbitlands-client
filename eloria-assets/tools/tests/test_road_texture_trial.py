@@ -55,6 +55,15 @@ def test_overlapping_different_uv_retains_ordered_separate_sheet():
     assert np.allclose(sheets[1]["uv"][valid]-sheets[0]["uv"][valid], 30)
 
 
+def test_identical_uv_interiors_still_preserve_repeated_alpha_blending():
+    triangle = np.array([[[0,0,0],[2,0,0],[0,0,2]]],float)
+    triangles = np.concatenate([triangle,triangle])
+    grid = dict(width=4,height=4,origin_xz=[0,0],pixels_per_metre=2)
+    sheets,conflicts = TRIAL.rasterize(triangles,triangles[...,[0,2]],np.full((2,3),.5),grid)
+    assert len(sheets) == 2 and conflicts > 0
+    assert sheets[0]["alpha"][0,0] == sheets[1]["alpha"][0,0] == .5
+
+
 def test_gutter_samples_agree_across_adjacent_aligned_frames():
     triangles = np.array([[[0,0,0],[4,0,0],[0,0,2]], [[4,0,0],[4,0,2],[0,0,2]]],float)
     uv = triangles[..., [0,2]]*2

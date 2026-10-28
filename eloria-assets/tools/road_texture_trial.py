@@ -178,7 +178,7 @@ def rasterize(triangles, uv, alpha, grid, max_sheets=8):
     sheets, overlap_pixels = [], 0
     def add_sheet():
         sheets.append(dict(uv=np.zeros((h, w, 2), np.float64), alpha=np.zeros((h, w), np.float64),
-                           valid=np.zeros((h, w), bool)))
+                           valid=np.zeros((h, w), bool), interior=np.zeros((h, w),bool)))
     add_sheet()
     for tri, values, cover in zip(triangles, uv, alpha):
         pixel = (tri[:, [0, 2]] - origin) * ppm - .5
@@ -200,8 +200,9 @@ def rasterize(triangles, uv, alpha, grid, max_sheets=8):
         if not len(xx):
             continue
         mapped, coverage = weights @ values, np.clip(weights @ cover, 0, 1)
+        interior = np.min(weights,axis=1) > 1e-7
         active = coverage > 0
-        yy, xx, mapped, coverage = yy[active], xx[active], mapped[active], coverage[active]
+        yy, xx, mapped, coverage, interior = yy[active], xx[active], mapped[active], coverage[active], interior[active]
         if not len(xx):
             continue
         sheet_index = 0
@@ -209,7 +210,9 @@ def rasterize(triangles, uv, alpha, grid, max_sheets=8):
             occupied = sheet["valid"][yy, xx]
             different = ((np.max(np.abs(sheet["uv"][yy, xx]-mapped), axis=1) > 2e-4)
                          | (np.abs(sheet["alpha"][yy, xx]-coverage) > 1/255))
-            conflicts = occupied & different
+            # Equal values on a shared triangle edge are one raster fragment.
+            # Equal values in overlapping interiors still blend twice.
+            conflicts = occupied & (different | (interior & sheet["interior"][yy,xx]))
             if conflicts.any():
                 sheet_index = max(sheet_index, i+1)
                 overlap_pixels += int(conflicts.sum())
@@ -219,6 +222,7 @@ def rasterize(triangles, uv, alpha, grid, max_sheets=8):
             add_sheet()
         sheet = sheets[sheet_index]
         sheet["uv"][yy, xx], sheet["alpha"][yy, xx], sheet["valid"][yy, xx] = mapped, coverage, True
+        sheet["interior"][yy,xx] |= interior
     return sheets, overlap_pixels
 
 
