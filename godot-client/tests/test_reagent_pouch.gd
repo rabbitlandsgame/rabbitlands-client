@@ -32,7 +32,7 @@ func run() -> void:
 	pouch._select_index(0)
 	pouch._sync_actions()
 	check(pouch.selected_reference() == 133 and not pouch.drop_button.disabled, "pouch actions retain authoritative item identity")
-	check(pouch.gold.text.contains("1,500,000") and pouch.heading.text.contains("1/8"), "gold has a dedicated slot outside the type allowance")
+	check(pouch.gold_count.text == "1,500,000" and pouch.heading.text.contains("1/8"), "gold has a dedicated slot outside the type allowance")
 	check(pouch.store_button.disabled, "deposit requires an open storage session")
 	state.inventory.erase(133)
 	state.state_changed.emit(&"inventory")

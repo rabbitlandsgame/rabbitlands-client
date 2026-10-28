@@ -399,10 +399,9 @@ func apply_layout() -> void:
 		header.move_child(main.inventory_resize_grip, header.get_child_count() - 2)
 	footer.visible = not tray
 	var pack_grid := _grid_extent("backpack", 24)
-	var pouch: Vector2 = reagent_pouch.extent(options.parts.pouch, options.gap)
-	pouch.x = maxf(pouch.x, pack_grid.x)
-	var pack := Vector2(maxf(pack_grid.x, pouch.x if options.parts.pouch.enabled else 0), pack_grid.y + (8 + pouch.y if options.parts.pouch.enabled else 0))
+	var pack := pack_grid
 	var worn := _grid_extent("equipment", 8)
+	var pouch: Vector2 = reagent_pouch.extent(options.parts.pouch, options.gap, worn.x)
 	var replace: bool = options.inspection_mode == "replace"
 	tabs.set_tab_disabled(1, not options.parts.equipment.enabled)
 	tabs.set_tab_disabled(2, not options.parts.inspection.enabled)
@@ -424,9 +423,14 @@ func apply_layout() -> void:
 	elif worn_visible: body_size = worn
 	# All tab pages share the full pack dimensions, so inspecting never grows a tabbed window.
 	if replace: body_size = pack.max(Vector2(260, 240))
+	var pouch_y: float = top + body_size.y + 8
+	if options.parts.pouch.enabled:
+		body_size.x = maxf(body_size.x, pouch.x)
+		body_size.y += pouch.y + 8
 	body_size.x = maxf(body_size.x, 224)
+	pouch.x = body_size.x
 	_place("backpack", pack_at + Vector2(0, top), pack_grid)
-	_place("pouch", pack_at + Vector2(0, top + pack_grid.y + 8), pouch)
+	_place("pouch", Vector2(0, pouch_y), pouch)
 	groups.pouch.visible = pack_visible and options.parts.pouch.enabled
 	_place("equipment", worn_at + Vector2(0, top), worn)
 	groups.backpack.visible = pack_visible
@@ -541,7 +545,7 @@ func _layout_contents() -> void:
 		(groups[key].get_node("Heading") as Label).size = Vector2(groups[key].size.x, 18)
 	reagent_pouch.position = Vector2.ZERO
 	reagent_pouch.size = groups.pouch.size
-	reagent_pouch.apply_style(model.working)
+	reagent_pouch.apply_style(model.working, _grid_extent("equipment", 8).x, model.working.equipment_side == "right")
 	var preview_size: Vector2 = groups.preview.size
 	preview_icon.position = Vector2(4, 4)
 	preview_icon.size = Vector2.ONE * minf(36, preview_size.y - 8)

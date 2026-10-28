@@ -47,6 +47,16 @@ func run() -> void:
 	var pack_buttons: Array = main.inventory_slot_buttons.duplicate()
 	var worn_buttons: Array = main.equipment_slot_buttons.duplicate()
 	var hud_before: Dictionary = main.hud_workspace.model.working.duplicate(true)
+	var pouch = workspace.reagent_pouch
+	expect(pouch.look_button.text.is_empty() and pouch.store_button.text.is_empty() and pouch.drop_button.text.is_empty() and pouch.mix_button.text.is_empty(), "pouch shortcuts use icons with no word labels")
+	expect(pouch.look_button.icon != null and pouch.store_button.icon != null and pouch.drop_button.icon != null and pouch.mix_button.icon != null, "pouch shortcuts reuse the real game artwork")
+	expect(pouch.auxiliary.global_position.x < pouch.contents.global_position.x, "gold and shortcuts occupy the space beneath Equipment")
+	main.manufacturing_panel.hide()
+	pouch.mix_button.pressed.emit()
+	expect(main.manufacturing_panel.visible, "Mix opens the existing crafting window")
+	main.manufacturing_panel.hide()
+	main.inventory_panel.show()
+
 	for id: String in Presets.BUILT_INS:
 		workspace.choose_preset(id, true)
 		await frames()
