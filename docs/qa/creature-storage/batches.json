@@ -5,8 +5,8 @@
   "batch_size": 5,
   "creature_count": 235,
   "batch_count": 47,
-  "completed_batches": 45,
-  "qualified_creatures": 203,
+  "completed_batches": 46,
+  "qualified_creatures": 204,
   "status": "in progress",
   "actors": [
     {
@@ -2761,7 +2761,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/giant_ant.glb",
       "source_sha256": "6cfea03093bb4de797b62ade10c02a21290e0b4f771699fbbf61cf58ea27b615",
       "source_bytes": 522736,
-      "status": "pending"
+      "status": "unchanged",
+      "candidate_sha256": "6cfea03093bb4de797b62ade10c02a21290e0b4f771699fbbf61cf58ea27b615",
+      "candidate_bytes": 522736,
+      "qualification_report": "docs/qa/creature-storage/batch-047/giant_ant.json"
     },
     {
       "actor": "giant_snail",
@@ -2770,7 +2773,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/giant_snail.glb",
       "source_sha256": "da9718c830eb4993fc93e58538b8107e82de30b78842a545a2ccc15d51cd82ee",
       "source_bytes": 511500,
-      "status": "pending"
+      "status": "unchanged",
+      "candidate_sha256": "da9718c830eb4993fc93e58538b8107e82de30b78842a545a2ccc15d51cd82ee",
+      "candidate_bytes": 511500,
+      "qualification_report": "docs/qa/creature-storage/batch-047/giant_snail.json"
     },
     {
       "actor": "animated_sword",
@@ -2779,7 +2785,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/animated_sword.glb",
       "source_sha256": "56b9af575eac41a82210c6c274c1d76f51c0092f77e4e1a47953c9979c931cf1",
       "source_bytes": 451188,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "c07e846c17c1bb315716774aadad7dfd1b9252bc405fe89fc63645fc3d2f2e55",
+      "candidate_bytes": 450712,
+      "qualification_report": "docs/qa/creature-storage/batch-047/animated_sword.json"
     },
     {
       "actor": "slime",
@@ -2788,7 +2797,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/slime.glb",
       "source_sha256": "15f30dca286d5167376dc768d33109fc5a09c9946e5f4dcabc96fa2af979b64a",
       "source_bytes": 445744,
-      "status": "pending"
+      "status": "unchanged",
+      "candidate_sha256": "15f30dca286d5167376dc768d33109fc5a09c9946e5f4dcabc96fa2af979b64a",
+      "candidate_bytes": 445744,
+      "qualification_report": "docs/qa/creature-storage/batch-047/slime.json"
     },
     {
       "actor": "crawling_hand",
@@ -2797,7 +2809,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/crawling_hand.glb",
       "source_sha256": "2cb97d33d3639554bd6e82827a2fe1f5e2fbde1ffa2b5d281086ccf64cbc6a1c",
       "source_bytes": 426604,
-      "status": "pending"
+      "status": "unchanged",
+      "candidate_sha256": "2cb97d33d3639554bd6e82827a2fe1f5e2fbde1ffa2b5d281086ccf64cbc6a1c",
+      "candidate_bytes": 426604,
+      "qualification_report": "docs/qa/creature-storage/batch-047/crawling_hand.json"
     }
   ],
   "completed_batch_numbers": [
@@ -2845,17 +2860,18 @@
     42,
     43,
     44,
-    45
+    45,
+    47
   ],
-  "reviewed_creatures": 225,
+  "reviewed_creatures": 230,
   "selection_policy": {
     "raw_asset_priority": "Prefer smaller qualified raw development models; small measured increases in packaged RLCZ size are accepted and recorded per actor and batch.",
     "runtime_claims": "Encoded input-key savings do not establish retained animation memory or frame-time savings because Godot rebakes curves at the declared cadence. Shared corrective GPU buffer savings are measured separately.",
     "approximation": "Exact batches retain their existing bounded float32/native/pixel gates. Approximate joint-curve trials are private and uninstalled."
   },
   "totals_reviewed": {
-    "raw_saved_bytes": 297840592,
-    "compressed_saved_bytes": 19448998,
+    "raw_saved_bytes": 297841068,
+    "compressed_saved_bytes": 19449045,
     "shared_gpu_saved_bytes": 39397800
   },
   "independent_editor_verification": {
