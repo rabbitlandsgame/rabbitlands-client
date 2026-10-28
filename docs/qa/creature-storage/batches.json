@@ -5,8 +5,8 @@
   "batch_size": 5,
   "creature_count": 235,
   "batch_count": 47,
-  "completed_batches": 41,
-  "qualified_creatures": 191,
+  "completed_batches": 42,
+  "qualified_creatures": 196,
   "status": "in progress",
   "actors": [
     {
@@ -2416,7 +2416,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/mudskipper.glb",
       "source_sha256": "24c77aa82b5232ffebcf1a272373c7420a78dc437810ce9747d44babe965582a",
       "source_bytes": 1845204,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "4db0c8e76181529569cdb1a30af48958e2b77f15c5a7f9f6a06727e2a01c955b",
+      "candidate_bytes": 1826112,
+      "qualification_report": "docs/qa/creature-storage/batch-041/mudskipper.json"
     },
     {
       "actor": "seahorse",
@@ -2425,7 +2428,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/seahorse.glb",
       "source_sha256": "27c94e1343cd96eb23b81cee83bb7f489e97b87a6951a6ffceb55a30f01acaf0",
       "source_bytes": 1819000,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "b690de8a6e47ebaf20258d2eda2bc666e9d8bb59d99b0af83d049b236172b418",
+      "candidate_bytes": 1770864,
+      "qualification_report": "docs/qa/creature-storage/batch-041/seahorse.json"
     },
     {
       "actor": "jadefeather_raptor",
@@ -2434,7 +2440,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/jadefeather_raptor.glb",
       "source_sha256": "4f7f93223afe19c9b24030646e4622f742568390d821f935bbd4dd7f2fef4a1e",
       "source_bytes": 1808728,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "d6355029073f9e98fa49066067b803e165530b38968352dc3ec7740644ca09b8",
+      "candidate_bytes": 1670324,
+      "qualification_report": "docs/qa/creature-storage/batch-041/jadefeather_raptor.json"
     },
     {
       "actor": "giant_praying_mantis",
@@ -2443,7 +2452,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/giant_praying_mantis.glb",
       "source_sha256": "4de575176b126cf2462bffec0abac969e27a43c9df59aa4d426d3d8af507b23f",
       "source_bytes": 1707304,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "5aaac7414422fb84a8f054d32ff4449c81b187addfc304f16129a0647a8be491",
+      "candidate_bytes": 1292652,
+      "qualification_report": "docs/qa/creature-storage/batch-041/giant_praying_mantis.json"
     },
     {
       "actor": "amberwood_owl",
@@ -2452,7 +2464,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/amberwood_owl.glb",
       "source_sha256": "6edee7b9cbb3f0107c1e62fcb917b360b54438cef2b4d188c81dd2df1b96c5f7",
       "source_bytes": 1695208,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "7d91701171fb31a109874b888dcda98e3209f87538c389ef6f52fda7c90da928",
+      "candidate_bytes": 1630456,
+      "qualification_report": "docs/qa/creature-storage/batch-041/amberwood_owl.json"
     },
     {
       "actor": "storm_chimera",
@@ -2781,17 +2796,18 @@
     38,
     39,
     40,
+    41,
     42
   ],
-  "reviewed_creatures": 205,
+  "reviewed_creatures": 210,
   "selection_policy": {
     "raw_asset_priority": "Prefer smaller qualified raw development models; small measured increases in packaged RLCZ size are accepted and recorded per actor and batch.",
     "runtime_claims": "Encoded input-key savings do not establish retained animation memory or frame-time savings because Godot rebakes curves at the declared cadence. Shared corrective GPU buffer savings are measured separately.",
     "approximation": "Exact batches retain their existing bounded float32/native/pixel gates. Approximate joint-curve trials are private and uninstalled."
   },
   "totals_reviewed": {
-    "raw_saved_bytes": 296949764,
-    "compressed_saved_bytes": 19453880,
+    "raw_saved_bytes": 297634800,
+    "compressed_saved_bytes": 19452305,
     "shared_gpu_saved_bytes": 39397800
   },
   "independent_editor_verification": {
