@@ -130,7 +130,19 @@ def test_the_lore_objects_show_what_their_plaques_say():
     assert lichen and all(set(p.get('palette', {})) == {'stone', 'mineral'} for p in lichen)
     assert sum(p.get('height', 0) > .7 for p in lichen) == 2 and any(p.get('height', 0) == 0 for p in lichen)
     assert 'over its arms' in plaques[59275]['text'] and 'round its foot' in plaques[59275]['text']
-    assert not [p for s in design['sections'] for p in s['props'] if p['asset'] == 'chandelier']
+    # Nothing hangs in the Hall, under the 4.6 m ceiling the cutaway never draws. A chandelier elsewhere (the library's
+    # reading tables, review 2026-10-28) hangs from the ceiling line: its hook within 0.15 m under the wall tops the
+    # camera sees, and a light marker at its candles (a lamp, not a light with no source)
+    assert not [p for p in castle['props'] if p['asset'] == 'chandelier']
+    import build_town_interiors as B
+    scenery = json.loads((HERE.parents[2]/'source/world_objects/underground/reused-scenery.json').read_text('utf-8'))
+    (drop,) = [record['bounds'][1][1] for record in scenery['assets'] if record['id'] == 'chandelier']
+    for s in design['sections']:
+        ceiling = B.THEMES[s['style']]['wallHeight']
+        for p in (p for p in s['props'] if p['asset'] == 'chandelier'):
+            assert ceiling-.15 <= p['height']+drop*p.get('scale', 1) <= ceiling-.1, p
+            assert any(max(abs(light['at'][0]-p['at'][0]), abs(light['at'][1]-p['at'][1])) < .05
+                       and p['height'] < light['height'] < ceiling-.5 for light in s['lights']), p
     tavern = section(design, 'tavern_ground')
     kitchen = [p['asset'] for p in tavern['props'] if TS.room_of(tavern, *p['at']) == 1]
     assert kitchen and 'barrel_stack' not in kitchen
@@ -143,9 +155,10 @@ def test_the_lore_objects_show_what_their_plaques_say():
 
 def test_the_library_sells_books_at_its_street_door_and_reads_fast_in_its_reading_room_only():
     """Owner 2026-10-28 ("Add a library with a book seller NPC"): #28 (joined through to #29) is Calloway's Books,
-    Ennis Calloway behind her counter in the shop at the street door, facing the door's side of the room; only the
-    reading room carries the fast_reading special area, over its floor inside its walls; the rooms play shop and
-    library music; the lore objects keep to their own ids."""
+    Ennis Calloway serving at her desk in the shop at the street door, facing the room (south, so the default camera
+    sees her across it; review 2026-10-28); no food or bakery dressing anywhere in the library; only the reading room
+    carries the fast_reading special area, over its floor inside its walls; the rooms play shop and library music;
+    the lore objects keep to their own ids."""
     design = TS.load(SOURCE)
     library = section(design, 'library')
     (door,) = TS.doors(library)
@@ -154,9 +167,12 @@ def test_the_library_sells_books_at_its_street_door_and_reads_fast_in_its_readin
     (ennis,) = TS.npcs(library)
     assert (ennis['name'], ennis['role'], ennis['occupation'], ennis['actorType'], ennis['mapCategory'],
             ennis['mapLabel']) == ('Ennis Calloway', 'shop', 'Bookseller', 316, 'bookshop', "Calloway's Books")
-    assert TS.room_of(library, ennis['tile'][0]+.5, ennis['tile'][1]+.5) == 0 and ennis['facing'] == 'W'
-    (counter,) = [p for p in library['props'] if p['asset'] == 'shop_counter']
-    assert door['exit'][0] < counter['at'][0] < ennis['tile'][0]
+    assert TS.room_of(library, ennis['tile'][0]+.5, ennis['tile'][1]+.5) == 0 and ennis['facing'] == 'S'
+    # her desk stands square in front of her, on the tile row just outside her post's eight open neighbours
+    (desk,) = [p for p in library['props']
+               if p['asset'] == 'writing_desk_ledgers' and TS.room_of(library, *p['at']) == 0]
+    assert ennis['tile'][1]-2 < desk['at'][1] < ennis['tile'][1]-1 and abs(desk['at'][0]-(ennis['tile'][0]+.5)) < .1
+    assert not {p['asset'] for p in library['props']} & {'dressed_round_table', 'shop_counter', 'crate_stack'}
     sys.path.insert(0, str(HERE.parents[2]/'tools'))
     import sync_music_program as music
     assert [music.room_program(name) for name in library['roomNames']] == ['shop', 'library', 'library']

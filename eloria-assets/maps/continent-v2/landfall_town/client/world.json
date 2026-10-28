@@ -1729,13 +1729,13 @@
       "objectId": 59285,
       "role": "information",
       "position": [
-        184,
+        188,
         0,
-        234
+        235
       ],
       "serverTile": [
-        184,
-        90
+        188,
+        89
       ],
       "section": "library",
       "label": "A card propped on the counter, in a careful Votary hand: Calloway's lends nothing. Read anything in the back room for as long as the lamps last; what leaves the shop leaves it paid for."
@@ -1811,7 +1811,7 @@
       "step": 0.1
     },
     "gridAlignment": "tile-centres-v1",
-    "sha256": "a285d449892ca2db67a1b6765388853843f11d69f745d5d37cc1072d3d1c9e86",
+    "sha256": "a98c140c702999d62a2f0b182f67c3853c2498aa21ca3a8b895728864c765a92",
     "nodeNames": [
       "Build_castle_east_ashlar_wall",
       "Build_castle_east_decal_banner_glasswarden",
@@ -1867,6 +1867,7 @@
       "Build_library_east_timber_band",
       "Build_library_east_wall_cap",
       "Build_library_east_window_leaded",
+      "Build_library_north_decal_banner_votary",
       "Build_library_north_door_daylight",
       "Build_library_north_lime_plaster",
       "Build_library_north_timber_band",
@@ -1880,7 +1881,6 @@
       "Build_library_west_lime_plaster",
       "Build_library_west_timber_band",
       "Build_library_west_wall_cap",
-      "Build_library_west_window_leaded",
       "Build_magic_shop_east_lime_plaster",
       "Build_magic_shop_east_timber_band",
       "Build_magic_shop_east_wall_cap",
@@ -2059,6 +2059,7 @@
       "Part_clerk_house_2_lime_plaster",
       "Part_clerk_house_2_timber_band",
       "Part_clerk_house_2_wall_cap",
+      "Part_library_0_decal_star_chart",
       "Part_library_0_lime_plaster",
       "Part_library_0_timber_band",
       "Part_library_0_wall_cap",
@@ -2142,7 +2143,7 @@
     "servedGrid": {
       "binary": "served-grid.escg.gz",
       "format": "ESCG-v2",
-      "sha256": "e0b38add46123445ee9bdfa0bf02bcbc16beb3982be6e2e13de58e246c111341",
+      "sha256": "613483d0f7a3efa781b5ab01441f60d388760b4a0d4cb131e90aedf163d61604",
       "unitMetres": 0.05,
       "climbMetres": 1.0,
       "originMetres": -100.0,
@@ -3787,25 +3788,9 @@
       {
         "id": "library-light-0",
         "position": [
-          186.5,
-          2.9,
-          233.0
-        ],
-        "color": [
-          1.0,
-          0.82,
-          0.6
-        ],
-        "energyHint": 1.1,
-        "rangeHint": 7,
-        "section": "library"
-      },
-      {
-        "id": "library-light-1",
-        "position": [
-          182.5,
-          2.9,
-          233.5
+          186.9,
+          2.7,
+          232.2
         ],
         "color": [
           1.0,
@@ -3813,7 +3798,23 @@
           0.6
         ],
         "energyHint": 0.9,
-        "rangeHint": 7,
+        "rangeHint": 5,
+        "section": "library"
+      },
+      {
+        "id": "library-light-1",
+        "position": [
+          182.6,
+          2.9,
+          233.6
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.9,
+        "rangeHint": 6,
         "section": "library"
       },
       {
@@ -3828,60 +3829,92 @@
           0.82,
           1.0
         ],
-        "energyHint": 0.3,
-        "rangeHint": 4,
+        "energyHint": 0.18,
+        "rangeHint": 3.5,
         "section": "library"
       },
       {
         "id": "library-light-3",
         "position": [
-          184.5,
-          2.6,
-          242.5
+          186.0,
+          2.7,
+          242.6
         ],
         "color": [
           1.0,
           0.74,
           0.46
         ],
-        "energyHint": 0.9,
-        "rangeHint": 6,
+        "energyHint": 2.2,
+        "rangeHint": 3.6,
         "section": "library"
       },
       {
         "id": "library-light-4",
         "position": [
-          190.0,
-          2.6,
-          242.5
+          190.6,
+          2.7,
+          242.6
         ],
         "color": [
           1.0,
           0.74,
           0.46
         ],
-        "energyHint": 0.9,
-        "rangeHint": 6,
+        "energyHint": 2.2,
+        "rangeHint": 3.6,
         "section": "library"
       },
       {
         "id": "library-light-5",
         "position": [
-          194.5,
-          2.6,
-          243.5
+          181.75,
+          0.55,
+          244.7
         ],
         "color": [
           1.0,
-          0.74,
-          0.46
+          0.56,
+          0.3
         ],
-        "energyHint": 0.8,
-        "rangeHint": 6,
+        "energyHint": 1.4,
+        "rangeHint": 4.0,
         "section": "library"
       },
       {
         "id": "library-light-6",
+        "position": [
+          181.1,
+          2.2,
+          241.55
+        ],
+        "color": [
+          1.0,
+          0.7,
+          0.42
+        ],
+        "energyHint": 0.45,
+        "rangeHint": 2.6,
+        "section": "library"
+      },
+      {
+        "id": "library-light-7",
+        "position": [
+          197.9,
+          2.2,
+          240.8
+        ],
+        "color": [
+          1.0,
+          0.7,
+          0.42
+        ],
+        "energyHint": 0.45,
+        "rangeHint": 2.6,
+        "section": "library"
+      },
+      {
+        "id": "library-light-8",
         "position": [
           197.9,
           2.0,
@@ -3892,39 +3925,39 @@
           0.82,
           1.0
         ],
-        "energyHint": 0.25,
-        "rangeHint": 4,
+        "energyHint": 0.08,
+        "rangeHint": 3.0,
         "section": "library"
       },
       {
-        "id": "library-light-7",
+        "id": "library-light-9",
         "position": [
-          194.0,
-          1.6,
-          231.0
+          194.4,
+          1.1,
+          230.45
         ],
         "color": [
           1.0,
-          0.74,
-          0.46
+          0.7,
+          0.42
         ],
-        "energyHint": 0.7,
-        "rangeHint": 4,
+        "energyHint": 1.3,
+        "rangeHint": 5.5,
         "section": "library"
       },
       {
-        "id": "library-light-8",
+        "id": "library-light-10",
         "position": [
           194.0,
           2.9,
-          234.3
+          234.5
         ],
         "color": [
           1.0,
           0.82,
           0.6
         ],
-        "energyHint": 0.5,
+        "energyHint": 0.18,
         "rangeHint": 6,
         "section": "library"
       },
@@ -3934,38 +3967,6 @@
           186.1,
           2.85,
           229.72
-        ],
-        "color": [
-          1,
-          0.72,
-          0.42
-        ],
-        "energyHint": 1.0,
-        "rangeHint": 7,
-        "section": "library"
-      },
-      {
-        "id": "library-lamp-1",
-        "position": [
-          180.72,
-          2.85,
-          243.0
-        ],
-        "color": [
-          1,
-          0.72,
-          0.42
-        ],
-        "energyHint": 1.0,
-        "rangeHint": 7,
-        "section": "library"
-      },
-      {
-        "id": "library-lamp-2",
-        "position": [
-          198.28,
-          2.85,
-          240.8
         ],
         "color": [
           1,
@@ -4480,6 +4481,15 @@
         "section": "library"
       },
       {
+        "node": "Build_library_north_decal_banner_votary",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "library"
+      },
+      {
         "node": "Build_library_north_door_daylight",
         "outward": [
           0.0,
@@ -4589,15 +4599,6 @@
       },
       {
         "node": "Build_library_west_wall_cap",
-        "outward": [
-          -1.0,
-          0,
-          0.0
-        ],
-        "section": "library"
-      },
-      {
-        "node": "Build_library_west_window_leaded",
         "outward": [
           -1.0,
           0,
@@ -6618,6 +6619,28 @@
         ]
       },
       {
+        "node": "Part_library_0_decal_star_chart",
+        "section": "library",
+        "rooms": [
+          0,
+          1
+        ],
+        "centre": [
+          185.0,
+          237.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          -0.0,
+          0,
+          -1.0
+        ]
+      },
+      {
         "node": "Part_library_0_lime_plaster",
         "section": "library",
         "rooms": [
@@ -8403,7 +8426,7 @@
   },
   "provenance": {
     "source": "_continent_v2/content/landfall_town.json",
-    "sourceSha256": "4f75e71ec959dd036c16ca9994db96ce2a6e6f6d6b9aa7c4b0546a28fedda513",
+    "sourceSha256": "fe70a298ec3b4b1abeab00d1cf88b7a6f59b4736667b3a516c9e1fd781d89c9b",
     "builder": "_continent_v2/build_town_interiors.py",
     "builderSha256": "efc1ad30222572a77ae78d83d6ed9fff8c733880ce0183462aae7c1940a338c2",
     "imports": {
@@ -8520,7 +8543,7 @@
         "sha256": "7c6a93fb1d841d589941c3a70fb74cda92747d503cf60c52803c89e091e1ef38"
       }
     },
-    "ownerApproved": "owner, 2026-10-27, chat: 'Implement your plan' - Landfall town interiors room shells (build_town_interiors.py)"
+    "ownerApproved": "owner, 2026-10-27, chat: 'Implement your plan' - Landfall town interiors room shells; owner, 2026-10-28, chat: 'Add a library with a book seller NPC' - Calloway's Books (build_town_interiors.py)"
   },
   "externalResources": {
     "../../../_shared/images/051bdd722e50093d9fe4a642e056c12db638bc003c01fe9e0f42373c64afc0cd.png": "051bdd722e50093d9fe4a642e056c12db638bc003c01fe9e0f42373c64afc0cd",

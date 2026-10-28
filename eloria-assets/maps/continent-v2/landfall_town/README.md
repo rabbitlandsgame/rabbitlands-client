@@ -29,15 +29,16 @@ Each street door stands in the interior wall matching its facade's direction
 serves both ends), the tavern stairs 59221/59222; the keep's sealed stair is art only,
 with no portal. A coloured door is named as its shopkeeper is on the map.
 
-The rooms are furnished with 358 placed pieces: the 35-piece `lf-interiors`
+The rooms are furnished with 384 placed pieces: the 35-piece `lf-interiors`
 furniture kit (beds, tables, benches, counters, shelves, hearths, the forge, the
 anvil, the loom, the eight high seats and the council map table; Meshy pieces
 prepared at real size) and reused kit scenery (barrels, milk churns, crates, sacks,
-pots, planters, carts). 138 of them stand against an outer wall and 56 against a
-partition; each is cut away with its wall (`cutawayWall`). Four are tinted through
+pots, planters, carts). 145 of them stand against an outer wall and 58 against a
+partition; each is cut away with its wall (`cutawayWall`). Thirteen are tinted through
 the prop palette (`palette`, drawn by the client's MineralAppearance shader): the
 three lichen crusts on the Mycelari seat and the Stoneborn standing stone in the
-Hall of Eight Seats. Twenty-one people stand at their posts (six shopkeepers: Hob
+Hall of Eight Seats, and nine of the library's 39 bookcases (amber and walnut cases,
+books and all, so the shelves are not one case repeated). Twenty-one people stand at their posts (six shopkeepers: Hob
 Tennant, Hanne Ashby, Bryony Larch, Ilka Tarn, Hild Ashlar and the bookseller Ennis
 Calloway), and 20 interior interactives (59251-59254, 59271-59278, 59281-59284,
 59285-59288) hold the lore objects and the smithy's anvil, a crafting station that publishes as `smithing`. A lore object is
@@ -45,9 +46,13 @@ a pick-only record in `objects.json` (`pickOnly`): a click shape and a hover nam
 on the prop it describes (the source's `at`), with no ring or stand-in model.
 
 The library (owner, 2026-10-28: "Add a library with a book seller NPC") is #28 with
-#29 joined through: Ennis Calloway keeps the counter at the street door (her shop
-sells every book in the game: the server's `[shop Ennis Calloway]`), the quiet
-reading room lies behind the shop and the windowless stacks beside it. A room may
+#29 joined through: Ennis Calloway serves at her ledger desk by the street door,
+facing the shop (her shop sells every book in the game: the server's `[shop Ennis
+Calloway]`), the quiet reading room lies behind the shop and the windowless stacks
+beside it, two double-sided ranges of bookcases with two-tile aisles. Two chandeliers
+hang over the reading room's long tables, their hooks at the ceiling line (3.29 m,
+under the 3.4 m wall tops the camera sees) and their light markers at their candles;
+the Hall of Eight Seats, under its 4.6 m ceiling, hangs none. A room may
 carry a server special area (the source's `specialAreas`, `town_source.special_areas`:
 the room's floor inside its walls); the reading room alone carries `fast_reading`
 x3 over tiles (181, 78)-(197, 85). `publish_server.py` writes those rows into the
@@ -97,16 +102,16 @@ pocket of floor larger than six tiles cut off from a section's arrival.
 
 ## Package
 
-11 sections, 33 rooms, 1,855 walkable tiles (tavern 130 + upstairs 133, shops 142,
-magic shop 86, smithy 96, houses 77-114, keep 668, library 210), 112 light markers
-(95 lights and 17 lamp props). `world.glb` is 1,022,404 bytes with its 27 images in the shared
+11 sections, 33 rooms, 1,842 walkable tiles (tavern 130 + upstairs 133, shops 142,
+magic shop 86, smithy 96, houses 77-114, keep 668, library 197), 112 light markers
+(97 lights and 15 lamp props). `world.glb` is 1,026,668 bytes with its 27 images in the shared
 pool (decals clamp to their edge, surfaces repeat); `collision.bin` (EWCG-v2),
 `served-grid.escg.gz` (ESCG-v2) and `minimap.webp` beside it. The manifest's
 `minimap.liveSpanMetres` (40) frames the live minimap at a room's scale, so a room
 spans 45-60 px of it instead of 10-20.
 
 Cutaway: the roofs are always hidden; the outer walls cut away by facing
-(threshold 0.35), with the props set against them. The 31 partitions (104
+(threshold 0.35), with the props set against them. The 31 partitions (105
 `cutaway.partitions` rows: each one's wall, trim and hung decals) are cut away by
 the client while one stands between the camera and the player inside its
 section and span, or - seen edge-on, running toward the camera - while it stands
