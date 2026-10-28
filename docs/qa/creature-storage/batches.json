@@ -5,8 +5,8 @@
   "batch_size": 5,
   "creature_count": 235,
   "batch_count": 47,
-  "completed_batches": 43,
-  "qualified_creatures": 199,
+  "completed_batches": 44,
+  "qualified_creatures": 201,
   "status": "in progress",
   "actors": [
     {
@@ -2641,7 +2641,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/arcane_crystal_automaton.glb",
       "source_sha256": "326fbbc89633331ec3210e988bbe98c38c2b3000df4cf1b7233fc98ae55ecc32",
       "source_bytes": 1076436,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "52b8b968dc5b204f652337f433977d1e0454a799f72d13444f476775f1d20af8",
+      "candidate_bytes": 1059816,
+      "qualification_report": "docs/qa/creature-storage/arcane_crystal_automaton.json"
     },
     {
       "actor": "giant_antlion",
@@ -2650,7 +2653,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/giant_antlion.glb",
       "source_sha256": "661a4adf62e960bacd58e1b1086e8932d1985204f11b80348ed4febdaaca1080",
       "source_bytes": 645988,
-      "status": "pending"
+      "status": "qualified",
+      "candidate_sha256": "188c11c93ed8f1bbb32a8243a5e872bd3cb3ec047d81a8422efcd1fb398e37d5",
+      "candidate_bytes": 645952,
+      "qualification_report": "docs/qa/creature-storage/giant_antlion.json"
     },
     {
       "actor": "mimic",
@@ -2659,7 +2665,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/mimic.glb",
       "source_sha256": "32adca02bf08398a850e446ce49f6fd8c60252a740c41be62e2f15cf1531a97c",
       "source_bytes": 640724,
-      "status": "pending"
+      "status": "unchanged",
+      "candidate_sha256": "32adca02bf08398a850e446ce49f6fd8c60252a740c41be62e2f15cf1531a97c",
+      "candidate_bytes": 640724,
+      "qualification_report": "docs/qa/creature-storage/mimic.json"
     },
     {
       "actor": "giant_worm",
@@ -2668,7 +2677,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/giant_worm.glb",
       "source_sha256": "8a928caf80674a5a614d967d2cf6874b09f96ca93d7b93c8c47001566bd18022",
       "source_bytes": 635828,
-      "status": "pending"
+      "status": "unchanged",
+      "candidate_sha256": "8a928caf80674a5a614d967d2cf6874b09f96ca93d7b93c8c47001566bd18022",
+      "candidate_bytes": 635828,
+      "qualification_report": "docs/qa/creature-storage/giant_worm.json"
     },
     {
       "actor": "iron_eater",
@@ -2677,7 +2689,10 @@
       "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/iron_eater.glb",
       "source_sha256": "11a7444b752fd17c152f3d609a1f4a23d721ae9cccd71aa2da45f696044a4dde",
       "source_bytes": 628944,
-      "status": "pending"
+      "status": "unchanged",
+      "candidate_sha256": "11a7444b752fd17c152f3d609a1f4a23d721ae9cccd71aa2da45f696044a4dde",
+      "candidate_bytes": 628944,
+      "qualification_report": "docs/qa/creature-storage/iron_eater.json"
     },
     {
       "actor": "stalactite_maw",
@@ -2813,17 +2828,18 @@
     40,
     41,
     42,
-    43
+    43,
+    45
   ],
-  "reviewed_creatures": 215,
+  "reviewed_creatures": 220,
   "selection_policy": {
     "raw_asset_priority": "Prefer smaller qualified raw development models; small measured increases in packaged RLCZ size are accepted and recorded per actor and batch.",
     "runtime_claims": "Encoded input-key savings do not establish retained animation memory or frame-time savings because Godot rebakes curves at the declared cadence. Shared corrective GPU buffer savings are measured separately.",
     "approximation": "Exact batches retain their existing bounded float32/native/pixel gates. Approximate joint-curve trials are private and uninstalled."
   },
   "totals_reviewed": {
-    "raw_saved_bytes": 297736792,
-    "compressed_saved_bytes": 19450723,
+    "raw_saved_bytes": 297753448,
+    "compressed_saved_bytes": 19449580,
     "shared_gpu_saved_bytes": 39397800
   },
   "independent_editor_verification": {
