@@ -1551,5 +1551,59 @@
     "tool_sha256": "b029b0e29eccdd9da4618b9b6f3f99e606373c3c80de370c1cfd56f97dad5105",
     "bounds": "eloria-assets/source/creature-storage/moss_horn_ram.bounds.json",
     "preserve_trs_keys": false
+  },
+  "editor_mode_correction": {
+    "previous_imported_claim_withdrawn": true,
+    "reason": "The previous shared imported phase used scene cache with outside-actor aliases, so its data came from raw glTF. That report remains valid as an extra raw-cache comparison.",
+    "superseded_report": "C:\\rabbitlands\\worktrees\\client-creature-storage-20261027\\.local\\batch-028\\moss_horn_ram\\v1\\imported-validation.json",
+    "superseded_report_sha256": "22816121b62489ce837e442e4647591b2f2a369b1fdd08d441cde8dddcc1bc02",
+    "corrected_actual_editor_numeric_passed": true,
+    "corrected_runtime_sha256": "0758597bc76511a0f242eb8735922825cab7b5ce419c923307879c90ee4517fc",
+    "load_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/moss_horn_ram.glb-bb4b853d968dac87be7a7079b76e6df5.md5",
+        "import_metadata_sha256": "31f981c2884dcaa1e078b36d791229d776766a775f3d7e7dac22e3632fb46e90",
+        "imported_resource_path": "res://.godot/imported/moss_horn_ram.glb-bb4b853d968dac87be7a7079b76e6df5.scn",
+        "imported_resource_sha256": "24efd14ae706a008e8f010e354f7fcc4050bf2b02ff4e1e0a639a4447e1a7571",
+        "packed_scene_resource_path": "res://assets/storage-baseline/moss_horn_ram.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "20b2f8b86afcb712715460a80bb47cd4",
+        "source_path": "res://assets/storage-baseline/moss_horn_ram.glb",
+        "source_sha256": "3901ec78176a635bc776b8a93934f3760e155419f1782d4a6362af96ca4f13ea"
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/moss_horn_ram.glb-f90772a36f3ad79a0680e75ea7f31ca7.md5",
+        "import_metadata_sha256": "5e6552315cf270f254d625f35818b5618edbab7beb50caf7bf24a05b5ce09599",
+        "imported_resource_path": "res://.godot/imported/moss_horn_ram.glb-f90772a36f3ad79a0680e75ea7f31ca7.scn",
+        "imported_resource_sha256": "9d9669e123d4d4673e7f3b1474f4233fba8b6324bdc698232a53952519e7f2d5",
+        "packed_scene_resource_path": "res://assets/storage-candidate/moss_horn_ram.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "2996cf7ecb17a4e296ae997bea754e4e",
+        "source_path": "res://assets/storage-candidate/moss_horn_ram.glb",
+        "source_sha256": "795c8379ade90cadde2ac2a106aa24cfeab693425325e9708c6cca1ba733cc7b"
+      }
+    ],
+    "complete_extra_static_attribute_supplement": {
+      "passed": true,
+      "report": "C:\\rabbitlands\\worktrees\\client-creature-storage-20261027\\.local\\batch-028\\moss_horn_ram\\v1\\actual-editor-v2\\allfields\\allfields-validation.json",
+      "sha256": "fcadb80a092ecea07d5978e24150a0db2e04e64314e419ace9cd3dcd7f43e041",
+      "actual_editor_all_static_vertex_fields_including_tangent_UV_color_skin": true,
+      "actual_editor_retained_morph_all_fields_including_generated_tangents": true,
+      "complete_oriented_triangles_identical": true,
+      "native_and_editor_tangents_cross_mode_equality_not_claimed": true,
+      "editor_generated_LODs_reported_not_distant_appearance_approved": true,
+      "material_typed_storage_supplement": {
+        "passed": true,
+        "report": "C:\\rabbitlands\\worktrees\\client-creature-storage-20261027\\.local\\batch-028\\moss_horn_ram\\v1\\actual-editor-v2\\editor-material-validation.json",
+        "sha256": "82ce931675dd58aaa4ef2e755f1540da139194ebac6a597c962725760c2804fe",
+        "actual_editor_material_storage_and_texture_pixels_including_mips_identical": true,
+        "numeric_static_material_source_and_SCN_hashes_agree": true
+      }
+    },
+    "native_blender_source_actual_actor_and_effect_proofs_unchanged": true,
+    "no_observation_or_limit_changes": true,
+    "status": "corrected actual Editor verification complete"
   }
 }

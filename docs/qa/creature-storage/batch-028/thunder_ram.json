@@ -1551,5 +1551,59 @@
     "tool_sha256": "b029b0e29eccdd9da4618b9b6f3f99e606373c3c80de370c1cfd56f97dad5105",
     "bounds": "eloria-assets/source/creature-storage/thunder_ram.bounds.json",
     "preserve_trs_keys": false
+  },
+  "editor_mode_correction": {
+    "previous_imported_claim_withdrawn": true,
+    "reason": "The previous shared imported phase used scene cache with outside-actor aliases, so its data came from raw glTF. That report remains valid as an extra raw-cache comparison.",
+    "superseded_report": "C:\\rabbitlands\\worktrees\\client-creature-storage-20261027\\.local\\batch-028\\thunder_ram\\v1\\imported-validation.json",
+    "superseded_report_sha256": "c0da7e13e306c0450557bbee51f9824a4993d6d2e0193c33c3313348be63bae6",
+    "corrected_actual_editor_numeric_passed": true,
+    "corrected_runtime_sha256": "2ac78f1b7cb7b4844e053f84cd72a3ef665c129ab2251539682ae4ba17761f01",
+    "load_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/thunder_ram.glb-cd43e835847700dd3a186156b17b382b.md5",
+        "import_metadata_sha256": "c5983fa5110ab6192526a67548e6c68f4302359a35928e365223ecb4b598a1ec",
+        "imported_resource_path": "res://.godot/imported/thunder_ram.glb-cd43e835847700dd3a186156b17b382b.scn",
+        "imported_resource_sha256": "027ec291c6a99ad358acb70c428577143b7b1a9f2a59dca873cc85de34af55ed",
+        "packed_scene_resource_path": "res://assets/storage-baseline/thunder_ram.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "4e3a73c28c7cc7b2ee1b5485a14b9616",
+        "source_path": "res://assets/storage-baseline/thunder_ram.glb",
+        "source_sha256": "6b2d946abffe08641cadc9cc16d3fc1fa3e716a8038178e09080d8e679b5c102"
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/thunder_ram.glb-903614f7b4fe611add1c82d516912c8e.md5",
+        "import_metadata_sha256": "88e20ae1bad0afba5917ab48cabb46e75345f2c440e2ed1436078084382d86fb",
+        "imported_resource_path": "res://.godot/imported/thunder_ram.glb-903614f7b4fe611add1c82d516912c8e.scn",
+        "imported_resource_sha256": "4b256391be0c866329955c331da17b93440524d912fe6ba6aba087dbd48c9e55",
+        "packed_scene_resource_path": "res://assets/storage-candidate/thunder_ram.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "4a2cdf4ca5fbdcc97035b93069a24291",
+        "source_path": "res://assets/storage-candidate/thunder_ram.glb",
+        "source_sha256": "c5efcd82a53abb6250a4504bb21e4daa06e7cf266f47f29b3aa2c1751e75b2e4"
+      }
+    ],
+    "complete_extra_static_attribute_supplement": {
+      "passed": true,
+      "report": "C:\\rabbitlands\\worktrees\\client-creature-storage-20261027\\.local\\batch-028\\thunder_ram\\v1\\actual-editor-v2\\allfields\\allfields-validation.json",
+      "sha256": "5e8e3e83d8fb9eceaad50bc8337316edc43375376d2bead1740c09c8a53f74cf",
+      "actual_editor_all_static_vertex_fields_including_tangent_UV_color_skin": true,
+      "actual_editor_retained_morph_all_fields_including_generated_tangents": true,
+      "complete_oriented_triangles_identical": true,
+      "native_and_editor_tangents_cross_mode_equality_not_claimed": true,
+      "editor_generated_LODs_reported_not_distant_appearance_approved": true,
+      "material_typed_storage_supplement": {
+        "passed": true,
+        "report": "C:\\rabbitlands\\worktrees\\client-creature-storage-20261027\\.local\\batch-028\\thunder_ram\\v1\\actual-editor-v2\\editor-material-validation.json",
+        "sha256": "962212a524c874c9274ed676e9024bf8e9d78d3ce414a001aafc4382dce147e0",
+        "actual_editor_material_storage_and_texture_pixels_including_mips_identical": true,
+        "numeric_static_material_source_and_SCN_hashes_agree": true
+      }
+    },
+    "native_blender_source_actual_actor_and_effect_proofs_unchanged": true,
+    "no_observation_or_limit_changes": true,
+    "status": "corrected actual Editor verification complete"
   }
 }

@@ -1551,5 +1551,59 @@
     "tool_sha256": "b029b0e29eccdd9da4618b9b6f3f99e606373c3c80de370c1cfd56f97dad5105",
     "bounds": "eloria-assets/source/creature-storage/cheetah.bounds.json",
     "preserve_trs_keys": false
+  },
+  "editor_mode_correction": {
+    "previous_imported_claim_withdrawn": true,
+    "reason": "The previous shared imported phase used scene cache with outside-actor aliases, so its data came from raw glTF. That report remains valid as an extra raw-cache comparison.",
+    "superseded_report": "C:\\rabbitlands\\worktrees\\client-creature-storage-20261027\\.local\\batch-028\\cheetah\\v1\\imported-validation.json",
+    "superseded_report_sha256": "e15c5422cdaca7cdf0e44285715700c54894b552f3735e28f3454b677218990f",
+    "corrected_actual_editor_numeric_passed": true,
+    "corrected_runtime_sha256": "db29ef88224b563f980b42fb9f89812d286ff8c10dc7be85f0e0ab29f3cc7e93",
+    "load_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/cheetah.glb-b55f06735f6ea38d3813d4f1302075f9.md5",
+        "import_metadata_sha256": "e942b2f034545669afb75d02a356e41ad2402c640cf496c2c515472ea2f1e4bf",
+        "imported_resource_path": "res://.godot/imported/cheetah.glb-b55f06735f6ea38d3813d4f1302075f9.scn",
+        "imported_resource_sha256": "f0dfc1a318a72cf1aa51be4be4975717bb607b633c3d79840ff690580d98a3af",
+        "packed_scene_resource_path": "res://assets/storage-baseline/cheetah.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "59b5e6dd2222ea013fe71ea5a14f2439",
+        "source_path": "res://assets/storage-baseline/cheetah.glb",
+        "source_sha256": "7cd5593eb836745f7cc21c6573f38571a475ee5c9ac1103eca16c3b6e0290dbd"
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/cheetah.glb-9807ad5cf58612ae60c5a46a7bf5d682.md5",
+        "import_metadata_sha256": "4d17996108eb579daaf174dc53364aabe9b4d36dafaddb842ab199e43a784a6f",
+        "imported_resource_path": "res://.godot/imported/cheetah.glb-9807ad5cf58612ae60c5a46a7bf5d682.scn",
+        "imported_resource_sha256": "f5e8c4557a21de2ab87d8ec4daf1dea3efe94d68f119f95c5cfe45a6a28efe19",
+        "packed_scene_resource_path": "res://assets/storage-candidate/cheetah.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "529ac7c0ab920abadab6946e5923b376",
+        "source_path": "res://assets/storage-candidate/cheetah.glb",
+        "source_sha256": "bbbd6ef4a09a39f18b44c9d183e72b59ed5bd33b69be2502bb2a37c38176893f"
+      }
+    ],
+    "complete_extra_static_attribute_supplement": {
+      "passed": true,
+      "report": "C:\\rabbitlands\\worktrees\\client-creature-storage-20261027\\.local\\batch-028\\cheetah\\v1\\actual-editor-v2\\allfields\\allfields-validation.json",
+      "sha256": "7e6220fe959212b84ede240c728df0d370d4ea22e350a9c6945e7fa59cbe0ae4",
+      "actual_editor_all_static_vertex_fields_including_tangent_UV_color_skin": true,
+      "actual_editor_retained_morph_all_fields_including_generated_tangents": true,
+      "complete_oriented_triangles_identical": true,
+      "native_and_editor_tangents_cross_mode_equality_not_claimed": true,
+      "editor_generated_LODs_reported_not_distant_appearance_approved": true,
+      "material_typed_storage_supplement": {
+        "passed": true,
+        "report": "C:\\rabbitlands\\worktrees\\client-creature-storage-20261027\\.local\\batch-028\\cheetah\\v1\\actual-editor-v2\\editor-material-validation.json",
+        "sha256": "bbdf232c0b1bbd653fb54dc2ee513cf3a89366891a76022332df1a591aa09942",
+        "actual_editor_material_storage_and_texture_pixels_including_mips_identical": true,
+        "numeric_static_material_source_and_SCN_hashes_agree": true
+      }
+    },
+    "native_blender_source_actual_actor_and_effect_proofs_unchanged": true,
+    "no_observation_or_limit_changes": true,
+    "status": "corrected actual Editor verification complete"
   }
 }

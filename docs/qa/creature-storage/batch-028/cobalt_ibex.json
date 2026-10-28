@@ -1551,5 +1551,59 @@
     "tool_sha256": "b029b0e29eccdd9da4618b9b6f3f99e606373c3c80de370c1cfd56f97dad5105",
     "bounds": "eloria-assets/source/creature-storage/cobalt_ibex.bounds.json",
     "preserve_trs_keys": false
+  },
+  "editor_mode_correction": {
+    "previous_imported_claim_withdrawn": true,
+    "reason": "The previous shared imported phase used scene cache with outside-actor aliases, so its data came from raw glTF. That report remains valid as an extra raw-cache comparison.",
+    "superseded_report": "C:\\rabbitlands\\worktrees\\client-creature-storage-20261027\\.local\\batch-028\\cobalt_ibex\\v1\\imported-validation.json",
+    "superseded_report_sha256": "1b38ff7525a602cf5c7b952e8a24a19114104cd88453415ecbf104b2a845dda4",
+    "corrected_actual_editor_numeric_passed": true,
+    "corrected_runtime_sha256": "b23402c4d686b5fb496b54dbf5e6c431041a44cede8e0229b691cf0220ab4aa2",
+    "load_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/cobalt_ibex.glb-53af91d52383e5effc8b3ec00e79d6a2.md5",
+        "import_metadata_sha256": "3c4cc6417a3e91c632e8aadd93dc687dbdde5d17743def5d084540c858a1d099",
+        "imported_resource_path": "res://.godot/imported/cobalt_ibex.glb-53af91d52383e5effc8b3ec00e79d6a2.scn",
+        "imported_resource_sha256": "e43ee51553f9ab586e4877b9894a8f56934a0385bbf1abc5ec0cbc49ca08ebfb",
+        "packed_scene_resource_path": "res://assets/storage-baseline/cobalt_ibex.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "53ac88ca4ce0c9dd0b23f644d37dd10e",
+        "source_path": "res://assets/storage-baseline/cobalt_ibex.glb",
+        "source_sha256": "30bf95721ad6fc43ad391326feb14c072fe6517837d7933a2cfa46d1828764c0"
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/cobalt_ibex.glb-0f5754ec74343f6699f9cf93e86105ae.md5",
+        "import_metadata_sha256": "3eaa264c163197d07261665d00df262bbbb329ca23de6550e8182bb9e720b07a",
+        "imported_resource_path": "res://.godot/imported/cobalt_ibex.glb-0f5754ec74343f6699f9cf93e86105ae.scn",
+        "imported_resource_sha256": "738bc8ed08fd646abef4109dd0863661dec48b08c904bb2f3c36980a0f986f1c",
+        "packed_scene_resource_path": "res://assets/storage-candidate/cobalt_ibex.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "3ca74a75f79fe64c487db8eb4842c676",
+        "source_path": "res://assets/storage-candidate/cobalt_ibex.glb",
+        "source_sha256": "d36101262f9551a082303f67152122c3cf966c351317e6d7b964f534b4cd50c4"
+      }
+    ],
+    "complete_extra_static_attribute_supplement": {
+      "passed": true,
+      "report": "C:\\rabbitlands\\worktrees\\client-creature-storage-20261027\\.local\\batch-028\\cobalt_ibex\\v1\\actual-editor-v2\\allfields\\allfields-validation.json",
+      "sha256": "916888a5579598fed417bb42d99cb33d2f5cea48922949e25a6342d0b2d66655",
+      "actual_editor_all_static_vertex_fields_including_tangent_UV_color_skin": true,
+      "actual_editor_retained_morph_all_fields_including_generated_tangents": true,
+      "complete_oriented_triangles_identical": true,
+      "native_and_editor_tangents_cross_mode_equality_not_claimed": true,
+      "editor_generated_LODs_reported_not_distant_appearance_approved": true,
+      "material_typed_storage_supplement": {
+        "passed": true,
+        "report": "C:\\rabbitlands\\worktrees\\client-creature-storage-20261027\\.local\\batch-028\\cobalt_ibex\\v1\\actual-editor-v2\\editor-material-validation.json",
+        "sha256": "d2440a05eb3b8cba9885cd5fee8e6de52c2e3130e9269a7f4474a9d47fda3936",
+        "actual_editor_material_storage_and_texture_pixels_including_mips_identical": true,
+        "numeric_static_material_source_and_SCN_hashes_agree": true
+      }
+    },
+    "native_blender_source_actual_actor_and_effect_proofs_unchanged": true,
+    "no_observation_or_limit_changes": true,
+    "status": "corrected actual Editor verification complete"
   }
 }

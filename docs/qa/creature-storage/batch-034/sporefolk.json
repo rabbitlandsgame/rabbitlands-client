@@ -1610,5 +1610,59 @@
     "tool_sha256": "b029b0e29eccdd9da4618b9b6f3f99e606373c3c80de370c1cfd56f97dad5105",
     "bounds": "eloria-assets/source/creature-storage/sporefolk.bounds.json",
     "preserve_trs_keys": false
+  },
+  "editor_mode_correction": {
+    "previous_imported_claim_withdrawn": true,
+    "reason": "The previous shared imported phase used scene cache with outside-actor aliases, so its data came from raw glTF. That report remains valid as an extra raw-cache comparison.",
+    "superseded_report": "C:\\rabbitlands\\worktrees\\client-creature-storage-20261027\\.local\\batch-034\\sporefolk\\v1\\imported-validation.json",
+    "superseded_report_sha256": "3ea847d5d25b68ad761dfac4a83092667a45501fc12c98d0c882c012fce14a7e",
+    "corrected_actual_editor_numeric_passed": true,
+    "corrected_runtime_sha256": "c5dc74e2bf5dd3646891343bfc33ab037ee9ea8dcff8790438a8f73474595aa6",
+    "load_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/sporefolk.glb-f7ac3c0c24021f1a23b45f673b871939.md5",
+        "import_metadata_sha256": "e15659ac459a1a5eaf92499871efce3ad98e304f401885efa8f5fa8c7647735f",
+        "imported_resource_path": "res://.godot/imported/sporefolk.glb-f7ac3c0c24021f1a23b45f673b871939.scn",
+        "imported_resource_sha256": "67f44fe5bb667534b97f17aec0fe70e3a6c26c687b5d0262ce5b818f9379fd55",
+        "packed_scene_resource_path": "res://assets/storage-baseline/sporefolk.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "17c0f6c5e0cf9a1dbbb698aaac0dc5b3",
+        "source_path": "res://assets/storage-baseline/sporefolk.glb",
+        "source_sha256": "3906d08fca5ede5c4826de2840879b865b498372e3ac4acb14847cccdd378675"
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/sporefolk.glb-c9389056bf98b5040f4b1d27ed15d1df.md5",
+        "import_metadata_sha256": "cd4f37d3e45a8cb5bf9683b17250dd0f5fb4beb1da03b66c6d0ca3bca076c96b",
+        "imported_resource_path": "res://.godot/imported/sporefolk.glb-c9389056bf98b5040f4b1d27ed15d1df.scn",
+        "imported_resource_sha256": "3e01241ff4a44c9b1cc0bfb53862bc86ec0481017af8b169a5249806ab65047f",
+        "packed_scene_resource_path": "res://assets/storage-candidate/sporefolk.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "2e18ed92d923e1987dfba4d8cff600cb",
+        "source_path": "res://assets/storage-candidate/sporefolk.glb",
+        "source_sha256": "c76815dda713eca954ef00ab458b3c2c06463fdfe21db992666a627831447bd7"
+      }
+    ],
+    "complete_extra_static_attribute_supplement": {
+      "passed": true,
+      "report": "C:\\rabbitlands\\worktrees\\client-creature-storage-20261027\\.local\\batch-034\\sporefolk\\v1\\actual-editor-v2\\allfields\\allfields-validation.json",
+      "sha256": "b9aeaf1735eaef6f4c663951eb4fd1f638383a02704a2128fe5e1eafb4392a76",
+      "actual_editor_all_static_vertex_fields_including_tangent_UV_color_skin": true,
+      "actual_editor_retained_morph_all_fields_including_generated_tangents": true,
+      "complete_oriented_triangles_identical": true,
+      "native_and_editor_tangents_cross_mode_equality_not_claimed": true,
+      "editor_generated_LODs_reported_not_distant_appearance_approved": true,
+      "material_typed_storage_supplement": {
+        "passed": true,
+        "report": "C:\\rabbitlands\\worktrees\\client-creature-storage-20261027\\.local\\batch-034\\sporefolk\\v1\\actual-editor-v2\\editor-material-validation.json",
+        "sha256": "da3972597660d197d60ec53729170c7ebc04412ccf9004f3254467550e8870a9",
+        "actual_editor_material_storage_and_texture_pixels_including_mips_identical": true,
+        "numeric_static_material_source_and_SCN_hashes_agree": true
+      }
+    },
+    "native_blender_source_actual_actor_and_effect_proofs_unchanged": true,
+    "no_observation_or_limit_changes": true,
+    "status": "corrected actual Editor verification complete"
   }
 }

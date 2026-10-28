@@ -1558,5 +1558,59 @@
     "tool_sha256": "b029b0e29eccdd9da4618b9b6f3f99e606373c3c80de370c1cfd56f97dad5105",
     "bounds": "eloria-assets/source/creature-storage/lobster.bounds.json",
     "preserve_trs_keys": false
+  },
+  "editor_mode_correction": {
+    "previous_imported_claim_withdrawn": true,
+    "reason": "The previous shared imported phase used scene cache with outside-actor aliases, so its data came from raw glTF. That report remains valid as an extra raw-cache comparison.",
+    "superseded_report": "C:\\rabbitlands\\worktrees\\client-creature-storage-20261027\\.local\\batch-034\\lobster\\v1\\imported-validation.json",
+    "superseded_report_sha256": "ca835765b3b251d9feb44aa67a69eb53ab87d0b8f5ec9bfdccac4e5e113421af",
+    "corrected_actual_editor_numeric_passed": true,
+    "corrected_runtime_sha256": "74fdbb85172f89fbfd51fc2170d27e8bc6bfa58df64141b9993184c48ba9dd5c",
+    "load_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/lobster.glb-4578a60e53a818f2395526705d4bea14.md5",
+        "import_metadata_sha256": "6ddab84bc1cac5e4af8239679e8505f456b0bcc440e42d753054f25ad122d7a6",
+        "imported_resource_path": "res://.godot/imported/lobster.glb-4578a60e53a818f2395526705d4bea14.scn",
+        "imported_resource_sha256": "8d5f5f00805eba721f2634797d9f467a2840a5ef1e4621ad5b8d79c20c43e80b",
+        "packed_scene_resource_path": "res://assets/storage-baseline/lobster.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "381a06d995850d4a012e8e13c206c7d0",
+        "source_path": "res://assets/storage-baseline/lobster.glb",
+        "source_sha256": "e3eba2f6b39be47bc01faee73c8992f1f74d47d821f249c8e7868ecf605ad099"
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/lobster.glb-a877b5258d023cd16ccb8a9d98f0eaf2.md5",
+        "import_metadata_sha256": "cbbd1e02c43c9302ebb3f2502b1cef11368f9c0d2d9a42f2004d47bec0bb8a6f",
+        "imported_resource_path": "res://.godot/imported/lobster.glb-a877b5258d023cd16ccb8a9d98f0eaf2.scn",
+        "imported_resource_sha256": "db04d55ab98ff5e9022a879c9f96ed83ce63612143c8af3c4c5128a906abf767",
+        "packed_scene_resource_path": "res://assets/storage-candidate/lobster.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "dbd82dcd536de2fcfe2fafeb2efd7528",
+        "source_path": "res://assets/storage-candidate/lobster.glb",
+        "source_sha256": "47fe345c23c7a5f6f4f5536eb742483a04b9899e8c11bb7e558a8b059f498413"
+      }
+    ],
+    "complete_extra_static_attribute_supplement": {
+      "passed": true,
+      "report": "C:\\rabbitlands\\worktrees\\client-creature-storage-20261027\\.local\\batch-034\\lobster\\v1\\actual-editor-v2\\allfields\\allfields-validation.json",
+      "sha256": "b865e5d06bee28490b03d8d4648cf5252c0fa23c63544186b03d811c7c86111b",
+      "actual_editor_all_static_vertex_fields_including_tangent_UV_color_skin": true,
+      "actual_editor_retained_morph_all_fields_including_generated_tangents": true,
+      "complete_oriented_triangles_identical": true,
+      "native_and_editor_tangents_cross_mode_equality_not_claimed": true,
+      "editor_generated_LODs_reported_not_distant_appearance_approved": true,
+      "material_typed_storage_supplement": {
+        "passed": true,
+        "report": "C:\\rabbitlands\\worktrees\\client-creature-storage-20261027\\.local\\batch-034\\lobster\\v1\\actual-editor-v2\\editor-material-validation.json",
+        "sha256": "bbda36c58ecde9fbff0fcbd1dd5719c3a734b3706464185be6d7a3c4a9aa0f92",
+        "actual_editor_material_storage_and_texture_pixels_including_mips_identical": true,
+        "numeric_static_material_source_and_SCN_hashes_agree": true
+      }
+    },
+    "native_blender_source_actual_actor_and_effect_proofs_unchanged": true,
+    "no_observation_or_limit_changes": true,
+    "status": "corrected actual Editor verification complete"
   }
 }

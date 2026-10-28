@@ -2063,5 +2063,59 @@
     "tool_sha256": "b029b0e29eccdd9da4618b9b6f3f99e606373c3c80de370c1cfd56f97dad5105",
     "bounds": "eloria-assets/source/creature-storage/flesh_golem.bounds.json",
     "preserve_trs_keys": false
+  },
+  "editor_mode_correction": {
+    "previous_imported_claim_withdrawn": true,
+    "reason": "The previous shared imported phase used scene cache with outside-actor aliases, so its data came from raw glTF. That report remains valid as an extra raw-cache comparison.",
+    "superseded_report": "C:\\rabbitlands\\worktrees\\client-creature-storage-20261027\\.local\\batch-028\\flesh_golem\\v1\\imported-validation.json",
+    "superseded_report_sha256": "ff8c5099903366a682105b114445597ca49e26c22c1745159a860d976c66eaea",
+    "corrected_actual_editor_numeric_passed": true,
+    "corrected_runtime_sha256": "72071acb98420262aa0ac1858d58a6ee1f4701c316304726cfb8e5a274883bf3",
+    "load_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/flesh_golem.glb-c56932ba307c8dd181bfc477da0b0ffe.md5",
+        "import_metadata_sha256": "76bfbd7cc44aed7f7c7cab7540ca4ce0e638917243add85a0e3073370335ffd1",
+        "imported_resource_path": "res://.godot/imported/flesh_golem.glb-c56932ba307c8dd181bfc477da0b0ffe.scn",
+        "imported_resource_sha256": "b4ef2b31af441f7cb3f1effa65a4f63d8669fcff98799587555048d2b97b3db8",
+        "packed_scene_resource_path": "res://assets/storage-baseline/flesh_golem.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "cb2a4fea5e16cff1a144ac0388d42b54",
+        "source_path": "res://assets/storage-baseline/flesh_golem.glb",
+        "source_sha256": "446428190e78d3534de3ec3184e046f2a70a81162974824a379a5cf7e0be68c0"
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/flesh_golem.glb-c0457b2a7250cac2d0481b3a7008b027.md5",
+        "import_metadata_sha256": "aa76219aefedb9e428692488896a52e9df4875d34b387aeb0cff38d24b4e599e",
+        "imported_resource_path": "res://.godot/imported/flesh_golem.glb-c0457b2a7250cac2d0481b3a7008b027.scn",
+        "imported_resource_sha256": "488ccbae7ac76210f94d5473f1c7f2fc80a76d49897aaf0143a2433e278a83d3",
+        "packed_scene_resource_path": "res://assets/storage-candidate/flesh_golem.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "59ba44f668be6a0701a6186aafc613ff",
+        "source_path": "res://assets/storage-candidate/flesh_golem.glb",
+        "source_sha256": "58ef506bfbaef05352c95826fff3b6f26013251af44ec3f384605c5b0644e665"
+      }
+    ],
+    "complete_extra_static_attribute_supplement": {
+      "passed": true,
+      "report": "C:\\rabbitlands\\worktrees\\client-creature-storage-20261027\\.local\\batch-028\\flesh_golem\\v1\\actual-editor-v2\\allfields\\allfields-validation.json",
+      "sha256": "7e03da88d1155cade56e34cef076a3473b2246c6208dff8313c031866d478299",
+      "actual_editor_all_static_vertex_fields_including_tangent_UV_color_skin": true,
+      "actual_editor_retained_morph_all_fields_including_generated_tangents": true,
+      "complete_oriented_triangles_identical": true,
+      "native_and_editor_tangents_cross_mode_equality_not_claimed": true,
+      "editor_generated_LODs_reported_not_distant_appearance_approved": true,
+      "material_typed_storage_supplement": {
+        "passed": true,
+        "report": "C:\\rabbitlands\\worktrees\\client-creature-storage-20261027\\.local\\batch-028\\flesh_golem\\v1\\actual-editor-v2\\editor-material-validation.json",
+        "sha256": "10526376fdce3e5413ed6e601e9df8754378e35d79fbb4d8201c4742ceec572a",
+        "actual_editor_material_storage_and_texture_pixels_including_mips_identical": true,
+        "numeric_static_material_source_and_SCN_hashes_agree": true
+      }
+    },
+    "native_blender_source_actual_actor_and_effect_proofs_unchanged": true,
+    "no_observation_or_limit_changes": true,
+    "status": "corrected actual Editor verification complete"
   }
 }

@@ -1558,5 +1558,59 @@
     "tool_sha256": "b029b0e29eccdd9da4618b9b6f3f99e606373c3c80de370c1cfd56f97dad5105",
     "bounds": "eloria-assets/source/creature-storage/manymouth_crab.bounds.json",
     "preserve_trs_keys": false
+  },
+  "editor_mode_correction": {
+    "previous_imported_claim_withdrawn": true,
+    "reason": "The previous shared imported phase used scene cache with outside-actor aliases, so its data came from raw glTF. That report remains valid as an extra raw-cache comparison.",
+    "superseded_report": "C:\\rabbitlands\\worktrees\\client-creature-storage-20261027\\.local\\batch-034\\manymouth_crab\\v1\\imported-validation.json",
+    "superseded_report_sha256": "f318d640d1d606e1caf6e76fdd7f08f37dfbd2ab705a2d5a7a706962fda332a7",
+    "corrected_actual_editor_numeric_passed": true,
+    "corrected_runtime_sha256": "fa5d6757957389ebc4176c1533f7a703ae1fb17420a9af3603e11161d260d817",
+    "load_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/manymouth_crab.glb-aae426a9525019764af6c2a8888fdae7.md5",
+        "import_metadata_sha256": "a290a444f56746084c10af7743aecac2799311529a93de4a20c559017a18a569",
+        "imported_resource_path": "res://.godot/imported/manymouth_crab.glb-aae426a9525019764af6c2a8888fdae7.scn",
+        "imported_resource_sha256": "8018c961862eeed4524789b083baf69cc56641d5026b6c9c7881894673056c91",
+        "packed_scene_resource_path": "res://assets/storage-baseline/manymouth_crab.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "4e3460dd55b48a5d7285f5b1f70c1fd6",
+        "source_path": "res://assets/storage-baseline/manymouth_crab.glb",
+        "source_sha256": "18e0d318ea63fba19306fa0638404b43a38c409f5325062dd747fb8207ff1fbc"
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/manymouth_crab.glb-d879bbec06fa11b91e695639b6b3bc3b.md5",
+        "import_metadata_sha256": "b777a2f3b2a0bd0914c26bdc536dcff1b59f74566b5d43396e8301b867c5f823",
+        "imported_resource_path": "res://.godot/imported/manymouth_crab.glb-d879bbec06fa11b91e695639b6b3bc3b.scn",
+        "imported_resource_sha256": "08e0bb721ed0e9850765013506cd8c735e09964102dfe714d01ee9f60f3dd373",
+        "packed_scene_resource_path": "res://assets/storage-candidate/manymouth_crab.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "5f2fefbf4fa0216970936921e76df41c",
+        "source_path": "res://assets/storage-candidate/manymouth_crab.glb",
+        "source_sha256": "7d55d862dba153ba1c28285d4908fe5c17386dd7860fd0538a7b70461a93c1d2"
+      }
+    ],
+    "complete_extra_static_attribute_supplement": {
+      "passed": true,
+      "report": "C:\\rabbitlands\\worktrees\\client-creature-storage-20261027\\.local\\batch-034\\manymouth_crab\\v1\\actual-editor-v2\\allfields\\allfields-validation.json",
+      "sha256": "63b60ad22354526398d796c0c8582dc6e9f160c5635458cd6f3a50f9564cbcd5",
+      "actual_editor_all_static_vertex_fields_including_tangent_UV_color_skin": true,
+      "actual_editor_retained_morph_all_fields_including_generated_tangents": true,
+      "complete_oriented_triangles_identical": true,
+      "native_and_editor_tangents_cross_mode_equality_not_claimed": true,
+      "editor_generated_LODs_reported_not_distant_appearance_approved": true,
+      "material_typed_storage_supplement": {
+        "passed": true,
+        "report": "C:\\rabbitlands\\worktrees\\client-creature-storage-20261027\\.local\\batch-034\\manymouth_crab\\v1\\actual-editor-v2\\editor-material-validation.json",
+        "sha256": "3e254b21dc84745cb3ed4cbd2698a25fbe45bc84e31d6c43e474e298fdfd1a5c",
+        "actual_editor_material_storage_and_texture_pixels_including_mips_identical": true,
+        "numeric_static_material_source_and_SCN_hashes_agree": true
+      }
+    },
+    "native_blender_source_actual_actor_and_effect_proofs_unchanged": true,
+    "no_observation_or_limit_changes": true,
+    "status": "corrected actual Editor verification complete"
   }
 }

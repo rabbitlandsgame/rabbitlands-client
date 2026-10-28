@@ -1644,5 +1644,59 @@
     "tool_sha256": "b029b0e29eccdd9da4618b9b6f3f99e606373c3c80de370c1cfd56f97dad5105",
     "bounds": "eloria-assets/source/creature-storage/river_stone_golem.bounds.json",
     "preserve_trs_keys": false
+  },
+  "editor_mode_correction": {
+    "previous_imported_claim_withdrawn": true,
+    "reason": "The previous shared imported phase used scene cache with outside-actor aliases, so its data came from raw glTF. That report remains valid as an extra raw-cache comparison.",
+    "superseded_report": "C:\\rabbitlands\\worktrees\\client-creature-storage-20261027\\.local\\batch-034\\river_stone_golem\\v1\\imported-validation.json",
+    "superseded_report_sha256": "2cabb1ae0620bfa1966dca414d4d166dd988937b9b51f30ca8837d68907f7b9c",
+    "corrected_actual_editor_numeric_passed": true,
+    "corrected_runtime_sha256": "b3a2c3cb777ecd1b7d24b0512c330bd3190eb66b9420595c2cc3253fcc5b8a9f",
+    "load_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/river_stone_golem.glb-bdf6d3aeecb82081309b7db8460343c2.md5",
+        "import_metadata_sha256": "3914a1d712b3c653858efb1eca3c89bd674de09eaa1bd7c6cd912caee38cb2fa",
+        "imported_resource_path": "res://.godot/imported/river_stone_golem.glb-bdf6d3aeecb82081309b7db8460343c2.scn",
+        "imported_resource_sha256": "74c5569177bd229fd78010e047d6294600b2c232d09661fa062a2ac708196b25",
+        "packed_scene_resource_path": "res://assets/storage-baseline/river_stone_golem.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "3ef6e504cf9b6a9cfd8e011f781a081c",
+        "source_path": "res://assets/storage-baseline/river_stone_golem.glb",
+        "source_sha256": "4e9e137743f96c1e2f3921798b132af1f5d715332b2a29357f60eb871dd186f7"
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/river_stone_golem.glb-359cfde67fbbef5fcfe2af6c5525282b.md5",
+        "import_metadata_sha256": "43254740ab6dcb7d0070ee750fdab3d5339707a8e627c1212fdb529e982ad720",
+        "imported_resource_path": "res://.godot/imported/river_stone_golem.glb-359cfde67fbbef5fcfe2af6c5525282b.scn",
+        "imported_resource_sha256": "16cac4920dec4ceaae01fe8f706330109da8316e47f013d26beac3239dba92eb",
+        "packed_scene_resource_path": "res://assets/storage-candidate/river_stone_golem.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "6553b9936634313e57ee1176cc6fac30",
+        "source_path": "res://assets/storage-candidate/river_stone_golem.glb",
+        "source_sha256": "fd8d41797ccbbc32a2b8f7fbbfa94b6d8cfbba947971f17f8eeae8a3af0dd7a7"
+      }
+    ],
+    "complete_extra_static_attribute_supplement": {
+      "passed": true,
+      "report": "C:\\rabbitlands\\worktrees\\client-creature-storage-20261027\\.local\\batch-034\\river_stone_golem\\v1\\actual-editor-v2\\allfields\\allfields-validation.json",
+      "sha256": "68ee36deef37beed1dbbb588a13775565abca63393b1b14e3b6d95d35f847428",
+      "actual_editor_all_static_vertex_fields_including_tangent_UV_color_skin": true,
+      "actual_editor_retained_morph_all_fields_including_generated_tangents": true,
+      "complete_oriented_triangles_identical": true,
+      "native_and_editor_tangents_cross_mode_equality_not_claimed": true,
+      "editor_generated_LODs_reported_not_distant_appearance_approved": true,
+      "material_typed_storage_supplement": {
+        "passed": true,
+        "report": "C:\\rabbitlands\\worktrees\\client-creature-storage-20261027\\.local\\batch-034\\river_stone_golem\\v1\\actual-editor-v2\\editor-material-validation.json",
+        "sha256": "9d4403cff8dc1e2d6be66619ae22a8d57d189d666dc244e1c7323ec1ee3c9d36",
+        "actual_editor_material_storage_and_texture_pixels_including_mips_identical": true,
+        "numeric_static_material_source_and_SCN_hashes_agree": true
+      }
+    },
+    "native_blender_source_actual_actor_and_effect_proofs_unchanged": true,
+    "no_observation_or_limit_changes": true,
+    "status": "corrected actual Editor verification complete"
   }
 }
