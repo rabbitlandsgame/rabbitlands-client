@@ -2,16 +2,16 @@
   "schema_version": 1,
   "actor": "autumn_bark_treant",
   "source_sha256": "70501bc91dc87dedf3dae24d599602a6ec6d0458e6f5dd0be2ce69996960b9b0",
-  "candidate_sha256": "58637ca1b20eaff4fec264e0749bb9fb14dc67c2102ff14a382d0b75bf4d7704",
+  "candidate_sha256": "70501bc91dc87dedf3dae24d599602a6ec6d0458e6f5dd0be2ce69996960b9b0",
   "pipeline": [
     "prune_zero_targets",
     "reduce_constant_runs",
     "compact"
   ],
   "partition": null,
-  "unchanged": false,
+  "unchanged": true,
   "removed_zero_target_indices": [],
-  "redundant_flat_key_rows_removed": 102750,
+  "redundant_flat_key_rows_removed": 0,
   "geometry_skin_rest_binds_materials_images_unchanged": true,
   "native_clips": [
     "Death_A",
@@ -22,5 +22,6 @@
     "Sword_Attack",
     "Walk"
   ],
-  "usage": "Deterministic exact preparation needs no partition --profile; frozen source/candidate hashes bind this record."
+  "usage": "Canonical pack_creature_storage.py --preserve-trs-keys reproduces original byte-for-byte. No partition; previous flat-key reduction withdrawn by strict native/editor4ULP position gate.",
+  "preserve_trs_keys": true
 }
