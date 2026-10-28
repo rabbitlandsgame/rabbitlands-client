@@ -1269,7 +1269,7 @@ func _market_sell_entries() -> Array[Dictionary]:
 	slots.sort()
 	for raw_slot: Variant in slots:
 		var slot: int = int(raw_slot)
-		if slot < 0 or slot >= MARKET_PACK_SLOTS:
+		if slot < 0 or (slot >= MARKET_PACK_SLOTS and slot < 128):
 			continue
 		var item: Dictionary = AppState.inventory[raw_slot] as Dictionary
 		var quantity: int = int(item.get("quantity", 0))

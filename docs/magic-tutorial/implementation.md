@@ -99,6 +99,10 @@ through the actual book button, Left Shift, class shortcut and Shift release.
 
 ## Optional experiments
 
+Reagents and Attunement Charges now enter the weightless **Inventory → Pouch**
+view. Foci stay in the ordinary backpack. Spell details show remaining casts
+at the selected power; quoted costs and charged-focus substitution are unchanged.
+
 | Experiment | Practice |
 | --- | --- |
 | A — Living equations | Regeneration's real tick; Life Drain's actual damage/healing; Ether Drain against a consenting non-ally inside the private PK arena; an empty target; three low-Magic Heal casts to compare potency and quoted spending |

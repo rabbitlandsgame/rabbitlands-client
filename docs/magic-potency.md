@@ -47,4 +47,5 @@ average and bounds. “200%” describes the center, not a hard upper bound on a
 individual damage or healing roll. Selected Power remains unchanged by rolls.
 
 Consumable materials and charged-focus substitution still use their existing
-rules while alternative resource systems are being considered.
+costs. Materials and charges now live in the [weightless reagent pouch](reagent-pouch.md),
+and spell details show remaining casts for the selected power.

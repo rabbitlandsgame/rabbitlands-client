@@ -144,7 +144,7 @@ func _names_cover(names: Dictionary, inventory: Dictionary,
 		include_equipment: bool) -> bool:
 	for slot_value: Variant in inventory:
 		var slot: int = int(slot_value)
-		if slot < 0 or slot >= (44 if include_equipment else 36):
+		if slot < 0 or (slot >= (44 if include_equipment else 36) and slot < 128):
 			continue
 		if not names.has(slot):
 			return false
@@ -156,7 +156,7 @@ func _inventory_slot_for_name(inventory: Dictionary, names: Dictionary,
 	slots.sort()
 	for slot_value: Variant in slots:
 		var slot: int = int(slot_value)
-		if slot < 0 or slot >= (44 if include_equipment else 36):
+		if slot < 0 or (slot >= (44 if include_equipment else 36) and slot < 128):
 			continue
 		if str(names.get(slot, "")) != name:
 			continue
@@ -173,7 +173,7 @@ func _inventory_slot_for_image(inventory: Dictionary, image_id: int, quantity: i
 	slots.sort()
 	for slot_value: Variant in slots:
 		var slot: int = int(slot_value)
-		if slot < 0 or slot >= (44 if include_equipment else 36):
+		if slot < 0 or (slot >= (44 if include_equipment else 36) and slot < 128):
 			continue
 		var item_value: Variant = inventory.get(slot)
 		if not item_value is Dictionary:

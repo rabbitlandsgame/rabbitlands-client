@@ -53,6 +53,7 @@ var name_label: Label
 var description_label: Label
 var numbers_label: Label
 var potency_label: Label
+var casts_label: Label
 var knowledge_label: Label
 var reagents_label: Label
 var reagents_rows: VBoxContainer
@@ -341,6 +342,7 @@ func _refresh_details() -> void:
 		description_label.text = "Select an icon to inspect its target, cost and requirements."
 		numbers_label.text = ""
 		potency_label.text = ""
+		casts_label.text = ""
 		knowledge_label.text = ""
 		reagents_label.text = ""
 		selected_icon.texture = null
@@ -367,6 +369,7 @@ func _refresh_details() -> void:
 	var level := int(definition.get("level", 0))
 	var recommended := int(definition.get("recommended_level", level))
 	potency_label.text = "Unlock %d · Recommended %d" % [level, recommended]
+	casts_label.text = ""
 	UI.requirement(requirements_rows, "Magic %d" % level, "Current %d" % magic, magic >= level)
 	var tome := catalog.knowledge_for(selected_spell_id)
 	var known := catalog.knows(selected_spell_id, AppState.known_knowledge)
@@ -415,6 +418,9 @@ func _quote_state(data: Dictionary) -> void:
 	effect_preview.set_spell(catalog.spell(selected_spell_id), int(data.get("power", 1)))
 	numbers_label.text = "%s · Power %d / %d · Ether %d" % [str(catalog.spell(selected_spell_id).get("scope", "self")).capitalize(), int(data.get("power", 1)), int(data.get("limit", 1)), int(data.get("mana", 0))]
 	var quality: Dictionary = data.get("potency", {})
+	if data.has("casts_remaining"):
+		casts_label.text = "Casts now: %s · Supplies: %s" % [str(data.casts_remaining) if data.casts_remaining != null else "Unlimited", str(data.get("reagent_casts")) if data.get("reagent_casts") != null else "Unlimited"]
+		casts_label.tooltip_text = "Casts now includes current ether and the selected power's reagent costs. Supplies includes usable anchors after focus charges run out. Ether recovery is not predicted."
 	if not quality.is_empty():
 		var label := "Duration" if str(data.get("potency_applies_to", "amount")) == "duration" else "Potency"
 		potency_label.text = "Unlock %d · Recommended %d\n%s %.0f%% average (%.0f–%.0f%%)" % [int(data.get("unlock_level", 0)), int(data.get("recommended_level", 0)), label, float(quality.get("mean", 100)), float(quality.get("minimum", 100)), float(quality.get("maximum", 100))]
@@ -658,6 +664,10 @@ func _build_details() -> void:
 	potency_label.name = "SpellPotency"
 	TextColors.bind(potency_label, "spell_text")
 	info.add_child(potency_label)
+	casts_label = UI.label("", 13, true)
+	casts_label.name = "SpellRemainingCasts"
+	TextColors.bind(casts_label, "spell_cost")
+	info.add_child(casts_label)
 	requirements_rows = VBoxContainer.new()
 	info.add_child(requirements_rows)
 	knowledge_label = UI.label("", 12, true)

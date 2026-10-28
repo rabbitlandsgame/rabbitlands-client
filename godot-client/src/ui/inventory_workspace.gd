@@ -54,6 +54,7 @@ var _drag_origin := Vector2.ZERO
 var _resizing := false
 var _drag_cell := 36.0
 var _drag_dimensions := Vector2.ZERO
+var reagent_pouch
 
 func configure(owner_main: Control) -> void:
 	main = owner_main
@@ -75,6 +76,11 @@ func configure(owner_main: Control) -> void:
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	header.add_child(title)
+	reagent_pouch = preload("res://src/ui/reagent_pouch.gd").new()
+	main.add_child(reagent_pouch)
+	header.add_child(_button("Pouch", func() -> void:
+		reagent_pouch.sync()
+		reagent_pouch.popup_centered(Vector2i(340, 350))))
 	search = LineEdit.new()
 	search.name = "InventorySearch"
 	search.placeholder_text = "Find item…"

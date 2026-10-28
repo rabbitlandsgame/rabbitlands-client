@@ -16258,7 +16258,7 @@ func _sync_storage_backpack() -> void:
 	var backpack: Dictionary = {}
 	for raw_slot: Variant in AppState.inventory:
 		var slot: int = int(raw_slot)
-		if slot >= 0 and slot < 36:
+		if slot >= 0 and (slot < 36 or slot >= 128):
 			backpack[slot] = AppState.inventory[raw_slot]
 	_fill_storage_item_list(storage_inventory, backpack, "Inventory")
 	_sync_storage_actions()
