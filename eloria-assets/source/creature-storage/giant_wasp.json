@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "actor": "giant_wasp",
+  "source_sha256": "8795cee2ec803e093b6f9298150665034fb5620badcaa337a2f4a358da7a160f",
+  "candidate_sha256": "68028bae7e8bcc57118e94b446db12b239bacf4612835ba1f200a98d8b23c0e8",
+  "pipeline": [
+    "prune_zero_targets",
+    "reduce_constant_runs",
+    "compact"
+  ],
+  "partition": null,
+  "unchanged": false,
+  "removed_zero_target_indices": [],
+  "redundant_flat_key_rows_removed": 7198,
+  "geometry_skin_rest_binds_materials_images_unchanged": true,
+  "preserve_trs_keys": false,
+  "native_clips": [
+    "Death_A",
+    "Fighting_Idle",
+    "Fly",
+    "Hit_Chest",
+    "Idle_A",
+    "Jog",
+    "Sword_Attack",
+    "Walk"
+  ],
+  "usage": "Deterministic exact preparation needs no partition --profile; frozen source/candidate hashes bind this record."
+}

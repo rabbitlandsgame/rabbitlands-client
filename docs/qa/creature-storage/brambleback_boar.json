@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "actor": "brambleback_boar",
+  "date": "2026-10-27",
+  "runtime_path": "godot-client/assets/actors/native/creatures/brambleback_boar.glb",
+  "status": "Held unchanged: existing duplicate animation timestamps retained without normalization",
+  "source_sha256": "32b094b165b592c72e75fa13049778e8155c82243a3705b86a33c277b51d3e96",
+  "candidate_sha256": "32b094b165b592c72e75fa13049778e8155c82243a3705b86a33c277b51d3e96",
+  "storage": {
+    "source_bytes": 6643700,
+    "candidate_bytes": 6643700,
+    "source_zstd_bytes": 3748265,
+    "candidate_zstd_bytes": 3748265
+  },
+  "raw_bytes_saved": 0,
+  "compressed_bytes_saved": 0,
+  "compression_scope": "RLCZ level 3 release envelope including fixed 56-byte header; encoded/install sizes, not live-process memory.",
+  "correctives": {
+    "source_count": 0,
+    "candidate_count": 0,
+    "removed_target_indices": [],
+    "shared_gpu_source_bytes": 0,
+    "shared_gpu_candidate_bytes": 0,
+    "shared_gpu_saved_bytes": 0,
+    "scope": "Measured shared Godot blend_shape_data bytes, not per-actor totals."
+  },
+  "draw_surfaces": {
+    "source": 1,
+    "candidate": 1
+  },
+  "exact_source_proof": {
+    "passed": true,
+    "actor": "brambleback_boar",
+    "source_sha256": "32b094b165b592c72e75fa13049778e8155c82243a3705b86a33c277b51d3e96",
+    "candidate_sha256": "32b094b165b592c72e75fa13049778e8155c82243a3705b86a33c277b51d3e96",
+    "all_original_bytes_unchanged": true,
+    "full_bytes_compared": 6643700,
+    "clips": [
+      "Fighting_Idle",
+      "Hit_Chest",
+      "Idle_A",
+      "Walk",
+      "Jog",
+      "Sword_Attack",
+      "Death_A"
+    ],
+    "proof_kind": "Unchanged full-file byte identity; no transform, clock normalization, key pruning or repacking attempted.",
+    "source_clock_audit": {
+      "finite": true,
+      "decreasing_intervals": 0,
+      "duplicate_timestamp_sampler_records": [
+        {
+          "clip": "Fighting_Idle",
+          "sampler": 108,
+          "input_accessor": 1209,
+          "output_accessor": 1210,
+          "duplicate_preceding_indices": [
+            962,
+            1283
+          ],
+          "duplicate_times": [
+            0.625,
+            0.8333333134651184
+          ],
+          "duplicate_value_row_bits_identical": true
+        }
+      ],
+      "decision": "Hold original unchanged under strict supported-clock gate. Duplicate timestamps and output row bits preserved exactly, including existing runtime behavior. Independent strict SciPy/Blender source-sampler qualification is not claimed."
+    }
+  },
+  "rigidity_preflight": {
+    "actor": "brambleback_boar",
+    "survivor_triangles": 0,
+    "reason": "Source has no corrective shapes; existing skin retained."
+  },
+  "runtime_scope": "Unchanged original bytes preserve current runtime behavior exactly. No storage saving, repaired clock semantics, new physical fitness or artistic approval claimed.",
+  "effects_scope": "Original topology, skin, binds, material/texture bytes and current clips retained; no runtime rig replacement.",
+  "evidence": "Immutable source/final, private versioned candidates, source/import/renderer receipts, full-resolution captures and lossless cycle previews retained in task-owned ignored .local/batch-027/brambleback_boar",
+  "unchanged_reason": "Original retained byte-for-byte because existing duplicate key timestamps are outside the strict source-sampler contract. No clock normalization, key removal, repacking, rig change or runtime replacement attempted.",
+  "source_clock_audit": {
+    "finite": true,
+    "decreasing_intervals": 0,
+    "duplicate_timestamp_sampler_records": [
+      {
+        "clip": "Fighting_Idle",
+        "sampler": 108,
+        "input_accessor": 1209,
+        "output_accessor": 1210,
+        "duplicate_preceding_indices": [
+          962,
+          1283
+        ],
+        "duplicate_times": [
+          0.625,
+          0.8333333134651184
+        ],
+        "duplicate_value_row_bits_identical": true
+      }
+    ],
+    "decision": "Hold original unchanged under strict supported-clock gate. Duplicate timestamps and output row bits preserved exactly, including existing runtime behavior. Independent strict SciPy/Blender source-sampler qualification is not claimed."
+  },
+  "original_observations_retained": true,
+  "original_witness_sha256": "72405f457fc485a1c2e7de07275aac3a24bc7c05824928bd72460c01643fd441",
+  "existing_native_original_pair": {
+    "maximum_position_error": 0.0,
+    "maximum_normal_angle_degrees": 1.9090959104164224e-06,
+    "worst_position": {
+      "label": "Death_A@0.0",
+      "max_surface_error": 0.0,
+      "max_normal_degrees": 1.7075472925031877e-06,
+      "p99_normal_degrees": 1.2074182697257333e-06
+    },
+    "worst_normal": {
+      "label": "Jog@0.25",
+      "max_surface_error": 0.0,
+      "max_normal_degrees": 1.9090959104164224e-06,
+      "p99_normal_degrees": 1.2074182697257333e-06
+    },
+    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "source_sha256": "32b094b165b592c72e75fa13049778e8155c82243a3705b86a33c277b51d3e96",
+    "candidate_sha256": "32b094b165b592c72e75fa13049778e8155c82243a3705b86a33c277b51d3e96"
+  }
+}
