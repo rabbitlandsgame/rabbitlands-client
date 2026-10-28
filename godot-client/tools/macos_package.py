@@ -16,7 +16,7 @@ platform="macOS"
 runnable=false
 export_filter="all_resources"
 include_filter="*.json,*.bin,assets/audio/*.txt,assets/audio/licenses/*.txt"
-exclude_filter="Godot_v*.exe,docs/*,tests/*,tools/*,test-artifacts/*,world_authoring/*,*.md,*.editor-notes.json"
+exclude_filter="Godot_v*.exe,docs/*,tests/*,tools/*,test-artifacts/*,world_authoring/*,prototypes/rl_heads/*,*.md,*.editor-notes.json"
 export_path=""
 script_export_mode=2
 [preset.2.options]

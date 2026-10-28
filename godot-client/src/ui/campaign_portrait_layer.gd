@@ -2,6 +2,9 @@ extends RefCounted
 ## Short-lived render membership for a real speaker in a shared World3D.
 ## Bits 12-19 are reserved here; layer 20 belongs to world labels. Each live
 ## dialogue leases its own bit, so simultaneous portraits remain isolated.
+## While bound, the speaker also holds its portrait pose (ReplicatedActor3D
+## hold_portrait_pose): an RL head keeps its first level of detail, a neutral
+## face and open eyes however far the gameplay camera is.
 const MASKS := [1 << 18, 1 << 17, 1 << 16, 1 << 15, 1 << 14, 1 << 13, 1 << 12, 1 << 11]
 static var _leases: Dictionary = {}
 var mask := 0
@@ -19,6 +22,8 @@ func bind(actor: Node3D) -> int:
 				mask = candidate
 				_leases[mask] = weakref(self)
 				_actor = weakref(actor)
+				if actor.has_method("hold_portrait_pose"):
+					actor.call("hold_portrait_pose", self)
 				break
 	refresh()
 	return mask
@@ -50,6 +55,9 @@ func _restore(node: MeshInstance3D, entry: Dictionary) -> void:
 	if not bool(entry.already_set): node.layers &= ~mask
 
 func clear() -> void:
+	var bound := _actor.get_ref() as Node3D if _actor != null else null
+	if is_instance_valid(bound) and bound.has_method("release_portrait_pose"):
+		bound.call("release_portrait_pose", self)
 	for entry: Dictionary in _meshes.values():
 		var node := (entry.node as WeakRef).get_ref() as MeshInstance3D
 		if is_instance_valid(node): _restore(node, entry)

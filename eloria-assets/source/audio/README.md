@@ -43,6 +43,11 @@ Windowless caves and temples retain their place-based music across the clock.
 to the sibling server. It derives interior zones from the current map manifests
 and registry transforms, including disconnected sections' actual entry points.
 Re-run it after changing an interior's authored geometry or coordinate frame.
+The server copy also carries music this source does not (the A3 isles'), which a
+whole run reverts: `--map <map id>` (repeatable) rewrites only that map's block
+and its zone digest, leaving every other byte of the server file as it stands,
+and `--check` exits 1 while what it would write differs (the Landfall Town rooms:
+`--map landfall_town`).
 New clients advertise `music_program_v1`; older clients keep `music.txt` beds.
 
 The server updates music on arrival, clock changes and its encounter upkeep.

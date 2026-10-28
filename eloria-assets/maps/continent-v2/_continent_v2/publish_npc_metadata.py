@@ -104,11 +104,9 @@ def prepare(checkout: Path, base_path: Path, current_path: Path) -> dict[Path, d
             manifest['provenance'].update(snapshotSha256=new_sha, sceneSha256=entry['sceneSha256'])
             append_receipt(manifest['provenance'], entry)
             collision.update(sourceSnapshotSha256=new_sha, sourceSceneSha256=entry['sceneSha256'])
-            manifest['serviceMarkers'] = [
-                {'id': mark['id'], 'name': mark['name'], 'label': mark.get('mapLabel', mark['name']),
-                 'category': mark['mapCategory'], 'position': mark['position'], 'serverTile': mark['serverTile']}
-                for mark in current['gameplay']['npcMarkers']
-                if mark.get('mapCategory') in ('general_store', 'tavern')]
+            # publish_client.py's rows (map_categories.py): an unknown category is refused, never dropped.
+            import map_categories
+            manifest['serviceMarkers'] = map_categories.service_markers(current['gameplay']['npcMarkers'])
             publication['snapshot'].update(sha256=new_sha, sceneSha256=entry['sceneSha256'])
             publication['collision']['sourceSnapshotSha256'] = new_sha
         updates[path] = manifest

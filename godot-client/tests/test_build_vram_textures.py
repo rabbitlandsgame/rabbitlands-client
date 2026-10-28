@@ -230,6 +230,116 @@ class ScopedInventory(unittest.TestCase):
             tool.scope_group_manifests(["not_a_group"])
 
 
+BASE_IMAGE = FIXTURE / "shared-assets" / "90c51de41c0f4fffd8a6c225f67472eb77d262a183e2fcae827383d3e10d32f4.jpg"
+NORMAL_IMAGE = FIXTURE / "shared-assets" / "5168b5c2d5238b41c0b8b9626b2987775d00fe27f953b84aa9bb8bc7f11349ab.png"
+
+
+def _scenery_glb(path: Path, images: list[tuple[bytes, str]], materials: list[dict]) -> None:
+    """A world-object GLB that embeds `images` ((bytes, mimeType)) in its BIN chunk; no geometry (the tool reads the
+    materials and the images only)."""
+    binary, views, image_list, textures = bytearray(), [], [], []
+    for payload, mime in images:
+        binary += b"\0" * (-len(binary) % 4)
+        image_list.append({"bufferView": len(views), "mimeType": mime})
+        textures.append({"source": len(textures)})
+        views.append({"buffer": 0, "byteOffset": len(binary), "byteLength": len(payload)})
+        binary += payload
+    binary += b"\0" * (-len(binary) % 4)
+    document = {"asset": {"version": "2.0"}, "materials": materials, "textures": textures, "images": image_list,
+                "bufferViews": views, "buffers": [{"byteLength": len(binary)}]}
+    payload = json.dumps(document).encode()
+    payload += b" " * (-len(payload) % 4)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(b"glTF" + struct.pack("<II", 2, 28 + len(payload) + len(binary))
+                     + struct.pack("<I", len(payload)) + b"JSON" + payload
+                     + struct.pack("<I", len(binary)) + b"BIN\0" + bytes(binary))
+
+
+def _scenery_tree(root: Path) -> tuple[Path, Path, Path, Path]:
+    """<root>/client/assets/world/props/{crate,barrel}.glb (the fixture's base colour and normal map embedded; the
+    barrel samples the same base colour bytes) and a config naming them. Returns (client, config, crate, barrel)."""
+    client = root / "client"
+    props = client / "assets" / "world" / "props"
+    base, normal = BASE_IMAGE.read_bytes(), NORMAL_IMAGE.read_bytes()
+    _scenery_glb(props / "crate.glb", [(base, "image/jpeg"), (normal, "image/png")],
+                 [{"pbrMetallicRoughness": {"baseColorTexture": {"index": 0}}, "normalTexture": {"index": 1}}])
+    _scenery_glb(props / "barrel.glb", [(base, "image/jpeg")],
+                 [{"pbrMetallicRoughness": {"baseColorTexture": {"index": 0}}}])
+    config = client / "data" / "scenery.json"
+    config.parent.mkdir(parents=True)
+    config.write_text(json.dumps({"assets": {"crate": "res://assets/world/props/crate.glb",
+                                             "barrel": "res://assets/world/props/barrel.glb"}}), encoding="utf-8")
+    return client, config, props / "crate.glb", props / "barrel.glb"
+
+
+class Scenery(unittest.TestCase):
+    """--scenery-config: the embedded images of world-object GLBs, keyed by the GLB's own directory."""
+
+    def setUp(self):
+        self.scratch = Path(tempfile.mkdtemp(prefix="vram-scenery-test-")).resolve()
+        self.client, self.config, self.crate, self.barrel = _scenery_tree(self.scratch)
+        self.patches = [mock.patch.object(tool, "CLIENT", self.client),
+                        mock.patch.object(tool, "SCENERY_ROOT", self.client / "assets" / "world")]
+        for patch in self.patches:
+            patch.start()
+
+    def tearDown(self):
+        for patch in self.patches:
+            patch.stop()
+        shutil.rmtree(self.scratch, ignore_errors=True)
+
+    def _config(self, assets: dict) -> Path:
+        path = self.scratch / "bad.json"
+        path.write_text(json.dumps({"assets": assets}), encoding="utf-8")
+        return path
+
+    def test_config_names_glbs_below_assets_world(self):
+        self.assertEqual(tool.scenery_glbs([self.config, self.config]), [self.crate.resolve(), self.barrel.resolve()])
+        for value in ("res://src/props/crate.glb", "res://assets/world/../../data/scenery.json",
+                      "res://assets/world/props/missing.glb", "assets/world/props/crate.glb",
+                      "res://assets/world/props/crate.png"):
+            with self.subTest(value=value), self.assertRaises(tool.BuildError):
+                tool.scenery_glbs([self._config({"x": value})])
+        with self.assertRaises(tool.BuildError):
+            tool.scenery_glbs([self._config({})])
+
+    def test_inventory_keys_embedded_images_by_the_glb_directory(self):
+        maps = self.scratch / "maps"
+        maps.mkdir()
+        extract = self.scratch / "cache" / tool.EMBEDDED_DIR
+        found = tool.inventory([maps], scenery=tool.scenery_glbs([self.config]), extract_dir=extract)
+        base_sha = hashlib.sha256(BASE_IMAGE.read_bytes()).hexdigest()
+        normal_sha = hashlib.sha256(NORMAL_IMAGE.read_bytes()).hexdigest()
+        props = self.crate.parent.resolve()
+        self.assertEqual(set(found), {(props, base_sha), (props, normal_sha)})
+        self.assertEqual(found[(props, base_sha)]["roles"], {("base", "OPAQUE")})
+        self.assertEqual(found[(props, base_sha)]["maps"], {"scenery:crate.glb", "scenery:barrel.glb"})
+        self.assertEqual(found[(props, normal_sha)]["roles"], {("normal", "OPAQUE")})
+        for (_, sha), record in found.items():
+            self.assertEqual(record["path"].parent, extract)
+            self.assertEqual(hashlib.sha256(record["path"].read_bytes()).hexdigest(), sha)
+        self.assertEqual(found[(props, base_sha)]["path"].suffix, ".jpg")
+        self.assertEqual(found[(props, normal_sha)]["path"].suffix, ".png")
+
+    def test_targets_beside_the_glbs_or_mirrored_below_the_out_root(self):
+        props = self.crate.parent
+        self.assertEqual(tool.scenery_target(props, None), props / "vram")
+        out = self.scratch / "stage" / "world"
+        self.assertEqual(tool.scenery_target(props, out), out.resolve() / "props" / "vram")
+        with self.assertRaises(tool.BuildError):
+            tool.scenery_target(self.scratch / "elsewhere", out)
+
+    def test_a_scoped_run_never_writes_a_partial_scenery_index_in_place(self):
+        maps = self.scratch / "maps"
+        maps.mkdir()
+        for scenery_out in (None, self.client / "assets" / "world" / "stage"):
+            with self.subTest(scenery_out=scenery_out), self.assertRaises(tool.BuildError) as raised:
+                tool.build([maps], self.scratch / "stage", self.scratch / "cache", Path("no-godot"), 1,
+                           manifests=[maps / "world.json"], scenery_configs=[self.config],
+                           scenery_out_root=scenery_out)
+            self.assertIn("--scenery-out-root", str(raised.exception))
+
+
 class NoRuntimeCompression(unittest.TestCase):
     """The shipped export template has no BC encoder: Image.compress returns
     ERR_UNAVAILABLE there, so a runtime call would pass every editor-binary
@@ -595,6 +705,52 @@ class Build(unittest.TestCase):
         self.assertEqual(summary["encoded"], 0)
         self.assertEqual(summary["basePsnrEncodes"], self.summary["basePsnrEncodes"])
         self.assertEqual(summary["basePsnrMedian"], self.summary["basePsnrMedian"])
+
+    def test_scenery_sidecars_go_in_the_glb_directory_s_vram(self):
+        # Embedded images of world-object GLBs, planned from the GLBs' materials and keyed by the bytes' sha: the
+        # same encodes as the fixture pool's (same bytes, same recipes), so nothing is encoded again.
+        self.assertEqual(self.code, 0, self.output[-2000:])
+        tree = self.scratch / "scenery"
+        client, config, crate, _ = _scenery_tree(tree)
+        maps = tree / "maps"
+        maps.mkdir()
+        cache = tree / "cache"
+        shutil.copytree(self.cache, cache)
+        stage = tree / "stage"
+        with mock.patch.object(tool, "CLIENT", client), \
+                mock.patch.object(tool, "SCENERY_ROOT", client / "assets" / "world"):
+            summary = tool.build([maps], None, cache, GODOT, 2, prune=False, scenery_configs=[config],
+                                 scenery_out_root=stage)
+        self.assertEqual(summary["encoded"], 0)
+        index = json.loads((stage / "props" / "vram" / "index.json").read_text(encoding="utf-8"))
+        committed = json.loads((SIDECARS / "index.json").read_text(encoding="utf-8"))
+        base_sha = hashlib.sha256(BASE_IMAGE.read_bytes()).hexdigest()
+        normal_sha = hashlib.sha256(NORMAL_IMAGE.read_bytes()).hexdigest()
+        self.assertEqual(index["excluded"], {})
+        self.assertEqual({sha: (e["recipe"], e["format"], e["roles"]) for sha, e in index["images"].items()},
+                         {base_sha: ("base", "bc7", ["base"]), normal_sha: ("normal", "bc5", ["normal"])})
+        for sha, entry in index["images"].items():
+            self.assertEqual(entry["width"], committed["images"][sha]["width"])
+            self.assertEqual(hashlib.sha256((stage / "props" / "vram" / entry["file"]).read_bytes()).hexdigest(),
+                             entry["sha256"])
+        self.assertFalse((crate.parent / "vram").exists(), "--scenery-out-root leaves the GLB directory alone")
+
+    def test_unskip_keeps_one_map_s_images_in_a_skipped_pool(self):
+        # The package skips the shared image pool but still ships one map's sidecars there (--unskip-map).
+        self.assertEqual(self.code, 0, self.output[-2000:])
+        tree = self.scratch / "unskip"
+        first, second = _two_pools(tree / "maps")
+        cache = tree / "cache"
+        shutil.copytree(self.cache, cache)
+        code, summary, output = _run_tool(tree / "maps", cache, "--no-prune", "--skip-dir", "shared-assets",
+                                          "--unskip-map", "a_first")
+        self.assertEqual(code, 0, output[-2000:])
+        kept = self._index(first / "vram")
+        skipped = self._index(second / "vram")
+        committed = json.loads((SIDECARS / "index.json").read_text(encoding="utf-8"))
+        self.assertEqual(set(kept["images"]), set(committed["images"]))
+        self.assertEqual(set(skipped["images"]), set())
+        self.assertEqual(set(skipped["excluded"].values()), {"excluded_by_caller"})
 
     def test_cache_inside_a_worktree_must_be_ignored(self):
         repo = self.scratch / "repo"

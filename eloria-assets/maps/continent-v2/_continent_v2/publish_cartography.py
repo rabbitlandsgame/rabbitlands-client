@@ -24,7 +24,25 @@ in registry order:
                   lattice (its continent originMetres and metresPerPixel), so main.gd turns them into the map's metres
                   as it turns every other row's
   globalTranslation   the registry row's continent translation
+  serviceMarkers  the package's shop dots (publish_client.py: every NPC marker with a mapCategory)
+  storageMarkers  the package's storage chests
+  entranceMarkers every door into an interior that stands on this map, from every interior source (INTERIOR_SOURCES:
+                  content/underground.json's caves through underground_source.doors, content/landfall_town.json's
+                  building rooms through town_source.doors): its label (a building door's own `label`, else its
+                  section's name), position [x, z] and height (the door's `position`: a cave's marker, a building's
+                  painted door on the facade), serverTile (the door tile), objectId (main.gd hides the server's portal
+                  P of that object under the dot), kind ("underground" | "building") and, for a building door that
+                  leads into a shop, its category (map_categories.py). The client draws a building door as a round
+                  dot in its category's colour (the tan entrance dot without one), labelled on hover only, a size down
+                  on the minimap and not at all on the continent overview; a cave keeps its permanent label.
 No row has a continentRect: the isles are not on the twelve-territory continent's picture.
+The top-level interiors object holds what an interior's own map draws (an interior has no tab map row):
+  interiors.<map id>.serviceMarkers   the interior's shopkeepers (a section's `npcs` with a mapCategory) as
+                  {label, name, category, position [x, z], height, serverTile, section}, placed on their post tiles'
+                  centres by the interior's coordinate transform (its registry row's, else the builders' frame: tile
+                  (x, y) is world (x, h, cells - y)). main.gd draws those of the section the player stands in and hides
+                  the shopkeeper's own blue dot by name, as on a territory. Omitted when no interior keeps a shop.
+An unknown category is refused, never dropped (map_categories.py).
 The separate overview object places all regions, including every ownership component, on a Landfall picture
 composed from their existing minimaps. Its image-local polygons and row identities drive the clickable overview.
 
@@ -58,6 +76,7 @@ import sys
 HERE = Path(__file__).resolve().parent
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
+import map_categories as MC
 import ownership
 import underground_source as US
 
@@ -75,10 +94,150 @@ BOAT_PHRASE = "Bound for "
 FRAME = "continent-v2"
 SERVED_STATUSES = {"continent-v2-served"}
 SCHEMA = "eloria-cartography-continent-v2-v1"
+# The interiors' sources, in the order their doors are listed: (source, the module that reads its doors, the kind of
+# door it holds unless a door names its own). A missing source has no doors.
+INTERIOR_SOURCES = (
+    ("eloria-assets/maps/continent-v2/_continent_v2/content/underground.json", "underground_source", "underground"),
+    ("eloria-assets/maps/continent-v2/_continent_v2/content/landfall_town.json", "town_source", "building"),
+)
+DOOR_KINDS = ("underground", "building")
 
 
 class CartographyError(ValueError):
     """A served territory this tool cannot give a tab map."""
+
+
+def interior_sources(checkout: Path) -> list[tuple[str, dict, object, str]]:
+    """Every interior source the checkout holds, as (its path, its JSON, its door reader module, its door kind)."""
+    result = []
+    for relative, reader_name, kind in INTERIOR_SOURCES:
+        path = Path(checkout) / relative
+        if not path.is_file():
+            continue
+        try:
+            reader = US if reader_name == US.__name__ else importlib.import_module(reader_name)
+        except ModuleNotFoundError as error:
+            if error.name != reader_name:
+                raise
+            raise CartographyError(f"{relative} is read by _continent_v2/{reader_name}.py, which is missing") from None
+        result.append((relative, read_json(path), reader, kind))
+    return result
+
+
+def section_doors(reader, section) -> list[dict]:
+    """A section's doors through its source's reader; a reader without `doors` reads them as underground_source does
+    (underground.py reader_of: the town's reader keeps the underground's functions it does not define)."""
+    return getattr(reader, "doors", US.doors)(section)
+
+
+def section_npcs(reader, section) -> list[dict]:
+    """A section's NPCs through its source's reader (`npcs`), else its `npcs` rows (underground.py section_npcs)."""
+    found = getattr(reader, "npcs", None)
+    return list(found(section)) if found else list(section.get("npcs", []))
+
+
+def entrance_markers(key: str, sources) -> list[dict]:
+    """The entranceMarkers of map `key`: every door of every interior section that stands on it, in source order.
+
+    sources is interior_sources(); each door comes from its source's reader (`doors(section)`)."""
+    rows, seen = [], {}
+    for relative, design, reader, default_kind in sources:
+        for section in design.get("sections", []):
+            for door in section_doors(reader, section):
+                if door["map"] != key:
+                    continue
+                where = f"{relative} {section.get('id', '?')} door {door.get('index', '?')}"
+                kind = door.get("kind", default_kind)
+                if kind not in DOOR_KINDS:
+                    raise CartographyError(f"{where}: kind {kind!r} is not one of {DOOR_KINDS}")
+                object_id = int(door["object"])
+                if object_id in seen:
+                    raise CartographyError(f"{where}: object {object_id} is also {seen[object_id]}'s door on {key}")
+                seen[object_id] = where
+                row = {"label": str(door.get("label") or section["name"]),
+                       "position": [door["position"][0], door["position"][2]],
+                       "height": door["position"][1],
+                       "serverTile": list(door["tile"]), "objectId": object_id, "kind": kind}
+                category = door.get("category")
+                if category is not None:
+                    if kind != "building":
+                        raise CartographyError(f"{where}: only a building door leads into a shop; a {kind} door "
+                                               "keeps the tan entrance dot")
+                    try:
+                        row["category"] = MC.check(category, where)
+                    except MC.CategoryError as error:
+                        raise CartographyError(str(error)) from None
+                rows.append(row)
+    return rows
+
+
+def service_category(key: str, mark: dict) -> str:
+    """A package's shop dot category, checked (a package published before the table learnt a category is refused)."""
+    try:
+        return MC.check(mark["category"], f"{key} {mark.get('name', '?')}")
+    except MC.CategoryError as error:
+        raise CartographyError(str(error)) from None
+
+
+def door_maps(sources) -> set[str]:
+    """Every map a door of an interior source stands on."""
+    return {door["map"] for _, design, reader, _ in sources for section in design.get("sections", [])
+            for door in section_doors(reader, section)}
+
+
+def tile_position(transform: dict, tile) -> tuple[list[float], float]:
+    """A server tile's centre as the client places it ([x, z] metres, height): CoordinateAdapter.tile_center."""
+    scale = float(transform.get("metresPerTile", 1.0))
+    origin = [float(v) for v in transform.get("origin", [0, 0, 0])]
+    server_origin = [float(v) for v in transform.get("serverOrigin", [0, 0])]
+    local_x = float(tile[0]) + 0.5 - server_origin[0]
+    local_y = float(tile[1]) + 0.5 - server_origin[1]
+    z = -local_y if transform.get("invertServerY", True) else local_y
+    return ([origin[0] + local_x * scale, origin[2] + z * scale],
+            float(transform.get("walkingHeight", origin[1])))
+
+
+def interior_transform(design: dict, registry: dict) -> dict:
+    """The interior's coordinate transform: its registry row's (what the client places tiles by), else the builders'
+    frame (build_underground.world: tile (x, y) is world (x, h, cells - y) at floor height 0)."""
+    row = registry.get("maps", {}).get(design["map"]["id"])
+    if isinstance(row, dict) and row.get("coordinateTransform"):
+        return row["coordinateTransform"]
+    cells = int(design["map"]["cells"])
+    return {"metresPerTile": 1.0, "serverOrigin": [0, cells], "origin": [0, 0, 0], "walkingHeight": 0.0,
+            "invertServerY": True}
+
+
+def interior_service_markers(relative: str, design: dict, transform: dict, reader=US) -> list[dict]:
+    """An interior's shopkeepers: every section `npcs` row with a mapCategory, on its post tile's centre."""
+    marks = []
+    for section in design.get("sections", []):
+        for npc in section_npcs(reader, section):
+            where = f"{relative} {section.get('id', '?')} {npc.get('name', '?')}"
+            try:
+                category = MC.service_category(npc, where)
+            except MC.CategoryError as error:
+                raise CartographyError(str(error)) from None
+            if category is None:
+                continue
+            position, height = tile_position(transform, npc["tile"])
+            marks.append({"label": str(npc.get("mapLabel") or npc["name"]), "name": str(npc["name"]),
+                          "category": category, "position": position, "height": height,
+                          "serverTile": [int(npc["tile"][0]), int(npc["tile"][1])], "section": section["id"]})
+    return marks
+
+
+def interiors(sources, registry: dict) -> dict:
+    """The top-level interiors object: {map id: {serviceMarkers}} for every interior that keeps a shop."""
+    result = {}
+    for relative, design, reader, _kind in sources:
+        marks = interior_service_markers(relative, design, interior_transform(design, registry), reader)
+        if marks:
+            map_id = design["map"]["id"]
+            if map_id in result:
+                raise CartographyError(f"{relative}: map {map_id} is another interior source's too")
+            result[map_id] = {"serviceMarkers": marks}
+    return result
 
 
 def read_json(path: Path):
@@ -131,8 +290,11 @@ def compose(checkout: Path = DEFAULT_CHECKOUT) -> dict:
     continent = read_json(checkout / CARTOGRAPHY)["continent"]
     lattice = {"originMetres": continent["originMetres"], "metresPerPixel": continent["metresPerPixel"]}
     regions, sources = [], {}
-    underground_path = checkout / 'eloria-assets/maps/continent-v2/_continent_v2/content/underground.json'
-    underground = read_json(underground_path)['sections'] if underground_path.is_file() else []
+    doors = interior_sources(checkout)
+    unserved = sorted(door_maps(doors) - {key for key, _ in served(registry)})
+    if unserved:
+        raise CartographyError(f"interior doors stand on {unserved}, which no served territory is: their dots would "
+                               "be dropped")
     water_rgb = None
     for key, entry in served(registry):
         manifest_path = tool.resource_to_path(entry["manifest"])
@@ -168,7 +330,8 @@ def compose(checkout: Path = DEFAULT_CHECKOUT) -> dict:
             "continentPolygons": [[tool.atlas_point(point, lattice) for point in ring] for ring in polygons],
             "continentLabel": tool.atlas_point([centroid.x,centroid.y], lattice),
             "globalTranslation": translation,
-            "serviceMarkers": [{"label": mark["label"], "name": mark["name"], "category": mark["category"],
+            "serviceMarkers": [{"label": mark["label"], "name": mark["name"],
+                                "category": service_category(key, mark),
                                 "position": [mark["position"][0], mark["position"][2]],
                                 "height": mark["position"][1], "serverTile": mark["serverTile"]}
                                for mark in manifest.get("serviceMarkers", [])],
@@ -176,17 +339,16 @@ def compose(checkout: Path = DEFAULT_CHECKOUT) -> dict:
                                 "position": [mark["position"][0], mark["position"][2]],
                                 "serverTile": mark["serverTile"], "objectId": mark["objectId"]}
                                for mark in manifest.get("interactives", []) if mark.get("type") == "storage"],
-            # every door of every underground section on this map (a section may have several: underground_source)
-            "entranceMarkers": [{"label": section['name'],
-                                 "position": [door['position'][0], door['position'][2]],
-                                 "height": door['position'][1],
-                                 "serverTile": door['tile'], "objectId": door['object']}
-                                for section in underground for door in US.doors(section) if door['map'] == key],
+            # every door of every interior section on this map (a section may have several: underground_source)
+            "entranceMarkers": entrance_markers(key, doors),
         })
     data = {"schema": SCHEMA, "generator": TOOL,
             "note": ("The continent-v2 territories' tab maps, appended by the client after cartography.json's regions. "
                      "Generated: run the generator after a map picture, a frame or a polygon changes."),
             "frame": FRAME, "lattice": lattice, "sources": sources, "regions": regions}
+    rooms = interiors(doors, registry)
+    if rooms:
+        data["interiors"] = rooms
     network = boat_network(checkout, dict(served(registry)))
     if network is not None:
         data["boatNetwork"] = network

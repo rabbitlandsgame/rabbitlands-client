@@ -49,9 +49,12 @@ func run() -> void:
 				ferries += 1
 			else:
 				walking += 1
+			# A map may have several caves (Landfall and Boarsend have two) and
+			# building doors besides: every one keeps its dot beside the border.
 			if source in ["landfall", "pinebrow", "coilmere", "boarsend"]:
-				expect(marks.filter(func(mark: Dictionary) -> bool: return mark.get("type") == &"entrance").size() == 1,
-					"Tan entrance remains visible alongside the walking border")
+				var doors: int = main._current_entrance_records().size()
+				expect(doors > 0 and marks.filter(func(mark: Dictionary) -> bool: return mark.get("type") == &"entrance").size() == doors,
+					"Every entrance remains visible alongside the walking border")
 	expect(walking > 0 and ferries > 0, "Both walking borders and coastlines were checked")
 	# A doorway exit on the shared interior is still a specific place to leave.
 	state.current_map = "landfall_insides"

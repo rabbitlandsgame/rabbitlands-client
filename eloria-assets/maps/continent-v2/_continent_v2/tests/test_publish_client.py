@@ -287,3 +287,29 @@ def test_a_republish_keeps_the_map_picture_only_while_it_shows_the_same_chunks(t
     assert PC.kept_minimap(out, chunks) is None
     # a first publish has no picture to keep
     assert PC.kept_minimap(tmp_path / "nowhere", chunks) is None
+
+
+def test_every_npc_marker_with_a_map_category_keeps_its_shop_dot_and_an_unknown_one_is_refused():
+    """The package's serviceMarkers (map_categories.service_markers): every category the client draws, in marker order;
+    an unknown category stops the publish rather than dropping the shop's dot."""
+    import map_categories as MC
+    def marker(ident, category=None, **extra):
+        row = {"id": ident, "name": ident.title(), "position": [1.0, 2.0, 3.0], "serverTile": [4, 5], **extra}
+        if category is not None:
+            row["mapCategory"] = category
+        return row
+    markers = [marker("bettany", "tavern", mapLabel="Bettany Orl's Tavern"), marker("hemmen"),
+               marker("lio", "flower_shop"), marker("ysolde", "magic_shop"), marker("garrow", "blacksmith"),
+               marker("rowan", "general_store"), marker("ilyon", "")]
+    rows = MC.service_markers(markers)
+    assert [(row["id"], row["category"]) for row in rows] == [
+        ("bettany", "tavern"), ("lio", "flower_shop"), ("ysolde", "magic_shop"), ("garrow", "blacksmith"),
+        ("rowan", "general_store")]
+    assert rows[0] == {"id": "bettany", "name": "Bettany", "label": "Bettany Orl's Tavern", "category": "tavern",
+                       "position": [1.0, 2.0, 3.0], "serverTile": [4, 5]}
+    assert rows[1]["label"] == "Lio"
+    with pytest.raises(MC.CategoryError, match="tessa: map category 'books'"):
+        MC.service_markers([*markers, marker("tessa", "books")])
+    # The publisher builds its rows through the table, and keeps no list of its own.
+    source = (V2 / "publish_client.py").read_text(encoding="utf-8")
+    assert "MC.service_markers(" in source and '("general_store", "tavern")' not in source

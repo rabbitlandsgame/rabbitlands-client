@@ -15,8 +15,19 @@ older models. Existing Low/Medium models and other assets keep their settings.
 Match the reference's anatomy, eye openings, brow angle, lip shape, skin color
 planes, freckles, curved hair clumps and silhouette. Keep the accepted 77-joint
 rig, rest/binds, torso/hands, animation curves, clothing fit and weapon sockets.
-Hair is static Head-bound geometry with pinned roots and controlled cosmetic
-length/volume; no strand simulation, extra bones or per-frame CPU rebuilding.
+Hair has pinned roots and controlled cosmetic length/volume, and is never
+rebuilt per frame.
+
+Motion at High (owner decision D6, 2026-10-27, superseding the earlier "no
+strand simulation, extra bones or per-frame CPU" rule for the RL head): the RL
+hairstyles may swing on spring locks - Godot's SpringBoneSimulator3D on the
+hairstyle's own small skeleton, never on the body's 77 joints - within a
+budget (High only, at most 8 actors, within 12 m of the camera, never while
+mounted); the RL face blinks and holds expressions through its own blend
+shapes, updated every frame up close, less often further away and not at all
+beyond 40 m; and the RL head picks its level of detail by camera distance every
+few frames. Portraits hold a neutral, eyes-open face at full detail. Low and
+Medium keep static hair and no facial animation.
 
 Fit the lower neck from its anatomical neck boundary to the canonical body
 rim. Preserve connected edge order when joining differently sampled rings.

@@ -27,6 +27,10 @@ const BASE_RADIUS := 4.0
 ## a waypoint the server went out of its way to place.
 const SELF_RADIUS := 5.5
 const PIN_RADIUS := 5.5
+## A building's door is a size down and unlabelled on the minimap: a town's
+## doors stand 7-10 m apart, about a dot's width at the default zoom, and the
+## minimap has no hover to name them by (the Tab map does).
+const DOOR_RADIUS := 3.25
 ## The dark ring every mark carries. The ground under the marks is parkland,
 ## water and roof, so a mark that shares a tone with what it stands on is a
 ## texture rather than a mark. Modelled discs solve this the same way; see
@@ -186,7 +190,10 @@ func _draw() -> void:
 		var colour: Color = mark.get("colour", Color.WHITE) as Color
 		var radius: float = mark_radius(mark)
 		var glyph: String = str(mark.get("glyph", ""))
-		if type == &"entrance":
+		if type == &"entrance" and EntranceOverlayScript.is_building(mark):
+			# main.gd gives a building's door DOOR_RADIUS and its shop's colour.
+			_queue_dot(point, radius, colour)
+		elif type == &"entrance":
 			_flush_dots()
 			EntranceOverlayScript.draw_marker(self, point, str(mark.get("label", "Entrance")), 11, radius)
 		elif not glyph.is_empty():

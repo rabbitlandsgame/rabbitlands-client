@@ -431,6 +431,8 @@ static func apply_body_refinement(root: Node3D, skeleton: Skeleton3D, config: Di
 		var instance := node as MeshInstance3D
 		if instance.mesh == null or instance.skin == null or instance.has_meta(&"occlusion_silhouette_clone") or instance.has_meta("portrait_groom") or _is_appearance_hair(instance, root):
 			continue
+		if instance.has_meta(&"rl_head"):  # RLHeadRig's head/beard/hair: fitted to the body already
+			continue
 		if instance.has_meta(BODY_RESULT_META) and instance.mesh == instance.get_meta(BODY_RESULT_META):
 			continue
 		var source := instance.mesh

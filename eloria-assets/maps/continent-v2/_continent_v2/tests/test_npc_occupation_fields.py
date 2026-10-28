@@ -26,6 +26,17 @@ def test_the_portrait_column_carries_the_occupation_after_the_body():
     assert P.portrait_options("actor_type=302") == {"actor_type": "302"}
 
 
+def test_a_configurable_humans_look_sits_between_the_body_and_the_occupation():
+    """server-rows.json "appearance" (server 17d1016, Odo Fenn): every cosmetic byte, in the loader's order."""
+    look = P.npc_appearance({"eyes": 2, "head": 0, "boots": 0, "pants": 9, "shirt": 5, "hair": 106, "skin": 1},
+                            1, "twinbrook--npc-sluice-keeper-odo-fenn")
+    assert P.npc_portrait(1, "Sluice-Keeper", "S", look) == (
+        "actor_type=1,skin=1,hair=106,shirt=5,pants=9,boots=0,head=0,eyes=2,occupation=Sluice-Keeper,facing=S")
+    assert P.npc_appearance(None, 360, "x") == {}
+    with pytest.raises(P.PublishError, match="draws no appearance"):
+        P.npc_appearance(look, 360, "x")
+
+
 def test_a_marker_without_an_occupation_has_none():
     assert P.occupation_field(None, "Tavi Unhar", "stagheath--npc-tavi-unhar") == ""
     assert P.occupation_field("Light-Keeper", "Marta Quell", "m") == "Light-Keeper"

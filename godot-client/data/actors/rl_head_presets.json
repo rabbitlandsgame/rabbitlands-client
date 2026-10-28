@@ -1,0 +1,414 @@
+{
+ "version": 1,
+ "_note": "RL head prototype presets. controls: id_<name> blend-shape control values in [-1, 1] (missing = 0). Colours are linear-ish sRGB triples 0..1. hair/beard name files under assets/actors/native/rl_heads/{hair,beards}/<name>.glb ('none' = bald / clean-shaven). hair 'legacy:<style>' reuses the shipped fitted hairstyle for the body (parted, long, buns, buzzed, bob, ponytail, braid, topknot, mohawk). stubble 0..1 drives the skin-shader stubble mask. brow_style is one of arched, straight, soft, angled (head_<sex>_brows.png R, G, B, A; a number 0..3 blends neighbours), brow_thickness -1..1, liner_wing 0..1 (features B).",
+ "presets": {
+  "mira": {
+   "sex": "female",
+   "label": "Mira",
+   "controls": {},
+   "skin": [
+    0.93,
+    0.74,
+    0.62
+   ],
+   "eyes": [
+    0.36,
+    0.55,
+    0.3
+   ],
+   "hair_color": [
+    0.82,
+    0.4,
+    0.17
+   ],
+   "brow_color": [
+    0.5,
+    0.22,
+    0.12
+   ],
+   "lip_tint": [
+    0.8,
+    0.44,
+    0.38
+   ],
+   "freckles": 0.65,
+   "liner": 0.7,
+   "hair": "mira_bun",
+   "beard": "none",
+   "brow_style": "arched",
+   "brow_thickness": 0.2,
+   "liner_wing": 0.8
+  },
+  "rowan": {
+   "sex": "male",
+   "label": "Rowan",
+   "controls": {},
+   "skin": [
+    0.8,
+    0.565,
+    0.4
+   ],
+   "eyes": [
+    0.3,
+    0.19,
+    0.1
+   ],
+   "hair_color": [
+    0.36,
+    0.22,
+    0.12
+   ],
+   "brow_color": [
+    0.16,
+    0.095,
+    0.055
+   ],
+   "lip_tint": [
+    0.7,
+    0.44,
+    0.36
+   ],
+   "freckles": 0.0,
+   "liner": 0.15,
+   "hair": "rowan_shag",
+   "beard": "stubble",
+   "brow_style": "straight",
+   "brow_thickness": 0.6,
+   "liner_wing": 0.0
+  },
+  "ilse": {
+   "sex": "female",
+   "label": "Ilse",
+   "controls": {
+    "nose_width": -0.5,
+    "nose_length": -0.3,
+    "lip_fullness": -0.45,
+    "eye_tilt": -0.35,
+    "jaw_width": -0.45,
+    "chin_length": 0.35,
+    "brow_height": 0.35,
+    "cheekbones": 0.6,
+    "cheek_fullness": -0.4,
+    "eye_spacing": -0.2
+   },
+   "skin": [
+    0.91,
+    0.8,
+    0.729
+   ],
+   "eyes": [
+    0.45,
+    0.55,
+    0.62
+   ],
+   "hair_color": [
+    0.86,
+    0.8,
+    0.64
+   ],
+   "brow_color": [
+    0.55,
+    0.48,
+    0.36
+   ],
+   "lip_tint": [
+    0.76,
+    0.52,
+    0.52
+   ],
+   "freckles": 0.12,
+   "liner": 0.25,
+   "hair": "legacy:long",
+   "beard": "none",
+   "brow_style": "soft",
+   "brow_thickness": -0.3,
+   "liner_wing": 0.0
+  },
+  "sera": {
+   "sex": "female",
+   "label": "Sera",
+   "controls": {
+    "cheek_fullness": 0.6,
+    "jaw_width": 0.15,
+    "chin_length": -0.45,
+    "eye_size": 0.35,
+    "nose_width": 0.45,
+    "nose_bridge": -0.45,
+    "lip_fullness": 0.65,
+    "cupid_bow": 0.5,
+    "eye_spacing": 0.3,
+    "nose_tip": 0.3
+   },
+   "skin": [
+    0.769,
+    0.592,
+    0.388
+   ],
+   "eyes": [
+    0.33,
+    0.2,
+    0.1
+   ],
+   "hair_color": [
+    0.17,
+    0.1,
+    0.06
+   ],
+   "brow_color": [
+    0.12,
+    0.07,
+    0.04
+   ],
+   "lip_tint": [
+    0.62,
+    0.36,
+    0.33
+   ],
+   "freckles": 0.0,
+   "liner": 0.5,
+   "hair": "legacy:braid",
+   "beard": "none",
+   "brow_style": "arched",
+   "brow_thickness": 0.0,
+   "liner_wing": 0.0
+  },
+  "ari": {
+   "sex": "female",
+   "label": "Ari",
+   "controls": {
+    "cheekbones": 0.75,
+    "eye_tilt": 0.6,
+    "nose_width": 0.55,
+    "nose_depth": -0.3,
+    "lip_fullness": 0.8,
+    "chin_projection": 0.3,
+    "ear_size": -0.3,
+    "brow_ridge": 0.2,
+    "eyelid": 0.2
+   },
+   "skin": [
+    0.404,
+    0.259,
+    0.184
+   ],
+   "eyes": [
+    0.22,
+    0.13,
+    0.07
+   ],
+   "hair_color": [
+    0.05,
+    0.04,
+    0.035
+   ],
+   "brow_color": [
+    0.04,
+    0.03,
+    0.025
+   ],
+   "lip_tint": [
+    0.42,
+    0.24,
+    0.22
+   ],
+   "freckles": 0.0,
+   "liner": 0.45,
+   "hair": "legacy:buns",
+   "beard": "none",
+   "brow_style": "angled",
+   "brow_thickness": 0.1,
+   "liner_wing": 0.6
+  },
+  "tavi": {
+   "sex": "male",
+   "label": "Tavi",
+   "controls": {
+    "brow_ridge": 0.6,
+    "jaw_width": 0.6,
+    "nose_width": 0.4,
+    "nose_bridge": 0.5,
+    "eyelid": -0.5,
+    "cheek_fullness": 0.3,
+    "mouth_width": 0.3,
+    "chin_width": 0.3,
+    "nose_length": 0.2
+   },
+   "skin": [
+    0.769,
+    0.592,
+    0.431
+   ],
+   "eyes": [
+    0.28,
+    0.17,
+    0.09
+   ],
+   "hair_color": [
+    0.22,
+    0.13,
+    0.07
+   ],
+   "brow_color": [
+    0.13,
+    0.08,
+    0.05
+   ],
+   "lip_tint": [
+    0.68,
+    0.46,
+    0.4
+   ],
+   "freckles": 0.0,
+   "liner": 0.2,
+   "stubble": 0.5,
+   "hair": "rowan_shag",
+   "beard": "full_beard",
+   "brow_style": "straight",
+   "brow_thickness": 0.8,
+   "liner_wing": 0.0
+  },
+  "bren": {
+   "sex": "male",
+   "label": "Bren",
+   "controls": {
+    "nose_length": 0.45,
+    "nose_tip": -0.4,
+    "eye_size": -0.2,
+    "eye_spacing": 0.3,
+    "chin_length": 0.35,
+    "cheekbones": -0.35,
+    "ear_size": 0.4,
+    "lip_fullness": -0.3,
+    "brow_height": 0.2
+   },
+   "skin": [
+    0.91,
+    0.745,
+    0.647
+   ],
+   "eyes": [
+    0.35,
+    0.48,
+    0.62
+   ],
+   "hair_color": [
+    0.62,
+    0.32,
+    0.13
+   ],
+   "brow_color": [
+    0.5,
+    0.26,
+    0.12
+   ],
+   "lip_tint": [
+    0.72,
+    0.46,
+    0.42
+   ],
+   "freckles": 0.35,
+   "liner": 0.15,
+   "stubble": 0.0,
+   "hair": "legacy:parted",
+   "beard": "short_beard",
+   "brow_style": "soft",
+   "brow_thickness": 0.0,
+   "liner_wing": 0.0
+  },
+  "kellan": {
+   "sex": "male",
+   "label": "Kellan",
+   "controls": {
+    "eye_size": 0.4,
+    "eye_tilt": 0.3,
+    "nose_width": -0.4,
+    "nose_length": -0.3,
+    "jaw_width": -0.5,
+    "chin_width": -0.3,
+    "lip_fullness": 0.3,
+    "cheek_fullness": -0.2,
+    "brow_ridge": -0.3
+   },
+   "skin": [
+    0.863,
+    0.714,
+    0.6
+   ],
+   "eyes": [
+    0.36,
+    0.42,
+    0.3
+   ],
+   "hair_color": [
+    0.42,
+    0.3,
+    0.17
+   ],
+   "brow_color": [
+    0.28,
+    0.19,
+    0.11
+   ],
+   "lip_tint": [
+    0.7,
+    0.47,
+    0.43
+   ],
+   "freckles": 0.1,
+   "liner": 0.15,
+   "stubble": 0.2,
+   "hair": "legacy:buzzed",
+   "beard": "none",
+   "brow_style": "soft",
+   "brow_thickness": -0.2,
+   "liner_wing": 0.0
+  },
+  "orin": {
+   "sex": "male",
+   "label": "Orin",
+   "controls": {
+    "brow_ridge": 0.45,
+    "nose_width": 0.7,
+    "lip_fullness": 0.6,
+    "jaw_width": 0.3,
+    "chin_projection": 0.4,
+    "nose_depth": -0.2,
+    "eye_size": -0.1,
+    "cupid_bow": 0.3
+   },
+   "skin": [
+    0.357,
+    0.227,
+    0.165
+   ],
+   "eyes": [
+    0.18,
+    0.11,
+    0.06
+   ],
+   "hair_color": [
+    0.04,
+    0.035,
+    0.03
+   ],
+   "brow_color": [
+    0.035,
+    0.03,
+    0.025
+   ],
+   "lip_tint": [
+    0.4,
+    0.24,
+    0.22
+   ],
+   "freckles": 0.0,
+   "liner": 0.2,
+   "stubble": 0.3,
+   "hair": "legacy:buzzed",
+   "beard": "goatee",
+   "brow_style": "straight",
+   "brow_thickness": 0.3,
+   "liner_wing": 0.0
+  }
+ }
+}

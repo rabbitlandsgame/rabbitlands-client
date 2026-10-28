@@ -914,6 +914,13 @@ def main():
             landmarks.append({"id": mark["id"], "name": mark.get("name", mark["id"]),
                               "label": mark.get("label", mark.get("name", mark["id"])),
                               "type": "landmark", "position": p, "serverTile": mark.get("serverTile")})
+    # Every NPC marker with a map category keeps its shop dot (map_categories.py); an unknown category is refused,
+    # never dropped.
+    import map_categories as MC
+    try:
+        service_markers = MC.service_markers(doc["gameplay"].get("npcMarkers", []))
+    except MC.CategoryError as error:
+        raise SystemExit(f"refused: {error}") from None
     manifest = {
         "schemaVersion": "1.0.0", "assetVersion": "1.0.0",
         "asset": {"id": REGION, "name": stub["asset"]["name"], "glb": "world.glb", "units": "meters",
@@ -931,11 +938,7 @@ def main():
                          for mark in doc["gameplay"].get("interactives", []) if mark.get("type") == "storage"],
         "npcMarkers": [], "harvestablesSchema": HARVEST_SCHEMA, "harvestables": harvestables,
         "harvestGroupings": harvest_groupings, "portals": [],
-        "serviceMarkers": [{"id": mark["id"], "name": mark["name"],
-                            "label": mark.get("mapLabel", mark["name"]), "category": mark["mapCategory"],
-                            "position": mark["position"], "serverTile": mark["serverTile"]}
-                           for mark in doc["gameplay"].get("npcMarkers", [])
-                           if mark.get("mapCategory") in ("general_store", "tavern")],
+        "serviceMarkers": service_markers,
         "environment": stub["environment"],
         "lighting": {"markers": sorted(markers, key=lambda m: m["id"])},
         "continentGeography": {"revision": stub["continentGeography"]["revision"],

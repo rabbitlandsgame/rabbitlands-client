@@ -48,6 +48,12 @@ func make_actor(slug: String, model: Dictionary, animations: Dictionary, equipme
 		(marker as MeshInstance3D).hide()
 	return actor
 
+## Whether this run draws the RL head for a Human at High (the renderer
+## supports it and RL_HEADS is not classic). Otherwise develop's expectations
+## hold unchanged, whatever the actor built.
+static func rl_heads_on() -> bool:
+	return ReplicatedActor3D.rl_heads_renderer_supported() and not ReplicatedActor3D.rl_heads_classic()
+
 func run() -> void:
 	output = OS.get_environment("ELORIA_GEAR_ARTIFACTS")
 	if not output.is_empty():
@@ -101,8 +107,14 @@ func run() -> void:
 			expect(diagnostics["visuals"] == kit[1] and diagnostics["fallback"] == 0,
 				slug + " complete " + str(kit[0]) + " kit")
 			if equipment["models"]["3:" + str(kit[1][3])].get("raceFeatures", "") == "show":
+				# Under the RL head (a Human at High) its cranium closes the head.
+				var rl_head: RLHeadRig = actor.rl_head() if rl_heads_on() else null
 				for scalp: Node in actor.find_children("scalp", "MeshInstance3D", true, false):
-					expect((scalp as MeshInstance3D).visible, slug + " " + str(kit[0]) + " preserves the head")
+					expect((scalp as MeshInstance3D).visible != (rl_head != null), slug + " " + str(kit[0]) + " preserves the head")
+				if rl_head != null:
+					var head: Array = rl_head.mesh_nodes()["head"]
+					expect(not head.is_empty() and (head[0][0] as MeshInstance3D).is_visible_in_tree(),
+						slug + " " + str(kit[0]) + " keeps the RL cranium")
 			for hair: Node in actor.get_skeleton().get_children():
 				if hair.name.begins_with("AppearanceHair_"):
 					expect(not (hair as Node3D).visible, slug + " headgear covers hair")

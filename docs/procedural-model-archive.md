@@ -42,6 +42,19 @@ rock shell, pools and light; the caves' art is reviewed Meshy kit scenery
 (`tools/prepare_underground_scenery.py`). The builder's docstring documents
 the source format, the theme table and the cutaway conventions.
 
+A second, separate generator was approved on 2026-10-27 (owner, chat:
+"Implement your plan" - Landfall town interiors room shells):
+`eloria-assets/maps/continent-v2/_continent_v2/build_town_interiors.py` builds
+the building interiors of Landfall's town (`landfall_town`: tavern, shops,
+smithy, homes and the keep) from `_continent_v2/content/landfall_town.json`
+(read by `town_source.py`). It imports the cave builder without changing it,
+refuses to run without `--owner-approved`, and draws only room shells: floors,
+straight walls with caps and trim bands, partitions with doorway openings,
+windows, wall and floor decals, stair art and lit street doors, textured with
+the codex surfaces under `godot-client/src/world/look/textures/interior/`.
+Furniture is reviewed Meshy kit scenery placed by the scenery packager; the
+builder makes no props or models.
+
 Procedural actor and equipment definitions are removed, including 158 actor
 model entries, 163 actor-type mappings, four equipment visuals and 710 obsolete
 authoring-catalog records. Historical identifiers remain reserved in the

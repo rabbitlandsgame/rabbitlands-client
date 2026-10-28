@@ -38,6 +38,14 @@ godot-client/.godot/
 # Biome masks encode four independent numeric weights, including alpha.
 # Keep their import settings so Godot never bleeds RGB under zero alpha.
 !godot-client/assets/world/biome_blend/masks/*.png.import
+# The RL head's maps load from the PCK as imported: VRAM-compressed with
+# mipmaps (BPTC, without alpha-border fixing, for the channel-packed masks;
+# features2 at 1024 px). Keep their import settings so a checkout draws what a
+# package ships (tools/package_client.py LOADED_IMAGE_FOLDERS).
+!godot-client/assets/actors/native/rl_head_textures/*.png.import
+# The RL head's GLBs are a loose-only actor folder: its local import guard
+# (AGENTS.md; actor_shipping loose_folders) is generated, never committed.
+godot-client/assets/actors/native/rl_heads/.gdignore
 *.uid
 godot-client/assets/actors/native/creatures/*-basecolor.png
 godot-client/assets/actors/native/races/*Atlas.png
@@ -60,6 +68,10 @@ eloria-assets/maps/*/world.glb.report.json
 # built by godot-client/tools/build_vram_textures.py at package time, never
 # tracked (the package stage gets its own copy).
 eloria-assets/maps/**/shared-assets/vram/
+# The same for one map's images in the shared image pool (--unskip-map) and for
+# the embedded images of scenery GLBs (--scenery-config; world_object_images.gd).
+eloria-assets/maps/_shared/images/vram/
+godot-client/assets/world/**/vram/
 /.vram-encode-cache/
 # The tool's per-image quality numbers (also beside the committed test sidecars).
 **/shared-assets/vram/report.json

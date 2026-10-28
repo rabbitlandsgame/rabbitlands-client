@@ -72,6 +72,30 @@ const PASSAGE_DESTINATION_PHRASE := "A way leads on into "
 ## object the registry could not place a model for.
 const RING_INNER_RADIUS := 0.62
 const RING_OUTER_RADIUS := 0.78
+## A building's street door (objects.json `building: true`, Landfall Town)
+## names itself within this many metres of the player, or under the pointer:
+## six doors stand within 45 m along one avenue, and labels drawn to 80 m
+## through the walls covered the street. Its interior exit follows the same
+## rule. Cave mouths keep their permanent labels.
+const BUILDING_LABEL_METRES := 12.0
+## A building door's label never draws beyond this distance from the camera,
+## whatever the player's distance: it is a door's name, not a landmark.
+const BUILDING_LABEL_RANGE := 45.0
+## An interior's way out names itself at its door - the record's `exitOffset`,
+## where the door stands in the wall - at the door's lintel
+## (EXIT_LABEL_HEIGHT), and only within EXIT_LABEL_METRES of the door (or
+## under the pointer). Drawn in the wall at 12 m a camera-side label sat under
+## the bottom HUD bar (review 2026-10-27, market-a-game); lifted 1.4 m above a
+## 3 m wall over the exit tile it looked ~3.7 m farther off than its door at
+## the town's -50 degree pitch and floated over the room (magic_shop, smithy,
+## clerk_house, weaver_house). A label that would still fall under the HUD
+## bar is lifted in screen space only (`keep_label_above`, Main), so it never
+## leaves its door in the world.
+const EXIT_LABEL_METRES := 6.0
+const EXIT_LABEL_HEIGHT := 2.3
+## The gap a label lifted clear of the bottom HUD bar keeps above it, in the
+## 3D viewport's pixels.
+const LABEL_HUD_MARGIN := 6.0
 
 var object_id: int = -1
 var kind: int = 0
@@ -124,6 +148,37 @@ var _model_yaw := 0.0
 ## node, whose model is set back into the rock face (`presentation.inset`).
 var _model_offset := Vector3.ZERO
 var _bound_body: WeakRef = null
+## A building's street door, standing on its exterior tile: picked, named near
+## the player or under the pointer, no ring (`BUILDING_LABEL_METRES`).
+var building_door := false
+## The same door object on the interior's exit tile (one object id serves both
+## ends): named by the record's `exitLabel` under the same rule.
+var building_exit := false
+## The name a building door or exit gives itself (the record's `label` or
+## `exitLabel`), without the "Click to enter" line.
+var door_label := ""
+## Where the door's own label stands relative to the tile's centre: the
+## painted door on the facade (`modelOffset`), or the tile.
+var _door_point := Vector3.ZERO
+## A way on inside an interior map: a passage end (objects.json
+## `passage: true`), and its record's label: the end's own for the town's
+## stairs ("Upstairs: the guest rooms"), the section it leads into for a cave
+## passage (retarget_underground.py). Empty for every other object.
+var _passage_end := false
+var _passage_label := ""
+## A stair end's drawn stair relative to the tile's centre (its record's
+## `modelOffset`): the pick reaches from the tile to the stair, as a door's
+## does to its painted door.
+var _stair_point := Vector3.ZERO
+## A lore object inside an interior (objects.json `pickOnly`, ids
+## 59251-59299): the prop it describes already stands in the room's scenery,
+## so the record is only a click target centred on that prop (`modelOffset`)
+## with no ring, no model and no map mark, named under the pointer.
+var pick_only := false
+var object_label := ""
+## Where a building door's, an exit's or a lore object's own label stands,
+## relative to the tile's centre.
+var _label_point := Vector3.ZERO
 
 ## The smallest side a footprint pick box is given, so a thin hedge or a kelp
 ## strand is still a target a player can hit.
@@ -257,8 +312,9 @@ static func from_pick_collider(collider: Variant) -> MapObject3D:
 	return null
 
 ## Where this leads, as far as the server said: an exit is named for its
-## destination, and a waygate's or a boat's text names it in a fixed phrase.
-## Empty when neither applies.
+## destination, and a waygate's, a boat's or a cave passage's text names it in
+## a fixed phrase; a building door and a town stair end are named by their
+## objects.json records. Empty when none of these applies.
 func destination() -> String:
 	if is_exit():
 		return label
@@ -266,7 +322,144 @@ func destination() -> String:
 		for phrase: String in [PORTAL_DESTINATION_PHRASE, BOAT_DESTINATION_PHRASE, PASSAGE_DESTINATION_PHRASE]:
 			if detail.contains(phrase):
 				return detail.get_slice(phrase, 1).get_slice(". ", 0).trim_suffix(".").strip_edges()
+		# A building's door says what it is ("The Unlit Boat. Open to all."),
+		# not where it leads in the gates' phrase: its record names it.
+		if (building_door or building_exit) and not door_label.is_empty():
+			return door_label
+		# A town stair end's text is its own label ("Upstairs: the guest
+		# rooms."), not the caves' phrase: its passage record names it, else
+		# the text's first sentence. A cave passage end's text always holds
+		# the phrase, so it is answered above, as it always was.
+		if _passage_end and not detail.strip_edges().is_empty():
+			if not _passage_label.is_empty():
+				return _passage_label
+			return detail.get_slice(". ", 0).trim_suffix(".").strip_edges()
 	return ""
+
+## A way on inside an interior: a passage end (a town stair or a cave
+## passage).
+func is_passage_end() -> bool:
+	return _passage_end
+
+## A passage end drawn as a stair beside its tile (its record's `modelOffset`:
+## the town's stairs). Main walks the player to it first when it is out of
+## reach, as to a building's door; a cave passage end is clicked as before.
+func is_stair_end() -> bool:
+	return _passage_end and _stair_point != Vector3.ZERO
+
+## Whether main should keep this object's label in step with the player's
+## distance and the pointer (`update_label_focus`): a building door or exit,
+## or a lore object.
+func wants_label_focus() -> bool:
+	return ((building_door or building_exit) and get_node_or_null("EntranceLabel") != null) \
+		or (pick_only and get_node_or_null("ObjectLabel") != null)
+
+## Shows a building door's name while the player stands within
+## BUILDING_LABEL_METRES of the door (measured flat, from the painted door), an
+## exit's within EXIT_LABEL_METRES of its door in the wall, and either while
+## the pointer is on it; a lore object's only under the pointer.
+## `player_position` is the local character's world position (INF when there
+## is none).
+func update_label_focus(player_position: Vector3, hovered: bool) -> void:
+	var title := get_node_or_null("ObjectLabel" if pick_only else "EntranceLabel") as Label3D
+	if title == null:
+		return
+	var near := false
+	if player_position.is_finite() and is_inside_tree() and not pick_only:
+		var door := global_position + _door_point
+		near = Vector2(player_position.x - door.x, player_position.z - door.z).length() \
+			<= (EXIT_LABEL_METRES if building_exit else BUILDING_LABEL_METRES)
+	var shown := hovered or near
+	if title.visible != shown:
+		title.visible = shown
+
+## Keeps a shown exit label clear of the bottom HUD: when the label would
+## reach below `floor_y` (the top of the bottom HUD under the label's width,
+## Main._label_floor_y of its `label_span`, in `camera`'s viewport pixels),
+## it is lifted on screen just far enough (Label3D.offset, which a fixed-size
+## billboard draws in screen space); its anchor stays at the door. Returns the
+## lift in viewport pixels (0 for none).
+func keep_label_above(camera: Camera3D, floor_y: float) -> float:
+	var title := get_node_or_null("EntranceLabel") as Label3D
+	if title == null or not building_exit:
+		return 0.0
+	var lift := 0.0
+	var per_unit := 0.0
+	if title.visible and camera != null and camera.is_inside_tree() and title.is_inside_tree() \
+			and not camera.is_position_behind(title.global_position):
+		per_unit = screen_pixels_per_unit(camera)
+		var anchor := camera.unproject_position(title.global_position)
+		var half := label_half_height(title) * per_unit
+		lift = label_lift(anchor.y, half, floor_y, float(camera.get_viewport().get_visible_rect().size.y))
+	var offset_y := lift / (per_unit * title.pixel_size) if lift > 0.0 and per_unit > 0.0 else 0.0
+	if not is_equal_approx(title.offset.y, offset_y):
+		title.offset.y = offset_y
+	return lift
+
+## The exit label's extent across `camera`'s screen, in its viewport's pixels:
+## (left, right), its anchor plus and minus half its widest line. The widest
+## possible span, (-INF, INF), while it is not drawn there.
+func label_span(camera: Camera3D) -> Vector2:
+	var title := get_node_or_null("EntranceLabel") as Label3D
+	if title == null or not title.visible or camera == null or not camera.is_inside_tree() \
+			or not title.is_inside_tree() or camera.is_position_behind(title.global_position):
+		return Vector2(-INF, INF)
+	var anchor := camera.unproject_position(title.global_position)
+	var half := label_half_width(title) * screen_pixels_per_unit(camera)
+	return Vector2(anchor.x - half, anchor.x + half)
+
+## The floor a label spanning `left`..`right` (viewport pixels) keeps above:
+## the top of the highest rectangle of `hud` (the bottom HUD's, in the same
+## pixels: Main._bottom_hud_rects) reaching under that span, else
+## `screen_bottom`.
+static func label_floor(hud: Array, left: float, right: float, screen_bottom: float) -> float:
+	var floor_y := screen_bottom
+	for value: Variant in hud:
+		if value is not Rect2:
+			continue
+		var rect: Rect2 = value
+		if rect.position.x < right and rect.end.x > left:
+			floor_y = minf(floor_y, rect.position.y)
+	return floor_y
+
+## Half the width of a label's widest line, outline included, in mesh units
+## (the block is centred on the anchor; as `label_half_height`).
+static func label_half_width(title: Label3D) -> float:
+	var font: Font = title.font if title.font != null else ThemeDB.fallback_font
+	var widest := 0.0
+	for line: String in title.text.split("\n"):
+		widest = maxf(widest, font.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, title.font_size).x)
+	return (widest + float(title.outline_size)) * 0.5 * title.pixel_size
+
+## Half the height of a label's text block, outline included, in mesh units
+## (its lines at the font's height; the block is centred on the anchor). Not
+## the label's AABB: a billboard's is a cube around every turn it may take.
+static func label_half_height(title: Label3D) -> float:
+	var font: Font = title.font if title.font != null else ThemeDB.fallback_font
+	var lines := title.text.count("\n") + 1
+	var height := float(lines) * (font.get_height(title.font_size) + title.line_spacing) \
+		- title.line_spacing + float(title.outline_size)
+	return maxf(0.0, height) * 0.5 * title.pixel_size
+
+## How many viewport pixels one unit of a fixed-size billboard's mesh spans
+## on `camera`'s screen: the fixed-size shader scales the mesh by its view
+## depth (perspective) or by the frustum's height (orthogonal), so the answer
+## is the same everywhere on screen.
+static func screen_pixels_per_unit(camera: Camera3D) -> float:
+	var height := float(camera.get_viewport().get_visible_rect().size.y)
+	var projection := camera.get_camera_projection()
+	return height * 0.5 * (projection.y.y if camera.projection != Camera3D.PROJECTION_ORTHOGONAL else 1.0)
+
+## The lift (pixels) a label centred at screen height `anchor_y`, reaching
+## `half_height` below it, needs to keep LABEL_HUD_MARGIN above `floor_y`.
+## A door just off the bottom of the screen (`screen_bottom`) - the player
+## near 6 m from a camera-side door - is still named over the bar; one more
+## than the bar's height below it is not: a label pinned to the bar would
+## point at nothing near.
+static func label_lift(anchor_y: float, half_height: float, floor_y: float, screen_bottom: float) -> float:
+	if anchor_y > screen_bottom + maxf(0.0, screen_bottom - floor_y):
+		return 0.0
+	return maxf(0.0, anchor_y + half_height + LABEL_HUD_MARGIN - floor_y)
 
 ## The glyph the maps draw for this object, or "" for one drawn as a disc.
 func map_glyph() -> String:
@@ -458,6 +651,13 @@ func _build_visual(catalog: Dictionary) -> void:
 		model_id = "map_authored_" + str(object_id)
 		# Harvest seams retain their active ring and resource map marker.
 		_map_authored = _map_authored or not is_harvestable()
+	# A passage end inside an interior map: its record names where it leads
+	# (`destination()`, the maps' hover name for its P), and may point at the
+	# stair it is drawn as (`modelOffset`).
+	_passage_end = bool(authored.get("passage", false)) and is_portal()
+	_passage_label = str(authored.get("label", "")) if _passage_end else ""
+	if _passage_end:
+		_stair_point = _flat_offset(authored.get("modelOffset"))
 	# The server calls both ends "Portal". Scope the exterior replacement by
 	# its authored tile so the same object id does not add a second doorway
 	# inside the underground map.
@@ -465,36 +665,98 @@ func _build_visual(catalog: Dictionary) -> void:
 	var entrance := bool(authored.get("entrance", false)) and (
 		(exterior_tile.size() == 2 and server_tile == Vector2i(exterior_tile[0], exterior_tile[1]))
 		or (exterior_tile.is_empty() and not is_portal()))
+	# A building's door (Landfall Town) has no model of its own: the door is
+	# painted on the townhouse's facade, and the record says where
+	# (`modelOffset`, world metres from the tile's centre). The same object id
+	# stands on the interior's exit tile, where `exitLabel` names the way out.
+	var building := bool(authored.get("building", false)) and is_portal()
+	building_door = entrance and building
+	building_exit = building and not entrance and bool(authored.get("entrance", false))
+	if building_door or building_exit:
+		door_label = str(authored.get("label" if building_door else "exitLabel", ""))
+		if door_label.is_empty():
+			door_label = "The way out" if building_exit else "A door"
+		var offset: Variant = authored.get("modelOffset" if building_door else "exitOffset")
+		if offset is Array and (offset as Array).size() == 3:
+			_door_point = Vector3(float(offset[0]), 0.0, float(offset[2]))
 	if entrance:
 		_map_authored = false
 		model_id = ""
 		_add_entrance_visual(authored)
+	pick_only = bool(authored.get("pickOnly", false)) and not is_harvestable() and not is_portal() \
+		and not entrance and not is_storage()
+	if pick_only:
+		object_label = str(authored.get("label", label))
+		_model_offset = _flat_offset(authored.get("modelOffset"))
 	# A role the region package authors is already standing in the world art:
 	# a secret's door is a `Secret_*` node in the region mesh, on the tile the
 	# server states. A ring under one duplicates the door and advertises it.
-	if not _map_authored:
+	# A building's door is the painted door itself: picked, hovered and named,
+	# with no ring on the street.
+	if not _map_authored and not building_door:
 		_add_ring()
 	# A waygate is drawn on the maps as its glyph, not as a disc under it, and
 	# a grouped node by its grouping's one mark.
 	if map_glyph().is_empty() and not grouped:
 		_add_map_marker()
+	if building_door or building_exit:
+		# One pick from the tile to the painted door, so a click on the door
+		# itself or on the step in front of it both enter.
+		_model_offset = _door_point * 0.5
+	elif _passage_end and _stair_point != Vector3.ZERO:
+		# Likewise from a stair end's tile to the stair drawn beside it.
+		_model_offset = _stair_point * 0.5
 	_add_pick_shape(height)
 	if not authored.is_empty() and $PickShape.shape is CylinderShape3D:
 		($PickShape.shape as CylinderShape3D).radius = float(authored.get("radius", .9))
+		var reach := _door_point if building_door or building_exit else _stair_point if _passage_end else Vector3.ZERO
+		if reach != Vector3.ZERO:
+			($PickShape.shape as CylinderShape3D).radius = maxf(float(authored.get("radius", .9)),
+				reach.length() * 0.5 + 0.6)
 	if is_storage():
 		_add_storage_visual(height)
-	elif entrance:
+	elif entrance or building_exit:
 		var title := Label3D.new()
 		title.name = "EntranceLabel"
-		title.text = str(authored.get("label", "Underground entrance")) + "\nClick to enter"
-		title.position.y = maxf(1.8, float(authored.get("visualHeight", 0.0)) + .35)
+		if building_door or building_exit:
+			title.text = door_label + ("\nClick to enter" if building_door else "\nClick to leave")
+			var standing := float(authored.get("visualHeight", authored.get("height", 0.0)))
+			_label_point = _door_point
+			if building_door:
+				title.position = _label_point + Vector3.UP * maxf(1.8, standing + .35)
+			else:
+				# At the door in the wall, at its lintel (EXIT_LABEL_METRES).
+				title.position = _label_point + Vector3.UP * EXIT_LABEL_HEIGHT
+		else:
+			title.text = str(authored.get("label", "Underground entrance")) + "\nClick to enter"
+			title.position.y = maxf(1.8, float(authored.get("visualHeight", 0.0)) + .35)
 		title.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 		title.fixed_size = true
 		WORLD_LABEL_STYLE.apply(title, 15, .0012953, 5)
 		TextColors.bind_property(title, "world_entrance", "modulate")
 		title.no_depth_test = true
 		title.layers = WORLD_LABEL_STYLE.RENDER_LAYER
-		title.visibility_range_end = 80
+		title.visibility_range_end = BUILDING_LABEL_RANGE if building_door or building_exit else 80.0
+		# Named only near the player or under the pointer (main keeps it in
+		# step: update_label_focus).
+		title.visible = not (building_door or building_exit)
+		add_child(title)
+	elif pick_only and not object_label.is_empty():
+		# Named under the pointer only: a room of lore objects is not a wall of
+		# labels (main keeps it in step: update_label_focus).
+		var title := Label3D.new()
+		title.name = "ObjectLabel"
+		title.text = object_label
+		_label_point = _model_offset
+		title.position = _label_point + Vector3.UP * (maxf(height, 0.8) + .35)
+		title.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		title.fixed_size = true
+		WORLD_LABEL_STYLE.apply(title, 15, .0012953, 5)
+		TextColors.bind_property(title, "world_entrance", "modulate")
+		title.no_depth_test = true
+		title.layers = WORLD_LABEL_STYLE.RENDER_LAYER
+		title.visibility_range_end = BUILDING_LABEL_RANGE
+		title.visible = false
 		add_child(title)
 	elif label == "Cache":
 		var title := Label3D.new()
@@ -665,6 +927,13 @@ func _add_model(entry: Dictionary) -> float:
 		_model_offset = -Vector3(sin(_model_yaw), 0.0, cos(_model_yaw)) * float(presentation.inset)
 		model.position = _model_offset
 	return float(entry.get("height", 1.0)) * model.scale.y
+
+## A record's `modelOffset` [dx, dy, dz] (metres from the tile's centre) laid
+## flat, or zero for none.
+static func _flat_offset(value: Variant) -> Vector3:
+	if value is Array and (value as Array).size() == 3:
+		return Vector3(float(value[0]), 0.0, float(value[2]))
+	return Vector3.ZERO
 
 func _stated_number(key: String) -> bool:
 	var value: Variant = presentation.get(key)

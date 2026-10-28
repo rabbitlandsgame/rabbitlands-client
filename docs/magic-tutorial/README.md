@@ -90,11 +90,11 @@ come from vendors. No permanent money or pickpoint spend is required here.
 
 For each lesson, derive the practice profile from its actual spells and powers:
 meet the variant's Magic requirement and the family's nexus/power requirements;
-normally use at least spell level +28 Magic for reliable introductory casts.
+use the recommended level for introductory casts at 100% average potency.
 Avoid arbitrary global “Power 10 unlocked” assumptions. Give enough health and
 ether capacity that the planned P1/P2 comparison is measurable without overheal.
-The short optional fizzle exercise uses a visibly less-practiced profile and
-normal random rolls. It can be left at any time; failing is never a progress gate.
+The short optional potency exercise uses a visibly less-practiced profile and
+three valid Heal casts with a narrow potency spread. It can be left at any time.
 
 Practice XP appears in practice Statistics. At departure, restore real statistics
 and sigil ownership and inspect the real next unlock. A fixed, one-time journal
@@ -151,21 +151,21 @@ change recipients and return to walking without accidentally attacking?
 **Picture:** Tavin points to a cabinet and a kettle. The ether bar is low; the
 book names a missing material instead of leaving the player to guess.
 
-**Sera:** “A failed cast spent nothing - not your ether, not your ingredients. Try again.”
+**Sera:** “A rejected request spends nothing. Every valid cast works and pays its quoted cost; practice improves its potency.”
 
 **Play:** In a safe preparation step, fix a real missing-reagent condition by
 withdrawing the named item from storage. Restore depleted ether with a Potion
 of Mana or a larger appropriate potion. Eat Bread and observe an ordinary
 positive-food regeneration tick while walking to the fountain. Offer a short
-fizzle experiment; if a natural failure happens, compare ether and item counts
-before retrying. No forced failure or requirement to wait for bad luck.
+potency experiment; compare healing and resource counts over three valid casts.
+Every attempt pays the quote, while healing varies within a narrow range.
 
-**Learn:** A rejected request spends nothing, and neither does an attempted
-cast that fizzles; only success consumes ether and reagents. Positive food supports
+**Learn:** A rejected request spends nothing. Every valid cast consumes its
+quoted ether and reagents, without random fizzles. Positive food supports
 passive ether recovery on the normal food tick. Potions have their own cooldowns.
 
 **Evidence:** Required material arrives, ether actually rises after a potion,
-and food is positive. Record regeneration/fizzle observations separately from
+and food is positive. Record regeneration/potency observations separately from
 required actions. **Recovery:** Bounded cabinet refills; no wait-only mana lock.
 **Observe:** After a blocked cast, does the player solve the stated shortage?
 

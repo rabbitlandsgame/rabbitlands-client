@@ -15,6 +15,9 @@ DOORS (a section's ways out to the overworld)
   The old form stays readable as one door: a single "entrance" {map, marker, object, tile, position, returnTile} with
   the section's own "arrival", "exit" and optional "exitFacing". A section has one form or the other, never both, and
   may have no door at all when a passage reaches it (a chain's deeper level).
+  A door's optional `kind` is "underground" (the default: a cave mouth with its scene marker) or "building" (2026-10-27,
+  content/landfall_town.json: a door painted on a building's facade; it has no `marker`, its `tile` and `returnTile`
+  are the source's, and it carries `label`, `exitLabel` and an optional map `category`; underground.py checks them).
 
 PASSAGES (the source's top-level list; same-map portal pairs between two sections)
   "passages": [{object, name?, art, ends: [{section, tile, arrival, facing?, object?, art?}, {...}]}, ...]
@@ -45,6 +48,9 @@ import copy
 import json
 
 DOOR_KEYS = ("map", "marker", "object", "tile", "position", "returnTile")
+DOOR_KINDS = ("underground", "building")
+# A building door (kind "building", town_source.py reads the town's) has no scene marker.
+BUILDING_DOOR_KEYS = tuple(key for key in DOOR_KEYS if key != "marker")
 MOUTH_ARTS = ("stairs", "crawl", "flooded")
 
 
@@ -61,7 +67,11 @@ def doors(section):
             raise SourceError(f"{sid}: give `entrances` or the old `entrance`, not both")
         result = []
         for index, door in enumerate(section["entrances"]):
-            missing = [k for k in (*DOOR_KEYS, "arrival", "exit") if k not in door]
+            kind = door.get("kind", "underground")
+            if kind not in DOOR_KINDS:
+                raise SourceError(f"{sid}: entrance {index} kind {kind!r} is not one of {DOOR_KINDS}")
+            keys = DOOR_KEYS if kind == "underground" else BUILDING_DOOR_KEYS
+            missing = [k for k in (*keys, "arrival", "exit") if k not in door]
             if missing:
                 raise SourceError(f"{sid}: entrance {index} lacks {missing}")
             result.append({**copy.deepcopy(door), "index": index})

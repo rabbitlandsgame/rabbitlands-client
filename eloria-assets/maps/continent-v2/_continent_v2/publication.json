@@ -274,7 +274,7 @@
     "laneDepartures": 1192
    },
    "npcPosts": 8,
-   "servedReachTiles": 173375
+   "servedReachTiles": 173374
   },
   "pinebrow": {
    "frame": {
@@ -670,12 +670,12 @@
  "inputs": {
   "crossingsSha256": "30eb2e9d09de9edd5b1aa0c448fe8c21a05efd2554a194219139aecb2d724dac",
   "contentTables": {
-   "eloria-assets/maps/continent-v2/_continent_v2/content/server-rows.json": "5085bc028a1b3d7f2d323d8878cf793533df225906ef0974aa99f08b5b9319ea",
+   "eloria-assets/maps/continent-v2/_continent_v2/content/server-rows.json": "431096bf1e4286bcdc269014535a1ed142edf81a8e6c456b31b46cba2c53a2d8",
    "eloria-assets/maps/continent-v2/_continent_v2/content/server-tables.json": "46be5845cf57cc6b787cf7485bab516c083a18ba5f396a77721b3b9b6c726ac4",
    "eloria-assets/maps/continent-v2/_continent_v2/content/questlines.txt": "a739e3c0558914ef54c3d41413b675658578466e3a2830e08e4229eab4795efd",
    "eloria-assets/maps/continent-v2/boarsend/content/spawns.json": "a71b73d9ce005c8ef29e513e4af87f418a8bebb0ad56d4e3e81fd8d624946086",
    "eloria-assets/maps/continent-v2/brambleshaw/content/spawns.json": "7c472fdbe95d782c3d05d723f542e4634495612c8eeeb5285353043e5240881c",
-   "eloria-assets/maps/continent-v2/coilmere/content/spawns.json": "c24bdf15adab2477b77f12bcb688311734c9c125575d8de924897cb9704a8f6e",
+   "eloria-assets/maps/continent-v2/coilmere/content/spawns.json": "c563d73dab38f776566901e032207a036cc7da8bf216b1589365805c6d4deabc",
    "eloria-assets/maps/continent-v2/greenlight/content/spawns.json": "db9e7a11bd98c1fd167a25803355296f3361150b386addfd600fe9e178798c84",
    "eloria-assets/maps/continent-v2/hearthcroft/content/spawns.json": "c56b6911ca23ea8ef65c7f260977bae24a3e2d8da843601a5ebcf6d8fa354b21",
    "eloria-assets/maps/continent-v2/hornmere/content/spawns.json": "c798af90bb3b7ae3d16f07605ba4bf5d5400211996f9ba16cf716d557e8dd778",
@@ -1073,17 +1073,18 @@
  "heldBack": [],
  "server": {
   "overlay": {
-   "README": "f3d9ac96e57d17b068e19c2b2f7ad303c580091f7f6caac13010a8a97e25d8e5",
-   "maps.txt": "222a6f1e5057d94d3b8afaef48a80fa91ad963a6c66ef865422a203e8adf0131",
-   "spawns.txt": "2d42196ee1fa8080d98fa75bc803db10274fa5128ce68d2e3fb7ace2bb394b3d",
+   "README": "3370dec01f13023720b6294d8e9a3ae661e4fe38ea4fbb9e069c09a32da62ba2",
+   "maps.txt": "e40ef10fb1266a8d0ac205483eaa9d63de43cc23271d3d6b3f60aa5f5fbff7c5",
+   "spawns.txt": "8a2bb986c122b4ddc9380f099b290367f655c1245aa9ff7f5042071effd6a078",
    "harvesting.txt": "136d7206328274e3b7586ce187bb238d444f7e1fa55d0bb60bb12ffd85251e6f",
-   "npcs.txt": "3ca92429e2ac28047d34bb3a13c8e7cf997562b560b6469ecd5c65de19bef3e7",
-   "interactives.txt": "d3f78c1b88be8ad20ae67a59d90cbfbcc065225538dc02574c25d5b738aa47d2",
+   "npcs.txt": "daf92e2604bde6c98dcf541d74c0c10d76ec90b200d0830551babada98d28cf4",
+   "interactives.txt": "b90fd24436b7a626fcdfeec797283a05c979eeb0b94681fc147bb96c5e1cba6c",
    "exterior_connections.json": "805a49705bdbc26e9b8052384b23aa1689d05415a990d1c74f1496973cff334e",
    "questlines.txt": "e83753a62ce00f9a103a694db3269e488f6e00d66633b91c706b6dd0a0248054",
    "landing.json": "253be8da18027b83bc8d08095edb119eefa04cd2b73c3dc65076d64c4aed4eaf",
    "homes.json": "b08e90c9ceadd0332326c77d664c2d311ae3455b17a7b8a79f632d1dd36fcb24",
-   "home_npcs.txt": "09fad334943c1262818df3a18209dc1652792ced0196671a97609a90ea6c883c"
+   "home_npcs.txt": "09fad334943c1262818df3a18209dc1652792ced0196671a97609a90ea6c883c",
+   "special_areas.txt": "3ef1eb5218e3eea99b4df7c71d9287a6f277afa9254b20b8ec142ece05625a87"
   },
   "stages": {
    "m1": {
@@ -1097,9 +1098,10 @@
      "exterior_connections.json",
      "landing.json",
      "homes.json",
-     "home_npcs.txt"
+     "home_npcs.txt",
+     "special_areas.txt"
     ],
-    "manifestBlockSha256": "2afcb8aba3416c45d518d14f6f8dc5d9497964960468be0554d6cd22553ca2cd"
+    "manifestBlockSha256": "c37d238cf53ca95ddd56e0395134e3ae6e04dac35f5e964574a41ab469d1d88b"
    },
    "m2": {
     "files": [
@@ -1113,9 +1115,10 @@
      "questlines.txt",
      "landing.json",
      "homes.json",
-     "home_npcs.txt"
+     "home_npcs.txt",
+     "special_areas.txt"
     ],
-    "manifestBlockSha256": "5582f89c5078e8aa1e74c0e5b84d6f9069c80b4503146b14733d1776e8427fb2"
+    "manifestBlockSha256": "0487ab802b30b893d40330c0814712dbca5a648d9d0456775d177de4f927121d"
    },
    "m3": {
     "files": [
@@ -1129,9 +1132,10 @@
      "questlines.txt",
      "landing.json",
      "homes.json",
-     "home_npcs.txt"
+     "home_npcs.txt",
+     "special_areas.txt"
     ],
-    "manifestBlockSha256": "84e219144dee3231c5ff9abd01526f9689fe4dd36184a19c3dc0b9383b58d94d"
+    "manifestBlockSha256": "4791c61a3cce795459b5d9a26773ffc63020926f79e39ed110acf9dea7df0b1c"
    },
    "m4": {
     "files": [
@@ -1145,12 +1149,13 @@
      "questlines.txt",
      "landing.json",
      "homes.json",
-     "home_npcs.txt"
+     "home_npcs.txt",
+     "special_areas.txt"
     ],
-    "manifestBlockSha256": "67614208a93d21361afe16845b530b4102c3c1cd0554030153ab9cf62c96b22c"
+    "manifestBlockSha256": "8d0f583afd850e32ac354c8b4d6726b14b9e3600aab783603900d6b81a26641f"
    }
   },
-  "manifestEntriesSha256": "7db316799dbb6cdf718c0fb679c69eab4f488187c1d766b37254d42a1b16fa23",
+  "manifestEntriesSha256": "fa6786fa18007d7007b706c2740959fd2227fc064c09fa3be918a8212f4ccd09",
   "vendored": {
    "boarsend": "aa6c6b10239fa2d4e7935a7f13956d721bb946f7e93a409d98519c5aab2ac25d",
    "brambleshaw": "554b25092d2b92a849d6c8e9533a0b9a295afdee046de28e642ab26fadf8199a",
@@ -1169,7 +1174,8 @@
    "twinbrook": "635a98fac682a86b24737ce01bb78434bcf75267e688a32656f5f660d7fde013",
    "warrenmead": "a92723729175fd24b9730080dc2c80cba0bf00cb3f5a01c84a8743ccf3510fd1",
    "whitepeak": "809bcc2249ce924b2db3a0815bdcc50d9e4d6dc98c4f16d98745aad11f967881",
-   "landfall_insides": "970fe4ce46b11670c7b8bb2d483e0c276c8df0935347e5c9b44f0a50f471afa1"
+   "landfall_insides": "970fe4ce46b11670c7b8bb2d483e0c276c8df0935347e5c9b44f0a50f471afa1",
+   "landfall_town": "28a8240f5aed98b8e0e57ba10d0647b840d97fc81b92df850b3d69f545afa64b"
   }
  },
  "interiors": {
@@ -1190,8 +1196,8 @@
    ],
    "servedGridSha256": "970fe4ce46b11670c7b8bb2d483e0c276c8df0935347e5c9b44f0a50f471afa1",
    "collisionSha256": "14dec92f19e7532e1bbf2198170d1d096069fc39ae5c47035865ec94df366331",
-   "sourceSha256": "e6831d19aca758969b27dd5cbae89c251f3a1a3fc4c0370b7ad5c4297317382f",
-   "manifestSha256": "eb10aa4bf5629ec1338bf279a58bb376e8f0df89504062f796b5e460c8bf1507",
+   "sourceSha256": "75c757b22bb21ed998aac4bbde1101673c8ace3aeb25d38bbbdf55d38dd5332d",
+   "manifestSha256": "d8cad7a081fd840d1ac20bd0b9fc75997b7a5d5dc5bc14c5621b6ba24eea6427",
    "sections": [
     {
      "id": "lantern_mine",
@@ -1248,7 +1254,7 @@
     {
      "id": "spindle_cavern",
      "name": "Cenote Deeps",
-     "danger": "Cave spiders and a moss golem",
+     "danger": "Marsh crocodiles and a moss golem; otters at the pools",
      "arrival": [
       55,
       153
@@ -1375,7 +1381,7 @@
     {
      "id": "brambleshaw_undercroft",
      "name": "Brambleshaw Undercroft",
-     "danger": "Giant moles and nightweave spiders in the vaults, a zombie in the old crypt",
+     "danger": "Giant moles in the vaults, a zombie in the old crypt",
      "arrival": [
       111,
       274
@@ -1910,31 +1916,358 @@
     "interactives": 70
    },
    "walkableTiles": 53091
-  }
- },
- "npcMetadataAmendments": [
-  {
-   "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_npc_metadata.py",
-   "region": "landfall",
-   "baseSnapshotSha256": "f8b229797e132c0716e422dd4b154bc2e89c579286952f360e595960837d4998",
-   "snapshotSha256": "67b317ded219082f8de34c294b511a6b75fa58c8cd2ef8984eb71fe1e1bb2d2e",
-   "sceneSha256": "6af8fca4347f8a724c8ca7e9a773cfe2d65f4ab036073af7f63878b24de67cce",
-   "unchangedContentSha256": "131cffcd5d55ef3d4e54ed1b532d39d3b373381e0de7dde8c43d7aaa2006aa4c",
-   "addedNpcMarkers": [
-    "landfall--npc-cape-seller-mara-vell"
+  },
+  "landfall_town": {
+   "name": "Landfall Town",
+   "alias": "LFT",
+   "serverOrigin": [
+    0,
+    324
    ],
-   "preserved": [
-    "geometry",
-    "terrain",
-    "paths",
-    "collision.bin",
-    "served-grid.escg.gz"
+   "serverCells": [
+    324,
+    324
    ],
-   "scope": "added NPC rows only",
-   "servedGridSha256": "f240f97793bacc17816fec061420f91bf2eadb6f3103bba0e6b82389cbdfcfd8",
-   "npcTableSha256": "3ca92429e2ac28047d34bb3a13c8e7cf997562b560b6469ecd5c65de19bef3e7",
-   "approachRings": "all open and reached",
-   "otherReachableTilesLost": 0
+   "arrival": [
+    26,
+    23
+   ],
+   "servedGridSha256": "28a8240f5aed98b8e0e57ba10d0647b840d97fc81b92df850b3d69f545afa64b",
+   "collisionSha256": "d0977998ba9b53c632a4fa69235711ac5f3aa9197288bf1b87e71bfc9d700472",
+   "sourceSha256": "d84e09ec09e5d8fa1f302c5c4e5c954be3106bfe95d6b858da78f24dc4f703ab",
+   "manifestSha256": "ecdac4b96f073642c9200e79148739c955ee692397f2e9e34550aef9d23b3d16",
+   "sections": [
+    {
+     "id": "tavern_ground",
+     "name": "The Unlit Boat",
+     "danger": "Open to all",
+     "arrival": [
+      26,
+      23
+     ],
+     "exit": [
+      26,
+      21
+     ],
+     "doors": [
+      [
+       59201,
+       "landfall",
+       [
+        26,
+        23
+       ],
+       [
+        26,
+        21
+       ]
+      ]
+     ],
+     "passageEnds": [
+      [
+       59221,
+       [
+        35,
+        27
+       ],
+       [
+        35,
+        28
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "market",
+     "name": "The avenue shops",
+     "danger": "Open to all",
+     "arrival": [
+      135,
+      23
+     ],
+     "exit": [
+      135,
+      21
+     ],
+     "doors": [
+      [
+       59202,
+       "landfall",
+       [
+        135,
+        23
+       ],
+       [
+        135,
+        21
+       ]
+      ],
+      [
+       59203,
+       "landfall",
+       [
+        125,
+        23
+       ],
+       [
+        125,
+        21
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "magic_shop",
+     "name": "The True Note",
+     "danger": "Open to all",
+     "arrival": [
+      175,
+      23
+     ],
+     "exit": [
+      175,
+      21
+     ],
+     "doors": [
+      [
+       59204,
+       "landfall",
+       [
+        175,
+        23
+       ],
+       [
+        175,
+        21
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "smithy",
+     "name": "The forge",
+     "danger": "Open to all",
+     "arrival": [
+      216,
+      23
+     ],
+     "exit": [
+      216,
+      21
+     ],
+     "doors": [
+      [
+       59205,
+       "landfall",
+       [
+        216,
+        23
+       ],
+       [
+        216,
+        21
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "clerk_house",
+     "name": "Hemmen's house",
+     "danger": "A private home, open by day",
+     "arrival": [
+      24,
+      83
+     ],
+     "exit": [
+      24,
+      81
+     ],
+     "doors": [
+      [
+       59206,
+       "landfall",
+       [
+        24,
+        83
+       ],
+       [
+        24,
+        81
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "weaver_house",
+     "name": "The weaver's house",
+     "danger": "A private home, open by day",
+     "arrival": [
+      63,
+      88
+     ],
+     "exit": [
+      63,
+      90
+     ],
+     "doors": [
+      [
+       59207,
+       "landfall",
+       [
+        63,
+        88
+       ],
+       [
+        63,
+        90
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "watch_house",
+     "name": "The watch house",
+     "danger": "The town watch; visitors welcome",
+     "arrival": [
+      103,
+      85
+     ],
+     "exit": [
+      101,
+      85
+     ],
+     "doors": [
+      [
+       59208,
+       "landfall",
+       [
+        103,
+        85
+       ],
+       [
+        101,
+        85
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "netmender_house",
+     "name": "The net-mender's house",
+     "danger": "A private home, open by day",
+     "arrival": [
+      143,
+      83
+     ],
+     "exit": [
+      141,
+      83
+     ],
+     "doors": [
+      [
+       59209,
+       "landfall",
+       [
+        143,
+        83
+       ],
+       [
+        141,
+        83
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "castle",
+     "name": "The keep",
+     "danger": "Open to petitioners",
+     "arrival": [
+      23,
+      154
+     ],
+     "exit": [
+      21,
+      154
+     ],
+     "doors": [
+      [
+       59210,
+       "landfall",
+       [
+        23,
+        154
+       ],
+       [
+        21,
+        154
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "tavern_upper",
+     "name": "The Unlit Boat, upstairs",
+     "danger": "Guests and the Orl family",
+     "arrival": [
+      85,
+      28
+     ],
+     "exit": [
+      85,
+      29
+     ],
+     "passageEnds": [
+      [
+       59222,
+       [
+        85,
+        28
+       ],
+       [
+        85,
+        29
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "library",
+     "name": "Calloway's Books",
+     "danger": "Open to all",
+     "arrival": [
+      184,
+      91
+     ],
+     "exit": [
+      184,
+      93
+     ],
+     "doors": [
+      [
+       59211,
+       "landfall",
+       [
+        184,
+        91
+       ],
+       [
+        184,
+        93
+       ]
+      ]
+     ]
+    }
+   ],
+   "kind": "building",
+   "rows": {
+    "nodes": 0,
+    "spawns": 0,
+    "interactives": 44,
+    "npcs": 21,
+    "specialAreas": 1
+   },
+   "walkableTiles": 1841
   }
- ]
+ }
 }

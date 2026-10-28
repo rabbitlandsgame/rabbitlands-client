@@ -188,19 +188,39 @@ static func _apply_lights(declared: Dictionary, parent: Node) -> int:
 	return spawned
 
 
+## The rig's framing before a map's camera block first took it over:
+## {property: value} for FRAMING_PROPERTIES, kept on the rig as metadata.
+const SAVED_FRAMING_META := &"rl_framing_before_map_camera"
+const FRAMING_PROPERTIES := ["distance", "min_distance", "max_distance", "pitch_degrees", "zoom_step"]
+## The controller's own defaults (isometric_camera_controller.gd), used only
+## when the rig's script cannot report its property defaults.
+const RIG_DEFAULTS := {"distance": 26.0, "min_distance": 1.5, "max_distance": 90.0,
+	"pitch_degrees": -60.0, "zoom_step": 2.5}
+
 ## Applies a map's camera profile. The isometric rig is framed for open ground;
 ## indoors it sits outside the room and renders the ceiling, so an interior
-## declares its own closer, shallower framing and tighter zoom limits. A map
-## that declares no `camera` block leaves the rig exactly as it was.
+## declares its own closer, shallower framing and tighter zoom limits.
+##
+## A map that declares no `camera` block gets the rig's own framing back
+## (`restore_camera`): an interior's 6-26 m zoom limits and close distance used
+## to stay on Landfall after leaving a building, and on any map reached from
+## inside by recall or teleport. Between two maps without blocks nothing
+## changes, so the player's zoom and pitch carry over as before.
 static func apply_camera(manifest: WorldManifest, rig: Node) -> bool:
 	if manifest == null or rig == null:
 		return false
 	var raw: Variant = manifest.data.get("camera", {})
-	if raw is not Dictionary:
-		return false
-	var declared: Dictionary = raw as Dictionary
+	var declared: Dictionary = raw as Dictionary if raw is Dictionary else {}
 	if declared.is_empty():
+		restore_camera(rig)
 		return false
+	if not rig.has_meta(SAVED_FRAMING_META):
+		# The framing the player had outdoors, kept across a run of interiors
+		# (a building's ground floor, its upstairs) until a map without a block.
+		var saved := {}
+		for property: String in FRAMING_PROPERTIES:
+			saved[property] = rig.get(property)
+		rig.set_meta(SAVED_FRAMING_META, saved)
 	if declared.has("minDistance"):
 		rig.set("min_distance", float(declared.get("minDistance")))
 	if declared.has("maxDistance"):
@@ -215,6 +235,47 @@ static func apply_camera(manifest: WorldManifest, rig: Node) -> bool:
 		rig.set("zoom_step", float(declared.get("zoomStep")))
 	if rig.has_method("_update_camera"):
 		rig.call("_update_camera")
+	return true
+
+## Puts the rig's zoom limits and step back to the controller's defaults and,
+## when a map's camera block took the framing over, the distance and pitch the
+## player had before it. Without a saved framing the distance and pitch stay
+## where the player left them, only clamped into the default limits. Returns
+## true when anything changed.
+static func restore_camera(rig: Node) -> bool:
+	if rig == null or rig.get("distance") == null:
+		return false
+	var saved: Dictionary = rig.get_meta(SAVED_FRAMING_META, {}) as Dictionary
+	if rig.has_meta(SAVED_FRAMING_META):
+		rig.remove_meta(SAVED_FRAMING_META)
+	var changed := false
+	for property: String in ["min_distance", "max_distance", "zoom_step"]:
+		changed = _set_if_changed(rig, property, float(rig_default(rig, property))) or changed
+	var low := float(rig.get("min_distance"))
+	var high := float(rig.get("max_distance"))
+	var distance := float(saved.get("distance", rig.get("distance")))
+	changed = _set_if_changed(rig, "distance", clampf(distance, low, high)) or changed
+	if saved.has("pitch_degrees"):
+		changed = _set_if_changed(rig, "pitch_degrees",
+			clampf(float(saved.pitch_degrees), -80.0, -15.0)) or changed
+	if changed and rig.has_method("_update_camera"):
+		rig.call("_update_camera")
+	return changed
+
+## The default the rig's script declares for `property` (its export value),
+## else RIG_DEFAULTS.
+static func rig_default(rig: Node, property: String) -> Variant:
+	var script := rig.get_script() as Script
+	if script != null:
+		var value: Variant = script.get_property_default_value(property)
+		if value is float or value is int:
+			return value
+	return RIG_DEFAULTS.get(property)
+
+static func _set_if_changed(rig: Node, property: String, value: float) -> bool:
+	if is_equal_approx(float(rig.get(property)), value):
+		return false
+	rig.set(property, value)
 	return true
 
 static func _restore_defaults(sun: DirectionalLight3D) -> void:

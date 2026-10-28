@@ -48,7 +48,8 @@ POLYGONS = {"landfall": [[40.0, 0.0], [100.0, 0.0], [100.0, 60.0], [40.0, 60.0]]
             "coilmere": [[100.0, 0.0], [160.0, 0.0], [160.0, 60.0], [100.0, 60.0]]}
 FRAMES = {"landfall": SW, "coilmere": TH}
 V2 = "eloria-assets/maps/continent-v2"
-REHOMED = {"Gate Warden Ilyon": ("guide", 308), "Wayfinder Nesh": ("tutorial", 307),
+# Nash: the server's tutorial wayfinder (formerly "Wayfinder Nesh"; renamed in the server's npcs.txt, 2b6fee2)
+REHOMED = {"Gate Warden Ilyon": ("guide", 308), "Nash": ("tutorial", 307),
            "Ferryman Caldus": ("dialogue", 310), "Hemmen": ("dialogue", 312),
            "Bettany Orl": ("shop", 303)}
 TARGETS = P.LANDING_TARGETS
@@ -425,6 +426,25 @@ def test_apply_check_and_a_byte_identical_rerun(tree):
             (tree / "client" / V2 / region / "client" / "served-grid.escg.gz").read_bytes()
 
 
+def test_another_tools_keys_in_the_block_survive_a_republish(tree):
+    """publish_npc_metadata.py appends its receipts to the continentV2 block (npcMetadataAmendments): a republish
+    carries every key this tool does not own over as it stands, so --check stays clean and --apply keeps it."""
+    assert publish(tree, "--apply").returncode == 0
+    path = tree / "server/config/eloria/client_content_manifest.json"
+    data = json.loads(path.read_bytes())
+    receipt = {"tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_npc_metadata.py", "region": "landfall",
+               "addedNpcMarkers": ["landfall--npc-new"], "scope": "added NPC rows only"}
+    data["continentV2"]["npcMetadataAmendments"] = [receipt]
+    path.write_bytes(manifest_bytes(data))
+    check = publish(tree, "--check")
+    assert check.returncode == 0, check.stderr + check.stdout
+    result = publish(tree, "--apply")
+    assert result.returncode == 0, result.stderr + result.stdout
+    block = json.loads(path.read_bytes())["continentV2"]
+    assert block["npcMetadataAmendments"] == [receipt] and list(block)[-1] == "npcMetadataAmendments"
+    assert set(block) - {"npcMetadataAmendments"} <= set(P.OWNED_BLOCK_KEYS)
+
+
 def test_catalog_retirements_remove_only_stale_grids_and_check_orphan_blobs(tree):
     retired = ["sw_isle", "tollholms", "gull_skerries"]  # Exact historical retirement inputs.
     catalog_path = tree / "client" / F.CATALOG
@@ -613,6 +633,39 @@ def test_a_moved_person_keeps_their_occupation(tree):
                                      if npc["name"] == "Bettany Orl").update(occupation="Innkeeper"))
     restamp(tree, "landfall")
     refused(publish(tree, "--check"), "a move keeps the occupation")
+
+
+LOOK = {"skin": 1, "hair": 106, "shirt": 5, "pants": 9, "boots": 0, "head": 0, "eyes": 2}
+
+
+def test_a_configurable_human_carries_its_look_after_the_body(tree):
+    """server-rows.json may give a new person the configurable Human body and its look in place of the marker's race
+    block (server 17d1016, Odo Fenn): the row carries every cosmetic byte after actor_type=, in the loader's order."""
+    path = tree / "client" / V2 / "_continent_v2" / "content" / "server-rows.json"
+    edit_json(path, lambda doc: doc["maps"]["landfall"]["npcs"]["npc-fixture-keeper"].update(
+        actorType=1, appearance=dict(reversed(list(LOOK.items())))))
+    result = publish(tree, "--apply")
+    assert result.returncode == 0, result.stderr + result.stdout
+    assert (" | dialogue | actor_type=1,skin=1,hair=106,shirt=5,pants=9,boots=0,head=0,eyes=2,"
+            "occupation=Fixture Warden | Welcome to the fixture.\r\n") in overlay(tree, "npcs.txt").decode("utf-8")
+
+
+@pytest.mark.parametrize("body,look,words", [
+    (376, LOOK, "draws no appearance"),                      # a race body inside the block takes no look
+    (1, {**LOOK, "eyes": 256}, "to a byte"),
+    (1, {key: value for key, value in LOOK.items() if key != "head"}, "to a byte"),
+])
+def test_a_look_needs_a_configurable_human_and_every_byte(tree, body, look, words):
+    path = tree / "client" / V2 / "_continent_v2" / "content" / "server-rows.json"
+    edit_json(path, lambda doc: doc["maps"]["landfall"]["npcs"]["npc-fixture-keeper"].update(
+        actorType=body, appearance=look))
+    refused(publish(tree, "--check"), words)
+
+
+def test_a_configurable_human_without_a_look_keeps_the_race_block(tree):
+    path = tree / "client" / V2 / "_continent_v2" / "content" / "server-rows.json"
+    edit_json(path, lambda doc: doc["maps"]["landfall"]["npcs"]["npc-fixture-keeper"].update(actorType=1))
+    refused(publish(tree, "--check"), "server-rows.json 'Fixture Keeper' body 1")
 
 
 def test_an_inline_comment_is_refused(tree):

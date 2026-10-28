@@ -78,10 +78,22 @@ func run() -> void:
 		OS.set_environment(LookProfile.QUALITY_VARIABLE, "")
 		LookProfile.set_player_quality(2)
 		editor.refresh_render_quality()
-		expect(ReplicatedActor3D.HIGH_PORTRAIT.cache_metrics().texture_bundles == 1, "open dressing room follows global High quality")
+		# High draws the RL head where the renderer supports it, with no classic
+		# High portrait artwork (develop's classic High portrait with
+		# RL_HEADS=classic and in the Compatibility renderer).
+		var rl_heads := ReplicatedActor3D.rl_heads_renderer_supported() and not ReplicatedActor3D.rl_heads_classic()
+		if rl_heads:
+			expect(actor.rl_head() != null and ReplicatedActor3D.HIGH_PORTRAIT.cache_metrics().texture_bundles == 0,
+				"open dressing room follows global High quality")
+		else:
+			expect(ReplicatedActor3D.HIGH_PORTRAIT.cache_metrics().texture_bundles == 1, "open dressing room follows global High quality")
 		LookProfile.set_player_quality(1)
 		editor.refresh_render_quality()
-		expect(ReplicatedActor3D.HIGH_PORTRAIT.cache_metrics().texture_bundles == 0, "open dressing room releases High resources after global downgrade")
+		if rl_heads:
+			expect(actor.rl_head() == null and ReplicatedActor3D.HIGH_PORTRAIT.cache_metrics().texture_bundles == 0,
+				"open dressing room releases High resources after global downgrade")
+		else:
+			expect(ReplicatedActor3D.HIGH_PORTRAIT.cache_metrics().texture_bundles == 0, "open dressing room releases High resources after global downgrade")
 		editor.set_preview_quality(2)
 		LookProfile.set_player_quality(0)
 		editor.refresh_render_quality()

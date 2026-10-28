@@ -26,7 +26,9 @@ What it writes into --server (route B of the serve plan, section 2.3):
                                                     harvestable marker of the bakes, by objectId
       npcs.txt                                      the new people (server-rows.json group "new") at their markers,
                                                     each with its marker's optional extras "occupation" as an
-                                                    occupation= option beside actor_type= (eloria/npcs.py)
+                                                    occupation= option beside actor_type= (eloria/npcs.py), and
+                                                    a configurable Human's server-rows.json "appearance" as its
+                                                    cosmetic options after actor_type= (APPEARANCE_FIELDS)
       interactives.txt                              every interactive marker with its server-rows.json role/target/text
       exterior_connections.json                     the land links (crossings.json exteriorConnections)
       questlines.txt                                content/questlines.txt with TX/TY/MAP resolved from uniquely owned
@@ -37,11 +39,16 @@ What it writes into --server (route B of the serve plan, section 2.3):
       homes.json                                    the home's points (eloria-homes-v1; eloria/home.py)
       home_npcs.txt                                 the re-homed people at their isle posts: each one's npcs.txt row
                                                     with only the map, the tile and the greeting changed
+      special_areas.txt                             the interiors' special areas: an area row per room a source's
+                                                    `specialAreas` names (town_source.special_areas, underground.py;
+                                                    the server's eloria/areas.py reads it after the base rows)
   config/eloria/client_content_manifest.json       the isles' maps[] entries and a continentV2 block, through the
                                                     legacy publisher's own serializer (publish_continent_geography.
                                                     json_bytes), then LF -> CRLF; refused unless re-serializing the
                                                     file as it stands reproduces it byte for byte. diagonalContinent
-                                                    and continentGeography are never touched.
+                                                    and continentGeography are never touched; a continentV2 key this
+                                                    tool does not write (OWNED_BLOCK_KEYS; publish_npc_metadata.py's
+                                                    npcMetadataAmendments) is carried over as it stands.
 And into this checkout: _continent_v2/publication.json (--record), what was published from what, by SHA-256: isle
 facts only (every file of every stage, the inputs' digests, row counts), the same whatever the server tree's base
 tables, code or stage, so a server-only change never makes --check differ on the client's record.
@@ -99,6 +106,16 @@ Checks, all fail closed (nothing is relocated; a row is moved in its source, nev
 The 19 rows of the B14 pocket (server-tables.json holdBack) are served only if every one of them passes; otherwise
 all 19 are held back and recorded, and any other failure refuses the publish.
 
+The interiors (underground.py SOURCES: content/underground.json's caves, then content/landfall_town.json's building
+rooms; an absent source publishes nothing) follow the isles' rows in maps.txt, spawns.txt, harvesting.txt, npcs.txt and
+interactives.txt, each under its own comment, held to underground.py's rules (each package built from its source by
+the builder its provenance names; doors, passages, nodes, encounters, interior people and interactives; object ids
+unique across every interior and apart from every isle object); an interior crafting station's target is the trade
+its text or its section's style names (station_targets: the smithy's anvil is smithing), else "crafting". Their
+grids are vendored beside the isles'. The manifest block lists every interior under interiorMaps, the caves' portal
+rows under undergroundPortals (row counts undergroundRows) and the town's building doors and stairs under
+buildingPortals (buildingRows, its special areas counted); the record lists every interior under interiors.
+
 --check builds everything and compares it with the server tree and the record, writing nothing there (the sync runs
 into a temporary folder seeded with the server's vendored manifest); it exits 1 on any difference. --apply writes.
 The server's loader counts and parser results, and the ferry landing's copies and grid, go to the run's summary
@@ -111,6 +128,7 @@ import argparse
 import ast
 from collections import Counter
 import copy
+import fnmatch
 import hashlib
 import importlib
 import json
@@ -152,6 +170,12 @@ PROFILE = "config/eloria"
 OVERLAY = "continent-v2"
 MANIFEST = "client_content_manifest.json"
 MANIFEST_BLOCK = "continentV2"
+# The continentV2 keys this tool writes (manifest_block), whether a run emits them or not (an absent interior source
+# emits no portal rows of its kind). Any other key of the server's block is another tool's and is carried over as it
+# stands, after these: rebuilding the block whole would drop publish_npc_metadata.py's npcMetadataAmendments receipts
+# (90bb8df).
+OWNED_BLOCK_KEYS = ("schema", "tool", "stage", "overlay", "maps", "crossingsSha256", "ferries", "boats", "heldBack",
+                    "rowCounts", "interiorMaps") + tuple(key for spec in U.SOURCES for key in (spec.portals, spec.rows))
 LANDING_SCHEMA = "eloria-landing-v1"
 HOMES_SCHEMA = "eloria-homes-v1"
 LANDING_TARGETS = ("olive_grove", "lemon_garden", "sage_meadow", "flint_outcrop", "bramble_edge", "resin_pines",
@@ -169,11 +193,29 @@ MAX_LEASH = 200
 AGGRESSIVE_MAPS = frozenset({"coilmere", "suncoil", "hornmere", "whitepeak"})
 INTERACTIVE_ROLES = {"storage", "crafting_station", "training", "information", "water_source", "scenery_effect",
                      "portal", "secret", "gate", "cache", "waystone"}
+# An interior crafting station's target column names the trade it serves, as the base stations name theirs
+# (config/eloria/interactives.txt, Emberhaven: smelting at the forge, smithing at the anvil, crafting at the
+# workbench, alchemy at the table). underground.py writes a station's own `target` where its source gives one
+# (town_source.py's interactives take none yet: {object, tile, role, text}) and otherwise the role's default,
+# "crafting". station_targets() then gives a station whose text names a trade (STATION_WORDS, first match) that
+# trade, else the trade of its section's style (STATION_STYLES): the smithy's anvil, "The forge is hot. Open your
+# manufacture window to smith.", publishes as smithing. A station that needs some other target needs town_source.py
+# to accept an optional `target` key (underground.py already honours one, and this rule then leaves it alone).
+STATION_WORDS = (("smelt", "smelting"), ("smith", "smithing"), ("anvil", "smithing"), ("alchem", "alchemy"),
+                 ("potion", "alchemy"))
+STATION_STYLES = {"smithy": "smithing"}
 FORBIDDEN = ("|", "#", "\n", "\r")
 # An NPC's occupation (the line a client draws under the name), as eloria/npcs.py's loader holds it: one more
 # comma-separated option in the row's portrait column, so it may not hold a separator or the brackets drawn round it.
 OCCUPATION_LIMIT = 32
 OCCUPATION_FORBIDDEN = frozenset("|#,=<>")
+# A new person's optional server-rows.json "appearance": every cosmetic byte of a configurable Human body, written
+# after actor_type= in eloria/npcs.py appearance_for's order. Only the configurable Human Female (0) and Male (1)
+# draw those bytes, and such a body replaces the race block the person's marker names (server 17d1016: Odo Fenn is
+# the configurable Human Male with skin=1,hair=106,shirt=5,pants=9,boots=0,head=0,eyes=2, as his campaign field
+# copies are).
+APPEARANCE_FIELDS = ("skin", "hair", "shirt", "pants", "boots", "head", "eyes")
+CONFIGURABLE_BODIES = (0, 1)
 RING = [(dx, dy) for dy in (-1, 0, 1) for dx in (-1, 0, 1)]
 NEIGHBOURS = [(dx, dy) for dx, dy in RING if dx or dy]
 APPROACH_SEARCH = 6
@@ -193,12 +235,16 @@ SERVER_FREE_TILE_RADIUS = 19
 HARVEST_ROAD_CHECK = True
 # The overlay's files, in the order the README lists them and this tool writes them.
 FILES = ("README", "maps.txt", "spawns.txt", "harvesting.txt", "npcs.txt", "interactives.txt",
-         "exterior_connections.json", "questlines.txt", "landing.json", "homes.json", "home_npcs.txt")
+         "exterior_connections.json", "questlines.txt", "landing.json", "homes.json", "home_npcs.txt",
+         "special_areas.txt")
 # Independently authored server services are loaded beside the generated roster.
 # Validate them with the server loaders, but never overwrite or retire them.
 PRESERVED_FILES = ("service_npcs.txt",)
+# The server's own campaign data stands in the overlay directory too (eloria/campaign_*runtime.py read
+# continent-v2/campaign_<name>.json): no loader table, never written, validated or removed here.
+PRESERVED_PATTERNS = ("campaign_*.json",)
 LOADER_TABLES = ("maps.txt", "spawns.txt", "harvesting.txt", "npcs.txt", "interactives.txt", "questlines.txt",
-                 "exterior_connections.json")
+                 "exterior_connections.json", "special_areas.txt")
 # The serve plan's milestones (section 5) and what each serves of the overlay (section 2.3; S5 at M1, S14 at M2).
 # Every file is S5's at M1, the inert landing.json, homes.json and home_npcs.txt included (nothing reads them until
 # the chapter's and the home's code arrive), except questlines.txt: the overlay loader reads it the moment it exists,
@@ -258,10 +304,28 @@ def portrait_options(text):
             if key.strip()}
 
 
-def npc_portrait(actor_type, occupation="", facing=""):
-    """The portrait column of a published npcs.txt row: the body, then the occupation when there is one."""
-    return (f"actor_type={int(actor_type)}" + (f",occupation={occupation}" if occupation else "")
+def npc_portrait(actor_type, occupation="", facing="", appearance=None):
+    """The portrait column of a published npcs.txt row: the body, its look when it sets one, then the occupation
+    when there is one."""
+    return (f"actor_type={int(actor_type)}"
+            + "".join(f",{key}={int(value)}" for key, value in (appearance or {}).items())
+            + (f",occupation={occupation}" if occupation else "")
             + (f",facing={facing}" if facing else ""))
+
+
+def npc_appearance(value, actor_type, where):
+    """A server-rows.json entry's optional "appearance" (APPEARANCE_FIELDS, each a byte) in the loader's order; {}
+    when it has none. Only a configurable Human body (CONFIGURABLE_BODIES) takes one."""
+    if value is None:
+        return {}
+    if (not isinstance(value, dict) or set(value) != set(APPEARANCE_FIELDS)
+            or any(type(value[key]) is not int or not 0 <= value[key] <= 255 for key in APPEARANCE_FIELDS)):
+        raise PublishError(f"{where}: appearance sets each of {', '.join(APPEARANCE_FIELDS)} to a byte (0-255), "
+                           f"not {value!r}")
+    if actor_type not in CONFIGURABLE_BODIES:
+        raise PublishError(f"{where}: actorType {actor_type} draws no appearance; only a configurable Human body "
+                           f"({', '.join(map(str, CONFIGURABLE_BODIES))}) takes one")
+    return {key: value[key] for key in APPEARANCE_FIELDS}
 
 
 def npc_facing(record):
@@ -807,10 +871,16 @@ def compose(ctx, *, log=say):
             rec, entry = found[identity], table[identity]
             name = plain_field(entry["name"], f"{identity} name")
             # A re-homed person's marker names its body; a new person's names the race block server-rows.json
-            # chose the body from (B3 notes 6.1).
+            # chose the body from (B3 notes 6.1), unless server-rows.json gives them a configurable Human body and
+            # its look (APPEARANCE_FIELDS).
+            appearance = npc_appearance(entry.get("appearance"), entry["actorType"], identity)
+            if appearance and entry["group"] != "new":
+                raise PublishError(f"{identity}: only a new person's look is set here; home_npcs.txt copies a moved "
+                                   "person's npcs.txt row")
             block = rec.get("actorTypeBlock")
             body_ok = (rec.get("actorType") == entry["actorType"] if "actorType" in rec
-                       else isinstance(block, list) and len(block) == 2 and block[0] <= entry["actorType"] <= block[1])
+                       else bool(appearance) or isinstance(block, list) and len(block) == 2
+                       and block[0] <= entry["actorType"] <= block[1])
             if rec.get("name", rec.get("label")) != name or not body_ok:
                 raise PublishError(f"{identity}: the marker names {rec.get('name')!r} body "
                                    f"{rec.get('actorType', block)}, server-rows.json {name!r} body {entry['actorType']}")
@@ -818,7 +888,7 @@ def compose(ctx, *, log=say):
                       "role": plain_field(entry["role"], f"{identity} role"), "actorType": int(entry["actorType"]),
                       "greeting": plain_field(entry["greeting"], f"{identity} greeting"),
                       "occupation": occupation_field(rec.get("occupation"), name, identity),
-                      "facing": npc_facing(rec)}
+                      "facing": npc_facing(rec), "appearance": appearance}
             if entry["group"] == "new":
                 if name.casefold() in ctx.server.npc_lines:
                     raise PublishError(f"{identity}: {name} is already in the base npcs.txt; a new person needs a "
@@ -1053,8 +1123,45 @@ def compose(ctx, *, log=say):
                           held=held, pocket_failures=pocket, arrivals=arrivals, reached=reached, codes=codes,
                           resources=tables["resources"], stage_tiles=stage_tiles)
     pub.files = overlay_files(ctx, pub)
-    U.attach(ctx, pub, PublishError)
+    # The interiors (underground.SOURCES: the caves, then the town's rooms), with this tool's field rules.
+    U.attach(ctx, pub, PublishError, fields=SimpleNamespace(plain=plain_field, occupation=occupation_field,
+                                                           portrait=npc_portrait))
+    station_targets(pub)
     return pub
+
+
+def station_target(item, section):
+    """The trade an interior crafting station serves (STATION_WORDS in its text, else its section's STATION_STYLES),
+    or None for neither."""
+    text = str(item.get("text", "")).casefold()
+    for word, target in STATION_WORDS:
+        if word in text:
+            return target
+    return STATION_STYLES.get(section.get("style"))
+
+
+def station_targets(pub):
+    """Give every interior crafting station that names no `target` of its own its trade (station_target): the row
+    underground.attach wrote with the role's default target is rewritten in place in interactives.txt."""
+    data = pub.files["interactives.txt"]
+    default = U.INTERACTIVE_TARGETS["crafting_station"]
+    for interior in getattr(pub, "interiors", None) or []:
+        reader = U.reader_of(interior.spec)
+        for section in interior.design["sections"]:
+            for item in U.section_interactives(reader, section):
+                if item.get("role") != "crafting_station" or "target" in item:
+                    continue
+                target = station_target(item, section)
+                if target is None or target == default:
+                    continue
+                x, y = item["tile"]
+                head = f"\n{interior.region} | {item['object']} | {x} | {y} | crafting_station | "
+                old = f"{head}{default} | {item['text']}\r".encode("utf-8")
+                if data.count(old) != 1:
+                    raise PublishError(f"{interior.region} interactive {item['object']}: its row is not in "
+                                       "interactives.txt as underground.py writes it")
+                data = data.replace(old, f"{head}{target} | {item['text']}\r".encode("utf-8"))
+    pub.files["interactives.txt"] = data
 
 
 def isle_boat(row, portal, markers):
@@ -1241,6 +1348,7 @@ here and appends its rows after every base row (eloria/content_overlay.py holds 
   landing.json                Signed Ashore's places (eloria/landing.py)
   homes.json                  the home's points, read only while home_map moves the home (eloria/home.py)
   home_npcs.txt               the people the home migration moves, read only while home_map moves the home
+  special_areas.txt           the interior rooms with a special area (Landfall Town's reading room: fast_reading)
 
 Every position comes from the client's scene markers and content tables through the territory frame
 (eloria-assets/maps/continent-v2/_continent_v2/frames.py); the client records what it published from in
@@ -1302,7 +1410,8 @@ def overlay_files(ctx, pub):
         "continent-v2 overlay: the resources the isles add, and every harvest node (from the scene's markers).",
         GENERATED, "No row may carry a '#': this table's loader does not strip an inline comment."]))
     lines = [f"npc | {p['name']} | {p['map']} | {p['tile'][0]} | {p['tile'][1]} | {p['role']} | "
-             f"{npc_portrait(p['actorType'], p.get('occupation', ''), p.get('facing', ''))} | {p['greeting']}" for p in pub.new_people]
+             f"{npc_portrait(p['actorType'], p.get('occupation', ''), p.get('facing', ''), p.get('appearance'))} | "
+             f"{p['greeting']}" for p in pub.new_people]
     files["npcs.txt"] = crlf(table_text(lines, [
         "continent-v2 overlay: the isles' new people at their scene posts.", GENERATED,
         "No row may carry a '#': this table's loader does not strip an inline comment."]))
@@ -1332,6 +1441,9 @@ def overlay_files(ctx, pub):
         "Read before npcs.txt, and only while home_map names a map other than four_gates (eloria/home.py): each row is",
         "the person's npcs.txt row with only the map, the tile, facing and the greeting changed.",
         "No row may carry a '#': the NPC loader does not strip an inline comment."]))
+    files["special_areas.txt"] = crlf(table_text([], [
+        "continent-v2 overlay: the special areas of the interiors' rooms (a room's floor inside its walls).", GENERATED,
+        "area | kind | map | min x | min y | max x | max y | multiplier, as config/eloria/special_areas.txt."]))
     for name in ("harvesting.txt", "npcs.txt", "interactives.txt", "questlines.txt", "home_npcs.txt"):
         for number, line in enumerate(files[name].decode("utf-8").splitlines(), 1):
             if line.strip() and not line.lstrip().startswith("#") and "#" in line:
@@ -1374,6 +1486,7 @@ def validate_with_server(ctx, pub):
         report["resources"], report["nodes"] = len(resources), len(nodes)
         report["npcs"] = len(load_npcs(profile / "npcs.txt", overlay=True))
         report["interactives"] = len(load_interactives(profile / "interactives.txt", overlay=True))
+        report["specialAreas"] = special_areas_read(profile, pub)
         report["questlines"] = len(load_questlines(profile / "questlines.txt", overlay=True))
         land = load_land_connections(profile / "exterior_connections.json", overlay=True)
         frames_ = load_land_frames(profile / "exterior_connections.json", overlay=True)
@@ -1413,6 +1526,28 @@ def validate_with_server(ctx, pub):
                                               base=load_npcs(profile / "npcs.txt", overlay=False), allowed_maps=pub.regions)
             report["homesParser"] = f"eloria.home.parse_homes: {sorted(homes)}; read_home_npcs: {len(rows)} rows"
     return report
+
+
+def special_areas_read(profile, pub):
+    """How many special areas of the interiors the server's eloria/areas.py reads from the overlay's special_areas.txt
+    (refused unless it reads every row this run publishes: a server whose loader reads no overlay serves none)."""
+    import inspect
+    from eloria.areas import load_special_areas
+    base = profile / "special_areas.txt"
+    if not base.is_file():
+        base.write_bytes(b"")
+    rows = list(getattr(pub, "special_areas", None) or [])
+    if "overlay" not in inspect.signature(load_special_areas).parameters:
+        if rows:
+            raise PublishError(f"the server's eloria/areas.py reads no {OVERLAY}/special_areas.txt: its "
+                               f"{len(rows)} interior special areas would not be served")
+        return 0
+    interiors = {u.region for u in getattr(pub, "interiors", None) or []}
+    read = sum(1 for area in load_special_areas(base, overlay=True) if area.map_id in interiors)
+    if read != len(rows):
+        raise PublishError(f"the server reads {read} interior special areas from {OVERLAY}/special_areas.txt, "
+                           f"not {len(rows)}")
+    return read
 
 
 def own_rules(pub):
@@ -1469,8 +1604,8 @@ def manifest_bytes(ctx, pub, stage):
                         "portals": portals.get(region, [])})
     retired = set(read_json(ctx.checkout / frames.CATALOG).get("retiredMapIds", ()))
     entries.extend(U.manifest_entries(pub))
-    if pub.underground is not None:
-        for source, _object, x, y, destination, _ax, _ay in pub.underground.portals:
+    for interior in pub.interiors:
+        for source, _object, x, y, destination, _ax, _ay in interior.portals:
             entry = next(e for e in entries if e["id"] == source)
             entry["portals"].append({"server_tile": [x, y], "destination": destination})
     maps = data.setdefault("maps", [])
@@ -1481,7 +1616,7 @@ def manifest_bytes(ctx, pub, stage):
             maps.append(entry)
         else:
             maps[at] = entry
-    data[MANIFEST_BLOCK] = manifest_block(ctx, pub, stage)
+    data[MANIFEST_BLOCK] = manifest_block(ctx, pub, stage, data.get(MANIFEST_BLOCK))
     for key, value in before.items():
         if data[key] != value:
             raise PublishError(f"{key} would change")
@@ -1495,7 +1630,10 @@ def boat_entries(pub):
             for b in pub.boats]
 
 
-def manifest_block(ctx, pub, stage):
+def manifest_block(ctx, pub, stage, existing=None):
+    """The manifest's continentV2 block of `stage`: the keys this tool owns (OWNED_BLOCK_KEYS), then every other key of
+    `existing` (the server's block as it stands, when given) as it stands, in its order. The record hashes the block
+    without `existing`: isle facts only."""
     block = {
         "schema": 1, "tool": TOOL, "stage": stage,
         "overlay": {"directory": f"{PROFILE}/{OVERLAY}",
@@ -1519,11 +1657,15 @@ def manifest_block(ctx, pub, stage):
                       "nodes": len(pub.nodes), "newNpcs": len(pub.new_people),
                       "rehomedNpcs": len(pub.rehomed), "interactives": len(pub.interactives)},
     }
-    if getattr(pub, "underground", None) is not None:
-        u = pub.underground
-        block["interiorMaps"] = {u.region: u.metadata}
-        block["undergroundPortals"] = u.portals
-        block["undergroundRows"] = u.rows
+    # interiorMaps (every interior), then the caves' undergroundPortals and undergroundRows, then the town's
+    # buildingPortals and buildingRows (underground.manifest_keys): a reader tells a cave door from a building door
+    # by the list it is in
+    block.update(U.manifest_keys(pub))
+    unowned = sorted(set(block) - set(OWNED_BLOCK_KEYS))
+    if unowned:
+        raise PublishError(f"the continentV2 block writes {unowned}, which OWNED_BLOCK_KEYS does not list")
+    if existing:
+        block.update({key: copy.deepcopy(value) for key, value in existing.items() if key not in OWNED_BLOCK_KEYS})
     return block
 
 
@@ -1624,9 +1766,9 @@ def record_bytes(ctx, pub, manifest_entries):
                    "manifestEntriesSha256": sha256_bytes(json.dumps(manifest_entries, sort_keys=True).encode()),
                    "vendored": {region: ctx.packages[region]["servedGridSha256"] for region in pub.vendor_regions}},
     }
-    if pub.underground is not None:
-        record["interiors"] = {pub.underground.region: {**pub.underground.metadata,
-                              "rows": pub.underground.rows, "walkableTiles": pub.underground.walkable}}
+    if pub.interiors:
+        record["interiors"] = {u.region: {**u.metadata, "rows": u.rows, "walkableTiles": u.walkable}
+                               for u in pub.interiors}
     return (json.dumps(record, indent=1, ensure_ascii=False) + "\n").encode("utf-8")
 
 
@@ -1695,7 +1837,9 @@ def main(argv=None):
         server = ctx.server.root
         overlay_dir = server / PROFILE / OVERLAY
         unknown = sorted(p.name for p in overlay_dir.iterdir()
-                         if p.name not in FILES + PRESERVED_FILES) if overlay_dir.is_dir() else []
+                         if p.name not in FILES + PRESERVED_FILES
+                         and not any(fnmatch.fnmatchcase(p.name, pattern) for pattern in PRESERVED_PATTERNS)
+                         ) if overlay_dir.is_dir() else []
         if unknown:
             raise PublishError(f"{overlay_dir} holds files this tool does not write: {unknown}")
         later = [name for name in FILES if name not in served and (overlay_dir / name).exists()]

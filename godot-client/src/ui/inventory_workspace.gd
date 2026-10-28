@@ -54,6 +54,8 @@ var _drag_origin := Vector2.ZERO
 var _resizing := false
 var _drag_cell := 36.0
 var _drag_dimensions := Vector2.ZERO
+var reagent_pouch
+var _pouch_side_width := 75.0
 
 func configure(owner_main: Control) -> void:
 	main = owner_main
@@ -75,6 +77,8 @@ func configure(owner_main: Control) -> void:
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	header.add_child(title)
+	reagent_pouch = preload("res://src/ui/reagent_pouch.gd").new()
+
 	search = LineEdit.new()
 	search.name = "InventorySearch"
 	search.placeholder_text = "Find item…"
@@ -121,6 +125,8 @@ func configure(owner_main: Control) -> void:
 		group.mouse_filter = Control.MOUSE_FILTER_PASS
 		canvas.add_child(group)
 		groups[key] = group
+	groups.pouch.add_child(reagent_pouch)
+	reagent_pouch.configure(main)
 	main.inventory_grid.reparent(groups.backpack)
 	main.equipment_grid.reparent(groups.equipment)
 	for pair: Array in [["backpack", "Backpack"], ["equipment", "Equipment"]]:
@@ -393,7 +399,8 @@ func apply_layout() -> void:
 		header.move_child(main.inventory_load, 1)
 		header.move_child(main.inventory_resize_grip, header.get_child_count() - 2)
 	footer.visible = not tray
-	var pack := _grid_extent("backpack", 36)
+	var pack_grid := _grid_extent("backpack", 24)
+	var pack := pack_grid
 	var worn := _grid_extent("equipment", 8)
 	var replace: bool = options.inspection_mode == "replace"
 	tabs.set_tab_disabled(1, not options.parts.equipment.enabled)
@@ -402,6 +409,10 @@ func apply_layout() -> void:
 	var show_detail: bool = _inspection_open or is_editing() or options.inspection_mode == "side"
 	var worn_visible: bool = options.parts.equipment.enabled and (not replace or _tab == 1)
 	var pack_visible: bool = not replace or _tab == 0
+	var top_pouch: bool = options.recipe == "dock" and options.equipment_side == "top" and worn_visible and pack_visible and options.parts.pouch.enabled
+	_pouch_side_width = 75.0 if top_pouch else worn.x
+	var pouch: Vector2 = reagent_pouch.extent(options.parts.pouch, options.gap, _pouch_side_width)
+
 	var top := 32.0 + (30.0 if replace else 0.0)
 	var pack_at := Vector2.ZERO
 	var worn_at := Vector2.ZERO
@@ -415,9 +426,22 @@ func apply_layout() -> void:
 		body_size = Vector2(pack.x + worn.x + 10, maxf(pack.y, worn.y)) if options.equipment_side != "top" else Vector2(maxf(pack.x, worn.x), pack.y + worn.y + 8)
 	elif worn_visible: body_size = worn
 	# All tab pages share the full pack dimensions, so inspecting never grows a tabbed window.
-	if replace: body_size = pack.max(Vector2(260, 240))
+	if replace: body_size = pack.max(Vector2(260, options.parts.inspection.height))
+	var pouch_at := Vector2(0, top + body_size.y + 8)
+	if top_pouch:
+		# Equipment and pouch share the top row; the larger backpack fills the row below.
+		pouch_at = Vector2(worn.x + 10, top)
+		var top_height := maxf(worn.y, pouch.y)
+		pack_at = Vector2(0, top_height + 8)
+		body_size = Vector2(maxf(pack.x, worn.x + 10 + pouch.x), top_height + 8 + pack.y)
+	elif options.parts.pouch.enabled:
+		body_size.x = maxf(body_size.x, pouch.x)
+		body_size.y += pouch.y + 8
 	body_size.x = maxf(body_size.x, 224)
-	_place("backpack", pack_at + Vector2(0, top), pack)
+	if not top_pouch: pouch.x = body_size.x
+	_place("backpack", pack_at + Vector2(0, top), pack_grid)
+	_place("pouch", pouch_at, pouch)
+	groups.pouch.visible = pack_visible and options.parts.pouch.enabled
 	_place("equipment", worn_at + Vector2(0, top), worn)
 	groups.backpack.visible = pack_visible
 	groups.equipment.visible = worn_visible
@@ -461,7 +485,7 @@ func apply_layout() -> void:
 	_place("actions", Vector2(0, bottom), Vector2(maxf(body_size.x, bulk_actions.get_combined_minimum_size().x), action_height))
 	bulk_actions.size.x = groups.actions.size.x
 	# Include moved components in the window's real input and background bounds.
-	for key: String in ["backpack", "equipment", "preview", "inspection", "actions"]:
+	for key: String in ["backpack", "equipment", "pouch", "preview", "inspection", "actions"]:
 		var group: Control = groups[key]
 		if group.visible and group.get_parent() == canvas:
 			group.position = group.position.max(Vector2(0, top))
@@ -523,12 +547,15 @@ func _layout_contents() -> void:
 		grid.columns = model.working.parts[key].columns
 		grid.add_theme_constant_override("h_separation", model.working.gap)
 		grid.add_theme_constant_override("v_separation", model.working.gap)
-		grid.size = groups[key].size - Vector2(0, 20)
+		grid.size = _grid_extent(key, 24 if key == "backpack" else 8) - Vector2(0, 20)
 		for button: Button in grid.get_children():
 			button.custom_minimum_size = Vector2.ONE * model.working.parts[key].cell
 			button.add_theme_constant_override("icon_max_width", model.working.parts[key].cell - 6)
 			button.add_theme_color_override("icon_normal_color", Color(1, 1, 1, model.working.parts[key].icon_opacity))
 		(groups[key].get_node("Heading") as Label).size = Vector2(groups[key].size.x, 18)
+	reagent_pouch.position = Vector2.ZERO
+	reagent_pouch.size = groups.pouch.size
+	reagent_pouch.apply_style(model.working, _pouch_side_width, model.working.equipment_side == "right")
 	var preview_size: Vector2 = groups.preview.size
 	preview_icon.position = Vector2(4, 4)
 	preview_icon.size = Vector2.ONE * minf(36, preview_size.y - 8)
@@ -742,8 +769,8 @@ func refresh_actions() -> void:
 	var matches := _detail_slot >= 0 and int(item.get("image_id", -1)) == int(_detail.get("image_id", -2))
 	for button: Button in inspection_actions.get_children():
 		button.visible = matches and ((button.name == "use" and item.get("inventory_usable", false) and _detail_slot < 36)
-			or (button.name == "drop" and _detail_slot < 36) or (button.name == "equip" and _detail_slot < 36 and str(_detail.get("equip_type", "")) not in ["", "none"])
-			or (button.name == "unequip" and _detail_slot >= 36))
+			or (button.name == "drop" and (_detail_slot < 24 or _detail_slot >= 127)) or (button.name == "equip" and _detail_slot < 36 and str(_detail.get("equip_type", "")) not in ["", "none"])
+			or (button.name == "unequip" and _detail_slot >= 36 and _detail_slot < 44))
 		button.disabled = not matches or (button.name == "use" and main._inventory_cooldown_remaining(_detail_slot) > 0)
 
 func _item_action(action: String) -> void:
@@ -770,6 +797,7 @@ func close_inspection() -> void:
 
 func sync_inventory() -> void:
 	if not ready_to_layout: return
+	reagent_pouch.sync()
 	var slot: int = main.selected_inventory_slot
 	var item: Dictionary = AppState.inventory.get(slot, {})
 	preview_icon.texture = main._slot_icon(int(item.get("image_id", 0)), slot) if not item.is_empty() else null
@@ -788,8 +816,8 @@ func sync_inventory() -> void:
 	main.inventory_use_button.disabled = item.is_empty() or slot >= 36 or not item.get("inventory_usable", false) or main._inventory_cooldown_remaining(slot) > 0
 	main.inventory_equip_button.visible = not item.is_empty() and slot < 36 and not item.get("inventory_usable", false)
 	main.inventory_equip_button.disabled = item.is_empty() or slot >= 36
-	main.inventory_unequip_button.visible = slot >= 36
-	main.inventory_unequip_button.disabled = slot < 36
+	main.inventory_unequip_button.visible = slot >= 36 and slot < 44
+	main.inventory_unequip_button.disabled = slot < 36 or slot >= 44
 	for index: int in main.inventory_quantity_labels.size():
 		var count: int = int(AppState.inventory.get(index, {}).get("quantity", 0))
 		if count >= 1000:
@@ -905,7 +933,7 @@ func handle_editor_input(event: InputEvent) -> void:
 			_resizing = main.inventory_resize_grip.get_global_rect().has_point(event.position)
 			get_viewport().set_input_as_handled()
 			return
-		for key: String in ["actions", "inspection", "preview", "equipment", "backpack"]:
+		for key: String in ["actions", "inspection", "preview", "pouch", "equipment", "backpack"]:
 			var control: Control = groups[key]
 			if control.is_visible_in_tree() and control.get_global_rect().has_point(event.position):
 				editor.select_component(key)
@@ -932,7 +960,7 @@ func handle_editor_input(event: InputEvent) -> void:
 		var delta: Vector2 = (event.position - _drag_mouse) / main.inventory_panel.scale
 		var config: Dictionary = model.working.parts[_drag_group]
 		if not _resizing: config.offset = _drag_origin + delta
-		elif _drag_group in ["backpack", "equipment"]: config.cell = clampi(roundi(_drag_cell + delta.x / config.columns), 28, 64)
+		elif _drag_group in ["backpack", "equipment", "pouch"]: config.cell = clampi(roundi(_drag_cell + delta.x / config.columns), 52 if _drag_group == "pouch" else 28, 80 if _drag_group == "pouch" else 64)
 		else:
 			config.height = clampi(roundi(_drag_dimensions.y + delta.y), 32 if _drag_group == "preview" else 140, 400)
 			config.width = clampi(roundi(_drag_dimensions.x + delta.x), 200, 500)

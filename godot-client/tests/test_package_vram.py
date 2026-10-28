@@ -428,6 +428,79 @@ class SelfTestLine(unittest.TestCase):
         self.assertIn('SELF_TEST_POOL_ENVIRONMENT := "ELORIA_VRAM_SELF_TEST_POOL"', client)
 
 
+RECORDING_TOOL = """
+import json, shutil, sys
+from pathlib import Path
+args = sys.argv[1:]
+Path(args[args.index("--out-root") + 1]).mkdir(parents=True, exist_ok=True)
+(Path(args[args.index("--out-root") + 1]) / "argv.json").write_text(json.dumps(args), encoding="utf-8")
+if "--scenery-out-root" in args:
+    vram = Path(args[args.index("--scenery-out-root") + 1]) / "underground" / "vram"
+    shutil.copytree(sys.argv[-1], vram, dirs_exist_ok=True)
+    (vram / "report.json").write_text("{}", encoding="utf-8")
+"""
+
+
+class SceneryAndUnskip(unittest.TestCase):
+    """Landfall Town's shell images ship sidecars although maps/_shared/images is skipped, and its scenery GLBs'
+    embedded images ship sidecars loose beside them in app/assets/world (build_vram_textures.py --unskip-map,
+    --scenery-config; world_object_images.gd reads them)."""
+
+    def setUp(self):
+        self.scratch = Path(tempfile.mkdtemp(prefix="vram-package-scenery-"))
+        self.build = self.scratch / "build"
+        self.stage = self.scratch / "stage"
+        self.app = self.stage / "app"
+        self.logs = self.scratch / "logs"
+        self.logs.mkdir()
+        self.tool = self.scratch / "recording_tool.py"
+        self.tool.write_text(RECORDING_TOOL, encoding="utf-8")
+        for config in packager.SCENERY_SIDECAR_CONFIGS:
+            (self.build / config).parent.mkdir(parents=True, exist_ok=True)
+            (self.build / config).write_text("{}", encoding="utf-8")
+
+    def tearDown(self):
+        shutil.rmtree(self.scratch, ignore_errors=True)
+
+    def stage_with(self, app_dir):
+        original = packager.subprocess.run
+
+        def run(command, **kwargs):
+            return original(command + [str(FIXTURE / "shared-assets" / "vram")], **kwargs)
+        with mock.patch.object(packager.subprocess, "run", run):
+            staged = packager.stage_vram_textures(self.build, self.stage, Path("godot"), self.scratch / "cache",
+                                                  self.logs, tool=self.tool, app_dir=app_dir)
+        argv = json.loads((self.stage / "eloria-assets" / "maps" / "argv.json").read_text(encoding="utf-8"))
+        (self.stage / "eloria-assets" / "maps" / "argv.json").unlink()
+        return staged, argv
+
+    def test_the_town_s_shell_images_are_unskipped(self):
+        _, argv = self.stage_with(None)
+        self.assertIn("_shared/images", argv)
+        self.assertEqual(argv[argv.index("--unskip-map") + 1], "continent-v2/landfall_town")
+        self.assertNotIn("--scenery-config", argv, "no scenery sidecars without an app/ to put them in")
+
+    def test_scenery_sidecars_ship_loose_beside_the_glbs(self):
+        staged, argv = self.stage_with(self.app)
+        self.assertEqual(argv[argv.index("--scenery-config") + 1],
+                         str(self.build / packager.SCENERY_SIDECAR_CONFIGS[0]))
+        self.assertEqual(argv[argv.index("--scenery-out-root") + 1], str(self.app / "assets" / "world"))
+        vram = self.app / "assets" / "world" / "underground" / "vram"
+        self.assertFalse((vram / "report.json").exists(), "the quality report goes to the logs, not app/")
+        self.assertTrue((self.logs / "vram-report-app__assets__world__underground.json").is_file())
+        self.assertEqual(staged["sceneryFiles"], 5, "the index and four sidecars")
+        packager.check_scenery_vram_textures(self.app)
+        (vram / "stray.evt").write_bytes(b"x")
+        with self.assertRaises(packager.PackageError):
+            packager.check_scenery_vram_textures(self.app)
+        (vram / "stray.evt").unlink()
+        index = json.loads((vram / "index.json").read_text(encoding="utf-8"))
+        first = next(iter(index["images"].values()))
+        (vram / first["file"]).write_bytes(b"changed")
+        with self.assertRaises(packager.PackageError):
+            packager.check_scenery_vram_textures(self.app)
+
+
 @unittest.skipIf(SKIP_ENCODE, SKIP_ENCODE or "")
 class Stage(unittest.TestCase):
     def test_stage_builds_checks_and_ships_only_index_and_sidecars(self):
