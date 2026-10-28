@@ -240,14 +240,30 @@ def _allowed(asset, part, weights):
         return [np.array([0]) for _ in weights]
     lookup = {int(n): i for i, n in enumerate(part['nodes'])}
     parents = np.array([lookup.get(int(asset.parent[n]), -1) for n in part['nodes']])
+    # Geometry is mesh-local. Joint rest translations are world-space, so an
+    # untransformed comparison can select the opposite limb on placed/scaled
+    # meshes. Include real parent segments even outside the skin palette.
+    inverse_mesh = np.linalg.inv(asset.rest[part['node']])
+    heads_world = asset.rest[part['nodes'], :3, 3]
+    starts_world = np.array([asset.rest[asset.parent[n], :3, 3]
+                             if asset.parent[n] >= 0 else asset.rest[n, :3, 3]
+                             for n in part['nodes']])
+    heads = (inverse_mesh @ np.c_[heads_world, np.ones(len(heads_world))].T).T[:, :3]
+    starts = (inverse_mesh @ np.c_[starts_world, np.ones(len(starts_world))].T).T[:, :3]
+    line = heads - starts
+    length2 = np.maximum(np.sum(line * line, axis=1), 1e-20)
     result = []
-    for row in weights:
+    for i, row in enumerate(weights):
         support = set(np.flatnonzero(row > 0).tolist())
         allowed = set(support)
         for joint in support:
             if parents[joint] >= 0:
                 allowed.add(int(parents[joint]))
             allowed.update(np.flatnonzero(parents == joint).tolist())
+        position = part['position'][i, :3]
+        fraction = np.clip(np.sum((position - starts) * line, axis=1) / length2, 0, 1)
+        distance = np.linalg.norm(position - (starts + fraction[:, None] * line), axis=1)
+        allowed.update(np.argsort(distance, kind='stable')[:3].tolist())
         result.append(np.array(sorted(allowed), dtype=int))
     return result
 
@@ -269,8 +285,19 @@ def _score(skin, target, weights, position, radius):
     return float(np.mean((1 + np.sum(error * error, axis=1) / radius**2)**3))
 
 
+def _ordinary_score(skin, target, weights, position):
+    error = np.einsum('j,tjab,b->ta', weights, skin, np.r_[position, 1.]) - target
+    return float(np.mean(np.sum(error * error, axis=1)))
+
+
 def _fit_weights(skin, target, position, current, allowed, budget, importance):
     a = np.einsum('tjab,b->taj', skin[:, allowed], np.r_[position, 1.])
+    # Sum-to-one makes a common trajectory cancel exactly. Center it out to
+    # avoid subtracting large world-position normal-equation terms near a
+    # translated mesh; this does not change the constrained problem.
+    origin = a[:, :, 0].copy()
+    a -= origin[:, :, None]
+    target = target - origin
     h = np.einsum('t,tai,taj->ij', importance, a, a)
     g = np.einsum('t,tai,ta->i', importance, a, target)
     scale = max(float(np.trace(h)), 1e-20)
@@ -340,12 +367,36 @@ def _fit(asset, part, data, skin, targets, height, iterations, fit_skin):
     allowed = _allowed(asset, part, weights)
     budget = part['joints'].shape[1] if 'joints' in part else 1
     radius = max(height * .00015, 1e-12)
+    uniform = np.full(len(skin), 1 / len(skin))
     for ids in groups:
         i = ids[0]
         original_fixed[ids] = _fit_position(skin, targets[:, i], weights[i], data['base'][i])
         if fit_skin:
             weights[ids] /= weights[i].sum()
-        positions[ids] = _fit_position(skin, targets[:, i], weights[i], data['base'][i])
+            # First learn weights at the ORIGINAL base. Starting with a large
+            # original-skin displacement traps alternating solves in a worse
+            # local minimum and prevents a nearby joint from explaining motion.
+            proposed = _fit_weights(skin, targets[:, i], data['base'][i], weights[i],
+                                    allowed[i], budget, uniform)
+            if _ordinary_score(skin, targets[:, i], proposed, data['base'][i]) < _ordinary_score(
+                    skin, targets[:, i], weights[i], data['base'][i]):
+                weights[ids] = proposed
+        else:
+            positions[ids] = original_fixed[ids]
+    ordinary_iterations = 12 if fit_skin and iterations else 0
+    for _ in range(ordinary_iterations):
+        for ids in groups:
+            i = ids[0]
+            y, w, x = targets[:, i], weights[i].copy(), positions[i].copy()
+            proposed = _fit_weights(skin, y, x, w, allowed[i], budget, uniform)
+            if _ordinary_score(skin, y, proposed, x) < _ordinary_score(skin, y, w, x):
+                w = proposed
+            x = _fit_position(skin, y, w, data['base'][i])
+            weights[ids], positions[ids] = w, x
+    if fit_skin and not ordinary_iterations:
+        for ids in groups:
+            i = ids[0]
+            positions[ids] = _fit_position(skin, targets[:, i], weights[i], data['base'][i])
     for _ in range(iterations):
         for ids in groups:
             i = ids[0]
@@ -372,10 +423,29 @@ def _fit(asset, part, data, skin, targets, height, iterations, fit_skin):
                     x = trial
                     break
             weights[ids], positions[ids] = w, x
+    fallback_groups = 0
+    if fit_skin:
+        # Keep the separate original-skin solution as a final competing model,
+        # never as the weight solver's initial displaced base. A perfectly
+        # static correction should not become worse merely because we also
+        # tried to explain it with joint motion.
+        for ids in groups:
+            i = ids[0]
+            old = data['weights'][i] / data['weights'][i].sum()
+            fixed = _fit_position(skin, targets[:, i], old, data['base'][i])
+            if _score(skin, targets[:, i], old, fixed, radius) < _score(
+                    skin, targets[:, i], weights[i], positions[i], radius):
+                weights[ids], positions[ids] = old, fixed
+                fallback_groups += 1
     return positions, weights, original_fixed, {
         'coincident_certified_groups': sum(len(g) > 1 for g in groups),
         'independent_fit_groups': len(groups), 'influence_budget': budget,
-        'local_joint_policy': 'original positive support plus immediate palette parents/children',
+        'local_joint_policy': 'original positive support, immediate palette parents/children, '
+                              'and three nearest anatomical rest segments in mesh-local space',
+        'segment_distance_space': 'inverse(mesh.rest) applied to joint/parent rest world positions',
+        'weight_only_seed_at_original_base': fit_skin,
+        'ordinary_alternating_iterations': ordinary_iterations,
+        'final_original_skin_fallback_groups': fallback_groups,
         'robust_objective': 'p6 residual with height-scaled smoothing; descending alternating steps',
         'robust_smoothing_radius_over_height': radius / height,
         'proposal_displacement_limit_over_height': .03,
@@ -559,6 +629,26 @@ def _summary(rows, state_count, height, field, category=None):
     return result
 
 
+def _original_mesh_bounds(document, binary, mesh):
+    """Raw ArrayMesh envelope: float32 base AND each morph endpoint.
+
+    This deliberately includes inactive corrective endpoints: actor grounding
+    and normalization use the original mesh envelope, not a selected pose or
+    only the smaller base/fitted mesh. Existing authored metadata wins.
+    """
+    low = np.full(3, np.inf, dtype='f4')
+    high = np.full(3, -np.inf, dtype='f4')
+    for primitive in mesh['primitives']:
+        base = accessor(document, binary, primitive['attributes']['POSITION']).astype('f4')
+        low, high = np.minimum(low, base.min(0)), np.maximum(high, base.max(0))
+        for target in primitive.get('targets', []):
+            if 'POSITION' not in target:
+                continue
+            endpoint = base + accessor(document, binary, target['POSITION']).astype('f4')
+            low, high = np.minimum(low, endpoint.min(0)), np.maximum(high, endpoint.max(0))
+    return {'position': low.tolist(), 'size': (high - low).tolist()}
+
+
 def bake(source: Path, output: Path, *, iterations=6, report: Path = None,
          fit_skin=True, allow_step_exceptions=False) -> dict:
     """Create a measured fixed-mesh candidate; never install or change source.
@@ -669,11 +759,11 @@ def bake(source: Path, output: Path, *, iterations=6, report: Path = None,
             mesh.pop('weights', None)
             mesh.get('extras', {}).pop('targetNames', None)
             document['nodes'][ni].pop('weights', None)
-            # Preserve placement/normalization based on the original local AABB.
-            base = np.concatenate([accessor(original_document, binary, p['attributes']['POSITION'])
-                for p in original_document['meshes'][old_node['mesh']]['primitives']])
+            # Raw ArrayMesh AABB includes every morph endpoint, even inactive
+            # ones. Using base-only bounds would move normalization/grounding.
             mesh.setdefault('extras', {}).setdefault('rabbitlands_actor_bounds_v1', {
-                'position': base.min(0).tolist(), 'size': np.ptp(base, axis=0).tolist()})
+                **_original_mesh_bounds(original_document, binary,
+                                        original_document['meshes'][old_node['mesh']])})
     # Every corrective mesh has a fitted clone. Remove unused originals too.
     used = sorted({n['mesh'] for n in document['nodes'] if 'mesh' in n})
     remap = {old: new for new, old in enumerate(used)}
@@ -717,7 +807,8 @@ def bake(source: Path, output: Path, *, iterations=6, report: Path = None,
                   'all raw morph weights included; no GPU weight/vertex quantization or engine import',
               'actual_engine_validated': False, 'acceptance_threshold_assumed': None,
               'limitations': ['Approximate fit; no lossless claim or automatic acceptance.',
-                  'No helper bones; support restricted to original palette hierarchy neighbors.',
+                  'No helper bones; support restricted to hierarchy neighbors and three nearest rest segments; '
+                  'crowded/crossing anatomy still needs individual review.',
                   'Crossfades are offline local-TRS blends, not an actual engine AnimationMixer.',
                   'Actor/dissolve/silhouette/reference-skin behavior requires separate runtime QA.',
                   'Normal-mapped materials require rendered tangent/normal inspection.']}

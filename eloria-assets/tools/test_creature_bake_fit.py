@@ -8,7 +8,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from video_motion.asset import accessor, digest, read_glb, write_glb
-from video_motion.creature_bake_fit import bake
+from video_motion.creature_bake_fit import bake, _allowed
 from video_motion.packing import append_array
 
 
@@ -217,3 +217,31 @@ def test_static_corrective_and_zero_normals_are_reported_without_invented_direct
     candidate, raw = read_glb(tmp_path / 'candidate.glb')
     attrs = candidate['meshes'][candidate['nodes'][2]['mesh']]['primitives'][0]['attributes']
     assert not np.any(accessor(candidate, raw, attrs['NORMAL']))
+
+
+def test_nearest_bone_segments_are_measured_in_mesh_local_space():
+    from types import SimpleNamespace
+    rest = np.tile(np.eye(4), (6, 1, 1))
+    rest[:, 0, 3] = [102, 103, 104, .2, 20, 100]
+    rest[5, :3, :3] *= 10
+    asset = SimpleNamespace(parent=np.full(6, -1), rest=rest)
+    part = {'node': 5, 'nodes': np.arange(5), 'position': np.array([[.2, 0, 0, 1]])}
+    allowed = _allowed(asset, part, np.array([[0., 0, 0, 0, 1.]]))[0]
+    assert set(allowed) == {0, 1, 2, 4}
+
+
+def test_new_logical_bounds_include_original_morph_endpoint_envelope(tmp_path):
+    source = fixture(tmp_path / 'source.glb')
+    doc, raw = read_glb(source)
+    blob = bytearray(raw)
+    mesh = doc['meshes'][0]
+    mesh['extras'].pop('rabbitlands_actor_bounds_v1')
+    mesh['primitives'][0]['targets'][0]['POSITION'] = append_array(doc, blob,
+        np.tile([.01, -.3, 0], (3, 1)), 'VEC3')
+    write_glb(source, doc, blob)
+    bake(source, tmp_path / 'candidate.glb', iterations=0)
+    candidate, _ = read_glb(tmp_path / 'candidate.glb')
+    mesh = candidate['meshes'][candidate['nodes'][2]['mesh']]
+    bounds = mesh['extras']['rabbitlands_actor_bounds_v1']
+    assert bounds['position'][1] == float(np.float32(-.3))
+    assert bounds['size'][1] == float(np.float32(1.3))
