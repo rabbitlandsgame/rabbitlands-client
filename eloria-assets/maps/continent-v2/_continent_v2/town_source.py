@@ -36,12 +36,10 @@ EDGE tiles from the map's edge):
                                   lays it on a surface that high instead, e.g. a book on a dresser's worktop); size [w,
                                   h] metres
   entrances [DOOR, ...]           one per line (see DOORS)
-  props [{asset, at, yaw, scale, block, blockBox, wall, height, palette, light, clearWall, mirror}]   reused kit
-                                  scenery: block = radius (tiles) closed on the walk grid, blockBox [hx, hy] = a
-                                  rectangle (half extents along the piece's own X and Z) turned by yaw; wall = the
-                                  compass side of the wall it stands against: it cuts away with that wall; mirror true
-                                  = the piece drawn mirrored across its own X (left for right), so one model standing
-                                  in a row need not repeat itself (the walk grid is the same either way)
+  props [{asset, at, yaw, scale, block, blockBox, wall, height, palette, light, clearWall}]   reused kit scenery:
+                                  block = radius (tiles) closed on the walk grid, blockBox [hx, hy] = a rectangle (half
+                                  extents along the piece's own X and Z) turned by yaw; wall = the compass side of the
+                                  wall it stands against: it cuts away with that wall
   lights [{at, height, colour, energy, range}]   at most MAX_LIGHTS_PER_ROOM in any room (props that are lamps count)
   npcs [{name, role, occupation, actorType, facing, tile, greeting, mapCategory?, mapLabel?}]
   interactives [{object, tile, role, text, label?, at?, target?, height?, radius?}]   role one of INTERACTIVE_ROLES;
@@ -119,8 +117,7 @@ TOP_KEYS = ("schema", "map", "sections", "passages")
 SECTION_KEYS = ("id", "name", "style", "danger", "about", "rooms", "roomNames", "links", "floors", "walls", "windows",
                 "decals", "entrances", "props", "lights", "npcs", "interactives", "sealedStairs", "specialAreas", "nodes",
                 "spawns")
-PROP_KEYS = ("asset", "at", "yaw", "scale", "block", "blockBox", "wall", "height", "palette", "light", "clearWall",
-             "mirror")
+PROP_KEYS = ("asset", "at", "yaw", "scale", "block", "blockBox", "wall", "height", "palette", "light", "clearWall")
 # one item per line in dump(): the lists people edit a row at a time (retarget-style tools find a door by its line)
 PER_LINE = ("entrances", "props", "lights", "windows", "decals", "npcs", "interactives", "sealedStairs")
 HEAD = ("id", "name", "style", "danger")
@@ -601,8 +598,6 @@ def _check_section(design, section, cells):
             raise SourceError(f"{where}: wall {prop['wall']!r} is not one of {SIDES}")
         if "light" in prop and not isinstance(prop["light"], bool):
             raise SourceError(f"{where}: light is true or false")
-        if "mirror" in prop and prop["mirror"] is not True:
-            raise SourceError(f"{where}: mirror is true or left out")
         if "palette" in prop and not isinstance(prop["palette"], dict):
             raise SourceError(f"{where}: palette is {{stone, mineral}}")
     lit = [0] * count

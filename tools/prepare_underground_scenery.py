@@ -365,10 +365,9 @@ INTERIORS = {
 }
 # Optional dressing keys a placement carries over, in this order: `outward` (the facing of the wall the piece is cut
 # away with: a cave's wall rock, a town prop standing against a wall), `cutawayWall` (a town prop's own wall node: the
-# client hides the prop exactly when that wall is cut away, underground_scenery.gd), `palette` and `mirror` (a town
-# prop drawn mirrored across its own X). A dressing item's other keys (the caves' `wall` flag among them) stay the
-# builder's.
-PLACEMENT_KEYS = ('outward', 'cutawayWall', 'palette', 'mirror')
+# client hides the prop exactly when that wall is cut away, underground_scenery.gd) and `palette`. A dressing item's
+# other keys (the caves' `wall` flag among them) stay the builder's.
+PLACEMENT_KEYS = ('outward', 'cutawayWall', 'palette')
 
 # The underground's laid-out nodes (Quartz, Salt, Clay, Flint, Moss, Toadstool,
 # Stormglass), presented as a continent-v2 package presents its nodes

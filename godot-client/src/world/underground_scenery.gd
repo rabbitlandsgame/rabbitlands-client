@@ -150,11 +150,6 @@ static func dress(model: Node3D, placement: Dictionary, count: int) -> void:
 	model.position = Vector3(p[0], p[1], p[2])
 	model.rotation.y = deg_to_rad(float(placement.get("yaw", 0.0)))
 	model.scale *= float(placement.get("scale", 1.0))
-	# A town prop drawn left for right (the source's `mirror`): one model in a
-	# row of its kind need not repeat its own layout. The renderer flips the
-	# face winding of a mirrored instance itself.
-	if placement.get("mirror", false) == true:
-		model.scale.x = -model.scale.x
 	if placement.asset == "mine_rail":
 		model.scale.y = .1 # Thin floor dressing, clear of character feet.
 	if placement.has("palette"):

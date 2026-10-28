@@ -144,7 +144,7 @@ storey of one, is a section with unfloored blackspace round it, as the caves' ar
   and `crafting` for a station, the smithy's anvil `smithing`) and `height`/`radius` (its pick's size, else the
   packaged prop's at `at`). A prop may add `palette` {stone, mineral} (tinted by the client's MineralAppearance
   shader: the Hall of Eight Seats' lichen and standing stone; a tint recolours the whole model, a bookcase's books
-  too) and `mirror` true (drawn left for right: the library's bookcases). A section may add `specialAreas` [{kind, room,
+  too). A section may add `specialAreas` [{kind, room,
   factor?}]: a server special area (eloria/areas.py kinds; factor by default the kind's, fast_reading 3) over that
   room's floor inside its walls (`town_source.room_tiles`); the library's reading room is the one fast_reading room.
 - `town_source.py` is the only reader, checker and writer of that file (its docstring is the format); it reuses

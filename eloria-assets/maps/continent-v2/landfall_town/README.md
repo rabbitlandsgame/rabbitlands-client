@@ -39,9 +39,9 @@ of them stand against an outer wall and 59 against a partition; each is cut away
 with its wall (`cutawayWall`). Four are tinted through the prop palette (`palette`,
 drawn by the client's MineralAppearance shader): the three lichen crusts on the
 Mycelari seat and the Stoneborn standing stone in the Hall of Eight Seats. The
-library's 36 bookcases keep their coloured spines (a tint recolours the books too):
-19 are drawn mirrored (`mirror`, left for right) and their sizes run 0.95-1.05, so
-neighbouring cases do not repeat. Twenty-one people stand at their posts (six shopkeepers: Hob
+library's 36 bookcases keep their coloured spines (a tint recolours the books too)
+and none is drawn mirrored (a mirrored case lit darker): cases side by side in a row
+alternate in size (0.95-1.05), so their tops step. Twenty-one people stand at their posts (six shopkeepers: Hob
 Tennant, Hanne Ashby, Bryony Larch, Ilka Tarn, Hild Ashlar and the bookseller Ennis
 Calloway), and 20 interior interactives (59251-59254, 59271-59278, 59281-59284,
 59285-59288) hold the lore objects and the smithy's anvil, a crafting station that publishes as `smithing`. A lore object is

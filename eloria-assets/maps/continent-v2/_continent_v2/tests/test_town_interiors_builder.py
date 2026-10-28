@@ -163,13 +163,18 @@ def test_the_library_sells_books_at_its_street_door_and_reads_fast_in_its_readin
                if p['asset'] == 'writing_desk_ledgers' and TS.room_of(library, *p['at']) == 0]
     assert ennis['tile'][1]-2 < desk['at'][1] < ennis['tile'][1]-1 and abs(desk['at'][0]-(ennis['tile'][0]+.5)) < .1
     assert not {p['asset'] for p in library['props']} & {'dressed_round_table', 'shop_counter', 'crate_stack'}
-    # Review 2026-10-28: the bookcases keep their coloured spines (no palette tint; mirroring and a few sizes vary
-    # them), books for sale and to hand are closed piles (book_stack), open books only where a reader sits and the
-    # lending-rule card on Ennis's desk, and one supply crate
+    # Review 2026-10-28: the bookcases keep their coloured spines (no palette tint), books for sale and to hand are
+    # closed piles (book_stack), open books only where a reader sits and the lending-rule card on Ennis's desk, and
+    # one supply crate. No case is drawn mirrored (a mirrored case lit darker than its neighbours): the cases standing
+    # side by side in a row alternate in size instead (0.95-1.05), so neighbouring tops step
     cases = [p for p in library['props'] if p['asset'] == 'bookcase']
     assert cases and not [p for p in cases if 'palette' in p]
-    assert len({(p.get('scale', 1), bool(p.get('mirror'))) for p in cases}) >= 6
+    assert len({p.get('scale', 1) for p in cases}) >= 6
     assert all(.95 <= p.get('scale', 1) <= 1.05 for p in cases)
+    for i, a in enumerate(cases):
+        for b in cases[i+1:]:
+            if a['yaw'] == b['yaw'] and np.hypot(a['at'][0]-b['at'][0], a['at'][1]-b['at'][1]) < 2:
+                assert abs(a.get('scale', 1)-b.get('scale', 1)) >= .05, (a, b)
     piles = [p for p in library['props'] if p['asset'] == 'book_stack']
     assert len(piles) >= 20 and all(p.get('height', 0) >= 0 for p in piles)
     open_books = [d for d in library['decals'] if d['image'] == 'book_recipes']
@@ -259,7 +264,6 @@ REFUSALS = {
         lambda d: section(d, 'library')['specialAreas'][0].update(factor=2.5), 'factor'),
     'a special area with an unknown key': (
         lambda d: section(d, 'library')['specialAreas'][0].update(bounds=[1, 1, 2, 2]), 'unknown keys'),
-    'a prop mirrored by anything but true': (lambda d: section(d, 'library')['props'][0].update(mirror='x'), 'mirror'),
 }
 
 

@@ -484,10 +484,9 @@ def _partition_node(section, prop):
 
 def dressing(section):
     """The section's reused scenery, as placements in tile units: {asset, x, y, height, yaw, scale, block, blockBox?,
-    wall, side?, outward?, cutawayWall?, palette?, light?, mirror?}. A prop against a wall (`wall`) carries its outward
-    direction (world) and its wall's cutaway node (`cutawayWall`), so the client's cutaway drops it with that wall; a
-    prop against a partition (_partition_node) carries the partition's node as its `cutawayWall`, so it hides with the
-    partition. A mirrored prop (`mirror`) is drawn left for right; its blockBox, symmetric, blocks the same tiles."""
+    wall, side?, outward?, cutawayWall?, palette?, light?}. A prop against a wall (`wall`) carries its outward direction
+    (world) and its wall's cutaway node (`cutawayWall`), so the client's cutaway drops it with that wall; a prop against
+    a partition (_partition_node) carries the partition's node as its `cutawayWall`, so it hides with the partition."""
     items = []
     for prop in section.get('props', []):
         x, y = prop['at']
@@ -507,8 +506,6 @@ def dressing(section):
             item['palette'] = prop['palette']
         if prop.get('light'):
             item['light'] = True
-        if prop.get('mirror'):
-            item['mirror'] = True
         items.append(item)
     return items
 
