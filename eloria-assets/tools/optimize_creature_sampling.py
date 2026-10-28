@@ -5,6 +5,9 @@ STEP clocks retain their bytes; dense bit-constant STEP uses endpoints.
 Unknown extensions and cubic interpolation
 fail explicitly. Geometry, both skin influence sets, defaults, clip metadata,
 materials and embedded images are verified independently after lossless packing.
+Unreferenced samplers remain byte-identical and are reported outside the active
+cadence bound. Equal-time rows can be removed only after bit-identity proof; a
+separate hash-bound source-evaluation view retains that complete certificate.
 
 The numerical report uses the project's float64 native glTF evaluator, all mesh
 vertices, shifted/off-grid times, reset/defaults and deterministic crossfades.
@@ -64,6 +67,12 @@ def _tool_fingerprint():
     return h.hexdigest()
 
 
+# A long-lived worker must describe the code it loaded, even if its checkout
+# moves to another branch while it is running. Re-reading files per actor can
+# otherwise attach a new on-disk pin to old Python function objects.
+_LOADED_TOOL_SHA256 = _tool_fingerprint()
+
+
 def _cadence(times, fps):
     delta = np.diff(times.astype(float))
     if not len(delta):
@@ -72,9 +81,9 @@ def _cadence(times, fps):
     # A nominal 30 Hz float32 clock can have intervals a few timestamp ULPs
     # shorter than 1/30. Keep it verbatim rather than needlessly sampling it.
     allowance = np.abs(np.spacing(times.astype(np.float32))).astype(float)
-    within = np.all(delta + allowance[:-1] + allowance[1:] >= 1.0 / fps)
-    return {"keys": len(times), "maximum_interval_hz": float(1.0 / delta.min()),
-            "average_hz": float(len(delta) / (times[-1] - times[0])),
+    within = np.all(delta > 0) and np.all(delta + allowance[:-1] + allowance[1:] >= 1.0 / fps)
+    return {"keys": len(times), "maximum_interval_hz": float(1.0 / delta.min()) if np.all(delta > 0) else None,
+            "average_hz": float(len(delta) / (times[-1] - times[0])) if times[-1] > times[0] else None,
             "within_rate_at_float32_precision": bool(within)}
 
 
@@ -122,7 +131,7 @@ def _extensions(value, *, material=False):
             _extensions(child, material=material)
 
 
-def _preflight(d, b):
+def _preflight(d, b, *, allow_identical_duplicates=False):
     _require(d.get("asset", {}).get("version") == "2.0", "Requires glTF 2.0")
     _require(not (set(d.get("extensionsUsed", [])) | set(d.get("extensionsRequired", [])))
              - _MATERIAL_EXTENSIONS, "Unsupported declared extension")
@@ -162,22 +171,33 @@ def _preflight(d, b):
             si = channel["sampler"]
             _require(isinstance(si, int) and 0 <= si < len(animation["samplers"]), "Invalid sampler")
             used.add(si)
-        _require(used == set(range(len(animation["samplers"]))), "Unreferenced animation sampler")
         for si, sampler in enumerate(animation["samplers"]):
             mode = sampler.get("interpolation", "LINEAR")
             _require(mode in ("LINEAR", "STEP"), f"Unsupported interpolation: {mode}")
             kinds = {c["target"]["path"] for c in animation["channels"] if c["sampler"] == si}
-            _require(len(kinds) == 1, "Shared sampler uses incompatible target paths")
-            kind = next(iter(kinds))
+            _require(len(kinds) <= 1, "Shared sampler uses incompatible target paths")
+            kind = next(iter(kinds), None)
             inp, out = (d["accessors"][sampler[k]] for k in ("input", "output"))
             _require(inp["type"] == "SCALAR" and inp["componentType"] == 5126 and not inp.get("normalized")
-                     and out["type"] == _PATH_TYPES[kind] and out["componentType"] == 5126
+                     and (out["type"] == _PATH_TYPES[kind] if kind is not None else out["type"] in ("SCALAR", "VEC3", "VEC4"))
+                     and out["componentType"] == 5126
                      and not out.get("normalized"), "Unsupported animation accessor encoding")
             ts = accessor(d, b, sampler["input"]).ravel()
             values = accessor(d, b, sampler["output"])
-            _require(len(ts) > 0 and np.isfinite(ts).all() and ts[0] >= 0
-                     and np.all(np.diff(ts) > 0), "Clock must be finite, nonnegative and strictly increasing")
+            _require(len(ts) > 0 and np.isfinite(ts).all() and ts[0] >= 0 and np.all(np.diff(ts) >= 0),
+                     "needs_original_engine_boundary_investigation: nonfinite, negative or decreasing clock")
             _require(np.isfinite(values).all(), "Nonfinite animation values")
+            _require(len(values) % len(ts) == 0 and len(values) >= len(ts), "Animation sampler length mismatch")
+            duplicates = np.flatnonzero(np.diff(ts) == 0) + 1
+            if len(duplicates):
+                rows = _array(d, b, sampler["output"]).reshape(len(ts), -1)
+                for row in duplicates:
+                    _require(rows[row].tobytes() == rows[row - 1].tobytes(),
+                             "needs_original_engine_boundary_investigation: conflicting equal-time output rows")
+            _require(not len(duplicates) or allow_identical_duplicates,
+                     "Clock requires certified identical-row normalization")
+            if kind is None:
+                continue  # Preserve unused samplers, without guessing a target path.
             if kind == "weights":
                 counts = []
                 for c in animation["channels"]:
@@ -201,6 +221,58 @@ def _append_like(d, blob, values, original):
         if key not in ("bufferView", "byteOffset", "count", "min", "max"):
             spec[key] = copy.deepcopy(value)
     return index
+
+
+def _normalized_evaluation_view(document, binary):
+    """Certify duplicate rows before creating a separate strictly keyed view.
+
+    Only referenced samplers need normalization for the native evaluator.
+    Unreferenced samplers remain untouched, including their original duration.
+    """
+    changes = []
+    for ai, animation in enumerate(document["animations"]):
+        used = {c["sampler"] for c in animation["channels"]}
+        for si in sorted(used):
+            sampler = animation["samplers"][si]
+            times = _array(document, binary, sampler["input"])
+            delta = np.diff(times.ravel().astype(float))
+            _require(np.isfinite(times).all() and times[0, 0] >= 0 and np.all(delta >= 0),
+                     "needs_original_engine_boundary_investigation: nonfinite, negative or decreasing clock")
+            duplicates = np.flatnonzero(delta == 0) + 1
+            if not len(duplicates):
+                continue
+            values = _array(document, binary, sampler["output"])
+            _require(sampler.get("interpolation", "LINEAR") in ("LINEAR", "STEP")
+                     and len(values) % len(times) == 0, "Unsupported duplicate-clock representation")
+            rows = values.reshape(len(times), -1)
+            proof = []
+            for row in duplicates:
+                anchor = int(np.searchsorted(times.ravel(), times[row, 0], side="left"))
+                _require(rows[row].tobytes() == rows[anchor].tobytes(),
+                         "needs_original_engine_boundary_investigation: conflicting equal-time output rows")
+                proof.append({"removed_original_row": int(row), "retained_original_row": anchor,
+                              "timestamp_bits_hex": times[row].tobytes().hex(),
+                              "identical_output_row_bits_hex": rows[row].tobytes().hex()})
+            keep = np.r_[True, delta != 0]
+            changes.append({"animation_index": ai, "clip": animation["name"], "sampler": si,
+                            "original_keys": len(times), "normalized_keys": int(keep.sum()),
+                            "source_clock_bits_sha256": hashlib.sha256(times.tobytes()).hexdigest(),
+                            "source_output_bits_sha256": hashlib.sha256(values.tobytes()).hexdigest(),
+                            "retained_original_rows": np.flatnonzero(keep).tolist(), "duplicate_rows": proof})
+    if not changes:
+        return document, binary, []
+    result, blob = copy.deepcopy(document), bytearray(binary)
+    for change in changes:
+        original = document["animations"][change["animation_index"]]["samplers"][change["sampler"]]
+        sampler = result["animations"][change["animation_index"]]["samplers"][change["sampler"]]
+        times = _array(document, binary, original["input"])
+        values = _array(document, binary, original["output"])
+        keep = change["retained_original_rows"]
+        rows = values.reshape(len(times), -1)[keep]
+        sampler["input"] = _append_like(result, blob, times[keep], document["accessors"][original["input"]])
+        sampler["output"] = _append_like(result, blob, rows.reshape(-1, values.shape[1]), document["accessors"][original["output"]])
+    result, blob, _ = compact(result, blob, collapse_paths=())
+    return result, blob, changes
 
 
 def verify_static(a, ab, b, bb, fps):
@@ -252,17 +324,30 @@ def verify_static(a, ab, b, bb, fps):
         return result
 
     _require(canonical(a, ab) == canonical(b, bb), "Static payload or clip/channel metadata changed")
-    for old, new in zip(a["animations"], b["animations"], strict=True):
-        for sa, sb in zip(old["samplers"], new["samplers"], strict=True):
+    # Certify the original duplicate rows independently before using this curve
+    # oracle; all static fields above still compare to the immutable original.
+    reference, rb, normalization = _normalized_evaluation_view(a, ab)
+    for old, normalized, new in zip(a["animations"], reference["animations"], b["animations"], strict=True):
+        used = {channel["sampler"] for channel in old["channels"]}
+        for si, (sa, sn, sb) in enumerate(zip(old["samplers"], normalized["samplers"], new["samplers"], strict=True)):
             for field in ("input", "output"):
                 ignored = {"bufferView", "byteOffset", "count", "min", "max"}
                 _require({k: v for k, v in a["accessors"][sa[field]].items() if k not in ignored}
                          == {k: v for k, v in b["accessors"][sb[field]].items() if k not in ignored},
                          "Animation accessor metadata changed")
-            ta = _array(a, ab, sa["input"])
+            if si not in used:
+                for key in ("input", "output"):
+                    ignored = {"bufferView", "byteOffset"}
+                    _require({k: v for k, v in a["accessors"][sa[key]].items() if k not in ignored}
+                             == {k: v for k, v in b["accessors"][sb[key]].items() if k not in ignored}
+                             and _array(a, ab, sa[key]).tobytes() == _array(b, bb, sb[key]).tobytes(),
+                             "Unreferenced sampler bits or specification changed")
+                continue
+            ta = _array(reference, rb, sn["input"])
             tb = _array(b, bb, sb["input"])
-            va = _array(a, ab, sa["output"]).reshape(len(ta), -1)
+            va = _array(reference, rb, sn["output"]).reshape(len(ta), -1)
             vb = _array(b, bb, sb["output"]).reshape(len(tb), -1)
+            _require(np.all(np.diff(tb.ravel().astype(float)) > 0), "Referenced candidate clock is not strictly increasing")
             _require(ta[[0, -1]].tobytes() == tb[[0, -1]].tobytes()
                      and va[[0, -1]].tobytes() == vb[[0, -1]].tobytes(), "Endpoint bits changed")
             constant_step = (sa.get("interpolation", "LINEAR") == "STEP" and len(ta) > 2
@@ -273,11 +358,12 @@ def verify_static(a, ab, b, bb, fps):
             elif sa.get("interpolation", "LINEAR") == "STEP" or _cadence(ta.ravel(), fps)["within_rate_at_float32_precision"]:
                 _require(ta.tobytes() == tb.tobytes() and va.tobytes() == vb.tobytes(),
                          "Sparse or STEP sampler changed")
-    return {"static_accessor_signatures_checked": count[0], "preserved": [
+    return {"static_accessor_signatures_checked": count[0], "certified_duplicate_samplers": len(normalization), "preserved": [
         "geometry/topology/UVs/normals/tangents/colors", "all morph POSITION/NORMAL/TANGENT fields",
         "all skin influence sets and inverse binds", "node hierarchy/rest/defaults",
         "materials/texture metadata/embedded image bytes", "clip order/names/metadata/channel order",
-        "all sampler endpoint bits", "sparse and variable STEP bits; dense bit-constant STEP endpoints"],
+        "all sampler endpoint bits", "sparse and variable STEP bits after certified duplicate normalization; dense bit-constant STEP endpoints",
+        "unreferenced samplers including original clocks, values, interpretation and duration"],
         "event_metadata": "Preserved verbatim; no universal event-knot schema assumed"}
 
 
@@ -461,7 +547,7 @@ def sample(source: Path, output: Path, *, fps=30, expected_sha256=None, report: 
     fps = int(fps) if float(fps).is_integer() else float(fps)
     source_hash = digest(source)
     _require(expected_sha256 is None or source_hash == expected_sha256, "Source SHA-256 mismatch")
-    tool_hash = _tool_fingerprint()
+    tool_hash = _LOADED_TOOL_SHA256
     if report is not None and report.exists() and output.exists():
         try:
             prior = json.loads(report.read_text(encoding="utf-8"))
@@ -470,29 +556,39 @@ def sample(source: Path, output: Path, *, fps=30, expected_sha256=None, report: 
                     and prior.get("tool_sha256") == tool_hash and prior.get("candidate_path") == str(output)
                     and prior.get("source_path") == str(source)
                     and prior.get("status") == "approximate_draft_not_installed_or_approved"):
-                return {**prior, "resumed": True}
+                evaluation = prior.get("source_evaluation", {})
+                evaluation_path = Path(evaluation.get("path", source))
+                expected_evaluation = evaluation.get("sha256", source_hash)
+                if (evaluation_path == source and expected_evaluation == source_hash
+                        or evaluation_path.exists() and digest(evaluation_path) == expected_evaluation):
+                    return {**prior, "resumed": True}
         except (ValueError, OSError):
             pass
     original, binary = read_glb(source)
-    _preflight(original, binary)
-    document, blob = copy.deepcopy(original), bytearray(binary)
+    _preflight(original, binary, allow_identical_duplicates=True)
+    reference, reference_binary, normalization = _normalized_evaluation_view(original, binary)
+    document, blob = copy.deepcopy(reference), bytearray(reference_binary)
     clips = []
-    for before, animation in zip(original["animations"], document["animations"], strict=True):
+    for source_animation, before, animation in zip(original["animations"], reference["animations"], document["animations"], strict=True):
         rows = []
         for si, sampler in enumerate(animation["samplers"]):
             old = before["samplers"][si]
-            kind = next(c["target"]["path"] for c in animation["channels"] if c["sampler"] == si)
-            ts = accessor(original, binary, old["input"]).ravel()
-            values = accessor(original, binary, old["output"]).reshape(len(ts), -1)
+            kind = next((c["target"]["path"] for c in animation["channels"] if c["sampler"] == si), None)
+            ts = accessor(reference, reference_binary, old["input"]).ravel()
+            values = accessor(reference, reference_binary, old["output"]).reshape(len(ts), -1)
             cadence = _cadence(ts, fps)
+            source_cadence = _cadence(accessor(original, binary, source_animation["samplers"][si]["input"]).ravel(), fps)
             mode = old.get("interpolation", "LINEAR")
-            if (mode == "STEP" and not cadence["within_rate_at_float32_precision"]
+            if kind is None:
+                query = ts
+                method = "retain_unreferenced_sampler_bits"
+            elif (mode == "STEP" and not cadence["within_rate_at_float32_precision"]
                     and len(ts) > 2 and all(row.tobytes() == values[0].tobytes() for row in values)):
                 query = ts[[0, -1]]
                 value = values[[0, -1]]
-                sampler["input"] = _append_like(document, blob, query[:, None], original["accessors"][old["input"]])
+                sampler["input"] = _append_like(document, blob, query[:, None], reference["accessors"][old["input"]])
                 sampler["output"] = _append_like(document, blob, value.reshape(-1, 1) if kind == "weights" else value,
-                                                original["accessors"][old["output"]])
+                                                reference["accessors"][old["output"]])
                 method = "collapse_exact_constant_STEP"
             elif mode == "STEP" or cadence["within_rate_at_float32_precision"]:
                 query = ts
@@ -501,20 +597,23 @@ def sample(source: Path, output: Path, *, fps=30, expected_sha256=None, report: 
                 query = uniform_clock(float(ts[0]), float(ts[-1]), fps)
                 value = resample(ts, values, query, kind == "rotation")
                 value[0], value[-1] = values[0], values[-1]
-                sampler["input"] = _append_like(document, blob, query[:, None], original["accessors"][old["input"]])
+                sampler["input"] = _append_like(document, blob, query[:, None], reference["accessors"][old["input"]])
                 sampler["output"] = _append_like(document, blob, value.reshape(-1, 1) if kind == "weights" else value,
-                                                original["accessors"][old["output"]])
+                                                reference["accessors"][old["output"]])
                 method = "LINEAR_quaternion_SLERP" if kind == "rotation" else "LINEAR_vector"
             after = _cadence(query, fps)
-            exception = ("original_STEP_discontinuities_retained" if mode == "STEP" and not after["within_rate_at_float32_precision"]
+            exception = ("unreferenced_sampler_retained" if kind is None
+                         else "original_STEP_discontinuities_retained" if mode == "STEP" and not after["within_rate_at_float32_precision"]
                          else "mandatory_endpoints_span_less_than_one_frame" if not after["within_rate_at_float32_precision"] else None)
             rows.append({"sampler": si, "path": kind, "interpolation": mode, "method": method,
-                         "source": cadence, "candidate": after, "cadence_exception": exception})
+                         "source": source_cadence, "normalized_evaluation": cadence,
+                         "candidate": after, "cadence_exception": exception})
         clips.append({"name": animation["name"], "duration_seconds": max(float(accessor(original, binary, s["input"])[-1, 0])
-                      for s in before["samplers"]), "samplers": rows,
+                      for s in source_animation["samplers"]), "samplers": rows,
                       "maximum_continuous_linear_interval_hz": max((r["candidate"]["maximum_interval_hz"] for r in rows
-                                                                  if r["interpolation"] == "LINEAR"), default=0.0),
-                      "maximum_all_sampler_interval_hz": max(r["candidate"]["maximum_interval_hz"] for r in rows),
+                                                                  if r["interpolation"] == "LINEAR" and r["path"] is not None), default=0.0),
+                      "maximum_all_sampler_interval_hz": (None if any(r["candidate"]["maximum_interval_hz"] is None for r in rows)
+                                                          else max(r["candidate"]["maximum_interval_hz"] for r in rows)),
                       "source_sampler_keys": sum(r["source"]["keys"] for r in rows),
                       "candidate_sampler_keys": sum(r["candidate"]["keys"] for r in rows)})
     document["asset"].setdefault("extras", {})["rabbitlands_animation_bake_fps"] = fps
@@ -522,24 +621,39 @@ def sample(source: Path, output: Path, *, fps=30, expected_sha256=None, report: 
     # particular, sparse clocks must not be changed by constant-track collapse.
     document, blob, packing = compact(document, blob, collapse_paths=())
     output.parent.mkdir(parents=True, exist_ok=True)
+    evaluation_path = output.with_name(output.stem + ".source-evaluation.glb") if normalization else source
+    _require(not normalization or evaluation_path not in (source, output, report)
+             and (not evaluation_path.exists() or not source.samefile(evaluation_path)),
+             "Normalized evaluation view must be separate from source/output/report")
+    evaluation_temporary = None
     with tempfile.NamedTemporaryFile(prefix=output.stem + "-", suffix=".glb", dir=output.parent, delete=False) as handle:
         temporary = Path(handle.name)
     try:
+        if normalization:
+            with tempfile.NamedTemporaryFile(prefix="source-evaluation-", suffix=".glb", dir=output.parent, delete=False) as handle:
+                evaluation_temporary = Path(handle.name)
+            write_glb(evaluation_temporary, reference, reference_binary)
+        native_source = evaluation_temporary if normalization else source
+        evaluation_hash = digest(native_source) if normalization else source_hash
         write_glb(temporary, document, blob)
         candidate, cb = read_glb(temporary)
-        _preflight(candidate, cb)
+        _preflight(candidate, cb, allow_identical_duplicates=True)
         structural = verify_static(original, binary, candidate, cb, fps)
         build_seconds = time.perf_counter() - started
-        native = measure_native(source, temporary)
+        native = measure_native(native_source, temporary)
         _require(digest(source) == source_hash, "Source changed during sampling")
         result = {"schema": SCHEMA, "status": "approximate_draft_not_installed_or_approved",
                   "source_path": str(source), "candidate_path": str(output), "source_sha256": source_hash,
+                  "source_evaluation": {"path": str(evaluation_path), "sha256": evaluation_hash,
+                                        "original_source_sha256": source_hash, "normalization": normalization,
+                                        "method": "certified identical-row duplicate clock normalization" if normalization else "immutable original"},
                   "candidate_sha256": digest(temporary), "source_bytes": source.stat().st_size,
                   "candidate_bytes": temporary.stat().st_size, "fps": fps, "tool_sha256": tool_hash,
                   "source_sampler_keys": sum(c["source_sampler_keys"] for c in clips),
                   "candidate_sampler_keys": sum(c["candidate_sampler_keys"] for c in clips),
                   "maximum_continuous_linear_interval_hz": max(c["maximum_continuous_linear_interval_hz"] for c in clips),
-                  "maximum_all_sampler_interval_hz": max(c["maximum_all_sampler_interval_hz"] for c in clips),
+                  "maximum_all_sampler_interval_hz": (None if any(c["maximum_all_sampler_interval_hz"] is None for c in clips)
+                                                      else max(c["maximum_all_sampler_interval_hz"] for c in clips)),
                   "cadence_exceptions": [{"clip": c["name"], "sampler": s["sampler"], "path": s["path"],
                                           "reason": s["cadence_exception"]} for c in clips for s in c["samplers"]
                                          if s["cadence_exception"]],
@@ -549,6 +663,8 @@ def sample(source: Path, output: Path, *, fps=30, expected_sha256=None, report: 
                                      "total": time.perf_counter() - started},
                   "scope": "Offline raw GLB draft. Source and external action/event mappings untouched. No installation, engine playback, runtime RAM/CPU/FPS or artistic acceptance claim.",
                   "resumed": False}
+        if normalization:
+            evaluation_temporary.replace(evaluation_path)
         temporary.replace(output)
         if report is not None:
             report.parent.mkdir(parents=True, exist_ok=True)
@@ -561,6 +677,8 @@ def sample(source: Path, output: Path, *, fps=30, expected_sha256=None, report: 
         return result
     finally:
         temporary.unlink(missing_ok=True)
+        if evaluation_temporary is not None:
+            evaluation_temporary.unlink(missing_ok=True)
 
 
 def main():

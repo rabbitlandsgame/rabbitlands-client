@@ -5,6 +5,7 @@ import numpy as np
 import pytest
 from scipy.spatial.transform import Rotation
 
+import optimize_creature_sampling as sampling
 from optimize_creature_sampling import sample, uniform_clock, resample, verify_static
 from video_motion.asset import accessor, digest, read_glb, write_glb
 from video_motion.creature_storage import _array
@@ -199,6 +200,124 @@ def test_hash_and_source_alias_guards(tmp_path):
     with pytest.raises(ValueError, match="Report must"):
         sample(source, tmp_path / "bad.glb", report=source)
     assert source.read_bytes() == old
+
+
+def test_unreferenced_dense_sampler_retains_bits_spec_and_longer_duration(tmp_path):
+    source = fixture(tmp_path)
+    d, binary = read_glb(source)
+    b = bytearray(binary)
+    clock = append_array(d, b, np.linspace(0, 2.375, 321)[:, None], "SCALAR")
+    values = append_array(d, b, np.c_[np.arange(321), np.zeros(321), -np.arange(321)], "VEC3")
+    d["accessors"][values]["name"] = "Unused authored record"
+    d["animations"][0]["samplers"].append({"input": clock, "output": values,
+                                          "interpolation": "LINEAR", "extras": {"retain": True}})
+    write_glb(source, d, b)
+    candidate = tmp_path / "draft.glb"
+    result = sample(source, candidate)
+    report = result["clips"][0]
+    assert report["duration_seconds"] == 2.375
+    assert report["maximum_continuous_linear_interval_hz"] <= 30.0001
+    assert report["maximum_all_sampler_interval_hz"] > 100
+    assert report["samplers"][-1]["path"] is None
+    assert report["samplers"][-1]["method"] == "retain_unreferenced_sampler_bits"
+    assert [e for e in result["cadence_exceptions"] if e["reason"] == "unreferenced_sampler_retained"] == [
+        {"clip": "Walk", "sampler": 4, "path": None, "reason": "unreferenced_sampler_retained"}]
+    a, ab = read_glb(source)
+    c, cb = read_glb(candidate)
+    sa, sc = a["animations"][0]["samplers"][-1], c["animations"][0]["samplers"][-1]
+    for key in ("input", "output"):
+        assert _array(a, ab, sa[key]).tobytes() == _array(c, cb, sc[key]).tobytes()
+        ignored = {"bufferView", "byteOffset"}
+        assert {k: v for k, v in a["accessors"][sa[key]].items() if k not in ignored} == {
+            k: v for k, v in c["accessors"][sc[key]].items() if k not in ignored}
+    assert result["native_measurements"]["clips"]["Walk"]["times_seconds"][-1] == 2.375
+    # The independent proof also covers middle rows, beyond endpoint checks.
+    c["accessors"][sc["output"]]["name"] = "changed"
+    with pytest.raises(ValueError, match="metadata changed|Unreferenced sampler"):
+        verify_static(a, ab, c, cb, 30)
+
+
+def duplicate_fixture(tmp_path, channel=0):
+    source = fixture(tmp_path)
+    d, binary = read_glb(source)
+    b = bytearray(binary)
+    sampler = d["animations"][0]["samplers"][channel]
+    times = _array(d, b, sampler["input"])
+    values = _array(d, b, sampler["output"])
+    sampler["input"] = append_array(d, b, np.insert(times, [40, 40], times[39], axis=0), "SCALAR")
+    sampler["output"] = append_array(d, b, np.insert(values, [40, 40], values[39], axis=0), d["accessors"][sampler["output"]]["type"])
+    write_glb(source, d, b)
+    return source
+
+
+@pytest.mark.parametrize("channel", [0, 1])
+def test_identical_duplicate_rows_have_separate_hash_bound_evaluation_view(tmp_path, channel):
+    source = duplicate_fixture(tmp_path, channel)
+    original_bytes = source.read_bytes()
+    output, report = tmp_path / "draft.glb", tmp_path / "report.json"
+    result = sample(source, output, report=report)
+    assert source.read_bytes() == original_bytes
+    evaluation = result["source_evaluation"]
+    evaluation_path = source.parent / "draft.source-evaluation.glb"
+    assert evaluation["original_source_sha256"] == digest(source)
+    assert evaluation["sha256"] == digest(evaluation_path) != digest(source)
+    proof = evaluation["normalization"]
+    assert len(proof) == 1 and proof[0]["sampler"] == channel
+    assert [r["removed_original_row"] for r in proof[0]["duplicate_rows"]] == [40, 41]
+    assert [r["retained_original_row"] for r in proof[0]["duplicate_rows"]] == [39, 39]
+    assert proof[0]["normalized_keys"] == 121 and proof[0]["original_keys"] == 123
+    d, b = read_glb(evaluation_path)
+    clock = accessor(d, b, d["animations"][0]["samplers"][channel]["input"]).ravel()
+    assert np.all(np.diff(clock) > 0)
+    assert d["asset"]["extras"]["rabbitlands_animation_bake_fps"] == 120
+    a, ab = read_glb(source)
+    c, cb = read_glb(output)
+    verify_static(a, ab, c, cb, 30)
+    assert result["structural_proof"]["certified_duplicate_samplers"] == 1
+    assert sample(source, output, report=report)["resumed"]
+    evaluation_path.write_bytes(evaluation_path.read_bytes() + b"stale")
+    assert not sample(source, output, report=report)["resumed"]
+    assert digest(evaluation_path) == evaluation["sha256"]
+
+
+@pytest.mark.parametrize("fault", ["conflicting", "signed_zero_conflict", "negative", "decreasing"])
+def test_nonstrict_clock_faults_require_original_engine_boundary_investigation(tmp_path, fault):
+    source = fixture(tmp_path)
+    d, binary = read_glb(source)
+    b = bytearray(binary)
+    sampler = d["animations"][0]["samplers"][2]
+    times = np.array([[0.], [0.], [1.]], dtype="<f4")
+    values = np.zeros((3, 3), dtype="<f4")
+    if fault == "conflicting":
+        values[1, 0] = .01
+    elif fault == "signed_zero_conflict":
+        values[1, 0] = -0.
+    elif fault == "negative":
+        times[0] = -.01
+    else:
+        times[:] = [[0], [.8], [.5]]
+    sampler["input"] = append_array(d, b, times, "SCALAR")
+    sampler["output"] = append_array(d, b, values, "VEC3")
+    write_glb(source, d, b)
+    old = source.read_bytes()
+    with pytest.raises(ValueError, match="needs_original_engine_boundary_investigation"):
+        sample(source, tmp_path / "bad.glb")
+    assert source.read_bytes() == old and not (tmp_path / "bad.glb").exists()
+
+
+def test_loaded_fingerprint_is_stable_and_changed_loaded_pin_invalidates_resume(tmp_path, monkeypatch):
+    source = fixture(tmp_path)
+    output, report = tmp_path / "draft.glb", tmp_path / "report.json"
+    loaded_pin = sampling._LOADED_TOOL_SHA256
+    # Simulates a checkout moving after import; no disk read may change the pin.
+    monkeypatch.setattr(sampling, "_tool_fingerprint", lambda: "f" * 64)
+    result = sample(source, output, report=report)
+    assert result["tool_sha256"] == loaded_pin
+    assert sample(source, output, report=report)["resumed"]
+    # A freshly loaded implementation would carry a different frozen pin.
+    monkeypatch.setattr(sampling, "_LOADED_TOOL_SHA256", "e" * 64)
+    result = sample(source, output, report=report)
+    assert not result["resumed"] and result["tool_sha256"] == "e" * 64
 
 
 @pytest.mark.parametrize("mutation", ["mesh_name", "node_default", "skin_bits", "image_bits", "clip_extra", "sampler_extra", "channel_extra"])
