@@ -60,7 +60,7 @@ func run() -> void:
 	set_auto_accept_quit(false)
 	root.close_requested.connect(close_preview)
 	root.size = Vector2i(1440, 920)
-	Engine.max_fps = 240
+	Engine.max_fps = int(job.get("max_fps",240))
 	var input_relay := InputRelay.new()
 	input_relay.callback = handle_input
 	root.add_child(input_relay)
@@ -185,11 +185,11 @@ func run() -> void:
 	button_for("Reset camera", views, func(): yaw = 2.2; pitch = 0.18; distance = default_distance; focus = default_focus; update_cameras())
 	views.add_child(label_for("   Drag either model to orbit  |  Wheel: zoom  |  Space: pause  |  Arrows: animation", 16))
 	if job.has("review_points"):
-		var review_row := HBoxContainer.new()
+		var review_row := HFlowContainer.new()
 		layout.add_child(review_row)
 		review_row.add_child(label_for("Inspect measured differences:  ", 16))
 		for point: Dictionary in job.review_points:
-			button_for(str(point.caption), review_row, inspect_point.bind(point))
+			button_for(str(point.get("caption",point.get("label",point.get("id","Inspect pose")))), review_row, inspect_point.bind(point))
 	ready_to_play = true
 	select_clip(clip)
 	update_cameras()
@@ -224,6 +224,7 @@ func make_stage(viewport: SubViewport) -> Node3D:
 	floor_mesh.mesh = plane
 	stage.add_child(floor_mesh)
 	var camera := Camera3D.new()
+	camera.cull_mask = 1
 	camera.fov = 38
 	camera.near = 0.02
 	stage.add_child(camera)

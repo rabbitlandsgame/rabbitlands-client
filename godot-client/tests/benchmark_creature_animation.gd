@@ -14,6 +14,8 @@ func run() -> void:
 	GlbSceneCache.install_prepared({str(job.path): packed})
 	var config: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/models.json")).models[str(job.actor)].duplicate(true)
 	var mapping: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(config.animationMap))
+	var selected_clips: Array = job.get("benchmark_clips",[])
+	for i in selected_clips.size(): mapping.actions["__benchmark_native_"+str(i)]=selected_clips[i]
 	config.scene = job.path
 	config.animationLibrary = job.path
 	var actor := ReplicatedActor3D.new()
@@ -26,7 +28,9 @@ func run() -> void:
 	for node in actor.find_children("*", "AnimationPlayer", true, false):
 		(node as AnimationPlayer).callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 	var load_ms := (Time.get_ticks_usec() - began) / 1000.0
-	var skeleton := actor.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
+	var skeletons := actor.find_children("*", "Skeleton3D", true, false)
+	var bone_count := 0
+	for skeleton: Skeleton3D in skeletons: bone_count+=skeleton.get_bone_count()
 	var keys := 0
 	var tracks := 0
 	var per_clip := {}
@@ -40,28 +44,29 @@ func run() -> void:
 	var retained := int(Performance.get_monitor(Performance.MEMORY_STATIC)) - base_memory
 	var peak_delta := int(Performance.get_monitor(Performance.MEMORY_STATIC_MAX)) - base_peak
 	var timings := {}
-	for name in player.get_animation_list():
+	for name in (selected_clips if not selected_clips.is_empty() else player.get_animation_list()):
 		if name == &"RESET": continue
+		assert(player.has_animation(name),"Missing benchmark clip: "+str(name))
 		var duration := player.get_animation(name).length
 		player.play(name, 0.0)
 		player.advance(0.0)
 		for frame in 240:
 			player.seek(fmod(frame / 240.0, duration), false)
 			player.advance(1.0 / 240.0)
-			skeleton.force_update_all_bone_transforms()
+			for skeleton: Skeleton3D in skeletons: skeleton.force_update_all_bone_transforms()
 		var batches := []
 		for batch in 9:
 			var start := Time.get_ticks_usec()
 			for frame in 1200:
 				if player.current_animation_position >= duration - 1.0 / 240.0: player.seek(0.0, true)
 				player.advance(1.0 / 240.0)
-				skeleton.force_update_all_bone_transforms()
+				for skeleton: Skeleton3D in skeletons: skeleton.force_update_all_bone_transforms()
 			batches.append((Time.get_ticks_usec() - start) / 1200.0)
 		batches.sort()
 		timings[str(name)] = {"median_usec_per_update": batches[4], "minimum_usec_per_update": batches[0], "batch_means_usec": batches}
 	var result := {"source_sha256": job.sha256, "load_ms": load_ms, "retained_static_memory_delta_bytes": retained,
 		"load_peak_static_memory_increase_bytes": peak_delta, "retargeted_keys": keys, "retargeted_tracks": tracks, "clips": per_clip,
-		"animation_update": timings, "bones": skeleton.get_bone_count(), "engine": Engine.get_version_info(),
+		"animation_update": timings, "bones": bone_count, "skeletons":skeletons.size(), "engine": Engine.get_version_info(),
 		"scope": "Fresh-process real GlbSceneCache._build_raw + ReplicatedActor3D + NativeAnimationImporter, warm OS file cache. Retained Godot static CPU allocations include scene and library caches, meshes, textures and actor. AnimationPlayer advance plus forced skeleton global transforms at 240 updates/s; nine batches of 1200 updates per clip after warmup. Excludes GPU rendering/skinning, whole-game logic and frame-rate claims."}
 	FileAccess.open(job.report, FileAccess.WRITE).store_string(JSON.stringify(result, "  "))
 	print("CREATURE_BENCHMARK_PASS ", job.sha256, " ", load_ms, " ms, ", retained, " retained bytes")

@@ -7,6 +7,8 @@ Catalog schema: {complete:bool, progress:{sampled,total,baked}, entries:[{
 id, display_name, source:{path,sha256,bytes}, clips:[...],
 variants:[{id,label,path,sha256,bytes,metrics:{...}}], was_installed,
 selected_local_draft}], review_store:".local/review-events.jsonl"}.
+Optional entry.source_label/review_note describe a repair baseline; commented_pose
+{clip,time_seconds} adds a jump to the saved observation without changing it.
 Paths are relative to the catalog or absolute. Journal paths MUST remain under
 the catalog directory's .local. Optional entry.actor supplies the models registry
 key for synthetic control entries. Approvals cover the entire exact candidate,

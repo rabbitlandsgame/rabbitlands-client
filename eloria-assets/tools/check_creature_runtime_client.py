@@ -290,11 +290,13 @@ def analyze(output, candidate_vertex_ids=None, position_limit_mm=None, normal_li
                "blend_buffer_bytes": sum(m["blend_buffer_bytes"] for m in d["meshes"])} for i, d in enumerate(descriptions)],
               "summary": summaries, "samples": samples, "engine": metadata["engine"], "placement": placement,
               "native_clips": descriptions[0]["clips"], "all_directed_switch_pairs": len(descriptions[0]["clips"]) * (len(descriptions[0]["clips"]) - 1),
+              "crossfade_coverage": {"first_tick_states": summaries.get("switch", {}).get("states", 0),
+                                     "frame_stepped_states": summaries.get("switch_stepped", {}).get("states", 0)},
               "position_limit_mm": position_limit_mm, "normal_limit_degrees": normal_limit_degrees,
               "within_requested_limits": None if position_limit_mm is None and normal_limit_degrees is None else
                                          (position_limit_mm is None or summaries["all"]["maximum_position_mm"] <= position_limit_mm) and
                                          (normal_limit_degrees is None or summaries["all"]["maximum_normal_degrees"] <= normal_limit_degrees),
-              "scope": "Actual configured raw-client actor; every native clip, shifted samples, directed switches, nonlooping held endpoints, configured default and RESET; all native vertices/normals, quantized four/eight-influence skin. Float64 reconstruction of renderer inputs, not GPU pixels, imported PackedScenes, artistic acceptance or exhaustive continuous-time proof.",
+              "scope": "Actual configured raw-client actor; every native clip, shifted samples, directed switches as enumerated by crossfade_coverage, nonlooping held endpoints, configured default and RESET; all native vertices/normals, quantized four/eight-influence skin. Float64 reconstruction of renderer inputs, not GPU pixels, imported PackedScenes, artistic acceptance or exhaustive continuous-time proof.",
               "provenance": {"probe_sha256": metadata["probe_sha256"], "checker_sha256": digest(__file__),
                              "metadata_sha256": digest(output / "client/metadata.json"), "states_sha256": digest(output / "client/states.f32"),
                              "candidate_vertex_mapping_sha256": digest_bytes(mapping.astype("<i8").tobytes())}}
@@ -337,6 +339,8 @@ def check(actor, source, candidate, output, *, client_root=None, godot=None, pro
            "original_animation_map_sha256": digest(original_map),
            "sample_fractions": [0., .03713, .13947, .25719, .38173, .49913, .61729, .73129, .85937, .93317, 1.],
            "switch_times": [.071, .193],
+           "switch_frame_step": 1.0 / 60.0,
+           "stepped_switch_times": [1.0 / 60.0, .071, .193, .25, .417],
            "actor_fixtures": [{"name": name, "path": str(path), "sha256": digest(path)}
                               for name, path in (("source", source), ("candidate", candidate))]}
     if dto is not None:

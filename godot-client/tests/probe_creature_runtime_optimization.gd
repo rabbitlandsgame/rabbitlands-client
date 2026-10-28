@@ -172,6 +172,22 @@ func run() -> void:
 					model.player.play(following,.25)
 					model.player.advance(time)
 				snapshot(previous+"->"+following+"@"+str(time),"switch")
+			# A single advance after play() is a distinct first-tick behavior in
+			# sparse deterministic blending. Also exercise an established outgoing
+			# clip and an incoming clip over realistic frame-sized advances.
+			for model: Dictionary in models:
+				reset(model)
+				model.player.play(previous,0.0)
+				model.player.seek(model.player.get_animation(previous).length*.61731,true)
+				model.player.advance(float(job.switch_frame_step))
+				model.player.play(following,.25)
+			var elapsed := 0.0
+			for target_time: float in job.stepped_switch_times:
+				while elapsed<target_time-1e-10:
+					var delta := minf(float(job.switch_frame_step),target_time-elapsed)
+					for model: Dictionary in models: model.player.advance(delta)
+					elapsed+=delta
+				snapshot(previous+"->"+following+"@stepped-"+str(target_time),"switch_stepped")
 	for model: Dictionary in models: reset(model)
 	snapshot("RESET-after-switches","RESET")
 	stream.close()

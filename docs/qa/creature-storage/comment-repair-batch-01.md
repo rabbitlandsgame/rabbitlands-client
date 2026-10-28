@@ -36,6 +36,6 @@ Isolated headless measurements use one fresh process per variant, warm OS file c
 | Giant Wasp previous draft | 70 | 12.28 | Fly: 6.51 | 11.54 |
 | Giant Wasp repair draft | 75 | 17.58 | Fly: 10.32 | 11.99 |
 
-The added controls cost CPU time. Skeleton retains substantially less allocation than its corrective-bearing source, but more than its broken zero-bake. No timing or total-memory result is inferred for the other three repairs. See the [Skeleton component receipt](skeleton-component-benchmark.json).
+The added controls cost CPU time. Skeleton retains substantially less allocation than its corrective-bearing source, but more than its broken zero-bake. No timing or total-memory result is inferred for the other three repairs. See the [Skeleton component receipt](skeleton-component-benchmark.json) and [Wasp repair receipt](giant-wasp-rigid-panel-repair.json).
 
 All five require a new user review before installation. Numeric, Blender and selected capture checks do not confer artistic acceptance.

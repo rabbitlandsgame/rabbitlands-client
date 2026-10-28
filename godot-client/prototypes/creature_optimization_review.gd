@@ -203,6 +203,7 @@ func run() -> void:
 	controls.add_child(clip_picker)
 	pause_button=button_for("Pause · P",controls,toggle_pause)
 	button_for("Restart",controls,func(): seek_both(0.0))
+	button_for("Commented pose",controls,show_commented_pose)
 	var speeds := OptionButton.new()
 	for value in [.1,.25,.5,1.,2.]: speeds.add_item(str(value)+"x")
 	speeds.select(3)
@@ -334,9 +335,9 @@ func load_entry(next_index: int, wanted_variant: String) -> void:
 	clip_picker.clear()
 	for name: String in clips: clip_picker.add_item(name.replace("_"," "))
 	if not clips.has(clip): clip=str(clips[0])
-	source_label.text="ORIGINAL · %s bytes\nSHA256 %s" % [str(loaded_entry.source.bytes),str(loaded_entry.source.sha256)]
+	source_label.text="%s · %s bytes\nSHA256 %s" % [str(loaded_entry.get("source_label","ORIGINAL")),str(loaded_entry.source.bytes),str(loaded_entry.source.sha256)]
 	candidate_label.text="Processing — candidate not ready"
-	metrics.text="Source review status retained: installed=%s · selected local draft=%s" % [str(loaded_entry.get("was_installed",false)),str(loaded_entry.get("selected_local_draft",false))]
+	metrics.text="New repair draft; prior approvals do not apply." if loaded_entry.has("source_label") else "Source review status retained: installed=%s · selected local draft=%s" % [str(loaded_entry.get("was_installed",false)),str(loaded_entry.get("selected_local_draft",false))]
 	if loaded_variant.is_empty():
 		loading=false
 		notice="This creature is still processing. Choose another creature or wait for the catalog update."
@@ -344,6 +345,7 @@ func load_entry(next_index: int, wanted_variant: String) -> void:
 		return
 	candidate_label.text="%s · %s bytes\nSHA256 %s" % [str(loaded_variant.get("label",loaded_variant.id)),str(loaded_variant.bytes),str(loaded_variant.sha256)]
 	metrics.text+="\n"+JSON.stringify(loaded_variant.get("metrics",{}),"  ")
+	if loaded_entry.has("review_note"): metrics.text=str(loaded_entry.review_note)+"\n"+metrics.text
 	var registry: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/models.json")).models
 	var config: Dictionary = registry[str(loaded_entry.get("actor",loaded_entry.id))]
 	var animation_map: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(config.animationMap))
@@ -400,6 +402,16 @@ func load_entry(next_index: int, wanted_variant: String) -> void:
 func navigate(direction: int) -> void:
 	if loading or modal.visible or entries.is_empty(): return
 	load_entry(index+direction,str(loaded_variant.get("id","")))
+
+func show_commented_pose() -> void:
+	if not ready_to_play: return
+	var point: Dictionary = loaded_entry.get("commented_pose",{})
+	var name := str(point.get("clip",""))
+	if not clips.has(name): return
+	select_clip(name)
+	seek_both(clampf(float(point.get("time_seconds",0.)),0.,timeline.max_value))
+	running=false
+	pause_button.text="Play · P"
 
 func select_clip(name: String) -> void:
 	if not ready_to_play: return
@@ -575,6 +587,10 @@ func smoke_test() -> void:
 	assert(catalog.get("test_only",false),"Smoke must use an isolated TEST catalog")
 	assert(ready_to_play and entries.size()==2)
 	running=false
+	if loaded_entry.has("commented_pose"):
+		show_commented_pose()
+		assert(clip==str(loaded_entry.commented_pose.clip) and not running)
+		assert(is_equal_approx(clock,clampf(float(loaded_entry.commented_pose.time_seconds),0.,timeline.max_value)))
 	for name: String in clips:
 		select_clip(name)
 		seek_both(timeline.max_value*.47)
