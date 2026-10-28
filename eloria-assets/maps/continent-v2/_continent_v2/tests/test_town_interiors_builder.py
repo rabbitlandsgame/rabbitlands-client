@@ -49,7 +49,7 @@ def test_the_source_writer_reproduces_the_authored_file():
     assert TS.dump(annotated).encode('utf-8') == raw
     # one door, prop, window, decal and light per line
     lines = raw.decode('utf-8').splitlines()
-    assert sum('"object": 592' in line and '"kind": "building"' in line for line in lines) == 10
+    assert sum('"object": 592' in line and '"kind": "building"' in line for line in lines) == 11
     assert all(line.count('"kind": "building"') <= 1 for line in lines)
 
 
@@ -59,7 +59,7 @@ def test_the_authored_source_holds_the_spec_doors_and_the_stairs():
     assert design['map']['cells'] == 324 and design['map']['alias'] == 'LFT'
     doors = TS.doors(design)
     by_object = {d['object']: d for d in doors}
-    # SPEC section 3, ids in table order A, B, C, D, E, G, H, I, J, K
+    # SPEC section 3, ids in table order A, B, C, D, E, G, H, I, J, K; then L, the library (owner 2026-10-28)
     table = [(59201, 'tavern_ground', [107, 250], [104, 247], 'tavern'),
              (59202, 'market', [131, 254], [134, 251], 'general_store'),
              (59203, 'market', [124, 251], [127, 248], 'flower_shop'),
@@ -69,7 +69,8 @@ def test_the_authored_source_holds_the_spec_doors_and_the_stairs():
              (59207, 'weaver_house', [152, 252], [149, 255], None),
              (59208, 'watch_house', [86, 275], [83, 275], None),
              (59209, 'netmender_house', [239, 208], [234, 207], None),
-             (59210, 'castle', [221, 276], [218, 273], None)]
+             (59210, 'castle', [221, 276], [218, 273], None),
+             (59211, 'library', [159, 253], [158, 256], 'bookshop')]
     assert sorted(by_object) == [row[0] for row in table]
     for oid, section, tile, back, category in table:
         door = by_object[oid]
@@ -90,7 +91,7 @@ def test_the_authored_source_holds_the_spec_doors_and_the_stairs():
     # the cast (2026-10-27): every coloured door opens on a shopkeeper of its category, who is named on the map as the
     # door is; the lore objects keep to the interior band
     people = TS.npcs(design)
-    assert len({p['name'] for p in people}) == len(people) == 20
+    assert len({p['name'] for p in people}) == len(people) == 21
     keepers = {(p['section'], p['mapCategory']): p for p in people if p.get('mapCategory')}
     assert all(p['role'] == 'shop' for p in keepers.values())
     for oid, section, _tile, _back, category in table:
@@ -140,6 +141,44 @@ def test_the_lore_objects_show_what_their_plaques_say():
     assert [p['asset'] for p in watch['props'] if p['at'] == board['at']] == ['notice_board']
 
 
+def test_the_library_sells_books_at_its_street_door_and_reads_fast_in_its_reading_room_only():
+    """Owner 2026-10-28 ("Add a library with a book seller NPC"): #28 (joined through to #29) is Calloway's Books,
+    Ennis Calloway behind her counter in the shop at the street door, facing the door's side of the room; only the
+    reading room carries the fast_reading special area, over its floor inside its walls; the rooms play shop and
+    library music; the lore objects keep to their own ids."""
+    design = TS.load(SOURCE)
+    library = section(design, 'library')
+    (door,) = TS.doors(library)
+    assert (door['object'], door['category'], door['label'], door['exitFacing']) == \
+        (59211, 'bookshop', "Calloway's Books", [0, 1])
+    (ennis,) = TS.npcs(library)
+    assert (ennis['name'], ennis['role'], ennis['occupation'], ennis['actorType'], ennis['mapCategory'],
+            ennis['mapLabel']) == ('Ennis Calloway', 'shop', 'Bookseller', 316, 'bookshop', "Calloway's Books")
+    assert TS.room_of(library, ennis['tile'][0]+.5, ennis['tile'][1]+.5) == 0 and ennis['facing'] == 'W'
+    (counter,) = [p for p in library['props'] if p['asset'] == 'shop_counter']
+    assert door['exit'][0] < counter['at'][0] < ennis['tile'][0]
+    sys.path.insert(0, str(HERE.parents[2]/'tools'))
+    import sync_music_program as music
+    assert [music.room_program(name) for name in library['roomNames']] == ['shop', 'library', 'library']
+    (area,) = TS.special_areas(design)
+    assert (area['section'], area['kind'], area['factor']) == ('library', 'fast_reading', 3)
+    assert library['roomNames'][area['room']] == 'Library reading room'
+    x0, y0, x1, y1 = TS.rooms(library)[area['room']]
+    assert area['bounds'] == (x0+.5, y0+.5, x1-1.5, y1-1.5) == (181, 78, 197, 85)
+    assert sorted(e['object'] for e in TS.interactives(library)) == [59285, 59286, 59287, 59288]
+
+
+def test_a_rooms_tiles_are_its_floor_inside_its_walls():
+    shop = synthetic()['sections'][0]
+    # front room x 10.5-20.5, y 10.5-16.5: its walls stand on tile rows 10, 20, 10 and 16
+    assert TS.room_tiles(shop, 0) == (11, 11, 19, 15) and TS.room_tiles(shop, 1) == (11, 17, 19, 20)
+    shop['specialAreas'] = [{'kind': 'fast_regeneration', 'room': 1, 'factor': 2}]
+    assert [(a['kind'], a['room'], a['factor'], a['bounds']) for a in TS.special_areas(shop)] == \
+        [('fast_regeneration', 1, 2, (11, 17, 19, 20))]
+    shop['specialAreas'] = [{'kind': 'experience', 'room': 0}]
+    assert TS.special_areas(shop)[0]['factor'] == TS.SPECIAL_AREAS['experience'] == 2
+
+
 def mutate(change):
     design = TS.load(SOURCE)
     change(design)
@@ -163,7 +202,7 @@ REFUSALS = {
     'sections too close': (lambda d: d['sections'].append(
         {'id': 'shed', 'name': 'Shed', 'style': 'house', 'danger': 'Private', 'rooms': [[45.5, 25.5, 2, 2]],
          'roomNames': ['Shed'], 'links': [], 'floors': ['oak_planks'], 'walls': 'lime_plaster',
-         'entrances': [{'map': 'landfall', 'kind': 'building', 'object': 59211, 'tile': [1, 1],
+         'entrances': [{'map': 'landfall', 'kind': 'building', 'object': 59219, 'tile': [1, 1],
                         'position': [0, 0, 0], 'returnTile': [1, 2], 'arrival': [45, 25], 'exit': [45, 24],
                         'label': 'Shed', 'exitLabel': 'Out'}], 'nodes': [], 'spawns': []}), 'blackspace'),
     'a door id outside its band': (lambda d: section(d, 'castle')['entrances'][0].update(object=59300), 'band'),
@@ -191,6 +230,15 @@ REFUSALS = {
                                'holds'),
     'a wall decal at a height': (lambda d: section(d, 'castle')['decals'][0].update(height=1.0),
                                  'only a floor decal'),
+    'a special area of no kind the server reads': (
+        lambda d: section(d, 'library')['specialAreas'][0].update(kind='quiet'), 'kind'),
+    'a special area in no room': (lambda d: section(d, 'library')['specialAreas'][0].update(room=3), 'room'),
+    'a special area named twice': (lambda d: section(d, 'library')['specialAreas'].append(
+        {'kind': 'fast_reading', 'room': 1, 'factor': 2}), 'twice'),
+    'a special area of a fractional factor': (
+        lambda d: section(d, 'library')['specialAreas'][0].update(factor=2.5), 'factor'),
+    'a special area with an unknown key': (
+        lambda d: section(d, 'library')['specialAreas'][0].update(bounds=[1, 1, 2, 2]), 'unknown keys'),
 }
 
 

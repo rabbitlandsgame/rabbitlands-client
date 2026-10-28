@@ -448,7 +448,7 @@ def test_two_sources_publish_side_by_side_and_the_caves_rows_do_not_move(built, 
     assert keys["undergroundPortals"] == caves.underground.portals
     assert all("landfall_town" in (row[0], row[4]) for row in keys["buildingPortals"])
     assert not any("landfall_town" in (row[0], row[4]) for row in keys["undergroundPortals"])
-    assert keys["buildingRows"] == {"nodes": 0, "spawns": 0, "interactives": 7, "npcs": 1}
+    assert keys["buildingRows"] == {"nodes": 0, "spawns": 0, "interactives": 7, "npcs": 1, "specialAreas": 0}
     assert keys["interiorMaps"]["landfall_town"]["kind"] == "building"
     assert "kind" not in keys["interiorMaps"]["landfall_insides"]
     assert [e["id"] for e in U.manifest_entries(pub)] == ["landfall_insides", "landfall_town"]
@@ -456,6 +456,41 @@ def test_two_sources_publish_side_by_side_and_the_caves_rows_do_not_move(built, 
     assert U.manifest_keys(caves) == {"interiorMaps": {"landfall_insides": keys["interiorMaps"]["landfall_insides"]},
                                       "undergroundPortals": keys["undergroundPortals"],
                                       "undergroundRows": keys["undergroundRows"]}
+
+
+def test_a_rooms_special_area_publishes_one_server_row_and_needs_floor(town, monkeypatch):
+    """A town room's `specialAreas` (town_source.special_areas) become area rows of the overlay's special_areas.txt,
+    under the town's banner (also pub.special_areas, the interior's special_areas and its row count); an area over no
+    reached floor, or of a kind the server does not read, is refused."""
+    import underground as U
+    (px, py) = town.post
+    found = {"areas": [{"kind": "fast_reading", "room": 0, "factor": 3, "bounds": (px - 1, py - 1, px + 1, py + 1),
+                        "index": 0}]}
+    tavern_id = town.design["sections"][0]["id"]
+    real = U.reader_of
+
+    def reader_of(spec):
+        # the town's reader (a stand-in: underground_source, as publish_both reads it) with the town's special areas
+        reader = real(spec)
+        if spec.kind != "building":
+            return reader
+        return SimpleNamespace(**{**vars(reader), "special_areas": lambda section: list(found["areas"])
+                                  if section["id"] == tavern_id else []})
+    monkeypatch.setattr(U, "reader_of", reader_of)
+    pub = publish_both(town, monkeypatch)
+    row = f"area | fast_reading | landfall_town | {px - 1} | {py - 1} | {px + 1} | {py + 1} | 3"
+    assert pub.special_areas == [row]
+    interior = next(u for u in pub.interiors if u.region == "landfall_town")
+    assert interior.special_areas == [row] and interior.rows["specialAreas"] == 1
+    assert pub.underground.special_areas == [] and "specialAreas" not in pub.underground.rows
+    assert pub.files["special_areas.txt"] == f"\r\n# Landfall town: building interiors.\r\n{row}\r\n".encode()
+    assert not any(b"area |" in data for name, data in pub.files.items() if name != "special_areas.txt")
+    found["areas"] = [{**found["areas"][0], "bounds": (1, 1, 2, 2)}]
+    with pytest.raises(ValueError, match="no reached floor"):
+        publish_both(town, monkeypatch)
+    found["areas"] = [{**found["areas"][0], "kind": "quiet_reading"}]
+    with pytest.raises(ValueError, match="kind"):
+        publish_both(town, monkeypatch)
 
 
 def test_building_doors_people_and_notices_publish_their_labels(town, monkeypatch):

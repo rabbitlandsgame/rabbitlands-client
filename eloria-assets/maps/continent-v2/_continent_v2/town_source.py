@@ -49,6 +49,12 @@ EDGE tiles from the map's edge):
                                   `target` the server's target column (default by role: notice, crafting; the anvil's
                                   "smithing"), `height`/`radius` the pick's size (metres; else the prop's at `at`)
   sealedStairs [{room, side, at}] a flight of stairs up to a shut door in the room's outer wall: art only, no portal
+  specialAreas [{kind, room, factor?}]   optional: a server special area (eloria/areas.py) over one room's floor, the
+                                  tiles inside its walls (room_tiles(); the wall rows and the doorways in them stay
+                                  outside it). `kind` one of SPECIAL_AREAS (the server's kinds), `factor` its
+                                  multiplier (default the kind's, as the server's own rows use it: fast_reading 3).
+                                  publish_server.py writes one `area | kind | map | x0 | y0 | x1 | y1 | factor` row per
+                                  entry into the overlay's continent-v2/special_areas.txt (eloria/areas.py reads it)
   nodes [], spawns []             required and empty: the town has no harvest nodes and no encounters
 
 DOORS ("entrances"; write each on ONE line):
@@ -93,6 +99,12 @@ FACINGS = ("N", "NE", "E", "SE", "S", "SW", "W", "NW")
 INTERACTIVE_ROLES = ("information", "crafting_station")
 INTERACTIVE_KEYS = ("object", "tile", "role", "text")
 INTERACTIVE_OPTIONAL = ("label", "at", "target", "height", "radius")
+# a room's special area (`specialAreas`): the server's kinds (eloria/areas.py VALID_KINDS) and the multiplier each takes
+# when the source names none, as the server's own rows in config/eloria/special_areas.txt use them
+SPECIAL_AREAS = {"fast_reading": 3, "fast_regeneration": 3, "harvest_speed": 2, "experience": 2, "cheap_magic": 2,
+                 "no_magic": 2}
+SPECIAL_AREA_KEYS = ("kind", "room")
+SPECIAL_FACTORS = range(2, 11)
 DOOR_IDS = range(59201, 59221)
 PASSAGE_IDS = range(59221, 59241)
 INTERACTIVE_IDS = range(59251, 59300)
@@ -103,13 +115,14 @@ MIN_LINK_WIDTH = 2.4
 MAX_LIGHTS_PER_ROOM = 6
 TOP_KEYS = ("schema", "map", "sections", "passages")
 SECTION_KEYS = ("id", "name", "style", "danger", "about", "rooms", "roomNames", "links", "floors", "walls", "windows",
-                "decals", "entrances", "props", "lights", "npcs", "interactives", "sealedStairs", "nodes", "spawns")
+                "decals", "entrances", "props", "lights", "npcs", "interactives", "sealedStairs", "specialAreas", "nodes",
+                "spawns")
 PROP_KEYS = ("asset", "at", "yaw", "scale", "block", "blockBox", "wall", "height", "palette", "light", "clearWall")
 # one item per line in dump(): the lists people edit a row at a time (retarget-style tools find a door by its line)
 PER_LINE = ("entrances", "props", "lights", "windows", "decals", "npcs", "interactives", "sealedStairs")
 HEAD = ("id", "name", "style", "danger")
 # map_categories.py is the one category table (the dots role's); this copy only stands in while it is missing
-_FALLBACK_CATEGORIES = ("tavern", "general_store", "flower_shop", "magic_shop", "blacksmith")
+_FALLBACK_CATEGORIES = ("tavern", "general_store", "flower_shop", "magic_shop", "blacksmith", "bookshop")
 
 
 class SourceError(S.SourceError):
@@ -157,6 +170,42 @@ def _text(value, where):
 def rooms(section):
     """The section's rooms as rectangles (x0, y0, x1, y1) in tiles, in source order."""
     return [(cx - rx, cy - ry, cx + rx, cy + ry) for cx, cy, rx, ry in section["rooms"]]
+
+
+def room_tiles(section, room):
+    """The served tiles of one room's floor as inclusive bounds (x0, y0, x1, y1): every tile whose centre lies inside
+    the room's walls (a wall stands on the row of tiles its edge centres, so those rows and the doorways in them are
+    outside)."""
+    cx, cy, rx, ry = section["rooms"][room]
+    return (int(round(cx - rx + .5)), int(round(cy - ry + .5)), int(round(cx + rx - 1.5)), int(round(cy + ry - 1.5)))
+
+
+def special_areas(item):
+    """A section's special areas (or every section's, given the source) as dicts {kind, room, factor, bounds (x0, y0,
+    x1, y1: room_tiles()), section, index}, in source order."""
+    if "sections" in item:
+        return [area for section in item["sections"] for area in special_areas(section)]
+    sid = item.get("id", "?")
+    result = []
+    for index, entry in enumerate(item.get("specialAreas", [])):
+        where = f"{sid}: special area {index}"
+        if not isinstance(entry, dict) or not set(SPECIAL_AREA_KEYS) <= set(entry):
+            raise SourceError(f"{where}: give {{kind, room}} (and a factor)")
+        extra = sorted(set(entry) - set(SPECIAL_AREA_KEYS) - {"factor"})
+        if extra:
+            raise SourceError(f"{where}: unknown keys {extra}")
+        if entry["kind"] not in SPECIAL_AREAS:
+            raise SourceError(f"{where}: kind {entry['kind']!r} is not one of {sorted(SPECIAL_AREAS)} (eloria/areas.py)")
+        room = entry["room"]
+        if not isinstance(room, int) or isinstance(room, bool) or room not in range(len(item.get("rooms", []))):
+            raise SourceError(f"{where}: room {room!r} is not one of the section's rooms")
+        factor = entry.get("factor", SPECIAL_AREAS[entry["kind"]])
+        if not isinstance(factor, int) or isinstance(factor, bool) or factor not in SPECIAL_FACTORS:
+            raise SourceError(f"{where}: factor {factor!r} is not a whole multiplier {SPECIAL_FACTORS.start}-"
+                              f"{SPECIAL_FACTORS.stop - 1}")
+        result.append({"kind": entry["kind"], "room": room, "factor": factor, "bounds": room_tiles(item, room),
+                       "section": sid, "index": index})
+    return result
 
 
 def room_of(section, x, y):
@@ -580,6 +629,13 @@ def _check_section(design, section, cells):
         if stair["room"] not in range(count) or stair["side"] not in SIDES:
             raise SourceError(f"{where}: name one of the rooms and one of {SIDES}")
         _number(stair["at"], f"{where} at", 0, 1)
+    areas = special_areas(section)
+    if len({(area["kind"], area["room"]) for area in areas}) != len(areas):
+        raise SourceError(f"{sid}: a room names the same special area twice")
+    for area in areas:
+        x0, y0, x1, y1 = area["bounds"]
+        if x1 < x0 or y1 < y0:
+            raise SourceError(f"{sid}: special area {area['index']}: room {area['room']} has no floor inside its walls")
     for door in doors(section):
         where = f"{sid}: entrance {door['index']}"
         for key in ("arrival", "exit"):

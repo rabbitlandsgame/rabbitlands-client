@@ -219,6 +219,22 @@
         28
       ],
       "rotationDegrees": 0
+    },
+    {
+      "id": "library",
+      "name": "Calloway's Books",
+      "section": "library",
+      "default": false,
+      "position": [
+        184,
+        0.05,
+        233
+      ],
+      "serverTile": [
+        184,
+        91
+      ],
+      "rotationDegrees": 0
     }
   ],
   "chambers": [
@@ -551,6 +567,39 @@
       ],
       "radius": 2.5,
       "name": "The Orl family room"
+    },
+    {
+      "id": "library-0",
+      "section": "library",
+      "position": [
+        185,
+        0,
+        233.5
+      ],
+      "radius": 3.5,
+      "name": "Calloway's bookshop"
+    },
+    {
+      "id": "library-1",
+      "section": "library",
+      "position": [
+        189.5,
+        0,
+        242
+      ],
+      "radius": 8,
+      "name": "Library reading room"
+    },
+    {
+      "id": "library-2",
+      "section": "library",
+      "position": [
+        194,
+        0,
+        233.5
+      ],
+      "radius": 3.5,
+      "name": "Library stacks"
     }
   ],
   "spaces": {
@@ -793,6 +842,30 @@
       "z1": 303.5,
       "section": "tavern_upper",
       "room": 4
+    },
+    "Calloway's bookshop": {
+      "x0": 180.5,
+      "x1": 189.5,
+      "z0": 229.5,
+      "z1": 237.5,
+      "section": "library",
+      "room": 0
+    },
+    "Library reading room": {
+      "x0": 180.5,
+      "x1": 198.5,
+      "z0": 237.5,
+      "z1": 246.5,
+      "section": "library",
+      "room": 1
+    },
+    "Library stacks": {
+      "x0": 189.5,
+      "x1": 198.5,
+      "z0": 229.5,
+      "z1": 237.5,
+      "section": "library",
+      "room": 2
     }
   },
   "harvestables": [],
@@ -1072,6 +1145,28 @@
         0.0,
         -2.0
       ]
+    },
+    {
+      "id": "library-exit",
+      "objectId": 59211,
+      "role": "portal",
+      "kind": "building",
+      "position": [
+        184,
+        0,
+        231
+      ],
+      "serverTile": [
+        184,
+        93
+      ],
+      "destinationMap": "landfall",
+      "destinationTile": [
+        158,
+        256
+      ],
+      "section": "library",
+      "label": "The avenue"
     }
   ],
   "interactives": [
@@ -1352,6 +1447,28 @@
       ]
     },
     {
+      "id": "library-exit",
+      "objectId": 59211,
+      "role": "portal",
+      "kind": "building",
+      "position": [
+        184,
+        0,
+        231
+      ],
+      "serverTile": [
+        184,
+        93
+      ],
+      "destinationMap": "landfall",
+      "destinationTile": [
+        158,
+        256
+      ],
+      "section": "library",
+      "label": "The avenue"
+    },
+    {
       "id": "tavern_ground-interactive0",
       "objectId": 59251,
       "role": "information",
@@ -1606,6 +1723,70 @@
       ],
       "section": "tavern_upper",
       "label": "Bettany's recipe book, spine split. The first page is in her mother's hand: delta eel, slow over smoke. Under it, in Bettany's: never rush it."
+    },
+    {
+      "id": "library-interactive0",
+      "objectId": 59285,
+      "role": "information",
+      "position": [
+        184,
+        0,
+        234
+      ],
+      "serverTile": [
+        184,
+        90
+      ],
+      "section": "library",
+      "label": "A card propped on the counter, in a careful Votary hand: Calloway's lends nothing. Read anything in the back room for as long as the lamps last; what leaves the shop leaves it paid for."
+    },
+    {
+      "id": "library-interactive1",
+      "objectId": 59286,
+      "role": "information",
+      "position": [
+        182,
+        0,
+        241
+      ],
+      "serverTile": [
+        182,
+        83
+      ],
+      "section": "library",
+      "label": "A history of Landfall, copied out of the Landing Register's margins: who came ashore, who stayed, and which people garrisons which wall. The chapter on the palace runs to two lines."
+    },
+    {
+      "id": "library-interactive2",
+      "objectId": 59287,
+      "role": "information",
+      "position": [
+        182,
+        0,
+        232
+      ],
+      "serverTile": [
+        182,
+        92
+      ],
+      "section": "library",
+      "label": "New arrivals, chalked in two columns: manuals off the Westhaven boat, tomes copied fair in Mirrorhold, and a crate of craft books still to be counted. Ask at the counter."
+    },
+    {
+      "id": "library-interactive3",
+      "objectId": 59288,
+      "role": "information",
+      "position": [
+        195,
+        0,
+        232
+      ],
+      "serverTile": [
+        195,
+        92
+      ],
+      "section": "library",
+      "label": "Ennis's catalogue: every book in the shop, entered twice in two inks and checked against the shelves each evening. The two columns have agreed for nine years."
     }
   ],
   "navigation": {
@@ -1630,7 +1811,7 @@
       "step": 0.1
     },
     "gridAlignment": "tile-centres-v1",
-    "sha256": "a984437e1b7c8bd2838acdc7591b0edb4ea3f531fb6ed7794c1ad05be98caede",
+    "sha256": "a285d449892ca2db67a1b6765388853843f11d69f745d5d37cc1072d3d1c9e86",
     "nodeNames": [
       "Build_castle_east_ashlar_wall",
       "Build_castle_east_decal_banner_glasswarden",
@@ -1682,6 +1863,24 @@
       "Build_clerk_house_west_timber_band",
       "Build_clerk_house_west_wall_cap",
       "Build_clerk_house_west_window_leaded",
+      "Build_library_east_lime_plaster",
+      "Build_library_east_timber_band",
+      "Build_library_east_wall_cap",
+      "Build_library_east_window_leaded",
+      "Build_library_north_door_daylight",
+      "Build_library_north_lime_plaster",
+      "Build_library_north_timber_band",
+      "Build_library_north_wall_cap",
+      "Build_library_north_window_leaded",
+      "Build_library_south_lime_plaster",
+      "Build_library_south_timber_band",
+      "Build_library_south_wall_cap",
+      "Build_library_south_window_leaded",
+      "Build_library_west_decal_map_landfall",
+      "Build_library_west_lime_plaster",
+      "Build_library_west_timber_band",
+      "Build_library_west_wall_cap",
+      "Build_library_west_window_leaded",
       "Build_magic_shop_east_lime_plaster",
       "Build_magic_shop_east_timber_band",
       "Build_magic_shop_east_wall_cap",
@@ -1860,6 +2059,16 @@
       "Part_clerk_house_2_lime_plaster",
       "Part_clerk_house_2_timber_band",
       "Part_clerk_house_2_wall_cap",
+      "Part_library_0_lime_plaster",
+      "Part_library_0_timber_band",
+      "Part_library_0_wall_cap",
+      "Part_library_1_decal_botanical_prints",
+      "Part_library_1_lime_plaster",
+      "Part_library_1_timber_band",
+      "Part_library_1_wall_cap",
+      "Part_library_2_lime_plaster",
+      "Part_library_2_timber_band",
+      "Part_library_2_wall_cap",
       "Part_magic_shop_0_decal_star_chart",
       "Part_magic_shop_0_lime_plaster",
       "Part_magic_shop_0_timber_band",
@@ -1933,7 +2142,7 @@
     "servedGrid": {
       "binary": "served-grid.escg.gz",
       "format": "ESCG-v2",
-      "sha256": "aee51c20296f00a7f0c602e81ac719008aace491bbfffb52fdf03da54a764312",
+      "sha256": "e0b38add46123445ee9bdfa0bf02bcbc16beb3982be6e2e13de58e246c111341",
       "unitMetres": 0.05,
       "climbMetres": 1.0,
       "originMetres": -100.0,
@@ -3574,6 +3783,198 @@
         "energyHint": 1.0,
         "rangeHint": 7,
         "section": "tavern_upper"
+      },
+      {
+        "id": "library-light-0",
+        "position": [
+          186.5,
+          2.9,
+          233.0
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 1.1,
+        "rangeHint": 7,
+        "section": "library"
+      },
+      {
+        "id": "library-light-1",
+        "position": [
+          182.5,
+          2.9,
+          233.5
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.9,
+        "rangeHint": 7,
+        "section": "library"
+      },
+      {
+        "id": "library-light-2",
+        "position": [
+          187.4,
+          2.0,
+          230.4
+        ],
+        "color": [
+          0.74,
+          0.82,
+          1.0
+        ],
+        "energyHint": 0.3,
+        "rangeHint": 4,
+        "section": "library"
+      },
+      {
+        "id": "library-light-3",
+        "position": [
+          184.5,
+          2.6,
+          242.5
+        ],
+        "color": [
+          1.0,
+          0.74,
+          0.46
+        ],
+        "energyHint": 0.9,
+        "rangeHint": 6,
+        "section": "library"
+      },
+      {
+        "id": "library-light-4",
+        "position": [
+          190.0,
+          2.6,
+          242.5
+        ],
+        "color": [
+          1.0,
+          0.74,
+          0.46
+        ],
+        "energyHint": 0.9,
+        "rangeHint": 6,
+        "section": "library"
+      },
+      {
+        "id": "library-light-5",
+        "position": [
+          194.5,
+          2.6,
+          243.5
+        ],
+        "color": [
+          1.0,
+          0.74,
+          0.46
+        ],
+        "energyHint": 0.8,
+        "rangeHint": 6,
+        "section": "library"
+      },
+      {
+        "id": "library-light-6",
+        "position": [
+          197.9,
+          2.0,
+          242.0
+        ],
+        "color": [
+          0.74,
+          0.82,
+          1.0
+        ],
+        "energyHint": 0.25,
+        "rangeHint": 4,
+        "section": "library"
+      },
+      {
+        "id": "library-light-7",
+        "position": [
+          194.0,
+          1.6,
+          231.0
+        ],
+        "color": [
+          1.0,
+          0.74,
+          0.46
+        ],
+        "energyHint": 0.7,
+        "rangeHint": 4,
+        "section": "library"
+      },
+      {
+        "id": "library-light-8",
+        "position": [
+          194.0,
+          2.9,
+          234.3
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.5,
+        "rangeHint": 6,
+        "section": "library"
+      },
+      {
+        "id": "library-lamp-0",
+        "position": [
+          186.1,
+          2.85,
+          229.72
+        ],
+        "color": [
+          1,
+          0.72,
+          0.42
+        ],
+        "energyHint": 1.0,
+        "rangeHint": 7,
+        "section": "library"
+      },
+      {
+        "id": "library-lamp-1",
+        "position": [
+          180.72,
+          2.85,
+          243.0
+        ],
+        "color": [
+          1,
+          0.72,
+          0.42
+        ],
+        "energyHint": 1.0,
+        "rangeHint": 7,
+        "section": "library"
+      },
+      {
+        "id": "library-lamp-2",
+        "position": [
+          198.28,
+          2.85,
+          240.8
+        ],
+        "color": [
+          1,
+          0.72,
+          0.42
+        ],
+        "energyHint": 1.0,
+        "rangeHint": 7,
+        "section": "library"
       }
     ]
   },
@@ -3581,6 +3982,7 @@
     "hideNodes": [
       "Roof_castle_wall_cap",
       "Roof_clerk_house_wall_cap",
+      "Roof_library_wall_cap",
       "Roof_magic_shop_wall_cap",
       "Roof_market_wall_cap",
       "Roof_netmender_house_wall_cap",
@@ -4040,6 +4442,168 @@
           0.0
         ],
         "section": "clerk_house"
+      },
+      {
+        "node": "Build_library_east_lime_plaster",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "library"
+      },
+      {
+        "node": "Build_library_east_timber_band",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "library"
+      },
+      {
+        "node": "Build_library_east_wall_cap",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "library"
+      },
+      {
+        "node": "Build_library_east_window_leaded",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "library"
+      },
+      {
+        "node": "Build_library_north_door_daylight",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "library"
+      },
+      {
+        "node": "Build_library_north_lime_plaster",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "library"
+      },
+      {
+        "node": "Build_library_north_timber_band",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "library"
+      },
+      {
+        "node": "Build_library_north_wall_cap",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "library"
+      },
+      {
+        "node": "Build_library_north_window_leaded",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "library"
+      },
+      {
+        "node": "Build_library_south_lime_plaster",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "library"
+      },
+      {
+        "node": "Build_library_south_timber_band",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "library"
+      },
+      {
+        "node": "Build_library_south_wall_cap",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "library"
+      },
+      {
+        "node": "Build_library_south_window_leaded",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "library"
+      },
+      {
+        "node": "Build_library_west_decal_map_landfall",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "library"
+      },
+      {
+        "node": "Build_library_west_lime_plaster",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "library"
+      },
+      {
+        "node": "Build_library_west_timber_band",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "library"
+      },
+      {
+        "node": "Build_library_west_wall_cap",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "library"
+      },
+      {
+        "node": "Build_library_west_window_leaded",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "library"
       },
       {
         "node": "Build_magic_shop_east_lime_plaster",
@@ -6054,6 +6618,226 @@
         ]
       },
       {
+        "node": "Part_library_0_lime_plaster",
+        "section": "library",
+        "rooms": [
+          0,
+          1
+        ],
+        "centre": [
+          185.0,
+          237.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          -0.0,
+          0,
+          -1.0
+        ]
+      },
+      {
+        "node": "Part_library_0_timber_band",
+        "section": "library",
+        "rooms": [
+          0,
+          1
+        ],
+        "centre": [
+          185.0,
+          237.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          -0.0,
+          0,
+          -1.0
+        ]
+      },
+      {
+        "node": "Part_library_0_wall_cap",
+        "section": "library",
+        "rooms": [
+          0,
+          1
+        ],
+        "centre": [
+          185.0,
+          237.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          -0.0,
+          0,
+          -1.0
+        ]
+      },
+      {
+        "node": "Part_library_1_decal_botanical_prints",
+        "section": "library",
+        "rooms": [
+          0,
+          2
+        ],
+        "centre": [
+          189.5,
+          233.5
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
+        ]
+      },
+      {
+        "node": "Part_library_1_lime_plaster",
+        "section": "library",
+        "rooms": [
+          0,
+          2
+        ],
+        "centre": [
+          189.5,
+          233.5
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
+        ]
+      },
+      {
+        "node": "Part_library_1_timber_band",
+        "section": "library",
+        "rooms": [
+          0,
+          2
+        ],
+        "centre": [
+          189.5,
+          233.5
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
+        ]
+      },
+      {
+        "node": "Part_library_1_wall_cap",
+        "section": "library",
+        "rooms": [
+          0,
+          2
+        ],
+        "centre": [
+          189.5,
+          233.5
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
+        ]
+      },
+      {
+        "node": "Part_library_2_lime_plaster",
+        "section": "library",
+        "rooms": [
+          1,
+          2
+        ],
+        "centre": [
+          194.0,
+          237.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          0.0,
+          0,
+          1.0
+        ]
+      },
+      {
+        "node": "Part_library_2_timber_band",
+        "section": "library",
+        "rooms": [
+          1,
+          2
+        ],
+        "centre": [
+          194.0,
+          237.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          0.0,
+          0,
+          1.0
+        ]
+      },
+      {
+        "node": "Part_library_2_wall_cap",
+        "section": "library",
+        "rooms": [
+          1,
+          2
+        ],
+        "centre": [
+          194.0,
+          237.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          0.0,
+          0,
+          1.0
+        ]
+      },
+      {
         "node": "Part_magic_shop_0_decal_star_chart",
         "section": "magic_shop",
         "rooms": [
@@ -7583,6 +8367,20 @@
           305.5
         ]
       }
+    },
+    {
+      "id": "library",
+      "name": "Calloway's Books",
+      "bounds": {
+        "min": [
+          178.5,
+          227.5
+        ],
+        "max": [
+          200.5,
+          248.5
+        ]
+      }
     }
   ],
   "minimap": {
@@ -7605,12 +8403,12 @@
   },
   "provenance": {
     "source": "_continent_v2/content/landfall_town.json",
-    "sourceSha256": "651033ef890d8f91ef0314ddf36d047ac79a953e58392199106e29f6bf42ec81",
+    "sourceSha256": "4f75e71ec959dd036c16ca9994db96ce2a6e6f6d6b9aa7c4b0546a28fedda513",
     "builder": "_continent_v2/build_town_interiors.py",
     "builderSha256": "efc1ad30222572a77ae78d83d6ed9fff8c733880ce0183462aae7c1940a338c2",
     "imports": {
       "_continent_v2/build_underground.py": "d4ad29b2b55f51752aea4478d782915cd1b774cf59611e689b84d868468e2845",
-      "_continent_v2/town_source.py": "bf9eabfb14686f95df0b95871b0798a512147e6bdd808232b358374d48ca3f84",
+      "_continent_v2/town_source.py": "714a99d1ea299e75d5ef2a45cc832881a7d81dc0e71bbd76877e5e89739230af",
       "_continent_v2/underground_source.py": "1c96af628d148d491d1a5b021470bdbdbf35885ef53d605c953ce97e03f26981"
     },
     "surfaces": {

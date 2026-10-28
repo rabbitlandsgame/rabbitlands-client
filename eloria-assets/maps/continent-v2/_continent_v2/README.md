@@ -123,8 +123,9 @@ id `spindle_cavern` and entrance marker id stay; its rooms are the cenote's).
 ## Landfall Town interiors
 
 Owner-approved 2026-10-27 (chat: "Implement your plan"): the rooms behind Landfall town's street doors (the tavern
-and its guest floor, the general store and the flower shop, the magic shop, the smithy, four homes and the keep) are
-one interior map, `landfall_town` (alias LFT, 324 cells), beside the caves' `landfall_insides`. Each building, or each
+and its guest floor, the general store and the flower shop, the magic shop, the smithy, four homes and the keep; and,
+2026-10-28, "Add a library with a book seller NPC": Calloway's Books, the bookseller's shop, reading room and stacks)
+are one interior map, `landfall_town` (alias LFT, 324 cells), beside the caves' `landfall_insides`. Each building, or each
 storey of one, is a section with unfloored blackspace round it, as the caves' are. See
 `../landfall_town/README.md` for the package and its rebuild.
 
@@ -142,7 +143,9 @@ storey of one, is a section with unfloored blackspace round it, as the caves' ar
   shape stands there, not on its tile), `target` (the server's target column; by default `notice` for information
   and `crafting` for a station, the smithy's anvil `smithing`) and `height`/`radius` (its pick's size, else the
   packaged prop's at `at`). A prop may add `palette` {stone, mineral} (tinted by the client's MineralAppearance
-  shader: the Hall of Eight Seats' lichen and standing stone).
+  shader: the Hall of Eight Seats' lichen and standing stone). A section may add `specialAreas` [{kind, room,
+  factor?}]: a server special area (eloria/areas.py kinds; factor by default the kind's, fast_reading 3) over that
+  room's floor inside its walls (`town_source.room_tiles`); the library's reading room is the one fast_reading room.
 - `town_source.py` is the only reader, checker and writer of that file (its docstring is the format); it reuses
   `underground_source.py`'s helpers without changing them.
 - `build_town_interiors.py` is the owner-approved builder of the room shells (floors, walls, partitions, doorways,
@@ -162,7 +165,8 @@ storey of one, is a section with unfloored blackspace round it, as the caves' ar
   them needs a town rebuild before anything publishes. The map loads raw (it is a geometry-cache interior candidate, not in the
   production scope); `godot-client/tools/interior_load_benchmark.py --target landfall_town` qualifies it.
 - `map_categories.py` is the one table of shop categories and their dot colours (tavern, general_store,
-  flower_shop, magic_shop, blacksmith; the tan entrance dot for a door without one). The client's copy is
+  flower_shop, magic_shop, blacksmith, bookshop - the legend's red Books dot; the tan entrance dot for a door without
+  one). The client's copy is
   `godot-client/src/ui/service_map_overlay.gd` and the legend in `main.tscn`; `test_continent_v2_cartography.py`
   keeps the three equal. A category the table does not hold is refused by every publisher, never dropped.
 
@@ -174,7 +178,10 @@ nothing. `publish_server.py` appends each interior's rows under its own heading 
 `harvesting.txt`, `npcs.txt` and `interactives.txt` (the caves' rows do not move), vendors both grids, and lists both
 under the manifest block's `interiorMaps` (the town's entry carries `kind: "building"`): the caves' doors and
 passages under `undergroundPortals` / `undergroundRows`, the town's doors and stairs under `buildingPortals` /
-`buildingRows`. Keys of the block another tool wrote (`publish_npc_metadata.py`'s `npcMetadataAmendments`) are carried
+`buildingRows` (with the town's special areas counted). A room's special areas are the overlay's own
+`special_areas.txt` (the town's rows under its heading), which the server's `eloria/areas.py` reads after its base
+rows (a base row may not name an overlay map); the run checks that the server's loader reads every one. Keys of the
+block another tool wrote (`publish_npc_metadata.py`'s `npcMetadataAmendments`) are carried
 over as they stand. An interior interactive's target is its source `target` when it names one (the smithy's anvil:
 `smithing`), else its role's (`underground.py` INTERACTIVE_TARGETS: `notice`, `crafting`). The other tools read both
 sources too:
