@@ -132,6 +132,8 @@ func apply_style(config: Dictionary, side_width: float = 75, actions_right := fa
 				button.get_theme_stylebox(state).set_content_margin_all(3)
 		# A disabled action keeps the same frame; the icon still conveys availability.
 		button.add_theme_stylebox_override("disabled", button.get_theme_stylebox("normal"))
+	# Preserve the chest's warm wood and gold fittings instead of the default heavy fade.
+	store_button.add_theme_color_override("icon_disabled_color", Color(1, 1, 1, 0.9))
 	gold_count.visible = part.show_quantity
 	_sync_actions()
 
