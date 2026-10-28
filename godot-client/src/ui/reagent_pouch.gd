@@ -21,11 +21,11 @@ var references: Array[int] = []
 
 func configure(owner_main: Control) -> void:
 	main = owner_main
-	# Reuse the game's own painted HUD art for consistent action silhouettes.
-	look_button.icon = main._atlas_region(main._hud_active_atlas, Rect2(64, 0, 32, 32))
-	store_button.icon = main._external_texture("res://assets/ui/menu-icons/storage.png")
+	# Match the bag with unframed, painted object art for every pouch action.
+	look_button.icon = main._external_texture("res://assets/ui/cursors/cursor_eye.png")
+	store_button.icon = main._external_texture("res://assets/ui/inventory-actions/store-painted.png")
 	drop_button.icon = main._external_texture("res://assets/ui/cursors/cursor_pick.png")
-	mix_button.icon = main._atlas_region(main._hud_active_atlas, Rect2(64, 32, 32, 32))
+	mix_button.icon = main.item_atlas.icon_for(8) # Mortar and Pestle
 	sync()
 
 func _ready() -> void:
