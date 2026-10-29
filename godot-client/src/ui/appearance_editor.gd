@@ -1,12 +1,20 @@
 extends PanelContainer
 ## Existing-player dressing room. Nothing changes in-world until the server
 ## accepts the explicit Apply command. Closing frees the preview actor.
+## On a server that negotiated PC/3 (the version comes from the host through a
+## callable, as `send` does) it offers the skin tone slider, the colour wheels,
+## the hair finish slider and More face detail; otherwise develop's controls.
 
 const FORM = preload("res://src/ui/portrait_customization_form.gd")
 const CHOICES = preload("res://src/actors/appearance_choices.gd")
 const CUSTOMIZATION = preload("res://src/actors/portrait_customization.gd")
 const COLOURS = preload("res://src/actors/appearance_colours.gd")
+const COLOUR_PANEL = preload("res://src/ui/appearance_colour_panel.gd")
 var _form
+var _colours
+var _grid: GridContainer
+var _version: Callable
+var _closeup_before := false
 var _pickers: Dictionary = {}
 var _viewport: SubViewport
 var _stage: Node3D
@@ -96,6 +104,7 @@ func _ready() -> void:
 	var grid := GridContainer.new()
 	grid.columns = 2
 	options.add_child(grid)
+	_grid = grid
 	for category: String in ["skin", "hair", "hair_color", "eyes", "shirt", "pants", "boots"]:
 		var label := Label.new()
 		label.text = category.replace("_", " ").capitalize()
@@ -105,10 +114,20 @@ func _ready() -> void:
 		grid.add_child(picker)
 		_pickers[category] = picker
 		picker.item_selected.connect(func(_index: int) -> void: _refresh())
+	_colours = COLOUR_PANEL.new()
+	options.add_child(_colours)
+	_colours.setup(_pickers, grid)
+	_colours.changed.connect(_refresh)
+	_colours.face_focus.connect(func(enabled: bool) -> void:
+		# The eye wheel inspects the face; closing it restores the framing.
+		if enabled:
+			_closeup_before = _closeup
+		_closeup = enabled or _closeup_before
+		_frame())
 	_form = FORM.new()
 	options.add_child(_form)
 	_form.changed.connect(_refresh)
-	_form.preset_selected.connect(_set_palette)
+	_form.preset_selected.connect(_apply_preset)
 	var actions := HBoxContainer.new()
 	content.add_child(actions)
 	var gear := CheckBox.new()
@@ -137,13 +156,16 @@ func _ready() -> void:
 			_release_preview())
 	hide()
 
+## `version` returns the negotiated appearance protocol (Network's
+## appearance_protocol_version); without one the editor behaves as offline (1).
 func open_for(dto: Dictionary, model: Dictionary, animations: Dictionary,
-		equipment: Dictionary, send: Callable) -> void:
+		equipment: Dictionary, send: Callable, version: Callable = Callable()) -> void:
 	_dto = dto.duplicate(true)
 	_model = model
 	_animations = animations
 	_equipment = equipment
 	_send = send
+	_version = version
 	var appearance: Dictionary = _dto.get("appearance", {})
 	var culture := AppearanceVariants.culture_for_actor_type(int(dto.get("actor_type", 0)))
 	for category: String in _pickers:
@@ -151,12 +173,34 @@ func open_for(dto: Dictionary, model: Dictionary, animations: Dictionary,
 		CHOICES.populate(_pickers[category], CHOICES.options("wardrobe" if int(part) > 0 else category, culture, part))
 	_set_palette(appearance)
 	_form.set_values(appearance)
+	_form.set_body(int(dto.get("actor_type", 0)))
+	_form.set_hair_style(AppearanceVariants.hair_style(int(appearance.get("hair", 0))))
+	_colours.set_body("female" if int(dto.get("actor_type", 0)) == 0 else "male", model)
+	_colours.set_values(appearance)
+	set_protocol_version(protocol_version())
 	_status.text = "Drag the preview to rotate. Apply saves your choices for everyone to see."
 	size = Vector2(780, 650).min(get_viewport_rect().size - Vector2(24, 24))
 	position = (get_viewport_rect().size - size) * 0.5
 	show()
 	_refresh()
 	_fit.call_deferred()
+
+## The negotiated version; 1 (offline) without a version source.
+func protocol_version() -> int:
+	return int(_version.call()) if _version.is_valid() else 1
+
+## PC/3 controls follow the negotiated version (and its changes while open).
+func set_protocol_version(version: int) -> void:
+	var enabled := version >= PortraitCustomization.LATEST and int(_dto.get("actor_type", -1)) in [0, 1]
+	set_detail_enabled(enabled)
+	_colours.set_custom_colours_enabled(enabled)
+
+func set_detail_enabled(enabled: bool) -> void:
+	_form.set_detail_enabled(enabled)
+
+func _apply_preset(look: Dictionary) -> void:
+	_set_palette(look)
+	_colours.apply_preset(look.get("colours", {}) as Dictionary)
 
 func _fit() -> void:
 	if not is_visible_in_tree():
@@ -183,6 +227,8 @@ func _values() -> Dictionary:
 	for category: String in ["skin", "eyes", "shirt", "pants", "boots"]:
 		result[category] = (_pickers[category] as OptionButton).get_selected_id()
 	result.hair = AppearanceVariants.pack_hair((_pickers.hair as OptionButton).get_selected_id(), (_pickers.hair_color as OptionButton).get_selected_id())
+	# The colour panel adds the skin tone and colour fields in saved form.
+	result = _colours.values(result)
 	# A palette pick replaces a custom colour or slider position it opened with.
 	return COLOURS.clear_replaced(_dto.get("appearance", {}) as Dictionary, result)
 
@@ -190,6 +236,9 @@ func _refresh() -> void:
 	if not is_visible_in_tree():
 		return
 	var look := _values()
+	_form.set_hair_style(AppearanceVariants.hair_style(int(look.get("hair", 0))))
+	_form.update_derived(look)
+	_colours.update_context(look, _model)
 	if not is_instance_valid(_actor):
 		_actor = ReplicatedActor3D.new()
 		_stage.add_child(_actor)
@@ -217,16 +266,30 @@ func _frame() -> void:
 	_camera.position = focus + Vector3(sin(_yaw), 0.08, cos(_yaw)) * distance
 	_camera.look_at(focus)
 
+## Sends the palette bytes and every field the negotiated version carries;
+## a value the server cannot save is refused here, with the gate's message.
+## Without a version source (the local preview lab) every field is sent, as
+## before.
 func _apply() -> void:
 	var look := _values()
-	var entries := PackedStringArray()
-	for field: String in look:
-		entries.append("%s=%d" % [field, look[field]])
-	var error: int = _send.call("#appearance " + " ".join(entries))
+	var version := protocol_version() if _version.is_valid() else PortraitCustomization.LATEST
+	var validation := PortraitCustomization.validate(look, version)
+	var error: int = OK
+	if not validation.ok:
+		error = ERR_UNAVAILABLE if validation.error == "unsupported" else ERR_INVALID_DATA
+	else:
+		var entries := PackedStringArray()
+		for field: String in look:
+			var carried := PortraitCustomization.field_version(field)
+			if carried == 0 or carried <= version:
+				entries.append("%s=%d" % [field, look[field]])
+		error = _send.call("#appearance " + " ".join(entries))
 	if error == OK:
 		_status.text = "Appearance requested. The server will confirm in chat."
 	elif error == ERR_UNAVAILABLE:
-		_status.text = "This server needs an update to save the new face, eye and hair controls. Your preview is still available."
+		var reason := str(validation.get("message", "")) if not validation.ok else ""
+		_status.text = (reason if not reason.is_empty() else "This server needs an update to save the new face, eye and hair controls.") \
+			+ " Your preview is still available."
 	else:
 		_status.text = "Could not send. Reconnect and try again."
 

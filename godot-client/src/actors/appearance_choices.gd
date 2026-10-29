@@ -1,6 +1,9 @@
 class_name AppearanceChoices
 extends RefCounted
 
+const LIP_TINT_NAMES: Array[String] = ["Natural pink", "Warm rose", "Soft neutral", "Muted rose-brown",
+	"Deep rose", "Cocoa", "Deep brown", "Mauve", "Berry", "Brick red", "Plum", "Frost lilac"]
+
 # Display order is independent of the persistent appearance byte.
 static func options(category: String, culture := "luminous", part := 0) -> Array[Dictionary]:
 	var names: Array = []
@@ -33,6 +36,14 @@ static func options(category: String, culture := "luminous", part := 0) -> Array
 			order = range(names.size())
 			for id: int in order:
 				colors.append(AppearanceVariants.wardrobe_color(culture, part, id))
+		"lip_tint":
+			# PC/3 lip tint: ids are the wire values 1..12 (PC/3 spec 2.4); the
+			# form adds "Auto" (0). Entries 1-7 are natural, 8-12 cosmetic.
+			var result_tints: Array[Dictionary] = []
+			for wire: int in range(1, LIP_TINT_NAMES.size() + 1):
+				result_tints.append({"id": wire, "label": LIP_TINT_NAMES[wire - 1],
+					"color": RLHeadPortraitMap.lip_tint_color(wire)})
+			return result_tints
 	var result: Array[Dictionary] = []
 	for id: int in order:
 		var entry: Dictionary = {"id": id, "label": names[id]}

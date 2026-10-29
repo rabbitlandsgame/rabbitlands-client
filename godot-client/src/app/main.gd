@@ -29,9 +29,14 @@ var lantern_scene: Node3D
 const AppearanceChoices = preload("res://src/actors/appearance_choices.gd")
 const PortraitFormScript = preload("res://src/ui/portrait_customization_form.gd")
 const AppearanceEditorScript = preload("res://src/ui/appearance_editor.gd")
+const AppearanceColourPanelScript = preload("res://src/ui/appearance_colour_panel.gd")
 var portrait_form
 var appearance_editor
 var creation_face_focus := false
+## The skin tone slider and colour wheels of character creation (PC/3, Human).
+var creation_colours
+var creation_inspect_face: CheckButton
+var _creation_face_before_eyes := false
 const OldcraftEntryStyleScript = preload("res://src/ui/oldcraft_entry_style.gd")
 const OldcraftDialogueStyleScript = preload("res://src/ui/oldcraft_dialogue_style.gd")
 const CreationArchetypes = preload("res://src/ui/creation_archetypes.gd")
@@ -2490,6 +2495,10 @@ func _randomize_creation_appearance(rng: RandomNumberGenerator = null) -> void:
 			selector.select(selector.get_item_index(amber))
 			continue
 		selector.select(source.randi_range(0, selector.item_count - 1))
+	if is_instance_valid(creation_colours) and creation_colours.visible:
+		# A random skin tone and an undertone near neutral, only where custom
+		# colours are offered (owner Q12); develop's draws are unchanged.
+		creation_colours.randomise(source)
 	_refresh_creation_preview()
 
 func _on_create_pressed() -> void:
@@ -2576,6 +2585,10 @@ func _refresh_creation_preview() -> void:
 		if creation_class_gear_visible else {})
 	var model_id := _model_for_actor(dto)
 	var model_config: Dictionary = models.get(model_id, {}) as Dictionary
+	if is_instance_valid(creation_colours) and actor_type in [0, 1]:
+		creation_colours.update_context(appearance, model_config)
+		portrait_form.set_hair_style(AppearanceVariants.hair_style(int(appearance.get("hair", 0))))
+		portrait_form.update_derived(appearance)
 	var errors := preview_actor.configure(dto,
 		CoordinateAdapter.new({"walkingHeight": 0.0}), model_config,
 		_animation_for_model(model_config), equipment_config)
@@ -2625,6 +2638,7 @@ func _populate_creation_choices(reset_skin := false) -> void:
 	var culture := AppearanceVariants.culture_for_actor_type(create_gender.get_selected_id())
 	if is_instance_valid(portrait_form):
 		portrait_form.visible = culture == "luminous"
+		portrait_form.set_body(create_gender.get_selected_id(), true)
 	AppearanceChoices.populate(%CreateSkin, AppearanceChoices.options("skin", culture))
 	if reset_skin and culture != "luminous":
 		%CreateSkin.select(%CreateSkin.get_item_index(0))
@@ -2638,6 +2652,29 @@ func _populate_creation_choices(reset_skin := false) -> void:
 	AppearanceChoices.populate(%CreateShirt, AppearanceChoices.options("wardrobe", culture, AppearanceVariants.PART_SHIRT))
 	AppearanceChoices.populate(%CreatePants, AppearanceChoices.options("wardrobe", culture, AppearanceVariants.PART_PANTS))
 	AppearanceChoices.populate(%CreateBoots, AppearanceChoices.options("wardrobe", culture, AppearanceVariants.PART_BOOTS))
+	_apply_creation_protocol()
+
+## PC/3 creation controls (PC/3 spec 8.1, colour model spec 6.3): the hair
+## finish slider and More face detail when the server negotiated PC/3; the
+## skin tone slider and colour wheels for a Human on such a server. Otherwise
+## develop's controls, keeping any values already chosen.
+func _apply_creation_protocol() -> void:
+	if not is_instance_valid(portrait_form) or not is_instance_valid(creation_colours):
+		return
+	var version: int = Network.appearance_protocol_version()
+	var actor_type: int = create_gender.get_selected_id()
+	var human := AppearanceVariants.culture_for_actor_type(actor_type) == "luminous" and actor_type in [0, 1]
+	portrait_form.set_detail_enabled(version >= PortraitCustomization.LATEST)
+	creation_colours.visible = human
+	if human:
+		var model_config: Dictionary = models.get("luminous_female" if actor_type == 0 else "luminous_male", {})
+		creation_colours.set_body("female" if actor_type == 0 else "male", model_config)
+	creation_colours.set_custom_colours_enabled(human and version >= PortraitCustomization.LATEST)
+
+func _on_appearance_protocol_changed(version: int) -> void:
+	_apply_creation_protocol()
+	if is_instance_valid(appearance_editor):
+		appearance_editor.set_protocol_version(version)
 
 func _creation_class_buttons() -> Array[Button]:
 	var buttons: Array[Button] = [
@@ -2681,8 +2718,10 @@ func _configure_creation_layout() -> void:
 	portrait_form.visible = AppearanceVariants.culture_for_actor_type(create_gender.get_selected_id()) == "luminous"
 	var inspect_face := CheckButton.new()
 	inspect_face.text = "Inspect face"
+	inspect_face.accessibility_name = "Inspect face"
 	portrait_form.add_child(inspect_face)
 	portrait_form.move_child(inspect_face, 0)
+	creation_inspect_face = inspect_face
 	inspect_face.toggled.connect(func(enabled: bool) -> void:
 		creation_face_focus = enabled
 		preview_distance = 1.5 if enabled else 4.2
@@ -2692,7 +2731,28 @@ func _configure_creation_layout() -> void:
 		%CreateHair.select(%CreateHair.get_item_index(AppearanceVariants.hair_style(look.hair)))
 		%CreateHairColor.select(%CreateHairColor.get_item_index(AppearanceVariants.hair_color_index(look.hair)))
 		%CreateSkin.select(%CreateSkin.get_item_index(look.skin))
-		%CreateEyes.select(%CreateEyes.get_item_index(look.eyes)))
+		%CreateEyes.select(%CreateEyes.get_item_index(look.eyes))
+		if is_instance_valid(creation_colours):
+			creation_colours.apply_preset(look.get("colours", {}) as Dictionary))
+	var appearance_grid := fields.get_node("AppearanceGrid") as GridContainer
+	creation_colours = AppearanceColourPanelScript.new()
+	fields.add_child(creation_colours)
+	fields.move_child(creation_colours, appearance_grid.get_index() + 1)
+	creation_colours.setup({"skin": get_node("%CreateSkin"), "hair": get_node("%CreateHair"),
+		"hair_color": get_node("%CreateHairColor"), "eyes": get_node("%CreateEyes"),
+		"shirt": get_node("%CreateShirt"), "pants": get_node("%CreatePants"),
+		"boots": get_node("%CreateBoots")}, appearance_grid)
+	creation_colours.changed.connect(_refresh_creation_preview)
+	creation_colours.face_focus.connect(func(enabled: bool) -> void:
+		# The eye wheel frames the face (as Inspect face does) while it is open.
+		if enabled:
+			_creation_face_before_eyes = inspect_face.button_pressed
+		inspect_face.button_pressed = enabled or _creation_face_before_eyes)
+	(get_node("%CreateHair") as OptionButton).item_selected.connect(func(_index: int) -> void:
+		portrait_form.set_hair_style((get_node("%CreateHair") as OptionButton).get_selected_id()))
+	if not Network.appearance_protocol_changed.is_connected(_on_appearance_protocol_changed):
+		Network.appearance_protocol_changed.connect(_on_appearance_protocol_changed)
+	_apply_creation_protocol()
 	var appearance_button := Button.new()
 	appearance_button.text = "Appearance"
 	appearance_button.tooltip_text = "Change your character's face, hair and silhouette"
@@ -2771,6 +2831,10 @@ func _creation_appearance() -> Dictionary:
 	}
 	if is_instance_valid(portrait_form) and create_gender.get_selected_id() in [0, 1]:
 		result.merge(portrait_form.values())
+		if is_instance_valid(creation_colours):
+			# Skin tone and colour fields, snapped and with the nearest palette
+			# bytes for older recipients (AppearanceColours.canonical).
+			result = creation_colours.values(result)
 	return result
 
 func _open_appearance_editor() -> void:
@@ -2787,7 +2851,8 @@ func _open_appearance_editor() -> void:
 			window_stack.register(appearance_editor)
 	var model_id := _model_for_actor(dto)
 	var model_config: Dictionary = models.get(model_id, {})
-	appearance_editor.open_for(dto, model_config, _animation_for_model(model_config), equipment_config, Network.send_chat)
+	appearance_editor.open_for(dto, model_config, _animation_for_model(model_config), equipment_config, Network.send_chat,
+		Network.appearance_protocol_version)
 
 func _on_character_preview_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:

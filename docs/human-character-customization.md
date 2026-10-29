@@ -10,8 +10,8 @@ Hair length and volume adjust the selected hairstyle. Height and body breadth
 control the overall silhouette. Rowan, Mira and Tavi offer editable starting
 looks guided by the archived Human player studies. They also select the study's
 hair, eye and skin colours, and preserve your selected sex and starting class.
-Rowan and Tavi use **Soft tan**, the Human bodies' own painted skin tone, which
-the skin list offers beside the other natural tones.
+The skin list includes **Soft tan**, the Human bodies' own painted skin tone,
+beside the other natural tones.
 Use **Inspect face** for a close-up while adjusting your facial features.
 **Reset shape** returns the face, grooming and proportions to their original
 settings without changing your hair colour or wardrobe dyes.
@@ -27,6 +27,50 @@ Saving the new face, eye and hair controls online requires a server with the
 matching appearance update. The client checks support before sending the look
 and explains when an older server cannot save it. Local previews and local
 preview saves support all controls without a server connection.
+
+### Colours, hair finish and face detail (updated servers)
+
+On a server with the latest appearance update, Human creation and the dressing
+room offer finer controls. Other races, and servers without the update, keep the
+lists described above.
+
+* **Skin tone.** A slider runs through the natural tones from pale beige to
+  ebony brown, with marks at the named tones; **‹** and **›** jump between
+  them. The **Undertone** slider below moves the tone towards Pink, Rosy,
+  Golden or Olive; its centre keeps the tone as designed and snaps back there.
+  Very strong undertones are limited to natural skin colours, and a note says
+  so. The four Eloria tones are swatches beside the slider.
+* **Hair, eyes, shirt, pants and boots.** Each keeps its list and adds
+  **Custom…**, which opens a colour wheel with lightness and saturation sliders
+  and the list's colours as swatches. A custom colour shows as "Custom, near"
+  the closest list colour, and choosing from the list replaces it. The hair
+  wheel shows the colour the hair appears, so one choice looks alike on every
+  hairstyle, at every graphics level and on the beard. Some hairstyles cannot
+  show the very lightest colours: the wheel marks how light this hairstyle and
+  every hairstyle can go, and the **On this hairstyle** swatch shows the
+  result. Opening the eye wheel switches the preview to a face close-up, and
+  very dark or very light irises are kept readable. A shirt or trousers too
+  close to the skin colour is drawn a little lighter or darker so it stands out.
+* **Hair finish.** A **Sleek ↔ Messy** slider replaces the three finishes, with
+  Swept, Classic and Tousled marked on it. It applies at every graphics level;
+  High also shows fine flyaway strands. It is disabled for Bald.
+* **More face detail.** This section, closed until you open it, adds eyelids,
+  brow height, shape and thickness, nose length, bridge and tip, mouth width,
+  cupid's bow, cheek fullness, chin projection and width, ear size, freckles,
+  eyeliner and its wing, stubble shadow (men), lip colour and a choice of
+  High-detail hair. These show at High graphics; Low and Medium keep the
+  classic look. Details marked **Auto** follow your skin tone, sex and facial
+  hair.
+* **Presets and Randomize.** Rowan, Mira and Tavi also set the skin tone,
+  undertone and hair colour of their concept art, and their face detail.
+  Randomize also rolls a skin tone and a near-neutral undertone.
+
+Without the update, each list shows the closest colour, and other players on
+older clients see those closest colours. If you return to an older server with
+custom values, they are kept and a note offers **Use nearest palette colours**,
+**Use nearest finish** or **Reset to Auto**; the server cannot save them until
+you do. Every slider takes the arrow keys, Page Up and Page Down, Home and End,
+and every control has a name for screen readers.
 
 Height ranges from 90% to 110% of the authored body height. Body breadth ranges
 from 85% to 115%. These choices change appearance only: movement speed, reach,

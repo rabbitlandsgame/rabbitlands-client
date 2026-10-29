@@ -352,7 +352,7 @@ func _run_smoke() -> void:
 					break
 			var presets = preload("res://src/actors/human_portrait_presets.gd")
 			_expect(form.values() == PortraitCustomization.normalized(presets.shape(preset_name)), "all face eye and hair controls follow the selected study preset")
-			_expect(_editor.call("_values").hair == presets.palette(preset_name).hair, "study preset sets the correct hair style and colour")
+			_expect(_editor.call("_values").hair == presets.pick(preset_name).hair, "study preset sets the nearest palette hair style and colour")
 			_expect((_editor.get("_actor") as ReplicatedActor3D)._model_config.gender == ("female" if sex == 0 else "male"), "study preset preserves the selected Human sex")
 		for outfit: int in range(5):
 			_outfit.select(outfit)
