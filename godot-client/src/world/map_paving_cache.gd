@@ -5,6 +5,7 @@ const Faces := preload("res://src/world/map_collision_cache.gd")
 const Sources := preload("res://src/world/map_geometry_texture_sources.gd")
 const Ground := preload("res://src/world/look/look_ground.gd")
 const Profile := preload("res://src/world/look/look_profile.gd")
+const Installed := preload("res://src/world/installed_world_cache.gd")
 const POLICY := "map-paving-coverage-v1"
 const DIRECTORY := "user://map-paving-cache"
 const VERSION := 1
@@ -28,9 +29,10 @@ static func _entry_path(source: String) -> String:
 
 static func _owned(path: String, extension: String, root := "") -> bool:
 	var directory := _root() if root.is_empty() else root
-	return path == path.replace("\\","/").simplify_path() \
+	var local := path == path.replace("\\","/").simplify_path() \
 		and path.get_base_dir() == directory.path_join("entries" if extension == "json" else "blobs") \
 		and path.get_extension() == extension and Faces._hash(path.get_file().get_basename())
+	return local or (root.is_empty() and extension == "res" and Installed.owns_blob(path,"paving",policy(),extension))
 
 static func _read(path: String) -> Dictionary:
 	var file := FileAccess.open(path,FileAccess.READ)
@@ -213,10 +215,10 @@ static func write_packed(packed: PackedScene, source: String, digest: String, in
 static func write_from_geometry(entry: Dictionary) -> Dictionary:
 	if OS.get_thread_caller_id() != OS.get_main_thread_id(): return _miss("paving_producer_requires_main")
 	if entry.get("kind") != "world" or not entry.get("payloads") is Dictionary \
-			or entry.payloads.size() > Faces.MAX_PATHS or not Faces._geometry_blob(entry.get("primary")) \
+			or entry.payloads.size() > Faces.MAX_PATHS or not Faces._geometry_blob(entry.get("primary"),str(entry.get("policy",""))) \
 			or not entry.payloads.has(entry.primary): return _miss("paving_geometry_invalid")
 	for path: Variant in entry.payloads:
-		if not Faces._geometry_blob(path) or not Faces._hash(entry.payloads[path]) \
+		if not Faces._geometry_blob(path,str(entry.get("policy",""))) or not Faces._hash(entry.payloads[path]) \
 				or FileAccess.get_sha256(path) != entry.payloads[path]: return _miss("paving_geometry_changed")
 	if not Faces._inputs(entry.get("inputs"),str(entry.get("source",""))): return _miss("paving_dependency_changed")
 	var packed := ResourceLoader.load(str(entry.primary),"PackedScene",ResourceLoader.CACHE_MODE_IGNORE_DEEP) as PackedScene
@@ -250,11 +252,16 @@ static func _entry_valid(entry: Dictionary, source: String, digest: String, veri
 
 static func acquire(source: String, digest: String, verified: Dictionary = {}) -> Dictionary:
 	if Faces._logical(source).is_empty() or not Faces._hash(digest): return _miss("paving_source_invalid")
+	var installed := Installed.entry("paving","world|"+Faces._logical(source),policy())
+	if not installed.is_empty():
+		var result := _acquire_entry(installed,source,digest,verified)
+		if bool(result.ok): return result
+	return _acquire_entry(_read(_entry_path(source)),source,digest,verified)
+
+static func _acquire_entry(entry: Dictionary, source: String, digest: String, verified: Dictionary = {}) -> Dictionary:
 	var began := Time.get_ticks_usec()
-	var metadata_path := _entry_path(source)
 	var timings := {"pavingAcquirePolicy":Time.get_ticks_usec()-began}
 	began = Time.get_ticks_usec()
-	var entry := _read(metadata_path)
 	timings["pavingAcquireMetadata"] = Time.get_ticks_usec()-began
 	if entry.is_empty(): return _miss("paving_not_prepared")
 	var validation := {"enabled":true,"detailed":detailed_diagnostics()}
@@ -323,7 +330,7 @@ static func _apply(record: Dictionary, root: Node3D, timings: Dictionary, valida
 	var metadata_path := _entry_path(source)
 	timings["pavingApplyPolicy"] = Time.get_ticks_usec()-began
 	began = Time.get_ticks_usec()
-	var same := _read(metadata_path) == entry
+	var same := _read(metadata_path) == entry or Installed.entry("paving","world|"+Faces._logical(source),policy()) == entry
 	timings["pavingApplyMetadata"] = Time.get_ticks_usec()-began
 	if not same or not _entry_valid(entry,source,str(entry.get("source_digest","")),{},validation): return 0
 	began = Time.get_ticks_usec()

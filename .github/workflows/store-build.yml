@@ -62,7 +62,16 @@ jobs:
         if: matrix.platform == 'linux' && inputs.distribution == 'steam' && (inputs.platform == 'all' || inputs.platform == 'linux')
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends libfontconfig1 libx11-6 libxcursor1 libxinerama1 libxi6 libxrandr2 libasound2t64 libgl1
+          sudo apt-get install -y --no-install-recommends libfontconfig1 libx11-6 libxcursor1 libxinerama1 libxi6 libxrandr2 libasound2t64 libgl1 libgl1-mesa-dri libglx-mesa0 mesa-vulkan-drivers xvfb xauth
+      - name: Restore verified world preparation
+        if: matrix.platform != 'macos' && inputs.distribution == 'steam' && (inputs.platform == 'all' || inputs.platform == matrix.platform)
+        id: prepared-world
+        continue-on-error: true
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ runner.temp }}/rabbitlands-native-cache/world-preparation-cache
+          key: rabbitlands-world-v1-${{ matrix.platform }}-${{ github.sha }}
+          restore-keys: rabbitlands-world-v1-${{ matrix.platform }}-
       - name: Build complete store content with bounded disk use
         if: (inputs.platform == 'all' || inputs.platform == matrix.platform) && (inputs.distribution == 'steam' || matrix.platform == 'macos')
         shell: bash
@@ -80,6 +89,13 @@ jobs:
           compression-level: 0
           if-no-files-found: error
           retention-days: 7
+      - name: Retain verified world preparation for later builds
+        if: matrix.platform != 'macos' && inputs.distribution == 'steam' && (inputs.platform == 'all' || inputs.platform == matrix.platform) && steps.prepared-world.outputs.cache-hit != 'true'
+        continue-on-error: true
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ runner.temp }}/rabbitlands-native-cache/world-preparation-cache
+          key: rabbitlands-world-v1-${{ matrix.platform }}-${{ github.sha }}
       - name: Retain disk and startup diagnostics
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -88,6 +104,8 @@ jobs:
           path: |
             ${{ runner.temp }}/store-build/disk-usage.json
             ${{ runner.temp }}/store-build/downloads/.build/logs/*/*.log
+            ${{ runner.temp }}/store-build/downloads/.build/logs/*/world-preparation/**/*.json
+            ${{ runner.temp }}/store-build/downloads/.build/logs/*/world-preparation/**/*.log
           include-hidden-files: true
           if-no-files-found: ignore
           retention-days: 7

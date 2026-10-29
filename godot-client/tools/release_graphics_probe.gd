@@ -7,7 +7,8 @@ static func software_adapter_matches(platform: String, adapter_name: String, ada
 	var normalized := adapter_name.to_lower()
 	return (platform == "windows" and adapter_type == RenderingDevice.DEVICE_TYPE_CPU \
 		and ("warp" in normalized or "microsoft basic render driver" in normalized)) \
-		or (platform == "linux" and "llvmpipe" in normalized)
+		or (platform == "linux" and ("llvmpipe" in normalized \
+			or ("lavapipe" in normalized and adapter_type == RenderingDevice.DEVICE_TYPE_CPU)))
 
 static func detected_formats() -> int:
 	var mask := 0
@@ -94,7 +95,8 @@ static func policy_errors(observation: Dictionary, platform: String, method: Str
 	if observation.get("rendering_method") != method or observation.get("rendering_driver") != driver:
 		failures.append("actual rendering method/driver differs")
 	if (platform == "windows" and (method != "forward_plus" or driver != "d3d12")) \
-		or (platform == "linux" and (method != "gl_compatibility" or driver != "opengl3")):
+		or (platform == "linux" and not ((method == "gl_compatibility" and driver == "opengl3") \
+			or (method == "forward_plus" and driver == "vulkan"))):
 		failures.append("unsupported native software rendering method/driver")
 	if str(observation.get("display_driver", "")).to_lower() in ["", "headless"]:
 		failures.append("a real display driver is required")
@@ -108,6 +110,10 @@ static func policy_errors(observation: Dictionary, platform: String, method: Str
 		failures.append("actual adapter name/type is required")
 	elif not software_adapter_matches(platform, str(name), int(type)):
 		failures.append("actual adapter is not the qualified CPU software renderer")
+	if platform == "linux" and driver == "vulkan" and (type != RenderingDevice.DEVICE_TYPE_CPU \
+		or observation.get("rendering_device_present") != true \
+		or observation.get("rendering_device_name") != name):
+		failures.append("Linux Vulkan must expose the actual CPU RenderingDevice")
 	if typeof(observation.get("software_adapter")) != TYPE_BOOL or observation.get("software_adapter") != true:
 		failures.append("actual software-adapter classification is required")
 	if platform == "windows":

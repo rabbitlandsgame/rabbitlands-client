@@ -160,11 +160,19 @@ stop that process promptly. The default preparation timeout is two hours and can
 be changed with `--timeout-seconds`. Logs and any partial report remain available
 for diagnosis and resumption.
 
-After installation or an update, a normal launch prepares the scoped world data
-once before showing the login screen. Its completion marker includes the release
-identity and cache format. Later launches reuse it. Headless launches and launches
-with map/geometry caching disabled skip automatic preparation. The settings window
-includes the scene, geometry, collision-face and paving caches in its displayed
+Release packages supply the complete scoped preparation as read-only loose
+assets. A checksum-bound catalog provides geometry, collision and paving entries
+for a compatible engine/renderer. Ordinary launches consume these in place and
+skip the whole-world preparation screen. Missing or incompatible packaged data
+retains source/local-cache fallback, rather than rebuilding every map before
+login. The updater owns these installed assets; clearing player caches does not
+delete the shipped preparation.
+
+Source/custom builds without a shipped catalog retain the scoped local
+preparation path. Its completion marker includes the release identity and cache
+format. Later launches reuse it. Headless launches and launches with map/geometry
+caching disabled skip automatic preparation. The settings window includes the
+player-owned scene, geometry, collision-face and paving caches in its displayed
 disk usage and Clear action.
 "Skip for now" retains completed entries and continues to login; a later launch
 resumes preparation. Missing entries use source loading in the meantime.

@@ -144,6 +144,7 @@ import client_runtime_package
 import prepared_content_package
 import creature_compression
 import full_optimization_package
+import release_world_preparation
 from road_ground_dependencies import dependencies as road_dependencies, RoadGroundDependencyError
 from pathlib import Path, PurePosixPath
 from urllib.parse import unquote
@@ -439,6 +440,10 @@ PLATFORMS = {
 # Kept separate so Windows/Linux export presets and their installer helpers
 # retain their existing behavior.
 EXPORT_PRESETS += macos_package.EXPORT_PRESET
+# The full world generation is a loose, independently updated resource tree.
+# Exclude it explicitly even when a disposable editor has indexed its files.
+EXPORT_PRESETS = EXPORT_PRESETS.replace('exclude_filter="',
+    'exclude_filter="prepared-world/*,.prepared-world-owner.json,')
 WSL_DISTRO = "Ubuntu-24.04"
 
 
@@ -1317,6 +1322,7 @@ def prepare_build_tree(build_dir: Path, sha: str) -> Path:
         # sidecars - survive, which is what keeps a rebuild's import short.
         git("clean", "-ffd", "-q", cwd=build_dir)
     project = build_dir / "godot-client"
+    release_world_preparation.reset_build(project)
     if STORAGE:
         # Keep authoring sources available for static reference checks, but
         # never import their unused models/textures or run editor plugins.
@@ -3548,6 +3554,15 @@ def _main(argv=None, storage=None) -> int:
                         help="build and qualify the native runtime and fresh prepared pilot on native Windows/Linux")
     parser.add_argument("--native-runtime-cache", type=Path,
                         help="verified payload-only cache for full optimization builds")
+    world_group = parser.add_mutually_exclusive_group()
+    world_group.add_argument("--prepared-world", dest="prepared_world", action="store_true", default=None,
+                             help="ship the complete lean geometry/collision/paving cache (native Windows/Linux default)")
+    world_group.add_argument("--no-prepared-world", dest="prepared_world", action="store_false",
+                             help="custom/local package only: retain raw fallback without shipping the world cache")
+    parser.add_argument("--prepared-world-catalog", type=Path,
+                        help="matching prebuilt complete world catalog instead of a native cook")
+    parser.add_argument("--world-preparation-cache", type=Path,
+                        help="persistent per-engine/producer world cache, independent of release revisions")
     parser.add_argument("--software-gpu-index", type=int,
                         help="optional Windows WARP index; default identifies system WARP by DXGI identity")
     parser.add_argument("--installer", action="store_true", help="also build an Inno Setup installer")
@@ -3564,6 +3579,17 @@ def _main(argv=None, storage=None) -> int:
     started = time.time()
     platform = PLATFORMS[options.platform]
     try:
+        want_prepared_world = (options.prepared_world if options.prepared_world is not None
+                               else options.platform in {"windows", "linux"} or bool(options.prepared_world_catalog))
+        if storage and options.platform in {"windows", "linux"} and not want_prepared_world:
+            raise PackageError("Official runner builds require the complete prepared world cache.")
+        if options.prepared_world_catalog and not want_prepared_world:
+            raise PackageError("A prepared world catalog conflicts with --no-prepared-world.")
+        if want_prepared_world and not options.prepared_world_catalog:
+            native_platform = "windows" if os.name == "nt" else "linux" if sys.platform.startswith("linux") else "macos"
+            if options.platform not in {"windows", "linux"} or options.platform != native_platform:
+                raise PackageError("World cooking requires native Windows/Linux; supply a matching --prepared-world-catalog "
+                                   "or use --no-prepared-world for a custom package.")
         if options.benchmark_profile and (options.distribution != "standalone" or storage):
             raise PackageError("--benchmark-profile is a local standalone test export only")
         # These local packages are identity-verified before and after a run.
@@ -3649,6 +3675,10 @@ def _main(argv=None, storage=None) -> int:
         (project / "data/client_release.json").write_text(json.dumps(metadata), encoding="utf-8")
         previews = drop_preview_maps(build_dir)
         served = read_served_v2_packages(build_dir)
+        # Capture every production leaf/scenery input while immutable source is
+        # still complete. Protect only this exact closure during retirement.
+        world_plan = release_world_preparation.capture(project) if want_prepared_world else None
+        world_receipt = None
         asset_cache = getattr(storage, "asset_cache", None)
         if asset_cache:
             asset_cache.restore_imports(project)
@@ -3667,8 +3697,10 @@ def _main(argv=None, storage=None) -> int:
             check_map_data_names_no_editor_sources(stage)
             check_registry(build_dir, stage)
             check_shared_meshes(build_dir, stage)
-            storage.retire_unstaged_maps(project, stage, sha,
-                full_optimization_package.release_prepared_content.selected_source_inputs(project))
+            protected = full_optimization_package.release_prepared_content.selected_source_inputs(project)
+            if world_plan:
+                protected.update(release_world_preparation.selected_source_inputs(project, world_plan))
+            storage.retire_unstaged_maps(project, stage, sha, protected)
         if storage:
             storage.check("before export", 1_500_000_000)
         app_dir = stage / "app"
@@ -3688,7 +3720,7 @@ def _main(argv=None, storage=None) -> int:
         check_world_import_pack(build_dir, app_dir)
         if storage:
             storage.check("export and staging validated")
-            if not optimization:
+            if not optimization and not want_prepared_world:
                 storage.clear_cache(project / ".godot")
             storage.check("export validated")
         if not (storage and optimization):
@@ -3705,6 +3737,19 @@ def _main(argv=None, storage=None) -> int:
             if storage:
                 storage.clear_cache(options.vram_cache.resolve())
                 storage.check("graphics prepared")
+        if world_plan:
+            world_receipt = release_world_preparation.prepare(project, stage, godot,
+                platform=options.platform, plan=world_plan,
+                cache_root=options.world_preparation_cache or options.out.resolve() / ".build/world-preparation-cache",
+                work_root=logs / "world-preparation", check_budget=storage.check if storage else None,
+                software_gpu_index=options.software_gpu_index, catalog_path=options.prepared_world_catalog,
+                links=bool(storage))
+            # The immutable native payloads live outside the PCK. Only the
+            # small generated descriptor must be picked up by the final export.
+            copy_file(project / release_world_preparation.DESCRIPTOR,
+                      app_dir / release_world_preparation.DESCRIPTOR)
+            log(f"prepared world: {world_receipt['targets']} targets, {world_receipt['bytes'] / 1e6:.1f} MB; "
+                f"{world_receipt.get('prepared', 0)} cooked, {world_receipt.get('reused', 0)} reused")
         if optimization:
             options.prepared_catalog = optimization.prepare_content()
         if options.prepared_catalog:
@@ -3730,6 +3775,16 @@ def _main(argv=None, storage=None) -> int:
                 (logs / "prepared-content.json").write_text(json.dumps(prepared_receipt, indent=2), encoding="utf-8")
             except prepared_content_package.PreparedError as error:
                 raise PackageError(str(error)) from error
+        elif world_receipt:
+            # Ordinary packages also need their actual exported descriptor;
+            # world cooking never writes to an existing PCK in place.
+            (logs / "prepared-world").mkdir(parents=True, exist_ok=True)
+            import_project(godot, project, logs / "prepared-world")
+            export_project(godot, project, app_dir, logs / "prepared-world", platform)
+            check_actor_pack(build_dir, app_dir)
+            check_world_import_pack(build_dir, app_dir)
+            check_scene_texture_pack(build_dir, app_dir)
+            check_editor_sources_unpacked(app_dir)
         # Keep loose creatures as ordinary GLBs after native cooking. Optimized
         # meshes/curves are already smaller; avoid per-load RLCZ decoding.
         try:
@@ -3744,6 +3799,12 @@ def _main(argv=None, storage=None) -> int:
             f"{creature_receipt['installed_bytes'] / 1e9:.2f} GB, ordinary uncompressed GLBs verified")
         if options.prepared_catalog:
             prepared_content_package.check_export(project / "prepared-content/index.json", stage)
+        if world_receipt:
+            world_receipt["export"] = release_world_preparation.check_export(project, stage, world_receipt,
+                plan=world_plan, platform=options.platform)
+            release_world_preparation.write_json(logs / "prepared-world.json", world_receipt)
+            if storage:
+                storage.world_preparation = world_receipt
         check_registry(build_dir, stage)
         check_glb_textures(app_dir)
         check_shared_meshes(build_dir, stage)

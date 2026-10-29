@@ -58,7 +58,12 @@ def build(options):
     root.mkdir(parents=True, exist_ok=False)
     (root / "BUILD.json").write_text(json.dumps({"commit": sha, "distribution": options.distribution}))
     git_dir = Path(package.git("rev-parse", "--path-format=absolute", "--git-common-dir").strip())
-    budget = DiskBudget([package.REPO, git_dir, root], allow_internal_symlinks=options.platform == "macos")
+    world_cache = root.parent / "rabbitlands-native-cache/world-preparation-cache"
+    if options.platform != "macos":
+        world_cache.mkdir(parents=True, exist_ok=True)
+    budget = DiskBudget([package.REPO, git_dir, root,
+                         *([world_cache] if options.platform != "macos" else [])],
+                        allow_internal_symlinks=options.platform == "macos")
     storage = RunnerStorage(root, budget, None)
     storage.check("preflight", 7_000_000_000)
     config = setup_runner_tools.install(options.platform, root / "tools", installers=False)
@@ -76,6 +81,8 @@ def build(options):
             "--ref", sha, "--no-fetch", "--godot", str(config["godot"]), "--build-dir", str(source),
             "--out", str(root / "downloads"), "--vram-cache", str(root / "vram-cache"),
             "--update-public-key", str(public), "--no-zip"]
+    if options.platform != "macos":
+        args += ["--prepared-world", "--world-preparation-cache", str(world_cache)]
     if package.main(args, storage):
         raise ValueError("Store build failed; see retained startup and disk diagnostics.")
     stage = next(path for path in (root / "downloads").iterdir()
@@ -110,6 +117,9 @@ def build(options):
         storage.check("Mac archive verified")
         shutil.rmtree(restored)
     storage.check("workspace released")
+    if options.platform != "macos":
+        from release_storage import unique_bytes
+        storage.check("before world cache save", unique_bytes([world_cache]) + 64 * 1024**2)
     return receipt
 
 

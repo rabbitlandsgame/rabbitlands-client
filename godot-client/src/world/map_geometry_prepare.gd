@@ -18,9 +18,12 @@ func run() -> void:
 			return
 	var preparer := Preparer.new()
 	root.add_child(preparer)
+	var release_output := bool(job.get("release_preparation",false))
+	if release_output: Cache.set_release_output(true)
 	preparer.progress.connect(func(done: int,total: int,label: String) -> void:
 		print("MAP_GEOMETRY_PROGRESS ",JSON.stringify({"done":done,"total":total,"id":label})))
 	var report := await preparer.run(job)
+	if release_output: Cache.set_release_output(false)
 	if job.get("output_report") is String and not str(job.output_report).is_empty():
 		Cache.write_json(str(job.output_report),report)
 	print("MAP_GEOMETRY_PREPARE ",JSON.stringify(report))

@@ -106,6 +106,7 @@ class RunnerStorage:
         self.source = None
         self.actor_plans = {}
         self.world_import_plans = {}
+        self.world_preparation = None
         self.asset_cache = asset_cache
         self.previous_packages = {}
         self.native_bootstrap = None
@@ -293,7 +294,8 @@ def build(options) -> Path:
             "--build-dir", str(source), "--out", str(output), "--vram-cache", str(cache.vram if cache else root / "vram-cache"),
             "--update-signing-key", str(key), "--update-public-key", str(storage.source / "data/update_public.pem"),
             "--server", options.server, "--full-optimizations", "--native-runtime-cache",
-            str(native_cache)]
+            str(native_cache), "--prepared-world", "--world-preparation-cache",
+            str(native_cache.parent / "world-preparation-cache")]
     if options.platform == "windows":
         if options.iscc is None:
             raise ValueError("The Windows runner needs Inno Setup 6 (--iscc).")
@@ -303,6 +305,7 @@ def build(options) -> Path:
     key_bytes = package.git("show", f"{sha}:godot-client/data/update_public.pem").encode("ascii")
     runner_public = root / "update_public.pem"
     runner_public.write_bytes(key_bytes)
+    world_cache = native_cache.parent / "world-preparation-cache"
     if cache:
         storage.previous_packages = cache.packages(key_bytes, options.platform, release.REPOSITORY)
         package.log(f"Asset cache: {'verified hit' if cache.hit else 'cold build'}; "
@@ -342,15 +345,16 @@ def build(options) -> Path:
         "transfer": {"uploaded_bytes": storage.sink.uploaded_bytes, "reused_bytes": storage.sink.reused_bytes},
         "asset_cache": cache.report() if cache else {"hit": False, "enabled": False},
         "optimizations": storage.optimization_proof,
+        "world_preparation": storage.world_preparation,
         "assets": list(storage.rows.values()), "disk": budget.report()})
     # Keep the tiny receipt/logs. Only this invocation's fresh worktree and stage are removed.
     storage.cleanup(stage, sha)
     storage.check("workspace released")
-    if cache:
+    if cache or world_cache.exists():
         # Cache upload creates a compressed archive only after the large source
         # and stage have gone. Charge worst-case archive scratch to the budget.
         from release_storage import unique_bytes
-        storage.check("before cache save", unique_bytes([cache.root]) + 64 * 1024**2)
+        storage.check("before cache save", unique_bytes([*([cache.root] if cache else []), world_cache]) + 64 * 1024**2)
     summary = os.environ.get("GITHUB_STEP_SUMMARY")
     if summary and cache:
         with Path(summary).open("a", encoding="utf-8") as output_summary:

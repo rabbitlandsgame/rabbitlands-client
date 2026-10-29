@@ -15,6 +15,9 @@ import zipfile
 import client_release
 from release_storage import PartWriter
 
+PREPARED_WORLD_BLOB_BUCKETS = 128
+PREPARED_WORLD_METADATA_BUCKETS = 8
+
 
 def package_id(relative: str) -> str:
     parts = relative.split("/")
@@ -22,7 +25,21 @@ def package_id(relative: str) -> str:
         return "engine"
     if relative in ("app/RabbitLands.pck", "app/client-release.json"):
         return "client"
-    if relative.startswith("app/assets/actors/"):
+    if relative.startswith("app/prepared-world/") and len(parts) >= 4:
+        # Compatibility describes native format/renderer policy, never the
+        # game release. Code-only releases can reuse every world package.
+        # Hashing also keeps IDs bounded without truncating distinct variants.
+        variant = hashlib.sha256(parts[2].encode()).hexdigest()[:16]
+        prefix = "prepared-world-" + variant
+        if len(parts) == 4 and parts[3] == "catalog.json":
+            return prefix + "-catalog"
+        # Geometry, collision and paving may each have a policy directory.
+        # Content-addressed payloads stay separate from small entry metadata.
+        if "blobs" in parts[3:-1]:
+            group, slots = prefix + "-blobs", PREPARED_WORLD_BLOB_BUCKETS
+        else:
+            group, slots = prefix + "-metadata", PREPARED_WORLD_METADATA_BUCKETS
+    elif relative.startswith("app/assets/actors/"):
         group, slots = "actors-" + "-".join(parts[3:5]), 16
     elif relative.startswith("eloria-assets/maps/"):
         group, slots = "map-" + parts[2], 8
