@@ -11,6 +11,8 @@ Optional entry.source_label/review_note describe a repair baseline; commented_po
 {clip,time_seconds} adds a jump to the saved observation without changing it.
 Optional review_camera {focus:[x,y,z],distance} supplies source-based framing
 when preserved gameplay bounds include old deformation outliers.
+Optional initial_clip selects the first animation when opening the reviewer;
+subsequent creature/variant navigation retains the selected clip where possible.
 Paths are relative to the catalog or absolute. Journal paths MUST remain under
 the catalog directory's .local. Optional entry.actor supplies the models registry
 key for synthetic control entries. Approvals cover the entire exact candidate,
@@ -104,6 +106,8 @@ def load_catalog(path, verify_files=False):
         clips = entry.get("clips", [])
         if not clips or len(clips) != len(set(clips)):
             raise ValueError("Every creature needs its full native clip inventory")
+        if "initial_clip" in entry and entry["initial_clip"] not in clips:
+            raise ValueError("Initial clip must belong to the native clip inventory")
         variant_ids = [v["id"] for v in entry.get("variants", [])]
         if len(variant_ids) != len(set(variant_ids)):
             raise ValueError("Duplicate candidate variant ID")

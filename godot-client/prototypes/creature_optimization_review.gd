@@ -318,6 +318,7 @@ func unload_pair() -> void:
 
 func load_entry(next_index: int, wanted_variant: String) -> void:
 	if loading or modal.visible or entries.is_empty(): return
+	var first_load := loaded_entry.is_empty()
 	loading=true
 	index=posmod(next_index,entries.size())
 	refresh_status()
@@ -334,6 +335,8 @@ func load_entry(next_index: int, wanted_variant: String) -> void:
 	clips=loaded_entry.clips.duplicate()
 	clip_picker.clear()
 	for name: String in clips: clip_picker.add_item(name.replace("_"," "))
+	if first_load and clips.has(str(loaded_entry.get("initial_clip",""))):
+		clip=str(loaded_entry.initial_clip)
 	if not clips.has(clip): clip=str(clips[0])
 	source_label.text="%s · %s bytes\nSHA256 %s" % [str(loaded_entry.get("source_label","ORIGINAL")),str(loaded_entry.source.bytes),str(loaded_entry.source.sha256)]
 	candidate_label.text="Processing — candidate not ready"
@@ -593,6 +596,7 @@ func key(code: int, echo := false, ctrl := false) -> InputEventKey:
 func smoke_test() -> void:
 	assert(catalog.get("test_only",false),"Smoke must use an isolated TEST catalog")
 	assert(ready_to_play and entries.size()==2)
+	if loaded_entry.has("initial_clip"): assert(clip==str(loaded_entry.initial_clip))
 	running=false
 	if loaded_entry.has("commented_pose"):
 		show_commented_pose()
