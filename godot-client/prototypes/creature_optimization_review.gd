@@ -217,6 +217,7 @@ func run() -> void:
 	controls.add_child(blend)
 	repeat_actions=CheckBox.new()
 	repeat_actions.text="Repeat one-shots"
+	repeat_actions.button_pressed=true
 	repeat_actions.focus_mode=Control.FOCUS_NONE
 	controls.add_child(repeat_actions)
 	var panels := HBoxContainer.new()
