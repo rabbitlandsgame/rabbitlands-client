@@ -240,7 +240,8 @@ def glb_bytes(document: dict, rest: bytes) -> bytes:
 
 
 def policy_inventory(root: Path) -> dict[str, dict]:
-    found = vram.inventory([(root / "eloria-assets/maps").resolve()])
+    public_inputs = {root / name for name in tracked_files(root) if name.endswith("/world.json") or (name.startswith("eloria-assets/maps/_shared/meshes/") and name.endswith(".glb"))}
+    found = vram.inventory([(root / "eloria-assets/maps").resolve()], input_files=public_inputs)
     return {directory.resolve().relative_to(root.resolve()).as_posix() + "|" + sha:
             {"sha256": sha, "source": record["path"].resolve().relative_to(root.resolve()).as_posix(),
              **vram.delivery_policy(record, directory, RELEASE_SKIP, RELEASE_UNSKIP)}
@@ -344,6 +345,7 @@ def refresh_hash_links(owner: str, document: object, hashes: dict[str, str],
 def verify_graph(root: Path, files: list[str], aliases: dict[str, str], stage: Path | None = None) -> None:
     """All image-bearing literals in every tracked text/GLB resolve after deletion."""
     removed = set(aliases)
+    canonical = set(aliases.values())
     names = set(files) - removed
     def verify(owner, value, base=None):
         if isinstance(value, dict):
@@ -359,7 +361,7 @@ def verify_graph(root: Path, files: list[str], aliases: dict[str, str], stage: P
                 raise CanonicalizationError(f"dangling removed-image reference in {owner}: {value}")
             # Only validate dependencies touched by this pass: older authoring
             # records can deliberately name archived/non-runtime source inputs.
-            if resolved and resolved[0] in aliases.values() and resolved[0] not in names:
+            if resolved and resolved[0] in canonical and resolved[0] not in names:
                 raise CanonicalizationError(f"canonical image is absent: {resolved[0]}")
     for relative in files:
         if relative in removed:

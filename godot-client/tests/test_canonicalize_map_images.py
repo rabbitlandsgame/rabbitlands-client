@@ -30,6 +30,7 @@ def write_glb(path,image,role='normal',tail=b'\x04\0\0\0BIN\0\x12\x34\x56\x78'):
 class CanonicalImages(unittest.TestCase):
  def setUp(self):
   self.tmp=tempfile.TemporaryDirectory();self.addCleanup(self.tmp.cleanup);self.root=Path(self.tmp.name);self.maps=self.root/'eloria-assets/maps'
+  patcher=mock.patch.object(C,'tracked_files',side_effect=lambda root:self.files());patcher.start();self.addCleanup(patcher.stop)
  def image(self,name,raw=b'identical encoded source pixels'):
   p=self.maps/name;p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes(raw);return p
  def files(self):return sorted(p.relative_to(self.root).as_posix() for p in self.root.rglob('*') if p.is_file() and '.local' not in p.relative_to(self.root).parts)
@@ -102,6 +103,9 @@ class CanonicalImages(unittest.TestCase):
   old='eloria-assets/maps/b/a.png';new='eloria-assets/maps/a/b.png';aliases={old:new};owner='godot-client/src/test.gd'
   for literal in ['res://../'+old,old]:self.assertEqual(C.resolve_reference(owner,C.rebase(owner,literal,aliases))[0],new)
   old='godot-client/assets/a.png';new='eloria-assets/maps/a/b.png';self.assertEqual(C.rebase(owner,'res://assets/a.png',{old:new}),'res://../'+new)
+ def test_ignored_trial_worlds_cannot_change_delivery_policy(self):
+  first,_=self.simple();trial=self.maps/'a/.local/trial/world.glb';write_glb(trial,first,role='base');write_json(trial.with_name('world.json'),{'asset':{'glb':'world.glb'},'externalResources':{uri(first,trial):sha(first.read_bytes())}})
+  policies=C.policy_inventory(self.root);self.assertEqual(len(policies),2);self.assertTrue(all(v['roles']==['normal'] for v in policies.values()))
  def test_default_candidates_exclude_fixed_ui_and_coverage(self):
   self.assertFalse(C.candidate_image('eloria-assets/maps/continent-v2/suncoil/client/map-detail.webp'))
   self.assertFalse(C.candidate_image('eloria-assets/maps/continent-v2/suncoil/client/minimap.webp'))

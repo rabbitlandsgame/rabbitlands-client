@@ -462,7 +462,7 @@ def declared_policy_directories(manifest: dict, uri: str, glb: Path, maps_roots:
 
 
 def inventory(maps_roots: list[Path], manifests: list[Path] | None = None, scenery: list[Path] | None = None,
-              extract_dir: Path | None = None) -> dict[tuple[Path, str], dict]:
+              extract_dir: Path | None = None, input_files: set[Path] | None = None) -> dict[tuple[Path, str], dict]:
     """(image directory, sha) -> {path, roles: {(role, alphaMode)}, maps: set, cutoffs: set}
 
     One record per COPY of an image: two pools can hold the same bytes (the
@@ -490,6 +490,8 @@ def inventory(maps_roots: list[Path], manifests: list[Path] | None = None, scene
     for root in maps_roots:
         paths = ([path for path in selected[0] if _containing_root(maps_roots, path.parent) == root]
                  if selected is not None else sorted(root.rglob("world.json")))
+        if input_files is not None:
+            paths = [path for path in paths if path in input_files]
         for manifest_path in paths:
             try:
                 manifest = json.loads(manifest_path.read_text(encoding="utf-8-sig"))
@@ -546,6 +548,8 @@ def inventory(maps_roots: list[Path], manifests: list[Path] | None = None, scene
     for root in maps_roots:
         paths = ([path for path in selected[1] if _containing_root(maps_roots, path.parent) == root]
                  if selected is not None else sorted((root / "_shared" / "meshes").glob("*.glb")))
+        if input_files is not None:
+            paths = [path for path in paths if path in input_files]
         for glb in paths:
             try:
                 document = glb_json(glb)
