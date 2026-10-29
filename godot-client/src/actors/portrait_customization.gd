@@ -2,9 +2,10 @@ class_name PortraitCustomization
 extends RefCounted
 ## Compact, versioned appearance; order is shared with the server trailers.
 ##
-## PC/1 is 7 fields, PC/2 16 and PC/3 53 (PC/3 spec: private server handbook
+## PC/1 is 7 fields, PC/2 16 and PC/3 55 (PC/3 spec: private server handbook
 ## docs/wiki/Human-Character-Customization.md, with colour model revision 3):
-## PC/2, then the 11 High face offsets (50 = none), 9 detail fields (0 = Auto;
+## PC/2, then the 13 High face offsets (50 = none; eye_style and eye_depth
+## added 2026-10-29), 9 detail fields (0 = Auto;
 ## hair_finish 0 = from hair_detail) and 17 colour fields (0 = the palette
 ## colour; a colour triple is custom only when all three of its bytes are set,
 ## Rule A). Each version's fields are a strict
@@ -15,8 +16,8 @@ const EXTRA_FIELDS := ["face_length", "eye_size", "eye_tilt", "eye_spacing", "no
 	"lip_fullness", "brow_depth", "hair_length", "hair_volume"]
 const V2_FIELDS := V1_FIELDS + EXTRA_FIELDS
 ## One offset per RL control without a PC/1 or PC/2 field (rlHead.controls order).
-const V3_CONTROLS := ["eyelid", "brow_height", "nose_length", "nose_bridge", "nose_tip",
-	"mouth_width", "cupid_bow", "cheek_fullness", "chin_projection", "chin_width", "ear_size"]
+const V3_CONTROLS := ["eyelid", "eye_style", "eye_depth", "brow_height", "nose_length", "nose_bridge",
+	"nose_tip", "mouth_width", "cupid_bow", "cheek_fullness", "chin_projection", "chin_width", "ear_size"]
 const V3_DETAILS := ["brow_style", "brow_thickness", "freckles", "liner", "liner_wing",
 	"stubble", "lip_tint", "hair_module", "hair_finish"]
 const V3_COLOURS := ["skin_tone", "skin_undertone", "hair_hue", "hair_sat", "hair_light",
@@ -34,7 +35,7 @@ const DEFAULTS := {"facial_hair": 0, "jaw": 50, "cheekbones": 50, "nose": 50,
 	"height": 50, "build": 50, "hair_detail": 0, "face_length": 50, "eye_size": 50,
 	"eye_tilt": 50, "eye_spacing": 50, "nose_width": 50, "lip_fullness": 50,
 	"brow_depth": 50, "hair_length": 50, "hair_volume": 50,
-	"eyelid": 50, "brow_height": 50, "nose_length": 50, "nose_bridge": 50, "nose_tip": 50,
+	"eyelid": 50, "eye_style": 50, "eye_depth": 50, "brow_height": 50, "nose_length": 50, "nose_bridge": 50, "nose_tip": 50,
 	"mouth_width": 50, "cupid_bow": 50, "cheek_fullness": 50, "chin_projection": 50,
 	"chin_width": 50, "ear_size": 50,
 	"brow_style": 0, "brow_thickness": 0, "freckles": 0, "liner": 0, "liner_wing": 0,

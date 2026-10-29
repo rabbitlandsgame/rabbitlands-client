@@ -1,6 +1,6 @@
 {
  "version": 1,
- "_note": "RL head prototype presets. controls: id_<name> blend-shape control values in [-1, 1] (missing = 0). Colours are linear-ish sRGB triples 0..1. hair/beard name files under assets/actors/native/rl_heads/{hair,beards}/<name>.glb ('none' = bald / clean-shaven). hair 'legacy:<style>' reuses the shipped fitted hairstyle for the body (parted, long, buns, buzzed, bob, ponytail, braid, topknot, mohawk). stubble 0..1 drives the skin-shader stubble mask. brow_style is one of arched, straight, soft, angled (head_<sex>_brows.png R, G, B, A; a number 0..3 blends neighbours), brow_thickness -1..1, liner_wing 0..1 (features B).",
+ "_note": "RL head prototype presets. controls: id_<name> blend-shape control values in [-1, 1] (missing = 0). Colours are linear-ish sRGB triples 0..1. hair/beard name files under assets/actors/native/rl_heads/{hair,beards}/<name>.glb ('none' = bald / clean-shaven). hair 'legacy:<style>' reuses the shipped fitted hairstyle for the body (parted, long, buns, buzzed, bob, ponytail, braid, topknot, mohawk). stubble 0..1 drives the skin-shader stubble mask. brow_style is one of arched, straight, soft, angled (head_<sex>_brows.png R, G, B, A; a number 0..3 blends neighbours), brow_thickness -1..1, liner_wing 0..1 (features B). eye_style +1 already sets the eye 1.6 mm deeper (half of eye_depth +1, coupled), so the stylised presets leave eye_depth at 0 and the slider moves the eye from there.",
  "presets": {
   "mira": {
    "sex": "female",
@@ -39,10 +39,90 @@
    "brow_thickness": 0.2,
    "liner_wing": 0.8
   },
+  "mira_stylised": {
+   "sex": "female",
+   "label": "Mira (stylised eyes)",
+   "controls": {
+    "eye_style": 1.0,
+    "eye_depth": 0.0
+   },
+   "skin": [
+    0.93,
+    0.74,
+    0.62
+   ],
+   "eyes": [
+    0.36,
+    0.55,
+    0.3
+   ],
+   "hair_color": [
+    0.82,
+    0.4,
+    0.17
+   ],
+   "brow_color": [
+    0.5,
+    0.22,
+    0.12
+   ],
+   "lip_tint": [
+    0.8,
+    0.44,
+    0.38
+   ],
+   "freckles": 0.65,
+   "liner": 0.7,
+   "hair": "mira_bun",
+   "beard": "none",
+   "brow_style": "arched",
+   "brow_thickness": 0.2,
+   "liner_wing": 0.8
+  },
   "rowan": {
    "sex": "male",
    "label": "Rowan",
    "controls": {},
+   "skin": [
+    0.8,
+    0.565,
+    0.4
+   ],
+   "eyes": [
+    0.3,
+    0.19,
+    0.1
+   ],
+   "hair_color": [
+    0.36,
+    0.22,
+    0.12
+   ],
+   "brow_color": [
+    0.16,
+    0.095,
+    0.055
+   ],
+   "lip_tint": [
+    0.7,
+    0.44,
+    0.36
+   ],
+   "freckles": 0.0,
+   "liner": 0.15,
+   "hair": "rowan_shag",
+   "beard": "stubble",
+   "brow_style": "straight",
+   "brow_thickness": 0.6,
+   "liner_wing": 0.0
+  },
+  "rowan_stylised": {
+   "sex": "male",
+   "label": "Rowan (stylised eyes)",
+   "controls": {
+    "eye_style": 1.0,
+    "eye_depth": 0.0
+   },
    "skin": [
     0.8,
     0.565,

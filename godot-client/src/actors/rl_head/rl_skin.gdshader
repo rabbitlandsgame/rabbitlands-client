@@ -16,7 +16,10 @@
 // Painted features, in the manifest's order: freckles, stubble, blush, the
 // hairline, lips, the lash line and liner (and its wing), and brows; teeth and
 // tongue are rl_mouth.gdshader's. Per-actor colours, amounts and styles are
-// instance uniforms: every actor with the same head shares this material.
+// instance uniforms: every actor with the same head shares this material. The
+// stylised eye (`eye_style_paint.y`, eye_paint from eye_style) thickens and
+// darkens the upper lash line, and the lash line fades as a blink closes the
+// lid (`lid_closure`).
 //
 // Brows are a player choice, not art per character: head_<sex>_brows.png holds
 // one hair-stroke mask per style (R arched, G straight, B soft, A angled), the
@@ -66,6 +69,25 @@ uniform float lip_strength : hint_range(0.0, 1.0) = 0.9;
 // The lash line drawn even without liner; liner darkens towards the colour.
 uniform float lash_line : hint_range(0.0, 1.0) = 0.35;
 uniform vec3 liner_color : source_color = vec3(0.07, 0.05, 0.045);
+// The stylised eye's liner (eye_paint, 0..1, from eye_style): the upper line -
+// features A is painted near 1 there and fainter along the lower lid - darkens towards
+// the liner colour by `liner_paint` and, as the Medium faces paint it, stays a thin line
+// over the inner part of the eye and thickens towards the outer corner: it grows up the
+// lid by up to `liner_grow` UV at eye_paint 1 (about 1.5 mm on the face; copies of the
+// line lifted up to that far, `liner_grow_lod` mip levels soft, so the band keeps a crisp
+// edge), scaled along the eye by `liner_taper` (x of it at the inner corner, growing from
+// y of the way out to all of it at z); the wing flicks out by at least `liner_paint_wing`.
+uniform float liner_grow = 0.0035;
+uniform float liner_grow_lod : hint_range(0.0, 4.0) = 0.0;
+uniform vec3 liner_taper = vec3(0.0, 0.45, 0.9);
+// Where the eye runs along u: |u - face_mid_u| at its inner and its outer corner (the
+// texture manifest's `liner_span_u` for the head; liner_span.py measures it).
+uniform vec2 liner_span_u = vec2(0.076, 0.132);
+uniform float liner_paint : hint_range(0.0, 1.0) = 0.92;
+uniform float liner_paint_wing : hint_range(0.0, 1.0) = 0.4;
+// The face island's midline in UV: the character's left eye (blink_l, lid_closure.x)
+// lies at larger u. The lash line and liner fade out with that side's lid closure.
+uniform float face_mid_u = 0.37;
 // The brow mask through a contrast curve, pow(clamp((m - floor) / span), gamma):
 // the faint fringe drops out and the body of the brow fills. These are the
 // curve at thickness 0; thickness -1 and +1 move it to the thin and thick ends.
@@ -134,9 +156,28 @@ void fragment() {
 		// skin sits from the reference tone the lips were painted against.
 		float skin_luma = clamp(dot(skin_color.rgb, LUMA) / reference_luma, 0.25, 1.25);
 		albedo = mix(albedo, lip_tint.rgb * shading * skin_luma, features.g * lip_strength);
-		albedo = mix(albedo, liner_color, features.a * mix(lash_line, 1.0, liner));
+		float line = features.a * mix(lash_line, 1.0, liner);
+		float closure = UV.x > face_mid_u ? lid_closure.x : lid_closure.y;
+		float eye_paint = clamp(eye_style_paint.y, 0.0, 1.0);
+		if (eye_paint > 0.0 && has_features) {
+			// The upper line only (painted near 1), and copies of it lifted up the
+			// lid, further towards the outer corner; the lift gives way as a squint or
+			// blink brings the lid down and stretches it.
+			float along = clamp((abs(UV.x - face_mid_u) - liner_span_u.x) / max(liner_span_u.y - liner_span_u.x, 0.001), 0.0, 1.0);
+			float taper = mix(liner_taper.x, 1.0, smoothstep(liner_taper.y, liner_taper.z, along));
+			float lift = liner_grow * eye_paint * taper * (1.0 - smoothstep(0.0, 0.7, max(closure, lid_closure.z)));
+			float lifted = 0.0;
+			for (int k = 1; k <= 4; k++) {
+				lifted = max(lifted, textureLod(features_texture, UV + vec2(0.0, lift * 0.25 * float(k)), liner_grow_lod).a);
+			}
+			float upper = max(smoothstep(0.65, 0.9, features.a), smoothstep(0.55, 0.8, lifted));
+			line = max(line, upper * liner_paint * eye_paint);
+		}
+		// A closing lid stretches the painted band over itself: fade it out instead.
+		line *= 1.0 - smoothstep(0.1, 0.8, closure);
+		albedo = mix(albedo, liner_color, clamp(line, 0.0, 1.0));
 		float wing = has_brows ? features.b : 0.0;
-		albedo = mix(albedo, liner_color, clamp(wing * liner_wing, 0.0, 1.0));
+		albedo = mix(albedo, liner_color, clamp(wing * max(liner_wing, liner_paint_wing * eye_paint), 0.0, 1.0));
 		vec4 style = brow_weights(brow_style);
 		float mask = has_brows ? dot(texture(brows_texture, UV), style) : features.b;
 		float thickness = clamp(brow_thickness, -1.0, 1.0);

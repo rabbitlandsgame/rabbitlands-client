@@ -64,7 +64,7 @@ func _check_data() -> void:
 				"%s %s gain %.3f has the expected sign and a bounded size" % [sex, field, g])
 		_expect(Map.primary_control(field) == Map.PRIMARY[field], "%s drives %s" % [field, Map.PRIMARY[field]])
 	var controls: PackedStringArray = RLHeadLibrary.head("female").get("control_names", PackedStringArray())
-	_expect(controls.size() == 21, "the head declares 21 controls (%d)" % controls.size())
+	_expect(controls.size() == 23, "the head declares 23 controls (%d)" % controls.size())
 	for field: String in Map.FACE_FIELDS:
 		_expect(controls.has(Map.primary_control(field)), "primary control %s exists on the head" % Map.primary_control(field))
 	for control: String in Map.V3_CONTROLS:
@@ -313,6 +313,14 @@ func _check_v3() -> void:
 		var lid := clampf(float(derived.get("eyelid", 0.0)) - 1.0, -1.0, 1.0)
 		_expect(float(raised.get("ear_size", 0.0)) > 0.99 and absf(float(raised.get("eyelid", 0.0)) - lid) < 1e-4,
 			"%s: PC/3 control offsets add to the derived controls %s" % [sex, raised])
+		# The stylised eye and the eye's position: no PC/2 field derives them, so
+		# 50 is the authored eye and the wire offset is the control.
+		_expect(not derived.has("eye_style") and not derived.has("eye_depth"),
+			"%s: eye_style and eye_depth derive to the authored eye %s" % [sex, derived])
+		var eyes := Map.controls({"eye_style": 100, "eye_depth": 25}, sex)
+		_expect(is_equal_approx(float(eyes.get("eye_style", 0.0)), 1.0)
+			and is_equal_approx(float(eyes.get("eye_depth", 0.0)), -0.5),
+			"%s: eye_style 100 and eye_depth 25 are the RL controls +1 and -0.5 %s" % [sex, eyes])
 		var explicit := Map.face({"freckles": 51, "liner": 1, "brow_style": 13, "brow_thickness": 1,
 			"lip_tint": 9, "stubble": 101}, sex)
 		_expect(is_equal_approx(explicit.freckles, 0.5) and explicit.liner == 0.0 and explicit.brow_style == 3.0

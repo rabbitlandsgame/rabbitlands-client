@@ -15,6 +15,8 @@ extends RefCounted
 ## fields also move a second control (`secondary`). The other RL controls have
 ## no field and stay at the authored head plus those couplings; a later PC/3
 ## field (`eyelid` .. `ear_size`, 50 neutral) adds g3 * (v - 50) / 50 on top.
+## eye_style and eye_depth (the large stylised eye and the eye's position) have
+## no PC/2 field and no coupling: 50 is the authored eye.
 ##
 ## Grooming: facial_hair 0..5 is none, stubble, moustache, goatee, short beard,
 ## full beard by name; women draw no beard and no stubble at High (the saved
@@ -71,9 +73,9 @@ const PRIMARY := {"jaw": "jaw_width", "cheekbones": "cheekbones", "nose": "nose_
 	"brow_depth": "brow_ridge"}
 ## PC/3 (planned): one offset per RL control without a field, 50 neutral, and
 ## the detail fields, 0 = Auto (the derived value below).
-const V3_CONTROLS: Array[String] = ["eyelid", "brow_height", "nose_length", "nose_bridge",
-	"nose_tip", "mouth_width", "cupid_bow", "cheek_fullness", "chin_projection", "chin_width",
-	"ear_size"]
+const V3_CONTROLS: Array[String] = ["eyelid", "eye_style", "eye_depth", "brow_height", "nose_length",
+	"nose_bridge", "nose_tip", "mouth_width", "cupid_bow", "cheek_fullness", "chin_projection",
+	"chin_width", "ear_size"]
 const V3_DETAILS: Array[String] = ["brow_style", "brow_thickness", "freckles", "liner",
 	"liner_wing", "stubble", "lip_tint", "hair_module"]
 const V3_MAXIMA := {"brow_style": 13, "brow_thickness": 101, "freckles": 101, "liner": 101,

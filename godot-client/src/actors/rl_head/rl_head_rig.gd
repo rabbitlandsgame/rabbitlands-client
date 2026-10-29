@@ -46,7 +46,7 @@ extends Node3D
 ##
 ## The levels shown are drawn with their identity baked in (RLHeadIdentityBake:
 ## one cached mesh per distinct face and level, shared by every actor wearing
-## it, keeping only the `ex_` shapes live), so a crowd does not deform up to 42
+## it, keeping only the `ex_` shapes live), so a crowd does not deform up to 46
 ## identity shapes per part every frame. Each mesh node keeps its source mesh
 ## (SOURCE_MESH_META) and falls back to it, with the identity weights set live,
 ## while its bake is pending, when the bake budget is spent, for the levels not
@@ -127,9 +127,17 @@ const MAX_EXPRESSIVE := 8
 const COMPATIBILITY_FIRST_LEVEL_METRES := 6.0
 const COMPATIBILITY_EXPRESSIVE_RANGE := 4.0
 const COMPATIBILITY_MAX_EXPRESSIVE := 4
+## The head's instance uniforms this rig writes (RLFaceExpression writes
+## `eye_look` and `lid_closure`).
 const INSTANCE_UNIFORMS := ["skin_color", "lip_tint", "brow_color", "hair_color",
 	"freckles", "liner", "stubble", "eye_color", "hairline", "brow_style", "brow_thickness",
-	"liner_wing"]
+	"liner_wing", "eye_style_paint"]
+## Shader values identity controls may drive (a control's `uniforms` in
+## rlHead.controls), with the value they have when no control moves them.
+## They reach the shaders packed, as `eye_style_paint` (x iris_scale, y
+## eye_paint): the head shaders already declare the 16 instance uniforms
+## Godot allows.
+const CONTROL_UNIFORMS := {"iris_scale": 1.0, "eye_paint": 0.0}
 ## How much hair colour the skin paints on the scalp and hairline while a
 ## hairstyle is drawn (features2 B); none on a bald head, nor while the chosen
 ## hairstyle's file is missing.
@@ -185,6 +193,8 @@ var _bakes: Dictionary = {}
 var _live_identity := false
 ## The irises' look angle, where the values are material uniforms.
 var _eye_look := Vector2.ZERO
+## The lids' closure (RLFaceExpression), where the values are material uniforms.
+var _lid_closure := Vector4.ZERO
 ## Among the faces drawing live expressions (see MAX_EXPRESSIVE).
 var _expressive := true
 ## draws_expressions() when the shown levels were last chosen (_bake_shown).
@@ -294,13 +304,49 @@ func apply_appearance(face: RLHeadAppearance) -> bool:
 ## One identity control, in [-1, 1], on the head, the beard and the hair.
 ## Drawn live from then on (no bake per slider step).
 func set_control(control_name: String, value: float) -> void:
+	var uniforms_before := eye_style_paint()
 	appearance.set_control(control_name, value)
 	_go_live()
 	var amount := appearance.control(control_name)
 	for mesh_node: MeshInstance3D in identity_targets():
 		_set_shape(mesh_node, "id_%s_p" % control_name, maxf(amount, 0.0))
 		_set_shape(mesh_node, "id_%s_n" % control_name, maxf(-amount, 0.0))
+	if eye_style_paint() != uniforms_before:
+		_apply_colours()
+	if _expression != null:
+		_expression.set_identity(appearance.controls)
 	changed.emit()
+
+
+## The shader values the identity controls drive: for each control with
+## `uniforms` ({"iris_scale": {"neutral": 1, "pos": 0.38, "neg": 0}}), the
+## neutral value plus the control's amount times its side's offset, summed
+## over controls. Values no control names keep CONTROL_UNIFORMS' values.
+func control_uniforms() -> Dictionary:
+	var result := CONTROL_UNIFORMS.duplicate()
+	var touched := {}
+	for control_value: Variant in _head_info.get("controls", []) as Array:
+		if control_value is not Dictionary or (control_value as Dictionary).get("uniforms") is not Dictionary:
+			continue
+		var control := control_value as Dictionary
+		var amount := appearance.control(str(control.get("name", ""))) if appearance != null else 0.0
+		var uniforms := control["uniforms"] as Dictionary
+		for uniform_name: Variant in uniforms:
+			if not CONTROL_UNIFORMS.has(str(uniform_name)) or uniforms[uniform_name] is not Dictionary:
+				continue
+			var spec := uniforms[uniform_name] as Dictionary
+			if not touched.has(uniform_name):
+				touched[uniform_name] = true
+				result[uniform_name] = float(spec.get("neutral", CONTROL_UNIFORMS[uniform_name]))
+			var offset := maxf(amount, 0.0) * float(spec.get("pos", 0.0)) + maxf(-amount, 0.0) * float(spec.get("neg", 0.0))
+			result[uniform_name] = float(result[uniform_name]) + offset
+	return result
+
+
+## control_uniforms packed as the head shaders read them: `eye_style_paint`.
+func eye_style_paint() -> Vector2:
+	var values := control_uniforms()
+	return Vector2(float(values["iris_scale"]), float(values["eye_paint"]))
 
 
 ## Re-reads colours and amounts from `appearance` after it was edited in place.
@@ -514,7 +560,8 @@ func _build_head() -> bool:
 		_expression = RLFaceExpression.new()
 		_expression.name = "RLFaceExpression"
 		add_child(_expression)
-	_expression.configure(expression_targets(), _head_info.get("expressions", PackedStringArray()))
+	_expression.configure(expression_targets(), _head_info.get("expressions", PackedStringArray()),
+		_head_info.get("correctives", []) as Array)
 	return true
 
 
@@ -903,6 +950,10 @@ static func _is_body_patch(material: Material) -> bool:
 func _apply_controls() -> void:
 	for mesh_node: MeshInstance3D in identity_targets():
 		_apply_identity_weights(mesh_node)
+	# The correctives follow the identity (RLFaceExpression); the shader values
+	# it drives go with the colours (_apply_colours).
+	if _expression != null:
+		_expression.set_identity(appearance.controls)
 
 
 ## The identity controls this head declares, plus any the face sets beyond them.
@@ -1001,6 +1052,9 @@ func _bake_shown() -> void:
 	if _expression != null and pause != _expression_paused:
 		_expression_paused = pause
 		_expression.set_process(not pause)
+		# A still face shows its lids open: no lash-line fade from a blink or
+		# squint caught mid-way.
+		_expression.set_drawn_still(pause)
 
 
 func _bake(mesh_node: MeshInstance3D, still: bool = false) -> void:
@@ -1126,12 +1180,14 @@ func _apply_colours() -> void:
 		"hairline": HAIRLINE_UNDER_HAIR if haired else 0.0,
 		"brow_style": appearance.brow_style, "brow_thickness": appearance.brow_thickness,
 		"liner_wing": appearance.liner_wing, "hair_detail": hair_detail_uniform(),
+		"eye_style_paint": eye_style_paint(),
 	}
 	# The head's surfaces read all but the hair's detail; the beard reads its
 	# colour, the hair its colour and detail.
 	var beard_values := {"hair_color": beard_colour}
 	if RLHeadLibrary.material_values():
 		values["eye_look"] = _eye_look
+		values["lid_closure"] = _lid_closure
 		_apply_material_values([[_head_lods, "", values], [_beard_lods, _beard_style, beard_values],
 			[_hair_lods, _hair_style, values]])
 		return
@@ -1172,6 +1228,16 @@ func set_eye_look(look: Vector2) -> void:
 	if look == _eye_look:
 		return
 	_eye_look = look
+	_apply_colours()
+
+
+## The lids' closure (RLFaceExpression's `lid_closure`: left blink, right
+## blink, squint) where the values are material uniforms; elsewhere the
+## expression sets the instance uniform itself.
+func set_lid_closure(closure: Vector4) -> void:
+	if closure == _lid_closure:
+		return
+	_lid_closure = closure
 	_apply_colours()
 
 

@@ -22,7 +22,9 @@ const FINISH_SNAP := 2
 const FINISH_TOOLTIP := "How sleek or loose your hair looks at every graphics level; High also shows fine flyaways."
 ## The More face detail section (PC/3 spec 8.3): [group, [[field, label, low, high]]].
 const DETAIL_GROUPS: Array = [
-	["Eyes", [["eyelid", "Eyelids", "Hooded", "Open"]]],
+	["Eyes", [["eyelid", "Eyelids", "Hooded", "Open"],
+		["eye_style", "Eye style", "Almond", "Large stylised"],
+		["eye_depth", "Eye position", "Forward", "Set deeper"]]],
 	["Brows", [["brow_height", "Brow height", "Lower", "Higher"],
 		["brow_style", "Brow shape", "Arched", "Angled"],
 		["brow_thickness", "Brow thickness", "Thin", "Thick"]]],

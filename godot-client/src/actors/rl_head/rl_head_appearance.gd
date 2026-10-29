@@ -54,7 +54,8 @@ const SEXES: Array[String] = ["female", "male"]
 ## Controls are written in the order of the head's `rlHead.controls`, which is
 ## what both ends pass as `control_names`; the hash lets a decoder holding a
 ## different revision of the head notice instead of misreading the nibbles.
-## With the heads' 21 controls a face is 32 bytes.
+## With the heads' 23 controls (eye_style and eye_depth added 2026-10-29) a face
+## is 33 bytes.
 const ENCODING_VERSION := 2
 ## Append-only registries for the style bytes. A name not listed travels inline.
 const HAIR_STYLES: Array[String] = [NONE, "mira_bun", "rowan_shag", "legacy:parted",

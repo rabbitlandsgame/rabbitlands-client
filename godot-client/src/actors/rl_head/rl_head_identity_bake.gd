@@ -2,7 +2,7 @@ class_name RLHeadIdentityBake
 extends RefCounted
 ## The RL head's identity baked into cached meshes, one per distinct face.
 ##
-## Identity is up to 42 `id_` blend shapes (21 controls, each _p or _n) on the
+## Identity is up to 46 `id_` blend shapes (23 controls, each _p or _n) on the
 ## head, its beard and its hair, plus the hairstyle's `hl_` hair shapes. Drawn
 ## live, every non-zero weight is deformed again each frame the skeleton
 ## moves: in the Compatibility renderer that is one transform-feedback pass per
@@ -12,7 +12,8 @@ extends RefCounted
 ## one source mesh (a part at one level of detail, for one sex or style) and
 ## its quantised identity weights, an ArrayMesh whose vertices, normals and
 ## tangents have those weights added in, carrying only the shapes still driven
-## live (the expression's `ex_` shapes, offset to the baked face), the
+## live (the expression's `ex_` shapes, its correctives such as
+## ex_blink_l__eye_style_p among them, offset to the baked face), the
 ## source's materials, surface names and generated index LODs. Every actor
 ## showing the same face at the same level shares that mesh.
 ##

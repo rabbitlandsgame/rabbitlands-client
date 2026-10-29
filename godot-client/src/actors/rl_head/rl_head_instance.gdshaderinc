@@ -7,8 +7,9 @@
 // shaders declaring `hair_color` in different positions would disagree on its
 // slot, and only the first would see the colour. So a new entry goes at the
 // end of this list, never between two existing ones, and no RL shader
-// declares an instance uniform of its own. (Godot allows 16 per shader; 14
-// are used.)
+// declares an instance uniform of its own. (Godot allows 16 per shader, and
+// all 16 are used: a new per-face value must be packed into an existing one,
+// as eye_style_paint packs two, or be geometry.)
 //
 // The Compatibility renderer keeps instance uniforms in one global buffer of
 // 4096 items, 16 for each mesh instance that uses any, which a crowd of RL
@@ -43,4 +44,17 @@ RL_VALUE float liner_wing = 0.0;
 // (rl_hair.gdshader). 0.5, the default and what beards keep, shows the
 // hairstyle as authored.
 RL_VALUE float hair_detail = 0.5;
+// The stylised eye, derived from identity controls (the eye_style control's
+// `uniforms`; RLHeadRig.control_uniforms), two values in one slot:
+//   x `iris_scale`: the iris and pupil drawn this many times their painted size
+//     on the eyeball (1 as authored), the sclera round them drawn in to make room
+//     (rl_eye);
+//   y `eye_paint`, 0 to 1: a heavier upper lash line and liner (rl_skin) and the
+//     upper lid's shadow over the top of the iris (rl_eye).
+RL_VALUE vec2 eye_style_paint = vec2(1.0, 0.0);
+// The lids' motion from RLFaceExpression: x, y how far the left and right eye are
+// closed by a blink, z the squint weight. A closing lid stretches the painted lash
+// line and liner over itself, so the line fades out with the blink, and the
+// stylised liner's extra width gives way while the lids come down (rl_skin).
+RL_VALUE vec4 lid_closure = vec4(0.0);
 #undef RL_VALUE

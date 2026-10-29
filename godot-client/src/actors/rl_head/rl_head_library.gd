@@ -118,8 +118,8 @@ static var _texture_queue: PackedStringArray = PackedStringArray()
 ## shader: what a per-face material copy of it carries (see face_material).
 const SHADER_VALUES := {
 	"rl_skin": ["skin_color", "lip_tint", "brow_color", "hair_color", "freckles", "liner", "stubble",
-		"hairline", "brow_style", "brow_thickness", "liner_wing"],
-	"rl_eye": ["eye_color", "eye_look"],
+		"hairline", "brow_style", "brow_thickness", "liner_wing", "eye_style_paint", "lid_closure"],
+	"rl_eye": ["eye_color", "eye_look", "eye_style_paint"],
 	"rl_lash": ["hair_color"],
 	"rl_brow": ["brow_color"],
 	"rl_hair": ["hair_color", "hair_detail"],
@@ -563,8 +563,16 @@ static func head(sex: String) -> Dictionary:
 		for name: Variant in extras.get("expressions", []) as Array:
 			var shape := str(name)
 			expressions.append(shape if shape.begins_with("ex_") else "ex_" + shape)
+		# Corrective shapes (`ex_<expression>__<control>_<p|n>`): `shape` drawn at
+		# the weight of `expression` times the amount of `control` on the side
+		# `sign` names (RLFaceExpression). Being `ex_` shapes, an identity bake
+		# keeps them live with the expressions.
+		var correctives: Array = []
+		for corrective: Variant in extras.get("correctives", []) as Array:
+			if corrective is Dictionary and str((corrective as Dictionary).get("shape", "")).begins_with("ex_"):
+				correctives.append(corrective)
 		info = {"path": path, "sex": sex, "extras": extras, "controls": controls,
-			"control_names": names, "expressions": expressions, "lods": lods,
+			"control_names": names, "expressions": expressions, "correctives": correctives, "lods": lods,
 			"body_cut": extras.get("bodyCut", {}) as Dictionary,
 			"eye": _eye_layout(lods[0] as Array)}
 	_heads[sex] = info
@@ -1043,6 +1051,10 @@ static func _configure_skin(target: ShaderMaterial, material_name: String, sex: 
 	if rgb.size() >= 3:
 		target.set_shader_parameter("skin_reference",
 			Color(float(rgb[0]), float(rgb[1]), float(rgb[2])))
+	# Where the eye runs along u, for the stylised liner's taper (manifest `liner_span_u`).
+	var span: Variant = manifest_value(keys, "liner_span_u", quality)
+	if span is Array and (span as Array).size() >= 2:
+		target.set_shader_parameter("liner_span_u", Vector2(float(span[0]), float(span[1])))
 	var info := head(sex)
 	var lods: Array = info.get("lods", []) as Array
 	if not lods.is_empty() and not (lods[0] as Array).is_empty():
@@ -1065,6 +1077,15 @@ static func _configure_eye(target: ShaderMaterial, sex: String, quality: int) ->
 		target.set_shader_parameter("look_y_%d" % index, fit["look_y"])
 		target.set_shader_parameter("iris_radius_%d" % index, float(fit["iris_radius"]))
 		index += 1
+	# The painted iris discs (manifest `eye_iris`: [u, v, radius] per eye), which
+	# the eye shader's iris_scale grows about.
+	var painted: Variant = _read_manifest().get("eye_iris")
+	if painted is Array:
+		for slot: int in mini((painted as Array).size(), 2):
+			var disc: Variant = (painted as Array)[slot]
+			if disc is Array and (disc as Array).size() >= 3:
+				target.set_shader_parameter("painted_iris_%d" % slot,
+					Vector3(float(disc[0]), float(disc[1]), float(disc[2])))
 
 
 ## The luminous body's calibrated skin reference (models.json skinPalette).

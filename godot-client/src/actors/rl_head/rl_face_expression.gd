@@ -19,6 +19,19 @@ extends Node
 ## blink: a crowd's idle faces cost a few microseconds a frame each. `advance` steps the face by hand, for deterministic renders.
 ## `hold_neutral` keeps the face neutral with the eyes open and no blink while
 ## a portrait (dialogue line, leaderboard card) is taken of it.
+##
+## Correctives: a head may carry `ex_<expression>__<control>_<p|n>` shapes
+## (rlHead.correctives) that fix an expression up for one identity control -
+## eye_style opens the lids further than ex_blink_* travels, so
+## ex_blink_l__eye_style_p takes the extra opening back out. Each is written at
+## the expression's weight times the control's amount on its side, from the
+## identity the rig hands over with `set_identity`; it is never set directly.
+##
+## The blink weights (and the squint's) also go to the head's shaders as
+## `lid_closure` (left blink, right blink, squint), so the painted lash line
+## fades as a lid closes rather than stretching over it: an instance uniform,
+## or, where the values are material uniforms (RLHeadLibrary.material_values),
+## through the rig's per-face materials, in LID_CLOSURE_STEP steps.
 
 signal weights_changed
 
@@ -45,7 +58,12 @@ const PRESETS := {
 	"squint": {"ex_squint": 1.0},
 	"pucker": {"ex_pucker": 1.0, "ex_lips_pucker": 1.0},
 	"sneer": {"ex_sneer": 1.0, "ex_brow_down": 0.3},
+	"blink": {"ex_blink_l": 1.0, "ex_blink_r": 1.0},
 }
+## Where the values are material uniforms, the lid closure is handed over in
+## steps this size, so a blink draws a handful of per-face materials, not one
+## per frame.
+const LID_CLOSURE_STEP := 0.125
 
 var auto_blink := true
 ## Forces every-frame updates whatever the distance (the lab, the renders).
@@ -78,6 +96,16 @@ var _far_wait := 0
 ## The actor (the CharacterBody3D above), found once.
 var _actor_node: Node = null
 var _actor_found := false
+## [{shape, expression, control, sign}] the head declares (RLHeadLibrary).
+var _correctives: Array = []
+## Identity control amounts by name, -1..1 (RLHeadRig).
+var _identity: Dictionary = {}
+## The lid closure last handed to the head's shaders (x left blink, y right
+## blink, z squint); -1 = never.
+var _closure_written := Vector4(-1.0, -1.0, -1.0, 0.0)
+## The rig draws the face still (RLHeadRig._bake_shown: no live shapes, this
+## node paused): the lids show open, so the shaders get no closure either.
+var _drawn_still := false
 
 
 func _ready() -> void:
@@ -85,19 +113,44 @@ func _ready() -> void:
 	_blink_wait = _random.randf_range(BLINK_GAP.x, BLINK_GAP.y)
 
 
-## The meshes to drive and the `ex_` shapes the head declares.
-func configure(targets: Array[MeshInstance3D], available: PackedStringArray) -> void:
+## The meshes to drive, the `ex_` shapes the head declares and its correctives.
+func configure(targets: Array[MeshInstance3D], available: PackedStringArray,
+		correctives: Array = []) -> void:
 	_available = PackedStringArray()
 	for shape: String in available:
 		if shape.begins_with("ex_"):
 			_available.append(shape)
+	_correctives = []
+	for corrective: Variant in correctives:
+		if corrective is not Dictionary:
+			continue
+		var entry := corrective as Dictionary
+		if str(entry.get("shape", "")).begins_with("ex_") and str(entry.get("expression", "")).begins_with("ex_"):
+			_correctives.append(entry)
 	set_targets(targets)
+
+
+## The identity control amounts the correctives follow (name -> -1..1).
+func set_identity(controls: Dictionary) -> void:
+	if controls == _identity:
+		return
+	_identity = controls.duplicate()
+	_write()
+
+
+## Whether the rig draws the face still (its lids open whatever the weights).
+func set_drawn_still(still: bool) -> void:
+	if still == _drawn_still:
+		return
+	_drawn_still = still
+	_write()
 
 
 ## New meshes (a quality change, a beard): every current weight is written again.
 func set_targets(targets: Array[MeshInstance3D]) -> void:
 	_targets = targets.duplicate()
 	_written.clear()
+	_closure_written = Vector4(-1.0, -1.0, -1.0, 0.0)
 	_write()
 	_write_look()
 
@@ -350,6 +403,13 @@ func _write() -> void:
 		# visible loop; the base stays open a little while speaking.
 		var syllable := 0.5 + 0.5 * sin(_talk_time * 23.0) * sin(_talk_time * 7.3 + 1.1)
 		wanted["ex_jaw_open"] = maxf(float(wanted.get("ex_jaw_open", 0.0)), 0.08 + 0.32 * syllable)
+	for corrective: Dictionary in _correctives:
+		var amount := maxf(float(_identity.get(str(corrective["control"]), 0.0)) * float(corrective.get("sign", 1)), 0.0)
+		var weight := float(wanted.get(str(corrective["expression"]), 0.0)) * amount
+		if weight > 0.0:
+			wanted[str(corrective["shape"])] = weight
+	_write_closure(Vector4.ZERO if _drawn_still else Vector4(float(wanted.get("ex_blink_l", 0.0)),
+		float(wanted.get("ex_blink_r", 0.0)), float(wanted.get("ex_squint", 0.0)), 0.0))
 	for shape: Variant in _written.keys():
 		if not wanted.has(shape):
 			wanted[shape] = 0.0
@@ -373,6 +433,25 @@ func _write() -> void:
 			_written[shape] = value
 	if changed:
 		weights_changed.emit()
+
+
+## Hands the blink and squint weights to the head's shaders (`lid_closure`), when they change.
+func _write_closure(closure: Vector4) -> void:
+	var material_values := RLHeadLibrary.material_values()
+	if material_values:
+		# Per-face materials there: a few steps, not one material per frame.
+		closure = closure.snappedf(LID_CLOSURE_STEP)
+	if closure.is_equal_approx(_closure_written):
+		return
+	_closure_written = closure
+	if material_values:
+		var rig := get_parent() as RLHeadRig
+		if rig != null:
+			rig.set_lid_closure(closure)
+		return
+	for mesh_node: MeshInstance3D in _targets:
+		if is_instance_valid(mesh_node) and mesh_node.name.begins_with("RLHead"):
+			mesh_node.set_instance_shader_parameter("lid_closure", closure)
 
 
 func _write_look() -> void:

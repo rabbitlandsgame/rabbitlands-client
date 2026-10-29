@@ -48,10 +48,10 @@ func form_suite() -> void:
 	var form = FORM.new()
 	root.add_child(form)
 	await process_frame
-	# U1: hidden by default; 53 values, V3 neutral.
+	# U1: hidden by default; 55 values, V3 neutral.
 	expect(not form.detail_enabled() and not form.detail_toggle.visible and not form.detail_box.visible,
 		"U1 the More face detail section is hidden by default")
-	expect(form.values().size() == 53 and neutral_v3(form.values()), "U1 values() has 53 keys and V3 is neutral")
+	expect(form.values().size() == 55 and neutral_v3(form.values()), "U1 values() has 55 keys and V3 is neutral")
 	expect((form.controls.hair_detail as OptionButton).visible and not form.finish_row.visible,
 		"U15 develop's finish dropdown shows at version 1-2")
 	# U2: enable and edit every V3 widget.
@@ -280,7 +280,7 @@ func editor_suite() -> void:
 	expect(form.detail_enabled(), "U6 the dressing room follows a version change")
 	editor.call("_apply")
 	var tokens := v3_tokens(state.command)
-	expect(tokens.size() == 37, "U6 at version 3 the sent text has all 37 V3 tokens (%d)" % tokens.size())
+	expect(tokens.size() == 39, "U6 at version 3 the sent text has all 39 V3 tokens (%d)" % tokens.size())
 	expect(state.command.contains("hair_finish=0") and state.command.contains("skin_tone=0")
 		and state.command.contains("boots_light=0"), "U10/U15 hair_finish and the colour fields are sent at version 3")
 	# open_for with V3 values restores them.

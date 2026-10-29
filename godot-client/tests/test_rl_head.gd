@@ -40,6 +40,11 @@ func _run() -> void:
 	_check_importer_filter()
 	await _check_actor("female", "mira")
 	await _check_actor("male", "rowan")
+	await _check_eye_style("female", "mira")
+	await _check_eye_style("male", "rowan")
+	await _check_eye_depth("female", "mira_stylised")
+	await _check_eye_depth("male", "rowan_stylised")
+	_check_instance_uniform_budget()
 	await _check_body_cut_composition("female")
 	await _check_removal("male")
 	await _check_dev_switch()
@@ -82,7 +87,12 @@ func _check_assets() -> void:
 		for expression: String in info["expressions"] as PackedStringArray:
 			if not shapes.has(expression):
 				missing.append(expression)
+		for corrective: Dictionary in info.get("correctives", []) as Array:
+			if not shapes.has(str(corrective.get("shape", ""))):
+				missing.append(str(corrective.get("shape", "")))
 		_expect(missing.is_empty(), "%s blend shapes match rlHead extras %s" % [sex, missing])
+		_expect(names.size() == 23 and shapes.size() == BEARD_SHAPE_COUNT,
+			"%s head: 23 controls and %d blend shapes (%d, %d)" % [sex, BEARD_SHAPE_COUNT, names.size(), shapes.size()])
 		var stray := PackedStringArray()
 		for shape: String in shapes:
 			if not shape.begins_with("id_") and not shape.begins_with("ex_"):
@@ -147,12 +157,19 @@ func _check_shipping_route() -> void:
 ## The head builds shipped, by sex. The hairstyles and beards beside them were
 ## fitted to exactly these (2026-10-28: mira_bun and rowan_shag rebuilt with
 ## the grooming shapes and keep levels, then with the scalp coverage fix and
-## the messy band). A new head build needs its hair and beards rebuilt and this
-## table changed with them.
+## the messy band; 2026-10-29: build v2_eyestyle, the eye_style and eye_depth
+## controls and their correctives added, the rest pose and every earlier shape
+## unchanged, hair and beards refitted to it). A new head build needs its hair
+## and beards rebuilt and this table changed with them.
 const SHIPPED_HEADS := {
-	"female": "abd93434b4d06be2f1b55ae5a71f7cc701e1abf286f4939c1f700e92cb523636",
-	"male": "cae93a7f3366c5b01fb0134d6048435602686d1eda9edc4c3e73cb9adf6ddbc6",
+	"female": "214459df4df8a63079b5075d84bbbef197c05f0bd40cd59c317d21bff614a192",
+	"male": "9fa7f57485d81cf18ff4b11ec3b405e7e128d8df04a7fd02d5a7ab08ec9f3cce",
 }
+## Blend shapes per mesh of the shipped build (23 controls): a hairstyle carries
+## the 46 `id_` shapes and the 4 grooming shapes; a beard the 46 `id_` shapes,
+## the 13 expressions and the head's 16 correctives, like the head itself.
+const HAIR_SHAPE_COUNT := 50
+const BEARD_SHAPE_COUNT := 75
 ## Every RL hairstyle carries these grooming shapes beside its `id_` shapes.
 const GROOMING_SHAPES: Array[String] = ["hl_length_p", "hl_length_n", "hl_volume_p", "hl_volume_n"]
 ## The hair author's keep-level bands (COLOR_0.A), [low, high]: core geometry,
@@ -258,8 +275,8 @@ func _check_hair_asset(style: String) -> void:
 			elif shape.begins_with("hl_"):
 				grooming.append(shape)
 		grooming.sort()
-		if ids != head_shapes or grooming != wanted:
-			bad.append("%s: %d id_, %s" % [node.name, ids, grooming])
+		if ids != head_shapes or grooming != wanted or mesh.get_blend_shape_count() != HAIR_SHAPE_COUNT:
+			bad.append("%s: %d id_, %s, %d shapes" % [node.name, ids, grooming, mesh.get_blend_shape_count()])
 		for surface: int in mesh.get_surface_count():
 			var material := mesh.surface_get_material(surface)
 			var kind := material.resource_name if material != null else ""
@@ -381,9 +398,12 @@ func _messy_shown(messy: Dictionary, detail: int) -> Array:
 func _check_beard_asset(style: String) -> void:
 	var lowest := 1.0
 	var surfaces := 0
+	var counts: Array = []
 	for level: Array in RLHeadLibrary.beard(style):
 		for piece: Dictionary in level:
 			var mesh := piece["mesh"] as Mesh
+			if not counts.has(mesh.get_blend_shape_count()):
+				counts.append(mesh.get_blend_shape_count())
 			for surface: int in mesh.get_surface_count():
 				surfaces += 1
 				var colours: Variant = mesh.surface_get_arrays(surface)[Mesh.ARRAY_COLOR]
@@ -394,6 +414,8 @@ func _check_beard_asset(style: String) -> void:
 					lowest = minf(lowest, colour.a)
 	_expect(surfaces > 0 and lowest >= 0.999, "beard %s is all core geometry (lowest keep level %.3f)"
 		% [style, lowest])
+	_expect(counts == [BEARD_SHAPE_COUNT], "beard %s carries the head's %d shapes on every level %s"
+		% [style, BEARD_SHAPE_COUNT, counts])
 
 
 # ---------------------------------------------------------------- encoding
@@ -432,7 +454,11 @@ func _check_encoding() -> void:
 	_expect(RLHeadAppearance.decode(bytes, reordered) == null,
 		"a different control set is refused, not misread")
 	_expect(RLHeadAppearance.decode(bytes.slice(0, 9), names) == null, "cut-short bytes are refused")
-	_expect(bytes.size() <= 32, "a face fits in %d bytes" % bytes.size())
+	# 5 header bytes, a nibble per control, 14 colour and amount bytes, one byte per
+	# style name the registries list: 33 bytes with the heads' 23 controls.
+	var expected_size := 5 + (names.size() + 1) / 2 + 14 + 2
+	_expect(bytes.size() == expected_size and bytes.size() <= 33,
+		"a face fits in %d bytes (%d controls)" % [bytes.size(), names.size()])
 	# Version 1 had no brow bytes: it still decodes, with the default brow.
 	var control_bytes := (int(bytes[4]) + 1) / 2
 	var version_one := bytes.slice(0, 5 + control_bytes + 12)
@@ -519,6 +545,209 @@ func _shape_values(nodes: Array[MeshInstance3D], prefix: String) -> Dictionary:
 			if shape.begins_with(prefix):
 				values["%s:%s" % [mesh_node.name, shape]] = mesh_node.get_blend_shape_value(index)
 	return values
+
+
+## eye_style: its _p/_n shapes, the iris_scale and eye_paint values it drives
+## through the control's `uniforms` (packed into the eye_style_paint instance
+## uniform), and the blink and squint correctives drawn at (expression weight)
+## x (eye_style on their side), never set on their own; the blink weights
+## reach the shaders as lid_closure; eyelid and eye_size carry blink
+## correctives too.
+func _check_eye_style(sex: String, preset: String) -> void:
+	var info := RLHeadLibrary.head(sex)
+	var names := info.get("control_names", PackedStringArray()) as PackedStringArray
+	_expect(names.has("eye_style"), "%s: the head declares eye_style" % preset)
+	var wanted := PackedStringArray()
+	for corrective: Dictionary in info.get("correctives", []) as Array:
+		if str(corrective.get("control", "")) == "eye_style":
+			wanted.append(str(corrective["shape"]))
+	wanted.sort()
+	_expect(wanted == PackedStringArray(["ex_blink_l__eye_style_n", "ex_blink_l__eye_style_p",
+		"ex_blink_r__eye_style_n", "ex_blink_r__eye_style_p", "ex_squint__eye_style_n", "ex_squint__eye_style_p"]),
+		"%s: blink and squint correctives declared for eye_style %s" % [preset, wanted])
+	var others := PackedStringArray()
+	for corrective: Dictionary in info.get("correctives", []) as Array:
+		if str(corrective.get("control", "")) in ["eyelid", "eye_size"]:
+			others.append(str(corrective["shape"]))
+	others.sort()
+	_expect(others == PackedStringArray(["ex_blink_l__eye_size_p", "ex_blink_l__eyelid_p",
+		"ex_blink_r__eye_size_p", "ex_blink_r__eyelid_p"]),
+		"%s: blink correctives declared for eyelid and eye_size %s" % [preset, others])
+	var actor := _rl_actor(sex, preset)
+	await process_frame
+	var rig := actor.rl_head()
+	if rig == null:
+		_expect(false, "%s: eye_style needs an RL head" % preset)
+		actor.queue_free()
+		return
+	var head_node: MeshInstance3D = rig.identity_targets()[0]
+	for shape: String in wanted:
+		_expect(RLHeadRig.shape_index(head_node, shape) >= 0, "%s: %s on the head mesh" % [preset, shape])
+	var expression := rig.expression()
+	expression.set_process(false)
+	expression.auto_blink = false
+	var weight := func(shape: String) -> float:
+		var index := RLHeadRig.shape_index(head_node, shape)
+		return head_node.get_blend_shape_value(index) if index >= 0 else -1.0
+	# The iris growth the head's own eye_style entry asks for at +1.
+	var grow := 0.0
+	for control: Dictionary in info.get("controls", []) as Array:
+		if str(control.get("name", "")) == "eye_style":
+			grow = float((((control.get("uniforms", {}) as Dictionary).get("iris_scale", {})) as Dictionary).get("pos", 0.0))
+	_expect(grow > 0.0, "%s: eye_style grows the iris (%.2f at +1)" % [preset, grow])
+	var packed := func() -> Vector2:
+		var value: Variant = head_node.get_instance_shader_parameter("eye_style_paint")
+		return value if value is Vector2 else Vector2(-1.0, -1.0)
+	var closure := func() -> Vector4:
+		var value: Variant = head_node.get_instance_shader_parameter("lid_closure")
+		return value if value is Vector4 else Vector4(-1.0, -1.0, -1.0, -1.0)
+	_expect(packed.call().is_equal_approx(Vector2(1.0, 0.0)),
+		"%s: iris_scale is 1 and eye_paint 0 with eye_style at 0 %s" % [preset, packed.call()])
+	rig.set_control("eye_style", 1.0)
+	_expect(is_equal_approx(weight.call("id_eye_style_p"), 1.0) and is_zero_approx(weight.call("id_eye_style_n")),
+		"%s: eye_style +1 drives id_eye_style_p" % preset)
+	_expect(packed.call().is_equal_approx(Vector2(1.0 + grow, 1.0)),
+		"%s: eye_style +1 sets iris_scale 1 + %.2f and eye_paint 1 %s" % [preset, grow, packed.call()])
+	_expect(is_zero_approx(weight.call("ex_blink_l__eye_style_p")) and closure.call().is_zero_approx(),
+		"%s: no corrective and no lid closure with the eyes open" % preset)
+	expression.set_expression("blink", 1.0, 0.0)
+	expression.advance(0.0)
+	_expect(is_equal_approx(weight.call("ex_blink_l"), 1.0) and is_equal_approx(weight.call("ex_blink_l__eye_style_p"), 1.0)
+		and is_equal_approx(weight.call("ex_blink_r__eye_style_p"), 1.0) and is_zero_approx(weight.call("ex_blink_l__eye_style_n")),
+		"%s: a blink at eye_style +1 draws the _p correctives at 1" % preset)
+	_expect(closure.call().is_equal_approx(Vector4(1.0, 1.0, 0.0, 0.0)), "%s: a blink closes lid_closure %s" % [preset, closure.call()])
+	expression.set_expression("smile", 1.0, 0.0)
+	expression.advance(0.0)
+	_expect(is_equal_approx(weight.call("ex_squint__eye_style_p"), weight.call("ex_squint"))
+		and weight.call("ex_squint") > 0.0 and is_zero_approx(weight.call("ex_blink_l__eye_style_p"))
+		and closure.call().is_equal_approx(Vector4(0.0, 0.0, weight.call("ex_squint"), 0.0)),
+		"%s: the smile's squint draws ex_squint__eye_style_p at its weight (%.2f), blink correctives cleared, lid_closure.z follows the squint" % [preset, weight.call("ex_squint__eye_style_p")])
+	rig.set_control("eyelid", 1.0)
+	rig.set_control("eye_size", 1.0)
+	expression.set_expression("blink", 1.0, 0.0)
+	expression.advance(0.0)
+	_expect(is_equal_approx(weight.call("ex_blink_l__eyelid_p"), 1.0) and is_equal_approx(weight.call("ex_blink_r__eye_size_p"), 1.0),
+		"%s: a blink at eyelid +1 and eye_size +1 draws their correctives" % preset)
+	rig.set_control("eyelid", 0.0)
+	rig.set_control("eye_size", 0.0)
+	expression.advance(0.0)
+	_expect(is_zero_approx(weight.call("ex_blink_l__eyelid_p")), "%s: eyelid 0 clears its corrective" % preset)
+	rig.set_control("eye_style", 0.5)
+	_expect(is_equal_approx(weight.call("ex_blink_r__eye_style_p"), 0.5)
+		and packed.call().is_equal_approx(Vector2(1.0 + 0.5 * grow, 0.5)),
+		"%s: eye_style 0.5 halves the corrective, the iris growth and the paint %s" % [preset, packed.call()])
+	rig.set_control("eye_style", -0.6)
+	_expect(is_equal_approx(weight.call("ex_blink_l__eye_style_n"), 0.6) and is_zero_approx(weight.call("ex_blink_l__eye_style_p"))
+		and packed.call().is_equal_approx(Vector2(1.0, 0.0)),
+		"%s: eye_style -0.6 draws the _n corrective at 0.6, iris and liner as painted" % preset)
+	expression.set_expression("squint", 1.0, 0.0)
+	expression.advance(0.0)
+	_expect(is_equal_approx(weight.call("ex_squint__eye_style_n"), 0.6) and is_zero_approx(weight.call("ex_squint__eye_style_p")),
+		"%s: a squint at eye_style -0.6 draws ex_squint__eye_style_n at 0.6" % preset)
+	# A face drawn still shows its lids open: no lash-line fade either.
+	expression.set_drawn_still(true)
+	_expect(closure.call().is_zero_approx(), "%s: a still face hands the shaders no lid closure %s" % [preset, closure.call()])
+	expression.set_drawn_still(false)
+	_expect(is_equal_approx(closure.call().z, 1.0), "%s: drawn live again, the squint closes lid_closure.z" % preset)
+	expression.clear_expression(0.0)
+	expression.advance(0.0)
+	_expect(is_zero_approx(weight.call("ex_blink_l__eye_style_n")) and is_zero_approx(weight.call("ex_blink_l"))
+		and is_zero_approx(weight.call("ex_squint__eye_style_n")) and closure.call().is_zero_approx(),
+		"%s: opening the eyes clears the correctives and the lid closure" % preset)
+	_expect(is_equal_approx(weight.call("id_eye_style_n"), 0.6), "%s: the identity shape is left as set" % preset)
+	actor.queue_free()
+	await process_frame
+
+
+## eye_depth ("Eye position"): an Eyes control of shapes only - its _p/_n
+## shapes and blink and squint correctives (drawn at expression weight x amount,
+## like eye_style's), and no shader value of its own; eye_style's +1 carries a
+## share of it (the coupled recession, in id_eye_style_p), so the stylised
+## presets leave it at 0 and the slider moves the eye from there.
+func _check_eye_depth(sex: String, preset: String) -> void:
+	var info := RLHeadLibrary.head(sex)
+	var names := info.get("control_names", PackedStringArray()) as PackedStringArray
+	_expect(names.has("eye_depth"), "%s: the head declares eye_depth" % preset)
+	var spec := {}
+	for control: Dictionary in info.get("controls", []) as Array:
+		if str(control.get("name", "")) == "eye_depth":
+			spec = control
+	_expect(str(spec.get("group", "")) == "Eyes" and not spec.has("uniforms"),
+		"%s: eye_depth is an Eyes slider and drives no shader value" % preset)
+	var wanted := PackedStringArray()
+	for corrective: Dictionary in info.get("correctives", []) as Array:
+		if str(corrective.get("control", "")) == "eye_depth":
+			wanted.append(str(corrective["shape"]))
+	wanted.sort()
+	_expect(wanted == PackedStringArray(["ex_blink_l__eye_depth_n", "ex_blink_l__eye_depth_p",
+		"ex_blink_r__eye_depth_n", "ex_blink_r__eye_depth_p", "ex_squint__eye_depth_n", "ex_squint__eye_depth_p"]),
+		"%s: blink and squint correctives declared for eye_depth %s" % [preset, wanted])
+	var face := RLHeadAppearance.from_preset(preset)
+	_expect(face != null and is_equal_approx(face.control("eye_style"), 1.0) and is_zero_approx(face.control("eye_depth")),
+		"%s: the stylised preset takes its depth from eye_style (eye_depth left at 0)" % preset)
+	var actor := _rl_actor(sex, preset)
+	await process_frame
+	var rig := actor.rl_head()
+	if rig == null:
+		_expect(false, "%s: eye_depth needs an RL head" % preset)
+		actor.queue_free()
+		return
+	var head_node: MeshInstance3D = rig.identity_targets()[0]
+	for shape: String in ["id_eye_depth_p", "id_eye_depth_n"] + Array(wanted):
+		_expect(RLHeadRig.shape_index(head_node, shape) >= 0, "%s: %s on the head mesh" % [preset, shape])
+	var weight := func(shape: String) -> float:
+		var index := RLHeadRig.shape_index(head_node, shape)
+		return head_node.get_blend_shape_value(index) if index >= 0 else -1.0
+	var expression := rig.expression()
+	expression.set_process(false)
+	expression.auto_blink = false
+	var uniforms_before := rig.control_uniforms()
+	rig.set_control("eye_depth", 1.0)
+	_expect(is_equal_approx(weight.call("id_eye_depth_p"), 1.0) and is_zero_approx(weight.call("id_eye_depth_n"))
+		and is_equal_approx(weight.call("id_eye_style_p"), 1.0),
+		"%s: eye_depth +1 drives id_eye_depth_p on top of eye_style" % preset)
+	_expect(rig.control_uniforms() == uniforms_before, "%s: eye_depth leaves the shader values alone %s" % [preset, rig.control_uniforms()])
+	expression.set_expression("blink", 1.0, 0.0)
+	expression.advance(0.0)
+	_expect(is_equal_approx(weight.call("ex_blink_l__eye_depth_p"), 1.0) and is_equal_approx(weight.call("ex_blink_r__eye_depth_p"), 1.0)
+		and is_equal_approx(weight.call("ex_blink_l__eye_style_p"), 1.0) and is_zero_approx(weight.call("ex_blink_l__eye_depth_n")),
+		"%s: a blink at eye_depth +1 draws both controls' _p correctives" % preset)
+	rig.set_control("eye_depth", -0.5)
+	expression.set_expression("squint", 1.0, 0.0)
+	expression.advance(0.0)
+	_expect(is_equal_approx(weight.call("ex_squint__eye_depth_n"), 0.5) and is_zero_approx(weight.call("ex_squint__eye_depth_p"))
+		and is_zero_approx(weight.call("ex_blink_l__eye_depth_p")) and is_equal_approx(weight.call("id_eye_depth_n"), 0.5),
+		"%s: a squint at eye_depth -0.5 draws ex_squint__eye_depth_n at 0.5" % preset)
+	expression.clear_expression(0.0)
+	expression.advance(0.0)
+	_expect(is_zero_approx(weight.call("ex_squint__eye_depth_n")), "%s: opening the eyes clears the eye_depth correctives" % preset)
+	actor.queue_free()
+	await process_frame
+
+
+## The head shaders' per-face values (rl_head_instance.gdshaderinc): Godot
+## allows 16 instance uniforms per shader, so the include may declare no more
+## (eye_style_paint packs two values into one). Each RL shader's per-face
+## material copy in the Compatibility renderer (RLHeadLibrary.SHADER_VALUES)
+## must carry every value that shader reads, the new eye values included.
+func _check_instance_uniform_budget() -> void:
+	var source := FileAccess.get_file_as_string("res://src/actors/rl_head/rl_head_instance.gdshaderinc")
+	var declared: Array[String] = []
+	for line: String in source.split("\n"):
+		var words := line.strip_edges().split(" ", false)
+		if words.size() >= 3 and words[0] == "RL_VALUE":
+			declared.append(words[2])
+	_expect(declared.size() <= 16 and declared.has("eye_style_paint") and declared.has("lid_closure"),
+		"the head shaders declare %d instance uniforms (Godot's limit is 16) %s" % [declared.size(), declared])
+	var missing: Array = []
+	var comments := RegEx.create_from_string("//[^\\n]*|/\\*[\\s\\S]*?\\*/")
+	for kind: String in RLHeadLibrary.SHADER_VALUES:
+		var code := comments.sub((RLHeadLibrary.SHADERS[kind] as Shader).code, "", true)
+		for value: String in declared:
+			var read := RegEx.create_from_string("\\b%s\\b" % value).search(code) != null
+			if read and not (RLHeadLibrary.SHADER_VALUES[kind] as Array).has(value):
+				missing.append("%s:%s" % [kind, value])
+	_expect(missing.is_empty(), "every value an RL shader reads is in its material values %s" % [missing])
 
 
 func _check_actor(sex: String, preset: String) -> void:

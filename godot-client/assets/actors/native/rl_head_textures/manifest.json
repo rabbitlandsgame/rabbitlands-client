@@ -10,7 +10,8 @@
   ],
   "texels_per_cm_face": 48.67602818882729,
   "size": 2048,
-  "brows": "head_female_brows.png"
+  "brows": "head_female_brows.png",
+  "liner_span_u": [0.0755, 0.1312]
  },
  "male": {
   "albedo": "head_male_albedo.png",
@@ -23,7 +24,8 @@
   ],
   "texels_per_cm_face": 51.47523608020762,
   "size": 2048,
-  "brows": "head_male_brows.png"
+  "brows": "head_male_brows.png",
+  "liner_span_u": [0.077, 0.1323]
  },
  "eye": "eye.png",
  "lash": "lash.png",
@@ -33,5 +35,11 @@
   "eye": "RGB sclera + neutral iris detail, A iris tint mask (pupil excluded)",
   "brows": "RGBA = brow styles arched, straight, soft, angled (hair-stroke masks; the runtime picks one and shapes thickness)"
  },
- "shader_notes": "skin = skin_color * mix(value, detail, k) with detail = albedo_lin / skin_reference_lin and value = luminance ratio (same formula as face_appearance.gdshader; k ~0.55 on the face). Apply freckles (darker warm tone x amount), stubble (towards darkened skin + hair colour), lips (lip tint scaled by skin luminance), liner (near-black brown), brows (brow colour, default hair colour x0.75) in that order."
+ "eye_iris": [
+  [0.2929, 0.69473, 0.11933],
+  [0.706, 0.29349, 0.11934]
+ ],
+ "eye_iris_note": "eye.png iris discs (alpha > 0.5): UV centre and radius per eyeball island, measured off the texture; the eye shader grows the iris about them (iris_scale, from eye_style).",
+ "shader_notes": "skin = skin_color * mix(value, detail, k) with detail = albedo_lin / skin_reference_lin and value = luminance ratio (same formula as face_appearance.gdshader; k ~0.55 on the face). Apply freckles (darker warm tone x amount), stubble (towards darkened skin + hair colour), lips (lip tint scaled by skin luminance), liner (near-black brown), brows (brow colour, default hair colour x0.75) in that order.",
+ "liner_span_u_note": "|u - face_mid_u| (0.37) at the inner and the outer corner of the eye opening (liner_span.py, rest pose): rl_skin.gdshader thins the stylised liner towards the inner corner and thickens it towards the outer one along it."
 }

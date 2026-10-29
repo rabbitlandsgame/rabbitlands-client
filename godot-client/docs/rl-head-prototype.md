@@ -64,7 +64,8 @@ shipped bodies, hair and equipment are untouched.
   painted stubble; women draw neither at High (their saved choice is kept). Under the
   RL head the body's face sculpt, PortraitGroom beard shell and painted stubble are off.
 * **Grooming (the hair author's contract).** Both RL hairstyles (the hair author's
-  2026-10-28 builds, fitted to the shipped heads) carry, beside the 42 `id_` shapes:
+  2026-10-28 builds, refitted 2026-10-29 to the eye_style head build) carry, beside the
+  46 `id_` shapes:
   * **`hl_length_p` / `hl_length_n`** (each lock re-meshed along its own growth curve at
     +60% / -40% of its length, roots pinned; Mira's locks that end in the bun keep their
     length) and **`hl_volume_p` / `hl_volume_n`** (+80% / -50% of the stand-off above a
@@ -270,6 +271,54 @@ the wire never set and which is honoured at every quality.
   resources load for the first time), as on develop with the RL head; later switches
   down take about 0.1 s (develop's classic head: 15 ms).
 
+## Eye style and eye position (eye_style, eye_depth)
+
+Owner requests 2026-10-28 and 2026-10-29: Mira's Medium eyes ("the larger more anime style
+eyes") at High, set further back in the head as they get bigger, with a slider for the
+eye's position. Both are Eyes controls of the head build `v2_eyestyle` (the prototype
+`concept/rl-heads-claude-20261027`, `docs/rl-head-prototype.md` there has the measurements
+and the authoring tools); the rest pose and every earlier shape are bit-identical, so a
+face with both at 0 is the head as before.
+
+* **eye_style** ("Eye style", Almond ... Large stylised). +1 is the painted Medium Mira eye
+  at the RL head's scale (opening 2.66 x 1.60 cm, iris 1.96 cm, white 18 % of the opening
+  and only beside the iris): the eye region grown 1.068x about the inner corner, MPFB lid
+  targets opening the lids into a lens, the lower lid slid back over the eyeball, and
+  half of eye_depth +1 coupled in, so the big eye sits deeper on its own. -1 is a
+  narrower, upturned almond. The control's `uniforms` entry drives two shader values,
+  packed in the `eye_style_paint` instance uniform (x `iris_scale`, 1.38 at +1; y
+  `eye_paint`, 1 at +1): `rl_eye.gdshader` draws the iris and pupil larger about eye.png's
+  painted iris discs (texture manifest `eye_iris`) and shades the top of the iris under
+  the lid (a 0.15 hint on every eye, 0.8 at eye_paint 1, taking the gloss with it), and
+  `rl_skin.gdshader` darkens the upper lash line into a liner that thickens towards the
+  outer corner (manifest `liner_span_u`).
+* **eye_depth** ("Eye position", Forward ... Set deeper): shapes only. +1 sets the eyeball,
+  lashes, lids and socket lining 3 MakeHuman units back (3.3 mm on Mira), -1 2 units
+  forward; brow ridge, cheek, nose and temple stay.
+* **Correctives.** `ex_<expression>__<control>_<p|n>` shapes (`rlHead.correctives`: blinks
+  and squint for eye_style and eye_depth, blinks for eyelid +1 and eye_size +1) are drawn
+  by `RLFaceExpression` at the expression's weight times the control's amount on its
+  side, so blinks close and a squint closes the same share of the eye at every setting.
+  Being `ex_` shapes they stay live in identity bakes; still bakes draw none. The blink
+  and squint weights also reach the skin shader as `lid_closure`, so the lash line fades
+  as a lid closes instead of stretching over it (zero on a face drawn still).
+* **Instance uniforms.** The head shaders now declare all 16 instance uniforms Godot
+  allows (eye_style_paint packs two values for that reason); a new per-face value must
+  be packed into an existing one or be geometry. In the Compatibility renderer both new
+  values are material uniforms like the rest, the lid closure handed over in eighths so
+  a blink draws a handful of per-face materials.
+* **Wire.** PC/3 carries both as control offsets (fields 17 and 18, right after `eyelid`
+  in the head's control order; 0-100, 50 = the authored eye, no PC/2 coupling); the
+  creation form and the dressing room show them in the More face detail section's Eyes
+  group, gated with the other PC/3 offsets. The heads' own byte form (RLHeadAppearance)
+  is 33 bytes with 23 controls.
+* **Calibration.** The heads, hair and beards draw the neutral face exactly as before
+  and the skin shader draws it identically with eye_style 0, so their colour-calibration
+  source pins were moved to the new files; the eye shader's 0.15 lid hint darkens the top
+  of every iris, so the RL eye tables (`colours.eyes`, `eyeLut`) want measuring again
+  (`rl_head_colour_calibration --part=eyes`) and keep their old `rl_eye.gdshader` pin
+  until then.
+
 ## What it is
 
 Two reusable head modules (female and male) built from MPFB / MakeHuman `hm08`
@@ -289,10 +338,11 @@ topology and fitted to the shipped Human bodies (`luminous_female`, `luminous_ma
   and normals, drawn with the body's own material) ends the body in one planar loop.
   The head's neck ring is pulled onto that loop and zipped to it. The body GLB is
   untouched, so the 14 race bodies that pin its SHA-256 are unaffected.
-* **Customisation.** 21 identity controls in 7 groups (eyes/eyelids, brows, nose,
+* **Customisation.** 23 identity controls in 7 groups (eyes/eyelids, brows, nose,
   lips, cheeks, jaw & chin, ears), each a pair of MPFB-derived blend shapes
   `id_<control>_p` / `id_<control>_n`. Controls are compatible authored variations of
-  the same topology, so any combination stays anatomically coherent.
+  the same topology, so any combination stays anatomically coherent. (eye_style and
+  eye_depth, the 22nd and 23rd, are described under *Eye style and eye position*.)
 * **Expressions.** 13 blend shapes `ex_*` from MPFB's FACS-like expression units
   (blinks, squint, wide eyes, brow raise/sad/furrow, smile, grin, frown, jaw open,
   pucker, sneer). Identity and expression shapes live in separate namespaces and

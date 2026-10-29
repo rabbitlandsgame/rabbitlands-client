@@ -8,11 +8,15 @@ const Custom = preload("res://src/actors/portrait_customization.gd")
 const Ranking = preload("res://src/network/leaderboard_codec.gd")
 const Finish = preload("res://src/actors/hair_finish.gd")
 const PC2_VALUES := [5, 70, 30, 60, 90, 85, 2, 12, 23, 34, 45, 56, 67, 78, 89, 100]
-const V3_VALUES := [0, 100, 25, 75, 40, 60, 10, 90, 33, 66, 99, 13, 101, 1, 51, 26, 76, 12, 31,
+## The V3 values in field order: eyelid 0, eye_style 87, eye_depth 21, the other ten
+## offsets, the nine details (hair_finish 88) and the 17 colour values.
+const V3_VALUES := [0, 87, 21, 100, 25, 75, 40, 60, 10, 90, 33, 66, 99, 13, 101, 1, 51, 26, 76, 12, 31,
 	88, 201, 1, 240, 101, 101, 168, 71, 58, 1, 1, 1, 120, 50, 60, 61, 26, 13]
-const LOOK3_HEX := "50430305461e3c5a55020c17222d38434e59640064194b283c0a5a2142630d6501331a4c0c1f58c901f06565a8473a01010178323c3d1a0d"
-const NEUTRAL_HEX := "5043030032323232320032323232323232323232323232323232323232320000000000000000000000000000000000000000000000000000"
-const UPGRADE_HEX := "50430305461e3c5a55020c17222d38434e596432323232323232323232320000000000000000000000000000000000000000000000000000"
+## The shared cross-language fixtures (the server's test_player_customization_v3.py
+## asserts the same bytes): eye_style 87 and eye_depth 21 are trailer bytes 20 and 21.
+const LOOK3_HEX := "50430305461e3c5a55020c17222d38434e596400571564194b283c0a5a2142630d6501331a4c0c1f58c901f06565a8473a01010178323c3d1a0d"
+const NEUTRAL_HEX := "50430300323232323200323232323232323232323232323232323232323232320000000000000000000000000000000000000000000000000000"
+const UPGRADE_HEX := "50430305461e3c5a55020c17222d38434e5964323232323232323232323232320000000000000000000000000000000000000000000000000000"
 const PC2_HEX := "50430205461e3c5a55020c17222d38434e5964"
 ## The maxima literal the server's test asserts (pc3 spec 3.4, colour model
 ## spec 3.3); every other field is 100.
@@ -67,18 +71,26 @@ func run() -> void:
 
 # C14: the field table.
 func check_fields() -> void:
-	expect(Custom.FIELDS.size() == 53 and Custom.V2_FIELDS.size() == 16 and Custom.V3_FIELDS.size() == 37,
-		"53 fields: 16 PC/2 and 37 V3 (%d, %d, %d)" % [Custom.FIELDS.size(), Custom.V2_FIELDS.size(), Custom.V3_FIELDS.size()])
-	expect(Custom.V3_CONTROLS.size() == 11 and Custom.V3_DETAILS.size() == 9 and Custom.V3_COLOURS.size() == 17,
-		"11 offsets, 9 details, 17 colour fields")
+	expect(Custom.FIELDS.size() == 55 and Custom.V2_FIELDS.size() == 16 and Custom.V3_FIELDS.size() == 39,
+		"55 fields: 16 PC/2 and 39 V3 (%d, %d, %d)" % [Custom.FIELDS.size(), Custom.V2_FIELDS.size(), Custom.V3_FIELDS.size()])
+	expect(Custom.V3_CONTROLS.size() == 13 and Custom.V3_DETAILS.size() == 9 and Custom.V3_COLOURS.size() == 17,
+		"13 offsets, 9 details, 17 colour fields")
+	# The offsets follow the head's rlHead.controls order: eye_style and eye_depth
+	# come right after eyelid (fields 17 and 18, trailer bytes 20 and 21).
+	expect(Custom.V3_CONTROLS.slice(0, 4) == ["eyelid", "eye_style", "eye_depth", "brow_height"]
+		and Custom.FIELDS.find("eye_style") == 17 and Custom.FIELDS.find("eye_depth") == 18,
+		"eye_style and eye_depth are fields 17 and 18, after eyelid")
+	for field: String in ["eye_style", "eye_depth"]:
+		expect(Custom.maximum(field) == 100 and Custom.DEFAULTS[field] == 50 and Custom.field_version(field) == 3,
+			"%s: 0-100, 50 = the authored eye, version 3" % field)
 	expect(Custom.V3_DETAILS[-1] == "hair_finish" and Custom.V3_COLOURS[0] == "skin_tone",
-		"hair_finish ends the details; the colours follow (field 35, 36)")
-	expect(Custom.FIELDS.find("hair_finish") == 35 and Custom.FIELDS.find("skin_tone") == 36
-		and Custom.FIELDS.find("boots_light") == 52, "field numbers 35, 36 and 52")
+		"hair_finish ends the details; the colours follow (field 37, 38)")
+	expect(Custom.FIELDS.find("hair_finish") == 37 and Custom.FIELDS.find("skin_tone") == 38
+		and Custom.FIELDS.find("boots_light") == 54, "field numbers 37, 38 and 54")
 	for field: String in Custom.FIELDS:
 		expect(Custom.maximum(field) == int(MAXIMA.get(field, 100)), "%s maximum %d" % [field, Custom.maximum(field)])
 		expect(Custom.DEFAULTS.has(field), "%s has a neutral value" % field)
-	expect(Custom.DEFAULTS.size() == 53, "53 neutral values")
+	expect(Custom.DEFAULTS.size() == 55, "55 neutral values")
 	for field: String in NEW_FIELDS:
 		expect(Custom.field_version(field) == 3 and Custom.DEFAULTS[field] == 0, "%s is a version 3 field, neutral 0" % field)
 	for field: String in Custom.V3_CONTROLS:
@@ -106,7 +118,9 @@ func check_fields() -> void:
 func check_fixtures() -> void:
 	var look := look3()
 	var encoded := Custom.encode(look, 3)
-	expect(encoded.hex_encode() == LOOK3_HEX and encoded.size() == 56, "PC/3 LOOK3 fixture (56 bytes)")
+	expect(encoded.hex_encode() == LOOK3_HEX and encoded.size() == 58, "PC/3 LOOK3 fixture (58 bytes)")
+	expect(encoded[20] == 87 and encoded[21] == 21 and look.eye_style == 87 and look.eye_depth == 21,
+		"the shared fixture carries eye_style 87 and eye_depth 21 at trailer bytes 20 and 21")
 	expect(Custom.decode(encoded, 0) == Custom.normalized(look) and Custom.normalized(look) == look,
 		"PC/3 LOOK3 round trip")
 	expect(Custom.encode({}, 3).hex_encode() == NEUTRAL_HEX, "PC/3 neutral fixture")
@@ -258,11 +272,12 @@ func check_creation_and_spawns() -> void:
 		var packet := Wire.create_character("Portrait", "secret", look.merged({"actor_type": 1, "hair": 299}), 2, version)
 		var nul := packet.find(0, 3)
 		var suffix := packet.slice(nul + 1)
-		expect(suffix[8] == 2 and suffix.size() == [0, 19, 28, 65][version], "version %d suffix %d bytes, class at 8" % [version, suffix.size()])
+		expect(suffix[8] == 2 and suffix.size() == [0, 19, 28, 67][version], "version %d suffix %d bytes, class at 8" % [version, suffix.size()])
 		expect(suffix.slice(9, 12) == PackedByteArray(Custom.tag(version)), "version %d trailer at suffix 9" % version)
 		if version == 3:
-			expect(suffix[47] == 88 and suffix[48] == 201 and suffix[64] == 13 and suffix[28] == 0 and suffix[46] == 31,
-				"V3 at suffix 28-64: hair_finish 47, skin_tone 48, boots_light 64")
+			expect(suffix[49] == 88 and suffix[50] == 201 and suffix[66] == 13 and suffix[28] == 0
+				and suffix[29] == 87 and suffix[30] == 21 and suffix[48] == 31,
+				"V3 at suffix 28-66: eye_style 29, eye_depth 30, hair_finish 49, skin_tone 50, boots_light 66")
 		for wardrobe: bool in [false, true]:
 			var body := PackedByteArray()
 			body.resize(28)
@@ -280,7 +295,7 @@ func check_creation_and_spawns() -> void:
 # C8: the leaderboard codec.
 func check_ranking() -> void:
 	var portrait := {"actor_type": 1, "appearance": look3().merged({"skin": 2, "hair": 111, "eyes": 3}), "equipment_visuals": {"0": 20}}
-	expect(Ranking._valid_portrait(portrait), "a portrait with all 53 fields is valid")
+	expect(Ranking._valid_portrait(portrait), "a portrait with all 55 fields is valid")
 	for field: String in Custom.V3_FIELDS:
 		var corrupt := portrait.duplicate(true)
 		corrupt.appearance[field] = Custom.maximum(field) + 1
@@ -381,9 +396,9 @@ func check_sending() -> void:
 	_reply(network, 3)
 	expect(network.appearance_protocol_version() == 3 and changed == [2, 3], "PC/3 reply gives version 3")
 	expect(network.create_character("Portrait", "secret", look) == OK
-		and network.sent[-1].slice(network.sent[-1].size() - 56).hex_encode() == LOOK3_HEX, "version 3 creation sends PC/3")
+		and network.sent[-1].slice(network.sent[-1].size() - 58).hex_encode() == LOOK3_HEX, "version 3 creation sends PC/3")
 	expect(network.create_character("Portrait", "secret", neutral) == OK
-		and network.sent[-1].slice(network.sent[-1].size() - 56).hex_encode() == NEUTRAL_HEX, "version 3 sends PC/3 even when neutral")
+		and network.sent[-1].slice(network.sent[-1].size() - 58).hex_encode() == NEUTRAL_HEX, "version 3 sends PC/3 even when neutral")
 	everything = PackedStringArray()
 	for field: String in Custom.FIELDS:
 		everything.append("%s=%d" % [field, look[field]])
