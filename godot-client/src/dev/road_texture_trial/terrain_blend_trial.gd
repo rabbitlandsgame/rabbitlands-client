@@ -15,6 +15,7 @@ static func apply(world_root: Node3D, trial_manifest_path: String, variant := "b
 		"production": false, "representation": "existing_visible_ground_pass",
 		"added_visual_nodes": 0, "added_material_passes": 0, "vertex_geometry_changed": false,
 		"overlaps": "max_raw_coverage_dominant_uv", "visual_road_lift_metres": 0.0,
+		"uv_sampling": "level_zero_selected_triangle_affine_reconstruction",
 		"visual_surface_above_terrain_metres": 0.006,
 		"physical_road_lift_metres": 0.055, "visual_physics_offset_metres": 0.049,
 		"full_painted_grass_supported": false}}
@@ -56,6 +57,7 @@ static func apply(world_root: Node3D, trial_manifest_path: String, variant := "b
 	var bindings: Array[Dictionary] = []
 	var field_bytes := 0
 	var collision_bytes := 0
+	var jacobian_bytes := 0
 	for part: Dictionary in prepared:
 		for item: Dictionary in part.colliders:
 			var placeholder: Node3D = item.placeholder
@@ -70,11 +72,13 @@ static func apply(world_root: Node3D, trial_manifest_path: String, variant := "b
 			"field_grid": part.grid, "coverage_image": part.coverage_image})
 		field_bytes += int(part.field_bytes)
 		collision_bytes += int(part.collision_bytes)
+		jacobian_bytes += int(part.jacobian_bytes)
 	Ownership.refresh(world_root)
 	world_root.set_meta(&"terrain_blend_trial", {"bindings": bindings, "chunks": chunks})
 	result.ok = true
 	result.metrics.merge({"chunks": chunks.size(), "existing_ground_materials_replaced": bindings.size(),
 		"field_texture_bytes": field_bytes, "compact_collision_source_bytes": collision_bytes,
+		"jacobian_texture_bytes": jacobian_bytes,
 		"apply_usec": Time.get_ticks_usec() - began}, true)
 	return result
 
@@ -106,6 +110,9 @@ static func _prepare(root: Node3D, data: Dictionary, context: Dictionary, shader
 	var fields: Dictionary = Trial._fields(directory, layer)
 	if not bool(fields.get("ok", false)):
 		return fields
+	var jacobian: Dictionary = _jacobian(directory, layer)
+	if not bool(jacobian.get("ok", false)):
+		return jacobian
 	var source: Dictionary = Trial._source_material(layer)
 	if not bool(source.get("ok", false)):
 		return source
@@ -153,13 +160,45 @@ static func _prepare(root: Node3D, data: Dictionary, context: Dictionary, shader
 	material.set_shader_parameter(&"trial_mask_extent", fields.extent)
 	material.set_shader_parameter(&"trial_coverage", fields.coverage)
 	material.set_shader_parameter(&"trial_uv_field", fields.uv)
+	material.set_shader_parameter(&"trial_uv_jacobian", jacobian.texture)
 	var rgb: Array = layer.get("source_vertex_rgb", [1.0, 1.0, 1.0])
 	if rgb.size() != 3:
 		return _prepare_error(colliders, "blend_vertex_rgb")
 	material.set_shader_parameter(&"trial_vertex_rgb", Vector3(float(rgb[0]), float(rgb[1]), float(rgb[2])))
 	return {"ok": true, "target": target, "material": material, "original_material": base,
-		"colliders": colliders, "field_bytes": fields.bytes, "collision_bytes": collision_bytes,
+		"colliders": colliders, "field_bytes": int(fields.bytes) + int(jacobian.bytes),
+		"jacobian_bytes": jacobian.bytes, "collision_bytes": collision_bytes,
 		"coverage_image": fields.coverage_image, "grid": layer.grid}
+
+static func _jacobian(directory: String, layer: Dictionary) -> Dictionary:
+	var record: Variant = layer.get("uv_jacobian")
+	var grid: Variant = layer.get("grid")
+	if not record is Dictionary or not grid is Dictionary or str(record.get("format", "")) != "RGBA32F" \
+			or str(record.get("byte_order", "")) != "little" or str(record.get("compression", "")) != "zstd" \
+			or record.get("components") != ["dU_dX", "dU_dZ", "dV_dX", "dV_dZ"]:
+		return {"ok": false, "error": "blend_jacobian_contract"}
+	var width: int = int(grid.get("width", 0))
+	var height: int = int(grid.get("height", 0))
+	var expected: int = width * height * 16
+	if width < 1 or height < 1 or width * height > Trial.MAX_PIXELS \
+			or int(record.get("width", 0)) != width or int(record.get("height", 0)) != height \
+			or int(record.get("uncompressed_bytes", -1)) != expected:
+		return {"ok": false, "error": "blend_jacobian_layout"}
+	var path: String = Trial._path(directory, str(record.get("file", "")))
+	var stored: PackedByteArray = FileAccess.get_file_as_bytes(path)
+	if str(record.get("file_sha256", "")).length() != 64 or BlendMaterial._sha(stored) != str(record.file_sha256):
+		return {"ok": false, "error": "blend_jacobian_stored_hash"}
+	var decoded: PackedByteArray = stored.decompress(expected, FileAccess.COMPRESSION_ZSTD)
+	if decoded.size() != expected or str(record.get("sha256", "")).length() != 64 \
+			or BlendMaterial._sha(decoded) != str(record.sha256):
+		return {"ok": false, "error": "blend_jacobian_decoded_hash_or_size"}
+	for value: float in decoded.to_float32_array():
+		if not is_finite(value):
+			return {"ok": false, "error": "blend_jacobian_nonfinite"}
+	var image := Image.create_from_data(width, height, false, Image.FORMAT_RGBAF, decoded)
+	if image == null:
+		return {"ok": false, "error": "blend_jacobian_image_creation"}
+	return {"ok": true, "texture": ImageTexture.create_from_image(image), "bytes": decoded.size()}
 
 static func _prepare_error(colliders: Array, message: String) -> Dictionary:
 	_dispose([{"colliders": colliders}])

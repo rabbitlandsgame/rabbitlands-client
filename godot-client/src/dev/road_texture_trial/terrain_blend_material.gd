@@ -12,12 +12,13 @@ const EXTRA_NAMES: Array[String] = [
 	"specular_value", "uv1_scale", "uv1_offset",
 ]
 const FIELD_NAMES: Array[String] = [
-	"trial_coverage", "trial_uv_field", "trial_mask_origin", "trial_mask_extent",
+	"trial_coverage", "trial_uv_field", "trial_uv_jacobian", "trial_mask_origin", "trial_mask_extent",
 	"trial_mesh_to_mask", "trial_vertex_rgb", "trial_debug_coverage",
 ]
 const GLOBALS := """
 uniform sampler2D trial_coverage : filter_linear_mipmap, repeat_disable;
-uniform sampler2D trial_uv_field : filter_linear_mipmap, repeat_disable;
+uniform sampler2D trial_uv_field : filter_nearest, repeat_disable;
+uniform sampler2D trial_uv_jacobian : filter_nearest, repeat_disable;
 uniform vec2 trial_mask_origin = vec2(0.0);
 uniform vec2 trial_mask_extent = vec2(1.0);
 uniform mat4 trial_mesh_to_mask = mat4(1.0);
@@ -148,11 +149,21 @@ static func _composite(road_fragment: String, road_coverage: String) -> String:
 	if (any(lessThan(terrain_blend_uv, vec2(0.0))) || any(greaterThan(terrain_blend_uv, vec2(1.0)))) {
 		trial_alpha = 0.0;
 	}
-	vec2 road_eval_uv = texture(trial_uv_field, terrain_blend_uv).rg * road_uv1_scale.xy + road_uv1_offset.xy;
+	// UV branches can jump at overlap boundaries. Reconstruct only from the
+	// selected source triangle, never from an average of unrelated branches.
+	ivec2 blend_field_size = textureSize(trial_uv_field, 0);
+	ivec2 blend_cell = clamp(ivec2(floor(terrain_blend_uv * vec2(blend_field_size))), ivec2(0), blend_field_size - ivec2(1));
+	vec2 blend_cell_center = trial_mask_origin + (vec2(blend_cell) + vec2(0.5)) * trial_mask_extent / vec2(blend_field_size);
+	vec4 blend_j = texelFetch(trial_uv_jacobian, blend_cell, 0);
+	vec2 blend_delta = terrain_blend_mask_xz - blend_cell_center;
+	vec2 blend_source_uv = texelFetch(trial_uv_field, blend_cell, 0).rg + vec2(dot(blend_j.xy, blend_delta), dot(blend_j.zw, blend_delta));
+	vec2 road_eval_uv = blend_source_uv * road_uv1_scale.xy + road_uv1_offset.xy;
 	vec3 blend_dpdx = dFdx(VERTEX);
 	vec3 blend_dpdy = dFdy(VERTEX);
-	vec2 blend_dudx = dFdx(road_eval_uv);
-	vec2 blend_dudy = dFdy(road_eval_uv);
+	vec2 blend_mask_dx = dFdx(terrain_blend_mask_xz);
+	vec2 blend_mask_dy = dFdy(terrain_blend_mask_xz);
+	vec2 blend_dudx = vec2(dot(blend_j.xy, blend_mask_dx), dot(blend_j.zw, blend_mask_dx)) * road_uv1_scale.xy;
+	vec2 blend_dudy = vec2(dot(blend_j.xy, blend_mask_dy), dot(blend_j.zw, blend_mask_dy)) * road_uv1_scale.xy;
 	vec2 blend_xzdx = dFdx(look_ground_xz);
 	vec2 blend_xzdy = dFdy(look_ground_xz);
 	if (trial_alpha > 0.0) {

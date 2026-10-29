@@ -10,6 +10,7 @@ var _failures: Array[String] = []
 
 func _init() -> void:
 	_check_sheared_uv_frame()
+	_check_affine_uv_reconstruction()
 	_expect(bool(Blend.apply(null, "", "baseline").ok), "baseline_no_op")
 	_expect(not bool(Blend.apply(null, "", "blend").ok), "missing_world_rejected")
 	var base := ShaderMaterial.new()
@@ -32,8 +33,9 @@ func _init() -> void:
 		_expect(code.contains("road_albedo_texture") and code.contains("road_normal_texture"), "independent_source_textures")
 		_expect(code.contains("vec3 road_sample_albedo =") and code.count("vec3 road_eval_albedo =") == 1, "source_colour_does_not_shadow_output")
 		_expect(code.contains("road_look_rim_grain") and code.contains("road_look_paint("), "maintained_road_paint_and_edge")
-		_expect(code.contains("dFdx(road_eval_uv)") and code.contains("inverse(blend_base_frame)"), "flow_normal_frame")
-		_expect(code.find("dFdx(road_eval_uv)") < code.find("if (trial_alpha > 0.0)"), "derivatives_outside_coverage_branch")
+		_expect(code.contains("texelFetch(trial_uv_jacobian") and code.contains("inverse(blend_base_frame)"), "selected_triangle_flow_normal_frame")
+		_expect(code.find("dFdx(terrain_blend_mask_xz)") < code.find("if (trial_alpha > 0.0)"), "derivatives_outside_coverage_branch")
+		_expect(not code.contains("dFdx(road_eval_uv)") and not code.contains("texture(trial_uv_field"), "no_filtered_branch_uv_or_branch_derivative")
 		_expect(code.contains("textureGrad(road_albedo_texture") and code.contains("textureGrad(road_normal_texture"), "explicit_road_texture_gradients")
 		_expect(not code.contains("TIME"), "qualification_shader_needs_no_clock_freeze")
 		_expect(is_equal_approx(float(material.get_shader_parameter(&"normal_scale")), 0.8), "base_uniform_preserved")
@@ -74,6 +76,23 @@ func _check_sheared_uv_frame() -> void:
 		_expect(absf(normal_map_green.dot(tangent)) < 0.000001,
 			"green_normal_has_no_shear_induced_tangent_component")
 
+func _check_affine_uv_reconstruction() -> void:
+	# Two adjacent texels can belong to unrelated overlapping UV branches.
+	# The stored row layout must reconstruct the selected affine map, while
+	# its screen footprint remains independent of the other branch's UV.
+	var du := Vector2(2.0, 0.5)
+	var dv := Vector2(-0.25, 3.0)
+	var centre_uv := Vector2(100.0, 200.0)
+	var delta := Vector2(0.1, 0.2)
+	var reconstructed := centre_uv + Vector2(du.dot(delta), dv.dot(delta))
+	_expect(reconstructed.is_equal_approx(Vector2(100.3, 200.575)), "jacobian_component_order_and_affine_reconstruction")
+	var screen_step := Vector2(0.01, -0.02)
+	var gradient := Vector2(du.dot(screen_step), dv.dot(screen_step))
+	_expect(gradient.is_equal_approx(Vector2(0.01, -0.0625)), "jacobian_screen_footprint")
+	var unrelated_branch := Vector2(-1000.0, -2000.0)
+	_expect((unrelated_branch - centre_uv).length() > gradient.length() * 10000.0,
+		"overlap_fixture_exposes_false_cross_branch_lod")
+
 func _check_trial(path: String) -> void:
 	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
 	_expect(parsed is Dictionary and str(parsed.get("schema", "")) == Blend.SCHEMA, "producer_schema")
@@ -87,6 +106,17 @@ func _check_trial(path: String) -> void:
 	for layer: Dictionary in parsed.get("layers", []):
 		var fields: Dictionary = Trial._fields(path.get_base_dir(), layer)
 		_expect(bool(fields.get("ok", false)), "actual_field_decode_and_hash: " + str(fields.get("error", "")))
+		var jacobian: Dictionary = Blend._jacobian(path.get_base_dir(), layer)
+		_expect(bool(jacobian.get("ok", false)), "actual_jacobian_decode_and_hash: " + str(jacobian.get("error", "")))
+		if bool(jacobian.get("ok", false)):
+			var image: Image = (jacobian.texture as ImageTexture).get_image()
+			_expect(image.get_format() == Image.FORMAT_RGBAF and not image.has_mipmaps(), "jacobian_full_precision_single_level")
+			var malformed: Dictionary = layer.duplicate(true)
+			malformed.uv_jacobian.uncompressed_bytes = 1
+			_expect(not bool(Blend._jacobian(path.get_base_dir(), malformed).get("ok", true)), "jacobian_wrong_decoded_size_rejected")
+			malformed = layer.duplicate(true)
+			malformed.uv_jacobian.sha256 = "0".repeat(64)
+			_expect(not bool(Blend._jacobian(path.get_base_dir(), malformed).get("ok", true)), "jacobian_wrong_decoded_hash_rejected")
 		var source: Dictionary = Trial._source_material(layer)
 		_expect(bool(source.get("ok", false)), "actual_road_source_material: " + str(source.get("error", "")))
 	for row: Dictionary in parsed.get("nodes", []):
