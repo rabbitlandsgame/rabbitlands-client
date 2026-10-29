@@ -860,7 +860,11 @@ static func slot_texture(keys: Array[String], slot: String, fallback: String, qu
 ## The shared ShaderMaterial for an imported material name, or null for a name
 ## the contract does not know (that surface keeps its imported material).
 ## Shared by every actor with the same head, style and quality: per-actor
-## colours and amounts are instance uniforms (RLHeadRig.apply_appearance).
+## colours and amounts are instance uniforms (RLHeadRig.apply_appearance), or,
+## where material_values, material uniforms on per-face copies of it
+## (face_material); its shader is then the RL_MATERIAL_VALUES compile too, so
+## no RL surface ever declares an instance uniform, not even for the moment
+## between a mesh node's creation and its face's values.
 static func material(material_name: String, sex: String, style: String, quality: int) -> ShaderMaterial:
 	var kind := str(MATERIAL_SHADERS.get(material_name, ""))
 	if kind.is_empty():
@@ -869,7 +873,7 @@ static func material(material_name: String, sex: String, style: String, quality:
 	if _materials.has(key):
 		return _materials[key] as ShaderMaterial
 	var result := ShaderMaterial.new()
-	result.shader = SHADERS[kind]
+	result.shader = _values_shader(SHADERS[kind]) if material_values() else SHADERS[kind]
 	if (material_name == "rl_brow" and not DRAW_BROW_CARDS) \
 			or (material_name == "rl_cornea" and quality < CORNEA_QUALITY):
 		result.shader = SHADERS["rl_hidden"]
@@ -930,9 +934,12 @@ static func material_values() -> bool:
 	return _values_switch == 1
 
 
-## Reads RL_HEAD_VALUES again on the next check (tests switch it).
+## Reads RL_HEAD_VALUES again on the next check (tests switch it); the shared
+## materials made for the other mode are made again.
 static func reload_values_switch() -> void:
 	_values_switch = -1
+	_materials.clear()
+	_face_materials.clear()
 
 
 ## The values `shared`'s shader reads (SHADER_VALUES), [] for one with none.
@@ -940,7 +947,8 @@ static func shader_values(shared: ShaderMaterial) -> Array:
 	if shared == null or shared.shader == null:
 		return []
 	for kind: String in SHADER_VALUES:
-		if shared.shader == SHADERS.get(kind):
+		var shader: Shader = SHADERS.get(kind)
+		if shared.shader == shader or shared.shader == _value_shaders.get(shader.get_instance_id()):
 			return SHADER_VALUES[kind] as Array
 	return []
 
@@ -951,13 +959,15 @@ static func shader_values(shared: ShaderMaterial) -> Array:
 ## same material and values while any of them draws it (a weak cache). A
 ## material whose shader includes no values (rl_hidden) is returned as it is.
 static func face_material(shared: ShaderMaterial, values: Dictionary) -> ShaderMaterial:
-	if shared == null or shared.shader == null or _values_shader(shared.shader) == shared.shader:
+	if shared == null or shared.shader == null or not shared.shader.code.contains(INSTANCE_INCLUDE):
 		# A shader without the per-actor values (rl_hidden) draws as it is.
 		return shared
 	# A shader that includes them but reads none (rl_mouth, rl_cornea) still
-	# declares them: one RL_MATERIAL_VALUES copy for every face, so its
-	# surfaces take no instance-uniform block either.
+	# declares them: compiled with RL_MATERIAL_VALUES, every face draws one
+	# material (the shared one, once it is that compile).
 	var names := shader_values(shared)
+	if names.is_empty() and shared.shader.code.contains(MATERIAL_VALUES_DEFINE):
+		return shared
 	var parts := PackedStringArray([str(shared.get_instance_id())])
 	for name: String in names:
 		parts.append(var_to_str(values.get(name)))
@@ -985,7 +995,8 @@ static func face_material(shared: ShaderMaterial, values: Dictionary) -> ShaderM
 
 
 ## `shader` compiled with RL_MATERIAL_VALUES defined (its values as material
-## uniforms), made once per shader.
+## uniforms), made once per shader; one already so compiled, or without the
+## values, is itself.
 static func _values_shader(shader: Shader) -> Shader:
 	var cached := _value_shaders.get(shader.get_instance_id()) as Shader
 	if cached != null:
@@ -993,7 +1004,7 @@ static func _values_shader(shader: Shader) -> Shader:
 	var code := shader.code
 	var at := code.find(INSTANCE_INCLUDE)
 	var result := shader
-	if at >= 0:
+	if at >= 0 and not code.contains(MATERIAL_VALUES_DEFINE):
 		result = Shader.new()
 		result.code = code.insert(at, MATERIAL_VALUES_DEFINE)
 	_value_shaders[shader.get_instance_id()] = result

@@ -554,15 +554,17 @@ func _check_material_values() -> void:
 					_expect(drawn == shared, "%s keeps its shared material (no values included)" % imported.resource_name)
 					continue
 				# Every surface whose shader includes the values, read or not,
-				# draws an RL_MATERIAL_VALUES compile: no instance uniform is
-				# declared on any RL mesh instance.
-				_expect(drawn != shared and drawn.shader != shared.shader
-					and drawn.shader.code.contains("#define RL_MATERIAL_VALUES"),
-					"%s draws a copy compiled with RL_MATERIAL_VALUES" % imported.resource_name)
+				# draws an RL_MATERIAL_VALUES compile, and so does the shared
+				# material it is copied from: no instance uniform is declared
+				# on any RL mesh instance, not even before its face's values.
+				_expect(drawn.shader.code.contains("#define RL_MATERIAL_VALUES")
+					and shared.shader.code.contains("#define RL_MATERIAL_VALUES"),
+					"%s draws an RL_MATERIAL_VALUES compile" % imported.resource_name)
 				if RLHeadLibrary.shader_values(shared).is_empty():
-					_expect(RLHeadLibrary.face_material(shared, {}) == drawn,
-						"%s reads no values: one copy for every face" % imported.resource_name)
+					_expect(drawn == shared and RLHeadLibrary.face_material(shared, {}) == shared,
+						"%s reads no values: every face draws the shared material" % imported.resource_name)
 					continue
+				_expect(drawn != shared, "%s draws a per-face copy" % imported.resource_name)
 				if imported.resource_name == "rl_skin":
 					skin_seen = true
 					_expect(drawn.get_shader_parameter("skin_color") == rig.appearance.skin,
