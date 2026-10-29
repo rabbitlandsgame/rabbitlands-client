@@ -2,7 +2,7 @@ extends SceneTree
 ## The colour model's pure resolver (colour model spec revision 3; C16-C18,
 ## C20-C22 and the resolver half of R1-R4, R7 and R8): AppearanceColours and
 ## HairFinish against frozen vectors from an independent OKLab/OKHSL reference
-## (.local/rl-colour/tools/okcolor.py, a port of Ottosson's ok_color.h).
+## (tools/colour_calibration/okcolor.py, a port of Ottosson's ok_color.h).
 ## No actor is built and no asset is imported.
 const Colours = preload("res://src/actors/appearance_colours.gd")
 const Finish = preload("res://src/actors/hair_finish.gd")
