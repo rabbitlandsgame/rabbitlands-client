@@ -63,11 +63,11 @@ def field_files(metadata):
     return {field["triangle_ids"]["file"],field["affine_coefficients"]["file"]} | {m["file"] for m in field["coverage_mips"]}
 
 
-def validate_metadata(root, path, metadata=None):
+def validate_metadata(root, path, metadata=None, *, verify_fields=True):
     data=metadata or json.loads(path.read_text())
     if data.get("schema")!=P.SCHEMA or data.get("pixels_per_metre")!=4:
         raise ValueError("unsupported production road-ground metadata")
-    P.read_field(path.parent,data["field"])
+    if verify_fields:P.read_field(path.parent,data["field"])
     resources=data.get("resources")
     if not isinstance(resources,dict):raise ValueError("road-ground metadata has no canonical resource closure")
     required=field_files(data)
@@ -81,7 +81,7 @@ def validate_metadata(root, path, metadata=None):
     return data
 
 
-def valid_existing_leaf(root, directory):
+def valid_existing_leaf(root, directory, *, verify_fields=True):
     manifest=json.loads((directory/"world.json").read_text())
     config=manifest.get("roadGround")
     if not config:return False
@@ -90,7 +90,7 @@ def valid_existing_leaf(root, directory):
         raise ValueError("roadGround metadata must be a local leaf file")
     path=directory/uri
     if P.T.sha(path.read_bytes())!=config.get("sha256"):raise ValueError("existing roadGround metadata SHA mismatch")
-    metadata=validate_metadata(root,path)
+    metadata=validate_metadata(root,path,verify_fields=verify_fields)
     source=P.load_chunk(directory)
     names={n.get("name") for n in source["document"]["nodes"] if "mesh" in n}
     if names.intersection(metadata["removed_road_node_names"]):raise ValueError("existing roadGround leaf still contains removed road geometry")
@@ -234,17 +234,22 @@ def apply_plan(plan, recovery_root=None):
 def finish_region(root, region, chunk_scope=None, *, work=None, apply=True):
     """Publishing hook after geometry processing, before final bookkeeping."""
     root=Path(root).resolve();manifest=root/f"eloria-assets/maps/continent-v2/{region}/client/world.json"
-    source=json.loads(manifest.read_text());selected=[];skipped=[];unstripped=[]
+    source=json.loads(manifest.read_text());skipped=[];unstripped=[];existing_stripped=[]
     catalog=P.authoring_catalog(root,region)
     for row in source["streamingChunks"]["chunks"]:
-        if chunk_scope and row["id"] not in chunk_scope:continue
         directory=(manifest.parent/row["manifest"]).parent;leaf=P.load_chunk(directory)
+        selected=not chunk_scope or row["id"] in chunk_scope
         has_roads=any("mesh" in n and P.classify_walk(n.get("name",""),region,row["id"],catalog,leaf["paths"][i])[0]=="road"
                       for i,n in enumerate(leaf["document"]["nodes"]))
-        if has_roads:unstripped.append(row["id"])
-        elif valid_existing_leaf(root,directory):skipped.append(row["id"])
-        selected.append(row["id"])
+        if has_roads:
+            if selected:unstripped.append(row["id"])
+        elif valid_existing_leaf(root,directory,verify_fields=False):
+            existing_stripped.append(row["id"])
+            if selected:skipped.append(row["id"])
     if not unstripped:return dict(region=region,applied=apply,chunks=0,skipped=skipped)
+    if existing_stripped:
+        raise ValueError(f"{region}: mixed partial road publication cannot recover neighbouring source road contributors; "
+                         "a full territory republish from saved authoring is required before baking road-ground fields")
     work=Path(work).resolve() if work else root/f"eloria-assets/maps/continent-v2/{region}/client/.local/road-ground-finish"/uuid.uuid4().hex
     P.bake_region(root,work/region,region,selected_chunks=unstripped)
     plan=build_plan(root,work,[region],unstripped)

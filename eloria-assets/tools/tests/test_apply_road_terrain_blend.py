@@ -123,5 +123,21 @@ def test_finish_hook_skips_already_valid_stripped_leaves(staged,monkeypatch):
     P.T.write_json(destination.parents[1]/"world.json",dict(streamingChunks={"chunks":[{"id":"01_01","manifest":"chunks/01_01/world.json"}]}))
     monkeypatch.setattr(P,"authoring_catalog",lambda *a:dict(roads={},bridges={},assets={}))
     monkeypatch.setattr(P,"bake_region",lambda *a,**kw:pytest.fail("already-stripped leaf must not be rebaked"))
+    monkeypatch.setattr(P,"read_field",lambda *a,**kw:pytest.fail("verified stored hashes must avoid unnecessary field decompression"))
     report=A.finish_region(root,"r")
     assert report["chunks"]==0 and report["skipped"]==["01_01"]
+
+
+def test_finish_hook_refuses_mixed_partial_inputs_before_creating_stage(staged,monkeypatch):
+    root,stage,destination,_=staged
+    fresh=destination.parent/"01_02";shutil.copytree(destination,fresh)
+    A.apply_plan(A.build_plan(root,stage),root/".local/recovery")
+    P.T.write_json(destination.parents[1]/"world.json",dict(streamingChunks={"chunks":[
+        {"id":"01_01","manifest":"chunks/01_01/world.json"},{"id":"01_02","manifest":"chunks/01_02/world.json"}]}))
+    monkeypatch.setattr(P,"authoring_catalog",lambda *a:dict(roads={"road-a":{}},bridges={},assets={}))
+    # This fixture's second chunk deliberately retains the first road name;
+    # the classification stub isolates the publishing-state guard.
+    monkeypatch.setattr(P,"classify_walk",lambda name,*a:("road","road-a") if name.startswith("Walk_") else (None,None))
+    monkeypatch.setattr(P,"bake_region",lambda *a,**kw:pytest.fail("guard must fire before any stage or GLB write"))
+    with pytest.raises(ValueError,match="full territory republish"):
+        A.finish_region(root,"r",chunk_scope=["01_02"])
