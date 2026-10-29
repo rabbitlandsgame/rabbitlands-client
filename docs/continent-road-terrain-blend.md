@@ -53,6 +53,11 @@ expanded attributes, materials and transforms. Fields occupy about 30 MB. Leaf
 packages are about 62 MB smaller than the consolidated geometry version, before
 map-image changes. Shared style images are reused.
 
+For those 287 changed leaf packages, ZIP level 6 shrinks from 81.93 MB to
+78.99 MB: about 2.95 MB saved in transfer versus 62.13 MB in loose file bytes.
+The format adds 3,230 small files; installer copy and filesystem overhead are
+separate from the byte counts above.
+
 Coverage samples are 25 cm apart, so close road edges can differ slightly.
 Ordinary collision loses the former 5.5 cm lift and follows terrain; retained
 ground artwork sits about 6 mm above it. Five server tiles close at existing

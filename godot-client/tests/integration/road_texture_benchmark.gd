@@ -4,6 +4,9 @@ extends SceneTree
 const Graphics := preload("res://src/world/graphics_options.gd")
 const TexturePool := preload("res://src/world/external_texture_pool.gd")
 const MeshPool := preload("res://src/world/external_mesh_pool.gd")
+const Quantization := preload("res://src/world/gltf_quantization.gd")
+const Vram := preload("res://src/world/vram_textures.gd")
+const MapMesh := preload("res://src/world/map_mesh_extension.gd")
 var config: Dictionary
 var stage: Node3D
 var camera: Camera3D
@@ -18,6 +21,9 @@ var current_view := 0
 
 func _init() -> void:
 	_run.call_deferred()
+
+func _prepare_worker(path: String) -> WorldLoader:
+	return WorldLoader.prepare_detached(path, true)
 
 func _json(path: String) -> Dictionary:
 	var value: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
@@ -118,6 +124,27 @@ func _road_probes() -> Array:
 					for corner: int in 3:
 						point += vertices[indices[offset+corner] if not indices.is_empty() else offset+corner]/3.0
 					points.append(_a(to_stage*point))
+	if points.is_empty():
+		const Road := preload("res://src/world/road_ground/road_ground.gd")
+		for loader: WorldLoader in loaders:
+			if not loader.world_root.has_meta(Road.META): continue
+			var binding: Dictionary = loader.world_root.get_meta(Road.META)
+			var data: Resource = binding.data
+			var coverage := data.get("coverage_l0") as Image
+			var pixels := coverage.get_data()
+			var from_field: Transform3D = loader.world_root.global_transform * (binding.to_field as Transform3D).affine_inverse()
+			for fraction: float in [0.2, 0.5, 0.8]:
+				var start := int(fraction * pixels.size())
+				for offset: int in pixels.size():
+					var index := (start + offset) % pixels.size()
+					if pixels[index] < 250: continue
+					var uv := Vector2(float(index % coverage.get_width()) + 0.5, float(index / coverage.get_width()) + 0.5) / Vector2(coverage.get_size())
+					var field: Vector2 = data.origin + uv * data.extent
+					var point := from_field * Vector3(field.x, 0.0, field.y)
+					var ray := PhysicsRayQueryParameters3D.create(point + Vector3.UP * 500.0, point - Vector3.UP * 500.0, 8)
+					var hit := stage.get_world_3d().direct_space_state.intersect_ray(ray)
+					if not hit.is_empty(): points.append(_a(hit.position))
+					break
 	return points
 
 func _pose(view: Dictionary) -> void:
@@ -249,11 +276,24 @@ func _run() -> void:
 	var before := _memory()
 	var load_start := Time.get_ticks_usec()
 	var load_us := 0
+	if bool(config.get("detached", false)):
+		_check(Quantization.ensure_registered() and Vram.ensure_registered()
+			and MapMesh.ensure_registered(), "worker glTF extensions initialize on main")
 	for path: String in config.manifests:
 		var loader := WorldLoader.new()
 		stage.add_child(loader)
 		var began := Time.get_ticks_usec()
-		loader.load_world(path,Vector3.INF,true)
+		if bool(config.get("detached", false)):
+			var thread := Thread.new()
+			_check(thread.start(_prepare_worker.bind(path)) == OK, "background preparation starts")
+			while thread.is_alive(): await process_frame
+			var builder := thread.wait_to_finish() as WorldLoader
+			_check(builder != null, "background preparation returns a private loader")
+			if builder != null:
+				loader.adopt_world(builder.release_world())
+				builder.free()
+		else:
+			loader.load_world(path,Vector3.INF,true)
 		load_us += Time.get_ticks_usec()-began
 		_check(is_instance_valid(loader.world_root),"chunk loads",path)
 		if bool(config.get("expect_geometry_cache", false)):
