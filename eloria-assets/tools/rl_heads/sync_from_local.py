@@ -2,9 +2,15 @@
 this folder (eloria-assets/tools/rl_heads/), with every machine-specific path
 replaced by a repository-relative or environment-configurable one (paths.py).
 
-    python sync_from_local.py [--source <.local/rl-heads/scripts>]
+    python sync_from_local.py [--source <.local/rl-heads/scripts>] [--machine <json>]
 
 The source defaults to RL_HEADS_SCRIPTS, else <repo>/.local/rl-heads/scripts.
+The machine paths the local scripts were written with (the worktree they were
+authored in, the concept study renders, Blender, Godot, the GPU lock and
+Python executables) are read from --machine, else RL_HEADS_SYNC_MACHINE, else
+sync_machine.json beside the source folder: a local, ignored file naming one
+workstation, never committed (keys: authored_worktrees, reference_dir,
+blender, godot, gpu_lock, python; any may be left out).
 Inputs and outputs (MPFB data, the Blender profile, builds, evidence, Meshy
 task ledgers) stay in the ignored local area and are never copied; neither is
 anything holding a key. The run fails rather than writing a file that still
@@ -21,16 +27,15 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.normpath(os.path.join(HERE, '..', '..', '..'))
 
-# Where the scripts were authored (the prototype worktree) and the concept
-# study renders they compare against: replaced by paths.REPO / paths.REFERENCE.
-AUTHORED_WORKTREES = ['C:/rabbitlands/worktrees/client-rl-heads-claude-20261027',
-                      '/c/rabbitlands/worktrees/client-rl-heads-claude-20261027']
-REFERENCE_DIR = ('C:/rabbitlands/worktrees/client-leaderboard-human-studies-20261026/.local/concept-art/'
-                 'leaderboard-humans-2026-10-26/output/Rabbit-Lands-Human-Player-Studies/characters/')
-BLENDER_EXE = 'C:/Program Files/Blender Foundation/Blender 5.2/blender.exe'
-GODOT_EXE = 'C:/rabbitlands/rabbitlands-client/godot-client/Godot_v4.7.2-stable_win64.exe'
-GPU_LOCK = 'C:/rabbitlands/rabbitlands-client/.local/asset-authoring/workspace/work-output/gpu_lock.sh'
-PYTHON_EXE = 'C:/Python/Python313/python.exe'
+# The machine paths the local scripts name, replaced by paths.REPO,
+# paths.REFERENCE and the environment-configured programs: read from the local
+# machine file (see the module notes) by load_machine_paths.
+AUTHORED_WORKTREES: list[str] = []
+REFERENCE_DIR = ''
+BLENDER_EXE = ''
+GODOT_EXE = ''
+GPU_LOCK = ''
+PYTHON_EXE = ''
 
 SKIP_FILES = {'sync_tools.py'}           # superseded by this script
 SKIP_DIRS = {'__pycache__'}
@@ -45,8 +50,34 @@ SPECS = {
     'lab/mira6/spec.json': 'specs/likeness_female.json',
     'lab/rowan4/spec.json': 'specs/likeness_male.json',
 }
-FORBIDDEN = re.compile(r'(?i)(?<![A-Za-z])[a-z]:[/\\](?:rabbitlands|users|program files|python)|/c/rabbitlands|'
-                       r'/e/rlw|client-rl-heads-claude|leaderboard-human-studies|meshy\.key|MESHY_API_KEY\s*=')
+# Any absolute drive or MSYS path, a key file or an assigned key. The machine
+# file's own folder names are refused as well (forbidden()).
+FORBIDDEN_BASE = (r'(?i)(?<![A-Za-z])[a-z]:[/\\][A-Za-z0-9_ .-]+|(?<![A-Za-z0-9_.])/[a-z]/[A-Za-z0-9_.-]+/|'
+                  r'meshy\.key|MESHY_API_KEY\s*=')
+
+
+def load_machine_paths(path: str) -> None:
+    """Sets the machine paths from the local machine file (none when it is missing)."""
+    global AUTHORED_WORKTREES, REFERENCE_DIR, BLENDER_EXE, GODOT_EXE, GPU_LOCK, PYTHON_EXE
+    import json
+    data = json.load(open(path, encoding='utf-8')) if path and os.path.exists(path) else {}
+    AUTHORED_WORKTREES = [str(value) for value in data.get('authored_worktrees', [])]
+    REFERENCE_DIR = str(data.get('reference_dir', ''))
+    BLENDER_EXE = str(data.get('blender', ''))
+    GODOT_EXE = str(data.get('godot', ''))
+    GPU_LOCK = str(data.get('gpu_lock', ''))
+    PYTHON_EXE = str(data.get('python', ''))
+
+
+def forbidden() -> 're.Pattern':
+    """FORBIDDEN_BASE plus every long folder name of the machine file's paths."""
+    names = set()
+    for value in AUTHORED_WORKTREES + [REFERENCE_DIR]:
+        for part in value.replace('\\', '/').split('/'):
+            if len(part) > 12:
+                names.add(re.escape(part))
+    extra = '|'.join(sorted(names))
+    return re.compile(FORBIDDEN_BASE + ('|' + extra if extra else ''))
 
 PATHS_PY = '''"""Where the RL head tools find their inputs, outputs and programs.
 
@@ -97,9 +128,11 @@ def python_rewrite(rel: str, text: str) -> str:
         text = text.replace(f"{wt}/.local/rl-heads", "' + paths.LOCAL + '")
         text = text.replace(f"'{wt}'", 'paths.REPO')
         text = text.replace(wt, "' + paths.REPO + '")
-    text = text.replace(f"'{REFERENCE_DIR}'", 'paths.REFERENCE')
-    text = text.replace(REFERENCE_DIR, "' + paths.REFERENCE + '")
-    text = text.replace(f"'{BLENDER_EXE}'", 'paths.BLENDER')
+    if REFERENCE_DIR:
+        text = text.replace(f"'{REFERENCE_DIR}'", 'paths.REFERENCE')
+        text = text.replace(REFERENCE_DIR, "' + paths.REFERENCE + '")
+    if BLENDER_EXE:
+        text = text.replace(f"'{BLENDER_EXE}'", 'paths.BLENDER')
     text = text.replace("'' + ", '').replace(" + ''", '')
     # The local authoring area, reached from the scripts folder in the original layout.
     text = text.replace("R = os.path.dirname(HERE)", "R = paths.LOCAL")
@@ -214,10 +247,14 @@ def shell_rewrite(rel: str, text: str) -> str:
         text = text.replace(wt, '$REPO')
     text = text.replace('R=$LOCAL\n', 'R=$LOCAL\n')
     text = text.replace('$R/scripts/', '$TOOLS/').replace('$M/scripts/', '$(cygpath -m "$TOOLS")/')
-    text = text.replace(f'"/c/Program Files/Blender Foundation/Blender 5.2/blender.exe"', '"${BLENDER:-blender}"')
-    text = text.replace(GODOT_EXE, '${GODOT:-godot}')
-    text = text.replace(GPU_LOCK, '${RL_GPU_LOCK:-}')
-    text = text.replace(PYTHON_EXE, '"${PYTHON:-python}"')
+    if len(BLENDER_EXE) > 2 and BLENDER_EXE[1] == ':':
+        # The shell scripts name Blender by its MSYS path (/c/...).
+        msys = '/' + BLENDER_EXE[0].lower() + BLENDER_EXE[2:].replace('\\', '/')
+        text = text.replace(f'"{msys}"', '"${BLENDER:-blender}"')
+    for machine, portable in ((GODOT_EXE, '${GODOT:-godot}'), (GPU_LOCK, '${RL_GPU_LOCK:-}'),
+                              (PYTHON_EXE, '"${PYTHON:-python}"')):
+        if machine:
+            text = text.replace(machine, portable)
     return text
 
 
@@ -244,9 +281,12 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.split('\n\n')[0])
     parser.add_argument('--source', default=os.environ.get('RL_HEADS_SCRIPTS')
                         or os.path.join(REPO, '.local', 'rl-heads', 'scripts'))
+    parser.add_argument('--machine', default=os.environ.get('RL_HEADS_SYNC_MACHINE'))
     args = parser.parse_args()
     source = os.path.abspath(args.source)
     local = os.path.dirname(source)
+    load_machine_paths(args.machine or os.path.join(local, 'sync_machine.json'))
+    pattern = forbidden()
     if not os.path.isdir(source):
         sys.exit(f'no authoring scripts at {source}')
     written = []
@@ -292,7 +332,7 @@ def main() -> None:
     for rel, text in written:
         if not text.strip():
             problems.append(f'{rel}: empty')
-        for match in FORBIDDEN.finditer(text):
+        for match in pattern.finditer(text):
             line = text.count('\n', 0, match.start()) + 1
             problems.append(f'{rel}:{line}: machine-specific or secret reference {match.group(0)!r}')
     if problems:

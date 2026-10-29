@@ -16,7 +16,9 @@ are deterministic: the same definition, seed and head build give the same asset.
 | `rlglb.py`, `glbwriter.py` | Self-contained GLB reading and writing (numpy only). `glbwriter.py` is a vendored copy of the RL head build writer. |
 | `textures.py` | Writes the three textures (see Provenance). |
 | `preview.py` | Blender headless previews and concept-vs-render comparison sheets. |
-| `validate.py` | Structural checks of the GLBs. |
+| `validate.py` | Structural checks of the GLBs, plus the scalp coverage gate for hair modules. |
+| `coverage.py` | Scalp coverage: ray casts from scalp samples to a sphere of view directions, with the runtime alpha test and hair_detail discard. |
+| `godot/hair_coverage_shots.gd` | Back, crown and nape screenshots of an installed style in the real client actor (run with `-s` against a client checkout; writes only `RL_SHOT_DIR`). |
 | `paths.py` | Locates every input. No machine-specific paths. |
 | `styles/*.json`, `beards/*.json` | Starter definitions (`mira_bun`, `rowan_shag`; `full_beard`, `short_beard`, `moustache`, `goatee`). Each group carries a `_doc` note. |
 
@@ -55,6 +57,8 @@ python build_hair.py styles/rowan_shag.json male ../../build/hair/rowan_shag.glb
 python build_beard.py beards/full_beard.json male ../../build/beards/full_beard.glb   [--chart chart.png] [--no-check]
 python validate.py ../../build/hair/*.glb ../../build/beards/*.glb
 python preview.py --sex male --asset ../../build/hair/rowan_shag.glb --name rowan_shag [--lod 1]
+python preview.py ... --views back,back_tq_l,back_tq_r,top_back,low_back --detail-level 0 [--shapes hl_volume_n,hl_length_n | all_id_p]
+python coverage.py ../../build/hair/rowan_shag.glb --sex male [--cases rest,hl_volume_n] [--map map.png] [--json out.json]
 ```
 
 ## Asset contract (summary)
@@ -104,6 +108,26 @@ value A becomes visible once the level exceeds `100 * (1 - A)`.
 - Messy groups use `avoid_eyes` (cut where they would enter a box in front of the eyes).
 - Hanging messy groups use `spring_follow` (they borrow the nearest sprung lock's skin weights within 2.5 cm).
 - `preview.py --detail-level L` (0..1) renders with the same discard rule; `--cpu` renders with Cycles on the CPU (no GPU, no GPU lock).
+
+### Scalp coverage
+
+`validate.py` runs `coverage.py` on every hair module (skip with `--no-coverage`).
+
+- **Samples.** About 900 scalp points at least 4° (true angular distance) inside the hairline.
+- **Views.** About 165 directions, elevation ≥ −30°.
+- **Runtime model.** Rays use the runtime rules: double-sided surfaces, the alpha test at 0.5 against the texture, and the hair_detail discard.
+- **Worst case.** The check runs at detail 0, where only core A = 1 geometry is drawn.
+- **Hole.** A robust escaped ray (2 of 4 jittered rays escape too) that climbs 10 mm off the skin while still ≥ 6° inside the hairline. The viewer sees scalp through a gap in the hair.
+- **Edge.** An escaped ray that runs out under the hairline edge, such as under the fringe, over an ear or up at the nape. These are reported only.
+- **Gate.** The build fails on any hole at rest, under `hl_volume_n`, under `hl_length_n`, or under both, on any LOD.
+- **Warnings.** `all_id_p`, `all_id_n` (alone and with both grooming shapes) and four random identity mixes are measured and reported as warnings.
+
+Under-shell options (style `shell`) that keep the scalp covered:
+
+- **Whole sectors.** `cols` is rounded to whole texture sectors. 40 columns over 12 sectors left a 36° wedge of scalp bare from the crown to the nape on LOD0. That wedge was the hole reported on 2026-10-28.
+- **`face_clear`.** Raises the grid until the triangle faces, not only the vertices, keep that fraction of `offset_mm` off the skin (ears excluded, lift ≤ 4 mm). Coarse grids dipped up to 6 mm under the skin at LOD2.
+- **`edge_inset`.** May be `[[lon, deg], ...]`, so the edge can sit under baby hairs at the front and past the hairline at the nape.
+- **Seam vertices.** Duplicated seam vertices share their morph deltas, so the seams do not open under identity shapes.
 
 ## Provenance and licences
 

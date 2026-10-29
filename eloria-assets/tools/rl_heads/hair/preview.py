@@ -109,6 +109,26 @@ def blender_main(a):
                 if mn in tex:
                     slot.material = hair_material(bpy, mn, tex[mn], btint if mn == 'rl_beard' else tint, level=a.detail_level,
                                                   clip=(-1.0 if a.opaque else 0.5 if mn == 'rl_hair_clump' else 0.4))
+    # ---------------- shape keys (head and hair share the id_* names; hl_* are hair only)
+    if a.shapes:
+        want = {}
+        for tok in a.shapes.split(','):
+            if tok in ('all_id_p', 'all_id_n'):
+                want[tok] = 1.0
+            elif '=' in tok:
+                k, v = tok.split('='); want[k] = float(v)
+            elif tok:
+                want[tok] = 1.0
+        for o in bpy.data.objects:
+            sk = o.data.shape_keys if o.type == 'MESH' and o.data.shape_keys else None
+            if sk is None:
+                continue
+            for kb in sk.key_blocks[1:]:
+                nm = kb.name
+                if nm in want:
+                    kb.value = want[nm]
+                elif nm.startswith('id_') and ('all_id_p' in want and nm.endswith('_p') or 'all_id_n' in want and nm.endswith('_n')):
+                    kb.value = 1.0
     # ---------------- render setup
     if a.cpu:
         # CPU path tracing: no GPU use (no GPU lock needed on a shared machine)
@@ -149,10 +169,14 @@ def blender_main(a):
     # angles match the concept sheets: side = her LEFT profile, isometric = her RIGHT-front
     # from slightly above (camera at -X); close-up from her left-front
     shots = {'front': (0, 2, 1.05, 0.0), 'profile': (90, 0, 1.05, 0.0), 'back': (180, 5, 1.05, 0.0),
-             'tq': (-35, 14, 1.05, 0.0), 'close': (25, 4, 0.62, 0.02)}
+             'tq': (-35, 14, 1.05, 0.0), 'close': (25, 4, 0.62, 0.02),
+             # coverage views (only on request): back three-quarters from either side,
+             # from above the crown and from below the nape
+             'back_tq_l': (145, 10, 1.05, 0.0), 'back_tq_r': (-145, 10, 1.05, 0.0),
+             'top_back': (180, 52, 1.05, 0.03), 'low_back': (180, -22, 1.05, 0.0)}
     want = [x for x in (a.views or '').split(',') if x]
     for v, (az, el, dist, dz) in shots.items():
-        if want and v not in want:
+        if (want and v not in want) or (not want and v not in VIEWS):
             continue
         az_r = math.radians(az); el_r = math.radians(el)
         # glTF +Z (face) == Blender -Y ; character's left (+X) stays +X
@@ -381,6 +405,7 @@ def main():
                     help='hair_detail 0..1: apply the runtime discard rule (COLOR_0.A < 1 - level)')
     ap.add_argument('--views', default='', help='comma list of views to render (default: all)')
     ap.add_argument('--cpu', action='store_true', help='Cycles on the CPU (no GPU, no GPU lock)')
+    ap.add_argument('--shapes', default='', help='shape keys on head + hair: name=w,... or all_id_p / all_id_n')
     argv = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else sys.argv[1:]
     a = ap.parse_args(argv)
     a.asset = [os.path.abspath(p) for p in a.asset]

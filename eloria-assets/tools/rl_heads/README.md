@@ -27,7 +27,7 @@ ledgers.
 | `godot/` | Godot measurement scripts (run with `--script <absolute path>`). |
 | `specs/` | Build inputs: identity controls, brow styles, paint styles, reference landmarks, the likeness lab specs and the head build specs with their MPFB macro stacks. |
 | `generated_textures.json` | Generation receipts of the authoring textures in `.local/rl-heads/gen/` (see Provenance). |
-| `sync_from_local.py` | Re-copies the scripts from `.local/rl-heads/scripts/` with machine paths rewritten (refuses machine paths, secrets and empty files). |
+| `sync_from_local.py` | Re-copies the scripts from `.local/rl-heads/scripts/` with machine paths rewritten (refuses machine paths, secrets and empty files). The machine paths to rewrite come from a local, ignored `sync_machine.json` (see the script's notes), never from this folder. |
 
 ## Environment
 
@@ -98,7 +98,8 @@ bash headwear/fit_all.sh
 python fit/fit_reference.py <reference.glb> --sex male --out "$RL_HEADS_LOCAL/evidence/fit/<name>"
 # Meshy references: a dry run without --submit; paid runs need the owner's go-ahead
 python meshy/meshy_multi.py --help
-# Re-copy the scripts after editing them in .local/rl-heads/scripts
+# Re-copy the scripts after editing them in .local/rl-heads/scripts (machine paths
+# to rewrite: .local/rl-heads/sync_machine.json or --machine <json>)
 python sync_from_local.py
 ```
 

@@ -830,7 +830,7 @@ _FACE_BC = np.array([[1 / 3, 1 / 3, 1 / 3], [2 / 3, 1 / 6, 1 / 6], [1 / 6, 2 / 3
                      [0.5, 0.5, 0.0], [0.0, 0.5, 0.5], [0.5, 0.0, 0.5]])
 
 
-def _shell_face_clearance(head, P, N, target, iters=6, max_lift=0.008):
+def _shell_face_clearance(head, P, N, target, iters=6, max_lift=0.004):
     """Raise grid vertices (along N) until the shell's triangle FACES keep `target`
     (per row) off the skin. The vertex offsets alone let coarse grids dip their faces
     under the skin between vertices (LOD2: by up to 6 mm), so the scalp poked through.
@@ -848,7 +848,9 @@ def _shell_face_clearance(head, P, N, target, iters=6, max_lift=0.008):
     for _ in range(iters):
         X = P[tri[:, :, 0], tri[:, :, 1]]                     # (F, 3, 3)
         S = np.einsum('kc,fcd->fkd', _FACE_BC, X).reshape(-1, 3)
-        sd = head.signed(S)[0].reshape(len(tri), len(_FACE_BC))
+        # against the skin without the ears (the shell is laid on that surface; the
+        # ears poke through it and must not push it up around them)
+        sd = head.signed(S, mesh=head.mesh_noear, T=head.T_noear)[0].reshape(len(tri), len(_FACE_BC))
         deficit = np.maximum(tgt[:, None] - sd, 0).max(1)
         if deficit.max() < 2e-4:
             break
@@ -878,6 +880,9 @@ def shell_mesh(scalp, spec, rows, cols, rng=None):
                   clump texture's pointed-tip alpha -- giving a soft, irregular
                   hairline edge (also lighter there: root darkening is under the pole)
       'to_pole':  v = 1 - s (plain; no edge alpha)
+    edge_inset (deg, or [[lon, deg], ...]): the shell edge sits that far OUTSIDE the
+    hairline (negative: inside it). face_clear: keep the triangle faces at that
+    fraction of offset_mm off the skin (raises the grid where coarse faces dip).
     Returns P, N, UV, T, t, s (s = 0 at the pole .. 1 at the hairline).
     """
     head = scalp.head
@@ -887,7 +892,13 @@ def shell_mesh(scalp, spec, rows, cols, rng=None):
     e2 = unit(np.cross(pole, e1))
     # hairline in the pole frame
     hl_lon = np.linspace(-180, 180, 721)[:-1]
-    hl_lat = scalp.hairline(hl_lon) - spec.get('edge_inset', 1.5)
+    ei = spec.get('edge_inset', 1.5)
+    if isinstance(ei, (list, tuple)):
+        # per-longitude inset [[lon, deg], ...] (e.g. tucked under baby hairs at the
+        # front, past the hairline at the nape)
+        ea = np.array(ei, np.float64)
+        ei = periodic_interp(hl_lon, ea[:, 0], ea[:, 1])
+    hl_lat = scalp.hairline(hl_lon) - ei
     D = lonlat_dir(hl_lon, hl_lat)
     rho_h = np.degrees(np.arccos(np.clip(D @ pole, -1, 1)))
     beta_h = np.degrees(np.arctan2(D @ e2, D @ e1))

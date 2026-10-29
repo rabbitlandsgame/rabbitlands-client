@@ -9,6 +9,12 @@ same number of morph targets and extras.targetNames matches; skin: one inverse
 bind per joint and node-global x inverse-bind == identity at rest (vertices then
 coincide with body model space); hair: hair_root rest global == body Head rest
 global, spring bones exist and chain parent->child, UV v in [0, 1].
+Hair modules also get the scalp coverage check (coverage.py): at hair_detail 0
+(only core A = 1 geometry drawn), no scalp sample inside the hairline may be seen
+through the hair from any view direction at rest or under hl_volume_n /
+hl_length_n (alone and together), on every LOD; the identity extremes and random
+identity mixes are measured too and reported as warnings ('coverage' in the
+summary). --no-coverage skips it.
 Prints a JSON summary per file; exit code 1 if anything fails.
 """
 import os, sys, json, struct
@@ -128,10 +134,40 @@ def validate(path):
     return errs, info
 
 
+GATE_CASES = ('rest', 'hl_volume_n', 'hl_length_n', 'hl_volume_n+hl_length_n')
+
+
+def coverage_check(path, info):
+    """Scalp coverage of a hair module -> (errors, summary)."""
+    import coverage
+    g, _ = rlglb.read(path)
+    rh = g['asset'].get('extras', {}).get('rlHair')
+    if not rh:
+        return [], None
+    rep = coverage.check(path, rh.get('sex', 'male'))
+    errs, warn = [], []
+    for c in rep['cases']:
+        if c['holeSamples']:
+            msg = (f"lod{c['lod']} {c['case']}: {c['holeSamples']} scalp samples seen through the hair "
+                   f"({c['holeRays']} rays) at {[(w['lon'], w['lat']) for w in c['where'][:3]]}")
+            (errs if c['case'] in GATE_CASES else warn).append(msg)
+    summary = {'samples': rep['samples'], 'directions': rep['directions'], 'level': rep['level'],
+               'gateCases': list(GATE_CASES), 'holeSamplesMax': max(c['holeSamples'] for c in rep['cases']),
+               'gateHoleSamplesMax': max([c['holeSamples'] for c in rep['cases'] if c['case'] in GATE_CASES] or [0]),
+               'warnings': warn}
+    return ['coverage: ' + m for m in errs], summary
+
+
 if __name__ == '__main__':
     bad = False
-    for p in sys.argv[1:]:
+    args = [a for a in sys.argv[1:] if not a.startswith('--')]
+    for p in args:
         e, i = validate(p)
+        if '--no-coverage' not in sys.argv:
+            ce, cs = coverage_check(p, i)
+            e += ce
+            if cs is not None:
+                i['coverage'] = cs
         bad |= bool(e)
         print(json.dumps({'file': os.path.basename(p), 'ok': not e, 'errors': e, **i}))
     sys.exit(1 if bad else 0)

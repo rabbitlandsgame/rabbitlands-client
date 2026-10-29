@@ -1,23 +1,32 @@
 """coverage -- does any scalp show through an RL hair module?
 
-Ray-casts from scalp samples (head skin inside the style's hairline, a margin in
-from it) toward a sphere of view directions and reports every sample that some
-outside viewpoint sees directly: no hair surface in between that the runtime
-would draw opaque. The runtime model (rl_hair.gdshader + the hair_detail
-contract): clumps and cards are drawn double-sided and alpha-tested at 0.5
-against their texture (hair_clump.png / hair_strands.png, UV wrapped), and a
-vertex with COLOR_0.A < 1 - level is discarded. Detail level 0 is the worst
-case (only core A = 1 geometry is drawn; every other level only adds hair).
+Ray-casts from scalp samples (head skin inside the style's hairline, at least
+--margin degrees of true angular distance in from it) toward a sphere of view
+directions, and reports the samples an outside viewpoint sees through the hair.
+The runtime model (rl_hair.gdshader + the hair_detail contract): clumps and cards
+are drawn double-sided and alpha-tested at 0.5 against their texture
+(hair_clump.png / hair_strands.png, UV wrapped), and a vertex with
+COLOR_0.A < 1 - level is discarded. Detail level 0 is the worst case (only core
+A = 1 geometry is drawn; every other level only adds hair). The head itself (ears
+included) occludes; the body does not (conservative). View directions stop at
+elevation --min-el (a camera below the shoulders cannot look up at the scalp).
 
-The head itself (ears included) occludes; the body does not (conservative).
-View directions are limited to elevations >= --min-el (a camera below the
-shoulders cannot look up at the scalp).
+An escaped ray counts only when it is robust (2 of 4 rays from origins jittered by
+0.25 mm escape too: one ray slipping through a shared triangle edge is not a hole)
+and is then classified:
+  hole  the ray climbs 10 mm off the skin while still 6 deg or more inside the
+        hairline: the viewer looks through a gap in the hair (a FAIL);
+  edge  it runs out under the hairline edge first, grazing the skin: the natural
+        view under a fringe, over an ear or up at a nape line (reported only).
+Cases: rest, the grooming extremes and pairs, all_id_p / all_id_n (alone and with
+hl_volume_n + hl_length_n) and four random identity mixes, on every LOD.
 
 Usage:
   python coverage.py <hair.glb> --sex male [--style styles/x.json] [--lods 0,1,2]
-         [--level 0] [--configs default] [--json out.json] [--map out.png]
-Exit status 1 when any sample is visible in any checked case (the validator
-calls `check()` instead).
+         [--level 0] [--cases rest,hl_volume_n] [--json out.json] [--map out.png]
+--map draws an equirectangular lon/lat map per case (red: holes, orange: edge).
+Exit status 1 when any case has a hole (validate.py gates rest + hl_*_n only and
+reports the identity cases as warnings).
 """
 import argparse
 import json
@@ -82,6 +91,29 @@ def load_hair(path):
     return J, out
 
 
+def inside_by(scalp, lon, lat, margin_deg):
+    """Inside the hairline by at least margin_deg of true angular distance to the hairline
+    curve (a latitude margin alone is far too lax where the hairline runs steeply, as
+    behind the ears and at the nape corners)."""
+    lon = np.atleast_1d(np.asarray(lon, np.float64)); lat = np.atleast_1d(np.asarray(lat, np.float64))
+    ins = scalp.inside(lon, lat, 0.0)
+    if margin_deg <= 0 or not ins.any():
+        return ins
+    key = id(scalp)
+    if key not in _HL:
+        hl = np.arange(-180, 180, 0.5)
+        _HL[key] = hairgen.lonlat_dir(hl, scalp.hairline(hl))
+    H = _HL[key]
+    D = hairgen.lonlat_dir(lon[ins], lat[ins])
+    cos = np.clip((D @ H.T).max(1), -1, 1)
+    out = ins.copy()
+    out[ins] = np.degrees(np.arccos(cos)) >= margin_deg
+    return out
+
+
+_HL = {}
+
+
 def fib_dirs(n, min_el_deg):
     i = np.arange(n) + 0.5
     y = 1 - 2 * i / n
@@ -99,7 +131,7 @@ def scalp_samples(head, scalp, n, margin_deg, seed=5):
     area = np.linalg.norm(np.cross(X[:, 1] - X[:, 0], X[:, 2] - X[:, 0]), axis=1) * 0.5
     cen = X.mean(1)
     lon, lat = hairgen.dir_lonlat(cen - scalp.C)
-    ok = scalp.inside(lon, lat, margin_deg) & (area > 0)
+    ok = scalp.inside(lon, lat, 0.0) & (area > 0)
     tri = np.flatnonzero(ok)
     pick = rng.choice(tri, size=n * 3, p=area[tri] / area[tri].sum())
     u, v = rng.random((2, len(pick)))
@@ -108,7 +140,7 @@ def scalp_samples(head, scalp, n, margin_deg, seed=5):
     bc = np.stack([1 - u - v, u, v], 1)
     pts = (P[T[pick]] * bc[:, :, None]).sum(1)
     lon, lat = hairgen.dir_lonlat(pts - scalp.C)
-    keep = scalp.inside(lon, lat, margin_deg)
+    keep = inside_by(scalp, lon, lat, margin_deg)
     pick, bc = pick[keep][:n], bc[keep][:n]
     return T[pick], bc
 
@@ -142,69 +174,73 @@ def default_configs(id_names, seed=11):
     return cfg
 
 
-def visibility(hair, head, tri_s, bc_s, weights, level, dirs, min_cos=0.2, lift=0.0006):
-    """-> per-sample count of view directions that see the scalp sample, and points."""
+def _bvh():
     try:
         from mathutils.bvhtree import BVHTree
     except ImportError:          # the pip bpy module ships mathutils behind bpy
         import bpy  # noqa: F401
         from mathutils.bvhtree import BVHTree
     from mathutils import Vector
-    HP = _morph(head.P, head.deltas, {n: w for n, w in weights.items() if n.startswith('id_')})
-    S = (HP[tri_s] * bc_s[:, :, None]).sum(1)
-    tn = np.cross(HP[tri_s[:, 1]] - HP[tri_s[:, 0]], HP[tri_s[:, 2]] - HP[tri_s[:, 0]])
-    Nn = tn / np.maximum(np.linalg.norm(tn, axis=1, keepdims=True), 1e-12)
-    # vertex-normal interpolation is smoother but the face normal is what the sample sits on
-    XP = _morph(hair['P'], hair['targets'], weights)
-    keep = hair['A'][hair['T']].min(1) >= 1.0 - level - 1e-4    # a tri with any discarded vertex
-    # is cut by the per-fragment test where A interpolates below 1 - level: conservative,
-    # count the tri only when all three corners survive
-    Th = hair['T'][keep]; texs = hair['tex'][keep]
-    nh = len(XP)
-    verts = np.concatenate([XP, HP])
-    polys = np.concatenate([Th, head.T + nh])
-    is_head = np.concatenate([np.zeros(len(Th), bool), np.ones(len(head.T), bool)])
-    tree = BVHTree.FromPolygons(verts.tolist(), polys.tolist(), all_triangles=True)
-    UV = hair['UV']
-    alphas = {t: _alpha(t) for t in np.unique(texs)}
-    cnt = np.zeros(len(S), np.int32)
-    esc_s, esc_d = [], []
-    O = S + Nn * lift
-    for di, d in enumerate(dirs):
-        facing = np.flatnonzero(Nn @ d > min_cos)
-        if not len(facing):
-            continue
-        dv = Vector(d.tolist())
-        org = O[facing].copy()
-        active = np.ones(len(facing), bool)
-        for _ in range(12):
+    return BVHTree, Vector
+
+
+class _Scene:
+    """Hair (detail-filtered, morphed) + head as one BVH, with the alpha-test model."""
+
+    def __init__(self, hair, HP, head_T, weights, level):
+        BVHTree, self.Vector = _bvh()
+        self.XP = _morph(hair['P'], hair['targets'], weights)
+        keep = hair['A'][hair['T']].min(1) >= 1.0 - level - 1e-4
+        # a tri with any discarded corner is cut by the per-fragment test where A
+        # interpolates below 1 - level: conservative, count it only when all corners survive
+        self.Th = hair['T'][keep]; self.texs = hair['tex'][keep]; self.UV = hair['UV']
+        nh = len(self.XP)
+        verts = np.concatenate([self.XP, HP]); polys = np.concatenate([self.Th, head_T + nh])
+        self.is_head = np.concatenate([np.zeros(len(self.Th), bool), np.ones(len(head_T), bool)])
+        self.tree = BVHTree.FromPolygons(verts.tolist(), polys.tolist(), all_triangles=True)
+        self.alphas = {t: _alpha(t) for t in np.unique(self.texs)}
+
+    def escapes(self, O, D, layers=16):
+        """Rays O + t D: True where no opaque hair texel and no head surface is hit."""
+        V = self.Vector
+        org = np.array(O, np.float64); n = len(org)
+        D = np.broadcast_to(D, org.shape)
+        last = np.full(n, -1, np.int64)
+        active = np.ones(n, bool); out = np.zeros(n, bool)
+        for _ in range(layers):
             idx = np.flatnonzero(active)
             if not len(idx):
                 break
             hit_tri = np.full(len(idx), -1, np.int64); hit_loc = np.zeros((len(idx), 3))
             for k, i in enumerate(idx):
-                loc, _n, ti, _dist = tree.ray_cast(Vector(org[i].tolist()), dv)
+                o = org[i]; dv = V(D[i].tolist())
+                loc, _n, ti, _dist = self.tree.ray_cast(V(o.tolist()), dv)
+                # after a transparent texel the ray steps on by a hair's breadth only (a
+                # surface crossing right there, a clump through the shell, is not
+                # skipped); re-hitting the same triangle steps a little further
+                for _r in range(3):
+                    if loc is None or ti != last[i]:
+                        break
+                    o = np.asarray(loc) + D[i] * 2e-5
+                    loc, _n, ti, _dist = self.tree.ray_cast(V(o.tolist()), dv)
                 if loc is not None:
                     hit_tri[k] = ti; hit_loc[k] = loc
             miss = hit_tri < 0
-            cnt[facing[idx[miss]]] += 1            # escaped: the viewer sees the scalp
-            esc_s.append(facing[idx[miss]]); esc_d.append(np.full(int(miss.sum()), di))
-            active[idx[miss]] = False
+            out[idx[miss]] = True; active[idx[miss]] = False
             h = ~miss
             if not h.any():
                 break
             hi = idx[h]; ht = hit_tri[h]; hl = hit_loc[h]
-            head_hit = is_head[ht]
+            head_hit = self.is_head[ht]
             active[hi[head_hit]] = False           # the head (an ear, the other side) blocks
-            hair_k = np.flatnonzero(~head_hit)
-            if len(hair_k):
-                tt = Th[ht[hair_k]]
-                A_, B_, C_ = XP[tt[:, 0]], XP[tt[:, 1]], XP[tt[:, 2]]
-                b = headref.barycentric(hl[hair_k], A_, B_, C_)
-                uv = (UV[tt] * b[:, :, None]).sum(1)
-                opaque = np.zeros(len(hair_k), bool)
-                tx = texs[ht[hair_k]]
-                for tname, al in alphas.items():
+            hk = np.flatnonzero(~head_hit)
+            if len(hk):
+                tt = self.Th[ht[hk]]
+                b = headref.barycentric(hl[hk], self.XP[tt[:, 0]], self.XP[tt[:, 1]], self.XP[tt[:, 2]])
+                uv = (self.UV[tt] * b[:, :, None]).sum(1)
+                opaque = np.zeros(len(hk), bool)
+                tx = self.texs[ht[hk]]
+                for tname, al in self.alphas.items():
                     s = tx == tname
                     if not s.any():
                         continue
@@ -212,12 +248,46 @@ def visibility(hair, head, tri_s, bc_s, weights, level, dirs, min_cos=0.2, lift=
                     px = (np.floor((uv[s, 0] % 1.0) * wid).astype(int)) % wid
                     py = (np.floor((uv[s, 1] % 1.0) * hgt).astype(int)) % hgt
                     opaque[s] = al[py, px] >= ALPHA_SCISSOR
-                active[hi[hair_k[opaque]]] = False
-                cont = hi[hair_k[~opaque]]
-                org[cont] = hl[hair_k[~opaque]] + d * 2e-5
-        # rays still bouncing after 12 layers: count as covered
-    esc = (np.concatenate(esc_s) if esc_s else np.zeros(0, int), np.concatenate(esc_d) if esc_d else np.zeros(0, int))
-    return cnt, S, esc, HP
+                active[hi[hk[opaque]]] = False
+                cont = hi[hk[~opaque]]
+                org[cont] = hl[hk[~opaque]] + D[cont] * 1e-7
+                last[cont] = ht[hk[~opaque]]
+        return out          # rays still passing layers after `layers` hits count as covered
+
+
+def visibility(hair, head, tri_s, bc_s, weights, level, dirs, min_cos=0.2, lift=0.0006, jitter=0.00025):
+    """-> per-sample count of view directions that see the scalp sample, the samples,
+    the escaped (sample, direction) pairs and the morphed skin. An escape counts only
+    when it is robust: at least 2 of 4 rays from origins jittered by `jitter` escape as
+    well (a single ray slipping through a shared triangle edge is not a hole)."""
+    HP = _morph(head.P, head.deltas, {n: w for n, w in weights.items() if n.startswith('id_')})
+    S = (HP[tri_s] * bc_s[:, :, None]).sum(1)
+    tn = np.cross(HP[tri_s[:, 1]] - HP[tri_s[:, 0]], HP[tri_s[:, 2]] - HP[tri_s[:, 0]])
+    Nn = tn / np.maximum(np.linalg.norm(tn, axis=1, keepdims=True), 1e-12)
+    sc = _Scene(hair, HP, head.T, weights, level)
+    O = S + Nn * lift
+    es, ed = [], []
+    for di, d in enumerate(dirs):
+        facing = np.flatnonzero(Nn @ d > min_cos)
+        if not len(facing):
+            continue
+        e = sc.escapes(O[facing], d)
+        if e.any():
+            es.append(facing[e]); ed.append(np.full(int(e.sum()), di))
+    es = np.concatenate(es) if es else np.zeros(0, int); ed = np.concatenate(ed) if ed else np.zeros(0, int)
+    robust = np.zeros(len(es), bool)
+    if len(es):
+        D = dirs[ed]
+        a1 = np.cross(D, Nn[es]); a1 /= np.maximum(np.linalg.norm(a1, axis=1, keepdims=True), 1e-9)
+        a2 = np.cross(D, a1)
+        votes = np.zeros(len(es), int)
+        for off in (a1, -a1, a2, -a2):
+            Oj = S[es] + Nn[es] * lift + off * jitter
+            votes += sc.escapes(Oj, D)
+        robust = votes >= 2
+    es, ed = es[robust], ed[robust]
+    cnt = np.bincount(es, minlength=len(S)).astype(np.int32)
+    return cnt, S, (es, ed), HP
 
 
 def skin_radius(head, scalp, HP=None, step=2.0):
@@ -268,7 +338,7 @@ def classify(S, esc, dirs, head, scalp, HP=None, cover_mm=10.0, reach_mm=80.0, i
         r = (R[i0, j0] * (1 - a) * (1 - b) + R[i0 + 1, j0] * a * (1 - b) + R[i0, j0 + 1] * (1 - a) * b + R[i0 + 1, j0 + 1] * a * b)
         out = ~done & (rr - r >= cover_mm * 1e-3)
         if out.any():
-            hole[out] = scalp.inside(lon[out], lat[out], inside_deg)
+            hole[out] = inside_by(scalp, lon[out], lat[out], inside_deg)
             done |= out
         if done.all():
             break

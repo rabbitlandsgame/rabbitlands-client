@@ -33,9 +33,11 @@ STYLE SCHEMA (styles/*.json; "_doc" keys are free comments)
                              nape_from/nape_blend (deg), noise (deg, soft irregular edge),
                              grow (deg, lowers everywhere), adjust [[lon, dlat], ...]
   shell                      pole [lon, lat], v from_pole|to_pole, tip_band (0 = opaque
-                             edge), v_start, edge_inset (deg; negative keeps the shell
-                             edge inside the hairline, e.g. under baby-hair cards),
-                             offset_mm [interior, edge], u_repeat, ao, lod {"0": [rows, cols]}
+                             edge), v_start, edge_inset (deg, or [[lon, deg], ...]; negative
+                             keeps the shell edge inside the hairline, e.g. under baby-hair
+                             cards), offset_mm [interior, edge], face_clear (faces keep that
+                             fraction of offset_mm off the skin), u_repeat, ao,
+                             lod {"0": [rows, cols]} (cols rounded to whole u_repeat sectors)
   groups[]                   type: locks | bun | braid; per group "lod" rules:
                              {"1": {"keep": f, "sides": n, "segs": mul, "width_mul": m,
                              "kind": "card", "drop": true, "no_split": true, ...}, "2": {...}}
@@ -803,6 +805,21 @@ def build(style_path, sex, out_path, embed=False, check=True, quiet=False, only=
                 Pm = secure_groom(head, Pm, hair_d, id_names, marg)
                 dP = Pm - P; dP[np.abs(dP).max(1) < 2e-6] = 0
                 targets.append((dP, None)); hair_d[nm] = dP
+            # the under-shell's duplicated seam vertices (texture sectors, the pole fan)
+            # must deform as one, or the seams open into cracks under the morphs and the
+            # scalp shows through them (they split by up to 4 mm under id extremes)
+            sh = np.flatnonzero(d['lock'] < 0)
+            if len(sh):
+                _, inv, cnt = np.unique(np.round(P[sh] / 1e-6).astype(np.int64), axis=0,
+                                        return_inverse=True, return_counts=True)
+                inv = inv.ravel()
+                if (cnt > 1).any():
+                    for k, (dP, dN) in enumerate(targets):
+                        acc = np.zeros((len(cnt), 3)); np.add.at(acc, inv, dP[sh])
+                        dP = dP.copy(); dP[sh] = acc[inv] / cnt[inv][:, None]
+                        targets[k] = (dP, dN)
+                    for k, nm in enumerate(id_names + groom_names):
+                        hair_d[nm] = targets[k][0]
             prims.append(W.primitive(P.astype(np.float32), d['N'].astype(np.float32), d['UV'].astype(np.float32),
                                      d['T'], col, J4, W4, mats[mname], targets))
             tris_lod[mname] = int(len(d['T']))
