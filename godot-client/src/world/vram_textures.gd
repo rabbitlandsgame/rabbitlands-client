@@ -426,6 +426,19 @@ const POLICY_COLLECTION := "externalImagePolicies"
 const POOL_KEYS_KEY := &"rl_image_pool_keys"
 static var _policy_discovery := false
 
+static func resource_root(globalized: String, executable: String) -> String:
+	var root := globalized.replace("\\", "/").simplify_path()
+	if root.is_empty() or not root.is_absolute_path() or root.begins_with("res://"):
+		root = executable.replace("\\", "/").get_base_dir().simplify_path()
+	return root.trim_suffix("/")
+
+static func runtime_absolute(path: String) -> String:
+	var root := resource_root(ProjectSettings.globalize_path("res://"), OS.get_executable_path())
+	if path.begins_with("res://"):
+		return root.path_join(path.trim_prefix("res://")).simplify_path()
+	var absolute := ProjectSettings.globalize_path(path).replace("\\", "/").simplify_path()
+	return absolute if absolute.is_absolute_path() else root.path_join(absolute).simplify_path()
+
 ## Canonical pixel location and original sidecar policy are independent.
 ## Explicit policies are relative to the GLB and stay within its map asset tree.
 static func image_policy_directory(descriptor: Dictionary, glb_directory: String) -> String:
@@ -438,17 +451,13 @@ static func image_policy_directory(descriptor: Dictionary, glb_directory: String
 	var decoded := (uri as String).uri_file_decode()
 	if decoded.is_absolute_path() or ":" in decoded or "\\" in decoded:
 		return ""
-	var base := _normalise(glb_directory)
-	var marker := "/eloria-assets/maps"
-	var at := base.find(marker)
-	if at < 0:
-		marker = "/godot-client/assets/world"
-		at = base.find(marker)
-	if at < 0:
-		marker = "/app/assets/world"
-		at = base.find(marker)
-	if at < 0: return ""
-	var map_root := base.left(at + marker.length())
+	var base := runtime_absolute(glb_directory)
+	var map_root := runtime_absolute("res://../eloria-assets/maps")
+	var world_root := runtime_absolute("res://assets/world")
+	if base == world_root or base.begins_with(world_root + "/"):
+		map_root = world_root
+	elif not (base == map_root or base.begins_with(map_root + "/")):
+		return ""
 	var directory := _normalise(base.path_join(decoded))
 	return directory if directory == map_root or directory.begins_with(map_root + "/") else ""
 

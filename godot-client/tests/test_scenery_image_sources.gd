@@ -49,6 +49,10 @@ func glb_bytes(document: Dictionary, binary: PackedByteArray) -> PackedByteArray
 	return bytes
 
 func run() -> void:
+	check(Vram.resource_root("", "D:/Games/Rabbit Lands/RabbitLands.exe") == "D:/Games/Rabbit Lands",
+		"exported PCK root follows executable directory without app basename")
+	check(Vram.resource_root("C:/arbitrary/project/", "D:/irrelevant.exe") == "C:/arbitrary/project",
+		"editor resource root takes precedence over executable directory")
 	fixture = ProjectSettings.globalize_path("res://assets/world/.local/scenery-contract-%d" % OS.get_process_id())
 	Graphics._texture_skip = 2
 	var image := Image.create(64, 64, false, Image.FORMAT_RGB8)

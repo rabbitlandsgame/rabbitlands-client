@@ -56,14 +56,10 @@ static func verify_document(document: Dictionary, directory: String) -> Dictiona
 	if not resources is Dictionary or not policies is Dictionary: return _fail("scenery_images_resources")
 	var errors := Vram.image_policy_errors({"externalResources": resources, "externalImagePolicies": policies}, directory)
 	if not errors.is_empty(): return _fail("scenery_images_policy: " + "; ".join(errors))
-	var base := ProjectSettings.globalize_path(directory).replace("\\", "/").simplify_path()
-	var marker := "/godot-client/assets/world"
-	var at := base.find(marker)
-	if at < 0:
-		marker = "/app/assets/world"
-		at = base.find(marker)
-	if at < 0: return _fail("scenery_images_source_scope")
-	var root := base.left(at)
+	var base := Vram.runtime_absolute(directory)
+	var world_root := Vram.runtime_absolute("res://assets/world")
+	var assets_root := Vram.runtime_absolute("res://../eloria-assets")
+	if not (base == world_root or base.begins_with(world_root + "/")): return _fail("scenery_images_source_scope")
 	var used := {}
 	for item: Variant in document.get("images", []):
 		if not item is Dictionary or not _plain_relative(item.get("uri")) or item.has("bufferView"):
@@ -73,13 +69,13 @@ static func verify_document(document: Dictionary, directory: String) -> Dictiona
 		if not image_extras is Dictionary or not image_extras.get(ELIGIBLE_EXTRA) is bool \
 			or not Vram.has_image_policy(item): return _fail("scenery_images_descriptor_policy")
 		var policy := Vram.image_policy_directory(item, directory)
-		if ProjectSettings.globalize_path(policy).simplify_path() != base: return _fail("scenery_images_original_directory")
+		if Vram.runtime_absolute(policy) != base: return _fail("scenery_images_original_directory")
 		if not policies.get(uri) is Array or not policies[uri].has(image_extras[Vram.POLICY_DIRECTORY_EXTRA]):
 			return _fail("scenery_images_undeclared_policy")
 		if not _hex(resources.get(uri)): return _fail("scenery_images_source_digest")
 		var source := base.path_join(uri).simplify_path()
-		if not (source.begins_with(root + "/eloria-assets/maps/") or source.begins_with(root + "/eloria-assets/world/") \
-			or source.begins_with(root + marker + "/")):
+		if not (source.begins_with(assets_root + "/maps/") or source.begins_with(assets_root + "/world/") \
+			or source.begins_with(world_root + "/")):
 			return _fail("scenery_images_resource_scope")
 		used[uri] = source
 	if used.size() != resources.size() or policies.size() != resources.size(): return _fail("scenery_images_resource_closure")
