@@ -7,6 +7,8 @@ must accept the cooker’s actual renderer and resource-buffer readback result.
 """
 from __future__ import annotations
 
+import hashlib
+import json
 import os
 from pathlib import Path
 import shutil
@@ -18,6 +20,7 @@ OBSERVATION_POLICY = "actual-renderer-supported-format-subset-v1"
 CPU_DEVICE_TYPE = 4
 FORMAT_MASK = 7
 LINUX_PACKAGES = ("libgl1-mesa-dri", "libglx-mesa0", "xvfb", "xauth")
+LINUX_WORLD_PACKAGES = (*LINUX_PACKAGES, "mesa-vulkan-drivers")
 # These can conceal missing features or change the selected driver. Never use
 # version/extension overrides to manufacture a cook capability token.
 CONTROLLED_ENV = frozenset((
@@ -37,9 +40,9 @@ def host_platform():
     return {"win32": "windows", "linux": "linux"}.get(sys.platform, "unsupported")
 
 
-def _linux_packages():
+def _linux_packages(required=LINUX_PACKAGES):
     result = subprocess.run(
-        ["dpkg-query", "-W", "-f=${binary:Package}\t${Version}\t${db:Status-Status}\n", *LINUX_PACKAGES],
+        ["dpkg-query", "-W", "-f=${binary:Package}\t${Version}\t${db:Status-Status}\n", *required],
         check=True, capture_output=True, text=True, timeout=30)
     packages = {}
     for line in result.stdout.splitlines():
@@ -47,10 +50,10 @@ def _linux_packages():
         require(len(parts) == 3 and parts[2] == "installed", "software graphics package is not installed")
         name, version, _ = parts
         name = name.split(":", 1)[0]
-        require(name in LINUX_PACKAGES and name not in packages and version,
+        require(name in required and name not in packages and version,
                 "unexpected or duplicate software graphics package")
         packages[name] = version
-    require(set(packages) == set(LINUX_PACKAGES), "software graphics package inventory is incomplete")
+    require(set(packages) == set(required), "software graphics package inventory is incomplete")
     return packages
 
 
@@ -104,6 +107,47 @@ def prepare_graphics(platform, godot_dir, tool_root, check_budget, *,
                       display_driver="x11", gpu_index=None,
                       software_kind="mesa-llvmpipe", packages=_linux_packages())
     check_budget("software graphics configuration ready")
+    return config
+
+
+def _linux_lavapipe():
+    """Use only the distro-installed CPU Vulkan driver, never a downloaded DLL."""
+    result = subprocess.run(["dpkg-query", "-L", "mesa-vulkan-drivers"],
+                            check=True, capture_output=True, text=True, timeout=30)
+    files = [Path(line) for line in result.stdout.splitlines() if line.startswith("/")]
+    manifests = [path for path in files if path.parent == Path("/usr/share/vulkan/icd.d")
+                 and path.name.startswith("lvp_icd") and path.suffix == ".json"]
+    libraries = [path for path in files if path.name == "libvulkan_lvp.so"]
+    require(len(manifests) == 1 and len(libraries) == 1,
+            "one distro-installed lavapipe Vulkan ICD and library are required")
+    manifest, library = manifests[0], libraries[0]
+    require(manifest.is_file() and library.is_file() and not manifest.is_symlink(),
+            "installed lavapipe driver files are unavailable")
+    data = json.loads(manifest.read_text(encoding="utf-8"))
+    declared = data.get("ICD", {}).get("library_path")
+    require(isinstance(declared, str) and Path(declared).name == library.name,
+            "lavapipe ICD does not name the installed CPU Vulkan library")
+    if "/" in declared:
+        named = Path(declared) if Path(declared).is_absolute() else manifest.parent / declared
+        require(named.resolve() == library.resolve(), "lavapipe ICD names another driver library")
+    return {"icd": str(manifest), "icd_sha256": hashlib.sha256(manifest.read_bytes()).hexdigest(),
+            "library": str(library.resolve()), "library_sha256": hashlib.sha256(library.read_bytes()).hexdigest()}
+
+
+def prepare_world_graphics(platform, godot_dir, tool_root, check_budget, *, gpu_index=None):
+    """Request the game's default Forward+ renderer for the lean world cache.
+
+    Keep the older optimization pilot's Compatibility cook unchanged. Actual
+    CPU-device, format and buffer roundtrip observations remain mandatory.
+    """
+    config = prepare_graphics(platform, godot_dir, tool_root, check_budget, gpu_index=gpu_index)
+    if platform == "linux":
+        packages = _linux_packages(LINUX_WORLD_PACKAGES)
+        driver = _linux_lavapipe()
+        config = dict(config, packages=packages, rendering_method="forward_plus",
+                      rendering_driver="vulkan", software_kind="mesa-lavapipe", lavapipe=driver,
+                      env={**config["env"], "VK_DRIVER_FILES": driver["icd"]})
+    check_budget("world Forward+ software graphics configuration ready")
     return config
 
 
@@ -178,6 +222,10 @@ def validate_observation(config, observation):
             require(selection.get("selected_index") == config["gpu_index"]
                     and name.strip().casefold() == str(selection.get("selected_adapter", {}).get("name", "")).strip().casefold(),
                     "actual Windows adapter differs from the independently selected WARP identity")
+    elif config.get("software_kind") == "mesa-lavapipe":
+        require(adapter_type == CPU_DEVICE_TYPE and
+                any(label in name.lower() for label in ("llvmpipe", "lavapipe")),
+                "selected Linux Vulkan adapter is not CPU lavapipe")
     else:
         # Godot's GL adapter-type API returns OTHER even for llvmpipe.
         require("llvmpipe" in name.lower(), "selected Linux adapter is not llvmpipe")
@@ -217,8 +265,9 @@ def validate_preflight_report(config, report, *, project, user_directory, godot)
             and type(buffer.get("buffer_elements")) is int and buffer["buffer_elements"] == 12
             and buffer.get("save_reload") is True and buffer.get("removed") is True,
             "early graphics actual resource-buffer proof is incomplete")
-    if config["platform"] == "windows":
-        require("windows_adapter" in config, "early graphics independent WARP selection is missing")
+    if config["platform"] == "windows" or config.get("software_kind") == "mesa-lavapipe":
+        if config["platform"] == "windows":
+            require("windows_adapter" in config, "early graphics independent WARP selection is missing")
         require(type(observed.get("expected_cpu_type")) is int and observed["expected_cpu_type"] == CPU_DEVICE_TYPE
                 and observed.get("rendering_device_present") is True
                 and observed.get("rendering_device_name") == observed.get("adapter_name"),

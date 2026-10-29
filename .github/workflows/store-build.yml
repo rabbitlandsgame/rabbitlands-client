@@ -62,7 +62,7 @@ jobs:
         if: matrix.platform == 'linux' && inputs.distribution == 'steam' && (inputs.platform == 'all' || inputs.platform == 'linux')
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends libfontconfig1 libx11-6 libxcursor1 libxinerama1 libxi6 libxrandr2 libasound2t64 libgl1
+          sudo apt-get install -y --no-install-recommends libfontconfig1 libx11-6 libxcursor1 libxinerama1 libxi6 libxrandr2 libasound2t64 libgl1 libgl1-mesa-dri libglx-mesa0 mesa-vulkan-drivers xvfb xauth
       - name: Build complete store content with bounded disk use
         if: (inputs.platform == 'all' || inputs.platform == matrix.platform) && (inputs.distribution == 'steam' || matrix.platform == 'macos')
         shell: bash

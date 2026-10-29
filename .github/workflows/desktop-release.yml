@@ -77,7 +77,7 @@ jobs:
         if: matrix.platform == 'linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends libfontconfig1 libx11-6 libxcursor1 libxinerama1 libxi6 libxrandr2 libasound2t64 libgl1 libgl1-mesa-dri libglx-mesa0 xvfb xauth cmake ninja-build g++
+          sudo apt-get install -y --no-install-recommends libfontconfig1 libx11-6 libxcursor1 libxinerama1 libxi6 libxrandr2 libasound2t64 libgl1 libgl1-mesa-dri libglx-mesa0 mesa-vulkan-drivers xvfb xauth cmake ninja-build g++
       - name: Install the pinned native runtime toolchain
         shell: bash
         run: |
