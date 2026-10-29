@@ -441,6 +441,12 @@ static func image_policy_directory(descriptor: Dictionary, glb_directory: String
 	var base := _normalise(glb_directory)
 	var marker := "/eloria-assets/maps"
 	var at := base.find(marker)
+	if at < 0:
+		marker = "/godot-client/assets/world"
+		at = base.find(marker)
+	if at < 0:
+		marker = "/app/assets/world"
+		at = base.find(marker)
 	if at < 0: return ""
 	var map_root := base.left(at + marker.length())
 	var directory := _normalise(base.path_join(decoded))
@@ -486,10 +492,10 @@ static func has_image_policy(descriptor: Dictionary) -> bool:
 static func set_policy_discovery(enabled: bool) -> void:
 	_policy_discovery = enabled
 
-static func variant_pool_key(sha: String, entry: Dictionary = {}, policy_directory := "") -> String:
+static func variant_pool_key(sha: String, entry: Dictionary = {}, policy_directory := "", requested_skip := -1) -> String:
 	var variant := "raw" if entry.is_empty() else "evt:%s:%s:%s" % [
 		str(entry.get("sha256", "")), str(entry.get("recipe", "")), str(entry.get("format", ""))]
-	var key := "%s|%s|mip-skip=%d" % [sha, variant, GraphicsOptions.active_texture_skip()]
+	var key := "%s|%s|mip-skip=%d" % [sha, variant, GraphicsOptions.active_texture_skip() if requested_skip < 0 else requested_skip]
 	return key + "|discovery=" + _normalise(policy_directory) if _policy_discovery else key
 
 static func policy_directory_list(manifest_data: Dictionary, uri: String, glb_directory: String) -> PackedStringArray:
@@ -806,7 +812,7 @@ static func prepare(job: Dictionary) -> void:
 	if not sidecar.is_empty():
 		var loaded := decode_sidecar(sidecar)
 		if loaded.image != null:
-			job["image"] = GraphicsOptions.reduced_image(loaded.image)
+			job["image"] = GraphicsOptions.reduced_image(loaded.image, int(job.get("mip_skip", -1)))
 			job["kind"] = "sidecar"
 			job["mime"] = "image/vnd-ms.dds"
 			return
@@ -814,7 +820,7 @@ static func prepare(job: Dictionary) -> void:
 		note_decoded_instead(str(job.sha))
 		_warn_once(str(job.sha), "vram_textures: sidecar %s unusable (%s); decoding %s" % [
 			str(sidecar.file), loaded.reason, str(job.source).get_file()])
-	var decoded := decode_source(str(job.source))
+	var decoded := decode_source(str(job.source), int(job.get("mip_skip", -1)))
 	job["mime"] = decoded.mime
 	job["image"] = decoded.image
 	job["kind"] = "decoded" if decoded.image != null else "failed"
@@ -866,7 +872,7 @@ static func _warn_once(sha: String, message: String) -> void:
 ## Decodes an image file by its leading bytes rather than its extension or a
 ## declared type, and gives it the mip chain the client has always built
 ## (`Image.generate_mipmaps`). Returns {image: Image or null, mime: String}.
-static func decode_source(path: String) -> Dictionary:
+static func decode_source(path: String, requested_skip := -1) -> Dictionary:
 	var bytes := FileAccess.get_file_as_bytes(path)
 	var mime := sniff(bytes)
 	var image := Image.new()
@@ -885,8 +891,8 @@ static func decode_source(path: String) -> Dictionary:
 	if not image.has_mipmaps():
 		image.generate_mipmaps()
 	var skip := GraphicsOptions.mip_skip(image.get_width(), image.get_height(),
-		image.get_mipmap_count(), GraphicsOptions.active_texture_skip())
-	return {"image": GraphicsOptions.reduced_image(image), "mime": mime, "mip_skip": skip}
+		image.get_mipmap_count(), GraphicsOptions.active_texture_skip() if requested_skip < 0 else requested_skip)
+	return {"image": GraphicsOptions.reduced_image(image, requested_skip), "mime": mime, "mip_skip": skip}
 
 ## The image type its first bytes declare: PNG, JPEG or WebP, else "".
 static func sniff(bytes: PackedByteArray) -> String:

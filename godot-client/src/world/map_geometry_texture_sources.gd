@@ -4,7 +4,7 @@ const CreaturePayload := preload("res://src/actors/creature_payload.gd")
 ## disabled fast path; discovery owns WeakRefs and portable data, never pixels.
 const Prepared := preload("res://src/world/prepared_content.gd")
 const Vram := preload("res://src/world/vram_textures.gd")
-const POLICY := "map-geometry-texture-sources-v2"
+const POLICY := "map-geometry-texture-sources-v3"
 const MAX_IMAGE_BYTES := 268435456
 static var _recording := false
 static var _records: Dictionary = {}
@@ -71,7 +71,8 @@ static func _record(texture: Texture2D, origin: Dictionary) -> void:
 	var previous: Dictionary = _records.get(identity, {})
 	if not previous.is_empty() and (previous.reference as WeakRef).get_ref() == texture \
 			and str(previous.origin.get("image_sha256", "")) == str(origin.get("image_sha256", "")) \
-			and str(previous.origin.get("policy_directory", "")) == str(origin.get("policy_directory", "")):
+			and str(previous.origin.get("policy_directory", "")) == str(origin.get("policy_directory", "")) \
+			and previous.origin.get("sidecar_eligible", true) == origin.get("sidecar_eligible", true):
 		var combined: Array[String] = _roles(previous.origin.get("roles", []))
 		for role: String in _roles(origin.get("roles", [])):
 			if not combined.has(role): combined.append(role)
@@ -120,6 +121,8 @@ static func note(state: GLTFState, glb_path: String) -> void:
 				"image_sha256": sha, "mip_policy": "full" if file.begins_with("godot-client/assets/world/") else "map",
 				"inputs": [{"path": image_file, "sha256": sha}]}
 			if Vram.has_image_policy(descriptor): origin["policy_directory"] = policy_logical
+			if descriptor.get("extras", {}).has("rl_texture_sidecar_eligible"):
+				origin["sidecar_eligible"] = descriptor.extras.rl_texture_sidecar_eligible
 		else:
 			if container.is_empty(): container = CreaturePayload.read_bytes(source_path(file))
 			var extracted := embedded_bytes(container, index)

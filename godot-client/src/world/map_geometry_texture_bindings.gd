@@ -9,7 +9,7 @@ const Vram := preload("res://src/world/vram_textures.gd")
 const Pool := preload("res://src/world/external_texture_pool.gd")
 const Graphics := preload("res://src/world/graphics_options.gd")
 const MapImages := preload("res://src/world/map_image_extension.gd")
-const POLICY := "map-geometry-texture-bindings-v2"
+const POLICY := "map-geometry-texture-bindings-v3"
 const SLOT_META := &"rl_geometry_texture_slots"
 const MAX_BINDINGS := 16384
 const MAX_SHARED_CONTAINER_BYTES := 8 * 1024 * 1024
@@ -27,6 +27,7 @@ static func _identity(origin: Dictionary) -> String:
 		"width": int(origin.get("width", 0)), "height": int(origin.get("height", 0))}
 	if origin.has("policy_directory"):
 		identity["policy_directory"] = str(origin.policy_directory)
+	if origin.has("sidecar_eligible"): identity["sidecar_eligible"] = origin.sidecar_eligible
 	if identity.kind == "constant":
 		identity["format"] = int(origin.get("format", -1))
 		identity["mips"] = int(origin.get("mips", 0))
@@ -105,8 +106,10 @@ static func _origin_error(origin: Dictionary) -> String:
 		if inputs.has(str(row.path)) and str(inputs[str(row.path)]) != str(row.sha256): return "texture_inputs_conflict"
 		inputs[str(row.path)] = str(row.sha256)
 	if origin.has("policy_directory"):
-		if kind != "external" or not origin.policy_directory is String or not str(origin.policy_directory).begins_with("eloria-assets/maps/") \
+		if kind != "external" or not origin.policy_directory is String or not (str(origin.policy_directory).begins_with("eloria-assets/maps/") \
+				or str(origin.policy_directory).begins_with("godot-client/assets/world/")) \
 				or Sources.source_path(str(origin.policy_directory)).is_empty(): return "texture_policy_scope"
+	if origin.has("sidecar_eligible") and (kind != "external" or not origin.sidecar_eligible is bool): return "texture_sidecar_policy"
 	if kind == "constant":
 		if not origin.get("data") is String or str(origin.data).is_empty() or str(origin.data).length() > 128 \
 				or not str(origin.data).is_valid_hex_number(false): return "constant_texture_data"
@@ -139,14 +142,18 @@ static func _policy_directory(origin: Dictionary) -> String:
 	return Sources.source_path(str(origin.policy_directory)) if origin.has("policy_directory") else _source(origin).get_base_dir()
 
 static func _roles_key(origin: Dictionary) -> String:
-	return str(origin.image_sha256) + "|policy=" + str(origin.policy_directory) if origin.has("policy_directory") else str(origin.image_sha256)
+	var key := str(origin.image_sha256) + "|policy=" + str(origin.policy_directory) if origin.has("policy_directory") else str(origin.image_sha256)
+	return key + "|eligible=" + str(origin.sidecar_eligible) if origin.has("sidecar_eligible") else key
+
+static func _entry(origin: Dictionary) -> Dictionary:
+	return Vram.sidecar_entry(str(origin.image_sha256), _policy_directory(origin)) if bool(origin.get("sidecar_eligible", true)) else {}
 
 static func _pool_key(origin: Dictionary, roles: Dictionary, actual: Texture2D = null) -> String:
 	if not origin.has("policy_directory"): return str(origin.image_sha256)
-	var entry := Vram.sidecar_entry(str(origin.image_sha256), _policy_directory(origin))
+	var entry := _entry(origin)
 	if not entry.is_empty() and not Vram.sidecar_fits(entry, roles): entry = {}
 	if actual is ImageTexture and not Vram.IMAGE_FORMATS.values().has((actual as ImageTexture).get_format()): entry = {}
-	return Vram.variant_pool_key(str(origin.image_sha256), entry, _policy_directory(origin))
+	return Vram.variant_pool_key(str(origin.image_sha256), entry, _policy_directory(origin), 0 if str(origin.get("mip_policy", "map")) == "full" else -1)
 
 static func _pool_fits(texture: Texture2D, origin: Dictionary, roles: Dictionary) -> bool:
 	if not texture is ImageTexture: return false
@@ -154,7 +161,7 @@ static func _pool_fits(texture: Texture2D, origin: Dictionary, roles: Dictionary
 	var format := image_texture.get_format()
 	var compressed := Vram.IMAGE_FORMATS.values().has(format)
 	if compressed:
-		var entry := Vram.sidecar_entry(str(origin.image_sha256), _policy_directory(origin))
+		var entry := _entry(origin)
 		if entry.is_empty() or not Vram.sidecar_fits(entry, roles) \
 				or int(Vram.IMAGE_FORMATS[str(entry.format)]) != format:
 			return false
@@ -232,10 +239,10 @@ static func prepare(bindings: Dictionary, worker: bool, container_source := "", 
 		# different sidecars for identical bytes. Role requirements still union
 		# across the source SHA before either job selects an encoding.
 		var job_key := "%s|%s|%s|%s|%s" % [sha, kind, str(origin.get("file", "")),
-			str(origin.get("image_index", -1)), str(origin.get("mip_policy", "map")) + "|" + str(origin.get("policy_directory", ""))]
+			str(origin.get("image_index", -1)), str(origin.get("mip_policy", "map")) + "|" + str(origin.get("policy_directory", "")) + "|" + str(origin.get("sidecar_eligible", true))]
 		if not jobs_by_key.has(job_key):
 			var source := _source(origin)
-			var entry := Vram.sidecar_entry(sha, _policy_directory(origin)) if kind in ["external", "gltf_image"] else {}
+			var entry := _entry(origin) if kind in ["external", "gltf_image"] else {}
 			if not entry.is_empty() and not Vram.sidecar_fits(entry, roles):
 				entry = {}
 				Vram.note_decoded_instead(sha)

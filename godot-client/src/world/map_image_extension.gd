@@ -56,6 +56,7 @@ func _import_preflight(state: GLTFState, _extensions: PackedStringArray) -> Erro
 	# or pooled by another map) is used only where it was encoded for them.
 	var document_roles := VramTextures.image_roles(state.get_json())
 	var base := state.get_base_path()
+	var requested_skip := int((plan as Dictionary).get("mip_skip", -1))
 	var jobs: Array[Dictionary] = []
 	var by_sha: Dictionary = {}
 	var assigned: Dictionary = {}
@@ -67,6 +68,8 @@ func _import_preflight(state: GLTFState, _extensions: PackedStringArray) -> Erro
 		if not descriptor is Dictionary or not (descriptor as Dictionary).has("uri"):
 			continue
 		var uri := str((descriptor as Dictionary).uri)
+		if bool((plan as Dictionary).get("eligible_only", false)) and not bool(descriptor.get("extras", {}).get("rl_texture_sidecar_eligible", false)):
+			continue
 		if uri.begins_with("data:") or not resources.has(uri):
 			continue
 		var sha := str(resources[uri])
@@ -94,7 +97,7 @@ func _import_preflight(state: GLTFState, _extensions: PackedStringArray) -> Erro
 		var job: Dictionary = by_sha.get(job_key, {})
 		if job.is_empty():
 			job = {"sha": sha, "source": source, "roles": {},
-				"sidecar": VramTextures.sidecar_entry(sha, policy_directory), "explicit_policy": explicit_policy, "policy_directory": policy_directory, "indices": []}
+				"sidecar": VramTextures.sidecar_entry(sha, policy_directory), "explicit_policy": explicit_policy, "policy_directory": policy_directory, "indices": [], "mip_skip": requested_skip}
 			by_sha[job_key] = job
 			jobs.append(job)
 		(job.roles as Dictionary).merge(roles)
@@ -113,7 +116,7 @@ func _import_preflight(state: GLTFState, _extensions: PackedStringArray) -> Erro
 			role_mismatches += 1
 			VramTextures.note_decoded_instead(str(job.sha))
 		if bool(job.explicit_policy):
-			var key := VramTextures.variant_pool_key(str(job.sha), job.sidecar, str(job.policy_directory))
+			var key := VramTextures.variant_pool_key(str(job.sha), job.sidecar, str(job.policy_directory), requested_skip)
 			var held := ExternalTexturePool._published(key)
 			if held != null:
 				for image_index: int in job.indices:
@@ -164,7 +167,7 @@ func _import_preflight(state: GLTFState, _extensions: PackedStringArray) -> Erro
 		var descriptor: Dictionary = images[index]
 		originals[index] = [descriptor.get("uri"), descriptor.get("mimeType")]
 		if bool(job.get("explicit_policy", false)):
-			pool_keys[index] = VramTextures.variant_pool_key(str(job.sha), job.sidecar if str(job.get("kind", "")) == "sidecar" else {}, str(job.policy_directory))
+			pool_keys[index] = VramTextures.variant_pool_key(str(job.sha), job.sidecar if str(job.get("kind", "")) == "sidecar" else {}, str(job.policy_directory), requested_skip)
 		var image: Image = job.get("image")
 		if image != null:
 			prepared[index] = image

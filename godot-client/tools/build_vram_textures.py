@@ -612,6 +612,18 @@ def inventory(maps_roots: list[Path], manifests: list[Path] | None = None, scene
         try:
             document = glb_json(glb)
             extracted = embedded_images(glb, extract_dir)
+            # Externalized scenery keeps its historical embedded-image policy:
+            # the original world directory, roles and recipe/cutoffs. Original
+            # URI images explicitly remain ineligible, exactly as before.
+            from scenery_image_sources import validate as validate_scenery_images
+            if "rabbitlands_scenery_images" in document.get("extras", {}):
+                source_root = next((parent for parent in glb.resolve().parents
+                                    if (parent / "godot-client").is_dir() and (parent / "eloria-assets").is_dir()), None)
+                if source_root is None:
+                    raise ValueError(f"cannot locate scenery repository root: {glb}")
+                scenery_sources = validate_scenery_images(source_root, glb, document)
+                extracted.extend((item["index"], item["sha256"], item["path"])
+                                 for item in scenery_sources["images"] if item["sidecar_eligible"])
         except (OSError, ValueError, KeyError) as error:
             raise BuildError(f"cannot read scenery GLB {glb}: {error}") from error
         roles = image_roles(document)
