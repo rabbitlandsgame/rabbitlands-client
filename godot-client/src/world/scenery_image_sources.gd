@@ -72,6 +72,9 @@ static func verify_document(document: Dictionary, directory: String) -> Dictiona
 		if Vram.runtime_absolute(policy) != base: return _fail("scenery_images_original_directory")
 		if not policies.get(uri) is Array or not policies[uri].has(image_extras[Vram.POLICY_DIRECTORY_EXTRA]):
 			return _fail("scenery_images_undeclared_policy")
+		for declared: String in policies[uri]:
+			var declared_directory := Vram.image_policy_directory({"extras": {Vram.POLICY_DIRECTORY_EXTRA: declared}}, directory)
+			if Vram.runtime_absolute(declared_directory) != base: return _fail("scenery_images_original_directory")
 		if not _hex(resources.get(uri)): return _fail("scenery_images_source_digest")
 		var source := base.path_join(uri).simplify_path()
 		if not (source.begins_with(assets_root + "/maps/") or source.begins_with(assets_root + "/world/") \

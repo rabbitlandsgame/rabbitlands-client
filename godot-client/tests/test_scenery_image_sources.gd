@@ -118,6 +118,9 @@ func run() -> void:
 	bad = document.duplicate(true)
 	bad.images[0].extras[Vram.POLICY_DIRECTORY_EXTRA] = "%2e"
 	check(not Source.verify_document(bad, fixture).ok, "encoded policy paths fail closed")
+	bad = document.duplicate(true)
+	bad.extras[Source.KEY].imagePolicies["shared.png"] = [".", ".."]
+	check(not Source.verify_document(bad, fixture).ok, "aggregate cannot add a different original policy directory")
 	# Exercise the real importer with both globally registered extensions. This
 	# catches extension ordering, restoration, normalized material carriers and
 	# the PREPARED threshold used by GlbSceneCache's no-readback worker path.
