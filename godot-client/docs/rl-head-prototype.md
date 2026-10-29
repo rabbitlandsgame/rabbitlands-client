@@ -314,10 +314,12 @@ face with both at 0 is the head as before.
   is 33 bytes with 23 controls.
 * **Calibration.** The heads, hair and beards draw the neutral face exactly as before
   and the skin shader draws it identically with eye_style 0, so their colour-calibration
-  source pins were moved to the new files; the eye shader's 0.15 lid hint darkens the top
-  of every iris, so the RL eye tables (`colours.eyes`, `eyeLut`) want measuring again
-  (`rl_head_colour_calibration --part=eyes`) and keep their old `rl_eye.gdshader` pin
-  until then.
+  source pins were moved to the new files. The eye shader's 0.15 lid hint darkens the top
+  of every iris (the palette table drew up to 0.012 sRGB dark), so the RL eye tables
+  (`colours.eyes`, `eyeLut`) were measured again on 2026-10-29
+  (`rl_head_colour_calibration --part=eyes`): eyeLut as `fit_skin_eyes.py` fits it, and
+  each palette entry solved through that run's affine fit of the RL iris (it matched the
+  old entries as measured within 0.0002 sRGB).
 
 ## What it is
 
