@@ -6,7 +6,9 @@ extends SceneTree
 ##     bias, layers, skins) for presets, beards, a game hairstyle, an open band
 ##     and a closed helm; RL_HEADS=classic switches a live actor to develop's
 ##     classic High head and back;
-##   * RL caches are released with the last RL head; no rig is left behind;
+##   * RL caches outlive the last RL head for the retention time (a switch back
+##     up within it parses nothing again), then are all released; no rig is
+##     left behind; prewarm parses the RL files on workers and publishes them;
 ##   * body refinement never touches RL meshes (no cache entries for them);
 ##   * RL meshes carry the animated-head culling envelope and the body's layers;
 ##   * the portrait pose (dialogue layer lease, leaderboard): first level of
@@ -57,6 +59,7 @@ func _run() -> void:
 	await _check_round_trips()
 	await _check_classic_switch()
 	await _check_release()
+	await _check_prewarm()
 	await _check_refinement_and_presentation()
 	await _check_portrait_pose()
 	await _check_female_facial_hair()
@@ -246,17 +249,34 @@ func _check_release() -> void:
 	await process_frame
 	_expect(RLHeadLibrary.users() == 2 and RLHeadLibrary.is_loaded(), "one switched down leaves the caches loaded")
 	_expect(RLHeadRig.find_on(actors[0].get_skeleton()) == null, "the switched actor keeps no rig")
+	# The last one going keeps the caches for the retention time: switching
+	# back up within it reads and parses nothing again.
+	RLHeadLibrary.retain_seconds = 0.4
 	actors[1].apply_render_quality(LOW, false)
 	actors[2].free()
 	await process_frame
 	await process_frame
+	_expect(RLHeadLibrary.users() == 0 and RLHeadLibrary.is_loaded() and RLHeadLibrary.retaining(),
+		"the last RL head going keeps the caches for the retention time")
+	var misses := int(GlbSceneCache.retention_snapshot()["lookup_misses"])
+	actors[0].apply_render_quality(HIGH, false)
+	await process_frame
+	_expect(actors[0].rl_head() != null and RLHeadLibrary.users() == 1
+		and int(GlbSceneCache.retention_snapshot()["lookup_misses"]) == misses,
+		"a switch back up within the retention time parses no RL file again")
+	actors[0].apply_render_quality(MEDIUM, false)
+	await process_frame
+	var waited := Time.get_ticks_msec()
+	while RLHeadLibrary.is_loaded() and Time.get_ticks_msec() - waited < 3000:
+		await process_frame
 	_expect(RLHeadLibrary.users() == 0 and not RLHeadLibrary.is_loaded() and RLHeadBodyCut._cuts.is_empty()
 		and RLHeadwearFit._meshes.is_empty() and RLHeadRig._shape_indices.is_empty(),
-		"the last RL head going releases every RL cache")
+		"after the retention time every RL cache is released")
 	var scenes := 0
 	for key: Variant in GlbSceneCache._scenes:
 		scenes += 1 if str(key).contains("rl_heads") else 0
 	_expect(scenes == 0, "GlbSceneCache lets go of the RL files (%d left)" % scenes)
+	RLHeadLibrary.retain_seconds = 0.0
 	actors[0].apply_render_quality(HIGH, false)
 	await process_frame
 	_expect(actors[0].rl_head() != null and RLHeadLibrary.users() == 1, "the next High actor loads them again")
@@ -264,7 +284,54 @@ func _check_release() -> void:
 		actor.free()
 	await process_frame
 	await process_frame
-	_expect(RLHeadLibrary.users() == 0, "freeing actors releases their RL heads")
+	_expect(RLHeadLibrary.users() == 0 and not RLHeadLibrary.is_loaded(),
+		"freeing actors releases their RL heads (at once with no retention time)")
+	RLHeadLibrary.retain_seconds = RLHeadLibrary.RETAIN_SECONDS
+
+
+## prewarm parses every RL file on the WorkerThreadPool and publishes it to
+## GlbSceneCache without the main thread waiting; the first High actor then
+## parses nothing; release_if_unused lets unused prewarmed files go.
+func _check_prewarm() -> void:
+	RLHeadLibrary.retain_seconds = 0.0
+	RLHeadLibrary.clear()
+	await process_frame
+	var paths := RLHeadLibrary.warm_paths()
+	_expect(paths.size() >= 4, "every head, hairstyle and beard is prewarmed (%d files)" % paths.size())
+	RLHeadLibrary.prewarm()
+	_expect(RLHeadLibrary.warming() or GlbSceneCache.missing(_global(paths)).is_empty(),
+		"prewarm starts worker parses")
+	var began := Time.get_ticks_msec()
+	while RLHeadLibrary.warming() and Time.get_ticks_msec() - began < 20000:
+		await process_frame
+	_expect(not RLHeadLibrary.warming() and GlbSceneCache.missing(_global(paths)).is_empty(),
+		"every prewarmed file is published (%d ms)" % (Time.get_ticks_msec() - began))
+	var misses := int(GlbSceneCache.retention_snapshot()["lookup_misses"])
+	var actor := _spawn("female", PRESETS.appearance("Mira"), {}, HIGH)
+	await process_frame
+	_expect(actor.rl_head() != null and int(GlbSceneCache.retention_snapshot()["lookup_misses"]) == misses,
+		"the first High actor after a prewarm parses nothing on the main thread")
+	actor.free()
+	await process_frame
+	await process_frame
+	_expect(not RLHeadLibrary.is_loaded(), "the prewarmed files go with the last RL head")
+	RLHeadLibrary.prewarm()
+	began = Time.get_ticks_msec()
+	while RLHeadLibrary.warming() and Time.get_ticks_msec() - began < 20000:
+		await process_frame
+	await process_frame
+	_expect(RLHeadLibrary.is_loaded() and RLHeadLibrary.users() == 0, "a prewarm with no RL head holds the parsed files")
+	RLHeadLibrary.release_if_unused()
+	await process_frame
+	_expect(not RLHeadLibrary.is_loaded(), "release_if_unused lets unused prewarmed files go")
+	RLHeadLibrary.retain_seconds = RLHeadLibrary.RETAIN_SECONDS
+
+
+static func _global(paths: PackedStringArray) -> PackedStringArray:
+	var result := PackedStringArray()
+	for path: String in paths:
+		result.append(ProjectSettings.globalize_path(path))
+	return result
 
 
 func _check_refinement_and_presentation() -> void:

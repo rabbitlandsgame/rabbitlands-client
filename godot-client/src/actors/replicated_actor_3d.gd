@@ -1154,6 +1154,22 @@ static func rl_heads_renderer_supported() -> bool:
 	return RL_HEADS_EVERYWHERE.has(_rl_heads_switch) \
 		or RenderingServer.get_current_rendering_method() != "gl_compatibility"
 
+## The graphics quality is now `level` (main.gd's quality pass, before the
+## actors switch): at High, where this renderer draws the RL head, its files
+## are parsed on worker threads ahead of the first High Human - the first
+## creation preview, the first Humans in sight, or the switch itself, whose
+## first head module is parsed on this thread while the rest go to workers
+## (RLHeadLibrary.prewarm). Below High, caches no RL head uses are let go
+## after RLHeadLibrary's retention time. A headless process (tests, tools)
+## draws nothing and never prewarms.
+static func prewarm_rl_heads(level: int) -> void:
+	if rl_heads_classic() or not rl_heads_renderer_supported() or DisplayServer.get_name() == "headless":
+		return
+	if ActorRenderQuality.normalized_quality(level) == ActorRenderQuality.Quality.HIGH:
+		RLHeadLibrary.prewarm()
+	else:
+		RLHeadLibrary.release_if_unused()
+
 ## The lab's explicit face, `appearance.rl_head` (a preset name or
 ## RLHeadAppearance's dictionary form), or null. Neither the game nor the wire
 ## ever sets it; the lab and the evidence scripts use it to show a chosen face,

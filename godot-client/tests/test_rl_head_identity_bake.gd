@@ -52,6 +52,8 @@ func _run() -> void:
 	_equipment = _json("res://data/actors/equipment.json")
 	_animation = _json("res://data/animations/luminous.json")
 	OS.set_environment("RL_HEADS", "")
+	# The cache checks below expect the caches to go with the last RL head.
+	RLHeadLibrary.retain_seconds = 0.0
 	# Headless runs report no renderer: switch the bake on explicitly.
 	OS.set_environment("RL_HEAD_BAKE", "1")
 	ReplicatedActor3D.reload_rl_heads_switch()
