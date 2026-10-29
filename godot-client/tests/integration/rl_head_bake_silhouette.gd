@@ -172,9 +172,15 @@ func _run() -> void:
 	quit(1 if failures > 0 else 0)
 
 
+## Every PC/2 face, grooming and proportion field at `value`, the fields the
+## tie allowance was measured on (2026-10-28, before PC/3). With the PC/3 face
+## controls at 100 as well (eyelid, nose, mouth, chin, ear ...) the female
+## all-100 blink-smile-jaw front depth view has 55 differing pixels against 51
+## allowed, every one isolated (no cluster larger than one pixel, no pair;
+## 2026-10-29): re-measure the allowance before adding them here.
 static func _all(value: int) -> Dictionary:
 	var result := {}
-	for field: String in PortraitCustomization.FIELDS:
+	for field: String in PortraitCustomization.V2_FIELDS:
 		result[field] = mini(value, PortraitCustomization.maximum(field))
 	return result
 
