@@ -794,7 +794,20 @@ def _mesh_image_policies(document: dict, mesh_index: int, source: Path) -> tuple
                     annotated |= explicit is not None
                     uri = image.get("uri", "")
                     external = bool(uri and not uri.startswith("data:"))
-                    directory = explicit if explicit is not None else (source.parent / uri).resolve().parent if external else source.parent.resolve()
+                    if explicit is not None:
+                        directory = explicit
+                    elif "bufferView" in image:
+                        # _collect preserves these bytes, then shared_images.externalise
+                        # publishes them in this pool. Compare that final policy, not
+                        # the incoming authoring GLB's directory. No assets are written.
+                        external = True
+                        directory = (MAPS / "_shared" / "images").resolve()
+                    elif external:
+                        directory = (source.parent / uri).resolve().parent
+                    else:
+                        # Data URIs stay inline in the current publisher, inside the
+                        # collected prototype. Do not invent a global-image policy.
+                        directory = POOL.resolve()
                     rows.append((slot + (key,), external, directory))
                 else:
                     walk(item, slot + (key,))
