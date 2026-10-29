@@ -1,0 +1,421 @@
+{
+  "schema": "rabbitlands-road-terrain-blend-v1",
+  "region": "ringholm",
+  "chunk": "06_10",
+  "pixels_per_metre": 4,
+  "source_glb_sha256": "74d8caf872e79bf33b9d3baa1d02060616a9ba6e7d42ad9fd79da83be9d3a497",
+  "source_manifest_sha256": "05dab238908cdf3d1e32572bfb7017446e5da4446b5e367e5a31059842cbb4ac",
+  "authoring_scene_sha256": "a31e61f6980b83a7c7fe21c74c6f07dd3e8fa72a506c44ca9f2ab253e3e868cd",
+  "mask_space": "gltf_scene_world_xz",
+  "source_frame_node": "AuthoredGround_ringholmBase_ringholm_06_10",
+  "source_frame_matrix": [
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    -2710.0,
+    0.0,
+    -6841.0,
+    1.0
+  ],
+  "targets": [
+    {
+      "name": "AuthoredGround_ringholmBase_ringholm_06_10",
+      "world_matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        -2710.0,
+        0.0,
+        -6841.0,
+        1.0
+      ]
+    }
+  ],
+  "removed_road_node_names": [
+    "Walk_ringholm_ringholm--a3-trail-02_ringholm_06_10",
+    "Walk_ringholm_ringholm--a3-trail-10_ringholm_06_10",
+    "Walk_ringholm_ringholm--r32-east--0_ringholm_06_10"
+  ],
+  "source_road_ids": [
+    "ringholm--a3-trail-02",
+    "ringholm--a3-trail-10",
+    "ringholm--r32-east--0"
+  ],
+  "retained_walk_nodes": [],
+  "collision_policy": "retained_terrain_only_for_removed_road_ribbons;structural_walks_unchanged",
+  "styles": [
+    {
+      "id": 0,
+      "identity_sha256": "e0de0a4bfc53f3d070b3f007bc42f8abcc98b64eb1699adf41e7b6b955de7812",
+      "material_document": {
+        "asset": {
+          "version": "2.0"
+        },
+        "materials": [
+          {
+            "name": "authored_ringholm_ringholm--a3-trail-07",
+            "pbrMetallicRoughness": {
+              "baseColorFactor": [
+                0.4479883954656566,
+                0.2738384190209769,
+                0.0946296286508036,
+                1.0
+              ],
+              "metallicFactor": 0.0,
+              "roughnessFactor": 1.0,
+              "baseColorTexture": {
+                "index": 0
+              },
+              "metallicRoughnessTexture": {
+                "index": 1
+              }
+            },
+            "occlusionTexture": {
+              "index": 1
+            },
+            "normalTexture": {
+              "index": 2,
+              "scale": 0.72
+            },
+            "alphaMode": "BLEND",
+            "doubleSided": true
+          }
+        ],
+        "textures": [
+          {
+            "sampler": 0,
+            "source": 0
+          },
+          {
+            "sampler": 0,
+            "source": 1
+          },
+          {
+            "sampler": 0,
+            "source": 2
+          }
+        ],
+        "images": [
+          {
+            "uri": "../../../../_continent_v2/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png",
+            "name": "ringholm_ringholm--a3-trail-07_albedoTexture"
+          },
+          {
+            "uri": "../../../../_continent_v2/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png",
+            "name": "ringholm_ringholm--a3-trail-07_ormTexture"
+          },
+          {
+            "uri": "../../../../_continent_v2/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png",
+            "name": "ringholm_ringholm--a3-trail-07_normalTexture"
+          }
+        ],
+        "samplers": [
+          {
+            "magFilter": 9729,
+            "minFilter": 9987,
+            "wrapS": 10497,
+            "wrapT": 10497
+          }
+        ]
+      },
+      "externalResources": {
+        "../../../../_continent_v2/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png": "8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805",
+        "../../../../_continent_v2/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png": "ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5",
+        "../../../../_continent_v2/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png": "6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7"
+      },
+      "original_material_names": [
+        "authored_ringholm_ringholm--a3-trail-01",
+        "authored_ringholm_ringholm--a3-trail-02",
+        "authored_ringholm_ringholm--a3-trail-03",
+        "authored_ringholm_ringholm--a3-trail-04",
+        "authored_ringholm_ringholm--a3-trail-05",
+        "authored_ringholm_ringholm--a3-trail-06",
+        "authored_ringholm_ringholm--a3-trail-07",
+        "authored_ringholm_ringholm--a3-trail-08",
+        "authored_ringholm_ringholm--a3-trail-09",
+        "authored_ringholm_ringholm--a3-trail-10",
+        "authored_ringholm_ringholm--a3-trail-11"
+      ],
+      "vertex_rgb": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "footstep_class": "dirt"
+    },
+    {
+      "id": 1,
+      "identity_sha256": "4d1cde4765a88bf0e35bd0c312163ec98e9d806e6b174a59e89177300fda09cc",
+      "material_document": {
+        "asset": {
+          "version": "2.0"
+        },
+        "materials": [
+          {
+            "name": "authored_ringholm_ringholm--r32-1--0",
+            "pbrMetallicRoughness": {
+              "baseColorFactor": [
+                0.3185468059531732,
+                0.1959941698684143,
+                0.07828832086604431,
+                1.0
+              ],
+              "metallicFactor": 0.0,
+              "roughnessFactor": 1.0,
+              "baseColorTexture": {
+                "index": 0
+              },
+              "metallicRoughnessTexture": {
+                "index": 1
+              }
+            },
+            "occlusionTexture": {
+              "index": 1
+            },
+            "normalTexture": {
+              "index": 2,
+              "scale": 0.72
+            },
+            "alphaMode": "BLEND",
+            "doubleSided": true
+          }
+        ],
+        "textures": [
+          {
+            "sampler": 0,
+            "source": 0
+          },
+          {
+            "sampler": 0,
+            "source": 1
+          },
+          {
+            "sampler": 0,
+            "source": 2
+          }
+        ],
+        "images": [
+          {
+            "uri": "../../../../_continent_v2/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png",
+            "name": "ringholm_ringholm--a3-trail-07_albedoTexture"
+          },
+          {
+            "uri": "../../../../_continent_v2/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png",
+            "name": "ringholm_ringholm--a3-trail-07_ormTexture"
+          },
+          {
+            "uri": "../../../../_continent_v2/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png",
+            "name": "ringholm_ringholm--a3-trail-07_normalTexture"
+          }
+        ],
+        "samplers": [
+          {
+            "magFilter": 9729,
+            "minFilter": 9987,
+            "wrapS": 10497,
+            "wrapT": 10497
+          }
+        ]
+      },
+      "externalResources": {
+        "../../../../_continent_v2/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png": "8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805",
+        "../../../../_continent_v2/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png": "ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5",
+        "../../../../_continent_v2/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png": "6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7"
+      },
+      "original_material_names": [
+        "authored_ringholm_ringholm--r32-1--0",
+        "authored_ringholm_ringholm--r32-east--0"
+      ],
+      "vertex_rgb": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "footstep_class": "dirt"
+    }
+  ],
+  "field": {
+    "grid": {
+      "origin_xz": [
+        -303.75,
+        -14.5
+      ],
+      "width": 173,
+      "height": 388,
+      "pixels_per_metre": 4,
+      "gutter_pixels": 2,
+      "axis_order": "row_increasing_z,column_increasing_x",
+      "sample": "pixel_centres"
+    },
+    "coverage_mips": [
+      {
+        "level": 0,
+        "width": 173,
+        "height": 388,
+        "file": "coverage-mip0.png",
+        "sha256": "b874dfa13f311af55f02280ee83de79478c9a297fc302245b43d72060b9c369c",
+        "decoded_sha256": "cb242eb1a967070059ebf776ccfc5b7189dbce5a682a1bb713a5e3066c9fdbcf"
+      },
+      {
+        "level": 1,
+        "width": 86,
+        "height": 194,
+        "file": "coverage-mip1.png",
+        "sha256": "21a0d9bd32f1fe6de91e7b045effdabdfc5793371164a35bb22c6a266dc59074",
+        "decoded_sha256": "8e6983cbaa9dad5d531b704294b41745c6e8d16a8c3595902a4359ffdb379b73"
+      },
+      {
+        "level": 2,
+        "width": 43,
+        "height": 97,
+        "file": "coverage-mip2.png",
+        "sha256": "a9789e9fe84019ef64a484eb30fad138a027077869de6087ca8852199453338d",
+        "decoded_sha256": "54c49775778528369bc636979032b117db6ad5d8d783c30f2781400b7f8bb6a4"
+      },
+      {
+        "level": 3,
+        "width": 21,
+        "height": 48,
+        "file": "coverage-mip3.png",
+        "sha256": "54cdf002328bb88cfae0be116d5e11cc98145d54cc4228823bfbf6d9cd16b405",
+        "decoded_sha256": "160b9c3f85f2e1e479ae51914c5eddfb28f06fcc4b67be1debe16bd80ee0dcc0"
+      },
+      {
+        "level": 4,
+        "width": 10,
+        "height": 24,
+        "file": "coverage-mip4.png",
+        "sha256": "f69d69e4121ec5ac8824be795c1cb6574e48d4890812d468afc222074f9abd8e",
+        "decoded_sha256": "fc834281469bf1e2e4084104931a8c016eda5aa1cb6bcf0d84009221a9ae6d75"
+      },
+      {
+        "level": 5,
+        "width": 5,
+        "height": 12,
+        "file": "coverage-mip5.png",
+        "sha256": "3cb9a97620736969b1856f837f265bcb3fd9bd417478d6b6c428961b36402ed5",
+        "decoded_sha256": "714931fe6daaa8d29fe3ce7fb36581b55317211d5a1fd392a38af43531c50e1f"
+      },
+      {
+        "level": 6,
+        "width": 2,
+        "height": 6,
+        "file": "coverage-mip6.png",
+        "sha256": "417eb0e640dade5ec81832240eb9371774d6c60f17482ab4299fabb012811b97",
+        "decoded_sha256": "3cf45a99869480de784060a7f7d5f50ea55054c351c5bda1f6b742e4fed43343"
+      },
+      {
+        "level": 7,
+        "width": 1,
+        "height": 3,
+        "file": "coverage-mip7.png",
+        "sha256": "97d41a598621d0a8bc4d14f2628ef778a298424c09e69cd97669edfeda9e44b8",
+        "decoded_sha256": "3b544279cb50202f472dda76b174b3ef5f13b11b1441327efa40c42ddf547146"
+      },
+      {
+        "level": 8,
+        "width": 1,
+        "height": 1,
+        "file": "coverage-mip8.png",
+        "sha256": "71e76aaf7f3e32975d9b163f8a6962603cf7f126d4094a6e996b29a2bdd1a8d4",
+        "decoded_sha256": "bd4fc42a21f1f860a1030e6eba23d53ecab71bd19297ab6c074381d4ecee0018"
+      }
+    ],
+    "triangle_ids": {
+      "file": "triangle-ids.bin.zst",
+      "compression": "zstd",
+      "uncompressed_bytes": 134248,
+      "sha256": "acccba7d3b62dff76a2db5268eea4f9e09d59cae1c1a5afcb6f50d96775a5ae9",
+      "file_sha256": "87cba95aed31d4734bbfff87e46684d6ee56903d1625ad89763e28ceae72b3d4",
+      "codec_roundtrip_byte_identical": true,
+      "format": "RG8",
+      "byte_order": "little",
+      "width": 173,
+      "height": 388,
+      "mipmaps": false,
+      "id_zero": "reserved",
+      "id_base": 1
+    },
+    "affine_coefficients": {
+      "file": "affine-coefficients.rgba32f.zst",
+      "compression": "zstd",
+      "uncompressed_bytes": 163840,
+      "sha256": "4a020db6eb9c0468200b9c7aa867a114e49f09cdde9f16ce08ccf16ec3eaf450",
+      "file_sha256": "3d94c15926eddddd83e8388c857b1b55dc93b3e10920e71b9aa63c5982b5d46e",
+      "codec_roundtrip_byte_identical": true,
+      "format": "RGBA32F",
+      "byte_order": "little",
+      "width": 2048,
+      "height": 5,
+      "records_per_row": 1024,
+      "record_count": 4901,
+      "texels_per_record": 2,
+      "mipmaps": false,
+      "layout": [
+        "u_at_grid_origin",
+        "v_at_grid_origin",
+        "dU_dX",
+        "dU_dZ",
+        "dV_dX",
+        "dV_dZ",
+        "style_id",
+        "reserved"
+      ]
+    },
+    "validation": {
+      "maximum_covered_uv_abs_error": 1.52587890625e-05,
+      "maximum_halo_uv_abs_error": 1.52587890625e-05,
+      "source_jacobian_float32_byte_identical": true,
+      "selected_triangle_count": 4901,
+      "maximum_triangle_id": 4901,
+      "coverage_policy": "maximum_raw_interpolated_source_alpha",
+      "uv_policy": "highest_alpha_then_last_stable_authored_triangle",
+      "affine_halo_policy": "nearest_valid_selected_triangle_evaluated_at_fragment_position"
+    }
+  },
+  "overlap": {
+    "covered_pixels": 9571,
+    "multiply_covered_pixels": 653,
+    "different_uv_overlap_pixels": 244,
+    "maximum_source_fragments_per_pixel": 5
+  },
+  "active_style_ids": [
+    0,
+    1
+  ],
+  "appearance_limit": "Dominant UV and maximum raw alpha collapse independent overlapping road samples at four pixels per metre.",
+  "resources": {
+    "coverage-mip7.png": "97d41a598621d0a8bc4d14f2628ef778a298424c09e69cd97669edfeda9e44b8",
+    "coverage-mip1.png": "21a0d9bd32f1fe6de91e7b045effdabdfc5793371164a35bb22c6a266dc59074",
+    "coverage-mip8.png": "71e76aaf7f3e32975d9b163f8a6962603cf7f126d4094a6e996b29a2bdd1a8d4",
+    "triangle-ids.bin.zst": "87cba95aed31d4734bbfff87e46684d6ee56903d1625ad89763e28ceae72b3d4",
+    "coverage-mip2.png": "a9789e9fe84019ef64a484eb30fad138a027077869de6087ca8852199453338d",
+    "coverage-mip4.png": "f69d69e4121ec5ac8824be795c1cb6574e48d4890812d468afc222074f9abd8e",
+    "coverage-mip6.png": "417eb0e640dade5ec81832240eb9371774d6c60f17482ab4299fabb012811b97",
+    "coverage-mip0.png": "b874dfa13f311af55f02280ee83de79478c9a297fc302245b43d72060b9c369c",
+    "affine-coefficients.rgba32f.zst": "3d94c15926eddddd83e8388c857b1b55dc93b3e10920e71b9aa63c5982b5d46e",
+    "coverage-mip3.png": "54cdf002328bb88cfae0be116d5e11cc98145d54cc4228823bfbf6d9cd16b405",
+    "coverage-mip5.png": "3cb9a97620736969b1856f837f265bcb3fd9bd417478d6b6c428961b36402ed5",
+    "../../../../_continent_v2/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png": "8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805",
+    "../../../../_continent_v2/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png": "ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5",
+    "../../../../_continent_v2/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png": "6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7"
+  }
+}

@@ -1,0 +1,301 @@
+{
+  "schema": "rabbitlands-road-terrain-blend-v1",
+  "region": "hornmere",
+  "chunk": "06_08",
+  "pixels_per_metre": 4,
+  "source_glb_sha256": "32abca0c839b2eb9a12fa7a2aa6d5dca8212b83f90fe4677a82b47f924613dbd",
+  "source_manifest_sha256": "92af888dbf50b25a1ca54b8d5fd1f707acb4b56916ddfb3dc5578a906ce67ce6",
+  "authoring_scene_sha256": "6db9b58eb6237e0af5df5aa6c69c68704fdd2ccccbf242f2b5becf47c0a35dd4",
+  "mask_space": "gltf_scene_world_xz",
+  "source_frame_node": "AuthoredGround_hornmereBase_hornmere_06_08",
+  "source_frame_matrix": [
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    -1576.0,
+    0.0,
+    -5816.0,
+    1.0
+  ],
+  "targets": [
+    {
+      "name": "AuthoredGround_hornmereBase_hornmere_06_08",
+      "world_matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        -1576.0,
+        0.0,
+        -5816.0,
+        1.0
+      ]
+    }
+  ],
+  "removed_road_node_names": [
+    "Walk_hornmere_hornmere--a3-trail-03_hornmere_06_08",
+    "Walk_hornmere_hornmere--a3-trail-11_hornmere_06_08"
+  ],
+  "source_road_ids": [
+    "hornmere--a3-trail-03",
+    "hornmere--a3-trail-11"
+  ],
+  "retained_walk_nodes": [],
+  "collision_policy": "retained_terrain_only_for_removed_road_ribbons;structural_walks_unchanged",
+  "styles": [
+    {
+      "id": 0,
+      "identity_sha256": "3f0fd94067ce780b654ad2700a04e1885b60ad93a6d464dde787281bcd07203c",
+      "material_document": {
+        "asset": {
+          "version": "2.0"
+        },
+        "materials": [
+          {
+            "name": "authored_hornmere_hornmere--a3-trail-09",
+            "pbrMetallicRoughness": {
+              "baseColorFactor": [
+                0.2956997859736278,
+                0.21404114048223255,
+                0.1328683257311731,
+                1.0
+              ],
+              "metallicFactor": 0.0,
+              "roughnessFactor": 1.0,
+              "baseColorTexture": {
+                "index": 0
+              },
+              "metallicRoughnessTexture": {
+                "index": 1
+              }
+            },
+            "occlusionTexture": {
+              "index": 1
+            },
+            "normalTexture": {
+              "index": 2,
+              "scale": 0.72
+            },
+            "alphaMode": "BLEND",
+            "doubleSided": true
+          }
+        ],
+        "textures": [
+          {
+            "sampler": 0,
+            "source": 0
+          },
+          {
+            "sampler": 0,
+            "source": 1
+          },
+          {
+            "sampler": 0,
+            "source": 2
+          }
+        ],
+        "images": [
+          {
+            "uri": "../../../../_continent_v2/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png",
+            "name": "hornmere_hornmere--a3-trail-09_albedoTexture"
+          },
+          {
+            "uri": "../../../../_continent_v2/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png",
+            "name": "hornmere_hornmere--a3-trail-09_ormTexture"
+          },
+          {
+            "uri": "../../../../_continent_v2/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png",
+            "name": "hornmere_hornmere--a3-trail-09_normalTexture"
+          }
+        ],
+        "samplers": [
+          {
+            "magFilter": 9729,
+            "minFilter": 9987,
+            "wrapS": 10497,
+            "wrapT": 10497
+          }
+        ]
+      },
+      "externalResources": {
+        "../../../../_continent_v2/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png": "8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805",
+        "../../../../_continent_v2/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png": "ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5",
+        "../../../../_continent_v2/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png": "6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7"
+      },
+      "original_material_names": [
+        "authored_hornmere_hornmere--a3-trail-01",
+        "authored_hornmere_hornmere--a3-trail-02",
+        "authored_hornmere_hornmere--a3-trail-03",
+        "authored_hornmere_hornmere--a3-trail-04",
+        "authored_hornmere_hornmere--a3-trail-05",
+        "authored_hornmere_hornmere--a3-trail-06",
+        "authored_hornmere_hornmere--a3-trail-07",
+        "authored_hornmere_hornmere--a3-trail-08",
+        "authored_hornmere_hornmere--a3-trail-09",
+        "authored_hornmere_hornmere--a3-trail-10",
+        "authored_hornmere_hornmere--a3-trail-11"
+      ],
+      "vertex_rgb": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "footstep_class": "dirt"
+    }
+  ],
+  "field": {
+    "grid": {
+      "origin_xz": [
+        -323.75,
+        -146.75
+      ],
+      "width": 44,
+      "height": 30,
+      "pixels_per_metre": 4,
+      "gutter_pixels": 2,
+      "axis_order": "row_increasing_z,column_increasing_x",
+      "sample": "pixel_centres"
+    },
+    "coverage_mips": [
+      {
+        "level": 0,
+        "width": 44,
+        "height": 30,
+        "file": "coverage-mip0.png",
+        "sha256": "d7b659a203ee54150c4e035f0cb34c9c8c4c59a859c3289f150601ce6bdc640e",
+        "decoded_sha256": "8310cd28bfd7f961a2ede2cc5179865b3366056b51b0c9a0bebd8faba02e9f81"
+      },
+      {
+        "level": 1,
+        "width": 22,
+        "height": 15,
+        "file": "coverage-mip1.png",
+        "sha256": "d66c2138b9e8f08b8b13d6a7801cb09e679afc275a7a74abc5238f1f9c04e54e",
+        "decoded_sha256": "2f92e8edf3040a91ea59587f11d264322ff969b7885f9d66fb5b9fc953546baa"
+      },
+      {
+        "level": 2,
+        "width": 11,
+        "height": 7,
+        "file": "coverage-mip2.png",
+        "sha256": "c6827b9bbf5f019acd025d52849fcceb46bebbd33cca32519b607991a1c1d8e9",
+        "decoded_sha256": "8784a73b8d3a3e33561b1552286e20220777e3533747409a87a4e6fe5e617249"
+      },
+      {
+        "level": 3,
+        "width": 5,
+        "height": 3,
+        "file": "coverage-mip3.png",
+        "sha256": "10eb287c5a7457d8e9c6f0994cbf28ed4be879af51fc871cc61175c7bff9dde6",
+        "decoded_sha256": "d1437ceca357374f07bf4f51f2cfa15833d776e9d0b92d8016fdd180ff439df2"
+      },
+      {
+        "level": 4,
+        "width": 2,
+        "height": 1,
+        "file": "coverage-mip4.png",
+        "sha256": "a3a7d03288021d8a0a4a7b25a46b3a46f18d2c292c733280dcc297cd74091362",
+        "decoded_sha256": "12490ec21839f91f08d1ddd7cb8fb30f1533bcf21a81e9b0fd9065deadc5a5c5"
+      },
+      {
+        "level": 5,
+        "width": 1,
+        "height": 1,
+        "file": "coverage-mip5.png",
+        "sha256": "568af156ea5d40c076a6c99709183cbc4243472fea28d2d1fba4d9df6f7df25a",
+        "decoded_sha256": "cbe5cfdf7c2118a9c3d78ef1d684f3afa089201352886449a06a6511cfef74a7"
+      }
+    ],
+    "triangle_ids": {
+      "file": "triangle-ids.bin.zst",
+      "compression": "zstd",
+      "uncompressed_bytes": 2640,
+      "sha256": "d55be609f923e08f8dace204dc430f679009ddfc6798b6d2095cc3c71c4dbaea",
+      "file_sha256": "4b05bbf1005a4873bf6ddbe2366f9e65abc80f3eb853409b64c38b214b447df8",
+      "codec_roundtrip_byte_identical": true,
+      "format": "RG8",
+      "byte_order": "little",
+      "width": 44,
+      "height": 30,
+      "mipmaps": false,
+      "id_zero": "reserved",
+      "id_base": 1
+    },
+    "affine_coefficients": {
+      "file": "affine-coefficients.rgba32f.zst",
+      "compression": "zstd",
+      "uncompressed_bytes": 11552,
+      "sha256": "ded5868eac354f5b693ad615d5a683f55eae7a234ddf77b21c91259d4fef5307",
+      "file_sha256": "3b34a21e6ae1f83f2a13e1842c99fdb7913812120536cdba076d8a03d3992d9b",
+      "codec_roundtrip_byte_identical": true,
+      "format": "RGBA32F",
+      "byte_order": "little",
+      "width": 722,
+      "height": 1,
+      "records_per_row": 361,
+      "record_count": 361,
+      "texels_per_record": 2,
+      "mipmaps": false,
+      "layout": [
+        "u_at_grid_origin",
+        "v_at_grid_origin",
+        "dU_dX",
+        "dU_dZ",
+        "dV_dX",
+        "dV_dZ",
+        "style_id",
+        "reserved"
+      ]
+    },
+    "validation": {
+      "maximum_covered_uv_abs_error": 1.52587890625e-05,
+      "maximum_halo_uv_abs_error": 1.52587890625e-05,
+      "source_jacobian_float32_byte_identical": true,
+      "selected_triangle_count": 361,
+      "maximum_triangle_id": 361,
+      "coverage_policy": "maximum_raw_interpolated_source_alpha",
+      "uv_policy": "highest_alpha_then_last_stable_authored_triangle",
+      "affine_halo_policy": "nearest_valid_selected_triangle_evaluated_at_fragment_position"
+    }
+  },
+  "overlap": {
+    "covered_pixels": 763,
+    "multiply_covered_pixels": 566,
+    "different_uv_overlap_pixels": 553,
+    "maximum_source_fragments_per_pixel": 7
+  },
+  "active_style_ids": [
+    0
+  ],
+  "appearance_limit": "Dominant UV and maximum raw alpha collapse independent overlapping road samples at four pixels per metre.",
+  "resources": {
+    "coverage-mip1.png": "d66c2138b9e8f08b8b13d6a7801cb09e679afc275a7a74abc5238f1f9c04e54e",
+    "triangle-ids.bin.zst": "4b05bbf1005a4873bf6ddbe2366f9e65abc80f3eb853409b64c38b214b447df8",
+    "coverage-mip2.png": "c6827b9bbf5f019acd025d52849fcceb46bebbd33cca32519b607991a1c1d8e9",
+    "coverage-mip4.png": "a3a7d03288021d8a0a4a7b25a46b3a46f18d2c292c733280dcc297cd74091362",
+    "coverage-mip0.png": "d7b659a203ee54150c4e035f0cb34c9c8c4c59a859c3289f150601ce6bdc640e",
+    "affine-coefficients.rgba32f.zst": "3b34a21e6ae1f83f2a13e1842c99fdb7913812120536cdba076d8a03d3992d9b",
+    "coverage-mip3.png": "10eb287c5a7457d8e9c6f0994cbf28ed4be879af51fc871cc61175c7bff9dde6",
+    "coverage-mip5.png": "568af156ea5d40c076a6c99709183cbc4243472fea28d2d1fba4d9df6f7df25a",
+    "../../../../_continent_v2/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png": "8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805",
+    "../../../../_continent_v2/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png": "ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5",
+    "../../../../_continent_v2/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png": "6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7"
+  }
+}

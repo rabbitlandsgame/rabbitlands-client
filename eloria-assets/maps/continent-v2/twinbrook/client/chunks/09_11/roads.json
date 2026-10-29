@@ -1,0 +1,462 @@
+{
+  "schema": "rabbitlands-road-terrain-blend-v1",
+  "region": "twinbrook",
+  "chunk": "09_11",
+  "pixels_per_metre": 4,
+  "source_glb_sha256": "66e88432a4d45e82a147de8a447edcfe1990e51571c1a251aca02d8b37c8f07f",
+  "source_manifest_sha256": "c5afd3282079b25b9f19b4adbe2f3d175b780924de3272417f9b0eb79037014a",
+  "authoring_scene_sha256": "08753659cfeccf944ae8873cc1409fc411f69bd546f75f2e3778b9b7586f3812",
+  "mask_space": "gltf_scene_world_xz",
+  "source_frame_node": "AuthoredGround_twinbrookBase_twinbrook_09_11",
+  "source_frame_matrix": [
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    -1154.0,
+    0.0,
+    -6956.0,
+    1.0
+  ],
+  "targets": [
+    {
+      "name": "AuthoredGround_twinbrookBase_twinbrook_09_11",
+      "world_matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        -1154.0,
+        0.0,
+        -6956.0,
+        1.0
+      ]
+    },
+    {
+      "name": "AuthoredGround_twinbrook_forest-06_twinbrook_09_11",
+      "world_matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        -1154.0,
+        0.0,
+        -6956.0,
+        1.0
+      ]
+    },
+    {
+      "name": "AuthoredGround_twinbrook_meadow-26_twinbrook_09_11",
+      "world_matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        -1154.0,
+        0.0,
+        -6956.0,
+        1.0
+      ]
+    }
+  ],
+  "removed_road_node_names": [
+    "Walk_twinbrook_twinbrook--a3-trail-09_twinbrook_09_11",
+    "Walk_twinbrook_twinbrook--a3-trail-10_twinbrook_09_11"
+  ],
+  "source_road_ids": [
+    "twinbrook--a3-trail-09",
+    "twinbrook--a3-trail-10"
+  ],
+  "retained_walk_nodes": [],
+  "collision_policy": "retained_terrain_only_for_removed_road_ribbons;structural_walks_unchanged",
+  "styles": [
+    {
+      "id": 0,
+      "identity_sha256": "8f43db2059c92618ddca006136b0bed9be463a5b84e755726cc850b2ec5c9bbf",
+      "material_document": {
+        "asset": {
+          "version": "2.0"
+        },
+        "materials": [
+          {
+            "name": "authored_twinbrook_twinbrook--a3-trail-11",
+            "pbrMetallicRoughness": {
+              "baseColorFactor": [
+                0.2738384190209769,
+                0.1473189894838384,
+                0.06372379582911632,
+                1.0
+              ],
+              "metallicFactor": 0.0,
+              "roughnessFactor": 1.0,
+              "baseColorTexture": {
+                "index": 0
+              },
+              "metallicRoughnessTexture": {
+                "index": 1
+              }
+            },
+            "occlusionTexture": {
+              "index": 1
+            },
+            "normalTexture": {
+              "index": 2,
+              "scale": 0.72
+            },
+            "alphaMode": "BLEND",
+            "doubleSided": true
+          }
+        ],
+        "textures": [
+          {
+            "sampler": 0,
+            "source": 0
+          },
+          {
+            "sampler": 0,
+            "source": 1
+          },
+          {
+            "sampler": 0,
+            "source": 2
+          }
+        ],
+        "images": [
+          {
+            "uri": "../../../../_continent_v2/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png",
+            "name": "twinbrook_twinbrook--a3-trail-11_albedoTexture"
+          },
+          {
+            "uri": "../../../../_continent_v2/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png",
+            "name": "twinbrook_forest-02_ormTexture"
+          },
+          {
+            "uri": "../../../../_continent_v2/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png",
+            "name": "twinbrook_forest-02_normalTexture"
+          }
+        ],
+        "samplers": [
+          {
+            "magFilter": 9729,
+            "minFilter": 9987,
+            "wrapS": 10497,
+            "wrapT": 10497
+          }
+        ]
+      },
+      "externalResources": {
+        "../../../../_continent_v2/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png": "8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805",
+        "../../../../_continent_v2/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png": "ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5",
+        "../../../../_continent_v2/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png": "6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7"
+      },
+      "original_material_names": [
+        "authored_twinbrook_twinbrook--a3-trail-01",
+        "authored_twinbrook_twinbrook--a3-trail-02",
+        "authored_twinbrook_twinbrook--a3-trail-03",
+        "authored_twinbrook_twinbrook--a3-trail-04",
+        "authored_twinbrook_twinbrook--a3-trail-05",
+        "authored_twinbrook_twinbrook--a3-trail-06",
+        "authored_twinbrook_twinbrook--a3-trail-07",
+        "authored_twinbrook_twinbrook--a3-trail-08",
+        "authored_twinbrook_twinbrook--a3-trail-09",
+        "authored_twinbrook_twinbrook--a3-trail-10",
+        "authored_twinbrook_twinbrook--a3-trail-11",
+        "authored_twinbrook_twinbrook--a3-trail-12"
+      ],
+      "vertex_rgb": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "footstep_class": "dirt"
+    },
+    {
+      "id": 1,
+      "identity_sha256": "4d1cde4765a88bf0e35bd0c312163ec98e9d806e6b174a59e89177300fda09cc",
+      "material_document": {
+        "asset": {
+          "version": "2.0"
+        },
+        "materials": [
+          {
+            "name": "authored_twinbrook_twinbrook--lv-north-road--0",
+            "pbrMetallicRoughness": {
+              "baseColorFactor": [
+                0.3185468059531732,
+                0.1959941698684143,
+                0.07828832086604431,
+                1.0
+              ],
+              "metallicFactor": 0.0,
+              "roughnessFactor": 1.0,
+              "baseColorTexture": {
+                "index": 0
+              },
+              "metallicRoughnessTexture": {
+                "index": 1
+              }
+            },
+            "occlusionTexture": {
+              "index": 1
+            },
+            "normalTexture": {
+              "index": 2,
+              "scale": 0.72
+            },
+            "alphaMode": "BLEND",
+            "doubleSided": true
+          }
+        ],
+        "textures": [
+          {
+            "sampler": 0,
+            "source": 0
+          },
+          {
+            "sampler": 0,
+            "source": 1
+          },
+          {
+            "sampler": 0,
+            "source": 2
+          }
+        ],
+        "images": [
+          {
+            "uri": "../../../../_continent_v2/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png",
+            "name": "twinbrook_twinbrook--a3-trail-06_albedoTexture"
+          },
+          {
+            "uri": "../../../../_continent_v2/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png",
+            "name": "twinbrook_forest-13_ormTexture"
+          },
+          {
+            "uri": "../../../../_continent_v2/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png",
+            "name": "twinbrook_forest-13_normalTexture"
+          }
+        ],
+        "samplers": [
+          {
+            "magFilter": 9729,
+            "minFilter": 9987,
+            "wrapS": 10497,
+            "wrapT": 10497
+          }
+        ]
+      },
+      "externalResources": {
+        "../../../../_continent_v2/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png": "8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805",
+        "../../../../_continent_v2/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png": "ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5",
+        "../../../../_continent_v2/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png": "6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7"
+      },
+      "original_material_names": [
+        "authored_twinbrook_twinbrook--lv-north-road--0",
+        "authored_twinbrook_twinbrook--r27-1--1",
+        "authored_twinbrook_twinbrook--r28-1--0"
+      ],
+      "vertex_rgb": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "footstep_class": "dirt"
+    }
+  ],
+  "field": {
+    "grid": {
+      "origin_xz": [
+        -98.25,
+        80.25
+      ],
+      "width": 292,
+      "height": 230,
+      "pixels_per_metre": 4,
+      "gutter_pixels": 2,
+      "axis_order": "row_increasing_z,column_increasing_x",
+      "sample": "pixel_centres"
+    },
+    "coverage_mips": [
+      {
+        "level": 0,
+        "width": 292,
+        "height": 230,
+        "file": "coverage-mip0.png",
+        "sha256": "ca409ded24c3b3268d06ff68bb79dd6938515a2d0f01c08b419242da6e501f78",
+        "decoded_sha256": "8cb83b3d3a2679753479931d3f2130755a6f4f5346c7f9f3df0bfce7b7c26d26"
+      },
+      {
+        "level": 1,
+        "width": 146,
+        "height": 115,
+        "file": "coverage-mip1.png",
+        "sha256": "f617e073ac6232f385ae6f5fee92605f32365f4ea55797c69bcf1c149133756f",
+        "decoded_sha256": "eeda6c100b2248df2b7b47b48ce9ecce95c50298563aa7a985692ef538b65d71"
+      },
+      {
+        "level": 2,
+        "width": 73,
+        "height": 57,
+        "file": "coverage-mip2.png",
+        "sha256": "b48fbf45305edfc6574eef1399978594219fe1612874dadd91e768e63750a2e0",
+        "decoded_sha256": "d10430dea8c300e9eb4c0ef2c5c696e942768b4b6cbe8af9189ec01ed8198e76"
+      },
+      {
+        "level": 3,
+        "width": 36,
+        "height": 28,
+        "file": "coverage-mip3.png",
+        "sha256": "3c8d8d1737232caf235d0a0bf0d536e000f5d51f23304ca278691d0b0e9077fc",
+        "decoded_sha256": "9ece9800993d495283be4c4dead0d0288af26e473a3234fce062bec8d8b49e43"
+      },
+      {
+        "level": 4,
+        "width": 18,
+        "height": 14,
+        "file": "coverage-mip4.png",
+        "sha256": "4681129ea3ecd4c9005bd346931c7da892c9da3f8be85961d088bb50af0d744c",
+        "decoded_sha256": "4d028e3f2ef5d511099ecafc467ba4b7f56d7ea276d08ee3c0747a9a6853c30c"
+      },
+      {
+        "level": 5,
+        "width": 9,
+        "height": 7,
+        "file": "coverage-mip5.png",
+        "sha256": "3f42cfa03e69c56ae4b0f401a634526bd3cbfa87fef427ff81dfc6e5455df6fe",
+        "decoded_sha256": "85b67c9b31e378df4124cefe066f880b6b56b319d210644bb0c7c3164d899539"
+      },
+      {
+        "level": 6,
+        "width": 4,
+        "height": 3,
+        "file": "coverage-mip6.png",
+        "sha256": "986775b0655bc61a5d52587b21572c4359c09a237f02a7e4185bbb493f7b622d",
+        "decoded_sha256": "c575acc2f354bc0b705173f931abb33e175a139d5423d096148ff241d737188d"
+      },
+      {
+        "level": 7,
+        "width": 2,
+        "height": 1,
+        "file": "coverage-mip7.png",
+        "sha256": "00fdf0aa91dde9caa608c7dff5dec0f5f4a70584d202edc0ee7e2a3f5a8eacbc",
+        "decoded_sha256": "f14d0b72b8bd9edd441c881bf7d77926d9c9844a48d77b75fca562f4faf8a008"
+      },
+      {
+        "level": 8,
+        "width": 1,
+        "height": 1,
+        "file": "coverage-mip8.png",
+        "sha256": "fae533f0b35d334d4e2fe1b9056038058c46a2e506477657a2e8c3b34d44776a",
+        "decoded_sha256": "c555eab45d08845ae9f10d452a99bfcb06f74a50b988fe7e48dd323789b88ee3"
+      }
+    ],
+    "triangle_ids": {
+      "file": "triangle-ids.bin.zst",
+      "compression": "zstd",
+      "uncompressed_bytes": 134320,
+      "sha256": "5ef8468c8a28a0587895446b2b2e619ad7433e778244243f1e69acdff70d77a2",
+      "file_sha256": "276419219dc0587a194f221f5d1e912ae9565024e32bfc6b2e905050e79cbb07",
+      "codec_roundtrip_byte_identical": true,
+      "format": "RG8",
+      "byte_order": "little",
+      "width": 292,
+      "height": 230,
+      "mipmaps": false,
+      "id_zero": "reserved",
+      "id_base": 1
+    },
+    "affine_coefficients": {
+      "file": "affine-coefficients.rgba32f.zst",
+      "compression": "zstd",
+      "uncompressed_bytes": 131072,
+      "sha256": "822f588e6ed4e13095818c2d608683683075c5122b8a184bf5adf2bcab4e6d83",
+      "file_sha256": "664eb93917648c262cc8ea29d864c2ffeb9b1018f16ced49ec22c176dc64f3d6",
+      "codec_roundtrip_byte_identical": true,
+      "format": "RGBA32F",
+      "byte_order": "little",
+      "width": 2048,
+      "height": 4,
+      "records_per_row": 1024,
+      "record_count": 3610,
+      "texels_per_record": 2,
+      "mipmaps": false,
+      "layout": [
+        "u_at_grid_origin",
+        "v_at_grid_origin",
+        "dU_dX",
+        "dU_dZ",
+        "dV_dX",
+        "dV_dZ",
+        "style_id",
+        "reserved"
+      ]
+    },
+    "validation": {
+      "maximum_covered_uv_abs_error": 1.52587890625e-05,
+      "maximum_halo_uv_abs_error": 3.0517578125e-05,
+      "source_jacobian_float32_byte_identical": true,
+      "selected_triangle_count": 3610,
+      "maximum_triangle_id": 3610,
+      "coverage_policy": "maximum_raw_interpolated_source_alpha",
+      "uv_policy": "highest_alpha_then_last_stable_authored_triangle",
+      "affine_halo_policy": "nearest_valid_selected_triangle_evaluated_at_fragment_position"
+    }
+  },
+  "overlap": {
+    "covered_pixels": 6695,
+    "multiply_covered_pixels": 274,
+    "different_uv_overlap_pixels": 150,
+    "maximum_source_fragments_per_pixel": 3
+  },
+  "active_style_ids": [
+    0
+  ],
+  "appearance_limit": "Dominant UV and maximum raw alpha collapse independent overlapping road samples at four pixels per metre.",
+  "resources": {
+    "coverage-mip7.png": "00fdf0aa91dde9caa608c7dff5dec0f5f4a70584d202edc0ee7e2a3f5a8eacbc",
+    "coverage-mip1.png": "f617e073ac6232f385ae6f5fee92605f32365f4ea55797c69bcf1c149133756f",
+    "coverage-mip8.png": "fae533f0b35d334d4e2fe1b9056038058c46a2e506477657a2e8c3b34d44776a",
+    "triangle-ids.bin.zst": "276419219dc0587a194f221f5d1e912ae9565024e32bfc6b2e905050e79cbb07",
+    "coverage-mip2.png": "b48fbf45305edfc6574eef1399978594219fe1612874dadd91e768e63750a2e0",
+    "coverage-mip4.png": "4681129ea3ecd4c9005bd346931c7da892c9da3f8be85961d088bb50af0d744c",
+    "coverage-mip6.png": "986775b0655bc61a5d52587b21572c4359c09a237f02a7e4185bbb493f7b622d",
+    "coverage-mip0.png": "ca409ded24c3b3268d06ff68bb79dd6938515a2d0f01c08b419242da6e501f78",
+    "affine-coefficients.rgba32f.zst": "664eb93917648c262cc8ea29d864c2ffeb9b1018f16ced49ec22c176dc64f3d6",
+    "coverage-mip3.png": "3c8d8d1737232caf235d0a0bf0d536e000f5d51f23304ca278691d0b0e9077fc",
+    "coverage-mip5.png": "3f42cfa03e69c56ae4b0f401a634526bd3cbfa87fef427ff81dfc6e5455df6fe",
+    "../../../../_continent_v2/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png": "8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805",
+    "../../../../_continent_v2/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png": "ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5",
+    "../../../../_continent_v2/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png": "6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7"
+  }
+}

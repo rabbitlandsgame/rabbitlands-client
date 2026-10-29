@@ -1,0 +1,293 @@
+{
+  "schema": "rabbitlands-road-terrain-blend-v1",
+  "region": "reedfall",
+  "chunk": "07_08",
+  "pixels_per_metre": 4,
+  "source_glb_sha256": "0a9fcfda5231dcd346b79b1803e171c9da1f9001a66f94fd6fb6c3ea739a90e3",
+  "source_manifest_sha256": "3e2d80262915978641f682984ad556319c27791da0ec95ad905a4ead085de68c",
+  "authoring_scene_sha256": "3186c3fa7c22312e672fa6355e50f8415aeeeb5ae190cddf8ec824cf65e0c50b",
+  "mask_space": "gltf_scene_world_xz",
+  "source_frame_node": "AuthoredGround_reedfallBase_reedfall_07_08",
+  "source_frame_matrix": [
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    -1606.0,
+    0.0,
+    -7404.0,
+    1.0
+  ],
+  "targets": [
+    {
+      "name": "AuthoredGround_reedfallBase_reedfall_07_08",
+      "world_matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        -1606.0,
+        0.0,
+        -7404.0,
+        1.0
+      ]
+    }
+  ],
+  "removed_road_node_names": [
+    "Walk_reedfall_reedfall--r29-3--1_reedfall_07_08"
+  ],
+  "source_road_ids": [
+    "reedfall--r29-3--1"
+  ],
+  "retained_walk_nodes": [],
+  "collision_policy": "retained_terrain_only_for_removed_road_ribbons;structural_walks_unchanged",
+  "styles": [
+    {
+      "id": 0,
+      "identity_sha256": "4d1cde4765a88bf0e35bd0c312163ec98e9d806e6b174a59e89177300fda09cc",
+      "material_document": {
+        "asset": {
+          "version": "2.0"
+        },
+        "materials": [
+          {
+            "name": "authored_reedfall_reedfall--r29-2--1",
+            "pbrMetallicRoughness": {
+              "baseColorFactor": [
+                0.3185468059531732,
+                0.1959941698684143,
+                0.07828832086604431,
+                1.0
+              ],
+              "metallicFactor": 0.0,
+              "roughnessFactor": 1.0,
+              "baseColorTexture": {
+                "index": 0
+              },
+              "metallicRoughnessTexture": {
+                "index": 1
+              }
+            },
+            "occlusionTexture": {
+              "index": 1
+            },
+            "normalTexture": {
+              "index": 2,
+              "scale": 0.72
+            },
+            "alphaMode": "BLEND",
+            "doubleSided": true
+          }
+        ],
+        "textures": [
+          {
+            "sampler": 0,
+            "source": 0
+          },
+          {
+            "sampler": 0,
+            "source": 1
+          },
+          {
+            "sampler": 0,
+            "source": 2
+          }
+        ],
+        "images": [
+          {
+            "uri": "../../../../_continent_v2/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png",
+            "name": "reedfall_reedfall--r29-2--1_albedoTexture"
+          },
+          {
+            "uri": "../../../../_continent_v2/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png",
+            "name": "reedfall_forest-20_ormTexture"
+          },
+          {
+            "uri": "../../../../_continent_v2/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png",
+            "name": "reedfall_forest-20_normalTexture"
+          }
+        ],
+        "samplers": [
+          {
+            "magFilter": 9729,
+            "minFilter": 9987,
+            "wrapS": 10497,
+            "wrapT": 10497
+          }
+        ]
+      },
+      "externalResources": {
+        "../../../../_continent_v2/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png": "8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805",
+        "../../../../_continent_v2/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png": "ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5",
+        "../../../../_continent_v2/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png": "6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7"
+      },
+      "original_material_names": [
+        "authored_reedfall_reedfall--r28-1--1",
+        "authored_reedfall_reedfall--r28-2--0",
+        "authored_reedfall_reedfall--r29-2--1",
+        "authored_reedfall_reedfall--r29-3--1",
+        "authored_reedfall_reedfall--r30-1--1"
+      ],
+      "vertex_rgb": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "footstep_class": "dirt"
+    }
+  ],
+  "field": {
+    "grid": {
+      "origin_xz": [
+        -206.75,
+        -155.25
+      ],
+      "width": 39,
+      "height": 61,
+      "pixels_per_metre": 4,
+      "gutter_pixels": 2,
+      "axis_order": "row_increasing_z,column_increasing_x",
+      "sample": "pixel_centres"
+    },
+    "coverage_mips": [
+      {
+        "level": 0,
+        "width": 39,
+        "height": 61,
+        "file": "coverage-mip0.png",
+        "sha256": "0c059e49fab3ebccd4418a55766d377847c3e688d1840a226025e72438145528",
+        "decoded_sha256": "1b116591af0b73d3bcf7ea8a82af608e7d34c5af0962114ef681ef1ff42027b1"
+      },
+      {
+        "level": 1,
+        "width": 19,
+        "height": 30,
+        "file": "coverage-mip1.png",
+        "sha256": "895f5ce1cbad306045cfa331a4210c7495c3bd325946134dee103e7437a31e9b",
+        "decoded_sha256": "8c912de86bdcd6a9e97c4aafcfbe33107cb9c7b05442fa4937889ff6ec33f91a"
+      },
+      {
+        "level": 2,
+        "width": 9,
+        "height": 15,
+        "file": "coverage-mip2.png",
+        "sha256": "77bc5553ebfc867ff966e894853c39e6c1884123d23272f4693f10439e2e1549",
+        "decoded_sha256": "fc58e9f6104d4a111499e1985025a749535ffc2670cad1dd11fd32df2d114bf0"
+      },
+      {
+        "level": 3,
+        "width": 4,
+        "height": 7,
+        "file": "coverage-mip3.png",
+        "sha256": "3ba3ad49243a1e8f1d18a6f4c699d0994fb14f9885f24d97e8908d8384725217",
+        "decoded_sha256": "c71509f3f39e65e25b289a22180d6990eb6d23b4065820e6bd005763185b132a"
+      },
+      {
+        "level": 4,
+        "width": 2,
+        "height": 3,
+        "file": "coverage-mip4.png",
+        "sha256": "c1cbbb12e1810ee1a13fb907fd01f4d599a639801a30a197fb4e94e009c53b86",
+        "decoded_sha256": "e00854e0dd93dfa4a94f28f633cc98c39f976a2f39ee70fff290f625ba292141"
+      },
+      {
+        "level": 5,
+        "width": 1,
+        "height": 1,
+        "file": "coverage-mip5.png",
+        "sha256": "71838e930096a9cbc1753ff73c96e386f051420a00542a0cd271dd61d04c5556",
+        "decoded_sha256": "4c94485e0c21ae6c41ce1dfe7b6bfaceea5ab68e40a2476f50208e526f506080"
+      }
+    ],
+    "triangle_ids": {
+      "file": "triangle-ids.bin.zst",
+      "compression": "zstd",
+      "uncompressed_bytes": 4758,
+      "sha256": "3ea08117b928e8099b8000dea123563c6d2d1a2a3a82e8c28a9707bf36fb2ba8",
+      "file_sha256": "32b7f3c0e91ae9a76d08a81577a52b83d053a3b89f09222aefa85456b6777242",
+      "codec_roundtrip_byte_identical": true,
+      "format": "RG8",
+      "byte_order": "little",
+      "width": 39,
+      "height": 61,
+      "mipmaps": false,
+      "id_zero": "reserved",
+      "id_base": 1
+    },
+    "affine_coefficients": {
+      "file": "affine-coefficients.rgba32f.zst",
+      "compression": "zstd",
+      "uncompressed_bytes": 22176,
+      "sha256": "544543ed7505bd58d337b9e058f0446275dbcff01d966c4e7bd27a94313ad78f",
+      "file_sha256": "867fb9d6b094d243b01874786e5d56091f9b67cf4682cea3af77c1b63e86e6cd",
+      "codec_roundtrip_byte_identical": true,
+      "format": "RGBA32F",
+      "byte_order": "little",
+      "width": 1386,
+      "height": 1,
+      "records_per_row": 693,
+      "record_count": 693,
+      "texels_per_record": 2,
+      "mipmaps": false,
+      "layout": [
+        "u_at_grid_origin",
+        "v_at_grid_origin",
+        "dU_dX",
+        "dU_dZ",
+        "dV_dX",
+        "dV_dZ",
+        "style_id",
+        "reserved"
+      ]
+    },
+    "validation": {
+      "maximum_covered_uv_abs_error": 1.9073486328125e-06,
+      "maximum_halo_uv_abs_error": 1.9073486328125e-06,
+      "source_jacobian_float32_byte_identical": true,
+      "selected_triangle_count": 693,
+      "maximum_triangle_id": 693,
+      "coverage_policy": "maximum_raw_interpolated_source_alpha",
+      "uv_policy": "highest_alpha_then_last_stable_authored_triangle",
+      "affine_halo_policy": "nearest_valid_selected_triangle_evaluated_at_fragment_position"
+    }
+  },
+  "overlap": {
+    "covered_pixels": 1199,
+    "multiply_covered_pixels": 24,
+    "different_uv_overlap_pixels": 0,
+    "maximum_source_fragments_per_pixel": 2
+  },
+  "active_style_ids": [
+    0
+  ],
+  "appearance_limit": "Dominant UV and maximum raw alpha collapse independent overlapping road samples at four pixels per metre.",
+  "resources": {
+    "coverage-mip1.png": "895f5ce1cbad306045cfa331a4210c7495c3bd325946134dee103e7437a31e9b",
+    "triangle-ids.bin.zst": "32b7f3c0e91ae9a76d08a81577a52b83d053a3b89f09222aefa85456b6777242",
+    "coverage-mip2.png": "77bc5553ebfc867ff966e894853c39e6c1884123d23272f4693f10439e2e1549",
+    "coverage-mip4.png": "c1cbbb12e1810ee1a13fb907fd01f4d599a639801a30a197fb4e94e009c53b86",
+    "coverage-mip0.png": "0c059e49fab3ebccd4418a55766d377847c3e688d1840a226025e72438145528",
+    "affine-coefficients.rgba32f.zst": "867fb9d6b094d243b01874786e5d56091f9b67cf4682cea3af77c1b63e86e6cd",
+    "coverage-mip3.png": "3ba3ad49243a1e8f1d18a6f4c699d0994fb14f9885f24d97e8908d8384725217",
+    "coverage-mip5.png": "71838e930096a9cbc1753ff73c96e386f051420a00542a0cd271dd61d04c5556",
+    "../../../../_continent_v2/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png": "8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805",
+    "../../../../_continent_v2/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png": "ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5",
+    "../../../../_continent_v2/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png": "6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7"
+  }
+}

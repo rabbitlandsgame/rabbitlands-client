@@ -1,0 +1,312 @@
+{
+  "schema": "rabbitlands-road-terrain-blend-v1",
+  "region": "suncoil",
+  "chunk": "14_08",
+  "pixels_per_metre": 4,
+  "source_glb_sha256": "0bb73f9cc8be927a29f057a480cd3df7eea384312803f01c99786c989dc3f93e",
+  "source_manifest_sha256": "57995c5999fba92dd86e9a1a9fea422329013a4556caa2e55db7b6409c5861cc",
+  "authoring_scene_sha256": "1f7b68d1fed5fd4d68b3923bc45f7cb5ea6cbd4771bd93d79b8067a787305fa7",
+  "mask_space": "gltf_scene_world_xz",
+  "source_frame_node": "AuthoredGround_suncoilBase_suncoil_14_08",
+  "source_frame_matrix": [
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    -3631.0,
+    0.0,
+    -7961.0,
+    1.0
+  ],
+  "targets": [
+    {
+      "name": "AuthoredGround_suncoilBase_suncoil_14_08",
+      "world_matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        -3631.0,
+        0.0,
+        -7961.0,
+        1.0
+      ]
+    }
+  ],
+  "removed_road_node_names": [
+    "Walk_suncoil_suncoil--a3-trail-08_suncoil_14_08"
+  ],
+  "source_road_ids": [
+    "suncoil--a3-trail-08"
+  ],
+  "retained_walk_nodes": [],
+  "collision_policy": "retained_terrain_only_for_removed_road_ribbons;structural_walks_unchanged",
+  "styles": [
+    {
+      "id": 0,
+      "identity_sha256": "305fbf47464643d740ba68208092f75cce43e2dd6e586a86eec35172a5110dba",
+      "material_document": {
+        "asset": {
+          "version": "2.0"
+        },
+        "materials": [
+          {
+            "name": "authored_suncoil_suncoil--a3-trail-11",
+            "pbrMetallicRoughness": {
+              "baseColorFactor": [
+                0.3423916453975833,
+                0.2956997859736278,
+                0.17886751091127312,
+                1.0
+              ],
+              "metallicFactor": 0.0,
+              "roughnessFactor": 1.0,
+              "baseColorTexture": {
+                "index": 0
+              },
+              "metallicRoughnessTexture": {
+                "index": 1
+              }
+            },
+            "occlusionTexture": {
+              "index": 1
+            },
+            "normalTexture": {
+              "index": 2,
+              "scale": 0.72
+            },
+            "alphaMode": "BLEND",
+            "doubleSided": true
+          }
+        ],
+        "textures": [
+          {
+            "sampler": 0,
+            "source": 0
+          },
+          {
+            "sampler": 0,
+            "source": 1
+          },
+          {
+            "sampler": 0,
+            "source": 2
+          }
+        ],
+        "images": [
+          {
+            "uri": "../../../../_continent_v2/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png",
+            "name": "suncoil_suncoil--a3-trail-11_albedoTexture"
+          },
+          {
+            "uri": "../../../../_continent_v2/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png",
+            "name": "suncoil_suncoil--a3-trail-11_ormTexture"
+          },
+          {
+            "uri": "../../../../_continent_v2/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png",
+            "name": "suncoil_suncoil--a3-trail-11_normalTexture"
+          }
+        ],
+        "samplers": [
+          {
+            "magFilter": 9729,
+            "minFilter": 9987,
+            "wrapS": 10497,
+            "wrapT": 10497
+          }
+        ]
+      },
+      "externalResources": {
+        "../../../../_continent_v2/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png": "8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805",
+        "../../../../_continent_v2/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png": "ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5",
+        "../../../../_continent_v2/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png": "6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7"
+      },
+      "original_material_names": [
+        "authored_suncoil_suncoil--a3-trail-01",
+        "authored_suncoil_suncoil--a3-trail-02",
+        "authored_suncoil_suncoil--a3-trail-03",
+        "authored_suncoil_suncoil--a3-trail-04",
+        "authored_suncoil_suncoil--a3-trail-05",
+        "authored_suncoil_suncoil--a3-trail-06",
+        "authored_suncoil_suncoil--a3-trail-07",
+        "authored_suncoil_suncoil--a3-trail-08",
+        "authored_suncoil_suncoil--a3-trail-09",
+        "authored_suncoil_suncoil--a3-trail-10",
+        "authored_suncoil_suncoil--a3-trail-11",
+        "authored_suncoil_suncoil--a3-trail-12",
+        "authored_suncoil_suncoil--a3-trail-13",
+        "authored_suncoil_suncoil--a3-trail-14",
+        "authored_suncoil_suncoil--a3-trail-15"
+      ],
+      "vertex_rgb": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "footstep_class": "dirt"
+    }
+  ],
+  "field": {
+    "grid": {
+      "origin_xz": [
+        325.75,
+        -110.0
+      ],
+      "width": 67,
+      "height": 71,
+      "pixels_per_metre": 4,
+      "gutter_pixels": 2,
+      "axis_order": "row_increasing_z,column_increasing_x",
+      "sample": "pixel_centres"
+    },
+    "coverage_mips": [
+      {
+        "level": 0,
+        "width": 67,
+        "height": 71,
+        "file": "coverage-mip0.png",
+        "sha256": "bbc7e505f702848fa4d4b99956b480222936d564a305f1bb7829ab2087a7c802",
+        "decoded_sha256": "05e475cd85de5f4d8076159b7f46dd428f9a8e26f2dee35a375833623b6e0834"
+      },
+      {
+        "level": 1,
+        "width": 33,
+        "height": 35,
+        "file": "coverage-mip1.png",
+        "sha256": "1f3c85308946830f939333469a7d3bb6e8546f7ad4c085c98de027f60f3a7f0f",
+        "decoded_sha256": "c7b4da8f37f3afb238617048eb259ce67b400d3cfc50dbcb94772d4ed30b1e70"
+      },
+      {
+        "level": 2,
+        "width": 16,
+        "height": 17,
+        "file": "coverage-mip2.png",
+        "sha256": "9e5687897c43e1c127af0f996c50caf0803d4f7a4114a5ac8d229ab170fac6cb",
+        "decoded_sha256": "72ba99abf1a5d463b4da7daa20a1d8c40745cb4b7049a5a43ad13ae9da268ed6"
+      },
+      {
+        "level": 3,
+        "width": 8,
+        "height": 8,
+        "file": "coverage-mip3.png",
+        "sha256": "6a6a58b8b5c40b970459a292e45e1856701cd4d644290bd921b2f2ba383349af",
+        "decoded_sha256": "67e0fb2cbac5423298d8d0ea56c0f5013b06c3a09c0191bcf3174bdb790da468"
+      },
+      {
+        "level": 4,
+        "width": 4,
+        "height": 4,
+        "file": "coverage-mip4.png",
+        "sha256": "697f037e11cc0893aea412ebbb45a964d7f12fb0f62d5fcea58607acbb5b31db",
+        "decoded_sha256": "f73abba76aa1e310418f89ec7c657b1a58b099d7b40a129a05cf79a527d28156"
+      },
+      {
+        "level": 5,
+        "width": 2,
+        "height": 2,
+        "file": "coverage-mip5.png",
+        "sha256": "d1188a7ad4a8affe36481480825d13212aebb50ebb838fdfec1f74d2c51055e5",
+        "decoded_sha256": "0ec1fcc7b9b8a5435d45456f9c15d689b5d7bf07bc205a25926d970b2fe65666"
+      },
+      {
+        "level": 6,
+        "width": 1,
+        "height": 1,
+        "file": "coverage-mip6.png",
+        "sha256": "6045d28def30b6ce0544834406b0e53f906ca1c6499de48c8d41a87fbe77a7a7",
+        "decoded_sha256": "dabd3aff769f07eb2965401eb029974ebba3407afd02b26ddb564ea5f8efae72"
+      }
+    ],
+    "triangle_ids": {
+      "file": "triangle-ids.bin.zst",
+      "compression": "zstd",
+      "uncompressed_bytes": 9514,
+      "sha256": "2e6075cc94b336a991b0294153760377698fbeeb8f37d0c8e5af7491f5f75a86",
+      "file_sha256": "64cf600db270c9f8f905c0c73c0f9e20262d03fc88ee0f1342667c10807af869",
+      "codec_roundtrip_byte_identical": true,
+      "format": "RG8",
+      "byte_order": "little",
+      "width": 67,
+      "height": 71,
+      "mipmaps": false,
+      "id_zero": "reserved",
+      "id_base": 1
+    },
+    "affine_coefficients": {
+      "file": "affine-coefficients.rgba32f.zst",
+      "compression": "zstd",
+      "uncompressed_bytes": 22944,
+      "sha256": "544fffd342d01c6be770a5d10cd1c2279f081aab9a310c5fc62b816a31073710",
+      "file_sha256": "e26eb0308a1639d4878a7dfc9046c8b32d4acc7e2bf564eb8acb046000718933",
+      "codec_roundtrip_byte_identical": true,
+      "format": "RGBA32F",
+      "byte_order": "little",
+      "width": 1434,
+      "height": 1,
+      "records_per_row": 717,
+      "record_count": 717,
+      "texels_per_record": 2,
+      "mipmaps": false,
+      "layout": [
+        "u_at_grid_origin",
+        "v_at_grid_origin",
+        "dU_dX",
+        "dU_dZ",
+        "dV_dX",
+        "dV_dZ",
+        "style_id",
+        "reserved"
+      ]
+    },
+    "validation": {
+      "maximum_covered_uv_abs_error": 1.52587890625e-05,
+      "maximum_halo_uv_abs_error": 3.0517578125e-05,
+      "source_jacobian_float32_byte_identical": true,
+      "selected_triangle_count": 717,
+      "maximum_triangle_id": 717,
+      "coverage_policy": "maximum_raw_interpolated_source_alpha",
+      "uv_policy": "highest_alpha_then_last_stable_authored_triangle",
+      "affine_halo_policy": "nearest_valid_selected_triangle_evaluated_at_fragment_position"
+    }
+  },
+  "overlap": {
+    "covered_pixels": 1339,
+    "multiply_covered_pixels": 45,
+    "different_uv_overlap_pixels": 0,
+    "maximum_source_fragments_per_pixel": 2
+  },
+  "active_style_ids": [
+    0
+  ],
+  "appearance_limit": "Dominant UV and maximum raw alpha collapse independent overlapping road samples at four pixels per metre.",
+  "resources": {
+    "coverage-mip1.png": "1f3c85308946830f939333469a7d3bb6e8546f7ad4c085c98de027f60f3a7f0f",
+    "triangle-ids.bin.zst": "64cf600db270c9f8f905c0c73c0f9e20262d03fc88ee0f1342667c10807af869",
+    "coverage-mip2.png": "9e5687897c43e1c127af0f996c50caf0803d4f7a4114a5ac8d229ab170fac6cb",
+    "coverage-mip4.png": "697f037e11cc0893aea412ebbb45a964d7f12fb0f62d5fcea58607acbb5b31db",
+    "coverage-mip6.png": "6045d28def30b6ce0544834406b0e53f906ca1c6499de48c8d41a87fbe77a7a7",
+    "coverage-mip0.png": "bbc7e505f702848fa4d4b99956b480222936d564a305f1bb7829ab2087a7c802",
+    "affine-coefficients.rgba32f.zst": "e26eb0308a1639d4878a7dfc9046c8b32d4acc7e2bf564eb8acb046000718933",
+    "coverage-mip3.png": "6a6a58b8b5c40b970459a292e45e1856701cd4d644290bd921b2f2ba383349af",
+    "coverage-mip5.png": "d1188a7ad4a8affe36481480825d13212aebb50ebb838fdfec1f74d2c51055e5",
+    "../../../../_continent_v2/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png": "8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805",
+    "../../../../_continent_v2/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png": "ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5",
+    "../../../../_continent_v2/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png": "6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7"
+  }
+}

@@ -1,0 +1,301 @@
+{
+  "schema": "rabbitlands-road-terrain-blend-v1",
+  "region": "greenlight",
+  "chunk": "05_07",
+  "pixels_per_metre": 4,
+  "source_glb_sha256": "6ec127abf26b2671dc8c4c8de81cdbd432b780dd3c8020a6111e16472926be4c",
+  "source_manifest_sha256": "eb0a0686c848ca884190d6e54c3621ae8d03468a5d4eedfe09666efc7c2bd60c",
+  "authoring_scene_sha256": "495981fd1120ed8ccb63bbf95bfee007ae1540c037d3a9ac010f641a8dd3b3b4",
+  "mask_space": "gltf_scene_world_xz",
+  "source_frame_node": "AuthoredGround_greenlightBase_greenlight_05_07",
+  "source_frame_matrix": [
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    -2006.0,
+    0.0,
+    -7815.0,
+    1.0
+  ],
+  "targets": [
+    {
+      "name": "AuthoredGround_greenlightBase_greenlight_05_07",
+      "world_matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        -2006.0,
+        0.0,
+        -7815.0,
+        1.0
+      ]
+    }
+  ],
+  "removed_road_node_names": [
+    "Walk_greenlight_greenlight--r28-2--1_greenlight_05_07"
+  ],
+  "source_road_ids": [
+    "greenlight--r28-2--1"
+  ],
+  "retained_walk_nodes": [],
+  "collision_policy": "retained_terrain_only_for_removed_road_ribbons;structural_walks_unchanged",
+  "styles": [
+    {
+      "id": 0,
+      "identity_sha256": "4d1cde4765a88bf0e35bd0c312163ec98e9d806e6b174a59e89177300fda09cc",
+      "material_document": {
+        "asset": {
+          "version": "2.0"
+        },
+        "materials": [
+          {
+            "name": "authored_greenlight_greenlight--r28-2--1",
+            "pbrMetallicRoughness": {
+              "baseColorFactor": [
+                0.3185468059531732,
+                0.1959941698684143,
+                0.07828832086604431,
+                1.0
+              ],
+              "metallicFactor": 0.0,
+              "roughnessFactor": 1.0,
+              "baseColorTexture": {
+                "index": 0
+              },
+              "metallicRoughnessTexture": {
+                "index": 1
+              }
+            },
+            "occlusionTexture": {
+              "index": 1
+            },
+            "normalTexture": {
+              "index": 2,
+              "scale": 0.72
+            },
+            "alphaMode": "BLEND",
+            "doubleSided": true
+          }
+        ],
+        "textures": [
+          {
+            "sampler": 0,
+            "source": 0
+          },
+          {
+            "sampler": 0,
+            "source": 1
+          },
+          {
+            "sampler": 0,
+            "source": 2
+          }
+        ],
+        "images": [
+          {
+            "uri": "../../../../_continent_v2/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png",
+            "name": "greenlight_greenlight--r28-2--1_albedoTexture"
+          },
+          {
+            "uri": "../../../../_continent_v2/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png",
+            "name": "greenlight_greenlight--r28-2--1_ormTexture"
+          },
+          {
+            "uri": "../../../../_continent_v2/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png",
+            "name": "greenlight_greenlight--r28-2--1_normalTexture"
+          }
+        ],
+        "samplers": [
+          {
+            "magFilter": 9729,
+            "minFilter": 9987,
+            "wrapS": 10497,
+            "wrapT": 10497
+          }
+        ]
+      },
+      "externalResources": {
+        "../../../../_continent_v2/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png": "8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805",
+        "../../../../_continent_v2/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png": "ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5",
+        "../../../../_continent_v2/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png": "6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7"
+      },
+      "original_material_names": [
+        "authored_greenlight_greenlight--r28-2--1",
+        "authored_greenlight_greenlight--r29-1--0",
+        "authored_greenlight_greenlight--r29-2--0",
+        "authored_greenlight_greenlight--r42-1--0"
+      ],
+      "vertex_rgb": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "footstep_class": "dirt"
+    }
+  ],
+  "field": {
+    "grid": {
+      "origin_xz": [
+        -422.5,
+        -217.0
+      ],
+      "width": 39,
+      "height": 70,
+      "pixels_per_metre": 4,
+      "gutter_pixels": 2,
+      "axis_order": "row_increasing_z,column_increasing_x",
+      "sample": "pixel_centres"
+    },
+    "coverage_mips": [
+      {
+        "level": 0,
+        "width": 39,
+        "height": 70,
+        "file": "coverage-mip0.png",
+        "sha256": "1681a1cef711c3b2c0c8725bca07594595d15ba06f7b4506a5ea7d99aea04112",
+        "decoded_sha256": "90faea4ee4b8bc7c29974fed652316ebd2bdbaca38379c2ad7baa6655f981d3a"
+      },
+      {
+        "level": 1,
+        "width": 19,
+        "height": 35,
+        "file": "coverage-mip1.png",
+        "sha256": "683f828e40a9f16b157b039150ac5ccc19a5df2a782d523faee9ce37c7f2dfdb",
+        "decoded_sha256": "05426adff853334e6615b9ddfdc8bdf6cbedf839794a27239c0b295e7df6555c"
+      },
+      {
+        "level": 2,
+        "width": 9,
+        "height": 17,
+        "file": "coverage-mip2.png",
+        "sha256": "ef1b8f77464bb03fc61ec3e45eac89b75ed904ffe1f4d84d2e87111931a60ebc",
+        "decoded_sha256": "fed72ea00e7530bc31f34857309cb670812341fafd0e4040ee292865ddf83f50"
+      },
+      {
+        "level": 3,
+        "width": 4,
+        "height": 8,
+        "file": "coverage-mip3.png",
+        "sha256": "2e8983ba031a2415af98f169d572e5fdc487c7e7768c63337c7fe6edab310114",
+        "decoded_sha256": "8b15de104e5fe7ead038ee0d7a4d6a73af124d87835079a48aa1a54d5e6a3e93"
+      },
+      {
+        "level": 4,
+        "width": 2,
+        "height": 4,
+        "file": "coverage-mip4.png",
+        "sha256": "f8c795308489cd7bae2eb675960acad005d0de508f062d3ad055b8229c222189",
+        "decoded_sha256": "460f39cada4179b34a297f308d76834c8c96c4fc75997c3d78c48a8f67cbb242"
+      },
+      {
+        "level": 5,
+        "width": 1,
+        "height": 2,
+        "file": "coverage-mip5.png",
+        "sha256": "5e61c93c1450c443a64ff8c3338909f3f4228c973fdb824fc9c1bbe9362c391f",
+        "decoded_sha256": "55a7c00ee1762387320baed79362ab065ab43d3632167c9b6d7232e842373ef3"
+      },
+      {
+        "level": 6,
+        "width": 1,
+        "height": 1,
+        "file": "coverage-mip6.png",
+        "sha256": "568af156ea5d40c076a6c99709183cbc4243472fea28d2d1fba4d9df6f7df25a",
+        "decoded_sha256": "cbe5cfdf7c2118a9c3d78ef1d684f3afa089201352886449a06a6511cfef74a7"
+      }
+    ],
+    "triangle_ids": {
+      "file": "triangle-ids.bin.zst",
+      "compression": "zstd",
+      "uncompressed_bytes": 5460,
+      "sha256": "5283386fe46dc473e68c39b27c0773c9fa8c40fdd5201bd1fd052c0ad837e915",
+      "file_sha256": "31672d34b1af33fbe3ce56d2aa7679f27507213a7cb413dd9d573ab616a75ce0",
+      "codec_roundtrip_byte_identical": true,
+      "format": "RG8",
+      "byte_order": "little",
+      "width": 39,
+      "height": 70,
+      "mipmaps": false,
+      "id_zero": "reserved",
+      "id_base": 1
+    },
+    "affine_coefficients": {
+      "file": "affine-coefficients.rgba32f.zst",
+      "compression": "zstd",
+      "uncompressed_bytes": 25152,
+      "sha256": "b0aaac82321ad00dd87642e62b9551a4189d1e4ddce27bf66fbeb499180c1610",
+      "file_sha256": "884dd0ba300ea4eabc050d37f2ee5206b7d1034235186fbba1380c5e0d0c0828",
+      "codec_roundtrip_byte_identical": true,
+      "format": "RGBA32F",
+      "byte_order": "little",
+      "width": 1572,
+      "height": 1,
+      "records_per_row": 786,
+      "record_count": 786,
+      "texels_per_record": 2,
+      "mipmaps": false,
+      "layout": [
+        "u_at_grid_origin",
+        "v_at_grid_origin",
+        "dU_dX",
+        "dU_dZ",
+        "dV_dX",
+        "dV_dZ",
+        "style_id",
+        "reserved"
+      ]
+    },
+    "validation": {
+      "maximum_covered_uv_abs_error": 1.9073486328125e-06,
+      "maximum_halo_uv_abs_error": 1.9073486328125e-06,
+      "source_jacobian_float32_byte_identical": true,
+      "selected_triangle_count": 786,
+      "maximum_triangle_id": 786,
+      "coverage_policy": "maximum_raw_interpolated_source_alpha",
+      "uv_policy": "highest_alpha_then_last_stable_authored_triangle",
+      "affine_halo_policy": "nearest_valid_selected_triangle_evaluated_at_fragment_position"
+    }
+  },
+  "overlap": {
+    "covered_pixels": 1455,
+    "multiply_covered_pixels": 14,
+    "different_uv_overlap_pixels": 0,
+    "maximum_source_fragments_per_pixel": 2
+  },
+  "active_style_ids": [
+    0
+  ],
+  "appearance_limit": "Dominant UV and maximum raw alpha collapse independent overlapping road samples at four pixels per metre.",
+  "resources": {
+    "coverage-mip1.png": "683f828e40a9f16b157b039150ac5ccc19a5df2a782d523faee9ce37c7f2dfdb",
+    "triangle-ids.bin.zst": "31672d34b1af33fbe3ce56d2aa7679f27507213a7cb413dd9d573ab616a75ce0",
+    "coverage-mip2.png": "ef1b8f77464bb03fc61ec3e45eac89b75ed904ffe1f4d84d2e87111931a60ebc",
+    "coverage-mip4.png": "f8c795308489cd7bae2eb675960acad005d0de508f062d3ad055b8229c222189",
+    "coverage-mip6.png": "568af156ea5d40c076a6c99709183cbc4243472fea28d2d1fba4d9df6f7df25a",
+    "coverage-mip0.png": "1681a1cef711c3b2c0c8725bca07594595d15ba06f7b4506a5ea7d99aea04112",
+    "affine-coefficients.rgba32f.zst": "884dd0ba300ea4eabc050d37f2ee5206b7d1034235186fbba1380c5e0d0c0828",
+    "coverage-mip3.png": "2e8983ba031a2415af98f169d572e5fdc487c7e7768c63337c7fe6edab310114",
+    "coverage-mip5.png": "5e61c93c1450c443a64ff8c3338909f3f4228c973fdb824fc9c1bbe9362c391f",
+    "../../../../_continent_v2/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png": "8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805",
+    "../../../../_continent_v2/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png": "ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5",
+    "../../../../_continent_v2/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png": "6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7"
+  }
+}
