@@ -137,8 +137,21 @@ def chunks_digest(out, chunks):
     digest = hashlib.sha256()
     for chunk in chunks:
         manifest = Path(out) / chunk["manifest"]
-        glb = manifest.parent / json.loads(manifest.read_text(encoding="utf-8"))["asset"]["glb"]
+        data = json.loads(manifest.read_text(encoding="utf-8"))
+        glb = manifest.parent / data["asset"]["glb"]
         digest.update(f"{chunk['id']} {sha(glb)}\n".encode("utf-8"))
+        if "roadGround" in data:
+            # Metadata does not hash this world manifest, avoiding a digest
+            # cycle. Packages without fields keep their exact legacy digest.
+            asset_root = next((p for p in Path(out).resolve().parents if p.name == "eloria-assets"), None)
+            if asset_root is None:
+                raise ValueError("Road cartography source is outside eloria-assets")
+            tools = str(asset_root.parent / "eloria-assets/tools")
+            if tools not in sys.path:
+                sys.path.insert(0, tools)
+            from road_ground_cartography import dependencies
+            for path, expected in sorted(dependencies(asset_root.parent, manifest, data["roadGround"]).items()):
+                digest.update(f"roadGround {chunk['id']} {path.relative_to(asset_root).as_posix()} {expected}\n".encode("utf-8"))
     return digest.hexdigest()
 
 

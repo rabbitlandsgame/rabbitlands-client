@@ -15,13 +15,14 @@ import re
 import shutil
 import subprocess
 
-VERSION = 2
+VERSION = 3
 HOOK = '''                    for (int c = 0; c < 4; ++c)
                         albedo[c] *= p0 * tri[0]->color[c]
                             + p1 * tri[1]->color[c] + p2 * tri[2]->color[c];'''
 _LOADED = {}
 SAMPLER_HOOK = '/* ---- matrix helpers (column-major 4x4 applied as m * v) ---- */'
 ALBEDO_HOOK = 'sample_bilinear(tex, mat->albedo_layer, uv[0], uv[1], texel);'
+MASK_HOOK = 'if (mat->alpha_mode == 1 && albedo[3] < mat->alpha_cutoff) continue;'
 CLAMP_S = 4
 CLAMP_T = 8
 
@@ -59,10 +60,10 @@ def specialize(source: str, shader: str) -> str:
                     }} else {{
 {HOOK}
                     }}'''
-    for hook in (SAMPLER_HOOK, ALBEDO_HOOK):
+    for hook in (SAMPLER_HOOK, ALBEDO_HOOK, MASK_HOOK):
         if source.count(hook) != 1:
             raise ValueError('Atlas clamp sampler hook must occur exactly once in frozen raster.c')
-    sampler = '''/* Atlas-only flags in the existing alpha_mode integer: opaque clamp S=4, T=8.
+    sampler = '''/* Atlas-only flags in the existing alpha_mode integer: clamp S=4, T=8.
  * Clamp to edge texel centres before the unchanged repeat bilinear sampler.
  * Repeat flags are zero, preserving its original arithmetic and mask semantics. */
 static void atlas_sample_albedo(const TextureArray *tex, int layer, float u, float v,
@@ -75,7 +76,8 @@ static void atlas_sample_albedo(const TextureArray *tex, int layer, float u, flo
 
 '''
     return (source.replace(HOOK, fragment).replace(SAMPLER_HOOK, sampler+SAMPLER_HOOK)
-            .replace(ALBEDO_HOOK, 'atlas_sample_albedo(tex, mat->albedo_layer, uv[0], uv[1], texel, mat->alpha_mode);'))
+            .replace(ALBEDO_HOOK, 'atlas_sample_albedo(tex, mat->albedo_layer, uv[0], uv[1], texel, mat->alpha_mode);')
+            .replace(MASK_HOOK, 'if ((mat->alpha_mode & 3) == 1 && albedo[3] < mat->alpha_cutoff) continue;'))
 
 
 def compiler():
