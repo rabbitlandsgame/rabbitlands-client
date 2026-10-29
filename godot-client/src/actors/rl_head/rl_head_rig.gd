@@ -78,7 +78,7 @@ const IDENTITY_BAKE := preload("res://src/actors/rl_head/rl_head_identity_bake.g
 const SOURCE_MESH_META := &"rl_source_mesh"
 ## On every head, beard and hair mesh node: the asset's LOD level it draws
 ## (`_lod<k>`; 0 for the first). Levels from 1 on are drawn still where
-## RLHeadIdentityBake.far_still says so.
+## RLHeadIdentityBake.still_enabled says so (see _bake_shown).
 const LOD_LEVEL_META := &"rl_lod_level"
 ## Where the next LOD takes over, in metres from the camera, by quality, when
 ## an asset ships more than one: HIGH draws lod0 to 10 m, lod1 to 25 m and lod2
@@ -102,6 +102,19 @@ const LOD_MARGIN := 1.0
 ## Frames between distance checks. One per-frame callback checks the rigs in
 ## turn, a sixth of them each frame, instead of a _process on every rig.
 const LOD_CHECK_FRAMES := 6
+## Live expressions (the blinks; the lab's expressions and speech) are drawn
+## for at most MAX_EXPRESSIVE faces, the nearest the camera within
+## EXPRESSIVE_RANGE metres, ranked every LOD_CHECK_FRAMES frames. Every other
+## face is drawn from still bakes at every level (RLHeadIdentityBake
+## `still`: no live shape is deformed per frame, the mouth is left out) and
+## its RLFaceExpression does not run. The gameplay camera starts 26 m out,
+## where a face is a few dozen pixels high and a blink one or two; the
+## creation preview, the lab and a camera zoomed in close stay within the
+## range. A held portrait pose, a rig drawn without a camera (headless runs)
+## and a rig with a single level keep their expressions. Hair has no live
+## shapes and is always drawn still.
+const EXPRESSIVE_RANGE := 8.0
+const MAX_EXPRESSIVE := 8
 const INSTANCE_UNIFORMS := ["skin_color", "lip_tint", "brow_color", "hair_color",
 	"freckles", "liner", "stubble", "eye_color", "hairline", "brow_style", "brow_thickness",
 	"liner_wing"]
@@ -160,6 +173,14 @@ var _bakes: Dictionary = {}
 var _live_identity := false
 ## The irises' look angle, where the values are material uniforms.
 var _eye_look := Vector2.ZERO
+## Among the faces drawing live expressions (see MAX_EXPRESSIVE).
+var _expressive := true
+## draws_expressions() when the shown levels were last chosen (_bake_shown).
+var _drawn_expressive := true
+## _bake_shown switched the expression node's processing off (a still face).
+var _expression_paused := false
+## The skeleton's Head bone (-2 until looked up).
+var _head_bone := -2
 
 ## Mesh resource id -> {blend shape name: index}, shared by every actor.
 static var _shape_indices: Dictionary = {}
@@ -167,6 +188,11 @@ static var _shape_indices: Dictionary = {}
 static var _lod_rigs: Array[RLHeadRig] = []
 static var _lod_cursor := 0
 static var _lod_ticking := false
+## The frame the expressive faces were last ranked.
+static var _ranked_at := -LOD_CHECK_FRAMES
+## EXPRESSIVE_RANGE and MAX_EXPRESSIVE, changed by tests.
+static var expressive_range := EXPRESSIVE_RANGE
+static var max_expressive := MAX_EXPRESSIVE
 
 
 ## Builds an RL head on `skeleton` from `value` (a preset name, the dictionary
@@ -189,6 +215,10 @@ static func attach(skeleton: Skeleton3D, value: Variant,
 	rig._counted = true
 	RLHeadLibrary.acquire()
 	skeleton.add_child(rig)
+	# Ranked with the others within LOD_CHECK_FRAMES; until then a face out of
+	# range starts still rather than baking expressions it will not draw.
+	var distance := rig._camera_distance()
+	rig._expressive = distance < 0.0 or distance <= expressive_range
 	if not rig.apply_appearance(face):
 		rig.teardown()
 		return null
@@ -698,10 +728,13 @@ func _refresh_lod_listing(in_tree: bool = true) -> void:
 			(Engine.get_main_loop() as SceneTree).process_frame.connect(_check_lods)
 	else:
 		_lod_rigs.erase(self)
+	if in_tree and is_inside_tree():
+		_refresh_expressive_drawing()
 
 
 ## A sixth of the listed rigs each frame look at their camera. A rig whose
 ## processing is off (its actor paused by the animation gate) keeps its level.
+## Every LOD_CHECK_FRAMES frames the expressive faces are ranked as well.
 static func _check_lods() -> void:
 	var count := _lod_rigs.size()
 	if count == 0:
@@ -710,6 +743,10 @@ static func _check_lods() -> void:
 			tree.process_frame.disconnect(_check_lods)
 		_lod_ticking = false
 		return
+	var frame := Engine.get_process_frames()
+	if frame - _ranked_at >= LOD_CHECK_FRAMES:
+		_ranked_at = frame
+		_rank_expressive()
 	for step: int in ceili(float(count) / LOD_CHECK_FRAMES):
 		if _lod_rigs.is_empty():
 			return
@@ -720,11 +757,61 @@ static func _check_lods() -> void:
 			rig._check_lod()
 
 
+## The max_expressive listed faces nearest their camera within
+## expressive_range draw live expressions, every other listed face still. A
+## rig without a camera keeps them (nothing to rank by); one whose processing
+## is off keeps what it has and takes no place.
+static func _rank_expressive() -> void:
+	var candidates: Array = []
+	for rig: RLHeadRig in _lod_rigs:
+		if not is_instance_valid(rig) or not rig.can_process():
+			continue
+		var distance := rig._camera_distance()
+		if distance < 0.0:
+			rig._set_expressive(true)
+		elif distance <= expressive_range:
+			candidates.append([distance, rig])
+		else:
+			rig._set_expressive(false)
+	candidates.sort_custom(func(a: Array, b: Array) -> bool: return float(a[0]) < float(b[0]))
+	for index: int in candidates.size():
+		(candidates[index][1] as RLHeadRig)._set_expressive(index < max_expressive)
+
+
+## Metres from this viewport's camera to the head, or -1 without a camera.
+func _camera_distance() -> float:
+	var viewport := get_viewport() if is_inside_tree() else null
+	var camera := viewport.get_camera_3d() if viewport != null else null
+	if camera == null or not is_instance_valid(_skeleton):
+		return -1.0
+	if _head_bone == -2:
+		_head_bone = _skeleton.find_bone("Head")
+	var at := _skeleton.global_transform * (_skeleton.get_bone_global_rest(_head_bone).origin
+		if _head_bone >= 0 else Vector3.ZERO)
+	return camera.global_position.distance_to(at)
+
+
 func _check_lod() -> void:
-	var camera := get_viewport().get_camera_3d()
-	if camera != null:
-		update_lod(camera.global_position.distance_to(
-			_skeleton.global_transform * _skeleton.get_bone_global_rest(_skeleton.find_bone("Head")).origin))
+	var distance := _camera_distance()
+	if distance >= 0.0:
+		update_lod(distance)
+
+
+## Whether this face is drawn with its live expressions (see MAX_EXPRESSIVE).
+func draws_expressions() -> bool:
+	return _expressive or _portrait_pose or not _lod_listed
+
+
+func _set_expressive(expressive: bool) -> void:
+	_expressive = expressive
+	_refresh_expressive_drawing()
+
+
+## Draws the shown levels again when draws_expressions changed since they
+## were last chosen (the ranking, a portrait pose taken or let go).
+func _refresh_expressive_drawing() -> void:
+	if draws_expressions() != _drawn_expressive:
+		_bake_shown()
 
 
 func _apply_portrait_pose() -> void:
@@ -857,22 +944,34 @@ func _baked_weights(mesh_node: MeshInstance3D) -> Dictionary:
 
 ## The shown level of every part draws its baked mesh (or waits for it, live);
 ## every other level goes back to its live source mesh and lets its bake go.
-## A shown far level (LOD 1 and up) is baked still - no expression shapes, no
-## mouth - where RLHeadIdentityBake.far_still says so, in every renderer.
+## Where RLHeadIdentityBake.still_enabled (every renderer by default) a shown
+## level is baked still - no live shapes, no mouth - unless it is the first
+## level of a face drawing its expressions (draws_expressions) and has
+## expression shapes; such a level is baked with them where
+## RLHeadIdentityBake.enabled (Compatibility) and drawn live elsewhere. The
+## expression node runs only while the face draws its expressions.
 func _bake_shown() -> void:
 	var baking := not _live_identity and IDENTITY_BAKE.enabled()
-	var still_far := not _live_identity and IDENTITY_BAKE.far_still()
+	var still_allowed := not _live_identity and IDENTITY_BAKE.still_enabled()
+	var expressive := draws_expressions()
+	_drawn_expressive = expressive
 	for group: Array in [_head_lods, _beard_lods, _hair_lods]:
 		var shown := mini(_lod_band, group.size() - 1)
 		for index: int in group.size():
 			for node: Variant in group[index]:
 				if not is_instance_valid(node):
 					continue
-				var still := still_far and int((node as Node).get_meta(LOD_LEVEL_META, 0)) >= 1
+				var still := still_allowed and (not expressive
+					or int((node as Node).get_meta(LOD_LEVEL_META, 0)) >= 1
+					or not IDENTITY_BAKE.keeps_live_shapes((node as Node).get_meta(SOURCE_MESH_META, null) as Mesh))
 				if index == shown and (baking or still):
 					_bake(node as MeshInstance3D, still)
 				else:
 					_unbake(node as MeshInstance3D, true)
+	var pause := still_allowed and not expressive
+	if _expression != null and pause != _expression_paused:
+		_expression_paused = pause
+		_expression.set_process(not pause)
 
 
 func _bake(mesh_node: MeshInstance3D, still: bool = false) -> void:

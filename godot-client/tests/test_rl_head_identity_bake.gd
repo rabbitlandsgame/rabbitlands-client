@@ -14,10 +14,14 @@ extends SceneTree
 ##     shapes, `set_control` goes live, RL_HEAD_BAKE=0 draws live, the bakes
 ##     done on the WorkerThreadPool arrive, and the cache empties with the
 ##     last RL head;
-##   * a still bake (the far levels, RLHeadIdentityBake.far_still) keeps no
-##     live shapes and leaves the mouth out, with the same identity vertices;
-##     on the actor a far level draws it with every surface's material found
-##     again by name, and the near level keeps its expressions;
+##   * a still bake (RLHeadIdentityBake.still_enabled) keeps no live shapes
+##     and leaves the mouth out, with the same identity vertices; on the actor
+##     a far level draws it with every surface's material found again by name,
+##     and the near level keeps its expressions;
+##   * the expressive budget (RLHeadRig.MAX_EXPRESSIVE): with a camera, only
+##     the nearest faces within the range draw their expressions; every other
+##     face, and every hairstyle, draws still bakes at the first level too and
+##     its expression node rests, until the camera comes close;
 ##   * material values (the Compatibility renderer's per-face materials,
 ##     forced with RL_HEAD_VALUES=material): each surface draws a copy of its
 ##     shared material carrying the face's values, compiled with
@@ -74,6 +78,7 @@ func _run() -> void:
 	RLHeadLibrary.release()
 	await _check_actors()
 	await _check_still()
+	await _check_expressive()
 	await _check_material_values()
 	await _check_async_and_switch()
 	print("rl head identity bake: worst vertex difference %s m" % String.num_scientific(_worst))
@@ -418,7 +423,7 @@ func _check_still() -> void:
 	var actor := _spawn("male", PRESETS.appearance("Tavi"))
 	await process_frame
 	var rig := actor.rl_head()
-	_expect(rig != null and BAKE.far_still(), "Tavi's RL head built, far levels still")
+	_expect(rig != null and BAKE.still_enabled(), "Tavi's RL head built, far levels still")
 	if rig == null:
 		actor.free()
 		return
@@ -442,6 +447,82 @@ func _check_still() -> void:
 	_expect(head.mesh.get_surface_count() == RLHeadRig.source_mesh(head).get_surface_count(),
 		"the near level draws every surface")
 	actor.free()
+	await process_frame
+	await process_frame
+
+
+## The expressive budget: one camera, max_expressive lowered to 1.
+func _check_expressive() -> void:
+	BAKE.synchronous = true
+	var camera := Camera3D.new()
+	root.add_child(camera)
+	camera.position = Vector3(0.0, 1.6, 6.0)
+	camera.current = true
+	RLHeadRig.max_expressive = 1
+	var tavi := PRESETS.appearance("Tavi")
+	var nearest := _spawn("male", tavi)
+	var second := _spawn("male", tavi)
+	var beyond := _spawn("male", tavi)
+	# Placed by hand: their movement (physics) would walk them back to their tile.
+	for placed: Array in [[nearest, Vector3.ZERO], [second, Vector3(1.2, 0.0, 0.0)], [beyond, Vector3(0.0, 0.0, -3.0)]]:
+		(placed[0] as ReplicatedActor3D).set_physics_process(false)
+		(placed[0] as ReplicatedActor3D).position = placed[1]
+	for _i: int in RLHeadRig.LOD_CHECK_FRAMES * 3:
+		await process_frame
+	var rigs: Array[RLHeadRig] = [nearest.rl_head(), second.rl_head(), beyond.rl_head()]
+	_expect(rigs.all(func(rig: RLHeadRig) -> bool: return rig != null and rig.lod_band() == 0),
+		"three faces within 10 m show their first level")
+	if not rigs.all(func(rig: RLHeadRig) -> bool: return rig != null):
+		for actor: ReplicatedActor3D in [nearest, second, beyond]:
+			actor.free()
+		camera.free()
+		RLHeadRig.max_expressive = RLHeadRig.MAX_EXPRESSIVE
+		return
+	_expect(rigs[0].draws_expressions() and not rigs[1].draws_expressions() and not rigs[2].draws_expressions(),
+		"only the nearest face within %.0f m draws its expressions" % RLHeadRig.expressive_range)
+	_expect(RLHeadRig.shape_index(_shown(rigs[0])[0], "ex_blink_l") >= 0 and rigs[0].expression().is_processing(),
+		"the expressive face keeps its expression shapes and runs its expression")
+	for index: int in [1, 2]:
+		var head := _shown(rigs[index])[0]
+		var mouth := false
+		for surface: int in head.mesh.get_surface_count():
+			var material := head.mesh.surface_get_material(surface)
+			mouth = mouth or (material != null and material.resource_name == "rl_mouth")
+		_expect(rigs[index].is_baked(head) and head.mesh.get_blend_shape_count() == 0 and not mouth
+			and not rigs[index].expression().is_processing(),
+			"face %d draws a still first level without its mouth, its expression resting" % index)
+	for rig: RLHeadRig in rigs:
+		for node: MeshInstance3D in _shown(rig):
+			if str(node.name).begins_with("RLHair"):
+				_expect(rig.is_baked(node) and node.mesh.get_blend_shape_count() == 0,
+					"%s: the hair is drawn still" % node.name)
+	# The camera beside the second face: it takes the expressive place.
+	camera.position = Vector3(1.2, 1.6, 1.5)
+	for _i: int in RLHeadRig.LOD_CHECK_FRAMES * 3:
+		await process_frame
+	var head_two := _shown(rigs[1])[0]
+	_expect(rigs[1].draws_expressions() and not rigs[0].draws_expressions()
+		and RLHeadRig.shape_index(head_two, "ex_blink_l") >= 0 and rigs[1].expression().is_processing(),
+		"coming close, the second face draws its expressions and the first goes still")
+	_expect(_shown(rigs[0])[0].mesh.get_blend_shape_count() == 0 and not rigs[0].expression().is_processing(),
+		"the face left behind draws still")
+	# A held portrait pose keeps its expressions whatever the ranking.
+	beyond.hold_portrait_pose(self)
+	_expect(rigs[2].draws_expressions() and RLHeadRig.shape_index(_shown(rigs[2])[0], "ex_blink_l") >= 0,
+		"a held portrait pose draws its expression shapes")
+	beyond.release_portrait_pose(self)
+	for _i: int in RLHeadRig.LOD_CHECK_FRAMES * 2:
+		await process_frame
+	_expect(not rigs[2].draws_expressions() and _shown(rigs[2])[0].mesh.get_blend_shape_count() == 0,
+		"released, it is ranked still again")
+	RLHeadRig.max_expressive = RLHeadRig.MAX_EXPRESSIVE
+	camera.free()
+	for _i: int in RLHeadRig.LOD_CHECK_FRAMES * 2:
+		await process_frame
+	_expect(rigs.all(func(rig: RLHeadRig) -> bool: return rig.draws_expressions()),
+		"without a camera every face keeps its expressions")
+	for actor: ReplicatedActor3D in [nearest, second, beyond]:
+		actor.free()
 	await process_frame
 	await process_frame
 

@@ -28,6 +28,11 @@ func _init() -> void:
 
 
 func _run() -> void:
+	# The rig's live contract: identity, grooming and expression weights as
+	# written on the meshes. Still bakes fold identity and grooming into the
+	# mesh instead (test_rl_head_identity_bake.gd checks them).
+	OS.set_environment("RL_HEAD_STILL", "0")
+	RLHeadIdentityBake.reload_switch()
 	_stage = Node3D.new()
 	root.add_child(_stage)
 	_check_assets()

@@ -99,20 +99,21 @@ static func enabled() -> bool:
 	return _switch == 1
 
 
-## Whether the far levels (every level after a part's first: beyond 10 m at
-## High) are baked still - identity in, no expression shapes, no mouth - in
-## every renderer, whatever `enabled` says for the near ones. A face's
-## expressions (blinks, speech, smiles) are a few pixels at that distance;
-## drawn still, a far head deforms nothing per frame and draws one surface
-## fewer. RL_HEAD_FAR_STILL (`1`/`0`) forces it, read once per session.
-static func far_still() -> bool:
+## Whether faces that show no expression are drawn from still bakes - identity
+## in, no live shapes, no mouth - in every renderer, whatever `enabled` says:
+## every level of a face outside the few drawing their expressions, every
+## level after a part's first (beyond 10 m at High), and every hair level
+## (hair has no live shapes; RLHeadRig.MAX_EXPRESSIVE). Drawn still, a face
+## deforms nothing per frame beyond its skinning and draws one surface fewer.
+## RL_HEAD_STILL (`1`/`0`) forces it, read once per session.
+static func still_enabled() -> bool:
 	if _still_switch < 0:
-		var value := OS.get_environment("RL_HEAD_FAR_STILL").strip_edges().to_lower()
+		var value := OS.get_environment("RL_HEAD_STILL").strip_edges().to_lower()
 		_still_switch = 0 if value in ["0", "off", "no", "false"] else 1
 	return _still_switch == 1
 
 
-## Reads RL_HEAD_BAKE and RL_HEAD_FAR_STILL again on the next check (tests switch them).
+## Reads RL_HEAD_BAKE and RL_HEAD_STILL again on the next check (tests switch them).
 static func reload_switch() -> void:
 	_switch = -1
 	_still_switch = -1
@@ -121,6 +122,16 @@ static func reload_switch() -> void:
 ## Whether a blend shape is baked (identity and hair shapes) rather than kept live.
 static func is_baked_shape(shape: String) -> bool:
 	return shape.begins_with("id_") or shape.begins_with("hl_")
+
+
+## Whether `source` keeps any shape live in a bake (an `ex_` expression shape).
+static func keeps_live_shapes(source: Mesh) -> bool:
+	if source == null:
+		return false
+	for index: int in source.get_blend_shape_count():
+		if not is_baked_shape(str(source.get_blend_shape_name(index))):
+			return true
+	return false
 
 
 ## Whether `source` has anything to bake.
@@ -154,11 +165,11 @@ static func key(source: Mesh, weights: Dictionary, still: bool = false) -> Strin
 ## is false) when nothing can be baked now: the switch is off, the source has
 ## no identity shapes, or the budget is spent by meshes in use. Draw live then.
 ## A `still` bake keeps no live shapes at all and leaves out
-## STILL_DROPPED_MATERIALS (the far levels, see far_still): its mesh can have
+## STILL_DROPPED_MATERIALS (see still_enabled): its mesh can have
 ## fewer surfaces than its source.
 static func acquire(source: ArrayMesh, weights: Dictionary, on_ready: Callable = Callable(),
 		still: bool = false) -> ArrayMesh:
-	if source == null or not has_baked_shapes(source) or not (enabled() or (still and far_still())):
+	if source == null or not has_baked_shapes(source) or not (enabled() or (still and still_enabled())):
 		return null
 	var entry_key := key(source, weights, still)
 	var entry: Dictionary = _entries.get(entry_key, {})
