@@ -27,8 +27,10 @@ art exactly. No asset is replaced: the shipped bodies, hair and equipment are un
   sculpt near the centre; `eye_tilt` is negative because RL `eye_tilt` raises the inner
   corners). Secondary couplings (jaw -> chin_width, nose -> nose_bridge, face_length ->
   nose_length, brow_depth -> brow_height, eye_size -> eyelid) and the colour tables
-  (`tests/integration/rl_head_colour_calibration.gd`: skin 10, hair 20, eyes 12 per sex,
-  matched to the lit Low/Medium head) are in `data/actors/rl_head_wire_defaults.json`,
+  (`tests/integration/rl_head_colour_calibration.gd`: skin 10, hair 20, eyes 12 per sex
+  and 20 male beards, matched to the lit Low/Medium head; hair and beards recalibrated
+  2026-10-28 for the flat hair shading below, residuals at most 0.001 sRGB where they were
+  0.09 for hair and 0.27 for beards) are in `data/actors/rl_head_wire_defaults.json`,
   with per-sex freckle, liner, brow and lip-tint defaults keyed by skin index. PC/3
   fields (planned) slot in when present.
 * **Hair and beards.** Male Parted is `rowan_shag`, female Buns `mira_bun`; every other
@@ -38,7 +40,7 @@ art exactly. No asset is replaced: the shipped bodies, hair and equipment are un
   painted stubble; women draw neither at High (their saved choice is kept). Under the
   RL head the body's face sculpt, PortraitGroom beard shell and painted stubble are off.
 * **Grooming (the hair author's contract).** Both RL hairstyles (the hair author's
-  2026-10-27 builds, fitted to the shipped heads) carry, beside the 42 `id_` shapes:
+  2026-10-28 builds, fitted to the shipped heads) carry, beside the 42 `id_` shapes:
   * **`hl_length_p` / `hl_length_n`** (each lock re-meshed along its own growth curve at
     +60% / -40% of its length, roots pinned; Mira's locks that end in the bun keep their
     length) and **`hl_volume_p` / `hl_volume_n`** (+80% / -50% of the stand-off above a
@@ -48,15 +50,21 @@ art exactly. No asset is replaced: the shipped bodies, hair and equipment are un
     `x = clamp((v - preset) / 50, -1, 1)` (`_p` for x > 0, `_n` for x < 0), preset =
     Rowan's values (75 / 76) for `rowan_shag` and Mira's (70 / 72) for `mira_bun`, so
     0 / 50 / 100 give Rowan length -1 / -0.5 / +0.5. A missing shape is a no-op.
-  * **Fine detail (`hair_detail`).** COLOR_0.A is each point's keep level: 1 for core
-    geometry (shell, clumps, ribbons, bun, braid, curls, baby hairs), 0.5-0.95 spread per
-    card for flyaway and wisp cards; beards and older assets carry 1. `rl_hair.gdshader`
-    drops a fragment where `A < 1 - hair_detail` (the instance uniform, 0-1) through the
-    same alpha scissor as the coverage, so the hair stays in the opaque pass in both
-    renderers. The RL face's `hair_detail` is a level 0-100 (the uniform is a hundredth
-    of it): 50, the default, is the authored look, lower drops flyaways from the lowest
-    keep level up, 0 is smooth, and above 50 nothing more appears - the strands gain up
-    to 35% contrast about the atlas's local mean instead. Beards keep 50.
+  * **Fine detail (`hair_detail`).** COLOR_0.A is each point's keep level, in one of
+    three bands and nothing else: 1 for core geometry (shell, clumps, ribbons, bun,
+    braid, curls, baby hairs); 0.5-0.95, spread per card, for the authored flyaway and
+    wisp cards (cards only); 0.05-0.45 for the messy extras - strays, crown and temple
+    frizz, loose locks, separated tips, and Rowan's two fringe-gap locks (clump locks at
+    0.38 and 0.22) - added for "messier than authored" (owner decision Q-N11, PC/3
+    spec). The last level is all core; beards and older assets carry 1.
+    `rl_hair.gdshader` drops a fragment where `A < 1 - hair_detail` (the instance
+    uniform, 0-1, less half an 8-bit step) through the same alpha scissor as the
+    coverage, so the hair stays in the opaque pass in both renderers. The RL face's
+    `hair_detail` is a level 0-100 (the uniform is a hundredth of it): 50, the default,
+    is the authored look, lower drops flyaways from the lowest keep level up, 0 is
+    smooth, and above 50 the strands gain up to 35% contrast about the atlas's local
+    mean while the messy extras fade in - a point with keep level A shows above level
+    `100 * (1 - A)`, so the band appears from 55 to 95. Beards keep 50.
   * **From the saved finish** (owner decision; colour model spec revision 3, 4.7). A
     Human's hair finish (`hair_detail` 0 Classic, 1 Tousled, 2 Swept) sits on the hair
     finish slider (0 sleekest to 100 messiest) at Swept 25, Classic 50, Tousled 75.
@@ -66,13 +74,57 @@ art exactly. No asset is replaced: the shipped bodies, hair and equipment are un
     Swept, 25), so each preset finish is the authored look: `rowan_shag` Swept 17,
     Classic 33, Tousled 50; `mira_bun` Swept 50, Classic 67, Tousled 83
     (`data/actors/rl_head_wire_defaults.json` `hair.detail.sliderPresetFinish`). A later
-    PC/3 `hair_finish` slider value feeds the same function.
+    PC/3 `hair_finish` slider value feeds the same function. So no finish of Rowan's
+    shows the messy band (Tousled, his messiest, is his authored look), and neither does
+    Mira's Swept; her Classic (67) and Tousled (83) are messier than authored and show
+    part of it by design: 406 and 1,078 of her 1,476 first-level messy points (19 and 48
+    of its 70 keep values). `tests/test_rl_head.gd` checks both against the shader's rule.
   * **Springs** keep their authored rest lengths; extended tips stay weighted to the last
     joint and swing with it, shortened locks use fewer joints.
     `tests/test_rl_head.gd` swings both hairstyles at full length and volume.
+  * **Scalp coverage** (2026-10-28 rebuild). The earlier builds let the scalp show
+    through from behind and above. Each style's scalp under-shell now spans whole
+    texture sectors (40 columns over 12 sectors had left a 36-degree wedge bare from the
+    crown to the nape on Rowan's first level, and a gap behind Mira's right ear), is
+    lifted until its faces, not only its vertices, clear the skin (the coarse last level
+    dipped up to 6 mm under it), shares morph deltas across its duplicated seam vertices
+    (the seams cracked under identity shapes) and reaches past the nape hairline. The
+    hair author's ray-cast gate (900 scalp samples, 165 view directions, level 0, where
+    only core geometry draws) counted up to 96 / 2 / 41 samples showing scalp through
+    the hair on levels 0 / 1 / 2 of the earlier Rowan at rest or under the grooming
+    extremes, and 29 / 1 / 16 on Mira; the rebuilt styles have none. The all-identity
+    extremes, which the gate reports as warnings, leave at most two single-ray samples
+    at the sides of the head.
   * The animation importer keeps RESET defaults off `id_`, `ex_` and `hl_` shapes, and
     `tests/test_rl_head.gd` pins the shipped head builds and fails when any hairstyle or
     beard records another head build (`headSHA256`).
+* **Hair shading** (`rl_hair.gdshader`; option B, "flat painterly", of the 2026-10-28
+  hair look review). Hair and beards are a flat, painterly colour mass, as in the concept
+  art: a wrapped Lambert (wrap 0.45) for gentle form, each pixel's painted luminance
+  moved 65% of the way to its lock's mean (`flatness`; cards, whose strand atlas is
+  mostly white fill, towards a fixed `card_flat_level` 0.35), and only a faint, broad
+  sheen in the hair's own hue (primary 0.015 with no white, secondary 0.08 at gloss 12),
+  root darkening 0.25, occlusion 0.4, exposure 2.5. The header of the shader lists the
+  uniforms of the earlier look and of two other options.
+  * **The double-albedo correction.** Godot 4.7.2 multiplies `DIFFUSE_LIGHT` by `ALBEDO`
+    after `light()`, in Forward+ and the Compatibility renderer alike (with `ALBEDO` pure
+    green every lit pixel came back with red and blue exactly 0). The earlier `light()`
+    multiplied `ALBEDO` in as well, so the diffuse fell with the square of the colour:
+    dark hair took almost no key light and its strand highlights carried 70-90% of its
+    light. `light()` now adds the diffuse without it; the uniform `double_albedo`
+    (default 0) restores the old term for comparison renders only.
+  * **Measured** on the RL head stage (neutral look, Forward+, front view, the
+    75th-percentile hair pixel against the preset colour's luminance), the earlier look
+    against this one: Rowan 0.57 -> 1.08, Mira 0.34 -> 0.82, Tavi 1.09 -> 1.15; the
+    highlights' share of Rowan's light 69% -> 6%, his luminance spread p90/p10 12.4 ->
+    4.0.
+  * **Beards** light like the hair of the same colour: the `rl_beard` material sets the
+    shader's `beard`, which draws it at `beard_gain` 1.7. Without the gain Tavi's full
+    beard in his hair colour lit to 0.68 of that colour against his hair's 1.15 (front;
+    0.59 of the hair over the front, three-quarter and profile views); with it 1.16
+    (1.10 against 1.10 over the three views). The earlier look's beard was at 0.19.
+  * The colour tables' hair and beard rows were recalibrated for this shading (above):
+    every hair and beard colour now lands on what Low/Medium show.
 * **Portraits.** `ReplicatedActor3D.hold_portrait_pose` / `release_portrait_pose`:
   while a dialogue line shows the speaker (`CampaignPortraitLayer`) or a leaderboard card
   renders, the head keeps its first level of detail, a neutral face and open eyes.
@@ -101,9 +153,10 @@ art exactly. No asset is replaced: the shipped bodies, hair and equipment are un
   compression, mipmaps or an S3TC/BPTC product and `check_actor_pack` holds every RL
   file to one place; `tests/test_package_client.py` and `tests/test_rl_head.gd` check the
   route. The lab (`prototypes/rl_heads`) and the RL tests and evidence scripts are not
-  exported. A Windows package carries 54.2 MB of RL head: the GLBs loose (17.1 MB), the
-  maps in the PCK (36.7 MB: VRAM-compressed, as large on disk as in video memory), code
-  and data 0.3 MB. Exported unchanged, the old layout (`assets/actors/rl_heads`) would
+  exported. A Windows package carries 54.9 MB of RL head: the GLBs loose (17.8 MB; 17.1
+  MB before the 2026-10-28 hair rebuild, when the package was measured), the maps in
+  the PCK (36.7 MB: VRAM-compressed, as large on disk as in video memory), code and data
+  0.3 MB. Exported unchanged, the old layout (`assets/actors/rl_heads`) would
   have carried about 104 MB: imported scenes the game never reads and lossless maps
   without mipmaps in the PCK, and every GLB and PNG loose as well.
 * **Open headwear.** RL heads take the RL fits of pieces 111/112/114/119. The data's
@@ -249,9 +302,12 @@ beards; mean frame work in ms, two runs each at 26 m.
   against 2,103 at 160). **Close portrait** (`mpfb_prototype_cost.gd` method, one head):
   GPU 0.14 against 0.10 ms in Forward+, 0.09 against 0.05 ms in Compatibility.
 * **Triangles up close** (level 0): head 12,152 (male) / 12,077 (female), rowan_shag
-  12,908, mira_bun 17,976, beards 872-4,536: Rowan 25,060 and Tavi with a full beard
-  29,596 against develop's 17,408 and 19,886; Mira 30,053 against 23,496 (develop's head
-  share of the body plus eyes, brows and scalp, its hairstyle and beard shell).
+  14,686, mira_bun 19,232, beards 872-4,536: Rowan 26,838 and Tavi with a full beard
+  31,374 against develop's 17,408 and 19,886; Mira 31,309 against 23,496 (develop's head
+  share of the body plus eyes, brows and scalp, its hairstyle and beard shell). The
+  2026-10-28 coverage rebuild added 1,778 (Rowan) and 1,256 (Mira) of these on level 0,
+  mostly messy-band cards that are drawn but discarded per fragment at level 55 and
+  below. The perf gate above ran on the earlier builds (12,908 and 17,976).
 * **Video memory**, both sexes loaded (Rowan and Mira, Forward+): develop +200 MB, RL
   +311 MB (textures +56 MB, mesh buffers +55 MB: the source meshes carry all 55 shapes).
   RL maps: per sex albedo 2.8 MB, features and brows 5.6 MB each, features2 1.4 MB
@@ -263,10 +319,11 @@ beards; mean frame work in ms, two runs each at 26 m.
 * **Quality switch** with 40 Humans: Medium/Low to High 2.5-2.9 s against develop's
   4.7-6.3 s (5.0-5.3 s on the packaged route); High to Medium 1.2 s the first time (0.1 s
   after) against 25 ms.
-* **Repository**: the RL assets are 27.0 MB (22 files; 25.7 MB before the hairstyles
-  gained their four grooming shapes), against 3.7 MB for develop's High portrait and hair
-  data. The grooming rebuild left every hairstyle level's triangle count unchanged; the
-  memory figures above predate it (four more blend shapes on each hair mesh).
+* **Repository**: the RL assets are 27.7 MB (22 files; 27.0 MB before the 2026-10-28
+  coverage rebuild, 25.7 MB before the hairstyles gained their four grooming shapes),
+  against 3.7 MB for develop's High portrait and hair data. The grooming rebuild left
+  every hairstyle level's triangle count unchanged; the memory figures above predate it
+  (four more blend shapes on each hair mesh) and the coverage rebuild.
 
 ## Files
 
