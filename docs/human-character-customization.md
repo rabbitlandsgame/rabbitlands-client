@@ -125,15 +125,18 @@ unchanged; switching quality swaps the heads in place.
   the preset's own finish (Tousled for Rowan, Swept for Mira) shows the
   authored strands. A sleeker finish drops loose flyaway strands, and a
   messier one adds strays, frizz and loose locks and breaks the strands up
-  more. The other hairstyles take length, volume and finish as before.
+  more (only Mira's Classic and Tousled are messier than her preset). The
+  hair covers the scalp from every side, and the RL hair and beards are shaded
+  as a soft, flat colour mass with a faint sheen, like the concept art. The
+  other hairstyles take length, volume and finish as before.
 * **Facial hair.** Moustache, goatee, short and full beards are RL beards that
-  follow facial expressions. Stubble is painted into the RL skin. Women show
-  no beard and no stubble at High for now; their saved choice is kept and shows
-  at Low and Medium.
+  follow facial expressions and light like hair of the same colour. Stubble is
+  painted into the RL skin. Women show no beard and no stubble at High for now;
+  their saved choice is kept and shows at Low and Medium.
 * **Colour.** Skin, eye and hair colour use the same palette choices, tuned so
-  the High head matches what Low and Medium show for the same choice (the
-  darkest hair colours stay slightly lighter on the RL hairstyles). Freckles,
-  liner, brow shape and lip colour follow per-sex defaults by skin tone.
+  the High head matches what Low and Medium show for the same choice, the RL
+  hair and beards included. Freckles, liner, brow shape and lip colour follow
+  per-sex defaults by skin tone.
 * **Portraits.** Dialogue and leaderboard portraits show the full-detail head
   with a neutral expression and open eyes.
 

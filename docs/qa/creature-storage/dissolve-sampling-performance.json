@@ -1,0 +1,272 @@
+{
+  "scope": "Headless CPU begin/reset on cached raw models at the Death_A terminal pose. Asset loading, native curve import and GPU frame/ash rendering time excluded; sequential scenarios, fixed seeds77..116.",
+  "warmup_per_case": 8,
+  "samples_per_case": 32,
+  "cold_first_note": "One first begin/reset after clearing the static sampling cache. Asset loading excluded. Cold single samples and sequential timings include ordinary run-to-run noise; old first scenario also includes first effect/material setup.",
+  "engine": {
+    "build": "official",
+    "hash": "ed1daf0bf001b61586d9930840f2f1394092c079",
+    "hex": 263938,
+    "major": 4,
+    "minor": 7,
+    "patch": 2,
+    "status": "stable",
+    "string": "4.7.2-stable (official)",
+    "timestamp": 0
+  },
+  "cache_policy": {
+    "max_entries": 64,
+    "lifetime": "Weak mesh resource only; complete immutable metadata fingerprint plus equality and vertex count guard reuse. Static IDs and packed joints/weights only. No actor, skin, material or pose retained."
+  },
+  "results": [
+    {
+      "name": "old_plain_tortoise",
+      "cold_first_total_ms": 6.011,
+      "begin_ms": {
+        "median": 2.2199999999999998,
+        "p95": 2.4910499999999995
+      },
+      "reset_ms": {
+        "median": 0.025500000000000002,
+        "p95": 0.0429
+      },
+      "total_ms": {
+        "median": 2.2445,
+        "p95": 2.5216
+      }
+    },
+    {
+      "name": "new_plain_tortoise",
+      "cold_first_total_ms": 2.754,
+      "begin_ms": {
+        "median": 2.4475,
+        "p95": 4.0447500000000005
+      },
+      "reset_ms": {
+        "median": 0.025,
+        "p95": 0.040350000000000004
+      },
+      "total_ms": {
+        "median": 2.476,
+        "p95": 4.08145
+      }
+    },
+    {
+      "name": "new_rigid_reference_tortoise",
+      "cold_first_total_ms": 4.383,
+      "begin_ms": {
+        "median": 2.5555000000000003,
+        "p95": 3.5497500000000004
+      },
+      "reset_ms": {
+        "median": 0.0265,
+        "p95": 0.03435
+      },
+      "total_ms": {
+        "median": 2.582,
+        "p95": 3.58535
+      }
+    },
+    {
+      "name": "old_plain_foal",
+      "cold_first_total_ms": 3.02,
+      "begin_ms": {
+        "median": 2.5389999999999997,
+        "p95": 3.2114
+      },
+      "reset_ms": {
+        "median": 0.023,
+        "p95": 0.05459999999999999
+      },
+      "total_ms": {
+        "median": 2.5620000000000003,
+        "p95": 3.2578000000000005
+      }
+    },
+    {
+      "name": "new_plain_foal",
+      "cold_first_total_ms": 2.465,
+      "begin_ms": {
+        "median": 2.7895000000000003,
+        "p95": 3.9488499999999997
+      },
+      "reset_ms": {
+        "median": 0.03,
+        "p95": 0.04625
+      },
+      "total_ms": {
+        "median": 2.815,
+        "p95": 3.9915499999999997
+      }
+    },
+    {
+      "name": "new_preserved_skin_partition_foal",
+      "cold_first_total_ms": 4.629,
+      "begin_ms": {
+        "median": 4.043,
+        "p95": 5.4006
+      },
+      "reset_ms": {
+        "median": 0.041,
+        "p95": 0.06305
+      },
+      "total_ms": {
+        "median": 4.0885,
+        "p95": 5.459150000000001
+      }
+    }
+  ],
+  "synthetic_verification": {
+    "checks": 2832,
+    "gpu_cases": 24,
+    "passed": true,
+    "reference": "Immutable pre-change creature_dissolve.gd from integration commit03d97ef3",
+    "buffer_pairs": [
+      {
+        "bytes": 25600,
+        "case": "4-0.0-0",
+        "new_sha256": "8afb09ecf181f1c15d712afbae799479613ae329c66d29fdfc4e25a97b87d52f",
+        "old_sha256": "8afb09ecf181f1c15d712afbae799479613ae329c66d29fdfc4e25a97b87d52f"
+      },
+      {
+        "bytes": 25600,
+        "case": "4-0.0-1",
+        "new_sha256": "0389ff477edf4149961b8cadf73ac4898e357bcbf03a11d6383ed44c4b461d73",
+        "old_sha256": "0389ff477edf4149961b8cadf73ac4898e357bcbf03a11d6383ed44c4b461d73"
+      },
+      {
+        "bytes": 25600,
+        "case": "4-0.0-77",
+        "new_sha256": "6b3f03203377d5a884ae1dc5b48d11c2ed1762a406e4e7a2ec39c3499fbc86fd",
+        "old_sha256": "6b3f03203377d5a884ae1dc5b48d11c2ed1762a406e4e7a2ec39c3499fbc86fd"
+      },
+      {
+        "bytes": 25600,
+        "case": "4-0.0-193",
+        "new_sha256": "32b8efe56aac6924a976d3d541c0fdf2889bcbffdf740e2e0a789efaecdd73d6",
+        "old_sha256": "32b8efe56aac6924a976d3d541c0fdf2889bcbffdf740e2e0a789efaecdd73d6"
+      },
+      {
+        "bytes": 25600,
+        "case": "4-0.67-0",
+        "new_sha256": "4d1c566130634404e06c5f624f40b258aa2d5e853a7257bc05ed2a7bddd486c6",
+        "old_sha256": "4d1c566130634404e06c5f624f40b258aa2d5e853a7257bc05ed2a7bddd486c6"
+      },
+      {
+        "bytes": 25600,
+        "case": "4-0.67-1",
+        "new_sha256": "c984fd0682581bb63cac03275ebd0850bc0bacce0bf99ed7b0eef30a2e26c2ca",
+        "old_sha256": "c984fd0682581bb63cac03275ebd0850bc0bacce0bf99ed7b0eef30a2e26c2ca"
+      },
+      {
+        "bytes": 25600,
+        "case": "4-0.67-77",
+        "new_sha256": "c3e6146211896726b574c4b74b8ab5da85d624f3bd54d9ff72e0f400d62a07a9",
+        "old_sha256": "c3e6146211896726b574c4b74b8ab5da85d624f3bd54d9ff72e0f400d62a07a9"
+      },
+      {
+        "bytes": 25600,
+        "case": "4-0.67-193",
+        "new_sha256": "1d0460ad48e50f9f5d570e31a0770e0f31cefaa5c1cc408262b66d21c7fcc860",
+        "old_sha256": "1d0460ad48e50f9f5d570e31a0770e0f31cefaa5c1cc408262b66d21c7fcc860"
+      },
+      {
+        "bytes": 25600,
+        "case": "4-1.0-0",
+        "new_sha256": "7c7f580d3e6b133a4e6b503e175ae0abdf516ef17e381ffabea3b41cf3cfa0cf",
+        "old_sha256": "7c7f580d3e6b133a4e6b503e175ae0abdf516ef17e381ffabea3b41cf3cfa0cf"
+      },
+      {
+        "bytes": 25600,
+        "case": "4-1.0-1",
+        "new_sha256": "89da7e7a9baea04f8d5cac96fe16e7ae813d37873a767ea57b61226117c2dbe8",
+        "old_sha256": "89da7e7a9baea04f8d5cac96fe16e7ae813d37873a767ea57b61226117c2dbe8"
+      },
+      {
+        "bytes": 25600,
+        "case": "4-1.0-77",
+        "new_sha256": "9f6686da3e72437e56166a627b69ccd4d000556367b0e51890dc0511f2abed39",
+        "old_sha256": "9f6686da3e72437e56166a627b69ccd4d000556367b0e51890dc0511f2abed39"
+      },
+      {
+        "bytes": 25600,
+        "case": "4-1.0-193",
+        "new_sha256": "14fbba92193cd93fdf25aafca788507dec723a7a550a37ddef4519c13ee6f557",
+        "old_sha256": "14fbba92193cd93fdf25aafca788507dec723a7a550a37ddef4519c13ee6f557"
+      },
+      {
+        "bytes": 25600,
+        "case": "8-0.0-0",
+        "new_sha256": "4dd27b3a4ffcecda03fc6de2a2dc8614b2ae7b3a44b69944b4438daed037e87e",
+        "old_sha256": "4dd27b3a4ffcecda03fc6de2a2dc8614b2ae7b3a44b69944b4438daed037e87e"
+      },
+      {
+        "bytes": 25600,
+        "case": "8-0.0-1",
+        "new_sha256": "86e4ec2e4eaa4ae31f90e085bedb6a61c64c34a583d8f8ca03634644ab21981c",
+        "old_sha256": "86e4ec2e4eaa4ae31f90e085bedb6a61c64c34a583d8f8ca03634644ab21981c"
+      },
+      {
+        "bytes": 25600,
+        "case": "8-0.0-77",
+        "new_sha256": "35806a70e08276d02624a3c96ad244219346a882c035c4b6472aec3106c5dd34",
+        "old_sha256": "35806a70e08276d02624a3c96ad244219346a882c035c4b6472aec3106c5dd34"
+      },
+      {
+        "bytes": 25600,
+        "case": "8-0.0-193",
+        "new_sha256": "e1e9d49e254f0f8334a00837998bbc4352d901bed5e8bc7410786c4c0a72e697",
+        "old_sha256": "e1e9d49e254f0f8334a00837998bbc4352d901bed5e8bc7410786c4c0a72e697"
+      },
+      {
+        "bytes": 25600,
+        "case": "8-0.67-0",
+        "new_sha256": "ccbf64accde58cd3716ab943c97bd4431416fa9ef6f3f407e5724d81494264cf",
+        "old_sha256": "ccbf64accde58cd3716ab943c97bd4431416fa9ef6f3f407e5724d81494264cf"
+      },
+      {
+        "bytes": 25600,
+        "case": "8-0.67-1",
+        "new_sha256": "8b1e2c9c655d2a444e9808ab890dfc77910944a35361b2134eb6101650322319",
+        "old_sha256": "8b1e2c9c655d2a444e9808ab890dfc77910944a35361b2134eb6101650322319"
+      },
+      {
+        "bytes": 25600,
+        "case": "8-0.67-77",
+        "new_sha256": "59fdf8efb184b146968c8c0b1a01608f11d4d96c955e6d649b8cec713e5fb996",
+        "old_sha256": "59fdf8efb184b146968c8c0b1a01608f11d4d96c955e6d649b8cec713e5fb996"
+      },
+      {
+        "bytes": 25600,
+        "case": "8-0.67-193",
+        "new_sha256": "cea6aa9f25ae551b92c9ee3c40122c0e68ece9a73e844f3ba006f3658016f43a",
+        "old_sha256": "cea6aa9f25ae551b92c9ee3c40122c0e68ece9a73e844f3ba006f3658016f43a"
+      },
+      {
+        "bytes": 25600,
+        "case": "8-1.0-0",
+        "new_sha256": "fc2c6f8aa1fa179c24d1d3ad1140674dc67ca21df6e8ab5beb05655a9722cdf5",
+        "old_sha256": "fc2c6f8aa1fa179c24d1d3ad1140674dc67ca21df6e8ab5beb05655a9722cdf5"
+      },
+      {
+        "bytes": 25600,
+        "case": "8-1.0-1",
+        "new_sha256": "554375fb473c34e7c26a5ba8c5df5ae10a7addcb8b3eec05d4ddb10c8ea82d6b",
+        "old_sha256": "554375fb473c34e7c26a5ba8c5df5ae10a7addcb8b3eec05d4ddb10c8ea82d6b"
+      },
+      {
+        "bytes": 25600,
+        "case": "8-1.0-77",
+        "new_sha256": "6cda329df37da194b0b00c743a84bb0a3e972bacd258dd978042c1af1432eead",
+        "old_sha256": "6cda329df37da194b0b00c743a84bb0a3e972bacd258dd978042c1af1432eead"
+      },
+      {
+        "bytes": 25600,
+        "case": "8-1.0-193",
+        "new_sha256": "e6533b1f5c2a5d00b3e430d11ebed937a64c395d337f97c456e2a0ed3179876b",
+        "old_sha256": "e6533b1f5c2a5d00b3e430d11ebed937a64c395d337f97c456e2a0ed3179876b"
+      }
+    ]
+  },
+  "runtime_scope": "Only begin/reset CPU setup changes. Ash instance count, shader parameters and per-frame GPU work unchanged. This is not an in-game frame-time or crowd benchmark."
+}

@@ -3751,15 +3751,9 @@ func _sync_bulk_option_menus() -> void:
 			menu.set_item_checked(index, index < values.size() and bool(values[index]))
 
 func _on_bulk_button_gui_input(event: InputEvent, kind: String) -> void:
-	if not event is InputEventMouseButton:
-		return
-	var mouse: InputEventMouseButton = event as InputEventMouseButton
-	if not mouse.pressed or mouse.button_index != MOUSE_BUTTON_RIGHT:
-		return
-	var menu: PopupMenu = _store_options_menu if kind == "store" else _drop_options_menu
-	menu.position = Vector2i(get_viewport().get_mouse_position())
-	menu.popup()
-	(inventory_store_all if kind == "store" else inventory_drop_all).accept_event()
+	if inventory_workspace != null:
+		inventory_workspace.bulk_actions.shortcut_input(event, kind,
+			inventory_store_all if kind == "store" else inventory_drop_all)
 
 func _on_bulk_option_selected(option_id: int, kind: String) -> void:
 	if option_id < 0 or option_id >= 4:
@@ -3771,11 +3765,14 @@ func _on_bulk_option_selected(option_id: int, kind: String) -> void:
 	_save_hud_settings()
 
 func _inventory_slot_is_protected(slot: int, kind: String) -> bool:
+	if slot < 0 or slot >= 24: return false
+	var columns: int = maxi(1, inventory_grid.columns)
+	var last_row: int = (23 / columns) * columns
 	var values: Array = _bulk_exclusions.get(kind, [false, false, false, false]) as Array
-	return ((bool(values[0]) and slot < 6)
-		or (bool(values[1]) and slot >= 30)
-		or (bool(values[2]) and slot % 6 == 0)
-		or (bool(values[3]) and slot % 6 == 5))
+	return ((bool(values[0]) and slot < columns)
+		or (bool(values[1]) and slot >= last_row)
+		or (bool(values[2]) and slot % columns == 0)
+		or (bool(values[3]) and slot % columns == columns - 1))
 
 func _on_inventory_store_all_pressed() -> void:
 	if bool(AppState.storage.get("read_only", false)):
@@ -3789,7 +3786,7 @@ func _on_inventory_store_all_pressed() -> void:
 	slots.sort()
 	for raw_slot: Variant in slots:
 		var slot: int = int(raw_slot)
-		if slot < 0 or slot >= 36 or _inventory_slot_is_protected(slot, "store"):
+		if slot < 0 or (slot >= 24 and slot < 127) or _inventory_slot_is_protected(slot, "store"):
 			continue
 		var item: Dictionary = AppState.inventory.get(slot, {}) as Dictionary
 		if not item.is_empty() and Network.deposit_storage(slot,
@@ -3851,7 +3848,7 @@ func _on_inventory_drop_all_pressed() -> void:
 	slots.sort()
 	for raw_slot: Variant in slots:
 		var slot: int = int(raw_slot)
-		if slot < 0 or slot >= 36 or _inventory_slot_is_protected(slot, "drop"):
+		if slot < 0 or (slot >= 24 and slot < 127) or _inventory_slot_is_protected(slot, "drop"):
 			continue
 		var item: Dictionary = AppState.inventory.get(slot, {}) as Dictionary
 		if not item.is_empty() and Network.drop_inventory_item(slot,
@@ -4223,7 +4220,7 @@ func _request_all_ground_bag_items() -> int:
 
 func _on_ground_bag_drop_pressed() -> void:
 	var slot: int = selected_inventory_slot
-	if slot < 0 or slot >= 36:
+	if slot < 0 or (slot >= 24 and slot < 127):
 		return
 	var item_value: Variant = AppState.inventory.get(slot)
 	if not item_value is Dictionary:
@@ -8559,7 +8556,7 @@ func _sync_ground_bag() -> void:
 
 func _sync_ground_bag_actions() -> void:
 	var slot: int = selected_inventory_slot
-	var droppable: bool = (slot >= 0 and slot < 36
+	var droppable: bool = (slot >= 0 and (slot < 24 or slot >= 127)
 		and AppState.inventory.get(slot) is Dictionary)
 	ground_bag_drop_button.disabled = not droppable
 	if droppable:
@@ -13885,7 +13882,7 @@ func _fill_ground_bag_grid(items: Dictionary) -> void:
 		ground_bag_quantity_labels[empty_index].text = ""
 
 func _build_inventory_slots() -> void:
-	for slot: int in range(36):
+	for slot: int in range(24):
 		var button: Button = Button.new()
 		button.custom_minimum_size = Vector2(44.0, 44.0)
 		button.expand_icon = true
@@ -15766,7 +15763,7 @@ func _apply_inventory_tool(slot: int) -> void:
 					_move_inventory_item(slot, wear)
 		"unequip":
 			if slot >= 36:
-				var carry: int = _first_empty_slot(0, 36)
+				var carry: int = _first_empty_slot(0, 24)
 				if carry >= 0:
 					_move_inventory_item(slot, carry)
 		"grab":
@@ -15898,7 +15895,7 @@ func _equip_inventory_slot(slot: int) -> void:
 ## with nothing free the move is not sent - the same rule the Unequip
 ## tool already follows.
 func _unequip_destination() -> int:
-	return _first_empty_slot(0, 36)
+	return _first_empty_slot(0, 24)
 
 ## Takes off what is worn in an equipment slot.
 func _unequip_inventory_slot(slot: int) -> void:
@@ -16258,7 +16255,7 @@ func _sync_storage_backpack() -> void:
 	var backpack: Dictionary = {}
 	for raw_slot: Variant in AppState.inventory:
 		var slot: int = int(raw_slot)
-		if slot >= 0 and slot < 36:
+		if slot >= 0 and (slot < 24 or slot >= 127):
 			backpack[slot] = AppState.inventory[raw_slot]
 	_fill_storage_item_list(storage_inventory, backpack, "Inventory")
 	_sync_storage_actions()

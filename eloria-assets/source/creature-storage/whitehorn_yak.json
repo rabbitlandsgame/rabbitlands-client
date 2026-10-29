@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "actor": "whitehorn_yak",
+  "source_sha256": "81010f614f06d6a2d9600b1453d1052b059b854ba69a0a7e6f0148496a167111",
+  "candidate_sha256": "1907c15446355a73415718d6240a75f3804f476b284132ded75fafe3ed457d63",
+  "pipeline": [
+    "prune_zero_targets",
+    "reduce_constant_runs",
+    "compact"
+  ],
+  "partition": null,
+  "unchanged": false,
+  "removed_zero_target_indices": [],
+  "redundant_flat_key_rows_removed": 122530,
+  "geometry_skin_rest_binds_materials_images_unchanged": true,
+  "preserve_trs_keys": false,
+  "native_clips": [
+    "Fighting_Idle",
+    "Hit_Chest",
+    "Idle_A",
+    "Walk",
+    "Jog",
+    "Sword_Attack",
+    "Death_A"
+  ],
+  "usage": "Deterministic exact preparation needs no partition --profile; frozen source/candidate hashes bind this record."
+}

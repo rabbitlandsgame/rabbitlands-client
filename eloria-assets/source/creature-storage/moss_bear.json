@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "actor": "moss_bear",
+  "source_sha256": "e27a2fedbfa57da44c0f3ff6ca10511f321367b63b0bbb69dfebcc30e498231c",
+  "candidate_sha256": "b7297bb872a7cf2ddc23731efa1427554b6762eac8538295a2f9c21aadc75247",
+  "pipeline": [
+    "prune_zero_targets",
+    "reduce_constant_runs",
+    "compact"
+  ],
+  "partition": null,
+  "unchanged": false,
+  "removed_zero_target_indices": [],
+  "redundant_flat_key_rows_removed": 167810,
+  "geometry_skin_rest_binds_materials_images_unchanged": true,
+  "preserve_trs_keys": false,
+  "native_clips": [
+    "Fighting_Idle",
+    "Hit_Chest",
+    "Idle_A",
+    "Walk",
+    "Jog",
+    "Sword_Attack",
+    "Death_A"
+  ],
+  "usage": "Deterministic exact preparation needs no partition --profile; frozen source/candidate hashes bind this record."
+}

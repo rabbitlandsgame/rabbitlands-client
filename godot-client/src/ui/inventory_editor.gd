@@ -152,11 +152,11 @@ func select_component(key: String) -> void:
 		_number("Buttons per row", part.columns, 1, 5, 1, func(value: float) -> void: workspace.change_part(key, "columns", int(value)))
 		for action: String in ["store", "get", "drop", "mix", "lists"]:
 			_toggle("Show " + action.capitalize(), part.get("show_" + action, true), func(value: bool) -> void: workspace.change_part(key, "show_" + action, value))
-	elif key in ["backpack", "equipment"]:
+	elif key in ["backpack", "equipment", "pouch"]:
 		_number("Columns", part.columns, 1, 12 if key == "backpack" else 8, 1, func(value: float) -> void: workspace.change_part(key, "columns", int(value)))
-		_number("Slot size", part.cell, 28, 64, 1, func(value: float) -> void: workspace.change_part(key, "cell", int(value)))
+		_number("Slot size", part.cell, 52 if key == "pouch" else 28, 80 if key == "pouch" else 64, 1, func(value: float) -> void: workspace.change_part(key, "cell", int(value)))
 		_number("Slot spacing", config.gap, 0, 10, 1, func(value: float) -> void: workspace.change_option("gap", int(value)))
-		if key == "backpack": _toggle("Show stack quantities", part.show_quantity, func(value: bool) -> void: workspace.change_part(key, "show_quantity", value))
+		if key in ["backpack", "pouch"]: _toggle("Show stack quantities", part.show_quantity, func(value: bool) -> void: workspace.change_part(key, "show_quantity", value))
 		_number("Icon opacity", part.icon_opacity * 100, 25, 100, 1, func(value: float) -> void: workspace.change_part(key, "icon_opacity", value / 100))
 	else:
 		_number("Section height", part.height, 32 if key == "preview" else 140, 400, 1, func(value: float) -> void: workspace.change_part(key, "height", int(value)))

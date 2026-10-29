@@ -73,10 +73,41 @@
     "walk": 0.48383371903361666,
     "run": 1.2286888384380958
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "Bright, quick and upright, with crisp alternating steps and a short precise beak jab. Deliberate alternating steps, visible knee and hock articulation, stable toe contact and restrained wings. The faster gait lengthens and quickens the steps without turning into flight.",
     "attack": "A short neck recoil into a long forward and downward beak stab, with both feet planted, then a quick recovery.",
     "death": "A forward breast-first collapse. The long neck folds, the legs release behind the body and the feather skirt settles without a beak-supported hover."
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "suncrest_heron",
+    "sourceSHA256": "ab84703466346a88a4c1655fe75715d185c184181641225e81f987ac5c6f583b",
+    "previousRuntimeSHA256": "9cc34beb87366fdc7ab14334072fee000515f1d260da0c20ac327b4e1114c570",
+    "runtimeSHA256": "6b4e54b69efed1da88671800556eb761ab981f1f5c182cafaf292df69d2b794d",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "suncrest_heron",
+      "sourceSHA256": "ab84703466346a88a4c1655fe75715d185c184181641225e81f987ac5c6f583b",
+      "runtimeSHA256": "9cc34beb87366fdc7ab14334072fee000515f1d260da0c20ac327b4e1114c570",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 240,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "suncrest_heron",
+    "appliesToSHA256": "6b4e54b69efed1da88671800556eb761ab981f1f5c182cafaf292df69d2b794d",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
   }
 }

@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "actor": "crystal_cave_spider",
+  "source_sha256": "8dda51c7c617e40be1b130a2482acf48bc43ea737d377114d0290fac31cc723c",
+  "candidate_sha256": "8dda51c7c617e40be1b130a2482acf48bc43ea737d377114d0290fac31cc723c",
+  "pipeline": [
+    "prune_zero_targets",
+    "reduce_constant_runs",
+    "compact"
+  ],
+  "partition": null,
+  "unchanged": true,
+  "removed_zero_target_indices": [],
+  "redundant_flat_key_rows_removed": 0,
+  "geometry_skin_rest_binds_materials_images_unchanged": true,
+  "native_clips": [
+    "Death_A",
+    "Fighting_Idle",
+    "Hit_Chest",
+    "Idle_A",
+    "Jog",
+    "Sword_Attack",
+    "Walk"
+  ],
+  "usage": "Deterministic exact preparation needs no partition --profile; frozen source/candidate hashes bind this record."
+}

@@ -73,12 +73,43 @@
     "walk": 1.124726226112646,
     "run": 2.7782710988887827
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "A streamlined, level cruise becomes a quicker, deeper tail beat. The flukes drive the motion while the dorsal fin stays coherent with the trunk and the pectoral fins make restrained steering strokes.",
     "attack": "An energetic rostrum-led body ram: a quick rearward load, a straight forward burst and a smooth return, with the fins swept clear of the face. No independent biting jaw is assumed.",
     "death": "Propulsion fades, the body glides forward and sinks onto separate belly supports. The rostrum lowers, the flippers relax and the flukes settle without rolling the animal onto its side."
   },
   "motionStyle": "swimming",
-  "locomotionMode": "swimming"
+  "locomotionMode": "swimming",
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "dolphin",
+    "sourceSHA256": "f3096eb3ec9db12e53456c8bc7ce3746760f9a66df8d82823e118dd50135f427",
+    "previousRuntimeSHA256": "c01700e8243277f4d335dc00c57364f07363743a41f2deb272690707909a1e20",
+    "runtimeSHA256": "85f817e3fe10628db3c5ef865355073f67452375fda3aaafd9d1522ae6a8aa4e",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "dolphin",
+      "sourceSHA256": "f3096eb3ec9db12e53456c8bc7ce3746760f9a66df8d82823e118dd50135f427",
+      "runtimeSHA256": "c01700e8243277f4d335dc00c57364f07363743a41f2deb272690707909a1e20",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 240,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "dolphin",
+    "appliesToSHA256": "85f817e3fe10628db3c5ef865355073f67452375fda3aaafd9d1522ae6a8aa4e",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
+  }
 }

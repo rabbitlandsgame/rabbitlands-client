@@ -73,12 +73,43 @@
     "walk": 0.4546557010266202,
     "run": 1.326774065174895
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "A low, deliberate bottom-cruise with a restrained armored forebody, continuous lateral caudal propulsion and small pectoral trim. Pursuit increases cadence and tail amplitude without vertical hopping.",
     "attack": "The pointed rostrum leads a low forward scooping body thrust. Load back briefly, lift the snout slightly through the forward surge, then recover without inventing a mouth hinge.",
     "death": "Propulsion fades as the long body drifts forward onto separate pelvic, central belly, chest and chin patches. Pectorals/pelvic fins, the two ventral blades, barbels and caudal panel release clear so the body is supported rather than suspended on appendages."
   },
   "motionStyle": "buoyant lateral-tail swimming",
-  "locomotionMode": "swimming"
+  "locomotionMode": "swimming",
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "sturgeon",
+    "sourceSHA256": "0200c0d0b64ae0349fdf0a8a93751c7f9db72e2f056feb6d480b93e83c244ad7",
+    "previousRuntimeSHA256": "66760cb184f4c5857962b1bd8712f48aae1dd009d0cf07bb8cac05ac8d51b815",
+    "runtimeSHA256": "a28aef0cd9764779e6ac1e6e41439ca0243aa163b5de219ae2031cb5ba76676d",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "sturgeon",
+      "sourceSHA256": "0200c0d0b64ae0349fdf0a8a93751c7f9db72e2f056feb6d480b93e83c244ad7",
+      "runtimeSHA256": "66760cb184f4c5857962b1bd8712f48aae1dd009d0cf07bb8cac05ac8d51b815",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 120,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "sturgeon",
+    "appliesToSHA256": "a28aef0cd9764779e6ac1e6e41439ca0243aa163b5de219ae2031cb5ba76676d",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
+  }
 }

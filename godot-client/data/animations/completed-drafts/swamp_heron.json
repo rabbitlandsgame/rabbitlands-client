@@ -73,10 +73,41 @@
     "walk": 0.4411413096457997,
     "run": 1.1400479331785258
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "A long-legged wading bird: deliberate alternating steps, visible knee and hock articulation, flat planted toes and folded wings. The faster gait lengthens and quickens the steps without turning into flight.",
     "attack": "A short neck recoil into a long forward and downward beak stab, with both feet planted, then a quick recovery.",
     "death": "A forward breast-first collapse. The long neck folds, the legs release behind the body and the feather skirt settles without a beak-supported hover."
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "swamp_heron",
+    "sourceSHA256": "f8b1b2b6800a23524186548af3b524ff4ce28d79e45b105c873b477c5995a55b",
+    "previousRuntimeSHA256": "dbbfe1e64c458fb254b108aaaadadd820bb9d4708bf5a93aadb863fe5fcc1231",
+    "runtimeSHA256": "03f7c4ba83d0eb1dfaf1f1522e0d225eab1c113c10323891bffafa28f8ce4ffe",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "swamp_heron",
+      "sourceSHA256": "f8b1b2b6800a23524186548af3b524ff4ce28d79e45b105c873b477c5995a55b",
+      "runtimeSHA256": "dbbfe1e64c458fb254b108aaaadadd820bb9d4708bf5a93aadb863fe5fcc1231",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 120,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "swamp_heron",
+    "appliesToSHA256": "03f7c4ba83d0eb1dfaf1f1522e0d225eab1c113c10323891bffafa28f8ce4ffe",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
   }
 }

@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "actor": "tidal_crystal_lion",
+  "source_sha256": "ba107b81be64fe16a6a9025d697371d5379b8a9fb907223ef19c685d9f2f33b9",
+  "candidate_sha256": "6c9da23b8bc3fc9b5458ccff73778ea83428867d7869b9b0ebb8dfc65c46e301",
+  "pipeline": [
+    "prune_zero_targets",
+    "reduce_constant_runs",
+    "compact"
+  ],
+  "partition": null,
+  "unchanged": false,
+  "removed_zero_target_indices": [],
+  "redundant_flat_key_rows_removed": 134439,
+  "geometry_skin_rest_binds_materials_images_unchanged": true,
+  "preserve_trs_keys": false,
+  "native_clips": [
+    "Fighting_Idle",
+    "Hit_Chest",
+    "Idle_A",
+    "Death_A",
+    "Walk",
+    "Jog",
+    "Sword_Attack"
+  ],
+  "usage": "Deterministic exact preparation needs no partition --profile; frozen source/candidate hashes bind this record."
+}

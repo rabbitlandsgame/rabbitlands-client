@@ -2,7 +2,8 @@
 
 Run against an isolated disposable package project after its imports and map
 sidecars match the final package. The caller owns engine scheduling. Source and
-raw files remain present. Exact runtime imports/products are snapshotted only
+logical source files remain present. Creatures currently ship as ordinary GLBs;
+legacy compressed payloads are still verified against decoded identity. Exact imports/products are snapshotted only
 inside an explicitly marked disposable cook project; authored trees stay out
 of the preparation/export workflow.
 """
@@ -17,6 +18,7 @@ from pathlib import Path, PurePosixPath
 import re
 import struct
 import shutil
+import creature_compression
 from urllib.parse import unquote
 
 SCHEMA = 1
@@ -97,7 +99,7 @@ class ExportView:
         row = self.entries.get(local)
         if row is None:
             if loose.is_file():
-                return digest(loose)
+                return creature_compression.source_digest(loose)
             raise PreparedError(f"prepared runtime dependency not exported: {name}")
         hashing = hashlib.sha256()
         with self.pck.open("rb") as stream:

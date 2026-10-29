@@ -75,10 +75,34 @@
     "walk": 0.2182900213310241,
     "run": 0.4928617008120387
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "An alert chest-up strut, quick alternating claws and restrained head counter-motion; a compact urgent ground run with the sickle feathers balanced behind.",
     "attack": "A sharp head recoil into a fast forward/down peck, braced claws and a brief folded-wing flare.",
     "death": "The breast folds forward, the comb and wattles follow the dropping head, and released claws settle beside the supported body."
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "rooster",
+    "appliesToSHA256": "ca0752c35b17c10ec31f7ba390a88e7e95c6fa35a74b15fb7802860da67c8d12",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "saved_button_approval",
+      "event_id": "f07dc49e-a486-46e1-8513-e95ff332b5a2",
+      "event_sha256": "bebbb32cd6d70d4dc3a373a5a7bb7cb6cdd9f2caf78f2580dc77b5b93e40191c",
+      "utc": "2026-10-28T21:35:36.451949+00:00"
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "rooster",
+    "sourceSHA256": "9068932d132fd505202d42182a50c02fcccc58f658c1b5362b1d46e9ef69c320",
+    "previousRuntimeSHA256": "9068932d132fd505202d42182a50c02fcccc58f658c1b5362b1d46e9ef69c320",
+    "runtimeSHA256": "ca0752c35b17c10ec31f7ba390a88e7e95c6fa35a74b15fb7802860da67c8d12",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": null
   }
 }

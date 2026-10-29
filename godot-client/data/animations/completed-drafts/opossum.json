@@ -73,10 +73,41 @@
     "walk": 0.06524300138161249,
     "run": 0.1685302983740613
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "A cautious hunched amble with a low snout, complete alternating steps and visible rear-thigh motion. Faster travel becomes a short, brisk diagonal scurry; the narrow bare tail trails from a quiet rump.",
     "attack": "A defensive low snap and shoulder dart from a brief withdrawn stance, with a compact forepaw step, braced landing and quick recovery. The closed native snout stays coherent with the skull.",
     "death": "An abrupt loss of support becomes a deliberate faint: head and forequarters drop, the hips fold into a supported flank, the paws relax and the long tail settles low. Finish with a still play-dead pose."
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "opossum",
+    "sourceSHA256": "6daeb140a6cd34d6e86c33142d6d35ab181f39b7ec3dbfc53e516981eae5046d",
+    "previousRuntimeSHA256": "cd2b1a6ea8fefd69b950cc059a3769e38cbfe99114002e1a656553079808797f",
+    "runtimeSHA256": "2eb0f53fa85f93ea765500716004c79c29121e48fbf456d17baafc8b8e9f460f",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "opossum",
+      "sourceSHA256": "6daeb140a6cd34d6e86c33142d6d35ab181f39b7ec3dbfc53e516981eae5046d",
+      "runtimeSHA256": "cd2b1a6ea8fefd69b950cc059a3769e38cbfe99114002e1a656553079808797f",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 120,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "opossum",
+    "appliesToSHA256": "2eb0f53fa85f93ea765500716004c79c29121e48fbf456d17baafc8b8e9f460f",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
   }
 }

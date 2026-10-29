@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "actor": "cockatrice",
+  "source_sha256": "b46c7be7f1d9b3af8b93570a1709a1a6b9f0b479a8ca4e10d89f071885a375b3",
+  "candidate_sha256": "79043e89229aa0fb8d5bd09119e1d36c65815bfb2794846f62d5c66f10a133cb",
+  "pipeline": [
+    "prune_zero_targets",
+    "reduce_constant_runs",
+    "compact"
+  ],
+  "partition": null,
+  "unchanged": false,
+  "removed_zero_target_indices": [],
+  "redundant_flat_key_rows_removed": 4987,
+  "geometry_skin_rest_binds_materials_images_unchanged": true,
+  "preserve_trs_keys": false,
+  "native_clips": [
+    "Death_A",
+    "Fighting_Idle",
+    "Fly",
+    "Hit_Chest",
+    "Idle_A",
+    "Jog",
+    "Sword_Attack",
+    "Walk"
+  ],
+  "usage": "Deterministic exact preparation needs no partition --profile; frozen source/candidate hashes bind this record."
+}

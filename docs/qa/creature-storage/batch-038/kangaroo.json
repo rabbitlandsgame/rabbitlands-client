@@ -1,0 +1,469 @@
+{
+  "schema_version": 1,
+  "batch": 38,
+  "actor": "kangaroo",
+  "date": "2026-10-28",
+  "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/kangaroo.glb",
+  "source_sha256": "7fa13e08511cd38f90cb36321227eb6eca9c0327a1732e70dfc7bdaf11e59104",
+  "runtime_sha256": "98dbffa96487f0dc4dd1c62a13cfd0ccb7397e46b0bd8995333f10c522f797b7",
+  "qualification": "Passed exact source/continuous curves, original physical observations, paired fresh Blender poses/default, native and fresh editor-imported playback/transitions, fully fitted actual-Actor cycles/four views, seeded dissolve/silhouette/reset checks.",
+  "human_approval_changed": false,
+  "recipe": {
+    "tool": "eloria-assets/tools/pack_creature_storage.py",
+    "tool_commit": "5bdd51c3",
+    "steps": [
+      "prune_zero_targets",
+      "reduce_constant_runs",
+      "compact"
+    ],
+    "profile": null,
+    "bounds": null,
+    "preserve_trs_keys": false
+  },
+  "bytes": {
+    "source_bytes": 2579292,
+    "candidate_bytes": 2341428,
+    "source_zstd_bytes": 1053545,
+    "candidate_zstd_bytes": 1055934
+  },
+  "inactive_targets_removed": 0,
+  "flat_run_key_rows_removed": 24447,
+  "corrective_graphics_buffer_bytes": {
+    "source": 0,
+    "candidate": 0,
+    "saved": 0,
+    "scope": "Actual Godot raw blend_shape_data byte totals over all mesh surfaces; shared per loaded model."
+  },
+  "draw_surfaces": {
+    "source": 1,
+    "candidate": 1
+  },
+  "source_validation": {
+    "passed": true,
+    "source_sha256": "7fa13e08511cd38f90cb36321227eb6eca9c0327a1732e70dfc7bdaf11e59104",
+    "candidate_sha256": "98dbffa96487f0dc4dd1c62a13cfd0ccb7397e46b0bd8995333f10c522f797b7",
+    "geometry_skin_binds_rest_topology_uv_material_image_bits_preserved": true,
+    "retained_key_time_and_value_bits_exact_only_flat_interiors_removed": true,
+    "every_removed_default_and_key_is_zero": true,
+    "redundant_flat_key_rows_proved": 24447,
+    "preexisting_duplicate_property_curves_preserved_in_occurrence_order": 0,
+    "meshes": [],
+    "clips": {
+      "Idle_A": {
+        "original_knots": 769,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 1542
+      },
+      "Fighting_Idle": {
+        "original_knots": 615,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 1234
+      },
+      "Hit_Chest": {
+        "original_knots": 308,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 620
+      },
+      "Walk": {
+        "original_knots": 416,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 836
+      },
+      "Jog": {
+        "original_knots": 254,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 512
+      },
+      "Sword_Attack": {
+        "original_knots": 596,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 1196
+      },
+      "Death_A": {
+        "original_knots": 1076,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 2156
+      }
+    },
+    "proof": "Zero defaults and every LINEAR/STEP key zero prove inactive targets remain zero continuously and under crossfades. All retained accessor bytes and retained time/value rows are exact. Deleted key rows sit strictly inside three bit-identical adjacent rows; plateau boundaries and endpoints remain."
+  },
+  "physical_observations": {
+    "passed": true,
+    "source_sha256": "7fa13e08511cd38f90cb36321227eb6eca9c0327a1732e70dfc7bdaf11e59104",
+    "candidate_sha256": "98dbffa96487f0dc4dd1c62a13cfd0ccb7397e46b0bd8995333f10c522f797b7",
+    "surface_probes": 112,
+    "poses": 21,
+    "clips": 7,
+    "source_candidate_position_error": 0.0,
+    "source_candidate_normal_vector_error": 0.0,
+    "original_witness_position_error_over_height": 0.0,
+    "original_source_witness_position_error_over_height": 0.0,
+    "original_witness_normal_vector_error": 0.0,
+    "original_witness_bone_matrix_error": 0.0,
+    "witness_sha256": "67b79e055ef28f05f1cf8cbdc415a77d228c4375a58f379d3a22cff6386784dc",
+    "sampled_motion_min": [
+      -0.1708985634019158,
+      0.00237052371491874,
+      -0.5672578536339087
+    ],
+    "sampled_motion_max": [
+      0.17480503952548387,
+      0.675307655726992,
+      0.599213590925801
+    ]
+  },
+  "paired_fresh_blender": {
+    "maximum_position_error": 0.0,
+    "maximum_bone_matrix_error": 0.0,
+    "maximum_float32_budget": 1.9073486328125e-06,
+    "poses": 22,
+    "neutral_default_checked": true,
+    "retained_bone_matrices_per_pose": 46,
+    "passed": true,
+    "source_sha256": "7fa13e08511cd38f90cb36321227eb6eca9c0327a1732e70dfc7bdaf11e59104",
+    "candidate_sha256": "98dbffa96487f0dc4dd1c62a13cfd0ccb7397e46b0bd8995333f10c522f797b7",
+    "scope": "Direct source/candidate frozen-ID surfaces and every bone matrix at each original witness pose plus controlled neutral/default pose. Sixteen float32 ULPs at baseline coordinate/matrix magnitude; independent of inherited source/witness residual and separate from native/source appearance budgets."
+  },
+  "native_and_editor_imported": {
+    "native": {
+      "samples": 232,
+      "maximum_position_error": 7.007324214168869e-08,
+      "maximum_normal_angle_degrees": 8.831503268221697e-06
+    },
+    "imported": {
+      "samples": 232,
+      "maximum_position_error": 7.007324214168869e-08,
+      "maximum_normal_angle_degrees": 8.831503268221697e-06,
+      "actual_loader": "ResourceLoader.load(PackedScene)",
+      "authoritative_SCN_provenance": "genuine_editor_verification_revision.load_proofs"
+    }
+  },
+  "editor_import_policy": {
+    "source_sidecar_exists": true,
+    "policy": "Original per-actor editor parameters retained"
+  },
+  "native_numeric_budget": {
+    "actor": "kangaroo",
+    "source_coordinate_or_extent_magnitude": 0.9999996903853381,
+    "four_float32_ULPs": 2.384185791015625e-07,
+    "runtime_position_error": 7.007324214168869e-08,
+    "runtime_normal_degrees": 8.831503268221697e-06,
+    "imported_position_error": 7.007324214168869e-08,
+    "imported_normal_degrees": 8.831503268221697e-06,
+    "normal_degrees_budget": 0.0001,
+    "scope": "Four float32 ULPs at maximum original source coordinate/extent magnitude; original source mathematical equality remains exact. Native normal screen 1e-4 degrees."
+  },
+  "placement": {
+    "passed": true,
+    "bounds_error": 0.0,
+    "placement_error": 0.0,
+    "overhead_height_error": 0.0
+  },
+  "render_fit": {
+    "source_sha256": "7fa13e08511cd38f90cb36321227eb6eca9c0327a1732e70dfc7bdaf11e59104",
+    "model_global": [
+      [
+        0.5,
+        1.20460832420122e-08,
+        -0.141999989748001
+      ],
+      [
+        -1.70000052452087,
+        0.0,
+        1.4861876707073e-07
+      ],
+      [
+        0.0,
+        1.70000052452087,
+        0.0
+      ],
+      [
+        -1.4861876707073e-07,
+        0.0,
+        -1.70000052452087
+      ]
+    ],
+    "position": [
+      0.19785143747449074,
+      0.004029670604622294,
+      -1.182272418572117
+    ],
+    "size": [
+      0.6042981275248396,
+      1.208865131476832,
+      2.01491924703744
+    ],
+    "poses": 276,
+    "scope": "Every vertex at every full-cycle render frame and view-still pose, using actual complete Actor Godot arrays/poses/weights/transforms, renderer morph cutoff and four/eight influence skin. Evaluated in float64 with a separate 30% camera margin."
+  },
+  "source_fit_inventory": {
+    "passed": true,
+    "source_sha256": "7fa13e08511cd38f90cb36321227eb6eca9c0327a1732e70dfc7bdaf11e59104",
+    "candidate_sha256": "98dbffa96487f0dc4dd1c62a13cfd0ccb7397e46b0bd8995333f10c522f797b7",
+    "source_clips": [
+      "Death_A",
+      "Fighting_Idle",
+      "Hit_Chest",
+      "Idle_A",
+      "Jog",
+      "Sword_Attack",
+      "Walk"
+    ],
+    "actual_Actor_fit_clips": [
+      "Death_A",
+      "Fighting_Idle",
+      "Hit_Chest",
+      "Idle_A",
+      "Jog",
+      "Sword_Attack",
+      "Walk"
+    ],
+    "fit_runtime_sha256": "fd2da4df7c36dea6a4254e80047a4023e3d499fd416df2349c16f3859751b405",
+    "poses": 276,
+    "fit_lineage": null,
+    "scope": "Actual Actor source-pose capture inventory, not merely requested QA aliases. Every source clip is present in fitted playback data."
+  },
+  "appearance": {
+    "source_sha256": "7fa13e08511cd38f90cb36321227eb6eca9c0327a1732e70dfc7bdaf11e59104",
+    "candidate_sha256": "98dbffa96487f0dc4dd1c62a13cfd0ccb7397e46b0bd8995333f10c522f797b7",
+    "image_pairs": 374,
+    "width": 512,
+    "height": 512,
+    "different_image_pairs": 12,
+    "maximum_different_pixels": 14,
+    "maximum_pixels_above_two_levels": 0,
+    "maximum_mean_channel_error": 2.4159749348958332e-05,
+    "maximum_channel_error": 1,
+    "scope": "Complete ReplicatedActor3D setup with actual display scale, grounding and body materials; identical cameras for source/candidate, four views and every full native cycle at24Hz. Numeric playback and pixel comparisons are separate reports.",
+    "framing_passed": true,
+    "clipped_frame_labels": [],
+    "maximum_border_foreground_pixels": 0
+  },
+  "secondary_effects": {
+    "effective_scale": 1.70000052452087,
+    "failures": [],
+    "gpu": "NVIDIA GeForce RTX 5080 Laptop GPU",
+    "max_color_error": 0.0,
+    "max_custom_error": 0.0,
+    "max_dissolve_bounds_error": 0.0,
+    "max_fragment_transform_error": 1.21286660714759e-07,
+    "max_grain_error": 0.0,
+    "max_silhouette_position_error": 1.24894484088145e-07,
+    "mounted": {},
+    "passed": true,
+    "renderer": "forward_plus",
+    "runtime_sha256": "98dbffa96487f0dc4dd1c62a13cfd0ccb7397e46b0bd8995333f10c522f797b7",
+    "seeded_cases": 15,
+    "source_sha256": "7fa13e08511cd38f90cb36321227eb6eca9c0327a1732e70dfc7bdaf11e59104"
+  },
+  "rig_investigation": {
+    "decision": "Original rig, skin and topology retained; this candidate uses exact storage reductions only."
+  },
+  "evidence_sha256": {
+    "qualification-job.json": "e06230b943fe796b9e57a85acd06b1f74f9816b91fc42cee31d7da2e9f2cad14",
+    "processing.json": "d8ec3b6bded8363677c5548659dce33b3a02ce948ab87613ec1cf9317039d1d3",
+    "exact-source-validation.json": "b8c4b2130838d214c0709c162423b7af68e9003dce4c2ac2c39ce3ddf41734ad",
+    "physical-witness-validation.json": "d91f6f03cdecf98054cdee993491baa358cdda42b638ca3cb5a714420c916d33",
+    "blender-validation.json": "5691c3c7d30f7d4c1796766a99b9a601a3996e4b85926911379ff79fabe4ce85",
+    "blender-direct-validation.json": "33dea3d347bd45c83d76d49778cc475de01e966198c0e9da0fbc1d9342442cdf",
+    "native-validation.json": "14dbdbe9bf597e8b292862e860661cbed6c1f313333e4b5e4a47cdf8564d2b72",
+    "imported-validation.json": "14dbdbe9bf597e8b292862e860661cbed6c1f313333e4b5e4a47cdf8564d2b72",
+    "render-fit.json": "7dd3cb5060ee79e69e5f94c15ceb647b4d719656fb598ee224fb83aec3abeb6e",
+    "placement.json": "5b796e45156a3bd7535c0e075b89810d4606641faf832d90b3c4fd5cd6cfe387",
+    "effects-validation.json": "6da92c89e77480aa38445759bdf44750aec0eca515623ace37cf6eba276eaffb",
+    "source-fit-inventory.json": "1e7566b044c1e165e26b3b84d1d9fb6a6ed71c9bd2ca356811e570d858a0ef40",
+    "actual-render/render.json": "4d737df933fc0bc22871b890c378384c062160339aeb79104b94fef708591dc6",
+    "actual-render/pixel-comparison.json": "21f8fa146a5c61d745008f53dcd7a11ffb2781d1a673f42b1dee55060396ea66",
+    "editor-import-policy.json": "4af712005813107dca040e472e35b06d3d55cebda5bcf80f7a5bf7065332123c"
+  },
+  "visual_review": "Paired normal contact boards and complete native-cycle previews reviewed. Every four-view/full-cycle frame has zero foreground pixels in its border two pixels wide.",
+  "known_limitations": [
+    "Separate resident RAM and frame-time benchmarks were not measured.",
+    "Encoded animation-key savings describe raw files, logical source accessors and import parsing input only. Native importing may densely rebake identical generated Animation keys; no runtime Animation RAM, key-search or playback CPU saving is claimed.",
+    "Original artistic review/approval status is unchanged.",
+    "Compressed shipping data increases by 2389 bytes despite smaller decoded GLB. This tradeoff is explicit; no unmeasured runtime-memory saving offsets it in this receipt."
+  ],
+  "genuine_editor_verification_revision": {
+    "status": "Corrected independent actual Editor verification passed within applicable unchanged modern or legacy scope",
+    "date": "2026-10-28",
+    "source_original_sha256": "7fa13e08511cd38f90cb36321227eb6eca9c0327a1732e70dfc7bdaf11e59104",
+    "current_canonical_sha256": "98dbffa96487f0dc4dd1c62a13cfd0ccb7397e46b0bd8995333f10c522f797b7",
+    "loader": "ResourceLoader.load(PackedScene)",
+    "load_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/kangaroo.glb-407b12c70168c08298e5513ae1d7f4a1.md5",
+        "import_metadata_sha256": "7d005218d7875363d88425632f8a464905907d4cc5ad0e155835a0bba595e9c5",
+        "imported_resource_path": "res://.godot/imported/kangaroo.glb-407b12c70168c08298e5513ae1d7f4a1.scn",
+        "imported_resource_sha256": "be0d9e1f69194610f101f0f391efdf4ddbf05aee7ed30cc634f2b94e2066ebe5",
+        "packed_scene_resource_path": "res://assets/qa/kangaroo/v2/baseline/kangaroo.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "77e48b866422799a0a6a32518a149522",
+        "source_path": "res://assets/qa/kangaroo/v2/baseline/kangaroo.glb",
+        "source_sha256": "7fa13e08511cd38f90cb36321227eb6eca9c0327a1732e70dfc7bdaf11e59104"
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/kangaroo.glb-9df822bd0606e701954faa4a57f968a3.md5",
+        "import_metadata_sha256": "01013d3eae6eb75e3e58718983a27e3423a3e595472a74efa10a9a5a3b95662f",
+        "imported_resource_path": "res://.godot/imported/kangaroo.glb-9df822bd0606e701954faa4a57f968a3.scn",
+        "imported_resource_sha256": "6a3e2cb2a4fd579a5a54fef6949a210b75822d1a6212543dd6ec92305a978840",
+        "packed_scene_resource_path": "res://assets/qa/kangaroo/v2/candidate/kangaroo.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "548e8e8ab49d820fb214774c1c79de87",
+        "source_path": "res://assets/qa/kangaroo/v2/candidate/kangaroo.glb",
+        "source_sha256": "98dbffa96487f0dc4dd1c62a13cfd0ccb7397e46b0bd8995333f10c522f797b7"
+      }
+    ],
+    "source_aliases_and_SCNs_have_current_source_and_destination_MD5_freshness": true,
+    "numeric": {
+      "poses": 232,
+      "all_source_clips": [
+        "Idle_A",
+        "Fighting_Idle",
+        "Hit_Chest",
+        "Walk",
+        "Jog",
+        "Sword_Attack",
+        "Death_A"
+      ],
+      "RESET_checked": true,
+      "maximum_Euclidean_position_error_source_units": 7.007324214168869e-08,
+      "maximum_normal_angle_degrees": 8.831503268221697e-06
+    },
+    "applicable_quality_budget": {
+      "position_four_float32_ULPs": 2.384185791015625e-07,
+      "source_coordinate_or_rest_axis_extent_magnitude": 0.9999996903853381,
+      "normal_degrees": 0.0001,
+      "both_passed": true
+    },
+    "full_typed_static_attributes_material_storage_texture_pixels_and_mips": {
+      "actor": "kangaroo",
+      "source_sha256": "7fa13e08511cd38f90cb36321227eb6eca9c0327a1732e70dfc7bdaf11e59104",
+      "candidate_sha256": "98dbffa96487f0dc4dd1c62a13cfd0ccb7397e46b0bd8995333f10c522f797b7",
+      "surfaces": [
+        {
+          "all_typed_arrays": [
+            {
+              "slot": 0,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 1,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 2,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 4,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 10,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 11,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 12,
+              "exact_after_proven_vertex_bijection": true
+            }
+          ],
+          "full_material_storage_fields_and_texture_pixels_mips_exact": true,
+          "format_exact": true,
+          "lods": [
+            {
+              "lod": 0,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            },
+            {
+              "lod": 1,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            },
+            {
+              "lod": 2,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            }
+          ],
+          "bounds_component_max_delta": 0.0,
+          "lod_capture_present": true
+        }
+      ],
+      "passed": true,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/kangaroo.glb-407b12c70168c08298e5513ae1d7f4a1.md5",
+          "import_metadata_sha256": "7d005218d7875363d88425632f8a464905907d4cc5ad0e155835a0bba595e9c5",
+          "imported_resource_path": "res://.godot/imported/kangaroo.glb-407b12c70168c08298e5513ae1d7f4a1.scn",
+          "imported_resource_sha256": "be0d9e1f69194610f101f0f391efdf4ddbf05aee7ed30cc634f2b94e2066ebe5",
+          "packed_scene_resource_path": "res://assets/qa/kangaroo/v2/baseline/kangaroo.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "77e48b866422799a0a6a32518a149522",
+          "source_path": "res://assets/qa/kangaroo/v2/baseline/kangaroo.glb",
+          "source_sha256": "7fa13e08511cd38f90cb36321227eb6eca9c0327a1732e70dfc7bdaf11e59104"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/kangaroo.glb-9df822bd0606e701954faa4a57f968a3.md5",
+          "import_metadata_sha256": "01013d3eae6eb75e3e58718983a27e3423a3e595472a74efa10a9a5a3b95662f",
+          "imported_resource_path": "res://.godot/imported/kangaroo.glb-9df822bd0606e701954faa4a57f968a3.scn",
+          "imported_resource_sha256": "6a3e2cb2a4fd579a5a54fef6949a210b75822d1a6212543dd6ec92305a978840",
+          "packed_scene_resource_path": "res://assets/qa/kangaroo/v2/candidate/kangaroo.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "548e8e8ab49d820fb214774c1c79de87",
+          "source_path": "res://assets/qa/kangaroo/v2/candidate/kangaroo.glb",
+          "source_sha256": "98dbffa96487f0dc4dd1c62a13cfd0ccb7397e46b0bd8995333f10c522f797b7"
+        }
+      ]
+    },
+    "retained_Editor_morph_fields": {
+      "actor": "kangaroo",
+      "source_sha256": "7fa13e08511cd38f90cb36321227eb6eca9c0327a1732e70dfc7bdaf11e59104",
+      "candidate_sha256": "98dbffa96487f0dc4dd1c62a13cfd0ccb7397e46b0bd8995333f10c522f797b7",
+      "all_retained_editor_POSITION_NORMAL_TANGENT_typed_bits_exact": true,
+      "retained_targets": 0,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/kangaroo.glb-407b12c70168c08298e5513ae1d7f4a1.md5",
+          "import_metadata_sha256": "7d005218d7875363d88425632f8a464905907d4cc5ad0e155835a0bba595e9c5",
+          "imported_resource_path": "res://.godot/imported/kangaroo.glb-407b12c70168c08298e5513ae1d7f4a1.scn",
+          "imported_resource_sha256": "be0d9e1f69194610f101f0f391efdf4ddbf05aee7ed30cc634f2b94e2066ebe5",
+          "packed_scene_resource_path": "res://assets/qa/kangaroo/v2/baseline/kangaroo.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "77e48b866422799a0a6a32518a149522",
+          "source_path": "res://assets/qa/kangaroo/v2/baseline/kangaroo.glb",
+          "source_sha256": "7fa13e08511cd38f90cb36321227eb6eca9c0327a1732e70dfc7bdaf11e59104"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/kangaroo.glb-9df822bd0606e701954faa4a57f968a3.md5",
+          "import_metadata_sha256": "01013d3eae6eb75e3e58718983a27e3423a3e595472a74efa10a9a5a3b95662f",
+          "imported_resource_path": "res://.godot/imported/kangaroo.glb-9df822bd0606e701954faa4a57f968a3.scn",
+          "imported_resource_sha256": "6a3e2cb2a4fd579a5a54fef6949a210b75822d1a6212543dd6ec92305a978840",
+          "packed_scene_resource_path": "res://assets/qa/kangaroo/v2/candidate/kangaroo.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "548e8e8ab49d820fb214774c1c79de87",
+          "source_path": "res://assets/qa/kangaroo/v2/candidate/kangaroo.glb",
+          "source_sha256": "98dbffa96487f0dc4dd1c62a13cfd0ccb7397e46b0bd8995333f10c522f797b7"
+        }
+      ],
+      "scope": "Direct actual Editor source/candidate retained morph P/N/T byte digests after independently proved complete static-attribute vertex bijection. Exact target mask from source packing lineage; no morph field omitted.",
+      "passed": true
+    },
+    "withdrawn_prior_loader_claim": "Prior shared dumper captures labelled imported used GlbSceneCache for these outside-actor aliases and therefore were raw-cache comparisons. They remain retained private raw/native evidence, but their independent Editor claim is withdrawn and superseded by these explicitly loaded SCNs.",
+    "unchanged_other_evidence": "Original independent physical observations, exact source curves, Blender, actual native gameplay body rendering, placement, mounted/cinematic dependencies and secondary effects remain hash-bound and unchanged. No artistic approval, model, action, cap or witness change in this QA revision.",
+    "production_scope": "Production actor_shipping loose folders remain raw/native and are not Editor-imported. Per-surface Editor-generated LODs are verification representation metadata, not a claim of new gameplay LODs.",
+    "evidence_sha256": {
+      ".local/heavy-batch/kangaroo/v2/editor-real-v1/qualification-job.json": "f1f3c676e7beb28dc31997d1b4b496836e7c0016b48649b09176a464c0f119e7",
+      ".local/heavy-batch/kangaroo/v2/editor-real-v1/imported/runtime.json": "8bc32dc11a8a31dc24e696c8271423e728168e6b0572745d750763890cfb227e",
+      ".local/heavy-batch/kangaroo/v2/editor-real-v1/imported-validation.json": "14dbdbe9bf597e8b292862e860661cbed6c1f313333e4b5e4a47cdf8564d2b72",
+      ".local/heavy-batch/kangaroo/v2/editor-real-v1/imported-static-mesh-bits.json": "d61bf9c92ab2bf849690b88cc075794da311af550eb1fd9e4279a5a0ce2ed7be",
+      ".local/heavy-batch/kangaroo/v2/editor-real-v1/imported-typed-validation.json": "01d9a625e6ab5d8c0dc1801d02262a43dc95ac87516a1fdcc83ea10a898dca54",
+      ".local/heavy-batch/kangaroo/v2/editor-real-v1/morph-digest-job.json": "4fd83e4d93b3deafc982c84c0956c990d1f863bd74b06415f0c70e1e4a85d950",
+      ".local/heavy-batch/kangaroo/v2/editor-real-v1/imported-morph-digests.json": "537202f86754dd55a0a9b57bf793857223bc8ac313fcf7761e7ff5fd1b189e47",
+      ".local/heavy-batch/kangaroo/v2/editor-real-v1/imported-morph-validation.json": "8d7ef7d0d752abbecfe17ce403c18cbdf0b1e47d76b5ed11df9c22f4aa7cb227"
+    }
+  }
+}

@@ -1,0 +1,612 @@
+{
+  "actor": "crystalback_tortoise",
+  "date": "2026-10-28",
+  "status": "complete_original_and_30_fps_comparison_draft_not_promoted",
+  "source_sha256": "fcec0718567c0f426a3ba81b7004d5b4cf39ecf60bcb94c37a6bb4cf4f12aa89",
+  "candidate_sha256": "01b3a309b5fe61ed6c7845aee5bd9552df62496af9d205928b72381a2aeeaf9c",
+  "runtime_path": "godot-client/assets/actors/native/creatures/crystalback_tortoise.glb",
+  "current_runtime_unchanged": true,
+  "source_bake_fps": 4096,
+  "draft_bake_fps": 30,
+  "maximum_stored_float32_interval_rate": 29.729758082236447,
+  "preserved": "exactly preserved",
+  "before": {
+    "path": "crystalback_tortoise.glb",
+    "sha256": "fcec0718567c0f426a3ba81b7004d5b4cf39ecf60bcb94c37a6bb4cf4f12aa89",
+    "raw_bytes": 41969644,
+    "binary_bytes": 41388368,
+    "json_chunk_bytes": 581248,
+    "container_bytes": 28,
+    "major_physical_bytes": {
+      "textures": 796382,
+      "unreferenced_binary_or_alignment": 8,
+      "skin": 108704,
+      "animation": 17210496,
+      "geometry": 189770,
+      "corrective": 23083008,
+      "metadata_and_container": 581276
+    },
+    "detailed_physical_bytes": {
+      "textures": 796382,
+      "unreferenced_binary_or_alignment": 8,
+      "skin.inverse_bind_matrices": 1344,
+      "animation.times": 47268,
+      "animation.rotation": 1338288,
+      "animation.translation": 141840,
+      "animation.scale": 754956,
+      "animation.weights": 14928144,
+      "geometry.indices": 17994,
+      "geometry.POSITION": 64416,
+      "geometry.NORMAL": 64416,
+      "geometry.TEXCOORD_0": 42944,
+      "skin.joint_indices": 21472,
+      "skin.weights": 85888,
+      "corrective.POSITION": 8825856,
+      "corrective.NORMAL + corrective.POSITION": 39936,
+      "corrective.NORMAL": 14217216
+    },
+    "animation_clip_physical_bytes": {
+      "Idle_A": 2021236,
+      "Sword_Attack": 1489904,
+      "Walk": 5219716,
+      "Jog": 3259584,
+      "Hit_Chest": 752440,
+      "Death_A": 3192072,
+      "shared_between_clips": 3316,
+      "Fighting_Idle": 1272228
+    },
+    "clips": [
+      {
+        "name": "Idle_A",
+        "channels": {
+          "translation": 22,
+          "rotation": 22,
+          "scale": 22,
+          "weights": 1
+        },
+        "samplers": 67,
+        "exclusive_physical_binary_bytes": 2021236
+      },
+      {
+        "name": "Fighting_Idle",
+        "channels": {
+          "translation": 22,
+          "rotation": 22,
+          "scale": 22,
+          "weights": 1
+        },
+        "samplers": 67,
+        "exclusive_physical_binary_bytes": 1272228
+      },
+      {
+        "name": "Walk",
+        "channels": {
+          "translation": 22,
+          "rotation": 22,
+          "scale": 22,
+          "weights": 1
+        },
+        "samplers": 67,
+        "exclusive_physical_binary_bytes": 5219716
+      },
+      {
+        "name": "Jog",
+        "channels": {
+          "translation": 22,
+          "rotation": 22,
+          "scale": 22,
+          "weights": 1
+        },
+        "samplers": 67,
+        "exclusive_physical_binary_bytes": 3259584
+      },
+      {
+        "name": "Sword_Attack",
+        "channels": {
+          "translation": 22,
+          "rotation": 22,
+          "scale": 22,
+          "weights": 1
+        },
+        "samplers": 67,
+        "exclusive_physical_binary_bytes": 1489904
+      },
+      {
+        "name": "Hit_Chest",
+        "channels": {
+          "translation": 22,
+          "rotation": 22,
+          "scale": 22,
+          "weights": 1
+        },
+        "samplers": 67,
+        "exclusive_physical_binary_bytes": 752440
+      },
+      {
+        "name": "Death_A",
+        "channels": {
+          "translation": 22,
+          "rotation": 22,
+          "scale": 22,
+          "weights": 1
+        },
+        "samplers": 67,
+        "exclusive_physical_binary_bytes": 3192072
+      }
+    ],
+    "images": [
+      {
+        "image": 0,
+        "name": "mesh_node_normal",
+        "mime": "image/jpeg",
+        "stored_bytes": 403409,
+        "dimensions": [
+          1024,
+          1024
+        ],
+        "mode": "RGB",
+        "material_uses": [
+          "materials.0.normalTexture"
+        ]
+      },
+      {
+        "image": 1,
+        "name": "mesh_node_basecolor",
+        "mime": "image/jpeg",
+        "stored_bytes": 392973,
+        "dimensions": [
+          1024,
+          1024
+        ],
+        "mode": "RGB",
+        "material_uses": [
+          "materials.0.pbrMetallicRoughness.baseColorTexture"
+        ]
+      }
+    ],
+    "meshes": [
+      {
+        "mesh": 0,
+        "name": "mesh.001",
+        "vertices": 3328,
+        "target_slots": [
+          577
+        ]
+      },
+      {
+        "mesh": 1,
+        "name": "RL_RigidShell",
+        "vertices": 2040,
+        "target_slots": [
+          0
+        ]
+      }
+    ],
+    "joint_count": 21,
+    "skin_count": 1,
+    "referenced_accessor_count": 1955,
+    "total_accessor_count": 1955,
+    "shared_cross_category_intervals": [],
+    "scope": "Exact raw-GLB physical byte attribution by referenced accessor element spans and embedded image spans. Overlapping/shared storage counted once. JSON metadata, chunk headers and padding separate. Not runtime memory or compressed-component attribution."
+  },
+  "after": {
+    "path": "crystalback_tortoise_30.glb",
+    "sha256": "01b3a309b5fe61ed6c7845aee5bd9552df62496af9d205928b72381a2aeeaf9c",
+    "raw_bytes": 25686684,
+    "binary_bytes": 25091332,
+    "json_chunk_bytes": 595324,
+    "container_bytes": 28,
+    "major_physical_bytes": {
+      "textures": 796382,
+      "unreferenced_binary_or_alignment": 8,
+      "skin": 108704,
+      "geometry": 189770,
+      "corrective": 23083008,
+      "animation": 913460,
+      "metadata_and_container": 595352
+    },
+    "detailed_physical_bytes": {
+      "textures": 796382,
+      "unreferenced_binary_or_alignment": 8,
+      "skin.inverse_bind_matrices": 1344,
+      "geometry.indices": 17994,
+      "geometry.POSITION": 64416,
+      "geometry.NORMAL": 64416,
+      "geometry.TEXCOORD_0": 42944,
+      "skin.joint_indices": 21472,
+      "skin.weights": 85888,
+      "corrective.POSITION": 8825856,
+      "corrective.NORMAL + corrective.POSITION": 39936,
+      "corrective.NORMAL": 14217216,
+      "animation.times": 1264,
+      "animation.translation": 6348,
+      "animation.rotation": 70272,
+      "animation.scale": 37008,
+      "animation.weights": 798568
+    },
+    "animation_clip_physical_bytes": {
+      "Idle_A": 154328,
+      "shared_between_clips": 1304,
+      "Fighting_Idle": 97432,
+      "Walk": 151432,
+      "Jog": 94648,
+      "Sword_Attack": 112896,
+      "Hit_Chest": 55532,
+      "Death_A": 245888
+    },
+    "clips": [
+      {
+        "name": "Idle_A",
+        "channels": {
+          "translation": 22,
+          "rotation": 22,
+          "scale": 22,
+          "weights": 1
+        },
+        "samplers": 67,
+        "exclusive_physical_binary_bytes": 154328
+      },
+      {
+        "name": "Fighting_Idle",
+        "channels": {
+          "translation": 22,
+          "rotation": 22,
+          "scale": 22,
+          "weights": 1
+        },
+        "samplers": 67,
+        "exclusive_physical_binary_bytes": 97432
+      },
+      {
+        "name": "Walk",
+        "channels": {
+          "translation": 22,
+          "rotation": 22,
+          "scale": 22,
+          "weights": 1
+        },
+        "samplers": 67,
+        "exclusive_physical_binary_bytes": 151432
+      },
+      {
+        "name": "Jog",
+        "channels": {
+          "translation": 22,
+          "rotation": 22,
+          "scale": 22,
+          "weights": 1
+        },
+        "samplers": 67,
+        "exclusive_physical_binary_bytes": 94648
+      },
+      {
+        "name": "Sword_Attack",
+        "channels": {
+          "translation": 22,
+          "rotation": 22,
+          "scale": 22,
+          "weights": 1
+        },
+        "samplers": 67,
+        "exclusive_physical_binary_bytes": 112896
+      },
+      {
+        "name": "Hit_Chest",
+        "channels": {
+          "translation": 22,
+          "rotation": 22,
+          "scale": 22,
+          "weights": 1
+        },
+        "samplers": 67,
+        "exclusive_physical_binary_bytes": 55532
+      },
+      {
+        "name": "Death_A",
+        "channels": {
+          "translation": 22,
+          "rotation": 22,
+          "scale": 22,
+          "weights": 1
+        },
+        "samplers": 67,
+        "exclusive_physical_binary_bytes": 245888
+      }
+    ],
+    "images": [
+      {
+        "image": 0,
+        "name": "mesh_node_normal",
+        "mime": "image/jpeg",
+        "stored_bytes": 403409,
+        "dimensions": [
+          1024,
+          1024
+        ],
+        "mode": "RGB",
+        "material_uses": [
+          "materials.0.normalTexture"
+        ]
+      },
+      {
+        "image": 1,
+        "name": "mesh_node_basecolor",
+        "mime": "image/jpeg",
+        "stored_bytes": 392973,
+        "dimensions": [
+          1024,
+          1024
+        ],
+        "mode": "RGB",
+        "material_uses": [
+          "materials.0.pbrMetallicRoughness.baseColorTexture"
+        ]
+      }
+    ],
+    "meshes": [
+      {
+        "mesh": 0,
+        "name": "mesh.001",
+        "vertices": 3328,
+        "target_slots": [
+          577
+        ]
+      },
+      {
+        "mesh": 1,
+        "name": "RL_RigidShell",
+        "vertices": 2040,
+        "target_slots": [
+          0
+        ]
+      }
+    ],
+    "joint_count": 21,
+    "skin_count": 1,
+    "referenced_accessor_count": 2105,
+    "total_accessor_count": 2105,
+    "shared_cross_category_intervals": [],
+    "scope": "Exact raw-GLB physical byte attribution by referenced accessor element spans and embedded image spans. Overlapping/shared storage counted once. JSON metadata, chunk headers and padding separate. Not runtime memory or compressed-component attribution."
+  },
+  "release_bytes": {
+    "current": 25051306,
+    "draft": 13063531,
+    "saved": 11987775,
+    "scope": "Existing level-3 Zstandard RLCZ plus 56-byte header. Actual draft encoded/decoded byte-for-byte. Raw component shares are not compressed component shares."
+  },
+  "clips": [
+    {
+      "name": "Idle_A",
+      "source_sampler_keys": 14935,
+      "draft_sampler_keys": 1236,
+      "channels_by_path": {
+        "translation": 22,
+        "rotation": 22,
+        "scale": 22,
+        "weights": 1
+      },
+      "packed_draft_sampler_keys": 1178,
+      "duration_seconds": 2.0
+    },
+    {
+      "name": "Fighting_Idle",
+      "source_sampler_keys": 683,
+      "draft_sampler_keys": 174,
+      "channels_by_path": {
+        "translation": 22,
+        "rotation": 22,
+        "scale": 22,
+        "weights": 1
+      },
+      "packed_draft_sampler_keys": 174,
+      "duration_seconds": 1.399999976158142
+    },
+    {
+      "name": "Walk",
+      "source_sampler_keys": 55570,
+      "draft_sampler_keys": 1700,
+      "channels_by_path": {
+        "translation": 22,
+        "rotation": 22,
+        "scale": 22,
+        "weights": 1
+      },
+      "packed_draft_sampler_keys": 1700,
+      "duration_seconds": 1.850000023841858
+    },
+    {
+      "name": "Jog",
+      "source_sampler_keys": 34769,
+      "draft_sampler_keys": 1091,
+      "channels_by_path": {
+        "translation": 22,
+        "rotation": 22,
+        "scale": 22,
+        "weights": 1
+      },
+      "packed_draft_sampler_keys": 1091,
+      "duration_seconds": 1.149999976158142
+    },
+    {
+      "name": "Sword_Attack",
+      "source_sampler_keys": 16055,
+      "draft_sampler_keys": 1294,
+      "channels_by_path": {
+        "translation": 22,
+        "rotation": 22,
+        "scale": 22,
+        "weights": 1
+      },
+      "packed_draft_sampler_keys": 1254,
+      "duration_seconds": 1.399999976158142
+    },
+    {
+      "name": "Hit_Chest",
+      "source_sampler_keys": 7135,
+      "draft_sampler_keys": 609,
+      "channels_by_path": {
+        "translation": 22,
+        "rotation": 22,
+        "scale": 22,
+        "weights": 1
+      },
+      "packed_draft_sampler_keys": 590,
+      "duration_seconds": 0.699999988079071
+    },
+    {
+      "name": "Death_A",
+      "source_sampler_keys": 36189,
+      "draft_sampler_keys": 2862,
+      "channels_by_path": {
+        "translation": 22,
+        "rotation": 22,
+        "scale": 22,
+        "weights": 1
+      },
+      "packed_draft_sampler_keys": 2862,
+      "duration_seconds": 3.0
+    }
+  ],
+  "runtime_measurements": {
+    "repeats_per_version": 1,
+    "versions": [
+      {
+        "load_ms": 2623.143,
+        "retained_static_memory_delta_bytes": 529600759,
+        "load_peak_static_memory_increase_bytes": 427732974,
+        "retargeted_keys": 4208956,
+        "retargeted_tracks": 4423,
+        "bones": 21,
+        "animation_update_usec": {
+          "Death_A": 65.48,
+          "Fighting_Idle": 41.8408333333333,
+          "Hit_Chest": 56.0108333333333,
+          "Idle_A": 62.0466666666667,
+          "Jog": 82.41,
+          "Sword_Attack": 60.7825,
+          "Walk": 82.9225
+        }
+      },
+      {
+        "load_ms": 1285.936,
+        "retained_static_memory_delta_bytes": 116758871,
+        "load_peak_static_memory_increase_bytes": 82945258,
+        "retargeted_keys": 190405,
+        "retargeted_tracks": 4423,
+        "bones": 21,
+        "animation_update_usec": {
+          "Death_A": 43.03,
+          "Fighting_Idle": 28.7608333333333,
+          "Hit_Chest": 39.2525,
+          "Idle_A": 43.0216666666667,
+          "Jog": 42.9916666666667,
+          "Sword_Attack": 41.4016666666667,
+          "Walk": 45.2775
+        }
+      }
+    ],
+    "scope": "Fresh-process real GlbSceneCache._build_raw + ReplicatedActor3D + NativeAnimationImporter, warm OS file cache. Retained Godot static CPU allocations include scene and library caches, meshes, textures and actor. AnimationPlayer advance plus forced skeleton global transforms at 240 updates/s; nine batches of 1200 updates per clip after warmup. Excludes GPU rendering/skinning, whole-game logic and frame-rate claims.",
+    "memory_scope": "Static CPU allocation delta for shared scene/source/animation-library caches and the first Actor. Not RSS, VRAM, or this many bytes saved per additional actor. Loose GLB load and warm file cache, no full-client or packaged-decode benchmark."
+  },
+  "corrective_gpu_buffer_bytes": [
+    38405120,
+    38405120
+  ],
+  "motion": {
+    "source_sha256": "fcec0718567c0f426a3ba81b7004d5b4cf39ecf60bcb94c37a6bb4cf4f12aa89",
+    "candidate_sha256": "01b3a309b5fe61ed6c7845aee5bd9552df62496af9d205928b72381a2aeeaf9c",
+    "vertices": 5368,
+    "poses": 909,
+    "maximum_surface_error_mm": 9.247364602193512,
+    "worst_position": {
+      "label": "Jog@0.48333333333333",
+      "maximum_surface_error_mm": 9.247364602193512,
+      "rms_surface_error_mm": 0.5849959352732069,
+      "vertex": 145,
+      "source_world_position": [
+        0.7226665591282759,
+        0.196374091914643,
+        0.1578239824805117
+      ]
+    },
+    "clips": {
+      "Idle_A": {
+        "poses": 127,
+        "maximum_surface_error_mm": 0.03788156334809316
+      },
+      "Fighting_Idle": {
+        "poses": 91,
+        "maximum_surface_error_mm": 0.0001303316876051282
+      },
+      "Walk": {
+        "poses": 119,
+        "maximum_surface_error_mm": 7.4269756193719845
+      },
+      "Jog": {
+        "poses": 76,
+        "maximum_surface_error_mm": 9.247364602193512
+      },
+      "Sword_Attack": {
+        "poses": 91,
+        "maximum_surface_error_mm": 5.82395138397613
+      },
+      "Hit_Chest": {
+        "poses": 49,
+        "maximum_surface_error_mm": 0.4466009666710848
+      },
+      "Death_A": {
+        "poses": 187,
+        "maximum_surface_error_mm": 1.2527779039124318
+      }
+    },
+    "combined_world_bounds": {
+      "minimum": [
+        -0.0788434778279254,
+        0.08833545503017587,
+        -1.0424798168773242
+      ],
+      "maximum": [
+        1.0783715829793266,
+        1.0992790107223098,
+        0.6947083687561353
+      ]
+    },
+    "scope": "Actual client Actor/native importer, every vertex of soft body and unskinned rigid shell. Full clips at 60 Hz plus six off-grid times each, all 42 directed crossfade pairs at four steps and RESET. Existing gameplay scale 0.588 and visual backset retained. Position-only sampled diagnostic; not continuous-time error bound, normal/contact/mounted-rider qualification or artistic approval."
+  },
+  "preview": {
+    "renderer": "forward_plus",
+    "clips": 7,
+    "directed_switches_exercised": 49,
+    "keyboard_mouse_orbit_zoom_input_delivered": true,
+    "end_hold_repeat_reset_scrub": true,
+    "components": "Actual client Actor, raw scene cache and native animation importer. Independent synchronized viewports, shared camera/playback controls, source/draft hashes checked, isolated local profile. Largest sampled movement jump button."
+  },
+  "limits": [
+    "Approximate sampled animations; no previous lossless motion budget claimed.",
+    "577 corrective targets and mounted-original-skin metadata preserved. Position check covers unmounted soft body and rigid shell; no new mounted-rider, contact or normal-shading certification.",
+    "Artist/user review of the 30 FPS tortoise is pending. Current asset and import policy unchanged."
+  ],
+  "evidence_snapshot": ".local/creature-sampling/crystalback_tortoise/fps-30/qa-draft1",
+  "evidence_sha256": {
+    "build-report.json": "f8d542a2563fd3edae6328c1d3bdf97368a56b8c64009640b6dbb0ae1007accd",
+    "before-components.json": "64c87d72fc6b4e0d3e7a52d306b02c5d1049f4375fdfba8363bd450644b43215",
+    "after-components.json": "203dc7add67a5466126833e8595aecb6e3c5147359790e92b2c836b63210488a",
+    "runtime-measurements.json": "08538adf714c7547574cd760f31812e7088fe6e2e2c2770623b1a07c71cf62ec",
+    "motion-measurements.json": "d6a0d9e29aa03030fcb25354f94fb7287d96a588fcbad6361e0b9eb64cdc5fbb",
+    "motion/metadata.json": "6f2f83a5caeab02366a811478f99e6613c3c149909d070a2d1605622f336d44b",
+    "preview-captures/preview-smoke.json": "602c561d677bfd08f8645767383e994c4db5a9728e977af9d3ad10c07f8d05d7",
+    "preview.stdout.log": "7755209efa918f61448042afb6ac9fa9ab8d078c90fdc25d003dafaa61d27339",
+    "preview.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "preview-import.stdout.log": "b728de0c23f24d9aa31bc7608b177d7ca13857d7c3aca862a08506d00675123b",
+    "preview-import.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "implementation_sha256": {
+    "eloria-assets/tools/build_creature_sampling_draft.py": "1fd988160edd16d030376898a81a36671ee675596e148bbb1b34a5dec59f330d",
+    "eloria-assets/tools/preview_creature_sampling.py": "58f207431d97ce26d7564bbb67bf6ea6a031df4680405383f96fcf4e80a426db",
+    "eloria-assets/tools/measure_creature_sampling.py": "7aef24eb248a5b17f4b8b981e74ba3904a7b3eed526f739b78b18958a592633a",
+    "eloria-assets/tools/video_motion/storage_components.py": "5a6d3bb2cde6f774478ae6aeaf8e58fd286e673e99462703e03cd6829bc050e4",
+    "godot-client/prototypes/creature_animation_comparison.gd": "dd260f734c8391c62c6250e95a4d15c062c7b14e89b3e07642b0eaa94aaa9c4c",
+    "godot-client/tests/benchmark_creature_animation.gd": "7ea270b8537c63ce6ac1f11da384743eb117d0b5637b4c86c79f26d1fe3a67ce",
+    "godot-client/open-crystalback-30fps-comparison.bat": "f7ea484b663f4b18a377cfd312b0e191aaae6a430232a48f6fc649cd37233ed0"
+  }
+}

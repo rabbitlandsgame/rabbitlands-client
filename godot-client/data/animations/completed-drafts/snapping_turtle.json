@@ -73,10 +73,40 @@
     "walk": 0.034739422828784124,
     "run": 0.09025632902564103
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "Low deliberate four-beat crawl with a rigid shell, outward elbows and complete clawed-foot contact. The faster scramble retains grounded support and low foot recovery.",
     "attack": "Four planted feet brace a short recoil and forceful forward/downward head strike. No independent jaw motion is implied by this rig.",
     "death": "The body settles forward onto the plastron, the neck droops, and the feet relax slightly outward before holding still."
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "snapping_turtle",
+    "appliesToSHA256": "2a5d4a1c8f2bdd4eba798b0522e6074906081843df33b7450d57bdf9e3c62edc",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "saved_button_approval",
+      "event_id": "b7a65046-7100-46ec-a030-7568be8bf5c1",
+      "event_sha256": "0b5dd388987ef0611d55293ba8688e28c3c266d38636650df1bab9c8f8935fb9",
+      "utc": "2026-10-28T20:50:22.601819+00:00"
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": [
+      {
+        "event_id": "cefeaafc-0f17-45ff-9fa0-d1075ff260cf",
+        "event_sha256": "6d3d9c39b6fe0ecf87fd1d7e0b50a46f8ad647a033e4258b1dd7112628966943",
+        "candidate_sha256": "2a5d4a1c8f2bdd4eba798b0522e6074906081843df33b7450d57bdf9e3c62edc"
+      }
+    ]
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "snapping_turtle",
+    "sourceSHA256": "8d904aaae134958faf91a6cff6d10706404231c4143942e1544f37b175389f53",
+    "previousRuntimeSHA256": "8d904aaae134958faf91a6cff6d10706404231c4143942e1544f37b175389f53",
+    "runtimeSHA256": "2a5d4a1c8f2bdd4eba798b0522e6074906081843df33b7450d57bdf9e3c62edc",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": null
   }
 }

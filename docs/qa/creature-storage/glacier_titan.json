@@ -1,0 +1,761 @@
+{
+  "schema_version": 1,
+  "actor": "glacier_titan",
+  "date": "2026-10-27",
+  "runtime_path": "godot-client/assets/actors/native/creatures/glacier_titan.glb",
+  "status": "Technical exact storage reduction qualified; existing artistic-review status unchanged",
+  "source_sha256": "ffe24b475a19611cf40c7a2b436b26442b7c86cfff70d55577403b8a57162c2c",
+  "candidate_sha256": "a55b425ab2c88f6bcc3626fb7565b16d83160a2f48aaaa1e874951b4a021b1f1",
+  "storage": {
+    "source_bytes": 14794312,
+    "candidate_bytes": 14469328,
+    "source_zstd_bytes": 10675221,
+    "candidate_zstd_bytes": 10671553
+  },
+  "raw_bytes_saved": 324984,
+  "compressed_bytes_saved": 3668,
+  "compression_scope": "RLCZ level 3 release envelope including fixed 56-byte header; encoded/install sizes, not live-process memory.",
+  "correctives": {
+    "source_count": 65,
+    "candidate_count": 65,
+    "removed_target_indices": [],
+    "shared_gpu_source_bytes": 5371600,
+    "shared_gpu_candidate_bytes": 5371600,
+    "shared_gpu_saved_bytes": 0,
+    "scope": "Measured shared Godot blend_shape_data bytes, not per-actor totals."
+  },
+  "draw_surfaces": {
+    "source": 1,
+    "candidate": 1
+  },
+  "exact_source_proof": {
+    "passed": true,
+    "source_sha256": "ffe24b475a19611cf40c7a2b436b26442b7c86cfff70d55577403b8a57162c2c",
+    "candidate_sha256": "a55b425ab2c88f6bcc3626fb7565b16d83160a2f48aaaa1e874951b4a021b1f1",
+    "geometry_skin_binds_rest_topology_uv_material_image_bits_preserved": true,
+    "retained_key_time_and_value_bits_exact_only_flat_interiors_removed": true,
+    "every_removed_default_and_key_is_zero": true,
+    "redundant_flat_key_rows_proved": 1231,
+    "preexisting_duplicate_property_curves_preserved_in_occurrence_order": 0,
+    "clips": {
+      "Death_A": {
+        "original_knots": 5716,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 11436
+      },
+      "Fighting_Idle": {
+        "original_knots": 2034,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 4072
+      },
+      "Hit_Chest": {
+        "original_knots": 709,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 1422
+      },
+      "Idle_A": {
+        "original_knots": 2796,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 5596
+      },
+      "Jog": {
+        "original_knots": 1662,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 3289
+      },
+      "Sword_Attack": {
+        "original_knots": 3070,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 6140
+      },
+      "Walk": {
+        "original_knots": 1940,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 3853
+      }
+    },
+    "proof": "Zero defaults and every LINEAR/STEP key zero prove inactive targets remain zero continuously and under crossfades. All retained accessor bytes and retained time/value rows are exact. Deleted key rows sit strictly inside three bit-identical adjacent rows; plateau boundaries and endpoints remain."
+  },
+  "rigidity_preflight": {
+    "actor": "glacier_titan",
+    "batch": 12,
+    "rank": 56,
+    "source_sha256": "ffe24b475a19611cf40c7a2b436b26442b7c86cfff70d55577403b8a57162c2c",
+    "survivor_triangles": 1074,
+    "elapsed_seconds": 8.655898500001058
+  },
+  "runtime_scope": "No procedural generation or new runtime algorithm. Smaller GLB accessor/key storage is proved; fixed Godot rebaking may restore the same retained Animation key count. These qualification checks do not establish retained Animation RAM, CPU lookup or FPS changes; separate loading benchmarks may measure startup time or peak-memory effects.",
+  "effects_scope": "Original topology, skin, binds, material/texture bytes and current clips retained; no runtime rig replacement.",
+  "evidence": "Immutable source/final, private versioned candidates, source/import/renderer receipts, full-resolution captures and lossless cycle previews retained in task-owned ignored .local/batch-012/glacier_titan",
+  "visual_contact_sheet_review": "Source/candidate comparison sheets inspected: no visible appearance difference; numeric full-cycle and multi-view gates passed separately.",
+  "fixture_copy_hash_guard": {
+    "actor": "glacier_titan",
+    "passed": true,
+    "source_and_candidate_copies": "All actor/native/imported fixtures SHA256 match canonical originals and final candidates."
+  },
+  "source_physical_witness": {
+    "passed": true,
+    "source_sha256": "ffe24b475a19611cf40c7a2b436b26442b7c86cfff70d55577403b8a57162c2c",
+    "candidate_sha256": "a55b425ab2c88f6bcc3626fb7565b16d83160a2f48aaaa1e874951b4a021b1f1",
+    "surface_probes": 180,
+    "poses": 42,
+    "clips": 7,
+    "source_candidate_position_error": 0.0,
+    "source_candidate_normal_vector_error": 0.0,
+    "original_witness_position_error_over_height": 1.918151108609533e-06,
+    "original_source_witness_position_error_over_height": 1.918151108609533e-06,
+    "original_witness_normal_vector_error": 0.0,
+    "original_witness_bone_matrix_error": 0.0,
+    "witness_sha256": "4ea70a32da1324b7c7c33cc0fc07354294299ad6848720c3ab0ed155c5235da0",
+    "sampled_motion_min": [
+      -1.1061638360205783,
+      0.007145586160636076,
+      -0.675324436267235
+    ],
+    "sampled_motion_max": [
+      1.0635652728631666,
+      1.6366016039660656,
+      1.2890346818449265
+    ],
+    "source_vertex_correspondence": "Explicit original IDs remapped only for candidate sampler; frozen source observations unmodified.",
+    "candidate_source_vertex_mapping_sha256": "13552019b148f32c89bb051a38e404966660e9cbd5dfe781a8140fd597744c3c"
+  },
+  "supplemental_source_observations": {
+    "passed": true,
+    "source_sha256": "ffe24b475a19611cf40c7a2b436b26442b7c86cfff70d55577403b8a57162c2c",
+    "candidate_sha256": "a55b425ab2c88f6bcc3626fb7565b16d83160a2f48aaaa1e874951b4a021b1f1",
+    "surface_probes": 166,
+    "poses": 133,
+    "clips": 7,
+    "source_candidate_position_error": 0.0,
+    "source_candidate_normal_vector_error": 0.0,
+    "original_witness_position_error_over_height": 0.0,
+    "original_source_witness_position_error_over_height": 0.0,
+    "original_witness_normal_vector_error": 0.0,
+    "original_witness_bone_matrix_error": 0.0,
+    "witness_sha256": "5cb40b9fa829a63ad7c61cd8d496c56a9fb9e885535629059402de33e5f0eb43",
+    "sampled_motion_min": [
+      -1.0871606207243132,
+      0.00039382916662398295,
+      -0.7597311848118321
+    ],
+    "sampled_motion_max": [
+      1.0994936064721779,
+      1.800444020513626,
+      1.3933388274158387
+    ]
+  },
+  "blender": {
+    "baseline": {
+      "sha256": "ffe24b475a19611cf40c7a2b436b26442b7c86cfff70d55577403b8a57162c2c",
+      "passed": true,
+      "surface_probes": 166,
+      "vertex_identity": [
+        {
+          "source_node": 63,
+          "object": "mesh",
+          "vertices": 4132,
+          "position_targets": 65,
+          "basis_world_error": 6.763708954566956e-07,
+          "basis_world_component_error": 6.047093400463055e-07,
+          "basis_strategy": "authored_joint_rest_skin",
+          "authored_rest_skin_component_error": 6.047093400463055e-07,
+          "uv_error": 0.0,
+          "skin_error": 0.0,
+          "skin_raw_group_error": 0.0,
+          "skin_lone_group_normalizations": [],
+          "normal_vector_error": 0.00030306786510374435,
+          "normal_scope": "Recorded only; Blender custom-normal packing is not the authority for source/Godot shading. Vertex motion identity is proved by basis,UV,skin and every POSITION shape.",
+          "all_target_position_error": 8.289182550680678e-08,
+          "position_budget": 4.38690185546875e-05,
+          "rest_composition_steps": 23
+        }
+      ],
+      "binding_method": "Full original GLB primitive vertex order, independently proved against basis/UV/skin/normals/all POSITION target data; frozen source IDs retained through partition mapping.",
+      "clips": {
+        "Death_A": {
+          "surface_error_over_height": 1.279146553648246e-06,
+          "bone_head_error_over_height": 1.1949578008186756e-06,
+          "poses": 19
+        },
+        "Fighting_Idle": {
+          "surface_error_over_height": 7.570781282599154e-07,
+          "bone_head_error_over_height": 5.877389019862566e-07,
+          "poses": 19
+        },
+        "Hit_Chest": {
+          "surface_error_over_height": 2.0483276215539304e-06,
+          "bone_head_error_over_height": 2.1208623480010957e-06,
+          "poses": 19
+        },
+        "Idle_A": {
+          "surface_error_over_height": 5.216005997413525e-07,
+          "bone_head_error_over_height": 5.880002935499847e-07,
+          "poses": 19
+        },
+        "Jog": {
+          "surface_error_over_height": 1.4633740609236515e-06,
+          "bone_head_error_over_height": 1.3875921023352804e-06,
+          "poses": 19
+        },
+        "Sword_Attack": {
+          "surface_error_over_height": 8.489316106620215e-07,
+          "bone_head_error_over_height": 8.617319893359084e-07,
+          "poses": 19
+        },
+        "Walk": {
+          "surface_error_over_height": 1.4130506040670378e-06,
+          "bone_head_error_over_height": 1.4056363984999462e-06,
+          "poses": 19
+        }
+      },
+      "max_surface_error_over_height": 2.0483276215539304e-06,
+      "max_bone_head_error_over_height": 2.1208623480010957e-06,
+      "scope": "Independent fresh Blender import geometry/motion witness check. Blender is not the authority for runtime morph normal shading."
+    },
+    "candidate": {
+      "sha256": "a55b425ab2c88f6bcc3626fb7565b16d83160a2f48aaaa1e874951b4a021b1f1",
+      "passed": true,
+      "surface_probes": 166,
+      "vertex_identity": [
+        {
+          "source_node": 63,
+          "object": "mesh",
+          "vertices": 4132,
+          "position_targets": 65,
+          "basis_world_error": 6.763708954566956e-07,
+          "basis_world_component_error": 6.047093400463055e-07,
+          "basis_strategy": "authored_joint_rest_skin",
+          "authored_rest_skin_component_error": 6.047093400463055e-07,
+          "uv_error": 0.0,
+          "skin_error": 0.0,
+          "skin_raw_group_error": 0.0,
+          "skin_lone_group_normalizations": [],
+          "normal_vector_error": 0.00030306786510374435,
+          "normal_scope": "Recorded only; Blender custom-normal packing is not the authority for source/Godot shading. Vertex motion identity is proved by basis,UV,skin and every POSITION shape.",
+          "all_target_position_error": 8.289182550680678e-08,
+          "position_budget": 4.38690185546875e-05,
+          "rest_composition_steps": 23
+        }
+      ],
+      "binding_method": "Full original GLB primitive vertex order, independently proved against basis/UV/skin/normals/all POSITION target data; frozen source IDs retained through partition mapping.",
+      "clips": {
+        "Death_A": {
+          "surface_error_over_height": 1.279146553648246e-06,
+          "bone_head_error_over_height": 1.1949578008186756e-06,
+          "poses": 19
+        },
+        "Fighting_Idle": {
+          "surface_error_over_height": 7.570781282599154e-07,
+          "bone_head_error_over_height": 5.877389019862566e-07,
+          "poses": 19
+        },
+        "Hit_Chest": {
+          "surface_error_over_height": 2.0483276215539304e-06,
+          "bone_head_error_over_height": 2.1208623480010957e-06,
+          "poses": 19
+        },
+        "Idle_A": {
+          "surface_error_over_height": 5.216005997413525e-07,
+          "bone_head_error_over_height": 5.880002935499847e-07,
+          "poses": 19
+        },
+        "Jog": {
+          "surface_error_over_height": 1.4633740609236515e-06,
+          "bone_head_error_over_height": 1.3875921023352804e-06,
+          "poses": 19
+        },
+        "Sword_Attack": {
+          "surface_error_over_height": 8.489316106620215e-07,
+          "bone_head_error_over_height": 8.617319893359084e-07,
+          "poses": 19
+        },
+        "Walk": {
+          "surface_error_over_height": 1.4130506040670378e-06,
+          "bone_head_error_over_height": 1.4056363984999462e-06,
+          "poses": 19
+        }
+      },
+      "max_surface_error_over_height": 2.0483276215539304e-06,
+      "max_bone_head_error_over_height": 2.1208623480010957e-06,
+      "scope": "Independent fresh Blender import geometry/motion witness check. Blender is not the authority for runtime morph normal shading."
+    }
+  },
+  "blender_direct": {
+    "maximum_position_error": 0.0,
+    "maximum_bone_matrix_error": 0.0,
+    "maximum_float32_budget": 1.9073486328125e-06,
+    "poses": 134,
+    "neutral_default_checked": true,
+    "passed": true,
+    "source_sha256": "ffe24b475a19611cf40c7a2b436b26442b7c86cfff70d55577403b8a57162c2c",
+    "candidate_sha256": "a55b425ab2c88f6bcc3626fb7565b16d83160a2f48aaaa1e874951b4a021b1f1",
+    "scope": "Direct source/candidate frozen-ID surfaces and every bone matrix at each original witness pose plus controlled neutral/default pose. Sixteen float32 ULPs at baseline coordinate/matrix magnitude; independent of inherited source/witness residual and separate from native/source appearance budgets."
+  },
+  "native_playback": {
+    "maximum_position_error": 0.0,
+    "maximum_normal_angle_degrees": 1.9090959104164224e-06,
+    "worst_position": {
+      "label": "Death_A@0.0",
+      "max_surface_error": 0.0,
+      "max_normal_degrees": 1.7075472925031877e-06,
+      "p99_normal_degrees": 1.2074182697257333e-06
+    },
+    "worst_normal": {
+      "label": "Death_A@0.731",
+      "max_surface_error": 0.0,
+      "max_normal_degrees": 1.9090959104164224e-06,
+      "p99_normal_degrees": 1.2074182697257333e-06
+    },
+    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "source_sha256": "ffe24b475a19611cf40c7a2b436b26442b7c86cfff70d55577403b8a57162c2c",
+    "candidate_sha256": "a55b425ab2c88f6bcc3626fb7565b16d83160a2f48aaaa1e874951b4a021b1f1"
+  },
+  "fresh_editor_import_playback": {
+    "maximum_position_error": 0.0,
+    "maximum_normal_angle_degrees": 1.9090959104164224e-06,
+    "worst_position": {
+      "label": "Death_A@0.0",
+      "max_surface_error": 0.0,
+      "max_normal_degrees": 1.7075472925031877e-06,
+      "p99_normal_degrees": 1.2074182697257333e-06
+    },
+    "worst_normal": {
+      "label": "Death_A@0.731",
+      "max_surface_error": 0.0,
+      "max_normal_degrees": 1.9090959104164224e-06,
+      "p99_normal_degrees": 1.2074182697257333e-06
+    },
+    "scope": "Both original and CURRENT final meshes loaded explicitly through ResourceLoader from fresh editor SCNs, bound to source/current GLB +SCN +freshness metadata hashes. All source clips, directed crossfades and RESET; independent retained-static/morph bijection and unchanged4float32ULP Euclidean/.0001degree caps. Earlier Cache-route imported labels are withdrawn, not treated as editor evidence.",
+    "source_sha256": "ffe24b475a19611cf40c7a2b436b26442b7c86cfff70d55577403b8a57162c2c",
+    "candidate_sha256": "a55b425ab2c88f6bcc3626fb7565b16d83160a2f48aaaa1e874951b4a021b1f1",
+    "actual_editor_scene_loads": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/glacier_titan.glb-7bc5c11169acfc10f7587e662c2ab196.md5",
+        "import_metadata_sha256": "4558f54230de55d8c3ba2d4414a5148927b53d870d2db86e9df6f5fd86ca9c67",
+        "imported_resource_path": "res://.godot/imported/glacier_titan.glb-7bc5c11169acfc10f7587e662c2ab196.scn",
+        "imported_resource_sha256": "c6668f632f87513f0554b97291ec2d3d3a12ac807e05d25fa53ace733ebcfcd5",
+        "packed_scene_resource_path": "res://assets/storage-baseline/glacier_titan.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "48a9afc20c9449f5609c6f464a8c34c3",
+        "source_path": "res://assets/storage-baseline/glacier_titan.glb",
+        "source_sha256": "ffe24b475a19611cf40c7a2b436b26442b7c86cfff70d55577403b8a57162c2c"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/glacier_titan.glb-1e19a7e03247e595ddbc6b5b7f673270.md5",
+        "import_metadata_sha256": "46c1daf439a42ca177d6ef96551e105e0154a76ee50292bf24b3a389b5e73c29",
+        "imported_resource_path": "res://.godot/imported/glacier_titan.glb-1e19a7e03247e595ddbc6b5b7f673270.scn",
+        "imported_resource_sha256": "50cb063c44da4ca0a6e885f0d350d0ae445574bac558367c95497dac5f6b8c0e",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/glacier_titan.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "1468a910bf435ced2a2e2ece9de89e84",
+        "source_path": "res://assets/actors/native/creatures/glacier_titan.glb",
+        "source_sha256": "a55b425ab2c88f6bcc3626fb7565b16d83160a2f48aaaa1e874951b4a021b1f1"
+      }
+    ]
+  },
+  "existing_family_playback": {
+    "actors": {
+      "glacier_titan": {
+        "candidate_sha256": "a55b425ab2c88f6bcc3626fb7565b16d83160a2f48aaaa1e874951b4a021b1f1",
+        "clips": [
+          {
+            "attack_switch_error": 0.0,
+            "clip": "Death_A",
+            "duration_seconds": 3.84000015258789,
+            "finite": true,
+            "idle_restore_error": 0.0,
+            "independent_glb_world_max_error": 8.27817616455562e-07,
+            "independent_surface_max_error": 9.36111391638406e-05,
+            "morph_error": 3.50218323230678e-08,
+            "native_import_max_error": 4.8879445557759e-07,
+            "terminal_hold_error": 0.0
+          },
+          {
+            "attack_switch_error": 0.0,
+            "clip": "Fighting_Idle",
+            "duration_seconds": 2.59999990463257,
+            "finite": true,
+            "idle_restore_error": 0.0,
+            "independent_glb_world_max_error": 8.17623627136221e-07,
+            "independent_surface_max_error": 8.57810082379729e-05,
+            "morph_error": 2.9757607600267e-08,
+            "native_import_max_error": 2.68220901489258e-07,
+            "terminal_hold_error": 0.0
+          },
+          {
+            "attack_switch_error": 0.0,
+            "clip": "Hit_Chest",
+            "duration_seconds": 0.899999976158142,
+            "finite": true,
+            "idle_restore_error": 0.0,
+            "independent_glb_world_max_error": 7.15163712583511e-07,
+            "independent_surface_max_error": 8.54848112794571e-05,
+            "morph_error": 2.9662335698788e-08,
+            "native_import_max_error": 3.63783698276166e-07,
+            "terminal_hold_error": 0.0
+          },
+          {
+            "attack_switch_error": 0.0,
+            "clip": "Idle_A",
+            "duration_seconds": 3.59999990463257,
+            "finite": true,
+            "idle_restore_error": 0.0,
+            "independent_glb_world_max_error": 6.72900380749297e-07,
+            "independent_surface_max_error": 8.98165526450612e-05,
+            "morph_error": 2.94451693028108e-08,
+            "native_import_max_error": 3.57627868652344e-07,
+            "terminal_hold_error": 0.0
+          },
+          {
+            "attack_switch_error": 0.0,
+            "clip": "Jog",
+            "duration_seconds": 1.08000004291534,
+            "finite": true,
+            "idle_restore_error": 0.0,
+            "independent_glb_world_max_error": 9.75353738663642e-07,
+            "independent_surface_max_error": 8.37400439195335e-05,
+            "morph_error": 2.97448071728823e-08,
+            "native_import_max_error": 4.8879445557759e-07,
+            "terminal_hold_error": 0.0
+          },
+          {
+            "attack_switch_error": 0.0,
+            "clip": "Sword_Attack",
+            "duration_seconds": 3.64800000190735,
+            "finite": true,
+            "idle_restore_error": 0.0,
+            "independent_glb_world_max_error": 9.15915662869082e-07,
+            "independent_surface_max_error": 9.00149607332423e-05,
+            "morph_error": 2.96207793848424e-08,
+            "native_import_max_error": 4.8879445557759e-07,
+            "terminal_hold_error": 0.0
+          },
+          {
+            "attack_switch_error": 0.0,
+            "clip": "Walk",
+            "duration_seconds": 1.79999995231628,
+            "finite": true,
+            "idle_restore_error": 0.0,
+            "independent_glb_world_max_error": 9.12396330710052e-07,
+            "independent_surface_max_error": 8.65561669343151e-05,
+            "morph_error": 5.41896416628163e-08,
+            "native_import_max_error": 4.8879445557759e-07,
+            "terminal_hold_error": 0.0
+          }
+        ],
+        "engine": {
+          "build": "official",
+          "hash": "ed1daf0bf001b61586d9930840f2f1394092c079",
+          "hex": 263938,
+          "major": 4,
+          "minor": 7,
+          "patch": 2,
+          "status": "stable",
+          "string": "4.7.2-stable (official)",
+          "timestamp": 0
+        },
+        "failures": [],
+        "max_source_nonzero_influences": 8.0,
+        "passed": true,
+        "preservation_note": "All seven slots checked against independent GLB world witnesses; declared paw/coat/tail preparations are recorded separately; prepared inherited physical worlds are preserved through wrapper baking.",
+        "requires_skin_packing": false,
+        "scope": "Iterative humanoid baseline, actual installed dedicated map and every native clip; focused component integration.",
+        "skin_influences": [
+          8
+        ],
+        "source_skin_slots": 8.0
+      }
+    },
+    "engine": {
+      "build": "official",
+      "hash": "ed1daf0bf001b61586d9930840f2f1394092c079",
+      "hex": 263938,
+      "major": 4,
+      "minor": 7,
+      "patch": 2,
+      "status": "stable",
+      "string": "4.7.2-stable (official)",
+      "timestamp": 0
+    },
+    "failures": [],
+    "passed": true,
+    "scope": "Actual installed baseline registry/maps; all native slots, independent off-grid surfaces/bones, loops, one-shot holds, action switches and RESET. Focused component integration."
+  },
+  "actor_placement": {
+    "passed": true,
+    "placements": [
+      {
+        "body_bounds_position": [
+          -0.853332996368408,
+          -0.0273992177098989,
+          -0.666507065296173
+        ],
+        "body_bounds_size": [
+          1.70666599273682,
+          1.72739887237549,
+          1.32984054088593
+        ],
+        "model_global": [
+          [
+            0.5,
+            0.0273992177098989,
+            -0.5
+          ],
+          [
+            -2.35294103622437,
+            0.0,
+            2.05700644073659e-07
+          ],
+          [
+            0.0,
+            2.35294103622437,
+            0.0
+          ],
+          [
+            -2.05700644073659e-07,
+            0.0,
+            -2.35294103622437
+          ]
+        ],
+        "name": "baseline",
+        "nameplate_global": [
+          0.5,
+          4.6273980140686,
+          -0.5
+        ],
+        "overhead_height": 4.02739810943604,
+        "selection_size": [
+          1.38999998569489,
+          9.99999974737875e-06,
+          1.38999998569489
+        ],
+        "sha256": "ffe24b475a19611cf40c7a2b436b26442b7c86cfff70d55577403b8a57162c2c"
+      },
+      {
+        "body_bounds_position": [
+          -0.853332996368408,
+          -0.0273992177098989,
+          -0.666507065296173
+        ],
+        "body_bounds_size": [
+          1.70666599273682,
+          1.72739887237549,
+          1.32984054088593
+        ],
+        "model_global": [
+          [
+            0.5,
+            0.0273992177098989,
+            -0.5
+          ],
+          [
+            -2.35294103622437,
+            0.0,
+            2.05700644073659e-07
+          ],
+          [
+            0.0,
+            2.35294103622437,
+            0.0
+          ],
+          [
+            -2.05700644073659e-07,
+            0.0,
+            -2.35294103622437
+          ]
+        ],
+        "name": "candidate",
+        "nameplate_global": [
+          0.5,
+          4.6273980140686,
+          -0.5
+        ],
+        "overhead_height": 4.02739810943604,
+        "selection_size": [
+          1.38999998569489,
+          9.99999974737875e-06,
+          1.38999998569489
+        ],
+        "sha256": "a55b425ab2c88f6bcc3626fb7565b16d83160a2f48aaaa1e874951b4a021b1f1"
+      }
+    ]
+  },
+  "actual_actor_render": {
+    "source_sha256": "ffe24b475a19611cf40c7a2b436b26442b7c86cfff70d55577403b8a57162c2c",
+    "candidate_sha256": "a55b425ab2c88f6bcc3626fb7565b16d83160a2f48aaaa1e874951b4a021b1f1",
+    "image_pairs": 542,
+    "width": 512,
+    "height": 512,
+    "different_image_pairs": 0,
+    "maximum_different_pixels": 0,
+    "maximum_pixels_above_two_levels": 0,
+    "maximum_mean_channel_error": 0.0,
+    "maximum_channel_error": 0,
+    "scope": "Complete ReplicatedActor3D setup with actual display scale, grounding and body materials; identical cameras for source/candidate, four views and every full native cycle at24Hz. Numeric playback and pixel comparisons are separate reports.",
+    "framing_passed": true,
+    "clipped_frame_labels": [],
+    "maximum_border_foreground_pixels": 0
+  },
+  "death_dissolve_gpu": {
+    "effective_scale": 2.35294103622437,
+    "failures": [],
+    "gpu": "NVIDIA GeForce RTX 5080 Laptop GPU",
+    "max_color_error": 0.0,
+    "max_custom_error": 0.0,
+    "max_dissolve_bounds_error": 0.0,
+    "max_fragment_transform_error": 0.0,
+    "max_grain_error": 0.0,
+    "max_silhouette_position_error": 0.0,
+    "mounted": {},
+    "passed": true,
+    "renderer": "forward_plus",
+    "runtime_sha256": "a55b425ab2c88f6bcc3626fb7565b16d83160a2f48aaaa1e874951b4a021b1f1",
+    "seeded_cases": 15,
+    "source_sha256": "ffe24b475a19611cf40c7a2b436b26442b7c86cfff70d55577403b8a57162c2c"
+  },
+  "death_dissolve_render": {
+    "source_sha256": "ffe24b475a19611cf40c7a2b436b26442b7c86cfff70d55577403b8a57162c2c",
+    "candidate_sha256": "a55b425ab2c88f6bcc3626fb7565b16d83160a2f48aaaa1e874951b4a021b1f1",
+    "image_pairs": 30,
+    "width": 640,
+    "height": 640,
+    "different_image_pairs": 0,
+    "maximum_different_pixels": 0,
+    "maximum_pixels_above_two_levels": 0,
+    "maximum_mean_channel_error": 0.0,
+    "maximum_channel_error": 0,
+    "scope": "Complete Actor death dissolve, source/candidate both at preview origin and actual species scale/materials. Three Death_A poses, five fade progresses, two views, fixed seed42. Full pose/skin/resources and15seeded cases recorded separately.",
+    "framing_passed": true,
+    "clipped_frame_labels": [],
+    "maximum_border_foreground_pixels": 0
+  },
+  "import_scale": 2.352941,
+  "actual_actor_display_scale": 2.352941036224379,
+  "rigid_candidate_rejected": {
+    "candidate_sha256": "825024c94c1be45feadb1e265c10cd8b691a50b3ae03d0c91b00ef1b3efee76c",
+    "vertices": 1087,
+    "whole_components": 13,
+    "unique_triangles": 980,
+    "all_original_keys_midpoints_offgrid": 35882,
+    "maximum_source_grid_position_error": 1.0470268499454453e-07,
+    "maximum_source_grid_normal_vector_error": 1.0797807361583459e-07,
+    "source_position_budget": 4.76837158203125e-07,
+    "source_normal_angle_budget_degrees": 0.0001,
+    "base_position_normal_weight_bits_retained": true,
+    "original_gpu8skin_reference_retained": true,
+    "native_blender_imported_numeric_gates_passed": true,
+    "pixel_result": {
+      "source_sha256": "ffe24b475a19611cf40c7a2b436b26442b7c86cfff70d55577403b8a57162c2c",
+      "candidate_sha256": "825024c94c1be45feadb1e265c10cd8b691a50b3ae03d0c91b00ef1b3efee76c",
+      "image_pairs": 542,
+      "width": 512,
+      "height": 512,
+      "different_image_pairs": 542,
+      "maximum_different_pixels": 929,
+      "maximum_pixels_above_two_levels": 9,
+      "maximum_mean_channel_error": 0.0028317769368489585,
+      "maximum_channel_error": 234,
+      "scope": "Complete ReplicatedActor3D setup with actual display scale, grounding and body materials; identical cameras for source/candidate, four views and every full native cycle at24Hz. Numeric playback and pixel comparisons are separate reports.",
+      "framing_passed": true,
+      "clipped_frame_labels": [],
+      "maximum_border_foreground_pixels": 0
+    },
+    "potential_shared_gpu_saved_bytes": 1413100,
+    "additional_draw_surfaces": 1,
+    "decision": "Rejected by unchanged raster gate: all 542 image pairs differ, maximum 929 pixels versus 256 allowed. Numeric budgets and original frozen observations were preserved; no image threshold adjustment. Private study retained; exact-only main installed, with no additional draw surface."
+  },
+  "full_flat_trs_candidate_rejected": {
+    "candidate_sha256": "2ed1af69961e7a18911ba7ec6939d843045eacc5f43c2c71b951974610c25c80",
+    "raster_passed": true,
+    "gpu_effects": {
+      "effective_scale": 2.35294103622437,
+      "failures": [
+        "original no-morph silhouette field preserved"
+      ],
+      "gpu": "NVIDIA GeForce RTX 5080 Laptop GPU",
+      "max_color_error": 0.0,
+      "max_custom_error": 0.0,
+      "max_dissolve_bounds_error": 4.76837158203125e-07,
+      "max_fragment_transform_error": 9.84830307970697e-07,
+      "max_grain_error": 0.0,
+      "max_silhouette_position_error": 1.21570099054225e-06,
+      "mounted": {},
+      "passed": false,
+      "renderer": "forward_plus",
+      "runtime_sha256": "2ed1af69961e7a18911ba7ec6939d843045eacc5f43c2c71b951974610c25c80",
+      "seeded_cases": 15,
+      "source_sha256": "ffe24b475a19611cf40c7a2b436b26442b7c86cfff70d55577403b8a57162c2c"
+    },
+    "decision": "Original joint row spacing retained in final after ordinary flat-TRS interpolation exceeded unchanged 1e-6 world-unit silhouette allowance at actual scale. Final keeps every original joint key; thresholds and source observations unchanged."
+  },
+  "source_clip_coverage": {
+    "actor": "glacier_titan",
+    "source_clips": [
+      "Death_A",
+      "Fighting_Idle",
+      "Hit_Chest",
+      "Idle_A",
+      "Jog",
+      "Sword_Attack",
+      "Walk"
+    ],
+    "actual_actor_fit_clips": [
+      "Death_A",
+      "Fighting_Idle",
+      "Hit_Chest",
+      "Idle_A",
+      "Jog",
+      "Sword_Attack",
+      "Walk"
+    ],
+    "passed": true,
+    "all_source_clips_full_cycle_rendered": true
+  },
+  "actual_editor_mode_correction": {
+    "passed": true,
+    "source_sha256": "ffe24b475a19611cf40c7a2b436b26442b7c86cfff70d55577403b8a57162c2c",
+    "candidate_sha256": "a55b425ab2c88f6bcc3626fb7565b16d83160a2f48aaaa1e874951b4a021b1f1",
+    "prior_cache_route_editor_comparison_labels_withdrawn": true,
+    "previous_public_receipt_sha256": "97ffbd993ae6742479db7769e81b1d52a088ec1a443fd25d6a4e81f92c02e37d",
+    "source_and_current_actual_editor_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/glacier_titan.glb-7bc5c11169acfc10f7587e662c2ab196.md5",
+        "import_metadata_sha256": "4558f54230de55d8c3ba2d4414a5148927b53d870d2db86e9df6f5fd86ca9c67",
+        "imported_resource_path": "res://.godot/imported/glacier_titan.glb-7bc5c11169acfc10f7587e662c2ab196.scn",
+        "imported_resource_sha256": "c6668f632f87513f0554b97291ec2d3d3a12ac807e05d25fa53ace733ebcfcd5",
+        "packed_scene_resource_path": "res://assets/storage-baseline/glacier_titan.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "48a9afc20c9449f5609c6f464a8c34c3",
+        "source_path": "res://assets/storage-baseline/glacier_titan.glb",
+        "source_sha256": "ffe24b475a19611cf40c7a2b436b26442b7c86cfff70d55577403b8a57162c2c"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/glacier_titan.glb-1e19a7e03247e595ddbc6b5b7f673270.md5",
+        "import_metadata_sha256": "46c1daf439a42ca177d6ef96551e105e0154a76ee50292bf24b3a389b5e73c29",
+        "imported_resource_path": "res://.godot/imported/glacier_titan.glb-1e19a7e03247e595ddbc6b5b7f673270.scn",
+        "imported_resource_sha256": "50cb063c44da4ca0a6e885f0d350d0ae445574bac558367c95497dac5f6b8c0e",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/glacier_titan.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "1468a910bf435ced2a2e2ece9de89e84",
+        "source_path": "res://assets/actors/native/creatures/glacier_titan.glb",
+        "source_sha256": "a55b425ab2c88f6bcc3626fb7565b16d83160a2f48aaaa1e874951b4a021b1f1"
+      }
+    ],
+    "source_size_position_budget": 4.76837158203125e-07,
+    "maximum_position_error": 0.0,
+    "normal_angle_budget_degrees": 0.0001,
+    "maximum_normal_angle_degrees": 1.9090959104164224e-06,
+    "all_typed_static_attributes_retained_morph_PNT_oriented_triangles_material_storage_and_texture_mips_identical": true,
+    "independent_complete_editor_vertex_and_oriented_triangle_payload_multisets_identical": true,
+    "independent_payload_source_retained_column_mapping": "No partitions. Exact preparation retained indices independently checked against raw authored POSITION/NORMAL/TANGENT accessor bits; no raw vertex ordinal or arbitrary coincident-ID assumption.",
+    "numeric_static_material_SCNs_identical": true,
+    "numeric_report_sha256": "5d251edd69c557ef53311c5534619f129f5e1fe9ffbedc140dd1fb16c21d7d81",
+    "static_report_sha256": "c8d7db9267fdaacf07412b45fdf43b631f3b623409965d7c7306df1072b3b90e",
+    "direct_payload_report_sha256": "b571c8dbf175ce739784b23e8432c89e3f6d9b6ce400a440d4e817ffc2f0c866",
+    "material_report_sha256": "31199413e538f0563aaf95e746c9a7100578be6d8a1e35014e2058b7ebadd388",
+    "loader_guard": "Public dump_creature_storage.gd explicit ResourceLoader imported branch; scene policy/current-source MD5/cache destination MD5 where single destination, source/SCN/freshness metadata SHA-bound.",
+    "scope": "Corrected matched actualEditor source/current comparison. Prior raw-Cache-source versus editor-current comparison labels are withdrawn; prior source/native/Blender/fullbody/seededFX/render evidence unchanged. All original caps and frozen source observations unchanged. Complete typed static attributes, retained morph P/N/T and oriented triangle payloads match. Material typed storage and texture pixels/mips match; generated distant LOD identity is not claimed."
+  }
+}

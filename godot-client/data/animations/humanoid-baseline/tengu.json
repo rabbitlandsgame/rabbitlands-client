@@ -94,5 +94,34 @@
       513
     ],
     "reset_to_authored_defaults": true
+  },
+  "reviewStatus": "accepted",
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/accepted-repair-delivery.json",
+    "actor": "tengu",
+    "appliesToSHA256": "e5fca05f56711c1a2549d1518a815e8cee85c24d39f3399dd9011a85d2da2c8b",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_repair_instruction",
+      "instruction_summary": "The user reviewed and accepted these five exact repair drafts, then explicitly instructed their installation and merge/push to develop. Five saved exact-version reviewer approvals corroborate this current instruction.",
+      "catalog_sha256": "c1fe36a4d450c06a16adb3fffe76d466778deff9fc6d060ff0db9dd3ae31142b",
+      "authorization_sha256": "88814c13afb22d45bb78cd3a9547d6b4ae70521b847f1d20aacd588171454bb5",
+      "not_a_historical_journal_event": true,
+      "saved_reviewer_approval": {
+        "event_id": "7e596b43-d115-47d1-aa5f-a6c384260af9",
+        "event_sha256": "0d4b242aa5e2eae8d07285906214768600f5d58284d1aba79f3f7c858c9837bf",
+        "utc": "2026-10-28T23:32:06.947707+00:00"
+      }
+    },
+    "previousAuthoringReviewStatus": null
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/accepted-repair-delivery.json",
+    "sourceSHA256": "6db47b6378dde6c6087e8c7bd9eaf19cf5376859ad660afdcc25139c27125b1f",
+    "previousRuntimeSHA256": "6db47b6378dde6c6087e8c7bd9eaf19cf5376859ad660afdcc25139c27125b1f",
+    "runtimeSHA256": "e5fca05f56711c1a2549d1518a815e8cee85c24d39f3399dd9011a85d2da2c8b",
+    "method": "visually_accepted_creature_repair",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": null
   }
 }

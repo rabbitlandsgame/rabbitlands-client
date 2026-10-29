@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "actor": "elephant",
+  "source_sha256": "63055d1e7651a94b63274c67821ca49f3c64a4b6a0a456a8322a2e708824c57e",
+  "candidate_sha256": "d16491f1d78ea9b5d7a525c1e67dfb372ad24d7a1d9d47eb42b5ef28eea7cf01",
+  "pipeline": [
+    "prune_zero_targets",
+    "reduce_constant_runs",
+    "compact"
+  ],
+  "partition": null,
+  "unchanged": false,
+  "removed_zero_target_indices": [],
+  "redundant_flat_key_rows_removed": 247745,
+  "geometry_skin_rest_binds_materials_images_unchanged": true,
+  "preserve_trs_keys": false,
+  "native_clips": [
+    "Walk",
+    "Sword_Attack",
+    "Death_A",
+    "Idle_A",
+    "Fighting_Idle",
+    "Hit_Chest",
+    "Jog"
+  ],
+  "usage": "Deterministic exact preparation needs no partition --profile; frozen source/candidate hashes bind this record."
+}

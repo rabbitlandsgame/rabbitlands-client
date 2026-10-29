@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "actor": "snow_yeti",
+  "source_sha256": "43244838a5c86302fbce4a5ea2d1b98f55f6414d666017076dc5abcc7e01e6bc",
+  "candidate_sha256": "8146626dc00fbb9ab05184f5d449ac7583f7109e7107764f40f9c1d498d618ab",
+  "pipeline": [
+    "prune_zero_targets",
+    "reduce_constant_runs",
+    "compact"
+  ],
+  "partition": null,
+  "unchanged": false,
+  "removed_zero_target_indices": [],
+  "redundant_flat_key_rows_removed": 116935,
+  "geometry_skin_rest_binds_materials_images_unchanged": true,
+  "native_clips": [
+    "Death_A",
+    "Fighting_Idle",
+    "Hit_Chest",
+    "Idle_A",
+    "Jog",
+    "Sword_Attack",
+    "Walk"
+  ],
+  "usage": "Deterministic exact preparation needs no partition --profile; frozen source/candidate hashes bind this record."
+}

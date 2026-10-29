@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "batch": 25,
+  "date": "2026-10-28",
+  "status": "reviewed and integrated locally; not pushed or released",
+  "human_approval_changed": false,
+  "actors": [
+    {
+      "actor": "manticore",
+      "source_sha256": "919c26bc7ccac14ff566efb544022cec0c9e1b64e2a6dcd48ff584df5627adc7",
+      "candidate_sha256": "e09fdda919c632a7898a6e9908a2ce81de499741d3fa3bf5568ba0771e398b7c",
+      "status": "qualified",
+      "qualification_report": "docs/qa/creature-storage/batch-025/manticore.json",
+      "source_bytes": 7416564,
+      "candidate_bytes": 5857064,
+      "source_zstd_bytes": 3026919,
+      "candidate_zstd_bytes": 2793016,
+      "shared_gpu_source_bytes": 5478200,
+      "shared_gpu_candidate_bytes": 5478200,
+      "draw_surfaces_source": 1,
+      "draw_surfaces_candidate": 1
+    },
+    {
+      "actor": "whitehorn_ice_ram",
+      "source_sha256": "a4566d82e8573bddeabcf9a64f20def0f52a890a6588befc6989f9a958e76116",
+      "candidate_sha256": "aa36840101705943e74b450a9fff0aeea8a16b21e6338ad60feb04efc703f496",
+      "status": "qualified",
+      "qualification_report": "docs/qa/creature-storage/batch-025/whitehorn_ice_ram.json",
+      "source_bytes": 7395232,
+      "candidate_bytes": 5944256,
+      "source_zstd_bytes": 4312780,
+      "candidate_zstd_bytes": 4312045,
+      "shared_gpu_source_bytes": 0,
+      "shared_gpu_candidate_bytes": 0,
+      "draw_surfaces_source": 1,
+      "draw_surfaces_candidate": 1
+    },
+    {
+      "actor": "moonlit_unicorn",
+      "source_sha256": "d547956007d124159904321735c4dcb2ba81070eb0856ebda5ba077417988d4f",
+      "candidate_sha256": "d547956007d124159904321735c4dcb2ba81070eb0856ebda5ba077417988d4f",
+      "status": "unchanged",
+      "qualification_report": "docs/qa/creature-storage/batch-025/moonlit_unicorn.json",
+      "source_bytes": 7394208,
+      "candidate_bytes": 7394208,
+      "source_zstd_bytes": 5484771,
+      "candidate_zstd_bytes": 5484771,
+      "shared_gpu_source_bytes": 0,
+      "shared_gpu_candidate_bytes": 0,
+      "draw_surfaces_source": 1,
+      "draw_surfaces_candidate": 1
+    },
+    {
+      "actor": "crown_antler_stag",
+      "source_sha256": "6a6fa1cfeec38fbe96d4fee06047d89ce4502623c1e9373b76f59fe369fc602c",
+      "candidate_sha256": "e09a914a95010033be3b249f906139f374cf687b0ff530809ecbde032ddfd3f7",
+      "status": "qualified",
+      "qualification_report": "docs/qa/creature-storage/batch-025/crown_antler_stag.json",
+      "source_bytes": 7280780,
+      "candidate_bytes": 5757284,
+      "source_zstd_bytes": 3966855,
+      "candidate_zstd_bytes": 3969896,
+      "shared_gpu_source_bytes": 0,
+      "shared_gpu_candidate_bytes": 0,
+      "draw_surfaces_source": 1,
+      "draw_surfaces_candidate": 1
+    },
+    {
+      "actor": "moorland_dire_wolf",
+      "source_sha256": "bb0470c18918a50e75b701a070728eb0c8c6fcfb6b3aca88c2fe04ffe4e1c870",
+      "candidate_sha256": "7739417f9be3e1347e806cbb3defdf29de621e53dbd60ffe2c3ae6681dc9618c",
+      "status": "qualified",
+      "qualification_report": "docs/qa/creature-storage/batch-025/moorland_dire_wolf.json",
+      "source_bytes": 7264508,
+      "candidate_bytes": 5332972,
+      "source_zstd_bytes": 3729920,
+      "candidate_zstd_bytes": 3728504,
+      "shared_gpu_source_bytes": 0,
+      "shared_gpu_candidate_bytes": 0,
+      "draw_surfaces_source": 1,
+      "draw_surfaces_candidate": 1
+    }
+  ],
+  "totals": {
+    "source_bytes": 36751292,
+    "source_bytes_unknown_actors": 0,
+    "candidate_bytes": 30285784,
+    "candidate_bytes_unknown_actors": 0,
+    "source_zstd_bytes": 20521245,
+    "source_zstd_bytes_unknown_actors": 0,
+    "candidate_zstd_bytes": 20288232,
+    "candidate_zstd_bytes_unknown_actors": 0,
+    "shared_gpu_source_bytes": 5478200,
+    "shared_gpu_source_bytes_unknown_actors": 0,
+    "shared_gpu_candidate_bytes": 5478200,
+    "shared_gpu_candidate_bytes_unknown_actors": 0,
+    "raw_saved_bytes": 6465508,
+    "compressed_saved_bytes": 233013,
+    "shared_gpu_saved_bytes": 0
+  },
+  "checks": [
+    {}
+  ],
+  "independent_editor_verification": {
+    "passed": true,
+    "method": "Both fixtures explicitly ResourceLoader.load(PackedScene); current source and generated scene MD5 freshness plus SHA256; all source clips, RESET and directed transitions, typed geometry/morphs/materials. Original per-stage budgets unchanged.",
+    "retrospective_audit": "docs/qa/creature-storage/editor-verification-audit.json",
+    "artistic_approval_changed": false
+  }
+}

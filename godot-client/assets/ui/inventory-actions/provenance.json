@@ -1,0 +1,30 @@
+{
+  "asset_id": "inventory-store-painted",
+  "generation_date": "2026-10-28",
+  "mode": "built-in image_gen",
+  "production_mode": "faithful style match; 2D UI icon",
+  "intended_camera": "front three-quarter",
+  "attempt": 1,
+  "verdict": "pass",
+  "reason": "Readable unframed warm painted chest; matches the bag at native button size.",
+  "prompt": "Use case: stylized-concept. Asset type: Rabbit Lands inventory Store action icon. Create ONE small wooden storage chest, lid closed, shown from a gentle front three-quarter view. Reference image 1 (a tiny beige drawstring bag cursor) and reference image 2 (an eye cursor) are STYLE references only. Match their classic hand-painted fantasy RPG inventory sprite style: chunky readable silhouette, warm muted brown/beige palette, matte painted materials, soft upper-left highlight, dark brown edge shading, simplified surfaces, low detail density. Chest has warm medium-brown wooden planks, two simple dull bronze bands and a readable central latch. Single isolated object centered, comfortably filling about 85% of a square canvas. Designed to remain clearly recognizable at 30 by 30 pixels beside the reference bag. Real transparent alpha background, no baked backdrop, no icon frame, no button, no border, no golden square, no text, no logo, no scenery, no ground plane, no glow. Keep the style pictorial and softly painted, not flat line art, not vector, not photorealistic.",
+  "references": [
+    "../cursors/cursor_pick.png",
+    "../cursors/cursor_eye.png"
+  ],
+  "runtime_asset": "store-painted.png",
+  "runtime_dimensions": [
+    32,
+    32
+  ],
+  "source_dimensions": [
+    1254,
+    1254
+  ],
+  "processing": "Alpha content bounds normalized, Lanczos downsampled into a transparent 32 × 32 canvas using Godot. Full source retained in ignored task-local authoring stage.",
+  "other_actions": {
+    "look": "Existing cursor_eye.png",
+    "drop": "Existing cursor_pick.png unchanged",
+    "mix": "Dedicated mix-painted.png; see mix-provenance.json"
+  }
+}

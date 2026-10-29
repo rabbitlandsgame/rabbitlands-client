@@ -26,6 +26,7 @@ func run() -> void:
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(FOLDER))
 	root.get_node("Network").block_for_hud_preview()
 	root.size = Vector2i(1280, 720)
+	root.gui_embed_subwindows = true
 	app = root.get_node("AppState")
 	main = (load("res://src/app/main.tscn") as PackedScene).instantiate()
 	main.get_node("GameView/ChatWindow").preferences_path = FOLDER.path_join("isolated_%d.cfg" % Time.get_ticks_usec())
@@ -44,14 +45,38 @@ func run() -> void:
 	main.selected_inventory_slot = 0
 	main.inventory_panel.show()
 	main._sync_inventory()
+	await _check_bulk_shortcuts()
 	var pack_buttons: Array = main.inventory_slot_buttons.duplicate()
 	var worn_buttons: Array = main.equipment_slot_buttons.duplicate()
 	var hud_before: Dictionary = main.hud_workspace.model.working.duplicate(true)
+	var pouch = workspace.reagent_pouch
+	expect(pouch.look_button.text.is_empty() and pouch.store_button.text.is_empty() and pouch.drop_button.text.is_empty() and pouch.mix_button.text.is_empty(), "pouch shortcuts use icons with no word labels")
+	expect(pouch.look_button.icon != null and pouch.store_button.icon != null and pouch.drop_button.icon != null and pouch.mix_button.icon != null, "pouch shortcuts reuse the real game artwork")
+	expect(pouch.auxiliary.global_position.x < pouch.contents.global_position.x, "gold and shortcuts occupy the space beneath Equipment")
+	main.manufacturing_panel.hide()
+	pouch.mix_button.pressed.emit()
+	expect(main.manufacturing_panel.visible, "Mix opens the existing crafting window")
+	main.manufacturing_panel.hide()
+	main.inventory_panel.show()
+
 	for id: String in Presets.BUILT_INS:
 		workspace.choose_preset(id, true)
 		await frames()
-		expect(main.inventory_slot_buttons.size() == 36 and main.equipment_slot_buttons.size() == 8, id + " retains all 36 pack and 8 wear slots")
+		var compact: bool = id in ["unified", "tabbed", "dock"]
+		expect(workspace.bulk_actions.buttons.store.visible == not compact and workspace.bulk_actions.buttons.drop.visible == not compact and workspace.bulk_actions.buttons.mix.visible == not compact, id + " has the intended default text shortcuts")
+		expect(main.inventory_slot_buttons.size() == 24 and main.equipment_slot_buttons.size() == 8, id + " retains all 24 pack and 8 wear slots")
 		expect(main.inventory_slot_buttons == pack_buttons and main.equipment_slot_buttons == worn_buttons, id + " reuses live controls and their signals")
+
+		if id == "tabbed":
+			expect(main.inventory_slot_buttons[0].custom_minimum_size.x >= 48, "Tabbed satchel uses larger item icons")
+			var pack_end: float = workspace.groups.backpack.position.y + workspace.groups.backpack.size.y
+			expect(is_equal_approx(workspace.groups.pouch.position.y - pack_end, 8.0), "Tabbed satchel places the pouch directly after the backpack without reserved blank space")
+		if id == "dock":
+			expect(main.inventory_slot_buttons[0].custom_minimum_size.x >= 60 and main.equipment_slot_buttons[0].custom_minimum_size.x >= 44, "Edge dock uses larger backpack and equipment icons")
+			var equipment_rect: Rect2 = workspace.groups.equipment.get_rect()
+			var pouch_rect: Rect2 = workspace.groups.pouch.get_rect()
+			expect(is_equal_approx(equipment_rect.position.y, pouch_rect.position.y) and pouch_rect.position.x >= equipment_rect.end.x + 8, "Edge dock puts the pouch at the top right beside equipment")
+			expect(workspace.groups.backpack.position.y >= maxf(equipment_rect.end.y, pouch_rect.end.y) + 8, "Edge dock keeps the backpack clear of both top-row sections")
 		var bounds: Rect2 = main.inventory_panel.get_global_rect()
 		expect(bounds.position.x >= -1 and bounds.position.y >= -1 and bounds.end.x <= main.game_view.size.x + 1 and bounds.end.y <= main.game_view.size.y + 1, id + " fits 1280x720")
 		workspace.request_inspection(0, true)
@@ -146,8 +171,37 @@ func run() -> void:
 		"storage can still dock the customized real inventory")
 	main.classic_storage._detach_inventory()
 	workspace.apply_layout()
-	expect(main.inventory_panel.get_parent() == main.game_view and main.inventory_grid.get_child_count() == 36,
+	expect(main.inventory_panel.get_parent() == main.game_view and main.inventory_grid.get_child_count() == 24,
 		"undocking restores the customized inventory and all its controls")
+	workspace.open_editor()
+	workspace.editor.select_component("pouch")
+	expect(workspace.editor.selected == "pouch", "Pouch is a selectable inventory customization section")
+	workspace.change_part("pouch", "columns", 8)
+	workspace.change_part("pouch", "cell", 58)
+	workspace.change_part("pouch", "offset", Vector2(12, 9))
+	workspace.change_part("pouch", "show_quantity", false)
+	workspace.change_part("pouch", "icon_opacity", 0.5)
+	workspace.apply_layout()
+	expect(workspace.reagent_pouch.grid.columns == 8 and workspace.reagent_pouch.slots[0].custom_minimum_size == Vector2(58, 58), "pouch columns and slot size apply to the live controls")
+	expect(not workspace.reagent_pouch.counts[0].visible and is_equal_approx(workspace.reagent_pouch.slots[0].get_theme_color("icon_normal_color").a, 0.5), "pouch quantity display and icon opacity are customizable")
+	var pouch_design: Dictionary = workspace.model.working.duplicate(true)
+	var normalised: Dictionary = Presets.normalise(pouch_design)
+	expect(normalised.parts.pouch.offset == Vector2(12, 9) and normalised.parts.pouch.columns == 8, "pouch customization survives saved-design normalization")
+	workspace.finish_edit(false)
+	expect(workspace.model.working.parts.pouch != pouch_design.parts.pouch, "Cancel restores the previous pouch customization")
+	var saved_pouch := Presets.new()
+	saved_pouch.working = pouch_design
+	var custom_pouch_id := saved_pouch.save_custom("Pouch layout")
+	var pouch_file := FOLDER.path_join("pouch_roundtrip_%d.cfg" % Time.get_ticks_usec())
+	expect(saved_pouch.save_file(pouch_file) == OK, "a custom pouch design saves to the player settings file")
+	var loaded_pouch := Presets.new()
+	loaded_pouch.load_file(pouch_file)
+	expect(loaded_pouch.active == custom_pouch_id and loaded_pouch.working.parts.pouch == pouch_design.parts.pouch, "a saved custom pouch design reloads with all section options")
+	var legacy_layout: Dictionary = Presets.preset("unified")
+	legacy_layout.parts.erase("pouch")
+	legacy_layout.parts.backpack.cell = 42
+	var upgraded: Dictionary = Presets.normalise(legacy_layout)
+	expect(upgraded.parts.pouch.columns == 4 and upgraded.parts.backpack.cell == 42, "older player layouts gain the pouch while retaining their customization")
 	var standalone := Presets.new()
 	var ids: Array[String] = []
 	for index: int in 5: ids.append(standalone.save_custom("Design %d" % index))
@@ -197,3 +251,77 @@ func run() -> void:
 func _bread() -> Dictionary:
 	return {"open": true, "image_id": 1, "name": "Hearth Bread", "category": "Food", "quantity": 24,
 		"description": "Baked before dawn at the Four Gates ovens.", "stats": "Restores 40 food. Weight 2.", "equipped": false}
+
+func _click_action(button: Button, mouse_button: int) -> void:
+	var event := InputEventMouseButton.new()
+	event.position = button.get_global_rect().get_center()
+	event.global_position = event.position
+	event.button_index = mouse_button
+	event.pressed = true
+	root.push_input(event, true)
+	event.pressed = false
+	root.push_input(event, true)
+	await frames(2)
+
+func _check_bulk_shortcuts() -> void:
+	workspace.choose_preset("unified", true)
+	await frames()
+	var pouch = workspace.reagent_pouch
+	var bulk = workspace.bulk_actions
+	var counts := {"store": 0, "drop": 0, "mix": 0, "single": 0}
+	main.inventory_store_all.pressed.connect(func() -> void: counts.store += 1)
+	main.inventory_drop_all.pressed.connect(func() -> void: counts.drop += 1)
+	main.inventory_mix_all.pressed.connect(func() -> void: counts.mix += 1)
+	pouch.drop_button.pressed.connect(func() -> void: counts.single += 1)
+	app.set("storage", {"open": false, "read_only": false})
+	pouch.sync()
+	expect(pouch.store_button.disabled, "Store remains unavailable without storage or a selected pouch item")
+	await _click_action(pouch.store_button, MOUSE_BUTTON_MIDDLE)
+	expect(main._store_options_menu.visible, "middle-click opens protection options on the disabled Store icon")
+	main._store_options_menu.hide()
+	await _click_action(pouch.store_button, MOUSE_BUTTON_RIGHT)
+	expect(counts.store == 0 and not main._store_options_menu.visible, "right-click Store respects storage access and never opens options")
+	main._bulk_exclusions.store = [true, false, false, false]
+	main._sync_bulk_option_menus()
+	expect(main._store_options_menu.is_item_checked(0) and main._inventory_slot_is_protected(5, "store") and not main._inventory_slot_is_protected(6, "store"), "Store menu and bulk action share protected slots")
+	main.inventory_grid.columns = 12
+	expect(main._inventory_slot_is_protected(11, "store") and not main._inventory_slot_is_protected(12, "store"), "protected rows follow the customized backpack columns")
+	main._bulk_exclusions.store = [false, false, false, false]
+	workspace.apply_layout()
+	app.set("storage", {"open": true, "read_only": false})
+	pouch.sync()
+	await _click_action(pouch.store_button, MOUSE_BUTTON_RIGHT)
+	expect(counts.store == 1, "right-click Store sends the all action even when no pouch item is selected")
+	app.set("storage", {"open": false, "read_only": false})
+	pouch.sync()
+	await _click_action(pouch.drop_button, MOUSE_BUTTON_MIDDLE)
+	expect(main._drop_options_menu.visible, "middle-click Drop opens its protection options")
+	main._drop_options_menu.hide()
+	await _click_action(pouch.drop_button, MOUSE_BUTTON_RIGHT)
+	expect(bulk.confirmation.visible and counts.drop == 0 and counts.single == 0, "right-click Drop starts the existing bulk confirmation without a single-item drop")
+	bulk.confirmation.confirmed.emit()
+	bulk.confirmation.hide()
+	expect(counts.drop == 1, "confirmed bulk Drop uses the same protected all action as the text button")
+	await _click_action(pouch.mix_button, MOUSE_BUTTON_MIDDLE)
+	expect(bulk.mix_options.visible and bulk.mix_options.is_item_disabled(bulk.mix_options.get_item_index(2)), "middle-click Mix opens recipe and source options, with storage access checked")
+	bulk.mix_options.hide()
+	await _click_action(pouch.mix_button, MOUSE_BUTTON_RIGHT)
+	expect(counts.mix == 1 and main.manufacturing_panel.visible, "right-click Mix starts Mix All, opening recipe selection when needed")
+	main.manufacturing_panel.hide()
+	main.inventory_panel.show()
+	app.trade = {"open": true}
+	pouch.sync()
+	await _click_action(pouch.mix_button, MOUSE_BUTTON_RIGHT)
+	expect(counts.mix == 1, "right-click cannot bypass the trade lock on Mix")
+	app.trade = {"open": false}
+	pouch.sync()
+	workspace.open_editor()
+	workspace.editor.select_component("actions")
+	for action: String in ["store", "drop", "mix"]: workspace.change_part("actions", "show_" + action, true)
+	expect(bulk.buttons.store.visible and bulk.buttons.drop.visible and bulk.buttons.mix.visible, "the inventory editor can restore every text bulk shortcut")
+	await _click_action(pouch.mix_button, MOUSE_BUTTON_RIGHT)
+	expect(counts.mix == 1, "editing the inventory never starts a bulk action")
+	workspace.finish_edit(false)
+	workspace.choose_preset("unified", true)
+	main._sync_bulk_option_menus()
+	await frames()

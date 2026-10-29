@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "actor": "giant_mole",
+  "source_sha256": "b0df1a01654a0de32465af5790647db95ff2faf61b97ed5eb22386535f4ef7c0",
+  "candidate_sha256": "41af9445f6f918dea547ad87d27b68a87a2026f78dfa5af20f984d664c0704d1",
+  "pipeline": [
+    "prune_zero_targets",
+    "reduce_constant_runs",
+    "compact"
+  ],
+  "partition": null,
+  "unchanged": false,
+  "removed_zero_target_indices": [],
+  "redundant_flat_key_rows_removed": 548983,
+  "geometry_skin_rest_binds_materials_images_unchanged": true,
+  "native_clips": [
+    "Fighting_Idle",
+    "Hit_Chest",
+    "Idle_A",
+    "Walk",
+    "Jog",
+    "Sword_Attack",
+    "Death_A"
+  ],
+  "usage": "Deterministic exact preparation needs no partition --profile; frozen source/candidate hashes bind this record."
+}

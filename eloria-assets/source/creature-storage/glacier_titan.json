@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "actor": "glacier_titan",
+  "source_sha256": "ffe24b475a19611cf40c7a2b436b26442b7c86cfff70d55577403b8a57162c2c",
+  "candidate_sha256": "a55b425ab2c88f6bcc3626fb7565b16d83160a2f48aaaa1e874951b4a021b1f1",
+  "pipeline": [
+    "prune_zero_targets",
+    "reduce_constant_runs",
+    "compact"
+  ],
+  "partition": null,
+  "unchanged": false,
+  "removed_zero_target_indices": [],
+  "redundant_flat_key_rows_removed": 1231,
+  "geometry_skin_rest_binds_materials_images_unchanged": true,
+  "preserve_trs_keys": true,
+  "native_clips": [
+    "Death_A",
+    "Fighting_Idle",
+    "Hit_Chest",
+    "Idle_A",
+    "Jog",
+    "Sword_Attack",
+    "Walk"
+  ],
+  "usage": "Canonical pack_creature_storage.py --preserve-trs-keys. All original joint row spacing/values retained; only morph-weight plateaus and unreachable/deduplicated storage reduced."
+}

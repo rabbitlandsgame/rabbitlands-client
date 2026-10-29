@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "actor": "reed_mask_hunter",
+  "source_sha256": "930b830093d49fc88060e4b9844954412176c0818efbc1c6e55f62a2fe126d85",
+  "candidate_sha256": "930b830093d49fc88060e4b9844954412176c0818efbc1c6e55f62a2fe126d85",
+  "pipeline": [
+    "retain_unchanged_bytes"
+  ],
+  "partition": null,
+  "unchanged": true,
+  "removed_zero_target_indices": [],
+  "redundant_flat_key_rows_removed": 0,
+  "geometry_skin_rest_binds_materials_images_unchanged": true,
+  "preserve_trs_keys": true,
+  "native_clips": [
+    "Death_A",
+    "Fighting_Idle",
+    "Hit_Chest",
+    "Idle_A",
+    "Jog",
+    "Sword_Attack",
+    "Walk"
+  ],
+  "usage": "Retain immutable original and verify full-file SHA. Existing animated sheared accessory matrices are outside strict sampler support; no decomposition, repair, key reduction or repacking."
+}

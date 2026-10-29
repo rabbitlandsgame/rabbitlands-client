@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "actor": "cave_salamander",
+  "source_sha256": "3f22bf843edc883567043b52cf494bc207413e8b1b05bbdbf593090e305e0858",
+  "candidate_sha256": "fcfb179b78861561e62150e6e516eb6cd7e900bf3c194eb0c0ce1b034e8c40f6",
+  "pipeline": [
+    "prune_zero_targets",
+    "reduce_constant_runs",
+    "compact"
+  ],
+  "partition": null,
+  "unchanged": false,
+  "removed_zero_target_indices": [],
+  "redundant_flat_key_rows_removed": 597638,
+  "geometry_skin_rest_binds_materials_images_unchanged": true,
+  "native_clips": [
+    "Idle_A",
+    "Fighting_Idle",
+    "Hit_Chest",
+    "Walk",
+    "Jog",
+    "Sword_Attack",
+    "Death_A"
+  ],
+  "usage": "Deterministic exact preparation needs no partition --profile; frozen source/candidate hashes bind this record."
+}

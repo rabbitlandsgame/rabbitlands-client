@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "batch": 26,
+  "date": "2026-10-28",
+  "status": "reviewed and integrated locally; not pushed or released",
+  "human_approval_changed": false,
+  "actors": [
+    {
+      "actor": "winged_serpent",
+      "source_sha256": "e6eb83cadbabb753fba02315b56be5038a1dc11e2a1042ea2d99b1f0ab9c21e0",
+      "candidate_sha256": "d6f2772b400869cd5b5ae9bd6209f2611325aef1bad951ae5204ffe124781aa3",
+      "status": "qualified",
+      "qualification_report": "docs/qa/creature-storage/batch-026/winged_serpent.json",
+      "source_bytes": 7233380,
+      "candidate_bytes": 5717040,
+      "source_zstd_bytes": 3372209,
+      "candidate_zstd_bytes": 3089999,
+      "shared_gpu_source_bytes": 5341700,
+      "shared_gpu_candidate_bytes": 5341700,
+      "draw_surfaces_source": 1,
+      "draw_surfaces_candidate": 1
+    },
+    {
+      "actor": "autumn_antler_stag",
+      "source_sha256": "8eb3f54fed102a5380d9788c1f3c3a523ae0edd753b55c23a0d9ce8b58c17408",
+      "candidate_sha256": "82411d998c8f00ae5728778cf1203185a436fd11d4db845089db183f668fee15",
+      "status": "qualified",
+      "qualification_report": "docs/qa/creature-storage/batch-026/autumn_antler_stag.json",
+      "source_bytes": 7231020,
+      "candidate_bytes": 5316052,
+      "source_zstd_bytes": 3944023,
+      "candidate_zstd_bytes": 3945259,
+      "shared_gpu_source_bytes": 0,
+      "shared_gpu_candidate_bytes": 0,
+      "draw_surfaces_source": 1,
+      "draw_surfaces_candidate": 1
+    },
+    {
+      "actor": "elderwood_stag",
+      "source_sha256": "ff12aa932a9cae5686b9ae6f0df291d976d2df7da5c656c4411685bc86f35df5",
+      "candidate_sha256": "9b3881300731c2b17c59405d7c3e9fc161f4744232f8cb3e3040e072d597d8cb",
+      "status": "qualified",
+      "qualification_report": "docs/qa/creature-storage/batch-026/elderwood_stag.json",
+      "source_bytes": 7230856,
+      "candidate_bytes": 5592756,
+      "source_zstd_bytes": 4020275,
+      "candidate_zstd_bytes": 4027965,
+      "shared_gpu_source_bytes": 0,
+      "shared_gpu_candidate_bytes": 0,
+      "draw_surfaces_source": 1,
+      "draw_surfaces_candidate": 1
+    },
+    {
+      "actor": "jackalope",
+      "source_sha256": "0de34ad9e4a2225190c382577c4b42e916cb32b517d96d9bab8490355e0cf38c",
+      "candidate_sha256": "a849f7e27220ad7b4cc9ae5cc8f8ad0b78b2c9761fffb9ffa5198ecfa43aac2e",
+      "status": "qualified",
+      "qualification_report": "docs/qa/creature-storage/batch-026/jackalope.json",
+      "source_bytes": 7209008,
+      "candidate_bytes": 2769500,
+      "source_zstd_bytes": 2080373,
+      "candidate_zstd_bytes": 1863492,
+      "shared_gpu_source_bytes": 1936000,
+      "shared_gpu_candidate_bytes": 0,
+      "draw_surfaces_source": 1,
+      "draw_surfaces_candidate": 1
+    },
+    {
+      "actor": "elderwood_dryad_queen",
+      "source_sha256": "acc71918137543500b40ae3ebb541b6c852402310ce27aed26bd775ea7efbabf",
+      "candidate_sha256": "30d5c342ba9532d02890a7961d24ab94a0d97bdd6069c43c9aa4e9916728388e",
+      "status": "qualified",
+      "qualification_report": "docs/qa/creature-storage/batch-026/elderwood_dryad_queen.json",
+      "source_bytes": 7154016,
+      "candidate_bytes": 5547180,
+      "source_zstd_bytes": 2977351,
+      "candidate_zstd_bytes": 2996769,
+      "shared_gpu_source_bytes": 1810840,
+      "shared_gpu_candidate_bytes": 358360,
+      "draw_surfaces_source": 1,
+      "draw_surfaces_candidate": 2
+    }
+  ],
+  "totals": {
+    "source_bytes": 36058280,
+    "source_bytes_unknown_actors": 0,
+    "candidate_bytes": 24942528,
+    "candidate_bytes_unknown_actors": 0,
+    "source_zstd_bytes": 16394231,
+    "source_zstd_bytes_unknown_actors": 0,
+    "candidate_zstd_bytes": 15923484,
+    "candidate_zstd_bytes_unknown_actors": 0,
+    "shared_gpu_source_bytes": 9088540,
+    "shared_gpu_source_bytes_unknown_actors": 0,
+    "shared_gpu_candidate_bytes": 5700060,
+    "shared_gpu_candidate_bytes_unknown_actors": 0,
+    "raw_saved_bytes": 11115752,
+    "compressed_saved_bytes": 470747,
+    "shared_gpu_saved_bytes": 3388480
+  },
+  "checks": [
+    {}
+  ],
+  "independent_editor_verification": {
+    "passed": true,
+    "method": "Both fixtures explicitly ResourceLoader.load(PackedScene); current source and generated scene MD5 freshness plus SHA256; all source clips, RESET and directed transitions, typed geometry/morphs/materials. Original per-stage budgets unchanged.",
+    "retrospective_audit": "docs/qa/creature-storage/editor-verification-audit.json",
+    "artistic_approval_changed": false
+  }
+}

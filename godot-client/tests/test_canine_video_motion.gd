@@ -105,10 +105,14 @@ func _run() -> void:
 				var fraction := (frame + .37) / 96.0 if frame > 0 and frame < 96 else frame / 96.0
 				var stamp := animation.length * fraction
 				player.stop()
+				# Independent queries start from authored neutral poses. Otherwise
+				# unkeyed reference bones retain the previous clip's last pose.
+				sk.reset_bone_poses()
 				source.play(clip, 0.0)
 				source.seek(stamp, true)
 				var expected := snapshot(sk)
 				source.stop()
+				sk.reset_bone_poses()
 				player.play(clip, 0.0)
 				player.seek(stamp, true)
 				import_error = maxf(import_error, difference(sk, expected))

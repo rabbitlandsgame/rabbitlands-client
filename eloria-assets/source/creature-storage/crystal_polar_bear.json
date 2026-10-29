@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "actor": "crystal_polar_bear",
+  "source_sha256": "6c37fff7783d149c69053bf69cd3dbfe700a8eb92a34a60ff1f78ee103b17f91",
+  "candidate_sha256": "6c37fff7783d149c69053bf69cd3dbfe700a8eb92a34a60ff1f78ee103b17f91",
+  "pipeline": [
+    "retain_unchanged_bytes"
+  ],
+  "partition": null,
+  "unchanged": true,
+  "removed_zero_target_indices": [],
+  "redundant_flat_key_rows_removed": 0,
+  "geometry_skin_rest_binds_materials_images_unchanged": true,
+  "preserve_trs_keys": true,
+  "native_clips": [
+    "Idle_A",
+    "Fighting_Idle",
+    "Hit_Chest",
+    "Walk",
+    "Jog",
+    "Sword_Attack",
+    "Death_A"
+  ],
+  "usage": "Retain immutable original. Joint-key removal is excluded after strict actual-Actor dissolve bounds failed; source and final are byte-identical."
+}

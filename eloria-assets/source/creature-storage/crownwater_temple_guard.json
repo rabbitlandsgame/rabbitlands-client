@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "actor": "crownwater_temple_guard",
+  "source_sha256": "83295660e07440b89ec06ab92a6b3310ce8b5a82043f352751623f5ca736e33e",
+  "candidate_sha256": "fcc3381d9a2e991e6ff09c7f49b74a3ee4816d6d47c5b831921bda6c34356f8d",
+  "pipeline": [
+    "prune_zero_targets",
+    "reduce_constant_runs",
+    "compact"
+  ],
+  "partition": null,
+  "unchanged": false,
+  "removed_zero_target_indices": [],
+  "redundant_flat_key_rows_removed": 34888,
+  "geometry_skin_rest_binds_materials_images_unchanged": true,
+  "preserve_trs_keys": false,
+  "native_clips": [
+    "Death_A",
+    "Fighting_Idle",
+    "Hit_Chest",
+    "Idle_A",
+    "Jog",
+    "Sword_Attack",
+    "Walk"
+  ],
+  "usage": "Deterministic exact preparation needs no partition --profile; frozen source/candidate hashes bind this record."
+}

@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "batch": 6,
+  "rank": 27,
+  "actor": "nightweave_spider",
+  "status": "Audited unchanged; no model replacement. Existing reviewed spider walk, skitter, bite and curl-collapse motion remains intact.",
+  "source_sha256": "0ef5b7de82333e980941d60a2b8bd4985c17a1fdf9f7d78e087816af63197e24",
+  "candidate_sha256": "0ef5b7de82333e980941d60a2b8bd4985c17a1fdf9f7d78e087816af63197e24",
+  "source_bytes": 33998800,
+  "candidate_bytes": 33998800,
+  "source_zstd_bytes": 16703126,
+  "candidate_zstd_bytes": 16703126,
+  "shared_gpu_source_bytes": 24498240,
+  "shared_gpu_candidate_bytes": 24498240,
+  "draw_surfaces_source": 1,
+  "draw_surfaces_candidate": 1,
+  "source_lods": [
+    0
+  ],
+  "candidate_lods": [
+    0
+  ],
+  "canonical_exact_pipeline_byte_identical": true,
+  "new_inactive_corrective_slots": 0,
+  "new_redundant_flat_keys": 0,
+  "qualifying_rigid_islands": 0,
+  "rig_screen_reason": "Original source-only rejection screen found no complete welded island that follows an existing bone across all sampled clips. One failed pose rejects a candidate from an exact-preservation claim; no fitted or approximate replacement was made.",
+  "native_runtime_samples": 232,
+  "native_source_candidate_validation": {
+    "maximum_position_error": 0.0,
+    "maximum_normal_vector_difference": 0.0,
+    "maximum_normal_angle_degrees": 1.7075472925031877e-06,
+    "worst_position": {
+      "label": "Death_A@0.0",
+      "max_surface_error": 0.0,
+      "max_normal_vector_difference": 0.0,
+      "max_normal_degrees": 1.7075472925031877e-06,
+      "p99_normal_degrees": 1.410939067534757e-06
+    },
+    "worst_normal": {
+      "label": "Death_A@0.0",
+      "max_surface_error": 0.0,
+      "max_normal_vector_difference": 0.0,
+      "max_normal_degrees": 1.7075472925031877e-06,
+      "p99_normal_degrees": 1.410939067534757e-06
+    },
+    "scope": "Actual imported Godot mesh arrays, native-library sampled poses and crossfades or mounted gait samples, renderer activation cutoff, linear blended skin; image rendering remains a separate check."
+  },
+  "scope": "Original bytes remain the runtime asset. No new bounds, material, skin, joint, corrective, animation or review-baseline change. No additional import/render qualification is claimed or needed for an unchanged file.",
+  "private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-batch-equids-20261027\\.local\\batch-006\\nightweave_spider\\v1"
+}

@@ -70,5 +70,37 @@
   "strideMetresPerSecond": {
     "walk": 0.10714303794188455,
     "run": 0.27272773294297886
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "moss_badger",
+    "sourceSHA256": "3a1c865ffb7a013fab4760b881e68e8d7ebfa4cf7d107ea0d75c8583f9cdccd1",
+    "previousRuntimeSHA256": "8e3203ff5cc3f86df92a5dbeb4b008881c7146fc80d0e45fa9a33e94137efbf4",
+    "runtimeSHA256": "47b798033601c1a405ed1b1f78289c37260beb13aac36b4ec6c2dac4d545e0be",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "moss_badger",
+      "sourceSHA256": "3a1c865ffb7a013fab4760b881e68e8d7ebfa4cf7d107ea0d75c8583f9cdccd1",
+      "runtimeSHA256": "8e3203ff5cc3f86df92a5dbeb4b008881c7146fc80d0e45fa9a33e94137efbf4",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 120,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "reviewStatus": "accepted",
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "moss_badger",
+    "appliesToSHA256": "47b798033601c1a405ed1b1f78289c37260beb13aac36b4ec6c2dac4d545e0be",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": null,
+    "repairNoteEvents": []
   }
 }

@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "actor": "amethyst_stag_beetle",
+  "source_sha256": "502b8abb61884f32a0733043f92bd7ca2005911a9e91c48a67caee0ecc0dd620",
+  "candidate_sha256": "96c1b31f29dad4e83a46db1922452c6271eb62c05e99dcaaf34b06e03274d7ae",
+  "pipeline": [
+    "prune_zero_targets",
+    "reduce_constant_runs",
+    "compact"
+  ],
+  "partition": null,
+  "unchanged": false,
+  "removed_zero_target_indices": [],
+  "redundant_flat_key_rows_removed": 21085,
+  "geometry_skin_rest_binds_materials_images_unchanged": true,
+  "preserve_trs_keys": false,
+  "native_clips": [
+    "Idle_A",
+    "Fighting_Idle",
+    "Hit_Chest",
+    "Death_A",
+    "Sword_Attack",
+    "Walk",
+    "Jog"
+  ],
+  "usage": "Deterministic exact preparation needs no partition --profile; frozen source/candidate hashes bind this record."
+}

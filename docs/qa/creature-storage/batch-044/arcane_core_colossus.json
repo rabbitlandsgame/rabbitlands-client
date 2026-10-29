@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "batch": 44,
+  "rank": 216,
+  "actor": "arcane_core_colossus",
+  "status": "Original bytes retained; exact-storage proposal not installed. Original fallback reason recorded.",
+  "source_sha256": "92e19d5573a838bde4f5d406675c6a558e32a1624db6de5d69c518da9fd3f581",
+  "candidate_sha256": "92e19d5573a838bde4f5d406675c6a558e32a1624db6de5d69c518da9fd3f581",
+  "source_bytes": 1376196,
+  "candidate_bytes": 1376196,
+  "source_zstd_bytes": 809880,
+  "candidate_zstd_bytes": 809880,
+  "shared_gpu_source_bytes": 0,
+  "draw_surfaces_source": 1,
+  "source_lods": [
+    0
+  ],
+  "shared_gpu_candidate_bytes": 0,
+  "draw_surfaces_candidate": 1,
+  "candidate_lods": [
+    0
+  ],
+  "canonical_pipeline_byte_identical": false,
+  "human_approval_changed": false,
+  "new_inactive_targets": 0,
+  "new_flat_key_reductions": 0,
+  "physical_observations": {
+    "passed": true,
+    "source_sha256": "92e19d5573a838bde4f5d406675c6a558e32a1624db6de5d69c518da9fd3f581",
+    "candidate_sha256": "92e19d5573a838bde4f5d406675c6a558e32a1624db6de5d69c518da9fd3f581",
+    "surface_probes": 166,
+    "poses": 133,
+    "clips": 7,
+    "source_candidate_position_error": 0.0,
+    "source_candidate_normal_vector_error": 0.0,
+    "original_witness_position_error_over_height": 0.0,
+    "original_source_witness_position_error_over_height": 0.0,
+    "original_witness_normal_vector_error": 0.0,
+    "original_witness_bone_matrix_error": 0.0,
+    "witness_sha256": "b87460591e8e44b7008f50cb58abd6941dacd5d5290f6c9808dea82f666d0b69",
+    "sampled_motion_min": [
+      -0.9413634952636939,
+      0.00028796797211142145,
+      -0.8366403933164964
+    ],
+    "sampled_motion_max": [
+      0.987216902575135,
+      1.833967872915969,
+      0.8724859136152504
+    ]
+  },
+  "native_unchanged_validation": {
+    "maximum_position_error": 0.0,
+    "maximum_normal_angle_degrees": 1.9090959104164224e-06,
+    "worst_position": {
+      "label": "Death_A@0.0",
+      "max_surface_error": 0.0,
+      "max_normal_degrees": 1.7075472925031877e-06,
+      "p99_normal_degrees": 1.2074182697257333e-06
+    },
+    "worst_normal": {
+      "label": "Death_A@0.933",
+      "max_surface_error": 0.0,
+      "max_normal_degrees": 1.9090959104164224e-06,
+      "p99_normal_degrees": 1.2074182697257333e-06
+    },
+    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "source_sha256": "92e19d5573a838bde4f5d406675c6a558e32a1624db6de5d69c518da9fd3f581",
+    "candidate_sha256": "92e19d5573a838bde4f5d406675c6a558e32a1624db6de5d69c518da9fd3f581"
+  },
+  "native_runtime_samples": 232,
+  "scope": "Original bytes, skin, rig, corrective data, materials, motions and approval status retained. A duplicate graphics comparison is unnecessary for identical input bytes.",
+  "evidence_sha256": {
+    "processing.json": "da6c1e9afb1235463cd121fb9d9991a2cb0b0831f05141010dd7fa1db7da103f",
+    "exact-source-validation.json": "fdc75404367c32b5ce7a46f4fe714bff232ec4e3ef6f0a0c39e4bc25f34abe9d",
+    "physical-witness-validation.json": "882ea549d22d76855bf079569d9ca654e7578ed9db297c84a6f6558c2cc67664",
+    "native-validation.json": "349bae9835ed4b680332fb55fac673532b4f637e36767116ac077e8855b64c4e",
+    "placement.json": "cfab2389256944891d1e79efe1cb3a1468865657d58b08e5a81ed4bc4686f6da"
+  },
+  "original_byte_fallback_reason": {
+    "reason": "Original model itself exceeds unchanged independent Blender witness caps, including the failing clip queried first in a fresh process. No narrowly proved harness correction found; original bytes retained instead of installing the unqualified exact-storage proposal.",
+    "rejected_proposal_sha256": "24c56a1485e8a8493040c5aba8cab0801313350565694c1186439dd8bd5c7608",
+    "rejected_proposal_processing_sha256": "c37a622271634f0c3219cf4674761411e249ce710d2930ffabd9ee7c8c9dadab",
+    "source_failure_log_sha256": "269d6e71e54728046e859b307ff3cd836f2feb50300ed190e102a055a009e59b",
+    "original_first_clip_diagnostic": {
+      "scope": "Diagnostic only: same immutable original source and unchanged original frozen values for failing clip, evaluated first in a fresh Blender process to exclude preceding clip state. Original witness file untouched.",
+      "actor": "arcane_core_colossus",
+      "clip": "Sword_Attack",
+      "source_sha256": "92e19d5573a838bde4f5d406675c6a558e32a1624db6de5d69c518da9fd3f581",
+      "original_witness_sha256": "b87460591e8e44b7008f50cb58abd6941dacd5d5290f6c9808dea82f666d0b69",
+      "result_code": 1
+    }
+  }
+}

@@ -70,5 +70,37 @@
   "strideMetresPerSecond": {
     "walk": 0.32143101087517906,
     "run": 0.8333396578245383
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "brambleback_boar",
+    "sourceSHA256": "32b094b165b592c72e75fa13049778e8155c82243a3705b86a33c277b51d3e96",
+    "previousRuntimeSHA256": "1eb4473c5adaf688187c439d738c75e621443c0a8b961661319f111b03ea5f12",
+    "runtimeSHA256": "870ac8e1c8798f6d82155c71aa3c2561cb573c22790ffa564f43f83f2f854219",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "brambleback_boar",
+      "sourceSHA256": "32b094b165b592c72e75fa13049778e8155c82243a3705b86a33c277b51d3e96",
+      "runtimeSHA256": "1eb4473c5adaf688187c439d738c75e621443c0a8b961661319f111b03ea5f12",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 240,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "reviewStatus": "accepted",
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "brambleback_boar",
+    "appliesToSHA256": "870ac8e1c8798f6d82155c71aa3c2561cb573c22790ffa564f43f83f2f854219",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": null,
+    "repairNoteEvents": []
   }
 }

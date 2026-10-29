@@ -86,5 +86,43 @@
       513
     ],
     "reset_to_authored_defaults": true
+  },
+  "reviewStatus": "accepted",
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/accepted-repair-delivery.json",
+    "actor": "heartwood_treant",
+    "appliesToSHA256": "fe4cb0869906cad3a49c8a22538b6e2d35a6fc1b55cca350fa91117421040955",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_repair_instruction",
+      "instruction_summary": "The user reviewed and accepted these five exact repair drafts, then explicitly instructed their installation and merge/push to develop. Five saved exact-version reviewer approvals corroborate this current instruction.",
+      "catalog_sha256": "c1fe36a4d450c06a16adb3fffe76d466778deff9fc6d060ff0db9dd3ae31142b",
+      "authorization_sha256": "88814c13afb22d45bb78cd3a9547d6b4ae70521b847f1d20aacd588171454bb5",
+      "not_a_historical_journal_event": true,
+      "saved_reviewer_approval": {
+        "event_id": "c9dd86d9-ebb2-4aac-93c7-1ed69f61025e",
+        "event_sha256": "709549f05fe14948d1a3d35ba6bae03739576a88c6a7d1e946d204cffd09bfca",
+        "utc": "2026-10-28T23:32:54.966406+00:00"
+      }
+    },
+    "previousAuthoringReviewStatus": "accepted"
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/accepted-repair-delivery.json",
+    "sourceSHA256": "2cc733b7021640c90837c4c37df1135ee123f9b2a890dcd7b836515647a673b5",
+    "previousRuntimeSHA256": "0908ec67ebe80bdb3de6e78b7c5cb31178e97cac0cc2494268a8d4f74c671f97",
+    "runtimeSHA256": "fe4cb0869906cad3a49c8a22538b6e2d35a6fc1b55cca350fa91117421040955",
+    "method": "visually_accepted_creature_repair",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+      "actor": "heartwood_treant",
+      "sourceSHA256": "2cc733b7021640c90837c4c37df1135ee123f9b2a890dcd7b836515647a673b5",
+      "previousRuntimeSHA256": "2cc733b7021640c90837c4c37df1135ee123f9b2a890dcd7b836515647a673b5",
+      "runtimeSHA256": "0908ec67ebe80bdb3de6e78b7c5cb31178e97cac0cc2494268a8d4f74c671f97",
+      "method": "visually_accepted_offline_corrective_bake",
+      "bakeFPS": 30,
+      "previousRuntimeOptimization": null
+    }
   }
 }

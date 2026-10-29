@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "batch": 37,
+  "date": "2026-10-28",
+  "status": "reviewed and integrated locally; not pushed or released",
+  "human_approval_changed": false,
+  "actors": [
+    {
+      "actor": "ember_leaf_spirit",
+      "source_sha256": "69d376701b83c1c439f41cf7ac86bbf1fd9cbce8bd9daad5e9644e2da829d7eb",
+      "candidate_sha256": "dbc4e531e945b8e263e3935098699ccf1ccb3aa9a6bda9123796ef30670b81e9",
+      "status": "qualified",
+      "qualification_report": "docs/qa/creature-storage/batch-037/ember_leaf_spirit.json",
+      "source_bytes": 3078292,
+      "candidate_bytes": 2835012,
+      "source_zstd_bytes": 2006953,
+      "candidate_zstd_bytes": 2013335,
+      "shared_gpu_source_bytes": 0,
+      "shared_gpu_candidate_bytes": 0,
+      "draw_surfaces_source": 1,
+      "draw_surfaces_candidate": 1
+    },
+    {
+      "actor": "crystal_carapace_beetle",
+      "source_sha256": "251227e4c652fd6716a22b000a083cadb18865487d5d534785eead597109dadc",
+      "candidate_sha256": "65dd61f3def376725a71b7f4845c1bd1b83dd787226c114b2e4c209b1c03877f",
+      "status": "qualified",
+      "qualification_report": "docs/qa/creature-storage/batch-037/crystal_carapace_beetle.json",
+      "source_bytes": 3019128,
+      "candidate_bytes": 3006652,
+      "source_zstd_bytes": 1451635,
+      "candidate_zstd_bytes": 1461256,
+      "shared_gpu_source_bytes": 0,
+      "shared_gpu_candidate_bytes": 0,
+      "draw_surfaces_source": 1,
+      "draw_surfaces_candidate": 1
+    },
+    {
+      "actor": "glacier_crab",
+      "source_sha256": "7260cc6c8ef7e6dacad168512244e91bb9731395b0b3ac3be19728d76dda0410",
+      "candidate_sha256": "ab621dbed0ae6b383bffc3a043b05751d8a37e084608e39ed7f94b839e247939",
+      "status": "qualified",
+      "qualification_report": "docs/qa/creature-storage/batch-037/glacier_crab.json",
+      "source_bytes": 2935892,
+      "candidate_bytes": 2905744,
+      "source_zstd_bytes": 1487485,
+      "candidate_zstd_bytes": 1488719,
+      "shared_gpu_source_bytes": 0,
+      "shared_gpu_candidate_bytes": 0,
+      "draw_surfaces_source": 1,
+      "draw_surfaces_candidate": 1
+    },
+    {
+      "actor": "luminous_manta_ray",
+      "source_sha256": "928ca234659593d12392067b539517ebf7c322ff312dbb633980881afb511e01",
+      "candidate_sha256": "033a32bd360d4f582b5a4fbaaddeefca2f0cf08ea9b214cf44086a1fa0458730",
+      "status": "qualified",
+      "qualification_report": "docs/qa/creature-storage/batch-037/luminous_manta_ray.json",
+      "source_bytes": 2843656,
+      "candidate_bytes": 2831896,
+      "source_zstd_bytes": 1440589,
+      "candidate_zstd_bytes": 1452418,
+      "shared_gpu_source_bytes": 0,
+      "shared_gpu_candidate_bytes": 0,
+      "draw_surfaces_source": 1,
+      "draw_surfaces_candidate": 1
+    },
+    {
+      "actor": "abyssal_armored_fish",
+      "source_sha256": "e381cfec066a6018550852d93b2cd1d1adf1250dca2c7061b5e974b6c761a7be",
+      "candidate_sha256": "6c75023cfaeaa8bf6c06dcf76287ef3ccb8e01484c788bbde95717fb93d970d7",
+      "status": "qualified",
+      "qualification_report": "docs/qa/creature-storage/batch-037/abyssal_armored_fish.json",
+      "source_bytes": 2760452,
+      "candidate_bytes": 2692812,
+      "source_zstd_bytes": 1240628,
+      "candidate_zstd_bytes": 1245319,
+      "shared_gpu_source_bytes": 0,
+      "shared_gpu_candidate_bytes": 0,
+      "draw_surfaces_source": 1,
+      "draw_surfaces_candidate": 1
+    }
+  ],
+  "totals": {
+    "source_bytes": 14637420,
+    "source_bytes_unknown_actors": 0,
+    "candidate_bytes": 14272116,
+    "candidate_bytes_unknown_actors": 0,
+    "source_zstd_bytes": 7627290,
+    "source_zstd_bytes_unknown_actors": 0,
+    "candidate_zstd_bytes": 7661047,
+    "candidate_zstd_bytes_unknown_actors": 0,
+    "shared_gpu_source_bytes": 0,
+    "shared_gpu_source_bytes_unknown_actors": 0,
+    "shared_gpu_candidate_bytes": 0,
+    "shared_gpu_candidate_bytes_unknown_actors": 0,
+    "raw_saved_bytes": 365304,
+    "compressed_saved_bytes": -33757,
+    "shared_gpu_saved_bytes": 0
+  },
+  "checks": [
+    {}
+  ],
+  "independent_editor_verification": {
+    "passed": true,
+    "method": "Both fixtures explicitly ResourceLoader.load(PackedScene); current source and generated scene MD5 freshness plus SHA256; all source clips, RESET and directed transitions, typed geometry/morphs/materials. Original per-stage budgets unchanged.",
+    "retrospective_audit": null,
+    "artistic_approval_changed": false
+  }
+}

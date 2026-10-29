@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "batch": 44,
+  "rank": 218,
+  "actor": "whitehorn_ice_griffin",
+  "status": "Original bytes retained; exact-storage proposal not installed. Original fallback reason recorded.",
+  "source_sha256": "99b505d8fc7a20bf4b4ff77caadb1fe280a94115158311b3eb9276ba1f03b681",
+  "candidate_sha256": "99b505d8fc7a20bf4b4ff77caadb1fe280a94115158311b3eb9276ba1f03b681",
+  "source_bytes": 1279788,
+  "candidate_bytes": 1279788,
+  "source_zstd_bytes": 858191,
+  "candidate_zstd_bytes": 858191,
+  "shared_gpu_source_bytes": 0,
+  "draw_surfaces_source": 1,
+  "source_lods": [
+    0
+  ],
+  "shared_gpu_candidate_bytes": 0,
+  "draw_surfaces_candidate": 1,
+  "candidate_lods": [
+    0
+  ],
+  "canonical_pipeline_byte_identical": false,
+  "human_approval_changed": false,
+  "new_inactive_targets": 0,
+  "new_flat_key_reductions": 0,
+  "physical_observations": {
+    "passed": true,
+    "source_sha256": "99b505d8fc7a20bf4b4ff77caadb1fe280a94115158311b3eb9276ba1f03b681",
+    "candidate_sha256": "99b505d8fc7a20bf4b4ff77caadb1fe280a94115158311b3eb9276ba1f03b681",
+    "surface_probes": 166,
+    "poses": 133,
+    "clips": 7,
+    "source_candidate_position_error": 0.0,
+    "source_candidate_normal_vector_error": 0.0,
+    "original_witness_position_error_over_height": 0.0,
+    "original_source_witness_position_error_over_height": 0.0,
+    "original_witness_normal_vector_error": 0.0,
+    "original_witness_bone_matrix_error": 0.0,
+    "witness_sha256": "449cb62d46ffa382de52f3a4e3c9a7d8face57c9d4505968dcbaf6caf086f34e",
+    "sampled_motion_min": [
+      -1.1051448621835,
+      0.0006703300273299233,
+      -0.9452400234046707
+    ],
+    "sampled_motion_max": [
+      1.0333659679440623,
+      1.9900841934616689,
+      1.2650398617212664
+    ]
+  },
+  "native_unchanged_validation": {
+    "maximum_position_error": 0.0,
+    "maximum_normal_angle_degrees": 1.9090959104164224e-06,
+    "worst_position": {
+      "label": "Death_A@0.0",
+      "max_surface_error": 0.0,
+      "max_normal_degrees": 1.7075472925031877e-06,
+      "p99_normal_degrees": 1.2074182697257333e-06
+    },
+    "worst_normal": {
+      "label": "Walk@0.25",
+      "max_surface_error": 0.0,
+      "max_normal_degrees": 1.9090959104164224e-06,
+      "p99_normal_degrees": 1.2074182697257333e-06
+    },
+    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "source_sha256": "99b505d8fc7a20bf4b4ff77caadb1fe280a94115158311b3eb9276ba1f03b681",
+    "candidate_sha256": "99b505d8fc7a20bf4b4ff77caadb1fe280a94115158311b3eb9276ba1f03b681"
+  },
+  "native_runtime_samples": 232,
+  "scope": "Original bytes, skin, rig, corrective data, materials, motions and approval status retained. A duplicate graphics comparison is unnecessary for identical input bytes.",
+  "evidence_sha256": {
+    "processing.json": "0bb4b2b840c4606b040feeb40de97e475b00b0032b05dd90b6a06ce4a7335a10",
+    "exact-source-validation.json": "a0cb434364a988e7787f4ccd706c70e7ece061ad31c32100c772f25f86b37f5b",
+    "physical-witness-validation.json": "44a972140b58a13cd701de1d1415a507eb6ff0b6be201488dd4d6e0c42fe61ab",
+    "native-validation.json": "d5505a9e57ca4a084d0ac2177c25bff0c94e2eb50cf280f6c8222acd53cc8432",
+    "placement.json": "bf2d6a1f7760050e049be7084843e3fd8b2687488d977b2a0faf169e7f3317bd"
+  },
+  "original_byte_fallback_reason": {
+    "reason": "Original model itself exceeds unchanged independent Blender witness caps, including the failing clip queried first in a fresh process. No narrowly proved harness correction found; original bytes retained instead of installing the unqualified exact-storage proposal.",
+    "rejected_proposal_sha256": "ed0252da7a29b65dd25d13c202cc91790f29384f66119f53941d38945c1211e7",
+    "rejected_proposal_processing_sha256": "24fc70a55c594d073848295c08c6253a9c133666b13830b756aea2c4dff9af83",
+    "source_failure_log_sha256": "7064f60dba39b7d7b2e55a47d7b018f874479643f0357d9a303489a939490d77",
+    "original_first_clip_diagnostic": {
+      "scope": "Diagnostic only: same immutable original source and unchanged original frozen values for failing clip, evaluated first in a fresh Blender process to exclude preceding clip state. Original witness file untouched.",
+      "actor": "whitehorn_ice_griffin",
+      "clip": "Fighting_Idle",
+      "source_sha256": "99b505d8fc7a20bf4b4ff77caadb1fe280a94115158311b3eb9276ba1f03b681",
+      "original_witness_sha256": "449cb62d46ffa382de52f3a4e3c9a7d8face57c9d4505968dcbaf6caf086f34e",
+      "result_code": 1
+    }
+  }
+}
