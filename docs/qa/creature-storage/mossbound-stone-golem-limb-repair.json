@@ -1,0 +1,298 @@
+{
+  "schema": 1,
+  "actor": "mossbound_stone_golem",
+  "status": "NEW_UNAPPROVED_PARTIAL_LOCAL_REPAIR_DRAFT",
+  "runtime_installed": false,
+  "recipe": "eloria-assets/tools/repair_mossbound_limb_skin.py",
+  "strength": 0.25,
+  "baseline_sha256": "e056751f8e6d490452250b7e0be3c1af74599ddf15602cf0cc22ddbc734cc5c0",
+  "reference_30_sha256": "48e312c04045a2f18ddd94dd815d66a822bfc9bbd077383b6a173d446a6d8c12",
+  "original_sha256": "2c79d105b5f8738db97427ddbc5e4e5234c0f93f85243f5d84ac12c4cb984ede",
+  "candidate_sha256": "0f3d19be309cefcb35238f3d5ad2a15252592c207c6712c550c76813d8cdc549",
+  "baseline_bytes": 1896812,
+  "candidate_bytes": 1896812,
+  "vertices": 9000,
+  "changed_skin_rows": 2367,
+  "complete_coincident_groups": 393,
+  "outside_vertices": 6633,
+  "palette_bones": 30,
+  "helpers_added": 0,
+  "influence_slots": 8,
+  "draw_surfaces": 1,
+  "corrective_targets": 0,
+  "motion_cadence": "Unchanged accepted30Hz curves; all8nativeclips including Attack_Ground_Pound preserved.",
+  "repair": "Bounded25% anatomical ownership cleanup in positive-X source-named left forearm/calf, with spatial boundary fades and two local-neighbor smoothing passes. It reduces the reported-pose stretching without changing geometry, rig, materials, original curves or distal sole trajectories. Screen-side labels depend on the camera.",
+  "coincident_proof": "All current baseline coincident local positions and dense skin coefficients are bit-identical; zero morph targets imply identical original seam trajectories for arbitrary poses. New grouped weights retain that property.",
+  "preserved": "All base POSITION/NORMAL/UV/index rows, original nodes/rest/binds/curves/materials/images; eight-slot unsigned joint storage.",
+  "native_initial": {
+    "poses": 90,
+    "baseline_local_edge_ratio_max": 4.095855299398025,
+    "candidate_local_edge_ratio_max": 4.237243257170211,
+    "baseline_comment_edge_ratio": 3.059563205305755,
+    "candidate_comment_edge_ratio": 2.558992897811625,
+    "source_selected_rms_source_units": 0.009318782889972206,
+    "source_selected_max_source_units": 0.04321191235134848
+  },
+  "actual_client": {
+    "states": 490,
+    "categories": {
+      "default": 1,
+      "clip": 88,
+      "held_end": 8,
+      "switch": 112,
+      "switch_stepped": 280,
+      "RESET": 1
+    },
+    "outside_position_and_normal_vector_difference": 0.0,
+    "all_bone_matrix_difference": 0.0,
+    "placement_equal": true,
+    "selected_plus_outside_summary": {
+      "all": {
+        "states": 490,
+        "maximum_position_mm": 142.30062735763707,
+        "maximum_normal_degrees": 37.40500391513063,
+        "worst_maximum_position_mm": {
+          "label": "Jog@0.49913",
+          "source_vertex": 6721
+        },
+        "worst_maximum_normal_degrees": {
+          "label": "Hit_Chest@0.25719",
+          "source_vertex": 6797
+        },
+        "rms_position_mm": 12.086797123633925,
+        "rms_normal_degrees": 1.4016534757148948
+      },
+      "default": {
+        "states": 1,
+        "maximum_position_mm": 0.0637999044323844,
+        "maximum_normal_degrees": 1.396754514182702e-06,
+        "worst_maximum_position_mm": {
+          "label": "configured-default",
+          "source_vertex": 4750
+        },
+        "worst_maximum_normal_degrees": {
+          "label": "configured-default",
+          "source_vertex": 4877
+        },
+        "rms_position_mm": 0.010023666982996192,
+        "rms_normal_degrees": 1.4065709647969338e-07
+      },
+      "clip": {
+        "states": 88,
+        "maximum_position_mm": 142.30062735763707,
+        "maximum_normal_degrees": 37.40500391513063,
+        "worst_maximum_position_mm": {
+          "label": "Jog@0.49913",
+          "source_vertex": 6721
+        },
+        "worst_maximum_normal_degrees": {
+          "label": "Hit_Chest@0.25719",
+          "source_vertex": 6797
+        },
+        "rms_position_mm": 13.789686924090054,
+        "rms_normal_degrees": 1.7386192160204774
+      },
+      "held_end": {
+        "states": 8,
+        "maximum_position_mm": 102.88434211478133,
+        "maximum_normal_degrees": 35.307323173587356,
+        "worst_maximum_position_mm": {
+          "label": "Attack_Ground_Pound@held-end+0.417",
+          "source_vertex": 6721
+        },
+        "worst_maximum_normal_degrees": {
+          "label": "Sword_Attack@held-end+0.417",
+          "source_vertex": 6797
+        },
+        "rms_position_mm": 13.772298966195176,
+        "rms_normal_degrees": 1.9120142798556385
+      },
+      "switch": {
+        "states": 112,
+        "maximum_position_mm": 86.64947276764971,
+        "maximum_normal_degrees": 16.014500295011747,
+        "worst_maximum_position_mm": {
+          "label": "Hit_Chest->Death_A@0.071",
+          "source_vertex": 6721
+        },
+        "worst_maximum_normal_degrees": {
+          "label": "Hit_Chest->Death_A@0.071",
+          "source_vertex": 6797
+        },
+        "rms_position_mm": 7.640754979400378,
+        "rms_normal_degrees": 0.7047718488557976
+      },
+      "switch_stepped": {
+        "states": 280,
+        "maximum_position_mm": 123.60221326188866,
+        "maximum_normal_degrees": 36.96087924947469,
+        "worst_maximum_position_mm": {
+          "label": "Death_A->Jog@stepped-0.417",
+          "source_vertex": 6721
+        },
+        "worst_maximum_normal_degrees": {
+          "label": "Death_A->Hit_Chest@stepped-0.417",
+          "source_vertex": 6797
+        },
+        "rms_position_mm": 12.927634781067566,
+        "rms_normal_degrees": 1.4781583942624559
+      },
+      "RESET": {
+        "states": 1,
+        "maximum_position_mm": 0.0637999044323844,
+        "maximum_normal_degrees": 1.396754514182702e-06,
+        "worst_maximum_position_mm": {
+          "label": "RESET-after-switches",
+          "source_vertex": 4750
+        },
+        "worst_maximum_normal_degrees": {
+          "label": "RESET-after-switches",
+          "source_vertex": 4877
+        },
+        "rms_position_mm": 0.010023667058696157,
+        "rms_normal_degrees": 1.2613939633632007e-07
+      }
+    },
+    "local_strain": {
+      "default": {
+        "states": 1,
+        "source_maximum_edge_stretch_ratio": 1.0,
+        "candidate_maximum_edge_stretch_ratio": 1.0,
+        "maximum_global_min_y_change_m": 0.0,
+        "source_worst_label": "configured-default",
+        "candidate_worst_label": "configured-default"
+      },
+      "clip": {
+        "states": 88,
+        "source_maximum_edge_stretch_ratio": 4.095853113199381,
+        "candidate_maximum_edge_stretch_ratio": 4.237548952922923,
+        "maximum_global_min_y_change_m": 0.0,
+        "source_worst_label": "Jog@0.49913",
+        "candidate_worst_label": "Jog@0.49913"
+      },
+      "held_end": {
+        "states": 8,
+        "source_maximum_edge_stretch_ratio": 3.4486880596351757,
+        "candidate_maximum_edge_stretch_ratio": 3.26575840276823,
+        "maximum_global_min_y_change_m": 0.0,
+        "source_worst_label": "Death_A@held-end+0.417",
+        "candidate_worst_label": "Attack_Ground_Pound@held-end+0.417"
+      },
+      "switch": {
+        "states": 112,
+        "source_maximum_edge_stretch_ratio": 2.6059977780177435,
+        "candidate_maximum_edge_stretch_ratio": 2.7036437553413957,
+        "maximum_global_min_y_change_m": 0.0,
+        "source_worst_label": "Jog->Death_A@0.071",
+        "candidate_worst_label": "Jog->Death_A@0.071"
+      },
+      "switch_stepped": {
+        "states": 280,
+        "source_maximum_edge_stretch_ratio": 3.7629868459753304,
+        "candidate_maximum_edge_stretch_ratio": 3.915321876167885,
+        "maximum_global_min_y_change_m": 0.0,
+        "source_worst_label": "Death_A->Jog@stepped-0.417",
+        "candidate_worst_label": "Death_A->Jog@stepped-0.417"
+      },
+      "RESET": {
+        "states": 1,
+        "source_maximum_edge_stretch_ratio": 1.000000049200152,
+        "candidate_maximum_edge_stretch_ratio": 1.000000049350323,
+        "maximum_global_min_y_change_m": 0.0,
+        "source_worst_label": "RESET-after-switches",
+        "candidate_worst_label": "RESET-after-switches"
+      }
+    },
+    "stance_plane_world_y": -0.9474080023940863,
+    "sole_vertices": 322,
+    "sole_vertices_all_outside_changed_mask": true,
+    "floor_scope": "Inherited configured-original sole plane, not an assertion of actual gameground atworld0. Global minimumY is unchanged in all490capturedstates."
+  },
+  "fresh_blender": {
+    "states": 298,
+    "outside_position_difference": 0.0,
+    "all_bone_matrix_difference": 0.0,
+    "outside_corner_normal_vector_difference": 1.9998116493225098,
+    "normal_changed_beyond_incident_one_ring": 0,
+    "scope": "Fresh import finite all8clips; Blender recomputes corner normals on incident deformed faces. No imported-shading equivalence claim; actualrawclient outside normals are exact."
+  },
+  "visual": {
+    "renderer": "Godot Forward+ actual configured Actor",
+    "paired_entries": 1812,
+    "images": 3624,
+    "views": [
+      "front",
+      "left",
+      "rear",
+      "right"
+    ],
+    "full_native_cycles_hz": 24,
+    "render_cap_fps": 30,
+    "comment_seconds": 1.441609,
+    "comment_closeups": [
+      "forearm",
+      "calf"
+    ],
+    "review_findings": "Modest forearm/calf contour redistribution and reduced reported-pose stretch; not a complete fix. Other poses retain or slightly worsen local strain. User review required.",
+    "normal_speed_media": {
+      "Death_A": {
+        "frames": 71,
+        "duration_ms_per_frame": 41,
+        "sha256": "5d7d0bba6555204c70f578a659d5d7469fbcf09a75329bc15e5d07aa73df9bb4"
+      },
+      "Fighting_Idle": {
+        "frames": 66,
+        "duration_ms_per_frame": 42,
+        "sha256": "014cc5f37e0c2c955139b951dccb7cccb55f7dc775b2c8c8659eac1a8dd261b3"
+      },
+      "Hit_Chest": {
+        "frames": 27,
+        "duration_ms_per_frame": 40,
+        "sha256": "fa3a73278d4e8674ac0d62b60670e00a67ff974c3f5050c1b3c51ede2dbafd05"
+      },
+      "Idle_A": {
+        "frames": 77,
+        "duration_ms_per_frame": 42,
+        "sha256": "90face0e660798c5196513155644ae98390c3512fe573eb302613ddf5ee59cfd"
+      },
+      "Jog": {
+        "frames": 34,
+        "duration_ms_per_frame": 43,
+        "sha256": "628b8751a64b70e83f52c15cd55bc50ba3ce154288513f3f29673e1025324dfe"
+      },
+      "Sword_Attack": {
+        "frames": 52,
+        "duration_ms_per_frame": 41,
+        "sha256": "dd97ea6992eb6c7e970f4e6031b411aab82dcc44949ee083c81e80d2f30692bd"
+      },
+      "Walk": {
+        "frames": 53,
+        "duration_ms_per_frame": 42,
+        "sha256": "f0928649bf449ccf13ceae12b3b0453089bcc0cd2673e409e9c996b5c026241e"
+      },
+      "Attack_Ground_Pound": {
+        "frames": 65,
+        "duration_ms_per_frame": 41,
+        "sha256": "5c0174fae58536de32594aa25f3eea25c2a259ba331bcb332d7942586766d5eb"
+      }
+    }
+  },
+  "limits": [
+    "Partial local improvement, not universal fidelity or physical quality acceptance.",
+    "Worst selected standalone edge stretch increases4.096to4.238times; steppedswitch3.763to3.915times despite comment-pose3.060to2.559times.",
+    "Maximum actual current-baseline position difference142.301mm; normal difference37.405degrees, intentionally local.",
+    "No addedbones/slots/surfaces or filegrowth; CPU/GPU timings and FPS not measured.",
+    "No runtime replacement or new exact-version approval."
+  ],
+  "evidence_sha256": {
+    "structural-proof.json": "6fc6971c92b2f4cb2a1a617b2e6d1318246c0838414b109976b029fc87a7083f",
+    "actual-client\\client-validation.json": "597d631fee8b4df7b6be614d5e8d7fab1e88fdd53d18bd7320bf7bb4d0f6c019",
+    "actual-client-outside-proof.json": "12a606b06229c49906158f95cc5f18f8af90b0653b355a0a43158c51b32bc40d",
+    "actual-client-strain.json": "6f73d10ce464a1044244e3ede873dc6011372ccbdb97617cfe2540309b1787f8",
+    "blender-outside-proof-v3.json": "f32bb8dae5bdc46d7ffaa1d08be0825f9a078f9621df82626b724552b138cca2",
+    "visual\\job.json": "695be9f74df7ce01f9c668ab7625e095065b54babebca3ed1ab7edf5ca3814cf",
+    "visual\\actual-render\\render.json": "da3c1657cf3dfb705579c77b5970c932362370a11987b660771d8f86fdc79e7c",
+    "visual\\arm-comment-board.png": "cd72a9d42290d3ff100143b067651324e67ba4051b5f7631fbcded0d0b6e49b6",
+    "visual\\leg-comment-board.png": "0f0bf054b98a936dbaf56f47491be3a4dd2585703d9f08191d780a7a0a444145"
+  }
+}
