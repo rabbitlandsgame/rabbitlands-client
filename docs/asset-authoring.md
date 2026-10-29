@@ -6,6 +6,8 @@ The [visually accepted delivery registry](qa/creature-storage/visually-accepted-
 
 The later [accepted repair delivery registry](qa/creature-storage/accepted-repair-delivery.json) takes precedence for Skeleton, Tengu, Giant Wasp, Heartwood Treant and Nightweave Spider. Their new exact-version acceptance retains the earlier draft findings and known limits.
 
+The separate [second-batch repair registry](qa/creature-storage/accepted-repair-delivery-batch02.json) records Autumn Bark Treant, Crystal Cave Spider, Storm Chimera and Ostrich. It supersedes their earlier overlapping delivery selections. The [installation report](qa/creature-storage/accepted-repair-batch-02.md) preserves the reviewed Storm playback policy and the Golem thumb-repair exclusion.
+
 Regional map detail images are rendered from the current published chunk GLBs,
 including shared mesh placements, with `eloria-assets/tools/render_region_map_details.py`.
 The maintained chunk reader and native cartography rasterizer are reused; no map

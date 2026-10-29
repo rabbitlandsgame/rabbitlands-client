@@ -89,33 +89,40 @@
   },
   "reviewStatus": "accepted",
   "runtimeVisualAcceptance": {
-    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "receipt": "docs/qa/creature-storage/accepted-repair-delivery-batch02.json",
     "actor": "autumn_bark_treant",
-    "appliesToSHA256": "eb7575c7bab1c7d36256f70f0fb47f77f94d5e38ab326bfd2fa8f7a190f228eb",
+    "appliesToSHA256": "c0d3791be5d2f318cfaf732cc3f909a3ee5268e41b8cad9c1ae53a6315e15a32",
     "scope": "exact_candidate_all_native_clips",
     "approvalBasis": {
-      "kind": "saved_button_approval",
-      "event_id": "cd93066c-0268-4ed7-95a6-9b417e5b63a0",
-      "event_sha256": "f46e2e0288c6ffde61bdaf88c93e7bb7b4dedafafba2e908019acb81eb42c49a",
-      "utc": "2026-10-28T21:29:10.422592+00:00"
-    },
-    "previousAuthoringReviewStatus": null,
-    "repairNoteEvents": [
-      {
-        "event_id": "a2abaf8b-4640-42c7-8694-af0dfb2742f1",
-        "event_sha256": "d69a9e0568872b6d7a2f460f106a52c72d1874bd93367bc5bdbe5f57e935af56",
-        "candidate_sha256": "eb7575c7bab1c7d36256f70f0fb47f77f94d5e38ab326bfd2fa8f7a190f228eb"
+      "kind": "current_user_repair_instruction",
+      "instruction_summary": "The user accepted the other four batch02 candidates and reported the Golem right thumb still attaches to its right leg. Install only the four exact accepted versions; retain Golem runtime and prepare a separate thumb repair draft. Four saved exact-version Space approvals corroborate acceptance. No new push or release authorized.",
+      "catalog_sha256": "da6ecacbb3e42420d376e6530447f4aedc506d2a04309c29773928583ad1d47a",
+      "authorization_sha256": "624bab02ec9f07b18a9b58031a2529919b127e81e7f183867fa083b3db7521a4",
+      "not_a_historical_journal_event": true,
+      "saved_reviewer_approval": {
+        "event_id": "7ef37012-694c-408c-b700-d22a3003899a",
+        "event_sha256": "ed8877bb41480233b207dcb8922b7a8386738c4e05090615c04b6f21a9dd5024",
+        "utc": "2026-10-29T02:04:57.638432+00:00"
       }
-    ]
+    },
+    "previousAuthoringReviewStatus": "accepted"
   },
   "runtimeOptimization": {
-    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
-    "actor": "autumn_bark_treant",
+    "receipt": "docs/qa/creature-storage/accepted-repair-delivery-batch02.json",
     "sourceSHA256": "70501bc91dc87dedf3dae24d599602a6ec6d0458e6f5dd0be2ce69996960b9b0",
-    "previousRuntimeSHA256": "70501bc91dc87dedf3dae24d599602a6ec6d0458e6f5dd0be2ce69996960b9b0",
-    "runtimeSHA256": "eb7575c7bab1c7d36256f70f0fb47f77f94d5e38ab326bfd2fa8f7a190f228eb",
-    "method": "visually_accepted_offline_corrective_bake",
+    "previousRuntimeSHA256": "eb7575c7bab1c7d36256f70f0fb47f77f94d5e38ab326bfd2fa8f7a190f228eb",
+    "runtimeSHA256": "c0d3791be5d2f318cfaf732cc3f909a3ee5268e41b8cad9c1ae53a6315e15a32",
+    "method": "visually_accepted_creature_repair",
     "bakeFPS": 30,
-    "previousRuntimeOptimization": null
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+      "actor": "autumn_bark_treant",
+      "sourceSHA256": "70501bc91dc87dedf3dae24d599602a6ec6d0458e6f5dd0be2ce69996960b9b0",
+      "previousRuntimeSHA256": "70501bc91dc87dedf3dae24d599602a6ec6d0458e6f5dd0be2ce69996960b9b0",
+      "runtimeSHA256": "eb7575c7bab1c7d36256f70f0fb47f77f94d5e38ab326bfd2fa8f7a190f228eb",
+      "method": "visually_accepted_offline_corrective_bake",
+      "bakeFPS": 30,
+      "previousRuntimeOptimization": null
+    }
   }
 }

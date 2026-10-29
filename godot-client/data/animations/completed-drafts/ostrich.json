@@ -73,19 +73,46 @@
     "walk": 1.196306791447821,
     "run": 2.87573229779274
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "An upright, long-legged stride with alternating full forward steps, quiet body carriage and a restrained head counterbalance. The run takes longer, faster steps with higher foot recovery and a slight forward lean.",
     "attack": "A quick braced forward kick: one leg chambers, extends its complete two-toed foot toward the target and recovers, while the other foot supports the body and the small wings balance the strike.",
     "death": "The long legs fold and release as the breast settles forward onto the ground; the long neck folds low in front and the feet come to rest beside the supported body."
   },
   "runtimeOptimization": {
-    "receipt": "docs/qa/creature-storage/runtime-delivery.json",
-    "actor": "ostrich",
+    "receipt": "docs/qa/creature-storage/accepted-repair-delivery-batch02.json",
     "sourceSHA256": "2c5d7c1fa448079dbfc956565c05197db473b885918baa35ccf0e41ac640ae2f",
-    "runtimeSHA256": "257b153037bf4620e7cff55a6620b1fd89778c409d59e1998f043e2d096fa979",
-    "method": "close_match_animation_resampling",
-    "bakeFPS": 240,
-    "artisticAcceptanceChanged": false
+    "previousRuntimeSHA256": "257b153037bf4620e7cff55a6620b1fd89778c409d59e1998f043e2d096fa979",
+    "runtimeSHA256": "9dc999b1f1a627fc0c30dd3a87707a4617fefe1c36bdb25c47760c7f68ee4be0",
+    "method": "visually_accepted_creature_repair",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "ostrich",
+      "sourceSHA256": "2c5d7c1fa448079dbfc956565c05197db473b885918baa35ccf0e41ac640ae2f",
+      "runtimeSHA256": "257b153037bf4620e7cff55a6620b1fd89778c409d59e1998f043e2d096fa979",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 240,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/accepted-repair-delivery-batch02.json",
+    "actor": "ostrich",
+    "appliesToSHA256": "9dc999b1f1a627fc0c30dd3a87707a4617fefe1c36bdb25c47760c7f68ee4be0",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_repair_instruction",
+      "instruction_summary": "The user accepted the other four batch02 candidates and reported the Golem right thumb still attaches to its right leg. Install only the four exact accepted versions; retain Golem runtime and prepare a separate thumb repair draft. Four saved exact-version Space approvals corroborate acceptance. No new push or release authorized.",
+      "catalog_sha256": "da6ecacbb3e42420d376e6530447f4aedc506d2a04309c29773928583ad1d47a",
+      "authorization_sha256": "624bab02ec9f07b18a9b58031a2529919b127e81e7f183867fa083b3db7521a4",
+      "not_a_historical_journal_event": true,
+      "saved_reviewer_approval": {
+        "event_id": "7fc38583-fc01-4c93-9618-66d5c5050e51",
+        "event_sha256": "e53402cf13f132c14def7e08897b791816bbf5837a240040aa32034685df4a17",
+        "utc": "2026-10-29T02:05:28.089561+00:00"
+      }
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review"
   }
 }

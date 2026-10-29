@@ -1,5 +1,7 @@
 # Creature comment repairs: second review batch
 
+Subsequent review accepted Autumn Bark Treant, Crystal Cave Spider, Storm Chimera and Ostrich. See [their delivery report](accepted-repair-batch-02.md) and [exact-version registry](accepted-repair-delivery-batch02.json). Golem's right-thumb attachment remains unaccepted; the draft findings below are retained as review history.
+
 The previously accepted Skeleton, Tengu, Giant Wasp, Heartwood Treant and Nightweave Spider repairs are installed in develop at `fff765386e0fa20427633ef8e17dced5261cea30`. The primary client checkout was fast-forwarded, its native-actor import guards prepared, and two settled editor-import passes completed without errors. Its project configuration was restored exactly and its tracked/untracked status was clean.
 
 The following **new, unapproved drafts** are available for exact-version review. They have not replaced runtime assets or been pushed. All retain the full native animation inventory, at most 30 Hz sampling and zero corrective shapes. Sizes below are ordinary GLB bytes, without ZIP or RLCZ encoding.
