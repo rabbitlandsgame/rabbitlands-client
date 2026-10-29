@@ -1141,18 +1141,22 @@ static func rl_heads_classic() -> bool:
 static func reload_rl_heads_switch() -> void:
 	_rl_heads_switch_read = false
 
-## Whether this renderer draws the RL head for the game's Humans. The
-## Compatibility renderer does not (it keeps develop's High head): there the
-## RL head's live identity blend shapes cost 3.2-3.9x develop's crowd frame
-## time; with the identity baked per face (RLHeadIdentityBake, on by default
-## in that renderer) a 40/160-Human crowd still takes 1.46x/1.24x (p95
-## 1.42x/1.32x), and its instance uniforms overflow the 4096-item global
-## buffer between 40 and 160 Humans (.local/rl-high/gate, 2026-10-28;
-## feasibility review fix A). RL_HEADS=all draws it anyway, baked.
+## Whether this renderer draws the RL head for the game's Humans: Forward+
+## always, and the Compatibility renderer where its driver samples BPTC (the
+## format of the RL head's channel-packed masks); without it that renderer
+## keeps develop's classic High head. In the Compatibility renderer the RL head
+## draws its identity baked per face (RLHeadIdentityBake), every face but the
+## nearest few still, its per-actor values as material uniforms (no instance
+## uniforms: RLHeadLibrary.material_values) and its first level to 6 m
+## (RLHeadRig.COMPATIBILITY_FIRST_LEVEL_METRES), within 1.15x of the classic
+## head's crowd frame time with 40 and 160 Humans at 10 m and 26 m (see
+## docs/rl-head-prototype.md, Cost at High). RL_HEADS=all draws it even
+## without BPTC.
 static func rl_heads_renderer_supported() -> bool:
 	rl_heads_classic()
 	return RL_HEADS_EVERYWHERE.has(_rl_heads_switch) \
-		or RenderingServer.get_current_rendering_method() != "gl_compatibility"
+		or RenderingServer.get_current_rendering_method() != "gl_compatibility" \
+		or RenderingServer.has_os_feature("bptc")
 
 ## The graphics quality is now `level` (main.gd's quality pass, before the
 ## actors switch): at High, where this renderer draws the RL head, its files
