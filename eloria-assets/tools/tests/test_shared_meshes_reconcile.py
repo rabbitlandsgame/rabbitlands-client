@@ -18,7 +18,8 @@ def test_reconcile_preserves_index_format_and_updates_consumers(tmp_path, monkey
     index = pool / 'index.json'
     data = {'prototypes': {'prop': {'sha256': '0' * 64, 'bytes': 1, 'images': {}}}}
     index.write_bytes((json.dumps(data, indent=2) + '\n').replace('\n', newline).encode())
-    payload = b'exact consolidated geometry'
+    payload = sm.write_glb({'asset': {'version': '2.0'},
+                            'buffers': [{'byteLength': 4}]}, b'\0' * 4)
     (pool / 'prop.glb').write_bytes(payload)
     directory = maps / 'room'
     directory.mkdir()

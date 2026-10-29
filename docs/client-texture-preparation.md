@@ -218,3 +218,36 @@ Duplicate images are deleted last. Any validation failure restores the exact
 originals. Retirement `mapMeshCopies` file SHA bindings are refreshed without
 changing their mesh lists. The plan and recovery receipt are local evidence;
 source asset changes still require the normal integration and qualification.
+
+## Measured map storage reduction, 2026-10-29
+
+The release selector's loose `eloria-assets` payload decreased from
+2,211,044,583 to 1,700,334,791 bytes: **510,709,792 bytes (510.71 MB, 23.10%)**.
+MB here means 1,000,000 bytes. Approximate contributions were:
+
+| Change | Net reduction |
+| --- | ---: |
+| Exact vertex consolidation in remaining map geometry | 253.7 MB |
+| Byte-identical shared images, including reference metadata overhead | 182.2 MB |
+| Exclude authoring snapshots, comparisons and concept/provenance images | 74.8 MB |
+
+The selector retained all 6,638 shipped GLBs. Geometry verification covered
+10,250,188 triangles; the final audit also checked six rewritten review/master
+GLBs. All 3,806 shipped original-directory/source-SHA policy records and 1,697
+eligible source/recipe variants matched the baseline. All 73 existing map-image
+files and 29 regional frame/style contracts remained unchanged.
+
+Ten fixed Forward+ views across Suncoil, Landfall Underground, Cinderbank and
+Reedway were pixel-identical before and after. Prepared-cache and background
+loading added 16 matching comparisons in Suncoil and Landfall Underground;
+collision probes and visible mesh/material inventories matched too. Texture
+GPU bytes matched the baseline in the four raw qualifications. Suncoil's
+measured static CPU allocation increased by about 14 MB; these
+qualification snapshots do not establish load-time or frame-time improvements.
+Existing prepared map caches require rebuilding with the new policy versions.
+
+This measures selected loose source assets. Exported PCK contents, generated
+sidecars, prepared products and release archive compression require separate
+release-build measurements. One pre-existing embedded-world-image assertion
+still reports 673 absent extracted source copies with the original packaging
+policy as well; its inputs were unchanged by this work.
