@@ -78,8 +78,9 @@ particular, generated native resource identifiers must not cause a code-only
 release to download every map again.
 
 The official desktop runner requires this step. Custom native builds can omit
-it with `--no-prepared-world`; cross-platform builds require a matching
-`--prepared-world-catalog` when preparation is requested. The dedicated
+it with `--no-prepared-world`, or supply a matching `--prepared-world-catalog`
+produced by the exact same engine executable. Cross-platform custom builds can
+omit this native preparation step. The dedicated
 `--world-preparation-cache` is retained across successful desktop and store
 builds independently of other asset caches. Missing or incompatible shipped
 data retains validated source/local-cache loading without automatic whole-world
@@ -100,7 +101,8 @@ probe projects and user caches are retired after verification, with reports and
 logs retained in diagnostics.
 
 Cooking needs real rendering-resource storage. Windows uses D3D12 WARP;
-Linux uses Mesa llvmpipe under Xvfb with the Compatibility renderer. These are
+the Linux pilot uses Mesa llvmpipe with Compatibility, and complete world
+preparation uses lavapipe with Forward+, both under Xvfb. These are
 build-time software renderers, not drivers shipped with the game. Each job
 selects dummy audio so qualification does not require a hosted audio device.
 The game keeps its ordinary audio-driver selection. Each job
