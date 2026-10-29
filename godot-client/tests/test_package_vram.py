@@ -160,7 +160,7 @@ class Check(unittest.TestCase):
         manifest, _ = self.canonicalize_sources()
         path = self.stage / MAP / "world.json"
         uri = next(iter(manifest["externalResources"]))
-        for invalid in ([], "shared-assets", ["../../../../outside"], ["C:/outside"]):
+        for invalid in ([], "shared-assets", ["../../../../outside"], ["C:/outside"], ["%2e%2e/outside"]):
             with self.subTest(invalid=invalid):
                 manifest["externalImagePolicies"][uri] = invalid
                 path.write_text(json.dumps(manifest), encoding="utf-8")
@@ -170,6 +170,13 @@ class Check(unittest.TestCase):
         manifest["externalImagePolicies"]["not-declared.png"] = ["shared-assets"]
         path.write_text(json.dumps(manifest), encoding="utf-8")
         with self.assertRaisesRegex(packager.PackageError, "undeclared image"):
+            packager.check_vram_textures(self.stage)
+
+    def test_policy_descriptors_reject_encoded_paths(self):
+        _, document = self.canonicalize_sources()
+        next(image for image in document["images"] if "uri" in image)["extras"][packager.TEXTURE_POLICY_DIRECTORY_KEY] = "%73hared-assets"
+        self.write_glb(self.stage / MAP / "world.glb", document)
+        with self.assertRaisesRegex(packager.PackageError, "unsafe rl_texture_policy_directory"):
             packager.check_vram_textures(self.stage)
 
     def test_prototype_only_policy_is_checked_even_without_a_world_resource(self):

@@ -2328,7 +2328,8 @@ def external_image_policy_directories(base: Path, resources: dict, policies, ass
     root = asset_root.resolve()
 
     def path_for(uri: str) -> Path:
-        if not isinstance(uri, str) or not uri or "\\" in uri or ":" in uri or PurePosixPath(uri).is_absolute():
+        if (not isinstance(uri, str) or not uri or "\\" in uri or ":" in uri or "%" in uri
+                or PurePosixPath(uri).is_absolute()):
             raise PackageError(f"unsafe external image policy path: {uri!r}")
         path = (base / uri).resolve()
         if not path.is_relative_to(root):
@@ -2368,7 +2369,7 @@ def _check_image_policy_descriptors(document: dict, base: Path, policies: dict[s
                 problems.append(f"{label}: policy-tagged image {uri} has no declared source/policy")
             continue
         policy = extras.get(TEXTURE_POLICY_DIRECTORY_KEY)
-        if tagged and (not isinstance(policy, str) or not policy or "\\" in policy or ":" in policy
+        if tagged and (not isinstance(policy, str) or not policy or "\\" in policy or ":" in policy or "%" in policy
                        or PurePosixPath(policy).is_absolute()):
             problems.append(f"{label}: image {uri} has unsafe {TEXTURE_POLICY_DIRECTORY_KEY}")
             continue
