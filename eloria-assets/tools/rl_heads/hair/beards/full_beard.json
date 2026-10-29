@@ -1,0 +1,391 @@
+{
+ "_doc": "Tavi-like full beard + moustache, ~2-3 cm, following the jaw. Region in the beard frame (see build_beard.py docstring; chart: build_beard.py ... --chart). top = cheek line from the moustache (subnasale ~ lat 5) along the cheek to the sideburn in front of the ear; bottom = neck line (under the jaw, above the Adam's apple). mass = the short dense shell (thickness, chin bulge); cards = strand cards rooted in the region. v2: denser (more cards), darker (Tavi), soft edges from the shell fade band + density/length fall-off.",
+ "name": "full_beard",
+ "seed": 3,
+ "color": [
+  0.12,
+  0.075,
+  0.042
+ ],
+ "region": {
+  "top": [
+   [
+    0,
+    3.6
+   ],
+   [
+    8,
+    4.0
+   ],
+   [
+    12,
+    4.6
+   ],
+   [
+    22,
+    6.5
+   ],
+   [
+    34,
+    12
+   ],
+   [
+    48,
+    19
+   ],
+   [
+    58,
+    26
+   ],
+   [
+    64,
+    31
+   ]
+  ],
+  "bottom": [
+   [
+    0,
+    -54
+   ],
+   [
+    30,
+    -51
+   ],
+   [
+    48,
+    -45
+   ],
+   [
+    58,
+    -34
+   ],
+   [
+    63,
+    -16
+   ],
+   [
+    64,
+    10
+   ]
+  ],
+  "lon_max": 64,
+  "mouth_mm": 2.5,
+  "soft_deg": 6
+ },
+ "mass": {
+  "fade_deg": 6,
+  "thickness_mm": 8.5,
+  "edge_mm": 2.6,
+  "smooth": 3,
+  "strip_mm": 28,
+  "bulges": [
+   {
+    "at": [
+     0,
+     -28
+    ],
+    "deg": 26,
+    "mm": 7
+   },
+   {
+    "at": [
+     0,
+     -45
+    ],
+    "deg": 20,
+    "mm": 4
+   }
+  ]
+ },
+ "cards": [
+  {
+   "name": "beard",
+   "_doc": "main beard hair: down and slightly forward, longer at the chin; shorter toward the region edge; roots kept 5.5 mm off the lips (the shell covers that band) so jaw_open does not roll the lower lip over them",
+   "region": {
+    "mouth_mm": 6.5,
+    "exclude": [
+     {
+      "at": [
+       16.5,
+       -6.0
+      ],
+      "deg": 5.5
+     },
+     {
+      "at": [
+       15.0,
+       -12.0
+      ],
+      "deg": 4.5
+     }
+    ]
+   },
+   "count": 480,
+   "length_table": {
+    "points": [
+     [
+      -60,
+      0.02
+     ],
+     [
+      -40,
+      0.026
+     ],
+     [
+      -20,
+      0.027
+     ],
+     [
+      -5,
+      0.02
+     ],
+     [
+      10,
+      0.014
+     ],
+     [
+      30,
+      0.011
+     ]
+    ]
+   },
+   "width": 0.0095,
+   "lift": 28,
+   "gravity": 0.45,
+   "stiffness": 0.6,
+   "jitter": 14,
+   "segs": 3,
+   "flow": {
+    "type": "dir",
+    "vec": [
+     0,
+     -1,
+     0.3
+    ]
+   },
+   "shape": {
+    "noise_mm": 1.2
+   },
+   "col": [
+    0,
+    0,
+    1
+   ],
+   "follow_mm": 10,
+   "fade_mm": 8,
+   "lod": {
+    "1": {
+     "keep": 0.35,
+     "segs": 0.67,
+     "width_mul": 1.5
+    },
+    "2": {
+     "keep": 0.08,
+     "segs": 0.67,
+     "width_mul": 2.2
+    }
+   }
+  },
+  {
+   "name": "moustache",
+   "_doc": "moustache: from the philtrum / upper lip down and outward over the lip corners; rigid with its root (follow_mm small) so it rides the upper lip",
+   "region": {
+    "top": [
+     [
+      0,
+      3.8
+     ],
+     [
+      8,
+      4.2
+     ],
+     [
+      14,
+      5.0
+     ],
+     [
+      22,
+      6
+     ]
+    ],
+    "bottom": [
+     [
+      0,
+      -1
+     ],
+     [
+      14,
+      -3
+     ],
+     [
+      22,
+      -8
+     ]
+    ],
+    "lon_max": 24,
+    "soft_deg": 1.5,
+    "exclude": [
+     {
+      "at": [
+       16.5,
+       -6.0
+      ],
+      "deg": 5.5
+     },
+     {
+      "at": [
+       15.0,
+       -12.0
+      ],
+      "deg": 4.5
+     }
+    ]
+   },
+   "count": 110,
+   "length": [
+    0.012,
+    0.019
+   ],
+   "width": 0.008,
+   "lift": 18,
+   "gravity": 0.6,
+   "stiffness": 0.6,
+   "jitter": 10,
+   "segs": 3,
+   "flow": {
+    "type": "side",
+    "vec": [
+     0.55,
+     -1,
+     0.25
+    ]
+   },
+   "col": [
+    2
+   ],
+   "follow_mm": 3,
+   "fade_mm": 4,
+   "lod": {
+    "1": {
+     "keep": 0.4,
+     "segs": 0.67,
+     "width_mul": 1.4
+    },
+    "2": {
+     "keep": 0.12,
+     "width_mul": 2.0
+    }
+   }
+  },
+  {
+   "name": "corner_fill",
+   "_doc": "short cards (~25-40% of the beard length) round the mouth corners, rooted outside the small corner keep-out and following the lip skin fully: connect the moustache to the chin beard past the corners",
+   "region": {
+    "top": [
+     [
+      0,
+      3.0
+     ],
+     [
+      30,
+      3.0
+     ]
+    ],
+    "bottom": [
+     [
+      0,
+      -16.0
+     ],
+     [
+      30,
+      -16.0
+     ]
+    ],
+    "lon_max": 28,
+    "mouth_mm": 2.0,
+    "soft_deg": 2.0,
+    "exclude": [
+     {
+      "at": [
+       16.5,
+       -6.0
+      ],
+      "deg": 5.5
+     },
+     {
+      "at": [
+       15.0,
+       -12.0
+      ],
+      "deg": 4.5
+     }
+    ]
+   },
+   "count": 70,
+   "length": [
+    0.005,
+    0.008
+   ],
+   "width": 0.007,
+   "lift": 12,
+   "gravity": 0.6,
+   "stiffness": 0.6,
+   "jitter": 12,
+   "segs": 2,
+   "flow": {
+    "type": "side",
+    "vec": [
+     0.35,
+     -1,
+     0.2
+    ]
+   },
+   "col": [
+    0,
+    1
+   ],
+   "follow_mm": 40,
+   "fade_mm": 10,
+   "lod": {
+    "1": {
+     "keep": 0.4,
+     "width_mul": 1.4
+    },
+    "2": {
+     "drop": true
+    }
+   }
+  }
+ ],
+ "morph": {
+  "lip_follow_mm": [
+   40.0,
+   10.0
+  ]
+ },
+ "shade": {
+  "ao_shell": [
+   0.55,
+   0.8
+  ],
+  "ao_card_floor": 0.45,
+  "v_start": 0.15
+ },
+ "keep_out": [
+  {
+   "at": [
+    16.5,
+    -6.0
+   ],
+   "deg": 4.5
+  },
+  {
+   "at": [
+    15.0,
+    -12.0
+   ],
+   "deg": 4.0
+  }
+ ],
+ "keep_out_min": 0.25
+}

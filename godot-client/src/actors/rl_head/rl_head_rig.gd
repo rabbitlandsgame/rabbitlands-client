@@ -38,7 +38,9 @@ extends Node3D
 ## quality uses), and this rig only paints the hairline under it.
 ##
 ## Identity is blend-shape weights - changing a control never rebuilds a mesh
-## - and per-actor colours are instance uniforms on shared materials.
+## - and per-actor colours are instance uniforms on shared materials (in the
+## Compatibility renderer material uniforms on per-face copies of them,
+## RLHeadLibrary.material_values).
 ## Expressions belong to the RLFaceExpression child, which never writes `id_`
 ## shapes; this never writes `ex_` shapes.
 ##
@@ -74,6 +76,10 @@ const IDENTITY_BAKE := preload("res://src/actors/rl_head/rl_head_identity_bake.g
 ## On every head, beard and hair mesh node: the shared, unbaked mesh it was
 ## built with, which carries the live identity shapes.
 const SOURCE_MESH_META := &"rl_source_mesh"
+## On every head, beard and hair mesh node: the asset's LOD level it draws
+## (`_lod<k>`; 0 for the first). Levels from 1 on are drawn still where
+## RLHeadIdentityBake.still_enabled says so (see _bake_shown).
+const LOD_LEVEL_META := &"rl_lod_level"
 ## Where the next LOD takes over, in metres from the camera, by quality, when
 ## an asset ships more than one: HIGH draws lod0 to 10 m, lod1 to 25 m and lod2
 ## beyond; MEDIUM starts at lod1 and hands over to lod2 at 18 m; LOW is lod2.
@@ -86,6 +92,8 @@ const SOURCE_MESH_META := &"rl_source_mesh"
 ## shapes is still deformed every frame, and in the compatibility renderer
 ## three per actor doubled a 40-actor crowd's frame time (18.4 ms against
 ## 9.2 ms with the unused levels hidden; .local/rl-heads evidence).
+## The Compatibility renderer hands HIGH's first level over at
+## COMPATIBILITY_FIRST_LEVEL_METRES instead (see lod_edges).
 const LOD_DISTANCES := {
 	ActorRenderQuality.Quality.HIGH: [10.0, 25.0],
 	ActorRenderQuality.Quality.MEDIUM: [18.0],
@@ -96,6 +104,29 @@ const LOD_MARGIN := 1.0
 ## Frames between distance checks. One per-frame callback checks the rigs in
 ## turn, a sixth of them each frame, instead of a _process on every rig.
 const LOD_CHECK_FRAMES := 6
+## Live expressions (the blinks; the lab's expressions and speech) are drawn
+## for at most MAX_EXPRESSIVE faces, the nearest the camera within
+## EXPRESSIVE_RANGE metres, ranked every LOD_CHECK_FRAMES frames. Every other
+## face is drawn from still bakes at every level (RLHeadIdentityBake
+## `still`: no live shape is deformed per frame, the mouth is left out) and
+## its RLFaceExpression does not run. The gameplay camera starts 26 m out,
+## where a face is a few dozen pixels high and a blink one or two; the
+## creation preview, the lab and a camera zoomed in close stay within the
+## range. A held portrait pose, a rig drawn without a camera (headless runs)
+## and a rig with a single level keep their expressions. Hair has no live
+## shapes and is always drawn still.
+const EXPRESSIVE_RANGE := 8.0
+const MAX_EXPRESSIVE := 8
+## The Compatibility renderer skins every surface of every drawn mesh with a
+## transform-feedback pass a frame, and a mesh with live shapes takes a
+## blend-shape pass per surface besides: there HIGH's first level ends at 6 m
+## (25-40 pixels of head at 720p from there to 10 m, where Forward+ hands over),
+## and the nearest 4 faces within 4 m draw their expressions (the creation
+## preview and a camera zoomed in close). 160 Humans 10 m out: 1.21x develop's
+## High frame time with Forward+'s values, 1.10x with these (2026-10-29).
+const COMPATIBILITY_FIRST_LEVEL_METRES := 6.0
+const COMPATIBILITY_EXPRESSIVE_RANGE := 4.0
+const COMPATIBILITY_MAX_EXPRESSIVE := 4
 const INSTANCE_UNIFORMS := ["skin_color", "lip_tint", "brow_color", "hair_color",
 	"freckles", "liner", "stubble", "eye_color", "hairline", "brow_style", "brow_thickness",
 	"liner_wing"]
@@ -152,6 +183,16 @@ var _bakes: Dictionary = {}
 ## The face is being edited control by control (`set_control`): every level
 ## stays live from then on.
 var _live_identity := false
+## The irises' look angle, where the values are material uniforms.
+var _eye_look := Vector2.ZERO
+## Among the faces drawing live expressions (see MAX_EXPRESSIVE).
+var _expressive := true
+## draws_expressions() when the shown levels were last chosen (_bake_shown).
+var _drawn_expressive := true
+## _bake_shown switched the expression node's processing off (a still face).
+var _expression_paused := false
+## The skeleton's Head bone (-2 until looked up).
+var _head_bone := -2
 
 ## Mesh resource id -> {blend shape name: index}, shared by every actor.
 static var _shape_indices: Dictionary = {}
@@ -159,6 +200,12 @@ static var _shape_indices: Dictionary = {}
 static var _lod_rigs: Array[RLHeadRig] = []
 static var _lod_cursor := 0
 static var _lod_ticking := false
+## The frame the expressive faces were last ranked.
+static var _ranked_at := -LOD_CHECK_FRAMES
+## EXPRESSIVE_RANGE and MAX_EXPRESSIVE (their Compatibility values there),
+## changed by tests.
+static var expressive_range := COMPATIBILITY_EXPRESSIVE_RANGE if _compatibility() else EXPRESSIVE_RANGE
+static var max_expressive := COMPATIBILITY_MAX_EXPRESSIVE if _compatibility() else MAX_EXPRESSIVE
 
 
 ## Builds an RL head on `skeleton` from `value` (a preset name, the dictionary
@@ -181,6 +228,10 @@ static func attach(skeleton: Skeleton3D, value: Variant,
 	rig._counted = true
 	RLHeadLibrary.acquire()
 	skeleton.add_child(rig)
+	# Ranked with the others within LOD_CHECK_FRAMES; until then a face out of
+	# range starts still rather than baking expressions it will not draw.
+	var distance := rig._camera_distance()
+	rig._expressive = distance < 0.0 or distance <= expressive_range
 	if not rig.apply_appearance(face):
 		rig.teardown()
 		return null
@@ -394,6 +445,13 @@ static func mesh_triangles(mesh: Mesh) -> int:
 ## The body face material's roughness, so the neck rim shades like the body.
 func set_rim_shading(roughness: float, specular: float = 0.5) -> void:
 	_rim_roughness = roughness
+	if RLHeadLibrary.material_values():
+		# Per-face copies are made from the shared material: it carries the
+		# rim too, for the copies still to come.
+		var shared := RLHeadLibrary.material("rl_skin", appearance.sex, "", quality)
+		if shared != null:
+			shared.set_shader_parameter("rim_roughness", roughness)
+			shared.set_shader_parameter("rim_specular", specular)
 	for level: Array in _head_lods:
 		for mesh_node: MeshInstance3D in level:
 			for surface: int in mesh_node.mesh.get_surface_count():
@@ -526,6 +584,7 @@ func _build_hair() -> void:
 		var kept: Array[MeshInstance3D] = []
 		for mesh_node: MeshInstance3D in nodes:
 			mesh_node.set_meta(SOURCE_MESH_META, mesh_node.mesh)
+			mesh_node.set_meta(LOD_LEVEL_META, int(levels[index]))
 			_assign_materials(mesh_node, _hair_style)
 			mesh_node.cast_shadow = HAIR_SHADOWS
 			_present(mesh_node)
@@ -579,6 +638,7 @@ func _instance_levels(lods: Array, prefix: String, style: String) -> Array:
 			mesh_node.name = "%s_lod%d_%s" % [prefix, level, piece["name"]]
 			mesh_node.mesh = piece["mesh"] as Mesh
 			mesh_node.set_meta(SOURCE_MESH_META, piece["mesh"])
+			mesh_node.set_meta(LOD_LEVEL_META, int(piece.get("level", level)))
 			mesh_node.skin = skin
 			add_child(mesh_node)
 			mesh_node.skeleton = mesh_node.get_path_to(_skeleton)
@@ -614,7 +674,7 @@ func _rebind(bones: PackedStringArray, binds: Array[Transform3D]) -> Skin:
 ## The band a camera at `distance` metres calls for, from `current`, with
 ## LOD_MARGIN of hysteresis around each hand-over.
 func lod_band_for(distance: float, current: int = -1) -> int:
-	var distances: Array = LOD_DISTANCES.get(quality, []) as Array
+	var distances := lod_edges(quality)
 	var band := 0
 	for edge: Variant in distances:
 		var threshold := float(edge)
@@ -623,6 +683,19 @@ func lod_band_for(distance: float, current: int = -1) -> int:
 		if distance > threshold:
 			band += 1
 	return mini(band, _band_count() - 1)
+
+
+## The hand-over distances of `level`'s bands (LOD_DISTANCES; in the
+## Compatibility renderer HIGH's first ends at COMPATIBILITY_FIRST_LEVEL_METRES).
+static func lod_edges(level: int) -> Array:
+	var distances: Array = (LOD_DISTANCES.get(level, []) as Array).duplicate()
+	if level == ActorRenderQuality.Quality.HIGH and _compatibility() and not distances.is_empty():
+		distances[0] = COMPATIBILITY_FIRST_LEVEL_METRES
+	return distances
+
+
+static func _compatibility() -> bool:
+	return RenderingServer.get_current_rendering_method() == "gl_compatibility"
 
 
 ## Shows the levels of `band` (each part clamps to the levels it has). A held
@@ -681,10 +754,13 @@ func _refresh_lod_listing(in_tree: bool = true) -> void:
 			(Engine.get_main_loop() as SceneTree).process_frame.connect(_check_lods)
 	else:
 		_lod_rigs.erase(self)
+	if in_tree and is_inside_tree():
+		_refresh_expressive_drawing()
 
 
 ## A sixth of the listed rigs each frame look at their camera. A rig whose
 ## processing is off (its actor paused by the animation gate) keeps its level.
+## Every LOD_CHECK_FRAMES frames the expressive faces are ranked as well.
 static func _check_lods() -> void:
 	var count := _lod_rigs.size()
 	if count == 0:
@@ -693,6 +769,10 @@ static func _check_lods() -> void:
 			tree.process_frame.disconnect(_check_lods)
 		_lod_ticking = false
 		return
+	var frame := Engine.get_process_frames()
+	if frame - _ranked_at >= LOD_CHECK_FRAMES:
+		_ranked_at = frame
+		_rank_expressive()
 	for step: int in ceili(float(count) / LOD_CHECK_FRAMES):
 		if _lod_rigs.is_empty():
 			return
@@ -703,11 +783,64 @@ static func _check_lods() -> void:
 			rig._check_lod()
 
 
+## The max_expressive listed faces nearest their camera within
+## expressive_range draw live expressions, every other listed face still. A
+## face already drawing them keeps them LOD_MARGIN further out and ranks as if
+## LOD_MARGIN nearer, so a face on the line does not swap its meshes back and
+## forth. A rig without a camera keeps them (nothing to rank by); one whose
+## processing is off keeps what it has and takes no place.
+static func _rank_expressive() -> void:
+	var candidates: Array = []
+	for rig: RLHeadRig in _lod_rigs:
+		if not is_instance_valid(rig) or not rig.can_process():
+			continue
+		var distance := rig._camera_distance()
+		var margin := LOD_MARGIN if rig._expressive else 0.0
+		if distance < 0.0:
+			rig._set_expressive(true)
+		elif distance <= expressive_range + margin:
+			candidates.append([distance - margin, rig])
+		else:
+			rig._set_expressive(false)
+	candidates.sort_custom(func(a: Array, b: Array) -> bool: return float(a[0]) < float(b[0]))
+	for index: int in candidates.size():
+		(candidates[index][1] as RLHeadRig)._set_expressive(index < max_expressive)
+
+
+## Metres from this viewport's camera to the head, or -1 without a camera.
+func _camera_distance() -> float:
+	var viewport := get_viewport() if is_inside_tree() else null
+	var camera := viewport.get_camera_3d() if viewport != null else null
+	if camera == null or not is_instance_valid(_skeleton):
+		return -1.0
+	if _head_bone == -2:
+		_head_bone = _skeleton.find_bone("Head")
+	var at := _skeleton.global_transform * (_skeleton.get_bone_global_rest(_head_bone).origin
+		if _head_bone >= 0 else Vector3.ZERO)
+	return camera.global_position.distance_to(at)
+
+
 func _check_lod() -> void:
-	var camera := get_viewport().get_camera_3d()
-	if camera != null:
-		update_lod(camera.global_position.distance_to(
-			_skeleton.global_transform * _skeleton.get_bone_global_rest(_skeleton.find_bone("Head")).origin))
+	var distance := _camera_distance()
+	if distance >= 0.0:
+		update_lod(distance)
+
+
+## Whether this face is drawn with its live expressions (see MAX_EXPRESSIVE).
+func draws_expressions() -> bool:
+	return _expressive or _portrait_pose or not _lod_listed
+
+
+func _set_expressive(expressive: bool) -> void:
+	_expressive = expressive
+	_refresh_expressive_drawing()
+
+
+## Draws the shown levels again when draws_expressions changed since they
+## were last chosen (the ranking, a portrait pose taken or let go).
+func _refresh_expressive_drawing() -> void:
+	if draws_expressions() != _drawn_expressive:
+		_bake_shown()
 
 
 func _apply_portrait_pose() -> void:
@@ -840,31 +973,48 @@ func _baked_weights(mesh_node: MeshInstance3D) -> Dictionary:
 
 ## The shown level of every part draws its baked mesh (or waits for it, live);
 ## every other level goes back to its live source mesh and lets its bake go.
+## Where RLHeadIdentityBake.still_enabled (every renderer by default) a shown
+## level is baked still - no live shapes, no mouth - unless it is the first
+## level of a face drawing its expressions (draws_expressions) and has
+## expression shapes; such a level is baked with them where
+## RLHeadIdentityBake.enabled (Compatibility) and drawn live elsewhere. The
+## expression node runs only while the face draws its expressions.
 func _bake_shown() -> void:
 	var baking := not _live_identity and IDENTITY_BAKE.enabled()
+	var still_allowed := not _live_identity and IDENTITY_BAKE.still_enabled()
+	var expressive := draws_expressions()
+	_drawn_expressive = expressive
 	for group: Array in [_head_lods, _beard_lods, _hair_lods]:
 		var shown := mini(_lod_band, group.size() - 1)
 		for index: int in group.size():
 			for node: Variant in group[index]:
 				if not is_instance_valid(node):
 					continue
-				if baking and index == shown:
-					_bake(node as MeshInstance3D)
+				var still := still_allowed and (not expressive
+					or int((node as Node).get_meta(LOD_LEVEL_META, 0)) >= 1
+					or not IDENTITY_BAKE.keeps_live_shapes((node as Node).get_meta(SOURCE_MESH_META, null) as Mesh))
+				if index == shown and (baking or still):
+					_bake(node as MeshInstance3D, still)
 				else:
 					_unbake(node as MeshInstance3D, true)
+	var pause := still_allowed and not expressive
+	if _expression != null and pause != _expression_paused:
+		_expression_paused = pause
+		_expression.set_process(not pause)
 
 
-func _bake(mesh_node: MeshInstance3D) -> void:
+func _bake(mesh_node: MeshInstance3D, still: bool = false) -> void:
 	var source := mesh_node.get_meta(SOURCE_MESH_META, null) as ArrayMesh
 	if source == null or not IDENTITY_BAKE.has_baked_shapes(source):
 		return
 	var weights := _baked_weights(mesh_node)
-	var entry_key := IDENTITY_BAKE.key(source, weights)
+	var level := int(mesh_node.get_meta(LOD_LEVEL_META, 0))
+	var entry_key := IDENTITY_BAKE.key(source, weights, still, level)
 	var id := mesh_node.get_instance_id()
 	if str(_bakes.get(id, "")) == entry_key:
 		return
 	_unbake(mesh_node, true)
-	var baked := IDENTITY_BAKE.acquire(source, weights, _on_baked.bind(id, entry_key))
+	var baked := IDENTITY_BAKE.acquire(source, weights, _on_baked.bind(id, entry_key), still, level)
 	if baked == null and not IDENTITY_BAKE.holds(entry_key):
 		# No bake to be had now (budget spent): this node stays live.
 		return
@@ -884,8 +1034,7 @@ func _on_baked(baked: ArrayMesh, id: int, entry_key: String) -> void:
 func _show_baked(mesh_node: MeshInstance3D, baked: ArrayMesh) -> void:
 	if mesh_node.mesh == baked:
 		return
-	mesh_node.mesh = baked
-	_after_mesh_swap(mesh_node)
+	_swap_mesh(mesh_node, baked)
 
 
 ## Lets a node's bake go; with `restore`, it draws its source mesh live again.
@@ -898,8 +1047,29 @@ func _unbake(mesh_node: MeshInstance3D, restore: bool) -> void:
 		return
 	var source := mesh_node.get_meta(SOURCE_MESH_META, null) as Mesh
 	if source != null and mesh_node.mesh != source:
-		mesh_node.mesh = source
-		_after_mesh_swap(mesh_node)
+		_swap_mesh(mesh_node, source)
+
+
+## Shows `mesh` on a node. A mesh with another surface count (a still bake
+## leaves surfaces out) takes its materials again, by surface name.
+func _swap_mesh(mesh_node: MeshInstance3D, mesh: Mesh) -> void:
+	var surfaces_before := mesh_node.mesh.get_surface_count() if mesh_node.mesh != null else -1
+	mesh_node.mesh = mesh
+	if mesh.get_surface_count() != surfaces_before:
+		for surface: int in mesh_node.get_surface_override_material_count():
+			mesh_node.set_surface_override_material(surface, null)
+		_assign_materials(mesh_node, _style_of(mesh_node))
+	_after_mesh_swap(mesh_node)
+
+
+## The hairstyle or beard style a node's materials belong to ("" for the head).
+func _style_of(mesh_node: MeshInstance3D) -> String:
+	if _is_hair_node(mesh_node):
+		return _hair_style
+	for level: Array in _beard_lods:
+		if level.has(mesh_node):
+			return _beard_style
+	return ""
 
 
 ## A node's mesh changed: MeshInstance3D keeps blend-shape weights by index
@@ -960,6 +1130,11 @@ func _apply_colours() -> void:
 	# The head's surfaces read all but the hair's detail; the beard reads its
 	# colour, the hair its colour and detail.
 	var beard_values := {"hair_color": beard_colour}
+	if RLHeadLibrary.material_values():
+		values["eye_look"] = _eye_look
+		_apply_material_values([[_head_lods, "", values], [_beard_lods, _beard_style, beard_values],
+			[_hair_lods, _hair_style, values]])
+		return
 	for part: Array in [[_head_lods, INSTANCE_UNIFORMS, values], [_beard_lods, ["hair_color"], beard_values],
 			[_hair_lods, HAIR_INSTANCE_UNIFORMS, values]]:
 		for level: Array in part[0]:
@@ -968,6 +1143,36 @@ func _apply_colours() -> void:
 					continue
 				for uniform_name: String in part[1]:
 					(node as MeshInstance3D).set_instance_shader_parameter(uniform_name, (part[2] as Dictionary)[uniform_name])
+
+
+## The values as material uniforms (RLHeadLibrary.material_values): every
+## surface of each part, [levels, style, values], draws the per-face copy of
+## its shared material. The body patch keeps the body's material.
+func _apply_material_values(parts: Array) -> void:
+	for part: Array in parts:
+		for level: Array in part[0]:
+			for node: Variant in level:
+				if not is_instance_valid(node):
+					continue
+				var mesh_node := node as MeshInstance3D
+				for surface: int in mesh_node.mesh.get_surface_count():
+					var imported := mesh_node.mesh.surface_get_material(surface)
+					if imported == null or _is_body_patch(imported):
+						continue
+					var shared := RLHeadLibrary.material(imported.resource_name, appearance.sex, str(part[1]), quality)
+					if shared != null:
+						mesh_node.set_surface_override_material(surface,
+							RLHeadLibrary.face_material(shared, part[2] as Dictionary))
+
+
+## Turns both irises by a look angle (RLFaceExpression.set_look) where the
+## values are material uniforms; elsewhere the expression sets the instance
+## uniform itself.
+func set_eye_look(look: Vector2) -> void:
+	if look == _eye_look:
+		return
+	_eye_look = look
+	_apply_colours()
 
 
 ## Sets a blend shape by name where the mesh has it. Identity and hair shapes

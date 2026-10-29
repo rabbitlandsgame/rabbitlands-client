@@ -4332,6 +4332,10 @@ func _close_client() -> void:
 	actor_resource_warmup.clear()
 	while not actor_resource_warmup.is_idle():
 		await get_tree().process_frame
+	# The RL head prewarm's running parse likewise (RLHeadLibrary.prewarm).
+	RLHeadLibrary.cancel_warm()
+	while RLHeadLibrary.warming():
+		await get_tree().process_frame
 	campaign_scene.cancel("client_closed")
 	_clear_campaign_cutaway()
 	gauntlet_prewarm.discard()
@@ -14367,6 +14371,7 @@ func _apply_graphics_quality() -> void:
 	effect_budget.quality = LookProfile.quality()
 	if weather_layer != null:
 		weather_layer.set_effects_enabled(_effects_enabled)
+	ReplicatedActor3D.prewarm_rl_heads(LookProfile.quality())
 	_apply_actor_render_quality()
 	_apply_ambient_render_quality()
 	_apply_day_night()

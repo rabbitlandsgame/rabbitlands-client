@@ -18,9 +18,11 @@ extends Node
 ## quality and the lab's switch, set by RLHeadRig), within RANGE_METRES of the
 ## active camera, for at most MAX_ACTIVE actors, nearest first, and never while
 ## the actor rides (the mount pauses every modifier under the rider's skeleton
-## and owns their clock). Everyone else's locks rest at their bind pose: an
-## inactive SkeletonModifier3D leaves the skeleton's own pose alone. The
-## ranking is shared: the first member processed in a frame ranks all of them.
+## and owns their clock). Everyone else's locks rest at their bind pose: the
+## simulator is a child of the hair skeleton only while it runs, so a resting
+## hairstyle's skeleton has no modifier at all and is not updated each frame
+## (a Skeleton3D with any modifier child, active or not, is). The ranking is
+## shared: the first member processed in a frame ranks all of them.
 
 const MAX_ACTIVE := 8
 const RANGE_METRES := 12.0
@@ -112,6 +114,7 @@ func configure(skeleton: Skeleton3D, extras: Dictionary) -> bool:
 			shape.position_offset = Vector3(float(offset[0]), float(offset[1]), float(offset[2]))
 		_simulator.add_child(shape)
 	_simulator.active = false
+	skeleton.remove_child(_simulator)
 	return true
 
 
@@ -168,10 +171,20 @@ func _set_running(running: bool) -> void:
 	if _simulator == null or running == _running:
 		return
 	_running = running
+	if running and _simulator.get_parent() == null and is_instance_valid(_skeleton):
+		_skeleton.add_child(_simulator)
 	if running:
 		# Wake from rest rather than from wherever the locks were left.
 		_simulator.reset()
 	_simulator.active = running
+	if not running and _simulator.get_parent() != null:
+		_simulator.get_parent().remove_child(_simulator)
+
+
+func _notification(what: int) -> void:
+	# A resting simulator is out of the tree: it goes with its member.
+	if what == NOTIFICATION_PREDELETE and is_instance_valid(_simulator) and _simulator.get_parent() == null:
+		_simulator.free()
 
 
 func _mounted() -> bool:

@@ -20,7 +20,6 @@ const HUMAN_LOCOMOTION := preload("res://src/actors/human_locomotion_polish.gd")
 const HIGH_PORTRAIT := preload("res://src/actors/high_portrait_appearance.gd")
 const HIGH_HAIR := preload("res://src/actors/high_hair_appearance.gd")
 const APPEARANCE_COLOURS := preload("res://src/actors/appearance_colours.gd")
-const MPFB_PROTOTYPE := preload("res://src/actors/mpfb_prototype_appearance.gd")
 const WORLD_LABEL_STYLE := preload("res://src/ui/world_label_style.gd")
 const TextColors := preload("res://src/ui/text_colors.gd")
 const ARCHIVED_MODEL_POLICY := preload("res://src/actors/archived_model_policy.gd")
@@ -759,10 +758,6 @@ func apply_appearance_variants(appearance: Dictionary) -> void:
 	for node_value: Node in native_model.find_children("*", "MeshInstance3D", true, false):
 		var mesh_node: MeshInstance3D = node_value as MeshInstance3D
 		var mesh_name: String = mesh_node.name.to_lower()
-		if MPFB_PROTOTYPE.supported(_model_config) and mesh_name in ["body", "eyes", "scalp", "eyebrows"]:
-			# The local study has its own skin/iris atlas. Its white eyes and
-			# painted features must not receive the production source UV finish.
-			continue
 		if mesh_name.begins_with(RACE_FEATURE_PREFIX):
 			# Horn, stone, glass and growth are not skin: a race feature keeps
 			# its imported material under every skin, hair and eye choice. Keep
@@ -1172,18 +1167,40 @@ static func rl_heads_classic() -> bool:
 static func reload_rl_heads_switch() -> void:
 	_rl_heads_switch_read = false
 
-## Whether this renderer draws the RL head for the game's Humans. The
-## Compatibility renderer does not (it keeps develop's High head): there the
-## RL head's live identity blend shapes cost 3.2-3.9x develop's crowd frame
-## time; with the identity baked per face (RLHeadIdentityBake, on by default
-## in that renderer) a 40/160-Human crowd still takes 1.46x/1.24x (p95
-## 1.42x/1.32x), and its instance uniforms overflow the 4096-item global
-## buffer between 40 and 160 Humans (.local/rl-high/gate, 2026-10-28;
-## feasibility review fix A). RL_HEADS=all draws it anyway, baked.
+## Whether this renderer draws the RL head for the game's Humans: Forward+
+## does; the Compatibility renderer keeps develop's classic High head unless
+## RL_HEADS=all. Its cost there is no longer the obstacle: with its identity
+## baked per face (RLHeadIdentityBake), every face but the nearest few still,
+## its per-actor values as material uniforms (no instance uniforms:
+## RLHeadLibrary.material_values) and its first level to 6 m
+## (RLHeadRig.COMPATIBILITY_FIRST_LEVEL_METRES) a crowd of 40 or 160 Humans
+## draws within 1.15x of the classic head at 10 m and 26 m (see
+## docs/rl-head-prototype.md, Cost at High). Its colours are: the RL skin,
+## iris, hair and beard tables are measured in Forward+ only, and in
+## Compatibility the RL iris is up to 0.28 and the module hair 0.22 (sRGB)
+## off the Medium head. Admit that renderer (where its driver samples BPTC,
+## the format of the RL head's channel-packed masks) once it has its own
+## tables (owner decision).
 static func rl_heads_renderer_supported() -> bool:
 	rl_heads_classic()
 	return RL_HEADS_EVERYWHERE.has(_rl_heads_switch) \
 		or RenderingServer.get_current_rendering_method() != "gl_compatibility"
+
+## The graphics quality is now `level` (main.gd's quality pass, before the
+## actors switch): at High, where this renderer draws the RL head, its files
+## are parsed on worker threads ahead of the first High Human - the first
+## creation preview, the first Humans in sight, or the switch itself, whose
+## first head module is parsed on this thread while the rest go to workers
+## (RLHeadLibrary.prewarm). Below High, caches no RL head uses are let go
+## after RLHeadLibrary's retention time. A headless process (tests, tools)
+## draws nothing and never prewarms.
+static func prewarm_rl_heads(level: int) -> void:
+	if rl_heads_classic() or not rl_heads_renderer_supported() or DisplayServer.get_name() == "headless":
+		return
+	if ActorRenderQuality.normalized_quality(level) == ActorRenderQuality.Quality.HIGH:
+		RLHeadLibrary.prewarm()
+	else:
+		RLHeadLibrary.release_if_unused()
 
 ## The lab's explicit face, `appearance.rl_head` (a preset name or
 ## RLHeadAppearance's dictionary form), or null. Neither the game nor the wire
@@ -1197,12 +1214,11 @@ static func _rl_head_override(appearance: Dictionary) -> Variant:
 	return null
 
 ## Whether this actor draws an RL head now: a Human, RL heads not switched to
-## classic, not the MPFB study body, and either the lab's override or High
+## classic, and either the lab's override or High
 ## quality in a renderer that draws it, with the head module for its sex on
 ## disk. Low and Medium never read an RL asset.
 func _rl_head_wanted() -> bool:
-	if _native_skeleton == null or not _uses_portrait_customization() or rl_heads_classic() \
-			or MPFB_PROTOTYPE.supported(_model_config):
+	if _native_skeleton == null or not _uses_portrait_customization() or rl_heads_classic():
 		return false
 	if _appearance.has("rl_head"):
 		return _rl_head_override(_appearance) != null
@@ -1585,13 +1601,9 @@ func _apply_render_quality_to_visuals() -> void:
 		# no stubble on it, and no classic High portrait. Its legacy hairstyle,
 		# when one is drawn, keeps the High hair finish.
 		var rl := _rl_head != null or _rl_head_pending != null
-		var mpfb := MPFB_PROTOTYPE.supported(_model_config)
-		if mpfb and _model_config.has("mpfbFaceFrame"):
-			_native_model.set_meta("mpfb_face_frame", _model_config.mpfbFaceFrame)
 		if _human_shape_needs_finish:
 			# Body refinement is identical on the head. Doing it before the
 			# individual face lets all face choices reuse the same outfit fit.
-			# MPFB's study retains the accepted canonical torso and hands.
 			# This field ends below its authored head/upper-neck replacement.
 			CHARACTER_PROPORTIONS.apply_body_refinement(_native_model, _native_skeleton, _model_config)
 			if rl:
@@ -1599,13 +1611,12 @@ func _apply_render_quality_to_visuals() -> void:
 				if not _rl_switching:
 					PORTRAIT_GROOM.apply(_native_model, _native_skeleton, _rl_groom_appearance(), _model_config)
 			else:
-				var shaped_appearance := MPFB_PROTOTYPE.shape_appearance(_appearance, _model_config) if mpfb else _appearance
-				CHARACTER_PROPORTIONS.apply(_native_model, _native_skeleton, shaped_appearance)
+				CHARACTER_PROPORTIONS.apply(_native_model, _native_skeleton, _appearance)
 				# A switch down from the RL head grooms again only to build a
 				# beard shell the RL head went without; otherwise the hair keeps
 				# the grooming and finish it had, as in develop's own switch.
 				if not _rl_switching or _beard_shell_missing():
-					PORTRAIT_GROOM.apply(_native_model, _native_skeleton, shaped_appearance, _model_config)
+					PORTRAIT_GROOM.apply(_native_model, _native_skeleton, _appearance, _model_config)
 			_human_shape_needs_finish = false
 		if rl:
 			if _native_model.has_meta(HIGH_PORTRAIT.USER_META):
@@ -1615,13 +1626,9 @@ func _apply_render_quality_to_visuals() -> void:
 			if _rl_head != null:
 				_rl_head.set_quality(_render_quality)
 		else:
-			if not mpfb:
-				HIGH_PORTRAIT.apply(_native_model, _native_skeleton, _appearance, _model_config, _render_quality)
+			HIGH_PORTRAIT.apply(_native_model, _native_skeleton, _appearance, _model_config, _render_quality)
 			HIGH_HAIR.apply(_native_model, _native_skeleton, _appearance, _model_config, _render_quality)
-			if mpfb:
-				MPFB_PROTOTYPE.apply(_native_model, _appearance, _model_config)
-			else:
-				STUBBLE_APPEARANCE.apply(_native_model, _appearance, _model_config)
+			STUBBLE_APPEARANCE.apply(_native_model, _appearance, _model_config)
 		ACTOR_RENDER_QUALITY.apply_actor(_native_model, _render_quality)
 	var fallback := get_node_or_null("MissingModelFallback") as MeshInstance3D
 	if fallback != null:

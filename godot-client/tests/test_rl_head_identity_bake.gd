@@ -13,7 +13,20 @@ extends SceneTree
 ##     shared by actors with the same face, expressions still drive the kept
 ##     shapes, `set_control` goes live, RL_HEAD_BAKE=0 draws live, the bakes
 ##     done on the WorkerThreadPool arrive, and the cache empties with the
-##     last RL head.
+##     last RL head;
+##   * a still bake (RLHeadIdentityBake.still_enabled) keeps no live shapes
+##     and leaves the mouth out, with the same identity vertices; on the actor
+##     a far level draws it with every surface's material found again by name,
+##     and the near level keeps its expressions;
+##   * the expressive budget (RLHeadRig.MAX_EXPRESSIVE): with a camera, only
+##     the nearest faces within the range draw their expressions; every other
+##     face, and every hairstyle, draws still bakes at the first level too and
+##     its expression node rests, until the camera comes close;
+##   * material values (the Compatibility renderer's per-face materials,
+##     forced with RL_HEAD_VALUES=material): each surface draws a copy of its
+##     shared material carrying the face's values, compiled with
+##     RL_MATERIAL_VALUES, shared by identical faces, and nothing is set as an
+##     instance uniform.
 ##
 ##   Godot --headless --path godot-client --script res://tests/test_rl_head_identity_bake.gd
 
@@ -52,6 +65,8 @@ func _run() -> void:
 	_equipment = _json("res://data/actors/equipment.json")
 	_animation = _json("res://data/animations/luminous.json")
 	OS.set_environment("RL_HEADS", "")
+	# The cache checks below expect the caches to go with the last RL head.
+	RLHeadLibrary.retain_seconds = 0.0
 	# Headless runs report no renderer: switch the bake on explicitly.
 	OS.set_environment("RL_HEAD_BAKE", "1")
 	ReplicatedActor3D.reload_rl_heads_switch()
@@ -62,6 +77,9 @@ func _run() -> void:
 	_check_cache()
 	RLHeadLibrary.release()
 	await _check_actors()
+	await _check_still()
+	await _check_expressive()
+	await _check_material_values()
 	await _check_async_and_switch()
 	print("rl head identity bake: worst vertex difference %s m" % String.num_scientific(_worst))
 	print("rl head identity bake: %d checks, %d failures" % [_checks, _failures])
@@ -358,6 +376,215 @@ func _check_actors() -> void:
 	await process_frame
 	_expect(RLHeadLibrary.users() == 0 and int(BAKE.describe()["entries"]) == 0,
 		"the cache empties with the last RL head %s" % BAKE.describe())
+
+
+## Still bakes: the far levels of a head, beard and hair, directly and on an actor.
+func _check_still() -> void:
+	BAKE.synchronous = true
+	RLHeadLibrary.acquire()
+	var face: RLHeadAppearance = _faces("male")["Tavi"]
+	var info := RLHeadLibrary.head("male")
+	for level: int in range(1, (info["lods"] as Array).size()):
+		var source: ArrayMesh = ((info["lods"] as Array)[level] as Array)[0]["mesh"]
+		var weights := _weights(face, info["control_names"])
+		var full := BAKE.acquire(source, weights)
+		var still := BAKE.acquire(source, weights, Callable(), true)
+		_expect(still != null and full != null and still != full and BAKE.key(source, weights, true) != BAKE.key(source, weights),
+			"lod%d: a still bake is its own entry" % level)
+		if still == null or full == null:
+			continue
+		_expect(still.get_blend_shape_count() == 0, "lod%d: a still bake keeps no live shapes" % level)
+		var kept := PackedStringArray()
+		for surface: int in source.get_surface_count():
+			var material := source.surface_get_material(surface)
+			if material == null or not BAKE.still_dropped_materials().has(material.resource_name):
+				kept.append(source.surface_get_name(surface))
+		var names := PackedStringArray()
+		for surface: int in still.get_surface_count():
+			names.append(still.surface_get_name(surface))
+		_expect(names == kept, "lod%d: a still bake draws every surface but the mouth %s" % [level, names])
+		var worst := 0.0
+		for surface: int in still.get_surface_count():
+			var at := -1
+			for index: int in full.get_surface_count():
+				if full.surface_get_name(index) == still.surface_get_name(surface):
+					at = index
+			var a: PackedVector3Array = still.surface_get_arrays(surface)[Mesh.ARRAY_VERTEX]
+			var b: PackedVector3Array = full.surface_get_arrays(at)[Mesh.ARRAY_VERTEX]
+			for i: int in mini(a.size(), b.size()):
+				worst = maxf(worst, a[i].distance_to(b[i]))
+			_expect(a.size() == b.size() and still.surface_get_material(surface) == full.surface_get_material(at),
+				"lod%d %s: same vertices and material as the full bake" % [level, still.surface_get_name(surface)])
+		_expect(worst <= 1e-6, "lod%d: the still bake carries the same identity (%s m)" % [level, String.num_scientific(worst)])
+		BAKE.release(BAKE.key(source, weights))
+		BAKE.release(BAKE.key(source, weights, true))
+	RLHeadLibrary.release()
+	# On the actor: a far band draws still meshes, the near band its expressions.
+	var actor := _spawn("male", PRESETS.appearance("Tavi"))
+	await process_frame
+	var rig := actor.rl_head()
+	_expect(rig != null and BAKE.still_enabled(), "Tavi's RL head built, far levels still")
+	if rig == null:
+		actor.free()
+		return
+	rig.update_lod(18.0)
+	_expect(rig.lod_band() == 1, "18 m shows the second level")
+	for node: MeshInstance3D in _shown(rig):
+		_expect(rig.is_baked(node) and node.mesh.get_blend_shape_count() == 0,
+			"%s draws a still bake at 18 m" % node.name)
+		for surface: int in node.mesh.get_surface_count():
+			var imported := node.mesh.surface_get_material(surface)
+			var drawn := node.get_active_material(surface)
+			_expect(imported != null and drawn != null and (drawn.resource_name == imported.resource_name
+				or imported.resource_name == RLHeadLibrary.BODY_PATCH_MATERIAL),
+				"%s surface %d draws its own material (%s)" % [node.name, surface,
+					drawn.resource_name if drawn != null else "none"])
+	rig.update_lod(2.0)
+	_expect(rig.lod_band() == 0, "2 m shows the first level")
+	var head := _shown(rig)[0]
+	_expect(rig.is_baked(head) and RLHeadRig.shape_index(head, "ex_blink_l") >= 0,
+		"the near level keeps its expression shapes")
+	_expect(head.mesh.get_surface_count() == RLHeadRig.source_mesh(head).get_surface_count(),
+		"the near level draws every surface")
+	actor.free()
+	await process_frame
+	await process_frame
+
+
+## The expressive budget: one camera, max_expressive lowered to 1.
+func _check_expressive() -> void:
+	BAKE.synchronous = true
+	var camera := Camera3D.new()
+	root.add_child(camera)
+	camera.position = Vector3(0.0, 1.6, 6.0)
+	camera.current = true
+	RLHeadRig.max_expressive = 1
+	var tavi := PRESETS.appearance("Tavi")
+	var nearest := _spawn("male", tavi)
+	var second := _spawn("male", tavi)
+	var beyond := _spawn("male", tavi)
+	# Placed by hand: their movement (physics) would walk them back to their tile.
+	for placed: Array in [[nearest, Vector3.ZERO], [second, Vector3(1.2, 0.0, 0.0)], [beyond, Vector3(0.0, 0.0, -3.0)]]:
+		(placed[0] as ReplicatedActor3D).set_physics_process(false)
+		(placed[0] as ReplicatedActor3D).position = placed[1]
+	for _i: int in RLHeadRig.LOD_CHECK_FRAMES * 3:
+		await process_frame
+	var rigs: Array[RLHeadRig] = [nearest.rl_head(), second.rl_head(), beyond.rl_head()]
+	_expect(rigs.all(func(rig: RLHeadRig) -> bool: return rig != null and rig.lod_band() == 0),
+		"three faces within 10 m show their first level")
+	if not rigs.all(func(rig: RLHeadRig) -> bool: return rig != null):
+		for actor: ReplicatedActor3D in [nearest, second, beyond]:
+			actor.free()
+		camera.free()
+		RLHeadRig.max_expressive = RLHeadRig.MAX_EXPRESSIVE
+		return
+	_expect(rigs[0].draws_expressions() and not rigs[1].draws_expressions() and not rigs[2].draws_expressions(),
+		"only the nearest face within %.0f m draws its expressions" % RLHeadRig.expressive_range)
+	_expect(RLHeadRig.shape_index(_shown(rigs[0])[0], "ex_blink_l") >= 0 and rigs[0].expression().is_processing(),
+		"the expressive face keeps its expression shapes and runs its expression")
+	for index: int in [1, 2]:
+		var head := _shown(rigs[index])[0]
+		var mouth := false
+		for surface: int in head.mesh.get_surface_count():
+			var material := head.mesh.surface_get_material(surface)
+			mouth = mouth or (material != null and material.resource_name == "rl_mouth")
+		_expect(rigs[index].is_baked(head) and head.mesh.get_blend_shape_count() == 0 and not mouth
+			and not rigs[index].expression().is_processing(),
+			"face %d draws a still first level without its mouth, its expression resting" % index)
+	for rig: RLHeadRig in rigs:
+		for node: MeshInstance3D in _shown(rig):
+			if str(node.name).begins_with("RLHair"):
+				_expect(rig.is_baked(node) and node.mesh.get_blend_shape_count() == 0,
+					"%s: the hair is drawn still" % node.name)
+	# The camera off to the side of the second face, past the ranking margin:
+	# it takes the expressive place.
+	camera.position = Vector3(3.0, 1.6, 1.0)
+	for _i: int in RLHeadRig.LOD_CHECK_FRAMES * 3:
+		await process_frame
+	var head_two := _shown(rigs[1])[0]
+	_expect(rigs[1].draws_expressions() and not rigs[0].draws_expressions()
+		and RLHeadRig.shape_index(head_two, "ex_blink_l") >= 0 and rigs[1].expression().is_processing(),
+		"coming close, the second face draws its expressions and the first goes still")
+	_expect(_shown(rigs[0])[0].mesh.get_blend_shape_count() == 0 and not rigs[0].expression().is_processing(),
+		"the face left behind draws still")
+	# A held portrait pose keeps its expressions whatever the ranking.
+	beyond.hold_portrait_pose(self)
+	_expect(rigs[2].draws_expressions() and RLHeadRig.shape_index(_shown(rigs[2])[0], "ex_blink_l") >= 0,
+		"a held portrait pose draws its expression shapes")
+	beyond.release_portrait_pose(self)
+	for _i: int in RLHeadRig.LOD_CHECK_FRAMES * 2:
+		await process_frame
+	_expect(not rigs[2].draws_expressions() and _shown(rigs[2])[0].mesh.get_blend_shape_count() == 0,
+		"released, it is ranked still again")
+	RLHeadRig.max_expressive = RLHeadRig.MAX_EXPRESSIVE
+	camera.free()
+	for _i: int in RLHeadRig.LOD_CHECK_FRAMES * 2:
+		await process_frame
+	_expect(rigs.all(func(rig: RLHeadRig) -> bool: return rig.draws_expressions()),
+		"without a camera every face keeps its expressions")
+	for actor: ReplicatedActor3D in [nearest, second, beyond]:
+		actor.free()
+	await process_frame
+	await process_frame
+
+
+## Material values: per-face material copies instead of instance uniforms.
+func _check_material_values() -> void:
+	BAKE.synchronous = true
+	OS.set_environment("RL_HEAD_VALUES", "material")
+	RLHeadLibrary.reload_values_switch()
+	_expect(RLHeadLibrary.material_values(), "RL_HEAD_VALUES=material switches material values on")
+	var mira := PRESETS.appearance("Mira")
+	var one := _spawn("female", mira)
+	var two := _spawn("female", mira)
+	var other := _spawn("female", mira.merged({"skin": (int(mira.get("skin", 0)) + 3) % 10}, true))
+	await process_frame
+	var rig := one.rl_head()
+	_expect(rig != null and two.rl_head() != null and other.rl_head() != null, "three female RL heads")
+	if rig != null:
+		var skin_seen := false
+		for node: MeshInstance3D in rig.all_meshes():
+			for surface: int in node.mesh.get_surface_count():
+				var imported := node.mesh.surface_get_material(surface)
+				var drawn := node.get_surface_override_material(surface) as ShaderMaterial
+				if imported == null or imported.resource_name == RLHeadLibrary.BODY_PATCH_MATERIAL or drawn == null:
+					continue
+				var shared := RLHeadLibrary.material(imported.resource_name, "female", rig.appearance.hair
+					if RLHeadRig.HAIR_NODE_NAME in str(node.get_path()) else "", rig.quality)
+				if not shared.shader.code.contains(RLHeadLibrary.INSTANCE_INCLUDE):
+					_expect(drawn == shared, "%s keeps its shared material (no values included)" % imported.resource_name)
+					continue
+				# Every surface whose shader includes the values, read or not,
+				# draws an RL_MATERIAL_VALUES compile, and so does the shared
+				# material it is copied from: no instance uniform is declared
+				# on any RL mesh instance, not even before its face's values.
+				_expect(drawn.shader.code.contains("#define RL_MATERIAL_VALUES")
+					and shared.shader.code.contains("#define RL_MATERIAL_VALUES"),
+					"%s draws an RL_MATERIAL_VALUES compile" % imported.resource_name)
+				if RLHeadLibrary.shader_values(shared).is_empty():
+					_expect(drawn == shared and RLHeadLibrary.face_material(shared, {}) == shared,
+						"%s reads no values: every face draws the shared material" % imported.resource_name)
+					continue
+				_expect(drawn != shared, "%s draws a per-face copy" % imported.resource_name)
+				if imported.resource_name == "rl_skin":
+					skin_seen = true
+					_expect(drawn.get_shader_parameter("skin_color") == rig.appearance.skin,
+						"the skin copy carries the face's skin colour")
+					_expect(drawn.get_shader_parameter("albedo_texture") == shared.get_shader_parameter("albedo_texture"),
+						"the skin copy keeps the shared maps")
+		_expect(skin_seen, "the head's skin draws a per-face copy")
+		var shown_one := _shown(rig)
+		var shown_two := _shown(two.rl_head())
+		_expect(not shown_one.is_empty() and shown_one[0].get_surface_override_material(0) == shown_two[0].get_surface_override_material(0),
+			"identical faces share their material copies")
+		_expect(_shown(other.rl_head())[0].get_surface_override_material(0) != shown_one[0].get_surface_override_material(0),
+			"another skin colour draws another copy")
+	for actor: ReplicatedActor3D in [one, two, other]:
+		actor.free()
+	OS.set_environment("RL_HEAD_VALUES", "")
+	RLHeadLibrary.reload_values_switch()
+	await process_frame
+	await process_frame
 
 
 func _check_async_and_switch() -> void:

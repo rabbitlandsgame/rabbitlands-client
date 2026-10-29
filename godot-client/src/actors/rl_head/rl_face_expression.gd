@@ -376,6 +376,12 @@ func _write() -> void:
 
 
 func _write_look() -> void:
+	if RLHeadLibrary.material_values():
+		# The look is a material value there (per-face eye material).
+		var rig := get_parent() as RLHeadRig
+		if rig != null:
+			rig.set_eye_look(_look)
+		return
 	for mesh_node: MeshInstance3D in _targets:
 		if is_instance_valid(mesh_node) and mesh_node.name.begins_with("RLHead"):
 			mesh_node.set_instance_shader_parameter("eye_look", _look)

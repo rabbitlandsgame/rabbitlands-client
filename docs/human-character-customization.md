@@ -266,10 +266,10 @@ game assets, attachment sockets and grip rules. The pose menu includes both
 single-cut directions, the original Flurry, and the weapon-ready pose.
 Changing equipment replays the selected pose, so the normal armed cuts can be
 compared with the unarmed jabs. Use **Pause** to hold a pose for inspection.
-When the local MPFB study is available, **Model → Current / MPFB prototype**
-compares the two models with the same appearance, equipment and pose. The
-prototype uses High graphics. Choosing Low or Medium returns to the Current
-model while keeping those choices.
+**High head → RL head / Classic head** chooses what High graphics draws: the
+RL head (the game's High Human head) or the previous classic High head, for
+comparison with the same appearance, equipment and pose. Low and Medium draw
+the lightweight Human head with either.
 **Save preview** stores choices separately for
 each body on this computer. **Screenshot** saves an image in the preview's
 private user-data folder; **Open saves** opens that folder. Closing the window
@@ -288,16 +288,9 @@ view uses soft shadows and the existing High scene occlusion settings;
 `RL_HUMAN_PORTRAIT_LIGHTING=flat` keeps a plain diagnostic light. Portraits are
 rendered from the models, with no painted retouching of the captured images.
 
-The optional `test-mpfb-prototype.bat` opens the same workshop directly in
-MPFB High mode. Use the Rowan and Mira presets for the concept study looks.
-The locally authored studies use new heads and upper necks on the
-accepted body and hands, preserving current motion and equipment. They are
-review candidates, outside the production registry and package. Low/Medium
-continue using the current models. The High study adds concept-led curved hair,
-painted face detail, wider eye openings and refined lower-face proportions.
-Its ten face controls reuse the same topology per sex. Brow color follows the
-hair palette, and skin-bound stubble uses coverage packed into the existing
-head texture. Other hair choices retain their existing sources. Facial
-expression and blinking targets have not yet been authored.
-See the [MPFB authoring and measured budget](../eloria-assets/tools/mpfb/README.md)
-for reproducible sources, validation scope, limitations and performance results.
+The earlier MPFB High study (new heads and upper necks on the accepted body)
+is no longer drawn by the game: the RL head replaced it, and its runtime and
+`test-mpfb-prototype.bat` were removed (owner decision D2). See the
+[MPFB authoring notes](../eloria-assets/tools/mpfb/README.md) for its sources,
+and `godot-client/docs/rl-head-prototype.md` and `eloria-assets/tools/rl_heads/`
+for the RL head.

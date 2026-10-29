@@ -162,14 +162,6 @@ static func face_frame(root: Node3D, skeleton: Skeleton3D) -> Dictionary:
 		"eye_left": (side_low[0] + side_high[0]) * 0.5,
 		"eye_right": (side_low[1] + side_high[1]) * 0.5,
 		"scale": size}
-	# The opt-in MPFB study has measured landmarks in the same canonical
-	# Head rest frame. Production Humans retain their exact original frame.
-	var authored: Dictionary = root.get_meta("mpfb_face_frame", {})
-	for key: String in ["eye_y", "mouth_y", "eye_z", "scale"]:
-		if authored.has(key): result[key] = float(authored[key])
-	for key: String in ["eye_left", "eye_right"]:
-		var values: Array = authored.get(key, [])
-		if values.size() == 3: result[key] = Vector3(float(values[0]), float(values[1]), float(values[2]))
 	return result
 
 ## Bounded shared rest field for the front face and coherent eye/lid opening.

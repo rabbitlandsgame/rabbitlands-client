@@ -28,6 +28,11 @@ func _init() -> void:
 
 
 func _run() -> void:
+	# The rig's live contract: identity, grooming and expression weights as
+	# written on the meshes. Still bakes fold identity and grooming into the
+	# mesh instead (test_rl_head_identity_bake.gd checks them).
+	OS.set_environment("RL_HEAD_STILL", "0")
+	RLHeadIdentityBake.reload_switch()
 	_stage = Node3D.new()
 	root.add_child(_stage)
 	_check_assets()
@@ -939,7 +944,7 @@ func _check_lod_selection() -> void:
 				if ((levels[index] as Array)[0] as MeshInstance3D).visible:
 					return index
 			return -1
-		var bands: Array = RLHeadRig.LOD_DISTANCES[quality]
+		var bands: Array = RLHeadRig.lod_edges(quality)
 		if bands.is_empty():
 			_expect(visible_at.call(2.0) == 0 and visible_at.call(60.0) == 0,
 				"%s draws its one level at every distance" % name)

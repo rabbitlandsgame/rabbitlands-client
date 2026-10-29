@@ -87,11 +87,59 @@ static var _materials: Dictionary = {}
 static var _manifest: Variant = null
 static var _warned: Dictionary = {}
 static var _users := 0
+## How long the caches outlive their last RL head (see release). A quality
+## switch down and back up, or a session's next Human, within it costs no
+## reading or parsing; released after it, as develop's High portrait releases
+## its own with its last user.
+const RETAIN_SECONDS := 120.0
+## RETAIN_SECONDS, lowered by tests (0 releases at once).
+static var retain_seconds := RETAIN_SECONDS
+## Bumped by every acquire, release and clear: a pending timed release only
+## acts if nothing happened since it was scheduled.
+static var _release_generation := 0
+## Global GLB path -> {"holder", "task"}: prewarm parses still on a worker.
+static var _warming: Dictionary = {}
+## Global GLB paths waiting for their prewarm parse.
+static var _warm_queue: PackedStringArray = PackedStringArray()
+## Global GLB paths a prewarm published to GlbSceneCache (let go with the rest).
+static var _warmed: Dictionary = {}
+static var _warm_polling := false
+## A full prewarm asked for the renderer's pipelines too (see _warm_pipelines).
+static var _pipelines_wanted := false
+static var _pipelines_done := false
+## The out-of-sight node holding one instance of every RL surface, while it is up.
+static var _pipeline_holder: Node3D = null
+## Frames the pipeline holder stays in the scene.
+const PIPELINE_WARM_FRAMES := 30
+## Map files a full prewarm queued; the per-frame poll loads one a frame.
+static var _texture_queue: PackedStringArray = PackedStringArray()
+
+## The per-actor values (rl_head_instance.gdshaderinc) each RL shader reads, by
+## shader: what a per-face material copy of it carries (see face_material).
+const SHADER_VALUES := {
+	"rl_skin": ["skin_color", "lip_tint", "brow_color", "hair_color", "freckles", "liner", "stubble",
+		"hairline", "brow_style", "brow_thickness", "liner_wing"],
+	"rl_eye": ["eye_color", "eye_look"],
+	"rl_lash": ["hair_color"],
+	"rl_brow": ["brow_color"],
+	"rl_hair": ["hair_color", "hair_detail"],
+	"rl_cornea": [],
+	"rl_mouth": [],
+}
+const INSTANCE_INCLUDE := "#include \"res://src/actors/rl_head/rl_head_instance.gdshaderinc\""
+const MATERIAL_VALUES_DEFINE := "#define RL_MATERIAL_VALUES\n"
+## -1 unread, 0 instance uniforms, 1 material values (see material_values).
+static var _values_switch := -1
+## Shared shader -> its RL_MATERIAL_VALUES compile.
+static var _value_shaders: Dictionary = {}
+## Shared material id + values -> WeakRef of its per-face copy.
+static var _face_materials: Dictionary = {}
 
 
 ## Drops every cached piece, texture and material, for a reload in the lab
 ## and at the end of a session (ReplicatedActor3D.clear_wardrobe_texture_cache).
 static func clear() -> void:
+	_release_generation += 1
 	release_unused()
 	_warned.clear()
 
@@ -99,13 +147,237 @@ static func clear() -> void:
 ## One more RL head drawn (RLHeadRig.attach).
 static func acquire() -> void:
 	_users += 1
+	_release_generation += 1
 
 
-## One RL head fewer (an RLHeadRig deleted); the last one releases the caches.
+## One RL head fewer (an RLHeadRig deleted). When the last one goes the caches
+## stay for RETAIN_SECONDS (retain_seconds) and are released then if no RL
+## head took them again meanwhile: a quality switch back up to High, the next
+## creation preview or the next Human to arrive reuses the parsed heads, hair,
+## beards, maps and materials instead of reading them again.
 static func release() -> void:
 	_users = maxi(0, _users - 1)
-	if _users == 0:
+	if _users > 0:
+		return
+	_release_generation += 1
+	var tree := Engine.get_main_loop() as SceneTree
+	if retain_seconds <= 0.0 or tree == null:
 		release_unused()
+		return
+	var generation := _release_generation
+	tree.create_timer(retain_seconds, true, false, true).timeout.connect(func() -> void:
+		if generation == _release_generation and _users == 0:
+			release_unused())
+
+
+## Whether caches no RL head uses are being kept for RETAIN_SECONDS.
+static func retaining() -> bool:
+	return _users == 0 and is_loaded()
+
+
+## Starts the timed release (see release) when no RL head uses the caches, for
+## caches filled by `prewarm` that no head took (the quality left High).
+static func release_if_unused() -> void:
+	if _users == 0 and is_loaded():
+		_users = 1
+		release()
+
+
+## Parses RL GLBs on the WorkerThreadPool ahead of their use (by default every
+## one a High Human can draw: both head modules, every hairstyle and beard),
+## each file its own task, each published to GlbSceneCache on the main thread
+## once its task has finished (a per-frame poll, and every `head`, `beard` and
+## `hair_info` lookup). The main thread never waits for a task (GlbSceneCache
+## "Threads": a parse can need the main thread): a file it needs before its
+## task has finished is parsed there as before, and the task's copy is dropped
+## when it arrives. The RL files name no texture by URI, so a worker parse
+## reads no texture back. Called when the graphics quality is or becomes High
+## (ReplicatedActor3D.prewarm_rl_heads): before the actors switch up, so the
+## files the first High Humans need are parsed on the worker while this thread
+## parses the first of them. A client closing waits for the running parse
+## (cancel_warm, then `warming` until false): a process that quits while a
+## worker parses can hang.
+static func prewarm(paths: PackedStringArray = PackedStringArray()) -> void:
+	if OS.get_thread_caller_id() != OS.get_main_thread_id() or not prewarm_enabled():
+		return
+	if paths.is_empty():
+		paths = warm_paths()
+	if not GlbSceneCache.GltfQuantization.ensure_registered():
+		return
+	var started := false
+	for path: String in paths:
+		var key := ProjectSettings.globalize_path(path)
+		if _warming.has(key) or _warm_queue.has(key) or not FileAccess.file_exists(key) \
+				or GlbSceneCache.missing(PackedStringArray([key])).is_empty():
+			continue
+		_warm_queue.append(key)
+		started = true
+	_start_next_warm()
+	if paths == warm_paths():
+		started = _queue_textures() or started
+		if _pipeline_holder == null and not _pipelines_done:
+			_pipelines_wanted = true
+			started = true
+	if started and not _warm_polling:
+		var tree := Engine.get_main_loop() as SceneTree
+		if tree != null:
+			_warm_polling = true
+			tree.process_frame.connect(_poll_warm)
+
+
+## Starts the next queued parse when none is running: one worker parse at a
+## time, beside whatever the main thread parses (several GLTFDocument parses
+## on workers at once crashed the headless renderer).
+static func _start_next_warm() -> void:
+	while _warming.is_empty() and not _warm_queue.is_empty():
+		var key := _warm_queue[0]
+		_warm_queue.remove_at(0)
+		if GlbSceneCache.missing(PackedStringArray([key])).is_empty():
+			continue
+		# The task writes only its own holder, read here once it has finished.
+		var holder := {}
+		_warming[key] = {"holder": holder, "task": WorkerThreadPool.add_task(func() -> void:
+			holder["scenes"] = GlbSceneCache.prepare(PackedStringArray([key])), false, "RL head GLB parse")}
+
+
+## Whether prewarm works ahead (RL_HEAD_PREWARM=0 turns it off, for A/B checks).
+static func prewarm_enabled() -> bool:
+	return OS.get_environment("RL_HEAD_PREWARM").strip_edges() != "0"
+
+
+## Every RL GLB a High Human can draw: both heads, every hairstyle and beard.
+static func warm_paths() -> PackedStringArray:
+	var paths := PackedStringArray()
+	for sex: String in RLHeadAppearance.SEXES:
+		paths.append(head_path(sex))
+	for style: String in hair_styles():
+		paths.append(hair_path(style))
+	for style: String in _glb_names(BEARD_DIR):
+		paths.append(beard_path(style))
+	return paths
+
+
+## Publishes every finished prewarm parse (main thread only). A file the main
+## thread parsed meanwhile keeps its own copy.
+static func collect_warm() -> void:
+	if (_warming.is_empty() and _warm_queue.is_empty()) or OS.get_thread_caller_id() != OS.get_main_thread_id():
+		return
+	for key: Variant in _warming.keys():
+		var entry: Dictionary = _warming[key]
+		if not WorkerThreadPool.is_task_completed(int(entry["task"])):
+			continue
+		WorkerThreadPool.wait_for_task_completion(int(entry["task"]))
+		_warming.erase(key)
+		var scenes: Dictionary = (entry["holder"] as Dictionary).get("scenes", {})
+		if not scenes.is_empty():
+			GlbSceneCache.install_prepared(scenes)
+			_warmed[str(key)] = true
+	_start_next_warm()
+
+
+## Stops the queued prewarm work (the client closing): the parse already
+## running finishes on its worker and is published when it arrives; `warming`
+## stays true until then. Never waits here.
+static func cancel_warm() -> void:
+	_warm_queue.clear()
+	_texture_queue.clear()
+	_pipelines_wanted = false
+	if is_instance_valid(_pipeline_holder):
+		_pipeline_holder.queue_free()
+	_pipeline_holder = null
+
+
+## Whether a prewarm is still at work: parses, queued maps, the pipeline warm-up.
+static func warming() -> bool:
+	return not _warming.is_empty() or not _warm_queue.is_empty() or not _texture_queue.is_empty() or _pipelines_wanted \
+		or _pipeline_holder != null
+
+
+## Forward+ compiles a surface's render pipelines when the surface first enters
+## a scene, on worker threads, and the first frame that draws it waits for
+## them (2.8 s for the first RL head in a fresh session, against 0.1 s for
+## develop's classic head: 49 surface pipelines). Once a full prewarm has
+## parsed every file, one instance of every RL surface - each head level, beard
+## and hairstyle, skinned as the game draws them, with the shared materials
+## the game gives them at High - stays out of sight for PIPELINE_WARM_FRAMES,
+## so those pipelines are compiled before the first RL head is shown. The
+## Compatibility renderer compiles at first draw instead and skips this.
+static func _warm_pipelines() -> void:
+	var tree := Engine.get_main_loop() as SceneTree
+	if tree == null or tree.root == null \
+			or RenderingServer.get_current_rendering_method() == "gl_compatibility":
+		_pipelines_done = true
+		return
+	var holder := Node3D.new()
+	holder.name = "RLHeadPipelineWarmup"
+	# Far below the world, in no camera's sight.
+	holder.position = Vector3(0.0, -10000.0, 0.0)
+	var quality := ActorRenderQuality.Quality.HIGH
+	for path: String in warm_paths():
+		var instance := GlbSceneCache.instantiate(ProjectSettings.globalize_path(path))
+		if instance == null:
+			continue
+		var sex := ""
+		var style := ""
+		if path.begins_with(HAIR_DIR) or path.begins_with(BEARD_DIR):
+			style = path.get_file().get_basename()
+			sex = "female" if style.begins_with("mira") else "male"
+		else:
+			sex = path.get_file().get_basename().trim_prefix("rl_head_")
+		for node: Node in instance.find_children("*", "MeshInstance3D", true, false):
+			var mesh_node := node as MeshInstance3D
+			if mesh_node.mesh == null:
+				continue
+			for surface: int in mesh_node.mesh.get_surface_count():
+				var imported := mesh_node.mesh.surface_get_material(surface)
+				var shared := material(imported.resource_name if imported != null else "", sex, style, quality)
+				if shared != null:
+					mesh_node.set_surface_override_material(surface, shared)
+		holder.add_child(instance)
+	tree.root.add_child(holder)
+	_pipeline_holder = holder
+
+
+## Queues every map under TEXTURE_DIR not loaded yet (an export lists them by
+## their .import files); true when any was queued. The maps are loaded on the
+## main thread, one a frame (`_poll_warm`): a texture load needs the main
+## thread, so waiting for one on ResourceLoader's threads from here can hang.
+static func _queue_textures() -> bool:
+	if not DirAccess.dir_exists_absolute(TEXTURE_DIR):
+		return false
+	for listed: String in DirAccess.get_files_at(TEXTURE_DIR):
+		var file := listed.trim_suffix(".import").trim_suffix(".remap")
+		if file.get_extension().to_lower() != "png" or _texture_queue.has(file) \
+				or _textures.has(TEXTURE_DIR + file) or not ResourceLoader.exists(TEXTURE_DIR + file):
+			continue
+		_texture_queue.append(file)
+	return not _texture_queue.is_empty()
+
+
+static func _poll_warm() -> void:
+	collect_warm()
+	if not _texture_queue.is_empty():
+		texture(_texture_queue[0])
+		_texture_queue.remove_at(0)
+		return
+	if _warming.is_empty() and _warm_queue.is_empty() and _pipelines_wanted:
+		_pipelines_wanted = false
+		_warm_pipelines()
+	if _pipeline_holder != null:
+		var frames := int(_pipeline_holder.get_meta(&"frames", 0)) + 1
+		_pipeline_holder.set_meta(&"frames", frames)
+		if frames >= PIPELINE_WARM_FRAMES:
+			_pipeline_holder.queue_free()
+			_pipeline_holder = null
+			_pipelines_done = true
+		return
+	if _warming.is_empty():
+		var tree := Engine.get_main_loop() as SceneTree
+		if not _warm_queue.is_empty():
+			return
+		if tree != null and tree.process_frame.is_connected(_poll_warm):
+			tree.process_frame.disconnect(_poll_warm)
+		_warm_polling = false
 
 
 ## How many RL heads hold the caches.
@@ -113,10 +385,11 @@ static func users() -> int:
 	return _users
 
 
-## Whether anything is cached (heads, beards, textures, materials).
+## Whether anything is cached (heads, beards, textures, materials, prewarmed files and maps).
 static func is_loaded() -> bool:
 	return not (_heads.is_empty() and _beards.is_empty() and _textures.is_empty()
-		and _materials.is_empty() and _hair_info.is_empty())
+		and _materials.is_empty() and _hair_info.is_empty() and _warmed.is_empty()
+		and _texture_queue.is_empty())
 
 
 ## Drops every shared RL resource; the next RL head loads them again.
@@ -129,14 +402,25 @@ static func release_unused() -> void:
 		paths.append(beard_path(str(style)))
 	for style: Variant in _hair_info.keys():
 		paths.append(hair_path(str(style)))
+	for key: Variant in _warmed.keys():
+		paths.append(ProjectSettings.localize_path(str(key)))
+	_warmed.clear()
 	for path: Variant in paths:
 		_forget_scene(str(path))
 	_documents.clear()
 	_heads.clear()
 	_beards.clear()
 	_hair_info.clear()
+	if is_instance_valid(_pipeline_holder):
+		_pipeline_holder.queue_free()
+	_pipeline_holder = null
+	_pipelines_wanted = false
+	_pipelines_done = false
 	_textures.clear()
+	_texture_queue.clear()
+	_warm_queue.clear()
 	_materials.clear()
+	_face_materials.clear()
 	_manifest = null
 	RLHeadBodyCut.clear()
 	RLHeadwearFit.clear_caches()
@@ -262,6 +546,7 @@ static func asset_extras(path: String, key: String) -> Dictionary:
 static func head(sex: String) -> Dictionary:
 	if _heads.has(sex):
 		return _heads[sex] as Dictionary
+	collect_warm()
 	var path := head_path(sex)
 	var info := {}
 	var lods := _skinned_lods(path, "rl_head") if glb_exists(path) else []
@@ -289,6 +574,7 @@ static func head(sex: String) -> Dictionary:
 ## A beard's pieces by LOD, or [] when there is no such file.
 static func beard(style: String) -> Array:
 	if not _beards.has(style):
+		collect_warm()
 		var path := beard_path(style)
 		var lods: Array = []
 		if glb_exists(path):
@@ -300,6 +586,7 @@ static func beard(style: String) -> Array:
 ## The hairstyle's `rlHair` extras, or {} for a missing file (logged once).
 static func hair_info(style: String) -> Dictionary:
 	if not _hair_info.has(style):
+		collect_warm()
 		var path := hair_path(style)
 		var info := {}
 		if glb_exists(path):
@@ -573,7 +860,11 @@ static func slot_texture(keys: Array[String], slot: String, fallback: String, qu
 ## The shared ShaderMaterial for an imported material name, or null for a name
 ## the contract does not know (that surface keeps its imported material).
 ## Shared by every actor with the same head, style and quality: per-actor
-## colours and amounts are instance uniforms (RLHeadRig.apply_appearance).
+## colours and amounts are instance uniforms (RLHeadRig.apply_appearance), or,
+## where material_values, material uniforms on per-face copies of it
+## (face_material); its shader is then the RL_MATERIAL_VALUES compile too, so
+## no RL surface ever declares an instance uniform, not even for the moment
+## between a mesh node's creation and its face's values.
 static func material(material_name: String, sex: String, style: String, quality: int) -> ShaderMaterial:
 	var kind := str(MATERIAL_SHADERS.get(material_name, ""))
 	if kind.is_empty():
@@ -582,7 +873,7 @@ static func material(material_name: String, sex: String, style: String, quality:
 	if _materials.has(key):
 		return _materials[key] as ShaderMaterial
 	var result := ShaderMaterial.new()
-	result.shader = SHADERS[kind]
+	result.shader = _values_shader(SHADERS[kind]) if material_values() else SHADERS[kind]
 	if (material_name == "rl_brow" and not DRAW_BROW_CARDS) \
 			or (material_name == "rl_cornea" and quality < CORNEA_QUALITY):
 		result.shader = SHADERS["rl_hidden"]
@@ -623,6 +914,101 @@ static func material(material_name: String, sex: String, style: String, quality:
 static func _set_texture(target: ShaderMaterial, uniform_name: String, flag: String, value: Texture2D) -> void:
 	target.set_shader_parameter(uniform_name, value)
 	target.set_shader_parameter(flag, value != null)
+
+
+## Whether the per-actor values are material uniforms on per-face copies of
+## the shared materials (face_material) instead of instance uniforms on the
+## shared materials themselves: in the Compatibility renderer, whose global
+## instance-uniform buffer (4096 items, 16 for every mesh instance with any)
+## a crowd of RL heads ran out of between 40 and 160 Humans. RL_HEAD_VALUES
+## (`material` or `instance`) forces either, for A/B checks. Read once.
+static func material_values() -> bool:
+	if _values_switch < 0:
+		var value := OS.get_environment("RL_HEAD_VALUES").strip_edges().to_lower()
+		if value == "material":
+			_values_switch = 1
+		elif value == "instance":
+			_values_switch = 0
+		else:
+			_values_switch = 1 if RenderingServer.get_current_rendering_method() == "gl_compatibility" else 0
+	return _values_switch == 1
+
+
+## Reads RL_HEAD_VALUES again on the next check (tests switch it); the shared
+## materials made for the other mode are made again.
+static func reload_values_switch() -> void:
+	_values_switch = -1
+	_materials.clear()
+	_face_materials.clear()
+
+
+## The values `shared`'s shader reads (SHADER_VALUES), [] for one with none.
+static func shader_values(shared: ShaderMaterial) -> Array:
+	if shared == null or shared.shader == null:
+		return []
+	for kind: String in SHADER_VALUES:
+		var shader: Shader = SHADERS.get(kind)
+		if shared.shader == shader or shared.shader == _value_shaders.get(shader.get_instance_id()):
+			return SHADER_VALUES[kind] as Array
+	return []
+
+
+## The material that draws `shared` with `values` (uniform name -> value; only
+## the shader's own values are read) as material uniforms: a copy of `shared`
+## compiled with RL_MATERIAL_VALUES, shared by every surface asking for the
+## same material and values while any of them draws it (a weak cache). A
+## material whose shader includes no values (rl_hidden) is returned as it is.
+static func face_material(shared: ShaderMaterial, values: Dictionary) -> ShaderMaterial:
+	if shared == null or shared.shader == null or not shared.shader.code.contains(INSTANCE_INCLUDE):
+		# A shader without the per-actor values (rl_hidden) draws as it is.
+		return shared
+	# A shader that includes them but reads none (rl_mouth, rl_cornea) still
+	# declares them: compiled with RL_MATERIAL_VALUES, every face draws one
+	# material (the shared one, once it is that compile).
+	var names := shader_values(shared)
+	if names.is_empty() and shared.shader.code.contains(MATERIAL_VALUES_DEFINE):
+		return shared
+	var parts := PackedStringArray([str(shared.get_instance_id())])
+	for name: String in names:
+		parts.append(var_to_str(values.get(name)))
+	var key := "|".join(parts)
+	var ref := _face_materials.get(key) as WeakRef
+	var found := ref.get_ref() as ShaderMaterial if ref != null else null
+	if found != null:
+		return found
+	var copy := ShaderMaterial.new()
+	copy.shader = _values_shader(shared.shader)
+	copy.resource_name = shared.resource_name
+	for uniform: Dictionary in shared.shader.get_shader_uniform_list():
+		var value: Variant = shared.get_shader_parameter(str(uniform["name"]))
+		if value != null:
+			copy.set_shader_parameter(str(uniform["name"]), value)
+	for name: String in names:
+		if values.has(name):
+			copy.set_shader_parameter(name, values[name])
+	if _face_materials.size() > 4096:
+		for stale: Variant in _face_materials.keys():
+			if (_face_materials[stale] as WeakRef).get_ref() == null:
+				_face_materials.erase(stale)
+	_face_materials[key] = weakref(copy)
+	return copy
+
+
+## `shader` compiled with RL_MATERIAL_VALUES defined (its values as material
+## uniforms), made once per shader; one already so compiled, or without the
+## values, is itself.
+static func _values_shader(shader: Shader) -> Shader:
+	var cached := _value_shaders.get(shader.get_instance_id()) as Shader
+	if cached != null:
+		return cached
+	var code := shader.code
+	var at := code.find(INSTANCE_INCLUDE)
+	var result := shader
+	if at >= 0 and not code.contains(MATERIAL_VALUES_DEFINE):
+		result = Shader.new()
+		result.code = code.insert(at, MATERIAL_VALUES_DEFINE)
+	_value_shaders[shader.get_instance_id()] = result
+	return result
 
 
 static func _configure_skin(target: ShaderMaterial, material_name: String, sex: String, quality: int) -> void:
