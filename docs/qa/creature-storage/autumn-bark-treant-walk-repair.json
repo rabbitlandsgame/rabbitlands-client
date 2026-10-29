@@ -1,0 +1,279 @@
+{
+  "schema": 1,
+  "actor": "autumn_bark_treant",
+  "status": "NEW_UNAPPROVED_WALK_ONLY_REVIEW_DRAFT",
+  "installed": false,
+  "recipe": "eloria-assets/tools/edit_creature_arm_carriage.py",
+  "parameters": {
+    "clip": "Walk",
+    "upper": 53,
+    "child": 52,
+    "toward_rest": 0.55,
+    "maximum_degrees": 25.0
+  },
+  "baseline_sha256": "eb7575c7bab1c7d36256f70f0fb47f77f94d5e38ab326bfd2fa8f7a190f228eb",
+  "candidate_sha256": "c0d3791be5d2f318cfaf732cc3f909a3ee5268e41b8cad9c1ae53a6315e15a32",
+  "baseline_bytes": 1927172,
+  "candidate_bytes": 1927176,
+  "concept": "Lower the conspicuously raised right upper arm into more compact woody Walk carriage. Preserve the already lowered opposite arm, torso motion, hand articulation, foot timing and stride. This is a stylistic proposal, not a source-fidelity optimization.",
+  "changed_rotation_curves": 1,
+  "existing_keys_modified": 44,
+  "added_keys": 0,
+  "added_bones": 0,
+  "original_nodes": 82,
+  "palette_bones": 80,
+  "influence_slots": 8,
+  "corrective_targets": 0,
+  "all_other_six_actions_and_other_Walk_curve_arrays_exact": true,
+  "all_static_attributes": [
+    "JOINTS_0",
+    "JOINTS_1",
+    "NORMAL",
+    "POSITION",
+    "TEXCOORD_0",
+    "WEIGHTS_0",
+    "WEIGHTS_1"
+  ],
+  "original_geometry_skin_uv_indices_material_images_rest_and_logical_bounds_exact": true,
+  "actual_client_preservation": {
+    "baseline_sha256": "eb7575c7bab1c7d36256f70f0fb47f77f94d5e38ab326bfd2fa8f7a190f228eb",
+    "candidate_sha256": "c0d3791be5d2f318cfaf732cc3f909a3ee5268e41b8cad9c1ae53a6315e15a32",
+    "states": 380,
+    "categories": {
+      "default": 1,
+      "clip": 77,
+      "held_end": 7,
+      "switch": 84,
+      "switch_stepped": 210,
+      "RESET": 1
+    },
+    "outside_vertices": 4541,
+    "outside_position_and_normal_vector_difference": 0.0,
+    "physical_foot_vertices": 819,
+    "all_foot_position_difference": 0.0,
+    "all_leg_bone_matrix_difference": 0.0,
+    "all_non_arm_bone_matrix_difference": 0.0,
+    "unrelated_full_surface_states_exact": 74,
+    "placement": {
+      "actor_global_equal": true,
+      "model_global_equal": true,
+      "selection_equal": true
+    },
+    "scope": "Actual merged raw client; originaldefault/RESET, all7nativeclips, heldends andboth firsttick/60Hzsteppedcrossfades. OnlyWalk arm descendants intentionallychange; actualquantized footfields remainexact."
+  },
+  "actual_client_difference_summary": {
+    "all": {
+      "states": 380,
+      "maximum_position_mm": 787.2173589394714,
+      "maximum_normal_degrees": 24.999729708510174,
+      "worst_maximum_position_mm": {
+        "label": "Walk@0.61729",
+        "source_vertex": 1465
+      },
+      "worst_maximum_normal_degrees": {
+        "label": "Walk@0.49913",
+        "source_vertex": 440
+      },
+      "rms_position_mm": 54.18116249405862,
+      "rms_normal_degrees": 2.085949582858002
+    },
+    "default": {
+      "states": 1,
+      "maximum_position_mm": 0.0,
+      "maximum_normal_degrees": 0.0,
+      "worst_maximum_position_mm": {
+        "label": "configured-default",
+        "source_vertex": 0
+      },
+      "worst_maximum_normal_degrees": {
+        "label": "configured-default",
+        "source_vertex": 0
+      },
+      "rms_position_mm": 0.0,
+      "rms_normal_degrees": 0.0
+    },
+    "clip": {
+      "states": 77,
+      "maximum_position_mm": 787.2173589394714,
+      "maximum_normal_degrees": 24.999729708510174,
+      "worst_maximum_position_mm": {
+        "label": "Walk@0.61729",
+        "source_vertex": 1465
+      },
+      "worst_maximum_normal_degrees": {
+        "label": "Walk@0.49913",
+        "source_vertex": 440
+      },
+      "rms_position_mm": 64.68474496931684,
+      "rms_normal_degrees": 2.4983538986483502
+    },
+    "held_end": {
+      "states": 7,
+      "maximum_position_mm": 765.1199204226629,
+      "maximum_normal_degrees": 23.47449202089759,
+      "worst_maximum_position_mm": {
+        "label": "Walk@held-end+0.417",
+        "source_vertex": 3423
+      },
+      "worst_maximum_normal_degrees": {
+        "label": "Walk@held-end+0.417",
+        "source_vertex": 86
+      },
+      "rms_position_mm": 64.52492409985143,
+      "rms_normal_degrees": 2.4783936584603086
+    },
+    "switch": {
+      "states": 84,
+      "maximum_position_mm": 546.4143273029252,
+      "maximum_normal_degrees": 17.16716533901596,
+      "worst_maximum_position_mm": {
+        "label": "Walk->Death_A@0.071",
+        "source_vertex": 1465
+      },
+      "worst_maximum_normal_degrees": {
+        "label": "Walk->Death_A@0.071",
+        "source_vertex": 1686
+      },
+      "rms_position_mm": 35.122587542340135,
+      "rms_normal_degrees": 1.3331279023008376
+    },
+    "switch_stepped": {
+      "states": 210,
+      "maximum_position_mm": 729.9871232483283,
+      "maximum_normal_degrees": 22.981661945905312,
+      "worst_maximum_position_mm": {
+        "label": "Walk->Death_A@stepped-0.01666666666667",
+        "source_vertex": 1465
+      },
+      "worst_maximum_normal_degrees": {
+        "label": "Walk->Death_A@stepped-0.01666666666667",
+        "source_vertex": 769
+      },
+      "rms_position_mm": 56.085992333525034,
+      "rms_normal_degrees": 2.160852704056513
+    },
+    "RESET": {
+      "states": 1,
+      "maximum_position_mm": 0.0,
+      "maximum_normal_degrees": 0.0,
+      "worst_maximum_position_mm": {
+        "label": "RESET-after-switches",
+        "source_vertex": 0
+      },
+      "worst_maximum_normal_degrees": {
+        "label": "RESET-after-switches",
+        "source_vertex": 0
+      },
+      "rms_position_mm": 0.0,
+      "rms_normal_degrees": 0.0
+    }
+  },
+  "contact_canopy": {
+    "physical_foot_vertices": 819,
+    "positive_packed_weights_on_modified_arm_bones": 0.0,
+    "foot_normals_maximum_vector_difference_all380": 0.0,
+    "canopy_vertices_neutral_y_above_1_2": 1352,
+    "canopy_maximum_position_change_actual_m": 0.013405901973159058,
+    "scope": "Foot skin has no positive packed weight on any modified arm bone; unchanged remaining bone curves preserve foot movement for arbitrary playback. Canopy threshold is an explicit source-space field, not an anatomical volume certificate."
+  },
+  "independent_native": {
+    "candidate_sha256": "c0d3791be5d2f318cfaf732cc3f909a3ee5268e41b8cad9c1ae53a6315e15a32",
+    "poses": 61,
+    "physical_foot_vertices": 819,
+    "maximum_physical_foot_difference_source_units": 8.886119947416683e-17,
+    "metrics": {
+      "approved": {
+        "affected_edge_stretch_max_ratio": 3.320903598994129,
+        "shoulder_region_edge_stretch_max_ratio": 1.4330893739961887,
+        "minimum_y_native_model_units": -0.06565502861114178,
+        "maximum_horizontal_width_native_units": 2.590647312012405,
+        "minimum_hand_leg_vertex_clearance": 0.6972847185915647
+      },
+      "walk_v2": {
+        "affected_edge_stretch_max_ratio": 3.320903598994129,
+        "shoulder_region_edge_stretch_max_ratio": 1.4076164030899203,
+        "minimum_y_native_model_units": -0.06565502861114178,
+        "maximum_horizontal_width_native_units": 2.507081450196958,
+        "minimum_hand_leg_vertex_clearance": 0.4935448086112411
+      }
+    },
+    "scope": "Independent native61Walksamples. Edge strain is measured only as a diagnostic; bark pieces may intentionally bend. Vertex nearest-neighbor clearance is not a triangle collision certificate. Native minY is not actual gameground."
+  },
+  "fresh_blender": {
+    "status": "passed_fresh_import_finite_only",
+    "scope": "Independent factory-empty imports of approved and candidate; all7clips/defaults finite. Not a selected-arm source-equivalence claim."
+  },
+  "visual": {
+    "renderer": "GodotForward+ completeActor",
+    "paired_entries": 1384,
+    "images": 2768,
+    "views": [
+      "front",
+      "left",
+      "rear",
+      "right"
+    ],
+    "full_cycle_capture_hz": 24,
+    "maximum_render_fps": 30,
+    "exact_comment_seconds": 0.889240319664,
+    "unchanged_other_action_pixel_pairs": 1236,
+    "maximum_other_action_RGB_channel_difference": 0,
+    "findings": "Raised arm is visibly lower and more balanced with its opposite arm at the reported pose. Inspected front/side/rear views show preserved canopy silhouette, unchanged stance and no obvious new arm/leg collision. The old gait remains; this does not re-author footsteps or resolve every possible Walk complaint.",
+    "normal_speed_media": {
+      "Death_A": {
+        "frames": 72,
+        "delay_ms": 42,
+        "sha256": "1686f42721a1a6a7c102a54d5235a1325a35c3b7f0eedd81d54f1f1ea15d2963"
+      },
+      "Fighting_Idle": {
+        "frames": 66,
+        "delay_ms": 42,
+        "sha256": "fc20722c9a9595186e62af2b17b102688986c95b041b7bdb40bd354d1b09be7e"
+      },
+      "Hit_Chest": {
+        "frames": 27,
+        "delay_ms": 40,
+        "sha256": "e5bd9bc581cf910105b3b03845225dfa4ed2bccd2dc31515d07e7f735b7f3397"
+      },
+      "Idle_A": {
+        "frames": 77,
+        "delay_ms": 42,
+        "sha256": "4425831e5b331eb809e62fa2b855e9cc6aa1cc107aa3942d08f32d2ea58e2d4c"
+      },
+      "Jog": {
+        "frames": 31,
+        "delay_ms": 43,
+        "sha256": "a0e9e6bc48505642fb0eb493602be2171c8d3c090f79363c55b0bf4bab3e3f3a"
+      },
+      "Sword_Attack": {
+        "frames": 33,
+        "delay_ms": 41,
+        "sha256": "9f73f215861bb8de34e902e6b2d8b9a37bd57f3a4b2b82a8f57501c91e7ad8a6"
+      },
+      "Walk": {
+        "frames": 35,
+        "delay_ms": 42,
+        "sha256": "9b2002a8a4e8179da7a755de30b22061704fe0e9fb3cd9d67fdc575d15a12607"
+      }
+    }
+  },
+  "limits": [
+    "New Walk silhouette and arm paths require exact-version user review.",
+    "Intentional arm motion can differ substantially in world position; no generic numerical fidelity threshold is assumed.",
+    "Small canopy changes inherit existing arm skin influences; quantify separately, not blanket-unchanged geometry motion.",
+    "Nearest-vertex clearance and sampled edge strain are diagnostics, not exhaustive triangle collision or continuous-time contact certificates.",
+    "No measured CPU/GPU timings or whole-game FPS claim; original80-bone palette/keycount unchanged.",
+    "No runtime installation or approval."
+  ],
+  "evidence_sha256": {
+    "build.json": "76b7f4b0b8616875133f972879b3353202968ebe02d34061573c94847eb4d20c",
+    "actual-client/client-validation.json": "44e995150a56f4fdb0a5de876a030a6cad3ccab8772986de69f88d556b8bf540",
+    "actual-client-preservation.json": "feb3656f3ccbcc47907cd332d52c9aa7d8cf4e49c681277e4334ca01b35c2649",
+    "physical-native.json": "2a3979b5a3ebdf72a05495b7738f1f435185016bb541af7701d919468d293f2c",
+    "contact-canopy-proof.json": "0e02df5b606773369e1a29f9d9f8931a9a50338a7796253868499086c33289a5",
+    "blender-summary.json": "84103279f288143c8a5fc8fa71a12879ec589b5f7d0bdd3c86be066f53a80172",
+    "visual/job.json": "7e5ffd328ca416500ea3ba67f30a54302e2b95e5e5a184dc1c0739c514d33787",
+    "visual/actual-render/render.json": "06856950d6d1fbf0a6e22a64a1b249400a2d1702c420a1c1fdd8440601cfe28d",
+    "visual/reported-walk-board.png": "b265dff25ed110d472f792586c5f81b6c3be475dc10e301a5f6dc86325f4fb23"
+  }
+}
