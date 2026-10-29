@@ -1,0 +1,110 @@
+{
+  "schema": 1,
+  "actor": "storm_chimera",
+  "status": "unapproved_candidate_component_benchmark",
+  "models": {
+    "active_legacy": {
+      "sha256": "308a44dd4e9ade94bb37544169bb3ebc2138ba947ba7ac1d16f85322fade47f1",
+      "raw_bytes": 1571288,
+      "native_bones": 63,
+      "native_skeletons": 1,
+      "retargeted_keys": 10141,
+      "retargeted_tracks": 401,
+      "corrective_targets_maximum": 0,
+      "retained_static_cpu_allocation_bytes": 24562295,
+      "animation_update": {
+        "Jog": {
+          "batch_means_usec": [
+            21.5258333333333,
+            22.2658333333333,
+            22.3858333333333,
+            22.5075,
+            22.7133333333333,
+            22.905,
+            23.1341666666667,
+            23.4916666666667,
+            31.4166666666667
+          ],
+          "median_usec_per_update": 22.7133333333333,
+          "minimum_usec_per_update": 21.5258333333333
+        },
+        "Walk": {
+          "batch_means_usec": [
+            19.8633333333333,
+            20.06,
+            20.085,
+            20.6808333333333,
+            20.9541666666667,
+            21.7433333333333,
+            22.0725,
+            22.865,
+            25.5558333333333
+          ],
+          "median_usec_per_update": 20.9541666666667,
+          "minimum_usec_per_update": 19.8633333333333
+        }
+      },
+      "vertices": 5035,
+      "surfaces": 1,
+      "stored_influence_width": 4
+    },
+    "selected_repair": {
+      "sha256": "05e2d23a87201f7ef94dcfd4227af888c69c3572b5a7020edaa647039d201252",
+      "raw_bytes": 2372480,
+      "native_bones": 153,
+      "native_skeletons": 1,
+      "retargeted_keys": 50434,
+      "retargeted_tracks": 1312,
+      "corrective_targets_maximum": 0,
+      "retained_static_cpu_allocation_bytes": 30395673,
+      "animation_update": {
+        "Jog": {
+          "batch_means_usec": [
+            50.2341666666667,
+            50.4741666666667,
+            50.8875,
+            50.9241666666667,
+            51.2433333333333,
+            51.5766666666667,
+            52.1441666666667,
+            52.3658333333333,
+            53.1033333333333
+          ],
+          "median_usec_per_update": 51.2433333333333,
+          "minimum_usec_per_update": 50.2341666666667
+        },
+        "Walk": {
+          "batch_means_usec": [
+            49.035,
+            50.8766666666667,
+            51.1241666666667,
+            52.18,
+            52.7058333333333,
+            53.3208333333333,
+            53.4008333333333,
+            54.3841666666667,
+            55.4291666666667
+          ],
+          "median_usec_per_update": 52.7058333333333,
+          "minimum_usec_per_update": 49.035
+        }
+      },
+      "vertices": 5035,
+      "surfaces": 1,
+      "stored_influence_width": 8
+    }
+  },
+  "scope": "Fresh-process real GlbSceneCache._build_raw + ReplicatedActor3D + NativeAnimationImporter, warm OS file cache. Retained Godot static CPU allocations include scene and library caches, meshes, textures and actor. AnimationPlayer advance plus forced skeleton global transforms at 240 updates/s; nine batches of 1200 updates per clip after warmup. Excludes GPU rendering/skinning, whole-game logic and frame-rate claims.",
+  "comparison_contract": "Active older63-bone delivery versus selected newer153-bone whole-strand repair. This measures more than the local strand edit: the newer selected rig adds90bones versus installed model, while the strand repair adds none versus its reviewed selected draft.",
+  "sampling": "One fresh process/model; warm OS cache;240warmups,9batches of1200updates/clip at240updates/s, identical configured current client. No cross-process confidence interval or whole-game/rendering benchmark.",
+  "allocation_scope": "Retained Godot static first-actor scene/library/mesh/texture caches; not processresident RAM or per-instance cost.",
+  "timing_delta_us": {
+    "Walk": 31.7516666666666,
+    "Jog": 28.529999999999998
+  },
+  "retained_static_cpu_delta_bytes": 5833378,
+  "raw_byte_delta": 801192,
+  "gpu_rendering_measured": false,
+  "fps_claim": null,
+  "skinning_note": "Stored influence width is reported from source attributes; no GPU rendering/skinning throughput was measured."
+}
