@@ -48,6 +48,35 @@ func _window() -> Dictionary:
 		"max_fps":Engine.max_fps,"low_processor_usage":OS.low_processor_usage_mode,
 		"display_backend":DisplayServer.get_name()}
 
+func _visual_inventory() -> Dictionary:
+	var meshes := 0
+	var surfaces := 0
+	var material_passes := 0
+	var overlay_passes := 0
+	var visible_roads: Array[String] = []
+	for candidate: Node in stage.find_children("*","MeshInstance3D",true,false):
+		var node := candidate as MeshInstance3D
+		if node.mesh == null or not node.is_visible_in_tree(): continue
+		meshes += 1
+		if str(node.name).begins_with("Walk_"): visible_roads.append(str(node.name))
+		for surface: int in node.mesh.get_surface_count():
+			surfaces += 1
+			var material := node.get_active_material(surface)
+			var visited := {}
+			while material != null and not visited.has(material.get_instance_id()):
+				visited[material.get_instance_id()] = true
+				material_passes += 1
+				material = material.next_pass
+			var overlay := node.material_overlay
+			visited = {}
+			while overlay != null and not visited.has(overlay.get_instance_id()):
+				visited[overlay.get_instance_id()] = true
+				overlay_passes += 1
+				material_passes += 1
+				overlay = overlay.next_pass
+	return {"visible_mesh_instances":meshes,"visible_surfaces":surfaces,
+		"material_passes":material_passes,"overlay_passes":overlay_passes,"visible_walk_nodes":visible_roads}
+
 func _draw() -> void:
 	var now := Time.get_ticks_usec()
 	if record_frames and previous_draw > 0:
@@ -230,15 +259,22 @@ func _run() -> void:
 		if not is_instance_valid(loader.world_root): continue
 		loaders.append(loader)
 	_check(loaders.size() == config.manifests.size(),"all chunks loaded")
+	var before_trial_visuals := _visual_inventory()
 	var trial_install_us := 0
 	if str(config.get("variant","baseline")) != "baseline":
-		var installer: Variant = load("res://src/dev/road_texture_trial/road_texture_trial.gd")
+		var blending := str(config.get("variant","")).begins_with("blend")
+		var installer: Variant = load("res://src/dev/road_texture_trial/terrain_blend_trial.gd" if blending else "res://src/dev/road_texture_trial/road_texture_trial.gd")
 		for index: int in loaders.size():
 			var started := Time.get_ticks_usec()
-			var result: Dictionary = installer.apply(loaders[index].world_root,str(config.trials[index]),"mask")
+			var result: Dictionary = installer.apply(loaders[index].world_root,str(config.trials[index]),"blend" if blending else "mask")
 			trial_install_us += Time.get_ticks_usec()-started
 			trial_results.append(result)
 			_check(bool(result.get("ok",false)),"road texture trial installs",result.get("errors",[]))
+	var after_trial_visuals := _visual_inventory()
+	if str(config.get("variant","")).begins_with("blend"):
+		_check(before_trial_visuals == after_trial_visuals,"terrain blend adds no visual geometry or material passes",after_trial_visuals)
+	if str(config.get("variant","baseline")) != "baseline":
+		for index: int in loaders.size():
 			if bool(config.get("debug_coverage",false)) or config.has("debug_lift"):
 				for overlay: Dictionary in loaders[index].world_root.get_meta(&"road_texture_trial",{}).get("layers",[]):
 					var material := (overlay.node as MeshInstance3D).material_override as ShaderMaterial
@@ -303,6 +339,7 @@ func _run() -> void:
 			"texture_mode":preload("res://src/world/vram_textures.gd").mode_name(),
 			"look":LookProfile.mode(),"decorative_grass":Graphics.decorative_grass},
 		"engine":Engine.get_version_info(),"window":_window(),"checks":checks,"trial_results":trial_results,
+		"visual_inventory":{"before_trial":before_trial_visuals,"after_trial":after_trial_visuals},
 		"timing":{"load_call_ms":float(load_us)/1000.0,"trial_install_ms":float(trial_install_us)/1000.0,
 			"through_ready_ms":float(ready_us)/1000.0},
 		"probes":probes,"ground":ground,"views":views,"captures":captures,"frames":samples,"before_memory":before,"after_memory":after}
