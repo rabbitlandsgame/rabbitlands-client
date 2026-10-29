@@ -9,7 +9,7 @@ const Vram := preload("res://src/world/vram_textures.gd")
 const Pool := preload("res://src/world/external_texture_pool.gd")
 const Graphics := preload("res://src/world/graphics_options.gd")
 const MapImages := preload("res://src/world/map_image_extension.gd")
-const POLICY := "map-geometry-texture-bindings-v1"
+const POLICY := "map-geometry-texture-bindings-v3"
 const SLOT_META := &"rl_geometry_texture_slots"
 const MAX_BINDINGS := 16384
 const MAX_SHARED_CONTAINER_BYTES := 8 * 1024 * 1024
@@ -25,6 +25,9 @@ static func _identity(origin: Dictionary) -> String:
 		"decoded_format": int(origin.get("decoded_format", -1)),
 		"mip_policy": str(origin.get("mip_policy", "")),
 		"width": int(origin.get("width", 0)), "height": int(origin.get("height", 0))}
+	if origin.has("policy_directory"):
+		identity["policy_directory"] = str(origin.policy_directory)
+	if origin.has("sidecar_eligible"): identity["sidecar_eligible"] = origin.sidecar_eligible
 	if identity.kind == "constant":
 		identity["format"] = int(origin.get("format", -1))
 		identity["mips"] = int(origin.get("mips", 0))
@@ -102,6 +105,11 @@ static func _origin_error(origin: Dictionary) -> String:
 		if Sources.source_path(str(row.path)).is_empty(): return "texture_source_scope"
 		if inputs.has(str(row.path)) and str(inputs[str(row.path)]) != str(row.sha256): return "texture_inputs_conflict"
 		inputs[str(row.path)] = str(row.sha256)
+	if origin.has("policy_directory"):
+		if kind != "external" or not origin.policy_directory is String or not (str(origin.policy_directory).begins_with("eloria-assets/maps/") \
+				or str(origin.policy_directory).begins_with("godot-client/assets/world/")) \
+				or Sources.source_path(str(origin.policy_directory)).is_empty(): return "texture_policy_scope"
+	if origin.has("sidecar_eligible") and (kind != "external" or not origin.sidecar_eligible is bool): return "texture_sidecar_policy"
 	if kind == "constant":
 		if not origin.get("data") is String or str(origin.data).is_empty() or str(origin.data).length() > 128 \
 				or not str(origin.data).is_valid_hex_number(false): return "constant_texture_data"
@@ -130,17 +138,34 @@ static func _roles(origin: Dictionary) -> Dictionary:
 static func _source(origin: Dictionary) -> String:
 	return Sources.source_path(str(origin.get("file", "")))
 
+static func _policy_directory(origin: Dictionary) -> String:
+	return Sources.source_path(str(origin.policy_directory)) if origin.has("policy_directory") else _source(origin).get_base_dir()
+
+static func _roles_key(origin: Dictionary) -> String:
+	var key := str(origin.image_sha256) + "|policy=" + str(origin.policy_directory) if origin.has("policy_directory") else str(origin.image_sha256)
+	return key + "|eligible=" + str(origin.sidecar_eligible) if origin.has("sidecar_eligible") else key
+
+static func _entry(origin: Dictionary) -> Dictionary:
+	return Vram.sidecar_entry(str(origin.image_sha256), _policy_directory(origin)) if bool(origin.get("sidecar_eligible", true)) else {}
+
+static func _pool_key(origin: Dictionary, roles: Dictionary, actual: Texture2D = null) -> String:
+	if not origin.has("policy_directory"): return str(origin.image_sha256)
+	var entry := _entry(origin)
+	if not entry.is_empty() and not Vram.sidecar_fits(entry, roles): entry = {}
+	if actual is ImageTexture and not Vram.IMAGE_FORMATS.values().has((actual as ImageTexture).get_format()): entry = {}
+	return Vram.variant_pool_key(str(origin.image_sha256), entry, _policy_directory(origin), 0 if str(origin.get("mip_policy", "map")) == "full" else -1)
+
 static func _pool_fits(texture: Texture2D, origin: Dictionary, roles: Dictionary) -> bool:
 	if not texture is ImageTexture: return false
 	var image_texture := texture as ImageTexture
 	var format := image_texture.get_format()
 	var compressed := Vram.IMAGE_FORMATS.values().has(format)
 	if compressed:
-		var entry := Vram.sidecar_entry(str(origin.image_sha256), _source(origin).get_base_dir())
+		var entry := _entry(origin)
 		if entry.is_empty() or not Vram.sidecar_fits(entry, roles) \
 				or int(Vram.IMAGE_FORMATS[str(entry.format)]) != format:
 			return false
-		if not Vram.pooled_fits(texture, str(origin.image_sha256), _source(origin).get_base_dir(), roles):
+		if not Vram.pooled_fits(texture, str(origin.image_sha256), _policy_directory(origin), roles, origin.has("policy_directory")):
 			return false
 	elif int(origin.get("decoded_format", -1)) >= 0 and format != int(origin.decoded_format):
 		return false
@@ -173,9 +198,9 @@ static func prepare(bindings: Dictionary, worker: bool, container_source := "", 
 		if kind != "constant" and _source(origin).is_empty(): return _fail("texture_source_scope")
 		var sha := str(origin.get("image_sha256", ""))
 		if sha.length() != 64: return _fail("texture_source_digest")
-		var roles: Dictionary = union_roles.get(sha, {})
+		var roles: Dictionary = union_roles.get(_roles_key(origin), {})
 		roles.merge(_roles(origin))
-		union_roles[sha] = roles
+		union_roles[_roles_key(origin)] = roles
 		normalised[key] = origin.duplicate(true)
 	var result := {"ok": true, "error": "", "bindings": normalised, "roles": union_roles,
 		"jobs": [], "by_binding": {}, "pooled": {}, "imported": {}, "textures": {}, "candidates": {},
@@ -186,7 +211,7 @@ static func prepare(bindings: Dictionary, worker: bool, container_source := "", 
 		var origin: Dictionary = normalised[id]
 		var kind := str(origin.kind)
 		var sha := str(origin.image_sha256)
-		var roles: Dictionary = union_roles[sha]
+		var roles: Dictionary = union_roles[_roles_key(origin)]
 		if kind == "imported":
 			var path := _source(origin)
 			if not path.begins_with("res://") and not path.begins_with("user://"):
@@ -206,7 +231,7 @@ static func prepare(bindings: Dictionary, worker: bool, container_source := "", 
 			if texture == null: return _fail("imported_texture_unavailable")
 			(result.imported as Dictionary)[id] = texture
 			continue
-		var pooled := Pool._published(sha)
+		var pooled := Pool._published(_pool_key(origin, roles))
 		if kind in ["external", "gltf_image"] and pooled != null and _pool_fits(pooled, origin, roles):
 			(result.pooled as Dictionary)[id] = pooled
 			continue
@@ -214,10 +239,10 @@ static func prepare(bindings: Dictionary, worker: bool, container_source := "", 
 		# different sidecars for identical bytes. Role requirements still union
 		# across the source SHA before either job selects an encoding.
 		var job_key := "%s|%s|%s|%s|%s" % [sha, kind, str(origin.get("file", "")),
-			str(origin.get("image_index", -1)), str(origin.get("mip_policy", "map"))]
+			str(origin.get("image_index", -1)), str(origin.get("mip_policy", "map")) + "|" + str(origin.get("policy_directory", "")) + "|" + str(origin.get("sidecar_eligible", true))]
 		if not jobs_by_key.has(job_key):
 			var source := _source(origin)
-			var entry := Vram.sidecar_entry(sha, source.get_base_dir()) if kind in ["external", "gltf_image"] else {}
+			var entry := _entry(origin) if kind in ["external", "gltf_image"] else {}
 			if not entry.is_empty() and not Vram.sidecar_fits(entry, roles):
 				entry = {}
 				Vram.note_decoded_instead(sha)
@@ -405,8 +430,8 @@ static func apply(packed: PackedScene, prepared: Dictionary) -> bool:
 			continue
 		var origin: Dictionary = bindings[id]
 		var sha := str(origin.image_sha256)
-		var roles: Dictionary = prepared.roles[sha]
-		var pooled := Pool._published(sha)
+		var roles: Dictionary = prepared.roles[_roles_key(origin)]
+		var pooled := Pool._published(_pool_key(origin, roles))
 		if str(origin.kind) in ["external", "gltf_image"] and pooled != null and _pool_fits(pooled, origin, roles):
 			textures[id] = pooled
 			if capture: _diagnostic_add(diagnostics,"counts","texturePublishedPoolHits",1)
@@ -431,7 +456,7 @@ static func apply(packed: PackedScene, prepared: Dictionary) -> bool:
 		if str(origin.kind) in ["external", "gltf_image"]:
 			# A concurrent publication may have installed another representation
 			# of this SHA. Incompatible roles/formats keep this map's private copy.
-			var canonical := Pool._publish_or_adopt(sha, candidate)
+			var canonical := Pool._publish_or_adopt(_pool_key(origin, roles, candidate), candidate)
 			textures[id] = canonical if _pool_fits(canonical, origin, roles) else candidate
 		else:
 			textures[id] = candidate

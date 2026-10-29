@@ -31,6 +31,7 @@ extends RefCounted
 ## Where the pass's own shaders live: a material drawn by one of them is the
 ## look's (`look_surfaces`).
 const LOOK_SHADERS := "res://src/world/look/"
+const RoadGround := preload("res://src/world/road_ground/road_ground.gd")
 
 ## Every root the look paints among `active` (the loader's world root: a
 ## ContinentChunkStream on a chunked territory, whose cells are the roots),
@@ -68,6 +69,10 @@ static func sync(root: Node, manifest: WorldManifest, bound := false) -> int:
 	var changed := revert(root)
 	if LookProfile.enabled():
 		changed += apply(root, manifest, bound)
+	if root is Node3D:
+		var roads: Dictionary = RoadGround.rebind(root as Node3D, manifest)
+		if not bool(roads.get("ok", false)):
+			push_error("road ground look switch: " + str(roads.get("error", "invalid retained road fields")))
 	LookProfile.stamp(root)
 	return changed
 

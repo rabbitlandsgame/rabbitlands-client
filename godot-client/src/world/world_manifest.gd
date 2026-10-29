@@ -3,6 +3,7 @@ extends RefCounted
 
 const SUPPORTED_SCHEMA_MAJOR := 1
 const ResourceDiagnostics := preload("res://src/world/resource_diagnostics.gd")
+const VramTextures := preload("res://src/world/vram_textures.gd")
 
 var source_path := ""
 var data: Dictionary = {}
@@ -10,6 +11,8 @@ var errors: Array[String] = []
 var warnings: Array[String] = []
 ## Last verification only; no file-stat/read pass is added to count bytes.
 var verification_diagnostics: Dictionary = {}
+## Exact road dependency hashes verified for this load, never a persistent cache.
+var road_ground_verified: Dictionary = {}
 
 static func load_file(path: String) -> WorldManifest:
 	var result := WorldManifest.new()
@@ -36,6 +39,10 @@ func glb_path() -> String:
 	var relative := str(data.get("asset", {}).get("glb", ""))
 	return source_path.get_base_dir().path_join(relative)
 
+func road_ground_config() -> Dictionary:
+	var value: Variant = data.get("roadGround", {})
+	return value if value is Dictionary else {}
+
 func has_streaming_chunks() -> bool:
 	return data.has("streamingChunks")
 
@@ -54,6 +61,11 @@ func verify_external_resources() -> Array[String]:
 		"paths_rejected": 0, "failures": 0, "elapsed_us": 0, "timings": {},
 		"policy": external_verification_policy()}
 	var failures: Array[String] = []
+	failures.append_array(VramTextures.image_policy_errors(data, glb_path().get_base_dir()))
+	if not failures.is_empty():
+		verification_diagnostics.failures = failures.size()
+		verification_diagnostics.elapsed_us = Time.get_ticks_usec() - began
+		return failures
 	var resources: Variant = data.get("externalResources", {})
 	if not resources is Dictionary:
 		failures.append("externalResources must be a URI-to-SHA256 object")
@@ -116,6 +128,7 @@ func _validate() -> void:
 	for key in ["id", "glb", "units", "coordinateSystem", "bounds"]:
 		if not asset.has(key):
 			errors.append("asset." + key + " missing")
+	errors.append_array(VramTextures.image_policy_errors(data, glb_path().get_base_dir()))
 	if str(asset.get("units", "")) != "meters":
 		errors.append("only metre GLB assets are currently supported")
 	var axes: Dictionary = asset.get("coordinateSystem", {})
@@ -127,6 +140,17 @@ func _validate() -> void:
 		warnings.append("collision declarations missing")
 	if not data.has("navigation"):
 		warnings.append("navigation declarations missing")
+	if data.has("roadGround"):
+		var roads: Variant = data.roadGround
+		if not roads is Dictionary:
+			errors.append("roadGround must be an object")
+		else:
+			var path := str(roads.get("metadata", "")).replace("\\", "/")
+			var digest := str(roads.get("sha256", ""))
+			if path.is_empty() or path.is_absolute_path() or ":" in path or ".." in path.split("/") or not path.ends_with(".json"):
+				errors.append("roadGround metadata must be a relative package JSON path")
+			if digest.length() != 64 or not digest.is_valid_hex_number(false):
+				errors.append("roadGround metadata SHA256 missing or invalid")
 	if has_streaming_chunks():
 		_validate_chunks()
 
@@ -151,7 +175,7 @@ func _validate_chunks() -> void:
 		if identity.is_empty() or ids.has(identity):
 			errors.append("streaming chunk id missing or duplicated: " + identity)
 		ids[identity] = true
-		for field: String in ["estimatedResidentBytes", "geometryResidentBytes"]:
+		for field: String in ["estimatedResidentBytes", "geometryResidentBytes", "roadGroundResidentBytes"]:
 			if value.has(field) and (not (value[field] is int or value[field] is float) or not is_finite(float(value[field])) or float(value[field]) < 1):
 				errors.append("streaming chunk memory estimate must be positive: " + identity)
 		# Shared images by content hash; pooled prototypes by identity (the

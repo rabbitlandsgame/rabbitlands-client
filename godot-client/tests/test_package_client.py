@@ -19,6 +19,7 @@ real tree's committed import settings.
 from __future__ import annotations
 
 import fnmatch
+import hashlib
 import json
 import re
 import shutil
@@ -138,6 +139,57 @@ class ServedIsle(unittest.TestCase):
         # the territory manifest streams chunks: its master world.glb is named but never existed, and is no refusal
         self.assertNotIn(f"{V2}/isle/client/world.glb", staged)
 
+    def add_road_field(self):
+        chunk = V2 + "/isle/client/chunks/00_00"
+        field = chunk + "/triangle-ids.bin.zst"
+        image = V2 + "/_continent_v2/shared-assets/road-only.png"
+        write(self.root, field, b"compact field bytes")
+        write(self.root, image, b"road style image bytes")
+        metadata = chunk + "/roads.json"
+        write(self.root, metadata, {"schema": "rabbitlands-road-terrain-blend-v1", "resources": {
+            "triangle-ids.bin.zst": hashlib.sha256((self.root / field).read_bytes()).hexdigest(),
+            "../../../../_continent_v2/shared-assets/road-only.png": hashlib.sha256((self.root / image).read_bytes()).hexdigest()}})
+        path = self.root / chunk / "world.json"
+        data = json.loads(path.read_text())
+        data["roadGround"] = {"metadata": "roads.json", "sha256": hashlib.sha256((self.root / metadata).read_bytes()).hexdigest()}
+        write(self.root, chunk + "/world.json", data)
+        return field, image, metadata
+
+    def test_road_fields_and_style_only_images_ship_with_verified_bytes(self):
+        files = self.add_road_field()
+        _, staged, _ = self.stage_assets()
+        for relative in files:
+            self.assertIn(relative, staged)
+            self.assertEqual((self.root / relative).read_bytes(), (self.stage / relative).read_bytes())
+
+    def test_road_field_absent_from_commit_is_refused(self):
+        field, _, _ = self.add_road_field()
+        original = packager.tracked
+        packager.tracked = lambda root, *paths: [p for p in original(root, *paths) if p != field]
+        with self.assertRaisesRegex(packager.PackageError, "roadGround.*not in the commit"):
+            self.stage_assets()
+
+    def test_mutated_road_input_is_refused(self):
+        _, image, _ = self.add_road_field()
+        (self.root / image).write_bytes(b"unpublished replacement")
+        with self.assertRaisesRegex(packager.PackageError, "runtime resource changed"):
+            self.stage_assets()
+
+    def test_staged_road_field_bytes_are_checked_after_copy(self):
+        field, _, _ = self.add_road_field()
+        original = packager.copy_file
+        def copy(source, destination):
+            size = original(source, destination)
+            if destination == self.stage / field:
+                destination.write_bytes(b"corrupted staged bytes")
+            return size
+        packager.copy_file = copy
+        try:
+            with self.assertRaisesRegex(packager.PackageError, "staged .*runtime resource changed"):
+                self.stage_assets()
+        finally:
+            packager.copy_file = original
+
     def test_the_territory_folder_around_the_package_stays_home(self):
         _, staged, _ = self.stage_assets()
         for relative in ("isle/world.json", "isle/content/spawns.json", "isle/source/prepare_meshy_kit.py",
@@ -149,6 +201,86 @@ class ServedIsle(unittest.TestCase):
         self.assertFalse([p for p in staged if p.startswith(V2 + "/draft/")])
         self.assertIn("eloria-assets/maps/legacy/collision.bin", staged)
         self.assertIn("eloria-assets/maps/legacy/world.glb", staged)
+
+    def test_authoring_and_comparison_files_stay_in_source_not_the_package(self):
+        files = {
+            "eloria-assets/maps/legacy/authoring/continent-authoring.json": {"image": "private-board.png"},
+            "eloria-assets/maps/legacy/authoring/private-board.png": b"authoring image",
+            "eloria-assets/maps/legacy/authoring/base-heights.f32le": b"height samples",
+            "eloria-assets/maps/legacy/authoring/base-colors.rgba8": b"color samples",
+            "eloria-assets/maps/legacy/comparison/additional-landmarks.webp": b"review image",
+            "eloria-assets/maps/legacy/comparison/review.json": {"image": "additional-landmarks.webp"},
+            f"{V2}/isle/client/chunks/00_00/authoring/snapshot.json": {"schema": 1},
+            f"{V2}/isle/client/comparison/overview.webp": b"served review image",
+        }
+        for relative, data in files.items():
+            write(self.root, relative, data)
+        original = {relative: (self.root / relative).read_bytes() for relative in files}
+        _, staged, warnings = self.stage_assets()
+        self.assertFalse(warnings)
+        for relative, data in original.items():
+            self.assertNotIn(relative, staged)
+            self.assertEqual((self.root / relative).read_bytes(), data)
+        self.assertIn("eloria-assets/maps/legacy/world.glb", staged)
+        self.assertIn(SHARED, staged)
+
+    def test_runtime_references_override_authoring_and_comparison_folder_defaults(self):
+        path = "eloria-assets/maps/legacy/world.json"
+        data = json.loads((self.root / path).read_text())
+        resources = {"authoring/runtime.png": b"runtime source pixels",
+                     "comparison/runtime.webp": b"runtime review-named pixels"}
+        data["externalResources"] = {}
+        for uri, contents in resources.items():
+            relative = "eloria-assets/maps/legacy/" + uri
+            write(self.root, relative, contents)
+            data["externalResources"][uri] = hashlib.sha256(contents).hexdigest()
+        write(self.root, path, data)
+        _, staged, warnings = self.stage_assets()
+        self.assertFalse(warnings)
+        for uri, contents in resources.items():
+            relative = "eloria-assets/maps/legacy/" + uri
+            self.assertIn(relative, staged)
+            self.assertEqual((self.stage / relative).read_bytes(), contents)
+
+    def test_missing_runtime_image_in_an_excluded_folder_is_still_refused(self):
+        path = "eloria-assets/maps/legacy/world.json"
+        data = json.loads((self.root / path).read_text())
+        data["externalResources"] = {"authoring/runtime.png": "a" * 64}
+        write(self.root, path, data)
+        with self.assertRaisesRegex(packager.PackageError, "externalResources.*authoring/runtime.png.*not in the commit"):
+            self.stage_assets()
+
+    def test_concept_provenance_does_not_pull_reference_art_into_the_package(self):
+        root = "eloria-assets/maps/legacy/"
+        files = {root + "references/board.png": b"reference board",
+                 "eloria-assets/concepts/region.png": b"cultural reference"}
+        for relative, contents in files.items():
+            write(self.root, relative, contents)
+        provenance = {"detailBoard": "references/board.png",
+                      "culturalReference": "../../concepts/region.png"}
+        world = json.loads((self.root / root / "world.json").read_text())
+        world["conceptArt"] = provenance
+        write(self.root, root + "world.json", world)
+        write(self.root, root + "concept.json", {"conceptArt": provenance})
+        _, staged, warnings = self.stage_assets()
+        self.assertFalse(warnings)
+        for relative, contents in files.items():
+            self.assertNotIn(relative, staged)
+            self.assertEqual((self.root / relative).read_bytes(), contents)
+
+    def test_an_independent_runtime_reference_still_pulls_in_concept_art(self):
+        root = "eloria-assets/maps/legacy/"
+        relative = root + "references/board.png"
+        contents = b"runtime map picture also used as reference"
+        write(self.root, relative, contents)
+        world = json.loads((self.root / root / "world.json").read_text())
+        world["conceptArt"] = {"detailBoard": "references/board.png"}
+        world["minimap"] = {"image": "references/board.png"}
+        write(self.root, root + "world.json", world)
+        _, staged, warnings = self.stage_assets()
+        self.assertFalse(warnings)
+        self.assertIn(relative, staged)
+        self.assertEqual((self.stage / relative).read_bytes(), contents)
 
     def test_a_chunk_glb_missing_from_the_commit_is_refused(self):
         (self.root / V2 / "isle/client/chunks/00_01/world.glb").unlink()

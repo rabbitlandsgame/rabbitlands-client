@@ -105,6 +105,7 @@ class RunnerStorage:
         self.linux_archive = None
         self.source = None
         self.actor_plans = {}
+        self.world_import_plans = {}
         self.asset_cache = asset_cache
         self.previous_packages = {}
         self.native_bootstrap = None

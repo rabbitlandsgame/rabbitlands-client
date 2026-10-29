@@ -17,6 +17,38 @@ import prepared_content_package as prepared
 FOUR_GATES = "eloria-assets/maps/four-gates/chunks/02_07/world.json"
 TEXTURES = ("full", "half", "quarter")
 POLICY = "fresh-release-prepared-pilot-v1"
+FULL_MIP_WORLD_TOKEN = "scene-images-v2|world-full-mips|skip=0|"
+
+
+def full_mip_world_entry(entry: dict) -> bool:
+    """One effective scenery variant serves every requested map quality."""
+    return (entry.get("kind") == "scene"
+            and str(entry.get("source", "")).startswith("godot-client/assets/world/")
+            and entry.get("texture_skip") == 0
+            and str(entry.get("texture_token", "")).startswith(FULL_MIP_WORLD_TOKEN))
+
+
+def entries_for_quality(catalog: dict, skip: int) -> list[dict]:
+    if type(skip) is not int or skip not in range(len(TEXTURES)):
+        raise ReleasePreparedError("unsupported requested texture quality")
+    return [row for row in catalog["entries"]
+            if row.get("texture_skip") == skip or full_mip_world_entry(row)]
+
+
+def full_mip_world_sources(project: Path, targets: list[tuple[str, str]]) -> set[str]:
+    """Recognize only hash-validated scenery explicitly declaring full mips."""
+    result = set()
+    from scenery_image_sources import validate
+    for kind, source in targets:
+        if kind != "scene" or not source.startswith("godot-client/assets/world/"):
+            continue
+        path = prepared.scoped(project.parent, source)
+        document, _binary = prepared.gltf(path)
+        if "rabbitlands_scenery_images" not in (document.get("extras") or {}):
+            continue  # Older source generations still cook their normal tiers.
+        if validate(project.parent, path, document)["tagged"]:
+            result.add(source)
+    return result
 
 
 class ReleasePreparedError(prepared.PreparedError):
@@ -202,6 +234,7 @@ def prepare_generation(project: Path, stage: Path, *, platform: str, godot: Path
     if generated.exists() or marker.exists() or snapshot_marker.exists():
         raise ReleasePreparedError("fresh build has leftover prepared generation or cook marker")
     retained = list(dict.fromkeys([*prepared.pilot(project), ("world", FOUR_GATES)]))
+    invariant_scenes = full_mip_world_sources(project, retained)
     all_targets = retained
     required = {quality: [(kind, source, "retain") for kind, source in retained]
         + [("world", FOUR_GATES, "lazy-source-v1")] for quality in TEXTURES}
@@ -211,7 +244,8 @@ def prepare_generation(project: Path, stage: Path, *, platform: str, godot: Path
     receipt = {"schema_version": 1, "policy": POLICY, "platform": platform,
         "status": "incomplete", "fresh_generation": True, "catalog_reused": False,
         "qualification": "pending_final_export_and_rendered_runtime_parity",
-        "required_entries": required, "variants": [], "limitations": [
+        "required_entries": required, "full_mip_world_sources": sorted(invariant_scenes),
+        "variants": [], "limitations": [
             "selected pilot only; unlisted format tokens, content or policies retain validated raw fallback",
             "cooking/resource identity is not a performance or low-end hardware qualification"]}
     receipt_file = work_root / "prepared-release.json"
@@ -230,7 +264,8 @@ def prepare_generation(project: Path, stage: Path, *, platform: str, godot: Path
         for quality in TEXTURES:
             for policy in ("retain", "lazy-source-v1"):
                 variant = quality + "-" + policy
-                targets = retained if policy == "retain" else [("world", FOUR_GATES)]
+                targets = ([target for target in retained if quality == "full"
+                    or target[1] not in invariant_scenes] if policy == "retain" else [("world", FOUR_GATES)])
                 job = work_root / "jobs" / (variant + ".json")
                 user_root = work_root / "users" / variant
                 prepared.write_job(project, quality, "res://prepared-content/" + variant,
@@ -255,6 +290,9 @@ def prepare_generation(project: Path, stage: Path, *, platform: str, godot: Path
                 subset = [(kind, source, policy if kind == "world" else "retain") for kind, source in targets]
                 _validate_log(log, len(subset))
                 mask, attestation = _validate_variant(catalog, subset, quality)
+                if any(row["source"] in invariant_scenes and not full_mip_world_entry(row)
+                       for row in _json(catalog)["entries"]):
+                    raise ReleasePreparedError("full-mip scenery did not produce its invariant runtime token")
                 if attestation.get("platform") != platform or attestation.get("rendering_method") != rendering_method:
                     raise ReleasePreparedError("cooker actual native platform/renderer differs from requested release")
                 if observed is not None and mask != observed:
@@ -266,14 +304,15 @@ def prepare_generation(project: Path, stage: Path, *, platform: str, godot: Path
                     "log": str(log), "job_sha256": prepared.digest(job)})
                 _check(check_budget, "after " + variant)
         result = prepared.merge_catalogs(project, catalogs, generated / "index.json")
-        expected_count = sum(len(rows) for rows in required.values())
+        expected_count = sum(row["entries"] for row in receipt["variants"])
         if result["entries"] != expected_count:
             raise ReleasePreparedError("merged generation lost or duplicated a planned exact entry")
         destination = work_root / "generation" / "prepared-content"
         destination.parent.mkdir()
         generated.rename(destination)  # No copy of the large generated payload tree.
         receipt.update(result, status="cooked_pending_final_export", catalog=str(destination / "index.json"),
-            observed_format_mask=observed, source_planned_entries=expected_count)
+            observed_format_mask=observed, source_planned_entries=expected_count,
+            source_planned_quality_requests=sum(len(rows) for rows in required.values()))
         return receipt
     except BaseException as error:
         receipt["error"] = type(error).__name__ + ": " + str(error)

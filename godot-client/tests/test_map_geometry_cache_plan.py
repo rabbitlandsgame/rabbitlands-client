@@ -125,6 +125,26 @@ def test_external_image_cannot_escape_runtime_asset_scope(project):
         cache.plan(project)
 
 
+def test_road_metadata_and_fields_are_verified_native_source_inputs(project):
+    path, source = world(project, "map")
+    field = path.parent / "ids.zst"
+    field.write_bytes(b"compact road field")
+    metadata = write_json(path.parent / "roads.json", {
+        "schema": "rabbitlands-road-terrain-blend-v1",
+        "resources": {field.name: hashlib.sha256(field.read_bytes()).hexdigest()}})
+    manifest = json.loads(path.read_text())
+    manifest["roadGround"] = {"metadata": metadata.name,
+                              "sha256": hashlib.sha256(metadata.read_bytes()).hexdigest()}
+    write_json(path, manifest)
+    setup_scope(project, {"map": {"manifest": source}}, ["map"])
+    result = cache.plan(project)
+    roads = [row for row in result["source_closure"] if "road_ground" in row["kinds"]]
+    assert {Path(row["source"]).name for row in roads} == {"roads.json", "ids.zst"}
+    field.write_bytes(b"changed after preparation")
+    with pytest.raises(cache.PlanError, match="resource changed"):
+        cache.plan(project)
+
+
 def test_closure_preserves_verification_and_prototype_image_path_aliases(project):
     path, source = world(project, "map")
     maps_root = path.parent.parent

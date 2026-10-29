@@ -21,6 +21,7 @@ import os
 from pathlib import Path
 import struct
 import sys
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
@@ -188,6 +189,44 @@ def code_at(codes, frame, x, z):
 def collision_map(codec, grid):
     from eloria.collision import CollisionMap
     return CollisionMap.from_grid(grid)
+
+
+def test_bake_uses_terrain_for_roads_and_preserves_authored_bridge_faces(monkeypatch, tmp_path):
+    """A mask road never calls the retired ribbon-floor path; bridge approaches
+    remain encoded, translated walk triangles rather than falling to the bed."""
+    import publish_client as PC
+
+    snapshot_path = tmp_path / "continent-authoring.json"
+    snapshot_path.write_text("{}")
+    resolved = tmp_path / "resolved-heights.f32le"
+    resolved.write_bytes(b"\0" * 4)
+    heights, origin = terrain(WEST)
+    bridge = rectangle(*DECK)
+    doc = {
+        "regionId": "west", "continentTranslation": list(WEST.translation),
+        "server": {"origin": list(WEST.origin), "cells": list(WEST.cells),
+                   "collisionOriginMetres": list(WEST.collision_origin)},
+        "terrain": {"origin": list(origin), "cellMetres": 2.0},
+        "paths": [{"id": "ordinary-road", "kind": "road"}],
+        "bridges": [{"id": "saved-bridge-with-approaches"}],
+        "sources": {"scene": {"sha256": "0" * 64}},
+    }
+    fake = SimpleNamespace(
+        doc=doc, world=object(), snapshot=SimpleNamespace(resolved_heights_path=resolved),
+        modules=SimpleNamespace(T=object(),
+                                BX=SimpleNamespace(_authored_bridge_geometry=lambda *_: ([], [bridge], [])),
+                                G=SimpleNamespace(GltfBuilder=lambda *_: object())),
+        height=heights, polygon=[[40., 0.], [100., 0.], [100., 60.], [40., 60.]],
+    )
+    monkeypatch.setattr(PC, "open_territory", lambda *_: fake)
+    monkeypatch.setattr(F, "load_source", lambda *_: WEST)
+    monkeypatch.setattr(X, "entrance_art", lambda *_: ([], {}))
+    monkeypatch.setattr(X, "default_spawn", lambda *_, **__: {"position": [0., 0., 0.]})
+    loaded = X.load_bake("west", snapshot_path, tmp_path, log=lambda *_: None)
+    assert np.array_equal(loaded.walk, bridge.astype(np.float32).astype(float) - WEST.translation)
+    assert loaded.walk_sources["roads"] == {"paths": 1, "ids": ["ordinary-road"], "faces": 0,
+                                            "surface": "terrain", "liftMetres": 0.0}
+    assert loaded.walk_sources["bridges"] == {"decks": 1, "faces": len(bridge)}
 
 
 # --- the walk rules ---------------------------------------------------------------------------------------------------
@@ -420,6 +459,7 @@ def test_the_servers_package_reader_accepts_the_package(exported, codec):
         assert block["gridAlignment"] == "tile-centres-v1" and block["binary"] == X.COLLISION_BIN
         assert block["sha256"] == hashlib.sha256((folder / X.COLLISION_BIN).read_bytes()).hexdigest()
         assert block["sourceSnapshotSha256"] == hashlib.sha256(region.encode()).hexdigest()
+        assert block["roadSurfacePolicy"] == X.ROAD_SURFACE_POLICY
         assert (grid.width, grid.height) == (CELLS, CELLS)
 
 

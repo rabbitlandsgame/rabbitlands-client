@@ -8,7 +8,7 @@ import re
 import tarfile
 from urllib.request import urlopen
 
-ROOTS = ("godot-client", "eloria-assets/maps", "eloria-assets/concepts",
+ROOTS = ("godot-client", "eloria-assets/maps", "eloria-assets/world", "eloria-assets/concepts",
          "eloria-assets/fonts", "eloria-assets/tools")
 PARENTS = {PurePosixPath(root).parent.as_posix() for root in ROOTS}
 BATCH_BYTES = 128 * 1024**2

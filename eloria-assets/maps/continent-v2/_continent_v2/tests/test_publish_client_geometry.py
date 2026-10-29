@@ -91,7 +91,7 @@ def check_estimate(cell, child_path, child, factor):
     prototypes = drawn_prototypes(child_path, child, factor)
     assert cell.get("sharedMeshResidentBytes", {}) == prototypes, (cell["id"], "the prototypes it draws")
     assert cell["estimatedResidentBytes"] == cell["geometryResidentBytes"] + sum(
-        cell["sharedResourceResidentBytes"].values()) + sum(prototypes.values()), cell["id"]
+        cell["sharedResourceResidentBytes"].values()) + sum(prototypes.values()) + cell.get("roadGroundResidentBytes", 0), cell["id"]
 
 
 def legacy_manifests():

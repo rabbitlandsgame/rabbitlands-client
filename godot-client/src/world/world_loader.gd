@@ -25,6 +25,7 @@ const GraphicsOptions := preload("res://src/world/graphics_options.gd")
 const GeometrySources := preload("res://src/world/map_geometry_texture_sources.gd")
 const MaterialOwnership := preload("res://src/world/prepared_material_ownership.gd")
 const MapMaterialPreparation := preload("res://src/world/map_material_preparation.gd")
+const RoadGround := preload("res://src/world/road_ground/road_ground.gd")
 
 # Static-instance batching. A region such as Four Gates imports ~1700 mesh
 # nodes that between them reference only 42 meshes, so almost every draw call
@@ -153,6 +154,8 @@ var _cached_collision_faces: Dictionary = {}
 ## CPU arrays give its collision faces (`_trimesh_shape`). Empty otherwise.
 var _cpu_meshes: Dictionary = {}
 var _cached_paving: Dictionary = {}
+var _road_ground_prepared: Dictionary = {}
+var _road_ground_bound := false
 
 # A preloader builds a private tree on one worker. It never enters the active
 # SceneTree, writes a disk cache, or mutates the shared digest registry there.
@@ -192,6 +195,7 @@ func release_world(detach := true, publish_prepared := true, admission_token: Di
 	# still owned. Stale/failed materialization must not acknowledge physical
 	# release while a CACHE_MODE_REUSE alias survives. Never instantiate here.
 	ResourceAdmission.retain_prepared(admission_token, _prepared_native.get("resource") as Resource)
+	ResourceAdmission.retain_prepared(admission_token, _road_ground_prepared.get("data") as Resource)
 	var geometry_resource := _geometry_native.get("resource") as Resource
 	# Split preparation can already own pooled/imported textures before its
 	# unbound PackedScene references them. A fresh Resource-only carrier also
@@ -214,6 +218,8 @@ func release_world(detach := true, publish_prepared := true, admission_token: Di
 		_materialize_prepared_world()
 	else:
 		_prepared_native.clear() # Stale completion: release Resources without Nodes.
+	if publish_prepared and is_instance_valid(world_root) and not _bind_road_ground():
+		unload_world()
 	_cache_write_countdown = 0
 	_release_snapshot()
 	var resident := {"root": world_root, "manifest": manifest,
@@ -226,6 +232,8 @@ func release_world(detach := true, publish_prepared := true, admission_token: Di
 	_deferred_stream_arrival = Vector3.INF
 	scenery_pending = false
 	_prepared_visuals = {}
+	_road_ground_prepared.clear()
+	_road_ground_bound = false
 	if detach and is_instance_valid(world_root) and world_root.get_parent() != null:
 		world_root.get_parent().remove_child(world_root)
 	world_root = null
@@ -344,6 +352,16 @@ func load_world(manifest_path: String, arrival := Vector3.INF, wait_for_arrival 
 		load_failed.emit(external_errors)
 		push_error("world_load stage=external_resources errors=%s" % [external_errors])
 		return
+	var road_began := Time.get_ticks_usec()
+	_road_ground_prepared = RoadGround.prepare(manifest.road_ground_config(), manifest.source_path)
+	ResourceDiagnostics.record(_resource_timings, &"road_ground_prepare", road_began)
+	if not bool(_road_ground_prepared.get("ok", false)):
+		load_failed.emit(["road_ground_prepare: " + str(_road_ground_prepared.get("error", "invalid road data"))])
+		return
+	var road_data := _road_ground_prepared.get("data") as Resource
+	if road_data != null:
+		manifest.road_ground_verified = (road_data.get("dependencies") as Dictionary).duplicate()
+	mark = _phase(&"roadGroundPrepare", mark)
 	# Prepared resources use an exact format/mip/engine variant. Source
 	# verification above remains mandatory. Workers publish Resources only;
 	# release_world() materializes their Node tree on the main thread.
@@ -544,12 +562,30 @@ func load_world(manifest_path: String, arrival := Vector3.INF, wait_for_arrival 
 	LookFoliage.paint_loaded(world_root, manifest)
 	GauntletSurfaceContrast.apply(manifest, world_root)
 	_apply_underground_scenery()
+	if not detached_build and not _bind_road_ground():
+		_dispose_import_node(world_root)
+		world_root = null
+		return
 	mark = _phase(&"lookBinding", mark)
 	load_phases[&"total"] = mark - began
 	load_completed.emit(manifest)
 	if cache_status == &"miss" and not detached_build:
 		_cache_write_countdown = CACHE_WRITE_DELAY_FRAMES
 		set_process(true)
+
+func _bind_road_ground() -> bool:
+	if geometry_capture or _road_ground_bound or manifest == null or manifest.road_ground_config().is_empty(): return true
+	if OS.get_thread_caller_id() != OS.get_main_thread_id():
+		push_error("road ground publication requires the main thread")
+		return false
+	var began := Time.get_ticks_usec()
+	var result: Dictionary = RoadGround.bind(world_root, manifest, _road_ground_prepared)
+	ResourceDiagnostics.record(_resource_timings, &"road_ground_bind", began)
+	if not bool(result.get("ok", false)):
+		load_failed.emit(["road_ground_bind: " + str(result.get("error", "invalid road publication"))])
+		return false
+	_road_ground_bound = true
+	return true
 
 func ensure_chunk_arrival(position: Vector3) -> bool:
 	if not world_root is ContinentChunkStream:
@@ -653,6 +689,10 @@ func _materialize_geometry_world() -> bool:
 	LookFoliage.paint_loaded(world_root,manifest)
 	GauntletSurfaceContrast.apply(manifest,world_root)
 	_apply_underground_scenery()
+	if not _bind_road_ground():
+		_dispose_import_node(world_root)
+		world_root = null
+		return false
 	MaterialOwnership.refresh(world_root)
 	load_phases[&"geometryLookBinding"] = Time.get_ticks_usec()-look_began
 	loaded_from_cache = true
@@ -722,12 +762,19 @@ func _materialize_prepared_world() -> bool:
 	LookFoliage.paint_loaded(world_root, manifest)
 	GauntletSurfaceContrast.apply(manifest, world_root)
 	_apply_underground_scenery()
+	if not _bind_road_ground():
+		_dispose_import_node(world_root)
+		world_root = null
+		return false
 	load_phases[&"preparedPublish"] = Time.get_ticks_usec() - began
 	load_phases[&"total"] = int(load_phases.get(&"total", 0)) + int(load_phases[&"preparedPublish"])
 	load_completed.emit(manifest)
 	return true
 
 func _load_from_cache(mark: int, began: int) -> bool:
+	# Road data is bound to pristine native/raw geometry after the snapshot;
+	# never serialize its per-load Resource carriers into a legacy scene cache.
+	if manifest != null and not manifest.road_ground_config().is_empty(): return false
 	if not (detached_cache_enabled if detached_build else MapSceneCache.is_enabled()):
 		cache_status = &"disabled"
 		return false
@@ -1433,6 +1480,8 @@ static func _is_authored_base_terrain(node_name: StringName,
 	return false
 
 func unload_world() -> void:
+	_road_ground_prepared.clear()
+	_road_ground_bound = false
 	_prepared_native.clear()
 	_geometry_native.clear()
 	_deferred_stream_arrival = Vector3.INF

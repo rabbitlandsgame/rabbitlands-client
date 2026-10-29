@@ -429,7 +429,7 @@ func _target(spec: Dictionary) -> Dictionary:
 			_error("retired prototype target: " + prototype)
 			return {}
 		var pool_entry: Dictionary = MeshPool.index_for(path).get(prototype, {})
-		token = Vram.cache_token({"externalResources": pool_entry.get("images", {})}, path.get_base_dir())
+		token = Vram.cache_token(MeshPool._image_manifest(pool_entry), path.get_base_dir())
 		native = MeshPool.acquire(prototype, path)
 	else:
 		_error("unknown target kind: " + kind)

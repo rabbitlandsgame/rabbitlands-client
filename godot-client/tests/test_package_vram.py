@@ -22,6 +22,7 @@ from __future__ import annotations
 import hashlib
 import json
 import shutil
+import struct
 import subprocess
 import sys
 import tempfile
@@ -96,6 +97,126 @@ class Check(unittest.TestCase):
         shutil.rmtree(self.vram)
         with self.assertRaisesRegex(packager.PackageError, "no sidecar and no exclusion reason"):
             packager.check_vram_textures(self.stage)
+
+    @staticmethod
+    def write_glb(path, document):
+        raw = json.dumps(document).encode("utf-8")
+        raw += b" " * (-len(raw) % 4)
+        path.write_bytes(b"glTF" + struct.pack("<II", 2, 20 + len(raw))
+                         + struct.pack("<II", len(raw), 0x4E4F534A) + raw)
+
+    def canonicalize_sources(self):
+        """One raw image copy; the original policy directory keeps only VRAM files."""
+        path = self.stage / MAP / "world.json"
+        manifest = json.loads(path.read_text(encoding="utf-8"))
+        renamed = {}
+        for uri in manifest["externalResources"]:
+            old = self.stage / MAP / uri
+            new_uri = "../canonical/" + old.name
+            new = self.stage / MAP / new_uri
+            new.parent.mkdir(parents=True, exist_ok=True)
+            old.rename(new)
+            renamed[uri] = new_uri
+        manifest["externalResources"] = {renamed[uri]: sha for uri, sha in manifest["externalResources"].items()}
+        manifest["externalImagePolicies"] = {uri: ["shared-assets"] for uri in renamed.values()}
+        path.write_text(json.dumps(manifest), encoding="utf-8")
+        glb = self.stage / MAP / "world.glb"
+        document = packager.gltf_document(glb)
+        for image in document["images"]:
+            if "uri" not in image:
+                continue
+            image["uri"] = renamed[image["uri"]]
+            image.setdefault("extras", {})[packager.TEXTURE_POLICY_DIRECTORY_KEY] = "shared-assets"
+        self.write_glb(glb, document)
+        return manifest, document
+
+    def test_canonical_sources_keep_their_original_sidecar_directory(self):
+        self.canonicalize_sources()
+        self.assertEqual(list(self.vram.parent.iterdir()), [self.vram])
+        packager.check_vram_textures(self.stage)
+
+    def test_a_changed_canonical_source_fails_its_original_hash(self):
+        manifest, _ = self.canonicalize_sources()
+        source = self.stage / MAP / next(iter(manifest["externalResources"]))
+        source.write_bytes(source.read_bytes() + b"changed")
+        with self.assertRaisesRegex(packager.PackageError, "source sha256 differs"):
+            packager.check_vram_textures(self.stage)
+
+    def test_canonical_directory_sidecars_cannot_replace_the_original_policy(self):
+        self.canonicalize_sources()
+        shutil.copytree(self.vram, self.stage / MAP.parent / "canonical/vram")
+        shutil.rmtree(self.vram)
+        with self.assertRaisesRegex(packager.PackageError, "no sidecar and no exclusion reason.*shared-assets"):
+            packager.check_vram_textures(self.stage)
+
+    def test_a_descriptor_cannot_silently_change_its_declared_policy(self):
+        _, document = self.canonicalize_sources()
+        next(image for image in document["images"] if "uri" in image)["extras"][packager.TEXTURE_POLICY_DIRECTORY_KEY] = "../canonical"
+        self.write_glb(self.stage / MAP / "world.glb", document)
+        with self.assertRaisesRegex(packager.PackageError, "policy directory disagrees"):
+            packager.check_vram_textures(self.stage)
+
+    def test_policy_metadata_must_name_a_declared_image_inside_the_asset_tree(self):
+        manifest, _ = self.canonicalize_sources()
+        path = self.stage / MAP / "world.json"
+        uri = next(iter(manifest["externalResources"]))
+        for invalid in ([], "shared-assets", ["../../../../outside"], ["C:/outside"], ["%2e%2e/outside"]):
+            with self.subTest(invalid=invalid):
+                manifest["externalImagePolicies"][uri] = invalid
+                path.write_text(json.dumps(manifest), encoding="utf-8")
+                with self.assertRaises(packager.PackageError):
+                    packager.check_vram_textures(self.stage)
+        manifest["externalImagePolicies"][uri] = ["shared-assets"]
+        manifest["externalImagePolicies"]["not-declared.png"] = ["shared-assets"]
+        path.write_text(json.dumps(manifest), encoding="utf-8")
+        with self.assertRaisesRegex(packager.PackageError, "undeclared image"):
+            packager.check_vram_textures(self.stage)
+
+    def test_policy_descriptors_reject_encoded_paths(self):
+        _, document = self.canonicalize_sources()
+        next(image for image in document["images"] if "uri" in image)["extras"][packager.TEXTURE_POLICY_DIRECTORY_KEY] = "%73hared-assets"
+        self.write_glb(self.stage / MAP / "world.glb", document)
+        with self.assertRaisesRegex(packager.PackageError, "unsafe rl_texture_policy_directory"):
+            packager.check_vram_textures(self.stage)
+
+    def test_prototype_only_policy_is_checked_even_without_a_world_resource(self):
+        manifest, document = self.canonicalize_sources()
+        pool = self.stage / "eloria-assets/maps/_shared/meshes"
+        pool.mkdir(parents=True)
+        resources = {"../../canonical/" + Path(uri).name: sha
+                     for uri, sha in manifest["externalResources"].items()}
+        policies = {uri: ["../../vram_fixture/shared-assets"] for uri in resources}
+        for image in document["images"]:
+            if "uri" not in image:
+                continue
+            image["uri"] = "../../canonical/" + Path(image["uri"]).name
+            image["extras"][packager.TEXTURE_POLICY_DIRECTORY_KEY] = "../../vram_fixture/shared-assets"
+        self.write_glb(pool / "prototype.glb", document)
+        (pool / "index.json").write_text(json.dumps({"prototypes": {"prototype": {
+            "images": resources, "imagePolicies": policies}}}), encoding="utf-8")
+        (self.stage / MAP / "world.json").unlink()
+        packager.check_vram_textures(self.stage)
+        (self.vram / "index.json").unlink()
+        with self.assertRaisesRegex(packager.PackageError, "no sidecar and no exclusion reason"):
+            packager.check_vram_textures(self.stage)
+
+    def test_road_only_style_keeps_its_source_fallback_without_a_new_sidecar(self):
+        path = self.stage / MAP / "world.json"
+        manifest = json.loads(path.read_text(encoding="utf-8"))
+        raw = self.stage / MAP / "road-only.png"
+        raw.write_bytes(b"source pixels")
+        sha = hashlib.sha256(raw.read_bytes()).hexdigest()
+        metadata = self.stage / MAP / "roads.json"
+        metadata.write_text(json.dumps({"schema": "rabbitlands-road-terrain-blend-v1",
+            "resources": {raw.name: sha}, "externalImagePolicies": {raw.name: ["original-road-policy"]},
+            "styles": [{"externalResources": {raw.name: sha}, "material_document": {"images": [{
+                "uri": raw.name, "extras": {packager.TEXTURE_POLICY_DIRECTORY_KEY: "original-road-policy"}}]}}]}),
+            encoding="utf-8")
+        manifest["roadGround"] = {"metadata": metadata.name,
+                                  "sha256": hashlib.sha256(metadata.read_bytes()).hexdigest()}
+        path.write_text(json.dumps(manifest), encoding="utf-8")
+        self.assertFalse((self.stage / MAP / "original-road-policy").exists())
+        packager.check_vram_textures(self.stage)
 
 
 class SharedPools(unittest.TestCase):
@@ -392,9 +513,22 @@ class StageCommittedMaps(unittest.TestCase):
         shutil.copyfile(registry_file, dropped_file)
         read_text = Path.read_text
         staged: set[str] = set()
+        # Post-copy checks read the staged world manifests and fully verify
+        # their road field closure. Materialize only that small required set;
+        # record all other selected files without copying the full map GLBs.
+        required = set(manifests)
+        for relative in manifests:
+            data = json.loads((CHECKOUT / relative).read_text(encoding="utf-8-sig"))
+            if isinstance(data, dict) and "roadGround" in data:
+                required.update(path.relative_to(CHECKOUT.resolve()).as_posix() for path in
+                                packager.road_dependencies(CHECKOUT, CHECKOUT / relative, data["roadGround"]))
 
         def copy_file(source: Path, target: Path) -> int:
-            staged.add(target.relative_to(stage).as_posix())
+            relative = target.relative_to(stage).as_posix()
+            staged.add(relative)
+            if relative in required:
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(source, target)
             return 0
 
         def read_dropped_registry(path: Path, *args, **kwargs) -> str:

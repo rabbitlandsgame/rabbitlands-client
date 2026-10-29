@@ -665,6 +665,13 @@ static func material_areas(ground: Array[MeshInstance3D]) -> Dictionary:
 ## trims fade across (none when empty).
 static func painted_for(source: Material, kind: Kind, mesh: Mesh, surface: int,
 		region := "", paving := PackedVector4Array(), area := Rect2()) -> Material:
+	var has_colour: bool = mesh != null and (mesh.surface_get_format(surface) & Mesh.ARRAY_FORMAT_COLOR) != 0
+	return painted_source_for(source, kind, has_colour, region, paving, area)
+
+## Portable road fields retain the authored material and colour contract, but
+## have no road mesh. Use the same maintained styling without a dummy mesh.
+static func painted_source_for(source: Material, kind: Kind, has_colour: bool,
+		region := "", paving := PackedVector4Array(), area := Rect2()) -> Material:
 	if source is ShaderMaterial:
 		var shader := (source as ShaderMaterial).shader
 		if shader != null and shader.resource_path == BIOME_SHADER_PATH:
@@ -697,7 +704,6 @@ static func painted_for(source: Material, kind: Kind, mesh: Mesh, surface: int,
 	# a worn road: it stays a bridge.
 	if kind == Kind.DECK and not blended and not standard.vertex_color_use_as_albedo:
 		return null
-	var has_colour: bool = (mesh.surface_get_format(surface) & Mesh.ARRAY_FORMAT_COLOR) != 0
 	var painted := ShaderMaterial.new()
 	painted.resource_name = standard.resource_name
 	painted.set_meta(LookProfile.SOURCE_META, source)

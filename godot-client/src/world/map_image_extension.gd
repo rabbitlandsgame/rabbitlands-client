@@ -33,6 +33,7 @@ const MIME_PREFIX := "image/x-eloria-map;"
 const PLACEHOLDER_URI := "data:application/octet-stream;base64,AA=="
 const ORIGINALS_KEY := &"eloria_vram_originals"
 const PREPARED_KEY := &"eloria_vram_prepared"
+const SOURCE_ERRORS_KEY := &"rl_verified_image_source_errors"
 ## Pool threads one chunk worker's images may use at once. Uncapped (-1) a
 ## streamed cell's preparation could take as many low-priority threads as
 ## Godot's low_priority_thread_ratio allows for the whole streaming window;
@@ -56,16 +57,21 @@ func _import_preflight(state: GLTFState, _extensions: PackedStringArray) -> Erro
 	# or pooled by another map) is used only where it was encoded for them.
 	var document_roles := VramTextures.image_roles(state.get_json())
 	var base := state.get_base_path()
+	var requested_skip := int((plan as Dictionary).get("mip_skip", -1))
+	var verify_source_sha := bool((plan as Dictionary).get("verify_source_sha", false))
 	var jobs: Array[Dictionary] = []
 	var by_sha: Dictionary = {}
 	var assigned: Dictionary = {}
 	var pooled: Dictionary = {}
 	var private: Dictionary = {}
+	var pool_keys: Dictionary = {}
 	for index: int in images.size():
 		var descriptor: Variant = images[index]
 		if not descriptor is Dictionary or not (descriptor as Dictionary).has("uri"):
 			continue
 		var uri := str((descriptor as Dictionary).uri)
+		if bool((plan as Dictionary).get("eligible_only", false)) and not bool(descriptor.get("extras", {}).get("rl_texture_sidecar_eligible", false)):
+			continue
 		if uri.begins_with("data:") or not resources.has(uri):
 			continue
 		var sha := str(resources[uri])
@@ -73,38 +79,56 @@ func _import_preflight(state: GLTFState, _extensions: PackedStringArray) -> Erro
 			continue
 		var roles: Dictionary = document_roles.get(index, {})
 		var source := base.path_join(uri.uri_file_decode()).simplify_path()
-		var shared := ExternalTexturePool._published(sha)
+		var policy_directory := VramTextures.image_policy_directory(descriptor, base)
+		var explicit_policy := VramTextures.has_image_policy(descriptor)
+		var job_key := sha + "|policy=" + policy_directory if explicit_policy else sha
+		if policy_directory.is_empty(): return ERR_INVALID_DATA
+		if VramTextures.has_image_policy(descriptor):
+			var policies: Variant = (plan as Dictionary).get("policies", {})
+			var declared: Variant = (policies as Dictionary).get(uri) if policies is Dictionary else null
+			if not declared is Array or not (declared as Array).has((descriptor.extras as Dictionary)[VramTextures.POLICY_DIRECTORY_EXTRA]):
+				return ERR_INVALID_DATA
+		var shared: Texture2D = null if explicit_policy else ExternalTexturePool._published(sha)
 		if shared != null:
-			if VramTextures.pooled_fits(shared, sha, source.get_base_dir(), roles):
+			if VramTextures.pooled_fits(shared, sha, policy_directory, roles, VramTextures.has_image_policy(descriptor)):
 				pooled[index] = shared
 				continue
 			# Another map's sidecar, encoded for other roles: this map decodes
 			# its own copy, which share() neither replaces nor publishes.
 			private[index] = true
-		var job: Dictionary = by_sha.get(sha, {})
+		var job: Dictionary = by_sha.get(job_key, {})
 		if job.is_empty():
 			job = {"sha": sha, "source": source, "roles": {},
-				"sidecar": VramTextures.sidecar_entry(sha, source.get_base_dir())}
-			by_sha[sha] = job
+				"sidecar": VramTextures.sidecar_entry(sha, policy_directory), "explicit_policy": explicit_policy, "policy_directory": policy_directory, "indices": [], "mip_skip": requested_skip,
+				"verify_source_sha": verify_source_sha}
+			by_sha[job_key] = job
 			jobs.append(job)
 		(job.roles as Dictionary).merge(roles)
 		if private.has(index):
 			job["private"] = true
 		assigned[index] = job
+		(job.indices as Array).append(index)
 	if assigned.is_empty() and pooled.is_empty():
 		return ERR_SKIP
 	var role_mismatches := 0
+	var pending: Array[Dictionary] = []
 	for job: Dictionary in jobs:
 		var sidecar: Dictionary = job.sidecar
-		if sidecar.is_empty():
-			continue
-		if bool(job.get("private", false)) or not VramTextures.sidecar_fits(sidecar, job.roles):
+		if not sidecar.is_empty() and (bool(job.get("private", false)) or not VramTextures.sidecar_fits(sidecar, job.roles)):
 			job["sidecar"] = {}
 			role_mismatches += 1
 			VramTextures.note_decoded_instead(str(job.sha))
-			VramTextures._warn_once(str(job.sha), "vram_textures: %s is sampled as %s here, which sidecar %s (%s) was not encoded for; decoding it" % [
-				str(job.source).get_file(), "+".join(PackedStringArray((job.roles as Dictionary).keys())),
-				str(sidecar.file), "+".join(PackedStringArray(sidecar.get("roles", VramTextures.RECIPE_ROLES.get(str(sidecar.recipe), []))))])
+		if bool(job.explicit_policy):
+			var key := VramTextures.variant_pool_key(str(job.sha), job.sidecar, str(job.policy_directory), requested_skip)
+			var held := ExternalTexturePool._published(key)
+			if held != null:
+				for image_index: int in job.indices:
+					pooled[image_index] = held
+					pool_keys[image_index] = key
+					assigned.erase(image_index)
+				continue
+		pending.append(job)
+	jobs = pending
 
 	var began := Time.get_ticks_usec()
 	if not jobs.is_empty():
@@ -141,11 +165,21 @@ func _import_preflight(state: GLTFState, _extensions: PackedStringArray) -> Erro
 
 	var originals: Dictionary = {}
 	var prepared: Dictionary = {}
+	var source_errors: Dictionary = {}
 	for index: int in assigned:
 		var job: Dictionary = assigned[index]
 		var descriptor: Dictionary = images[index]
 		originals[index] = [descriptor.get("uri"), descriptor.get("mimeType")]
+		if bool(job.get("explicit_policy", false)):
+			pool_keys[index] = VramTextures.variant_pool_key(str(job.sha), job.sidecar if str(job.get("kind", "")) == "sidecar" else {}, str(job.policy_directory), requested_skip)
 		var image: Image = job.get("image")
+		if image == null and verify_source_sha:
+			# Keep GLTF away from the ordinary URI fallback/ResourceLoader path.
+			# This private sentinel is never published: postparse returns failure,
+			# and scenery callers also inspect SOURCE_ERRORS_KEY before generation.
+			source_errors[index] = str(job.get("error", "image_decode"))
+			image = Image.create(1, 1, false, Image.FORMAT_RGBA8)
+			image.fill(Color(0, 0, 0, 0))
 		if image != null:
 			prepared[index] = image
 			descriptor["uri"] = PLACEHOLDER_URI
@@ -161,8 +195,10 @@ func _import_preflight(state: GLTFState, _extensions: PackedStringArray) -> Erro
 		descriptor["mimeType"] = MIME_PREFIX + "pooled;" + str(index)
 	state.set_additional_data(ORIGINALS_KEY, originals)
 	state.set_additional_data(PREPARED_KEY, prepared)
+	state.set_additional_data(SOURCE_ERRORS_KEY, source_errors)
 	state.set_additional_data(VramTextures.POOLED_KEY, pooled)
 	state.set_additional_data(VramTextures.PRIVATE_KEY, private)
+	state.set_additional_data(VramTextures.POOL_KEYS_KEY, pool_keys)
 	state.set_additional_data(VramTextures.DONE_KEY, {})
 	state.set_additional_data(VramTextures.STATS_KEY, stats)
 	return OK
@@ -205,4 +241,5 @@ func _import_post_parse(state: GLTFState) -> Error:
 				descriptor["mimeType"] = original[1]
 	# GLTFState keeps its own reference to each source image; ours is done.
 	state.set_additional_data(PREPARED_KEY, {})
-	return OK
+	var failures: Variant = state.get_additional_data(SOURCE_ERRORS_KEY)
+	return ERR_FILE_CORRUPT if failures is Dictionary and not failures.is_empty() else OK

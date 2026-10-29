@@ -49,6 +49,7 @@ extends Node3D
 ## main camera's gameplay layer only (the map cameras never see it).
 
 const SHADER := preload("res://src/world/look/grass_beds.gdshader")
+const RoadGround := preload("res://src/world/road_ground/road_ground.gd")
 const SeasonSurfaces = preload("res://src/world/season_surfaces.gd")
 const GraphicsOptions := preload("res://src/world/graphics_options.gd")
 const NODE_NAME := "LookGrassBeds"
@@ -745,6 +746,14 @@ func _classify(hit: Dictionary, up: Vector3, patches: Array[Dictionary],
 		else Vector3(0.0, 1.0, 0.0)
 	if int(cover.x) == 1:
 		return Vector3(Ground.PATH, 0.0, palette)
+	if kind == Surface.TERRAIN:
+		var road: Dictionary = RoadGround.query(body.node, point)
+		if bool(road.get("present", false)):
+			var alpha: float = float(road.coverage)
+			if alpha >= LookProfile.GRASS_VERGE_ALPHA.y:
+				return Vector3(Ground.PATH, 0.0, palette)
+			return Vector3(Ground.VERGE, verge_strength(alpha, cell_hash) * slope
+				* _rim_grass(point, cell_hash) * paving, palette)
 	if kind == Surface.DECK:
 		var alpha := _vertex_colour(body, hit).a
 		if alpha >= LookProfile.GRASS_VERGE_ALPHA.y or _road_beneath(hit, collider, up):
@@ -1054,8 +1063,15 @@ func _surface_of(collider: CollisionObject3D) -> Dictionary:
 ## deck with coverage) or is opaque, whether its vertex colour is its colour.
 static func _material_facts(node: MeshInstance3D) -> Dictionary:
 	var material := node.get_active_material(0)
-	while material != null and material.has_meta(SeasonSurfaces.SOURCE_META):
-		material = material.get_meta(SeasonSurfaces.SOURCE_META) as Material
+	for _hop: int in 8:
+		if material != null and material.has_meta(SeasonSurfaces.SOURCE_META):
+			material = material.get_meta(SeasonSurfaces.SOURCE_META) as Material
+		elif material != null and material.has_meta(RoadGround.MATERIAL_META):
+			# A structural road composite preserves the underlying patch's
+			# class/alpha; its private shader identity is not a new ground type.
+			material = material.get_meta(RoadGround.MATERIAL_META) as Material
+		else:
+			break
 	var coloured: bool = (int(node.mesh.surface_get_format(0)) & Mesh.ARRAY_FORMAT_COLOR) != 0
 	if material is ShaderMaterial and material.has_meta(LookGround.PAINTED_META):
 		var painted := material as ShaderMaterial

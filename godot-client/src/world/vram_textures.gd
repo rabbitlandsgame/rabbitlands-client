@@ -291,7 +291,9 @@ static func force_formats(mask: int) -> void:
 # --------------------------------------------------------------------------
 
 static func _normalise(directory: String) -> String:
-	return ProjectSettings.globalize_path(directory).replace("\\", "/").simplify_path()
+	# Exported PCKs can globalize res:// to a relative path. Use one physical
+	# spelling before policy-directory deduplication and index-cache lookup.
+	return runtime_absolute(directory)
 
 ## The index beside the images in `source_directory` (its `vram/index.json`),
 ## read once per directory: {status: "ok" | "missing" | "rejected:<why>",
@@ -421,6 +423,106 @@ static func sidecar_entry(sha: String, source_directory: String) -> Dictionary:
 ## material is "base_cutout"). The same walk as the tool's image_roles: every
 ## slot key anywhere in a material, extensions included; a texture's source
 ## may come from a texture extension.
+const POLICY_DIRECTORY_EXTRA := "rl_texture_policy_directory"
+const POLICY_COLLECTION := "externalImagePolicies"
+const POOL_KEYS_KEY := &"rl_image_pool_keys"
+static var _policy_discovery := false
+
+static func resource_root(globalized: String, executable: String) -> String:
+	var root := globalized.replace("\\", "/").simplify_path()
+	if root.is_empty() or not root.is_absolute_path() or root.begins_with("res://"):
+		root = executable.replace("\\", "/").get_base_dir().simplify_path()
+	return root.trim_suffix("/")
+
+static func runtime_absolute(path: String) -> String:
+	var root := resource_root(ProjectSettings.globalize_path("res://"), OS.get_executable_path())
+	if path.begins_with("res://"):
+		return root.path_join(path.trim_prefix("res://")).simplify_path()
+	var absolute := ProjectSettings.globalize_path(path).replace("\\", "/").simplify_path()
+	return absolute if absolute.is_absolute_path() else root.path_join(absolute).simplify_path()
+
+## Canonical pixel location and original sidecar policy are independent.
+## Explicit policies are relative to the GLB and stay within its map asset tree.
+static func image_policy_directory(descriptor: Dictionary, glb_directory: String) -> String:
+	var extras: Variant = descriptor.get("extras", {})
+	if not extras is Dictionary or not (extras as Dictionary).has(POLICY_DIRECTORY_EXTRA):
+		return _normalise(glb_directory.path_join(str(descriptor.get("uri", "")).uri_file_decode()).get_base_dir())
+	var uri: Variant = (extras as Dictionary)[POLICY_DIRECTORY_EXTRA]
+	if not uri is String or uri.is_empty() or uri.is_absolute_path() or ":" in uri or "\\" in uri or "%" in uri:
+		return ""
+	var decoded := (uri as String).uri_file_decode()
+	if decoded.is_absolute_path() or ":" in decoded or "\\" in decoded:
+		return ""
+	var base := runtime_absolute(glb_directory)
+	var map_root := runtime_absolute("res://../eloria-assets/maps")
+	var world_root := runtime_absolute("res://assets/world")
+	if base == world_root or base.begins_with(world_root + "/"):
+		map_root = world_root
+	elif not (base == map_root or base.begins_with(map_root + "/")):
+		return ""
+	var directory := _normalise(base.path_join(decoded))
+	return directory if directory == map_root or directory.begins_with(map_root + "/") else ""
+
+## Missing collections are legacy packages. An explicit collection must be
+## complete enough to validate every declared directory before IO or parsing.
+static func image_policy_errors(manifest_data: Dictionary, glb_directory: String) -> Array[String]:
+	var failures: Array[String] = []
+	if not manifest_data.has(POLICY_COLLECTION): return failures
+	var policies: Variant = manifest_data[POLICY_COLLECTION]
+	if not policies is Dictionary:
+		failures.append("externalImagePolicies must be a URI-to-directory-list object")
+		return failures
+	var resources: Variant = manifest_data.get("externalResources", {})
+	if not resources is Dictionary:
+		failures.append("externalImagePolicies requires an externalResources object")
+		return failures
+	for key: Variant in policies:
+		if not key is String or not (resources as Dictionary).has(key):
+			failures.append("externalImagePolicies has an undeclared resource key: " + str(key))
+			continue
+		var uri: String = key
+		var decoded := uri.uri_file_decode()
+		if uri.is_empty() or uri.is_absolute_path() or "%" in uri or ":" in decoded or "\\" in decoded or decoded.is_absolute_path():
+			failures.append("externalImagePolicies has an unsafe resource URI: " + uri)
+			continue
+		var values: Variant = (policies as Dictionary)[key]
+		if not values is Array or (values as Array).is_empty():
+			failures.append("externalImagePolicies requires a nonempty directory array: " + uri)
+			continue
+		for value: Variant in values:
+			if not value is String or image_policy_directory({"extras": {POLICY_DIRECTORY_EXTRA: value}}, glb_directory).is_empty():
+				failures.append("externalImagePolicies has an unsafe policy directory: " + uri)
+	return failures
+
+static func has_image_policy(descriptor: Dictionary) -> bool:
+	var extras: Variant = descriptor.get("extras", {})
+	return extras is Dictionary and (extras as Dictionary).has(POLICY_DIRECTORY_EXTRA)
+
+## Explicit policy uses share by the representation actually uploaded, not by
+## directory. A rejected EVT gets the raw key after prepare(), never the EVT key.
+static func set_policy_discovery(enabled: bool) -> void:
+	_policy_discovery = enabled
+
+static func variant_pool_key(sha: String, entry: Dictionary = {}, policy_directory := "", requested_skip := -1) -> String:
+	var variant := "raw" if entry.is_empty() else "evt:%s:%s:%s" % [
+		str(entry.get("sha256", "")), str(entry.get("recipe", "")), str(entry.get("format", ""))]
+	var key := "%s|%s|mip-skip=%d" % [sha, variant, GraphicsOptions.active_texture_skip() if requested_skip < 0 else requested_skip]
+	return key + "|discovery=" + _normalise(policy_directory) if _policy_discovery else key
+
+static func policy_directory_list(manifest_data: Dictionary, uri: String, glb_directory: String) -> PackedStringArray:
+	var policies: Variant = manifest_data.get(POLICY_COLLECTION, {})
+	if not policies is Dictionary or not (policies as Dictionary).has(uri):
+		return PackedStringArray([_normalise(glb_directory.path_join(uri).get_base_dir())])
+	var declared: Variant = (policies as Dictionary)[uri]
+	if not declared is Array or declared.is_empty(): return PackedStringArray()
+	var out := PackedStringArray()
+	for value: Variant in declared:
+		var directory := image_policy_directory({"extras": {POLICY_DIRECTORY_EXTRA: value}}, glb_directory)
+		if directory.is_empty(): return PackedStringArray()
+		if not out.has(directory): out.append(directory)
+	out.sort()
+	return out
+
 static func image_roles(document: Dictionary) -> Dictionary:
 	var sources: Array = []
 	for texture: Variant in document.get("textures", []):
@@ -480,13 +582,13 @@ static func sidecar_fits(entry: Dictionary, roles: Dictionary) -> bool:
 ## serve `roles` here. A decoded one serves any role; one uploaded from a
 ## sidecar only the roles that sidecar fits, judged by the index of the
 ## image's own directory (`source_directory`, read here if it was not yet).
-static func pooled_fits(texture: Texture2D, sha: String, source_directory: String, roles: Dictionary) -> bool:
+static func pooled_fits(texture: Texture2D, sha: String, source_directory: String, roles: Dictionary, strict_policy := false) -> bool:
 	if roles.is_empty() or not texture is ImageTexture:
 		return true
 	if not IMAGE_FORMATS.values().has((texture as ImageTexture).get_format()):
 		return true
 	var entry: Dictionary = (index_for_directory(source_directory).images as Dictionary).get(sha, {})
-	if entry.is_empty():
+	if entry.is_empty() and not strict_policy:
 		entry = lookup(sha)
 	return not entry.is_empty() and sidecar_fits(entry, roles)
 
@@ -517,7 +619,8 @@ static func image_directories(manifest_data: Dictionary, glb_directory: String) 
 	var resources: Variant = manifest_data.get("externalResources", {})
 	if resources is Dictionary:
 		for uri: Variant in resources:
-			directories[_normalise(glb_directory.path_join(str(uri)).get_base_dir())] = true
+			for directory: String in policy_directory_list(manifest_data, str(uri), glb_directory):
+				directories[directory] = true
 	var sorted := PackedStringArray(directories.keys())
 	sorted.sort()
 	return sorted
@@ -534,7 +637,8 @@ static func image_directories_by_sha(manifest_data: Dictionary, glb_directory: S
 			var sha := str((resources as Dictionary)[uri])
 			if not by_sha.has(sha):
 				by_sha[sha] = {}
-			by_sha[sha][_normalise(glb_directory.path_join(str(uri)).get_base_dir())] = true
+			for directory: String in policy_directory_list(manifest_data, str(uri), glb_directory):
+				by_sha[sha][directory] = true
 	for sha: String in by_sha:
 		var sorted := PackedStringArray((by_sha[sha] as Dictionary).keys())
 		sorted.sort()
@@ -584,7 +688,9 @@ static func lookup(sha: String) -> Dictionary:
 ## named for, keeps the published figure until a successful reduced CPU decode
 ## supplies its dimensions/mips. That corrected fallback remains conservative
 ## RGBA8 and never lowers unknown or incompatible-role private-copy estimates.
-static func resident_bytes(sha: String, published: int, source_directories: PackedStringArray) -> int:
+static func resident_bytes(sha: String, published: int, source_directories: PackedStringArray, explicit_variants := false) -> int:
+	if explicit_variants:
+		return _variant_resident_bytes(sha, published, source_directories)
 	if mode() == Mode.OFF or source_directories.is_empty():
 		return _decoded_resident_bytes(sha, published)
 	_mutex.lock()
@@ -604,6 +710,34 @@ static func resident_bytes(sha: String, published: int, source_directories: Pack
 			trimmed_bytes -= _mip0_bytes(str(entry.format), int(entry.width) >> level,
 				int(entry.height) >> level)
 		bytes = maxi(bytes, trimmed_bytes)
+	return bytes
+
+## Explicit policy uses can hold raw and multiple accepted representations of
+## one source SHA at once. Match the actual variant pool identity, count equal
+## payload/recipe/format variants once, and keep fallback knowledge conservative.
+static func _variant_resident_bytes(sha: String, published: int, source_directories: PackedStringArray) -> int:
+	if mode() == Mode.OFF:
+		return _decoded_resident_bytes(sha, published)
+	_mutex.lock()
+	var include_raw := _decoded_instead.has(sha)
+	_mutex.unlock()
+	include_raw = include_raw or source_directories.is_empty()
+	var variants: Dictionary = {}
+	for directory: String in source_directories:
+		var entry := sidecar_entry(sha, directory)
+		if entry.is_empty():
+			include_raw = true
+			continue
+		var key := "%s:%s:%s" % [str(entry.sha256), str(entry.recipe), str(entry.format)]
+		var skip := GraphicsOptions.mip_skip(int(entry.width), int(entry.height),
+			int(entry.mipmaps), GraphicsOptions.active_texture_skip(), true)
+		var trimmed_bytes := int(entry.gpuBytes)
+		for level: int in skip:
+			trimmed_bytes -= _mip0_bytes(str(entry.format), int(entry.width) >> level,
+				int(entry.height) >> level)
+		variants[key] = maxi(int(variants.get(key, 0)), trimmed_bytes)
+	var bytes := _decoded_resident_bytes(sha, published) if include_raw else 0
+	for value: int in variants.values(): bytes += value
 	return bytes
 
 ## Only a successful CPU decode can lower a fallback estimate. Do not derive
@@ -675,7 +809,7 @@ static func plan_for(manifest_data: Dictionary) -> Dictionary:
 	var resources: Variant = manifest_data.get("externalResources", {})
 	if not resources is Dictionary or (resources as Dictionary).is_empty():
 		return {}
-	return {"resources": resources}
+	return {"resources": resources, "policies": manifest_data.get(POLICY_COLLECTION, {})}
 
 ## Prepares one image job on whatever thread runs it (a WorkerThreadPool task).
 ## `job` holds `sha`, `source` (absolute path) and optionally `sidecar` (an
@@ -689,7 +823,7 @@ static func prepare(job: Dictionary) -> void:
 	if not sidecar.is_empty():
 		var loaded := decode_sidecar(sidecar)
 		if loaded.image != null:
-			job["image"] = GraphicsOptions.reduced_image(loaded.image)
+			job["image"] = GraphicsOptions.reduced_image(loaded.image, int(job.get("mip_skip", -1)))
 			job["kind"] = "sidecar"
 			job["mime"] = "image/vnd-ms.dds"
 			return
@@ -697,10 +831,12 @@ static func prepare(job: Dictionary) -> void:
 		note_decoded_instead(str(job.sha))
 		_warn_once(str(job.sha), "vram_textures: sidecar %s unusable (%s); decoding %s" % [
 			str(sidecar.file), loaded.reason, str(job.source).get_file()])
-	var decoded := decode_source(str(job.source))
+	var expected_sha := str(job.sha) if bool(job.get("verify_source_sha", false)) else ""
+	var decoded := decode_source(str(job.source), int(job.get("mip_skip", -1)), expected_sha)
 	job["mime"] = decoded.mime
 	job["image"] = decoded.image
 	job["kind"] = "decoded" if decoded.image != null else "failed"
+	if decoded.has("error"): job["error"] = decoded.error
 	if decoded.image != null:
 		_note_decoded_footprint(str(job.sha), decoded.image, int(decoded.get("mip_skip", 0)),
 			bool(job.get("private", false)))
@@ -749,8 +885,16 @@ static func _warn_once(sha: String, message: String) -> void:
 ## Decodes an image file by its leading bytes rather than its extension or a
 ## declared type, and gives it the mip chain the client has always built
 ## (`Image.generate_mipmaps`). Returns {image: Image or null, mime: String}.
-static func decode_source(path: String) -> Dictionary:
+static func decode_source(path: String, requested_skip := -1, expected_sha := "") -> Dictionary:
 	var bytes := FileAccess.get_file_as_bytes(path)
+	# Strict scenery decodes the very bytes this comparison checks. A prior
+	# closure verification cannot authorize a second mutable file read.
+	if not expected_sha.is_empty():
+		var hashing := HashingContext.new()
+		hashing.start(HashingContext.HASH_SHA256)
+		hashing.update(bytes)
+		if hashing.finish().hex_encode() != expected_sha:
+			return {"image": null, "mime": "", "error": "source_sha256"}
 	var mime := sniff(bytes)
 	var image := Image.new()
 	var error: Error = FAILED
@@ -768,8 +912,8 @@ static func decode_source(path: String) -> Dictionary:
 	if not image.has_mipmaps():
 		image.generate_mipmaps()
 	var skip := GraphicsOptions.mip_skip(image.get_width(), image.get_height(),
-		image.get_mipmap_count(), GraphicsOptions.active_texture_skip())
-	return {"image": GraphicsOptions.reduced_image(image), "mime": mime, "mip_skip": skip}
+		image.get_mipmap_count(), GraphicsOptions.active_texture_skip() if requested_skip < 0 else requested_skip)
+	return {"image": GraphicsOptions.reduced_image(image, requested_skip), "mime": mime, "mip_skip": skip}
 
 ## The image type its first bytes declare: PNG, JPEG or WebP, else "".
 static func sniff(bytes: PackedByteArray) -> String:

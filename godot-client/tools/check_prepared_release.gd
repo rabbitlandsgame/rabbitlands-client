@@ -35,6 +35,12 @@ func _path(value: String) -> String:
 func _same(left: String, right: String) -> bool:
 	return _path(left).to_lower() == _path(right).to_lower() if _platform == "windows" else _path(left) == _path(right)
 
+func _full_mip_world_scene(entry: Dictionary) -> bool:
+	return str(entry.get("kind", "")) == "scene" \
+		and str(entry.get("source", "")).begins_with("godot-client/assets/world/") \
+		and int(entry.get("texture_skip", -1)) == 0 \
+		and str(entry.get("texture_token", "")).begins_with("scene-images-v2|world-full-mips|skip=0|")
+
 func _inside(path: String, root_path: String) -> bool:
 	var value := _path(path).to_lower() if _platform == "windows" else _path(path)
 	var parent := _path(root_path).to_lower() if _platform == "windows" else _path(root_path)
@@ -159,7 +165,7 @@ func _identity(row: Dictionary) -> Dictionary:
 	elif kind == "mesh":
 		digest = FileAccess.get_sha256(source)
 		var pool_entry: Dictionary = MeshPool.index_for(source).get(source.get_file().get_basename(), {})
-		token = Vram.cache_token({"externalResources": pool_entry.get("images", {})}, source.get_base_dir())
+		token = Vram.cache_token(MeshPool._image_manifest(pool_entry), source.get_base_dir())
 	else:
 		return {}
 	return {"source": source, "digest": digest, "token": token, "manifest": manifest}
@@ -301,7 +307,9 @@ func _run() -> void:
 		var fields_match := true
 		for key: String in ["kind", "source", "node_policy", "source_digest", "texture_token"]:
 			fields_match = fields_match and row.get(key) == actual.get(key, "retain" if key == "node_policy" else null)
-		if not _check(fields_match and int(actual.get("texture_skip", -1)) == Graphics.TEXTURE_QUALITIES.find(quality), "required identity or quality differs from final catalog"):
+		var quality_matches := int(actual.get("texture_skip", -1)) == Graphics.TEXTURE_QUALITIES.find(quality) \
+			or _full_mip_world_scene(actual)
+		if not _check(fields_match and quality_matches, "required identity or quality differs from final catalog"):
 			break
 		expected_ids[entry_id] = true
 		if not _failures.is_empty():

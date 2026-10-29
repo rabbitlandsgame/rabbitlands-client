@@ -142,6 +142,11 @@ static func _base_inputs(kind: String, source: String) -> Dictionary:
 	if kind == "world":
 		var manifest := Cache._read(source)
 		if manifest.is_empty() or manifest.has("streamingChunks"): return {"ok":false,"error":"Only complete leaf maps can be prepared."}
+		var roads: Dictionary = preload("res://src/world/road_ground/road_ground.gd").dependency_closure(manifest.get("roadGround", {}), source)
+		if not bool(roads.get("ok", false)): return roads
+		for path: String in roads.get("files", {}):
+			var road_input := _add_input(inputs, path, str(roads.files[path]))
+			if not bool(road_input.ok): return road_input
 		var glb := _relative_source(source.get_base_dir(),str(manifest.get("asset",{}).get("glb","")))
 		var geometry := _add_input(inputs,glb)
 		if not bool(geometry.ok): return geometry

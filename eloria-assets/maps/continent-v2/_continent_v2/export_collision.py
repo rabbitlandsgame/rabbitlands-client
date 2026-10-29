@@ -19,11 +19,12 @@ z = z1 - (r + .5) / 2 with (x0, z1) = collisionOriginMetres, and tile (tx, ty) h
 - ground: the bake's resolved terrain on the two triangles per 2 m square the client's Terrain_ mesh draws
   (collision_export.terrain_grade's split);
 - walk surfaces lie over it where they stand at or above the ground less 3 cm, faces no steeper than 0.65 only
-  (collision_export's rule, glb_reader.rasterise): the road ribbons (terrain_export's own conformed Walk_ faces,
-  terrain + 0.055 m), the saved bridges' deck strips (bridge_export's Walk_AuthoredBridge_ tops), each kit model's
+  (collision_export's rule, glb_reader.rasterise): the saved bridges' deck strips
+  (bridge_export's Walk_AuthoredBridge_ tops), each kit model's
   Walk_ subtrees, and the flat kit inlays publish_client.py publishes as walk surfaces (WALK_KIT_STEMS on a
   placement that is not solid; the solid kit decks, the causeway arch and pier trestle spans, keep their Walk_ deck
-  child as the walk surface and their body as a solid);
+  child as the walk surface and their body as a solid). Ordinary authored roads are texture fields on the
+  existing ground, with no raised navigation ribbon; their physical floor is the resolved terrain itself;
 - standable: no steeper than 0.65 or on a walk surface; not under water deeper than 0.35 m, the water being the sea
   at the plan's level wherever the ground lies below it, the lake ellipses (waterRegions) and the river ribbons
   (paths of kind river, which are NOT waterRegions: each segment's capsule at the width interpolated between its
@@ -90,6 +91,12 @@ PACKAGES = "eloria-assets/maps/continent-v2"
 SIDECAR_SCHEMA = "eloria-continent-v2-collision-v1"
 COLLISION_BIN = "collision.bin"
 SERVED_GRID = "served-grid.escg.gz"
+ROAD_SURFACE_POLICY = {
+    "schema": "terrain-road-surface-v1",
+    "ordinaryRoadSurface": "terrain",
+    "ordinaryRoadLiftMetres": 0.0,
+    "bridgeSurfaces": "retained-authored-walk-faces",
+}
 CELL = CE.CELL                      # 0.5 m half-cells
 MAX_GRADE = CE.MAX_GRADE            # 0.65
 WADE = CE.WADE                      # 0.35 m
@@ -358,19 +365,12 @@ def load_bake(region, bake, checkout=DEFAULT_CHECKOUT, *, sea_level=0.0, log=say
                                              "width": float(point["width"])} for point in path["points"]]}
               for path in doc.get("paths", []) if path.get("kind") == "river"]
     walk, sources = [], {}
-    # Road ribbons: terrain_export's conformed Walk_ faces, as authored_overlays adds them (walk=True encodes them).
-    t = time.time()
-    road_faces = 0
-    for path in doc.get("paths", []):
-        if path.get("kind") != "road":
-            continue
-        faces, uv, colours = T.conform_road_faces(world, *T.authored_road_faces(world, snapshot, path))
-        faces = T.encoded_road_faces(faces, uv, colours)[0]
-        if len(faces):
-            walk.append(faces.astype(np.float32).astype(float) - translation)
-            road_faces += len(faces)
-    sources["roads"] = {"paths": sum(1 for p in doc.get("paths", []) if p.get("kind") == "road"),
-                        "faces": road_faces, "seconds": round(time.time() - t, 1)}
+    # Paths remain the road-mask authority, but do not manufacture an invisible
+    # floor 55 mm above the terrain. Bridge decks/approaches and kit walk faces
+    # below are separate authored surfaces and retain their original geometry.
+    road_ids = [str(path["id"]) for path in doc.get("paths", []) if path.get("kind") == "road"]
+    sources["roads"] = {"paths": len(road_ids), "ids": road_ids, "faces": 0,
+                        "surface": "terrain", "liftMetres": 0.0}
     # Saved bridges: the deck strips bridge_export draws as Walk_AuthoredBridge_* (fascia and piers are visual).
     builder = G.GltfBuilder("export_collision: bridge decks")
     _parts, bridge_walk, _records = BX._authored_bridge_geometry(world, builder)
@@ -1114,6 +1114,7 @@ def collision_block(result, collision_sha, served_sha, codec, group=None):
         "heightEncoding": {k: (list(v) if isinstance(v, (list, tuple)) else float(v))
                            for k, v in result.encoding.items()},
         "gridAlignment": "tile-centres-v1", "authoredSurfaceExport": True,
+        "roadSurfacePolicy": dict(ROAD_SURFACE_POLICY),
         "maxTerrainGrade": MAX_GRADE, "maximumWadingDepth": WADE,
         "actorVolume": {"floorClearance": CE.ACTOR_FLOOR_CLEARANCE, "height": CE.ACTOR_HEIGHT,
                         "halfCellWidth": CELL},

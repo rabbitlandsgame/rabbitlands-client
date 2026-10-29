@@ -5,6 +5,25 @@ references separate from texture pixels. Normal texture loading still selects
 the current texture quality and uses existing VRAM sidecars where compatible.
 Preparing geometry does not generate textures, actors or authored map assets.
 
+Published static map GLBs also consolidate byte-identical complete vertex records
+with `eloria-assets/tools/consolidate_map_vertices.py`, called by
+`publish_finish.py` after normal/tangent quantization and before prototype hash
+reconciliation, resident-size figures and cartography rendering. This preserves
+triangle order, component precision, every expanded triangle attribute, mesh/node
+identities, material bindings and position bounds. It does not join across UV,
+normal, tangent or colour seams. Unsupported deformation/extension contracts and
+import-generated shading attributes retain their original storage; files are
+written only when the complete verified GLB is smaller.
+
+Consolidation changes source hashes, so affected geometry, collision and paving
+entries naturally rebuild through the existing source-closure validation. It
+does not change the native cache format or preparation scope. Prototype names
+remain stable; their index and every consuming manifest must record the new file
+hash. Map-picture source digests must follow too: ordinary publication renders
+after finishing geometry. Carrying an existing picture forward is justified only
+by a complete geometry/material/placement equivalence check and unchanged image
+bytes, not merely by a smaller file or a matching triangle count.
+
 Prepared-native loading may create private texture Resources on its worker, as
 the raw loader does. The main thread alone publishes them to the weak pool,
 binds the native scene and creates its Nodes. Stale native completions retain no
@@ -100,6 +119,13 @@ the collision and paving policies include it too. Update the writer, texture-sou
 identifiers as well when their contracts change. The policy key also includes
 the engine build, renderer, archived-model policy and older map-cache format.
 
+Canonical map and scenery image sharing uses central geometry policy 4, map scene
+format 11, and texture-source/binding policy v3. Existing prepared entries are
+invalidated:
+rebuild them with the matching runtime. Shared prototype and road material
+loads retain each original image directory's texture policy even when the
+physical pixel file is shared with another region.
+
 Development checkouts lack a release identity. Selected source-input metadata
 provides a cheap hint that preparation should run again; it is not evidence that
 a cache entry is valid. Runtime source and payload hashes remain authoritative,
@@ -160,3 +186,8 @@ the derived policy versions and regional paving profiles in its startup marker;
 a later unchanged launch skips preparation. Source and payload hashes are still
 checked when loading an entry. Clearing the caches removes these derived files
 as well as the completion marker, and a later launch can rebuild them.
+
+Continent road fields are verified source inputs to native geometry preparation,
+but bind to retained ground after materialization rather than being serialized
+into its snapshot. See [continent road surfaces](continent-road-terrain-blend.md)
+for the publication, collision and streaming-memory contracts.

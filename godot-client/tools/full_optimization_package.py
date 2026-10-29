@@ -345,7 +345,7 @@ class FullOptimizationBuild:
         catalog = json.loads(index.read_text(encoding="utf-8"))
         require(self.receipt.get("prepared_export", {}).get("export"), "final PCK readback must precede runtime checks")
         for quality, required in self.receipt["prepared"]["required_entries"].items():
-            selected = [row for row in catalog["entries"] if row["texture_skip"] == ("full", "half", "quarter").index(quality)]
+            selected = release_prepared_content.entries_for_quality(catalog, ("full", "half", "quarter").index(quality))
             require({(row["kind"], row["source"], row.get("node_policy", "retain")) for row in selected}
                     == {tuple(row) for row in required}, "final catalog quality coverage differs from the committed plan")
             environment = self.user_environment("prepared-" + quality)

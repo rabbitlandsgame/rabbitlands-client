@@ -1,5 +1,30 @@
 # Local asset-authoring workspace
 
+Published static world-object GLBs can reduce raw storage with
+`eloria-assets/tools/optimize_static_glb_storage.py`. It changes only eligible
+32-bit index storage to 16-bit, retaining every vertex record and numeric index
+order. Image pruning is opt-in per file and checks every declared material,
+material variant and alternate texture source. Unknown extension or image-index
+contracts remain unchanged. No encoder, compression, precision reduction or
+procedural builder runs. For example, after preparing imported object outputs
+and before image externalization:
+
+```powershell
+python eloria-assets/tools/optimize_static_glb_storage.py godot-client/assets/world `
+  --prune-images-for godot-client/assets/world/underground/cave_mouth.glb `
+  --stage .local/static-world-storage-review
+```
+
+Without `--stage` the command reports candidates only. A stage must be fresh and
+Git-ignored; it holds complete recovery originals, candidates and SHA/semantic
+receipts. Promotion must compare the original hashes, refresh current source
+records and invalidate/rebuild affected imported/prepared caches. Original
+import receipts are historical: a repacked GLB no longer preserves a literal
+source binary prefix, so current provenance should cite the new accessor/image
+equivalence proof rather than restating that old storage claim. Keep a baseline
+asset snapshot for matched appearance and collision qualification. This step
+does not authorize rerunning any retired generator.
+
 Creature runtime sampling, fixed mesh/skin fitting and approval follow the maintained [creature runtime optimization skill](../.agents/skills/rabbitlands-creature-runtime-optimization/SKILL.md). The [completed retrofit report](qa/creature-storage/completed-runtime-retrofit.md) explains the review browser and separate draft/delivery choices. For optimized installed assets, [runtime-delivery.json](qa/creature-storage/runtime-delivery.json) records current hashes and cadence; frozen authoring observations remain historical evidence.
 
 The [visually accepted delivery registry](qa/creature-storage/visually-accepted-delivery.json) now supersedes overlapping conservative selections. See the [191-model installation report](qa/creature-storage/accepted-creature-delivery.md) for exact-version acceptance, qualified local-draft metadata and retained repair notes.
