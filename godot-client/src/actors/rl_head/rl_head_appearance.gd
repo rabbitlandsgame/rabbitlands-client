@@ -95,10 +95,10 @@ var liner_wing := 0.0
 ## An RL hairstyle's length and volume, -1 to 1 (0 as authored), through the
 ## hairstyle's optional `hl_` blend shapes, and its fine detail 0..100
 ## (DEFAULT_HAIR_DETAIL, 50, is the authored look; lower drops its flyaway and
-## wisp cards, 0 is smooth, above 50 adds strand contrast), the hair shader's
-## `hair_detail` instance uniform at a hundredth of it (RLHeadRig). A Human's
-## saved finish (PortraitCustomization `hair_detail` 0..2) becomes this level
-## through RLHeadPortraitMap. Not part of the byte form.
+## wisp cards, 0 is smooth, above 50 fades in the messy extras and adds strand
+## contrast), the hair shader's `hair_detail` instance uniform at a hundredth of
+## it (RLHeadRig). A Human's saved finish (PortraitCustomization `hair_detail`
+## 0..2) becomes this level through RLHeadPortraitMap. Not part of the byte form.
 var hair_length := 0.0
 var hair_volume := 0.0
 var hair_detail := DEFAULT_HAIR_DETAIL

@@ -2,7 +2,8 @@ extends SceneTree
 ## Headless contract for the RL head (src/actors/rl_head/): the assets against
 ## their own extras and each other (the shipped head builds pinned, every hair
 ## and beard fitted to the head shipped beside it, the hairstyles' grooming
-## shapes and fine-detail keep levels, beards whole), the packaged route
+## shapes and fine-detail keep levels - which saved finishes show the messy
+## band - beards whole), the packaged route
 ## (loose, never-imported GLBs; imported block-compressed, mipmapped maps used
 ## as they are), the hair detail uniform
 ## and the grooming from saved fields with the springs still swinging, the
@@ -140,14 +141,24 @@ func _check_shipping_route() -> void:
 
 ## The head builds shipped, by sex. The hairstyles and beards beside them were
 ## fitted to exactly these (2026-10-28: mira_bun and rowan_shag rebuilt with
-## the grooming shapes and keep levels). A new head build needs its hair and
-## beards rebuilt and this table changed with them.
+## the grooming shapes and keep levels, then with the scalp coverage fix and
+## the messy band). A new head build needs its hair and beards rebuilt and this
+## table changed with them.
 const SHIPPED_HEADS := {
 	"female": "abd93434b4d06be2f1b55ae5a71f7cc701e1abf286f4939c1f700e92cb523636",
 	"male": "cae93a7f3366c5b01fb0134d6048435602686d1eda9edc4c3e73cb9adf6ddbc6",
 }
 ## Every RL hairstyle carries these grooming shapes beside its `id_` shapes.
 const GROOMING_SHAPES: Array[String] = ["hl_length_p", "hl_length_n", "hl_volume_p", "hl_volume_n"]
+## The hair author's keep-level bands (COLOR_0.A), [low, high]: core geometry,
+## authored fine detail (flyaway and wisp cards) and messy extras. A value is
+## in a band within KEEP_BAND_SLACK, one 8-bit step (COLOR_0 is normalised u8:
+## 0.5 is stored as 127 or 128, 0.45 as 115).
+const KEEP_BANDS := {"core": [1.0, 1.0], "fine": [0.5, 0.95], "messy": [0.05, 0.45]}
+const KEEP_BAND_SLACK := 1.0 / 255.0
+## rl_hair.gdshader keeps a point when COLOR.a >= 1 - hair_detail -
+## KEEP_TOLERANCE (half an 8-bit step); _check_messy_band_by_finish models it.
+const HAIR_KEEP_TOLERANCE := 0.5 / 255.0
 
 ## Hair and facial hair are fitted to one build of a head: each records the
 ## SHA-256 of the head GLB it was fitted to (`headSHA256`), which must be the
@@ -177,15 +188,19 @@ func _check_asset_consistency() -> void:
 		"every shipped hairstyle and beard was checked %s" % counted)
 	for style: String in RLHeadLibrary.hair_styles():
 		_check_hair_asset(style)
+	_check_messy_band_by_finish()
 	for style: String in RLHeadLibrary.beard_styles():
 		if style != RLHeadAppearance.STUBBLE:
 			_check_beard_asset(style)
 
 
 ## The hair author's contract on one hairstyle as imported: every level
-## carries the head's identity shapes and the four grooming shapes, its clumps
-## are core geometry (COLOR_0.A = 1) and its cards keep levels in 0.5..1, with
-## fine detail below 1 on the first level.
+## carries the head's identity shapes and the four grooming shapes, and every
+## keep level (COLOR_0.A) is in one of KEEP_BANDS and nothing else: core
+## geometry (1), authored fine detail (0.5..0.95, cards only) or messy extras
+## (0.05..0.45, cards or clump locks such as Rowan's fringe-gap locks, shown
+## only above level 55). The first level has both fine and messy detail; the
+## last is all core.
 func _check_hair_asset(style: String) -> void:
 	var path := RLHeadLibrary.hair_path(style)
 	var extras := RLHeadLibrary.asset_extras(path, "rlHair")
@@ -200,8 +215,13 @@ func _check_hair_asset(style: String) -> void:
 	wanted.sort()
 	var levels := {}
 	var fine_points := 0
+	var messy_points := 0
 	var bad: Array = []
-	for node: Node in scene.find_children("*", "MeshInstance3D", true, false):
+	var nodes := scene.find_children("*", "MeshInstance3D", true, false)
+	var last_level := 0
+	for node: Node in nodes:
+		last_level = maxi(last_level, RLHeadLibrary.lod_level(str(node.name)))
+	for node: Node in nodes:
 		var mesh := (node as MeshInstance3D).mesh
 		var level := RLHeadLibrary.lod_level(str(node.name))
 		levels[level] = true
@@ -223,18 +243,114 @@ func _check_hair_asset(style: String) -> void:
 			if colours is not PackedColorArray or (colours as PackedColorArray).is_empty():
 				bad.append("%s/%s: no COLOR_0" % [node.name, kind])
 				continue
-			var lowest := 1.0
 			for colour: Color in colours as PackedColorArray:
-				lowest = minf(lowest, colour.a)
-				if level == 0 and kind == "rl_hair_card" and colour.a < 0.999:
+				var band := _keep_band(colour.a)
+				if level == 0 and band == "fine":
 					fine_points += 1
-			if (kind == "rl_hair_clump" and lowest < 0.999) or lowest < 0.499:
-				bad.append("%s/%s: keep level down to %.3f" % [node.name, kind, lowest])
+				elif level == 0 and band == "messy":
+					messy_points += 1
+				if band.is_empty() or (band == "fine" and kind != "rl_hair_card") \
+						or (level == last_level and band != "core"):
+					bad.append("%s/%s: keep level %.3f outside the contract" % [node.name, kind, colour.a])
+					break
 	_expect(levels.size() == 3 and bad.is_empty(),
 		"%s: %d levels, each with %d id_ shapes and the grooming shapes, keep levels in contract %s"
 			% [style, levels.size(), head_shapes, bad])
 	_expect(fine_points > 0, "%s: its first level has fine-detail cards (%d points)" % [style, fine_points])
+	_expect(messy_points > 0, "%s: its first level has messy extras for above level 55 (%d points)"
+		% [style, messy_points])
 	scene.free()
+
+
+## The KEEP_BANDS name of keep level `a`, or "" outside every band.
+func _keep_band(a: float) -> String:
+	for band: String in KEEP_BANDS:
+		var limits: Array = KEEP_BANDS[band]
+		if a >= float(limits[0]) - KEEP_BAND_SLACK and a <= float(limits[1]) + KEEP_BAND_SLACK:
+			return band
+	return ""
+
+
+## What develop's three saved finishes show of the messy band. A finish becomes
+## a fine-detail level through RLHeadPortraitMap, and the hair shader keeps a
+## point at A >= 1 - level / 100 (less half an 8-bit step), so the messy band
+## (0.05..0.45) shows only above level 55. rowan_shag's finishes are Swept 17,
+## Classic 33 and Tousled 50 (Tousled, his preset finish, is the authored look):
+## no messy point shows on any level. mira_bun's are Swept 50 (her preset finish,
+## none shown), Classic 67 and Tousled 83: messier than authored, they show part
+## of the band by design, Tousled more of it. Level 100 shows all of it.
+func _check_messy_band_by_finish() -> void:
+	var shader := load("res://src/actors/rl_head/rl_hair.gdshader") as Shader
+	var code := shader.code if shader != null else ""
+	_expect(code.contains("const float KEEP_TOLERANCE = 0.5 / 255.0;")
+		and code.contains("COLOR.a >= 1.0 - detail - KEEP_TOLERANCE"),
+		"rl_hair.gdshader keeps a point at A >= 1 - hair_detail - 0.5/255, the rule modelled here")
+	# [sex, hair index (AppearanceVariants), module, levels and whether messy
+	# points show at Swept, Classic, Tousled]
+	for row: Array in [["male", 1, "rowan_shag", [17, 33, 50], [false, false, false]],
+			["female", 3, "mira_bun", [50, 67, 83], [false, true, true]]]:
+		var module: String = row[2]
+		var messy := _messy_keep_levels(module)
+		var total := 0
+		for level: int in messy:
+			total += (messy[level] as PackedFloat32Array).size()
+		var first_total := (messy.get(0, PackedFloat32Array()) as PackedFloat32Array).size()
+		var levels: Array = []
+		var shows: Array = []
+		var counts: Array = []
+		for finish: Array in [[2, "Swept"], [0, "Classic"], [1, "Tousled"]]:
+			var detail := RLHeadPortraitMap.face({"hair": AppearanceVariants.pack_hair(int(row[1]), 0),
+				"hair_detail": finish[0]}, str(row[0])).hair_detail
+			var shown := _messy_shown(messy, detail)
+			levels.append(detail)
+			shows.append(int(shown[0]) > 0)
+			counts.append("%s %d: %d of %d first-level points (%d keep values), %d on all levels"
+				% [finish[1], detail, shown[1], first_total, shown[2], shown[0]])
+		var increasing := int(_messy_shown(messy, int(levels[2]))[0]) >= int(_messy_shown(messy, int(levels[1]))[0])
+		_expect(total > 0 and levels == row[3] and shows == row[4] and increasing
+			and int(_messy_shown(messy, 100)[0]) == total,
+			"%s: the saved finishes are levels %s and show the messy band %s (level 100: all %d points) %s"
+				% [module, levels, shows, total, counts])
+
+
+## Each level's keep values (COLOR_0.A) in the messy band of RL hairstyle
+## `style`, by level of detail.
+func _messy_keep_levels(style: String) -> Dictionary:
+	var result := {}
+	var scene := GlbSceneCache.instantiate(RLHeadLibrary.hair_path(style))
+	if scene == null:
+		return result
+	for node: Node in scene.find_children("*", "MeshInstance3D", true, false):
+		var mesh := (node as MeshInstance3D).mesh
+		var values := PackedFloat32Array()
+		for surface: int in mesh.get_surface_count():
+			var colours: Variant = mesh.surface_get_arrays(surface)[Mesh.ARRAY_COLOR]
+			if colours is PackedColorArray:
+				for colour: Color in colours as PackedColorArray:
+					if _keep_band(colour.a) == "messy":
+						values.append(colour.a)
+		var level := RLHeadLibrary.lod_level(str(node.name))
+		result[level] = (result.get(level, PackedFloat32Array()) as PackedFloat32Array) + values
+	scene.free()
+	return result
+
+
+## [points shown on all levels, points shown on the first level, distinct keep
+## values shown on the first level] of `messy` at detail level `detail`, by
+## rl_hair.gdshader's rule.
+func _messy_shown(messy: Dictionary, detail: int) -> Array:
+	var threshold := 1.0 - float(detail) / 100.0 - HAIR_KEEP_TOLERANCE
+	var points := 0
+	var first := 0
+	var values := {}
+	for level: int in messy:
+		for a: float in messy[level] as PackedFloat32Array:
+			if a >= threshold:
+				points += 1
+				if level == 0:
+					first += 1
+					values[snappedf(a, 0.0001)] = true
+	return [points, first, values.size()]
 
 
 ## Beards stay whole at every hair detail: COLOR_0.A = 1 everywhere.
