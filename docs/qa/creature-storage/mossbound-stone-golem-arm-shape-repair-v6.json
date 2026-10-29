@@ -1,0 +1,221 @@
+{
+  "schema": 1,
+  "actor": "mossbound_stone_golem",
+  "date": "2026-10-29",
+  "status": "NEW_UNAPPROVED_ARTICULATED_ARM_REPAIR_DRAFT",
+  "runtime_installed": false,
+  "candidate": {
+    "sha256": "3cee2609447cbd0013fe1ebb07654c84d1e6b625c4ec32fc57aff7b332dec4c7",
+    "raw_bytes": 1967072
+  },
+  "baselines": {
+    "last_reviewed_v5": {
+      "sha256": "f9a54ff96ebb62738e0e14630f9640958eea963274b181e76ed9915233bf5fd0",
+      "raw_bytes": 1947032,
+      "role": "LEFT comparison; uninstalled and unapproved"
+    },
+    "installed": {
+      "sha256": "e056751f8e6d490452250b7e0be3c1af74599ddf15602cf0cc22ddbc734cc5c0",
+      "raw_bytes": 1896812,
+      "role": "Current runtime remains unchanged; separate combined-repair comparison"
+    },
+    "source_30_reference": {
+      "sha256": "48e312c04045a2f18ddd94dd815d66a822bfc9bbd077383b6a173d446a6d8c12",
+      "role": "Corrective-bearing intent reference; not the runtime baseline"
+    }
+  },
+  "repair": [
+    "Replace mixed arm ownership with a complete connected partition: hand 244, forearm 158, upper-arm 169 original triangles; retain 2429 torso/rest triangles. Anatomical classification uses triangle connectivity and actual wrist/elbow/shoulder loops rather than inherited bad weight labels.",
+    "Close both sides of the 14-edge wrist, 28-edge elbow and 27-edge shoulder articulation loops. Add 414 cap rows and 138 triangles; reuse an existing stone UV patch without changing original textures or UV rows.",
+    "Drive the three rigid stones through physical joint centres with a small parallel support chain. Reuse original local rotation/scale samplers where appropriate to inherit continuous hierarchy motion; avoid globally sampled world-rotation winding aliases.",
+    "Use Ground Pound-only fixed-length local IK for the new upper/forearm supports and retain the original local wrist grip. This preserves coherent stone shape and a raised wind-up/downstroke while deliberately changing the visible arm path."
+  ],
+  "geometry_and_skin": {
+    "source_vertices": 9000,
+    "candidate_vertices": 9414,
+    "source_triangles": 3000,
+    "candidate_triangles": 3138,
+    "draw_surfaces": 1,
+    "correctives": 0,
+    "influence_slots": 8,
+    "all_original_9000_position_normal_uv_rows_and_3000_triangle_prefix_bit_exact_vs_f9": true,
+    "materials_and_embedded_images_exact": true,
+    "original_vertex_map": "Identity for the original 9000 ordinal rows; added cap rows have a separate explicit manifest. Inherited v4 contact-cap row roles are not original-e056 semantic identity.",
+    "actual_raw_skin_changed_original_rows": 1409,
+    "motion_dependency_affected_original_rows": 1729,
+    "outside_original_rows": 7271,
+    "old_helper_dependencies_removed_from_torso_rows": 16,
+    "original_anatomical_binds_and_calf_bind_retained": true,
+    "each_piece_closed_and_oriented": {
+      "hand": {
+        "faces": 258,
+        "euler": 0
+      },
+      "forearm": {
+        "faces": 200,
+        "euler": 2
+      },
+      "upperarm": {
+        "faces": 224,
+        "euler": 2
+      },
+      "torso_rest": {
+        "faces": 2456,
+        "euler": 2
+      }
+    }
+  },
+  "rig": {
+    "redefined_existing_control_node": 33,
+    "redefined_control_name": "RL_Golem_forearm_volume",
+    "new_nodes": {
+      "35": "RL_Golem_physical_upperarm",
+      "36": "RL_Golem_physical_hand"
+    },
+    "hierarchy": "Original clavicle_r node 7 -> physical upper arm 35 -> forearm support 33 -> physical hand 36. The calf support 34 remains unchanged.",
+    "native_bones_f9_to_final": [
+      33,
+      35
+    ],
+    "palette_f9_to_final": [
+      32,
+      34
+    ],
+    "original_anatomical_channels_bit_exact": 703,
+    "new_ground_pound_rotation_keys_per_support": 80,
+    "new_ground_pound_tracks": 2,
+    "all_eight_clip_durations_preserved": true,
+    "original_local_wrist_samplers_reused": true,
+    "world_hand_orientation_preserved": false
+  },
+  "actual_client": {
+    "comparison_states_each": 738,
+    "all_eight_clips_defaults_helds_reset_firsttick_and_60hz_stepped_switches": true,
+    "placement_unchanged_both_baselines": true,
+    "f9_to_final": {
+      "receipt_sha256": "658642275350746025c5be521aedc44f3042a14f1b98cf993c90490fdba5839a",
+      "protected_runtime_bone_worlds_exact": 32,
+      "outside_positions_and_unit_normals_exact_rows": 7271,
+      "maximum_changed_original_row_world_mm": 2392.8430902523414,
+      "rms_all_original_rows_world_mm": 175.26230770056605
+    },
+    "installed_to_final": {
+      "receipt_sha256": "ca1f4774d9940efa1bd333c256f664ae0af938449cabe8a404e6b4b8dbb59599",
+      "protected_runtime_bone_worlds_exact": 30,
+      "scope": "Finite new geometry and unchanged placement; inherited limb/thumb/calf changes mean the arm-only outside-preservation mask does not apply to the installed baseline."
+    },
+    "native_shape_retention": {
+      "receipt_sha256": "d73bfd08e278811279f839a6d48f02db48a1c7f859a49a987f99f4e9a3fa9e77",
+      "faces_including_all_caps": 682,
+      "maximum_edge_relative_change": 9.506494990096925e-07,
+      "maximum_area_relative_change": 1.1289990002882888e-06,
+      "scope": "Each closed stone holds shape throughout the sampled engine clips and blends. This does not prove welded inter-piece seams or identical motion."
+    },
+    "native_cap_closure": {
+      "receipt_sha256": "4f84a057e51a039e44ab128ff139c012ad33813289ffbcc27706d110af6c7bce",
+      "original_added_boundary_pairs": 276,
+      "within_piece_duplicate_pairs": 270,
+      "native_positions_and_packed_u16_skin_coefficients_bit_equal": true
+    }
+  },
+  "independent_native": {
+    "receipt_sha256": "ccb91f1ed2626c0a026eba7adfb4078933e6f7bd04060dfd115bb38025126011",
+    "poses": 1633,
+    "ground_pound_poses": 646,
+    "maximum_shared_joint_centre_gap_model": 2.704761940120198e-08,
+    "cut_ring_opening_maxima_model": {
+      "wrist": {
+        "distance": 0.23065745430895063,
+        "clip": "Attack_Ground_Pound",
+        "time": 0.375,
+        "rows": [
+          1948,
+          1947
+        ]
+      },
+      "elbow": {
+        "distance": 0.3354812474980215,
+        "clip": "Attack_Ground_Pound",
+        "time": 0.5208333333333334,
+        "rows": [
+          1953,
+          1951
+        ]
+      },
+      "shoulder": {
+        "distance": 0.3144129769959391,
+        "clip": "Attack_Ground_Pound",
+        "time": 0.5083333333333333,
+        "rows": [
+          3892,
+          3889
+        ]
+      }
+    }
+  },
+  "fresh_blender": {
+    "status": "passed_fresh_import_finite_only",
+    "source_and_final": true,
+    "summary_sha256": "e32d64ffda1940b44e956145171890784cd0db484a4c63dd550e7a588fcc2fda",
+    "scope": "Fresh import and finite actions only; no deformation equivalence or approval claim."
+  },
+  "visual": {
+    "main_pairs": 324,
+    "supplement_pairs": 12,
+    "full_resolution_pngs": 672,
+    "ground_pound_full_cycle_endpoint_frames": 80,
+    "ground_pound_cycle_views": [
+      "front",
+      "rear"
+    ],
+    "other_coverage": "All eight clips at start/mid/held end, four views; critical wind-up/impact poses; RESET; legacy first-tick and realistic stepped transitions. Additional exact rim-opening witnesses at .375, .508333333 and .520833333 seconds.",
+    "main_job_sha256": "7b7549bee1113cdcbbe8928fb51ebf7440a33d6a7ba8757b3d966f6f6ad38599",
+    "main_manifest_sha256": "1b47877eb4d2468cee538ad279d4b1d6347cad8b311e7620941b4dd0ead8def5",
+    "rim_job_sha256": "68582bed316c01e02ef0737055e1e805ca82f8daab10ecdd910ac7f3eebfb5f9",
+    "rim_manifest_sha256": "7223b3877f6d8999aaed49fd6ec66ffca16a4f324c11e7895b848aeebc5a467d",
+    "framing": {
+      "main_sha256": "e106faf42e2eaac592b21885b48655f6ad399716c17ce2fc772fb16639dc479e",
+      "rim_sha256": "0db2cf42a2541a2fec8b907410f0c1a54eb9ac69c9e164d4482eb9eb8129a9e7",
+      "sampled_standalone_geometry_pairs": 296,
+      "maximum_projected_fraction_of_halfviewport": 0.8294459281622754,
+      "all_image_borders_material_foreground_pixels": 0,
+      "source_candidate_border_pixel_differences": 0,
+      "scope": "Independent sampled all-vertex projection and blue-gray backdrop border audit; shaded floor excluded. No image-equivalence gate for this intentional repair."
+    },
+    "assessment": "The upper arm, forearm and fist now remain solid stones through wind-up, downstroke and switches; the previous stretched sheets and thin forearm are absent in reviewed captures. Distinct capped joint ends and openings remain visible in deep bends. This is ready for human judgment as a changed articulated-stone design.",
+    "gpu_epochs": [
+      122,
+      123
+    ],
+    "all_children_exited": true
+  },
+  "cost_vs_f9": {
+    "raw_bytes_added": 20040,
+    "raw_bytes_added_vs_installed": 70260,
+    "native_bones_added": 2,
+    "palette_joints_added": 2,
+    "draw_surfaces_added": 0,
+    "retargeted_keys_added": 499,
+    "retargeted_tracks_added": 13,
+    "retained_first_actor_and_library_cache_static_bytes_added": 130094,
+    "warm_component_medians_usec": {
+      "Ground_Pound_f9": 12.8125,
+      "Ground_Pound_final": 16.2508333333333,
+      "Walk_f9": 11.96,
+      "Walk_final": 11.5275
+    },
+    "benchmark_receipt": "docs/qa/creature-storage/mossbound-stone-golem-ground-pound-component-benchmark-v6.json",
+    "benchmark_sha256": "7fa8a124424efe906857a590bf03fd81ee496ae354a1eb1fd8b22a38b812ab1c",
+    "scope": "One fresh process per model, warm file cache, uncontrolled background scheduling. Static allocations include scene/library/mesh/texture caches. Component animation timings are not isolated causal FPS, GPU skinning, VRAM or per-instance memory measurements."
+  },
+  "prominent_limits": [
+    "This is a new, unapproved articulated-stone interpretation. It is not lossless preservation of the former rendered arm motion.",
+    "Each stone is closed and rigid, but opposing cut rims rotate apart. Maximum sampled model-space separations are 0.230657 at the wrist, 0.335481 at the elbow and 0.314413 at the shoulder. Visible capped joint ends and openings need human judgment.",
+    "Physical ownership and joint pivots change the visible right arm in all eight clips. Ground Pound additionally uses new local IK curves and a coherent wrist-local grip. Original anatomical bone curves remain exact; that does not imply exact visible strike motion.",
+    "The source corrected fist reaches its lowest model Y at 1.566667 seconds; the new draft does so at 1.133333 seconds, about 0.433333 seconds earlier. Minimum model Y values are +0.022028 and +0.019035 respectively. These are not actual scene-plane ground-contact measurements.",
+    "The fixed physical arm has limited reach; some former wrist targets are unreachable. The Ground Pound wrist target is clamped by up to 0.166597 model units at delivered control keys. At some poses the hand remains higher or follows a different arc.",
+    "Sampled actual-client differences against the last reviewed f9 reach 2392.843 world millimetres on affected original rows. This measures the intentional redesign, not a fidelity error accepted under a relaxed threshold.",
+    "The calf, foot and thumb/calf topology repairs from f9 are retained. Existing unrelated model limitations are not all repaired by this arm draft.",
+    "Native finite/shape checks and fresh Blender import do not establish collision freedom, identical secondary effects, FPS performance or human approval. No runtime installation or push is authorized by this receipt."
+  ]
+}
