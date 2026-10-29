@@ -147,6 +147,7 @@ def test_native_mask_clamp_and_bridge_prop_occlusion(tmp_path):
     road_id = scene.add_material(road)
     bridge = scene.add_material(RC.R.RenderMaterial("bridge", (.02, .02, .7, 1), double_sided=True))
     prop = scene.add_material(RC.R.RenderMaterial("prop", (.7, .02, .02, 1), double_sided=True))
+    water = scene.add_material(RC.R.RenderMaterial("water", RC.WATER, roughness=1., double_sided=True))
     # Half the mask is transparent, and UVs deliberately exceed its extent:
     # clamping must keep that half transparent instead of repeating the road.
     scene._texture_images[0][:, 256:, 3] = 0
@@ -162,6 +163,7 @@ def test_native_mask_clamp_and_bridge_prop_occlusion(tmp_path):
     quad([0,0,4,4], .01, road_id, 2)
     quad([.2,.2,.8,.8], 1, bridge)
     quad([.2,3.2,.8,3.8], 2, prop)
+    quad([.2,1.2,.8,1.8], .1, water)
     rgb, _, _, _ = RC.raster(scene, np.concatenate(colors), np.array([0,0]), np.array([4,4]),
                              (64,64), supersample=1, minify=False, native_cache=tmp_path / "native")
     pixels = np.asarray(rgb)
@@ -169,6 +171,7 @@ def test_native_mask_clamp_and_bridge_prop_occlusion(tmp_path):
     assert pixels[32, 56, 1] > pixels[32, 56, 0]      # clamped transparent road -> floor
     assert pixels[8, 8, 2] > pixels[8, 8, 0]         # bridge above road
     assert pixels[56, 8, 0] > pixels[56, 8, 1]       # prop above road
+    assert pixels[24, 8, 1] > pixels[24, 8, 0] and pixels[24, 8, 2] > pixels[24, 8, 0]  # water above road
 
 
 def test_native_legacy_repeat_mask_pixels_remain_identical(tmp_path, monkeypatch):
