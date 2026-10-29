@@ -26,9 +26,9 @@ extends Node3D
 ##     `hl_length_p/_n` and `hl_volume_p/_n` (weight 1 = the full change, 0 =
 ##     as authored) for the hair length and volume. COLOR_0.A is each point's
 ##     keep level for the hair's fine detail (1 core geometry, flyaway and wisp
-##     cards 0.5-0.95), which the hair shader compares with the `hair_detail`
-##     instance uniform (RLHeadAppearance.hair_detail / 100; see
-##     rl_hair.gdshader).
+##     cards 0.5-0.95, messy extras 0.05-0.45), which the hair shader compares
+##     with the `hair_detail` instance uniform (RLHeadAppearance.hair_detail /
+##     100; see rl_hair.gdshader).
 ##   * beards/<style>.glb: skinned like the head, meshes `beard_lod<k>` or
 ##     `beard`, material rl_beard, and the head's `id_` and `ex_` shape names.
 ##     `stubble` with no file is painted by the skin shader.

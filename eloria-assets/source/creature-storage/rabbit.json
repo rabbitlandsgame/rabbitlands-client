@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "actor": "rabbit",
+  "source_sha256": "2c23a31766f672eb3d78d2f74e7016546451dd5acbdc8631268be5b3883e1d99",
+  "candidate_sha256": "9b7a5109960c246e4bea7aa69d2fc90036cda6d4774c96afbaa9fd47cfd42f0c",
+  "pipeline": [
+    "prune_zero_targets",
+    "reduce_constant_runs",
+    "compact"
+  ],
+  "partition": null,
+  "unchanged": false,
+  "removed_zero_target_indices": [],
+  "redundant_flat_key_rows_removed": 111016,
+  "geometry_skin_rest_binds_materials_images_unchanged": true,
+  "preserve_trs_keys": false,
+  "native_clips": [
+    "Fighting_Idle",
+    "Hit_Chest",
+    "Idle_A",
+    "Walk",
+    "Jog",
+    "Sword_Attack",
+    "Death_A"
+  ],
+  "usage": "Deterministic exact preparation needs no partition --profile; frozen source/candidate hashes bind this record."
+}

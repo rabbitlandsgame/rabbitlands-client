@@ -1,0 +1,514 @@
+{
+  "schema_version": 1,
+  "batch": 32,
+  "actor": "four_armed_guardian",
+  "date": "2026-10-28",
+  "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/four_armed_guardian.glb",
+  "source_sha256": "4339198fb5079e271815af3103520f13e03e4ac3aeef7a5cb23a202f3fadb990",
+  "runtime_sha256": "cf8ed55bdfbd1781ceedd7dc42258892f402b631a130864440955d9511f0050e",
+  "qualification": "Passed exact source/continuous curves, original physical observations, paired fresh Blender poses/default, native and fresh editor-imported playback/transitions, fully fitted actual-Actor cycles/four views, seeded dissolve/silhouette/reset checks.",
+  "human_approval_changed": false,
+  "recipe": {
+    "tool": "eloria-assets/tools/pack_creature_storage.py",
+    "tool_commit": "5bdd51c3",
+    "steps": [
+      "prune_zero_targets",
+      "reduce_constant_runs",
+      "compact"
+    ],
+    "profile": null,
+    "bounds": null,
+    "preserve_trs_keys": false
+  },
+  "bytes": {
+    "source_bytes": 4707180,
+    "candidate_bytes": 4417416,
+    "source_zstd_bytes": 2945175,
+    "candidate_zstd_bytes": 2906928
+  },
+  "inactive_targets_removed": 0,
+  "flat_run_key_rows_removed": 24,
+  "corrective_graphics_buffer_bytes": {
+    "source": 3328080,
+    "candidate": 3328080,
+    "saved": 0,
+    "scope": "Actual Godot raw blend_shape_data byte totals over all mesh surfaces; shared per loaded model."
+  },
+  "draw_surfaces": {
+    "source": 1,
+    "candidate": 1
+  },
+  "source_validation": {
+    "passed": true,
+    "source_sha256": "4339198fb5079e271815af3103520f13e03e4ac3aeef7a5cb23a202f3fadb990",
+    "candidate_sha256": "cf8ed55bdfbd1781ceedd7dc42258892f402b631a130864440955d9511f0050e",
+    "geometry_skin_binds_rest_topology_uv_material_image_bits_preserved": true,
+    "retained_key_time_and_value_bits_exact_only_flat_interiors_removed": true,
+    "every_removed_default_and_key_is_zero": true,
+    "redundant_flat_key_rows_proved": 24,
+    "preexisting_duplicate_property_curves_preserved_in_occurrence_order": 0,
+    "meshes": [
+      {
+        "mesh": 0,
+        "targets_before": 42,
+        "targets_after": 42,
+        "removed_target_indices": [],
+        "retained_target_indices": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31,
+          32,
+          33,
+          34,
+          35,
+          36,
+          37,
+          38,
+          39,
+          40,
+          41
+        ]
+      }
+    ],
+    "clips": {
+      "Death_A": {
+        "original_knots": 34,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 72
+      },
+      "Fighting_Idle": {
+        "original_knots": 50,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 104
+      },
+      "Hit_Chest": {
+        "original_knots": 113,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 230
+      },
+      "Idle_A": {
+        "original_knots": 50,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 104
+      },
+      "Jog": {
+        "original_knots": 34,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 72
+      },
+      "Sword_Attack": {
+        "original_knots": 121,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 246
+      },
+      "Walk": {
+        "original_knots": 50,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 104
+      }
+    },
+    "proof": "Zero defaults and every LINEAR/STEP key zero prove inactive targets remain zero continuously and under crossfades. All retained accessor bytes and retained time/value rows are exact. Deleted key rows sit strictly inside three bit-identical adjacent rows; plateau boundaries and endpoints remain."
+  },
+  "physical_observations": {
+    "passed": true,
+    "source_sha256": "4339198fb5079e271815af3103520f13e03e4ac3aeef7a5cb23a202f3fadb990",
+    "candidate_sha256": "cf8ed55bdfbd1781ceedd7dc42258892f402b631a130864440955d9511f0050e",
+    "surface_probes": 165,
+    "poses": 133,
+    "clips": 7,
+    "source_candidate_position_error": 0.0,
+    "source_candidate_normal_vector_error": 0.0,
+    "original_witness_position_error_over_height": 0.0,
+    "original_source_witness_position_error_over_height": 0.0,
+    "original_witness_normal_vector_error": 0.0,
+    "original_witness_bone_matrix_error": 0.0,
+    "witness_sha256": "c413abc2c475994aba52559498315c1d8b83a56a489458425b8845aa836977f3",
+    "sampled_motion_min": [
+      -0.7813883466847954,
+      -0.06679846610331147,
+      -0.5000074142183082
+    ],
+    "sampled_motion_max": [
+      0.2890681897149334,
+      0.8420468449248786,
+      0.6570452741458322
+    ]
+  },
+  "paired_fresh_blender": {
+    "maximum_position_error": 0.0,
+    "maximum_bone_matrix_error": 0.0,
+    "maximum_float32_budget": 1.9073486328125e-06,
+    "poses": 134,
+    "neutral_default_checked": true,
+    "retained_bone_matrices_per_pose": 30,
+    "passed": true,
+    "source_sha256": "4339198fb5079e271815af3103520f13e03e4ac3aeef7a5cb23a202f3fadb990",
+    "candidate_sha256": "cf8ed55bdfbd1781ceedd7dc42258892f402b631a130864440955d9511f0050e",
+    "scope": "Direct source/candidate frozen-ID surfaces and every bone matrix at each original witness pose plus controlled neutral/default pose. Sixteen float32 ULPs at baseline coordinate/matrix magnitude; independent of inherited source/witness residual and separate from native/source appearance budgets."
+  },
+  "native_and_editor_imported": {
+    "native": {
+      "samples": 232,
+      "maximum_position_error": 9.986433732318688e-08,
+      "maximum_normal_angle_degrees": 9.195423586105984e-06
+    },
+    "imported": {
+      "samples": 232,
+      "maximum_position_error": 9.986433732318688e-08,
+      "maximum_normal_angle_degrees": 9.195423586105984e-06,
+      "actual_loader": "ResourceLoader.load(PackedScene)",
+      "authoritative_SCN_provenance": "genuine_editor_verification_revision.load_proofs"
+    }
+  },
+  "editor_import_policy": {
+    "source_sidecar_exists": false,
+    "policy": "Fresh Godot editor defaults for both inputs; native runtime source has no editor import metadata. Runtime native-folder policy remains unchanged."
+  },
+  "native_numeric_budget": {
+    "actor": "four_armed_guardian",
+    "source_coordinate_or_extent_magnitude": 1.0000001408300763,
+    "four_float32_ULPs": 4.76837158203125e-07,
+    "runtime_position_error": 9.986433732318688e-08,
+    "runtime_normal_degrees": 9.195423586105984e-06,
+    "imported_position_error": 9.986433732318688e-08,
+    "imported_normal_degrees": 9.195423586105984e-06,
+    "normal_degrees_budget": 0.0001,
+    "scope": "Four float32 ULPs at maximum original source coordinate/extent magnitude; original source mathematical equality remains exact. Native normal screen 1e-4 degrees."
+  },
+  "placement": {
+    "passed": true,
+    "bounds_error": 0.0,
+    "placement_error": 0.0,
+    "overhead_height_error": 0.0
+  },
+  "render_fit": {
+    "source_sha256": "4339198fb5079e271815af3103520f13e03e4ac3aeef7a5cb23a202f3fadb990",
+    "model_global": [
+      [
+        0.5,
+        0.000888681970536709,
+        -0.5
+      ],
+      [
+        -2.19999957084656,
+        0.0,
+        1.92330077197767e-07
+      ],
+      [
+        0.0,
+        2.19999957084656,
+        0.0
+      ],
+      [
+        -1.92330077197767e-07,
+        0.0,
+        -2.19999957084656
+      ]
+    ],
+    "position": [
+      -0.1359460463073554,
+      -0.14472169151072145,
+      -1.9538850119387137
+    ],
+    "size": [
+      2.3910920444530905,
+      2.007203299278519,
+      2.5538850566586824
+    ],
+    "poses": 254,
+    "scope": "Every vertex at every full-cycle render frame and view-still pose, using actual complete Actor Godot arrays/poses/weights/transforms, renderer morph cutoff and four/eight influence skin. Evaluated in float64 with a separate 30% camera margin."
+  },
+  "source_fit_inventory": {
+    "passed": true,
+    "source_sha256": "4339198fb5079e271815af3103520f13e03e4ac3aeef7a5cb23a202f3fadb990",
+    "candidate_sha256": "cf8ed55bdfbd1781ceedd7dc42258892f402b631a130864440955d9511f0050e",
+    "source_clips": [
+      "Death_A",
+      "Fighting_Idle",
+      "Hit_Chest",
+      "Idle_A",
+      "Jog",
+      "Sword_Attack",
+      "Walk"
+    ],
+    "actual_Actor_fit_clips": [
+      "Death_A",
+      "Fighting_Idle",
+      "Hit_Chest",
+      "Idle_A",
+      "Jog",
+      "Sword_Attack",
+      "Walk"
+    ],
+    "fit_runtime_sha256": "ef908b9a223e28f5cffd32987256ba1c0702b723cb84e7c7c77be03fad65ff5f",
+    "poses": 254,
+    "fit_lineage": null,
+    "scope": "Actual Actor source-pose capture inventory, not merely requested QA aliases. Every source clip is present in fitted playback data."
+  },
+  "appearance": {
+    "source_sha256": "4339198fb5079e271815af3103520f13e03e4ac3aeef7a5cb23a202f3fadb990",
+    "candidate_sha256": "cf8ed55bdfbd1781ceedd7dc42258892f402b631a130864440955d9511f0050e",
+    "image_pairs": 352,
+    "width": 512,
+    "height": 512,
+    "different_image_pairs": 5,
+    "maximum_different_pixels": 5,
+    "maximum_pixels_above_two_levels": 0,
+    "maximum_mean_channel_error": 8.900960286458334e-06,
+    "maximum_channel_error": 1,
+    "scope": "Complete ReplicatedActor3D setup with actual display scale, grounding and body materials; identical cameras for source/candidate, four views and every full native cycle at24Hz. Numeric playback and pixel comparisons are separate reports.",
+    "framing_passed": true,
+    "clipped_frame_labels": [],
+    "maximum_border_foreground_pixels": 0
+  },
+  "secondary_effects": {
+    "effective_scale": 2.19999957084656,
+    "failures": [],
+    "gpu": "NVIDIA GeForce RTX 5080 Laptop GPU",
+    "max_color_error": 0.0,
+    "max_custom_error": 0.0,
+    "max_dissolve_bounds_error": 0.0,
+    "max_fragment_transform_error": 0.0,
+    "max_grain_error": 0.0,
+    "max_silhouette_position_error": 0.0,
+    "mounted": {},
+    "passed": true,
+    "renderer": "forward_plus",
+    "runtime_sha256": "cf8ed55bdfbd1781ceedd7dc42258892f402b631a130864440955d9511f0050e",
+    "seeded_cases": 15,
+    "source_sha256": "4339198fb5079e271815af3103520f13e03e4ac3aeef7a5cb23a202f3fadb990"
+  },
+  "rig_investigation": {
+    "decision": "Original rig, skin and topology retained; this candidate uses exact storage reductions only."
+  },
+  "evidence_sha256": {
+    "qualification-job.json": "6534dcbf65f6e2b4525f621620f13b6bdf75af3e8fb33800305d7169b5c2486e",
+    "processing.json": "002da28350f693a353f8446bbd31dd1c36895fd7b2bf7119bcfb7c5d812f5bb8",
+    "exact-source-validation.json": "c6ddf75b6094b8fb0eb7ab39c7ec631379dd7c2675bd97798e437fa51d69d3ef",
+    "physical-witness-validation.json": "bf20d74a6c3a21a64d81ddc278d8a624942003c8fcb14c11e405861f8ac3e30f",
+    "blender-validation.json": "201de2939028550b985acd0dd9f08cde0787dbcb74fe967fe8a7e7f529dd38b8",
+    "blender-direct-validation.json": "860c16061c58b64e2275d07bfeb7f6e11f3012f900ea7d5981e00be5612a8ae0",
+    "native-validation.json": "e6c72a07dae7626d1ac9389a06d122733d5708e8e946296f7bb70ae5930d3021",
+    "imported-validation.json": "e6c72a07dae7626d1ac9389a06d122733d5708e8e946296f7bb70ae5930d3021",
+    "render-fit.json": "28fb4d154b4a0e69b3f24273521c376a5157561497a924ce8f6f8f3119007d7e",
+    "placement.json": "718302938504428c1210611a62dd81ef636b9ab634d8e61286a908d103c6fb3c",
+    "effects-validation.json": "16f9ffef0b614801c67558fdab30e7e213c6eacccd51a26a9be5f4754061b2f6",
+    "source-fit-inventory.json": "19892d66c64dbc09cd9512e08421c68fdc7b0cb903cc17d247dfc2a477210649",
+    "actual-render/render.json": "748582e56f2ab87de110f55731cb492ac716df3b98dcbe555a8b674b1cad1071",
+    "actual-render/pixel-comparison.json": "536f0eb70ccf2dc7da41c4ced7d2669ea3a9e8dd1f47d7b01405212d67afdb5a",
+    "editor-import-policy.json": "4474c4227bc14e85a4ec6097ce722f82eb5d3ade27c5307152e30519d4a46203"
+  },
+  "visual_review": "Paired normal contact boards and complete native-cycle previews reviewed. Every four-view/full-cycle frame has zero foreground pixels in its border two pixels wide.",
+  "known_limitations": [
+    "Separate resident RAM and frame-time benchmarks were not measured.",
+    "Encoded animation-key savings describe raw files, logical source accessors and import parsing input only. Native importing may densely rebake identical generated Animation keys; no runtime Animation RAM, key-search or playback CPU saving is claimed.",
+    "Original artistic review/approval status is unchanged."
+  ],
+  "genuine_editor_verification_revision": {
+    "status": "Corrected independent actual Editor verification passed within applicable unchanged modern or legacy scope",
+    "date": "2026-10-28",
+    "source_original_sha256": "4339198fb5079e271815af3103520f13e03e4ac3aeef7a5cb23a202f3fadb990",
+    "current_canonical_sha256": "cf8ed55bdfbd1781ceedd7dc42258892f402b631a130864440955d9511f0050e",
+    "loader": "ResourceLoader.load(PackedScene)",
+    "load_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/four_armed_guardian.glb-f818ca58b43458b28e47dea30000e780.md5",
+        "import_metadata_sha256": "5f61ecfc3151d45a5af4dcb26de6ba13f17ec6bee9db8cb2db24e3a4cfae87cf",
+        "imported_resource_path": "res://.godot/imported/four_armed_guardian.glb-f818ca58b43458b28e47dea30000e780.scn",
+        "imported_resource_sha256": "bd29bc93925ff8c7611f66573b6ce36fd16da2c0ea05d452c4483f8c553c4c35",
+        "packed_scene_resource_path": "res://assets/qa/four_armed_guardian/v2/baseline/four_armed_guardian.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "87b9e5ef9df8af81c99f78286209098f",
+        "source_path": "res://assets/qa/four_armed_guardian/v2/baseline/four_armed_guardian.glb",
+        "source_sha256": "4339198fb5079e271815af3103520f13e03e4ac3aeef7a5cb23a202f3fadb990"
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/four_armed_guardian.glb-eb894fbeebcdc423d9d0cae6aa60ebd7.md5",
+        "import_metadata_sha256": "5c3158b47ae6eb9e2152fb0c5c5e44d4add45c911df89d7f24174c040c7ecb6a",
+        "imported_resource_path": "res://.godot/imported/four_armed_guardian.glb-eb894fbeebcdc423d9d0cae6aa60ebd7.scn",
+        "imported_resource_sha256": "5a067a54d8b77424d4482e2594d76b0315a3d2a6d16a97af999dcf7b4fe9b3af",
+        "packed_scene_resource_path": "res://assets/qa/four_armed_guardian/v2/candidate/four_armed_guardian.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "f6bacf85a940ff57bd9b136c3e5bad7e",
+        "source_path": "res://assets/qa/four_armed_guardian/v2/candidate/four_armed_guardian.glb",
+        "source_sha256": "cf8ed55bdfbd1781ceedd7dc42258892f402b631a130864440955d9511f0050e"
+      }
+    ],
+    "source_aliases_and_SCNs_have_current_source_and_destination_MD5_freshness": true,
+    "numeric": {
+      "poses": 232,
+      "all_source_clips": [
+        "Death_A",
+        "Fighting_Idle",
+        "Hit_Chest",
+        "Idle_A",
+        "Jog",
+        "Sword_Attack",
+        "Walk"
+      ],
+      "RESET_checked": true,
+      "maximum_Euclidean_position_error_source_units": 9.986433732318688e-08,
+      "maximum_normal_angle_degrees": 9.195423586105984e-06
+    },
+    "applicable_quality_budget": {
+      "position_four_float32_ULPs": 4.76837158203125e-07,
+      "source_coordinate_or_rest_axis_extent_magnitude": 1.0000001408300763,
+      "normal_degrees": 0.0001,
+      "both_passed": true
+    },
+    "full_typed_static_attributes_material_storage_texture_pixels_and_mips": {
+      "actor": "four_armed_guardian",
+      "source_sha256": "4339198fb5079e271815af3103520f13e03e4ac3aeef7a5cb23a202f3fadb990",
+      "candidate_sha256": "cf8ed55bdfbd1781ceedd7dc42258892f402b631a130864440955d9511f0050e",
+      "surfaces": [
+        {
+          "all_typed_arrays": [
+            {
+              "slot": 0,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 1,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 2,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 4,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 10,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 11,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 12,
+              "exact_after_proven_vertex_bijection": true
+            }
+          ],
+          "full_material_storage_fields_and_texture_pixels_mips_exact": true,
+          "format_exact": true,
+          "lods": [
+            {
+              "lod": 0,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            },
+            {
+              "lod": 1,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            }
+          ],
+          "bounds_component_max_delta": 0.0,
+          "lod_capture_present": true
+        }
+      ],
+      "passed": true,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/four_armed_guardian.glb-f818ca58b43458b28e47dea30000e780.md5",
+          "import_metadata_sha256": "5f61ecfc3151d45a5af4dcb26de6ba13f17ec6bee9db8cb2db24e3a4cfae87cf",
+          "imported_resource_path": "res://.godot/imported/four_armed_guardian.glb-f818ca58b43458b28e47dea30000e780.scn",
+          "imported_resource_sha256": "bd29bc93925ff8c7611f66573b6ce36fd16da2c0ea05d452c4483f8c553c4c35",
+          "packed_scene_resource_path": "res://assets/qa/four_armed_guardian/v2/baseline/four_armed_guardian.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "87b9e5ef9df8af81c99f78286209098f",
+          "source_path": "res://assets/qa/four_armed_guardian/v2/baseline/four_armed_guardian.glb",
+          "source_sha256": "4339198fb5079e271815af3103520f13e03e4ac3aeef7a5cb23a202f3fadb990"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/four_armed_guardian.glb-eb894fbeebcdc423d9d0cae6aa60ebd7.md5",
+          "import_metadata_sha256": "5c3158b47ae6eb9e2152fb0c5c5e44d4add45c911df89d7f24174c040c7ecb6a",
+          "imported_resource_path": "res://.godot/imported/four_armed_guardian.glb-eb894fbeebcdc423d9d0cae6aa60ebd7.scn",
+          "imported_resource_sha256": "5a067a54d8b77424d4482e2594d76b0315a3d2a6d16a97af999dcf7b4fe9b3af",
+          "packed_scene_resource_path": "res://assets/qa/four_armed_guardian/v2/candidate/four_armed_guardian.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "f6bacf85a940ff57bd9b136c3e5bad7e",
+          "source_path": "res://assets/qa/four_armed_guardian/v2/candidate/four_armed_guardian.glb",
+          "source_sha256": "cf8ed55bdfbd1781ceedd7dc42258892f402b631a130864440955d9511f0050e"
+        }
+      ]
+    },
+    "retained_Editor_morph_fields": {
+      "actor": "four_armed_guardian",
+      "source_sha256": "4339198fb5079e271815af3103520f13e03e4ac3aeef7a5cb23a202f3fadb990",
+      "candidate_sha256": "cf8ed55bdfbd1781ceedd7dc42258892f402b631a130864440955d9511f0050e",
+      "all_retained_editor_POSITION_NORMAL_TANGENT_typed_bits_exact": true,
+      "retained_targets": 42,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/four_armed_guardian.glb-f818ca58b43458b28e47dea30000e780.md5",
+          "import_metadata_sha256": "5f61ecfc3151d45a5af4dcb26de6ba13f17ec6bee9db8cb2db24e3a4cfae87cf",
+          "imported_resource_path": "res://.godot/imported/four_armed_guardian.glb-f818ca58b43458b28e47dea30000e780.scn",
+          "imported_resource_sha256": "bd29bc93925ff8c7611f66573b6ce36fd16da2c0ea05d452c4483f8c553c4c35",
+          "packed_scene_resource_path": "res://assets/qa/four_armed_guardian/v2/baseline/four_armed_guardian.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "87b9e5ef9df8af81c99f78286209098f",
+          "source_path": "res://assets/qa/four_armed_guardian/v2/baseline/four_armed_guardian.glb",
+          "source_sha256": "4339198fb5079e271815af3103520f13e03e4ac3aeef7a5cb23a202f3fadb990"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/four_armed_guardian.glb-eb894fbeebcdc423d9d0cae6aa60ebd7.md5",
+          "import_metadata_sha256": "5c3158b47ae6eb9e2152fb0c5c5e44d4add45c911df89d7f24174c040c7ecb6a",
+          "imported_resource_path": "res://.godot/imported/four_armed_guardian.glb-eb894fbeebcdc423d9d0cae6aa60ebd7.scn",
+          "imported_resource_sha256": "5a067a54d8b77424d4482e2594d76b0315a3d2a6d16a97af999dcf7b4fe9b3af",
+          "packed_scene_resource_path": "res://assets/qa/four_armed_guardian/v2/candidate/four_armed_guardian.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "f6bacf85a940ff57bd9b136c3e5bad7e",
+          "source_path": "res://assets/qa/four_armed_guardian/v2/candidate/four_armed_guardian.glb",
+          "source_sha256": "cf8ed55bdfbd1781ceedd7dc42258892f402b631a130864440955d9511f0050e"
+        }
+      ],
+      "scope": "Direct actual Editor source/candidate retained morph P/N/T byte digests after independently proved complete static-attribute vertex bijection. Exact target mask from source packing lineage; no morph field omitted.",
+      "passed": true
+    },
+    "withdrawn_prior_loader_claim": "Prior shared dumper captures labelled imported used GlbSceneCache for these outside-actor aliases and therefore were raw-cache comparisons. They remain retained private raw/native evidence, but their independent Editor claim is withdrawn and superseded by these explicitly loaded SCNs.",
+    "unchanged_other_evidence": "Original independent physical observations, exact source curves, Blender, actual native gameplay body rendering, placement, mounted/cinematic dependencies and secondary effects remain hash-bound and unchanged. No artistic approval, model, action, cap or witness change in this QA revision.",
+    "production_scope": "Production actor_shipping loose folders remain raw/native and are not Editor-imported. Per-surface Editor-generated LODs are verification representation metadata, not a claim of new gameplay LODs.",
+    "evidence_sha256": {
+      ".local/heavy-batch/four_armed_guardian/v2/editor-real-v1/qualification-job.json": "b97c435e7252a28606db99501c45df81ea553f47e53e07de1b1c5e9ec53d228f",
+      ".local/heavy-batch/four_armed_guardian/v2/editor-real-v1/imported/runtime.json": "c7d77af74cf4c3bb36bd83b468ea868871ecd30cf8e6e08ec725304e2d7b31f7",
+      ".local/heavy-batch/four_armed_guardian/v2/editor-real-v1/imported-validation.json": "e6c72a07dae7626d1ac9389a06d122733d5708e8e946296f7bb70ae5930d3021",
+      ".local/heavy-batch/four_armed_guardian/v2/editor-real-v1/imported-static-mesh-bits.json": "5897bff8184e62f29be32b2921522118b39670df0df5897bd71a14984817143e",
+      ".local/heavy-batch/four_armed_guardian/v2/editor-real-v1/imported-typed-validation.json": "64f0c778a2f00f15c81d58cc5b7087c5a3ea768774da6f27529963474b8c8f1c",
+      ".local/heavy-batch/four_armed_guardian/v2/editor-real-v1/morph-digest-job.json": "74d3387f6c4174228ec8dc509a81f1247359ebbe1a3d720c9db3f78c4ffbf43d",
+      ".local/heavy-batch/four_armed_guardian/v2/editor-real-v1/imported-morph-digests.json": "5156a15c0053d4b38d3a9c47fce5634af851f077cad778ff2a05ac34853bebbb",
+      ".local/heavy-batch/four_armed_guardian/v2/editor-real-v1/imported-morph-validation.json": "92fe26926a911cc60a806eaa726251262a1a05c4c5954cc8ae649bcb30302fac"
+    }
+  }
+}

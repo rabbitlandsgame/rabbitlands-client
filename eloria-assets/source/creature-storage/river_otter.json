@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "actor": "river_otter",
+  "source_sha256": "456e1a5ce00c6685074f4e8d787b6da4c89531bbcf56fd4a0dd83046c580907a",
+  "candidate_sha256": "7c4887007346c41b40b77c59a448532ad77c85335951c4ae6ac2b92c3efe1a91",
+  "pipeline": [
+    "prune_zero_targets",
+    "reduce_constant_runs",
+    "compact"
+  ],
+  "partition": null,
+  "unchanged": false,
+  "removed_zero_target_indices": [],
+  "redundant_flat_key_rows_removed": 313369,
+  "geometry_skin_rest_binds_materials_images_unchanged": true,
+  "preserve_trs_keys": false,
+  "native_clips": [
+    "Fighting_Idle",
+    "Hit_Chest",
+    "Idle_A",
+    "Walk",
+    "Jog",
+    "Sword_Attack",
+    "Death_A"
+  ],
+  "usage": "Deterministic exact preparation needs no partition --profile; frozen source/candidate hashes bind this record."
+}

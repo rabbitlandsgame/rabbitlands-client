@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "actor": "golden_bison",
+  "source_sha256": "ce539149989c9eea1bd6bbf1671f8b2e003baefac7c692a75d31e9600c329deb",
+  "candidate_sha256": "8ad247e9cd1d8ee3fe2f9125844880101149847498a44835c099a808c772dbbd",
+  "pipeline": [
+    "prune_zero_targets",
+    "reduce_constant_runs",
+    "compact"
+  ],
+  "partition": null,
+  "unchanged": false,
+  "removed_zero_target_indices": [],
+  "redundant_flat_key_rows_removed": 133093,
+  "geometry_skin_rest_binds_materials_images_unchanged": true,
+  "preserve_trs_keys": false,
+  "native_clips": [
+    "Fighting_Idle",
+    "Hit_Chest",
+    "Idle_A",
+    "Walk",
+    "Jog",
+    "Sword_Attack",
+    "Death_A"
+  ],
+  "usage": "Deterministic exact preparation needs no partition --profile; frozen source/candidate hashes bind this record."
+}

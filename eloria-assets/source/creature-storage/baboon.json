@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "actor": "baboon",
+  "source_sha256": "70642dc46ec409454d14974b14180c593bcc7792071481c08ba54d67e8106330",
+  "candidate_sha256": "450a8b1ce98a8698fac32ea929053962b7183dbe94c1f47ef0f1b14471265083",
+  "pipeline": [
+    "prune_zero_targets",
+    "reduce_constant_runs",
+    "compact"
+  ],
+  "partition": null,
+  "unchanged": false,
+  "removed_zero_target_indices": [],
+  "redundant_flat_key_rows_removed": 23045,
+  "geometry_skin_rest_binds_materials_images_unchanged": true,
+  "preserve_trs_keys": false,
+  "native_clips": [
+    "Idle_A",
+    "Fighting_Idle",
+    "Hit_Chest",
+    "Walk",
+    "Jog",
+    "Sword_Attack",
+    "Death_A"
+  ],
+  "usage": "Deterministic exact preparation needs no partition --profile; frozen source/candidate hashes bind this record."
+}

@@ -73,12 +73,43 @@
     "walk": 0.05538479758523963,
     "run": 0.12439065311319067
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "A compact eight-blade shore crab creeps with an overlapping alternating wave. The inner armor stays braced while the outer jointed limbs rotate without swelling; fast scuttle increases cadence and reach with a level shell.",
     "attack": "A short braced double pincer thrust: right claw opens and snaps ahead, then the left follows, keeping all walking blades planted.",
     "death": "The rigid shell sinks onto its actual underside as the eight blades unfold outward. Both claws rest in front and the final collapsed silhouette holds still."
   },
   "motionStyle": "grounded eight-blade crab wave gait",
-  "locomotionMode": "grounded"
+  "locomotionMode": "grounded",
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "crystal_shore_crab",
+    "sourceSHA256": "e73d3ff8897de0321d3f584178135dda932cb055a5b3e39489eb312b21ec1fc4",
+    "previousRuntimeSHA256": "69962bc9dfc42c70eb19f58a48dcf6b21dd11efdbbff3054b447136ee4e54371",
+    "runtimeSHA256": "3d0c8bae69d8bcd35298d72faea9ecee66ca3399959be57bb977bdc41552752c",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "crystal_shore_crab",
+      "sourceSHA256": "e73d3ff8897de0321d3f584178135dda932cb055a5b3e39489eb312b21ec1fc4",
+      "runtimeSHA256": "69962bc9dfc42c70eb19f58a48dcf6b21dd11efdbbff3054b447136ee4e54371",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 240,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "crystal_shore_crab",
+    "appliesToSHA256": "3d0c8bae69d8bcd35298d72faea9ecee66ca3399959be57bb977bdc41552752c",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
+  }
 }

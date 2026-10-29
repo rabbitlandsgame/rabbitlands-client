@@ -75,10 +75,34 @@
     "walk": 0.19730075433992766,
     "run": 0.4667362718409391
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "A purposeful long-necked waddle, low alternating webbed-foot recovery and modest side-to-side weight transfer. The quicker run lengthens the step without bouncing the breast.",
     "attack": "A sharp neck-driven bill thrust with a short recoil and an assertive wing flare, then a grounded recovery.",
     "death": "The breast lowers forward; the long neck folds and the bill settles low while the webbed feet release outward and the body comes to rest."
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "goose",
+    "appliesToSHA256": "0b312ed4ff83c77161ec1119af3a6b18157957de04e12dab225c239146fea5e8",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "saved_button_approval",
+      "event_id": "b95a0779-8a63-406d-a559-81bdccedcf77",
+      "event_sha256": "8e4485d54be3561dc9c2e6fec518ef3cb310bd623381200fcf83a99b79c3ea4e",
+      "utc": "2026-10-28T20:55:26.518555+00:00"
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "goose",
+    "sourceSHA256": "80774e4fbe9c949d53ff646e79ce31040525b83ca0183adaad38c12846f59fac",
+    "previousRuntimeSHA256": "80774e4fbe9c949d53ff646e79ce31040525b83ca0183adaad38c12846f59fac",
+    "runtimeSHA256": "0b312ed4ff83c77161ec1119af3a6b18157957de04e12dab225c239146fea5e8",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": null
   }
 }

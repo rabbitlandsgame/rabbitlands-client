@@ -19,11 +19,13 @@ def append_array(document, blob, values, kind):
     return len(document['accessors']) - 1
 
 
-def compact(document, binary):
+def compact(document, binary, *, collapse_paths=None):
     """Remove unreachable storage; collapse only exactly constant LINEAR/STEP tracks.
 
     Endpoint timestamps remain intact, including clips with only constant tracks.
     Unknown binary-bearing extensions fail closed rather than losing payload.
+    ``collapse_paths`` optionally restricts constant-track collapse; storage
+    compaction and deduplication still apply to every referenced accessor.
     """
     document = copy.deepcopy(document)
     if set(document.get('extensionsUsed', [])) - {'KHR_materials_unlit', 'KHR_materials_specular',
@@ -34,13 +36,19 @@ def compact(document, binary):
         raise ValueError('Packing requires one embedded buffer')
     blob = bytearray(binary)
     collapsed = 0
+    allowed_paths = None if collapse_paths is None else frozenset(collapse_paths)
     for animation in document.get('animations', []):
-        for sampler in animation['samplers']:
+        for index, sampler in enumerate(animation['samplers']):
+            target_paths = {channel['target']['path'] for channel in animation['channels']
+                            if channel['sampler'] == index}
+            if allowed_paths is not None and (not target_paths or not target_paths <= allowed_paths):
+                continue
             if sampler.get('interpolation', 'LINEAR') not in ('LINEAR', 'STEP'):
                 continue
             values = accessor(document, blob, sampler['output'])
             times = accessor(document, blob, sampler['input'])
-            if len(values) > 2 and len(values) == len(times) and np.all(values == values[0]):
+            bits = values.view(np.uint8).reshape(len(values), -1)
+            if len(values) > 2 and len(values) == len(times) and np.all(bits == bits[0]):
                 spec = document['accessors'][sampler['output']]
                 # Preserve non-float/normalized attributes without conversion.
                 if spec['componentType'] != 5126 or spec.get('normalized'):

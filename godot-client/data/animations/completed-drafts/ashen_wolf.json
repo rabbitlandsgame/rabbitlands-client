@@ -73,10 +73,34 @@
     "walk": 0.6962921616324195,
     "run": 1.6360431210384119
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "A grounded four-beat canine walk and diagonal trot, with full balanced strides, a quiet back and aligned mirrored paw lanes. Ashen Wolf keeps its lean stalking silhouette.",
     "attack": "A clear backward load followed by a forward lunge, head-led bite, supported landing and recovery. Upper snout stays with the skull; only valid lower-jaw branches articulate.",
     "death": "The head drops as the forelegs fold, the body rolls into supported flank/head contact, the paws release and relax, and the tail follows into a still grounded hold."
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "ashen_wolf",
+    "appliesToSHA256": "18d5ec00c6edbfe75cfd3e31116d1df9c7099cebad346011447e072dd11030e1",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "saved_button_approval",
+      "event_id": "599ae677-d28a-48b5-9af3-21ea86bfb47f",
+      "event_sha256": "214a92f80b0108b6b5d0870de2d076f8a3bd056bc36669e688ca4d44a21e01a1",
+      "utc": "2026-10-28T21:44:20.944047+00:00"
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "ashen_wolf",
+    "sourceSHA256": "567e7dc55774223a90ccf02da585a66716501a69e2e87de6cd72d9338b6486c4",
+    "previousRuntimeSHA256": "567e7dc55774223a90ccf02da585a66716501a69e2e87de6cd72d9338b6486c4",
+    "runtimeSHA256": "18d5ec00c6edbfe75cfd3e31116d1df9c7099cebad346011447e072dd11030e1",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": null
   }
 }

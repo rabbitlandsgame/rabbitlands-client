@@ -577,7 +577,7 @@ func withdraw_selected() -> void:
 func deposit_selected() -> void:
 	var slot: int = int(main.get("selected_inventory_slot"))
 	var item: Dictionary = AppState.inventory.get(slot, {}) as Dictionary
-	if slot < 0 or slot >= 36 or item.is_empty():
+	if slot < 0 or (slot >= 24 and slot < 127) or item.is_empty():
 		description.text = "Select a backpack item first."
 		return
 	var quantity: int = mini(int(main.call("_selected_quantity")), int(item.get("quantity", 0)))
@@ -709,7 +709,7 @@ func add_selected_storage() -> void:
 
 func add_inventory_slot(slot: int, capture_quantity: bool = false) -> void:
 	var item: Dictionary = AppState.inventory.get(slot, {}) as Dictionary
-	if slot < 0 or slot >= 36 or item.is_empty():
+	if slot < 0 or (slot >= 24 and slot < 127) or item.is_empty():
 		list_status.text = "Select a backpack item first."
 		return
 	var entry: Dictionary = item.duplicate()
@@ -750,7 +750,8 @@ func _on_add_menu(id: int) -> void:
 		1: add_inventory_slot(int(main.get("selected_inventory_slot")))
 		2:
 			var captured: Dictionary = {}
-			for slot: int in range(36):
+			for slot: int in AppState.inventory:
+				if slot >= 24 and slot < 127: continue
 				if not AppState.inventory.has(slot):
 					continue
 				var item: Dictionary = AppState.inventory[slot] as Dictionary
@@ -925,7 +926,7 @@ func _popup_layout() -> void:
 func _popup_add() -> void:
 	add_menu.set_item_disabled(0, _selected_position < 0)
 	var slot: int = int(main.get("selected_inventory_slot"))
-	add_menu.set_item_disabled(1, slot < 0 or slot >= 36 or not AppState.inventory.has(slot))
+	add_menu.set_item_disabled(1, slot < 0 or (slot >= 24 and slot < 127) or not AppState.inventory.has(slot))
 	add_menu.position = Vector2i(get_viewport().get_mouse_position())
 	add_menu.popup()
 

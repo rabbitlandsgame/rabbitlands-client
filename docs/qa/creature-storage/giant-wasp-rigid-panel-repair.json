@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "actor": "giant_wasp",
+  "status": "unapproved_repair_review_candidate_not_installed",
+  "candidate_sha256": "3ba6501be3dd4f8d282fc4c866454df2ae8aa243935e8fcd9fa742f4b5319820",
+  "reference_30hz_sha256": "864e1e701fd2a839387fe4b90105b96435836e2994722749b64c254c7481b78a",
+  "commented_bake_sha256": "c6b7a08075da07dad2573deef1a597809c7bb752c75b1411a7d099c84a6a70a6",
+  "regions_sha256": "0a8321c77711e650b5b71d28a17143e978e45eb316a4240855f29b75ce015e31",
+  "raw_bytes": 1481000,
+  "previous_bake_bytes": 1383972,
+  "extra_bytes": 97028,
+  "corrective_shapes": 0,
+  "maximum_animation_samples_per_second": 30,
+  "native_clips": 8,
+  "panel_vertices": 240,
+  "new_rigid_controls": 4,
+  "native_bones_before_after": [
+    70,
+    75
+  ],
+  "surfaces_before_after": [
+    1,
+    1
+  ],
+  "repair": "Restore four intact reference wing membranes and fit isolated rigid panel controls to their authored trajectories. Preserve all other baked attributes, original controls/curves, original vertex order and triangle indices.",
+  "validation": {
+    "raw_client_states_per_comparison": 490,
+    "transition_scopes": [
+      "first tick after switching",
+      "60 Hz frame-stepped established outgoing pose"
+    ],
+    "nonwing_actual_position_difference_mm": 0,
+    "source_to_old_bake_maximum_position_mm": 712.6633342401112,
+    "source_to_repair_maximum_position_mm": 199.71495317950888,
+    "source_to_old_bake_rms_position_mm": 36.190573743307496,
+    "source_to_repair_rms_position_mm": 11.547249899237661,
+    "maximum_wing_edge_relative_length_variation_before_after": [
+      2.48555,
+      2.24863e-07
+    ],
+    "fresh_blender_all_clips_finite": true,
+    "forward_plus_full_clip_and_wing_phase_captures": true,
+    "guarded_tool_replay_same_candidate_sha256": true
+  },
+  "cpu_component_benchmark": {
+    "scope": "AnimationPlayer.advance plus forced skeleton transforms, headless; 9 batches of 1200 updates after 240 warmups. No rendering or whole-client FPS measurement.",
+    "fly_median_update_us_before_after": [
+      6.5058,
+      10.3242
+    ],
+    "jog_median_update_us_before_after": [
+      12.2825,
+      17.575
+    ],
+    "first_actor_retained_static_bytes_before_after": [
+      11542502,
+      11992271
+    ],
+    "allocation_scope": "Static scene/library/cache allocations, not per-instance or whole-process RAM."
+  },
+  "shared_corrective_buffer_bytes_source_to_repair": [
+    62039780,
+    0
+  ],
+  "limitations": [
+    "Approximate rigid panel motion, not identical authored soft deformation.",
+    "Maximum remaining source difference includes unchanged baked body and transition behavior.",
+    "No new draw surface, but added controls increase CPU transform/curve work.",
+    "Candidate requires new exact-version human review; old approval cannot authorize this repair."
+  ]
+}

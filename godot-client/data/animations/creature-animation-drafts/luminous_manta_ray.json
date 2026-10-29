@@ -73,12 +73,43 @@
     "walk": 0.5238204226908426,
     "run": 1.5652499587125575
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "Broad symmetric pectoral-disk strokes drive a slow luminous glide. Faster travel increases spanwise wave amplitude/cadence while the central disk and face remain quiet and the curved ornamental tail trails with sagittal lag.",
     "attack": "A brief wing load leads into a forward mantle-and-cephalic-lobe surge, then a controlled recovery. The face, eyes, mouth rim and long lobes remain coherent.",
     "death": "The central disk settles level onto separate underside regions. The wide fins relax outward and the long vertical tail curve and upper ornamental fan lay down behind the body without rolling the main disk onto its side."
   },
   "motionStyle": "buoyant paired pectoral-disk swimming",
-  "locomotionMode": "swimming"
+  "locomotionMode": "swimming",
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "luminous_manta_ray",
+    "sourceSHA256": "033a32bd360d4f582b5a4fbaaddeefca2f0cf08ea9b214cf44086a1fa0458730",
+    "previousRuntimeSHA256": "12c650bc4c2d2d2cdc5bee47165bbbffaca71300b60ff15f9f2ada96cd158911",
+    "runtimeSHA256": "e28e82a6cb522707440b0a41e45ee95eab1443e0888e858f1234b4a04bedf2d8",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "luminous_manta_ray",
+      "sourceSHA256": "033a32bd360d4f582b5a4fbaaddeefca2f0cf08ea9b214cf44086a1fa0458730",
+      "runtimeSHA256": "12c650bc4c2d2d2cdc5bee47165bbbffaca71300b60ff15f9f2ada96cd158911",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 120,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "luminous_manta_ray",
+    "appliesToSHA256": "e28e82a6cb522707440b0a41e45ee95eab1443e0888e858f1234b4a04bedf2d8",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
+  }
 }

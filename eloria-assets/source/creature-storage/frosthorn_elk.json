@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "actor": "frosthorn_elk",
+  "source_sha256": "f3965ded399467bb3c1ea6e5c5c088f3e4d6fcfd7d823563d8ceaf9123e24d9b",
+  "candidate_sha256": "ffefc304b8183ff63439033af4d1a11e2dc8f0a23d4529554cb8fbefe213e3ba",
+  "pipeline": [
+    "prune_zero_targets",
+    "reduce_constant_runs",
+    "compact"
+  ],
+  "partition": null,
+  "unchanged": false,
+  "removed_zero_target_indices": [],
+  "redundant_flat_key_rows_removed": 106776,
+  "geometry_skin_rest_binds_materials_images_unchanged": true,
+  "preserve_trs_keys": false,
+  "native_clips": [
+    "Fighting_Idle",
+    "Hit_Chest",
+    "Idle_A",
+    "Walk",
+    "Jog",
+    "Sword_Attack",
+    "Death_A"
+  ],
+  "usage": "Deterministic exact preparation needs no partition --profile; frozen source/candidate hashes bind this record."
+}

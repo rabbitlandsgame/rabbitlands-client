@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "actor": "leafwing_owl",
+  "source_sha256": "2e382f1d626076d60bb818e762ac0ebce0c804626acc51dc9d6a242ea643bbef",
+  "candidate_sha256": "4f2c2b55911319d81600c9016755bdd8a4bb5315e4ba13b26648e88028cb8227",
+  "pipeline": [
+    "prune_zero_targets",
+    "reduce_constant_runs",
+    "compact"
+  ],
+  "partition": null,
+  "unchanged": false,
+  "removed_zero_target_indices": [],
+  "redundant_flat_key_rows_removed": 3986,
+  "geometry_skin_rest_binds_materials_images_unchanged": true,
+  "preserve_trs_keys": false,
+  "native_clips": [
+    "Idle_A",
+    "Fighting_Idle",
+    "Walk",
+    "Jog",
+    "Sword_Attack",
+    "Hit_Chest",
+    "Death_A"
+  ],
+  "usage": "Deterministic exact preparation needs no partition --profile; frozen source/candidate hashes bind this record."
+}

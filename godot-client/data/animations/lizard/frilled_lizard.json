@@ -70,5 +70,37 @@
   "strideMetresPerSecond": {
     "walk": 0.1756657103919045,
     "run": 0.5165408388904812
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "frilled_lizard",
+    "sourceSHA256": "a3c7e2f65ba4e2da4c328107da90f39f0c8b87e7fa34a77a345b4cca6d1c6fb2",
+    "previousRuntimeSHA256": "391ef04aae8b847e0751bae908447ac0c7dcde80716a54619396a28b7a6f31ef",
+    "runtimeSHA256": "5fd88f98686c32b16e6ebf16907ef6b88596626f6c7006c6f48a6dc953f1c871",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "frilled_lizard",
+      "sourceSHA256": "a3c7e2f65ba4e2da4c328107da90f39f0c8b87e7fa34a77a345b4cca6d1c6fb2",
+      "runtimeSHA256": "391ef04aae8b847e0751bae908447ac0c7dcde80716a54619396a28b7a6f31ef",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 240,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "reviewStatus": "accepted",
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "frilled_lizard",
+    "appliesToSHA256": "5fd88f98686c32b16e6ebf16907ef6b88596626f6c7006c6f48a6dc953f1c871",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": null,
+    "repairNoteEvents": []
   }
 }

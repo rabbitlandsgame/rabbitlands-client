@@ -75,11 +75,35 @@
     "walk": 0.3547714591779655,
     "run": 0.7036860965632977
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "A deliberate webbed-foot walk with the heavy body steady and the long bill carried forward. The quicker run lengthens the alternating steps while the folded wings and bill stay coherent.",
     "attack": "The neck coils briefly, then drives the complete long bill and pouch forward in a forceful downward jab while both webbed feet brace and the wings open slightly for balance.",
     "death": "The breast settles forward, the long neck folds low and the bill rests ahead of the body. The webbed feet release beside the torso and the wings and tail settle into a still supported pose.",
     "flight": "Original native flight and every original corrective shape are retained unchanged."
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "pelican",
+    "appliesToSHA256": "5b9f68d7f7bd05d9f271f8b699df1149e0280a79ad0b026b481ed714ac0e6d98",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "saved_button_approval",
+      "event_id": "b2810e9b-01f8-457b-b35f-aa1460fc60df",
+      "event_sha256": "99a724cf7556fc6763cb1a5dece6eaf574c77c719847375c6bc666582798f3cb",
+      "utc": "2026-10-28T21:40:24.783718+00:00"
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "pelican",
+    "sourceSHA256": "3cfd69080eeb192df527487cea3c8b534442a2772a0cfc539d3e739882e08994",
+    "previousRuntimeSHA256": "3cfd69080eeb192df527487cea3c8b534442a2772a0cfc539d3e739882e08994",
+    "runtimeSHA256": "5b9f68d7f7bd05d9f271f8b699df1149e0280a79ad0b026b481ed714ac0e6d98",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": null
   }
 }

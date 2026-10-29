@@ -73,12 +73,43 @@
     "walk": 0.22059027085888397,
     "run": 0.6333391776659513
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "An armored deep-water fish cruises with a steady heavy trunk and deliberate lateral caudal strokes. Faster travel strengthens the posterior wave while the head, eye lenses and plated torso remain coherent; pectoral fins steer rather than walk.",
     "attack": "A short backward load and forceful straight forward armored-head/body ram, with pectorals swept clear of the face. No invented jaw opening is assumed.",
     "death": "Tail propulsion fades and the fish drifts down into a supported forward rest on separate head and belly regions. Fins fold or relax clear of the bottom rather than holding the body up on a single fin tip; the natural upward tail silhouette is retained when clearance allows."
   },
   "motionStyle": "buoyant lateral-tail swimming",
-  "locomotionMode": "swimming"
+  "locomotionMode": "swimming",
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "abyssal_armored_fish",
+    "sourceSHA256": "6c75023cfaeaa8bf6c06dcf76287ef3ccb8e01484c788bbde95717fb93d970d7",
+    "previousRuntimeSHA256": "c2bb8b67228f49dca527e0c455135e2525e53a5b6941f43917a44005d75942fd",
+    "runtimeSHA256": "6e4b18432ebde063bf3df025d68e9b00e86a2425065b5faedb3c1cbb2428865a",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "abyssal_armored_fish",
+      "sourceSHA256": "6c75023cfaeaa8bf6c06dcf76287ef3ccb8e01484c788bbde95717fb93d970d7",
+      "runtimeSHA256": "c2bb8b67228f49dca527e0c455135e2525e53a5b6941f43917a44005d75942fd",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 120,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "abyssal_armored_fish",
+    "appliesToSHA256": "6e4b18432ebde063bf3df025d68e9b00e86a2425065b5faedb3c1cbb2428865a",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
+  }
 }

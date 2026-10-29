@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "fallbackAction": "idle",
+  "playbackSpeeds": {
+    "walk": 1.0,
+    "run": 1.0,
+    "attack_primary": 1.0,
+    "death": 1.0
+  },
+  "actions": {
+    "idle": "Idle_A",
+    "alternate_idle": "Idle_A",
+    "combat_idle": "Fighting_Idle",
+    "walk": "Walk",
+    "run": "Jog",
+    "turn": "Idle_A",
+    "sit": "Idle_A",
+    "seated_idle": "Idle_A",
+    "stand": "Idle_A",
+    "death": "Death_A",
+    "pain": "Hit_Chest",
+    "attack_primary": "Sword_Attack",
+    "ranged_attack": "Sword_Attack",
+    "cast": "Sword_Attack",
+    "harvest": "Sword_Attack",
+    "pickup": "Idle_A",
+    "drop": "Idle_A",
+    "emote_greeting": "Idle_A"
+  },
+  "serverCommands": {
+    "3": "death",
+    "5": "pain",
+    "7": "idle",
+    "13": "sit",
+    "14": "stand",
+    "15": "combat_idle",
+    "18": "combat_idle",
+    "19": "idle",
+    "20": "walk",
+    "21": "walk",
+    "22": "walk",
+    "23": "walk",
+    "24": "walk",
+    "25": "walk",
+    "26": "walk",
+    "27": "walk",
+    "30": "run",
+    "31": "run",
+    "32": "run",
+    "33": "run",
+    "34": "run",
+    "35": "run",
+    "36": "run",
+    "37": "run",
+    "38": "turn",
+    "39": "turn",
+    "40": "turn",
+    "41": "turn",
+    "42": "turn",
+    "43": "turn",
+    "44": "turn",
+    "45": "turn",
+    "46": "attack_primary"
+  },
+  "loopingClips": [
+    "Idle_A",
+    "Fighting_Idle",
+    "Walk",
+    "Jog"
+  ],
+  "strideScalesWithActor": true,
+  "strideMetresPerSecond": {
+    "walk": 0.2398331538461538,
+    "run": 0.536796375
+  },
+  "reviewStatus": "accepted",
+  "concept": {
+    "movement": "Four actual taloned legs carry a steady low torso. A deliberate four-beat walk changes to a brisk diagonal trot with full matched recovery and no stutter step. The hooked face remains forward;body-rooted feather mantle stays attached and the long tail follows from its centered base.",
+    "attack": "A low gathered brace becomes a strong forward hooked-beak surge and a lifted reaching talon rake,then controlled recovery. The folded mantle braces with the body; no independently inferred jaw movement.",
+    "death": "The actual chest and central pelvic belly settle forward onto the floor together. Real serial leg lengths stay fixed as talons release naturally outside the body. The connected neck folds smoothly without separating the skull;the whole tail lowers coherently and holds."
+  },
+  "locomotionMode": "grounded",
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "plains_griffin",
+    "appliesToSHA256": "08dac82c4ef309e08172e5646610ba3eb6d1c8db254fd5fc940f45759d8350fd",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "saved_button_approval",
+      "event_id": "f1649a05-ee97-485f-8a81-37c52538dddb",
+      "event_sha256": "6a1cd475ee61d002d6d896f78dfc4b36b8d2c6f635688f442961c06fbd06c56d",
+      "utc": "2026-10-28T21:10:09.625788+00:00"
+    },
+    "previousAuthoringReviewStatus": "draft",
+    "repairNoteEvents": []
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "plains_griffin",
+    "sourceSHA256": "80330cd8a7c8feec151cc5ba2029e219dad3413fefd6c1ccec6ccad54a4f6ffa",
+    "previousRuntimeSHA256": "53dfed9268760c31c6c541cb720dcbabdec5e7ae8894a1357db6fa5cda531059",
+    "runtimeSHA256": "08dac82c4ef309e08172e5646610ba3eb6d1c8db254fd5fc940f45759d8350fd",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": null
+  }
+}

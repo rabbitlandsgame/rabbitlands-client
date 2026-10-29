@@ -1,4 +1,5 @@
 extends RefCounted
+const CreaturePayload := preload("res://src/actors/creature_payload.gd")
 ## Texture provenance for the offline geometry cooker. Ordinary play takes the
 ## disabled fast path; discovery owns WeakRefs and portable data, never pixels.
 const Prepared := preload("res://src/world/prepared_content.gd")
@@ -114,7 +115,7 @@ static func note(state: GLTFState, glb_path: String) -> void:
 				"image_sha256": sha, "mip_policy": "full" if file.begins_with("godot-client/assets/world/") else "map",
 				"inputs": [{"path": image_file, "sha256": sha}]}
 		else:
-			if container.is_empty(): container = FileAccess.get_file_as_bytes(source_path(file))
+			if container.is_empty(): container = CreaturePayload.read_bytes(source_path(file))
 			var extracted := embedded_bytes(container, index)
 			if not bool(extracted.get("ok", false)): continue
 			var sha := digest_bytes(container)

@@ -5,6 +5,7 @@ extends RefCounted
 const BODY_SHADER := preload("res://src/actors/creature_dissolve.gdshader")
 const BODY_INCLUDE := preload("res://src/actors/creature_dissolve.gdshaderinc")
 const ASH_SHADER := preload("res://src/actors/creature_ash.gdshader")
+const SurfaceSampling := preload("res://src/actors/creature_surface_sampling.gd")
 const FRAGMENT_COUNT := 320
 
 var _saved: Array[Dictionary] = []
@@ -37,39 +38,23 @@ func begin(actor: Node3D, seconds: float, seed_value: int) -> void:
 				continue
 			total_vertices += vertices.size()
 			surfaces.append({"mesh": source, "arrays": arrays, "skin": skinning,
-				"end": total_vertices, "material": active[surface]})
+				"surface":surface, "end": total_vertices, "material": active[surface]})
 			var material := _body_material(active[surface])
 			source.set_surface_override_material(surface, material)
 			_materials.append(material)
 		source.material_override = null
+	var sampling := SurfaceSampling.virtual_surfaces(surfaces)
+	if not sampling.errors.is_empty():
+		reset()
+		push_error("Invalid creature sampling partition: " + str(sampling.errors))
+		return
+	surfaces.assign(sampling.surfaces)
+	total_vertices = int(sampling.total_vertices)
 	if total_vertices == 0:
 		return
-	var points := PackedVector3Array()
-	var colors := PackedColorArray()
-	for index in FRAGMENT_COUNT:
-		var pick := rng.randi_range(0, total_vertices - 1)
-		for surface: Dictionary in surfaces:
-			if pick >= int(surface.end):
-				continue
-			var arrays: Array = surface.arrays
-			var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
-			var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX] if arrays[Mesh.ARRAY_INDEX] != null else PackedInt32Array()
-			var count := indices.size() if not indices.is_empty() else vertices.size()
-			if count < 3:
-				break
-			var triangle := rng.randi_range(0, count / 3 - 1) * 3
-			var corners := PackedVector3Array()
-			for corner in 3:
-				var vertex := indices[triangle + corner] if not indices.is_empty() else triangle + corner
-				corners.append(_posed_vertex(surface, vertex))
-			var u := sqrt(rng.randf())
-			var v := rng.randf()
-			points.append(corners[0] * (1.0 - u) + corners[1] * u * (1.0 - v) + corners[2] * u * v)
-			var base := Color(0.48, 0.43, 0.36)
-			if surface.material is BaseMaterial3D:
-				base = (surface.material as BaseMaterial3D).albedo_color.lerp(base, 0.65)
-			colors.append(base.darkened(rng.randf_range(0.0, 0.35)))
-			break
+	var fragments := _sample_fragments(surfaces,total_vertices,rng)
+	var points: PackedVector3Array = fragments.points
+	var colors: PackedColorArray = fragments.colors
 	if points.is_empty():
 		return
 	var bounds := AABB(points[0], Vector3.ZERO)
@@ -108,6 +93,46 @@ func begin(actor: Node3D, seconds: float, seed_value: int) -> void:
 	_ash.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_ash.custom_aabb = bounds.grow(3.0)
 	actor.add_child(_ash)
+
+func _sample_fragments(surfaces: Array[Dictionary], total_vertices: int, rng: RandomNumberGenerator) -> Dictionary:
+	var points := PackedVector3Array()
+	var colors := PackedColorArray()
+	for index in FRAGMENT_COUNT:
+		var pick := rng.randi_range(0, total_vertices - 1)
+		for surface: Dictionary in surfaces:
+			if pick >= int(surface.end):
+				continue
+			if int(surface.triangles) < 1:
+				break
+			# Keep the original surface/triangle RNG ranges and call order.
+			# The chosen physical partition supplies only its corner indices.
+			var original := rng.randi_range(0,int(surface.triangles)-1)
+			var physical: Dictionary = surface
+			var local_triangle := original
+			if surface.has("partition"):
+				var partition: Dictionary = surface.partition
+				physical = partition.remainder
+				local_triangle = original - partition.ids.bsearch(original)
+				for part: Dictionary in partition.selected:
+					var found: int = part.ids.bsearch(original)
+					if found < part.ids.size() and part.ids[found] == original:
+						physical = part.surface; local_triangle = found; break
+			var arrays: Array = physical.arrays
+			var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX] if arrays[Mesh.ARRAY_INDEX] != null else PackedInt32Array()
+			var triangle := local_triangle * 3
+			var corners := PackedVector3Array()
+			for corner in 3:
+				var vertex := indices[triangle + corner] if not indices.is_empty() else triangle + corner
+				corners.append(_posed_vertex(physical, vertex))
+			var u := sqrt(rng.randf())
+			var v := rng.randf()
+			points.append(corners[0] * (1.0 - u) + corners[1] * u * (1.0 - v) + corners[2] * u * v)
+			var base := Color(0.48, 0.43, 0.36)
+			if surface.material is BaseMaterial3D:
+				base = (surface.material as BaseMaterial3D).albedo_color.lerp(base, 0.65)
+			colors.append(base.darkened(rng.randf_range(0.0, 0.35)))
+			break
+	return {"points":points,"colors":colors}
 
 func update(progress: float) -> void:
 	for material: ShaderMaterial in _materials:

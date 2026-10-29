@@ -1,0 +1,571 @@
+{
+  "schema_version": 1,
+  "batch": 1,
+  "actor": "thornwood_dryad_queen",
+  "date": "2026-10-27",
+  "runtime_path": "godot-client/assets/actors/native/creatures/thornwood_dryad_queen.glb",
+  "source_sha256": "643502582c8b7ef8d2fa4ebcd0d18b8035685f844099b2c8db0ade561314b735",
+  "runtime_sha256": "37ef36bb5b26e87594409136ed8892c88fbc408bdb6cba9ea24718ed3c38496d",
+  "qualification": "appearance/motion preservation passed before task-worktree replacement",
+  "human_approval_changed": false,
+  "recipe": {
+    "tool": "eloria-assets/tools/pack_creature_storage.py",
+    "source_sha256": "643502582c8b7ef8d2fa4ebcd0d18b8035685f844099b2c8db0ade561314b735",
+    "profile": null,
+    "steps": [
+      "prune_zero_targets",
+      "reduce_constant_runs",
+      "compact"
+    ]
+  },
+  "bytes": {
+    "source_bytes": 85298756,
+    "candidate_bytes": 83389388,
+    "source_zstd_bytes": 22868639,
+    "candidate_zstd_bytes": 22893994
+  },
+  "method": "Exact bit-identical flat-run interior keys removed; original boundary times, defaults, positions, normals, UVs, all 641 corrective targets, skin/rest/binds and native motions preserved.",
+  "inactive_targets_removed": 0,
+  "flat_run_key_rows_removed": 77033,
+  "animation_accessor_storage": {
+    "scope": "Logical bytes of unique referenced animation accessors; accessors may share buffer views. Not process RSS.",
+    "models": [
+      {
+        "model": "original",
+        "unique_animation_accessor_bytes": 15166028,
+        "input_key_rows": 283347
+      },
+      {
+        "model": "candidate",
+        "unique_animation_accessor_bytes": 12840144,
+        "input_key_rows": 206314
+      }
+    ]
+  },
+  "corrective_graphics_buffer_bytes": {
+    "source": 115380000,
+    "candidate": 115380000,
+    "saved": 0,
+    "scope": "Measured raw Godot mesh blend_shape_data bytes, common surface format also used by Forward+."
+  },
+  "draw_surfaces": {
+    "source": 1,
+    "candidate": 1
+  },
+  "source_validation": {
+    "passed": true,
+    "source_sha256": "643502582c8b7ef8d2fa4ebcd0d18b8035685f844099b2c8db0ade561314b735",
+    "candidate_sha256": "37ef36bb5b26e87594409136ed8892c88fbc408bdb6cba9ea24718ed3c38496d",
+    "source_geometry_normals_uv_images_binds_rest_and_retained_corrective_fields_bit_exact": true,
+    "triangle_coverage_preserved": true,
+    "source_curves_preserved_through_constant_run_reduction": true,
+    "clips": {
+      "Death_A": {
+        "source_knots_midpoints_offgrid_samples": 4032,
+        "maximum_curve_component_error": {
+          "translation": 0.0,
+          "rotation_components": 0.0,
+          "scale": 0.0,
+          "weights": 0.0
+        }
+      },
+      "Fighting_Idle": {
+        "source_knots_midpoints_offgrid_samples": 1702,
+        "maximum_curve_component_error": {
+          "translation": 0.0,
+          "rotation_components": 0.0,
+          "scale": 0.0,
+          "weights": 0.0
+        }
+      },
+      "Hit_Chest": {
+        "source_knots_midpoints_offgrid_samples": 608,
+        "maximum_curve_component_error": {
+          "translation": 0.0,
+          "rotation_components": 0.0,
+          "scale": 0.0,
+          "weights": 0.0
+        }
+      },
+      "Idle_A": {
+        "source_knots_midpoints_offgrid_samples": 3286,
+        "maximum_curve_component_error": {
+          "translation": 0.0,
+          "rotation_components": 0.0,
+          "scale": 0.0,
+          "weights": 0.0
+        }
+      },
+      "Jog": {
+        "source_knots_midpoints_offgrid_samples": 3756,
+        "maximum_curve_component_error": {
+          "translation": 0.0,
+          "rotation_components": 0.0,
+          "scale": 0.0,
+          "weights": 0.0
+        }
+      },
+      "Sword_Attack": {
+        "source_knots_midpoints_offgrid_samples": 3902,
+        "maximum_curve_component_error": {
+          "translation": 0.0,
+          "rotation_components": 0.0,
+          "scale": 0.0,
+          "weights": 0.0
+        }
+      },
+      "Walk": {
+        "source_knots_midpoints_offgrid_samples": 5108,
+        "maximum_curve_component_error": {
+          "translation": 0.0,
+          "rotation_components": 0.0,
+          "scale": 0.0,
+          "weights": 0.0
+        }
+      }
+    }
+  },
+  "source_rigid_validation": null,
+  "fresh_blender": {
+    "baseline": {
+      "sha256": "643502582c8b7ef8d2fa4ebcd0d18b8035685f844099b2c8db0ade561314b735",
+      "passed": true,
+      "surface_probes": 180,
+      "clips": {
+        "Death_A": {
+          "surface_error_over_height": 1.5712685016406238e-06,
+          "bone_head_error_over_height": 5.36690365880486e-07,
+          "poses": 6
+        },
+        "Fighting_Idle": {
+          "surface_error_over_height": 1.4547923932046115e-06,
+          "bone_head_error_over_height": 5.105926098564437e-07,
+          "poses": 6
+        },
+        "Hit_Chest": {
+          "surface_error_over_height": 1.4547923932046115e-06,
+          "bone_head_error_over_height": 5.105926098564437e-07,
+          "poses": 6
+        },
+        "Idle_A": {
+          "surface_error_over_height": 1.3937982481876528e-06,
+          "bone_head_error_over_height": 4.021990392872842e-07,
+          "poses": 6
+        },
+        "Jog": {
+          "surface_error_over_height": 1.325621744685067e-05,
+          "bone_head_error_over_height": 3.592880032282338e-06,
+          "poses": 6
+        },
+        "Sword_Attack": {
+          "surface_error_over_height": 5.899236163292275e-06,
+          "bone_head_error_over_height": 3.3094151491117336e-06,
+          "poses": 6
+        },
+        "Walk": {
+          "surface_error_over_height": 1.2967691927519717e-05,
+          "bone_head_error_over_height": 6.194001814240195e-07,
+          "poses": 6
+        }
+      },
+      "max_surface_error_over_height": 1.325621744685067e-05,
+      "max_bone_head_error_over_height": 3.592880032282338e-06,
+      "scope": "Independent fresh Blender import geometry/motion witness check. Blender is not the authority for runtime morph normal shading."
+    },
+    "candidate": {
+      "sha256": "37ef36bb5b26e87594409136ed8892c88fbc408bdb6cba9ea24718ed3c38496d",
+      "passed": true,
+      "surface_probes": 180,
+      "clips": {
+        "Death_A": {
+          "surface_error_over_height": 1.5712685016406238e-06,
+          "bone_head_error_over_height": 5.36690365880486e-07,
+          "poses": 6
+        },
+        "Fighting_Idle": {
+          "surface_error_over_height": 1.4547923932046115e-06,
+          "bone_head_error_over_height": 5.105926098564437e-07,
+          "poses": 6
+        },
+        "Hit_Chest": {
+          "surface_error_over_height": 1.4547923932046115e-06,
+          "bone_head_error_over_height": 5.105926098564437e-07,
+          "poses": 6
+        },
+        "Idle_A": {
+          "surface_error_over_height": 1.3937982481876528e-06,
+          "bone_head_error_over_height": 4.021990392872842e-07,
+          "poses": 6
+        },
+        "Jog": {
+          "surface_error_over_height": 1.325621744685067e-05,
+          "bone_head_error_over_height": 3.592880032282338e-06,
+          "poses": 6
+        },
+        "Sword_Attack": {
+          "surface_error_over_height": 5.899236163292275e-06,
+          "bone_head_error_over_height": 3.3094151491117336e-06,
+          "poses": 6
+        },
+        "Walk": {
+          "surface_error_over_height": 1.2967691927519717e-05,
+          "bone_head_error_over_height": 6.194001814240195e-07,
+          "poses": 6
+        }
+      },
+      "max_surface_error_over_height": 1.325621744685067e-05,
+      "max_bone_head_error_over_height": 3.592880032282338e-06,
+      "scope": "Independent fresh Blender import geometry/motion witness check. Blender is not the authority for runtime morph normal shading."
+    }
+  },
+  "runtime": {
+    "scope": "Actual imported Godot mesh arrays, native-library sampled poses and crossfades or mounted gait samples, renderer activation cutoff, linear blended skin; image rendering remains a separate check.",
+    "samples": 232,
+    "maximum_surface_error_source_units": 1.8652729183486763e-07,
+    "maximum_surface_error_mm_at_game_scale": 0.0005555816112039123,
+    "maximum_normal_angle_degrees": 0.00016669370178859738
+  },
+  "visual": {
+    "method": "Fresh Godot 4.7.2 Forward+ on RTX 5080 Laptop GPU, identical cameras/lights/materials, full 7 native cycles sampled at 24 Hz and actual model scale. Stills from game overview/side/rear plus eye closeup for Snap.",
+    "model_scale": 2.978554,
+    "pairs": 392,
+    "width": 640,
+    "height": 640,
+    "max_mean_channel_error_out_of_255": 0.00012532552083333333,
+    "max_pixels_above_two_levels": 2,
+    "views": {
+      "game": {
+        "pairs": 336,
+        "max_mean_channel_error": 0.00012532552083333333,
+        "max_pixels_above_two_levels": 2
+      },
+      "side": {
+        "pairs": 28,
+        "max_mean_channel_error": 6.022135416666667e-05,
+        "max_pixels_above_two_levels": 1
+      },
+      "rear": {
+        "pairs": 28,
+        "max_mean_channel_error": 6.673177083333333e-05,
+        "max_pixels_above_two_levels": 1
+      }
+    },
+    "review": "Paired contact boards visually reviewed; full-cycle paired GIFs retained locally. Tiny raster-edge changes, not bit-identical pixels."
+  },
+  "full_actor_placement_bounds_overhead_and_raw_lods": {
+    "bounds_error": 0.0,
+    "overhead_height_error": 0.0,
+    "passed": true,
+    "placement_error": 0.0,
+    "records": [
+      {
+        "banner_height": 2.23421955108643,
+        "name": "baseline",
+        "native_bounds_position": [
+          -0.491359174251556,
+          -0.730631709098816,
+          -0.643388271331787
+        ],
+        "native_bounds_size": [
+          0.984919250011444,
+          1.23543632030487,
+          1.35791873931885
+        ],
+        "raw_meshes": [
+          {
+            "name": "geometry_0",
+            "surface_lod_counts": [
+              0
+            ]
+          }
+        ],
+        "visual_root_position": [
+          0.0,
+          0.730631709098816,
+          0.0
+        ]
+      },
+      {
+        "banner_height": 2.23421955108643,
+        "name": "candidate",
+        "native_bounds_position": [
+          -0.491359174251556,
+          -0.730631709098816,
+          -0.643388271331787
+        ],
+        "native_bounds_size": [
+          0.984919250011444,
+          1.23543632030487,
+          1.35791873931885
+        ],
+        "raw_meshes": [
+          {
+            "name": "geometry_0",
+            "surface_lod_counts": [
+              0
+            ]
+          }
+        ],
+        "visual_root_position": [
+          0.0,
+          0.730631709098816,
+          0.0
+        ]
+      }
+    ]
+  },
+  "raw_lod_policy": "All original/candidate raw surfaces have zero generated LOD levels. Production loose native actors use this raw path; editor-generated LODs are not inferred from the tracked .import policy.",
+  "framework_tests_passed": 35,
+  "known_limitations": [
+    "Process RSS and separate CPU/GPU frame time were not measured.",
+    "The original artistic approval status is unchanged.",
+    "Compressed install payload increases by 25,355 bytes while decoded GLB/model size falls 1,909,368 bytes.",
+    "All 641 corrective targets remain necessary; fused body rigid replacement was rejected.",
+    "Encoded animation-key savings describe the raw file, logical source accessors and import parsing input only. The native importer can densely rebake the same generated Animation keys, so runtime Animation RAM, key search work and playback CPU may remain unchanged; no such saving was measured or claimed."
+  ],
+  "rigid_replacement_rejected": {
+    "whole_component_vertices": 9000,
+    "existing_owners_tested": 30,
+    "poses": 98,
+    "best_owner": "head",
+    "best_max_position_error_over_height": 1.0116844487634857,
+    "best_max_position_error_source_units": 1.01898862637654
+  },
+  "withdrawn_cache_route_editor_supplement": {
+    "status": "Independent Editor claim withdrawn; raw-cache numeric evidence retained",
+    "previous_claim": {
+      "source_sha256": "643502582c8b7ef8d2fa4ebcd0d18b8035685f844099b2c8db0ade561314b735",
+      "current_canonical_sha256": "37ef36bb5b26e87594409136ed8892c88fbc408bdb6cba9ea24718ed3c38496d",
+      "engine": "Godot4.7.2stable",
+      "source_and_canonical_fixture_hashes_checked_before_launch": true,
+      "editor_policy": "Fresh editor-imported isolated copies with original per-actor import parameters; production native loose assets remain outside editor importing.",
+      "numeric_reports": {
+        "native": {
+          "all_source_clips": [
+            "Death_A",
+            "Fighting_Idle",
+            "Hit_Chest",
+            "Idle_A",
+            "Jog",
+            "Sword_Attack",
+            "Walk"
+          ],
+          "directed_transition_pairs": 42,
+          "poses": 232,
+          "maximum_Euclidean_position_error": 1.8652729183486763e-07,
+          "maximum_normal_angle_degrees": 0.00016669370178859738,
+          "numeric_report_sha256": "93017b697adbacdc1de2b53a65261e7aa1a6c5220c5ac9efb97b2322f8e64309",
+          "runtime_dump_sha256": "cac0006ffdc5eafa37be20b2b1e5ac2fe0ae6c56ed198a6b02eb68cb3ea5b959",
+          "RESET_checked": true,
+          "later_strict_cap_comparison": {
+            "four_float32_ULP_position_budget": 4.76837158203125e-07,
+            "position_within_later_cap": true,
+            "normal_degrees_budget": 0.0001,
+            "normal_within_later_cap": false
+          }
+        },
+        "imported": {
+          "all_source_clips": [
+            "Death_A",
+            "Fighting_Idle",
+            "Hit_Chest",
+            "Idle_A",
+            "Jog",
+            "Sword_Attack",
+            "Walk"
+          ],
+          "directed_transition_pairs": 42,
+          "poses": 232,
+          "maximum_Euclidean_position_error": 1.8652729183486763e-07,
+          "maximum_normal_angle_degrees": 0.00016669370178859738,
+          "numeric_report_sha256": "93017b697adbacdc1de2b53a65261e7aa1a6c5220c5ac9efb97b2322f8e64309",
+          "runtime_dump_sha256": "ecdcf6242d091a0cdfa5f011cfa306f1977e884dfc16b3f78d922ba7535c4aa4",
+          "RESET_checked": true,
+          "later_strict_cap_comparison": {
+            "four_float32_ULP_position_budget": 4.76837158203125e-07,
+            "position_within_later_cap": true,
+            "normal_degrees_budget": 0.0001,
+            "normal_within_later_cap": false
+          }
+        }
+      },
+      "legacy_decision": "Existing accepted asset-specific float/GPU quantization qualification retained. These measured maxima are not presented as passing the newer4ULP/.0001degree strict caps; this supplement adds independent Editor evidence without defining a new tolerance or changing the prior quality decision.",
+      "preserved_evidence": "Existing source/all-key proof, original frozen physical observations, fresh Blender checks, graphics and secondary-effect proof retained. No model, action, observation, placement, physical behavior or artistic approval changes.",
+      "supplemental_summary_sha256": "0f29dbb3aef641450a562bba2fede2daf26c7d2e73e9c056b47eb67eb1d86c79"
+    }
+  },
+  "genuine_editor_verification_revision": {
+    "status": "Corrected independent actual Editor verification passed within applicable unchanged modern or legacy scope",
+    "date": "2026-10-28",
+    "source_original_sha256": "643502582c8b7ef8d2fa4ebcd0d18b8035685f844099b2c8db0ade561314b735",
+    "current_canonical_sha256": "37ef36bb5b26e87594409136ed8892c88fbc408bdb6cba9ea24718ed3c38496d",
+    "loader": "ResourceLoader.load(PackedScene)",
+    "load_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/thornwood_dryad_queen.glb-c31d27169f41988cea5b796afa294b25.md5",
+        "import_metadata_sha256": "c08e5e10cb12903c3043e09780e63851262acc8b1cebc9c6b55733f15eb267eb",
+        "imported_resource_path": "res://.godot/imported/thornwood_dryad_queen.glb-c31d27169f41988cea5b796afa294b25.scn",
+        "imported_resource_sha256": "4739599740d343dbdb4994624caec4b6ef1cbdc6e8d9a86e96d6ca8ce34a112c",
+        "packed_scene_resource_path": "res://assets/qa/thornwood_dryad_queen/editor-revision-v1/baseline/thornwood_dryad_queen.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "d312b4b85d7495cf99699070e6cf070f",
+        "source_path": "res://assets/qa/thornwood_dryad_queen/editor-revision-v1/baseline/thornwood_dryad_queen.glb",
+        "source_sha256": "643502582c8b7ef8d2fa4ebcd0d18b8035685f844099b2c8db0ade561314b735"
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/thornwood_dryad_queen.glb-9dc76c8e3939f101721b473cadd8de79.md5",
+        "import_metadata_sha256": "1683933c5a46a9a63842e5827cd7879428b7e9c2a2569fae62f0bb8179b8572a",
+        "imported_resource_path": "res://.godot/imported/thornwood_dryad_queen.glb-9dc76c8e3939f101721b473cadd8de79.scn",
+        "imported_resource_sha256": "50a990e4b5114c3826038d10c372e6436b5d70583ccbc72a8ecbd8835e40395f",
+        "packed_scene_resource_path": "res://assets/qa/thornwood_dryad_queen/editor-revision-v1/candidate/thornwood_dryad_queen.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "d82bd0ca9a22ad13f6a2e376b78e504c",
+        "source_path": "res://assets/qa/thornwood_dryad_queen/editor-revision-v1/candidate/thornwood_dryad_queen.glb",
+        "source_sha256": "37ef36bb5b26e87594409136ed8892c88fbc408bdb6cba9ea24718ed3c38496d"
+      }
+    ],
+    "source_aliases_and_SCNs_have_current_source_and_destination_MD5_freshness": true,
+    "numeric": {
+      "poses": 232,
+      "all_source_clips": [
+        "Death_A",
+        "Fighting_Idle",
+        "Hit_Chest",
+        "Idle_A",
+        "Jog",
+        "Sword_Attack",
+        "Walk"
+      ],
+      "RESET_checked": true,
+      "maximum_Euclidean_position_error_source_units": 1.8652729183486763e-07,
+      "maximum_normal_angle_degrees": 0.00016669370178859738
+    },
+    "applicable_quality_budget": {
+      "decision": "Retain the already accepted asset-specific source/skin/GPU quantization scope. This verification-loader correction defines no new tolerance and is not a new4ULP/.0001degree pass.",
+      "previously_accepted_maximum_position_error_source_units": 1.8652729183486763e-07,
+      "previously_accepted_maximum_normal_degrees": 0.00016669370178859738,
+      "genuine_Editor_reproduces_both_accepted_maxima_exactly": true
+    },
+    "full_typed_static_attributes_material_storage_texture_pixels_and_mips": {
+      "actor": "thornwood_dryad_queen",
+      "source_sha256": "643502582c8b7ef8d2fa4ebcd0d18b8035685f844099b2c8db0ade561314b735",
+      "candidate_sha256": "37ef36bb5b26e87594409136ed8892c88fbc408bdb6cba9ea24718ed3c38496d",
+      "surfaces": [
+        {
+          "all_typed_arrays": [
+            {
+              "slot": 0,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 1,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 2,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 4,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 10,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 11,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 12,
+              "exact_after_proven_vertex_bijection": true
+            }
+          ],
+          "full_material_storage_fields_and_texture_pixels_mips_exact": true,
+          "format_exact": true,
+          "lods": [],
+          "bounds_component_max_delta": 0.0,
+          "lod_capture_present": true
+        }
+      ],
+      "passed": true,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/thornwood_dryad_queen.glb-c31d27169f41988cea5b796afa294b25.md5",
+          "import_metadata_sha256": "c08e5e10cb12903c3043e09780e63851262acc8b1cebc9c6b55733f15eb267eb",
+          "imported_resource_path": "res://.godot/imported/thornwood_dryad_queen.glb-c31d27169f41988cea5b796afa294b25.scn",
+          "imported_resource_sha256": "4739599740d343dbdb4994624caec4b6ef1cbdc6e8d9a86e96d6ca8ce34a112c",
+          "packed_scene_resource_path": "res://assets/qa/thornwood_dryad_queen/editor-revision-v1/baseline/thornwood_dryad_queen.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "d312b4b85d7495cf99699070e6cf070f",
+          "source_path": "res://assets/qa/thornwood_dryad_queen/editor-revision-v1/baseline/thornwood_dryad_queen.glb",
+          "source_sha256": "643502582c8b7ef8d2fa4ebcd0d18b8035685f844099b2c8db0ade561314b735"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/thornwood_dryad_queen.glb-9dc76c8e3939f101721b473cadd8de79.md5",
+          "import_metadata_sha256": "1683933c5a46a9a63842e5827cd7879428b7e9c2a2569fae62f0bb8179b8572a",
+          "imported_resource_path": "res://.godot/imported/thornwood_dryad_queen.glb-9dc76c8e3939f101721b473cadd8de79.scn",
+          "imported_resource_sha256": "50a990e4b5114c3826038d10c372e6436b5d70583ccbc72a8ecbd8835e40395f",
+          "packed_scene_resource_path": "res://assets/qa/thornwood_dryad_queen/editor-revision-v1/candidate/thornwood_dryad_queen.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "d82bd0ca9a22ad13f6a2e376b78e504c",
+          "source_path": "res://assets/qa/thornwood_dryad_queen/editor-revision-v1/candidate/thornwood_dryad_queen.glb",
+          "source_sha256": "37ef36bb5b26e87594409136ed8892c88fbc408bdb6cba9ea24718ed3c38496d"
+        }
+      ]
+    },
+    "retained_Editor_morph_fields": {
+      "actor": "thornwood_dryad_queen",
+      "source_sha256": "643502582c8b7ef8d2fa4ebcd0d18b8035685f844099b2c8db0ade561314b735",
+      "candidate_sha256": "37ef36bb5b26e87594409136ed8892c88fbc408bdb6cba9ea24718ed3c38496d",
+      "all_retained_editor_POSITION_NORMAL_TANGENT_typed_bits_exact": true,
+      "retained_targets": 641,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/thornwood_dryad_queen.glb-c31d27169f41988cea5b796afa294b25.md5",
+          "import_metadata_sha256": "c08e5e10cb12903c3043e09780e63851262acc8b1cebc9c6b55733f15eb267eb",
+          "imported_resource_path": "res://.godot/imported/thornwood_dryad_queen.glb-c31d27169f41988cea5b796afa294b25.scn",
+          "imported_resource_sha256": "4739599740d343dbdb4994624caec4b6ef1cbdc6e8d9a86e96d6ca8ce34a112c",
+          "packed_scene_resource_path": "res://assets/qa/thornwood_dryad_queen/editor-revision-v1/baseline/thornwood_dryad_queen.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "d312b4b85d7495cf99699070e6cf070f",
+          "source_path": "res://assets/qa/thornwood_dryad_queen/editor-revision-v1/baseline/thornwood_dryad_queen.glb",
+          "source_sha256": "643502582c8b7ef8d2fa4ebcd0d18b8035685f844099b2c8db0ade561314b735"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/thornwood_dryad_queen.glb-9dc76c8e3939f101721b473cadd8de79.md5",
+          "import_metadata_sha256": "1683933c5a46a9a63842e5827cd7879428b7e9c2a2569fae62f0bb8179b8572a",
+          "imported_resource_path": "res://.godot/imported/thornwood_dryad_queen.glb-9dc76c8e3939f101721b473cadd8de79.scn",
+          "imported_resource_sha256": "50a990e4b5114c3826038d10c372e6436b5d70583ccbc72a8ecbd8835e40395f",
+          "packed_scene_resource_path": "res://assets/qa/thornwood_dryad_queen/editor-revision-v1/candidate/thornwood_dryad_queen.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "d82bd0ca9a22ad13f6a2e376b78e504c",
+          "source_path": "res://assets/qa/thornwood_dryad_queen/editor-revision-v1/candidate/thornwood_dryad_queen.glb",
+          "source_sha256": "37ef36bb5b26e87594409136ed8892c88fbc408bdb6cba9ea24718ed3c38496d"
+        }
+      ],
+      "scope": "Direct actual Editor source/candidate retained morph P/N/T byte digests after independently proved complete static-attribute vertex bijection. Exact target mask from source packing lineage; no morph field omitted.",
+      "passed": true
+    },
+    "withdrawn_prior_loader_claim": "Prior shared dumper captures labelled imported used GlbSceneCache for these outside-actor aliases and therefore were raw-cache comparisons. They remain retained private raw/native evidence, but their independent Editor claim is withdrawn and superseded by these explicitly loaded SCNs.",
+    "unchanged_other_evidence": "Original independent physical observations, exact source curves, Blender, actual native gameplay body rendering, placement, mounted/cinematic dependencies and secondary effects remain hash-bound and unchanged. No artistic approval, model, action, cap or witness change in this QA revision.",
+    "production_scope": "Production actor_shipping loose folders remain raw/native and are not Editor-imported. Per-surface Editor-generated LODs are verification representation metadata, not a claim of new gameplay LODs.",
+    "evidence_sha256": {
+      ".local/heavy-batch/thornwood_dryad_queen/editor-revision-v1/editor-real-v1/qualification-job.json": "e9d2fbf7c7e500a23c6bb62dec1c6b365c65d9617a48dbc1da574202fd9e14c3",
+      ".local/heavy-batch/thornwood_dryad_queen/editor-revision-v1/editor-real-v1/imported/runtime.json": "ede6705eeb1044106c48121f6818190ee9ad097b11d29bca064b1b2adc76a82e",
+      ".local/heavy-batch/thornwood_dryad_queen/editor-revision-v1/editor-real-v1/imported-validation.json": "93017b697adbacdc1de2b53a65261e7aa1a6c5220c5ac9efb97b2322f8e64309",
+      ".local/heavy-batch/thornwood_dryad_queen/editor-revision-v1/editor-real-v1/imported-static-mesh-bits.json": "dd1bb178ccc3900a478698ffa9d1adfd745f8dc870f8c2322e48cae86c9a6412",
+      ".local/heavy-batch/thornwood_dryad_queen/editor-revision-v1/editor-real-v1/imported-typed-validation.json": "3ab4b1b878ed89e732ce0b90c88f54cc4ecdd743ebc2bdb2e562236b02193617",
+      ".local/heavy-batch/thornwood_dryad_queen/editor-revision-v1/editor-real-v1/morph-digest-job.json": "801a25d8d5343e8ceb14b74b6e9db541328e52db1065846eb7b17e65d99226ff",
+      ".local/heavy-batch/thornwood_dryad_queen/editor-revision-v1/editor-real-v1/imported-morph-digests.json": "3f18c4b9920f92c0b6fe68f2602d772b1a24a3eb1988f9f5a923b361f070e1a3",
+      ".local/heavy-batch/thornwood_dryad_queen/editor-revision-v1/editor-real-v1/imported-morph-validation.json": "1498c940577ef1dfaefa52a3d17dc143357ef5e84b1a5b1913aabd5af6725467"
+    }
+  }
+}

@@ -70,5 +70,37 @@
   "strideMetresPerSecond": {
     "walk": 0.24986493904669727,
     "run": 0.6360198448461384
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "ice_wolverine",
+    "sourceSHA256": "d8d6a39b0185164881474a940a36d581ceff630b2047e2625e4aeec7db826a53",
+    "previousRuntimeSHA256": "664a761a314dbd4cc645360564e3de90e58d1076d80d574dd7b1c1d459c3b151",
+    "runtimeSHA256": "288d2133f3dd4e3e734ed113f8ac2ad44b4faad6721d0a4609ee164ad0890bcf",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "ice_wolverine",
+      "sourceSHA256": "d8d6a39b0185164881474a940a36d581ceff630b2047e2625e4aeec7db826a53",
+      "runtimeSHA256": "664a761a314dbd4cc645360564e3de90e58d1076d80d574dd7b1c1d459c3b151",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 120,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "reviewStatus": "accepted",
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "ice_wolverine",
+    "appliesToSHA256": "288d2133f3dd4e3e734ed113f8ac2ad44b4faad6721d0a4609ee164ad0890bcf",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": null,
+    "repairNoteEvents": []
   }
 }

@@ -73,12 +73,43 @@
     "walk": 0.06206914141165392,
     "run": 0.14318222393824712
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "A low, steady forward crab scuttle with a cautious five-group wave gait. The supplied asymmetric right fore-fork keeps its two pointed blades together, with six actual contacts and a coherent armored carapace. Faster travel lengthens reach and increases cadence.",
     "attack": "The crab braces its pointed legs, draws a claw back, then snaps it forward; a following mirrored claw snap gives a short aggressive double strike. Actual movable fingers close coherently around their measured hinge.",
     "death": "The carapace drops onto a measured balanced underside bearing, the walking limbs relax outward and both claws settle in front. The final pose is held still."
   },
   "motionStyle": "grounded five-group crab wave gait",
-  "locomotionMode": "grounded"
+  "locomotionMode": "grounded",
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "bronze_tide_crab",
+    "sourceSHA256": "4914d7a1b4599fd00827beeb70b1b94d68cf618bc84449ae53697c43387a054b",
+    "previousRuntimeSHA256": "3f1011ce0acbabd91827bf669e441eb494590ac99d5b1da418736e19154e2b95",
+    "runtimeSHA256": "6d3d32387fa7058f0c71d82877116ed39f26047ab379aee8150e4b032119ebaa",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "bronze_tide_crab",
+      "sourceSHA256": "4914d7a1b4599fd00827beeb70b1b94d68cf618bc84449ae53697c43387a054b",
+      "runtimeSHA256": "3f1011ce0acbabd91827bf669e441eb494590ac99d5b1da418736e19154e2b95",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 120,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "bronze_tide_crab",
+    "appliesToSHA256": "6d3d32387fa7058f0c71d82877116ed39f26047ab379aee8150e4b032119ebaa",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
+  }
 }

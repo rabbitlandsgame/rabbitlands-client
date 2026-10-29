@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "fallbackAction": "idle",
+  "playbackSpeeds": {
+    "walk": 1.0,
+    "run": 1.0,
+    "attack_primary": 1.0,
+    "death": 1.0
+  },
+  "actions": {
+    "idle": "Idle_A",
+    "alternate_idle": "Idle_A",
+    "combat_idle": "Fighting_Idle",
+    "walk": "Walk",
+    "run": "Jog",
+    "turn": "Idle_A",
+    "sit": "Idle_A",
+    "seated_idle": "Idle_A",
+    "stand": "Idle_A",
+    "death": "Death_A",
+    "pain": "Hit_Chest",
+    "attack_primary": "Sword_Attack",
+    "ranged_attack": "Sword_Attack",
+    "cast": "Sword_Attack",
+    "harvest": "Sword_Attack",
+    "pickup": "Idle_A",
+    "drop": "Idle_A",
+    "emote_greeting": "Idle_A"
+  },
+  "serverCommands": {
+    "3": "death",
+    "5": "pain",
+    "7": "idle",
+    "13": "sit",
+    "14": "stand",
+    "15": "combat_idle",
+    "18": "combat_idle",
+    "19": "idle",
+    "20": "walk",
+    "21": "walk",
+    "22": "walk",
+    "23": "walk",
+    "24": "walk",
+    "25": "walk",
+    "26": "walk",
+    "27": "walk",
+    "30": "run",
+    "31": "run",
+    "32": "run",
+    "33": "run",
+    "34": "run",
+    "35": "run",
+    "36": "run",
+    "37": "run",
+    "38": "turn",
+    "39": "turn",
+    "40": "turn",
+    "41": "turn",
+    "42": "turn",
+    "43": "turn",
+    "44": "turn",
+    "45": "turn",
+    "46": "attack_primary"
+  },
+  "loopingClips": [
+    "Idle_A",
+    "Fighting_Idle",
+    "Walk",
+    "Jog"
+  ],
+  "strideScalesWithActor": true,
+  "strideMetresPerSecond": {
+    "walk": 0.2052635526102007,
+    "run": 0.5500010576350249
+  },
+  "reviewStatus": "accepted",
+  "concept": {
+    "movement": "A heavy amber moth holds its long abdomen centered while four broad eye-spotted wings beat steadily. Forewings lead and hindwings follow gently, with tucked six-legged suspension and restrained feeler overlap. Slow flight is deliberate; fast flight makes the stroke quicker without bouncing the torso.",
+    "attack": "It opens its forelegs and wings in a broad warning draw, then drives forward and down in a heavy head-led swoop, the front pair reaching ahead. A strong restoring beat returns it to the hovering guard.",
+    "death": "A failing wingbeat lets the centered body sink and tip forward. The actual thorax and abdomen settle, the four eye-spotted wings relax low, all six legs release around the torso, and both feelers droop into a supported, motionless finish."
+  },
+  "locomotionMode": "airborne",
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "giant_amber_moth",
+    "appliesToSHA256": "c9c0c4a2c4ebb2bb8a9b32d74a746434bc7786fc70c433d68192dbfe0f0a0e8d",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "saved_button_approval",
+      "event_id": "f5ae71ea-a787-4ab4-9b48-e3153e6887ec",
+      "event_sha256": "eec197b115785aea4974fa30d6c936dcd5393c2d16e5ba30cccefaa473b44a9c",
+      "utc": "2026-10-28T21:44:08.972668+00:00"
+    },
+    "previousAuthoringReviewStatus": "draft",
+    "repairNoteEvents": []
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "giant_amber_moth",
+    "sourceSHA256": "93ddb722475dd2635bc8fe3d9eb65113b13946c88d0c8be59457d6a943d67efe",
+    "previousRuntimeSHA256": "dedfb3e569edb22233823b879e28e9b8ab860971785ff7e2f267f125034dea45",
+    "runtimeSHA256": "c9c0c4a2c4ebb2bb8a9b32d74a746434bc7786fc70c433d68192dbfe0f0a0e8d",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": null
+  }
+}

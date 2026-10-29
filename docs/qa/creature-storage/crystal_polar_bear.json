@@ -1,0 +1,132 @@
+{
+  "schema_version": 1,
+  "actor": "crystal_polar_bear",
+  "date": "2026-10-27",
+  "runtime_path": "godot-client/assets/actors/native/creatures/crystal_polar_bear.glb",
+  "status": "Original retained: flat joint-key candidate exceeded existing dissolve precision allowance",
+  "source_sha256": "6c37fff7783d149c69053bf69cd3dbfe700a8eb92a34a60ff1f78ee103b17f91",
+  "candidate_sha256": "6c37fff7783d149c69053bf69cd3dbfe700a8eb92a34a60ff1f78ee103b17f91",
+  "storage": {
+    "source_bytes": 4629748,
+    "candidate_bytes": 4629748,
+    "source_zstd_bytes": 2129569,
+    "candidate_zstd_bytes": 2129569
+  },
+  "raw_bytes_saved": 0,
+  "compressed_bytes_saved": 0,
+  "compression_scope": "RLCZ level 3 release envelope including fixed 56-byte header; encoded/install sizes, not live-process memory.",
+  "correctives": {
+    "source_count": 0,
+    "candidate_count": 0,
+    "removed_target_indices": [],
+    "shared_gpu_source_bytes": 0,
+    "shared_gpu_candidate_bytes": 0,
+    "shared_gpu_saved_bytes": 0,
+    "scope": "Measured shared Godot blend_shape_data bytes, not per-actor totals."
+  },
+  "draw_surfaces": {
+    "source": 1,
+    "candidate": 1
+  },
+  "exact_source_proof": {
+    "passed": true,
+    "source_sha256": "6c37fff7783d149c69053bf69cd3dbfe700a8eb92a34a60ff1f78ee103b17f91",
+    "candidate_sha256": "6c37fff7783d149c69053bf69cd3dbfe700a8eb92a34a60ff1f78ee103b17f91",
+    "geometry_skin_binds_rest_topology_uv_material_image_bits_preserved": true,
+    "retained_key_time_and_value_bits_exact_only_flat_interiors_removed": true,
+    "every_removed_default_and_key_is_zero": true,
+    "redundant_flat_key_rows_proved": 0,
+    "preexisting_duplicate_property_curves_preserved_in_occurrence_order": 0,
+    "clips": {
+      "Idle_A": {
+        "original_knots": 19,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 42
+      },
+      "Fighting_Idle": {
+        "original_knots": 4,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 12
+      },
+      "Hit_Chest": {
+        "original_knots": 16,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 36
+      },
+      "Walk": {
+        "original_knots": 1655,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 3314
+      },
+      "Jog": {
+        "original_knots": 1111,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 2226
+      },
+      "Sword_Attack": {
+        "original_knots": 1472,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 2948
+      },
+      "Death_A": {
+        "original_knots": 2889,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 5782
+      }
+    },
+    "proof": "Zero defaults and every LINEAR/STEP key zero prove inactive targets remain zero continuously and under crossfades. All retained accessor bytes and retained time/value rows are exact. Deleted key rows sit strictly inside three bit-identical adjacent rows; plateau boundaries and endpoints remain."
+  },
+  "rigidity_preflight": {
+    "actor": "crystal_polar_bear",
+    "survivor_triangles": 0,
+    "reason": "Source has no corrective shapes; existing skin retained."
+  },
+  "runtime_scope": "No procedural generation or new runtime algorithm. Smaller GLB accessor/key storage is proved; fixed Godot rebaking may restore the same retained Animation key count. These qualification checks do not establish retained Animation RAM, CPU lookup or FPS changes; separate loading benchmarks may measure startup time or peak-memory effects.",
+  "effects_scope": "Original topology, skin, binds, material/texture bytes and current clips retained; no runtime rig replacement.",
+  "evidence": "Immutable source/final, private versioned candidates, source/import/renderer receipts, full-resolution captures and lossless cycle previews retained in task-owned ignored .local/batch-033/crystal_polar_bear",
+  "unchanged_reason": "Preserving every original joint key produces the byte-identical original. Smaller flat-TRS candidate exceeded unchanged1e-6 world-unit dissolve-bounds tolerance; original retained without a runtime replacement or threshold adjustment.",
+  "strict_actual_import_numeric_budget": {
+    "actor": "crystal_polar_bear",
+    "source_sha256": "6c37fff7783d149c69053bf69cd3dbfe700a8eb92a34a60ff1f78ee103b17f91",
+    "candidate_sha256": "6c37fff7783d149c69053bf69cd3dbfe700a8eb92a34a60ff1f78ee103b17f91",
+    "passed": true,
+    "source_rest_largest_axis_extent": 2.9706554737893986,
+    "source_extent_float32_ulp": 2.384185791015625e-07,
+    "position_budget": 9.5367431640625e-07,
+    "normal_angle_budget_degrees": 0.0001,
+    "checks": {
+      "byte_identical_original": {
+        "passed": true
+      }
+    },
+    "scope": "Full source/candidate byte identity preserves original native/editor behavior, including original clock and float32 interpolation. No changed-model precision claim required."
+  },
+  "death_dissolve_source_framing": {
+    "actor": "crystal_polar_bear",
+    "source_sha256": "6c37fff7783d149c69053bf69cd3dbfe700a8eb92a34a60ff1f78ee103b17f91",
+    "candidate_sha256": "6c37fff7783d149c69053bf69cd3dbfe700a8eb92a34a60ff1f78ee103b17f91",
+    "passed": true,
+    "original_full_motion_bbox_all8corners_checked": true,
+    "source_actor_translation_removed": [
+      0.5,
+      0,
+      -0.5
+    ],
+    "views": [
+      {
+        "view": "game",
+        "minimum_body_bbox_pixel_border_margin": 181.1720882519313,
+        "minimum_camera_depth": 2.026119826497105,
+        "maximum_camera_depth": 7.973880173502895
+      },
+      {
+        "view": "under",
+        "minimum_body_bbox_pixel_border_margin": 171.14475304975286,
+        "minimum_camera_depth": 1.6947980088605918,
+        "maximum_camera_depth": 8.305201991139409
+      }
+    ],
+    "scope": "All8corners of original full-motion actualActor fit after exact preview translation, both640square orthographic FX cameras, near/far planes and minimum2pixel margin. Actual source/candidate fade PNG foreground borders remain a separate required post-capture check."
+  },
+  "rejected_flat_joint_candidate": {
+    "candidate_sha256": "08da7cf94f86326bd859c8df7575e3efd83c9971baf3df2ba86e94ac9e62dd40",
+    "raw_bytes": 3399212,
+    "dissolve_bounds_error": 1.01852458556095e-06,
+    "dissolve_bounds_budget": 1e-06,
+    "silhouette_error": 8.28054169232928e-07,
+    "decision": "Rejected. Private candidate, preparation and seeded CPU failure evidence retained; no GPU promotion attempted."
+  }
+}

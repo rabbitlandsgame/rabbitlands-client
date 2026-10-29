@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "fallbackAction": "idle",
+  "playbackSpeeds": {
+    "walk": 1.0,
+    "run": 1.0,
+    "attack_primary": 1.0,
+    "death": 1.0
+  },
+  "actions": {
+    "idle": "Idle_A",
+    "alternate_idle": "Idle_A",
+    "combat_idle": "Fighting_Idle",
+    "walk": "Walk",
+    "run": "Jog",
+    "turn": "Idle_A",
+    "sit": "Idle_A",
+    "seated_idle": "Idle_A",
+    "stand": "Idle_A",
+    "death": "Death_A",
+    "pain": "Hit_Chest",
+    "attack_primary": "Sword_Attack",
+    "ranged_attack": "Sword_Attack",
+    "cast": "Sword_Attack",
+    "harvest": "Sword_Attack",
+    "pickup": "Idle_A",
+    "drop": "Idle_A",
+    "emote_greeting": "Idle_A"
+  },
+  "serverCommands": {
+    "3": "death",
+    "5": "pain",
+    "7": "idle",
+    "13": "sit",
+    "14": "stand",
+    "15": "combat_idle",
+    "18": "combat_idle",
+    "19": "idle",
+    "20": "walk",
+    "21": "walk",
+    "22": "walk",
+    "23": "walk",
+    "24": "walk",
+    "25": "walk",
+    "26": "walk",
+    "27": "walk",
+    "30": "run",
+    "31": "run",
+    "32": "run",
+    "33": "run",
+    "34": "run",
+    "35": "run",
+    "36": "run",
+    "37": "run",
+    "38": "turn",
+    "39": "turn",
+    "40": "turn",
+    "41": "turn",
+    "42": "turn",
+    "43": "turn",
+    "44": "turn",
+    "45": "turn",
+    "46": "attack_primary"
+  },
+  "loopingClips": [
+    "Idle_A",
+    "Fighting_Idle",
+    "Walk",
+    "Jog"
+  ],
+  "strideScalesWithActor": true,
+  "strideMetresPerSecond": {
+    "walk": 0.2971442369814103,
+    "run": 0.8454584714811979
+  },
+  "reviewStatus": "accepted",
+  "concept": {
+    "movement": "The actual avian Griffin holds its hooked face forward and real talons tucked beneath a steady torso. Broad coherent feather fans beat slowly for hovering and slow flight, then more strongly and quickly for fast travel. Central belly skin stays with the body.",
+    "attack": "An airborne gather draws the body back before a forward surge and a strong two-talon reach. The real head and complete split beak stay coherent; the wings brace behind and outside the face.",
+    "death": "Lift fades into a restrained forward settlement on the actual breast and central belly. Complete legs and talons release outward; whole wing and posterior feather fans lower near the ground and hold, with no independently wagged tip plates."
+  },
+  "locomotionMode": "airborne",
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "crystal_wing_griffin",
+    "appliesToSHA256": "12099c1c2a11ff1c330f63b141c3fbe8c10f133ab60135f5d65279a1d87c4e26",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": "draft",
+    "repairNoteEvents": []
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "crystal_wing_griffin",
+    "sourceSHA256": "82db0090aed3b62beb8afa2b4e9aff00c4dfb4c1897a62fb7f82ffef34cac17f",
+    "previousRuntimeSHA256": "385452c28809358f80e9621ca65a793a65839da4dc73d3a442ef76aff4d04e13",
+    "runtimeSHA256": "12099c1c2a11ff1c330f63b141c3fbe8c10f133ab60135f5d65279a1d87c4e26",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": null
+  }
+}

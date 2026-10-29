@@ -1,0 +1,524 @@
+{
+  "schema_version": 1,
+  "batch": 32,
+  "actor": "centaur",
+  "date": "2026-10-28",
+  "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/centaur.glb",
+  "source_sha256": "e500b26a17d4416d17364e949a9521f5ccbf331d0b0cc61b4a435489733587fb",
+  "runtime_sha256": "f6ffb941c25c694696e53c7f60c3243f7ac051176e366482b60e55463b6651e0",
+  "qualification": "Passed exact source/continuous curves, original physical observations, paired fresh Blender poses/default, native and fresh editor-imported playback/transitions, fully fitted actual-Actor cycles/four views, seeded dissolve/silhouette/reset checks.",
+  "human_approval_changed": false,
+  "recipe": {
+    "tool": "eloria-assets/tools/pack_creature_storage.py",
+    "tool_commit": "5bdd51c3",
+    "steps": [
+      "prune_zero_targets",
+      "reduce_constant_runs",
+      "compact"
+    ],
+    "profile": null,
+    "bounds": null,
+    "preserve_trs_keys": false
+  },
+  "bytes": {
+    "source_bytes": 4708816,
+    "candidate_bytes": 4416340,
+    "source_zstd_bytes": 2465660,
+    "candidate_zstd_bytes": 2430125
+  },
+  "inactive_targets_removed": 0,
+  "flat_run_key_rows_removed": 34,
+  "corrective_graphics_buffer_bytes": {
+    "source": 3337320,
+    "candidate": 3337320,
+    "saved": 0,
+    "scope": "Actual Godot raw blend_shape_data byte totals over all mesh surfaces; shared per loaded model."
+  },
+  "draw_surfaces": {
+    "source": 1,
+    "candidate": 1
+  },
+  "source_validation": {
+    "passed": true,
+    "source_sha256": "e500b26a17d4416d17364e949a9521f5ccbf331d0b0cc61b4a435489733587fb",
+    "candidate_sha256": "f6ffb941c25c694696e53c7f60c3243f7ac051176e366482b60e55463b6651e0",
+    "geometry_skin_binds_rest_topology_uv_material_image_bits_preserved": true,
+    "retained_key_time_and_value_bits_exact_only_flat_interiors_removed": true,
+    "every_removed_default_and_key_is_zero": true,
+    "redundant_flat_key_rows_proved": 34,
+    "preexisting_duplicate_property_curves_preserved_in_occurrence_order": 0,
+    "meshes": [
+      {
+        "mesh": 0,
+        "targets_before": 42,
+        "targets_after": 42,
+        "removed_target_indices": [],
+        "retained_target_indices": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31,
+          32,
+          33,
+          34,
+          35,
+          36,
+          37,
+          38,
+          39,
+          40,
+          41
+        ]
+      }
+    ],
+    "clips": {
+      "Death_A": {
+        "original_knots": 34,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 72
+      },
+      "Fighting_Idle": {
+        "original_knots": 50,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 104
+      },
+      "Hit_Chest": {
+        "original_knots": 113,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 230
+      },
+      "Idle_A": {
+        "original_knots": 50,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 104
+      },
+      "Jog": {
+        "original_knots": 34,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 72
+      },
+      "Sword_Attack": {
+        "original_knots": 121,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 246
+      },
+      "Walk": {
+        "original_knots": 50,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 104
+      }
+    },
+    "proof": "Zero defaults and every LINEAR/STEP key zero prove inactive targets remain zero continuously and under crossfades. All retained accessor bytes and retained time/value rows are exact. Deleted key rows sit strictly inside three bit-identical adjacent rows; plateau boundaries and endpoints remain."
+  },
+  "physical_observations": {
+    "passed": true,
+    "source_sha256": "e500b26a17d4416d17364e949a9521f5ccbf331d0b0cc61b4a435489733587fb",
+    "candidate_sha256": "f6ffb941c25c694696e53c7f60c3243f7ac051176e366482b60e55463b6651e0",
+    "surface_probes": 166,
+    "poses": 133,
+    "clips": 7,
+    "source_candidate_position_error": 0.0,
+    "source_candidate_normal_vector_error": 0.0,
+    "original_witness_position_error_over_height": 0.0,
+    "original_source_witness_position_error_over_height": 0.0,
+    "original_witness_normal_vector_error": 0.0,
+    "original_witness_bone_matrix_error": 0.0,
+    "witness_sha256": "da7ce527000d3b810bebdc290bcf9c8fa0fc08107426f68a03eff24f97e0ca99",
+    "sampled_motion_min": [
+      -0.9953903440390065,
+      -0.012545596231668493,
+      -0.4359987984540641
+    ],
+    "sampled_motion_max": [
+      0.25506777772772815,
+      1.0193143230479589,
+      0.6832024421401308
+    ]
+  },
+  "paired_fresh_blender": {
+    "maximum_position_error": 0.0,
+    "maximum_bone_matrix_error": 0.0,
+    "maximum_float32_budget": 1.9073486328125e-06,
+    "poses": 134,
+    "neutral_default_checked": true,
+    "retained_bone_matrices_per_pose": 32,
+    "passed": true,
+    "source_sha256": "e500b26a17d4416d17364e949a9521f5ccbf331d0b0cc61b4a435489733587fb",
+    "candidate_sha256": "f6ffb941c25c694696e53c7f60c3243f7ac051176e366482b60e55463b6651e0",
+    "scope": "Direct source/candidate frozen-ID surfaces and every bone matrix at each original witness pose plus controlled neutral/default pose. Sixteen float32 ULPs at baseline coordinate/matrix magnitude; independent of inherited source/witness residual and separate from native/source appearance budgets."
+  },
+  "native_and_editor_imported": {
+    "native": {
+      "samples": 232,
+      "maximum_position_error": 1.6761633125341624e-07,
+      "maximum_normal_angle_degrees": 1.0029569411827041e-05
+    },
+    "imported": {
+      "samples": 232,
+      "maximum_position_error": 1.6761633125341624e-07,
+      "maximum_normal_angle_degrees": 1.0029569411827041e-05,
+      "actual_loader": "ResourceLoader.load(PackedScene)",
+      "authoritative_SCN_provenance": "genuine_editor_verification_revision.load_proofs"
+    }
+  },
+  "editor_import_policy": {
+    "source_sidecar_exists": false,
+    "policy": "Fresh Godot editor defaults for both inputs; native runtime source has no editor import metadata. Runtime native-folder policy remains unchanged."
+  },
+  "native_numeric_budget": {
+    "actor": "centaur",
+    "source_coordinate_or_extent_magnitude": 1.0000014798274048,
+    "four_float32_ULPs": 4.76837158203125e-07,
+    "runtime_position_error": 1.6761633125341624e-07,
+    "runtime_normal_degrees": 1.0029569411827041e-05,
+    "imported_position_error": 1.6761633125341624e-07,
+    "imported_normal_degrees": 1.0029569411827041e-05,
+    "normal_degrees_budget": 0.0001,
+    "scope": "Four float32 ULPs at maximum original source coordinate/extent magnitude; original source mathematical equality remains exact. Native normal screen 1e-4 degrees."
+  },
+  "placement": {
+    "passed": true,
+    "bounds_error": 0.0,
+    "placement_error": 0.0,
+    "overhead_height_error": 0.0
+  },
+  "render_fit": {
+    "source_sha256": "e500b26a17d4416d17364e949a9521f5ccbf331d0b0cc61b4a435489733587fb",
+    "model_global": [
+      [
+        0.5,
+        3.16940571565283e-07,
+        -0.5
+      ],
+      [
+        -2.39999651908875,
+        0.0,
+        2.09814359664051e-07
+      ],
+      [
+        0.0,
+        2.39999651908875,
+        0.0
+      ],
+      [
+        -2.09814359664051e-07,
+        0.0,
+        -2.39999651908875
+      ]
+    ],
+    "position": [
+      -0.11454922532787634,
+      -0.03490157516363769,
+      -2.175573524440823
+    ],
+    "size": [
+      3.0146321015235023,
+      2.48990664744345,
+      2.7241098377075503
+    ],
+    "poses": 247,
+    "scope": "Every vertex at every full-cycle render frame and view-still pose, using actual complete Actor Godot arrays/poses/weights/transforms, renderer morph cutoff and four/eight influence skin. Evaluated in float64 with a separate 30% camera margin."
+  },
+  "source_fit_inventory": {
+    "passed": true,
+    "source_sha256": "e500b26a17d4416d17364e949a9521f5ccbf331d0b0cc61b4a435489733587fb",
+    "candidate_sha256": "f6ffb941c25c694696e53c7f60c3243f7ac051176e366482b60e55463b6651e0",
+    "source_clips": [
+      "Death_A",
+      "Fighting_Idle",
+      "Hit_Chest",
+      "Idle_A",
+      "Jog",
+      "Sword_Attack",
+      "Walk"
+    ],
+    "actual_Actor_fit_clips": [
+      "Death_A",
+      "Fighting_Idle",
+      "Hit_Chest",
+      "Idle_A",
+      "Jog",
+      "Sword_Attack",
+      "Walk"
+    ],
+    "fit_runtime_sha256": "56bb755618934f82b4996c69af6d1004a85c81a2f95a7cc40b78d9be6d37dc88",
+    "poses": 247,
+    "fit_lineage": null,
+    "scope": "Actual Actor source-pose capture inventory, not merely requested QA aliases. Every source clip is present in fitted playback data."
+  },
+  "appearance": {
+    "source_sha256": "e500b26a17d4416d17364e949a9521f5ccbf331d0b0cc61b4a435489733587fb",
+    "candidate_sha256": "f6ffb941c25c694696e53c7f60c3243f7ac051176e366482b60e55463b6651e0",
+    "image_pairs": 345,
+    "width": 512,
+    "height": 512,
+    "different_image_pairs": 2,
+    "maximum_different_pixels": 10,
+    "maximum_pixels_above_two_levels": 0,
+    "maximum_mean_channel_error": 1.2715657552083334e-05,
+    "maximum_channel_error": 1,
+    "scope": "Complete ReplicatedActor3D setup with actual display scale, grounding and body materials; identical cameras for source/candidate, four views and every full native cycle at24Hz. Numeric playback and pixel comparisons are separate reports.",
+    "framing_passed": true,
+    "clipped_frame_labels": [],
+    "maximum_border_foreground_pixels": 0
+  },
+  "secondary_effects": {
+    "effective_scale": 2.39999651908875,
+    "failures": [],
+    "gpu": "NVIDIA GeForce RTX 5080 Laptop GPU",
+    "max_color_error": 0.0,
+    "max_custom_error": 0.0,
+    "max_dissolve_bounds_error": 0.0,
+    "max_fragment_transform_error": 0.0,
+    "max_grain_error": 0.0,
+    "max_silhouette_position_error": 0.0,
+    "mounted": {},
+    "passed": true,
+    "renderer": "forward_plus",
+    "runtime_sha256": "f6ffb941c25c694696e53c7f60c3243f7ac051176e366482b60e55463b6651e0",
+    "seeded_cases": 15,
+    "source_sha256": "e500b26a17d4416d17364e949a9521f5ccbf331d0b0cc61b4a435489733587fb"
+  },
+  "rig_investigation": {
+    "decision": "Original rig, skin and topology retained; main uses exact storage reductions only.",
+    "screened_whole_island_vertices_upper_bound": 560,
+    "maximum_additional_shared_GPU_bytes_before_full_proof": 470400,
+    "extra_draw_surfaces_required": 1,
+    "qualification_scope": "Source rejection screen/zero-island audit only; no all-key rig qualification or private partition promotion claimed.",
+    "reason_not_pursued": "The modest shared GPU saving would require another draw surface per actor/pass. No runtime performance benchmark justifies that tradeoff; original bindings are retained."
+  },
+  "evidence_sha256": {
+    "qualification-job.json": "016520c4804746cc9b9fd4d05b692cc1815182c48dc2344adf23b88bec5878e4",
+    "processing.json": "9231f4fae802fbe2c62f6c57365098ce36fe66e168ff6c5fba4a9884df8662b7",
+    "exact-source-validation.json": "f27bfae5236ed27cbd5e91cd7bc319a2628252a7914986abb42bfe9b99e847c4",
+    "physical-witness-validation.json": "bf7b225ddd86fb19024f882324133a247326e25f6d5f8fc8a73e7f5c096bc129",
+    "blender-validation.json": "65c3979705997a5fe3e2b5b15dfae228315c3483b5639315b04a8e105a50ca39",
+    "blender-direct-validation.json": "5d26d642bf0cb4a8c524e6694ffc7ec29497b3683794543efa68f2e3bba55a91",
+    "native-validation.json": "0f7cc0590f8fee4abb1220fdd67dba2c6ce8c1cfacf34a59e7994d2eb3d95673",
+    "imported-validation.json": "0f7cc0590f8fee4abb1220fdd67dba2c6ce8c1cfacf34a59e7994d2eb3d95673",
+    "render-fit.json": "b100005c16cbd4f5bb6ed6ea7e4d8b56609c1b2b815512f0f05476025ad25346",
+    "placement.json": "daa21e455006de9618e741c2b118b3d1e3397901218e38e0f0a84743308fd9f1",
+    "effects-validation.json": "d13c5aba4a4941cb30ed1b91005e45ff79a49772971e5dfacd3c353b49b3f38a",
+    "source-fit-inventory.json": "5daed3c59df2bbf3b203cb4df7406f094e7a118288d9ec27ccfd03fcf2d99ccc",
+    "actual-render/render.json": "2e07f277b2e24b3bb27ed3dd4b5b6e5d91a90425116eea0f1cbcd4121cbdfeb7",
+    "actual-render/pixel-comparison.json": "ada71ed73f5dd0ce23f44d33a203634a1c46f278571b2015a4d8d017b909eef2",
+    "editor-import-policy.json": "4474c4227bc14e85a4ec6097ce722f82eb5d3ade27c5307152e30519d4a46203"
+  },
+  "visual_review": "Paired normal contact boards and complete native-cycle previews reviewed. Every four-view/full-cycle frame has zero foreground pixels in its border two pixels wide.",
+  "known_limitations": [
+    "Separate resident RAM and frame-time benchmarks were not measured.",
+    "Encoded animation-key savings describe raw files, logical source accessors and import parsing input only. Native importing may densely rebake identical generated Animation keys; no runtime Animation RAM, key-search or playback CPU saving is claimed.",
+    "Original artistic review/approval status is unchanged."
+  ],
+  "genuine_editor_verification_revision": {
+    "status": "Corrected independent actual Editor verification passed within applicable unchanged modern or legacy scope",
+    "date": "2026-10-28",
+    "source_original_sha256": "e500b26a17d4416d17364e949a9521f5ccbf331d0b0cc61b4a435489733587fb",
+    "current_canonical_sha256": "f6ffb941c25c694696e53c7f60c3243f7ac051176e366482b60e55463b6651e0",
+    "loader": "ResourceLoader.load(PackedScene)",
+    "load_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/centaur.glb-6f190823eb696d0168656e57730d2026.md5",
+        "import_metadata_sha256": "af32b93a17bc841f6a75cd9d9b14babf6143c69cd1b9aff9f782f08dab2e9fe6",
+        "imported_resource_path": "res://.godot/imported/centaur.glb-6f190823eb696d0168656e57730d2026.scn",
+        "imported_resource_sha256": "ec531a3e360084b36e4ab49048dd140f051d5809578da73d37e767794e2f584e",
+        "packed_scene_resource_path": "res://assets/qa/centaur/v2/baseline/centaur.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "2dcd32b0fd9626720cf08ef9e37d254e",
+        "source_path": "res://assets/qa/centaur/v2/baseline/centaur.glb",
+        "source_sha256": "e500b26a17d4416d17364e949a9521f5ccbf331d0b0cc61b4a435489733587fb"
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/centaur.glb-712a474aa39783a6d3373b88e999df08.md5",
+        "import_metadata_sha256": "d66b5cbf2a7212ecf34cf141506121a1e2610313ca51ca117c1c068bf55f1fca",
+        "imported_resource_path": "res://.godot/imported/centaur.glb-712a474aa39783a6d3373b88e999df08.scn",
+        "imported_resource_sha256": "5ae6bab9f5cb4aeb42c81d7840b3d7a376ef4df2f6652d3ca95cc2b18db7d9c0",
+        "packed_scene_resource_path": "res://assets/qa/centaur/v2/candidate/centaur.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "a47cc1572eac61aa0342fbb944b66983",
+        "source_path": "res://assets/qa/centaur/v2/candidate/centaur.glb",
+        "source_sha256": "f6ffb941c25c694696e53c7f60c3243f7ac051176e366482b60e55463b6651e0"
+      }
+    ],
+    "source_aliases_and_SCNs_have_current_source_and_destination_MD5_freshness": true,
+    "numeric": {
+      "poses": 232,
+      "all_source_clips": [
+        "Death_A",
+        "Fighting_Idle",
+        "Hit_Chest",
+        "Idle_A",
+        "Jog",
+        "Sword_Attack",
+        "Walk"
+      ],
+      "RESET_checked": true,
+      "maximum_Euclidean_position_error_source_units": 1.6761633125341624e-07,
+      "maximum_normal_angle_degrees": 1.0029569411827041e-05
+    },
+    "applicable_quality_budget": {
+      "position_four_float32_ULPs": 4.76837158203125e-07,
+      "source_coordinate_or_rest_axis_extent_magnitude": 1.0000014798274048,
+      "normal_degrees": 0.0001,
+      "both_passed": true
+    },
+    "full_typed_static_attributes_material_storage_texture_pixels_and_mips": {
+      "actor": "centaur",
+      "source_sha256": "e500b26a17d4416d17364e949a9521f5ccbf331d0b0cc61b4a435489733587fb",
+      "candidate_sha256": "f6ffb941c25c694696e53c7f60c3243f7ac051176e366482b60e55463b6651e0",
+      "surfaces": [
+        {
+          "all_typed_arrays": [
+            {
+              "slot": 0,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 1,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 2,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 4,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 10,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 11,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 12,
+              "exact_after_proven_vertex_bijection": true
+            }
+          ],
+          "full_material_storage_fields_and_texture_pixels_mips_exact": true,
+          "format_exact": true,
+          "lods": [
+            {
+              "lod": 0,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            },
+            {
+              "lod": 1,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            },
+            {
+              "lod": 2,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            }
+          ],
+          "bounds_component_max_delta": 0.0,
+          "lod_capture_present": true
+        }
+      ],
+      "passed": true,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/centaur.glb-6f190823eb696d0168656e57730d2026.md5",
+          "import_metadata_sha256": "af32b93a17bc841f6a75cd9d9b14babf6143c69cd1b9aff9f782f08dab2e9fe6",
+          "imported_resource_path": "res://.godot/imported/centaur.glb-6f190823eb696d0168656e57730d2026.scn",
+          "imported_resource_sha256": "ec531a3e360084b36e4ab49048dd140f051d5809578da73d37e767794e2f584e",
+          "packed_scene_resource_path": "res://assets/qa/centaur/v2/baseline/centaur.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "2dcd32b0fd9626720cf08ef9e37d254e",
+          "source_path": "res://assets/qa/centaur/v2/baseline/centaur.glb",
+          "source_sha256": "e500b26a17d4416d17364e949a9521f5ccbf331d0b0cc61b4a435489733587fb"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/centaur.glb-712a474aa39783a6d3373b88e999df08.md5",
+          "import_metadata_sha256": "d66b5cbf2a7212ecf34cf141506121a1e2610313ca51ca117c1c068bf55f1fca",
+          "imported_resource_path": "res://.godot/imported/centaur.glb-712a474aa39783a6d3373b88e999df08.scn",
+          "imported_resource_sha256": "5ae6bab9f5cb4aeb42c81d7840b3d7a376ef4df2f6652d3ca95cc2b18db7d9c0",
+          "packed_scene_resource_path": "res://assets/qa/centaur/v2/candidate/centaur.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "a47cc1572eac61aa0342fbb944b66983",
+          "source_path": "res://assets/qa/centaur/v2/candidate/centaur.glb",
+          "source_sha256": "f6ffb941c25c694696e53c7f60c3243f7ac051176e366482b60e55463b6651e0"
+        }
+      ]
+    },
+    "retained_Editor_morph_fields": {
+      "actor": "centaur",
+      "source_sha256": "e500b26a17d4416d17364e949a9521f5ccbf331d0b0cc61b4a435489733587fb",
+      "candidate_sha256": "f6ffb941c25c694696e53c7f60c3243f7ac051176e366482b60e55463b6651e0",
+      "all_retained_editor_POSITION_NORMAL_TANGENT_typed_bits_exact": true,
+      "retained_targets": 42,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/centaur.glb-6f190823eb696d0168656e57730d2026.md5",
+          "import_metadata_sha256": "af32b93a17bc841f6a75cd9d9b14babf6143c69cd1b9aff9f782f08dab2e9fe6",
+          "imported_resource_path": "res://.godot/imported/centaur.glb-6f190823eb696d0168656e57730d2026.scn",
+          "imported_resource_sha256": "ec531a3e360084b36e4ab49048dd140f051d5809578da73d37e767794e2f584e",
+          "packed_scene_resource_path": "res://assets/qa/centaur/v2/baseline/centaur.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "2dcd32b0fd9626720cf08ef9e37d254e",
+          "source_path": "res://assets/qa/centaur/v2/baseline/centaur.glb",
+          "source_sha256": "e500b26a17d4416d17364e949a9521f5ccbf331d0b0cc61b4a435489733587fb"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/centaur.glb-712a474aa39783a6d3373b88e999df08.md5",
+          "import_metadata_sha256": "d66b5cbf2a7212ecf34cf141506121a1e2610313ca51ca117c1c068bf55f1fca",
+          "imported_resource_path": "res://.godot/imported/centaur.glb-712a474aa39783a6d3373b88e999df08.scn",
+          "imported_resource_sha256": "5ae6bab9f5cb4aeb42c81d7840b3d7a376ef4df2f6652d3ca95cc2b18db7d9c0",
+          "packed_scene_resource_path": "res://assets/qa/centaur/v2/candidate/centaur.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "a47cc1572eac61aa0342fbb944b66983",
+          "source_path": "res://assets/qa/centaur/v2/candidate/centaur.glb",
+          "source_sha256": "f6ffb941c25c694696e53c7f60c3243f7ac051176e366482b60e55463b6651e0"
+        }
+      ],
+      "scope": "Direct actual Editor source/candidate retained morph P/N/T byte digests after independently proved complete static-attribute vertex bijection. Exact target mask from source packing lineage; no morph field omitted.",
+      "passed": true
+    },
+    "withdrawn_prior_loader_claim": "Prior shared dumper captures labelled imported used GlbSceneCache for these outside-actor aliases and therefore were raw-cache comparisons. They remain retained private raw/native evidence, but their independent Editor claim is withdrawn and superseded by these explicitly loaded SCNs.",
+    "unchanged_other_evidence": "Original independent physical observations, exact source curves, Blender, actual native gameplay body rendering, placement, mounted/cinematic dependencies and secondary effects remain hash-bound and unchanged. No artistic approval, model, action, cap or witness change in this QA revision.",
+    "production_scope": "Production actor_shipping loose folders remain raw/native and are not Editor-imported. Per-surface Editor-generated LODs are verification representation metadata, not a claim of new gameplay LODs.",
+    "evidence_sha256": {
+      ".local/heavy-batch/centaur/v2/editor-real-v1/qualification-job.json": "46cb1cbf1c5e07b7feed3e7494176be50dbc02504269a7308c0401d4d6a5f897",
+      ".local/heavy-batch/centaur/v2/editor-real-v1/imported/runtime.json": "b5e461599e025c7527eac6850dd517867e9226df3ac25f76208fa0621f425bba",
+      ".local/heavy-batch/centaur/v2/editor-real-v1/imported-validation.json": "0f7cc0590f8fee4abb1220fdd67dba2c6ce8c1cfacf34a59e7994d2eb3d95673",
+      ".local/heavy-batch/centaur/v2/editor-real-v1/imported-static-mesh-bits.json": "7d249273020bbf87ad313b27919baadde4c98a13fcfd6fe0fab314df545c46bb",
+      ".local/heavy-batch/centaur/v2/editor-real-v1/imported-typed-validation.json": "c9e21b747e6d9c7735309af801f986dd99fc0196a01fdd9815e1ba0825841802",
+      ".local/heavy-batch/centaur/v2/editor-real-v1/morph-digest-job.json": "7fa04764461b5d480e6f4965b6b0f13ba0d99e5e0889a74c87e4fefb29f01101",
+      ".local/heavy-batch/centaur/v2/editor-real-v1/imported-morph-digests.json": "daa73beb0f7e312aab5eaf5fa9f83d03dda7a096d2895e2875f14ffbf7c6d867",
+      ".local/heavy-batch/centaur/v2/editor-real-v1/imported-morph-validation.json": "0d21f570874dec913003f8e3d02dacb66c0b16195094837f777e3251b72c980b"
+    }
+  }
+}

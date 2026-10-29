@@ -1,0 +1,121 @@
+{
+  "schema_version": 1,
+  "batch": 1,
+  "date": "2026-10-27",
+  "status": "qualified and integrated locally; not pushed or released",
+  "human_approval_changed": false,
+  "actors": [
+    {
+      "actor": "snapping_turtle",
+      "source_sha256": "4dbfd46129a5bf9f19495761a2944415cbf2bd464f62ef5253b259ff6e04c9c7",
+      "candidate_sha256": "8d904aaae134958faf91a6cff6d10706404231c4143942e1544f37b175389f53",
+      "source_bytes": 102196500,
+      "candidate_bytes": 94962244,
+      "source_zstd_bytes": 74574374,
+      "candidate_zstd_bytes": 71471682,
+      "shared_gpu_corrective_source_bytes": 119305600,
+      "shared_gpu_corrective_candidate_bytes": 113405160,
+      "surfaces": {
+        "source": 1,
+        "candidate": 2
+      },
+      "qualification_report": "docs/qa/creature-storage/batch-001/snapping_turtle.json"
+    },
+    {
+      "actor": "sunmane_foal_dun",
+      "source_sha256": "77e7ce55c7aa77b99eb84f3395896630267219150f0a33a02dc800b7910090a1",
+      "candidate_sha256": "b15e77e1b20a7eb768e0313fe4a49518b9b3e8403e0b429d61cc741706426f8a",
+      "source_bytes": 99641988,
+      "candidate_bytes": 96538140,
+      "source_zstd_bytes": 57723283,
+      "candidate_zstd_bytes": 57579453,
+      "shared_gpu_corrective_source_bytes": 27354600,
+      "shared_gpu_corrective_candidate_bytes": 24759800,
+      "surfaces": {
+        "source": 1,
+        "candidate": 2
+      },
+      "qualification_report": "docs/qa/creature-storage/sunmane-foal-dun.json"
+    },
+    {
+      "actor": "thornwood_dryad_queen",
+      "source_sha256": "643502582c8b7ef8d2fa4ebcd0d18b8035685f844099b2c8db0ade561314b735",
+      "candidate_sha256": "37ef36bb5b26e87594409136ed8892c88fbc408bdb6cba9ea24718ed3c38496d",
+      "source_bytes": 85298756,
+      "candidate_bytes": 83389388,
+      "source_zstd_bytes": 22868639,
+      "candidate_zstd_bytes": 22893994,
+      "shared_gpu_corrective_source_bytes": 115380000,
+      "shared_gpu_corrective_candidate_bytes": 115380000,
+      "surfaces": {
+        "source": 1,
+        "candidate": 1
+      },
+      "qualification_report": "docs/qa/creature-storage/batch-001/thornwood_dryad_queen.json"
+    },
+    {
+      "actor": "magpie",
+      "source_sha256": "9ebfd307319cc3798e5887017e24a3d7061c057eee57810f349ef59679a8bc40",
+      "candidate_sha256": "d9081c27122de9a0aaf860515da5f72bae9e71b62fed12ff8e813ffe742912c7",
+      "source_bytes": 77397936,
+      "candidate_bytes": 75446524,
+      "source_zstd_bytes": 54748918,
+      "candidate_zstd_bytes": 53586877,
+      "shared_gpu_corrective_source_bytes": 99844680,
+      "shared_gpu_corrective_candidate_bytes": 98343920,
+      "surfaces": {
+        "source": 1,
+        "candidate": 1
+      },
+      "qualification_report": "docs/qa/creature-storage/magpie.json"
+    },
+    {
+      "actor": "sunmane_foal_grey",
+      "source_sha256": "c44d6fa3f3857b06037aba8d790ed631996360473ad06b4a210290c409d1b4b0",
+      "candidate_sha256": "0bf68e9a0888fb77614497d41a2ce47edbec82d28bcadce4a3c36be60ec9433c",
+      "source_bytes": 73440584,
+      "candidate_bytes": 70271408,
+      "source_zstd_bytes": 44484186,
+      "candidate_zstd_bytes": 44361627,
+      "shared_gpu_corrective_source_bytes": 15058460,
+      "shared_gpu_corrective_candidate_bytes": 12402520,
+      "surfaces": {
+        "source": 1,
+        "candidate": 2
+      },
+      "qualification_report": "docs/qa/creature-storage/sunmane-foal-grey.json"
+    }
+  ],
+  "totals": {
+    "source_bytes": 437975764,
+    "candidate_bytes": 420607704,
+    "source_zstd_bytes": 254399400,
+    "candidate_zstd_bytes": 249893633,
+    "shared_gpu_corrective_source_bytes": 376943340,
+    "shared_gpu_corrective_candidate_bytes": 364291400,
+    "raw_saved_bytes": 17368060,
+    "compressed_saved_bytes": 4505767,
+    "shared_gpu_corrective_saved_bytes": 12651940
+  },
+  "checks": {
+    "focused_python_tests_passed": 75,
+    "seeded_dissolve_headless_checks_passed": 2808,
+    "seeded_dissolve_gpu_checks_passed": 2832,
+    "retained_skin_checks_passed": 27,
+    "current_native_witnesses_passed": [
+      "snapping_turtle",
+      "magpie",
+      "thornwood_dryad_queen",
+      "all six equid family members",
+      "crystalback_tortoise"
+    ]
+  },
+  "tradeoffs": [
+    "Three additional draw surfaces across five model resources; per-instance rendering cost depends on visible creatures and passes.",
+    "One-time dissolve setup CPU benchmarks are recorded separately; no frame-rate or process-memory claim.",
+    "Dryad compressed payload increases 25,355 bytes despite lower raw/key storage.",
+    "Original Blender/native discrepancies on foals are preserved, not repaired.",
+    "Preexisting stale Dryad roster hash reconciled against the exact original model at origin/develop revision 159bb0c5778510655fd79671c19c365e90687b79."
+  ],
+  "secondary_compatibility_retrofit": "docs/qa/creature-storage/crystalback-tortoise-pilot.json"
+}

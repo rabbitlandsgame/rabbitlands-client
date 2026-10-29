@@ -75,11 +75,35 @@
     "walk": 0.21120849480680937,
     "run": 0.5268921584152483
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "A deliberate alternating ground step with a small lateral weight shift, articulate gripping toes and a quiet long tail. The quick run takes longer low steps with a purposeful forward lean.",
     "attack": "An alert head recoil into a forceful forward/down hooked-beak bite, with planted claws and a brief balanced wing flare.",
     "death": "The breast drops forward, the beak and neck fold toward the ground and the released feet settle beside the body while the long tail follows its attachment.",
     "flight": "Original native wingbeat and its source corrective shapes retained unchanged."
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "macaw",
+    "appliesToSHA256": "8640e23de6452e76a763b43e4605036986980925be2a7f1ac39ad75cae297df5",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "saved_button_approval",
+      "event_id": "bdb584f7-e849-48ec-8006-cc2b8e6f186a",
+      "event_sha256": "c574519a9cef8d6e0acccdf39be15d1a046d058b5c34f00ba17dd47e5d9104d0",
+      "utc": "2026-10-28T21:40:43.410328+00:00"
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "macaw",
+    "sourceSHA256": "fd8be70fdd7dc694176b3bd25f741dedaa9bd5f5e83e02fc2060b4b6ad42f092",
+    "previousRuntimeSHA256": "fd8be70fdd7dc694176b3bd25f741dedaa9bd5f5e83e02fc2060b4b6ad42f092",
+    "runtimeSHA256": "8640e23de6452e76a763b43e4605036986980925be2a7f1ac39ad75cae297df5",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": null
   }
 }

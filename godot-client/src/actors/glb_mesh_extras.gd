@@ -12,6 +12,7 @@ const GLB_VERSION := 2
 const JSON_CHUNK := 0x4E4F534A
 const HEADER_BYTES := 12
 const CHUNK_HEADER_BYTES := 8
+const CreaturePayload := preload("res://src/actors/creature_payload.gd")
 
 
 ## Returns mesh/node name -> the mesh's extras dictionary.
@@ -34,6 +35,15 @@ static func read(path: String) -> Dictionary:
 
 
 static func _read_glb_json(path: String) -> Variant:
+	if CreaturePayload.is_compressed(path):
+		var bytes := CreaturePayload.read_bytes(path)
+		if bytes.size() < 20: return null
+		var length := bytes.decode_u32(12)
+		if bytes.decode_u32(16) != JSON_CHUNK or length > bytes.size() - 20: return null
+		var json_bytes := bytes.slice(20,20+length)
+		while not json_bytes.is_empty() and json_bytes[json_bytes.size()-1] in [0,9,10,13,32]:
+			json_bytes.resize(json_bytes.size()-1)
+		return JSON.parse_string(json_bytes.get_string_from_utf8())
 	var file := FileAccess.open(path, FileAccess.READ)
 	if file == null or file.get_length() < HEADER_BYTES:
 		return null

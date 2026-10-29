@@ -1,0 +1,3206 @@
+{
+  "schema_version": 1,
+  "batch": 47,
+  "actor": "animated_sword",
+  "date": "2026-10-28",
+  "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/animated_sword.glb",
+  "source_sha256": "56b9af575eac41a82210c6c274c1d76f51c0092f77e4e1a47953c9979c931cf1",
+  "runtime_sha256": "c07e846c17c1bb315716774aadad7dfd1b9252bc405fe89fc63645fc3d2f2e55",
+  "qualification": "Passed exact source/continuous curves, original physical observations, paired fresh Blender poses/default, native and fresh editor-imported playback/transitions, fully fitted actual-Actor cycles/four views, seeded dissolve/silhouette/reset checks.",
+  "human_approval_changed": false,
+  "recipe": {
+    "tool": "eloria-assets/tools/pack_creature_storage.py",
+    "tool_commit": "5bdd51c3",
+    "steps": [
+      "prune_zero_targets",
+      "reduce_constant_runs",
+      "compact"
+    ],
+    "profile": null,
+    "bounds": null,
+    "preserve_trs_keys": false
+  },
+  "bytes": {
+    "source_bytes": 451188,
+    "candidate_bytes": 450712,
+    "source_zstd_bytes": 324002,
+    "candidate_zstd_bytes": 323955
+  },
+  "inactive_targets_removed": 0,
+  "flat_run_key_rows_removed": 22,
+  "corrective_graphics_buffer_bytes": {
+    "source": 0,
+    "candidate": 0,
+    "saved": 0,
+    "scope": "Actual Godot raw blend_shape_data byte totals over all mesh surfaces; shared per loaded model."
+  },
+  "draw_surfaces": {
+    "source": 1,
+    "candidate": 1
+  },
+  "source_validation": {
+    "passed": true,
+    "source_sha256": "56b9af575eac41a82210c6c274c1d76f51c0092f77e4e1a47953c9979c931cf1",
+    "candidate_sha256": "c07e846c17c1bb315716774aadad7dfd1b9252bc405fe89fc63645fc3d2f2e55",
+    "geometry_skin_binds_rest_topology_uv_material_image_bits_preserved": true,
+    "retained_key_time_and_value_bits_exact_only_flat_interiors_removed": true,
+    "every_removed_default_and_key_is_zero": true,
+    "redundant_flat_key_rows_proved": 22,
+    "preexisting_duplicate_property_curves_preserved_in_occurrence_order": 0,
+    "meshes": [],
+    "clips": {
+      "Death_A": {
+        "original_knots": 33,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 70
+      },
+      "Fighting_Idle": {
+        "original_knots": 49,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 102
+      },
+      "Hit_Chest": {
+        "original_knots": 33,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 70
+      },
+      "Idle_A": {
+        "original_knots": 49,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 102
+      },
+      "Jog": {
+        "original_knots": 19,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 42
+      },
+      "Sword_Attack": {
+        "original_knots": 97,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 198
+      },
+      "Walk": {
+        "original_knots": 25,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 54
+      }
+    },
+    "proof": "Zero defaults and every LINEAR/STEP key zero prove inactive targets remain zero continuously and under crossfades. All retained accessor bytes and retained time/value rows are exact. Deleted key rows sit strictly inside three bit-identical adjacent rows; plateau boundaries and endpoints remain."
+  },
+  "physical_observations": {
+    "passed": true,
+    "source_sha256": "56b9af575eac41a82210c6c274c1d76f51c0092f77e4e1a47953c9979c931cf1",
+    "candidate_sha256": "c07e846c17c1bb315716774aadad7dfd1b9252bc405fe89fc63645fc3d2f2e55",
+    "surface_probes": 166,
+    "poses": 133,
+    "clips": 7,
+    "source_candidate_position_error": 0.0,
+    "source_candidate_normal_vector_error": 0.0,
+    "original_witness_position_error_over_height": 0.0,
+    "original_source_witness_position_error_over_height": 0.0,
+    "original_witness_normal_vector_error": 0.0,
+    "original_witness_bone_matrix_error": 0.0,
+    "witness_sha256": "41046beef500610879254301a3c555ef558bb8a3de617a6f7bc24b2be396d07b",
+    "sampled_motion_min": [
+      -0.984824368906591,
+      -0.26171314890234487,
+      -0.48498928019779075
+    ],
+    "sampled_motion_max": [
+      0.3655021602476545,
+      1.106826765149468,
+      0.8777257500276591
+    ]
+  },
+  "paired_fresh_blender": {
+    "maximum_position_error": 0.0,
+    "maximum_bone_matrix_error": 0.0,
+    "maximum_float32_budget": 1.9073486328125e-06,
+    "poses": 134,
+    "neutral_default_checked": true,
+    "retained_bone_matrices_per_pose": 3,
+    "passed": true,
+    "source_sha256": "56b9af575eac41a82210c6c274c1d76f51c0092f77e4e1a47953c9979c931cf1",
+    "candidate_sha256": "c07e846c17c1bb315716774aadad7dfd1b9252bc405fe89fc63645fc3d2f2e55",
+    "scope": "Direct source/candidate frozen-ID surfaces and every bone matrix at each original witness pose plus controlled neutral/default pose. Sixteen float32 ULPs at baseline coordinate/matrix magnitude; independent of inherited source/witness residual and separate from native/source appearance budgets."
+  },
+  "native_and_editor_imported": {
+    "native": {
+      "samples": 232,
+      "maximum_position_error": 1.1205674445904278e-07,
+      "maximum_normal_angle_degrees": 6.883343194785022e-06
+    },
+    "imported": {
+      "samples": 232,
+      "maximum_position_error": 1.1205674445904278e-07,
+      "maximum_normal_angle_degrees": 6.883343194785022e-06,
+      "actual_loader": "ResourceLoader.load(PackedScene)",
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/animated_sword.glb-cc502ce994723df620f25ca0d029c088.md5",
+          "import_metadata_sha256": "33b2440f1bc87f9f265b3b11e233963c4ace3c40591b98b0dcfca7195047f60c",
+          "imported_resource_path": "res://.godot/imported/animated_sword.glb-cc502ce994723df620f25ca0d029c088.scn",
+          "imported_resource_sha256": "4402f54b3ee20543d8f8b9b684034a2e62404a9a0f05296866dfa612e7b7e5a6",
+          "packed_scene_resource_path": "res://assets/qa/animated_sword/v2/baseline/animated_sword.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "8de8deec2ca91f1acc4897ad4cfb93fd",
+          "source_path": "res://assets/qa/animated_sword/v2/baseline/animated_sword.glb",
+          "source_sha256": "56b9af575eac41a82210c6c274c1d76f51c0092f77e4e1a47953c9979c931cf1"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/animated_sword.glb-19748c8341ee17d4ad4cacba2469299b.md5",
+          "import_metadata_sha256": "0976b73a22ed04375f6dc6338dd49300e8fabd70194f00dc09830c7bd8f7ed58",
+          "imported_resource_path": "res://.godot/imported/animated_sword.glb-19748c8341ee17d4ad4cacba2469299b.scn",
+          "imported_resource_sha256": "717d6ad40e4a440a891a9a0a0d76ffb66af512d5ee78c29456f6cf637a17fa5d",
+          "packed_scene_resource_path": "res://assets/qa/animated_sword/v2/candidate/animated_sword.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "9f2f84f9252eb52481d5760c0d1b15e2",
+          "source_path": "res://assets/qa/animated_sword/v2/candidate/animated_sword.glb",
+          "source_sha256": "c07e846c17c1bb315716774aadad7dfd1b9252bc405fe89fc63645fc3d2f2e55"
+        }
+      ]
+    }
+  },
+  "editor_import_policy": {
+    "source_sidecar_exists": false,
+    "policy": "Fresh Godot editor defaults for both inputs; native runtime source has no editor import metadata. Runtime native-folder policy remains unchanged."
+  },
+  "native_numeric_budget": {
+    "actor": "animated_sword",
+    "source_coordinate_or_extent_magnitude": 1.0000002422405811,
+    "four_float32_ULPs": 4.76837158203125e-07,
+    "runtime_position_error": 1.1205674445904278e-07,
+    "runtime_normal_degrees": 6.883343194785022e-06,
+    "imported_position_error": 1.1205674445904278e-07,
+    "imported_normal_degrees": 6.883343194785022e-06,
+    "normal_degrees_budget": 0.0001,
+    "scope": "Four float32 ULPs at maximum original source coordinate/extent magnitude; original source mathematical equality remains exact. Native normal screen 1e-4 degrees."
+  },
+  "placement": {
+    "passed": true,
+    "bounds_error": 0.0,
+    "placement_error": 0.0,
+    "overhead_height_error": 0.0
+  },
+  "render_fit": {
+    "source_sha256": "56b9af575eac41a82210c6c274c1d76f51c0092f77e4e1a47953c9979c931cf1",
+    "model_global": [
+      [
+        0.5,
+        1.82635915280116e-07,
+        -0.5
+      ],
+      [
+        -1.29999971389771,
+        0.0,
+        1.1364958396598e-07
+      ],
+      [
+        0.0,
+        1.29999971389771,
+        0.0
+      ],
+      [
+        -1.1364958396598e-07,
+        0.0,
+        -1.29999971389771
+      ]
+    ],
+    "position": [
+      0.026848045831281697,
+      -0.33812264389870794,
+      -1.6565374951250718
+    ],
+    "size": [
+      1.7534232988373324,
+      1.7771323422212393,
+      1.7553484196341425
+    ],
+    "poses": 242,
+    "scope": "Every vertex at every full-cycle render frame and view-still pose, using actual complete Actor Godot arrays/poses/weights/transforms, renderer morph cutoff and four/eight influence skin. Evaluated in float64 with a separate 30% camera margin."
+  },
+  "source_fit_inventory": {
+    "passed": true,
+    "source_sha256": "56b9af575eac41a82210c6c274c1d76f51c0092f77e4e1a47953c9979c931cf1",
+    "candidate_sha256": "c07e846c17c1bb315716774aadad7dfd1b9252bc405fe89fc63645fc3d2f2e55",
+    "source_clips": [
+      "Death_A",
+      "Fighting_Idle",
+      "Hit_Chest",
+      "Idle_A",
+      "Jog",
+      "Sword_Attack",
+      "Walk"
+    ],
+    "actual_Actor_fit_clips": [
+      "Death_A",
+      "Fighting_Idle",
+      "Hit_Chest",
+      "Idle_A",
+      "Jog",
+      "Sword_Attack",
+      "Walk"
+    ],
+    "fit_runtime_sha256": "6af0df159def9eac61c7d3b92b59d7a57f29922924d02c33188ef09b57b95dbc",
+    "poses": 242,
+    "fit_lineage": null,
+    "scope": "Actual Actor source-pose capture inventory, not merely requested QA aliases. Every source clip is present in fitted playback data."
+  },
+  "appearance": {
+    "source_sha256": "56b9af575eac41a82210c6c274c1d76f51c0092f77e4e1a47953c9979c931cf1",
+    "candidate_sha256": "c07e846c17c1bb315716774aadad7dfd1b9252bc405fe89fc63645fc3d2f2e55",
+    "image_pairs": 340,
+    "width": 512,
+    "height": 512,
+    "different_image_pairs": 1,
+    "maximum_different_pixels": 2,
+    "maximum_pixels_above_two_levels": 0,
+    "maximum_mean_channel_error": 2.5431315104166665e-06,
+    "maximum_channel_error": 1,
+    "scope": "Complete ReplicatedActor3D setup with actual display scale, grounding and body materials; identical cameras for source/candidate, four views and every full native cycle at24Hz. Numeric playback and pixel comparisons are separate reports.",
+    "framing_passed": true,
+    "clipped_frame_labels": [],
+    "maximum_border_foreground_pixels": 0
+  },
+  "secondary_effects": {
+    "passed": true,
+    "source_sha256": "56b9af575eac41a82210c6c274c1d76f51c0092f77e4e1a47953c9979c931cf1",
+    "candidate_sha256": "c07e846c17c1bb315716774aadad7dfd1b9252bc405fe89fc63645fc3d2f2e55",
+    "source_helper_sha256": "52e180bd81c7070a0c5a1a9365fe8db339e9502ab23e1b07d490eda9c13a7242",
+    "current_helper_sha256": "52e180bd81c7070a0c5a1a9365fe8db339e9502ab23e1b07d490eda9c13a7242",
+    "source_fit_sha256": "7d0a4a38b4b34306fddebd79b61dc383314b9836e865176dbc48170335204093",
+    "source_identity_control_materials_and_full_ash_byte_exact": true,
+    "current_candidate_maximum_ash_transform_vector_error": 0.0,
+    "maximum_material_uniform_vector_or_scalar_error": 0.0,
+    "maximum_different_pixels": 0,
+    "maximum_pixels_above_two_levels": 0,
+    "maximum_mean_channel_error": 0.0,
+    "all_RGBA_alpha_channels_equal": true,
+    "all_150_captured_images_zero_border_foreground": true,
+    "cases": [
+      {
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 1,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 1,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 42,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 42,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 7654321,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 7654321,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 1,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 1,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 42,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 42,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 7654321,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 7654321,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 1,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 1,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 42,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 42,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 7654321,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 7654321,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 1,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 1,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 42,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 42,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 7654321,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 7654321,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 1,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 1,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 42,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 42,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 7654321,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 7654321,
+        "maximum_ash_transform_vector_error": 0.0,
+        "colors_custom_byte_exact": true,
+        "all_material_uniforms_compared": [
+          {
+            "progress": 0.0,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.17,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.42,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 0.73,
+            "old_materials": 2,
+            "new_materials": 2
+          },
+          {
+            "progress": 1.0,
+            "old_materials": 2,
+            "new_materials": 2
+          }
+        ],
+        "reset_resources_exact": true
+      }
+    ],
+    "pixel_comparisons": [
+      {
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 1,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 1,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 1,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 1,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 1,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 1,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 1,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 1,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 1,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 1,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 42,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 42,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 42,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 42,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 42,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 42,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 42,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 42,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 42,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 42,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 7654321,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 7654321,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 7654321,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 7654321,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.0,
+        "seed": 7654321,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 7654321,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 7654321,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 7654321,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 7654321,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.0,
+        "seed": 7654321,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 1,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 1,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 1,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 1,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 1,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 1,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 1,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 1,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 1,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 1,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 42,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 42,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 42,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 42,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 42,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 42,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 42,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 42,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 42,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 42,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 7654321,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 7654321,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 7654321,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 7654321,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.25,
+        "seed": 7654321,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 7654321,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 7654321,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 7654321,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 7654321,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.25,
+        "seed": 7654321,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 1,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 1,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 1,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 1,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 1,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 1,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 1,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 1,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 1,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 1,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 42,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 42,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 42,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 42,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 42,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 42,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 42,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 42,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 42,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 42,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 7654321,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 7654321,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 7654321,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 7654321,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.5,
+        "seed": 7654321,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 7654321,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 7654321,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 7654321,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 7654321,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.5,
+        "seed": 7654321,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 1,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 1,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 1,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 1,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 1,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 1,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 1,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 1,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 1,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 1,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 42,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 42,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 42,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 42,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 42,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 42,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 42,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 42,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 42,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 42,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 7654321,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 7654321,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 7654321,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 7654321,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 0.9,
+        "seed": 7654321,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 7654321,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 7654321,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 7654321,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 7654321,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 0.9,
+        "seed": 7654321,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 1,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 1,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 1,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 1,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 1,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 1,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 1,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 1,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 1,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 1,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 42,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 42,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 42,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 42,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 42,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 42,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 42,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 42,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 42,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 42,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 7654321,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 7654321,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 7654321,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 7654321,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "baseline",
+        "fraction": 1.0,
+        "seed": 7654321,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 7654321,
+        "progress": 0,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 7654321,
+        "progress": 17,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 7654321,
+        "progress": 42,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 7654321,
+        "progress": 73,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      },
+      {
+        "role": "candidate",
+        "fraction": 1.0,
+        "seed": 7654321,
+        "progress": 100,
+        "different_pixels": 0,
+        "pixels_above_two_levels": 0,
+        "mean_channel_error": 0.0,
+        "maximum_channel_error": 0,
+        "border_foreground_pixels": 0
+      }
+    ],
+    "scope": "Real Forward+640px source-fit full-body/fade images. Current implementation/original source compared with current implementation/candidate; source identity controls retained at five Death fractions, three seeds and five fade phases. Complete packed320-instance transforms/colors/custom, every body+ash material shader/uniform/texture-pixel value and exact resource restoration. Candidate keeps1e-6effect numeric and unchanged strict pixel caps. No asset/artistic change.",
+    "maximum_complete_secondary_silhouette_position_error": 0.0,
+    "real_source_candidate_fade_pairs": 75,
+    "all_body_ash_uniforms_and_texture_pixels_mips_compared": true,
+    "actual_original_helper_reference_claimed": false,
+    "current_helper_cameras": [
+      {
+        "name": "baseline",
+        "size": 5.84078121185303,
+        "target": [
+          0.903559684753418,
+          0.550443530082703,
+          -0.778863310813904
+        ]
+      },
+      {
+        "name": "candidate",
+        "size": 5.84078121185303,
+        "target": [
+          0.903559684753418,
+          0.550443530082703,
+          -0.778863310813904
+        ]
+      }
+    ]
+  },
+  "rig_investigation": {
+    "decision": "Original rig, skin and topology retained; this candidate uses exact storage reductions only."
+  },
+  "evidence_sha256": {
+    "qualification-job.json": "9173d7fe7bd3f99ffe32ec8616c988dc28d010985fc1e59439243ccc481f1841",
+    "processing.json": "afff8ab0cf9d16a3450adaad1164ca40bef1a306db22fd41655533c6d4374a2f",
+    "exact-source-validation.json": "e11f4c76c92a75adffecdbe2abda1b44e6d9ddb9d4a81aec5e5fa7af3c91350d",
+    "physical-witness-validation.json": "46ace2bfd8d1d8a3b824089195711b3be7f7844ba7c5de111ca168bf0900da8f",
+    "blender-validation.json": "ddc68e6bc55680f87b948c89194a417d63e5cf4fbd6a7cacf2f4f97a4e22ef00",
+    "blender-direct-validation.json": "1c911258cf992b5d0b12cf58bf7576fa3f7d6c3a39a7d222866cd4959f1ee8ce",
+    "native-validation.json": "39bb27e7d0afd21a8ccefde03aaf2afb1801cbeb44ba2d69385a17118d4ae493",
+    "imported-validation.json": "39bb27e7d0afd21a8ccefde03aaf2afb1801cbeb44ba2d69385a17118d4ae493",
+    "render-fit.json": "7d0a4a38b4b34306fddebd79b61dc383314b9836e865176dbc48170335204093",
+    "placement.json": "7257ba39efc2644b5e1f46fd7d4ebf2478eb8b2f938df981e44e1c8585e7d6d2",
+    "effects-validation.json": "bf6670316f261a4ab688d3990df0a2c047099a8a8a0bee981721cfa68cbaff73",
+    "source-fit-inventory.json": "b39d34ff0bce36f2c268be4b696985594b6725da43968c590168a856663e6519",
+    "actual-render/render.json": "a129ba5c33c29b79eaa7ef3c98b02928e0f4ad8baecfb71d92be6d29337cd933",
+    "actual-render/pixel-comparison.json": "a48e80905b929e8b065e33526dbf2914d2e6cb36f2ac078c020731ee10b69103",
+    "editor-import-policy.json": "4474c4227bc14e85a4ec6097ce722f82eb5d3ade27c5307152e30519d4a46203",
+    "full-effects/job.json": "855182d2e06f92e9614da550190938c1cf7add62d4496cb2d564e9617cccd716",
+    "full-effects/dissolve.json": "e14bf7cfc968f3275dccfb7946609d868f8be6996e1b947244957357bd878931",
+    "full-effects/image-sha256.json": "7cff690fd044b6d862886efa74bdc77fd97445a9c9b670a37f061e2b1882a492"
+  },
+  "visual_review": "Normal-scale native body and five-progress seeded fade contact boards reviewed; complete models and effects remain in frame. All150batch fade images have zero foreground border pixels; all75real source/candidate fade pairs pass the unchanged strict pixel gates.",
+  "known_limitations": [
+    "Separate resident RAM and frame-time benchmarks were not measured.",
+    "Encoded animation-key savings describe raw files, logical source accessors and import parsing input only. Native importing may densely rebake identical generated Animation keys; no runtime Animation RAM, key-search or playback CPU saving is claimed.",
+    "Original artistic review/approval status is unchanged."
+  ],
+  "independent_editor_verification": {
+    "source_original_sha256": "56b9af575eac41a82210c6c274c1d76f51c0092f77e4e1a47953c9979c931cf1",
+    "canonical_sha256": "c07e846c17c1bb315716774aadad7dfd1b9252bc405fe89fc63645fc3d2f2e55",
+    "actual_loader": "ResourceLoader.load(PackedScene)",
+    "load_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/animated_sword.glb-cc502ce994723df620f25ca0d029c088.md5",
+        "import_metadata_sha256": "33b2440f1bc87f9f265b3b11e233963c4ace3c40591b98b0dcfca7195047f60c",
+        "imported_resource_path": "res://.godot/imported/animated_sword.glb-cc502ce994723df620f25ca0d029c088.scn",
+        "imported_resource_sha256": "4402f54b3ee20543d8f8b9b684034a2e62404a9a0f05296866dfa612e7b7e5a6",
+        "packed_scene_resource_path": "res://assets/qa/animated_sword/v2/baseline/animated_sword.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "8de8deec2ca91f1acc4897ad4cfb93fd",
+        "source_path": "res://assets/qa/animated_sword/v2/baseline/animated_sword.glb",
+        "source_sha256": "56b9af575eac41a82210c6c274c1d76f51c0092f77e4e1a47953c9979c931cf1"
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/animated_sword.glb-19748c8341ee17d4ad4cacba2469299b.md5",
+        "import_metadata_sha256": "0976b73a22ed04375f6dc6338dd49300e8fabd70194f00dc09830c7bd8f7ed58",
+        "imported_resource_path": "res://.godot/imported/animated_sword.glb-19748c8341ee17d4ad4cacba2469299b.scn",
+        "imported_resource_sha256": "717d6ad40e4a440a891a9a0a0d76ffb66af512d5ee78c29456f6cf637a17fa5d",
+        "packed_scene_resource_path": "res://assets/qa/animated_sword/v2/candidate/animated_sword.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "9f2f84f9252eb52481d5760c0d1b15e2",
+        "source_path": "res://assets/qa/animated_sword/v2/candidate/animated_sword.glb",
+        "source_sha256": "c07e846c17c1bb315716774aadad7dfd1b9252bc405fe89fc63645fc3d2f2e55"
+      }
+    ],
+    "typed_static_material_texture_mips_lod_and_triangle_proof": {
+      "actor": "animated_sword",
+      "source_sha256": "56b9af575eac41a82210c6c274c1d76f51c0092f77e4e1a47953c9979c931cf1",
+      "candidate_sha256": "c07e846c17c1bb315716774aadad7dfd1b9252bc405fe89fc63645fc3d2f2e55",
+      "surfaces": [
+        {
+          "all_typed_arrays": [
+            {
+              "slot": 0,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 1,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 2,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 4,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 10,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 11,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 12,
+              "exact_after_proven_vertex_bijection": true
+            }
+          ],
+          "full_material_storage_fields_and_texture_pixels_mips_exact": true,
+          "format_exact": true,
+          "lods": [
+            {
+              "lod": 0,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            },
+            {
+              "lod": 1,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            },
+            {
+              "lod": 2,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            },
+            {
+              "lod": 3,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            },
+            {
+              "lod": 4,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            }
+          ],
+          "bounds_component_max_delta": 0.0,
+          "lod_capture_present": true
+        }
+      ],
+      "passed": true,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/animated_sword.glb-cc502ce994723df620f25ca0d029c088.md5",
+          "import_metadata_sha256": "33b2440f1bc87f9f265b3b11e233963c4ace3c40591b98b0dcfca7195047f60c",
+          "imported_resource_path": "res://.godot/imported/animated_sword.glb-cc502ce994723df620f25ca0d029c088.scn",
+          "imported_resource_sha256": "4402f54b3ee20543d8f8b9b684034a2e62404a9a0f05296866dfa612e7b7e5a6",
+          "packed_scene_resource_path": "res://assets/qa/animated_sword/v2/baseline/animated_sword.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "8de8deec2ca91f1acc4897ad4cfb93fd",
+          "source_path": "res://assets/qa/animated_sword/v2/baseline/animated_sword.glb",
+          "source_sha256": "56b9af575eac41a82210c6c274c1d76f51c0092f77e4e1a47953c9979c931cf1"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/animated_sword.glb-19748c8341ee17d4ad4cacba2469299b.md5",
+          "import_metadata_sha256": "0976b73a22ed04375f6dc6338dd49300e8fabd70194f00dc09830c7bd8f7ed58",
+          "imported_resource_path": "res://.godot/imported/animated_sword.glb-19748c8341ee17d4ad4cacba2469299b.scn",
+          "imported_resource_sha256": "717d6ad40e4a440a891a9a0a0d76ffb66af512d5ee78c29456f6cf637a17fa5d",
+          "packed_scene_resource_path": "res://assets/qa/animated_sword/v2/candidate/animated_sword.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "9f2f84f9252eb52481d5760c0d1b15e2",
+          "source_path": "res://assets/qa/animated_sword/v2/candidate/animated_sword.glb",
+          "source_sha256": "c07e846c17c1bb315716774aadad7dfd1b9252bc405fe89fc63645fc3d2f2e55"
+        }
+      ]
+    },
+    "all_retained_morph_POSITION_NORMAL_TANGENT_typed_fields": {
+      "actor": "animated_sword",
+      "source_sha256": "56b9af575eac41a82210c6c274c1d76f51c0092f77e4e1a47953c9979c931cf1",
+      "candidate_sha256": "c07e846c17c1bb315716774aadad7dfd1b9252bc405fe89fc63645fc3d2f2e55",
+      "all_retained_editor_POSITION_NORMAL_TANGENT_typed_bits_exact": true,
+      "retained_targets": 0,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/animated_sword.glb-cc502ce994723df620f25ca0d029c088.md5",
+          "import_metadata_sha256": "33b2440f1bc87f9f265b3b11e233963c4ace3c40591b98b0dcfca7195047f60c",
+          "imported_resource_path": "res://.godot/imported/animated_sword.glb-cc502ce994723df620f25ca0d029c088.scn",
+          "imported_resource_sha256": "4402f54b3ee20543d8f8b9b684034a2e62404a9a0f05296866dfa612e7b7e5a6",
+          "packed_scene_resource_path": "res://assets/qa/animated_sword/v2/baseline/animated_sword.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "8de8deec2ca91f1acc4897ad4cfb93fd",
+          "source_path": "res://assets/qa/animated_sword/v2/baseline/animated_sword.glb",
+          "source_sha256": "56b9af575eac41a82210c6c274c1d76f51c0092f77e4e1a47953c9979c931cf1"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/animated_sword.glb-19748c8341ee17d4ad4cacba2469299b.md5",
+          "import_metadata_sha256": "0976b73a22ed04375f6dc6338dd49300e8fabd70194f00dc09830c7bd8f7ed58",
+          "imported_resource_path": "res://.godot/imported/animated_sword.glb-19748c8341ee17d4ad4cacba2469299b.scn",
+          "imported_resource_sha256": "717d6ad40e4a440a891a9a0a0d76ffb66af512d5ee78c29456f6cf637a17fa5d",
+          "packed_scene_resource_path": "res://assets/qa/animated_sword/v2/candidate/animated_sword.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "9f2f84f9252eb52481d5760c0d1b15e2",
+          "source_path": "res://assets/qa/animated_sword/v2/candidate/animated_sword.glb",
+          "source_sha256": "c07e846c17c1bb315716774aadad7dfd1b9252bc405fe89fc63645fc3d2f2e55"
+        }
+      ],
+      "scope": "Direct actual Editor source/candidate retained morph P/N/T byte digests after independently proved complete static-attribute vertex bijection. Exact target mask from source packing lineage; no morph field omitted.",
+      "passed": true
+    },
+    "evidence_sha256": {
+      "imported/runtime.json": "cb553f962c7de05a0d71397d0757a4908c254269477e78f132ef22e9227efaac",
+      "imported-validation.json": "39bb27e7d0afd21a8ccefde03aaf2afb1801cbeb44ba2d69385a17118d4ae493",
+      "imported-static-mesh-bits.json": "1374033d21c3b5337bda2eb5b342b6f0743b8afdfb937efb3df3160d06c64530",
+      "imported-typed-validation.json": "87b6fe10e6f3b945a9ed0d6d696aee7620a337b4b6eb5d34f6458753085be4b4",
+      "imported-morph-digests.json": "2c06a78558dac45b337d899a471d2339e0e6fc93231f6ed62d2f2b9416f8224f",
+      "imported-morph-validation.json": "2f86de5f7fcd72917ab381b3297d51d2adf8126f456950282d3dc86cd0984015"
+    },
+    "scope": "Genuine independent Editor verification from the first capture. Both current GLBs bind generatedSCNs plus source/destinationMD5 freshness. Numeric/static/material/morph proofs use exactly those sameSCNs. Original observations and production loose-folder native mode remain unchanged."
+  }
+}

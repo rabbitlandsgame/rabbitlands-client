@@ -126,7 +126,12 @@ func _sources() -> Array[MeshInstance3D]:
 func _clone_of(source: MeshInstance3D) -> MeshInstance3D:
 	var clone := MeshInstance3D.new()
 	clone.name = CLONE_PREFIX + source.name
-	clone.mesh = source.mesh
+	var reference := preload("res://src/mounts/retained_mount_skin.gd").for_secondary(source.mesh,source.skin,_skeleton)
+	if not reference.errors.is_empty():
+		push_error(str(reference.errors))
+		clone.free()
+		return null
+	clone.mesh = reference.mesh
 	clone.material_override = _silhouette()
 	clone.layers = GAMEPLAY_ONLY_VISUAL_LAYER
 	clone.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF

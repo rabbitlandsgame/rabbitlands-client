@@ -9,28 +9,35 @@ from .native_shapes import NativeShapeAsset
 
 def surface_sampler(asset, ids=None):
     """Cache a fixed physical field; avoid copying all shape targets each frame."""
+    if ids is not None:
+        ids = np.asarray(ids)
+        count = sum(len(p['position']) for p in asset.parts)
+        if ids.ndim != 1 or not np.issubdtype(ids.dtype, np.integer) or np.any(ids < 0) or np.any(ids >= count):
+            raise ValueError('Surface probe IDs must be valid global vertex indices')
     fields = []
     offset = 0
     for p in asset.parts:
-        local = np.arange(len(p['position'])) if ids is None else np.asarray(ids)[(np.asarray(ids)>=offset)&(np.asarray(ids)<offset+len(p['position']))]-offset
+        take = (np.arange(offset, offset + len(p['position'])) if ids is None else
+                np.flatnonzero((ids >= offset) & (ids < offset + len(p['position']))))
+        local = np.arange(len(p['position'])) if ids is None else ids[take]-offset
         offset += len(p['position'])
         if not len(local): continue
-        fields.append((p, local, p['targets'][:,local].reshape(len(p['targets']),-1) if len(p['targets']) else None))
+        fields.append((p, local, take, p['targets'][:,local].reshape(len(p['targets']),-1) if len(p['targets']) else None))
     def evaluate(world, morph):
-        out=[]
-        for p, local, targets in fields:
+        out=np.empty((offset if ids is None else len(ids),3))
+        for p, local, take, targets in fields:
             pos=p['position'][local].copy()
             if targets is not None:
                 weights=morph.get(p['node'],asset.default_weights[p['node']])
                 active=np.flatnonzero(weights)
                 if len(active)==len(weights): pos[:,:3]+=(weights@targets).reshape(-1,3)
                 elif len(active): pos[:,:3]+=np.einsum('m,mv->v',weights[active],targets[active]).reshape(-1,3)
-            if 'joints' not in p: out.append((world[p['node']]@pos.T).T[:,:3]);continue
+            if 'joints' not in p: out[take]=(world[p['node']]@pos.T).T[:,:3];continue
             matrices=world[p['nodes']]@p['bind']; v=np.zeros((len(local),3))
             for slot in range(p['joints'].shape[1]):
                 v+=np.einsum('vab,vb->va',matrices[p['joints'][local,slot],:3],pos)*p['weights'][local,slot,None]
-            out.append(v)
-        return np.concatenate(out)
+            out[take]=v
+        return out
     return evaluate
 
 

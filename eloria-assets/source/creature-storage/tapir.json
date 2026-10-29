@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "actor": "tapir",
+  "source_sha256": "d84ddff26f57dd5b89e2146f2080214f06fb39e0271727becb1b7b719159d5da",
+  "candidate_sha256": "5bd461b3f450b6a785972ed987e5db2c9d2260b8a549f8b4b39c207f48ef8130",
+  "pipeline": [
+    "prune_zero_targets",
+    "reduce_constant_runs",
+    "compact"
+  ],
+  "partition": null,
+  "unchanged": false,
+  "removed_zero_target_indices": [],
+  "redundant_flat_key_rows_removed": 158551,
+  "geometry_skin_rest_binds_materials_images_unchanged": true,
+  "preserve_trs_keys": false,
+  "native_clips": [
+    "Fighting_Idle",
+    "Hit_Chest",
+    "Idle_A",
+    "Walk",
+    "Jog",
+    "Sword_Attack",
+    "Death_A"
+  ],
+  "usage": "Deterministic exact preparation needs no partition --profile; frozen source/candidate hashes bind this record."
+}

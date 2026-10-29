@@ -73,10 +73,34 @@
     "walk": 0.24387776166851302,
     "run": 0.6096944041712826
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "A steady, deliberate capybara amble on four short feet; the quicker gait is a compact diagonal scurry with a quiet broad back.",
     "attack": "A defensive head-led nip and forward shoulder shove, with a restrained backward load, supported landing and recovery.",
     "death": "The head and forequarters sink first, the short legs fold and release, and the broad chest and rump settle together into a still flank-supported pose."
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "river_capybara",
+    "appliesToSHA256": "3adbab1512463e92af6d2b6b32ef282cbe43c7014ec26795294fa541cf40d264",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "saved_button_approval",
+      "event_id": "2e916697-14e0-4bc9-bbf7-a5f67296c788",
+      "event_sha256": "ca90095dcd7edf17f9ea3b52cc4f28c39859bd8ad589a14b696140f6ee643e62",
+      "utc": "2026-10-28T21:48:21.396581+00:00"
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "river_capybara",
+    "sourceSHA256": "192de018fe15d2883648f1a45c68266d479163f62292b11d126401a1affe26e3",
+    "previousRuntimeSHA256": "192de018fe15d2883648f1a45c68266d479163f62292b11d126401a1affe26e3",
+    "runtimeSHA256": "3adbab1512463e92af6d2b6b32ef282cbe43c7014ec26795294fa541cf40d264",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": null
   }
 }
