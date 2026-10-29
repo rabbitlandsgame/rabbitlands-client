@@ -168,11 +168,13 @@ static func share(state: GLTFState, resources: Dictionary) -> int:
 	# encoded for other roles (VramTextures.pooled_fits). Keep it, publish nothing.
 	var private_value: Variant = state.get_additional_data(VramTextures.PRIVATE_KEY)
 	var private: Dictionary = private_value if private_value is Dictionary else {}
+	var keys_value: Variant = state.get_additional_data(VramTextures.POOL_KEYS_KEY)
+	var pool_keys: Dictionary = keys_value if keys_value is Dictionary else {}
 	for index: int in mini(descriptors.size(), images.size()):
 		var uri := str(descriptors[index].get("uri", ""))
 		if not resources.has(uri) or not images[index] is ImageTexture or private.has(index):
 			continue
-		var key := str(resources[uri])
+		var key := str(pool_keys.get(index, resources[uri]))
 		var current := images[index] as ImageTexture
 		# The held reference, never a fresh lookup: a placeholder must not be
 		# published as the texture for its hash.

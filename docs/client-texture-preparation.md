@@ -158,3 +158,56 @@ release-download estimate: existing files, cross-pool references and package
 deduplication must be accounted for first. Local preparation needs an encode
 cache, a stage and temporary quality scratch in addition to the final outputs.
 Use the actual build summary for a chosen scope when budgeting that disk space.
+
+
+## Canonical pixels and original texture policy
+
+`eloria-assets/tools/canonicalize_map_images.py` can remove byte-identical files
+from the shared map image pools. It neither decodes nor re-encodes images.
+Fixed minimap, detail-map, overview and road-field files are outside its default
+candidate set. Plan only after other asset transformations have been applied;
+an old plan must not replace newer geometry.
+
+A canonical image URI identifies the physical pixel file. Its original sidecar
+policy stays separate:
+
+- A glTF image's `extras.rl_texture_policy_directory` is the original image
+  directory, as a relative URI from that GLB. Every descriptor of an affected
+  image content is annotated, including descriptors using the surviving copy.
+- A world's `externalImagePolicies` maps each affected canonical URI in
+  `externalResources` to a sorted array of original directory URIs, relative to
+  `asset.glb`'s directory. Streaming roots retain the same collection for their
+  existing resource set.
+- A shared prototype's index record uses `imagePolicies` with the same shape,
+  relative to the prototype/index directory. Road metadata uses its own
+  `externalImagePolicies`, and material-document image descriptors carry the
+  same glTF extra. Road-only fallback textures do not acquire new cooker roles.
+
+Explicit directories must be relative and remain inside `eloria-assets/maps`.
+Invalid or undeclared policies fail validation instead of selecting the
+canonical file's directory. These are ordinary image URIs and standard glTF
+extras; offline tools can continue reading the canonical files.
+
+The sidecar cooker reads pixels from the canonical URI but plans separately by
+original directory and source SHA. Existing caller exclusions, roles, recipes,
+alpha cutoffs, quality floors and full-mip fallback stay unchanged. Native
+texture origins and binding IDs retain the original directory too. Cache tokens
+and stream budgets read every declared original directory's index, even when
+that directory contains no remaining raw image files.
+
+Runtime weak pooling uses the actual uploaded variant: raw pixels, or the
+accepted EVT payload SHA/recipe/format, plus the active mip tier. Compatible
+variants share across policy directories; raw and compressed variants remain
+separate. A refused sidecar gets the raw variant key after decoding. During an
+offline native cook only, source discovery also separates policy directories so
+one shared Texture2D cannot erase another usage's provenance. No strong resource
+cache is added.
+
+The canonicalizer writes an ignored plan and stage. Apply checks the SHA of every
+scanned input, saves affected originals to a fresh ignored recovery directory,
+and verifies ordinary references, unchanged non-JSON GLB bytes, image hashes,
+prototype/manifest/road integrity links and the complete pre/post sidecar plan.
+Duplicate images are deleted last. Any validation failure restores the exact
+originals. Retirement `mapMeshCopies` file SHA bindings are refreshed without
+changing their mesh lists. The plan and recovery receipt are local evidence;
+source asset changes still require the normal integration and qualification.

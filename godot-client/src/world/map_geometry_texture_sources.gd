@@ -4,7 +4,7 @@ const CreaturePayload := preload("res://src/actors/creature_payload.gd")
 ## disabled fast path; discovery owns WeakRefs and portable data, never pixels.
 const Prepared := preload("res://src/world/prepared_content.gd")
 const Vram := preload("res://src/world/vram_textures.gd")
-const POLICY := "map-geometry-texture-sources-v1"
+const POLICY := "map-geometry-texture-sources-v2"
 const MAX_IMAGE_BYTES := 268435456
 static var _recording := false
 static var _records: Dictionary = {}
@@ -18,6 +18,7 @@ static func set_recording(enabled: bool) -> void:
 		_records.clear()
 		_notes = 0
 	_recording = enabled
+	Vram.set_policy_discovery(enabled)
 
 static func set_external_resolver(resolver: Callable) -> void:
 	_resolver = resolver
@@ -69,7 +70,8 @@ static func _record(texture: Texture2D, origin: Dictionary) -> void:
 	var identity := texture.get_instance_id()
 	var previous: Dictionary = _records.get(identity, {})
 	if not previous.is_empty() and (previous.reference as WeakRef).get_ref() == texture \
-			and str(previous.origin.get("image_sha256", "")) == str(origin.get("image_sha256", "")):
+			and str(previous.origin.get("image_sha256", "")) == str(origin.get("image_sha256", "")) \
+			and str(previous.origin.get("policy_directory", "")) == str(origin.get("policy_directory", "")):
 		var combined: Array[String] = _roles(previous.origin.get("roles", []))
 		for role: String in _roles(origin.get("roles", [])):
 			if not combined.has(role): combined.append(role)
@@ -111,9 +113,13 @@ static func note(state: GLTFState, glb_path: String) -> void:
 			if image_file.is_empty(): continue
 			var sha := FileAccess.get_sha256(source_path(image_file))
 			if sha.length() != 64: continue
+			var policy_directory := Vram.image_policy_directory(descriptor, glb_path.get_base_dir())
+			var policy_logical := logical_source(policy_directory)
+			if policy_logical.is_empty(): continue
 			origin = {"kind": "external", "file": image_file, "file_sha256": sha,
 				"image_sha256": sha, "mip_policy": "full" if file.begins_with("godot-client/assets/world/") else "map",
 				"inputs": [{"path": image_file, "sha256": sha}]}
+			if Vram.has_image_policy(descriptor): origin["policy_directory"] = policy_logical
 		else:
 			if container.is_empty(): container = CreaturePayload.read_bytes(source_path(file))
 			var extracted := embedded_bytes(container, index)

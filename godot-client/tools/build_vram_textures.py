@@ -434,6 +434,33 @@ def scoped_inputs(maps_roots: list[Path], manifests: list[Path],
     return sorted(leaves), sorted(prototypes)
 
 
+
+POLICY_DIRECTORY_EXTRA = "rl_texture_policy_directory"
+POLICY_COLLECTION = "externalImagePolicies"
+
+def image_policy_directory(image: dict, glb: Path, maps_roots: list[Path]) -> Path:
+    extras = image.get("extras", {})
+    if not isinstance(extras, dict) or POLICY_DIRECTORY_EXTRA not in extras:
+        return (glb.parent / str(image.get("uri", ""))).resolve().parent
+    uri = extras[POLICY_DIRECTORY_EXTRA]
+    if not isinstance(uri, str) or not uri or ":" in uri or "\\" in uri or Path(uri).is_absolute():
+        raise BuildError(f"invalid texture policy directory in {glb}: {uri!r}")
+    directory = (glb.parent / uri).resolve()
+    _containing_root(maps_roots, directory)
+    return directory
+
+def declared_policy_directories(manifest: dict, uri: str, glb: Path, maps_roots: list[Path]) -> list[Path]:
+    policies = manifest.get(POLICY_COLLECTION, {})
+    if not isinstance(policies, dict):
+        raise BuildError(f"invalid {POLICY_COLLECTION} for {glb}")
+    if uri not in policies:
+        return [(glb.parent / uri).resolve().parent]
+    values = policies[uri]
+    if not isinstance(values, list) or not values:
+        raise BuildError(f"invalid texture policy collection for {glb}: {uri}")
+    return sorted({image_policy_directory({"extras": {POLICY_DIRECTORY_EXTRA: value}}, glb, maps_roots) for value in values})
+
+
 def inventory(maps_roots: list[Path], manifests: list[Path] | None = None, scenery: list[Path] | None = None,
               extract_dir: Path | None = None) -> dict[tuple[Path, str], dict]:
     """(image directory, sha) -> {path, roles: {(role, alphaMode)}, maps: set, cutoffs: set}
@@ -452,13 +479,13 @@ def inventory(maps_roots: list[Path], manifests: list[Path] | None = None, scene
     selected = scoped_inputs(maps_roots, manifests, hashes=image_hashes) if manifests is not None else None
     prototype_indexes: dict[Path, dict] = {}
 
-    def record_for(path: Path, sha: str) -> dict:
+    def record_for(path: Path, sha: str, policy_directory: Path | None = None) -> dict:
         path = path.resolve()
         if selected is not None:
             _containing_root(maps_roots, path.parent)
             if not path.is_file():
                 raise BuildError(f"scoped image is missing: {path}")
-        return found.setdefault((path.parent, sha), {"path": path, "roles": set(), "maps": set(), "cutoffs": set()})
+        return found.setdefault((policy_directory or path.parent, sha), {"path": path, "roles": set(), "maps": set(), "cutoffs": set()})
 
     for root in maps_roots:
         paths = ([path for path in selected[0] if _containing_root(maps_roots, path.parent) == root]
@@ -476,10 +503,11 @@ def inventory(maps_roots: list[Path], manifests: list[Path] | None = None, scene
             # A territory root lists its chunks' resources, but its own GLB is
             # a review file the client never loads; the chunks carry the roles.
             if "streamingChunks" in manifest:
+                glb = manifest_path.parent / str(manifest.get("asset", {}).get("glb", "world.glb"))
                 for uri, sha in resources.items():
                     if isinstance(sha, str) and len(sha) == 64:
-                        record_for((manifest_path.parent / str(manifest.get("asset", {}).get("glb", "world.glb")))
-                                   .parent / uri, sha)
+                        for directory in declared_policy_directories(manifest, uri, glb, maps_roots):
+                            record_for(glb.parent / uri, sha, directory)
                 continue
             glb = manifest_path.parent / str(manifest.get("asset", {}).get("glb", "world.glb"))
             try:
@@ -491,14 +519,22 @@ def inventory(maps_roots: list[Path], manifests: list[Path] | None = None, scene
             manifest_count += 1
             roles = image_roles(document)
             cutoffs = image_cutoffs(document)
-            by_uri = {str(image.get("uri")): index for index, image in enumerate(document.get("images", []))
-                      if image.get("uri")}
+            by_uri: dict[str, list[int]] = {}
+            for index, image in enumerate(document.get("images", [])):
+                if image.get("uri"): by_uri.setdefault(str(image["uri"]), []).append(index)
             for uri, sha in resources.items():
                 if not isinstance(sha, str) or len(sha) != 64:
                     continue
-                record = record_for(glb.parent / uri, sha)
-                index = by_uri.get(uri)
-                if index is not None:
+                declared = declared_policy_directories(manifest, uri, glb, maps_roots)
+                indices = by_uri.get(uri, [])
+                if not indices:
+                    for directory in declared: record_for(glb.parent / uri, sha, directory)
+                for index in indices:
+                    image = document["images"][index]
+                    directory = image_policy_directory(image, glb, maps_roots)
+                    if directory not in declared:
+                        raise BuildError(f"undeclared texture policy in {glb}: {uri}")
+                    record = record_for(glb.parent / uri, sha, directory)
                     record["roles"] |= roles.get(index, set())
                     record["cutoffs"] |= cutoffs.get(index, set())
                     record["maps"].add(str(manifest_path.parent.relative_to(root)))
@@ -547,7 +583,17 @@ def inventory(maps_roots: list[Path], manifests: list[Path] | None = None, scene
                     sha = _check_source_sha(path, declared_images.get(uri), image_hashes)
                 else:
                     sha = _source_sha(path, image_hashes)
-                record = record_for(path, sha)
+                policy_directory = image_policy_directory(image, glb, maps_roots)
+                if isinstance(image.get("extras"), dict) and POLICY_DIRECTORY_EXTRA in image["extras"]:
+                    index_path = glb.parent / "index.json"
+                    if index_path not in prototype_indexes:
+                        prototype_indexes[index_path] = json.loads(index_path.read_text(encoding="utf-8-sig"))
+                    entry = prototype_indexes[index_path].get("prototypes", {}).get(glb.stem, {})
+                    collection = entry.get("imagePolicies", {})
+                    if uri not in collection or policy_directory not in declared_policy_directories(
+                            {POLICY_COLLECTION: collection}, uri, glb, maps_roots):
+                        raise BuildError(f"undeclared prototype texture policy in {glb}: {uri}")
+                record = record_for(path, sha, policy_directory)
                 record["roles"] |= roles.get(index, set())
                 record["cutoffs"] |= cutoffs.get(index, set())
                 record["maps"].add("_shared/meshes")
@@ -579,6 +625,28 @@ def inventory(maps_roots: list[Path], manifests: list[Path] | None = None, scene
         f"and {prototypes} prototypes" + (f"; {scenery_images} embedded images of {len(scenery)} scenery GLBs"
                                             if scenery else ""))
     return found
+
+
+
+def delivery_policy(record: dict, source_dir: Path, skip: list[str] | None = None,
+                    unskip: list[str] | None = None) -> dict:
+    """Pure package planning policy, also used to prove lossless URI rebasing.
+
+    The complete role/alpha pairs and cutoffs matter even when caller-excluded:
+    merging only equally planned copies must not expand a skipped usage or turn
+    an existing role conflict into a new encode. Quality verdicts remain the
+    normal per-recipe, per-cutoff gates later in build().
+    """
+    recipe, reason = recipe_for(record)
+    unskip = [str(name).replace(chr(92), "/").strip("/") for name in unskip or []]
+    if skip and any(str(source_dir).replace(chr(92), "/").endswith(
+            str(name).replace(chr(92), "/")) for name in skip) and not any(
+            used == name or used.startswith(name + "/")
+            for used in record["maps"] for name in unskip):
+        recipe, reason = None, "excluded_by_caller"
+    return {"recipe": recipe, "reason": reason, "roles": role_names(record["roles"]),
+            "rolePairs": sorted([list(pair) for pair in record["roles"]]),
+            "cutoffs": sorted(record.get("cutoffs") or [])}
 
 
 def alpha_used(path: Path) -> bool:
@@ -944,14 +1012,9 @@ def build(maps_roots: list[Path], out_root: Path | None, cache: Path, godot: Pat
             continue
         if hashlib.sha256(record["path"].read_bytes()).hexdigest() != sha:
             raise BuildError(f"{record['path']} does not hash to its manifest sha {sha}")
-        recipe, reason = recipe_for(record)
-        # An excluded image still gets an index entry naming why: a missing
-        # sidecar and a missing reason look the same to check_vram_textures,
-        # and telling them apart is how a lost sidecar gets noticed.
-        if skip and any(str(source_dir).replace(chr(92), "/").endswith(str(name).replace(chr(92), "/"))
-                        for name in skip) and not any(
-                            used == name or used.startswith(name + "/") for used in record["maps"] for name in unskip):
-            recipe, reason = None, "excluded_by_caller"
+        policy = delivery_policy(record, source_dir, skip, unskip)
+        recipe, reason = policy["recipe"], policy["reason"]
+        # Exclusions remain explicit, including a copy's inherited caller policy.
         plan = plans.setdefault(source_dir, {"images": {}, "excluded": {}})
         if recipe is None:
             plan["excluded"][sha] = reason
