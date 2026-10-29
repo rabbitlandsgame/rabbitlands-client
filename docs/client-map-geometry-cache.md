@@ -179,3 +179,8 @@ the derived policy versions and regional paving profiles in its startup marker;
 a later unchanged launch skips preparation. Source and payload hashes are still
 checked when loading an entry. Clearing the caches removes these derived files
 as well as the completion marker, and a later launch can rebuild them.
+
+Continent road fields are verified source inputs to native geometry preparation,
+but bind to retained ground after materialization rather than being serialized
+into its snapshot. See [continent road surfaces](continent-road-terrain-blend.md)
+for the publication, collision and streaming-memory contracts.
