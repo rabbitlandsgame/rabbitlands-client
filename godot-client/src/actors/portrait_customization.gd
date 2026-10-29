@@ -2,11 +2,12 @@ class_name PortraitCustomization
 extends RefCounted
 ## Compact, versioned appearance; order is shared with the server trailers.
 ##
-## PC/1 is 7 fields, PC/2 16 and PC/3 53 (E:/rlw/pc3-spec.md as amended by the
-## colour model spec revision 3): PC/2, then the 11 High face offsets (50 =
-## none), 9 detail fields (0 = Auto; hair_finish 0 = from hair_detail) and 17
-## colour fields (0 = the palette colour; a colour triple is custom only when
-## all three of its bytes are set, Rule A). Each version's fields are a strict
+## PC/1 is 7 fields, PC/2 16 and PC/3 53 (PC/3 spec: private server handbook
+## docs/wiki/Human-Character-Customization.md, with colour model revision 3):
+## PC/2, then the 11 High face offsets (50 = none), 9 detail fields (0 = Auto;
+## hair_finish 0 = from hair_detail) and 17 colour fields (0 = the palette
+## colour; a colour triple is custom only when all three of its bytes are set,
+## Rule A). Each version's fields are a strict
 ## prefix of the next; the neutral values are fixed for all time.
 
 const V1_FIELDS := ["facial_hair", "jaw", "cheekbones", "nose", "height", "build", "hair_detail"]

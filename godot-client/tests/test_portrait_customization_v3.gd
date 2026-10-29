@@ -1,6 +1,7 @@
 extends SceneTree
-## PC/3 data and wire (E:/rlw/pc3-spec.md 9.1 C1-C13 as amended by the colour
-## model spec revision 3: C14, C15, C19 and C23's data checks). Protocol only:
+## PC/3 data and wire (PC/3 spec: private server handbook
+## docs/wiki/Human-Character-Customization.md; checks C1-C13, and C14, C15, C19
+## and C23's data checks from colour model revision 3). Protocol only:
 ## no native actor asset is imported or drawn.
 const Wire = preload("res://src/network/protocol.gd")
 const Custom = preload("res://src/actors/portrait_customization.gd")
