@@ -1142,21 +1142,23 @@ static func reload_rl_heads_switch() -> void:
 	_rl_heads_switch_read = false
 
 ## Whether this renderer draws the RL head for the game's Humans: Forward+
-## always, and the Compatibility renderer where its driver samples BPTC (the
-## format of the RL head's channel-packed masks); without it that renderer
-## keeps develop's classic High head. In the Compatibility renderer the RL head
-## draws its identity baked per face (RLHeadIdentityBake), every face but the
-## nearest few still, its per-actor values as material uniforms (no instance
-## uniforms: RLHeadLibrary.material_values) and its first level to 6 m
-## (RLHeadRig.COMPATIBILITY_FIRST_LEVEL_METRES), within 1.15x of the classic
-## head's crowd frame time with 40 and 160 Humans at 10 m and 26 m (see
-## docs/rl-head-prototype.md, Cost at High). RL_HEADS=all draws it even
-## without BPTC.
+## does; the Compatibility renderer keeps develop's classic High head unless
+## RL_HEADS=all. Its cost there is no longer the obstacle: with its identity
+## baked per face (RLHeadIdentityBake), every face but the nearest few still,
+## its per-actor values as material uniforms (no instance uniforms:
+## RLHeadLibrary.material_values) and its first level to 6 m
+## (RLHeadRig.COMPATIBILITY_FIRST_LEVEL_METRES) a crowd of 40 or 160 Humans
+## draws within 1.15x of the classic head at 10 m and 26 m (see
+## docs/rl-head-prototype.md, Cost at High). Its colours are: the RL skin,
+## iris, hair and beard tables are measured in Forward+ only, and in
+## Compatibility the RL iris is up to 0.28 and the module hair 0.22 (sRGB)
+## off the Medium head. Admit that renderer (where its driver samples BPTC,
+## the format of the RL head's channel-packed masks) once it has its own
+## tables (owner decision).
 static func rl_heads_renderer_supported() -> bool:
 	rl_heads_classic()
 	return RL_HEADS_EVERYWHERE.has(_rl_heads_switch) \
-		or RenderingServer.get_current_rendering_method() != "gl_compatibility" \
-		or RenderingServer.has_os_feature("bptc")
+		or RenderingServer.get_current_rendering_method() != "gl_compatibility"
 
 ## The graphics quality is now `level` (main.gd's quality pass, before the
 ## actors switch): at High, where this renderer draws the RL head, its files

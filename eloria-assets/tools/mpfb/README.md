@@ -91,9 +91,15 @@ preview and evidence fixtures. `test-human-customization.bat` remains the
 ordinary preview; its workshop compares the RL head with the classic High head.
 
 Use an isolated guarded Godot project/profile and `--offline-hud-preview`.
-The portrait output directory is `RL_HUMAN_PORTRAIT_OUTPUT`; integration/cost
-output is `RL_MPFB_REVIEW_OUTPUT`. Rendered comparisons must use the actual
-export hashes, identical cameras and lights, and unretouched game pixels.
+The portrait output directory is `RL_HUMAN_PORTRAIT_OUTPUT`. (The integration
+and cost output `RL_MPFB_REVIEW_OUTPUT` belonged to the removed
+`mpfb_prototype_cost.gd`.) Rendered comparisons must use the actual export
+hashes, identical cameras and lights, and unretouched game pixels.
+
+Historical: the portrait and validation tests named in the steps below
+(`tests/mpfb_concept_portrait.gd`, `tests/mpfb_identity_validation.gd`) were
+removed with the MPFB runtime; they and their fixtures are in the revisions
+before that removal, and are not runnable on this branch.
 
 This is a geometry/material workflow prototype, not a production replacement.
 Shipping an MPFB target library, Blender, subdivision, skin microdisplacement
@@ -138,7 +144,7 @@ supplies the canonical rim. Never overwrite the source stage.
    Head-local mesh/material per sex. Vertex alpha pins roots during bounded
    length/volume changes; it is not transparency. UV0 follows lock growth.
 4. `face_landmark_audit.py` measures the exported anatomical anchors.
-   `tests/mpfb_concept_portrait.gd` captures actual High portraits and projected
+   The removed `tests/mpfb_concept_portrait.gd` (historical) captured actual High portraits and projected
    mesh coordinates with reference-framed cameras. Portrait-only head yaw,
    pitch and roll never alter shared gameplay animations or skeleton rests.
 5. `bake_concept_reference.py` uses those projections and original reference
@@ -189,7 +195,7 @@ primary UV and retains growth coordinates in UV2. The authored shader follows
 that imported layout; the validation fixture checks both channels against the
 original GLB with a tolerance for engine vertex quantization.
 
-`tests/mpfb_identity_validation.gd` checks three identities per sex, endpoint
+The removed `tests/mpfb_identity_validation.gd` (historical) checked three identities per sex, endpoint
 and mixed fields, eye/skin correspondence, UV/weight preservation, grooming
 toggles, repeated editing and identity persistence through accepted actions.
 GPU portraits are required in addition to finite/Jacobian checks: a numerical

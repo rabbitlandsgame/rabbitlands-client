@@ -3,7 +3,8 @@
 Status: **the High Human head, on the task branch `feature/rl-heads-high`** (on
 origin/develop `98c76adf`; the prototype was `concept/rl-heads-claude-20261027`). Every
 Human (culture `luminous`, bodyTemplate `luminous_male` / `luminous_female`) at High
-quality draws it, in Forward+ and the Compatibility renderer, players and NPCs alike;
+quality draws it in Forward+, players and NPCs alike (the Compatibility renderer keeps
+develop's classic High head unless `RL_HEADS=all`; see below);
 Low, Medium and every other race keep their art exactly. No asset is replaced: the
 shipped bodies, hair and equipment are untouched.
 
@@ -14,12 +15,16 @@ shipped bodies, hair and equipment are untouched.
   High (down from High the actor ends exactly as develop's own in-place switch leaves
   it; `tests/test_rl_head_quality_switch.gd`). Develop's classic High head
   (`HighPortraitAppearance`) is kept dormant: `RL_HEADS=classic` (or `off`, `0`, `no`)
-  draws it instead, for side-by-side checks and rollback. Both renderers draw the RL
-  head (`ReplicatedActor3D.rl_heads_renderer_supported`): the Compatibility renderer
-  wherever its driver samples BPTC, the format of the channel-packed masks (without it
-  that renderer keeps the classic head; `RL_HEADS=all` forces the RL head). There it
-  draws its identity baked, its per-actor values as material uniforms (no instance
-  uniforms) and a lighter profile; see *Draw cost* and *Cost at High* below.
+  draws it instead, for side-by-side checks and rollback. Forward+ draws the RL head
+  (`ReplicatedActor3D.rl_heads_renderer_supported`); the Compatibility renderer keeps
+  develop's classic High head unless `RL_HEADS=all`. Its cost there is no longer the
+  obstacle (its identity baked, its per-actor values as material uniforms, no instance
+  uniforms, and a lighter profile: within 1.15x of the classic head; see *Draw cost*
+  and *Cost at High* below), but its colours are: the RL skin, iris, hair and beard
+  tables are measured in Forward+ only, and in Compatibility the RL iris draws up to
+  0.28 and the module hair 0.22 (sRGB) off the Medium head. Admitting that renderer
+  (where its driver samples BPTC, the masks' format) waits for its own tables and an
+  owner decision.
 * **Draw cost.** Only the nearest few faces draw live expressions (blinks; the lab's
   expressions): `RLHeadRig.MAX_EXPRESSIVE` (8) within `EXPRESSIVE_RANGE` (8 m) of the
   camera, ranked with the level checks every six frames (a face keeps them 1 m past the
@@ -209,10 +214,11 @@ the wire never set and which is honoured at every quality.
   counterpart.
 * A missing RL beard file draws the face clean-shaven (with a one-time notice): the
   body's own beard shell cannot be built on the cut body.
-* The channel-packed masks are imported as BPTC (BC7) only. Every desktop GPU that runs
-  Forward+ (Vulkan or D3D12) samples it; a Compatibility (OpenGL) driver without BPTC
-  keeps the classic High head (with `RL_HEADS=all` the engine would have to decompress
-  the masks or draw without them).
+* The Compatibility renderer keeps the classic High head by default: the RL head's
+  colour tables are not measured there (above). The channel-packed masks are imported
+  as BPTC (BC7) only; every desktop GPU that runs Forward+ (Vulkan or D3D12) samples
+  it, and a Compatibility (OpenGL) driver without BPTC would have to decompress the
+  masks or draw without them (`RL_HEADS=all`).
 * In the Compatibility renderer the RL head's first level ends at 6 m, and faces that
   draw no expressions (all but the nearest 4 within 4 m) have no cornea highlight and,
   beyond 6 m, no eyelashes; Forward+ keeps both up to 10 m and on every still face.
@@ -305,6 +311,13 @@ all 56 views in both renderers.
 | Compatibility, 10 m, 40 | 11.4 | 16.7 (1.47x) | 12.0 (1.05x) |
 | Compatibility, 10 m, 160 | 25.6 | 37.3 (1.65x) | 24.8 (0.97x) |
 
+The Forward+ cells are within run-to-run spread of develop's RL head rather than a
+clear gain: an independent rerun at 10 m (review, 2026-10-29, two passes each with
+nothing else running) measured this branch at 0.98x develop's RL head with 40 Humans
+and 1.03x with 160 (1.07x and 1.14x the classic head), its 160-Human passes ranging
+16.5-20.1 ms. That rerun reproduced the Compatibility rows (1.04x and 1.12x the classic
+head at 10 m; develop's RL head 17.4-18.9 and 36.8-38.4 ms).
+
 Develop's RL head in the Compatibility renderer (`RL_HEADS=all`) also logged about 4,100
 "Too many instances using shader instance variables" errors a run; this branch logs
 none. Loading (40 Humans for the switch; the probe's preview is a fresh actor of the
@@ -373,7 +386,8 @@ beards; mean frame work in ms, two runs each at 26 m.
   its allowance, each alone or, on the female all-100 face, in one diagonal pair a view
   along a 45-degree edge; no strip of 3 or more). A crowd of 16 looks holds about
   50 MB of baked meshes.
-* **Compatibility (resolved 2026-10-29; see the table above).** The baked crowd was
+* **Compatibility cost (resolved 2026-10-29; see the table above; the renderer still
+  keeps the classic head by default for its colours).** The baked crowd was
   1.46x/1.24x develop's frame time at 26 m and 1.42x/1.66x at 10 m, and each RL mesh
   instance took a 16-slot block of the 4096-item instance-uniform buffer whether it was
   shown or not, which ran out between 40 and 160 Humans. Now: the per-actor values are
