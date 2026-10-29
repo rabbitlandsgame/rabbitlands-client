@@ -18241,7 +18241,10 @@ func _model_for_actor(dto: Dictionary) -> String:
 	# Player actor IDs are not safe for NPC wire records: the server may send an
 	# enhanced packet for an NPC while keeping the legacy actor_type byte at 1.
 	# Nymara NPC/creature/enemy IDs occupy the dedicated 200+ registry range.
-	if actor_type_models.has(actor_type) and (kind in [1, 4] or actor_type_value >= 200):
+	# Type 0 is an explicit native female NPC (including Elen and Liora).
+	# Keep the ambiguous legacy NPC type 1 behind the named-NPC lookup above.
+	if actor_type_models.has(actor_type) and (kind in [1, 4] or actor_type_value >= 200 \
+			or kind == 2 and actor_type_value == 0):
 		return str(actor_type_models[actor_type])
 	# The server uses the enhanced wire layout for most NPCs so their appearance
 	# bytes survive replication. Registry actor type wins for native NPCs and
