@@ -75,6 +75,9 @@ class CanonicalImages(unittest.TestCase):
   with self.assertRaises((C.CanonicalizationError,C.vram.BuildError)):self.plan()
  def test_raw_unplanned_copies_can_merge_without_enabling_sidecars(self):
   first=self.image('x/a.png');second=self.image('y/b.png');p=self.plan({});self.assertEqual(len(p['deletes']),1);C.apply_plan(self.root,self.root/'.local/plan.json',self.root/'.local/recovery');self.assertEqual(C.policy_inventory(self.root),{})
+ def test_unselected_policy_source_still_gets_a_full_hash_guard(self):
+  first,second=self.simple();plan=C.make_plan(self.root,self.root/'.local/plan.json',files=self.files(),images=[first.relative_to(self.root).as_posix()]);self.assertIn(second.relative_to(self.root).as_posix(),plan['inputs']);second.write_bytes(b'new unselected source')
+  with self.assertRaisesRegex(C.CanonicalizationError,'stale plan input'):C.apply_plan(self.root,self.root/'.local/plan.json',self.root/'.local/recovery')
  def test_stale_consolidated_geometry_refuses_apply(self):
   self.simple();plan=self.plan();world=self.maps/'b/world.glb';world.write_bytes(world.read_bytes()+b'new geometry after planning')
   with self.assertRaisesRegex(C.CanonicalizationError,'stale plan input'):C.apply_plan(self.root,self.root/'.local/plan.json',self.root/'.local/recovery')

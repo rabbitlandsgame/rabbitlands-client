@@ -437,6 +437,9 @@ def make_plan(root: Path, plan_path: Path, *, files: list[str] | None = None,
         actual = inputs.get(source) or file_sha(inside(root, source))
         if actual != policy["sha256"]:
             raise CanonicalizationError(f"image differs from declared source hash: {source}")
+        if source not in inputs:
+            inputs[source] = hashes[source] = actual
+            sizes[source] = inside(root, source).stat().st_size
     originals = dict(inputs)
     # Child metadata hashes precede parents; no circular file hash fixpoints are accepted.
     for iteration in range(16):
