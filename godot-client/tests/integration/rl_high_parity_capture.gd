@@ -217,34 +217,38 @@ static func cases() -> Array:
 	var all := looks()
 	var names: Array = all.keys()
 	var finishes: Array = finish_looks().keys()
-	var add := func(group: String, model: String, quality: int, path: String, look: String) -> void:
-		if _fits(all.get(look, {}) as Dictionary, model):
-			result.append(_case(group, model, quality, path, look))
 	for quality: int in [0, 1]:
 		for sex: String in ["male", "female"]:
 			for look: String in names:
-				add.call("luminous_" + QUALITY_NAMES[quality], "luminous_" + sex, quality, "direct", look)
+				_add_case(result, all, "luminous_" + QUALITY_NAMES[quality], "luminous_" + sex, quality, "direct", look)
 	for quality: int in [0, 1]:
 		for sex: String in ["male", "female"]:
 			for look: String in FROM_HIGH_LOOKS:
-				add.call("luminous_from_high", "luminous_" + sex, quality, "from_high", look)
+				_add_case(result, all, "luminous_from_high", "luminous_" + sex, quality, "from_high", look)
 			for look: String in EDITED_LOOKS:
-				add.call("luminous_edited", "luminous_" + sex, quality, "edited", look)
+				_add_case(result, all, "luminous_edited", "luminous_" + sex, quality, "edited", look)
 	for race: String in OTHER_RACES:
 		for sex: String in ["male", "female"]:
 			for look: String in names:
-				add.call("other_races_high", race + "_" + sex, 2, "direct", look)
+				_add_case(result, all, "other_races_high", race + "_" + sex, 2, "direct", look)
 	for sex: String in ["male", "female"]:
 		for look: String in names:
-			add.call("luminous_high_classic", "luminous_" + sex, 2, "direct", look)
+			_add_case(result, all, "luminous_high_classic", "luminous_" + sex, 2, "direct", look)
 	for quality: int in [0, 1]:
 		for sex: String in ["male", "female"]:
 			for look: String in finishes:
-				add.call("luminous_finish", "luminous_" + sex, quality, "direct", look)
+				_add_case(result, all, "luminous_finish", "luminous_" + sex, quality, "direct", look)
 	for sex: String in ["male", "female"]:
 		for look: String in finishes:
-			add.call("luminous_finish_classic", "luminous_" + sex, 2, "direct", look)
+			_add_case(result, all, "luminous_finish_classic", "luminous_" + sex, 2, "direct", look)
 	return result
+
+## Appends a case when the look fits the model (a named helper, not a lambda
+## called with string arguments, which tests/test_gdscript_references.py reads
+## as string-named method calls).
+static func _add_case(result: Array, all: Dictionary, group: String, model: String, quality: int, path: String, look: String) -> void:
+	if _fits(all.get(look, {}) as Dictionary, model):
+		result.append(_case(group, model, quality, path, look))
 
 static func _case(group: String, model: String, quality: int, path: String, look: String) -> Dictionary:
 	return {"id": "%s/%s/%s/%s/%s" % [group, model, QUALITY_NAMES[quality], path, look],
