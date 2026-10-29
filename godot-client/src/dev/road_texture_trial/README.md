@@ -137,3 +137,109 @@ of the original height after the importer-winding correction. Its masked passes
 also compiled and rendered in the compatibility renderer. Focused validation
 passed 41 Python tests, 99 protocol checks and 57 importer/physics checks. Two
 unfocused timing attempts were rejected; twelve accepted runs form the table.
+
+## Direct blending in the existing ground pass
+
+`terrain_blend_trial.gd` is a separate opt-in experiment. Suncoil disables biome
+blending and its opaque `AuthoredGround_suncoilBase` surface covers `Terrain`
+by 6 mm. This trial changes that visible ground surface's material, retaining
+its geometry, original ground shading and render modes. It adds no visual nodes,
+`material_overlay`, `next_pass` or road draw pass. The production loader does not
+call it.
+
+```gdscript
+const Blend := preload("res://src/dev/road_texture_trial/terrain_blend_trial.gd")
+var result := Blend.apply(world_root, absolute_trial_json, "blend")
+```
+
+The producer `eloria-assets/tools/road_terrain_blend_trial.py` requires equivalent
+road PBR definitions, source image bytes, sampler settings and vertex RGB.
+It currently selects a single common material for the two Suncoil trails.
+It combines raw coverage by maximum and selects the highest-coverage fragment's
+UV, with stable authored triangle order breaking ties. This approximates the
+original overlapping ribbons; their separately sampled textures and lighting
+are not retained individually.
+
+Generate fresh ignored fields inside the source map asset root, for example:
+
+```powershell
+python eloria-assets/tools/road_terrain_blend_trial.py `
+  --out eloria-assets/maps/continent-v2/suncoil/client/.local/road-terrain-blend-trial `
+  --ppm 4 --ppm 8
+```
+
+An optional `--original-root` selects a pre-consolidation asset fixture for
+accounting. Prior generations are never overwritten. The producer validates
+compact collision, every stored mip, encoded and decoded hashes, and shared
+covered gutter samples. Coverage is R8 PNG; UV is lossless RG32F Zstd with a full
+mip stream. A second RGBA32F Zstd field stores each selected triangle's affine
+UV derivatives `(dU/dX, dU/dZ, dV/dX, dV/dZ)`, without mips.
+
+Filtering unrelated overlap UVs creates huge false texture gradients and flat
+patches. The shader instead fetches a single level-zero UV/Jacobian pair,
+reconstructs the UV at the fragment and derives the original texture footprint
+from world-position derivatives. Normal mapping uses an orthogonal frame with
+the source UV handedness. Void UV cells must be extrapolated to their own cell
+centers using the nearest selected affine map; copying a neighbor's center UV
+shifts the texture at filtered edges. The producer checks that covered cells
+and lower UV mip bytes survive this halo correction. All old UV mips remain
+stored, validated and counted even though this shader reads level zero only.
+
+`terrain_blend_contract_check.gd` checks material namespace separation, affine
+reconstruction, sheared normal frames, actual field layouts/hashes and bad-input
+rejection. The existing collision checker also accepts these compact payloads.
+Use benchmark variants `blend4`/`blend8`, generated road-free manifests and their
+parallel `trials` paths. The harness checks the before/after regular-mesh,
+surface, material-chain and overlay inventories to reject added road passes.
+
+Road physics remains at terrain +55 mm while these visuals lie on Base at
++6 mm: a 49 mm visual/physical difference. Road albedo and normal/PBR values
+are combined before lighting, which differs from separately lit alpha ribbons.
+Coverage edges, overlap texture choice and distant taper can therefore change.
+Decorative grass still needs its CPU road-coverage adapter. This trial does not
+promote runtime assets or rebuild production caches.
+
+The final edge-corrected 2026-10-28 test used the same engine, hardware, high
+quality settings and two-chunk route as the earlier experiment. Three accepted
+runs per variant produced these medians:
+
+| Variant | Asset bytes, MB | GPU ms | Frame ms | GPU allocation, MB |
+| --- | ---: | ---: | ---: | ---: |
+| Consolidated geometry | 19.828 | 0.676 | 1.019 | 336.7 |
+| Previous overlay, 4 pixels/metre | 18.825 | 1.106 | 1.459 | 354.6 |
+| Direct blend, 4 pixels/metre | 19.725 | 0.474 | 0.809 | 341.8 |
+| Direct blend, 8 pixels/metre | 25.004 | 0.475 | 0.815 | 363.9 |
+
+The direct 4-pixel blend saves about 30% GPU time against geometry and 57%
+against the earlier overlay, but saves only 103,393 asset bytes (0.52%). It adds
+about 5.1 MB GPU allocation against geometry. The 8-pixel version adds 5.18 MB
+of asset data for little visual improvement. Correct affine UV values in empty
+cells are less compressible than nearest-value copies: the final 4-pixel UV
+stream alone occupies 1.79 MB. Per-file zlib-6 comparison grows from 13.338 MB
+for consolidated geometry to 15.132 MB for direct 4-pixel data; these figures
+are not an exported package or download measurement.
+
+Seven matched views include the original five, the exact shared chunk edge and
+a fork where road flow directions differ by about 70 degrees. Road layout and
+colour remain recognizable, without an obvious seam crack or large UV smears,
+but edge silhouette, taper, grain and lighting differ from geometry. Doubling
+resolution provides only small improvements and does not restore independent
+overlap samples. GPU captures also pass in the compatibility renderer.
+
+Focused validation passed 53 Python tests, and the actual final fields passed
+69 material/codec checks and 57 importer/physics checks. Twelve live road probes
+retain their footstep classes and heights within 0.031 mm. The two regular-mesh
+inventories across both chunks have 102 visible surfaces with geometry roads, 117 in the old
+overlay trial and 98 in the direct blend; no overlay or next pass is added.
+
+Unfocused attempts are rejected. Two control measurements from the preceding
+cohort filled rejected final control slots only after their complete input-hash
+dictionaries matched the final controls exactly. All six direct-blend timings
+use the final halo-corrected asset generation. Startup and tail frame times
+varied, so treat the steady GPU result as the useful component comparison.
+
+For a further disk experiment, store shared affine coefficients or a compact
+triangle lookup and reconstruct the floating-point fields at load time. Avoid
+persisting dense extrapolated UVs and unused UV mip levels. That encoding has
+not been implemented or measured here; direct blending currently improves
+rendering cost without a meaningful asset-size reduction.
