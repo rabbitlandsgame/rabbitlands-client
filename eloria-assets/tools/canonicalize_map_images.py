@@ -131,7 +131,7 @@ def _policy_uri(owner: str, descriptor: dict) -> str:
     if isinstance(extras, dict) and POLICY_DIRECTORY_EXTRA in extras:
         uri = extras[POLICY_DIRECTORY_EXTRA]
         resolved = resolve_reference(owner, uri) if isinstance(uri, str) else None
-        if not resolved or not resolved[0].startswith("eloria-assets/maps/") or ":" in uri or "\\" in uri:
+        if not resolved or not resolved[0].startswith("eloria-assets/maps/") or ":" in uri or "%" in uri or "\\" in uri:
             raise CanonicalizationError(f"unsafe image policy in {owner}: {uri!r}")
         return uri
     resolved = resolve_reference(owner, str(descriptor.get("uri", "")))
@@ -170,7 +170,7 @@ def annotate_policies(owner: str, document: object, aliases: dict[str, str]) -> 
                 if not isinstance(values, list) or not values: raise CanonicalizationError(f"invalid policy collection in {owner}: {uri}")
                 for value in values:
                     policy = resolve_reference(owner, value, base) if isinstance(value, str) else None
-                    if not policy or not policy[0].startswith("eloria-assets/maps/") or ":" in value or "\\" in value:
+                    if not policy or not policy[0].startswith("eloria-assets/maps/") or ":" in value or "%" in value or "\\" in value:
                         raise CanonicalizationError(f"unsafe image policy in {owner}: {value!r}")
                     result[new_uri].add(value)
             elif resolved and resolved[0] in touched:

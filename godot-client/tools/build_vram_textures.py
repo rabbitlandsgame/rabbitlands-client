@@ -443,7 +443,7 @@ def image_policy_directory(image: dict, glb: Path, maps_roots: list[Path]) -> Pa
     if not isinstance(extras, dict) or POLICY_DIRECTORY_EXTRA not in extras:
         return (glb.parent / str(image.get("uri", ""))).resolve().parent
     uri = extras[POLICY_DIRECTORY_EXTRA]
-    if not isinstance(uri, str) or not uri or ":" in uri or "\\" in uri or Path(uri).is_absolute():
+    if not isinstance(uri, str) or not uri or ":" in uri or "%" in uri or "\\" in uri or Path(uri).is_absolute():
         raise BuildError(f"invalid texture policy directory in {glb}: {uri!r}")
     directory = (glb.parent / uri).resolve()
     _containing_root(maps_roots, directory)

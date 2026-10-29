@@ -106,6 +106,10 @@ class CanonicalImages(unittest.TestCase):
  def test_ignored_trial_worlds_cannot_change_delivery_policy(self):
   first,_=self.simple();trial=self.maps/'a/.local/trial/world.glb';write_glb(trial,first,role='base');write_json(trial.with_name('world.json'),{'asset':{'glb':'world.glb'},'externalResources':{uri(first,trial):sha(first.read_bytes())}})
   policies=C.policy_inventory(self.root);self.assertEqual(len(policies),2);self.assertTrue(all(v['roles']==['normal'] for v in policies.values()))
+ def test_percent_encoded_policy_is_rejected_consistently(self):
+  image=self.image('a/images/source.png');glb=self.maps/'a/world.glb';descriptor={'uri':'images/source.png','extras':{C.POLICY_DIRECTORY_EXTRA:'%2e%2e'}}
+  with self.assertRaises(C.vram.BuildError):C.vram.image_policy_directory(descriptor,glb,[self.maps])
+  with self.assertRaises(C.CanonicalizationError):C._policy_uri('eloria-assets/maps/a/world.glb',descriptor)
  def test_default_candidates_exclude_fixed_ui_and_coverage(self):
   self.assertFalse(C.candidate_image('eloria-assets/maps/continent-v2/suncoil/client/map-detail.webp'))
   self.assertFalse(C.candidate_image('eloria-assets/maps/continent-v2/suncoil/client/minimap.webp'))
