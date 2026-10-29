@@ -250,6 +250,38 @@ class ServedIsle(unittest.TestCase):
         with self.assertRaisesRegex(packager.PackageError, "externalResources.*authoring/runtime.png.*not in the commit"):
             self.stage_assets()
 
+    def test_concept_provenance_does_not_pull_reference_art_into_the_package(self):
+        root = "eloria-assets/maps/legacy/"
+        files = {root + "references/board.png": b"reference board",
+                 "eloria-assets/concepts/region.png": b"cultural reference"}
+        for relative, contents in files.items():
+            write(self.root, relative, contents)
+        provenance = {"detailBoard": "references/board.png",
+                      "culturalReference": "../../concepts/region.png"}
+        world = json.loads((self.root / root / "world.json").read_text())
+        world["conceptArt"] = provenance
+        write(self.root, root + "world.json", world)
+        write(self.root, root + "concept.json", {"conceptArt": provenance})
+        _, staged, warnings = self.stage_assets()
+        self.assertFalse(warnings)
+        for relative, contents in files.items():
+            self.assertNotIn(relative, staged)
+            self.assertEqual((self.root / relative).read_bytes(), contents)
+
+    def test_an_independent_runtime_reference_still_pulls_in_concept_art(self):
+        root = "eloria-assets/maps/legacy/"
+        relative = root + "references/board.png"
+        contents = b"runtime map picture also used as reference"
+        write(self.root, relative, contents)
+        world = json.loads((self.root / root / "world.json").read_text())
+        world["conceptArt"] = {"detailBoard": "references/board.png"}
+        world["minimap"] = {"image": "references/board.png"}
+        write(self.root, root + "world.json", world)
+        _, staged, warnings = self.stage_assets()
+        self.assertFalse(warnings)
+        self.assertIn(relative, staged)
+        self.assertEqual((self.stage / relative).read_bytes(), contents)
+
     def test_a_chunk_glb_missing_from_the_commit_is_refused(self):
         (self.root / V2 / "isle/client/chunks/00_01/world.glb").unlink()
         with self.assertRaisesRegex(packager.PackageError, "chunks/00_01/world.glb is not in the commit"):

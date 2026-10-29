@@ -183,7 +183,9 @@ SERVED_V2_STATUSES = {"continent-v2-served"}
 SERVER_ONLY_FILES = {"collision.bin", "served-grid.escg.gz"}
 REGISTRY_FILE = "godot-client/data/maps/registry.json"
 # Manifest keys that describe provenance, or files the client never opens.
-MANIFEST_SKIPPED_KEYS = {"sources", "provenance", "knownLimitations", "lodGroups"}
+# conceptArt retains the source boards' provenance in the repository; runtime
+# pictures/textures declared independently still enter the verified closure.
+MANIFEST_SKIPPED_KEYS = {"sources", "provenance", "conceptArt", "knownLimitations", "lodGroups"}
 # The manifest key naming the prototype meshes a package does not carry
 # (eloria-assets/tools/shared_meshes.py): URI relative to the manifest's folder
 # -> sha256 of the prototype GLB it names. The pool keeps index.json beside the
@@ -2307,14 +2309,121 @@ def check_scenery_vram_textures(app_dir: Path) -> None:
     log(f"checked {sidecars} scenery sidecars in app/assets")
 
 
+TEXTURE_POLICY_DIRECTORY_KEY = "rl_texture_policy_directory"
+
+
+def external_image_policy_directories(base: Path, resources: dict, policies, asset_root: Path) -> dict[str, set[Path]]:
+    """Original sidecar directories, independent of a canonical image's URI.
+
+    An unannotated image keeps the legacy directory beside its source pixels.
+    Directory metadata never supplies an alternative source or expected hash.
+    """
+    if policies is None:
+        policies = {}
+    if not isinstance(policies, dict):
+        raise PackageError("externalImagePolicies must be an object")
+    unknown = set(policies) - set(resources)
+    if unknown:
+        raise PackageError("externalImagePolicies names an undeclared image: " + str(sorted(unknown)[0]))
+    root = asset_root.resolve()
+
+    def path_for(uri: str) -> Path:
+        if not isinstance(uri, str) or not uri or "\\" in uri or ":" in uri or PurePosixPath(uri).is_absolute():
+            raise PackageError(f"unsafe external image policy path: {uri!r}")
+        path = (base / uri).resolve()
+        if not path.is_relative_to(root):
+            raise PackageError(f"external image policy path resolves outside eloria-assets: {uri}")
+        return path
+
+    result = {}
+    for uri in resources:
+        image = path_for(uri)
+        if uri not in policies:
+            result[uri] = {image.parent}
+            continue
+        values = policies[uri]
+        if not isinstance(values, list) or not values:
+            raise PackageError(f"externalImagePolicies[{uri!r}] must be a nonempty array")
+        result[uri] = {path_for(value) for value in values}
+    return result
+
+
+def _check_image_policy_descriptors(document: dict, base: Path, policies: dict[str, set[Path]],
+                                    asset_root: Path, label: str, problems: list[str]) -> None:
+    """An image's actual runtime policy must be one its manifest/index declares."""
+    root = asset_root.resolve()
+    for image in document.get("images", []):
+        if not isinstance(image, dict):
+            continue
+        uri = image.get("uri")
+        if not isinstance(uri, str) or not uri or uri.startswith("data:"):
+            continue
+        extras = image.get("extras") or {}
+        if not isinstance(extras, dict):
+            problems.append(f"{label}: image {uri} extras must be an object")
+            continue
+        tagged = TEXTURE_POLICY_DIRECTORY_KEY in extras
+        if uri not in policies:
+            if tagged:
+                problems.append(f"{label}: policy-tagged image {uri} has no declared source/policy")
+            continue
+        policy = extras.get(TEXTURE_POLICY_DIRECTORY_KEY)
+        if tagged and (not isinstance(policy, str) or not policy or "\\" in policy or ":" in policy
+                       or PurePosixPath(policy).is_absolute()):
+            problems.append(f"{label}: image {uri} has unsafe {TEXTURE_POLICY_DIRECTORY_KEY}")
+            continue
+        directory = (base / policy).resolve() if tagged else (base / uri).resolve().parent
+        if not directory.is_relative_to(root) or directory not in policies[uri]:
+            problems.append(f"{label}: image {uri} policy directory disagrees with declared image policies")
+
+
 def check_vram_textures(stage: Path) -> None:
     """Every external map image a staged manifest names is staged, has a
     sidecar or a reason it has none, and every staged sidecar is the file its
     index names, byte for byte."""
-    import hashlib
+    stage = stage.resolve()
     problems: list[str] = []
     indexes: dict[Path, dict] = {}
+    digests: dict[Path, str] = {}
+    asset_root = (stage / "eloria-assets").resolve()
     checked = 0
+
+    def check_sources(base: Path, resources: dict, policies, label: str, *, sidecars: bool = True):
+        nonlocal checked
+        try:
+            directories = external_image_policy_directories(base, resources, policies, asset_root)
+        except PackageError as error:
+            problems.append(f"{label}: {error}")
+            return {}
+        for uri, sha in resources.items():
+            image = (base / uri).resolve()
+            if not image.is_file():
+                problems.append(f"{label}: external image {uri} is not in the package")
+                continue
+            if image not in digests:
+                digests[image] = hashlib.sha256(image.read_bytes()).hexdigest()
+            if digests[image] != sha:
+                problems.append(f"{image.relative_to(stage)}: source sha256 differs from the manifest")
+            if not sidecars:
+                continue
+            for directory in sorted(directories[uri]):
+                if directory not in indexes:
+                    index_path = directory / "vram" / "index.json"
+                    try:
+                        indexes[directory] = (json.loads(index_path.read_text(encoding="utf-8"))
+                                              if index_path.is_file() else {})
+                        if not isinstance(indexes[directory], dict):
+                            raise ValueError("sidecar index must be an object")
+                    except (OSError, ValueError):
+                        problems.append(f"{index_path.relative_to(stage)}: cannot read sidecar index")
+                        indexes[directory] = {}
+                index = indexes[directory]
+                checked += 1
+                if sha not in index.get("images", {}) and sha not in index.get("excluded", {}):
+                    problems.append(f"{image.relative_to(stage)}: no sidecar and no exclusion reason in "
+                                    f"{directory.relative_to(stage)}")
+        return directories
+
     for manifest_path in (stage / "eloria-assets").rglob("world.json"):
         try:
             manifest = json.loads(manifest_path.read_text(encoding="utf-8-sig"))
@@ -2323,25 +2432,52 @@ def check_vram_textures(stage: Path) -> None:
         resources = manifest.get("externalResources") or {}
         if not isinstance(resources, dict) or "streamingChunks" in manifest:
             continue
-        base = (manifest_path.parent / str(manifest.get("asset", {}).get("glb", "world.glb"))).parent
-        for uri, sha in resources.items():
-            image = (base / uri).resolve()
-            if not image.is_file():
-                problems.append(f"{manifest_path.relative_to(stage)}: external image {uri} is not in the package")
+        glb = manifest_path.parent / str(manifest.get("asset", {}).get("glb", "world.glb"))
+        label = manifest_path.relative_to(stage).as_posix()
+        policies = check_sources(glb.parent, resources, manifest.get("externalImagePolicies"), label)
+        _check_image_policy_descriptors(gltf_document(glb), glb.parent, policies, asset_root, label, problems)
+        # Road-only style uses retain their original source fallback. Validate
+        # the source/policy metadata without creating a new sidecar requirement.
+        road = manifest.get("roadGround")
+        if isinstance(road, dict):
+            try:
+                road_dependencies(stage, manifest_path, road)
+                path = manifest_path.parent / road["metadata"]
+                metadata = json.loads(path.read_text(encoding="utf-8"))
+                road_resources = {uri: sha for style in metadata.get("styles", [])
+                                  for uri, sha in style.get("externalResources", {}).items()}
+                road_policies = check_sources(path.parent, road_resources, metadata.get("externalImagePolicies"),
+                                              path.relative_to(stage).as_posix(), sidecars=False)
+                for style in metadata.get("styles", []):
+                    _check_image_policy_descriptors(style.get("material_document", {}), path.parent, road_policies,
+                                                    asset_root, label + " roadGround", problems)
+            except (RoadGroundDependencyError, OSError, ValueError, KeyError, TypeError) as error:
+                problems.append(f"{label} roadGround: {error}")
+    # A shared prototype can be the only consumer of an image. Its source and
+    # original policy are recorded by the pool index, not by its parent map.
+    for index_path in (stage / "eloria-assets/maps/_shared/meshes").glob("index.json"):
+        try:
+            entries = json.loads(index_path.read_text(encoding="utf-8")).get("prototypes", {})
+        except (OSError, ValueError):
+            continue  # check_shared_meshes reports an unreadable pool index.
+        for identity, entry in entries.items():
+            glb = index_path.parent / (identity + ".glb")
+            if not glb.is_file() or not isinstance(entry, dict):
                 continue
-            if image.parent not in indexes:
-                index_path = image.parent / "vram" / "index.json"
-                indexes[image.parent] = (json.loads(index_path.read_text(encoding="utf-8"))
-                                         if index_path.is_file() else {})
-            index = indexes[image.parent]
-            checked += 1
-            if sha not in index.get("images", {}) and sha not in index.get("excluded", {}):
-                problems.append(f"{image.relative_to(stage)}: no sidecar and no exclusion reason")
+            resources = entry.get("images") or {}
+            if not isinstance(resources, dict):
+                continue
+            label = glb.relative_to(stage).as_posix()
+            policies = check_sources(glb.parent, resources, entry.get("imagePolicies"), label)
+            _check_image_policy_descriptors(gltf_document(glb), glb.parent, policies, asset_root, label, problems)
     sidecars = 0
     for directory, index in indexes.items():
         for sha, entry in index.get("images", {}).items():
             # A "pool" entry's file is the one another pool ships (share_identical_sidecars).
             path = Path(os.path.normpath(directory / entry.get("pool", ".") / "vram" / entry["file"]))
+            if not path.resolve().is_relative_to(asset_root):
+                problems.append(f"{directory.relative_to(stage)}: sidecar path resolves outside eloria-assets")
+                continue
             if not path.is_file():
                 problems.append(f"{path.relative_to(stage)}: listed in the index but missing")
                 continue
