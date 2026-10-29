@@ -1,5 +1,7 @@
 """Source streaming must preserve committed inputs without hydrating Git blobs."""
 import io
+import hashlib
+import json
 import os
 from pathlib import Path
 import subprocess
@@ -30,6 +32,13 @@ def source(tmp_path):
              "godot-client/run.sh": b"#!/bin/sh\necho test\n",
              "eloria-assets/maps/example/world.json": b'{"map":"example"}\n',
              "eloria-assets/source/private-to-the-build.txt": b"not a runtime input\n"}
+    image = b"shared scenery image\x00\r\n"
+    image_name = hashlib.sha256(image).hexdigest() + ".png"
+    files["eloria-assets/world/_shared/images/" + image_name] = image
+    files["godot-client/assets/world/tree.gltf"] = json.dumps({
+        "asset": {"version": "2.0"},
+        "images": [{"uri": "../../../eloria-assets/world/_shared/images/" + image_name}],
+    }).encode()
     for name, data in files.items():
         target = origin / name
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -100,6 +109,24 @@ def test_changed_bytes_fail_git_object_verification(source, monkeypatch):
     with pytest.raises(ValueError, match="differs from the committed Git blob"):
         materialize(source, monkeypatch, rewrite(source[3], change))
     assert not (source[1] / "godot-client/assets/model.glb").exists()
+
+
+def test_external_scenery_image_closure_is_materialized_from_committed_bytes(source, monkeypatch):
+    materialize(source, monkeypatch)
+    root = source[1]
+    model = root / "godot-client/assets/world/tree.gltf"
+    image_uri = json.loads(model.read_text())["images"][0]["uri"]
+    image = (model.parent / image_uri).resolve()
+    assert image.is_relative_to(root / "eloria-assets/world/_shared/images")
+    assert image.is_file()
+    assert hashlib.sha256(image.read_bytes()).hexdigest() == image.stem
+    assert not (root / "eloria-assets/source/private-to-the-build.txt").exists()
+
+
+def test_missing_shared_scenery_image_fails_closed(source, monkeypatch):
+    data = rewrite(source[3], lambda item, raw: [] if "/eloria-assets/world/_shared/images/" in item.name else [(item, raw)])
+    with pytest.raises(ValueError, match="omitted committed inputs.*eloria-assets/world/_shared/images/"):
+        materialize(source, monkeypatch, data)
 
 
 def test_missing_committed_inputs_fail_closed(source, monkeypatch):

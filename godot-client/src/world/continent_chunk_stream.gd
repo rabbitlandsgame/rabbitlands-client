@@ -90,6 +90,8 @@ var _corrected_generation := -1
 ## Image sha -> the directories this territory loads it from
 ## (VramTextures.image_directories_by_sha), which price it.
 var _image_directories: Dictionary = {}
+## Only annotated source hashes use simultaneous raw/EVT variant accounting.
+var _explicit_image_variants: Dictionary = {}
 ## A short cinematic holds the union of its views until the camera hands back.
 ## The same worker imports them during character creation; no blocking prime.
 var _preload_views: Array[Dictionary] = []
@@ -213,6 +215,13 @@ func configure(source: WorldManifest, cache_enabled: bool) -> void:
 	# Nymara index excludes, and a Nymara chunk decodes those).
 	var indexes := VramTextures.read_indexes_for(source.data, source.glb_path().get_base_dir())
 	_image_directories = VramTextures.image_directories_by_sha(source.data, source.glb_path().get_base_dir())
+	_explicit_image_variants.clear()
+	var policies: Variant = source.data.get(VramTextures.POLICY_COLLECTION, {})
+	var resources: Variant = source.data.get("externalResources", {})
+	if policies is Dictionary and resources is Dictionary:
+		for uri: Variant in policies:
+			if (resources as Dictionary).has(uri):
+				_explicit_image_variants[str(resources[uri])] = true
 	for value: Dictionary in config.chunks:
 		var entry := value.duplicate(true)
 		entry.path = source.source_path.get_base_dir().path_join(str(entry.manifest))
@@ -251,7 +260,7 @@ func _correct_entries() -> Vector2i:
 			continue
 		for identity: String in published:
 			var bytes := VramTextures.resident_bytes(identity, int(published[identity]),
-				_image_directories.get(identity, PackedStringArray()))
+				_image_directories.get(identity, PackedStringArray()), _explicit_image_variants.has(identity))
 			shared[identity] = bytes
 			counted[identity] = true
 			if bytes != int(published[identity]):
@@ -294,7 +303,7 @@ static func incremental_cost(entry: Dictionary, shared: Dictionary,
 		if floor_bytes > geometry:
 			prototype_scale = float(floor_bytes) / maxi(1, geometry)
 			geometry = floor_bytes
-	var cost := maxi(1, geometry)
+	var cost := maxi(1, geometry) + maxi(0, int(entry.get("roadGroundResidentBytes", 0)))
 	var images: Dictionary = entry.get(key, entry.get("sharedResourceResidentBytes", {}))
 	for identity: String in images:
 		var bytes := maxi(0, int(images[identity]))

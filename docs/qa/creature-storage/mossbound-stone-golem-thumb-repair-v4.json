@@ -1,0 +1,290 @@
+{
+  "schema": 1,
+  "actor": "mossbound_stone_golem",
+  "status": "NEW_UNAPPROVED_ANATOMICAL_THUMB_REPAIR_DRAFT",
+  "runtime_installed": false,
+  "candidate_version": "v4 compact fist after rejected v3 fin diagnostic",
+  "installed_baseline_sha256": "e056751f8e6d490452250b7e0be3c1af74599ddf15602cf0cc22ddbc734cc5c0",
+  "reviewed_v2_sha256": "0f3d19be309cefcb35238f3d5ad2a15252592c207c6712c550c76813d8cdc549",
+  "candidate_sha256": "5c2df781469ad3199e4e8dd6353c671534e4404681fac5430b86f79032831831",
+  "baseline_bytes": 1896812,
+  "candidate_bytes": 1896812,
+  "reference_30_sha256": "48e312c04045a2f18ddd94dd815d66a822bfc9bbd077383b6a173d446a6d8c12",
+  "vertices": 9000,
+  "triangles": 3000,
+  "surfaces": 1,
+  "palette_bones": 30,
+  "influence_slots": 8,
+  "added_bones": 0,
+  "corrective_targets": 0,
+  "repair": [
+    "The actual negative-X right thumb and calf shared a seven-triangle contact bridge. Weight changes alone could not detach it.",
+    "Replace that strip by four closed thumb-cap triangles and three closed calf-cap triangles using the same 21 triangle-owned rows and unchanged index buffer.",
+    "Remove leg ownership throughout the anatomical right fist, then taper the ownership correction across source Y .02 to .20 into the wrist. This avoids the fin caused by correcting only the thumb beside a leg-dragged palm.",
+    "Retain the previously reviewed v2 forearm/calf changes; this combined payload requires a new exact-version review."
+  ],
+  "local_recipe": {
+    "input_reviewed_v2_sha256": "0f3d19be309cefcb35238f3d5ad2a15252592c207c6712c550c76813d8cdc549",
+    "audited_cut_faces": [
+      140,
+      149,
+      1599,
+      1601,
+      1602,
+      1606,
+      1618
+    ],
+    "reused_rows": [
+      921,
+      935,
+      904,
+      908,
+      940,
+      919,
+      914,
+      923,
+      907,
+      902,
+      933,
+      925,
+      934,
+      943,
+      926,
+      953,
+      928,
+      944,
+      909,
+      947,
+      942
+    ],
+    "cap_triangles": [
+      {
+        "side": "thumb",
+        "rows": [
+          921,
+          935,
+          904
+        ],
+        "boundary_groups": [
+          249,
+          257
+        ]
+      },
+      {
+        "side": "thumb",
+        "rows": [
+          908,
+          940,
+          919
+        ],
+        "boundary_groups": [
+          311,
+          308
+        ]
+      },
+      {
+        "side": "thumb",
+        "rows": [
+          914,
+          923,
+          907
+        ],
+        "boundary_groups": [
+          308,
+          249
+        ]
+      },
+      {
+        "side": "thumb",
+        "rows": [
+          902,
+          933,
+          925
+        ],
+        "boundary_groups": [
+          257,
+          311
+        ]
+      },
+      {
+        "side": "leg",
+        "rows": [
+          934,
+          943,
+          926
+        ],
+        "boundary_groups": [
+          302,
+          309
+        ]
+      },
+      {
+        "side": "leg",
+        "rows": [
+          953,
+          928,
+          944
+        ],
+        "boundary_groups": [
+          309,
+          258
+        ]
+      },
+      {
+        "side": "leg",
+        "rows": [
+          909,
+          947,
+          942
+        ],
+        "boundary_groups": [
+          258,
+          302
+        ]
+      }
+    ],
+    "thumb_boundary_groups": [
+      257,
+      249,
+      308,
+      311
+    ],
+    "leg_boundary_groups": [
+      258,
+      309,
+      302
+    ],
+    "grouping": "Original sampled30 POSITION-exact coincident groups, sorted NumPy unique; never merge posed-divergent anatomy.",
+    "hand_support_original_node_ids": [
+      4,
+      5,
+      6,
+      30,
+      31
+    ],
+    "anatomical_additional_selection": "neutral source X < -.23, Y < .20, current hand-chain weight sum > .5; union audited thumb-side two-ring groups",
+    "wrist_taper_source_y": [
+      0.02,
+      0.2
+    ],
+    "weights": "Keep each group original hand-chain proportions where hand mass>.5; otherwise nearest high-hand-mass palm donor. Nonnegative normalized at most 8; blend with original weights through the wrist taper.",
+    "changed_original_rows": 1113,
+    "outside_rows": 7887,
+    "vertex_ordinal_mapping": "identity for all 9000 rows;21 contact rows repurposed as explicit cap roles",
+    "all_original_index_bytes_exact": true
+  },
+  "preserved": "All original bone nodes/rest/binds and all 8 clip samplers/curves/events; materials/images/UVs/index bytes; original skin slot count and unsigned joint storage. POSITION/NORMAL edits are confined to21 cap rows. Outside1,113rows every static field is bit-identical to reviewed v2.",
+  "closed_caps": {
+    "watertight_at_neutral": true,
+    "welded_euler_before": -2,
+    "welded_euler_after": 0,
+    "arbitrary_pose_closure": "All duplicated boundary and centre POSITION+original bone weight coefficients exactly equal; unchanged shared bind/curves and zero morphs preserve the seams in arbitrary poses.",
+    "full_hand_noncap_rows_with_zero_nonhand_influence": 656
+  },
+  "actual_client": {
+    "installed_to_combined": {
+      "states": 490,
+      "summary": {
+        "states": 490,
+        "maximum_position_mm": 1605.2617622399368,
+        "maximum_normal_degrees": 156.026054757219,
+        "worst_maximum_position_mm": {
+          "label": "Sword_Attack@0.25719",
+          "source_vertex": 940
+        },
+        "worst_maximum_normal_degrees": {
+          "label": "Sword_Attack->Idle_A@stepped-0.071",
+          "source_vertex": 923
+        },
+        "rms_position_mm": 78.9700890828488,
+        "rms_normal_degrees": 5.423289076524707
+      },
+      "receipt_sha256": "4e9894e2e5b9d6cb8b075f98b2ae92e12927ad03163166cb0bfdafa4bae5f690"
+    },
+    "reviewed_v2_to_thumb": {
+      "states": 490,
+      "summary": {
+        "states": 490,
+        "maximum_position_mm": 1605.2617622399368,
+        "maximum_normal_degrees": 156.026054757219,
+        "worst_maximum_position_mm": {
+          "label": "Sword_Attack@0.25719",
+          "source_vertex": 940
+        },
+        "worst_maximum_normal_degrees": {
+          "label": "Sword_Attack->Idle_A@stepped-0.071",
+          "source_vertex": 923
+        },
+        "rms_position_mm": 78.03963291203502,
+        "rms_normal_degrees": 5.239029675576245
+      },
+      "receipt_sha256": "317055effe4d5cd2aab82d9437f7cb8117336832824b8759a828003d3c657b03"
+    },
+    "thumb_only_outside": {
+      "scope": "Localized current-client preservation relative to the previously reviewed v2. The combined v4 also retains v2 broad limb changes versus installed e056; this is not an unchanged-outside claim against e056.",
+      "source_sha256": "0f3d19be309cefcb35238f3d5ad2a15252592c207c6712c550c76813d8cdc549",
+      "candidate_sha256": "5c2df781469ad3199e4e8dd6353c671534e4404681fac5430b86f79032831831",
+      "states": 490,
+      "outside_vertices": 7887,
+      "changed_vertices": 1113,
+      "all_original_bone_worlds_max_abs_delta": 0.0,
+      "outside_positions_max_abs_delta": 0.0,
+      "outside_unit_normals_max_abs_delta": 0.0,
+      "placement": {
+        "actor_global_equal": true,
+        "model_global_equal": true,
+        "selection_equal": true
+      },
+      "metadata_sha256": "997f01fe9da7719c1d7ffad6cafea4ee0513d5f37b0aedf216df1c85639a8415",
+      "states_sha256": "0e6799dcfab6df526023a72f4c81b40c83aa9d8b9cb0cf140929cd3da96ea1c6"
+    },
+    "scope": "Each pair includes all 8 native clips, default/held/RESET, first-tick switches and60 Hz-stepped crossfades in the merged configured client. Intentional changed anatomy is not a lossless/source-fidelity pass."
+  },
+  "fresh_blender": {
+    "status": "passed_fresh_import_finite_only",
+    "models": [
+      "installed e056",
+      "reviewed v2 0f3d",
+      "new v4 5c2d"
+    ],
+    "summary_sha256": "41913a065c5d96be821c533abcf122f6491894a27fa57b898886bec15d47a02c"
+  },
+  "pbr_review": {
+    "pairs": 124,
+    "pngs": 248,
+    "views": [
+      "front",
+      "left",
+      "rear",
+      "right"
+    ],
+    "all_eight_clips": true,
+    "source_clip_inventory": [
+      "Death_A",
+      "Fighting_Idle",
+      "Hit_Chest",
+      "Idle_A",
+      "Jog",
+      "Sword_Attack",
+      "Walk",
+      "Attack_Ground_Pound"
+    ],
+    "job_sha256": "2bf0b89bf0090b9a1e1ba38409dfc5ef1c2dcf45aa8e5e2f6c5e1401c043c9ba",
+    "capture_manifest_sha256": "f95f54b5d7a7e2baae53c0fd9ea563a8be133a06bb2a91d6c78fd855d57d52be",
+    "scope": "Targeted thumb/calf still and motion samples, all 8clip midpoints, RESET and Walk/Sword stepped switches. Shared source cameras can crop other limbs; this is not a new whole-body framing claim.",
+    "assessment": "The calf tether and triangular thumb fin are absent in the reviewed four-view Sword/GroundPound boards. The fist remains compact in the all 8clip and stepped/reset boards. Hand carriage changes visibly as erroneous leg drag is removed.",
+    "gpu_epochs": [
+      105,
+      106
+    ],
+    "all_gpu_children_exited": true
+  },
+  "limits": [
+    "Intentional anatomy, topology-role and skin changes; not lossless and not a closer fit to the bad tethered source.",
+    "The 1.605 m maximum original-row difference includes repurposed contact-cap rows. Whole-model RMS difference is about 79 mm against installed e056 and 78 mm against reviewed v2; these are disclosed differences, not pass thresholds.",
+    "Existing v2 limb repair is partial: its original clip maximum edge ratio 4.096\u21924.237 and stepped 3.763\u21923.915 regressions remain relevant.",
+    "New small cap surfaces retain original UV rows and use flat cap normals. Exact texture appearance and thumb shape require user approval.",
+    "No helper bones, extra draws or file growth; no new runtime CPU/GPU/FPS measurements or performance claim.",
+    "Installed runtime remains e056 until this exact new hash is reviewed and approved."
+  ]
+}

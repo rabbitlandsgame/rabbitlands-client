@@ -1,0 +1,127 @@
+{
+  "schema": 1,
+  "actor": "mossbound_stone_golem",
+  "status": "NEW_UNAPPROVED_PARTIAL_GROUND_POUND_REPAIR_DRAFT",
+  "runtime_installed": false,
+  "candidate_sha256": "f9a54ff96ebb62738e0e14630f9640958eea963274b181e76ed9915233bf5fd0",
+  "candidate_bytes": 1947032,
+  "active_runtime_baseline_sha256": "e056751f8e6d490452250b7e0be3c1af74599ddf15602cf0cc22ddbc734cc5c0",
+  "left_review_baseline_sha256": "5c2df781469ad3199e4e8dd6353c671534e4404681fac5430b86f79032831831",
+  "left_review_baseline_status": "Prior v4 draft is uninstalled and unapproved. Active runtime baseline remains separately identified.",
+  "reference_30_sha256": "48e312c04045a2f18ddd94dd815d66a822bfc9bbd077383b6a173d446a6d8c12",
+  "repair": [
+    "Two translated rigid stone-support controls keep the forearm and calf core sections from collapsing. Proper rigid fits follow original section motion at <=30Hz; original anatomical bones, hand strike path and timing remain unchanged.",
+    "Nine positive-X inner-foot rows4610-4618 move from erroneous root-dominant ownership to foot_l16, following their physical foot neighbors.",
+    "Remove arm-chain ownership from66 leg-cap/calf peer rows with a synchronized two-ring taper into the calf support. Preserve the closed cap geometry and hand-side thumb/fist."
+  ],
+  "preservation": {
+    "vertices": 9000,
+    "triangle_indices_identity": true,
+    "all_position_normal_uv_bytes_exact_vs_v4": true,
+    "all_original_703_sampler_clock_value_bytes_exact": true,
+    "all_original_30_runtime_bone_worlds_exact_in_490_states": true,
+    "conservative_selected_skin_rows": 1455,
+    "actual_changed_skin_rows": 1419,
+    "actual_outside_rows": 7581,
+    "outside_positions_and_unit_normals_max_delta": 0.0,
+    "materials_images_and_original_bind_prefix_exact": true,
+    "original_skin_retained_extended_body_skin_cloned": true,
+    "corrective_targets": 0,
+    "draw_surfaces": 1
+  },
+  "rig_mapping": {
+    "original_gltf_node_prefix": 32,
+    "identity_wrapper_node": 32,
+    "identity_wrapper_name": "RL_Golem_Stone_Control_Frame",
+    "new_volume_nodes": {
+      "33": "RL_Golem_forearm_volume",
+      "34": "RL_Golem_calf_volume"
+    },
+    "native_bones_before": 30,
+    "native_bones_after": 33,
+    "native_added_ancestor": "Armature",
+    "skin_palette_before": 30,
+    "skin_palette_after": 32,
+    "source_skeleton": "Armature/Skeleton3D",
+    "candidate_skeleton": "RL_Golem_Stone_Control_Frame/Skeleton3D",
+    "vertex_correspondence": "Explicit identity for9000 current v4 rows and unchanged index order. The21 contact-cap row roles introduced in v4 are inherited, not an original-e056 semantic-identity claim."
+  },
+  "actual_client": {
+    "installed_to_final": {
+      "states": 490,
+      "summary": {
+        "states": 490,
+        "maximum_position_mm": 1605.2617622399368,
+        "maximum_normal_degrees": 175.44610451827558,
+        "worst_maximum_position_mm": {
+          "label": "Sword_Attack@0.25719",
+          "source_vertex": 940
+        },
+        "worst_maximum_normal_degrees": {
+          "label": "Attack_Ground_Pound@0.85937",
+          "source_vertex": 947
+        },
+        "rms_position_mm": 99.48369133094515,
+        "rms_normal_degrees": 7.7309970034059425
+      },
+      "receipt_sha256": "86af482f8f7730ccb1ffe9c9edba0e489c4648769b3b44a68aa00e1676edbfbc"
+    },
+    "reviewed_v4_to_final": {
+      "states": 490,
+      "summary": {
+        "states": 490,
+        "maximum_position_mm": 932.9986384407814,
+        "maximum_normal_degrees": 107.4009560103533,
+        "worst_maximum_position_mm": {
+          "label": "Sword_Attack@0.25719",
+          "source_vertex": 909
+        },
+        "worst_maximum_normal_degrees": {
+          "label": "Attack_Ground_Pound@0.13947",
+          "source_vertex": 3455
+        },
+        "rms_position_mm": 67.45014652242413,
+        "rms_normal_degrees": 5.509638727373911
+      },
+      "receipt_sha256": "0f6ea2cb029333bb85c15a9c2c81954666792178a5d55175556e358e7270983d"
+    },
+    "outside_proof_sha256": "e7a6fd75aba868bc5ac97c779d3bb456b387f05661c418fea601b4fd396f1d3c",
+    "native_cap_closure_sha256": "3a44b3c9de82bcc4a4eca58e8208bcde91ad7845bb4bf855ac060adac54b0aea",
+    "native_packed_cap_pairs_exact": 19,
+    "scope": "All8 clips/default/held/RESET, first-tick and realistic60Hz stepped switches; exact placement. Intentional selected anatomy changes are not lossless/source-fidelity passes."
+  },
+  "fresh_blender": {
+    "status": "passed_fresh_import_finite_only",
+    "summary_sha256": "efb8a534e9e4155e5321360623138e8f50703921c73951d3a2b5681f93b242f7"
+  },
+  "visual": {
+    "pairs": 270,
+    "pngs": 540,
+    "complete_ground_pound": "81 endpoint frames in front/rear views",
+    "additional": "All8 clip midpoints, known other-clip/transition witnesses, exact wrist .35/upper-forearm .391667/calf-cap Sword .533333 closeups, stepped switches andRESET.",
+    "job_sha256": "3afa02fd1e313fc02a5023ddcf65e7693cba2157eb35b7518baaa14954c9eb9b",
+    "manifest_sha256": "941052b911e6f7328806862885fe69561256b7f51ef5e18f3ce115ee3a14f95a",
+    "media_lineage_annotation_sha256": "f807753af5c6554d1e34c07f8fb511c0a9a56be2736bcf418891233780ec7577",
+    "gpu_epoch": 115,
+    "all_children_exited": true,
+    "assessment": "Clear core forearm/calf volume improvement, original swing retained, calf tether substantially reduced. Partial repair: pointed shoulder/upper-forearm leaf/facet and wrist/ankle creases remain visible. No universal fidelity or fully-fixed claim.",
+    "caption_note": "Frozen copied scope string names the old fac767 parent; actual engine placement/fixture hashes prove finalf9 capture. Separate annotation records this without changing frozen media."
+  },
+  "measured_cost": {
+    "baseline_bytes": 1896812,
+    "raw_bytes_increase": 50220,
+    "retained_first_actor_and_library_cache_static_allocation_increase_bytes": 297195,
+    "public_benchmark_receipt": "docs/qa/creature-storage/mossbound-stone-golem-ground-pound-component-benchmark-v2.json",
+    "public_benchmark_sha256": "b6c4cf94df9aa1bd1cdd413ed98cbf0b705ea526571c63e8d99dd894fb388cae",
+    "timing_interpretation": "Scoped warm component timings remain around9-12microseconds/update in this run. Uncontrolled scheduling and one-process measurement do not establish a speedup. No FPS or per-instance-memory claim."
+  },
+  "limits": [
+    "Partial repair for human review. Pointed shoulder/upper-forearm facet and wrist/ankle creasing are still visible.",
+    "The rigid cores preserve their rest widths; they are deliberately fuller than the collapsed source. This is not exact fidelity to the old deformation.",
+    "A remaining wrist taper can have high local strain around GroundPound .35; upper-forearm/armpit folding around .391667 remains.",
+    "After the cap cleanup, local edge936-1014 can still reach37.119 model-mm from10.184mm rest in Sword; the same region can fold in GroundPound/Walk.",
+    "First-tick and realistic blends intentionally differ on repaired skin while original bone worlds/hand path remain exact.",
+    "Earlier v2/v4 limb/thumb changes and their disclosed partial limits remain part of the combined draft.",
+    "No runtime installation, user approval, push or release is implied."
+  ]
+}

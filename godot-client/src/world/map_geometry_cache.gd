@@ -241,6 +241,8 @@ static func world_proof(manifest: WorldManifest, _source_digest: String) -> Dict
 			or int(manifest.verification_diagnostics.failures) != 0: return proof
 	for uri: String in manifest.data.get("externalResources",{}):
 		proof[logical(manifest.glb_path().get_base_dir().path_join(uri).simplify_path())] = str(manifest.data.externalResources[uri])
+	for path: String in manifest.road_ground_verified:
+		proof[logical(path)] = str(manifest.road_ground_verified[path])
 	# package_digest normalizes manifest line endings, while geometry inputs
 	# record exact bytes. Do not treat that combined digest as a raw-file proof.
 	return proof

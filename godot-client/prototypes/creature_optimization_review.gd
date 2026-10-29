@@ -217,6 +217,7 @@ func run() -> void:
 	controls.add_child(blend)
 	repeat_actions=CheckBox.new()
 	repeat_actions.text="Repeat one-shots"
+	repeat_actions.button_pressed=true
 	repeat_actions.focus_mode=Control.FOCUS_NONE
 	controls.add_child(repeat_actions)
 	var panels := HBoxContainer.new()
@@ -318,6 +319,7 @@ func unload_pair() -> void:
 
 func load_entry(next_index: int, wanted_variant: String) -> void:
 	if loading or modal.visible or entries.is_empty(): return
+	var first_load := loaded_entry.is_empty()
 	loading=true
 	index=posmod(next_index,entries.size())
 	refresh_status()
@@ -334,6 +336,8 @@ func load_entry(next_index: int, wanted_variant: String) -> void:
 	clips=loaded_entry.clips.duplicate()
 	clip_picker.clear()
 	for name: String in clips: clip_picker.add_item(name.replace("_"," "))
+	if first_load and clips.has(str(loaded_entry.get("initial_clip",""))):
+		clip=str(loaded_entry.initial_clip)
 	if not clips.has(clip): clip=str(clips[0])
 	source_label.text="%s · %s bytes\nSHA256 %s" % [str(loaded_entry.get("source_label","ORIGINAL")),str(loaded_entry.source.bytes),str(loaded_entry.source.sha256)]
 	candidate_label.text="Processing — candidate not ready"
@@ -388,6 +392,13 @@ func load_entry(next_index: int, wanted_variant: String) -> void:
 			var bounds: AABB = native.global_transform*actor._native_body_bounds
 			default_focus=bounds.get_center()
 			default_distance=maxf(3.,bounds.size.length()*1.3)
+	# Preserved gameplay bounds can include old deformation outliers. A review
+	# catalog may supply source-based framing without changing actor placement.
+	var framing: Dictionary = loaded_entry.get("review_camera",{})
+	if framing.has("focus"):
+		var point: Array = framing.focus
+		default_focus=Vector3(float(point[0]),float(point[1]),float(point[2]))
+	if framing.has("distance"): default_distance=float(framing.distance)
 	focus=default_focus
 	distance=default_distance
 	loading=false
@@ -586,6 +597,7 @@ func key(code: int, echo := false, ctrl := false) -> InputEventKey:
 func smoke_test() -> void:
 	assert(catalog.get("test_only",false),"Smoke must use an isolated TEST catalog")
 	assert(ready_to_play and entries.size()==2)
+	if loaded_entry.has("initial_clip"): assert(clip==str(loaded_entry.initial_clip))
 	running=false
 	if loaded_entry.has("commented_pose"):
 		show_commented_pose()

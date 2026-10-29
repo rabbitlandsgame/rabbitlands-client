@@ -2,6 +2,8 @@ extends RefCounted
 ## Resolves the material under the player's feet using the same navigation
 ## layer as actor grounding. Works with freshly imported and cached maps.
 
+const RoadGround := preload("res://src/world/road_ground/road_ground.gd")
+
 const SURFACES := {
 	"snow": ["snow", "frost"],
 	"wood": ["timber", "wood", "plank", "board", "bamboo", "teak", "bark"],
@@ -49,6 +51,18 @@ static func from_hit(hit: Dictionary) -> String:
 		return "dirt"
 	var instance := collider.get_parent() as MeshInstance3D
 	if instance != null and instance.mesh != null:
+		if RoadGround.is_terrain(instance):
+			var point: Variant = hit.get("position")
+			if point is Vector3:
+				var road: Dictionary = RoadGround.query(instance, point)
+				if bool(road.get("present", false)) and float(road.get("coverage", 0.0)) >= 0.5:
+					var style: Dictionary = road.style
+					var surface: String = str(style.get("footstep_class", ""))
+					if SURFACES.has(surface):
+						return surface
+					var names: Array = style.get("original_material_names", [])
+					if not names.is_empty():
+						return from_name(str(names[0]))
 		var mesh := instance.mesh
 		var face: int = int(hit.get("face_index", -1))
 		# A terrain mesh can contain grass, sand and paving in separate surfaces.

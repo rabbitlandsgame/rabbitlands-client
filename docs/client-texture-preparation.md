@@ -69,14 +69,15 @@ scope selector retains the existing whole-tree packaging behavior.
 
 ## Scenery GLBs and one map's images in the shared pool
 
-Scenery (world-object) GLBs under `godot-client/assets/world/` embed their
-images. `--scenery-config` names a scenery config (its `assets` object of
+Scenery (world-object) GLBs under `godot-client/assets/world/` support embedded
+images and verified external images. `--scenery-config` names a scenery config (its `assets` object of
 `res://` GLB paths, such as `godot-client/data/world/town-scenery.json`); each
-embedded image of those GLBs gets a sidecar in the `vram/` folder of its GLB's
-own directory, keyed by the SHA-256 of the image bytes. The client
+eligible image gets a sidecar in the `vram/` folder of its original GLB's
+directory, keyed by the SHA-256 of the image bytes. Externalization preserves
+the eligibility of embedded images and previously external images. The client
 (`src/world/world_object_images.gd`) uploads it when the renderer samples its
 format and the GLB samples the image only in the roles it was encoded for;
-otherwise it decodes the embedded bytes as before. `--scenery-out-root`
+otherwise it decodes the original image bytes as before. `--scenery-out-root`
 mirrors those folders below a stage; a scoped run requires it.
 
 Release packaging skips the whole shared image pool `maps/_shared/images`.
@@ -102,6 +103,44 @@ misses the changed images, which then decode. On 2026-10-27 the town's
 textures took about 365 MiB of GPU memory decoded and about 90 MiB with these
 sidecars (shell 27 images: 90 to 22 MiB; scenery 201 images: 272 to 65 MiB,
 three below the quality floors decoded), for about 63 MB of sidecar files.
+
+## Shared standalone scenery sources
+
+`eloria-assets/tools/externalize_scenery_images.py` stages ordinary world GLBs
+whose image URIs reuse byte-identical files already in the selected map shipment.
+Remaining unique images live in `eloria-assets/world/_shared/images/`, outside
+Godot's editor import tree. Keep the sibling `eloria-assets` layout beside the
+packaged application. Source pixel dimensions and encoded image bytes are preserved.
+
+The GLB's `extras.rabbitlands_scenery_images` declares schema
+`rabbitlands-scenery-images-v1`, `mipPolicy: full`, resource URI/SHA pairs and
+original-directory policy lists. Each converted image records
+`rl_texture_policy_directory` and `rl_texture_sidecar_eligible` in its extras.
+The original world directory still selects its sidecars and quality fallback;
+the canonical pixel file's location does not change that choice. Existing
+ordinary URI models retain their source layout.
+
+Scenery keeps its full mip chains at every map texture quality tier. Runtime
+and native binding pools distinguish the actual full-resolution representation
+from reduced map variants. Disk/cache acquisition checks the source GLB and
+every declared external image; worker publication rechecks its captured inputs.
+Raw decoding checks the bytes it actually reads against the declared source SHA.
+Strict scenery failures reject the scene before fallback or pool publication.
+Already installed in-memory templates reuse their immutable Resources without
+new per-placement file reads. Source verification has no timestamp acceptance
+cache and makes no sealed-content claim.
+
+Run raw storage optimization before image externalization. Use a fresh ignored
+plan/recovery directory, and a shipping list from the same combined checkout.
+The externalizer refreshes current output hashes/image lists in the scenery
+records and object catalog while preserving historical source/task records.
+The new files stay ordinary GLBs and PNG/JPEG/WebP images.
+
+Production packaging keeps raw world GLBs and the complete external image
+closure. It skips unused editor scene imports and their extracted texture
+copies only when the target loader and independent references prove that safe.
+Explicit scene, material or image consumers retain their required imports.
+Actor imports and independent world material textures retain their existing rules.
 
 ## Review and use the output
 
@@ -158,3 +197,142 @@ release-download estimate: existing files, cross-pool references and package
 deduplication must be accounted for first. Local preparation needs an encode
 cache, a stage and temporary quality scratch in addition to the final outputs.
 Use the actual build summary for a chosen scope when budgeting that disk space.
+
+
+## Canonical pixels and original texture policy
+
+`eloria-assets/tools/canonicalize_map_images.py` can remove byte-identical files
+from the shared map image pools. It neither decodes nor re-encodes images.
+Fixed minimap, detail-map, overview and road-field files are outside its default
+candidate set. Plan only after other asset transformations have been applied;
+an old plan must not replace newer geometry.
+
+A canonical image URI identifies the physical pixel file. Its original sidecar
+policy stays separate:
+
+- A glTF image's `extras.rl_texture_policy_directory` is the original image
+  directory, as a relative URI from that GLB. Every descriptor of an affected
+  image content is annotated, including descriptors using the surviving copy.
+- A world's `externalImagePolicies` maps each affected canonical URI in
+  `externalResources` to a sorted array of original directory URIs, relative to
+  `asset.glb`'s directory. Streaming roots retain the same collection for their
+  existing resource set.
+- A shared prototype's index record uses `imagePolicies` with the same shape,
+  relative to the prototype/index directory. Road metadata uses its own
+  `externalImagePolicies`, and material-document image descriptors carry the
+  same glTF extra. Road-only fallback textures do not acquire new cooker roles.
+
+Explicit directories must be plain relative paths (no percent escapes) and
+remain inside `eloria-assets/maps`.
+Invalid or undeclared policies fail validation instead of selecting the
+canonical file's directory. These are ordinary image URIs and standard glTF
+extras; offline tools can continue reading the canonical files.
+
+The sidecar cooker reads pixels from the canonical URI but plans separately by
+original directory and source SHA. Existing caller exclusions, roles, recipes,
+alpha cutoffs, quality floors and full-mip fallback stay unchanged. Native
+texture origins and binding IDs retain the original directory too. Cache tokens
+and stream budgets read every declared original directory's index, even when
+that directory contains no remaining raw image files.
+
+Runtime weak pooling uses the actual uploaded variant: raw pixels, or the
+accepted EVT payload SHA/recipe/format, plus the active mip tier. Compatible
+variants share across policy directories; raw and compressed variants remain
+separate. A refused sidecar gets the raw variant key after decoding. During an
+offline native cook only, source discovery also separates policy directories so
+one shared Texture2D cannot erase another usage's provenance. No strong resource
+cache is added.
+
+For explicitly annotated contents, streaming counts raw pixels once and each
+distinct accepted payload/recipe/format once. Compatible copies in different
+directories share one estimate; raw and compressed variants can coexist.
+Fallback knowledge conservatively retains the raw estimate alongside accepted
+variants. Unannotated legacy sources keep their existing accounting.
+
+The canonicalizer writes an ignored plan and stage. Apply checks the SHA of every
+scanned input, saves affected originals to a fresh ignored recovery directory,
+and verifies ordinary references, unchanged non-JSON GLB bytes, image hashes,
+prototype/manifest/road integrity links and the complete pre/post sidecar plan.
+Duplicate images are deleted last. Any validation failure restores the exact
+originals. Retirement `mapMeshCopies` file SHA bindings are refreshed without
+changing their mesh lists. The plan and recovery receipt are local evidence;
+source asset changes still require the normal integration and qualification.
+
+## Measured map storage reduction, 2026-10-29
+
+The release selector's loose `eloria-assets` payload decreased from
+2,211,044,583 to 1,700,334,791 bytes: **510,709,792 bytes (510.71 MB, 23.10%)**.
+MB here means 1,000,000 bytes. Approximate contributions were:
+
+| Change | Net reduction |
+| --- | ---: |
+| Exact vertex consolidation in remaining map geometry | 253.7 MB |
+| Byte-identical shared images, including reference metadata overhead | 182.2 MB |
+| Exclude authoring snapshots, comparisons and concept/provenance images | 74.8 MB |
+
+The selector retained all 6,638 shipped GLBs. Geometry verification covered
+10,250,188 triangles; the final audit also checked six rewritten review/master
+GLBs. All 3,806 shipped original-directory/source-SHA policy records and 1,697
+eligible source/recipe variants matched the baseline. All 73 existing map-image
+files and 29 regional frame/style contracts remained unchanged.
+
+Ten fixed Forward+ views across Suncoil, Landfall Underground, Cinderbank and
+Reedway were pixel-identical before and after. Prepared-cache and background
+loading added 16 matching comparisons in Suncoil and Landfall Underground;
+collision probes and visible mesh/material inventories matched too. Texture
+GPU bytes matched the baseline in the four raw qualifications. Suncoil's
+measured static CPU allocation increased by about 14 MB; these
+qualification snapshots do not establish load-time or frame-time improvements.
+Existing prepared map caches require rebuilding with the new policy versions.
+
+This measures selected loose source assets. Exported PCK contents, generated
+sidecars, prepared products and release archive compression require separate
+release-build measurements. The standalone scenery qualification below also
+corrects the old packaging assertion that expected unused extracted images for
+raw-loaded world models; explicitly imported models retain that check.
+
+## Measured standalone scenery reduction, 2026-10-29
+
+The next pass reduces the tested PCK and selected loose asset payload by
+**583,590,621 bytes (583.59 MB)** beyond the map reduction above. It adds no
+compression container or runtime decompression step. The components do not
+overlap:
+
+| Change | Before | After | Reduction |
+| --- | ---: | ---: | ---: |
+| Fresh exported PCK, with unused world imports excluded | 1,039,241,516 | 518,814,388 | 520,427,128 |
+| 262 loose world GLBs plus the new unique image pool | 114,500,144 | 54,299,826 | 60,200,318 |
+| 36 unused loose extracted image copies | 2,963,175 | 0 | 2,963,175 |
+
+The PCK comparison uses fresh controlled exports of the production PCK input
+selection, before and after this pass. It is not an installer-size measurement.
+Existing map images reused by scenery were already selected for shipping and
+are not counted again. The new image pool contains 164 files (21,380,078 bytes);
+the 262 GLBs now total 32,919,748 bytes. Provenance records outside the release
+payload grow separately by 214,949 bytes. Optional newly generated prepared
+products and archive compression are outside this comparison.
+
+The changes share exact encoded image bytes, narrow legal 32-bit indices to
+16-bit indices, and remove one unreferenced cave-mouth image. An independent
+audit checked all 262 models against their originals: geometry values,
+triangles, nodes, materials, samplers, bounds, and all 717 retained image uses
+match. Image dimensions, full mip behavior and decoded RGBA values are
+preserved. The production town sidecar scope retains all 198 eligible variants;
+no new sidecar encoding is needed.
+
+Four representative assets (bookcase, tree fern, storage and cave mouth) were
+rendered from four views through raw and prepared loading, both normally and
+on a worker with the quarter map-texture setting. All **64 before/after image
+comparisons were pixel-identical**; mesh/material and texture inventories also
+matched. The final decode guard passed 16 more matching worker comparisons.
+Cache publication tests reject changed source images and preserve
+immutable already-loaded scenes without hashing again for each placement.
+
+The final PCK and loose files also passed a relocated-folder probe with an
+empty exported `res://` root and an unrelated working directory. That probe
+uses the supported editor executable beside the PCK, matching the existing
+package guard: the installed debug export template disables external path
+overrides and cannot run the probe script. It is not a full release-client
+gameplay or frame-time benchmark. Fresh acquisition verifies GLB and image
+hashes; no timing improvement is claimed. Older prepared caches require a
+rebuild with scene format 11 and map geometry policy 4.

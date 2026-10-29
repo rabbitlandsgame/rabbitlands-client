@@ -73,19 +73,46 @@
     "walk": 0.1149336227951153,
     "run": 0.2727119142572283
   },
-  "reviewStatus": "approved",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "A low, deliberate alternating-tripod stalk with six large walking limbs, separate front palps and a steady crystal abdomen. The faster skitter increases reach and cadence without bouncing the body.",
     "attack": "The legs brace as the body coils briefly, then drives the face and palps straight forward in a venomous bite thrust. The small fangs close inward and the spider recovers to its stance.",
     "death": "The crystal body sinks onto the ground while the six legs curl inward in a staggered release; the front palps relax, then the corpse holds still."
   },
   "runtimeOptimization": {
-    "receipt": "docs/qa/creature-storage/runtime-delivery.json",
-    "actor": "crystal_cave_spider",
+    "receipt": "docs/qa/creature-storage/accepted-repair-delivery-batch02.json",
     "sourceSHA256": "8dda51c7c617e40be1b130a2482acf48bc43ea737d377114d0290fac31cc723c",
-    "runtimeSHA256": "d37a47a3f42314d3cddc632a1e62d0a534a503896213e43dba528a277ca7a57f",
-    "method": "close_match_animation_resampling",
-    "bakeFPS": 120,
-    "artisticAcceptanceChanged": false
+    "previousRuntimeSHA256": "d37a47a3f42314d3cddc632a1e62d0a534a503896213e43dba528a277ca7a57f",
+    "runtimeSHA256": "7e32aea069b53a320a5fdbe6dc52aac32761167d99d5f4b6be4f73aba850cf95",
+    "method": "visually_accepted_creature_repair",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "crystal_cave_spider",
+      "sourceSHA256": "8dda51c7c617e40be1b130a2482acf48bc43ea737d377114d0290fac31cc723c",
+      "runtimeSHA256": "d37a47a3f42314d3cddc632a1e62d0a534a503896213e43dba528a277ca7a57f",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 120,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/accepted-repair-delivery-batch02.json",
+    "actor": "crystal_cave_spider",
+    "appliesToSHA256": "7e32aea069b53a320a5fdbe6dc52aac32761167d99d5f4b6be4f73aba850cf95",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_repair_instruction",
+      "instruction_summary": "The user accepted the other four batch02 candidates and reported the Golem right thumb still attaches to its right leg. Install only the four exact accepted versions; retain Golem runtime and prepare a separate thumb repair draft. Four saved exact-version Space approvals corroborate acceptance. No new push or release authorized.",
+      "catalog_sha256": "da6ecacbb3e42420d376e6530447f4aedc506d2a04309c29773928583ad1d47a",
+      "authorization_sha256": "624bab02ec9f07b18a9b58031a2529919b127e81e7f183867fa083b3db7521a4",
+      "not_a_historical_journal_event": true,
+      "saved_reviewer_approval": {
+        "event_id": "f6983424-a37e-4997-9d4a-b6fc3aed757a",
+        "event_sha256": "c68fefab332cf897063b0a098df04994326262a3b5468512b13465f2dbf07d41",
+        "utc": "2026-10-29T02:05:06.244633+00:00"
+      }
+    },
+    "previousAuthoringReviewStatus": "approved"
   }
 }

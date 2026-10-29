@@ -556,8 +556,27 @@
     {
       "id": "crystal_cave_spider",
       "file": "godot-client/assets/actors/native/creatures/crystal_cave_spider.glb",
-      "sha256": "d37a47a3f42314d3cddc632a1e62d0a534a503896213e43dba528a277ca7a57f",
-      "status": "current imported model; reviewed spider walk, skitter, bite and curl collapse integrated"
+      "sha256": "7e32aea069b53a320a5fdbe6dc52aac32761167d99d5f4b6be4f73aba850cf95",
+      "status": "current imported model; reviewed spider walk, skitter, bite and curl collapse integrated",
+      "runtimeVisualAcceptance": {
+        "receipt": "docs/qa/creature-storage/accepted-repair-delivery-batch02.json",
+        "actor": "crystal_cave_spider",
+        "appliesToSHA256": "7e32aea069b53a320a5fdbe6dc52aac32761167d99d5f4b6be4f73aba850cf95",
+        "scope": "exact_candidate_all_native_clips",
+        "approvalBasis": {
+          "kind": "current_user_repair_instruction",
+          "instruction_summary": "The user accepted the other four batch02 candidates and reported the Golem right thumb still attaches to its right leg. Install only the four exact accepted versions; retain Golem runtime and prepare a separate thumb repair draft. Four saved exact-version Space approvals corroborate acceptance. No new push or release authorized.",
+          "catalog_sha256": "da6ecacbb3e42420d376e6530447f4aedc506d2a04309c29773928583ad1d47a",
+          "authorization_sha256": "624bab02ec9f07b18a9b58031a2529919b127e81e7f183867fa083b3db7521a4",
+          "not_a_historical_journal_event": true,
+          "saved_reviewer_approval": {
+            "event_id": "f6983424-a37e-4997-9d4a-b6fc3aed757a",
+            "event_sha256": "c68fefab332cf897063b0a098df04994326262a3b5468512b13465f2dbf07d41",
+            "utc": "2026-10-29T02:05:06.244633+00:00"
+          }
+        },
+        "previousAuthoringReviewStatus": "approved"
+      }
     },
     {
       "id": "crystal_dire_wolf",
@@ -1088,7 +1107,7 @@
     {
       "id": "mossbound_stone_golem",
       "file": "godot-client/assets/actors/native/creatures/mossbound_stone_golem.glb",
-      "sha256": "e056751f8e6d490452250b7e0be3c1af74599ddf15602cf0cc22ddbc734cc5c0",
+      "sha256": "61d9bbc85cf6d85d8ec1e62fd0dc5dbb01153f36449471d69de6854d2cfeaeea",
       "status": "current model; animation work may require actor-specific visual review; storage optimized",
       "storage_roster_reconciliation": {
         "previous_recorded_sha256": "2e3398bc43637a5075db2459cd2513c55347bf23fcb0eea54ea0567c85aeacdb",
@@ -1096,25 +1115,18 @@
         "verified_source_revision": "159bb0c5778510655fd79671c19c365e90687b79"
       },
       "runtimeVisualAcceptance": {
-        "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+        "receipt": "docs/qa/creature-storage/accepted-golem-repair-delivery.json",
         "actor": "mossbound_stone_golem",
-        "appliesToSHA256": "e056751f8e6d490452250b7e0be3c1af74599ddf15602cf0cc22ddbc734cc5c0",
+        "appliesToSHA256": "61d9bbc85cf6d85d8ec1e62fd0dc5dbb01153f36449471d69de6854d2cfeaeea",
         "scope": "exact_candidate_all_native_clips",
         "approvalBasis": {
-          "kind": "saved_explicit_acceptance_comment",
-          "event_id": "fd10818c-3954-46e2-ab6e-fc90dedbed76",
-          "event_sha256": "4193060fb292db50ca89477ca5e69e4dcb7d77fd2bb0fac3ada2138e4d80a16d",
-          "utc": "2026-10-28T20:53:34.274445+00:00",
-          "repair_note_retained": true
+          "kind": "current_user_exact_candidate_acceptance",
+          "instruction_summary": "let's accept that one. Merge your changes into develop and push.",
+          "authorization_sha256": "826996ee9fe87d2ce9be95492debdb4ca5cbbfeda1c9cbcb49dbeaeb84e854cb",
+          "catalog_sha256": "8e982e9aa95a1a1f6e5844ecabdd8b3e5c3f463169febed9e2ad3824f7323f9e",
+          "not_a_generated_reviewer_event": true
         },
-        "previousAuthoringReviewStatus": null,
-        "repairNoteEvents": [
-          {
-            "event_id": "fd10818c-3954-46e2-ab6e-fc90dedbed76",
-            "event_sha256": "4193060fb292db50ca89477ca5e69e4dcb7d77fd2bb0fac3ada2138e4d80a16d",
-            "candidate_sha256": "e056751f8e6d490452250b7e0be3c1af74599ddf15602cf0cc22ddbc734cc5c0"
-          }
-        ]
+        "previousAuthoringReviewStatus": "accepted"
       }
     },
     {
@@ -1724,8 +1736,27 @@
     {
       "id": "storm_chimera",
       "file": "godot-client/assets/actors/native/creatures/storm_chimera.glb",
-      "sha256": "308a44dd4e9ade94bb37544169bb3ebc2138ba947ba7ac1d16f85322fade47f1",
-      "status": "current model; animation work may require actor-specific visual review; storage optimized"
+      "sha256": "05e2d23a87201f7ef94dcfd4227af888c69c3572b5a7020edaa647039d201252",
+      "status": "current model; animation work may require actor-specific visual review; storage optimized",
+      "runtimeVisualAcceptance": {
+        "receipt": "docs/qa/creature-storage/accepted-repair-delivery-batch02.json",
+        "actor": "storm_chimera",
+        "appliesToSHA256": "05e2d23a87201f7ef94dcfd4227af888c69c3572b5a7020edaa647039d201252",
+        "scope": "exact_candidate_all_native_clips",
+        "approvalBasis": {
+          "kind": "current_user_repair_instruction",
+          "instruction_summary": "The user accepted the other four batch02 candidates and reported the Golem right thumb still attaches to its right leg. Install only the four exact accepted versions; retain Golem runtime and prepare a separate thumb repair draft. Four saved exact-version Space approvals corroborate acceptance. No new push or release authorized.",
+          "catalog_sha256": "da6ecacbb3e42420d376e6530447f4aedc506d2a04309c29773928583ad1d47a",
+          "authorization_sha256": "624bab02ec9f07b18a9b58031a2529919b127e81e7f183867fa083b3db7521a4",
+          "not_a_historical_journal_event": true,
+          "saved_reviewer_approval": {
+            "event_id": "200fba82-f448-46c3-9084-b5906edae7d2",
+            "event_sha256": "12fbc3e8d8d8def38b67e34f88b32e1ea2f945e853e35f6170faa243e76475b2",
+            "utc": "2026-10-29T02:05:19.912572+00:00"
+          }
+        },
+        "previousAuthoringReviewStatus": null
+      }
     },
     {
       "id": "moonlit_unicorn",
@@ -2027,7 +2058,7 @@
     {
       "id": "autumn_bark_treant",
       "file": "godot-client/assets/actors/native/creatures/autumn_bark_treant.glb",
-      "sha256": "eb7575c7bab1c7d36256f70f0fb47f77f94d5e38ab326bfd2fa8f7a190f228eb",
+      "sha256": "c0d3791be5d2f318cfaf732cc3f909a3ee5268e41b8cad9c1ae53a6315e15a32",
       "status": "current model; animation work may require actor-specific visual review",
       "storage_roster_reconciliation": {
         "previous_recorded_sha256": "e1f5ed09d2e4157bef7706d00cbc86d3327d5048a01fc918c91a53af2e025232",
@@ -2035,24 +2066,23 @@
         "verified_source_revision": "159bb0c5778510655fd79671c19c365e90687b79"
       },
       "runtimeVisualAcceptance": {
-        "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+        "receipt": "docs/qa/creature-storage/accepted-repair-delivery-batch02.json",
         "actor": "autumn_bark_treant",
-        "appliesToSHA256": "eb7575c7bab1c7d36256f70f0fb47f77f94d5e38ab326bfd2fa8f7a190f228eb",
+        "appliesToSHA256": "c0d3791be5d2f318cfaf732cc3f909a3ee5268e41b8cad9c1ae53a6315e15a32",
         "scope": "exact_candidate_all_native_clips",
         "approvalBasis": {
-          "kind": "saved_button_approval",
-          "event_id": "cd93066c-0268-4ed7-95a6-9b417e5b63a0",
-          "event_sha256": "f46e2e0288c6ffde61bdaf88c93e7bb7b4dedafafba2e908019acb81eb42c49a",
-          "utc": "2026-10-28T21:29:10.422592+00:00"
-        },
-        "previousAuthoringReviewStatus": null,
-        "repairNoteEvents": [
-          {
-            "event_id": "a2abaf8b-4640-42c7-8694-af0dfb2742f1",
-            "event_sha256": "d69a9e0568872b6d7a2f460f106a52c72d1874bd93367bc5bdbe5f57e935af56",
-            "candidate_sha256": "eb7575c7bab1c7d36256f70f0fb47f77f94d5e38ab326bfd2fa8f7a190f228eb"
+          "kind": "current_user_repair_instruction",
+          "instruction_summary": "The user accepted the other four batch02 candidates and reported the Golem right thumb still attaches to its right leg. Install only the four exact accepted versions; retain Golem runtime and prepare a separate thumb repair draft. Four saved exact-version Space approvals corroborate acceptance. No new push or release authorized.",
+          "catalog_sha256": "da6ecacbb3e42420d376e6530447f4aedc506d2a04309c29773928583ad1d47a",
+          "authorization_sha256": "624bab02ec9f07b18a9b58031a2529919b127e81e7f183867fa083b3db7521a4",
+          "not_a_historical_journal_event": true,
+          "saved_reviewer_approval": {
+            "event_id": "7ef37012-694c-408c-b700-d22a3003899a",
+            "event_sha256": "ed8877bb41480233b207dcb8922b7a8386738c4e05090615c04b6f21a9dd5024",
+            "utc": "2026-10-29T02:04:57.638432+00:00"
           }
-        ]
+        },
+        "previousAuthoringReviewStatus": "accepted"
       }
     },
     {
@@ -3401,8 +3431,27 @@
     {
       "id": "ostrich",
       "file": "godot-client/assets/actors/native/creatures/basic_expansion/ostrich.glb",
-      "sha256": "257b153037bf4620e7cff55a6620b1fd89778c409d59e1998f043e2d096fa979",
-      "status": "current model; updated animation draft installed; actor-specific visual review pending; storage optimized"
+      "sha256": "9dc999b1f1a627fc0c30dd3a87707a4617fefe1c36bdb25c47760c7f68ee4be0",
+      "status": "current model; updated animation draft installed; actor-specific visual review pending; storage optimized",
+      "runtimeVisualAcceptance": {
+        "receipt": "docs/qa/creature-storage/accepted-repair-delivery-batch02.json",
+        "actor": "ostrich",
+        "appliesToSHA256": "9dc999b1f1a627fc0c30dd3a87707a4617fefe1c36bdb25c47760c7f68ee4be0",
+        "scope": "exact_candidate_all_native_clips",
+        "approvalBasis": {
+          "kind": "current_user_repair_instruction",
+          "instruction_summary": "The user accepted the other four batch02 candidates and reported the Golem right thumb still attaches to its right leg. Install only the four exact accepted versions; retain Golem runtime and prepare a separate thumb repair draft. Four saved exact-version Space approvals corroborate acceptance. No new push or release authorized.",
+          "catalog_sha256": "da6ecacbb3e42420d376e6530447f4aedc506d2a04309c29773928583ad1d47a",
+          "authorization_sha256": "624bab02ec9f07b18a9b58031a2529919b127e81e7f183867fa083b3db7521a4",
+          "not_a_historical_journal_event": true,
+          "saved_reviewer_approval": {
+            "event_id": "7fc38583-fc01-4c93-9618-66d5c5050e51",
+            "event_sha256": "e53402cf13f132c14def7e08897b791816bbf5837a240040aa32034685df4a17",
+            "utc": "2026-10-29T02:05:28.089561+00:00"
+          }
+        },
+        "previousAuthoringReviewStatus": "draft_needs_review"
+      }
     },
     {
       "id": "penguin",

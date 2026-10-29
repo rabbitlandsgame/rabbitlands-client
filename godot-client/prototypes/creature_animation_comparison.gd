@@ -276,7 +276,9 @@ func inspect_point(point: Dictionary) -> void:
 	seek_both(float(point.time))
 	var target: Array = point.get("focus", [default_focus.x, default_focus.y, default_focus.z])
 	focus = Vector3(float(target[0]), float(target[1]), float(target[2]))
-	yaw = 2.2; pitch = 0.15; distance = maxf(1.0, default_distance * 0.6)
+	yaw = float(point.get("yaw",2.2))
+	pitch = float(point.get("pitch",0.15))
+	distance = maxf(0.05,float(point.get("distance",maxf(1.0,default_distance*0.6))))
 	update_cameras()
 
 func orbit_input(event: InputEvent) -> void:
@@ -333,6 +335,7 @@ func smoke_test() -> void:
 	var output := str(job.output)
 	DirAccess.make_dir_recursive_absolute(output)
 	var records := []
+	var inspections := []
 	for name in clips:
 		select_clip(name)
 		seek_both(timeline.max_value * 0.47)
@@ -344,14 +347,19 @@ func smoke_test() -> void:
 		records.append({"clip": name, "length": timeline.max_value, "synchronized_time": clock})
 	if DisplayServer.get_name() != "headless":
 		for point: Dictionary in job.get("review_points", []):
-			inspect_point(point)
-			for view in ["close", "side"]:
-				if view == "side": yaw = PI / 2; update_cameras()
+			for view: Dictionary in job.get("inspect_views",[{"id":"close"},{"id":"side","yaw":PI/2}]):
+				inspect_point(point)
+				yaw = float(view.get("yaw",yaw))
+				pitch = float(view.get("pitch",pitch))
+				distance = maxf(0.05,float(view.get("distance",distance)))
+				update_cameras()
+				var view_id := str(view.id)
 				for frame in 3: await process_frame
 				await RenderingServer.frame_post_draw
-				root.get_texture().get_image().save_png(output.path_join(str(point.id) + "-" + view + ".png"))
+				root.get_texture().get_image().save_png(output.path_join(str(point.id) + "-" + view_id + ".png"))
 				for index in 2:
-					viewports[index].get_texture().get_image().save_png(output.path_join(str(point.id) + "-" + view + "-" + str(index) + ".png"))
+					viewports[index].get_texture().get_image().save_png(output.path_join(str(point.id) + "-" + view_id + "-" + str(index) + ".png"))
+				inspections.append({"point":point.id,"clip":clip,"time":clock,"view":view_id,"yaw":yaw,"pitch":pitch,"distance":distance,"focus":[focus.x,focus.y,focus.z]})
 	# Exercise end hold, restoration, all directed switches and controls.
 	for previous in clips:
 		for following in clips:
@@ -400,6 +408,6 @@ func smoke_test() -> void:
 	Input.parse_input_event(mouse)
 	await process_frame
 	assert(distance < old_distance, "Mouse wheel did not zoom")
-	FileAccess.open(output.path_join("preview-smoke.json"), FileAccess.WRITE).store_string(JSON.stringify({"clips": records, "directed_switches_exercised": clips.size() * clips.size(), "terminal_hold_and_idle_reset": true, "keyboard_mouse_orbit_zoom_input_delivered": true, "models": job.models, "renderer": RenderingServer.get_current_rendering_method()}, "  "))
+	FileAccess.open(output.path_join("preview-smoke.json"), FileAccess.WRITE).store_string(JSON.stringify({"clips": records, "inspections":inspections,"directed_switches_exercised": clips.size() * clips.size(), "terminal_hold_and_idle_reset": true, "keyboard_mouse_orbit_zoom_input_delivered": true, "models": job.models, "renderer": RenderingServer.get_current_rendering_method()}, "  "))
 	print("CREATURE_COMPARISON_SMOKE_PASS")
 	await close_preview()

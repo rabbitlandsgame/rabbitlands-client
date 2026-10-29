@@ -1,0 +1,122 @@
+{
+  "schema": 1,
+  "actor": "mossbound_stone_golem",
+  "date": "2026-10-29",
+  "status": "Unapproved forearm-twist review draft, not installed",
+  "baseline_role": "Last reviewed uninstalled V9 5230",
+  "models": {
+    "reviewed_v9": {
+      "sha256": "5230858a864b77cb29c147f48f44e73b46e307be5b2fe43ce15b8bec9f3bc7e3",
+      "raw_bytes": 2009044,
+      "bones": 36,
+      "skeletons": 1,
+      "retargeted_keys": 15344,
+      "retargeted_tracks": 323,
+      "animation_update": {
+        "Attack_Ground_Pound": {
+          "batch_means_usec": [
+            14.2333333333333,
+            14.37,
+            15.5425,
+            15.5991666666667,
+            17.1216666666667,
+            17.5366666666667,
+            17.7708333333333,
+            18.2041666666667,
+            18.2108333333333
+          ],
+          "median_usec_per_update": 17.1216666666667,
+          "minimum_usec_per_update": 14.2333333333333
+        },
+        "Walk": {
+          "batch_means_usec": [
+            12.0025,
+            12.5108333333333,
+            12.61,
+            12.765,
+            13.79,
+            15.2825,
+            15.4558333333333,
+            17.5441666666667,
+            20.7866666666667
+          ],
+          "median_usec_per_update": 13.79,
+          "minimum_usec_per_update": 12.0025
+        }
+      },
+      "retained_static_memory_delta_bytes": 19702352,
+      "scope": "Fresh-process real GlbSceneCache._build_raw + ReplicatedActor3D + NativeAnimationImporter, warm OS file cache. Retained Godot static CPU allocations include scene and library caches, meshes, textures and actor. AnimationPlayer advance plus forced skeleton global transforms at 240 updates/s; nine batches of 1200 updates per clip after warmup. Excludes GPU rendering/skinning, whole-game logic and frame-rate claims."
+    },
+    "forearm_v10": {
+      "sha256": "61d9bbc85cf6d85d8ec1e62fd0dc5dbb01153f36449471d69de6854d2cfeaeea",
+      "raw_bytes": 2016188,
+      "bones": 37,
+      "skeletons": 1,
+      "retargeted_keys": 15428,
+      "retargeted_tracks": 327,
+      "animation_update": {
+        "Attack_Ground_Pound": {
+          "batch_means_usec": [
+            10.3141666666667,
+            10.4308333333333,
+            10.5225,
+            10.5241666666667,
+            10.53,
+            10.6841666666667,
+            10.8716666666667,
+            12.81,
+            13.3616666666667
+          ],
+          "median_usec_per_update": 10.53,
+          "minimum_usec_per_update": 10.3141666666667
+        },
+        "Walk": {
+          "batch_means_usec": [
+            9.25333333333333,
+            9.845,
+            10.2016666666667,
+            12.3658333333333,
+            12.4108333333333,
+            13.0383333333333,
+            13.2658333333333,
+            13.6025,
+            13.6133333333333
+          ],
+          "median_usec_per_update": 12.4108333333333,
+          "minimum_usec_per_update": 9.25333333333333
+        }
+      },
+      "retained_static_memory_delta_bytes": 19715633,
+      "scope": "Fresh-process real GlbSceneCache._build_raw + ReplicatedActor3D + NativeAnimationImporter, warm OS file cache. Retained Godot static CPU allocations include scene and library caches, meshes, textures and actor. AnimationPlayer advance plus forced skeleton global transforms at 240 updates/s; nine batches of 1200 updates per clip after warmup. Excludes GPU rendering/skinning, whole-game logic and frame-rate claims."
+    }
+  },
+  "delta": {
+    "raw_bytes": 7144,
+    "native_bones": 1,
+    "retargeted_keys": 84,
+    "retargeted_tracks": 4,
+    "retained_static_memory_delta_bytes": 13281
+  },
+  "geometry_each": {
+    "vertices": 9816,
+    "triangles": 3272,
+    "draw_surfaces": 1,
+    "corrective_shapes": 0,
+    "active_skin_palette_joints": 35
+  },
+  "active_installed_reference": {
+    "sha256": "e056751f8e6d490452250b7e0be3c1af74599ddf15602cf0cc22ddbc734cc5c0",
+    "raw_bytes": 1896812,
+    "native_bones": 30,
+    "candidate_delta_bytes": 119376,
+    "candidate_delta_native_bones": 7,
+    "scope": "Includes preceding uninstalled Golem repairs; not solely this forearm correction."
+  },
+  "interpretation": [
+    "One skin-only axial control changes only the closed 600-row forearm; every existing control and the fist path remain unchanged.",
+    "Extra cached first-actor static allocation includes shared caches; not per-instance memory or VRAM.",
+    "Fresh-process timings vary with scheduling/background activity; no causal speedup or whole-game FPS claim.",
+    "Animation advance plus forced transforms at 240 updates/s; nine batches of 1200 after warmup. GPU rendering and skinning not benchmarked.",
+    "Raw bytes +7144 versus displayed V9; source geometry/surface/influence workload unchanged. New control adds bone and animation work."
+  ]
+}

@@ -215,8 +215,8 @@ def clamp_flags(material):
         raise ValueError(f'Unsupported atlas material wrap mode: {wrap}')
     flags = (atlas_soft_ground.CLAMP_S if wrap[0] == CLAMP_TO_EDGE else 0) | (
              atlas_soft_ground.CLAMP_T if wrap[1] == CLAMP_TO_EDGE else 0)
-    if flags and (material.alpha_mode != 'OPAQUE' or getattr(material,'atlas_soft_ground',False) or material.orm):
-        raise ValueError('Atlas CLAMP_TO_EDGE supports opaque albedo only; masked, soft-ground or ORM clamp requires explicit support')
+    if flags and (material.alpha_mode not in ('OPAQUE', 'MASK') or getattr(material,'atlas_soft_ground',False) or material.orm):
+        raise ValueError('Atlas CLAMP_TO_EDGE supports opaque/masked albedo; soft-ground and ORM clamp require explicit support')
     return flags
 
 
@@ -415,7 +415,7 @@ def raster(scene, colors, low, high, size, supersample=2, *, minify=True, native
         for i in soft:
             materials[i].alpha_mode = 3
         for i,flags in clamped.items():
-            materials[i].alpha_mode = flags  # Opaque low bits remain zero; native ABI unchanged.
+            materials[i].alpha_mode |= flags  # Preserve low alpha-mode bits; native ABI unchanged.
     all_positions = keep[0]
     ceiling = float(all_positions[:, 1].max()) + 100.
     floor = float(all_positions[:, 1].min()) - 10.

@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "fallbackAction": "idle",
+  "loopingClips": [
+    "Idle_A",
+    "Fighting_Idle",
+    "Walk",
+    "Jog"
+  ],
+  "playbackSpeeds": {
+    "walk": 1.15,
+    "run": 1.25
+  },
+  "actions": {
+    "idle": "Idle_A",
+    "alternate_idle": "Idle_A",
+    "combat_idle": "Fighting_Idle",
+    "walk": "Walk",
+    "run": "Jog",
+    "turn": "Idle_A",
+    "sit": "Idle_A",
+    "seated_idle": "Idle_A",
+    "stand": "Idle_A",
+    "death": "Death_A",
+    "pain": "Hit_Chest",
+    "attack_primary": "Sword_Attack",
+    "ranged_attack": "Sword_Attack",
+    "cast": "Sword_Attack",
+    "harvest": "Sword_Attack",
+    "pickup": "Idle_A",
+    "drop": "Idle_A",
+    "emote_greeting": "Idle_A"
+  },
+  "serverCommands": {
+    "3": "death",
+    "5": "pain",
+    "7": "idle",
+    "13": "sit",
+    "14": "stand",
+    "15": "combat_idle",
+    "18": "combat_idle",
+    "19": "idle",
+    "20": "walk",
+    "21": "walk",
+    "22": "walk",
+    "23": "walk",
+    "24": "walk",
+    "25": "walk",
+    "26": "walk",
+    "27": "walk",
+    "30": "run",
+    "31": "run",
+    "32": "run",
+    "33": "run",
+    "34": "run",
+    "35": "run",
+    "36": "run",
+    "37": "run",
+    "38": "turn",
+    "39": "turn",
+    "40": "turn",
+    "41": "turn",
+    "42": "turn",
+    "43": "turn",
+    "44": "turn",
+    "45": "turn",
+    "46": "attack_primary"
+  },
+  "reviewStatus": "accepted",
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/accepted-repair-delivery-batch02.json",
+    "actor": "storm_chimera",
+    "appliesToSHA256": "05e2d23a87201f7ef94dcfd4227af888c69c3572b5a7020edaa647039d201252",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_repair_instruction",
+      "instruction_summary": "The user accepted the other four batch02 candidates and reported the Golem right thumb still attaches to its right leg. Install only the four exact accepted versions; retain Golem runtime and prepare a separate thumb repair draft. Four saved exact-version Space approvals corroborate acceptance. No new push or release authorized.",
+      "catalog_sha256": "da6ecacbb3e42420d376e6530447f4aedc506d2a04309c29773928583ad1d47a",
+      "authorization_sha256": "624bab02ec9f07b18a9b58031a2529919b127e81e7f183867fa083b3db7521a4",
+      "not_a_historical_journal_event": true,
+      "saved_reviewer_approval": {
+        "event_id": "200fba82-f448-46c3-9084-b5906edae7d2",
+        "event_sha256": "12fbc3e8d8d8def38b67e34f88b32e1ea2f945e853e35f6170faa243e76475b2",
+        "utc": "2026-10-29T02:05:19.912572+00:00"
+      }
+    },
+    "previousAuthoringReviewStatus": null
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/accepted-repair-delivery-batch02.json",
+    "sourceSHA256": "e35e661a2a2ad5987be76c473c916ed17c7692e7d0233277a782903765f909e8",
+    "previousRuntimeSHA256": "308a44dd4e9ade94bb37544169bb3ebc2138ba947ba7ac1d16f85322fade47f1",
+    "runtimeSHA256": "05e2d23a87201f7ef94dcfd4227af888c69c3572b5a7020edaa647039d201252",
+    "method": "visually_accepted_creature_repair",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": null
+  }
+}

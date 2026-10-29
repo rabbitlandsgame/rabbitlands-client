@@ -38,7 +38,7 @@ def current(region, ppm=4, supersample=1):
     tab = region["tabMap"]
     if not detail or detail.get("pixelsPerMetre") != ppm:
         return False
-    if detail.get("chunkReaderVersion") != RM.CHUNK_READER_VERSION:
+    if detail.get("chunkReaderVersion") != RM.reader_version_for(ROOT, region["serverMap"], (tab["worldMin"], tab["worldMax"])):
         return False
     if detail.get("styleVersion") != RC.STYLE_VERSION or detail.get("supersample") != supersample:
         return False

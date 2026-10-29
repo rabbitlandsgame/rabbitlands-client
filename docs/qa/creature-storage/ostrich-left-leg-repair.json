@@ -1,0 +1,85 @@
+{
+  "actor": "ostrich",
+  "variant": "left-leg-skin-v1",
+  "status": "ready_for_human_review_partial_repair",
+  "key_fix": "129skin rows/81complete coincident groups fitted with original local-edge motion plus harmonic unchanged boundary offsets; all stored geometry/normals/UV/index rows, original17bone curves/binds and materials retained.",
+  "limits": [
+    "Partial improvement only: residual left-leg narrowing/shear remains during Sword_Attack, Jog and Death.",
+    "All native metrics are in authoring model units unless explicitly marked as actual-client world millimetres.",
+    "The two-control v3 option is rejected after PBR showed a sharper knee kink; its lower aggregate numeric error does not justify offering it.",
+    "Current active conservative model remains installed; this is an unapproved compact30Hz zero-corrective replacement draft.",
+    "No new bones/draws/weight slots versus either baseline; no runtime FPS claim."
+  ],
+  "active_placement": {
+    "model_global_equal": true,
+    "nameplate_global_equal": true,
+    "overhead_height_equal": true,
+    "selection_size_equal": true
+  },
+  "runtime_replaced": false,
+  "approved": false,
+  "source_sha256": "2c5d7c1fa448079dbfc956565c05197db473b885918baa35ccf0e41ac640ae2f",
+  "commented_sha256": "b41f786ebd08aff62b3669d492e7932d84fcfb9c8c5d643cbcdbf4b6250e64cd",
+  "active_runtime_sha256": "257b153037bf4620e7cff55a6620b1fd89778c409d59e1998f043e2d096fa979",
+  "candidate_sha256": "9dc999b1f1a627fc0c30dd3a87707a4617fefe1c36bdb25c47760c7f68ee4be0",
+  "candidate_bytes": 703000,
+  "added_bytes_vs_commented": 0,
+  "extra_bones": 0,
+  "extra_draws": 0,
+  "comment": {
+    "actor": "ostrich",
+    "clip": "Sword_Attack",
+    "time_seconds": 0.733304000000001,
+    "comment": "left leg needs a bit of work during the attack animation",
+    "source_sha256": "2c5d7c1fa448079dbfc956565c05197db473b885918baa35ccf0e41ac640ae2f",
+    "commented_sha256": "b41f786ebd08aff62b3669d492e7932d84fcfb9c8c5d643cbcdbf4b6250e64cd",
+    "accepted_installed": false,
+    "original_to_bake_maximum_position_mm": 317.4839727222914,
+    "note_event_id": "e96ae837-176c-4f65-8e36-bc40e9789161"
+  },
+  "native_states": 1027,
+  "reported_edge_excess_percent": {
+    "before": 109.10608637021562,
+    "after": 83.74853919854726
+  },
+  "worst_left_leg_edge_excess_percent": {
+    "before": 909.5757056157715,
+    "after": 654.728415477461
+  },
+  "actual_client": {
+    "states": 380,
+    "outside_vertices": 4094,
+    "outside_position_delta": 0,
+    "outside_normal_vector_delta": 0,
+    "original_named_bone_world_delta": 0,
+    "loader": "Actual ReplicatedActor3D / raw GlbSceneCache, not editor PackedScene"
+  },
+  "evidence_sha256": {
+    "structural": "525f3f929d981238dc5b089afb3bfeb4300d5f59b83cf96c5201b89462bbc9c8",
+    "fresh_blender": "fe32764294d91e143ed04d8209c9519e88c36c5c64bcbee54949fcb8abe1f341",
+    "actual_client": "0b4560a37d4996f8bf58c8a395f17373b511589555cdd876aee89a883fde74ba",
+    "actual_outside": "3e4daec7da6a1a53e5b69187d84589f0bce03b5018290374eb1d1a8370dc8359",
+    "active_model_placement": "9c28a2caf825530b7c4468069c9df330e38a5f6ab01e9d58dfaed24f33a0b2a1",
+    "active_model_placement_job": "d90e78c0f89e9e917a653bbcf58ef64257041ae5510fec218f4e1ee9a1d89c76",
+    "independent_native_comparison": "1b3a39a120e84e64f5697a02b883aeeaae7953c5475f06bbf68ea5b821de70ea",
+    "visual_launches": "d154818c3be1f1cd00effc4230b15e8863830bc486d83e82d43c618ca643cb89",
+    "visual_job": "e7098702e067a05d1fb00d849d2a86df7cd66f634fa9b2a6daecf5817bf6fd99",
+    "visual_smoke": "c2e8994491e9d0186deac9a85eb4f893d52578119f6459af6650c91097a158dd",
+    "reported_board": "ffa7603090e661108eeb5a11a0395928b518dbdff1c29b6414bd47b7cd37e55b",
+    "worst_board": "f897df2ce6c84ebb44ea87adc222e3d9730db80cd80ad5bb2281c62c128db354",
+    "reproduction_report": "15bb460857dfb5c81e847be4e065d91bac44eb3c9c4e9ba2a4bc30e64407924d",
+    "reproduction_tool": "5ee16e125d10e525b90c9af01aa36e001c3fe53abff7e746e2650728bc1a2dde",
+    "all_clips_visual_job": "9fe8160a5e88d1c74b34efecc5b3d37650424484200a5c4114f96592d52f1633",
+    "all_clips_visual_smoke": "d24219b4e4c8d525847ab6f06b6c38706f107bf07a25e1d99c56915f20bb1a01",
+    "all_clips_launch": "5d933fdd1720f428945469caaa5ba51ce0bcc514f6a73d77f560ff199e0511fa",
+    "all_clips_board": "d335c087f3bdba488569837ee0966b5fa79d1060a713ea035f98c87c1ca25443"
+  },
+  "reproduction_tool": "eloria-assets/tools/repair_ostrich_left_leg.py",
+  "media_scope": {
+    "all_seven_native_clips": "One fully framed PBR still per clip at47% duration, epoch101.",
+    "targeted_pose_views": "Epoch99: four cardinal views at reported Sword_Attack, Jog, old/new worst, RESET and held Death; not all7full-cycle movies.",
+    "all_seven_numeric_playback": "380actual rawClient states inclfullclipgrids/default/held/firsttick and60Hzstepped directed switches.",
+    "caption_correction": "The inherited bottom runtime_summary in epoch99/101 screenshots describes rejectedv3 controls. Exact9dc model pins/public structural proof are authoritative: freev1 adds0bones/keys/draws and0bytes. This is a UIcaption error only."
+  },
+  "versioned_handoff_sha256": "44e861f84dbfb811238729d26529226217f3734804b28a3e75acb7240e6b8ba7"
+}

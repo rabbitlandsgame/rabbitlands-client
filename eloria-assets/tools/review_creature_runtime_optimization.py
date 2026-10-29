@@ -9,6 +9,10 @@ variants:[{id,label,path,sha256,bytes,metrics:{...}}], was_installed,
 selected_local_draft}], review_store:".local/review-events.jsonl"}.
 Optional entry.source_label/review_note describe a repair baseline; commented_pose
 {clip,time_seconds} adds a jump to the saved observation without changing it.
+Optional review_camera {focus:[x,y,z],distance} supplies source-based framing
+when preserved gameplay bounds include old deformation outliers.
+Optional initial_clip selects the first animation when opening the reviewer;
+subsequent creature/variant navigation retains the selected clip where possible.
 Paths are relative to the catalog or absolute. Journal paths MUST remain under
 the catalog directory's .local. Optional entry.actor supplies the models registry
 key for synthetic control entries. Approvals cover the entire exact candidate,
@@ -25,6 +29,7 @@ import contextlib
 import datetime as dt
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import shutil
@@ -86,9 +91,23 @@ def load_catalog(path, verify_files=False):
         if not entry.get("id") or entry["id"] in seen:
             raise ValueError("Catalog creature IDs must be unique")
         seen.add(entry["id"])
+        framing = entry.get("review_camera", {})
+        if not isinstance(framing, dict):
+            raise ValueError("Review camera must be a dictionary")
+        if "focus" in framing:
+            point = framing["focus"]
+            if not isinstance(point, list) or len(point) != 3 or not all(
+                    isinstance(v, (int, float)) and math.isfinite(v) for v in point):
+                raise ValueError("Review camera focus requires three finite coordinates")
+        if "distance" in framing:
+            value = framing["distance"]
+            if not isinstance(value, (int, float)) or not math.isfinite(value) or not .1 <= value <= 200:
+                raise ValueError("Review camera distance must be within .1 to200")
         clips = entry.get("clips", [])
         if not clips or len(clips) != len(set(clips)):
             raise ValueError("Every creature needs its full native clip inventory")
+        if "initial_clip" in entry and entry["initial_clip"] not in clips:
+            raise ValueError("Initial clip must belong to the native clip inventory")
         variant_ids = [v["id"] for v in entry.get("variants", [])]
         if len(variant_ids) != len(set(variant_ids)):
             raise ValueError("Duplicate candidate variant ID")

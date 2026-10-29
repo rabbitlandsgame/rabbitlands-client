@@ -67,8 +67,9 @@ What goes in, and why it is more than an export:
       it. Its interactive lab (prototypes/rl_heads) is not exported.
   eloria-assets/maps, eloria-assets/concepts
       "res://../eloria-assets/..." resolves beside app/. Every map package (a
-      folder holding world.json) ships without its references, captures,
-      sources, reports and unused world-lod2.glb; any other file a shipped
+      folder holding world.json) ships without its authoring snapshots,
+      comparison panels, references, captures, sources, reports and unused
+      world-lod2.glb; any other file a shipped
       manifest or the map registry names is pulled in even if the filter
       dropped it.
   eloria-assets/maps/.../shared-assets/vram
@@ -143,6 +144,7 @@ import client_runtime_package
 import prepared_content_package
 import creature_compression
 import full_optimization_package
+from road_ground_dependencies import dependencies as road_dependencies, RoadGroundDependencyError
 from pathlib import Path, PurePosixPath
 from urllib.parse import unquote
 
@@ -162,9 +164,12 @@ ASSET_REF = re.compile(r"res://\.\./(eloria-assets/[^\"'\s]+)")
 INSTALLER_APP_ID = "{6B1E9F4C-3A52-4D8E-9C71-5E0B2F8A4D17}"
 INSTALLER_MUTEX = "RabbitLandsSetup-" + INSTALLER_APP_ID.strip("{}")
 
-# Folders and files inside a map package that the client never reads.
-MAP_EXCLUDED_DIRS = {"references", "captures", "godot-captures", "source",
-                     "sources", "qa", "reports", "review", "renders"}
+# Leave local editing snapshots and review art in the repository, not in a
+# release. These are folder defaults: an explicit client/manifest dependency
+# still ships and is checked by shipped_eloria_assets, including road styles.
+MAP_EXCLUDED_DIRS = {"authoring", "comparison", "references", "captures",
+                     "godot-captures", "source", "sources", "qa", "reports",
+                     "review", "renders"}
 MAP_EXCLUDED_SUFFIXES = {".py", ".md", ".gd", ".c", ".txt", ".gitignore"}
 # Reduced-detail map packages (world-lod2.glb, 335 MB across eleven maps) and
 # their manifests and statistics. Manifests list them under lodGroups and the
@@ -178,7 +183,9 @@ SERVED_V2_STATUSES = {"continent-v2-served"}
 SERVER_ONLY_FILES = {"collision.bin", "served-grid.escg.gz"}
 REGISTRY_FILE = "godot-client/data/maps/registry.json"
 # Manifest keys that describe provenance, or files the client never opens.
-MANIFEST_SKIPPED_KEYS = {"sources", "provenance", "knownLimitations", "lodGroups"}
+# conceptArt retains the source boards' provenance in the repository; runtime
+# pictures/textures declared independently still enter the verified closure.
+MANIFEST_SKIPPED_KEYS = {"sources", "provenance", "conceptArt", "knownLimitations", "lodGroups"}
 # The manifest key naming the prototype meshes a package does not carry
 # (eloria-assets/tools/shared_meshes.py): URI relative to the manifest's folder
 # -> sha256 of the prototype GLB it names. The pool keeps index.json beside the
@@ -850,6 +857,228 @@ def _extracted_image_names(document: dict) -> list[str | None]:
     return names
 
 
+WORLD_ASSET_ROOT = "godot-client/assets/world/"
+WORLD_RESOURCE_LITERAL = re.compile(r"res://(assets/world/[^\"'\s]+\.(?:glb|gltf|png|jpg|jpeg|webp))", re.I)
+WORLD_LOAD_LITERAL = re.compile(r"\b(?:load|preload)\s*\(\s*['\"]res://(assets/world/[^'\"]+\.(?:glb|gltf))['\"]", re.I)
+
+
+def _possible_gltf_uris(path: Path) -> list[str]:
+    """Read URI strings without materializing unrelated actors' huge curve JSON."""
+    if path.suffix.lower() == ".glb":
+        with path.open("rb") as handle:
+            header = handle.read(20)
+            if len(header) < 20 or header[:4] != b"glTF":
+                return gltf_image_uris(path)  # Preserve legacy compressed-container support.
+            raw = handle.read(struct.unpack_from("<I", header, 12)[0])
+    else:
+        raw = path.read_bytes()
+    return [unquote(json.loads(match.group(1))) for match in re.finditer(rb'"uri"\s*:\s*("(?:\\.|[^"\\])*")', raw)]
+
+
+def world_import_shipping(build_dir: Path) -> dict[str, set[str]]:
+    # A runner owns one immutable committed input generation. Complete this
+    # reference proof before its verified map/editor source retirement, as we
+    # already do for actor_shipping. Later checks still hash actual staged
+    # models/images and inspect the real PCK. Ordinary local builds recompute.
+    if STORAGE is None:
+        return _world_import_shipping(build_dir)
+    plans = STORAGE.world_import_plans
+    resolved = build_dir.resolve()
+    if resolved not in plans:
+        result = _world_import_shipping(build_dir)
+        plans[resolved] = {key: frozenset(value) for key, value in result.items()}
+    return {key: set(value) for key, value in plans[resolved].items()}
+
+
+def _world_import_shipping(build_dir: Path) -> dict[str, set[str]]:
+    """Raw scenery needs no editor scene import; explicit resource users win.
+
+    An image is dropped only when its encoded bytes exactly match an embedded
+    source image and no independent shipped text/glTF reference names it.
+    Names alone never establish that a source texture is disposable.
+    """
+    files = tracked(build_dir, "godot-client")
+    models = {path for path in files if path.startswith(WORLD_ASSET_ROOT) and path.lower().endswith(GLTF_SUFFIXES)}
+    images = {path for path in files if path.startswith(WORLD_ASSET_ROOT) and path.lower().endswith(IMAGE_SUFFIXES)}
+    imported: set[str] = set()
+    independent: set[str] = set()
+    reader_path = "godot-client/src/actors/glb_scene_cache.gd"
+    reader = build_dir / reader_path
+    reader_text = reader.read_text(encoding="utf-8", errors="replace") if reader.is_file() else ""
+    raw_reader_known = 'if not resource_path.begins_with("res://assets/actors/")' in reader_text
+    texts = [path for path in files if path.lower().endswith((".gd", ".tscn", ".tres", ".gdshader", ".json"))
+             and not path.startswith((*UNSHIPPED_CLIENT_DIRS, "godot-client/world_authoring/"))]
+    texts += [path for path in tracked(build_dir, "eloria-assets/maps") if path.endswith(".json")
+              and is_shipped_map_file(PurePosixPath(path).relative_to("eloria-assets/maps"))]
+    for path in texts:
+        text = (build_dir / path).read_text(encoding="utf-8-sig", errors="replace")
+        if path != reader_path or not raw_reader_known:
+            for _quote, literal in SOURCE_LITERAL.findall(text):
+                if literal.startswith("res://assets/world/") and (literal.endswith("/") or "%" in literal or "{" in literal):
+                    prefix = "godot-client/" + re.split(r"[%{]", literal[6:], maxsplit=1)[0]
+                    imported.update(model for model in models if model.startswith(prefix))
+                    independent.update(image for image in images if image.startswith(prefix))
+        for target in WORLD_RESOURCE_LITERAL.findall(text):
+            target = "godot-client/" + target
+            if target in images:
+                independent.add(target)
+            elif path.endswith((".tscn", ".tres")) and target in models:
+                imported.add(target)
+        if path.endswith(".gd"):
+            imported.update("godot-client/" + target for target in WORLD_LOAD_LITERAL.findall(text))
+            if re.search(r"\b(?:load|preload)\s*\(\s*[A-Za-z_]", text):
+                # A constant/variable resource path is still an explicit user.
+                # Conservatively keep every world-model literal in that script.
+                imported.update("godot-client/" + target for target in WORLD_RESOURCE_LITERAL.findall(text)
+                                if target.lower().endswith(GLTF_SUFFIXES))
+    if not raw_reader_known:
+        # Packaging another revision must not assume the current raw-world
+        # reader. An unrecognized/imported world reader keeps its old imports.
+        imported.update(models)
+    expected: dict[str, set[str]] = {}
+    imported_images: set[str] = set()
+    for path in shipped_client_files(build_dir, GLTF_SUFFIXES):
+        if path.startswith("godot-client/world_authoring/"):
+            continue
+        if path not in models:
+            independent.update(_resolve(path, uri) for uri in _possible_gltf_uris(build_dir / path))
+            continue
+        document = gltf_document(build_dir / path)
+        for uri in [unquote(image["uri"]) for image in document.get("images", [])
+                    if isinstance(image, dict) and isinstance(image.get("uri"), str)]:
+            independent.add(_resolve(path, uri))
+        if path in imported:
+            stems = {path.rsplit(".", 1)[0] + "_" + name for name in _extracted_image_names(document) if name is not None}
+            imported_images.update(image for image in images if image.rsplit(".", 1)[0] in stems)
+        if path not in models - imported or not path.endswith(".glb"):
+            continue
+        if "rabbitlands_scenery_images" in (document.get("extras") or {}):
+            from scenery_image_sources import validate
+            try:
+                closure = validate(build_dir, build_dir / path, document)
+            except (OSError, ValueError) as error:
+                raise PackageError(f"{path}: invalid scenery image closure: {error}") from error
+            # Externalization preserves image names and exact encoded hashes.
+            # A matching old extraction is still redundant; an original URI
+            # remains independently referenced above and can never be dropped.
+            names = _extracted_image_names({"images": [{key: value for key, value in image.items() if key != "uri"}
+                                                       for image in document.get("images", [])]})
+            for image in closure["images"]:
+                name = names[image["index"]]
+                if name is not None:
+                    expected.setdefault(path.rsplit(".", 1)[0] + "_" + name, set()).add(image["sha256"])
+            continue
+        raw = (build_dir / path).read_bytes()
+        offset = 12
+        binary = b""
+        while offset + 8 <= len(raw):
+            length, kind = struct.unpack_from("<II", raw, offset)
+            if offset + 8 + length > len(raw):
+                break
+            if kind == 0x004E4942:
+                binary = raw[offset + 8:offset + 8 + length]
+                break
+            offset += 8 + length
+        views = document.get("bufferViews", [])
+        for image, name in zip(document.get("images", []), _extracted_image_names(document)):
+            if name is None or not isinstance(image, dict) or "bufferView" not in image:
+                continue
+            index = image["bufferView"]
+            if not isinstance(index, int) or not 0 <= index < len(views):
+                continue
+            view = views[index]
+            start, size = view.get("byteOffset", 0), view.get("byteLength", 0)
+            if view.get("buffer", 0) != 0 or not isinstance(start, int) or not isinstance(size, int) \
+                    or start < 0 or size <= 0 or start + size > len(binary):
+                continue
+            stem = path.rsplit(".", 1)[0] + "_" + name
+            expected.setdefault(stem, set()).add(hashlib.sha256(binary[start:start + size]).hexdigest())
+    dropped = {path for path in images if path not in independent and path.rsplit(".", 1)[0] in expected
+               and hashlib.sha256((build_dir / path).read_bytes()).hexdigest() in expected[path.rsplit(".", 1)[0]]}
+    return {"raw_models": models - imported, "imported_models": models & imported,
+            "dropped_images": dropped, "independent_images": (independent & images) | imported_images}
+
+
+def write_world_import_settings(build_dir: Path, shipping: dict[str, set[str]] | None = None) -> dict[str, set[str]]:
+    """Apply only to an owned build tree, before its first editor import."""
+    shipping = world_import_shipping(build_dir) if shipping is None else shipping
+    for relative in sorted(shipping["raw_models"] | shipping["dropped_images"]):
+        (build_dir / (relative + ".import")).write_text(SKIP_IMPORT, encoding="utf-8", newline="\n")
+    for relative in sorted(shipping["imported_models"] | shipping["independent_images"]):
+        path = build_dir / (relative + ".import")
+        if path.is_file() and _import_settings(path)[0] == "skip":
+            path.unlink()
+    log(f"world import policy: {len(shipping['raw_models'])} raw models, "
+        f"{len(shipping['imported_models'])} explicit imported models, {len(shipping['dropped_images'])} unused exact extracted copies")
+    return shipping
+
+
+def scenery_image_resources(build_dir: Path) -> set[str]:
+    """Verified tagged scenery image closure, including pools outside Godot."""
+    resources: set[str] = set()
+    files = set(tracked(build_dir, "godot-client/assets/world", "eloria-assets"))
+    for relative in sorted(path for path in files if path.startswith(WORLD_ASSET_ROOT) and path.lower().endswith(GLTF_SUFFIXES)):
+        document = gltf_document(build_dir / relative)
+        if "rabbitlands_scenery_images" not in (document.get("extras") or {}):
+            continue
+        from scenery_image_sources import validate
+        try:
+            closure = validate(build_dir, build_dir / relative, document)
+            for path in {image["path"] for image in closure["images"]}:
+                name = path.relative_to(build_dir.resolve()).as_posix()
+                if name not in files:
+                    raise PackageError(f"{relative}: scenery image {name} is not in the commit")
+                resources.add(name)
+        except (OSError, ValueError) as error:
+            raise PackageError(f"{relative}: invalid scenery image closure: {error}") from error
+    return resources
+
+
+def check_loose_scenery_images(build_dir: Path, stage: Path) -> None:
+    """The actual raw-model copy and every declared image retain source hashes."""
+    for relative in tracked(build_dir, "godot-client/assets/world"):
+        if not relative.lower().endswith(GLTF_SUFFIXES):
+            continue
+        source = build_dir / relative
+        document = gltf_document(source)
+        if "rabbitlands_scenery_images" not in (document.get("extras") or {}):
+            continue
+        from scenery_image_sources import validate
+        target = stage / "app" / PurePosixPath(relative).relative_to("godot-client")
+        if not target.is_file() or hashlib.sha256(source.read_bytes()).digest() != hashlib.sha256(target.read_bytes()).digest():
+            raise PackageError(f"{relative}: staged raw scenery model is missing or changed")
+        try:
+            validate(build_dir, source, document)
+            validate(stage, target, document, client_directory="app")
+        except (OSError, ValueError) as error:
+            raise PackageError(f"{relative}: staged scenery images: {error}") from error
+
+
+def check_world_import_pack(build_dir: Path, app_dir: Path) -> None:
+    """Raw scenery and unused exact derivatives never gain parallel PCK copies."""
+    shipping = world_import_shipping(build_dir)
+    paths = pck_paths(app_dir / "RabbitLands.pck")
+    problems = []
+    for relative in sorted(shipping["raw_models"] | shipping["dropped_images"]):
+        local = PurePosixPath(relative).relative_to("godot-client").as_posix()
+        if local in paths or local + ".import" in paths or local + ".remap" in paths:
+            problems.append(f"{local}: unused editor resource is in the PCK")
+        loose = app_dir / local
+        if relative in shipping["raw_models"]:
+            if not loose.is_file() or hashlib.sha256(loose.read_bytes()).digest() != hashlib.sha256((build_dir / relative).read_bytes()).digest():
+                problems.append(f"{local}: raw source is missing or changed beside the PCK")
+        elif loose.exists():
+            problems.append(f"{local}: unused exact extracted image was staged loose")
+    for relative in sorted(shipping["imported_models"]):
+        local = PurePosixPath(relative).relative_to("godot-client").as_posix()
+        products = _import_products(build_dir / (relative + ".import"))
+        if not products or local + ".import" not in paths or any(path not in paths for path in products):
+            problems.append(f"{local}: explicit imported resource dependency is absent")
+    if problems:
+        raise PackageError("world import shipping failed:\n  " + "\n  ".join(problems[:40]))
+    log(f"checked {len(shipping['raw_models'])} raw world models without unused editor copies")
+
+
 def _material_textures(text: str, shader_code) -> list[tuple[str, bool]]:
     """(res:// path, sampled as a normal map) of each image a 3D material in a .tscn/.tres names.
 
@@ -933,6 +1162,7 @@ def scene_textures(build_dir: Path) -> dict[str, bool]:
     for image in images:
         by_stem.setdefault(image.rsplit(".", 1)[0], []).append(image)
     found: dict[str, bool] = {}
+    dropped_world_images = world_import_shipping(build_dir)["dropped_images"]
 
     def add(path: str, normal_map: bool) -> None:
         if path in images:
@@ -951,7 +1181,8 @@ def scene_textures(build_dir: Path) -> dict[str, bool]:
                 add(_resolve(relative, unquote(uri)), index in normals)
             elif name is not None:
                 for extracted in by_stem.get(f"{stem}_{name}", ()):
-                    add(extracted, index in normals)
+                    if extracted not in dropped_world_images:
+                        add(extracted, index in normals)
     shaders: dict[str, str] = {}
 
     def shader_code(path: str) -> str:
@@ -1062,6 +1293,8 @@ def prepare_build_tree(build_dir: Path, sha: str) -> Path:
     # this build path inside one invocation. Never reuse its earlier proof.
     if BENCHMARK_ACTOR_PLANS is not None:
         BENCHMARK_ACTOR_PLANS.pop(build_dir.resolve(), None)
+    if STORAGE is not None:
+        STORAGE.world_import_plans.pop(build_dir.resolve(), None)
     if not (build_dir / ".git").exists():
         log(f"creating build worktree {build_dir}")
         build_dir.parent.mkdir(parents=True, exist_ok=True)
@@ -1104,6 +1337,7 @@ def prepare_build_tree(build_dir: Path, sha: str) -> Path:
     for folder in shipping["loose_folders"]:
         (build_dir / folder / ".gdignore").write_text("", encoding="utf-8")
     write_actor_import_settings(build_dir, shipping)
+    write_world_import_settings(build_dir)
     write_scene_texture_import_settings(build_dir, scene_textures(build_dir))
     for image, where in sorted(shipping["kept"].items()):
         log(f"kept loose, named outside the catalogs: {image} ({'; '.join(sorted(where)[:3])})")
@@ -1401,6 +1635,7 @@ def stage_loose_client_files(build_dir: Path, app_dir: Path) -> None:
     # Actor files ship once: the PCK-only ones (face masks, equipment URI
     # textures) and the dropped images stay out of app/.
     shipping = actor_shipping(build_dir)
+    world = world_import_shipping(build_dir)
     loose_actors = shipping["loose"]
     # Anything the export recognised as a resource is IN the pack and loaded
     # from it (`load("res://assets/ui/start_screen/....ogv")`), so a loose copy
@@ -1414,6 +1649,8 @@ def stage_loose_client_files(build_dir: Path, app_dir: Path) -> None:
     files = tracked(build_dir, "godot-client/assets", "godot-client/data", "godot-client/schemas")
     for relative in files:
         if relative.endswith((".import", ".report.json")):
+            continue
+        if relative in world["dropped_images"]:
             continue
         if relative.startswith(ACTOR_ROOT + "/") and relative not in loose_actors:
             if relative in shipping["dropped"]:
@@ -1676,6 +1913,7 @@ def shipped_eloria_assets(build_dir: Path, excluded: list[str] = (),
     served_folders = [package for package, _ in served]
     all_tracked = {p for p in tracked(build_dir, "eloria-assets") if _ships_asset(p, excluded, served)}
     wanted: set[str] = set()
+    wanted.update(path for path in scenery_image_resources(build_dir) if path.startswith("eloria-assets/"))
     package_dirs = {str(PurePosixPath(p).parent) for p in all_tracked
                     if p.startswith("eloria-assets/maps/") and p.endswith("/world.json")}
     for path in all_tracked:
@@ -1719,6 +1957,19 @@ def shipped_eloria_assets(build_dir: Path, excluded: list[str] = (),
             continue
         base = PurePosixPath(manifest).parent
         is_world = manifest.endswith("/world.json")
+        if is_world and isinstance(data, dict) and "roadGround" in data:
+            try:
+                closure = road_dependencies(build_dir, build_dir / manifest, data["roadGround"])
+                for dependency in closure:
+                    target = dependency.relative_to(build_dir.resolve()).as_posix()
+                    if target not in all_tracked:
+                        errors.append(f"{manifest} roadGround -> {target} is not in the commit")
+                    elif target not in wanted:
+                        wanted.add(target)
+                        if target.endswith(".json"):
+                            queue.append(target)
+            except RoadGroundDependencyError as exc:
+                errors.append(f"{manifest} roadGround: {exc}")
         # A served continent-v2 package's collision block names what only the server reads, and its territory
         # manifest streams chunks and has no master GLB: asset.glb names none the client opens (its map digest is
         # empty without one, map_scene_cache.package_digest).
@@ -1812,6 +2063,17 @@ def stage_eloria_assets(build_dir: Path, stage: Path, excluded: list[str] = (),
     if errors:
         raise PackageError("missing map files:\n  " + "\n  ".join(errors[:40]))
     total = sum(copy_file(build_dir / p, stage / p) for p in sorted(wanted))
+    # Verify the bytes that will ship as well as the source selection. Road
+    # style images can live outside the chunk's folder and their URI keys are
+    # not covered by the generic JSON value walk.
+    for relative in sorted(p for p in wanted if p.endswith("/world.json")):
+        path = stage / relative
+        data = json.loads(path.read_text(encoding="utf-8-sig"))
+        if isinstance(data, dict) and "roadGround" in data:
+            try:
+                road_dependencies(stage, path, data["roadGround"])
+            except RoadGroundDependencyError as exc:
+                raise PackageError(f"staged {relative} roadGround: {exc}") from exc
     package_dirs = {str(PurePosixPath(p).parent) for p in tracked(build_dir, "eloria-assets/maps")
                     if p.endswith("/world.json") and _ships_asset(p, excluded, served)}
     log(f"staged {len(wanted)} eloria-assets files from {len(package_dirs)} map packages "
@@ -2273,19 +2535,152 @@ def check_scenery_vram_textures(app_dir: Path) -> None:
         for path in index_path.parent.iterdir():
             if path.name != "index.json" and path.name not in listed:
                 problems.append(f"{path.relative_to(app_dir)}: not named by the index")
+    # Only the configured scenery previously received sidecars. Converted
+    # embedded images retain that coverage; original URI uses retain fallback.
+    for name in SCENERY_SIDECAR_CONFIGS:
+        config = app_dir / PurePosixPath(name).relative_to("godot-client")
+        if not config.is_file():
+            continue
+        try:
+            assets = json.loads(config.read_text(encoding="utf-8")).get("assets", {})
+            for uri in set(assets.values()):
+                if not isinstance(uri, str) or not uri.startswith("res://assets/world/"):
+                    continue
+                source = app_dir / uri.removeprefix("res://")
+                document = gltf_document(source)
+                if "rabbitlands_scenery_images" not in (document.get("extras") or {}):
+                    continue
+                from scenery_image_sources import validate
+                closure = validate(app_dir.parent, source, document, client_directory="app")
+                index_path = source.parent / "vram/index.json"
+                index = json.loads(index_path.read_text(encoding="utf-8")) if index_path.is_file() else {}
+                for image in closure["images"]:
+                    if image["sidecar_eligible"] and image["sha256"] not in index.get("images", {}) \
+                            and image["sha256"] not in index.get("excluded", {}):
+                        problems.append(f"{source.relative_to(app_dir)}: converted image has no original-directory sidecar/exclusion")
+        except (OSError, ValueError, TypeError) as error:
+            problems.append(f"{config.relative_to(app_dir)}: invalid scenery image sidecar closure: {error}")
     if problems:
         raise PackageError(f"{len(problems)} scenery sidecar problems:\n  " + "\n  ".join(problems[:40]))
     log(f"checked {sidecars} scenery sidecars in app/assets")
+
+
+TEXTURE_POLICY_DIRECTORY_KEY = "rl_texture_policy_directory"
+
+
+def external_image_policy_directories(base: Path, resources: dict, policies, asset_root: Path) -> dict[str, set[Path]]:
+    """Original sidecar directories, independent of a canonical image's URI.
+
+    An unannotated image keeps the legacy directory beside its source pixels.
+    Directory metadata never supplies an alternative source or expected hash.
+    """
+    if policies is None:
+        policies = {}
+    if not isinstance(policies, dict):
+        raise PackageError("externalImagePolicies must be an object")
+    unknown = set(policies) - set(resources)
+    if unknown:
+        raise PackageError("externalImagePolicies names an undeclared image: " + str(sorted(unknown)[0]))
+    root = asset_root.resolve()
+
+    def path_for(uri: str) -> Path:
+        if (not isinstance(uri, str) or not uri or "\\" in uri or ":" in uri or "%" in uri
+                or PurePosixPath(uri).is_absolute()):
+            raise PackageError(f"unsafe external image policy path: {uri!r}")
+        path = (base / uri).resolve()
+        if not path.is_relative_to(root):
+            raise PackageError(f"external image policy path resolves outside eloria-assets: {uri}")
+        return path
+
+    result = {}
+    for uri in resources:
+        image = path_for(uri)
+        if uri not in policies:
+            result[uri] = {image.parent}
+            continue
+        values = policies[uri]
+        if not isinstance(values, list) or not values:
+            raise PackageError(f"externalImagePolicies[{uri!r}] must be a nonempty array")
+        result[uri] = {path_for(value) for value in values}
+    return result
+
+
+def _check_image_policy_descriptors(document: dict, base: Path, policies: dict[str, set[Path]],
+                                    asset_root: Path, label: str, problems: list[str]) -> None:
+    """An image's actual runtime policy must be one its manifest/index declares."""
+    root = asset_root.resolve()
+    for image in document.get("images", []):
+        if not isinstance(image, dict):
+            continue
+        uri = image.get("uri")
+        if not isinstance(uri, str) or not uri or uri.startswith("data:"):
+            continue
+        extras = image.get("extras") or {}
+        if not isinstance(extras, dict):
+            problems.append(f"{label}: image {uri} extras must be an object")
+            continue
+        tagged = TEXTURE_POLICY_DIRECTORY_KEY in extras
+        if uri not in policies:
+            if tagged:
+                problems.append(f"{label}: policy-tagged image {uri} has no declared source/policy")
+            continue
+        policy = extras.get(TEXTURE_POLICY_DIRECTORY_KEY)
+        if tagged and (not isinstance(policy, str) or not policy or "\\" in policy or ":" in policy or "%" in policy
+                       or PurePosixPath(policy).is_absolute()):
+            problems.append(f"{label}: image {uri} has unsafe {TEXTURE_POLICY_DIRECTORY_KEY}")
+            continue
+        directory = (base / policy).resolve() if tagged else (base / uri).resolve().parent
+        if not directory.is_relative_to(root) or directory not in policies[uri]:
+            problems.append(f"{label}: image {uri} policy directory disagrees with declared image policies")
 
 
 def check_vram_textures(stage: Path) -> None:
     """Every external map image a staged manifest names is staged, has a
     sidecar or a reason it has none, and every staged sidecar is the file its
     index names, byte for byte."""
-    import hashlib
+    stage = stage.resolve()
     problems: list[str] = []
     indexes: dict[Path, dict] = {}
+    digests: dict[Path, str] = {}
+    asset_root = (stage / "eloria-assets").resolve()
     checked = 0
+
+    def check_sources(base: Path, resources: dict, policies, label: str, *, sidecars: bool = True):
+        nonlocal checked
+        try:
+            directories = external_image_policy_directories(base, resources, policies, asset_root)
+        except PackageError as error:
+            problems.append(f"{label}: {error}")
+            return {}
+        for uri, sha in resources.items():
+            image = (base / uri).resolve()
+            if not image.is_file():
+                problems.append(f"{label}: external image {uri} is not in the package")
+                continue
+            if image not in digests:
+                digests[image] = hashlib.sha256(image.read_bytes()).hexdigest()
+            if digests[image] != sha:
+                problems.append(f"{image.relative_to(stage)}: source sha256 differs from the manifest")
+            if not sidecars:
+                continue
+            for directory in sorted(directories[uri]):
+                if directory not in indexes:
+                    index_path = directory / "vram" / "index.json"
+                    try:
+                        indexes[directory] = (json.loads(index_path.read_text(encoding="utf-8"))
+                                              if index_path.is_file() else {})
+                        if not isinstance(indexes[directory], dict):
+                            raise ValueError("sidecar index must be an object")
+                    except (OSError, ValueError):
+                        problems.append(f"{index_path.relative_to(stage)}: cannot read sidecar index")
+                        indexes[directory] = {}
+                index = indexes[directory]
+                checked += 1
+                if sha not in index.get("images", {}) and sha not in index.get("excluded", {}):
+                    problems.append(f"{image.relative_to(stage)}: no sidecar and no exclusion reason in "
+                                    f"{directory.relative_to(stage)}")
+        return directories
+
     for manifest_path in (stage / "eloria-assets").rglob("world.json"):
         try:
             manifest = json.loads(manifest_path.read_text(encoding="utf-8-sig"))
@@ -2294,25 +2689,52 @@ def check_vram_textures(stage: Path) -> None:
         resources = manifest.get("externalResources") or {}
         if not isinstance(resources, dict) or "streamingChunks" in manifest:
             continue
-        base = (manifest_path.parent / str(manifest.get("asset", {}).get("glb", "world.glb"))).parent
-        for uri, sha in resources.items():
-            image = (base / uri).resolve()
-            if not image.is_file():
-                problems.append(f"{manifest_path.relative_to(stage)}: external image {uri} is not in the package")
+        glb = manifest_path.parent / str(manifest.get("asset", {}).get("glb", "world.glb"))
+        label = manifest_path.relative_to(stage).as_posix()
+        policies = check_sources(glb.parent, resources, manifest.get("externalImagePolicies"), label)
+        _check_image_policy_descriptors(gltf_document(glb), glb.parent, policies, asset_root, label, problems)
+        # Road-only style uses retain their original source fallback. Validate
+        # the source/policy metadata without creating a new sidecar requirement.
+        road = manifest.get("roadGround")
+        if isinstance(road, dict):
+            try:
+                road_dependencies(stage, manifest_path, road)
+                path = manifest_path.parent / road["metadata"]
+                metadata = json.loads(path.read_text(encoding="utf-8"))
+                road_resources = {uri: sha for style in metadata.get("styles", [])
+                                  for uri, sha in style.get("externalResources", {}).items()}
+                road_policies = check_sources(path.parent, road_resources, metadata.get("externalImagePolicies"),
+                                              path.relative_to(stage).as_posix(), sidecars=False)
+                for style in metadata.get("styles", []):
+                    _check_image_policy_descriptors(style.get("material_document", {}), path.parent, road_policies,
+                                                    asset_root, label + " roadGround", problems)
+            except (RoadGroundDependencyError, OSError, ValueError, KeyError, TypeError) as error:
+                problems.append(f"{label} roadGround: {error}")
+    # A shared prototype can be the only consumer of an image. Its source and
+    # original policy are recorded by the pool index, not by its parent map.
+    for index_path in (stage / "eloria-assets/maps/_shared/meshes").glob("index.json"):
+        try:
+            entries = json.loads(index_path.read_text(encoding="utf-8")).get("prototypes", {})
+        except (OSError, ValueError):
+            continue  # check_shared_meshes reports an unreadable pool index.
+        for identity, entry in entries.items():
+            glb = index_path.parent / (identity + ".glb")
+            if not glb.is_file() or not isinstance(entry, dict):
                 continue
-            if image.parent not in indexes:
-                index_path = image.parent / "vram" / "index.json"
-                indexes[image.parent] = (json.loads(index_path.read_text(encoding="utf-8"))
-                                         if index_path.is_file() else {})
-            index = indexes[image.parent]
-            checked += 1
-            if sha not in index.get("images", {}) and sha not in index.get("excluded", {}):
-                problems.append(f"{image.relative_to(stage)}: no sidecar and no exclusion reason")
+            resources = entry.get("images") or {}
+            if not isinstance(resources, dict):
+                continue
+            label = glb.relative_to(stage).as_posix()
+            policies = check_sources(glb.parent, resources, entry.get("imagePolicies"), label)
+            _check_image_policy_descriptors(gltf_document(glb), glb.parent, policies, asset_root, label, problems)
     sidecars = 0
     for directory, index in indexes.items():
         for sha, entry in index.get("images", {}).items():
             # A "pool" entry's file is the one another pool ships (share_identical_sidecars).
             path = Path(os.path.normpath(directory / entry.get("pool", ".") / "vram" / entry["file"]))
+            if not path.resolve().is_relative_to(asset_root):
+                problems.append(f"{directory.relative_to(stage)}: sidecar path resolves outside eloria-assets")
+                continue
             if not path.is_file():
                 problems.append(f"{path.relative_to(stage)}: listed in the index but missing")
                 continue
@@ -3263,6 +3685,7 @@ def _main(argv=None, storage=None) -> int:
             check_actor_pack(build_dir, app_dir)
             check_scene_texture_pack(build_dir, app_dir)
         check_editor_sources_unpacked(app_dir)
+        check_world_import_pack(build_dir, app_dir)
         if storage:
             storage.check("export and staging validated")
             if not optimization:
@@ -3272,6 +3695,7 @@ def _main(argv=None, storage=None) -> int:
             warnings = stage_eloria_assets(build_dir, stage, previews, served)
             check_served_packages(stage, served)
             check_map_data_names_no_editor_sources(stage)
+        check_loose_scenery_images(build_dir, stage)
         if not options.no_vram_textures:
             if storage:
                 storage.check("before graphics encoding", 512 * 1024**2 if asset_cache and asset_cache.hit else 1024**3)
@@ -3296,6 +3720,7 @@ def _main(argv=None, storage=None) -> int:
                     optimization.retire_intermediate_pck(prepared_receipt)
                 export_project(godot, project, app_dir, logs / "prepared", platform)
                 check_actor_pack(build_dir, app_dir)
+                check_world_import_pack(build_dir, app_dir)
                 check_scene_texture_pack(build_dir, app_dir)
                 check_editor_sources_unpacked(app_dir)
                 prepared_receipt["export"] = prepared_content_package.check_export(

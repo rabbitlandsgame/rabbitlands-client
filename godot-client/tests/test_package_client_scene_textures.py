@@ -76,11 +76,15 @@ def _write(build: Path, files: dict[str, bytes | str]) -> list[str]:
 def _world_tree(build: Path, monkeypatch, extra: dict | None = None) -> list[str]:
     """A continent chunk naming two textures by URI and a harvestable with an embedded image."""
     files = _write(build, {
+        "godot-client/src/actors/glb_scene_cache.gd":
+            'if not resource_path.begins_with("res://assets/actors/"):\n\treturn null\n',
         CHUNK: _material_glb([{"uri": "_textures/albedo.png"}, {"uri": "_textures/normal.png"}], 1),
         ALBEDO: b"x", NORMAL: b"x",
         HARVESTABLE: _material_glb([{"name": "amber_resin Base Color", "bufferView": 0,
                                      "mimeType": "image/png"}]),
         EXTRACTED: b"x",
+        "godot-client/src/imported-world-fixture.tscn":
+            '[gd_scene]\n[ext_resource type="PackedScene" path="res://assets/world/harvestables/amber_resin.glb" id="1"]\n',
         **(extra or {})})
     _track(monkeypatch, files)
     return files
@@ -115,7 +119,9 @@ def test_an_embedded_image_counts_through_the_copy_the_editor_extracted(tmp_path
     glb = f"{WORLD}/interactives/tree.glb"
     files = _write(tmp_path, {glb: _glb({"images": images}),
                               f"{WORLD}/interactives/{extracted}": b"x",
-                              f"{WORLD}/interactives/leaf.png": b"x"})
+                              f"{WORLD}/interactives/leaf.png": b"x",
+                              "godot-client/src/imported-tree.tscn":
+                                  '[gd_scene]\n[ext_resource type="PackedScene" path="res://assets/world/interactives/tree.glb" id="1"]\n'})
     _track(monkeypatch, files)
     found = package.scene_textures(tmp_path)
     assert f"{WORLD}/interactives/{extracted}" in found
@@ -510,7 +516,8 @@ def test_every_embedded_world_image_is_committed_beside_its_glTF():
     roots = tuple(root + "/" for root in package.SCENE_TEXTURE_ROOTS)
     files = [f for f in _repo_tracked(*package.SCENE_TEXTURE_ROOTS) if f.startswith(roots)]
     stems = {f.rsplit(".", 1)[0] for f in files if f.lower().endswith(package.IMAGE_SUFFIXES)}
-    gltfs = [f for f in files if f.lower().endswith(package.GLTF_SUFFIXES)]
+    raw_world = package.world_import_shipping(package.REPO)["raw_models"]
+    gltfs = [f for f in files if f.lower().endswith(package.GLTF_SUFFIXES) and f not in raw_world]
     absent = [f for f in gltfs if not (package.REPO / f).is_file()]
     if absent:
         pytest.skip(f"{len(absent)} world glTFs are not checked out, e.g. {absent[0]}")

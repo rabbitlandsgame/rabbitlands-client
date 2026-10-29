@@ -13,6 +13,12 @@ extends GLTFDocumentExtension
 ## index behaves exactly as it always has. Nothing here touches the
 ## RenderingServer, so it is safe on a preloader's worker.
 const VramTextures := preload("res://src/world/vram_textures.gd")
+const ScenerySources := preload("res://src/world/scenery_image_sources.gd")
+const MapImages := preload("res://src/world/map_image_extension.gd")
+const Pool := preload("res://src/world/external_texture_pool.gd")
+const VERIFIED_KEY := ScenerySources.VERIFIED_KEY
+const EXTERNAL_ACTIVE := &"rl_world_external_images_active"
+const LEGACY_PREPARED := &"rl_world_legacy_images_prepared"
 const ENABLED := &"rabbitlands_world_object_images"
 const PREPARED := &"rabbitlands_world_object_images_prepared"
 ## How many of this parse's images were uploaded from a sidecar.
@@ -26,12 +32,34 @@ func _import_preflight(state: GLTFState, _extensions: PackedStringArray) -> Erro
 	if typeof(enabled) != TYPE_BOOL or not enabled:
 		return ERR_SKIP
 	state.set_additional_data(PREPARED, 0)
+	state.set_additional_data(LEGACY_PREPARED, 0)
 	state.set_additional_data(SIDECARS, 0)
+	var verified: Variant = state.get_additional_data(VERIFIED_KEY)
+	if not verified is Dictionary:
+		verified = ScenerySources.verify_document(state.get_json(), state.get_base_path())
+	if not bool(verified.get("ok", false)): return ERR_INVALID_DATA
+	if bool(verified.get("tagged", false)):
+		state.set_additional_data(VERIFIED_KEY, verified)
+		state.set_additional_data(VramTextures.PLAN_KEY, {"resources": verified.resources,
+			"policies": verified.policies, "mip_skip": 0, "eligible_only": true, "verify_source_sha": true})
+		var result := MapImages.new()._import_preflight(state, _extensions)
+		if result != OK and result != ERR_SKIP: return result
+		state.set_additional_data(EXTERNAL_ACTIVE, true)
 	return OK
 
+static func has_source_errors(state: GLTFState) -> bool:
+	var failures: Variant = state.get_additional_data(MapImages.SOURCE_ERRORS_KEY)
+	return failures is Dictionary and not failures.is_empty()
+
 func _parse_image_data(state: GLTFState, bytes: PackedByteArray, _mime: String, image: Image) -> Error:
+	if _mime.begins_with(MapImages.MIME_PREFIX):
+		var result := MapImages.new()._parse_image_data(state, bytes, _mime, image)
+		if not image.is_empty():
+			state.set_additional_data(PREPARED, int(state.get_additional_data(PREPARED)) + 1)
+		return result
 	if _sidecar(state, bytes, image):
 		state.set_additional_data(PREPARED, int(state.get_additional_data(PREPARED)) + 1)
+		state.set_additional_data(LEGACY_PREPARED, int(state.get_additional_data(LEGACY_PREPARED)) + 1)
 		state.set_additional_data(SIDECARS, int(state.get_additional_data(SIDECARS)) + 1)
 		return OK
 	var error := ERR_FILE_UNRECOGNIZED
@@ -45,7 +73,25 @@ func _parse_image_data(state: GLTFState, bytes: PackedByteArray, _mime: String, 
 	if error == OK and not image.is_empty():
 		if not image.has_mipmaps(): image.generate_mipmaps()
 		state.set_additional_data(PREPARED, int(state.get_additional_data(PREPARED)) + 1)
+		state.set_additional_data(LEGACY_PREPARED, int(state.get_additional_data(LEGACY_PREPARED)) + 1)
 	# Empty images fall back to GLTFDocument's normal decoder.
+	return OK
+
+func _import_post_parse(state: GLTFState) -> Error:
+	if not bool(state.get_additional_data(EXTERNAL_ACTIVE)): return OK
+	var result := MapImages.new()._import_post_parse(state)
+	if result != OK: return result
+	var verified: Dictionary = state.get_additional_data(VERIFIED_KEY)
+	var eligible := {}
+	for descriptor: Dictionary in state.get_json().get("images", []):
+		if bool(descriptor.get("extras", {}).get(ScenerySources.ELIGIBLE_EXTRA, false)):
+			eligible[str(descriptor.uri)] = verified.resources[str(descriptor.uri)]
+	# Every prepared/pooled image has DONE_KEY. share() must never read it back.
+	Pool.share(state, eligible)
+	var done: Variant = state.get_additional_data(VramTextures.DONE_KEY)
+	state.set_additional_data(PREPARED, int(state.get_additional_data(LEGACY_PREPARED)) + (done.size() if done is Dictionary else 0))
+	var stats: Variant = state.get_additional_data(VramTextures.STATS_KEY)
+	if stats is Dictionary: state.set_additional_data(SIDECARS, int(stats.get("imagesSidecar", 0)))
 	return OK
 
 ## Fills `image` from the sidecar of these bytes when one may stand for them.

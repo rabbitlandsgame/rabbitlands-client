@@ -46,6 +46,7 @@ TOOL = "eloria-assets/maps/continent-v2/_continent_v2/render_minimap.py"
 REGISTRY = "godot-client/data/maps/registry.json"
 RETIREMENT = "godot-client/data/assets/retired_procedural_models.json"
 CHUNK_READER_VERSION = 2              # shared placements and the runtime retirement policy
+ROAD_CHUNK_READER_VERSION = 3         # portable road fields, native depth-tested offline atlas
 CATALOG = "godot-client/world_authoring/continent-v2/territories.json"
 WEBP_QUALITY = 92                       # the region minimaps' encoding (render_region_cartography.py)
 # One window covers every Landfall territory (the largest is 1,356 m): drawn in 256 m windows the pictures showed
@@ -97,8 +98,9 @@ class Pool:
     """Albedo images shared by every chunk: decoded once, linearised and reduced to the native renderer's 512 px
     layers (what Scene._pack_textures does to each layer), checked against the SHA-256 the manifest records."""
 
-    def __init__(self, rc):
+    def __init__(self, rc, asset_root=None):
         self.rc = rc
+        self.asset_root = asset_root
         self.images = {}
 
     def key(self, doc, binary, index, glb, resources, chunk):
@@ -111,7 +113,7 @@ class Pool:
         uri = spec.get("uri")
         if uri not in self.images:
             # _texture resolves the URI under eloria-assets and refuses one whose SHA-256 is not the recorded one
-            self.images[uri] = self._prepare(self.rc._texture(doc, binary, index, glb, resources))
+            self.images[uri] = self._prepare(self.rc._texture(doc, binary, index, glb, resources, self.asset_root))
         return uri
 
     @staticmethod
@@ -125,7 +127,8 @@ class Pool:
         return np.ascontiguousarray(rgba, dtype=np.uint8)
 
 
-def read_chunk(rc, pool, glb: Path, resources: dict, chunk: str, retirement=None, checkout=None) -> dict:
+def read_chunk(rc, pool, glb: Path, resources: dict, chunk: str, retirement=None, checkout=None,
+               *, road_ground=None, manifest_path=None) -> dict:
     """One chunk's materials and its triangles in territory metres (scene_from_glb's rules: water ink on water
     materials, linear albedo, MASK for BLEND and soft ground, mirrored instances re-wound, invisible stream
     thresholds left out)."""
@@ -147,7 +150,13 @@ def read_chunk(rc, pool, glb: Path, resources: dict, chunk: str, retirement=None
             if extras.get("prototype") in retired_prototypes:
                 extras.pop("prototype")
                 node.pop("mesh", None)
-    doc, binary = glb_reader.SM.inline_prototypes(glb, doc, binary)
+    previous_pool = glb_reader.SM.POOL
+    try:
+        if checkout is not None:
+            glb_reader.SM.POOL = Path(checkout) / "eloria-assets/maps/_shared/meshes"
+        doc, binary = glb_reader.SM.inline_prototypes(glb, doc, binary)
+    finally:
+        glb_reader.SM.POOL = previous_pool
     resources = dict(resources)
     # Restored pooled prototypes can name textures not present in the tiny
     # placement document. Their content-addressed filenames pin their bytes.
@@ -186,7 +195,7 @@ def read_chunk(rc, pool, glb: Path, resources: dict, chunk: str, retirement=None
         materials.append(made)
     if not materials:
         materials.append(R.RenderMaterial(f"{chunk}:0"))
-    parts, cache = [], {}
+    parts, cache, ground = [], {}, []
     for name, mesh_index, transform in rc.visible_nodes(doc):
         for pi, primitive in enumerate(doc["meshes"][mesh_index]["primitives"]):
             if primitive.get("mode", 4) != 4:
@@ -223,9 +232,17 @@ def read_chunk(rc, pool, glb: Path, resources: dict, chunk: str, retirement=None
                 faces = indices.reshape(-1, 3)[:, ::-1].reshape(-1)
             parts.append((world.astype(np.float32), normals.astype(np.float32), uv, faces.astype(np.int32), color,
                           material))
+            if road_ground and name.startswith("AuthoredGround_"):
+                ground.append((name, world, normals, faces))
     low = np.min([p[0].min(axis=0) for p in parts], axis=0) if parts else np.zeros(3)
     high = np.max([p[0].max(axis=0) for p in parts], axis=0) if parts else np.zeros(3)
-    return {"materials": materials, "parts": parts, "low": low, "high": high}
+    result = {"materials": materials, "parts": parts, "low": low, "high": high}
+    if road_ground is not None:
+        if checkout is None or manifest_path is None:
+            raise MinimapError("Road-field cartography requires its repository and chunk manifest")
+        import road_ground_cartography
+        road_ground_cartography.append(rc, pool, result, ground, checkout, manifest_path, road_ground, chunk)
+    return result
 
 
 def window_scene(rc, pool, pieces: list[tuple[dict, tuple[float, float]]]):
@@ -289,6 +306,22 @@ def sources(checkout: Path, region: str) -> list[dict]:
     return found
 
 
+def reader_version_for(checkout: Path, region: str, world_frame=None) -> int:
+    """Preserve old pictures when no converted own/neighbour chunk reaches them."""
+    drawn = sources(checkout, region)
+    low, high = world_frame or frame_of(read_json(drawn[0]["package"] / "world.json"))[:2]
+    for source in drawn:
+        dx, dz = source["offset"]
+        for chunk in source["chunks"]:
+            bounds = chunk["bounds"]
+            if not (bounds["min"][0] + dx <= high[0] and bounds["max"][0] + dx >= low[0]
+                    and bounds["min"][2] + dz <= high[1] and bounds["max"][2] + dz >= low[1]):
+                continue
+            if "roadGround" in read_json(source["package"] / chunk["manifest"]):
+                return ROAD_CHUNK_READER_VERSION
+    return CHUNK_READER_VERSION
+
+
 def render(checkout: Path, region: str, work: Path, supersample: int = 2, window: int = WINDOW_METRES,
            log=print, *, pixels_per_metre: int = 1, world_frame=None) -> dict:
     """Draw the picture of one package into work/<region>/minimap.webp and return its report."""
@@ -304,6 +337,10 @@ def render(checkout: Path, region: str, work: Path, supersample: int = 2, window
     retirement_sha = PC.sha(policy_path) if policy_path.is_file() else None
     drawn = sources(checkout, region)
     package = drawn[0]["package"]
+    # Capture each source before its first chunk read, then recheck after
+    # rendering. A metadata edit during a long draw cannot certify old pixels
+    # with a newly computed road-field digest.
+    digests = {region: PC.chunks_digest(package, drawn[0]["chunks"])}
     manifest = read_json(package / "world.json")
     low, high, size = frame_of(manifest)
     if pixels_per_metre not in (1, 2, 4, 8):
@@ -313,10 +350,11 @@ def render(checkout: Path, region: str, work: Path, supersample: int = 2, window
         if any(v != int(v) for v in low + high):
             raise MinimapError("detail frame must use whole metres")
     size = [int((high[i] - low[i]) * pixels_per_metre) for i in range(2)]
-    pool = Pool(rc)
+    pool = Pool(rc, Path(checkout) / "eloria-assets")
     last_row, cache, used = {}, {}, set()
     picture = Image.new("RGB", tuple(size), tuple(rc.water_rgb()))
-    stats = {"windows": 0, "emptyWindows": 0, "chunkReads": 0, "triangles": 0, "coveredSamples": 0, "samples": 0}
+    stats = {"windows": 0, "emptyWindows": 0, "chunkReads": 0, "triangles": 0, "coveredSamples": 0, "samples": 0,
+             "roadFieldChunks": 0, "roadFieldProxyTriangles": 0}
     native = Path(work) / "_atlas_native"
     for row, z0 in enumerate(range(int(low[1]), int(high[1]), window)):
         z1 = min(z0 + window, int(high[1]))
@@ -334,12 +372,19 @@ def render(checkout: Path, region: str, work: Path, supersample: int = 2, window
                         continue
                     key = (source["region"], c["id"])
                     if key not in cache:
+                        if source["region"] not in digests:
+                            digests[source["region"]] = PC.chunks_digest(source["package"], source["chunks"])
                         chunk_manifest = read_json(source["package"] / c["manifest"])
                         glb = (source["package"] / c["manifest"]).parent / chunk_manifest["asset"]["glb"]
                         for uri, expected in chunk_manifest.get("externalMeshes", {}).items():
                             rc.external_resource(glb, uri, expected)
                         cache[key] = read_chunk(rc, pool, glb, chunk_manifest.get("externalResources") or {},
-                                                f"{source['region']}/{c['id']}", retirement, checkout)
+                                                f"{source['region']}/{c['id']}", retirement, checkout,
+                                                road_ground=chunk_manifest.get("roadGround"),
+                                                manifest_path=source["package"] / c["manifest"])
+                        if "road_fields" in cache[key]:
+                            stats["roadFieldChunks"] += 1
+                            stats["roadFieldProxyTriangles"] += cache[key]["road_fields"]["triangles"]
                         stats["chunkReads"] += 1
                     last_row[key] = row
                     used.add(source["region"])
@@ -362,8 +407,7 @@ def render(checkout: Path, region: str, work: Path, supersample: int = 2, window
         # a chunk this row did not reach lies behind the window rows still to come
         for key in [k for k in cache if last_row.get(k, -1) < row]:
             del cache[key]
-    digests = {source["region"]: PC.chunks_digest(source["package"], source["chunks"])
-               for source in drawn if source["region"] in used or source["region"] == region}
+    digests = {key: value for key, value in digests.items() if key in used or key == region}
     folder = Path(work) / region
     folder.mkdir(parents=True, exist_ok=True)
     encoded = io.BytesIO()
@@ -372,7 +416,7 @@ def render(checkout: Path, region: str, work: Path, supersample: int = 2, window
     report = {"region": region, "tool": TOOL, "styleVersion": rc.STYLE_VERSION, "package": str(package),
               "worldMin": low, "worldMax": high, "imageSize": size, "supersample": supersample,
               "pixelsPerMetre": pixels_per_metre,
-              "chunkReaderVersion": CHUNK_READER_VERSION, "retirementSha256": retirement_sha,
+              "chunkReaderVersion": reader_version_for(checkout, region, (low, high)), "retirementSha256": retirement_sha,
               "windowMetres": window, "marginMetres": MARGIN_METRES, "chunks": len(drawn[0]["chunks"]),
               "chunksSha256": digests[region],
               "neighbourChunksSha256": {k: v for k, v in sorted(digests.items()) if k != region},
@@ -403,6 +447,7 @@ def minimap_block(manifest: dict, report: dict) -> dict:
             "cartographyRender": {"generator": TOOL, "styleVersion": report["styleVersion"],
                                   "chunksSha256": report["chunksSha256"],
                                   "neighbourChunksSha256": report["neighbourChunksSha256"],
+                                  "chunkReaderVersion": report["chunkReaderVersion"],
                                   "supersample": report["supersample"],
                                   "windowMetres": report["windowMetres"], "waterRGB": report["waterRGB"]}}
 
@@ -453,6 +498,8 @@ def check(checkout: Path, regions: list[str]) -> list[str]:
         if not image.is_file() or PC.sha(image) != block.get("imageSha256"):
             problems.append(f"{region}: {image.name} is missing or not the picture the manifest records")
         render = block.get("cartographyRender") or {}
+        if render.get("chunkReaderVersion", CHUNK_READER_VERSION) != reader_version_for(checkout, region):
+            problems.append(f"{region}: the map reader version is stale")
         stale = drawn_from(checkout, region, render.get("chunksSha256"), render.get("neighbourChunksSha256") or {})
         if stale:
             problems.append(f"{region}: the picture was drawn from other chunks than {stale} hold now; run "

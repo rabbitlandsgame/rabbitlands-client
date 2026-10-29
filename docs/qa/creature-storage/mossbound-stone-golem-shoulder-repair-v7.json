@@ -1,0 +1,139 @@
+{
+  "schema": 1,
+  "actor": "mossbound_stone_golem",
+  "date": "2026-10-29",
+  "status": "NEW_UNAPPROVED_SHOULDER_ONLY_REPAIR_DRAFT",
+  "runtime_installed": false,
+  "candidate": {
+    "sha256": "8d778fc385cc0b363ec0cde251fd478bd892385e3a77058608451cfc5a4b4483",
+    "raw_bytes": 2000032
+  },
+  "baseline": {
+    "sha256": "3cee2609447cbd0013fe1ebb07654c84d1e6b625c4ec32fc57aff7b332dec4c7",
+    "raw_bytes": 1967072,
+    "role": "Last reviewed V6 3cee; uninstalled and unapproved"
+  },
+  "installed_baseline_sha256": "e056751f8e6d490452250b7e0be3c1af74599ddf15602cf0cc22ddbc734cc5c0",
+  "repair": [
+    "Correct only the 27 appended torso-cap centre rows: they incorrectly inherited 76.7% moving upper-arm ownership from arbitrary coincident-group representatives. They now follow the existing torso-attached clavicle_r control. The body rim and all existing arm fields remain unchanged.",
+    "Add one closed, faceted shoulder socket of radius 0.12 model units, owned by existing clavicle_r node 7. Reuse original moss/stone texture triangles without adding images or materials.",
+    "Round the upper 27-triangle flat cap into a shallow two-ring stone end, depth 0.065 model units. Preserve its exact outer rim and upper-arm owner 35. All original arm, forearm, fist, calf and foot motion remains unchanged."
+  ],
+  "geometry": {
+    "source_vertices": 9414,
+    "candidate_vertices": 9816,
+    "source_triangles": 3138,
+    "candidate_triangles": 3272,
+    "new_rows": 402,
+    "new_triangles": 134,
+    "socket_faces": 80,
+    "rounded_upper_end_faces": 81,
+    "upper_piece_total_faces": 278,
+    "draw_surfaces": 1,
+    "correctives": 0,
+    "influence_slots": 8,
+    "new_bones": 0,
+    "new_animation_tracks": 0,
+    "materials_and_image_bytes_exact": true,
+    "all_source_original9000_attributes_bit_exact": true,
+    "source9414_index_prefix_bit_exact": true,
+    "source9414_field_changes": {
+      "POSITION": 27,
+      "NORMAL": 81,
+      "TEXCOORD_0": 27,
+      "skin_rows": 27
+    },
+    "affected_existing_rows": 108,
+    "outside_existing_rows": 9306,
+    "mapping_scope": "Twenty-seven old upper-cap centre rows now hold inner-ring corner positions; all 81 old upper-cap corner normals are rounded-facet normals. Other source rows retain their original roles. The identity map is ordinal, not a deformation-equivalence assertion for rewritten cap rows."
+  },
+  "motion_preservation": {
+    "all_37_gltf_nodes_binds_and_all_764_curve_channels_exact": true,
+    "all_35_runtime_bone_worlds_exact": true,
+    "all_eight_clip_durations_and_gp_ik_curves_exact": true,
+    "forearm_fist_upper_outer_surface_calf_foot_motion_exact_vs_v6": true,
+    "skeletons": 1,
+    "native_bones": 35,
+    "skin_palette_joints": 34,
+    "retargeted_keys": 15260,
+    "retargeted_tracks": 319
+  },
+  "actual_client": {
+    "states_each_comparison": 738,
+    "all_eight_clips_defaults_helds_reset_firsttick_and_realistic_60hz_stepped_switches": true,
+    "v6_to_final_receipt_sha256": "b31b779a579bc2d2d68ab21a9bd5718d92c4cd5788a3e7e042c208c10fb3f14b",
+    "installed_to_final_receipt_sha256": "62bb10073aabab237d0d1c71dcc080a6c6d2a468446d0b9d0210b5f953d95440",
+    "placement_unchanged": {
+      "actor_global": true,
+      "model_global": true,
+      "selection": true
+    },
+    "protected_runtime_bones": 35,
+    "maximum_bone_world_delta": 0.0,
+    "outside_positions_and_unit_normals_exact_rows": 9306,
+    "outside_position_max_delta": 0.0,
+    "outside_unit_normal_max_delta": 0.0,
+    "scope": "Exact local preservation is relative to last reviewed V6. The older installed baseline has inherited previous repair differences and is not subject to this shoulder-only outside-equivalence mask.",
+    "new_shoulder_shape_retention": {
+      "receipt_sha256": "56f92c08233c2f3133cf51913de0c01d2a3d752f7cb3aa2cf681c705357a0e1c",
+      "socket_and_dome_faces": 161,
+      "native_states": 738,
+      "maximum_area_relative_change": 9.310452974142791e-07
+    },
+    "native_closure": {
+      "receipt_sha256": "33e4bc81ad09b99541f6dfc62b988e21b6e8008e9574513ef8f6d467e3f0fde0",
+      "candidate_boundary_peer_pairs": 1044,
+      "added_duplicate_pairs": 305,
+      "positions_and_dense_packed_u16_skin_coefficients_bit_exact": true,
+      "scope": "Fresh candidate-local peer mapping, including new mid-ring/apex roles. Closed individual pieces do not imply welded opposing articulations."
+    }
+  },
+  "fresh_blender": {
+    "status": "passed_fresh_import_finite_only",
+    "summary_sha256": "7040bd125ee75931fe798e63c3650013888d945e7a41d38810976f9cb061ef5c",
+    "source_and_candidate_all8": true
+  },
+  "visual": {
+    "final_pairs": 280,
+    "full_resolution_pngs": 560,
+    "complete_ground_pound_frames": 80,
+    "complete_cycle_views": [
+      "front",
+      "rear"
+    ],
+    "other_views": "All eight midpoints/near endpoints, RESET, legacy first-tick and realistic stepped switches; three-angle shoulder close-ups at .375, .508333333, .520833333 and 1.067 seconds.",
+    "job_sha256": "34059224097460da8e61cb9acf182806c9b8cce16e0ff64a735f46cc6dffd803",
+    "manifest_sha256": "9a5337ada8fbc89e4e2bec9361c5f3607a50903bef1abcf4301b35e22a9bc102",
+    "framing_receipt_sha256": "4dbd941d2da33be688502f85fbd50063f50336e0ac0d4f22ccc6b9dd6f0f78d2",
+    "sampled_geometry_pairs": 240,
+    "transition_pairs_border_only": 40,
+    "intentional_shoulder_closeup_pairs": 12,
+    "maximum_projected_fraction_of_halfviewport": 0.6667716360400526,
+    "fullbody_pairs_with_zero_material_foreground_at_border": 268,
+    "assessment": "The body socket fills the former flat junction and the rotating end has rounded stone depth, without an obvious new resting silhouette blob. The improved V6 arm motion is retained. The shoulder still reads as a separate faceted articulation and requires human judgment.",
+    "gpu_epoch": 126,
+    "all_children_exited": true
+  },
+  "cost_vs_v6": {
+    "raw_bytes_added": 32960,
+    "additional_vertices": 402,
+    "additional_triangles": 134,
+    "additional_bones_tracks_draw_surfaces": 0,
+    "retained_first_actor_and_scene_library_cache_static_bytes_added": 49836,
+    "native_key_and_track_counts_unchanged": true,
+    "benchmark_receipt": "docs/qa/creature-storage/mossbound-stone-golem-shoulder-component-benchmark-v7.json",
+    "benchmark_sha256": "787102f0621d5842fe0243c00fb4bdfde94475c62a415e406f729c8cf541a791",
+    "scope": "One fresh process per model, warm file cache and uncontrolled background scheduling. Component timings varied; no speedup/FPS/GPU/per-instance-memory inference."
+  },
+  "lineage_annotation_sha256": "3390b2987212a1e851eba1c27f1b92f2393a9a8513ca908fe5d263febcf74653",
+  "independent_static_sha256": "e48c55376690dbb9cb75e24a12c4de657448c922e416fa1c4f0303956d03c0be",
+  "independent_motion_contact_sha256": "a859c774bf203e1ac297a2fea204ef3aa2c157c6e1654e37b7f492c8916bb996",
+  "prominent_limits": [
+    "New unapproved shoulder-only review draft. It is not installed and does not imply approval of this or the preceding V6 arm interpretation.",
+    "The shoulder remains an articulated assembly of separate closed stones. Rounded contact surfaces and rim/facet edges are visible during deep bends; this is not a continuously welded seam or a collision-freedom claim.",
+    "Independent contact containment covers about 69.9\u201382.4% of the new rounded upper end in the tested phases. The remaining visible rounded stone area is not the old flat fan; containment is not camera occlusion or an artistic pass/fail gate.",
+    "V7 deliberately preserves every V6 animation, including its revised right-arm gesture, reach limits, earlier fist-lowpoint timing and existing wrist/elbow articulation. Those inherited V6 tradeoffs are unchanged, rather than repaired or re-approved here.",
+    "The cap-only ordinal mapping does not make the 108 intentionally changed source-cap rows deformation-equivalent. All original 9000 rows and every row outside that explicit local domain remain exact against V6.",
+    "Scoped CPU/cache measurements do not establish FPS, GPU-skinning cost, total VRAM, per-instance memory or a speedup. Human review remains required."
+  ]
+}

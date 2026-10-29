@@ -1,0 +1,1071 @@
+{
+  "schema_version": 1,
+  "scope": "Four exact batch02 repairs accepted; Mossbound Golem explicitly excluded. Historical proofs remain historical; no fresh numerical equivalence or FPS claim inferred from approval.",
+  "input_hashes": {
+    "catalog": "da6ecacbb3e42420d376e6530447f4aedc506d2a04309c29773928583ad1d47a",
+    "authorization": "624bab02ec9f07b18a9b58031a2529919b127e81e7f183867fa083b3db7521a4",
+    "manifest": "9b784760de71cb69a5b361f79ad745747beeb55b99160bef25e0b3db892bfc1c",
+    "owner_metadata": "6e8acd3687c28b15147701c8c095c63146c5168bcc3d24818c70b7ab888ccd5e",
+    "journal": "f24f196b67dbd0a36ba23368acecec621a96b2b443c6b279697eab2c12ef885e"
+  },
+  "immutable_batch01_receipt_sha256": "de3fa7f01579d380db2dd113d54cb83d5d8d434988ba8095a308ac3b640f44bc",
+  "excluded_actors": [
+    "mossbound_stone_golem"
+  ],
+  "approval_counts": {
+    "current_user_repair_instruction": 4
+  },
+  "excluded_runtime_held": {
+    "actor": "mossbound_stone_golem",
+    "runtime_path": "godot-client/assets/actors/native/creatures/mossbound_stone_golem.glb",
+    "sha256": "e056751f8e6d490452250b7e0be3c1af74599ddf15602cf0cc22ddbc734cc5c0"
+  },
+  "reviewed_generic_map_sha256_preserved": "2bd6f445f6fe1dd750b45e8dbbfbb2d40dd8921848a91b900a43dc3a86c1c790",
+  "actors": {
+    "autumn_bark_treant": {
+      "actor": "autumn_bark_treant",
+      "runtime_path": "godot-client/assets/actors/native/creatures/autumn_bark_treant.glb",
+      "source_sha256": "70501bc91dc87dedf3dae24d599602a6ec6d0458e6f5dd0be2ce69996960b9b0",
+      "reviewed_previous_draft_sha256": "eb7575c7bab1c7d36256f70f0fb47f77f94d5e38ab326bfd2fa8f7a190f228eb",
+      "previous_runtime_sha256": "eb7575c7bab1c7d36256f70f0fb47f77f94d5e38ab326bfd2fa8f7a190f228eb",
+      "runtime_sha256": "c0d3791be5d2f318cfaf732cc3f909a3ee5268e41b8cad9c1ae53a6315e15a32",
+      "previous_runtime_bytes": 1927172,
+      "runtime_bytes": 1927176,
+      "variant": "repair-walk-arm-carriage-v2",
+      "declared_animation_bake_fps": 30,
+      "structural_counts": {
+        "vertices": 5561,
+        "triangles": 4018,
+        "joints": 80,
+        "animations": 7,
+        "surfaceCount": 1,
+        "correctiveTargets": 0
+      },
+      "clips": [
+        "Death_A",
+        "Fighting_Idle",
+        "Hit_Chest",
+        "Idle_A",
+        "Jog",
+        "Sword_Attack",
+        "Walk"
+      ],
+      "approval_basis": {
+        "kind": "current_user_repair_instruction",
+        "instruction_summary": "The user accepted the other four batch02 candidates and reported the Golem right thumb still attaches to its right leg. Install only the four exact accepted versions; retain Golem runtime and prepare a separate thumb repair draft. Four saved exact-version Space approvals corroborate acceptance. No new push or release authorized.",
+        "catalog_sha256": "da6ecacbb3e42420d376e6530447f4aedc506d2a04309c29773928583ad1d47a",
+        "authorization_sha256": "624bab02ec9f07b18a9b58031a2529919b127e81e7f183867fa083b3db7521a4",
+        "not_a_historical_journal_event": true,
+        "saved_reviewer_approval": {
+          "event_id": "7ef37012-694c-408c-b700-d22a3003899a",
+          "event_sha256": "ed8877bb41480233b207dcb8922b7a8386738c4e05090615c04b6f21a9dd5024",
+          "utc": "2026-10-29T02:04:57.638432+00:00"
+        }
+      },
+      "previous_delivery": {
+        "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+        "receipt_sha256": "f7f6667bad231e5ef4e4ca1e0065772dcc13aeedc565cb75ac846f22ad390b9b",
+        "runtime_sha256": "eb7575c7bab1c7d36256f70f0fb47f77f94d5e38ab326bfd2fa8f7a190f228eb"
+      },
+      "previous_old_runtime_lineage": null,
+      "previous_native_catalog_sha256": [
+        null
+      ],
+      "owner_metadata_evidence": null,
+      "preserved_roster_status": "current model; animation work may require actor-specific visual review",
+      "preview_import_preserved": true,
+      "metrics": {
+        "corrective_shapes": 0,
+        "raw_bytes_change_from_displayed_baseline": 4,
+        "scope": "New repair draft; see review note for remaining limits"
+      },
+      "retained_repair_limits": [
+        "New stylistic Walk arm carriage, not a full gait re-authoring. Canopy field moves at most13.406actualmm; all819feet P/N exact and all6other actions pixel-exact1236pairs. Requires new review; no runtime copy."
+      ],
+      "evidence": {
+        "artifact_index_sha256": "531bf7e832c659258ccc7dfdd1560d4a0600ea45c44d52739db625a1fae556d8",
+        "handoff_sha256": "68017b8c6821ec9e074af427a70c9bff1d2c73d066117e111536ff2805925a6d",
+        "files": [
+          {
+            "kind": "evidence/handoff",
+            "sha256": "68017b8c6821ec9e074af427a70c9bff1d2c73d066117e111536ff2805925a6d"
+          },
+          {
+            "kind": "evidence/actual_client",
+            "sha256": "44e995150a56f4fdb0a5de876a030a6cad3ccab8772986de69f88d556b8bf540"
+          },
+          {
+            "kind": "evidence/fresh_blender",
+            "sha256": "84103279f288143c8a5fc8fa71a12879ec589b5f7d0bdd3c86be066f53a80172"
+          },
+          {
+            "kind": "evidence/visual",
+            "sha256": "06856950d6d1fbf0a6e22a64a1b249400a2d1702c420a1c1fdd8440601cfe28d"
+          },
+          {
+            "kind": "evidence/visual_job",
+            "sha256": "7e5ffd328ca416500ea3ba67f30a54302e2b95e5e5a184dc1c0739c514d33787"
+          },
+          {
+            "kind": "evidence/additional/0",
+            "sha256": "feb3656f3ccbcc47907cd332d52c9aa7d8cf4e49c681277e4334ca01b35c2649"
+          },
+          {
+            "kind": "evidence/additional/1",
+            "sha256": "0e02df5b606773369e1a29f9d9f8931a9a50338a7796253868499086c33289a5"
+          },
+          {
+            "kind": "evidence/additional/2",
+            "sha256": "1e65f1f0629ba3fcc29df257cac81696b4a90e79b711ec68f2530ff2202ba174"
+          }
+        ],
+        "actual_client_observations": [
+          {
+            "report_sha256": "44e995150a56f4fdb0a5de876a030a6cad3ccab8772986de69f88d556b8bf540",
+            "comparison_sha256": [
+              "eb7575c7bab1c7d36256f70f0fb47f77f94d5e38ab326bfd2fa8f7a190f228eb",
+              "c0d3791be5d2f318cfaf732cc3f909a3ee5268e41b8cad9c1ae53a6315e15a32"
+            ],
+            "summary": {
+              "all": {
+                "states": 380,
+                "maximum_position_mm": 787.2173589394714,
+                "maximum_normal_degrees": 24.999729708510174,
+                "worst_maximum_position_mm": {
+                  "label": "Walk@0.61729",
+                  "source_vertex": 1465
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Walk@0.49913",
+                  "source_vertex": 440
+                },
+                "rms_position_mm": 54.18116249405862,
+                "rms_normal_degrees": 2.085949582858002
+              },
+              "default": {
+                "states": 1,
+                "maximum_position_mm": 0.0,
+                "maximum_normal_degrees": 0.0,
+                "worst_maximum_position_mm": {
+                  "label": "configured-default",
+                  "source_vertex": 0
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "configured-default",
+                  "source_vertex": 0
+                },
+                "rms_position_mm": 0.0,
+                "rms_normal_degrees": 0.0
+              },
+              "clip": {
+                "states": 77,
+                "maximum_position_mm": 787.2173589394714,
+                "maximum_normal_degrees": 24.999729708510174,
+                "worst_maximum_position_mm": {
+                  "label": "Walk@0.61729",
+                  "source_vertex": 1465
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Walk@0.49913",
+                  "source_vertex": 440
+                },
+                "rms_position_mm": 64.68474496931684,
+                "rms_normal_degrees": 2.4983538986483502
+              },
+              "held_end": {
+                "states": 7,
+                "maximum_position_mm": 765.1199204226629,
+                "maximum_normal_degrees": 23.47449202089759,
+                "worst_maximum_position_mm": {
+                  "label": "Walk@held-end+0.417",
+                  "source_vertex": 3423
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Walk@held-end+0.417",
+                  "source_vertex": 86
+                },
+                "rms_position_mm": 64.52492409985143,
+                "rms_normal_degrees": 2.4783936584603086
+              },
+              "switch": {
+                "states": 84,
+                "maximum_position_mm": 546.4143273029252,
+                "maximum_normal_degrees": 17.16716533901596,
+                "worst_maximum_position_mm": {
+                  "label": "Walk->Death_A@0.071",
+                  "source_vertex": 1465
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Walk->Death_A@0.071",
+                  "source_vertex": 1686
+                },
+                "rms_position_mm": 35.122587542340135,
+                "rms_normal_degrees": 1.3331279023008376
+              },
+              "switch_stepped": {
+                "states": 210,
+                "maximum_position_mm": 729.9871232483283,
+                "maximum_normal_degrees": 22.981661945905312,
+                "worst_maximum_position_mm": {
+                  "label": "Walk->Death_A@stepped-0.01666666666667",
+                  "source_vertex": 1465
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Walk->Death_A@stepped-0.01666666666667",
+                  "source_vertex": 769
+                },
+                "rms_position_mm": 56.085992333525034,
+                "rms_normal_degrees": 2.160852704056513
+              },
+              "RESET": {
+                "states": 1,
+                "maximum_position_mm": 0.0,
+                "maximum_normal_degrees": 0.0,
+                "worst_maximum_position_mm": {
+                  "label": "RESET-after-switches",
+                  "source_vertex": 0
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "RESET-after-switches",
+                  "source_vertex": 0
+                },
+                "rms_position_mm": 0.0,
+                "rms_normal_degrees": 0.0
+              }
+            },
+            "scope": "Actual configured raw-client actor; every native clip, shifted samples, directed switches as enumerated by crossfade_coverage, nonlooping held endpoints, configured default and RESET; all native vertices/normals, quantized four/eight-influence skin. Float64 reconstruction of renderer inputs, not GPU pixels, imported PackedScenes, artistic acceptance or exhaustive continuous-time proof."
+          }
+        ],
+        "media_scope_preserved": true
+      }
+    },
+    "crystal_cave_spider": {
+      "actor": "crystal_cave_spider",
+      "runtime_path": "godot-client/assets/actors/native/creatures/crystal_cave_spider.glb",
+      "source_sha256": "8dda51c7c617e40be1b130a2482acf48bc43ea737d377114d0290fac31cc723c",
+      "reviewed_previous_draft_sha256": "94111d2ba449f4c8f571c21df07501217c8d48cf30c8b573db87a4734a966950",
+      "previous_runtime_sha256": "d37a47a3f42314d3cddc632a1e62d0a534a503896213e43dba528a277ca7a57f",
+      "runtime_sha256": "7e32aea069b53a320a5fdbe6dc52aac32761167d99d5f4b6be4f73aba850cf95",
+      "previous_runtime_bytes": 22663360,
+      "runtime_bytes": 1061772,
+      "variant": "rigid-owner-30-v1",
+      "declared_animation_bake_fps": 30,
+      "structural_counts": {
+        "vertices": 4057,
+        "triangles": 4213,
+        "joints": 99,
+        "animations": 7,
+        "surfaceCount": 1,
+        "correctiveTargets": 0
+      },
+      "clips": [
+        "Death_A",
+        "Fighting_Idle",
+        "Hit_Chest",
+        "Idle_A",
+        "Jog",
+        "Sword_Attack",
+        "Walk"
+      ],
+      "approval_basis": {
+        "kind": "current_user_repair_instruction",
+        "instruction_summary": "The user accepted the other four batch02 candidates and reported the Golem right thumb still attaches to its right leg. Install only the four exact accepted versions; retain Golem runtime and prepare a separate thumb repair draft. Four saved exact-version Space approvals corroborate acceptance. No new push or release authorized.",
+        "catalog_sha256": "da6ecacbb3e42420d376e6530447f4aedc506d2a04309c29773928583ad1d47a",
+        "authorization_sha256": "624bab02ec9f07b18a9b58031a2529919b127e81e7f183867fa083b3db7521a4",
+        "not_a_historical_journal_event": true,
+        "saved_reviewer_approval": {
+          "event_id": "f6983424-a37e-4997-9d4a-b6fc3aed757a",
+          "event_sha256": "c68fefab332cf897063b0a098df04994326262a3b5468512b13465f2dbf07d41",
+          "utc": "2026-10-29T02:05:06.244633+00:00"
+        }
+      },
+      "previous_delivery": {
+        "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+        "receipt_sha256": "816c51e9e29147835f47ce586eb80573ff88a6597c8c67aa35510df8d312cb33",
+        "runtime_sha256": "d37a47a3f42314d3cddc632a1e62d0a534a503896213e43dba528a277ca7a57f"
+      },
+      "previous_old_runtime_lineage": null,
+      "previous_native_catalog_sha256": [
+        null
+      ],
+      "owner_metadata_evidence": null,
+      "preserved_roster_status": "current imported model; reviewed spider walk, skitter, bite and curl collapse integrated",
+      "preview_import_preserved": true,
+      "metrics": {
+        "corrective_shapes": 0,
+        "raw_bytes_change_from_displayed_baseline": 300,
+        "scope": "New repair draft; see review note for remaining limits"
+      },
+      "retained_repair_limits": [
+        "Newexactcandidateuserreviewrequired; no runtime copy or approval.",
+        "Wholeprobe originalmaximum127.34mm and21.82deg occursduringrigid-vs-morphlinearblending; standaloneclipmaximum8.023mm/2.029deg,RMS.416mm. No universal equalitypass.",
+        "Death\u2192live tiparc drops76.30mm below the originalstanceplane (worldY.5981876), notably Death\u2192Walk.193. Gamegroundworld0 is distinct; Actorplacement is unchanged.",
+        "All42pieces intentionally change skinownership relative commentedbake and activeconservative; no unchanged-outsideworldsurfaceclaim. Sourcegeometry rawP/N/UV and allbonecurves are independently preserved.",
+        "Actualrawclient and freshBlender checked; no genuineEditorPackedScene,newseededcorpseFX/mounttest or whole-gameRAM/FPSbenchmark claimed.",
+        "SharedcorrectiveGPUbuffer elimination is resource-sized, notper-instanceVRAM or FPS. Native99bones and1surface retained, no extra controlcost."
+      ],
+      "evidence": {
+        "artifact_index_sha256": "531bf7e832c659258ccc7dfdd1560d4a0600ea45c44d52739db625a1fae556d8",
+        "handoff_sha256": "10cd639cb55721545e6706fadb44241247b240777ba59eb6677af0969e0f70e6",
+        "files": [
+          {
+            "kind": "evidence/handoff",
+            "sha256": "10cd639cb55721545e6706fadb44241247b240777ba59eb6677af0969e0f70e6"
+          },
+          {
+            "kind": "evidence/actual_client",
+            "sha256": "1ba43eade99c607ac5a2a3187bfc8a23846c124b5ca5467d6af5b6701a15b565"
+          },
+          {
+            "kind": "evidence/fresh_blender",
+            "sha256": "78fc01a4e5b4934cdcb388b1418548827892f3c03c3dde8e97fc5a306020910b"
+          },
+          {
+            "kind": "evidence/visual",
+            "sha256": "d557953962953ed68950a7e44b5f8bc9ba509a6b5609cabb40cf7c20cf1d2c5e"
+          },
+          {
+            "kind": "evidence/visual_job",
+            "sha256": "6eff9053ed1ceb5c8d6c671ff5894884bf366195cae3d50ef4b2f9846bee5770"
+          },
+          {
+            "kind": "evidence/additional/0",
+            "sha256": "ffc60e37092511d61759ce28e3003bd3f1925bb5569a233ba1934a69269599bc"
+          },
+          {
+            "kind": "evidence/additional/1",
+            "sha256": "17332aba74a80aa242630b1eec76ec1f6779a32499e8ecfbdc0e1e3e65381af9"
+          },
+          {
+            "kind": "evidence/additional/2",
+            "sha256": "2a495e4d80cf3849bb99a1d8acea218091928f834b090601705ddc76378843df"
+          }
+        ],
+        "actual_client_observations": [
+          {
+            "report_sha256": "1ba43eade99c607ac5a2a3187bfc8a23846c124b5ca5467d6af5b6701a15b565",
+            "comparison_sha256": [
+              "d37a47a3f42314d3cddc632a1e62d0a534a503896213e43dba528a277ca7a57f",
+              "7e32aea069b53a320a5fdbe6dc52aac32761167d99d5f4b6be4f73aba850cf95"
+            ],
+            "summary": {
+              "all": {
+                "states": 380,
+                "maximum_position_mm": 127.32193258213536,
+                "maximum_normal_degrees": 21.82465578022216,
+                "worst_maximum_position_mm": {
+                  "label": "Death_A->Jog@stepped-0.071",
+                  "source_vertex": 2
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Death_A->Jog@stepped-0.071",
+                  "source_vertex": 2178
+                },
+                "rms_position_mm": 5.648068001513551,
+                "rms_normal_degrees": 1.1121090518910417
+              },
+              "default": {
+                "states": 1,
+                "maximum_position_mm": 0.061501388179441126,
+                "maximum_normal_degrees": 8.469706986358645e-05,
+                "worst_maximum_position_mm": {
+                  "label": "configured-default",
+                  "source_vertex": 3195
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "configured-default",
+                  "source_vertex": 742
+                },
+                "rms_position_mm": 0.019077911523063953,
+                "rms_normal_degrees": 1.0266959948977575e-05
+              },
+              "clip": {
+                "states": 77,
+                "maximum_position_mm": 8.022099496303548,
+                "maximum_normal_degrees": 2.0278962654576036,
+                "worst_maximum_position_mm": {
+                  "label": "Jog@0.61729",
+                  "source_vertex": 46
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Jog@0.61729",
+                  "source_vertex": 1828
+                },
+                "rms_position_mm": 0.40668899595969443,
+                "rms_normal_degrees": 0.0841981088956005
+              },
+              "held_end": {
+                "states": 7,
+                "maximum_position_mm": 0.061058761657930866,
+                "maximum_normal_degrees": 0.009058432557762508,
+                "worst_maximum_position_mm": {
+                  "label": "Idle_A@held-end+0.417",
+                  "source_vertex": 3195
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Death_A@held-end+0.417",
+                  "source_vertex": 3802
+                },
+                "rms_position_mm": 0.018724319947992035,
+                "rms_normal_degrees": 0.001669596463044713
+              },
+              "switch": {
+                "states": 84,
+                "maximum_position_mm": 108.36174253351645,
+                "maximum_normal_degrees": 20.135834594953554,
+                "worst_maximum_position_mm": {
+                  "label": "Death_A->Fighting_Idle@0.071",
+                  "source_vertex": 2
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Death_A->Fighting_Idle@0.071",
+                  "source_vertex": 291
+                },
+                "rms_position_mm": 8.271651218006655,
+                "rms_normal_degrees": 1.632000611219346
+              },
+              "switch_stepped": {
+                "states": 210,
+                "maximum_position_mm": 127.32193258213536,
+                "maximum_normal_degrees": 21.82465578022216,
+                "worst_maximum_position_mm": {
+                  "label": "Death_A->Jog@stepped-0.071",
+                  "source_vertex": 2
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Death_A->Jog@stepped-0.071",
+                  "source_vertex": 2178
+                },
+                "rms_position_mm": 5.504205657105969,
+                "rms_normal_degrees": 1.0816768410991504
+              },
+              "RESET": {
+                "states": 1,
+                "maximum_position_mm": 0.06150543350420401,
+                "maximum_normal_degrees": 8.469706986358645e-05,
+                "worst_maximum_position_mm": {
+                  "label": "RESET-after-switches",
+                  "source_vertex": 3195
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "RESET-after-switches",
+                  "source_vertex": 742
+                },
+                "rms_position_mm": 0.019073848708237372,
+                "rms_normal_degrees": 1.0295919263616075e-05
+              }
+            },
+            "scope": "Actual configured raw-client actor; every native clip, shifted samples, directed switches as enumerated by crossfade_coverage, nonlooping held endpoints, configured default and RESET; all native vertices/normals, quantized four/eight-influence skin. Float64 reconstruction of renderer inputs, not GPU pixels, imported PackedScenes, artistic acceptance or exhaustive continuous-time proof."
+          }
+        ],
+        "media_scope_preserved": true
+      }
+    },
+    "storm_chimera": {
+      "actor": "storm_chimera",
+      "runtime_path": "godot-client/assets/actors/native/creatures/storm_chimera.glb",
+      "source_sha256": "e35e661a2a2ad5987be76c473c916ed17c7692e7d0233277a782903765f909e8",
+      "reviewed_previous_draft_sha256": "53125895c058ae0f00793b5459325a6f04d0906fbcf8fb1487f0253c82bc93da",
+      "previous_runtime_sha256": "308a44dd4e9ade94bb37544169bb3ebc2138ba947ba7ac1d16f85322fade47f1",
+      "runtime_sha256": "05e2d23a87201f7ef94dcfd4227af888c69c3572b5a7020edaa647039d201252",
+      "previous_runtime_bytes": 1571288,
+      "runtime_bytes": 2372480,
+      "variant": "whole-strand-mane-v2",
+      "declared_animation_bake_fps": 30,
+      "structural_counts": {
+        "vertices": 5035,
+        "triangles": 4037,
+        "joints": 153,
+        "animations": 7,
+        "surfaceCount": 1,
+        "correctiveTargets": 0
+      },
+      "clips": [
+        "Idle_A",
+        "Fighting_Idle",
+        "Walk",
+        "Jog",
+        "Sword_Attack",
+        "Hit_Chest",
+        "Death_A"
+      ],
+      "approval_basis": {
+        "kind": "current_user_repair_instruction",
+        "instruction_summary": "The user accepted the other four batch02 candidates and reported the Golem right thumb still attaches to its right leg. Install only the four exact accepted versions; retain Golem runtime and prepare a separate thumb repair draft. Four saved exact-version Space approvals corroborate acceptance. No new push or release authorized.",
+        "catalog_sha256": "da6ecacbb3e42420d376e6530447f4aedc506d2a04309c29773928583ad1d47a",
+        "authorization_sha256": "624bab02ec9f07b18a9b58031a2529919b127e81e7f183867fa083b3db7521a4",
+        "not_a_historical_journal_event": true,
+        "saved_reviewer_approval": {
+          "event_id": "200fba82-f448-46c3-9084-b5906edae7d2",
+          "event_sha256": "12fbc3e8d8d8def38b67e34f88b32e1ea2f945e853e35f6170faa243e76475b2",
+          "utc": "2026-10-29T02:05:19.912572+00:00"
+        }
+      },
+      "previous_delivery": null,
+      "previous_old_runtime_lineage": {
+        "receipt": "docs/qa/creature-storage/storm_chimera.json",
+        "receipt_sha256": "2b8945da3ca4a978c9066f4a1eac2fa92523faf566a75bb2b9d03057661e8895",
+        "historical_runtime_sha256": "a55951ffff9b7080b3be257b1c79a98f8856230abc69f31b4e6b468567f53171",
+        "packed_old_runtime_sha256": "308a44dd4e9ade94bb37544169bb3ebc2138ba947ba7ac1d16f85322fade47f1"
+      },
+      "previous_native_catalog_sha256": [
+        null
+      ],
+      "owner_metadata_evidence": {
+        "owner_profile_sha256": "9cbf8d9343806d344e4ab8d5995f6d0643112b970afb84cc1923b5292ffba378",
+        "owner_stage_receipt_sha256": "17b1a1bef6fcc31a718f5ce76e00df873c176e30fc2b382fa5b7c48e090654b8",
+        "owner_map_sha256": "9641af8f556d56722c90c54ff6bc81735b3965a87b1d65e3870a4c90a940646a",
+        "owner_source_inventory_sha256": "81e6847901559b532d611a557aa15a27ef8ccfad9824f456bd41698e091228fe",
+        "owner_import_policy_sha256": "219b809b7e56d033b77b778e1ceb406d4c29590b7a74025397db3e58417f3ad9",
+        "reviewed_runtime_playback_policy_preserved": true,
+        "qualified_fields_not_promoted": [
+          "concept",
+          "locomotionMode",
+          "playbackSpeeds",
+          "reviewStatus",
+          "strideMetresPerSecond",
+          "strideScalesWithActor"
+        ],
+        "attachment_aliases": {
+          "head": "RL_Chimera_lion_neck_4",
+          "body": "RL_Chimera_Body",
+          "neck": "RL_Chimera_lion_neck_1"
+        }
+      },
+      "preserved_roster_status": "current model; animation work may require actor-specific visual review; storage optimized",
+      "preview_import_preserved": true,
+      "metrics": {
+        "corrective_shapes": 0,
+        "raw_bytes_change_from_displayed_baseline": 0,
+        "scope": "New repair draft; see review note for remaining limits"
+      },
+      "retained_repair_limits": [
+        "Partial repair: original open/overlapping mane-card construction and underlying gaps remain. Whole-strand rigidity approximates the source corrective deformation.",
+        "Reported Walk goat-side difference is subtle; clearer improvement is coherent outer lion-strand contours through Walk and less strand distortion during Death. No claim that every apparent tear is resolved.",
+        "Selected actual-client source-position RMS improves18.484\u219210.943world-mm, but source-normal maximum worsens69.310\u219271.301degrees; whole-body source-position maximum remains369.346world-mm. No source-equivalence claim.",
+        "770selected default contour vertices intentionally shift up to52.314model-mm versus commented bake; they match original default contour within3.65e-8modelunits. RESET was visually inspected.",
+        "No new bones or slots versus153joint/8slot selected source/commented bake. Active installed asset is63joints/4slots; candidate adds801192rawbytes and5833378retained static first-actor CPU allocation bytes. Warm component updates rose~21\u219253us Walk/~23\u219251us Jog; no GPU/whole-game FPS or per-instance-memory claim.",
+        "GPU100 screenshots contain a size-caption typo saying2372484bytes; exact payload/report/replay all prove2372480bytes.",
+        "Active runtime and historical authoring observations remain unchanged; draft requires exact-version human review."
+      ],
+      "evidence": {
+        "artifact_index_sha256": "531bf7e832c659258ccc7dfdd1560d4a0600ea45c44d52739db625a1fae556d8",
+        "handoff_sha256": "be64ddb9a10626e3c8b8fafc74b21f49c830b89c386f00bb1727551d2660745b",
+        "files": [
+          {
+            "kind": "evidence/handoff",
+            "sha256": "be64ddb9a10626e3c8b8fafc74b21f49c830b89c386f00bb1727551d2660745b"
+          },
+          {
+            "kind": "evidence/actual_client",
+            "sha256": "b06f92587461773ef4b5dd982452e0f352b2282fded574c48dae10ff19eab614"
+          },
+          {
+            "kind": "evidence/fresh_blender",
+            "sha256": "22d0697a93d2b648194a8df5fce36875349c2a94ba7737d9d6163943e6ae4bce"
+          },
+          {
+            "kind": "evidence/visual",
+            "sha256": "93eebfaf0d176efe2c0af4a49b704ebe512a1310b78978c589f065e03e366b68"
+          },
+          {
+            "kind": "evidence/visual_job",
+            "sha256": "b3cfc96f6774ea651e5732ad717ff00690d81700c3e801cef50de09d4f112973"
+          },
+          {
+            "kind": "evidence/additional/0",
+            "sha256": "260d5194facd8c05adc7d758bc6a6632d41cb1daf611498eb5b0546759b3decd"
+          },
+          {
+            "kind": "evidence/additional/1",
+            "sha256": "33d90d12e5bc991b1072fe7ebe45ebde37e4a52b4dde465d2823f632d9a95341"
+          },
+          {
+            "kind": "evidence/additional/2",
+            "sha256": "bc2dcf25cf07acee300c3d6c4998d033c7bf138d97ca9879d551cc292cd42965"
+          },
+          {
+            "kind": "evidence/additional/3",
+            "sha256": "39e415f45f13aae744548c4d0282b31b486412c9a138755f16492ff497c052ff"
+          },
+          {
+            "kind": "evidence/additional/4",
+            "sha256": "96ad35e7778911fe95a7df6e522b891eefa6a8e5b07bdbdb2187876ba91d558d"
+          },
+          {
+            "kind": "evidence/additional/5",
+            "sha256": "4776ebe5ae59ae07702acc4180e77d448c2fa251294cc6a8c10cdd252a10ec41"
+          },
+          {
+            "kind": "evidence/additional/6",
+            "sha256": "aeb458d2d9e111003afafade5e752e876ba74f1efd7bd918ad455bdd6da22695"
+          },
+          {
+            "kind": "evidence/additional/7",
+            "sha256": "82d1459e8fdea3381454ccd5b09a6bc85c75705b3f9a88ed9633bc5afa355fcc"
+          },
+          {
+            "kind": "evidence/additional/8",
+            "sha256": "e2d5e98e7d679b773f31d1a5650992fa4cbd010d0a285f73d64163cfe94d49e7"
+          },
+          {
+            "kind": "evidence/additional/9",
+            "sha256": "24d167f63cd920195398065ffc67720d7c0bc9fafe029fb3c74d18176dd7e6f5"
+          },
+          {
+            "kind": "evidence/additional/10",
+            "sha256": "ef09372711a88addef53df3f8cea4c8469d49f2fb2f1d74b77d60f21fff5f1a6"
+          },
+          {
+            "kind": "evidence/additional/11",
+            "sha256": "4655be87e1fba09294f733de70fd3016af3697144deaac254e56d656d1ee7ce4"
+          },
+          {
+            "kind": "evidence/additional/12",
+            "sha256": "ee3ad091c50df8098fb98d7e5a54479e5d375f10479e343ed68fb4b216b734c2"
+          },
+          {
+            "kind": "evidence/additional/13",
+            "sha256": "220edcf6acec54b7a66d2c6a0f4585bbd3b49cd9f7c65987a61b9f201ac688a2"
+          },
+          {
+            "kind": "evidence/additional/14",
+            "sha256": "60f5632619a3569ff312f4bdd7a6d286aa27aa5c092f2169244407c70648869d"
+          },
+          {
+            "kind": "evidence/additional/15",
+            "sha256": "6dba280dca8643ec23f829604d57693c152ee1f3da8a8885185e5f4498e704e6"
+          },
+          {
+            "kind": "evidence/additional/16",
+            "sha256": "070cec91a83dd87b416b85ff15f7c0696bbbb40c83401c6518badfa8bfe0160b"
+          },
+          {
+            "kind": "evidence/additional/17",
+            "sha256": "c96ca5f83916c1ae555b39311466174b1b523dfef5133ab7c34ddca12f1a039e"
+          },
+          {
+            "kind": "evidence/additional/18",
+            "sha256": "54b44ffbb9fa9f78f56244e2a0d7fddfd48e002fa6c11b38206e17e9222ac7ec"
+          },
+          {
+            "kind": "evidence/additional/19",
+            "sha256": "e06c2dfcf7e77d2df603c4493f52249fc4ca26e1bfd3ca753091654ae0747ad5"
+          },
+          {
+            "kind": "evidence/additional/20",
+            "sha256": "da451f021a914a32ab1f5c5617ac5187999114dfa7cfd67b805c74fc21c011ec"
+          },
+          {
+            "kind": "evidence/additional/21",
+            "sha256": "66d3c590a9fa343574638514a5e66ae3c630a42c8081253b8fc02f8d35f98d62"
+          },
+          {
+            "kind": "evidence/additional/22",
+            "sha256": "b6106e287c8db2597eecbf260b5975bbc11f5101ab17de07628def8ffcb3e2f2"
+          },
+          {
+            "kind": "evidence/active_placement",
+            "sha256": "96ad35e7778911fe95a7df6e522b891eefa6a8e5b07bdbdb2187876ba91d558d"
+          },
+          {
+            "kind": "evidence/active_placement_job",
+            "sha256": "4776ebe5ae59ae07702acc4180e77d448c2fa251294cc6a8c10cdd252a10ec41"
+          }
+        ],
+        "actual_client_observations": [
+          {
+            "report_sha256": "b06f92587461773ef4b5dd982452e0f352b2282fded574c48dae10ff19eab614",
+            "comparison_sha256": [
+              "53125895c058ae0f00793b5459325a6f04d0906fbcf8fb1487f0253c82bc93da",
+              "05e2d23a87201f7ef94dcfd4227af888c69c3572b5a7020edaa647039d201252"
+            ],
+            "summary": {
+              "all": {
+                "states": 380,
+                "maximum_position_mm": 531.7840409264747,
+                "maximum_normal_degrees": 49.71694209212132,
+                "worst_maximum_position_mm": {
+                  "label": "Death_A@0.93317",
+                  "source_vertex": 2768
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Death_A@0.85937",
+                  "source_vertex": 2768
+                },
+                "rms_position_mm": 8.118488217466231,
+                "rms_normal_degrees": 0.5591642782155901
+              },
+              "default": {
+                "states": 1,
+                "maximum_position_mm": 63.00150213161977,
+                "maximum_normal_degrees": 4.243909649122375,
+                "worst_maximum_position_mm": {
+                  "label": "configured-default",
+                  "source_vertex": 665
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "configured-default",
+                  "source_vertex": 4138
+                },
+                "rms_position_mm": 6.059680930720308,
+                "rms_normal_degrees": 0.28640003642052797
+              },
+              "clip": {
+                "states": 77,
+                "maximum_position_mm": 531.7840409264747,
+                "maximum_normal_degrees": 49.71694209212132,
+                "worst_maximum_position_mm": {
+                  "label": "Death_A@0.93317",
+                  "source_vertex": 2768
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Death_A@0.85937",
+                  "source_vertex": 2768
+                },
+                "rms_position_mm": 9.122817802021311,
+                "rms_normal_degrees": 0.6698155853287177
+              },
+              "held_end": {
+                "states": 7,
+                "maximum_position_mm": 531.7840409264747,
+                "maximum_normal_degrees": 49.71694136858229,
+                "worst_maximum_position_mm": {
+                  "label": "Death_A@held-end+0.417",
+                  "source_vertex": 2768
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Death_A@held-end+0.417",
+                  "source_vertex": 2768
+                },
+                "rms_position_mm": 11.265740975769225,
+                "rms_normal_degrees": 0.9031937933473868
+              },
+              "switch": {
+                "states": 84,
+                "maximum_position_mm": 338.9897799058784,
+                "maximum_normal_degrees": 31.784233149124233,
+                "worst_maximum_position_mm": {
+                  "label": "Death_A->Idle_A@0.071",
+                  "source_vertex": 2768
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Death_A->Idle_A@0.071",
+                  "source_vertex": 2768
+                },
+                "rms_position_mm": 7.305439809967891,
+                "rms_normal_degrees": 0.495976333259237
+              },
+              "switch_stepped": {
+                "states": 210,
+                "maximum_position_mm": 441.54192284991063,
+                "maximum_normal_degrees": 41.208348779853445,
+                "worst_maximum_position_mm": {
+                  "label": "Death_A->Idle_A@stepped-0.01666666666667",
+                  "source_vertex": 2768
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Death_A->Idle_A@stepped-0.01666666666667",
+                  "source_vertex": 2768
+                },
+                "rms_position_mm": 7.925986381589551,
+                "rms_normal_degrees": 0.5243071273419591
+              },
+              "RESET": {
+                "states": 1,
+                "maximum_position_mm": 63.00150213161977,
+                "maximum_normal_degrees": 4.243909649122375,
+                "worst_maximum_position_mm": {
+                  "label": "RESET-after-switches",
+                  "source_vertex": 665
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "RESET-after-switches",
+                  "source_vertex": 4138
+                },
+                "rms_position_mm": 6.059680929021733,
+                "rms_normal_degrees": 0.28640003692038746
+              }
+            },
+            "scope": "Actual configured raw-client actor; every native clip, shifted samples, directed switches as enumerated by crossfade_coverage, nonlooping held endpoints, configured default and RESET; all native vertices/normals, quantized four/eight-influence skin. Float64 reconstruction of renderer inputs, not GPU pixels, imported PackedScenes, artistic acceptance or exhaustive continuous-time proof."
+          }
+        ],
+        "media_scope_preserved": true
+      }
+    },
+    "ostrich": {
+      "actor": "ostrich",
+      "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/ostrich.glb",
+      "source_sha256": "2c5d7c1fa448079dbfc956565c05197db473b885918baa35ccf0e41ac640ae2f",
+      "reviewed_previous_draft_sha256": "b41f786ebd08aff62b3669d492e7932d84fcfb9c8c5d643cbcdbf4b6250e64cd",
+      "previous_runtime_sha256": "257b153037bf4620e7cff55a6620b1fd89778c409d59e1998f043e2d096fa979",
+      "runtime_sha256": "9dc999b1f1a627fc0c30dd3a87707a4617fefe1c36bdb25c47760c7f68ee4be0",
+      "previous_runtime_bytes": 25878072,
+      "runtime_bytes": 703000,
+      "variant": "left-leg-skin-v1",
+      "declared_animation_bake_fps": 30,
+      "structural_counts": {
+        "vertices": 4223,
+        "triangles": 4347,
+        "joints": 17,
+        "animations": 7,
+        "surfaceCount": 1,
+        "correctiveTargets": 0
+      },
+      "clips": [
+        "Death_A",
+        "Fighting_Idle",
+        "Hit_Chest",
+        "Idle_A",
+        "Jog",
+        "Sword_Attack",
+        "Walk"
+      ],
+      "approval_basis": {
+        "kind": "current_user_repair_instruction",
+        "instruction_summary": "The user accepted the other four batch02 candidates and reported the Golem right thumb still attaches to its right leg. Install only the four exact accepted versions; retain Golem runtime and prepare a separate thumb repair draft. Four saved exact-version Space approvals corroborate acceptance. No new push or release authorized.",
+        "catalog_sha256": "da6ecacbb3e42420d376e6530447f4aedc506d2a04309c29773928583ad1d47a",
+        "authorization_sha256": "624bab02ec9f07b18a9b58031a2529919b127e81e7f183867fa083b3db7521a4",
+        "not_a_historical_journal_event": true,
+        "saved_reviewer_approval": {
+          "event_id": "7fc38583-fc01-4c93-9618-66d5c5050e51",
+          "event_sha256": "e53402cf13f132c14def7e08897b791816bbf5837a240040aa32034685df4a17",
+          "utc": "2026-10-29T02:05:28.089561+00:00"
+        }
+      },
+      "previous_delivery": {
+        "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+        "receipt_sha256": "816c51e9e29147835f47ce586eb80573ff88a6597c8c67aa35510df8d312cb33",
+        "runtime_sha256": "257b153037bf4620e7cff55a6620b1fd89778c409d59e1998f043e2d096fa979"
+      },
+      "previous_old_runtime_lineage": null,
+      "previous_native_catalog_sha256": [
+        "b850bd8eb5c79c46c8cfbe6f127ea154275908e0285bc44775950d3bf82defcd"
+      ],
+      "owner_metadata_evidence": null,
+      "preserved_roster_status": "current model; updated animation draft installed; actor-specific visual review pending; storage optimized",
+      "preview_import_preserved": true,
+      "metrics": {
+        "corrective_shapes": 0,
+        "raw_bytes_change_from_displayed_baseline": 0,
+        "scope": "New repair draft; see review note for remaining limits"
+      },
+      "retained_repair_limits": [
+        "Partial improvement only: residual left-leg narrowing/shear remains during Sword_Attack, Jog and Death.",
+        "All native metrics are in authoring model units unless explicitly marked as actual-client world millimetres.",
+        "The two-control v3 option is rejected after PBR showed a sharper knee kink; its lower aggregate numeric error does not justify offering it.",
+        "Current active conservative model remains installed; this is an unapproved compact30Hz zero-corrective replacement draft.",
+        "No new bones/draws/weight slots versus either baseline; no runtime FPS claim.",
+        "The inherited bottom runtime_summary in epoch99/101 screenshots describes rejectedv3 controls. Exact9dc model pins/public structural proof are authoritative: freev1 adds0bones/keys/draws and0bytes. This is a UIcaption error only."
+      ],
+      "evidence": {
+        "artifact_index_sha256": "531bf7e832c659258ccc7dfdd1560d4a0600ea45c44d52739db625a1fae556d8",
+        "handoff_sha256": "44e861f84dbfb811238729d26529226217f3734804b28a3e75acb7240e6b8ba7",
+        "files": [
+          {
+            "kind": "evidence/handoff",
+            "sha256": "44e861f84dbfb811238729d26529226217f3734804b28a3e75acb7240e6b8ba7"
+          },
+          {
+            "kind": "evidence/actual_client",
+            "sha256": "0b4560a37d4996f8bf58c8a395f17373b511589555cdd876aee89a883fde74ba"
+          },
+          {
+            "kind": "evidence/fresh_blender",
+            "sha256": "fe32764294d91e143ed04d8209c9519e88c36c5c64bcbee54949fcb8abe1f341"
+          },
+          {
+            "kind": "evidence/visual",
+            "sha256": "d24219b4e4c8d525847ab6f06b6c38706f107bf07a25e1d99c56915f20bb1a01"
+          },
+          {
+            "kind": "evidence/visual_job",
+            "sha256": "9fe8160a5e88d1c74b34efecc5b3d37650424484200a5c4114f96592d52f1633"
+          },
+          {
+            "kind": "evidence/additional/0",
+            "sha256": "525f3f929d981238dc5b089afb3bfeb4300d5f59b83cf96c5201b89462bbc9c8"
+          },
+          {
+            "kind": "evidence/additional/1",
+            "sha256": "3e4daec7da6a1a53e5b69187d84589f0bce03b5018290374eb1d1a8370dc8359"
+          },
+          {
+            "kind": "evidence/additional/2",
+            "sha256": "9c28a2caf825530b7c4468069c9df330e38a5f6ab01e9d58dfaed24f33a0b2a1"
+          },
+          {
+            "kind": "evidence/additional/3",
+            "sha256": "d90e78c0f89e9e917a653bbcf58ef64257041ae5510fec218f4e1ee9a1d89c76"
+          },
+          {
+            "kind": "evidence/additional/4",
+            "sha256": "1b3a39a120e84e64f5697a02b883aeeaae7953c5475f06bbf68ea5b821de70ea"
+          },
+          {
+            "kind": "evidence/additional/5",
+            "sha256": "d154818c3be1f1cd00effc4230b15e8863830bc486d83e82d43c618ca643cb89"
+          },
+          {
+            "kind": "evidence/additional/6",
+            "sha256": "e7098702e067a05d1fb00d849d2a86df7cd66f634fa9b2a6daecf5817bf6fd99"
+          },
+          {
+            "kind": "evidence/additional/7",
+            "sha256": "c2e8994491e9d0186deac9a85eb4f893d52578119f6459af6650c91097a158dd"
+          },
+          {
+            "kind": "evidence/additional/8",
+            "sha256": "ffa7603090e661108eeb5a11a0395928b518dbdff1c29b6414bd47b7cd37e55b"
+          },
+          {
+            "kind": "evidence/additional/9",
+            "sha256": "f897df2ce6c84ebb44ea87adc222e3d9730db80cd80ad5bb2281c62c128db354"
+          },
+          {
+            "kind": "evidence/additional/10",
+            "sha256": "15bb460857dfb5c81e847be4e065d91bac44eb3c9c4e9ba2a4bc30e64407924d"
+          },
+          {
+            "kind": "evidence/additional/11",
+            "sha256": "5ee16e125d10e525b90c9af01aa36e001c3fe53abff7e746e2650728bc1a2dde"
+          },
+          {
+            "kind": "evidence/additional/12",
+            "sha256": "5d933fdd1720f428945469caaa5ba51ce0bcc514f6a73d77f560ff199e0511fa"
+          },
+          {
+            "kind": "evidence/additional/13",
+            "sha256": "d335c087f3bdba488569837ee0966b5fa79d1060a713ea035f98c87c1ca25443"
+          },
+          {
+            "kind": "evidence/active_placement",
+            "sha256": "9c28a2caf825530b7c4468069c9df330e38a5f6ab01e9d58dfaed24f33a0b2a1"
+          },
+          {
+            "kind": "evidence/active_placement_job",
+            "sha256": "d90e78c0f89e9e917a653bbcf58ef64257041ae5510fec218f4e1ee9a1d89c76"
+          }
+        ],
+        "actual_client_observations": [
+          {
+            "report_sha256": "0b4560a37d4996f8bf58c8a395f17373b511589555cdd876aee89a883fde74ba",
+            "comparison_sha256": [
+              "b41f786ebd08aff62b3669d492e7932d84fcfb9c8c5d643cbcdbf4b6250e64cd",
+              "9dc999b1f1a627fc0c30dd3a87707a4617fefe1c36bdb25c47760c7f68ee4be0"
+            ],
+            "summary": {
+              "all": {
+                "states": 380,
+                "maximum_position_mm": 201.00324346345312,
+                "maximum_normal_degrees": 15.512340064741386,
+                "worst_maximum_position_mm": {
+                  "label": "Death_A->Jog@stepped-0.417",
+                  "source_vertex": 763
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Death_A->Sword_Attack@stepped-0.417",
+                  "source_vertex": 1630
+                },
+                "rms_position_mm": 3.6044199654199858,
+                "rms_normal_degrees": 0.19595245698864816
+              },
+              "default": {
+                "states": 1,
+                "maximum_position_mm": 0.03242807652439805,
+                "maximum_normal_degrees": 1.32777124935206e-06,
+                "worst_maximum_position_mm": {
+                  "label": "configured-default",
+                  "source_vertex": 2575
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "configured-default",
+                  "source_vertex": 950
+                },
+                "rms_position_mm": 0.002070129144379824,
+                "rms_normal_degrees": 7.95729687522049e-08
+              },
+              "clip": {
+                "states": 77,
+                "maximum_position_mm": 195.6699042918607,
+                "maximum_normal_degrees": 15.262798218136187,
+                "worst_maximum_position_mm": {
+                  "label": "Jog@0.73129",
+                  "source_vertex": 763
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Jog@0.85937",
+                  "source_vertex": 1630
+                },
+                "rms_position_mm": 3.6108555031208565,
+                "rms_normal_degrees": 0.22429156632235533
+              },
+              "held_end": {
+                "states": 7,
+                "maximum_position_mm": 78.1547569377981,
+                "maximum_normal_degrees": 11.433111834661421,
+                "worst_maximum_position_mm": {
+                  "label": "Fighting_Idle@held-end+0.417",
+                  "source_vertex": 763
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Jog@held-end+0.417",
+                  "source_vertex": 1630
+                },
+                "rms_position_mm": 2.8019398462310745,
+                "rms_normal_degrees": 0.20597469388661077
+              },
+              "switch": {
+                "states": 84,
+                "maximum_position_mm": 142.0439444187559,
+                "maximum_normal_degrees": 9.165240747033327,
+                "worst_maximum_position_mm": {
+                  "label": "Jog->Death_A@0.071",
+                  "source_vertex": 763
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Jog->Death_A@0.071",
+                  "source_vertex": 1630
+                },
+                "rms_position_mm": 2.424985693627213,
+                "rms_normal_degrees": 0.12438123937903267
+              },
+              "switch_stepped": {
+                "states": 210,
+                "maximum_position_mm": 201.00324346345312,
+                "maximum_normal_degrees": 15.512340064741386,
+                "worst_maximum_position_mm": {
+                  "label": "Death_A->Jog@stepped-0.417",
+                  "source_vertex": 763
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Death_A->Sword_Attack@stepped-0.417",
+                  "source_vertex": 1630
+                },
+                "rms_position_mm": 4.014278287657722,
+                "rms_normal_degrees": 0.2084051140151914
+              },
+              "RESET": {
+                "states": 1,
+                "maximum_position_mm": 0.03242807652439805,
+                "maximum_normal_degrees": 1.32777124935206e-06,
+                "worst_maximum_position_mm": {
+                  "label": "RESET-after-switches",
+                  "source_vertex": 2575
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "RESET-after-switches",
+                  "source_vertex": 950
+                },
+                "rms_position_mm": 0.002070129144379824,
+                "rms_normal_degrees": 7.95729687522049e-08
+              }
+            },
+            "scope": "Actual configured raw-client actor; every native clip, shifted samples, directed switches as enumerated by crossfade_coverage, nonlooping held endpoints, configured default and RESET; all native vertices/normals, quantized four/eight-influence skin. Float64 reconstruction of renderer inputs, not GPU pixels, imported PackedScenes, artistic acceptance or exhaustive continuous-time proof."
+          }
+        ],
+        "media_scope_preserved": true
+      }
+    }
+  }
+}
