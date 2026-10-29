@@ -16,11 +16,77 @@ from pathlib import Path
 import subprocess
 
 import numpy as np
+from PIL import Image
+import zstandard
 
 import road_texture_trial as T
 
 SCHEMA = "rabbitlands-road-terrain-blend-trial-v1"
 MAX_PIXELS = 4_194_304
+JACOBIAN_COMPONENTS = ["dU_dX","dU_dZ","dV_dX","dV_dZ"]
+
+
+def affine_uv_jacobians(triangles, uv):
+    """Authored affine UV derivatives in the same world-XZ frame as the mask."""
+    xz = np.asarray(triangles,float)[...,[0,2]]
+    delta = np.asarray(uv,float)[:,1:] - np.asarray(uv,float)[:,:1]
+    edge = xz[:,1:] - xz[:,:1]
+    determinant = edge[:,0,0]*edge[:,1,1]-edge[:,0,1]*edge[:,1,0]
+    valid = np.abs(determinant) >= 1e-16
+    result = np.zeros((len(xz),4),float)
+    # Degenerate projected faces have no raster samples. Keep a finite unused
+    # sentinel rather than manufacturing a footprint for those faces.
+    a,b = edge[valid,0,0],edge[valid,0,1]
+    c,d = edge[valid,1,0],edge[valid,1,1]
+    du,dv = delta[valid,:,0],delta[valid,:,1]
+    det = determinant[valid]
+    result[valid] = np.column_stack(((d*du[:,0]-b*du[:,1])/det,
+                                     (-c*du[:,0]+a*du[:,1])/det,
+                                     (d*dv[:,0]-b*dv[:,1])/det,
+                                     (-c*dv[:,0]+a*dv[:,1])/det))
+    if not np.isfinite(result).all():
+        raise ValueError("nonfinite source affine UV Jacobian")
+    return result
+
+
+def store_jacobian(directory, stem, sheet, table):
+    selected = sheet["selected_triangle"]
+    valid = sheet["valid"]
+    if np.any(selected[valid]<0):
+        raise ValueError("covered field pixel has no authored triangle")
+    values = np.zeros((*selected.shape,4),float)
+    values[valid] = table[selected[valid]]
+    packed = T.fill_uv(values,valid)
+    if not np.isfinite(packed).all():
+        raise ValueError("source Jacobian cannot be represented as finite RGBA32F")
+    raw = packed.astype("<f4").tobytes()
+    encoded = zstandard.ZstdCompressor(level=8).compress(raw)
+    if zstandard.ZstdDecompressor().decompress(encoded,max_output_size=len(raw)) != raw:
+        raise AssertionError("Jacobian codec changed authored derivative bytes")
+    name = stem+".jacobian.rgba32f.zst"
+    (directory/name).write_bytes(encoded)
+    return dict(file=name,format="RGBA32F",byte_order="little",compression="zstd",
+                width=selected.shape[1],height=selected.shape[0],components=JACOBIAN_COMPONENTS,
+                mipmaps=False,uncompressed_bytes=len(raw),sha256=T.sha(raw),file_sha256=T.sha(encoded),
+                codec_roundtrip_byte_identical=True,outside="nearest_valid",space="gltf_scene_world_xz",
+                maximum_float32_abs_error=float(np.max(np.abs(packed[valid]-values[valid]))))
+
+
+def read_jacobian(directory, metadata):
+    if metadata.get("format") != "RGBA32F" or metadata.get("components") != JACOBIAN_COMPONENTS \
+            or metadata.get("compression") != "zstd" or metadata.get("mipmaps") is not False:
+        raise ValueError("invalid Jacobian format")
+    encoded = (directory/metadata["file"]).read_bytes()
+    if T.sha(encoded) != metadata["file_sha256"]:
+        raise ValueError("Jacobian stored hash mismatch")
+    raw = zstandard.ZstdDecompressor().decompress(encoded,max_output_size=metadata["uncompressed_bytes"])
+    expected = metadata["width"]*metadata["height"]*16
+    if len(raw) != expected or len(raw) != metadata["uncompressed_bytes"] or T.sha(raw) != metadata["sha256"]:
+        raise ValueError("Jacobian decoded size or hash mismatch")
+    values = np.frombuffer(raw,dtype="<f4").reshape(metadata["height"],metadata["width"],4)
+    if not np.isfinite(values).all():
+        raise ValueError("nonfinite stored Jacobian")
+    return values
 
 
 def field_plan(triangles, ppm):
@@ -39,6 +105,7 @@ def field_plan(triangles, ppm):
     return dict(grid=grid, fits_runtime_cap=grid["width"]*grid["height"] <= MAX_PIXELS,
                 runtime_pixel_cap=MAX_PIXELS, mip_levels=levels,
                 planned_rg32f_mip_bytes=mip_pixels*8, planned_r8_mip_bytes=mip_pixels,
+                planned_rgba32f_jacobian_nomip_bytes=grid["width"]*grid["height"]*16,
                 size_scope="uncompressed upper bound before sparse cropping; actual PNG/ZSTD files measured separately")
 
 
@@ -113,10 +180,44 @@ def validate_variant(variant):
         unique[(tuple(row["chunks"]),row["road_id"])] = row
     result["seam_checks"] = list(unique.values())
     index = json.loads((variant/"trial.json").read_text())
+    jacobian_samples = []
     for relative in index["chunks"]:
-        d = json.loads((variant/relative).read_text())
+        path = variant/relative
+        d = json.loads(path.read_text())
         if d.get("schema") != SCHEMA or len(d.get("layers",[])) != 1:
             result["failures"].append("expected_one_combined_field:"+relative)
+            continue
+        layer = d["layers"][0]
+        grid = layer["grid"]
+        try:
+            jacobian = read_jacobian(path.parent,layer["uv_jacobian"])
+            if jacobian.shape[:2] != (grid["height"],grid["width"]):
+                raise ValueError("Jacobian dimensions differ from field")
+            coverage = np.asarray(Image.open(path.parent/layer["mips"][0]["coverage"]).convert("L"))
+            origin = np.rint(np.asarray(grid["origin_xz"])*grid["pixels_per_metre"]).astype(int)
+            jacobian_samples.append(dict(chunk=d["chunk"],origin=origin,jacobian=jacobian,coverage=coverage))
+        except (ValueError,KeyError) as error:
+            result["failures"].append("jacobian:"+relative+":"+str(error))
+    result["jacobian_seam_checks"] = []
+    for i,a in enumerate(jacobian_samples):
+        for b in jacobian_samples[i+1:]:
+            first = np.maximum(a["origin"],b["origin"])
+            last = np.minimum(a["origin"]+[a["coverage"].shape[1],a["coverage"].shape[0]],
+                              b["origin"]+[b["coverage"].shape[1],b["coverage"].shape[0]])
+            if np.any(last<=first):
+                continue
+            samples=[]
+            for item in (a,b):
+                lo,hi = first-item["origin"],last-item["origin"]
+                samples.append((item["jacobian"][lo[1]:hi[1],lo[0]:hi[0]],
+                                item["coverage"][lo[1]:hi[1],lo[0]:hi[0]]))
+            mask = (samples[0][1]>0)|(samples[1][1]>0)
+            mismatch = int(np.count_nonzero(np.any(samples[0][0][mask]!=samples[1][0][mask],axis=1)))
+            result["jacobian_seam_checks"].append(dict(chunks=[a["chunk"],b["chunk"]],
+                                                       covered_pixel_samples=int(mask.sum()),mismatched_pixels=mismatch))
+            if mismatch:
+                result["failures"].append("Jacobian shared-gutter mismatch")
+    result["stored_jacobians_verified"] = len(jacobian_samples)
     result["ok"] = not result["failures"]
     return result
 
@@ -140,6 +241,7 @@ def bake(root, original_root, out, region, chunks, road_ids, ppms=(2,4)):
     alpha = np.concatenate([r["alpha"] for r in roads])
     if not all(np.isfinite(v).all() for v in (triangles,flow,alpha)):
         raise ValueError("source positions, UVs and alpha must be finite")
+    jacobians = affine_uv_jacobians(triangles,flow)
     plans = {str(ppm):{chunk:field_plan(np.concatenate([r["triangles"] for r in roads if r["chunk"]==chunk]),ppm)
                       for chunk in chunks} for ppm in sorted(set(ppms)|{8})}
     if any(not plans[str(ppm)][chunk]["fits_runtime_cap"] for ppm in ppms for chunk in chunks):
@@ -186,6 +288,7 @@ def bake(root, original_root, out, region, chunks, road_ids, ppms=(2,4)):
                            maximum_source_fragments_per_pixel=int(sheet["contributors"].max()))
             sheet,sheet_grid = T.crop_sheet(sheet,grid)
             fields = T.store_fields(directory,"combined-road",sheet,"zstd")
+            fields["uv_jacobian"] = store_jacobian(directory,"combined-road",sheet,jacobians)
             material = T.material_document(source,record)
             images = {im["uri"] for im in material["images"] if "uri" in im}
             layer = dict(**fields,grid=sheet_grid,road_id="combined",road_node_name=record["road_node_name"],
@@ -199,6 +302,7 @@ def bake(root, original_root, out, region, chunks, road_ids, ppms=(2,4)):
                          uv_policy="highest_alpha_then_last_stable_authored_triangle",overlap=overlap,
                          source_alpha_float32_sha256=T.sha(alpha.astype("<f4").tobytes()),
                          source_uv_float32_sha256=T.sha(flow.astype("<f4").tobytes()),
+                         source_jacobian_float32_sha256=T.sha(jacobians.astype("<f4").tobytes()),
                          selected_triangle_int32_sha256=T.sha(sheet["selected_triangle"].astype("<i4").tobytes()))
             metadata = dict(schema=SCHEMA,technique="terrain_single_pass",region=region,chunk=chunk,
                             pixels_per_metre=ppm,source_directory=str(source["directory"]),

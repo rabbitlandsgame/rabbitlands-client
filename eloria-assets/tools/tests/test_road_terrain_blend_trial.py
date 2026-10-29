@@ -54,10 +54,52 @@ def test_arbitrary_ppm_mip_plan_and_runtime_cap_are_explicit():
     assert plan["fits_runtime_cap"]
     assert plan["mip_levels"][-1] == dict(width=1,height=1)
     assert plan["planned_rg32f_mip_bytes"] == 8*sum(m["width"]*m["height"] for m in plan["mip_levels"])
+    assert plan["planned_rgba32f_jacobian_nomip_bytes"] == plan["grid"]["width"]*plan["grid"]["height"]*16
     large=TRIAL.field_plan(np.array([[[0,0,0],[1000,0,0],[0,0,1000]]]),8)
     assert not large["fits_runtime_cap"]
     with pytest.raises(ValueError,match="positive integer"):
         TRIAL.field_plan(triangles(),0)
+
+
+def test_source_affine_jacobian_reconstructs_uv_on_skewed_sloping_triangle():
+    positions=np.array([[[11,30,-4],[13,35,-3],[10,33,1]]],float)
+    xz=positions[...,[0,2]]
+    uv=np.stack([2*xz[...,0]-3*xz[...,1]+7,.5*xz[...,0]+4*xz[...,1]-2],axis=-1)
+    jacobian=TRIAL.affine_uv_jacobians(positions,uv)[0]
+    assert np.array_equal(jacobian,[2,-3,.5,4])
+    centre=positions[0].mean(axis=0)[[0,2]]
+    centre_uv=uv[0].mean(axis=0)
+    point=np.array([11.4,-1.3])
+    reconstructed=centre_uv+jacobian.reshape(2,2)@(point-centre)
+    assert np.allclose(reconstructed,[2*point[0]-3*point[1]+7,.5*point[0]+4*point[1]-2])
+
+
+def test_uv_discontinuity_keeps_authored_footprint_in_jacobian_field(tmp_path):
+    positions=np.array([[[0,0,0],[1,0,0],[0,0,1]],[[1,0,0],[1,0,1],[0,0,1]],
+                        [[1,0,0],[2,0,0],[1,0,1]],[[2,0,0],[2,0,1],[1,0,1]]],float)
+    uv=positions[...,[0,2]].copy();uv[2:]+=1000
+    grid=dict(width=4,height=2,origin_xz=[0,0],pixels_per_metre=2)
+    sheet=TRIAL.dominant_raster(positions,uv,np.ones((4,3)),grid)
+    table=TRIAL.affine_uv_jacobians(positions,uv)
+    metadata=TRIAL.store_jacobian(tmp_path,"jump",sheet,table)
+    decoded=TRIAL.read_jacobian(tmp_path,metadata)
+    assert np.array_equal(decoded,np.broadcast_to([1,0,0,1],decoded.shape))
+    # Implicit differences across the field would invent a ~2001 texel/metre
+    # footprint here. The authored selected triangles still have unit scale.
+    assert sheet["uv"][0,2,0]-sheet["uv"][0,1,0] > 1000
+    assert metadata["mipmaps"] is False
+    assert metadata["uncompressed_bytes"] == 4*2*16
+    assert metadata["codec_roundtrip_byte_identical"]
+
+
+def test_degenerate_faces_have_finite_unused_jacobian_and_corruption_is_rejected(tmp_path):
+    positions=np.array([[[0,0,0],[1,0,0],[2,0,0]]],float)
+    assert np.array_equal(TRIAL.affine_uv_jacobians(positions,np.zeros((1,3,2))),np.zeros((1,4)))
+    sheet=dict(selected_triangle=np.zeros((1,1),np.int32),valid=np.ones((1,1),bool))
+    metadata=TRIAL.store_jacobian(tmp_path,"finite",sheet,np.array([[1,0,0,1.]]))
+    (tmp_path/metadata["file"]).write_bytes(b"corrupt")
+    with pytest.raises(ValueError,match="stored hash"):
+        TRIAL.read_jacobian(tmp_path,metadata)
 
 
 @pytest.fixture
@@ -95,6 +137,8 @@ def test_complete_single_field_trial_verifies_storage_colliders_and_seams(source
     report=TRIAL.bake(root,root,out,"test",["00_00","00_01"],["foo"],ppms=(3,))
     validation=report["variants"]["3"]["validation"]
     assert validation["ok"] and validation["exact_collision_primitives"] == 2
+    assert validation["stored_jacobians_verified"] == 2
+    assert validation["jacobian_seam_checks"][0]["mismatched_pixels"] == 0
     assert len(validation["seam_checks"]) == 1
     assert validation["seam_checks"][0]["covered_pixel_samples"] > 0
     assert validation["seam_checks"][0]["mismatched_fragments"] == 0
