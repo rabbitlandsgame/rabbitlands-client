@@ -1,0 +1,137 @@
+{
+  "actor": "storm_chimera",
+  "variant": "whole-strand-mane-v2",
+  "status": "ready_for_human_review_partial_repair",
+  "key_fix": "Restore original default contour/normals for27complete disconnected mane pieces (770vertices), bind each whole strand to one existing anatomically valid neck/body owner chosen over135native poses. Protected face/body components untouched. Original153bone curves/binds, UVs/topology/materials/images retained.",
+  "active_placement": {
+    "model_global_equal": true,
+    "nameplate_global_equal": true,
+    "overhead_height_equal": true,
+    "selection_size_equal": true
+  },
+  "media_scope": "Epoch100: seven PBR fullbody stills eachpair, fourcardinal views ofbothheads atreportedWalk/old+newworstDeath/RESET,24frame completeWalk cycle tracked fromopposing visible sides forbothheads.80inspectionrecords perpair. Native/client numeric cycles/switches separate.",
+  "visual_assessment": "Worth offering as a partial improvement: whole mane pieces keep more coherent source contours through Walk/Death; original construction gaps remain. Head visibility now checked fromopposing sides and an exterior rear camera.",
+  "limits": [
+    "Partial repair: original open/overlapping mane-card construction and underlying gaps remain. Whole-strand rigidity approximates the source corrective deformation.",
+    "Reported Walk goat-side difference is subtle; clearer improvement is coherent outer lion-strand contours through Walk and less strand distortion during Death. No claim that every apparent tear is resolved.",
+    "Selected actual-client source-position RMS improves18.484\u219210.943world-mm, but source-normal maximum worsens69.310\u219271.301degrees; whole-body source-position maximum remains369.346world-mm. No source-equivalence claim.",
+    "770selected default contour vertices intentionally shift up to52.314model-mm versus commented bake; they match original default contour within3.65e-8modelunits. RESET was visually inspected.",
+    "No new bones or slots versus153joint/8slot selected source/commented bake. Active installed asset is63joints/4slots; candidate adds801192rawbytes and5833378retained static first-actor CPU allocation bytes. Warm component updates rose~21\u219253us Walk/~23\u219251us Jog; no GPU/whole-game FPS or per-instance-memory claim.",
+    "GPU100 screenshots contain a size-caption typo saying2372484bytes; exact payload/report/replay all prove2372480bytes.",
+    "Active runtime and historical authoring observations remain unchanged; draft requires exact-version human review."
+  ],
+  "runtime_replaced": false,
+  "approved": false,
+  "source_sha256": "e35e661a2a2ad5987be76c473c916ed17c7692e7d0233277a782903765f909e8",
+  "commented_sha256": "53125895c058ae0f00793b5459325a6f04d0906fbcf8fb1487f0253c82bc93da",
+  "active_runtime_sha256": "308a44dd4e9ade94bb37544169bb3ebc2138ba947ba7ac1d16f85322fade47f1",
+  "candidate_sha256": "05e2d23a87201f7ef94dcfd4227af888c69c3572b5a7020edaa647039d201252",
+  "candidate_bytes": 2372480,
+  "active_runtime_bytes": 1571288,
+  "added_bytes_vs_commented": 0,
+  "added_bytes_vs_active": 801192,
+  "skin_joints": {
+    "active": 63,
+    "commented": 153,
+    "candidate": 153
+  },
+  "influence_budget": 8,
+  "extra_draws": 0,
+  "comment": {
+    "actor": "storm_chimera",
+    "clip": "Walk",
+    "time_seconds": 1.32499957084651,
+    "comment": "a bit of tearing in the mane of the lion and the goat.",
+    "source_sha256": "e35e661a2a2ad5987be76c473c916ed17c7692e7d0233277a782903765f909e8",
+    "commented_sha256": "53125895c058ae0f00793b5459325a6f04d0906fbcf8fb1487f0253c82bc93da",
+    "accepted_installed": false,
+    "original_to_bake_maximum_position_mm": 369.34628729750153,
+    "note_event_id": "ec82ec5a-92ff-4d82-8370-06d88b5bea05"
+  },
+  "reported_strand_edge_excess_percent": {
+    "commented": 44.740277691356226,
+    "whole_strands": 0.23198462288752664
+  },
+  "worst_strand_edge_excess_percent": {
+    "commented": 164.18168714223918,
+    "whole_strands": 18.856433532160956
+  },
+  "native_states": 316,
+  "actual_client": {
+    "states": 380,
+    "outside_vertices": 4265,
+    "outside_position_delta": 0,
+    "outside_normal_vector_delta": 0,
+    "original_named_bone_world_delta": 0,
+    "source_position_and_normal_metrics": {
+      "commented": {
+        "maximum_position_mm": 353.42580191255314,
+        "rms_position_mm": 18.483788063318478,
+        "maximum_normal_degrees": 69.30956706699102
+      },
+      "candidate": {
+        "maximum_position_mm": 335.23497071911555,
+        "rms_position_mm": 10.942939138072814,
+        "maximum_normal_degrees": 71.30054255533729
+      }
+    },
+    "loader": "Actual ReplicatedActor3D / raw GlbSceneCache, not editor PackedScene"
+  },
+  "evidence_sha256": {
+    "structural_recipe": "260d5194facd8c05adc7d758bc6a6632d41cb1daf611498eb5b0546759b3decd",
+    "complete_structural": "33d90d12e5bc991b1072fe7ebe45ebde37e4a52b4dde465d2823f632d9a95341",
+    "fresh_blender": "22d0697a93d2b648194a8df5fce36875349c2a94ba7737d9d6163943e6ae4bce",
+    "actual_client": "b06f92587461773ef4b5dd982452e0f352b2282fded574c48dae10ff19eab614",
+    "actual_outside": "bc2dcf25cf07acee300c3d6c4998d033c7bf138d97ca9879d551cc292cd42965",
+    "source_client_compound": "39e415f45f13aae744548c4d0282b31b486412c9a138755f16492ff497c052ff",
+    "active_model_placement": "96ad35e7778911fe95a7df6e522b891eefa6a8e5b07bdbdb2187876ba91d558d",
+    "active_model_placement_job": "4776ebe5ae59ae07702acc4180e77d448c2fa251294cc6a8c10cdd252a10ec41",
+    "independent_native": "aeb458d2d9e111003afafade5e752e876ba74f1efd7bd918ad455bdd6da22695",
+    "visual_launches": "82d1459e8fdea3381454ccd5b09a6bc85c75705b3f9a88ed9633bc5afa355fcc",
+    "visual_prototype_source": "e2d5e98e7d679b773f31d1a5650992fa4cbd010d0a285f73d64163cfe94d49e7",
+    "visual_evidence_index": "24d167f63cd920195398065ffc67720d7c0bc9fafe029fb3c74d18176dd7e6f5",
+    "commented_visual_job": "b3cfc96f6774ea651e5732ad717ff00690d81700c3e801cef50de09d4f112973",
+    "original_visual_job": "ef09372711a88addef53df3f8cea4c8469d49f2fb2f1d74b77d60f21fff5f1a6",
+    "commented_smoke": "93eebfaf0d176efe2c0af4a49b704ebe512a1310b78978c589f065e03e366b68",
+    "original_smoke": "4655be87e1fba09294f733de70fd3016af3697144deaac254e56d656d1ee7ce4",
+    "seven_stills_board": "ee3ad091c50df8098fb98d7e5a54479e5d375f10479e343ed68fb4b216b734c2",
+    "lion_comment_board": "220edcf6acec54b7a66d2c6a0f4585bbd3b49cd9f7c65987a61b9f201ac688a2",
+    "goat_comment_board": "60f5632619a3569ff312f4bdd7a6d286aa27aa5c092f2169244407c70648869d",
+    "lion_walk_cycle": "6dba280dca8643ec23f829604d57693c152ee1f3da8a8885185e5f4498e704e6",
+    "goat_walk_cycle": "070cec91a83dd87b416b85ff15f7c0696bbbb40c83401c6518badfa8bfe0160b",
+    "reproduction_report": "c96ca5f83916c1ae555b39311466174b1b523dfef5133ab7c34ddca12f1a039e",
+    "reproduction_tool": "54b44ffbb9fa9f78f56244e2a0d7fddfd48e002fa6c11b38206e17e9222ac7ec",
+    "component_benchmark": "e06c2dfcf7e77d2df603c4493f52249fc4ca26e1bfd3ca753091654ae0747ad5",
+    "component_benchmark_active63": "da451f021a914a32ab1f5c5617ac5187999114dfa7cfd67b805c74fc21c011ec",
+    "component_benchmark_repair153": "66d3c590a9fa343574638514a5e66ae3c630a42c8081253b8fc02f8d35f98d62",
+    "component_benchmark_comparison": "b6106e287c8db2597eecbf260b5975bbc11f5101ab17de07628def8ffcb3e2f2"
+  },
+  "versioned_handoff_sha256": "be64ddb9a10626e3c8b8fafc74b21f49c830b89c386f00bb1727551d2660745b",
+  "reproduction_tool": "eloria-assets/tools/repair_storm_chimera_mane.py",
+  "component_cost": {
+    "active_skin_joints": 63,
+    "candidate_skin_joints": 153,
+    "active_influence_width": 4,
+    "candidate_influence_width": 8,
+    "raw_bytes_added": 801192,
+    "retained_static_cpu_bytes_added": 5833378,
+    "median_animation_update_usec": {
+      "Walk": {
+        "active": 20.9541666666667,
+        "candidate": 52.7058333333333
+      },
+      "Jog": {
+        "active": 22.7133333333333,
+        "candidate": 51.2433333333333
+      }
+    },
+    "scope": "Fresh-process real GlbSceneCache._build_raw + ReplicatedActor3D + NativeAnimationImporter, warm OS file cache. Retained Godot static CPU allocations include scene and library caches, meshes, textures and actor. AnimationPlayer advance plus forced skeleton global transforms at 240 updates/s; nine batches of 1200 updates per clip after warmup. Excludes GPU rendering/skinning, whole-game logic and frame-rate claims.",
+    "allocation_scope": "Retained Godot static first-actor scene/library/mesh/texture caches; not processresident RAM or per-instance cost.",
+    "sampling": "One fresh process/model; warm OS cache;240warmups,9batches of1200updates/clip at240updates/s, identical configured current client. No cross-process confidence interval or whole-game/rendering benchmark.",
+    "fps_claim": null
+  },
+  "component_benchmark_receipt": {
+    "path": "docs/qa/creature-storage/storm-chimera-component-benchmark.json",
+    "sha256": "e06c2dfcf7e77d2df603c4493f52249fc4ca26e1bfd3ca753091654ae0747ad5"
+  }
+}
