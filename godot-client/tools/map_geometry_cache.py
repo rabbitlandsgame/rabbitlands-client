@@ -12,6 +12,7 @@ import json
 import os
 from pathlib import Path, PurePosixPath
 import re
+import signal
 import subprocess
 import sys
 import time
@@ -366,17 +367,23 @@ def _stop_child(process: subprocess.Popen) -> None:
     if process.poll() is not None:
         return
     try:
-        process.terminate()
+        if os.name == "nt":
+            process.terminate()
+        else:
+            os.killpg(process.pid, signal.SIGTERM)
         process.wait(timeout=5)
     except subprocess.TimeoutExpired:
-        process.kill()
+        if os.name == "nt":
+            process.kill()
+        else:
+            os.killpg(process.pid, signal.SIGKILL)
         process.wait(timeout=5)
     except ProcessLookupError:
         pass  # It finished between poll and terminate.
 
 
 def _run_engine(command: list[str], env: dict, stdout_path: Path, stderr_path: Path,
-                timeout_seconds: float) -> int:
+                timeout_seconds: float, *, check_progress=None) -> int:
     offsets = {stdout_path: 0, stderr_path: 0}
     tails = {stdout_path: "", stderr_path: ""}
 
@@ -395,10 +402,15 @@ def _run_engine(command: list[str], env: dict, stdout_path: Path, stderr_path: P
 
     options = {"creationflags": subprocess.CREATE_NO_WINDOW} if os.name == "nt" else {}
     with stdout_path.open("w", encoding="utf-8") as stdout, stderr_path.open("w", encoding="utf-8") as stderr:
-        process = subprocess.Popen(command, env=env, stdout=stdout, stderr=stderr, **options)
+        process = subprocess.Popen(command, env=env, stdout=stdout, stderr=stderr,
+                                   start_new_session=os.name != "nt", **options)
         deadline = time.monotonic() + timeout_seconds
+        next_check = time.monotonic()
         try:
             while True:
+                if check_progress is not None and time.monotonic() >= next_check:
+                    check_progress()
+                    next_check = time.monotonic() + 5
                 error = first_error()
                 if error:
                     _stop_child(process)
@@ -424,7 +436,8 @@ def _run_engine(command: list[str], env: dict, stdout_path: Path, stderr_path: P
 
 def build(project: Path, godot: Path, *, user_root: Path | None = None, plan_path: Path | None = None,
           resume: bool = False, include_assets: bool = True, rendering_method: str = "forward_plus",
-          timeout_seconds: float = DEFAULT_TIMEOUT_SECONDS) -> dict:
+          timeout_seconds: float = DEFAULT_TIMEOUT_SECONDS, release_preparation: bool = False,
+          run_engine=None) -> dict:
     project = project_path(project)
     godot = godot.resolve()
     if not godot.is_file():
@@ -444,6 +457,7 @@ def build(project: Path, godot: Path, *, user_root: Path | None = None, plan_pat
     report_path = run / "report.json"
     job_path = run / "job.json"
     _write_json(job_path, {"schema": SCHEMA, "targets": targets, "resume": resume,
+                           "release_preparation": release_preparation,
                            "output_report": str(report_path)})
     env = dict(os.environ, APPDATA=str(user_root), LOCALAPPDATA=str(user_root),
                XDG_DATA_HOME=str(user_root), XDG_CONFIG_HOME=str(user_root),
@@ -455,7 +469,7 @@ def build(project: Path, godot: Path, *, user_root: Path | None = None, plan_pat
                "--audio-driver", "Dummy", "--position", "-32000,-32000", "--resolution", "320x180",
                "--script", PREPARER]
     stdout_path, stderr_path = run / "stdout.log", run / "stderr.log"
-    returncode = _run_engine(command, env, stdout_path, stderr_path, timeout_seconds)
+    returncode = (run_engine or _run_engine)(command, env, stdout_path, stderr_path, timeout_seconds)
     stdout_text = stdout_path.read_text(encoding="utf-8", errors="replace")
     stderr_text = stderr_path.read_text(encoding="utf-8", errors="replace")
     if not report_path.is_file():

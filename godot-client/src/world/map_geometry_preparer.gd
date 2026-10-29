@@ -316,6 +316,29 @@ func run(job: Dictionary = {}) -> Dictionary:
 	report.elapsed_ms = Time.get_ticks_msec()-started
 	report.policy = Cache.policy()
 	report.targets = targets.size()
+	if bool(job.get("release_preparation",false)):
+		var collision_keys: Array = []
+		var paving_keys: Array = []
+		for target: Dictionary in targets:
+			var key := str(target.kind)+"|"+Cache.logical(str(target.source))
+			if str(target.kind) == "world" and str(target.id).contains("__chunk_"):
+				collision_keys.append(key)
+			if _paving_target(target): paving_keys.append(key)
+		collision_keys.sort()
+		paving_keys.sort()
+		var engine := Engine.get_version_info()
+		report.release_metadata = {"scope_complete":complete,"platform":OS.get_name(),
+			"renderer":RenderingServer.get_current_rendering_method(),
+			"engine":{"hash":str(engine.get("hash","")),"string":str(engine.get("string",""))},
+			"engine_executable_sha256":FileAccess.get_sha256(OS.get_executable_path()),
+			"user_data_path":ProjectSettings.globalize_path("user://"),
+			"geometry_policy":Cache.policy(),"geometry_schema":Cache.VERSION,
+			"geometry_root":Cache.root_path(),
+			"collision_policy":CollisionCache.policy(),"paving_policy":PavingCache.policy(),
+			"scope_sha256":FileAccess.get_sha256(Cache.SCOPE),
+			"registry_sha256":FileAccess.get_sha256(Cache.REGISTRY),
+			"target_keys":selected.get("keys",[]),"collision_target_keys":collision_keys,
+			"paving_target_keys":paving_keys}
 	if complete and not Cache.write_json(Cache.root_path().path_join("complete.json"),{"signature":Cache.startup_signature(),
 			"targets":targets.size(),"target_keys":selected["keys"],"policy":Cache.policy(),"input_hints":Cache.input_hints()}):
 		report.failed.append({"error":"The completed world preparation could not be recorded."})
