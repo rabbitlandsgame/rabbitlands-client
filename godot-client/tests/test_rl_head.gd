@@ -944,7 +944,7 @@ func _check_lod_selection() -> void:
 				if ((levels[index] as Array)[0] as MeshInstance3D).visible:
 					return index
 			return -1
-		var bands: Array = RLHeadRig.LOD_DISTANCES[quality]
+		var bands: Array = RLHeadRig.lod_edges(quality)
 		if bands.is_empty():
 			_expect(visible_at.call(2.0) == 0 and visible_at.call(60.0) == 0,
 				"%s draws its one level at every distance" % name)

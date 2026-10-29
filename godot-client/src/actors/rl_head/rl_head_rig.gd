@@ -92,6 +92,8 @@ const LOD_LEVEL_META := &"rl_lod_level"
 ## shapes is still deformed every frame, and in the compatibility renderer
 ## three per actor doubled a 40-actor crowd's frame time (18.4 ms against
 ## 9.2 ms with the unused levels hidden; .local/rl-heads evidence).
+## The Compatibility renderer hands HIGH's first level over at
+## COMPATIBILITY_FIRST_LEVEL_METRES instead (see lod_edges).
 const LOD_DISTANCES := {
 	ActorRenderQuality.Quality.HIGH: [10.0, 25.0],
 	ActorRenderQuality.Quality.MEDIUM: [18.0],
@@ -115,6 +117,16 @@ const LOD_CHECK_FRAMES := 6
 ## shapes and is always drawn still.
 const EXPRESSIVE_RANGE := 8.0
 const MAX_EXPRESSIVE := 8
+## The Compatibility renderer skins every surface of every drawn mesh with a
+## transform-feedback pass a frame, and a mesh with live shapes takes a
+## blend-shape pass per surface besides: there HIGH's first level ends at 6 m
+## (25-40 pixels of head at 720p from there to 10 m, where Forward+ hands over),
+## and the nearest 4 faces within 4 m draw their expressions (the creation
+## preview and a camera zoomed in close). 160 Humans 10 m out: 1.21x develop's
+## High frame time with Forward+'s values, 1.10x with these (2026-10-29).
+const COMPATIBILITY_FIRST_LEVEL_METRES := 6.0
+const COMPATIBILITY_EXPRESSIVE_RANGE := 4.0
+const COMPATIBILITY_MAX_EXPRESSIVE := 4
 const INSTANCE_UNIFORMS := ["skin_color", "lip_tint", "brow_color", "hair_color",
 	"freckles", "liner", "stubble", "eye_color", "hairline", "brow_style", "brow_thickness",
 	"liner_wing"]
@@ -190,9 +202,10 @@ static var _lod_cursor := 0
 static var _lod_ticking := false
 ## The frame the expressive faces were last ranked.
 static var _ranked_at := -LOD_CHECK_FRAMES
-## EXPRESSIVE_RANGE and MAX_EXPRESSIVE, changed by tests.
-static var expressive_range := EXPRESSIVE_RANGE
-static var max_expressive := MAX_EXPRESSIVE
+## EXPRESSIVE_RANGE and MAX_EXPRESSIVE (their Compatibility values there),
+## changed by tests.
+static var expressive_range := COMPATIBILITY_EXPRESSIVE_RANGE if _compatibility() else EXPRESSIVE_RANGE
+static var max_expressive := COMPATIBILITY_MAX_EXPRESSIVE if _compatibility() else MAX_EXPRESSIVE
 
 
 ## Builds an RL head on `skeleton` from `value` (a preset name, the dictionary
@@ -661,7 +674,7 @@ func _rebind(bones: PackedStringArray, binds: Array[Transform3D]) -> Skin:
 ## The band a camera at `distance` metres calls for, from `current`, with
 ## LOD_MARGIN of hysteresis around each hand-over.
 func lod_band_for(distance: float, current: int = -1) -> int:
-	var distances: Array = LOD_DISTANCES.get(quality, []) as Array
+	var distances := lod_edges(quality)
 	var band := 0
 	for edge: Variant in distances:
 		var threshold := float(edge)
@@ -670,6 +683,19 @@ func lod_band_for(distance: float, current: int = -1) -> int:
 		if distance > threshold:
 			band += 1
 	return mini(band, _band_count() - 1)
+
+
+## The hand-over distances of `level`'s bands (LOD_DISTANCES; in the
+## Compatibility renderer HIGH's first ends at COMPATIBILITY_FIRST_LEVEL_METRES).
+static func lod_edges(level: int) -> Array:
+	var distances: Array = (LOD_DISTANCES.get(level, []) as Array).duplicate()
+	if level == ActorRenderQuality.Quality.HIGH and _compatibility() and not distances.is_empty():
+		distances[0] = COMPATIBILITY_FIRST_LEVEL_METRES
+	return distances
+
+
+static func _compatibility() -> bool:
+	return RenderingServer.get_current_rendering_method() == "gl_compatibility"
 
 
 ## Shows the levels of `band` (each part clamps to the levels it has). A held

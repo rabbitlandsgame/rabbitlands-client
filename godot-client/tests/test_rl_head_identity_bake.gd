@@ -397,7 +397,7 @@ func _check_still() -> void:
 		var kept := PackedStringArray()
 		for surface: int in source.get_surface_count():
 			var material := source.surface_get_material(surface)
-			if material == null or not BAKE.STILL_DROPPED_MATERIALS.has(material.resource_name):
+			if material == null or not BAKE.still_dropped_materials().has(material.resource_name):
 				kept.append(source.surface_get_name(surface))
 		var names := PackedStringArray()
 		for surface: int in still.get_surface_count():

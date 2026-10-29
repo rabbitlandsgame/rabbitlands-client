@@ -63,8 +63,11 @@ const FINISH_BUDGET_USEC := 3000
 const MOVE_EPSILON := 1e-7
 
 ## Surfaces a still bake leaves out (see `acquire`): the teeth and tongue, which
-## a closed mouth hides.
+## a closed mouth hides; in the Compatibility renderer the cornea's glossy shell
+## too (still_dropped_materials), whose highlight is a pixel at the distances
+## still faces are drawn there (beyond the 4 expressive faces within 4 m).
 const STILL_DROPPED_MATERIALS: Array[String] = ["rl_mouth"]
+const COMPATIBILITY_STILL_DROPPED_MATERIALS: Array[String] = ["rl_mouth", "rl_cornea"]
 
 ## Bake on the calling thread at once (tests and evidence renders), instead of
 ## after BAKE_DELAY_MSEC on the WorkerThreadPool with a callback.
@@ -165,7 +168,7 @@ static func key(source: Mesh, weights: Dictionary, still: bool = false) -> Strin
 ## is false) when nothing can be baked now: the switch is off, the source has
 ## no identity shapes, or the budget is spent by meshes in use. Draw live then.
 ## A `still` bake keeps no live shapes at all and leaves out
-## STILL_DROPPED_MATERIALS (see still_enabled): its mesh can have
+## still_dropped_materials (see still_enabled): its mesh can have
 ## fewer surfaces than its source.
 static func acquire(source: ArrayMesh, weights: Dictionary, on_ready: Callable = Callable(),
 		still: bool = false) -> ArrayMesh:
@@ -427,10 +430,17 @@ static func _finish(entry: Dictionary) -> void:
 			waiter.call(mesh)
 
 
+## The materials whose surfaces a still bake leaves out in this renderer.
+static func still_dropped_materials() -> Array[String]:
+	if RenderingServer.get_current_rendering_method() == "gl_compatibility":
+		return COMPATIBILITY_STILL_DROPPED_MATERIALS
+	return STILL_DROPPED_MATERIALS
+
+
 ## Whether a still bake leaves this source surface out.
 static func _still_dropped(source_surface: Dictionary) -> bool:
 	var material := source_surface.get("material") as Material
-	return material != null and STILL_DROPPED_MATERIALS.has(material.resource_name)
+	return material != null and still_dropped_materials().has(material.resource_name)
 
 
 static func _source_state(source: ArrayMesh) -> Dictionary:
