@@ -58,3 +58,82 @@ Godot, compares its CPU ImporterMesh triangle bytes with every compact collider,
 waits four physics ticks and compares downward ray heights/normals on twelve
 deterministic road witnesses. This guards the glTF-to-engine winding conversion,
 which a raw source-byte check alone cannot establish.
+
+## Repeating the comparison
+
+`tools/road_texture_compare.py` launches `tests/integration/road_texture_benchmark.gd`
+in a fresh process and isolated player/editor profile. Run from the repository
+root with `--godot PATH_TO_GODOT --config CONFIG.json --output
+godot-client/test-artifacts/UNIQUE_RUN`. Add `--qualification` for screenshots;
+omit it for timing. `--project` can select a task-owned original-asset fixture,
+and `--renderer gl_compatibility` selects the compatibility renderer. The runner
+holds the shared client performance lock and rejects engine errors, leaks,
+changed inputs, mismatched rendering settings and unfocused timed frames.
+
+The configuration supplies `manifests`, `lighting_manifest`, `region`,
+`look: "painted_ground"`, fixed `probes` in world coordinates, and `views` with
+`target`, `yaw`, `pitch` and `distance`. Timing uses `measure_seconds: 10` and
+five views, each visited twice with a small continuous camera orbit. For texture
+roads use `variant: "mask2"` or `"mask4"`, the generated road-free `world.json`
+manifests and a parallel `trials` array of generated chunk `trial.json` paths.
+For geometry use `variant: "baseline"` and the ordinary chunk manifests.
+`expected_ground` can contain the original report's `ground` witnesses to
+require road collision, matching footstep classes and positions within 0.1 mm.
+Equal-height ribbon overlaps may choose a different road collider after a BVH
+rebuild, so the comparison checks the road class rather than that tie winner.
+
+Bake with `eloria-assets/tools/road_texture_trial.py`. Its output must be a new,
+locally ignored `.local` directory inside this worktree's map asset root so the
+normal manifest path guards continue to apply. `--original-root` optionally
+provides a task-owned pre-consolidation asset snapshot for size accounting.
+All stored coverage/flow mips and compact colliders count toward disk totals;
+content-identical files at different paths are counted separately. Per-file
+zlib figures are a compression comparison, not an exported package measurement.
+
+The harness loads Suncoil chunks `06_09` and `06_10` through the normal raw
+`WorldLoader` path with high quality, full textures, native VRAM sidecars off,
+decorative grass off, a 1280x720 foreground window, VSync off and no frame cap.
+It binds the Suncoil environment and waits for visible frames and physics
+registration before readiness/probes. Qualification freezes animated shader
+time and captures five fixed views; timing performs no pixel or mesh readbacks.
+Reported readiness includes chunk loading, trial installation and first-view
+preparation; it is not the chunk-load call alone.
+
+Keep qualification and timing separate, use the same engine, views and probes
+for every arm, and counterbalance run order. Record GPU timing, wall frame
+percentiles, draw calls, primitives, GPU memory and process peak working set.
+The report includes each input hash and effective settings. Fresh processes
+retain OS and driver caches; hashing inputs also warms the filesystem cache.
+These are offline component measurements without an avatar, streaming or a
+network connection, and do not establish whole-game FPS or cold disk load time.
+
+## Initial Suncoil result
+
+The 2026-10-28 local trial used Godot 4.7.2 Forward+ on an RTX 5080 Laptop GPU.
+The table gives three-run medians; disk includes the complete two-chunk runtime
+dependency closure. The 2/4 pixel-per-metre versions remain experimental.
+
+| Variant | Disk MB | GPU ms | Frame ms | p95 frame ms |
+| --- | ---: | ---: | ---: | ---: |
+| Original geometry | 23.77 | 0.692 | 1.027 | 1.169 |
+| Exact consolidation | 19.83 | 0.679 | 1.015 | 1.154 |
+| Texture roads, 2 pixels/metre | 17.99 | 1.080 | 1.423 | 1.609 |
+| Texture roads, 4 pixels/metre | 18.83 | 1.107 | 1.440 | 1.638 |
+
+The texture variants save another 9.3%/5.1% against consolidation, but add
+59%/63% GPU time in this scene. Lower resolution has conspicuous stepped edges
+and flat texture patches; higher resolution is closer but retains small seams
+and border artifacts. Per-file zlib-6 comparison reduces the lower-resolution
+saving to 76 KB and makes the higher-resolution variant 757 KB larger. A future
+trial should blend a packed road mask in the existing terrain pass and reduce
+UV reconstruction cost before considering production use; those savings and
+quality are not yet measured.
+
+Exact consolidation saved 276,409,840 bytes across 1,286 outdoor GLBs without
+changing expanded corner attributes, triangles or bounds. All ten matched
+Suncoil/Landfall qualification views were pixel-identical. The texture trial's
+twelve road-ground probes matched footstep classes and remained within 0.031 mm
+of the original height after the importer-winding correction. Its masked passes
+also compiled and rendered in the compatibility renderer. Focused validation
+passed 41 Python tests, 99 protocol checks and 57 importer/physics checks. Two
+unfocused timing attempts were rejected; twelve accepted runs form the table.
