@@ -821,7 +821,7 @@ def reconcile(dry_run: bool = False, prototypes: set | None = None,
                 entry["bytes"] = len(data)
                 changed = True
         if changed and not dry_run:
-            INDEX.write_text(json.dumps(index, indent=2) + "\n", encoding="utf-8")
+            write_manifest(INDEX, index, INDEX.read_bytes().decode("utf-8"))
         if changed:
             updated.append(repo_relative(INDEX))
     candidates = sorted(MAPS.rglob("*.json")) if manifests is None else [Path(m) for m in manifests]
