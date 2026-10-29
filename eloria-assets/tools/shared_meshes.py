@@ -89,6 +89,53 @@ def sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+
+POLICY_DIRECTORY_EXTRA = "rl_texture_policy_directory"
+
+
+def _explicit_image_policy(image: dict, source_directory: Path) -> Path | None:
+    extras = image.get("extras", {})
+    if not isinstance(extras, dict) or POLICY_DIRECTORY_EXTRA not in extras:
+        return None
+    uri = extras[POLICY_DIRECTORY_EXTRA]
+    if not isinstance(uri, str) or not uri or any(character in uri for character in (":", "%", "\\")) or Path(uri).is_absolute():
+        raise ValueError(f"invalid explicit image policy directory: {uri!r}")
+    if not image.get("uri") or str(image["uri"]).startswith("data:"):
+        raise ValueError("explicit image policy requires an external image URI")
+    directory = (source_directory / uri).resolve()
+    if not directory.is_relative_to(MAPS.resolve()):
+        raise ValueError(f"explicit image policy escapes map assets: {uri}")
+    return directory
+
+
+def rebase_image_policy(image: dict, source_directory: Path, target_directory: Path) -> None:
+    """Rebase provenance with the URI, without mutating a shallow copy's source extras."""
+    directory = _explicit_image_policy(image, source_directory)
+    if directory is not None:
+        image["extras"] = {**image["extras"], POLICY_DIRECTORY_EXTRA:
+                           os.path.relpath(directory, target_directory).replace("\\", "/")}
+
+
+def image_policy_collections(document: dict, directory: Path | None = None) -> dict:
+    """Regenerate only explicit policies; never infer an old policy from canonical pixels."""
+    directory = POOL if directory is None else directory
+    entries: dict[str, list[str | None]] = defaultdict(list)
+    for image in document.get("images", []):
+        uri = image.get("uri", "")
+        policy = _explicit_image_policy(image, directory)
+        if uri and not uri.startswith("data:"):
+            entries[uri].append(str(image["extras"][POLICY_DIRECTORY_EXTRA]) if policy is not None else None)
+    result = {}
+    for uri, policies in sorted(entries.items()):
+        explicit = [policy for policy in policies if policy is not None]
+        if not explicit:
+            continue
+        if len(explicit) != len(policies):
+            raise ValueError(f"ambiguous original policy for {uri}: restore missing descriptor extras")
+        result[uri] = sorted(set(explicit))
+    return result
+
+
 # --- GLB ---------------------------------------------------------------------
 
 def read_glb(path: Path) -> tuple[dict, bytes]:
@@ -371,6 +418,7 @@ def _collect(document: dict, binary: bytes, mesh_index: int, source: Path) -> tu
             elif "uri" in image and not image["uri"].startswith("data:"):
                 target = (source.parent / image["uri"]).resolve()
                 image["uri"] = os.path.relpath(target, POOL).replace("\\", "/")
+                rebase_image_policy(image, source.parent, POOL)
             out["images"].append(image)
             image_map[index] = len(out["images"]) - 1
         return image_map[index]
@@ -636,6 +684,7 @@ def _merge(path: Path, document: dict, packed: bytearray, source: dict, body: by
             elif "uri" in image and not image["uri"].startswith("data:"):
                 target = (POOL / image["uri"]).resolve()
                 image["uri"] = os.path.relpath(target, path.parent).replace(os.sep, "/")
+                rebase_image_policy(image, POOL, path.parent)
             images[index] = add("images", image)
         return images[index]
 
@@ -712,15 +761,57 @@ def _index_entry(prototype: dict, data: bytes) -> dict:
     them back off the GPU and deadlocks a worker the main thread is joining.
     """
     images = {}
+    policies = image_policy_collections(prototype)
     for image in prototype.get("images", []):
         uri = image.get("uri", "")
         if uri and not uri.startswith("data:"):
             path = (POOL / uri).resolve()
             if path.is_file():
                 images[uri] = sha256(path.read_bytes())
-    return {"bytes": len(data), "sha256": sha256(data),
-            "primitives": len(prototype["meshes"][0]["primitives"]),
-            "images": images}
+            elif uri in policies:
+                raise ValueError(f"explicit policy image is missing: {path}")
+    entry = {"bytes": len(data), "sha256": sha256(data),
+             "primitives": len(prototype["meshes"][0]["primitives"]), "images": images}
+    if policies:
+        entry["imagePolicies"] = policies
+    return entry
+
+
+
+def _mesh_image_policies(document: dict, mesh_index: int, source: Path) -> tuple[bool, list]:
+    """Per primitive/slot policy only; the existing mesh ID still owns appearance identity."""
+    rows, annotated = [], False
+    def walk(value, slot):
+        nonlocal annotated
+        if isinstance(value, dict):
+            for key, item in sorted(value.items()):
+                if key.endswith("Texture") and isinstance(item, dict) and "index" in item:
+                    texture = document["textures"][item["index"]]
+                    if "source" not in texture:
+                        continue
+                    image = document["images"][texture["source"]]
+                    explicit = _explicit_image_policy(image, source.parent)
+                    annotated |= explicit is not None
+                    uri = image.get("uri", "")
+                    external = bool(uri and not uri.startswith("data:"))
+                    directory = explicit if explicit is not None else (source.parent / uri).resolve().parent if external else source.parent.resolve()
+                    rows.append((slot + (key,), external, directory))
+                else:
+                    walk(item, slot + (key,))
+        elif isinstance(value, list):
+            for number, item in enumerate(value): walk(item, slot + (str(number),))
+    for number, primitive in enumerate(document["meshes"][mesh_index]["primitives"]):
+        if "material" in primitive:
+            walk(document["materials"][primitive["material"]], (str(number),))
+    return annotated, rows
+
+
+def _check_prototype_policy(document: dict, mesh_index: int, source: Path, prototype: dict, target: Path) -> None:
+    incoming_explicit, incoming = _mesh_image_policies(document, mesh_index, source)
+    existing_explicit, existing = _mesh_image_policies(prototype, 0, target)
+    if (incoming_explicit or existing_explicit) and incoming != existing:
+        raise ValueError(f"cannot reuse {target.name}: original texture policy differs from {source}; "
+                         "restore matching per-slot policy provenance before sharing this prototype")
 
 
 def apply_to_file(glb: Path, shared: dict, index: dict, dry_run: bool) -> dict:
@@ -744,9 +835,12 @@ def apply_to_file(glb: Path, shared: dict, index: dict, dry_run: bool) -> dict:
                 target.write_bytes(data)
             written += 1
             index[identity] = _index_entry(prototype, data)
-        elif identity not in index:
-            data = target.read_bytes()
-            index[identity] = _index_entry(read_glb(target)[0], data)
+        else:
+            existing, _ = read_glb(target)
+            _check_prototype_policy(document, mesh_index, glb, existing, target)
+            if identity not in index:
+                data = target.read_bytes()
+                index[identity] = _index_entry(existing, data)
 
     placements = 0
     for node in document.get("nodes", []):
@@ -816,6 +910,13 @@ def reconcile(dry_run: bool = False, prototypes: set | None = None,
             if not target.is_file():
                 continue
             data = target.read_bytes()
+            policies = image_policy_collections(read_glb(target)[0])
+            if policies:
+                if entry.get("imagePolicies") != policies:
+                    entry["imagePolicies"] = policies
+                    changed = True
+            elif entry.get("imagePolicies"):
+                raise ValueError(f"prototype policy descriptors missing for {target}; restore original policy extras")
             if entry.get("sha256") != sha256(data) or entry.get("bytes") != len(data):
                 entry["sha256"] = sha256(data)
                 entry["bytes"] = len(data)

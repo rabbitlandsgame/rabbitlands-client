@@ -143,21 +143,27 @@ def annotate_policies(owner: str, document: object, aliases: dict[str, str]) -> 
     document = json.loads(json.dumps(document))
     touched = set(aliases) | set(aliases.values())
     material_policies = defaultdict(set)
+    descriptor_policies = defaultdict(set)
     def images(value):
         if isinstance(value, dict):
             for image in value.get("images", []) if isinstance(value.get("images"), list) else []:
                 if not isinstance(image, dict) or not isinstance(image.get("uri"), str): continue
                 resolved = resolve_reference(owner, image["uri"])
-                if resolved and resolved[0] in touched:
+                explicit = isinstance(image.get("extras"), dict) and POLICY_DIRECTORY_EXTRA in image["extras"]
+                if resolved and (resolved[0] in touched or explicit):
                     policy = _policy_uri(owner, image)
                     extras = image.setdefault("extras", {})
                     if not isinstance(extras, dict): raise CanonicalizationError(f"invalid image extras in {owner}")
                     extras[POLICY_DIRECTORY_EXTRA] = policy
                     material_policies[rebase(owner, image["uri"], aliases)].add(policy)
+                if resolved:
+                    descriptor_policies[rebase(owner, image["uri"], aliases)].add(isinstance(image.get("extras"), dict) and POLICY_DIRECTORY_EXTRA in image["extras"])
             for child in value.values(): images(child)
         elif isinstance(value, list):
             for child in value: images(child)
     images(document)
+    if any(True in values and False in values for values in descriptor_policies.values()):
+        raise CanonicalizationError(f"ambiguous original image policy in {owner}; restore missing descriptor extras")
     def collection(resources, previous, base):
         result = defaultdict(set)
         if not isinstance(previous, dict): raise CanonicalizationError(f"invalid policy collection in {owner}")
@@ -173,6 +179,8 @@ def annotate_policies(owner: str, document: object, aliases: dict[str, str]) -> 
                     if not policy or not policy[0].startswith("eloria-assets/maps/") or ":" in value or "%" in value or "\\" in value:
                         raise CanonicalizationError(f"unsafe image policy in {owner}: {value!r}")
                     result[new_uri].add(value)
+            elif new_uri in material_policies:
+                result[new_uri].update(material_policies[new_uri])
             elif resolved and resolved[0] in touched:
                 result[new_uri].add(posixpath.relpath(posixpath.dirname(resolved[0]), base))
         return {uri: sorted(values) for uri, values in sorted(result.items())}
@@ -241,7 +249,15 @@ def glb_bytes(document: dict, rest: bytes) -> bytes:
 
 def policy_inventory(root: Path) -> dict[str, dict]:
     public_inputs = {root / name for name in tracked_files(root) if name.endswith("/world.json") or (name.startswith("eloria-assets/maps/_shared/meshes/") and name.endswith(".glb"))}
-    found = vram.inventory([(root / "eloria-assets/maps").resolve()], input_files=public_inputs)
+    try:
+        found = vram.inventory([(root / "eloria-assets/maps").resolve()], input_files=public_inputs)
+    except vram.BuildError as error:
+        if "undeclared" not in str(error):
+            raise
+        raise CanonicalizationError(
+            "Original texture policy metadata is missing or inconsistent. Repair externalImagePolicies "
+            "from the owning GLB descriptors, or prototype imagePolicies via shared_meshes.reconcile(); "
+            "refusing to infer original policy from the canonical pixel directory. " + str(error)) from error
     return {directory.resolve().relative_to(root.resolve()).as_posix() + "|" + sha:
             {"sha256": sha, "source": record["path"].resolve().relative_to(root.resolve()).as_posix(),
              **vram.delivery_policy(record, directory, RELEASE_SKIP, RELEASE_UNSKIP)}
