@@ -496,8 +496,9 @@ func _check_expressive() -> void:
 			if str(node.name).begins_with("RLHair"):
 				_expect(rig.is_baked(node) and node.mesh.get_blend_shape_count() == 0,
 					"%s: the hair is drawn still" % node.name)
-	# The camera beside the second face: it takes the expressive place.
-	camera.position = Vector3(1.2, 1.6, 1.5)
+	# The camera off to the side of the second face, past the ranking margin:
+	# it takes the expressive place.
+	camera.position = Vector3(3.0, 1.6, 1.0)
 	for _i: int in RLHeadRig.LOD_CHECK_FRAMES * 3:
 		await process_frame
 	var head_two := _shown(rigs[1])[0]

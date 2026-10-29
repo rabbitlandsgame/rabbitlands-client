@@ -785,18 +785,21 @@ static func _check_lods() -> void:
 
 ## The max_expressive listed faces nearest their camera within
 ## expressive_range draw live expressions, every other listed face still. A
-## rig without a camera keeps them (nothing to rank by); one whose processing
-## is off keeps what it has and takes no place.
+## face already drawing them keeps them LOD_MARGIN further out and ranks as if
+## LOD_MARGIN nearer, so a face on the line does not swap its meshes back and
+## forth. A rig without a camera keeps them (nothing to rank by); one whose
+## processing is off keeps what it has and takes no place.
 static func _rank_expressive() -> void:
 	var candidates: Array = []
 	for rig: RLHeadRig in _lod_rigs:
 		if not is_instance_valid(rig) or not rig.can_process():
 			continue
 		var distance := rig._camera_distance()
+		var margin := LOD_MARGIN if rig._expressive else 0.0
 		if distance < 0.0:
 			rig._set_expressive(true)
-		elif distance <= expressive_range:
-			candidates.append([distance, rig])
+		elif distance <= expressive_range + margin:
+			candidates.append([distance - margin, rig])
 		else:
 			rig._set_expressive(false)
 	candidates.sort_custom(func(a: Array, b: Array) -> bool: return float(a[0]) < float(b[0]))
