@@ -67,8 +67,9 @@ What goes in, and why it is more than an export:
       it. Its interactive lab (prototypes/rl_heads) is not exported.
   eloria-assets/maps, eloria-assets/concepts
       "res://../eloria-assets/..." resolves beside app/. Every map package (a
-      folder holding world.json) ships without its references, captures,
-      sources, reports and unused world-lod2.glb; any other file a shipped
+      folder holding world.json) ships without its authoring snapshots,
+      comparison panels, references, captures, sources, reports and unused
+      world-lod2.glb; any other file a shipped
       manifest or the map registry names is pulled in even if the filter
       dropped it.
   eloria-assets/maps/.../shared-assets/vram
@@ -163,9 +164,12 @@ ASSET_REF = re.compile(r"res://\.\./(eloria-assets/[^\"'\s]+)")
 INSTALLER_APP_ID = "{6B1E9F4C-3A52-4D8E-9C71-5E0B2F8A4D17}"
 INSTALLER_MUTEX = "RabbitLandsSetup-" + INSTALLER_APP_ID.strip("{}")
 
-# Folders and files inside a map package that the client never reads.
-MAP_EXCLUDED_DIRS = {"references", "captures", "godot-captures", "source",
-                     "sources", "qa", "reports", "review", "renders"}
+# Leave local editing snapshots and review art in the repository, not in a
+# release. These are folder defaults: an explicit client/manifest dependency
+# still ships and is checked by shipped_eloria_assets, including road styles.
+MAP_EXCLUDED_DIRS = {"authoring", "comparison", "references", "captures",
+                     "godot-captures", "source", "sources", "qa", "reports",
+                     "review", "renders"}
 MAP_EXCLUDED_SUFFIXES = {".py", ".md", ".gd", ".c", ".txt", ".gitignore"}
 # Reduced-detail map packages (world-lod2.glb, 335 MB across eleven maps) and
 # their manifests and statistics. Manifests list them under lodGroups and the

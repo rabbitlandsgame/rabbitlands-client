@@ -202,6 +202,54 @@ class ServedIsle(unittest.TestCase):
         self.assertIn("eloria-assets/maps/legacy/collision.bin", staged)
         self.assertIn("eloria-assets/maps/legacy/world.glb", staged)
 
+    def test_authoring_and_comparison_files_stay_in_source_not_the_package(self):
+        files = {
+            "eloria-assets/maps/legacy/authoring/continent-authoring.json": {"image": "private-board.png"},
+            "eloria-assets/maps/legacy/authoring/private-board.png": b"authoring image",
+            "eloria-assets/maps/legacy/authoring/base-heights.f32le": b"height samples",
+            "eloria-assets/maps/legacy/authoring/base-colors.rgba8": b"color samples",
+            "eloria-assets/maps/legacy/comparison/additional-landmarks.webp": b"review image",
+            "eloria-assets/maps/legacy/comparison/review.json": {"image": "additional-landmarks.webp"},
+            f"{V2}/isle/client/chunks/00_00/authoring/snapshot.json": {"schema": 1},
+            f"{V2}/isle/client/comparison/overview.webp": b"served review image",
+        }
+        for relative, data in files.items():
+            write(self.root, relative, data)
+        original = {relative: (self.root / relative).read_bytes() for relative in files}
+        _, staged, warnings = self.stage_assets()
+        self.assertFalse(warnings)
+        for relative, data in original.items():
+            self.assertNotIn(relative, staged)
+            self.assertEqual((self.root / relative).read_bytes(), data)
+        self.assertIn("eloria-assets/maps/legacy/world.glb", staged)
+        self.assertIn(SHARED, staged)
+
+    def test_runtime_references_override_authoring_and_comparison_folder_defaults(self):
+        path = "eloria-assets/maps/legacy/world.json"
+        data = json.loads((self.root / path).read_text())
+        resources = {"authoring/runtime.png": b"runtime source pixels",
+                     "comparison/runtime.webp": b"runtime review-named pixels"}
+        data["externalResources"] = {}
+        for uri, contents in resources.items():
+            relative = "eloria-assets/maps/legacy/" + uri
+            write(self.root, relative, contents)
+            data["externalResources"][uri] = hashlib.sha256(contents).hexdigest()
+        write(self.root, path, data)
+        _, staged, warnings = self.stage_assets()
+        self.assertFalse(warnings)
+        for uri, contents in resources.items():
+            relative = "eloria-assets/maps/legacy/" + uri
+            self.assertIn(relative, staged)
+            self.assertEqual((self.stage / relative).read_bytes(), contents)
+
+    def test_missing_runtime_image_in_an_excluded_folder_is_still_refused(self):
+        path = "eloria-assets/maps/legacy/world.json"
+        data = json.loads((self.root / path).read_text())
+        data["externalResources"] = {"authoring/runtime.png": "a" * 64}
+        write(self.root, path, data)
+        with self.assertRaisesRegex(packager.PackageError, "externalResources.*authoring/runtime.png.*not in the commit"):
+            self.stage_assets()
+
     def test_a_chunk_glb_missing_from_the_commit_is_refused(self):
         (self.root / V2 / "isle/client/chunks/00_01/world.glb").unlink()
         with self.assertRaisesRegex(packager.PackageError, "chunks/00_01/world.glb is not in the commit"):
