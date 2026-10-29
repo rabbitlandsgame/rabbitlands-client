@@ -388,6 +388,13 @@ func load_entry(next_index: int, wanted_variant: String) -> void:
 			var bounds: AABB = native.global_transform*actor._native_body_bounds
 			default_focus=bounds.get_center()
 			default_distance=maxf(3.,bounds.size.length()*1.3)
+	# Preserved gameplay bounds can include old deformation outliers. A review
+	# catalog may supply source-based framing without changing actor placement.
+	var framing: Dictionary = loaded_entry.get("review_camera",{})
+	if framing.has("focus"):
+		var point: Array = framing.focus
+		default_focus=Vector3(float(point[0]),float(point[1]),float(point[2]))
+	if framing.has("distance"): default_distance=float(framing.distance)
 	focus=default_focus
 	distance=default_distance
 	loading=false

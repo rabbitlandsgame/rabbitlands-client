@@ -1,0 +1,117 @@
+{
+  "schema": 1,
+  "actor": "mossbound_stone_golem",
+  "status": "unapproved_final_refinement_component_benchmark",
+  "baseline_role": "Last reviewed V4, uninstalled; active runtime remains e056.",
+  "models": {
+    "reviewed30": {
+      "sha256": "5c2df781469ad3199e4e8dd6353c671534e4404681fac5430b86f79032831831",
+      "raw_bytes": 1896812,
+      "bones": 30,
+      "skeletons": 1,
+      "retargeted_keys": 12780,
+      "retargeted_tracks": 269,
+      "animation_update": {
+        "Attack_Ground_Pound": {
+          "batch_means_usec": [
+            8.75916666666667,
+            10.1575,
+            11.5716666666667,
+            11.7308333333333,
+            12.0425,
+            12.0791666666667,
+            12.34,
+            12.9475,
+            13.3316666666667
+          ],
+          "median_usec_per_update": 12.0425,
+          "minimum_usec_per_update": 8.75916666666667
+        },
+        "Walk": {
+          "batch_means_usec": [
+            9.96333333333333,
+            10.7591666666667,
+            11.075,
+            11.4366666666667,
+            11.4508333333333,
+            12.035,
+            12.0908333333333,
+            12.8166666666667,
+            13.7083333333333
+          ],
+          "median_usec_per_update": 11.4508333333333,
+          "minimum_usec_per_update": 9.96333333333333
+        }
+      },
+      "retained_static_memory_delta_bytes": 19213134,
+      "scope": "Fresh-process real GlbSceneCache._build_raw + ReplicatedActor3D + NativeAnimationImporter, warm OS file cache. Retained Godot static CPU allocations include scene and library caches, meshes, textures and actor. AnimationPlayer advance plus forced skeleton global transforms at 240 updates/s; nine batches of 1200 updates per clip after warmup. Excludes GPU rendering/skinning, whole-game logic and frame-rate claims."
+    },
+    "repaired33": {
+      "sha256": "f9a54ff96ebb62738e0e14630f9640958eea963274b181e76ed9915233bf5fd0",
+      "raw_bytes": 1947032,
+      "bones": 33,
+      "skeletons": 1,
+      "retargeted_keys": 14761,
+      "retargeted_tracks": 306,
+      "animation_update": {
+        "Attack_Ground_Pound": {
+          "batch_means_usec": [
+            9.02166666666667,
+            9.08083333333333,
+            9.08416666666667,
+            9.10166666666667,
+            9.18583333333333,
+            9.22833333333333,
+            9.36666666666667,
+            9.53,
+            10.2541666666667
+          ],
+          "median_usec_per_update": 9.18583333333333,
+          "minimum_usec_per_update": 9.02166666666667
+        },
+        "Walk": {
+          "batch_means_usec": [
+            8.745,
+            8.82,
+            8.84083333333333,
+            8.96583333333333,
+            8.9825,
+            9.02666666666667,
+            9.06,
+            9.15083333333333,
+            9.36916666666667
+          ],
+          "median_usec_per_update": 8.9825,
+          "minimum_usec_per_update": 8.745
+        }
+      },
+      "retained_static_memory_delta_bytes": 19510329,
+      "scope": "Fresh-process real GlbSceneCache._build_raw + ReplicatedActor3D + NativeAnimationImporter, warm OS file cache. Retained Godot static CPU allocations include scene and library caches, meshes, textures and actor. AnimationPlayer advance plus forced skeleton global transforms at 240 updates/s; nine batches of 1200 updates per clip after warmup. Excludes GPU rendering/skinning, whole-game logic and frame-rate claims."
+    }
+  },
+  "raw_byte_increase": 50220,
+  "skin_palette_before_after": [
+    30,
+    32
+  ],
+  "native_bones_before_after": [
+    30,
+    33
+  ],
+  "semantic_support_controls_added": 2,
+  "additional_native_ancestor": "Armature",
+  "retargeted_key_increase": 1981,
+  "retargeted_track_increase": 37,
+  "retained_static_first_actor_allocation_increase_bytes": 297195,
+  "timing_observation": "Measured medians: V4 Walk 11.45 / Ground Pound 12.04 microseconds; final Walk 8.98 / Ground Pound 9.19. One fresh process per model and uncontrolled scheduling/background activity do not establish a speedup or quantify the intrinsic small added-rig cost. No measured slowdown in these snapshots; no whole-game FPS claim.",
+  "scope": "AnimationPlayer advance plus forced skeleton transforms, 240 updates/second, 240 warmups and nine batches of 1200 updates per clip. Warm OS cache. Excludes rendering, GPU skinning and gameplay.",
+  "memory_scope": "Retained Godot static allocations for the first actor include scene/library/mesh/texture caches. Not processresident memory or per-instance RAM.",
+  "structure": "Same 9000 vertices, triangle indices, mesh surfaces, textures and eight stored influence slots; zero corrective targets.",
+  "evidence_hashes": {
+    "baseline_raw_report": "fdec2d4d428bfe43dfaff2d2eeb078013513766029f2515e8a619c8226c4e21c",
+    "candidate_raw_report": "19143ec7d864a307d1c81f4d80fca3f706970c7436f4c0a0c624f5cb049cd4cf",
+    "comparison": "a0285e49bfa1fe0d5a8d08b351ee1ed14d4a7f0086455f30b6686a88c6290f8f",
+    "benchmark_gd": "250f072b41238675d5f7a779b932f8bd29564a7e5f5f57e72f269f5accffb4c4",
+    "project_marker": "a21b687453568122ad7938291b8ec4534768493e684ff917c537a698bfbcda1f"
+  }
+}
