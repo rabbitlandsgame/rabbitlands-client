@@ -5,6 +5,7 @@ const Sources := preload("res://src/world/map_geometry_texture_sources.gd")
 const MapCache := preload("res://src/world/map_scene_cache.gd")
 const Archived := preload("res://src/actors/archived_model_policy.gd")
 const GeometryPolicy := preload("res://src/world/map_geometry_policy.gd")
+const Installed := preload("res://src/world/installed_world_cache.gd")
 const POLICY := "map-collision-faces-v1"
 const VERSION := 1
 const DIRECTORY := "user://map-collision-cache"
@@ -42,9 +43,10 @@ static func _entry_path(source: String) -> String:
 static func _owned(path: String, extension: String, root := "") -> bool:
 	var directory := _root() if root.is_empty() else root
 	var folder := "entries" if extension == "json" else "blobs"
-	return path == path.replace("\\","/").simplify_path() \
+	var local := path == path.replace("\\","/").simplify_path() \
 		and path.get_base_dir() == directory.path_join(folder) \
 		and path.get_extension() == extension and _hash(path.get_file().get_basename())
+	return local or (root.is_empty() and extension == "rlc" and Installed.owns_blob(path,"collision",policy(),extension))
 
 static func _read(path: String, limit := MAX_METADATA_BYTES) -> Dictionary:
 	var file := FileAccess.open(path,FileAccess.READ)
@@ -144,7 +146,14 @@ static func _layout(raw: PackedByteArray) -> bool:
 static func acquire(source: String, digest: String, verified: Dictionary = {}) -> Dictionary:
 	var logical := _logical(source)
 	if logical.is_empty() or not logical.ends_with(".json") or not _hash(digest): return _miss("collision_source_invalid")
-	var entry := _read(_entry_path(logical))
+	var installed := Installed.entry("collision","world|"+logical,policy())
+	if not installed.is_empty():
+		var result := _acquire_entry(installed,source,digest,verified)
+		if bool(result.ok): return result
+	return _acquire_entry(_read(_entry_path(logical)),source,digest,verified)
+
+static func _acquire_entry(entry: Dictionary, source: String, digest: String, verified: Dictionary = {}) -> Dictionary:
+	var logical := _logical(source)
 	if entry.is_empty(): return _miss("collision_not_prepared")
 	if int(entry.get("schema",0)) != VERSION or entry.get("policy") != policy() \
 			or entry.get("source") != logical or entry.get("source_digest") != digest: return _miss("collision_source_or_policy_changed")
@@ -287,8 +296,11 @@ static func write_packed(packed: PackedScene, source: String, digest: String, in
 	return {"ok":true,"bytes":extracted.bytes,"blob_bytes":bytes.size(),
 		"entry":entry,"coverage":extracted.coverage}
 
-static func _geometry_blob(path: Variant) -> bool:
+static func _geometry_blob(path: Variant, geometry_policy := "") -> bool:
 	if not path is String or path != path.replace("\\","/").simplify_path(): return false
+	if path.get_extension() in ["scn","res"] and _hash(path.get_file().get_basename()) \
+			and not geometry_policy.is_empty() and Installed.release_blob_directory(path.get_base_dir(),geometry_policy): return true
+	if not geometry_policy.is_empty() and Installed.owns_blob(path,"geometry",geometry_policy,path.get_extension()): return true
 	var prefix := "user://map-geometry-cache/"
 	if not path.begins_with(prefix): return false
 	var parts: PackedStringArray = str(path).trim_prefix(prefix).split("/")
@@ -298,10 +310,10 @@ static func _geometry_blob(path: Variant) -> bool:
 static func write_from_geometry(entry: Dictionary) -> Dictionary:
 	if OS.get_thread_caller_id() != OS.get_main_thread_id(): return _miss("collision_producer_requires_main")
 	if entry.get("kind") != "world" or not entry.get("payloads") is Dictionary \
-			or entry.payloads.size() > MAX_PATHS or not _geometry_blob(entry.get("primary")) \
+			or entry.payloads.size() > MAX_PATHS or not _geometry_blob(entry.get("primary"),str(entry.get("policy",""))) \
 			or not entry.payloads.has(entry.primary): return _miss("collision_geometry_invalid")
 	for path: Variant in entry.payloads:
-		if not _geometry_blob(path) or not _hash(entry.payloads[path]) \
+		if not _geometry_blob(path,str(entry.get("policy",""))) or not _hash(entry.payloads[path]) \
 				or FileAccess.get_sha256(path) != entry.payloads[path]: return _miss("collision_geometry_changed")
 	if not _inputs(entry.get("inputs"),str(entry.get("source",""))): return _miss("collision_dependency_changed")
 	var packed := ResourceLoader.load(str(entry.primary),"PackedScene",ResourceLoader.CACHE_MODE_IGNORE_DEEP) as PackedScene

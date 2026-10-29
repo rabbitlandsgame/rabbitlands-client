@@ -4,8 +4,9 @@ extends RefCounted
 ## represented by stable material-slot bindings instead of native payloads.
 const Bindings := preload("res://src/world/map_geometry_texture_bindings.gd")
 const Prepared := preload("res://src/world/prepared_content.gd")
+const Installed := preload("res://src/world/installed_world_cache.gd")
 const SLOT_META := &"rl_geometry_texture_slots"
-const POLICY := "map-geometry-native-writer-v1"
+const POLICY := "map-geometry-native-writer-v2"
 const MAX_DEPTH := 96
 
 var root_path := ""
@@ -34,9 +35,9 @@ func configure(path: String) -> bool:
 	_configure_error = ""
 	_clear_entry()
 	var normalized := path.replace("\\", "/").simplify_path().trim_suffix("/")
-	if normalized != path or not normalized.begins_with("user://") \
-			or normalized == "user:" or normalized.trim_prefix("user://").is_empty():
-		_configure_error = "geometry blob root must be a canonical owned user:// directory"
+	if normalized != path or (not Installed.release_blob_directory(path) and (not normalized.begins_with("user://") \
+			or normalized == "user:" or normalized.trim_prefix("user://").is_empty())):
+		_configure_error = "geometry blob root must be an owned user:// or scoped release directory"
 		return false
 	var error := DirAccess.make_dir_recursive_absolute(normalized)
 	if error != OK:
@@ -414,6 +415,9 @@ func _save_resource(source: Resource, depth: int, owner: Dictionary, force_file 
 	_sequence += 1
 	var extension := "scn" if native is PackedScene else "res"
 	var staging := root_path.path_join("writing-%d-%06d.%s" % [OS.get_process_id(), _sequence, extension])
+	# Release roots use their stable res://prepared-world namespace, identical
+	# in the disposable producer and installed client. Bare relative binary
+	# dependencies do not resolve against their owning resource in Godot 4.7.
 	var error := ResourceSaver.save(native, staging, ResourceSaver.FLAG_COMPRESS)
 	if error != OK:
 		_error("geometry native save failed: " + error_string(error))
@@ -456,12 +460,16 @@ func _owned(path: String) -> bool:
 		and path.get_base_dir() == root_path and path.get_extension() in ["res", "scn"] \
 		and _digest(path.get_file().get_basename())
 
-func _dependency(value: String) -> String:
+func _dependency(value: String, owner_path := "") -> String:
 	var path := ""
 	for part: String in value.split("::"):
 		if part.begins_with("res://") or part.begins_with("user://"):
 			if not path.is_empty(): return ""
 			path = part
+		elif not owner_path.is_empty() and part.is_relative_path() and not part.get_extension().is_empty() \
+				and not ":" in part and not "\\" in part:
+			if not path.is_empty(): return ""
+			path = owner_path.get_base_dir().path_join(part).simplify_path()
 	return path if path == path.replace("\\", "/").simplify_path() else ""
 
 func _closure(primary: String, known: Dictionary, inputs: Dictionary) -> Dictionary:
@@ -474,7 +482,7 @@ func _closure(primary: String, known: Dictionary, inputs: Dictionary) -> Diction
 			return {"ok": false, "error": "geometry native dependency is missing or changed"}
 		reached[path] = known[path]
 		for value: String in ResourceLoader.get_dependencies(path):
-			var target := _dependency(value)
+			var target := _dependency(value,path)
 			if target.is_empty(): return {"ok": false, "error": "geometry dependency cannot be resolved"}
 			if _owned(target):
 				pending.append(target)

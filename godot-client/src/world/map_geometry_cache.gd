@@ -11,6 +11,7 @@ const CollisionCache := preload("res://src/world/map_collision_cache.gd")
 const GeometryPolicy := preload("res://src/world/map_geometry_policy.gd")
 const PavingCache := preload("res://src/world/map_paving_cache.gd")
 const GroundProfile := preload("res://src/world/look/look_profile.gd")
+const Installed := preload("res://src/world/installed_world_cache.gd")
 const SCOPE := "res://data/maps/geometry-cache-scope.json"
 const REGISTRY := "res://data/maps/registry.json"
 const DIRECTORY := "user://map-geometry-cache"
@@ -31,6 +32,8 @@ static var _scope_error := ""
 static var _mutex := Mutex.new()
 static var _hits := 0
 static var _misses := 0
+static var _installed_coverage := "not_declared"
+static var _release_root := ""
 
 static func _read(path: String) -> Dictionary:
 	var file := FileAccess.open(path,FileAccess.READ)
@@ -114,7 +117,15 @@ static func policy() -> String:
 	return _policy
 
 static func root_path() -> String:
-	return DIRECTORY.path_join(policy())
+	return DIRECTORY.path_join(policy()) if _release_root.is_empty() else _release_root
+
+static func set_release_output(enabled: bool) -> String:
+	if OS.get_thread_caller_id() != OS.get_main_thread_id(): return ""
+	_release_root = ""
+	if enabled:
+		var identity := Installed.compatibility(policy(),CollisionCache.policy(),PavingCache.policy())
+		_release_root = Installed.ROOT.path_join(identity).path_join("geometry").path_join(policy())
+	return root_path()
 
 static func blobs_path() -> String:
 	return root_path().path_join("blobs")
@@ -135,8 +146,9 @@ static func _hash_valid(value: Variant) -> bool:
 	return true
 
 static func _owned_blob(path: String) -> bool:
-	return path == path.replace("\\","/").simplify_path() and path.get_base_dir() == blobs_path() \
-		and path.get_extension() in ["scn","res"] and _hash_valid(path.get_file().get_basename())
+	if path != path.replace("\\","/").simplify_path() or not path.get_extension() in ["scn","res"] \
+			or not _hash_valid(path.get_file().get_basename()): return false
+	return path.get_base_dir() == blobs_path() or Installed.owns_blob(path, "geometry", policy(), path.get_extension())
 
 static func _diagnostic_add(diagnostics: Dictionary, section: String, key: String, value: int) -> void:
 	var values: Dictionary = diagnostics.get(section,{})
@@ -187,11 +199,17 @@ static func _validate_inputs(entry: Dictionary, verified: Dictionary = {}, diagn
 	return true
 
 static func _valid_entry(kind: String, path: String, source_digest: String, verified: Dictionary = {}, diagnostics: Dictionary = {}) -> Dictionary:
+	if not eligible(kind,path): return _miss("outside_geometry_scope")
+	var installed := Installed.entry("geometry", kind + "|" + logical(path), policy())
+	if not installed.is_empty():
+		var result := _validate_entry(installed,kind,path,source_digest,verified,diagnostics)
+		if str(result.status) == "hit": return result
+	return _validate_entry(_read(entry_path(kind,path)),kind,path,source_digest,verified,diagnostics)
+
+static func _validate_entry(entry: Dictionary, kind: String, path: String, source_digest: String, verified: Dictionary = {}, diagnostics: Dictionary = {}) -> Dictionary:
 	var capture := not diagnostics.is_empty()
 	var began := Time.get_ticks_usec() if capture else 0
 	if capture: _diagnostic_add(diagnostics,"counts","entryValidationCalls",1)
-	if not eligible(kind,path): return _miss("outside_geometry_scope")
-	var entry := _read(entry_path(kind,path))
 	if capture:
 		_diagnostic_add(diagnostics,"timings_us","geometryVerifyMetadataRead",Time.get_ticks_usec()-began)
 		began = Time.get_ticks_usec()
@@ -345,8 +363,12 @@ static func instantiate(record: Dictionary, verify_again := true) -> Node3D:
 		elif node != null: node.free()
 	else:
 		# World look/fade passes receive private materials and MultiMesh buffers.
+		var mesh_aliases: Dictionary = entry.shared_meshes.duplicate()
+		for path: String in entry.shared_meshes:
+			var portable := Installed.logical_blob(path,"geometry",policy())
+			if not portable.is_empty(): mesh_aliases[portable] = entry.shared_meshes[path]
 		instance = Lifecycle.instantiate({"status":"hit","resource":packed,"entry":{
-			"source":entry.source,"payloads":[],"shared_meshes":entry.shared_meshes,"shared_images":{}}})
+			"source":entry.source,"payloads":[],"shared_meshes":mesh_aliases,"shared_images":{}}})
 	timings_us["geometryInstantiate"] = int(timings_us.get("geometryInstantiate",0))+Time.get_ticks_usec()-began
 	if instance != null: record["verified_template_id"] = packed.get_instance_id()
 	return instance
@@ -408,6 +430,17 @@ static func startup_signature() -> String:
 static func needs_preparation() -> bool:
 	if DisplayServer.get_name() == "headless" or OS.get_environment("ELORIA_NO_GEOMETRY_CACHE") == "1" \
 			or not MapCache.is_enabled(): return false
+	if Installed.declared():
+		# Release packages declare the supported renderer generation. Missing,
+		# corrupt or incompatible installed data retains user/raw loading rather
+		# than unexpectedly starting an all-world cook before login. Explicit
+		# --prepare-map-geometry still invokes the normal local producer.
+		initialize()
+		var installed_keys: Array = _targets.keys()
+		installed_keys.sort()
+		_installed_coverage = "complete" if Installed.complete({"geometry":policy(),"collision":CollisionCache.policy(),"paving":PavingCache.policy()},
+			FileAccess.get_sha256(SCOPE),FileAccess.get_sha256(REGISTRY),installed_keys) else "raw_fallback"
+		return false
 	var complete := _read(root_path().path_join("complete.json"))
 	var keys: Array = _targets.keys()
 	keys.sort()
@@ -496,6 +529,7 @@ static func prune_unreferenced() -> int:
 static func snapshot() -> Dictionary:
 	initialize()
 	_mutex.lock()
-	var result := {"policy":_policy,"targets":_targets.size(),"scope_error":_scope_error,"hits":_hits,"misses":_misses,"cooking":cooking}
+	var result := {"policy":_policy,"targets":_targets.size(),"scope_error":_scope_error,"hits":_hits,"misses":_misses,"cooking":cooking,
+		"installed_coverage":_installed_coverage}
 	_mutex.unlock()
 	return result
