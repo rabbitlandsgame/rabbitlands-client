@@ -89,6 +89,59 @@ def read_jacobian(directory, metadata):
     return values
 
 
+def affine_halo_uv(uv, jacobian, valid, ppm):
+    """Store void UV at its own texel centre, using the nearest valid affine map."""
+    if ppm <= 0:
+        raise ValueError("pixels per metre must be positive")
+    original = np.asarray(uv,dtype="<f4")
+    result = original.copy()
+    if not valid.any() or valid.all():
+        return result
+    nearest = T.distance_transform_edt(~valid,return_distances=False,return_indices=True)
+    rows,cols = np.indices(valid.shape)
+    dx = (cols-nearest[1])/ppm
+    dz = (rows-nearest[0])/ppm
+    source_uv = original[tuple(nearest)].astype(float)
+    source_j = jacobian[tuple(nearest)].astype(float)
+    extrapolated = source_uv + np.stack((source_j[...,0]*dx+source_j[...,1]*dz,
+                                         source_j[...,2]*dx+source_j[...,3]*dz),axis=-1)
+    if not np.isfinite(extrapolated[~valid]).all():
+        raise ValueError("nonfinite affine UV halo")
+    result[~valid] = extrapolated[~valid]
+    if not np.isfinite(result).all():
+        raise ValueError("affine UV halo is not representable as RG32F")
+    return result
+
+
+def store_affine_fields(directory, stem, sheet, table, grid):
+    """Retain the old complete mip protocol, correcting only unused L0 UV cells."""
+    fields = T.store_fields(directory,stem,sheet,"zstd")
+    fields["uv_jacobian"] = store_jacobian(directory,stem,sheet,table)
+    jacobian = read_jacobian(directory,fields["uv_jacobian"])
+    path = directory/fields["uv_file"]
+    raw = zstandard.ZstdDecompressor().decompress(path.read_bytes(),max_output_size=fields["uv_uncompressed_bytes"])
+    base = fields["mips"][0]
+    count = base["width"]*base["height"]*2
+    uv = np.frombuffer(raw,dtype="<f4",count=count,offset=base["uv_offset_bytes"]).reshape(base["height"],base["width"],2)
+    fixed = affine_halo_uv(uv,jacobian,sheet["valid"],grid["pixels_per_metre"])
+    if fixed[sheet["valid"]].tobytes() != uv[sheet["valid"]].tobytes():
+        raise AssertionError("covered texel UV bytes changed during halo correction")
+    body = bytearray(raw)
+    start,end = base["uv_offset_bytes"],base["uv_offset_bytes"]+base["uv_bytes"]
+    body[start:end] = fixed.astype("<f4").tobytes()
+    if bytes(body[end:]) != raw[end:]:
+        raise AssertionError("unused lower UV mip bytes changed")
+    encoded = zstandard.ZstdCompressor(level=8).compress(bytes(body))
+    if zstandard.ZstdDecompressor().decompress(encoded,max_output_size=len(body)) != bytes(body):
+        raise AssertionError("affine halo flow codec roundtrip changed bytes")
+    path.write_bytes(encoded)
+    fields.update(uv_sha256=T.sha(body),uv_file_sha256=T.sha(encoded),
+                  uv_outside="nearest_valid_affine_at_destination_cell_centre",
+                  uv_l0_halo_extrapolated_pixels=int(np.count_nonzero(~sheet["valid"])),
+                  uv_l0_covered_bytes_preserved=True,unused_lower_uv_mip_bytes_preserved=True)
+    return fields
+
+
 def field_plan(triangles, ppm):
     if not isinstance(ppm, int) or isinstance(ppm, bool) or ppm <= 0:
         raise ValueError("pixels per metre must be a positive integer")
@@ -287,8 +340,7 @@ def bake(root, original_root, out, region, chunks, road_ids, ppms=(2,4)):
                            different_uv_overlap_pixels=int(sheet["ambiguous_uv"].sum()),
                            maximum_source_fragments_per_pixel=int(sheet["contributors"].max()))
             sheet,sheet_grid = T.crop_sheet(sheet,grid)
-            fields = T.store_fields(directory,"combined-road",sheet,"zstd")
-            fields["uv_jacobian"] = store_jacobian(directory,"combined-road",sheet,jacobians)
+            fields = store_affine_fields(directory,"combined-road",sheet,jacobians,sheet_grid)
             material = T.material_document(source,record)
             images = {im["uri"] for im in material["images"] if "uri" in im}
             layer = dict(**fields,grid=sheet_grid,road_id="combined",road_node_name=record["road_node_name"],

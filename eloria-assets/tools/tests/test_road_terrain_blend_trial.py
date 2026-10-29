@@ -102,6 +102,46 @@ def test_degenerate_faces_have_finite_unused_jacobian_and_corruption_is_rejected
         TRIAL.read_jacobian(tmp_path,metadata)
 
 
+def test_one_dimensional_halo_uses_destination_texel_centre():
+    uv=np.broadcast_to(np.array([10,20],dtype="<f4"),(1,3,2)).copy()
+    valid=np.array([[False,True,False]])
+    jacobian=np.broadcast_to([4,0,2,0],(1,3,4))
+    actual=TRIAL.affine_halo_uv(uv,jacobian,valid,4)
+    assert np.array_equal(actual,np.array([[[9,19.5],[10,20],[11,20.5]]],dtype="<f4"))
+    assert actual[valid].tobytes() == uv[valid].tobytes()
+
+
+def test_two_dimensional_halo_reconstructs_same_affine_map_at_fragment():
+    uv=np.broadcast_to(np.array([5,7],dtype="<f4"),(3,3,2)).copy()
+    valid=np.zeros((3,3),bool);valid[1,1]=True
+    jacobian=np.broadcast_to([2,-3,.5,4],(3,3,4))
+    actual=TRIAL.affine_halo_uv(uv,jacobian,valid,2)
+    rows,cols=np.indices((3,3));dx,dz=(cols-1)/2,(rows-1)/2
+    expected=np.stack([5+2*dx-3*dz,7+.5*dx+4*dz],axis=-1)
+    assert np.array_equal(actual,expected)
+    # Shader reconstruction from the void texel centre now agrees with
+    # reconstruction from the original valid texel centre.
+    delta=np.array([.1,-.07]);j=np.array([[2,-3],[.5,4]])
+    assert np.allclose(actual[0,0]+j@delta,np.array([5,7])+j@(np.array([-.5,-.5])+delta))
+
+
+def test_affine_field_wrapper_rehashes_l0_and_preserves_lower_mips(tmp_path):
+    sheet=dict(valid=np.zeros((4,4),bool),alpha=np.zeros((4,4)),uv=np.zeros((4,4,2)),
+               selected_triangle=np.zeros((4,4),np.int32))
+    sheet["valid"][1,1]=True;sheet["alpha"][1,1]=1;sheet["uv"][1,1]=[5,7]
+    before=TRIAL.T.store_fields(tmp_path,"reference",sheet,"zstd")
+    raw_before=TRIAL.zstandard.ZstdDecompressor().decompress((tmp_path/before["uv_file"]).read_bytes())
+    fields=TRIAL.store_affine_fields(tmp_path,"affine",sheet,np.array([[2,-3,.5,4.]]),dict(pixels_per_metre=2))
+    encoded=(tmp_path/fields["uv_file"]).read_bytes()
+    raw=TRIAL.zstandard.ZstdDecompressor().decompress(encoded)
+    assert raw[4*4*8:] == raw_before[4*4*8:]
+    assert TRIAL.T.sha(raw) == fields["uv_sha256"]
+    assert TRIAL.T.sha(encoded) == fields["uv_file_sha256"]
+    assert fields["uv_l0_covered_bytes_preserved"]
+    assert fields["unused_lower_uv_mip_bytes_preserved"]
+    assert fields["uv_l0_halo_extrapolated_pixels"] == 15
+
+
 @pytest.fixture
 def source_fixture(tmp_path,monkeypatch):
     root=tmp_path/"repo"
