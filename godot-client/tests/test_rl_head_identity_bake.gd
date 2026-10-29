@@ -17,7 +17,12 @@ extends SceneTree
 ##   * a still bake (the far levels, RLHeadIdentityBake.far_still) keeps no
 ##     live shapes and leaves the mouth out, with the same identity vertices;
 ##     on the actor a far level draws it with every surface's material found
-##     again by name, and the near level keeps its expressions.
+##     again by name, and the near level keeps its expressions;
+##   * material values (the Compatibility renderer's per-face materials,
+##     forced with RL_HEAD_VALUES=material): each surface draws a copy of its
+##     shared material carrying the face's values, compiled with
+##     RL_MATERIAL_VALUES, shared by identical faces, and nothing is set as an
+##     instance uniform.
 ##
 ##   Godot --headless --path godot-client --script res://tests/test_rl_head_identity_bake.gd
 
@@ -69,6 +74,7 @@ func _run() -> void:
 	RLHeadLibrary.release()
 	await _check_actors()
 	await _check_still()
+	await _check_material_values()
 	await _check_async_and_switch()
 	print("rl head identity bake: worst vertex difference %s m" % String.num_scientific(_worst))
 	print("rl head identity bake: %d checks, %d failures" % [_checks, _failures])
@@ -436,6 +442,63 @@ func _check_still() -> void:
 	_expect(head.mesh.get_surface_count() == RLHeadRig.source_mesh(head).get_surface_count(),
 		"the near level draws every surface")
 	actor.free()
+	await process_frame
+	await process_frame
+
+
+## Material values: per-face material copies instead of instance uniforms.
+func _check_material_values() -> void:
+	BAKE.synchronous = true
+	OS.set_environment("RL_HEAD_VALUES", "material")
+	RLHeadLibrary.reload_values_switch()
+	_expect(RLHeadLibrary.material_values(), "RL_HEAD_VALUES=material switches material values on")
+	var mira := PRESETS.appearance("Mira")
+	var one := _spawn("female", mira)
+	var two := _spawn("female", mira)
+	var other := _spawn("female", mira.merged({"skin": (int(mira.get("skin", 0)) + 3) % 10}, true))
+	await process_frame
+	var rig := one.rl_head()
+	_expect(rig != null and two.rl_head() != null and other.rl_head() != null, "three female RL heads")
+	if rig != null:
+		var skin_seen := false
+		for node: MeshInstance3D in rig.all_meshes():
+			for surface: int in node.mesh.get_surface_count():
+				var imported := node.mesh.surface_get_material(surface)
+				var drawn := node.get_surface_override_material(surface) as ShaderMaterial
+				if imported == null or imported.resource_name == RLHeadLibrary.BODY_PATCH_MATERIAL or drawn == null:
+					continue
+				var shared := RLHeadLibrary.material(imported.resource_name, "female", rig.appearance.hair
+					if RLHeadRig.HAIR_NODE_NAME in str(node.get_path()) else "", rig.quality)
+				if not shared.shader.code.contains(RLHeadLibrary.INSTANCE_INCLUDE):
+					_expect(drawn == shared, "%s keeps its shared material (no values included)" % imported.resource_name)
+					continue
+				# Every surface whose shader includes the values, read or not,
+				# draws an RL_MATERIAL_VALUES compile: no instance uniform is
+				# declared on any RL mesh instance.
+				_expect(drawn != shared and drawn.shader != shared.shader
+					and drawn.shader.code.contains("#define RL_MATERIAL_VALUES"),
+					"%s draws a copy compiled with RL_MATERIAL_VALUES" % imported.resource_name)
+				if RLHeadLibrary.shader_values(shared).is_empty():
+					_expect(RLHeadLibrary.face_material(shared, {}) == drawn,
+						"%s reads no values: one copy for every face" % imported.resource_name)
+					continue
+				if imported.resource_name == "rl_skin":
+					skin_seen = true
+					_expect(drawn.get_shader_parameter("skin_color") == rig.appearance.skin,
+						"the skin copy carries the face's skin colour")
+					_expect(drawn.get_shader_parameter("albedo_texture") == shared.get_shader_parameter("albedo_texture"),
+						"the skin copy keeps the shared maps")
+		_expect(skin_seen, "the head's skin draws a per-face copy")
+		var shown_one := _shown(rig)
+		var shown_two := _shown(two.rl_head())
+		_expect(not shown_one.is_empty() and shown_one[0].get_surface_override_material(0) == shown_two[0].get_surface_override_material(0),
+			"identical faces share their material copies")
+		_expect(_shown(other.rl_head())[0].get_surface_override_material(0) != shown_one[0].get_surface_override_material(0),
+			"another skin colour draws another copy")
+	for actor: ReplicatedActor3D in [one, two, other]:
+		actor.free()
+	OS.set_environment("RL_HEAD_VALUES", "")
+	RLHeadLibrary.reload_values_switch()
 	await process_frame
 	await process_frame
 

@@ -38,7 +38,9 @@ extends Node3D
 ## quality uses), and this rig only paints the hairline under it.
 ##
 ## Identity is blend-shape weights - changing a control never rebuilds a mesh
-## - and per-actor colours are instance uniforms on shared materials.
+## - and per-actor colours are instance uniforms on shared materials (in the
+## Compatibility renderer material uniforms on per-face copies of them,
+## RLHeadLibrary.material_values).
 ## Expressions belong to the RLFaceExpression child, which never writes `id_`
 ## shapes; this never writes `ex_` shapes.
 ##
@@ -156,6 +158,8 @@ var _bakes: Dictionary = {}
 ## The face is being edited control by control (`set_control`): every level
 ## stays live from then on.
 var _live_identity := false
+## The irises' look angle, where the values are material uniforms.
+var _eye_look := Vector2.ZERO
 
 ## Mesh resource id -> {blend shape name: index}, shared by every actor.
 static var _shape_indices: Dictionary = {}
@@ -398,6 +402,13 @@ static func mesh_triangles(mesh: Mesh) -> int:
 ## The body face material's roughness, so the neck rim shades like the body.
 func set_rim_shading(roughness: float, specular: float = 0.5) -> void:
 	_rim_roughness = roughness
+	if RLHeadLibrary.material_values():
+		# Per-face copies are made from the shared material: it carries the
+		# rim too, for the copies still to come.
+		var shared := RLHeadLibrary.material("rl_skin", appearance.sex, "", quality)
+		if shared != null:
+			shared.set_shader_parameter("rim_roughness", roughness)
+			shared.set_shader_parameter("rim_specular", specular)
 	for level: Array in _head_lods:
 		for mesh_node: MeshInstance3D in level:
 			for surface: int in mesh_node.mesh.get_surface_count():
@@ -990,6 +1001,11 @@ func _apply_colours() -> void:
 	# The head's surfaces read all but the hair's detail; the beard reads its
 	# colour, the hair its colour and detail.
 	var beard_values := {"hair_color": beard_colour}
+	if RLHeadLibrary.material_values():
+		values["eye_look"] = _eye_look
+		_apply_material_values([[_head_lods, "", values], [_beard_lods, _beard_style, beard_values],
+			[_hair_lods, _hair_style, values]])
+		return
 	for part: Array in [[_head_lods, INSTANCE_UNIFORMS, values], [_beard_lods, ["hair_color"], beard_values],
 			[_hair_lods, HAIR_INSTANCE_UNIFORMS, values]]:
 		for level: Array in part[0]:
@@ -998,6 +1014,36 @@ func _apply_colours() -> void:
 					continue
 				for uniform_name: String in part[1]:
 					(node as MeshInstance3D).set_instance_shader_parameter(uniform_name, (part[2] as Dictionary)[uniform_name])
+
+
+## The values as material uniforms (RLHeadLibrary.material_values): every
+## surface of each part, [levels, style, values], draws the per-face copy of
+## its shared material. The body patch keeps the body's material.
+func _apply_material_values(parts: Array) -> void:
+	for part: Array in parts:
+		for level: Array in part[0]:
+			for node: Variant in level:
+				if not is_instance_valid(node):
+					continue
+				var mesh_node := node as MeshInstance3D
+				for surface: int in mesh_node.mesh.get_surface_count():
+					var imported := mesh_node.mesh.surface_get_material(surface)
+					if imported == null or _is_body_patch(imported):
+						continue
+					var shared := RLHeadLibrary.material(imported.resource_name, appearance.sex, str(part[1]), quality)
+					if shared != null:
+						mesh_node.set_surface_override_material(surface,
+							RLHeadLibrary.face_material(shared, part[2] as Dictionary))
+
+
+## Turns both irises by a look angle (RLFaceExpression.set_look) where the
+## values are material uniforms; elsewhere the expression sets the instance
+## uniform itself.
+func set_eye_look(look: Vector2) -> void:
+	if look == _eye_look:
+		return
+	_eye_look = look
+	_apply_colours()
 
 
 ## Sets a blend shape by name where the mesh has it. Identity and hair shapes

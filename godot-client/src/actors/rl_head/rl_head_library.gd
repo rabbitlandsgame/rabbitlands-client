@@ -114,6 +114,27 @@ const PIPELINE_WARM_FRAMES := 30
 ## Map files a full prewarm queued; the per-frame poll loads one a frame.
 static var _texture_queue: PackedStringArray = PackedStringArray()
 
+## The per-actor values (rl_head_instance.gdshaderinc) each RL shader reads, by
+## shader: what a per-face material copy of it carries (see face_material).
+const SHADER_VALUES := {
+	"rl_skin": ["skin_color", "lip_tint", "brow_color", "hair_color", "freckles", "liner", "stubble",
+		"hairline", "brow_style", "brow_thickness", "liner_wing"],
+	"rl_eye": ["eye_color", "eye_look"],
+	"rl_lash": ["hair_color"],
+	"rl_brow": ["brow_color"],
+	"rl_hair": ["hair_color", "hair_detail"],
+	"rl_cornea": [],
+	"rl_mouth": [],
+}
+const INSTANCE_INCLUDE := "#include \"res://src/actors/rl_head/rl_head_instance.gdshaderinc\""
+const MATERIAL_VALUES_DEFINE := "#define RL_MATERIAL_VALUES\n"
+## -1 unread, 0 instance uniforms, 1 material values (see material_values).
+static var _values_switch := -1
+## Shared shader -> its RL_MATERIAL_VALUES compile.
+static var _value_shaders: Dictionary = {}
+## Shared material id + values -> WeakRef of its per-face copy.
+static var _face_materials: Dictionary = {}
+
 
 ## Drops every cached piece, texture and material, for a reload in the lab
 ## and at the end of a session (ReplicatedActor3D.clear_wardrobe_texture_cache).
@@ -399,6 +420,7 @@ static func release_unused() -> void:
 	_texture_queue.clear()
 	_warm_queue.clear()
 	_materials.clear()
+	_face_materials.clear()
 	_manifest = null
 	RLHeadBodyCut.clear()
 	RLHeadwearFit.clear_caches()
@@ -886,6 +908,94 @@ static func material(material_name: String, sex: String, style: String, quality:
 static func _set_texture(target: ShaderMaterial, uniform_name: String, flag: String, value: Texture2D) -> void:
 	target.set_shader_parameter(uniform_name, value)
 	target.set_shader_parameter(flag, value != null)
+
+
+## Whether the per-actor values are material uniforms on per-face copies of
+## the shared materials (face_material) instead of instance uniforms on the
+## shared materials themselves: in the Compatibility renderer, whose global
+## instance-uniform buffer (4096 items, 16 for every mesh instance with any)
+## a crowd of RL heads ran out of between 40 and 160 Humans. RL_HEAD_VALUES
+## (`material` or `instance`) forces either, for A/B checks. Read once.
+static func material_values() -> bool:
+	if _values_switch < 0:
+		var value := OS.get_environment("RL_HEAD_VALUES").strip_edges().to_lower()
+		if value == "material":
+			_values_switch = 1
+		elif value == "instance":
+			_values_switch = 0
+		else:
+			_values_switch = 1 if RenderingServer.get_current_rendering_method() == "gl_compatibility" else 0
+	return _values_switch == 1
+
+
+## Reads RL_HEAD_VALUES again on the next check (tests switch it).
+static func reload_values_switch() -> void:
+	_values_switch = -1
+
+
+## The values `shared`'s shader reads (SHADER_VALUES), [] for one with none.
+static func shader_values(shared: ShaderMaterial) -> Array:
+	if shared == null or shared.shader == null:
+		return []
+	for kind: String in SHADER_VALUES:
+		if shared.shader == SHADERS.get(kind):
+			return SHADER_VALUES[kind] as Array
+	return []
+
+
+## The material that draws `shared` with `values` (uniform name -> value; only
+## the shader's own values are read) as material uniforms: a copy of `shared`
+## compiled with RL_MATERIAL_VALUES, shared by every surface asking for the
+## same material and values while any of them draws it (a weak cache). A
+## material whose shader includes no values (rl_hidden) is returned as it is.
+static func face_material(shared: ShaderMaterial, values: Dictionary) -> ShaderMaterial:
+	if shared == null or shared.shader == null or _values_shader(shared.shader) == shared.shader:
+		# A shader without the per-actor values (rl_hidden) draws as it is.
+		return shared
+	# A shader that includes them but reads none (rl_mouth, rl_cornea) still
+	# declares them: one RL_MATERIAL_VALUES copy for every face, so its
+	# surfaces take no instance-uniform block either.
+	var names := shader_values(shared)
+	var parts := PackedStringArray([str(shared.get_instance_id())])
+	for name: String in names:
+		parts.append(var_to_str(values.get(name)))
+	var key := "|".join(parts)
+	var ref := _face_materials.get(key) as WeakRef
+	var found := ref.get_ref() as ShaderMaterial if ref != null else null
+	if found != null:
+		return found
+	var copy := ShaderMaterial.new()
+	copy.shader = _values_shader(shared.shader)
+	copy.resource_name = shared.resource_name
+	for uniform: Dictionary in shared.shader.get_shader_uniform_list():
+		var value: Variant = shared.get_shader_parameter(str(uniform["name"]))
+		if value != null:
+			copy.set_shader_parameter(str(uniform["name"]), value)
+	for name: String in names:
+		if values.has(name):
+			copy.set_shader_parameter(name, values[name])
+	if _face_materials.size() > 4096:
+		for stale: Variant in _face_materials.keys():
+			if (_face_materials[stale] as WeakRef).get_ref() == null:
+				_face_materials.erase(stale)
+	_face_materials[key] = weakref(copy)
+	return copy
+
+
+## `shader` compiled with RL_MATERIAL_VALUES defined (its values as material
+## uniforms), made once per shader.
+static func _values_shader(shader: Shader) -> Shader:
+	var cached := _value_shaders.get(shader.get_instance_id()) as Shader
+	if cached != null:
+		return cached
+	var code := shader.code
+	var at := code.find(INSTANCE_INCLUDE)
+	var result := shader
+	if at >= 0:
+		result = Shader.new()
+		result.code = code.insert(at, MATERIAL_VALUES_DEFINE)
+	_value_shaders[shader.get_instance_id()] = result
+	return result
 
 
 static func _configure_skin(target: ShaderMaterial, material_name: String, sex: String, quality: int) -> void:
