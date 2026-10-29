@@ -74,6 +74,10 @@ const IDENTITY_BAKE := preload("res://src/actors/rl_head/rl_head_identity_bake.g
 ## On every head, beard and hair mesh node: the shared, unbaked mesh it was
 ## built with, which carries the live identity shapes.
 const SOURCE_MESH_META := &"rl_source_mesh"
+## On every head, beard and hair mesh node: the asset's LOD level it draws
+## (`_lod<k>`; 0 for the first). Levels from 1 on are drawn still where
+## RLHeadIdentityBake.far_still says so.
+const LOD_LEVEL_META := &"rl_lod_level"
 ## Where the next LOD takes over, in metres from the camera, by quality, when
 ## an asset ships more than one: HIGH draws lod0 to 10 m, lod1 to 25 m and lod2
 ## beyond; MEDIUM starts at lod1 and hands over to lod2 at 18 m; LOW is lod2.
@@ -526,6 +530,7 @@ func _build_hair() -> void:
 		var kept: Array[MeshInstance3D] = []
 		for mesh_node: MeshInstance3D in nodes:
 			mesh_node.set_meta(SOURCE_MESH_META, mesh_node.mesh)
+			mesh_node.set_meta(LOD_LEVEL_META, int(levels[index]))
 			_assign_materials(mesh_node, _hair_style)
 			mesh_node.cast_shadow = HAIR_SHADOWS
 			_present(mesh_node)
@@ -579,6 +584,7 @@ func _instance_levels(lods: Array, prefix: String, style: String) -> Array:
 			mesh_node.name = "%s_lod%d_%s" % [prefix, level, piece["name"]]
 			mesh_node.mesh = piece["mesh"] as Mesh
 			mesh_node.set_meta(SOURCE_MESH_META, piece["mesh"])
+			mesh_node.set_meta(LOD_LEVEL_META, int(piece.get("level", level)))
 			mesh_node.skin = skin
 			add_child(mesh_node)
 			mesh_node.skeleton = mesh_node.get_path_to(_skeleton)
@@ -840,31 +846,35 @@ func _baked_weights(mesh_node: MeshInstance3D) -> Dictionary:
 
 ## The shown level of every part draws its baked mesh (or waits for it, live);
 ## every other level goes back to its live source mesh and lets its bake go.
+## A shown far level (LOD 1 and up) is baked still - no expression shapes, no
+## mouth - where RLHeadIdentityBake.far_still says so, in every renderer.
 func _bake_shown() -> void:
 	var baking := not _live_identity and IDENTITY_BAKE.enabled()
+	var still_far := not _live_identity and IDENTITY_BAKE.far_still()
 	for group: Array in [_head_lods, _beard_lods, _hair_lods]:
 		var shown := mini(_lod_band, group.size() - 1)
 		for index: int in group.size():
 			for node: Variant in group[index]:
 				if not is_instance_valid(node):
 					continue
-				if baking and index == shown:
-					_bake(node as MeshInstance3D)
+				var still := still_far and int((node as Node).get_meta(LOD_LEVEL_META, 0)) >= 1
+				if index == shown and (baking or still):
+					_bake(node as MeshInstance3D, still)
 				else:
 					_unbake(node as MeshInstance3D, true)
 
 
-func _bake(mesh_node: MeshInstance3D) -> void:
+func _bake(mesh_node: MeshInstance3D, still: bool = false) -> void:
 	var source := mesh_node.get_meta(SOURCE_MESH_META, null) as ArrayMesh
 	if source == null or not IDENTITY_BAKE.has_baked_shapes(source):
 		return
 	var weights := _baked_weights(mesh_node)
-	var entry_key := IDENTITY_BAKE.key(source, weights)
+	var entry_key := IDENTITY_BAKE.key(source, weights, still)
 	var id := mesh_node.get_instance_id()
 	if str(_bakes.get(id, "")) == entry_key:
 		return
 	_unbake(mesh_node, true)
-	var baked := IDENTITY_BAKE.acquire(source, weights, _on_baked.bind(id, entry_key))
+	var baked := IDENTITY_BAKE.acquire(source, weights, _on_baked.bind(id, entry_key), still)
 	if baked == null and not IDENTITY_BAKE.holds(entry_key):
 		# No bake to be had now (budget spent): this node stays live.
 		return
@@ -884,8 +894,7 @@ func _on_baked(baked: ArrayMesh, id: int, entry_key: String) -> void:
 func _show_baked(mesh_node: MeshInstance3D, baked: ArrayMesh) -> void:
 	if mesh_node.mesh == baked:
 		return
-	mesh_node.mesh = baked
-	_after_mesh_swap(mesh_node)
+	_swap_mesh(mesh_node, baked)
 
 
 ## Lets a node's bake go; with `restore`, it draws its source mesh live again.
@@ -898,8 +907,29 @@ func _unbake(mesh_node: MeshInstance3D, restore: bool) -> void:
 		return
 	var source := mesh_node.get_meta(SOURCE_MESH_META, null) as Mesh
 	if source != null and mesh_node.mesh != source:
-		mesh_node.mesh = source
-		_after_mesh_swap(mesh_node)
+		_swap_mesh(mesh_node, source)
+
+
+## Shows `mesh` on a node. A mesh with another surface count (a still bake
+## leaves surfaces out) takes its materials again, by surface name.
+func _swap_mesh(mesh_node: MeshInstance3D, mesh: Mesh) -> void:
+	var surfaces_before := mesh_node.mesh.get_surface_count() if mesh_node.mesh != null else -1
+	mesh_node.mesh = mesh
+	if mesh.get_surface_count() != surfaces_before:
+		for surface: int in mesh_node.get_surface_override_material_count():
+			mesh_node.set_surface_override_material(surface, null)
+		_assign_materials(mesh_node, _style_of(mesh_node))
+	_after_mesh_swap(mesh_node)
+
+
+## The hairstyle or beard style a node's materials belong to ("" for the head).
+func _style_of(mesh_node: MeshInstance3D) -> String:
+	if _is_hair_node(mesh_node):
+		return _hair_style
+	for level: Array in _beard_lods:
+		if level.has(mesh_node):
+			return _beard_style
+	return ""
 
 
 ## A node's mesh changed: MeshInstance3D keeps blend-shape weights by index

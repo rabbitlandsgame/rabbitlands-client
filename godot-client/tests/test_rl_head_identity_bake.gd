@@ -13,7 +13,11 @@ extends SceneTree
 ##     shared by actors with the same face, expressions still drive the kept
 ##     shapes, `set_control` goes live, RL_HEAD_BAKE=0 draws live, the bakes
 ##     done on the WorkerThreadPool arrive, and the cache empties with the
-##     last RL head.
+##     last RL head;
+##   * a still bake (the far levels, RLHeadIdentityBake.far_still) keeps no
+##     live shapes and leaves the mouth out, with the same identity vertices;
+##     on the actor a far level draws it with every surface's material found
+##     again by name, and the near level keeps its expressions.
 ##
 ##   Godot --headless --path godot-client --script res://tests/test_rl_head_identity_bake.gd
 
@@ -64,6 +68,7 @@ func _run() -> void:
 	_check_cache()
 	RLHeadLibrary.release()
 	await _check_actors()
+	await _check_still()
 	await _check_async_and_switch()
 	print("rl head identity bake: worst vertex difference %s m" % String.num_scientific(_worst))
 	print("rl head identity bake: %d checks, %d failures" % [_checks, _failures])
@@ -360,6 +365,79 @@ func _check_actors() -> void:
 	await process_frame
 	_expect(RLHeadLibrary.users() == 0 and int(BAKE.describe()["entries"]) == 0,
 		"the cache empties with the last RL head %s" % BAKE.describe())
+
+
+## Still bakes: the far levels of a head, beard and hair, directly and on an actor.
+func _check_still() -> void:
+	BAKE.synchronous = true
+	RLHeadLibrary.acquire()
+	var face: RLHeadAppearance = _faces("male")["Tavi"]
+	var info := RLHeadLibrary.head("male")
+	for level: int in range(1, (info["lods"] as Array).size()):
+		var source: ArrayMesh = ((info["lods"] as Array)[level] as Array)[0]["mesh"]
+		var weights := _weights(face, info["control_names"])
+		var full := BAKE.acquire(source, weights)
+		var still := BAKE.acquire(source, weights, Callable(), true)
+		_expect(still != null and full != null and still != full and BAKE.key(source, weights, true) != BAKE.key(source, weights),
+			"lod%d: a still bake is its own entry" % level)
+		if still == null or full == null:
+			continue
+		_expect(still.get_blend_shape_count() == 0, "lod%d: a still bake keeps no live shapes" % level)
+		var kept := PackedStringArray()
+		for surface: int in source.get_surface_count():
+			var material := source.surface_get_material(surface)
+			if material == null or not BAKE.STILL_DROPPED_MATERIALS.has(material.resource_name):
+				kept.append(source.surface_get_name(surface))
+		var names := PackedStringArray()
+		for surface: int in still.get_surface_count():
+			names.append(still.surface_get_name(surface))
+		_expect(names == kept, "lod%d: a still bake draws every surface but the mouth %s" % [level, names])
+		var worst := 0.0
+		for surface: int in still.get_surface_count():
+			var at := -1
+			for index: int in full.get_surface_count():
+				if full.surface_get_name(index) == still.surface_get_name(surface):
+					at = index
+			var a: PackedVector3Array = still.surface_get_arrays(surface)[Mesh.ARRAY_VERTEX]
+			var b: PackedVector3Array = full.surface_get_arrays(at)[Mesh.ARRAY_VERTEX]
+			for i: int in mini(a.size(), b.size()):
+				worst = maxf(worst, a[i].distance_to(b[i]))
+			_expect(a.size() == b.size() and still.surface_get_material(surface) == full.surface_get_material(at),
+				"lod%d %s: same vertices and material as the full bake" % [level, still.surface_get_name(surface)])
+		_expect(worst <= 1e-6, "lod%d: the still bake carries the same identity (%s m)" % [level, String.num_scientific(worst)])
+		BAKE.release(BAKE.key(source, weights))
+		BAKE.release(BAKE.key(source, weights, true))
+	RLHeadLibrary.release()
+	# On the actor: a far band draws still meshes, the near band its expressions.
+	var actor := _spawn("male", PRESETS.appearance("Tavi"))
+	await process_frame
+	var rig := actor.rl_head()
+	_expect(rig != null and BAKE.far_still(), "Tavi's RL head built, far levels still")
+	if rig == null:
+		actor.free()
+		return
+	rig.update_lod(18.0)
+	_expect(rig.lod_band() == 1, "18 m shows the second level")
+	for node: MeshInstance3D in _shown(rig):
+		_expect(rig.is_baked(node) and node.mesh.get_blend_shape_count() == 0,
+			"%s draws a still bake at 18 m" % node.name)
+		for surface: int in node.mesh.get_surface_count():
+			var imported := node.mesh.surface_get_material(surface)
+			var drawn := node.get_active_material(surface)
+			_expect(imported != null and drawn != null and (drawn.resource_name == imported.resource_name
+				or imported.resource_name == RLHeadLibrary.BODY_PATCH_MATERIAL),
+				"%s surface %d draws its own material (%s)" % [node.name, surface,
+					drawn.resource_name if drawn != null else "none"])
+	rig.update_lod(2.0)
+	_expect(rig.lod_band() == 0, "2 m shows the first level")
+	var head := _shown(rig)[0]
+	_expect(rig.is_baked(head) and RLHeadRig.shape_index(head, "ex_blink_l") >= 0,
+		"the near level keeps its expression shapes")
+	_expect(head.mesh.get_surface_count() == RLHeadRig.source_mesh(head).get_surface_count(),
+		"the near level draws every surface")
+	actor.free()
+	await process_frame
+	await process_frame
 
 
 func _check_async_and_switch() -> void:
