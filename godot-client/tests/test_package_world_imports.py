@@ -5,11 +5,13 @@ from pathlib import Path
 import struct
 import sys
 import tempfile
+from types import SimpleNamespace
 import unittest
 from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 import package_client as package
+import runner_retirement
 
 
 class WorldImports(unittest.TestCase):
@@ -57,6 +59,60 @@ class WorldImports(unittest.TestCase):
         self.assertEqual((self.root / self.model).read_bytes(), self.original)
         self.assertEqual((self.root / self.image).read_bytes(), self.pixels)
         self.assertNotIn(self.image, package.scene_textures(self.root))
+
+    def test_runner_reuses_complete_world_proof_after_actual_verified_map_retirement(self):
+        relative = "eloria-assets/maps/continent-v2/_continent_v2/content/boat-network.json"
+        self.write(relative, '{"note":"no world resource override"}\n')
+        raw = (self.root / relative).read_bytes()
+        expected = {relative: hashlib.sha1(f"blob {len(raw)}\0".encode() + raw).hexdigest()}
+        # A Git index continues to name retired tracked inputs. The ordinary
+        # fixture's filesystem inventory must retain those names as Git does.
+        files = self.tracked(self.root, "godot-client", "eloria-assets/maps")
+        def committed(_root, *specs):
+            return [path for path in files if any(path == spec or path.startswith(spec.rstrip("/") + "/") for spec in specs)]
+        storage = SimpleNamespace(world_import_plans={})
+        with tempfile.TemporaryDirectory() as outside:
+            stage = Path(outside) / "stage"
+            stage.mkdir()
+            receipt = Path(outside) / "map-source-retirement.json"
+            with mock.patch.object(package, "tracked", side_effect=committed), mock.patch.object(package, "STORAGE", storage):
+                proof = package.world_import_shipping(self.root)
+                retired = runner_retirement.retire_unstaged_maps(self.root, stage, expected, {}, lambda *_: None, receipt)
+                self.assertEqual(set(retired["files"]), {relative})
+                self.assertFalse((self.root / relative).exists())
+                self.assertEqual(package.world_import_shipping(self.root), proof)
+                # Exercise the failing production consumer, not just its cache.
+                with mock.patch.object(package, "actor_shipping", return_value={"loose": set(), "dropped": set()}), \
+                        mock.patch.object(package, "pck_paths", return_value=set()):
+                    package.stage_loose_client_files(self.root, stage / "app")
+                    package.check_world_import_pack(self.root, stage / "app")
+                self.assertEqual((stage / "app/assets/world/props/bookcase.glb").read_bytes(), self.original)
+                self.assertFalse((stage / "app/assets/world/props/bookcase_wood.png").exists())
+
+    def test_runner_first_missing_reference_input_fails_without_caching_partial_proof(self):
+        relative = "eloria-assets/maps/continent-v2/_continent_v2/content/boat-network.json"
+        storage = SimpleNamespace(world_import_plans={})
+        original = self.tracked
+        with mock.patch.object(package, "tracked", side_effect=lambda root, *specs:
+                original(root, *specs) + ([relative] if "eloria-assets/maps" in specs else [])), \
+                mock.patch.object(package, "STORAGE", storage):
+            with self.assertRaises(FileNotFoundError):
+                package.world_import_shipping(self.root)
+        self.assertEqual(storage.world_import_plans, {})
+
+    def test_runner_generation_reset_invalidates_prior_world_proof(self):
+        storage = SimpleNamespace(world_import_plans={})
+        with mock.patch.object(package, "STORAGE", storage):
+            first = package.world_import_shipping(self.root)
+            first["dropped_images"].clear()
+            self.assertEqual(package.world_import_shipping(self.root)["dropped_images"], {self.image})
+            self.write("godot-client/src/new.tscn", '[gd_scene]\n[ext_resource type="PackedScene" '
+                       'path="res://assets/world/props/bookcase.glb" id="1"]\n')
+            self.write(".git", "gitdir: fixture\n")
+            with self.assertRaisesRegex(package.PackageError, "fresh disposable build worktree"):
+                package.prepare_build_tree(self.root, "a" * 40)
+            self.assertEqual(storage.world_import_plans, {})
+            self.assertEqual(package.world_import_shipping(self.root)["imported_models"], {self.model})
 
     def test_matching_name_with_custom_pixels_is_preserved(self):
         self.write(self.image, b"custom painted override")

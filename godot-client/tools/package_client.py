@@ -876,6 +876,21 @@ def _possible_gltf_uris(path: Path) -> list[str]:
 
 
 def world_import_shipping(build_dir: Path) -> dict[str, set[str]]:
+    # A runner owns one immutable committed input generation. Complete this
+    # reference proof before its verified map/editor source retirement, as we
+    # already do for actor_shipping. Later checks still hash actual staged
+    # models/images and inspect the real PCK. Ordinary local builds recompute.
+    if STORAGE is None:
+        return _world_import_shipping(build_dir)
+    plans = STORAGE.world_import_plans
+    resolved = build_dir.resolve()
+    if resolved not in plans:
+        result = _world_import_shipping(build_dir)
+        plans[resolved] = {key: frozenset(value) for key, value in result.items()}
+    return {key: set(value) for key, value in plans[resolved].items()}
+
+
+def _world_import_shipping(build_dir: Path) -> dict[str, set[str]]:
     """Raw scenery needs no editor scene import; explicit resource users win.
 
     An image is dropped only when its encoded bytes exactly match an embedded
@@ -1278,6 +1293,8 @@ def prepare_build_tree(build_dir: Path, sha: str) -> Path:
     # this build path inside one invocation. Never reuse its earlier proof.
     if BENCHMARK_ACTOR_PLANS is not None:
         BENCHMARK_ACTOR_PLANS.pop(build_dir.resolve(), None)
+    if STORAGE is not None:
+        STORAGE.world_import_plans.pop(build_dir.resolve(), None)
     if not (build_dir / ".git").exists():
         log(f"creating build worktree {build_dir}")
         build_dir.parent.mkdir(parents=True, exist_ok=True)
