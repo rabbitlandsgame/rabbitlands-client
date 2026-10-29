@@ -1,0 +1,238 @@
+{
+  "schema": 1,
+  "actor": "mossbound_stone_golem",
+  "date": "2026-10-29",
+  "status": "NEW_UNAPPROVED_CONTROLLED_UPSWING_REVIEW_DRAFT",
+  "runtime_installed": false,
+  "candidate": {
+    "sha256": "5230858a864b77cb29c147f48f44e73b46e307be5b2fe43ce15b8bec9f3bc7e3",
+    "raw_bytes": 2009044
+  },
+  "baselines": {
+    "reviewed_v8": {
+      "sha256": "4929864488eac9c6937bdbef2267892f6bff86f1bf71c48630ed649bd8d80d16",
+      "raw_bytes": 2007416,
+      "role": "LEFT last reviewed uninstalled V8"
+    },
+    "installed": {
+      "sha256": "e056751f8e6d490452250b7e0be3c1af74599ddf15602cf0cc22ddbc734cc5c0",
+      "raw_bytes": 1896812,
+      "role": "Separate active runtime combined-repair control"
+    }
+  },
+  "repair": {
+    "clip": "Attack_Ground_Pound",
+    "edited_support_nodes": [
+      35,
+      33,
+      36,
+      37
+    ],
+    "edited_key_rows": "Only 1 through 19; guard key 0 and source keys20 through79 retained bit for bit.",
+    "join_seconds": 0.6683544516563416,
+    "join_source_key": 20,
+    "single_lift": "Shortest support rotations from the existing guard to the settled raised pose, with smoothstep timing; one 45-degree elbow flex/release avoids the previous near-fully folded retract and a stiff constant maximum-reach lift.",
+    "upper_material_orientation": "Recompute the skin-only roll stabilizer against the new aim using parallel transport and shortest endpoint closure to the unchanged raised-pose material frame. No old corrective blob, projected animated Z or noisy IK pole guides.",
+    "hand_sampler": "Clone only physical hand36 Ground Pound sampler output; original anatomical hand_r4 sampler15 remains bit-exact.",
+    "preserved": "All geometry, normals, UVs, triangle indices, skin weights/joints, materials/images, rest/binds, node hierarchy, original anatomical bone curves and all seven unrelated actions remain exact.",
+    "all_four_source_clocks_exact": true,
+    "all_four_support_key20_plus_value_bits_exact": true,
+    "source_vertices": 9816,
+    "candidate_vertices": 9816,
+    "triangles": 3272,
+    "native_bones": 36,
+    "palette_joints": 35,
+    "draw_surfaces": 1,
+    "influence_slots": 8,
+    "correctives": 0,
+    "affected_dependency_rows": 2208,
+    "outside_rows": 7608,
+    "raw_mesh_field_changes": 0
+  },
+  "source_space_cpu_motion": {
+    "samples": 2801,
+    "policy": "Native CPU1ms +actualkeys/midpoints; model-space worldincludesoriginalbodymotion, noactualscene-floor/contactclaim. Early motion intentionallyauthored; source suffix copied raw; visual required.",
+    "early_source": {
+      "visible_piece_rotation": {
+        "37": {
+          "early_angular_path_degrees": 564.7275938876388,
+          "early_max_speed_degrees_per_second": 2270.793213626096,
+          "early_max_time": 0.40101268887519836,
+          "join_incoming_speed": 157.0256029000002,
+          "join_outgoing_speed": 59.726732962449304
+        },
+        "33": {
+          "early_angular_path_degrees": 476.5307551901986,
+          "early_max_speed_degrees_per_second": 3255.388482721676,
+          "early_max_time": 0.40101268887519836,
+          "join_incoming_speed": 542.0767884868804,
+          "join_outgoing_speed": 154.58805327299484
+        },
+        "36": {
+          "early_angular_path_degrees": 674.8852805713784,
+          "early_max_speed_degrees_per_second": 8281.346699720927,
+          "early_max_time": 0.40101268887519836,
+          "join_incoming_speed": 100.22932839002618,
+          "join_outgoing_speed": 63.12176978098875
+        }
+      },
+      "early_wrist_reach_min_max_model": [
+        0.08112940387318827,
+        0.29086988580411177
+      ],
+      "early_wrist_height_model_min_max": [
+        0.6301306110861117,
+        0.9989635230595363
+      ],
+      "early_wrist_apex_seconds": 0.601518988609314,
+      "fist_lowest_model_y": 0.16872867350901477,
+      "fist_lowest_seconds": 1.1295721766534335,
+      "early_transported_roll_range_degrees": 0.7950050008657686,
+      "early_wrist_path_length_model": 0.9379558927818931
+    },
+    "early_candidate": {
+      "visible_piece_rotation": {
+        "37": {
+          "early_angular_path_degrees": 128.94902192679177,
+          "early_max_speed_degrees_per_second": 288.43849489842324,
+          "early_max_time": 0.3508860915899277,
+          "join_incoming_speed": 27.9756336138599,
+          "join_outgoing_speed": 59.72673296242601
+        },
+        "33": {
+          "early_angular_path_degrees": 194.5078784077711,
+          "early_max_speed_degrees_per_second": 463.36506795424344,
+          "early_max_time": 0.23392406105995178,
+          "join_incoming_speed": 35.00574301361691,
+          "join_outgoing_speed": 154.58805327290213
+        },
+        "36": {
+          "early_angular_path_degrees": 198.125683564817,
+          "early_max_speed_degrees_per_second": 449.4539845570112,
+          "early_max_time": 0.23392406105995178,
+          "join_incoming_speed": 38.60903223750805,
+          "join_outgoing_speed": 63.12176978077697
+        }
+      },
+      "early_wrist_reach_min_max_model": [
+        0.2700456043389698,
+        0.2908708594519922
+      ],
+      "early_wrist_height_model_min_max": [
+        0.7232259157202658,
+        0.9890237189201354
+      ],
+      "early_wrist_apex_seconds": 0.5937751087895039,
+      "fist_lowest_model_y": 0.16872867350901477,
+      "fist_lowest_seconds": 1.1295721766534335,
+      "early_transported_roll_range_degrees": 78.27030602156127,
+      "early_wrist_path_length_model": 0.4733179568297694
+    },
+    "maximum_changed_fist_centroid_model_units": 0.6794172436229912,
+    "maximum_change_seconds": 0.22691405672595522,
+    "postjoin_all_control_world_max_abs_delta": 3.3306690738754696e-16,
+    "postjoin_fist_centroid_max_delta_model": 1.1443916996305594e-16,
+    "all_protected_other_bone_worlds_max_abs_delta": 0.0,
+    "fist_metric_definition": "Mean position of all774 existing hand-piece rows, including its articulation cap; not lowest surface point or actual scene-plane contact."
+  },
+  "actual_client": {
+    "states_each": 2210,
+    "reviewed_source_receipt_sha256": "717749e30bcab61a15a570975e2b3e8688b71d02acbca46a42f48fd67f9eebee",
+    "installed_receipt_sha256": "a1a18b73a08b943aaf5640e3be659b3e0c91277c5f0434878eadd456e50ca378",
+    "all_eight_defaults_helds_offgrid_firsttick_60hz_stepped_switches": true,
+    "protected_native_worlds_exact": 32,
+    "outside7608_positions_unit_normals_exact": true,
+    "both_baseline_placements_unchanged": true,
+    "maximum_intentionally_changed_source_row_world_mm": 2840.96470774553,
+    "native_join_probe_sha256": "a1a6f65c55d0f2bbbf540899354fd51b04e6e9120cc2a50a6cd9f12ce705a6f3",
+    "native_join_measurements": {
+      "source_file_raw_join_seconds": 0.6683544516563416,
+      "native_raw_join_sample": {
+        "state_index": 1725,
+        "fraction": 0.25316455496135654,
+        "time_seconds": 0.6683544516559987,
+        "maximum_original_position_world_mm": 6.974513865908002,
+        "maximum_original_normal_degrees": 0.9078067829952479,
+        "entire_mesh_P_N_exact": false
+      },
+      "last_tested_nonexact_GP_pose": {
+        "state_index": 1734,
+        "fraction": 0.26199493908420596,
+        "time_seconds": 0.6916666666666653,
+        "maximum_original_position_world_mm": 1.7500848615167968,
+        "maximum_original_normal_degrees": 0.238471795489592,
+        "entire_mesh_P_N_exact": false
+      },
+      "earliest_tested_all_later_GP_P_N_exact": {
+        "state_index": 1735,
+        "fraction": 0.265151504615341,
+        "time_seconds": 0.6999999999999987,
+        "maximum_original_position_world_mm": 0.0,
+        "maximum_original_normal_degrees": 0.0,
+        "entire_mesh_P_N_exact": true
+      },
+      "exact_sampled_suffix_pose_count": 81,
+      "exact_sampled_suffix_end_seconds": 2.64000010490417,
+      "default_other7_all_held_RESET_whole_mesh_exact_states": 1592,
+      "native_cap_peers_base_POSITION_and_dense_u16_skin_equal": 1044
+    },
+    "native_join_scope": "See the separately bound integration-owner actual rebake probe; raw suffix equality is not a C1 or immediate native bit-equivalence claim."
+  },
+  "blender": {
+    "summary_sha256": "46530000e498c63444b508dfa4303e88b70a0b2d4e3aa7d7a4df7c24ffc98274",
+    "source_and_candidate_all8_fresh_import_finite": true,
+    "scope": "Finite actions and fresh import only; not a deformation equivalence or approval gate."
+  },
+  "visual": {
+    "main_pairs": 254,
+    "diagnostic_pairs": 62,
+    "full_resolution_pngs": 632,
+    "ground_pound_endpoint_frames": 80,
+    "full_ground_pound_views": [
+      "front",
+      "rear"
+    ],
+    "early_diagnostic_frames": 27,
+    "early_diagnostic_views": [
+      "left",
+      "rear"
+    ],
+    "other_coverage": "All eight clips at three phases/nearend, RESET, five realistic stepped-switch pairs at three elapsed times, two legacy firsttick cases, five explicit source-join times in side/rear views.",
+    "main_job_sha256": "2f45892c2a2a3b89a027c0913d13270933b5ab957fa70bd8d0265bcbe916bb7e",
+    "main_manifest_sha256": "fc50aa8fbfdc3701d0a4e928934c9e7698d9e4ea529e5617e730f66920d656b4",
+    "diagnostic_job_sha256": "4bd8bb842714a542b60a224ed4b4a7e4db327450c5671a68a7c78baef91379d2",
+    "diagnostic_manifest_sha256": "349d3942d33d07e836f583819c578bbcf10d511b16ce2f731599b42db5547193",
+    "main_framing_sha256": "fd05822c61b7399b3d46b4b66162c765559f0c2334a07bca4bf13290bec3938c",
+    "diagnostic_framing_sha256": "ddaa9c24d1e1a8cba6e14ca09919c21b21186322c3e8abecc76f30e93fd2c649",
+    "maximum_projected_fraction_of_halfviewport": 0.9545846099091309,
+    "all_fullbody_material_border_pixels": 0,
+    "unchanged_seven_actions_and_reset_pixel_exact_pairs": 44,
+    "unchanged_action_pixel_proof_sha256": "2bf1a366fa30fe97885725ea5a1c9d63e968ab6bce646d8999a2b02fc998f26d",
+    "assessment": "The old dip/extension/reversal loop is replaced by one compact flex and lift into the overhead pose. The stones remain solid, the side/rear join has no visible position pop, and the existing later strike/recovery is retained. No new unrelated-action change was found in retained comparisons. This is ready for human judgment, not accepted by this receipt.",
+    "gpu_epoch": 132,
+    "all_children_exited": true
+  },
+  "cost": {
+    "raw_bytes_added_vs_v8": 1628,
+    "raw_bytes_added_vs_installed": 112232,
+    "additional_bones": 0,
+    "additional_vertices_triangles_surfaces": 0,
+    "public_component_receipt": "docs/qa/creature-storage/mossbound-stone-golem-upswing-component-benchmark-v9.json",
+    "public_component_receipt_sha256": "8e14de976c2800206631c8db6b7d9acda43e2ea2ae39140985edaf48a67a3135",
+    "scope": "Use the bound component receipt; no broad runtime-performance claim."
+  },
+  "independent_proofs": {
+    "equids_handoff_sha256": "e5f41723b257ce3904b8e980b9524c286f3c74c88fe8ee5169c81001600da429",
+    "magpie_final_static_sha256": "4524a3195ec33fe1f1d898580d34e6482146300deded64cd29218a471dcca1fc"
+  },
+  "lineage": "The selected correctly encoded float32 artifact5230 is the only V9 review draft. Earlier malformed encoding and extended-reach prototypes remain private, rejected before any GPU run. The initial selected build status was diagnostic; unchanged bytes were subsequently qualified for review. Earlier V8/V7 reports are retained unchanged.",
+  "prominent_limits": [
+    "New unapproved controlled-upswing review draft. The installed Golem remains e056. Human approval, installation and push are separate.",
+    "Ground Pound before 0.668354 seconds deliberately changes the physical right-arm wrist, elbow and fist path. This is a new authored single lift with a modest bend, not lossless preservation of the former upswing.",
+    "The new early material orientation turns about 78 degrees smoothly relative to parallel transport. It is not a zero-rotation shoulder; it removes the former repeated detours and high-speed loops. The later strike/recovery interpretation from V8 remains.",
+    "The join is position-continuous in the decoded source model but is not C1 velocity-continuous: upper/forearm/fist angular speeds have finite steps at the join. No visible spatial pop was found in the explicit side/rear join strip.",
+    "Every raw support key at index 20 and later is copied literally. The client rebakes/interpolates tracks; do not infer exact native equality immediately after the source join from raw-key equality. The separate actual native join probe defines the measured scope.",
+    "Existing closed articulated stones, rounded shoulder/socket, visible joint ends and gaps remain. No welded-seam, full-contact, collision-free or universal anatomical-correctness claim.",
+    "Component timings and cache allocations are scoped separately. No FPS, GPU, VRAM, per-instance memory or speedup claim follows from the smaller animation artifact."
+  ]
+}
