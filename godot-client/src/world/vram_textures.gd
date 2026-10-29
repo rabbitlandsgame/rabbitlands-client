@@ -433,15 +433,49 @@ static func image_policy_directory(descriptor: Dictionary, glb_directory: String
 	if not extras is Dictionary or not (extras as Dictionary).has(POLICY_DIRECTORY_EXTRA):
 		return _normalise(glb_directory.path_join(str(descriptor.get("uri", "")).uri_file_decode()).get_base_dir())
 	var uri: Variant = (extras as Dictionary)[POLICY_DIRECTORY_EXTRA]
-	if not uri is String or uri.is_empty() or uri.is_absolute_path() or ":" in uri or "\\" in uri:
+	if not uri is String or uri.is_empty() or uri.is_absolute_path() or ":" in uri or "\\" in uri or "%" in uri:
+		return ""
+	var decoded := (uri as String).uri_file_decode()
+	if decoded.is_absolute_path() or ":" in decoded or "\\" in decoded:
 		return ""
 	var base := _normalise(glb_directory)
 	var marker := "/eloria-assets/maps"
 	var at := base.find(marker)
 	if at < 0: return ""
 	var map_root := base.left(at + marker.length())
-	var directory := _normalise(base.path_join(uri.uri_file_decode()))
+	var directory := _normalise(base.path_join(decoded))
 	return directory if directory == map_root or directory.begins_with(map_root + "/") else ""
+
+## Missing collections are legacy packages. An explicit collection must be
+## complete enough to validate every declared directory before IO or parsing.
+static func image_policy_errors(manifest_data: Dictionary, glb_directory: String) -> Array[String]:
+	var failures: Array[String] = []
+	if not manifest_data.has(POLICY_COLLECTION): return failures
+	var policies: Variant = manifest_data[POLICY_COLLECTION]
+	if not policies is Dictionary:
+		failures.append("externalImagePolicies must be a URI-to-directory-list object")
+		return failures
+	var resources: Variant = manifest_data.get("externalResources", {})
+	if not resources is Dictionary:
+		failures.append("externalImagePolicies requires an externalResources object")
+		return failures
+	for key: Variant in policies:
+		if not key is String or not (resources as Dictionary).has(key):
+			failures.append("externalImagePolicies has an undeclared resource key: " + str(key))
+			continue
+		var uri: String = key
+		var decoded := uri.uri_file_decode()
+		if uri.is_empty() or uri.is_absolute_path() or "%" in uri or ":" in decoded or "\\" in decoded or decoded.is_absolute_path():
+			failures.append("externalImagePolicies has an unsafe resource URI: " + uri)
+			continue
+		var values: Variant = (policies as Dictionary)[key]
+		if not values is Array or (values as Array).is_empty():
+			failures.append("externalImagePolicies requires a nonempty directory array: " + uri)
+			continue
+		for value: Variant in values:
+			if not value is String or image_policy_directory({"extras": {POLICY_DIRECTORY_EXTRA: value}}, glb_directory).is_empty():
+				failures.append("externalImagePolicies has an unsafe policy directory: " + uri)
+	return failures
 
 static func has_image_policy(descriptor: Dictionary) -> bool:
 	var extras: Variant = descriptor.get("extras", {})
@@ -637,7 +671,9 @@ static func lookup(sha: String) -> Dictionary:
 ## named for, keeps the published figure until a successful reduced CPU decode
 ## supplies its dimensions/mips. That corrected fallback remains conservative
 ## RGBA8 and never lowers unknown or incompatible-role private-copy estimates.
-static func resident_bytes(sha: String, published: int, source_directories: PackedStringArray) -> int:
+static func resident_bytes(sha: String, published: int, source_directories: PackedStringArray, explicit_variants := false) -> int:
+	if explicit_variants:
+		return _variant_resident_bytes(sha, published, source_directories)
 	if mode() == Mode.OFF or source_directories.is_empty():
 		return _decoded_resident_bytes(sha, published)
 	_mutex.lock()
@@ -657,6 +693,34 @@ static func resident_bytes(sha: String, published: int, source_directories: Pack
 			trimmed_bytes -= _mip0_bytes(str(entry.format), int(entry.width) >> level,
 				int(entry.height) >> level)
 		bytes = maxi(bytes, trimmed_bytes)
+	return bytes
+
+## Explicit policy uses can hold raw and multiple accepted representations of
+## one source SHA at once. Match the actual variant pool identity, count equal
+## payload/recipe/format variants once, and keep fallback knowledge conservative.
+static func _variant_resident_bytes(sha: String, published: int, source_directories: PackedStringArray) -> int:
+	if mode() == Mode.OFF:
+		return _decoded_resident_bytes(sha, published)
+	_mutex.lock()
+	var include_raw := _decoded_instead.has(sha)
+	_mutex.unlock()
+	include_raw = include_raw or source_directories.is_empty()
+	var variants: Dictionary = {}
+	for directory: String in source_directories:
+		var entry := sidecar_entry(sha, directory)
+		if entry.is_empty():
+			include_raw = true
+			continue
+		var key := "%s:%s:%s" % [str(entry.sha256), str(entry.recipe), str(entry.format)]
+		var skip := GraphicsOptions.mip_skip(int(entry.width), int(entry.height),
+			int(entry.mipmaps), GraphicsOptions.active_texture_skip(), true)
+		var trimmed_bytes := int(entry.gpuBytes)
+		for level: int in skip:
+			trimmed_bytes -= _mip0_bytes(str(entry.format), int(entry.width) >> level,
+				int(entry.height) >> level)
+		variants[key] = maxi(int(variants.get(key, 0)), trimmed_bytes)
+	var bytes := _decoded_resident_bytes(sha, published) if include_raw else 0
+	for value: int in variants.values(): bytes += value
 	return bytes
 
 ## Only a successful CPU decode can lower a fallback estimate. Do not derive

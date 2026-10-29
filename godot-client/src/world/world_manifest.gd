@@ -3,6 +3,7 @@ extends RefCounted
 
 const SUPPORTED_SCHEMA_MAJOR := 1
 const ResourceDiagnostics := preload("res://src/world/resource_diagnostics.gd")
+const VramTextures := preload("res://src/world/vram_textures.gd")
 
 var source_path := ""
 var data: Dictionary = {}
@@ -60,6 +61,11 @@ func verify_external_resources() -> Array[String]:
 		"paths_rejected": 0, "failures": 0, "elapsed_us": 0, "timings": {},
 		"policy": external_verification_policy()}
 	var failures: Array[String] = []
+	failures.append_array(VramTextures.image_policy_errors(data, glb_path().get_base_dir()))
+	if not failures.is_empty():
+		verification_diagnostics.failures = failures.size()
+		verification_diagnostics.elapsed_us = Time.get_ticks_usec() - began
+		return failures
 	var resources: Variant = data.get("externalResources", {})
 	if not resources is Dictionary:
 		failures.append("externalResources must be a URI-to-SHA256 object")
@@ -122,6 +128,7 @@ func _validate() -> void:
 	for key in ["id", "glb", "units", "coordinateSystem", "bounds"]:
 		if not asset.has(key):
 			errors.append("asset." + key + " missing")
+	errors.append_array(VramTextures.image_policy_errors(data, glb_path().get_base_dir()))
 	if str(asset.get("units", "")) != "meters":
 		errors.append("only metre GLB assets are currently supported")
 	var axes: Dictionary = asset.get("coordinateSystem", {})

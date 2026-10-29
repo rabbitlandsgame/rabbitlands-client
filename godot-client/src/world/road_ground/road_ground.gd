@@ -24,7 +24,8 @@ static func prepare(config: Dictionary, manifest_path: String) -> Dictionary:
 		var row: Dictionary = data.document.styles[index]
 		if int(row.get("id", -1)) != index:
 			return _error("road_style_ids_not_contiguous")
-		var loaded: Dictionary = Pbr.read(row, str(data.metadata_path).get_base_dir())
+		var loaded: Dictionary = Pbr.read(row, str(data.metadata_path).get_base_dir(),
+			data.document.get("externalImagePolicies", {}))
 		if not bool(loaded.get("ok", false)):
 			return loaded
 		data.styles.append(loaded.material)

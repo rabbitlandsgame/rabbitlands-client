@@ -5,6 +5,7 @@ extends Resource
 const SCHEMA := "rabbitlands-road-terrain-blend-v1"
 const MAX_PIXELS := 16 * 1024 * 1024
 const MAX_RECORDS := 2 * 1024 * 1024
+const Vram := preload("res://src/world/vram_textures.gd")
 const LAYOUT: Array[String] = ["u_at_grid_origin", "v_at_grid_origin", "dU_dX", "dU_dZ",
 	"dV_dX", "dV_dZ", "style_id", "reserved"]
 
@@ -76,15 +77,25 @@ static func dependency_closure(config: Dictionary, manifest_path: String) -> Dic
 		var failure: String = _add_file(files, path.get_base_dir(), str(record.get("file", "")), digest)
 		if not failure.is_empty():
 			return {"ok": false, "error": failure}
+	var style_resources: Dictionary = {}
 	for style: Variant in rows:
 		if not style is Dictionary or not style.get("material_document") is Dictionary \
 				or not style.get("externalResources") is Dictionary:
 			return {"ok": false, "error": "road_material_record"}
+		for uri: Variant in style.externalResources:
+			if style_resources.has(uri) and style_resources[uri] != style.externalResources[uri]:
+				return {"ok": false, "error": "road_material_resource_conflict"}
+			style_resources[uri] = style.externalResources[uri]
 		for image: Dictionary in style.material_document.get("images", []):
 			var uri: String = str(image.get("uri", ""))
 			var failure: String = _add_file(files, path.get_base_dir(), uri, str(style.externalResources.get(uri, "")))
 			if not failure.is_empty():
 				return {"ok": false, "error": failure}
+	var policy_data := {"externalResources": style_resources}
+	if parsed.has(Vram.POLICY_COLLECTION): policy_data[Vram.POLICY_COLLECTION] = parsed[Vram.POLICY_COLLECTION]
+	var policy_errors := Vram.image_policy_errors(policy_data, path.get_base_dir())
+	if not policy_errors.is_empty():
+		return {"ok": false, "error": "road_image_policy: " + "; ".join(policy_errors)}
 	for uri: String in parsed.get("resources", {}):
 		var failure: String = _add_file(files, path.get_base_dir(), uri, str(parsed.resources[uri]))
 		if not failure.is_empty():

@@ -4,7 +4,7 @@ extends RefCounted
 
 const Vram := preload("res://src/world/vram_textures.gd")
 
-static func read(style: Dictionary, directory: String) -> Dictionary:
+static func read(style: Dictionary, directory: String, image_policies: Dictionary = {}) -> Dictionary:
 	var source: Variant = style.get("material_document")
 	var resources: Variant = style.get("externalResources")
 	if not source is Dictionary or not source.get("materials") is Array or source.materials.size() != 1 \
@@ -19,7 +19,8 @@ static func read(style: Dictionary, directory: String) -> Dictionary:
 		return {"ok": false, "error": "road_texture_extension_registration"}
 	var document := GLTFDocument.new()
 	var state := GLTFState.new()
-	state.set_additional_data(Vram.PLAN_KEY, Vram.plan_for({"externalResources": resources}))
+	state.set_additional_data(Vram.PLAN_KEY, Vram.plan_for({"externalResources": resources,
+		Vram.POLICY_COLLECTION: image_policies}))
 	var input: Dictionary = source.duplicate(true)
 	input["asset"] = {"version": "2.0"}
 	# A material-only glTF is valid: image extraction and prepared texture jobs

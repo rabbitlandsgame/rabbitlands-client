@@ -5,6 +5,8 @@ const Extension := preload("res://src/world/map_image_extension.gd")
 const Pool := preload("res://src/world/external_texture_pool.gd")
 const Bindings := preload("res://src/world/map_geometry_texture_bindings.gd")
 const Sources := preload("res://src/world/map_geometry_texture_sources.gd")
+const Pbr := preload("res://src/world/road_ground/source_material.gd")
+const RoadData := preload("res://src/world/road_ground/field_data.gd")
 var failures := 0
 var checks := 0
 var fixture := ""
@@ -58,6 +60,115 @@ func native(directory: String) -> Dictionary:
 	var source := origin(directory)
 	return Bindings.prepare({Bindings._identity(source): {"origin": source}}, false)
 
+func manifest_data() -> Dictionary:
+	return {"schemaVersion": "1.0.0", "asset": {"id": "policy-contract", "glb": "world.glb",
+		"units": "meters", "coordinateSystem": {"upAxis": "Y"}, "bounds": {"min": [0,0,0], "max": [1,1,1]}},
+		"spawnPoints": [], "collision": {}, "navigation": {}, "externalResources": {"../canonical.png": sha}}
+
+func validation_contracts() -> void:
+	var directory := fixture.path_join("chunk")
+	var legacy := manifest_data()
+	check(Vram.image_policy_errors(legacy, directory).is_empty(), "legacy manifest may omit the policy collection")
+	var valid := legacy.duplicate(true)
+	valid[Vram.POLICY_COLLECTION] = {"../canonical.png": ["../a", "../skipped"]}
+	check(Vram.image_policy_errors(valid, directory).is_empty(), "valid explicit policy directories are accepted")
+	var cases: Array[Dictionary] = [
+		{"name": "nonobject collection", "value": []},
+		{"name": "undeclared URI", "value": {"missing.png": ["../a"]}},
+		{"name": "nonarray directories", "value": {"../canonical.png": "../a"}},
+		{"name": "empty directories", "value": {"../canonical.png": []}},
+		{"name": "nonstring directory", "value": {"../canonical.png": [7]}},
+		{"name": "absolute directory", "value": {"../canonical.png": ["C:/outside"]}},
+		{"name": "backslash directory", "value": {"../canonical.png": ["..\\a"]}},
+		{"name": "escaped absolute directory", "value": {"../canonical.png": ["%2foutside"]}},
+		{"name": "escaped colon directory", "value": {"../canonical.png": ["%43%3a/outside"]}},
+		{"name": "outside map tree", "value": {"../canonical.png": ["../../../../../../outside"]}}]
+	for item: Dictionary in cases:
+		var invalid := legacy.duplicate(true)
+		invalid[Vram.POLICY_COLLECTION] = item.value
+		check(not Vram.image_policy_errors(invalid, directory).is_empty(), "reject " + str(item.name))
+		var world := WorldManifest.new()
+		world.source_path = directory.path_join("world.json")
+		world.data = invalid
+		world._validate()
+		check(not world.is_valid() and not world.verify_external_resources().is_empty()
+			and int(world.verification_diagnostics.hashes_attempted) == 0,
+			"manifest load and verification fail closed: " + str(item.name))
+	var escaped := legacy.duplicate(true)
+	escaped.externalResources = {"..%2fcanonical.png": sha}
+	escaped[Vram.POLICY_COLLECTION] = {"..%2fcanonical.png": ["../a"]}
+	check(not Vram.image_policy_errors(escaped, directory).is_empty(), "escaped policy resource URI is rejected")
+	var old := WorldManifest.new()
+	old.source_path = directory.path_join("world.json")
+	old.data = legacy
+	old._validate()
+	check(old.is_valid() and old.verify_external_resources().is_empty(), "legacy manifest still validates and verifies its original resource")
+
+func budget_contracts(a: String, b: String, skipped: String) -> void:
+	var published := 1000000
+	var sidecar := Vram.resident_bytes(sha, published, PackedStringArray([a]))
+	check(sidecar > 0 and sidecar < published, "valid indexed sidecar has its trimmed resident footprint")
+	check(Vram.resident_bytes(sha, published, PackedStringArray([a,b]), true) == sidecar,
+		"explicit identical accepted representations count once across directories")
+	check(Vram.resident_bytes(sha, published, PackedStringArray([a,skipped]), true) == published + sidecar,
+		"explicit mixed skipped and accepted directories include raw plus EVT")
+	check(Vram.resident_bytes(sha, published, PackedStringArray([a,skipped])) == published,
+		"unannotated mixed directories retain legacy single-source accounting")
+	Vram.note_decoded_instead(sha)
+	check(Vram.resident_bytes(sha, published, PackedStringArray([a,b]), true) == published + sidecar,
+		"a global decode observation adds raw without discarding accepted variants")
+	OS.set_environment("ELORIA_VRAM_TEXTURES", "0")
+	Vram.reconfigure()
+	check(Vram.resident_bytes(sha, published, PackedStringArray([a,b,skipped]), true) == published,
+		"sidecars off count one raw representation")
+	OS.set_environment("ELORIA_VRAM_TEXTURES", "force")
+	Vram.reconfigure()
+	Vram.force_formats(Vram.ALL_FORMATS)
+	var world := WorldManifest.new()
+	world.source_path = fixture.path_join("chunk/world.json")
+	world.data = manifest_data()
+	var legacy_sha := "1".repeat(64)
+	world.data.externalResources["../legacy.png"] = legacy_sha
+	world.data[Vram.POLICY_COLLECTION] = {"../canonical.png": ["../a", "../skipped"]}
+	world.data.streamingChunks = {"chunks": [{"id": "0", "manifest": "0/world.json",
+		"sharedResourceResidentBytes": {sha: published, legacy_sha: published}}]}
+	var stream := ContinentChunkStream.new()
+	stream.configure(world, false)
+	var cost: Dictionary = stream.entries[0].sharedResourceResidentBytes
+	check(int(cost[sha]) == published + sidecar and int(cost[legacy_sha]) == published
+		and stream._explicit_image_variants.has(sha) and not stream._explicit_image_variants.has(legacy_sha),
+		"stream applies variant accounting only to explicitly annotated source hashes")
+	world.data.erase(Vram.POLICY_COLLECTION)
+	stream.configure(world, false)
+	check(stream._explicit_image_variants.is_empty(), "reconfiguring a legacy manifest clears the explicit SHA set")
+	stream.free()
+
+func road_contracts() -> void:
+	var directory := fixture.path_join("chunk")
+	var descriptor := {"uri": "../canonical.png", "extras": {Vram.POLICY_DIRECTORY_EXTRA: "../skipped"}}
+	var document := {"images": [descriptor], "textures": [{"source": 0}],
+		"materials": [{"alphaMode": "BLEND", "doubleSided": true,
+			"pbrMetallicRoughness": {"baseColorTexture": {"index": 0}}, "normalTexture": {"index": 0}}]}
+	var style := {"material_document": document, "externalResources": {"../canonical.png": sha}, "vertex_rgb": [1.0,1.0,1.0]}
+	var parsed := Pbr.read(style, directory, {"../canonical.png": ["../skipped"]})
+	check(bool(parsed.get("ok", false)), "road PBR parser passes the aggregate explicit policy to image preparation")
+	write(fixture.path_join("other.png"), FileAccess.get_file_as_bytes(fixture.path_join("canonical.png")))
+	var second := {"material_document": {"images": [{"uri": "../other.png"}]}, "externalResources": {"../other.png": sha}}
+	var metadata := {"schema": RoadData.SCHEMA, "mask_space": "gltf_scene_world_xz",
+		"field": {"triangle_ids": {"file": "../canonical.png", "sha256": sha},
+			"affine_coefficients": {"file": "../canonical.png", "sha256": sha}, "coverage_mips": []},
+		"styles": [style,second], "resources": {}, Vram.POLICY_COLLECTION: {"../other.png": ["../b"]}}
+	var path := directory.path_join("roads.json")
+	write(path, JSON.stringify(metadata).to_utf8_buffer())
+	var config := {"metadata": "roads.json", "sha256": FileAccess.get_sha256(path)}
+	check(bool(RoadData.dependency_closure(config, directory.path_join("world.json")).ok),
+		"road aggregate policies validate against the union of both style resource sets")
+	metadata[Vram.POLICY_COLLECTION] = {"undeclared.png": ["../b"]}
+	write(path, JSON.stringify(metadata).to_utf8_buffer())
+	config.sha256 = FileAccess.get_sha256(path)
+	check(not bool(RoadData.dependency_closure(config, directory.path_join("world.json")).ok),
+		"road closure rejects a policy outside the style-resource union")
+
 func _initialize() -> void:
 	OS.set_environment("ELORIA_VRAM_TEXTURES", "force")
 	Vram.reconfigure()
@@ -80,6 +191,9 @@ func _initialize() -> void:
 	var skipped := fixture.path_join("skipped")
 	policy_index(a)
 	policy_index(b)
+	validation_contracts()
+	budget_contracts(a,b,skipped)
+	road_contracts()
 	var ra := raw(a)
 	var rb := raw(b)
 	var rr := raw(skipped)
