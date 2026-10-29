@@ -16151,6 +16151,12 @@ func _on_chat_submitted(text: String) -> void:
 	else:
 		push_warning(("SEND_PM" if is_private else "RAW_TEXT")
 			+ " failed: " + error_string(error))
+		# A typed #appearance this server's version cannot save was refused
+		# before sending (pc3 spec 4.6): say why in chat; the text stays in the
+		# box to edit.
+		if not is_private and message.strip_edges().to_lower().begins_with("#appearance ") \
+				and not str(Network.appearance_error).is_empty():
+			AppState.append_local_message(str(Network.appearance_error))
 
 func _sync_trade() -> void:
 	var is_open: bool = bool(AppState.trade.get("open", false))

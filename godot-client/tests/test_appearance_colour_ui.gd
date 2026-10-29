@@ -60,6 +60,7 @@ func run() -> void:
 	u9_presets()
 	u11_randomise()
 	u12_accessibility()
+	u15_typed_refusal()
 	network.call("_set_appearance_protocol", 1)
 	node("%CreationPanel").hide()
 	main.queue_free()
@@ -69,6 +70,21 @@ func run() -> void:
 	GlbSceneCache.clear()
 	print("Appearance colour UI: %d checks, %d failures" % [checks, failures])
 	quit(1 if failures else 0)
+
+# ------------------------------------------------------------------ U15
+
+## A typed #appearance this version cannot save is refused before sending,
+## and chat says why (pc3 spec 4.6; cross-version review rb2).
+func u15_typed_refusal() -> void:
+	network.call("_set_appearance_protocol", 2)
+	var app_state := root.get_node("AppState")
+	var before: int = (app_state.get("chat_history") as Array).size()
+	main.call("_on_chat_submitted", "#appearance skin_tone=95 jaw=41")
+	var history: Array = app_state.get("chat_history")
+	var error := str(network.get("appearance_error"))
+	expect(not error.is_empty() and history.size() == before + 1 and str((history[-1] as Dictionary).get("text", "")) == error,
+		"U15 a refused typed #appearance explains itself in chat (%s)" % error)
+	network.call("_set_appearance_protocol", 3)
 
 # ------------------------------------------------------------------ U7
 
