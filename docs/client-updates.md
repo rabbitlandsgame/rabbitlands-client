@@ -70,6 +70,22 @@ builds, independent of the release date, filename and source-file timestamps.
 The exported `RabbitLands.pck` remains one client package; this is package reuse,
 not a binary patch within a PCK, GLB or ZIP.
 
+Prepared world data is shipped loose under `app/prepared-world/`, outside the
+client PCK. Each engine/renderer compatibility variant has a small catalog
+package, eight stable metadata buckets and 128 stable native-payload buckets.
+The geometry, collision and paving files use the same signed file inventories,
+part checksums, repair checks and transactional installation as other assets.
+Changing client code alone does not change these package identities. A changed
+map changes its affected payload buckets and metadata, while unchanged buckets
+remain reusable. Removed files are retired with the ordinary installation
+inventory; the updater does not modify player cache directories.
+
+The client PCK binds the compatible loose catalog by checksum. The client reads
+shipped preparation in place, retaining its local-cache and raw-source fallbacks.
+It does not copy a second full cache into the player profile at first launch.
+Incompatible or missing preparation never qualifies as a cache hit. Explicit
+local preparation remains available for alternate renderers and development.
+
 The build compares local file hashes with GitHub's recorded SHA-256 and size,
 reusing identical uploaded packages across releases. Changed packages get new
 checksum names. Both platform manifests and `SHA256SUMS` reference those files;

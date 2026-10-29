@@ -55,8 +55,41 @@ plan and the actual first export's import records and texture products. It is
 not restored from a historical cooked catalog. Full, half and quarter texture
 jobs include the retained pilot and the Four Gates lazy-object target. The
 exact planned sources and resulting entry identities are recorded; an old
-entry count is not evidence that a new generation is complete. Only the
-selected pilot is cooked, rather than the entire world.
+entry count is not evidence that a new generation is complete. This optional
+pilot remains separate from the complete lean world preparation below.
+
+## Shipped world preparation
+
+Native Windows and Linux packages prepare the complete production geometry
+scope, including its collision faces and paving coverage, during the release
+build. Texture pixels remain in their existing raw/VRAM assets. This is one
+default-renderer generation rather than copies of the entire world at every
+texture tier. Windows uses Forward+ with system WARP; Linux uses Forward+ with
+the distro-installed Mesa lavapipe Vulkan driver. The existing optimization
+pilot's Linux Compatibility cook is unchanged. Actual CPU-adapter, format and
+native-buffer observations must pass before the world cook.
+
+The finished data stays loose in `app/prepared-world/`. Native dependencies use
+stable installation paths, and a small PCK record binds the loose catalog's
+checksum. A persistent, verified world-preparation cache reuses unchanged
+source closures and payload bytes across builds. Compatibility, producer policy
+and producer inputs govern reuse; the overall game commit does not. In
+particular, generated native resource identifiers must not cause a code-only
+release to download every map again.
+
+The official desktop runner requires this step. Custom native builds can omit
+it with `--no-prepared-world`; cross-platform builds require a matching
+`--prepared-world-catalog` when preparation is requested. The dedicated
+`--world-preparation-cache` is retained across successful desktop and store
+builds independently of other asset caches. Missing or incompatible shipped
+data retains validated source/local-cache loading without automatic whole-world
+preparation before login. `--prepare-map-geometry` still explicitly builds a
+player-owned cache.
+
+The ordinary signed updater inventories these files in independent stable
+packages. New releases reuse unchanged packages and download changed or damaged
+ones, rather than replacing one monolithic prepared-world archive. Build output,
+cache scratch and local profiles remain ignored authoring/build evidence.
 
 Before compiling or loading game assets, a tiny isolated project qualifies the
 actual renderer and saves its observations. Windows identifies system WARP by
