@@ -1,0 +1,157 @@
+{
+  "schema": 1,
+  "actor": "mossbound_stone_golem",
+  "date": "2026-10-29",
+  "status": "NEW_UNAPPROVED_SHOULDER_MOTION_REVIEW_DRAFT",
+  "runtime_installed": false,
+  "candidate": {
+    "sha256": "4929864488eac9c6937bdbef2267892f6bff86f1bf71c48630ed649bd8d80d16",
+    "raw_bytes": 2007416
+  },
+  "baselines": {
+    "reviewed_v7": {
+      "sha256": "8d778fc385cc0b363ec0cde251fd478bd892385e3a77058608451cfc5a4b4483",
+      "raw_bytes": 2000032,
+      "role": "LEFT last reviewed, uninstalled V7"
+    },
+    "installed": {
+      "sha256": "e056751f8e6d490452250b7e0be3c1af74599ddf15602cf0cc22ddbc734cc5c0",
+      "raw_bytes": 1896812,
+      "role": "Separate active-runtime combined-repair control"
+    }
+  },
+  "diagnosis": "The upper physical arm used a per-key projected source orientation guide that crossed its aim axis and introduced axial frame flips. Quaternion signs and global-between-key aliasing were not the cause. The material stone accumulated a near-full axial turn through the action, including recovery.",
+  "repair": {
+    "new_skin_only_control": {
+      "node": 37,
+      "name": "RL_Golem_upperarm_roll_stabilizer",
+      "parent_node": 35,
+      "default": "identity",
+      "local_axis": [
+        -0.14812758913793836,
+        0.9717191510099773,
+        -0.18390244396589933
+      ],
+      "policy": "Cancel unwrapped axial roll measured against a parallel-transported shoulder-to-elbow frame, with a small smooth endpoint closure. Original forearm/hand remain children of their unchanged controls; the new node is used only as the upper-stone skin owner."
+    },
+    "ground_pound_rotation_keys": 80,
+    "maximum_continuous_delivery_hz": 29.92426015239291,
+    "other_seven_actions": "Explicit identity rotation endpoints; all their surfaces and default pose remain exact.",
+    "raw_changed_joint_index_rows": 834,
+    "all_source_position_normal_uv_weight_triangle_index_material_image_arrays_exact": true,
+    "all764_source_channels_exact": true,
+    "source_vertices": 9816,
+    "candidate_vertices": 9816,
+    "source_triangles": 3272,
+    "candidate_triangles": 3272,
+    "draw_surfaces": 1,
+    "influence_slots": 8,
+    "correctives": 0,
+    "source9816_vertex_mapping": "Identity; only upper-stone positive joint indices change on 834 existing rows.",
+    "outside_rows": 8982,
+    "native_bones": [
+      35,
+      36
+    ],
+    "palette_joints": [
+      34,
+      35
+    ],
+    "additional_rotation_tracks": 8,
+    "additional_rotation_keys": 94
+  },
+  "independent_dense_motion": {
+    "poses_all_eight": 3792,
+    "ground_pound_poses": 2805,
+    "sample_policy": "Ground Pound 1ms grid plus delivered keys, midpoints and shifted times; other actions at 60Hz plus shifted times. Measure actual visible owner world-skin rotation in clavicle-relative frame, not the new helper angle alone.",
+    "source": {
+      "actual_upper_skin_owner_node": 35,
+      "actual_material_roll_range_degrees": 365.047514987196,
+      "recovery_roll_range_degrees": 347.98443859358883,
+      "maximum_roll_speed_degrees_per_second": 4776.1031610132895,
+      "relative_angular_path_degrees": 1488.9938543474818,
+      "maximum_relative_angular_speed_degrees_per_second": 4991.131306581968,
+      "maximum_relative_angular_speed_time": 1.0860380105972292,
+      "loop_rotation_error_degrees": 3.0372037154702787e-14
+    },
+    "candidate": {
+      "actual_upper_skin_owner_node": 37,
+      "actual_material_roll_range_degrees": 4.1466329659248045,
+      "recovery_roll_range_degrees": 1.6490614861051769,
+      "maximum_roll_speed_degrees_per_second": 5.107312716860036,
+      "relative_angular_path_degrees": 798.2440779426446,
+      "maximum_relative_angular_speed_degrees_per_second": 2270.795961604005,
+      "maximum_relative_angular_speed_time": 0.4010063444375992,
+      "loop_rotation_error_degrees": 9.980440211770618e-14
+    },
+    "upper_aim_axis_max_delta": 9.242811373777144e-08,
+    "shoulder_anchor_max_delta_model": 1.2467310774142448e-08,
+    "elbow_anchor_max_delta_model": 1.243784674970283e-08,
+    "upper_edge_max_relative_delta": 6.145151335568144e-07,
+    "upper_area_max_relative_delta": 1.1116951050826884e-06,
+    "default_and_other7_whole_mesh_positions_exact": true,
+    "original37_glTF_worlds_exact": true,
+    "scope": "Source-space CPU measurements; actual client proof is separate."
+  },
+  "actual_client": {
+    "comparison_states_each": 1418,
+    "all_eight_defaults_helds_offgrid_legacy_firsttick_and_realistic60hz_stepped_switches": true,
+    "reviewed_source_receipt_sha256": "d1daef354c9063842979498723d4222cb3b026f6b6b6ff08af1944f1da2cf76c",
+    "installed_source_receipt_sha256": "d26f4de865189099cf012f5d147d433936ce9de894ff862c119040f7885a1036",
+    "old_native_worlds_exact": 35,
+    "outside8982_positions_unit_normals_exact": true,
+    "placement_unchanged_both_baselines": true,
+    "maximum_upper_surface_change_world_mm": 1189.822595602504,
+    "scope": "Intentional upper-stone motion change; no new source-fidelity tolerance or approval implied."
+  },
+  "blender": {
+    "summary_sha256": "c085246e2e5c515cc510e7954501d239225767c6186f14727d7e18f43c158241",
+    "source_and_candidate_all8_fresh_import_finite": true,
+    "scope": "Fresh import/finite actions only; no equivalence or approval."
+  },
+  "visual": {
+    "pairs": 232,
+    "full_resolution_pngs": 464,
+    "ground_pound_endpoint_frames": 80,
+    "ground_pound_views": [
+      "front",
+      "rear"
+    ],
+    "scope": "Full GP cycle and RESET arm-focused; separate all-eight three-phase/near-end, RESET, firsttick and realistic60Hz stepped-switch whole-body supplement. Same immutable candidate in both jobs.",
+    "motion_job_sha256": "8affbf3347e3fe5788cd869d51626a9abb4369cdcb05ebb6543ab9a7a4b44d14",
+    "supplement_job_sha256": "d9b73f0ea75c8064f54290795cf20c7b18fa02dfb999bde2015f733b46eba73a",
+    "motion_manifest_sha256": "586d4877c860a33931ac9450100cd0b30fc535fb523d416327143b31335f2779",
+    "supplement_manifest_sha256": "4a3d91636fbbfef51711b2316ce38a94a76c019268fdcdc8c24f4a9a054b677f",
+    "framing_sha256": "1b8cda4144cf5dc247e880aba342e7a6363b0e6890761206dc494eb0d08c8dab",
+    "complete_physical_arm_projected_max_fraction": 0.9465038861516584,
+    "wholebody_supplement_projected_max_fraction": 0.6667716360400526,
+    "wholebody_material_border_pixels": 0,
+    "untouched_action_and_reset_pixel_exact_pairs": 44,
+    "untouched_action_pixel_proof_sha256": "4208e421a714f6e72aeeb804e8f17d12bd231e12c336e2e4ccabc676a8440193",
+    "assessment": "The upper stone no longer spins in place during recovery; the early action reads as a lowering/extension followed by overhead wind-up. Its original brisk swing/reversal remains and needs human judgment. No new visible calf, thumb, fist or unrelated-action change was found in the retained comparisons.",
+    "gpu_epoch": 129,
+    "all_children_exited": true
+  },
+  "cost": {
+    "raw_bytes_added_vs_v7": 7384,
+    "raw_bytes_added_vs_installed": 110604,
+    "native_bones_added": 1,
+    "palette_joints_added": 1,
+    "surfaces_added": 0,
+    "benchmark_receipt": "docs/qa/creature-storage/mossbound-stone-golem-shoulder-motion-component-benchmark-v8.json",
+    "benchmark_sha256": "57ffae8bf208f76dfc04e00d380696fd7298823cf16f053b349a81886de0828b",
+    "scope": "Use the separately scoped component benchmark; no FPS, GPU, VRAM, per-instance RAM or speedup claim."
+  },
+  "lineage": {
+    "preserved_build_status": "The immutable initial build.json calls the artifact an axial-only diagnostic; exact same SHA is now qualified as an unapproved review draft. No model bytes or old evidence were rewritten.",
+    "previous_V7_QA_unchanged": true
+  },
+  "prominent_limits": [
+    "This is a new, unapproved shoulder-motion review draft. The installed Golem remains e056; neither V7 nor V8 is approved or installed by this receipt.",
+    "The correction removes axial material spin of the upper stone. It does not reduce total shoulder rotation to four degrees: the original aim/swing remains, with about 798 degrees of accumulated angular travel and a sampled peak near 2271 degrees per second. The early lowering, extension and overhead wind-up still include a brisk reversal.",
+    "The existing articulated-stone right arm, capped joints, socket and rounded shoulder end are retained. This does not establish welded joints, complete contact coverage, collision freedom or anatomical correctness of every pose.",
+    "The visible Ground Pound strike timing/path interpretation from V6/V7 is retained, including its earlier lowest-pose timing relative to the original corrective-bearing source. Exact preservation here is against V7, not recovery of the original source motion.",
+    "The one added skin-only control rotates around the existing shoulder-to-elbow axis. All original control worlds, forearm/fist paths and calf/foot/thumb work remain unchanged; the upper-stone surface deliberately changes during Ground Pound and its blends.",
+    "Fresh Blender import is a finite-actions check. CPU/native rigidity and preserved-field proofs do not substitute for human visual approval, complete secondary-effect validation or measured FPS/GPU cost."
+  ]
+}
