@@ -291,7 +291,9 @@ static func force_formats(mask: int) -> void:
 # --------------------------------------------------------------------------
 
 static func _normalise(directory: String) -> String:
-	return ProjectSettings.globalize_path(directory).replace("\\", "/").simplify_path()
+	# Exported PCKs can globalize res:// to a relative path. Use one physical
+	# spelling before policy-directory deduplication and index-cache lookup.
+	return runtime_absolute(directory)
 
 ## The index beside the images in `source_directory` (its `vram/index.json`),
 ## read once per directory: {status: "ok" | "missing" | "rejected:<why>",
