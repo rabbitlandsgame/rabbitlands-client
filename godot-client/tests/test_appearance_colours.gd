@@ -318,7 +318,8 @@ func check_custom_values() -> void:
 		var index := Colours.nearest_hair_index(Colours.triple_colour(wire), sex)
 		var hair := Colours.hair({"hair": AppearanceVariants.pack_hair(1, index), "hair_hue": wire.x, "hair_sat": wire.y, "hair_light": wire.z}, config)
 		var apparent := Colours.to_linear(Colours.triple_colour(wire))
-		var shown := Colours.hair_ratio(sex) * Colours.to_linear(hair.dye)
+		var reference: Dictionary = Colours.hair_table(sex, "R", 0, 50.0)
+		var shown := (reference.gain as Vector3) * Colours.to_linear(hair.dye) / (Colours.SKIN_GAIN[sex] as Vector3)
 		expect(hair.custom and shown.distance_to(apparent) < 1e-5, "%s custom hair: R shows the apparent colour" % sex)
 		var bright := Vector3i(60, 20, 96)
 		var light := Colours.hair({"hair": AppearanceVariants.pack_hair(3, Colours.nearest_hair_index(Colours.triple_colour(bright), sex)),
@@ -362,10 +363,83 @@ func check_garment_limits() -> void:
 						"%s stands out from skin %s by %.3f" % [part, str(skin_look), Colours.delta_e(resolved.colour, skin)])
 	expect(cases >= 20, "garment limit cases exercised (%d)" % cases)
 
-# C22: measured hair tables (the calibration phase writes them; interim now).
+# C22: the measured hair tables (data/actors/hair_apparent.json): their source
+# files unchanged (SHA-256), every path present for both sexes and all nine
+# styles, the inverses exact on their own entries, out-of-reach scaling
+# keeping the hue; then the forward-table form on a synthetic table.
 func check_hair_tables() -> void:
-	expect(not FileAccess.file_exists(Colours.HAIR_TABLES_PATH) and Colours.hair_tables().is_empty(),
-		"no measured hair table yet: every path uses the interim reference response")
+	expect(FileAccess.file_exists(Colours.HAIR_TABLES_PATH), "hair_apparent.json is present")
+	var file: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(Colours.HAIR_TABLES_PATH))
+	var sources: Dictionary = file.get("sources", {})
+	expect(sources.size() >= 20, "hair_apparent.json records its source files (%d)" % sources.size())
+	for path: String in sources:
+		var digest := _sha256(path)
+		expect(digest == str(sources[path]), "%s is unchanged since the hair calibration (re-run tests/integration/hair_apparent_calibration.gd and tools/colour_calibration/fit_hair.py if not)" % path)
+	var paths: Dictionary = file.get("paths", {})
+	for raw: Variant in paths.values():
+		for source: Variant in (raw as Dictionary).get("sources", []):
+			expect(sources.has(source), "every entry's sources are hashed (%s)" % source)
+	var shapes: Dictionary = file.get("shapes", {})
+	for sex: String in ["female", "male"]:
+		for style: int in range(1, 10):
+			for s: int in [0, 25, 50, 75, 100]:
+				expect(paths.has("%s/P3/%d/%d" % [sex, style, s]) and paths.has("%s/P4/%d/%d" % [sex, style, s]),
+					"%s style %d: P3 and P4 measured at finish %d" % [sex, style, s])
+			expect(paths.has("%s/P1/%d/50" % [sex, style]) and paths.has("%s/P2/%d/50" % [sex, style]),
+				"%s style %d: P1 and P2 present" % [sex, style])
+			for s: int in [0, 25, 50, 75, 100]:
+				expect(shapes.has("%s/medium/%d/%d" % [sex, style, s]) and shapes.has("%s/high/%d/%d" % [sex, style, s]),
+					"%s style %d: length and volume shape factors at finish %d" % [sex, style, s])
+			for s: int in [12, 37, 49, 51, 63, 88]:
+				expect(paths.has("%s/P3/%d/%d" % [sex, style, s]) and paths.has("%s/P4/%d/%d" % [sex, style, s]),
+					"%s style %d: P3 and P4 measured at custom finish %d" % [sex, style, s])
+		for beard: int in range(2, 6):
+			expect(paths.has("%s/B1/%d/50" % [sex, beard]) and paths.has("%s/B2/%d/50" % [sex, beard]),
+				"%s beard %d: B1 and B2 present" % [sex, beard])
+	Colours.set_hair_tables({})
+	var linear_worst := 0.0
+	var model_worst := 0.0
+	var hue_worst := 0.0
+	var reached := 0
+	var targets: Array[Vector3] = [Vector3(0.002, 0.0015, 0.001), Vector3(0.03, 0.012, 0.004), Vector3(0.09, 0.06, 0.02),
+		Vector3(0.01, 0.04, 0.12), Vector3(0.2, 0.18, 0.15), Vector3(0.05, 0.13, 0.08)]
+	for key: String in paths:
+		var parts := key.split("/")
+		var sex := parts[0]
+		var path := parts[1]
+		var style := int(parts[2])
+		var s := float(parts[3])
+		var entry := Colours.hair_table(sex, path, style, s)
+		var skin_gain: Vector3 = Colours.SKIN_GAIN[sex]
+		for target: Vector3 in targets:
+			var result: Dictionary = Colours.hair_dye_linear(target, sex, path, style, s)
+			var want := target * float(result.reach)
+			if entry.has("model"):
+				var shown := (Colours.model_mu(entry, result.dye) - (entry.floor as Vector3)) / skin_gain
+				model_worst = maxf(model_worst, shown.distance_to(want))
+			else:
+				linear_worst = maxf(linear_worst, ((entry.gain as Vector3) * (result.dye as Vector3) / skin_gain).distance_to(want))
+		var far: Dictionary = Colours.hair_dye_linear(Vector3(0.9, 0.55, 0.25), sex, path, style, s)
+		if float(far.reach) < 1.0:
+			reached += 1
+			var shown_far := (Colours.model_mu(entry, far.dye) - (entry.floor as Vector3)) / skin_gain if entry.has("model") \
+				else (entry.gain as Vector3) * (far.dye as Vector3) / skin_gain
+			var a := Colours.linear_to_oklab(shown_far)
+			var b := Colours.linear_to_oklab(Vector3(0.9, 0.55, 0.25))
+			hue_worst = maxf(hue_worst, absf(rad_to_deg(atan2(a.z, a.y) - atan2(b.z, b.y))))
+	expect(linear_worst < 1e-6, "linear inverses are exact on every measured entry (%.9f)" % linear_worst)
+	expect(model_worst <= 1e-4, "the pigment model's inverse converges on every P4 entry (%.9f)" % model_worst)
+	expect(reached > 0 and hue_worst <= 0.5, "out-of-reach scaling keeps hue on %d entries (%.3f deg)" % [reached, hue_worst])
+	# Shape factors: 1 at 50 / 50, bilinear, used by every legacy hair path.
+	expect(Colours.shape_factor("female", false, 3, 50, 50) == Vector3.ONE, "no shape correction at length and volume 50")
+	var short := Colours.hair_dye_linear(Vector3(0.05, 0.03, 0.02), "female", "P2", 3, 50.0, 0, 0)
+	var plain := Colours.hair_dye_linear(Vector3(0.05, 0.03, 0.02), "female", "P2", 3, 50.0, 50, 50)
+	expect(not (short.dye as Vector3).is_equal_approx(plain.dye), "length and volume change a hairstyle's dye")
+	# The reference path R is P1 on the sex's module slot style.
+	var reference := Colours.hair_dye_linear(Vector3(0.05, 0.03, 0.02), "male", "R")
+	var p1 := Colours.hair_dye_linear(Vector3(0.05, 0.03, 0.02), "male", "P1", 1, 50.0)
+	expect((reference.dye as Vector3).is_equal_approx(p1.dye), "R is male Parted P1")
+	# A forward table (the other entry form): A(d) = 0.25 d^0.8 per channel on 7^3 nodes.
 	var apparent := Vector3(0.05, 0.03, 0.02)
 	Colours.set_hair_tables({"female/P1/3/50": {"gain": [0.30, 0.31, 0.32], "floor": [0.01, 0.01, 0.01]},
 		"female/P3/3/25": {"gain": [0.20, 0.21, 0.22], "floor": [0.0, 0.0, 0.0]},
@@ -376,7 +450,6 @@ func check_hair_tables() -> void:
 	expect(shown.distance_to(apparent) < 1e-7, "linear inverse is exact")
 	var between: Dictionary = Colours.hair_table("female", "P3", 3, 37.5)
 	expect((between.gain as Vector3).is_equal_approx(Vector3(0.30, 0.31, 0.32)), "linear tables interpolate in s")
-	# A non-linear forward table A(d) = 0.25 d^0.8 per channel on 7^3 nodes.
 	var nodes := 7
 	var table: Array = []
 	for r: int in nodes:
@@ -392,13 +465,18 @@ func check_hair_tables() -> void:
 		var result: Dictionary = Colours.hair_dye_linear(target, "male", "P4", 1, 50.0)
 		worst = maxf(worst, Colours.table_apparent(entry, result.dye).distance_to(target * float(result.reach)))
 	expect(worst <= 1e-4, "iterative inverse converges on its own table (%.9f)" % worst)
-	var far := Vector3(0.9, 0.6, 0.3)
-	var reached: Dictionary = Colours.hair_dye_linear(far, "male", "P4", 1, 50.0)
-	var shown_far := Colours.linear_to_oklab(Colours.table_apparent(entry, reached.dye))
-	var target_lab := Colours.linear_to_oklab(far)
-	var hue_change := absf(rad_to_deg(atan2(shown_far.z, shown_far.y) - atan2(target_lab.z, target_lab.y)))
-	expect(float(reached.reach) < 1.0 and hue_change <= 0.5, "out-of-reach scaling keeps hue (%.3f deg)" % hue_change)
 	Colours.set_hair_tables({})
+	# A dye above 1 keeps its own material cache key.
+	expect(Colours.colour_key(Color(1.2, 0.5, 0.3)) != Colours.colour_key(Color(1.4, 0.5, 0.3))
+		and Colours.colour_key(Color(0.4, 0.5, 0.3)) == Color(0.4, 0.5, 0.3).to_html(), "colour keys: exact above 1, to_html below")
+
+
+func _sha256(path: String) -> String:
+	var bytes := FileAccess.get_file_as_bytes(path)
+	var context := HashingContext.new()
+	context.start(HashingContext.HASH_SHA256)
+	context.update(bytes)
+	return context.finish().hex_encode()
 
 # Rule B and the nearest legacy bytes older recipients see (R8).
 func check_canonical() -> void:

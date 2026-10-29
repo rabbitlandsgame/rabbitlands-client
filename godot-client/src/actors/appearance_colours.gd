@@ -13,12 +13,15 @@ extends RefCounted
 ## byte for byte as on develop. Only custom values meet the limits.
 ##
 ## Hair is an apparent colour - what the hair looks like, on the skin
-## swatches' scale - and each draw path gets the dye that shows it. INTERIM
-## (until the calibration phase writes data/actors/hair_apparent.json, spec
-## 4.4): every Low/Medium and classic High path, hair and beard shells alike,
-## uses the measured reference path R's linear response (Medium, Classic,
-## length and volume 50, male Parted / female Buns: Appendix C), so a custom
-## colour is exact on R and within a few percent on the other styles.
+## swatches' scale - and each draw path gets the dye that shows it, from the
+## measured response of that path (data/actors/hair_apparent.json, written by
+## tests/integration/hair_apparent_calibration.gd and
+## tools/colour_calibration/fit_hair.py; spec 4.4): per style, finish position and
+## sex, a linear gain and floor for the Low/Medium hairstyles (P1-P3) and beard
+## shells (B1, B2), and the classic High hair finish's pigment response (P4).
+## The reference path R is P1 on the sex's module slot style (male Parted,
+## female Buns). A path the file does not list falls back to R's frozen linear
+## response (Appendix C), the interim model before calibration.
 
 const HAIR_FINISH := preload("res://src/actors/hair_finish.gd")
 const D_MAX := 1.6
@@ -75,8 +78,18 @@ const GARMENT_LIGHT_MAX := 0.92
 const GARMENT_CONTRAST := 0.08
 const TIE := 1e-6
 const HAIR_TABLES_PATH := "res://data/actors/hair_apparent.json"
+## The reference path R's hairstyle slot per sex (male Parted, female Buns).
+const REFERENCE_STYLE := {"male": 1, "female": 3}
+const LUMA := Vector3(0.2126, 0.7152, 0.0722)
+## Bisection steps per channel and Gauss-Seidel sweeps of the measured-model
+## inverse (deterministic; converges far below 1e-4 for these monotone models).
+const SOLVE_STEPS := 32
+const SOLVE_SWEEPS := 6
 
 static var _hair_tables: Dictionary = {}
+static var _hair_shapes: Dictionary = {}
+## "<sex>/<path>/<style>" -> the measured finish positions, ascending.
+static var _hair_positions: Dictionary = {}
 static var _hair_tables_loaded := false
 
 
@@ -135,6 +148,15 @@ static func quantise(colour: Color) -> Vector3i:
 	var hue := posmod(roundi(colour.ok_hsl_h * HUE_STEPS), HUE_STEPS) + 1
 	return Vector3i(hue, clampi(roundi(colour.ok_hsl_s * 100.0), 0, 100) + 1,
 		clampi(roundi(colour.ok_hsl_l * 100.0), 0, 100) + 1)
+
+## A material cache key for a dye: Color.to_html() while every channel is in
+## 0..1, so palette colours keep develop's keys; a custom dye above 1 (up to
+## D_MAX) adds its exact channels, which to_html clamps to ff - two light
+## dyes would otherwise share one cached material.
+static func colour_key(colour: Color) -> String:
+	if colour.r <= 1.0 and colour.g <= 1.0 and colour.b <= 1.0:
+		return colour.to_html()
+	return "%s+%.5f,%.5f,%.5f" % [colour.to_html(), colour.r, colour.g, colour.b]
 
 
 # --------------------------------------------------------------- fields
@@ -341,14 +363,21 @@ static func _limit_max(value: Vector3, ceiling: float) -> Vector3:
 ## ("R", "P1".."P4", "B1", "B2", with style and slider position for a measured
 ## table): {"dye", "reach"}. Out of reach, A is scaled uniformly in linear
 ## light (hue and saturation kept) to the largest factor that fits D_MAX.
-## INTERIM: without a measured table every path uses R's linear response.
+## A path without a measured entry uses R's frozen linear response.
 static func hair_dye_linear(apparent: Vector3, sex: String, path: String = "R", style: int = 0,
-		s: float = 50.0) -> Dictionary:
+		s: float = 50.0, length: int = 50, volume: int = 50) -> Dictionary:
 	var entry := hair_table(sex, path, style, s)
-	var gain: Vector3 = entry.get("gain", hair_ratio(sex) * (SKIN_GAIN.get(sex, SKIN_GAIN["female"]) as Vector3))
 	var skin_gain: Vector3 = SKIN_GAIN.get(sex, SKIN_GAIN["female"])
+	# Length and volume reshape the hairstyle, which changes how much of it is
+	# lit: the measured shape factor scales the path's response.
+	var shape := Vector3.ONE
+	if path in ["P1", "P2", "P3", "P4"]:
+		shape = shape_factor(sex, path == "P4", style, length, volume, s)
+	var gain: Vector3 = (entry.get("gain", hair_ratio(sex) * skin_gain) as Vector3) * shape
+	if entry.has("model"):
+		return model_dye(entry, skin_gain * apparent.max(Vector3.ZERO) / shape, entry.floor as Vector3, D_MAX)
 	if entry.has("table"):
-		return _iterative_dye(apparent, entry, skin_gain)
+		return _iterative_dye(apparent / shape, entry, skin_gain)
 	var dye := Vector3(apparent.x * skin_gain.x / maxf(gain.x, 1e-6), apparent.y * skin_gain.y / maxf(gain.y, 1e-6),
 		apparent.z * skin_gain.z / maxf(gain.z, 1e-6))
 	var peak := maxf(dye.x, maxf(dye.y, dye.z))
@@ -366,59 +395,268 @@ static func hair_dye(appearance: Dictionary, model_config: Dictionary, path: Str
 	var resolved := hair(appearance, model_config)
 	if not resolved.custom:
 		return resolved.dye
-	return to_srgb(hair_dye_linear(to_linear(resolved.apparent), body_sex(model_config), path, style, s).dye)
+	# Beards show the apparent colour the hair shows (owner Q-N4): scaled by
+	# the reference path's reach, so a light colour beyond the hair's reach
+	# does not draw a lighter beard.
+	var apparent := to_linear(resolved.apparent) * (float(resolved.reach) if path in ["B1", "B2"] else 1.0)
+	return to_srgb(hair_dye_linear(apparent, body_sex(model_config), path, style, s,
+		roundi(CharacterProportions.value(appearance, "hair_length")),
+		roundi(CharacterProportions.value(appearance, "hair_volume"))).dye)
 
 
 # --------------------------------------------- measured hair tables (4.4)
 
-## data/actors/hair_apparent.json, when the calibration phase has written it:
-## {"version": 1, "paths": {"<sex>/<path>/<style>/<s>": entry}} where an entry
-## is linear {"gain": [r, g, b], "floor": [r, g, b]} (mu = gain * dye + floor)
-## or non-linear {"nodes": n, "dmax": x, "table": [n^3 apparent rgb triples,
-## index (r * n + g) * n + b, dye nodes spaced in sRGB encoding over 0..dmax]}.
+## data/actors/hair_apparent.json: {"paths": {"<sex>/<path>/<style>/<s>":
+## entry}} where an entry is linear {"gain": [r, g, b], "floor": [r, g, b]}
+## (the lit hair mean mu = gain * dye + floor, linear light), a measured model
+## {"model": "pigment" | "rl", ...} (see model_mu) or a forward table
+## {"nodes": n, "dmax": x, "table": [n^3 apparent rgb triples, index
+## (r * n + g) * n + b, dye nodes spaced in sRGB encoding over 0..dmax]}. The
+## apparent colour of dye d is (mu(d) - mu(0)) / g_ref (SKIN_GAIN).
 static func hair_tables() -> Dictionary:
 	if not _hair_tables_loaded:
 		_hair_tables_loaded = true
 		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(HAIR_TABLES_PATH)) \
 			if FileAccess.file_exists(HAIR_TABLES_PATH) else null
 		_hair_tables = (parsed as Dictionary).get("paths", {}) if parsed is Dictionary else {}
+		_hair_shapes = (parsed as Dictionary).get("shapes", {}) if parsed is Dictionary else {}
+		_index_positions()
 	return _hair_tables
 
-## Test seam: install tables directly (an empty dictionary restores the file).
-static func set_hair_tables(paths: Dictionary) -> void:
-	_hair_tables = paths
-	_hair_tables_loaded = not paths.is_empty()
+static func _index_positions() -> void:
+	_hair_positions = {}
+	for key: Variant in _hair_tables:
+		var parts := str(key).split("/")
+		if parts.size() != 4:
+			continue
+		var group := "%s/%s/%s" % [parts[0], parts[1], parts[2]]
+		if not _hair_positions.has(group):
+			_hair_positions[group] = []
+		(_hair_positions[group] as Array).append(int(parts[3]))
+	for group: Variant in _hair_positions:
+		(_hair_positions[group] as Array).sort()
 
-## The measured entry for a path, linear entries interpolated in s between the
-## measured finish positions 0, 25, 50, 75 and 100; {} when none is measured.
+## Test seam: install tables (and shape factors) directly; an empty dictionary
+## restores the file.
+static func set_hair_tables(paths: Dictionary, shapes: Dictionary = {}) -> void:
+	_hair_tables = paths
+	_hair_shapes = shapes
+	_hair_tables_loaded = not paths.is_empty()
+	_index_positions()
+
+## The measured positions either side of s (equal at or beyond the ends), as
+## (low, high); the 25-step neighbours when nothing is listed.
+static func _bracket(positions: Array, s: float) -> Vector2:
+	if positions.is_empty():
+		var step := int(floor(clampf(s, 0.0, 100.0) / 25.0)) * 25
+		return Vector2(step, mini(step + 25, 100))
+	var low := int(positions[0])
+	var high := int(positions[-1])
+	for value: Variant in positions:
+		if float(value) <= s:
+			low = int(value)
+	for index: int in range(positions.size() - 1, -1, -1):
+		if float(positions[index]) >= s:
+			high = int(positions[index])
+	return Vector2(low, maxi(high, low))
+
+## The measured response scale of a legacy hairstyle at hair length and volume
+## (0..100) against 50 / 50 at finish position s: the file's `shapes`
+## "<sex>/<medium|high>/<style>/<s>" {"grid": positions, "factor": [rgb per
+## (length, volume), length-major]}, bilinear, linear in s between the measured
+## positions (the Classic grid, s 50, where no other is measured); 1 where
+## nothing is measured.
+static func shape_factor(sex: String, high: bool, style: int, length: int, volume: int, s: float = 50.0) -> Vector3:
+	hair_tables()
+	if length == 50 and volume == 50:
+		return Vector3.ONE
+	var group := "%s/%s/%d" % [sex, "high" if high else "medium", style]
+	var measured: Array = []
+	for position: int in [0, 25, 50, 75, 100]:
+		if _hair_shapes.has("%s/%d" % [group, position]):
+			measured.append(position)
+	if measured.is_empty():
+		return _shape_grid(_hair_shapes.get(group), length, volume)
+	var span := _bracket(measured, s)
+	var first := _shape_grid(_hair_shapes.get("%s/%d" % [group, int(span.x)]), length, volume)
+	if int(span.y) == int(span.x):
+		return first
+	var second := _shape_grid(_hair_shapes.get("%s/%d" % [group, int(span.y)]), length, volume)
+	return first.lerp(second, (clampf(s, span.x, span.y) - span.x) / (span.y - span.x))
+
+static func _shape_grid(raw: Variant, length: int, volume: int) -> Vector3:
+	if raw is not Dictionary:
+		return Vector3.ONE
+	var grid: Array = (raw as Dictionary).get("grid", [])
+	var factors: Array = (raw as Dictionary).get("factor", [])
+	var n := grid.size()
+	if n < 2 or factors.size() != n * n:
+		return Vector3.ONE
+	var u := grid_cell(grid, float(length))
+	var v := grid_cell(grid, float(volume))
+	var result := Vector3.ZERO
+	for corner: int in 4:
+		var i := int(u.x) + (corner >> 1)
+		var j := int(v.x) + (corner & 1)
+		var weight := (u.y if corner >> 1 else 1.0 - u.y) * (v.y if corner & 1 else 1.0 - v.y)
+		result += _vector(factors[i * n + j], Vector3.ONE) * weight
+	return result
+
+## The cell (x) and fraction (y) of `value` on an ascending grid, clamped.
+static func grid_cell(grid: Array, value: float) -> Vector2:
+	var n := grid.size()
+	value = clampf(value, float(grid[0]), float(grid[n - 1]))
+	for cell: int in n - 1:
+		if value <= float(grid[cell + 1]):
+			return Vector2(cell, (value - float(grid[cell])) / maxf(float(grid[cell + 1]) - float(grid[cell]), 1e-6))
+	return Vector2(n - 2, 1.0)
+
+## The measured entry for a path, linear and model entries interpolated in s
+## between the measured finish positions 0, 25, 50, 75 and 100; {} when none
+## is measured. "R" is P1 on the sex's reference style at s 50.
 static func hair_table(sex: String, path: String, style: int, s: float) -> Dictionary:
 	var paths := hair_tables()
 	if paths.is_empty():
 		return {}
+	if path == "R":
+		path = "P1"
+		style = int(REFERENCE_STYLE.get(sex, 3))
+		s = 50.0
 	var exact: Variant = paths.get("%s/%s/%d/%d" % [sex, path, style, roundi(s)])
 	if exact is Dictionary:
-		return _entry(exact as Dictionary)
-	var low := int(floor(clampf(s, 0.0, 100.0) / 25.0)) * 25
-	var high := mini(low + 25, 100)
+		return table_entry(exact as Dictionary)
+	var span := _bracket(_hair_positions.get("%s/%s/%d" % [sex, path, style], []) as Array, s)
+	var low := int(span.x)
+	var high := int(span.y)
 	var a: Variant = paths.get("%s/%s/%d/%d" % [sex, path, style, low])
 	var b: Variant = paths.get("%s/%s/%d/%d" % [sex, path, style, high])
-	if a is Dictionary and b is Dictionary and (a as Dictionary).has("gain") and (b as Dictionary).has("gain"):
-		var u := (clampf(s, 0.0, 100.0) - low) / 25.0
-		var first := _entry(a as Dictionary)
-		var second := _entry(b as Dictionary)
-		return {"gain": (first.gain as Vector3).lerp(second.gain, u), "floor": (first.floor as Vector3).lerp(second.floor, u)}
+	if a is Dictionary and b is Dictionary:
+		var u := 0.0 if high == low else (clampf(s, float(low), float(high)) - low) / float(high - low)
+		var blended := lerp_entries(table_entry(a as Dictionary), table_entry(b as Dictionary), u)
+		if not blended.is_empty():
+			return blended
 	var any: Variant = a if a is Dictionary else (b if b is Dictionary else null)
-	return _entry(any as Dictionary) if any is Dictionary else {}
+	return table_entry(any as Dictionary) if any is Dictionary else {}
 
 static func _vector(value: Variant, fallback: Vector3) -> Vector3:
 	if value is Array and (value as Array).size() >= 3:
 		return Vector3(float(value[0]), float(value[1]), float(value[2]))
 	return fallback
 
-static func _entry(raw: Dictionary) -> Dictionary:
+## The vector parameters of each measured model (model_mu).
+const MODEL_TERMS := {"linear": ["gain", "floor"], "pigment": ["matte", "light", "floor"],
+	"rl": ["gain", "hue", "floor"]}
+
+## A raw table entry with its arrays as Vector3s.
+static func table_entry(raw: Dictionary) -> Dictionary:
 	if raw.has("table"):
 		return {"table": raw["table"], "nodes": int(raw.get("nodes", 7)), "dmax": float(raw.get("dmax", D_MAX))}
+	if raw.has("model") and MODEL_TERMS.has(str(raw.model)):
+		var result := {"model": str(raw.model)}
+		for term: String in MODEL_TERMS[str(raw.model)]:
+			result[term] = _vector(raw.get(term), Vector3.ZERO)
+		if raw.has("targetFloor"):
+			result["targetFloor"] = _vector(raw.get("targetFloor"), result.floor)
+		return result
 	return {"gain": _vector(raw.get("gain"), Vector3.ONE), "floor": _vector(raw.get("floor"), Vector3.ZERO)}
+
+## Two measured entries of one kind blended by u (0 = a); {} if their kinds differ.
+static func lerp_entries(a: Dictionary, b: Dictionary, u: float) -> Dictionary:
+	var kind_a := str(a.get("model", "linear" if a.has("gain") else ""))
+	var kind_b := str(b.get("model", "linear" if b.has("gain") else ""))
+	if kind_a != kind_b or not MODEL_TERMS.has(kind_a):
+		return {}
+	var result := {} if not a.has("model") else {"model": kind_a}
+	for term: String in MODEL_TERMS[kind_a]:
+		result[term] = (a[term] as Vector3).lerp(b[term], u)
+	if a.has("targetFloor") and b.has("targetFloor"):
+		result["targetFloor"] = (a.targetFloor as Vector3).lerp(b.targetFloor, u)
+	return result
+
+## The forward response of a measured path, the lit hair mean (linear) for
+## dye d (linear, as the shader sees it), in the functional form of its shader:
+##   linear  - gain * d + floor (StandardMaterial, portrait_hair, beard shells);
+##   pigment - matte * m(d) + light * l(d) + floor, high_hair_appearance's
+##             pigment(): m = mix(d, luma(d), 0.10), l = sqrt(d) warmed by
+##             smoothstep(0, 0.35, d.r - max(d.g, d.b)) towards (1, 0.90, 0.73);
+##   rl      - gain * d + hue * d / max(d) + floor, rl_hair.gdshader's diffuse
+##             and its hue-normalised primary sheen.
+## Each term's coefficient is fitted per channel to rendered means
+## (calibration probe), so the forms are exact up to clipping and 8-bit output.
+static func model_mu(model: Dictionary, dye: Vector3) -> Vector3:
+	var d := dye.max(Vector3.ZERO)
+	match str(model.get("model", "linear")):
+		"pigment":
+			var value := d.dot(LUMA)
+			var matte := d * 0.9 + Vector3.ONE * (value * 0.1)
+			var warm := smoothstep(0.0, 0.35, d.x - maxf(d.y, d.z))
+			var light := Vector3(sqrt(d.x), sqrt(d.y), sqrt(d.z)) * Vector3.ONE.lerp(Vector3(1.0, 0.90, 0.73), warm)
+			return (model.matte as Vector3) * matte + (model.light as Vector3) * light + (model.floor as Vector3)
+		"rl":
+			var peak := maxf(maxf(d.x, d.y), maxf(d.z, 1e-4))
+			return (model.gain as Vector3) * d + (model.hue as Vector3) * (d / peak) + (model.floor as Vector3)
+	return (model.gain as Vector3) * d + (model.floor as Vector3)
+
+## The dye (linear, 0..dmax) whose lit mean is base + rise on a measured
+## model: {"dye", "reach"}. A rise out of reach is scaled uniformly (hue and
+## saturation kept) to the largest factor the model reaches at dmax on every
+## channel; a target below the model's own floor on a channel takes dye 0
+## there. Per channel bisection, Gauss-Seidel sweeps: deterministic.
+static func model_dye(model: Dictionary, rise: Vector3, base: Vector3, dmax: float) -> Dictionary:
+	rise = rise.max(Vector3.ZERO)
+	var ceiling := model_mu(model, Vector3.ONE * dmax)
+	var reach := 1.0
+	for axis: int in 3:
+		if base[axis] + rise[axis] > ceiling[axis] and rise[axis] > 0.0:
+			reach = minf(reach, maxf(ceiling[axis] - base[axis], 0.0) / rise[axis])
+	var dye := _model_solve(model, base + rise * reach, dmax)
+	# A model whose channels share terms (the pigment model's luma) can fall
+	# short below the all-dmax ceiling: shrink the factor until every channel
+	# reaches its target, so the hue holds.
+	if _model_short(model, dye, base + rise * reach, dmax):
+		var low := 0.0
+		var high := reach
+		for _step: int in 16:
+			var middle := (low + high) * 0.5
+			if _model_short(model, _model_solve(model, base + rise * middle, dmax), base + rise * middle, dmax):
+				high = middle
+			else:
+				low = middle
+		reach = low
+		dye = _model_solve(model, base + rise * reach, dmax)
+	return {"dye": dye, "reach": reach}
+
+## Per channel bisection with Gauss-Seidel sweeps for the dye whose lit mean
+## is `target` (clamped to 0..dmax).
+static func _model_solve(model: Dictionary, target: Vector3, dmax: float) -> Vector3:
+	var floor_mu := model_mu(model, Vector3.ZERO)
+	var top := model_mu(model, Vector3.ONE * dmax)
+	var dye := Vector3.ZERO
+	for axis: int in 3:
+		var slope := maxf(top[axis] - floor_mu[axis], 1e-6) / dmax
+		dye[axis] = clampf((target[axis] - floor_mu[axis]) / slope, 0.0, dmax)
+	for _sweep: int in SOLVE_SWEEPS:
+		for axis: int in 3:
+			var low := 0.0
+			var high := dmax
+			for _step: int in SOLVE_STEPS:
+				var middle := (low + high) * 0.5
+				var probe := dye
+				probe[axis] = middle
+				if model_mu(model, probe)[axis] < target[axis]:
+					low = middle
+				else:
+					high = middle
+			dye[axis] = (low + high) * 0.5
+	return dye
+
+## Whether a channel sits at dmax and still falls short of its target.
+static func _model_short(model: Dictionary, dye: Vector3, target: Vector3, dmax: float) -> bool:
+	var shown := model_mu(model, dye)
+	for axis: int in 3:
+		if dye[axis] >= dmax * (1.0 - 1e-6) and shown[axis] < target[axis] - 1e-6:
+			return true
+	return false
 
 ## A non-linear table's apparent colour for dye d (linear): trilinear over the
 ## forward table, whose nodes are spaced evenly in sRGB-encoded dye.

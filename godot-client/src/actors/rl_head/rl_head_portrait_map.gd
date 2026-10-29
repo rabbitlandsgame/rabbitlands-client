@@ -33,18 +33,27 @@ extends RefCounted
 ## index. A missing or invalid field counts as its neutral value (50 for the
 ## sliders, 0 for facial_hair and hair_detail), as PortraitCustomization does.
 ##
-## PC/3 colour fields (colour model spec revision 3, 4.3), resolved by
+## PC/3 colour fields (colour model spec revision 3, 4.3-4.4), resolved by
 ## AppearanceColours, so the palette path - neutral, typed frozen or guarded -
-## is the table path above, unchanged. A custom skin tone and undertone draw
-## the final skin times the per-stop RL gain interpolated by slider position;
-## custom hair, beard and eye colours scale the reference dye (or the iris
-## pigment) by the per-channel RL/palette ratio of the table entries, inverse
-## distance weighted in OKLab, so they are exact at every palette entry.
-## INTERIM until the calibration phase writes `skinTone`, `hairLut`,
-## `beardLut` and `eyeLut` into the data file (spec 4.3-4.4). A custom skin
-## tone interpolates freckles, liner and the lip tint between the neighbouring
-## slider stops. The hair finish slider (hair_finish) gives the module's
-## detail level (detail_level).
+## is the table path above, unchanged. Custom values use the calibrated data
+## (tests/integration/rl_head_colour_calibration.gd --part=skin|eyes and
+## tests/integration/hair_apparent_calibration.gd, fitted by
+## tools/colour_calibration) in `colours`:
+##   * skinTone - the RL / final-skin gain per channel at knots every 5 slider
+##     positions (and the stops) x undertone -1, -0.5, 0, 0.5, 1, bilinear;
+##     the t = 0 knots at the stops are the palette table's own gains;
+##   * eyeLut - pigment (linear, 7 nodes per channel, linear spacing) to RL
+##     eye colour (linear), trilinear, plus the inverse-distance-weighted
+##     residual of the 12 palette entries, so it is exact at each of them;
+##   * hairLut / beardLut - the RL module's (per fine-detail level) and each
+##     RL beard's measured response (AppearanceColours.model_mu, "rl"): the RL
+##     dye whose lit mean is the reference path's look for the apparent colour
+##     (targetFloor + skin gain * A; Low/Medium's B1 beard for a beard).
+## Without the data the interim models apply: the final skin times the stops'
+## RL gain by position, and the IDW of the table entries' RL/palette ratios. A
+## custom skin tone interpolates freckles, liner and the lip tint between the
+## neighbouring slider stops. The hair finish slider (hair_finish) gives the
+## module's detail level (detail_level).
 
 const DATA_PATH := "res://data/actors/rl_head_wire_defaults.json"
 const PRESETS := preload("res://src/actors/human_portrait_presets.gd")
@@ -120,14 +129,16 @@ static func face(appearance: Dictionary, sex: String) -> RLHeadAppearance:
 	result.eyes = custom_eye_color(custom_eyes.pigment, sex) if custom_eyes.custom \
 		else eye_color(palette_index(appearance, "eyes", 12), sex)
 	var custom_hair := COLOURS.hair(appearance, config)
-	result.hair_color = custom_table_color("hair", custom_hair, sex) if custom_hair.custom \
-		else hair_color(AppearanceVariants.hair_color_index(int(appearance.get("hair", 0))), sex)
+	var hair_name := hair(appearance, sex)
+	var shapes := hair_shapes(appearance, hair_name)
+	result.hair_color = custom_table_color("hair", custom_hair, sex, hair_name, int(shapes["detail"])) \
+		if custom_hair.custom else hair_color(AppearanceVariants.hair_color_index(int(appearance.get("hair", 0))), sex)
 	result.brow_color = result.hair_color * BROW_FROM_HAIR
 	result.brow_color.a = 1.0
 	var beard_table := _table("beard", sex)
 	if not beard_table.is_empty():
 		var hair_index := posmod(AppearanceVariants.hair_color_index(int(appearance.get("hair", 0))), 20)
-		result.beard_color = custom_table_color("beard", custom_hair, sex) if custom_hair.custom \
+		result.beard_color = custom_table_color("beard", custom_hair, sex, beard(appearance, sex)) if custom_hair.custom \
 			else _colour(beard_table[mini(hair_index, beard_table.size() - 1)], result.hair_color)
 		result.beard_color_set = true
 	var detail := details(appearance, sex)
@@ -137,10 +148,9 @@ static func face(appearance: Dictionary, sex: String) -> RLHeadAppearance:
 	result.liner = float(detail["liner"])
 	result.liner_wing = float(detail["liner_wing"])
 	result.lip_tint = detail["lip_tint"] as Color
-	result.hair = hair(appearance, sex)
+	result.hair = hair_name
 	result.beard = beard(appearance, sex)
 	result.stubble = float(detail["stubble"])
-	var shapes := hair_shapes(appearance, result.hair)
 	result.hair_length = float(shapes["length"])
 	result.hair_volume = float(shapes["volume"])
 	result.hair_detail = int(shapes["detail"])
@@ -390,21 +400,48 @@ static func skin_stop_gain(index: int, sex: String) -> Vector3:
 	return Vector3(table.x / maxf(palette.x, 1e-6), table.y / maxf(palette.y, 1e-6), table.z / maxf(palette.z, 1e-6))
 
 
+## colours.<name> (skinTone, eyeLut, hairLut, beardLut), or {}.
+static func calibration(name: String) -> Dictionary:
+	var entry: Variant = (data().get("colours", {}) as Dictionary).get(name)
+	return entry as Dictionary if entry is Dictionary else {}
+
+
 ## The RL skin (sRGB) for a custom skin tone and undertone (AppearanceColours.
-## skin): the final skin times the RL gain interpolated linearly by slider
-## position between the stops (spec 4.3; INTERIM until `skinTone` knots).
+## skin): the final skin times the calibrated RL gain at its slider position
+## and undertone (skinTone knots, bilinear); without knots the stops' gains
+## interpolated by position.
 static func custom_skin_color(resolved: Dictionary, sex: String) -> Color:
 	var position := clampf(float(resolved.get("position", 1.0)), 1.0, 201.0)
+	var gain := skin_tone_gain(position, float(resolved.get("undertone", 0.0)), sex)
+	var shown := COLOURS.to_linear(resolved.get("colour", Color.WHITE) as Color) * gain
+	return COLOURS.to_srgb(shown.clamp(Vector3.ZERO, Vector3.ONE))
+
+
+## The RL / final-skin gain (linear, per channel) at slider position p and
+## undertone t: the skinTone knots, else the interim stop gains by position.
+static func skin_tone_gain(position: float, undertone: float, sex: String) -> Vector3:
+	var knots := calibration("skinTone")
+	var positions: Array = knots.get("positions", [])
+	var undertones: Array = knots.get("undertones", [])
+	var gains: Variant = knots.get(sex)
+	if gains is Array and positions.size() >= 2 and undertones.size() >= 2 \
+			and (gains as Array).size() == positions.size() * undertones.size():
+		var u := COLOURS.grid_cell(positions, position)
+		var v := COLOURS.grid_cell(undertones, undertone)
+		var result := Vector3.ZERO
+		for corner: int in 4:
+			var i := int(u.x) + (corner >> 1)
+			var j := int(v.x) + (corner & 1)
+			var weight := (u.y if corner >> 1 else 1.0 - u.y) * (v.y if corner & 1 else 1.0 - v.y)
+			result += COLOURS._vector((gains as Array)[i * undertones.size() + j], Vector3.ONE) * weight
+		return result
 	var stops := COLOURS.SKIN_STOP_POSITION
-	var gain := skin_stop_gain(COLOURS.SKIN_STOP_INDEX[-1], sex)
 	for stop: int in range(stops.size() - 1):
 		if position <= stops[stop + 1]:
 			var u := (position - stops[stop]) / float(stops[stop + 1] - stops[stop])
-			gain = skin_stop_gain(COLOURS.SKIN_STOP_INDEX[stop], sex).lerp(
+			return skin_stop_gain(COLOURS.SKIN_STOP_INDEX[stop], sex).lerp(
 				skin_stop_gain(COLOURS.SKIN_STOP_INDEX[stop + 1], sex), u)
-			break
-	var shown := COLOURS.to_linear(resolved.get("colour", Color.WHITE) as Color) * gain
-	return COLOURS.to_srgb(shown.clamp(Vector3.ZERO, Vector3.ONE))
+	return skin_stop_gain(COLOURS.SKIN_STOP_INDEX[-1], sex)
 
 
 ## Inverse distance weights (OKLab) of `target` against `references`; an exact
@@ -439,23 +476,107 @@ static func _ratio_blend(base: Vector3, weights: PackedFloat64Array, table: Arra
 	return base * Vector3(exp(log_ratio.x), exp(log_ratio.y), exp(log_ratio.z))
 
 
-## The RL eye colour (sRGB) for a custom iris pigment: the pigment times the
-## IDW of the table entries' RL/pigment ratios (INTERIM until `eyeLut`).
+## The RL eye colour (sRGB) for a custom iris pigment: the eyeLut (trilinear
+## over the linear pigment) plus the inverse-distance-weighted residual of the
+## palette entries, exact at each; without it the pigment times the IDW of the
+## table entries' RL/pigment ratios.
 static func custom_eye_color(pigment: Color, sex: String) -> Color:
 	var table: Array[Color] = []
 	var palette: Array[Color] = []
 	for index: int in 12:
 		table.append(eye_color(index, sex))
 		palette.append(AppearanceVariants.eye_color(index))
+	var lut: Variant = calibration("eyeLut").get(sex)
+	if lut is Dictionary and (lut as Dictionary).has("table"):
+		var shown := eye_lut(lut as Dictionary, COLOURS.to_linear(pigment))
+		var residuals: Array = (lut as Dictionary).get("residuals", [])
+		if residuals.size() == 12:
+			var weights := _idw(pigment, palette)
+			for index: int in 12:
+				shown += COLOURS._vector(residuals[index], Vector3.ZERO) * float(weights[index])
+		return COLOURS.to_srgb(shown.clamp(Vector3.ZERO, Vector3.ONE))
 	var shown := _ratio_blend(COLOURS.to_linear(pigment), _idw(pigment, palette), table, palette)
 	return COLOURS.to_srgb(shown.clamp(Vector3.ZERO, Vector3.ONE))
 
 
+## An eyeLut's RL eye colour (linear) for a pigment (linear), trilinear over
+## its n^3 nodes spaced evenly over 0..1 per channel, index (r * n + g) * n + b.
+static func eye_lut(lut: Dictionary, pigment: Vector3) -> Vector3:
+	var n := int(lut.get("nodes", 7))
+	var table: Array = lut.get("table", [])
+	if n < 2 or table.size() != n * n * n:
+		return pigment
+	var at := pigment.clamp(Vector3.ZERO, Vector3.ONE) * float(n - 1)
+	var base := Vector3i(mini(int(at.x), n - 2), mini(int(at.y), n - 2), mini(int(at.z), n - 2))
+	var f := at - Vector3(base)
+	var result := Vector3.ZERO
+	for corner: int in 8:
+		var offset := Vector3i(corner >> 2 & 1, corner >> 1 & 1, corner & 1)
+		var node := base + offset
+		var weight := (f.x if offset.x else 1.0 - f.x) * (f.y if offset.y else 1.0 - f.y) * (f.z if offset.z else 1.0 - f.z)
+		result += COLOURS._vector(table[(node.x * n + node.y) * n + node.z], Vector3.ZERO) * weight
+	return result
+
+
 ## The RL hair or beard colour (sRGB) for a custom apparent hair colour
-## (AppearanceColours.hair): the reference dye times the IDW, by apparent
-## colour, of the table entries' RL/palette-dye ratios, at most 1 per channel
-## (scaled uniformly; INTERIM until `hairLut` / `beardLut`).
-static func custom_table_color(category: String, resolved: Dictionary, sex: String) -> Color:
+## (AppearanceColours.hair): the RL dye (0..1) whose lit mean on the module at
+## fine-detail level `level` (or on beard `name`) is the reference look for
+## that apparent colour, hairLut / beardLut; out of reach scaled uniformly,
+## below the RL floor 0. Without them the reference dye times the IDW, by
+## apparent colour, of the table entries' RL/palette-dye ratios.
+static func custom_table_color(category: String, resolved: Dictionary, sex: String, name: String = "",
+		level: int = RLHeadAppearance.DEFAULT_HAIR_DETAIL) -> Color:
+	var entry := hair_lut(category, sex, name, level)
+	if not entry.is_empty():
+		var apparent := COLOURS.to_linear(resolved.get("apparent", Color.BLACK) as Color)
+		if category == "beard":
+			# A beard shows the apparent colour the hair shows (AppearanceColours.hair_dye).
+			apparent *= float(resolved.get("reach", 1.0))
+		var skin_gain: Vector3 = COLOURS.SKIN_GAIN.get(sex, COLOURS.SKIN_GAIN["female"])
+		var solved := COLOURS.model_dye(entry, skin_gain * apparent, entry.get("targetFloor", entry.floor) as Vector3, 1.0)
+		return COLOURS.to_srgb(solved.dye)
+	return _interim_table_color(category, resolved, sex)
+
+
+## The calibrated RL response for `category` "hair" (the sex's module `name`,
+## or its first module for a legacy-style head, at `level`, linear between the
+## measured levels) or "beard" (`name`, else the full beard); {} if none.
+static func hair_lut(category: String, sex: String, name: String, level: int) -> Dictionary:
+	if category == "beard":
+		var beards: Variant = calibration("beardLut").get(sex)
+		if beards is not Dictionary or (beards as Dictionary).is_empty():
+			return {}
+		var raw: Variant = (beards as Dictionary).get(name, (beards as Dictionary).get("full_beard"))
+		return COLOURS.table_entry(raw as Dictionary) if raw is Dictionary else {}
+	var modules: Variant = calibration("hairLut").get(sex)
+	if modules is not Dictionary or (modules as Dictionary).is_empty():
+		return {}
+	var module: Variant = (modules as Dictionary).get(name, (modules as Dictionary).values()[0])
+	if module is not Dictionary:
+		return {}
+	var levels: Dictionary = (module as Dictionary).get("levels", {}) as Dictionary
+	var known: Array[int] = []
+	for key: Variant in levels:
+		known.append(int(key))
+	if known.is_empty():
+		return {}
+	known.sort()
+	var low := known[0]
+	var high := known[-1]
+	for value: int in known:
+		if value <= level:
+			low = value
+		if value >= level and high >= value:
+			high = value
+	high = maxi(high, low)
+	var first := COLOURS.table_entry(levels[str(low)] as Dictionary)
+	var result := first if high == low else COLOURS.lerp_entries(first,
+		COLOURS.table_entry(levels[str(high)] as Dictionary), float(level - low) / float(high - low))
+	result["targetFloor"] = COLOURS._vector((module as Dictionary).get("targetFloor"), result.floor as Vector3)
+	return result
+
+
+static func _interim_table_color(category: String, resolved: Dictionary, sex: String) -> Color:
 	var listed := _table(category, sex)
 	var table: Array[Color] = []
 	var palette: Array[Color] = []

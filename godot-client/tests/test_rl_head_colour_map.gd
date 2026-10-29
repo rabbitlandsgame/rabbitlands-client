@@ -2,8 +2,11 @@ extends SceneTree
 ## RLHeadPortraitMap with PC/3 colour fields and the hair finish slider (colour
 ## model spec revision 3, 4.3 and 4.7; R1 and R3 at RL High): the palette path -
 ## neutral, typed frozen, guarded - is the table path exactly; custom skin,
-## eyes, hair and beard colours change the head and stay exact at the palette
-## entries (interim RL models); a custom skin tone interpolates freckles,
+## eyes, hair and beard colours change the head through the calibrated data
+## (skinTone, eyeLut, hairLut, beardLut: exact at the skin stops and the
+## palette irises, within 0.02 of the hair table near palette colours, R6),
+## whose source files are unchanged; the RL skin moves smoothly along the
+## slider and the undertone (R6); a custom skin tone interpolates freckles,
 ## liner and lip tint; hair_finish sets the module's detail level. Pure.
 const Map = preload("res://src/actors/rl_head/rl_head_portrait_map.gd")
 const Colours = preload("res://src/actors/appearance_colours.gd")
@@ -24,6 +27,8 @@ func expect(condition: bool, label: String) -> void:
 func run() -> void:
 	check_palette_path()
 	check_custom_colours()
+	check_calibration_data()
+	check_skin_continuity()
 	check_details()
 	check_finish()
 	print("RL head colour map: %d checks, %d failures" % [checks, failures])
@@ -78,20 +83,24 @@ func check_custom_colours() -> void:
 			var custom := Map.custom_skin_color(resolved, sex)
 			var table := Map.skin_color(index, sex)
 			expect(absf(custom.r - table.r) < 1e-4 and absf(custom.g - table.g) < 1e-4 and absf(custom.b - table.b) < 1e-4,
-				"%s: the interim skin model is exact at stop %d (%s vs %s)" % [sex, index, custom, table])
+				"%s: the calibrated skin model is exact at stop %d (%s vs %s)" % [sex, index, custom, table])
 		# Eyes: exact at every palette pigment.
 		for index: int in 12:
 			var custom := Map.custom_eye_color(AppearanceVariants.eye_color(index), sex)
 			var table := Map.eye_color(index, sex)
 			expect(absf(custom.r - table.r) < 1e-4 and absf(custom.g - table.g) < 1e-4 and absf(custom.b - table.b) < 1e-4,
-				"%s: the interim eye model is exact at eye %d" % [sex, index])
-		# Hair and beard: exact at every palette entry's apparent colour.
+				"%s: the eye LUT is exact at eye %d" % [sex, index])
+		# Hair (R6): the LUT near the palette colours matches the hair table
+		# (each palette colour's apparent value on the module's authored level).
+		var module: String = "rowan_shag" if sex == "male" else "mira_bun"
+		var worst := 0.0
 		for index: int in 20:
 			var resolved := {"apparent": Colours.palette_apparent(index, sex), "dye": AppearanceVariants.hair_color(index)}
-			var custom := Map.custom_table_color("hair", resolved, sex)
+			var custom := Map.custom_table_color("hair", resolved, sex, module, 50)
 			var table := Map.hair_color(index, sex)
-			expect(absf(custom.r - table.r) < 2e-4 and absf(custom.g - table.g) < 2e-4 and absf(custom.b - table.b) < 2e-4,
-				"%s: the interim hair model is exact at colour %d (%s vs %s)" % [sex, index, custom, table])
+			worst = maxf(worst, maxf(absf(custom.r - table.r), maxf(absf(custom.g - table.g), absf(custom.b - table.b))))
+		expect(worst <= 0.02, "%s: the hair LUT meets the table within 0.02 at the palette colours (%.4f)" % [sex, worst])
+		print("RL hair LUT against the table at the palette colours, %s: %.4f sRGB" % [sex, worst])
 		var wire := Vector3i(40, 60, 30)
 		var hair_index := Colours.nearest_hair_index(Colours.triple_colour(wire), sex)
 		var look := {"skin": 1, "eyes": 0, "hair": AppearanceVariants.pack_hair(1, hair_index), "hair_hue": wire.x,
@@ -107,6 +116,66 @@ func check_custom_colours() -> void:
 		var eye_index := Colours.nearest_eye_index(Colours.triple_colour(eye_wire))
 		var eyes := Map.face({"eyes": eye_index, "eye_hue": eye_wire.x, "eye_sat": eye_wire.y, "eye_light": eye_wire.z}, sex)
 		expect(not eyes.eyes.is_equal_approx(Map.face({"eyes": eye_index}, sex).eyes), "%s: a custom iris changes the RL eyes" % sex)
+
+# The calibrated data is present and its source files are unchanged.
+func check_calibration_data() -> void:
+	for name: String in ["skinTone", "eyeLut", "hairLut", "beardLut"]:
+		expect(not Map.calibration(name).is_empty(), "rl_head_wire_defaults.json has colours.%s" % name)
+	var sources: Dictionary = Map.calibration("customSources")
+	expect(sources.size() >= 10, "the calibration records its source files (%d)" % sources.size())
+	for path: String in sources:
+		var context := HashingContext.new()
+		context.start(HashingContext.HASH_SHA256)
+		context.update(FileAccess.get_file_as_bytes(path))
+		expect(context.finish().hex_encode() == str(sources[path]),
+			"%s is unchanged since the RL colour calibration (re-run rl_head_colour_calibration --part=skin/eyes and hair_apparent_calibration)" % path)
+	for sex: String in ["female", "male"]:
+		var knots := Map.calibration("skinTone")
+		expect((knots[sex] as Array).size() == (knots.positions as Array).size() * (knots.undertones as Array).size(),
+			"%s: a skin knot per position and undertone" % sex)
+		expect(((Map.calibration("eyeLut")[sex] as Dictionary).table as Array).size() == 343, "%s: a 7^3 eye LUT" % sex)
+	for level: int in [0, 17, 33, 50, 100]:
+		expect(not Map.hair_lut("hair", "male", "rowan_shag", level).is_empty(), "rowan_shag hair LUT at level %d" % level)
+	for level: int in [0, 50, 67, 83, 100]:
+		expect(not Map.hair_lut("hair", "female", "mira_bun", level).is_empty(), "mira_bun hair LUT at level %d" % level)
+	for beard: String in ["moustache", "goatee", "short_beard", "full_beard"]:
+		expect(not Map.hair_lut("beard", "male", beard, 50).is_empty(), "%s beard LUT" % beard)
+	# A legacy-style head (brows only) uses the sex's module.
+	expect(not Map.hair_lut("hair", "female", "legacy:long", 50).is_empty(), "a legacy-style head uses the module's LUT")
+
+
+# R6: adjacent slider and undertone steps move the RL skin by at most 0.006
+# (OKLab, on the RL colour), the Soft tan seam at 23 reported.
+func check_skin_continuity() -> void:
+	for sex: String in ["female", "male"]:
+		var config := Map.human_config(sex)
+		var worst := 0.0
+		var seam := 0.0
+		for wire: int in [0, 21, 51, 81, 121, 151, 181, 201]:
+			var previous := Color()
+			for p: int in range(1, 202):
+				var look := {"skin": Colours.nearest_skin_index(p), "skin_tone": p, "skin_undertone": wire}
+				var resolved := Colours.skin(look, config)
+				var colour := Map.custom_skin_color(resolved, sex) if resolved.custom else Map.skin_color(int(resolved.index), sex)
+				if p > 1:
+					var step := Colours.delta_e(previous, colour)
+					if p == 23 or p == 24:
+						seam = maxf(seam, step)
+					else:
+						worst = maxf(worst, step)
+				previous = colour
+		for p: int in [5, 23, 60, 120, 180]:
+			var previous := Color()
+			for wire: int in range(1, 202):
+				var look := {"skin": Colours.nearest_skin_index(p), "skin_tone": p, "skin_undertone": wire}
+				var resolved := Colours.skin(look, config)
+				var colour := Map.custom_skin_color(resolved, sex) if resolved.custom else Map.skin_color(int(resolved.index), sex)
+				if wire > 1:
+					worst = maxf(worst, Colours.delta_e(previous, colour))
+				previous = colour
+		expect(worst <= 0.006, "%s: adjacent RL skin steps move at most 0.006 (%.4f)" % [sex, worst])
+		print("RL skin continuity %s: worst step %.4f, Soft tan seam %.4f" % [sex, worst, seam])
+
 
 # A custom skin tone interpolates the derived freckles, liner and lip tint
 # between the neighbouring stops by position; the undertone leaves them.

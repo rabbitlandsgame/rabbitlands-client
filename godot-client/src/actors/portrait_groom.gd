@@ -110,7 +110,7 @@ static func apply(native_root: Node3D, skeleton: Skeleton3D,
 	if custom_colour:
 		# B1: a custom beard shows the hair's apparent colour (owner Q-N4).
 		color = COLOURS.hair_dye(appearance, model_config, "B1", style)
-	var material_key := "%s:%d:%.5f:%.5f" % [color.to_html(), style, eye_height,mouth_y]
+	var material_key := "%s:%d:%.5f:%.5f" % [COLOURS.colour_key(color), style, eye_height,mouth_y]
 	var material := _beard_materials.get(material_key) as ShaderMaterial
 	if material == null:
 		material = ShaderMaterial.new()
@@ -229,7 +229,7 @@ static func _groom_hair(hair: MeshInstance3D, skeleton: Skeleton3D,
 		var original := source.surface_get_material(surface) as StandardMaterial3D
 		if original == null:
 			continue
-		var material_key := "%d:%s" % [original.get_instance_id(), color.to_html()]
+		var material_key := "%d:%s" % [original.get_instance_id(), COLOURS.colour_key(color)]
 		var material := _hair_materials.get(material_key) as ShaderMaterial
 		if material == null:
 			material = ShaderMaterial.new()
@@ -377,7 +377,7 @@ static func _groom_hair_finish(hair: MeshInstance3D, skeleton: Skeleton3D, frame
 		var original := source.surface_get_material(surface) as StandardMaterial3D
 		if original == null:
 			continue
-		var material_key := "%d:%s:s%d" % [original.get_instance_id(), color.to_html(), s]
+		var material_key := "%d:%s:s%d" % [original.get_instance_id(), COLOURS.colour_key(color), s]
 		var material := _hair_materials.get(material_key) as ShaderMaterial
 		if material == null:
 			material = ShaderMaterial.new()

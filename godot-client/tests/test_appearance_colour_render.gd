@@ -137,7 +137,8 @@ func check_custom_parameters() -> void:
 				for hair: MeshInstance3D in _hair_nodes(actor):
 					for surface: int in hair.mesh.get_surface_count():
 						var material := hair.get_surface_override_material(surface)
-						var dye := resolved.hair.dye as Color
+						# P1 (Classic, length and volume 50): the measured path's dye.
+						var dye := Colours.hair_dye(look, config, "P1", AppearanceVariants.hair_style(int(look.hair)), 50.0)
 						var shown: Color = (material as StandardMaterial3D).albedo_color if material is StandardMaterial3D \
 							else (material as ShaderMaterial).get_shader_parameter("hair_color")
 						expect(shown.is_equal_approx(dye) or shown.is_equal_approx(dye * Color.WHITE),

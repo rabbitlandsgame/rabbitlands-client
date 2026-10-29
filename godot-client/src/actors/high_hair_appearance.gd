@@ -128,7 +128,7 @@ static func apply(native_root: Node3D, skeleton: Skeleton3D, appearance: Diction
 		var high_materials: Array[Material] = []
 		for surface: int in source.get_surface_count():
 			var original := authored.surface_get_material(surface) as StandardMaterial3D
-			var material_key := "%d:%s:%d:%s:%s" % [original.get_instance_id() if original != null else 0, color.to_html(), style, finish_key,layered]
+			var material_key := "%d:%s:%d:%s:%s" % [original.get_instance_id() if original != null else 0, COLOURS.colour_key(color), style, finish_key,layered]
 			var material := _materials.get(material_key) as ShaderMaterial
 			if material == null:
 				material = ShaderMaterial.new()
@@ -587,7 +587,7 @@ static func _apply_beard(beard: MeshInstance3D, skeleton: Skeleton3D, root: Node
 	var color:=AppearanceVariants.hair_color(int(appearance.get("hair",0)))
 	if bool(COLOURS.hair(appearance, config).custom):
 		color = COLOURS.hair_dye(appearance, config, "B2", clampi(int(appearance.get("facial_hair", 0)), 0, 5))
-	var material_key:="beard:%d:%s" % [original.get_instance_id(),color.to_html()]
+	var material_key:="beard:%d:%s" % [original.get_instance_id(),COLOURS.colour_key(color)]
 	var material:=_materials.get(material_key) as ShaderMaterial
 	if material==null:
 		material=original.duplicate() as ShaderMaterial

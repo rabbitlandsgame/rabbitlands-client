@@ -84,12 +84,44 @@ art exactly. No asset is replaced: the shipped bodies, hair and equipment are un
   * **PC/3 colour fields** (`AppearanceColours`, colour model spec revision 3). The palette
     path - every colour field 0, a typed value equal to the palette entry's frozen value,
     or a custom value whose nearest palette entry is not the saved byte - is the table
-    path above, unchanged. A custom skin tone and undertone draw the final skin times the
-    RL gain of the neighbouring stops by slider position; custom hair, beard and iris
-    colours scale the reference dye (or pigment) by the inverse-distance-weighted RL /
-    palette ratio of the table entries, exact at every palette entry. These are interim
-    models until the calibration phase adds `skinTone`, `hairLut`, `beardLut` and
-    `eyeLut`. Freckles, liner and lip tint interpolate between the neighbouring stops.
+    path above, unchanged. Custom values draw through calibrated data in
+    `rl_head_wire_defaults.json` `colours` (2026-10-29, Forward+, the stage's neutral
+    look; how to re-run it: `docs/colour-calibration.md`):
+    * `skinTone`: the RL / final-skin gain at knots every 5 slider positions and the
+      six stops x undertone -1, -0.5, 0, 0.5, 1, bilinear, each measured against the
+      Medium cheeks with that custom skin (`rl_head_colour_calibration.gd --part=skin`;
+      knot residual at most 0.0007 sRGB). The knots at the stops with no undertone are
+      the palette table's own gains, so the custom path meets the table there.
+    * `eyeLut`: pigment to RL eye colour on 7^3 nodes over the linear pigment, plus the
+      inverse-distance-weighted residual of the 12 palette entries (exact at each). Both
+      irises are affine in the colour, so the nodes compose the measured affine fits
+      (`--part=eyes`; fit residual at most 0.0007, linear).
+    * `hairLut` / `beardLut`: the module's lit response per fine-detail level
+      (`rowan_shag` 0/17/33/50/100, `mira_bun` 0/50/67/83/100) and each beard's,
+      `gain * d + hue * d / max(d) + floor` (the diffuse and the hue-normalised sheen;
+      fit residual at most 0.0002), from `tests/integration/hair_apparent_calibration.gd`.
+      The RL colour is the one whose lit mean is the reference path's look for the
+      apparent colour (`targetFloor` + skin gain x A: Medium Classic in the module's slot
+      style; for a beard, the Low/Medium beard shell), so near the palette colours it
+      meets the palette hair table within 0.009 sRGB. A custom beard shows the colour
+      the hair shows (the apparent colour scaled by the reference path's reach).
+      Length and volume change the modules' response by at most 3%, not compensated.
+    * Accuracy on hold-out colours drawn through the game's own path (RL against
+      Medium, largest channel, sRGB): skin 0.0020 (female) and 0.0049 (male) with no
+      undertone, 0.0020 / 0.0040 with one; iris 0.0008 / 0.0020 (limit 0.02), the
+      darkest allowed iris 2.0-4.2 times the pupil's luminance; module hair 0.011
+      (limit 0.03), beards 0.0004. Adjacent slider and undertone steps move the RL skin
+      by at most 0.0048 (OKLab), the Soft tan seam at position 23 by 0.0038.
+    * Every LUT's source files are hashed in `customSources`;
+      `tests/test_rl_head_colour_map.gd` fails when one changes.
+    * The male skin hold-outs next to the stops exceed the spec's 0.002 because the
+      palette skin table, calibrated 2026-10-27, now sits up to 0.008 sRGB (male; 0.004
+      female) from the Medium cheeks it was matched to - most likely since the RL maps
+      moved to VRAM-compressed imports. Re-running the palette calibration would fix
+      both; it changes every RL High skin by that much. The calibration is Forward+:
+      the RL head in the Compatibility renderer (`RL_HEADS=all` only) differs from the
+      Medium head by up to 0.28 on the iris and 0.016 on the skin for custom colours (the
+      palette tables are Forward+ calibrations too).
   * **Springs** keep their authored rest lengths; extended tips stay weighted to the last
     joint and swing with it, shortened locks use fewer joints.
     `tests/test_rl_head.gd` swings both hairstyles at full length and volume.
