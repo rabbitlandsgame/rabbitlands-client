@@ -435,6 +435,30 @@ func check_hair_tables() -> void:
 	var short := Colours.hair_dye_linear(Vector3(0.05, 0.03, 0.02), "female", "P2", 3, 50.0, 0, 0)
 	var plain := Colours.hair_dye_linear(Vector3(0.05, 0.03, 0.02), "female", "P2", 3, 50.0, 50, 50)
 	expect(not (short.dye as Vector3).is_equal_approx(plain.dye), "length and volume change a hairstyle's dye")
+	# P2 is P1's response: at length and volume 50 it draws P1's dye, and off 50
+	# only the shape factor scales it (a P2 gain of its own as well would count
+	# the reshaping twice).
+	for sex: String in ["female", "male"]:
+		for style: int in range(1, 10):
+			var a := Vector3(0.05, 0.03, 0.02)
+			var p1_dye: Vector3 = Colours.hair_dye_linear(a, sex, "P1", style, 50.0).dye
+			var p2_dye: Vector3 = Colours.hair_dye_linear(a, sex, "P2", style, 50.0, 50, 50).dye
+			expect(p2_dye.is_equal_approx(p1_dye), "%s style %d: P2 at length and volume 50 is P1" % [sex, style])
+			var shaped_dye: Vector3 = Colours.hair_dye_linear(a, sex, "P2", style, 50.0, 20, 80).dye
+			var factor := Colours.shape_factor(sex, false, style, 20, 80, 50.0)
+			expect((shaped_dye * factor).is_equal_approx(p1_dye),
+				"%s style %d: a reshaped Classic hairstyle is P1 scaled by its shape factor once" % [sex, style])
+	# A coarse grid (the finish positions other than Classic) takes the Classic
+	# grid's curvature between its nodes, so it stays exact on its own nodes.
+	for group: String in ["female/medium/3", "male/high/1"]:
+		var coarse: Dictionary = shapes.get(group + "/25", {})
+		var parts := group.split("/")
+		var node := Colours._vector((coarse.get("factor", []) as Array)[0 * 3 + 2], Vector3.ONE)
+		var drawn := Colours.shape_factor(parts[0], parts[1] == "high", int(parts[2]), 0, 100, 25.0)
+		expect(drawn.is_equal_approx(node), "%s: the coarse grid at finish 25 is exact on its node (0, 100)" % group)
+		var between := Colours.shape_factor(parts[0], parts[1] == "high", int(parts[2]), 20, 80, 25.0)
+		var coarse_only := Colours._shape_grid(coarse, 20, 80)
+		expect(not between.is_equal_approx(coarse_only), "%s: between its nodes it follows the Classic grid's curvature" % group)
 	# The reference path R is P1 on the sex's module slot style.
 	var reference := Colours.hair_dye_linear(Vector3(0.05, 0.03, 0.02), "male", "R")
 	var p1 := Colours.hair_dye_linear(Vector3(0.05, 0.03, 0.02), "male", "P1", 1, 50.0)

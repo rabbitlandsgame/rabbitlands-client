@@ -6,7 +6,7 @@ Reads data/actors/hair_apparent.json and the RL LUTs in rl_head_wire_defaults.js
 import json, sys
 from pathlib import Path
 import numpy as np
-from calib_lib import CLIENT, SKIN_GAIN, D_MAX, enc, lin, oklab, predict, load
+from calib_lib import CLIENT, SKIN_GAIN, D_MAX, enc, lin, oklab, predict, load, fit
 
 out_dir = Path(sys.argv[1])
 runs = [load(f) for f in sys.argv[2:]]
@@ -58,6 +58,17 @@ def rl_entry(sex, path, name, level):
 
 
 MODULE = {'male': 'rowan_shag', 'female': 'mira_bun'}
+REFERENCE_STYLE = {'male': 1, 'female': 3}
+
+
+def reference_reach(sex, A):
+    """The uniform scale R applies to apparent colour A (beards draw A times it)."""
+    model, params = table(sex, 'P1', REFERENCE_STYLE[sex], 50)
+    dye = SKIN_GAIN[sex] * A / params['gain']
+    peak = float(dye.max())
+    return min(1.0, D_MAX / peak) if peak > 0 else 1.0
+
+
 rows = []
 for run in runs:
     renderer = run.get('renderer')
@@ -66,6 +77,13 @@ for run in runs:
         g = SKIN_GAIN[sex]
         if path in ('P5', 'B3'):
             name = MODULE[sex] if path == 'P5' else inst['key'].split('/')[2]
+        # A reshaped hairstyle (length or volume off 50) has its own black: the
+        # intercept of its response, fitted to this instance's own samples.
+        shape_floor = None
+        if (inst.get('length', 50), inst.get('volume', 50)) != (50, 50) and inst['samples']:
+            model_kind = 'pigment' if path == 'P4' else 'linear'
+            shape_floor = fit(model_kind, np.array([s['dye'] for s in inst['samples']]),
+                              np.array([s['mu'] for s in inst['samples']]))['floor']
         for sample in inst['samples']:
             A = np.array(sample['apparent'])
             mu = np.array(sample['mu'])
@@ -79,8 +97,12 @@ for run in runs:
                         reach = min(reach, max(ceiling[c] - floor[c], 0) / (g[c] * A[c]))
             else:
                 model, params = table(sex, path, inst['style'], inst['s'])
-                floor = params['floor']
+                floor = params['floor'] if shape_floor is None else shape_floor
                 reach = float(sample['reach'])
+            if path in ('B1', 'B2', 'B3'):
+                # Beards show the colour the hair shows: A scaled by R's reach
+                # (inside every beard path's own, larger reach).
+                reach = reference_reach(sex, A)
             target = A * reach
             shown = np.maximum((mu - floor) / g, 0)
             error = float(np.abs(enc(shown) - enc(target)).max())
@@ -134,6 +156,24 @@ if spread:
     worst = max(spread, key=lambda r: r['spread'])
     summary.append('R11 cross-style/quality spread (in reach, Medium P1/P3, High P4, RL P5): %d colours, max %.4f (limit 0.02), '
                    'worst %s' % (len(spread), worst['spread'], json.dumps(worst)))
+# R16: the RL module's mean tone across its finish positions (one colour, every
+# level drawn through the game's own path) stays within 0.01 of each other.
+r16 = []
+for renderer in sorted(set(r['renderer'] for r in rows)):
+    for sex in ('female', 'male'):
+        by_wire = {}
+        for r in rows:
+            if r['renderer'] == renderer and r['sex'] == sex and r['path'] == 'P5' and r['in_reach']:
+                by_wire.setdefault(tuple(r['wire']), []).append(r)
+        for wire, sel in by_wire.items():
+            if len(sel) > 1:
+                shown = np.array([r['shown'] for r in sel])
+                r16.append({'renderer': renderer, 'sex': sex, 'wire': list(wire), 'levels': len(sel),
+                            'spread': float((shown.max(axis=0) - shown.min(axis=0)).max())})
+if r16:
+    worst = max(r16, key=lambda r: r['spread'])
+    summary.append('R16 RL module tone across finish levels (in reach): %d colours, max %.4f (limit 0.01), worst %s' % (
+        len(r16), worst['spread'], json.dumps(worst)))
 # Low against Medium (same style and s), for the report.
 low = []
 index = {(r['renderer'], r['sex'], r['path'], r['quality'], r['style'], r['s'], tuple(r['wire'])): r for r in rows}

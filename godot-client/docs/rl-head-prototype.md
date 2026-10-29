@@ -109,8 +109,9 @@ art exactly. No asset is replaced: the shipped bodies, hair and equipment are un
     * Accuracy on hold-out colours drawn through the game's own path (RL against
       Medium, largest channel, sRGB): skin 0.0020 (female) and 0.0049 (male) with no
       undertone, 0.0020 / 0.0040 with one; iris 0.0008 / 0.0020 (limit 0.02), the
-      darkest allowed iris 2.0-4.2 times the pupil's luminance; module hair 0.011
-      (limit 0.03), beards 0.0004. Adjacent slider and undertone steps move the RL skin
+      darkest allowed iris 2.0-4.2 times the pupil's luminance; module hair 0.0006
+      (limit 0.03; one colour across the five finish levels within 0.0007), beards
+      0.0004. Adjacent slider and undertone steps move the RL skin
       by at most 0.0048 (OKLab), the Soft tan seam at position 23 by 0.0038.
     * Every LUT's source files are hashed in `customSources`;
       `tests/test_rl_head_colour_map.gd` fails when one changes.

@@ -463,9 +463,10 @@ static func _bracket(positions: Array, s: float) -> Vector2:
 ## The measured response scale of a legacy hairstyle at hair length and volume
 ## (0..100) against 50 / 50 at finish position s: the file's `shapes`
 ## "<sex>/<medium|high>/<style>/<s>" {"grid": positions, "factor": [rgb per
-## (length, volume), length-major]}, bilinear, linear in s between the measured
-## positions (the Classic grid, s 50, where no other is measured); 1 where
-## nothing is measured.
+## (length, volume), length-major]}, bilinear (a coarse grid with the Classic
+## grid's curvature, _shape_at), linear in s between the measured positions
+## (the Classic grid, s 50, where no other is measured); 1 where nothing is
+## measured.
 static func shape_factor(sex: String, high: bool, style: int, length: int, volume: int, s: float = 50.0) -> Vector3:
 	hair_tables()
 	if length == 50 and volume == 50:
@@ -478,11 +479,42 @@ static func shape_factor(sex: String, high: bool, style: int, length: int, volum
 	if measured.is_empty():
 		return _shape_grid(_hair_shapes.get(group), length, volume)
 	var span := _bracket(measured, s)
-	var first := _shape_grid(_hair_shapes.get("%s/%d" % [group, int(span.x)]), length, volume)
+	var first := _shape_at(group, int(span.x), length, volume)
 	if int(span.y) == int(span.x):
 		return first
-	var second := _shape_grid(_hair_shapes.get("%s/%d" % [group, int(span.y)]), length, volume)
+	var second := _shape_at(group, int(span.y), length, volume)
 	return first.lerp(second, (clampf(s, span.x, span.y) - span.x) / (span.y - span.x))
+
+## One measured finish position's shape factor: its own grid, bilinear; where
+## that grid is coarser than the Classic one (s 50), times the Classic grid's
+## own curvature between those coarse nodes (its fine value over its bilinear
+## value from the coarse nodes alone), which the coarse grid cannot see.
+static func _shape_at(group: String, position: int, length: int, volume: int) -> Vector3:
+	var raw: Variant = _hair_shapes.get("%s/%d" % [group, position])
+	var result := _shape_grid(raw, length, volume)
+	var classic: Variant = _hair_shapes.get("%s/50" % group)
+	if position == 50 or raw is not Dictionary or classic is not Dictionary:
+		return result
+	var coarse: Array = (raw as Dictionary).get("grid", [])
+	var fine: Array = (classic as Dictionary).get("grid", [])
+	var fine_factors: Array = (classic as Dictionary).get("factor", [])
+	if fine.size() <= coarse.size() or fine_factors.size() != fine.size() * fine.size():
+		return result
+	var nodes: Array[int] = []
+	for value: Variant in coarse:
+		var at := fine.find(value)
+		if at < 0:
+			return result
+		nodes.append(at)
+	var picked: Array = []
+	for i: int in nodes:
+		for j: int in nodes:
+			picked.append(fine_factors[i * fine.size() + j])
+	var on_coarse := _shape_grid({"grid": coarse, "factor": picked}, length, volume)
+	var on_fine := _shape_grid(classic, length, volume)
+	if on_coarse.x <= 0.0 or on_coarse.y <= 0.0 or on_coarse.z <= 0.0:
+		return result
+	return result * on_fine / on_coarse
 
 static func _shape_grid(raw: Variant, length: int, volume: int) -> Vector3:
 	if raw is not Dictionary:

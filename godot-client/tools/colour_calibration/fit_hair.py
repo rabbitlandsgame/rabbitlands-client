@@ -203,8 +203,10 @@ for sex in ('female', 'male'):
             continue
         files = hair_sources(sex, 'P1', style)
         paths[f'{sex}/P1/{style}/50'] = linear_entry(p1[1], files, residual_of[('medium', f'{sex}/P1/{style}/50', 50, 50)])
-        if p2_shares or shapes.get(f'{sex}/medium/{style}'):
-            # P2 is P1's response; length and volume act through `shapes`.
+        if p2_shares or shapes.get(f'{sex}/medium/{style}/50'):
+            # P2 is P1's response; length and volume act through `shapes`
+            # (a separate P2 gain on top of the shape factor would count the
+            # reshaping twice).
             paths[f'{sex}/P2/{style}/50'] = dict(paths[f'{sex}/P1/{style}/50'], shares='P1')
         else:
             measured = [v for k, v in fits.items() if k[0] == 'medium' and k[1] == f'{sex}/P2/{style}/50']
@@ -244,7 +246,8 @@ about = ("Measured apparent-colour response of every Low/Medium and classic High
          "pigment entries: see AppearanceColours.model_mu. The apparent colour of dye d is (mu(d) - floor) / "
          "skinGain. `shapes` scales a hairstyle's response by its hair length and volume: keys "
          "<sex>/<medium|high>/<style>/<s>, measured on a 5 x 5 grid at Classic (s 50) and a 3 x 3 grid at 0, 25, "
-         "75 and 100 (Medium for P1-P3, classic High for P4), bilinear, linear in s. Low draws the Medium "
+         "75 and 100 (Medium for P1-P3, classic High for P4), bilinear (a 3 x 3 grid with the Classic grid's "
+         "curvature between its nodes, AppearanceColours._shape_at), linear in s. Low draws the Medium "
          "response: its hair is %s brighter than Medium for every colour, palette included, because Low actors "
          "cast no shadows (no self-shadowing in the hair); custom colours keep the palette's relationship. "
          "Written by tools/colour_calibration/fit_hair.py from tests/integration/hair_apparent_calibration.gd; "
@@ -276,8 +279,10 @@ for sex in ('female', 'male'):
     ref = entry('medium', f'{sex}/P1/{REFERENCE_STYLE[sex]}/50')
     module = RL_MODULE[sex]
     levels = {}
-    for (quality, key, _l, _v), (model, params, floor) in fits.items():
-        if quality == 'high-rl' and key.startswith(f'{sex}/P5/{module}/'):
+    for (quality, key, length, volume), (model, params, floor) in fits.items():
+        # Only the module at its own length and volume: the rlshape spot checks
+        # share the authored level's key and must not replace its response.
+        if quality == 'high-rl' and key.startswith(f'{sex}/P5/{module}/') and (length, volume) == (50, 50):
             level = int(key.split('/')[-1])
             levels[str(level)] = {'model': 'rl', 'gain': rounded(params['gain']), 'hue': rounded(params['hue']),
                                   'floor': rounded(params['floor']),

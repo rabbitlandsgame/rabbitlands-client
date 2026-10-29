@@ -353,7 +353,12 @@ func _measure_appearance(actor: ReplicatedActor3D, sex: String, key: String, pat
 			if mask.is_empty():
 				mask = await _mask(actor, keep)
 				record["pixels"] = mask.size()
-			var expected: Dictionary = Colours.hair_dye_linear(Colours.to_linear(apparent), sex, path, style, float(s))
+			# The dye the game draws on this path: length, volume and (for a beard)
+			# the reference path's reach included, as AppearanceColours.hair_dye.
+			var config := {"culture": "luminous", "bodyTemplate": "luminous_" + sex, "gender": sex}
+			var shown := Colours.to_linear(apparent) * (float(Colours.hair(custom, config).reach) if beard else 1.0)
+			var expected: Dictionary = Colours.hair_dye_linear(shown, sex, path, style, float(s),
+				int(look.get("hair_length", 50)), int(look.get("hair_volume", 50)))
 			var mu := await _mean(actor, keep, mask)
 			(record.samples as Array).append({"wire": wire_value, "apparent": _array(Colours.to_linear(apparent)),
 				"reach": expected.reach, "dye": _array(expected.dye), "mu": _array(mu), "clipped": _clipped})
