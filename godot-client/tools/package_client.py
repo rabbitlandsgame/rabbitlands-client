@@ -143,6 +143,7 @@ import client_runtime_package
 import prepared_content_package
 import creature_compression
 import full_optimization_package
+from road_ground_dependencies import dependencies as road_dependencies, RoadGroundDependencyError
 from pathlib import Path, PurePosixPath
 from urllib.parse import unquote
 
@@ -1719,6 +1720,19 @@ def shipped_eloria_assets(build_dir: Path, excluded: list[str] = (),
             continue
         base = PurePosixPath(manifest).parent
         is_world = manifest.endswith("/world.json")
+        if is_world and isinstance(data, dict) and "roadGround" in data:
+            try:
+                closure = road_dependencies(build_dir, build_dir / manifest, data["roadGround"])
+                for dependency in closure:
+                    target = dependency.relative_to(build_dir.resolve()).as_posix()
+                    if target not in all_tracked:
+                        errors.append(f"{manifest} roadGround -> {target} is not in the commit")
+                    elif target not in wanted:
+                        wanted.add(target)
+                        if target.endswith(".json"):
+                            queue.append(target)
+            except RoadGroundDependencyError as exc:
+                errors.append(f"{manifest} roadGround: {exc}")
         # A served continent-v2 package's collision block names what only the server reads, and its territory
         # manifest streams chunks and has no master GLB: asset.glb names none the client opens (its map digest is
         # empty without one, map_scene_cache.package_digest).
@@ -1812,6 +1826,17 @@ def stage_eloria_assets(build_dir: Path, stage: Path, excluded: list[str] = (),
     if errors:
         raise PackageError("missing map files:\n  " + "\n  ".join(errors[:40]))
     total = sum(copy_file(build_dir / p, stage / p) for p in sorted(wanted))
+    # Verify the bytes that will ship as well as the source selection. Road
+    # style images can live outside the chunk's folder and their URI keys are
+    # not covered by the generic JSON value walk.
+    for relative in sorted(p for p in wanted if p.endswith("/world.json")):
+        path = stage / relative
+        data = json.loads(path.read_text(encoding="utf-8-sig"))
+        if isinstance(data, dict) and "roadGround" in data:
+            try:
+                road_dependencies(stage, path, data["roadGround"])
+            except RoadGroundDependencyError as exc:
+                raise PackageError(f"staged {relative} roadGround: {exc}") from exc
     package_dirs = {str(PurePosixPath(p).parent) for p in tracked(build_dir, "eloria-assets/maps")
                     if p.endswith("/world.json") and _ships_asset(p, excluded, served)}
     log(f"staged {len(wanted)} eloria-assets files from {len(package_dirs)} map packages "

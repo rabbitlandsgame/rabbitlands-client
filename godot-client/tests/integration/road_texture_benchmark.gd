@@ -321,6 +321,19 @@ func _run() -> void:
 		for yaw: float in [35.0,125.0,215.0,305.0]: views.append({"target":probes[mini(1,probes.size()-1)],"yaw":yaw,"pitch":45.0,"distance":24.0})
 		views.append({"target":probes[0],"yaw":35.0,"pitch":22.0,"distance":12.0})
 	_check(not views.is_empty(),"camera views exist")
+	var grass_instances := 0
+	if Graphics.decorative_grass and not loaders.is_empty() and not views.is_empty():
+		var residents := {}
+		for index: int in range(1, loaders.size()):
+			residents[str(index)] = {"root": loaders[index].world_root, "manifest": loaders[index].manifest}
+		LookGrassBeds.tend(stage, loaders[0].world_root, loaders[0].manifest, residents, _v(views[0].target))
+		var beds := stage.get_node_or_null(LookGrassBeds.NODE_NAME) as LookGrassBeds
+		if beds != null:
+			beds.settle()
+			for node: Node in beds.find_children("*", "MultiMeshInstance3D", true, false):
+				if (node as MultiMeshInstance3D).multimesh != null:
+					grass_instances += (node as MultiMeshInstance3D).multimesh.instance_count
+		_check(grass_instances > 0, "full painted scene grows actual decorative grass", grass_instances)
 	var captures: Array = []
 	var qualification := bool(config.get("qualification",false))
 	if qualification:
@@ -359,7 +372,8 @@ func _run() -> void:
 		"visual_inventory":{"before_trial":before_trial_visuals,"after_trial":after_trial_visuals},
 		"timing":{"load_call_ms":float(load_us)/1000.0,"trial_install_ms":float(trial_install_us)/1000.0,
 			"through_ready_ms":float(ready_us)/1000.0},
-		"probes":probes,"ground":ground,"views":views,"captures":captures,"frames":samples,"before_memory":before,"after_memory":after}
+		"probes":probes,"ground":ground,"views":views,"captures":captures,"frames":samples,"before_memory":before,"after_memory":after,
+		"grass_instances":grass_instances}
 	# Teardown is outside timing and keeps engine leak diagnostics meaningful.
 	for loader: WorldLoader in loaders: loader.unload_world()
 	stage.queue_free()

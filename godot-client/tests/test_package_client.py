@@ -19,6 +19,7 @@ real tree's committed import settings.
 from __future__ import annotations
 
 import fnmatch
+import hashlib
 import json
 import re
 import shutil
@@ -137,6 +138,57 @@ class ServedIsle(unittest.TestCase):
         self.assertIn(SHARED, staged)
         # the territory manifest streams chunks: its master world.glb is named but never existed, and is no refusal
         self.assertNotIn(f"{V2}/isle/client/world.glb", staged)
+
+    def add_road_field(self):
+        chunk = V2 + "/isle/client/chunks/00_00"
+        field = chunk + "/triangle-ids.bin.zst"
+        image = V2 + "/_continent_v2/shared-assets/road-only.png"
+        write(self.root, field, b"compact field bytes")
+        write(self.root, image, b"road style image bytes")
+        metadata = chunk + "/roads.json"
+        write(self.root, metadata, {"schema": "rabbitlands-road-terrain-blend-v1", "resources": {
+            "triangle-ids.bin.zst": hashlib.sha256((self.root / field).read_bytes()).hexdigest(),
+            "../../../../_continent_v2/shared-assets/road-only.png": hashlib.sha256((self.root / image).read_bytes()).hexdigest()}})
+        path = self.root / chunk / "world.json"
+        data = json.loads(path.read_text())
+        data["roadGround"] = {"metadata": "roads.json", "sha256": hashlib.sha256((self.root / metadata).read_bytes()).hexdigest()}
+        write(self.root, chunk + "/world.json", data)
+        return field, image, metadata
+
+    def test_road_fields_and_style_only_images_ship_with_verified_bytes(self):
+        files = self.add_road_field()
+        _, staged, _ = self.stage_assets()
+        for relative in files:
+            self.assertIn(relative, staged)
+            self.assertEqual((self.root / relative).read_bytes(), (self.stage / relative).read_bytes())
+
+    def test_road_field_absent_from_commit_is_refused(self):
+        field, _, _ = self.add_road_field()
+        original = packager.tracked
+        packager.tracked = lambda root, *paths: [p for p in original(root, *paths) if p != field]
+        with self.assertRaisesRegex(packager.PackageError, "roadGround.*not in the commit"):
+            self.stage_assets()
+
+    def test_mutated_road_input_is_refused(self):
+        _, image, _ = self.add_road_field()
+        (self.root / image).write_bytes(b"unpublished replacement")
+        with self.assertRaisesRegex(packager.PackageError, "runtime resource changed"):
+            self.stage_assets()
+
+    def test_staged_road_field_bytes_are_checked_after_copy(self):
+        field, _, _ = self.add_road_field()
+        original = packager.copy_file
+        def copy(source, destination):
+            size = original(source, destination)
+            if destination == self.stage / field:
+                destination.write_bytes(b"corrupted staged bytes")
+            return size
+        packager.copy_file = copy
+        try:
+            with self.assertRaisesRegex(packager.PackageError, "staged .*runtime resource changed"):
+                self.stage_assets()
+        finally:
+            packager.copy_file = original
 
     def test_the_territory_folder_around_the_package_stays_home(self):
         _, staged, _ = self.stage_assets()
