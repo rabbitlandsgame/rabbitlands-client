@@ -37,6 +37,7 @@ const GltfQuantization := preload("res://src/world/gltf_quantization.gd")
 const GltfAnimationFidelity := preload("res://src/actors/gltf_animation_fidelity.gd")
 const CreaturePayload := preload("res://src/actors/creature_payload.gd")
 const WorldObjectImages := preload("res://src/world/world_object_images.gd")
+const SceneryImages := preload("res://src/world/scenery_image_sources.gd")
 const ArchivedModelPolicy := preload("res://src/actors/archived_model_policy.gd")
 const ResourceDiagnostics := preload("res://src/world/resource_diagnostics.gd")
 const PreparedContent := preload("res://src/world/prepared_content.gd")
@@ -73,22 +74,26 @@ static func prepare(paths: PackedStringArray) -> Dictionary:
 	var result: Dictionary = {}
 	for path: String in paths:
 		path = _canonical_path(path)
+		var scenery := _scenery_inputs(path)
+		if not scenery.is_empty() and not bool(scenery.get("ok", false)):
+			continue
 		if not GeometryCache.cooking and PreparedContent.selected_mode() != "require-pilot" and GeometryCache.eligible("asset",path):
-			var geometry := GeometryCache.acquire("asset",path,CreaturePayload.source_sha256(path),{},MapSceneCache.is_enabled())
+			var geometry := GeometryCache.acquire("asset",path,_source_sha(path, scenery),{},MapSceneCache.is_enabled())
 			if str(geometry.status) == "hit":
 				result[path] = {"geometry_record":geometry}
 				continue
 		if PreparedContent.selected_mode() != "raw":
-			var record := PreparedContent.acquire("scene", path, CreaturePayload.source_sha256(path),
-				PreparedContent.scene_texture_token(path))
+			var record := PreparedContent.acquire("scene", path, _source_sha(path, scenery),
+				PreparedContent.scene_texture_token(path, scenery))
 			if str(record.status) == "hit":
 				result[path] = record # Immutable native Resources, never Nodes.
 				continue
 			if str(record.status) == "reject":
 				continue
-		var scene := _build(path)
+		var scene := _build(path, scenery)
 		if scene != null:
-			result[path] = scene
+			result[path] = {"raw_scene": scene, "source_sha256": _source_sha(path, scenery),
+				"closure_token": str(scenery.get("closure_token", ""))} if not scenery.is_empty() else scene
 	return result
 
 static func install_prepared(scenes: Dictionary) -> void:
@@ -96,25 +101,36 @@ static func install_prepared(scenes: Dictionary) -> void:
 		if not _scenes.has(path):
 			var prepared: Variant = scenes[path]
 			if prepared is Dictionary:
+				var scenery := _scenery_inputs(path)
+				if not scenery.is_empty() and not bool(scenery.get("ok", false)):
+					continue
+				if prepared.has("raw_scene"):
+					if str(prepared.get("source_sha256", "")) == _source_sha(path, scenery) \
+							and str(prepared.get("closure_token", "")) == str(scenery.get("closure_token", "")):
+						_scenes[path] = prepared.raw_scene
+					else:
+						var current := _build(path, scenery)
+						if current != null: _scenes[path] = current
+					continue
 				if prepared.has("geometry_record"):
 					var geometry: Dictionary = prepared.geometry_record
 					if GeometryCache.revalidate(geometry):
 						_scenes[path] = geometry.resource
 						_geometry_entries[path] = geometry
 					else:
-						var raw := _build(path)
+						var raw := _build(path, scenery)
 						if raw != null: _scenes[path] = raw
 					continue
 				# Revalidate the current bytes/policy before publishing a worker record.
 				var began := Time.get_ticks_usec()
-				var verified := PreparedContent.acquire("scene", path, CreaturePayload.source_sha256(path),
-					PreparedContent.scene_texture_token(path))
+				var verified := PreparedContent.acquire("scene", path, _source_sha(path, scenery),
+					PreparedContent.scene_texture_token(path, scenery))
 				_record_operation(&"prepared_completion_verify", began)
 				if str(verified.status) == "hit":
 					_scenes[path] = verified.resource
 					_prepared_entries[path] = verified.entry
 				elif str(verified.status) == "miss":
-					var raw := _build(path)
+					var raw := _build(path, scenery)
 					if raw != null:
 						_scenes[path] = raw
 			else:
@@ -170,17 +186,24 @@ static func _packed_scene(path: String, allow_prepared: bool) -> PackedScene:
 			raw = _build(path)
 			if raw != null: _direct_raw_scenes[path] = raw
 		return raw
+	# An installed in-memory template owns already verified immutable Resources.
+	# Verify loose inputs for a new disk/cache acquisition, never per placement.
+	var scenery: Dictionary = {}
+	if not _scenes.has(path) or _prepared_entries.has(path):
+		scenery = _scenery_inputs(path)
+		if not scenery.is_empty() and not bool(scenery.get("ok", false)):
+			return null
 	if allow_prepared and not _scenes.has(path) and not GeometryCache.cooking \
 			and PreparedContent.selected_mode() != "require-pilot" and GeometryCache.eligible("asset",path):
-		var geometry := GeometryCache.acquire("asset",path,CreaturePayload.source_sha256(path),{},MapSceneCache.is_enabled())
+		var geometry := GeometryCache.acquire("asset",path,_source_sha(path, scenery),{},MapSceneCache.is_enabled())
 		if str(geometry.status) == "hit":
 			_scenes[path] = geometry.resource
 			_geometry_entries[path] = geometry
 			return geometry.resource as PackedScene
 	if allow_prepared and (PreparedContent.selected_mode() != "raw" or _prepared_entries.has(path)):
 		var verification_began := Time.get_ticks_usec()
-		var verified := PreparedContent.acquire("scene", path, CreaturePayload.source_sha256(path),
-			PreparedContent.scene_texture_token(path))
+		var verified := PreparedContent.acquire("scene", path, _source_sha(path, scenery),
+			PreparedContent.scene_texture_token(path, scenery))
 		_record_operation(&"prepared_publication_verify", verification_began)
 		if str(verified.status) == "hit":
 			_scenes[path] = verified.resource
@@ -194,14 +217,14 @@ static func _packed_scene(path: String, allow_prepared: bool) -> PackedScene:
 	if not allow_prepared and _prepared_entries.has(path):
 		var raw := _direct_raw_scenes.get(path) as PackedScene
 		if raw == null:
-			raw = _build(path)
+			raw = _build(path, scenery)
 			if raw != null:
 				_direct_raw_scenes[path] = raw
 		return raw
 	if packed == null:
 		_lookup_misses += 1
 		var miss_began := Time.get_ticks_usec()
-		packed = _build(path)
+		packed = _build(path, scenery)
 		_record_operation(&"cache_miss_build", miss_began, false)
 		if packed == null:
 			_failed[path] = true
@@ -273,16 +296,35 @@ static func _record_operation(operation: StringName, started: int, atomic := tru
 	_diagnostics_mutex.unlock()
 
 static func _canonical_path(path: String) -> String:
+	# Export templates may globalize res:// to a relative name. Scenery's
+	# external file closure is rooted beside the executable, independent of cwd.
+	if path.begins_with(WORLD_ASSET_ROOT):
+		return PreparedContent._runtime_absolute(path)
 	return ProjectSettings.globalize_path(path) if path.begins_with("res://") else path
 
-static func _build(path: String) -> PackedScene:
+static func _scenery_inputs(path: String) -> Dictionary:
+	if not is_world_asset(path): return {}
+	var began := Time.get_ticks_usec()
+	var verified := SceneryImages.verify(path)
+	_record_operation(&"scenery_source_verify", began)
+	if not bool(verified.get("ok", false)):
+		push_error("scenery image source rejected: %s (%s)" % [path, str(verified.get("error", "invalid"))])
+	return verified
+
+static func _source_sha(path: String, scenery: Dictionary) -> String:
+	return str(scenery.source_sha256) if not scenery.is_empty() and scenery.get("source_sha256") is String \
+		else CreaturePayload.source_sha256(path)
+
+static func _build(path: String, scenery: Dictionary = {}) -> PackedScene:
 	if ArchivedModelPolicy.is_retired_path(path):
 		return null
-	if GeometryCache.cooking: return _build_raw(path)
+	if is_world_asset(path) and scenery.is_empty(): scenery = _scenery_inputs(path)
+	if not scenery.is_empty() and not bool(scenery.get("ok", false)): return null
+	if GeometryCache.cooking: return _build_raw(path, scenery)
 	var imported := _imported_actor_scene(path)
 	if imported != null:
 		return imported
-	return _build_raw(path)
+	return _build_raw(path, scenery)
 
 ## ResourceLoader resolves the `.import` remap in an editor checkout and the
 ## equivalent remap in an exported PCK. Restricting this preference to actor
@@ -312,16 +354,28 @@ static func _imported_actor_scene(path: String) -> PackedScene:
 	_record_operation(&"imported_scene_read", began)
 	return imported
 
-static func _build_raw(path: String) -> PackedScene:
+static func _build_raw(path: String, scenery: Dictionary = {}) -> PackedScene:
 	if not GltfQuantization.ensure_registered():
 		push_error("raw glTF parse requires main-thread extension initialization")
 		return null
 	var document: GLTFDocument = GLTFDocument.new()
 	var state: GLTFState = GLTFState.new()
 	var world_asset := is_world_asset(path)
-	if world_asset: state.set_additional_data(WorldObjectImages.ENABLED, true)
+	if world_asset:
+		if scenery.is_empty(): scenery = _scenery_inputs(path)
+		if not bool(scenery.get("ok", false)): return null
+		state.set_additional_data(WorldObjectImages.ENABLED, true)
+		state.set_additional_data(SceneryImages.VERIFIED_KEY, scenery)
 	var operation_began := Time.get_ticks_usec()
-	var parse_error := CreaturePayload.append(document, path, state)
+	var parse_error: Error
+	if world_asset and scenery.get("bytes") is PackedByteArray:
+		state.filename = path.get_file().get_basename()
+		parse_error = document.append_from_buffer(scenery.bytes, path.get_base_dir().trim_suffix("/") + "/", state)
+	else:
+		parse_error = CreaturePayload.append(document, path, state)
+	# Texture extension jobs are complete; do not retain a second source blob.
+	state.set_additional_data(SceneryImages.VERIFIED_KEY, null)
+	scenery = {}
 	_record_operation(&"gltf_parse", operation_began)
 	if parse_error != OK:
 		return null
@@ -355,7 +409,7 @@ static func _build_raw(path: String) -> PackedScene:
 	return packed
 
 static func is_world_asset(path: String) -> bool:
-	return _canonical_path(path).begins_with(ProjectSettings.globalize_path(WORLD_ASSET_ROOT))
+	return _canonical_path(path).begins_with(_canonical_path(WORLD_ASSET_ROOT))
 
 ## Gives every image the state carries a mip chain. The images are the objects
 ## the generated materials will reference, so this must run before

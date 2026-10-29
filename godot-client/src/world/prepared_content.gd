@@ -12,6 +12,7 @@ const Graphics := preload("res://src/world/graphics_options.gd")
 const TextureSizes := preload("res://src/world/prepared_texture_sizes.gd")
 const AnimationKeys := preload("res://src/world/prepared_animation_keys.gd")
 const CreaturePayload := preload("res://src/actors/creature_payload.gd")
+const SceneryImages := preload("res://src/world/scenery_image_sources.gd")
 static func node_policy() -> String:
 	var policy := OptimizationProfile.selected("prepared_node_policy")
 	return "lazy-source-v1" if policy == "lazy-source-v1" else "retain"
@@ -75,10 +76,23 @@ static func entry_identity(entry: Dictionary) -> String:
 	hashing.update(_canonical_json(identity).to_utf8_buffer())
 	return hashing.finish().hex_encode()
 
-static func scene_texture_token(source: String) -> String:
+static func scene_texture_token(source: String, verified_scenery: Dictionary = {}) -> String:
 	# Imported equipment products are verified through the explicit input
 	# closure. Embedded actor/world-image policy differs from map sidecars.
 	var world := logical_source(source).begins_with("godot-client/assets/world/")
+	if world:
+		var verified := verified_scenery if not verified_scenery.is_empty() else SceneryImages.verify(source)
+		if not bool(verified.get("ok", false)): return "scene-images-v2|invalid-world-source"
+		var parts := PackedStringArray(["scene-images-v2", "world-full-mips", "skip=0",
+			"formats=%d" % Vram.usable_formats(), "mode=" + Vram.mode_name(), str(verified.get("closure_token", ""))])
+		if Vram.mode() != Vram.Mode.OFF:
+			var directories := Vram.image_directories({"externalResources": verified.get("resources", {}),
+				"externalImagePolicies": verified.get("policies", {})}, source.get_base_dir())
+			if directories.is_empty(): directories.append(source.get_base_dir())
+			for directory: String in directories:
+				var info := Vram.index_for_directory(directory)
+				parts.append("%s:%s:%s" % [logical_source(directory), str(info.status), str(info.sha256)])
+		return "|".join(parts)
 	return "scene-images-v1|%s|skip=%d|formats=%d|mode=%s" % [
 		"world-preupload-mips" if world else "actor-runtime-import",
 		Graphics.active_texture_skip(), Vram.usable_formats(), Vram.mode_name()]
