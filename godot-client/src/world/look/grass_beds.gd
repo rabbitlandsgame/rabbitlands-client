@@ -49,6 +49,7 @@ extends Node3D
 ## main camera's gameplay layer only (the map cameras never see it).
 
 const SHADER := preload("res://src/world/look/grass_beds.gdshader")
+const RoadGround := preload("res://src/world/road_ground/road_ground.gd")
 const SeasonSurfaces = preload("res://src/world/season_surfaces.gd")
 const GraphicsOptions := preload("res://src/world/graphics_options.gd")
 const NODE_NAME := "LookGrassBeds"
@@ -745,6 +746,14 @@ func _classify(hit: Dictionary, up: Vector3, patches: Array[Dictionary],
 		else Vector3(0.0, 1.0, 0.0)
 	if int(cover.x) == 1:
 		return Vector3(Ground.PATH, 0.0, palette)
+	if kind == Surface.TERRAIN:
+		var road: Dictionary = RoadGround.query(body.node, point)
+		if bool(road.get("present", false)):
+			var alpha: float = float(road.coverage)
+			if alpha >= LookProfile.GRASS_VERGE_ALPHA.y:
+				return Vector3(Ground.PATH, 0.0, palette)
+			return Vector3(Ground.VERGE, verge_strength(alpha, cell_hash) * slope
+				* _rim_grass(point, cell_hash) * paving, palette)
 	if kind == Surface.DECK:
 		var alpha := _vertex_colour(body, hit).a
 		if alpha >= LookProfile.GRASS_VERGE_ALPHA.y or _road_beneath(hit, collider, up):
