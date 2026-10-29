@@ -1,5 +1,7 @@
 # Local asset-authoring workspace
 
+The [accepted Golem repair](qa/creature-storage/accepted-golem-repair.md) and its [delivery record](qa/creature-storage/accepted-golem-repair-delivery.json) now select the final reviewed Mossbound Stone Golem. They supersede its previous runtime selection; the earlier batch02 Golem exclusion and draft reports remain historical.
+
 Published static world-object GLBs can reduce raw storage with
 `eloria-assets/tools/optimize_static_glb_storage.py`. It changes only eligible
 32-bit index storage to 16-bit, retaining every vertex record and numeric index
