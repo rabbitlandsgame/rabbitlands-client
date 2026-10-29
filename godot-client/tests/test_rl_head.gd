@@ -192,6 +192,25 @@ func _check_asset_consistency() -> void:
 	for style: String in RLHeadLibrary.beard_styles():
 		if style != RLHeadAppearance.STUBBLE:
 			_check_beard_asset(style)
+	_check_hair_shading()
+
+
+## The flat-painterly hair shading (2026-10-28): Godot multiplies the diffuse
+## light by ALBEDO itself, so light() adds it only for the comparison uniform
+## double_albedo (default 0), and only the beard material draws at beard_gain.
+func _check_hair_shading() -> void:
+	var shader := load("res://src/actors/rl_head/rl_hair.gdshader") as Shader
+	var code := shader.code if shader != null else ""
+	_expect(code.contains("uniform float double_albedo : hint_range(0.0, 1.0) = 0.0;")
+		and code.contains("DIFFUSE_LIGHT += diffuse * ATTENUATION * LIGHT_COLOR * mix(vec3(1.0), ALBEDO, double_albedo) / PI;"),
+		"rl_hair.gdshader adds the diffuse light without ALBEDO (Godot multiplies it in) unless double_albedo")
+	for row: Array in [["rl_hair_clump", "rowan_shag", false], ["rl_hair_card", "mira_bun", false],
+			["rl_beard", "full_beard", true]]:
+		for quality: int in [ActorRenderQuality.Quality.LOW, ActorRenderQuality.Quality.HIGH]:
+			var material := RLHeadLibrary.material(str(row[0]), "male", str(row[1]), quality)
+			var value: Variant = material.get_shader_parameter("beard") if material != null else null
+			_expect(material != null and value == row[2], "%s draws as %s at quality %d (beard = %s)"
+				% [row[0], "a beard" if row[2] else "hair", quality, value])
 
 
 ## The hair author's contract on one hairstyle as imported: every level

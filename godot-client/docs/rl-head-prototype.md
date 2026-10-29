@@ -27,8 +27,10 @@ art exactly. No asset is replaced: the shipped bodies, hair and equipment are un
   sculpt near the centre; `eye_tilt` is negative because RL `eye_tilt` raises the inner
   corners). Secondary couplings (jaw -> chin_width, nose -> nose_bridge, face_length ->
   nose_length, brow_depth -> brow_height, eye_size -> eyelid) and the colour tables
-  (`tests/integration/rl_head_colour_calibration.gd`: skin 10, hair 20, eyes 12 per sex,
-  matched to the lit Low/Medium head) are in `data/actors/rl_head_wire_defaults.json`,
+  (`tests/integration/rl_head_colour_calibration.gd`: skin 10, hair 20, eyes 12 per sex
+  and 20 male beards, matched to the lit Low/Medium head; hair and beards recalibrated
+  2026-10-28 for the flat hair shading below, residuals at most 0.001 sRGB where they were
+  0.09 for hair and 0.27 for beards) are in `data/actors/rl_head_wire_defaults.json`,
   with per-sex freckle, liner, brow and lip-tint defaults keyed by skin index. PC/3
   fields (planned) slot in when present.
 * **Hair and beards.** Male Parted is `rowan_shag`, female Buns `mira_bun`; every other
@@ -96,6 +98,33 @@ art exactly. No asset is replaced: the shipped bodies, hair and equipment are un
   * The animation importer keeps RESET defaults off `id_`, `ex_` and `hl_` shapes, and
     `tests/test_rl_head.gd` pins the shipped head builds and fails when any hairstyle or
     beard records another head build (`headSHA256`).
+* **Hair shading** (`rl_hair.gdshader`; option B, "flat painterly", of the 2026-10-28
+  hair look review). Hair and beards are a flat, painterly colour mass, as in the concept
+  art: a wrapped Lambert (wrap 0.45) for gentle form, each pixel's painted luminance
+  moved 65% of the way to its lock's mean (`flatness`; cards, whose strand atlas is
+  mostly white fill, towards a fixed `card_flat_level` 0.35), and only a faint, broad
+  sheen in the hair's own hue (primary 0.015 with no white, secondary 0.08 at gloss 12),
+  root darkening 0.25, occlusion 0.4, exposure 2.5. The header of the shader lists the
+  uniforms of the earlier look and of two other options.
+  * **The double-albedo correction.** Godot 4.7.2 multiplies `DIFFUSE_LIGHT` by `ALBEDO`
+    after `light()`, in Forward+ and the Compatibility renderer alike (with `ALBEDO` pure
+    green every lit pixel came back with red and blue exactly 0). The earlier `light()`
+    multiplied `ALBEDO` in as well, so the diffuse fell with the square of the colour:
+    dark hair took almost no key light and its strand highlights carried 70-90% of its
+    light. `light()` now adds the diffuse without it; the uniform `double_albedo`
+    (default 0) restores the old term for comparison renders only.
+  * **Measured** on the RL head stage (neutral look, Forward+, front view, the
+    75th-percentile hair pixel against the preset colour's luminance), the earlier look
+    against this one: Rowan 0.57 -> 1.08, Mira 0.34 -> 0.82, Tavi 1.09 -> 1.15; the
+    highlights' share of Rowan's light 69% -> 6%, his luminance spread p90/p10 12.4 ->
+    4.0.
+  * **Beards** light like the hair of the same colour: the `rl_beard` material sets the
+    shader's `beard`, which draws it at `beard_gain` 1.7. Without the gain Tavi's full
+    beard in his hair colour lit to 0.68 of that colour against his hair's 1.15 (front;
+    0.59 of the hair over the front, three-quarter and profile views); with it 1.16
+    (1.10 against 1.10 over the three views). The earlier look's beard was at 0.19.
+  * The colour tables' hair and beard rows were recalibrated for this shading (above):
+    every hair and beard colour now lands on what Low/Medium show.
 * **Portraits.** `ReplicatedActor3D.hold_portrait_pose` / `release_portrait_pose`:
   while a dialogue line shows the speaker (`CampaignPortraitLayer`) or a leaderboard card
   renders, the head keeps its first level of detail, a neutral face and open eyes.
