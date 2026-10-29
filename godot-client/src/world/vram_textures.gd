@@ -829,10 +829,12 @@ static func prepare(job: Dictionary) -> void:
 		note_decoded_instead(str(job.sha))
 		_warn_once(str(job.sha), "vram_textures: sidecar %s unusable (%s); decoding %s" % [
 			str(sidecar.file), loaded.reason, str(job.source).get_file()])
-	var decoded := decode_source(str(job.source), int(job.get("mip_skip", -1)))
+	var expected_sha := str(job.sha) if bool(job.get("verify_source_sha", false)) else ""
+	var decoded := decode_source(str(job.source), int(job.get("mip_skip", -1)), expected_sha)
 	job["mime"] = decoded.mime
 	job["image"] = decoded.image
 	job["kind"] = "decoded" if decoded.image != null else "failed"
+	if decoded.has("error"): job["error"] = decoded.error
 	if decoded.image != null:
 		_note_decoded_footprint(str(job.sha), decoded.image, int(decoded.get("mip_skip", 0)),
 			bool(job.get("private", false)))
@@ -881,8 +883,16 @@ static func _warn_once(sha: String, message: String) -> void:
 ## Decodes an image file by its leading bytes rather than its extension or a
 ## declared type, and gives it the mip chain the client has always built
 ## (`Image.generate_mipmaps`). Returns {image: Image or null, mime: String}.
-static func decode_source(path: String, requested_skip := -1) -> Dictionary:
+static func decode_source(path: String, requested_skip := -1, expected_sha := "") -> Dictionary:
 	var bytes := FileAccess.get_file_as_bytes(path)
+	# Strict scenery decodes the very bytes this comparison checks. A prior
+	# closure verification cannot authorize a second mutable file read.
+	if not expected_sha.is_empty():
+		var hashing := HashingContext.new()
+		hashing.start(HashingContext.HASH_SHA256)
+		hashing.update(bytes)
+		if hashing.finish().hex_encode() != expected_sha:
+			return {"image": null, "mime": "", "error": "source_sha256"}
 	var mime := sniff(bytes)
 	var image := Image.new()
 	var error: Error = FAILED

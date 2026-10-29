@@ -377,7 +377,7 @@ static func _build_raw(path: String, scenery: Dictionary = {}) -> PackedScene:
 	state.set_additional_data(SceneryImages.VERIFIED_KEY, null)
 	scenery = {}
 	_record_operation(&"gltf_parse", operation_began)
-	if parse_error != OK:
+	if parse_error != OK or (world_asset and WorldObjectImages.has_source_errors(state)):
 		return null
 	if world_asset and int(state.get_additional_data(WorldObjectImages.PREPARED)) < state.get_images().size():
 		build_texture_mipmaps(state)

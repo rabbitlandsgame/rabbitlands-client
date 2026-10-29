@@ -41,11 +41,15 @@ func _import_preflight(state: GLTFState, _extensions: PackedStringArray) -> Erro
 	if bool(verified.get("tagged", false)):
 		state.set_additional_data(VERIFIED_KEY, verified)
 		state.set_additional_data(VramTextures.PLAN_KEY, {"resources": verified.resources,
-			"policies": verified.policies, "mip_skip": 0, "eligible_only": true})
+			"policies": verified.policies, "mip_skip": 0, "eligible_only": true, "verify_source_sha": true})
 		var result := MapImages.new()._import_preflight(state, _extensions)
 		if result != OK and result != ERR_SKIP: return result
 		state.set_additional_data(EXTERNAL_ACTIVE, true)
 	return OK
+
+static func has_source_errors(state: GLTFState) -> bool:
+	var failures: Variant = state.get_additional_data(MapImages.SOURCE_ERRORS_KEY)
+	return failures is Dictionary and not failures.is_empty()
 
 func _parse_image_data(state: GLTFState, bytes: PackedByteArray, _mime: String, image: Image) -> Error:
 	if _mime.begins_with(MapImages.MIME_PREFIX):

@@ -33,6 +33,7 @@ const MIME_PREFIX := "image/x-eloria-map;"
 const PLACEHOLDER_URI := "data:application/octet-stream;base64,AA=="
 const ORIGINALS_KEY := &"eloria_vram_originals"
 const PREPARED_KEY := &"eloria_vram_prepared"
+const SOURCE_ERRORS_KEY := &"rl_verified_image_source_errors"
 ## Pool threads one chunk worker's images may use at once. Uncapped (-1) a
 ## streamed cell's preparation could take as many low-priority threads as
 ## Godot's low_priority_thread_ratio allows for the whole streaming window;
@@ -57,6 +58,7 @@ func _import_preflight(state: GLTFState, _extensions: PackedStringArray) -> Erro
 	var document_roles := VramTextures.image_roles(state.get_json())
 	var base := state.get_base_path()
 	var requested_skip := int((plan as Dictionary).get("mip_skip", -1))
+	var verify_source_sha := bool((plan as Dictionary).get("verify_source_sha", false))
 	var jobs: Array[Dictionary] = []
 	var by_sha: Dictionary = {}
 	var assigned: Dictionary = {}
@@ -97,7 +99,8 @@ func _import_preflight(state: GLTFState, _extensions: PackedStringArray) -> Erro
 		var job: Dictionary = by_sha.get(job_key, {})
 		if job.is_empty():
 			job = {"sha": sha, "source": source, "roles": {},
-				"sidecar": VramTextures.sidecar_entry(sha, policy_directory), "explicit_policy": explicit_policy, "policy_directory": policy_directory, "indices": [], "mip_skip": requested_skip}
+				"sidecar": VramTextures.sidecar_entry(sha, policy_directory), "explicit_policy": explicit_policy, "policy_directory": policy_directory, "indices": [], "mip_skip": requested_skip,
+				"verify_source_sha": verify_source_sha}
 			by_sha[job_key] = job
 			jobs.append(job)
 		(job.roles as Dictionary).merge(roles)
@@ -162,6 +165,7 @@ func _import_preflight(state: GLTFState, _extensions: PackedStringArray) -> Erro
 
 	var originals: Dictionary = {}
 	var prepared: Dictionary = {}
+	var source_errors: Dictionary = {}
 	for index: int in assigned:
 		var job: Dictionary = assigned[index]
 		var descriptor: Dictionary = images[index]
@@ -169,6 +173,13 @@ func _import_preflight(state: GLTFState, _extensions: PackedStringArray) -> Erro
 		if bool(job.get("explicit_policy", false)):
 			pool_keys[index] = VramTextures.variant_pool_key(str(job.sha), job.sidecar if str(job.get("kind", "")) == "sidecar" else {}, str(job.policy_directory), requested_skip)
 		var image: Image = job.get("image")
+		if image == null and verify_source_sha:
+			# Keep GLTF away from the ordinary URI fallback/ResourceLoader path.
+			# This private sentinel is never published: postparse returns failure,
+			# and scenery callers also inspect SOURCE_ERRORS_KEY before generation.
+			source_errors[index] = str(job.get("error", "image_decode"))
+			image = Image.create(1, 1, false, Image.FORMAT_RGBA8)
+			image.fill(Color(0, 0, 0, 0))
 		if image != null:
 			prepared[index] = image
 			descriptor["uri"] = PLACEHOLDER_URI
@@ -184,6 +195,7 @@ func _import_preflight(state: GLTFState, _extensions: PackedStringArray) -> Erro
 		descriptor["mimeType"] = MIME_PREFIX + "pooled;" + str(index)
 	state.set_additional_data(ORIGINALS_KEY, originals)
 	state.set_additional_data(PREPARED_KEY, prepared)
+	state.set_additional_data(SOURCE_ERRORS_KEY, source_errors)
 	state.set_additional_data(VramTextures.POOLED_KEY, pooled)
 	state.set_additional_data(VramTextures.PRIVATE_KEY, private)
 	state.set_additional_data(VramTextures.POOL_KEYS_KEY, pool_keys)
@@ -229,4 +241,5 @@ func _import_post_parse(state: GLTFState) -> Error:
 				descriptor["mimeType"] = original[1]
 	# GLTFState keeps its own reference to each source image; ours is done.
 	state.set_additional_data(PREPARED_KEY, {})
-	return OK
+	var failures: Variant = state.get_additional_data(SOURCE_ERRORS_KEY)
+	return ERR_FILE_CORRUPT if failures is Dictionary and not failures.is_empty() else OK
