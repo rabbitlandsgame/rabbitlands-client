@@ -182,7 +182,13 @@ func check_skin_continuity() -> void:
 func check_details() -> void:
 	for sex: String in ["female", "male"]:
 		var seeds := Map.defaults(sex)
-		var between := Map.details({"skin": 0, "skin_tone": 33}, sex)
+		# Soft tan saved as its stop on golden tan's byte is the RL head's skin 0.
+		var authored_face := Map.face({"skin": 0}, sex)
+		var stop_face := Map.face({"skin": 2, "skin_tone": 23}, sex)
+		expect(str(Map.details({"skin": 0}, sex)) == str(Map.details({"skin": 2, "skin_tone": 23}, sex))
+			and authored_face.skin == stop_face.skin and authored_face.freckles == stop_face.freckles
+			and authored_face.lip_tint == stop_face.lip_tint, "%s: the Soft tan stop draws the RL head's skin 0" % sex)
+		var between := Map.details({"skin": 2, "skin_tone": 33}, sex)
 		var u := (33.0 - 23.0) / 20.0
 		var want := lerpf(float(seeds.freckles[0]), float(seeds.freckles[2]), u)
 		expect(is_equal_approx(float(between.freckles), want), "%s: freckles between Soft tan and Golden tan (%.3f)" % [sex, between.freckles])

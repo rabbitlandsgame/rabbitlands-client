@@ -232,10 +232,7 @@ func run() -> void:
 	choose(race, 0)
 	expect(skin.get_selected_id() == 0, "changing non-human race resets a custom skin")
 	choose(race, human_index)
-	# The Human list offers skin 0 as "Soft tan" (colour model spec F1) but a
-	# switch from another race's "Race default" still opens on pale beige.
-	expect(skin.get_selected_id() == 1 and skin.get_item_text(skin.get_item_index(0)) == "Soft tan",
-		"returning to Human selects a valid human tone")
+	expect(skin.get_selected_id() == 1 and skin.get_item_index(0) == -1, "returning to Human selects a valid human tone")
 	for window_size: Vector2i in [Vector2i(1280, 720), Vector2i(1920, 1080)]:
 		root.size = window_size
 		for frame in range(3):

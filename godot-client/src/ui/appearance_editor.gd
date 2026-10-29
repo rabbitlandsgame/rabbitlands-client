@@ -29,6 +29,10 @@ var _status: Label
 var _yaw := PI + 0.2
 var _closeup := false
 var _show_equipment := false
+## category -> {"saved": the save's byte its dropdown does not list,
+## "shown": the listed entry shown for it}: the byte is kept unless the player
+## picks another entry (a merged dye, e.g. Human pants 11, typed on develop).
+var _unlisted: Dictionary = {}
 var quality_level := -1
 
 func set_preview_quality(level: int) -> void:
@@ -170,7 +174,12 @@ func open_for(dto: Dictionary, model: Dictionary, animations: Dictionary,
 	var culture := AppearanceVariants.culture_for_actor_type(int(dto.get("actor_type", 0)))
 	for category: String in _pickers:
 		var part: int = {"shirt": 5, "pants": 4, "boots": 6}.get(category, 0)
-		CHOICES.populate(_pickers[category], CHOICES.options("wardrobe" if int(part) > 0 else category, culture, part))
+		var choices := CHOICES.options("wardrobe" if int(part) > 0 else category, culture, part)
+		if category == "skin" and culture == "luminous" and appearance.has("skin") and int(appearance.get("skin", -1)) == 0:
+			# A Human save with Soft tan (skin 0, which the list does not offer
+			# as a new pick) shows and keeps it.
+			choices.insert(mini(1, choices.size()), CHOICES.soft_tan_option())
+		CHOICES.populate(_pickers[category], choices)
 	_set_palette(appearance)
 	_form.set_values(appearance)
 	_form.set_body(int(dto.get("actor_type", 0)))
@@ -212,6 +221,7 @@ func _set_palette(appearance: Dictionary) -> void:
 	for category: String in _pickers:
 		if not appearance.has(category) and category != "hair_color":
 			continue
+		_unlisted.erase(category)
 		var value := int(appearance.get(category, 0))
 		if category == "hair":
 			value = AppearanceVariants.hair_style(int(appearance.get("hair", 0)))
@@ -219,13 +229,35 @@ func _set_palette(appearance: Dictionary) -> void:
 			value = AppearanceVariants.hair_color_index(int(appearance.get("hair", 0)))
 		var picker := _pickers[category] as OptionButton
 		var index := picker.get_item_index(value)
+		if index < 0 and category in ["shirt", "pants", "boots"]:
+			index = _nearest_listed(picker, category, value)
+			if index >= 0:
+				_unlisted[category] = {"saved": value, "shown": picker.get_item_id(index)}
 		if index >= 0:
 			picker.select(index)
+
+## The listed dye nearest (OKLab) to a byte the dropdown merged away.
+func _nearest_listed(picker: OptionButton, category: String, value: int) -> int:
+	var culture := AppearanceVariants.culture_for_actor_type(int(_dto.get("actor_type", 0)))
+	var part: int = {"shirt": AppearanceVariants.PART_SHIRT, "pants": AppearanceVariants.PART_PANTS,
+		"boots": AppearanceVariants.PART_BOOTS}[category]
+	var target := COLOURS.oklab(AppearanceVariants.wardrobe_color(culture, part, value))
+	var best := -1
+	var distance := INF
+	for row: int in picker.item_count:
+		var d := target.distance_to(COLOURS.oklab(AppearanceVariants.wardrobe_color(culture, part, picker.get_item_id(row))))
+		if d < distance:
+			distance = d
+			best = row
+	return best
 
 func _values() -> Dictionary:
 	var result: Dictionary = _form.values()
 	for category: String in ["skin", "eyes", "shirt", "pants", "boots"]:
 		result[category] = (_pickers[category] as OptionButton).get_selected_id()
+		var kept: Dictionary = _unlisted.get(category, {})
+		if not kept.is_empty() and int(result[category]) == int(kept.shown):
+			result[category] = int(kept.saved)
 	result.hair = AppearanceVariants.pack_hair((_pickers.hair as OptionButton).get_selected_id(), (_pickers.hair_color as OptionButton).get_selected_id())
 	# The colour panel adds the skin tone and colour fields in saved form.
 	result = _colours.values(result)

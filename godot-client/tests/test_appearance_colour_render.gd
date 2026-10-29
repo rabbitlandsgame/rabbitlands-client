@@ -105,6 +105,7 @@ func run() -> void:
 	_equipment = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/equipment.json"))
 	ReplicatedActor3D.reload_rl_heads_switch()
 	await check_custom_parameters()
+	await check_soft_tan_stop()
 	await check_finish_continuity()
 	await check_rl_head()
 	print("Appearance colour render: %d checks, %d failures" % [checks, failures])
@@ -268,6 +269,41 @@ func check_lock_growth() -> void:
 		print("lock growth %s style %d finish %d: %.4f-%.4f m a step" % [set[0], set[1], set[2], low, high])
 
 # The RL head at High: custom colours drawn, finish levels by slider.
+## Every skin shader value on an actor: mesh/surface -> recolour, colour, tint.
+func _skin_values(actor: Node) -> Dictionary:
+	var result := {}
+	for node: Node in actor.find_children("*", "MeshInstance3D", true, false):
+		var mesh := node as MeshInstance3D
+		if mesh.mesh == null:
+			continue
+		for surface: int in mesh.mesh.get_surface_count():
+			var material := mesh.material_override if mesh.material_override != null else mesh.get_surface_override_material(surface)
+			if material is ShaderMaterial:
+				var shader := material as ShaderMaterial
+				result["%s/%d" % [actor.get_path_to(mesh), surface]] = [shader.get_shader_parameter("recolor_skin"),
+					shader.get_shader_parameter("skin_color"), shader.get_shader_parameter("skin_tint")]
+	return result
+
+## Soft tan saved as its slider stop on golden tan's byte (the byte develop's
+## list has) draws exactly the authored skin 0, at Low, Medium and High.
+func check_soft_tan_stop() -> void:
+	for model: String in ["luminous_female", "luminous_male"]:
+		var base := {"hair": AppearanceVariants.pack_hair(3, 4), "eyes": 2}
+		for quality: int in [0, 1, 2]:
+			var authored := await _actor(model, quality, base.merged({"skin": 0}))
+			var stop := await _actor(model, quality, base.merged({"skin": 2, "skin_tone": 23}))
+			var a := _skin_values(authored)
+			var b := _skin_values(stop)
+			expect(not a.is_empty() and str(a) == str(b), "%s q%d: the Soft tan stop draws the authored skin" % [model, quality])
+			if authored.rl_head() != null and stop.rl_head() != null:
+				expect(authored.rl_head().appearance.skin == stop.rl_head().appearance.skin
+					and authored.rl_head().appearance.freckles == stop.rl_head().appearance.freckles
+					and authored.rl_head().appearance.lip_tint == stop.rl_head().appearance.lip_tint,
+					"%s: the RL head draws the Soft tan stop as skin 0" % model)
+			authored.free()
+			stop.free()
+			await process_frame
+
 func check_rl_head() -> void:
 	if ReplicatedActor3D.rl_heads_classic() or not ReplicatedActor3D.rl_heads_renderer_supported():
 		print("RL head checks skipped (classic High in this setup)")

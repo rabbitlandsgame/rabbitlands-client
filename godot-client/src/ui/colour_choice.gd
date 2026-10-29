@@ -275,9 +275,12 @@ func clear_custom() -> void:
 	_sync()
 
 
-## The palette entry whose frozen triple is `value`, else -1 (Rule B).
+## The palette entry whose frozen triple is `value`, else -1 (Rule B). A
+## garment snaps only to the dyes its dropdown lists (a merged dye's frozen
+## value stays custom, AppearanceColours.listed_dyes).
 func _snap(value: Vector3i) -> int:
-	for index: int in palette_size():
+	var ids: Array = COLOURS.listed_dyes(group) if COLOURS.PARTS.has(group) else range(palette_size())
+	for index: int in ids:
 		if frozen(index) == value:
 			return index
 	return -1

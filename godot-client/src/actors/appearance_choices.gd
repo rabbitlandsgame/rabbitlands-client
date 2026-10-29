@@ -14,11 +14,15 @@ static func options(category: String, culture := "luminous", part := 0) -> Array
 			names = ["Bald", "Parted", "Long", "Buns", "Buzzcut", "Bob", "Ponytail", "Long braid", "Topknot", "Mohawk"]
 			order = [0, 4, 1, 9, 5, 8, 3, 6, 2, 7]
 		"skin":
-			# Human skin 0 is the authored tone, "Soft tan" (the Rowan and Tavi
-			# presets; colour model spec F1, owner Q10), between pale beige and
-			# golden tan; other races offer 0 as their own Race default below.
+			# Human skin 0 is the authored tone, "Soft tan" (colour model spec
+			# F1, owner Q10). The list stays develop's, without it: develop's
+			# dressing room cannot show a byte its list lacks and rewrites it on
+			# its next Apply, so a new pick never writes 0 (at version 3 the
+			# slider saves Soft tan as its stop on golden tan's byte). A save
+			# that already has it keeps it (soft_tan_option). Other races offer
+			# 0 as their own Race default below.
 			names = ["Soft tan", "Pale beige", "Golden tan", "Warm brown", "Deep brown", "Ebony brown", "Frost blue", "Moss green", "Dusk violet", "Stone grey"]
-			order = [1, 0, 2, 3, 4, 5, 9, 7, 6, 8] if culture == "luminous" or culture.is_empty() else [1, 2, 3, 4, 5, 9, 7, 6, 8]
+			order = [1, 2, 3, 4, 5, 9, 7, 6, 8]
 			for id: int in range(names.size()):
 				colors.append(AppearanceVariants.skin_color(id))
 		"eyes":
@@ -47,11 +51,6 @@ static func options(category: String, culture := "luminous", part := 0) -> Array
 	var result: Array[Dictionary] = []
 	for id: int in order:
 		var entry: Dictionary = {"id": id, "label": names[id]}
-		if category == "skin" and id == 0:
-			# Soft tan is kept when chosen but never taken as a default: a new
-			# list or a switch from another race's "Race default" (also id 0)
-			# still opens on pale beige, as before.
-			entry["keep_only"] = true
 		if not colors.is_empty():
 			var color := colors[id]
 			# The culture palette can repeat a common dye (e.g. Greyhaven ivory).
@@ -76,10 +75,14 @@ static func options(category: String, culture := "luminous", part := 0) -> Array
 		result.push_front({"id": 0, "label": "Race default"})
 	return result
 
+## The Human list's Soft tan entry (skin 0), for a dressing room opening a save
+## that has it (develop's Rowan and Tavi presets wrote it): shown so the save
+## keeps it, never offered as a new pick (options).
+static func soft_tan_option() -> Dictionary:
+	return {"id": 0, "label": "Soft tan", "color": AppearanceVariants.skin_color(0)}
+
 static func populate(control: OptionButton, choices: Array[Dictionary]) -> void:
 	var previous := control.get_selected_id() if control.item_count > 0 else 0
-	var previous_label := control.get_item_text(control.selected) \
-		if control.item_count > 0 and control.selected >= 0 else ""
 	control.clear()
 	for entry: Dictionary in choices:
 		if entry.has("color"):
@@ -89,9 +92,6 @@ static func populate(control: OptionButton, choices: Array[Dictionary]) -> void:
 		else:
 			control.add_item(entry.label, entry.id)
 	var selected := control.get_item_index(previous)
-	if selected >= 0 and bool(choices[selected].get("keep_only", false)) \
-			and previous_label != str(choices[selected].label):
-		selected = -1
 	control.select(selected if selected >= 0 else (0 if not choices.is_empty() else -1))
 
 static func wardrobe_names(culture: String, part: int) -> Array:

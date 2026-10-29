@@ -118,6 +118,7 @@ func run() -> void:
 	check_canonical()
 	check_npc_catalogue()
 	check_clearing()
+	check_listed_bytes()
 	print("Appearance colours: %d checks, %d failures" % [checks, failures])
 	quit(1 if failures else 0)
 
@@ -159,14 +160,19 @@ func check_palette_coordinates() -> void:
 	for index: int in 12:
 		expect(Colours.nearest_eye_index(Colours.triple_colour(Colours.EYE_FROZEN[index])) == index, "eye %d snaps back" % index)
 		for part: String in Colours.PARTS:
-			expect(Colours.nearest_dye_index(Colours.triple_colour(Colours.frozen_dye(part, index)), part) == index,
-				"%s dye %d snaps back" % [part, index])
+			var nearest := Colours.nearest_dye_index(Colours.triple_colour(Colours.frozen_dye(part, index)), part)
+			if Colours.listed_dyes(part).has(index):
+				expect(nearest == index, "%s dye %d snaps back" % [part, index])
+			else:
+				expect(nearest != index and Colours.listed_dyes(part).has(nearest),
+					"%s dye %d (merged in the dropdown) is nearest a listed dye (%d)" % [part, index, nearest])
 
 # C17: the skin tone slider.
 func check_slider() -> void:
 	expect(Colours.SKIN_STOP_POSITION == [1, 23, 43, 95, 156, 201] and Colours.SKIN_STOP_INDEX == [1, 0, 2, 3, 4, 5],
 		"frozen stop positions")
-	var expected := {1: 1, 12: 1, 13: 0, 33: 0, 34: 2, 69: 2, 70: 3, 125: 3, 126: 4, 178: 4, 179: 5, 201: 5}
+	# Soft tan (index 0) is not a legacy byte: develop's Human list lacks it.
+	var expected := {1: 1, 12: 1, 13: 1, 22: 1, 23: 2, 33: 2, 34: 2, 69: 2, 70: 3, 125: 3, 126: 4, 178: 4, 179: 5, 201: 5}
 	for position: int in expected:
 		expect(Colours.nearest_skin_index(position) == expected[position], "position %d -> skin %d" % [position, expected[position]])
 	for sex: String in ["female", "male"]:
@@ -532,6 +538,70 @@ func check_canonical() -> void:
 	expect(v2.hair_detail == 1 and v2.hair_finish == 0 and v2.skin_tone == 0, "a PC/2 recipient sees the nearest enum, no colour fields")
 	var eloria := Colours.canonical({"skin": 7, "skin_tone": 50, "skin_undertone": 30}, "female")
 	expect(eloria.skin == 7 and eloria.skin_tone == 0 and eloria.skin_undertone == 0, "an Eloria swatch drops tone and undertone")
+
+# Every legacy byte the client writes is one develop's pickers list (Human skin
+# 1-9, the garment dropdowns without merged dyes; every eye and hair colour),
+# so an older dressing room shows it and its Apply keeps it (cross-version
+# review: Human pants 11 and Soft tan were rewritten, clearing the custom
+# value). Soft tan's stop is golden tan's byte with its position, drawn as the
+# authored skin.
+func check_listed_bytes() -> void:
+	var develop_skins := [1, 2, 3, 4, 5, 6, 7, 8, 9]
+	var skin_list: Array = []
+	for entry: Dictionary in AppearanceChoices.options("skin", "luminous"):
+		skin_list.append(int(entry.id))
+	skin_list.sort()
+	expect(skin_list == develop_skins, "the Human skin list is develop's (%s)" % [skin_list])
+	for part: String in Colours.PARTS:
+		var listed: Array = []
+		for entry: Dictionary in AppearanceChoices.options("wardrobe", "luminous", Colours.PARTS[part]):
+			listed.append(int(entry.id))
+		listed.sort()
+		expect(Array(Colours.listed_dyes(part)) == listed, "%s listed dyes are the dropdown's (%s)" % [part, listed])
+		var outside := 0
+		var points := 0
+		for hue: int in range(1, 241, 4):
+			for sat: int in range(1, 102, 5):
+				for light: int in range(1, 102, 5):
+					var saved := Colours.canonical({part: 0, part + "_hue": hue, part + "_sat": sat, part + "_light": light}, "male")
+					points += 1
+					if not listed.has(int(saved[part])):
+						outside += 1
+		for index: int in 12:
+			var frozen := Colours.frozen_dye(part, index)
+			var saved := Colours.canonical({part: 0, part + "_hue": frozen.x, part + "_sat": frozen.y, part + "_light": frozen.z}, "male")
+			points += 1
+			if not listed.has(int(saved[part])):
+				outside += 1
+			if not listed.has(index):
+				expect(saved[part + "_hue"] == frozen.x and Colours.garment(saved, MALE, part).custom,
+					"%s dye %d's frozen value (merged) stays a drawn custom value" % [part, index])
+		expect(outside == 0, "%s: every byte canonical writes is listed (%d of %d outside)" % [part, outside, points])
+	var unlisted_skin := 0
+	for tone: int in range(1, 202):
+		for undertone: int in [0, 1, 60, 101, 140, 201]:
+			var saved := Colours.canonical({"skin": 1, "skin_tone": tone, "skin_undertone": undertone}, "female")
+			if not develop_skins.has(int(saved.skin)):
+				unlisted_skin += 1
+			# The guard keeps every canonical tone drawn custom (or as its stop).
+			var drawn := Colours.skin(saved, FEMALE)
+			if int(saved.skin_tone) >= 1 and not drawn.custom and not bool(drawn.get("authored", false)):
+				unlisted_skin += 1
+	expect(unlisted_skin == 0, "every skin tone saves a listed skin byte its guard draws (%d bad)" % unlisted_skin)
+	for sex: String in ["female", "male"]:
+		var config := FEMALE if sex == "female" else MALE
+		var saved := Colours.canonical({"skin": 1, "skin_tone": Colours.SOFT_TAN_POSITION}, sex)
+		expect(saved.skin == 2 and saved.skin_tone == Colours.SOFT_TAN_POSITION and saved.skin_undertone == 0,
+			"%s: the Soft tan stop saves as its position on golden tan" % sex)
+		var drawn := Colours.skin(saved, config)
+		expect(not drawn.custom and drawn.authored and drawn.index == 0 and Colours.skin_shown(saved, config) == Colours.skin_shown({"skin": 0}, config),
+			"%s: the saved Soft tan stop draws the authored skin (index 0)" % sex)
+		expect(Colours.skin({"skin": 2, "skin_tone": 23, "skin_undertone": 60}, config).custom,
+			"%s: Soft tan with an undertone is a custom tone" % sex)
+		expect(not Colours.skin({"skin": 0, "skin_tone": 20}, config).custom and Colours.skin({"skin": 1, "skin_tone": 20}, config).custom,
+			"%s: tone 20 is drawn on pale beige's byte, guarded on skin 0" % sex)
+	var untouched := Colours.canonical({"skin": 0}, "male")
+	expect(untouched.skin == 0 and untouched.skin_tone == 0, "a save's own Soft tan (skin 0, no tone) is kept")
 
 # C20: the NPC catalogue's looks stay palette looks (no colour key, or one whose
 # legacy byte is its nearest value), so NPCs draw as on develop.

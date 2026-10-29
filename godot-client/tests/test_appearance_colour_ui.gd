@@ -78,8 +78,8 @@ func u7_gating() -> void:
 	var hair_color := node("%CreateHairColor") as OptionButton
 	expect(grid.visible and not panel.content.visible and hair_color.get_parent() == grid,
 		"U7 version 1: develop's dropdowns in develop's grid")
-	expect(skin.get_item_index(0) >= 0 and skin.get_item_text(skin.get_item_index(0)) == "Soft tan",
-		"U7 the Human skin list offers Soft tan")
+	expect(skin.get_item_index(0) == -1 and skin.item_count == 9,
+		"U7 the Human skin list is develop's: Soft tan (0) is not a new pick")
 	var order_before: Array = []
 	for child: Node in grid.get_children():
 		order_before.append(child.name)
@@ -207,12 +207,16 @@ func u13_undertone() -> void:
 	slider.tone_slider.value = 60
 	expect(slider.eloria() == -1 and slider.undertone_slider.editable and int(look().skin_tone) == 60,
 		"U13 moving the natural slider leaves the Eloria tone")
-	# Stop positions save as the palette byte; a stop with undertone keeps the tone.
+	# Stop positions save as the palette byte; a stop with undertone keeps the
+	# tone. Soft tan (no legacy byte of its own) keeps its position on golden tan.
 	slider.undertone_slider.value = 101
+	slider.tone_slider.value = 43
+	expect(int(look().skin) == 2 and int(look().skin_tone) == 0, "U13 the Golden tan stop saves skin 2 with tone 0")
 	slider.tone_slider.value = 23
-	expect(int(look().skin) == 0 and int(look().skin_tone) == 0, "U13 the Soft tan stop saves skin 0 with tone 0")
+	expect(int(look().skin) == 2 and int(look().skin_tone) == 23 and slider.tone_readout.text == "Soft tan",
+		"U13 the Soft tan stop saves its position on golden tan's byte")
 	slider.undertone_slider.value = 51
-	expect(int(look().skin) == 0 and int(look().skin_tone) == 23 and int(look().skin_undertone) == 51,
+	expect(int(look().skin) == 2 and int(look().skin_tone) == 23 and int(look().skin_undertone) == 51,
 		"U13 a stop with an undertone keeps the explicit tone")
 	# Mira's concept skin (p 10, Rosy) within the spec's 0.0005.
 	slider.set_body("female")
@@ -507,6 +511,75 @@ func u10_dressing_room() -> void:
 			leaked.append(field)
 	expect(state.sent == sent_before + 1 and leaked.is_empty() and state.command.contains("skin=%d" % COLOURS.nearest_skin_index(30)),
 		"U10 the version-2 Apply text has none of the colour fields or hair_finish: %s" % [leaked])
+	editor.call("_close")
+	editor.queue_free()
+	await process_frame
+	await u10_round_trips(model, animations, equipment)
+
+## Opening the dressing room and applying with nothing changed keeps every
+## saved byte and custom value (the cross-version review's pants 11 and Soft
+## tan): palette and custom, every listed or merged dye, every skin, at
+## versions 3 and 2.
+func u10_round_trips(model: Dictionary, animations: Dictionary, equipment: Dictionary) -> void:
+	var saves: Array = []
+	var base := {"skin": 1, "hair": AppearanceVariants.pack_hair(3, 4), "eyes": 1, "shirt": 0, "pants": 0, "boots": 0}
+	for skin: int in 10:
+		saves.append(base.merged({"skin": skin}, true))
+	for tone: int in [13, 20, 23, 30, 60, 150]:
+		saves.append(COLOURS.canonical(base.merged({"skin_tone": tone, "skin_undertone": 0 if tone == 23 else 60}, true), "female"))
+	for part: String in COLOURS.PARTS:
+		for index: int in 12:
+			saves.append(base.merged({part: index}, true))
+			var frozen: Vector3i = COLOURS.frozen_dye(part, index)
+			var custom := Vector3i(frozen.x, clampi(frozen.y + 3, 1, 101), clampi(frozen.z - 2, 1, 101))
+			saves.append(COLOURS.canonical(base.merged({part + "_hue": custom.x, part + "_sat": custom.y,
+				part + "_light": custom.z}, true), "female"))
+	for index: int in 12:
+		var eye: Vector3i = COLOURS.EYE_FROZEN[index]
+		saves.append(COLOURS.canonical(base.merged({"eyes": index, "eye_hue": eye.x, "eye_sat": eye.y,
+			"eye_light": clampi(eye.z + 2, 1, 101)}, true), "female"))
+	for index: int in 20:
+		var hair: Vector3i = COLOURS.frozen_hair(index, "female")
+		saves.append(COLOURS.canonical(base.merged({"hair": AppearanceVariants.pack_hair(3, index), "hair_hue": hair.x,
+			"hair_sat": hair.y, "hair_light": clampi(hair.z + 2, 1, 101)}, true), "female"))
+	var bad: Array = []
+	var trips := 0
+	for version: int in [3, 2]:
+		var editor = EDITOR.new()
+		root.add_child(editor)
+		var state := {"version": version}
+		var send := func(_command: String) -> int: return OK
+		var source := func() -> int: return state.version
+		for look: Dictionary in saves:
+			var saved := Custom.normalized(look)
+			saved.merge(look, true)
+			if not Custom.validate(saved, version).ok:
+				continue
+			editor.open_for({"actor_id": 0, "actor_type": 0, "x": 0, "y": 0, "rotation": 0, "name": "", "kind": 1,
+				"appearance": saved}, model, animations, equipment, send, source)
+			var applied: Dictionary = editor.call("_values")
+			trips += 1
+			for field: String in saved:
+				if int(applied.get(field, -1)) != int(saved[field]):
+					bad.append("v%d %s: %s %s -> %s" % [version, str(look), field, saved[field], applied.get(field)])
+					break
+		editor.call("_close")
+		editor.queue_free()
+		await process_frame
+	expect(trips >= 150 and bad.is_empty(), "U10 open-and-Apply keeps every saved byte and custom value (%d trips): %s" % [trips, bad.slice(0, 6)])
+	# A save with Soft tan shows and keeps it; a new pick never offers it.
+	var editor = EDITOR.new()
+	root.add_child(editor)
+	editor.open_for({"actor_id": 0, "actor_type": 0, "x": 0, "y": 0, "rotation": 0, "name": "", "kind": 1,
+		"appearance": Custom.normalized({}).merged(base.merged({"skin": 0}, true), true)}, model, animations, equipment,
+		func(_command: String) -> int: return OK, func() -> int: return 2)
+	var skin_picker := (editor.get("_pickers") as Dictionary).skin as OptionButton
+	expect(skin_picker.get_selected_id() == 0 and skin_picker.get_item_text(skin_picker.selected) == "Soft tan",
+		"U10 a Soft tan save opens on Soft tan")
+	editor.open_for({"actor_id": 0, "actor_type": 0, "x": 0, "y": 0, "rotation": 0, "name": "", "kind": 1,
+		"appearance": Custom.normalized({}).merged(base, true)}, model, animations, equipment,
+		func(_command: String) -> int: return OK, func() -> int: return 2)
+	expect(skin_picker.get_item_index(0) == -1, "U10 another save's list has no Soft tan")
 	editor.call("_close")
 	editor.queue_free()
 	await process_frame

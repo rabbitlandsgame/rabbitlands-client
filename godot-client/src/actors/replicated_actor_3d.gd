@@ -726,15 +726,19 @@ func apply_appearance_variants(appearance: Dictionary) -> void:
 	if _native_skeleton == null:
 		return
 	var culture: String = str(_model_config.get("culture", "luminous"))
-	_skin_choice = int(appearance.get("skin", 0))
-	var skin_tint: Color = AppearanceVariants.skin_tint(int(appearance.get("skin", 0)))
-	var hair_tint: Color = AppearanceVariants.hair_color(int(appearance.get("hair", 0)))
-	var eye_tint: Color = AppearanceVariants.eye_color(int(appearance.get("eyes", 0)))
 	# PC/3 colour fields (colour model spec revision 3): every value is the
 	# palette's - develop's own - unless a Human's custom value survives Rule A,
 	# Rule C and the guard. Brows (and stubble) take the hair's reference dye
 	# clamped to 1; the hair meshes get their per-path dyes from the groom.
 	var colours := APPEARANCE_COLOURS.resolve(appearance, _model_config)
+	# Soft tan saved as its slider stop on golden tan's byte draws skin 0.
+	var skin_byte := int(appearance.get("skin", 0))
+	if bool(colours.skin.get("authored", false)):
+		skin_byte = APPEARANCE_COLOURS.SOFT_TAN
+	_skin_choice = skin_byte
+	var skin_tint: Color = AppearanceVariants.skin_tint(skin_byte)
+	var hair_tint: Color = AppearanceVariants.hair_color(int(appearance.get("hair", 0)))
+	var eye_tint: Color = AppearanceVariants.eye_color(int(appearance.get("eyes", 0)))
 	_skin_custom = bool(colours.skin.custom)
 	_skin_colour = colours.skin.colour if _skin_custom else AppearanceVariants.skin_color(_skin_choice)
 	var brow_tint := hair_tint

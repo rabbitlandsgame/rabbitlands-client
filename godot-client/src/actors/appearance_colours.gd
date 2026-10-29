@@ -12,6 +12,12 @@ extends RefCounted
 ## exactly develop's palette colours, so old saves, NPCs and older peers draw
 ## byte for byte as on develop. Only custom values meet the limits.
 ##
+## Legacy bytes written for older recipients are always entries develop's own
+## pickers list - natural skins 1-5 (not Soft tan, 0) and the dyes a garment's
+## dropdown keeps (not a near-duplicate such as Human pants 11) - so an older
+## dressing room shows them, and its next Apply neither rewrites the byte nor
+## (through the server's clearing rule) erases the custom value it carries.
+##
 ## Hair is an apparent colour - what the hair looks like, on the skin
 ## swatches' scale - and each draw path gets the dye that shows it, from the
 ## measured response of that path (data/actors/hair_apparent.json, written by
@@ -30,6 +36,11 @@ const HUE_STEPS := 240
 ## at their frozen wire positions (cumulative OKLab arc length, spec 2.1).
 const SKIN_STOP_INDEX: Array[int] = [1, 0, 2, 3, 4, 5]
 const SKIN_STOP_POSITION: Array[int] = [1, 23, 43, 95, 156, 201]
+## Soft tan, the authored skin (index 0) at its slider stop. Develop's Human skin
+## list has no id 0, so it is saved as its position on the nearest listed byte
+## (golden tan) and drawn as the authored skin (skin()).
+const SOFT_TAN := 0
+const SOFT_TAN_POSITION := 23
 ## Index 0's colour is the body's mean authored skin (never recoloured), per sex.
 const SKIN_REFERENCE := {"female": Color(0.8138729394650926, 0.6331850101745203, 0.5323137669781451),
 	"male": Color(0.8267734339554071, 0.6364139581297991, 0.5191423802593961)}
@@ -91,6 +102,8 @@ static var _hair_shapes: Dictionary = {}
 ## "<sex>/<path>/<style>" -> the measured finish positions, ascending.
 static var _hair_positions: Dictionary = {}
 static var _hair_tables_loaded := false
+## part -> the listed dye ids (listed_dyes).
+static var _listed_dyes: Dictionary = {}
 
 
 # ------------------------------------------------------------ colour spaces
@@ -208,10 +221,18 @@ static func nearest_skin_stop(position: float) -> int:
 			best = stop
 	return best
 
-## The palette skin index older recipients get for slider position p:
-## 1-12 -> 1, 13-33 -> 0, 34-69 -> 2, 70-125 -> 3, 126-178 -> 4, 179-201 -> 5.
+## The palette skin index older recipients get for slider position p: the
+## nearest of the stops develop's Human skin list offers (Soft tan, index 0, is
+## not one), ties to the lower position: 1-22 -> 1, 23-69 -> 2, 70-125 -> 3,
+## 126-178 -> 4, 179-201 -> 5.
 static func nearest_skin_index(position: float) -> int:
-	return SKIN_STOP_INDEX[nearest_skin_stop(position)]
+	var best := -1
+	for stop: int in range(SKIN_STOP_POSITION.size()):
+		if SKIN_STOP_INDEX[stop] == SOFT_TAN:
+			continue
+		if best < 0 or absf(position - SKIN_STOP_POSITION[stop]) < absf(position - SKIN_STOP_POSITION[best]) - TIE:
+			best = stop
+	return SKIN_STOP_INDEX[best]
 
 ## The slider position of a natural skin index 0..5, else 0.
 static func skin_position(index: int) -> int:
@@ -273,7 +294,10 @@ static func skin_lab(position: float, t: float, sex: String, model_config: Dicti
 	return {"lab": result, "limited": limited}
 
 ## The skin to draw: {"index", "custom", "colour" (sRGB; the palette swatch on
-## the palette path), "position", "undertone" (t), "limited"}.
+## the palette path), "position", "undertone" (t), "limited"}. Soft tan saved
+## as its stop (SOFT_TAN_POSITION, neutral, on its nearest byte) is the palette
+## entry 0, the authored skin, with "authored" true: the renderer draws index 0
+## instead of the stored byte.
 static func skin(appearance: Dictionary, model_config: Dictionary) -> Dictionary:
 	var index := int(appearance.get("skin", 0)) if typeof(appearance.get("skin", 0)) in [TYPE_INT, TYPE_FLOAT] else 0
 	var result := {"index": index, "custom": false, "colour": AppearanceVariants.skin_color(index),
@@ -287,6 +311,9 @@ static func skin(appearance: Dictionary, model_config: Dictionary) -> Dictionary
 		return result
 	if position == skin_position(index) and is_zero_approx(t):
 		return result
+	if position == SOFT_TAN_POSITION and is_zero_approx(t):
+		return {"index": SOFT_TAN, "custom": false, "colour": AppearanceVariants.skin_color(SOFT_TAN),
+			"position": float(SOFT_TAN_POSITION), "undertone": 0.0, "limited": false, "authored": true}
 	var sex := body_sex(model_config)
 	var final := skin_lab(position, t, sex, model_config)
 	result.merge({"custom": true, "colour": from_oklab(final.lab), "position": float(position),
@@ -776,12 +803,26 @@ static func frozen_dye(part: String, index: int) -> Vector3i:
 	index = posmod(index, 12)
 	return (DYE_FROZEN_OWN[part] as Array)[index] if index < 3 else DYE_FROZEN_SHARED[index - 3]
 
-## The luminous dye (0..11) for `part` nearest a colour, by OKLab distance.
+## The luminous dyes `part`'s dropdown lists, ascending: AppearanceChoices
+## merges a dye within its threshold of an earlier one (Human pants 11,
+## Charcoal grey), and develop's dropdown the same, so a byte outside this list
+## would be shown as another entry and rewritten by the next Apply.
+static func listed_dyes(part: String) -> Array[int]:
+	if not _listed_dyes.has(part):
+		var ids: Array[int] = []
+		for entry: Dictionary in AppearanceChoices.options("wardrobe", "luminous", PARTS[part]):
+			ids.append(int(entry.id))
+		ids.sort()
+		_listed_dyes[part] = ids
+	return _listed_dyes[part]
+
+## The listed luminous dye (listed_dyes) for `part` nearest a colour, by OKLab
+## distance; ties to the lower index.
 static func nearest_dye_index(colour: Color, part: String) -> int:
 	var target := oklab(colour)
 	var best := 0
 	var distance := INF
-	for index: int in 12:
+	for index: int in listed_dyes(part):
 		var d := target.distance_to(oklab(AppearanceVariants.wardrobe_color("luminous", PARTS[part], index)))
 		if d < distance - TIE:
 			best = index
@@ -854,8 +895,11 @@ static func resolve(appearance: Dictionary, model_config: Dictionary) -> Diction
 ## custom fields 0; every other custom value keeps its fields and writes the
 ## nearest palette byte into the legacy field (skin, the colour part of hair,
 ## eyes, shirt, pants, boots), so older recipients and PC/2 servers see the
-## nearest palette look. An undertone of 101 is written 0; an Eloria skin
-## (6-9) drops tone and undertone. The hair finish slider likewise
+## nearest palette look. Only bytes develop's pickers list are written: the
+## Soft tan stop keeps its position on golden tan's byte (nearest_skin_index),
+## and a garment snaps only to its listed dyes (a merged dye's frozen value is
+## a custom value). An undertone of 101 is written 0; an Eloria skin (6-9)
+## drops tone and undertone. The hair finish slider likewise
 ## (HairFinish.canonical). `sex` is the body's ("female" / "male").
 static func canonical(appearance: Dictionary, sex: String) -> Dictionary:
 	var result := appearance.duplicate()
@@ -893,7 +937,7 @@ static func canonical(appearance: Dictionary, sex: String) -> Dictionary:
 		wire = triple(appearance, part)
 		if wire != Vector3i.ZERO:
 			var snapped := -1
-			for index: int in 12:
+			for index: int in listed_dyes(part):
 				if frozen_dye(part, index) == wire:
 					snapped = index
 					break

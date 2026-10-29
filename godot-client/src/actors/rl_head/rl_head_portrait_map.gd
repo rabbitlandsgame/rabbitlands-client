@@ -124,6 +124,8 @@ static func face(appearance: Dictionary, sex: String) -> RLHeadAppearance:
 	var skin_index := palette_index(appearance, "skin", 10)
 	var config := human_config(sex)
 	var custom_skin := COLOURS.skin(appearance, config)
+	if bool(custom_skin.get("authored", false)):
+		skin_index = COLOURS.SOFT_TAN
 	result.skin = custom_skin_color(custom_skin, sex) if custom_skin.custom else skin_color(skin_index, sex)
 	var custom_eyes := COLOURS.eyes(appearance, config)
 	result.eyes = custom_eye_color(custom_eyes.pigment, sex) if custom_eyes.custom \
@@ -645,6 +647,9 @@ static func _indexed(value: Variant, index: int, fallback: float) -> float:
 static func details(appearance: Dictionary, sex: String) -> Dictionary:
 	var seeds := defaults(sex)
 	var skin := palette_index(appearance, "skin", 10)
+	var custom_skin := COLOURS.skin(appearance, human_config(sex))
+	if bool(custom_skin.get("authored", false)):
+		skin = COLOURS.SOFT_TAN
 	var facial := field(appearance, "facial_hair", 0, 5)
 	var result := {
 		"brow_style": _indexed(seeds.get("brow_style"), 0, 2.0),
@@ -655,7 +660,6 @@ static func details(appearance: Dictionary, sex: String) -> Dictionary:
 		"stubble": _indexed(seeds.get("stubble"), facial, 0.0),
 		"lip_tint": lip_tint_color(int(_indexed(seeds.get("lip_tint"), skin, 2.0))),
 	}
-	var custom_skin := COLOURS.skin(appearance, human_config(sex))
 	if custom_skin.custom:
 		# A custom skin tone: freckles, liner and lip tint between the two
 		# neighbouring slider stops by position; the undertone leaves them.
