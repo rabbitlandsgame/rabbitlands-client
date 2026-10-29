@@ -64,7 +64,7 @@ extends RefCounted
 ## entry. (Live continent chunks are detached builds, which read the cache but
 ## never write it, so this reaches whole-map loads today.)
 ## 8 - archived procedural model copies are omitted before scene batching.
-const CACHE_FORMAT_VERSION := 9 # Ordinary road meshes/colliders are replaced by external fields.
+const CACHE_FORMAT_VERSION := 10 # Canonical pixels preserve original per-use texture policy.
 
 ## Wrapped into the digest so the hash of a package cannot be confused with the
 ## hash of anything else, and so the digest itself can be revised without

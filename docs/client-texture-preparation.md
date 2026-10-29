@@ -183,7 +183,8 @@ policy stays separate:
   `externalImagePolicies`, and material-document image descriptors carry the
   same glTF extra. Road-only fallback textures do not acquire new cooker roles.
 
-Explicit directories must be relative and remain inside `eloria-assets/maps`.
+Explicit directories must be plain relative paths (no percent escapes) and
+remain inside `eloria-assets/maps`.
 Invalid or undeclared policies fail validation instead of selecting the
 canonical file's directory. These are ordinary image URIs and standard glTF
 extras; offline tools can continue reading the canonical files.
@@ -202,6 +203,12 @@ separate. A refused sidecar gets the raw variant key after decoding. During an
 offline native cook only, source discovery also separates policy directories so
 one shared Texture2D cannot erase another usage's provenance. No strong resource
 cache is added.
+
+For explicitly annotated contents, streaming counts raw pixels once and each
+distinct accepted payload/recipe/format once. Compatible copies in different
+directories share one estimate; raw and compressed variants can coexist.
+Fallback knowledge conservatively retains the raw estimate alongside accepted
+variants. Unannotated legacy sources keep their existing accounting.
 
 The canonicalizer writes an ignored plan and stage. Apply checks the SHA of every
 scanned input, saves affected originals to a fresh ignored recovery directory,

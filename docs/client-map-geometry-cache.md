@@ -119,6 +119,12 @@ the collision and paving policies include it too. Update the writer, texture-sou
 identifiers as well when their contracts change. The policy key also includes
 the engine build, renderer, archived-model policy and older map-cache format.
 
+Canonical map image sharing uses central geometry policy 3, map scene format 10,
+and texture-source/binding policy v2. Existing prepared entries are invalidated:
+rebuild them with the matching runtime. Shared prototype and road material
+loads retain each original image directory's texture policy even when the
+physical pixel file is shared with another region.
+
 Development checkouts lack a release identity. Selected source-input metadata
 provides a cheap hint that preparation should run again; it is not evidence that
 a cache entry is valid. Runtime source and payload hashes remain authoritative,

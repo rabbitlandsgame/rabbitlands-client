@@ -86,9 +86,14 @@ static func acquire(key: String, path: String) -> Mesh:
 	if not FileAccess.file_exists(path):
 		push_error("shared_mesh missing prototype=%s path=%s" % [key, path])
 		return null
+	var entry: Dictionary = index_for(path).get(key, {})
+	var image_manifest := _image_manifest(entry)
+	var policy_errors := VramTextures.image_policy_errors(image_manifest, path.get_base_dir())
+	if not policy_errors.is_empty():
+		push_error("shared_mesh image policy invalid prototype=%s: %s" % [key, "; ".join(policy_errors)])
+		return null
 	if not GeometrySources.is_recording() and PreparedContent.selected_mode() != "raw":
-		var declared: Dictionary = index_for(path).get(key, {})
-		var token := VramTextures.cache_token({"externalResources": declared.get("images", {})}, path.get_base_dir())
+		var token := VramTextures.cache_token(image_manifest, path.get_base_dir())
 		var record := PreparedContent.acquire("mesh", path, FileAccess.get_sha256(path), token)
 		if str(record.status) == "hit":
 			var mesh := PreparedSharing.mesh_resource(record)
@@ -102,10 +107,9 @@ static func acquire(key: String, path: String) -> Mesh:
 		push_error("shared_mesh parse requires main-thread extension initialization")
 		return null
 	VramTextures.ensure_registered()
-	var entry: Dictionary = index_for(path).get(key, {})
 	var images: Variant = entry.get("images")
 	if images is Dictionary and not (images as Dictionary).is_empty():
-		var plan: Dictionary = VramTextures.plan_for({"externalResources": images})
+		var plan: Dictionary = VramTextures.plan_for(image_manifest)
 		if not plan.is_empty():
 			state.set_additional_data(VramTextures.PLAN_KEY, plan)
 	var operation_began := Time.get_ticks_usec()
@@ -135,6 +139,11 @@ static func acquire(key: String, path: String) -> Mesh:
 		return null
 	last_parsed += 1
 	return _publish_or_adopt(key, meshes[0])
+
+
+static func _image_manifest(entry: Dictionary) -> Dictionary:
+	return {"externalResources": entry.get("images", {}),
+		"externalImagePolicies": entry.get("imagePolicies", {})}
 
 
 static func _published(key: String) -> Mesh:
