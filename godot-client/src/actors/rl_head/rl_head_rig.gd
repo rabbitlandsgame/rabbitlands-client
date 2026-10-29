@@ -1005,12 +1005,13 @@ func _bake(mesh_node: MeshInstance3D, still: bool = false) -> void:
 	if source == null or not IDENTITY_BAKE.has_baked_shapes(source):
 		return
 	var weights := _baked_weights(mesh_node)
-	var entry_key := IDENTITY_BAKE.key(source, weights, still)
+	var level := int(mesh_node.get_meta(LOD_LEVEL_META, 0))
+	var entry_key := IDENTITY_BAKE.key(source, weights, still, level)
 	var id := mesh_node.get_instance_id()
 	if str(_bakes.get(id, "")) == entry_key:
 		return
 	_unbake(mesh_node, true)
-	var baked := IDENTITY_BAKE.acquire(source, weights, _on_baked.bind(id, entry_key), still)
+	var baked := IDENTITY_BAKE.acquire(source, weights, _on_baked.bind(id, entry_key), still, level)
 	if baked == null and not IDENTITY_BAKE.holds(entry_key):
 		# No bake to be had now (budget spent): this node stays live.
 		return

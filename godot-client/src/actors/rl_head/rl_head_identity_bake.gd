@@ -63,11 +63,14 @@ const FINISH_BUDGET_USEC := 3000
 const MOVE_EPSILON := 1e-7
 
 ## Surfaces a still bake leaves out (see `acquire`): the teeth and tongue, which
-## a closed mouth hides; in the Compatibility renderer the cornea's glossy shell
-## too (still_dropped_materials), whose highlight is a pixel at the distances
-## still faces are drawn there (beyond the 4 expressive faces within 4 m).
+## a closed mouth hides. In the Compatibility renderer, where every skinned
+## surface costs a transform-feedback pass a frame, also the cornea's glossy
+## shell and, from the second level on (beyond 6 m there), the eyelashes: a
+## pixel or less at the distances still faces are drawn there (beyond the 4
+## expressive faces within 4 m). See still_dropped_materials.
 const STILL_DROPPED_MATERIALS: Array[String] = ["rl_mouth"]
 const COMPATIBILITY_STILL_DROPPED_MATERIALS: Array[String] = ["rl_mouth", "rl_cornea"]
+const COMPATIBILITY_FAR_STILL_DROPPED_MATERIALS: Array[String] = ["rl_mouth", "rl_cornea", "rl_lash"]
 
 ## Bake on the calling thread at once (tests and evidence renders), instead of
 ## after BAKE_DELAY_MSEC on the WorkerThreadPool with a callback.
@@ -149,8 +152,8 @@ static func has_baked_shapes(source: Mesh) -> bool:
 
 ## The cache key of `source` with `weights` (blend-shape name -> weight; any
 ## shape not named is 0): the source's identity, the quantised weights and
-## whether the bake is still.
-static func key(source: Mesh, weights: Dictionary, still: bool = false) -> String:
+## whether the bake is still (with the level its surfaces are left out for).
+static func key(source: Mesh, weights: Dictionary, still: bool = false, level: int = 0) -> String:
 	var codes := PackedStringArray()
 	for index: int in source.get_blend_shape_count():
 		var shape := str(source.get_blend_shape_name(index))
@@ -159,7 +162,7 @@ static func key(source: Mesh, weights: Dictionary, still: bool = false) -> Strin
 		var code := roundi(float(weights.get(shape, 0.0)) / QUANTUM)
 		if code != 0:
 			codes.append("%d:%d" % [index, code])
-	return "%d|%s%s" % [source.get_instance_id(), ",".join(codes), "|still" if still else ""]
+	return "%d|%s%s" % [source.get_instance_id(), ",".join(codes), ("|still%d" % level) if still else ""]
 
 
 ## The baked mesh for `source` and `weights`, counted as one more user. When
@@ -168,13 +171,13 @@ static func key(source: Mesh, weights: Dictionary, still: bool = false) -> Strin
 ## is false) when nothing can be baked now: the switch is off, the source has
 ## no identity shapes, or the budget is spent by meshes in use. Draw live then.
 ## A `still` bake keeps no live shapes at all and leaves out
-## still_dropped_materials (see still_enabled): its mesh can have
-## fewer surfaces than its source.
+## still_dropped_materials for the source's `level` (see still_enabled): its
+## mesh can have fewer surfaces than its source.
 static func acquire(source: ArrayMesh, weights: Dictionary, on_ready: Callable = Callable(),
-		still: bool = false) -> ArrayMesh:
+		still: bool = false, level: int = 0) -> ArrayMesh:
 	if source == null or not has_baked_shapes(source) or not (enabled() or (still and still_enabled())):
 		return null
-	var entry_key := key(source, weights, still)
+	var entry_key := key(source, weights, still, level)
 	var entry: Dictionary = _entries.get(entry_key, {})
 	if not entry.is_empty():
 		if int(entry["users"]) == 0:
@@ -190,18 +193,18 @@ static func acquire(source: ArrayMesh, weights: Dictionary, on_ready: Callable =
 	if _bytes >= budget_bytes:
 		return null
 	entry = {"key": entry_key, "source": source, "weights": weights.duplicate(), "mesh": null, "users": 1,
-		"bytes": 0, "waiters": [], "task": -1, "result": [], "still": still,
+		"bytes": 0, "waiters": [], "task": -1, "result": [], "still": still, "level": level,
 		"due": Time.get_ticks_msec() + BAKE_DELAY_MSEC}
 	_entries[entry_key] = entry
 	if synchronous:
 		var data := _ready_source(source)
-		entry["bytes"] = int(data["still_bytes" if still else "bytes"])
+		entry["bytes"] = _entry_bytes(data, still, level)
 		_bytes += int(entry["bytes"])
 		entry["result"] = compute(data, _vector(data, weights), not still)
 		_finish(entry)
 		return entry["mesh"] as ArrayMesh
 	# Counted against the budget at once, so a burst of requests stops at it.
-	entry["bytes"] = _estimate(source, still)
+	entry["bytes"] = _estimate(source, still, level)
 	_bytes += int(entry["bytes"])
 	if on_ready.is_valid():
 		(entry["waiters"] as Array).append(on_ready)
@@ -356,7 +359,7 @@ static func _poll() -> void:
 		var vector := _vector(data, entry["weights"] as Dictionary)
 		var result: Array = entry["result"]
 		var still := bool(entry["still"])
-		var bytes := int(data["still_bytes" if still else "bytes"])
+		var bytes := _entry_bytes(data, still, int(entry["level"]))
 		_bytes += bytes - int(entry["bytes"])
 		entry["bytes"] = bytes
 		entry["task"] = WorkerThreadPool.add_task(func() -> void:
@@ -394,7 +397,7 @@ static func _finish(entry: Dictionary) -> void:
 	for surface: int in result.size():
 		var source_surface: Dictionary = (data["surfaces"] as Array)[surface]
 		var baked: Dictionary = result[surface]
-		if still and _still_dropped(source_surface):
+		if still and _still_dropped(source_surface, int(entry["level"])):
 			continue
 		var arrays: Array = (source_surface["arrays"] as Array).duplicate()
 		arrays[Mesh.ARRAY_VERTEX] = baked["v"]
@@ -430,17 +433,30 @@ static func _finish(entry: Dictionary) -> void:
 			waiter.call(mesh)
 
 
-## The materials whose surfaces a still bake leaves out in this renderer.
-static func still_dropped_materials() -> Array[String]:
+## The materials whose surfaces a still bake of a `level` source leaves out in
+## this renderer (main thread).
+static func still_dropped_materials(level: int = 0) -> Array[String]:
 	if RenderingServer.get_current_rendering_method() == "gl_compatibility":
-		return COMPATIBILITY_STILL_DROPPED_MATERIALS
+		return COMPATIBILITY_FAR_STILL_DROPPED_MATERIALS if level >= 1 else COMPATIBILITY_STILL_DROPPED_MATERIALS
 	return STILL_DROPPED_MATERIALS
 
 
-## Whether a still bake leaves this source surface out.
-static func _still_dropped(source_surface: Dictionary) -> bool:
+## Whether a still bake of a `level` source leaves this source surface out.
+static func _still_dropped(source_surface: Dictionary, level: int) -> bool:
 	var material := source_surface.get("material") as Material
-	return material != null and still_dropped_materials().has(material.resource_name)
+	return material != null and still_dropped_materials(level).has(material.resource_name)
+
+
+## The bytes of one entry's mesh: `bytes` of the source data, or for a still
+## bake its kept surfaces without shapes.
+static func _entry_bytes(data: Dictionary, still: bool, level: int) -> int:
+	if not still:
+		return int(data["bytes"])
+	var bytes := 0
+	for surface: Dictionary in data["surfaces"] as Array:
+		if not _still_dropped(surface, level):
+			bytes += _surface_bytes(surface["arrays"] as Array, 0, surface["lods"] as Dictionary)
+	return bytes
 
 
 static func _source_state(source: ArrayMesh) -> Dictionary:
@@ -503,7 +519,6 @@ static func _prepare(raw: Dictionary, into: Dictionary) -> void:
 			kept.append(index)
 	var surfaces: Array = []
 	var bytes := 0
-	var still_bytes := 0
 	for fetched: Dictionary in raw["surfaces"] as Array:
 		var arrays: Array = fetched["arrays"]
 		var shapes: Array = fetched["shapes"]
@@ -516,8 +531,6 @@ static func _prepare(raw: Dictionary, into: Dictionary) -> void:
 		for index: int in names.size():
 			sparse.append(_sparse(base_v, base_n, base_t, shapes[index] as Array) if index < shapes.size() else [])
 		bytes += _surface_bytes(arrays, kept.size(), fetched["lods"] as Dictionary)
-		if not _still_dropped(fetched):
-			still_bytes += _surface_bytes(arrays, 0, fetched["lods"] as Dictionary)
 		var surface := fetched.duplicate()
 		surface.erase("shapes")
 		surface["base_v"] = base_v
@@ -527,7 +540,7 @@ static func _prepare(raw: Dictionary, into: Dictionary) -> void:
 		surfaces.append(surface)
 	var data: Dictionary = into["data"] if into.has("data") else {}
 	data.merge({"names": names, "baked": baked, "kept": kept, "mode": raw["mode"], "surfaces": surfaces,
-		"bytes": bytes, "still_bytes": still_bytes}, true)
+		"bytes": bytes}, true)
 	into["data"] = data
 
 
@@ -548,16 +561,20 @@ static func _surface_bytes(arrays: Array, kept: int, lods: Dictionary) -> int:
 
 
 ## The same estimate before the source is read (vertex and shape counts only).
-static func _estimate(source: ArrayMesh, still: bool = false) -> int:
+static func _estimate(source: ArrayMesh, still: bool = false, level: int = 0) -> int:
 	var state: Dictionary = _sources.get(source.get_instance_id(), {})
 	# Only a ready source's data: a worker may still be filling it.
 	if str(state.get("state", "")) == "ready":
-		return int((state["data"] as Dictionary)["still_bytes" if still else "bytes"])
+		return _entry_bytes(state["data"] as Dictionary, still, level)
 	var kept := 0
 	for index: int in source.get_blend_shape_count():
 		kept += 0 if still or is_baked_shape(str(source.get_blend_shape_name(index))) else 1
 	var bytes := 0
+	var dropped := still_dropped_materials(level) if still else ([] as Array[String])
 	for surface: int in source.get_surface_count():
+		var material := source.surface_get_material(surface)
+		if material != null and dropped.has(material.resource_name):
+			continue
 		bytes += source.surface_get_array_len(surface) * (20 * (1 + kept) + 28) \
 			+ source.surface_get_array_index_len(surface) * 4
 	return bytes
