@@ -330,7 +330,7 @@ func run() -> void:
 	reset_main(); controller.set("playing", false)
 	app.campaign.targets = [{"id":"mother","object_id":64000,"tile":[253,154],"approach":[253,153],"label":"Speak to her","enabled":true,"completed":false}]
 	main.call("_on_campaign_target", 64000, Vector2i(253,154), false)
-	expect(frames.size() == 1 and frames[0] == EloriaProtocol.use_map_object(64000), "field use recomputes current native range instead of trusting a queued nearby flag")
+	expect(frames.size() == 1 and frames[0] == EloriaProtocol.chat("#campaign rescue replay"), "nearby field interaction restores the missing cinematic cast instead of trusting the queued nearby flag")
 	frames.clear(); app.campaign.targets[0].enabled = false
 	main.call("_on_campaign_target", 64000, Vector2i(253,154), true)
 	expect(frames.is_empty(), "an obsolete field button cannot use a currently disabled rescue target")
@@ -342,7 +342,7 @@ func run() -> void:
 	frames.clear()
 	main.get("campaign_hud").call("apply_state", app.campaign, Vector2i(253,154), "landfall")
 	main.get("campaign_hud").call("_request_target", "mother", 64000)
-	expect(frames.size() == 1 and frames[0] == EloriaProtocol.use_map_object(64000), "after Skip the enabled mother card still opens ordinary live conversation")
+	expect(frames.size() == 1 and frames[0] == EloriaProtocol.chat("#campaign rescue replay"), "after Skip the enabled mother card requests the current cinematic conversation without inventing a response")
 	for response: int in [6400,6401,6402,6403]:
 		frames.clear(); main.call("_on_dialogue_option", 20, response)
 		expect(frames.size() == 1 and frames[0] == EloriaProtocol.npc_response(20,response), "native mother response " + str(response) + " remains available independently of replay")
