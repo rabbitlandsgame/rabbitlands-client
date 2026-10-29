@@ -1,473 +1,478 @@
 {
- "schemaVersion": "1.0.0",
- "assetVersion": "1.0.0",
- "asset": {
-  "id": "boarsend__chunk_12_13",
-  "name": "Boarsend",
-  "glb": "world.glb",
-  "units": "meters",
-  "coordinateSystem": {
-   "handedness": "right",
-   "upAxis": "Y",
-   "northAxis": "-Z"
-  },
-  "origin": [
-   0,
-   0,
-   0
-  ],
-  "bounds": {
-   "min": [
-    210.0,
-    -16.0,
-    307.0
-   ],
-   "max": [
-    308.0,
-    0.0,
-    405.0
-   ]
-  },
-  "playableBounds": {
-   "min": [
-    -678.0,
-    -16.0,
-    -425.0
-   ],
-   "max": [
-    678.0,
-    194.72972436523438,
-    425.0
-   ]
-  },
-  "mapBounds": {
-   "min": [
-    -678.0,
-    -16.0,
-    -425.0
-   ],
-   "max": [
-    678.0,
-    194.72972436523438,
-    425.0
-   ]
-  },
-  "seaLevel": 0.0,
-  "serverCells": 1368
- },
- "coordinateTransform": {
-  "metresPerTile": 1.0,
-  "serverOrigin": [
-   682,
-   429
-  ],
-  "serverCells": [
-   1368,
-   1368
-  ],
-  "origin": [
-   0,
-   0,
-   0
-  ],
-  "walkingHeight": 133.04600524902344,
-  "invertServerY": true,
-  "serverStorageVersion": 1,
-  "serverTileMin": [
-   0,
-   0
-  ],
-  "addressableWorldBounds": {
-   "min": [
-    -682,
-    -939
-   ],
-   "max": [
-    686,
-    429
-   ]
-  }
- },
- "collision": {
-  "nodeNames": [],
-  "format": "EWCG-v2",
-  "formatVersion": 2,
-  "version": 2,
-  "width": 2736,
-  "height": 2736,
-  "cellMetres": 0.5,
-  "serverStorageVersion": 1,
-  "serverTileMin": [
-   0,
-   0
-  ],
-  "serverCells": [
-   1368,
-   1368
-  ],
-  "originMetres": [
-   -682.0,
-   429.0
-  ],
-  "gridAlignment": "tile-centres-v1",
-  "authoredSurfaceExport": true,
-  "maxTerrainGrade": 0.65,
-  "maximumWadingDepth": 0.35,
-  "actorVolume": {
-   "floorClearance": 0.06,
-   "height": 2.1,
-   "halfCellWidth": 0.5
-  },
-  "note": "kit solids carry no client collision (the wrappers that name them are not meshes); the served grid blocks them"
- },
- "navigation": {
-  "surfaceNodePrefixes": [
-   "Terrain_",
-   "Walk_"
-  ],
-  "terrainConforming": true,
-  "authority": "server",
-  "defaultSpawn": "boarsend--arrival-plateau"
- },
- "environment": {
-  "sky": {
-   "type": "gradient",
-   "zenith": [
-    0.16,
-    0.42,
-    0.72
-   ],
-   "horizon": [
-    0.72,
-    0.87,
-    0.92
-   ],
-   "curve": 0.14,
-   "groundHorizon": [
-    0.42,
-    0.62,
-    0.66
-   ],
-   "groundBottom": [
-    0.16,
-    0.3,
-    0.38
-   ],
-   "sunAngleMax": 14.0,
-   "energy": 1.16
-  },
-  "sun": {
-   "direction": [
-    -0.45,
-    -0.78,
-    -0.43
-   ],
-   "color": [
-    1.0,
-    0.94,
-    0.83
-   ],
-   "energy": 1.1
-  },
-  "ambient": {
-   "color": [
-    0.6,
-    0.67,
-    0.72
-   ],
-   "energy": 0.6
-  },
-  "saturation": 1.15,
-  "fog": {
-   "enabled": true,
-   "color": [
-    0.7,
-    0.68,
-    0.58
-   ],
-   "density": 0.0006,
-   "heightFalloff": 0.0022
-  },
-  "variants": {
-   "golden-hour": {
-    "sun": {
-     "direction": [
-      -0.8,
-      -0.26,
-      0.54
-     ],
-     "color": [
-      1.52,
-      1.02,
-      0.62
-     ],
-     "energy": 1.25
+  "schemaVersion": "1.0.0",
+  "assetVersion": "1.0.0",
+  "asset": {
+    "id": "boarsend__chunk_12_13",
+    "name": "Boarsend",
+    "glb": "world.glb",
+    "units": "meters",
+    "coordinateSystem": {
+      "handedness": "right",
+      "upAxis": "Y",
+      "northAxis": "-Z"
     },
-    "fog": {
-     "enabled": true,
-     "color": [
-      0.78,
-      0.66,
-      0.52
-     ],
-     "density": 0.0016
+    "origin": [
+      0,
+      0,
+      0
+    ],
+    "bounds": {
+      "min": [
+        210.0,
+        -16.0,
+        307.0
+      ],
+      "max": [
+        308.0,
+        0.0,
+        405.0
+      ]
+    },
+    "playableBounds": {
+      "min": [
+        -678.0,
+        -16.0,
+        -425.0
+      ],
+      "max": [
+        678.0,
+        194.72972436523438,
+        425.0
+      ]
+    },
+    "mapBounds": {
+      "min": [
+        -678.0,
+        -16.0,
+        -425.0
+      ],
+      "max": [
+        678.0,
+        194.72972436523438,
+        425.0
+      ]
+    },
+    "seaLevel": 0.0,
+    "serverCells": 1368
+  },
+  "coordinateTransform": {
+    "metresPerTile": 1.0,
+    "serverOrigin": [
+      682,
+      429
+    ],
+    "serverCells": [
+      1368,
+      1368
+    ],
+    "origin": [
+      0,
+      0,
+      0
+    ],
+    "walkingHeight": 133.04600524902344,
+    "invertServerY": true,
+    "serverStorageVersion": 1,
+    "serverTileMin": [
+      0,
+      0
+    ],
+    "addressableWorldBounds": {
+      "min": [
+        -682,
+        -939
+      ],
+      "max": [
+        686,
+        429
+      ]
     }
-   },
-   "dawn": {
+  },
+  "collision": {
+    "nodeNames": [],
+    "format": "EWCG-v2",
+    "formatVersion": 2,
+    "version": 2,
+    "width": 2736,
+    "height": 2736,
+    "cellMetres": 0.5,
+    "serverStorageVersion": 1,
+    "serverTileMin": [
+      0,
+      0
+    ],
+    "serverCells": [
+      1368,
+      1368
+    ],
+    "originMetres": [
+      -682.0,
+      429.0
+    ],
+    "gridAlignment": "tile-centres-v1",
+    "authoredSurfaceExport": true,
+    "maxTerrainGrade": 0.65,
+    "maximumWadingDepth": 0.35,
+    "actorVolume": {
+      "floorClearance": 0.06,
+      "height": 2.1,
+      "halfCellWidth": 0.5
+    },
+    "note": "kit solids carry no client collision (the wrappers that name them are not meshes); the served grid blocks them"
+  },
+  "navigation": {
+    "surfaceNodePrefixes": [
+      "Terrain_",
+      "Walk_"
+    ],
+    "terrainConforming": true,
+    "authority": "server",
+    "defaultSpawn": "boarsend--arrival-plateau"
+  },
+  "environment": {
+    "sky": {
+      "type": "gradient",
+      "zenith": [
+        0.16,
+        0.42,
+        0.72
+      ],
+      "horizon": [
+        0.72,
+        0.87,
+        0.92
+      ],
+      "curve": 0.14,
+      "groundHorizon": [
+        0.42,
+        0.62,
+        0.66
+      ],
+      "groundBottom": [
+        0.16,
+        0.3,
+        0.38
+      ],
+      "sunAngleMax": 14.0,
+      "energy": 1.16
+    },
     "sun": {
-     "color": [
-      1.0,
-      0.8,
-      0.58
-     ]
-    },
-    "sky": {
-     "horizon": [
-      0.96,
-      0.82,
-      0.62
-     ]
-    },
-    "fog": {
-     "color": [
-      0.8,
-      0.78,
-      0.64
-     ]
-    }
-   },
-   "dusk": {
-    "sun": {
-     "color": [
-      1.0,
-      0.62,
-      0.38
-     ]
-    },
-    "sky": {
-     "horizon": [
-      0.94,
-      0.64,
-      0.42
-     ]
-    },
-    "fog": {
-     "color": [
-      0.76,
-      0.62,
-      0.48
-     ]
-    }
-   },
-   "night": {
-    "sky": {
-     "zenith": [
-      0.11,
-      0.15,
-      0.24
-     ],
-     "horizon": [
-      0.24,
-      0.29,
-      0.36
-     ]
-    },
-    "fog": {
-     "color": [
-      0.24,
-      0.28,
-      0.32
-     ]
+      "direction": [
+        -0.45,
+        -0.78,
+        -0.43
+      ],
+      "color": [
+        1.0,
+        0.94,
+        0.83
+      ],
+      "energy": 1.1
     },
     "ambient": {
-     "color": [
-      0.54,
-      0.6,
-      0.68
-     ]
+      "color": [
+        0.6,
+        0.67,
+        0.72
+      ],
+      "energy": 0.6
     },
-    "moon": {
-     "color": [
-      0.54,
-      0.62,
-      0.82
-     ]
+    "saturation": 1.15,
+    "fog": {
+      "enabled": true,
+      "color": [
+        0.7,
+        0.68,
+        0.58
+      ],
+      "density": 0.0006,
+      "heightFalloff": 0.0022
+    },
+    "variants": {
+      "golden-hour": {
+        "sun": {
+          "direction": [
+            -0.8,
+            -0.26,
+            0.54
+          ],
+          "color": [
+            1.52,
+            1.02,
+            0.62
+          ],
+          "energy": 1.25
+        },
+        "fog": {
+          "enabled": true,
+          "color": [
+            0.78,
+            0.66,
+            0.52
+          ],
+          "density": 0.0016
+        }
+      },
+      "dawn": {
+        "sun": {
+          "color": [
+            1.0,
+            0.8,
+            0.58
+          ]
+        },
+        "sky": {
+          "horizon": [
+            0.96,
+            0.82,
+            0.62
+          ]
+        },
+        "fog": {
+          "color": [
+            0.8,
+            0.78,
+            0.64
+          ]
+        }
+      },
+      "dusk": {
+        "sun": {
+          "color": [
+            1.0,
+            0.62,
+            0.38
+          ]
+        },
+        "sky": {
+          "horizon": [
+            0.94,
+            0.64,
+            0.42
+          ]
+        },
+        "fog": {
+          "color": [
+            0.76,
+            0.62,
+            0.48
+          ]
+        }
+      },
+      "night": {
+        "sky": {
+          "zenith": [
+            0.11,
+            0.15,
+            0.24
+          ],
+          "horizon": [
+            0.24,
+            0.29,
+            0.36
+          ]
+        },
+        "fog": {
+          "color": [
+            0.24,
+            0.28,
+            0.32
+          ]
+        },
+        "ambient": {
+          "color": [
+            0.54,
+            0.6,
+            0.68
+          ]
+        },
+        "moon": {
+          "color": [
+            0.54,
+            0.62,
+            0.82
+          ]
+        }
+      }
+    },
+    "water": {
+      "shallowColor": [
+        0.24,
+        0.74,
+        0.74
+      ],
+      "deepColor": [
+        0.04,
+        0.24,
+        0.44
+      ],
+      "causticsEnabled": true,
+      "note": "Shallow/deep tint and caustics are presentation settings for whoever writes the water shader; the GLB ships a flat lit plane."
+    },
+    "presentation": {
+      "mist": {
+        "enabled": true,
+        "density": 0.5
+      }
     }
-   }
   },
-  "water": {
-   "shallowColor": [
-    0.24,
-    0.74,
-    0.74
-   ],
-   "deepColor": [
-    0.04,
-    0.24,
-    0.44
-   ],
-   "causticsEnabled": true,
-   "note": "Shallow/deep tint and caustics are presentation settings for whoever writes the water shader; the GLB ships a flat lit plane."
+  "continentGeography": {
+    "revision": "continent-v2-draft-1",
+    "translation": [
+      1007.0,
+      0.0,
+      8226.0
+    ],
+    "ownershipPolygon": [
+      [
+        899.0,
+        8271.0
+      ],
+      [
+        329.0,
+        8321.0
+      ],
+      [
+        329.0,
+        8651.0
+      ],
+      [
+        1461.0,
+        8651.0
+      ],
+      [
+        1461.0,
+        8259.0
+      ],
+      [
+        1685.0,
+        8259.0
+      ],
+      [
+        1675.0,
+        7941.0
+      ],
+      [
+        1299.0,
+        7921.0
+      ],
+      [
+        1129.0,
+        7911.0
+      ],
+      [
+        1039.0,
+        7801.0
+      ],
+      [
+        899.0,
+        7821.0
+      ]
+    ],
+    "ownershipPolygons": [
+      [
+        [
+          899.0,
+          8271.0
+        ],
+        [
+          329.0,
+          8321.0
+        ],
+        [
+          329.0,
+          8651.0
+        ],
+        [
+          1461.0,
+          8651.0
+        ],
+        [
+          1461.0,
+          8259.0
+        ],
+        [
+          1685.0,
+          8259.0
+        ],
+        [
+          1675.0,
+          7941.0
+        ],
+        [
+          1299.0,
+          7921.0
+        ],
+        [
+          1129.0,
+          7911.0
+        ],
+        [
+          1039.0,
+          7801.0
+        ],
+        [
+          899.0,
+          7821.0
+        ]
+      ]
+    ],
+    "geometryMode": "continent-chunks-v1"
   },
-  "presentation": {
-   "mist": {
-    "enabled": true,
-    "density": 0.5
-   }
-  }
- },
- "continentGeography": {
-  "revision": "continent-v2-draft-1",
-  "translation": [
-   1007.0,
-   0.0,
-   8226.0
+  "productionStatus": "chunk-streamed for the game client, with the served walk grid export_collision.py wrote (collision.bin, served-grid.escg.gz); the server rows are publish_server.py's",
+  "knownLimitations": [
+    "kit solids carry no client collision (the wrappers that name them are not meshes); the served grid blocks them",
+    "no map digest: the master world.glb is not committed, so the server's client content manifest names no packageSha256 for this map",
+    "outside the ownership polygons nothing is exported (the neighbouring territory publishes it)"
   ],
-  "ownershipPolygon": [
-   [
-    899.0,
-    8271.0
-   ],
-   [
-    329.0,
-    8321.0
-   ],
-   [
-    329.0,
-    8651.0
-   ],
-   [
-    1461.0,
-    8651.0
-   ],
-   [
-    1461.0,
-    8259.0
-   ],
-   [
-    1685.0,
-    8259.0
-   ],
-   [
-    1675.0,
-    7941.0
-   ],
-   [
-    1299.0,
-    7921.0
-   ],
-   [
-    1129.0,
-    7911.0
-   ],
-   [
-    1039.0,
-    7801.0
-   ],
-   [
-    899.0,
-    7821.0
-   ]
-  ],
-  "ownershipPolygons": [
-   [
-    [
-     899.0,
-     8271.0
-    ],
-    [
-     329.0,
-     8321.0
-    ],
-    [
-     329.0,
-     8651.0
-    ],
-    [
-     1461.0,
-     8651.0
-    ],
-    [
-     1461.0,
-     8259.0
-    ],
-    [
-     1685.0,
-     8259.0
-    ],
-    [
-     1675.0,
-     7941.0
-    ],
-    [
-     1299.0,
-     7921.0
-    ],
-    [
-     1129.0,
-     7911.0
-    ],
-    [
-     1039.0,
-     7801.0
-    ],
-    [
-     899.0,
-     7821.0
-    ]
-   ]
-  ],
-  "geometryMode": "continent-chunks-v1"
- },
- "productionStatus": "chunk-streamed for the game client, with the served walk grid export_collision.py wrote (collision.bin, served-grid.escg.gz); the server rows are publish_server.py's",
- "knownLimitations": [
-  "kit solids carry no client collision (the wrappers that name them are not meshes); the served grid blocks them",
-  "no map digest: the master world.glb is not committed, so the server's client content manifest names no packageSha256 for this map",
-  "outside the ownership polygons nothing is exported (the neighbouring territory publishes it)"
- ],
- "provenance": {
-  "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_client.py",
-  "snapshotSha256": "3b50d0209ab9a882b9309cbbb720ab1d9d8cfaf69ea508d4a2a7107c57237aad",
-  "sceneSha256": "efe18d4214682e47205275878c8c33c425f0f8edd94dbc7f167eebbf9066804a"
- },
- "externalResources": {
-  "../../../../_continent_v2/shared-assets/4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04.png": "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04",
-  "../../../../_continent_v2/shared-assets/d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac.png": "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac",
-  "../../../../_continent_v2/shared-assets/1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5.png": "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5",
-  "../../../../_continent_v2/shared-assets/c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0.png": "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0"
- },
- "bounds": {
-  "min": [
-   210.0,
-   -16.0,
-   307.0
-  ],
-  "max": [
-   308.0,
-   0.0,
-   405.0
-  ]
- },
- "performance": {
-  "glbBytes": 318264,
-  "nodes": 6,
-  "meshes": 3,
+  "provenance": {
+    "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_client.py",
+    "snapshotSha256": "3b50d0209ab9a882b9309cbbb720ab1d9d8cfaf69ea508d4a2a7107c57237aad",
+    "sceneSha256": "efe18d4214682e47205275878c8c33c425f0f8edd94dbc7f167eebbf9066804a"
+  },
   "externalResources": {
-   "../../../../_continent_v2/shared-assets/4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04.png": "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04",
-   "../../../../_continent_v2/shared-assets/d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac.png": "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac",
-   "../../../../_continent_v2/shared-assets/1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5.png": "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5",
-   "../../../../_continent_v2/shared-assets/c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0.png": "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0"
+    "../../../../_continent_v2/shared-assets/4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04.png": "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04",
+    "../../../../../nymara-regions/_continent/shared-assets/d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac.png": "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac",
+    "../../../../_continent_v2/shared-assets/1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5.png": "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5",
+    "../../../../_continent_v2/shared-assets/c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0.png": "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0"
   },
-  "sharedResourceResidentBytes": {
-   "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-   "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-   "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-   "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+  "bounds": {
+    "min": [
+      210.0,
+      -16.0,
+      307.0
+    ],
+    "max": [
+      308.0,
+      0.0,
+      405.0
+    ]
+  },
+  "performance": {
+    "glbBytes": 318360,
+    "nodes": 6,
+    "meshes": 3,
+    "externalResources": {
+      "../../../../_continent_v2/shared-assets/4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04.png": "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04",
+      "../../../../../nymara-regions/_continent/shared-assets/d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac.png": "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac",
+      "../../../../_continent_v2/shared-assets/1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5.png": "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5",
+      "../../../../_continent_v2/shared-assets/c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0.png": "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0"
+    },
+    "sharedResourceResidentBytes": {
+      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+      "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+      "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+  },
+  "biomeBlend": null,
+  "objectMaterialOverrides": {
+    "schema": "eloria-object-material-overrides-v1",
+    "entries": []
+  },
+  "externalImagePolicies": {
+    "../../../../../nymara-regions/_continent/shared-assets/d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac.png": [
+      "../../../../_continent_v2/shared-assets"
+    ]
   }
- },
- "biomeBlend": null,
- "objectMaterialOverrides": {
-  "schema": "eloria-object-material-overrides-v1",
-  "entries": []
- }
 }

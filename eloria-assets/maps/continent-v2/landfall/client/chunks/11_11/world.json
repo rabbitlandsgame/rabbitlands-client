@@ -1,625 +1,726 @@
 {
- "schemaVersion": "1.0.0",
- "assetVersion": "1.0.0",
- "asset": {
-  "id": "landfall__chunk_11_11",
-  "name": "Landfall",
-  "glb": "world.glb",
-  "units": "meters",
-  "coordinateSystem": {
-   "handedness": "right",
-   "upAxis": "Y",
-   "northAxis": "-Z"
-  },
-  "origin": [
-   0,
-   0,
-   0
-  ],
-  "bounds": {
-   "min": [
-    78.81807997295351,
-    75.53974914550781,
-    30.910685239614153
-   ],
-   "max": [
-    180.0,
-    135.49786567687988,
-    133.09351683557216
-   ]
-  },
-  "playableBounds": {
-   "min": [
-    -278.0,
-    70.70653533935547,
-    -244.0
-   ],
-   "max": [
-    278.0,
-    174.11864038085938,
-    244.0
-   ]
-  },
-  "mapBounds": {
-   "min": [
-    -278.0,
-    70.70653533935547,
-    -244.0
-   ],
-   "max": [
-    278.0,
-    174.11864038085938,
-    244.0
-   ]
-  },
-  "seaLevel": 0.0,
-  "serverCells": 564
- },
- "coordinateTransform": {
-  "metresPerTile": 1.0,
-  "serverOrigin": [
-   282,
-   248
-  ],
-  "serverCells": [
-   564,
-   564
-  ],
-  "origin": [
-   0,
-   0,
-   0
-  ],
-  "walkingHeight": 121.49400329589844,
-  "invertServerY": true,
-  "serverStorageVersion": 1,
-  "serverTileMin": [
-   0,
-   0
-  ],
-  "addressableWorldBounds": {
-   "min": [
-    -282,
-    -316
-   ],
-   "max": [
-    282,
-    248
-   ]
-  }
- },
- "collision": {
-  "nodeNames": [],
-  "format": "EWCG-v2",
-  "formatVersion": 2,
-  "version": 2,
-  "width": 1128,
-  "height": 1128,
-  "cellMetres": 0.5,
-  "serverStorageVersion": 1,
-  "serverTileMin": [
-   0,
-   0
-  ],
-  "serverCells": [
-   564,
-   564
-  ],
-  "originMetres": [
-   -282.0,
-   248.0
-  ],
-  "gridAlignment": "tile-centres-v1",
-  "authoredSurfaceExport": true,
-  "maxTerrainGrade": 0.65,
-  "maximumWadingDepth": 0.35,
-  "actorVolume": {
-   "floorClearance": 0.06,
-   "height": 2.1,
-   "halfCellWidth": 0.5
-  },
-  "note": "kit solids carry no client collision (the wrappers that name them are not meshes); the served grid blocks them"
- },
- "navigation": {
-  "surfaceNodePrefixes": [
-   "Terrain_",
-   "Walk_"
-  ],
-  "terrainConforming": true,
-  "authority": "server",
-  "defaultSpawn": "landfall--arrival"
- },
- "environment": {
-  "sky": {
-   "type": "gradient",
-   "zenith": [
-    0.12,
-    0.42,
-    0.78
-   ],
-   "horizon": [
-    0.7,
-    0.88,
-    0.95
-   ],
-   "curve": 0.14,
-   "groundHorizon": [
-    0.42,
-    0.62,
-    0.66
-   ],
-   "groundBottom": [
-    0.16,
-    0.3,
-    0.38
-   ],
-   "sunAngleMax": 14.0,
-   "energy": 1.16
-  },
-  "sun": {
-   "direction": [
-    -0.45,
-    -0.78,
-    -0.43
-   ],
-   "color": [
-    1.0,
-    0.94,
-    0.83
-   ],
-   "energy": 1.1
-  },
-  "ambient": {
-   "color": [
-    0.6,
-    0.67,
-    0.72
-   ],
-   "energy": 0.6
-  },
-  "saturation": 1.34,
-  "fog": {
-   "enabled": true,
-   "color": [
-    0.58,
-    0.8,
-    0.9
-   ],
-   "density": 0.0003,
-   "heightFalloff": 0.0022
-  },
-  "variants": {
-   "golden-hour": {
-    "sun": {
-     "direction": [
-      -0.8,
-      -0.26,
-      0.54
-     ],
-     "color": [
-      1.52,
-      1.02,
-      0.62
-     ],
-     "energy": 1.25
+  "schemaVersion": "1.0.0",
+  "assetVersion": "1.0.0",
+  "asset": {
+    "id": "landfall__chunk_11_11",
+    "name": "Landfall",
+    "glb": "world.glb",
+    "units": "meters",
+    "coordinateSystem": {
+      "handedness": "right",
+      "upAxis": "Y",
+      "northAxis": "-Z"
     },
-    "fog": {
-     "enabled": true,
-     "color": [
-      0.78,
-      0.66,
-      0.52
-     ],
-     "density": 0.0016
+    "origin": [
+      0,
+      0,
+      0
+    ],
+    "bounds": {
+      "min": [
+        78.81807997295351,
+        75.53974914550781,
+        30.910685239614153
+      ],
+      "max": [
+        180.0,
+        135.49786567687988,
+        133.09351683557216
+      ]
+    },
+    "playableBounds": {
+      "min": [
+        -278.0,
+        70.70653533935547,
+        -244.0
+      ],
+      "max": [
+        278.0,
+        174.11864038085938,
+        244.0
+      ]
+    },
+    "mapBounds": {
+      "min": [
+        -278.0,
+        70.70653533935547,
+        -244.0
+      ],
+      "max": [
+        278.0,
+        174.11864038085938,
+        244.0
+      ]
+    },
+    "seaLevel": 0.0,
+    "serverCells": 564
+  },
+  "coordinateTransform": {
+    "metresPerTile": 1.0,
+    "serverOrigin": [
+      282,
+      248
+    ],
+    "serverCells": [
+      564,
+      564
+    ],
+    "origin": [
+      0,
+      0,
+      0
+    ],
+    "walkingHeight": 121.49400329589844,
+    "invertServerY": true,
+    "serverStorageVersion": 1,
+    "serverTileMin": [
+      0,
+      0
+    ],
+    "addressableWorldBounds": {
+      "min": [
+        -282,
+        -316
+      ],
+      "max": [
+        282,
+        248
+      ]
     }
-   },
-   "dawn": {
+  },
+  "collision": {
+    "nodeNames": [],
+    "format": "EWCG-v2",
+    "formatVersion": 2,
+    "version": 2,
+    "width": 1128,
+    "height": 1128,
+    "cellMetres": 0.5,
+    "serverStorageVersion": 1,
+    "serverTileMin": [
+      0,
+      0
+    ],
+    "serverCells": [
+      564,
+      564
+    ],
+    "originMetres": [
+      -282.0,
+      248.0
+    ],
+    "gridAlignment": "tile-centres-v1",
+    "authoredSurfaceExport": true,
+    "maxTerrainGrade": 0.65,
+    "maximumWadingDepth": 0.35,
+    "actorVolume": {
+      "floorClearance": 0.06,
+      "height": 2.1,
+      "halfCellWidth": 0.5
+    },
+    "note": "kit solids carry no client collision (the wrappers that name them are not meshes); the served grid blocks them"
+  },
+  "navigation": {
+    "surfaceNodePrefixes": [
+      "Terrain_",
+      "Walk_"
+    ],
+    "terrainConforming": true,
+    "authority": "server",
+    "defaultSpawn": "landfall--arrival"
+  },
+  "environment": {
+    "sky": {
+      "type": "gradient",
+      "zenith": [
+        0.12,
+        0.42,
+        0.78
+      ],
+      "horizon": [
+        0.7,
+        0.88,
+        0.95
+      ],
+      "curve": 0.14,
+      "groundHorizon": [
+        0.42,
+        0.62,
+        0.66
+      ],
+      "groundBottom": [
+        0.16,
+        0.3,
+        0.38
+      ],
+      "sunAngleMax": 14.0,
+      "energy": 1.16
+    },
     "sun": {
-     "color": [
-      1.0,
-      0.78,
-      0.58
-     ]
-    },
-    "sky": {
-     "horizon": [
-      1.0,
-      0.8,
-      0.64
-     ]
-    },
-    "fog": {
-     "color": [
-      0.86,
-      0.8,
-      0.74
-     ]
-    }
-   },
-   "dusk": {
-    "sun": {
-     "color": [
-      1.0,
-      0.66,
-      0.4
-     ]
-    },
-    "sky": {
-     "horizon": [
-      1.0,
-      0.7,
-      0.48
-     ]
-    },
-    "fog": {
-     "color": [
-      0.86,
-      0.7,
-      0.58
-     ]
-    }
-   },
-   "night": {
-    "sky": {
-     "zenith": [
-      0.1,
-      0.17,
-      0.32
-     ],
-     "horizon": [
-      0.22,
-      0.33,
-      0.46
-     ]
-    },
-    "fog": {
-     "color": [
-      0.22,
-      0.32,
-      0.44
-     ]
+      "direction": [
+        -0.45,
+        -0.78,
+        -0.43
+      ],
+      "color": [
+        1.0,
+        0.94,
+        0.83
+      ],
+      "energy": 1.1
     },
     "ambient": {
-     "color": [
-      0.54,
-      0.62,
-      0.76
-     ]
+      "color": [
+        0.6,
+        0.67,
+        0.72
+      ],
+      "energy": 0.6
     },
-    "moon": {
-     "color": [
-      0.54,
-      0.64,
-      0.9
-     ]
+    "saturation": 1.34,
+    "fog": {
+      "enabled": true,
+      "color": [
+        0.58,
+        0.8,
+        0.9
+      ],
+      "density": 0.0003,
+      "heightFalloff": 0.0022
+    },
+    "variants": {
+      "golden-hour": {
+        "sun": {
+          "direction": [
+            -0.8,
+            -0.26,
+            0.54
+          ],
+          "color": [
+            1.52,
+            1.02,
+            0.62
+          ],
+          "energy": 1.25
+        },
+        "fog": {
+          "enabled": true,
+          "color": [
+            0.78,
+            0.66,
+            0.52
+          ],
+          "density": 0.0016
+        }
+      },
+      "dawn": {
+        "sun": {
+          "color": [
+            1.0,
+            0.78,
+            0.58
+          ]
+        },
+        "sky": {
+          "horizon": [
+            1.0,
+            0.8,
+            0.64
+          ]
+        },
+        "fog": {
+          "color": [
+            0.86,
+            0.8,
+            0.74
+          ]
+        }
+      },
+      "dusk": {
+        "sun": {
+          "color": [
+            1.0,
+            0.66,
+            0.4
+          ]
+        },
+        "sky": {
+          "horizon": [
+            1.0,
+            0.7,
+            0.48
+          ]
+        },
+        "fog": {
+          "color": [
+            0.86,
+            0.7,
+            0.58
+          ]
+        }
+      },
+      "night": {
+        "sky": {
+          "zenith": [
+            0.1,
+            0.17,
+            0.32
+          ],
+          "horizon": [
+            0.22,
+            0.33,
+            0.46
+          ]
+        },
+        "fog": {
+          "color": [
+            0.22,
+            0.32,
+            0.44
+          ]
+        },
+        "ambient": {
+          "color": [
+            0.54,
+            0.62,
+            0.76
+          ]
+        },
+        "moon": {
+          "color": [
+            0.54,
+            0.64,
+            0.9
+          ]
+        }
+      }
+    },
+    "water": {
+      "shallowColor": [
+        0.24,
+        0.74,
+        0.74
+      ],
+      "deepColor": [
+        0.04,
+        0.24,
+        0.44
+      ],
+      "causticsEnabled": true,
+      "note": "Shallow/deep tint and caustics are presentation settings for whoever writes the water shader; the GLB ships a flat lit plane."
+    },
+    "presentation": {
+      "mist": {
+        "enabled": true,
+        "density": 0.3
+      },
+      "gulls": {
+        "enabled": true,
+        "density": 0.7
+      }
     }
-   }
   },
-  "water": {
-   "shallowColor": [
-    0.24,
-    0.74,
-    0.74
-   ],
-   "deepColor": [
-    0.04,
-    0.24,
-    0.44
-   ],
-   "causticsEnabled": true,
-   "note": "Shallow/deep tint and caustics are presentation settings for whoever writes the water shader; the GLB ships a flat lit plane."
+  "continentGeography": {
+    "revision": "continent-v2-draft-1",
+    "translation": [
+      1127.0,
+      0.0,
+      7357.0
+    ],
+    "ownershipPolygon": [
+      [
+        899.0,
+        7541.0
+      ],
+      [
+        999.0,
+        7591.0
+      ],
+      [
+        1139.0,
+        7595.0
+      ],
+      [
+        1159.0,
+        7597.0
+      ],
+      [
+        1263.0,
+        7601.0
+      ],
+      [
+        1307.0,
+        7421.0
+      ],
+      [
+        1311.0,
+        7323.0
+      ],
+      [
+        1405.0,
+        7271.0
+      ],
+      [
+        1365.0,
+        7171.0
+      ],
+      [
+        1299.0,
+        7113.0
+      ],
+      [
+        959.0,
+        7113.0
+      ],
+      [
+        869.0,
+        7171.0
+      ],
+      [
+        849.0,
+        7301.0
+      ],
+      [
+        855.0,
+        7421.0
+      ]
+    ],
+    "ownershipPolygons": [
+      [
+        [
+          899.0,
+          7541.0
+        ],
+        [
+          999.0,
+          7591.0
+        ],
+        [
+          1139.0,
+          7595.0
+        ],
+        [
+          1159.0,
+          7597.0
+        ],
+        [
+          1263.0,
+          7601.0
+        ],
+        [
+          1307.0,
+          7421.0
+        ],
+        [
+          1311.0,
+          7323.0
+        ],
+        [
+          1405.0,
+          7271.0
+        ],
+        [
+          1365.0,
+          7171.0
+        ],
+        [
+          1299.0,
+          7113.0
+        ],
+        [
+          959.0,
+          7113.0
+        ],
+        [
+          869.0,
+          7171.0
+        ],
+        [
+          849.0,
+          7301.0
+        ],
+        [
+          855.0,
+          7421.0
+        ]
+      ]
+    ],
+    "geometryMode": "continent-chunks-v1"
   },
-  "presentation": {
-   "mist": {
-    "enabled": true,
-    "density": 0.3
-   },
-   "gulls": {
-    "enabled": true,
-    "density": 0.7
-   }
-  }
- },
- "continentGeography": {
-  "revision": "continent-v2-draft-1",
-  "translation": [
-   1127.0,
-   0.0,
-   7357.0
+  "productionStatus": "chunk-streamed for the game client, with the served walk grid export_collision.py wrote (collision.bin, served-grid.escg.gz); the server rows are publish_server.py's",
+  "knownLimitations": [
+    "kit solids carry no client collision (the wrappers that name them are not meshes); the served grid blocks them",
+    "no map digest: the master world.glb is not committed, so the server's client content manifest names no packageSha256 for this map",
+    "outside the ownership polygons nothing is exported (the neighbouring territory publishes it)"
   ],
-  "ownershipPolygon": [
-   [
-    899.0,
-    7541.0
-   ],
-   [
-    999.0,
-    7591.0
-   ],
-   [
-    1139.0,
-    7595.0
-   ],
-   [
-    1159.0,
-    7597.0
-   ],
-   [
-    1263.0,
-    7601.0
-   ],
-   [
-    1307.0,
-    7421.0
-   ],
-   [
-    1311.0,
-    7323.0
-   ],
-   [
-    1405.0,
-    7271.0
-   ],
-   [
-    1365.0,
-    7171.0
-   ],
-   [
-    1299.0,
-    7113.0
-   ],
-   [
-    959.0,
-    7113.0
-   ],
-   [
-    869.0,
-    7171.0
-   ],
-   [
-    849.0,
-    7301.0
-   ],
-   [
-    855.0,
-    7421.0
-   ]
-  ],
-  "ownershipPolygons": [
-   [
-    [
-     899.0,
-     7541.0
-    ],
-    [
-     999.0,
-     7591.0
-    ],
-    [
-     1139.0,
-     7595.0
-    ],
-    [
-     1159.0,
-     7597.0
-    ],
-    [
-     1263.0,
-     7601.0
-    ],
-    [
-     1307.0,
-     7421.0
-    ],
-    [
-     1311.0,
-     7323.0
-    ],
-    [
-     1405.0,
-     7271.0
-    ],
-    [
-     1365.0,
-     7171.0
-    ],
-    [
-     1299.0,
-     7113.0
-    ],
-    [
-     959.0,
-     7113.0
-    ],
-    [
-     869.0,
-     7171.0
-    ],
-    [
-     849.0,
-     7301.0
-    ],
-    [
-     855.0,
-     7421.0
-    ]
-   ]
-  ],
-  "geometryMode": "continent-chunks-v1"
- },
- "productionStatus": "chunk-streamed for the game client, with the served walk grid export_collision.py wrote (collision.bin, served-grid.escg.gz); the server rows are publish_server.py's",
- "knownLimitations": [
-  "kit solids carry no client collision (the wrappers that name them are not meshes); the served grid blocks them",
-  "no map digest: the master world.glb is not committed, so the server's client content manifest names no packageSha256 for this map",
-  "outside the ownership polygons nothing is exported (the neighbouring territory publishes it)"
- ],
- "provenance": {
-  "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_client.py",
-  "snapshotSha256": "f8b229797e132c0716e422dd4b154bc2e89c579286952f360e595960837d4998",
-  "sceneSha256": "dd59ce43b5b2ac133181af988c0170857aece08a4cfa27e2009b8a6049cc6d71"
- },
- "externalResources": {
-  "../../../../_continent_v2/shared-assets/4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04.png": "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04",
-  "../../../../_continent_v2/shared-assets/1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5.png": "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5",
-  "../../../../_continent_v2/shared-assets/c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0.png": "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0",
-  "../../../../_continent_v2/shared-assets/454fdae2b1c2ba75cbd950c262ce76e1d6c16a480284231b3b6ac8c55ed806b9.png": "454fdae2b1c2ba75cbd950c262ce76e1d6c16a480284231b3b6ac8c55ed806b9",
-  "../../../../_continent_v2/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png": "ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5",
-  "../../../../_continent_v2/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png": "6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7",
-  "../../../../_continent_v2/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png": "8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805",
-  "../../../../_continent_v2/shared-assets/93772afc0935e2f29c2bdbd215194e4fb6e49a59d21cc98b201ddf5c43206346.jpg": "93772afc0935e2f29c2bdbd215194e4fb6e49a59d21cc98b201ddf5c43206346",
-  "../../../../_continent_v2/shared-assets/5ff5587aad7e75854997ab4e4515a05cdfafab4d962ad9a7207c8cb0a95db29e.jpg": "5ff5587aad7e75854997ab4e4515a05cdfafab4d962ad9a7207c8cb0a95db29e",
-  "../../../../_continent_v2/shared-assets/d6015571411ae42074bfb738eb9946b90b7a1834e624ad91407508b899f2563a.jpg": "d6015571411ae42074bfb738eb9946b90b7a1834e624ad91407508b899f2563a",
-  "../../../../_continent_v2/shared-assets/81c1564f19b98b6587eda57965d3f63a0694ef8c0d258fac43431d0f8c2963b7.jpg": "81c1564f19b98b6587eda57965d3f63a0694ef8c0d258fac43431d0f8c2963b7",
-  "../../../../_continent_v2/shared-assets/fc1d556975b86289b120a4e0b211f1b710cc3ff2a0ba44b53a2e97defe5d40d7.jpg": "fc1d556975b86289b120a4e0b211f1b710cc3ff2a0ba44b53a2e97defe5d40d7",
-  "../../../../_continent_v2/shared-assets/88cf9a1d632f9ae3a282147bbd04313fe18f61e39b89328798907a028ddc8581.jpg": "88cf9a1d632f9ae3a282147bbd04313fe18f61e39b89328798907a028ddc8581",
-  "../../../../_continent_v2/shared-assets/3caef983cee269d0b7b74dfbe0812fc3756bc07916ee40dff50c75fc5f612383.jpg": "3caef983cee269d0b7b74dfbe0812fc3756bc07916ee40dff50c75fc5f612383",
-  "../../../../_continent_v2/shared-assets/43a249593f903767aec9ca1011d925c7dfbd92abd4b497999509d3ddc20d6a9b.jpg": "43a249593f903767aec9ca1011d925c7dfbd92abd4b497999509d3ddc20d6a9b",
-  "../../../../_continent_v2/shared-assets/aa291da4bba343d502c66dc47e3cb8bd996a1ee196eec21604108694c505a9ce.jpg": "aa291da4bba343d502c66dc47e3cb8bd996a1ee196eec21604108694c505a9ce",
-  "../../../../_continent_v2/shared-assets/335197b7c3143957b13f75f694583fe78a177d98b6985c72323777ab5e18d11d.jpg": "335197b7c3143957b13f75f694583fe78a177d98b6985c72323777ab5e18d11d",
-  "../../../../_continent_v2/shared-assets/2a9f97c3189df8ebfc749bea5442894448612842a098466fa24ac4682804ac92.jpg": "2a9f97c3189df8ebfc749bea5442894448612842a098466fa24ac4682804ac92",
-  "../../../../_continent_v2/shared-assets/1c5cd4b20051f674a314e48da9a6c7c087d63efb3688484d66d4953de2d7d1ee.jpg": "1c5cd4b20051f674a314e48da9a6c7c087d63efb3688484d66d4953de2d7d1ee",
-  "../../../../_continent_v2/shared-assets/68f442f3801210245087e73797002e43a1210baef71f1f61fa2401eff0ba3a79.jpg": "68f442f3801210245087e73797002e43a1210baef71f1f61fa2401eff0ba3a79",
-  "../../../../_continent_v2/shared-assets/ac2d99b51b095a27e7fcb53184448a494a684fc4598b92083fc77b8065640832.jpg": "ac2d99b51b095a27e7fcb53184448a494a684fc4598b92083fc77b8065640832",
-  "../../../../_continent_v2/shared-assets/91eed6a90c01e31ce28591ed2317962602130bec70ad8085569e28eda732f66f.jpg": "91eed6a90c01e31ce28591ed2317962602130bec70ad8085569e28eda732f66f",
-  "../../../../_continent_v2/shared-assets/d60ec1cde1705a44c1ae392e4c7f5c80a3e40f1fe41af7f332fe89e5e179a09b.jpg": "d60ec1cde1705a44c1ae392e4c7f5c80a3e40f1fe41af7f332fe89e5e179a09b",
-  "../../../../_continent_v2/shared-assets/85fd322f578538a421032124e03cead4f021d78b3a61ad8d6ba17066bc2f5f76.jpg": "85fd322f578538a421032124e03cead4f021d78b3a61ad8d6ba17066bc2f5f76",
-  "../../../../_continent_v2/shared-assets/01300e168e2edc0d77115560a01872fd2c6844d0bbce53894344b1ce828703ac.jpg": "01300e168e2edc0d77115560a01872fd2c6844d0bbce53894344b1ce828703ac",
-  "../../../../_continent_v2/shared-assets/47dd31db8b6238e4242890f51a872300b11ad231988fa2c40f9a50a96f900f26.jpg": "47dd31db8b6238e4242890f51a872300b11ad231988fa2c40f9a50a96f900f26",
-  "../../../../_continent_v2/shared-assets/ac9d858275ae3947431d90a493f8e4cb3a919cbe5413b88117743d26ebde62a2.jpg": "ac9d858275ae3947431d90a493f8e4cb3a919cbe5413b88117743d26ebde62a2",
-  "../../../../_continent_v2/shared-assets/a4eba70a3461958f950306e485bc501da422d1d79473c222b4f8794f32a73996.jpg": "a4eba70a3461958f950306e485bc501da422d1d79473c222b4f8794f32a73996",
-  "../../../../_continent_v2/shared-assets/752e921fac49199f3383059436ab14f537ff1360ae7dd8375ca5b9ef2721af66.jpg": "752e921fac49199f3383059436ab14f537ff1360ae7dd8375ca5b9ef2721af66",
-  "../../../../_continent_v2/shared-assets/f0b46130becc0eee2ac1b080fcdf4325ae78268bda557ae8761dbf609d661f6e.jpg": "f0b46130becc0eee2ac1b080fcdf4325ae78268bda557ae8761dbf609d661f6e",
-  "../../../../_continent_v2/shared-assets/b470e4970f5d4ee9a5d2a48270438ecbec32ca6c20a5170ee8c01c38f24abbb4.jpg": "b470e4970f5d4ee9a5d2a48270438ecbec32ca6c20a5170ee8c01c38f24abbb4",
-  "../../../../_continent_v2/shared-assets/70c9d518e70115014b5f97613fe1063ea81fb5112fc7ddbec1ade8151b3a49a7.jpg": "70c9d518e70115014b5f97613fe1063ea81fb5112fc7ddbec1ade8151b3a49a7",
-  "../../../../_continent_v2/shared-assets/0dc62c7cfc8a98a837193fd9d757914d57009ac96ec0ea68ff77cf27bb1f685a.jpg": "0dc62c7cfc8a98a837193fd9d757914d57009ac96ec0ea68ff77cf27bb1f685a",
-  "../../../../_continent_v2/shared-assets/390390d75ea28238c8eb3c5067f1992a5dfb06857db41917ff96a01f10e49259.jpg": "390390d75ea28238c8eb3c5067f1992a5dfb06857db41917ff96a01f10e49259",
-  "../../../../_continent_v2/shared-assets/d500922ba4e27ec1553f745bebb9cf3b0f3fb9d5ee4fe0a7888dcec10f525d72.jpg": "d500922ba4e27ec1553f745bebb9cf3b0f3fb9d5ee4fe0a7888dcec10f525d72",
-  "../../../../_continent_v2/shared-assets/122bdb504a9f663b0df8da74d61591166d42c387141ac11c4720c09d03ec3b13.jpg": "122bdb504a9f663b0df8da74d61591166d42c387141ac11c4720c09d03ec3b13",
-  "../../../../_continent_v2/shared-assets/0e6d52c15b5f9f217f3547b4eba4f21bf47ae2115a18d1850b4a672cd8a3d039.jpg": "0e6d52c15b5f9f217f3547b4eba4f21bf47ae2115a18d1850b4a672cd8a3d039",
-  "../../../../_continent_v2/shared-assets/1977ff0714b29b57bee9a080d3204a815dc8856398c15104b2c09730443b975f.jpg": "1977ff0714b29b57bee9a080d3204a815dc8856398c15104b2c09730443b975f",
-  "../../../../_continent_v2/shared-assets/479cdfd09ea478cb6dc31be06299f35c94b53441a4253725827a71bfd3808f85.jpg": "479cdfd09ea478cb6dc31be06299f35c94b53441a4253725827a71bfd3808f85",
-  "../../../../_continent_v2/shared-assets/217165e36379162a6222e9cfc0efa22d9f7e2d68428d92deb58037040ab822f9.jpg": "217165e36379162a6222e9cfc0efa22d9f7e2d68428d92deb58037040ab822f9"
- },
- "bounds": {
-  "min": [
-   78.81807997295351,
-   75.53974914550781,
-   30.910685239614153
-  ],
-  "max": [
-   180.0,
-   135.49786567687988,
-   133.09351683557216
-  ]
- },
- "performance": {
-  "glbBytes": 689156,
-  "nodes": 122,
-  "meshes": 5,
+  "provenance": {
+    "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_client.py",
+    "snapshotSha256": "f8b229797e132c0716e422dd4b154bc2e89c579286952f360e595960837d4998",
+    "sceneSha256": "dd59ce43b5b2ac133181af988c0170857aece08a4cfa27e2009b8a6049cc6d71"
+  },
   "externalResources": {
-   "../../../../_continent_v2/shared-assets/4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04.png": "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04",
-   "../../../../_continent_v2/shared-assets/1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5.png": "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5",
-   "../../../../_continent_v2/shared-assets/c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0.png": "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0",
-   "../../../../_continent_v2/shared-assets/454fdae2b1c2ba75cbd950c262ce76e1d6c16a480284231b3b6ac8c55ed806b9.png": "454fdae2b1c2ba75cbd950c262ce76e1d6c16a480284231b3b6ac8c55ed806b9",
-   "../../../../_continent_v2/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png": "ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5",
-   "../../../../_continent_v2/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png": "6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7",
-   "../../../../_continent_v2/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png": "8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805",
-   "../../../../_continent_v2/shared-assets/93772afc0935e2f29c2bdbd215194e4fb6e49a59d21cc98b201ddf5c43206346.jpg": "93772afc0935e2f29c2bdbd215194e4fb6e49a59d21cc98b201ddf5c43206346",
-   "../../../../_continent_v2/shared-assets/5ff5587aad7e75854997ab4e4515a05cdfafab4d962ad9a7207c8cb0a95db29e.jpg": "5ff5587aad7e75854997ab4e4515a05cdfafab4d962ad9a7207c8cb0a95db29e",
-   "../../../../_continent_v2/shared-assets/d6015571411ae42074bfb738eb9946b90b7a1834e624ad91407508b899f2563a.jpg": "d6015571411ae42074bfb738eb9946b90b7a1834e624ad91407508b899f2563a",
-   "../../../../_continent_v2/shared-assets/81c1564f19b98b6587eda57965d3f63a0694ef8c0d258fac43431d0f8c2963b7.jpg": "81c1564f19b98b6587eda57965d3f63a0694ef8c0d258fac43431d0f8c2963b7",
-   "../../../../_continent_v2/shared-assets/fc1d556975b86289b120a4e0b211f1b710cc3ff2a0ba44b53a2e97defe5d40d7.jpg": "fc1d556975b86289b120a4e0b211f1b710cc3ff2a0ba44b53a2e97defe5d40d7",
-   "../../../../_continent_v2/shared-assets/88cf9a1d632f9ae3a282147bbd04313fe18f61e39b89328798907a028ddc8581.jpg": "88cf9a1d632f9ae3a282147bbd04313fe18f61e39b89328798907a028ddc8581",
-   "../../../../_continent_v2/shared-assets/3caef983cee269d0b7b74dfbe0812fc3756bc07916ee40dff50c75fc5f612383.jpg": "3caef983cee269d0b7b74dfbe0812fc3756bc07916ee40dff50c75fc5f612383",
-   "../../../../_continent_v2/shared-assets/43a249593f903767aec9ca1011d925c7dfbd92abd4b497999509d3ddc20d6a9b.jpg": "43a249593f903767aec9ca1011d925c7dfbd92abd4b497999509d3ddc20d6a9b",
-   "../../../../_continent_v2/shared-assets/aa291da4bba343d502c66dc47e3cb8bd996a1ee196eec21604108694c505a9ce.jpg": "aa291da4bba343d502c66dc47e3cb8bd996a1ee196eec21604108694c505a9ce",
-   "../../../../_continent_v2/shared-assets/335197b7c3143957b13f75f694583fe78a177d98b6985c72323777ab5e18d11d.jpg": "335197b7c3143957b13f75f694583fe78a177d98b6985c72323777ab5e18d11d",
-   "../../../../_continent_v2/shared-assets/2a9f97c3189df8ebfc749bea5442894448612842a098466fa24ac4682804ac92.jpg": "2a9f97c3189df8ebfc749bea5442894448612842a098466fa24ac4682804ac92",
-   "../../../../_continent_v2/shared-assets/1c5cd4b20051f674a314e48da9a6c7c087d63efb3688484d66d4953de2d7d1ee.jpg": "1c5cd4b20051f674a314e48da9a6c7c087d63efb3688484d66d4953de2d7d1ee",
-   "../../../../_continent_v2/shared-assets/68f442f3801210245087e73797002e43a1210baef71f1f61fa2401eff0ba3a79.jpg": "68f442f3801210245087e73797002e43a1210baef71f1f61fa2401eff0ba3a79",
-   "../../../../_continent_v2/shared-assets/ac2d99b51b095a27e7fcb53184448a494a684fc4598b92083fc77b8065640832.jpg": "ac2d99b51b095a27e7fcb53184448a494a684fc4598b92083fc77b8065640832",
-   "../../../../_continent_v2/shared-assets/91eed6a90c01e31ce28591ed2317962602130bec70ad8085569e28eda732f66f.jpg": "91eed6a90c01e31ce28591ed2317962602130bec70ad8085569e28eda732f66f",
-   "../../../../_continent_v2/shared-assets/d60ec1cde1705a44c1ae392e4c7f5c80a3e40f1fe41af7f332fe89e5e179a09b.jpg": "d60ec1cde1705a44c1ae392e4c7f5c80a3e40f1fe41af7f332fe89e5e179a09b",
-   "../../../../_continent_v2/shared-assets/85fd322f578538a421032124e03cead4f021d78b3a61ad8d6ba17066bc2f5f76.jpg": "85fd322f578538a421032124e03cead4f021d78b3a61ad8d6ba17066bc2f5f76",
-   "../../../../_continent_v2/shared-assets/01300e168e2edc0d77115560a01872fd2c6844d0bbce53894344b1ce828703ac.jpg": "01300e168e2edc0d77115560a01872fd2c6844d0bbce53894344b1ce828703ac",
-   "../../../../_continent_v2/shared-assets/47dd31db8b6238e4242890f51a872300b11ad231988fa2c40f9a50a96f900f26.jpg": "47dd31db8b6238e4242890f51a872300b11ad231988fa2c40f9a50a96f900f26",
-   "../../../../_continent_v2/shared-assets/ac9d858275ae3947431d90a493f8e4cb3a919cbe5413b88117743d26ebde62a2.jpg": "ac9d858275ae3947431d90a493f8e4cb3a919cbe5413b88117743d26ebde62a2",
-   "../../../../_continent_v2/shared-assets/a4eba70a3461958f950306e485bc501da422d1d79473c222b4f8794f32a73996.jpg": "a4eba70a3461958f950306e485bc501da422d1d79473c222b4f8794f32a73996",
-   "../../../../_continent_v2/shared-assets/752e921fac49199f3383059436ab14f537ff1360ae7dd8375ca5b9ef2721af66.jpg": "752e921fac49199f3383059436ab14f537ff1360ae7dd8375ca5b9ef2721af66",
-   "../../../../_continent_v2/shared-assets/f0b46130becc0eee2ac1b080fcdf4325ae78268bda557ae8761dbf609d661f6e.jpg": "f0b46130becc0eee2ac1b080fcdf4325ae78268bda557ae8761dbf609d661f6e",
-   "../../../../_continent_v2/shared-assets/b470e4970f5d4ee9a5d2a48270438ecbec32ca6c20a5170ee8c01c38f24abbb4.jpg": "b470e4970f5d4ee9a5d2a48270438ecbec32ca6c20a5170ee8c01c38f24abbb4",
-   "../../../../_continent_v2/shared-assets/70c9d518e70115014b5f97613fe1063ea81fb5112fc7ddbec1ade8151b3a49a7.jpg": "70c9d518e70115014b5f97613fe1063ea81fb5112fc7ddbec1ade8151b3a49a7",
-   "../../../../_continent_v2/shared-assets/0dc62c7cfc8a98a837193fd9d757914d57009ac96ec0ea68ff77cf27bb1f685a.jpg": "0dc62c7cfc8a98a837193fd9d757914d57009ac96ec0ea68ff77cf27bb1f685a",
-   "../../../../_continent_v2/shared-assets/390390d75ea28238c8eb3c5067f1992a5dfb06857db41917ff96a01f10e49259.jpg": "390390d75ea28238c8eb3c5067f1992a5dfb06857db41917ff96a01f10e49259",
-   "../../../../_continent_v2/shared-assets/d500922ba4e27ec1553f745bebb9cf3b0f3fb9d5ee4fe0a7888dcec10f525d72.jpg": "d500922ba4e27ec1553f745bebb9cf3b0f3fb9d5ee4fe0a7888dcec10f525d72",
-   "../../../../_continent_v2/shared-assets/122bdb504a9f663b0df8da74d61591166d42c387141ac11c4720c09d03ec3b13.jpg": "122bdb504a9f663b0df8da74d61591166d42c387141ac11c4720c09d03ec3b13",
-   "../../../../_continent_v2/shared-assets/0e6d52c15b5f9f217f3547b4eba4f21bf47ae2115a18d1850b4a672cd8a3d039.jpg": "0e6d52c15b5f9f217f3547b4eba4f21bf47ae2115a18d1850b4a672cd8a3d039",
-   "../../../../_continent_v2/shared-assets/1977ff0714b29b57bee9a080d3204a815dc8856398c15104b2c09730443b975f.jpg": "1977ff0714b29b57bee9a080d3204a815dc8856398c15104b2c09730443b975f",
-   "../../../../_continent_v2/shared-assets/479cdfd09ea478cb6dc31be06299f35c94b53441a4253725827a71bfd3808f85.jpg": "479cdfd09ea478cb6dc31be06299f35c94b53441a4253725827a71bfd3808f85",
-   "../../../../_continent_v2/shared-assets/217165e36379162a6222e9cfc0efa22d9f7e2d68428d92deb58037040ab822f9.jpg": "217165e36379162a6222e9cfc0efa22d9f7e2d68428d92deb58037040ab822f9"
+    "../../../../_continent_v2/shared-assets/4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04.png": "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04",
+    "../../../../_continent_v2/shared-assets/1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5.png": "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5",
+    "../../../../_continent_v2/shared-assets/c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0.png": "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0",
+    "../../../../_continent_v2/shared-assets/454fdae2b1c2ba75cbd950c262ce76e1d6c16a480284231b3b6ac8c55ed806b9.png": "454fdae2b1c2ba75cbd950c262ce76e1d6c16a480284231b3b6ac8c55ed806b9",
+    "../../../../../nymara-regions/_continent/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png": "ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5",
+    "../../../../../nymara-regions/_continent/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png": "6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7",
+    "../../../../../nymara-regions/_continent/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png": "8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805",
+    "../../../../../nymara-regions/_continent/shared-assets/93772afc0935e2f29c2bdbd215194e4fb6e49a59d21cc98b201ddf5c43206346.jpg": "93772afc0935e2f29c2bdbd215194e4fb6e49a59d21cc98b201ddf5c43206346",
+    "../../../../../nymara-regions/_continent/shared-assets/5ff5587aad7e75854997ab4e4515a05cdfafab4d962ad9a7207c8cb0a95db29e.jpg": "5ff5587aad7e75854997ab4e4515a05cdfafab4d962ad9a7207c8cb0a95db29e",
+    "../../../../../nymara-regions/_continent/shared-assets/d6015571411ae42074bfb738eb9946b90b7a1834e624ad91407508b899f2563a.jpg": "d6015571411ae42074bfb738eb9946b90b7a1834e624ad91407508b899f2563a",
+    "../../../../../nymara-regions/_continent/shared-assets/81c1564f19b98b6587eda57965d3f63a0694ef8c0d258fac43431d0f8c2963b7.jpg": "81c1564f19b98b6587eda57965d3f63a0694ef8c0d258fac43431d0f8c2963b7",
+    "../../../../../nymara-regions/_continent/shared-assets/fc1d556975b86289b120a4e0b211f1b710cc3ff2a0ba44b53a2e97defe5d40d7.jpg": "fc1d556975b86289b120a4e0b211f1b710cc3ff2a0ba44b53a2e97defe5d40d7",
+    "../../../../../nymara-regions/_continent/shared-assets/88cf9a1d632f9ae3a282147bbd04313fe18f61e39b89328798907a028ddc8581.jpg": "88cf9a1d632f9ae3a282147bbd04313fe18f61e39b89328798907a028ddc8581",
+    "../../../../../nymara-regions/_continent/shared-assets/3caef983cee269d0b7b74dfbe0812fc3756bc07916ee40dff50c75fc5f612383.jpg": "3caef983cee269d0b7b74dfbe0812fc3756bc07916ee40dff50c75fc5f612383",
+    "../../../../../nymara-regions/_continent/shared-assets/43a249593f903767aec9ca1011d925c7dfbd92abd4b497999509d3ddc20d6a9b.jpg": "43a249593f903767aec9ca1011d925c7dfbd92abd4b497999509d3ddc20d6a9b",
+    "../../../../../nymara-regions/_continent/shared-assets/aa291da4bba343d502c66dc47e3cb8bd996a1ee196eec21604108694c505a9ce.jpg": "aa291da4bba343d502c66dc47e3cb8bd996a1ee196eec21604108694c505a9ce",
+    "../../../../../nymara-regions/_continent/shared-assets/335197b7c3143957b13f75f694583fe78a177d98b6985c72323777ab5e18d11d.jpg": "335197b7c3143957b13f75f694583fe78a177d98b6985c72323777ab5e18d11d",
+    "../../../../../nymara-regions/_continent/shared-assets/2a9f97c3189df8ebfc749bea5442894448612842a098466fa24ac4682804ac92.jpg": "2a9f97c3189df8ebfc749bea5442894448612842a098466fa24ac4682804ac92",
+    "../../../../../nymara-regions/_continent/shared-assets/1c5cd4b20051f674a314e48da9a6c7c087d63efb3688484d66d4953de2d7d1ee.jpg": "1c5cd4b20051f674a314e48da9a6c7c087d63efb3688484d66d4953de2d7d1ee",
+    "../../../../../nymara-regions/_continent/shared-assets/68f442f3801210245087e73797002e43a1210baef71f1f61fa2401eff0ba3a79.jpg": "68f442f3801210245087e73797002e43a1210baef71f1f61fa2401eff0ba3a79",
+    "../../../../../nymara-regions/_continent/shared-assets/ac2d99b51b095a27e7fcb53184448a494a684fc4598b92083fc77b8065640832.jpg": "ac2d99b51b095a27e7fcb53184448a494a684fc4598b92083fc77b8065640832",
+    "../../../../../nymara-regions/_continent/shared-assets/91eed6a90c01e31ce28591ed2317962602130bec70ad8085569e28eda732f66f.jpg": "91eed6a90c01e31ce28591ed2317962602130bec70ad8085569e28eda732f66f",
+    "../../../../../nymara-regions/_continent/shared-assets/d60ec1cde1705a44c1ae392e4c7f5c80a3e40f1fe41af7f332fe89e5e179a09b.jpg": "d60ec1cde1705a44c1ae392e4c7f5c80a3e40f1fe41af7f332fe89e5e179a09b",
+    "../../../../../nymara-regions/_continent/shared-assets/85fd322f578538a421032124e03cead4f021d78b3a61ad8d6ba17066bc2f5f76.jpg": "85fd322f578538a421032124e03cead4f021d78b3a61ad8d6ba17066bc2f5f76",
+    "../../../../../nymara-regions/_continent/shared-assets/01300e168e2edc0d77115560a01872fd2c6844d0bbce53894344b1ce828703ac.jpg": "01300e168e2edc0d77115560a01872fd2c6844d0bbce53894344b1ce828703ac",
+    "../../../../../nymara-regions/_continent/shared-assets/47dd31db8b6238e4242890f51a872300b11ad231988fa2c40f9a50a96f900f26.jpg": "47dd31db8b6238e4242890f51a872300b11ad231988fa2c40f9a50a96f900f26",
+    "../../../../../nymara-regions/_continent/shared-assets/ac9d858275ae3947431d90a493f8e4cb3a919cbe5413b88117743d26ebde62a2.jpg": "ac9d858275ae3947431d90a493f8e4cb3a919cbe5413b88117743d26ebde62a2",
+    "../../../../../nymara-regions/_continent/shared-assets/a4eba70a3461958f950306e485bc501da422d1d79473c222b4f8794f32a73996.jpg": "a4eba70a3461958f950306e485bc501da422d1d79473c222b4f8794f32a73996",
+    "../../../../_continent_v2/shared-assets/752e921fac49199f3383059436ab14f537ff1360ae7dd8375ca5b9ef2721af66.jpg": "752e921fac49199f3383059436ab14f537ff1360ae7dd8375ca5b9ef2721af66",
+    "../../../../_continent_v2/shared-assets/f0b46130becc0eee2ac1b080fcdf4325ae78268bda557ae8761dbf609d661f6e.jpg": "f0b46130becc0eee2ac1b080fcdf4325ae78268bda557ae8761dbf609d661f6e",
+    "../../../../_continent_v2/shared-assets/b470e4970f5d4ee9a5d2a48270438ecbec32ca6c20a5170ee8c01c38f24abbb4.jpg": "b470e4970f5d4ee9a5d2a48270438ecbec32ca6c20a5170ee8c01c38f24abbb4",
+    "../../../../_continent_v2/shared-assets/70c9d518e70115014b5f97613fe1063ea81fb5112fc7ddbec1ade8151b3a49a7.jpg": "70c9d518e70115014b5f97613fe1063ea81fb5112fc7ddbec1ade8151b3a49a7",
+    "../../../../_continent_v2/shared-assets/0dc62c7cfc8a98a837193fd9d757914d57009ac96ec0ea68ff77cf27bb1f685a.jpg": "0dc62c7cfc8a98a837193fd9d757914d57009ac96ec0ea68ff77cf27bb1f685a",
+    "../../../../_continent_v2/shared-assets/390390d75ea28238c8eb3c5067f1992a5dfb06857db41917ff96a01f10e49259.jpg": "390390d75ea28238c8eb3c5067f1992a5dfb06857db41917ff96a01f10e49259",
+    "../../../../../nymara-regions/_continent/shared-assets/d500922ba4e27ec1553f745bebb9cf3b0f3fb9d5ee4fe0a7888dcec10f525d72.jpg": "d500922ba4e27ec1553f745bebb9cf3b0f3fb9d5ee4fe0a7888dcec10f525d72",
+    "../../../../../nymara-regions/_continent/shared-assets/122bdb504a9f663b0df8da74d61591166d42c387141ac11c4720c09d03ec3b13.jpg": "122bdb504a9f663b0df8da74d61591166d42c387141ac11c4720c09d03ec3b13",
+    "../../../../../nymara-regions/_continent/shared-assets/0e6d52c15b5f9f217f3547b4eba4f21bf47ae2115a18d1850b4a672cd8a3d039.jpg": "0e6d52c15b5f9f217f3547b4eba4f21bf47ae2115a18d1850b4a672cd8a3d039",
+    "../../../../../nymara-regions/_continent/shared-assets/1977ff0714b29b57bee9a080d3204a815dc8856398c15104b2c09730443b975f.jpg": "1977ff0714b29b57bee9a080d3204a815dc8856398c15104b2c09730443b975f",
+    "../../../../../nymara-regions/_continent/shared-assets/479cdfd09ea478cb6dc31be06299f35c94b53441a4253725827a71bfd3808f85.jpg": "479cdfd09ea478cb6dc31be06299f35c94b53441a4253725827a71bfd3808f85",
+    "../../../../../nymara-regions/_continent/shared-assets/217165e36379162a6222e9cfc0efa22d9f7e2d68428d92deb58037040ab822f9.jpg": "217165e36379162a6222e9cfc0efa22d9f7e2d68428d92deb58037040ab822f9"
   },
-  "sharedResourceResidentBytes": {
-   "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-   "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-   "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406,
-   "454fdae2b1c2ba75cbd950c262ce76e1d6c16a480284231b3b6ac8c55ed806b9": 8413526,
-   "ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5": 1398102,
-   "6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7": 1398102,
-   "8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805": 5592406,
-   "93772afc0935e2f29c2bdbd215194e4fb6e49a59d21cc98b201ddf5c43206346": 5592406,
-   "5ff5587aad7e75854997ab4e4515a05cdfafab4d962ad9a7207c8cb0a95db29e": 5592406,
-   "d6015571411ae42074bfb738eb9946b90b7a1834e624ad91407508b899f2563a": 5592406,
-   "81c1564f19b98b6587eda57965d3f63a0694ef8c0d258fac43431d0f8c2963b7": 5592406,
-   "fc1d556975b86289b120a4e0b211f1b710cc3ff2a0ba44b53a2e97defe5d40d7": 5592406,
-   "88cf9a1d632f9ae3a282147bbd04313fe18f61e39b89328798907a028ddc8581": 5592406,
-   "3caef983cee269d0b7b74dfbe0812fc3756bc07916ee40dff50c75fc5f612383": 5592406,
-   "43a249593f903767aec9ca1011d925c7dfbd92abd4b497999509d3ddc20d6a9b": 5592406,
-   "aa291da4bba343d502c66dc47e3cb8bd996a1ee196eec21604108694c505a9ce": 5592406,
-   "335197b7c3143957b13f75f694583fe78a177d98b6985c72323777ab5e18d11d": 5592406,
-   "2a9f97c3189df8ebfc749bea5442894448612842a098466fa24ac4682804ac92": 5592406,
-   "1c5cd4b20051f674a314e48da9a6c7c087d63efb3688484d66d4953de2d7d1ee": 5592406,
-   "68f442f3801210245087e73797002e43a1210baef71f1f61fa2401eff0ba3a79": 5592406,
-   "ac2d99b51b095a27e7fcb53184448a494a684fc4598b92083fc77b8065640832": 5592406,
-   "91eed6a90c01e31ce28591ed2317962602130bec70ad8085569e28eda732f66f": 5592406,
-   "d60ec1cde1705a44c1ae392e4c7f5c80a3e40f1fe41af7f332fe89e5e179a09b": 1398102,
-   "85fd322f578538a421032124e03cead4f021d78b3a61ad8d6ba17066bc2f5f76": 1398102,
-   "01300e168e2edc0d77115560a01872fd2c6844d0bbce53894344b1ce828703ac": 1398102,
-   "47dd31db8b6238e4242890f51a872300b11ad231988fa2c40f9a50a96f900f26": 5592406,
-   "ac9d858275ae3947431d90a493f8e4cb3a919cbe5413b88117743d26ebde62a2": 5592406,
-   "a4eba70a3461958f950306e485bc501da422d1d79473c222b4f8794f32a73996": 5592406,
-   "752e921fac49199f3383059436ab14f537ff1360ae7dd8375ca5b9ef2721af66": 1398102,
-   "f0b46130becc0eee2ac1b080fcdf4325ae78268bda557ae8761dbf609d661f6e": 1398102,
-   "b470e4970f5d4ee9a5d2a48270438ecbec32ca6c20a5170ee8c01c38f24abbb4": 1398102,
-   "70c9d518e70115014b5f97613fe1063ea81fb5112fc7ddbec1ade8151b3a49a7": 22369622,
-   "0dc62c7cfc8a98a837193fd9d757914d57009ac96ec0ea68ff77cf27bb1f685a": 22369622,
-   "390390d75ea28238c8eb3c5067f1992a5dfb06857db41917ff96a01f10e49259": 5592406,
-   "d500922ba4e27ec1553f745bebb9cf3b0f3fb9d5ee4fe0a7888dcec10f525d72": 5592406,
-   "122bdb504a9f663b0df8da74d61591166d42c387141ac11c4720c09d03ec3b13": 5592406,
-   "0e6d52c15b5f9f217f3547b4eba4f21bf47ae2115a18d1850b4a672cd8a3d039": 5592406,
-   "1977ff0714b29b57bee9a080d3204a815dc8856398c15104b2c09730443b975f": 1398102,
-   "479cdfd09ea478cb6dc31be06299f35c94b53441a4253725827a71bfd3808f85": 1398102,
-   "217165e36379162a6222e9cfc0efa22d9f7e2d68428d92deb58037040ab822f9": 1398102
+  "bounds": {
+    "min": [
+      78.81807997295351,
+      75.53974914550781,
+      30.910685239614153
+    ],
+    "max": [
+      180.0,
+      135.49786567687988,
+      133.09351683557216
+    ]
+  },
+  "performance": {
+    "glbBytes": 689452,
+    "nodes": 122,
+    "meshes": 5,
+    "externalResources": {
+      "../../../../_continent_v2/shared-assets/4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04.png": "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04",
+      "../../../../_continent_v2/shared-assets/1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5.png": "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5",
+      "../../../../_continent_v2/shared-assets/c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0.png": "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0",
+      "../../../../_continent_v2/shared-assets/454fdae2b1c2ba75cbd950c262ce76e1d6c16a480284231b3b6ac8c55ed806b9.png": "454fdae2b1c2ba75cbd950c262ce76e1d6c16a480284231b3b6ac8c55ed806b9",
+      "../../../../../nymara-regions/_continent/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png": "ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5",
+      "../../../../../nymara-regions/_continent/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png": "6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7",
+      "../../../../../nymara-regions/_continent/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png": "8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805",
+      "../../../../../nymara-regions/_continent/shared-assets/93772afc0935e2f29c2bdbd215194e4fb6e49a59d21cc98b201ddf5c43206346.jpg": "93772afc0935e2f29c2bdbd215194e4fb6e49a59d21cc98b201ddf5c43206346",
+      "../../../../../nymara-regions/_continent/shared-assets/5ff5587aad7e75854997ab4e4515a05cdfafab4d962ad9a7207c8cb0a95db29e.jpg": "5ff5587aad7e75854997ab4e4515a05cdfafab4d962ad9a7207c8cb0a95db29e",
+      "../../../../../nymara-regions/_continent/shared-assets/d6015571411ae42074bfb738eb9946b90b7a1834e624ad91407508b899f2563a.jpg": "d6015571411ae42074bfb738eb9946b90b7a1834e624ad91407508b899f2563a",
+      "../../../../../nymara-regions/_continent/shared-assets/81c1564f19b98b6587eda57965d3f63a0694ef8c0d258fac43431d0f8c2963b7.jpg": "81c1564f19b98b6587eda57965d3f63a0694ef8c0d258fac43431d0f8c2963b7",
+      "../../../../../nymara-regions/_continent/shared-assets/fc1d556975b86289b120a4e0b211f1b710cc3ff2a0ba44b53a2e97defe5d40d7.jpg": "fc1d556975b86289b120a4e0b211f1b710cc3ff2a0ba44b53a2e97defe5d40d7",
+      "../../../../../nymara-regions/_continent/shared-assets/88cf9a1d632f9ae3a282147bbd04313fe18f61e39b89328798907a028ddc8581.jpg": "88cf9a1d632f9ae3a282147bbd04313fe18f61e39b89328798907a028ddc8581",
+      "../../../../../nymara-regions/_continent/shared-assets/3caef983cee269d0b7b74dfbe0812fc3756bc07916ee40dff50c75fc5f612383.jpg": "3caef983cee269d0b7b74dfbe0812fc3756bc07916ee40dff50c75fc5f612383",
+      "../../../../../nymara-regions/_continent/shared-assets/43a249593f903767aec9ca1011d925c7dfbd92abd4b497999509d3ddc20d6a9b.jpg": "43a249593f903767aec9ca1011d925c7dfbd92abd4b497999509d3ddc20d6a9b",
+      "../../../../../nymara-regions/_continent/shared-assets/aa291da4bba343d502c66dc47e3cb8bd996a1ee196eec21604108694c505a9ce.jpg": "aa291da4bba343d502c66dc47e3cb8bd996a1ee196eec21604108694c505a9ce",
+      "../../../../../nymara-regions/_continent/shared-assets/335197b7c3143957b13f75f694583fe78a177d98b6985c72323777ab5e18d11d.jpg": "335197b7c3143957b13f75f694583fe78a177d98b6985c72323777ab5e18d11d",
+      "../../../../../nymara-regions/_continent/shared-assets/2a9f97c3189df8ebfc749bea5442894448612842a098466fa24ac4682804ac92.jpg": "2a9f97c3189df8ebfc749bea5442894448612842a098466fa24ac4682804ac92",
+      "../../../../../nymara-regions/_continent/shared-assets/1c5cd4b20051f674a314e48da9a6c7c087d63efb3688484d66d4953de2d7d1ee.jpg": "1c5cd4b20051f674a314e48da9a6c7c087d63efb3688484d66d4953de2d7d1ee",
+      "../../../../../nymara-regions/_continent/shared-assets/68f442f3801210245087e73797002e43a1210baef71f1f61fa2401eff0ba3a79.jpg": "68f442f3801210245087e73797002e43a1210baef71f1f61fa2401eff0ba3a79",
+      "../../../../../nymara-regions/_continent/shared-assets/ac2d99b51b095a27e7fcb53184448a494a684fc4598b92083fc77b8065640832.jpg": "ac2d99b51b095a27e7fcb53184448a494a684fc4598b92083fc77b8065640832",
+      "../../../../../nymara-regions/_continent/shared-assets/91eed6a90c01e31ce28591ed2317962602130bec70ad8085569e28eda732f66f.jpg": "91eed6a90c01e31ce28591ed2317962602130bec70ad8085569e28eda732f66f",
+      "../../../../../nymara-regions/_continent/shared-assets/d60ec1cde1705a44c1ae392e4c7f5c80a3e40f1fe41af7f332fe89e5e179a09b.jpg": "d60ec1cde1705a44c1ae392e4c7f5c80a3e40f1fe41af7f332fe89e5e179a09b",
+      "../../../../../nymara-regions/_continent/shared-assets/85fd322f578538a421032124e03cead4f021d78b3a61ad8d6ba17066bc2f5f76.jpg": "85fd322f578538a421032124e03cead4f021d78b3a61ad8d6ba17066bc2f5f76",
+      "../../../../../nymara-regions/_continent/shared-assets/01300e168e2edc0d77115560a01872fd2c6844d0bbce53894344b1ce828703ac.jpg": "01300e168e2edc0d77115560a01872fd2c6844d0bbce53894344b1ce828703ac",
+      "../../../../../nymara-regions/_continent/shared-assets/47dd31db8b6238e4242890f51a872300b11ad231988fa2c40f9a50a96f900f26.jpg": "47dd31db8b6238e4242890f51a872300b11ad231988fa2c40f9a50a96f900f26",
+      "../../../../../nymara-regions/_continent/shared-assets/ac9d858275ae3947431d90a493f8e4cb3a919cbe5413b88117743d26ebde62a2.jpg": "ac9d858275ae3947431d90a493f8e4cb3a919cbe5413b88117743d26ebde62a2",
+      "../../../../../nymara-regions/_continent/shared-assets/a4eba70a3461958f950306e485bc501da422d1d79473c222b4f8794f32a73996.jpg": "a4eba70a3461958f950306e485bc501da422d1d79473c222b4f8794f32a73996",
+      "../../../../_continent_v2/shared-assets/752e921fac49199f3383059436ab14f537ff1360ae7dd8375ca5b9ef2721af66.jpg": "752e921fac49199f3383059436ab14f537ff1360ae7dd8375ca5b9ef2721af66",
+      "../../../../_continent_v2/shared-assets/f0b46130becc0eee2ac1b080fcdf4325ae78268bda557ae8761dbf609d661f6e.jpg": "f0b46130becc0eee2ac1b080fcdf4325ae78268bda557ae8761dbf609d661f6e",
+      "../../../../_continent_v2/shared-assets/b470e4970f5d4ee9a5d2a48270438ecbec32ca6c20a5170ee8c01c38f24abbb4.jpg": "b470e4970f5d4ee9a5d2a48270438ecbec32ca6c20a5170ee8c01c38f24abbb4",
+      "../../../../_continent_v2/shared-assets/70c9d518e70115014b5f97613fe1063ea81fb5112fc7ddbec1ade8151b3a49a7.jpg": "70c9d518e70115014b5f97613fe1063ea81fb5112fc7ddbec1ade8151b3a49a7",
+      "../../../../_continent_v2/shared-assets/0dc62c7cfc8a98a837193fd9d757914d57009ac96ec0ea68ff77cf27bb1f685a.jpg": "0dc62c7cfc8a98a837193fd9d757914d57009ac96ec0ea68ff77cf27bb1f685a",
+      "../../../../_continent_v2/shared-assets/390390d75ea28238c8eb3c5067f1992a5dfb06857db41917ff96a01f10e49259.jpg": "390390d75ea28238c8eb3c5067f1992a5dfb06857db41917ff96a01f10e49259",
+      "../../../../../nymara-regions/_continent/shared-assets/d500922ba4e27ec1553f745bebb9cf3b0f3fb9d5ee4fe0a7888dcec10f525d72.jpg": "d500922ba4e27ec1553f745bebb9cf3b0f3fb9d5ee4fe0a7888dcec10f525d72",
+      "../../../../../nymara-regions/_continent/shared-assets/122bdb504a9f663b0df8da74d61591166d42c387141ac11c4720c09d03ec3b13.jpg": "122bdb504a9f663b0df8da74d61591166d42c387141ac11c4720c09d03ec3b13",
+      "../../../../../nymara-regions/_continent/shared-assets/0e6d52c15b5f9f217f3547b4eba4f21bf47ae2115a18d1850b4a672cd8a3d039.jpg": "0e6d52c15b5f9f217f3547b4eba4f21bf47ae2115a18d1850b4a672cd8a3d039",
+      "../../../../../nymara-regions/_continent/shared-assets/1977ff0714b29b57bee9a080d3204a815dc8856398c15104b2c09730443b975f.jpg": "1977ff0714b29b57bee9a080d3204a815dc8856398c15104b2c09730443b975f",
+      "../../../../../nymara-regions/_continent/shared-assets/479cdfd09ea478cb6dc31be06299f35c94b53441a4253725827a71bfd3808f85.jpg": "479cdfd09ea478cb6dc31be06299f35c94b53441a4253725827a71bfd3808f85",
+      "../../../../../nymara-regions/_continent/shared-assets/217165e36379162a6222e9cfc0efa22d9f7e2d68428d92deb58037040ab822f9.jpg": "217165e36379162a6222e9cfc0efa22d9f7e2d68428d92deb58037040ab822f9"
+    },
+    "sharedResourceResidentBytes": {
+      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+      "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+      "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406,
+      "454fdae2b1c2ba75cbd950c262ce76e1d6c16a480284231b3b6ac8c55ed806b9": 8413526,
+      "ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5": 1398102,
+      "6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7": 1398102,
+      "8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805": 5592406,
+      "93772afc0935e2f29c2bdbd215194e4fb6e49a59d21cc98b201ddf5c43206346": 5592406,
+      "5ff5587aad7e75854997ab4e4515a05cdfafab4d962ad9a7207c8cb0a95db29e": 5592406,
+      "d6015571411ae42074bfb738eb9946b90b7a1834e624ad91407508b899f2563a": 5592406,
+      "81c1564f19b98b6587eda57965d3f63a0694ef8c0d258fac43431d0f8c2963b7": 5592406,
+      "fc1d556975b86289b120a4e0b211f1b710cc3ff2a0ba44b53a2e97defe5d40d7": 5592406,
+      "88cf9a1d632f9ae3a282147bbd04313fe18f61e39b89328798907a028ddc8581": 5592406,
+      "3caef983cee269d0b7b74dfbe0812fc3756bc07916ee40dff50c75fc5f612383": 5592406,
+      "43a249593f903767aec9ca1011d925c7dfbd92abd4b497999509d3ddc20d6a9b": 5592406,
+      "aa291da4bba343d502c66dc47e3cb8bd996a1ee196eec21604108694c505a9ce": 5592406,
+      "335197b7c3143957b13f75f694583fe78a177d98b6985c72323777ab5e18d11d": 5592406,
+      "2a9f97c3189df8ebfc749bea5442894448612842a098466fa24ac4682804ac92": 5592406,
+      "1c5cd4b20051f674a314e48da9a6c7c087d63efb3688484d66d4953de2d7d1ee": 5592406,
+      "68f442f3801210245087e73797002e43a1210baef71f1f61fa2401eff0ba3a79": 5592406,
+      "ac2d99b51b095a27e7fcb53184448a494a684fc4598b92083fc77b8065640832": 5592406,
+      "91eed6a90c01e31ce28591ed2317962602130bec70ad8085569e28eda732f66f": 5592406,
+      "d60ec1cde1705a44c1ae392e4c7f5c80a3e40f1fe41af7f332fe89e5e179a09b": 1398102,
+      "85fd322f578538a421032124e03cead4f021d78b3a61ad8d6ba17066bc2f5f76": 1398102,
+      "01300e168e2edc0d77115560a01872fd2c6844d0bbce53894344b1ce828703ac": 1398102,
+      "47dd31db8b6238e4242890f51a872300b11ad231988fa2c40f9a50a96f900f26": 5592406,
+      "ac9d858275ae3947431d90a493f8e4cb3a919cbe5413b88117743d26ebde62a2": 5592406,
+      "a4eba70a3461958f950306e485bc501da422d1d79473c222b4f8794f32a73996": 5592406,
+      "752e921fac49199f3383059436ab14f537ff1360ae7dd8375ca5b9ef2721af66": 1398102,
+      "f0b46130becc0eee2ac1b080fcdf4325ae78268bda557ae8761dbf609d661f6e": 1398102,
+      "b470e4970f5d4ee9a5d2a48270438ecbec32ca6c20a5170ee8c01c38f24abbb4": 1398102,
+      "70c9d518e70115014b5f97613fe1063ea81fb5112fc7ddbec1ade8151b3a49a7": 22369622,
+      "0dc62c7cfc8a98a837193fd9d757914d57009ac96ec0ea68ff77cf27bb1f685a": 22369622,
+      "390390d75ea28238c8eb3c5067f1992a5dfb06857db41917ff96a01f10e49259": 5592406,
+      "d500922ba4e27ec1553f745bebb9cf3b0f3fb9d5ee4fe0a7888dcec10f525d72": 5592406,
+      "122bdb504a9f663b0df8da74d61591166d42c387141ac11c4720c09d03ec3b13": 5592406,
+      "0e6d52c15b5f9f217f3547b4eba4f21bf47ae2115a18d1850b4a672cd8a3d039": 5592406,
+      "1977ff0714b29b57bee9a080d3204a815dc8856398c15104b2c09730443b975f": 1398102,
+      "479cdfd09ea478cb6dc31be06299f35c94b53441a4253725827a71bfd3808f85": 1398102,
+      "217165e36379162a6222e9cfc0efa22d9f7e2d68428d92deb58037040ab822f9": 1398102
+    }
+  },
+  "biomeBlend": null,
+  "objectMaterialOverrides": {
+    "schema": "eloria-object-material-overrides-v1",
+    "entries": []
+  },
+  "externalMeshes": {
+    "../../../../../_shared/meshes/226204a0d88b242c4b6699822cb34355d2d53416e600e2fa51fc0546ab7bb4d2.glb": "c64c832b3975d8dbc5e1c8f242db8a90387fc5ca8d61d5f78a24f4fca26ce9cd",
+    "../../../../../_shared/meshes/227af73fdff40bf0984a71fd5ab6e52a37fd51663d85e0cc3a7b91ab79416640.glb": "4088786b688baf548585ed6e2b0960d0e5234e5c365d57816b4c972890ea3db3",
+    "../../../../../_shared/meshes/28915a615734b4c4d12b874819d97dc6a29008d55dd9712a43194136e240a1bb.glb": "e75c9944ca11c42183ec645016aa2df829f317a4c42aea28295246bf4bf22862",
+    "../../../../../_shared/meshes/45a6e21459e342205cec64d041c07474909b5d904d0c040c28e29578ad572a10.glb": "775ec7f86275bb21cc4b307c04272fb345a377a16c2e4cbf10fc4a5bfac8bcbc",
+    "../../../../../_shared/meshes/4a4346f2db96fb416395fa7999d6f123c47cde542871ab71d5fd405bf4f9cb61.glb": "4efab8f803c60f33d9f50489fd3a1a5f17dc096f8434a0419213734dc87d68d5",
+    "../../../../../_shared/meshes/6840382acd411a668190cee9ba576c9444032b32694ae55d5476eb96dfadada8.glb": "80f382bd7a21bd0222c15c50f79dc7ed4b2b1cc661cb7a211af8ea1ea4d704ae",
+    "../../../../../_shared/meshes/7dec60957ca0e7465b597764948487a030e3bea39c32a289034288a24a271479.glb": "253d5a9574e8949ac4d059d2e896bee9a209ba03e167a6e8181f66fa9ef85538",
+    "../../../../../_shared/meshes/aa262578b9f92c6964daa02e396784ca9422a71103849e5f87c2f097dc8954ac.glb": "5109637c4219050e0fa1144cb45ee71324b7c9a4920a9cc17c5fd44731f4486e",
+    "../../../../../_shared/meshes/b2b042a78c3d413b6f17226b4b9ca889574eadddead6722022ee883092582894.glb": "aacf3511a1a3544c7e5fe8c889c99fca5e2b9da9200a80196b67066802311bfe",
+    "../../../../../_shared/meshes/b942865bb9f5e8e8adf4cc68e2bed964d013e319794bbf29b451aa2185c0c7b0.glb": "debe74df327368c111fd224109d7a8ca64c6837893b96657d878139d3e0e9a4a",
+    "../../../../../_shared/meshes/e340ddbb54ffbc3c290ec9eeb45c3f86ecc4b724cf6cf26910bd2fc1d997f0be.glb": "0bcffc1c4eabb68862767060fd737ad6c68f462b5818f4bfccba44c51b81c539",
+    "../../../../../_shared/meshes/e8111b48daa2994a416e01bf59db2ead8fe0d3a18591c95f1263b1a194e540d0.glb": "117f9dc9f094cd2ef402439a1bd8bc56b95c8ef614f16e79d7474aa2267b5162",
+    "../../../../../_shared/meshes/edbd6a5578f1fe3dc83101ab2ef0e7e99df64d7c21aa74043339dedc80f4a26f.glb": "dd4d03f76f77515fa762fbb90098b445f2eba5f9a90e44a203d882cc8412782b",
+    "../../../../../_shared/meshes/fe01d645c127545bfcf33c7fcc4f2d108633830873e2e225063f2c35c8623b44.glb": "df933642e80ef55a015f62d30067233f6bee5ad8903ba8e8e2d2a2436af10ee2"
+  },
+  "externalImagePolicies": {
+    "../../../../../nymara-regions/_continent/shared-assets/01300e168e2edc0d77115560a01872fd2c6844d0bbce53894344b1ce828703ac.jpg": [
+      "../../../../_continent_v2/shared-assets"
+    ],
+    "../../../../../nymara-regions/_continent/shared-assets/0e6d52c15b5f9f217f3547b4eba4f21bf47ae2115a18d1850b4a672cd8a3d039.jpg": [
+      "../../../../_continent_v2/shared-assets"
+    ],
+    "../../../../../nymara-regions/_continent/shared-assets/122bdb504a9f663b0df8da74d61591166d42c387141ac11c4720c09d03ec3b13.jpg": [
+      "../../../../_continent_v2/shared-assets"
+    ],
+    "../../../../../nymara-regions/_continent/shared-assets/1977ff0714b29b57bee9a080d3204a815dc8856398c15104b2c09730443b975f.jpg": [
+      "../../../../_continent_v2/shared-assets"
+    ],
+    "../../../../../nymara-regions/_continent/shared-assets/1c5cd4b20051f674a314e48da9a6c7c087d63efb3688484d66d4953de2d7d1ee.jpg": [
+      "../../../../_continent_v2/shared-assets"
+    ],
+    "../../../../../nymara-regions/_continent/shared-assets/217165e36379162a6222e9cfc0efa22d9f7e2d68428d92deb58037040ab822f9.jpg": [
+      "../../../../_continent_v2/shared-assets"
+    ],
+    "../../../../../nymara-regions/_continent/shared-assets/2a9f97c3189df8ebfc749bea5442894448612842a098466fa24ac4682804ac92.jpg": [
+      "../../../../_continent_v2/shared-assets"
+    ],
+    "../../../../../nymara-regions/_continent/shared-assets/335197b7c3143957b13f75f694583fe78a177d98b6985c72323777ab5e18d11d.jpg": [
+      "../../../../_continent_v2/shared-assets"
+    ],
+    "../../../../../nymara-regions/_continent/shared-assets/3caef983cee269d0b7b74dfbe0812fc3756bc07916ee40dff50c75fc5f612383.jpg": [
+      "../../../../_continent_v2/shared-assets"
+    ],
+    "../../../../../nymara-regions/_continent/shared-assets/43a249593f903767aec9ca1011d925c7dfbd92abd4b497999509d3ddc20d6a9b.jpg": [
+      "../../../../_continent_v2/shared-assets"
+    ],
+    "../../../../../nymara-regions/_continent/shared-assets/479cdfd09ea478cb6dc31be06299f35c94b53441a4253725827a71bfd3808f85.jpg": [
+      "../../../../_continent_v2/shared-assets"
+    ],
+    "../../../../../nymara-regions/_continent/shared-assets/47dd31db8b6238e4242890f51a872300b11ad231988fa2c40f9a50a96f900f26.jpg": [
+      "../../../../_continent_v2/shared-assets"
+    ],
+    "../../../../../nymara-regions/_continent/shared-assets/5ff5587aad7e75854997ab4e4515a05cdfafab4d962ad9a7207c8cb0a95db29e.jpg": [
+      "../../../../_continent_v2/shared-assets"
+    ],
+    "../../../../../nymara-regions/_continent/shared-assets/68f442f3801210245087e73797002e43a1210baef71f1f61fa2401eff0ba3a79.jpg": [
+      "../../../../_continent_v2/shared-assets"
+    ],
+    "../../../../../nymara-regions/_continent/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png": [
+      "../../../../_continent_v2/shared-assets"
+    ],
+    "../../../../../nymara-regions/_continent/shared-assets/81c1564f19b98b6587eda57965d3f63a0694ef8c0d258fac43431d0f8c2963b7.jpg": [
+      "../../../../_continent_v2/shared-assets"
+    ],
+    "../../../../../nymara-regions/_continent/shared-assets/85fd322f578538a421032124e03cead4f021d78b3a61ad8d6ba17066bc2f5f76.jpg": [
+      "../../../../_continent_v2/shared-assets"
+    ],
+    "../../../../../nymara-regions/_continent/shared-assets/88cf9a1d632f9ae3a282147bbd04313fe18f61e39b89328798907a028ddc8581.jpg": [
+      "../../../../_continent_v2/shared-assets"
+    ],
+    "../../../../../nymara-regions/_continent/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png": [
+      "../../../../_continent_v2/shared-assets"
+    ],
+    "../../../../../nymara-regions/_continent/shared-assets/91eed6a90c01e31ce28591ed2317962602130bec70ad8085569e28eda732f66f.jpg": [
+      "../../../../_continent_v2/shared-assets"
+    ],
+    "../../../../../nymara-regions/_continent/shared-assets/93772afc0935e2f29c2bdbd215194e4fb6e49a59d21cc98b201ddf5c43206346.jpg": [
+      "../../../../_continent_v2/shared-assets"
+    ],
+    "../../../../../nymara-regions/_continent/shared-assets/a4eba70a3461958f950306e485bc501da422d1d79473c222b4f8794f32a73996.jpg": [
+      "../../../../_continent_v2/shared-assets"
+    ],
+    "../../../../../nymara-regions/_continent/shared-assets/aa291da4bba343d502c66dc47e3cb8bd996a1ee196eec21604108694c505a9ce.jpg": [
+      "../../../../_continent_v2/shared-assets"
+    ],
+    "../../../../../nymara-regions/_continent/shared-assets/ac2d99b51b095a27e7fcb53184448a494a684fc4598b92083fc77b8065640832.jpg": [
+      "../../../../_continent_v2/shared-assets"
+    ],
+    "../../../../../nymara-regions/_continent/shared-assets/ac9d858275ae3947431d90a493f8e4cb3a919cbe5413b88117743d26ebde62a2.jpg": [
+      "../../../../_continent_v2/shared-assets"
+    ],
+    "../../../../../nymara-regions/_continent/shared-assets/d500922ba4e27ec1553f745bebb9cf3b0f3fb9d5ee4fe0a7888dcec10f525d72.jpg": [
+      "../../../../_continent_v2/shared-assets"
+    ],
+    "../../../../../nymara-regions/_continent/shared-assets/d6015571411ae42074bfb738eb9946b90b7a1834e624ad91407508b899f2563a.jpg": [
+      "../../../../_continent_v2/shared-assets"
+    ],
+    "../../../../../nymara-regions/_continent/shared-assets/d60ec1cde1705a44c1ae392e4c7f5c80a3e40f1fe41af7f332fe89e5e179a09b.jpg": [
+      "../../../../_continent_v2/shared-assets"
+    ],
+    "../../../../../nymara-regions/_continent/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png": [
+      "../../../../_continent_v2/shared-assets"
+    ],
+    "../../../../../nymara-regions/_continent/shared-assets/fc1d556975b86289b120a4e0b211f1b710cc3ff2a0ba44b53a2e97defe5d40d7.jpg": [
+      "../../../../_continent_v2/shared-assets"
+    ],
+    "../../../../_continent_v2/shared-assets/752e921fac49199f3383059436ab14f537ff1360ae7dd8375ca5b9ef2721af66.jpg": [
+      "../../../../_continent_v2/shared-assets"
+    ],
+    "../../../../_continent_v2/shared-assets/b470e4970f5d4ee9a5d2a48270438ecbec32ca6c20a5170ee8c01c38f24abbb4.jpg": [
+      "../../../../_continent_v2/shared-assets"
+    ],
+    "../../../../_continent_v2/shared-assets/f0b46130becc0eee2ac1b080fcdf4325ae78268bda557ae8761dbf609d661f6e.jpg": [
+      "../../../../_continent_v2/shared-assets"
+    ]
   }
- },
- "biomeBlend": null,
- "objectMaterialOverrides": {
-  "schema": "eloria-object-material-overrides-v1",
-  "entries": []
- },
- "externalMeshes": {
-  "../../../../../_shared/meshes/226204a0d88b242c4b6699822cb34355d2d53416e600e2fa51fc0546ab7bb4d2.glb": "f6b4a68ca24d6aabdbbe158ddb4b2e1b14bf2b94b01b6217ffb43e06fb818904",
-  "../../../../../_shared/meshes/227af73fdff40bf0984a71fd5ab6e52a37fd51663d85e0cc3a7b91ab79416640.glb": "be1bb5de6b2b6ec707ab5598813e67596b6c0ed4067bb9d136bdea0315590a45",
-  "../../../../../_shared/meshes/28915a615734b4c4d12b874819d97dc6a29008d55dd9712a43194136e240a1bb.glb": "41b1a7194619d3c13a4b0ff399c8169d8a774e04adca17c90b3aa22b140cb813",
-  "../../../../../_shared/meshes/45a6e21459e342205cec64d041c07474909b5d904d0c040c28e29578ad572a10.glb": "775ec7f86275bb21cc4b307c04272fb345a377a16c2e4cbf10fc4a5bfac8bcbc",
-  "../../../../../_shared/meshes/4a4346f2db96fb416395fa7999d6f123c47cde542871ab71d5fd405bf4f9cb61.glb": "1c9db7ba04c9c3b71a40d68f76e67192451c7230bdd9084db370a4cdf31e05b6",
-  "../../../../../_shared/meshes/6840382acd411a668190cee9ba576c9444032b32694ae55d5476eb96dfadada8.glb": "3ad923ea8a2ce663fbb48ddf3a5f4c2ccbfdf056358ac47b9d511aafcc9872e6",
-  "../../../../../_shared/meshes/7dec60957ca0e7465b597764948487a030e3bea39c32a289034288a24a271479.glb": "253d5a9574e8949ac4d059d2e896bee9a209ba03e167a6e8181f66fa9ef85538",
-  "../../../../../_shared/meshes/aa262578b9f92c6964daa02e396784ca9422a71103849e5f87c2f097dc8954ac.glb": "8e29663af1d20dd484b0415ce2ea7b4e3b2f594d49401744cdc27625ff53a331",
-  "../../../../../_shared/meshes/b2b042a78c3d413b6f17226b4b9ca889574eadddead6722022ee883092582894.glb": "a5bdfa6d522db45797a84de902fe1bf5b6e20cd89c47c25728277ddf45d03bc1",
-  "../../../../../_shared/meshes/b942865bb9f5e8e8adf4cc68e2bed964d013e319794bbf29b451aa2185c0c7b0.glb": "2ab2d1e4b5a308fe6fbdba652807abb04b0a06ae8bd9569a01e901b9bc55e414",
-  "../../../../../_shared/meshes/e340ddbb54ffbc3c290ec9eeb45c3f86ecc4b724cf6cf26910bd2fc1d997f0be.glb": "835025e7085b85ddbb25b94569f40eea3eae41348ebf1228e49bbaa561c8b7ba",
-  "../../../../../_shared/meshes/e8111b48daa2994a416e01bf59db2ead8fe0d3a18591c95f1263b1a194e540d0.glb": "ec66006fb9b699348503a77398198f9932e3c6401d98308469ae0878f6bdb67b",
-  "../../../../../_shared/meshes/edbd6a5578f1fe3dc83101ab2ef0e7e99df64d7c21aa74043339dedc80f4a26f.glb": "dd4d03f76f77515fa762fbb90098b445f2eba5f9a90e44a203d882cc8412782b",
-  "../../../../../_shared/meshes/fe01d645c127545bfcf33c7fcc4f2d108633830873e2e225063f2c35c8623b44.glb": "df933642e80ef55a015f62d30067233f6bee5ad8903ba8e8e2d2a2436af10ee2"
- }
 }
