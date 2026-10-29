@@ -10,8 +10,9 @@ Hair length and volume adjust the selected hairstyle. Height and body breadth
 control the overall silhouette. Rowan, Mira and Tavi offer editable starting
 looks guided by the archived Human player studies. They also select the study's
 hair, eye and skin colours, and preserve your selected sex and starting class.
-The skin list includes **Soft tan**, the Human bodies' own painted skin tone,
-beside the other natural tones.
+**Soft tan**, the Human bodies' own painted skin tone, is a named stop on the
+skin tone slider (below); a character who already has it keeps it in the
+dressing room's skin list.
 Use **Inspect face** for a close-up while adjusting your facial features.
 **Reset shape** returns the face, grooming and proportions to their original
 settings without changing your hair colour or wardrobe dyes.
