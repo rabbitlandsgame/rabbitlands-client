@@ -73,12 +73,43 @@
     "walk": 0.07871930981625434,
     "run": 0.2599755667777835
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "A rigid spiral shell glides buoyantly with a restrained jet-like pulse and gentle arm-fan lag. Faster travel increases pulse and reach cadence without bending the shell or inventing lateral fins.",
     "attack": "The hood braces over the coherent eyes while the measured forward arm fan loads and unfurls into a short forward grasp, carried by a brief whole-body surge.",
     "death": "The heavy rigid shell tips onto a measured broad-side bearing facet. The head droops separately and the common arm web releases into a relaxed supported arm pile. The shell shape and spiral ornaments stay rigid, with no continued tip writhing."
   },
   "motionStyle": "buoyant rigid-shell pulsed swimming",
-  "locomotionMode": "swimming"
+  "locomotionMode": "swimming",
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "nautilus",
+    "sourceSHA256": "b313c0ab22da9918a2c1728071765859b00248f941457309fa5a06be0f831863",
+    "previousRuntimeSHA256": "b2ee8907e319d9f0bb8d5c78c32f90b349582136250f1460a7cacf2045c9dfb8",
+    "runtimeSHA256": "31770c65c32ae5db8e53fa836dbc545bf81e7b0cf4488d4453dfb0a89a3ffbee",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "nautilus",
+      "sourceSHA256": "b313c0ab22da9918a2c1728071765859b00248f941457309fa5a06be0f831863",
+      "runtimeSHA256": "b2ee8907e319d9f0bb8d5c78c32f90b349582136250f1460a7cacf2045c9dfb8",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 120,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "nautilus",
+    "appliesToSHA256": "31770c65c32ae5db8e53fa836dbc545bf81e7b0cf4488d4453dfb0a89a3ffbee",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
+  }
 }

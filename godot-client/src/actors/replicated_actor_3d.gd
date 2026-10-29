@@ -5908,7 +5908,7 @@ func _native_visual_bounds(model: Node3D) -> AABB:
 		if mesh_node.mesh == null:
 			continue
 		var relative: Transform3D = to_model * mesh_node.global_transform
-		var mesh_bounds: AABB = relative * mesh_node.get_aabb()
+		var mesh_bounds: AABB = relative * preload("res://src/actors/stored_visual_bounds.gd").read(mesh_node)
 		combined = combined.merge(mesh_bounds) if initialized else mesh_bounds
 		initialized = true
 	return combined

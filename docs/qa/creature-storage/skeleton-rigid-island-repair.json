@@ -1,0 +1,352 @@
+{
+  "schema": 1,
+  "actor": "skeleton",
+  "status": "unapproved_review_draft",
+  "installed": false,
+  "recipe": "eloria-assets/tools/build_skeleton_island_repair.py",
+  "reproduction": {
+    "fps": 30,
+    "blas_threads": 2,
+    "note": "Fresh reproduction with two BLAS threads produces candidate SHA exactly. Other SVD thread schedules can vary tiny near-zero quaternion bits."
+  },
+  "inputs": {
+    "original": {
+      "sha256": "ceda2fd85bff7d67917f8fdffef5e916e8dd5f3e7d9161154257f812b6133d45",
+      "bytes": 13890240
+    },
+    "reference_30": {
+      "sha256": "6dcb2808d5eca57e0bc8f12ef134d910f8d5ac0b16c6a98a638ef5c662145bb6",
+      "bytes": 13504268
+    },
+    "rejected_zero_bake": {
+      "sha256": "174ca49692dee42cf66bad4b1fb5bd7adf7ee9afd3bdce646f940be84df6a17a",
+      "bytes": 683740
+    }
+  },
+  "candidate": {
+    "sha256": "4f5c4b538e047b116c40cdac29becaa6734d507090079a7a02c26f22f5837da0",
+    "bytes": 1265036,
+    "control_fps": 30,
+    "original_bones": 19,
+    "added_rigid_controls": 38,
+    "skin_palette_bones": 57,
+    "native_skeleton_bones": 58,
+    "vertices": 4088,
+    "draw_surfaces": 1,
+    "corrective_targets": 0,
+    "added_curve_keys": 16876,
+    "source_corrective_gpu_buffer_bytes": 10547040,
+    "candidate_corrective_gpu_buffer_bytes": 0
+  },
+  "cause": "Original Death_A bone tracks are constant; corrective data carries the entire anatomical-island breakup. Zero-bake erased it. Femur skin is largely pelvis-owned, so zero-bake also displaced gait limbs.",
+  "repair": "38 whole anatomical islands get independent measured rigid poses. The original 19 bones, binds, nonweight curves and world rest remain; an identity wrapper avoids inherited shear. Source neutral geometry and source logical Actor bounds are retained. Feet pin each sampled island minimumY to the original.",
+  "coincident_motion_proof": {
+    "coincident_groups": 1294,
+    "skin_and_all_129_position_target_columns_bit_exact": true,
+    "scope": "Proves no rest-coincident source points with divergent positions were welded, for arbitrary poses and corrective coefficients."
+  },
+  "preserved_arrays": {
+    "TEXCOORD_0": true,
+    "oriented_indices": true,
+    "material_descriptions": true,
+    "textures": true,
+    "samplers": true,
+    "embedded_images": true
+  },
+  "actual_client": {
+    "reference_30_to_draft": {
+      "all": {
+        "states": 380,
+        "maximum_position_mm": 487.3017825455653,
+        "maximum_normal_degrees": 178.52160729013556,
+        "worst_maximum_position_mm": {
+          "label": "Death_A->Sword_Attack@stepped-0.193",
+          "source_vertex": 3646
+        },
+        "worst_maximum_normal_degrees": {
+          "label": "Death_A@0.61729",
+          "source_vertex": 300
+        },
+        "rms_position_mm": 15.092746618959799,
+        "rms_normal_degrees": 22.24055993360008
+      },
+      "default": {
+        "states": 1,
+        "maximum_position_mm": 0.08504694143005012,
+        "maximum_normal_degrees": 0.0038417385197629535,
+        "worst_maximum_position_mm": {
+          "label": "configured-default",
+          "source_vertex": 1406
+        },
+        "worst_maximum_normal_degrees": {
+          "label": "configured-default",
+          "source_vertex": 1288
+        },
+        "rms_position_mm": 0.029302808897746703,
+        "rms_normal_degrees": 0.0002651601342742369
+      },
+      "clip": {
+        "states": 77,
+        "maximum_position_mm": 50.24627281741645,
+        "maximum_normal_degrees": 178.52160729013556,
+        "worst_maximum_position_mm": {
+          "label": "Jog@0.13947",
+          "source_vertex": 923
+        },
+        "worst_maximum_normal_degrees": {
+          "label": "Death_A@0.61729",
+          "source_vertex": 300
+        },
+        "rms_position_mm": 2.510208769616236,
+        "rms_normal_degrees": 27.609135606580146
+      },
+      "held_end": {
+        "states": 7,
+        "maximum_position_mm": 43.17450041511642,
+        "maximum_normal_degrees": 178.52160583995473,
+        "worst_maximum_position_mm": {
+          "label": "Death_A@held-end+0.417",
+          "source_vertex": 505
+        },
+        "worst_maximum_normal_degrees": {
+          "label": "Death_A@held-end+0.417",
+          "source_vertex": 300
+        },
+        "rms_position_mm": 2.1499068578198948,
+        "rms_normal_degrees": 35.701966219435725
+      },
+      "switch": {
+        "states": 84,
+        "maximum_position_mm": 157.25702162953849,
+        "maximum_normal_degrees": 133.09181820316914,
+        "worst_maximum_position_mm": {
+          "label": "Death_A->Fighting_Idle@0.071",
+          "source_vertex": 3016
+        },
+        "worst_maximum_normal_degrees": {
+          "label": "Death_A->Fighting_Idle@0.071",
+          "source_vertex": 3144
+        },
+        "rms_position_mm": 16.653355463750984,
+        "rms_normal_degrees": 20.160414289388353
+      },
+      "switch_stepped": {
+        "states": 210,
+        "maximum_position_mm": 487.3017825455653,
+        "maximum_normal_degrees": 167.9188760568265,
+        "worst_maximum_position_mm": {
+          "label": "Death_A->Sword_Attack@stepped-0.193",
+          "source_vertex": 3646
+        },
+        "worst_maximum_normal_degrees": {
+          "label": "Death_A->Fighting_Idle@stepped-0.01666666666667",
+          "source_vertex": 754
+        },
+        "rms_position_mm": 17.285688895957257,
+        "rms_normal_degrees": 20.260944088578896
+      },
+      "RESET": {
+        "states": 1,
+        "maximum_position_mm": 0.08504694143005012,
+        "maximum_normal_degrees": 0.0038417385197629535,
+        "worst_maximum_position_mm": {
+          "label": "RESET-after-switches",
+          "source_vertex": 1406
+        },
+        "worst_maximum_normal_degrees": {
+          "label": "RESET-after-switches",
+          "source_vertex": 1288
+        },
+        "rms_position_mm": 0.029302788468081712,
+        "rms_normal_degrees": 0.0002651156826068462
+      }
+    },
+    "original_to_draft": {
+      "all": {
+        "states": 380,
+        "maximum_position_mm": 487.40314955425606,
+        "maximum_normal_degrees": 178.52160729013556,
+        "worst_maximum_position_mm": {
+          "label": "Death_A->Sword_Attack@stepped-0.193",
+          "source_vertex": 3646
+        },
+        "worst_maximum_normal_degrees": {
+          "label": "Death_A@0.61729",
+          "source_vertex": 300
+        },
+        "rms_position_mm": 15.171054475765837,
+        "rms_normal_degrees": 22.240687204525585
+      },
+      "default": {
+        "states": 1,
+        "maximum_position_mm": 0.08504694143005012,
+        "maximum_normal_degrees": 0.0038417385197629535,
+        "worst_maximum_position_mm": {
+          "label": "configured-default",
+          "source_vertex": 1406
+        },
+        "worst_maximum_normal_degrees": {
+          "label": "configured-default",
+          "source_vertex": 1288
+        },
+        "rms_position_mm": 0.029302808897746703,
+        "rms_normal_degrees": 0.0002651601342742369
+      },
+      "clip": {
+        "states": 77,
+        "maximum_position_mm": 54.63031874553844,
+        "maximum_normal_degrees": 178.52160729013556,
+        "worst_maximum_position_mm": {
+          "label": "Jog@0.13947",
+          "source_vertex": 923
+        },
+        "worst_maximum_normal_degrees": {
+          "label": "Death_A@0.61729",
+          "source_vertex": 300
+        },
+        "rms_position_mm": 2.97282648487228,
+        "rms_normal_degrees": 27.60957389041725
+      },
+      "held_end": {
+        "states": 7,
+        "maximum_position_mm": 43.17450041511642,
+        "maximum_normal_degrees": 178.52160583995473,
+        "worst_maximum_position_mm": {
+          "label": "Death_A@held-end+0.417",
+          "source_vertex": 505
+        },
+        "worst_maximum_normal_degrees": {
+          "label": "Death_A@held-end+0.417",
+          "source_vertex": 300
+        },
+        "rms_position_mm": 2.1499068578198948,
+        "rms_normal_degrees": 35.701966219435725
+      },
+      "switch": {
+        "states": 84,
+        "maximum_position_mm": 157.24659510349275,
+        "maximum_normal_degrees": 133.0894131602959,
+        "worst_maximum_position_mm": {
+          "label": "Death_A->Fighting_Idle@0.071",
+          "source_vertex": 3016
+        },
+        "worst_maximum_normal_degrees": {
+          "label": "Death_A->Fighting_Idle@0.071",
+          "source_vertex": 3144
+        },
+        "rms_position_mm": 16.672472881269332,
+        "rms_normal_degrees": 20.160977927401756
+      },
+      "switch_stepped": {
+        "states": 210,
+        "maximum_position_mm": 487.40314955425606,
+        "maximum_normal_degrees": 167.9192840185288,
+        "worst_maximum_position_mm": {
+          "label": "Death_A->Sword_Attack@stepped-0.193",
+          "source_vertex": 3646
+        },
+        "worst_maximum_normal_degrees": {
+          "label": "Death_A->Fighting_Idle@stepped-0.01666666666667",
+          "source_vertex": 754
+        },
+        "rms_position_mm": 17.375226892920022,
+        "rms_normal_degrees": 20.26075356057085
+      },
+      "RESET": {
+        "states": 1,
+        "maximum_position_mm": 0.08504694143005012,
+        "maximum_normal_degrees": 0.0038417385197629535,
+        "worst_maximum_position_mm": {
+          "label": "RESET-after-switches",
+          "source_vertex": 1406
+        },
+        "worst_maximum_normal_degrees": {
+          "label": "RESET-after-switches",
+          "source_vertex": 1288
+        },
+        "rms_position_mm": 0.029302788468081712,
+        "rms_normal_degrees": 0.0002651156826068462
+      }
+    },
+    "placement": {
+      "actor_global_equal": true,
+      "model_global_equal": true,
+      "selection_equal": true
+    },
+    "original_19_bone_matrices_30_to_draft_maximum_component_error": 0.0,
+    "scope": "Actual configured raw-client actor; every native clip, shifted samples, first-tick and frame-stepped directed switches, nonlooping held endpoints, configured default and RESET; all native vertices/normals, quantized four/eight-influence skin. Float64 reconstruction of renderer inputs, not GPU pixels, imported PackedScenes, artistic acceptance or exhaustive continuous-time proof.",
+    "equality_gate_or_approval_implied": false
+  },
+  "shading_investigation": {
+    "source": {
+      "maximum_normal_vs_geometric_rigid_transport": 178.52176564762868,
+      "observations": 49056,
+      "maximum_rigid_shape_residual_m": 0.04316664816651759,
+      "rms_normal_vs_geometric_rigid_transport": 74.2432069801431
+    },
+    "candidate": {
+      "maximum_normal_vs_geometric_rigid_transport": 1.584289146906573e-05,
+      "observations": 49056,
+      "maximum_rigid_shape_residual_m": 3.656651124023443e-08,
+      "rms_normal_vs_geometric_rigid_transport": 2.1620374874661594e-06
+    }
+  },
+  "fresh_blender": {
+    "version": "5.2.1 LTS",
+    "vertices": 4088,
+    "queries": 43,
+    "maximum_candidate_vs_independent_gltf_source_units": 0.0001040705162449717,
+    "approximate_maximum_at_actor_scale_mm": 0.18732670028581333,
+    "scope": "Fresh Blender import full-vertex candidate versus independent glTF native evaluator; all7clips at shifted times+neutral. Not source-reference artistic equivalence or normal conformance."
+  },
+  "visual_review": {
+    "renderer": "Actual Godot Forward+ full ReplicatedActor3D PBR",
+    "views": [
+      "front",
+      "left",
+      "rear",
+      "right",
+      "top",
+      "game"
+    ],
+    "selected_poses": 13,
+    "native_clips": [
+      "Death_A",
+      "Fighting_Idle",
+      "Hit_Chest",
+      "Idle_A",
+      "Jog",
+      "Sword_Attack",
+      "Walk"
+    ],
+    "variants": [
+      "reference30",
+      "rejected_zero_bake",
+      "repair30",
+      "repair60"
+    ],
+    "images": 312,
+    "floor_y": 0.1610105299279955,
+    "scope": "Finite selected stills, not full-cycle video or exhaustive transition media. Shared original-fitted cameras and source configured-neutral floor. Numeric checks separately cover all clips/off-grid/default/RESET/directed switches.",
+    "finding": "30Hz restores source stature, connected gait and bone-pile death. 60Hz offers no clear visual benefit at sampled scale and costs 224252 additional raw bytes. The source shading normal field does not follow its own rotated bone geometry during death; new normals follow rigid geometry.",
+    "approval": "Requires user review; no runtime change."
+  },
+  "limits": [
+    "Approximate anatomical repair, not lossless or original-pixel-equivalent.",
+    "Original-to-draft clip maximum54.630mm and RMS2.973mm; foot intrabone flex is made rigid.",
+    "Rigid quaternion crossfades differ from original linear corrective collapse: original-to-draft stepped maximum487.403mm, RMS17.375mm.",
+    "Source normal mismatch reaches178.52degrees; candidate rigid transport is geometrically consistent, an intentional shading difference.",
+    "Extra38 animated controls and39 native skeleton bones add CPU/palette work; no measured FPS or timing claim.",
+    "Runtime seeded death effects, mount behavior and complete normal-speed transition videos are not newly qualified by this draft."
+  ],
+  "evidence_sha256": {
+    "client-original\\client-validation.json": "1dad65ee958b24653ef2ece3c81abedb65fd40be0fee164d8bf1a8ef409bcd2b",
+    "client-reference\\client-validation.json": "4c6198ae3ca9cf0d1a97996f2c1df61da3a92309f5d6867a9c7a6b6be53fe50a",
+    "blender-fresh.json": "76ba394eb8fa73cc325b2f6de423811feeca37397c1045a751a84e543231b72e",
+    "normal-transport.json": "76d99c4e9cd461420dc809c295bd66ac2b0cb130187a66573d16c2b409f884aa",
+    "visual88\\job.json": "5d0722429417cac032cb6dc02a0d3146ea95263476b181f52602732005dd23d8",
+    "visual88\\actual-render\\render.json": "0e2a9ad1bdd4240876acd2d792b591a0f57c02394d0ac289fd852a7eb8ca1c45",
+    "visual88\\comparison-board.png": "5fb2a621bb41b5d695482f33745c0bcdb4a48d6a5eff54d206d9a8ae60d7f3e4",
+    "visual88\\allview-board.png": "ed0ee6daed484cd26e3760fc3aa6bd9ba1f237131268fa89f800b0471583a784"
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "batch": 38,
+  "date": "2026-10-28",
+  "status": "reviewed and integrated locally; not pushed or released",
+  "human_approval_changed": false,
+  "actors": [
+    {
+      "actor": "manatee",
+      "source_sha256": "87b87a7d20718e7090a6fe0e17cb1a4a57ab2a9c3fdb8cfe90a3bcbd9c6e31f8",
+      "candidate_sha256": "f5451f227f020e3b0a244d73b4a3874d3b4afcf111aa78e1b33f471b99401d9e",
+      "status": "qualified",
+      "qualification_report": "docs/qa/creature-storage/batch-038/manatee.json",
+      "source_bytes": 2607548,
+      "candidate_bytes": 2535944,
+      "source_zstd_bytes": 1248007,
+      "candidate_zstd_bytes": 1260533,
+      "shared_gpu_source_bytes": 0,
+      "shared_gpu_candidate_bytes": 0,
+      "draw_surfaces_source": 1,
+      "draw_surfaces_candidate": 1
+    },
+    {
+      "actor": "frost_wraith_queen",
+      "source_sha256": "2325d6fd059ef3d1bc27b86596aaa61edbf3e16bbc68347aeba01ef8e0251328",
+      "candidate_sha256": "4b4e9fd62801fc9d7f4aedac76c56fd44050495a0f57f3c89359b6ca462c770b",
+      "status": "qualified",
+      "qualification_report": "docs/qa/creature-storage/batch-038/frost_wraith_queen.json",
+      "source_bytes": 2606540,
+      "candidate_bytes": 2365300,
+      "source_zstd_bytes": 1625601,
+      "candidate_zstd_bytes": 1627001,
+      "shared_gpu_source_bytes": 0,
+      "shared_gpu_candidate_bytes": 0,
+      "draw_surfaces_source": 2,
+      "draw_surfaces_candidate": 2
+    },
+    {
+      "actor": "kangaroo",
+      "source_sha256": "7fa13e08511cd38f90cb36321227eb6eca9c0327a1732e70dfc7bdaf11e59104",
+      "candidate_sha256": "98dbffa96487f0dc4dd1c62a13cfd0ccb7397e46b0bd8995333f10c522f797b7",
+      "status": "qualified",
+      "qualification_report": "docs/qa/creature-storage/batch-038/kangaroo.json",
+      "source_bytes": 2579292,
+      "candidate_bytes": 2341428,
+      "source_zstd_bytes": 1053545,
+      "candidate_zstd_bytes": 1055934,
+      "shared_gpu_source_bytes": 0,
+      "shared_gpu_candidate_bytes": 0,
+      "draw_surfaces_source": 1,
+      "draw_surfaces_candidate": 1
+    },
+    {
+      "actor": "coralcrest_heron",
+      "source_sha256": "bca26898450cf1451850a009c5c196ab9555c9d5395bdb2f89ba3fbc882d7062",
+      "candidate_sha256": "a8698248a9ede4907ba3840fbd2acce099b4623eb3aff2b8d086ae9ee5fb6621",
+      "status": "qualified",
+      "qualification_report": "docs/qa/creature-storage/batch-038/coralcrest_heron.json",
+      "source_bytes": 2565196,
+      "candidate_bytes": 2411412,
+      "source_zstd_bytes": 1235136,
+      "candidate_zstd_bytes": 1236445,
+      "shared_gpu_source_bytes": 0,
+      "shared_gpu_candidate_bytes": 0,
+      "draw_surfaces_source": 1,
+      "draw_surfaces_candidate": 1
+    },
+    {
+      "actor": "amber_lantern_moth",
+      "source_sha256": "ab2ac357c494244e928572cc84ccca021e1c41b36b7a6f9deeace892d49320a5",
+      "candidate_sha256": "ec7af15b4dbfe1aaf3e2eb7b962900d4411f314ffcf9c97e01be6359566e3432",
+      "status": "qualified",
+      "qualification_report": "docs/qa/creature-storage/batch-038/amber_lantern_moth.json",
+      "source_bytes": 2523920,
+      "candidate_bytes": 2456252,
+      "source_zstd_bytes": 1087165,
+      "candidate_zstd_bytes": 1090827,
+      "shared_gpu_source_bytes": 0,
+      "shared_gpu_candidate_bytes": 0,
+      "draw_surfaces_source": 1,
+      "draw_surfaces_candidate": 1
+    }
+  ],
+  "totals": {
+    "source_bytes": 12882496,
+    "source_bytes_unknown_actors": 0,
+    "candidate_bytes": 12110336,
+    "candidate_bytes_unknown_actors": 0,
+    "source_zstd_bytes": 6249454,
+    "source_zstd_bytes_unknown_actors": 0,
+    "candidate_zstd_bytes": 6270740,
+    "candidate_zstd_bytes_unknown_actors": 0,
+    "shared_gpu_source_bytes": 0,
+    "shared_gpu_source_bytes_unknown_actors": 0,
+    "shared_gpu_candidate_bytes": 0,
+    "shared_gpu_candidate_bytes_unknown_actors": 0,
+    "raw_saved_bytes": 772160,
+    "compressed_saved_bytes": -21286,
+    "shared_gpu_saved_bytes": 0
+  },
+  "checks": [
+    {}
+  ],
+  "independent_editor_verification": {
+    "passed": true,
+    "method": "Both fixtures explicitly ResourceLoader.load(PackedScene); current source and generated scene MD5 freshness plus SHA256; all source clips, RESET and directed transitions, typed geometry/morphs/materials. Original per-stage budgets unchanged.",
+    "retrospective_audit": null,
+    "artistic_approval_changed": false
+  }
+}

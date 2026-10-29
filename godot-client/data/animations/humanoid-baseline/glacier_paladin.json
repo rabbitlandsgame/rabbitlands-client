@@ -86,5 +86,37 @@
       65
     ],
     "reset_to_authored_defaults": true
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "glacier_paladin",
+    "sourceSHA256": "f4b724e3ae99663ce5ae93152a625f3cf6342decb14940575b3215b1c6f7615f",
+    "previousRuntimeSHA256": "0f06769c10551e5835061e7c14f26795dc91b79c506621cd0dc15caf3c5fd8f3",
+    "runtimeSHA256": "593d59daa80243a5302c60f400a2ede28280f1b325e207af6fe39a2956688a8d",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "glacier_paladin",
+      "sourceSHA256": "f4b724e3ae99663ce5ae93152a625f3cf6342decb14940575b3215b1c6f7615f",
+      "runtimeSHA256": "0f06769c10551e5835061e7c14f26795dc91b79c506621cd0dc15caf3c5fd8f3",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 240,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "reviewStatus": "accepted",
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "glacier_paladin",
+    "appliesToSHA256": "593d59daa80243a5302c60f400a2ede28280f1b325e207af6fe39a2956688a8d",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": null,
+    "repairNoteEvents": []
   }
 }

@@ -73,10 +73,34 @@
     "walk": 0.7940587800811799,
     "run": 2.017091843654492
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "An alert, light four-beat walk and brisk diagonal trot. Long slender legs take complete alternating steps beneath a quiet, forward-facing torso; the neck counterbalances and the centered tail follows softly.",
     "attack": "A clear upward horn load followed by an aggressive forward and downward horn-led thrust, with braced forehooves, a short body drive and controlled recovery.",
     "death": "The forelegs fold first, then the narrow body settles onto its flank. The long horned head and chest/pelvis find real support, while released legs relax into a still hold."
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "skystripe_antelope",
+    "appliesToSHA256": "77fbda6f7dc16a15d51eb0eaea0a8c15ce7045ad177b492659c72b0c865eacac",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "saved_button_approval",
+      "event_id": "8bba7813-8c0d-4d15-baec-d6642b92902a",
+      "event_sha256": "fd7f9e998136b2d302d69b8554e707e079af489753de5023694309bbfc93d0de",
+      "utc": "2026-10-28T21:47:17.284198+00:00"
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "skystripe_antelope",
+    "sourceSHA256": "8d10a92130dcf11c732f65dc3595ab44a2b7a916156415813084e5cc245f26fe",
+    "previousRuntimeSHA256": "8d10a92130dcf11c732f65dc3595ab44a2b7a916156415813084e5cc245f26fe",
+    "runtimeSHA256": "77fbda6f7dc16a15d51eb0eaea0a8c15ce7045ad177b492659c72b0c865eacac",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": null
   }
 }

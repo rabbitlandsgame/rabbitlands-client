@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "actor": "verdant_cyclops",
+  "source_sha256": "1939d03d166b45d81c06ec0721d70be633b85594c20dbc5e79a0870979b738e5",
+  "candidate_sha256": "6e001f2fa2f5d8eee8e637c0cde28a2a513d442150e5d263018b70cdd3d87aa7",
+  "pipeline": [
+    "prune_zero_targets",
+    "reduce_constant_runs",
+    "compact"
+  ],
+  "partition": null,
+  "unchanged": false,
+  "removed_zero_target_indices": [],
+  "redundant_flat_key_rows_removed": 196230,
+  "geometry_skin_rest_binds_materials_images_unchanged": true,
+  "preserve_trs_keys": false,
+  "native_clips": [
+    "Death_A",
+    "Fighting_Idle",
+    "Hit_Chest",
+    "Idle_A",
+    "Jog",
+    "Sword_Attack",
+    "Walk"
+  ],
+  "usage": "Deterministic exact preparation needs no partition --profile; frozen source/candidate hashes bind this record."
+}

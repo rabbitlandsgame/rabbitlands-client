@@ -73,10 +73,41 @@
     "walk": 0.13634334908576443,
     "run": 0.3125634626353223
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "A weighty, broad four-beat trundle with visible shoulder and thigh motion, quiet back and full planted claws. Faster travel becomes a low determined trot, with the short tail following the rump in one coherent shape.",
     "attack": "A compact backward brace drives into a forceful shoulder and blunt-muzzle shove. Both forepaws reach and brace the landing before the body recovers its heavy stance.",
     "death": "The muzzle lowers behind folding forelegs, then the bulky body settles onto a supported flank. Head, chest and pelvis carry the resting pose; the short tail relaxes with the rump without being forced to become a ground support."
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "wombat",
+    "sourceSHA256": "8bc00972392c69f616c11a7677c0fa5eb63fd6d09bbc4040bcb4518cb61d0188",
+    "previousRuntimeSHA256": "885844033911942cf66238920af3d57486860ec98b782439518c123bb07a7c50",
+    "runtimeSHA256": "9a25ab98be6135f808d1cfa16d23fb5c47ff2645668c3a03129422c01f764b48",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "wombat",
+      "sourceSHA256": "8bc00972392c69f616c11a7677c0fa5eb63fd6d09bbc4040bcb4518cb61d0188",
+      "runtimeSHA256": "885844033911942cf66238920af3d57486860ec98b782439518c123bb07a7c50",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 120,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "wombat",
+    "appliesToSHA256": "9a25ab98be6135f808d1cfa16d23fb5c47ff2645668c3a03129422c01f764b48",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
   }
 }

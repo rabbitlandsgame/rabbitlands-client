@@ -1,0 +1,1444 @@
+{
+  "schema_version": 1,
+  "scope": "Five exact repair versions accepted by current user instruction. Historical proofs remain historical; no fresh numerical equivalence or FPS claim inferred from approval.",
+  "input_hashes": {
+    "catalog": "c1fe36a4d450c06a16adb3fffe76d466778deff9fc6d060ff0db9dd3ae31142b",
+    "authorization": "88814c13afb22d45bb78cd3a9547d6b4ae70521b847f1d20aacd588171454bb5",
+    "manifest": "9b784760de71cb69a5b361f79ad745747beeb55b99160bef25e0b3db892bfc1c",
+    "owner_metadata": "6e8acd3687c28b15147701c8c095c63146c5168bcc3d24818c70b7ab888ccd5e",
+    "journal": "e2ba342d724a6c33de6785ce251757461718bb9f4384333a496c1193918b9f93"
+  },
+  "approval_counts": {
+    "current_user_repair_instruction": 5
+  },
+  "actors": {
+    "skeleton": {
+      "actor": "skeleton",
+      "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/skeleton.glb",
+      "source_sha256": "ceda2fd85bff7d67917f8fdffef5e916e8dd5f3e7d9161154257f812b6133d45",
+      "reviewed_previous_draft_sha256": "174ca49692dee42cf66bad4b1fb5bd7adf7ee9afd3bdce646f940be84df6a17a",
+      "previous_runtime_sha256": "0c0d18686d55b1f8e83534c796805023ff6efa35a3b65a004c6fdf01b68e7465",
+      "runtime_sha256": "4f5c4b538e047b116c40cdac29becaa6734d507090079a7a02c26f22f5837da0",
+      "previous_runtime_bytes": 13853016,
+      "runtime_bytes": 1265036,
+      "variant": "repair-rigid-islands-v4",
+      "declared_animation_bake_fps": 30,
+      "structural_counts": {
+        "vertices": 4088,
+        "triangles": 4365,
+        "joints": 57,
+        "animations": 7,
+        "surfaceCount": 1,
+        "correctiveTargets": 0
+      },
+      "clips": [
+        "Death_A",
+        "Fighting_Idle",
+        "Hit_Chest",
+        "Idle_A",
+        "Sword_Attack",
+        "Walk",
+        "Jog"
+      ],
+      "approval_basis": {
+        "kind": "current_user_repair_instruction",
+        "instruction_summary": "The user reviewed and accepted these five exact repair drafts, then explicitly instructed their installation and merge/push to develop. Five saved exact-version reviewer approvals corroborate this current instruction.",
+        "catalog_sha256": "c1fe36a4d450c06a16adb3fffe76d466778deff9fc6d060ff0db9dd3ae31142b",
+        "authorization_sha256": "88814c13afb22d45bb78cd3a9547d6b4ae70521b847f1d20aacd588171454bb5",
+        "not_a_historical_journal_event": true,
+        "saved_reviewer_approval": {
+          "event_id": "cfdfcb81-42f6-4924-b445-5bcaf6ffc627",
+          "event_sha256": "fa8c3b0b460f6996a735c3f781ca0bbbcc0babc48aa23b7e9d07af37053023ce",
+          "utc": "2026-10-28T23:31:48.281071+00:00"
+        }
+      },
+      "previous_delivery": {
+        "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+        "receipt_sha256": "2039ac13144d9f310d6fed200650cb2344293124c1363b54f524380ffac2e83a",
+        "runtime_sha256": "0c0d18686d55b1f8e83534c796805023ff6efa35a3b65a004c6fdf01b68e7465"
+      },
+      "previous_old_runtime_lineage": null,
+      "previous_native_catalog_sha256": "7625809e4e256943c677080f203bdb628e7fa74023243b2e56dbaa06b906902a",
+      "owner_metadata_evidence": null,
+      "preserved_roster_status": "current model; animation work may require actor-specific visual review; storage optimized",
+      "preview_import_preserved": true,
+      "metrics": {
+        "new_controls": 38,
+        "corrective_shapes": 0,
+        "clip_maximum_source_error_mm": 54.63,
+        "scope": "New rigid representation; not lossless"
+      },
+      "retained_repair_limits": [
+        "The ONLY reviewer baseline is duration-v2 SHA174ca496... with Death_A1.8500000238seconds; old worker baked.glb can have shortened/zero Death and is excluded.",
+        "38rigid controls plus wrapper yield58native bones versus19original; candidate1.265MB is larger than commented zero-bake.",
+        "Approximate rigid-anatomy repair. Original-to-draft standalone maximum54.63mm; stepped maximum487.40mm. Source corrective shading normals do not follow rotated geometry (up to178.52degrees difference); candidate normals intentionally follow geometry.",
+        "312selected RGB stills in sixviews; not complete fullcycle/transition videos or seeded-death/mount qualification. All numerical native clips/default/RESET/directed switches covered. No artistic acceptance or runtime install."
+      ],
+      "evidence": {
+        "artifact_index_sha256": "22f91450a9d85287f7352c929b58b0c0792dadd8285e00d8c5e5952cdbb57409",
+        "handoff_sha256": "c3cd6b4c8e2a040d4772f9ee8dea865cc28226aa82670288b148900ee3f9b692",
+        "files": [
+          {
+            "kind": "handoff",
+            "sha256": "c3cd6b4c8e2a040d4772f9ee8dea865cc28226aa82670288b148900ee3f9b692"
+          },
+          {
+            "kind": "build",
+            "sha256": "ed7c1069b1a77ba5783044558fff8fd7b82aa00c751a5e52755cb081e0ec30a7"
+          },
+          {
+            "kind": "actual_client_original",
+            "sha256": "1dad65ee958b24653ef2ece3c81abedb65fd40be0fee164d8bf1a8ef409bcd2b"
+          },
+          {
+            "kind": "actual_client_sampled30",
+            "sha256": "4c6198ae3ca9cf0d1a97996f2c1df61da3a92309f5d6867a9c7a6b6be53fe50a"
+          },
+          {
+            "kind": "fresh_blender_candidate_motion",
+            "sha256": "76ba394eb8fa73cc325b2f6de423811feeca37397c1045a751a84e543231b72e"
+          },
+          {
+            "kind": "normal_transport",
+            "sha256": "76d99c4e9cd461420dc809c295bd66ac2b0cb130187a66573d16c2b409f884aa"
+          },
+          {
+            "kind": "visual_receipt",
+            "sha256": "0e2a9ad1bdd4240876acd2d792b591a0f57c02394d0ac289fd852a7eb8ca1c45"
+          },
+          {
+            "kind": "visual_job_hash_binding",
+            "sha256": "5d0722429417cac032cb6dc02a0d3146ea95263476b181f52602732005dd23d8"
+          },
+          {
+            "kind": "visual_board",
+            "sha256": "5fb2a621bb41b5d695482f33745c0bcdb4a48d6a5eff54d206d9a8ae60d7f3e4"
+          },
+          {
+            "kind": "visual_allviews",
+            "sha256": "ed0ee6daed484cd26e3760fc3aa6bd9ba1f237131268fa89f800b0471583a784"
+          }
+        ],
+        "earlier_incomplete_index_snapshot_retained": false,
+        "actual_client_observations": [
+          {
+            "report_sha256": "1dad65ee958b24653ef2ece3c81abedb65fd40be0fee164d8bf1a8ef409bcd2b",
+            "comparison_sha256": [
+              "ceda2fd85bff7d67917f8fdffef5e916e8dd5f3e7d9161154257f812b6133d45",
+              "4f5c4b538e047b116c40cdac29becaa6734d507090079a7a02c26f22f5837da0"
+            ],
+            "summary": {
+              "all": {
+                "states": 380,
+                "maximum_position_mm": 487.40314955425606,
+                "maximum_normal_degrees": 178.52160729013556,
+                "worst_maximum_position_mm": {
+                  "label": "Death_A->Sword_Attack@stepped-0.193",
+                  "source_vertex": 3646
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Death_A@0.61729",
+                  "source_vertex": 300
+                },
+                "rms_position_mm": 15.171054475765837,
+                "rms_normal_degrees": 22.240687204525585
+              },
+              "default": {
+                "states": 1,
+                "maximum_position_mm": 0.08504694143005012,
+                "maximum_normal_degrees": 0.0038417385197629535,
+                "worst_maximum_position_mm": {
+                  "label": "configured-default",
+                  "source_vertex": 1406
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "configured-default",
+                  "source_vertex": 1288
+                },
+                "rms_position_mm": 0.029302808897746703,
+                "rms_normal_degrees": 0.0002651601342742369
+              },
+              "clip": {
+                "states": 77,
+                "maximum_position_mm": 54.63031874553844,
+                "maximum_normal_degrees": 178.52160729013556,
+                "worst_maximum_position_mm": {
+                  "label": "Jog@0.13947",
+                  "source_vertex": 923
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Death_A@0.61729",
+                  "source_vertex": 300
+                },
+                "rms_position_mm": 2.97282648487228,
+                "rms_normal_degrees": 27.60957389041725
+              },
+              "held_end": {
+                "states": 7,
+                "maximum_position_mm": 43.17450041511642,
+                "maximum_normal_degrees": 178.52160583995473,
+                "worst_maximum_position_mm": {
+                  "label": "Death_A@held-end+0.417",
+                  "source_vertex": 505
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Death_A@held-end+0.417",
+                  "source_vertex": 300
+                },
+                "rms_position_mm": 2.1499068578198948,
+                "rms_normal_degrees": 35.701966219435725
+              },
+              "switch": {
+                "states": 84,
+                "maximum_position_mm": 157.24659510349275,
+                "maximum_normal_degrees": 133.0894131602959,
+                "worst_maximum_position_mm": {
+                  "label": "Death_A->Fighting_Idle@0.071",
+                  "source_vertex": 3016
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Death_A->Fighting_Idle@0.071",
+                  "source_vertex": 3144
+                },
+                "rms_position_mm": 16.672472881269332,
+                "rms_normal_degrees": 20.160977927401756
+              },
+              "switch_stepped": {
+                "states": 210,
+                "maximum_position_mm": 487.40314955425606,
+                "maximum_normal_degrees": 167.9192840185288,
+                "worst_maximum_position_mm": {
+                  "label": "Death_A->Sword_Attack@stepped-0.193",
+                  "source_vertex": 3646
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Death_A->Fighting_Idle@stepped-0.01666666666667",
+                  "source_vertex": 754
+                },
+                "rms_position_mm": 17.375226892920022,
+                "rms_normal_degrees": 20.26075356057085
+              },
+              "RESET": {
+                "states": 1,
+                "maximum_position_mm": 0.08504694143005012,
+                "maximum_normal_degrees": 0.0038417385197629535,
+                "worst_maximum_position_mm": {
+                  "label": "RESET-after-switches",
+                  "source_vertex": 1406
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "RESET-after-switches",
+                  "source_vertex": 1288
+                },
+                "rms_position_mm": 0.029302788468081712,
+                "rms_normal_degrees": 0.0002651156826068462
+              }
+            },
+            "scope": "Actual configured raw-client actor; every native clip, shifted samples, first-tick and frame-stepped directed switches, nonlooping held endpoints, configured default and RESET; all native vertices/normals, quantized four/eight-influence skin. Float64 reconstruction of renderer inputs, not GPU pixels, imported PackedScenes, artistic acceptance or exhaustive continuous-time proof."
+          },
+          {
+            "report_sha256": "4c6198ae3ca9cf0d1a97996f2c1df61da3a92309f5d6867a9c7a6b6be53fe50a",
+            "comparison_sha256": [
+              "6dcb2808d5eca57e0bc8f12ef134d910f8d5ac0b16c6a98a638ef5c662145bb6",
+              "4f5c4b538e047b116c40cdac29becaa6734d507090079a7a02c26f22f5837da0"
+            ],
+            "summary": {
+              "all": {
+                "states": 380,
+                "maximum_position_mm": 487.3017825455653,
+                "maximum_normal_degrees": 178.52160729013556,
+                "worst_maximum_position_mm": {
+                  "label": "Death_A->Sword_Attack@stepped-0.193",
+                  "source_vertex": 3646
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Death_A@0.61729",
+                  "source_vertex": 300
+                },
+                "rms_position_mm": 15.092746618959799,
+                "rms_normal_degrees": 22.24055993360008
+              },
+              "default": {
+                "states": 1,
+                "maximum_position_mm": 0.08504694143005012,
+                "maximum_normal_degrees": 0.0038417385197629535,
+                "worst_maximum_position_mm": {
+                  "label": "configured-default",
+                  "source_vertex": 1406
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "configured-default",
+                  "source_vertex": 1288
+                },
+                "rms_position_mm": 0.029302808897746703,
+                "rms_normal_degrees": 0.0002651601342742369
+              },
+              "clip": {
+                "states": 77,
+                "maximum_position_mm": 50.24627281741645,
+                "maximum_normal_degrees": 178.52160729013556,
+                "worst_maximum_position_mm": {
+                  "label": "Jog@0.13947",
+                  "source_vertex": 923
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Death_A@0.61729",
+                  "source_vertex": 300
+                },
+                "rms_position_mm": 2.510208769616236,
+                "rms_normal_degrees": 27.609135606580146
+              },
+              "held_end": {
+                "states": 7,
+                "maximum_position_mm": 43.17450041511642,
+                "maximum_normal_degrees": 178.52160583995473,
+                "worst_maximum_position_mm": {
+                  "label": "Death_A@held-end+0.417",
+                  "source_vertex": 505
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Death_A@held-end+0.417",
+                  "source_vertex": 300
+                },
+                "rms_position_mm": 2.1499068578198948,
+                "rms_normal_degrees": 35.701966219435725
+              },
+              "switch": {
+                "states": 84,
+                "maximum_position_mm": 157.25702162953849,
+                "maximum_normal_degrees": 133.09181820316914,
+                "worst_maximum_position_mm": {
+                  "label": "Death_A->Fighting_Idle@0.071",
+                  "source_vertex": 3016
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Death_A->Fighting_Idle@0.071",
+                  "source_vertex": 3144
+                },
+                "rms_position_mm": 16.653355463750984,
+                "rms_normal_degrees": 20.160414289388353
+              },
+              "switch_stepped": {
+                "states": 210,
+                "maximum_position_mm": 487.3017825455653,
+                "maximum_normal_degrees": 167.9188760568265,
+                "worst_maximum_position_mm": {
+                  "label": "Death_A->Sword_Attack@stepped-0.193",
+                  "source_vertex": 3646
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Death_A->Fighting_Idle@stepped-0.01666666666667",
+                  "source_vertex": 754
+                },
+                "rms_position_mm": 17.285688895957257,
+                "rms_normal_degrees": 20.260944088578896
+              },
+              "RESET": {
+                "states": 1,
+                "maximum_position_mm": 0.08504694143005012,
+                "maximum_normal_degrees": 0.0038417385197629535,
+                "worst_maximum_position_mm": {
+                  "label": "RESET-after-switches",
+                  "source_vertex": 1406
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "RESET-after-switches",
+                  "source_vertex": 1288
+                },
+                "rms_position_mm": 0.029302788468081712,
+                "rms_normal_degrees": 0.0002651156826068462
+              }
+            },
+            "scope": "Actual configured raw-client actor; every native clip, shifted samples, first-tick and frame-stepped directed switches, nonlooping held endpoints, configured default and RESET; all native vertices/normals, quantized four/eight-influence skin. Float64 reconstruction of renderer inputs, not GPU pixels, imported PackedScenes, artistic acceptance or exhaustive continuous-time proof."
+          }
+        ]
+      }
+    },
+    "tengu": {
+      "actor": "tengu",
+      "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/tengu.glb",
+      "source_sha256": "6db47b6378dde6c6087e8c7bd9eaf19cf5376859ad660afdcc25139c27125b1f",
+      "reviewed_previous_draft_sha256": "ec74b29c4e77ecfa9ecf6231ed802097f737239bdcd2468c7ddda5926a3a7c23",
+      "previous_runtime_sha256": "6db47b6378dde6c6087e8c7bd9eaf19cf5376859ad660afdcc25139c27125b1f",
+      "runtime_sha256": "e5fca05f56711c1a2549d1518a815e8cee85c24d39f3399dd9011a85d2da2c8b",
+      "previous_runtime_bytes": 57765512,
+      "runtime_bytes": 675900,
+      "variant": "repair-thumb-v1",
+      "declared_animation_bake_fps": 30,
+      "structural_counts": {
+        "vertices": 4382,
+        "triangles": 4391,
+        "joints": 23,
+        "animations": 8,
+        "surfaceCount": 1,
+        "correctiveTargets": 0
+      },
+      "clips": [
+        "Death_A",
+        "Fighting_Idle",
+        "Fly",
+        "Hit_Chest",
+        "Idle_A",
+        "Jog",
+        "Sword_Attack",
+        "Walk"
+      ],
+      "approval_basis": {
+        "kind": "current_user_repair_instruction",
+        "instruction_summary": "The user reviewed and accepted these five exact repair drafts, then explicitly instructed their installation and merge/push to develop. Five saved exact-version reviewer approvals corroborate this current instruction.",
+        "catalog_sha256": "c1fe36a4d450c06a16adb3fffe76d466778deff9fc6d060ff0db9dd3ae31142b",
+        "authorization_sha256": "88814c13afb22d45bb78cd3a9547d6b4ae70521b847f1d20aacd588171454bb5",
+        "not_a_historical_journal_event": true,
+        "saved_reviewer_approval": {
+          "event_id": "7e596b43-d115-47d1-aa5f-a6c384260af9",
+          "event_sha256": "0d4b242aa5e2eae8d07285906214768600f5d58284d1aba79f3f7c858c9837bf",
+          "utc": "2026-10-28T23:32:06.947707+00:00"
+        }
+      },
+      "previous_delivery": null,
+      "previous_old_runtime_lineage": null,
+      "previous_native_catalog_sha256": "2ac6611359374c173ede83dc9231256c7c15352e731035b48570248f90233ed0",
+      "owner_metadata_evidence": null,
+      "preserved_roster_status": "current model; animation work may require actor-specific visual review; storage optimized",
+      "preview_import_preserved": true,
+      "metrics": {
+        "changed_vertices": 8,
+        "extra_bytes": 0,
+        "new_controls": 0,
+        "outside_actual_client_delta_mm": 0
+      },
+      "retained_repair_limits": [
+        "Only8thumb-tip rows changed; other4374vertices/bones actual-client exact. Other bake approximations remain.",
+        "Blender recomputes custom corner normals at8cap+9boundary rows; raw actual-client outside normals exactly match baseline. No Editor/PackedScene shading identity claim.",
+        "Finite actual raw Forward+ sampled stills; no GPU fullcycle or stepped-crossfade movie. Exact comment time has CPU image and GPU nearby phases. Intentional local changes exceed equality limits; new draft unapproved."
+      ],
+      "evidence": {
+        "artifact_index_sha256": "22f91450a9d85287f7352c929b58b0c0792dadd8285e00d8c5e5952cdbb57409",
+        "handoff_sha256": "ac6807781da1e001582875f6b3de126eb9ae306ab18b9377bc101d8d7084299a",
+        "files": [
+          {
+            "kind": "handoff",
+            "sha256": "ac6807781da1e001582875f6b3de126eb9ae306ab18b9377bc101d8d7084299a"
+          },
+          {
+            "kind": "structural",
+            "sha256": "9f6f71eacb0c3bc8e3a6a15333b73a7617b63767faffa46d950657b8e32ee908"
+          },
+          {
+            "kind": "native_local_grid",
+            "sha256": "db2a18ffcd98a9bc12d4dc2d748ca323816835de9d7abd91e75494ce9902ce1a"
+          },
+          {
+            "kind": "actual_client_commented_to_candidate",
+            "sha256": "9d78b15b29419764aabd429dcb00351eab90e343b238282b2fa361600ddba2c8"
+          },
+          {
+            "kind": "actual_client_unchanged_outside",
+            "sha256": "148604dd56c25102cd75832c6be14788559e16041605254d59ee20e047d23817"
+          },
+          {
+            "kind": "fresh_blender",
+            "sha256": "69cb2b6096a543d280d3fb84732bba290c368e00a21fade326fa0542c454232f"
+          },
+          {
+            "kind": "blender_unchanged_outside",
+            "sha256": "3c3d0c6b4bf90a207cca5c711a20afa3bde8eb52b61211de72c7addc08e55d33"
+          },
+          {
+            "kind": "visual_comment_local",
+            "sha256": "cd3bcea9c00f8a1f6737cfd8869ba356a63c60b89a8f56cd18812b384addea46"
+          },
+          {
+            "kind": "visual_body",
+            "sha256": "98de3b759473063ec37f35e03a271ad662ca73f370770e0eb0d00c6090f136d2"
+          },
+          {
+            "kind": "visual_original_control",
+            "sha256": "903553a1100e36161b1772f9a0213971c6b22d40ed44ac50c73568d6e9d5ecf2"
+          }
+        ],
+        "earlier_incomplete_index_snapshot_retained": false,
+        "actual_client_observations": [
+          {
+            "report_sha256": "9d78b15b29419764aabd429dcb00351eab90e343b238282b2fa361600ddba2c8",
+            "comparison_sha256": [
+              "ec74b29c4e77ecfa9ecf6231ed802097f737239bdcd2468c7ddda5926a3a7c23",
+              "e5fca05f56711c1a2549d1518a815e8cee85c24d39f3399dd9011a85d2da2c8b"
+            ],
+            "summary": {
+              "all": {
+                "states": 490,
+                "maximum_position_mm": 885.2766734927385,
+                "maximum_normal_degrees": 89.98379722147739,
+                "worst_maximum_position_mm": {
+                  "label": "Sword_Attack@0.49913",
+                  "source_vertex": 811
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Sword_Attack@0.25719",
+                  "source_vertex": 4165
+                },
+                "rms_position_mm": 9.467128953031052,
+                "rms_normal_degrees": 0.8105890770314829
+              },
+              "default": {
+                "states": 1,
+                "maximum_position_mm": 73.48576018525388,
+                "maximum_normal_degrees": 9.630326322327805,
+                "worst_maximum_position_mm": {
+                  "label": "configured-default",
+                  "source_vertex": 811
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "configured-default",
+                  "source_vertex": 814
+                },
+                "rms_position_mm": 2.957703149134197,
+                "rms_normal_degrees": 0.2934434687539983
+              },
+              "clip": {
+                "states": 88,
+                "maximum_position_mm": 885.2766734927385,
+                "maximum_normal_degrees": 89.98379722147739,
+                "worst_maximum_position_mm": {
+                  "label": "Sword_Attack@0.49913",
+                  "source_vertex": 811
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Sword_Attack@0.25719",
+                  "source_vertex": 4165
+                },
+                "rms_position_mm": 9.30269871528753,
+                "rms_normal_degrees": 0.7969738640677516
+              },
+              "held_end": {
+                "states": 8,
+                "maximum_position_mm": 207.9865901067228,
+                "maximum_normal_degrees": 20.22086037643715,
+                "worst_maximum_position_mm": {
+                  "label": "Death_A@held-end+0.417",
+                  "source_vertex": 811
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Death_A@held-end+0.417",
+                  "source_vertex": 4164
+                },
+                "rms_position_mm": 4.812784068115112,
+                "rms_normal_degrees": 0.39250261551173604
+              },
+              "switch": {
+                "states": 112,
+                "maximum_position_mm": 590.32853391354,
+                "maximum_normal_degrees": 63.132833795546965,
+                "worst_maximum_position_mm": {
+                  "label": "Sword_Attack->Death_A@0.071",
+                  "source_vertex": 811
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Sword_Attack->Death_A@0.071",
+                  "source_vertex": 4164
+                },
+                "rms_position_mm": 6.998682677037389,
+                "rms_normal_degrees": 0.6437847992005633
+              },
+              "switch_stepped": {
+                "states": 280,
+                "maximum_position_mm": 796.7232956803879,
+                "maximum_normal_degrees": 83.54982673475357,
+                "worst_maximum_position_mm": {
+                  "label": "Death_A->Sword_Attack@stepped-0.417",
+                  "source_vertex": 811
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Jog->Sword_Attack@stepped-0.25",
+                  "source_vertex": 4165
+                },
+                "rms_position_mm": 10.45615477170436,
+                "rms_normal_degrees": 0.8828484251844715
+              },
+              "RESET": {
+                "states": 1,
+                "maximum_position_mm": 73.48576018525388,
+                "maximum_normal_degrees": 9.630326322327805,
+                "worst_maximum_position_mm": {
+                  "label": "RESET-after-switches",
+                  "source_vertex": 811
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "RESET-after-switches",
+                  "source_vertex": 814
+                },
+                "rms_position_mm": 2.957703149134197,
+                "rms_normal_degrees": 0.2934434687539983
+              }
+            },
+            "scope": "Actual configured raw-client actor; every native clip, shifted samples, first-tick and frame-stepped directed switches, nonlooping held endpoints, configured default and RESET; all native vertices/normals, quantized four/eight-influence skin. Float64 reconstruction of renderer inputs, not GPU pixels, imported PackedScenes, artistic acceptance or exhaustive continuous-time proof."
+          }
+        ]
+      }
+    },
+    "giant_wasp": {
+      "actor": "giant_wasp",
+      "runtime_path": "godot-client/assets/actors/native/creatures/basic_expansion/giant_wasp.glb",
+      "source_sha256": "ce628e14ec322634e63fc297eda24dc408e16136fcce9b9c7f2136040e38d46f",
+      "reviewed_previous_draft_sha256": "c6b7a08075da07dad2573deef1a597809c7bb752c75b1411a7d099c84a6a70a6",
+      "previous_runtime_sha256": "68028bae7e8bcc57118e94b446db12b239bacf4612835ba1f200a98d8b23c0e8",
+      "runtime_sha256": "3ba6501be3dd4f8d282fc4c866454df2ae8aa243935e8fcd9fa742f4b5319820",
+      "previous_runtime_bytes": 6766240,
+      "runtime_bytes": 1481000,
+      "variant": "repair-rigid-wings-v1",
+      "declared_animation_bake_fps": 30,
+      "structural_counts": {
+        "vertices": 3863,
+        "triangles": 4244,
+        "joints": 74,
+        "animations": 8,
+        "surfaceCount": 1,
+        "correctiveTargets": 0
+      },
+      "clips": [
+        "Fly",
+        "Idle_A",
+        "Fighting_Idle",
+        "Hit_Chest",
+        "Death_A",
+        "Sword_Attack",
+        "Walk",
+        "Jog"
+      ],
+      "approval_basis": {
+        "kind": "current_user_repair_instruction",
+        "instruction_summary": "The user reviewed and accepted these five exact repair drafts, then explicitly instructed their installation and merge/push to develop. Five saved exact-version reviewer approvals corroborate this current instruction.",
+        "catalog_sha256": "c1fe36a4d450c06a16adb3fffe76d466778deff9fc6d060ff0db9dd3ae31142b",
+        "authorization_sha256": "88814c13afb22d45bb78cd3a9547d6b4ae70521b847f1d20aacd588171454bb5",
+        "not_a_historical_journal_event": true,
+        "saved_reviewer_approval": {
+          "event_id": "0a2eea10-33e9-49fa-b3c5-7f699f5d8cf8",
+          "event_sha256": "bf98f9705bb228b6b65b5e09b837dcb62afe05807469a368460571eef38cac0e",
+          "utc": "2026-10-28T23:32:19.568026+00:00"
+        }
+      },
+      "previous_delivery": null,
+      "previous_old_runtime_lineage": {
+        "receipt": "docs/qa/creature-storage/giant_wasp.json",
+        "receipt_sha256": "43cfa7882b8121413d432ac0f9c37c77d64295472f54eeefb241091cd816c800",
+        "historical_runtime_sha256": "8795cee2ec803e093b6f9298150665034fb5620badcaa337a2f4a358da7a160f",
+        "packed_old_runtime_sha256": "68028bae7e8bcc57118e94b446db12b239bacf4612835ba1f200a98d8b23c0e8"
+      },
+      "previous_native_catalog_sha256": "8795cee2ec803e093b6f9298150665034fb5620badcaa337a2f4a358da7a160f",
+      "owner_metadata_evidence": {
+        "owner_profile_sha256": "fb05968d8042bc829a69f10ca2051f0ee05991312e58f232fd04620741fbc480",
+        "owner_stage_receipt_sha256": "26e156c45a511ba4f402e4ed00fe2be6cc60f363a6e720d47b9cd45f255921a9",
+        "owner_map_sha256": "24f52389fd438bb8bf52c6bfd35968c4435e51230fc3dd2ea6630c71d442fa66",
+        "owner_source_inventory_sha256": "9bee60aa507965356cde3a9803630bbb77e0f6163f9fe261db9b64045bac4de0",
+        "owner_import_policy_sha256": "3c0c4e909be62ad1526cb7d93b686bd58b8f177a402ba4261c39aa9dc44ad39e"
+      },
+      "preserved_roster_status": "current model; animation work may require actor-specific visual review; storage optimized",
+      "preview_import_preserved": true,
+      "metrics": {
+        "new_controls": 4,
+        "extra_bytes": 97028,
+        "corrective_shapes": 0,
+        "nonwing_actual_client_delta_mm": 0
+      },
+      "retained_repair_limits": [
+        "240wing vertices reassigned to4rigid controls plus wrapper; actual skeleton70\u219275bones. Nonwing actual-client positions unchanged relative commented zero-bake.",
+        "1.481MB candidate grows97,028bytes versus commented1.384MB. Overall sampled30-reference max199.71mm/RMS11.55mm; residual nonwing approximations and blend differences remain.",
+        "Wing intrinsic edge variation improves2.486\u21922.25e\u22127; this is physical rigidity, not source-pixel equivalence. Visual selected stills plus actual native allclips/RESET/switches; user review still required."
+      ],
+      "evidence": {
+        "artifact_index_sha256": "22f91450a9d85287f7352c929b58b0c0792dadd8285e00d8c5e5952cdbb57409",
+        "handoff_sha256": "ce89f23977e0f0237f796c9e996e465ff8f3ceb0f193089cda07e0ee9ddd9233",
+        "files": [
+          {
+            "kind": "build",
+            "sha256": "ce89f23977e0f0237f796c9e996e465ff8f3ceb0f193089cda07e0ee9ddd9233"
+          },
+          {
+            "kind": "actual_client_sampled30",
+            "sha256": "5b621885a6742880ea3e31c969a89b6e79e49e400b5b388920c16b95d69f7b79"
+          },
+          {
+            "kind": "actual_client_commented_to_candidate",
+            "sha256": "332bf8969e3c0b53a86b14118c1697a5402d40eba17017eb5bd1b67abf2083f2"
+          },
+          {
+            "kind": "actual_client_old_control",
+            "sha256": "d2d3be31389ee2220477533435aa4f0e527a95be8cb80f256cbfc9fba42ae855"
+          },
+          {
+            "kind": "localized_deltas",
+            "sha256": "9f2b898cab75871453a8753eadfd711acaf0774df45027d113ca1688eb0f08ba"
+          },
+          {
+            "kind": "rigid_panel_metric",
+            "sha256": "1f41bdcd6dd99f1b79be91183228388540503c84a686fb88561166069e2a6e98"
+          },
+          {
+            "kind": "fresh_blender_finite",
+            "sha256": "d44bf59f92064686ff76686eb925daa5e2ae71cc425b6a8c9d0b2fe4e0f7cca3"
+          },
+          {
+            "kind": "visual_receipt",
+            "sha256": "382a340b5a476445656c30ea29a62613070e7398921b77f0bd6b7448e6585ef8"
+          },
+          {
+            "kind": "visual_job_hash_binding",
+            "sha256": "668be463f9cda91fc4d450eef84f1e430877b20d882dac471e58c18ca02a4880"
+          },
+          {
+            "kind": "visual_fly_comment_bracketing",
+            "sha256": "7b675e5f398c96801af0450b4410e01dbc3025257409a74e78d124f579c47cf5"
+          }
+        ],
+        "earlier_incomplete_index_snapshot_retained": false,
+        "actual_client_observations": [
+          {
+            "report_sha256": "5b621885a6742880ea3e31c969a89b6e79e49e400b5b388920c16b95d69f7b79",
+            "comparison_sha256": [
+              "864e1e701fd2a839387fe4b90105b96435836e2994722749b64c254c7481b78a",
+              "3ba6501be3dd4f8d282fc4c866454df2ae8aa243935e8fcd9fa742f4b5319820"
+            ],
+            "summary": {
+              "all": {
+                "states": 490,
+                "maximum_position_mm": 199.71495317950888,
+                "maximum_normal_degrees": 166.13102950962218,
+                "worst_maximum_position_mm": {
+                  "label": "Fly->Hit_Chest@stepped-0.071",
+                  "source_vertex": 1567
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Fly@0.73129",
+                  "source_vertex": 2347
+                },
+                "rms_position_mm": 11.547249899237661,
+                "rms_normal_degrees": 5.3717391804436625
+              },
+              "default": {
+                "states": 1,
+                "maximum_position_mm": 35.203772872246226,
+                "maximum_normal_degrees": 29.102774394710067,
+                "worst_maximum_position_mm": {
+                  "label": "configured-default",
+                  "source_vertex": 209
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "configured-default",
+                  "source_vertex": 2153
+                },
+                "rms_position_mm": 8.092617880587092,
+                "rms_normal_degrees": 4.244033072682649
+              },
+              "clip": {
+                "states": 88,
+                "maximum_position_mm": 178.77716868037135,
+                "maximum_normal_degrees": 166.13102950962218,
+                "worst_maximum_position_mm": {
+                  "label": "Death_A@0.93317",
+                  "source_vertex": 589
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Fly@0.73129",
+                  "source_vertex": 2347
+                },
+                "rms_position_mm": 9.338916843971559,
+                "rms_normal_degrees": 6.12911064264282
+              },
+              "held_end": {
+                "states": 8,
+                "maximum_position_mm": 178.77716868037135,
+                "maximum_normal_degrees": 88.41433832262989,
+                "worst_maximum_position_mm": {
+                  "label": "Death_A@held-end+0.417",
+                  "source_vertex": 589
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Death_A@held-end+0.417",
+                  "source_vertex": 369
+                },
+                "rms_position_mm": 11.07930782111216,
+                "rms_normal_degrees": 6.859554223177567
+              },
+              "switch": {
+                "states": 112,
+                "maximum_position_mm": 157.35299513449564,
+                "maximum_normal_degrees": 59.30152798418127,
+                "worst_maximum_position_mm": {
+                  "label": "Fly->Idle_A@0.071",
+                  "source_vertex": 436
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Sword_Attack->Fly@0.071",
+                  "source_vertex": 959
+                },
+                "rms_position_mm": 12.827399578457763,
+                "rms_normal_degrees": 4.457433306926954
+              },
+              "switch_stepped": {
+                "states": 280,
+                "maximum_position_mm": 199.71495317950888,
+                "maximum_normal_degrees": 165.93394880324655,
+                "worst_maximum_position_mm": {
+                  "label": "Fly->Hit_Chest@stepped-0.071",
+                  "source_vertex": 1567
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Idle_A->Fly@stepped-0.417",
+                  "source_vertex": 2347
+                },
+                "rms_position_mm": 11.66794056528567,
+                "rms_normal_degrees": 5.410202042170226
+              },
+              "RESET": {
+                "states": 1,
+                "maximum_position_mm": 35.20377259841338,
+                "maximum_normal_degrees": 29.102773656852346,
+                "worst_maximum_position_mm": {
+                  "label": "RESET-after-switches",
+                  "source_vertex": 209
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "RESET-after-switches",
+                  "source_vertex": 2153
+                },
+                "rms_position_mm": 8.092617939264727,
+                "rms_normal_degrees": 4.244033029546712
+              }
+            },
+            "scope": "Actual configured raw-client actor; every native clip, shifted samples, first-tick and frame-stepped directed switches, nonlooping held endpoints, configured default and RESET; all native vertices/normals, quantized four/eight-influence skin. Float64 reconstruction of renderer inputs, not GPU pixels, imported PackedScenes, artistic acceptance or exhaustive continuous-time proof."
+          },
+          {
+            "report_sha256": "332bf8969e3c0b53a86b14118c1697a5402d40eba17017eb5bd1b67abf2083f2",
+            "comparison_sha256": [
+              "c6b7a08075da07dad2573deef1a597809c7bb752c75b1411a7d099c84a6a70a6",
+              "3ba6501be3dd4f8d282fc4c866454df2ae8aa243935e8fcd9fa742f4b5319820"
+            ],
+            "summary": {
+              "all": {
+                "states": 490,
+                "maximum_position_mm": 710.3597483369313,
+                "maximum_normal_degrees": 158.3065975137852,
+                "worst_maximum_position_mm": {
+                  "label": "Fly@0.49913",
+                  "source_vertex": 436
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Fly@0.73129",
+                  "source_vertex": 1964
+                },
+                "rms_position_mm": 35.284391819758724,
+                "rms_normal_degrees": 9.317155558247487
+              },
+              "default": {
+                "states": 1,
+                "maximum_position_mm": 360.5160481040743,
+                "maximum_normal_degrees": 80.76266763895579,
+                "worst_maximum_position_mm": {
+                  "label": "configured-default",
+                  "source_vertex": 3086
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "configured-default",
+                  "source_vertex": 3082
+                },
+                "rms_position_mm": 23.895309135627933,
+                "rms_normal_degrees": 11.927475621887432
+              },
+              "clip": {
+                "states": 88,
+                "maximum_position_mm": 710.3597483369313,
+                "maximum_normal_degrees": 158.3065975137852,
+                "worst_maximum_position_mm": {
+                  "label": "Fly@0.49913",
+                  "source_vertex": 436
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Fly@0.73129",
+                  "source_vertex": 1964
+                },
+                "rms_position_mm": 40.587721306673295,
+                "rms_normal_degrees": 9.960033175800726
+              },
+              "held_end": {
+                "states": 8,
+                "maximum_position_mm": 708.9201500697095,
+                "maximum_normal_degrees": 158.10171490239867,
+                "worst_maximum_position_mm": {
+                  "label": "Fly@held-end+0.417",
+                  "source_vertex": 436
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Fly@held-end+0.417",
+                  "source_vertex": 1964
+                },
+                "rms_position_mm": 44.11328719217018,
+                "rms_normal_degrees": 10.612470736367278
+              },
+              "switch": {
+                "states": 112,
+                "maximum_position_mm": 521.7872840740762,
+                "maximum_normal_degrees": 134.64849739476062,
+                "worst_maximum_position_mm": {
+                  "label": "Fly->Idle_A@0.071",
+                  "source_vertex": 436
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Fly->Idle_A@0.071",
+                  "source_vertex": 2392
+                },
+                "rms_position_mm": 26.57304471065878,
+                "rms_normal_degrees": 9.678678469715276
+              },
+              "switch_stepped": {
+                "states": 280,
+                "maximum_position_mm": 708.9566957221515,
+                "maximum_normal_degrees": 158.19155593689337,
+                "worst_maximum_position_mm": {
+                  "label": "Idle_A->Fly@stepped-0.417",
+                  "source_vertex": 436
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Idle_A->Fly@stepped-0.417",
+                  "source_vertex": 1964
+                },
+                "rms_position_mm": 36.31608733786254,
+                "rms_normal_degrees": 8.890097197081142
+              },
+              "RESET": {
+                "states": 1,
+                "maximum_position_mm": 360.5160481040743,
+                "maximum_normal_degrees": 80.76266763895579,
+                "worst_maximum_position_mm": {
+                  "label": "RESET-after-switches",
+                  "source_vertex": 3086
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "RESET-after-switches",
+                  "source_vertex": 3082
+                },
+                "rms_position_mm": 23.89531007101252,
+                "rms_normal_degrees": 11.927475674904281
+              }
+            },
+            "scope": "Actual configured raw-client actor; every native clip, shifted samples, first-tick and frame-stepped directed switches, nonlooping held endpoints, configured default and RESET; all native vertices/normals, quantized four/eight-influence skin. Float64 reconstruction of renderer inputs, not GPU pixels, imported PackedScenes, artistic acceptance or exhaustive continuous-time proof."
+          }
+        ]
+      }
+    },
+    "heartwood_treant": {
+      "actor": "heartwood_treant",
+      "runtime_path": "godot-client/assets/actors/native/creatures/heartwood_treant.glb",
+      "source_sha256": "2cc733b7021640c90837c4c37df1135ee123f9b2a890dcd7b836515647a673b5",
+      "reviewed_previous_draft_sha256": "0908ec67ebe80bdb3de6e78b7c5cb31178e97cac0cc2494268a8d4f74c671f97",
+      "previous_runtime_sha256": "0908ec67ebe80bdb3de6e78b7c5cb31178e97cac0cc2494268a8d4f74c671f97",
+      "runtime_sha256": "fe4cb0869906cad3a49c8a22538b6e2d35a6fc1b55cca350fa91117421040955",
+      "previous_runtime_bytes": 1480724,
+      "runtime_bytes": 1480724,
+      "variant": "repair-ankle-skin-v1",
+      "declared_animation_bake_fps": 30,
+      "structural_counts": {
+        "vertices": 5507,
+        "triangles": 4113,
+        "joints": 47,
+        "animations": 7,
+        "surfaceCount": 1,
+        "correctiveTargets": 0
+      },
+      "clips": [
+        "Death_A",
+        "Fighting_Idle",
+        "Hit_Chest",
+        "Idle_A",
+        "Jog",
+        "Sword_Attack",
+        "Walk"
+      ],
+      "approval_basis": {
+        "kind": "current_user_repair_instruction",
+        "instruction_summary": "The user reviewed and accepted these five exact repair drafts, then explicitly instructed their installation and merge/push to develop. Five saved exact-version reviewer approvals corroborate this current instruction.",
+        "catalog_sha256": "c1fe36a4d450c06a16adb3fffe76d466778deff9fc6d060ff0db9dd3ae31142b",
+        "authorization_sha256": "88814c13afb22d45bb78cd3a9547d6b4ae70521b847f1d20aacd588171454bb5",
+        "not_a_historical_journal_event": true,
+        "saved_reviewer_approval": {
+          "event_id": "c9dd86d9-ebb2-4aac-93c7-1ed69f61025e",
+          "event_sha256": "709549f05fe14948d1a3d35ba6bae03739576a88c6a7d1e946d204cffd09bfca",
+          "utc": "2026-10-28T23:32:54.966406+00:00"
+        }
+      },
+      "previous_delivery": {
+        "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+        "receipt_sha256": "a3f39b071cc8b5701966cbff1e13f074648387d0d53afe520f9497c2a096a2a6",
+        "runtime_sha256": "0908ec67ebe80bdb3de6e78b7c5cb31178e97cac0cc2494268a8d4f74c671f97"
+      },
+      "previous_old_runtime_lineage": null,
+      "previous_native_catalog_sha256": null,
+      "owner_metadata_evidence": null,
+      "preserved_roster_status": "current model; animation work may require actor-specific visual review; storage optimized",
+      "preview_import_preserved": true,
+      "metrics": {
+        "changed_vertices": 106,
+        "extra_bytes": 0,
+        "new_controls": 0,
+        "outside_actual_client_delta_mm": 0
+      },
+      "retained_repair_limits": [
+        "Commented baseline already useraccepted/installed; preserve that historical approval. NEW106skin-row repair is unapproved. No automatic replacement.",
+        "Ankle-only106rows changed; other5401vertices and allbone matrices exact in380actual states. Existing broad arm/body approximations remain outside local repair.",
+        "Independent source comparison local RMS.05596\u2192.05543modelunits; maximum selected error can grow. Comment edge distortion1.180\u2192.400, wholegrid maximum2.950\u21921.078. This is local edge-shape improvement, not closer original motion everywhere.",
+        "Final visual currently pending under Equids GPU90. CPU/freshBlender complete; wait for finalhandoff and both visualchildren to exit before catalog marks visual-reviewed."
+      ],
+      "evidence": {
+        "artifact_index_sha256": "22f91450a9d85287f7352c929b58b0c0792dadd8285e00d8c5e5952cdbb57409",
+        "handoff_sha256": "a85ccc8e89510d558900424432e3bd800321510ac38c1a2b8ece4b94ee58838d",
+        "files": [
+          {
+            "kind": "final_handoff_structural-proof.json",
+            "sha256": "3931f0f7a20f3839fb9f925eae12ae1fe26dbcb2120091ac48969c03194395a7"
+          },
+          {
+            "kind": "final_handoff_native-validation.json",
+            "sha256": "01accf518cc4d3187732f1ec117a9a5a7cedad2f4ed36256f05e663131a06767"
+          },
+          {
+            "kind": "final_handoff_client-validation.json",
+            "sha256": "13dcc0a3951429077069aeafea0f062af2cefefa7720e79a16b6f1b97ef82605"
+          },
+          {
+            "kind": "final_handoff_actual-client-outside-proof.json",
+            "sha256": "b479da12a5b38f215b4b90c5bfe8240b8b25d806b84301bcc67ad981944dad05"
+          },
+          {
+            "kind": "final_handoff_actual-contact-diagnostic.json",
+            "sha256": "0b3624de57eaf86b00dee193f7943aaf1d3cbb19af5df2bbf2a42af44b1b450b"
+          },
+          {
+            "kind": "final_handoff_blender-summary.json",
+            "sha256": "f2807450c2a7b86b7de6386b347b711176bdc5e13313cc0466a9df92ac77e8c8"
+          },
+          {
+            "kind": "final_handoff_blender-outside-proof-v3.json",
+            "sha256": "523c41c7f3bcb1f37c0748e1204b3aa2997a3052cbba91c1c764cc0ff5a2ecbb"
+          },
+          {
+            "kind": "final_handoff_actual-pixel-differences.json",
+            "sha256": "176a98a8d92b8d2a01f2c47b639da78285ee7b625f9e06b55d16d1ac85901ab1"
+          },
+          {
+            "kind": "final_handoff_visual-launches.json",
+            "sha256": "0700e9c69af730817cb309e8f84a5d81387a9a94f4240dc584c764ac1665ea01"
+          },
+          {
+            "kind": "final_handoff_cpu-ankle-board-0.png",
+            "sha256": "ede6513e3a7c24b7dfb4f8979f2bb2d746e8fc08ec37d4cb3f8d354092311915"
+          },
+          {
+            "kind": "final_handoff_cpu-ankle-board-90.png",
+            "sha256": "c45518c81ef8acb84fa9986d43a87931ddf192f07da331eea344f3c0c87cf47b"
+          },
+          {
+            "kind": "final_handoff_actual-ankle-contact-board.png",
+            "sha256": "33e8879e65299174742ab540f8e63f5dbfe387c848d6e002cea8f571f0cec555"
+          },
+          {
+            "kind": "final_handoff_preview-smoke.json",
+            "sha256": "193717ad647501f764ade98dc3a4301f31b9eef3e52f8dd6842499a20769bf4c"
+          },
+          {
+            "kind": "final_handoff_preview-smoke.json",
+            "sha256": "db48fc760a0c049bd7fc60df3c5109b06c2f2c3f183e39d4f64ad8f8b6594ba6"
+          },
+          {
+            "kind": "structural",
+            "sha256": "3931f0f7a20f3839fb9f925eae12ae1fe26dbcb2120091ac48969c03194395a7"
+          },
+          {
+            "kind": "native_local_grid",
+            "sha256": "01accf518cc4d3187732f1ec117a9a5a7cedad2f4ed36256f05e663131a06767"
+          },
+          {
+            "kind": "actual_client_commented_to_candidate",
+            "sha256": "13dcc0a3951429077069aeafea0f062af2cefefa7720e79a16b6f1b97ef82605"
+          },
+          {
+            "kind": "actual_client_unchanged_outside",
+            "sha256": "b479da12a5b38f215b4b90c5bfe8240b8b25d806b84301bcc67ad981944dad05"
+          },
+          {
+            "kind": "actual_contact",
+            "sha256": "0b3624de57eaf86b00dee193f7943aaf1d3cbb19af5df2bbf2a42af44b1b450b"
+          },
+          {
+            "kind": "fresh_blender",
+            "sha256": "f2807450c2a7b86b7de6386b347b711176bdc5e13313cc0466a9df92ac77e8c8"
+          },
+          {
+            "kind": "blender_unchanged_outside",
+            "sha256": "3806db22d37047f828fd7cef2959f253eb837e2ccea4b6d60c0ca2251f168480"
+          },
+          {
+            "kind": "CPU_comment_board",
+            "sha256": "ede6513e3a7c24b7dfb4f8979f2bb2d746e8fc08ec37d4cb3f8d354092311915"
+          },
+          {
+            "kind": "visual_commented_receipt",
+            "sha256": "193717ad647501f764ade98dc3a4301f31b9eef3e52f8dd6842499a20769bf4c"
+          },
+          {
+            "kind": "visual_original_receipt",
+            "sha256": "db48fc760a0c049bd7fc60df3c5109b06c2f2c3f183e39d4f64ad8f8b6594ba6"
+          }
+        ],
+        "earlier_incomplete_index_snapshot_retained": true,
+        "actual_client_observations": [
+          {
+            "report_sha256": "13dcc0a3951429077069aeafea0f062af2cefefa7720e79a16b6f1b97ef82605",
+            "comparison_sha256": [
+              "0908ec67ebe80bdb3de6e78b7c5cb31178e97cac0cc2494268a8d4f74c671f97",
+              "fe4cb0869906cad3a49c8a22538b6e2d35a6fc1b55cca350fa91117421040955"
+            ],
+            "summary": {
+              "all": {
+                "states": 380,
+                "maximum_position_mm": 244.3544321200374,
+                "maximum_normal_degrees": 27.213105997586606,
+                "worst_maximum_position_mm": {
+                  "label": "Death_A@0.85937",
+                  "source_vertex": 2844
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Jog@0.49913",
+                  "source_vertex": 1246
+                },
+                "rms_position_mm": 2.510129008063407,
+                "rms_normal_degrees": 0.20484683871258327
+              },
+              "default": {
+                "states": 1,
+                "maximum_position_mm": 0.04374798260728659,
+                "maximum_normal_degrees": 8.922034064484352e-06,
+                "worst_maximum_position_mm": {
+                  "label": "configured-default",
+                  "source_vertex": 3131
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "configured-default",
+                  "source_vertex": 356
+                },
+                "rms_position_mm": 0.002823346120221706,
+                "rms_normal_degrees": 4.394631518035918e-07
+              },
+              "clip": {
+                "states": 77,
+                "maximum_position_mm": 244.3544321200374,
+                "maximum_normal_degrees": 27.213105997586606,
+                "worst_maximum_position_mm": {
+                  "label": "Death_A@0.85937",
+                  "source_vertex": 2844
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Jog@0.49913",
+                  "source_vertex": 1246
+                },
+                "rms_position_mm": 3.1249181194730897,
+                "rms_normal_degrees": 0.27103734711804006
+              },
+              "held_end": {
+                "states": 7,
+                "maximum_position_mm": 244.35438887161777,
+                "maximum_normal_degrees": 13.506383208339164,
+                "worst_maximum_position_mm": {
+                  "label": "Death_A@held-end+0.417",
+                  "source_vertex": 2844
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Walk@held-end+0.417",
+                  "source_vertex": 1246
+                },
+                "rms_position_mm": 4.130380694240352,
+                "rms_normal_degrees": 0.2696144626420783
+              },
+              "switch": {
+                "states": 84,
+                "maximum_position_mm": 167.9345828481538,
+                "maximum_normal_degrees": 5.673370515547546,
+                "worst_maximum_position_mm": {
+                  "label": "Death_A->Fighting_Idle@0.071",
+                  "source_vertex": 2844
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Death_A->Fighting_Idle@0.071",
+                  "source_vertex": 2844
+                },
+                "rms_position_mm": 1.6123345854785485,
+                "rms_normal_degrees": 0.08077066362151317
+              },
+              "switch_stepped": {
+                "states": 210,
+                "maximum_position_mm": 212.0665202539932,
+                "maximum_normal_degrees": 18.544113422511934,
+                "worst_maximum_position_mm": {
+                  "label": "Death_A->Fighting_Idle@stepped-0.01666666666667",
+                  "source_vertex": 2844
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Walk->Jog@stepped-0.193",
+                  "source_vertex": 1246
+                },
+                "rms_position_mm": 2.492447388170253,
+                "rms_normal_degrees": 0.20967411580109
+              },
+              "RESET": {
+                "states": 1,
+                "maximum_position_mm": 0.043755963913416955,
+                "maximum_normal_degrees": 7.010808106464259e-06,
+                "worst_maximum_position_mm": {
+                  "label": "RESET-after-switches",
+                  "source_vertex": 3131
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "RESET-after-switches",
+                  "source_vertex": 356
+                },
+                "rms_position_mm": 0.0028239772730739416,
+                "rms_normal_degrees": 3.583737261726732e-07
+              }
+            },
+            "scope": "Actual configured raw-client actor; every native clip, shifted samples, first-tick and frame-stepped directed switches, nonlooping held endpoints, configured default and RESET; all native vertices/normals, quantized four/eight-influence skin. Float64 reconstruction of renderer inputs, not GPU pixels, imported PackedScenes, artistic acceptance or exhaustive continuous-time proof."
+          }
+        ]
+      }
+    },
+    "nightweave_spider": {
+      "actor": "nightweave_spider",
+      "runtime_path": "godot-client/assets/actors/native/creatures/nightweave_spider.glb",
+      "source_sha256": "0ef5b7de82333e980941d60a2b8bd4985c17a1fdf9f7d78e087816af63197e24",
+      "reviewed_previous_draft_sha256": "3fbf5d171484ad6d5e76c022bd8fcd11af0f69870ccacdc2dabad3b0d6e4712f",
+      "previous_runtime_sha256": "b164ade0bd1814a3f7d13579381c0ee1636456a7a612ce727b98c828e94f91d2",
+      "runtime_sha256": "3155e74a9021e04f42cb8c5968398af34e4359ff3521e101bfdfec9ef472aa19",
+      "previous_runtime_bytes": 17748552,
+      "runtime_bytes": 1089356,
+      "variant": "repair-rigid-owners-v1",
+      "declared_animation_bake_fps": 30,
+      "structural_counts": {
+        "vertices": 3926,
+        "triangles": 4272,
+        "joints": 65,
+        "animations": 7,
+        "surfaceCount": 1,
+        "correctiveTargets": 0
+      },
+      "clips": [
+        "Death_A",
+        "Fighting_Idle",
+        "Hit_Chest",
+        "Idle_A",
+        "Jog",
+        "Sword_Attack",
+        "Walk"
+      ],
+      "approval_basis": {
+        "kind": "current_user_repair_instruction",
+        "instruction_summary": "The user reviewed and accepted these five exact repair drafts, then explicitly instructed their installation and merge/push to develop. Five saved exact-version reviewer approvals corroborate this current instruction.",
+        "catalog_sha256": "c1fe36a4d450c06a16adb3fffe76d466778deff9fc6d060ff0db9dd3ae31142b",
+        "authorization_sha256": "88814c13afb22d45bb78cd3a9547d6b4ae70521b847f1d20aacd588171454bb5",
+        "not_a_historical_journal_event": true,
+        "saved_reviewer_approval": {
+          "event_id": "9f3b3aee-6f44-43a3-b785-50361242e215",
+          "event_sha256": "912de6588c2283050fcfb2b86c3dc570361eace53427a44db938d413213597b1",
+          "utc": "2026-10-28T23:33:10.466434+00:00"
+        }
+      },
+      "previous_delivery": {
+        "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+        "receipt_sha256": "2039ac13144d9f310d6fed200650cb2344293124c1363b54f524380ffac2e83a",
+        "runtime_sha256": "b164ade0bd1814a3f7d13579381c0ee1636456a7a612ce727b98c828e94f91d2"
+      },
+      "previous_old_runtime_lineage": null,
+      "previous_native_catalog_sha256": null,
+      "owner_metadata_evidence": null,
+      "preserved_roster_status": "current imported model; reviewed spider walk, skitter, bite and curl collapse integrated",
+      "preview_import_preserved": true,
+      "metrics": {
+        "new_controls": 0,
+        "extra_bytes": 284,
+        "corrective_shapes": 0,
+        "standalone_maximum_source_error_mm": 6.765
+      },
+      "retained_repair_limits": [
+        "38whole physical components use existing65helper bones; no additional bone or drawsurface. Corrective buffer24,498,240B\u21920. Anatomy sixwalking legs+twopalps preserved.",
+        "Standalone original-to-repair clip maximum6.765mm; fullprobe193.6mm due quaternion-rigid vs morph-linear blending. Armor volume preserved rather than source shrink.",
+        "Death\u2192live arcs dip99.25mm firsttick/92.09mm stepped below original stance plane. This is inherited sourcefoot worldY.5180967, not gamegroundworld0. Other attachment gaps differ\u22644.736mm (standalone\u2264.589mm).",
+        "Failed1tip-helper control is NOT the review candidate; it fixes tip path but opens111mm blade/knee gap. Current Night repair unapproved, not installed."
+      ],
+      "evidence": {
+        "artifact_index_sha256": "22f91450a9d85287f7352c929b58b0c0792dadd8285e00d8c5e5952cdbb57409",
+        "handoff_sha256": "d4e765e95564a19f3e261dc17f72fc96967cc3a956744d531f78876d7847e154",
+        "files": [
+          {
+            "kind": "handoff",
+            "sha256": "d4e765e95564a19f3e261dc17f72fc96967cc3a956744d531f78876d7847e154"
+          },
+          {
+            "kind": "build",
+            "sha256": "7f552d9f84ce711a5b84d1896522a65323e00390f96610b3b50991148aeeb151"
+          },
+          {
+            "kind": "actual_client_original",
+            "sha256": "4fc068e34739e60ad51055ab9ec3ad89b60e682303a8b54516637ae68124ef16"
+          },
+          {
+            "kind": "fresh_blender_finite",
+            "sha256": "ddfc519d2118094116638e5e4f0e86c5b577bae70ac9d49c86039790bafb5148"
+          },
+          {
+            "kind": "intrinsic_and_contact_metrics",
+            "sha256": "1d2258ad85ec39976fcc2ebb9a2bfbd2dec2ef7bc901a9dffe939214707e75a9"
+          },
+          {
+            "kind": "all18joints",
+            "sha256": "fac3fee6ab4039fcb96213a9c87c9409afb3ccbfe06cc44260835d07ee73b09b"
+          },
+          {
+            "kind": "visual_receipt",
+            "sha256": "04ad52fb8ded92222655b9fd8d1b845dba8a6c598aef5281b3f578df78a6cec0"
+          },
+          {
+            "kind": "visual_job_hash_binding",
+            "sha256": "0d27e3f40ba3aff8ce307b846fb1b5633550405a05807b8e1377f86446aa9a9e"
+          },
+          {
+            "kind": "visual_comment_board",
+            "sha256": "a0574f86d77f43a54136114a136136dcfd20e4624c96629c847eb98efbad272f"
+          },
+          {
+            "kind": "visual_jog_lossless_preview",
+            "sha256": "c0d28f27cc47c087913f0fe7ada38746379a063bb5e9afeb64c4f4ad0ee17915"
+          },
+          {
+            "kind": "visual_death_to_live_board",
+            "sha256": "30ad62254ceb065d8a277d90ed6f6588cac6842375a5ba4fb193cf205dc5e5a1"
+          }
+        ],
+        "earlier_incomplete_index_snapshot_retained": false,
+        "actual_client_observations": [
+          {
+            "report_sha256": "4fc068e34739e60ad51055ab9ec3ad89b60e682303a8b54516637ae68124ef16",
+            "comparison_sha256": [
+              "0ef5b7de82333e980941d60a2b8bd4985c17a1fdf9f7d78e087816af63197e24",
+              "3155e74a9021e04f42cb8c5968398af34e4359ff3521e101bfdfec9ef472aa19"
+            ],
+            "summary": {
+              "all": {
+                "states": 380,
+                "maximum_position_mm": 193.59873035250874,
+                "maximum_normal_degrees": 26.957637049358887,
+                "worst_maximum_position_mm": {
+                  "label": "Death_A->Fighting_Idle@0.071",
+                  "source_vertex": 2270
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Death_A->Fighting_Idle@0.071",
+                  "source_vertex": 3390
+                },
+                "rms_position_mm": 9.332574173660229,
+                "rms_normal_degrees": 1.4979980572739298
+              },
+              "default": {
+                "states": 1,
+                "maximum_position_mm": 0.0558005409329085,
+                "maximum_normal_degrees": 4.8634256902212505e-05,
+                "worst_maximum_position_mm": {
+                  "label": "configured-default",
+                  "source_vertex": 2700
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "configured-default",
+                  "source_vertex": 1009
+                },
+                "rms_position_mm": 0.014451895346792743,
+                "rms_normal_degrees": 2.283958593817437e-05
+              },
+              "clip": {
+                "states": 77,
+                "maximum_position_mm": 6.7645512207359095,
+                "maximum_normal_degrees": 1.7322480829228424,
+                "worst_maximum_position_mm": {
+                  "label": "Jog@0.61729",
+                  "source_vertex": 1866
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Jog@0.61729",
+                  "source_vertex": 189
+                },
+                "rms_position_mm": 0.3966147274021703,
+                "rms_normal_degrees": 0.07885769563150141
+              },
+              "held_end": {
+                "states": 7,
+                "maximum_position_mm": 0.05555359064724547,
+                "maximum_normal_degrees": 0.010927358752403122,
+                "worst_maximum_position_mm": {
+                  "label": "Hit_Chest@held-end+0.417",
+                  "source_vertex": 2700
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Death_A@held-end+0.417",
+                  "source_vertex": 1511
+                },
+                "rms_position_mm": 0.01412144747974794,
+                "rms_normal_degrees": 0.0018800826354976555
+              },
+              "switch": {
+                "states": 84,
+                "maximum_position_mm": 193.59873035250874,
+                "maximum_normal_degrees": 26.957637049358887,
+                "worst_maximum_position_mm": {
+                  "label": "Death_A->Fighting_Idle@0.071",
+                  "source_vertex": 2270
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Death_A->Fighting_Idle@0.071",
+                  "source_vertex": 3390
+                },
+                "rms_position_mm": 15.561722122041985,
+                "rms_normal_degrees": 2.4607261363373603
+              },
+              "switch_stepped": {
+                "states": 210,
+                "maximum_position_mm": 153.03013866792065,
+                "maximum_normal_degrees": 21.680350519991602,
+                "worst_maximum_position_mm": {
+                  "label": "Death_A->Jog@stepped-0.071",
+                  "source_vertex": 0
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "Death_A->Jog@stepped-0.071",
+                  "source_vertex": 1062
+                },
+                "rms_position_mm": 7.789699820442217,
+                "rms_normal_degrees": 1.2791476222595495
+              },
+              "RESET": {
+                "states": 1,
+                "maximum_position_mm": 0.055802779556210116,
+                "maximum_normal_degrees": 4.8634256902212505e-05,
+                "worst_maximum_position_mm": {
+                  "label": "RESET-after-switches",
+                  "source_vertex": 2700
+                },
+                "worst_maximum_normal_degrees": {
+                  "label": "RESET-after-switches",
+                  "source_vertex": 1009
+                },
+                "rms_position_mm": 0.01445201683039112,
+                "rms_normal_degrees": 2.288459771825486e-05
+              }
+            },
+            "scope": "Actual configured raw-client actor; every native clip, shifted samples, first-tick and frame-stepped directed switches, nonlooping held endpoints, configured default and RESET; all native vertices/normals, quantized four/eight-influence skin. Float64 reconstruction of renderer inputs, not GPU pixels, imported PackedScenes, artistic acceptance or exhaustive continuous-time proof."
+          }
+        ]
+      }
+    }
+  }
+}

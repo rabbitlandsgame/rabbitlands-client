@@ -70,5 +70,37 @@
   "strideMetresPerSecond": {
     "walk": 0.178571671608534,
     "run": 0.4545460731853592
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "river_otter",
+    "sourceSHA256": "7c4887007346c41b40b77c59a448532ad77c85335951c4ae6ac2b92c3efe1a91",
+    "previousRuntimeSHA256": "5a922b92579bdf540e5f244a20e13e25028eeb6f6f972335b6c5fec371e3e95a",
+    "runtimeSHA256": "448188c1f197a366964fa47ce8da4f412b10bd89e2f02b6917972f9f745c0fdf",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "river_otter",
+      "sourceSHA256": "7c4887007346c41b40b77c59a448532ad77c85335951c4ae6ac2b92c3efe1a91",
+      "runtimeSHA256": "5a922b92579bdf540e5f244a20e13e25028eeb6f6f972335b6c5fec371e3e95a",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 120,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "reviewStatus": "accepted",
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "river_otter",
+    "appliesToSHA256": "448188c1f197a366964fa47ce8da4f412b10bd89e2f02b6917972f9f745c0fdf",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": null,
+    "repairNoteEvents": []
   }
 }

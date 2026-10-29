@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "fallbackAction": "idle",
+  "playbackSpeeds": {
+    "walk": 1.0,
+    "run": 1.0,
+    "attack_primary": 1.0,
+    "death": 1.0
+  },
+  "actions": {
+    "idle": "Idle_A",
+    "alternate_idle": "Idle_A",
+    "combat_idle": "Fighting_Idle",
+    "walk": "Walk",
+    "run": "Jog",
+    "turn": "Idle_A",
+    "sit": "Idle_A",
+    "seated_idle": "Idle_A",
+    "stand": "Idle_A",
+    "death": "Death_A",
+    "pain": "Hit_Chest",
+    "attack_primary": "Sword_Attack",
+    "ranged_attack": "Sword_Attack",
+    "cast": "Sword_Attack",
+    "harvest": "Sword_Attack",
+    "pickup": "Idle_A",
+    "drop": "Idle_A",
+    "emote_greeting": "Idle_A"
+  },
+  "serverCommands": {
+    "3": "death",
+    "5": "pain",
+    "7": "idle",
+    "13": "sit",
+    "14": "stand",
+    "15": "combat_idle",
+    "18": "combat_idle",
+    "19": "idle",
+    "20": "walk",
+    "21": "walk",
+    "22": "walk",
+    "23": "walk",
+    "24": "walk",
+    "25": "walk",
+    "26": "walk",
+    "27": "walk",
+    "30": "run",
+    "31": "run",
+    "32": "run",
+    "33": "run",
+    "34": "run",
+    "35": "run",
+    "36": "run",
+    "37": "run",
+    "38": "turn",
+    "39": "turn",
+    "40": "turn",
+    "41": "turn",
+    "42": "turn",
+    "43": "turn",
+    "44": "turn",
+    "45": "turn",
+    "46": "attack_primary"
+  },
+  "loopingClips": [
+    "Idle_A",
+    "Fighting_Idle",
+    "Walk",
+    "Jog"
+  ],
+  "strideScalesWithActor": true,
+  "strideMetresPerSecond": {
+    "walk": 0.18632806004594812,
+    "run": 0.3549105905637107
+  },
+  "reviewStatus": "accepted",
+  "concept": {
+    "movement": "A low broad antlion advances on alternating tripods with full equal individual foot travel, firm pointed-talon contacts and nearly steady front shell. The faster scuttle has larger sweeps and quicker cadence. Four real overlapping posterior rows hang centered behind the anterior shell.",
+    "attack": "Six real feet brace. The massive separate serrated mandibles spread during a short gather, the whole combined anterior head/thorax presses forward, and the hooks clamp before recovery. The rigid front shell is not split into an invented freely pitching head.",
+    "death": "The front carapace belly lowers forward and all four rear rows settle onto disjoint support regions. Six fixed-length legs release outward through floor-cleared paths with whole pointed feet. The supported ending holds still."
+  },
+  "locomotionMode": "grounded",
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "giant_antlion",
+    "appliesToSHA256": "99f0364473ff5ee0e9b57b5d4b6d736f99b245fa8ae8e7519306a14bab130b28",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": "draft",
+    "repairNoteEvents": []
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "giant_antlion",
+    "sourceSHA256": "80088c75bbd759b4dc84a07ed9bfaee792f02e2dcf838d416c46a2c7fb3f74bf",
+    "previousRuntimeSHA256": "188c11c93ed8f1bbb32a8243a5e872bd3cb3ec047d81a8422efcd1fb398e37d5",
+    "runtimeSHA256": "99f0364473ff5ee0e9b57b5d4b6d736f99b245fa8ae8e7519306a14bab130b28",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": null
+  }
+}

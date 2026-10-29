@@ -11,6 +11,7 @@ const Vram := preload("res://src/world/vram_textures.gd")
 const Graphics := preload("res://src/world/graphics_options.gd")
 const TextureSizes := preload("res://src/world/prepared_texture_sizes.gd")
 const AnimationKeys := preload("res://src/world/prepared_animation_keys.gd")
+const CreaturePayload := preload("res://src/actors/creature_payload.gd")
 static func node_policy() -> String:
 	var policy := OptimizationProfile.selected("prepared_node_policy")
 	return "lazy-source-v1" if policy == "lazy-source-v1" else "retain"
@@ -301,7 +302,7 @@ static func acquire(kind: String, source: String, source_digest: String,
 			shader_inputs[actual] = true
 		if logical.get_extension() == "glb":
 			prototype_keys[logical.get_file().get_basename()] = true
-		if FileAccess.get_sha256(actual) != str(record.sha256):
+		if CreaturePayload.source_sha256(actual) != str(record.sha256):
 			return _miss("input_hash_mismatch", required, logical)
 	_record(&"source_verify", began)
 	if not seen.has(requested):

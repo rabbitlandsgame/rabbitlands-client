@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "actor": "dormouse",
+  "source_sha256": "ec8285ba0059b02a27fe779d44419889c4884b1afe091eb37cb12d89d145b64d",
+  "candidate_sha256": "206de89967ee2ac21acf7528c30ff810cb9e7a87c168da2bb1effaade83754d2",
+  "pipeline": [
+    "prune_zero_targets",
+    "reduce_constant_runs",
+    "compact"
+  ],
+  "partition": null,
+  "unchanged": false,
+  "removed_zero_target_indices": [],
+  "redundant_flat_key_rows_removed": 171689,
+  "geometry_skin_rest_binds_materials_images_unchanged": true,
+  "preserve_trs_keys": false,
+  "native_clips": [
+    "Fighting_Idle",
+    "Hit_Chest",
+    "Idle_A",
+    "Walk",
+    "Jog",
+    "Sword_Attack",
+    "Death_A"
+  ],
+  "usage": "Deterministic exact preparation needs no partition --profile; frozen source/candidate hashes bind this record."
+}

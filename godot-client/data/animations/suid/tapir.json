@@ -88,5 +88,37 @@
   "strideMetresPerSecond": {
     "walk": 0.1743688200369531,
     "run": 0.45206731120691546
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "tapir",
+    "sourceSHA256": "5bd461b3f450b6a785972ed987e5db2c9d2260b8a549f8b4b39c207f48ef8130",
+    "previousRuntimeSHA256": "ab4bde6e1b4a70a83fc48f95659e19dfffc49092c67dd21b6bc6408a085dbde1",
+    "runtimeSHA256": "d10b128fbaf08323dcaf4b364bdfe328c370a42fb13d02d3c4913e66214e5754",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "tapir",
+      "sourceSHA256": "5bd461b3f450b6a785972ed987e5db2c9d2260b8a549f8b4b39c207f48ef8130",
+      "runtimeSHA256": "ab4bde6e1b4a70a83fc48f95659e19dfffc49092c67dd21b6bc6408a085dbde1",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 120,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "reviewStatus": "accepted",
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "tapir",
+    "appliesToSHA256": "d10b128fbaf08323dcaf4b364bdfe328c370a42fb13d02d3c4913e66214e5754",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": null,
+    "repairNoteEvents": []
   }
 }

@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "fallbackAction": "idle",
+  "playbackSpeeds": {
+    "walk": 1.0,
+    "run": 1.0,
+    "attack_primary": 1.0,
+    "death": 1.0
+  },
+  "actions": {
+    "idle": "Idle_A",
+    "alternate_idle": "Idle_A",
+    "combat_idle": "Fighting_Idle",
+    "walk": "Walk",
+    "run": "Jog",
+    "turn": "Idle_A",
+    "sit": "Idle_A",
+    "seated_idle": "Idle_A",
+    "stand": "Idle_A",
+    "death": "Death_A",
+    "pain": "Hit_Chest",
+    "attack_primary": "Sword_Attack",
+    "ranged_attack": "Sword_Attack",
+    "cast": "Sword_Attack",
+    "harvest": "Sword_Attack",
+    "pickup": "Idle_A",
+    "drop": "Idle_A",
+    "emote_greeting": "Idle_A"
+  },
+  "serverCommands": {
+    "3": "death",
+    "5": "pain",
+    "7": "idle",
+    "13": "sit",
+    "14": "stand",
+    "15": "combat_idle",
+    "18": "combat_idle",
+    "19": "idle",
+    "20": "walk",
+    "21": "walk",
+    "22": "walk",
+    "23": "walk",
+    "24": "walk",
+    "25": "walk",
+    "26": "walk",
+    "27": "walk",
+    "30": "run",
+    "31": "run",
+    "32": "run",
+    "33": "run",
+    "34": "run",
+    "35": "run",
+    "36": "run",
+    "37": "run",
+    "38": "turn",
+    "39": "turn",
+    "40": "turn",
+    "41": "turn",
+    "42": "turn",
+    "43": "turn",
+    "44": "turn",
+    "45": "turn",
+    "46": "attack_primary"
+  },
+  "loopingClips": [
+    "Idle_A",
+    "Fighting_Idle",
+    "Walk",
+    "Jog",
+    "Fly"
+  ],
+  "strideScalesWithActor": true,
+  "strideMetresPerSecond": {
+    "walk": 0.0779780893184367,
+    "run": 0.17359407979223404
+  },
+  "reviewStatus": "accepted",
+  "concept": {
+    "movement": "Two alternating tripods carry a steady armored thorax. The pointed claws stay fixed during stance; fast travel increases the full leg sweep and cadence, with a restrained abdomen and raised wings.",
+    "attack": "The six claws brace as the head and mandibles coil briefly, dart forward with a wing twitch, close, then recover.",
+    "death": "The thorax lowers forward, the real waist flexes to let the banded abdomen settle behind it, all six limbs release outward and the four wings relax toward the floor."
+  },
+  "locomotionMode": "grounded",
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/accepted-repair-delivery.json",
+    "actor": "giant_wasp",
+    "appliesToSHA256": "3ba6501be3dd4f8d282fc4c866454df2ae8aa243935e8fcd9fa742f4b5319820",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_repair_instruction",
+      "instruction_summary": "The user reviewed and accepted these five exact repair drafts, then explicitly instructed their installation and merge/push to develop. Five saved exact-version reviewer approvals corroborate this current instruction.",
+      "catalog_sha256": "c1fe36a4d450c06a16adb3fffe76d466778deff9fc6d060ff0db9dd3ae31142b",
+      "authorization_sha256": "88814c13afb22d45bb78cd3a9547d6b4ae70521b847f1d20aacd588171454bb5",
+      "not_a_historical_journal_event": true,
+      "saved_reviewer_approval": {
+        "event_id": "0a2eea10-33e9-49fa-b3c5-7f699f5d8cf8",
+        "event_sha256": "bf98f9705bb228b6b65b5e09b837dcb62afe05807469a368460571eef38cac0e",
+        "utc": "2026-10-28T23:32:19.568026+00:00"
+      }
+    },
+    "previousAuthoringReviewStatus": "draft"
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/accepted-repair-delivery.json",
+    "sourceSHA256": "ce628e14ec322634e63fc297eda24dc408e16136fcce9b9c7f2136040e38d46f",
+    "previousRuntimeSHA256": "68028bae7e8bcc57118e94b446db12b239bacf4612835ba1f200a98d8b23c0e8",
+    "runtimeSHA256": "3ba6501be3dd4f8d282fc4c866454df2ae8aa243935e8fcd9fa742f4b5319820",
+    "method": "visually_accepted_creature_repair",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": null
+  }
+}

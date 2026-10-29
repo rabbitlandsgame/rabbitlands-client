@@ -3,13 +3,14 @@ extends RefCounted
 ## Mask only the imported animal, preserving tack and the face/head attachment.
 const Coats := preload("res://src/mounts/mount_coats.gd")
 const CoatShader := preload("res://src/mounts/mount_coat.gdshader")
+const RetainedSkin := preload("res://src/mounts/retained_mount_skin.gd")
 var current := "original"
 var mount_id := ""
 var parts: Array[Dictionary] = []
 var rig: Skeleton3D
 var protected := {}
 
-func configure(actor: ReplicatedActor3D, id: String, profile: Dictionary) -> void:
+func configure(actor: ReplicatedActor3D, id: String, profile: Dictionary) -> Array[String]:
 	mount_id = id
 	rig = actor.get_skeleton()
 	var names: Array = profile.get("appearanceProtectedBones", [str(profile.reins.headBone)])
@@ -24,13 +25,18 @@ func configure(actor: ReplicatedActor3D, id: String, profile: Dictionary) -> voi
 	for node: Node in actor.get_node("NativeModel").find_children("*", "MeshInstance3D", true, false):
 		var mesh := node as MeshInstance3D
 		if mesh.mesh != null:
+			var retained := RetainedSkin.for_mount(mesh.mesh,mesh.skin,rig)
+			if not retained.errors.is_empty(): return Array(retained.errors,TYPE_STRING,"",null)
+			mesh.mesh = retained.mesh
 			var materials: Array = []
 			var active: Array = []
 			for surface: int in mesh.mesh.get_surface_count():
 				materials.append(mesh.get_surface_override_material(surface))
 				active.append(mesh.get_active_material(surface))
 			parts.append({"node":mesh, "mesh":mesh.mesh, "overrides":materials,
-				"materialOverride":mesh.material_override,"active":active,"masked":null})
+				"materialOverride":mesh.material_override,"active":active,"masked":null,
+				"patternHeight":_pattern_height(mesh.mesh)})
+	return []
 
 func apply(coat_id: String) -> void:
 	if not Coats.valid(mount_id, coat_id): coat_id = "original"
@@ -70,7 +76,7 @@ func apply(coat_id: String) -> void:
 			material.set_shader_parameter("coat_strength",float(preset.strength))
 			material.set_shader_parameter("pattern",int(preset.pattern))
 			material.set_shader_parameter("pattern_strength",float(preset.get("patternStrength",0.7)))
-			material.set_shader_parameter("pattern_scale",6.0 / maxf(.05,source.get_aabb().size.y))
+			material.set_shader_parameter("pattern_scale",6.0 / maxf(.05,float(part.patternHeight)))
 			material.set_shader_parameter("roughness",base.roughness)
 			material.set_shader_parameter("metallic",base.metallic)
 			if base.metallic_texture != null:
@@ -86,6 +92,13 @@ func apply(coat_id: String) -> void:
 				material.set_shader_parameter("coat_normal",base.normal_texture)
 				material.set_shader_parameter("normal_strength",base.normal_scale)
 			node.set_surface_override_material(surface,material)
+
+static func _pattern_height(source: Mesh) -> float:
+	var extras: Variant = source.get_meta("extras",{})
+	if extras is Dictionary:
+		var height := float(extras.get("rabbitlands_coat_pattern_height",0.0))
+		if is_finite(height) and height > 0.0: return height
+	return source.get_aabb().size.y
 
 static func _channel(channel: int) -> Vector4:
 	if channel == BaseMaterial3D.TEXTURE_CHANNEL_GRAYSCALE: return Vector4(.333333,.333333,.333333,0)

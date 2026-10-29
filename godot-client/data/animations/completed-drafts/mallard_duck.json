@@ -75,10 +75,34 @@
     "walk": 0.09264547342089219,
     "run": 0.21972484281049512
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "A restrained side-to-side waddle with low webbed-foot recovery and a steady torso. A quicker, slightly lower run lengthens the alternating steps while the wings stay close.",
     "attack": "A small neck recoil followed by a quick forward and downward bill jab, with a light wing flare and both webbed feet planted.",
     "death": "The breast drops forward, the head and neck fold low, the feet release and the duck settles into a still supported pose."
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "mallard_duck",
+    "appliesToSHA256": "965f09cda9bbdbd913fff6bf34b97a0d5804b40302b18136c4a31ee0434818c7",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "saved_button_approval",
+      "event_id": "6061ac86-7299-4043-8adb-41ce4342dfcb",
+      "event_sha256": "3455747d423938bff53d0ee200d426cd9c7edd8cb092713fe2abc8b374e8459a",
+      "utc": "2026-10-28T20:54:48.051530+00:00"
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "mallard_duck",
+    "sourceSHA256": "46d2cdea6d9475207ebb8cdd82db15423e85dc27c394cbf421c35e3cbad0d106",
+    "previousRuntimeSHA256": "46d2cdea6d9475207ebb8cdd82db15423e85dc27c394cbf421c35e3cbad0d106",
+    "runtimeSHA256": "965f09cda9bbdbd913fff6bf34b97a0d5804b40302b18136c4a31ee0434818c7",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": null
   }
 }

@@ -1,0 +1,433 @@
+{
+  "schema_version": 1,
+  "batch": 11,
+  "actor": "ice_wolverine",
+  "date": "2026-10-27",
+  "runtime_path": "godot-client/assets/actors/native/creatures/ice_wolverine.glb",
+  "source_sha256": "3d6bd984630ea4f868c7fcf99ae2da13260d1023721c93e27a417afabae71209",
+  "runtime_sha256": "d8d6a39b0185164881474a940a36d581ceff630b2047e2625e4aeec7db826a53",
+  "qualification": "Passed exact source/continuous curves, original physical observations, paired fresh Blender poses/default, native and fresh editor-imported playback/transitions, fully fitted actual-Actor cycles/four views, seeded dissolve/silhouette/reset checks.",
+  "human_approval_changed": false,
+  "recipe": {
+    "tool": "eloria-assets/tools/pack_creature_storage.py",
+    "tool_commit": "5bdd51c3",
+    "steps": [
+      "prune_zero_targets",
+      "reduce_constant_runs",
+      "compact"
+    ],
+    "profile": null,
+    "bounds": null,
+    "preserve_trs_keys": false
+  },
+  "bytes": {
+    "source_bytes": 16037876,
+    "candidate_bytes": 11533336,
+    "source_zstd_bytes": 6540005,
+    "candidate_zstd_bytes": 6587244
+  },
+  "inactive_targets_removed": 0,
+  "flat_run_key_rows_removed": 396259,
+  "corrective_graphics_buffer_bytes": {
+    "source": 0,
+    "candidate": 0,
+    "saved": 0,
+    "scope": "Actual Godot raw blend_shape_data byte totals over all mesh surfaces; shared per loaded model."
+  },
+  "draw_surfaces": {
+    "source": 1,
+    "candidate": 1
+  },
+  "source_validation": {
+    "passed": true,
+    "source_sha256": "3d6bd984630ea4f868c7fcf99ae2da13260d1023721c93e27a417afabae71209",
+    "candidate_sha256": "d8d6a39b0185164881474a940a36d581ceff630b2047e2625e4aeec7db826a53",
+    "geometry_skin_binds_rest_topology_uv_material_image_bits_preserved": true,
+    "retained_key_time_and_value_bits_exact_only_flat_interiors_removed": true,
+    "every_removed_default_and_key_is_zero": true,
+    "redundant_flat_key_rows_proved": 396259,
+    "preexisting_duplicate_property_curves_preserved_in_occurrence_order": 0,
+    "meshes": [],
+    "clips": {
+      "Fighting_Idle": {
+        "original_knots": 4,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 12
+      },
+      "Hit_Chest": {
+        "original_knots": 16,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 36
+      },
+      "Idle_A": {
+        "original_knots": 22,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 48
+      },
+      "Walk": {
+        "original_knots": 3439,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 6882
+      },
+      "Jog": {
+        "original_knots": 2029,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 4062
+      },
+      "Sword_Attack": {
+        "original_knots": 4912,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 9828
+      },
+      "Death_A": {
+        "original_knots": 7987,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 15978
+      }
+    },
+    "proof": "Zero defaults and every LINEAR/STEP key zero prove inactive targets remain zero continuously and under crossfades. All retained accessor bytes and retained time/value rows are exact. Deleted key rows sit strictly inside three bit-identical adjacent rows; plateau boundaries and endpoints remain."
+  },
+  "physical_observations": {
+    "passed": true,
+    "source_sha256": "3d6bd984630ea4f868c7fcf99ae2da13260d1023721c93e27a417afabae71209",
+    "candidate_sha256": "d8d6a39b0185164881474a940a36d581ceff630b2047e2625e4aeec7db826a53",
+    "surface_probes": 166,
+    "poses": 133,
+    "clips": 7,
+    "source_candidate_position_error": 0.0,
+    "source_candidate_normal_vector_error": 0.0,
+    "original_witness_position_error_over_height": 0.0,
+    "original_source_witness_position_error_over_height": 0.0,
+    "original_witness_normal_vector_error": 0.0,
+    "original_witness_bone_matrix_error": 0.0,
+    "witness_sha256": "668486a6fb2103fa19166cbff6fbf089326c7ea4b5ad592604afb7c4e3cd3f24",
+    "sampled_motion_min": [
+      -0.8521887938001689,
+      0.0006873197882591303,
+      -2.3229641959629355
+    ],
+    "sampled_motion_max": [
+      1.2693095857538796,
+      1.7808616523017087,
+      2.443599808549778
+    ]
+  },
+  "paired_fresh_blender": {
+    "maximum_position_error": 0.0,
+    "maximum_bone_matrix_error": 0.0,
+    "maximum_float32_budget": 3.814697265625e-06,
+    "poses": 134,
+    "neutral_default_checked": true,
+    "passed": true,
+    "source_sha256": "3d6bd984630ea4f868c7fcf99ae2da13260d1023721c93e27a417afabae71209",
+    "candidate_sha256": "d8d6a39b0185164881474a940a36d581ceff630b2047e2625e4aeec7db826a53",
+    "scope": "Direct source/candidate frozen-ID surfaces and every bone matrix at each original witness pose plus controlled neutral/default pose. Sixteen float32 ULPs at baseline coordinate/matrix magnitude; independent of inherited source/witness residual and separate from native/source appearance budgets."
+  },
+  "native_and_editor_imported": {
+    "native": {
+      "samples": 232,
+      "maximum_position_error": 6.961552492985022e-07,
+      "maximum_normal_angle_degrees": 2.2524095754713237e-05
+    },
+    "imported": {
+      "samples": 232,
+      "maximum_position_error": 6.961552492985022e-07,
+      "maximum_normal_angle_degrees": 2.2524095754713237e-05,
+      "actual_loader": "ResourceLoader.load(PackedScene)",
+      "authoritative_SCN_provenance": "genuine_editor_verification_revision.load_proofs"
+    }
+  },
+  "native_numeric_budget": {
+    "actor": "ice_wolverine",
+    "source_coordinate_or_extent_magnitude": 4.257338409891193,
+    "four_float32_ULPs": 1.9073486328125e-06,
+    "runtime_position_error": 6.961552492985022e-07,
+    "runtime_normal_degrees": 2.2524095754713237e-05,
+    "normal_degrees_budget": 0.0001,
+    "scope": "Four float32 ULPs at maximum original source coordinate/extent magnitude; original source mathematical equality remains exact. Native normal screen 1e-4 degrees."
+  },
+  "placement": {
+    "passed": true,
+    "bounds_error": 0.0,
+    "placement_error": 0.0,
+    "overhead_height_error": 0.0
+  },
+  "render_fit": {
+    "source_sha256": "3d6bd984630ea4f868c7fcf99ae2da13260d1023721c93e27a417afabae71209",
+    "model_global": [
+      [
+        0.5,
+        0.0438542179763317,
+        -0.15599998831749
+      ],
+      [
+        -0.401441991329193,
+        0.0,
+        3.50951729899407e-08
+      ],
+      [
+        0.0,
+        0.401441991329193,
+        0.0
+      ],
+      [
+        -3.50951729899407e-08,
+        0.0,
+        -0.401441991329193
+      ]
+    ],
+    "position": [
+      -0.03445303284200454,
+      0.04413981829992726,
+      -1.1392888516194326
+    ],
+    "size": [
+      0.8769452886523126,
+      0.7147277001225468,
+      1.9200064791556295
+    ],
+    "poses": 301,
+    "scope": "Every vertex at every full-cycle render frame and view-still pose, using actual complete Actor Godot arrays/poses/weights/transforms, renderer morph cutoff and four/eight influence skin. Evaluated in float64 with a separate 30% camera margin."
+  },
+  "appearance": {
+    "source_sha256": "3d6bd984630ea4f868c7fcf99ae2da13260d1023721c93e27a417afabae71209",
+    "candidate_sha256": "d8d6a39b0185164881474a940a36d581ceff630b2047e2625e4aeec7db826a53",
+    "image_pairs": 399,
+    "width": 512,
+    "height": 512,
+    "different_image_pairs": 29,
+    "maximum_different_pixels": 29,
+    "maximum_pixels_above_two_levels": 0,
+    "maximum_mean_channel_error": 4.4504801432291664e-05,
+    "maximum_channel_error": 2,
+    "scope": "Complete ReplicatedActor3D setup with actual display scale, grounding and body materials; identical cameras for source/candidate, four views and every full native cycle at24Hz. Numeric playback and pixel comparisons are separate reports.",
+    "framing_passed": true,
+    "clipped_frame_labels": [],
+    "maximum_border_foreground_pixels": 0
+  },
+  "secondary_effects": {
+    "effective_scale": 0.401441991329193,
+    "failures": [],
+    "gpu": "NVIDIA GeForce RTX 5080 Laptop GPU",
+    "max_color_error": 0.0,
+    "max_custom_error": 0.0,
+    "max_dissolve_bounds_error": 2.98023223876953e-08,
+    "max_fragment_transform_error": 2.08616256713867e-07,
+    "max_grain_error": 0.0,
+    "max_silhouette_position_error": 1.90827975643515e-07,
+    "mounted": {},
+    "passed": true,
+    "renderer": "forward_plus",
+    "runtime_sha256": "d8d6a39b0185164881474a940a36d581ceff630b2047e2625e4aeec7db826a53",
+    "seeded_cases": 15,
+    "source_sha256": "3d6bd984630ea4f868c7fcf99ae2da13260d1023721c93e27a417afabae71209"
+  },
+  "rig_investigation": {
+    "decision": "Original rig, skin and topology retained; this candidate uses exact storage reductions only."
+  },
+  "evidence_sha256": {
+    "qualification-job.json": "614dae232e28bbb95c6e04dface19427698f4b04b88c362dec408bf169a62c4e",
+    "processing.json": "54c1bb083d9d1e1e959be720986bf73d0df597d434f130201c71e9949ecb9bfd",
+    "exact-source-validation.json": "a0c989f63a96ec4642faba5ad48a78b32d8a4f68a4678607a79d2b53225e348e",
+    "physical-witness-validation.json": "0d1d2de796ed7a90b3666c3abb48401e35fa4e032623778ddc8b474db29800f1",
+    "blender-validation.json": "72c654acba48d8f8a7e3d877a563cf6973454100e16e48a5d664e24c01f47b60",
+    "blender-direct-validation.json": "d63200a9cb077a56ff3c50cfddce020676bb4dbb1f1ddd32686ba9c9ee8a3324",
+    "native-validation.json": "402f9886b18bc59eaff372ca10f8bf42743405a3959a111c7fff07cc637af17c",
+    "imported-validation.json": "402f9886b18bc59eaff372ca10f8bf42743405a3959a111c7fff07cc637af17c",
+    "render-fit.json": "15e2133e40438032e205845e4d3b4139e63c3b9311af4bcd8b6dc8c89f027328",
+    "placement.json": "7aa301a2edb2cf7681d2830ee9f004d13f6437553e23da2bc524decdfdb34c53",
+    "effects-validation.json": "20b8897a9368a2b25dc4f5537bb5ebf9e0e466220b84ee73cf2ab6ff8710f83a",
+    "actual-render/render.json": "397e2139156aa66ed5f8f5da3e4c51ad646b3830c45464a50e8da5776b930c8d",
+    "actual-render/pixel-comparison.json": "9cc365c7efce86d1a33e6e5ba06af68aa31d23dea45ee6dfcefb90a4cac6f3db"
+  },
+  "visual_review": "Paired normal contact boards and complete native-cycle previews reviewed. Every four-view/full-cycle frame has zero foreground pixels in its border two pixels wide.",
+  "known_limitations": [
+    "Separate resident RAM and frame-time benchmarks were not measured.",
+    "Encoded animation-key savings describe raw files, logical source accessors and import parsing input only. Native importing may densely rebake identical generated Animation keys; no runtime Animation RAM, key-search or playback CPU saving is claimed.",
+    "Original artistic review/approval status is unchanged.",
+    "Compressed shipping data increases by 47239 bytes despite smaller decoded GLB. This tradeoff is explicit; no unmeasured runtime-memory saving offsets it in this receipt."
+  ],
+  "genuine_editor_verification_revision": {
+    "status": "Corrected independent actual Editor verification passed within applicable unchanged modern or legacy scope",
+    "date": "2026-10-28",
+    "source_original_sha256": "3d6bd984630ea4f868c7fcf99ae2da13260d1023721c93e27a417afabae71209",
+    "current_canonical_sha256": "d8d6a39b0185164881474a940a36d581ceff630b2047e2625e4aeec7db826a53",
+    "loader": "ResourceLoader.load(PackedScene)",
+    "load_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/ice_wolverine.glb-49dc0b8b5723553c801573ebfd8024d0.md5",
+        "import_metadata_sha256": "29dfcfcd754805f536f749e3ce4efed97d44fae47731eec4f715279c1d1ec15a",
+        "imported_resource_path": "res://.godot/imported/ice_wolverine.glb-49dc0b8b5723553c801573ebfd8024d0.scn",
+        "imported_resource_sha256": "6fa220f906151fb6691f4b1f0c89c41d6beb5c54d4ff624ee636108ce445b264",
+        "packed_scene_resource_path": "res://assets/qa/ice_wolverine/v2/baseline/ice_wolverine.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "81e64ea17ade2743f9a0417cce8755e2",
+        "source_path": "res://assets/qa/ice_wolverine/v2/baseline/ice_wolverine.glb",
+        "source_sha256": "3d6bd984630ea4f868c7fcf99ae2da13260d1023721c93e27a417afabae71209"
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/ice_wolverine.glb-54878938ede55a24f9b45593e79a92ee.md5",
+        "import_metadata_sha256": "9da32544934428ba99b497e3e7f9a6cb412f47202e3536c8d38efb422392f558",
+        "imported_resource_path": "res://.godot/imported/ice_wolverine.glb-54878938ede55a24f9b45593e79a92ee.scn",
+        "imported_resource_sha256": "0a8c5ccaa54467490dc03f902f1aaf34b2f5bdbd5e205962e1e62e722c137662",
+        "packed_scene_resource_path": "res://assets/qa/ice_wolverine/v2/candidate/ice_wolverine.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "2922890e758f8b54d23db6df46014ee0",
+        "source_path": "res://assets/qa/ice_wolverine/v2/candidate/ice_wolverine.glb",
+        "source_sha256": "d8d6a39b0185164881474a940a36d581ceff630b2047e2625e4aeec7db826a53"
+      }
+    ],
+    "source_aliases_and_SCNs_have_current_source_and_destination_MD5_freshness": true,
+    "numeric": {
+      "poses": 232,
+      "all_source_clips": [
+        "Fighting_Idle",
+        "Hit_Chest",
+        "Idle_A",
+        "Walk",
+        "Jog",
+        "Sword_Attack",
+        "Death_A"
+      ],
+      "RESET_checked": true,
+      "maximum_Euclidean_position_error_source_units": 6.961552492985022e-07,
+      "maximum_normal_angle_degrees": 2.2524095754713237e-05
+    },
+    "applicable_quality_budget": {
+      "position_four_float32_ULPs": 1.9073486328125e-06,
+      "source_coordinate_or_rest_axis_extent_magnitude": 4.257338409891193,
+      "normal_degrees": 0.0001,
+      "both_passed": true
+    },
+    "full_typed_static_attributes_material_storage_texture_pixels_and_mips": {
+      "actor": "ice_wolverine",
+      "source_sha256": "3d6bd984630ea4f868c7fcf99ae2da13260d1023721c93e27a417afabae71209",
+      "candidate_sha256": "d8d6a39b0185164881474a940a36d581ceff630b2047e2625e4aeec7db826a53",
+      "surfaces": [
+        {
+          "all_typed_arrays": [
+            {
+              "slot": 0,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 1,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 2,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 4,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 10,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 11,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 12,
+              "exact_after_proven_vertex_bijection": true
+            }
+          ],
+          "full_material_storage_fields_and_texture_pixels_mips_exact": true,
+          "format_exact": true,
+          "lods": [
+            {
+              "lod": 0,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            },
+            {
+              "lod": 1,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            },
+            {
+              "lod": 2,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            }
+          ],
+          "bounds_component_max_delta": 0.0,
+          "lod_capture_present": true
+        }
+      ],
+      "passed": true,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/ice_wolverine.glb-49dc0b8b5723553c801573ebfd8024d0.md5",
+          "import_metadata_sha256": "29dfcfcd754805f536f749e3ce4efed97d44fae47731eec4f715279c1d1ec15a",
+          "imported_resource_path": "res://.godot/imported/ice_wolverine.glb-49dc0b8b5723553c801573ebfd8024d0.scn",
+          "imported_resource_sha256": "6fa220f906151fb6691f4b1f0c89c41d6beb5c54d4ff624ee636108ce445b264",
+          "packed_scene_resource_path": "res://assets/qa/ice_wolverine/v2/baseline/ice_wolverine.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "81e64ea17ade2743f9a0417cce8755e2",
+          "source_path": "res://assets/qa/ice_wolverine/v2/baseline/ice_wolverine.glb",
+          "source_sha256": "3d6bd984630ea4f868c7fcf99ae2da13260d1023721c93e27a417afabae71209"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/ice_wolverine.glb-54878938ede55a24f9b45593e79a92ee.md5",
+          "import_metadata_sha256": "9da32544934428ba99b497e3e7f9a6cb412f47202e3536c8d38efb422392f558",
+          "imported_resource_path": "res://.godot/imported/ice_wolverine.glb-54878938ede55a24f9b45593e79a92ee.scn",
+          "imported_resource_sha256": "0a8c5ccaa54467490dc03f902f1aaf34b2f5bdbd5e205962e1e62e722c137662",
+          "packed_scene_resource_path": "res://assets/qa/ice_wolverine/v2/candidate/ice_wolverine.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "2922890e758f8b54d23db6df46014ee0",
+          "source_path": "res://assets/qa/ice_wolverine/v2/candidate/ice_wolverine.glb",
+          "source_sha256": "d8d6a39b0185164881474a940a36d581ceff630b2047e2625e4aeec7db826a53"
+        }
+      ]
+    },
+    "retained_Editor_morph_fields": {
+      "actor": "ice_wolverine",
+      "source_sha256": "3d6bd984630ea4f868c7fcf99ae2da13260d1023721c93e27a417afabae71209",
+      "candidate_sha256": "d8d6a39b0185164881474a940a36d581ceff630b2047e2625e4aeec7db826a53",
+      "all_retained_editor_POSITION_NORMAL_TANGENT_typed_bits_exact": true,
+      "retained_targets": 0,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/ice_wolverine.glb-49dc0b8b5723553c801573ebfd8024d0.md5",
+          "import_metadata_sha256": "29dfcfcd754805f536f749e3ce4efed97d44fae47731eec4f715279c1d1ec15a",
+          "imported_resource_path": "res://.godot/imported/ice_wolverine.glb-49dc0b8b5723553c801573ebfd8024d0.scn",
+          "imported_resource_sha256": "6fa220f906151fb6691f4b1f0c89c41d6beb5c54d4ff624ee636108ce445b264",
+          "packed_scene_resource_path": "res://assets/qa/ice_wolverine/v2/baseline/ice_wolverine.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "81e64ea17ade2743f9a0417cce8755e2",
+          "source_path": "res://assets/qa/ice_wolverine/v2/baseline/ice_wolverine.glb",
+          "source_sha256": "3d6bd984630ea4f868c7fcf99ae2da13260d1023721c93e27a417afabae71209"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/ice_wolverine.glb-54878938ede55a24f9b45593e79a92ee.md5",
+          "import_metadata_sha256": "9da32544934428ba99b497e3e7f9a6cb412f47202e3536c8d38efb422392f558",
+          "imported_resource_path": "res://.godot/imported/ice_wolverine.glb-54878938ede55a24f9b45593e79a92ee.scn",
+          "imported_resource_sha256": "0a8c5ccaa54467490dc03f902f1aaf34b2f5bdbd5e205962e1e62e722c137662",
+          "packed_scene_resource_path": "res://assets/qa/ice_wolverine/v2/candidate/ice_wolverine.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "2922890e758f8b54d23db6df46014ee0",
+          "source_path": "res://assets/qa/ice_wolverine/v2/candidate/ice_wolverine.glb",
+          "source_sha256": "d8d6a39b0185164881474a940a36d581ceff630b2047e2625e4aeec7db826a53"
+        }
+      ],
+      "scope": "Direct actual Editor source/candidate retained morph P/N/T byte digests after independently proved complete static-attribute vertex bijection. Exact target mask from source packing lineage; no morph field omitted.",
+      "passed": true
+    },
+    "withdrawn_prior_loader_claim": "Prior shared dumper captures labelled imported used GlbSceneCache for these outside-actor aliases and therefore were raw-cache comparisons. They remain retained private raw/native evidence, but their independent Editor claim is withdrawn and superseded by these explicitly loaded SCNs.",
+    "unchanged_other_evidence": "Original independent physical observations, exact source curves, Blender, actual native gameplay body rendering, placement, mounted/cinematic dependencies and secondary effects remain hash-bound and unchanged. No artistic approval, model, action, cap or witness change in this QA revision.",
+    "production_scope": "Production actor_shipping loose folders remain raw/native and are not Editor-imported. Per-surface Editor-generated LODs are verification representation metadata, not a claim of new gameplay LODs.",
+    "evidence_sha256": {
+      ".local/heavy-batch/ice_wolverine/v2/editor-real-v1/qualification-job.json": "639952c7ef6425e858a5c27b56c45262c4770a6cf87923f1613c1d0fc8cf0264",
+      ".local/heavy-batch/ice_wolverine/v2/editor-real-v1/imported/runtime.json": "d8ed17ed2f26b137cdefdd0f240e5dd0697e010f1ea98d82b83441f9ec82042f",
+      ".local/heavy-batch/ice_wolverine/v2/editor-real-v1/imported-validation.json": "402f9886b18bc59eaff372ca10f8bf42743405a3959a111c7fff07cc637af17c",
+      ".local/heavy-batch/ice_wolverine/v2/editor-real-v1/imported-static-mesh-bits.json": "6818d994f521503d263cb94fe8904be04744e82089557fe4f699d703cdc98949",
+      ".local/heavy-batch/ice_wolverine/v2/editor-real-v1/imported-typed-validation.json": "83aefb99395a4c2969b1f6ea1be206ebd1ecf439715f13e9b5552ca9b7515abc",
+      ".local/heavy-batch/ice_wolverine/v2/editor-real-v1/morph-digest-job.json": "92d6e5526cb88204abd29a7d46c590b5b6e2afe13dc05cf4a8f15e00f5fe5026",
+      ".local/heavy-batch/ice_wolverine/v2/editor-real-v1/imported-morph-digests.json": "420df3040149d0062042fb36d6918db49c8248f28470ebb14d24eef3d72ed8d8",
+      ".local/heavy-batch/ice_wolverine/v2/editor-real-v1/imported-morph-validation.json": "353e099974e8fee59fc9a26e06fb0ffbfea6bdf260670531ccc726d99aa2e203"
+    }
+  }
+}

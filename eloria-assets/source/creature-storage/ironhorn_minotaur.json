@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "actor": "ironhorn_minotaur",
+  "source_sha256": "1c73ee15410c73a7684ee70e5f94c5fbbb47c6674e23b71c0309d51a4b1c5c7e",
+  "candidate_sha256": "a8c38e726060f775e49171e7df7355ab7efa53df594c2835285359eeb90e0953",
+  "pipeline": [
+    "prune_zero_targets",
+    "reduce_constant_runs",
+    "compact"
+  ],
+  "partition": null,
+  "unchanged": false,
+  "removed_zero_target_indices": [],
+  "redundant_flat_key_rows_removed": 87887,
+  "geometry_skin_rest_binds_materials_images_unchanged": true,
+  "preserve_trs_keys": false,
+  "native_clips": [
+    "Death_A",
+    "Fighting_Idle",
+    "Hit_Chest",
+    "Idle_A",
+    "Jog",
+    "Sword_Attack",
+    "Walk"
+  ],
+  "usage": "Deterministic exact preparation needs no partition --profile; frozen source/candidate hashes bind this record."
+}

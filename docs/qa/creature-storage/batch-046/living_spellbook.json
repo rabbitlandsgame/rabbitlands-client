@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "batch": 46,
+  "actor": "living_spellbook",
+  "status": "Original retained; proposed canonical storage rewrite increases raw source size.",
+  "source_sha256": "0ac27a79533006dff6b50ae2e3bdc75e23290524e1f9dc7f589a36291df42618",
+  "candidate_sha256": "0ac27a79533006dff6b50ae2e3bdc75e23290524e1f9dc7f589a36291df42618",
+  "source_bytes": 575260,
+  "candidate_bytes": 575260,
+  "source_zstd_bytes": 429311,
+  "candidate_zstd_bytes": 429311,
+  "shared_gpu_source_bytes": 0,
+  "shared_gpu_candidate_bytes": 0,
+  "draw_surfaces_source": 1,
+  "draw_surfaces_candidate": 1,
+  "reason": "Canonical exact packing including original-source logical bounds grows raw GLB bytes and has no corrective-GPU or draw benefit. User preference accepts packaged growth only for smaller source files; original bytes retained.",
+  "rejected_proposal": {
+    "sha256": "f71534b51777e632626801426dee0a2ad2e14be60efa3ff20c691d0718c868e0",
+    "bytes": 575484,
+    "raw_growth_bytes": 224,
+    "private_evidence": "C:\\rabbitlands\\worktrees\\client-creature-storage-20261027\\.local\\batch-046\\living_spellbook\\v1",
+    "scope": "Size rejection only. No full replacement qualification or new authored fitness/art approval is claimed."
+  },
+  "rig_investigation": "Original has zero corrective targets; no corrective buffer or draw-call reduction from this proposed rewrite. Original rig and skin unchanged.",
+  "human_approval_changed": false,
+  "original_bytes_verified_identical": true
+}

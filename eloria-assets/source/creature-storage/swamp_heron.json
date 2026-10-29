@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "actor": "swamp_heron",
+  "source_sha256": "1a36c9c45746eee5ed9ad08fb38388ff11719ca96198661ea077d41035595f29",
+  "candidate_sha256": "f8b1b2b6800a23524186548af3b524ff4ce28d79e45b105c873b477c5995a55b",
+  "pipeline": [
+    "prune_zero_targets",
+    "reduce_constant_runs",
+    "compact"
+  ],
+  "partition": null,
+  "unchanged": false,
+  "removed_zero_target_indices": [],
+  "redundant_flat_key_rows_removed": 26863,
+  "geometry_skin_rest_binds_materials_images_unchanged": true,
+  "preserve_trs_keys": false,
+  "native_clips": [
+    "Idle_A",
+    "Fighting_Idle",
+    "Walk",
+    "Jog",
+    "Sword_Attack",
+    "Hit_Chest",
+    "Death_A"
+  ],
+  "usage": "Deterministic exact preparation needs no partition --profile; frozen source/candidate hashes bind this record."
+}

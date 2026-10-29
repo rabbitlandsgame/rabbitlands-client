@@ -73,10 +73,41 @@
     "walk": 0.06349211534489077,
     "run": 0.1499119390087699
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "A deliberate four-beat armored amble with full short steps and a steady shell. Faster travel is a compact scurry driven by the legs beneath the shell, with little bounce or lateral roll.",
     "attack": "Brace the hind feet, lower the snout and rake forward and down with the left foreclaw, followed by the right. The armored torso stays supported while each strong claw makes a clear reaching stroke and returns to its planted track.",
     "death": "The snout lowers, the legs fold under the armored body and release into a supported flank. The shell retains its shape; head, rear body and narrow tail settle into a still grounded finish."
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "armadillo",
+    "sourceSHA256": "79da50dcb51cf7beb9e05096dc6b9dd2c7ae22b0eda014670ceffc405499c125",
+    "previousRuntimeSHA256": "e1dc29f4b96e1a809dfeec255d7edd5f34d424e0f76b9ebc68372f4a526f7ab9",
+    "runtimeSHA256": "3f1682603eab41b455ef7680c82eaaa72f54a1d92d058a7b39cc7d8bf8344108",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "armadillo",
+      "sourceSHA256": "79da50dcb51cf7beb9e05096dc6b9dd2c7ae22b0eda014670ceffc405499c125",
+      "runtimeSHA256": "e1dc29f4b96e1a809dfeec255d7edd5f34d424e0f76b9ebc68372f4a526f7ab9",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 120,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "armadillo",
+    "appliesToSHA256": "3f1682603eab41b455ef7680c82eaaa72f54a1d92d058a7b39cc7d8bf8344108",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "current_user_group_instruction",
+      "instruction_summary": "User explicitly instructed installation of the 101 remaining 30fps bakes too, following the coordinator clarification; this is a current instruction and not a historical journal approval.",
+      "not_a_historical_journal_event": true
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
   }
 }

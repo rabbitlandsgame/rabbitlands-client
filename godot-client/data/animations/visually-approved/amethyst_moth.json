@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "fallbackAction": "idle",
+  "playbackSpeeds": {
+    "walk": 1.0,
+    "run": 1.0,
+    "attack_primary": 1.0,
+    "death": 1.0
+  },
+  "actions": {
+    "idle": "Idle_A",
+    "alternate_idle": "Idle_A",
+    "combat_idle": "Fighting_Idle",
+    "walk": "Walk",
+    "run": "Jog",
+    "turn": "Idle_A",
+    "sit": "Idle_A",
+    "seated_idle": "Idle_A",
+    "stand": "Idle_A",
+    "death": "Death_A",
+    "pain": "Hit_Chest",
+    "attack_primary": "Sword_Attack",
+    "ranged_attack": "Sword_Attack",
+    "cast": "Sword_Attack",
+    "harvest": "Sword_Attack",
+    "pickup": "Idle_A",
+    "drop": "Idle_A",
+    "emote_greeting": "Idle_A"
+  },
+  "serverCommands": {
+    "3": "death",
+    "5": "pain",
+    "7": "idle",
+    "13": "sit",
+    "14": "stand",
+    "15": "combat_idle",
+    "18": "combat_idle",
+    "19": "idle",
+    "20": "walk",
+    "21": "walk",
+    "22": "walk",
+    "23": "walk",
+    "24": "walk",
+    "25": "walk",
+    "26": "walk",
+    "27": "walk",
+    "30": "run",
+    "31": "run",
+    "32": "run",
+    "33": "run",
+    "34": "run",
+    "35": "run",
+    "36": "run",
+    "37": "run",
+    "38": "turn",
+    "39": "turn",
+    "40": "turn",
+    "41": "turn",
+    "42": "turn",
+    "43": "turn",
+    "44": "turn",
+    "45": "turn",
+    "46": "attack_primary"
+  },
+  "loopingClips": [
+    "Idle_A",
+    "Fighting_Idle",
+    "Walk",
+    "Jog"
+  ],
+  "strideScalesWithActor": true,
+  "strideMetresPerSecond": {
+    "walk": 0.25625120490973036,
+    "run": 0.7000032914607269
+  },
+  "reviewStatus": "accepted",
+  "concept": {
+    "movement": "A faceted amethyst moth hangs almost motionless in the air while its four veined wings beat in close coordination. The rear wings follow the forewings slightly, and its small hanging legs make restrained tucked adjustments. Fast flight increases the beat while the crystal-covered torso remains steady.",
+    "attack": "A quick backward draw and wider forewing opening precede a committed forward/downward head-led swoop, with the hindwings following the same body line. A crisp recovery beat returns it to alert hover.",
+    "death": "The four wingbeats lose strength together, the moth pitches forward and sinks, and its hanging appendages release. Its actual torso and abdomen settle with the four whole wing surfaces spread low, crystal spines and face remaining coherent in a still supported ending."
+  },
+  "locomotionMode": "airborne",
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "amethyst_moth",
+    "appliesToSHA256": "da51a61f0b3da9537b307ee1a4b5a0e67822bf9bd178b6c050df4fec3271f5ea",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "saved_button_approval",
+      "event_id": "e5c01da1-5209-4f2b-9be9-a8454c02108a",
+      "event_sha256": "b03e02043e9506b1ad94c1d7cd84a45f5587a7925ae0cd682a61f1d1a3b38edb",
+      "utc": "2026-10-28T21:42:51.231714+00:00"
+    },
+    "previousAuthoringReviewStatus": "draft",
+    "repairNoteEvents": []
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "amethyst_moth",
+    "sourceSHA256": "6901b31008dc4b414743b2daf247c3f7139fdf1286d6bf91f6c6fa9ccecd5a3d",
+    "previousRuntimeSHA256": "887a1084b5101b17a96d444f7440763b1a63c25585a85fe1e3c95169c592203c",
+    "runtimeSHA256": "da51a61f0b3da9537b307ee1a4b5a0e67822bf9bd178b6c050df4fec3271f5ea",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": null
+  }
+}

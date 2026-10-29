@@ -69,5 +69,38 @@
   "strideMetresPerSecond": {
     "walk": 0.17704696387670987
   },
-  "strideScalesWithActor": true
+  "strideScalesWithActor": true,
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "red_fox",
+    "sourceSHA256": "b8dce60f1236bde7bf5caf451a6781ee9b3b0352671f9752769a23ddc4949a0a",
+    "previousRuntimeSHA256": "1567792adb0db41b89e579fbbc578b634f2c59e1f51c1d7b8241b6edb0d25090",
+    "runtimeSHA256": "ea9f2e715eae37117439685fb409faf9e57dede6bc6fe7c72f446cdde84c4f31",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "red_fox",
+      "sourceSHA256": "b8dce60f1236bde7bf5caf451a6781ee9b3b0352671f9752769a23ddc4949a0a",
+      "runtimeSHA256": "1567792adb0db41b89e579fbbc578b634f2c59e1f51c1d7b8241b6edb0d25090",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 240,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "reviewStatus": "accepted",
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "red_fox",
+    "appliesToSHA256": "ea9f2e715eae37117439685fb409faf9e57dede6bc6fe7c72f446cdde84c4f31",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "saved_button_approval",
+      "event_id": "a07420ee-0388-4203-a5e2-85b6805973a4",
+      "event_sha256": "9c8e46b49e45a5e04d80d0e353b7161937d1dc6f00d9ee1b9b164d89d1de8f39",
+      "utc": "2026-10-28T21:15:21.227426+00:00"
+    },
+    "previousAuthoringReviewStatus": null,
+    "repairNoteEvents": []
+  }
 }

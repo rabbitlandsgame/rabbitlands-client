@@ -73,10 +73,34 @@
     "walk": 0.11188798508158508,
     "run": 0.2769227630769231
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "A draconic armored four-beat crawl with a restrained, centered tail follow-through. Low deliberate four-beat crawl with a rigid shell, outward elbows and complete clawed-foot contact. The faster scramble retains grounded support and low foot recovery.",
     "attack": "Four planted feet brace a short recoil and forceful forward/downward head strike. No independent jaw motion is implied by this rig.",
     "death": "The body settles forward onto the plastron, the neck droops, and the feet relax slightly outward before holding still."
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "dragon_turtle",
+    "appliesToSHA256": "465b80dad013e12b8d7a8c45a2b4d0543a546e9d35e7b5d61634eb27a43b6662",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "saved_button_approval",
+      "event_id": "9cd9acdb-e7fc-49db-8f14-a05a235c15b6",
+      "event_sha256": "071b4a12b2795c8b93a2344943708fe8e40e98ca60b3ac97ab7d7fb120bf5cb1",
+      "utc": "2026-10-28T21:47:37.895413+00:00"
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "dragon_turtle",
+    "sourceSHA256": "6b853e814bb7a1f74f24a3469168c8cc11d2ca45e7eca6ee2f570c2acb4a11c7",
+    "previousRuntimeSHA256": "6b853e814bb7a1f74f24a3469168c8cc11d2ca45e7eca6ee2f570c2acb4a11c7",
+    "runtimeSHA256": "465b80dad013e12b8d7a8c45a2b4d0543a546e9d35e7b5d61634eb27a43b6662",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": null
   }
 }

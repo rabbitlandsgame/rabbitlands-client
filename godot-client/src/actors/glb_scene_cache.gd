@@ -35,6 +35,7 @@ extends RefCounted
 ## Actors are left as they were: their load time is why this cache exists.
 const GltfQuantization := preload("res://src/world/gltf_quantization.gd")
 const GltfAnimationFidelity := preload("res://src/actors/gltf_animation_fidelity.gd")
+const CreaturePayload := preload("res://src/actors/creature_payload.gd")
 const WorldObjectImages := preload("res://src/world/world_object_images.gd")
 const ArchivedModelPolicy := preload("res://src/actors/archived_model_policy.gd")
 const ResourceDiagnostics := preload("res://src/world/resource_diagnostics.gd")
@@ -73,12 +74,12 @@ static func prepare(paths: PackedStringArray) -> Dictionary:
 	for path: String in paths:
 		path = _canonical_path(path)
 		if not GeometryCache.cooking and PreparedContent.selected_mode() != "require-pilot" and GeometryCache.eligible("asset",path):
-			var geometry := GeometryCache.acquire("asset",path,FileAccess.get_sha256(path),{},MapSceneCache.is_enabled())
+			var geometry := GeometryCache.acquire("asset",path,CreaturePayload.source_sha256(path),{},MapSceneCache.is_enabled())
 			if str(geometry.status) == "hit":
 				result[path] = {"geometry_record":geometry}
 				continue
 		if PreparedContent.selected_mode() != "raw":
-			var record := PreparedContent.acquire("scene", path, FileAccess.get_sha256(path),
+			var record := PreparedContent.acquire("scene", path, CreaturePayload.source_sha256(path),
 				PreparedContent.scene_texture_token(path))
 			if str(record.status) == "hit":
 				result[path] = record # Immutable native Resources, never Nodes.
@@ -106,7 +107,7 @@ static func install_prepared(scenes: Dictionary) -> void:
 					continue
 				# Revalidate the current bytes/policy before publishing a worker record.
 				var began := Time.get_ticks_usec()
-				var verified := PreparedContent.acquire("scene", path, FileAccess.get_sha256(path),
+				var verified := PreparedContent.acquire("scene", path, CreaturePayload.source_sha256(path),
 					PreparedContent.scene_texture_token(path))
 				_record_operation(&"prepared_completion_verify", began)
 				if str(verified.status) == "hit":
@@ -171,14 +172,14 @@ static func _packed_scene(path: String, allow_prepared: bool) -> PackedScene:
 		return raw
 	if allow_prepared and not _scenes.has(path) and not GeometryCache.cooking \
 			and PreparedContent.selected_mode() != "require-pilot" and GeometryCache.eligible("asset",path):
-		var geometry := GeometryCache.acquire("asset",path,FileAccess.get_sha256(path),{},MapSceneCache.is_enabled())
+		var geometry := GeometryCache.acquire("asset",path,CreaturePayload.source_sha256(path),{},MapSceneCache.is_enabled())
 		if str(geometry.status) == "hit":
 			_scenes[path] = geometry.resource
 			_geometry_entries[path] = geometry
 			return geometry.resource as PackedScene
 	if allow_prepared and (PreparedContent.selected_mode() != "raw" or _prepared_entries.has(path)):
 		var verification_began := Time.get_ticks_usec()
-		var verified := PreparedContent.acquire("scene", path, FileAccess.get_sha256(path),
+		var verified := PreparedContent.acquire("scene", path, CreaturePayload.source_sha256(path),
 			PreparedContent.scene_texture_token(path))
 		_record_operation(&"prepared_publication_verify", verification_began)
 		if str(verified.status) == "hit":
@@ -320,7 +321,7 @@ static func _build_raw(path: String) -> PackedScene:
 	var world_asset := is_world_asset(path)
 	if world_asset: state.set_additional_data(WorldObjectImages.ENABLED, true)
 	var operation_began := Time.get_ticks_usec()
-	var parse_error := document.append_from_file(path, state)
+	var parse_error := CreaturePayload.append(document, path, state)
 	_record_operation(&"gltf_parse", operation_began)
 	if parse_error != OK:
 		return null

@@ -75,10 +75,34 @@
     "walk": 0.10451793058886408,
     "run": 0.28066057928806315
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "Quick deliberate alternating steps with the visible thigh participating, stable toe pads and a restrained head nod; a brisk low stepping run with folded-wing balance.",
     "attack": "A short coil, forward/down beak jab and quick recoil, with a small wing flare and both feet supported.",
     "death": "A forward breast-first slump, folded wings settling beside the body, released feet settling forward and outward, then held still."
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "magpie",
+    "appliesToSHA256": "232c9f0f116c0078b8bd0589f2ef3c5d18f72265810918e9dbb146d5d018f93c",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "saved_button_approval",
+      "event_id": "efe74bf3-257f-4726-aeb5-c02965ad7da5",
+      "event_sha256": "fa24a033ed588959dfc2e1a3107ec512461ff6aa59724baabf0277ceafb7c0f2",
+      "utc": "2026-10-28T20:52:05.922103+00:00"
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "magpie",
+    "sourceSHA256": "d9081c27122de9a0aaf860515da5f72bae9e71b62fed12ff8e813ffe742912c7",
+    "previousRuntimeSHA256": "d9081c27122de9a0aaf860515da5f72bae9e71b62fed12ff8e813ffe742912c7",
+    "runtimeSHA256": "232c9f0f116c0078b8bd0589f2ef3c5d18f72265810918e9dbb146d5d018f93c",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": null
   }
 }

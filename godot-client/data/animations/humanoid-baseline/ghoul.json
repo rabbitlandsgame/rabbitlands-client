@@ -86,5 +86,36 @@
       129
     ],
     "reset_to_authored_defaults": true
+  },
+  "reviewStatus": "accepted",
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "ghoul",
+    "appliesToSHA256": "d268ef6ea50045f7a4fb0b1fd737643d7031d9ea9b98d6899313f17f91a74a90",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "saved_button_approval",
+      "event_id": "7765925e-c074-49d9-aa51-3c6489e1d4b5",
+      "event_sha256": "dadff4a8ff0db73163d46b54e3b38f79d87fc77b5443e7abb3ad9637bd661dd5",
+      "utc": "2026-10-28T21:40:08.225287+00:00"
+    },
+    "previousAuthoringReviewStatus": null,
+    "repairNoteEvents": [
+      {
+        "event_id": "9fc5c5ba-11f3-469c-99e5-66962bdc70b5",
+        "event_sha256": "47d59df2ccff58a7eeeed2d8d185fabad0157b04aed205977206cfd4ed251f6d",
+        "candidate_sha256": "d268ef6ea50045f7a4fb0b1fd737643d7031d9ea9b98d6899313f17f91a74a90"
+      }
+    ]
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "ghoul",
+    "sourceSHA256": "275def154b7135f43b4b72101af89b308d7bde647a4d4a7d10197ac7c8910a26",
+    "previousRuntimeSHA256": "275def154b7135f43b4b72101af89b308d7bde647a4d4a7d10197ac7c8910a26",
+    "runtimeSHA256": "d268ef6ea50045f7a4fb0b1fd737643d7031d9ea9b98d6899313f17f91a74a90",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": null
   }
 }

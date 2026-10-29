@@ -1,0 +1,832 @@
+{
+  "schema_version": 1,
+  "actor": "amethyst_stag_beetle",
+  "date": "2026-10-27",
+  "runtime_path": "godot-client/assets/actors/native/creatures/amethyst_stag_beetle.glb",
+  "status": "Technical exact storage reduction qualified; existing artistic-review status unchanged",
+  "source_sha256": "502b8abb61884f32a0733043f92bd7ca2005911a9e91c48a67caee0ecc0dd620",
+  "candidate_sha256": "96c1b31f29dad4e83a46db1922452c6271eb62c05e99dcaaf34b06e03274d7ae",
+  "storage": {
+    "source_bytes": 3092468,
+    "candidate_bytes": 3071356,
+    "source_zstd_bytes": 1550201,
+    "candidate_zstd_bytes": 1557498
+  },
+  "raw_bytes_saved": 21112,
+  "compressed_bytes_saved": -7297,
+  "compression_scope": "RLCZ level 3 release envelope including fixed 56-byte header; encoded/install sizes, not live-process memory.",
+  "correctives": {
+    "source_count": 0,
+    "candidate_count": 0,
+    "removed_target_indices": [],
+    "shared_gpu_source_bytes": 0,
+    "shared_gpu_candidate_bytes": 0,
+    "shared_gpu_saved_bytes": 0,
+    "scope": "Measured shared Godot blend_shape_data bytes, not per-actor totals."
+  },
+  "draw_surfaces": {
+    "source": 1,
+    "candidate": 1
+  },
+  "exact_source_proof": {
+    "passed": true,
+    "source_sha256": "502b8abb61884f32a0733043f92bd7ca2005911a9e91c48a67caee0ecc0dd620",
+    "candidate_sha256": "96c1b31f29dad4e83a46db1922452c6271eb62c05e99dcaaf34b06e03274d7ae",
+    "geometry_skin_binds_rest_topology_uv_material_image_bits_preserved": true,
+    "retained_key_time_and_value_bits_exact_only_flat_interiors_removed": true,
+    "every_removed_default_and_key_is_zero": true,
+    "redundant_flat_key_rows_proved": 21085,
+    "preexisting_duplicate_property_curves_preserved_in_occurrence_order": 0,
+    "clips": {
+      "Idle_A": {
+        "original_knots": 961,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 1926
+      },
+      "Fighting_Idle": {
+        "original_knots": 2,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 8
+      },
+      "Hit_Chest": {
+        "original_knots": 270,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 544
+      },
+      "Death_A": {
+        "original_knots": 1153,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 2310
+      },
+      "Sword_Attack": {
+        "original_knots": 539,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 1082
+      },
+      "Walk": {
+        "original_knots": 443,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 890
+      },
+      "Jog": {
+        "original_knots": 277,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 558
+      }
+    },
+    "proof": "Zero defaults and every LINEAR/STEP key zero prove inactive targets remain zero continuously and under crossfades. All retained accessor bytes and retained time/value rows are exact. Deleted key rows sit strictly inside three bit-identical adjacent rows; plateau boundaries and endpoints remain."
+  },
+  "rigidity_preflight": {
+    "actor": "amethyst_stag_beetle",
+    "survivor_triangles": 0,
+    "reason": "Source has no corrective shapes; existing skin retained."
+  },
+  "runtime_scope": "No procedural generation or new runtime algorithm. Smaller GLB accessor/key storage is proved; fixed Godot rebaking may restore the same retained Animation key count. These qualification checks do not establish retained Animation RAM, CPU lookup or FPS changes; separate loading benchmarks may measure startup time or peak-memory effects.",
+  "effects_scope": "Original topology, skin, binds, material/texture bytes and current clips retained; no runtime rig replacement.",
+  "evidence": "Immutable source/final, private versioned candidates, source/import/renderer receipts, full-resolution captures and lossless cycle previews retained in task-owned ignored .local/batch-036/amethyst_stag_beetle",
+  "source_clip_coverage": {
+    "source_clips": [
+      "Death_A",
+      "Fighting_Idle",
+      "Hit_Chest",
+      "Idle_A",
+      "Jog",
+      "Sword_Attack",
+      "Walk"
+    ],
+    "all_source_clips_full_cycle_rendered": true,
+    "private_qa_aliases_preserve_original_configuration_map": true
+  },
+  "visual_contact_sheet_review": "Source/candidate comparison sheets inspected: no visible appearance difference; numeric full-cycle and multi-view gates passed separately.",
+  "fixture_copy_hash_guard": {
+    "actor": "amethyst_stag_beetle",
+    "passed": true,
+    "source_and_candidate_copies": "All actor/native/imported fixtures SHA256 match canonical originals and final candidates.",
+    "source_clip_inventory_verified": true
+  },
+  "source_physical_witness": {
+    "passed": true,
+    "source_sha256": "502b8abb61884f32a0733043f92bd7ca2005911a9e91c48a67caee0ecc0dd620",
+    "candidate_sha256": "96c1b31f29dad4e83a46db1922452c6271eb62c05e99dcaaf34b06e03274d7ae",
+    "surface_probes": 172,
+    "poses": 42,
+    "clips": 7,
+    "source_candidate_position_error": 0.0,
+    "source_candidate_normal_vector_error": 0.0,
+    "original_witness_position_error_over_height": 0.0,
+    "original_source_witness_position_error_over_height": 0.0,
+    "original_witness_normal_vector_error": 0.0,
+    "original_witness_bone_matrix_error": 0.0,
+    "witness_sha256": "430d8640f8432d135a6dc3f5631bdd4e5ee83921080dbd28a5ec86f530403ec7",
+    "sampled_motion_min": [
+      -1.3603283544560205,
+      0.001026759416535579,
+      -1.4157647359021506
+    ],
+    "sampled_motion_max": [
+      1.3462218263399455,
+      1.5356300501227365,
+      1.5667482554906402
+    ],
+    "source_vertex_correspondence": "Explicit original IDs remapped only for candidate sampler; frozen source observations unmodified.",
+    "candidate_source_vertex_mapping_sha256": "b2f23ea6ad00f8bdab509057332ce0f58728888d365c5f12d4d67dadf6bb7aaf"
+  },
+  "supplemental_source_observations": {
+    "passed": true,
+    "source_sha256": "502b8abb61884f32a0733043f92bd7ca2005911a9e91c48a67caee0ecc0dd620",
+    "candidate_sha256": "96c1b31f29dad4e83a46db1922452c6271eb62c05e99dcaaf34b06e03274d7ae",
+    "surface_probes": 166,
+    "poses": 133,
+    "clips": 7,
+    "source_candidate_position_error": 0.0,
+    "source_candidate_normal_vector_error": 0.0,
+    "original_witness_position_error_over_height": 0.0,
+    "original_source_witness_position_error_over_height": 0.0,
+    "original_witness_normal_vector_error": 0.0,
+    "original_witness_bone_matrix_error": 0.0,
+    "witness_sha256": "ae6dfb0df51ce3f90fdbb518df5f76f0dfdd7a83e6a40bcd4b6b45487d43405b",
+    "sampled_motion_min": [
+      -1.3558463774100529,
+      0.001026559718055542,
+      -1.4123752909520237
+    ],
+    "sampled_motion_max": [
+      1.333798536849531,
+      1.6482037645892638,
+      1.6689407337611788
+    ]
+  },
+  "blender": {
+    "baseline": {
+      "sha256": "502b8abb61884f32a0733043f92bd7ca2005911a9e91c48a67caee0ecc0dd620",
+      "passed": true,
+      "surface_probes": 166,
+      "vertex_identity": [
+        {
+          "source_node": 52,
+          "object": "mesh_node",
+          "vertices": 4145,
+          "position_targets": 0,
+          "basis_world_error": 2.614491582170002e-07,
+          "basis_world_component_error": 2.3779475388785443e-07,
+          "basis_strategy": "authored_joint_rest_skin",
+          "authored_rest_skin_component_error": 2.3779475388785443e-07,
+          "uv_error": 0.0,
+          "skin_error": 0.0,
+          "skin_raw_group_error": 0.0,
+          "skin_lone_group_normalizations": [],
+          "normal_vector_error": 8.607976283646906e-05,
+          "normal_scope": "Recorded only; Blender custom-normal packing is not the authority for source/Godot shading. Vertex motion identity is proved by basis,UV,skin and every POSITION shape.",
+          "all_target_position_error": 0.0,
+          "position_budget": 2.47955322265625e-05,
+          "rest_composition_steps": 13
+        }
+      ],
+      "bone_identity": {
+        "single_armature": "UniRigArmature",
+        "original_action_slots_present": {
+          "Idle_A": {
+            "UniRigArmature": true
+          },
+          "Fighting_Idle": {
+            "UniRigArmature": true
+          },
+          "Hit_Chest": {
+            "UniRigArmature": true
+          },
+          "Death_A": {
+            "UniRigArmature": true
+          },
+          "Sword_Attack": {
+            "UniRigArmature": true
+          },
+          "Walk": {
+            "UniRigArmature": true
+          },
+          "Jog": {
+            "UniRigArmature": true
+          }
+        }
+      },
+      "binding_method": "Full original GLB primitive vertex order, independently proved against basis/UV/skin/normals/all POSITION target data; frozen source IDs retained through partition mapping.",
+      "clips": {
+        "Idle_A": {
+          "surface_error_over_height": 2.896552204993414e-07,
+          "bone_head_error_over_height": 3.5798766631081815e-07,
+          "poses": 19
+        },
+        "Fighting_Idle": {
+          "surface_error_over_height": 2.2244004525207195e-07,
+          "bone_head_error_over_height": 3.5798766631081815e-07,
+          "poses": 19
+        },
+        "Hit_Chest": {
+          "surface_error_over_height": 2.896552204993414e-07,
+          "bone_head_error_over_height": 3.5798766631081815e-07,
+          "poses": 19
+        },
+        "Death_A": {
+          "surface_error_over_height": 2.9334524468098296e-07,
+          "bone_head_error_over_height": 3.5798766631081815e-07,
+          "poses": 19
+        },
+        "Sword_Attack": {
+          "surface_error_over_height": 2.83217634026397e-07,
+          "bone_head_error_over_height": 3.5798766631081815e-07,
+          "poses": 19
+        },
+        "Walk": {
+          "surface_error_over_height": 2.896552204993414e-07,
+          "bone_head_error_over_height": 3.5798766631081815e-07,
+          "poses": 19
+        },
+        "Jog": {
+          "surface_error_over_height": 2.896552204993414e-07,
+          "bone_head_error_over_height": 3.5798766631081815e-07,
+          "poses": 19
+        }
+      },
+      "step_frame_correspondence": [],
+      "max_surface_error_over_height": 2.9334524468098296e-07,
+      "max_bone_head_error_over_height": 3.5798766631081815e-07,
+      "scope": "Independent fresh Blender import geometry/motion witness check. Blender is not the authority for runtime morph normal shading."
+    },
+    "candidate": {
+      "sha256": "96c1b31f29dad4e83a46db1922452c6271eb62c05e99dcaaf34b06e03274d7ae",
+      "passed": true,
+      "surface_probes": 166,
+      "vertex_identity": [
+        {
+          "source_node": 52,
+          "object": "mesh_node",
+          "vertices": 4145,
+          "position_targets": 0,
+          "basis_world_error": 2.614491582170002e-07,
+          "basis_world_component_error": 2.3779475388785443e-07,
+          "basis_strategy": "authored_joint_rest_skin",
+          "authored_rest_skin_component_error": 2.3779475388785443e-07,
+          "uv_error": 0.0,
+          "skin_error": 0.0,
+          "skin_raw_group_error": 0.0,
+          "skin_lone_group_normalizations": [],
+          "normal_vector_error": 8.607976283646906e-05,
+          "normal_scope": "Recorded only; Blender custom-normal packing is not the authority for source/Godot shading. Vertex motion identity is proved by basis,UV,skin and every POSITION shape.",
+          "all_target_position_error": 0.0,
+          "position_budget": 2.47955322265625e-05,
+          "rest_composition_steps": 13
+        }
+      ],
+      "bone_identity": {
+        "single_armature": "UniRigArmature",
+        "original_action_slots_present": {
+          "Idle_A": {
+            "UniRigArmature": true
+          },
+          "Fighting_Idle": {
+            "UniRigArmature": true
+          },
+          "Hit_Chest": {
+            "UniRigArmature": true
+          },
+          "Death_A": {
+            "UniRigArmature": true
+          },
+          "Sword_Attack": {
+            "UniRigArmature": true
+          },
+          "Walk": {
+            "UniRigArmature": true
+          },
+          "Jog": {
+            "UniRigArmature": true
+          }
+        }
+      },
+      "binding_method": "Full original GLB primitive vertex order, independently proved against basis/UV/skin/normals/all POSITION target data; frozen source IDs retained through partition mapping.",
+      "clips": {
+        "Idle_A": {
+          "surface_error_over_height": 2.896552204993414e-07,
+          "bone_head_error_over_height": 3.5798766631081815e-07,
+          "poses": 19
+        },
+        "Fighting_Idle": {
+          "surface_error_over_height": 2.2244004525207195e-07,
+          "bone_head_error_over_height": 3.5798766631081815e-07,
+          "poses": 19
+        },
+        "Hit_Chest": {
+          "surface_error_over_height": 2.896552204993414e-07,
+          "bone_head_error_over_height": 3.5798766631081815e-07,
+          "poses": 19
+        },
+        "Death_A": {
+          "surface_error_over_height": 2.9334524468098296e-07,
+          "bone_head_error_over_height": 3.5798766631081815e-07,
+          "poses": 19
+        },
+        "Sword_Attack": {
+          "surface_error_over_height": 2.83217634026397e-07,
+          "bone_head_error_over_height": 3.5798766631081815e-07,
+          "poses": 19
+        },
+        "Walk": {
+          "surface_error_over_height": 2.896552204993414e-07,
+          "bone_head_error_over_height": 3.5798766631081815e-07,
+          "poses": 19
+        },
+        "Jog": {
+          "surface_error_over_height": 2.896552204993414e-07,
+          "bone_head_error_over_height": 3.5798766631081815e-07,
+          "poses": 19
+        }
+      },
+      "step_frame_correspondence": [],
+      "max_surface_error_over_height": 2.9334524468098296e-07,
+      "max_bone_head_error_over_height": 3.5798766631081815e-07,
+      "scope": "Independent fresh Blender import geometry/motion witness check. Blender is not the authority for runtime morph normal shading."
+    }
+  },
+  "blender_direct": {
+    "maximum_position_error": 0.0,
+    "maximum_bone_matrix_error": 0.0,
+    "maximum_float32_budget": 1.9073486328125e-06,
+    "poses": 134,
+    "neutral_default_checked": true,
+    "retained_bone_matrices_per_pose": 86,
+    "passed": true,
+    "source_sha256": "502b8abb61884f32a0733043f92bd7ca2005911a9e91c48a67caee0ecc0dd620",
+    "candidate_sha256": "96c1b31f29dad4e83a46db1922452c6271eb62c05e99dcaaf34b06e03274d7ae",
+    "scope": "Direct source/candidate frozen-ID surfaces and every bone matrix at each original witness pose plus controlled neutral/default pose. Sixteen float32 ULPs at baseline coordinate/matrix magnitude; independent of inherited source/witness residual and separate from native/source appearance budgets."
+  },
+  "native_playback": {
+    "maximum_position_error": 1.224942599900321e-07,
+    "maximum_normal_angle_degrees": 7.963470424126384e-06,
+    "worst_position": {
+      "label": "Sword_Attack@0.499",
+      "max_surface_error": 1.224942599900321e-07,
+      "max_normal_degrees": 7.963470424126384e-06,
+      "p99_normal_degrees": 7.399647598202746e-06
+    },
+    "worst_normal": {
+      "label": "Sword_Attack@0.499",
+      "max_surface_error": 1.224942599900321e-07,
+      "max_normal_degrees": 7.963470424126384e-06,
+      "p99_normal_degrees": 7.399647598202746e-06
+    },
+    "scope": "Actual Godot mesh arrays, every native clip and directed crossfade pair, renderer morph activation cutoff, linear blended four/eight-influence skin. Pixel rendering remains a separate check.",
+    "source_sha256": "502b8abb61884f32a0733043f92bd7ca2005911a9e91c48a67caee0ecc0dd620",
+    "candidate_sha256": "96c1b31f29dad4e83a46db1922452c6271eb62c05e99dcaaf34b06e03274d7ae"
+  },
+  "fresh_editor_import_playback": {
+    "maximum_position_error": 1.224942599900321e-07,
+    "maximum_normal_angle_degrees": 7.963470424126384e-06,
+    "worst_position": {
+      "label": "Sword_Attack@0.499",
+      "max_surface_error": 1.224942599900321e-07,
+      "max_normal_degrees": 7.963470424126384e-06,
+      "p99_normal_degrees": 7.399647598202746e-06
+    },
+    "worst_normal": {
+      "label": "Sword_Attack@0.499",
+      "max_surface_error": 1.224942599900321e-07,
+      "max_normal_degrees": 7.963470424126384e-06,
+      "p99_normal_degrees": 7.399647598202746e-06
+    },
+    "scope": "Both original and CURRENT final meshes loaded explicitly through ResourceLoader from fresh editor SCNs, bound to source/current GLB +SCN +freshness metadata hashes. All source clips, directed crossfades and RESET; independent retained-static/morph bijection and unchanged4float32ULP Euclidean/.0001degree caps. Earlier Cache-route imported labels are withdrawn, not treated as editor evidence.",
+    "source_sha256": "502b8abb61884f32a0733043f92bd7ca2005911a9e91c48a67caee0ecc0dd620",
+    "candidate_sha256": "96c1b31f29dad4e83a46db1922452c6271eb62c05e99dcaaf34b06e03274d7ae",
+    "actual_editor_scene_loads": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/amethyst_stag_beetle.glb-352274ea6334105c0635dddeaac5eabd.md5",
+        "import_metadata_sha256": "8bc3f5d1e5129f82202f585e385f8405f91e0dbb0d18775209fd6d95d8da99f2",
+        "imported_resource_path": "res://.godot/imported/amethyst_stag_beetle.glb-352274ea6334105c0635dddeaac5eabd.scn",
+        "imported_resource_sha256": "c548d1552725e7f20706192f5a85f0abfa56926c9511aed4fe28f11b3d8c1b0c",
+        "packed_scene_resource_path": "res://assets/storage-baseline/amethyst_stag_beetle.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "1d129d0d8fc28f6713c7a57acb168f2b",
+        "source_path": "res://assets/storage-baseline/amethyst_stag_beetle.glb",
+        "source_sha256": "502b8abb61884f32a0733043f92bd7ca2005911a9e91c48a67caee0ecc0dd620"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/amethyst_stag_beetle.glb-384a43defbb1e1f99c8adba760be3b44.md5",
+        "import_metadata_sha256": "8d5900608c027b68b39f5e818e0a17f2d0b1fea976d2e13d9ef7682dbfb2f4ea",
+        "imported_resource_path": "res://.godot/imported/amethyst_stag_beetle.glb-384a43defbb1e1f99c8adba760be3b44.scn",
+        "imported_resource_sha256": "ac7dc83ecd25762e0c10e5e1987c28e442f91990f1c254e78bee8b884d398635",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/amethyst_stag_beetle.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "ff99fd1f62ba8c9442b69ecf19b7ced9",
+        "source_path": "res://assets/actors/native/creatures/amethyst_stag_beetle.glb",
+        "source_sha256": "96c1b31f29dad4e83a46db1922452c6271eb62c05e99dcaaf34b06e03274d7ae"
+      }
+    ]
+  },
+  "existing_family_playback": {
+    "actors": {
+      "amethyst_stag_beetle": {
+        "candidate_sha256": "96c1b31f29dad4e83a46db1922452c6271eb62c05e99dcaaf34b06e03274d7ae",
+        "clips": [
+          {
+            "attack_switch_error": 0.0,
+            "clip": "Idle_A",
+            "duration_seconds": 2.5,
+            "finite": true,
+            "idle_restore_error": 0.0,
+            "independent_glb_world_max_error": 6.60037005606462e-07,
+            "independent_surface_max_error": 1.50330197357107e-05,
+            "independent_surface_normal_max_error": 9.99083931674249e-05,
+            "morph_error": 0.0,
+            "native_import_max_error": 3.53882967374375e-07,
+            "terminal_hold_error": 0.0
+          },
+          {
+            "attack_switch_error": 0.0,
+            "clip": "Fighting_Idle",
+            "duration_seconds": 1.70000004768372,
+            "finite": true,
+            "idle_restore_error": 0.0,
+            "independent_glb_world_max_error": 5.40827716055681e-07,
+            "independent_surface_max_error": 1.50585501614842e-05,
+            "independent_surface_normal_max_error": 9.99083931674249e-05,
+            "morph_error": 0.0,
+            "native_import_max_error": 3.76972877802473e-07,
+            "terminal_hold_error": 0.0
+          },
+          {
+            "attack_switch_error": 0.0,
+            "clip": "Hit_Chest",
+            "duration_seconds": 0.699999988079071,
+            "finite": true,
+            "idle_restore_error": 0.0,
+            "independent_glb_world_max_error": 7.6132365389725e-07,
+            "independent_surface_max_error": 1.54124118125765e-05,
+            "independent_surface_normal_max_error": 9.99944459181279e-05,
+            "morph_error": 0.0,
+            "native_import_max_error": 3.76972877802473e-07,
+            "terminal_hold_error": 0.0
+          },
+          {
+            "attack_switch_error": 0.0,
+            "clip": "Death_A",
+            "duration_seconds": 3.0,
+            "finite": true,
+            "idle_restore_error": 0.0,
+            "independent_glb_world_max_error": 5.92009718025643e-07,
+            "independent_surface_max_error": 1.50786790982238e-05,
+            "independent_surface_normal_max_error": 9.99597759800963e-05,
+            "morph_error": 0.0,
+            "native_import_max_error": 3.68634374581234e-07,
+            "terminal_hold_error": 0.0
+          },
+          {
+            "attack_switch_error": 0.0,
+            "clip": "Sword_Attack",
+            "duration_seconds": 1.39999997615814,
+            "finite": true,
+            "idle_restore_error": 0.0,
+            "independent_glb_world_max_error": 7.69211925377711e-07,
+            "independent_surface_max_error": 1.51841295519262e-05,
+            "independent_surface_normal_max_error": 0.000100211356766522,
+            "morph_error": 0.0,
+            "native_import_max_error": 3.20980831247653e-07,
+            "terminal_hold_error": 0.0
+          },
+          {
+            "attack_switch_error": 0.0,
+            "clip": "Walk",
+            "duration_seconds": 1.14999997615814,
+            "finite": true,
+            "idle_restore_error": 0.0,
+            "independent_glb_world_max_error": 6.60037005606462e-07,
+            "independent_surface_max_error": 1.53726832650136e-05,
+            "independent_surface_normal_max_error": 9.99230614979751e-05,
+            "morph_error": 0.0,
+            "native_import_max_error": 3.76972877802473e-07,
+            "terminal_hold_error": 0.0
+          },
+          {
+            "attack_switch_error": 0.0,
+            "clip": "Jog",
+            "duration_seconds": 0.720000028610229,
+            "finite": true,
+            "idle_restore_error": 0.0,
+            "independent_glb_world_max_error": 3.49552289452548e-06,
+            "independent_surface_max_error": 1.53513210534584e-05,
+            "independent_surface_normal_max_error": 9.99083931674249e-05,
+            "morph_error": 0.0,
+            "native_import_max_error": 3.11145385012424e-07,
+            "terminal_hold_error": 0.0
+          }
+        ],
+        "engine": {
+          "build": "official",
+          "hash": "ed1daf0bf001b61586d9930840f2f1394092c079",
+          "hex": 263938,
+          "major": 4,
+          "minor": 7,
+          "patch": 2,
+          "status": "stable",
+          "string": "4.7.2-stable (official)",
+          "timestamp": 0
+        },
+        "failures": [],
+        "max_source_nonzero_influences": 2.0,
+        "passed": true,
+        "preservation_note": "All available native clips checked against independent GLB bone, surface and normal witnesses. Original flight preservation and deliberate ground-surface repairs are qualified separately.",
+        "requires_skin_packing": false,
+        "scope": "Installed draft baseline with actor-specific action map and every native clip; current client component integration.",
+        "skin_influences": [
+          4
+        ],
+        "source_skin_slots": 4.0
+      }
+    },
+    "engine": {
+      "build": "official",
+      "hash": "ed1daf0bf001b61586d9930840f2f1394092c079",
+      "hex": 263938,
+      "major": 4,
+      "minor": 7,
+      "patch": 2,
+      "status": "stable",
+      "string": "4.7.2-stable (official)",
+      "timestamp": 0
+    },
+    "failures": [],
+    "passed": true,
+    "scope": "Completed creature draft baseline, installed registry/maps, independent off-grid surfaces, normals and bones, loops, one-shot holds, action switches and RESET; all available native slots."
+  },
+  "actor_placement": {
+    "passed": true,
+    "placements": [
+      {
+        "body_bounds_position": [
+          -1.18451857566834,
+          -2.61562354353373e-06,
+          -1.40388035774231
+        ],
+        "body_bounds_size": [
+          2.36903738975525,
+          1.70000457763672,
+          2.80776143074036
+        ],
+        "model_global": [
+          [
+            0.5,
+            2.61562354353373e-06,
+            -0.5
+          ],
+          [
+            -0.352941989898682,
+            0.0,
+            3.08551690864078e-08
+          ],
+          [
+            0.0,
+            0.352941989898682,
+            0.0
+          ],
+          [
+            -3.08551690864078e-08,
+            0.0,
+            -0.352941989898682
+          ]
+        ],
+        "name": "baseline",
+        "nameplate_global": [
+          0.5,
+          1.20000469684601,
+          -0.5
+        ],
+        "overhead_height": 0.60000467300415,
+        "selection_size": [
+          1.38999998569489,
+          9.99999974737875e-06,
+          1.38999998569489
+        ],
+        "sha256": "502b8abb61884f32a0733043f92bd7ca2005911a9e91c48a67caee0ecc0dd620"
+      },
+      {
+        "body_bounds_position": [
+          -1.18451857566834,
+          -2.61562354353373e-06,
+          -1.40388035774231
+        ],
+        "body_bounds_size": [
+          2.36903738975525,
+          1.70000457763672,
+          2.80776143074036
+        ],
+        "model_global": [
+          [
+            0.5,
+            2.61562354353373e-06,
+            -0.5
+          ],
+          [
+            -0.352941989898682,
+            0.0,
+            3.08551690864078e-08
+          ],
+          [
+            0.0,
+            0.352941989898682,
+            0.0
+          ],
+          [
+            -3.08551690864078e-08,
+            0.0,
+            -0.352941989898682
+          ]
+        ],
+        "name": "candidate",
+        "nameplate_global": [
+          0.5,
+          1.20000469684601,
+          -0.5
+        ],
+        "overhead_height": 0.60000467300415,
+        "selection_size": [
+          1.38999998569489,
+          9.99999974737875e-06,
+          1.38999998569489
+        ],
+        "sha256": "96c1b31f29dad4e83a46db1922452c6271eb62c05e99dcaaf34b06e03274d7ae"
+      }
+    ]
+  },
+  "actual_actor_render": {
+    "source_sha256": "502b8abb61884f32a0733043f92bd7ca2005911a9e91c48a67caee0ecc0dd620",
+    "candidate_sha256": "96c1b31f29dad4e83a46db1922452c6271eb62c05e99dcaaf34b06e03274d7ae",
+    "image_pairs": 389,
+    "width": 512,
+    "height": 512,
+    "different_image_pairs": 3,
+    "maximum_different_pixels": 15,
+    "maximum_pixels_above_two_levels": 0,
+    "maximum_mean_channel_error": 1.9073486328125e-05,
+    "maximum_channel_error": 1,
+    "scope": "Complete ReplicatedActor3D setup with actual display scale, grounding and body materials; identical cameras for source/candidate, four views and every full native cycle at24Hz. Numeric playback and pixel comparisons are separate reports.",
+    "framing_passed": true,
+    "clipped_frame_labels": [],
+    "maximum_border_foreground_pixels": 0
+  },
+  "death_dissolve_gpu": {
+    "effective_scale": 0.352941989898682,
+    "failures": [],
+    "gpu": "NVIDIA GeForce RTX 5080 Laptop GPU",
+    "max_color_error": 0.0,
+    "max_custom_error": 0.0,
+    "max_dissolve_bounds_error": 2.98023223876953e-08,
+    "max_fragment_transform_error": 1.20655712976259e-07,
+    "max_grain_error": 0.0,
+    "max_silhouette_position_error": 9.21585936453084e-08,
+    "mounted": {},
+    "passed": true,
+    "renderer": "forward_plus",
+    "runtime_sha256": "96c1b31f29dad4e83a46db1922452c6271eb62c05e99dcaaf34b06e03274d7ae",
+    "seeded_cases": 15,
+    "source_sha256": "502b8abb61884f32a0733043f92bd7ca2005911a9e91c48a67caee0ecc0dd620"
+  },
+  "death_dissolve_render": {
+    "source_sha256": "502b8abb61884f32a0733043f92bd7ca2005911a9e91c48a67caee0ecc0dd620",
+    "candidate_sha256": "96c1b31f29dad4e83a46db1922452c6271eb62c05e99dcaaf34b06e03274d7ae",
+    "image_pairs": 30,
+    "width": 640,
+    "height": 640,
+    "different_image_pairs": 1,
+    "maximum_different_pixels": 1,
+    "maximum_pixels_above_two_levels": 0,
+    "maximum_mean_channel_error": 8.138020833333334e-07,
+    "maximum_channel_error": 1,
+    "scope": "Complete Actor death dissolve, source/candidate both at preview origin and actual species scale/materials. Three Death_A poses, five fade progresses, two views, fixed seed42. Full pose/skin/resources and15seeded cases recorded separately.",
+    "framing_passed": true,
+    "clipped_frame_labels": [],
+    "maximum_border_foreground_pixels": 0
+  },
+  "import_scale": 0.176471,
+  "actual_actor_display_scale": 0.3529419898986833,
+  "strict_actual_import_numeric_budget": {
+    "actor": "amethyst_stag_beetle",
+    "source_sha256": "502b8abb61884f32a0733043f92bd7ca2005911a9e91c48a67caee0ecc0dd620",
+    "candidate_sha256": "96c1b31f29dad4e83a46db1922452c6271eb62c05e99dcaaf34b06e03274d7ae",
+    "passed": true,
+    "source_rest_largest_axis_extent": 2.8077614879152986,
+    "source_extent_float32_ulp": 2.384185791015625e-07,
+    "position_budget": 9.5367431640625e-07,
+    "normal_angle_budget_degrees": 0.0001,
+    "checks": {
+      "native": {
+        "maximum_position_error": 1.224942599900321e-07,
+        "maximum_normal_angle_degrees": 7.963470424126384e-06,
+        "passed": true
+      },
+      "imported": {
+        "maximum_position_error": 1.224942599900321e-07,
+        "maximum_normal_angle_degrees": 7.963470424126384e-06,
+        "passed": true
+      }
+    },
+    "scope": "Unchanged source-size-dependent4float32ULP Euclidean/.0001degree caps. Native original proof retained; editor pair now explicitly loads BOTH fresh ResourceLoader SCNs, bound to canonical GLB/SCN/sourceMD5/freshness metadata hashes. Earlier Cache-route editor labels withdrawn.",
+    "actual_editor_resource_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/amethyst_stag_beetle.glb-352274ea6334105c0635dddeaac5eabd.md5",
+        "import_metadata_sha256": "8bc3f5d1e5129f82202f585e385f8405f91e0dbb0d18775209fd6d95d8da99f2",
+        "imported_resource_path": "res://.godot/imported/amethyst_stag_beetle.glb-352274ea6334105c0635dddeaac5eabd.scn",
+        "imported_resource_sha256": "c548d1552725e7f20706192f5a85f0abfa56926c9511aed4fe28f11b3d8c1b0c",
+        "packed_scene_resource_path": "res://assets/storage-baseline/amethyst_stag_beetle.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "1d129d0d8fc28f6713c7a57acb168f2b",
+        "source_path": "res://assets/storage-baseline/amethyst_stag_beetle.glb",
+        "source_sha256": "502b8abb61884f32a0733043f92bd7ca2005911a9e91c48a67caee0ecc0dd620"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/amethyst_stag_beetle.glb-384a43defbb1e1f99c8adba760be3b44.md5",
+        "import_metadata_sha256": "8d5900608c027b68b39f5e818e0a17f2d0b1fea976d2e13d9ef7682dbfb2f4ea",
+        "imported_resource_path": "res://.godot/imported/amethyst_stag_beetle.glb-384a43defbb1e1f99c8adba760be3b44.scn",
+        "imported_resource_sha256": "ac7dc83ecd25762e0c10e5e1987c28e442f91990f1c254e78bee8b884d398635",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/amethyst_stag_beetle.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "ff99fd1f62ba8c9442b69ecf19b7ced9",
+        "source_path": "res://assets/actors/native/creatures/amethyst_stag_beetle.glb",
+        "source_sha256": "96c1b31f29dad4e83a46db1922452c6271eb62c05e99dcaaf34b06e03274d7ae"
+      }
+    ]
+  },
+  "death_dissolve_source_framing": {
+    "actor": "amethyst_stag_beetle",
+    "source_sha256": "502b8abb61884f32a0733043f92bd7ca2005911a9e91c48a67caee0ecc0dd620",
+    "candidate_sha256": "96c1b31f29dad4e83a46db1922452c6271eb62c05e99dcaaf34b06e03274d7ae",
+    "passed": true,
+    "original_full_motion_bbox_all8corners_checked": true,
+    "source_actor_translation_removed": [
+      0.5,
+      0,
+      -0.5
+    ],
+    "views": [
+      {
+        "view": "game",
+        "minimum_body_bbox_pixel_border_margin": 254.88568431415058,
+        "minimum_camera_depth": 4.378910753136768,
+        "maximum_camera_depth": 5.621089246863232
+      },
+      {
+        "view": "under",
+        "minimum_body_bbox_pixel_border_margin": 234.5282892875794,
+        "minimum_camera_depth": 4.234215452496638,
+        "maximum_camera_depth": 5.765784547503363
+      }
+    ],
+    "scope": "All8corners of original full-motion actualActor fit after exact preview translation, both640square orthographic FX cameras, near/far planes and minimum2pixel margin. Actual source/candidate fade PNG foreground borders remain a separate required post-capture check."
+  },
+  "actual_editor_mode_correction": {
+    "passed": true,
+    "source_sha256": "502b8abb61884f32a0733043f92bd7ca2005911a9e91c48a67caee0ecc0dd620",
+    "candidate_sha256": "96c1b31f29dad4e83a46db1922452c6271eb62c05e99dcaaf34b06e03274d7ae",
+    "prior_cache_route_editor_comparison_labels_withdrawn": true,
+    "previous_public_receipt_sha256": "c49ae54a5e5f21f684823be025351210e40e5efd176db76b13761e812acc3408",
+    "source_and_current_actual_editor_load_proofs": [
+      {
+        "name": "baseline",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/amethyst_stag_beetle.glb-352274ea6334105c0635dddeaac5eabd.md5",
+        "import_metadata_sha256": "8bc3f5d1e5129f82202f585e385f8405f91e0dbb0d18775209fd6d95d8da99f2",
+        "imported_resource_path": "res://.godot/imported/amethyst_stag_beetle.glb-352274ea6334105c0635dddeaac5eabd.scn",
+        "imported_resource_sha256": "c548d1552725e7f20706192f5a85f0abfa56926c9511aed4fe28f11b3d8c1b0c",
+        "packed_scene_resource_path": "res://assets/storage-baseline/amethyst_stag_beetle.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "1d129d0d8fc28f6713c7a57acb168f2b",
+        "source_path": "res://assets/storage-baseline/amethyst_stag_beetle.glb",
+        "source_sha256": "502b8abb61884f32a0733043f92bd7ca2005911a9e91c48a67caee0ecc0dd620"
+      },
+      {
+        "name": "candidate",
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/amethyst_stag_beetle.glb-384a43defbb1e1f99c8adba760be3b44.md5",
+        "import_metadata_sha256": "8d5900608c027b68b39f5e818e0a17f2d0b1fea976d2e13d9ef7682dbfb2f4ea",
+        "imported_resource_path": "res://.godot/imported/amethyst_stag_beetle.glb-384a43defbb1e1f99c8adba760be3b44.scn",
+        "imported_resource_sha256": "ac7dc83ecd25762e0c10e5e1987c28e442f91990f1c254e78bee8b884d398635",
+        "packed_scene_resource_path": "res://assets/actors/native/creatures/amethyst_stag_beetle.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "ff99fd1f62ba8c9442b69ecf19b7ced9",
+        "source_path": "res://assets/actors/native/creatures/amethyst_stag_beetle.glb",
+        "source_sha256": "96c1b31f29dad4e83a46db1922452c6271eb62c05e99dcaaf34b06e03274d7ae"
+      }
+    ],
+    "source_size_position_budget": 9.5367431640625e-07,
+    "maximum_position_error": 1.224942599900321e-07,
+    "normal_angle_budget_degrees": 0.0001,
+    "maximum_normal_angle_degrees": 7.963470424126384e-06,
+    "all_typed_static_attributes_retained_morph_PNT_oriented_triangles_material_storage_and_texture_mips_identical": true,
+    "independent_complete_editor_vertex_and_oriented_triangle_payload_multisets_identical": true,
+    "independent_payload_source_retained_column_mapping": "No partitions. Exact preparation retained indices independently checked against raw authored POSITION/NORMAL/TANGENT accessor bits; no raw vertex ordinal or arbitrary coincident-ID assumption.",
+    "numeric_static_material_SCNs_identical": true,
+    "numeric_report_sha256": "f91f3ed2f6326ac5b0e8e280e01b9ed68c2ddeed6956c9d4c31ac71682f4dda1",
+    "static_report_sha256": "1f2a97c7afed1c84e526ad4a66cb66702257bd7c2efab4ce5f917abd27ee9a1f",
+    "direct_payload_report_sha256": "d36562165b2a422ef1a8b285ce52edc2b6a98b8901839e3fd1dc76abbc8d0666",
+    "material_report_sha256": "3815e03e42b9cbf0003ca0e392129abaeb2363df26f1ff4d093fd5989ab9aecd",
+    "loader_guard": "Public dump_creature_storage.gd explicit ResourceLoader imported branch; scene policy/current-source MD5/cache destination MD5 where single destination, source/SCN/freshness metadata SHA-bound.",
+    "scope": "Corrected matched actualEditor source/current comparison. Prior raw-Cache-source versus editor-current comparison labels are withdrawn; prior source/native/Blender/fullbody/seededFX/render evidence unchanged. All original caps and frozen source observations unchanged. Complete typed static attributes, retained morph P/N/T and oriented triangle payloads match. Material typed storage and texture pixels/mips match; generated distant LOD identity is not claimed."
+  }
+}

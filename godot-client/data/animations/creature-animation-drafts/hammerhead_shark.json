@@ -73,12 +73,44 @@
     "walk": 1.6306822204300546,
     "run": 4.716798038515288
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "A streamlined, level patrol driven by a smooth lateral wave increasing toward the caudal fin. The hammer-shaped head stays forward and steady, with small pectoral steering adjustments. Faster travel strengthens the tail stroke and cadence rather than bouncing the trunk.",
     "attack": "A short rearward load and strong forward torpedo lunge, with a small downward catch of the broad head and restrained recovery. The source has no independent jaw control, so no fabricated jaw opening is used.",
     "death": "Tail propulsion fades as the animal drifts forward and lowers onto separate belly, pelvic and broad chin supports. Pectoral and small ventral fins release clear of the bottom, with a stable forward rest rather than an axial roll."
   },
   "motionStyle": "buoyant lateral-tail swimming",
-  "locomotionMode": "swimming"
+  "locomotionMode": "swimming",
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "hammerhead_shark",
+    "sourceSHA256": "16e19c9c5c66c284b8dea4712aa923fed773e9ab52a408ab8bf62f17c6f62dcd",
+    "previousRuntimeSHA256": "5fc26cd1d80e44e9a0514defd26f79e4055ec15da52a1fd72debcc944c2f86c8",
+    "runtimeSHA256": "5378606197985ee6d1d14341dbc11b04e844596aa87b559244da3d2857537959",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/runtime-delivery.json",
+      "actor": "hammerhead_shark",
+      "sourceSHA256": "16e19c9c5c66c284b8dea4712aa923fed773e9ab52a408ab8bf62f17c6f62dcd",
+      "runtimeSHA256": "5fc26cd1d80e44e9a0514defd26f79e4055ec15da52a1fd72debcc944c2f86c8",
+      "method": "close_match_animation_resampling",
+      "bakeFPS": 240,
+      "artisticAcceptanceChanged": false
+    }
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "hammerhead_shark",
+    "appliesToSHA256": "5378606197985ee6d1d14341dbc11b04e844596aa87b559244da3d2857537959",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "saved_button_approval",
+      "event_id": "f3052376-897f-4afe-aec8-6dee00105a31",
+      "event_sha256": "75565c7f1830d0e8d885d38e19f02f68864f21374e0fa47a1c9e2358f5c1264a",
+      "utc": "2026-10-28T21:14:26.352913+00:00"
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
+  }
 }

@@ -1,0 +1,206 @@
+{
+  "schema": 1,
+  "actor": "magpie",
+  "status": "rejected_optional_experiment_not_installed",
+  "selected_for_approval_catalog": false,
+  "decision": "Retain the zero-corrective baseline for review; do not offer this helper variant.",
+  "reason": "Four helpers improved isolated clip fits but increased independent crossfade error and file size. The all-state position RMS also increased.",
+  "tool": "eloria-assets/tools/add_creature_bake_helpers.py",
+  "tool_commit": "5507ebe0abbb407ac40b9bf6c7253bfa0c5e4d6b",
+  "implementation_sha256": "750d20f91bd76bbb70ac9b9128074b8250a72422fb2f3de87ad1aacfd0d8268d",
+  "fitter_implementation_sha256": "c8d43acfcf4ea9283f2253a4da07db1f575f7c2a9d6cfac609abd6dea11c6015",
+  "inputs": {
+    "frozen_original": {
+      "sha256": "d9081c27122de9a0aaf860515da5f72bae9e71b62fed12ff8e813ffe742912c7",
+      "raw_bytes": 75446524
+    },
+    "explicit_30_hz_reference": {
+      "sha256": "6a8f3caa94ce58be67830dad5ced37069e1700385587df6b3fa919cf3f6afe84",
+      "raw_bytes": 62751788
+    },
+    "zero_corrective_baseline": {
+      "sha256": "232c9f0f116c0078b8bd0589f2ef3c5d18f72265810918e9dbb146d5d018f93c",
+      "raw_bytes": 695000
+    }
+  },
+  "candidate": {
+    "sha256": "bddc90efdc236d8c0c41cdb31fb2ef9a700d2ed6c7ecbbc528af406ac158a25f",
+    "raw_bytes": 767972,
+    "added_bytes": 72972,
+    "added_bones": 4,
+    "added_curve_keys": 2136,
+    "corrective_targets": 0,
+    "modified_patch_vertices": [
+      44,
+      42,
+      15,
+      22
+    ]
+  },
+  "units": "Native-convention source world units after authored transforms, before client import/gameplay scale; not client millimetres.",
+  "source_native_y_height": 0.4873049437417396,
+  "independent_measurements": {
+    "all": {
+      "before": {
+        "maximum_position_source_units": 0.18022544646843072,
+        "rms_position_source_units": 0.0109014010513488,
+        "maximum_position_over_height": 0.36984120268631226,
+        "rms_position_over_height": 0.022370799211768908,
+        "maximum_normal_degrees": 179.61968481800565,
+        "rms_normal_degrees": 15.306526710052918
+      },
+      "after": {
+        "maximum_position_source_units": 0.19041487520159703,
+        "rms_position_source_units": 0.010940492913420788,
+        "maximum_position_over_height": 0.39075096127592857,
+        "rms_position_over_height": 0.022451019744258942,
+        "maximum_normal_degrees": 179.61968481800565,
+        "rms_normal_degrees": 15.323744732451699
+      }
+    },
+    "off_grid": {
+      "before": {
+        "maximum_position_source_units": 0.09866185273011524,
+        "rms_position_source_units": 0.00906253213379806,
+        "maximum_position_over_height": 0.20246429673490804,
+        "rms_position_over_height": 0.01859725055159915,
+        "maximum_normal_degrees": 179.61968481800565,
+        "rms_normal_degrees": 16.476677898404166
+      },
+      "after": {
+        "maximum_position_source_units": 0.07335279556438452,
+        "rms_position_source_units": 0.008336020606479349,
+        "maximum_position_over_height": 0.15052750132422177,
+        "rms_position_over_height": 0.0171063739728798,
+        "maximum_normal_degrees": 179.61968481800565,
+        "rms_normal_degrees": 16.49168863609054
+      }
+    },
+    "crossfade": {
+      "before": {
+        "maximum_position_source_units": 0.18022544646843072,
+        "rms_position_source_units": 0.01440392740136336,
+        "maximum_position_over_height": 0.36984120268631226,
+        "rms_position_over_height": 0.029558344495263542,
+        "maximum_normal_degrees": 178.4233864680709,
+        "rms_normal_degrees": 12.862427460326032
+      },
+      "after": {
+        "maximum_position_source_units": 0.19041487520159703,
+        "rms_position_source_units": 0.015475175214260194,
+        "maximum_position_over_height": 0.39075096127592857,
+        "rms_position_over_height": 0.03175665548441815,
+        "maximum_normal_degrees": 178.4233864680709,
+        "rms_normal_degrees": 12.887048216505109
+      }
+    },
+    "neutral": {
+      "before": {
+        "maximum_position_source_units": 0.014619168245541755,
+        "rms_position_source_units": 0.007411583461056943,
+        "maximum_position_over_height": 0.0300000409051659,
+        "rms_position_over_height": 0.015209333613871381,
+        "maximum_normal_degrees": 11.497744353089384,
+        "rms_normal_degrees": 2.5356023033617787
+      },
+      "after": {
+        "maximum_position_source_units": 0.014619164566377265,
+        "rms_position_source_units": 0.007004240332277732,
+        "maximum_position_over_height": 0.030000033355140936,
+        "rms_position_over_height": 0.01437342350458447,
+        "maximum_normal_degrees": 11.497744353089384,
+        "rms_normal_degrees": 2.5384053618041427
+      }
+    },
+    "step_boundary": {
+      "before": {
+        "maximum_position_source_units": 0.019041069572619307,
+        "rms_position_source_units": 0.007240503651542426,
+        "maximum_position_over_height": 0.039074238456137306,
+        "rms_position_over_height": 0.01485826020139809,
+        "maximum_normal_degrees": 15.101112717266123,
+        "rms_normal_degrees": 2.8759551045484733
+      },
+      "after": {
+        "maximum_position_source_units": 0.019367383932363424,
+        "rms_position_source_units": 0.007019429737860472,
+        "maximum_position_over_height": 0.03974386917491995,
+        "rms_position_over_height": 0.01440459373131377,
+        "maximum_normal_degrees": 15.101112717266123,
+        "rms_normal_degrees": 2.8906076776433878
+      }
+    }
+  },
+  "preservation": {
+    "inputs_unchanged": true,
+    "original_prefix_nodes": 19,
+    "maximum_original_world_matrix_error": 0.0,
+    "maximum_original_rest_matrix_error": 0.0,
+    "original_bone_curve_arrays_bit_exact": true,
+    "original_skin_resources_retained": true,
+    "identity_mapped_vertices": 4414,
+    "position_uv_indices_materials_images_logical_bounds_preserved": true,
+    "unselected_attributes_preserved": true,
+    "certified_seam_groups_verified": 1419,
+    "four_or_eight_influence_budget_retained": true,
+    "all_original_clips_retained": true,
+    "helper_trs_tracks_explicit_in_every_clip": true,
+    "neutral_helper_defaults_explicit": true,
+    "identity_scene_wrapper_added": true
+  },
+  "method": {
+    "controls": "Independent proper rigid Kabsch world controls under a static identity scene wrapper; no helper scale/shear fitting.",
+    "patches": "Original dominant joint, triangle connectivity and rest proximity; certified trajectory-equivalent seam groups share control/weight. Uncertified contacts are excluded conservatively.",
+    "weights": "Nonnegative bounded helper weight; retain original four/eight slot budget.",
+    "directions": "Separate fixed normal/tangent fitting after position controls.",
+    "helper_keys": "At most 30 Hz; only bit-constant newly authored tracks may collapse. Original bone keys retained.",
+    "acceptance_threshold_assumed": null
+  },
+  "synthetic_feasibility": {
+    "tests_passed": 4,
+    "cases": [
+      "Four-influence placed nonuniform animated parent and UV/hard-normal seam",
+      "Eight positive original influences with retained slot budget",
+      "Mismatched original prefix rejected",
+      "No-benefit result copies the original bake exactly"
+    ],
+    "added_bones": 1,
+    "added_curve_keys": 32,
+    "added_raw_bytes": 3012,
+    "before": {
+      "maximum_position_source_units": 0.09045085310510226,
+      "rms_position_source_units": 0.025329311032374346,
+      "maximum_position_over_height": 0.5025047507046467,
+      "rms_position_over_height": 0.1407183977696032,
+      "maximum_normal_degrees": 0.0,
+      "rms_normal_degrees": 0.0
+    },
+    "after": {
+      "maximum_position_source_units": 3.8012735987789256e-06,
+      "rms_position_source_units": 9.170875124137691e-07,
+      "maximum_position_over_height": 2.1118187131911187e-05,
+      "rms_position_over_height": 5.094930738401516e-06,
+      "maximum_normal_degrees": 5.963540027744096e-16,
+      "rms_normal_degrees": 1.3364912669773262e-16
+    },
+    "maximum_original_world_matrix_error": 0.0,
+    "maximum_original_rest_matrix_error": 0.0
+  },
+  "qualification_scope": {
+    "offline_native_convention_math": true,
+    "actual_client_validated": false,
+    "runtime_reset_or_state_switching_validated": false,
+    "gpu_render_validated": false,
+    "blender_import_validated": false,
+    "artistically_approved": false,
+    "runtime_installed": false
+  },
+  "real_actors_attempted": 1,
+  "private_evidence_retained": true,
+  "limitations": [
+    "This rejected experiment is not a runtime or visual quality certificate.",
+    "Offline crossfades are local-TRS source queries, not an actual client AnimationMixer.",
+    "Mixed/multiple primitive body nodes need an explicit shell-preserving split before helper fitting.",
+    "Changed scene paths and extended skins would require actual client attachment, shell, effect and placement validation before any promotion."
+  ]
+}

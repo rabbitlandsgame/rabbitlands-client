@@ -1,0 +1,430 @@
+{
+  "schema_version": 1,
+  "batch": 14,
+  "actor": "shadow_warg",
+  "date": "2026-10-27",
+  "runtime_path": "godot-client/assets/actors/native/creatures/shadow_warg.glb",
+  "source_sha256": "2a3b84c36784ba54dedb102f436b834419e2ab82deab8c43bc5240ff3a5eed14",
+  "runtime_sha256": "4f36c28282afd5ee30a26150b39a6a74e8ae2d29052374a9c0803f2e87e7a965",
+  "qualification": "Passed exact source/continuous curves, original physical observations, paired fresh Blender poses/default, native and fresh editor-imported playback/transitions, fully fitted actual-Actor cycles/four views, seeded dissolve/silhouette/reset checks.",
+  "human_approval_changed": false,
+  "recipe": {
+    "tool": "eloria-assets/tools/pack_creature_storage.py",
+    "tool_commit": "5bdd51c3",
+    "steps": [
+      "prune_zero_targets",
+      "reduce_constant_runs",
+      "compact"
+    ],
+    "profile": null,
+    "bounds": null,
+    "preserve_trs_keys": false
+  },
+  "bytes": {
+    "source_bytes": 11491836,
+    "candidate_bytes": 9669416,
+    "source_zstd_bytes": 5064130,
+    "candidate_zstd_bytes": 5071340
+  },
+  "inactive_targets_removed": 0,
+  "flat_run_key_rows_removed": 187662,
+  "corrective_graphics_buffer_bytes": {
+    "source": 0,
+    "candidate": 0,
+    "saved": 0,
+    "scope": "Actual Godot raw blend_shape_data byte totals over all mesh surfaces; shared per loaded model."
+  },
+  "draw_surfaces": {
+    "source": 1,
+    "candidate": 1
+  },
+  "source_validation": {
+    "passed": true,
+    "source_sha256": "2a3b84c36784ba54dedb102f436b834419e2ab82deab8c43bc5240ff3a5eed14",
+    "candidate_sha256": "4f36c28282afd5ee30a26150b39a6a74e8ae2d29052374a9c0803f2e87e7a965",
+    "geometry_skin_binds_rest_topology_uv_material_image_bits_preserved": true,
+    "retained_key_time_and_value_bits_exact_only_flat_interiors_removed": true,
+    "every_removed_default_and_key_is_zero": true,
+    "redundant_flat_key_rows_proved": 187662,
+    "preexisting_duplicate_property_curves_preserved_in_occurrence_order": 0,
+    "meshes": [],
+    "clips": {
+      "Walk": {
+        "original_knots": 1717,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 3438
+      },
+      "Jog": {
+        "original_knots": 1015,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 2034
+      },
+      "Sword_Attack": {
+        "original_knots": 2455,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 4914
+      },
+      "Death_A": {
+        "original_knots": 3994,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 7992
+      },
+      "Idle_A": {
+        "original_knots": 1998,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 4000
+      },
+      "Fighting_Idle": {
+        "original_knots": 1697,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 3398
+      },
+      "Hit_Chest": {
+        "original_knots": 603,
+        "all_keys_midpoints_and_offgrid_covered_by_exact_channel_identity": 1210
+      }
+    },
+    "proof": "Zero defaults and every LINEAR/STEP key zero prove inactive targets remain zero continuously and under crossfades. All retained accessor bytes and retained time/value rows are exact. Deleted key rows sit strictly inside three bit-identical adjacent rows; plateau boundaries and endpoints remain."
+  },
+  "physical_observations": {
+    "passed": true,
+    "source_sha256": "2a3b84c36784ba54dedb102f436b834419e2ab82deab8c43bc5240ff3a5eed14",
+    "candidate_sha256": "4f36c28282afd5ee30a26150b39a6a74e8ae2d29052374a9c0803f2e87e7a965",
+    "surface_probes": 145,
+    "poses": 21,
+    "clips": 7,
+    "source_candidate_position_error": 0.0,
+    "source_candidate_normal_vector_error": 0.0,
+    "original_witness_position_error_over_height": 0.0,
+    "original_source_witness_position_error_over_height": 0.0,
+    "original_witness_normal_vector_error": 0.0,
+    "original_witness_bone_matrix_error": 0.0,
+    "witness_sha256": "1bcbe406796927d8fb384d157b1ab3a71036c7de29c5211ade09c1922ea6c9cd",
+    "sampled_motion_min": [
+      -0.5401758935392486,
+      0.003474794362286739,
+      -2.237188565401758
+    ],
+    "sampled_motion_max": [
+      1.1893237285192195,
+      1.5737205688847038,
+      1.6223077717744385
+    ]
+  },
+  "paired_fresh_blender": {
+    "maximum_position_error": 0.0,
+    "maximum_bone_matrix_error": 0.0,
+    "maximum_float32_budget": 3.814697265625e-06,
+    "poses": 22,
+    "neutral_default_checked": true,
+    "passed": true,
+    "source_sha256": "2a3b84c36784ba54dedb102f436b834419e2ab82deab8c43bc5240ff3a5eed14",
+    "candidate_sha256": "4f36c28282afd5ee30a26150b39a6a74e8ae2d29052374a9c0803f2e87e7a965",
+    "scope": "Direct source/candidate frozen-ID surfaces and every bone matrix at each original witness pose plus controlled neutral/default pose. Sixteen float32 ULPs at baseline coordinate/matrix magnitude; independent of inherited source/witness residual and separate from native/source appearance budgets."
+  },
+  "native_and_editor_imported": {
+    "native": {
+      "samples": 232,
+      "maximum_position_error": 5.540263436230451e-07,
+      "maximum_normal_angle_degrees": 2.4373704946366044e-05
+    },
+    "imported": {
+      "samples": 232,
+      "maximum_position_error": 5.540263436230451e-07,
+      "maximum_normal_angle_degrees": 2.4373704946366044e-05,
+      "actual_loader": "ResourceLoader.load(PackedScene)",
+      "authoritative_SCN_provenance": "genuine_editor_verification_revision.load_proofs"
+    }
+  },
+  "native_numeric_budget": {
+    "actor": "shadow_warg",
+    "source_coordinate_or_extent_magnitude": 3.506778149028791,
+    "four_float32_ULPs": 9.5367431640625e-07,
+    "runtime_position_error": 5.540263436230451e-07,
+    "runtime_normal_degrees": 2.4373704946366044e-05,
+    "imported_position_error": 5.540263436230451e-07,
+    "imported_normal_degrees": 2.4373704946366044e-05,
+    "normal_degrees_budget": 0.0001,
+    "scope": "Four float32 ULPs at maximum original source coordinate/extent magnitude; original source mathematical equality remains exact. Native normal screen 1e-4 degrees."
+  },
+  "placement": {
+    "passed": true,
+    "bounds_error": 0.0,
+    "placement_error": 0.0,
+    "overhead_height_error": 0.0
+  },
+  "render_fit": {
+    "source_sha256": "2a3b84c36784ba54dedb102f436b834419e2ab82deab8c43bc5240ff3a5eed14",
+    "model_global": [
+      [
+        0.5,
+        0.0374588333070278,
+        -0.115000009536743
+      ],
+      [
+        -0.805688977241516,
+        0.0,
+        7.04355684888469e-08
+      ],
+      [
+        0.0,
+        0.805688977241516,
+        0.0
+      ],
+      [
+        -7.04355684888469e-08,
+        0.0,
+        -0.805688977241516
+      ]
+    ],
+    "position": [
+      -0.5054501056748114,
+      0.04025793271840443,
+      -1.4649481964474411
+    ],
+    "size": [
+      1.523088826677634,
+      1.4350522375390458,
+      3.2749525239642754
+    ],
+    "poses": 301,
+    "scope": "Every vertex at every full-cycle render frame and view-still pose, using actual complete Actor Godot arrays/poses/weights/transforms, renderer morph cutoff and four/eight influence skin. Evaluated in float64 with a separate 30% camera margin."
+  },
+  "appearance": {
+    "source_sha256": "2a3b84c36784ba54dedb102f436b834419e2ab82deab8c43bc5240ff3a5eed14",
+    "candidate_sha256": "4f36c28282afd5ee30a26150b39a6a74e8ae2d29052374a9c0803f2e87e7a965",
+    "image_pairs": 399,
+    "width": 512,
+    "height": 512,
+    "different_image_pairs": 31,
+    "maximum_different_pixels": 39,
+    "maximum_pixels_above_two_levels": 1,
+    "maximum_mean_channel_error": 0.000339508056640625,
+    "maximum_channel_error": 79,
+    "scope": "Complete ReplicatedActor3D setup with actual display scale, grounding and body materials; identical cameras for source/candidate, four views and every full native cycle at24Hz. Numeric playback and pixel comparisons are separate reports.",
+    "framing_passed": true,
+    "clipped_frame_labels": [],
+    "maximum_border_foreground_pixels": 0
+  },
+  "secondary_effects": {
+    "effective_scale": 0.805688977241516,
+    "failures": [],
+    "gpu": "NVIDIA GeForce RTX 5080 Laptop GPU",
+    "max_color_error": 0.0,
+    "max_custom_error": 0.0,
+    "max_dissolve_bounds_error": 1.68587391158326e-07,
+    "max_fragment_transform_error": 5.59934790089756e-07,
+    "max_grain_error": 0.0,
+    "max_silhouette_position_error": 5.62309082852153e-07,
+    "mounted": {},
+    "passed": true,
+    "renderer": "forward_plus",
+    "runtime_sha256": "4f36c28282afd5ee30a26150b39a6a74e8ae2d29052374a9c0803f2e87e7a965",
+    "seeded_cases": 15,
+    "source_sha256": "2a3b84c36784ba54dedb102f436b834419e2ab82deab8c43bc5240ff3a5eed14"
+  },
+  "rig_investigation": {
+    "decision": "Original rig, skin and topology retained; this candidate uses exact storage reductions only."
+  },
+  "evidence_sha256": {
+    "qualification-job.json": "6ef37f4830924273127f35fe5260c2205da60864545e7a196a506a5c7761f551",
+    "processing.json": "47932d233d04f2e3697203944a5fe00e3fb49bcfa328418a2466de04c8f9c70f",
+    "exact-source-validation.json": "a4b1e3e9cfb4bd5bed46e972a8d5fa1b0d98d8232f292fb70f70ccbf6a4a8f4f",
+    "physical-witness-validation.json": "f28e69ed2bc61c062d5796d1de6af099abab8db4dec76f9c603c881f5d009c58",
+    "blender-validation.json": "c1761ea1a3e737ce2c98b9665f84cfe67e24d886c704ac68788514b9d2016de8",
+    "blender-direct-validation.json": "caf69fd404082597c2000084c2bbcdc8289b3a220f15359d16b39c64c9991e58",
+    "native-validation.json": "afa2433985e933e872e283f3415f3baaefacbd00014175a0d9c2f4988a979b91",
+    "imported-validation.json": "afa2433985e933e872e283f3415f3baaefacbd00014175a0d9c2f4988a979b91",
+    "render-fit.json": "b73a9f66b6c4d040243b3843d48e1801111eff0fb8c93116644e8703a3b63ff6",
+    "placement.json": "ed74a189fd41facbff27ccd4d0df86c86bda299333349404a83a7c83b5926e86",
+    "effects-validation.json": "c0bc5b30854ac223a13b732af3199a6b286a899d5444d26c27b4cb7ba670b4df",
+    "actual-render/render.json": "23776d855e7fd701bf38077d667bebec8b75870916347fa59bdd7b94dccb6e96",
+    "actual-render/pixel-comparison.json": "d471e9aa2a55b3060956f389e0c3fd59c9ed3c89cc2f27479ea25241c4b83f4c"
+  },
+  "visual_review": "Paired normal contact boards and complete native-cycle previews reviewed. Every four-view/full-cycle frame has zero foreground pixels in its border two pixels wide.",
+  "known_limitations": [
+    "Separate resident RAM and frame-time benchmarks were not measured.",
+    "Encoded animation-key savings describe raw files, logical source accessors and import parsing input only. Native importing may densely rebake identical generated Animation keys; no runtime Animation RAM, key-search or playback CPU saving is claimed.",
+    "Original artistic review/approval status is unchanged.",
+    "Compressed shipping data increases by 7210 bytes despite smaller decoded GLB. This tradeoff is explicit; no unmeasured runtime-memory saving offsets it in this receipt."
+  ],
+  "genuine_editor_verification_revision": {
+    "status": "Corrected independent actual Editor verification passed within applicable unchanged modern or legacy scope",
+    "date": "2026-10-28",
+    "source_original_sha256": "2a3b84c36784ba54dedb102f436b834419e2ab82deab8c43bc5240ff3a5eed14",
+    "current_canonical_sha256": "4f36c28282afd5ee30a26150b39a6a74e8ae2d29052374a9c0803f2e87e7a965",
+    "loader": "ResourceLoader.load(PackedScene)",
+    "load_proofs": [
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/shadow_warg.glb-e7e8d053577632164947dfc92ff95a76.md5",
+        "import_metadata_sha256": "342c35cf14986bc3b398aa7d07135039a9523a5cfbf1df381129f0381a1772a1",
+        "imported_resource_path": "res://.godot/imported/shadow_warg.glb-e7e8d053577632164947dfc92ff95a76.scn",
+        "imported_resource_sha256": "18c97f8fc5e2b17fc94a7961382bbdf9cbb557c5cef648f893533b638194ed2b",
+        "packed_scene_resource_path": "res://assets/qa/shadow_warg/v2/baseline/shadow_warg.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "6d530d351cd0f153b87214e0b9d1808d",
+        "source_path": "res://assets/qa/shadow_warg/v2/baseline/shadow_warg.glb",
+        "source_sha256": "2a3b84c36784ba54dedb102f436b834419e2ab82deab8c43bc5240ff3a5eed14"
+      },
+      {
+        "actual_loader": "ResourceLoader.load(PackedScene)",
+        "import_metadata_path": "res://.godot/imported/shadow_warg.glb-0cd0ba34ca86a4fe1ceb5222bec445bd.md5",
+        "import_metadata_sha256": "33c7beff8a380d999ef34b0ee864e01e8d7beb15c9a03bdef2c506e75ed7513d",
+        "imported_resource_path": "res://.godot/imported/shadow_warg.glb-0cd0ba34ca86a4fe1ceb5222bec445bd.scn",
+        "imported_resource_sha256": "457586174ea43231ea410cdda6422a83db4d5f0de390660f4695594c95b8589e",
+        "packed_scene_resource_path": "res://assets/qa/shadow_warg/v2/candidate/shadow_warg.glb",
+        "single_scene_destination_md5_checked": true,
+        "source_md5": "cd881d703bb159ab753094e9e9521987",
+        "source_path": "res://assets/qa/shadow_warg/v2/candidate/shadow_warg.glb",
+        "source_sha256": "4f36c28282afd5ee30a26150b39a6a74e8ae2d29052374a9c0803f2e87e7a965"
+      }
+    ],
+    "source_aliases_and_SCNs_have_current_source_and_destination_MD5_freshness": true,
+    "numeric": {
+      "poses": 232,
+      "all_source_clips": [
+        "Walk",
+        "Jog",
+        "Sword_Attack",
+        "Death_A",
+        "Idle_A",
+        "Fighting_Idle",
+        "Hit_Chest"
+      ],
+      "RESET_checked": true,
+      "maximum_Euclidean_position_error_source_units": 5.540263436230451e-07,
+      "maximum_normal_angle_degrees": 2.4373704946366044e-05
+    },
+    "applicable_quality_budget": {
+      "position_four_float32_ULPs": 9.5367431640625e-07,
+      "source_coordinate_or_rest_axis_extent_magnitude": 3.506778149028791,
+      "normal_degrees": 0.0001,
+      "both_passed": true
+    },
+    "full_typed_static_attributes_material_storage_texture_pixels_and_mips": {
+      "actor": "shadow_warg",
+      "source_sha256": "2a3b84c36784ba54dedb102f436b834419e2ab82deab8c43bc5240ff3a5eed14",
+      "candidate_sha256": "4f36c28282afd5ee30a26150b39a6a74e8ae2d29052374a9c0803f2e87e7a965",
+      "surfaces": [
+        {
+          "all_typed_arrays": [
+            {
+              "slot": 0,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 1,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 2,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 4,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 10,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 11,
+              "exact_after_proven_vertex_bijection": true
+            },
+            {
+              "slot": 12,
+              "exact_after_proven_vertex_bijection": true
+            }
+          ],
+          "full_material_storage_fields_and_texture_pixels_mips_exact": true,
+          "format_exact": true,
+          "lods": [
+            {
+              "lod": 0,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            },
+            {
+              "lod": 1,
+              "triangles_exact": true,
+              "edge_delta": 0.0
+            }
+          ],
+          "bounds_component_max_delta": 0.0,
+          "lod_capture_present": true
+        }
+      ],
+      "passed": true,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/shadow_warg.glb-e7e8d053577632164947dfc92ff95a76.md5",
+          "import_metadata_sha256": "342c35cf14986bc3b398aa7d07135039a9523a5cfbf1df381129f0381a1772a1",
+          "imported_resource_path": "res://.godot/imported/shadow_warg.glb-e7e8d053577632164947dfc92ff95a76.scn",
+          "imported_resource_sha256": "18c97f8fc5e2b17fc94a7961382bbdf9cbb557c5cef648f893533b638194ed2b",
+          "packed_scene_resource_path": "res://assets/qa/shadow_warg/v2/baseline/shadow_warg.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "6d530d351cd0f153b87214e0b9d1808d",
+          "source_path": "res://assets/qa/shadow_warg/v2/baseline/shadow_warg.glb",
+          "source_sha256": "2a3b84c36784ba54dedb102f436b834419e2ab82deab8c43bc5240ff3a5eed14"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/shadow_warg.glb-0cd0ba34ca86a4fe1ceb5222bec445bd.md5",
+          "import_metadata_sha256": "33c7beff8a380d999ef34b0ee864e01e8d7beb15c9a03bdef2c506e75ed7513d",
+          "imported_resource_path": "res://.godot/imported/shadow_warg.glb-0cd0ba34ca86a4fe1ceb5222bec445bd.scn",
+          "imported_resource_sha256": "457586174ea43231ea410cdda6422a83db4d5f0de390660f4695594c95b8589e",
+          "packed_scene_resource_path": "res://assets/qa/shadow_warg/v2/candidate/shadow_warg.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "cd881d703bb159ab753094e9e9521987",
+          "source_path": "res://assets/qa/shadow_warg/v2/candidate/shadow_warg.glb",
+          "source_sha256": "4f36c28282afd5ee30a26150b39a6a74e8ae2d29052374a9c0803f2e87e7a965"
+        }
+      ]
+    },
+    "retained_Editor_morph_fields": {
+      "actor": "shadow_warg",
+      "source_sha256": "2a3b84c36784ba54dedb102f436b834419e2ab82deab8c43bc5240ff3a5eed14",
+      "candidate_sha256": "4f36c28282afd5ee30a26150b39a6a74e8ae2d29052374a9c0803f2e87e7a965",
+      "all_retained_editor_POSITION_NORMAL_TANGENT_typed_bits_exact": true,
+      "retained_targets": 0,
+      "load_proofs": [
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/shadow_warg.glb-e7e8d053577632164947dfc92ff95a76.md5",
+          "import_metadata_sha256": "342c35cf14986bc3b398aa7d07135039a9523a5cfbf1df381129f0381a1772a1",
+          "imported_resource_path": "res://.godot/imported/shadow_warg.glb-e7e8d053577632164947dfc92ff95a76.scn",
+          "imported_resource_sha256": "18c97f8fc5e2b17fc94a7961382bbdf9cbb557c5cef648f893533b638194ed2b",
+          "packed_scene_resource_path": "res://assets/qa/shadow_warg/v2/baseline/shadow_warg.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "6d530d351cd0f153b87214e0b9d1808d",
+          "source_path": "res://assets/qa/shadow_warg/v2/baseline/shadow_warg.glb",
+          "source_sha256": "2a3b84c36784ba54dedb102f436b834419e2ab82deab8c43bc5240ff3a5eed14"
+        },
+        {
+          "actual_loader": "ResourceLoader.load(PackedScene)",
+          "import_metadata_path": "res://.godot/imported/shadow_warg.glb-0cd0ba34ca86a4fe1ceb5222bec445bd.md5",
+          "import_metadata_sha256": "33c7beff8a380d999ef34b0ee864e01e8d7beb15c9a03bdef2c506e75ed7513d",
+          "imported_resource_path": "res://.godot/imported/shadow_warg.glb-0cd0ba34ca86a4fe1ceb5222bec445bd.scn",
+          "imported_resource_sha256": "457586174ea43231ea410cdda6422a83db4d5f0de390660f4695594c95b8589e",
+          "packed_scene_resource_path": "res://assets/qa/shadow_warg/v2/candidate/shadow_warg.glb",
+          "single_scene_destination_md5_checked": true,
+          "source_md5": "cd881d703bb159ab753094e9e9521987",
+          "source_path": "res://assets/qa/shadow_warg/v2/candidate/shadow_warg.glb",
+          "source_sha256": "4f36c28282afd5ee30a26150b39a6a74e8ae2d29052374a9c0803f2e87e7a965"
+        }
+      ],
+      "scope": "Direct actual Editor source/candidate retained morph P/N/T byte digests after independently proved complete static-attribute vertex bijection. Exact target mask from source packing lineage; no morph field omitted.",
+      "passed": true
+    },
+    "withdrawn_prior_loader_claim": "Prior shared dumper captures labelled imported used GlbSceneCache for these outside-actor aliases and therefore were raw-cache comparisons. They remain retained private raw/native evidence, but their independent Editor claim is withdrawn and superseded by these explicitly loaded SCNs.",
+    "unchanged_other_evidence": "Original independent physical observations, exact source curves, Blender, actual native gameplay body rendering, placement, mounted/cinematic dependencies and secondary effects remain hash-bound and unchanged. No artistic approval, model, action, cap or witness change in this QA revision.",
+    "production_scope": "Production actor_shipping loose folders remain raw/native and are not Editor-imported. Per-surface Editor-generated LODs are verification representation metadata, not a claim of new gameplay LODs.",
+    "evidence_sha256": {
+      ".local/heavy-batch/shadow_warg/v2/editor-real-v1/qualification-job.json": "b3cf438caa6db899c71df2c76d4a80fffa4ca5c04cb022a4f853980ab372b25b",
+      ".local/heavy-batch/shadow_warg/v2/editor-real-v1/imported/runtime.json": "1d8930e3f3e0636d2fe1a0238014dda5d86ba6f32a42b7bb9cf8820041132d7a",
+      ".local/heavy-batch/shadow_warg/v2/editor-real-v1/imported-validation.json": "afa2433985e933e872e283f3415f3baaefacbd00014175a0d9c2f4988a979b91",
+      ".local/heavy-batch/shadow_warg/v2/editor-real-v1/imported-static-mesh-bits.json": "3c7be9b164df23f2381f3f30aa7222b5f1a7d4b9d911e8377fd123288ae7afc9",
+      ".local/heavy-batch/shadow_warg/v2/editor-real-v1/imported-typed-validation.json": "21b531bc9a523ca0be19b04a64197b5a69740917cd189375c17b13681a8b8155",
+      ".local/heavy-batch/shadow_warg/v2/editor-real-v1/morph-digest-job.json": "ead15eeb054d57b2f87bc6df45c2a096b0775b690bd37b48514b9d3330e39d5f",
+      ".local/heavy-batch/shadow_warg/v2/editor-real-v1/imported-morph-digests.json": "140cb70318b9139bead528d958a89f0754f8b14a650fc01bebaf1af627a7076f",
+      ".local/heavy-batch/shadow_warg/v2/editor-real-v1/imported-morph-validation.json": "ca2fdceb9e10cddf6a51832a0c27a4d29d336fc5a2734ee80d72dfe62d4e7eeb"
+    }
+  }
+}

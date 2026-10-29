@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "actor": "rune_stone_golem",
+  "source_sha256": "c7f6ba5c84435c270983f95abdb60954bb1edd518ad9c5864e11411681ef6828",
+  "candidate_sha256": "b28330b15981cd8ceae723dd686c88ad528f643c97a3d375896c5176853d6508",
+  "pipeline": [
+    "prune_zero_targets",
+    "reduce_constant_runs",
+    "compact"
+  ],
+  "partition": null,
+  "unchanged": false,
+  "removed_zero_target_indices": [],
+  "redundant_flat_key_rows_removed": 42458,
+  "geometry_skin_rest_binds_materials_images_unchanged": true,
+  "preserve_trs_keys": false,
+  "native_clips": [
+    "Death_A",
+    "Fighting_Idle",
+    "Hit_Chest",
+    "Idle_A",
+    "Jog",
+    "Sword_Attack",
+    "Walk",
+    "Attack_Ground_Pound"
+  ],
+  "usage": "Deterministic exact preparation needs no partition --profile; frozen source/candidate hashes bind this record."
+}

@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "actor": "octopus",
+  "source_sha256": "db11fdb99503896770892d3a3514a8e8dd3063610ff12fa697ba33f608f9520f",
+  "candidate_sha256": "2203e1c803bf998da2764593e78bd817f89a06de0307ffa96de839f9193fe1e4",
+  "pipeline": [
+    "prune_zero_targets",
+    "reduce_constant_runs",
+    "compact"
+  ],
+  "partition": null,
+  "unchanged": false,
+  "removed_zero_target_indices": [],
+  "redundant_flat_key_rows_removed": 8970,
+  "geometry_skin_rest_binds_materials_images_unchanged": true,
+  "preserve_trs_keys": false,
+  "native_clips": [
+    "Idle_A",
+    "Fighting_Idle",
+    "Hit_Chest",
+    "Death_A",
+    "Sword_Attack",
+    "Walk",
+    "Jog"
+  ],
+  "usage": "Deterministic exact preparation needs no partition --profile; frozen source/candidate hashes bind this record."
+}

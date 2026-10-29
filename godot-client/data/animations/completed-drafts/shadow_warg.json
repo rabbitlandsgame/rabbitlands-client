@@ -73,10 +73,34 @@
     "walk": 0.8124162238771508,
     "run": 1.9088940644945644
   },
-  "reviewStatus": "draft_needs_review",
+  "reviewStatus": "accepted",
   "concept": {
     "movement": "A grounded four-beat canine walk and diagonal trot, with full balanced strides, a quiet back and aligned mirrored paw lanes. Shadow Warg carries its bulky shoulders low and forward.",
     "attack": "A clear backward load followed by a forward lunge, head-led bite, supported landing and recovery. Upper snout stays with the skull; only valid lower-jaw branches articulate.",
     "death": "The head drops as the forelegs fold, the body rolls into supported flank/head contact, the paws release and relax, and the tail follows into a still grounded hold."
+  },
+  "runtimeVisualAcceptance": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "shadow_warg",
+    "appliesToSHA256": "0dc165a2460f36e893d96da25baec88dc51bb81cc332a14c54d80db6a25e9027",
+    "scope": "exact_candidate_all_native_clips",
+    "approvalBasis": {
+      "kind": "saved_button_approval",
+      "event_id": "fe047311-166b-44ab-b127-f7165d94fb16",
+      "event_sha256": "a44daf77dd20dade12390b3173f73dd592f66948b35171276e71edc7d914c749",
+      "utc": "2026-10-28T21:46:02.571930+00:00"
+    },
+    "previousAuthoringReviewStatus": "draft_needs_review",
+    "repairNoteEvents": []
+  },
+  "runtimeOptimization": {
+    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "actor": "shadow_warg",
+    "sourceSHA256": "4f36c28282afd5ee30a26150b39a6a74e8ae2d29052374a9c0803f2e87e7a965",
+    "previousRuntimeSHA256": "4f36c28282afd5ee30a26150b39a6a74e8ae2d29052374a9c0803f2e87e7a965",
+    "runtimeSHA256": "0dc165a2460f36e893d96da25baec88dc51bb81cc332a14c54d80db6a25e9027",
+    "method": "visually_accepted_offline_corrective_bake",
+    "bakeFPS": 30,
+    "previousRuntimeOptimization": null
   }
 }
