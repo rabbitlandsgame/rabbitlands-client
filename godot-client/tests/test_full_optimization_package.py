@@ -99,7 +99,7 @@ def final_engine(build, rows, reports, *, mutation=None):
         assert not script.is_relative_to(build.stage)
         job = json.loads(Path(argv[-1]).read_text())
         quality = job["texture_quality"]
-        selected = [row for row in rows if row["texture_skip"] == ("full", "half", "quarter").index(quality)]
+        selected = full.release_prepared_content.entries_for_quality({"entries": rows}, ("full", "half", "quarter").index(quality))
         assert job["expected_stage_root"] == str(build.stage)
         assert job["expected_stage_app"] == str(build.stage / "app")
         assert job["catalog_sha256"] == full.native.sha256(build.project / "prepared-content/index.json")
@@ -202,6 +202,27 @@ def test_final_pck_checks_all_qualities_exact_identities_and_isolated_jobs(conte
     assert proof["default_profile"] == "legacy" and proof["default_features"] == full.DEFAULT_FEATURES
     assert proof["opt_in_profile"] == "human-testing" and proof["features"] == full.FEATURES
     assert proof["ordinary_startup_sha256"] != proof["opt_in_startup_sha256"]
+
+
+def test_one_canonical_full_mip_world_scene_is_acquired_at_every_quality(context, monkeypatch):
+    build, rows, _ = context
+    scene = {"kind": "scene", "source": "godot-client/assets/world/interactives/storage.glb",
+        "node_policy": "retain", "texture_skip": 0, "source_digest": "d" * 64,
+        "entry_id": "e" * 64,
+        "texture_token": full.release_prepared_content.FULL_MIP_WORLD_TOKEN + "formats=7|fixture"}
+    rows.append(scene)
+    for required in build.receipt["prepared"]["required_entries"].values():
+        required.append((scene["kind"], scene["source"], "retain"))
+    index = build.project / "prepared-content/index.json"
+    index.write_text(json.dumps({"entries": rows}))
+    build.receipt["prepared"]["entries"] = len(rows)
+    build.receipt["prepared_export"]["catalog_sha256"] = full.native.sha256(index)
+    reports = []
+    monkeypatch.setattr(build, "run_engine", final_engine(build, rows, reports))
+    build.check_final_package()
+    assert len(reports) == 3
+    assert all(scene["entry_id"] in {row["entry_id"] for row in report["required_entries"]} for report in reports)
+    assert all(report["expected_entries"] == 3 for report in reports)
 
 
 @pytest.mark.parametrize("problem", ["no-export", "wrong-coverage", "failed-report", "wrong-catalog", "missing-entry", "extra-entry", "stage-write",

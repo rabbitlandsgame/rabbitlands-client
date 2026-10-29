@@ -117,7 +117,9 @@ class ReleasePreparedTests(unittest.TestCase):
             prepared.scoped(self.project, resource.removeprefix("res://")).write_bytes(data)
             entry = {"kind": spec["kind"], "source": spec["source"], "node_policy": spec["node_policy"],
                 "source_digest": next(row["sha256"] for row in spec["inputs"] if row["path"] == spec["source"]),
-                "texture_token": "synthetic:7:" + job["texture_quality"], "texture_skip": release.TEXTURES.index(job["texture_quality"]),
+                "texture_token": (release.FULL_MIP_WORLD_TOKEN + "formats=7|synthetic" if
+                    getattr(self, "full_world_scene", False) and spec["source"] == self.scene_name else
+                    "synthetic:7:" + job["texture_quality"]), "texture_skip": release.TEXTURES.index(job["texture_quality"]),
                 "format_mask": 7, "resource": resource, "inputs": spec["inputs"],
                 "payloads": [{"path": resource, "sha256": sha}],
                 "metadata_json": json.dumps({"runtime_import_snapshot": spec["runtime_import_snapshot"]})}
@@ -181,6 +183,42 @@ class ReleasePreparedTests(unittest.TestCase):
             self.assertEqual(Path(job["expected_user_directory"]), user / "godot/app_userdata/Eloria")
             self.assertTrue(user.is_relative_to(self.work))
         self.assert_restored()
+
+    def test_full_mip_scenery_is_cooked_once_and_covers_all_requested_qualities(self):
+        sha = hashlib.sha256(self.image.read_bytes()).hexdigest()
+        self.scene.write_bytes(glb({"asset": {"version": "2.0"}, "images": [{
+            "uri": "external.jpg", "extras": {"rl_texture_policy_directory": ".",
+                "rl_texture_sidecar_eligible": False}}], "extras": {"rabbitlands_scenery_images": {
+            "schema": "rabbitlands-scenery-images-v1", "mipPolicy": "full", "resources": {"external.jpg": sha},
+            "imagePolicies": {"external.jpg": ["."]}}}}))
+        self.runtime_rows[0] = ("assets/world/synthetic.glb", self.scene.read_bytes())
+        write_pck(self.stage / "app/RabbitLands.pck", self.runtime_rows)
+        self.full_world_scene = True
+        result = self.run_prepare()
+        self.assertEqual(len(self.invocations), 6)
+        jobs = [json.loads(Path(row["argv"][-1]).read_text()) for row in self.invocations]
+        self.assertEqual(sum(target["source"] == self.scene_name for job in jobs for target in job["targets"]), 1)
+        self.assertEqual(result["entries"], 7)
+        self.assertEqual(result["source_planned_entries"], 7)
+        self.assertEqual(result["source_planned_quality_requests"], 9)
+        catalog = json.loads(Path(result["catalog"]).read_text())
+        scene = [row for row in catalog["entries"] if row["source"] == self.scene_name]
+        self.assertEqual(len(scene), 1)
+        self.assertEqual(scene[0]["texture_skip"], 0)
+        for skip in range(3):
+            selected = release.entries_for_quality(catalog, skip)
+            self.assertEqual(len(selected), 3)
+            self.assertIn(scene[0], selected)
+        self.assert_restored()
+
+    def test_invariant_quality_selection_does_not_share_actor_or_nonfull_world_tokens(self):
+        token = release.FULL_MIP_WORLD_TOKEN + "formats=7|fixture"
+        rows = [{"kind": "scene", "source": source, "texture_skip": skip, "texture_token": value}
+            for source, skip, value in [
+                ("godot-client/assets/actors/native/body.glb", 0, token),
+                (self.scene_name, 0, "generic|skip=0"),
+                (self.scene_name, 1, token)]]
+        self.assertEqual(release.entries_for_quality({"entries": rows}, 2), [])
 
     def test_mid_cook_failure_restores_only_owned_inputs_and_keeps_failure_receipt(self):
         def failing(invocation):

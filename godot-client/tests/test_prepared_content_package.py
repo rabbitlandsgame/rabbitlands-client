@@ -235,6 +235,10 @@ class PreparedPackageTests(unittest.TestCase):
         self.assertEqual(merged["entry_id"],entry["entry_id"])
         self.assertNotIn("metadata",merged)
         self.assertIn("rigs",prepared.entry_metadata(merged))
+        # Equivalent requested tiers are source-planned once by the release
+        # coordinator. Generic merge must never accept duplicate exact keys.
+        with self.assertRaisesRegex(prepared.PreparedError, "duplicate exact variant"):
+            prepared.merge_catalogs(self.project, [index, index], output)
         self.assertNotEqual(json.dumps(json.loads(wire),separators=(",",":")),wire,
             "control proves parsing/re-serializing the metadata numbers changes their original wire lexemes")
 
