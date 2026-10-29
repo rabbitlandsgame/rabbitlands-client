@@ -433,6 +433,24 @@ func prime(position: Vector3) -> void:
 		var builder := WorldLoader.prepare_detached(str(entry.path), _cache_enabled)
 		_install(requested, builder)
 
+## Raw territory preloads build these cells on their worker. Their road
+## Resources stay private until the owning territory is published on Main.
+## Visit only resident cells, rather than walking every scenery Node again.
+func publish_prepared_roads() -> void:
+	for identity: String in cells.keys():
+		var resident: Dictionary = cells[identity]
+		var result := WorldLoader.publish_resident_roads(resident)
+		if bool(result.get("ok", false)):
+			continue
+		var imported := resident.root as Node3D
+		if is_instance_valid(imported):
+			imported.free()
+		cells.erase(identity)
+		ResourceAdmission.hold(resident.entry.get("_admission_token", {}), null, false)
+		_failed(resident.entry, "road_ground_bind: " + str(result.get("error", "invalid road publication")))
+		_update_resident_bytes()
+		_changed()
+
 ## True when every cell whose bounds hold the position is resident. Bounds
 ## include the props that overhang a cell, so neighbours overlap: a resident
 ## neighbour can cover a destination whose own ground cell is still missing,

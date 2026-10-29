@@ -45,6 +45,25 @@ func _run() -> void:
 	expect(main.preview_actor.get_instance_id() == preview_id,
 		"reopening creation reuses the unchanged character")
 	expect(main.call("_creation_appearance") == expected, "opening creation preserves fixed choices")
+	main.call("_refresh_creation_preview")
+	expect(main.preview_actor.get_instance_id() == preview_id,
+		"an unchanged preview refresh does not rebuild the actor")
+	var eyes := main.get_node("%CreateEyes") as OptionButton
+	eyes.select(eyes.get_item_index(3))
+	main.call("_refresh_creation_preview")
+	expect(main.preview_actor.get_instance_id() == preview_id
+		and int(main.preview_actor.get("_appearance").eyes) == 3,
+		"appearance controls update the existing preview actor")
+	main.call("_on_creation_class_gear_toggled", false)
+	main.call("_refresh_creation_preview")
+	expect(main.preview_actor.get_instance_id() == preview_id
+		and main.preview_actor.equipment_diagnostics().visuals.is_empty(),
+		"appearance refresh respects hidden class gear without rebuilding")
+	main.create_gender.select(main.create_gender.get_item_index(0))
+	main.call("_on_create_gender_item_selected", main.create_gender.selected)
+	expect(main.preview_actor.get_instance_id() != preview_id
+		and str(main.preview_actor.get("_model_config").gender) == "female",
+		"changing the body constructs the selected independent model")
 	main.creation_panel.hide()
 	main.queue_free()
 	await process_frame

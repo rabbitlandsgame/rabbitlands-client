@@ -113,6 +113,45 @@ static var _pipeline_holder: Node3D = null
 const PIPELINE_WARM_FRAMES := 30
 ## Map files a full prewarm queued; the per-frame poll loads one a frame.
 static var _texture_queue: PackedStringArray = PackedStringArray()
+## Main supplies a live presentation gate. The callable captures only a WeakRef
+## and a method name, so neither the library nor its poll keeps Main alive.
+## Standalone labs/tests that register no context retain ordinary prewarming.
+static var _render_warm_owner: WeakRef
+static var _render_warm_gate: Callable
+
+static func set_render_warm_context(owner: Object, method: StringName) -> void:
+	if owner == null:
+		return
+	if _render_warm_owner == null or _render_warm_owner.get_ref() != owner:
+		cancel_warm()
+	var reference: WeakRef = weakref(owner)
+	_render_warm_owner = reference
+	_render_warm_gate = func() -> bool:
+		var live: Object = reference.get_ref()
+		return is_instance_valid(live) and live.has_method(method) and bool(live.call(method))
+
+static func clear_render_warm_context(owner: Object) -> void:
+	if _render_warm_owner == null or _render_warm_owner.get_ref() != owner:
+		return
+	cancel_warm()
+	_render_warm_owner = null
+	_render_warm_gate = Callable()
+
+static func render_warm_allowed() -> bool:
+	return _render_warm_owner == null or (_render_warm_owner.get_ref() != null \
+		and _render_warm_gate.is_valid() and bool(_render_warm_gate.call()))
+
+## Only already-submitted pipeline work holds a loading curtain. Queued parses,
+## textures and a pipeline request that has not started can defer until login or
+## a future loading screen, without extending every arrival indefinitely.
+static func render_warm_active() -> bool:
+	return is_instance_valid(_pipeline_holder)
+
+static func render_warm_snapshot() -> Dictionary:
+	return {"context_registered": _render_warm_owner != null, "allowed": render_warm_allowed(),
+		"textures_pending": _texture_queue.size(), "pipeline_pending": _pipelines_wanted,
+		"pipeline_active": render_warm_active(), "pipeline_done": _pipelines_done,
+		"pipeline_frames": int(_pipeline_holder.get_meta(&"frames", 0)) if render_warm_active() else 0}
 
 ## The per-actor values (rl_head_instance.gdshaderinc) each RL shader reads, by
 ## shader: what a per-face material copy of it carries (see face_material).
@@ -187,7 +226,9 @@ static func release_if_unused() -> void:
 ## one a High Human can draw: both head modules, every hairstyle and beard),
 ## each file its own task, each published to GlbSceneCache on the main thread
 ## once its task has finished (a per-frame poll, and every `head`, `beard` and
-## `hair_info` lookup). The main thread never waits for a task (GlbSceneCache
+## `hair_info` lookup). Main gates speculative texture/pipeline publication to
+## login or a drawn loading screen; CPU parsing still runs while playing.
+## The main thread never waits for a task (GlbSceneCache
 ## "Threads": a parse can need the main thread): a file it needs before its
 ## task has finished is parsed there as before, and the task's copy is dropped
 ## when it arrives. The RL files name no texture by URI, so a worker parse
@@ -300,12 +341,18 @@ static func warming() -> bool:
 ## parsed every file, one instance of every RL surface - each head level, beard
 ## and hairstyle, skinned as the game draws them, with the shared materials
 ## the game gives them at High - stays out of sight for PIPELINE_WARM_FRAMES,
-## so those pipelines are compiled before the first RL head is shown. The
-## Compatibility renderer compiles at first draw instead and skips this.
+## so a permitted login/loading context can prepare them before use. Pending
+## work defers while playing or editing; it never starts a bulk render there.
+## The Compatibility renderer compiles at first draw instead and skips this.
+## RL_HEAD_PIPELINE_PREWARM=0 skips only this stage for diagnostic comparisons.
 static func _warm_pipelines() -> void:
+	if not render_warm_allowed():
+		return
+	_pipelines_wanted = false
 	var tree := Engine.get_main_loop() as SceneTree
 	if tree == null or tree.root == null \
-			or RenderingServer.get_current_rendering_method() == "gl_compatibility":
+			or RenderingServer.get_current_rendering_method() == "gl_compatibility" \
+			or OS.get_environment("RL_HEAD_PIPELINE_PREWARM") == "0":
 		_pipelines_done = true
 		return
 	var holder := Node3D.new()
@@ -356,14 +403,15 @@ static func _queue_textures() -> bool:
 
 static func _poll_warm() -> void:
 	collect_warm()
-	if not _texture_queue.is_empty():
-		texture(_texture_queue[0])
-		_texture_queue.remove_at(0)
-		return
-	if _warming.is_empty() and _warm_queue.is_empty() and _pipelines_wanted:
-		_pipelines_wanted = false
-		_warm_pipelines()
-	if _pipeline_holder != null:
+	if _render_warm_owner != null and _render_warm_owner.get_ref() == null:
+		# An owner that disappeared without its normal exit hook must never
+		# leave a late root-level render holder behind.
+		cancel_warm()
+		_render_warm_owner = null
+		_render_warm_gate = Callable()
+	# Submitted pipelines finish their settle frames even if the live context
+	# closes meanwhile. Waiting only for this active phase cannot join a worker.
+	if render_warm_active():
 		var frames := int(_pipeline_holder.get_meta(&"frames", 0)) + 1
 		_pipeline_holder.set_meta(&"frames", frames)
 		if frames >= PIPELINE_WARM_FRAMES:
@@ -371,9 +419,18 @@ static func _poll_warm() -> void:
 			_pipeline_holder = null
 			_pipelines_done = true
 		return
+	if not _texture_queue.is_empty() and render_warm_allowed():
+		texture(_texture_queue[0])
+		_texture_queue.remove_at(0)
+		return
+	if _warming.is_empty() and _warm_queue.is_empty() and _texture_queue.is_empty() \
+			and _pipelines_wanted and render_warm_allowed():
+		_warm_pipelines()
+	if render_warm_active():
+		return
 	if _warming.is_empty():
 		var tree := Engine.get_main_loop() as SceneTree
-		if not _warm_queue.is_empty():
+		if not _warm_queue.is_empty() or not _texture_queue.is_empty() or _pipelines_wanted:
 			return
 		if tree != null and tree.process_frame.is_connected(_poll_warm):
 			tree.process_frame.disconnect(_poll_warm)

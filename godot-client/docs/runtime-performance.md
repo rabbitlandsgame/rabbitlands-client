@@ -12,10 +12,27 @@ Compare both milestones: deferred theme work can delay drawing after setup
 has finished. Source launches also include script compilation and asset loading;
 compare equivalent source or exported builds with the same settings.
 
+`startup_window` records split interface construction into a fixed set of window
+names. The settings window does not inventory map-cache files during startup.
+It counts them on a cancellable read-only worker when settings opens, publishing
+the result on the main thread. Closing settings cancels that count; clearing
+caches stops it before deleting files and starts a new count afterward.
+
 Character creation starts with fixed Human Male choices. Its 3D preview is
 constructed when creation opens and reused when reopened without changes.
+Appearance and starting-equipment changes update that same preview actor;
+changing its body model or actor type creates a new one. Select its graphics
+quality before configuration to avoid building an intermediate tier.
 Build the complete shared theme before installing it on the interface, and
 publish live text-colour changes together to avoid repeated tree invalidation.
+
+High-head GLB parsing can continue on workers during play. Speculative texture
+uploads and the bulk head/hair/beard pipeline warm-up publish only on login or
+behind a drawn, blocking loading curtain. Creation editing and ordinary play
+defer that work. An already-started pipeline warm-up settles before arrival
+releases input; pending work alone does not extend the curtain. Diagnostics
+include `rl_head_warmup` state. `RL_HEAD_PIPELINE_PREWARM=0` skips only the bulk
+pipeline stage for controlled investigations, retaining ordinary resource use.
 
 ## Reproducible performance checks
 
@@ -175,6 +192,20 @@ layers 1 and 3. They therefore cost nothing in the two top-down views, which
 never showed them legibly anyway.
 
 ## Where actor spawns go
+
+`ReplicatedActor3D.configuration_timings_usec()` returns the last configuration's
+model-scene, import-adapter, appearance, animation, RL-head, equipment and total
+times. These are setup spans rather than delivered frame timings. The initial
+configuration still includes first-use appearance and equipment preparation;
+the per-frame actor allowance cannot split one such blocking operation.
+`slow_actor_creation` records the first sixteen body builds exceeding 100 ms in
+a client session, including these phases and the static model/type, without
+player names or actor identities. It does not sample ordinary process frames.
+
+In source checkouts, actor folders protected by `.gdignore` always use their
+loose runtime source, even if old editor import remaps and products remain.
+Unguarded actor assets can still use a valid available editor scene. Keep the
+local guards aligned with `tools/package_client.py`'s `actor_shipping()` plan.
 
 **Model and equipment glTF parsing.** Every actor used to run
 `GLTFDocument.append_from_file()` for its race mesh, again for its hair, and

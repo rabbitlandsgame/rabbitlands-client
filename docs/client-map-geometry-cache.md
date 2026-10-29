@@ -33,6 +33,13 @@ World instances keep private materials and MultiMesh buffers;
 static scenery retains the existing immutable-template sharing and its consumers
 create overrides when styling or fading an instance.
 
+A raw territory preloader can prime private child chunks on its worker too.
+Their decoded road fields travel with the resident chunk record; the main thread
+binds them when publishing the owning territory. This handoff retains the
+worker-built geometry and rechecks road dependencies before binding. A rejected
+child is released and follows the stream's normal retry policy. A discarded
+territory releases its private candidates without publishing road Resources.
+
 On a synchronous main-thread underground arrival, each scenery asset is prepared,
 installed with full revalidation and texture-bound before preparing the next asset.
 Binding creates no Nodes and drops that asset's decoded CPU image carriers;

@@ -21,6 +21,21 @@ or material pass. Terrain footsteps and grass query the same coverage and style;
 bridge hits keep the bridge's surface classification. Missing or changed required
 fields fail loading and packaging. Legacy maps without `roadGround` are unchanged.
 
+## Runtime shader reuse
+
+Road composition shares immutable shader programs and uniform layouts across
+chunks with identical base headers, road shaders, surface/paint sources and look
+mode. Lookup happens before source rewriting and shader reflection. The cache
+holds at most 64 weak entries; active materials and seasonal replacements retain
+their programs for their existing lifetime. Each chunk still owns its materials,
+texture bindings, colours and field parameters. Shared shader identity also lets
+the existing seasonal shader cache reuse its work across those chunks.
+
+`ELORIA_ROAD_SHADER_CACHE=0` reconstructs the same shader bytes through the
+uncached path for matched measurements. Compare fresh processes with the same
+content, renderer, texture tier and preparation. OS and driver caches remain
+uncontrolled. This reuse changes no saved geometry, field data or cache format.
+
 ## Publishing
 
 Publish a complete territory through the normal continent-v2 authoring publisher.

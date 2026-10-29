@@ -54,8 +54,15 @@ vec3 terrain_blend_normal_view(vec3 texel, float depth, vec3 n, vec3 t, vec3 b) 
 }
 """
 
+## Only immutable programs/layouts are shared. Materials, textures and field
+## carriers remain owned by their chunk. Dead or evicted entries own no Shader.
+const PROGRAM_LIMIT := 64
+static var _programs: Dictionary = {}
+static var _program_order: Array[String] = []
+
 static func build(base: ShaderMaterial, road: ShaderMaterial, styles: Array[BaseMaterial3D], painted: bool,
 		shader_cache: Dictionary, sources: Dictionary) -> Dictionary:
+	var began := Time.get_ticks_usec()
 	if base == null or road == null or base.shader == null or road.shader == null:
 		return {"ok": false, "error": "blend_requires_painted_base_and_road"}
 	var header: String = base.shader.code
@@ -67,6 +74,110 @@ static func build(base: ShaderMaterial, road: ShaderMaterial, styles: Array[Base
 		return {"ok": false, "error": "blend_requires_authored_alpha_road"}
 	var surface: String = str(sources.get("surface", ""))
 	var paint: String = str(sources.get("paint", ""))
+	# A structured hash cannot alias input boundaries. All code/layout inputs
+	# participate; uniforms are deliberately copied from this call's materials.
+	var input_key := _sha(var_to_bytes([header, road.shader.code, surface, paint, painted]))
+	var shared := OS.get_thread_caller_id() == OS.get_main_thread_id() \
+		and OS.get_environment("ELORIA_ROAD_SHADER_CACHE") != "0"
+	var program := _program(input_key) if shared else {}
+	var cache_hit := not program.is_empty()
+	var compose_usec := 0
+	var shader_usec := 0
+	var layout_usec := 0
+	if program.is_empty():
+		var step := Time.get_ticks_usec()
+		var composed := _compose_code(header, surface, paint, painted)
+		compose_usec = Time.get_ticks_usec() - step
+		if not bool(composed.get("ok", false)):
+			return composed
+		var code: String = composed.code
+		var key := _sha(code.to_utf8_buffer())
+		var shader: Shader = shader_cache.get(key)
+		step = Time.get_ticks_usec()
+		if shader == null or _sha(shader.code.to_utf8_buffer()) != key:
+			shader = Shader.new()
+			shader.code = code
+			shader_cache[key] = shader
+		shader_usec = Time.get_ticks_usec() - step
+		step = Time.get_ticks_usec()
+		program = {"shader": shader, "shader_sha256": key,
+			"production_surface_sha256": _sha(surface.to_utf8_buffer()),
+			"production_paint_sha256": _sha(paint.to_utf8_buffer()),
+			"base_uniforms": _uniform_names(base.shader), "road_uniforms": _uniform_names(road.shader)}
+		layout_usec = Time.get_ticks_usec() - step
+		if shared:
+			_remember(input_key, program)
+	var program_usec := Time.get_ticks_usec() - began
+	var material := ShaderMaterial.new()
+	material.shader = program.shader as Shader
+	material.resource_name = base.resource_name
+	material.render_priority = base.render_priority
+	material.next_pass = base.next_pass
+	var names: Array[String] = []
+	for name: String in program.base_uniforms:
+		material.set_shader_parameter(StringName(name), base.get_shader_parameter(StringName(name)))
+		names.append(name)
+	for name: String in program.road_uniforms:
+		var mapped: String = _road_name(name)
+		material.set_shader_parameter(StringName(mapped), road.get_shader_parameter(StringName(name)))
+		names.append(mapped)
+	var params := PackedVector4Array()
+	var transforms := PackedVector4Array()
+	for index: int in 2:
+		var source: BaseMaterial3D = styles[mini(index, styles.size() - 1)]
+		var tint: Color = source.albedo_color
+		material.set_shader_parameter(StringName("rg_style_tint%d" % index), tint)
+		params.append(Vector4(source.roughness, source.metallic, source.metallic_specular, source.normal_scale))
+		transforms.append(Vector4(source.uv1_scale.x, source.uv1_scale.y, source.uv1_offset.x, source.uv1_offset.y))
+	material.set_shader_parameter(&"rg_style_params", params)
+	material.set_shader_parameter(&"rg_style_uv", transforms)
+	material.set_shader_parameter(&"rg_road_orm", styles[0].roughness_texture)
+	names.append_array(FIELD_NAMES)
+	material.set_meta(&"terrain_blend_parameter_names", names)
+	material.set_meta(&"terrain_blend_existing_pass", true)
+	return {"ok": true, "material": material, "shader_sha256": program.shader_sha256,
+		"production_surface_sha256": program.production_surface_sha256,
+		"production_paint_sha256": program.production_paint_sha256,
+		"metrics": {"shader_cache_hit": cache_hit, "program_usec": program_usec,
+			"compose_usec": compose_usec, "shader_usec": shader_usec, "layout_usec": layout_usec,
+			"material_usec": Time.get_ticks_usec() - began - program_usec}}
+
+static func _uniform_names(shader: Shader) -> PackedStringArray:
+	var names := PackedStringArray()
+	for uniform: Dictionary in shader.get_shader_uniform_list():
+		names.append(str(uniform.get("name", "")))
+	return names
+
+static func _program(key: String) -> Dictionary:
+	if not _programs.has(key):
+		return {}
+	var entry: Dictionary = _programs[key]
+	var shader := (entry.shader as WeakRef).get_ref() as Shader
+	_program_order.erase(key)
+	if shader == null or _sha(shader.code.to_utf8_buffer()) != str(entry.shader_sha256):
+		_programs.erase(key)
+		return {}
+	_program_order.append(key)
+	var result := entry.duplicate()
+	result.shader = shader
+	return result
+
+static func _remember(key: String, program: Dictionary) -> void:
+	for old: String in _programs.keys():
+		if (_programs[old].shader as WeakRef).get_ref() == null:
+			_programs.erase(old)
+			_program_order.erase(old)
+	_program_order.erase(key)
+	while _program_order.size() >= PROGRAM_LIMIT:
+		_programs.erase(_program_order.pop_front())
+	var entry := program.duplicate()
+	entry.shader = weakref(program.shader as Shader)
+	_programs[key] = entry
+	_program_order.append(key)
+
+## Keep the compositor byte-for-byte independent of reuse. The opt-out runs
+## this same construction on each call, retaining the previous local cache.
+static func _compose_code(header: String, surface: String, paint: String, painted: bool) -> Dictionary:
 	var anchors: Array[String] = ["void vertex() {", "void fragment() {", "look_ground_xz = VERTEX.xz;",
 		"NORMAL_MAP = texture(normal_texture, UV).rgb;", "NORMAL_MAP_DEPTH = normal_scale;",
 		"float coverage = 1.0;", "#ifdef LOOK_GROUND_CUTOUT"]
@@ -124,44 +235,7 @@ static func build(base: ShaderMaterial, road: ShaderMaterial, styles: Array[Base
 	var last_brace: int = base_surface.rfind("}")
 	base_surface = base_surface.insert(last_brace, _composite(road_fragment, road_coverage))
 	var code: String = header.replace(INCLUDE, base_surface) if header.count(INCLUDE) == 1 else base_surface
-	var key: String = _sha(code.to_utf8_buffer())
-	var shader: Shader = shader_cache.get(key)
-	if shader == null:
-		shader = Shader.new()
-		shader.code = code
-		shader_cache[key] = shader
-	var material := ShaderMaterial.new()
-	material.shader = shader
-	material.resource_name = base.resource_name
-	material.render_priority = base.render_priority
-	material.next_pass = base.next_pass
-	var names: Array[String] = []
-	for uniform: Dictionary in base.shader.get_shader_uniform_list():
-		var name: String = str(uniform.get("name", ""))
-		material.set_shader_parameter(StringName(name), base.get_shader_parameter(StringName(name)))
-		names.append(name)
-	for uniform: Dictionary in road.shader.get_shader_uniform_list():
-		var name: String = str(uniform.get("name", ""))
-		var mapped: String = _road_name(name)
-		material.set_shader_parameter(StringName(mapped), road.get_shader_parameter(StringName(name)))
-		names.append(mapped)
-	var params := PackedVector4Array()
-	var transforms := PackedVector4Array()
-	for index: int in 2:
-		var source: BaseMaterial3D = styles[mini(index, styles.size() - 1)]
-		var tint: Color = source.albedo_color
-		material.set_shader_parameter(StringName("rg_style_tint%d" % index), tint)
-		params.append(Vector4(source.roughness, source.metallic, source.metallic_specular, source.normal_scale))
-		transforms.append(Vector4(source.uv1_scale.x, source.uv1_scale.y, source.uv1_offset.x, source.uv1_offset.y))
-	material.set_shader_parameter(&"rg_style_params", params)
-	material.set_shader_parameter(&"rg_style_uv", transforms)
-	material.set_shader_parameter(&"rg_road_orm", styles[0].roughness_texture)
-	names.append_array(FIELD_NAMES)
-	material.set_meta(&"terrain_blend_parameter_names", names)
-	material.set_meta(&"terrain_blend_existing_pass", true)
-	return {"ok": true, "material": material, "shader_sha256": key,
-		"production_surface_sha256": _sha(surface.to_utf8_buffer()),
-		"production_paint_sha256": _sha(paint.to_utf8_buffer())}
+	return {"ok": true, "code": code}
 
 static func _namespace(code: String) -> String:
 	var words: Dictionary = {}

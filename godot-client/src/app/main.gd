@@ -617,6 +617,10 @@ var gameplay_world: World3D
 var loaded_server_map := ""
 var adapter := CoordinateAdapter.new({"walkingHeight": 0.0, "invertServerY": true})
 var preview_actor: ReplicatedActor3D
+var _creation_preview_model_id := ""
+var _creation_preview_actor_type := -1
+var _creation_preview_appearance: Dictionary = {}
+var _creation_preview_errors: Array[String] = []
 var pending_create_username := ""
 var pending_create_password := ""
 var preview_yaw := PI + 0.28
@@ -896,6 +900,7 @@ var actor_resource_warmup := preload("res://src/actors/actor_resource_warmup.gd"
 var _actor_creation_frame := -1
 var _actor_creation_count := 0
 var _actor_creation_spent_usec := 0
+var _slow_actor_creation_reports := 0
 var _actor_creation_priority_seen: Dictionary = {}
 var _actor_creation_overrun_seen := false
 ## Bounded scalar diagnostics, never a per-actor or per-frame history.
@@ -1396,6 +1401,7 @@ func _prepare_geometry_before_login() -> bool:
 	return false
 
 func _ready() -> void:
+	RLHeadLibrary.set_render_warm_context(self, &"_rl_head_render_warm_allowed")
 	Diagnostics.startup_stage("geometry_preparation")
 	if await _prepare_geometry_before_login():
 		Diagnostics.startup_stage("")
@@ -1523,8 +1529,10 @@ func _ready() -> void:
 	audio_director.surface_at_tile = _footstep_surface_at
 	add_child(audio_director)
 	Diagnostics.startup_stage("gameplay_windows")
+	var window_started := Time.get_ticks_usec()
 	player_info_panel = PlayerInfoPanelScript.new()
 	game_view.add_child(player_info_panel)
+	window_started = _record_startup_window("player_info", window_started)
 	# The three legacy windows Eternal Lands opens from its icon row: the spell
 	# book, the emote picker and the ranging readout. Each lives in its own
 	# script; main.gd only opens them and lends them a network seam.
@@ -1535,24 +1543,30 @@ func _ready() -> void:
 	techniques_panel.call("configure", Network.technique_request,
 		_technique_creature_target, _technique_player_target)
 	techniques_panel.connect("place_on_bar", _place_technique_on_bar)
+	window_started = _record_startup_window("spells", window_started)
 	# Configured further down, once the spell catalog has read its data file:
 	# the window builds its group rows from the catalog it is handed.
 	summoning_window = SummoningWindowScript.new()
 	game_view.add_child(summoning_window)
+	window_started = _record_startup_window("summoning", window_started)
 	# Also configured further down: it builds its rows from the manufacturing
 	# catalog, which is read at the same point the spell catalog is.
 	emotes_window = EmotesWindowScript.new()
 	game_view.add_child(emotes_window)
 	emotes_window.call("configure", _perform_emote)
+	window_started = _record_startup_window("emotes", window_started)
 	ranging_window = RangingWindowScript.new()
 	game_view.add_child(ranging_window)
+	window_started = _record_startup_window("ranging", window_started)
 	mounts_window = MountsWindowScript.new()
 	game_view.add_child(mounts_window)
 	%MountsButton.pressed.connect(func() -> void: mounts_window.call("toggle"))
 	(mounts_window.get("panel") as Control).visibility_changed.connect(func() -> void: _sync_hud_button_states(true))
+	window_started = _record_startup_window("mounts", window_started)
 	guild_window = GuildWindowScript.new()
 	game_view.add_child(guild_window)
 	guild_window.call("configure", Network.send_chat)
+	window_started = _record_startup_window("guild", window_started)
 	leaderboards_window = LeaderboardsWindowScript.new()
 	game_view.add_child(leaderboards_window)
 	leaderboards_window.call("configure", Network.send_chat, model_registry, equipment_config)
@@ -1564,19 +1578,23 @@ func _ready() -> void:
 	%LeaderboardsButton.toggle_mode = true
 	%LeaderboardsButton.pressed.connect(func() -> void: leaderboards_window.call("toggle"))
 	(leaderboards_window.get("panel") as Control).visibility_changed.connect(func() -> void: _sync_hud_button_states(true))
+	window_started = _record_startup_window("leaderboards", window_started)
 	settings_window = SettingsWindowScript.new()
 	game_view.add_child(settings_window)
 	settings_panel = settings_window.panel
 	settings_window.setting_changed.connect(_on_client_setting_changed)
 	settings_window.binding_changed.connect(_on_binding_changed)
+	window_started = _record_startup_window("settings", window_started)
 	reference_window = ReferenceWindowScript.new()
 	game_view.add_child(reference_window)
 	reference_window.notes_changed.connect(_on_notes_changed)
 	reference_window.bookmarks_changed.connect(_on_encyclopedia_bookmarks_changed)
+	window_started = _record_startup_window("reference", window_started)
 	active_buff_bar = ActiveBuffBarScript.new()
 	active_buff_bar.bottom_hud = $GameView/Quickbar
 	game_view.add_child(active_buff_bar)
 	active_buff_bar.configure(spell_catalog)
+	window_started = _record_startup_window("active_buffs", window_started)
 	extension_windows = ExtensionWindowsScript.new()
 	game_view.add_child(extension_windows)
 	extension_windows.configure(item_atlas, lantern_guide)
@@ -1584,6 +1602,7 @@ func _ready() -> void:
 	extension_windows.gauntlet_loot_window.configure(item_atlas, model_registry, equipment_config)
 	extension_windows.gauntlet_loot_window.configure_completion_wait(_gauntlet_creature_deaths_pending)
 	extension_windows.combat_hud_preference_changed.connect(_save_hud_settings)
+	window_started = _record_startup_window("extensions", window_started)
 	invasion_assistant_window = InvasionAssistantScript.new()
 	add_child(invasion_assistant_window)
 	invasion_assistant_window.configure_monitor_dock(_invasion_monitor_dock_rect)
@@ -1591,6 +1610,7 @@ func _ready() -> void:
 	invasion_assistant_window.coordinate_context = Network.coordinates
 	invasion_assistant_window.command_requested.connect(
 		_on_invasion_assistant_command_requested)
+	_record_startup_window("invasion_assistant", window_started)
 	Diagnostics.startup_stage("cartography_data")
 	cartography = _json("res://data/maps/cartography.json")
 	cartography_regions = (cartography.get("regions", []) as Array).duplicate()
@@ -1952,6 +1972,7 @@ func client_diagnostic_snapshot() -> Dictionary:
 		"authenticated": AppState.authenticated, "connection": AppState.connection_state,
 		"server_map": AppState.current_map, "loaded_map": loaded_server_map,
 		"login_visible": login_panel.is_visible_in_tree(),
+		"rl_head_warmup": RLHeadLibrary.render_warm_snapshot(),
 		"game_visible": game_view.is_visible_in_tree(),
 		"window_size": str(get_window().size), "viewport_size": str(main_viewport.size),
 		"root_viewport_size": str(get_tree().root.size),
@@ -2563,11 +2584,14 @@ func _clear_pending_creation() -> void:
 	pending_create_username = ""
 	pending_create_password = ""
 
+## Fixed names keep startup logging bounded; no user or server values are logged.
+func _record_startup_window(window_name: String, began: int) -> int:
+	var now := Time.get_ticks_usec()
+	Diagnostics.record("startup_window", {"window": window_name,
+		"duration_ms": (now - began) / 1000.0})
+	return Time.get_ticks_usec()
+
 func _refresh_creation_preview() -> void:
-	if is_instance_valid(preview_actor):
-		preview_actor.queue_free()
-	preview_actor = ReplicatedActor3D.new()
-	preview_root.add_child(preview_actor)
 	var actor_type: int = create_gender.get_selected_id()
 	var appearance: Dictionary = _creation_appearance()
 	# Modified 2026-08-28 for Eloria Client: the creation bytes are equipment
@@ -2589,14 +2613,29 @@ func _refresh_creation_preview() -> void:
 		creation_colours.update_context(appearance, model_config)
 		portrait_form.set_hair_style(AppearanceVariants.hair_style(int(appearance.get("hair", 0))))
 		portrait_form.update_derived(appearance)
-	var errors := preview_actor.configure(dto,
-		CoordinateAdapter.new({"walkingHeight": 0.0}), model_config,
-		_animation_for_model(model_config), equipment_config)
-	preview_actor.set_nameplate_visible(false)
-	preview_actor.apply_render_quality(LookProfile.quality(), true)
+	# A colour slider changes an existing actor's appearance. Reimporting its
+	# body and animation library for each event stalls the whole interface.
+	# Race/sex changes still construct the corresponding independent model.
+	if not is_instance_valid(preview_actor) or _creation_preview_model_id != model_id \
+			or _creation_preview_actor_type != actor_type:
+		if is_instance_valid(preview_actor):
+			preview_actor.queue_free()
+		preview_actor = ReplicatedActor3D.new()
+		preview_actor.apply_render_quality(LookProfile.quality(), true)
+		preview_root.add_child(preview_actor)
+		_creation_preview_errors = preview_actor.configure(dto,
+			CoordinateAdapter.new({"walkingHeight": 0.0}), model_config,
+			_animation_for_model(model_config), equipment_config)
+		preview_actor.set_nameplate_visible(false)
+		_creation_preview_model_id = model_id
+		_creation_preview_actor_type = actor_type
+	elif _creation_preview_appearance != appearance:
+		preview_actor.apply_appearance_variants(appearance)
+	preview_actor.apply_equipment_visuals(dto.equipment_visuals)
+	_creation_preview_appearance = appearance.duplicate(true)
 	_frame_preview_actor()
-	if not errors.is_empty():
-		create_status.text = "Preview warnings: " + "; ".join(errors)
+	if not _creation_preview_errors.is_empty():
+		create_status.text = "Preview warnings: " + "; ".join(_creation_preview_errors)
 	else:
 		create_status.text = "%s starting items will be granted for any race. Drag to rotate." % \
 			creation_class_title.text
@@ -4352,6 +4391,7 @@ func _close_client() -> void:
 	get_tree().quit()
 
 func _exit_tree() -> void:
+	RLHeadLibrary.clear_render_warm_context(self)
 	lantern_mine_lighting.clear()
 	actor_resource_warmup.clear()
 	RustRiderPose.close_batches()
@@ -6865,6 +6905,15 @@ func _hold_for_arrival() -> bool:
 		"position": [position.x, position.y, position.z]})
 	return true
 
+## Evaluate the actual screen at publication time, including callbacks that run
+## before Main's next process pass. Editing and ordinary play never bulk-warm.
+func _rl_head_render_warm_allowed() -> bool:
+	if _actor_preparation_closing or not is_instance_valid(creation_panel) \
+			or creation_panel.is_visible_in_tree():
+		return false
+	return (is_instance_valid(login_panel) and login_panel.is_visible_in_tree()) \
+		or (is_instance_valid(arrival_curtain) and arrival_curtain.is_showing() and arrival_curtain.has_drawn())
+
 ## Each frame: a deferred whole-map load once the curtain is drawn; a pending
 ## arrival's progress, and its release once every cell framing it is resident;
 ## then the curtain lowered once the character stands grounded for a few frames.
@@ -6913,6 +6962,12 @@ func _update_arrival() -> void:
 		return
 	if not AppState.authenticated and AppState.connection_state != "connected":
 		_end_arrival()
+		return
+	# A warm-up submitted behind login/loading must settle before input is
+	# released. Pending work alone never delays arrival: its live gate closes
+	# as the curtain starts fading and it can resume at a later safe screen.
+	if RLHeadLibrary.render_warm_active():
+		_arrival_settle_frames = 0
 		return
 	var local_id: int = AppState.local_actor_id
 	var standing: bool = actor_nodes.has(local_id) and _grounded_actors.has(local_id)
@@ -7414,7 +7469,16 @@ func _spawn_actor(id: Variant, build := true,
 	node._remote_enrollment_ready = true
 	if is_instance_valid(remote_presentation): remote_presentation.consider(node)
 	if creates_body:
-		_record_actor_creation(int(id), Time.get_ticks_usec() - creation_started)
+		var creation_usec := Time.get_ticks_usec() - creation_started
+		_record_actor_creation(int(id), creation_usec)
+		# Keep evidence for long atomic builds without logging identities or
+		# sampling actors every frame. The bound lasts for this Main instance.
+		if creation_usec > 100000 and _slow_actor_creation_reports < 16:
+			_slow_actor_creation_reports += 1
+			Diagnostics.record("slow_actor_creation", {
+				"actor_type": int(dto.get("actor_type", -1)), "model": model_id,
+				"duration_ms": creation_usec / 1000.0,
+				"configuration_usec": node.configuration_timings_usec()})
 	return true
 
 ## Puts a parked body back for the actor it was parked for: the same steps a

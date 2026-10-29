@@ -5,6 +5,11 @@ const RemotePresentationService = preload("res://src/runtime/remote_presentation
 var _remote_generation := 0
 var _remote_enrollment_ready := false
 var _remote_pending_transfer := PackedFloat64Array()
+## Last configure call only; no frame-time sampling or retained Resources.
+var _configuration_phases_us: Dictionary = {}
+
+func configuration_timings_usec() -> Dictionary:
+	return _configuration_phases_us.duplicate()
 
 const REBOUND_SKIN_POOL := preload("res://src/actors/rebound_skin_pool.gd")
 const ACTOR_RENDER_QUALITY := preload("res://src/actors/actor_render_quality.gd")
@@ -580,6 +585,8 @@ const RING_SEGMENT_METRES := 0.5
 func configure(dto: Dictionary, adapter: CoordinateAdapter,
 		model_config: Dictionary, animation_config: Dictionary,
 		equipment_config: Dictionary = {}, build_model := true) -> Array[String]:
+	var configure_started := Time.get_ticks_usec()
+	_configuration_phases_us.clear()
 	# Choose the tier before loading any optional High-only portrait resources.
 	if not _render_quality_selected:
 		_render_quality = LookProfile.quality()
@@ -647,13 +654,17 @@ func configure(dto: Dictionary, adapter: CoordinateAdapter,
 		# Keep identity, picking, nameplate and protocol state without drawing
 		# either the archived model or a replacement placeholder body.
 		set_meta("retired_model", true)
+		_configuration_phases_us["total"] = Time.get_ticks_usec() - configure_started
 		return []
 	if not build_model:
 		_model_deferred = true
 		_add_stand_in()
+		_configuration_phases_us["total"] = Time.get_ticks_usec() - configure_started
 		return []
 	var source_path := _external_path(str(model_config.get("scene", "")))
+	var phase_started := Time.get_ticks_usec()
 	var errors := _load_native_scene(source_path)
+	_configuration_phases_us["model_scene"] = Time.get_ticks_usec() - phase_started
 	if not errors.is_empty():
 		_add_fallback_visual(dto)
 		# The native model never loaded, so the import adapter below will not
@@ -661,11 +672,13 @@ func configure(dto: Dictionary, adapter: CoordinateAdapter,
 		# should still be giant, and its nameplate still above it.
 		_apply_model_scale()
 	if errors.is_empty():
+		phase_started = Time.get_ticks_usec()
 		_apply_import_adapter(model_config.get("import", {}))
 		var visual_error: String = _validate_native_visual()
 		if not visual_error.is_empty():
 			errors.append(visual_error)
 			_add_fallback_visual(dto)
+		_configuration_phases_us["import_adapter"] = Time.get_ticks_usec() - phase_started
 		var skeleton: Skeleton3D = null
 		for node in find_children("*", "Skeleton3D", true, false):
 			skeleton = node as Skeleton3D
@@ -680,8 +693,11 @@ func configure(dto: Dictionary, adapter: CoordinateAdapter,
 				_weapon_carry.set("actor", self)
 				_weapon_carry.active = false
 				skeleton.add_child(_weapon_carry)
+			phase_started = Time.get_ticks_usec()
 			_attach_cape_cloth(skeleton)
 			apply_appearance_variants(dto.get("appearance", {}) as Dictionary)
+			_configuration_phases_us["appearance"] = Time.get_ticks_usec() - phase_started
+			phase_started = Time.get_ticks_usec()
 			var animation_path := _external_path(str(model_config.get("animationLibrary", "")))
 			var wanted_clips := resolver.required_clips()
 			# Player techniques use the same immutable imported rig/library cache.
@@ -709,13 +725,19 @@ func configure(dto: Dictionary, adapter: CoordinateAdapter,
 					combat_presentation = CombatPresentation3D.new()
 					add_child(combat_presentation)
 					combat_presentation.configure(self)
+			_configuration_phases_us["animation"] = Time.get_ticks_usec() - phase_started
+			phase_started = Time.get_ticks_usec()
 			_rl_head_ready = true
 			if _rl_head_pending != null:
 				# The appearance pass above drew everything but the RL head
 				# itself: build it now, after the import, in place.
 				_switch_rl_head_in_place()
+			_configuration_phases_us["rl_head"] = Time.get_ticks_usec() - phase_started
+	phase_started = Time.get_ticks_usec()
 	apply_equipment_visuals(dto.get("equipment_visuals", {}) as Dictionary,
 		dto.get("equipment_fallback_parts", []) as Array)
+	_configuration_phases_us["equipment"] = Time.get_ticks_usec() - phase_started
+	_configuration_phases_us["total"] = Time.get_ticks_usec() - configure_started
 	return errors
 
 func apply_appearance_variants(appearance: Dictionary) -> void:

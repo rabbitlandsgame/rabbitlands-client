@@ -218,8 +218,19 @@ func release_world(detach := true, publish_prepared := true, admission_token: Di
 		_materialize_prepared_world()
 	else:
 		_prepared_native.clear() # Stale completion: release Resources without Nodes.
-	if publish_prepared and is_instance_valid(world_root) and not _bind_road_ground():
-		unload_world()
+	var pending_road_ground: Dictionary = {}
+	if publish_prepared and is_instance_valid(world_root):
+		if OS.get_thread_caller_id() == OS.get_main_thread_id():
+			if not _bind_road_ground():
+				unload_world()
+			elif world_root is ContinentChunkStream:
+				(world_root as ContinentChunkStream).publish_prepared_roads()
+		elif not _road_ground_bound and manifest != null and not manifest.road_ground_config().is_empty():
+			# A raw territory preload primes its private child chunks on its
+			# worker too. Keep their geometry there; only road publication needs
+			# Main. The owning stream retains these private field Resources until
+			# its main-thread release (or drops them with a stale private tree).
+			pending_road_ground = _road_ground_prepared.duplicate()
 	_cache_write_countdown = 0
 	_release_snapshot()
 	var resident := {"root": world_root, "manifest": manifest,
@@ -227,6 +238,7 @@ func release_world(detach := true, publish_prepared := true, admission_token: Di
 		"from_cache": loaded_from_cache, "cache_status": cache_status,
 		"cache_file": cache_file, "visuals": _prepared_visuals,
 		"resource_timings": _resource_timings,
+		"pending_road_ground": pending_road_ground,
 		"deferred_stream_arrival": _deferred_stream_arrival if publish_prepared else Vector3.INF,
 		"scenery_pending": scenery_pending}
 	_deferred_stream_arrival = Vector3.INF
@@ -239,6 +251,23 @@ func release_world(detach := true, publish_prepared := true, admission_token: Di
 	world_root = null
 	manifest = null
 	return resident
+
+## Finish a raw child chunk prepared inside a detached territory worker.
+## This transfers no geometry work to Main and never decodes the fields again.
+static func publish_resident_roads(resident: Dictionary) -> Dictionary:
+	var prepared: Dictionary = resident.get("pending_road_ground", {})
+	if prepared.is_empty():
+		return {"ok": true}
+	if OS.get_thread_caller_id() != OS.get_main_thread_id():
+		return {"ok": false, "error": "road_ground_publication_not_main"}
+	var began := Time.get_ticks_usec()
+	var result: Dictionary = RoadGround.bind(resident.root as Node3D,
+		resident.manifest as WorldManifest, prepared)
+	ResourceDiagnostics.record(resident.get("resource_timings", {}), &"road_ground_bind", began)
+	# Success transfers the data to the root's binding; failure releases any
+	# remaining private candidates along with the rejected chunk.
+	resident.erase("pending_road_ground")
+	return result
 
 func adopt_world(resident: Dictionary) -> void:
 	unload_world()

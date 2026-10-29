@@ -56,6 +56,7 @@ func _run() -> void:
 	_animation = _json("res://data/animations/luminous.json")
 	OS.set_environment("RL_HEADS", "")
 	ReplicatedActor3D.reload_rl_heads_switch()
+	await _check_initial_high_finish()
 	await _check_round_trips()
 	await _check_classic_switch()
 	await _check_release()
@@ -66,9 +67,38 @@ func _run() -> void:
 	await _check_missing_hair()
 	await _check_hair_edits_and_helms()
 	await _check_spring_scale()
+	# Animation source caches own detached Nodes, so exiting the test without
+	# the session cleanup reports them as orphaned ObjectDB instances.
+	NativeAnimationImporter.clear()
+	GlbSceneCache.clear()
 	print("rl head quality switch: %d checks, %d failures" % [_checks, _failures])
 	print("rl head quality switch: ", "PASS" if _failures == 0 else "FAIL (%d)" % _failures)
 	quit(1 if _failures > 0 else 0)
+
+
+## Selecting High before initial configuration must produce the same final
+## outfit as the established live tier switch (including bare head visibility).
+func _check_initial_high_finish() -> void:
+	for sex: String in ["male", "female"]:
+		for equipped: bool in [false, true]:
+			var appearance := PRESETS.appearance("Rowan" if sex == "male" else "Mira")
+			var equipment := {3: 111} if equipped else {}
+			var switched := _spawn(sex, appearance, equipment, MEDIUM)
+			switched.apply_render_quality(HIGH, false)
+			var initial := _spawn(sex, appearance, equipment, HIGH)
+			await process_frame
+			var diff := _differences(_capture(switched), _capture(initial))
+			_expect(diff.is_empty(), "%s initial High final outfit matches a live switch (%s): %s"
+				% [sex, equipped, diff.slice(0, 6)])
+			var timings := initial.configuration_timings_usec()
+			_expect(int(timings.get("total", -1)) >= int(timings.get("model_scene", 0))
+				and int(timings.get("total", -1)) >= int(timings.get("equipment", 0)),
+				"configuration diagnostics retain plain phase durations")
+			timings.clear()
+			_expect(not initial.configuration_timings_usec().is_empty(), "diagnostics snapshots do not mutate the actor")
+			initial.free()
+			switched.free()
+			await process_frame
 
 
 func _spawn(sex: String, appearance: Dictionary, equipment: Dictionary, quality: int) -> ReplicatedActor3D:

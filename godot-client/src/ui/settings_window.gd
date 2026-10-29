@@ -48,6 +48,7 @@ const MapCache := preload("res://src/world/map_scene_cache.gd")
 const GeometryCache := preload("res://src/world/map_geometry_cache.gd")
 const CollisionCache := preload("res://src/world/map_collision_cache.gd")
 const PavingCache := preload("res://src/world/map_paving_cache.gd")
+const CacheDiskUsage := preload("res://src/ui/cache_disk_usage.gd")
 ## The look pass's switch and quality names; preloaded for the same reason.
 const LookProfileScript := preload("res://src/world/look/look_profile.gd")
 ## keys.ini, Eternal Lands-style: the file every key binding is kept in.
@@ -104,6 +105,9 @@ var text_color_group: OptionButton
 var text_color_search: LineEdit
 var text_color_notice: Label
 var _chat_palette: Dictionary = {}
+var _cache_size_thread: Thread
+var _cache_size_scan: CacheDiskUsage
+var _cache_size_refresh_again := false
 
 ## The action waiting for a key. While this is set the window swallows every
 ## key press, so a rebind cannot fire the action it is rebinding.
@@ -114,6 +118,33 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_build()
+	set_process(false)
+
+func _exit_tree() -> void:
+	_stop_cache_size_scan()
+
+func _stop_cache_size_scan() -> void:
+	if _cache_size_thread != null:
+		_cache_size_scan.cancel()
+		_cache_size_thread.wait_to_finish()
+		_cache_size_thread = null
+		_cache_size_scan = null
+	_cache_size_refresh_again = false
+	set_process(false)
+
+func _process(_delta: float) -> void:
+	if _cache_size_thread == null or _cache_size_thread.is_alive():
+		return
+	var result: Dictionary = _cache_size_thread.wait_to_finish()
+	_cache_size_thread = null
+	_cache_size_scan = null
+	if _cache_size_refresh_again:
+		_cache_size_refresh_again = false
+		_refresh_map_cache()
+		return
+	if not bool(result.cancelled):
+		_set_cache_size_text(MapCache.describe_size(int(result.bytes)))
+	set_process(false)
 
 func is_open() -> bool:
 	return panel.visible
@@ -150,6 +181,9 @@ func close() -> void:
 	capturing = ""
 	capture_label.hide()
 	panel.hide()
+	_cache_size_refresh_again = false
+	if _cache_size_scan != null:
+		_cache_size_scan.cancel()
 
 ## The tab titles, in order. Used by the tests and by nothing else.
 func tab_titles() -> Array[String]:
@@ -972,18 +1006,38 @@ func _add_map_cache_row(page: VBoxContainer) -> void:
 	map_cache_clear.pressed.connect(func() -> void:
 		if GeometryCache.cooking or CollisionCache.busy():
 			return
+		# Release the inventory's current read handle before deleting files on
+		# Windows, then start a fresh count of the resulting empty caches.
+		_stop_cache_size_scan()
 		var removed: int = MapCache.clear_disk() + GeometryCache.clear_disk() + CollisionCache.clear_disk() + PavingCache.clear_disk()
 		_refresh_map_cache()
 		setting_changed.emit(page.name, "map_cache_clear", removed))
 	row.add_child(map_cache_clear)
-	_refresh_map_cache()
+	# This hidden row must not open every prepared cache file before login.
+	# Its read-only inventory starts when the player opens settings instead.
+	map_cache_clear.disabled = GeometryCache.cooking or CollisionCache.busy()
 
 ## What the row says: the size on disk, and whatever the server's digest had to
 ## say about this install.
 func _refresh_map_cache() -> void:
 	if map_cache_size == null:
 		return
-	var text: String = MapCache.describe_size(MapCache.total_bytes() + GeometryCache.total_bytes() + CollisionCache.total_bytes() + PavingCache.total_bytes())
+	_set_cache_size_text("Calculating…")
+	if _cache_size_thread != null:
+		_cache_size_refresh_again = true
+		return
+	_cache_size_scan = CacheDiskUsage.new()
+	_cache_size_thread = Thread.new()
+	var error := _cache_size_thread.start(_cache_size_scan.measure)
+	if error != OK:
+		_cache_size_thread = null
+		_cache_size_scan = null
+		_set_cache_size_text("Unavailable")
+		return
+	set_process(true)
+
+func _set_cache_size_text(value: String) -> void:
+	var text := value
 	var digests: String = MapCache.digest_summary()
 	if not digests.is_empty():
 		text += " - " + digests

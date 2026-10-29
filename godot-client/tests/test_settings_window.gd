@@ -36,8 +36,11 @@ func _run() -> void:
 	await process_frame
 
 	_expect(not panel.visible, "the settings window starts closed")
+	_expect(window.get("_cache_size_thread") == null,
+		"a closed settings window does not inventory disk caches during login")
 	main.call("_on_more_settings_pressed")
 	await process_frame
+	await _wait_cache_size(window)
 	_expect(panel.visible, "the settings button opens it")
 	_expect((window.call("tab_titles") as Array)
 			== ["HUD", "Chat", "Text colors", "Minimap", "Banners", "Graphics", "Camera", "Audio", "Inventory", "Spells", "Gameplay", "Controls"],
@@ -91,7 +94,7 @@ func _run() -> void:
 		await process_frame
 		_expect(MapSceneCache.is_enabled(), "and back on")
 		cache_clear.pressed.emit()
-		await process_frame
+		await _wait_cache_size(window)
 		_expect(MapSceneCache.total_bytes() == 0
 				and cache_size.text.begins_with("empty"),
 			"clearing empties it and says so: %s" % cache_size.text)
@@ -601,6 +604,13 @@ func _test_unified_settings(main: Control, window: Control, panel: PanelContaine
 	main.call("_on_ui_scale_changed", 1.0)
 	root.size = Vector2i(1280, 720)
 	window.call("open_tab", "Graphics")
+
+func _wait_cache_size(window: Control) -> void:
+	var deadline := Time.get_ticks_msec() + 5000
+	while window.get("_cache_size_thread") != null and Time.get_ticks_msec() < deadline:
+		await process_frame
+	_expect(window.get("_cache_size_thread") == null,
+		"the read-only cache size inventory completes without blocking UI frames")
 
 func _hex(value: String) -> PackedByteArray:
 	var bytes := PackedByteArray()

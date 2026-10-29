@@ -337,14 +337,7 @@ static func _imported_actor_scene(path: String) -> PackedScene:
 	if extension != "glb" and extension != "gltf":
 		return null
 	if OS.has_feature("editor"):
-		# ResourceLoader.exists() also accepts skipped or unfinished editor
-		# imports. Loading those emits errors before the raw fallback succeeds.
-		var import_settings := ConfigFile.new()
-		if import_settings.load(resource_path + ".import") != OK \
-				or str(import_settings.get_value("remap", "importer", "")) != "scene":
-			return null
-		var imported_path := str(import_settings.get_value("remap", "path", ""))
-		if imported_path.is_empty() or not FileAccess.file_exists(imported_path):
+		if _editor_import_path(resource_path).is_empty():
 			return null
 	if not ResourceLoader.exists(resource_path, "PackedScene"):
 		return null
@@ -353,6 +346,27 @@ static func _imported_actor_scene(path: String) -> PackedScene:
 		ResourceLoader.CACHE_MODE_REUSE) as PackedScene
 	_record_operation(&"imported_scene_read", began)
 	return imported
+
+## An ignored loose-native folder can retain import files from an older
+## checkout. ResourceLoader still follows those remaps, even though an editor
+## scan now excludes their source. Honor the active folder policy first.
+## Kept separate from the actor whitelist for small ignored import fixtures.
+static func _editor_import_path(resource_path: String) -> String:
+	var directory := resource_path.get_base_dir()
+	while directory.begins_with("res://") or directory.begins_with("user://"):
+		if FileAccess.file_exists(directory.path_join(".gdignore")):
+			return ""
+		if directory in ["res://", "user://"]: break
+		var parent := directory.get_base_dir()
+		if parent == directory: break
+		directory = parent
+	# ResourceLoader.exists() also accepts skipped or unfinished editor imports.
+	var import_settings := ConfigFile.new()
+	if import_settings.load(resource_path + ".import") != OK \
+			or str(import_settings.get_value("remap", "importer", "")) != "scene":
+		return ""
+	var imported_path := str(import_settings.get_value("remap", "path", ""))
+	return imported_path if not imported_path.is_empty() and FileAccess.file_exists(imported_path) else ""
 
 static func _build_raw(path: String, scenery: Dictionary = {}) -> PackedScene:
 	if not GltfQuantization.ensure_registered():
