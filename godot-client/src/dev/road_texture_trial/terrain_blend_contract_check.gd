@@ -9,6 +9,7 @@ var _checks := 0
 var _failures: Array[String] = []
 
 func _init() -> void:
+	_check_sheared_uv_frame()
 	_expect(bool(Blend.apply(null, "", "baseline").ok), "baseline_no_op")
 	_expect(not bool(Blend.apply(null, "", "blend").ok), "missing_world_rejected")
 	var base := ShaderMaterial.new()
@@ -50,6 +51,28 @@ func _init() -> void:
 			_check_trial(args[i + 1])
 	print(JSON.stringify({"checks": _checks, "failures": _failures, "gpu_qualified": false}))
 	quit(0 if _failures.is_empty() else 1)
+
+func _check_sheared_uv_frame() -> void:
+	# A sloped plane whose UV-v axis has a component along UV-u. A normal map
+	# must use the same orthonormal frame as imported glTF tangents, with its
+	# handedness retained. Merely normalizing the raw two axes fails this case.
+	var n := Vector3(0.0, 1.0, 1.0).normalized()
+	var tangent := Vector3.RIGHT
+	var imported_bitangent := n.cross(tangent).normalized()
+	for handedness: float in [-1.0, 1.0]:
+		var raw_v: Vector3 = tangent * 0.65 + imported_bitangent * handedness
+		var rebuilt: Vector3 = n.cross(tangent).normalized()
+		if rebuilt.dot(raw_v) < 0.0:
+			rebuilt = -rebuilt
+		_expect(absf(tangent.dot(raw_v.normalized())) > 0.5, "fixture_has_material_uv_shear")
+		_expect(absf(rebuilt.dot(tangent)) < 0.000001 and absf(rebuilt.dot(n)) < 0.000001,
+			"sheared_uv_frame_is_orthogonal")
+		_expect(rebuilt.is_equal_approx(imported_bitangent * handedness), "sheared_uv_frame_matches_imported_handedness")
+		# A pure green-channel normal must point along the imported bitangent;
+		# the old projected raw-v axis incorrectly contributed tangent red.
+		var normal_map_green := (tangent * 0.0 + rebuilt * 0.8 + n * 0.6).normalized()
+		_expect(absf(normal_map_green.dot(tangent)) < 0.000001,
+			"green_normal_has_no_shear_induced_tangent_component")
 
 func _check_trial(path: String) -> void:
 	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))

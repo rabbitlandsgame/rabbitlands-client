@@ -180,8 +180,16 @@ static func _composite(road_fragment: String, road_coverage: String) -> String:
 		if (abs(blend_det) > 0.00000001) {
 			vec3 t = (blend_dpdx * blend_dudy.y - blend_dpdy * blend_dudx.y) / blend_det;
 			vec3 b = (blend_dpdy * blend_dudx.x - blend_dpdx * blend_dudy.x) / blend_det;
-			blend_t = normalize(t - blend_n * dot(blend_n, t));
-			blend_b = normalize(b - blend_n * dot(blend_n, b));
+			vec3 projected_t = t - blend_n * dot(blend_n, t);
+			if (dot(projected_t, projected_t) > 0.00000001) {
+				vec3 candidate_t = normalize(projected_t);
+				vec3 candidate_b = normalize(cross(blend_n, candidate_t));
+				float handedness = dot(candidate_b, b);
+				if (abs(handedness) > 0.00000001) {
+					blend_t = candidate_t;
+					blend_b = candidate_b * (handedness < 0.0 ? -1.0 : 1.0);
+				}
+			}
 		}
 		vec3 blend_base_n = terrain_blend_normal_view(terrain_blend_base_map, terrain_blend_base_depth, NORMAL, TANGENT, BINORMAL);
 		vec3 blend_road_n = terrain_blend_normal_view(road_eval_map, road_eval_depth, blend_n, blend_t, blend_b);
