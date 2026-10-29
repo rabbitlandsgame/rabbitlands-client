@@ -98,6 +98,13 @@ class WorldImports(unittest.TestCase):
         self.write("godot-client/src/actors/glb_scene_cache.gd", 'return ResourceLoader.load(path)\n')
         self.assertEqual(package.world_import_shipping(self.root)["imported_models"], {self.model})
 
+    def test_dynamic_world_directory_prefix_keeps_possible_resource_dependencies(self):
+        self.write("godot-client/src/custom.gd", 'const ROOT="res://assets/world/props/"\n'
+                   'func resource(id): return ResourceLoader.load(ROOT + id)\n')
+        result = package.world_import_shipping(self.root)
+        self.assertEqual(result["imported_models"], {self.model})
+        self.assertNotIn(self.image, result["dropped_images"])
+
     def test_loose_stage_keeps_raw_model_and_omits_only_verified_unused_image(self):
         app = self.root / "app"
         with mock.patch.object(package, "actor_shipping", return_value={"loose": set(), "dropped": set()}), \

@@ -513,9 +513,22 @@ class StageCommittedMaps(unittest.TestCase):
         shutil.copyfile(registry_file, dropped_file)
         read_text = Path.read_text
         staged: set[str] = set()
+        # Post-copy checks read the staged world manifests and fully verify
+        # their road field closure. Materialize only that small required set;
+        # record all other selected files without copying the full map GLBs.
+        required = set(manifests)
+        for relative in manifests:
+            data = json.loads((CHECKOUT / relative).read_text(encoding="utf-8-sig"))
+            if isinstance(data, dict) and "roadGround" in data:
+                required.update(path.relative_to(CHECKOUT.resolve()).as_posix() for path in
+                                packager.road_dependencies(CHECKOUT, CHECKOUT / relative, data["roadGround"]))
 
         def copy_file(source: Path, target: Path) -> int:
-            staged.add(target.relative_to(stage).as_posix())
+            relative = target.relative_to(stage).as_posix()
+            staged.add(relative)
+            if relative in required:
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(source, target)
             return 0
 
         def read_dropped_registry(path: Path, *args, **kwargs) -> str:

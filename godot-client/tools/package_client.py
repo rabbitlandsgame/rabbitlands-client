@@ -887,12 +887,22 @@ def world_import_shipping(build_dir: Path) -> dict[str, set[str]]:
     images = {path for path in files if path.startswith(WORLD_ASSET_ROOT) and path.lower().endswith(IMAGE_SUFFIXES)}
     imported: set[str] = set()
     independent: set[str] = set()
+    reader_path = "godot-client/src/actors/glb_scene_cache.gd"
+    reader = build_dir / reader_path
+    reader_text = reader.read_text(encoding="utf-8", errors="replace") if reader.is_file() else ""
+    raw_reader_known = 'if not resource_path.begins_with("res://assets/actors/")' in reader_text
     texts = [path for path in files if path.lower().endswith((".gd", ".tscn", ".tres", ".gdshader", ".json"))
              and not path.startswith((*UNSHIPPED_CLIENT_DIRS, "godot-client/world_authoring/"))]
     texts += [path for path in tracked(build_dir, "eloria-assets/maps") if path.endswith(".json")
               and is_shipped_map_file(PurePosixPath(path).relative_to("eloria-assets/maps"))]
     for path in texts:
         text = (build_dir / path).read_text(encoding="utf-8-sig", errors="replace")
+        if path != reader_path or not raw_reader_known:
+            for _quote, literal in SOURCE_LITERAL.findall(text):
+                if literal.startswith("res://assets/world/") and (literal.endswith("/") or "%" in literal or "{" in literal):
+                    prefix = "godot-client/" + re.split(r"[%{]", literal[6:], maxsplit=1)[0]
+                    imported.update(model for model in models if model.startswith(prefix))
+                    independent.update(image for image in images if image.startswith(prefix))
         for target in WORLD_RESOURCE_LITERAL.findall(text):
             target = "godot-client/" + target
             if target in images:
@@ -906,9 +916,7 @@ def world_import_shipping(build_dir: Path) -> dict[str, set[str]]:
                 # Conservatively keep every world-model literal in that script.
                 imported.update("godot-client/" + target for target in WORLD_RESOURCE_LITERAL.findall(text)
                                 if target.lower().endswith(GLTF_SUFFIXES))
-    reader = build_dir / "godot-client/src/actors/glb_scene_cache.gd"
-    reader_text = reader.read_text(encoding="utf-8", errors="replace") if reader.is_file() else ""
-    if 'if not resource_path.begins_with("res://assets/actors/")' not in reader_text:
+    if not raw_reader_known:
         # Packaging another revision must not assume the current raw-world
         # reader. An unrecognized/imported world reader keeps its old imports.
         imported.update(models)
