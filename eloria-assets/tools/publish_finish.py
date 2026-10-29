@@ -239,19 +239,50 @@ def _own_figures(manifest: dict, path: Path) -> bool:
     if not isinstance(performance, dict) or "glbBytes" not in performance or not glb.is_file():
         return False
     figures = {"glbBytes": glb.stat().st_size}
+    road_resident, road_stored = road_ground_figures(manifest, path)
+    if road_resident:
+        figures["roadGroundResidentBytes"] = road_resident
+        figures["roadGroundStoredBytes"] = road_stored
     if "nodes" in performance or "meshes" in performance:
         document = _document(glb)
         figures["nodes"] = len(document.get("nodes", []))
         figures["meshes"] = len(document.get("meshes", []))
     changed = False
     for key, value in figures.items():
-        if key in performance and performance[key] != value:
+        if (key in performance or key.startswith("roadGround")) and performance.get(key) != value:
             performance[key] = value
             changed = True
     return changed
 
 
 SHARED_MESHES_KEY = "sharedMeshResidentBytes"
+
+
+def road_ground_figures(manifest: dict, path: Path) -> tuple[int, int]:
+    """Unique field CPU/GPU residency and stored payload bytes, not shared images."""
+    config = manifest.get("roadGround")
+    if not config:
+        return 0, 0
+    relative = Path(config["metadata"])
+    if relative.is_absolute() or ".." in relative.parts:
+        raise ValueError("roadGround metadata must stay in its chunk")
+    metadata = path.parent / relative
+    raw = metadata.read_bytes()
+    import hashlib
+    if hashlib.sha256(raw).hexdigest() != config["sha256"]:
+        raise ValueError("roadGround metadata changed before accounting")
+    data = json.loads(raw)
+    field = data["field"]
+    coverage = sum(int(row["width"]) * int(row["height"]) for row in field["coverage_mips"])
+    ids = int(field["triangle_ids"]["uncompressed_bytes"])
+    coefficients = int(field["affine_coefficients"]["uncompressed_bytes"])
+    # The root retains CPU lookup Images/bytes as well as GPU textures. The
+    # separate L0 coverage and coefficient-style lookup stay CPU-only.
+    l0 = field["coverage_mips"][0]
+    resident = 2 * (coverage + ids + coefficients) + int(l0["width"]) * int(l0["height"]) + int(field["affine_coefficients"]["record_count"])
+    files = [row["file"] for row in field["coverage_mips"]] + [field["triangle_ids"]["file"], field["affine_coefficients"]["file"]]
+    stored = len(raw) + sum((metadata.parent / name).stat().st_size for name in set(files))
+    return resident, stored
 
 
 def _pool_index(directory: Path, indexes: dict) -> dict:
@@ -339,11 +370,19 @@ def restamp(manifests, dry_run: bool = False, factor: float | None = None) -> li
                 continue
             size = glb.stat().st_size
             geometry = math.ceil(resident * size)
+            road_resident, _ = road_ground_figures(child[0], child_path)
+            if road_resident:
+                if cell.get("roadGroundResidentBytes") != road_resident:
+                    cell["roadGroundResidentBytes"] = road_resident
+                    changed = True
+            elif "roadGroundResidentBytes" in cell:
+                del cell["roadGroundResidentBytes"]
+                changed = True
             prototypes = prototype_figures(child[0], child_path, resident, indexes)
             changed = _set_prototypes(cell, prototypes) or changed
             shared = (cell.get("sharedResourceResidentBytes") or {}).values()
             for key, value in (("glbBytes", size), ("geometryResidentBytes", geometry),
-                               ("estimatedResidentBytes", geometry + sum(shared) + sum(prototypes.values()))):
+                               ("estimatedResidentBytes", geometry + road_resident + sum(shared) + sum(prototypes.values()))):
                 if key in cell and cell[key] != value:
                     cell[key] = value
                     changed = True
@@ -424,6 +463,22 @@ def finish(paths, *, dry_run: bool = False, quantise_pass: bool = True,
         _save_index(index)
     quantised = quantise(files + fresh, dry_run) if quantise_pass else {"files": 0, "bytes": 0, "accessors": {}}
     vertices = consolidate_vertices(files + fresh, dry_run)
+    # A publisher may still emit its authored road ribbons as intermediate
+    # geometry. Convert before accounting and never let a later publish bring
+    # nonbridge road render/collision meshes back into the shipped leaves.
+    road_reports = []
+    regions = set()
+    for path in files:
+        try:
+            relative = path.relative_to(MAPS)
+        except ValueError:
+            continue
+        if len(relative.parts) >= 4 and relative.parts[0] == "continent-v2" and relative.parts[2] == "client":
+            regions.add(relative.parts[1])
+    if regions:
+        import apply_road_terrain_blend as road_publish
+        for region in sorted(regions):
+            road_reports.append(road_publish.finish_region(REPO, region, apply=not dry_run))
     manifests = package_manifests(files)
     reconciled = SM.reconcile(dry_run, prototypes={path.stem for path in fresh}, manifests=manifests)
     restated = restamp(manifests, dry_run, factor)
@@ -435,13 +490,13 @@ def finish(paths, *, dry_run: bool = False, quantise_pass: bool = True,
         f"{(shared['bytes'] + images['bytes'] + quantised['bytes'] + vertices['bytes']) / 1e6:.0f} MB smaller")
     if reconciled or restated:
         log(f"  restated {len(set(restated))} manifests and {len(reconciled)} prototype hashes")
-    return {"files": len(files), "shared": shared, "images": images, "quantised": quantised, "vertices": vertices,
+    return {"files": len(files), "shared": shared, "images": images, "quantised": quantised, "vertices": vertices, "roads": road_reports,
             "prototypes": [path.name for path in fresh], "reconciled": reconciled,
             "restamped": sorted(set(restated))}
 
 
 def every_manifest() -> list[Path]:
-    skip = {"source", "sources", "references", "captures", "godot-captures", "qa", "work"}
+    skip = {"source", "sources", "references", "captures", "godot-captures", "qa", "work", ".local"}
     return [path for path in sorted(MAPS.rglob("world.json"))
             if not {part.lower() for part in path.relative_to(MAPS).parts[:-1]} & skip]
 

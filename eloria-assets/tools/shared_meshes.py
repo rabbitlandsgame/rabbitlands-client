@@ -288,7 +288,7 @@ def package_glbs(root: Path) -> list[Path]:
     out = []
     for path in sorted(root.rglob("*.glb")):
         parts = {p.lower() for p in path.relative_to(root).parts[:-1]}
-        if parts & {"source", "sources", "references", "captures", "godot-captures", "qa", "work"}:
+        if parts & {"source", "sources", "references", "captures", "godot-captures", "qa", "work", ".local"}:
             continue
         if path.name.startswith("world-lod") or path.parent.name == "meshes":
             continue

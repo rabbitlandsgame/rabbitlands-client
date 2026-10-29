@@ -230,7 +230,7 @@ func _run() -> void:
 	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 	root.size = Vector2i(1280,720)
 	root.grab_focus()
-	Graphics.decorative_grass = false
+	Graphics.decorative_grass = bool(config.get("decorative_grass", false))
 	LookProfile.set_player_quality(LookProfile.QUALITY_DEFAULT)
 	RenderingServer.frame_post_draw.connect(_draw)
 	RenderingServer.viewport_set_measure_render_time(root.get_viewport_rid(),true)
@@ -256,10 +256,27 @@ func _run() -> void:
 		loader.load_world(path,Vector3.INF,true)
 		load_us += Time.get_ticks_usec()-began
 		_check(is_instance_valid(loader.world_root),"chunk loads",path)
+		if bool(config.get("expect_geometry_cache", false)):
+			_check(loader.cache_status == &"geometry", "native geometry cache was consumed", str(loader.cache_status))
 		if not is_instance_valid(loader.world_root): continue
 		loaders.append(loader)
 	_check(loaders.size() == config.manifests.size(),"all chunks loaded")
 	var before_trial_visuals := _visual_inventory()
+	if bool(config.get("production_roads", false)):
+		const Road := preload("res://src/world/road_ground/road_ground.gd")
+		for loader: WorldLoader in loaders:
+			if loader.manifest.road_ground_config().is_empty(): continue
+			_check(loader.world_root.has_meta(Road.META), "production fields bind to retained ground")
+			if not loader.world_root.has_meta(Road.META): continue
+			var data: Resource = loader.world_root.get_meta(Road.META).data
+			for target: Dictionary in data.document.targets:
+				var node := loader.world_root.find_child(str(target.name), true, false) as MeshInstance3D
+				_check(node != null, "existing production ground target survives", target.name)
+				if node == null: continue
+				for surface: int in node.mesh.get_surface_count():
+					var material := node.get_active_material(surface)
+					_check(material is ShaderMaterial and material.has_meta(Road.MATERIAL_META) and material.next_pass == null,
+						"production roads add no material pass", target.name)
 	var trial_install_us := 0
 	if str(config.get("variant","baseline")) != "baseline":
 		var blending := str(config.get("variant","")).begins_with("blend")

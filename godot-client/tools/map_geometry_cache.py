@@ -15,6 +15,7 @@ import re
 import subprocess
 import sys
 import time
+from road_ground_dependencies import dependencies as road_dependencies, RoadGroundDependencyError
 
 SCHEMA = 1
 SCOPE = "data/maps/geometry-cache-scope.json"
@@ -179,6 +180,11 @@ class Closure:
 
     def world(self, path: Path, manifest: dict) -> None:
         self.add(path, "world_manifest")
+        try:
+            for dependency, digest in road_dependencies(self.project.parent, path, manifest.get("roadGround")).items():
+                self.add(dependency, "road_ground", digest)
+        except RoadGroundDependencyError as exc:
+            raise PlanError(str(exc)) from exc
         glb = self.dependency(path.parent, manifest.get("asset", {}).get("glb", ""))
         self.gltf(glb, "geometry")
         for field, kind in (("externalResources", "image"), ("externalMeshes", "prototype")):

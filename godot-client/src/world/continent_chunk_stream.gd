@@ -294,7 +294,7 @@ static func incremental_cost(entry: Dictionary, shared: Dictionary,
 		if floor_bytes > geometry:
 			prototype_scale = float(floor_bytes) / maxi(1, geometry)
 			geometry = floor_bytes
-	var cost := maxi(1, geometry)
+	var cost := maxi(1, geometry) + maxi(0, int(entry.get("roadGroundResidentBytes", 0)))
 	var images: Dictionary = entry.get(key, entry.get("sharedResourceResidentBytes", {}))
 	for identity: String in images:
 		var bytes := maxi(0, int(images[identity]))

@@ -19,6 +19,7 @@ import re
 import struct
 import shutil
 import creature_compression
+from road_ground_dependencies import dependencies as road_dependencies, RoadGroundDependencyError
 from urllib.parse import unquote
 
 SCHEMA = 1
@@ -353,6 +354,11 @@ class Closure:
                     self.add(self.uri(path.parent, uri))
         elif path.name == "world.json":
             doc = json.loads(path.read_text(encoding="utf-8"))
+            try:
+                for dependency, digest in road_dependencies(self.repository, path, doc.get("roadGround")).items():
+                    self.add(dependency, digest)
+            except RoadGroundDependencyError as exc:
+                raise PreparedError(str(exc)) from exc
             if "streamingChunks" in doc:
                 raise PreparedError("cook child packages, never a partially resident territory")
             self.visit(self.uri(path.parent, str(doc["asset"]["glb"])))

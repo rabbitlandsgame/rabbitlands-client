@@ -97,6 +97,11 @@ func _check_cost() -> void:
 		"a cell costs its geometry plus the prototypes it draws")
 	_expect(ContinentChunkStream.incremental_cost(first.duplicate(), shared) == GEOMETRY,
 		"a second cell drawing the same prototype costs only its own geometry")
+	var road_cell := first.duplicate(true)
+	road_cell.roadGroundResidentBytes = 2000
+	_expect(ContinentChunkStream.incremental_cost(road_cell, shared) == GEOMETRY + 2000
+		and ContinentChunkStream.incremental_cost(road_cell.duplicate(true), shared) == GEOMETRY + 2000,
+		"each chunk's decoded road fields count even when its images and prototypes are shared")
 	var bigger := {"geometryResidentBytes": GEOMETRY, KEY: {_id("a"): PROTOTYPE + 500}}
 	_expect(ContinentChunkStream.incremental_cost(bigger, shared) == GEOMETRY + 500,
 		"a larger figure for a counted prototype adds only the difference")
