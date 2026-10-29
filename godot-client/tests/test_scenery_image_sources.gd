@@ -141,5 +141,7 @@ func run() -> void:
 		"real import handles every image before any fallback readback")
 	check(raw_state.get_json().images[0].uri == "shared.png" and raw_state.get_images()[0] != null and raw_state.get_images()[0].get_width() == 64,
 		"real import restores URI and replaces pooled placeholder")
+	DirAccess.remove_absolute(fixture.path_join("shared.png"))
+	DirAccess.remove_absolute(fixture)
 	print("SCENERY IMAGE SOURCES: %d checks, %d failures" % [checks, failures])
 	quit(1 if failures else 0)
