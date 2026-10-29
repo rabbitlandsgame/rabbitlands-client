@@ -1063,8 +1063,15 @@ func _surface_of(collider: CollisionObject3D) -> Dictionary:
 ## deck with coverage) or is opaque, whether its vertex colour is its colour.
 static func _material_facts(node: MeshInstance3D) -> Dictionary:
 	var material := node.get_active_material(0)
-	while material != null and material.has_meta(SeasonSurfaces.SOURCE_META):
-		material = material.get_meta(SeasonSurfaces.SOURCE_META) as Material
+	for _hop: int in 8:
+		if material != null and material.has_meta(SeasonSurfaces.SOURCE_META):
+			material = material.get_meta(SeasonSurfaces.SOURCE_META) as Material
+		elif material != null and material.has_meta(RoadGround.MATERIAL_META):
+			# A structural road composite preserves the underlying patch's
+			# class/alpha; its private shader identity is not a new ground type.
+			material = material.get_meta(RoadGround.MATERIAL_META) as Material
+		else:
+			break
 	var coloured: bool = (int(node.mesh.surface_get_format(0)) & Mesh.ARRAY_FORMAT_COLOR) != 0
 	if material is ShaderMaterial and material.has_meta(LookGround.PAINTED_META):
 		var painted := material as ShaderMaterial

@@ -101,26 +101,34 @@ static func rebind(root: Node, manifest: WorldManifest) -> Dictionary:
 		if target == null or target.mesh == null or target.material_override != null:
 			return _error("road_existing_ground_target_missing")
 		meshes.append(target)
+	var paving: PackedVector4Array = _paving_rects(meshes)
+	for target: MeshInstance3D in meshes:
 		for surface: int in target.mesh.get_surface_count():
 			var source: Material = target.get_active_material(surface)
 			if source != null and source.has_meta(MATERIAL_META):
 				source = source.get_meta(MATERIAL_META) as Material
 			var raw: Material = _source_of(source)
 			var base: ShaderMaterial = source as ShaderMaterial
+			var box: AABB = target.mesh.get_aabb()
+			var area := Rect2(box.position.x, box.position.z, box.size.x, box.size.z)
 			if not painted and raw is BaseMaterial3D:
 				base = _raw_base(raw as BaseMaterial3D, target, surface, region)
+			elif painted and source == raw and raw is ShaderMaterial \
+					and (raw as ShaderMaterial).shader != null \
+					and (raw as ShaderMaterial).shader.resource_path == LookGround.BIOME_SHADER_PATH:
+				base = LookGround.painted_source_for(raw, LookGround.Kind.BIOME, false, region, paving, area) as ShaderMaterial
 			elif base == null and raw is BaseMaterial3D:
-				base = LookGround.painted_for(raw, LookGround.kind_of(str(target.name)), target.mesh, surface, region) as ShaderMaterial
+				base = LookGround.painted_for(raw, LookGround.kind_of(str(target.name)), target.mesh, surface, region, paving, area) as ShaderMaterial
 			if base == null:
 				return _error("road_ground_material_not_supported")
+			base.set_shader_parameter(&"look_sun_heading", heading)
 			source_targets.append({"target": target, "surface": surface, "source": source, "raw": raw, "base": base})
 	if source_targets.is_empty():
 		return _error("road_ground_targets_empty")
-	var paving: PackedVector4Array = _paving_rects(meshes)
 	var road: ShaderMaterial
 	if painted:
 		road = LookGround.painted_source_for(data.styles[0], LookGround.Kind.DECK, true, region,
-			paving, Rect2(data.origin, data.extent)) as ShaderMaterial
+			paving, _paint_area(data)) as ShaderMaterial
 	else:
 		road = _pbr_adapter(data.styles[0], true)
 	if road == null:
@@ -138,6 +146,8 @@ static func rebind(root: Node, manifest: WorldManifest) -> Dictionary:
 		# Original road materials are structural and survive look-off rebinds.
 		if painted:
 			material.set_meta(LookProfile.SOURCE_META, item.raw)
+			if (item.base as Material).has_meta(LookGround.PAINTED_META):
+				material.set_meta(LookGround.PAINTED_META, (item.base as Material).get_meta(LookGround.PAINTED_META))
 		data.upload()
 		material.set_shader_parameter(&"trial_coverage", data.coverage_texture)
 		material.set_shader_parameter(&"rg_triangle_ids", data.id_texture)
@@ -180,6 +190,20 @@ static func is_terrain(node: Node) -> bool:
 	if name.begins_with("StreamView_"):
 		name = name.get_slice("__", 1)
 	return name.begins_with("Terrain_") or name.begins_with("Walk_Terrain")
+
+static func _paint_area(data: Resource) -> Rect2:
+	# Ground paint's variation/border segments use original mesh-local XZ;
+	# portable fields use scene-world XZ after the translation-only wrapper.
+	var to_mesh: Transform3D = matrix(data.document.source_frame_matrix).affine_inverse()
+	var points := PackedVector2Array()
+	for delta: Vector2 in [Vector2.ZERO, Vector2(data.extent.x, 0.0), data.extent, Vector2(0.0, data.extent.y)]:
+		var value: Vector2 = data.origin + delta
+		var point: Vector3 = to_mesh * Vector3(value.x, 0.0, value.y)
+		points.append(Vector2(point.x, point.z))
+	var result := Rect2(points[0], Vector2.ZERO)
+	for point: Vector2 in points:
+		result = result.expand(point)
+	return result
 
 static func _raw_base(source: BaseMaterial3D, target: MeshInstance3D, surface: int, region: String) -> ShaderMaterial:
 	var material: ShaderMaterial = _pbr_adapter(source,

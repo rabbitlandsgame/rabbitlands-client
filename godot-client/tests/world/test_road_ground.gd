@@ -11,6 +11,11 @@ func _init() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
+	var translated: Resource = Data.new()
+	translated.document = {"source_frame_matrix": [1,0,0,0,0,1,0,0,0,0,1,0,-100,0,-200,1]}
+	translated.origin = Vector2(4,8)
+	translated.extent = Vector2(8,12)
+	_expect(Road._paint_area(translated) == Rect2(104,208,8,12), "border_paint_area_uses_original_mesh_frame")
 	_expect(bool(Road.prepare({}, "").get("absent", false)), "absent_legacy_field_is_no_op")
 	_expect(not bool(Road.prepare({"metadata": "missing.json", "sha256": "0".repeat(64)}, "res://../eloria-assets/world.json").ok), "required_missing_field_fails")
 	_expect(Data.safe_path("res://../eloria-assets", "../../private").is_empty(), "outside_asset_path_rejected")
@@ -104,10 +109,28 @@ func _actual(path: String) -> void:
 			_expect(Feet.from_hit({"collider": body, "position": root.global_transform * point}) == Feet.from_name(source.resource_name), "bridge_ignores_underlying_road_field")
 		var current: Material = target.get_active_material(0)
 		_expect(current is ShaderMaterial and current.next_pass == null, "existing_single_material_pass")
+		var base_facts: Dictionary = Grass._material_facts(target)
+		_expect(not base_facts.is_empty() and not bool(base_facts.get("blended", true)), "grass_keeps_opaque_base_class_through_road_composite")
 		var patch_material := patch.get_active_material(0) as ShaderMaterial
 		_expect(patch_material != null and patch_material.shader.code.contains("#define LOOK_GROUND_ALPHA"), "existing_patch_keeps_alpha_pass")
+		var patch_facts: Dictionary = Grass._material_facts(patch)
+		_expect(not patch_facts.is_empty() and bool(patch_facts.get("blended", false)) \
+			and is_equal_approx(float(patch_facts.get("alpha", 0.0)), 0.8), "grass_keeps_existing_patch_tint_and_alpha")
 		var repeated: Dictionary = Road.rebind(root, manifest)
 		_expect(bool(repeated.get("ok", false)), "retained_field_rebind")
+		# A biome enabled later still needs its ground paint restored when
+		# switching from an Original structural composite to a painted mode.
+		var saved_look: String = OS.get_environment("ELORIA_LOOK")
+		OS.set_environment("ELORIA_LOOK", "original")
+		var biome := ShaderMaterial.new()
+		biome.shader = load(LookGround.BIOME_SHADER_PATH) as Shader
+		target.set_surface_override_material(0, biome)
+		_expect(bool(Road.rebind(root, manifest).get("ok", false)), "original_active_biome_adapter")
+		OS.set_environment("ELORIA_LOOK", "painted_ground")
+		var repainted: Dictionary = Road.rebind(root, manifest)
+		var painted_biome := target.get_active_material(0) as ShaderMaterial
+		_expect(bool(repainted.get("ok", false)) and painted_biome.shader.code.contains("look_biome_reference(region_weights, secondary_weights)"), "live_biome_ground_repainted_after_original")
+		OS.set_environment("ELORIA_LOOK", saved_look)
 	root.free()
 
 func _expect(value: bool, label: String) -> void:
