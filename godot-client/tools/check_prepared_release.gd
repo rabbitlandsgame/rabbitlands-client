@@ -165,7 +165,7 @@ func _identity(row: Dictionary) -> Dictionary:
 	elif kind == "mesh":
 		digest = FileAccess.get_sha256(source)
 		var pool_entry: Dictionary = MeshPool.index_for(source).get(source.get_file().get_basename(), {})
-		token = Vram.cache_token({"externalResources": pool_entry.get("images", {})}, source.get_base_dir())
+		token = Vram.cache_token(MeshPool._image_manifest(pool_entry), source.get_base_dir())
 	else:
 		return {}
 	return {"source": source, "digest": digest, "token": token, "manifest": manifest}
