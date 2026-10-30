@@ -8,6 +8,8 @@ unchanged.
 
 The later [complete torso collar audit](collar-fit.md) supersedes this stage's
 Scout/Recruit torso collar fits and their corresponding model/icon hashes.
+The [second equipment review](second-review.md) records later headwear, arm,
+clothing and bow-grip revisions and supersedes their overlapping file hashes.
 
 | Equipment | Revision |
 | --- | --- |

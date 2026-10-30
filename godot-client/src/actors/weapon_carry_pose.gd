@@ -94,7 +94,11 @@ func refresh_equipment() -> void:
 		if not actor._ranged_bow_path(model).is_empty():
 			var bow_hand := skeleton.find_bone("hand_l")
 			if bow_hand >= 0:
-				_hands.append({"hand": bow_hand, "side": "l", "finger_only": true})
+				var rest := skeleton.get_bone_global_rest(bow_hand)
+				_hands.append({"hand": bow_hand, "side": "l", "finger_only": true,
+					"bow": true, "grip": rest.basis.inverse() * RangerBow3D.CARRY_SOCKET_BASIS,
+					"upperarm": skeleton.find_bone("upperarm_l"),
+					"across": skeleton.find_bone("upperarm_r"), "spread": deg_to_rad(7.0)})
 			continue
 		if model.get("attach", "socket") != "socket":
 			continue
@@ -263,6 +267,18 @@ func _process_modification_with_delta(delta: float) -> void:
 		_hold_lowered(skeleton)
 	if easing:
 		_ease(skeleton)
+	# Carrying must turn the hand and its grip together. Rotating only the bow
+	# left the fingers crossing its handle. A small shoulder spread also keeps
+	# the long limbs beside the clothes through the idle and walking arm swing.
+	if actor.current_action in [&"idle", &"turn", &"walk", &"run", &"combat_idle"]:
+		for carry: Dictionary in _hands:
+			if not carry.get("bow", false):
+				continue
+			if carry.upperarm >= 0 and carry.across >= 0:
+				_spread(skeleton, carry)
+			var wanted := skeleton.global_basis.orthonormalized().inverse() \
+				* RangerBow3D.relaxed_basis(actor) * (carry.grip as Basis).inverse()
+			_set_basis(skeleton, carry.hand, wanted, 1.0)
 	if _weight <= 0.0:
 		return
 	var to_skeleton := skeleton.global_basis.orthonormalized().inverse() * actor.global_basis.orthonormalized()

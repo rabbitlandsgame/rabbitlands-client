@@ -233,11 +233,108 @@ static func apply(attachment: BoneAttachment3D, visual_id: int, skeleton: Skelet
 		refit.set_meta("native_equipment", true)
 		refit.set_meta(&"rl_headwear_fit", chosen)
 		made.append(refit)
+	if entry.has("backLining") and not made.is_empty():
+		var cloth := (made[0] as MeshInstance3D).get_active_material(0)
+		var backing := _back_lining(sources, entry.backLining, cloth, skeleton, chosen)
+		if backing != null:
+			made.append(backing)
 	if not made.is_empty():
 		attachment.remove_child(holder)
 		holder.queue_free()
 		attachment.set_meta(&"rl_headwear_fit", chosen)
 	return made
+
+
+## Continue a veil's missing back over the actual skull surface. Reuse the
+## imported head triangles and the veil's own fabric atlas, beneath its gold
+## framework and hanging panels. This adds no second face or foreign model.
+static func _back_lining(sources: Array, config: Dictionary, material: Material,
+		skeleton: Skeleton3D, chosen: String) -> MeshInstance3D:
+	for source: Dictionary in sources:
+		if not str(source.get("key", "")).begins_with("head:"):
+			continue
+		var original := source.get("mesh") as Mesh
+		if original == null:
+			continue
+		var cache_key := "veil_back|%d|%s" % [original.get_instance_id(), config]
+		var mesh := _meshes.get(cache_key) as ArrayMesh
+		if mesh == null:
+			mesh = ArrayMesh.new()
+			for surface: int in original.get_surface_count():
+				var skin_material := original.surface_get_material(surface)
+				if skin_material == null or skin_material.resource_name != "rl_skin":
+					continue
+				var arrays := original.surface_get_arrays(surface)
+				var p: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+				var n: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
+				var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
+				var kept := PackedInt32Array()
+				for i: int in range(0, indices.size(), 3):
+					var center := (p[indices[i]] + p[indices[i + 1]] + p[indices[i + 2]]) / 3.0
+					if center.y > 1.60 and (center.z < -.005 or (absf(center.x) > .057 and center.z < .035)):
+						kept.append_array(indices.slice(i, i + 3))
+				if kept.is_empty():
+					continue
+				var uv := PackedVector2Array()
+				var bones := PackedInt32Array()
+				var weights := PackedFloat32Array()
+				var center := Vector2(float(config.uv[0]), float(config.uv[1]))
+				var span := Vector2(float(config.span[0]), float(config.span[1]))
+				for i: int in p.size():
+					var vertex := p[i]
+					vertex += n[i] * .006
+					# The backing stays under the existing framework. Soften the
+					# ears into the cloth instead of copying their protruding tips.
+					vertex.x = clampf(vertex.x, -.080, .080)
+					p[i] = vertex
+					uv.append(center + Vector2(p[i].x / .1, (p[i].y - 1.66) / .15) * span)
+					bones.append_array(PackedInt32Array([0, 0, 0, 0]))
+					weights.append_array(PackedFloat32Array([1., 0., 0., 0.]))
+				arrays[Mesh.ARRAY_VERTEX] = p
+				arrays[Mesh.ARRAY_NORMAL] = n
+				arrays[Mesh.ARRAY_TEX_UV] = uv
+				arrays[Mesh.ARRAY_BONES] = bones
+				arrays[Mesh.ARRAY_WEIGHTS] = weights
+				arrays[Mesh.ARRAY_INDEX] = kept
+				arrays[Mesh.ARRAY_TANGENT] = null
+				# Drop unused face vertices; they must not expand icon/cull bounds
+				# or carry a second full head's buffers for a small cloth backing.
+				var compact := []
+				compact.resize(Mesh.ARRAY_MAX)
+				var points := PackedVector3Array()
+				var normals := PackedVector3Array()
+				var coords := PackedVector2Array()
+				var remap := {}
+				var faces := PackedInt32Array()
+				for old: int in kept:
+					if not remap.has(old):
+						remap[old] = points.size()
+						points.append(p[old]); normals.append(n[old]); coords.append(uv[old])
+					faces.append(int(remap[old]))
+				bones.resize(points.size() * 4); weights.resize(points.size() * 4)
+				bones.fill(0); weights.fill(0.)
+				for i: int in points.size():weights[i * 4] = 1.
+				compact[Mesh.ARRAY_VERTEX] = points
+				compact[Mesh.ARRAY_NORMAL] = normals
+				compact[Mesh.ARRAY_TEX_UV] = coords
+				compact[Mesh.ARRAY_BONES] = bones
+				compact[Mesh.ARRAY_WEIGHTS] = weights
+				compact[Mesh.ARRAY_INDEX] = faces
+				mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, compact)
+			_meshes[cache_key] = mesh
+		if mesh.get_surface_count() == 0:
+			continue
+		var lining := MeshInstance3D.new()
+		lining.name = NODE_PREFIX + "VeilBacking"
+		lining.mesh = mesh
+		lining.skin = _skin(skeleton)
+		lining.material_override = material
+		skeleton.add_child(lining)
+		lining.skeleton = lining.get_path_to(skeleton)
+		lining.set_meta("native_equipment", true)
+		lining.set_meta(&"rl_headwear_fit", chosen)
+		return lining
+	return null
 
 
 static func _relative(node: Node3D, root: Node3D) -> Transform3D:
@@ -560,8 +657,17 @@ static func _envelope(sources: Array, key: String) -> PackedFloat32Array:
 			var material := mesh.surface_get_material(surface)
 			if material != null and material.resource_name.contains("card"):
 				continue
-			var vertices: PackedVector3Array = mesh.surface_get_arrays(surface)[Mesh.ARRAY_VERTEX]
-			for p: Vector3 in vertices:
+			var arrays := mesh.surface_get_arrays(surface)
+			var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+			var used := {}
+			if arrays[Mesh.ARRAY_INDEX] is PackedInt32Array:
+				for index: int in arrays[Mesh.ARRAY_INDEX]:
+					used[index] = true
+			else:
+				for index: int in vertices.size():
+					used[index] = true
+			for index: int in used:
+				var p := vertices[index]
 				if absf(p.x) > TRUNK_HALF or p.y < ROW_FLOOR or p.y >= ceiling or p.y > ymax:
 					continue
 				var dz := p.z - AXIS_Z

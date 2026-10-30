@@ -1,0 +1,4231 @@
+{
+  "schema": 1,
+  "product": "Rabbit Lands",
+  "source_revision": "56c59723",
+  "scope": "Second equipment review and headwear fit",
+  "saved_comment_count": 22,
+  "headwear": {
+    "human_designs_reviewed": 64,
+    "human_native_refits": 120,
+    "calibrated_open_fits_retained": 8,
+    "other_race_geometry": "retained; ear/crown/horn clearance suite passes",
+    "antler_palette_variants": 16
+  },
+  "validation": {
+    "status": "passed",
+    "files": 160,
+    "new_collapsed_faces": 0,
+    "max_weight_sum_error": 0.0039217472076416016,
+    "preserved": [
+      "nodes/rests",
+      "inverse binds",
+      "image payloads/references",
+      "non-arm UVs",
+      "headwear and torso-shell topology"
+    ],
+    "scoped_exceptions": [
+      "forearm UVs sample the native skin atlas",
+      "duplicate hand faces trimmed from the forearm lining",
+      "cloth foot-wrap trimmed from Acolyte leggings inside the boot shaft",
+      "Acolyte lining color matched to pale cloth"
+    ]
+  },
+  "fresh_import_files": 160,
+  "fresh_component_renders": 9,
+  "review_views": {
+    "human_headwear": 128,
+    "saved_comments": 22,
+    "movement_and_races": 158
+  },
+  "checks": {
+    "neck_continuation": 4830,
+    "review_fit": 298,
+    "second_review": 21,
+    "race_tests": 4,
+    "race_subtests": 1968,
+    "weapon_carry": "passed",
+    "quiver": 13354,
+    "catalog_icons": 6,
+    "graphical_previewer": "passed",
+    "transparent_icons": 443
+  },
+  "implementation_sha256": {
+    "eloria-assets/tools/refine_equipment_review_second.py": "c9324eb02915bc4272f05e0b29bd2584f2ef98c6ebdeeef70b4abba042afa008",
+    "godot-client/src/actors/replicated_actor_3d.gd": "fa28148c5f1465d1ee553effc83dc058b9508d41c230de8905913a8e1749fa6a",
+    "godot-client/src/actors/combat_presentation_3d.gd": "efe90bc9a2e4f60882d9f64e34f3559a8fda61af3da575bfe6ef044bb54f70a5",
+    "godot-client/src/actors/weapon_carry_pose.gd": "89f6349071e5a8f1713260b508c1850fc4383ccba7c384dd8bf5ff70fbc5d6ff",
+    "godot-client/src/actors/rl_head/rl_headwear_fit.gd": "02d6d065503a905eabcbbadb202a79929b6935e5b76908957e8d4bd559244884",
+    "godot-client/src/actors/equipment_antler_palette.gdshader": "2866a13cc5386bb714902a6a03974fd0ddfe24d77c37e6371d6a498351bfc263",
+    "godot-client/data/actors/rl_head_headwear_fit.json": "2e3056077db1e117af9121c1dd3f995a5bb821063001ca8318db4501bcada95d",
+    "godot-client/tools/equipment_review/review_app.gd": "877df8facabf8a155155c68b139cdc028ef2fe5957a91d6ba31fad7d56f752b9",
+    "godot-client/tools/equipment_review/render_icons.gd": "a912f855ce4d7efeb6f3e1b21d93cc9a6ff216b3a203f9eac6666143f7e3b9da"
+  },
+  "items": [
+    {
+      "key": "3:157",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/adventurer_headwear_01.glb",
+      "before_sha256": "0764f7c85226ce3893ed2bc5e81f0ad8bd187d6551fbbe99ba6f2ce0ac3f1a22",
+      "after_sha256": "50d68e28c5528557f6eabf43c186f3d7f95641762ffd8b9997a332121ac031e2",
+      "changes": [
+        {
+          "moved_vertices": 2071,
+          "max_displacement_m": 0.157659
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "hood",
+          "section_samples": 39,
+          "before_radius_m": 0.09633540772610083,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.961175368254885,
+          "scale_y": 0.8842813387944942,
+          "drop_m": 0.016
+        }
+      ],
+      "validation": {
+        "vertices": 2071,
+        "triangles": 1525,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:158",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/adventurer_headwear_02.glb",
+      "before_sha256": "5652516d234ac34c5867aa547825c0a31ac18202717d8322a929092ecd39c6c2",
+      "after_sha256": "d1c0988f5f5348264acb2c976dae90368514f051d05fb36507873fb8dda53b2b",
+      "changes": [
+        {
+          "moved_vertices": 1982,
+          "max_displacement_m": 0.065239
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "cap",
+          "section_samples": 44,
+          "before_radius_m": 0.10962171516660085,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.8446795496348066,
+          "scale_y": 0.7771051856640221,
+          "drop_m": 0.022
+        }
+      ],
+      "validation": {
+        "vertices": 1982,
+        "triangles": 1556,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:159",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/adventurer_headwear_03.glb",
+      "before_sha256": "bbea460b94f2abacfa18b26f92215421366baad3fc1ca04ab8b6156a40c84c16",
+      "after_sha256": "c4f6cb36e10e09ca8327342c5089e62348b9f59d15e999ee72ca257bf7162a4c",
+      "changes": [
+        {
+          "moved_vertices": 1907,
+          "max_displacement_m": 0.181996
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "hood",
+          "section_samples": 46,
+          "before_radius_m": 0.09704609905513562,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.9541364557529773,
+          "scale_y": 0.8778055392927392,
+          "drop_m": 0.016
+        }
+      ],
+      "validation": {
+        "vertices": 1907,
+        "triangles": 1604,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:160",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/adventurer_headwear_04.glb",
+      "before_sha256": "e574219f0edd9d580ebec27668e8c9911f523cc68ed24d71e29485d908723c08",
+      "after_sha256": "f20915e1f424400415a6fcb27e35cbbaabeefa8ea19d94a866e015c16b247e99",
+      "changes": [
+        {
+          "moved_vertices": 1906,
+          "max_displacement_m": 0.120185
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "hat",
+          "section_samples": 37,
+          "before_radius_m": 0.12269358026386785,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.7546867635452637,
+          "scale_y": 0.6943118224616426,
+          "drop_m": 0.024
+        }
+      ],
+      "validation": {
+        "vertices": 1906,
+        "triangles": 1494,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:161",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/adventurer_headwear_05.glb",
+      "before_sha256": "dba1531f833293eb1a8270e7e9df7983928e115fb9ece22eb9daa6e5b5cbce19",
+      "after_sha256": "bbf55de3441f9b8445075f011efb5dc64ab3c5c6379adf6a8dfacb7bd142c27a",
+      "changes": [
+        {
+          "moved_vertices": 2069,
+          "max_displacement_m": 0.153951
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "hood",
+          "section_samples": 40,
+          "before_radius_m": 0.09427787825717782,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.9821521517967525,
+          "scale_y": 0.9035799796530124,
+          "drop_m": 0.016
+        }
+      ],
+      "validation": {
+        "vertices": 2069,
+        "triangles": 1384,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:122",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/amberwood_forest_helm_06.glb",
+      "before_sha256": "038b7ab9804358ff8c079e0821ff28a9a5d5b3528dbb03d3a028097b7a76d863",
+      "after_sha256": "a79f74c0553c8e0c96ebea89c5e3cc52b7a5005a8d5535d44d6ad1d2cbfaad5c",
+      "changes": [
+        {
+          "moved_vertices": 2064,
+          "max_displacement_m": 0.193554
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "hood",
+          "section_samples": 41,
+          "before_radius_m": 0.10052276190252958,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.9211368574104943,
+          "scale_y": 0.8474459088176548,
+          "drop_m": 0.016
+        }
+      ],
+      "validation": {
+        "vertices": 2064,
+        "triangles": 1512,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "5:186",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/amberwood_woodland_cuirass_03.glb",
+      "before_sha256": "3a7a1462718366b025c22d8d19d8fded63534816c6681ef1e4e838105e5a2060",
+      "after_sha256": "4b96eabac53eddafffd0bbe55ff838441de6cd38e5b4f94aced81f25bbf8f361",
+      "changes": [
+        {
+          "moved_vertices": 1665,
+          "max_displacement_m": 0.038616
+        },
+        {
+          "moved_vertices": 33644,
+          "max_displacement_m": 0.035947
+        },
+        {
+          "second_review_torso": 186,
+          "native_exposed_arms": false
+        }
+      ],
+      "validation": {
+        "vertices": 55420,
+        "triangles": 20083,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:190",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/amberwood_woodland_cuirass_07.glb",
+      "before_sha256": "ed4727fa7448b23d1ea4879226f6a1f9253a62a4e4c7fa9e5136f9b4c4319768",
+      "after_sha256": "da2c249e972b795e08d827340be7bcda555143f6bf6187bc4acbc38b65a47a52",
+      "changes": [
+        {
+          "moved_vertices": 280,
+          "max_displacement_m": 0.065
+        },
+        {
+          "second_review_torso": 190,
+          "native_exposed_arms": false
+        }
+      ],
+      "validation": {
+        "vertices": 54730,
+        "triangles": 19735,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "3:110",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/arcane_ethereal_circlet_02.glb",
+      "before_sha256": "e6b7de894296ca1427d380cb9ee99440b980d865b1f3227b9675386262db0873",
+      "after_sha256": "401ee411a55b045a789b867d87a6fa974bf250b9f47f17ae53c9214291818dc1",
+      "changes": [
+        {
+          "moved_vertices": 1986,
+          "max_displacement_m": 0.154427
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "hood",
+          "section_samples": 45,
+          "before_radius_m": 0.0972223176798158,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.9524070522785226,
+          "scale_y": 0.8762144880962408,
+          "drop_m": 0.016
+        }
+      ],
+      "validation": {
+        "vertices": 1986,
+        "triangles": 1466,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:113",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/arcane_ethereal_circlet_05.glb",
+      "before_sha256": "9ec1d165aece7403c5d6e6919e3cfb4d9c42fb40a7b0be861bfdf5f35db0ddbb",
+      "after_sha256": "21d53c2782ce9406b5a88c598a62405c75b8bbdc224a09ece7336d6613806cf8",
+      "changes": [
+        {
+          "moved_vertices": 2026,
+          "max_displacement_m": 0.083407
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "helm",
+          "section_samples": 46,
+          "before_radius_m": 0.11863780898771001,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.7804866069864088,
+          "scale_y": 0.7180476784274962,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2026,
+        "triangles": 1571,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:115",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/arcane_ethereal_circlet_07.glb",
+      "before_sha256": "9f76b1db231fc9a950b51666525940154af9ee6029f1f099f3771a596c814071",
+      "after_sha256": "1728e69afb1d1c8b5dc997ebaf84d3ba62e5f1f05df33b64aac5097769cb505e",
+      "changes": [
+        {
+          "moved_vertices": 2237,
+          "max_displacement_m": 0.1573
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "hood",
+          "section_samples": 46,
+          "before_radius_m": 0.09482528034108637,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.9764824386920304,
+          "scale_y": 0.8983638435966681,
+          "drop_m": 0.016
+        }
+      ],
+      "validation": {
+        "vertices": 2237,
+        "triangles": 1554,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:116",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/arcane_ethereal_circlet_08.glb",
+      "before_sha256": "7ad6d1d97ce1630032946d59cf5bb8327e72f67b128e5192bbdd4f856fb8d30d",
+      "after_sha256": "a056cfc0d2d382cee74dc1c617a482ba99ebbd094e43b5bf4bf53efd79e45097",
+      "changes": [
+        {
+          "moved_vertices": 2333,
+          "max_displacement_m": 0.041382
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "helm",
+          "section_samples": 45,
+          "before_radius_m": 0.09895430816313329,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.9357371368255093,
+          "scale_y": 0.8608781658794686,
+          "drop_m": 0.01
+        },
+        {
+          "lower_neck_guard_m": 0.025
+        }
+      ],
+      "validation": {
+        "vertices": 2333,
+        "triangles": 1624,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "4:185",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/arcane_leg_armor_07.glb",
+      "before_sha256": "faa4bc47df8d131c8e9c738112ad091415715552df9782ac0e9d3121dd801eb4",
+      "after_sha256": "c724078966d647b8066903141e838cf5d4db54585f40295af25a24d67d554f2a",
+      "changes": [
+        {
+          "moved_vertices": 702,
+          "max_displacement_m": 0.097902
+        },
+        {
+          "moved_vertices": 23,
+          "max_displacement_m": 0.055533
+        },
+        {
+          "moved_vertices": 5104,
+          "max_displacement_m": 0.037052
+        },
+        {
+          "moved_vertices": 3802,
+          "max_displacement_m": 0.037027
+        },
+        {
+          "second_review_legs": 185
+        }
+      ],
+      "validation": {
+        "vertices": 15850,
+        "triangles": 29373,
+        "max_weight_sum_error": 1.1920928955078125e-07
+      }
+    },
+    {
+      "key": "5:218",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/eloria_arcane_armor_03.glb",
+      "before_sha256": "e499198a712658a36bb79b410b25adfaa0c1e9d674a2e52553bbbffd65d5951a",
+      "after_sha256": "372e9be615be6727faa2226aa66dd8e190312c94b5b9f8cd3aed2c9ae3c34f4c",
+      "changes": [
+        {
+          "moved_vertices": 336,
+          "max_displacement_m": 0.013667
+        },
+        {
+          "moved_vertices": 2586,
+          "max_displacement_m": 0.003305
+        },
+        {
+          "second_review_torso": 218,
+          "native_exposed_arms": false
+        }
+      ],
+      "validation": {
+        "vertices": 52225,
+        "triangles": 18044,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:219",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/eloria_arcane_armor_04.glb",
+      "before_sha256": "645023a373311273b355fed5bdb6e617384a3dfc4faa9007990549fe47aaf7a4",
+      "after_sha256": "b730c51d0c8a4e6ec716d26339dc705dba58deb65c66c57a910c03cb0be2be41",
+      "changes": [
+        {
+          "moved_vertices": 106,
+          "max_displacement_m": 0.035146
+        },
+        {
+          "second_review_torso": 219,
+          "native_exposed_arms": false
+        }
+      ],
+      "validation": {
+        "vertices": 52205,
+        "triangles": 18002,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:232",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/eloria_frontier_shirt_01.glb",
+      "before_sha256": "e63c7504be6b98a43c33cc6b9a88c6016d2873de179d044771451ea7ff8c9c1a",
+      "after_sha256": "a212ef9ac747010195998ae101b08ee1cc7ef51cf3b7f5a6a349d4c05e18fdd2",
+      "changes": [
+        {
+          "moved_vertices": 12600,
+          "max_displacement_m": 0.025569
+        },
+        {
+          "anatomical_forearms": "female",
+          "native_skin_uv_center": [
+            0.27734375,
+            0.06298828125
+          ]
+        },
+        {
+          "second_review_torso": 232,
+          "native_exposed_arms": true
+        }
+      ],
+      "validation": {
+        "vertices": 105538,
+        "triangles": 18869,
+        "max_weight_sum_error": 0.0039217472076416016
+      }
+    },
+    {
+      "key": "5:234",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/eloria_frontier_shirt_03.glb",
+      "before_sha256": "0cf064a5e80a44e9dc3d55474e7b24181813c37c6ec402b5b719b05549bf5f01",
+      "after_sha256": "d0e5b04a2c50379e2c769a769bff5f1412a261870451302a34a5d1acb9a96b70",
+      "changes": [
+        {
+          "moved_vertices": 11664,
+          "max_displacement_m": 0.025569
+        },
+        {
+          "anatomical_forearms": "female",
+          "native_skin_uv_center": [
+            0.27734375,
+            0.06298828125
+          ]
+        },
+        {
+          "second_review_torso": 234,
+          "native_exposed_arms": true
+        }
+      ],
+      "validation": {
+        "vertices": 100732,
+        "triangles": 17997,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:238",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/eloria_frontier_shirt_07.glb",
+      "before_sha256": "24db448eece32c6373a2d1e5df4ad333fa473fa2b0ed70f77de3272eb33075df",
+      "after_sha256": "4bbe1f54ccb18bc2401e51a8866c846dd22767cd815b46dcdc293e0cd02678c5",
+      "changes": [
+        {
+          "moved_vertices": 13176,
+          "max_displacement_m": 0.025564
+        },
+        {
+          "anatomical_forearms": "female",
+          "native_skin_uv_center": [
+            0.27734375,
+            0.06298828125
+          ]
+        },
+        {
+          "second_review_torso": 238,
+          "native_exposed_arms": true
+        }
+      ],
+      "validation": {
+        "vertices": 105197,
+        "triangles": 18695,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "4:219",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/militia_leg_armor_01.glb",
+      "before_sha256": "3d27c6dfbbfb69079872ffa62e4088df879032910c17896225e1602e363a7d9f",
+      "after_sha256": "ae435519fc734fd9b110e31d27f53531459c0742521cd536a2b90bf711a3d34e",
+      "changes": [
+        {
+          "moved_vertices": 234,
+          "max_displacement_m": 0.023839
+        },
+        {
+          "moved_vertices": 561,
+          "max_displacement_m": 0.023812
+        },
+        {
+          "moved_vertices": 561,
+          "max_displacement_m": 0.023736
+        },
+        {
+          "second_review_legs": 219
+        }
+      ],
+      "validation": {
+        "vertices": 15328,
+        "triangles": 28972,
+        "max_weight_sum_error": 1.1920928955078125e-07
+      }
+    },
+    {
+      "key": "5:209",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/militia_torso_armor_02.glb",
+      "before_sha256": "f9a3cc68fd432dfb7e61811671309bc4ffe77f1b662f0901f1fbfb5277e5d3ab",
+      "after_sha256": "437a9eb9c25ac8fffd69c172d53872d258c7ae53fad7e13b537ae33721a95448",
+      "changes": [
+        {
+          "moved_vertices": 127,
+          "max_displacement_m": 0.018974
+        },
+        {
+          "second_review_torso": 209,
+          "native_exposed_arms": false
+        }
+      ],
+      "validation": {
+        "vertices": 51920,
+        "triangles": 18278,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:210",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/militia_torso_armor_03.glb",
+      "before_sha256": "2c98954e5aaf0e04a0b3e1a02b7479b5023b0df834a2dbad6b1fa6a54369f9ab",
+      "after_sha256": "d44dbeae6271fc570fb0c108d2e4d077c1f43f729abf834d09e9a381e73d183e",
+      "changes": [
+        {
+          "moved_vertices": 13146,
+          "max_displacement_m": 0.025564
+        },
+        {
+          "anatomical_forearms": "female",
+          "native_skin_uv_center": [
+            0.27734375,
+            0.06298828125
+          ]
+        },
+        {
+          "second_review_torso": 210,
+          "native_exposed_arms": true
+        }
+      ],
+      "validation": {
+        "vertices": 103455,
+        "triangles": 18300,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:211",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/militia_torso_armor_04.glb",
+      "before_sha256": "d5f9c687bc03547aa89d2a3e4142f1d059d662c58bf43b50ee495d2d37038035",
+      "after_sha256": "371e1fca520e9f4df1b266cc5ed081bfc1b280e07cb09ab3212cdec399f4a009",
+      "changes": [
+        {
+          "moved_vertices": 14166,
+          "max_displacement_m": 0.025649
+        },
+        {
+          "anatomical_forearms": "female",
+          "native_skin_uv_center": [
+            0.27734375,
+            0.06298828125
+          ]
+        },
+        {
+          "second_review_torso": 211,
+          "native_exposed_arms": true
+        }
+      ],
+      "validation": {
+        "vertices": 104230,
+        "triangles": 18552,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:242",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/sunmane_steppe_shirt_03.glb",
+      "before_sha256": "8e98d252b9043f71630b2527237036c26654bcd415cc03ea6ec3086d5290fa5a",
+      "after_sha256": "4cc2a6918ea836772298cfeb325752d53acabffb0d78f9457d88f7947b5f9481",
+      "changes": [
+        {
+          "moved_vertices": 17951,
+          "max_displacement_m": 0.025733
+        },
+        {
+          "anatomical_forearms": "female",
+          "native_skin_uv_center": [
+            0.27734375,
+            0.06298828125
+          ]
+        },
+        {
+          "second_review_torso": 242,
+          "native_exposed_arms": true
+        }
+      ],
+      "validation": {
+        "vertices": 101191,
+        "triangles": 17971,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "3:157",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/adventurer_headwear_01.glb",
+      "before_sha256": "611c441d0de6c274bb11d94e07d07ccafd2d96e63a9d65e0bc7848c63fc2c788",
+      "after_sha256": "1b8e408cf4e11327c6aef2bf81b52368869100c6bf6d8cd711f016247a647853",
+      "changes": [
+        {
+          "moved_vertices": 2071,
+          "max_displacement_m": 0.144701
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "hood",
+          "section_samples": 39,
+          "before_radius_m": 0.09135512005240987,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.923115760619376,
+          "scale_y": 0.8492664997698259,
+          "drop_m": 0.016
+        }
+      ],
+      "validation": {
+        "vertices": 2071,
+        "triangles": 1525,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:158",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/adventurer_headwear_02.glb",
+      "before_sha256": "b964a5aab83610473eff40bebd5332bb7da853958f13617535008b63bd7ca8e1",
+      "after_sha256": "a3508429fe10eb5b8f89f969061d0cf1c35c6416671a0816b25a03e478d99eec",
+      "changes": [
+        {
+          "moved_vertices": 1982,
+          "max_displacement_m": 0.088092
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "cap",
+          "section_samples": 43,
+          "before_radius_m": 0.11243451102541364,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.7500486315504433,
+          "scale_y": 0.6900447410264079,
+          "drop_m": 0.022
+        }
+      ],
+      "validation": {
+        "vertices": 1982,
+        "triangles": 1556,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:159",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/adventurer_headwear_03.glb",
+      "before_sha256": "f94b9b5feba13d3c4890140ab8cd18f02b51c8d3e1aed4f0da343bda1b2244aa",
+      "after_sha256": "18743485cb67c2e09fea393bc7c887d31af7eabb62db5644f5742598ce4a17ea",
+      "changes": [
+        {
+          "moved_vertices": 1907,
+          "max_displacement_m": 0.160492
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "hood",
+          "section_samples": 44,
+          "before_radius_m": 0.09080818734396642,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.9286756359778607,
+          "scale_y": 0.8543815850996319,
+          "drop_m": 0.016
+        }
+      ],
+      "validation": {
+        "vertices": 1907,
+        "triangles": 1604,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:160",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/adventurer_headwear_04.glb",
+      "before_sha256": "346b6c0f16f7df2b3a37f981e3c178bfcd84745b3cc1b69d4beef48dbd48d67b",
+      "after_sha256": "eb649db8edcb1d497cc294957e9e312f33051f3bd1544d27a0f9360b840649bf",
+      "changes": [
+        {
+          "moved_vertices": 1906,
+          "max_displacement_m": 0.14834
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "hat",
+          "section_samples": 39,
+          "before_radius_m": 0.12575553499695244,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.6705975298478785,
+          "scale_y": 0.6169497274600482,
+          "drop_m": 0.024
+        }
+      ],
+      "validation": {
+        "vertices": 1906,
+        "triangles": 1494,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:161",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/adventurer_headwear_05.glb",
+      "before_sha256": "cac3f866a09b8d5de57a2bed5f8d723bedcaf4b5ae89e767df58c23d0178bda1",
+      "after_sha256": "aa5f0a728054a7e68ed72bc2348572b9eacc526fad9b2f26698a2175038d8f29",
+      "changes": [
+        {
+          "moved_vertices": 2069,
+          "max_displacement_m": 0.150392
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "hood",
+          "section_samples": 41,
+          "before_radius_m": 0.08827221732914615,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.9553555318453499,
+          "scale_y": 0.878927089297722,
+          "drop_m": 0.016
+        }
+      ],
+      "validation": {
+        "vertices": 2069,
+        "triangles": 1384,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:122",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/amberwood_forest_helm_06.glb",
+      "before_sha256": "74a3836d40f92808a11098dc20e4ebbb1eb4f852d598cb9263924ab9d8ba37a5",
+      "after_sha256": "8cb0e0632a07cb67114e9efb832093c1671edec848d8df8fe41ba3f5c17bd24e",
+      "changes": [
+        {
+          "moved_vertices": 2064,
+          "max_displacement_m": 0.172861
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "hood",
+          "section_samples": 43,
+          "before_radius_m": 0.09593935485226664,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.8790068607769291,
+          "scale_y": 0.8086863119147748,
+          "drop_m": 0.016
+        }
+      ],
+      "validation": {
+        "vertices": 2064,
+        "triangles": 1512,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "5:186",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/amberwood_woodland_cuirass_03.glb",
+      "before_sha256": "c41f59fe32369d538ed65a6e523f01d29848d00189f23ab2fbeb1b7b525272df",
+      "after_sha256": "2e92a841d52ef0f31a0610be639fabeb9f6a705a253258039a0efce6fdde214f",
+      "changes": [
+        {
+          "moved_vertices": 1643,
+          "max_displacement_m": 0.043556
+        },
+        {
+          "moved_vertices": 27701,
+          "max_displacement_m": 0.039911
+        },
+        {
+          "second_review_torso": 186,
+          "native_exposed_arms": false
+        }
+      ],
+      "validation": {
+        "vertices": 48628,
+        "triangles": 17823,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:190",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/amberwood_woodland_cuirass_07.glb",
+      "before_sha256": "7215f993a6edc7b03d0fa1ca4cb62b1789a3bf36cba4521eb9319146a2bb40fd",
+      "after_sha256": "7ba9ea1c42e27127d083c3f5935021227c8c8a80cc4f7b4cbb270af587ef8209",
+      "changes": [
+        {
+          "moved_vertices": 248,
+          "max_displacement_m": 0.065
+        },
+        {
+          "second_review_torso": 190,
+          "native_exposed_arms": false
+        }
+      ],
+      "validation": {
+        "vertices": 48226,
+        "triangles": 17568,
+        "max_weight_sum_error": 0.0039217472076416016
+      }
+    },
+    {
+      "key": "3:110",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/arcane_ethereal_circlet_02.glb",
+      "before_sha256": "fd89ed3161e58aa82de99e66cb670887c9a52e0bc54d59a5e25d6a29d5124d1d",
+      "after_sha256": "f1757937000ada58677f70266eac5b112937a0f6b31e575bd36ff768e6fa31f0",
+      "changes": [
+        {
+          "moved_vertices": 1986,
+          "max_displacement_m": 0.148016
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "hood",
+          "section_samples": 48,
+          "before_radius_m": 0.09247830949491355,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.91190411669769,
+          "scale_y": 0.8389517873618748,
+          "drop_m": 0.016
+        }
+      ],
+      "validation": {
+        "vertices": 1986,
+        "triangles": 1466,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:113",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/arcane_ethereal_circlet_05.glb",
+      "before_sha256": "0e45ed9dbb4eb471cf59cf6562fe90a50c2c9869f1067ca372d6e86c2c8011f1",
+      "after_sha256": "47c768f4d8328036e12482edb5be5dd86b09bdc0c8b6920c9c14bdcaa636057a",
+      "changes": [
+        {
+          "moved_vertices": 2026,
+          "max_displacement_m": 0.096063
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "helm",
+          "section_samples": 46,
+          "before_radius_m": 0.11417774993097007,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.7385970662816533,
+          "scale_y": 0.6795093009791211,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2026,
+        "triangles": 1571,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:115",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/arcane_ethereal_circlet_07.glb",
+      "before_sha256": "97a56ba8d9d1e6bc473d0592369b9466484e6b2de5588355a59f38b567c29326",
+      "after_sha256": "e1e5e4aca2887bdb898ed4a64b5f17e22ec1b66214efe01ec1fb1ce33f3ef11c",
+      "changes": [
+        {
+          "moved_vertices": 2237,
+          "max_displacement_m": 0.169865
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "hood",
+          "section_samples": 45,
+          "before_radius_m": 0.08486461686174063,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.993716277197661,
+          "scale_y": 0.9142189750218481,
+          "drop_m": 0.016
+        }
+      ],
+      "validation": {
+        "vertices": 2237,
+        "triangles": 1554,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:116",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/arcane_ethereal_circlet_08.glb",
+      "before_sha256": "d1c93a2437d2d0cf4c0042a2ee546cca88adc01984a3e98f965f9df5853148a8",
+      "after_sha256": "47d04a97b1760de222d77945cb8692d9022441c6255f480744d2a651b13f1c12",
+      "changes": [
+        {
+          "moved_vertices": 2333,
+          "max_displacement_m": 0.03527
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "helm",
+          "section_samples": 46,
+          "before_radius_m": 0.08895061658608916,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.9480693262203107,
+          "scale_y": 0.8722237801226859,
+          "drop_m": 0.01
+        },
+        {
+          "lower_neck_guard_m": 0.025
+        }
+      ],
+      "validation": {
+        "vertices": 2333,
+        "triangles": 1624,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "4:185",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/arcane_leg_armor_07.glb",
+      "before_sha256": "188262887afb2136ed37c7ef36c71bdc661ff9133a2496fac99b33d8e5fa2825",
+      "after_sha256": "3e9e448db1356a8beeaa480ab6a755035ea5f8548f3ee547f60c5d1f28f1c160",
+      "changes": [
+        {
+          "moved_vertices": 704,
+          "max_displacement_m": 0.105887
+        },
+        {
+          "moved_vertices": 23,
+          "max_displacement_m": 0.061534
+        },
+        {
+          "moved_vertices": 2991,
+          "max_displacement_m": 0.041245
+        },
+        {
+          "moved_vertices": 2467,
+          "max_displacement_m": 0.04126
+        },
+        {
+          "second_review_legs": 185
+        }
+      ],
+      "validation": {
+        "vertices": 10387,
+        "triangles": 19265,
+        "max_weight_sum_error": 1.1920928955078125e-07
+      }
+    },
+    {
+      "key": "5:218",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/eloria_arcane_armor_03.glb",
+      "before_sha256": "10205eccf72ed899aedf4f6d396bdfaafde1c8783cef737f1ed7c9fde4f3e66b",
+      "after_sha256": "ab2fc06e3985ddfdff8007daaa3d8a76c430011ad15bdb633c7ea37a259cf73e",
+      "changes": [
+        {
+          "moved_vertices": 307,
+          "max_displacement_m": 0.012429
+        },
+        {
+          "moved_vertices": 2642,
+          "max_displacement_m": 0.002837
+        },
+        {
+          "second_review_torso": 218,
+          "native_exposed_arms": false
+        }
+      ],
+      "validation": {
+        "vertices": 47053,
+        "triangles": 16390,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:219",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/eloria_arcane_armor_04.glb",
+      "before_sha256": "4fdecc83675b9ff535ff61238b1a885b8279b481419bf64b1e1f6ddabbc8b26f",
+      "after_sha256": "65f935b85039688694593664937617212f8461db738bc479c747415356225a45",
+      "changes": [
+        {
+          "moved_vertices": 78,
+          "max_displacement_m": 0.028059
+        },
+        {
+          "second_review_torso": 219,
+          "native_exposed_arms": false
+        }
+      ],
+      "validation": {
+        "vertices": 46877,
+        "triangles": 16225,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:232",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/eloria_frontier_shirt_01.glb",
+      "before_sha256": "e897c6a62d21c5a40c80be9bcdfc4a6351230e504c88aea696e1abc077920f17",
+      "after_sha256": "77e8e419ef32c1d46b66e6073cdb92c844954cc67d536432b10100a250786820",
+      "changes": [
+        {
+          "moved_vertices": 13881,
+          "max_displacement_m": 0.041142
+        },
+        {
+          "anatomical_forearms": "male",
+          "native_skin_uv_center": [
+            0.10009765625,
+            0.095703125
+          ]
+        },
+        {
+          "second_review_torso": 232,
+          "native_exposed_arms": true
+        }
+      ],
+      "validation": {
+        "vertices": 92338,
+        "triangles": 16671,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:234",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/eloria_frontier_shirt_03.glb",
+      "before_sha256": "490ec1fce04bf2f9416043f13276116e029b0326e5dbf3a7aa54009108c881e7",
+      "after_sha256": "6dd1515c1043491c253eeb77b3eee2f62bd677c8eca14c1babe561bbbcfbde39",
+      "changes": [
+        {
+          "moved_vertices": 13404,
+          "max_displacement_m": 0.041228
+        },
+        {
+          "anatomical_forearms": "male",
+          "native_skin_uv_center": [
+            0.10009765625,
+            0.095703125
+          ]
+        },
+        {
+          "second_review_torso": 234,
+          "native_exposed_arms": true
+        }
+      ],
+      "validation": {
+        "vertices": 91516,
+        "triangles": 16462,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:238",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/eloria_frontier_shirt_07.glb",
+      "before_sha256": "3acf4f2313eb8d4d538b3e9319247d75ad9c15165efe74a2a3419e2c6700e3c9",
+      "after_sha256": "96f63bc5792fda528af26616349707217b107a0834a6265cab1c1570e66c0779",
+      "changes": [
+        {
+          "moved_vertices": 14172,
+          "max_displacement_m": 0.041142
+        },
+        {
+          "anatomical_forearms": "male",
+          "native_skin_uv_center": [
+            0.10009765625,
+            0.095703125
+          ]
+        },
+        {
+          "second_review_torso": 238,
+          "native_exposed_arms": true
+        }
+      ],
+      "validation": {
+        "vertices": 92453,
+        "triangles": 16570,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "4:219",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/militia_leg_armor_01.glb",
+      "before_sha256": "b8b6c46ba11674839b04463e8d2f4100cd8facc9db9a6be080f582ba8c08d89e",
+      "after_sha256": "5c3fb063d1997a3e6eb9a3f11bfa89cdb9f0ab873092d7b01b3c574e4e518343",
+      "changes": [
+        {
+          "moved_vertices": 247,
+          "max_displacement_m": 0.025452
+        },
+        {
+          "moved_vertices": 361,
+          "max_displacement_m": 0.025651
+        },
+        {
+          "moved_vertices": 361,
+          "max_displacement_m": 0.025495
+        },
+        {
+          "second_review_legs": 219
+        }
+      ],
+      "validation": {
+        "vertices": 9852,
+        "triangles": 18836,
+        "max_weight_sum_error": 1.1920928955078125e-07
+      }
+    },
+    {
+      "key": "5:209",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/militia_torso_armor_02.glb",
+      "before_sha256": "36fcbc7415c5e840350cc9f2a28c0ad298a385f9795e664ecfe0e43a4e93834e",
+      "after_sha256": "b95ada7f6a11c6094744082a7cc4856aa0c3b491a19887cb3b910a6327dd9b68",
+      "changes": [
+        {
+          "moved_vertices": 108,
+          "max_displacement_m": 0.018974
+        },
+        {
+          "second_review_torso": 209,
+          "native_exposed_arms": false
+        }
+      ],
+      "validation": {
+        "vertices": 46736,
+        "triangles": 16552,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:210",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/militia_torso_armor_03.glb",
+      "before_sha256": "319c4e44ccd1de22ae19e70187e1591b9fdc152b5d1ec52229efc9decd73773f",
+      "after_sha256": "a0b4003f63dc848676590b60c77b86a09737b7a0a1bd897877d67ab4d6e39fb7",
+      "changes": [
+        {
+          "moved_vertices": 14208,
+          "max_displacement_m": 0.041142
+        },
+        {
+          "anatomical_forearms": "male",
+          "native_skin_uv_center": [
+            0.10009765625,
+            0.095703125
+          ]
+        },
+        {
+          "second_review_torso": 210,
+          "native_exposed_arms": true
+        }
+      ],
+      "validation": {
+        "vertices": 92487,
+        "triangles": 16478,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:211",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/militia_torso_armor_04.glb",
+      "before_sha256": "0088d973d3cfbe1bad846800075ceaf1efe73bfec360a6df7e3f4f60c9021db2",
+      "after_sha256": "733541f544eac49c77ec98d2f7784ed21bacfc9f9fefc94107ee70789492991e",
+      "changes": [
+        {
+          "moved_vertices": 15147,
+          "max_displacement_m": 0.051702
+        },
+        {
+          "anatomical_forearms": "male",
+          "native_skin_uv_center": [
+            0.10009765625,
+            0.095703125
+          ]
+        },
+        {
+          "second_review_torso": 211,
+          "native_exposed_arms": true
+        }
+      ],
+      "validation": {
+        "vertices": 92470,
+        "triangles": 16594,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:242",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/sunmane_steppe_shirt_03.glb",
+      "before_sha256": "f8a6a72a61595f4965fed961dd6a1c9c0f48bee24ed1107557f47ed11511cff1",
+      "after_sha256": "14d0265240d34d391eb704f8be07c692a68ea40f6c4e17791fa8bb0af3c68acf",
+      "changes": [
+        {
+          "moved_vertices": 17033,
+          "max_displacement_m": 0.040459
+        },
+        {
+          "anatomical_forearms": "male",
+          "native_skin_uv_center": [
+            0.10009765625,
+            0.095703125
+          ]
+        },
+        {
+          "second_review_torso": 242,
+          "native_exposed_arms": true
+        }
+      ],
+      "validation": {
+        "vertices": 91879,
+        "triangles": 16419,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "3:122",
+      "scene": "res://assets/actors/native/equipment/variants/glasswarden_female/amberwood_forest_helm_06.glb",
+      "before_sha256": "c9a5d7860a27dc9eacf0315d42cb8be23b1b8667201b6c6c10508e040357ff8b",
+      "after_sha256": "efe9de27cb37393bb795a2b89df4309b9225688b0e9fae4bc8dba0b400a5e547",
+      "changes": [
+        {
+          "retained_race_geometry": "glasswarden_female",
+          "antler_palette": true
+        }
+      ],
+      "validation": {
+        "vertices": 2819,
+        "triangles": 2590,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:122",
+      "scene": "res://assets/actors/native/equipment/variants/glasswarden_male/amberwood_forest_helm_06.glb",
+      "before_sha256": "5d423d0a5e397bbc8c13cfd30d9f2fca9f8ac4b4fd736c2f9f894aa2264652e5",
+      "after_sha256": "b7583c55ef4ca4e5cdc1effc74350b43f8421e602966080dcc42273714251729",
+      "changes": [
+        {
+          "retained_race_geometry": "glasswarden_male",
+          "antler_palette": true
+        }
+      ],
+      "validation": {
+        "vertices": 3216,
+        "triangles": 3206,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:122",
+      "scene": "res://assets/actors/native/equipment/variants/greyhaven_female/amberwood_forest_helm_06.glb",
+      "before_sha256": "dc0c235bf78d1c7068c7c6e2dc4084439767681b3073ca71e900b63d6baa16dc",
+      "after_sha256": "e7aed92173ccdc1ab53ae8fb081d94864a8afaeabd47adf7b8dcf78189cefcf9",
+      "changes": [
+        {
+          "retained_race_geometry": "greyhaven_female",
+          "antler_palette": true
+        }
+      ],
+      "validation": {
+        "vertices": 2273,
+        "triangles": 1782,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:122",
+      "scene": "res://assets/actors/native/equipment/variants/greyhaven_male/amberwood_forest_helm_06.glb",
+      "before_sha256": "d4994533f95d84b0e62ff1f7d1304533431067ca3c2cfb443743c150288ee0ce",
+      "after_sha256": "c4f9dd6f473e9ae21ba471d88f59e18a2cc30b348a5e9e345a305231450f9cb9",
+      "changes": [
+        {
+          "retained_race_geometry": "greyhaven_male",
+          "antler_palette": true
+        }
+      ],
+      "validation": {
+        "vertices": 2672,
+        "triangles": 2388,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:162",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/adventurer_headwear_06.glb",
+      "before_sha256": "d84014510ee41a2390a99cea01279ce8c6630806576a5c8f405361f2ee13eeac",
+      "after_sha256": "d84d7debfa2addddc6531ba4b135b8deeb39ce2e1fe070417ed5bc6297455122",
+      "changes": [
+        {
+          "moved_vertices": 2153,
+          "max_displacement_m": 0.094788
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "cap",
+          "section_samples": 42,
+          "before_radius_m": 0.13067283637137597,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.7086034371670114,
+          "scale_y": 0.6519151621936504,
+          "drop_m": 0.022
+        }
+      ],
+      "validation": {
+        "vertices": 2153,
+        "triangles": 1506,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:163",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/adventurer_headwear_07.glb",
+      "before_sha256": "df4e5b87f906bdee15ebba0fbe6a71f13387a4de0a4e885db9579d752e834473",
+      "after_sha256": "8247a40e168dc9a243009bebe4211ca4c5eced12322fdd2c070c4f15ec593c42",
+      "changes": [
+        {
+          "moved_vertices": 2060,
+          "max_displacement_m": 0.054542
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "cap",
+          "section_samples": 42,
+          "before_radius_m": 0.1079454827705083,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.8577961635872856,
+          "scale_y": 0.7891724705003028,
+          "drop_m": 0.022
+        }
+      ],
+      "validation": {
+        "vertices": 2060,
+        "triangles": 1551,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:164",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/adventurer_headwear_08.glb",
+      "before_sha256": "731e44fad9eed8c97c794a4aee107c1605c39ed0b73c5bec83bc08ad95089355",
+      "after_sha256": "774b34e9483e36a602d45acb540465beee05310ccdff4632ad8c92ba0eefe167",
+      "changes": [
+        {
+          "moved_vertices": 1772,
+          "max_displacement_m": 0.156879
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "hood",
+          "section_samples": 39,
+          "before_radius_m": 0.09218241850689166,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 1.0,
+          "scale_y": 0.92,
+          "drop_m": 0.016
+        }
+      ],
+      "validation": {
+        "vertices": 1772,
+        "triangles": 1261,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:117",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/amberwood_forest_helm_01.glb",
+      "before_sha256": "4a2b1a89ecf14fe4aadc534dd000c61b6d314065df074ca3b439d7c02e9c05ed",
+      "after_sha256": "d4e3bb7ae9788aaac9c031f40f95ec9ba6aaae61c34462093a866126b45cac4c",
+      "changes": [
+        {
+          "moved_vertices": 2364,
+          "max_displacement_m": 0.156115
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "hood",
+          "section_samples": 43,
+          "before_radius_m": 0.09914658307274958,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.9339224623523031,
+          "scale_y": 0.8592086653641189,
+          "drop_m": 0.016
+        }
+      ],
+      "validation": {
+        "vertices": 2364,
+        "triangles": 1312,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:118",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/amberwood_forest_helm_02.glb",
+      "before_sha256": "f3913abc847b8e2c2dbdeb6529f766e45ed78db0c4e66fb4f540826a099ef329",
+      "after_sha256": "4cd5d215abc1681465f34f2c38faaf2e90796069bd54b5bd44d5d15f85891389",
+      "changes": [
+        {
+          "moved_vertices": 1998,
+          "max_displacement_m": 0.071828
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "cap",
+          "section_samples": 41,
+          "before_radius_m": 0.10956249694692187,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.8451360965420285,
+          "scale_y": 0.7775252088186663,
+          "drop_m": 0.022
+        }
+      ],
+      "validation": {
+        "vertices": 1998,
+        "triangles": 1216,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:120",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/amberwood_forest_helm_04.glb",
+      "before_sha256": "52d8071a0432d4b3e5ba2367b31f254dd5b111e147a310cd8e202bbc7f8f9fc5",
+      "after_sha256": "777e5bd84ffa47646eef7ac3f31102386cdb58db1c4915a1e0f63d3cc8f39e46",
+      "changes": [
+        {
+          "moved_vertices": 1920,
+          "max_displacement_m": 0.160871
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "hood",
+          "section_samples": 41,
+          "before_radius_m": 0.101316698909167,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.913918653035996,
+          "scale_y": 0.8408051607931163,
+          "drop_m": 0.016
+        }
+      ],
+      "validation": {
+        "vertices": 1920,
+        "triangles": 1287,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:121",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/amberwood_forest_helm_05.glb",
+      "before_sha256": "ffa39a82e25c4ef887cafa69e4ba696a34b913d7c01b1232c0892b1ca270d5b4",
+      "after_sha256": "404788303e0e8cff4c62db708ae916199655caae6d208e9dace439ec331c9c75",
+      "changes": [
+        {
+          "moved_vertices": 1780,
+          "max_displacement_m": 0.053689
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "helm",
+          "section_samples": 46,
+          "before_radius_m": 0.10869209330070333,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.8519039258996431,
+          "scale_y": 0.7837516118276717,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 1780,
+        "triangles": 1535,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:123",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/amberwood_forest_helm_07.glb",
+      "before_sha256": "0f55dde54a08cbdbad121a72990c7fcfbc4196f38d1f12e5022cb72bb06f1186",
+      "after_sha256": "84e661c7d4d81605e7ccda0f982b9e43102097fa74bcc30ec6b8062436bcd76c",
+      "changes": [
+        {
+          "moved_vertices": 2015,
+          "max_displacement_m": 0.054726
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "helm",
+          "section_samples": 46,
+          "before_radius_m": 0.11059201657209683,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.8372685829157935,
+          "scale_y": 0.7702870962825301,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2015,
+        "triangles": 1490,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:124",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/amberwood_forest_helm_08.glb",
+      "before_sha256": "657672fdf813a5760750acbe222a5c9ac4f05b8dbd4fee11e983486f4515b82c",
+      "after_sha256": "2036587e351cfc98d1b759b3b9bf49cb0b07adafb334ad2981678358c7019b31",
+      "changes": [
+        {
+          "moved_vertices": 2092,
+          "max_displacement_m": 0.08147
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "helm",
+          "section_samples": 44,
+          "before_radius_m": 0.11567790929097159,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.8004572486196059,
+          "scale_y": 0.7364206687300374,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2092,
+        "triangles": 1542,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:109",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/arcane_ethereal_circlet_01.glb",
+      "before_sha256": "43ff31e38ba183c16d116cbc50d2047d15cfd255eee7c0ca92eb56bd9fcaa4a1",
+      "after_sha256": "41b1c9e35298c59d414e1e6d23f26f3c5b1b7b90a59608b91cd4dbec4367e03f",
+      "changes": [
+        {
+          "moved_vertices": 2073,
+          "max_displacement_m": 0.05338
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "turban",
+          "section_samples": 42,
+          "before_radius_m": 0.1043878848643923,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.887030339942299,
+          "scale_y": 0.816067912746915,
+          "drop_m": 0.014
+        }
+      ],
+      "validation": {
+        "vertices": 2073,
+        "triangles": 1395,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:149",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/frontier_hat_01.glb",
+      "before_sha256": "727d9754f028ae9c7f1f85877a4d66acbfcc17df8ba66166b4e9363ce9fbe2df",
+      "after_sha256": "009895fab23375fb42b1ff63c52fc8d29d024a8e449a8edfe9f8c9845efe58a8",
+      "changes": [
+        {
+          "moved_vertices": 2160,
+          "max_displacement_m": 0.056176
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "cap",
+          "section_samples": 45,
+          "before_radius_m": 0.11077282495180597,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.8359019555329111,
+          "scale_y": 0.7690297990902782,
+          "drop_m": 0.022
+        }
+      ],
+      "validation": {
+        "vertices": 2160,
+        "triangles": 1587,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:150",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/frontier_hat_02.glb",
+      "before_sha256": "1f121ad8c8893782f681f799111ce001bbd7b2d691c14d43649f3ce5ea7faf1f",
+      "after_sha256": "3c996bc9310663905cdb9067cbb4e0e12e64eb8232a34883433d6701224b52a2",
+      "changes": [
+        {
+          "moved_vertices": 2166,
+          "max_displacement_m": 0.112964
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "hat",
+          "section_samples": 45,
+          "before_radius_m": 0.13854134430810583,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.6683580375197923,
+          "scale_y": 0.6148893945182089,
+          "drop_m": 0.024
+        }
+      ],
+      "validation": {
+        "vertices": 2166,
+        "triangles": 1620,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:151",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/frontier_hat_03.glb",
+      "before_sha256": "9ea99effa5ff3090382d0aae2d83fd8b943fd7b13b660a42dc970f4021f9c026",
+      "after_sha256": "de985ee2094ca126603698b08716845f76f36337c42647132f11662156d48b70",
+      "changes": [
+        {
+          "moved_vertices": 2019,
+          "max_displacement_m": 0.078792
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "hat",
+          "section_samples": 43,
+          "before_radius_m": 0.12671392827537872,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.7307422495488309,
+          "scale_y": 0.6722828695849244,
+          "drop_m": 0.024
+        }
+      ],
+      "validation": {
+        "vertices": 2019,
+        "triangles": 1425,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:152",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/frontier_hat_04.glb",
+      "before_sha256": "0e6f082e411c506e7b2d5453b91c8158c7ab3f3703b6fe5ba0f7704950153f0a",
+      "after_sha256": "1bf5b875d15402ae59c60f22b72524822560606846fc723f901c94c50096d240",
+      "changes": [
+        {
+          "moved_vertices": 1974,
+          "max_displacement_m": 0.048513
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "cap",
+          "section_samples": 44,
+          "before_radius_m": 0.10261446245340855,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.9023603377463654,
+          "scale_y": 0.8301715107266562,
+          "drop_m": 0.022
+        }
+      ],
+      "validation": {
+        "vertices": 1974,
+        "triangles": 1589,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:153",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/frontier_hat_05.glb",
+      "before_sha256": "a37c6deadb356cc8b7ad7f699234b9853abeec491a831b97ac8425e2ed288275",
+      "after_sha256": "cbfdb3f3a4acbfd4992ff82cfc5ed749b6219435206f569cad8ce778dd98abad",
+      "changes": [
+        {
+          "moved_vertices": 2000,
+          "max_displacement_m": 0.122673
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "wrap",
+          "section_samples": 44,
+          "before_radius_m": 0.10383885571604651,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.891720352257411,
+          "scale_y": 0.8203827240768181,
+          "drop_m": 0.014
+        }
+      ],
+      "validation": {
+        "vertices": 2000,
+        "triangles": 1657,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:154",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/frontier_hat_06.glb",
+      "before_sha256": "c961238a2b1bd33b009a63d496a8ca5570e5d3e57ba08bbc5452cb9f1a04e088",
+      "after_sha256": "070d33f60e6086d066296d49ecd5c6e7ad98dd059c95a11ab527f9341a7a7679",
+      "changes": [
+        {
+          "moved_vertices": 1969,
+          "max_displacement_m": 0.117252
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "hat",
+          "section_samples": 39,
+          "before_radius_m": 0.1628911549955278,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.64,
+          "scale_y": 0.5888,
+          "drop_m": 0.024
+        }
+      ],
+      "validation": {
+        "vertices": 1969,
+        "triangles": 1591,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:155",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/frontier_hat_07.glb",
+      "before_sha256": "d6990152bedc477ba534906e288d77d63ca2398a46db36176c5fe624fe5c6473",
+      "after_sha256": "8f8a40fbbcbce4f549be01feb0c56bb8afc0c1f71ce741826d1b12b4d1dcf1fe",
+      "changes": [
+        {
+          "moved_vertices": 2172,
+          "max_displacement_m": 0.145546
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "hood",
+          "section_samples": 43,
+          "before_radius_m": 0.1049432246183631,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.8823363426638696,
+          "scale_y": 0.81174943525076,
+          "drop_m": 0.016
+        }
+      ],
+      "validation": {
+        "vertices": 2172,
+        "triangles": 1609,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:156",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/frontier_hat_08.glb",
+      "before_sha256": "bfdaaa7e6531dcf09218686fa25d98572ce272b4107b033205876ed04b1d76de",
+      "after_sha256": "c1d80347d309db252d1e9d321c4ad5b2fe977d398facaab9718c9b63086819b5",
+      "changes": [
+        {
+          "moved_vertices": 2010,
+          "max_displacement_m": 0.088989
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "cap",
+          "section_samples": 44,
+          "before_radius_m": 0.12936073838912135,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.7157907580783127,
+          "scale_y": 0.6585274974320477,
+          "drop_m": 0.022
+        }
+      ],
+      "validation": {
+        "vertices": 2010,
+        "triangles": 1605,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:141",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/knightly_headgear_01.glb",
+      "before_sha256": "a7df4b9f87356133c4d98a69115038a3c21794c4012ab6aff1f165e503aaec68",
+      "after_sha256": "2118d04825abee97440e3d2ff88e52904aefd1c76480110f72f6ef3db32bfaec",
+      "changes": [
+        {
+          "moved_vertices": 2249,
+          "max_displacement_m": 0.046817
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "helm",
+          "section_samples": 48,
+          "before_radius_m": 0.1068784739510507,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.8663598718627585,
+          "scale_y": 0.7970510821137379,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2249,
+        "triangles": 1672,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:142",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/knightly_headgear_02.glb",
+      "before_sha256": "fbfff917aa203be6397209d9ba526ba05d6b7b2e1f1ff310036a9f218300f4a6",
+      "after_sha256": "44c8cb6e4d790934154ddad5a5f7447497e583a3077af7d6a2e903f3d5b220f0",
+      "changes": [
+        {
+          "moved_vertices": 2037,
+          "max_displacement_m": 0.058897
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "helm",
+          "section_samples": 47,
+          "before_radius_m": 0.11234672155198241,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.8241915715740401,
+          "scale_y": 0.7582562458481169,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2037,
+        "triangles": 1608,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:143",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/knightly_headgear_03.glb",
+      "before_sha256": "5d685f742812296f96e7bc42348db8d263e0d16b8444be9359c56d860b76b4af",
+      "after_sha256": "5daf76aad5c5622658029f2c3fbb62aaa73ee344dc7573b9e4a1caf67c920dca",
+      "changes": [
+        {
+          "moved_vertices": 2054,
+          "max_displacement_m": 0.039656
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "helm",
+          "section_samples": 48,
+          "before_radius_m": 0.1055154492658777,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.8775513125456931,
+          "scale_y": 0.8073472075420377,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2054,
+        "triangles": 1636,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:144",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/knightly_headgear_04.glb",
+      "before_sha256": "a47f2868fcef56d27458348456ed0122a2acba056e062c9a72c947e34ae74a54",
+      "after_sha256": "f7ac01e6df92d796024bf3e3a044bfeb937bbcb84677df18abec9ef51dc4f6c1",
+      "changes": [
+        {
+          "moved_vertices": 2091,
+          "max_displacement_m": 0.028622
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "helm",
+          "section_samples": 48,
+          "before_radius_m": 0.09750590991082835,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.9496370125851876,
+          "scale_y": 0.8736660515783726,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2091,
+        "triangles": 1570,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:145",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/knightly_headgear_05.glb",
+      "before_sha256": "e5fb32978033a7bba9f1688dfbcfd9eeb727783b7e438b59a4bffdb0795cb5f9",
+      "after_sha256": "57c0bba263227e33b805f5c48f51cffb237564f22ef7843079074409708f7da0",
+      "changes": [
+        {
+          "moved_vertices": 2163,
+          "max_displacement_m": 0.078821
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "helm",
+          "section_samples": 45,
+          "before_radius_m": 0.11428182087787964,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.8102357862854299,
+          "scale_y": 0.7454169233825956,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2163,
+        "triangles": 1632,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:146",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/knightly_headgear_06.glb",
+      "before_sha256": "35d0e7985e760c48abd4b530ebe2cf910a37445a9d9290dce3fbaa910569a06f",
+      "after_sha256": "fff77c78dda4fd6e644cc559100042300e7c3bbd0a9bbaef94d98592dbcc088e",
+      "changes": [
+        {
+          "moved_vertices": 1722,
+          "max_displacement_m": 0.068463
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "helm",
+          "section_samples": 46,
+          "before_radius_m": 0.11544801711615496,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.8020512028713082,
+          "scale_y": 0.7378871066416035,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 1722,
+        "triangles": 1402,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:147",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/knightly_headgear_07.glb",
+      "before_sha256": "ce9297c236f507c2cd573d653eed328be97c3b577c342edec37ba98f51dc55d9",
+      "after_sha256": "295600cee858f1d6c85ea18bef9dc2e318843cf3af8d9bf1808728c393316c77",
+      "changes": [
+        {
+          "moved_vertices": 2061,
+          "max_displacement_m": 0.075468
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "helm",
+          "section_samples": 43,
+          "before_radius_m": 0.11129360567331661,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.8319904853196771,
+          "scale_y": 0.765431246494103,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2061,
+        "triangles": 1584,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:148",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/knightly_headgear_08.glb",
+      "before_sha256": "fe62505ab01b39f460bc1741aadccadcf7cd0353632b08236afd3d4297ec9fae",
+      "after_sha256": "a2cdb86ff36f7fe56d18121f45b1977553ac11d4293f15a17a855786baefbf60",
+      "changes": [
+        {
+          "moved_vertices": 2201,
+          "max_displacement_m": 0.086214
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "helm",
+          "section_samples": 46,
+          "before_radius_m": 0.11882331429398363,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.7792681221466975,
+          "scale_y": 0.7169266723749618,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2201,
+        "triangles": 1672,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:125",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/legendary_eloria_helm_01.glb",
+      "before_sha256": "2ebbf1e2f25bdb3a28f62355816582e1b6f1ef03433b6bab0cc349841928ef26",
+      "after_sha256": "8cb7d9cacad1b0c4ba0964b2048aae820cff70c110e237b3a0204ec39c788a90",
+      "changes": [
+        {
+          "moved_vertices": 2006,
+          "max_displacement_m": 0.066181
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "helm",
+          "section_samples": 46,
+          "before_radius_m": 0.10866440101688987,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.8521210270392715,
+          "scale_y": 0.7839513448761298,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2006,
+        "triangles": 1581,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:126",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/legendary_eloria_helm_02.glb",
+      "before_sha256": "7cf6713538cfb110b49ff0a29eeac44679f63db0cfafde24b473e1cbd6cc10b8",
+      "after_sha256": "c00e4131f1c80ea861fdc5e9b4c14dda110d11a3010eb14c6d93f70decdc6e9f",
+      "changes": [
+        {
+          "moved_vertices": 2201,
+          "max_displacement_m": 0.077
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "helm",
+          "section_samples": 46,
+          "before_radius_m": 0.11477540332606254,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.8067514320474052,
+          "scale_y": 0.7422113174836128,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2201,
+        "triangles": 1608,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:127",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/legendary_eloria_helm_03.glb",
+      "before_sha256": "e1f5c94fb1a7192382c07d0ef89defe2d0cc758086f9fa1039ad78aa156e6eb0",
+      "after_sha256": "adec1787dd96bedf449c161ab6af6641d54da94128487868795b463dc94b8bc6",
+      "changes": [
+        {
+          "moved_vertices": 2181,
+          "max_displacement_m": 0.107147
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "helm",
+          "section_samples": 46,
+          "before_radius_m": 0.12099155101582881,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.7653031986093444,
+          "scale_y": 0.7040789427205969,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2181,
+        "triangles": 1553,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:128",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/legendary_eloria_helm_04.glb",
+      "before_sha256": "b134dd4a46f75af0c9f4d3d468cfb0fcadfeb6a8896f40c3239b16d346166cab",
+      "after_sha256": "c20f24a9b350c9fb3e98385caef2e94742fcddcdae91f2d9fc63aa12a7d516cd",
+      "changes": [
+        {
+          "moved_vertices": 2072,
+          "max_displacement_m": 0.083929
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "helm",
+          "section_samples": 44,
+          "before_radius_m": 0.11862104568620183,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.780596903875467,
+          "scale_y": 0.7181491515654297,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2072,
+        "triangles": 1421,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:129",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/legendary_eloria_helm_05.glb",
+      "before_sha256": "b77e38c18b351115035a00a757224c348ec50bdf010adcd23dcf0d17fac64069",
+      "after_sha256": "4c1b30c4779f4f4f0cc6339cd7249de3339795809e84053f53e8f72407a483b7",
+      "changes": [
+        {
+          "moved_vertices": 1921,
+          "max_displacement_m": 0.037465
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "helm",
+          "section_samples": 43,
+          "before_radius_m": 0.09760711873469637,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.9486523339429819,
+          "scale_y": 0.8727601472275434,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 1921,
+        "triangles": 1263,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:130",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/legendary_eloria_helm_06.glb",
+      "before_sha256": "d96c2cf0355ba7f74e4de9d214da41ada07be255d6fa7921803f5a95dd336fec",
+      "after_sha256": "b0a730102147602b9f5925e4a72df4fbaf15d435a9e5fd678c771a18e1453665",
+      "changes": [
+        {
+          "moved_vertices": 2264,
+          "max_displacement_m": 0.059656
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "helm",
+          "section_samples": 46,
+          "before_radius_m": 0.10903950567002256,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.8491896622984783,
+          "scale_y": 0.7812544893146001,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2264,
+        "triangles": 1612,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:131",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/legendary_eloria_helm_07.glb",
+      "before_sha256": "6417d0f93cc392cd2174ff68f9fd1fdb766787359b740bd95de0abbd04e23ae2",
+      "after_sha256": "0633380c4aa40874be8187d02b791d3fc622227c2024f8a7fac00b3551347eb1",
+      "changes": [
+        {
+          "moved_vertices": 2094,
+          "max_displacement_m": 0.04324
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "helm",
+          "section_samples": 48,
+          "before_radius_m": 0.10619181320780176,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.871961954505139,
+          "scale_y": 0.8022049981447279,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2094,
+        "triangles": 1465,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:132",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/legendary_eloria_helm_08.glb",
+      "before_sha256": "ea8ceb15d183e40a8df16ac6e9b08792de4640ef91ebf472eea827f0eef5db95",
+      "after_sha256": "4baaeb1c7e0646295ef65f23e18725e09664af3d0ca337f3c62c832b9459d47d",
+      "changes": [
+        {
+          "moved_vertices": 2240,
+          "max_displacement_m": 0.10762
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "helm",
+          "section_samples": 44,
+          "before_radius_m": 0.123589965124944,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.7492131007845968,
+          "scale_y": 0.6892760527218291,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2240,
+        "triangles": 1556,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:133",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/militia_helmet_01.glb",
+      "before_sha256": "0c7283fc42cd4ddd5fb91a3d5a0fc03f9308e423f6914a34cd5225bca6010916",
+      "after_sha256": "86ad8e14ee110ff2526344a48925a7f1b67f2401a20ad92400ba99704d41086c",
+      "changes": [
+        {
+          "moved_vertices": 2104,
+          "max_displacement_m": 0.135398
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "coif",
+          "section_samples": 41,
+          "before_radius_m": 0.09963772017425963,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.9293189450258064,
+          "scale_y": 0.8549734294237419,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2104,
+        "triangles": 1620,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:134",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/militia_helmet_02.glb",
+      "before_sha256": "c153ab165280da0877cd9c85e09abc67c9364eda80837d697233c100cd5b80f1",
+      "after_sha256": "07fba85bd35669ed37fe090191e0b6f26be883619995452376b91cd0f606159f",
+      "changes": [
+        {
+          "moved_vertices": 1813,
+          "max_displacement_m": 0.030703
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "helm",
+          "section_samples": 46,
+          "before_radius_m": 0.1007600689661558,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.9189674237740069,
+          "scale_y": 0.8454500298720864,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 1813,
+        "triangles": 1464,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:135",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/militia_helmet_03.glb",
+      "before_sha256": "39b53ce00d51662ea2887b02fd84cfd14b58e7d975258f9ebf3b8aa598e69905",
+      "after_sha256": "ad5ce8be9e70b01b5fba1abe6cc5b356f9ec39c9ef9aa29a25519ea524bd929f",
+      "changes": [
+        {
+          "moved_vertices": 2106,
+          "max_displacement_m": 0.035867
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "helm",
+          "section_samples": 43,
+          "before_radius_m": 0.10244002194635847,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.9038969265899404,
+          "scale_y": 0.8315851724627452,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2106,
+        "triangles": 1603,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:136",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/militia_helmet_04.glb",
+      "before_sha256": "cefdf462cf8ad8871453c90b9cf53b4a25e2dbffc1a6f5527c1c5d7871130f55",
+      "after_sha256": "57258a2242f71afc9d72a2f8ddebb7dbe3fc92e1f07bbadd606042da70a8a1be",
+      "changes": [
+        {
+          "moved_vertices": 2083,
+          "max_displacement_m": 0.056582
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "helm",
+          "section_samples": 46,
+          "before_radius_m": 0.11265177199696384,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.8219597380111789,
+          "scale_y": 0.7562029589702847,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2083,
+        "triangles": 1630,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:137",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/militia_helmet_05.glb",
+      "before_sha256": "f9c0bac4df560d65d15d7612e33d1d9edadd1bed7a26339f3d34e16f4b583a64",
+      "after_sha256": "a5c6ce1eae7a03e91507c1eb1d744d1397d67698bc99b2ff20d796a19232be18",
+      "changes": [
+        {
+          "moved_vertices": 1963,
+          "max_displacement_m": 0.136521
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "coif",
+          "section_samples": 44,
+          "before_radius_m": 0.11007582579604765,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.841194879325122,
+          "scale_y": 0.7738992889791123,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 1963,
+        "triangles": 1640,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:138",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/militia_helmet_06.glb",
+      "before_sha256": "54e72f0d68eb61dab63ec3bbed32596c1afd2f486df51cce7afbf325e25261e7",
+      "after_sha256": "bac780f9f2eb786ce169cac6d1b2ffe8ad6c141ad23adfddae4b471bb76ddd0a",
+      "changes": [
+        {
+          "moved_vertices": 1752,
+          "max_displacement_m": 0.055327
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "helm",
+          "section_samples": 44,
+          "before_radius_m": 0.11219564582624808,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.8253013770295253,
+          "scale_y": 0.7592772668671633,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 1752,
+        "triangles": 1607,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:139",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/militia_helmet_07.glb",
+      "before_sha256": "fcfb4d7435f7f9ead816b848cc78a3ecd16dc0e3cdea5eb5ab449f3b6ba6fef6",
+      "after_sha256": "a0fbf343ce1ab0b2ca51a4ad670731cd7dcd49d34d1f2354d00b24d66f4e97cb",
+      "changes": [
+        {
+          "moved_vertices": 2003,
+          "max_displacement_m": 0.076743
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "helm",
+          "section_samples": 44,
+          "before_radius_m": 0.12463102188294041,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.7429548406021211,
+          "scale_y": 0.6835184533539514,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2003,
+        "triangles": 1552,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:140",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/militia_helmet_08.glb",
+      "before_sha256": "77e0dfa21795fbf9c57f93a51524c691d4a3cedeb449d85a96279e303833f8fb",
+      "after_sha256": "1a6db03c9172d82033114db3ede00ed239d7a37985501ae0c4b8ee179303bcf9",
+      "changes": [
+        {
+          "moved_vertices": 2079,
+          "max_displacement_m": 0.045276
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "helm",
+          "section_samples": 44,
+          "before_radius_m": 0.10744635738478661,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.8617809226004536,
+          "scale_y": 0.7928384487924174,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2079,
+        "triangles": 1537,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:165",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/sunmane_steppe_headgear_01.glb",
+      "before_sha256": "dba3f5722bfcedb056425777982d9c8b8bf0e732c02a56729d9d9092ce5b76a3",
+      "after_sha256": "353000777c0d3bb7d4cf1f81e70e37734574bba00d7bf3e3d0d42693d18c05f7",
+      "changes": [
+        {
+          "moved_vertices": 1889,
+          "max_displacement_m": 0.137632
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "hat",
+          "section_samples": 37,
+          "before_radius_m": 0.142231309851921,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.6510185492457436,
+          "scale_y": 0.5989370653060841,
+          "drop_m": 0.024
+        }
+      ],
+      "validation": {
+        "vertices": 1889,
+        "triangles": 1510,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:166",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/sunmane_steppe_headgear_02.glb",
+      "before_sha256": "4447d2315c3ec9dddcb56940913144a7197de4a0ba98586ae967d6069d0b0549",
+      "after_sha256": "3e5b50745eb9091a07b167dc33b9c7eb20ea50cefd774a64dc181214067d330c",
+      "changes": [
+        {
+          "moved_vertices": 2239,
+          "max_displacement_m": 0.139684
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "wrap",
+          "section_samples": 44,
+          "before_radius_m": 0.10479018636956641,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.8836249290612135,
+          "scale_y": 0.8129349347363164,
+          "drop_m": 0.014
+        }
+      ],
+      "validation": {
+        "vertices": 2239,
+        "triangles": 1616,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:167",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/sunmane_steppe_headgear_03.glb",
+      "before_sha256": "c54c63b4433fc5c75122812886c957935a1b8c9282c7d4d840648ddd97996a69",
+      "after_sha256": "91bb1876270bda3bc5cb33fbf859f08fa2d8aadecf2de2c1bc605629e6e60812",
+      "changes": [
+        {
+          "moved_vertices": 2118,
+          "max_displacement_m": 0.059679
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "helm",
+          "section_samples": 46,
+          "before_radius_m": 0.11533218194198869,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.8028567520182202,
+          "scale_y": 0.7386282118567625,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2118,
+        "triangles": 1591,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:168",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/sunmane_steppe_headgear_04.glb",
+      "before_sha256": "89a7f29f85f84340fd44e42fd8e5afdc9e867f914705141fd7e3b79670b9853e",
+      "after_sha256": "48450fa4b85dad02a1ec3b11ce250789a472201a98e76833a3415d3a47a26208",
+      "changes": [
+        {
+          "moved_vertices": 2146,
+          "max_displacement_m": 0.070714
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "turban",
+          "section_samples": 41,
+          "before_radius_m": 0.11404290436869721,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.8119332062761393,
+          "scale_y": 0.7469785497740482,
+          "drop_m": 0.014
+        }
+      ],
+      "validation": {
+        "vertices": 2146,
+        "triangles": 1540,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:169",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/sunmane_steppe_headgear_05.glb",
+      "before_sha256": "3276c5fd49376912984241f8d612f257b5fa3282c85e203be786d2ce63b8743a",
+      "after_sha256": "d48bf8f251de8bc6e68b79c01a2780705023144f9f6d8afb3e1662683c11df3b",
+      "changes": [
+        {
+          "moved_vertices": 1776,
+          "max_displacement_m": 0.065239
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "helm",
+          "section_samples": 46,
+          "before_radius_m": 0.11444992475817964,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.8090457131602593,
+          "scale_y": 0.7443220561074386,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 1776,
+        "triangles": 1557,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:170",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/sunmane_steppe_headgear_06.glb",
+      "before_sha256": "0b05601fe6193899c7a31e91bcf3414e780d275643edea869cf22f5d1b5b2208",
+      "after_sha256": "a82bc59bcf03c20ef2b319543e0e41b807a1cb725e40e594919a76f373194eab",
+      "changes": [
+        {
+          "moved_vertices": 2149,
+          "max_displacement_m": 0.059977
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "band",
+          "section_samples": 48,
+          "before_radius_m": 0.11783946758742789,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.7857742647082216,
+          "scale_y": 0.722912323531564,
+          "drop_m": 0.006
+        }
+      ],
+      "validation": {
+        "vertices": 2149,
+        "triangles": 1285,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:171",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/sunmane_steppe_headgear_07.glb",
+      "before_sha256": "fb029ed92ad02a78708c2b81a4293bb6bc6291391afb559ca20f50249fadfad8",
+      "after_sha256": "a72e5671dea2c11ce3850fed50d5fc2bdef2800280b397c68f9d846efd799909",
+      "changes": [
+        {
+          "moved_vertices": 2071,
+          "max_displacement_m": 0.151833
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "hood",
+          "section_samples": 42,
+          "before_radius_m": 0.10597582956067511,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.8737390533386223,
+          "scale_y": 0.8038399290715326,
+          "drop_m": 0.016
+        }
+      ],
+      "validation": {
+        "vertices": 2071,
+        "triangles": 1618,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:172",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/sunmane_steppe_headgear_08.glb",
+      "before_sha256": "d4a1f9c1b9708dd29de51c5d6868e34e22040e4dc8d0e4b6d546493948528ceb",
+      "after_sha256": "42c41ce9e0447093482ac40039cca86d801ea573c271f8df47b3d1898753696f",
+      "changes": [
+        {
+          "moved_vertices": 1757,
+          "max_displacement_m": 0.068333
+        },
+        {
+          "headwear_fit": "luminous_female",
+          "kind": "helm",
+          "section_samples": 43,
+          "before_radius_m": 0.10806646544234233,
+          "head_radius_m": 0.08359522099711947,
+          "scale_xz": 0.8568358428130752,
+          "scale_y": 0.7882889753880292,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 1757,
+        "triangles": 1196,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:162",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/adventurer_headwear_06.glb",
+      "before_sha256": "5c254c48252028b5af8f289fa8255220b51877e9caa2a82d0de9597a1c438390",
+      "after_sha256": "4a6649514975f95ccd662fe8f630ef5c55d7e1c2f49a262d94886a16b421ee56",
+      "changes": [
+        {
+          "moved_vertices": 2153,
+          "max_displacement_m": 0.047531
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "cap",
+          "section_samples": 44,
+          "before_radius_m": 0.0942780302483037,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.8944963202089394,
+          "scale_y": 0.8229366145922243,
+          "drop_m": 0.022
+        }
+      ],
+      "validation": {
+        "vertices": 2153,
+        "triangles": 1506,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:163",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/adventurer_headwear_07.glb",
+      "before_sha256": "f5d3490be7dc1995a28367fb21a419c860a6545efddd9bc0d8b4c654d298de94",
+      "after_sha256": "0a6db5eb0f3ab6add3bba577901a2f04167e64acef398b48d3d481adcdc38a18",
+      "changes": [
+        {
+          "moved_vertices": 2060,
+          "max_displacement_m": 0.054085
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "cap",
+          "section_samples": 42,
+          "before_radius_m": 0.09997259643638551,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.8435446726375303,
+          "scale_y": 0.776061098826528,
+          "drop_m": 0.022
+        }
+      ],
+      "validation": {
+        "vertices": 2060,
+        "triangles": 1551,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:164",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/adventurer_headwear_08.glb",
+      "before_sha256": "6009cf14e821aca6eda4bf6e028fdb0dd5ab654b710f5285a4fd54385bddce67",
+      "after_sha256": "34d60d54a366f0b19aa42e85f422f5665f0ef54f773acd6add92c6cc8af9e451",
+      "changes": [
+        {
+          "moved_vertices": 1772,
+          "max_displacement_m": 0.149875
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "hood",
+          "section_samples": 39,
+          "before_radius_m": 0.08845321964496512,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.9534005825016342,
+          "scale_y": 0.8771285359015035,
+          "drop_m": 0.016
+        }
+      ],
+      "validation": {
+        "vertices": 1772,
+        "triangles": 1261,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:117",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/amberwood_forest_helm_01.glb",
+      "before_sha256": "f667d111a16deae4c04c1e7d3b4c2b779ae615e479e1be4c492d332e07960072",
+      "after_sha256": "52cd8dac1ea78c18cc00f9b25eb0546e1270c80fe5e8aae630199f5ffcafd3b8",
+      "changes": [
+        {
+          "moved_vertices": 2364,
+          "max_displacement_m": 0.148184
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "hood",
+          "section_samples": 45,
+          "before_radius_m": 0.10028603499346637,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.8409082195656545,
+          "scale_y": 0.7736355620004022,
+          "drop_m": 0.016
+        }
+      ],
+      "validation": {
+        "vertices": 2364,
+        "triangles": 1312,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:118",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/amberwood_forest_helm_02.glb",
+      "before_sha256": "a7c7737a0b498d3db814e3a11dd5af948b3fca60b14b5ce3ff2db52e22c9ab65",
+      "after_sha256": "8b81cc8bda1039fb0df6951ec1e0d8793b3ee63adaf089aeacbd9b5807a00533",
+      "changes": [
+        {
+          "moved_vertices": 1998,
+          "max_displacement_m": 0.059003
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "cap",
+          "section_samples": 42,
+          "before_radius_m": 0.09501676337208034,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.8875418204198123,
+          "scale_y": 0.8165384747862274,
+          "drop_m": 0.022
+        }
+      ],
+      "validation": {
+        "vertices": 1998,
+        "triangles": 1216,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:120",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/amberwood_forest_helm_04.glb",
+      "before_sha256": "2a339dcd6e3e7948b6f9299a933403d8781f485f3f2d5886c5fa26e445e32efe",
+      "after_sha256": "f1f49a83fdeeb79f9eb5cda0d9a98b15779dd6027add561906b073ad3772f34f",
+      "changes": [
+        {
+          "moved_vertices": 1920,
+          "max_displacement_m": 0.159939
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "hood",
+          "section_samples": 46,
+          "before_radius_m": 0.09202571652344863,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.9163889651667823,
+          "scale_y": 0.8430778479534398,
+          "drop_m": 0.016
+        }
+      ],
+      "validation": {
+        "vertices": 1920,
+        "triangles": 1287,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:121",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/amberwood_forest_helm_05.glb",
+      "before_sha256": "25639ef054e81b59efafc9aaa38a6cf6ecb9770b69ea8cd4f7174a745c632503",
+      "after_sha256": "8e14dd639fa24515052ebf75c820e65faff2de6b05366cb62b7348c56d16916b",
+      "changes": [
+        {
+          "moved_vertices": 1780,
+          "max_displacement_m": 0.062632
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "helm",
+          "section_samples": 46,
+          "before_radius_m": 0.10425708764707575,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.8088788305609274,
+          "scale_y": 0.7441685241160532,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 1780,
+        "triangles": 1535,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:123",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/amberwood_forest_helm_07.glb",
+      "before_sha256": "b80f5fa3c08fd1efe1c1f1fe0a0f7336fdacc9675559e21da1c056fcfc78e3cf",
+      "after_sha256": "b8c43e45c31f564a0b1cf2c825a5be4fa41ff6e2c07e36ffd166df6470b761a3",
+      "changes": [
+        {
+          "moved_vertices": 2015,
+          "max_displacement_m": 0.048534
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "helm",
+          "section_samples": 46,
+          "before_radius_m": 0.09838531477047932,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.8571538479130678,
+          "scale_y": 0.7885815400800225,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2015,
+        "triangles": 1490,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:124",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/amberwood_forest_helm_08.glb",
+      "before_sha256": "efa762cc9ea14c337d03480c93ff6ad7b253d19aea45a7c22e2327ce58067d24",
+      "after_sha256": "fd07a9908070727be0a735cf7fb5b6095a76ffc0483c99d147d17bf482eca10c",
+      "changes": [
+        {
+          "moved_vertices": 2092,
+          "max_displacement_m": 0.081695
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "helm",
+          "section_samples": 44,
+          "before_radius_m": 0.10681606897185864,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.7895006055303567,
+          "scale_y": 0.7263405570879282,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2092,
+        "triangles": 1542,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:109",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/arcane_ethereal_circlet_01.glb",
+      "before_sha256": "8c36280afece518b7de6b46e27e0ece12f5866698f0cd26e992a01b2dffdbf27",
+      "after_sha256": "27e0be87969641293034c2a5df4144c753b2be549f175577c1d8069bf2168568",
+      "changes": [
+        {
+          "moved_vertices": 2073,
+          "max_displacement_m": 0.047726
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "turban",
+          "section_samples": 43,
+          "before_radius_m": 0.09406940445911643,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.8964801214438011,
+          "scale_y": 0.824761711728297,
+          "drop_m": 0.014
+        }
+      ],
+      "validation": {
+        "vertices": 2073,
+        "triangles": 1395,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:149",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/frontier_hat_01.glb",
+      "before_sha256": "180b36bc3d3c6528b5ea92ba308776cceb0b8b5fcaa56398d2b99d9deb0c220f",
+      "after_sha256": "7858d1d223420625ad60aef5a25ca93733df1400cc3cc8157ee506577245c1a3",
+      "changes": [
+        {
+          "moved_vertices": 2160,
+          "max_displacement_m": 0.060647
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "cap",
+          "section_samples": 45,
+          "before_radius_m": 0.10709105093620855,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.7874733733249925,
+          "scale_y": 0.7244755034589931,
+          "drop_m": 0.022
+        }
+      ],
+      "validation": {
+        "vertices": 2160,
+        "triangles": 1587,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:150",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/frontier_hat_02.glb",
+      "before_sha256": "1a7807b4868d75a8764cb58ea40538db8cccad342748dc4a1c6d30933e013c4d",
+      "after_sha256": "a32c186a7e7b7432818cac0e27f9d6f9fd0ee174b782bca9abc0e219b836cc64",
+      "changes": [
+        {
+          "moved_vertices": 2166,
+          "max_displacement_m": 0.091528
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "hat",
+          "section_samples": 46,
+          "before_radius_m": 0.12362622637366903,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.6821477416835264,
+          "scale_y": 0.6275759223488443,
+          "drop_m": 0.024
+        }
+      ],
+      "validation": {
+        "vertices": 2166,
+        "triangles": 1620,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:151",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/frontier_hat_03.glb",
+      "before_sha256": "a55f2d4cd76182dd62f87ad9697642b2bf16dd7510e8dfed9bd78e67f07dd084",
+      "after_sha256": "17bd8f7909ce68b88f353fa9bff74520314a075df46e7d2689d93e9e8c544d29",
+      "changes": [
+        {
+          "moved_vertices": 2019,
+          "max_displacement_m": 0.069728
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "hat",
+          "section_samples": 45,
+          "before_radius_m": 0.112354572044312,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.7505822824939864,
+          "scale_y": 0.6905356998944675,
+          "drop_m": 0.024
+        }
+      ],
+      "validation": {
+        "vertices": 2019,
+        "triangles": 1425,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:152",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/frontier_hat_04.glb",
+      "before_sha256": "0402a8de32d85a5bda5f96bd0863f757196a3690874cb0824252ee789a7027ac",
+      "after_sha256": "93795ef1f766f85a048bac10d60a85538e28d72a1706f6ca6fc4a32a085388dc",
+      "changes": [
+        {
+          "moved_vertices": 1974,
+          "max_displacement_m": 0.046701
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "cap",
+          "section_samples": 44,
+          "before_radius_m": 0.0934665771198655,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.9022621105029303,
+          "scale_y": 0.8300811416626959,
+          "drop_m": 0.022
+        }
+      ],
+      "validation": {
+        "vertices": 1974,
+        "triangles": 1589,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:153",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/frontier_hat_05.glb",
+      "before_sha256": "95d26b5c22c332f17146e45d6e805d28a0abcb941952f33b87655ef3d62d6655",
+      "after_sha256": "d869c46270aa8002213f95ac0dc729699d521a020f1417a2a9d732ea8e0a6104",
+      "changes": [
+        {
+          "moved_vertices": 2000,
+          "max_displacement_m": 0.124249
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "wrap",
+          "section_samples": 44,
+          "before_radius_m": 0.09208842492257097,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.9157649422776156,
+          "scale_y": 0.8425037468954064,
+          "drop_m": 0.014
+        }
+      ],
+      "validation": {
+        "vertices": 2000,
+        "triangles": 1657,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:154",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/frontier_hat_06.glb",
+      "before_sha256": "ad51aef537e9cba674b185cf314de064dfd1100f046b86e478a605e893c77dce",
+      "after_sha256": "401940051e1cdcb9f1bdb8854a1ed6ecde8947f677eb39b4d445c2267010c1ab",
+      "changes": [
+        {
+          "moved_vertices": 1969,
+          "max_displacement_m": 0.116955
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "hat",
+          "section_samples": 41,
+          "before_radius_m": 0.16191930259250245,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.64,
+          "scale_y": 0.5888,
+          "drop_m": 0.024
+        }
+      ],
+      "validation": {
+        "vertices": 1969,
+        "triangles": 1591,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:155",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/frontier_hat_07.glb",
+      "before_sha256": "05dac5d9a75338e2156deef0645043a45f57fb30bd1f492cbd0c9249eb6e73e3",
+      "after_sha256": "997901ac9861832a8f10324e648bba2ee7faa48c5958499183acea5fb87c1e96",
+      "changes": [
+        {
+          "moved_vertices": 2172,
+          "max_displacement_m": 0.136171
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "hood",
+          "section_samples": 44,
+          "before_radius_m": 0.10018417173652266,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.8417632213942964,
+          "scale_y": 0.7744221636827527,
+          "drop_m": 0.016
+        }
+      ],
+      "validation": {
+        "vertices": 2172,
+        "triangles": 1609,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:156",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/frontier_hat_08.glb",
+      "before_sha256": "10b69c55b9e14bc0455fa5a6ce99e4330893cab53e13522919910df9487c9f35",
+      "after_sha256": "d6d833309fb6a828166a4ee2a1ef517f1e7aacbd3244787c5c8f04d55d2d51b9",
+      "changes": [
+        {
+          "moved_vertices": 2010,
+          "max_displacement_m": 0.08675
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "cap",
+          "section_samples": 45,
+          "before_radius_m": 0.12016058299697467,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.7018220869965152,
+          "scale_y": 0.645676320036794,
+          "drop_m": 0.022
+        }
+      ],
+      "validation": {
+        "vertices": 2010,
+        "triangles": 1605,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:141",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/knightly_headgear_01.glb",
+      "before_sha256": "e4821f9bc24ec2ca05d3a837dc3099990e19bcbf2517b2384c7be8f3c688d5ce",
+      "after_sha256": "04cb2b148cf90e57133603ad3c889de81dc6acb92ff457d4347b7a1eccc4b557",
+      "changes": [
+        {
+          "moved_vertices": 2249,
+          "max_displacement_m": 0.053375
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "helm",
+          "section_samples": 48,
+          "before_radius_m": 0.10356518550024538,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.8142828183652018,
+          "scale_y": 0.7491401928959857,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2249,
+        "triangles": 1672,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:142",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/knightly_headgear_02.glb",
+      "before_sha256": "ebdbf8e47fcc692b1b38113a63093ccb1eebda7d5feeb24910e08d8118859b54",
+      "after_sha256": "9df367462297fac1cb9c32e1dc935c9a40099ce6fb27ea7e3d0532bfc250fa38",
+      "changes": [
+        {
+          "moved_vertices": 2037,
+          "max_displacement_m": 0.072676
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "helm",
+          "section_samples": 45,
+          "before_radius_m": 0.10873435710557482,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.775572260493285,
+          "scale_y": 0.7135264796538222,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2037,
+        "triangles": 1608,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:143",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/knightly_headgear_03.glb",
+      "before_sha256": "3900cee31842e5789998578e0f76c36b1083794d24c6114f6246554f85a2a289",
+      "after_sha256": "b3552ac8ad591be836df27ec34d2f25d369807ba6e6cf6b53fae2dac3bd60385",
+      "changes": [
+        {
+          "moved_vertices": 2054,
+          "max_displacement_m": 0.044633
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "helm",
+          "section_samples": 46,
+          "before_radius_m": 0.10008759986873594,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.8425754163777991,
+          "scale_y": 0.7751693830675752,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2054,
+        "triangles": 1636,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:144",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/knightly_headgear_04.glb",
+      "before_sha256": "80fb04f86f140f68b4241f0ef011fa7c1ecf857866e41b63cebb0421b8d1e8c7",
+      "after_sha256": "a5007285dac957bba9d5374a09b40711f072fcc1fc91d1971bfd10a237bbcc14",
+      "changes": [
+        {
+          "moved_vertices": 2091,
+          "max_displacement_m": 0.046677
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "helm",
+          "section_samples": 48,
+          "before_radius_m": 0.0957451986570978,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.8807893483586509,
+          "scale_y": 0.8103262004899588,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2091,
+        "triangles": 1570,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:145",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/knightly_headgear_05.glb",
+      "before_sha256": "4404cb6051518bdfd7a104d34ccc29307e08ac6e9155cf12746153299827496a",
+      "after_sha256": "8d84fa85325df07f3453be091e9fd65a1b60c98ecf591ce5eb9fafa97e03c22a",
+      "changes": [
+        {
+          "moved_vertices": 2163,
+          "max_displacement_m": 0.096997
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "helm",
+          "section_samples": 45,
+          "before_radius_m": 0.1120829125797101,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.7524014962912454,
+          "scale_y": 0.6922093765879458,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2163,
+        "triangles": 1632,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:146",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/knightly_headgear_06.glb",
+      "before_sha256": "4c5736e5b79b468156b3bcf2b8b2ddfba0984cbe427b22bab6347589092965cf",
+      "after_sha256": "68ba850afefa553223e4c72b7a2b8549b85c4c44ab1093ac2ff59af0a620c262",
+      "changes": [
+        {
+          "moved_vertices": 1722,
+          "max_displacement_m": 0.06408
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "helm",
+          "section_samples": 46,
+          "before_radius_m": 0.10458606895833736,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.8063344570991454,
+          "scale_y": 0.7418277005312138,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 1722,
+        "triangles": 1402,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:147",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/knightly_headgear_07.glb",
+      "before_sha256": "018198866d48b8e5d3de40b05c10de6b33d1949f0aa43be566cacfb9680dfe7a",
+      "after_sha256": "cc049f2d00727d654be4c25f914de19d45fd3248dcb2ee2116ecb0093d3a88e8",
+      "changes": [
+        {
+          "moved_vertices": 2061,
+          "max_displacement_m": 0.067432
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "helm",
+          "section_samples": 43,
+          "before_radius_m": 0.10151001768505509,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.8307687561960745,
+          "scale_y": 0.7643072557003886,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2061,
+        "triangles": 1584,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:148",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/knightly_headgear_08.glb",
+      "before_sha256": "f74b6a385c4740a44569808243569f77b245c531037f0e739f5c63c312c9343e",
+      "after_sha256": "7c5adb2b9f0b691129367a48bae331d55249407f4cb512f9e8bbdc1ec43ec4a0",
+      "changes": [
+        {
+          "moved_vertices": 2201,
+          "max_displacement_m": 0.086889
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "helm",
+          "section_samples": 46,
+          "before_radius_m": 0.10996783058318843,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.7668729180745253,
+          "scale_y": 0.7055230846285633,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2201,
+        "triangles": 1672,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:125",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/legendary_eloria_helm_01.glb",
+      "before_sha256": "84adb671365cda233cd812e9f96ecb7db3279c27e700a0f995323051c509b111",
+      "after_sha256": "6f411aacbfcb028e80f1b89329f04c648ef2d889d88233b1228ac4faf78792bf",
+      "changes": [
+        {
+          "moved_vertices": 2006,
+          "max_displacement_m": 0.076429
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "helm",
+          "section_samples": 46,
+          "before_radius_m": 0.10551347724132573,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.799247198922047,
+          "scale_y": 0.7353074230082832,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2006,
+        "triangles": 1581,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:126",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/legendary_eloria_helm_02.glb",
+      "before_sha256": "2f92b0dc0c66d753309d2f1023825455c49f416f4c46156ebed581c710ddf1d4",
+      "after_sha256": "c4fe0d58d2a316e97654109fb8e75981b221070e3cb3b1e051f2f3fc3bb0b04e",
+      "changes": [
+        {
+          "moved_vertices": 2201,
+          "max_displacement_m": 0.075393
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "helm",
+          "section_samples": 46,
+          "before_radius_m": 0.10384142147656686,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.812116686525571,
+          "scale_y": 0.7471473516035254,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2201,
+        "triangles": 1608,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:127",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/legendary_eloria_helm_03.glb",
+      "before_sha256": "5fa70a9fed8da7dc8b5b508467e454b7af8698ba8f9fbe04e383fa0a03d4e3d0",
+      "after_sha256": "a35497397a32a09550add7925a585c9548cb82277663e1dc2994da3176ada178",
+      "changes": [
+        {
+          "moved_vertices": 2181,
+          "max_displacement_m": 0.088605
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "helm",
+          "section_samples": 44,
+          "before_radius_m": 0.10936152397343446,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.7711245058558261,
+          "scale_y": 0.7094345453873601,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2181,
+        "triangles": 1553,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:128",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/legendary_eloria_helm_04.glb",
+      "before_sha256": "8912910ee567b6f79d577d175e35b1fa2d14c9f8e4d5550e5e26e7afa3b19624",
+      "after_sha256": "5cd327f64240a3826ab76c9b012f4b94f82798131c1a7a72c7e33258bf30d99f",
+      "changes": [
+        {
+          "moved_vertices": 2072,
+          "max_displacement_m": 0.088751
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "helm",
+          "section_samples": 46,
+          "before_radius_m": 0.11234446939677406,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.7506497790809477,
+          "scale_y": 0.6905977967544719,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2072,
+        "triangles": 1421,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:129",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/legendary_eloria_helm_05.glb",
+      "before_sha256": "637b8c436c153544602d3c42ea9f104898b599166335a7a61b71592b439548df",
+      "after_sha256": "45db8575eae2ca03ab3388394252a86cd097203fb3bf0ee585adb12f08573698",
+      "changes": [
+        {
+          "moved_vertices": 1921,
+          "max_displacement_m": 0.030459
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "helm",
+          "section_samples": 41,
+          "before_radius_m": 0.0871761423805216,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.9673673189798945,
+          "scale_y": 0.889977933461503,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 1921,
+        "triangles": 1263,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:130",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/legendary_eloria_helm_06.glb",
+      "before_sha256": "a6b56096f6dca0886f364765c191c56e788e1448564270a6bc95189dcdd81c36",
+      "after_sha256": "570634b866ead1b5e3ca2e1a8166e030f3fdcd1262fdc2d8a71a9a68a23de55c",
+      "changes": [
+        {
+          "moved_vertices": 2264,
+          "max_displacement_m": 0.080546
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "helm",
+          "section_samples": 46,
+          "before_radius_m": 0.1079403508283267,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.7812773488922525,
+          "scale_y": 0.7187751609808724,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2264,
+        "triangles": 1612,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:131",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/legendary_eloria_helm_07.glb",
+      "before_sha256": "5f6fdc7437e9f3589750946e93bd2f8e3c8b532390e8d7af93df83e312b9d42a",
+      "after_sha256": "75bf135cf1df7798218689b2bd8f0fbdcd43cdf7fb10202214a583d06db9fcdb",
+      "changes": [
+        {
+          "moved_vertices": 2094,
+          "max_displacement_m": 0.044998
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "helm",
+          "section_samples": 47,
+          "before_radius_m": 0.09895212991225202,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.8522439204536316,
+          "scale_y": 0.7840644068173411,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2094,
+        "triangles": 1465,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:132",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/legendary_eloria_helm_08.glb",
+      "before_sha256": "dada209cac7029bfaf08abefdeec07a309e8136d6c5aecf5f9a5c338e4f68dc4",
+      "after_sha256": "58474faac83e7ded83d0f2863f642d0bd2f0e313bd43683720faddc7f06f50d7",
+      "changes": [
+        {
+          "moved_vertices": 2240,
+          "max_displacement_m": 0.136448
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "helm",
+          "section_samples": 46,
+          "before_radius_m": 0.12507737473905467,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.6742334599650242,
+          "scale_y": 0.6202947831678223,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2240,
+        "triangles": 1556,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:133",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/militia_helmet_01.glb",
+      "before_sha256": "9d9eb8ad29d4c8b28def64294691149c581f7beeb08e495d5f24264c356ad460",
+      "after_sha256": "2e77a1927e6d56e501ba617ac436ba779a1c003e37bbec6a5cc51a50c328767d",
+      "changes": [
+        {
+          "moved_vertices": 2104,
+          "max_displacement_m": 0.126965
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "coif",
+          "section_samples": 44,
+          "before_radius_m": 0.09344073214719464,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.9025116691167386,
+          "scale_y": 0.8303107355873995,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2104,
+        "triangles": 1620,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:134",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/militia_helmet_02.glb",
+      "before_sha256": "5f80ba4f6d7a9af717257bf077ed4dff2e04c352379b3ae85cf21d245153598b",
+      "after_sha256": "ff0d851a30d8def7e87a4105bfd03cc9b706e085cf81d658fb1276e1a4dc4c7c",
+      "changes": [
+        {
+          "moved_vertices": 1813,
+          "max_displacement_m": 0.03042
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "helm",
+          "section_samples": 46,
+          "before_radius_m": 0.0929395100061462,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.9073789083682259,
+          "scale_y": 0.8347885956987678,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 1813,
+        "triangles": 1464,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:135",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/militia_helmet_03.glb",
+      "before_sha256": "dad20f87a80047c953d5b9ef907bfab158a4945b75db8ae290f3019a0be87ee7",
+      "after_sha256": "9c78a8905c16791ae56e8354637df55a4ab0c65b9cb9cc528818cbb8e3e34e78",
+      "changes": [
+        {
+          "moved_vertices": 2106,
+          "max_displacement_m": 0.043226
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "helm",
+          "section_samples": 43,
+          "before_radius_m": 0.10065132972824242,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.8378563041476803,
+          "scale_y": 0.7708277998158659,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2106,
+        "triangles": 1603,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:136",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/militia_helmet_04.glb",
+      "before_sha256": "708053268d3e899d9b5b87c3dc366dfe620c60a7e41da60e212e9bf5db52384f",
+      "after_sha256": "3a020ce4aef8b56e60c907cd54db65fe167b7e680e8b37f1e2534634b748628d",
+      "changes": [
+        {
+          "moved_vertices": 2083,
+          "max_displacement_m": 0.060818
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "helm",
+          "section_samples": 46,
+          "before_radius_m": 0.10753897710385898,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.7841933539335157,
+          "scale_y": 0.7214578856188345,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2083,
+        "triangles": 1630,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:137",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/militia_helmet_05.glb",
+      "before_sha256": "42f336729a5cf20d12a2944c365f97d221f83e815d01baad1eeeb489ceaf1b4e",
+      "after_sha256": "7af25239074827fc74f9df16a3230e6b8ea6735922bbf79dae5100111d857189",
+      "changes": [
+        {
+          "moved_vertices": 1963,
+          "max_displacement_m": 0.127453
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "coif",
+          "section_samples": 44,
+          "before_radius_m": 0.10273581351584313,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.8208564107067668,
+          "scale_y": 0.7551878978502256,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 1963,
+        "triangles": 1640,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:138",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/militia_helmet_06.glb",
+      "before_sha256": "4017a898f61d0a050586d627ce18cea861400270288b20cf47b47b57c77653b5",
+      "after_sha256": "0c179d0eff5264f2c7f6e65e949e8e424d6ca34b45b95f79e75a14ef8b15c6d4",
+      "changes": [
+        {
+          "moved_vertices": 1752,
+          "max_displacement_m": 0.048351
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "helm",
+          "section_samples": 44,
+          "before_radius_m": 0.10082795220668464,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.8363886133558089,
+          "scale_y": 0.7694775242873443,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 1752,
+        "triangles": 1607,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:139",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/militia_helmet_07.glb",
+      "before_sha256": "5cb1b85891ba9dd8a9c9ea10a2e3e9f5ad9d2cb8d7939e2a863d1a5677a40e45",
+      "after_sha256": "10ea6ff687961b16a4930a798c0825636804fe87ae4c12ee7f689ba95b79e49b",
+      "changes": [
+        {
+          "moved_vertices": 2003,
+          "max_displacement_m": 0.063134
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "helm",
+          "section_samples": 44,
+          "before_radius_m": 0.10984401771687949,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.767737314115885,
+          "scale_y": 0.7063183289866142,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2003,
+        "triangles": 1552,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:140",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/militia_helmet_08.glb",
+      "before_sha256": "b949b733636b4e74820008232965e3024d9af5f21c0ffe856fdc656da9605961",
+      "after_sha256": "0c10ffdbbe30e321c07dc6d5883f5111c97e2fdb841fd00ce2d815ef4e0d5951",
+      "changes": [
+        {
+          "moved_vertices": 2079,
+          "max_displacement_m": 0.045674
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "helm",
+          "section_samples": 45,
+          "before_radius_m": 0.10030170737172026,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.8407768256737741,
+          "scale_y": 0.7735146796198722,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2079,
+        "triangles": 1537,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:165",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/sunmane_steppe_headgear_01.glb",
+      "before_sha256": "e0576dda804eb9f133e3f74ed4ade185a07530a4442dd4b38d59c93eca780c1f",
+      "after_sha256": "6d912c1ecbcbe2876e6e6bbe7939cad26aaab3ce5e60d90a350920002d45fa51",
+      "changes": [
+        {
+          "moved_vertices": 1889,
+          "max_displacement_m": 0.145583
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "hat",
+          "section_samples": 37,
+          "before_radius_m": 0.14026116836750926,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.64,
+          "scale_y": 0.5888,
+          "drop_m": 0.024
+        }
+      ],
+      "validation": {
+        "vertices": 1889,
+        "triangles": 1510,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:166",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/sunmane_steppe_headgear_02.glb",
+      "before_sha256": "ec44eee5d1231375a719bb5d9e1e0188ba9b87861f9398640df6c44ada8c9d80",
+      "after_sha256": "5fa692206fabd506aa4a984d4d3f2ff36600378c13716ba228c45bf9181ebb73",
+      "changes": [
+        {
+          "moved_vertices": 2239,
+          "max_displacement_m": 0.116936
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "wrap",
+          "section_samples": 44,
+          "before_radius_m": 0.09681685820528513,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.8710399479690116,
+          "scale_y": 0.8013567521314907,
+          "drop_m": 0.014
+        }
+      ],
+      "validation": {
+        "vertices": 2239,
+        "triangles": 1616,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:167",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/sunmane_steppe_headgear_03.glb",
+      "before_sha256": "f774f8d9a73569cc5d3dd868ccdb869157240ff7d4191e17e36ed2a18c7de4ac",
+      "after_sha256": "04eeffc25849a5580132b5c61c0f1e427a9bf8472372ad3664d889a22487e39f",
+      "changes": [
+        {
+          "moved_vertices": 2118,
+          "max_displacement_m": 0.066936
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "helm",
+          "section_samples": 46,
+          "before_radius_m": 0.11007014883330313,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.7661600536342621,
+          "scale_y": 0.7048672493435212,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 2118,
+        "triangles": 1591,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:168",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/sunmane_steppe_headgear_04.glb",
+      "before_sha256": "b10517074e364c1df0562a394992a94514b201fb941e63429f47b5c6feaf6c57",
+      "after_sha256": "affa30cadcf5814d511b51a31cdef54cef2459d8377a7967645d7fd812d06fc0",
+      "changes": [
+        {
+          "moved_vertices": 2146,
+          "max_displacement_m": 0.072387
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "turban",
+          "section_samples": 42,
+          "before_radius_m": 0.10558452556463784,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.7987093817268506,
+          "scale_y": 0.7348126311887025,
+          "drop_m": 0.014
+        }
+      ],
+      "validation": {
+        "vertices": 2146,
+        "triangles": 1540,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:169",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/sunmane_steppe_headgear_05.glb",
+      "before_sha256": "10d5887952e99b43cb502c584d523b116a89d74337f395588c32a9cda5418e5a",
+      "after_sha256": "2d805a21a5a42fa806538c8d66c4d2e1db17b86ada92a08dfe25ce34ed1eb928",
+      "changes": [
+        {
+          "moved_vertices": 1776,
+          "max_displacement_m": 0.066104
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "helm",
+          "section_samples": 46,
+          "before_radius_m": 0.10705776462078453,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.7877182139228264,
+          "scale_y": 0.7247007568090003,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 1776,
+        "triangles": 1557,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:170",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/sunmane_steppe_headgear_06.glb",
+      "before_sha256": "2e37378db83646562572ab119d26d8f19b01601c2b1c01a06ce1f0c0cdba6dcb",
+      "after_sha256": "205c2eff0fae3838b82a743ab54b5effc766749cec2318041fe4fc551cd34f1c",
+      "changes": [
+        {
+          "moved_vertices": 2149,
+          "max_displacement_m": 0.063389
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "band",
+          "section_samples": 48,
+          "before_radius_m": 0.11241351117738443,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.750188747334677,
+          "scale_y": 0.6901736475479029,
+          "drop_m": 0.006
+        }
+      ],
+      "validation": {
+        "vertices": 2149,
+        "triangles": 1285,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:171",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/sunmane_steppe_headgear_07.glb",
+      "before_sha256": "2207f5182092fe0e1ee1bf262ed6e032ca84d4425d09229d1a965d389783d064",
+      "after_sha256": "b54e5619f10c74946c3fca05a7d504259f0e66f3165e0c934801caa777803c83",
+      "changes": [
+        {
+          "moved_vertices": 2071,
+          "max_displacement_m": 0.144575
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "hood",
+          "section_samples": 42,
+          "before_radius_m": 0.10315205210866332,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.8175440954370707,
+          "scale_y": 0.7521405678021051,
+          "drop_m": 0.016
+        }
+      ],
+      "validation": {
+        "vertices": 2071,
+        "triangles": 1618,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:172",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/sunmane_steppe_headgear_08.glb",
+      "before_sha256": "447401f22e086cc89d57308e5adff172ee167c1279086bbe24d242096384a093",
+      "after_sha256": "f4e63230e035ea9e31d7d7f0ac389c77b279b938a5cbdb4a1b6f17c0a8614d5f",
+      "changes": [
+        {
+          "moved_vertices": 1757,
+          "max_displacement_m": 0.057667
+        },
+        {
+          "headwear_fit": "luminous_male",
+          "kind": "helm",
+          "section_samples": 45,
+          "before_radius_m": 0.09740125934443089,
+          "head_radius_m": 0.07533135113365474,
+          "scale_xz": 0.8658137656664349,
+          "scale_y": 0.7965486644131201,
+          "drop_m": 0.01
+        }
+      ],
+      "validation": {
+        "vertices": 1757,
+        "triangles": 1196,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:122",
+      "scene": "res://assets/actors/native/equipment/variants/mycelari_female/amberwood_forest_helm_06.glb",
+      "before_sha256": "1e86d4cdc24cfee8c089d9b9417c375b6da2ec731783d476f14360f263bb33f0",
+      "after_sha256": "961aecc421d716ef93e8313a771edcf143649c5dd535d584c4bbfac3288b2630",
+      "changes": [
+        {
+          "retained_race_geometry": "mycelari_female",
+          "antler_palette": true
+        }
+      ],
+      "validation": {
+        "vertices": 2234,
+        "triangles": 1732,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:122",
+      "scene": "res://assets/actors/native/equipment/variants/mycelari_male/amberwood_forest_helm_06.glb",
+      "before_sha256": "997f2a4a4c6a1d479126cdfc9d8b65ee3a3cb8800b68beba814f119688a974e5",
+      "after_sha256": "a86e0370e7c4c6fa5c97ef43efde4b8820c6848d3bc84742af02dfc6d101e7a6",
+      "changes": [
+        {
+          "retained_race_geometry": "mycelari_male",
+          "antler_palette": true
+        }
+      ],
+      "validation": {
+        "vertices": 2333,
+        "triangles": 1903,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:122",
+      "scene": "res://assets/actors/native/equipment/variants/orun_female/amberwood_forest_helm_06.glb",
+      "before_sha256": "e370a1030884932e672047dcfffd5dc09ae74e8f8f6dcaa7dce417b112a373a4",
+      "after_sha256": "9bc666a62bf13745b9b9734299a57af846f08d93ee271967f415e1494950f4f5",
+      "changes": [
+        {
+          "retained_race_geometry": "orun_female",
+          "antler_palette": true
+        }
+      ],
+      "validation": {
+        "vertices": 2291,
+        "triangles": 1813,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:122",
+      "scene": "res://assets/actors/native/equipment/variants/orun_male/amberwood_forest_helm_06.glb",
+      "before_sha256": "c6c3ed3f3f6974acf74c2991f63bc925a703c8df63a04fa42f1ea892b356e07f",
+      "after_sha256": "840a19ea3ec4eb3a72d7957d282c67cfa5237ecee7dcf5276f88822e88ef4154",
+      "changes": [
+        {
+          "retained_race_geometry": "orun_male",
+          "antler_palette": true
+        }
+      ],
+      "validation": {
+        "vertices": 2717,
+        "triangles": 2442,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:122",
+      "scene": "res://assets/actors/native/equipment/variants/ssarathi_female/amberwood_forest_helm_06.glb",
+      "before_sha256": "56f9c67c5e54f40b66920a52ae290a9bef4ef8238dfb2fba79277b192590f168",
+      "after_sha256": "807005c1719e48e823210accfdb7536dbeb24f3735c1ff258208beefa1a8c62c",
+      "changes": [
+        {
+          "retained_race_geometry": "ssarathi_female",
+          "antler_palette": true
+        }
+      ],
+      "validation": {
+        "vertices": 4084,
+        "triangles": 4637,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:122",
+      "scene": "res://assets/actors/native/equipment/variants/ssarathi_male/amberwood_forest_helm_06.glb",
+      "before_sha256": "fd7b9de13b094fe485c1b669c23713b351dade6f0d5d0edf9881b81d852d8d2f",
+      "after_sha256": "080b13410a1684934a15ec778b7c9e951161ba0b7db0f914f9643d10844df267",
+      "changes": [
+        {
+          "retained_race_geometry": "ssarathi_male",
+          "antler_palette": true
+        }
+      ],
+      "validation": {
+        "vertices": 2429,
+        "triangles": 2018,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:122",
+      "scene": "res://assets/actors/native/equipment/variants/stoneborn_female/amberwood_forest_helm_06.glb",
+      "before_sha256": "ec18b77f3c24d149cd6640a92feb6aaaae8359cf0866cacc38aaca0842e72d31",
+      "after_sha256": "1ff16a6987282a7949b6286e823f14ccb748851b78fcbfb76f1ecc0b8ea75f2a",
+      "changes": [
+        {
+          "retained_race_geometry": "stoneborn_female",
+          "antler_palette": true
+        }
+      ],
+      "validation": {
+        "vertices": 3390,
+        "triangles": 3453,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:122",
+      "scene": "res://assets/actors/native/equipment/variants/stoneborn_male/amberwood_forest_helm_06.glb",
+      "before_sha256": "c020b920afac60e16aae2d081a0e07825133ba458fe8192983670b57c97629e7",
+      "after_sha256": "455ecf4ded9991537bc17e580b87cfe335b413bcb5971ed0e5e2ef8bac9d6797",
+      "changes": [
+        {
+          "retained_race_geometry": "stoneborn_male",
+          "antler_palette": true
+        }
+      ],
+      "validation": {
+        "vertices": 3634,
+        "triangles": 3808,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:122",
+      "scene": "res://assets/actors/native/equipment/variants/votary_female/amberwood_forest_helm_06.glb",
+      "before_sha256": "cf627b62fe7779d247e357efe71c8b47ceee259adbfa37e5226564efdb7eab97",
+      "after_sha256": "c228e7304fbaa60b1eccceb0c6539a8cd233c716256f8a29b9e04176a4c84c1e",
+      "changes": [
+        {
+          "retained_race_geometry": "votary_female",
+          "antler_palette": true
+        }
+      ],
+      "validation": {
+        "vertices": 11725,
+        "triangles": 17660,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:122",
+      "scene": "res://assets/actors/native/equipment/variants/votary_male/amberwood_forest_helm_06.glb",
+      "before_sha256": "8ba383bac55af93801d5c1bb787a839f21646a57e09d1477b946218eff81b899",
+      "after_sha256": "002973eeae70a3f39e091f3446f6dcffd36e15bfdd737f28c078db943162ce5a",
+      "changes": [
+        {
+          "retained_race_geometry": "votary_male",
+          "antler_palette": true
+        }
+      ],
+      "validation": {
+        "vertices": 10060,
+        "triangles": 14718,
+        "max_weight_sum_error": 0.0
+      }
+    }
+  ]
+}

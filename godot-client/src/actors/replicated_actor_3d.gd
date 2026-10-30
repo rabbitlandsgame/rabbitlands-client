@@ -4282,12 +4282,12 @@ func _attach_skinned_equipment(scene_path: String, part: int, visual_id: int,
 		_restore_piece_render_state(clone, piece)
 		_tint_surfaces(clone, tint)
 		if str(piece.get("name", "")) == "EquipmentForearmSkin":
-			# This is the existing anatomical lining split from a short sleeve.
-			# Keep its authored skinning and use the wearer's selected skin colour.
-			var skin_material := StandardMaterial3D.new()
-			skin_material.albedo_color = _skin_colour
-			skin_material.roughness = 0.78
-			clone.material_override = skin_material
+			# The fitted arm samples a clean patch of the native skin atlas.
+			# Sharing the hands' material preserves their texture, roughness and
+			# calibrated skin selection instead of painting a flat colour tube.
+			var body := _native_model.find_child("body", true, false) as MeshInstance3D
+			if body != null and body.mesh != null:
+				clone.material_override = body.get_active_material(0)
 			clone.set_meta("equipment_forearm_skin", true)
 		_native_skeleton.add_child(clone)
 		clone.skeleton = NodePath("..")
@@ -4368,6 +4368,15 @@ static func _restore_piece_render_state(mesh_node: MeshInstance3D,
 			quilt.shader = preload("res://src/actors/equipment_quilt.gdshader")
 			quilt.set_shader_parameter("cloth_texture", source.albedo_texture)
 			mesh_node.set_surface_override_material(surface, quilt)
+	if bool(piece.get("match_antler_palette", false)) and mesh_node.mesh != null:
+		for surface: int in range(mesh_node.mesh.get_surface_count()):
+			var source := mesh_node.mesh.surface_get_material(surface) as StandardMaterial3D
+			if source == null or source.albedo_texture == null:
+				continue
+			var leather := ShaderMaterial.new()
+			leather.shader = preload("res://src/actors/equipment_antler_palette.gdshader")
+			leather.set_shader_parameter("cloth_texture", source.albedo_texture)
+			mesh_node.set_surface_override_material(surface, leather)
 
 const TINT_SLOTS := {"base": 0, "trim": 1, "detail": 2}
 
@@ -5886,6 +5895,7 @@ static func _equipment_pieces(path: String) -> Array:
 			"body_cover": extras.get("bodyCover", []),
 			"covers_hair": extras.get("coversHair", false),
 			"repair_quilt_paint": extras.get("repairQuiltPaint", false),
+			"match_antler_palette": extras.get("matchAntlerPalette", false),
 			"transform": _relative_transform(mesh_node, imported),
 			"bones": _skin_bone_names(mesh_node.skin, skeleton),
 			"binds": _skin_bind_poses(mesh_node.skin),

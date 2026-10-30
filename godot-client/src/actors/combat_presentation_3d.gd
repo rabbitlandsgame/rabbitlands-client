@@ -76,9 +76,9 @@ func carried_bow_grip() -> Transform3D:
 	var socket := Transform3D(RangerBow3D.CARRY_SOCKET_BASIS,
 		rest.origin + Vector3(0.0757, -0.05, 0) * fit)
 	var held := skeleton.global_transform * skeleton.get_bone_global_pose(_hand_l) * rest.affine_inverse() * socket
-	# A relaxed fist used to lay the full bow crosswise through the hips.
-	# Carry it upright beside the wearer, with its curve facing outwards.
-	return Transform3D(RangerBow3D.relaxed_basis(actor), held.origin)
+	# The wrist owns the complete grip frame. WeaponCarryPose turns the hand
+	# with the carried bow, so its handle stays inside the closed fingers.
+	return held
 
 func update_pose() -> void:
 	if not is_instance_valid(actor) or _hand_l < 0 or _hand_r < 0:

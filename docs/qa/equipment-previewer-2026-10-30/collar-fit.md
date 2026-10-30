@@ -1,6 +1,8 @@
 # Torso collar audit
 
 All 64 torso designs have revised male and female native fits (128 GLBs).
+The later [second equipment review](second-review.md) supersedes overlapping
+file hashes and adds the Guard/Silver Ward collar refinements.
 Oversized collars are shorter and narrower, with their openings centered on the
 wearer's neck. The deformation fades into the existing chest and shoulders.
 Collar skin ownership is transferred from each body type's actual neck surface:

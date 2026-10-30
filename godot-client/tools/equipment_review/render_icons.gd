@@ -249,7 +249,16 @@ func _posed_points(instance: MeshInstance3D) -> PackedVector3Array:
 		var weights: Variant = arrays[Mesh.ARRAY_WEIGHTS]
 		var skinned: bool = not transforms.is_empty() and bones != null and weights != null and vertices.size() > 0
 		var influences := int(bones.size() / vertices.size()) if skinned else 0
-		for i in range(0, vertices.size(), maxi(1, int(vertices.size() / 3000))):
+		# Shared GLB arrays can retain removed feet, hands or backing vertices.
+		# Frame only drawn triangles, including narrow plumes and ornaments.
+		var used := {}
+		if arrays[Mesh.ARRAY_INDEX] is PackedInt32Array:
+			for index: int in arrays[Mesh.ARRAY_INDEX]:
+				used[index] = true
+		else:
+			for index: int in vertices.size():
+				used[index] = true
+		for i: int in used:
 			var point := instance.global_transform * vertices[i]
 			if skinned:
 				point = Vector3.ZERO

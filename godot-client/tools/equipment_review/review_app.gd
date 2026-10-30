@@ -187,6 +187,8 @@ func _build_sets() -> void:
 		var source: Dictionary = calling.get("equipment_visuals", {}) as Dictionary
 		for part: Variant in source:
 			visuals[int(part)] = int(source[part])
+		if calling.get("label", "") == "Ranger":
+			visuals[3] = 158 # Matching Scout Cap for the preview outfit.
 		_sets.append({"name": "%s starter kit" % calling.get("label", "?"), "visuals": visuals})
 	for entry: Variant in _read_json(SETS_FILE).get("sets", []) as Array:
 		var visuals := {}
@@ -421,6 +423,7 @@ func _reload_from_disk() -> void:
 	var set_name := str(_sets[_set_index]["name"])
 	GlbSceneCache.clear()
 	NativeAnimationImporter.clear()
+	RLHeadwearFit.reload()
 	_raw_loaded.clear()
 	_equipment = _read_json(str(options.get("equipment", "res://data/actors/equipment.json")))
 	_models = _read_json("res://data/actors/models.json").get("models", {}) as Dictionary

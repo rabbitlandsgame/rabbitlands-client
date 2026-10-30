@@ -34,6 +34,10 @@ func run() -> void:
 			actor.animation_player.advance(0.3)
 			actor.animation_player.pause()
 			await process_frame
+			# Headless rendering does not advance skeleton modifiers. Exercise
+			# the actual carry modifier after the animation pose, as the renderer
+			# does, before reading the wrist-owned bow grip.
+			actor._weapon_carry._process_modification_with_delta(1.0/60.0)
 			actor.combat_presentation.update_pose()
 			var bow := actor.combat_presentation.bow
 			check(bow != null and bow.global_basis.y.normalized().dot(actor.global_basis.y.normalized())>.99,
@@ -52,8 +56,9 @@ func run() -> void:
 				check(skins.size()==1,name+" torso %d has one exposed forearm surface"%torso)
 				if not skins.is_empty():
 					actor.apply_appearance_variants({"skin":4})
-					var material: StandardMaterial3D = skins[0].material_override
-					check(material.albedo_color.is_equal_approx(actor._skin_colour),name+" forearm follows selected skin")
+					var body := actor._native_model.find_child("body", true, false) as MeshInstance3D
+					check(skins[0].material_override == body.get_active_material(0),
+						name+" forearm shares the native hands' calibrated skin material")
 			if race=="luminous":
 				actor.apply_equipment_visuals({2:100,3:122,4:172,5:188,6:193})
 				actor.set_cape_cloth_allowed(true)
