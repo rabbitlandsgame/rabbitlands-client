@@ -3535,7 +3535,6 @@ func _on_stats_button_pressed() -> void:
 	if stats_panel.visible:
 		_road_ui(12)
 		inventory_panel.hide()
-		manufacturing_panel.hide()
 		stats_tabs.current_tab = 0
 		_sync_stats()
 	_sync_hud_button_states(true)
@@ -3572,7 +3571,6 @@ func _on_inventory_button_pressed() -> void:
 		_on_storage_close_pressed()
 		_road_ui(16)
 		stats_panel.hide()
-		manufacturing_panel.hide()
 		# Ask for the enriched view of what the ordinary inventory packet
 		# already told us. Command 226 never replaces that inventory: it only
 		# names the items the icon ids stand for.
@@ -3589,7 +3587,6 @@ func _on_knowledge_button_pressed() -> void:
 	if stats_panel.visible:
 		stats_tabs.current_tab = 1
 		inventory_panel.hide()
-		manufacturing_panel.hide()
 		full_map.hide()
 		_sync_knowledge()
 	_sync_hud_button_states(true)
@@ -3601,7 +3598,6 @@ func _on_manufacturing_button_pressed() -> void:
 	manufacturing_panel.visible = not manufacturing_panel.visible
 	if manufacturing_panel.visible:
 		_road_ui(10)
-		inventory_panel.hide()
 		stats_panel.hide()
 		full_map.hide()
 		_sync_manufacturing()
@@ -5111,9 +5107,7 @@ func _on_world_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and not event.pressed \
 			and event.button_index == MOUSE_BUTTON_MIDDLE:
 		camera_rig.handle_mouse_button(event as InputEventMouseButton)
-	if (not game_view.visible or full_map.visible
-			or trade_panel.visible
-			or manufacturing_panel.visible):
+	if not game_view.visible or full_map.visible or trade_panel.visible:
 		# The world takes no clicks behind these windows, but a right click
 		# on it still puts back whatever is in hand, as it does everywhere.
 		if (game_view.visible and _has_carry() and event is InputEventMouseButton
@@ -5799,8 +5793,7 @@ func _local_actor_server_tile() -> Variant:
 	return adapter.godot_to_server((actor_value as Node3D).global_position)
 
 func _map_input_blocked() -> bool:
-	return (_world_input_blocked() or not game_view.visible or trade_panel.visible
-		or manufacturing_panel.visible)
+	return _world_input_blocked() or not game_view.visible or trade_panel.visible
 
 func _handle_map_gui_input(event: InputEvent, map_control: TextureRect,
 		map_render_viewport: SubViewport, camera: Camera3D, source: String) -> void:
@@ -16253,7 +16246,6 @@ func _sync_trade() -> void:
 	storage_panel.hide()
 	if classic_storage != null:
 		classic_storage.refresh()
-	manufacturing_panel.hide()
 	trade_partner.text = "Trading with %s%s" % [
 		str(AppState.trade.get("partner", "another player")),
 		" — storage trading available" if bool(
@@ -16361,7 +16353,6 @@ func _sync_storage() -> void:
 		return
 	stats_panel.hide()
 	trade_panel.hide()
-	manufacturing_panel.hide()
 	storage_categories.clear()
 	var active_category: int = int(AppState.storage.get("category_id", -1))
 	var raw_categories: Variant = AppState.storage.get("categories", [])
