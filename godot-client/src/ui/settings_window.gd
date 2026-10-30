@@ -488,6 +488,7 @@ func _build_hud() -> void:
 	_add_toggle(page, "hud_timer", "Countdown/Stopwatch Timer", true)
 	_add_toggle(page, "side_stats", "Stats In HUD", true)
 	_add_toggle(page, "indicators", "Show Status Indicators in HUD", true)
+	_add_toggle(page, "quick_item_quantities", "Show Quick Item Quantities", true)
 	_add_toggle(page, "chat_timestamps", "Show Time Stamps", true)
 	_add_toggle(page, "combat_hud", tr("ELORIA_SETTINGS_COMBAT_HUD"), true)
 	_add_toggle(page, "combat_hud_pinned", "Keep combat HUD visible", false)
