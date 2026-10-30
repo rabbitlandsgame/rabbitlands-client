@@ -1,5 +1,9 @@
 # Wrist, chest and under-helmet fit review
 
+The later [bow idle reference](bow-idle-reference.md) updates the resting bow
+orientation. Its runtime/test hashes supersede this review; the native model
+hashes below remain current.
+
 The bow carry correction from the second review forced the hand into a world
 orientation at the wrist. That bent it sideways out of long cuffs. The client
 now retains the animated wrist rotation, centers the handle between the palm

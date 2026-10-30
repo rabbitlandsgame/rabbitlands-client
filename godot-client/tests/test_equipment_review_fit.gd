@@ -40,8 +40,9 @@ func run() -> void:
 			actor._weapon_carry._process_modification_with_delta(1.0/60.0)
 			actor.combat_presentation.update_pose()
 			var bow := actor.combat_presentation.bow
-			check(bow != null and bow.global_basis.y.normalized().dot(actor.global_basis.y.normalized())>.70,
-				name + " carries the bow upward with the natural forearm cant")
+			check(bow != null and bow.global_basis.y.normalized().dot(actor.global_basis.y.normalized())>.50
+				and bow.global_basis.y.normalized().dot(-actor.global_basis.z.normalized())>.50,
+				name + " carries the idle bow diagonally forward and up")
 			for action: StringName in [&"ranged_draw", &"ranged_hold", &"ranged_attack", &"idle"]:
 				actor.play_action(action,true)
 				actor.animation_player.advance(0.3)

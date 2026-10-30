@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "product": "Rabbit Lands",
+  "source_revision": "9646906a",
+  "scope": "Annotated idle bow carry reference",
+  "reference_sha256": "77ec0141ef9f7c9ce4c86ff4be43b25f90b9ed5ea4e283d93afa51f8b1c0540e",
+  "idle": {
+    "upper_limb": "forward/up",
+    "lower_limb": "behind/down",
+    "string": "behind/above the wooden belly",
+    "reference_angle_degrees": 45,
+    "native_reference_time_seconds": 0.7,
+    "calibration": "per body; reads the idle clip without changing the live pose",
+    "activity_blend": "existing carry crossfade"
+  },
+  "preserved": [
+    "native models and rigs",
+    "shared animations",
+    "wrist pose and grip position",
+    "moving carry socket",
+    "active bow aiming",
+    "textures and catalog records"
+  ],
+  "checks": {
+    "wrist": 3089,
+    "body_variants": 16,
+    "bow_designs": 2,
+    "review_fit": 298,
+    "second_review": 21,
+    "weapon_carry": "passed",
+    "catalog_icon_tests": 6,
+    "catalog_icon_subtests": 1315,
+    "graphical_previewer": "passed"
+  },
+  "measurements": {
+    "max_quaternion_comparison_rad": 0.0009765625,
+    "max_grip_distance_m": 0.09577514976263
+  },
+  "views": {
+    "idle": 36,
+    "race_and_movement": 120
+  },
+  "implementation_sha256": {
+    "godot-client/src/actors/ranger_bow_3d.gd": "39fbc67049db44904cc648cec280137139d8289f5b5210c2f955d8a90f911625",
+    "godot-client/src/actors/combat_presentation_3d.gd": "26556c16f02b30978daf74e39fd0d15e472939131c3529a077e31cf5f7b9a1b0",
+    "godot-client/src/actors/weapon_carry_pose.gd": "4e6354b0063b79ba1a01619dba1efb8ede614eafa13bd2088efcde0c14a72aeb",
+    "godot-client/tests/test_equipment_wrist_alignment.gd": "211f4117f3d27638068998e1189c3d4a8a9cfa762edd5547154809b465d2a6b2",
+    "godot-client/tests/test_equipment_review_fit.gd": "eb7bd0954dcd0c56d9536b9aece2ee0be38473a26120b56bbd2b2d99be4768d8"
+  }
+}

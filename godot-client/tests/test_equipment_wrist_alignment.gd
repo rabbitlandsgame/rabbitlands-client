@@ -48,12 +48,45 @@ func run() -> void:
 						max_wrist_change = maxf(max_wrist_change, change)
 						check(change<.001,slug+" retains animated wrist: "+str(action))
 						var grip := actor.combat_presentation.carried_bow_grip()
+						if action == &"idle":
+							var along := grip.basis.y.normalized()
+							check(along.dot(actor.global_basis.y.normalized())>.50
+								and along.dot(-actor.global_basis.z.normalized())>.50,
+								slug+" idle bow upper limb points forward/up, matching the reference")
+							check(grip.basis.z.normalized().dot(actor.global_basis.y.normalized())>.50
+								and grip.basis.z.normalized().dot(actor.global_basis.z.normalized())>.50,
+								slug+" idle string is behind and above the wooden belly")
+						if action in [&"walk",&"run",&"combat_idle"]:
+							check(actor._weapon_carry.bow_carry_socket_basis().is_equal_approx(RangerBow3D.CARRY_SOCKET_BASIS),
+								slug+" movement keeps its existing carry socket")
 						var wrist := skeleton.global_transform * skeleton.get_bone_global_pose(hand)
 						var distance := grip.origin.distance_to(wrist.origin)
 						max_grip_distance = maxf(max_grip_distance, distance)
 						check(distance<.11,slug+" grip stays in the fist")
 						actor.combat_presentation.update_pose()
 						check(actor.combat_presentation.bow.global_transform.is_finite(),slug+" finite bow/action switch")
+				var time_before: float = actor.animation_player.current_animation_position
+				var wrist_before: Transform3D = skeleton.get_bone_pose(hand)
+				actor._weapon_carry._idle_bow_socket(skeleton,hand)
+				check(is_equal_approx(time_before,actor.animation_player.current_animation_position)
+					and wrist_before.is_equal_approx(skeleton.get_bone_pose(hand)),slug+" idle calibration leaves the live pose untouched")
+				var idle_basis: Basis = actor._weapon_carry.bow_carry_socket_basis()
+				# A live action change keeps its outgoing pose for the crossfade.
+				actor.play_action(&"walk",false);actor.animation_player.advance(.01);actor.animation_player.pause()
+				actor._weapon_carry._process_modification_with_delta(.01)
+				var blended: Basis = actor._weapon_carry.bow_carry_socket_basis()
+				var step: float = idle_basis.get_rotation_quaternion().angle_to(blended.get_rotation_quaternion())
+				var whole: float = idle_basis.get_rotation_quaternion().angle_to(RangerBow3D.CARRY_SOCKET_BASIS.get_rotation_quaternion())
+				check(step>0. and step<whole*.5,slug+" leaving idle blends the bow rather than snapping")
+				actor.play_action(&"ranged_draw",true);actor._advance_facing_offset(1.)
+				actor._weapon_carry.refresh_equipment()
+				actor.play_action(&"idle",true);actor._advance_facing_offset(1.)
+				actor.animation_player.seek(.7,true)
+				actor._weapon_carry._process_modification_with_delta(.3)
+				var after_equip: Vector3 = actor.combat_presentation.carried_bow_grip().basis.y.normalized()
+				check(after_equip.dot(actor.global_basis.y.normalized())>.50
+					and after_equip.dot(-actor.global_basis.z.normalized())>.50,
+					slug+" equipping during aiming preserves the later idle direction")
 			actor.free();await process_frame
 	print("EQUIPMENT_WRIST_ALIGNMENT ",checks," checks; failures=",failures)
 	print("WRIST_MEASURE max_local_change_rad=",max_wrist_change," max_grip_distance_m=",max_grip_distance)
