@@ -76,7 +76,7 @@ func run() -> void:
 	for step: int in 18:
 		picker._cycle_focus(1)
 		check(picker.is_ancestor_of(root.gui_get_focus_owner()), "Tab stays inside the popup")
-	for resolution: Vector2 in [Vector2(1920,1080), Vector2(1366,768), Vector2(1024,768), Vector2(800,600), Vector2(640,480)]:
+	for resolution: Vector2 in [Vector2(1920,1080), Vector2(1366,768), Vector2(1280,720), Vector2(1024,768), Vector2(800,600), Vector2(640,480)]:
 		host.size = resolution
 		picker.size = resolution
 		picker._layout()
@@ -86,6 +86,24 @@ func run() -> void:
 		check(picker.panel.get_global_rect().encloses(picker.cancel_button.get_global_rect()), "Cancel remains visible at %s" % resolution)
 		check(picker.panel.get_global_rect().encloses(picker.use_button.get_global_rect()), "Use remains visible at %s" % resolution)
 	check(picker.grid.columns >= 1 and picker.grid.columns <= 4, "responsive portrait columns")
+	var named_rows: Array[Dictionary] = []
+	for index: int in 8:
+		var row := rows[0].duplicate(true)
+		row.id = "name_%d" % index
+		row.label = ["Mira", "Rowan", "Tavi", "Amara", "Idris", "Aldric", "Anika", "Kellan"][index]
+		named_rows.append(row)
+	host.size = Vector2(1280,720)
+	picker.size = host.size
+	picker.setup(named_rows,"name_4")
+	picker._layout()
+	await settle()
+	check(picker.grid.columns == 4, "common logical resolution uses four portrait columns")
+	for row: Dictionary in named_rows:
+		var card := picker._cards[str(row.id)] as Button
+		var caption := card.get_meta("caption") as Label
+		check(picker.scroll.get_global_rect().encloses(card.get_global_rect()), "both rows fit without clipping %s" % row.label)
+		check(card.get_global_rect().encloses(caption.get_global_rect()), "name stays inside its card: %s" % row.label)
+		check((card.get_meta("portrait") as TextureRect).size.y >= 96, "portrait remains legible: %s" % row.label)
 	var cancel := InputEventAction.new()
 	cancel.action = "ui_cancel"
 	cancel.pressed = true

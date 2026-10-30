@@ -18,6 +18,8 @@ const MUTED := Color("b9b5aa")
 const GOLD := Color("d7b574")
 const GOLD_DARK := Color("897347")
 const FIELD := Color("121419")
+const CARD_FOOTER_HEIGHT := 40.0
+const MIN_PORTRAIT_HEIGHT := 96.0
 
 var panel: PanelContainer
 var search: LineEdit
@@ -338,17 +340,15 @@ func _make_card(row: Dictionary) -> Button:
 	placeholder.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	portrait_frame.add_child(placeholder)
 	var label := _label(str(row.get("label", "Starting look")), 15, TEXT)
+	label.name = "Name"
 	label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	body.add_child(label)
-	var detail := _label(str(row.get("race_label", "")) + " · " + str(row.get("sex", "")).capitalize(), 12, MUTED)
-	detail.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	detail.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	body.add_child(detail)
 	button.set_meta("portrait", portrait)
+	button.set_meta("caption", label)
 	button.set_meta("placeholder", placeholder)
 	button.set_meta("look", row.get("look", {}))
-	button.custom_minimum_size.y = _portrait_height + 60
+	button.custom_minimum_size.y = _portrait_height + CARD_FOOTER_HEIGHT
 	_cards[id] = button
 	var key := Portraits.cache_key(row.get("look", {}))
 	if not _portrait_keys.has(key):
@@ -465,7 +465,9 @@ func _ensure_ui() -> void:
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.custom_minimum_size.y = 80
 	scroll.follow_focus = true
-	scroll.resized.connect(func() -> void: _request_visible_portraits.call_deferred())
+	scroll.resized.connect(func() -> void:
+		_fit_card_height.call_deferred()
+		_request_visible_portraits.call_deferred())
 	scroll.get_v_scroll_bar().value_changed.connect(func(_value: float) -> void: _request_visible_portraits.call_deferred())
 	_body.add_child(scroll)
 	var results := VBoxContainer.new()
@@ -526,13 +528,31 @@ func _layout() -> void:
 	grid.columns = clampi(floori((content_width + 12) / 180), 1, 4)
 	_card_width = floorf((content_width - (grid.columns - 1) * 12) / grid.columns)
 	_portrait_height = minf(_card_width - 18, 144 if bounds.y < 760 else 176)
-	for id: String in _cards:
-		var card := _cards[id] as Button
-		card.custom_minimum_size = Vector2(_card_width, _portrait_height + 60)
-		(card.get_meta("portrait") as TextureRect).custom_minimum_size.y = _portrait_height
 	panel.size = target_size
 	panel.position = Vector2(start + (region_width - panel.size.x) * .5, (bounds.y - panel.size.y) * .5)
+	_fit_card_height()
 	_refresh_focus_links()
+	_request_visible_portraits.call_deferred()
+
+
+## Reserve room for the name as well as the face. The portrait area is the
+## flexible part, so two full rows remain readable at ordinary UI scaling.
+## Shorter windows retain a useful minimum face size and scroll normally.
+func _fit_card_height() -> void:
+	if not _built or scroll == null or grid == null:
+		return
+	var bounds := size if size.x > 0 and size.y > 0 else get_viewport_rect().size
+	var maximum := minf(_card_width - 18, 144 if bounds.y < 760 else 176)
+	if scroll.size.y > 0 and not _visible_rows.is_empty():
+		var rows_to_show := mini(2, ceili(float(_visible_rows.size()) / grid.columns))
+		var gaps := float(grid.get_theme_constant("v_separation") * (rows_to_show - 1))
+		var fitting_height := floorf((scroll.size.y - gaps) / rows_to_show) - CARD_FOOTER_HEIGHT
+		maximum = minf(maximum, maxf(MIN_PORTRAIT_HEIGHT, fitting_height))
+	_portrait_height = maximum
+	for id: String in _cards:
+		var card := _cards[id] as Button
+		card.custom_minimum_size = Vector2(_card_width, _portrait_height + CARD_FOOTER_HEIGHT)
+		(card.get_meta("portrait") as TextureRect).custom_minimum_size.y = _portrait_height
 	_request_visible_portraits.call_deferred()
 
 
