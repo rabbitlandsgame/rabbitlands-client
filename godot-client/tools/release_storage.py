@@ -14,21 +14,18 @@ INVENTORY_ATTEMPTS = 8
 
 
 def unique_bytes(roots: list[Path], *, allow_internal_symlinks=False) -> int:
-    """Count linked files once, with bounded recovery for live atomic renames.
+    """Count linked files once, with bounded recovery for live publication.
 
     Rescan only a directory with vanished entries, measuring newly observed
     names before its stable prefix. Keep the largest observed size per inode
-    conservatively even if deleted or replaced during this sample. A walk
+    conservatively even if deleted or replaced during this sample. Removed
+    child directories invalidate their parent's scan, including preparation
+    locks. Required roots and unexpected enumeration errors remain fatal. A walk
     is not atomic; idle recounts, allocation reservations and physical free
     space remain separate mandatory guards.
     """
     seen = {}
     total = 0
-    def walk_error(error):
-        # os.walk otherwise silently skips unreadable subtrees, which would
-        # understate the inventory. Only enumerated-entry lstat ENOENT retries.
-        raise error
-
     def check_link(path):
         if not allow_internal_symlinks or not any(path.resolve().is_relative_to(root.resolve()) for root in roots if root.is_dir()):
             raise ValueError(f"Runner input link escapes its accounted roots: {path}")
@@ -44,9 +41,33 @@ def unique_bytes(roots: list[Path], *, allow_internal_symlinks=False) -> int:
             total += stat.st_size - previous
             seen[key] = stat.st_size
 
-    def directory_entries(directory, names):
-        observed_names, regular_folders = set(), {}
+    def vanished_after_windows_denial(path, error):
+        # A deleted Windows directory can briefly report access denied. This
+        # is not a permission waiver: require a fresh lstat to prove absence.
+        if getattr(error, "winerror", None) != 5:
+            return False
+        try:
+            path.lstat()
+        except FileNotFoundError:
+            return True
+        return False
+
+    def scan_directory(directory, *, required=False):
+        observed_names, completed_folders = set(), {}
         for attempt in range(INVENTORY_ATTEMPTS):
+            try:
+                with os.scandir(directory) as entries:
+                    names = [entry.name for entry in entries]
+            except FileNotFoundError:
+                if required:
+                    raise
+                # The enumerated child vanished during open/iteration. Its
+                # nearest live parent must rediscover any replacement names.
+                return False
+            except PermissionError as error:
+                if required or not vanished_after_windows_denial(directory, error):
+                    raise
+                return False
             vanished = False
             # Check new final/staging names before walking the stable prefix
             # again, so its cost cannot repeatedly outlast a transient name.
@@ -59,36 +80,49 @@ def unique_bytes(roots: list[Path], *, allow_internal_symlinks=False) -> int:
                     # A prior observation stays conservatively counted. An
                     # unseen missing name requires discovery of its successor.
                     vanished |= name not in observed_names
-                    regular_folders.pop(name, None)
+                    completed_folders.pop(name, None)
                     continue
                 observed_names.add(name)
                 if S_ISLNK(observation.st_mode):
-                    regular_folders.pop(name, None)
+                    completed_folders.pop(name, None)
                     count(path, observation)
                 elif S_ISDIR(observation.st_mode):
-                    regular_folders[name] = True
+                    identity = (observation.st_dev, observation.st_ino)
+                    if completed_folders.get(name) == identity:
+                        continue
+                    if not scan_directory(path):
+                        vanished = True
+                        completed_folders.pop(name, None)
+                        continue
+                    try:
+                        after = path.lstat()
+                    except FileNotFoundError:
+                        vanished = True
+                        completed_folders.pop(name, None)
+                        continue
+                    if not S_ISDIR(after.st_mode) or (after.st_dev, after.st_ino) != identity:
+                        vanished = True
+                        completed_folders.pop(name, None)
+                        continue
+                    # Completion belongs to this directory identity, never
+                    # to a subsequently recreated directory at the same path.
+                    completed_folders[name] = identity
                 else:
-                    regular_folders.pop(name, None)
+                    completed_folders.pop(name, None)
                     count(path, observation)
             if not vanished:
-                return list(regular_folders)
+                return True
             if attempt == INVENTORY_ATTEMPTS - 1:
                 raise ValueError("Runner storage inventory kept changing; cannot verify disk budget")
-            # Keep inode/name observations within this sample, and discover
-            # the final checksum name which replaced a transient staging file.
-            # Enumeration errors propagate; they are never empty inventories.
-            with os.scandir(directory) as entries:
-                names = [entry.name for entry in entries]
 
     for root in roots:
         # Accounted roots are required inputs, unlike live descendant names.
         # Never turn a missing root into an empty successful inventory.
         observation = root.lstat()
-        if root.is_file():
+        if not S_ISDIR(observation.st_mode):
             count(root, observation)
-            continue
-        for directory, folders, files in os.walk(root, followlinks=False, onerror=walk_error):
-            folders[:] = directory_entries(directory, [*folders, *files])
+        else:
+            scan_directory(root, required=True)
         root.lstat()
     return total
 
