@@ -149,10 +149,11 @@ class ItemIconAtlasTest(unittest.TestCase):
     def test_essence_replacements_change_only_their_existing_icon_slots(self) -> None:
         from unittest.mock import patch
         from build_item_icon_atlases import planned_atlases, REPLACEMENTS
-        expected = {74, *range(584, 594)}
-        records = json.loads((REPLACEMENTS[0] / "manifest.json").read_text())["items"]
+        expected = {74, *range(584, 594), *range(617, 625)}
+        records = [row for folder in REPLACEMENTS
+                   for row in json.loads((folder / "manifest.json").read_text())["items"]]
         self.assertEqual(expected, {row["imageId"] for row in records})
-        self.assertEqual(11, len(records))
+        self.assertEqual(19, len(records))
         self.assertTrue(all(row["name"].endswith(" Essence") for row in records))
         with patch("build_item_icon_atlases.REPLACEMENTS", []):
             before = [image for _, image in planned_atlases()]
@@ -170,7 +171,7 @@ class ItemIconAtlasTest(unittest.TestCase):
     def test_eight_enriched_variants_have_distinct_cells_and_preserve_the_base_art(self) -> None:
         import hashlib
         from PIL import Image
-        folder = ROOT / "eloria-assets/source/item-icons/enriched-essences-2026-10-30"
+        folder = ROOT / "eloria-assets/source/item-icons/enriched-essences-radiant-2026-10-30"
         records = json.loads((folder / "manifest.json").read_text())["items"]
         self.assertEqual(set(range(617, 625)), {row["imageId"] for row in records})
         self.assertEqual({'Enriched ' + school + ' Essence' for school in

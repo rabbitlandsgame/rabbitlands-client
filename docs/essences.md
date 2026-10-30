@@ -16,4 +16,6 @@ automatically spent in place of ordinary spell or recipe reagents.
 
 The base artwork retains its existing shapes and colors. Wind uses the former
 Air painting; Earth and Fire keep their selected paintings. Enriched icons
-preserve those silhouettes with brighter cores and luminous highlights.
+preserve those silhouettes with brighter cores, painted bursts of light and
+two star glints in each school's palette. The selected treatment follows the
+Enriched Life Essence option 4 painting.

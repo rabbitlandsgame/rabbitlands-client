@@ -14,3 +14,9 @@ The [consolidated essence families](essences.md) use eight of those base paintin
 Wind keeps the Air artwork. Eight [enriched variants](../eloria-assets/source/item-icons/enriched-essences-2026-10-30/README.md)
 extend the ledger at 617–624 with brighter cores and luminous highlights. They
 pack into the unused tail of `items25.png`, preserving all existing artwork.
+
+The [selected radiant-burst treatment](../eloria-assets/source/item-icons/enriched-essences-radiant-2026-10-30/README.md)
+supersedes those initial eight enriched cells. It follows the approved Life
+option 4, with painted rays and two star glints adapted to each school palette.
+The previous selection remains available as a checked source, and the builder
+validates its cell hashes before replacing image IDs 617–624.

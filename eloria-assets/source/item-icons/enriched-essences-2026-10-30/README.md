@@ -1,5 +1,9 @@
 # Enriched essence paintings
 
+The [radiant-burst selection](../enriched-essences-radiant-2026-10-30/README.md)
+now supersedes these initial eight paintings in the runtime atlas. This source
+set remains intact for provenance and exact replacement-hash validation.
+
 Eight separate built-in imagegen edits enhance the selected Life, Fire, Water,
 Earth, Wind, Death, Magic and Frost paintings. Wind uses the Air source image.
 The base silhouettes and palettes remain recognizable; luminous cores and

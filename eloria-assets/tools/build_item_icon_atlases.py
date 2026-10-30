@@ -25,6 +25,7 @@ SUPPLEMENTS = [
 ]
 REPLACEMENTS = [
     ROOT / 'eloria-assets/source/item-icons/essences-2026-10-29',
+    ROOT / 'eloria-assets/source/item-icons/enriched-essences-radiant-2026-10-30',
 ]
 
 
