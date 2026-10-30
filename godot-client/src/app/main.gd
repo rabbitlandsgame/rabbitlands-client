@@ -9,6 +9,7 @@ const RemotePresentationService = preload("res://src/runtime/remote_presentation
 @onready var remote_presentation := RemotePresentationService.new()
 var _gate_slice_tiers: Dictionary = {}
 const ExperienceCurve = preload("res://src/state/experience_curve.gd")
+const SkillProgressScript = preload("res://src/ui/hud_skill_progress.gd")
 const ItemNames = preload("res://src/state/item_names.gd")
 const SeasonSky = preload("res://src/world/season_sky.gd")
 const SeasonSurfaces = preload("res://src/world/season_surfaces.gd")
@@ -12722,7 +12723,7 @@ static func _skill_is_capped(skill: String, stats: Dictionary) -> bool:
 func _build_skill_rows() -> void:
 	for spec: Array in SKILL_ROW_SPECS:
 		var key: String = str(spec[1])
-		var row := ProgressBar.new()
+		var row := SkillProgressScript.new()
 		row.name = "SkillRow" + key.capitalize()
 		# Tall enough for the whole line box, not just the x-height: at twelve
 		# pixels the descender of "eng" was sliced off by the row's own frame.
@@ -12730,34 +12731,24 @@ func _build_skill_rows() -> void:
 		row.max_value = 1.0
 		row.show_percentage = false
 		row.mouse_filter = Control.MOUSE_FILTER_STOP
-		var background := StyleBoxFlat.new()
-		background.bg_color = Color(0.02, 0.02, 0.02, 0.6)
-		background.border_color = EL_GUI_COLOUR
-		background.set_border_width_all(1)
-		var fill := StyleBoxFlat.new()
-		# The side-stats bar colour hud_misc_window.c uses: a quiet green that
-		# stays behind white text without swallowing it.
-		fill.bg_color = Color(0.24, 0.40, 0.16, 0.9)
-		row.add_theme_stylebox_override("background", background)
-		row.add_theme_stylebox_override("fill", fill)
 		var name_label := Label.new()
 		name_label.name = "Name"
 		name_label.text = str(spec[0])
-		name_label.add_theme_font_size_override("font_size", 10)
+		SkillProgressScript.style_label(name_label)
 		TextColors.bind(name_label, "hud_skill")
 		name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		name_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		name_label.offset_left = 3.0
+		name_label.offset_left = 4.0
 		name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		row.add_child(name_label)
 		var value_label := Label.new()
 		value_label.name = "Value"
 		value_label.text = "0"
-		value_label.add_theme_font_size_override("font_size", 10)
+		SkillProgressScript.style_label(value_label)
 		TextColors.bind(value_label, "hud_skill")
 		value_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		value_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		value_label.offset_right = -3.0
+		value_label.offset_right = -4.0
 		value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 		value_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		row.add_child(value_label)
@@ -12772,6 +12763,7 @@ func _sync_skill_rows(stats: Dictionary) -> void:
 		if not row_value is ProgressBar:
 			continue
 		var row: ProgressBar = row_value as ProgressBar
+		row.set("watched", key == _selected_experience_skill)
 		var level: int = int(stats.get("overall_level", 0)) \
 			if key == "overall" else int(stats.get(key, 0))
 		(row.get_node("Value") as Label).text = str(level)
