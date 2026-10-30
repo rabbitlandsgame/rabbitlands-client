@@ -9,6 +9,7 @@ const RemotePresentationService = preload("res://src/runtime/remote_presentation
 @onready var remote_presentation := RemotePresentationService.new()
 var _gate_slice_tiers: Dictionary = {}
 const ExperienceCurve = preload("res://src/state/experience_curve.gd")
+const SkillProgressScript = preload("res://src/ui/hud_skill_progress.gd")
 const ItemNames = preload("res://src/state/item_names.gd")
 const SeasonSky = preload("res://src/world/season_sky.gd")
 const SeasonSurfaces = preload("res://src/world/season_surfaces.gd")
@@ -3534,7 +3535,6 @@ func _on_stats_button_pressed() -> void:
 	if stats_panel.visible:
 		_road_ui(12)
 		inventory_panel.hide()
-		manufacturing_panel.hide()
 		stats_tabs.current_tab = 0
 		_sync_stats()
 	_sync_hud_button_states(true)
@@ -3571,7 +3571,6 @@ func _on_inventory_button_pressed() -> void:
 		_on_storage_close_pressed()
 		_road_ui(16)
 		stats_panel.hide()
-		manufacturing_panel.hide()
 		# Ask for the enriched view of what the ordinary inventory packet
 		# already told us. Command 226 never replaces that inventory: it only
 		# names the items the icon ids stand for.
@@ -3588,7 +3587,6 @@ func _on_knowledge_button_pressed() -> void:
 	if stats_panel.visible:
 		stats_tabs.current_tab = 1
 		inventory_panel.hide()
-		manufacturing_panel.hide()
 		full_map.hide()
 		_sync_knowledge()
 	_sync_hud_button_states(true)
@@ -3600,7 +3598,6 @@ func _on_manufacturing_button_pressed() -> void:
 	manufacturing_panel.visible = not manufacturing_panel.visible
 	if manufacturing_panel.visible:
 		_road_ui(10)
-		inventory_panel.hide()
 		stats_panel.hide()
 		full_map.hide()
 		_sync_manufacturing()
@@ -5110,9 +5107,7 @@ func _on_world_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and not event.pressed \
 			and event.button_index == MOUSE_BUTTON_MIDDLE:
 		camera_rig.handle_mouse_button(event as InputEventMouseButton)
-	if (not game_view.visible or full_map.visible
-			or trade_panel.visible
-			or manufacturing_panel.visible):
+	if not game_view.visible or full_map.visible or trade_panel.visible:
 		# The world takes no clicks behind these windows, but a right click
 		# on it still puts back whatever is in hand, as it does everywhere.
 		if (game_view.visible and _has_carry() and event is InputEventMouseButton
@@ -5798,8 +5793,7 @@ func _local_actor_server_tile() -> Variant:
 	return adapter.godot_to_server((actor_value as Node3D).global_position)
 
 func _map_input_blocked() -> bool:
-	return (_world_input_blocked() or not game_view.visible or trade_panel.visible
-		or manufacturing_panel.visible)
+	return _world_input_blocked() or not game_view.visible or trade_panel.visible
 
 func _handle_map_gui_input(event: InputEvent, map_control: TextureRect,
 		map_render_viewport: SubViewport, camera: Camera3D, source: String) -> void:
@@ -12729,7 +12723,7 @@ static func _skill_is_capped(skill: String, stats: Dictionary) -> bool:
 func _build_skill_rows() -> void:
 	for spec: Array in SKILL_ROW_SPECS:
 		var key: String = str(spec[1])
-		var row := ProgressBar.new()
+		var row := SkillProgressScript.new()
 		row.name = "SkillRow" + key.capitalize()
 		# Tall enough for the whole line box, not just the x-height: at twelve
 		# pixels the descender of "eng" was sliced off by the row's own frame.
@@ -12737,34 +12731,24 @@ func _build_skill_rows() -> void:
 		row.max_value = 1.0
 		row.show_percentage = false
 		row.mouse_filter = Control.MOUSE_FILTER_STOP
-		var background := StyleBoxFlat.new()
-		background.bg_color = Color(0.02, 0.02, 0.02, 0.6)
-		background.border_color = EL_GUI_COLOUR
-		background.set_border_width_all(1)
-		var fill := StyleBoxFlat.new()
-		# The side-stats bar colour hud_misc_window.c uses: a quiet green that
-		# stays behind white text without swallowing it.
-		fill.bg_color = Color(0.24, 0.40, 0.16, 0.9)
-		row.add_theme_stylebox_override("background", background)
-		row.add_theme_stylebox_override("fill", fill)
 		var name_label := Label.new()
 		name_label.name = "Name"
 		name_label.text = str(spec[0])
-		name_label.add_theme_font_size_override("font_size", 10)
+		SkillProgressScript.style_label(name_label)
 		TextColors.bind(name_label, "hud_skill")
 		name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		name_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		name_label.offset_left = 3.0
+		name_label.offset_left = 4.0
 		name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		row.add_child(name_label)
 		var value_label := Label.new()
 		value_label.name = "Value"
 		value_label.text = "0"
-		value_label.add_theme_font_size_override("font_size", 10)
+		SkillProgressScript.style_label(value_label)
 		TextColors.bind(value_label, "hud_skill")
 		value_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		value_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		value_label.offset_right = -3.0
+		value_label.offset_right = -4.0
 		value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 		value_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		row.add_child(value_label)
@@ -12779,6 +12763,7 @@ func _sync_skill_rows(stats: Dictionary) -> void:
 		if not row_value is ProgressBar:
 			continue
 		var row: ProgressBar = row_value as ProgressBar
+		row.set("watched", key == _selected_experience_skill)
 		var level: int = int(stats.get("overall_level", 0)) \
 			if key == "overall" else int(stats.get(key, 0))
 		(row.get_node("Value") as Label).text = str(level)
@@ -16261,7 +16246,6 @@ func _sync_trade() -> void:
 	storage_panel.hide()
 	if classic_storage != null:
 		classic_storage.refresh()
-	manufacturing_panel.hide()
 	trade_partner.text = "Trading with %s%s" % [
 		str(AppState.trade.get("partner", "another player")),
 		" — storage trading available" if bool(
@@ -16369,7 +16353,6 @@ func _sync_storage() -> void:
 		return
 	stats_panel.hide()
 	trade_panel.hide()
-	manufacturing_panel.hide()
 	storage_categories.clear()
 	var active_category: int = int(AppState.storage.get("category_id", -1))
 	var raw_categories: Variant = AppState.storage.get("categories", [])

@@ -28,6 +28,7 @@ func _run() -> void:
 		quit(failures)
 		return
 	main = scene.instantiate()
+	main.set_script(load("res://tests/fixtures/mixing_world_click_main.gd"))
 	root.add_child(main)
 	await process_frame
 	(main.get_node("GameView") as Control).show()
@@ -35,12 +36,86 @@ func _run() -> void:
 	var fixture: Dictionary = await _open_fixture()
 	if not fixture.is_empty():
 		receiver = fixture["receiver"] as StreamPeerTCP
+		_check_open_windows()
 		_check_queue()
 		_close_fixture(fixture)
 	main.queue_free()
 	await process_frame
 	print("PASS" if failures == 0 else "FAIL (%d)" % failures)
 	quit(failures)
+
+func _check_open_windows() -> void:
+	var inventory := main.get("inventory_panel") as Control
+	var mixing := main.get("manufacturing_panel") as Control
+	main.call("_on_inventory_button_pressed")
+	main.call("_on_manufacturing_button_pressed")
+	_expect(inventory.visible and mixing.visible,
+		"opening mixing keeps inventory open")
+	main.call("_on_inventory_button_pressed")
+	main.call("_on_inventory_button_pressed")
+	_expect(inventory.visible and mixing.visible,
+		"opening inventory keeps mixing open")
+	_take()
+	var rig := main.get("camera_rig") as IsometricCameraController
+	var distance := rig.distance
+	var wheel := InputEventMouseButton.new()
+	wheel.pressed = true
+	wheel.button_index = MOUSE_BUTTON_WHEEL_UP
+	main.call("_on_world_gui_input", wheel)
+	_expect(rig.distance < distance, "mixing allows viewport zoom")
+	var middle := InputEventMouseButton.new()
+	middle.button_index = MOUSE_BUTTON_MIDDLE
+	middle.pressed = true
+	main.call("_on_world_gui_input", middle)
+	var yaw := rig.yaw_degrees
+	var motion := InputEventMouseMotion.new()
+	motion.relative = Vector2(30, 0)
+	main.call("_on_world_gui_input", motion)
+	middle.pressed = false
+	main.call("_on_world_gui_input", middle)
+	_expect(not is_equal_approx(rig.yaw_degrees, yaw),
+		"mixing allows viewport camera rotation")
+	_expect(not bool(main.call("_map_input_blocked")),
+		"mixing allows map navigation")
+	var click := InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
+	var object := MapObject3D.new()
+	object.object_id = 42
+	object.kind = EloriaProtocol.MAP_OBJECT_HARVEST
+	main.set("clicked_object", object)
+	main.call("_on_world_gui_input", click)
+	_expect(_take() == EloriaProtocol.harvest(42),
+		"a viewport resource click sends harvest with mixing and inventory open")
+	main.set("clicked_object", null)
+	object.free()
+	app_state.set("actors", {43: {"kind": 2, "name": "Test NPC"}})
+	main.set("clicked_actor", 43)
+	main.call("_on_world_gui_input", click)
+	_expect(_take() == EloriaProtocol.touch_actor(43),
+		"a viewport NPC click sends talk with mixing and inventory open")
+	main.set("clicked_actor", -1)
+	app_state.set("npc_dialogue", {"open": true, "name": "Test NPC", "text": "Hello", "options": []})
+	main.call("_sync_dialogue")
+	_expect(mixing.visible and inventory.visible,
+		"NPC dialogue keeps mixing and inventory open")
+	app_state.set("npc_dialogue", {})
+	main.call("_sync_dialogue")
+	app_state.set("storage", {"open": true})
+	main.call("_sync_storage")
+	_expect(mixing.visible, "opening storage keeps mixing open")
+	app_state.set("storage", {})
+	main.call("_sync_storage")
+	app_state.set("trade", {"open": true, "partner": "Test trader"})
+	main.call("_sync_trade")
+	_expect(mixing.visible, "opening trade keeps mixing open")
+	app_state.set("trade", {})
+	main.call("_sync_trade")
+	main.call("_on_inventory_button_pressed")
+	main.call("_on_manufacturing_close_pressed")
+	_expect(not mixing.visible and inventory.visible,
+		"closing mixing explicitly keeps inventory open")
+	inventory.hide()
 
 func _check_queue() -> void:
 	var catalog: ManufacturingCatalog = main.get("manufacturing_catalog")
@@ -79,7 +154,21 @@ func _check_queue() -> void:
 		"and the next entry's batch is asked for at once")
 
 	_serve(true, 2, 0, second_output)
+	var resource := MapObject3D.new()
+	resource.object_id = 42
+	resource.kind = EloriaProtocol.MAP_OBJECT_HARVEST
+	main.set("clicked_object", resource)
+	var click := InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
+	main.call("_on_world_gui_input", click)
+	_expect(_take() == EloriaProtocol.harvest(42),
+		"harvesting is sent while the mixing queue is running")
+	main.set("clicked_object", null)
+	resource.free()
 	_serve(false, 0, 1, second_output, true)
+	_expect((main.get("manufacturing_panel") as Control).visible,
+		"an interrupted mix leaves its window open")
 	_expect(not bool(main.get("manufacturing_queue_running")),
 		"a batch another action interrupted stops the queue")
 	_expect(_take_requests().is_empty(),
@@ -176,12 +265,14 @@ func _take() -> PackedByteArray:
 func _open_fixture() -> Dictionary:
 	var network: Node = root.get_node("Network")
 	var old_peer: StreamPeerTCP = network.get("_peer") as StreamPeerTCP
+	var old_secure: bool = network.get("_secure")
 	var peer := StreamPeerTCP.new()
 	var server := TCPServer.new()
 	if not _expect(server.listen(0, "127.0.0.1") == OK, "the local socket listens"):
 		return {}
 	network.set_process(false)
 	network.set("_peer", peer)
+	network.set("_secure", false)
 	peer.connect_to_host("127.0.0.1", server.get_local_port())
 	for attempt: int in range(20):
 		peer.poll()
@@ -190,7 +281,7 @@ func _open_fixture() -> Dictionary:
 		await process_frame
 	var taken: StreamPeerTCP = server.take_connection()
 	var fixture: Dictionary = {"server": server, "peer": peer,
-		"receiver": taken, "old_peer": old_peer}
+		"receiver": taken, "old_peer": old_peer, "old_secure": old_secure}
 	if not _expect(taken != null, "the local socket connects"):
 		_close_fixture(fixture)
 		return {}
@@ -204,6 +295,7 @@ func _close_fixture(fixture: Dictionary) -> void:
 		(fixture["receiver"] as StreamPeerTCP).disconnect_from_host()
 	(fixture["server"] as TCPServer).stop()
 	network.set("_peer", fixture["old_peer"])
+	network.set("_secure", fixture["old_secure"])
 	network.set_process(true)
 
 func _expect(condition: bool, label: String) -> bool:

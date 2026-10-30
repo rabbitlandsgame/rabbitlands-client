@@ -109,6 +109,48 @@ func run() -> void:
 	ui.call("_edit_sale", state.rows[1])
 	expect(ui.sale_dialog.visible, "individual NPC quantities remain editable after staging all sales")
 	ui.sale_dialog.hide()
+	ui.sell_unassigned_button.pressed.emit()
+	expect(sent.back().action == "sell_all_unassigned" and sent.back().revision == state.revision,
+		"unassigned-only sales use the current server revision")
+	expect(ui.sell_all_button.disabled and ui.sell_unassigned_button.disabled,
+		"pending sales disable both bulk sale controls")
+	var staged := state.duplicate(true)
+	for index: int in [1, 4]:
+		staged.rows[index].sell_quantity = staged.rows[index].quantity
+		staged.rows[index].available_quantity = 0
+		staged.rows[index].allocations = {}
+		staged.rows[index].sale_proceeds = int(staged.rows[index].quantity) * int(staged.rows[index].npc_gold)
+	ui.apply_snapshot(staged)
+	var recipient: OptionButton = ui.table.get_child(1).find_child("LootRecipient", true, false)
+	expect(not recipient.disabled, "fully staged NPC loot keeps recipient selection enabled")
+	expect(recipient.get_item_text(0) == "Unassigned" and recipient.selected > 1,
+		"staged NPC status leaves a distinct Unassigned choice in the recipient menu")
+	recipient.item_selected.emit(3)
+	expect(sent.back().action == "allocate" and sent.back().allocations.size() == 1 and sent.back().allocations.get("mira") == 40 and sent.back().clear_sale,
+		"choosing a player atomically removes the NPC sale and allocates the whole item stack")
+	ui.apply_snapshot(staged)
+	(ui.table.get_child(1).find_child("LootRecipient", true, false) as OptionButton).item_selected.emit(1)
+	expect(sent.back().action == "split" and sent.back().row_id == "1" and sent.back().clear_sale,
+		"common items can be split equally after sell all")
+	ui.apply_snapshot(staged)
+	(ui.table.get_child(4).find_child("LootRecipient", true, false) as OptionButton).item_selected.emit(0)
+	expect(sent.back().action == "allocate" and sent.back().allocations.is_empty() and sent.back().clear_sale,
+		"Unassigned removes an individual item's staged sale")
+	ui.apply_snapshot(staged)
+	(ui.table.get_child(4).find_child("LootRecipient", true, false) as OptionButton).item_selected.emit(1)
+	expect(ui.editor.visible and ui.editor_fields["mira"].max_value == 1,
+		"custom allocation can recover the full quantity from a staged rare sale")
+	ui.editor_fields["mira"].get_line_edit().text = "1"
+	ui.editor.confirmed.emit()
+	expect(sent.back().action == "allocate" and sent.back().allocations.mira == 1 and sent.back().clear_sale,
+		"custom allocation removes the NPC sale when saved")
+	ui.editor.hide()
+	ui.apply_snapshot(staged)
+	var sale_menu := ui.table.get_child(1).find_children("*", "MenuButton", true, false)[0] as MenuButton
+	expect(sale_menu.get_popup().get_item_text(0) == "Unset NPC sale", "staged sales expose an explicit unset action")
+	sale_menu.get_popup().id_pressed.emit(2)
+	expect(sent.back().action == "sell" and sent.back().quantity == 0, "unsetting a sale requests a zero NPC quantity")
+	ui.apply_snapshot(state)
 	ui.split_button.pressed.emit()
 	expect(sent.back().action == "split" and sent.back().revision == 3, "split sends the server revision")
 	expect(ui.send_button.disabled, "pending edits disable delivery")
@@ -130,6 +172,7 @@ func run() -> void:
 	ui.apply_snapshot(state)
 	expect(ui.split_button.disabled and ui.send_button.disabled, "members see a read-only allocation preview")
 	expect(ui.sell_all_button.disabled, "only the party leader can stage all NPC sales")
+	expect(ui.sell_unassigned_button.disabled, "only the party leader can sell unassigned loot")
 	(ui.table.get_child(4).find_child("InspectItem", true, false) as Button).pressed.emit()
 	expect(sent.back().action == "inspect", "non-leaders can inspect rare loot")
 	state.is_leader = true
@@ -173,6 +216,14 @@ func run() -> void:
 	ui.approve_button.pressed.emit()
 	expect(sent.back().action == "approve_payment", "payment approval is an explicit buyer action")
 	ui.apply_snapshot(state)
+	for viewport_size: Vector2i in [Vector2i(1024, 640), Vector2i(1280, 720), Vector2i(1600, 900)]:
+		root.size = viewport_size
+		await process_frame
+		await process_frame
+		for button: Button in [ui.split_button, ui.clear_button, ui.sell_all_button, ui.sell_unassigned_button]:
+			expect(ui.panel.get_global_rect().encloses(button.get_global_rect()),
+				"bulk loot controls stay inside the window at %s" % viewport_size)
+	root.size = Vector2i(1280, 720)
 	if OS.get_cmdline_user_args().has("--render"):
 		for i: int in range(150):
 			await process_frame
@@ -201,6 +252,8 @@ func run() -> void:
 		ui.call("_edit_sale", state.rows[5])
 		await capture("ledger-sale-dialog.png")
 		ui.sale_dialog.hide()
+		ui.apply_snapshot(staged)
+		await capture("ledger-npc-staged.png")
 	ui.apply_snapshot(state)
 	ui.send_button.pressed.emit()
 	expect(ui.confirmation.dialog_text.contains("beam"), "save and exit explains the party's return to the beam")

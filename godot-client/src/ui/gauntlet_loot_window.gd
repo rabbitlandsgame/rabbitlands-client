@@ -28,6 +28,7 @@ var deliveries: VBoxContainer
 var split_button: Button
 var clear_button: Button
 var sell_all_button: Button
+var sell_unassigned_button: Button
 var send_button: Button
 var approve_button: Button
 var status: Label
@@ -333,10 +334,14 @@ func _build() -> void:
 	pager = _label(page_row, "", 12, MUTED)
 	pager.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	next_button = _button(page_row, "›", func() -> void: _page(1))
-	split_button = _button(page_row, "Split common equally", func() -> void: _request("split"))
-	clear_button = _button(page_row, "Clear assignments", func() -> void: _request("clear"))
-	sell_all_button = _button(page_row, "Sell all to NPC", func() -> void: _request("sell_all"))
-	sell_all_button.tooltip_text = "Stage all sellable shared loot at the established NPC prices. Adjust individual NPC quantities before saving. Personal rewards, staged exchange listings and unsellable items are kept."
+	var actions := HFlowContainer.new()
+	left.add_child(actions)
+	split_button = _button(actions, "Split common equally", func() -> void: _request("split"))
+	clear_button = _button(actions, "Clear assignments", func() -> void: _request("clear"))
+	sell_all_button = _button(actions, "Sell all to NPC", func() -> void: _request("sell_all"))
+	sell_all_button.tooltip_text = "Stage all sellable shared loot at NPC prices. Choose a recipient or Unassigned on an item to remove its NPC sale. Personal rewards, exchange listings and unsellable items are kept."
+	sell_unassigned_button = _button(actions, "Sell all unassigned to NPC", func() -> void: _request("sell_all_unassigned"))
+	sell_unassigned_button.tooltip_text = "Stage NPC sales only for unassigned quantities across all pages. Keep player allocations, existing NPC sales, personal rewards and exchange listings. Incomplete NPC bundles stay unassigned."
 	_storage = PanelContainer.new()
 	_storage.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_storage.size_flags_stretch_ratio = 1.0
@@ -644,6 +649,7 @@ func _render() -> void:
 	split_button.disabled = not _editable()
 	clear_button.disabled = not _editable()
 	sell_all_button.disabled = not _editable()
+	sell_unassigned_button.disabled = not _editable()
 	send_button.disabled = (not bool(_state.is_leader) or _pending_since > 0 or bool(_state.get("exited", false))) if _state.phase == "sent" else (not _editable() or not bool(_state.can_send))
 	send_button.text = "RETURN PARTY TO BEAM" if _state.phase == "sent" else "SAVE & EXIT TO BEAM"
 	send_button.visible = not _show_exchange
@@ -801,10 +807,16 @@ func _item_row(row: Dictionary) -> void:
 		amounts.append("%s ×%d" % [_member_name(username), int(row.allocations[username])])
 		quantities.append(int(row.allocations[username]))
 	var recipient := OptionButton.new()
+	recipient.name = "LootRecipient"
 	recipient.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	recipient.add_item("Unassigned")
 	recipient.add_item("Split evenly" if not row.rare else "Edit allocation…")
 	for member: Dictionary in _state.members: recipient.add_item(str(member.name))
+	var staged_index := -1
+	if int(row.sell_quantity) == int(row.quantity):
+		staged_index = recipient.item_count
+		recipient.add_item("NPC buyback · staged")
+		recipient.set_item_disabled(staged_index, true)
 	recipient.add_item("Edit quantities…")
 	recipient.fit_to_longest_item = false
 	recipient.custom_minimum_size.x = 135
@@ -815,6 +827,8 @@ func _item_row(row: Dictionary) -> void:
 	recipient.add_theme_stylebox_override("disabled", style(Color("293c3e"), Color("091215"), 4))
 	TextColors.bind(recipient, "loot_title")
 	recipient.tooltip_text = ", ".join(amounts)
+	if int(row.sell_quantity) > 0:
+		recipient.tooltip_text += "\nChoosing a recipient or Unassigned removes this item's staged NPC sale."
 	var show_portraits := not _compact_view and get_viewport_rect().size.x >= 1400 and not bool(row.locked)
 	if quantities.size() > 1:
 		var equal: bool = quantities.min() == quantities.max() and quantities.size() == _state.members.size()
@@ -823,16 +837,16 @@ func _item_row(row: Dictionary) -> void:
 	elif quantities.size() == 1:
 		for i: int in range(_state.members.size()):
 			if row.allocations.has(str(_state.members[i].username)): recipient.select(i + 2)
-	if int(row.sell_quantity) == int(row.quantity): recipient.set_item_text(0, "NPC buyback · staged")
+	if staged_index >= 0: recipient.select(staged_index)
 	if int(row.get("exchange_quantity", 0)) == int(row.quantity): recipient.set_item_text(0, "Exchange listing · staged")
-	recipient.disabled = not _editable() or bool(row.locked) or int(row.available_quantity) == 0
+	recipient.disabled = not _editable() or bool(row.locked) or _allocation_quantity(row) == 0
 	recipient.item_selected.connect(func(index: int) -> void:
 		_select_row(str(row.id))
 		if index == recipient.item_count - 1 or index == 1 and row.rare:
 			_edit_item(row)
-		elif index == 1: _request("split", {"row_id": row.id})
-		elif index == 0: _request("allocate", {"row_id": row.id, "allocations": {}})
-		else: _request("allocate", {"row_id": row.id, "allocations": {str(_state.members[index - 2].username): int(row.available_quantity)}}))
+		elif index == 1: _request("split", {"row_id": row.id, "clear_sale": true})
+		elif index == 0: _request("allocate", {"row_id": row.id, "allocations": {}, "clear_sale": true})
+		else: _request("allocate", {"row_id": row.id, "allocations": {str(_state.members[index - 2].username): _allocation_quantity(row)}, "clear_sale": true}))
 	allocation_controls.add_child(recipient)
 	if show_portraits and quantities.size() > 1:
 		var shares := HBoxContainer.new()
@@ -1026,8 +1040,12 @@ func _process(_delta: float) -> void:
 			status.text = "No update received. Reopen the ledger to refresh before retrying."
 	set_process(_completion_open_pending or _pending_since > 0)
 
+func _allocation_quantity(row: Dictionary) -> int:
+	return int(row.quantity) - int(row.get("exchange_quantity", 0))
+
 func _edit_item(row: Dictionary) -> void:
 	_editing = row.duplicate(true)
+	_editing.available_quantity = _allocation_quantity(row)
 	_editor_run = str(_state.run_id)
 	_edit_revision = int(_state.revision)
 	editor_fields.clear()
@@ -1039,14 +1057,16 @@ func _edit_item(row: Dictionary) -> void:
 	body.name = "AllocationFields"
 	body.add_theme_constant_override("separation", 10)
 	editor.add_child(body)
-	_label(body, "%s · %d available" % [row.name, int(row.available_quantity)], 16, GOLD)
+	_label(body, "%s · %d available" % [row.name, int(_editing.available_quantity)], 16, GOLD)
+	if int(row.sell_quantity) > 0:
+		_label(body, "Saving this allocation removes the item's staged NPC sale.", 12, MUTED)
 	for member: Dictionary in _state.members:
 		var line := HBoxContainer.new()
 		body.add_child(line)
 		_label(line, str(member.name)).size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var quantity := SpinBox.new()
 		quantity.min_value = 0
-		quantity.max_value = int(row.available_quantity)
+		quantity.max_value = int(_editing.available_quantity)
 		quantity.step = 1
 		quantity.allow_greater = false
 		quantity.value = int(row.allocations.get(str(member.username), 0))
@@ -1071,7 +1091,7 @@ func _apply_editor() -> void:
 		var field: SpinBox = editor_fields[username]
 		field.apply()
 		allocation[username] = int(field.value)
-	_request("allocate", {"run_id": _editor_run, "row_id": _editing.id, "allocations": allocation}, _edit_revision)
+	_request("allocate", {"run_id": _editor_run, "row_id": _editing.id, "allocations": allocation, "clear_sale": true}, _edit_revision)
 
 func _confirm_send() -> void:
 	if send_button.disabled: return
@@ -1126,11 +1146,13 @@ func _sale_menu(parent: Node, row: Dictionary) -> void:
 	sell.disabled = not _editable()
 	parent.add_child(sell)
 	var menu := sell.get_popup()
+	if int(row.sell_quantity) > 0: menu.add_item("Unset NPC sale", 2)
 	if int(row.npc_gold) > 0: menu.add_item("NPC buyback · %d GC / %d item(s)" % [int(row.npc_gold), int(row.npc_bundle)], 0)
 	if bool(row.get("exchange_allowed", false)): menu.add_item("List on party exchange…", 1)
 	menu.id_pressed.connect(func(id: int) -> void:
 		if id == 0: _edit_sale(row)
-		elif id == 1: _edit_exchange(row))
+		elif id == 1: _edit_exchange(row)
+		elif id == 2: _request("sell", {"row_id": row.id, "quantity": 0}))
 	sell.tooltip_text = "Choose an NPC buyback or a party-owned exchange listing. Sales are staged until final confirmation."
 
 func _edit_exchange(row: Dictionary) -> void:
