@@ -16,7 +16,7 @@
   "preserved": [
     "native models and rigs",
     "shared animations",
-    "wrist pose and grip position",
+    "wrist pose and approved idle angle",
     "moving carry socket",
     "active bow aiming",
     "textures and catalog records"
@@ -34,7 +34,7 @@
   },
   "measurements": {
     "max_quaternion_comparison_rad": 0.0009765625,
-    "max_grip_distance_m": 0.077024102211
+    "max_grip_distance_m": 0.04015614837408
   },
   "views": {
     "idle": 36,
@@ -42,23 +42,38 @@
   },
   "implementation_sha256": {
     "godot-client/src/actors/ranger_bow_3d.gd": "39fbc67049db44904cc648cec280137139d8289f5b5210c2f955d8a90f911625",
-    "godot-client/src/actors/combat_presentation_3d.gd": "a5aa5e6b76cf96e04ed20e839fed592334ed64649b802ee733988b80dd2e2e03",
+    "godot-client/src/actors/combat_presentation_3d.gd": "685e9628921ca6e2cd0f0179c8b17f028800fc36a52ae4979e9be1d864cd390c",
     "godot-client/src/actors/weapon_carry_pose.gd": "4e6354b0063b79ba1a01619dba1efb8ede614eafa13bd2088efcde0c14a72aeb",
     "godot-client/tests/test_equipment_wrist_alignment.gd": "211f4117f3d27638068998e1189c3d4a8a9cfa762edd5547154809b465d2a6b2",
     "godot-client/tests/test_equipment_review_fit.gd": "eb7bd0954dcd0c56d9536b9aece2ee0be38473a26120b56bbd2b2d99be4768d8"
   },
   "palm_seat_refinement": {
-    "source_revision": "940aa281",
+    "source_revision": "5e85f79e",
     "user_accepted": "idle bow orientation",
-    "request": "seat the handle higher in the palm",
-    "toward_wrist_m": 0.02,
+    "request": "raise the bow another 5 cm into the palm",
+    "toward_wrist_m": 0.07,
+    "latest_step_m": 0.05,
+    "steps": [
+      {
+        "source_revision": "940aa281",
+        "toward_wrist_m": 0.02,
+        "rest_x_before": 0.085,
+        "rest_x_after": 0.065
+      },
+      {
+        "source_revision": "5e85f79e",
+        "toward_wrist_m": 0.05,
+        "rest_x_before": 0.065,
+        "rest_x_after": 0.015
+      }
+    ],
     "rest_offset_before": [
-      0.085,
+      0.065,
       -0.028,
       0.022
     ],
     "rest_offset_after": [
-      0.065,
+      0.015,
       -0.028,
       0.022
     ],

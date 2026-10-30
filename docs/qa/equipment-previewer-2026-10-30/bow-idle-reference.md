@@ -8,7 +8,8 @@ Each body calibrates this grip from its own native idle pose at 0.7 seconds,
 including the existing shoulder spread. Calibration reads animation channels
 without seeking or changing the live rig. The grip remains attached to the
 anatomical wrist. After the user accepted the orientation, the handle was seated
-20 mm closer to the wrist, higher in the palm. The sleeve/wrist corrections and
+70 mm closer to the wrist in reviewed 20 mm and additional 50 mm steps, higher
+in the palm. The sleeve/wrist corrections and
 approved idle angle are retained.
 The existing activity crossfade blends into the movement carry frame. Bow
 draw/hold/release continue to use their existing aiming presentation.
@@ -16,7 +17,7 @@ draw/hold/release continue to use their existing aiming presentation.
 Verified on both current bow designs and all 16 body variants: 3,089 wrist,
 direction, read-only calibration, live-transition and equip-during-aim checks
 pass. Maximum quaternion comparison is 0.000976563 rad, within the existing
-floating-point tolerance; maximum wrist-to-grip distance is now 0.077024 m.
+floating-point tolerance; maximum wrist-to-grip distance is now 0.040156 m.
 The 298 review-fit checks, 21 second-review checks, weapon-carry tests,
 catalog/icon tests (6 tests and 1,315 subtests), and graphical self-test pass.
 
