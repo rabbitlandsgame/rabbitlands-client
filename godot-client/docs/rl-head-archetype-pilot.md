@@ -2,11 +2,11 @@
 
 This develop integration adds three explicit bases to the existing RL Head Lab:
 
-| Preset | Sex | Grooming |
-|---|---|---|
-| `human_01` | female | Cornrows into a low knot |
-| `human_20` | male | Rounded Afro |
-| `human_34` | male | Bald elder with an attached grey full beard |
+| Preset | Name | Sex | Grooming |
+|---|---|---|---|
+| `human_01` | Amara | female | Cornrows into a low knot |
+| `human_20` | Darian | male | Rounded Afro |
+| `human_34` | Bram | male | Bald elder with an attached grey full beard |
 
 Run `godot-client/open-rl-head-lab.bat --preset human_01` or
 `godot-client/open-rl-head-lab.bat --preset human_20`, or use `--preset human_34`.
@@ -18,8 +18,7 @@ head controls; existing head-only presets retain their previous behavior.
 The catalog is `data/actors/rl_head_archetypes.json`. PC/2 fallback appearances
 are retained exactly. Module IDs 4 and 5 are append-only; IDs 6–8 remain
 unregistered here. Existing saves, NPC assignments and creation Randomize are
-unchanged. This adds no character-creation popup; that interface is a separate
-design task.
+unchanged. These bases also supply the editable [starting-look library](character-starting-looks.md) before character creation.
 
 The source is the already generated pilot assets, not new paid generation.
 The cornrows deliberately expose six scalp channels between seven rows. Afro

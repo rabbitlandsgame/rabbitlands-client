@@ -41,6 +41,8 @@ var _creation_face_before_eyes := false
 const OldcraftEntryStyleScript = preload("res://src/ui/oldcraft_entry_style.gd")
 const OldcraftDialogueStyleScript = preload("res://src/ui/oldcraft_dialogue_style.gd")
 const CreationArchetypes = preload("res://src/ui/creation_archetypes.gd")
+const CreationBaseFlowScript = preload("res://src/ui/creation_base_flow.gd")
+var creation_base_flow
 const CreationClassIcons = preload("res://src/ui/creation_class_icons.gd")
 const WardrobeShirtFitScript = preload("res://src/actors/wardrobe_shirt_fit.gd")
 const NewCharacterIntroScript = preload("res://src/camera/new_character_intro.gd")
@@ -2425,20 +2427,27 @@ func _on_new_character_pressed() -> void:
 		status_label.text = "Connect to the server before creating a character."
 		return
 	_set_login_screen_visible(false)
+	creation_base_flow.entry_opening = true
 	creation_panel.show()
+	creation_base_flow.open(true)
+	creation_base_flow.entry_opening = false
 	character_intro.prewarm(MapRegistry.resolve(map_registry, NewCharacterIntroScript.MAP), world_root)
 
 func _on_creation_visibility_changed() -> void:
 	var showing := creation_panel.is_visible_in_tree()
 	preview_viewport.render_target_update_mode = (SubViewport.UPDATE_ALWAYS
 		if showing else SubViewport.UPDATE_DISABLED)
-	if showing and not is_instance_valid(preview_actor):
+	if not showing and is_instance_valid(creation_base_flow):
+		creation_base_flow.close_for_exit()
+	if showing and not is_instance_valid(preview_actor) and not creation_base_flow.entry_opening:
 		var began := Time.get_ticks_usec()
 		_refresh_creation_preview()
 		Diagnostics.record("creation_preview_ready", {
 			"duration_ms": (Time.get_ticks_usec() - began) / 1000.0})
 
 func _on_creation_back_pressed() -> void:
+	if is_instance_valid(creation_base_flow):
+		creation_base_flow.close_for_exit()
 	character_intro.cancel()
 	_clear_pending_creation()
 	creation_panel.hide()
@@ -2460,11 +2469,15 @@ func _sync_login_logo_visibility() -> void:
 		start_screen_backdrop.set_active(login_panel.visible)
 
 func _on_create_race_item_selected(_index: int) -> void:
+	if is_instance_valid(creation_base_flow):
+		creation_base_flow.forget_basis()
 	_populate_creation_sexes()
 	_populate_creation_choices(true)
 	_refresh_creation_preview()
 
 func _on_create_gender_item_selected(_index: int) -> void:
+	if is_instance_valid(creation_base_flow):
+		creation_base_flow.forget_basis()
 	_populate_creation_choices()
 	_refresh_creation_preview()
 
@@ -2497,6 +2510,8 @@ func _initialize_creation_appearance() -> void:
 ## Tests can pass a seeded generator without changing the generator used by the
 ## live button.
 func _randomize_creation_appearance(rng: RandomNumberGenerator = null) -> void:
+	if is_instance_valid(creation_base_flow):
+		creation_base_flow.forget_basis()
 	var source := rng if rng != null else _creation_appearance_rng
 	if create_race.item_count > 0:
 		create_race.select(source.randi_range(0, create_race.item_count - 1))
@@ -2593,9 +2608,10 @@ func _record_startup_window(window_name: String, began: int) -> int:
 		"duration_ms": (now - began) / 1000.0})
 	return Time.get_ticks_usec()
 
-func _refresh_creation_preview() -> void:
-	var actor_type: int = create_gender.get_selected_id()
-	var appearance: Dictionary = _creation_appearance()
+func _refresh_creation_preview(starting_look: Dictionary = {}) -> void:
+	var choosing_base := not starting_look.is_empty()
+	var actor_type: int = int(starting_look.get("actor_type", create_gender.get_selected_id()))
+	var appearance: Dictionary = (starting_look.get("appearance", {}) as Dictionary).duplicate(true) if choosing_base else _creation_appearance()
 	# Modified 2026-08-28 for Eloria Client: the creation bytes are equipment
 	# visual ids now, so the preview resolves them exactly as the world does.
 	# Building the dto by hand here would preview a different wardrobe from the
@@ -2608,10 +2624,10 @@ func _refresh_creation_preview() -> void:
 	# the same selected class id is sent separately from the eight appearance
 	# bytes when the player creates the character.
 	dto["equipment_visuals"] = (_creation_class_loadout()
-		if creation_class_gear_visible else {})
+		if creation_class_gear_visible and not choosing_base else {})
 	var model_id := _model_for_actor(dto)
 	var model_config: Dictionary = models.get(model_id, {}) as Dictionary
-	if is_instance_valid(creation_colours) and actor_type in [0, 1]:
+	if not choosing_base and is_instance_valid(creation_colours) and actor_type in [0, 1]:
 		creation_colours.update_context(appearance, model_config)
 		portrait_form.set_hair_style(AppearanceVariants.hair_style(int(appearance.get("hair", 0))))
 		portrait_form.update_derived(appearance)
@@ -2648,7 +2664,7 @@ func _populate_creation_races() -> void:
 		var config: Dictionary = models.get(str(option.get("model", "")), {})
 		var culture := str(config.get("culture", ""))
 		var label := str(option.get("label", "")).trim_suffix(" Female").trim_suffix(" Male")
-		races[culture] = label
+		races[culture] = "Ssarathi" if culture == "ssarathi" else label
 	var cultures: Array = races.keys()
 	cultures.sort_custom(func(a: String, b: String) -> bool:
 		return str(races[a]).naturalnocasecmp_to(str(races[b])) < 0)
@@ -2714,6 +2730,8 @@ func _apply_creation_protocol() -> void:
 
 func _on_appearance_protocol_changed(version: int) -> void:
 	_apply_creation_protocol()
+	if is_instance_valid(creation_base_flow):
+		creation_base_flow.refresh_protocol()
 	if is_instance_valid(appearance_editor):
 		appearance_editor.set_protocol_version(version)
 
@@ -2807,6 +2825,9 @@ func _configure_creation_layout() -> void:
 		picker.custom_minimum_size.x = 180
 		picker.item_selected.connect(func(index: int) -> void:
 			picker.tooltip_text = picker.get_item_text(index))
+	creation_base_flow = CreationBaseFlowScript.new()
+	add_child(creation_base_flow)
+	creation_base_flow.configure(self)
 	var rail := get_node("%ClassRail") as Control
 	var class_content := rail.get_node("ClassContent") as Control
 	var class_scroll := ScrollContainer.new()
@@ -2925,7 +2946,11 @@ func _frame_preview_actor() -> void:
 		return
 	var stand: Vector3 = preview_actor.position
 	preview_focus = Vector3(stand.x, 1.0, stand.z)
-	if creation_face_focus and create_gender.get_selected_id() in [0, 1]:
+	if is_instance_valid(creation_base_flow) and creation_base_flow.is_open():
+		preview_focus.y = stand.y + preview_actor.head_height() * 0.57
+		preview_distance = maxf(1.6, preview_actor.head_height() * 2.25)
+		preview_camera.fov = 35.0
+	elif creation_face_focus and create_gender.get_selected_id() in [0, 1]:
 		preview_focus.y = stand.y + preview_actor.head_height() * 0.88
 		preview_camera.fov = 35.0
 	else:

@@ -114,7 +114,8 @@ func run() -> void:
 	var saved := form_state()
 	var camera := {"yaw": main.get("preview_yaw"), "pitch": main.get("preview_pitch"),
 		"distance": main.get("preview_distance"), "face": main.get("creation_face_focus")}
-	flow.open(false)
+	flow._button.pressed.emit()
+	check(flow.is_open() and flow.picker.is_open(), "The editor's starting-look button reopens the library")
 	flow.picker._select_card("human_01")
 	await settle()
 	check(form_state() == saved, "Browsing another look does not mutate the edited form")
