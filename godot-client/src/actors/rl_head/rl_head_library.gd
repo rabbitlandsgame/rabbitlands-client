@@ -171,6 +171,8 @@ const MATERIAL_VALUES_DEFINE := "#define RL_MATERIAL_VALUES\n"
 static var _values_switch := -1
 ## Shared shader -> its RL_MATERIAL_VALUES compile.
 static var _value_shaders: Dictionary = {}
+## Only beard assets explicitly carrying featheredRoots use true alpha.
+static var _beard_feather_shaders: Dictionary = {}
 ## Shared material id + values -> WeakRef of its per-face copy.
 static var _face_materials: Dictionary = {}
 
@@ -477,6 +479,7 @@ static func release_unused() -> void:
 	_texture_queue.clear()
 	_warm_queue.clear()
 	_materials.clear()
+	_beard_feather_shaders.clear()
 	_face_materials.clear()
 	_manifest = null
 	RLHeadBodyCut.clear()
@@ -962,6 +965,19 @@ static func material(material_name: String, sex: String, style: String, quality:
 			# (`texture`); without that, by convention.
 			var asset := beard_path(style) if material_name == "rl_beard" else hair_path(style)
 			var extras := material_extras(asset, material_name)
+			if material_name == "rl_beard" and bool(extras.get("featheredRoots", false)):
+				var source: Shader = result.shader
+				if not _beard_feather_shaders.has(source.get_instance_id()):
+					var shader := Shader.new()
+					shader.code = "#define RL_BEARD_FEATHER\n" + source.code
+					shader.set_meta(&"rl_base_shader", source)
+					_beard_feather_shaders[source.get_instance_id()] = shader
+				result.shader = _beard_feather_shaders[source.get_instance_id()]
+				result.set_shader_parameter("lock_variation", 0.0)
+				result.set_shader_parameter("beard_gain", 1.0)
+				result.set_shader_parameter("flatness", 0.65)
+				result.set_shader_parameter("root_darkening", 0.15)
+				result.set_shader_parameter("primary_strength", 0.003)
 			var file := str(extras.get("texture", ""))
 			if file.is_empty():
 				file = "beard.png" if material_name == "rl_beard" else "hair_%s.png" % style
@@ -1012,9 +1028,12 @@ static func reload_values_switch() -> void:
 static func shader_values(shared: ShaderMaterial) -> Array:
 	if shared == null or shared.shader == null:
 		return []
+	var actual := shared.shader
+	while actual != null and actual.has_meta(&"rl_base_shader"):
+		actual = actual.get_meta(&"rl_base_shader") as Shader
 	for kind: String in SHADER_VALUES:
 		var shader: Shader = SHADERS.get(kind)
-		if shared.shader == shader or shared.shader == _value_shaders.get(shader.get_instance_id()):
+		if actual == shader or actual == _value_shaders.get(shader.get_instance_id()):
 			return SHADER_VALUES[kind] as Array
 	return []
 
@@ -1073,6 +1092,7 @@ static func _values_shader(shader: Shader) -> Shader:
 	if at >= 0 and not code.contains(MATERIAL_VALUES_DEFINE):
 		result = Shader.new()
 		result.code = code.insert(at, MATERIAL_VALUES_DEFINE)
+		result.set_meta(&"rl_base_shader", shader)
 	_value_shaders[shader.get_instance_id()] = result
 	return result
 

@@ -70,13 +70,46 @@
       "clearance_cases_per_lod": 69
     }
   ],
-  "beards": [],
-  "revision": "selected-unflagged-pilots-20261030",
+  "beards": [
+    {
+      "name": "full_beard",
+      "glb_sha256": "7a4aded0b1211125b6a50de5a4c53d6583200be5961b4e0f8f9df3f01c4c018e",
+      "texture_sha256": "bd9b224ccf7b700b3f1aa3d8c2dd1017eeaf92e661e94e372f7fc2be54596206",
+      "triangles": {
+        "lod0": 9996,
+        "lod1": 5164,
+        "lod2": 2572
+      },
+      "review_repair_4": {
+        "source_sha256": "7bfa6eb5d80689c85a0a6e8b00ca422326173edb138f4f21c66fac08ec49468b",
+        "tool_sha256": "acdaaa6574caa50894a2b5a22d43d1c1cda0f241050c3f0182d880f9f532ecf4",
+        "method": "Attached continuous foundation under retained long reference mass; oral sheet removed, continuous foundation UV patch, inset lower-mass backing",
+        "foundation_components_by_lod": [
+          1,
+          1,
+          1
+        ],
+        "attachment_cases_per_lod": 5,
+        "maximum_root_gap_mm": 0.7507321351309896,
+        "maximum_chin_gap_mm": 3.2823865708980393,
+        "maximum_mouth_bridge_gap_mm": 3.2942542981202587,
+        "all_head_identity_and_expression_targets": 75,
+        "visual_review": "Actual client neutral/smile/jaw-smile front, both three-quarter/profiles and rear; lower-LOD live expressions; no projecting oral sheet or visible lower-mass holes",
+        "new_generation_credits": 0
+      },
+      "id": "human_34",
+      "foundation_tool": "eloria-assets/tools/rl_heads/hair/fit_attached_beard.py",
+      "foundation_tool_sha256": "fbdd1e607024715c2fa5e2d6b1e830d04da25823d3f7b9497fd2ed3d579f3dfb",
+      "tool": "eloria-assets/tools/rl_heads/hair/fit_attached_full_beard.py",
+      "byte_reproduction": "Exact GLB and PNG from retained source inputs with full_beard-v4 output basename"
+    }
+  ],
+  "revision": "selected-three-pilots-attached-full-beard-20261030",
   "review_notes": [
-    "Selected humans 01 and 20 only. Other pilots remain outside this integration.",
+    "Selected humans01,20 and34 only. Humans08,14 and27 remain outside this integration.",
     "Original Mira/Rowan rules, PC/2 fallbacks, NPC assignments and Randomize behavior are retained.",
     "Cornrows deliberately expose scalp channels. Afro wisps are compact and root-attached.",
-    "Existing develop beard assets are unchanged. A separate full-beard pilot failed mouth-pose review and remains held.",
+    "The full beard has a continuous attached foundation and feathered alpha edges, with its long reference silhouette retained. Other beard assets are unchanged.",
     "Neck-dye blend and female collar use the current reviewed fixes."
   ],
   "female_shirt_neckline": {
