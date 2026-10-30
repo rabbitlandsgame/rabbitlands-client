@@ -296,7 +296,7 @@ func _build_menu() -> void:
 		for value: int in main._inventory_quantities: quantity_menu.add_item(str(value)))
 	quantity_menu.id_pressed.connect(func(index: int) -> void:
 		main._on_quantity_box_pressed(index)
-		quantity_value.text = str(main._selected_quantity()))
+		quantity_value.text = _quantity_text())
 	popup.add_item("Customize inventory…", 21)
 	popup.add_separator()
 	for pair: Array in [["Store all", 0], ["Get all", 1], ["Drop all", 2], ["Mix all", 3], ["Item lists…", 4],
@@ -671,18 +671,28 @@ func _position_card() -> void:
 	if where.x < available.position.x and main.inventory_panel.visible: where.x = inventory_rect.end.x + 10
 	card.position = where.clamp(available.position, (available.end - card.size).max(available.position))
 
+func _quantity_text() -> String:
+	return "All" if main._inventory_quantity_override == 0xffffffff else str(main._selected_quantity())
+
 func _quantity_submitted(text: String) -> void:
+	if text.strip_edges().to_lower() == "all":
+		_quantity_all()
+		return
 	if not text.is_valid_int():
-		quantity_value.text = str(main._selected_quantity())
+		quantity_value.text = _quantity_text()
 		return
 	main._inventory_quantity_override = clampi(int(text), 1, 0xffffffff)
 	main._sync_inventory_quantity_boxes()
 	main._save_hud_settings()
-	quantity_value.text = str(main._selected_quantity())
+	quantity_value.text = _quantity_text()
 
 func _quantity_all() -> void:
-	var item: Dictionary = AppState.inventory.get(main.selected_inventory_slot, {})
-	_quantity_submitted(str(maxi(1, int(item.get("quantity", 1)))))
+	# Keep All active across sources and changing stacks; each transfer clamps
+	# this protocol maximum to the quantity currently available.
+	main._inventory_quantity_override = 0xffffffff
+	main._sync_inventory_quantity_boxes()
+	main._save_hud_settings()
+	quantity_value.text = _quantity_text()
 
 func request_inspection(slot: int, full: bool) -> void:
 	_pending_slot = slot
@@ -812,7 +822,7 @@ func sync_inventory() -> void:
 			main._grouped(int(item.get("quantity", 0))), str(cached.get("stats", "Weight %s" % description.emu if description.has("emu") else "Choose Look for item details"))] if not item.is_empty() else "Select an item to inspect it."
 	main.inventory_description.text = ItemNames.in_text(main.inventory_description.text)
 	main.inventory_description.tooltip_text = main.inventory_description.text
-	if not quantity_value.has_focus(): quantity_value.text = str(main._selected_quantity())
+	if not quantity_value.has_focus(): quantity_value.text = _quantity_text()
 	main.inventory_use_button.disabled = item.is_empty() or slot >= 36 or not item.get("inventory_usable", false) or main._inventory_cooldown_remaining(slot) > 0
 	main.inventory_equip_button.visible = not item.is_empty() and slot < 36 and not item.get("inventory_usable", false)
 	main.inventory_equip_button.disabled = item.is_empty() or slot >= 36

@@ -3910,6 +3910,7 @@ func _on_inventory_get_all_pressed() -> void:
 			and int(AppState.ground_bag.get("bag_id", -1)) == bag_id:
 		_ground_bag_get_all_requested_msec = -1
 		_ground_bag_get_all_bag_id = -1
+		_sync_ground_bag()
 		var sent: int = _request_all_ground_bag_items()
 		inventory_description.text = _ground_bag_get_all_message(sent)
 		return
@@ -4269,6 +4270,9 @@ func _on_storage_close_pressed() -> void:
 ## box below, so picking something up is one gesture rather than select-then-
 ## press. A right click asks the server what the stack is instead.
 func _on_ground_bag_slot_pressed(index: int) -> void:
+	if _carried_slot >= 0:
+		_drop_carry()
+		return
 	var position: int = _ground_bag_slot_position(index)
 	if position < 0:
 		return
@@ -15774,7 +15778,7 @@ func _deposit_carry() -> void:
 	if not item_value is Dictionary:
 		_cancel_carry()
 		return
-	if slot >= 36:
+	if slot >= 24 and slot < 127:
 		inventory_description.text = "Take that off before storing it."
 		return
 	var available: int = maxi(1, int((item_value as Dictionary).get("quantity", 1)))
@@ -17904,16 +17908,28 @@ func _cursor_context() -> Dictionary:
 ## equipped, unequipped or Ctrl-dropped; the finger uses it; the eye looks at
 ## it. This is the promise, so it must match _on_inventory_slot_pressed.
 func _slot_cursor_target(button: Button) -> String:
+	if button in ground_bag_slot_buttons:
+		return "item_grab" if _carried_slot >= 0 or int(button.get_meta("bag_position", -1)) >= 0 else ""
+	if classic_storage != null and button.get_parent() == classic_storage.storage_grid:
+		var occupied: bool = int(button.get_meta("storage_position", -1)) >= 0
+		if bool(AppState.storage.get("read_only", false)):
+			return "item_inspect" if occupied else ""
+		return "item_grab" if _carried_slot >= 0 or occupied else ""
 	if bool(button.get_meta("gauntlet_loot_inspect", false)):
 		return "item_inspect"
 	var slot: int = inventory_slot_buttons.find(button)
 	if slot < 0:
 		var equipment_index: int = equipment_slot_buttons.find(button)
-		if equipment_index < 0:
+		if equipment_index >= 0:
+			slot = 36 + equipment_index
+		elif inventory_workspace != null:
+			var pouch: Control = inventory_workspace.reagent_pouch
+			if button == pouch.gold or button in pouch.slots:
+				slot = int(button.get_meta("reference", -1))
+		if slot < 0:
 			return ""
-		slot = 36 + equipment_index
 	if _storage_carried_position >= 0:
-		return "item_grab" if slot < 36 else ""
+		return "item_grab" if slot < 24 or slot >= 127 else ""
 	if _carried_slot >= 0:
 		return "item_grab"
 	if not AppState.inventory.has(slot):

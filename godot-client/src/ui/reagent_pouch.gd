@@ -16,12 +16,14 @@ var gold: Button
 var look_button: Button
 var store_button: Button
 var drop_button: Button
+var grab_button: Button
 var selected := -1
 var references: Array[int] = []
 
 func configure(owner_main: Control) -> void:
 	main = owner_main
 	# Match the bag with unframed, painted object art for every pouch action.
+	grab_button.icon = main._external_texture("res://assets/ui/cursors/cursor_grab.png")
 	look_button.icon = main._external_texture("res://assets/ui/cursors/cursor_eye.png")
 	store_button.icon = main._external_texture("res://assets/ui/inventory-actions/store-painted.png")
 	drop_button.icon = main._external_texture("res://assets/ui/cursors/cursor_pick.png")
@@ -85,13 +87,15 @@ func _ready() -> void:
 	auxiliary.add_child(action_grid)
 	look_button = _button(action_grid, "Look · Inspect the selected pouch item", func() -> void: Network.look_at_inventory_item(selected))
 	store_button = _button(action_grid, "Store · Deposit the selected quantity; open storage first", func() -> void: Network.deposit_storage(selected, _quantity()))
-	drop_button = _button(action_grid, "Drop · Drop the selected quantity", func() -> void: Network.drop_inventory_item(selected, _quantity()))
+	drop_button = _button(action_grid, "Bag · Get all from the bag at your feet", _get_bag)
+	grab_button = _button(action_grid, "Grab · Click an item to carry it, then storage or the ground to put it down", _grab)
+	grab_button.toggle_mode = true
 	mix_button = _button(action_grid, "Mix · Open crafting", _open_mix)
 	for pair: Array in [[store_button, "store"], [drop_button, "drop"], [mix_button, "mix"]]:
 		var button: Button = pair[0]
 		button.gui_input.connect(_action_shortcut_input.bind(pair[1], button))
 	store_button.tooltip_text = "Store · Left: selected quantity · Right: store all · Middle: protection options"
-	drop_button.tooltip_text = "Drop · Left: selected quantity · Right: drop all · Middle: protection options"
+	drop_button.tooltip_text = "Bag · Left: open the bag at your feet and get all · Right: drop all · Middle: drop protection options"
 	mix_button.tooltip_text = "Mix · Left: crafting · Right: mix all · Middle: mixing options"
 
 	AppState.state_changed.connect(_changed)
@@ -106,7 +110,7 @@ static func grouped(value: int) -> String:
 	return result
 
 func extent(part: Dictionary, gap: int, side_width: float = 75) -> Vector2:
-	return Vector2(maxf(224, part.columns * (part.cell + gap) - gap) + maxf(75, side_width) + 10, maxf(115, 20 + ceili(8.0 / part.columns) * (part.cell + gap) - gap))
+	return Vector2(maxf(224, part.columns * (part.cell + gap) - gap) + maxf(75, side_width) + 10, maxf(149, 20 + ceili(8.0 / part.columns) * (part.cell + gap) - gap))
 
 func apply_style(config: Dictionary, side_width: float = 75, actions_right := false) -> void:
 	var part: Dictionary = config.parts.pouch
@@ -131,7 +135,7 @@ func apply_style(config: Dictionary, side_width: float = 75, actions_right := fa
 		button.add_theme_stylebox_override("normal", Chrome.box(Color("181713"), Color("e2b854") if active else config.border.darkened(0.35), 3))
 		button.add_theme_stylebox_override("hover", Chrome.box(Color("30291c"), config.border.lightened(0.3), 3))
 		button.add_theme_color_override("font_color", config.text)
-	for button: Button in [look_button, store_button, drop_button, mix_button]:
+	for button: Button in [look_button, store_button, drop_button, mix_button, grab_button]:
 		Chrome.button(button)
 		if button != drop_button:
 			# Give these smaller silhouettes more room inside the same button footprint.
@@ -171,13 +175,20 @@ func _select(reference: int) -> void:
 	selected = reference
 	if main != null:
 		main.selected_inventory_slot = reference
-		main._describe_slot(reference, false)
+		if main._inventory_tool == "grab" and main._carry_enabled():
+			if main._storage_carried_position >= 0:
+				main._withdraw_storage_carry()
+			else:
+				main._begin_carry(reference)
+		else:
+			main._describe_slot(reference, false)
 		main._sync_inventory()
 		main.inventory_workspace.queue_layout()
 	_sync_actions()
 
 func _changed(path: StringName) -> void:
 	if path in [&"inventory", &"inventory_names", &"storage", &"trade"]: sync()
+	elif path in [&"ground_bags", &"actors"]: _sync_actions()
 
 func sync() -> void:
 	if grid == null: return
@@ -206,6 +217,17 @@ func sync() -> void:
 	if not AppState.inventory.has(selected): selected = -1
 	_sync_actions()
 
+func _get_bag() -> void:
+	if main != null and not drop_button.disabled:
+		main._on_inventory_get_all_pressed()
+
+func _grab() -> void:
+	if main == null or grab_button.disabled: return
+	# Arm the tool without lifting the previously selected item.
+	main._cancel_carry()
+	main._reset_world_action()
+	_sync_actions()
+
 func _open_mix() -> void:
 	if main != null and not mix_button.disabled:
 		main._on_manufacturing_button_pressed()
@@ -214,7 +236,9 @@ func _sync_actions() -> void:
 	var editing: bool = main != null and main.inventory_workspace != null and main.inventory_workspace.is_editing()
 	var held := int(AppState.inventory.get(selected, {}).get("quantity", 0))
 	look_button.disabled = held <= 0 or editing
-	drop_button.disabled = held <= 0 or editing
+	drop_button.disabled = main == null or editing or main._ground_bag_below_player() < 0
+	grab_button.disabled = main == null or editing
+	grab_button.set_pressed_no_signal(main != null and main._inventory_tool == "grab" and main._carry_enabled())
 	store_button.disabled = held <= 0 or editing or not AppState.storage.get("open", false) or AppState.storage.get("read_only", false)
 	mix_button.disabled = main == null or editing or AppState.trade.get("open", false) or AppState.storage.get("open", false)
 
