@@ -70,6 +70,18 @@ func piece_at(part: int) -> Dictionary:
 	return by_id.get(str(selected.get(part, "")), {})
 
 
+func cycle_piece(direction: int) -> void:
+	var parts := selected.keys()
+	parts.sort()
+	if parts.is_empty():
+		return
+	var index := parts.find(selected_part)
+	if index < 0:
+		selected_part = int(parts[0] if direction > 0 else parts[-1])
+	else:
+		selected_part = int(parts[posmod(index + direction, parts.size())])
+
+
 func visuals() -> Dictionary:
 	var result := {}
 	for part: int in selected:

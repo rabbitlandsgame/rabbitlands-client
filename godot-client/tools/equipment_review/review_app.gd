@@ -92,6 +92,7 @@ var _drafts: Dictionary = {}
 var _piece_options: Dictionary = {}
 var _piece_checks: Dictionary = {}
 var _piece_buttons: Dictionary = {}
+var _piece_scroll: ScrollContainer
 var _atlas := ItemAtlas.new()
 var _details_name: Label
 var _details_icon: TextureRect
@@ -656,6 +657,7 @@ func _build_ui() -> void:
 	panel.offset_right = 334
 	panel.offset_bottom = -52
 	var scroll := ScrollContainer.new()
+	_piece_scroll = scroll
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	panel.add_child(scroll)
 	var box := VBoxContainer.new()
@@ -756,7 +758,8 @@ func _build_ui() -> void:
 	var help := Label.new()
 	help.add_theme_font_size_override("font_size", 12)
 	help.text = ("Left drag: orbit. Right/middle drag: pan.\n"
-		+ "Wheel or Q/E: zoom. A/D: turn. Up/Down: tilt.\n"
+		+ "Up/Down: inspect equipped pieces.\n"
+		+ "Wheel or Q/E: zoom. A/D: turn. PgUp/PgDn: tilt.\n"
 		+ "1 front, 2 side, 3 back, 4 other side, 5 three-quarter.\n"
 		+ "R: reset view. Space: pause. , and .: step a frame.\n"
 		+ "[ and ]: speed. V: travel. H: hide panels.\n"
@@ -1076,6 +1079,11 @@ func _unhandled_input(event: InputEvent) -> void:
 	if key == null or not key.pressed or key.echo or key.ctrl_pressed or key.alt_pressed or key.meta_pressed:
 		return
 	match key.keycode:
+		KEY_UP, KEY_DOWN:
+			_wardrobe.cycle_piece(-1 if key.keycode == KEY_UP else 1)
+			_refresh_pieces()
+			if _piece_buttons.has(_wardrobe.selected_part):
+				_piece_scroll.ensure_control_visible(_piece_buttons[_wardrobe.selected_part])
 		KEY_LEFT:
 			_select_set(_set_index - 1)
 		KEY_RIGHT:
@@ -1123,8 +1131,8 @@ func _process(delta: float) -> void:
 		var zoom := 0.0
 		if Input.is_key_pressed(KEY_A): turn += 1.0
 		if Input.is_key_pressed(KEY_D): turn -= 1.0
-		if Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_UP): tilt += 1.0
-		if Input.is_key_pressed(KEY_DOWN): tilt -= 1.0
+		if Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_PAGEUP): tilt += 1.0
+		if Input.is_key_pressed(KEY_PAGEDOWN): tilt -= 1.0
 		if Input.is_key_pressed(KEY_Q): zoom -= 1.0
 		if Input.is_key_pressed(KEY_E): zoom += 1.0
 		if turn != 0.0 or tilt != 0.0 or zoom != 0.0:
@@ -1341,6 +1349,32 @@ func _selftest() -> void:
 	var key := InputEventKey.new()
 	key.pressed = true
 	var initial_set := _set_index
+	var initial_loadout := _wardrobe.snapshot()
+	var initial_pitch := _pitch
+	# Feed real viewport key events: selection updates the icon/details, not gear
+	# or camera movement, and skips the starter kit's empty quiver slot.
+	key.keycode = KEY_DOWN
+	Input.parse_input_event(key)
+	await get_tree().process_frame
+	assert(_wardrobe.selected_part == 6)
+	assert(_details_name.text == str(_wardrobe.piece_at(6).name))
+	assert(_details_icon.texture == _atlas.icon_for(int(_wardrobe.piece_at(6).image_id)))
+	key = key.duplicate()
+	key.pressed = false
+	Input.parse_input_event(key)
+	key = key.duplicate()
+	key.pressed = true
+	key.keycode = KEY_UP
+	Input.parse_input_event(key)
+	await get_tree().process_frame
+	assert(_wardrobe.selected_part == 5)
+	assert(_wardrobe.snapshot() == initial_loadout and _set_index == initial_set)
+	assert(is_equal_approx(_pitch, initial_pitch))
+	key = key.duplicate()
+	key.pressed = false
+	Input.parse_input_event(key)
+	key = key.duplicate()
+	key.pressed = true
 	key.keycode = KEY_LEFT
 	_unhandled_input(key)
 	assert(_set_index == posmod(initial_set - 1, _sets.size()))

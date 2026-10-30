@@ -36,6 +36,28 @@ func _run() -> void:
 			_expect(covered.has(key), "every armour design appears in a set: " + key)
 	wardrobe.use_set(CreationArchetypes.CLASSES[0].equipment_visuals)
 	var original := wardrobe.snapshot()
+	wardrobe.selected_part = 5
+	wardrobe.cycle_piece(1)
+	_expect(wardrobe.selected_part == 6, "Down selects the next equipped slot")
+	wardrobe.cycle_piece(1)
+	_expect(wardrobe.selected_part == 0, "selection wraps and skips empty slots")
+	wardrobe.cycle_piece(-1)
+	_expect(wardrobe.selected_part == 6, "Up wraps to the last equipped slot")
+	wardrobe.disabled[5] = true
+	wardrobe.cycle_piece(-1)
+	_expect(wardrobe.selected_part == 5, "hidden equipped pieces remain inspectable")
+	wardrobe.disabled.erase(5)
+	_expect(wardrobe.snapshot() == original, "inspecting does not change the loadout")
+	wardrobe.selected_part = 8
+	wardrobe.cycle_piece(1)
+	_expect(wardrobe.selected_part == 0, "Down from an empty slot selects the first piece")
+	wardrobe.selected_part = 8
+	wardrobe.cycle_piece(-1)
+	_expect(wardrobe.selected_part == 6, "Up from an empty slot selects the last piece")
+	wardrobe.use_set({})
+	wardrobe.cycle_piece(1)
+	_expect(wardrobe.selected.is_empty(), "empty outfits are safe to navigate")
+	wardrobe.restore(original)
 	var torso: Dictionary = wardrobe.by_key["5:192"]
 	wardrobe.choose(5, str(torso.id))
 	_expect(wardrobe.visuals()[5] == 192 and wardrobe.visuals()[4] == 220, "cross-set replacement changes only its slot")

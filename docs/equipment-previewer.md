@@ -11,6 +11,9 @@ to hide/show its selected piece and a dropdown offering every registered piece
 for that slot. Selecting a replacement changes that slot alone. Click the slot
 name to inspect it without changing it. Its game name, icon, description, stats
 and effects appear on the right, including when the piece is hidden.
+Press **Up / Down** to cycle this inspection through the currently equipped
+pieces in slot order. Empty slots are skipped; selection wraps at either end.
+Hidden pieces remain equipped and can still be inspected.
 
 Edits stay with each set while the previewer is open. **Restore set** restores
 the original pieces and visibility. The eight alternate legendary boots, spare
@@ -23,7 +26,7 @@ their game stats are explicitly unavailable.
 - **Ctrl+Enter:** save a comment. **Esc:** cancel it.
 - **F2 / C:** screenshot and general view comment.
 - Drag to orbit; right/middle drag to pan; wheel or Q/E to zoom.
-- A/D rotates the camera; Up/Down tilts it; 1–5 chooses standard views.
+- A/D rotates the camera; Page Up/Down tilts it; 1–5 chooses standard views.
 - Space pauses; comma/period steps; V toggles travel; F5 reloads assets.
 
 Comments persist in the checkout's ignored
