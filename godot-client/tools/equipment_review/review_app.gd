@@ -7,7 +7,7 @@ extends Node3D
 ## Race, sex, armour set and animation are chosen from drop-downs. The chosen
 ## clip loops. The camera orbits the character.
 ##
-## Travel (T, or --travel yes) moves the actor through the scene while a walk or
+## Travel (V, or --travel yes) moves the actor through the scene while a walk or
 ## a run plays, at the client's own pace and clip speed, with the camera and
 ## floor following. In place the cape cloth never sees the actor move, so it
 ## hangs into the arms and legs as it never does in play. Travelling, the clip,
@@ -32,6 +32,10 @@ const FIRST_CLIPS: Array[String] = ["Idle_Subtle", "Walk", "Jog", "Run_Female", 
 const HEAD_PART := 3
 const EXTRA_PARTS: Array[int] = [0, 1, 2]
 const SETS_FILE := "res://tools/equipment_review/review_sets.json"
+const Wardrobe := preload("res://tools/equipment_review/review_wardrobe.gd")
+const ITEM_CATALOG := "res://tools/equipment_review/item_catalog.json"
+const PART_LABELS := {0: "Main hand", 1: "Off hand", 2: "Cape", 3: "Head",
+	4: "Legs", 5: "Torso", 6: "Feet", 7: "Neck", 8: "Quiver"}
 const VIEWS := {KEY_1: 0.0, KEY_2: 90.0, KEY_3: 180.0, KEY_4: -90.0, KEY_5: 35.0}
 ## Travelled this far from the origin, the actor and its cloth are carried back
 ## by whole metres, so a long run stays clear of float precision.
@@ -60,6 +64,7 @@ void fragment() {
 var options: Dictionary = {}
 
 var actor: ReplicatedActor3D
+var _actor_generation := 0
 var _models: Dictionary = {}
 var _animation_map: Dictionary = {}
 var _equipment: Dictionary = {}
@@ -69,7 +74,7 @@ var _sex := "male"
 var _set_index := 0
 var _clip := "Idle_Subtle"
 var _show_head := true
-var _show_extras := false
+var _show_extras := true
 var _show_hair := true
 var _light_follows := true
 var _paused := false
@@ -82,6 +87,20 @@ var _travel := false
 var _travel_speed := 0.0
 ## Played seconds owed to the travelling actor, in whole frames.
 var _travel_owed := 0.0
+var _wardrobe := Wardrobe.new()
+var _drafts: Dictionary = {}
+var _piece_options: Dictionary = {}
+var _piece_checks: Dictionary = {}
+var _piece_buttons: Dictionary = {}
+var _atlas := ItemAtlas.new()
+var _details_name: Label
+var _details_icon: TextureRect
+var _details_text: RichTextLabel
+var _details_set: Label
+var _details_comments: Label
+var _comments: Array[Dictionary] = []
+var _modal: ColorRect
+var _noting := false
 
 var _cam: Camera3D
 var _key_light: DirectionalLight3D
@@ -123,12 +142,14 @@ func _ready() -> void:
 	var window := get_window()
 	window.title = "Rabbit Lands - equipment review"
 	window.size = Vector2i(int(options.get("width", "1600")), int(options.get("height", "1000")))
-	window.min_size = Vector2i(900, 600)
+	window.min_size = Vector2i(1280, 800)
 	get_viewport().msaa_3d = Viewport.MSAA_4X
 	_models = _read_json("res://data/actors/models.json").get("models", {}) as Dictionary
 	_animation_map = _read_json("res://data/animations/luminous.json")
 	_equipment = _read_json(str(options.get("equipment", "res://data/actors/equipment.json")))
 	_build_sets()
+	_wardrobe.configure(_equipment, _read_json(ITEM_CATALOG))
+	_atlas.configure(_read_json("res://data/items/atlases.json"))
 	_race = str(options.get("race", _race))
 	_sex = str(options.get("sex", _sex))
 	_clip = str(options.get("clip", _clip))
@@ -138,6 +159,7 @@ func _ready() -> void:
 		if str(_sets[i]["name"]).to_lower().begins_with(wanted_set.to_lower()) and not wanted_set.is_empty():
 			_set_index = i
 			break
+	_wardrobe.use_set(_sets[_set_index]["visuals"])
 	_build_stage()
 	_build_ui()
 	_start_session()
@@ -176,15 +198,7 @@ func _slug() -> String:
 
 
 func _current_visuals() -> Dictionary:
-	var visuals := {}
-	var wanted: Dictionary = _sets[_set_index]["visuals"] as Dictionary
-	for part: int in wanted:
-		if part == HEAD_PART and not _show_head:
-			continue
-		if part in EXTRA_PARTS and not _show_extras:
-			continue
-		visuals[part] = wanted[part]
-	return visuals
+	return _wardrobe.visuals()
 
 
 # ---------------------------------------------------------------- stage
@@ -260,10 +274,14 @@ func _update_floor() -> void:
 # ---------------------------------------------------------------- actor
 
 func _rebuild_actor() -> void:
+	_actor_generation += 1
+	var generation := _actor_generation
 	if actor != null:
 		actor.queue_free()
 		actor = null
 		await get_tree().process_frame
+	if generation != _actor_generation:
+		return
 	var slug := _slug()
 	if not _models.has(slug):
 		_set_status("No model %s in models.json" % slug)
@@ -385,12 +403,25 @@ func _import_is_stale(path: String) -> bool:
 
 
 func _reload_from_disk() -> void:
+	var loadout := _wardrobe.snapshot()
+	var set_name := str(_sets[_set_index]["name"])
 	GlbSceneCache.clear()
 	NativeAnimationImporter.clear()
 	_raw_loaded.clear()
 	_equipment = _read_json(str(options.get("equipment", "res://data/actors/equipment.json")))
 	_models = _read_json("res://data/actors/models.json").get("models", {}) as Dictionary
 	_build_sets()
+	_set_index = 0
+	_set_opt.clear()
+	for i in range(_sets.size()):
+		_set_opt.add_item(_set_label(_sets[i]))
+		if str(_sets[i]["name"]) == set_name:
+			_set_index = i
+	_set_opt.select(_set_index)
+	_wardrobe.configure(_equipment, _read_json(ITEM_CATALOG))
+	_wardrobe.restore(loadout)
+	_fill_piece_options()
+	_refresh_pieces()
 	await _rebuild_actor()
 	_toast_message("Reloaded equipment from disk")
 
@@ -609,16 +640,81 @@ func _build_ui() -> void:
 	add_child(_ui)
 	var theme := Theme.new()
 	theme.default_font_size = 14
+	var backing := StyleBoxFlat.new()
+	backing.bg_color = Color(0.105, 0.13, 0.15, 0.98)
+	backing.content_margin_left = 10
+	backing.content_margin_right = 10
+	backing.content_margin_top = 10
+	backing.content_margin_bottom = 10
+	theme.set_stylebox("panel", "PanelContainer", backing)
 	var panel := PanelContainer.new()
 	panel.theme = theme
-	panel.position = Vector2(12, 12)
 	_ui.add_child(panel)
+	panel.anchor_bottom = 1.0
+	panel.offset_left = 12
+	panel.offset_top = 12
+	panel.offset_right = 334
+	panel.offset_bottom = -52
+	var scroll := ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	panel.add_child(scroll)
 	var box := VBoxContainer.new()
-	box.custom_minimum_size = Vector2(280, 0)
-	panel.add_child(box)
+	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	box.add_theme_constant_override("separation", 6)
+	scroll.add_child(box)
 	var title := Label.new()
-	title.text = "Equipment review"
+	title.text = "Rabbit Lands · Equipment preview"
+	title.add_theme_font_size_override("font_size", 16)
+	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(title)
+	_set_opt = _option(box, "Equipment set  ·  ← / →")
+	for entry: Dictionary in _sets:
+		_set_opt.add_item(_set_label(entry))
+	_set_opt.select(_set_index)
+	_set_opt.item_selected.connect(_select_set)
+	var set_buttons := HBoxContainer.new()
+	box.add_child(set_buttons)
+	_button(set_buttons, "← Previous", func() -> void: _select_set(posmod(_set_index - 1, _sets.size())))
+	_button(set_buttons, "Next →", func() -> void: _select_set(posmod(_set_index + 1, _sets.size())))
+	_button(set_buttons, "Restore set", _restore_set)
+	var hint := Label.new()
+	hint.text = "Check to show a piece. Click its slot for details.\nEach list includes pieces from every set."
+	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	hint.add_theme_font_size_override("font_size", 12)
+	box.add_child(hint)
+	for part: int in PART_LABELS:
+		if not _wardrobe.by_part.has(part):
+			continue
+		var row := HBoxContainer.new()
+		box.add_child(row)
+		var check := CheckBox.new()
+		check.focus_mode = Control.FOCUS_NONE
+		check.tooltip_text = "Show or hide this piece without removing the selection"
+		row.add_child(check)
+		_piece_checks[part] = check
+		check.toggled.connect(func(on: bool) -> void: _toggle_piece(part, on))
+		var inspect := Button.new()
+		inspect.text = str(PART_LABELS[part])
+		inspect.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		inspect.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		inspect.toggle_mode = true
+		inspect.focus_mode = Control.FOCUS_NONE
+		row.add_child(inspect)
+		_piece_buttons[part] = inspect
+		inspect.pressed.connect(func() -> void:
+			_wardrobe.selected_part = part
+			_refresh_pieces())
+		var choice := OptionButton.new()
+		choice.focus_mode = Control.FOCUS_NONE
+		choice.fit_to_longest_item = false
+		choice.clip_text = true
+		box.add_child(choice)
+		_piece_options[part] = choice
+		choice.item_selected.connect(func(i: int) -> void:
+			_wardrobe.choose(part, str(choice.get_item_metadata(i)))
+			_loadout_changed())
+	_fill_piece_options()
+	box.add_child(HSeparator.new())
 	_race_opt = _option(box, "Race")
 	for race: Array in RACES:
 		_race_opt.add_item(str(race[1]))
@@ -633,56 +729,38 @@ func _build_ui() -> void:
 	_sex_opt.item_selected.connect(func(i: int) -> void:
 		_sex = "male" if i == 0 else "female"
 		_rebuild_actor())
-	_set_opt = _option(box, "Armour set")
-	for entry: Dictionary in _sets:
-		_set_opt.add_item(str(entry["name"]))
-	_set_opt.select(_set_index)
-	_set_opt.item_selected.connect(func(i: int) -> void:
-		_set_index = i
-		_apply_equipment()
-		_play_clip(_clip)
-		_set_status("%s, %s" % [_race_label(), _sets[_set_index]["name"]]))
 	_clip_opt = _option(box, "Animation (loops)")
 	_clip_opt.item_selected.connect(func(i: int) -> void: _play_clip(_clip_opt.get_item_text(i)))
-	_check(box, "Headwear", _show_head, func(on: bool) -> void:
-		_show_head = on
-		_apply_equipment())
-	_check(box, "Weapons and cape", _show_extras, func(on: bool) -> void:
-		_show_extras = on
-		_apply_equipment()
-		_play_clip(_clip)
-		_set_status("%s, %s" % [_race_label(), _sets[_set_index]["name"]]))
 	_check(box, "Hair", _show_hair, func(on: bool) -> void:
 		_show_hair = on
 		_rebuild_actor())
 	_check(box, "Light follows camera", _light_follows, func(on: bool) -> void:
 		_light_follows = on
 		_update_camera())
-	_travel_check = _check(box, "Travel: walks and runs move (T)", _travel, func(on: bool) -> void:
+	_travel_check = _check(box, "Travel: walks and runs move (V)", _travel, func(on: bool) -> void:
 		_set_travel(on))
 	var buttons := HBoxContainer.new()
 	box.add_child(buttons)
 	_pause_button = _button(buttons, "Pause (Space)", func() -> void: _set_paused(not _paused))
-	_button(buttons, "Note (F2)", func() -> void: _begin_note())
 	_button(buttons, "Reload (F5)", func() -> void: _reload_from_disk())
 	_button(buttons, "Notes", func() -> void:
-		_ensure_session()
-		OS.shell_open(_review_dir))
+		if _ensure_session():
+			OS.shell_open(_review_dir))
 	_clip_label = Label.new()
 	box.add_child(_clip_label)
 	_status = Label.new()
 	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_status.custom_minimum_size = Vector2(280, 0)
+	_status.custom_minimum_size = Vector2(290, 0)
 	_status.add_theme_font_size_override("font_size", 12)
 	box.add_child(_status)
 	var help := Label.new()
 	help.add_theme_font_size_override("font_size", 12)
 	help.text = ("Left drag: orbit. Right/middle drag: pan.\n"
-		+ "Wheel or Q/E: zoom. A/D, arrows: turn. W/S: tilt.\n"
+		+ "Wheel or Q/E: zoom. A/D: turn. Up/Down: tilt.\n"
 		+ "1 front, 2 side, 3 back, 4 other side, 5 three-quarter.\n"
 		+ "R: reset view. Space: pause. , and .: step a frame.\n"
-		+ "[ and ]: speed. T: travel. H: hide panels. F5: reload.\n"
-		+ "F2 or C: screenshot and note.")
+		+ "[ and ]: speed. V: travel. H: hide panels.\n"
+		+ "T: piece comment. S: set comment. F2/C: view note.")
 	box.add_child(help)
 	_toast = Label.new()
 	_toast.anchor_top = 1.0
@@ -691,7 +769,179 @@ func _build_ui() -> void:
 	_toast.offset_top = -40
 	_toast.add_theme_font_size_override("font_size", 16)
 	_ui.add_child(_toast)
+	_build_details(theme)
 	_build_dialog()
+	_refresh_pieces()
+
+
+func _set_label(entry: Dictionary) -> String:
+	return str(entry["name"]).trim_prefix("Audit ")
+
+
+func _select_set(index: int) -> void:
+	if _noting or _dialog.visible:
+		return
+	_drafts[str(_sets[_set_index]["name"])] = _wardrobe.snapshot()
+	_set_index = posmod(index, _sets.size())
+	_set_opt.select(_set_index)
+	var name := str(_sets[_set_index]["name"])
+	if _drafts.has(name):
+		_wardrobe.restore(_drafts[name])
+	else:
+		_wardrobe.use_set(_sets[_set_index]["visuals"])
+	_loadout_changed()
+
+
+func _restore_set() -> void:
+	_wardrobe.use_set(_sets[_set_index]["visuals"])
+	_loadout_changed()
+
+
+func _fill_piece_options() -> void:
+	for part: int in _piece_options:
+		var choice: OptionButton = _piece_options[part]
+		choice.clear()
+		choice.add_item("Empty slot")
+		choice.set_item_metadata(0, "")
+		for piece: Dictionary in _wardrobe.by_part.get(part, []):
+			choice.add_item(str(piece.name) + (" · visual only" if bool(piece.get("visual_only", false)) else ""))
+			choice.set_item_metadata(choice.item_count - 1, str(piece.id))
+			choice.set_item_tooltip(choice.item_count - 1, str(piece.name))
+
+
+func _toggle_piece(part: int, on: bool) -> void:
+	_wardrobe.selected_part = part
+	_wardrobe.disabled[part] = not on
+	_loadout_changed()
+
+
+func _loadout_changed() -> void:
+	_apply_equipment()
+	_play_clip(_clip)
+	_refresh_pieces()
+	_set_status("%s · %s" % [_race_label(), _set_label(_sets[_set_index])])
+
+
+func _refresh_pieces() -> void:
+	for part: int in _piece_options:
+		var piece := _wardrobe.piece_at(part)
+		var choice: OptionButton = _piece_options[part]
+		var check: CheckBox = _piece_checks[part]
+		check.disabled = piece.is_empty()
+		check.set_pressed_no_signal(not piece.is_empty() and not bool(_wardrobe.disabled.get(part, false)))
+		(_piece_buttons[part] as Button).set_pressed_no_signal(part == _wardrobe.selected_part)
+		choice.select(0)
+		for i in range(choice.item_count):
+			if str(choice.get_item_metadata(i)) == str(piece.get("id", "")):
+				choice.select(i)
+				break
+	_refresh_details()
+
+
+func _build_details(theme: Theme) -> void:
+	var panel := PanelContainer.new()
+	panel.theme = theme
+	_ui.add_child(panel)
+	panel.anchor_left = 1.0
+	panel.anchor_right = 1.0
+	panel.anchor_bottom = 1.0
+	panel.offset_left = -372
+	panel.offset_right = -12
+	panel.offset_top = 12
+	panel.offset_bottom = -52
+	var scroll := ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	panel.add_child(scroll)
+	var box := VBoxContainer.new()
+	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	box.custom_minimum_size.x = 310
+	box.add_theme_constant_override("separation", 12)
+	scroll.add_child(box)
+	_details_set = Label.new()
+	_details_set.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	box.add_child(_details_set)
+	var row := HBoxContainer.new()
+	box.add_child(row)
+	_button(row, "Piece comment (T)", func() -> void: _begin_note("piece"))
+	_button(row, "Set comment (S)", func() -> void: _begin_note("set"))
+	box.add_child(HSeparator.new())
+	_details_icon = TextureRect.new()
+	_details_icon.custom_minimum_size = Vector2(100, 100)
+	_details_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_details_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	box.add_child(_details_icon)
+	_details_name = Label.new()
+	_details_name.add_theme_font_size_override("font_size", 22)
+	_details_name.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	box.add_child(_details_name)
+	_details_text = RichTextLabel.new()
+	_details_text.fit_content = true
+	_details_text.scroll_active = false
+	_details_text.selection_enabled = true
+	box.add_child(_details_text)
+	box.add_child(HSeparator.new())
+	_details_comments = Label.new()
+	_details_comments.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	box.add_child(_details_comments)
+	var notes := HBoxContainer.new()
+	box.add_child(notes)
+	_button(notes, "Open saved comments", func() -> void:
+		if _ensure_session():
+			OS.shell_open(_review_dir))
+	_button(notes, "View note (F2)", func() -> void: _begin_note())
+
+
+func _refresh_details() -> void:
+	if _details_name == null:
+		return
+	_details_set.text = "%s\n%d / %d sets · %d registered visuals" % [
+		_set_label(_sets[_set_index]), _set_index + 1, _sets.size(), _wardrobe.by_key.size()]
+	var part := _wardrobe.selected_part
+	var piece := _wardrobe.piece_at(part)
+	_details_name.text = str(piece.get("name", str(PART_LABELS.get(part, "Piece")) + " · empty"))
+	var image_id := int(piece.get("image_id", -1))
+	_details_icon.texture = (_atlas.worn_icon_for(image_id) if bool(piece.get("worn", false)) else _atlas.icon_for(image_id)) if image_id >= 0 else _atlas.placeholder_icon()
+	_details_text.clear()
+	if piece.is_empty():
+		_details_text.add_text("Choose equipment for this slot to inspect its game details.")
+	else:
+		var lines := PackedStringArray()
+		lines.append("%s · %s" % [PART_LABELS.get(part, "Piece"), "Hidden" if bool(_wardrobe.disabled.get(part, false)) else "Visible"])
+		lines.append("\n" + str(piece.get("description", "")))
+		lines.append("\nStats")
+		var stats: Dictionary = piece.get("stats", {})
+		if stats.is_empty():
+			lines.append("No game stats available for this visual.")
+		for stat: String in stats:
+			var value: Variant = stats[stat]
+			var words := "%s – %s" % [_stat_number(value[0]), _stat_number(value[1])] if value is Array and value.size() == 2 else _stat_number(value)
+			lines.append("%s: %s" % ["Weight (EMU)" if stat == "weight_emu" else stat.replace("_", " ").capitalize(), words])
+		for effect: Dictionary in piece.get("effects", []):
+			lines.append("\n%s · %s (%s%%)" % [str(effect.get("trigger", "")).capitalize(),
+				str(effect.get("kind", "")).replace("_", " "), float(effect.get("chance", 0)) * 100.0])
+			for parameter: Array in effect.get("parameters", []):
+				lines.append("  %s: %s" % [str(parameter[0]).replace("_", " "), str(parameter[1])])
+			if not str(effect.get("message", "")).is_empty():
+				lines.append(str(effect.message))
+		if not str(piece.get("degrades_to", "")).is_empty():
+			lines.append("\nDegrades to: " + str(piece.degrades_to))
+		if piece.get("wear_chance") != null:
+			lines.append("Wear chance: %s" % piece.wear_chance)
+		if piece.has("item_id"):
+			lines.append("\nItem #%d · visual %s" % [int(piece.item_id), str(piece.key)])
+		if str(piece.get("canonical_name", "")) != str(piece.name):
+			lines.append("Catalog name: " + str(piece.canonical_name))
+		_details_text.add_text("\n".join(lines))
+	var notes := PackedStringArray(["Comments this session"])
+	for entry: Dictionary in _comments:
+		var target: Dictionary = entry.get("target", {})
+		if (str(entry.get("scope", "")) == "piece" and str(target.get("id", "")) == str(piece.get("id", ""))) or (str(entry.get("scope", "")) == "set" and entry.get("set") == _sets[_set_index]["name"]):
+			notes.append("\n%s: %s" % ["Piece" if entry.scope == "piece" else "Set", str(entry.comment)])
+	_details_comments.text = "\n".join(notes) + ("\nNo comments yet. T comments on the selected piece; S comments on the set." if notes.size() == 1 else "")
+
+
+func _stat_number(value: Variant) -> String:
+	return str(int(value)) if value is float and is_equal_approx(value, roundf(value)) else str(value)
 
 
 func _option(box: VBoxContainer, label: String) -> OptionButton:
@@ -724,12 +974,24 @@ func _button(box: HBoxContainer, label: String, pressed: Callable) -> Button:
 
 
 func _build_dialog() -> void:
+	_modal = ColorRect.new()
+	_modal.color = Color(0, 0, 0, 0.55)
+	_modal.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_modal.visible = false
+	_ui.add_child(_modal)
 	_dialog = PanelContainer.new()
 	_dialog.theme = Theme.new()
 	_dialog.theme.default_font_size = 15
+	var backing := StyleBoxFlat.new()
+	backing.bg_color = Color(0.105, 0.13, 0.15, 1.0)
+	backing.content_margin_left = 16
+	backing.content_margin_right = 16
+	backing.content_margin_top = 16
+	backing.content_margin_bottom = 16
+	_dialog.theme.set_stylebox("panel", "PanelContainer", backing)
 	_dialog.custom_minimum_size = Vector2(660, 260)
 	_dialog.visible = false
-	_ui.add_child(_dialog)
+	_modal.add_child(_dialog)
 	var box := VBoxContainer.new()
 	_dialog.add_child(box)
 	_dialog_label = Label.new()
@@ -765,23 +1027,9 @@ func _set_status(text: String) -> void:
 			if not _raw_loaded.is_empty() else "") + "\nNotes: " + _review_dir
 
 
-## What "Weapons and cape" adds for the chosen set, named, so a set that carries
-## none (the Default clothes) says so instead of the toggle seeming to fail.
+## Visibility counts include substitutions and all individually hidden pieces.
 func _extras_line() -> String:
-	if _sets.is_empty():
-		return ""
-	var models: Dictionary = _equipment.get("models", {}) as Dictionary
-	var wanted: Dictionary = _sets[_set_index]["visuals"] as Dictionary
-	var names := PackedStringArray()
-	for part: int in EXTRA_PARTS:
-		if wanted.has(part):
-			var model: Dictionary = models.get("%d:%d" % [part, int(wanted[part])], {}) as Dictionary
-			var label := str(model.get("name", ""))
-			names.append(label if not label.is_empty() else
-				("cape %d" % int(wanted[part]) if part == 2 else "%d:%d" % [part, int(wanted[part])]))
-	if names.is_empty():
-		return "Weapons and cape: this set carries none"
-	return "Weapons and cape (%s): %s" % ["shown" if _show_extras else "off", ", ".join(names)]
+	return "%d of %d selected pieces visible" % [_current_visuals().size(), _wardrobe.selected.size()]
 
 
 func _toast_message(text: String) -> void:
@@ -799,7 +1047,7 @@ func _race_label() -> String:
 # ---------------------------------------------------------------- input
 
 func _unhandled_input(event: InputEvent) -> void:
-	if _dialog.visible:
+	if _dialog.visible or _noting:
 		return
 	var button := event as InputEventMouseButton
 	if button != null:
@@ -825,16 +1073,24 @@ func _unhandled_input(event: InputEvent) -> void:
 		_update_camera()
 		return
 	var key := event as InputEventKey
-	if key == null or not key.pressed or key.echo:
+	if key == null or not key.pressed or key.echo or key.ctrl_pressed or key.alt_pressed or key.meta_pressed:
 		return
 	match key.keycode:
+		KEY_LEFT:
+			_select_set(_set_index - 1)
+		KEY_RIGHT:
+			_select_set(_set_index + 1)
+		KEY_T:
+			_begin_note("piece")
+		KEY_S:
+			_begin_note("set")
 		KEY_F2, KEY_C:
 			_begin_note()
 		KEY_SPACE:
 			_set_paused(not _paused)
 		KEY_H:
 			for child: Node in _ui.get_children():
-				if child != _dialog and child != _toast:
+				if child != _modal and child != _toast:
 					(child as CanvasItem).visible = not (child as CanvasItem).visible
 		KEY_F5:
 			_reload_from_disk()
@@ -852,7 +1108,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			_speed = clampf(_speed * (0.5 if key.keycode == KEY_BRACKETLEFT else 2.0), 0.125, 4.0)
 			_apply_speed()
 			_toast_message("Speed x%s" % _speed)
-		KEY_T:
+		KEY_V:
 			_set_travel(not _travel)
 		_:
 			if VIEWS.has(key.keycode):
@@ -861,14 +1117,14 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _process(delta: float) -> void:
-	if not _dialog.visible:
+	if not _dialog.visible and not _noting:
 		var turn := 0.0
 		var tilt := 0.0
 		var zoom := 0.0
-		if Input.is_key_pressed(KEY_A) or Input.is_key_pressed(KEY_LEFT): turn += 1.0
-		if Input.is_key_pressed(KEY_D) or Input.is_key_pressed(KEY_RIGHT): turn -= 1.0
+		if Input.is_key_pressed(KEY_A): turn += 1.0
+		if Input.is_key_pressed(KEY_D): turn -= 1.0
 		if Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_UP): tilt += 1.0
-		if Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_DOWN): tilt -= 1.0
+		if Input.is_key_pressed(KEY_DOWN): tilt -= 1.0
 		if Input.is_key_pressed(KEY_Q): zoom -= 1.0
 		if Input.is_key_pressed(KEY_E): zoom += 1.0
 		if turn != 0.0 or tilt != 0.0 or zoom != 0.0:
@@ -901,7 +1157,7 @@ func _process(delta: float) -> void:
 func _start_session() -> void:
 	var project := ProjectSettings.globalize_path("res://").trim_suffix("/")
 	var checkout := project.get_base_dir()
-	var stamp := Time.get_datetime_string_from_system().replace(":", "-").replace("T", "_")
+	var stamp := Time.get_datetime_string_from_system().replace(":", "-").replace("T", "_") + "_%d_%d" % [OS.get_process_id(), Time.get_ticks_msec()]
 	var root := str(options.get("review-dir", checkout.path_join(".local/asset-authoring/working/equipment-review")))
 	_review_dir = root.path_join(stamp)
 	_commit = _git(checkout, ["rev-parse", "HEAD"])
@@ -913,15 +1169,24 @@ func _start_session() -> void:
 
 
 ## The session folder is written with its first note, so a look without notes leaves nothing.
-func _ensure_session() -> void:
-	if FileAccess.file_exists(_review_dir.path_join("session.json")):
-		return
-	DirAccess.make_dir_recursive_absolute(_review_dir)
+func _ensure_session() -> bool:
+	if FileAccess.file_exists(_review_dir.path_join("session.json")) and FileAccess.file_exists(_review_dir.path_join("notes.md")):
+		return true
+	if DirAccess.make_dir_recursive_absolute(_review_dir) != OK:
+		_toast_message("Cannot create the comments folder: " + _review_dir)
+		return false
 	var file := FileAccess.open(_review_dir.path_join("session.json"), FileAccess.WRITE)
+	if file == null:
+		_toast_message("Cannot write session details: " + error_string(FileAccess.get_open_error()))
+		return false
 	file.store_string(JSON.stringify(_session, "\t") + "\n")
 	file = FileAccess.open(_review_dir.path_join("notes.md"), FileAccess.WRITE)
+	if file == null:
+		_toast_message("Cannot write the comments index")
+		return false
 	file.store_string("# Equipment review %s\n\nCheckout `%s`, branch `%s`, commit `%s`.\n\n" % [
 		_session["started"], _session["checkout"], _branch, _commit.left(10)])
+	return true
 
 
 func _git(checkout: String, arguments: Array) -> String:
@@ -947,7 +1212,9 @@ func _state() -> Dictionary:
 		time = actor.animation_player.current_animation_position
 		length = actor.animation_player.get_animation(_clip).length
 	return {"race": _race, "sex": _sex, "slug": _slug(), "set": _sets[_set_index]["name"],
-		"headwear": _show_head, "weapons_and_cape": _show_extras, "hair": _show_hair,
+		"loadout": _wardrobe.snapshot(), "selected_part": _wardrobe.selected_part,
+		"headwear": visuals.has(HEAD_PART),
+		"weapons_and_cape": EXTRA_PARTS.any(func(part: int) -> bool: return visuals.has(part)), "hair": _show_hair,
 		"pieces": pieces, "clip": _clip, "clip_time": snappedf(time, 0.001),
 		"clip_length": snappedf(length, 0.001), "paused": _paused, "speed": _speed,
 		# The camera target is relative to the actor's ground point, which only
@@ -960,10 +1227,18 @@ func _state() -> Dictionary:
 		"window": [get_window().size.x, get_window().size.y], "commit": _commit, "branch": _branch}
 
 
-func _begin_note() -> void:
-	if _dialog.visible:
+func _begin_note(scope := "view") -> void:
+	if _dialog.visible or _noting:
 		return
+	var piece := _wardrobe.piece_at(_wardrobe.selected_part)
+	if scope == "piece" and piece.is_empty():
+		_toast_message("Select a piece in the left panel before adding a piece comment")
+		return
+	_noting = true
+	_dragging = MOUSE_BUTTON_NONE
 	_pending_state = _state()
+	_pending_state["scope"] = scope
+	_pending_state["target"] = piece.duplicate(true) if scope == "piece" else {"set": _sets[_set_index]["name"]}
 	_resume_after_note = not _paused
 	if not _paused:
 		_set_paused(true)
@@ -976,11 +1251,13 @@ func _begin_note() -> void:
 	_pending_shot = get_viewport().get_texture().get_image()
 	for item: CanvasItem in shown:
 		item.visible = true
-	_dialog_label.text = "Note %d: %s, %s, %s at %.2f s%s. Ctrl+Enter saves, Esc cancels." % [
-		_note_count + 1, _race_label(), _sets[_set_index]["name"], _clip, _pending_state["clip_time"],
-		_travel_words(_pending_state)]
+	var subject := str(piece.name) if scope == "piece" else _set_label(_sets[_set_index])
+	_dialog_label.text = "%s comment: %s\n%s · %s at %.2f s. Ctrl+Enter saves, Esc cancels." % [
+		scope.capitalize(), subject, _race_label(), _clip, _pending_state["clip_time"]]
 	_dialog_text.text = ""
 	_dialog.visible = true
+	_modal.visible = true
+	_noting = false
 	_dialog.reset_size()
 	_dialog.position = ((get_viewport().get_visible_rect().size - _dialog.get_combined_minimum_size()) / 2.0).floor()
 	_dialog_text.grab_focus()
@@ -990,30 +1267,48 @@ func _save_note() -> void:
 	if not _dialog.visible:
 		return
 	var comment := _dialog_text.text.strip_edges()
-	_ensure_session()
-	_note_count += 1
-	var shot := "shot_%03d.png" % _note_count
-	_pending_shot.save_png(_review_dir.path_join(shot))
+	if comment.is_empty():
+		_dialog_label.text = "Write a comment before saving. Esc cancels."
+		return
+	if not _ensure_session():
+		_dialog_label.text = "Could not save. Check the comments folder and try again. Your text is preserved."
+		return
+	var next := _note_count + 1
+	var shot := "shot_%03d.png" % next
+	if _pending_shot == null or _pending_shot.save_png(_review_dir.path_join(shot)) != OK:
+		_dialog_label.text = "Could not save the screenshot. Your comment is preserved; try again."
+		return
 	var entry := _pending_state.duplicate(true)
-	entry["n"] = _note_count
+	entry["n"] = next
 	entry["time"] = Time.get_datetime_string_from_system()
 	entry["comment"] = comment
 	entry["screenshot"] = shot
 	var path := _review_dir.path_join("notes.jsonl")
 	var file := FileAccess.open(path, FileAccess.READ_WRITE) if FileAccess.file_exists(path) \
 		else FileAccess.open(path, FileAccess.WRITE)
+	if file == null:
+		_dialog_label.text = "Could not save the comment. Your text is preserved; try again."
+		return
 	file.seek_end()
 	file.store_line(JSON.stringify(entry))
+	file.flush()
+	if file.get_error() != OK:
+		_dialog_label.text = "The comment could not be written. Your text is preserved."
+		return
+	_note_count = next
+	_comments.append(entry)
 	file = FileAccess.open(_review_dir.path_join("notes.md"), FileAccess.READ_WRITE)
-	file.seek_end()
 	var parts := PackedStringArray()
 	for piece: Dictionary in entry["pieces"]:
 		parts.append("%s %s" % [piece["key"], piece["name"]])
-	file.store_string("## %d. %s, %s\n\n%s at %.2f s%s, camera yaw %s, pitch %s. Pieces: %s.\n\n%s\n\n![](%s)\n\n" % [
-		_note_count, _race_label(), entry["set"], entry["clip"], entry["clip_time"], _travel_words(entry),
-		entry["camera"]["yaw_degrees"], entry["camera"]["pitch_degrees"], ", ".join(parts),
-		comment if not comment.is_empty() else "(no comment)", shot])
+	if file != null:
+		file.seek_end()
+		file.store_string("## %d. %s comment: %s\n\n%s, %s. %s at %.2f s%s. Pieces: %s.\n\n%s\n\n![](%s)\n\n" % [
+			_note_count, str(entry.scope).capitalize(), str(entry.target.get("name", entry["set"])),
+			_race_label(), entry["set"], entry["clip"], entry["clip_time"], _travel_words(entry),
+			", ".join(parts), comment, shot])
 	_close_note()
+	_refresh_details()
 	_toast_message("Saved note %d (%s)" % [_note_count, shot])
 
 
@@ -1027,6 +1322,8 @@ func _travel_words(state: Dictionary) -> String:
 
 func _close_note() -> void:
 	_dialog.visible = false
+	_modal.visible = false
+	_noting = false
 	_dialog_text.release_focus()
 	if _resume_after_note:
 		_set_paused(false)
@@ -1034,12 +1331,61 @@ func _close_note() -> void:
 
 # ---------------------------------------------------------------- self-test
 
-## --selftest yes: walk every control once, save one note, quit. For the tool's own checks.
+## --selftest yes: exercise controls, save piece/set/view notes, then quit.
 func _selftest() -> void:
 	await get_tree().create_timer(1.5).timeout
 	_ensure_session()
 	await RenderingServer.frame_post_draw
 	get_viewport().get_texture().get_image().save_png(_review_dir.path_join("ui_check.png"))
+	# Use the same keyboard path as an interactive reviewer, including wraparound.
+	var key := InputEventKey.new()
+	key.pressed = true
+	var initial_set := _set_index
+	key.keycode = KEY_LEFT
+	_unhandled_input(key)
+	assert(_set_index == posmod(initial_set - 1, _sets.size()))
+	key.keycode = KEY_RIGHT
+	_unhandled_input(key)
+	assert(_set_index == initial_set)
+	var torso_choice: OptionButton = _piece_options[5]
+	for i in range(torso_choice.item_count):
+		if str(torso_choice.get_item_metadata(i)) == str((_wardrobe.by_key["5:192"] as Dictionary).id):
+			torso_choice.select(i)
+			torso_choice.item_selected.emit(i)
+			break
+	assert(int(_current_visuals()[5]) == 192 and int(_current_visuals()[4]) == 220)
+	(_piece_checks[5] as CheckBox).button_pressed = false
+	assert(not _current_visuals().has(5))
+	(_piece_checks[5] as CheckBox).button_pressed = true
+	assert(int(_current_visuals()[5]) == 192)
+	(_piece_checks[3] as CheckBox).button_pressed = false
+	_select_set(initial_set + 1)
+	_select_set(initial_set)
+	assert(int(_current_visuals()[5]) == 192 and not _current_visuals().has(3))
+	(_piece_buttons[5] as Button).pressed.emit()
+	key.keycode = KEY_T
+	_unhandled_input(key)
+	while _noting:
+		await get_tree().process_frame
+	assert(_dialog.visible and _pending_state.scope == "piece")
+	assert(str(_pending_state.target.id) == str(_wardrobe.piece_at(5).id))
+	# Arrow keys inside the comment editor must never navigate sets.
+	key.keycode = KEY_RIGHT
+	_unhandled_input(key)
+	assert(_set_index == initial_set)
+	_dialog_text.text = "self-test piece comment"
+	_save_note()
+	key.keycode = KEY_S
+	_unhandled_input(key)
+	while _noting:
+		await get_tree().process_frame
+	assert(_dialog.visible and _pending_state.scope == "set")
+	_dialog_text.text = "self-test full-set comment"
+	await RenderingServer.frame_post_draw
+	get_viewport().get_texture().get_image().save_png(_review_dir.path_join("set_dialog_check.png"))
+	_save_note()
+	assert(_note_count == 2)
+	_restore_set()
 	for step: Array in [["sex", 1], ["race", 5], ["set", 4], ["clip", 1], ["race", 0], ["sex", 0], ["set", 0], ["clip", 2]]:
 		match str(step[0]):
 			"race":
@@ -1094,9 +1440,18 @@ func _replay() -> void:
 		for i in range(_sets.size()):
 			if _sets[i]["name"] == note["set"]:
 				_set_index = i
+		if note.has("loadout"):
+			_wardrobe.restore(note.loadout)
+		else:
+			_wardrobe.use_set(_sets[_set_index]["visuals"])
 		_show_head = (bool(note.get("headwear", true)) if not options.has("headwear")
 			else options["headwear"] == "yes")
 		_show_extras = bool(note.get("weapons_and_cape", false))
+		if not note.has("loadout"):
+			_wardrobe.disabled[HEAD_PART] = not _show_head
+			for part: int in EXTRA_PARTS:
+				_wardrobe.disabled[part] = not _show_extras
+		_wardrobe.selected_part = int(note.get("selected_part", 5))
 		_show_hair = bool(note.get("hair", true))
 		_travel = (bool(note.get("travel", false)) if not options.has("travel")
 			else options["travel"] == "yes")
