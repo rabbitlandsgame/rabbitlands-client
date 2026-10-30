@@ -15,8 +15,8 @@ extends SkeletonModifier3D
 ## At ease every rigid held weapon stays in its fighting socket, with the
 ## fingers closed around that grip. The wrist lowers it ahead by up to 45
 ## degrees, limited by the piece's reach to keep its far end above the floor.
-## Long staves and blades use the same rule; the ranged bow owns its visual
-## pose and only asks this modifier to close its left hand at ease.
+## Long staves and blades use the same rule; the ranged bow follows its native
+## palm fit, with finger closure and a small shoulder spread at ease.
 
 const TRAVEL_ACTIONS: Array[StringName] = [&"walk", &"run"]
 
@@ -267,18 +267,15 @@ func _process_modification_with_delta(delta: float) -> void:
 		_hold_lowered(skeleton)
 	if easing:
 		_ease(skeleton)
-	# Carrying must turn the hand and its grip together. Rotating only the bow
-	# left the fingers crossing its handle. A small shoulder spread also keeps
-	# the long limbs beside the clothes through the idle and walking arm swing.
+	# Keep the animation's wrist aligned with its forearm and cuff. The bow's
+	# native grip follows that hand; forcing it upright by turning only the
+	# wrist bent the hand ninety degrees through long sleeves.
 	if actor.current_action in [&"idle", &"turn", &"walk", &"run", &"combat_idle"]:
 		for carry: Dictionary in _hands:
 			if not carry.get("bow", false):
 				continue
 			if carry.upperarm >= 0 and carry.across >= 0:
 				_spread(skeleton, carry)
-			var wanted := skeleton.global_basis.orthonormalized().inverse() \
-				* RangerBow3D.relaxed_basis(actor) * (carry.grip as Basis).inverse()
-			_set_basis(skeleton, carry.hand, wanted, 1.0)
 	if _weight <= 0.0:
 		return
 	var to_skeleton := skeleton.global_basis.orthonormalized().inverse() * actor.global_basis.orthonormalized()

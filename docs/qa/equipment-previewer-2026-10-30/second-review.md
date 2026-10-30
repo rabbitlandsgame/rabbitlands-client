@@ -1,5 +1,8 @@
 # Second equipment review
 
+The later [wrist, chest and under-helmet review](third-review.md) corrects the
+bow wrist alignment and supersedes overlapping native file hashes below.
+
 The 22 new saved comments are addressed in the equipment previewer. All 64
 headwear designs were reviewed on the male and female Human heads. Sixty designs
 have smaller, lower native fits (120 files); the four open pieces retain their

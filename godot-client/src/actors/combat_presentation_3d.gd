@@ -67,17 +67,20 @@ func hand_position(index: int) -> Vector3:
 	var skeleton := actor.get_skeleton()
 	return (skeleton.global_transform * skeleton.get_bone_global_pose(index)) * Vector3(0, 0.035, 0)
 
-## The fist bore uses the same mirrored fit as a sword in the left hand.
+## Native palm fit measured in the imported left-hand rest frame.
 ## Its frame follows the wrist while relaxed; aiming still uses both hands.
 func carried_bow_grip() -> Transform3D:
 	var skeleton := actor.get_skeleton()
 	var rest := skeleton.get_bone_global_rest(_hand_l)
 	var fit := actor.rig_fit_scale("legacy")
+	# Center the handle between the native palm and curled middle finger.
+	# The previous lateral offset placed it outside the fingers once the
+	# wrist's anatomical alignment was restored.
 	var socket := Transform3D(RangerBow3D.CARRY_SOCKET_BASIS,
-		rest.origin + Vector3(0.0757, -0.05, 0) * fit)
+		rest.origin + Vector3(0.085, -0.028, 0.022) * fit)
 	var held := skeleton.global_transform * skeleton.get_bone_global_pose(_hand_l) * rest.affine_inverse() * socket
-	# The wrist owns the complete grip frame. WeaponCarryPose turns the hand
-	# with the carried bow, so its handle stays inside the closed fingers.
+	# The wrist owns the complete grip frame, including the animation's natural
+	# forearm angle. The handle stays inside the closed fingers through movement.
 	return held
 
 func update_pose() -> void:

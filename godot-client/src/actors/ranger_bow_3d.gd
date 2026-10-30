@@ -4,7 +4,10 @@ extends Node3D
 const ARROW_PATH := "res://assets/actors/native/equipment/ranger_arrow.glb"
 const DEFAULT_BOW := "res://assets/actors/native/equipment/amberwood_longbow.glb"
 const CURRENT_BOWS := [DEFAULT_BOW, "res://assets/actors/native/equipment/sunmane_recurve_bow.glb"]
-const CARRY_SOCKET_BASIS := Basis(Vector3.RIGHT, deg_to_rad(80.0))
+# In the native rest frame the forearm runs along X. The bow's length follows
+# that line through the fist with a 25-degree outward cant for arm clearance;
+# an upright world frame must not bend the wrist sideways out of a sleeve.
+const CARRY_SOCKET_BASIS := Basis(Vector3.BACK, deg_to_rad(65.0))
 static func relaxed_basis(actor: Node3D) -> Basis:
 	var up := actor.global_basis.y.normalized()
 	var out := -actor.global_basis.x.normalized()
