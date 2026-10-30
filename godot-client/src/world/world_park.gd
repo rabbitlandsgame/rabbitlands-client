@@ -168,9 +168,10 @@ func _now() -> int:
 # Relations
 # --------------------------------------------------------------------------
 
-## The map `map_id` is an interior of, or "". Only continent-v2 rows: the
-## registry's `parentRegion` or `interiorOf`, else the manifest's
-## `asset.parentRegion` for an interior row (read once, by text, not parsed).
+## The map `map_id` is an interior of, or "". Registry relationships are
+## authoritative regardless of publication status (regional rooms, caves and
+## secret areas use several statuses). Otherwise an interior row can name its
+## parent in the manifest's `asset.parentRegion` (read once, by text).
 func parent_of(map_id: String) -> String:
 	map_id = MapRegistry.normalize_server_map_id(map_id)
 	if map_id.is_empty():
@@ -180,13 +181,12 @@ func parent_of(map_id: String) -> String:
 	var parent := ""
 	var entry := MapRegistry.resolve(registry, map_id)
 	var status := str(entry.get("status", ""))
-	if status.begins_with("continent-v2"):
-		for key: String in ["parentRegion", "interiorOf", "insidesOf"]:
-			if not str(entry.get(key, "")).is_empty():
-				parent = MapRegistry.normalize_server_map_id(str(entry[key]))
-				break
-		if parent.is_empty() and status.contains("interior"):
-			parent = _manifest_parent(ProjectSettings.globalize_path(str(entry.get("manifest", ""))))
+	for key: String in ["parentRegion", "interiorOf", "insidesOf"]:
+		if not str(entry.get(key, "")).is_empty():
+			parent = MapRegistry.normalize_server_map_id(str(entry[key]))
+			break
+	if parent.is_empty() and status.contains("interior"):
+		parent = _manifest_parent(ProjectSettings.globalize_path(str(entry.get("manifest", ""))))
 	_parents[map_id] = parent
 	return parent
 

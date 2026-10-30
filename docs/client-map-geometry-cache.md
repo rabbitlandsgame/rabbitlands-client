@@ -5,6 +5,14 @@ references separate from texture pixels. Normal texture loading still selects
 the current texture quality and uses existing VRAM sidecars where compatible.
 Preparing geometry does not generate textures, actors or authored map assets.
 
+Travelling between an interior and its declared parent also keeps the world
+just left resident in memory. Its loaded chunks are detached and paused, then
+the same nodes are reattached on return. Registry `parentRegion`, `interiorOf`
+and `insidesOf` relationships apply regardless of publication status, including
+regional rooms, caves, secret areas and Landfall Underground. This uses the
+existing WorldPark byte budget and travel/expiry cleanup; it adds no disk cache
+or geometry preparation. Actors and map objects still refresh from the server.
+
 Published static map GLBs also consolidate byte-identical complete vertex records
 with `eloria-assets/tools/consolidate_map_vertices.py`, called by
 `publish_finish.py` after normal/tangent quantization and before prototype hash

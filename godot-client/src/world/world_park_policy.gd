@@ -48,11 +48,10 @@ const BUDGET_BYTES := 1536 * 1048576
 ## What an interior holds beyond its textures: its geometry, collision and
 ## nodes (the Town's 1,771 nodes and 818 KB shell measured ~26 MiB of RAM).
 const INTERIOR_FLOOR_BYTES := 32 * 1048576
-## Interiors whose parking stays off until it is measured: the Landfall
-## underground loads ~1.2 GB at its peak (docs/client-interior-preparation-
-## performance.md), and keeping Landfall beside it, or it beside Landfall, has
-## not been measured. Enter `{}` in a test or an experiment to lift this.
-const HELD_INTERIORS := {"landfall_insides": "measure memory before parking (SPEC 8)"}
+## All declared parent/interior pairs use parking, including Landfall's
+## underground. The shared byte budget still bounds retained worlds. A caller
+## may supply individual holds for diagnostics.
+const HELD_INTERIORS := {}
 
 ## How `to` relates to `from`: "enter" when `to` is an interior of `from`,
 ## "leave" when `from` is an interior of `to`, else "". `parents` maps an

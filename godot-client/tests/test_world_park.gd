@@ -52,7 +52,9 @@ func _run() -> void:
 	_write_fixtures()
 	_test_policy()
 	_test_relations()
+	_test_production_relations()
 	await _test_parking()
+	await _test_streamed_parking()
 	await _test_eviction()
 	await _test_preload()
 	await _test_wait_and_miss()
@@ -185,10 +187,11 @@ func _test_policy() -> void:
 		and not Policy.should_park("landfall", "four_gates", parents, {})
 		and not Policy.should_park("town", "four_gates", parents, {}),
 		"the map left is parked across an interior's door, both ways, and never otherwise")
-	_expect(not Policy.should_park("landfall", "landfall_insides", parents)
-		and not Policy.should_park("landfall_insides", "landfall", parents)
-		and Policy.should_park("landfall", "landfall_insides", parents, {}),
-		"the underground is held from parking until measured, in both directions")
+	_expect(Policy.should_park("landfall", "landfall_insides", parents)
+		and Policy.should_park("landfall_insides", "landfall", parents),
+		"Landfall Underground parks in both directions by default")
+	_expect(not Policy.should_park("landfall", "landfall_insides", parents, {"landfall_insides": "test"}),
+		"an explicit diagnostic hold still prevents parking")
 	_expect(Policy.evicted_by_travel(["town"], "landfall") == ["town"]
 		and Policy.evicted_by_travel(["landfall"], "landfall").is_empty(),
 		"travel evicts every parked world except the destination")
@@ -249,13 +252,33 @@ func _test_relations() -> void:
 	_expect(park.parent_of("cellar") == "exterior", "an interior row's manifest parentRegion names the parent")
 	_expect(park.parent_of("exterior") == "" and park.parent_of("elsewhere") == "",
 		"an exterior has no parent")
-	_expect(park.parent_of("legacy_insides") == "",
-		"only continent-v2 rows park (a legacy insides map does not)")
+	_expect(park.parent_of("legacy_insides") == "exterior",
+		"a declared interior relationship does not depend on the publication status")
 	_expect(park.parent_of("maps/nymara/interior.elm") == "exterior",
 		"the server's map reference is normalised")
 	_expect(park.bind_map("exterior") == 1 and park.doors().get(DOOR) == "interior",
 		"the exterior's doors into a flagged interior are indexed from the interior's portals")
 	_expect(park.bind_map("elsewhere") == 0, "a map without such doors indexes none")
+	park.queue_free()
+
+func _test_production_relations() -> void:
+	var maps: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/maps/registry.json")).maps
+	var park := _park()
+	park.configure(maps)
+	for map_id: String in maps:
+		var entry := MapRegistry.resolve(maps, map_id)
+		var parent := ""
+		for key: String in ["parentRegion", "interiorOf", "insidesOf"]:
+			if not str(entry.get(key, "")).is_empty():
+				parent = MapRegistry.normalize_server_map_id(str(entry[key]))
+				break
+		if not parent.is_empty():
+			_expect(park.parent_of(map_id) == parent
+				and Policy.should_park(parent, map_id, {map_id: parent})
+				and Policy.should_park(map_id, parent, {map_id: parent}),
+				"production interior %s retains worlds across its parent door, including aliases" % map_id)
+	_expect(park.parent_of("landfall_insides") == "landfall",
+		"Landfall Underground retains its manifest-only parent relationship")
 	park.queue_free()
 
 # --------------------------------------------------------------------------
@@ -326,6 +349,72 @@ func _test_parking() -> void:
 	park.release_now()
 	park.queue_free()
 	await _frames(2)
+
+## Real chunk-stream ownership with synthetic resident geometry: a missing
+## resident would need a disk import. Keep exact nodes and collision across
+## repeated doors, including a stay longer than the ordinary parking TTL.
+func _test_streamed_parking() -> void:
+	var park := _park()
+	var loader := _loader_with("exterior")
+	loader.unload_world()
+	var stream := ContinentChunkStream.new()
+	stream.territory = _manifest("exterior")
+	var chunk := Node3D.new()
+	var body := StaticBody3D.new()
+	var shape := CollisionShape3D.new()
+	shape.shape = BoxShape3D.new()
+	body.add_child(shape)
+	chunk.add_child(body)
+	stream.add_child(chunk)
+	var entry := {"id": "resident", "estimatedResidentBytes": 1024,
+		"bounds": {"min": [-1, -1, -1], "max": [1, 1, 1]}}
+	stream.cells["resident"] = {"root": chunk, "entry": entry}
+	stream.entries.append(entry)
+	stream.resident_bytes = 1024
+	loader.world_root = stream
+	loader.manifest = stream.territory
+	loader.add_child(stream)
+	var identity := chunk.get_instance_id()
+	var interior: Node3D
+	for visit: int in 3:
+		_expect(park.leave(loader, "exterior", "legacy_insides"),
+			"regional interior visit %d parks the loaded chunk stream" % visit)
+		if visit == 0:
+			interior = _give_world(loader, "legacy_insides")
+		else:
+			loader.adopt_world(park.take("legacy_insides"))
+		park.bind_map("legacy_insides")
+		park.now_override = (visit + 1) * (Policy.PARK_TTL_MSEC + 1000)
+		park.tick()
+		await physics_frame
+		await physics_frame
+		_expect(not stream.is_inside_tree() and stream.cells.size() == 1
+			and _chunk_hit().is_empty(), "parked chunks stay resident with no exterior collision inside")
+		var kept: Dictionary = park.take("exterior")
+		_expect(not kept.is_empty(), "the parent survives a long interior stay")
+		if kept.is_empty():
+			break
+		park.leave(loader, "legacy_insides", "exterior")
+		loader.adopt_world(kept)
+		park.bind_map("exterior")
+		await physics_frame
+		await physics_frame
+		_expect(loader.world_root == stream and chunk.get_instance_id() == identity
+			and stream.cells.size() == 1 and stream.arrival_ready(Vector3.ZERO)
+			and stream.events.is_empty(), "return restores identical ready chunks with no import or retirement")
+		_expect(_chunk_hit().get("collider") == body, "return restores the original chunk collision")
+		_expect(park.has_parked("legacy_insides") and is_instance_valid(interior),
+			"the interior stays resident for the next visit")
+	park.clear()
+	park.release_now()
+	loader.unload_world()
+	loader.queue_free()
+	park.queue_free()
+	await _frames(2)
+
+func _chunk_hit() -> Dictionary:
+	return stage.get_world_3d().direct_space_state.intersect_ray(
+		PhysicsRayQueryParameters3D.create(Vector3(0, 2, 0), Vector3(0, -2, 0)))
 
 func _test_eviction() -> void:
 	var park := _park()
