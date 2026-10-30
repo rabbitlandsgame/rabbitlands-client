@@ -1012,9 +1012,12 @@ static func reload_values_switch() -> void:
 static func shader_values(shared: ShaderMaterial) -> Array:
 	if shared == null or shared.shader == null:
 		return []
+	var actual := shared.shader
+	while actual != null and actual.has_meta(&"rl_base_shader"):
+		actual = actual.get_meta(&"rl_base_shader") as Shader
 	for kind: String in SHADER_VALUES:
 		var shader: Shader = SHADERS.get(kind)
-		if shared.shader == shader or shared.shader == _value_shaders.get(shader.get_instance_id()):
+		if actual == shader or actual == _value_shaders.get(shader.get_instance_id()):
 			return SHADER_VALUES[kind] as Array
 	return []
 
@@ -1073,6 +1076,7 @@ static func _values_shader(shader: Shader) -> Shader:
 	if at >= 0 and not code.contains(MATERIAL_VALUES_DEFINE):
 		result = Shader.new()
 		result.code = code.insert(at, MATERIAL_VALUES_DEFINE)
+		result.set_meta(&"rl_base_shader", shader)
 	_value_shaders[shader.get_instance_id()] = result
 	return result
 
