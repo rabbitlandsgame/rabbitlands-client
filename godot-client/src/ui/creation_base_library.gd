@@ -70,7 +70,17 @@ static func rows(registry: Dictionary, protocol_version: int = 3) -> Array[Dicti
 			for tag: Variant in entry.get("tags", []):
 				row.search_text += " " + str(tag).to_lower()
 			result.append(row)
-	return result
+	# Keep the Human starting points together on the first page. Both groups
+	# retain their source order and only include bodies available above.
+	var humans: Array[Dictionary] = []
+	var other_races: Array[Dictionary] = []
+	for entry: Dictionary in result:
+		if entry.race_id == "luminous":
+			humans.append(entry)
+		else:
+			other_races.append(entry)
+	humans.append_array(other_races)
+	return humans
 
 
 static func find(entries: Array[Dictionary], id: String) -> Dictionary:

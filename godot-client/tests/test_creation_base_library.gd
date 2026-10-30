@@ -24,9 +24,16 @@ func _run() -> void:
 	check(entries.size() == 22, "All sixteen bodies, three studies and three qualified Humans are offered")
 	var ids: Dictionary = {}
 	var native_types: Dictionary = {}
+	var other_race_seen := false
+	var other_native_ids: Array[String] = []
 	for row: Dictionary in entries:
 		check(not ids.has(row.id), "Unique stable id: " + row.id)
 		ids[row.id] = true
+		if row.race_id == "luminous":
+			check(not other_race_seen, "Human starting points precede the other races")
+		else:
+			other_race_seen = true
+			other_native_ids.append(str(row.id))
 		var look: Dictionary = row.look
 		var actor_type := int(look.actor_type)
 		var model_id := str(registry.actorTypes[str(actor_type)])
@@ -54,6 +61,11 @@ func _run() -> void:
 			check(int(appearance.eyes) == 3, row.id + " preserves amber race defaults")
 	for option: Dictionary in registry.creationOptions:
 		check(native_types.has(int(option.actorType)), "Default exists for playable actor type %d" % option.actorType)
+	var expected_other_ids: Array[String] = []
+	for option: Dictionary in registry.creationOptions:
+		if registry.models[str(option.model)].culture != "luminous":
+			expected_other_ids.append("native_" + str(option.model))
+	check(other_native_ids == expected_other_ids, "Other race pairs retain their registry order")
 	check(native_types.size() == 16, "Exactly sixteen native race/sex bases")
 	for sex: String in ["female", "male"]:
 		var ssarathi := LIBRARY.find(entries, "native_ssarathi_" + sex)
