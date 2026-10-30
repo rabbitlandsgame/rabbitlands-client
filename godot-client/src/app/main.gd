@@ -1015,6 +1015,7 @@ var _hud_element_options: Dictionary = {
 	"show_fps": true, "show_game_seconds": true, "hud_timer": true,
 	"knowledge_bar": true, "side_stats": true, "indicators": true,
 	"analog_clock": true, "digital_clock": true, "chat_timestamps": true,
+	"quick_item_quantities": true,
 	# Damage and healing float over whoever took them, kept as three switches
 	# because the three are wanted at different times.
 	"damage_numbers_self": true, "damage_numbers_players": true,
@@ -12971,6 +12972,7 @@ func _on_knowledge_bar_gui_input(event: InputEvent) -> void:
 ## keeps them in el.ini.
 func _apply_hud_element_options() -> void:
 	fps_label.visible = bool(_hud_element_options.get("show_fps", true))
+	_sync_quick_slots()
 	_sync_chat()
 	hud_timer_label.visible = bool(_hud_element_options.get("hud_timer", true))
 	knowledge_bar.visible = bool(_hud_element_options.get("knowledge_bar", true))
@@ -14062,6 +14064,9 @@ func _bind_quick_slots() -> void:
 			shortcut.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
 			shortcut.offset_top = 1.0
 			shortcut.offset_bottom = 12.0
+			var quantity := _add_slot_quantity_label(button)
+			# Keep the stack count readable over the cooldown shade and slot trim.
+			quantity.z_index = 1
 			quick_slot_buttons.append(button)
 			slot += 1
 
@@ -14164,10 +14169,14 @@ func _sync_equipment_slots() -> void:
 func _sync_quick_slots() -> void:
 	for slot: int in range(quick_slot_buttons.size()):
 		var quick_button: Button = quick_slot_buttons[slot]
+		var quantity := quick_button.get_node("Quantity") as Label
 		var shortcut: String = settings_window.call("binding_text", "quick_item_%d" % (slot + 1))
 		var quick_item_value: Variant = AppState.inventory.get(slot)
+		quantity.visible = (bool(_hud_element_options.get("quick_item_quantities", true))
+			and quick_item_value is Dictionary)
 		if quick_item_value is Dictionary:
 			var quick_item: Dictionary = quick_item_value as Dictionary
+			_set_slot_quantity(quantity, int(quick_item.get("quantity", 0)))
 			var usable: bool = bool(quick_item.get("inventory_usable", false))
 			var cooldown_seconds: int = _inventory_cooldown_remaining(slot)
 			quick_button.icon = _slot_icon(int(quick_item.get("image_id", 0)), slot)
@@ -14187,6 +14196,7 @@ func _sync_quick_slots() -> void:
 		else:
 			quick_button.icon = null
 			quick_button.text = ""
+			quantity.text = ""
 			quick_button.disabled = true
 			quick_button.tooltip_text = ("Empty item quick slot\nShortcut: " + shortcut
 				+ "\nScroll this column for more item shortcuts.")
