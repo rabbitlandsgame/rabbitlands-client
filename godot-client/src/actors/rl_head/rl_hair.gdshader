@@ -87,7 +87,11 @@
 // the 75th percentile, against the hair's 1.09 -> 1.30 / 1.14 / 1.07; with the
 // beard_gain default it is 1.16 at flat painterly.
 shader_type spatial;
+#ifdef RL_BEARD_FEATHER
+render_mode blend_mix, depth_prepass_alpha, cull_disabled;
+#else
 render_mode blend_mix, depth_draw_opaque, cull_disabled;
+#endif
 
 #include "res://src/actors/rl_head/rl_head_instance.gdshaderinc"
 
@@ -174,7 +178,13 @@ void fragment() {
 			ALPHA = 0.0;
 		}
 	}
+#ifdef RL_BEARD_FEATHER
+	// Attached beard margins encode continuous coverage in vertex red.
+	// True alpha keeps the cheek/lip edge soft rather than cutting a polygon.
+	ALPHA *= smoothstep(0.0, 0.5, COLOR.r);
+#else
 	ALPHA_SCISSOR_THRESHOLD = alpha_scissor;
+#endif
 	ROUGHNESS = 0.6;
 	// light() replaces only the direct lights; the environment's reflection
 	// still uses SPECULAR, and its Fresnel term mirrored the grey sky as silver

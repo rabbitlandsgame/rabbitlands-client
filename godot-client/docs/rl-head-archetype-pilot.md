@@ -1,14 +1,16 @@
 # Selected human bases
 
-This develop integration adds two explicit bases to the existing RL Head Lab:
+This develop integration adds three explicit bases to the existing RL Head Lab:
 
 | Preset | Sex | Grooming |
 |---|---|---|
 | `human_01` | female | Cornrows into a low knot |
 | `human_20` | male | Rounded Afro |
+| `human_34` | male | Bald elder with an attached grey full beard |
 
 Run `godot-client/open-rl-head-lab.bat --preset human_01` or
-`godot-client/open-rl-head-lab.bat --preset human_20`, or choose the appropriate
+`godot-client/open-rl-head-lab.bat --preset human_20`, or use `--preset human_34`.
+You can also choose the appropriate
 sex and preset in the lab. Use High quality for the fitted hair modules. The lab
 uses each base's saved PC/3 body and garment appearance while editing its raw
 head controls; existing head-only presets retain their previous behavior.
@@ -32,9 +34,16 @@ female default shirt has a smooth mirrored collar; its skin cover is active only
 on the repaired luminous female shirt and is disabled for an equipped torso.
 Canonical body/head files, Mira/Rowan assets and rules are preserved.
 
-Humans 08, 14 and 27 remain in repair. Human 34 is also held: the proposed beard
-replacement and the existing full beard both failed the combined mouth-opening
-review. No beard asset is replaced by this integration. Original source stages,
+Human 34 uses a continuous skin-attached foundation around the chin and lips,
+with the long painted reference mass retained below it. All three detail levels
+retain the 75 identity/expression targets. The full-beard module uses continuous
+alpha at its feathered margins; the other hair and beard modules retain their
+existing rendering routes. Individual beard colour remains bound in both
+instance-uniform and material-uniform rendering modes. Neutral, smile and
+combined jaw/smile views are reviewed at the saved human34 fit and all three
+detail levels. Artistic acceptance remains an owner review.
+
+Humans 08, 14 and 27 stay outside this integration. Original source stages,
 fit consensus, failed candidates and images remain in ignored authoring storage.
 
 The selected fits are review bases with disputed controls recorded in the data;
@@ -49,4 +58,6 @@ Godot --headless --path godot-client --script res://tests/test_rl_head_archetype
 Godot --headless --path godot-client --script res://tests/test_female_shirt_neckline.gd
 Godot --headless --path godot-client --script res://tests/test_rl_head.gd
 Godot --headless --path godot-client --script res://tests/test_rl_head_portrait_map.gd
+Godot --headless --path godot-client --script res://tests/test_rl_head_full_beard.gd
+Godot --headless --path godot-client --script res://tests/test_rl_head_shader_values.gd
 ```
