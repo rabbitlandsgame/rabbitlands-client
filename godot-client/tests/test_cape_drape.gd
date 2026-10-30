@@ -70,6 +70,10 @@ func _run() -> void:
 		return
 	var mesh: Mesh = capes[0]["mesh"]
 	var bones: PackedStringArray = capes[0]["bones"]
+	# The shoulder wrap is the newly authored rest shape. Measure armour
+	# fitting against that rest, independently of the intentional relocation
+	# from the old, low collar. The same 2.2x fitting limit remains in force.
+	var relaxed: Mesh = CapeDrape.drape(mesh, bones, PackedFloat32Array())
 	for torso: String in TORSOS:
 		var name: String = "%s/%s" % [torso.get_base_dir().get_file(), torso.get_file().get_basename()]
 		var grid: PackedFloat32Array = CapeDrape.envelope(_pieces(torso))
@@ -82,7 +86,7 @@ func _run() -> void:
 		var torn := 0
 		for surface: int in range(mesh.get_surface_count()):
 			var arrays: Array = mesh.surface_get_arrays(surface)
-			var rest: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+			var rest: PackedVector3Array = relaxed.surface_get_arrays(surface)[Mesh.ARRAY_VERTEX]
 			var worn: PackedVector3Array = draped.surface_get_arrays(surface)[Mesh.ARRAY_VERTEX]
 			var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
 			for corner: int in range(0, indices.size() - 2, 3):

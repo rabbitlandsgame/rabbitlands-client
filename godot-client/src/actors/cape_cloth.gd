@@ -143,6 +143,10 @@ var _fabric_rest: Array[PackedVector3Array] = []
 var _anchor_rest_inverse := Basis.IDENTITY
 var _anchor_rest_origin := Vector3.ZERO
 var _surface_samples: Array = []
+var _surface_rest := PackedVector3Array()
+var _surface_indices: Array[PackedInt32Array] = []
+var _surface_weights: Array[PackedFloat32Array] = []
+var _surface_norms := PackedVector2Array()
 ## The legs, hip to knee and knee to ankle (thighs then shins, left then
 ## right), and how far what is worn reaches behind each, sampled along it
 ## (`set_shin_reach`).
@@ -579,6 +583,28 @@ func _keep_sheet_coherent(carried: Basis, forward: Vector3) -> void:
 
 func set_surface_samples(samples: Array) -> void:
 	_surface_samples = samples
+	_surface_rest.clear()
+	_surface_indices.clear()
+	_surface_weights.clear()
+	_surface_norms.clear()
+	for sample: Dictionary in samples:
+		_surface_rest.append(sample.position)
+		var indices := PackedInt32Array()
+		var active_weights := PackedFloat32Array()
+		var norms := Vector2.ZERO
+		var weights: PackedFloat32Array = sample.weights
+		for bone: int in weights.size():
+			var weight := weights[bone]
+			if weight <= 0.0:
+				continue
+			indices.append(bone)
+			active_weights.append(weight)
+			norms.x += weight * weight
+			if bone % LINKS > 0:
+				norms.y += weight * weight
+		_surface_indices.append(indices)
+		_surface_weights.append(active_weights)
+		_surface_norms.append(norms)
 
 
 ## Project the skinned folds and hem, rather than only the joint line. With
@@ -588,44 +614,64 @@ func set_surface_samples(samples: Array) -> void:
 ## the shoulder attachment itself remains held by its spine skin weights.
 func _keep_surface_clear(fabrics: Array[PackedVector3Array], anchor: Vector3,
 		carried: Basis, forward: Vector3) -> void:
-	if _mount_surface != null or forward == Vector3.ZERO or _surface_samples.is_empty() or not _fabric_measured(1):
+	if _mount_surface != null or forward == Vector3.ZERO or _surface_rest.is_empty() or not _fabric_measured(1):
 		return
-	for _pass: int in 2:
+	# Sample positions and capsule spans do not change within the projection
+	# passes. Keep only their active skin weights in the inner loop.
+	var world := PackedVector3Array()
+	for point: Vector3 in _surface_rest:
+		world.append(anchor + carried * (point - _anchor_rest_origin))
+	var axes := PackedVector3Array()
+	var spans := PackedFloat64Array()
+	var limits := PackedVector2Array()
+	for shin: int in _shins.size():
+		var start := _shin_world[shin * 2]
+		var end := _shin_world[shin * 2 + 1]
+		axes.append(end - start)
+		spans.append(axes[shin].length_squared())
+		var radius := SHIN_RADIUS
+		if shin < _shin_row_reach.size():
+			for reach: float in _shin_row_reach[shin]:
+				radius = maxf(radius, reach)
+		limits.append(Vector2(minf(start.y, end.y) - radius,
+			maxf(start.y, end.y) + radius))
+	for _pass: int in 4:
+		var displacements := PackedVector3Array()
+		for chain: int in _points.size():
+			for link: int in LINKS:
+				displacements.append(_points[chain][link] - fabrics[chain][link])
 		var moved := false
-		for sample: Dictionary in _surface_samples:
-			var weights: PackedFloat32Array = sample.weights
-			var point := anchor + carried * ((sample.position as Vector3) - _anchor_rest_origin)
-			var norm := 0.0
-			var full_norm := 0.0
-			for chain: int in _points.size():
-				for link: int in LINKS:
-					var weight := weights[chain * LINKS + link]
-					if weight <= 0.0:
-						continue
-					point += (_points[chain][link] - fabrics[chain][link]) * weight
-					full_norm += weight * weight
-					if link > 0:
-						norm += weight * weight
+		for sample: int in world.size():
+			var indices := _surface_indices[sample]
+			var weights := _surface_weights[sample]
+			var point := world[sample]
+			for at: int in indices.size():
+				point += displacements[indices[at]] * weights[at]
 			var plane_back := maxf(0.0, (point - anchor).dot(forward) - BACK_OFFSET)
 			var first_link := 0 if plane_back > 0.0 else 1
-			if first_link == 0:
-				norm = full_norm
+			var norm := _surface_norms[sample].x if first_link == 0 else _surface_norms[sample].y
 			if norm < 1e-6:
 				continue
 			var back := plane_back
 			for shin: int in _shins.size():
-				var knee := _shin_world[shin * 2]
-				var axis := _shin_world[shin * 2 + 1] - knee
-				if axis.length_squared() > 1e-9:
-					back = maxf(back, _band_clearance(shin, point, forward, knee, axis, axis.length_squared()))
+				if point.y < limits[shin].x or point.y > limits[shin].y or spans[shin] < 1e-9:
+					continue
+				back = maxf(back, _band_clearance(shin, point, forward,
+					_shin_world[shin * 2], axes[shin], spans[shin]))
 			if back <= 0.0:
 				continue
 			moved = true
-			for chain: int in _points.size():
-				for link: int in range(first_link, LINKS):
-					_points[chain][link] -= forward * (back * weights[chain * LINKS + link] / norm)
+			for at: int in indices.size():
+				var bone := indices[at]
+				if bone % LINKS >= first_link:
+					displacements[bone] -= forward * (back * weights[at] / norm)
 		if not moved:
 			return
+		for chain: int in _points.size():
+			var points := _points[chain]
+			for link: int in LINKS:
+				points[link] = fabrics[chain][link] + displacements[chain * LINKS + link]
+			_points[chain] = points
 		_keep_sheet_coherent(carried, forward)
 
 

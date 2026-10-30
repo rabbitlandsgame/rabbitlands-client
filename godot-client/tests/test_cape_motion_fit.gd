@@ -58,6 +58,7 @@ func _outfit(rig: String, body: int) -> void:
 	cloth.call("reset")
 	_step_cloth(cloth, 180)
 	_check_rig_hang(skeleton, rig, label + " idle")
+	_check_shoulder_attachment(skeleton, label)
 	if _images():
 		await _capture(actor, label + "-idle-side.png", Vector3(2.8, 0, 0))
 		await _capture(actor, label + "-idle-back.png", Vector3(1.8, 0.1, 2.0))
@@ -71,7 +72,7 @@ func _outfit(rig: String, body: int) -> void:
 		var worst_leg := 0.0
 		var photographed_leg := 0.0
 		for frame: int in int(entry[2]):
-			actor.position.z += float(entry[1]) * STEP
+			actor.global_position += skeleton.global_basis * Vector3(0.0, 0.0, float(entry[1]) * STEP)
 			actor.animation_player.advance(STEP)
 			_step_cloth(cloth, 1)
 			if frame % 6 != 0:
@@ -204,3 +205,35 @@ func _check_rig_hang(skeleton: Skeleton3D, rig: String, label: String) -> void:
 		depths.append(total / maxf(count, 1))
 	_check(absf(depths[1] - depths[0]) < MAX_IDLE_SLOPE,
 		"%s hangs down (%.1f mm depth change)" % [label, absf(depths[1] - depths[0]) * 1000.0])
+
+
+func _check_shoulder_attachment(skeleton: Skeleton3D, label: String) -> void:
+	var source: Mesh = ReplicatedActor3D._equipment_pieces(
+		"res://assets/actors/native/equipment/generic_cape.glb")[0].mesh
+	var posed := _posed(skeleton, 2)
+	var totals: Array[Vector3] = [Vector3.ZERO, Vector3.ZERO]
+	var counts := PackedInt32Array([0, 0])
+	var offset := 0
+	for surface: int in source.get_surface_count():
+		var rest: PackedVector3Array = source.surface_get_arrays(surface)[Mesh.ARRAY_VERTEX]
+		for index: int in rest.size():
+			var point := rest[index]
+			# Existing front ends of the collar, identified in the unchanged
+			# source topology, then measured on the actual rebound skin.
+			if absf(point.x) < 0.09 or absf(point.x) > 0.16 or point.y < 1.48 or point.y > 1.58 or point.z < -0.065:
+				continue
+			var side := 0 if point.x > 0.0 else 1
+			totals[side] += posed[offset + index]
+			counts[side] += 1
+		offset += rest.size()
+	for side: int in 2:
+		_check(counts[side] > 0, label + " has clasp geometry on shoulder " + str(side))
+		var clasp := totals[side] / maxi(counts[side], 1)
+		var bone := skeleton.find_bone("upperarm_l" if side == 0 else "upperarm_r")
+		var shoulder := skeleton.get_bone_global_pose(bone).origin
+		var height := clasp.y - shoulder.y
+		var forward := clasp.z - shoulder.z
+		_check(height >= 0.05 and height <= 0.14,
+			"%s clasp %d rests above the shoulder (%.1f mm)" % [label, side, height * 1000.0])
+		_check(forward >= 0.04 and forward <= 0.20,
+			"%s clasp %d wraps forward over the shoulder (%.1f mm)" % [label, side, forward * 1000.0])
