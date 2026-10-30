@@ -8,6 +8,7 @@ import sys
 import tarfile
 import zipfile
 import subprocess
+from contextlib import contextmanager
 
 import pytest
 
@@ -138,12 +139,14 @@ def test_directory_retry_accounts_observed_same_name_growth_or_replacement(tmp_p
     stable.write_bytes(bytes(64))
     staging, final = tmp_path / "writing-000952.res", tmp_path / "digest.res"
     staging.write_bytes(bytes(128))
-    original_stat, original_walk = Path.lstat, storage.os.walk
+    original_stat, original_scan = Path.lstat, storage.os.scandir
     moved = []
 
-    def sorted_walk(*args, **kwargs):
-        for directory, folders, files in original_walk(*args, **kwargs):
-            yield directory, folders, sorted(files)
+    @contextmanager
+    def sorted_scan(path):
+        with original_scan(path) as entries:
+            ordered = sorted(entries, key=lambda entry: entry.name)
+        yield iter(ordered)
 
     def publish_and_grow(path, *args, **kwargs):
         if path == staging and not moved:
@@ -157,7 +160,7 @@ def test_directory_retry_accounts_observed_same_name_growth_or_replacement(tmp_p
             moved.append(True)
         return original_stat(path, *args, **kwargs)
 
-    monkeypatch.setattr(storage.os, "walk", sorted_walk)
+    monkeypatch.setattr(storage.os, "scandir", sorted_scan)
     monkeypatch.setattr(Path, "lstat", publish_and_grow)
     budget = storage.DiskBudget([tmp_path], capacity=1000, reserve=64)
     with pytest.raises(ValueError, match="margin"):
@@ -193,13 +196,15 @@ def test_inventory_retry_preserves_inode_dedup_and_keeps_budget_enforcement(tmp_
     staging, final, alias = tmp_path / "writing-000952.res", tmp_path / "digest.res", tmp_path / "a-alias.res"
     staging.write_bytes(bytes(256))
     os.link(staging, alias)
-    original_stat, original_walk = Path.lstat, storage.os.walk
+    original_stat, original_scan = Path.lstat, storage.os.scandir
     moved, scans = [], []
 
-    def sorted_walk(*args, **kwargs):
-        scans.append(True)
-        for directory, folders, files in original_walk(*args, **kwargs):
-            yield directory, folders, sorted(files)
+    @contextmanager
+    def sorted_scan(path):
+        scans.append(Path(path))
+        with original_scan(path) as entries:
+            ordered = sorted(entries, key=lambda entry: entry.name)
+        yield iter(ordered)
 
     def rename_before_stat(path, *args, **kwargs):
         if path == staging and not moved:
@@ -208,10 +213,10 @@ def test_inventory_retry_preserves_inode_dedup_and_keeps_budget_enforcement(tmp_
         return original_stat(path, *args, **kwargs)
 
     budget = storage.DiskBudget([tmp_path], capacity=384, reserve=64)
-    monkeypatch.setattr(storage.os, "walk", sorted_walk)
+    monkeypatch.setattr(storage.os, "scandir", sorted_scan)
     monkeypatch.setattr(Path, "lstat", rename_before_stat)
     budget.check("live rename", additional=64)
-    assert len(scans) == 1  # Retry the affected directory, not all accounted roots.
+    assert scans == [tmp_path, tmp_path]
     assert budget.peak == 256 and budget.planned_peak == 320
     with pytest.raises(ValueError, match="margin"):
         budget.check("still enforced", additional=65)
@@ -268,6 +273,195 @@ def test_missing_required_inventory_root_is_never_a_transient_entry(tmp_path):
         storage.unique_bytes([tmp_path / "missing-required-root"])
 
 
+def test_removed_preparation_lock_before_directory_open_rescans_parent(tmp_path, monkeypatch):
+    lock = tmp_path / "preparing.lock"
+    lock.mkdir()
+    (tmp_path / "prepared.res").write_bytes(bytes(256))
+    original = storage.os.scandir
+    removed = []
+
+    def unlock_before_open(path):
+        if Path(path) == lock and not removed:
+            lock.rmdir()
+            removed.append(True)
+        return original(path)
+
+    monkeypatch.setattr(storage.os, "scandir", unlock_before_open)
+    assert storage.unique_bytes([tmp_path]) == 256
+    assert removed
+
+
+def test_removed_preparation_lock_during_entry_stat_rescans_live_parent(tmp_path, monkeypatch):
+    lock = tmp_path / "preparing.lock"
+    lock.mkdir()
+    owner = lock / "owner.json"
+    owner.write_bytes(b"{}")
+    (tmp_path / "prepared.res").write_bytes(bytes(256))
+    original = Path.lstat
+    removed = []
+
+    def unlock_before_owner_stat(path, *args, **kwargs):
+        if path == owner and not removed:
+            owner.unlink()
+            lock.rmdir()
+            removed.append(True)
+        return original(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "lstat", unlock_before_owner_stat)
+    assert storage.unique_bytes([tmp_path]) == 256
+    assert removed
+
+
+def test_nested_removed_lock_rescans_only_the_nearest_live_parent(tmp_path, monkeypatch):
+    unaffected = tmp_path / "unaffected"
+    unaffected.mkdir()
+    (unaffected / "asset.res").write_bytes(bytes(128))
+    parent = tmp_path / "prepared-world" / "geometry"
+    parent.mkdir(parents=True)
+    lock = parent / "preparing.lock"
+    lock.mkdir()
+    (parent / "prepared.res").write_bytes(bytes(256))
+    original = storage.os.scandir
+    scans, removed = [], []
+
+    def unlock_before_open(path):
+        path = Path(path)
+        scans.append(path)
+        if path == lock and not removed:
+            lock.rmdir()
+            removed.append(True)
+        return original(path)
+
+    monkeypatch.setattr(storage.os, "scandir", unlock_before_open)
+    assert storage.unique_bytes([tmp_path]) == 384
+    assert scans.count(tmp_path) == scans.count(unaffected) == 1
+    assert scans.count(parent) == 2
+
+
+def test_lock_directory_recreated_at_same_name_is_measured(tmp_path, monkeypatch):
+    lock = tmp_path / "preparing.lock"
+    lock.mkdir()
+    (tmp_path / "prepared.res").write_bytes(bytes(256))
+    original = storage.os.scandir
+    replaced = []
+
+    def replace_before_open(path):
+        if Path(path) == lock and not replaced:
+            lock.rmdir()
+            lock.mkdir()
+            (lock / "new.res").write_bytes(bytes(1024))
+            replaced.append(True)
+            raise FileNotFoundError(2, "fixture old directory handle vanished", str(lock))
+        return original(path)
+
+    monkeypatch.setattr(storage.os, "scandir", replace_before_open)
+    assert storage.unique_bytes([tmp_path]) == 1280
+    assert replaced
+
+
+@pytest.mark.parametrize("remove", [False, True])
+@pytest.mark.parametrize("winerror", [None, 5, 32])
+def test_directory_access_denial_requires_windows_delete_and_proven_absence(tmp_path, monkeypatch, remove, winerror):
+    lock = tmp_path / "preparing.lock"
+    lock.mkdir()
+    (tmp_path / "prepared.res").write_bytes(bytes(256))
+    original = storage.os.scandir
+    denied = []
+
+    def denied_open(path):
+        if Path(path) == lock and not denied:
+            denied.append(True)
+            if remove:
+                lock.rmdir()
+            error = PermissionError(13, "fixture Windows directory access denied", str(lock))
+            if winerror is not None:
+                error.winerror = winerror
+            raise error
+        return original(path)
+
+    monkeypatch.setattr(storage.os, "scandir", denied_open)
+    if remove and winerror == 5:
+        assert storage.unique_bytes([tmp_path]) == 256
+    else:
+        with pytest.raises(PermissionError, match="fixture Windows"):
+            storage.unique_bytes([tmp_path])
+    assert denied
+
+
+def test_required_root_access_denial_is_fatal_even_if_deleted(tmp_path, monkeypatch):
+    root = tmp_path / "required-root"
+    root.mkdir()
+    original = storage.os.scandir
+
+    def delete_and_deny(path):
+        if Path(path) == root:
+            root.rmdir()
+            error = PermissionError(13, "fixture required root denied", str(root))
+            error.winerror = 5
+            raise error
+        return original(path)
+
+    monkeypatch.setattr(storage.os, "scandir", delete_and_deny)
+    with pytest.raises(PermissionError, match="required root denied"):
+        storage.unique_bytes([root])
+
+
+@pytest.mark.parametrize("replace_after_completion", [False, True])
+def test_directory_replacement_never_inherits_old_completion(tmp_path, monkeypatch, replace_after_completion):
+    lock = tmp_path / "preparing.lock"
+    lock.mkdir()
+    (lock / "old.res").write_bytes(bytes(64))
+    staging, final = tmp_path / "writing.res", tmp_path / "digest.res"
+    staging.write_bytes(bytes(128))
+    retired = tmp_path / "retired-directory"
+    original_stat, original_scan = Path.lstat, storage.os.scandir
+    lock_stats, replaced = [], []
+
+    @contextmanager
+    def sorted_scan(path):
+        with original_scan(path) as entries:
+            ordered = sorted(entries, key=lambda entry: entry.name)
+        yield iter(ordered)
+
+    def replace_directory(path, *args, **kwargs):
+        if path == lock:
+            lock_stats.append(True)
+        trigger = (path == staging if replace_after_completion else path == lock and len(lock_stats) == 2)
+        if trigger and not replaced:
+            assert lock.resolve().is_relative_to(tmp_path.resolve())
+            assert retired.resolve().is_relative_to(tmp_path.resolve())
+            lock.rename(retired)  # Retain the old inode so identity replacement is deterministic.
+            lock.mkdir()
+            (lock / "new.res").write_bytes(bytes(1024))
+            replaced.append(True)
+            if replace_after_completion:
+                staging.rename(final)
+        return original_stat(path, *args, **kwargs)
+
+    monkeypatch.setattr(storage.os, "scandir", sorted_scan)
+    monkeypatch.setattr(Path, "lstat", replace_directory)
+    assert storage.unique_bytes([tmp_path]) == 1216
+    assert replaced
+
+
+def test_persistent_child_directory_disappearance_is_bounded(tmp_path, monkeypatch):
+    lock = tmp_path / "preparing.lock"
+    lock.mkdir()
+    original = storage.os.scandir
+    calls = []
+
+    def disappearing_handle(path):
+        if Path(path) == lock:
+            calls.append(True)
+            raise FileNotFoundError(2, "fixture child directory churn", str(lock))
+        return original(path)
+
+    monkeypatch.setattr(storage.os, "scandir", disappearing_handle)
+    with pytest.raises(ValueError, match="cannot verify disk budget"):
+        storage.unique_bytes([tmp_path])
+    assert len(calls) == storage.INVENTORY_ATTEMPTS
+
+
 def test_several_transient_entry_races_can_settle_within_bounded_inventory_attempts(tmp_path, monkeypatch):
     staging = tmp_path / "writing-000952.res"
     staging.write_bytes(bytes(256))
@@ -304,19 +498,21 @@ def test_unreadable_directory_enumeration_is_never_silently_omitted(tmp_path, mo
         storage.unique_bytes([tmp_path])
 
 
-def test_required_inventory_root_disappearing_during_walk_still_fails(tmp_path, monkeypatch):
+def test_required_inventory_root_disappearing_during_scan_still_fails(tmp_path, monkeypatch):
     root = tmp_path / "required-root"
     root.mkdir()
-    original = storage.os.walk
+    original = storage.os.scandir
     scans = []
 
-    def remove_root_during_walk(*args, **kwargs):
+    @contextmanager
+    def remove_root_during_scan(path):
         scans.append(True)
-        for entry in original(*args, **kwargs):
-            root.rmdir()
-            yield entry
+        with original(path) as entries:
+            observed = list(entries)
+        root.rmdir()
+        yield iter(observed)
 
-    monkeypatch.setattr(storage.os, "walk", remove_root_during_walk)
+    monkeypatch.setattr(storage.os, "scandir", remove_root_during_scan)
     with pytest.raises(FileNotFoundError):
         storage.unique_bytes([root])
     assert len(scans) == 1
