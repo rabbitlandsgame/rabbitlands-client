@@ -59,7 +59,15 @@ var _lengths: Array[PackedFloat32Array] = []
 var _bone_rests: Array[Array] = []
 var _legs: Array[PackedInt32Array] = []
 var _settled := false
-var _last_anchor := Vector3.ZERO
+var _step_owed := 0.0
+const FIXED_STEP := 1.0 / 60.0
+var _held_chain_positions := PackedVector3Array()
+var _held_chain_rotations: Array[Quaternion] = []
+var _last_anchor := Vector3.INF
+var _frame_anchor_speed := 0.0
+var _frame_travel_speed := 0.0
+var _previous_frame_world := Transform3D.IDENTITY
+var _frame_world_ready := false
 var _torso := PackedInt32Array()
 var _lumbar := PackedInt32Array()
 ## Collision capsules keep their original order (torso, lumbar, left leg,
@@ -781,6 +789,60 @@ func _push_out_of_capsule_axis(to_world: Transform3D, point: Vector3,
 
 
 func _process_modification_with_delta(delta: float) -> void:
+	# Verlet gravity scales with dt squared. Feeding display-frame jitter into
+	# it made an idle cape continually change its equilibrium and wiggle.
+	var skeleton := get_skeleton()
+	if skeleton == null or (not _cached and not _cache(skeleton)) or _anchor < 0:
+		return
+	var world := skeleton.global_transform
+	var anchor_world := world * skeleton.get_bone_global_pose(_anchor).origin
+	# Measure input motion once per display frame. Re-reading it in two fixed
+	# steps would call the second step stationary and multiply its gravity.
+	_frame_anchor_speed = (anchor_world.distance_to(_last_anchor) / delta
+		if delta > 0.0 and _last_anchor.is_finite() else 0.0)
+	_frame_travel_speed = (Vector2(world.origin.x - _last_translation.x,
+		world.origin.z - _last_translation.z).length() / delta
+		if delta > 0.0 and _last_translation.is_finite() else 0.0)
+	_last_anchor = anchor_world
+	_last_translation = world.origin
+	var elapsed := clampf(delta, 0.0, MAX_STEP)
+	if not _frame_world_ready or _previous_frame_world.origin.distance_to(world.origin) > TELEPORT:
+		_previous_frame_world = world
+		_frame_world_ready = true
+	var next_step_time := FIXED_STEP - _step_owed
+	_step_owed += elapsed
+	var stepped := false
+	while _step_owed + 0.000001 >= FIXED_STEP:
+		_step_owed -= FIXED_STEP
+		# Spread a display frame's root motion across its fixed steps. Giving
+		# both steps the final root position produces a jump followed by a stop.
+		var fraction := clampf(next_step_time / maxf(elapsed, 0.000001), 0.0, 1.0)
+		_simulate_step(FIXED_STEP, _previous_frame_world.interpolate_with(world, fraction))
+		next_step_time += FIXED_STEP
+		stepped = true
+	_previous_frame_world = world
+	if skeleton == null or not _settled:
+		return
+	# SkeletonModifier3D starts each display frame from the animation input.
+	# Reapply the last solved cape on frames shorter than the simulation step;
+	# otherwise a fast display alternates between the solved and authored hang.
+	if stepped:
+		_held_chain_positions.clear()
+		_held_chain_rotations.clear()
+		for chain: PackedInt32Array in _bones:
+			for bone: int in chain:
+				_held_chain_positions.append(skeleton.get_bone_pose_position(bone))
+				_held_chain_rotations.append(skeleton.get_bone_pose_rotation(bone))
+	elif _held_chain_positions.size() == _bones.size() * LINKS:
+		var index := 0
+		for chain: PackedInt32Array in _bones:
+			for bone: int in chain:
+				skeleton.set_bone_pose_position(bone, _held_chain_positions[index])
+				skeleton.set_bone_pose_rotation(bone, _held_chain_rotations[index])
+				index += 1
+
+
+func _simulate_step(delta: float, simulation_world: Transform3D) -> void:
 	var skeleton := get_skeleton()
 	if skeleton == null:
 		return
@@ -788,7 +850,7 @@ func _process_modification_with_delta(delta: float) -> void:
 		return
 	if _anchor < 0 or _bones.is_empty():
 		return
-	var to_world := skeleton.global_transform
+	var to_world := simulation_world
 	var to_local := to_world.affine_inverse()
 	if _mount_surface != null:
 		# Mounted cloth travels with the rider. Damping absolute world velocity
@@ -812,17 +874,11 @@ func _process_modification_with_delta(delta: float) -> void:
 	var anchor_pose := skeleton.get_bone_global_pose(_anchor)
 	var anchor_world := to_world * anchor_pose.origin
 	_snapshot_collision_world(skeleton, to_world)
-	var anchor_speed := 0.0 if step <= 0.0 else (
-		anchor_world.distance_to(_last_anchor) / step)
-	_last_anchor = anchor_world
-	var still := anchor_speed < SETTLE_SPEED
+	var still := _frame_anchor_speed < SETTLE_SPEED
 	var fall := GRAVITY * (SETTLE_GRAVITY if still and _mount_surface == null else 1.0) * step * step
 	var damping := SETTLE_DAMPING if still or _mount_surface != null else DAMPING
-	if not still and _mount_surface == null and _last_translation.is_finite() and step > 0:
-		var travel := to_world.origin - _last_translation
-		var speed := Vector2(travel.x, travel.z).length() / step
-		damping = lerpf(WALK_DAMPING, DAMPING, smoothstep(2.0, 4.0, speed))
-	_last_translation = to_world.origin
+	if not still and _mount_surface == null:
+		damping = lerpf(WALK_DAMPING, DAMPING, smoothstep(2.0, 4.0, _frame_travel_speed))
 	# The back-of-the-torso plane, held for every chain this frame: a cape
 	# swings and cannot pass to the chest, which is what an attack's lean and
 	# twist made it do.
@@ -987,3 +1043,16 @@ func _write_chain_bones(skeleton: Skeleton3D, chain: int,
 func reset() -> void:
 	"""Drop the chains back onto their rest hang, for a teleport or a respawn."""
 	_settled = false
+	_step_owed = 0.0
+	_last_anchor = Vector3.INF
+	_last_translation = Vector3.INF
+	_frame_world_ready = false
+	var skeleton := get_skeleton()
+	if skeleton != null:
+		_previous_frame_world = skeleton.global_transform
+		_frame_world_ready = true
+		_last_translation = _previous_frame_world.origin
+		if _anchor >= 0:
+			_last_anchor = _previous_frame_world * skeleton.get_bone_global_pose(_anchor).origin
+	_held_chain_positions.clear()
+	_held_chain_rotations.clear()

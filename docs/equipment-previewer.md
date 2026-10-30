@@ -69,7 +69,9 @@ names remain internal replay identifiers, while the dropdown and new comments
 use the new labels. The mixed Ranger Starter Kit remains a separate outfit.
 
 The detail icons depict the actual registered gear, fitted to the client actor
-and captured in a fixed idle pose. Actor skin, hair, generated fitting liners,
+and captured in a fixed idle pose. Boots use the canonical bind pose with
+parallel toe directions, preserving the ankle angle through the whole leg.
+Actor skin, hair, generated fitting liners,
 floor and background are excluded. The two animated bows use their registered
 rigid source scenes. Each transparent 512-pixel PNG is keyed by part and visual
 ID, including color capes and historical Sabatons for old note replay. The
@@ -87,3 +89,10 @@ checks full coverage, unique names, preserved game facts, 512-pixel resolution,
 transparent image borders and unclipped content. See the preview icon audit in
 `docs/qa/equipment-previewer-2026-10-30/icon-audit.json` for the original painted
 background-removal findings and replacement validation.
+
+The first equipment review corrections are documented in
+[review-fixes.md](qa/equipment-previewer-2026-10-30/review-fixes.md).
+They include native garment repairs and shared actor fitting/cloth corrections,
+so the revised equipment behaves the same in the client and the previewer.
+The Ranger Starter Kit's headwear remains unchanged pending review of the
+existing Scout Cap alternative.

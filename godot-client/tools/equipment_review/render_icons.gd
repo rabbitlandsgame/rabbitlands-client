@@ -119,7 +119,15 @@ func _render(key: String, path: String) -> void:
 	actor.show()
 	actor.apply_equipment_visuals({part: visual})
 	if actor.animation_player != null:
+		actor.animation_player.play("Idle_Subtle")
 		actor.animation_player.seek(0.3, true)
+		actor.animation_player.pause()
+	if part == 6:
+		# Product views need the authored, level pair of soles. A living idle
+		# bends one ankle and turns its toe out, disguising the actual boot fit.
+		actor.animation_player.stop()
+		actor.get_skeleton().reset_bone_poses()
+		_parallel_boot_pose()
 	actor._advance_facing_offset(1.0)
 	await process_frame
 	var wanted: Array[MeshInstance3D] = []
@@ -141,7 +149,7 @@ func _render(key: String, path: String) -> void:
 	# Fitting envelopes cover the wearer in gameplay. Component icons show the
 	# authored garment only, without neck skin or generated body/boot liners.
 	wanted = wanted.filter(func(mesh: MeshInstance3D) -> bool:
-		return mesh.visible and not mesh.has_meta("neck_source") and not mesh.has_meta("suppress_generated_backing") and not str(mesh.name).contains("_Generated"))
+		return mesh.visible and not mesh.has_meta("neck_source") and not mesh.has_meta("equipment_forearm_skin") and not mesh.has_meta("suppress_generated_backing") and not str(mesh.name).contains("_Generated"))
 	for node: Node in actor.find_children("*", "MeshInstance3D", true, false):
 		(node as MeshInstance3D).visible = node in wanted
 	# The client hides socketed bows while its animated bow presentation owns
@@ -203,6 +211,25 @@ func _render(key: String, path: String) -> void:
 	if standalone != null:
 		records[key]["pose"] = "registered rigid bow source; native rest shape"
 		standalone.queue_free()
+	elif part == 6:
+		records[key]["pose"] = "canonical bind pose with whole legs turned to parallel toes; luminous_male client fit"
+
+
+func _parallel_boot_pose() -> void:
+	var skeleton := actor.get_skeleton()
+	var world_basis := skeleton.global_basis.orthonormalized()
+	for side: String in ["l", "r"]:
+		var foot := skeleton.find_bone("foot_" + side)
+		var ball := skeleton.find_bone("ball_" + side)
+		var thigh := skeleton.find_bone("thigh_" + side)
+		var direction := world_basis * (skeleton.get_bone_global_pose(ball).origin - skeleton.get_bone_global_pose(foot).origin)
+		var yaw := atan2(direction.x, direction.z)
+		var pose := skeleton.get_bone_global_pose(thigh)
+		var turn := world_basis.inverse() * Basis(Vector3.UP, -yaw) * world_basis
+		var parent := skeleton.get_bone_global_pose(skeleton.get_bone_parent(thigh))
+		skeleton.set_bone_pose_rotation(thigh, (parent.basis.inverse() * turn * pose.basis).get_rotation_quaternion())
+	# Turn complete legs, so the calf and foot keep the same ankle angle.
+	# Rotating feet alone would manufacture a kink in a rigid greave.
 
 
 func _posed_points(instance: MeshInstance3D) -> PackedVector3Array:

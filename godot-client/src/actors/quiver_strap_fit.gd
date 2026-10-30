@@ -46,6 +46,7 @@ static func envelope(layers: Array, skeleton: Skeleton3D) -> Dictionary:
 	var width := int(ceil(2.0 * half / step)) + 1
 	var height := int(ceil((high - low) / step)) + 1
 	var grid := PackedFloat32Array()
+	var top_grid: Dictionary = {}
 	grid.resize(width * height)
 	grid.fill(-INF)
 	for value: Variant in layers:
@@ -81,6 +82,8 @@ static func envelope(layers: Array, skeleton: Skeleton3D) -> Dictionary:
 				var a := rest[indices[corner]]
 				var b := rest[indices[corner + 1]]
 				var c := rest[indices[corner + 2]]
+				if maxf(a.y, maxf(b.y, c.y)) >= shoulder - 0.08 * stature:
+					_top_triangle(top_grid, a, b, c, step, shoulder - 0.08 * stature)
 				if maxf(a.z, maxf(b.z, c.z)) <= 0.0:
 					continue
 				var determinant := (b.y - c.y) * (a.x - c.x) + (c.x - b.x) * (a.y - c.y)
@@ -100,7 +103,48 @@ static func envelope(layers: Array, skeleton: Skeleton3D) -> Dictionary:
 							var at := row * width + column
 							grid[at] = maxf(grid[at], u * a.z + v * b.z + (1.0 - u - v) * c.z)
 	return {"grid": grid, "step": step, "low": low, "half": half,
-		"width": width, "height": height, "stature": stature}
+		"width": width, "height": height, "stature": stature,
+		"top_grid": top_grid, "shoulder": shoulder}
+
+
+## The front depth field cannot see the roof of a shoulder. Sample that roof
+## in X/Z too, including the short band that turns over it toward the back.
+static func _top_triangle(grid: Dictionary, a: Vector3, b: Vector3,
+		c: Vector3, step: float, floor_y: float) -> void:
+	var determinant := (b.z - c.z) * (a.x - c.x) + (c.x - b.x) * (a.z - c.z)
+	if absf(determinant) < 0.00000001:
+		return
+	for iz: int in range(int(floor(minf(a.z, minf(b.z, c.z)) / step)),
+			int(ceil(maxf(a.z, maxf(b.z, c.z)) / step)) + 1):
+		if absf(iz * step) > 0.20:
+			continue
+		for ix: int in range(int(floor(minf(a.x, minf(b.x, c.x)) / step)),
+				int(ceil(maxf(a.x, maxf(b.x, c.x)) / step)) + 1):
+			if absf(ix * step) > 0.40:
+				continue
+			var u := ((b.z - c.z) * (ix * step - c.x) + (c.x - b.x) * (iz * step - c.z)) / determinant
+			var v := ((c.z - a.z) * (ix * step - c.x) + (a.x - c.x) * (iz * step - c.z)) / determinant
+			if u >= 0.0 and v >= 0.0 and u + v <= 1.0:
+				var y := u * a.y + v * b.y + (1.0 - u - v) * c.y
+				if y >= floor_y:
+					var at := Vector2i(ix, iz)
+					grid[at] = maxf(float(grid.get(at, -INF)), y)
+
+
+static func _top_offset(field: Dictionary, point: Vector3) -> float:
+	if not field.has("top_grid"):
+		return 0.0
+	var stature := float(field.stature)
+	var shoulder := float(field.shoulder)
+	if point.z < -0.10 * stature or point.y < shoulder - 0.065 * stature or point.y > shoulder + 0.12 * stature:
+		return 0.0
+	var step := float(field.step)
+	var at := Vector2i(int(floor(point.x / step)), int(floor(point.z / step)))
+	var roof := -INF
+	for dz: int in [0, 1]:
+		for dx: int in [0, 1]:
+			roof = maxf(roof, float(field.top_grid.get(at + Vector2i(dx, dz), -INF)))
+	return clampf(roof + 0.008 * stature - point.y, 0.0, 0.030 * stature) if is_finite(roof) else 0.0
 
 
 static func reach(field: Dictionary, x: float, y: float) -> float:
@@ -153,11 +197,15 @@ static func fit(source: Mesh, field: Dictionary) -> Mesh:
 	for surface: int in range(source.get_surface_count()):
 		var arrays := source.surface_get_arrays(surface)
 		var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
-		var offsets := PackedFloat32Array()
+		var offsets := PackedVector3Array()
 		offsets.resize(vertices.size())
-		offsets.fill(0.0)
+		offsets.fill(Vector3.ZERO)
 		for vertex: int in range(vertices.size()):
 			var point := vertices[vertex]
+			var lift := _top_offset(field, point)
+			vertices[vertex].y += lift
+			offsets[vertex].y = lift
+			moved = moved or lift > 0.00001
 			if point.z <= 0.025 * stature:
 				continue
 			var at := clampf((point.y - low) / step, 0.0, float(pushes.size() - 1))
@@ -166,7 +214,7 @@ static func fit(source: Mesh, field: Dictionary) -> Mesh:
 			push *= smoothstep(0.025 * stature, 0.06 * stature, point.z)
 			if push > 0.00001:
 				vertices[vertex].z += push
-				offsets[vertex] = push
+				offsets[vertex].z = push
 				moved = true
 		arrays[Mesh.ARRAY_VERTEX] = vertices
 		var shapes := source.surface_get_blend_shape_arrays(surface)
@@ -176,7 +224,7 @@ static func fit(source: Mesh, field: Dictionary) -> Mesh:
 			for shape_arrays: Array in shapes:
 				var points: PackedVector3Array = shape_arrays[Mesh.ARRAY_VERTEX]
 				for vertex: int in range(points.size()):
-					points[vertex].z += offsets[vertex]
+					points[vertex] += offsets[vertex]
 				shape_arrays[Mesh.ARRAY_VERTEX] = points
 		result.add_surface_from_arrays(source.surface_get_primitive_type(surface), arrays,
 			shapes, LOD_READER._surface_lods(source, surface),

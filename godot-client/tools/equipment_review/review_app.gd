@@ -143,7 +143,7 @@ var _session: Dictionary = {}
 
 func _ready() -> void:
 	var window := get_window()
-	window.title = "Rabbit Lands - equipment preview"
+	window.title = str(options.get("title", "Rabbit Lands - equipment preview"))
 	window.size = Vector2i(int(options.get("width", "1600")), int(options.get("height", "1000")))
 	window.min_size = Vector2i(1280, 800)
 	get_viewport().msaa_3d = Viewport.MSAA_4X

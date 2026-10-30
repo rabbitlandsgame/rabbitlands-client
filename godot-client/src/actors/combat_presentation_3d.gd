@@ -73,9 +73,12 @@ func carried_bow_grip() -> Transform3D:
 	var skeleton := actor.get_skeleton()
 	var rest := skeleton.get_bone_global_rest(_hand_l)
 	var fit := actor.rig_fit_scale("legacy")
-	var socket := Transform3D(Basis.from_euler(Vector3(deg_to_rad(80.0), 0, 0)),
+	var socket := Transform3D(RangerBow3D.CARRY_SOCKET_BASIS,
 		rest.origin + Vector3(0.0757, -0.05, 0) * fit)
-	return skeleton.global_transform * skeleton.get_bone_global_pose(_hand_l) * rest.affine_inverse() * socket
+	var held := skeleton.global_transform * skeleton.get_bone_global_pose(_hand_l) * rest.affine_inverse() * socket
+	# A relaxed fist used to lay the full bow crosswise through the hips.
+	# Carry it upright beside the wearer, with its curve facing outwards.
+	return Transform3D(RangerBow3D.relaxed_basis(actor), held.origin)
 
 func update_pose() -> void:
 	if not is_instance_valid(actor) or _hand_l < 0 or _hand_r < 0:

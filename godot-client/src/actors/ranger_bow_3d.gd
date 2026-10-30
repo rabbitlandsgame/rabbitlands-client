@@ -4,6 +4,12 @@ extends Node3D
 const ARROW_PATH := "res://assets/actors/native/equipment/ranger_arrow.glb"
 const DEFAULT_BOW := "res://assets/actors/native/equipment/amberwood_longbow.glb"
 const CURRENT_BOWS := [DEFAULT_BOW, "res://assets/actors/native/equipment/sunmane_recurve_bow.glb"]
+const CARRY_SOCKET_BASIS := Basis(Vector3.RIGHT, deg_to_rad(80.0))
+static func relaxed_basis(actor: Node3D) -> Basis:
+	var up := actor.global_basis.y.normalized()
+	var out := -actor.global_basis.x.normalized()
+	return Basis(up.cross(out).normalized(), up, out)
+
 static func supports_asset(path: String) -> bool:
 	return path in CURRENT_BOWS
 # The ranged bow replaces the registry hand prop, so its own root needs the

@@ -156,8 +156,12 @@ func check_chest_layers(actor: ReplicatedActor3D, visual: int, label: String) ->
 				var quiver := node as MeshInstance3D
 				expect(actor._equipment_nodes[8].has(quiver), label + " retains its quiver while changing clothing")
 				var source: Mesh = quiver.get_meta("quiver_authored_mesh") as Mesh
+				# The actor's existing body-proportion pass follows strap fitting.
+				# Inspect its retained input for the strap-only preservation contract;
+				# the live mesh below still checks final geometry and repeated swaps.
+				var fitted: Mesh = quiver.get_meta("human_body_refinement_source", quiver.mesh) as Mesh
 				if armor == 0 and cape == 0:
-					expect(quiver.mesh == source, label + " restores its authored bare fit")
+					expect(fitted == source, label + " restores its authored bare fit")
 				var key := "%d:%d:%d" % [armor, cape, node.get_instance_id()]
 				var signature: Array = []
 				for surface: int in range(quiver.mesh.get_surface_count()):
@@ -171,15 +175,24 @@ func check_chest_layers(actor: ReplicatedActor3D, visual: int, label: String) ->
 				var largest_front_offset := 0.0
 				for surface: int in range(source.get_surface_count()):
 					var before: PackedVector3Array = source.surface_get_arrays(surface)[Mesh.ARRAY_VERTEX]
-					var after: PackedVector3Array = quiver.mesh.surface_get_arrays(surface)[Mesh.ARRAY_VERTEX]
+					var after: PackedVector3Array = fitted.surface_get_arrays(surface)[Mesh.ARRAY_VERTEX]
+					var displayed: PackedVector3Array = quiver.mesh.surface_get_arrays(surface)[Mesh.ARRAY_VERTEX]
 					for vertex: int in range(before.size()):
-						finite = finite and after[vertex].is_finite()
-						if before[vertex].z <= 0.0:
+						finite = finite and after[vertex].is_finite() and displayed[vertex].is_finite()
+						# The short strap crossing the shoulder now also clears the
+						# roof of armor. The rear case and attachments remain exact.
+						var head := actor.get_skeleton().find_bone("Head")
+						var stature := actor.get_skeleton().get_bone_global_rest(head).origin.y / 1.568490028858185
+						var shoulder := actor.get_skeleton().get_bone_global_rest(actor.get_skeleton().find_bone("upperarm_r")).origin.y
+						var shoulder_band := (before[vertex].z >= -0.10 * stature
+							and before[vertex].y >= shoulder - 0.065 * stature
+							and before[vertex].y <= shoulder + 0.12 * stature)
+						if before[vertex].z <= 0.0 and not shoulder_band:
 							preserved = preserved and before[vertex].is_equal_approx(after[vertex])
 						else:
 							largest_front_offset = maxf(largest_front_offset, after[vertex].z - before[vertex].z)
-					if quiver.mesh is ArrayMesh and (quiver.mesh as ArrayMesh).blend_shape_mode == Mesh.BLEND_SHAPE_MODE_NORMALIZED:
-						for shape: Array in quiver.mesh.surface_get_blend_shape_arrays(surface):
+					if fitted is ArrayMesh and (fitted as ArrayMesh).blend_shape_mode == Mesh.BLEND_SHAPE_MODE_NORMALIZED:
+						for shape: Array in fitted.surface_get_blend_shape_arrays(surface):
 							var positions: PackedVector3Array = shape[Mesh.ARRAY_VERTEX]
 							for vertex: int in range(before.size()):
 								if before[vertex].z > 0.06:

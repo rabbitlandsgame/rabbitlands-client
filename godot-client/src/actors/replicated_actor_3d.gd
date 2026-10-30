@@ -780,6 +780,11 @@ func apply_appearance_variants(appearance: Dictionary) -> void:
 	for node_value: Node in native_model.find_children("*", "MeshInstance3D", true, false):
 		var mesh_node: MeshInstance3D = node_value as MeshInstance3D
 		var mesh_name: String = mesh_node.name.to_lower()
+		if mesh_node.has_meta("equipment_forearm_skin"):
+			var skin_material := mesh_node.material_override as StandardMaterial3D
+			if skin_material != null:
+				skin_material.albedo_color = _skin_colour
+			continue
 		if mesh_name.begins_with(RACE_FEATURE_PREFIX):
 			# Horn, stone, glass and growth are not skin: a race feature keeps
 			# its imported material under every skin, hair and eye choice. Keep
@@ -4276,6 +4281,14 @@ func _attach_skinned_equipment(scene_path: String, part: int, visual_id: int,
 		clone.transform = piece.get("transform", Transform3D.IDENTITY)
 		_restore_piece_render_state(clone, piece)
 		_tint_surfaces(clone, tint)
+		if str(piece.get("name", "")) == "EquipmentForearmSkin":
+			# This is the existing anatomical lining split from a short sleeve.
+			# Keep its authored skinning and use the wearer's selected skin colour.
+			var skin_material := StandardMaterial3D.new()
+			skin_material.albedo_color = _skin_colour
+			skin_material.roughness = 0.78
+			clone.material_override = skin_material
+			clone.set_meta("equipment_forearm_skin", true)
 		_native_skeleton.add_child(clone)
 		clone.skeleton = NodePath("..")
 		clone.set_meta("native_equipment", true)
@@ -4346,6 +4359,15 @@ static func _restore_piece_render_state(mesh_node: MeshInstance3D,
 			mesh_node.mesh.get_surface_count() if mesh_node.mesh != null else 0):
 		mesh_node.set_surface_override_material(surface,
 			surface_overrides[surface] as Material)
+	if bool(piece.get("repair_quilt_paint", false)) and mesh_node.mesh != null:
+		for surface: int in range(mesh_node.mesh.get_surface_count()):
+			var source := mesh_node.mesh.surface_get_material(surface) as StandardMaterial3D
+			if source == null or source.albedo_texture == null:
+				continue
+			var quilt := ShaderMaterial.new()
+			quilt.shader = preload("res://src/actors/equipment_quilt.gdshader")
+			quilt.set_shader_parameter("cloth_texture", source.albedo_texture)
+			mesh_node.set_surface_override_material(surface, quilt)
 
 const TINT_SLOTS := {"base": 0, "trim": 1, "detail": 2}
 
@@ -5863,6 +5885,7 @@ static func _equipment_pieces(path: String) -> Array:
 			"name": str(mesh_node.name),
 			"body_cover": extras.get("bodyCover", []),
 			"covers_hair": extras.get("coversHair", false),
+			"repair_quilt_paint": extras.get("repairQuiltPaint", false),
 			"transform": _relative_transform(mesh_node, imported),
 			"bones": _skin_bone_names(mesh_node.skin, skeleton),
 			"binds": _skin_bind_poses(mesh_node.skin),
