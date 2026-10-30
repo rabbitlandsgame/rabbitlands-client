@@ -14,7 +14,10 @@ func _run() -> void:
 	var catalog: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://tools/equipment_review/item_catalog.json"))
 	var wardrobe := Wardrobe.new()
 	wardrobe.configure(equipment, catalog)
-	_expect(wardrobe.by_key.size() == (equipment.models as Dictionary).size(), "every registered visual is offered")
+	_expect(wardrobe.by_key.size() == (equipment.models as Dictionary).size(), "every registered visual retains its identity for replay")
+	_expect(wardrobe.available_visual_count() == (equipment.models as Dictionary).size() - 8, "the eight legendary Sabatons are disabled")
+	for piece: Dictionary in wardrobe.by_part[6]:
+		_expect(str(piece.key) not in Wardrobe.DISABLED_LEGENDARY_SABATONS, "legendary Sabatons cannot be selected in the feet list")
 	for piece: Dictionary in catalog.items:
 		_expect(wardrobe.by_id.has(str(piece.id)), "catalog choice is available: " + str(piece.id))
 		_expect(not str(piece.name).is_empty() and not (piece.stats as Dictionary).is_empty(), "item has game name and stats")
@@ -27,13 +30,19 @@ func _run() -> void:
 	var sets: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://tools/equipment_review/review_sets.json"))
 	for entry: Dictionary in sets.sets:
 		wardrobe.use_set(entry.visuals)
+		if str(entry.name) == "Phoenix legendary set" or str(entry.name).begins_with("Audit Legendary "):
+			var foot := wardrobe.piece_at(6)
+			_expect(int(foot.visual) in range(208, 216) and str(foot.name).ends_with(" Boots"), "legendary outfit uses matching Boots: " + str(entry.name))
 		for part: String in entry.visuals:
 			_expect(wardrobe.visuals().get(int(part), -1) == int(entry.visuals[part]), "set resolves " + str(entry.name))
 			covered["%s:%d" % [part, int(entry.visuals[part])]] = true
-	# The eight alternate legendary boots are separate individual choices.
+	# Every active armor design is represented; Sabatons remain disabled.
 	for key: String in equipment.models:
-		if key.get_slice(":", 0) in ["3", "4", "5", "6"] and not (key.begins_with("6:") and int(key.get_slice(":", 1)) in range(208, 216)):
+		if key.get_slice(":", 0) in ["3", "4", "5", "6"] and key not in Wardrobe.DISABLED_LEGENDARY_SABATONS:
 			_expect(covered.has(key), "every armour design appears in a set: " + key)
+	var sabatons: Dictionary = wardrobe.by_key["6:107"]
+	wardrobe.restore([sabatons])
+	_expect(wardrobe.visuals().get(6) == 107, "historical notes can still replay their original Sabatons")
 	wardrobe.use_set(CreationArchetypes.CLASSES[0].equipment_visuals)
 	var original := wardrobe.snapshot()
 	wardrobe.selected_part = 5

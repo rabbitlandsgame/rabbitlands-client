@@ -897,8 +897,8 @@ func _build_details(theme: Theme) -> void:
 func _refresh_details() -> void:
 	if _details_name == null:
 		return
-	_details_set.text = "%s\n%d / %d sets · %d registered visuals" % [
-		_set_label(_sets[_set_index]), _set_index + 1, _sets.size(), _wardrobe.by_key.size()]
+	_details_set.text = "%s\n%d / %d sets · %d available visuals" % [
+		_set_label(_sets[_set_index]), _set_index + 1, _sets.size(), _wardrobe.available_visual_count()]
 	var part := _wardrobe.selected_part
 	var piece := _wardrobe.piece_at(part)
 	_details_name.text = str(piece.get("name", str(PART_LABELS.get(part, "Piece")) + " · empty"))

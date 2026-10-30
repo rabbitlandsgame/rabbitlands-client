@@ -16,8 +16,10 @@ pieces in slot order. Empty slots are skipped; selection wraps at either end.
 Hidden pieces remain equipped and can still be inspected.
 
 Edits stay with each set while the previewer is open. **Restore set** restores
-the original pieces and visibility. The eight alternate legendary boots, spare
-weapons, off-hand weapons, capes and quivers are available in the slot lists.
+the original pieces and visibility. All eight legendary outfits use their Boots
+variants. Their Sabatons are temporarily hidden from the slot lists; older saved
+notes can still replay those original appearances. Spare weapons, off-hand
+weapons, capes and quivers are available in the slot lists.
 Registry visuals without an equippable item definition are marked **visual only**;
 their game stats are explicitly unavailable.
 

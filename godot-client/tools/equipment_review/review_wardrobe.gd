@@ -1,6 +1,10 @@
 extends RefCounted
 ## Preview-only loadout state. The source sets and actor registry stay immutable.
 
+## Retain identities for historical note replay, but omit these from new choices.
+const DISABLED_LEGENDARY_SABATONS := ["6:107", "6:108", "6:109", "6:110",
+	"6:111", "6:112", "6:113", "6:114"]
+
 var by_part: Dictionary = {}
 var by_id: Dictionary = {}
 var by_key: Dictionary = {}
@@ -38,11 +42,21 @@ func configure(equipment: Dictionary, catalog: Dictionary) -> void:
 func _add(piece: Dictionary) -> void:
 	var part := int(piece.part)
 	by_id[str(piece.id)] = piece
+	if not by_key.has(str(piece.key)):
+		by_key[str(piece.key)] = piece
+	if str(piece.key) in DISABLED_LEGENDARY_SABATONS:
+		return
 	if not by_part.has(part):
 		by_part[part] = []
 	(by_part[part] as Array).append(piece)
-	if not by_key.has(str(piece.key)):
-		by_key[str(piece.key)] = piece
+
+
+func available_visual_count() -> int:
+	var count := by_key.size()
+	for key: String in DISABLED_LEGENDARY_SABATONS:
+		if by_key.has(key):
+			count -= 1
+	return count
 
 
 func use_set(visuals: Dictionary) -> void:
