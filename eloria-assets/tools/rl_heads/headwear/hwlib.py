@@ -29,7 +29,8 @@ MODELS = CLIENT + '/data/actors/models.json'
 POLICY = ROOT + '/eloria-assets/tools/headwear_race_policy.json'
 PRESETS = CLIENT + '/data/actors/rl_head_presets.json'
 RL_HEAD = CLIENT + '/assets/actors/native/rl_heads/rl_head_{sex}.glb'
-RL_HAIR = CLIENT + '/assets/actors/native/rl_heads/hair/{style}.glb'
+RL_HAIR_DIR = os.environ.get('RL_HEAD_HAIR_DIR') or CLIENT + '/assets/actors/native/rl_heads/hair'
+RL_HAIR = RL_HAIR_DIR + '/{style}.glb'
 LEGACY_HAIR = CLIENT + '/assets/actors/native/hair/fitted/luminous_{sex}_{style}_{sex}.glb'
 BODY = CLIENT + '/assets/actors/native/races/luminous_{sex}.glb'
 LEGACY_HAIR_STYLES = ['parted', 'long', 'buns', 'buzzed', 'bob', 'ponytail', 'braid', 'topknot', 'mohawk']
@@ -307,7 +308,7 @@ def hair(sex: str, style: str, lod: str = '0') -> dict | None:
         return None
     Ps, Is, n = [], [], 0
     for p in glb_primitives(path):
-        if path.startswith(CLIENT + '/assets/actors/rl_heads') and not p['node'].endswith('lod' + lod) \
+        if not style.startswith('legacy:') and style not in shipped and not p['node'].endswith('lod' + lod) \
                 and 'lod' in p['node']:
             continue
         Ps.append(p['P'])
@@ -319,7 +320,7 @@ def hair(sex: str, style: str, lod: str = '0') -> dict | None:
 
 
 def rl_hair_styles() -> list[str]:
-    d = CLIENT + '/assets/actors/native/rl_heads/hair'
+    d = RL_HAIR_DIR
     return sorted(f[:-4] for f in os.listdir(d) if f.endswith('.glb'))
 
 

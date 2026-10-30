@@ -1,5 +1,5 @@
 {
-	"_note": "Extra armour sets for the equipment review viewer, after the four class starter kits (read from src/ui/creation_archetypes.gd). visuals maps part -> visual id, as in equipment.json model keys \"part:visual\" (0 main hand, 1 off hand, 2 cape, 3 head, 4 legs, 5 torso, 6 feet). Parts 0-2 show only with the viewer's \"Weapons and cape\" toggle. Audit sets (2026-10-18): every generated set not yet design-fitted, one per theme and design index (torso, legs, boots, headwear of the same index), with the theme's weapon and the Red Cape.",
+	"_note": "Extra equipment preview outfits after the four class starter kits in src/ui/creation_archetypes.gd. visuals maps actor part to visual ID. Legendary outfits use the matching Boots (feet 208-215); legendary Sabatons (feet 107-114) are temporarily excluded from new preview choices. Audit outfits pair armor designs by theme and index; their weapons and capes are shared preview accessories.",
 	"sets": [
 		{
 			"name": "Phoenix legendary set",
@@ -9,7 +9,7 @@
 				"3": 125,
 				"4": 195,
 				"5": 192,
-				"6": 107
+				"6": 208
 			}
 		},
 		{
@@ -204,7 +204,7 @@
 				"3": 126,
 				"4": 196,
 				"5": 193,
-				"6": 108
+				"6": 209
 			}
 		},
 		{
@@ -215,7 +215,7 @@
 				"3": 127,
 				"4": 197,
 				"5": 194,
-				"6": 109
+				"6": 210
 			}
 		},
 		{
@@ -226,7 +226,7 @@
 				"3": 128,
 				"4": 198,
 				"5": 195,
-				"6": 110
+				"6": 211
 			}
 		},
 		{
@@ -237,7 +237,7 @@
 				"3": 129,
 				"4": 199,
 				"5": 196,
-				"6": 111
+				"6": 212
 			}
 		},
 		{
@@ -248,7 +248,7 @@
 				"3": 130,
 				"4": 200,
 				"5": 197,
-				"6": 112
+				"6": 213
 			}
 		},
 		{
@@ -259,7 +259,7 @@
 				"3": 131,
 				"4": 201,
 				"5": 198,
-				"6": 113
+				"6": 214
 			}
 		},
 		{
@@ -270,7 +270,7 @@
 				"3": 132,
 				"4": 202,
 				"5": 199,
-				"6": 114
+				"6": 215
 			}
 		},
 		{

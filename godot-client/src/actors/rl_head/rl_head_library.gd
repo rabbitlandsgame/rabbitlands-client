@@ -968,6 +968,7 @@ static func material(material_name: String, sex: String, style: String, quality:
 			_set_texture(result, "strand_texture", "has_texture",
 				slot_texture(keys, "albedo", file, quality))
 			result.set_shader_parameter("card", material_name != "rl_hair_clump")
+			result.set_shader_parameter("scalp_channels", style == "cornrows_low_knot")
 			# Beards draw at the shader's beard_gain, so they light like the hair.
 			result.set_shader_parameter("beard", material_name == "rl_beard")
 			result.set_shader_parameter("alpha_scissor", 0.5 if material_name == "rl_hair_clump" else 0.35)

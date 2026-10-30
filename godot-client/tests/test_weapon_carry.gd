@@ -143,11 +143,11 @@ func run() -> void:
 		check(not carry.active, "offscreen carry pauses")
 		actor.set_animation_tier(AnimationGate.Tier.FULL, gate)
 		check(carry.active, "visible carry resumes")
-		actor.apply_equipment_visuals({0: 64})
+		actor.apply_equipment_visuals({0: 164})
 		check(carry.active, "the bow closes its holding hand")
 		var bow_hands: Array = carry.get("_hands")
 		check(bow_hands.size() == 1 and bow_hands[0].side == "l" and bow_hands[0].get("finger_only", false),
-			"the bow keeps its own pose and only closes the holding left hand")
+			"the current bow closes its holding left hand and owns a wrist grip")
 		actor.apply_equipment_visuals({0: 114})
 		check(carry.active and (carry.get("_hands") as Array).size() == 1, "swapping back enables main hand only")
 		actor.apply_equipment_visuals({})

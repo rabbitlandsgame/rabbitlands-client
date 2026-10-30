@@ -5,7 +5,8 @@ extends RefCounted
 ## Continue the existing skin rim under the collar. Keep the imported head,
 ## its UVs and its boundary skinning exact, and remove this lining on unequip.
 
-const STEPS := 2
+const STEPS := 4
+const NECK_AXIS_Z := -.038
 
 static var _cache := {}
 
@@ -120,8 +121,12 @@ static func build(original: Mesh, skin: Skin, skeleton: Skeleton3D) -> Dictionar
 				for column: int in range(2):
 					var v := int(pair[column])
 					var vertex := original_p[v]
-					var drop := maxf(vertex.y - 1.395,0.)
-					p.append(vertex + Vector3(vertex.x * .08,-drop,-drop * .32) * blend)
+					# Tuck the continuation inside the fitted collar. The former
+					# outward/backward extrusion made a broad skin flap at the
+					# nape when a large collar was reduced to the real neck size.
+					var bottom := Vector3(vertex.x * .90, minf(vertex.y, 1.395),
+						NECK_AXIS_Z + (vertex.z - NECK_AXIS_Z) * .70)
+					p.append(vertex.lerp(bottom, blend))
 					n.append(original_n[v])
 					uv.append(original_uv[v].lerp((original_uv[v] * 2.+original_uv[int(pair[2])]) / 3.,blend))
 					if original_colors.size() == original_p.size():

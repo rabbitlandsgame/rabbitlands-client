@@ -53,12 +53,12 @@ func _leg_clearance(skeleton: Skeleton3D, points: PackedVector3Array) -> float:
 
 
 func _run() -> void:
-	var packed := load(RIG) as PackedScene
-	if packed == null:
+	# Native actor shipping folders are deliberately not editor-imported.
+	var actor := GlbSceneCache.instantiate(RIG)
+	if actor == null:
 		push_error("cape cloth: cannot load " + RIG)
 		quit(1)
 		return
-	var actor := packed.instantiate()
 	root.add_child(actor)
 	var skeleton: Skeleton3D = null
 	for node in actor.find_children("*", "Skeleton3D", true, false):

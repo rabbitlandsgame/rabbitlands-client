@@ -181,6 +181,7 @@ var _lod_band := 0
 var _lod_listed := false
 ## The actor's body material, which the head's body patch is drawn with.
 var _body_material: Material = null
+var _body_skin_color := Color(0, 0, 0, 0)
 ## A portrait (dialogue line, leaderboard card) is being taken: first level,
 ## neutral expression, eyes open, no blinking, no distance switching.
 var _portrait_pose := false
@@ -515,6 +516,16 @@ func set_body_material(material: Material) -> void:
 	for level: Array in _head_lods:
 		for mesh_node: MeshInstance3D in level:
 			_assign_body_patch(mesh_node)
+
+
+## Keep the calibrated face pigment, while the neck transitions to the body's
+## actual dye. RGB is packed in three unused colour alpha components so the
+## shared shaders stay within Godot's sixteen instance-uniform slots.
+func set_body_skin_color(colour: Color) -> void:
+	if _body_skin_color == colour:
+		return
+	_body_skin_color = colour
+	_apply_colours()
 
 
 ## The actor's culling envelope and render layers, on every mesh made here.
@@ -1172,9 +1183,16 @@ static func source_mesh(mesh_node: MeshInstance3D) -> Mesh:
 func _apply_colours() -> void:
 	var haired := not _hair_lods.is_empty() or _hair_external
 	var beard_colour := appearance.beard_color if appearance.beard_color_set else appearance.hair_color
+	var body_colour := (_body_skin_color if _body_skin_color.a > 0.0 else appearance.skin).srgb_to_linear()
+	var skin := appearance.skin
+	var brow := appearance.brow_color
+	var hair := appearance.hair_color
+	skin.a = body_colour.r
+	brow.a = body_colour.g
+	hair.a = body_colour.b
 	var values := {
-		"skin_color": appearance.skin, "lip_tint": appearance.lip_tint,
-		"brow_color": appearance.brow_color, "hair_color": appearance.hair_color,
+		"skin_color": skin, "lip_tint": appearance.lip_tint,
+		"brow_color": brow, "hair_color": hair,
 		"freckles": appearance.freckles, "liner": appearance.liner,
 		"stubble": appearance.stubble_amount(), "eye_color": appearance.eyes,
 		"hairline": HAIRLINE_UNDER_HAIR if haired else 0.0,

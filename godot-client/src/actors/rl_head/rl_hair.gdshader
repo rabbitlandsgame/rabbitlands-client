@@ -94,6 +94,8 @@ render_mode blend_mix, depth_draw_opaque, cull_disabled;
 uniform sampler2D strand_texture : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform bool has_texture = false;
 uniform bool card = false;
+// Tight braids intentionally expose the actor's scalp between their rows.
+uniform bool scalp_channels = false;
 uniform float alpha_scissor : hint_range(0.0, 1.0) = 0.5;
 uniform float root_darkening : hint_range(0.0, 1.0) = 0.25;
 uniform float lock_variation : hint_range(0.0, 0.5) = 0.12;
@@ -132,6 +134,11 @@ const float KEEP_TOLERANCE = 0.5 / 255.0;
 const float MEAN_LOD = 6.0;
 
 varying vec3 strand;
+varying vec3 rest_position;
+
+void vertex() {
+	rest_position = VERTEX;
+}
 
 void fragment() {
 	float detail = clamp(hair_detail, 0.0, 1.0);
@@ -160,6 +167,13 @@ void fragment() {
 	// A dropped detail fragment fails the scissor below like uncovered atlas
 	// (alpha_scissor is above 0 on every RL hair material).
 	ALPHA = kept ? atlas.a : 0.0;
+	if (scalp_channels && rest_position.y > 1.715 && rest_position.z > -0.075) {
+		float row = rest_position.x / 0.027;
+		float gap = abs(fract(row) - 0.5);
+		if (gap < 0.055 && abs(rest_position.x) < 0.078) {
+			ALPHA = 0.0;
+		}
+	}
 	ALPHA_SCISSOR_THRESHOLD = alpha_scissor;
 	ROUGHNESS = 0.6;
 	// light() replaces only the direct lights; the environment's reflection

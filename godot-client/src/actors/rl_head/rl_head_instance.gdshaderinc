@@ -22,6 +22,8 @@
 #else
 #define RL_VALUE instance uniform
 #endif
+// RGB remains sRGB dye. On head meshes the otherwise unused alpha of skin,
+// brow and hair colour packs the body's linear R/G/B for neck blending.
 RL_VALUE vec4 skin_color : source_color = vec4(0.85, 0.66, 0.55, 1.0);
 RL_VALUE vec4 lip_tint : source_color = vec4(0.75, 0.45, 0.42, 1.0);
 RL_VALUE vec4 brow_color : source_color = vec4(0.2, 0.12, 0.07, 1.0);

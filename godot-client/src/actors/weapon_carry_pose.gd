@@ -15,8 +15,8 @@ extends SkeletonModifier3D
 ## At ease every rigid held weapon stays in its fighting socket, with the
 ## fingers closed around that grip. The wrist lowers it ahead by up to 45
 ## degrees, limited by the piece's reach to keep its far end above the floor.
-## Long staves and blades use the same rule; the ranged bow owns its visual
-## pose and only asks this modifier to close its left hand at ease.
+## Long staves and blades use the same rule; the ranged bow follows its native
+## palm fit, with finger closure and a small shoulder spread at ease.
 
 const TRAVEL_ACTIONS: Array[StringName] = [&"walk", &"run"]
 
@@ -67,6 +67,7 @@ const FINGERS: Array[String] = ["thumb", "index", "middle", "ring", "pinky"]
 var actor: ReplicatedActor3D
 var _hands: Array[Dictionary] = []
 var _weight := 0.0
+var _bow_idle_socket := RangerBow3D.CARRY_SOCKET_BASIS
 ## 1 when every weapon is in its idle grip, 0 when every weapon is in its
 ## fighting grip. It starts at ease, which is how an actor arrives.
 var _idle_weight := 1.0
@@ -94,7 +95,12 @@ func refresh_equipment() -> void:
 		if not actor._ranged_bow_path(model).is_empty():
 			var bow_hand := skeleton.find_bone("hand_l")
 			if bow_hand >= 0:
-				_hands.append({"hand": bow_hand, "side": "l", "finger_only": true})
+				var rest := skeleton.get_bone_global_rest(bow_hand)
+				_bow_idle_socket = _idle_bow_socket(skeleton, bow_hand)
+				_hands.append({"hand": bow_hand, "side": "l", "finger_only": true,
+					"bow": true, "grip": rest.basis.inverse() * RangerBow3D.CARRY_SOCKET_BASIS,
+					"upperarm": skeleton.find_bone("upperarm_l"),
+					"across": skeleton.find_bone("upperarm_r"), "spread": deg_to_rad(7.0)})
 			continue
 		if model.get("attach", "socket") != "socket":
 			continue
@@ -222,6 +228,60 @@ func _at_ease() -> bool:
 func _idle_target() -> float:
 	return 1.0 if _at_ease() else 0.0
 
+## Use the same activity blend as the fist and shoulder when leaving idle.
+## Both socket frames remain owned by the anatomical wrist.
+func bow_carry_socket_basis() -> Basis:
+	return RangerBow3D.CARRY_SOCKET_BASIS.slerp(_bow_idle_socket, _idle_weight)
+
+## Sample the native idle reference without seeking or modifying the live rig.
+## Race rest frames differ even when they share an animation library.
+func _idle_bow_socket(skeleton: Skeleton3D, hand: int) -> Basis:
+	if actor.resolver == null or actor.animation_player == null:
+		return RangerBow3D.CARRY_SOCKET_BASIS
+	var clip := actor.resolver.clip_for_action(&"idle")
+	if clip == &"" or not actor.animation_player.has_animation(clip):
+		return RangerBow3D.CARRY_SOCKET_BASIS
+	var animation := actor.animation_player.get_animation(clip)
+	var time := minf(.7, animation.length)
+	var poses: Array[Transform3D] = []
+	for bone: int in skeleton.get_bone_count():
+		poses.append(skeleton.get_bone_rest(bone))
+	for track: int in animation.get_track_count():
+		var bone := skeleton.find_bone(str(animation.track_get_path(track).get_concatenated_subnames()))
+		if bone < 0:
+			continue
+		var pose := poses[bone]
+		match animation.track_get_type(track):
+			Animation.TYPE_POSITION_3D:
+				pose.origin = animation.position_track_interpolate(track, time)
+			Animation.TYPE_ROTATION_3D:
+				pose.basis = Basis(animation.rotation_track_interpolate(track, time)).scaled(pose.basis.get_scale())
+			Animation.TYPE_SCALE_3D:
+				pose.basis = pose.basis.orthonormalized().scaled(animation.scale_track_interpolate(track, time))
+		poses[bone] = pose
+	var reference := _reference_pose(skeleton, poses, hand)
+	var upper := skeleton.find_bone("upperarm_l")
+	var across := skeleton.find_bone("upperarm_r")
+	if upper >= 0 and across >= 0:
+		var shoulder := _reference_pose(skeleton, poses, upper)
+		var out := shoulder.origin - _reference_pose(skeleton, poses, across).origin
+		out.y = 0.0
+		var axis := (reference.origin - shoulder.origin).cross(out)
+		if axis.length_squared() > 1e-10:
+			reference.basis = Basis(axis.normalized(), deg_to_rad(7.0)) * reference.basis
+	# Remove the temporary action-facing offset when equipping during aiming.
+	var neutral := skeleton.global_basis.inverse() * actor.global_basis * Basis(Vector3.UP, actor._facing_offset)
+	return (skeleton.get_bone_global_rest(hand).basis * reference.basis.inverse()
+		* neutral * RangerBow3D.IDLE_CARRY_BASIS).orthonormalized()
+
+static func _reference_pose(skeleton: Skeleton3D, poses: Array[Transform3D], bone: int) -> Transform3D:
+	var result := poses[bone]
+	var parent := skeleton.get_bone_parent(bone)
+	while parent >= 0:
+		result = poses[parent] * result
+		parent = skeleton.get_bone_parent(parent)
+	return result
+
 ## Writes the current idle blend onto every prop that has an idle grip, as it
 ## stands in the registry. Used where no pose is to hand - an equipment change,
 ## coming back on screen - and refined by the next frame's pass.
@@ -263,6 +323,15 @@ func _process_modification_with_delta(delta: float) -> void:
 		_hold_lowered(skeleton)
 	if easing:
 		_ease(skeleton)
+	# Keep the animation's wrist aligned with its forearm and cuff. The bow's
+	# native grip follows that hand; forcing it upright by turning only the
+	# wrist bent the hand ninety degrees through long sleeves.
+	if actor.current_action in [&"idle", &"turn", &"walk", &"run", &"combat_idle"]:
+		for carry: Dictionary in _hands:
+			if not carry.get("bow", false):
+				continue
+			if carry.upperarm >= 0 and carry.across >= 0:
+				_spread(skeleton, carry)
 	if _weight <= 0.0:
 		return
 	var to_skeleton := skeleton.global_basis.orthonormalized().inverse() * actor.global_basis.orthonormalized()

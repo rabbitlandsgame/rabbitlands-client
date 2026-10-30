@@ -24,6 +24,7 @@ const CAMERA_BUTTONS := [["Front", "front"], ["3/4", "three_quarter"], ["Profile
 var options: Dictionary = {}
 var actor: ReplicatedActor3D
 var face: RLHeadAppearance
+var _archetype_library: Dictionary = {}
 
 var _sex := "female"
 var _headwear := 0
@@ -83,6 +84,8 @@ func _ready() -> void:
 	if face == null:
 		face = RLHeadAppearance.new()
 		face.sex = _sex
+	else:
+		_sex = face.sex
 	_build_ui()
 	await _rebuild_actor()
 	_set_view(_view)
@@ -103,6 +106,23 @@ func _visuals() -> Dictionary:
 	return visuals
 
 
+## Selected human bases retain their saved body/clothes while the lab edits
+## their raw head controls. Existing head-only presets keep the original path.
+func _actor_appearance() -> Dictionary:
+	if _archetype_library.is_empty():
+		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(
+			"res://data/actors/rl_head_archetypes.json"))
+		if parsed is Dictionary:
+			_archetype_library = parsed
+	var result := {}
+	for row: Dictionary in _archetype_library.get("archetypes", []):
+		if row.id == face.preset and row.sex == _sex:
+			result = (row.appearance_pc3 as Dictionary).duplicate(true)
+			break
+	result["rl_head"] = face.to_dict()
+	return result
+
+
 func _rebuild_actor() -> void:
 	_rebuilding = true
 	if actor != null:
@@ -110,7 +130,7 @@ func _rebuild_actor() -> void:
 		actor = null
 		await get_tree().process_frame
 	face.sex = _sex
-	actor = Stage.spawn(self, _sex, {"rl_head": face.to_dict()}, _visuals(), _quality)
+	actor = Stage.spawn(self, _sex, _actor_appearance(), _visuals(), _quality)
 	var player := actor.animation_player
 	if player != null and not player.animation_finished.is_connected(_on_clip_finished):
 		player.animation_finished.connect(_on_clip_finished)
@@ -125,7 +145,7 @@ func _rebuild_actor() -> void:
 func _apply_face() -> void:
 	if actor == null or _rebuilding:
 		return
-	actor.apply_appearance_variants({"rl_head": face.to_dict()})
+	actor.apply_appearance_variants(_actor_appearance())
 	_sync_rig_switches()
 
 
@@ -260,6 +280,17 @@ func _build_ui() -> void:
 		_apply_face())
 	_button(row, "Copy JSON", _copy_json)
 
+	_heading("Hair and grooming")
+	_hair_option = _option("Hairstyle", [], func(index: int) -> void:
+		face.hair = _hair_option.get_item_metadata(index)
+		_apply_face())
+	_beard_option = _option("Facial hair", [], func(index: int) -> void:
+		face.beard = _beard_option.get_item_metadata(index)
+		_apply_face())
+	_groom_slider("hair_length", "Length", -1.0, 1.0)
+	_groom_slider("hair_volume", "Volume", -1.0, 1.0)
+	_groom_slider("hair_detail", "Messiness", 0.0, 100.0)
+
 	_heading("Identity")
 	_controls_box = VBoxContainer.new()
 	_panel.add_child(_controls_box)
@@ -290,13 +321,7 @@ func _build_ui() -> void:
 		_apply_face())
 	_amount_slider("brow_thickness", -1.0)
 
-	_heading("Hair and headwear")
-	_hair_option = _option("Hairstyle", [], func(index: int) -> void:
-		face.hair = _hair_option.get_item_metadata(index)
-		_apply_face())
-	_beard_option = _option("Facial hair", [], func(index: int) -> void:
-		face.beard = _beard_option.get_item_metadata(index)
-		_apply_face())
+	_heading("Headwear")
 	var headwear_names: Array = []
 	for entry: Array in Stage.HEADWEAR:
 		headwear_names.append(("3:%d " % entry[0] if entry[0] > 0 else "") + str(entry[1]))
@@ -453,6 +478,26 @@ func _colour_row(text: String, field: String, palette: Array) -> void:
 			picker.color = colour
 			_apply_face())
 		swatches.add_child(swatch)
+
+
+func _groom_slider(field: String, text: String, minimum: float, maximum: float) -> void:
+	var row := _row()
+	var label := Label.new()
+	label.text = text
+	label.custom_minimum_size.x = 92
+	row.add_child(label)
+	var slider := HSlider.new()
+	slider.name = field
+	slider.min_value = minimum
+	slider.max_value = maximum
+	slider.step = 1.0 if field == "hair_detail" else 0.01
+	slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	slider.tooltip_text = "Sleek (0) to messy (100); 50 is the authored finish." if field == "hair_detail" else "Relative to the authored style. Length changes loose strands on tied styles."
+	slider.value_changed.connect(func(value: float) -> void:
+		face.set(field, value)
+		_apply_face())
+	row.add_child(slider)
+	_amount_sliders[field] = slider
 
 
 func _amount_slider(field: String, minimum: float = 0.0) -> void:

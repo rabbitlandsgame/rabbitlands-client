@@ -17,6 +17,7 @@ const OLDCRAFT_ACTOR_STYLE := preload("res://src/actors/oldcraft_actor_style.gd"
 const CapeEmblems := preload("res://src/actors/cape_emblems.gd")
 const GLB_MESH_EXTRAS := preload("res://src/actors/glb_mesh_extras.gd")
 const WARDROBE_SHIRT_FIT := preload("res://src/actors/wardrobe_shirt_fit.gd")
+const FEMALE_SHIRT_NECKLINE := preload("res://src/actors/female_shirt_neckline.gd")
 const QUIVER_STRAP_FIT := preload("res://src/actors/quiver_strap_fit.gd")
 const CHARACTER_PROPORTIONS := preload("res://src/actors/character_proportions.gd")
 const PORTRAIT_GROOM := preload("res://src/actors/portrait_groom.gd")
@@ -531,6 +532,7 @@ static var _wardrobe_texture_cache: Dictionary = {}
 static func clear_wardrobe_texture_cache() -> void:
 	_wardrobe_texture_cache.clear()
 	NecklineSkin.clear()
+	FEMALE_SHIRT_NECKLINE.clear()
 	CHARACTER_PROPORTIONS.clear()
 	PORTRAIT_GROOM.clear()
 	STUBBLE_APPEARANCE.clear()
@@ -780,6 +782,11 @@ func apply_appearance_variants(appearance: Dictionary) -> void:
 	for node_value: Node in native_model.find_children("*", "MeshInstance3D", true, false):
 		var mesh_node: MeshInstance3D = node_value as MeshInstance3D
 		var mesh_name: String = mesh_node.name.to_lower()
+		if mesh_node.has_meta("equipment_forearm_skin"):
+			var skin_material := mesh_node.material_override as StandardMaterial3D
+			if skin_material != null:
+				skin_material.albedo_color = _skin_colour
+			continue
 		if mesh_name.begins_with(RACE_FEATURE_PREFIX):
 			# Horn, stone, glass and growth are not skin: a race feature keeps
 			# its imported material under every skin, hair and eye choice. Keep
@@ -1315,6 +1322,7 @@ func _set_rl_head(face: RLHeadAppearance) -> bool:
 	# is never recoloured for the head.
 	if body != null and body.mesh != null:
 		_rl_head.set_body_material(body.get_active_material(0))
+	_rl_head.set_body_skin_color(_skin_colour)
 	_rl_head.set_portrait_pose(portrait_pose_held())
 	return true
 
@@ -3889,6 +3897,8 @@ func _refresh_wardrobe_cover() -> void:
 	CHARACTER_PROPORTIONS.restore_body_refinement(native_model)
 	var torso_visual: int = int(_equipment_visuals.get(BODY_PART, 0))
 	var covered: bool = torso_visual != 0
+	FEMALE_SHIRT_NECKLINE.cover_skin(native_model,
+		str(_model_config.get("bodyTemplate", "")) == "luminous_female" and not covered)
 	var torso_model := {}
 	if covered:
 		torso_model = _equipment_model_config(BODY_PART, torso_visual)
@@ -4280,6 +4290,14 @@ func _attach_skinned_equipment(scene_path: String, part: int, visual_id: int,
 		clone.transform = piece.get("transform", Transform3D.IDENTITY)
 		_restore_piece_render_state(clone, piece)
 		_tint_surfaces(clone, tint)
+		if str(piece.get("name", "")) == "EquipmentForearmSkin":
+			# The fitted arm samples a clean patch of the native skin atlas.
+			# Sharing the hands' material preserves their texture, roughness and
+			# calibrated skin selection instead of painting a flat colour tube.
+			var body := _native_model.find_child("body", true, false) as MeshInstance3D
+			if body != null and body.mesh != null:
+				clone.material_override = body.get_active_material(0)
+			clone.set_meta("equipment_forearm_skin", true)
 		_native_skeleton.add_child(clone)
 		clone.skeleton = NodePath("..")
 		clone.set_meta("native_equipment", true)
@@ -4350,6 +4368,24 @@ static func _restore_piece_render_state(mesh_node: MeshInstance3D,
 			mesh_node.mesh.get_surface_count() if mesh_node.mesh != null else 0):
 		mesh_node.set_surface_override_material(surface,
 			surface_overrides[surface] as Material)
+	if bool(piece.get("repair_quilt_paint", false)) and mesh_node.mesh != null:
+		for surface: int in range(mesh_node.mesh.get_surface_count()):
+			var source := mesh_node.mesh.surface_get_material(surface) as StandardMaterial3D
+			if source == null or source.albedo_texture == null:
+				continue
+			var quilt := ShaderMaterial.new()
+			quilt.shader = preload("res://src/actors/equipment_quilt.gdshader")
+			quilt.set_shader_parameter("cloth_texture", source.albedo_texture)
+			mesh_node.set_surface_override_material(surface, quilt)
+	if bool(piece.get("match_antler_palette", false)) and mesh_node.mesh != null:
+		for surface: int in range(mesh_node.mesh.get_surface_count()):
+			var source := mesh_node.mesh.surface_get_material(surface) as StandardMaterial3D
+			if source == null or source.albedo_texture == null:
+				continue
+			var leather := ShaderMaterial.new()
+			leather.shader = preload("res://src/actors/equipment_antler_palette.gdshader")
+			leather.set_shader_parameter("cloth_texture", source.albedo_texture)
+			mesh_node.set_surface_override_material(surface, leather)
 
 const TINT_SLOTS := {"base": 0, "trim": 1, "detail": 2}
 
@@ -5806,6 +5842,7 @@ func _load_native_scene(path: String) -> Array[String]:
 	if model == null:
 		return ["model glTF import failed", path]
 	model.name = "NativeModel"
+	FEMALE_SHIRT_NECKLINE.apply(model, path)
 	add_child(model)
 	return []
 
@@ -5867,6 +5904,8 @@ static func _equipment_pieces(path: String) -> Array:
 			"name": str(mesh_node.name),
 			"body_cover": extras.get("bodyCover", []),
 			"covers_hair": extras.get("coversHair", false),
+			"repair_quilt_paint": extras.get("repairQuiltPaint", false),
+			"match_antler_palette": extras.get("matchAntlerPalette", false),
 			"transform": _relative_transform(mesh_node, imported),
 			"bones": _skin_bone_names(mesh_node.skin, skeleton),
 			"binds": _skin_bind_poses(mesh_node.skin),

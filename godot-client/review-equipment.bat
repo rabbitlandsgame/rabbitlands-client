@@ -1,7 +1,8 @@
 @echo off
-rem Equipment review viewer: the real client actor on a turntable.
+rem Equipment previewer: all registered pieces on the real client actor.
+rem Left/Right: sets. T: selected piece comment. S: set comment. V: travel.
 rem   review-equipment.bat [--race luminous] [--sex male] [--set "Vanguard"] [--clip Walk] [--travel yes] [--review-dir <folder>]
-rem Notes and screenshots (F2) go to ..\.local\asset-authoring\working\equipment-review\<session>\
+rem Comments and screenshots go to ..\.local\asset-authoring\working\equipment-review\<session>\
 rem Close any GPU-heavy renders first: the laptop GPU handles one at a time.
 setlocal
 set "GODOT=%GODOT_EXE%"

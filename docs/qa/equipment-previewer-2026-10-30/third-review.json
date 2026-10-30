@@ -1,0 +1,2019 @@
+{
+  "schema": 1,
+  "product": "Rabbit Lands",
+  "source_revision": "f809b150",
+  "scope": "Wrist alignment, chest depth and detached under-helmet neck shells",
+  "audit": {
+    "torso_designs": 64,
+    "torso_native_variants": 128,
+    "metal_helmet_designs": 30,
+    "metal_helmet_native_variants": 60
+  },
+  "changed": {
+    "native_files": 87,
+    "torso_files": 63,
+    "torso_designs": 41,
+    "helmet_files": 24,
+    "helmet_designs": 13
+  },
+  "validation": {
+    "status": "passed",
+    "files": 87,
+    "new_collapsed_faces": 0,
+    "removed_neck_shell_triangles": 3767,
+    "max_weight_sum_error": 0.0039217472076416016
+  },
+  "fresh_blender": {
+    "imports": 87,
+    "component_renders": 4
+  },
+  "review_views": {
+    "all_torso_side_views": 128,
+    "helmet_front_side_rear": 78,
+    "focused_scout_phoenix": 16,
+    "race_and_movement": 120
+  },
+  "checks": {
+    "wrist": 2321,
+    "review_fit": 298,
+    "second_review": 21,
+    "weapon_carry": "passed",
+    "catalog_icon_tests": 6,
+    "catalog_icon_subtests": 1315,
+    "graphical_previewer": "passed",
+    "icon_manifest_records": 443
+  },
+  "wrist_measurement": {
+    "max_local_quaternion_angle_rad": 0.0009765625,
+    "max_grip_distance_m": 0.09577514976263
+  },
+  "implementation_sha256": {
+    "eloria-assets/tools/refine_equipment_review_third.py": "11935c3a1f30783e46530f7c9ed1498144ea09c5aa257208913ddecf08814f11",
+    "godot-client/src/actors/ranger_bow_3d.gd": "fd2a336301da7df2c271ea9cbd3bc1504e5a806a0c7ff011eb048b642db73122",
+    "godot-client/src/actors/combat_presentation_3d.gd": "531d894fd4e6ce743aa764809fff05f3ccdf6ac27a3767dc7bc44f3b543a6bd1",
+    "godot-client/src/actors/weapon_carry_pose.gd": "eb046de38fdddc7061eab0cbb008834eb088cd308ffc73e74ed541f55b1ff79c",
+    "godot-client/tests/test_equipment_wrist_alignment.gd": "16f0ec5b9d91e36f0b1e5a7af13c8a3ac08c0c861d72fce104641a2cfdc85bb7",
+    "godot-client/tests/test_equipment_review_fit.gd": "caeeb523ed236a8a02d7b41ec930ad1e4c87ebf20705624594adcee784f33f5a"
+  },
+  "items": [
+    {
+      "key": "3:124",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/amberwood_forest_helm_08.glb",
+      "before_sha256": "2036587e351cfc98d1b759b3b9bf49cb0b07adafb334ad2981678358c7019b31",
+      "after_sha256": "373b5408d06bb3a447ba690408eb80a59df90066815d56d8b056c5c327236501",
+      "changes": [
+        {
+          "removed_detached_neck_shell_triangles": 36
+        }
+      ],
+      "validation": {
+        "vertices": 2092,
+        "triangles": 1506,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "5:184",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/amberwood_woodland_cuirass_01.glb",
+      "before_sha256": "d938da2be4567bd2025ca6ec4e105f71edfc76a44977c013aa308d500200cf29",
+      "after_sha256": "30ecb6a39a538a7a95f8843ba03989cb3b348948ea526e5f906c80bb311e6ee9",
+      "changes": [
+        {
+          "moved_vertices": 580,
+          "max_displacement_m": 0.039821
+        },
+        {
+          "moved_vertices": 15938,
+          "max_displacement_m": 0.015358
+        },
+        {
+          "chest_front_98_before_m": 0.18275830149650574,
+          "front_depth_factor": 0.7155861360767742
+        }
+      ],
+      "validation": {
+        "vertices": 55251,
+        "triangles": 19928,
+        "max_weight_sum_error": 0.0039217472076416016
+      }
+    },
+    {
+      "key": "5:188",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/amberwood_woodland_cuirass_05.glb",
+      "before_sha256": "c4f12ea6d1d2ee38f1104676b0cbfbf35fc09c9928a1b44946482cc94b09a263",
+      "after_sha256": "8598c0aa33a599e05e7ead397977254e1a054db4b915389a71f393bfd0bd3eb3",
+      "changes": [
+        {
+          "moved_vertices": 734,
+          "max_displacement_m": 0.041108
+        },
+        {
+          "moved_vertices": 15680,
+          "max_displacement_m": 0.015663
+        },
+        {
+          "chest_front_98_before_m": 0.18381528556346893,
+          "front_depth_factor": 0.7099338435065494
+        }
+      ],
+      "validation": {
+        "vertices": 53212,
+        "triangles": 19212,
+        "max_weight_sum_error": 0.0039217472076416016
+      }
+    },
+    {
+      "key": "5:189",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/amberwood_woodland_cuirass_06.glb",
+      "before_sha256": "405daf3f37639cc9996d693742bdd7a18668edf5aa96b4e43b8e357e0ef03337",
+      "after_sha256": "d5c52c34bf03153cd0195611dc4786ca51490e1ed1f2bc70d4c2b311009ffae1",
+      "changes": [
+        {
+          "moved_vertices": 1003,
+          "max_displacement_m": 0.058756
+        },
+        {
+          "moved_vertices": 14979,
+          "max_displacement_m": 0.019721
+        },
+        {
+          "chest_front_98_before_m": 0.19966065883636475,
+          "front_depth_factor": 0.6347693558122754
+        }
+      ],
+      "validation": {
+        "vertices": 52759,
+        "triangles": 19507,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:191",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/amberwood_woodland_cuirass_08.glb",
+      "before_sha256": "958a3d8ac310b3d10bda63a3969dfeec25f060b547bd01194303100ed489b3b7",
+      "after_sha256": "8bc8889ab307d43ba7220e2d6a2374a1bd77dc17b6bce297c738e2c29df9e70f",
+      "changes": [
+        {
+          "moved_vertices": 562,
+          "max_displacement_m": 0.026861
+        },
+        {
+          "moved_vertices": 15114,
+          "max_displacement_m": 0.011584
+        },
+        {
+          "chest_front_98_before_m": 0.17094658315181732,
+          "front_depth_factor": 0.7854707220686997
+        }
+      ],
+      "validation": {
+        "vertices": 53580,
+        "triangles": 19384,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:216",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/eloria_arcane_armor_01.glb",
+      "before_sha256": "e8d65a96e44b8a425426fcffc46d9384a89023a5cd8f717d4c127cbfc6804c1f",
+      "after_sha256": "2a8234978c3fb071e6aa461d3a22f68b425e0027ee295e1a880ea0531c532a82",
+      "changes": [
+        {
+          "moved_vertices": 293,
+          "max_displacement_m": 0.036312
+        },
+        {
+          "moved_vertices": 15639,
+          "max_displacement_m": 0.014932
+        },
+        {
+          "chest_front_98_before_m": 0.1813122183084488,
+          "front_depth_factor": 0.7234665686390858
+        }
+      ],
+      "validation": {
+        "vertices": 52400,
+        "triangles": 18140,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:217",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/eloria_arcane_armor_02.glb",
+      "before_sha256": "6a6fb1f15280b58cd18194714840e3be39271544ca6f39ba53c2bbb61f4897da",
+      "after_sha256": "59650e83b52a620cae2ec1495d081bf887c377280461f6f403e324c3b653276a",
+      "changes": [
+        {
+          "moved_vertices": 368,
+          "max_displacement_m": 0.022195
+        },
+        {
+          "moved_vertices": 15424,
+          "max_displacement_m": 0.009446
+        },
+        {
+          "chest_front_98_before_m": 0.16514146327972412,
+          "front_depth_factor": 0.8250720226579668
+        }
+      ],
+      "validation": {
+        "vertices": 52362,
+        "triangles": 18232,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:218",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/eloria_arcane_armor_03.glb",
+      "before_sha256": "372e9be615be6727faa2226aa66dd8e190312c94b5b9f8cd3aed2c9ae3c34f4c",
+      "after_sha256": "7e0a3e2e6f0034ddd95dca18b8e0b1bae2025b7d31953c39d466f63f0e1b7c02",
+      "changes": [
+        {
+          "moved_vertices": 185,
+          "max_displacement_m": 0.031628
+        },
+        {
+          "moved_vertices": 15455,
+          "max_displacement_m": 0.013045
+        },
+        {
+          "chest_front_98_before_m": 0.17526015639305115,
+          "front_depth_factor": 0.7584215343137647
+        }
+      ],
+      "validation": {
+        "vertices": 52225,
+        "triangles": 18044,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:223",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/eloria_arcane_armor_08.glb",
+      "before_sha256": "a70bb47c30828160cffd5b6603b93d281ba26d07e5c5dd71f7eda43d37e644b4",
+      "after_sha256": "fbf23584bc8cd21b82696cc80190910831493a369b3602af6c1bc2d79786935b",
+      "changes": [
+        {
+          "moved_vertices": 312,
+          "max_displacement_m": 0.025059
+        },
+        {
+          "moved_vertices": 15738,
+          "max_displacement_m": 0.010947
+        },
+        {
+          "chest_front_98_before_m": 0.16915588080883026,
+          "front_depth_factor": 0.7972749591135567
+        }
+      ],
+      "validation": {
+        "vertices": 51711,
+        "triangles": 17922,
+        "max_weight_sum_error": 0.0039217472076416016
+      }
+    },
+    {
+      "key": "5:235",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/eloria_frontier_shirt_04.glb",
+      "before_sha256": "4157c2d28d56be21ca4673d6715d219b7db12e5425cfe9679d6f3514add8bf5a",
+      "after_sha256": "3d78f009249822c6c68c15a81d64e3166e4e885630b7181122f90264186e4de0",
+      "changes": [
+        {
+          "moved_vertices": 340,
+          "max_displacement_m": 0.024764
+        },
+        {
+          "moved_vertices": 15441,
+          "max_displacement_m": 0.010611
+        },
+        {
+          "chest_front_98_before_m": 0.16823267936706543,
+          "front_depth_factor": 0.8035003563191085
+        }
+      ],
+      "validation": {
+        "vertices": 53661,
+        "triangles": 18807,
+        "max_weight_sum_error": 0.0039217472076416016
+      }
+    },
+    {
+      "key": "5:237",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/eloria_frontier_shirt_06.glb",
+      "before_sha256": "199dd853c3ea74033b10d2328225c46e18840815b15529eff0582329534a416e",
+      "after_sha256": "2e09859eb82f113087c212575d952eca7b9d777fe098013413073161296bc763",
+      "changes": [
+        {
+          "moved_vertices": 546,
+          "max_displacement_m": 0.035876
+        },
+        {
+          "moved_vertices": 15262,
+          "max_displacement_m": 0.014303
+        },
+        {
+          "chest_front_98_before_m": 0.1792324036359787,
+          "front_depth_factor": 0.7351097505513833
+        }
+      ],
+      "validation": {
+        "vertices": 53742,
+        "triangles": 18734,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:238",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/eloria_frontier_shirt_07.glb",
+      "before_sha256": "4bbe1f54ccb18bc2401e51a8866c846dd22767cd815b46dcdc293e0cd02678c5",
+      "after_sha256": "e9c05a6e6f266e1d7a5a00774188628d0b2e45f5138528ebb4742ac6fa837a5c",
+      "changes": [
+        {
+          "moved_vertices": 815,
+          "max_displacement_m": 0.028299
+        },
+        {
+          "moved_vertices": 15196,
+          "max_displacement_m": 0.012178
+        },
+        {
+          "chest_front_98_before_m": 0.1726635843515396,
+          "front_depth_factor": 0.7744759824377951
+        }
+      ],
+      "validation": {
+        "vertices": 105197,
+        "triangles": 18695,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "3:143",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/knightly_headgear_03.glb",
+      "before_sha256": "5daf76aad5c5622658029f2c3fbb62aaa73ee344dc7573b9e4a1caf67c920dca",
+      "after_sha256": "e363bdee2f8af4477cc37e299f5be5323b8b68d0a13a770e459d9f0915c27956",
+      "changes": [
+        {
+          "removed_detached_neck_shell_triangles": 444
+        }
+      ],
+      "validation": {
+        "vertices": 2054,
+        "triangles": 1192,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "5:204",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/knightly_torso_armor_05.glb",
+      "before_sha256": "015e3e8e3eb12a25033d63205e4bad91e9e68bf2b69ac719777f1d845a187e84",
+      "after_sha256": "a9f57c8bbe0f557f7f53e1b9eaca1920a79ecf1c5cffb884efa2dd73bc3e22e2",
+      "changes": [
+        {
+          "moved_vertices": 195,
+          "max_displacement_m": 0.034138
+        },
+        {
+          "moved_vertices": 15781,
+          "max_displacement_m": 0.014213
+        },
+        {
+          "chest_front_98_before_m": 0.1789388209581375,
+          "front_depth_factor": 0.736783532640209
+        }
+      ],
+      "validation": {
+        "vertices": 52375,
+        "triangles": 18237,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:206",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/knightly_torso_armor_07.glb",
+      "before_sha256": "53fedd60bad12dc679c45ef467173669dce22cbec5cb90af9653338cba4af4fc",
+      "after_sha256": "fcd64d9d5613f622a3d2d1829d8d4bb7cd35fb03db1c1b1a973f04bdfe69d856",
+      "changes": [
+        {
+          "moved_vertices": 409,
+          "max_displacement_m": 0.024887
+        },
+        {
+          "moved_vertices": 15600,
+          "max_displacement_m": 0.010272
+        },
+        {
+          "chest_front_98_before_m": 0.16731609404087067,
+          "front_depth_factor": 0.8097780681898924
+        }
+      ],
+      "validation": {
+        "vertices": 54118,
+        "triangles": 18689,
+        "max_weight_sum_error": 0.0039217472076416016
+      }
+    },
+    {
+      "key": "5:225",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/leather_ranger_torso_02.glb",
+      "before_sha256": "cac630160217f9fac9e847b2eec99446088c9a110dbfe6435bd68a572e892453",
+      "after_sha256": "24d69dd6d7eccd16271dd46af958f5f91b99cee59b303499b09824bf910e8cd7",
+      "changes": [
+        {
+          "moved_vertices": 355,
+          "max_displacement_m": 0.02639
+        },
+        {
+          "moved_vertices": 12622,
+          "max_displacement_m": 0.011402
+        },
+        {
+          "chest_front_98_before_m": 0.170822873711586,
+          "front_depth_factor": 0.7862749583888619
+        }
+      ],
+      "validation": {
+        "vertices": 52470,
+        "triangles": 18338,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:227",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/leather_ranger_torso_04.glb",
+      "before_sha256": "595a5f1faef81eae82c8ebde6b7559827333ed14dcde2e7c0e8e03e45b6dc97c",
+      "after_sha256": "e9b93c4d5c0dbf5186d796d43aec0556d7d7c7e9364df9519481a96ff3247a9c",
+      "changes": [
+        {
+          "moved_vertices": 295,
+          "max_displacement_m": 0.060283
+        },
+        {
+          "moved_vertices": 14616,
+          "max_displacement_m": 0.020489
+        },
+        {
+          "chest_front_98_before_m": 0.2030913382768631,
+          "front_depth_factor": 0.6205445786109341
+        }
+      ],
+      "validation": {
+        "vertices": 51666,
+        "triangles": 17975,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:228",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/leather_ranger_torso_05.glb",
+      "before_sha256": "7797335abbae86efdb2cfd7e723ee6d9b6359a248e971840064385a4b4d30b22",
+      "after_sha256": "8905477b4c53433ec87ff5f51184fa4b532d2fa8f68c1f2d7970943497c96c33",
+      "changes": [
+        {
+          "moved_vertices": 446,
+          "max_displacement_m": 0.031634
+        },
+        {
+          "moved_vertices": 13393,
+          "max_displacement_m": 0.013355
+        },
+        {
+          "chest_front_98_before_m": 0.17621535062789917,
+          "front_depth_factor": 0.7526818214059675
+        }
+      ],
+      "validation": {
+        "vertices": 53865,
+        "triangles": 18610,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:229",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/leather_ranger_torso_06.glb",
+      "before_sha256": "c41dfb246b099ceaec00fe2c5744dbb87e09500e0697cdaa6fe963bd9eca4c7c",
+      "after_sha256": "18f3c24a7a5ff1fb50a5aef94b8fe23d26a0e42a31db666ecb9fa123ba030577",
+      "changes": [
+        {
+          "moved_vertices": 286,
+          "max_displacement_m": 0.036251
+        },
+        {
+          "moved_vertices": 15768,
+          "max_displacement_m": 0.014259
+        },
+        {
+          "chest_front_98_before_m": 0.17908719182014465,
+          "front_depth_factor": 0.7359366848134874
+        }
+      ],
+      "validation": {
+        "vertices": 52258,
+        "triangles": 18163,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:230",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/leather_ranger_torso_07.glb",
+      "before_sha256": "08ed01953f3ce405309fb2c5938a182c4225178bd733b513415e293984d7afbf",
+      "after_sha256": "9264c63779d54431742f10d583a10c7b3730d99abbeb74a180359ef3dcf9271a",
+      "changes": [
+        {
+          "moved_vertices": 270,
+          "max_displacement_m": 0.031753
+        },
+        {
+          "moved_vertices": 15610,
+          "max_displacement_m": 0.013409
+        },
+        {
+          "chest_front_98_before_m": 0.17638558149337769,
+          "front_depth_factor": 0.7516680216008482
+        }
+      ],
+      "validation": {
+        "vertices": 52160,
+        "triangles": 18207,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:231",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/leather_ranger_torso_08.glb",
+      "before_sha256": "de93e3f5cbf316ee7b57602d4a5f4427c627e4993fea1ce2e90d831d63b4e83e",
+      "after_sha256": "4423727c1521689e0977a80dba05065b03de8519425da6ee6598cd84a71e3021",
+      "changes": [
+        {
+          "moved_vertices": 514,
+          "max_displacement_m": 0.056343
+        },
+        {
+          "moved_vertices": 15431,
+          "max_displacement_m": 0.020054
+        },
+        {
+          "chest_front_98_before_m": 0.20112749934196472,
+          "front_depth_factor": 0.6286082970580895
+        }
+      ],
+      "validation": {
+        "vertices": 52305,
+        "triangles": 18224,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "3:125",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/legendary_eloria_helm_01.glb",
+      "before_sha256": "8cb7d9cacad1b0c4ba0964b2048aae820cff70c110e237b3a0204ec39c788a90",
+      "after_sha256": "9d67c7ddc4ac8723d5bb82e81a78dd2617665ed5af3728e84e832b00b290f0f4",
+      "changes": [
+        {
+          "removed_detached_neck_shell_triangles": 150
+        }
+      ],
+      "validation": {
+        "vertices": 2006,
+        "triangles": 1431,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:128",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/legendary_eloria_helm_04.glb",
+      "before_sha256": "c20f24a9b350c9fb3e98385caef2e94742fcddcdae91f2d9fc63aa12a7d516cd",
+      "after_sha256": "a3179f591973eab574715c39b5e90ec916713664d8beb8007f715fb4279272eb",
+      "changes": [
+        {
+          "removed_detached_neck_shell_triangles": 38
+        }
+      ],
+      "validation": {
+        "vertices": 2072,
+        "triangles": 1383,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:131",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/legendary_eloria_helm_07.glb",
+      "before_sha256": "0633380c4aa40874be8187d02b791d3fc622227c2024f8a7fac00b3551347eb1",
+      "after_sha256": "b5a8c6250c40872cd9003d4182e44aa401617e002c185313c50d3a57880a111e",
+      "changes": [
+        {
+          "removed_detached_neck_shell_triangles": 28
+        }
+      ],
+      "validation": {
+        "vertices": 2094,
+        "triangles": 1437,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:132",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/legendary_eloria_helm_08.glb",
+      "before_sha256": "4baaeb1c7e0646295ef65f23e18725e09664af3d0ca337f3c62c832b9459d47d",
+      "after_sha256": "83a73490747114db282bbd0c349a73662667893cdaefb32f174ba62b9ac2037a",
+      "changes": [
+        {
+          "removed_detached_neck_shell_triangles": 52
+        }
+      ],
+      "validation": {
+        "vertices": 2240,
+        "triangles": 1504,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "5:192",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/legendary_hero_cuirass_01.glb",
+      "before_sha256": "d53fe92d4b432d6b635e295af7a198984c60ebbd787d170b3ab58e3fbb6e5e33",
+      "after_sha256": "85753ac41ef89930a03239683eb8f90f6b71203a9582935e2114f9a5e1b5c154",
+      "changes": [
+        {
+          "moved_vertices": 296,
+          "max_displacement_m": 0.046763
+        },
+        {
+          "moved_vertices": 15576,
+          "max_displacement_m": 0.016802
+        },
+        {
+          "chest_front_98_before_m": 0.18791504204273224,
+          "front_depth_factor": 0.6888298665098818
+        }
+      ],
+      "validation": {
+        "vertices": 52344,
+        "triangles": 18064,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:193",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/legendary_hero_cuirass_02.glb",
+      "before_sha256": "ffd068d7d3a5d3b8f7e3c48945fba1b82dc0b34f52ec403f290850341bbff6e4",
+      "after_sha256": "0a4af781735e627bb5f5e10450747f9c8087ff02fd326d2af2e3cdcece4c16d5",
+      "changes": [
+        {
+          "moved_vertices": 236,
+          "max_displacement_m": 0.053636
+        },
+        {
+          "moved_vertices": 15815,
+          "max_displacement_m": 0.019485
+        },
+        {
+          "chest_front_98_before_m": 0.19863618910312653,
+          "front_depth_factor": 0.6391444813893017
+        }
+      ],
+      "validation": {
+        "vertices": 52740,
+        "triangles": 18285,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:194",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/legendary_hero_cuirass_03.glb",
+      "before_sha256": "99b646e93d90da5a93dd7d3137234b1f0a50209a00ddc2feb75c852e27a68301",
+      "after_sha256": "fc75bbb07c4d3b713e9bd7f0cbd889de9d057918d9c00e3b3d720eebc95c08d4",
+      "changes": [
+        {
+          "moved_vertices": 289,
+          "max_displacement_m": 0.042358
+        },
+        {
+          "moved_vertices": 16019,
+          "max_displacement_m": 0.016177
+        },
+        {
+          "chest_front_98_before_m": 0.18563461303710938,
+          "front_depth_factor": 0.7004111846731053
+        }
+      ],
+      "validation": {
+        "vertices": 53469,
+        "triangles": 18456,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:195",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/legendary_hero_cuirass_04.glb",
+      "before_sha256": "94f3cdb3c46ad02d5a86b7b622ee7d22c9e69e6bff894207fd97f332ab12d656",
+      "after_sha256": "1cfbad7a3b58231502c13dbac57fe6667bd64e9122ac4956c925dbc5233259d9",
+      "changes": [
+        {
+          "moved_vertices": 367,
+          "max_displacement_m": 0.057118
+        },
+        {
+          "moved_vertices": 15444,
+          "max_displacement_m": 0.019786
+        },
+        {
+          "chest_front_98_before_m": 0.19994160532951355,
+          "front_depth_factor": 0.6335799846295282
+        }
+      ],
+      "validation": {
+        "vertices": 52895,
+        "triangles": 18296,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:196",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/legendary_hero_cuirass_05.glb",
+      "before_sha256": "684afd7fe4ac0367bf75b3a16d68bd7c33af352089bca7dbdcd31cde5644cd06",
+      "after_sha256": "745469eedb7e5db1d7473bae9f9fe470f87c9b531e0c7212d66257ffe3e74dfe",
+      "changes": [
+        {
+          "moved_vertices": 272,
+          "max_displacement_m": 0.068307
+        },
+        {
+          "moved_vertices": 15861,
+          "max_displacement_m": 0.022243
+        },
+        {
+          "chest_front_98_before_m": 0.21154172718524933,
+          "front_depth_factor": 0.5880833494559454
+        }
+      ],
+      "validation": {
+        "vertices": 51420,
+        "triangles": 17783,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:197",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/legendary_hero_cuirass_06.glb",
+      "before_sha256": "59554b5306038ae89986beac238ab8b23b991e4c618b6365a1dee37a70243a60",
+      "after_sha256": "89651af128d33004973b8e2a92cb7f459acd32db7342cbc31fb751225b9a2f05",
+      "changes": [
+        {
+          "moved_vertices": 248,
+          "max_displacement_m": 0.027284
+        },
+        {
+          "moved_vertices": 15739,
+          "max_displacement_m": 0.011787
+        },
+        {
+          "chest_front_98_before_m": 0.17152796685695648,
+          "front_depth_factor": 0.7817130694848123
+        }
+      ],
+      "validation": {
+        "vertices": 52070,
+        "triangles": 17966,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:198",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/legendary_hero_cuirass_07.glb",
+      "before_sha256": "4fddb9a644507de1b5154c3220f60181bb59661e09d250b17ba0a2a2ca7f29cd",
+      "after_sha256": "0313367e6e7fcc17ac4afb0d0eff02c04da5c2e60f8361916cd50a02746c92c0",
+      "changes": [
+        {
+          "moved_vertices": 332,
+          "max_displacement_m": 0.023087
+        },
+        {
+          "moved_vertices": 15576,
+          "max_displacement_m": 0.010314
+        },
+        {
+          "chest_front_98_before_m": 0.16743071377277374,
+          "front_depth_factor": 0.8089876740749719
+        }
+      ],
+      "validation": {
+        "vertices": 53666,
+        "triangles": 18503,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "3:134",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/militia_helmet_02.glb",
+      "before_sha256": "07fba85bd35669ed37fe090191e0b6f26be883619995452376b91cd0f606159f",
+      "after_sha256": "1d40b09ddec6f6afcea85f901dfb0904d2f1c60ebe715afc1e9498f493592b09",
+      "changes": [
+        {
+          "removed_detached_neck_shell_triangles": 312
+        }
+      ],
+      "validation": {
+        "vertices": 1813,
+        "triangles": 1152,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:135",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/militia_helmet_03.glb",
+      "before_sha256": "ad5ce8be9e70b01b5fba1abe6cc5b356f9ec39c9ef9aa29a25519ea524bd929f",
+      "after_sha256": "d3805cd75ffd4a094b920f1ea4b6e37cec595c2e42eee04eb1309a69fe959291",
+      "changes": [
+        {
+          "removed_detached_neck_shell_triangles": 229
+        }
+      ],
+      "validation": {
+        "vertices": 2106,
+        "triangles": 1374,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:138",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/militia_helmet_06.glb",
+      "before_sha256": "bac780f9f2eb786ce169cac6d1b2ffe8ad6c141ad23adfddae4b471bb76ddd0a",
+      "after_sha256": "7915766ed019d90ee615293f494f534a9025890e5888723e01507323c9799a01",
+      "changes": [
+        {
+          "removed_detached_neck_shell_triangles": 92
+        }
+      ],
+      "validation": {
+        "vertices": 1752,
+        "triangles": 1515,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:139",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/militia_helmet_07.glb",
+      "before_sha256": "a0fbf343ce1ab0b2ca51a4ad670731cd7dcd49d34d1f2354d00b24d66f4e97cb",
+      "after_sha256": "8b840c11abb3a8b0670422f163362a47bedb9072110c724459d1bdade969b27f",
+      "changes": [
+        {
+          "removed_detached_neck_shell_triangles": 118
+        }
+      ],
+      "validation": {
+        "vertices": 2003,
+        "triangles": 1434,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "5:208",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/militia_torso_armor_01.glb",
+      "before_sha256": "3667d0e911a47e0a37a54f45e54ae4f8777c60b0c33bd680ceea6582452eee8a",
+      "after_sha256": "19cd3171eb79aee866f185c15222dd45020e349e8d10a92afe2eadb9f46491bb",
+      "changes": [
+        {
+          "moved_vertices": 388,
+          "max_displacement_m": 0.03659
+        },
+        {
+          "moved_vertices": 15484,
+          "max_displacement_m": 0.014954
+        },
+        {
+          "chest_front_98_before_m": 0.18138661980628967,
+          "front_depth_factor": 0.723056884636073
+        }
+      ],
+      "validation": {
+        "vertices": 53851,
+        "triangles": 18873,
+        "max_weight_sum_error": 0.0039217472076416016
+      }
+    },
+    {
+      "key": "5:210",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/militia_torso_armor_03.glb",
+      "before_sha256": "d44dbeae6271fc570fb0c108d2e4d077c1f43f729abf834d09e9a381e73d183e",
+      "after_sha256": "8e4ca65d3d1fbde357b273d427062e77116a6277bf4ffb0096984c00b96a55f7",
+      "changes": [
+        {
+          "moved_vertices": 434,
+          "max_displacement_m": 0.028659
+        },
+        {
+          "moved_vertices": 15516,
+          "max_displacement_m": 0.012351
+        },
+        {
+          "chest_front_98_before_m": 0.17317457497119904,
+          "front_depth_factor": 0.7712630631947632
+        }
+      ],
+      "validation": {
+        "vertices": 103455,
+        "triangles": 18300,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:211",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/militia_torso_armor_04.glb",
+      "before_sha256": "371e1fca520e9f4df1b266cc5ed081bfc1b280e07cb09ab3212cdec399f4a009",
+      "after_sha256": "c84c406f8b2cfb4bd99a956de7b011c7be62ecfe6e9eee773cce7c817fafee9d",
+      "changes": [
+        {
+          "moved_vertices": 521,
+          "max_displacement_m": 0.027695
+        },
+        {
+          "moved_vertices": 15610,
+          "max_displacement_m": 0.012151
+        },
+        {
+          "chest_front_98_before_m": 0.1725849062204361,
+          "front_depth_factor": 0.7749730609506521
+        }
+      ],
+      "validation": {
+        "vertices": 104230,
+        "triangles": 18552,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:213",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/militia_torso_armor_06.glb",
+      "before_sha256": "4aaff08975466a7d75ad831c898a7ae877b53ca4c9b276d7f8cec0fd2528aea6",
+      "after_sha256": "9ced83e84e6916a357bf25df6c547c72a1d4b898c4909f3ad35dae190efbf134",
+      "changes": [
+        {
+          "moved_vertices": 426,
+          "max_displacement_m": 0.027299
+        },
+        {
+          "moved_vertices": 15335,
+          "max_displacement_m": 0.011868
+        },
+        {
+          "chest_front_98_before_m": 0.17176353931427002,
+          "front_depth_factor": 0.7802007114363381
+        }
+      ],
+      "validation": {
+        "vertices": 53641,
+        "triangles": 18701,
+        "max_weight_sum_error": 0.0039217472076416016
+      }
+    },
+    {
+      "key": "5:214",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/militia_torso_armor_07.glb",
+      "before_sha256": "22161c2ea750ee0e15b91dbef2c20e7723374926ed2cef3712110145a0fd6cab",
+      "after_sha256": "ea02dcb01c5265feecee7c34d7c4940212e3cfdb6b1d989eda1cc5bac44f971b",
+      "changes": [
+        {
+          "moved_vertices": 446,
+          "max_displacement_m": 0.022914
+        },
+        {
+          "moved_vertices": 15222,
+          "max_displacement_m": 0.010449
+        },
+        {
+          "chest_front_98_before_m": 0.1677938848733902,
+          "front_depth_factor": 0.8064934788602139
+        }
+      ],
+      "validation": {
+        "vertices": 52034,
+        "triangles": 18176,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:215",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/militia_torso_armor_08.glb",
+      "before_sha256": "35bc6e83f636b4530c5cb2f7d274673475606eea8df7c57bcc71b45d7ecef95b",
+      "after_sha256": "2fb6319b99be760a55ff4cccbaee49c1f283c2ba571ab49be3c6c2031aa4d170",
+      "changes": [
+        {
+          "moved_vertices": 517,
+          "max_displacement_m": 0.03045
+        },
+        {
+          "moved_vertices": 15429,
+          "max_displacement_m": 0.012706
+        },
+        {
+          "chest_front_98_before_m": 0.17423419654369354,
+          "front_depth_factor": 0.7646847860169338
+        }
+      ],
+      "validation": {
+        "vertices": 53557,
+        "triangles": 18503,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "3:172",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/sunmane_steppe_headgear_08.glb",
+      "before_sha256": "42c41ce9e0447093482ac40039cca86d801ea573c271f8df47b3d1898753696f",
+      "after_sha256": "81ec1db2b486643a86bd89d3e6959fd380925bdcdec4ae68ea5f0172b91aaea8",
+      "changes": [
+        {
+          "removed_detached_neck_shell_triangles": 38
+        }
+      ],
+      "validation": {
+        "vertices": 1757,
+        "triangles": 1158,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "5:240",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/sunmane_steppe_shirt_01.glb",
+      "before_sha256": "67912e825b2deed90ace4d8044ff2cf33663b72b347c43fc468c455c94160c54",
+      "after_sha256": "482e829c32d82b4da69b49651ccfe766b4c3302bfb1bbcc16a1c26fab7c176cf",
+      "changes": [
+        {
+          "moved_vertices": 322,
+          "max_displacement_m": 0.033664
+        },
+        {
+          "moved_vertices": 15950,
+          "max_displacement_m": 0.014128
+        },
+        {
+          "chest_front_98_before_m": 0.17866390943527222,
+          "front_depth_factor": 0.7383577913726633
+        }
+      ],
+      "validation": {
+        "vertices": 53345,
+        "triangles": 18559,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:243",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/sunmane_steppe_shirt_04.glb",
+      "before_sha256": "840fd74bb4b0193f4d5809ca0d117090ee3be7fc81d1caef304c7fd712ab44d8",
+      "after_sha256": "c7e4abb56e572c3e454321289899317426e9d3099a34739562fdf9a15bdaa902",
+      "changes": [
+        {
+          "moved_vertices": 494,
+          "max_displacement_m": 0.02218
+        },
+        {
+          "moved_vertices": 14654,
+          "max_displacement_m": 0.009861
+        },
+        {
+          "chest_front_98_before_m": 0.166516974568367,
+          "front_depth_factor": 0.8153318462989974
+        }
+      ],
+      "validation": {
+        "vertices": 51525,
+        "triangles": 18003,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:244",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/sunmane_steppe_shirt_05.glb",
+      "before_sha256": "b9811b6b14e6832f8518721ea784e4647b28b8cc7121e7169f8b3fd55642a1a3",
+      "after_sha256": "26f210dfc66d6b9c8ab5e3ab24bc813b5e031b4d2f0e3bdfd17c1fcef9b9f3cc",
+      "changes": [
+        {
+          "moved_vertices": 336,
+          "max_displacement_m": 0.043562
+        },
+        {
+          "moved_vertices": 15576,
+          "max_displacement_m": 0.016523
+        },
+        {
+          "chest_front_98_before_m": 0.18688496947288513,
+          "front_depth_factor": 0.6940133775521502
+        }
+      ],
+      "validation": {
+        "vertices": 51802,
+        "triangles": 18038,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:245",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/sunmane_steppe_shirt_06.glb",
+      "before_sha256": "a2c44877b442f57e30e792e9995bdb3709023bbaffed59adb1a35a4d5a02944d",
+      "after_sha256": "9bf99af7cd189ac6ec012849dfba8c99d056ee24d715a403252f50452b718609",
+      "changes": [
+        {
+          "moved_vertices": 572,
+          "max_displacement_m": 0.041679
+        },
+        {
+          "moved_vertices": 14107,
+          "max_displacement_m": 0.016308
+        },
+        {
+          "chest_front_98_before_m": 0.18610554933547974,
+          "front_depth_factor": 0.6979877048645478
+        }
+      ],
+      "validation": {
+        "vertices": 51969,
+        "triangles": 18006,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:246",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/sunmane_steppe_shirt_07.glb",
+      "before_sha256": "2af435c39414cf99970ab91e6934a1ec9c38449ff9257570c6dea06c0083700f",
+      "after_sha256": "e005f8b8f36cd2677d0b57aa0d27126c2e42bc8a898d07cd8d783c0607387572",
+      "changes": [
+        {
+          "moved_vertices": 331,
+          "max_displacement_m": 0.031882
+        },
+        {
+          "moved_vertices": 14807,
+          "max_displacement_m": 0.013492
+        },
+        {
+          "chest_front_98_before_m": 0.1766447275876999,
+          "front_depth_factor": 0.7501299249446738
+        }
+      ],
+      "validation": {
+        "vertices": 52024,
+        "triangles": 18199,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:247",
+      "scene": "res://assets/actors/native/equipment/variants/human_female/sunmane_steppe_shirt_08.glb",
+      "before_sha256": "141fe72ef2fea3d925e98134a890334ba45cb138f65af69e04d4f8af1d07bc4b",
+      "after_sha256": "32d52e8534bc132943783d828fb1b579b3a058c6c06950d0c8b64bc4c0bf2a75",
+      "changes": [
+        {
+          "moved_vertices": 397,
+          "max_displacement_m": 0.034561
+        },
+        {
+          "moved_vertices": 14728,
+          "max_displacement_m": 0.013528
+        },
+        {
+          "chest_front_98_before_m": 0.17675483226776123,
+          "front_depth_factor": 0.749478329941053
+        }
+      ],
+      "validation": {
+        "vertices": 51637,
+        "triangles": 17793,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "3:124",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/amberwood_forest_helm_08.glb",
+      "before_sha256": "fd07a9908070727be0a735cf7fb5b6095a76ffc0483c99d147d17bf482eca10c",
+      "after_sha256": "6d606c7106d31904cb3e0db570b12f787761189ed6e333d7cff99ea44322d30d",
+      "changes": [
+        {
+          "removed_detached_neck_shell_triangles": 36
+        }
+      ],
+      "validation": {
+        "vertices": 2092,
+        "triangles": 1506,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "5:188",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/amberwood_woodland_cuirass_05.glb",
+      "before_sha256": "e0e5dd9d299877968d5b70dec1da530837d0cd4f80f57423abdb94c52d86d35b",
+      "after_sha256": "d0dd47101a27e4fc17205d1e104f46bcb50f1959b41bc97ebe3a395d62649bc1",
+      "changes": [
+        {
+          "moved_vertices": 688,
+          "max_displacement_m": 0.032902
+        },
+        {
+          "moved_vertices": 10897,
+          "max_displacement_m": 0.013217
+        },
+        {
+          "chest_front_98_before_m": 0.17578786611557007,
+          "front_depth_factor": 0.7552397773622844
+        }
+      ],
+      "validation": {
+        "vertices": 48352,
+        "triangles": 17592,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:189",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/amberwood_woodland_cuirass_06.glb",
+      "before_sha256": "f99992f8533ea7e5931a5fdb4dc5adaca0c52d779f572ab7b5fdb82c13d6908b",
+      "after_sha256": "1f4fe1c0e269fa78470a954e12eef654663617bca8350c7f4f9d84112767a04c",
+      "changes": [
+        {
+          "moved_vertices": 962,
+          "max_displacement_m": 0.040674
+        },
+        {
+          "moved_vertices": 10291,
+          "max_displacement_m": 0.015602
+        },
+        {
+          "chest_front_98_before_m": 0.18362806737422943,
+          "front_depth_factor": 0.7109284888028023
+        }
+      ],
+      "validation": {
+        "vertices": 48103,
+        "triangles": 17947,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:191",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/amberwood_woodland_cuirass_08.glb",
+      "before_sha256": "f3c4ee95f9f33730b453c593b1034074415d1a43d873f2f5e8f4e49a972720d4",
+      "after_sha256": "328f5d26914517a033fb2d0067cdb74bdd392736caa5ac9b781679764214cced",
+      "changes": [
+        {
+          "moved_vertices": 529,
+          "max_displacement_m": 0.036623
+        },
+        {
+          "moved_vertices": 10735,
+          "max_displacement_m": 0.014732
+        },
+        {
+          "chest_front_98_before_m": 0.18064169585704803,
+          "front_depth_factor": 0.727179782662587
+        }
+      ],
+      "validation": {
+        "vertices": 48636,
+        "triangles": 17738,
+        "max_weight_sum_error": 0.0039217472076416016
+      }
+    },
+    {
+      "key": "5:216",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/eloria_arcane_armor_01.glb",
+      "before_sha256": "8ae5684268aa8527477f314f15887c9e70128ba199d3b41b552500d81039a4a2",
+      "after_sha256": "d88ceffa78192e7254a8edd216ccbe5126891ea74fc0993e87909f037c835111",
+      "changes": [
+        {
+          "moved_vertices": 271,
+          "max_displacement_m": 0.027294
+        },
+        {
+          "moved_vertices": 11057,
+          "max_displacement_m": 0.012051
+        },
+        {
+          "chest_front_98_before_m": 0.17229369282722473,
+          "front_depth_factor": 0.7768184752930392
+        }
+      ],
+      "validation": {
+        "vertices": 46700,
+        "triangles": 16241,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "3:143",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/knightly_headgear_03.glb",
+      "before_sha256": "b3552ac8ad591be836df27ec34d2f25d369807ba6e6cf6b53fae2dac3bd60385",
+      "after_sha256": "4ba00a4476f0b91b5364d544da69c726b3eba068cda0373145f0c3fed09065e7",
+      "changes": [
+        {
+          "removed_detached_neck_shell_triangles": 444
+        }
+      ],
+      "validation": {
+        "vertices": 2054,
+        "triangles": 1192,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:144",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/knightly_headgear_04.glb",
+      "before_sha256": "a5007285dac957bba9d5374a09b40711f072fcc1fc91d1971bfd10a237bbcc14",
+      "after_sha256": "d41ecc04b20767092a70722edc2bcaaf203a5096dfe805922b8321b7e8b8e093",
+      "changes": [
+        {
+          "removed_detached_neck_shell_triangles": 303
+        }
+      ],
+      "validation": {
+        "vertices": 2091,
+        "triangles": 1267,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:148",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/knightly_headgear_08.glb",
+      "before_sha256": "7c5adb2b9f0b691129367a48bae331d55249407f4cb512f9e8bbdc1ec43ec4a0",
+      "after_sha256": "3f62e8e0b93463aaf539aac0025c51e3b3feba479b6c65cc5908b13ad920453a",
+      "changes": [
+        {
+          "removed_detached_neck_shell_triangles": 360
+        }
+      ],
+      "validation": {
+        "vertices": 2201,
+        "triangles": 1312,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "5:206",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/knightly_torso_armor_07.glb",
+      "before_sha256": "7d0668c273a4c1fae78aa65f95f1cefe73e7fca06b1a56835dc37e40fb18662a",
+      "after_sha256": "5100cfea3c083cd7cd0d00d902a0972d306fd640e649bb2f3c842977601f1627",
+      "changes": [
+        {
+          "moved_vertices": 370,
+          "max_displacement_m": 0.031447
+        },
+        {
+          "moved_vertices": 10847,
+          "max_displacement_m": 0.013429
+        },
+        {
+          "chest_front_98_before_m": 0.1764470487833023,
+          "front_depth_factor": 0.7513026275750059
+        }
+      ],
+      "validation": {
+        "vertices": 46954,
+        "triangles": 16309,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:207",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/knightly_torso_armor_08.glb",
+      "before_sha256": "3ca197d41e43b36826cacad9fa2e82c768c968ab777e0d1a82ff26f3e2002958",
+      "after_sha256": "73c904d4201a56c9d678993d4007f068edb95221fa7195d5d3c582e096b4ac61",
+      "changes": [
+        {
+          "moved_vertices": 287,
+          "max_displacement_m": 0.022637
+        },
+        {
+          "moved_vertices": 11041,
+          "max_displacement_m": 0.010083
+        },
+        {
+          "chest_front_98_before_m": 0.1668132245540619,
+          "front_depth_factor": 0.8132640834346063
+        }
+      ],
+      "validation": {
+        "vertices": 46807,
+        "triangles": 16335,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:227",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/leather_ranger_torso_04.glb",
+      "before_sha256": "718f41d81a7f732e2ce87bcea4ba0f4e0c7ec51304c277fc798514a7f366c7cf",
+      "after_sha256": "353c17be399183db095cdf9929313f12f2b1923e4b7e665e28df89d1a59ce838",
+      "changes": [
+        {
+          "moved_vertices": 268,
+          "max_displacement_m": 0.052293
+        },
+        {
+          "moved_vertices": 10749,
+          "max_displacement_m": 0.018734
+        },
+        {
+          "chest_front_98_before_m": 0.1954711228609085,
+          "front_depth_factor": 0.6530505720426297
+        }
+      ],
+      "validation": {
+        "vertices": 46722,
+        "triangles": 16329,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:228",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/leather_ranger_torso_05.glb",
+      "before_sha256": "bb4088d3726687e4fc22d083c71bc89c292e4c72e16c41693231efddf88483e8",
+      "after_sha256": "892f6a9dc07480c360873e6b3f6347981f0ecf3c4e3a4696239612275b712888",
+      "changes": [
+        {
+          "moved_vertices": 397,
+          "max_displacement_m": 0.027514
+        },
+        {
+          "moved_vertices": 10606,
+          "max_displacement_m": 0.012029
+        },
+        {
+          "chest_front_98_before_m": 0.1722278892993927,
+          "front_depth_factor": 0.7772366891430237
+        }
+      ],
+      "validation": {
+        "vertices": 47013,
+        "triangles": 16334,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:229",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/leather_ranger_torso_06.glb",
+      "before_sha256": "b06a914a46ce3351a9575015ee1567dc1d1bed302bbcb43d9046cfe35460b564",
+      "after_sha256": "ab5e22b6bcb3b7894bf713913503088a327f74d34218e09b8fb6057e621bf0ca",
+      "changes": [
+        {
+          "moved_vertices": 275,
+          "max_displacement_m": 0.022987
+        },
+        {
+          "moved_vertices": 11083,
+          "max_displacement_m": 0.009447
+        },
+        {
+          "chest_front_98_before_m": 0.1656225025653839,
+          "front_depth_factor": 0.82163936856736
+        }
+      ],
+      "validation": {
+        "vertices": 46822,
+        "triangles": 16353,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:230",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/leather_ranger_torso_07.glb",
+      "before_sha256": "36a387b74b69bfca69c966e80970658242cb1ab3620b2799d2544d6222d825a8",
+      "after_sha256": "5563f8713d3397ffeccc8aa9bf78d694c4543b4cf673f6b79592555a1862da9c",
+      "changes": [
+        {
+          "moved_vertices": 259,
+          "max_displacement_m": 0.024971
+        },
+        {
+          "moved_vertices": 11037,
+          "max_displacement_m": 0.011203
+        },
+        {
+          "chest_front_98_before_m": 0.16987062990665436,
+          "front_depth_factor": 0.7925210710411581
+        }
+      ],
+      "validation": {
+        "vertices": 46700,
+        "triangles": 16390,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:231",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/leather_ranger_torso_08.glb",
+      "before_sha256": "4b8b0eb3f8c378633f8585030432660d4e6fdee8d86e8a059b63935f7a5e7b95",
+      "after_sha256": "8c1bbb145a9ecaaf8ca8cd8b86cfbef045017137be1ee4d5b5207166d14d7c1b",
+      "changes": [
+        {
+          "moved_vertices": 516,
+          "max_displacement_m": 0.029527
+        },
+        {
+          "moved_vertices": 10676,
+          "max_displacement_m": 0.012152
+        },
+        {
+          "chest_front_98_before_m": 0.17449526488780975,
+          "front_depth_factor": 0.7630812311264229
+        }
+      ],
+      "validation": {
+        "vertices": 46881,
+        "triangles": 16416,
+        "max_weight_sum_error": 0.0039217472076416016
+      }
+    },
+    {
+      "key": "3:125",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/legendary_eloria_helm_01.glb",
+      "before_sha256": "6f411aacbfcb028e80f1b89329f04c648ef2d889d88233b1228ac4faf78792bf",
+      "after_sha256": "d7584e19b028414ace4f1639b6c372fc7a9bc6c437a99df9c9bdc6285c758b00",
+      "changes": [
+        {
+          "removed_detached_neck_shell_triangles": 150
+        }
+      ],
+      "validation": {
+        "vertices": 2006,
+        "triangles": 1431,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:128",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/legendary_eloria_helm_04.glb",
+      "before_sha256": "5cd327f64240a3826ab76c9b012f4b94f82798131c1a7a72c7e33258bf30d99f",
+      "after_sha256": "019358e7405f2003230f8fbdc8e18fbffed7dfd5e180d8cf05538fff5f47f444",
+      "changes": [
+        {
+          "removed_detached_neck_shell_triangles": 38
+        }
+      ],
+      "validation": {
+        "vertices": 2072,
+        "triangles": 1383,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:131",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/legendary_eloria_helm_07.glb",
+      "before_sha256": "75bf135cf1df7798218689b2bd8f0fbdcd43cdf7fb10202214a583d06db9fcdb",
+      "after_sha256": "44055e1d1fad92ef41f80becb7cea4812e81046ec263bb875187a31eb7b38e96",
+      "changes": [
+        {
+          "removed_detached_neck_shell_triangles": 28
+        }
+      ],
+      "validation": {
+        "vertices": 2094,
+        "triangles": 1437,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:132",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/legendary_eloria_helm_08.glb",
+      "before_sha256": "58474faac83e7ded83d0f2863f642d0bd2f0e313bd43683720faddc7f06f50d7",
+      "after_sha256": "867401452b6c375e92f47065ac27bc162255159fa5665d593568493f3ade7b5f",
+      "changes": [
+        {
+          "removed_detached_neck_shell_triangles": 76
+        }
+      ],
+      "validation": {
+        "vertices": 2240,
+        "triangles": 1480,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "5:192",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/legendary_hero_cuirass_01.glb",
+      "before_sha256": "b060734311f0dd4c43c5457c689088aaa990952bf2c6a587fae55e3c151bf1a1",
+      "after_sha256": "4f10ee9bb6b299bc788f93bdd244fc4f513f5c9a5f26e25fc5f8fd98b06f18c1",
+      "changes": [
+        {
+          "moved_vertices": 269,
+          "max_displacement_m": 0.058705
+        },
+        {
+          "moved_vertices": 10870,
+          "max_displacement_m": 0.019839
+        },
+        {
+          "chest_front_98_before_m": 0.20017433166503906,
+          "front_depth_factor": 0.6325981207753641
+        }
+      ],
+      "validation": {
+        "vertices": 47052,
+        "triangles": 16302,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:193",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/legendary_hero_cuirass_02.glb",
+      "before_sha256": "02a0f80567b251097a3418d809f17ee38ee589d6f16cacf37b57ead50f215443",
+      "after_sha256": "146bce29974f4328e285bc8c3587bc1ec4426fc40ef302fdef30d16bb90b2fe7",
+      "changes": [
+        {
+          "moved_vertices": 212,
+          "max_displacement_m": 0.046202
+        },
+        {
+          "moved_vertices": 11152,
+          "max_displacement_m": 0.017647
+        },
+        {
+          "chest_front_98_before_m": 0.19111765921115875,
+          "front_depth_factor": 0.6731971075133022
+        }
+      ],
+      "validation": {
+        "vertices": 47100,
+        "triangles": 16405,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:194",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/legendary_hero_cuirass_03.glb",
+      "before_sha256": "5cbf7680904ec4e746119313600d83a56bb9519bb8c64dfb674324cc4262bf56",
+      "after_sha256": "8c4c0ca1af097cc1e65d233d203fb4f0aa59d89ec128e8f2605fa2e9a35c7638",
+      "changes": [
+        {
+          "moved_vertices": 255,
+          "max_displacement_m": 0.024219
+        },
+        {
+          "moved_vertices": 11077,
+          "max_displacement_m": 0.009575
+        },
+        {
+          "chest_front_98_before_m": 0.16547691822052002,
+          "front_depth_factor": 0.8226752277765469
+        }
+      ],
+      "validation": {
+        "vertices": 46785,
+        "triangles": 16224,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:195",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/legendary_hero_cuirass_04.glb",
+      "before_sha256": "7b6b123a06ed4b5e1abd78861ec35eb1f6520863936786fbe1e25edfb0394a80",
+      "after_sha256": "81c2160d7440e39173dd69cfe837e61ff1f84f238af586abf181258483a0eab4",
+      "changes": [
+        {
+          "moved_vertices": 360,
+          "max_displacement_m": 0.069753
+        },
+        {
+          "moved_vertices": 11060,
+          "max_displacement_m": 0.022038
+        },
+        {
+          "chest_front_98_before_m": 0.21050769090652466,
+          "front_depth_factor": 0.5918719499573726
+        }
+      ],
+      "validation": {
+        "vertices": 46859,
+        "triangles": 16281,
+        "max_weight_sum_error": 0.0039217472076416016
+      }
+    },
+    {
+      "key": "5:196",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/legendary_hero_cuirass_05.glb",
+      "before_sha256": "38c7c96431cbb285be46c0c79873c998e5f6fed9f2b76f46a8364d8b188b9a6f",
+      "after_sha256": "ade5bdfc64d073e9e34773217d20067d75cae66d19f99430daf5fa64ba31614e",
+      "changes": [
+        {
+          "moved_vertices": 261,
+          "max_displacement_m": 0.064883
+        },
+        {
+          "moved_vertices": 11055,
+          "max_displacement_m": 0.021268
+        },
+        {
+          "chest_front_98_before_m": 0.20673207938671112,
+          "front_depth_factor": 0.6061299025172939
+        }
+      ],
+      "validation": {
+        "vertices": 46692,
+        "triangles": 16212,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:198",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/legendary_hero_cuirass_07.glb",
+      "before_sha256": "9724c7ae3021ffcd6e5be9951633a4437ad76b724d7d6181bbed90d84595f4a2",
+      "after_sha256": "af471fb58cd0221dc5099d3e22a67ad1a42a7fda039146503f477f4c561541e5",
+      "changes": [
+        {
+          "moved_vertices": 308,
+          "max_displacement_m": 0.036005
+        },
+        {
+          "moved_vertices": 10711,
+          "max_displacement_m": 0.014759
+        },
+        {
+          "chest_front_98_before_m": 0.18073336780071259,
+          "front_depth_factor": 0.7266698747087748
+        }
+      ],
+      "validation": {
+        "vertices": 47066,
+        "triangles": 16306,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "3:134",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/militia_helmet_02.glb",
+      "before_sha256": "ff0d851a30d8def7e87a4105bfd03cc9b706e085cf81d658fb1276e1a4dc4c7c",
+      "after_sha256": "a01ebd698e1c313be6e9f7f811f41287de4994fe7ddbee15ee438b11c766d209",
+      "changes": [
+        {
+          "removed_detached_neck_shell_triangles": 312
+        }
+      ],
+      "validation": {
+        "vertices": 1813,
+        "triangles": 1152,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:135",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/militia_helmet_03.glb",
+      "before_sha256": "9c78a8905c16791ae56e8354637df55a4ab0c65b9cb9cc528818cbb8e3e34e78",
+      "after_sha256": "39ca2c6ee306da61cd16bb5a316c52d3abd4ee6af92e31bfb43a074160b2fb57",
+      "changes": [
+        {
+          "removed_detached_neck_shell_triangles": 229
+        }
+      ],
+      "validation": {
+        "vertices": 2106,
+        "triangles": 1374,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:138",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/militia_helmet_06.glb",
+      "before_sha256": "0c179d0eff5264f2c7f6e65e949e8e424d6ca34b45b95f79e75a14ef8b15c6d4",
+      "after_sha256": "9d874ac5dbecb789c73ad4b9f53bb21e5a65ae8d54d8f162112b22bacdbcf13b",
+      "changes": [
+        {
+          "removed_detached_neck_shell_triangles": 92
+        }
+      ],
+      "validation": {
+        "vertices": 1752,
+        "triangles": 1515,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "3:139",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/militia_helmet_07.glb",
+      "before_sha256": "10ea6ff687961b16a4930a798c0825636804fe87ae4c12ee7f689ba95b79e49b",
+      "after_sha256": "d56cb1b489d4cde216aa0e783598a1e9d2372f8e7fb77c9c35a19a5eba44f975",
+      "changes": [
+        {
+          "removed_detached_neck_shell_triangles": 88
+        }
+      ],
+      "validation": {
+        "vertices": 2003,
+        "triangles": 1464,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "5:213",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/militia_torso_armor_06.glb",
+      "before_sha256": "bead329eba75fed7d3cfa05528b13a03967e8fb7ab7791c1f0d0a3964c557c13",
+      "after_sha256": "4b52f35f923b427fd4683e244465037202d9b1c78fdb3c158c9cc2116e65b270",
+      "changes": [
+        {
+          "moved_vertices": 393,
+          "max_displacement_m": 0.040877
+        },
+        {
+          "moved_vertices": 10798,
+          "max_displacement_m": 0.016238
+        },
+        {
+          "chest_front_98_before_m": 0.1858774721622467,
+          "front_depth_factor": 0.699159312344019
+        }
+      ],
+      "validation": {
+        "vertices": 46897,
+        "triangles": 16458,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "3:172",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/sunmane_steppe_headgear_08.glb",
+      "before_sha256": "f4e63230e035ea9e31d7d7f0ac389c77b279b938a5cbdb4a1b6f17c0a8614d5f",
+      "after_sha256": "67c28cea7a35502024d1cc693bee1c6a5c3e5e9ab6b68e443d78bb8a59e49721",
+      "changes": [
+        {
+          "removed_detached_neck_shell_triangles": 74
+        }
+      ],
+      "validation": {
+        "vertices": 1757,
+        "triangles": 1122,
+        "max_weight_sum_error": 0.0
+      }
+    },
+    {
+      "key": "5:241",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/sunmane_steppe_shirt_02.glb",
+      "before_sha256": "bf396e42c86c68c0b449297c45bfe97cbbaf0eedd89ffa79acc25412cc03dabd",
+      "after_sha256": "6abe01c02044a40a50db3ac6bb82b3d3d28324baf776d209aec642337d339b54",
+      "changes": [
+        {
+          "moved_vertices": 258,
+          "max_displacement_m": 0.022359
+        },
+        {
+          "moved_vertices": 8399,
+          "max_displacement_m": 0.009428
+        },
+        {
+          "chest_front_98_before_m": 0.16579651832580566,
+          "front_depth_factor": 0.8204046319657687
+        }
+      ],
+      "validation": {
+        "vertices": 46594,
+        "triangles": 16274,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:242",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/sunmane_steppe_shirt_03.glb",
+      "before_sha256": "14d0265240d34d391eb704f8be07c692a68ea40f6c4e17791fa8bb0af3c68acf",
+      "after_sha256": "3388942ca386e84da5a3ee08164ca8febd3e9705b6f3fff3944e783dcdfbfbc0",
+      "changes": [
+        {
+          "moved_vertices": 495,
+          "max_displacement_m": 0.020542
+        },
+        {
+          "moved_vertices": 10576,
+          "max_displacement_m": 0.009409
+        },
+        {
+          "chest_front_98_before_m": 0.16504715383052826,
+          "front_depth_factor": 0.8257483721843394
+        }
+      ],
+      "validation": {
+        "vertices": 91879,
+        "triangles": 16419,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:243",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/sunmane_steppe_shirt_04.glb",
+      "before_sha256": "b7b2c47ac64a71dda62fc4be4c403ff0f2e039b1088476b600c0e34a9f9e309b",
+      "after_sha256": "6b4e67480930ed9086a2c5b04abecbda72581c8e2fff8a26294a54ad1b64fe1f",
+      "changes": [
+        {
+          "moved_vertices": 466,
+          "max_displacement_m": 0.031469
+        },
+        {
+          "moved_vertices": 10510,
+          "max_displacement_m": 0.013064
+        },
+        {
+          "chest_front_98_before_m": 0.17646925151348114,
+          "front_depth_factor": 0.7511707301428391
+        }
+      ],
+      "validation": {
+        "vertices": 46725,
+        "triangles": 16405,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:244",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/sunmane_steppe_shirt_05.glb",
+      "before_sha256": "69421e5e73641508c6d7667ef9db1140f413394d9f11ae6382ec87ae7c7cb648",
+      "after_sha256": "c252c0b5bfb954c4bcbeedc85b6152774e24f3c025924ae1d93716f5116e67a0",
+      "changes": [
+        {
+          "moved_vertices": 294,
+          "max_displacement_m": 0.033818
+        },
+        {
+          "moved_vertices": 10774,
+          "max_displacement_m": 0.013181
+        },
+        {
+          "chest_front_98_before_m": 0.17567938566207886,
+          "front_depth_factor": 0.7558916643293575
+        }
+      ],
+      "validation": {
+        "vertices": 46918,
+        "triangles": 16411,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:245",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/sunmane_steppe_shirt_06.glb",
+      "before_sha256": "d601f67fdcb283af19cb4c6c49949aec6079d614bf9371b4c25541bbf3bb84db",
+      "after_sha256": "19f3c4c8e8f0257d62ebb06716d4df973afd7299f0db7ea235cd2ee7cc01772f",
+      "changes": [
+        {
+          "moved_vertices": 550,
+          "max_displacement_m": 0.03786
+        },
+        {
+          "moved_vertices": 10416,
+          "max_displacement_m": 0.01379
+        },
+        {
+          "chest_front_98_before_m": 0.17758166790008545,
+          "front_depth_factor": 0.7446210851734472
+        }
+      ],
+      "validation": {
+        "vertices": 47181,
+        "triangles": 16413,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    },
+    {
+      "key": "5:246",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/sunmane_steppe_shirt_07.glb",
+      "before_sha256": "4b2452db4eec4ad2be083022651c24aa07d54a83be924df9a08d483db609bf04",
+      "after_sha256": "d17a7c0234638ef87f4cc137ab4c29a78a6896af4a88f321697a25e8c0afa48b",
+      "changes": [
+        {
+          "moved_vertices": 304,
+          "max_displacement_m": 0.024856
+        },
+        {
+          "moved_vertices": 10877,
+          "max_displacement_m": 0.011138
+        },
+        {
+          "chest_front_98_before_m": 0.16968855261802673,
+          "front_depth_factor": 0.7937267008582046
+        }
+      ],
+      "validation": {
+        "vertices": 47068,
+        "triangles": 16548,
+        "max_weight_sum_error": 0.0039217472076416016
+      }
+    },
+    {
+      "key": "5:247",
+      "scene": "res://assets/actors/native/equipment/variants/human_male/sunmane_steppe_shirt_08.glb",
+      "before_sha256": "2d5eac5988f1dc5cc05a0b9eb1175d456ed3d75ed7d5c12e4e2b6c5e5e054d28",
+      "after_sha256": "7d86477dde6bcc56cebab82fdfba19380363c09d5695875c124976a6f5ba6839",
+      "changes": [
+        {
+          "moved_vertices": 356,
+          "max_displacement_m": 0.033634
+        },
+        {
+          "moved_vertices": 10536,
+          "max_displacement_m": 0.013628
+        },
+        {
+          "chest_front_98_before_m": 0.17707106471061707,
+          "front_depth_factor": 0.7476131581674118
+        }
+      ],
+      "validation": {
+        "vertices": 46945,
+        "triangles": 16226,
+        "max_weight_sum_error": 0.003921627998352051
+      }
+    }
+  ]
+}

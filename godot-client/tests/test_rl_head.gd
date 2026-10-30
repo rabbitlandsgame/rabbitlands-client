@@ -45,6 +45,7 @@ func _run() -> void:
 	await _check_eye_depth("female", "mira_stylised")
 	await _check_eye_depth("male", "rowan_stylised")
 	_check_instance_uniform_budget()
+	await _check_neck_dye()
 	await _check_body_cut_composition("female")
 	await _check_removal("male")
 	await _check_dev_switch()
@@ -875,6 +876,35 @@ func _check_actor(sex: String, preset: String) -> void:
 		await process_frame
 		_expect((attachment as Node3D).visible, "%s: taking the helm off shows it again" % preset)
 	actor.queue_free()
+	await process_frame
+
+
+func _check_neck_dye() -> void:
+	var actors: Array[ReplicatedActor3D] = []
+	var expected: Array[Color] = []
+	for skin: int in [1, 8]:
+		var app := {"skin":skin,"hair":0}
+		app["rl_head"] = RLHeadPortraitMap.face(app,"female").to_dict()
+		var actor := Stage.spawn(_stage, "female", app, {}, ActorRenderQuality.Quality.HIGH)
+		actors.append(actor)
+		await process_frame
+		var body := actor.get_node("NativeModel").find_child("body", true, false) as MeshInstance3D
+		var material := body.get_active_material(0) as ShaderMaterial
+		var dye: Color = material.get_shader_parameter("skin_color")
+		expected.append(dye.srgb_to_linear())
+	for i: int in actors.size():
+		var rig := actors[i].rl_head()
+		var node: MeshInstance3D = rig.mesh_nodes()["head"][0][0]
+		var material := node.get_surface_override_material(0) as ShaderMaterial
+		var skin: Color = material.get_shader_parameter("skin_color") if RLHeadLibrary.material_values() else node.get_instance_shader_parameter("skin_color")
+		var brow: Color = material.get_shader_parameter("brow_color") if RLHeadLibrary.material_values() else node.get_instance_shader_parameter("brow_color")
+		var hair: Color = material.get_shader_parameter("hair_color") if RLHeadLibrary.material_values() else node.get_instance_shader_parameter("hair_color")
+		_expect(absf(skin.a-expected[i].r)<0.00001 and absf(brow.a-expected[i].g)<0.00001
+			and absf(hair.a-expected[i].b)<0.00001, "neck keeps its actor's body dye across different skin colours")
+		_expect(skin.r == rig.appearance.skin.r and skin.g == rig.appearance.skin.g
+			and skin.b == rig.appearance.skin.b, "neck dye preserves calibrated face RGB")
+	for actor: ReplicatedActor3D in actors:
+		actor.queue_free()
 	await process_frame
 
 
