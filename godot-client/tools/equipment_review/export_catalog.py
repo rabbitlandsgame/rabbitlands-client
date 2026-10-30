@@ -71,7 +71,7 @@ def main() -> None:
             raise SystemExit("Preview item catalog needs refreshing")
         print("Preview item catalog is current")
     else:
-        args.output.write_text(text, encoding="utf-8")
+        args.output.write_bytes(text.encode("utf-8"))
         print(f"Exported {len(json.loads(text)['items'])} item/slot choices to {args.output}")
 
 
