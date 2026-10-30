@@ -45,20 +45,7 @@ func _expect(condition: bool, message: String) -> void:
 ## Every mesh of an equipment scene, as the actor reads them: the mesh and,
 ## for a skinned one, the bone name behind each skin bind.
 func _pieces(path: String) -> Array:
-	var pieces: Array = []
-	var scene: PackedScene = load(path) as PackedScene
-	if scene == null:
-		return pieces
-	var root: Node = scene.instantiate()
-	for node: Node in root.find_children("*", "MeshInstance3D", true, false):
-		var mesh_node := node as MeshInstance3D
-		var names := PackedStringArray()
-		if mesh_node.skin != null:
-			for bind: int in range(mesh_node.skin.get_bind_count()):
-				names.append(mesh_node.skin.get_bind_name(bind))
-		pieces.append({"mesh": mesh_node.mesh, "bones": names})
-	root.free()
-	return pieces
+	return ReplicatedActor3D._equipment_pieces(path)
 
 
 ## How much of a vertex the spine holds (no cape_ bone), as the drape reads it.

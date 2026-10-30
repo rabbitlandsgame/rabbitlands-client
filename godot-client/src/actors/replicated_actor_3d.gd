@@ -3599,12 +3599,12 @@ func _worn_skinned_scene(part: int) -> String:
 		return ""
 	return str(model.get("scene", ""))
 
-## One cape surface, cut to clear the torso worn under it. The mesh itself
-## when nothing is worn there, or when nothing on it had to move.
+## One cape surface, relaxed at the shoulders and fitted to the torso worn
+## under it. The bare wardrobe receives the same relaxed shoulder fold.
 func _draped_over(torso_scene: String, cape_scene: String,
 		piece: Dictionary) -> Mesh:
 	var mesh: Mesh = piece.get("mesh") as Mesh
-	if torso_scene.is_empty() or mesh == null:
+	if mesh == null:
 		return mesh
 	var key: String = "%s|%s|%s" % [cape_scene, torso_scene,
 		str(piece.get("name", ""))]
@@ -3706,6 +3706,7 @@ func _tell_cloth_what_is_worn() -> void:
 	var torso_scene: String = _worn_torso_scene()
 	var fabric: Array = _cape_fabric_line(torso_scene)
 	_cape_cloth.call("set_fabric_line", fabric[0], fabric[1])
+	_cape_cloth.call("set_surface_samples", fabric[2])
 	_cape_cloth.call("set_shin_reach", _shin_reach(torso_scene))
 	var empty := PackedFloat32Array()
 	if torso_scene.is_empty():
@@ -3724,22 +3725,24 @@ func _tell_cloth_what_is_worn() -> void:
 ## Where the worn cape's cloth hangs behind each of its chains, for the solver
 ## to hang plumb and to collide. It depends on the rig, the cape and - through
 ## the drape that holds the yoke out over armour - the torso, so it is shared
-## by every actor wearing the three. The line, then the cape's cross-section.
+## by every actor wearing the three. The line, the cape's cross-section, then
+## actual surface contact samples with their per-link skin weights.
 func _cape_fabric_line(torso_scene: String) -> Array:
 	var cape: Array = []
 	for node_value: Variant in _equipment_nodes.get(CAPE_PART, []) as Array:
 		if node_value is MeshInstance3D and is_instance_valid(node_value):
 			cape.append(node_value)
 	if cape.is_empty():
-		return [[], []]
+		return [[], [], []]
 	var visual: int = int(_equipment_visuals.get(CAPE_PART, 0))
 	var key: String = "%s|%s|%s" % [str(_model_config.get("scene", "")),
 		str(_equipment_model_config(CAPE_PART, visual).get("scene", "")),
 		torso_scene]
 	if not _fabric_lines.has(key):
 		var section: Array = []
-		var line: Array = CapeDrape.fabric_line(_native_skeleton, cape, section)
-		_fabric_lines[key] = [line, section]
+		var contacts: Array = []
+		var line: Array = CapeDrape.fabric_line(_native_skeleton, cape, section, contacts)
+		_fabric_lines[key] = [line, section, contacts]
 	return _fabric_lines[key] as Array
 
 ## How far the legs reach behind each thigh and shin - left thigh, right
@@ -4271,7 +4274,8 @@ func _attach_skinned_equipment(scene_path: String, part: int, visual_id: int,
 		var clone: MeshInstance3D = MeshInstance3D.new()
 		clone.name = "EquipmentSkin_%d_Visual_%d_%s" % [part, visual_id,
 			str(piece.get("name", "Mesh"))]
-		clone.mesh = _draped_over(worn, scene_path, piece)
+		clone.mesh = (_draped_over(worn, scene_path, piece) if part == CAPE_PART
+			else piece.get("mesh") as Mesh)
 		clone.skin = rebound
 		clone.transform = piece.get("transform", Transform3D.IDENTITY)
 		_restore_piece_render_state(clone, piece)

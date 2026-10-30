@@ -28,6 +28,10 @@ const GRAVITY := Vector3(0.0, -14.0, 0.0)
 ## second and trails lower while travelling.
 const DAMPING := 0.72
 const WALK_DAMPING := 0.42
+## Damp relative motion rather than discarding the wearer's carried velocity.
+## Absolute world damping acted like a strong headwind even at walking speed,
+## folding the free sheet up against its rigid shoulder section.
+const TRAVEL_CARRY := 0.85
 var _last_translation := Vector3.INF
 ## Two passes is enough for a four-link chain and is the whole reason this is
 ## affordable. More iterations buy stiffness nobody can see on a cape.
@@ -137,6 +141,8 @@ const BACK_OFFSET := -0.02
 ## what hangs plumb from the yoke and what the body pushes out.
 var _fabric_rest: Array[PackedVector3Array] = []
 var _anchor_rest_inverse := Basis.IDENTITY
+var _anchor_rest_origin := Vector3.ZERO
+var _surface_samples: Array = []
 ## The legs, hip to knee and knee to ankle (thighs then shins, left then
 ## right), and how far what is worn reaches behind each, sampled along it
 ## (`set_shin_reach`).
@@ -266,6 +272,7 @@ func _cache(skeleton: Skeleton3D) -> bool:
 	# the chest is found once, against the rest hang the cape drapes opposite.
 	var anchor_rest := skeleton.get_bone_global_rest(_anchor)
 	_anchor_rest_inverse = anchor_rest.basis.inverse()
+	_anchor_rest_origin = anchor_rest.origin
 	_hang_local = _anchor_rest_inverse * Vector3.DOWN
 	var up_rest := Vector3.UP
 	var neck := skeleton.find_bone("neck_01")
@@ -540,6 +547,86 @@ func _keep_off_legs(forward: Vector3, carried: Basis) -> void:
 					for offset: float in [-between, between]:
 						_push_section(level, index, third, clampf(nearest + offset,
 							-half, half), half, side, forward, shin, knee, axis, span)
+
+
+## The chains carry one sheet. Independent capsule contacts can otherwise
+## leave one strip at the knees and its neighbour at the shoulders, folding
+## the skinned cloth through itself. Share the row's displacement while
+## retaining each root's authored spacing and the cape's measured folds.
+## Use the furthest-back contact: moving the other strips back preserves
+## the clearance already found by the body and leg constraints.
+func _keep_sheet_coherent(carried: Basis, forward: Vector3) -> void:
+	if _mount_surface != null or _points.size() != 3 or forward == Vector3.ZERO:
+		return
+	for chain: int in range(3):
+		if not _fabric_measured(chain) or _points[chain].size() != LINKS + 1:
+			return
+	var side := carried * Vector3.RIGHT
+	side = (side - forward * side.dot(forward)).normalized()
+	var up := forward.cross(side).normalized()
+	for joint: int in range(1, LINKS + 1):
+		var middle := _points[1][joint] - _points[1][0]
+		var fall := 0.0
+		var back := INF
+		for chain: int in range(3):
+			var displacement := _points[chain][joint] - _points[chain][0]
+			fall += displacement.dot(up) / 3.0
+			back = minf(back, displacement.dot(forward))
+		var displacement := side * middle.dot(side) + up * fall + forward * back
+		for chain: int in range(3):
+			_points[chain][joint] = _points[chain][0] + displacement
+
+
+func set_surface_samples(samples: Array) -> void:
+	_surface_samples = samples
+
+
+## Project the skinned folds and hem, rather than only the joint line. With
+## displacement skinning their positions are exactly the weighted sums below;
+## pushing the responsible rows backward clears the rendered fabric too.
+## The freely skinned top row may follow that correction in a torso twist;
+## the shoulder attachment itself remains held by its spine skin weights.
+func _keep_surface_clear(fabrics: Array[PackedVector3Array], anchor: Vector3,
+		carried: Basis, forward: Vector3) -> void:
+	if _mount_surface != null or forward == Vector3.ZERO or _surface_samples.is_empty() or not _fabric_measured(1):
+		return
+	for _pass: int in 2:
+		var moved := false
+		for sample: Dictionary in _surface_samples:
+			var weights: PackedFloat32Array = sample.weights
+			var point := anchor + carried * ((sample.position as Vector3) - _anchor_rest_origin)
+			var norm := 0.0
+			var full_norm := 0.0
+			for chain: int in _points.size():
+				for link: int in LINKS:
+					var weight := weights[chain * LINKS + link]
+					if weight <= 0.0:
+						continue
+					point += (_points[chain][link] - fabrics[chain][link]) * weight
+					full_norm += weight * weight
+					if link > 0:
+						norm += weight * weight
+			var plane_back := maxf(0.0, (point - anchor).dot(forward) - BACK_OFFSET)
+			var first_link := 0 if plane_back > 0.0 else 1
+			if first_link == 0:
+				norm = full_norm
+			if norm < 1e-6:
+				continue
+			var back := plane_back
+			for shin: int in _shins.size():
+				var knee := _shin_world[shin * 2]
+				var axis := _shin_world[shin * 2 + 1] - knee
+				if axis.length_squared() > 1e-9:
+					back = maxf(back, _band_clearance(shin, point, forward, knee, axis, axis.length_squared()))
+			if back <= 0.0:
+				continue
+			moved = true
+			for chain: int in _points.size():
+				for link: int in range(first_link, LINKS):
+					_points[chain][link] -= forward * (back * weights[chain * LINKS + link] / norm)
+		if not moved:
+			return
+		_keep_sheet_coherent(carried, forward)
 
 
 ## A chain's point `third` of the way from joint `index` to the next.
@@ -822,6 +909,8 @@ func _process_modification_with_delta(delta: float) -> void:
 		var travel := to_world.origin - _last_translation
 		var speed := Vector2(travel.x, travel.z).length() / step
 		damping = lerpf(WALK_DAMPING, DAMPING, smoothstep(2.0, 4.0, speed))
+		if travel.length() < TELEPORT:
+			fall += travel * (1.0 - damping) * TRAVEL_CARRY
 	_last_translation = to_world.origin
 	# The back-of-the-torso plane, held for every chain this frame: a cape
 	# swings and cannot pass to the chest, which is what an attack's lean and
@@ -895,8 +984,11 @@ func _process_modification_with_delta(delta: float) -> void:
 					points[index] = _mount_surface.call("limit_lift", points[index], rest[0], material_length, float(index) / LINKS)
 		_points[chain] = points
 		_previous[chain] = previous
+	_keep_sheet_coherent(anchor_carry, forward)
 	if _keeps_off_legs():
 		_keep_off_legs(forward, anchor_carry)
+	_keep_sheet_coherent(anchor_carry, forward)
+	_keep_surface_clear(fabrics, anchor_world, anchor_carry, forward)
 	for chain in range(_bones.size()):
 		_write_chain_bones(skeleton, chain, fabrics[chain], anchor_pose, to_world, to_local)
 	_settled = true
@@ -941,22 +1033,21 @@ func _try_native_constraint_step(skeleton: Skeleton3D, to_world: Transform3D,
 			_native_constraint_fallbacks += 1
 			return false
 		_native_constraint_calls += 1
+	_keep_sheet_coherent(carried, forward)
 	if _keeps_off_legs():
 		_keep_off_legs(forward, carried)
+	_keep_sheet_coherent(carried, forward)
+	_keep_surface_clear(fabrics, to_world * anchor_pose.origin, carried, forward)
 	for chain: int in range(_bones.size()):
 		_write_chain_bones(skeleton, chain, fabrics[chain], anchor_pose,
 			to_world, to_local)
 	return true
 
 
-## Carry the authored bone frames with the simulated cloth. A bone's origin is
-## offset from the cloth it carries, increasingly so down a tilted bind chain;
-## rotating bones alone turns that offset into an outward hem slope, even when
-## every simulated segment has settled vertically. So each frame is turned from
-## the direction its own stretch of cloth was authored in to the simulated one,
-## about the cloth, and the offset rides along. Without a measured line the
-## material line stands in for the cloth and every segment starts straight
-## down; with one, an authored lean onto the legs is what gets straightened.
+## Measured unmounted cloth uses a displacement lattice: the original bone
+## bases retain the folds while skin weights blend the simulated row offsets.
+## Mounted cloth and unmeasured rigs retain their original rotating frames,
+## including the offset between each bind frame and its material line.
 func _write_chain_bones(skeleton: Skeleton3D, chain: int,
 		fabric: PackedVector3Array, anchor_pose: Transform3D,
 		to_world: Transform3D, to_local: Transform3D) -> void:
@@ -977,6 +1068,14 @@ func _write_chain_bones(skeleton: Skeleton3D, chain: int,
 			turn = Basis(Quaternion(rest_direction, wanted))
 		var posed := to_local * Transform3D(turn * authored.basis,
 			points[link] + turn * (authored.origin - fabric[link]))
+		if measured and _mount_surface == null:
+			# Measured rows are a displacement lattice for the actual skin.
+			# Rotating an off-line bind frame about each independently tilted
+			# segment folds its vertices over the neighbouring row in a run.
+			# Shared translations retain the authored cross-section and let
+			# the existing skin weights interpolate a continuous curved sheet.
+			posed = to_local * Transform3D(authored.basis,
+				authored.origin + points[link] - fabric[link])
 		var local_pose := parent.affine_inverse() * posed
 		skeleton.set_bone_pose_position(bone, local_pose.origin)
 		skeleton.set_bone_pose_rotation(bone,

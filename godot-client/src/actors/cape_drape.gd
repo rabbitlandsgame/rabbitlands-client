@@ -61,12 +61,13 @@ const BARE_TRUNK_RADIUS := 0.205
 ## its side edges cross the shoulder at a bearing of 40 to 50 degrees. At
 ## 50/65 and 1.44/1.53 nearly all the push landed on those edges and the
 ## sloping collar, and drew the trim out over the shoulder in a hook. Faded at
-## 30/45 and 1.38/1.46 the edges and collar tuck under as intended, and what
-## is still pushed is the mid-back, on the 11 of 128 Human fits that reach it.
+## 30/45 the side edges still tuck under the shoulders. The vertical fade
+## now reaches 1.54 so the softened rear fold joins the armour fit gradually;
+## ending it at 1.46 pinched the reshaped sheet against deep back plates.
 const DRAPE_ARC := 30.0
 const DRAPE_FADE := 45.0
 const DRAPE_SHOULDER := 1.38
-const DRAPE_COLLAR := 1.46
+const DRAPE_COLLAR := 1.54
 ## Samples along a bone axis in the reach the cloth solver is given. Nine over
 ## the trunk is a sample every 55 mm, which follows a back plate without
 ## chasing the rivets on it.
@@ -131,6 +132,13 @@ const LINE_FOLD := 0.90
 ## How far from the middle chain the sheet reaches at a joint, read this far
 ## out through it: 0.24 either side at the top link and 0.37 at the hem.
 const LINE_WIDTH := 0.90
+## Let the back of the yoke fall from the shoulder attachment instead of
+## carrying the authored collar's almost level ledge into the free sheet.
+## The warp fades down the back and toward the collar's open front; it is
+## applied once, before fitting armour and measuring the simulated fabric.
+const SHOULDER_DROP := 0.07
+const SHOULDER_EASE := 0.055
+
 ## The cape's cross-section is read at this many places from side to side, at
 ## each joint, each from cloth within FOLD_WINDOW of it. Below the yoke the
 ## sheet is a U round the body: 25 cm out from the middle it stands 10-15 cm
@@ -225,11 +233,14 @@ static func reach(grid: PackedFloat32Array, bearing: float, y: float) -> float:
 	return lerpf(top, bottom, fy)
 
 
-## A copy of a cape surface set with its yoke pushed clear of the envelope, or
-## the mesh itself when nothing had to move.
+## A relaxed shoulder fold, then a fit to the worn torso's envelope. Empty
+## armour still receives the shoulder fold; the source mesh stays untouched.
 static func drape(mesh: Mesh, bones: PackedStringArray,
 		grid: PackedFloat32Array) -> Mesh:
-	if mesh == null or grid.is_empty():
+	if mesh == null:
+		return mesh
+	mesh = _hang_yoke(mesh)
+	if grid.is_empty():
 		return mesh
 	var surfaces: Array = []
 	# Vertices the yoke rules may move, welded by position across surfaces so
@@ -301,6 +312,65 @@ static func drape(mesh: Mesh, bones: PackedStringArray,
 			arrays, [], {},
 			mesh.surface_get_format(surface) & Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS)
 		built.surface_set_material(surface, mesh.surface_get_material(surface))
+		built.surface_set_name(surface, mesh.surface_get_name(surface))
+	return built
+
+
+## A smooth downward fold behind the shoulder, with the neck opening and
+## lower sheet fixed. The side collar falls from its front attachment, while
+## the centre eases into the back. Preserve folds, seams and skin weights.
+static func _shoulder_point(point: Vector3) -> Vector3:
+	var shoulder := smoothstep(0.08, 0.14, absf(point.x))
+	var hanging := lerpf(smoothstep(1.40, 1.56, point.y),
+		smoothstep(1.25, 1.50, point.y), shoulder)
+	var down := SHOULDER_DROP * smoothstep(0.03, 0.21, -point.z) * hanging
+	var inward := SHOULDER_EASE * smoothstep(0.08, 0.23, -point.z) \
+		* smoothstep(1.06, 1.38, point.y) * (1.0 - smoothstep(1.43, 1.60, point.y)) \
+		* maxf(1.0 - smoothstep(0.08, 0.20, absf(point.x)), 0.25 * smoothstep(1.38, 1.46, point.y))
+	var y := point.y - down
+	var radius := lerpf(BARE_TRUNK_RADIUS, 0.10, smoothstep(1.40, 1.60, y))
+	var back := sqrt(maxf(0.0, radius * radius - point.x * point.x))
+	inward = minf(inward, 0.65 * maxf(0.0, -point.z - back))
+	return Vector3(point.x, y, point.z + inward)
+
+
+static func _hang_yoke(mesh: Mesh) -> Mesh:
+	var built := ArrayMesh.new()
+	for surface: int in range(mesh.get_surface_count()):
+		var arrays: Array = mesh.surface_get_arrays(surface)
+		var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+		var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
+		var tangents: PackedFloat32Array = arrays[Mesh.ARRAY_TANGENT]
+		for index: int in range(vertices.size()):
+			var point := vertices[index]
+			var hung := _shoulder_point(point)
+			if hung.is_equal_approx(point):
+				continue
+			# Differentiate the fit in all three directions: inverse transpose
+			# for normals, direct transform for tangents. UVs and skin stay exact.
+			var epsilon := 0.0001
+			var warp := Basis.IDENTITY
+			for axis: int in 3:
+				var offset := Vector3.ZERO
+				offset[axis] = epsilon
+				warp[axis] = (_shoulder_point(point + offset)
+					- _shoulder_point(point - offset)) / (2.0 * epsilon)
+			vertices[index] = hung
+			if index < normals.size():
+				normals[index] = (warp.inverse().transposed() * normals[index]).normalized()
+			if tangents.size() >= (index + 1) * 4:
+				var tangent := (warp * Vector3(tangents[index * 4],
+					tangents[index * 4 + 1], tangents[index * 4 + 2])).normalized()
+				tangents[index * 4] = tangent.x
+				tangents[index * 4 + 1] = tangent.y
+				tangents[index * 4 + 2] = tangent.z
+		arrays[Mesh.ARRAY_VERTEX] = vertices
+		arrays[Mesh.ARRAY_NORMAL] = normals
+		arrays[Mesh.ARRAY_TANGENT] = tangents
+		built.add_surface_from_arrays(mesh.surface_get_primitive_type(surface),
+			arrays, [], {}, mesh.surface_get_format(surface) & Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS)
+		built.surface_set_material(surface, mesh.surface_get_material(surface))
+		built.surface_set_name(surface, mesh.surface_get_name(surface))
 	return built
 
 
@@ -461,8 +531,10 @@ static func axis_reach(pieces: Array, from: Vector3, to: Vector3,
 ## places, CHAIN_SIDES order]. The middle chain carries nearly the whole sheet,
 ## its side panels too, and cloth between chains is a blend of them, so each
 ## place is read against the blend of the chains' lines that carries it.
+## contacts receives actual inner-fold positions and their per-link weights
+## for the surface collision correction, including the hem below the last bone.
 static func fabric_line(skeleton: Skeleton3D, cape: Array,
-		section: Array = []) -> Array:
+		section: Array = [], contacts: Array = []) -> Array:
 	var chains: Array[PackedInt32Array] = []
 	for side: String in CHAIN_SIDES:
 		var chain := PackedInt32Array()
@@ -470,6 +542,7 @@ static func fabric_line(skeleton: Skeleton3D, cape: Array,
 			chain.append(skeleton.find_bone("cape_%s_%02d" % [side, link + 1]))
 		chains.append(chain)
 	var cloth := PackedVector3Array()
+	var contact_grid: Dictionary = {}
 	var carriers := PackedInt32Array()
 	# Each vertex's weight on each chain, in CHAIN_SIDES order.
 	var shares := PackedFloat32Array()
@@ -508,6 +581,8 @@ static func fabric_line(skeleton: Skeleton3D, cape: Array,
 						heaviest = bones[index * per + slot]
 				if heaviest < 0 or heaviest >= carry.size() or carrier[heaviest] < 0:
 					continue
+				_record_surface_sample(contact_grid, chains, carrier, carry, vertices[index],
+					bones, weights, index, per)
 				cloth.append(carry[heaviest] * vertices[index])
 				carriers.append(carrier[heaviest])
 				for chain: PackedInt32Array in chains:
@@ -517,6 +592,7 @@ static func fabric_line(skeleton: Skeleton3D, cape: Array,
 						if bone >= 0 and bone < carrier.size() and chain.has(carrier[bone]):
 							share += weights[index * per + slot]
 					shares.append(share)
+	contacts.append_array(contact_grid.values())
 	var out: Array = []
 	var roots: Array = []
 	var heights: Array = []
@@ -578,6 +654,37 @@ static func fabric_line(skeleton: Skeleton3D, cape: Array,
 	section.append_array(_cross_section(cloth, carriers, shares, carried_by, roots,
 		heights, out))
 	return out
+
+
+## Actual free-surface samples for collision, retaining the link weights that
+## the renderer uses. The innermost fold in each 10 by 7.5 cm patch is conservative
+## without walking every cape vertex per frame. This also covers the hem,
+## which extends below the last driven bone and cannot be inferred from the
+## simulated joints alone.
+static func _record_surface_sample(grid: Dictionary, chains: Array[PackedInt32Array],
+		carrier: PackedInt32Array, carry: Array[Transform3D], vertex: Vector3,
+		bones: PackedInt32Array, weights: PackedFloat32Array, index: int, per: int) -> void:
+	var position := Vector3.ZERO
+	var shares := PackedFloat32Array()
+	shares.resize(CHAIN_SIDES.size() * CHAIN_LINKS)
+	shares.fill(0.0)
+	var total := 0.0
+	for slot: int in per:
+		var at := index * per + slot
+		var bone := bones[at]
+		if weights[at] <= 0.0 or bone < 0 or bone >= carrier.size():
+			continue
+		position += (carry[bone] * vertex) * weights[at]
+		for chain: int in chains.size():
+			var link := chains[chain].find(carrier[bone])
+			if link >= 0:
+				shares[chain * CHAIN_LINKS + link] += weights[at]
+				total += weights[at]
+	if total < 0.999:
+		return
+	var cell := Vector2i(floori(position.x / 0.10), floori(position.y / 0.075))
+	if not grid.has(cell) or position.z > (grid[cell].position as Vector3).z:
+		grid[cell] = {"position": position, "weights": shares}
 
 
 ## The cape's cross-section at each joint (see `fabric_line`), read at the
