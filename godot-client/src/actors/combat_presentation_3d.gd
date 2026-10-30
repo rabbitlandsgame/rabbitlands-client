@@ -73,14 +73,12 @@ func carried_bow_grip() -> Transform3D:
 	var skeleton := actor.get_skeleton()
 	var rest := skeleton.get_bone_global_rest(_hand_l)
 	var fit := actor.rig_fit_scale("legacy")
-	# Center the handle between the native palm and curled middle finger.
-	# The previous lateral offset placed it outside the fingers once the
-	# wrist's anatomical alignment was restored.
+	# Seat the handle in the upper palm between the wrist and curled fingers.
 	var carry_basis := RangerBow3D.CARRY_SOCKET_BASIS
 	if is_instance_valid(actor._weapon_carry):
 		carry_basis = actor._weapon_carry.bow_carry_socket_basis()
 	var socket := Transform3D(carry_basis,
-		rest.origin + Vector3(0.085, -0.028, 0.022) * fit)
+		rest.origin + Vector3(0.065, -0.028, 0.022) * fit)
 	var held := skeleton.global_transform * skeleton.get_bone_global_pose(_hand_l) * rest.affine_inverse() * socket
 	# The wrist owns the complete grip frame, including the animation's natural
 	# forearm angle. The handle stays inside the closed fingers through movement.
