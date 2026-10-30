@@ -10,7 +10,18 @@ const HEAD_MAP := preload("res://src/actors/rl_head/rl_head_portrait_map.gd")
 const ARCHETYPES_PATH := "res://data/actors/rl_head_archetypes.json"
 const LEGACY_FIELDS := ["skin", "hair", "eyes", "head", "shirt", "pants", "boots"]
 const STUDY_SEX := {"Mira": "female", "Rowan": "male", "Tavi": "male"}
-const PUBLIC_LABELS := {"human_01": "Cornrows and low knot", "human_20": "Rounded Afro", "human_34": "Grey beard"}
+## Names stay stable when a base's hairstyle or availability changes.
+const HUMAN_NAMES := {
+	"native_luminous_female": "Lyra", "native_luminous_male": "Alden",
+	"study_mira": "Mira", "study_rowan": "Rowan", "study_tavi": "Tavi",
+	"human_01": "Amara", "human_08": "Corin", "human_14": "Nessa",
+	"human_20": "Darian", "human_27": "Elowen", "human_34": "Bram",
+}
+const PUBLIC_DESCRIPTIONS := {
+	"human_01": "Cornrows and low knot", "human_08": "Receding sweep and short beard",
+	"human_14": "Curly twin buns", "human_20": "Rounded Afro",
+	"human_27": "Shoulder waves", "human_34": "Grey beard",
+}
 
 
 static func rows(registry: Dictionary, protocol_version: int = 3) -> Array[Dictionary]:
@@ -62,10 +73,10 @@ static func rows(registry: Dictionary, protocol_version: int = 3) -> Array[Dicti
 			if source.is_empty():
 				continue
 			var source_label := str(entry.get("label", id))
-			var label := str(PUBLIC_LABELS.get(id, source_label.trim_suffix(" target")))
-			var row := _row(id, label, body,
+			var row := _row(id, source_label, body,
 				_appearance(source, true, protocol_version))
 			row.search_text += " " + id.to_lower() + " " + source_label.to_lower()
+			row.search_text += " " + str(PUBLIC_DESCRIPTIONS.get(id, "")).to_lower()
 			row.search_text += " " + str(entry.get("age_band", "")).replace("_", " ")
 			for tag: Variant in entry.get("tags", []):
 				row.search_text += " " + str(tag).to_lower()
@@ -118,6 +129,8 @@ static func _appearance(source: Dictionary, human: bool, version: int) -> Dictio
 
 static func _row(id: String, label: String, body: Dictionary, appearance: Dictionary) -> Dictionary:
 	var tags := _hair_tags(appearance, str(body.sex), str(body.race) == "luminous")
+	if body.race == "luminous":
+		label = str(HUMAN_NAMES.get(id, label))
 	var words: Array[String] = [label, str(body.label), str(body.race), str(body.sex)]
 	words.append_array(tags)
 	if body.race == "ssarathi":

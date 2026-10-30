@@ -24,6 +24,7 @@ func _run() -> void:
 	check(entries.size() == 22, "All sixteen bodies, three studies and three qualified Humans are offered")
 	var ids: Dictionary = {}
 	var native_types: Dictionary = {}
+	var human_names: Dictionary = {}
 	var other_race_seen := false
 	var other_native_ids: Array[String] = []
 	for row: Dictionary in entries:
@@ -31,9 +32,13 @@ func _run() -> void:
 		ids[row.id] = true
 		if row.race_id == "luminous":
 			check(not other_race_seen, "Human starting points precede the other races")
+			check(row.label == LIBRARY.HUMAN_NAMES.get(row.id, ""), row.id + " uses its stable Human name")
+			check(not human_names.has(row.label), "Available Human names are unique: " + row.label)
+			human_names[row.label] = true
 		else:
 			other_race_seen = true
 			other_native_ids.append(str(row.id))
+			check(row.label == row.race_label + " " + str(row.sex).capitalize(), "Other races retain their existing labels")
 		var look: Dictionary = row.look
 		var actor_type := int(look.actor_type)
 		var model_id := str(registry.actorTypes[str(actor_type)])
@@ -76,8 +81,13 @@ func _run() -> void:
 	var cornrows := LIBRARY.find(entries, "human_01")
 	var afro := LIBRARY.find(entries, "human_20")
 	var elder := LIBRARY.find(entries, "human_34")
-	check(cornrows.label == "Cornrows and low knot" and afro.label == "Rounded Afro" \
-		and elder.label == "Grey beard", "Player labels contain no pilot numbers or authoring status")
+	check(LIBRARY.find(entries, "native_luminous_female").label == "Lyra" \
+		and LIBRARY.find(entries, "native_luminous_male").label == "Alden", "Native Human bases have distinct names")
+	check(cornrows.label == "Amara" and afro.label == "Darian" and elder.label == "Bram", "Qualified Human bases use their given names")
+	check(LIBRARY.HUMAN_NAMES.size() == 11 and LIBRARY.HUMAN_NAMES.human_08 == "Corin" \
+		and LIBRARY.HUMAN_NAMES.human_14 == "Nessa" and LIBRARY.HUMAN_NAMES.human_27 == "Elowen", "The central mapping reserves all six pilot names without adding bases")
+	check(LIBRARY.find(entries, "human_08").is_empty() and LIBRARY.find(entries, "human_14").is_empty() \
+		and LIBRARY.find(entries, "human_27").is_empty(), "A reserved name does not invent an unavailable base")
 	check(cornrows.sex == "female" and "Cornrows" in cornrows.hair_tags and not "Long braid" in cornrows.hair_tags, "Cornrows use their actual female module, not the fallback Long braid byte")
 	check(afro.sex == "male" and "Afro" in afro.hair_tags and "Curly" in afro.hair_tags and not "Parted" in afro.hair_tags, "Afro uses its actual male module, not the fallback Parted byte")
 	check("Bald" in elder.hair_tags and "Full beard" in elder.hair_tags, "Bald elder retains his full beard")
@@ -87,6 +97,11 @@ func _run() -> void:
 	for version: int in [0, 1, 2, 3]:
 		network.call("_set_appearance_protocol", maxi(1, version))
 		var versioned: Array[Dictionary] = LIBRARY.rows(registry, version)
+		check("cornrows" in LIBRARY.find(versioned, "human_01").search_text \
+			and "low knot" in LIBRARY.find(versioned, "human_01").search_text \
+			and "afro" in LIBRARY.find(versioned, "human_20").search_text \
+			and "grey beard" in LIBRARY.find(versioned, "human_34").search_text,
+			"Named Humans remain searchable by their hairstyle on PC/%d" % version)
 		for row: Dictionary in versioned:
 			check(PC.validate(row.look.appearance, version).get("ok", false), "%s is valid on PC/%d" % [row.id, version])
 			var creation: Dictionary = row.look.appearance.duplicate(true)
