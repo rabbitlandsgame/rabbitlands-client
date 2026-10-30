@@ -11,6 +11,7 @@ import hashlib
 import json
 from pathlib import Path
 import sys
+from gear_presentation import decorate_items
 
 CLIENT = Path(__file__).resolve().parents[2]
 DEFAULT_OUTPUT = Path(__file__).with_name("item_catalog.json")
@@ -54,8 +55,10 @@ def build_catalog(server: Path, client: Path = CLIENT) -> dict:
                 "degrades_to": aliases.get(item.degrades_to, item.degrades_to),
                 "wear_chance": item.wear_chance, "obtainable": item.obtainable,
             })
-    return {"schema": 1, "source": "Rabbit Lands authored item definitions",
+    presentation = decorate_items(entries, registry)
+    return {"schema": 2, "source": "Rabbit Lands authored item definitions with preview presentation",
             "items_sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
+            **presentation,
             "items": entries}
 
 

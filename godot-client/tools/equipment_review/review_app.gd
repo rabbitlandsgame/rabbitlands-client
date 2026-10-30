@@ -34,6 +34,7 @@ const EXTRA_PARTS: Array[int] = [0, 1, 2]
 const SETS_FILE := "res://tools/equipment_review/review_sets.json"
 const Wardrobe := preload("res://tools/equipment_review/review_wardrobe.gd")
 const ITEM_CATALOG := "res://tools/equipment_review/item_catalog.json"
+const ReviewIcons := preload("res://tools/equipment_review/review_icons.gd")
 const PART_LABELS := {0: "Main hand", 1: "Off hand", 2: "Cape", 3: "Head",
 	4: "Legs", 5: "Torso", 6: "Feet", 7: "Neck", 8: "Quiver"}
 const VIEWS := {KEY_1: 0.0, KEY_2: 90.0, KEY_3: 180.0, KEY_4: -90.0, KEY_5: 35.0}
@@ -68,6 +69,7 @@ var _actor_generation := 0
 var _models: Dictionary = {}
 var _animation_map: Dictionary = {}
 var _equipment: Dictionary = {}
+var _gear_catalog: Dictionary = {}
 var _sets: Array[Dictionary] = []
 var _race := "luminous"
 var _sex := "male"
@@ -93,7 +95,7 @@ var _piece_options: Dictionary = {}
 var _piece_checks: Dictionary = {}
 var _piece_buttons: Dictionary = {}
 var _piece_scroll: ScrollContainer
-var _atlas := ItemAtlas.new()
+var _icons := ReviewIcons.new()
 var _details_name: Label
 var _details_icon: TextureRect
 var _details_text: RichTextLabel
@@ -141,23 +143,23 @@ var _session: Dictionary = {}
 
 func _ready() -> void:
 	var window := get_window()
-	window.title = "Rabbit Lands - equipment review"
+	window.title = "Rabbit Lands - equipment preview"
 	window.size = Vector2i(int(options.get("width", "1600")), int(options.get("height", "1000")))
 	window.min_size = Vector2i(1280, 800)
 	get_viewport().msaa_3d = Viewport.MSAA_4X
 	_models = _read_json("res://data/actors/models.json").get("models", {}) as Dictionary
 	_animation_map = _read_json("res://data/animations/luminous.json")
 	_equipment = _read_json(str(options.get("equipment", "res://data/actors/equipment.json")))
+	_gear_catalog = _read_json(ITEM_CATALOG)
 	_build_sets()
-	_wardrobe.configure(_equipment, _read_json(ITEM_CATALOG))
-	_atlas.configure(_read_json("res://data/items/atlases.json"))
+	_wardrobe.configure(_equipment, _gear_catalog)
 	_race = str(options.get("race", _race))
 	_sex = str(options.get("sex", _sex))
 	_clip = str(options.get("clip", _clip))
 	_travel = options.get("travel", "no") == "yes"
 	var wanted_set := str(options.get("set", ""))
 	for i in range(_sets.size()):
-		if str(_sets[i]["name"]).to_lower().begins_with(wanted_set.to_lower()) and not wanted_set.is_empty():
+		if not wanted_set.is_empty() and (str(_sets[i]["name"]).to_lower().begins_with(wanted_set.to_lower()) or _set_label(_sets[i]).to_lower().begins_with(wanted_set.to_lower())):
 			_set_index = i
 			break
 	_wardrobe.use_set(_sets[_set_index]["visuals"])
@@ -192,6 +194,17 @@ func _build_sets() -> void:
 		for part: Variant in source:
 			visuals[int(part)] = int(source[part])
 		_sets.append({"name": str((entry as Dictionary).get("name", "?")), "visuals": visuals})
+	for entry: Dictionary in _sets:
+		var label := str(entry["name"]).trim_prefix("Audit ")
+		var visuals: Dictionary = entry["visuals"]
+		if visuals.is_empty():
+			label = "No Armor"
+		elif entry["name"] == "Ranger starter kit":
+			label = "Ranger Starter Kit"
+		elif visuals.has(5):
+			var style: Dictionary = (_gear_catalog.get("sets", {}) as Dictionary).get("5:%d" % int(visuals[5]), {})
+			label = str(style.get("name", label))
+		entry["label"] = label
 
 
 func _slug() -> String:
@@ -315,7 +328,7 @@ func _rebuild_actor() -> void:
 	_apply_equipment()
 	_refresh_clip_list()
 	_play_clip(_clip)
-	_set_status("%s, %s" % [_race_label(), _sets[_set_index]["name"]])
+	_set_status("%s, %s" % [_race_label(), _set_label(_sets[_set_index])])
 
 
 func _apply_equipment() -> void:
@@ -411,6 +424,8 @@ func _reload_from_disk() -> void:
 	_raw_loaded.clear()
 	_equipment = _read_json(str(options.get("equipment", "res://data/actors/equipment.json")))
 	_models = _read_json("res://data/actors/models.json").get("models", {}) as Dictionary
+	_gear_catalog = _read_json(ITEM_CATALOG)
+	_icons.clear()
 	_build_sets()
 	_set_index = 0
 	_set_opt.clear()
@@ -419,7 +434,7 @@ func _reload_from_disk() -> void:
 		if str(_sets[i]["name"]) == set_name:
 			_set_index = i
 	_set_opt.select(_set_index)
-	_wardrobe.configure(_equipment, _read_json(ITEM_CATALOG))
+	_wardrobe.configure(_equipment, _gear_catalog)
 	_wardrobe.restore(loadout)
 	_fill_piece_options()
 	_refresh_pieces()
@@ -778,7 +793,7 @@ func _build_ui() -> void:
 
 
 func _set_label(entry: Dictionary) -> String:
-	return str(entry["name"]).trim_prefix("Audit ")
+	return str(entry.get("label", str(entry["name"]).trim_prefix("Audit ")))
 
 
 func _select_set(index: int) -> void:
@@ -869,7 +884,7 @@ func _build_details(theme: Theme) -> void:
 	_button(row, "Set comment (S)", func() -> void: _begin_note("set"))
 	box.add_child(HSeparator.new())
 	_details_icon = TextureRect.new()
-	_details_icon.custom_minimum_size = Vector2(100, 100)
+	_details_icon.custom_minimum_size = Vector2(192, 192)
 	_details_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_details_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	box.add_child(_details_icon)
@@ -902,14 +917,15 @@ func _refresh_details() -> void:
 	var part := _wardrobe.selected_part
 	var piece := _wardrobe.piece_at(part)
 	_details_name.text = str(piece.get("name", str(PART_LABELS.get(part, "Piece")) + " · empty"))
-	var image_id := int(piece.get("image_id", -1))
-	_details_icon.texture = (_atlas.worn_icon_for(image_id) if bool(piece.get("worn", false)) else _atlas.icon_for(image_id)) if image_id >= 0 else _atlas.placeholder_icon()
+	_details_icon.texture = _icons.icon_for(piece)
 	_details_text.clear()
 	if piece.is_empty():
 		_details_text.add_text("Choose equipment for this slot to inspect its game details.")
 	else:
 		var lines := PackedStringArray()
 		lines.append("%s · %s" % [PART_LABELS.get(part, "Piece"), "Hidden" if bool(_wardrobe.disabled.get(part, false)) else "Visible"])
+		if not str(piece.get("set_name", "")).is_empty():
+			lines.append("Set: " + str(piece.set_name))
 		lines.append("\n" + str(piece.get("description", "")))
 		lines.append("\nStats")
 		var stats: Dictionary = piece.get("stats", {})
@@ -932,8 +948,6 @@ func _refresh_details() -> void:
 			lines.append("Wear chance: %s" % piece.wear_chance)
 		if piece.has("item_id"):
 			lines.append("\nItem #%d · visual %s" % [int(piece.item_id), str(piece.key)])
-		if str(piece.get("canonical_name", "")) != str(piece.name):
-			lines.append("Catalog name: " + str(piece.canonical_name))
 		_details_text.add_text("\n".join(lines))
 	var notes := PackedStringArray(["Comments this session"])
 	for entry: Dictionary in _comments:
@@ -1212,7 +1226,7 @@ func _state() -> Dictionary:
 		var model: Dictionary = models.get(key, {}) as Dictionary
 		var resolved: Dictionary = actor._fit_variant(model) if actor != null and not model.is_empty() else model
 		pieces.append({"part": part, "visual": int(visuals[part]), "key": key,
-			"name": str(model.get("name", "")), "scene": str(resolved.get("scene", "")),
+			"name": str(_wardrobe.piece_at(part).get("name", model.get("name", ""))), "scene": str(resolved.get("scene", "")),
 			"loaded_from_disk": _raw_loaded.has(str(resolved.get("scene", "")))})
 	var time := 0.0
 	var length := 0.0
@@ -1220,6 +1234,7 @@ func _state() -> Dictionary:
 		time = actor.animation_player.current_animation_position
 		length = actor.animation_player.get_animation(_clip).length
 	return {"race": _race, "sex": _sex, "slug": _slug(), "set": _sets[_set_index]["name"],
+		"set_label": _set_label(_sets[_set_index]),
 		"loadout": _wardrobe.snapshot(), "selected_part": _wardrobe.selected_part,
 		"headwear": visuals.has(HEAD_PART),
 		"weapons_and_cape": EXTRA_PARTS.any(func(part: int) -> bool: return visuals.has(part)), "hair": _show_hair,
@@ -1246,7 +1261,7 @@ func _begin_note(scope := "view") -> void:
 	_dragging = MOUSE_BUTTON_NONE
 	_pending_state = _state()
 	_pending_state["scope"] = scope
-	_pending_state["target"] = piece.duplicate(true) if scope == "piece" else {"set": _sets[_set_index]["name"]}
+	_pending_state["target"] = piece.duplicate(true) if scope == "piece" else {"set": _sets[_set_index]["name"], "name": _set_label(_sets[_set_index])}
 	_resume_after_note = not _paused
 	if not _paused:
 		_set_paused(true)
@@ -1313,7 +1328,7 @@ func _save_note() -> void:
 		file.seek_end()
 		file.store_string("## %d. %s comment: %s\n\n%s, %s. %s at %.2f s%s. Pieces: %s.\n\n%s\n\n![](%s)\n\n" % [
 			_note_count, str(entry.scope).capitalize(), str(entry.target.get("name", entry["set"])),
-			_race_label(), entry["set"], entry["clip"], entry["clip_time"], _travel_words(entry),
+			_race_label(), entry.get("set_label", entry["set"]), entry["clip"], entry["clip_time"], _travel_words(entry),
 			", ".join(parts), comment, shot])
 	_close_note()
 	_refresh_details()
@@ -1342,6 +1357,16 @@ func _close_note() -> void:
 ## --selftest yes: exercise controls, save piece/set/view notes, then quit.
 func _selftest() -> void:
 	await get_tree().create_timer(1.5).timeout
+	var labels := {}
+	for outfit: Dictionary in _sets:
+		var label := _set_label(outfit)
+		assert(not labels.has(label))
+		assert(not label.begins_with("Audit "))
+		labels[label] = true
+	assert(_set_opt.get_item_text(0) == "Guard")
+	assert(_details_name.text == "Guard Armor")
+	assert(_details_text.get_parsed_text().contains("The Guard set"))
+	assert(not _details_text.get_parsed_text().to_lower().contains("concept"))
 	_ensure_session()
 	await RenderingServer.frame_post_draw
 	get_viewport().get_texture().get_image().save_png(_review_dir.path_join("ui_check.png"))
@@ -1358,7 +1383,8 @@ func _selftest() -> void:
 	await get_tree().process_frame
 	assert(_wardrobe.selected_part == 6)
 	assert(_details_name.text == str(_wardrobe.piece_at(6).name))
-	assert(_details_icon.texture == _atlas.icon_for(int(_wardrobe.piece_at(6).image_id)))
+	assert(_details_icon.texture == _icons.icon_for(_wardrobe.piece_at(6)))
+	assert(_details_icon.texture.get_size() == Vector2(512, 512))
 	key = key.duplicate()
 	key.pressed = false
 	Input.parse_input_event(key)

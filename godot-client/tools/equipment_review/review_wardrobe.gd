@@ -30,10 +30,12 @@ func configure(equipment: Dictionary, catalog: Dictionary) -> void:
 		var label := str(model.get("name", ""))
 		if label.is_empty():
 			label = "%s %s" % [str((equipment.get("parts", {}) as Dictionary).get(key.get_slice(":", 0), {}).get("name", "Piece")).capitalize(), key.get_slice(":", 1)]
-		_add({"id": "visual:" + key, "key": key, "part": int(key.get_slice(":", 0)),
+		var piece := {"id": "visual:" + key, "key": key, "part": int(key.get_slice(":", 0)),
 			"visual": int(key.get_slice(":", 1)), "name": label, "canonical_name": label,
 			"image_id": -1, "stats": {}, "description": "This client visual has no matching equippable item definition.",
-			"visual_only": true})
+			"visual_only": true}
+		piece.merge((catalog.get("visuals", {}) as Dictionary).get(key, {}), true)
+		_add(piece)
 	for part: int in by_part:
 		(by_part[part] as Array).sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 			return str(a.name).naturalnocasecmp_to(str(b.name)) < 0)

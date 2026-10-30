@@ -1,0 +1,88 @@
+{
+  "schema": 1,
+  "product": "Rabbit Lands",
+  "date": "2026-10-30",
+  "scope": "Equipment previewer presentation and component icons",
+  "previous_detail_icon_source_pixels": [
+    50,
+    50
+  ],
+  "new_detail_icon_pixels": [
+    512,
+    512
+  ],
+  "rendered_visuals": 443,
+  "available_visuals": 435,
+  "matching_armor_sets": 64,
+  "original_painted_icon_audit": {
+    "unique_item_image_ids_reviewed": 375,
+    "problem": "Pale paper and shadow backing remained inside some extracted cutouts.",
+    "observed_examples": [
+      {
+        "section": "Headgear",
+        "image_ids": [
+          152,
+          190,
+          191,
+          195,
+          196,
+          197,
+          206,
+          208,
+          209,
+          213,
+          215,
+          220,
+          227
+        ],
+        "finding": "Paper patches beneath headwear, inside open headbands, or between hanging side panels."
+      },
+      {
+        "section": "Legwear",
+        "image_ids": [
+          126,
+          166,
+          174,
+          178,
+          310,
+          313,
+          314,
+          318,
+          320,
+          321,
+          322,
+          324,
+          326,
+          330,
+          341
+        ],
+        "finding": "Pale ground strips beneath feet or retained paper bridging the gap between legs."
+      }
+    ],
+    "example_lists_are_not_a_count_of_all_failures": true,
+    "resolution": "Every preview icon now uses an actual 3D component render with alpha transparency; painted cutouts are not used by the preview detail panel."
+  },
+  "render_capture": {
+    "source": "Existing client actor, fitted equipment meshes, registered rigid bow scenes",
+    "pose": "Idle_Subtle at 0.3 seconds; luminous_male fit",
+    "excluded": [
+      "actor body and neckline skin",
+      "hair",
+      "generated fitting liners and hidden fitting envelopes",
+      "floor",
+      "background"
+    ],
+    "bow_capture_fix": "Longbow and Recurve Bow use registered rigid scenes rather than the actor-hidden socketed copies.",
+    "manifest": "godot-client/tools/equipment_review/icons/manifest.json",
+    "fitting_liner_capture_fix": "Generated boot and body fitting liners are excluded so capture silhouettes contain only authored equipment surfaces."
+  },
+  "verification": {
+    "all_models_covered": true,
+    "all_images_512_rgba": true,
+    "all_nonempty": true,
+    "all_border_pixels_transparent": true,
+    "minimum_content_margin_pixels": 39,
+    "clipped_or_empty_images": []
+  },
+  "identity_policy": "Preview labels and descriptions change; canonical item IDs, equipment visuals, game stats, and historical replay identifiers are preserved."
+}
