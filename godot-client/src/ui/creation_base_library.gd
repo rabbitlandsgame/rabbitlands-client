@@ -148,6 +148,9 @@ static func _hair_tags(appearance: Dictionary, sex: String, human: bool) -> Arra
 	match actual:
 		"rounded_afro": tags.assign(["Short", "Curly", "Afro"])
 		"cornrows_low_knot": tags.assign(["Tied", "Braided", "Cornrows"])
+		"receding_sweep": tags.assign(["Short", "Receding", "Sweep"])
+		"curly_twin_buns": tags.assign(["Tied", "Curly", "Buns"])
+		"shoulder_waves": tags.assign(["Long", "Wavy"])
 		"rowan_shag": tags.assign(["Short", "Wavy", "Shag"])
 		"mira_bun": tags.assign(["Tied", "Bun"])
 		_:

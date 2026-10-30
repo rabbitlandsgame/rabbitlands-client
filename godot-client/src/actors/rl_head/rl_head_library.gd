@@ -166,13 +166,12 @@ const SHADER_VALUES := {
 	"rl_mouth": [],
 }
 const INSTANCE_INCLUDE := "#include \"res://src/actors/rl_head/rl_head_instance.gdshaderinc\""
+static var _soft_root_shaders: Dictionary = {}
 const MATERIAL_VALUES_DEFINE := "#define RL_MATERIAL_VALUES\n"
 ## -1 unread, 0 instance uniforms, 1 material values (see material_values).
 static var _values_switch := -1
 ## Shared shader -> its RL_MATERIAL_VALUES compile.
 static var _value_shaders: Dictionary = {}
-## Only beard assets explicitly carrying featheredRoots use true alpha.
-static var _beard_feather_shaders: Dictionary = {}
 ## Shared material id + values -> WeakRef of its per-face copy.
 static var _face_materials: Dictionary = {}
 
@@ -479,7 +478,7 @@ static func release_unused() -> void:
 	_texture_queue.clear()
 	_warm_queue.clear()
 	_materials.clear()
-	_beard_feather_shaders.clear()
+	_soft_root_shaders.clear()
 	_face_materials.clear()
 	_manifest = null
 	RLHeadBodyCut.clear()
@@ -942,6 +941,14 @@ static func material(material_name: String, sex: String, style: String, quality:
 		return _materials[key] as ShaderMaterial
 	var result := ShaderMaterial.new()
 	result.shader = _values_shader(SHADERS[kind]) if material_values() else SHADERS[kind]
+	if material_name == "rl_hair_clump" and style == "curly_twin_buns":
+		var source: Shader = result.shader
+		if not _soft_root_shaders.has(source):
+			var shader := Shader.new()
+			shader.code = "#define RL_SOFT_ROOTS\n" + source.code
+			shader.set_meta(&"rl_base_shader", source)
+			_soft_root_shaders[source] = shader
+		result.shader = _soft_root_shaders[source]
 	if (material_name == "rl_brow" and not DRAW_BROW_CARDS) \
 			or (material_name == "rl_cornea" and quality < CORNEA_QUALITY):
 		result.shader = SHADERS["rl_hidden"]
@@ -965,19 +972,17 @@ static func material(material_name: String, sex: String, style: String, quality:
 			# (`texture`); without that, by convention.
 			var asset := beard_path(style) if material_name == "rl_beard" else hair_path(style)
 			var extras := material_extras(asset, material_name)
-			if material_name == "rl_beard" and bool(extras.get("featheredRoots", false)):
+			var feathered_beard := material_name == "rl_beard" and bool(extras.get("featheredRoots", false))
+			var soft_details := material_name == "rl_hair_card" and bool(extras.get("softRootDetails", false))
+			if feathered_beard or soft_details:
 				var source: Shader = result.shader
-				if not _beard_feather_shaders.has(source.get_instance_id()):
+				var shader_key: Variant = "beard_feather:%d" % source.get_instance_id() if feathered_beard else source
+				if not _soft_root_shaders.has(shader_key):
 					var shader := Shader.new()
-					shader.code = "#define RL_BEARD_FEATHER\n" + source.code
+					shader.code = ("#define RL_BEARD_FEATHER\n" if feathered_beard else "#define RL_SOFT_ROOTS\n") + source.code
 					shader.set_meta(&"rl_base_shader", source)
-					_beard_feather_shaders[source.get_instance_id()] = shader
-				result.shader = _beard_feather_shaders[source.get_instance_id()]
-				result.set_shader_parameter("lock_variation", 0.0)
-				result.set_shader_parameter("beard_gain", 1.0)
-				result.set_shader_parameter("flatness", 0.65)
-				result.set_shader_parameter("root_darkening", 0.15)
-				result.set_shader_parameter("primary_strength", 0.003)
+					_soft_root_shaders[shader_key] = shader
+				result.shader = _soft_root_shaders[shader_key]
 			var file := str(extras.get("texture", ""))
 			if file.is_empty():
 				file = "beard.png" if material_name == "rl_beard" else "hair_%s.png" % style
@@ -985,6 +990,15 @@ static func material(material_name: String, sex: String, style: String, quality:
 				slot_texture(keys, "albedo", file, quality))
 			result.set_shader_parameter("card", material_name != "rl_hair_clump")
 			result.set_shader_parameter("scalp_channels", style == "cornrows_low_knot")
+			result.set_shader_parameter("soft_hairline", bool(extras.get("softHairline", false)))
+			if bool(extras.get("referenceSurface", false)):
+				result.set_shader_parameter("soft_hairline", feathered_beard)
+				result.set_shader_parameter("lock_variation", 0.0)
+				result.set_shader_parameter("beard_gain", 1.0)
+				result.set_shader_parameter("card", true)
+				result.set_shader_parameter("flatness", 0.65)
+				result.set_shader_parameter("root_darkening", 0.15)
+				result.set_shader_parameter("primary_strength", 0.003)
 			# Beards draw at the shader's beard_gain, so they light like the hair.
 			result.set_shader_parameter("beard", material_name == "rl_beard")
 			result.set_shader_parameter("alpha_scissor", 0.5 if material_name == "rl_hair_clump" else 0.35)

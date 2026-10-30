@@ -68,9 +68,218 @@
         ]
       },
       "clearance_cases_per_lod": 69
+    },
+    {
+      "id": "human_27",
+      "module_id": 6,
+      "name": "shoulder_waves",
+      "sex": "female",
+      "glb_sha256": "75f9b87275ddb6950efb8eea8fd8c445703d7b473a29192e08f6311c27acfeb7",
+      "texture_sha256": "e79dbfe94be8ad448ba12f0c3bf07782f24d4aeaec3a52592efa6b564959f3cf",
+      "triangles": {
+        "lod0": 16852,
+        "lod1": 6156,
+        "lod2": 1838
+      },
+      "source_reference_sha256": "77ed9d901a30ef018fda3b95e6d2259e474a19572dcb06c826023a210e118ba1",
+      "previous_review_evidence": {
+        "coverage": {
+          "samples": 900,
+          "directions": 165,
+          "level": 0.0,
+          "gateCases": [
+            "rest",
+            "hl_volume_n",
+            "hl_length_n",
+            "hl_volume_n+hl_length_n"
+          ],
+          "holeSamplesMax": 0,
+          "gateHoleSamplesMax": 0,
+          "warnings": []
+        },
+        "minimum_clearance_mm": 2.8006613012864543,
+        "clearance_cases_per_lod": 69,
+        "review_repair_3": {
+          "source_sha256": "ef4bb37f77fecdba159b93b1d052da99f7f90a09081c9d8f4c716e5bc60cf150",
+          "tool_sha256": "ae2ea0d2b7c488b3a1dd72609a54ca5ffc47ac7a6fafa466592ca4cc48228808",
+          "checked_cases_per_lod": 74,
+          "minimum_changed_region_clearance_mm": 2.8006613012864543,
+          "original_core_and_cards_preserved": true,
+          "opaque_hanging_coverage_added": true,
+          "scalp_coverage_preserved_by_addition": true,
+          "root_pinned_length": true,
+          "inner_layer_keeps_minimum_volume": true
+        }
+      },
+      "review_repair_4": {
+        "source_sha256": "0fbeb43e7a6155998d778bfc089f4c29281c72f2763288f8b2aeb2300c646175",
+        "tool_sha256": "076c8889f017b38ee48cd5475a507814d958e29e0a771a106290efd9c17b2b57",
+        "method": "Closed opaque volume with full head/ear cavity; rooted optional cards; near-head grooming pinned; continuous texture projection",
+        "closed_core_components_by_lod": [
+          1,
+          1,
+          1
+        ],
+        "closed_core_watertight_by_lod": [
+          true,
+          true,
+          true
+        ],
+        "vertex_cases_per_lod": 73,
+        "minimum_vertex_clearance_mm": 2.872281788706916,
+        "triangle_cases_per_lod": [
+          "rest",
+          "pilot",
+          "long",
+          "short_flat"
+        ],
+        "minimum_triangle_sample_clearance_mm": 1.9180014898094617,
+        "triangle_inside_samples": 0,
+        "visual_review": "Front, both three-quarter/profiles and rear at neutral, long, short and short/min-volume; no visible ear-to-shoulder openings. High and forced lower detail inspected.",
+        "old_core_preserved": false,
+        "new_generation_credits": 0
+      }
+    },
+    {
+      "id": "human_14",
+      "module_id": 7,
+      "name": "curly_twin_buns",
+      "sex": "female",
+      "glb_sha256": "f2a9f9db6f02d96426a11b74ff3c13ddf0774d3780c8ccbb83f23efc8aaec92a",
+      "texture_sha256": "6f146e89c0f09b1eaeb348756d89c21632e7edb95f1a316aa1e98001d95dc984",
+      "triangles": {
+        "lod0": 17342,
+        "lod1": 6652,
+        "lod2": 2456
+      },
+      "source_reference_sha256": "02345827ecd8383e6c03f9ca32d34d8b14b86becde91784f6a9c7e32548880c4",
+      "previous_review_evidence": {
+        "coverage": {
+          "samples": 900,
+          "directions": 165,
+          "level": 0.0,
+          "gateCases": [
+            "rest",
+            "hl_volume_n",
+            "hl_length_n",
+            "hl_volume_n+hl_length_n"
+          ],
+          "holeSamplesMax": 0,
+          "gateHoleSamplesMax": 0,
+          "warnings": []
+        },
+        "minimum_clearance_mm": 2.8091900491606956,
+        "clearance_cases_per_lod": 69
+      },
+      "review_repair_4": {
+        "source_sha256": "472a2a56beb390c71d7600fdd467139670a3929a8158d0c3261ff06ddd04726b",
+        "tool_sha256": "10eb8522d093428b0d417d5e7b6ff540d3b660f78ce7ff4cde9093f2eb78826d",
+        "method": "Smooth scalp-relative face boundary, dense cap, closed bun backing, rooted feathered fringe and disconnected crown-card removal",
+        "vertex_cases_per_lod": 72,
+        "cap_triangle_cases_per_lod": 57,
+        "minimum_cap_triangle_clearance_mm": 0.7592987418263746,
+        "ear_triangle_crossings_neutral_and_groom": 0,
+        "retained_internal_overlap": "Source curl closure triangles remain buried inside the neck at the nape; no visible skin gap or ear intersection.",
+        "visual_review": "54 actual client views across all three detail levels; final ear target-only refinement proven identical for pilot ear_size=0.",
+        "new_generation_credits": 0,
+        "messiness": "Three exact-root-contact ornamental curl tips gated above64/74;139alpha values only, all geometry/morph arrays unchanged"
+      }
+    },
+    {
+      "id": "human_08",
+      "module_id": 8,
+      "name": "receding_sweep",
+      "sex": "male",
+      "glb_sha256": "6e1b1397ef8e996e3be8ba1c85f3d8f586ca8b895ea09344bece82720222a362",
+      "texture_sha256": "80b30d22b7114768fc61e47007348d0133088267b3e7f1b611d8d31f8806e69f",
+      "triangles": {
+        "lod0": 17635,
+        "lod1": 6376,
+        "lod2": 2011
+      },
+      "minimum_clearance_mm": 2.4204263388280056,
+      "source_reference_sha256": "3053ebe4b7547ae2a8a5186d07e8c328e3b8cd80cfdbe50320cc71301dcc17a6",
+      "coverage": {
+        "samples": 900,
+        "directions": 165,
+        "level": 0.0,
+        "gateCases": [
+          "rest",
+          "hl_volume_n",
+          "hl_length_n",
+          "hl_volume_n+hl_length_n"
+        ],
+        "holeSamplesMax": 1,
+        "gateHoleSamplesMax": 0,
+        "warnings": [
+          "lod0 all_id_p+hl_volume_n+hl_length_n: 1 scalp samples seen through the hair (1 rays) at [([-120, -100], [-30, -20])]",
+          "lod1 all_id_p+hl_volume_n+hl_length_n: 1 scalp samples seen through the hair (1 rays) at [([100, 120], [-10, 0])]",
+          "lod2 all_id_p+hl_volume_n+hl_length_n: 1 scalp samples seen through the hair (2 rays) at [([100, 120], [-10, 0])]"
+        ]
+      },
+      "clearance_cases_per_lod": 69
     }
   ],
   "beards": [
+    {
+      "name": "short_beard",
+      "glb_sha256": "9376df2b9f3459bc72ebbc636c3dd8fa1eca28b6ad0fc8bdb14c725e8b0afe50",
+      "texture_sha256": "0b1d1a7171422c858305f8c653e1dd6405f317d063cda4e10a1b8be10482611d",
+      "triangles": {
+        "lod0": 4420,
+        "lod1": 2979,
+        "lod2": 1662
+      },
+      "previous_review_evidence": {
+        "all_checked_deformations_clear": true,
+        "review_repair_3": {
+          "source_sha256": "42ba83a1cd5bdc1739c8e07d701b0cfe9e1ce3badea6d9ef7c66b15f2748df6f",
+          "tool_sha256": "ae2ea0d2b7c488b3a1dd72609a54ca5ffc47ac7a6fafa466592ca4cc48228808",
+          "checked_cases_per_lod": 89,
+          "minimum_changed_region_clearance_mm": 2.3008809613108507,
+          "lip_opening_clipped": true,
+          "neutral_fit_preserved_during_combination_allowances": true,
+          "mouth_sides_bound_separately": true,
+          "oral_fold_sign_confirmed_with_escape_rays": true,
+          "pilot_preset": "human_08",
+          "presets_sha256": "7762c5217f2fe2ebabdd9cb99c9d49579124d082e4f949f8f7acb53079c51db4"
+        },
+        "source_core_sha256": "7f4c1beae22b31b3a2451401fe7b7df08398069ffe17b932e2c08395b31015d4",
+        "source_whiskers_sha256": "f35234d35bffbaaacd179d9c8c317a69dc61bf04dca241fe2f6188d80ad09a73",
+        "whisker_scale": 0.1
+      },
+      "review_repair_4": {
+        "tool_sha256": "fbdd1e607024715c2fa5e2d6b1e830d04da25823d3f7b9497fd2ed3d579f3dfb",
+        "method": "One welded skin-following foundation per LOD, continuous moustache/goatee lip ring, feathered cheek/neck boundary and rerooted short whiskers",
+        "foundation_components_by_lod": [
+          1,
+          1,
+          1
+        ],
+        "root_gap_mm": [
+          0.06028721177164738,
+          0.7644936499414628
+        ],
+        "chin_gap_mm": [
+          0.28173628429111836,
+          3.2528293494843172
+        ],
+        "mouth_bridge_gap_mm": [
+          0.0037393432383514497,
+          3.5823650033911982
+        ],
+        "visual_review": {
+          "lod0": "Rest/smile/max combined jaw-smile front, both 3/4 and both profiles reviewed; attached chin and continuous moustache/goatee mouth ring. v5-soft captures use geometry exactly identical to final LOD0 attributes/indices/all75 targets.",
+          "lod1_2": "Explicit rig.lod_band assertions; neutral front/both profiles reviewed after lower-LOD refinement. The client bakes distant faces still, so max expression-labelled lowerLOD captures are not claimed as dynamic expression evidence.",
+          "baseline_note": "The apparent extra chin in close T-pose profiles is the far hand projected behind the neck, confirmed by hands-only and hands-hidden diagnostic renders. Extreme teeth/jaw deformation remains pre-existing; no head/body asset change was needed."
+        },
+        "all_head_identity_and_expression_targets": 75,
+        "new_generation_credits": 0
+      },
+      "tool": "eloria-assets/tools/rl_heads/hair/fit_attached_beard.py",
+      "tool_sha256": "fbdd1e607024715c2fa5e2d6b1e830d04da25823d3f7b9497fd2ed3d579f3dfb",
+      "authoring_inputs": "Use the matching canonical head GLB/NPZ via RL_HEADS_BUILD and scalp groups via RL_MPFB_GROUPS; retained ignored sources are required for exact reproduction."
+    },
     {
       "name": "full_beard",
       "glb_sha256": "7a4aded0b1211125b6a50de5a4c53d6583200be5961b4e0f8f9df3f01c4c018e",
@@ -97,20 +306,20 @@
         "visual_review": "Actual client neutral/smile/jaw-smile front, both three-quarter/profiles and rear; lower-LOD live expressions; no projecting oral sheet or visible lower-mass holes",
         "new_generation_credits": 0
       },
-      "id": "human_34",
       "foundation_tool": "eloria-assets/tools/rl_heads/hair/fit_attached_beard.py",
       "foundation_tool_sha256": "fbdd1e607024715c2fa5e2d6b1e830d04da25823d3f7b9497fd2ed3d579f3dfb",
       "tool": "eloria-assets/tools/rl_heads/hair/fit_attached_full_beard.py",
-      "byte_reproduction": "Exact GLB and PNG from retained source inputs with full_beard-v4 output basename"
+      "byte_reproduction": "Exact GLB and PNG from retained source inputs with full_beard-v4 output basename",
+      "status": "existing_shared_module_unchanged; human34 is held outside selectable presets"
     }
   ],
-  "revision": "selected-three-pilots-attached-full-beard-20261030",
+  "revision": "five-selected-pilots-human34-held-20261030",
   "review_notes": [
-    "Selected humans01,20 and34 only. Humans08,14 and27 remain outside this integration.",
-    "Original Mira/Rowan rules, PC/2 fallbacks, NPC assignments and Randomize behavior are retained.",
-    "Cornrows deliberately expose scalp channels. Afro wisps are compact and root-attached.",
-    "The full beard has a continuous attached foundation and feathered alpha edges, with its long reference silhouette retained. Other beard assets are unchanged.",
-    "Neck-dye blend and female collar use the current reviewed fixes."
+    "Selected Humans01,08,14,20 and27 only; Bram/human34 remains reserved and held outside the selectable catalog and raw presets.",
+    "Existing full_beard geometry and atlas are unchanged for other wearers.",
+    "No NPC or Randomize adoption. Mira/Rowan, canonical bodies/heads and existing PC/2 fallbacks are preserved.",
+    "Cornrows retain intentional scalp partings; curls/waves and short-beard repair evidence is bound to the module hashes.",
+    "User artistic review remains distinct from numerical checks."
   ],
   "female_shirt_neckline": {
     "glb_sha256": "33bc520528eb0631087e728a0d3f04b99370196e445379f83f7c308b90938a29",

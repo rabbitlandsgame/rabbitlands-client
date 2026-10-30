@@ -86,17 +86,17 @@ func run() -> void:
 	main.call("_set_creation_class", 2)
 	main.call("_on_new_character_pressed")
 	await settle()
-	var row: Dictionary = flow._find("human_34")
-	check(not row.is_empty(), "Qualified elder is available through the real controller")
+	var row: Dictionary = flow._find("human_08")
+	check(not row.is_empty(), "Qualified bearded base is available through the real controller")
 	var before := form_state()
-	await choose("human_34")
+	await choose("human_08")
 	check(not flow.is_open() and main.get_node("%FormPanel").visible,
 		"Use this basis opens the full editor")
 	check(int(main.get("_creation_preview_actor_type")) == 1
 		and (main.get_node("%CreateGender") as OptionButton).get_selected_id() == 1,
-		"Human34 applies the male body to both form and actor")
+		"Corin applies the male body to both form and actor")
 	check(PC.normalized(appearance()) == PC.normalized(row.look.appearance),
-		"Human34 transfers its complete palette, grooming and morph controls")
+		"Corin transfers its complete palette, grooming and morph controls")
 	var applied := form_state()
 	for field: String in ["calling", "name", "password", "confirm"]:
 		check(applied[field] == before[field], "Applying a basis preserves " + field)
@@ -163,15 +163,15 @@ func run() -> void:
 	for version: int in [1, 2, 3]:
 		network.call("_set_appearance_protocol", version)
 		flow.open(false)
-		await choose("human_34")
+		await choose("human_08")
 		var payload := appearance().duplicate(true)
 		payload["actor_type"] = 1
 		check(network.call("validate_creation_appearance", payload) == OK,
 			"Applied real form validates for negotiated protocol %d" % version)
 	flow.open(false)
-	flow.picker._select_card("human_34")
+	flow.picker._select_card("human_08")
 	network.call("_set_appearance_protocol", 2)
-	await choose("human_34")
+	await choose("human_08")
 	var reconnect_payload := appearance().duplicate(true)
 	reconnect_payload["actor_type"] = 1
 	check(network.call("validate_creation_appearance", reconnect_payload) == OK,

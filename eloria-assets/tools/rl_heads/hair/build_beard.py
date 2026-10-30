@@ -207,7 +207,7 @@ class SubRegion(Region):
 
 
 # ===================================================================== build
-def build(spec_path, sex, out_path, chart=None, check=True, embed=False):
+def build(spec_path, sex, out_path, chart=None, check=True, embed=False, surface=None):
     t0 = time.time()
     spec = json.load(open(spec_path))
     head = headref.Head(sex)
@@ -317,15 +317,24 @@ def build(spec_path, sex, out_path, chart=None, check=True, embed=False):
             # nothing survived this LOD's rules (tiny regions): reuse the previous LOD
             lod_data[lod] = lod_data[lod - 1]
 
+    if surface:
+        from pathlib import Path
+        for lod in LODS:
+            source=np.load(Path(surface)/f'lod{lod}.npz');count=len(source['P'])
+            lod_data[lod]={k:source[k] for k in ('P','N','UV','T')}
+            lod_data[lod].update(t=np.full(count,.65),rand=np.full(count,.5),lock=np.full(count,-1,dtype=int))
     # ---------------- output
     names_all = list(head.target_names)
     W = assemble.Writer('RL beard build (scripts/hair/build_beard.py)')
     col = spec.get('color', [0.12, 0.07, 0.04])
+    texture=os.path.join(surface,'surface.png') if surface else TEX
+    texture_name=spec['name']+'.png' if surface else 'beard.png'
     mat = W.material('rl_beard', col + [1.0], alpha='MASK', cutoff=0.4, double=True,
-                     extras={'texture': 'beard.png', 'atlasColumns': NCOLS, 'shellColumn': SHELL_COL, 'tint': col})
+                     extras={'texture': texture_name, 'atlasColumns': NCOLS, 'shellColumn': SHELL_COL, 'tint': col,'referenceSurface':bool(surface)})
     if embed:
-        W.embed_texture(mat, TEX)
+        W.embed_texture(mat, texture)
     report = {'style': spec.get('name'), 'sex': sex, 'lods': {}}
+    if surface:report['source']=json.load(open(os.path.join(surface,'source.json')))
     clearance_rep = {}
     lock_root = np.array([lk.root for lk in locks]) if locks else np.zeros((0, 3))
     follow_of = {}
@@ -386,9 +395,25 @@ def build(spec_path, sex, out_path, chart=None, check=True, embed=False):
         targets = []; hair_d = {}
         for nm in names_all:
             dP = bind.delta(head.delta(nm), keep_clear=True, margin=0.0026)
+            if surface:
+                delta=head.delta(nm)
+                mesh=assemble.trimesh.Trimesh(head.P+delta,head.T,process=False)
+                for _ in range(4):
+                    sd,cp,normal,rim=head.signed(P+dP,D=delta,mesh=mesh,with_rim=True)
+                    bad=(sd<.0028)&~rim
+                    if not bad.any():break
+                    dP[bad]=cp[bad]+normal[bad]*.0032-P[bad]
             dP[np.abs(dP).max(1) < 2e-6] = 0
             dN = None
             targets.append((dP, dN)); hair_d[nm] = dP
+        if surface:
+            from reference_surface import joint_groom_clearance
+            ids=[n for n in names_all if n.startswith('id_')]
+            combos=None
+            if spec['name']=='full_beard':
+                combos=assemble.default_combos(ids)
+                combos['jaw_open+smile']={'ex_jaw_open':1,'ex_smile':1}
+            P=joint_groom_clearance(head,P,hair_d,ids,.0032 if combos else .003,combos)
         prim = W.primitive(P.astype(np.float32), d['N'].astype(np.float32), d['UV'].astype(np.float32), d['T'],
                            colr, J4, W4, mat, targets)
         mesh_ids.append(W.mesh(f'beard_lod{lod}', [prim], names_all))
@@ -434,7 +459,7 @@ def build(spec_path, sex, out_path, chart=None, check=True, embed=False):
         'joints': [hn[j]['name'] for j in hskin['joints']],
         'colour': {'R': 'per-hair-card random', 'G': 'position along the card (0 root .. 1 tip); shell: 0 top edge .. 1 bottom edge',
                    'B': 'ao'},
-        'texture': {'file': 'beard.png', 'columns': NCOLS, 'cards': [0, 1, 2], 'shell': SHELL_COL,
+        'texture': {'file': texture_name, 'columns': 1 if surface else NCOLS, 'cards': [] if surface else [0, 1, 2], 'shell': 0 if surface else SHELL_COL,
                     'shellPeriodPx': SHELL_PERIOD, 'shellMarginPx': SHELL_MARGIN},
         'morphTransfer': {'source': os.path.basename(head.glb_path), 'targets': 'all head shapes (id_* and ex_*)'},
         'headSHA256': assemble.file_sha(head.glb_path)}}
@@ -483,8 +508,9 @@ if __name__ == '__main__':
     ap.add_argument('--chart', default='')
     ap.add_argument('--no-check', action='store_true')
     ap.add_argument('--embed-textures', action='store_true')
+    ap.add_argument('--surface', help='Ignored reference-derived NPZ LOD stage, already neutralized to the head')
     a = ap.parse_args()
-    rep = build(a.spec, a.sex, a.out, chart=a.chart or None, check=not a.no_check, embed=a.embed_textures)
+    rep = build(a.spec, a.sex, a.out, chart=a.chart or None, check=not a.no_check, embed=a.embed_textures, surface=a.surface)
     out = {'style': rep['style'], 'bytes': rep['bytes'], 'seconds': rep['seconds'], 'lods': rep['lods']}
     if rep['clearance']:
         out['clearance'] = {k: {'restMinMM': round(v['rest']['minMM'], 2), 'restViol': v['rest']['violations'],

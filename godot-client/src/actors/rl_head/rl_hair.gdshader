@@ -89,6 +89,8 @@
 shader_type spatial;
 #ifdef RL_BEARD_FEATHER
 render_mode blend_mix, depth_prepass_alpha, cull_disabled;
+#elif defined(RL_SOFT_ROOTS)
+render_mode blend_mix, depth_draw_opaque, cull_disabled, alpha_to_coverage;
 #else
 render_mode blend_mix, depth_draw_opaque, cull_disabled;
 #endif
@@ -100,6 +102,7 @@ uniform bool has_texture = false;
 uniform bool card = false;
 // Tight braids intentionally expose the actor's scalp between their rows.
 uniform bool scalp_channels = false;
+uniform bool soft_hairline = false;
 uniform float alpha_scissor : hint_range(0.0, 1.0) = 0.5;
 uniform float root_darkening : hint_range(0.0, 1.0) = 0.25;
 uniform float lock_variation : hint_range(0.0, 0.5) = 0.12;
@@ -158,7 +161,8 @@ void fragment() {
 		atlas = vec4(vec3(mix(0.78, 1.08, streak)), coverage);
 	}
 	float root = mix(1.0 - root_darkening, 1.0, smoothstep(0.0, 0.55, COLOR.g));
-	float lock = 1.0 + (COLOR.r - 0.5) * 2.0 * lock_variation * (1.0 + boost);
+	float lock_random = soft_hairline && (!card || beard) ? 0.5 : COLOR.r;
+	float lock = 1.0 + (lock_random - 0.5) * 2.0 * lock_variation * (1.0 + boost);
 	float shade = mix(1.0, COLOR.b, occlusion);
 	float painted = has_texture ? dot(atlas.rgb, LUMA) : atlas.r / 1.5;
 	if (has_texture && (boost > 0.0 || flatness > 0.0)) {
@@ -178,12 +182,15 @@ void fragment() {
 			ALPHA = 0.0;
 		}
 	}
-#ifdef RL_BEARD_FEATHER
-	// Attached beard margins encode continuous coverage in vertex red.
-	// True alpha keeps the cheek/lip edge soft rather than cutting a polygon.
-	ALPHA *= smoothstep(0.0, 0.5, COLOR.r);
-#else
+	if (soft_hairline && ((!card && !beard) || beard)) {
+		ALPHA *= smoothstep(0.0, 0.5, COLOR.r);
+	}
+#ifndef RL_BEARD_FEATHER
 	ALPHA_SCISSOR_THRESHOLD = alpha_scissor;
+#endif
+#ifdef RL_SOFT_ROOTS
+	ALPHA_ANTIALIASING_EDGE = alpha_scissor * 0.5;
+	ALPHA_TEXTURE_COORDINATE = UV * vec2(textureSize(strand_texture, 0));
 #endif
 	ROUGHNESS = 0.6;
 	// light() replaces only the direct lights; the environment's reflection
