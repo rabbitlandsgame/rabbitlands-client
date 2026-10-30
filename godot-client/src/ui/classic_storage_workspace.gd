@@ -41,7 +41,6 @@ var _inventory_parent: Node
 var _inventory_z_index := 20
 var _bank_dragger: WindowDrag
 var _inventory_position := Vector2.ZERO
-var _inventory_was_visible := false
 var _selected_position := -1
 var _selected_entry := -1
 var _category_id := -1
@@ -347,7 +346,6 @@ func refresh() -> void:
 	if is_open != _open:
 		_open = is_open
 		if is_open:
-			_inventory_was_visible = inventory.visible
 			_inventory_position = inventory.position
 			inventory.show()
 			if docked:
@@ -357,8 +355,6 @@ func refresh() -> void:
 		else:
 			_pending_withdrawals.clear()
 			_detach_inventory()
-			if not _inventory_was_visible:
-				inventory.hide()
 	if not is_open:
 		return
 	var category_id: int = int(AppState.storage.get("category_id", -1))
