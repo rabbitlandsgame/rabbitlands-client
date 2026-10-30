@@ -2608,7 +2608,7 @@ func _record_startup_window(window_name: String, began: int) -> int:
 		"duration_ms": (now - began) / 1000.0})
 	return Time.get_ticks_usec()
 
-func _refresh_creation_preview(starting_look: Dictionary = {}) -> void:
+func _refresh_creation_preview(starting_look: Dictionary = {}, reset_actor: bool = false) -> void:
 	var choosing_base := not starting_look.is_empty()
 	var actor_type: int = int(starting_look.get("actor_type", create_gender.get_selected_id()))
 	var appearance: Dictionary = (starting_look.get("appearance", {}) as Dictionary).duplicate(true) if choosing_base else _creation_appearance()
@@ -2631,11 +2631,13 @@ func _refresh_creation_preview(starting_look: Dictionary = {}) -> void:
 		creation_colours.update_context(appearance, model_config)
 		portrait_form.set_hair_style(AppearanceVariants.hair_style(int(appearance.get("hair", 0))))
 		portrait_form.update_derived(appearance)
-	# A colour slider changes an existing actor's appearance. Reimporting its
-	# body and animation library for each event stalls the whole interface.
-	# Race/sex changes still construct the corresponding independent model.
-	if not is_instance_valid(preview_actor) or _creation_preview_model_id != model_id \
-			or _creation_preview_actor_type != actor_type:
+	# Whole bases and hair-module route changes start from a fresh cached scene;
+	# changing native/High grooming in place can leave a stale render material.
+	# Colour and face sliders still update the existing actor without rebuilding.
+	var new_basis := choosing_base and _creation_preview_appearance != appearance
+	var hair_route_changed := int(_creation_preview_appearance.get("hair_module", 0)) != int(appearance.get("hair_module", 0))
+	if reset_actor or new_basis or hair_route_changed or not is_instance_valid(preview_actor) \
+			or _creation_preview_model_id != model_id or _creation_preview_actor_type != actor_type:
 		if is_instance_valid(preview_actor):
 			preview_actor.queue_free()
 		preview_actor = ReplicatedActor3D.new()

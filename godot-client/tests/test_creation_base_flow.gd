@@ -132,6 +132,20 @@ func run() -> void:
 		and is_equal_approx(float(main.get("preview_pitch")), float(camera.pitch))
 		and is_equal_approx(float(main.get("preview_distance")), float(camera.distance))
 		and main.get("creation_face_focus") == camera.face, "Cancel restores the prior camera framing")
+	# A warmed portrait cache exposed a material fault during same-body grooming
+	# transitions; exercise both directions and preserve the editor on Cancel.
+	flow.open(false)
+	var deadline := Time.get_ticks_msec() + 15000
+	while not flow.picker.portraits.is_idle() and Time.get_ticks_msec() < deadline:
+		await process_frame
+	check(flow.picker.portraits.is_idle(), "Visible portraits finish before changing the staged look")
+	flow.picker._select_card("human_20")
+	await settle()
+	check(form_state() == saved, "A same-body hair-route preview keeps editor changes staged")
+	flow.picker._dismiss()
+	await settle()
+	check(form_state() == saved and main.get("_creation_preview_appearance") == saved.appearance,
+		"Cancelling the same-body hair-route preview restores the edited appearance")
 	for actor_type: int in [41, 42]:
 		flow.open(false)
 		var id := ssarathi_id(actor_type)

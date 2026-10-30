@@ -172,7 +172,7 @@ func _use_basis(id: String) -> void:
 		_main.get("creation_colours").set_values(appearance)
 	_basis_id = id
 	_restore_layout()
-	_main.call("_refresh_creation_preview")
+	_main.call("_refresh_creation_preview", {}, true)
 	_button.grab_focus.call_deferred()
 
 
@@ -182,7 +182,7 @@ func _cancel() -> void:
 	if return_to_login:
 		_main.call("_on_creation_back_pressed")
 	else:
-		_main.call("_refresh_creation_preview")
+		_main.call("_refresh_creation_preview", {}, true)
 		_button.grab_focus.call_deferred()
 
 
