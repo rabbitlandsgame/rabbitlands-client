@@ -1,0 +1,802 @@
+{
+ "_doc": "Pilot review variant; current 23-control RL heads. Existing named styles remain unchanged. Human 01: seven parallel scalp braids converging into a small low knot; tight root coverage and fine hairline detail.",
+ "name": "cornrows_low_knot",
+ "sex": "female",
+ "seed": 41,
+ "color": [
+  0.18,
+  0.1,
+  0.06
+ ],
+ "clearance_mm": 2.6,
+ "morph": {
+  "follow_mm": 15,
+  "fade_mm": 15,
+  "stretch": 0.5,
+  "keep_clear": true
+ },
+ "hairline": {
+  "_doc": "lowered and asymmetric at the front (more on her left, less on the parting side), U-shaped nape (corners raised, centre lower), soft noise",
+  "ear_margin": 1.5,
+  "nape_below_lobe_mm": 20,
+  "noise": 0.6,
+  "adjust": [
+   [
+    0,
+    -3
+   ],
+   [
+    50,
+    -2
+   ],
+   [
+    90,
+    0
+   ],
+   [
+    180,
+    0
+   ],
+   [
+    -90,
+    0
+   ],
+   [
+    -50,
+    -2
+   ]
+  ]
+ },
+ "shell": {
+  "_doc": "under-shell round the pole (bun direction) in seamless sectors of the clump texture window; opaque edge kept 1.5 deg inside the hairline, hidden under the baby-hair cards",
+  "pole": [
+   180,
+   65
+  ],
+  "v": "from_pole",
+  "tip_band": 0.0,
+  "v_start": 0.3,
+  "offset_mm": [
+   4.2,
+   3.2
+  ],
+  "u_repeat": 12,
+  "ao": 0.6,
+  "lod": {
+   "0": [
+    14,
+    36
+   ],
+   "1": [
+    9,
+    24
+   ],
+   "2": [
+    7,
+    24
+   ]
+  },
+  "edge_inset": 1.5,
+  "face_clear": 0.9
+ },
+ "groups": [
+  {
+   "name": "low_knot",
+   "type": "bun",
+   "_doc": "big messy bun (outer diameter ~2*(major+minor) ~ 10 cm, ~58% head width): flattened ribbon locks wound round a torus, loose ends lifting off, loops of different sizes (loop_size range), plus a core",
+   "center": [
+    180,
+    -18,
+    31
+   ],
+   "tilt": [
+    0,
+    0.15,
+    0.1
+   ],
+   "major_mm": 18,
+   "minor_mm": 13,
+   "clumps": 7,
+   "sweep_deg": [
+    150,
+    280
+   ],
+   "turns": [
+    0.45,
+    0.9
+   ],
+   "messy": 0.55,
+   "loose_ends": 0.55,
+   "loops": 5,
+   "loop_size": [
+    0.4,
+    1.4
+   ],
+   "loop_width": 0.75,
+   "section": {
+    "kind": "clump",
+    "width": 0.013,
+    "thick": 0.009,
+    "cup": 0.4,
+    "across": 5,
+    "segs": 22,
+    "twist": 30,
+    "profile": {
+     "root": 0.6,
+     "belly": 0.15,
+     "tip_start": 0.6,
+     "tip_pow": 1.0
+    },
+    "sides": 6
+   },
+   "core": {
+    "scale": [
+     1.0,
+     1.0,
+     0.92
+    ],
+    "res": {
+     "0": [
+      14,
+      8
+     ],
+     "1": [
+      10,
+      6
+     ],
+     "2": [
+      8,
+      5
+     ]
+    }
+   },
+   "lod": {
+    "1": {
+     "keep": 0.6,
+     "sides": 4,
+     "segs": 0.55,
+     "width_mul": 1.2
+    },
+    "2": {
+     "keep": 0.3,
+     "sides": 3,
+     "segs": 0.35,
+     "width_mul": 1.5
+    }
+   },
+   "groom": {
+    "length": false,
+    "volume": true
+   }
+  },
+  {
+   "name": "cornrow_0",
+   "type": "braid",
+   "around": "path",
+   "path": [
+    [
+     -63,
+     10.66,
+     6
+    ],
+    [
+     -63,
+     45,
+     6
+    ],
+    [
+     -63,
+     67.84,
+     6
+    ],
+    [
+     -117,
+     67.84,
+     6
+    ],
+    [
+     -117,
+     45,
+     6
+    ],
+    [
+     -145.35,
+     10,
+     6
+    ],
+    [
+     180,
+     -18,
+     8
+    ]
+   ],
+   "width_mm": 6,
+   "depth_mm": 2.8,
+   "period_mm": 16,
+   "segs_per_period": 4,
+   "section": {
+    "width": 0.0028,
+    "thick": 0.0026,
+    "sides": 4
+   },
+   "groom": {
+    "length": false,
+    "volume": false
+   },
+   "lod": {
+    "1": {
+     "sides": 3,
+     "segs": 0.4
+    },
+    "2": {
+     "sides": 3,
+     "segs": 0.14
+    }
+   }
+  },
+  {
+   "name": "cornrow_1",
+   "type": "braid",
+   "around": "path",
+   "path": [
+    [
+     -42,
+     14.440000000000001,
+     6
+    ],
+    [
+     -42,
+     45,
+     6
+    ],
+    [
+     -42,
+     74.56,
+     6
+    ],
+    [
+     -138,
+     74.56,
+     6
+    ],
+    [
+     -138,
+     45,
+     6
+    ],
+    [
+     -156.9,
+     10,
+     6
+    ],
+    [
+     180,
+     -18,
+     8
+    ]
+   ],
+   "width_mm": 6,
+   "depth_mm": 2.8,
+   "period_mm": 16,
+   "segs_per_period": 4,
+   "section": {
+    "width": 0.0028,
+    "thick": 0.0026,
+    "sides": 4
+   },
+   "groom": {
+    "length": false,
+    "volume": false
+   },
+   "lod": {
+    "1": {
+     "sides": 3,
+     "segs": 0.4
+    },
+    "2": {
+     "drop": true
+    }
+   }
+  },
+  {
+   "name": "cornrow_2",
+   "type": "braid",
+   "around": "path",
+   "path": [
+    [
+     -21,
+     18.22,
+     6
+    ],
+    [
+     -21,
+     45,
+     6
+    ],
+    [
+     -21,
+     81.28,
+     6
+    ],
+    [
+     -159,
+     81.28,
+     6
+    ],
+    [
+     -159,
+     45,
+     6
+    ],
+    [
+     -168.45,
+     10,
+     6
+    ],
+    [
+     180,
+     -18,
+     8
+    ]
+   ],
+   "width_mm": 6,
+   "depth_mm": 2.8,
+   "period_mm": 16,
+   "segs_per_period": 4,
+   "section": {
+    "width": 0.0028,
+    "thick": 0.0026,
+    "sides": 4
+   },
+   "groom": {
+    "length": false,
+    "volume": false
+   },
+   "lod": {
+    "1": {
+     "sides": 3,
+     "segs": 0.4
+    },
+    "2": {
+     "sides": 3,
+     "segs": 0.14
+    }
+   }
+  },
+  {
+   "name": "cornrow_3",
+   "type": "braid",
+   "around": "path",
+   "path": [
+    [
+     0,
+     22.0,
+     6
+    ],
+    [
+     0,
+     45,
+     6
+    ],
+    [
+     0,
+     88.0,
+     6
+    ],
+    [
+     180,
+     88.0,
+     6
+    ],
+    [
+     180,
+     45,
+     6
+    ],
+    [
+     180.0,
+     10,
+     6
+    ],
+    [
+     180,
+     -18,
+     8
+    ]
+   ],
+   "width_mm": 6,
+   "depth_mm": 2.8,
+   "period_mm": 16,
+   "segs_per_period": 4,
+   "section": {
+    "width": 0.0028,
+    "thick": 0.0026,
+    "sides": 4
+   },
+   "groom": {
+    "length": false,
+    "volume": false
+   },
+   "lod": {
+    "1": {
+     "sides": 3,
+     "segs": 0.4
+    },
+    "2": {
+     "drop": true
+    }
+   }
+  },
+  {
+   "name": "cornrow_4",
+   "type": "braid",
+   "around": "path",
+   "path": [
+    [
+     21,
+     18.22,
+     6
+    ],
+    [
+     21,
+     45,
+     6
+    ],
+    [
+     21,
+     81.28,
+     6
+    ],
+    [
+     159,
+     81.28,
+     6
+    ],
+    [
+     159,
+     45,
+     6
+    ],
+    [
+     168.45,
+     10,
+     6
+    ],
+    [
+     180,
+     -18,
+     8
+    ]
+   ],
+   "width_mm": 6,
+   "depth_mm": 2.8,
+   "period_mm": 16,
+   "segs_per_period": 4,
+   "section": {
+    "width": 0.0028,
+    "thick": 0.0026,
+    "sides": 4
+   },
+   "groom": {
+    "length": false,
+    "volume": false
+   },
+   "lod": {
+    "1": {
+     "sides": 3,
+     "segs": 0.4
+    },
+    "2": {
+     "sides": 3,
+     "segs": 0.14
+    }
+   }
+  },
+  {
+   "name": "cornrow_5",
+   "type": "braid",
+   "around": "path",
+   "path": [
+    [
+     42,
+     14.440000000000001,
+     6
+    ],
+    [
+     42,
+     45,
+     6
+    ],
+    [
+     42,
+     74.56,
+     6
+    ],
+    [
+     138,
+     74.56,
+     6
+    ],
+    [
+     138,
+     45,
+     6
+    ],
+    [
+     156.9,
+     10,
+     6
+    ],
+    [
+     180,
+     -18,
+     8
+    ]
+   ],
+   "width_mm": 6,
+   "depth_mm": 2.8,
+   "period_mm": 16,
+   "segs_per_period": 4,
+   "section": {
+    "width": 0.0028,
+    "thick": 0.0026,
+    "sides": 4
+   },
+   "groom": {
+    "length": false,
+    "volume": false
+   },
+   "lod": {
+    "1": {
+     "sides": 3,
+     "segs": 0.4
+    },
+    "2": {
+     "drop": true
+    }
+   }
+  },
+  {
+   "name": "cornrow_6",
+   "type": "braid",
+   "around": "path",
+   "path": [
+    [
+     63,
+     10.66,
+     6
+    ],
+    [
+     63,
+     45,
+     6
+    ],
+    [
+     63,
+     67.84,
+     6
+    ],
+    [
+     117,
+     67.84,
+     6
+    ],
+    [
+     117,
+     45,
+     6
+    ],
+    [
+     145.35,
+     10,
+     6
+    ],
+    [
+     180,
+     -18,
+     8
+    ]
+   ],
+   "width_mm": 6,
+   "depth_mm": 2.8,
+   "period_mm": 16,
+   "segs_per_period": 4,
+   "section": {
+    "width": 0.0028,
+    "thick": 0.0026,
+    "sides": 4
+   },
+   "groom": {
+    "length": false,
+    "volume": false
+   },
+   "lod": {
+    "1": {
+     "sides": 3,
+     "segs": 0.4
+    },
+    "2": {
+     "sides": 3,
+     "segs": 0.14
+    }
+   }
+  },
+  {
+   "name": "fine_surface",
+   "type": "locks",
+   "kind": "card",
+   "roots": {
+    "region": {
+     "lon": [
+      -180,
+      180
+     ],
+     "lat": [
+      10,
+      35
+     ]
+    },
+    "count": 22,
+    "margin": 2
+   },
+   "length": [
+    0.025,
+    0.05
+   ],
+   "flow": {
+    "type": "toward",
+    "point": [
+     180,
+     -18
+    ]
+   },
+   "grow": {
+    "hug": 0.4,
+    "height_mm": [
+     5,
+     9
+    ],
+    "gravity": 0.75,
+    "stiffness": 0.65,
+    "jitter": 15,
+    "steps": 48,
+    "min_mm": 5
+   },
+   "shape": {
+    "wave": {
+     "amp_mm": 3,
+     "cycles": 1.3
+    }
+   },
+   "width_jitter": 0.15,
+   "section": {
+    "width": 0.009,
+    "thick": 0.002,
+    "sides": 6,
+    "segs": 8,
+    "twist": 8,
+    "inner_flat": 0.9,
+    "profile": {
+     "root": 0.7,
+     "belly": 0.2,
+     "tip_start": 0.7,
+     "tip_pow": 1.2,
+     "tip_min": 0.04
+    }
+   },
+   "lod": {
+    "1": {
+     "keep": 0.4,
+     "segs": 0.5
+    },
+    "2": {
+     "drop": true
+    }
+   },
+   "detail": "fine",
+   "col": [
+    3,
+    4,
+    5
+   ],
+   "avoid_eyes": true
+  },
+  {
+   "name": "messy_extras",
+   "type": "locks",
+   "kind": "card",
+   "roots": {
+    "region": {
+     "lon": [
+      -180,
+      180
+     ],
+     "lat": [
+      10,
+      35
+     ]
+    },
+    "count": 11,
+    "margin": 2
+   },
+   "length": [
+    0.025,
+    0.05
+   ],
+   "flow": {
+    "type": "toward",
+    "point": [
+     180,
+     -18
+    ]
+   },
+   "grow": {
+    "hug": 0.4,
+    "height_mm": [
+     5,
+     9
+    ],
+    "gravity": 0.75,
+    "stiffness": 0.65,
+    "jitter": 15,
+    "steps": 48,
+    "min_mm": 5
+   },
+   "shape": {
+    "wave": {
+     "amp_mm": 3,
+     "cycles": 1.3
+    }
+   },
+   "width_jitter": 0.15,
+   "section": {
+    "width": 0.009,
+    "thick": 0.002,
+    "sides": 6,
+    "segs": 8,
+    "twist": 8,
+    "inner_flat": 0.9,
+    "profile": {
+     "root": 0.7,
+     "belly": 0.2,
+     "tip_start": 0.7,
+     "tip_pow": 1.2,
+     "tip_min": 0.04
+    }
+   },
+   "lod": {
+    "1": {
+     "keep": 0.4,
+     "segs": 0.5
+    },
+    "2": {
+     "drop": true
+    }
+   },
+   "detail": "messy",
+   "col": [
+    3,
+    4,
+    5
+   ],
+   "avoid_eyes": true
+  }
+ ],
+ "groom": {
+  "_doc": "grooming shapes hl_length_p/_n and hl_volume_p/_n (weight 1 = full): length fractions [n, p] of each lock, volume fractions of the stand-off. Swept-up locks that end in the bun keep their length (groom.length false); loose locks, curls and flyaways change length.",
+  "length": [
+   -0.4,
+   0.6
+  ],
+  "volume": [
+   -0.5,
+   0.8
+  ]
+ },
+ "points": {},
+ "conform_front_hairline": {
+  "sector_degrees": 75,
+  "margin_degrees": 1,
+  "softness_degrees": 2
+ }
+}

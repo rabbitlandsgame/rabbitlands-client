@@ -5,6 +5,7 @@ Environment variables (all optional):
                  (default: <repo>/.local/rl-heads, or RL_HEADS_LOCAL)
   RL_WORKTREE    the client repository root (godot-client/, eloria-assets/)
                  (default: this repository)
+  RL_HEADS_BUILD folder holding rl_head_<sex>.glb / .npz (default: build/v1)
   RL_MPFB_GROUPS path of MPFB's socketobject/_extra_vertex_groups.py
                  (default: RL_HEADS_ROOT/blender_profile/extensions/user_default/mpfb/...)
   BLENDER        Blender executable for preview.py (default: `blender` on PATH)
@@ -21,7 +22,7 @@ RL_ROOT = os.path.abspath(os.environ.get('RL_HEADS_ROOT') or os.environ.get('RL_
 WORKTREE = os.path.abspath(os.environ.get('RL_WORKTREE') or _REPO)
 
 BUILD = os.path.join(RL_ROOT, 'build')
-HEADS = os.path.join(BUILD, 'v1')                          # rl_head_<sex>.glb / .npz
+HEADS = os.path.abspath(os.environ.get('RL_HEADS_BUILD') or os.path.join(BUILD, 'v1'))
 HAIR_OUT = os.path.join(BUILD, 'hair')
 BEARD_OUT = os.path.join(BUILD, 'beards')
 HAIR_TEX = os.path.join(HAIR_OUT, 'textures')

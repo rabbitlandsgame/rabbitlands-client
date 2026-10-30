@@ -1,0 +1,94 @@
+{
+  "version": 1,
+  "status": "selected_develop_bases",
+  "method": "Approved reference hair surfaces, fitted to current RL head identity and grooming targets; procedural shell and optional detail cards",
+  "additional_generation_credits": 0,
+  "springs": false,
+  "modules": [
+    {
+      "id": "human_20",
+      "module_id": 4,
+      "name": "rounded_afro",
+      "sex": "male",
+      "glb_sha256": "f443f272ecdf3221ceaf510ad67d0aa19383efe09988619df9b6db3ce2e68747",
+      "texture_sha256": "0ea03bb403d8a5aac4f7e62405dfb8543e602a6f04ed4592d92fad0f5ac74ca0",
+      "triangles": {
+        "lod0": 17632,
+        "lod1": 6376,
+        "lod2": 2012
+      },
+      "minimum_clearance_mm": 2.6056324268017654,
+      "source_reference_sha256": "888f4dd697e8a225ae08de8ae1e2585b5f863f5c19b032110796677ab913ebf1",
+      "coverage": {
+        "samples": 900,
+        "directions": 165,
+        "level": 0.0,
+        "gateCases": [
+          "rest",
+          "hl_volume_n",
+          "hl_length_n",
+          "hl_volume_n+hl_length_n"
+        ],
+        "holeSamplesMax": 0,
+        "gateHoleSamplesMax": 0,
+        "warnings": []
+      },
+      "clearance_cases_per_lod": 69
+    },
+    {
+      "id": "human_01",
+      "module_id": 5,
+      "name": "cornrows_low_knot",
+      "sex": "female",
+      "glb_sha256": "a4038fe2acbdfa975866fd0a84b356c20eedbc5afee415e102d072d105c69913",
+      "texture_sha256": "2ff478ad6de8be676ef8c9b3c6fb3fae506bdb10fb43b0e188074167476044fa",
+      "triangles": {
+        "lod0": 17299,
+        "lod1": 6312,
+        "lod2": 2012
+      },
+      "minimum_clearance_mm": 3.0259870005718947,
+      "source_reference_sha256": "77149da3877599b0347b73aa4a47e998027a861d663722e06efd0a743f29a534",
+      "coverage": {
+        "samples": 900,
+        "directions": 165,
+        "level": 0.0,
+        "gateCases": [
+          "rest",
+          "hl_volume_n",
+          "hl_length_n",
+          "hl_volume_n+hl_length_n"
+        ],
+        "holeSamplesMax": 1,
+        "gateHoleSamplesMax": 0,
+        "warnings": [
+          "lod0 all_id_p: 1 scalp samples seen through the hair (1 rays) at [([-80, -60], [0, 10])]",
+          "lod0 all_id_p+hl_volume_n+hl_length_n: 1 scalp samples seen through the hair (1 rays) at [([-80, -60], [0, 10])]",
+          "lod0 mix0: 1 scalp samples seen through the hair (1 rays) at [([-80, -60], [0, 10])]"
+        ]
+      },
+      "clearance_cases_per_lod": 69
+    }
+  ],
+  "beards": [],
+  "revision": "selected-unflagged-pilots-20261030",
+  "review_notes": [
+    "Selected humans 01 and 20 only. Other pilots remain outside this integration.",
+    "Original Mira/Rowan rules, PC/2 fallbacks, NPC assignments and Randomize behavior are retained.",
+    "Cornrows deliberately expose scalp channels. Afro wisps are compact and root-attached.",
+    "Existing develop beard assets are unchanged. A separate full-beard pilot failed mouth-pose review and remains held.",
+    "Neck-dye blend and female collar use the current reviewed fixes."
+  ],
+  "female_shirt_neckline": {
+    "glb_sha256": "33bc520528eb0631087e728a0d3f04b99370196e445379f83f7c308b90938a29",
+    "canonical_body_sha256": "3a8ff81e9f152102ee1e57d892759c0a8e69ab49064ab8e473f5cb9ed3e8fc94",
+    "triangles": 6116,
+    "rim_vertices": 192,
+    "rim_mirror_error_mm": 2.330476870336199e-13,
+    "largest_rim_edge_mm": 4.746413830265605,
+    "body_cut_contract_preserved": true,
+    "skin_cover_only_when_repaired_default_shirt_is_active": true,
+    "tool": "eloria-assets/tools/rl_heads/hair/repair_female_neckline.py",
+    "tool_sha256": "7e659d9fb0fe7f64dee167199906be5232090da8f45f21cc565f294f376209a2"
+  }
+}

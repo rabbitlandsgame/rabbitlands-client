@@ -1,5 +1,18 @@
 # RL hair and beard modules
 
+The selected human bases currently add `rounded_afro` and `cornrows_low_knot`.
+Their reference surfaces are processed with `reference_surface.py`, the UV-aware
+`decimate_reference_surface.py`, topology repair and final UV/detail guards.
+The authoring stages remain ignored; safe hashes and retained qualification
+records are in `pilot-provenance.json`. Source reconstructions are preserved.
+No generation service is called by these tools.
+
+`repair_female_neckline.py --source <canonical-female-body.glb> --out <stage.glb>`
+rebuilds the separate default-shirt mesh, using the matching local head inputs
+selected by `RL_HEADS_BUILD` and `RL_MPFB_GROUPS`. It preserves the canonical
+body, skeleton, bind order and atlas. The client installs only this garment mesh
+and masks source skin beneath its symmetric collar. Do not overwrite the input.
+
 Offline Python tools that turn hairstyle and beard *definitions* (JSON) into
 game-ready, skinned, morphing GLB modules for the Rabbit Lands (RL) head. They
 are deterministic: the same definition, seed and head build give the same asset.
@@ -136,7 +149,7 @@ Under-shell options (style `shell`) that keep the scalp covered:
   - `hair_clump.png` is derived by `textures.py` from `gen/hair_lock_v1.png`: re-tiled, contrast-normalised, overlaid with procedural fine strands, and given procedural alpha.
   - `hair_lock_v1.png` was generated with gpt-image-bridge (Codex image generation through the owner's ChatGPT connection, authorised in the owner's brief) on 2026-10-27; its receipt (SHA-256, time, prompt, size) is in `../generated_textures.json`.
 - **Geometry:**
-  - All hair and beard geometry is generated procedurally by these scripts.
+  - The original Mira/Rowan and beard geometry is generated procedurally by these scripts. The selected Afro and cornrows combine processed generated-reference surfaces with a procedural coverage shell and optional detail cards; their source hashes are recorded in `pilot-provenance.json`.
   - It is placed on and bound to the RL head module skin, which is derived from MPFB2 / MakeHuman hm08. The MakeHuman base mesh and targets are CC0 1.0.
   - The GLBs contain no MakeHuman mesh data. Their morph deltas are computed from the head module's shapes by surface binding.
   - At build time the tools read the scalp, ears and lips vertex-index lists from MPFB2's `_extra_vertex_groups.py`. MPFB2 is GPL-3.0; the file is read, not vendored.

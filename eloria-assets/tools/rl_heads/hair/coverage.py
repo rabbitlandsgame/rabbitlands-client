@@ -80,6 +80,19 @@ def load_hair(path):
             A = C[:, 3] if C.shape[1] > 3 else np.ones(len(P))
             mat = J['materials'][pr['material']]
             tex = (mat.get('extras') or {}).get('texture', 'hair_clump.png')
+            # A reference-derived style embeds its own atlas. Check the exact
+            # exported image, rather than an unrelated file with the same name
+            # in the author's texture cache.
+            texture_info=mat.get('pbrMetallicRoughness',{}).get('baseColorTexture')
+            if texture_info is not None:
+                image=J['images'][J['textures'][texture_info['index']]['source']]
+                if 'bufferView' in image:
+                    import io
+                    from PIL import Image
+                    view=J['bufferViews'][image['bufferView']];start=view.get('byteOffset',0)
+                    key=os.path.abspath(path)+'#'+str(texture_info['index'])
+                    _TEX[key]=np.asarray(Image.open(io.BytesIO(B[start:start+view['byteLength']])).convert('RGBA'),np.float32)[:,:,3]/255
+                    tex=key
             for n, t in zip(names, pr.get('targets', [])):
                 D[n].append(np.asarray(rlglb.accessor(J, B, t['POSITION']), np.float64))
             Ps.append(P); Ts.append(T + off); UVs.append(UV); As.append(A)
@@ -87,6 +100,7 @@ def load_hair(path):
             off += len(P)
         out[lod] = {'P': np.concatenate(Ps), 'T': np.concatenate(Ts), 'UV': np.concatenate(UVs),
                     'A': np.concatenate(As), 'tex': np.array(texs),
+                    'scalp_channels':J.get('asset',{}).get('extras',{}).get('rlHair',{}).get('style')=='cornrows_low_knot',
                     'targets': {n: np.concatenate(v) for n, v in D.items() if v}}
     return J, out
 
@@ -190,6 +204,7 @@ class _Scene:
     def __init__(self, hair, HP, head_T, weights, level):
         BVHTree, self.Vector = _bvh()
         self.XP = _morph(hair['P'], hair['targets'], weights)
+        self.partings=hair.get('scalp_channels',False)
         keep = hair['A'][hair['T']].min(1) >= 1.0 - level - 1e-4
         # a tri with any discarded corner is cut by the per-fragment test where A
         # interpolates below 1 - level: conservative, count it only when all corners survive
@@ -207,6 +222,7 @@ class _Scene:
         D = np.broadcast_to(D, org.shape)
         last = np.full(n, -1, np.int64)
         active = np.ones(n, bool); out = np.zeros(n, bool)
+        through_parting=np.zeros(n,bool)
         for _ in range(layers):
             idx = np.flatnonzero(active)
             if not len(idx):
@@ -248,11 +264,24 @@ class _Scene:
                     px = (np.floor((uv[s, 0] % 1.0) * wid).astype(int)) % wid
                     py = (np.floor((uv[s, 1] % 1.0) * hgt).astype(int)) % hgt
                     opaque[s] = al[py, px] >= ALPHA_SCISSOR
+                if self.partings:
+                    parting=scalp_channels(hl[hk])
+                    through_parting[hi[hk[parting]]]=True
+                    opaque &= ~parting
                 active[hi[hk[opaque]]] = False
                 cont = hi[hk[~opaque]]
                 org[cont] = hl[hk[~opaque]] + D[cont] * 1e-7
                 last[cont] = ht[hk[~opaque]]
-        return out          # rays still passing layers after `layers` hits count as covered
+        # A ray through an authored scalp part can reveal neighbouring skin
+        # at an oblique angle. Classify its actual path, not the sample's x.
+        return out & ~through_parting if self.partings else out
+
+
+def scalp_channels(P,padding=0.0):
+    """The runtime cornrow partings, in head model metres (rl_hair shader)."""
+    row=P[:,0]/.027
+    gap=np.abs(row%1-.5)
+    return (P[:,1]>1.715-padding)&(P[:,2]>-.075-padding)&(np.abs(P[:,0])<.078+padding)&(gap<.055+padding/.027)
 
 
 def visibility(hair, head, tri_s, bc_s, weights, level, dirs, min_cos=0.2, lift=0.0006, jitter=0.00025):
