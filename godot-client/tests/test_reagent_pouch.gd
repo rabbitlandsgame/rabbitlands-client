@@ -11,16 +11,16 @@ func check(value: bool, message: String) -> void:
 func run() -> void:
 	var state := root.get_node("AppState")
 	state.inventory = {0: {"image_id": 1, "quantity": 2}, 133: {"image_id": 584, "quantity": 10000000}, 127: {"image_id": 0, "quantity": 1500000}}
-	state.inventory_names = {0: "Bread", 133: "Life Distillate"}
+	state.inventory_names = {0: "Bread", 133: "Life Essence"}
 	var catalog := SpellCatalog.new()
 	catalog.configure(JSON.parse_string(FileAccess.get_file_as_string("res://data/spells/catalog.json")))
 	check(catalog.inventory_quantity(584, state.inventory) == 10000000, "spell costs see large pouch reserves")
 	var crafting := ManufacturingCatalog.new()
-	check(crafting._inventory_slot_for_name(state.inventory, state.inventory_names, "Life Distillate", 1, false) == 133, "crafting resolves supplies from the pouch")
+	check(crafting._inventory_slot_for_name(state.inventory, state.inventory_names, "Life Essence", 1, false) == 133, "crafting resolves supplies from the pouch")
 	var market = load("res://src/ui/extension_windows.gd").new()
 	var listed := false
 	for entry: Dictionary in market._market_sell_entries():
-		if entry.name == "Life Distillate" and entry.slot == 133: listed = true
+		if entry.name == "Life Essence" and entry.slot == 133: listed = true
 	check(listed, "the Exchange can list pouch supplies for sale")
 	market.free()
 	var pouch = load("res://src/ui/reagent_pouch.gd").new()

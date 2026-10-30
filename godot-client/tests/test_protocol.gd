@@ -1620,10 +1620,10 @@ func _init() -> void:
 				"owned Heal requirements are locally ready")
 			var blocked_reasons: Array[String] = spell_catalog.unavailable_reasons(0,
 				[], {"magic": 0, "ether": 4}, {})
-			# Heal is a self spell: one distillate and its anchor, and the
+			# Heal is a self spell: one essence and its anchor, and the
 			# anchor costs nothing below Power 4.
 			_expect(blocked_reasons.size() == 2,
-				"the mana and the distillate are explicit, the free anchor is not")
+				"the mana and the essence are explicit, the free anchor is not")
 			# Every other family waits on its tome, by the knowledge index the
 			# server reports it under.
 			var ward_reasons: Array[String] = spell_catalog.unavailable_reasons(2,
@@ -1636,7 +1636,7 @@ func _init() -> void:
 				"and reading it lifts that reason")
 			# A reagent is stated by the server's name for the item, not by
 			# the number the catalog files it under.
-			_expect(blocked_reasons.has("Requires 1 Life Distillate (have 0)"),
+			_expect(blocked_reasons.has("Requires 1 Life Essence (have 0)"),
 				"a missing reagent is named: %s" % str(blocked_reasons))
 			# The two ids are not interchangeable: a backpack holding the
 			# item id rather than the image id is not holding the reagent.

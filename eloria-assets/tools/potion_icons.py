@@ -114,7 +114,7 @@ SHELF = [
            "flask_large", 1.0, (216, 28, 44), glow=True),
     Potion("Potion of Mana", "Potions", 1,
            {"cooldown": "8"},
-           "A sip of blue distillate that steadies the ethereal reserve. The vial is worth keeping.",
+           "A sip of blue essence that steadies the ethereal reserve. The vial is worth keeping.",
            "vial_small", 0.72, (52, 96, 220)),
     Potion("Potion of Spirit Restoration", "Potions", 1,
            {"cooldown": "17"},
@@ -122,7 +122,7 @@ SHELF = [
            "flask_round", 0.9, (44, 84, 210)),
     Potion("Potion of Extra Mana", "Potions", 2,
            {"cooldown": "15"},
-           "A brimming flask of blue distillate for spellwork that will not wait.",
+           "A brimming flask of blue essence for spellwork that will not wait.",
            "flask_large", 1.0, (64, 112, 240), glow=True),
     # -- sustenance and momentum.
     Potion("Potion of Feasting", "Potions", 2,
@@ -235,37 +235,37 @@ SHELF = [
            "A tonic the colour of deep water, for spells that are meant "
            "to hold.",
            "flask_round", 0.82, (48, 128, 176), glow=True),
-    # -- the ten distillates spells are cast with, one per school. Narrow
-    #    phials rather than bottles, because nobody drinks them; the colour
-    #    names the school. Ids continue after the armour set's sabatons.
-    Potion("Life Distillate", "Catalysts", 1, {},
+    # -- the ten essences spells are cast with, one per school. Narrow
+    #    Historical phial render parameters are retained for ID compatibility;
+    #    selected essence paintings are packed by build_item_icon_atlases.py.
+    Potion("Life Essence", "Catalysts", 1, {},
            "Sage and hearthroot pressed down to a green drop that remembers growing.",
            "phial", 0.82, (86, 190, 82)),
-    Potion("Fire Distillate", "Catalysts", 1, {},
+    Potion("Fire Essence", "Catalysts", 1, {},
            "Coal and flint reduced to an ember-bright drop that will not stay cool.",
            "phial", 0.82, (236, 104, 36), motif="spark"),
-    Potion("Water Distillate", "Catalysts", 1, {},
+    Potion("Water Essence", "Catalysts", 1, {},
            "Kelp and watercress drawn down to a clear blue drop that is always moving.",
            "phial", 0.82, (52, 132, 222)),
-    Potion("Earth Distillate", "Catalysts", 1, {},
+    Potion("Earth Essence", "Catalysts", 1, {},
            "Clay and peat settled into a brown drop as heavy as a field.",
            "phial", 0.82, (150, 104, 58), motif="dots"),
-    Potion("Matter Distillate", "Catalysts", 1, {},
+    Potion("Matter Essence", "Catalysts", 1, {},
            "Quartz and bog iron ground into a grey drop that holds its shape.",
            "phial", 0.82, (142, 148, 158), motif="dots"),
-    Potion("Air Distillate", "Catalysts", 1, {},
-           "Seed and reed winnowed to a pale drop that barely weighs the glass.",
+    Potion("Air Essence", "Catalysts", 1, {},
+           "Seed and reed winnowed to a pale drop that barely weighs anything.",
            "phial", 0.82, (200, 226, 236)),
-    Potion("Death Distillate", "Catalysts", 1, {},
-           "Toadstool and thistle rotted down to a bruise-coloured drop. Stopper it.",
+    Potion("Death Essence", "Catalysts", 1, {},
+           "Toadstool and thistle rotted down to a bruise-coloured drop. Handle it with care.",
            "phial", 0.82, (104, 70, 112)),
-    Potion("Energy Distillate", "Catalysts", 1, {},
+    Potion("Energy Essence", "Catalysts", 1, {},
            "Stormglass and verdigris charged into a yellow drop that hums.",
            "phial", 0.82, (238, 206, 52), motif="spark", glow=True),
-    Potion("Spirit Distillate", "Catalysts", 1, {},
+    Potion("Spirit Essence", "Catalysts", 1, {},
            "Silverleaf and lichen drawn into a pale violet drop that seems to look back.",
            "phial", 0.82, (190, 176, 246), glow=True),
-    Potion("Magic Distillate", "Catalysts", 1, {},
+    Potion("Magic Essence", "Catalysts", 1, {},
            "Lotus and resin refined into a deep purple drop of pure working.",
            "phial", 0.82, (150, 66, 216), motif="frost", glow=True),
 ]
@@ -282,13 +282,13 @@ CONTINUED_IMAGE_ID = 570
 #: took icons 576-583 and the practice items took item ids up to 1833. Frozen
 #: for the same reason as SHELF_BEFORE_TORSO.
 SHELF_BEFORE_SABATONS = 38
-#: The distillates' first id and icon. Item ids leave the practice items room.
+#: The essences' first id and icon. Item ids leave the practice items room.
 DISTILLATE_ITEM_ID = 1850
 DISTILLATE_IMAGE_ID = 584
 #: Where the shelf stopped the third time: the island crops (crop_icons.py)
-#: took icons 594-595 directly after the distillates, and the server stream
-#: gives their items the ids after Magic Distillate (crop_icons.SERVER_ITEM_IDS,
-#: proposed 1860-1861). A distillate appended past this point would otherwise
+#: took icons 594-595 directly after the essences, and the server stream
+#: gives their items the ids after Magic Essence (crop_icons.SERVER_ITEM_IDS,
+#: proposed 1860-1861). A essence appended past this point would otherwise
 #: be handed exactly those ids. Frozen for the same reason as the others.
 SHELF_BEFORE_CROPS = 48
 #: The first id and icon after the crops. The crop roster grew on 2026-10-14

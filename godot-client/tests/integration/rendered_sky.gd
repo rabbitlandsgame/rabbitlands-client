@@ -113,7 +113,7 @@ func run() -> void:
 		elif old=="tome":await keeper(1462)
 		elif old=="cancel":await go_target();await book_cast("Heal Target",1,-1,Vector2i(-1,-1),true)
 		elif old=="target":await go_target();await book_cast("Heal Target",1,actor_id("Tavin"))
-		elif old=="withdraw":await cupboard();await withdraw("Life Distillate",35);main._on_storage_close_pressed()
+		elif old=="withdraw":await cupboard();await withdraw("Life Essence",35);main._on_storage_close_pressed()
 		elif old in ["mana","food"]:await double_click("Potion of Mana" if old=="mana" else "Bread")
 		elif old=="focus":
 			await cupboard();await withdraw("Hearthstone Focus",1);await withdraw("Attunement Charge",1)

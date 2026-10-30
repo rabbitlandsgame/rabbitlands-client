@@ -22,6 +22,9 @@ SUPPLEMENTS = [
     ROOT / 'eloria-assets/source/item-icons/quivers-2026-10-20',
     ROOT / 'eloria-assets/source/item-icons/perk-capes-2026-10-22',
 ]
+REPLACEMENTS = [
+    ROOT / 'eloria-assets/source/item-icons/essences-2026-10-29',
+]
 
 
 def planned_atlases() -> list[tuple[Path, Image.Image]]:
@@ -69,6 +72,26 @@ def planned_atlases() -> list[tuple[Path, Image.Image]]:
             cells.append((int(record['imageId']), cell))
     if [image_id for image_id, _ in cells] != list(range(count)):
         raise ValueError('Base paintings and supplements must cover every image ID exactly once')
+    replaced = set()
+    for folder in REPLACEMENTS:
+        replacement = json.loads((folder / 'manifest.json').read_text(encoding='utf-8'))
+        if replacement.get('draft') or replacement.get('decorativeFrame'):
+            raise ValueError('Only selected unframed replacement paintings can be packed')
+        for record in replacement['items']:
+            image_id = int(record['imageId'])
+            if not 0 <= image_id < count or image_id in replaced:
+                raise ValueError(f'Invalid or duplicate replacement image ID: {image_id}')
+            original = cells[image_id][1]
+            if hashlib.sha256(original.tobytes()).hexdigest() != record['replacesCellSha256']:
+                raise ValueError(f'Replacement target painting differs: {image_id}')
+            path = folder / record['source']
+            if hashlib.sha256(path.read_bytes()).hexdigest() != record['sourceSha256']:
+                raise ValueError(f'Replacement source hash differs: {path.name}')
+            cell = Image.open(path).convert('RGBA')
+            if cell.size != (50, 50):
+                raise ValueError(f'Replacement must contain a 50px cell: {path.name}')
+            cells[image_id] = (image_id, cell)
+            replaced.add(image_id)
     for image_id, cell in cells:
         local = image_id % per_atlas
         output[image_id // per_atlas].paste(cell, (local % columns * 50, local // columns * 50))

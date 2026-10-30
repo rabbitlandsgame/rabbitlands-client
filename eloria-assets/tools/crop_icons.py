@@ -16,7 +16,7 @@ the same height-field light as the Nymara material icons and on the same
 empty-slot plate as every generated set since 118.
 
 Ids follow the ledger's rules (memory `eloria-item-economy`): image ids
-continue the atlas's single contiguous run after the distillates' 593, and
+continue the atlas's single contiguous run after the essences' 593, and
 this roster is append only.
 
 Appended 2026-10-14 (Landfall liveliness H5/H6): Grapes and Cabbage, the
@@ -28,7 +28,7 @@ not tell them apart. It is painted here because it is the same kind of
 picture - a plant, not a mesh - and this is the roster that appends. The roster owns IMAGE ids only. The server's
 items.txt owns the item ids; the island content plan proposes Olive = item
 1860 and Lemon = item 1861, recorded in SERVER_ITEM_IDS so potion_icons.py
-continues after them instead of handing the next distillate the same ids.
+continues after them instead of handing the next essence the same ids.
 The server stream appends the two [item] blocks AFTER the
 `# --- end potion and magic supplies ---` marker, never inside that fence:
 potion_icons.py rewrites the fenced block whole and would delete them.
@@ -49,7 +49,7 @@ from PIL import Image
 from paint_material_icons import _over, _rotate, _shade
 import potion_icons
 
-#: The first icon after the distillates (potion_icons.DISTILLATE_IMAGE_ID + 10).
+#: The first icon after the essences (potion_icons.DISTILLATE_IMAGE_ID + 10).
 FIRST_IMAGE_ID = 594
 #: The item ids the server stream gives the crops (island content plan; the
 #: server's items.txt owns them). Recorded so the potion shelf, which writes

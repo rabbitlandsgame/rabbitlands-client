@@ -146,6 +146,27 @@ class ItemIconAtlasTest(unittest.TestCase):
             with self.subTest(atlas=path):
                 self.assertTrue((CLIENT / path.removeprefix("res://")).is_file())
 
+    def test_essence_replacements_change_only_their_existing_icon_slots(self) -> None:
+        from unittest.mock import patch
+        from build_item_icon_atlases import planned_atlases, REPLACEMENTS
+        expected = {74, *range(584, 594)}
+        records = json.loads((REPLACEMENTS[0] / "manifest.json").read_text())["items"]
+        self.assertEqual(expected, {row["imageId"] for row in records})
+        self.assertEqual(11, len(records))
+        self.assertTrue(all(row["name"].endswith(" Essence") for row in records))
+        with patch("build_item_icon_atlases.REPLACEMENTS", []):
+            before = [image for _, image in planned_atlases()]
+        after = [image for _, image in planned_atlases()]
+        changed = set()
+        for image_id in range(self.config["imageCount"]):
+            atlas, local = divmod(image_id, self.per_atlas)
+            row, column = divmod(local, self.columns)
+            x, y = column * self.cell, row * self.cell
+            bounds = (x, y, x + self.cell, y + self.cell)
+            if before[atlas].crop(bounds).tobytes() != after[atlas].crop(bounds).tobytes():
+                changed.add(image_id)
+        self.assertEqual(expected, changed)
+
     def test_the_island_crops_take_the_icons_after_the_distillates(self) -> None:
         """Olive and Lemon are 594 and 595, the ids the server's items name.
 
@@ -164,7 +185,7 @@ class ItemIconAtlasTest(unittest.TestCase):
         self.assertEqual(min(crops.values()),
                          max(p.image_id for p in potion_icons.roster()) + 1)
         # The potion shelf writes item ids into the server's fence; a
-        # distillate appended after Magic Distillate would have been handed
+        # essence appended after Magic Essence would have been handed
         # 1860 and icon 594, the crops' own. It continues after them now,
         # and after Grapes and Cabbage's items (1892-1893), which follow the
         # spell tomes, and after the Watch Arming Sword the server gave 1894.

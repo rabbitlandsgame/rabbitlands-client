@@ -421,7 +421,7 @@ func _apply_rescue(rescue: Dictionary) -> void:
 	_patient_heal.disabled = not bool(patient.get("can_cast", false))
 	_patient_heal.text = "Heal Target · first lesson" if int(patient.get("lesson_remaining", 0)) > 0 else "Heal Target"
 	_patient_heal.tooltip_text = "Cast Heal Target on this patient. The first lesson supplies its cost." \
-		if int(patient.get("lesson_remaining", 0)) > 0 else "Heal Target requires Magic 0: 5 mana, one Life Distillate and one Water Distillate."
+		if int(patient.get("lesson_remaining", 0)) > 0 else "Heal Target requires Magic 0: 5 mana, one Life Essence and one Water Essence."
 	for action: String in ["accept", "defer", "supplies"]:
 		var allowed := bool(rescue.get("can_" + action, false)) if action != "supplies" \
 			else bool((rescue.get("supplies", {}) as Dictionary).get("can_claim", false))

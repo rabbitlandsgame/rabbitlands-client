@@ -1591,7 +1591,7 @@ func _run() -> void:
 		1: {"image_id": 67, "quantity": 1, "slot": 1, "flags": 6}})
 	main.call("_sync_spells")
 	_expect(first_spell_slot.self_modulate.a == 1.0
-			and first_spell_slot.tooltip_text.contains("Life Distillate"),
+			and first_spell_slot.tooltip_text.contains("Life Essence"),
 		"a missing reagent keeps the editable icon fully visible and is named: "
 			+ first_spell_slot.tooltip_text)
 	app_state_inventory.set("inventory", {
